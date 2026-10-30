@@ -1,0 +1,61 @@
+---
+// Tool page mold (docs/design/components/ToolPage): breadcrumb, H1 + PrivacySeal, the panel island,
+// options, next-step chips, then the first AdSlot (150px clearance built in), how-to, privacy note,
+// FAQ. From 1280px the 300x600 rail holds the side AdSlot (not sticky).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import PrivacySeal from '../../components/PrivacySeal.astro';
+import Faq from '../../components/Faq.astro';
+import AdSlot from '../../ads/AdSlot.astro';
+import ToolPanel, { type ToolPanelProps } from './ToolPanel.tsx';
+import { routeById, type Lang } from '../../i18n/routes.ts';
+import { TEXTS } from '../../i18n/texts.ts';
+import { breadcrumbLd, homePath, webApplicationLd, type Crumb } from '../../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('compress-image');
+const t = TEXTS[lang]['compress-image'];
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const area = route.adArea ?? 'arquivos';
+const panelProps: ToolPanelProps = { lang, t, moreToolsHref: homePath(lang) };
+const crumbs: Crumb[] = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path },
+];
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`}
+  description={t.description}
+  withAds
+  schema={[breadcrumbLd(crumbs), webApplicationLd(common.tools['compress-image'].name, t.description, path, lang)]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-top">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <PrivacySeal text={common.seal} />
+  </div>
+  <div id="fo-tool-root" data-props={JSON.stringify(panelProps)}><ToolPanel {...panelProps} /></div>
+  <script>
+    import './mount.ts';
+  </script>
+  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" aria-labelledby="how">
+    <h2 id="how">{t.howHeading}</h2>
+    <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="privacy-note">
+    <h2 id="privacy-note">{t.privacyHeading}</h2>
+    <p>{t.privacyNote}</p>
+  </section>
+  <section class="fo-section" aria-labelledby="faq">
+    <h2 id="faq">{t.faqHeading}</h2>
+    <Faq items={t.faq} />
+  </section>
+  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
+</BaseLayout>

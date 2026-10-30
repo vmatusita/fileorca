@@ -1,0 +1,274 @@
+# F1a · Fundação técnica do FileOrca
+
+Prompt da run 1 de 2 da F1, gerado em 30/out/2026 a partir da ficha F1a do PLANO-FILEORCA.md (v7.1). Main em `d5fe2a8`.
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode a F1a do FileOrca, a fundação técnica (run 1 de 2 da F1). Ao terminar, o repositório tem um app Astro estático com uma página-modelo de ferramenta (Compress image, com motor provisório) no molde final, nos três idiomas, mais as páginas jurídicas e institucionais, o pipeline (CI com o job de merge e o pós-deploy) e o `pnpm verificar` verde em até 15 minutos. Tudo isso fica numa PR da branch `fase-01a`, e você abriu e conferiu a prévia que o Workers Builds comentou nela. O merge dessa PR é do Victor: ela cria `.github/workflows/`, e o próprio job de merge vai recusá-la e comentar isso.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows: o seu shell é o Git Bash, e o CI roda em Ubuntu. O repositório só tem documentação, fixtures e o design system. Código ainda não existe. A main está em `d5fe2a8`.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. `CLAUDE.md`: regras de toda run, que valem inteiras.
+3. `PLANO-FILEORCA.md`. A ficha "F1a · Fundação técnica" do apêndice é o contrato desta run, e as "Decisões fechadas" não mudam. A F1a também usa estas seções: "Plataforma (ADR-001)", "Bibliotecas e licenças", "Estrutura do repositório", "Da run ao ar", "Molde da página de ferramenta", "Orçamento de desempenho", as regras de anúncio da seção da Oli, "O que derruba conta", "Como o anúncio liga", "Doações", "SEO agressivo › Técnico", os eventos do GA4 (em "Metas, métricas e cenários") e "Páginas obrigatórias (F1a)".
+4. `docs/adr/ADR-001-plataforma-de-entrega.md`.
+5. `docs/design/`: o README (voz, cor, acessibilidade, layout e anúncios), `components/README.md` e, de cada componente que a F1a usa, o README e o `preview.html` (nomes, classes `fo-*`, marcação e ARIA). O pacote já está no v1.1 (`docs/design/MUDANCAS-v1.1.md`): use a marcação v1.1 como está.
+6. `docs/F0-SAIDA.md`, `data/keywords.csv` e `fixtures/ORIGEM.md`.
+
+Versões: o plano conferiu no npm, em 28/out/2026, astro 7.4.2, @astrojs/preact 6.1.1, preact 11.1.0, tailwindcss 4.3.3, wrangler 4.154.0, comlink 4.4.2, satori 0.63.2 e axe-core 4.14.0. Instale a versão estável atual de cada uma, dentro da mesma major. Antes de usar qualquer API, leia a documentação da versão instalada (README e CHANGELOG em node_modules, ou a doc oficial). Não escreva Astro, Preact, Tailwind ou wrangler de memória, porque várias APIs mudaram nas majors recentes.
+
+# Dados desta run (o Victor passou agora)
+
+- ID de medição do GA4: `G-T4BBJN7S11`.
+- Ko-fi: `https://ko-fi.com/victormatusita`. O plano diz ko-fi.com/fileorca, mas vale este endereço. Registre a troca no DECISOES.md, como o § 3, com o porquê: "endereço informado pelo Victor ao gerar o prompt da F1a".
+- Chave Pix aleatória: `1647afcb-3eb8-4fee-8dfe-d5ef477fb13c`. O Pix é da F6, então nesta run a chave só vai para o docs/F0-SAIDA.md.
+- No docs/F0-SAIDA.md, preencha só estas três linhas (GA4, Ko-fi e chave Pix), num commit próprio. Os outros campos vazios do arquivo ficam como estão e entram na lista de pendências do relatório.
+- Sobre: LinkedIn `https://www.linkedin.com/in/victor-matusita` e site `https://vmatusita.com.br`. Não há foto no repositório, então a página sai sem foto, sem imagem genérica e sem imagem quebrada. A foto vira pendência no relatório, com o caminho exato onde o Victor deve pôr o arquivo.
+
+# Escopo
+
+Dentro: tudo o que a linha "Dentro" da ficha F1a lista, com as decisões abaixo.
+
+Fora (não toque):
+- Tudo da seção "Fora de toda run" do CLAUDE.md: DNS, zona, Worker e variáveis do Workers Builds no Cloudflare; `wrangler deploy` de qualquer forma, inclusive `--dry-run`; configurações do repositório no GitHub; contas; envio de e-mail, post ou pedido a qualquer serviço; código de Worker. Os testes nunca chamam GA4, IndexNow ou AdSense de verdade: use mock.
+- Identidade visual final, fontes, sprite e arte da Oli, logo final e onda do rodapé, que são da F1b. O estilo da F1a é provisório e mínimo, só com as variáveis de `docs/design/tokens.css`: nenhuma cor, raio ou sombra fora dos tokens, e amarelo (`sun`) só no Baixar.
+- Ferramenta de verdade (jSquash, libheif, ZIP com fflate, BeforeAfter), hubs de categoria (/image-tools/ é da F2), Pix, SupportCard estilizado e a linha de café no ResultCard (F1b).
+- Editar `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/`, `.claude/settings.json` e `docs/design/`, que são só leitura. No `CLAUDE.md`, só uma seção nova no fim.
+- `LAUNCHED` continua `false`.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md)
+
+O DECISOES.md nasce com o § 1 (aponta para a ADR-001), o § 2 (design system v1.1 em docs/design/, que já veio no pacote) e o § 3 (Ko-fi). Daí em diante, um § numerado por decisão, com as alternativas e o porquê.
+
+1. Rotas. Inglês na raiz, os outros idiomas em pasta com slug traduzido, sempre com barra no fim:
+
+   | Página | en | pt | es |
+   | --- | --- | --- | --- |
+   | Home | / | /pt/ | /es/ |
+   | Compress image (página-modelo) | /compress-image/ | /pt/comprimir-imagem/ | /es/comprimir-imagen/ |
+   | Privacidade | /privacy/ | /pt/privacidade/ | /es/privacidad/ |
+   | Termos | /terms/ | /pt/termos/ | /es/terminos/ |
+   | Sobre | /about/ | /pt/sobre/ | /es/acerca-de/ |
+   | Contato | /contact/ | /pt/contato/ | /es/contacto/ |
+   | Licenças | /licenses/ | /pt/licencas/ | /es/licencias/ |
+   | Apoio | /support/ | /pt/apoie/ | /es/apoyo/ |
+   | 404 | /404.html | /pt/404.html | /es/404.html |
+
+   No mapa de rotas (src/i18n/routes.ts), cada linha é equivalente nos três idiomas. O 404 fica fora do sitemap e do hreflang.
+2. A página de apoio entra mínima já na F1a, para o link do rodapé não quebrar: o título e o texto da tabela de Doações do plano, um botão-link para o Ko-fi (sem widget e sem script do Ko-fi) e o evento donate_click. A F1b veste a página com o SupportCard e a Oli `coffee`. Em português, por enquanto sem Pix.
+3. Breadcrumb, rodapé e ToolCards só linkam páginas que existem. Até a F2, o breadcrumb da ferramenta é Home › Compress image, sem hub.
+4. O motor provisório (o "de mentira" da ficha) é um Web Worker com Comlink que decodifica a imagem (JPG, PNG e WebP) e regrava num OffscreenCanvas, o que já descarta os metadados, inclusive o GPS. Nada de jSquash, HEIC, orientação fina ou ZIP, que são da F2. Ele existe para exercitar o molde, o worker, os estados e o orçamento de JS, e a F2 troca o motor sem mexer no molde. Arquivo que o navegador não decodifica cai no erro, com a fala da Oli em texto. A tela mostra os tamanhos reais. Sem ganho, ela diz que o arquivo já estava otimizado e entrega o original. O texto da página não promete o que o motor provisório não faz.
+5. O GA4 só injeta o `gtag.js` quando `location.hostname === "fileorca.com"`. Localhost, CI e prévias em *.workers.dev nunca mandam nada ao Google. A camada de consentimento e o `dataLayer` rodam sempre, para os testes conferirem. O `page_location` vai como origem + caminho, sem `?` e sem `#`, porque o link do cenário da F4 guarda números no `#`.
+6. Consent Mode v2: padrão `denied` nas quatro chaves (ad_storage, analytics_storage, ad_user_data e ad_personalization) na UE, no EEE (Islândia, Liechtenstein e Noruega), no Reino Unido e na Suíça, e `granted` no resto, tudo declarado antes do `config`. Os três países do EEE entram porque a política de consentimento do Google cobre o EEE inteiro.
+7. Eventos com lista fechada de parâmetros, num módulo tipado: `tool_start`, `tool_complete`, `download`, `next_step_click`, `tool_error` (com navegador e codec) e `donate_click` (com o lugar). Parâmetro fora da lista reprova no teste. Nenhum evento leva nome de arquivo, conteúdo ou número digitado.
+8. Com `LAUNCHED = false`, o pós-deploy confere tudo mas não dispara o IndexNow, porque as páginas estão em noindex. Com true, dispara só as URLs que mudaram.
+9. Noindex só pelo cabeçalho `X-Robots-Tag`, como manda a ADR. Nunca por `<meta name="robots">`.
+10. O que vai para o navegador fica em `dependencies`. Build, teste e CI ficam em `devDependencies`. A /licenses é gerada das `dependencies` mais as fontes (OFL), e o portão de licenças confere as duas listas contra as licenças permitidas.
+11. A busca de ferramentas (Ctrl+K) não pesa no carregamento: o código e o índice só carregam no primeiro uso. O molde segue com uma ilha Preact só, a do painel da ferramenta.
+12. O `pode-mesclar.ts` também recusa PR em rascunho, sem abrir issue, porque o `gh pr merge` falharia nela. O `ci.yml` escuta `opened`, `synchronize`, `reopened` e `ready_for_review`, para a decisão de merge rodar quando o rascunho fica pronto.
+
+# Pontos de atenção (armadilhas conhecidas)
+
+- Windows e Ubuntu: o `pnpm verificar` roda igual nos dois. Scripts em TypeScript, sem bash, sem `rm -rf` e sem barra invertida em caminho nos scripts do package.json. LF em tudo (o .gitattributes já manda).
+- O Workers Builds e o CI leem o `.node-version` (ponha a LTS atual) e o campo `packageManager` do package.json (a versão fixa do pnpm). Confira na doc do build image do Workers Builds como ele escolhe Node e pnpm. O build da prévia é a prova.
+- O `pnpm build` precisa rodar no Workers Builds em menos de 20 min e sem rede além do registro do npm. Nada de LanguageTool ou actionlint no build.
+- As variáveis PUBLIC_* são de build (Workers Builds), não de runtime. Teste os três estados. Sem nenhuma: nada de meta tag do AdSense, ads.txt ou script de anúncio. Com `PUBLIC_ADSENSE_CLIENT=ca-pub-…`: a meta tag e o `ads.txt`, que usa `pub-…` sem o `ca-`. Com as três preenchidas: o script do AdSense no AdSlot.
+- O `build.txt` leva o SHA de `WORKERS_CI_COMMIT_SHA`. Fora do Workers Builds, o de `git rev-parse HEAD`.
+- O pós-deploy decide "esse commit ou um posterior" com histórico: checkout com `fetch-depth: 0` e `git merge-base --is-ancestor`. O LAUNCHED do commit sai de `git show <sha>:src/platform/site.ts`. O robots.txt é comparado byte a byte. O build.txt é pedido sem cache.
+- A chamada ao pós-deploy é um job próprio (`uses: ./.github/workflows/pos-deploy.yml`), que depende do job de merge e só roda quando o merge aconteceu.
+- O `not_found_handling: "404-page"` serve o `404.html` mais próximo. Confira no dist/ que saem `pt/404.html` e `es/404.html`, e não `pt/404/index.html`.
+- O actionlint é um binário Go. Baixe a release fixada, confira o SHA-256 com um script que roda em Windows e Linux, guarde o binário em cache fora do git e rode no verificar. O pacote npm "actionlint" está parado há anos: não use. Se a sua sessão não puder baixar e executar o binário, rode o actionlint no CI pela imagem oficial e registre a diferença local como pendência.
+- O satori não lê woff2. Para a imagem de OG, use .woff ou .ttf de um pacote com licença OFL (por exemplo @fontsource/figtree) e registre a escolha.
+- Rode o Lighthouse CI sobre o build estático, com o preset de celular e o Chromium do Playwright (`chromePath`), para não depender de Chrome instalado. Use upload no filesystem: o padrão `temporary-public-storage` manda o relatório para fora.
+- Orçamento de requisições: na segunda página, conte as URLs do próprio domínio que não vieram na primeira (asset com hash no nome é cache imutável). Assim o teste não depende de o servidor local mandar os cabeçalhos de cache.
+- Teste de distância dos anúncios: meça nos dois estados da página-modelo (antes do arquivo, e com o resultado e o Baixar na tela), a 360×740 e a 1280×800, contra o Baixar, cada campo, o painel e a Oli (pelo seletor que a F1b vai usar, mesmo que hoje não exista Oli na página). Confira também que nenhum AdSlot fica acima do painel no celular e que as páginas jurídicas, o Sobre, o Contato, as Licenças e o Apoio não têm AdSlot.
+- lint:texto: só os textos alterados contra o merge-base com `origin/main`, respeitando os limites publicados da API pública do LanguageTool (confira na doc dela). API fora do ar gera aviso e não reprova. Na F1a quase tudo é novo, então o tempo precisa caber nos 15 min.
+- Nos testes do motor, use `fixtures/images/jpg-02-iphone6-paisagem-gps.jpg`, que tem GPS, para provar que a saída não leva GPS. Gere o arquivo corrompido no próprio teste. As fixtures nunca entram no build.
+- Texto jurídico: não invente fato que depende de configuração de conta (a retenção de dados do GA4, por exemplo). Escreva de um jeito que continue verdadeiro, ou deixe a frase como pendência no relatório. O controlador é Victor Yuki Matusita, pessoa física, em Curitiba/PR, com contato em contato@fileorca.com. Nada de CPF ou endereço.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. `pnpm verificar` verde na sua máquina e no CI da PR, em até 15 min em cada um. Cole a saída e o tempo.
+2. Portões ativos dentro do verificar: tipos, lint, Vitest, Playwright em Chromium e WebKit, axe a 360 e a 1280 px, Lighthouse CI, licenças, hreflang, links internos e páginas órfãs, orçamento de JS (80 KB gzip, só o JS do próprio domínio, sem WASM), orçamento de requisições (8 na primeira página e 3 nas seguintes), distância dos anúncios (150 px), cabeçalhos gerados, Worker sem código, conteúdo de dinheiro e saúde (com teste do próprio checador, já que ainda não há página desses hubs) e lint:texto. Nenhum portão "desligado por enquanto".
+3. Lighthouse de desempenho ≥ 90 no celular na página-modelo em inglês.
+4. Validador de hreflang sem erro nos três idiomas (recíproco, autorreferente, com x-default no inglês). Um sitemap por idioma dentro de um índice, todos válidos. `public/robots.txt` fixo, liberando tudo e apontando o índice.
+5. Teste do `_headers` gerado: nosniff, Referrer-Policy, `frame-ancestors 'self'`, HSTS `max-age=31536000; includeSubDomains`, nenhum COOP ou COEP, noindex na regra `https://:version.:subdomain.workers.dev/*` e noindex geral com LAUNCHED = false.
+6. Teste do Worker sem código: o `wrangler.jsonc` exatamente como a ficha manda (name "fileorca", compatibility_date fixa, assets em ./dist, not_found_handling "404-page", html_handling "auto-trailing-slash", workers_dev e preview_urls true), sem `main`, sem `run_worker_first`, sem `_worker.js` e sem `functions/`.
+7. `pode-mesclar.ts` e `urls-alteradas.ts` com testes no Vitest. No pode-mesclar: fase-* e ajuste-*, Dependabot patch, minor e major, PR que mexe em .github/workflows/, branch qualquer e rascunho. No urls-alteradas: arquivos de página viram URLs pelo mapa de rotas, e PR só de dependência ou de CI não gera URL nenhuma.
+8. actionlint sem erro nos dois workflows.
+9. Páginas jurídicas, Sobre, Contato, Licenças e Apoio nos três idiomas, sem AdSlot.
+10. Consentimento testado no Playwright: o consent default vem antes do config no dataLayer; o padrão muda por região; Aceitar e Recusar atualizam o consentimento e o aviso some para sempre; com um `__tcfapi` de teste que responde gdprApplies true, o aviso não aparece; nenhum `gtag.js` fora de fileorca.com; eventos só com os parâmetros da lista.
+11. AdSlot testado nos três estados de variável (nenhuma, só o client, as três), com a altura reservada e o rótulo certo em cada idioma: "Advertisements", "Publicidade" e "Anuncios".
+12. Prévia: o comentário do Workers Builds aparece na PR, a URL abre com 200, manda `X-Robots-Tag: noindex` e o `build.txt` dela traz o commit da PR. O job de merge recusou a PR e comentou que ela fica para o Victor.
+
+# Verificação: rode de verdade
+
+- Monte o `pnpm verificar` cedo, primeiro com os portões que já existem, e rode a cada fatia. Leia a falha, corrija a causa e repita até passar.
+- É proibido desligar, pular, marcar como skip, afrouxar limiar ou mudar orçamento para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no DECISOES.md.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e build do zero) e guarde a saída completa para o relatório.
+- Depois de abrir a PR, acompanhe o CI com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Espere o comentário do Workers Builds por até 30 min, olhando a cada poucos minutos com `gh pr view <n> --comments`. Abra a prévia (com Playwright ou curl) e confira o critério 12.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão: (1) este prompt; (2) o CLAUDE.md, a ficha F1a e o resto do plano; (3) docs/design/ e a ADR; (4) na dúvida, a opção mais simples e reversível. Toda decisão que não está escrita aqui vira um § no DECISOES.md.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real (o comentário do Workers Builds que não chega, o LanguageTool fora do ar, um serviço caído) não para a run. Siga com o resto e registre a pendência, com o que falta para resolver. ID que faltar vira placeholder e pendência.
+
+A arquitetura é fixa. Se você achar que algo do host, do framework, da estrutura ou do pipeline precisa mudar, escreva uma ADR nova com status "Proposta" em docs/adr/, deixe a mudança de fora e aponte no relatório.
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar: (a) a imagem de OG sai única por idioma, sem a Oli; (b) a busca Ctrl+K sai só como lista filtrada; (c) a página de apoio fica de fora, e o rodapé sai sem a linha de apoio. O que for cortado vira pendência para uma run curta de ajuste. Nunca corte: o `pnpm verificar` e cada portão dele, o CI com o job de merge, o pós-deploy, o i18n com o mapa de rotas, o SEO técnico, o consentimento, o AdSlot, os cabeçalhos e o teste de Worker sem código.
+
+# Git e segurança
+
+- Comece com `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar dois arquivos não rastreados: `docs/prompts/prompt-fase-01a.md` e `docs/prompts/prompt-fase-01a.txt`, o prompt desta run, que o Victor deixou ali. Crie a branch com `git switch -c fase-01a`. Esses dois arquivos entram sem edição no primeiro commit dela. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-01a.txt`.
+- Commits pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Faça push em marcos, não a cada commit: cada push roda o verificar no CI e gasta minutos do plano grátis do GitHub.
+- Abra a PR cedo, em rascunho, assim que o pipeline e um build existirem (`gh pr create --draft --base main --head fase-01a`). Assim o CI no Ubuntu e a prévia andam enquanto você trabalha. Marque a PR como pronta (`gh pr ready`) no fim. Título e descrição em português, com o resumo e o link do relatório.
+- Nunca: push na main, force push, `git reset --hard`, `--amend`, `--no-verify`, mexer em `core.hooksPath` ou em `.githooks/`, `gh pr merge`, `wrangler deploy` em qualquer forma, `gh api` com método de escrita, `gh secret` ou `gh variable`. O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. Explorar com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - a ficha F1a e as seções do plano listadas acima, transformadas em checklist;
+   - a ADR e as regras de cabeçalho, wrangler e pipeline;
+   - em docs/design/, a marcação e o ARIA de Header, Breadcrumb, PrivacySeal, DropZone, WaterLevel, FileCard, OptionGroup, ResultCard, NextStepChips, OliMessage, AdSlot, ToolCard, ToolSearch, Faq, CookieNotice, Footer e SupportCard, e o molde ToolPage;
+   - a doc das versões instaladas de Astro, Preact, Tailwind v4 e wrangler, e a do build image do Workers Builds.
+2. Planejar: escreva `docs/relatorios/fase-01a-plano.md`, autossuficiente. Ele traz a árvore de arquivos, os módulos e interfaces com nome, cada critério deste prompt ligado a um teste ou comando, o que fica de fora e a ordem de execução. Ele é o gabarito da revisão.
+3. Implementar em fatias que terminam verdes, nesta ordem (o que vem antes é o que nunca se corta):
+   - esqueleto do app, `pnpm verificar` mínimo e plataforma (wrangler.jsonc, headers.ts, site.ts com LAUNCHED, build.txt, teste de Worker sem código);
+   - CI, pode-mesclar, urls-alteradas, pós-deploy e actionlint;
+   - PR em rascunho;
+   - i18n com o mapa de rotas, páginas e SEO técnico (sitemaps, hreflang, schema, robots, IndexNow, 404);
+   - molde da página-modelo, com os componentes e o motor provisório;
+   - AdSlot e teste de distância;
+   - consentimento, GA4 e eventos;
+   - páginas jurídicas, Sobre, Contato, Licenças e Apoio nos três idiomas;
+   - imagem de OG no build, manifest e ícones provisórios;
+   - orçamentos, Lighthouse e lint:texto, fechando o verificar.
+
+   Frentes paralelas que editam arquivos (os textos jurídicos nos três idiomas e os scripts de CI, por exemplo) rodam em worktrees separadas, e você integra. Textos e testes de tabela podem ir para subagentes Sonnet. O resto fica no modelo forte.
+4. Revisão adversarial no fim, em contexto limpo, com subagentes Sonnet que não viram o código sendo escrito. Eles revisam contra este prompt, a ficha F1a e o `docs/relatorios/fase-01a-plano.md`, em três lentes paralelas: pipeline e plataforma; privacidade, anúncio e consentimento (inclusive "O que derruba conta"); SEO, i18n e acessibilidade. Cada lente aponta só lacunas de correção ou de requisito, com arquivo:linha e evidência, nada de preferência de estilo. Corrija os achados críticos e altos, rode o verificar e revise de novo até limpar. Os médios e baixos que ficarem vão para o relatório.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-01a.md` em português, commitado na branch, com:
+- o que foi feito, por área, e a árvore do que nasceu;
+- a saída real e completa do `pnpm verificar` local, com o tempo, e o link da execução verde do CI na PR, com o tempo;
+- o Lighthouse da página-modelo, o JS inicial em KB gzip e as requisições contadas;
+- o link da prévia e o que você conferiu nela (status, X-Robots-Tag e build.txt), mais o comentário do job de merge;
+- as decisões novas, apontando os § do DECISOES.md;
+- o que a revisão adversarial achou e o que foi corrigido;
+- o que a válvula cortou, se cortou algo;
+- a lista do que é do Victor, em passos: dar o merge da PR (squash) depois do CI verde; conferir o pós-deploy no Actions e o noindex em fileorca.com; pôr a foto do Sobre; preencher os campos vazios do docs/F0-SAIDA.md; e cada pendência de bloqueio;
+- uma nota para a F2: as páginas-modelo em pt e es existem para provar o i18n, mas com LAUNCHED = true elas passam a indexar antes da revisão de texto da F6. A F2 decide se ficam no ar ou saem do mapa até lá.
+
+Acrescente no fim do CLAUDE.md uma seção curta, "F1a: comandos e pegadinhas", com os scripts do package.json, como rodar um portão sozinho e as armadilhas de Windows e Ubuntu que você achou. Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português e o link da PR.
+
+# Idioma
+
+Narrativa, plano, relatório, DECISOES.md e descrição da PR em português. Código, nomes de arquivo, identificadores e commits em inglês. Os textos do site ficam nos arquivos de tradução de cada idioma, com a voz de docs/design/README.md: sentence case, sem emoji, sem as palavras proibidas e com "tú" no espanhol.
+```
+
+## Como executar
+
+### 1. Antes de rodar (10 min, no PowerShell)
+
+```powershell
+cd C:\Users\vmatusita\projetos\fileorca
+git switch main
+git pull --ff-only
+git status                  # só pode aparecer docs/prompts/prompt-fase-01a.md e .txt, como não rastreados
+git config core.hooksPath   # tem que responder .githooks
+gh auth status              # logado na conta dona de vmatusita/fileorca
+node --version              # uma LTS
+pnpm --version              # se faltar: corepack enable
+claude --version            # o modo auto pede 2.1.83 ou mais
+```
+
+No Cloudflare, confira que os blocos 3 e 4 da F0 estão feitos. Em Workers & Pages → `fileorca`:
+
+- **Domains & Routes:** fileorca.com.
+- **Settings → Build:** ligado a `vmatusita/fileorca`, branch de produção `main`, comando `pnpm build`, builds de outras branches ligados, comentário na PR ligado, variável `PUBLIC_ADS_ENABLED = false`.
+
+Sem isso, a run faz todo o resto, mas a conferência da prévia (critério 12) vira pendência.
+
+A run deve levar algumas horas. Deixe o PC sem suspender enquanto ela roda (`powercfg /change standby-timeout-ac 0`; depois volte ao valor que você usa) e não mexa na pasta do repositório até ela terminar.
+
+### 2. Rodar
+
+Interativo, que é o recomendado:
+
+```powershell
+claude --model opus --permission-mode auto -n fase-01a
+```
+
+Cole o conteúdo inteiro de `docs\prompts\prompt-fase-01a.txt` (começa por `ultracode`) e deixe rodando. Se cair ou o limite acabar no meio, retome com `claude --resume fase-01a` e mande: "continue de onde parou: leia docs/relatorios/fase-01a-plano.md, o git log da branch e siga".
+
+Headless, se preferir disparar e sair:
+
+```powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Raw -Encoding utf8 docs\prompts\prompt-fase-01a.txt |
+  claude -p --model opus --permission-mode auto --output-format json > $HOME\run-fase-01a.json
+(Get-Content $HOME\run-fase-01a.json | ConvertFrom-Json).session_id   # guarde: é o único jeito de retomar
+```
+
+O `$OutputEncoding` evita que o PowerShell estrague os acentos no caminho até o `claude`. O JSON fica fora do repositório para não sujar o `git status` da run.
+
+**Por que o modo `auto`:** a run instala pacotes, baixa os navegadores do Playwright e o actionlint, faz commit, push da branch e abre a PR. O `auto` deixa tudo isso passar sem perguntar e barra o que parece arriscado. As regras `deny` do `.claude/settings.json` (push na main, `gh pr merge`, `wrangler deploy`, reset e amend) continuam valendo em qualquer modo. O prompt não pede nada disso, então nada deve ser barrado. Se o classificador barrar o download do actionlint, o prompt já diz o caminho alternativo.
+
+**Custo:** o prompt manda exploração e revisão em subagentes Sonnet e deixa o modelo forte no orquestrador e no código difícil. Cada push roda o verificar no GitHub Actions (2.000 min/mês no plano grátis), e por isso o prompt pede push só em marcos.
+
+### 3. Acompanhar
+
+- A PR aparece cedo, em rascunho, em github.com/vmatusita/fileorca/pulls. O CI e o comentário do Workers Builds andam enquanto a run trabalha.
+- `claude --resume fase-01a` mostra onde a sessão está.
+
+### 4. Ao voltar
+
+1. Leia `docs/relatorios/fase-01a.md` e confira as evidências: a saída do `pnpm verificar` com o tempo, o link do CI verde, o Lighthouse e o link da prévia.
+2. Dê uma olhada no diff:
+   ```powershell
+   git fetch
+   git log --oneline main..origin/fase-01a
+   git diff --stat main...origin/fase-01a
+   ```
+3. Abra a prévia pelo link do comentário na PR, no celular e no computador.
+4. **O merge é seu:** com o CI verde e o comentário do job dizendo que a PR fica para você, use "Squash and merge" no GitHub.
+5. Depois do merge, no Actions, o `pos-deploy` tem que ficar verde (ele espera até 20 min o deploy chegar). Confira também:
+   ```powershell
+   curl.exe -sI https://fileorca.com/ | Select-String -Pattern x-robots   # tem que mostrar noindex
+   curl.exe -s https://fileorca.com/build.txt                              # o commit do merge
+   git switch main; git pull --ff-only
+   ```
+6. Resolva as pendências da lista do relatório (foto do Sobre, campos vazios do F0-SAIDA) e gere o prompt da F1b.
+
+Se o resultado vier errado: depois de duas correções que não resolvem, não emende. Peça um prompt novo de run curta de ajuste, com o que aprendeu.
+
+## Suposições que fiz
+
+- **Ko-fi:** usei `ko-fi.com/victormatusita`, que você passou, no lugar do `ko-fi.com/fileorca` do plano. Isso vira o § 3 do DECISOES.md.
+- **F0, blocos 3 e 4:** assumi que o Worker `fileorca`, o domínio e o Workers Builds (com prévia e comentário na PR) já estão ligados. O docs/F0-SAIDA.md está quase todo em branco, então não deu para confirmar. Se não estiverem, a run segue e a prévia vira pendência.
+- **Página de apoio mínima já na F1a**, só com o Ko-fi, para o link do rodapé não quebrar. A F1b veste a página com o SupportCard e a Oli.
+- **Slugs em pt e es** das páginas institucionais, definidos no prompt (tabela da decisão 1). Como nada está indexado, dá para trocar sem custo até a F6.
+- **Motor provisório:** ele regrava a imagem num canvas, o que descarta o GPS, em vez de devolver os mesmos bytes. Assim a página no ar não entrega foto com localização.
+- **GA4 só em fileorca.com:** prévias e testes não mandam nada ao GA4. O EEE (Islândia, Liechtenstein, Noruega) entra no padrão negado junto com a UE, o Reino Unido e a Suíça.
+- **IndexNow parado enquanto LAUNCHED = false**, porque não faz sentido avisar os buscadores de páginas em noindex.
+- **Pix:** a chave só vai para o docs/F0-SAIDA.md, e a F6 usa dali.
+- **Sobre** com o LinkedIn `linkedin.com/in/victor-matusita` e sem foto, que fica como pendência.
+- **PR em rascunho cedo:** a run abre a PR logo que o pipeline existe, para ter o CI no Ubuntu e a prévia durante o trabalho. Isso pede duas regras pequenas no pipeline (pode-mesclar ignora rascunho; o CI também roda em `ready_for_review`).
+- **Uma coisa para você decidir antes da F2:** as páginas-modelo em pt e es passam a indexar quando a F2 ligar o LAUNCHED, antes da revisão de texto da F6. O relatório da F1a deixa isso anotado para a F2.

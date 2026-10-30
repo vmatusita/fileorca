@@ -1,0 +1,144 @@
+# CI of every PR (ADR-001, item 5): pnpm verificar, then the merge job decides with
+# scripts/ci/pode-mesclar.ts, then the post-deploy check runs when the merge happened.
+# A merge made with the GITHUB_TOKEN does not fire `push`, so the post-deploy is called here.
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ci-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Cache pinned tools (actionlint, LanguageTool, JRE)
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache
+          key: tools-${{ runner.os }}-${{ hashFiles('scripts/lib/tools.ts') }}
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - name: pnpm verificar
+        run: pnpm verificar
+        env:
+          LINT_TEXTO_BASE: origin/${{ github.event.pull_request.base.ref }}
+      - name: Playwright report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  merge:
+    needs: verificar
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      merged: ${{ steps.merge.outputs.merged }}
+      sha: ${{ steps.merge.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Dependabot metadata
+        id: dependabot
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+      - name: Decide
+        id: decide
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          UPDATE_TYPE: ${{ steps.dependabot.outputs.update-type }}
+        run: |
+          # The decision script comes from the base branch, so a PR cannot change its own rule.
+          # Only the PR that creates the pipeline (no script on the base yet) uses its own copy.
+          mkdir -p "$RUNNER_TEMP/ci"
+          if git cat-file -e "$BASE_SHA:scripts/ci/pode-mesclar.ts" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/ci/pode-mesclar.ts" > "$RUNNER_TEMP/ci/pode-mesclar.ts"
+          else
+            cp scripts/ci/pode-mesclar.ts "$RUNNER_TEMP/ci/pode-mesclar.ts"
+          fi
+          # --no-renames lists both sides of a rename, so moving a workflow out of the folder counts.
+          git -c core.quotePath=false diff --no-renames --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"
+          jq -n --arg head "$HEAD_REF" --arg author "$AUTHOR" --argjson draft "$DRAFT" \
+            --rawfile files "$RUNNER_TEMP/files.txt" \
+            '{headRefName: $head, isDraft: $draft, author: {login: $author}, files: ($files | split("\n") | map(select(length > 0)) | map({path: .}))}' \
+            > "$RUNNER_TEMP/pr.json"
+          node "$RUNNER_TEMP/ci/pode-mesclar.ts" "$RUNNER_TEMP/pr.json" "$UPDATE_TYPE"
+      - name: Comment why it was not merged
+        if: steps.decide.outputs.merge != 'true' && steps.decide.outputs.comment == 'true'
+        env:
+          REASON: ${{ steps.decide.outputs.reason }}
+        run: |
+          gh pr comment "$PR" --body "Merge automático: não. $REASON"
+      - name: Merge
+        id: merge
+        if: steps.decide.outputs.merge == 'true'
+        env:
+          REASON: ${{ steps.decide.outputs.reason }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if gh pr merge "$PR" --squash --delete-branch --match-head-commit "$HEAD_SHA"; then
+            sha=''
+            for _ in 1 2 3 4 5; do
+              sha=$(gh pr view "$PR" --json mergeCommit --jq '.mergeCommit.oid // empty')
+              [[ "$sha" =~ ^[0-9a-f]{40}$ ]] && break
+              sleep 5
+            done
+            if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+              gh issue create --title "Merge da PR #$PR sem commit de merge legível" --body "O merge aconteceu, mas o commit não apareceu no gh pr view; rode o pós-deploy à mão. Execução: $RUN_URL"
+              exit 1
+            fi
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          else
+            gh pr comment "$PR" --body "Merge automático: o GitHub recusou o merge (conflito ou PR desatualizada). Execução: $RUN_URL"
+            gh issue create --title "Merge automático falhou na PR #$PR" --body "O job de merge decidiu mesclar ($REASON), mas o gh pr merge falhou. Execução: $RUN_URL"
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+  pos-deploy:
+    needs: merge
+    if: needs.merge.outputs.merged == 'true'
+    permissions:
+      contents: read
+      issues: write
+    uses: ./.github/workflows/pos-deploy.yml
+    with:
+      commit: ${{ needs.merge.outputs.sha }}
+      wait_minutes: 20

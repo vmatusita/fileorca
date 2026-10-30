@@ -1,0 +1,15 @@
+---
+// ToolCard (docs/design/components/ToolCard): the whole card is a link; name in an H3.
+interface Props {
+  href: string;
+  name: string;
+  description: string;
+  category: 'image';
+}
+const { href, name, description, category } = Astro.props;
+---
+<a class={`fo-tool fo-dogear fo-cat--${category}`} href={href}>
+  <span class="fo-tool__icon" aria-hidden="true"></span>
+  <h3 class="fo-tool__name">{name}</h3>
+  <p class="fo-tool__desc">{description}</p>
+</a>

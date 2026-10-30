@@ -1,0 +1,8 @@
+---
+// PrivacySeal: fixed text per language, right below the H1 of every tool. Not clickable.
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+<span class="fo-seal">{text}</span>

@@ -1,0 +1,13 @@
+// Assets-only Worker (ADR-001). No `main`, no `run_worker_first`: a test fails if either appears.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fileorca",
+  "compatibility_date": "2026-10-23",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "workers_dev": true,
+  "preview_urls": true
+}

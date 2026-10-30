@@ -1,0 +1,66 @@
+# Post-deploy check of production (PLANO "Da run ao ar", item 7): waits until build.txt carries the
+# commit (or a later one), checks injected scripts, robots.txt and X-Robots-Tag against the
+# LAUNCHED of that commit, pings IndexNow with the changed URLs, and opens an issue on failure.
+name: Pós-deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_call:
+    inputs:
+      commit:
+        description: Commit do merge
+        type: string
+        required: true
+      wait_minutes:
+        description: Minutos de espera pelo deploy
+        type: number
+        required: false
+        default: 20
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Commit a conferir em produção
+        type: string
+        required: true
+      wait_minutes:
+        description: Minutos de espera pelo deploy
+        type: number
+        required: false
+        default: 20
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: pos-deploy-${{ inputs.commit || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  conferir:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      COMMIT: ${{ inputs.commit || github.sha }}
+      WAIT_MINUTES: ${{ inputs.wait_minutes || 20 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          # Credentials stay so the check can fetch a newer main when build.txt is ahead of the clone.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Conferir produção
+        run: node scripts/ci/pos-deploy.ts "$COMMIT" "$WAIT_MINUTES"
+      - name: Abrir issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue create --title "Pós-deploy falhou para ${COMMIT:0:7}" \
+            --body "A conferência de produção do commit $COMMIT falhou ou o deploy não chegou em $WAIT_MINUTES minutos. Execução: $RUN_URL"

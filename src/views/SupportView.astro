@@ -1,0 +1,35 @@
+---
+// Support page, minimal in the F1a (DECISOES § 5): title and text of the plan, a link to Ko-fi
+// (no widget, no Ko-fi script) and donate_click. The F1b adds the SupportCard and the Oli.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { AUTHOR, KOFI_URL } from '../platform/site.ts';
+import { breadcrumbLd, homePath } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('support');
+const t = TEXTS[lang].support;
+const common = TEXTS[lang].common;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path: route.paths[lang] ?? '/' },
+];
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <article class="fo-prose">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <p>{t.body}</p>
+    <p><a class="fo-btn" href={KOFI_URL} rel="noopener" data-track="donate_click" data-track-place="support_page">{t.button}</a></p>
+    <p class="fo-muted">{t.amountsNote}</p>
+    <h2>{t.whoHeading}</h2>
+    <p>{t.who} <a href={AUTHOR.website} rel="me">vmatusita.com.br</a></p>
+    <h2>{t.nextHeading}</h2>
+    <p>{t.next}</p>
+  </article>
+</BaseLayout>

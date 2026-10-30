@@ -1,0 +1,19 @@
+---
+// AdSense in <head>: the verification meta only with PUBLIC_ADSENSE_CLIENT; the loader only with
+// the three variables, on a page that has AdSlots (never on legal or institutional pages) and,
+// like gtag.js, only on fileorca.com: previews on *.workers.dev never request ads.
+import { PRODUCTION_HOSTNAME } from '../platform/site.ts';
+import { adsenseScriptSrc, buildAdsConfig, type AdsConfig } from './config.ts';
+
+interface Props {
+  withAds: boolean;
+  config?: AdsConfig;
+}
+const { withAds, config = buildAdsConfig() } = Astro.props;
+const loader =
+  withAds && config.scriptEnabled && config.client
+    ? `if(location.hostname===${JSON.stringify(PRODUCTION_HOSTNAME)}){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src=${JSON.stringify(adsenseScriptSrc(config.client))};document.head.appendChild(s);}`
+    : null;
+---
+{config.client && <meta name="google-adsense-account" content={config.client} />}
+{loader && <script is:inline set:html={loader} />}
