@@ -12,5 +12,5 @@ export default {
   next: 'A Oli funciona à base de café, e o próximo café paga a próxima ferramenta da fila. A doação é opcional: não compra nada e não muda nada no site.',
   button: 'Me pague um café',
   amountsNote:
-    'Valores sugeridos no Ko-fi: US$ 3, 5 ou 10. O pagamento acontece no Ko-fi e no PayPal, que seguem as próprias políticas.',
+    'Valores sugeridos no Ko-fi: US$ 3, 5 ou 10. O pagamento acontece no Ko-fi, que segue as próprias políticas.',
 } satisfies SupportTexts;

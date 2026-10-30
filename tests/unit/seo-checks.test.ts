@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
 import { alternatesFor, graph } from '../../src/seo/meta.ts';
 import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
-import { ROUTES, routeById } from '../../src/i18n/routes.ts';
+import { ROUTES, routeById, type RouteDef } from '../../src/i18n/routes.ts';
 
 const O = 'https://fileorca.com';
 const tags = { xDefaultLang: 'en', langTags: ['en', 'pt-BR', 'es'] };
@@ -43,10 +43,10 @@ describe('validador de hreflang', () => {
   });
 
   it('accepts pages in one language only (no hreflang) and clusters without English (no x-default)', () => {
-    const ptOnly = { id: 'home', paths: { pt: '/pt/so-pt/' }, indexable: true, view: 'v', texts: [] } as const;
+    const ptOnly: RouteDef = { id: 'home', paths: { pt: '/pt/so-pt/' }, indexable: true, view: 'v', texts: [] };
     expect(alternatesFor(ptOnly)).toEqual([]);
     expect(validateHreflang([{ url: `${O}/pt/so-pt/`, alternates: [] }], tags)).toEqual([]);
-    const ptEs = { id: 'home', paths: { pt: '/pt/b/', es: '/es/b/' }, indexable: true, view: 'v', texts: [] } as const;
+    const ptEs: RouteDef = { id: 'home', paths: { pt: '/pt/b/', es: '/es/b/' }, indexable: true, view: 'v', texts: [] };
     const heads = Object.values(ptEs.paths).map((path) => ({ url: `${O}${path}`, alternates: alternatesFor(ptEs) }));
     expect(heads[0]?.alternates.map((alt) => alt.hreflang)).toEqual(['pt-BR', 'es']);
     expect(validateHreflang(heads, tags)).toEqual([]);

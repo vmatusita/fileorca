@@ -17,6 +17,8 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 a { color: var(--brand); }
+/* Links inside running text are underlined, so colour is never the only cue (axe link-in-text-block). */
+main :where(p, li) a:not(.fo-btn), .fo-cookie a { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 :where(a, button, input, select, textarea, summary, [tabindex], label.fo-seg__opt):focus-visible {
   outline: var(--stroke-3) solid var(--focus);
   outline-offset: 2px;
@@ -176,9 +178,9 @@ a { color: var(--brand); }
 .fo-footer__coffee { font-weight: 700; }
 
 /* CookieNotice: floats, never blocks the page. */
-.fo-cookie { position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: var(--space-2); box-sizing: border-box; padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
+.fo-cookie { position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
 .fo-cookie[hidden] { display: none; }
-@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: var(--space-4); max-width: 440px; } }
+@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 440px; } }
 .fo-cookie p { margin: 0; font-size: 15px; line-height: 22px; }
 .fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 
@@ -195,6 +197,7 @@ a { color: var(--brand); }
 .fo-search__empty { padding: var(--space-6) var(--space-4); text-align: center; display: grid; gap: var(--space-2); }
 .fo-search__empty p { margin: 0; }
 .fo-search-inline { max-width: 560px; }
+.fo-search-close { display: flex; justify-content: center; margin-top: var(--space-2); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
 
 /* Licenses table */
 .fo-table { width: 100%; border-collapse: collapse; font: 500 15px/22px var(--font-text); font-variant-numeric: tabular-nums; }

@@ -68,7 +68,7 @@ export default {
       paragraphs: [
         'To stay free, FileOrca shows, or will show, ads from Google AdSense. Google is the advertising partner. The Privacy page explains how ads and cookies work.',
         'The ads, and the sites they lead to, come from third parties. FileOrca does not control their content and is not responsible for it.',
-        'Donations are optional. FileOrca has a link to Ko-fi, where you can leave one. The payment happens on Ko-fi and PayPal, under their own policies.',
+        'Donations are optional. FileOrca has a link to Ko-fi, where you can leave one. The payment happens on Ko-fi, under its own policies.',
         'A donation is voluntary. It buys nothing and changes nothing on the site.',
       ],
     },

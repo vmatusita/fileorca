@@ -18,5 +18,6 @@ document.addEventListener('focusin',function(e){var b=e.target.closest&&e.target
 ---
 <dialog id="fo-search-dialog" class="fo-search-dialog" aria-label={t.search.dialogLabel} closedby="any">
   <SearchBox t={t} id="fo-search" />
+  <form method="dialog" class="fo-search-close"><button type="submit" class="fo-btn fo-btn--ghost">{t.search.close}</button></form>
 </dialog>
 <script is:inline set:html={trigger} />

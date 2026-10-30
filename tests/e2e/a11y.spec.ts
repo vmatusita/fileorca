@@ -8,6 +8,18 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-prac
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
 
 for (const width of [360, 1280]) {
+  test.describe(`axe a ${width}px, tema escuro`, () => {
+    test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, colorScheme: 'dark' });
+
+    for (const path of PAGES) {
+      test(`${path}`, async ({ page }) => {
+        await page.goto(path);
+        const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+        expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([]);
+      });
+    }
+  });
+
   test.describe(`axe a ${width}px`, () => {
     test.use({ viewport: { width, height: width === 360 ? 740 : 800 } });
 

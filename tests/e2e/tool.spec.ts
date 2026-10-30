@@ -56,7 +56,13 @@ test.describe('Compress image (motor provisório)', () => {
     await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeChecked();
     // While it re-processes the card may give way to the progress for a moment; wait for it back.
     await expect
-      .poll(async () => ((await page.locator('.fo-btn--download').count()) ? (await downloadBytes(page)).length : Number.POSITIVE_INFINITY), { timeout: 30_000 })
+      .poll(async () => {
+        try {
+          return (await downloadBytes(page)).length;
+        } catch {
+          return Number.POSITIVE_INFINITY; // the card is giving way to the progress right now
+        }
+      }, { timeout: 30_000 })
       .toBeLessThan(recommended);
     await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeFocused();
     await expect(page.getByRole('button', { name: /apply/i })).toHaveCount(0);

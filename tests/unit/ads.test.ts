@@ -66,7 +66,7 @@ describe('AdSlot and the AdSense head in the three states', () => {
         if (state === 'all') {
           expect(html).toContain(`data-ad-client="${CLIENT}"`);
           expect(html).toContain('data-ad-slot="1111111111"');
-          expect(html).toContain('(window.adsbygoogle = window.adsbygoogle || []).push({});');
+          expect(html).toContain('if(location.hostname==="fileorca.com"){(window.adsbygoogle=window.adsbygoogle||[]).push({});}');
         }
       }
     });
@@ -78,6 +78,7 @@ describe('AdSlot and the AdSense head in the three states', () => {
       expect(withAds.includes(meta)).toBe(state !== 'none');
       expect(withoutAds.includes(meta)).toBe(state !== 'none');
       expect(withAds.includes('adsbygoogle.js?client=ca-pub-1234567890123456')).toBe(state === 'all');
+      if (state === 'all') expect(withAds).toContain('if(location.hostname==="fileorca.com")');
       expect(withoutAds).not.toContain('adsbygoogle.js');
     });
   }
@@ -99,5 +100,6 @@ describe('AdSlot and the AdSense head in the three states', () => {
     expect(html).toContain('class="fo-ad fo-ad--rail"');
     expect(html).toContain('data-ad-slot="2222222222"');
     expect(html).toContain('width:300px;height:600px');
+    expect(html).toContain("matchMedia('(min-width: 1280px)').matches");
   });
 });

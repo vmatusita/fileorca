@@ -68,7 +68,7 @@ export default {
       paragraphs: [
         'Para continuar grátis, o FileOrca mostra, ou vai mostrar, anúncios do Google AdSense. O Google é o parceiro de publicidade. A página de Privacidade explica como funcionam os anúncios e os cookies.',
         'Os anúncios, e os sites para onde eles levam, vêm de terceiros. O FileOrca não controla o conteúdo deles e não se responsabiliza por ele.',
-        'Doar é opcional. O FileOrca tem um link para o Ko-fi, onde você pode deixar uma doação. O pagamento acontece no Ko-fi e no PayPal, sob as políticas deles.',
+        'Doar é opcional. O FileOrca tem um link para o Ko-fi, onde você pode deixar uma doação. O pagamento acontece no Ko-fi, sob as políticas dele.',
         'A doação é voluntária. Ela não compra nada e não muda nada no site.',
       ],
     },

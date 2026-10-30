@@ -12,5 +12,5 @@ export default {
   next: 'Oli runs on coffee, and the next coffee pays for the next tool in the queue. A donation is optional: it buys nothing and changes nothing on the site.',
   button: 'Support with a coffee',
   amountsNote:
-    'Suggested amounts on Ko-fi: US$ 3, 5 or 10. The payment happens on Ko-fi and PayPal, under their own policies.',
+    'Suggested amounts on Ko-fi: US$ 3, 5 or 10. The payment happens on Ko-fi, under its own policies.',
 } satisfies SupportTexts;
