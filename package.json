@@ -9,7 +9,22 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build"
+    "build": "astro build",
+    "verificar": "node scripts/verificar.ts",
+    "tipos": "astro check",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "lhci": "node scripts/gates/lighthouse.ts",
+    "lint:texto": "node scripts/gates/lint-texto.ts",
+    "serve": "node scripts/serve-dist.ts",
+    "gate:cabecalhos": "node scripts/gates/cabecalhos.ts",
+    "gate:worker": "node scripts/gates/worker.ts",
+    "gate:seo": "node scripts/gates/seo.ts",
+    "gate:links": "node scripts/gates/links.ts",
+    "gate:licencas": "node scripts/gates/licencas.ts",
+    "gate:dinheiro-saude": "node scripts/gates/dinheiro-saude.ts",
+    "gate:actionlint": "node scripts/gates/actionlint.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
