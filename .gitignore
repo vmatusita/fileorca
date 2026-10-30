@@ -1,0 +1,19 @@
+# Dependencias e build (a F1a pode acrescentar)
+node_modules/
+dist/
+.astro/
+.wrangler/
+coverage/
+playwright-report/
+test-results/
+.lighthouseci/
+
+# Segredos e ambiente local
+.env
+.env.*
+.claude/settings.local.json
+
+# Sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store

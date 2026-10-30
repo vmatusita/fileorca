@@ -1,0 +1,171 @@
+/* FileOrca v1.1 — generated from tokens.json. Fonts come from @fontsource-variable/fredoka and /figtree (latin subset).
+   Dark theme: follows prefers-color-scheme, and data-theme="light" | "dark" on <html> forces either one. */
+:root, [data-theme="light"] {
+  --bg: #F7FAFD;
+  --surface: #FFFFFF;
+  --surface-sunken: #EEF4FA;
+  --deep: #0C2B5E;
+  --water: #D6E6FF;
+  --ink: #0F1B2D;
+  --ink-muted: #4A5A72;
+  --on-deep: #F7FAFD;
+  --on-deep-muted: #B4C3D8;
+  --stroke: #0F1B2D;
+  --hairline: #D5DFEA;
+  --focus: #0B63F6;
+  --brand: #0B63F6;
+  --on-brand: #FFFFFF;
+  --brand-soft: #E3EEFE;
+  --brand-edge: #0F1B2D;
+  --brand-on-deep: #5AA2FF;
+  --sun: #FFC93C;
+  --on-sun: #0F1B2D;
+  --sun-edge: #0F1B2D;
+  --turquesa: #14B8A6;
+  --coral: #FF6B57;
+  --alga: #2FBF71;
+  --violeta: #6C47F5;
+  --lima: #9BD84A;
+  --on-cat: #0F1B2D;
+  --on-violeta: #FFFFFF;
+  --turquesa-soft: #D3EFEF;
+  --coral-soft: #F8E3E2;
+  --alga-soft: #D7F1E7;
+  --violeta-soft: #E1DDFC;
+  --lima-soft: #E8F5E0;
+  --danger: #C62828;
+  --danger-soft: #FDE8E6;
+  --success: #177A44;
+  --cheek: #FF9CA8;
+  --ad-ground: var(--surface-sunken);
+  --shadow-lift: 0 1px 2px rgba(15,27,45,0.06), 0 10px 24px -12px rgba(15,27,45,0.22);
+  --shadow-pop: 0 2px 6px rgba(15,27,45,0.08), 0 24px 48px -16px rgba(15,27,45,0.32);
+  --shadow-lip: 0 4px 0 #0F1B2D;
+  --shadow-lip-brand: 0 4px 0 #0F1B2D;
+  --shadow-lip-sun: 0 4px 0 #0F1B2D;
+  --shadow-lip-on-deep: 0 4px 0 #B8870F;
+}
+[data-theme="dark"] {
+  --bg: #0B1524;
+  --surface: #13223A;
+  --surface-sunken: #0E1A2D;
+  --water: #14407E;
+  --ink: #F7FAFD;
+  --ink-muted: #A9B7CA;
+  --stroke: #6A82A6;
+  --hairline: #22344F;
+  --focus: #5AA2FF;
+  --brand: #5AA2FF;
+  --on-brand: #0B1524;
+  --brand-soft: #17335E;
+  --brand-edge: #5AA2FF;
+  --sun-edge: #FFC93C;
+  --turquesa-soft: #0D3941;
+  --coral-soft: #41282F;
+  --alga-soft: #133A35;
+  --violeta-soft: #202052;
+  --lima-soft: #2B402C;
+  --danger: #FF8A80;
+  --danger-soft: #3A1C22;
+  --success: #5EDB97;
+  --shadow-lift: 0 1px 2px rgba(0,0,0,0.5), 0 12px 28px -12px rgba(0,0,0,0.7);
+  --shadow-pop: 0 2px 6px rgba(0,0,0,0.5), 0 24px 48px -16px rgba(0,0,0,0.8);
+  --shadow-lip: 0 4px 0 #6A82A6;
+  --shadow-lip-brand: 0 4px 0 #2B6FD6;
+  --shadow-lip-sun: 0 4px 0 #B8870F;
+  --ad-ground: var(--surface-sunken);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1524;
+    --surface: #13223A;
+    --surface-sunken: #0E1A2D;
+    --water: #14407E;
+    --ink: #F7FAFD;
+    --ink-muted: #A9B7CA;
+    --stroke: #6A82A6;
+    --hairline: #22344F;
+    --focus: #5AA2FF;
+    --brand: #5AA2FF;
+    --on-brand: #0B1524;
+    --brand-soft: #17335E;
+    --brand-edge: #5AA2FF;
+    --sun-edge: #FFC93C;
+    --turquesa-soft: #0D3941;
+    --coral-soft: #41282F;
+    --alga-soft: #133A35;
+    --violeta-soft: #202052;
+    --lima-soft: #2B402C;
+    --danger: #FF8A80;
+    --danger-soft: #3A1C22;
+    --success: #5EDB97;
+    --shadow-lift: 0 1px 2px rgba(0,0,0,0.5), 0 12px 28px -12px rgba(0,0,0,0.7);
+    --shadow-pop: 0 2px 6px rgba(0,0,0,0.5), 0 24px 48px -16px rgba(0,0,0,0.8);
+    --shadow-lip: 0 4px 0 #6A82A6;
+    --shadow-lip-brand: 0 4px 0 #2B6FD6;
+    --shadow-lip-sun: 0 4px 0 #B8870F;
+    --ad-ground: var(--surface-sunken);
+  }
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --stroke-hair: 1px;
+  --stroke-2: 2px;
+  --stroke-3: 3px;
+  --tap-min: 48px;
+  --control-h: 52px;
+  --button-lg: 60px;
+  --icon: 24px;
+  --icon-sm: 20px;
+  --lip: 4px;
+  --dogear: 26px;
+  --measure: 68ch;
+  --tool-max: 760px;
+  --page-max: 1240px;
+  --rail: 300px;
+  --ad-clearance: 150px;
+  --dur-instant: 90ms;
+  --dur-quick: 160ms;
+  --dur-base: 240ms;
+  --dur-cheer: 600ms;
+  --dur-float: 3000ms;
+  --dur-wave: 2400ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --font-display: "Fredoka", "Figtree", ui-rounded, system-ui, sans-serif;
+  --font-text: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.display { font-family: var(--font-display); font-size: 52px; line-height: 56px; font-weight: 600; letter-spacing: -0.01em; }
+.h1 { font-family: var(--font-display); font-size: 36px; line-height: 42px; font-weight: 600; letter-spacing: -0.01em; }
+.h1-mobile { font-family: var(--font-display); font-size: 28px; line-height: 34px; font-weight: 600; }
+.h2 { font-family: var(--font-display); font-size: 24px; line-height: 30px; font-weight: 600; }
+.number-xl { font-family: var(--font-display); font-size: 60px; line-height: 64px; font-weight: 600; }
+.number-lg { font-family: var(--font-display); font-size: 40px; line-height: 44px; font-weight: 600; }
+.number-md { font-family: var(--font-display); font-size: 24px; line-height: 28px; font-weight: 600; }
+.oli { font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 500; }
+.lead { font-family: var(--font-text); font-size: 18px; line-height: 28px; font-weight: 400; }
+.body { font-family: var(--font-text); font-size: 16px; line-height: 26px; font-weight: 400; }
+.body-strong { font-family: var(--font-text); font-size: 16px; line-height: 26px; font-weight: 600; }
+.h3 { font-family: var(--font-text); font-size: 18px; line-height: 26px; font-weight: 700; }
+.label { font-family: var(--font-text); font-size: 15px; line-height: 20px; font-weight: 600; }
+.button { font-family: var(--font-text); font-size: 16px; line-height: 20px; font-weight: 700; }
+.small { font-family: var(--font-text); font-size: 14px; line-height: 20px; font-weight: 400; }
+.table { font-family: var(--font-text); font-size: 15px; line-height: 22px; font-weight: 500; }
+.caption { font-family: var(--font-text); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; }

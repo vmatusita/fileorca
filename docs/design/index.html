@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FileOrca · design system v1.1</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; background: var(--bg); color: var(--ink); font: 400 15px/22px var(--font-text); }
+  nav { padding: 20px; border-right: 1px solid var(--hairline); overflow: auto; max-height: 100vh; box-sizing: border-box; }
+  nav h1 { font: 600 22px/28px var(--font-display); margin: 0 0 4px; }
+  nav p { margin: 0 0 12px; color: var(--ink-muted); font-size: 13px; }
+  nav h2 { font: 600 12px/16px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); margin: 18px 0 6px; }
+  nav ul { list-style: none; margin: 0; padding: 0; }
+  nav a { display: block; padding: 4px 8px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+  nav a[aria-current] { background: var(--brand-soft); font-weight: 700; }
+  main { display: grid; grid-template-rows: auto 1fr; }
+  .bar { display: flex; gap: 8px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--hairline); }
+  .bar b { margin-right: auto; font: 600 18px/24px var(--font-display); }
+  .bar button { font: 700 14px/18px var(--font-text); padding: 8px 14px; border-radius: 999px; border: 2px solid var(--stroke); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .bar button[aria-pressed="true"] { background: var(--brand-soft); }
+  iframe { width: 100%; height: 100%; border: 0; background: var(--bg); }
+</style>
+</head>
+<body>
+<nav aria-label="Componentes">
+<h1>FileOrca</h1>
+<p>Design system v1.1 · 29/out/2026. As regras estão no README.md desta pasta.</p>
+<h2>Ações</h2><ul><li><a href="components/Button/preview.html" data-name="Button">Button</a></li><li><a href="components/PrivacySeal/preview.html" data-name="PrivacySeal">PrivacySeal</a></li><li><a href="components/NextStepChips/preview.html" data-name="NextStepChips">NextStepChips</a></li></ul>
+<h2>Arquivos</h2><ul><li><a href="components/DropZone/preview.html" data-name="DropZone">DropZone</a></li><li><a href="components/WaterLevel/preview.html" data-name="WaterLevel">WaterLevel</a></li><li><a href="components/FileCard/preview.html" data-name="FileCard">FileCard</a></li><li><a href="components/ResultCard/preview.html" data-name="ResultCard">ResultCard</a></li><li><a href="components/Placard/preview.html" data-name="Placard">Placard</a></li><li><a href="components/BeforeAfter/preview.html" data-name="BeforeAfter">BeforeAfter</a></li></ul>
+<h2>Entradas</h2><ul><li><a href="components/OptionGroup/preview.html" data-name="OptionGroup">OptionGroup</a></li><li><a href="components/NumberField/preview.html" data-name="NumberField">NumberField</a></li></ul>
+<h2>Calculadoras</h2><ul><li><a href="components/ResultHero/preview.html" data-name="ResultHero">ResultHero</a></li><li><a href="components/SplitChart/preview.html" data-name="SplitChart">SplitChart</a></li><li><a href="components/ScenarioCompare/preview.html" data-name="ScenarioCompare">ScenarioCompare</a></li><li><a href="components/AmortTable/preview.html" data-name="AmortTable">AmortTable</a></li><li><a href="components/ExportBar/preview.html" data-name="ExportBar">ExportBar</a></li></ul>
+<h2>Feedback</h2><ul><li><a href="components/OliMessage/preview.html" data-name="OliMessage">OliMessage</a></li><li><a href="components/CookieNotice/preview.html" data-name="CookieNotice">CookieNotice</a></li></ul>
+<h2>Marca</h2><ul><li><a href="components/Oli/preview.html" data-name="Oli">Oli</a></li></ul>
+<h2>Navegação</h2><ul><li><a href="components/Header/preview.html" data-name="Header">Header</a></li><li><a href="components/Breadcrumb/preview.html" data-name="Breadcrumb">Breadcrumb</a></li><li><a href="components/ToolSearch/preview.html" data-name="ToolSearch">ToolSearch</a></li><li><a href="components/ToolCard/preview.html" data-name="ToolCard">ToolCard</a></li><li><a href="components/Footer/preview.html" data-name="Footer">Footer</a></li></ul>
+<h2>Conteúdo</h2><ul><li><a href="components/Faq/preview.html" data-name="Faq">Faq</a></li></ul>
+<h2>Monetização</h2><ul><li><a href="components/AdSlot/preview.html" data-name="AdSlot">AdSlot</a></li><li><a href="components/SupportCard/preview.html" data-name="SupportCard">SupportCard</a></li></ul>
+<h2>Moldes</h2><ul><li><a href="components/ToolPage/preview.html" data-name="ToolPage">ToolPage</a></li></ul>
+</nav>
+<main>
+<div class="bar"><b id="title">Button</b>
+<button type="button" data-theme-btn="light" aria-pressed="true">Claro</button>
+<button type="button" data-theme-btn="dark" aria-pressed="false">Escuro</button>
+<button type="button" data-w="360">360px</button>
+<button type="button" data-w="">Largura total</button></div>
+<iframe id="view" title="Preview do componente" src="components/Button/preview.html?theme=light"></iframe>
+</main>
+<script>
+  var theme = "light", cur = "Button", view = document.getElementById("view");
+  function show() {
+    view.src = "components/" + cur + "/preview.html?theme=" + theme;
+    document.getElementById("title").textContent = cur;
+    document.querySelectorAll("nav a").forEach(function (a) { a.toggleAttribute("aria-current", a.dataset.name === cur); });
+    document.querySelectorAll("[data-theme-btn]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.themeBtn === theme); });
+  }
+  document.querySelectorAll("nav a").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); cur = a.dataset.name; show(); }); });
+  document.querySelectorAll("[data-theme-btn]").forEach(function (b) { b.addEventListener("click", function () { theme = b.dataset.themeBtn; show(); }); });
+  document.querySelectorAll("[data-w]").forEach(function (b) { b.addEventListener("click", function () { view.style.width = b.dataset.w ? b.dataset.w + "px" : "100%"; }); });
+  show();
+</script>
+</body>
+</html>

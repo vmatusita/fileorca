@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FileOrca · OptionGroup</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath></defs></svg>
+<div class="fo-stage" style="display:grid;gap:24px;max-width:520px">
+<fieldset class="fo-field" style="border:0;padding:0;margin:0">
+  <legend class="fo-field__label" style="margin-bottom:8px">Compression</legend>
+  <div class="fo-seg">
+    <label class="fo-seg__opt"><input type="radio" name="m">Lossless<small>bigger</small></label>
+    <label class="fo-seg__opt"><input type="radio" name="m" checked>Recommended<small>best balance</small></label>
+    <label class="fo-seg__opt"><input type="radio" name="m">Strong<small>smallest</small></label>
+  </div>
+</fieldset>
+<div class="fo-field">
+  <label class="fo-field__label" for="q">Quality <span class="fo-field__value" id="qv">80</span></label>
+  <input class="fo-range" id="q" type="range" min="10" max="100" value="80" style="--fill:77.8%">
+  <div class="fo-ticks"><span>Smaller file</span><span>Sharper image</span></div>
+</div>
+<fieldset class="fo-field" style="border:0;padding:0;margin:0">
+  <legend class="fo-field__label" style="margin-bottom:8px">Format</legend>
+  <div class="fo-seg"><label class="fo-seg__opt"><input type="radio" name="f" checked>Keep</label><label class="fo-seg__opt"><input type="radio" name="f">JPG</label><label class="fo-seg__opt"><input type="radio" name="f">WebP</label><label class="fo-seg__opt"><input type="radio" name="f">AVIF</label></div>
+</fieldset>
+</div>
+<script>var q=document.getElementById('q');q.addEventListener('input',function(){document.getElementById('qv').textContent=q.value;q.style.setProperty('--fill',((q.value-10)/90*100)+'%')});</script>
+</body>
+</html>

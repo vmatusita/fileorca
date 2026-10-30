@@ -1,0 +1,17 @@
+# Fim de linha LF em todo arquivo de texto, inclusive no Windows.
+* text=auto eol=lf
+.githooks/* text eol=lf
+
+# Binarios: nunca converter.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.heic binary
+*.HEIC binary
+*.webp binary
+*.avif binary
+*.gif binary
+*.pdf binary
+*.woff2 binary
+*.zip binary
+*.wasm binary

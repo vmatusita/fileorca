@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FileOrca · BeforeAfter</title>
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../bundle.css">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath></defs></svg>
+<div class="fo-stage" style="display:block;max-width:560px">
+<div class="fo-ba" id="ba">
+  <img src="../../assets/photo.jpg" alt="Original image">
+  <img class="fo-ba__after" src="../../assets/photo-after.jpg" alt="Compressed image">
+  <span class="fo-ba__tag fo-ba__tag--l">Before · 2.4 MB</span><span class="fo-ba__tag fo-ba__tag--r">After · 780 KB</span>
+  <input class="fo-ba__range" type="range" min="0" max="100" value="50" aria-label="Compare before and after">
+  <span class="fo-ba__line"></span>
+  <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+</div></div>
+<script>var b=document.getElementById('ba'),r=b.querySelector('input');r.addEventListener('input',function(){b.style.setProperty('--pos',r.value+'%')});</script>
+</body>
+</html>
