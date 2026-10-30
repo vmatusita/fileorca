@@ -1,14 +1,16 @@
 // Image worker: the page talks to it through Comlink, so the main thread never decodes pixels.
 import { expose } from 'comlink';
-import { EngineError, recompress, type Level, type Progress } from './recompress.ts';
+import { EngineError, recompress, workerCanEncode, type Level, type Progress } from './recompress.ts';
 
 export interface EngineFailure {
   ok: false;
-  reason: EngineError['reason'];
+  /** 'no-canvas': this worker has no OffscreenCanvas; the page falls back to a main-thread canvas. */
+  reason: EngineError['reason'] | 'no-canvas';
 }
 
 const api = {
   async compress(file: Blob, level: Level, onProgress: Progress) {
+    if (!workerCanEncode()) return { ok: false as const, reason: 'no-canvas' } satisfies EngineFailure;
     try {
       const result = await recompress(file, level, onProgress);
       return { ok: true as const, ...result };

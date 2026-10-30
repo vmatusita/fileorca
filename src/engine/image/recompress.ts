@@ -35,6 +35,26 @@ export function isSupportedType(type: string): type is SupportedType {
 
 export type Progress = (percent: number) => void;
 
+/** Workers need OffscreenCanvas; Safari before 16.4 (and Playwright's WebKit on Windows) lacks it. */
+export function workerCanEncode(): boolean {
+  return typeof OffscreenCanvas !== 'undefined';
+}
+
+function makeCanvas(width: number, height: number): OffscreenCanvas | HTMLCanvasElement {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
+function encode(canvas: OffscreenCanvas | HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
+  if ('convertToBlob' in canvas) return canvas.convertToBlob(quality === undefined ? { type } : { type, quality });
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('toBlob returned null'))), type, quality);
+  });
+}
+
 export async function recompress(file: Blob, level: Level, onProgress: Progress = () => {}): Promise<RecompressResult> {
   const type = file.type;
   if (!isSupportedType(type)) throw new EngineError('unsupported', `type ${type || 'unknown'} is not supported`);
@@ -46,8 +66,8 @@ export async function recompress(file: Blob, level: Level, onProgress: Progress 
   }
   onProgress(40);
   const { width, height } = bitmap;
-  const canvas = new OffscreenCanvas(width, height);
-  const context = canvas.getContext('2d');
+  const canvas = makeCanvas(width, height);
+  const context = canvas.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
   if (!context) throw new EngineError('encode', '2d context unavailable');
   if (type === 'image/jpeg') {
     // JPEG has no alpha: paint a white ground so transparent pixels do not turn black.
@@ -59,7 +79,7 @@ export async function recompress(file: Blob, level: Level, onProgress: Progress 
   onProgress(70);
   let output: Blob;
   try {
-    output = await canvas.convertToBlob(type === 'image/png' ? { type } : { type, quality: QUALITY[level] });
+    output = await encode(canvas, type, type === 'image/png' ? undefined : QUALITY[level]);
   } catch {
     throw new EngineError('encode', 'the browser could not save this format');
   }
