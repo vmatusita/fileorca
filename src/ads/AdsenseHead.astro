@@ -1,0 +1,15 @@
+---
+// AdSense in <head>: the verification meta only with PUBLIC_ADSENSE_CLIENT; the loader only with
+// the three variables AND on a page that has AdSlots (never on legal or institutional pages).
+import { adsenseScriptSrc, buildAdsConfig, type AdsConfig } from './config.ts';
+
+interface Props {
+  withAds: boolean;
+  config?: AdsConfig;
+}
+const { withAds, config = buildAdsConfig() } = Astro.props;
+---
+{config.client && <meta name="google-adsense-account" content={config.client} />}
+{withAds && config.scriptEnabled && config.client && (
+  <script is:inline async src={adsenseScriptSrc(config.client)} crossorigin="anonymous"></script>
+)}

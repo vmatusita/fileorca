@@ -1,0 +1,31 @@
+---
+// AdSlot (docs/design/components/AdSlot): neutral box with reserved height and the label AdSense
+// accepts in each language. The unit and its push only render with the three build variables
+// filled in (PLANO "Como o anúncio liga"). The loader script lives in <head> (AdsenseLoader).
+import type { AdArea } from '../i18n/routes.ts';
+import { buildAdsConfig, unitFor, type AdsConfig } from './config.ts';
+
+interface Props {
+  area: AdArea;
+  variant: 'content' | 'rail';
+  label: string;
+  /** Tests pass a config; the site uses the build variables. */
+  config?: AdsConfig;
+}
+const { area, variant, label, config = buildAdsConfig() } = Astro.props;
+const unit = unitFor(config, area, variant === 'rail' ? 'lateral' : 'conteudo');
+---
+<div class={`fo-ad fo-ad--${variant}`} data-ad-area={area}>
+  <span class="fo-ad__label">{label}</span>
+  {unit && config.client && (
+    <ins
+      class="adsbygoogle"
+      data-ad-client={config.client}
+      data-ad-slot={unit}
+      data-ad-format={variant === 'rail' ? undefined : 'auto'}
+      data-full-width-responsive={variant === 'rail' ? undefined : 'true'}
+      style={variant === 'rail' ? 'display:inline-block;width:300px;height:600px' : 'display:block'}
+    ></ins>
+  )}
+  {unit && <script is:inline>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>}
+</div>
