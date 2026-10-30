@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fileorca.com/sitemap-index.xml
