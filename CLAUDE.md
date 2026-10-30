@@ -58,3 +58,33 @@ DNS, configuração da zona, Worker e variáveis do Workers Builds no Cloudflare
 ## Idioma
 
 Narrativa, relatórios e docs em português. Código, nomes de arquivo e commits em inglês. Textos do site nos arquivos de tradução de cada idioma.
+
+## F1a: comandos e pegadinhas
+
+Scripts do `package.json` (todos rodam igual no Windows e no Ubuntu, em TypeScript com o Node puro, sem bash):
+
+| Comando | O que faz |
+| --- | --- |
+| `pnpm verificar` | Tudo, em ordem, com o tempo de cada portão; para na primeira falha e reprova acima de 15 min |
+| `pnpm tipos` / `pnpm lint` / `pnpm test` | `astro check`, ESLint, Vitest |
+| `pnpm build` | Build estático em `dist/` (grava `_headers`, `_redirects` e `build.txt`) |
+| `pnpm e2e` | Playwright em Chromium e WebKit sobre o `dist/` (precisa de build antes) |
+| `pnpm lhci` | Lighthouse CI no celular sobre o `dist/`, com o Chromium do Playwright |
+| `pnpm lint:texto` | LanguageTool local nos textos alterados contra `origin/main` |
+| `pnpm gate:cabecalhos`, `gate:worker`, `gate:seo`, `gate:links`, `gate:licencas`, `gate:dinheiro-saude`, `gate:actionlint` | Um portão pós-build de cada vez |
+| `pnpm serve` | Serve o `dist/` como o Cloudflare (barra no fim, 404 mais próximo, `_headers`) |
+
+Rodar um teste só: `pnpm exec vitest run tests/unit/ads.test.ts`, `pnpm exec playwright test tests/e2e/ads.spec.ts --project=webkit`. Primeira vez numa máquina: `pnpm exec playwright install chromium webkit` (no Ubuntu, com `--with-deps`).
+
+Pegadinhas que a F1a achou:
+
+- O pnpm 12 recusa scripts de instalação não aprovados (`ERR_PNPM_IGNORED_BUILDS`): aprove em `pnpm-workspace.yaml` (`allowBuilds`), nunca com flag de linha de comando. Ele também recusa pacote publicado há menos de um dia; fixe a versão anterior em vez de abrir exceção.
+- Astro 7: `build.format` é `preserve` (DECISOES § 16), então toda página é `.../index.astro`. Use Vite 8 com Rolldown: opções em `vite.build.rolldownOptions`, não `rollupOptions`.
+- Preact 11: os tipos de evento (`TargetedMouseEvent`) vêm de `preact`, não de `JSX.*`.
+- A ilha da ferramenta é hidratada por um `mount.ts` (DECISOES § 23). Um `<script>` do Astro com `import()` vira arquivo externo e puxa o `preload-helper`: para módulo carregado no primeiro uso, use `?worker&url` com um entry que publica a API no `window` (a busca faz assim).
+- O WebKit do Playwright no Windows não tem `OffscreenCanvas` no worker; o motor cai para a página (DECISOES § 22). No CI (Linux) o comportamento pode diferir: os testes cobrem os dois caminhos sem depender disso.
+- O tsconfig usa `exactOptionalPropertyTypes`: não passe `undefined` para opção opcional, espalhe um objeto condicional.
+- No Git Bash do Claude Code, heredoc pode engolir `\\` e falhar com aspas; escreva arquivos com a ferramenta de edição.
+- `git push` e `gh pr create --base main` na mesma linha casam com a regra de negação de push na main do `.claude/settings.json`: rode em comandos separados.
+- A API pública do LanguageTool proíbe requisição automatizada; o `lint:texto` sobe o servidor local (DECISOES § 24). No Windows sem Java, ele baixa o JRE fixado para `.cache/`.
+- O Workers Builds desta conta usa o modelo "Worker Previews" (`wrangler preview`), que pede um bloco `previews` no `wrangler.jsonc`; enquanto a ADR-002 não for decidida, a prévia depende do comando configurado no painel.
