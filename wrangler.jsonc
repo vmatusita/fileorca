@@ -9,6 +9,5 @@
     "html_handling": "auto-trailing-slash"
   },
   "workers_dev": true,
-  "preview_urls": true,
-  "previews": {}
+  "preview_urls": true
 }
