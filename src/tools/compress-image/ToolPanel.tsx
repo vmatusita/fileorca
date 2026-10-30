@@ -107,7 +107,8 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
     setErrorName(file.name || 'file');
     setResult(null);
     setPhase('error');
-    setAnnounce(`${t.drop.errorTitle}. ${fmt(t.drop.errorHelp, { name: file.name || 'file' })}`);
+    // The error text sits in a role="alert" box, which announces it; the status region stays empty.
+    setAnnounce('');
     track('tool_error', { tool: TOOL, lang, browser: browserLabel(navigator.userAgent), codec: file.type || 'unknown', reason });
   }
 
