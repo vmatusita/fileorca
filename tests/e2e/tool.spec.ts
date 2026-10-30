@@ -36,6 +36,16 @@ test.describe('Compress image (motor provisório)', () => {
     expect(outbound).toEqual([]);
   });
 
+  test('the work runs in the Web Worker where the browser supports OffscreenCanvas', async ({ page }) => {
+    const workerSupported = await page.evaluate(() => typeof OffscreenCanvas !== 'undefined');
+    const workers: string[] = [];
+    page.on('worker', (worker) => workers.push(worker.url()));
+    await page.setInputFiles('input[type="file"]', GPS_PHOTO);
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    expect(workers.some((url) => /\/_astro\/worker-[\w-]+\.js$/.test(url))).toBe(true);
+    if (!workerSupported) console.log('este navegador não tem OffscreenCanvas: o motor rodou na página (DECISOES § 22)');
+  });
+
   test('changing the option re-processes at once, without an Apply button', async ({ page }) => {
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
