@@ -67,7 +67,7 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
       <main id="main" class="fo-main fo-content">
         <slot />
       </main>
-      {hasRail && <div class="fo-rail"><slot name="rail" /></div>}
+      {hasRail && <aside class="fo-rail" aria-label={common.adLabel}><slot name="rail" /></aside>}
     </div>
     <Footer lang={lang} t={common} />
     <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />

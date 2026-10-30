@@ -36,7 +36,8 @@ a { color: var(--brand); }
 .fo-content { max-width: var(--tool-max); min-width: 0; }
 .fo-rail { display: none; }
 @media (min-width: 1280px) {
-  .fo-frame--rail { display: grid; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); justify-content: space-between; align-items: start; }
+  /* The column gap is the ad clearance itself, so the rail never comes closer than 150px. */
+  .fo-frame--rail { display: grid; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; align-items: start; }
   .fo-rail { display: block; padding-top: var(--space-5); }
 }
 .fo-prose { max-width: var(--measure); }

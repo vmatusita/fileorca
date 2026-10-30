@@ -14,6 +14,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     worker: { format: 'es' },
-    build: { modulePreload: false },
+    build: {
+      rolldownOptions: {
+        // One shared chunk for the Preact runtime, so a tool page loads two JS files (DECISOES § 23).
+        output: { codeSplitting: { groups: [{ name: 'preact-runtime', test: /[\\/]node_modules[\\/]preact[\\/]|preload-helper/ }] } },
+      },
+    },
   },
 });

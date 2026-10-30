@@ -7,7 +7,7 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import AdSlot from '../../ads/AdSlot.astro';
-import ToolPanel from './ToolPanel.tsx';
+import ToolPanel, { type ToolPanelProps } from './ToolPanel.tsx';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd, type Crumb } from '../../seo/meta.ts';
@@ -21,6 +21,7 @@ const t = TEXTS[lang]['compress-image'];
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
 const area = route.adArea ?? 'arquivos';
+const panelProps: ToolPanelProps = { lang, t, moreToolsHref: homePath(lang) };
 const crumbs: Crumb[] = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path },
@@ -39,7 +40,10 @@ const crumbs: Crumb[] = [
     <h1 class="fo-h1">{t.h1}</h1>
     <PrivacySeal text={common.seal} />
   </div>
-  <ToolPanel client:load lang={lang} t={t} moreToolsHref={homePath(lang)} />
+  <div id="fo-tool-root" data-props={JSON.stringify(panelProps)}><ToolPanel {...panelProps} /></div>
+  <script>
+    import './mount.ts';
+  </script>
   <AdSlot area={area} variant="content" label={common.adLabel} />
   <section class="fo-section fo-prose" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
