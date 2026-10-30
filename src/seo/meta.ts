@@ -11,17 +11,21 @@ export interface Alternate {
   href: string;
 }
 
-/** hreflang links of an indexable route: every equivalent language plus x-default (English). */
+/**
+ * hreflang links of an indexable route: every equivalent language plus x-default (English).
+ * A page in a single language (allowed by the plan) gets no hreflang at all.
+ */
 export function alternatesFor(route: RouteDef): Alternate[] {
-  if (!route.indexable) return [];
+  if (!route.indexable || languagesOf(route).length < 2) return [];
   const links = languagesOf(route).map((lang) => ({ hreflang: LANG_TAG[lang], href: absolute(route.paths[lang] ?? '/') }));
   const fallback = route.paths[DEFAULT_LANG];
   if (fallback) links.push({ hreflang: 'x-default', href: absolute(fallback) });
   return links;
 }
 
+/** '<page title> | FileOrca'; a title that already starts with the brand (the home) stays as is. */
 export function pageTitle(title: string): string {
-  return `${title} | ${SITE_NAME}`;
+  return title.startsWith(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 }
 
 export function ogImagePath(id: RouteId, lang: Lang): string {

@@ -42,6 +42,16 @@ describe('validador de hreflang', () => {
     expect(validateHreflang(unknown, tags).join('\n')).toMatch(/desconhecido fr|não é página indexável/);
   });
 
+  it('accepts pages in one language only (no hreflang) and clusters without English (no x-default)', () => {
+    const ptOnly = { id: 'home', paths: { pt: '/pt/so-pt/' }, indexable: true, view: 'v', texts: [] } as const;
+    expect(alternatesFor(ptOnly)).toEqual([]);
+    expect(validateHreflang([{ url: `${O}/pt/so-pt/`, alternates: [] }], tags)).toEqual([]);
+    const ptEs = { id: 'home', paths: { pt: '/pt/b/', es: '/es/b/' }, indexable: true, view: 'v', texts: [] } as const;
+    const heads = Object.values(ptEs.paths).map((path) => ({ url: `${O}${path}`, alternates: alternatesFor(ptEs) }));
+    expect(heads[0]?.alternates.map((alt) => alt.hreflang)).toEqual(['pt-BR', 'es']);
+    expect(validateHreflang(heads, tags)).toEqual([]);
+  });
+
   it('is green for the real route map', () => {
     const heads = ROUTES.filter((route) => route.indexable).flatMap((route) =>
       Object.values(route.paths).map((path) => ({ url: `${O}${path}`, alternates: alternatesFor(route) })),

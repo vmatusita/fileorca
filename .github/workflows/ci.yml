@@ -92,7 +92,8 @@ jobs:
           else
             cp scripts/ci/pode-mesclar.ts "$RUNNER_TEMP/ci/pode-mesclar.ts"
           fi
-          git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"
+          # --no-renames lists both sides of a rename, so moving a workflow out of the folder counts.
+          git -c core.quotePath=false diff --no-renames --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"
           jq -n --arg head "$HEAD_REF" --arg author "$AUTHOR" --argjson draft "$DRAFT" \
             --rawfile files "$RUNNER_TEMP/files.txt" \
             '{headRefName: $head, isDraft: $draft, author: {login: $author}, files: ($files | split("\n") | map(select(length > 0)) | map({path: .}))}' \
@@ -112,8 +113,18 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if gh pr merge "$PR" --squash --delete-branch --match-head-commit "$HEAD_SHA"; then
+            sha=''
+            for attempt in 1 2 3 4 5; do
+              sha=$(gh pr view "$PR" --json mergeCommit --jq '.mergeCommit.oid // empty')
+              [[ "$sha" =~ ^[0-9a-f]{40}$ ]] && break
+              sleep 5
+            done
+            if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+              gh issue create --title "Merge da PR #$PR sem commit de merge legível" --body "O merge aconteceu, mas o commit não apareceu no gh pr view; rode o pós-deploy à mão. Execução: $RUN_URL"
+              exit 1
+            fi
             echo "merged=true" >> "$GITHUB_OUTPUT"
-            echo "sha=$(gh pr view "$PR" --json mergeCommit --jq .mergeCommit.oid)" >> "$GITHUB_OUTPUT"
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
           else
             gh pr comment "$PR" --body "Merge automático: o GitHub recusou o merge (conflito ou PR desatualizada). Execução: $RUN_URL"
             gh issue create --title "Merge automático falhou na PR #$PR" --body "O job de merge decidiu mesclar ($REASON), mas o gh pr merge falhou. Execução: $RUN_URL"

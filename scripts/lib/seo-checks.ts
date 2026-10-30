@@ -14,6 +14,8 @@ export function validateHreflang(pages: PageHead[], options: { xDefaultLang: str
   const problems: string[] = [];
   const byUrl = new Map(pages.map((page) => [page.url, page]));
   for (const page of pages) {
+    // A page in a single language carries no hreflang; nothing to check.
+    if (page.alternates.length === 0) continue;
     const tags = page.alternates.map((alt) => alt.hreflang);
     const duplicate = tags.find((tag, index) => tags.indexOf(tag) !== index);
     if (duplicate) problems.push(`${page.url}: hreflang ${duplicate} repetido`);
@@ -22,7 +24,9 @@ export function validateHreflang(pages: PageHead[], options: { xDefaultLang: str
     }
     const xDefault = page.alternates.filter((alt) => alt.hreflang === 'x-default');
     const english = page.alternates.find((alt) => alt.hreflang === options.xDefaultLang);
-    if (xDefault.length !== 1) problems.push(`${page.url}: ${xDefault.length} x-default`);
+    // x-default points to the English page; a cluster without English has none.
+    if (english && xDefault.length !== 1) problems.push(`${page.url}: ${xDefault.length} x-default`);
+    else if (!english && xDefault.length > 0) problems.push(`${page.url}: x-default sem página em inglês`);
     else if (english && xDefault[0]?.href !== english.href) problems.push(`${page.url}: x-default não aponta o inglês`);
     for (const alt of page.alternates) {
       if (alt.hreflang !== 'x-default' && !options.langTags.includes(alt.hreflang)) problems.push(`${page.url}: hreflang desconhecido ${alt.hreflang}`);

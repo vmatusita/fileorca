@@ -2,7 +2,7 @@
 // hreflang reciprocal and self-referencing with x-default in English; one sitemap per language
 // inside an index, valid and matching the route map; canonical, title and description per page;
 // robots.txt fixed; no robots meta; JSON-LD parses; 404 out of sitemaps and hreflang.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
@@ -22,14 +22,26 @@ for (const page of allPages()) {
   if (html?.getAttribute('lang') !== LANG_TAG[page.lang]) problems.add(`${page.path}: <html lang> diferente de ${LANG_TAG[page.lang]}`);
   const title = root.querySelector('title')?.text.trim() ?? '';
   const description = root.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
-  if (!title.endsWith(' | FileOrca')) problems.add(`${page.path}: título sem " | FileOrca"`);
+  const brandFirst = page.route.id === 'home' && title.startsWith('FileOrca') && !title.includes(' | FileOrca');
+  if (!title.endsWith(' | FileOrca') && !brandFirst) problems.add(`${page.path}: título sem " | FileOrca"`);
+  if ((title.match(/FileOrca/g) ?? []).length > 1 && page.route.id === 'home') problems.add(`${page.path}: marca repetida no título`);
+  const h1 = root.querySelector('h1')?.text.trim() ?? '';
+  if (page.route.id === 'compress-image' && !title.startsWith(h1)) problems.add(`${page.path}: título não começa pelo nome da ferramenta (${h1})`);
   if (description.length < 50 || description.length > 170) problems.add(`${page.path}: descrição com ${description.length} caracteres`);
   if (root.querySelector('meta[name="robots"]')) problems.add(`${page.path}: tem <meta name="robots"> (noindex é só por cabeçalho)`);
   const h1s = root.querySelectorAll('h1');
   if (h1s.length !== 1) problems.add(`${page.path}: ${h1s.length} H1`);
+  const types = new Set<string>();
   for (const script of root.querySelectorAll('script[type="application/ld+json"]')) {
     try {
-      const data = JSON.parse(script.text) as { '@graph'?: { '@type'?: string; aggregateRating?: unknown }[] };
+      const data = JSON.parse(script.text) as { '@graph'?: { '@type'?: string; logo?: string; name?: string }[] };
+      for (const node of data['@graph'] ?? []) {
+        if (node['@type']) types.add(node['@type']);
+        if (node['@type'] === 'Organization' && (!node.logo || !existsSync(`${DIST}${new URL(node.logo).pathname}`))) {
+          problems.add(`${page.path}: Organization sem logo que exista no dist`);
+        }
+        if (node['@type'] === 'Person' && node.name !== 'Victor Yuki Matusita') problems.add(`${page.path}: Person diferente do autor`);
+      }
       if (JSON.stringify(data).includes('aggregateRating') || JSON.stringify(data).includes('"review"')) {
         problems.add(`${page.path}: schema com nota ou avaliação`);
       }
@@ -37,6 +49,15 @@ for (const page of allPages()) {
       problems.add(`${page.path}: JSON-LD inválido`);
     }
   }
+  const required: Record<string, string[]> = {
+    home: ['Organization', 'WebSite'],
+    'compress-image': ['Organization', 'BreadcrumbList', 'WebApplication'],
+    about: ['Organization', 'BreadcrumbList', 'Person', 'AboutPage'],
+  };
+  for (const type of required[page.route.id] ?? ['Organization']) {
+    if (!types.has(type)) problems.add(`${page.path}: falta o schema ${type}`);
+  }
+  if (page.route.indexable && page.route.id !== 'home' && !types.has('BreadcrumbList')) problems.add(`${page.path}: falta o schema BreadcrumbList`);
   if (!page.route.indexable) {
     if (root.querySelector('link[rel="canonical"]')) problems.add(`${page.path}: página não indexável com canonical`);
     if (root.querySelectorAll('link[rel="alternate"][hreflang]').length) problems.add(`${page.path}: página não indexável com hreflang`);
