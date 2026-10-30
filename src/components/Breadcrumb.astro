@@ -1,0 +1,18 @@
+---
+// Breadcrumb (docs/design/components/Breadcrumb). Only links to pages that exist (DECISOES § 6).
+import type { Crumb } from '../seo/meta.ts';
+
+interface Props {
+  label: string;
+  crumbs: Crumb[];
+}
+const { label, crumbs } = Astro.props;
+const last = crumbs.length - 1;
+---
+<nav aria-label={label}>
+  <ol class="fo-crumbs">
+    {crumbs.map((crumb, index) => (
+      <li>{index === last ? <span aria-current="page">{crumb.name}</span> : <a href={crumb.path}>{crumb.name}</a>}</li>
+    ))}
+  </ol>
+</nav>

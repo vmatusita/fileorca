@@ -1,0 +1,34 @@
+---
+// CookieNotice (docs/design/components/CookieNotice): Accept and Decline for everyone, Decline
+// first, neither button is brand or sun. Hidden for good after a choice, and hidden where the
+// IAB __tcfapi says GDPR applies (Google's CMP takes over there). Non-modal: it never blocks.
+import type { CommonTexts } from '../i18n/types.ts';
+import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
+
+interface Props {
+  t: CommonTexts;
+  privacyHref: string;
+}
+const { t, privacyHref } = Astro.props;
+const script = `(function(){
+var K=${JSON.stringify(CONSENT_STORAGE_KEY)},box=document.getElementById('fo-cookie');if(!box)return;
+function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
+function save(v){try{localStorage.setItem(K,v);}catch(e){}}
+function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics_storage:v,ad_user_data:v,ad_personalization:v});}
+function hide(){box.hidden=true;}
+function show(){box.hidden=false;}
+function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
+box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent');save(v);apply(v);hide();});
+document.addEventListener('click',function(e){if(e.target.closest('[data-consent-change]')){try{localStorage.removeItem(K);}catch(x){}show();var f=box.querySelector('button');if(f)f.focus();}});
+if(stored()==='granted'||stored()==='denied')return;
+show();tcf()||window.addEventListener('load',tcf,{once:true});
+})();`;
+---
+<div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>
+  <p id="fo-cookie-text"><b>{t.cookie.title}</b> {t.cookie.body} <a href={privacyHref}>{t.cookie.privacyLink}</a></p>
+  <div class="fo-cookie__actions">
+    <button type="button" class="fo-btn" data-consent="denied">{t.cookie.decline}</button>
+    <button type="button" class="fo-btn" data-consent="granted">{t.cookie.accept}</button>
+  </div>
+</div>
+<script is:inline set:html={script} />

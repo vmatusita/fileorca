@@ -1,0 +1,39 @@
+---
+// About: who makes the site (Person schema), why it exists and the orca fact. No photo yet:
+// the photo is a pending item for Victor (public/about/victor.jpg), never a placeholder image.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { AUTHOR } from '../platform/site.ts';
+import { breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('about');
+const t = TEXTS[lang].about;
+const common = TEXTS[lang].common;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path: route.paths[lang] ?? '/' },
+];
+const aboutPage = { '@type': 'AboutPage', name: t.h1, mainEntity: { '@id': 'https://fileorca.com/#victor' } };
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), personLd(), aboutPage]}>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <article class="fo-prose">
+    <h1 class="fo-h1">{t.h1}</h1>
+    {t.intro.map((paragraph) => <p>{paragraph}</p>)}
+    <h2>{t.whyHeading}</h2>
+    {t.why.map((paragraph) => <p>{paragraph}</p>)}
+    <h2>{t.orcaHeading}</h2>
+    <p>{t.orca}</p>
+    <h2>{t.linksHeading}</h2>
+    <ul>
+      <li><a href={AUTHOR.website} rel="me">{t.websiteLabel}</a></li>
+      <li><a href={AUTHOR.linkedin} rel="me">{t.linkedinLabel}</a></li>
+    </ul>
+  </article>
+</BaseLayout>

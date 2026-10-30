@@ -1,0 +1,77 @@
+---
+// Base layout of every page: technical SEO head, consent bootstrap first, header, footer,
+// cookie notice and the lazy tool search. Noindex comes only from the _headers file (DECISOES § 12).
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CookieNotice from '../components/CookieNotice.astro';
+import SearchDialog from '../components/SearchDialog.astro';
+import AdsenseHead from '../ads/AdsenseHead.astro';
+import { consentBootstrap } from '../analytics/consent.ts';
+import { LANG_TAG, OG_LOCALE, pathFor, type Lang, type RouteDef } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { absolute, alternatesFor, graph, ogImagePath, organizationLd, pageTitle } from '../seo/meta.ts';
+import { SITE_NAME } from '../platform/site.ts';
+import { ICON_SVG } from '../seo/images.ts';
+
+interface Props {
+  lang: Lang;
+  route: RouteDef;
+  title: string;
+  description: string;
+  /** Extra JSON-LD nodes (BreadcrumbList, WebApplication, Person…). */
+  schema?: Record<string, unknown>[];
+  /** Pages with AdSlots (tool pages). Legal and institutional pages never have ads. */
+  withAds?: boolean;
+}
+const { lang, route, title, description, schema = [], withAds = false } = Astro.props;
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const canonical = absolute(path);
+const alternates = alternatesFor(route);
+const fullTitle = pageTitle(title);
+const ogImage = absolute(ogImagePath(route.indexable ? route.id : 'home', lang));
+const hasRail = Astro.slots.has('rail');
+const trackScript = `document.addEventListener('click',function(e){var a=e.target.closest('[data-track]');if(a&&window.foTrack){var p={lang:${JSON.stringify(lang)}};if(a.dataset.trackPlace)p.place=a.dataset.trackPlace;foTrack(a.dataset.track,p);}});`;
+---
+<!doctype html>
+<html lang={LANG_TAG[lang]} data-lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={consentBootstrap()} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {route.indexable && <link rel="canonical" href={canonical} />}
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0C2B5E" />
+    <link rel="icon" href={`data:image/svg+xml,${encodeURIComponent(ICON_SVG)}`} type="image/svg+xml" />
+    <link rel="manifest" href={`/manifest-${lang}.webmanifest`} />
+    <AdsenseHead withAds={withAds} />
+    <script type="application/ld+json" is:inline set:html={graph(organizationLd(), ...schema)} />
+  </head>
+  <body>
+    <a class="fo-skip" href="#main">{common.skipToContent}</a>
+    <Header lang={lang} route={route} t={common} />
+    <div class:list={['fo-frame', { 'fo-frame--rail': hasRail }]}>
+      <main id="main" class="fo-main fo-content">
+        <slot />
+      </main>
+      {hasRail && <div class="fo-rail"><slot name="rail" /></div>}
+    </div>
+    <Footer lang={lang} t={common} />
+    <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />
+    <SearchDialog t={common} />
+    <script is:inline set:html={trackScript} />
+  </body>
+</html>

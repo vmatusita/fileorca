@@ -1,0 +1,30 @@
+---
+// Contact: contato@fileorca.com. No form (nothing to submit, nothing to store).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { CONTACT_EMAIL } from '../platform/site.ts';
+import { breadcrumbLd, homePath } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('contact');
+const t = TEXTS[lang].contact;
+const common = TEXTS[lang].common;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path: route.paths[lang] ?? '/' },
+];
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <article class="fo-prose">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <p>{t.intro}</p>
+    <p><strong>{t.emailLabel}:</strong> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+    <ul>{t.notes.map((note) => <li>{note}</li>)}</ul>
+  </article>
+</BaseLayout>

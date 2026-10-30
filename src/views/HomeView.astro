@@ -1,0 +1,38 @@
+---
+// Home: the tools that exist today. No AdSlot on the home in the F1a.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
+import { absolute } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('home');
+const t = TEXTS[lang].home;
+const common = TEXTS[lang].common;
+const tool = common.tools['compress-image'];
+const website = {
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: absolute(route.paths[lang] ?? '/'),
+  publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+};
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]}>
+  <h1 class="fo-h1">{t.h1}</h1>
+  <p class="fo-prose">{t.intro}</p>
+  <section class="fo-section" aria-labelledby="tools">
+    <h2 id="tools">{t.toolsHeading}</h2>
+    <ul class="fo-grid">
+      <li><ToolCard href={pathFor('compress-image', lang)} name={tool.name} description={tool.description} category="image" /></li>
+    </ul>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="privacy-home">
+    <h2 id="privacy-home">{t.privacyHeading}</h2>
+    <p>{t.privacyBody}</p>
+  </section>
+</BaseLayout>

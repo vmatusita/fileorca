@@ -1,0 +1,42 @@
+---
+// Header (docs/design/components/Header, v1.1): logo, tool search and language. No menu.
+// The logo art is the F1b's; the provisional logo is the wordmark in text.
+import type { Lang, RouteDef } from '../i18n/routes.ts';
+import { LANGS, languagesOf } from '../i18n/routes.ts';
+import type { CommonTexts } from '../i18n/types.ts';
+import { homePath } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+  route: RouteDef;
+  t: CommonTexts;
+}
+const { lang, route, t } = Astro.props;
+const available = new Set(languagesOf(route));
+// Language links go to the equivalent page; without one, to that language's home.
+const links = LANGS.map((code) => ({
+  code,
+  href: available.has(code) && route.indexable ? route.paths[code] : homePath(code),
+  name: t.header.langNames[code],
+}));
+---
+<header class="fo-header">
+  <a class="fo-header__logo" href={homePath(lang)} aria-label={t.header.homeLabel}>File<b>Orca</b></a>
+  <button type="button" class="fo-header__search" data-search-open aria-haspopup="dialog" aria-keyshortcuts="Control+K">
+    <span>{t.header.search}</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">{t.search.shortcut}</span>
+  </button>
+  <button type="button" class="fo-header__lang" popovertarget="fo-langmenu">
+    {t.header.langCode}<span class="fo-sr">{t.header.langSr}</span>
+  </button>
+  <nav id="fo-langmenu" class="fo-langmenu" popover aria-label={t.header.langMenuLabel}>
+    <ul>
+      {links.map((link) => (
+        <li>
+          <a href={link.href} hreflang={link.code === 'pt' ? 'pt-BR' : link.code} lang={link.code === 'pt' ? 'pt-BR' : link.code} aria-current={link.code === lang ? 'true' : undefined}>
+            {link.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>

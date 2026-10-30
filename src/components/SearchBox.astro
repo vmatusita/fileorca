@@ -1,0 +1,29 @@
+---
+// ToolSearch markup (combobox + named listbox). Used inside the modal dialog and inline on the 404.
+import type { CommonTexts } from '../i18n/types.ts';
+
+interface Props {
+  t: CommonTexts;
+  id: string;
+}
+const { t, id } = Astro.props;
+---
+<div class="fo-search">
+  <div class="fo-search__field">
+    <input
+      type="search"
+      role="combobox"
+      aria-label={t.search.inputLabel}
+      aria-expanded="false"
+      aria-controls={`${id}-list`}
+      aria-autocomplete="list"
+      autocomplete="off"
+      placeholder={t.search.placeholder}
+    />
+  </div>
+  <ul class="fo-search__list" id={`${id}-list`} role="listbox" aria-label={t.search.listLabel} hidden></ul>
+  <div class="fo-search__empty" data-search-empty data-title={t.search.emptyTitle} hidden>
+    <p class="fo-h3" data-search-empty-title></p>
+    <p class="fo-muted">{t.search.emptyHint}</p>
+  </div>
+</div>

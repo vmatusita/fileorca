@@ -1,0 +1,22 @@
+---
+// The search dialog shell. Its code loads on the first click, focus or Ctrl+K (DECISOES § 15):
+// the inline trigger imports the bundled module by URL, so no script loads with the page.
+import type { CommonTexts } from '../i18n/types.ts';
+import SearchBox from './SearchBox.astro';
+import searchUrl from '../search/entry.ts?worker&url';
+
+interface Props {
+  t: CommonTexts;
+}
+const { t } = Astro.props;
+const trigger = `(function(){var u=${JSON.stringify(searchUrl)},m;function load(){return m||(m=import(u));}
+function api(){return load().then(function(){return window.foSearch;});}
+function open(){api().then(function(s){s&&s.openSearch();});}
+document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-search-open]'))open();});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key&&e.key.toLowerCase()==='k'){e.preventDefault();open();}});
+document.addEventListener('focusin',function(e){var b=e.target.closest&&e.target.closest('[data-search-inline]');if(b)api().then(function(s){s&&s.attach(b);});});})();`;
+---
+<dialog id="fo-search-dialog" class="fo-search-dialog" aria-label={t.search.dialogLabel} closedby="any">
+  <SearchBox t={t} id="fo-search" />
+</dialog>
+<script is:inline set:html={trigger} />

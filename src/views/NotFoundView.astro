@@ -1,0 +1,24 @@
+---
+// 404 with tool search (PLANO: "404 com busca de ferramentas"). Out of sitemap and hreflang.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/SearchBox.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { homePath } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('not-found');
+const t = TEXTS[lang]['not-found'];
+const common = TEXTS[lang].common;
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description}>
+  <h1 class="fo-h1">{t.h1}</h1>
+  <p class="fo-prose">{t.body}</p>
+  <section class="fo-section fo-search-inline" aria-label={t.searchLabel} data-search-inline>
+    <SearchBox t={common} id="fo-404-search" />
+  </section>
+  <p><a href={homePath(lang)}>{t.homeLink}</a></p>
+</BaseLayout>

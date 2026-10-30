@@ -1,0 +1,19 @@
+---
+// Plain text with its bare URLs and e-mail addresses turned into links (texts stay plain strings).
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const pattern = /(https:\/\/[^\s,)]+[^\s.,;:)]|[\w.+-]+@[\w-]+\.[\w.]+[a-z])/g;
+const parts = text.split(pattern).map((part, index) => {
+  if (index % 2 === 0) return { kind: 'text' as const, value: part };
+  return part.includes('@') && !part.startsWith('https://')
+    ? { kind: 'mail' as const, value: part }
+    : { kind: 'url' as const, value: part };
+});
+---
+{parts.map((part) =>
+  part.kind === 'text' ? part.value
+  : part.kind === 'mail' ? <a href={`mailto:${part.value}`}>{part.value}</a>
+  : <a href={part.value} rel="noopener">{part.value.replace(/^https:\/\//, '')}</a>
+)}
