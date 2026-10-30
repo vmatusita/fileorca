@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
-import { exifBlock, hasGps } from './lib/jpeg.ts';
+import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
 import { dataLayer, dismissCookies, downloadBytes, hydrated } from './lib/page.ts';
 
 const GPS_PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
@@ -46,13 +46,52 @@ test.describe('Compress image (motor provisório)', () => {
     if (!workerSupported) console.log('este navegador não tem OffscreenCanvas: o motor rodou na página (DECISOES § 22)');
   });
 
-  test('changing the option re-processes at once, without an Apply button', async ({ page }) => {
+  test('changing the option re-processes at once, without an Apply button, and keeps the focus', async ({ page }) => {
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-btn--download')).toBeFocused();
     const recommended = (await downloadBytes(page)).length;
-    await page.locator('label.fo-seg__opt', { hasText: 'Strong' }).click();
-    await expect.poll(async () => (await downloadBytes(page)).length, { timeout: 30_000 }).toBeLessThan(recommended);
+    await page.locator('input[name="ci-level"][value="recommended"]').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeChecked();
+    // While it re-processes the card may give way to the progress for a moment; wait for it back.
+    await expect
+      .poll(async () => ((await page.locator('.fo-btn--download').count()) ? (await downloadBytes(page)).length : Number.POSITIVE_INFINITY), { timeout: 30_000 })
+      .toBeLessThan(recommended);
+    await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeFocused();
     await expect(page.getByRole('button', { name: /apply/i })).toHaveCount(0);
+  });
+
+  test('without gain, the original goes back without metadata and the text says so', async ({ page }) => {
+    const exif = segmentsOf(new Uint8Array(readFileSync(GPS_PHOTO))).find((segment) => segment.marker === 0xe1);
+    expect(exif).toBeDefined();
+    // A small, noisy, already very compressed JPEG: saving it again at 82% makes it bigger.
+    const tiny = await page.evaluate(async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 600;
+      const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const pixels = context.createImageData(800, 600);
+      let seed = 12345;
+      for (let i = 0; i < pixels.data.length; i += 1) {
+        seed = (seed * 1103515245 + 12345) % 2147483648;
+        pixels.data[i] = i % 4 === 3 ? 255 : seed % 256;
+      }
+      context.putImageData(pixels, 0, 0);
+      const blob = await new Promise<Blob>((done) => canvas.toBlob((b) => done(b as Blob), 'image/jpeg', 0.2));
+      return Array.from(new Uint8Array(await blob.arrayBuffer()));
+    });
+    const length = (exif?.data.length ?? 0) + 2;
+    const app1 = [0xff, 0xe1, length >> 8, length & 0xff, ...(exif?.data ?? [])];
+    const withGps = Buffer.from([...tiny.slice(0, 2), ...app1, ...tiny.slice(2)]);
+    expect(hasGps(new Uint8Array(withGps))).toBe(true);
+    await page.setInputFiles('input[type="file"]', { name: 'tiny.jpg', mimeType: 'image/jpeg', buffer: withGps });
+    await expect(page.locator('.fo-result')).toContainText('This image was already optimized', { timeout: 30_000 });
+    const bytes = await downloadBytes(page);
+    expect(hasGps(bytes)).toBe(false);
+    expect(exifBlock(bytes)).toBeNull();
+    expect(bytes.length).toBeLessThanOrEqual(withGps.length);
+    await expect(page.locator('.fo-placard')).toHaveCount(0);
   });
 
   test('a file the browser cannot decode shows the Oli error in text, with role alert', async ({ page }) => {
@@ -107,7 +146,7 @@ test.describe('Compress image (motor provisório)', () => {
 });
 
 test('the tool works in Portuguese and Spanish too', async ({ page }) => {
-  for (const [path, done] of [['/pt/comprimir-imagem/', /Prontinho! Sua imagem ficou \d+% mais leve\./], ['/es/comprimir-imagen/', /¡Listo! Tu imagen quedó \d+ % más ligera\./]] as const) {
+  for (const [path, done] of [['/pt/comprimir-imagem/', /Prontinho! Sua imagem ficou \d+% mais leve\./], ['/es/comprimir-imagen/', /¡Listo! Tu imagen quedó un \d+ % más ligera\./]] as const) {
     await page.goto(path);
     await hydrated(page);
     await dismissCookies(page);

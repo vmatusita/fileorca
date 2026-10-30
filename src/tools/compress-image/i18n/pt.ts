@@ -5,6 +5,7 @@ export default {
   description:
     'Comprima um JPG, PNG ou WebP no navegador. O arquivo é processado no seu aparelho, nunca é enviado, e os dados de GPS da foto são removidos.',
   h1: 'Comprimir imagem',
+  fileFallback: 'imagem',
   drop: {
     title: 'Solte uma imagem aqui',
     choose: 'Escolher imagem',
@@ -23,6 +24,7 @@ export default {
     recommendedHelp: 'melhor equilíbrio',
     strong: 'Forte',
     strongHelp: 'menor tamanho',
+    pngNote: 'O PNG é salvo sem perda, então o nível só muda JPG e WebP.',
   },
   progress: {
     label: 'Comprimindo a imagem',
@@ -30,7 +32,8 @@ export default {
   },
   result: {
     done: 'Prontinho! Sua imagem ficou {percent} mais leve.',
-    unchanged: 'Essa imagem já estava otimizada, então a Oli manteve o original.',
+    unchanged: 'Essa imagem já estava otimizada, então a Oli manteve a imagem original, sem os metadados da foto.',
+    cannotEncode: 'Este navegador não consegue salvar arquivos {format}, então a Oli manteve a imagem original, sem os metadados da foto.',
     placardLabel: 'mais leve',
     before: 'Antes',
     after: 'Depois',

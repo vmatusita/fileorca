@@ -147,6 +147,8 @@ export interface NotFoundTexts extends PageMeta {
 
 export interface CompressImageTexts extends PageMeta {
   h1: string;
+  /** Used when a file has no name. */
+  fileFallback: string;
   drop: {
     title: string;
     choose: string;
@@ -168,6 +170,8 @@ export interface CompressImageTexts extends PageMeta {
     recommendedHelp: string;
     strong: string;
     strongHelp: string;
+    /** PNG is saved without loss: the level only changes JPG and WebP. */
+    pngNote: string;
   };
   progress: {
     label: string;
@@ -176,8 +180,10 @@ export interface CompressImageTexts extends PageMeta {
   result: {
     /** "Done! Your image is {percent} lighter." */
     done: string;
-    /** No gain: the original is handed back. */
+    /** No gain: the original image goes back, without its metadata. */
     unchanged: string;
+    /** This browser cannot save the format: '{format}' is JPG, PNG or WebP. */
+    cannotEncode: string;
     placardLabel: string;
     before: string;
     after: string;

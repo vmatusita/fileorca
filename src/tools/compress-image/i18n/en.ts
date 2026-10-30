@@ -5,6 +5,7 @@ export default {
   description:
     'Compress a JPG, PNG or WebP image in your browser. The file is processed on your device, never uploaded, and the GPS data in the photo is removed.',
   h1: 'Compress image',
+  fileFallback: 'image',
   drop: {
     title: 'Drop an image here',
     choose: 'Choose image',
@@ -23,6 +24,7 @@ export default {
     recommendedHelp: 'best balance',
     strong: 'Strong',
     strongHelp: 'smallest',
+    pngNote: 'PNG is saved without loss, so the level only changes JPG and WebP.',
   },
   progress: {
     label: 'Compressing image',
@@ -30,7 +32,8 @@ export default {
   },
   result: {
     done: 'Done! Your image is {percent} lighter.',
-    unchanged: 'This image was already optimized, so Oli kept the original.',
+    unchanged: 'This image was already optimized, so Oli kept the original image, without the photo metadata.',
+    cannotEncode: "This browser can't save {format} files, so Oli kept the original image, without the photo metadata.",
     placardLabel: 'lighter',
     before: 'Before',
     after: 'After',

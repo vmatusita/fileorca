@@ -1,7 +1,10 @@
 // Provisional image engine (DECISOES § 7): decode with createImageBitmap and save again from an
 // OffscreenCanvas in the same format. Saving from a canvas writes no metadata, so EXIF and GPS
-// are gone. The F2 swaps this file for the real engine (jSquash, libheif) behind the same API.
+// are gone. When the copy would not be smaller, the original pixels go back with the metadata
+// stripped losslessly (strip.ts). The F2 swaps this engine (jSquash, libheif) behind the same API.
 // Self-contained on purpose: nothing here imports from outside src/engine/image/ (lint rule).
+
+import { stripMetadata } from './strip.ts';
 
 export type Level = 'recommended' | 'strong';
 
@@ -11,12 +14,12 @@ export type SupportedType = (typeof SUPPORTED_TYPES)[number];
 export const QUALITY: Record<Level, number> = { recommended: 0.82, strong: 0.6 };
 
 export interface RecompressResult {
-  /** The lighter copy, or the original when the copy would not be smaller. */
+  /** The lighter copy, or the original pixels without metadata when the copy would not be smaller. */
   blob: Blob;
   width: number;
   height: number;
-  /** True when the original is handed back (no gain, or the browser cannot encode the type). */
-  unchanged: boolean;
+  /** smaller: new copy; no-gain: the copy would not be smaller; cannot-encode: this browser cannot save the type. */
+  outcome: 'smaller' | 'no-gain' | 'cannot-encode';
 }
 
 export class EngineError extends Error {
@@ -84,7 +87,17 @@ export async function recompress(file: Blob, level: Level, onProgress: Progress 
     throw new EngineError('encode', 'the browser could not save this format');
   }
   onProgress(100);
-  // A browser that cannot encode the type silently returns PNG: keep the original then.
-  if (output.type !== type || output.size >= file.size) return { blob: file, width, height, unchanged: true };
-  return { blob: output, width, height, unchanged: false };
+  // A browser that cannot encode the type silently returns PNG; a copy that is not smaller is
+  // never handed out. In both cases the original goes back, without its metadata.
+  if (output.type !== type || output.size >= file.size) {
+    let stripped: Uint8Array;
+    try {
+      stripped = stripMetadata(new Uint8Array(await file.arrayBuffer()), type);
+    } catch {
+      throw new EngineError('encode', 'could not remove the metadata of this file');
+    }
+    const outcome = output.type !== type ? 'cannot-encode' : 'no-gain';
+    return { blob: new Blob([stripped as BlobPart], { type }), width, height, outcome };
+  }
+  return { blob: output, width, height, outcome: 'smaller' };
 }

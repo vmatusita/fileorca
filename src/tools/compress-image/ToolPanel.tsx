@@ -24,12 +24,14 @@ interface Result {
   after: number;
   width: number;
   height: number;
-  unchanged: boolean;
+  outcome: 'smaller' | 'no-gain' | 'cannot-encode';
+  format: string;
 }
 
 const TOOL = 'compress-image';
 const SHOW_PROGRESS_AFTER_MS = 400;
 const MINUS = '−';
+const FORMAT_NAME: Record<string, string> = { 'image/jpeg': 'JPG', 'image/png': 'PNG', 'image/webp': 'WebP' };
 
 function imageFrom(list: FileList | DataTransferItemList | null | undefined): File | null {
   if (!list) return null;
@@ -41,6 +43,12 @@ function imageFrom(list: FileList | DataTransferItemList | null | undefined): Fi
 }
 
 export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
+  const says = (outcome: Result['outcome'], saved: number, format: string) =>
+    outcome === 'smaller'
+      ? fmt(t.result.done, { percent: percent(saved, lang) })
+      : outcome === 'no-gain'
+        ? t.result.unchanged
+        : fmt(t.result.cannotEncode, { format });
   const [phase, setPhase] = useState<Phase>('idle');
   const [showLevel, setShowLevel] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -53,11 +61,14 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
   const chooseRef = useRef<HTMLButtonElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const runRef = useRef(0);
-  const prevPhase = useRef<Phase>('idle');
+  // Focus goes to Download when the card appears for a new file, not when an option re-runs it.
+  const focusDownload = useRef(false);
 
   useEffect(() => {
-    if (phase === 'done' && prevPhase.current !== 'done') downloadRef.current?.focus();
-    prevPhase.current = phase;
+    if (phase === 'done' && focusDownload.current) {
+      focusDownload.current = false;
+      downloadRef.current?.focus();
+    }
   }, [phase]);
 
   useEffect(() => () => {
@@ -85,17 +96,20 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
       const after = outcome.blob.size;
       setResult({
         url: URL.createObjectURL(outcome.blob),
-        name: file.name || 'image',
+        name: file.name || t.fileFallback,
         before: file.size,
         after,
         width: outcome.width,
         height: outcome.height,
-        unchanged: outcome.unchanged,
+        outcome: outcome.outcome,
+        format: FORMAT_NAME[file.type] ?? file.type,
       });
       setPhase('done');
-      const saved = outcome.unchanged ? 0 : (1 - after / file.size) * 100;
-      setAnnounce(outcome.unchanged ? t.result.unchanged : fmt(t.result.done, { percent: percent(saved, lang) }));
-      track('tool_complete', { tool: TOOL, lang, outcome: outcome.unchanged ? 'unchanged' : 'smaller' });
+      setAnnounce(says(outcome.outcome, (1 - after / file.size) * 100, FORMAT_NAME[file.type] ?? file.type));
+      track('tool_complete', { tool: TOOL, lang, outcome: outcome.outcome === 'smaller' ? 'smaller' : 'unchanged' });
+      if (outcome.outcome === 'cannot-encode') {
+        track('tool_error', { tool: TOOL, lang, browser: browserLabel(navigator.userAgent), codec: file.type, reason: 'encode' });
+      }
     } catch {
       if (runRef.current === id) fail(file, 'decode');
     } finally {
@@ -104,7 +118,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
   }
 
   function fail(file: File, reason: 'decode' | 'encode' | 'unsupported') {
-    setErrorName(file.name || 'file');
+    setErrorName(file.name || t.fileFallback);
     setResult(null);
     setPhase('error');
     // The error text sits in a role="alert" box, which announces it; the status region stays empty.
@@ -115,6 +129,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
   function accept(file: File | null) {
     if (!file) return;
     fileRef.current = file;
+    focusDownload.current = true;
     track('tool_start', { tool: TOOL, lang });
     if (!isSupportedType(file.type)) {
       runRef.current += 1;
@@ -215,15 +230,16 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
       </div>
     );
   } else if (showResult && result) {
-    const saved = result.unchanged ? 0 : (1 - result.after / result.before) * 100;
+    const saved = (1 - result.after / result.before) * 100;
+    const smaller = result.outcome === 'smaller';
     panel = (
       <section class="fo-result fo-deep" aria-live="polite">
         <div class="fo-result__head">
           <div class="fo-result__oli" data-oli="cheer" aria-hidden="true" />
           <p class="fo-result__says">
-            {result.unchanged ? t.result.unchanged : fmt(t.result.done, { percent: percent(saved, lang) })}
+            {says(result.outcome, saved, result.format)}
           </p>
-          {!result.unchanged && (
+          {smaller && (
             <div class="fo-placard">
               <span class="fo-placard__n">{MINUS + percent(saved, lang)}</span>
               <span class="fo-placard__l">{t.result.placardLabel}</span>
@@ -231,7 +247,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
           )}
         </div>
         <dl class="fo-result__stats">
-          {!result.unchanged && (
+          {result.after < result.before && (
             <div class="fo-result__stat fo-result__stat--before">
               <dt>{t.result.before}</dt>
               <dd>{fileSize(result.before, lang)}</dd>
@@ -335,6 +351,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
             </label>
           ))}
         </div>
+        <p class="fo-field__help">{t.options.pngNote}</p>
       </fieldset>
       {phase === 'done' && (
         <nav class="fo-next" aria-labelledby="ci-next">
