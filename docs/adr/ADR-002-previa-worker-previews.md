@@ -21,6 +21,18 @@
 
 A opção 1, por ser reversível, não mudar o contrato e bater com a ADR-001. Se o Victor preferir o modelo novo, a opção 2 entra por uma run curta de ajuste, com a ADR-001 revisada.
 
+## O que a run tentou (30/out/2026)
+
+| Commit | Configuração | Resultado no Workers Builds |
+| --- | --- | --- |
+| `af28dfa` | Node 26.13.0, pnpm 12.16.1, sem `previews` | falhou em menos de 17 s após o push (build `b9d3b134-ed15-47e6-b3a7-596cd72e63ac`) |
+| `bc0f703` | igual | falhou em ~26 s (build `d925f68d-ee94-4f07-a5e1-0f2938a54eb9`) |
+| `fe97a8e` | Node 24.22.2, pnpm 12.16.1, sem `previews` | falhou depois de ~27 s de execução |
+| `a120197` | Node 24.22.2, pnpm 12.16.1, com `"previews": {}` (sonda, revertida) | falhou em ~25 s (build `adb0c2f3-69c4-470d-aeb4-6482c996776b`) |
+| `f8673c6` | Node 24.22.2, pnpm 10.34.9, com `"previews": {}` (sonda, revertida em `f4b8aea`) | falhou em ~60 s, mais adiante que as outras |
+
+O CI do GitHub (Ubuntu 24.04) instala e builda o mesmo commit sem erro, então a falha restante está no ambiente do Workers Builds ou no comando de prévia. A run não tem acesso aos logs do painel.
+
 ## Antes de decidir
 
-Abrir o log do build `b9d3b134-ed15-47e6-b3a7-596cd72e63ac` no painel e confirmar a causa. Se o erro for outro (por exemplo, o Corepack com o Node 26), a correção é a do DECISOES § 17.
+Abrir no painel o log do build mais recente da branch `fase-01a` e ver em que etapa ele para (instalação, `pnpm build` ou o comando de prévia). Se for o comando de prévia, vale a opção 1 (ou a 2). Se for a instalação, ajustar Node e pnpm (DECISOES § 17).
