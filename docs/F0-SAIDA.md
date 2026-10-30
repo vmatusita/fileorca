@@ -40,7 +40,7 @@ Data em que a F0 terminou:
 
 | Item | Valor |
 | --- | --- |
-| GA4, ID de medição (G-…) | |
+| GA4, ID de medição (G-…) | G-T4BBJN7S11 |
 | Search Console (propriedade de domínio) verificado | sim / não |
 | Bing Webmaster importado do Search Console | sim / não |
 
@@ -48,9 +48,9 @@ Data em que a F0 terminou:
 
 | Item | Valor |
 | --- | --- |
-| Ko-fi | https://ko-fi.com/fileorca |
+| Ko-fi | https://ko-fi.com/victormatusita |
 | PayPal ligado ao Ko-fi | sim / não |
-| Chave Pix aleatória (só do site) | |
+| Chave Pix aleatória (só do site) | 1647afcb-3eb8-4fee-8dfe-d5ef477fb13c |
 | Nome que aparece no Pix | VICTOR YUKI MATUSITA |
 
 ## Redes reservadas
