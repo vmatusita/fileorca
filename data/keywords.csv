@@ -1,63 +1,63 @@
 slug,area,fase,tipo,termo,volume_eua_faixa,lance_topo_min_usd,lance_topo_max_usd,trends_12m,decisao
-compress-image,imagem,F2,ferramenta-imagem,compress image,,,,,entra
-resize-image,imagem,F2,ferramenta-imagem,resize image,,,,,entra
-crop-image,imagem,F2,ferramenta-imagem,crop image,,,,,entra
-rotate-image,imagem,F2,ferramenta-imagem,rotate image,,,,,entra
-heic-to-jpg,imagem,F2,ferramenta-imagem,heic to jpg,,,,,entra
-webp-to-jpg,imagem,F2,ferramenta-imagem,webp to jpg,,,,,entra
-png-to-jpg,imagem,F2,ferramenta-imagem,png to jpg,,,,,entra
-avif-to-jpg,imagem,F2,ferramenta-imagem,avif to jpg,,,,,entra
-convert-to-webp,imagem,F2,ferramenta-imagem,convert image to webp,,,,,entra
-image-to-pdf,imagem,F2,ferramenta-imagem,image to pdf,,,,,entra
-compress-image/to-100kb,imagem,F2,preset-imagem,compress image to 100kb,,,,,
-compress-image/to-200kb,imagem,F2,preset-imagem,compress image to 200kb,,,,,
-compress-image/to-500kb,imagem,F2,preset-imagem,compress image to 500kb,,,,,
-compress-image/to-1mb,imagem,F2,preset-imagem,compress image to 1mb,,,,,
-resize-image/instagram-post,imagem,F2,preset-imagem,resize image for instagram post,,,,,
-resize-image/instagram-story,imagem,F2,preset-imagem,resize image for instagram story,,,,,
-resize-image/youtube-thumbnail,imagem,F2,preset-imagem,youtube thumbnail resizer,,,,,
-resize-image/linkedin-banner,imagem,F2,preset-imagem,linkedin banner resizer,,,,,
-resize-image/x-header,imagem,F2,preset-imagem,twitter header resizer,,,,,
-resize-image/facebook-cover,imagem,F2,preset-imagem,facebook cover photo resizer,,,,,
-mortgage-calculator,dinheiro,F4,calculadora,mortgage calculator,,,,,
-refinance-calculator,dinheiro,F4,calculadora,refinance calculator,,,,,
-auto-loan-calculator,dinheiro,F4,calculadora,auto loan calculator,,,,,
-personal-loan-calculator,dinheiro,F4,calculadora,personal loan calculator,,,,,
-loan-amortization-calculator,dinheiro,F4,calculadora,amortization calculator,,,,,
-home-affordability-calculator,dinheiro,F4,calculadora,home affordability calculator,,,,,
-rent-vs-buy-calculator,dinheiro,F4,calculadora,rent vs buy calculator,,,,,
-credit-card-payoff-calculator,dinheiro,F4,calculadora,credit card payoff calculator,,,,,
-debt-payoff-calculator,dinheiro,F4,calculadora,debt payoff calculator,,,,,
-debt-consolidation-calculator,dinheiro,F4,calculadora,debt consolidation calculator,,,,,
-compound-interest-calculator,dinheiro,F4,calculadora,compound interest calculator,,,,,
-savings-goal-calculator,dinheiro,F4,calculadora,savings goal calculator,,,,,
-apr-to-apy-calculator,dinheiro,F4,calculadora,apr to apy calculator,,,,,
-simple-interest-calculator,dinheiro,F4,calculadora,simple interest calculator,,,,,
-mortgage-calculator/extra-payments,dinheiro,F4,preset-dinheiro,mortgage calculator with extra payments,,,,,
-mortgage-calculator/biweekly,dinheiro,F4,preset-dinheiro,biweekly mortgage calculator,,,,,
-mortgage-calculator/15-vs-30-year,dinheiro,F4,preset-dinheiro,15 vs 30 year mortgage calculator,,,,,
-loan-amortization-calculator/balloon-payment,dinheiro,F4,preset-dinheiro,balloon loan calculator,,,,,
-merge-pdf,pdf,F5,ferramenta-pdf,merge pdf,,,,,entra
-split-pdf,pdf,F5,ferramenta-pdf,split pdf,,,,,entra
-rotate-pdf,pdf,F5,ferramenta-pdf,rotate pdf,,,,,entra
-delete-pdf-pages,pdf,F5,ferramenta-pdf,delete pages from pdf,,,,,entra
-reorder-pdf-pages,pdf,F5,ferramenta-pdf,rearrange pdf pages,,,,,entra
-pdf-to-jpg,pdf,F5,ferramenta-pdf,pdf to jpg,,,,,entra
-add-page-numbers-to-pdf,pdf,F5,ferramenta-pdf,add page numbers to pdf,,,,,entra
-watermark-pdf,pdf,F5,ferramenta-pdf,add watermark to pdf,,,,,entra
-sign-pdf,pdf,F5,ferramenta-pdf,sign pdf,,,,,entra
-compress-pdf,pdf,F5,ferramenta-pdf,compress pdf,,,,,entra
-protect-pdf,pdf,F5,ferramenta-pdf,password protect pdf,,,,,entra
-unlock-pdf,pdf,F5,ferramenta-pdf,unlock pdf,,,,,entra
-square-footage-calculator,casa,F7,calculadora,square footage calculator,,,,,
-concrete-calculator,casa,F7,calculadora,concrete calculator,,,,,
-paint-calculator,casa,F7,calculadora,paint calculator,,,,,
-tile-calculator,casa,F7,calculadora,tile calculator,,,,,
-mulch-calculator,casa,F7,calculadora,mulch calculator,,,,,
-btu-calculator,casa,F7,calculadora,btu calculator,,,,,
-bmi-calculator,saude,F7,calculadora,bmi calculator,,,,,
-calorie-calculator,saude,F7,calculadora,calorie calculator,,,,,
-due-date-calculator,saude,F7,calculadora,due date calculator,,,,,
-ovulation-calculator,saude,F7,calculadora,ovulation calculator,,,,,
-body-fat-calculator,saude,F7,calculadora,body fat calculator,,,,,
-qr-code-generator,utilidades,F7,qr-code,qr code generator,,,,,
+compress-image,imagem,F2,ferramenta-imagem,compress image,100K-1M,,,estavel,entra
+resize-image,imagem,F2,ferramenta-imagem,resize image,100K-1M,,,estavel,entra
+crop-image,imagem,F2,ferramenta-imagem,crop image,100K-1M,,,estavel,entra
+rotate-image,imagem,F2,ferramenta-imagem,rotate image,10K-100K,,,estavel,entra
+heic-to-jpg,imagem,F2,ferramenta-imagem,heic to jpg,100K-1M,,,estavel,entra
+webp-to-jpg,imagem,F2,ferramenta-imagem,webp to jpg,100K-1M,,,estavel,entra
+png-to-jpg,imagem,F2,ferramenta-imagem,png to jpg,100K-1M,,,estavel,entra
+avif-to-jpg,imagem,F2,ferramenta-imagem,avif to jpg,10K-100K,,,subindo,entra
+convert-to-webp,imagem,F2,ferramenta-imagem,convert image to webp,1K-10K,,,estavel,entra
+image-to-pdf,imagem,F2,ferramenta-imagem,image to pdf,100K-1M,,,estavel,entra
+compress-image/to-100kb,imagem,F2,preset-imagem,compress image to 100kb,1K-10K,,,estavel,entra
+compress-image/to-200kb,imagem,F2,preset-imagem,compress image to 200kb,100-1K,,,estavel,fora
+compress-image/to-500kb,imagem,F2,preset-imagem,compress image to 500kb,100-1K,,,estavel,fora
+compress-image/to-1mb,imagem,F2,preset-imagem,compress image to 1mb,1K-10K,,,estavel,entra
+resize-image/instagram-post,imagem,F2,preset-imagem,resize image for instagram post,100-1K,,,estavel,fora
+resize-image/instagram-story,imagem,F2,preset-imagem,resize image for instagram story,100-1K,,,estavel,fora
+resize-image/youtube-thumbnail,imagem,F2,preset-imagem,youtube thumbnail resizer,1K-10K,,,estavel,entra
+resize-image/linkedin-banner,imagem,F2,preset-imagem,linkedin banner resizer,100-1K,,,estavel,fora
+resize-image/x-header,imagem,F2,preset-imagem,twitter header resizer,100-1K,,,caindo,fora
+resize-image/facebook-cover,imagem,F2,preset-imagem,facebook cover photo resizer,100-1K,,,estavel,fora
+mortgage-calculator,dinheiro,F4,calculadora,mortgage calculator,1M-10M,,3.17,estavel,entra
+refinance-calculator,dinheiro,F4,calculadora,refinance calculator,100K-1M,,,subindo,entra
+auto-loan-calculator,dinheiro,F4,calculadora,auto loan calculator,100K-1M,,1.22,estavel,entra
+personal-loan-calculator,dinheiro,F4,calculadora,personal loan calculator,100K-1M,,2.64,estavel,entra
+loan-amortization-calculator,dinheiro,F4,calculadora,amortization calculator,100K-1M,,,estavel,entra
+home-affordability-calculator,dinheiro,F4,calculadora,home affordability calculator,10K-100K,,,estavel,entra
+rent-vs-buy-calculator,dinheiro,F4,calculadora,rent vs buy calculator,10K-100K,,,estavel,entra
+credit-card-payoff-calculator,dinheiro,F4,calculadora,credit card payoff calculator,10K-100K,,,estavel,entra
+debt-payoff-calculator,dinheiro,F4,calculadora,debt payoff calculator,10K-100K,,,estavel,entra
+debt-consolidation-calculator,dinheiro,F4,calculadora,debt consolidation calculator,10K-100K,,,estavel,entra
+compound-interest-calculator,dinheiro,F4,calculadora,compound interest calculator,100K-1M,,,estavel,entra
+savings-goal-calculator,dinheiro,F4,calculadora,savings goal calculator,1K-10K,,,estavel,entra
+apr-to-apy-calculator,dinheiro,F4,calculadora,apr to apy calculator,1K-10K,,,estavel,entra
+simple-interest-calculator,dinheiro,F4,calculadora,simple interest calculator,10K-100K,,,estavel,entra
+mortgage-calculator/extra-payments,dinheiro,F4,preset-dinheiro,mortgage calculator with extra payments,10K-100K,,,estavel,entra
+mortgage-calculator/biweekly,dinheiro,F4,preset-dinheiro,biweekly mortgage calculator,10K-100K,,,estavel,entra
+mortgage-calculator/15-vs-30-year,dinheiro,F4,preset-dinheiro,15 vs 30 year mortgage calculator,1K-10K,,,estavel,entra
+loan-amortization-calculator/balloon-payment,dinheiro,F4,preset-dinheiro,balloon loan calculator,1K-10K,,,estavel,entra
+merge-pdf,pdf,F5,ferramenta-pdf,merge pdf,100K-1M,,,estavel,entra
+split-pdf,pdf,F5,ferramenta-pdf,split pdf,100K-1M,,,estavel,entra
+rotate-pdf,pdf,F5,ferramenta-pdf,rotate pdf,10K-100K,,,estavel,entra
+delete-pdf-pages,pdf,F5,ferramenta-pdf,delete pages from pdf,10K-100K,,,estavel,entra
+reorder-pdf-pages,pdf,F5,ferramenta-pdf,rearrange pdf pages,1K-10K,,,estavel,entra
+pdf-to-jpg,pdf,F5,ferramenta-pdf,pdf to jpg,100K-1M,,,estavel,entra
+add-page-numbers-to-pdf,pdf,F5,ferramenta-pdf,add page numbers to pdf,10K-100K,,,estavel,entra
+watermark-pdf,pdf,F5,ferramenta-pdf,add watermark to pdf,1K-10K,,,estavel,entra
+sign-pdf,pdf,F5,ferramenta-pdf,sign pdf,10K-100K,,,estavel,entra
+compress-pdf,pdf,F5,ferramenta-pdf,compress pdf,100K-1M,,,estavel,entra
+protect-pdf,pdf,F5,ferramenta-pdf,password protect pdf,10K-100K,,,estavel,entra
+unlock-pdf,pdf,F5,ferramenta-pdf,unlock pdf,10K-100K,,,estavel,entra
+square-footage-calculator,casa,F7,calculadora,square footage calculator,100K-1M,,,estavel,entra
+concrete-calculator,casa,F7,calculadora,concrete calculator,100K-1M,,,estavel,entra
+paint-calculator,casa,F7,calculadora,paint calculator,10K-100K,,,estavel,entra
+tile-calculator,casa,F7,calculadora,tile calculator,10K-100K,,,estavel,entra
+mulch-calculator,casa,F7,calculadora,mulch calculator,100K-1M,,,estavel,entra
+btu-calculator,casa,F7,calculadora,btu calculator,10K-100K,,,estavel,entra
+bmi-calculator,saude,F7,calculadora,bmi calculator,1M-10M,,,estavel,entra
+calorie-calculator,saude,F7,calculadora,calorie calculator,100K-1M,,,estavel,entra
+due-date-calculator,saude,F7,calculadora,due date calculator,100K-1M,,0.36,estavel,entra
+ovulation-calculator,saude,F7,calculadora,ovulation calculator,100K-1M,,,estavel,entra
+body-fat-calculator,saude,F7,calculadora,body fat calculator,100K-1M,,,estavel,entra
+qr-code-generator,utilidades,F7,qr-code,qr code generator,100K-1M,,,estavel,entra
