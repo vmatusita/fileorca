@@ -32,6 +32,13 @@ describe('_headers gerado', () => {
     });
   }
 
+  it('keeps the 404 pages out of the index even after launch (they answer 200 at /404)', () => {
+    for (const launched of [false, true]) {
+      expect(rule(headerRules({ launched }), '/404')['X-Robots-Tag']).toBe('noindex');
+      expect(rule(headerRules({ launched }), '/:lang/404')['X-Robots-Tag']).toBe('noindex');
+    }
+  });
+
   it('puts noindex on the whole site while LAUNCHED = false, and drops it after launch', () => {
     expect(rule(headerRules({ launched: false }), '/*')['X-Robots-Tag']).toBe('noindex');
     expect(rule(headerRules({ launched: true }), '/*')['X-Robots-Tag']).toBeUndefined();

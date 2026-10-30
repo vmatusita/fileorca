@@ -30,6 +30,9 @@ export function headerRules(options: { launched: boolean }): HeaderRule[] {
   return [
     { pattern: '/*', headers: site },
     { pattern: WORKERS_DEV_PATTERN, headers: { 'X-Robots-Tag': 'noindex' } },
+    // With auto-trailing-slash the 404 pages also answer 200 at /404 and /pt/404: keep them out.
+    { pattern: '/404', headers: { 'X-Robots-Tag': 'noindex' } },
+    { pattern: '/:lang/404', headers: { 'X-Robots-Tag': 'noindex' } },
     { pattern: '/_astro/*', headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } },
     { pattern: '/build.txt', headers: { 'Cache-Control': 'no-store' } },
   ];
