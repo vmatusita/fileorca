@@ -46,7 +46,7 @@ export default {
     {
       heading: 'Calculadoras são educativas, não aconselhamento',
       paragraphs: [
-        'O FileOrca também vai ter calculadoras. Elas servem só para aprender e se informar. Não são aconselhamento financeiro, jurídico nem médico, e não substituem um profissional qualificado.',
+        'O FileOrca também vai ter calculadoras. Elas servem só para aprender e se informar. Elas não constituem aconselhamento financeiro, jurídico nem médico e não substituem um profissional qualificado.',
         'Os resultados são estimativas feitas com os números que você digita. A vida real pode ser diferente, então confirme com um profissional qualificado antes de tomar uma decisão sobre dinheiro, questões jurídicas ou saúde.',
       ],
     },
