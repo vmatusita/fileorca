@@ -5,9 +5,9 @@ Gabarito da revisão adversarial. Fontes, nesta ordem: o prompt da run (`docs/pr
 ## Árvore do que nasce
 
 ```
-.node-version                 26.13.0 (LTS "Lithium")
-package.json                  packageManager pnpm@12.16.1; scripts de cada portão
-pnpm-workspace.yaml           allowBuilds (esbuild, workerd)
+.node-version                 24.22.2 (LTS "Krypton"; DECISOES § 17)
+package.json                  packageManager pnpm@10.34.9; scripts de cada portão
+pnpm-workspace.yaml           onlyBuiltDependencies (esbuild, workerd)
 astro.config.ts               static, trailingSlash always, build.format preserve, worker es
 tsconfig.json                 astro/tsconfigs/strictest + jsx preact
 eslint.config.ts              typescript-eslint + regra local fileorca/engine-self-contained
