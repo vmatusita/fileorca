@@ -1,7 +1,7 @@
 import type { AboutTexts } from '../types.ts';
 
 export default {
-  title: 'Acerca de quien hace estas herramientas gratis',
+  title: 'Acerca de FileOrca y de quien lo hace',
   description:
     'FileOrca es obra de Victor Yuki Matusita, desarrollador en Curitiba, Brasil. Descubre por qué las herramientas son gratis y qué tiene que ver una orca.',
   h1: 'Acerca de FileOrca',

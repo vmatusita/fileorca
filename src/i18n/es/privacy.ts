@@ -74,6 +74,7 @@ export default {
     },
     {
       heading: 'Consentimiento por región y tus opciones',
+      action: 'consent-choice',
       paragraphs: [
         'El consentimiento depende de dónde estés y usa Consent Mode v2 de Google.',
         'En la Unión Europea, el EEE (Islandia, Liechtenstein y Noruega), el Reino Unido y Suiza, el almacenamiento para analítica y para anuncios está denegado por defecto hasta que aceptes.',

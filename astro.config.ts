@@ -11,5 +11,9 @@ export default defineConfig({
   // 'preserve' keeps src/pages/pt/404.astro as pt/404.html (the "404-page" handler needs it).
   build: { format: 'preserve' },
   integrations: [preact(), platformFiles()],
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    worker: { format: 'es' },
+    build: { modulePreload: false },
+  },
 });

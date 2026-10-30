@@ -1,7 +1,7 @@
 import type { AboutTexts } from '../types.ts';
 
 export default {
-  title: 'About the person behind these free tools',
+  title: 'About FileOrca and the person behind it',
   description:
     'FileOrca is made and run by Victor Yuki Matusita, a developer in Curitiba, Brazil. Read why the tools are free and what an orca has to do with it.',
   h1: 'About FileOrca',

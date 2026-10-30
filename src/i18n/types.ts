@@ -45,6 +45,8 @@ export interface CommonTexts {
     privacyLink: string;
     accept: string;
     decline: string;
+    /** Privacy page button that clears the stored choice and shows the notice again. */
+    change: string;
   };
   /** The only words AdSense accepts per language: Advertisements, Publicidade, Anuncios. */
   adLabel: string;
@@ -70,6 +72,8 @@ export interface Section {
   heading: string;
   paragraphs: string[];
   list?: string[];
+  /** Renders a control after the section (the privacy page button that reopens the cookie notice). */
+  action?: 'consent-choice';
 }
 
 export interface HomeTexts extends PageMeta {
