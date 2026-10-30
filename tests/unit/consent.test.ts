@@ -1,7 +1,7 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultConsentFor } from '../../src/analytics/consent.ts';
-import { EVENT_PARAMS, browserLabel, cleanParams } from '../../src/analytics/events.ts';
+import { EVENT_PARAMS, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
 
 function runBootstrap(hostname: string, stored: string | null) {
   const appended: string[] = [];
@@ -81,7 +81,7 @@ describe('typed events', () => {
     const check = (fn: () => void) => fn;
     check(() => {
       // @ts-expect-error file names are not an event parameter
-      cleanParams('tool_start', { tool: 'compress-image', lang: 'en', fileName: 'x' } satisfies import('../../src/analytics/events.ts').EventMap['tool_start']);
+      cleanParams('tool_start', { tool: 'compress-image', lang: 'en', fileName: 'x' } satisfies EventMap['tool_start']);
     });
   });
 

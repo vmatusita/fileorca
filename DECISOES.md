@@ -76,7 +76,8 @@ O design system v1.1 já veio no pacote da F0 em `docs/design/` (ver `docs/desig
 
 ## § 13 · dependencies × devDependencies e licenças (F1a, 30/out/2026)
 
-- **Decisão:** o que vai para o navegador fica em `dependencies` (astro e @astrojs/preact, pelo runtime das ilhas; preact; comlink; tailwindcss, pelo CSS gerado). Build, teste e CI ficam em `devDependencies`. A /licenses é gerada das `dependencies` mais as fontes (OFL). O portão de licenças confere as duas listas (dependências diretas de cada lado) contra as licenças permitidas do CLAUDE.md.
+- **Decisão:** o que vai para o navegador fica em `dependencies` (astro e @astrojs/preact, pelo runtime das ilhas; preact; comlink; tailwindcss, pelo CSS gerado). Build, teste e CI ficam em `devDependencies`. A /licenses é gerada das `dependencies` mais as fontes (OFL). O portão de licenças (`pnpm gate:licencas`) confere as duas listas (dependências diretas de cada lado) contra as licenças permitidas do CLAUDE.md e, na árvore instalada inteira, reprova AGPL, GPL, SSPL, BUSL, licença não comercial e licença desconhecida. As licenças permissivas fora da lista que aparecem só em dependências transitivas de ferramentas de build (BlueOak-1.0.0, CC0-1.0, CC-BY-3.0/4.0 de dados como o caniuse-lite) são listadas na saída do portão, sem reprovar, porque não vão ao navegador nem são escolha da run.
+- **Alternativa:** reprovar toda transitiva fora da lista, o que tiraria do projeto o próprio Astro, o Lighthouse e o Playwright.
 
 ## § 14 · Merge recusa rascunho (F1a, 30/out/2026)
 
@@ -86,9 +87,90 @@ O design system v1.1 já veio no pacote da F0 em `docs/design/` (ver `docs/desig
 ## § 15 · Busca Ctrl+K carregada no primeiro uso (F1a, 30/out/2026)
 
 - **Decisão:** a busca de ferramentas não pesa no carregamento: o código e o índice só carregam no primeiro uso (foco, clique ou Ctrl+K). O molde segue com uma ilha Preact só, a do painel da ferramenta; a busca é TypeScript sem framework.
+- **Como:** `src/search/entry.ts` é empacotado à parte (`?worker&url`, que no Vite 8 devolve a URL de um bundle ES próprio) e importado por URL num script inline de 0,6 KB. Um `<script>` processado do Astro com `import()` viraria arquivo externo e puxaria o `preload-helper` em toda página.
 
 ## § 16 · build.format "preserve" (F1a, 30/out/2026)
 
 - **Decisão:** `build.format: 'preserve'` no `astro.config.ts`, com toda página em `.../index.astro` e os 404 em `404.astro`.
 - **Por quê:** com o padrão `'directory'`, o Astro 7.4 grava `src/pages/pt/404.astro` como `pt/404/index.html`, e o `not_found_handling: "404-page"` do Cloudflare procura `pt/404.html`. Conferido no build em 30/out/2026.
 - **Alternativa:** mover o arquivo num hook depois do build (mais frágil).
+
+## § 17 · Node 26 LTS, pnpm 12 e scripts de build aprovados (F1a, 30/out/2026)
+
+- **Decisão:** `.node-version` em 26.13.0, a LTS ativa ("Lithium", desde 28/out/2026), e `packageManager: pnpm@12.16.1`. O `pnpm-workspace.yaml` aprova só os scripts de instalação do esbuild e do workerd (`allowBuilds`), que o pnpm 12 bloqueia por padrão. O eslint fica em 10.13 porque o 10.14 saiu no próprio dia e o pnpm recusa versão com menos de um dia (`minimumReleaseAge`). O TypeScript fica em 6.0, porque o `@astrojs/check` e o typescript-eslint ainda não aceitam o 7.
+- **Por quê:** prompt da F1a ("a LTS atual") e versões estáveis dentro da major pedida.
+- **Risco aberto:** o Node 25+ não traz mais o Corepack, e o Workers Builds instala o pnpm pelo Corepack. Se o log do build da prévia mostrar esse erro, a troca para a LTS de manutenção (24.22.x) é uma linha no `.node-version`.
+
+## § 18 · Estilo provisório da F1a (F1a, 30/out/2026)
+
+- **Decisão:** `src/styles/global.css` importa só o preflight do Tailwind 4 e `docs/design/tokens.css`, sem tema nem utilitários do Tailwind (que gerariam classes a partir das palavras dos textos e cores fora dos tokens). As regras usam as classes `fo-*` do design system e só variáveis dos tokens; as fontes são as do sistema até a F1b. Um teste reprova hex fora do `tokens.css` e amarelo fora do Baixar.
+- **Por quê:** a identidade visual é da F1b; a F1a precisa de um molde que funcione, meça e passe no axe.
+
+## § 19 · Seletor da Oli: `[data-oli]` (F1a, 30/out/2026)
+
+- **Decisão:** todo lugar da Oli é um elemento com `data-oli="<pose>"` (`wave`, `gulp`, `swim`, `cheer`, `oops`…), `aria-hidden="true"`, com a caixa no tamanho do design system (88 px no DropZone do celular, 112 px a partir de 768 px, 72 px no WaterLevel, 72 ou 96 px no ResultCard). Na F1a a caixa fica vazia; a F1b põe a arte dentro dela e mantém o atributo.
+- **Por quê:** o design system não define um seletor único; o teste de distância dos anúncios mede `[data-oli]` desde já.
+
+## § 20 · Alturas reservadas (F1a, 30/out/2026)
+
+- **Decisão:** o lugar do painel (`.fo-slot`) reserva 380 px no celular e 340 px a partir de 768 px, para DropZone, WaterLevel e ResultCard ocuparem o mesmo retângulo. O AdSlot de conteúdo reserva 300 px e o lateral 644 px (o `bundle.css` diz 280 e 624). No computador, o vão entre a coluna da ferramenta e o trilho é o próprio `ad-clearance` (`column-gap: 150px`).
+- **Por quê:** com o rótulo e o respiro do AdSlot (44 px), 280 px deixam 236 px para uma unidade de 250 px e 624 px deixam 580 px para a 300×600, o que mexeria a página quando o anúncio chegasse (CLS). O teste de distância achou o trilho a 148 px do painel a 1280 px antes do `column-gap`.
+
+## § 21 · Imagem de Open Graph (F1a, 30/out/2026)
+
+- **Decisão:** uma imagem de 1200×630 por página indexável e idioma (24), gerada no build com satori e resvg, com o título da página sobre o fundo do mar. A fonte é o `.woff` do `@fontsource/figtree` (OFL-1.1), porque o satori não lê woff2; fica em `devDependencies`, já que a imagem não distribui a fonte. A Oli segurando o ícone da ferramenta entra na F1b, junto com a arte dela.
+
+## § 22 · Motor na página quando o worker não tem OffscreenCanvas (F1a, 30/out/2026)
+
+- **Decisão:** o worker responde `no-canvas` quando não existe `OffscreenCanvas` (Safari antes do 16.4, e o WebKit do Playwright no Windows), e o mesmo `recompress()` roda então na página com um `<canvas>`.
+- **Por quê:** achado no teste em WebKit; sem isso a ferramenta falharia nesses navegadores. O motor continua fora do carregamento inicial (só carrega quando chega a imagem).
+
+## § 23 · Ilha do painel hidratada por um script e runtime do Preact num chunk (F1a, 30/out/2026)
+
+- **Decisão:** o `ToolPanel` é renderizado pelo Astro em HTML estático (com o `@astrojs/preact`) e hidratado por `src/tools/compress-image/mount.ts` com o `hydrate()` do Preact, em vez de `client:load`. O `astro.config.ts` junta o Preact e o `preload-helper` num chunk só (`codeSplitting.groups`, nome `preact-runtime`).
+- **Por quê:** com `client:load` a página da ferramenta baixava cinco arquivos de JS (componente, renderer, preact, hooks, preload-helper), e ir da home para a ferramenta somava 6 requisições novas, acima das 3 do orçamento. Agora são dois arquivos (11,6 KB gzip com os scripts inline). Continua sendo uma ilha Preact só por página.
+- **Para a F2:** cada ferramenta segue o mesmo molde (um `mount.ts` por ferramenta).
+
+## § 24 · lint:texto contra um LanguageTool local (F1a, 30/out/2026)
+
+- **Decisão:** o `pnpm lint:texto` sobe um servidor local do LanguageTool 6.6 (distribuição oficial, conferida por SHA-256) e confere nele os textos alterados contra o merge-base com `origin/main`, nos três idiomas. Reprova só erro de gramática (issueType `grammar` ou categorias `GRAMMAR` e `AGREEMENT*`); ortografia, estilo e tipografia são avisos. Usa o Java 17+ instalado (o runner do GitHub tem) ou baixa o JRE Temurin 21 fixado. `LANGUAGETOOL_URL` aponta para outro servidor. Sem servidor, avisa e não reprova.
+- **Por quê:** a página da API pública diz "Do not send automated requests" (dev.languagetool.org/public-http-api, conferida em 30/out/2026), e o CI é exatamente isso. Com servidor local não há limite por minuto, e a F1a inteira (30 arquivos, 741 textos) roda em uns 16 s.
+- **Alternativa:** a API pública com os limites publicados (20 req/min, 75 KB/min, 20 KB por pedido), como diz o plano. Fica disponível com `LANGUAGETOOL_URL=https://api.languagetool.org`, se o Victor decidir assim.
+
+## § 25 · Uma imagem por vez no motor provisório (F1a, 30/out/2026)
+
+- **Decisão:** a página-modelo aceita uma imagem por vez (JPG, PNG ou WebP), e os textos dizem isso. Lote, ZIP, HEIC e a fila de FileCards são da F2.
+- **Por quê:** o texto não promete o que o motor provisório não faz (§ 7).
+
+## § 26 · O job de merge usa o pode-mesclar da main (F1a, 30/out/2026)
+
+- **Decisão:** o job de merge roda o `scripts/ci/pode-mesclar.ts` tirado do commit base da PR (`git show $BASE_SHA:...`), não o da própria PR. Só a PR que cria o pipeline, sem o script na main, usa a própria cópia. A lista de arquivos vem de `git diff base...head`, sem o limite do `gh pr view --json files`. O merge usa `--match-head-commit`.
+- **Por quê:** sem isso uma PR `fase-*` poderia mudar a regra que decide o próprio merge.
+
+## § 27 · Próximo passo aponta para a home até a F2 (F1a, 30/out/2026)
+
+- **Decisão:** o NextStepChips da página-modelo tem um chip, "More tools" / "Mais ferramentas" / "Más herramientas", para a home do idioma. A F2 troca pelos chips das ferramentas de verdade (converter em PDF, redimensionar).
+- **Por quê:** só se linka página que existe (§ 6), e o evento `next_step_click` precisa ser exercitado.
+
+## § 28 · Botão para mudar a escolha de cookies (F1a, 30/out/2026)
+
+- **Decisão:** o aviso de cookies não volta sozinho depois da escolha, e a política de privacidade tem um botão que apaga a escolha guardada e mostra o aviso de novo.
+- **Por quê:** o GDPR e a LGPD pedem que retirar o consentimento seja tão fácil quanto dar.
+
+## § 29 · Noindex nos próprios 404 (F1a, 30/out/2026)
+
+- **Decisão:** o `_headers` tem as regras `/404` e `/:lang/404` com `X-Robots-Tag: noindex`, que continuam depois do lançamento.
+- **Por quê:** com `html_handling: "auto-trailing-slash"`, o Cloudflare responde `/404` e `/pt/404` com 200 (o `/404.html` vira 307 para `/404`), e essa página não pode ser indexada.
+
+## § 30 · Cabeçalho provisório (F1a, 30/out/2026)
+
+- **Decisão:** o logo é a palavra "FileOrca" em texto (a arte é da F1b); a busca é um botão com o texto visível em toda largura (o ícone sozinho no celular entra com os ícones, na F1b); o idioma abre um menu nativo (`popover`), sem JavaScript, com os links para a página equivalente.
+
+## § 31 · Ferramentas fixadas por SHA-256 e CI fixado (F1a, 30/out/2026)
+
+- **Decisão:** actionlint 1.7.12, LanguageTool 6.6 e o JRE Temurin 21.0.13 são baixados para `.cache/` (fora do git) por `scripts/lib/tools.ts`, que confere o SHA-256 antes de usar, em Windows e Linux; o CI guarda `.cache/` com `actions/cache`. As ações do GitHub ficam fixadas pelo SHA do commit, e o runner em `ubuntu-24.04` (o `ubuntu-latest` está migrando para o 26.04 até 19/nov/2026).
+
+## § 32 · hreflang `pt-BR` (F1a, 30/out/2026)
+
+- **Decisão:** o português sai como `pt-BR` no `lang` e no hreflang; o inglês como `en` (também x-default) e o espanhol como `es`.
+- **Por quê:** o português do site é o brasileiro; o espanhol é neutro.
