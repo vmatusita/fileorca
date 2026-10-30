@@ -78,7 +78,8 @@ Rodar um teste só: `pnpm exec vitest run tests/unit/ads.test.ts`, `pnpm exec pl
 
 Pegadinhas que a F1a achou:
 
-- O pnpm 12 recusa scripts de instalação não aprovados (`ERR_PNPM_IGNORED_BUILDS`): aprove em `pnpm-workspace.yaml` (`allowBuilds`), nunca com flag de linha de comando. Ele também recusa pacote publicado há menos de um dia; fixe a versão anterior em vez de abrir exceção.
+- O projeto usa Node 24 LTS e pnpm 10 porque o Workers Builds instala o pnpm pelo Corepack, e o Node 26 e o pnpm 12 quebram ali (DECISOES § 17). Scripts de instalação de dependência só rodam se estiverem em `onlyBuiltDependencies` no `pnpm-workspace.yaml`; aprove ali, nunca com flag. Pacote publicado no mesmo dia: fixe a versão anterior em vez de abrir exceção.
+- Rodar `pnpm install` fora de um terminal interativo pede `CI=true` quando o pnpm precisa recriar o `node_modules`.
 - Astro 7: `build.format` é `preserve` (DECISOES § 16), então toda página é `.../index.astro`. Use Vite 8 com Rolldown: opções em `vite.build.rolldownOptions`, não `rollupOptions`.
 - Preact 11: os tipos de evento (`TargetedMouseEvent`) vêm de `preact`, não de `JSX.*`.
 - A ilha da ferramenta é hidratada por um `mount.ts` (DECISOES § 23). Um `<script>` do Astro com `import()` vira arquivo externo e puxa o `preload-helper`: para módulo carregado no primeiro uso, use `?worker&url` com um entry que publica a API no `window` (a busca faz assim).

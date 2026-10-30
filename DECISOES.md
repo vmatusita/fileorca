@@ -95,11 +95,11 @@ O design system v1.1 já veio no pacote da F0 em `docs/design/` (ver `docs/desig
 - **Por quê:** com o padrão `'directory'`, o Astro 7.4 grava `src/pages/pt/404.astro` como `pt/404/index.html`, e o `not_found_handling: "404-page"` do Cloudflare procura `pt/404.html`. Conferido no build em 30/out/2026.
 - **Alternativa:** mover o arquivo num hook depois do build (mais frágil).
 
-## § 17 · Node 26 LTS, pnpm 12 e scripts de build aprovados (F1a, 30/out/2026)
+## § 17 · Node 24 LTS e pnpm 10, por causa do build image do Workers Builds (F1a, 30/out/2026)
 
-- **Decisão:** `.node-version` em 26.13.0, a LTS ativa ("Lithium", desde 28/out/2026), e `packageManager: pnpm@12.16.1`. O `pnpm-workspace.yaml` aprova só os scripts de instalação do esbuild e do workerd (`allowBuilds`), que o pnpm 12 bloqueia por padrão. O eslint fica em 10.13 porque o 10.14 saiu no próprio dia e o pnpm recusa versão com menos de um dia (`minimumReleaseAge`). O TypeScript fica em 6.0, porque o `@astrojs/check` e o typescript-eslint ainda não aceitam o 7.
-- **Por quê:** prompt da F1a ("a LTS atual") e versões estáveis dentro da major pedida.
-- **Risco aberto:** o Node 25+ não traz mais o Corepack, e o Workers Builds instala o pnpm pelo Corepack. Se o log do build da prévia mostrar esse erro, a troca para a LTS de manutenção (24.22.x) é uma linha no `.node-version`.
+- **Decisão:** `.node-version` em 24.22.2 (LTS "Krypton", em manutenção até abr/2028) e `packageManager: pnpm@10.34.9`. O `pnpm-workspace.yaml` aprova só os scripts de instalação do esbuild e do workerd (`onlyBuiltDependencies`). O eslint fica em 10.13 porque o 10.14 saiu no próprio dia da run, e o TypeScript em 6.0, porque o `@astrojs/check` e o typescript-eslint ainda não aceitam o 7.
+- **Por quê:** a run começou com o Node 26.13.0 (LTS ativa desde 28/out/2026) e o pnpm 12.16.1. O CI do GitHub instalou e buildou com eles, mas o build da prévia no Workers Builds caiu em menos de 17 s depois do push, antes de instalar. O build image instala o pnpm pelo Corepack, que o Node 25+ não traz mais, e o pnpm 12 é distribuído como executável nativo por dependência opcional, o que o Corepack antigo não baixa. Com Node 24 a falha passou para uns 27 s, e com pnpm 10 para uns 60 s: cada troca fez o build ir mais longe. O lockfile (v9) é o mesmo nas duas versões do pnpm.
+- **Não confirmado:** o log do build fica no painel do Cloudflare, que a run não acessa; o build com pnpm 10 ainda falhou numa etapa posterior (ver ADR-002 e o relatório). Voltar ao Node 26 e ao pnpm 12 é uma linha cada, quando o build image aceitar.
 
 ## § 18 · Estilo provisório da F1a (F1a, 30/out/2026)
 
