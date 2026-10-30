@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 /** Waits until the tool island is hydrated (Astro removes the ssr attribute). */
 export async function hydrated(page: Page): Promise<void> {
-  await page.waitForSelector('astro-island:not([ssr])', { state: 'attached' });
+  await page.waitForSelector('#fo-tool-root[data-hydrated="true"]', { state: 'attached' });
 }
 
 /** Accepts or declines the cookie notice so it does not cover the page in a test. */
