@@ -1,5 +1,5 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import AdSlot from '../../src/ads/AdSlot.astro';
 import AdsenseHead from '../../src/ads/AdsenseHead.astro';
 import { adsConfigFrom, adsTxt, unitFor, type AdsConfig } from '../../src/ads/config.ts';
@@ -81,6 +81,18 @@ describe('AdSlot and the AdSense head in the three states', () => {
       expect(withoutAds).not.toContain('adsbygoogle.js');
     });
   }
+
+  it('emits /ads.txt only when PUBLIC_ADSENSE_CLIENT exists, with pub- and without ca-', async () => {
+    const { getStaticPaths, GET } = await import('../../src/pages/[adsfile].txt.ts');
+    const paths = () => (getStaticPaths as unknown as () => { params: { adsfile: string } }[])();
+    vi.stubEnv('PUBLIC_ADSENSE_CLIENT', '');
+    expect(paths()).toEqual([]);
+    vi.stubEnv('PUBLIC_ADSENSE_CLIENT', CLIENT);
+    expect(paths()).toEqual([{ params: { adsfile: 'ads' } }]);
+    const response = await (GET as unknown as () => Response)();
+    expect(await response.text()).toBe('google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n');
+    vi.unstubAllEnvs();
+  });
 
   it('reserves the rail unit size', async () => {
     const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', variant: 'rail', label: 'Anuncios', config: STATES['all'] } });
