@@ -1,6 +1,6 @@
 # F1a · Relatório da run (fundação técnica)
 
-Run 1 de 2 da F1, branch `fase-01a`, PR [vmatusita/fileorca#1](https://github.com/vmatusita/fileorca/pull/1). Prompt em `docs/prompts/prompt-fase-01a.md`; plano da run (gabarito da revisão) em `docs/relatorios/fase-01a-plano.md`; decisões no `DECISOES.md` (§ 1 a § 35); proposta de arquitetura em `docs/adr/ADR-002-previa-worker-previews.md`.
+Run 1 de 2 da F1, branch `fase-01a`, PR [vmatusita/fileorca#1](https://github.com/vmatusita/fileorca/pull/1). Prompt em `docs/prompts/prompt-fase-01a.md`; plano da run (gabarito da revisão) em `docs/relatorios/fase-01a-plano.md`; decisões no `DECISOES.md` (§ 1 a § 36); proposta de arquitetura em `docs/adr/ADR-002-previa-worker-previews.md`.
 
 ## Resumo
 
@@ -52,7 +52,7 @@ pnpm-workspace.yaml     onlyBuiltDependencies (esbuild, workerd)
 tsconfig.json           astro/tsconfigs/strictest + JSX do Preact
 vitest.config.ts        getViteConfig do Astro (Container API)
 wrangler.jsonc          Worker "fileorca" só com assets
-DECISOES.md             § 1 a § 35
+DECISOES.md             § 1 a § 36
 docs/adr/               ADR-002 (Proposta)
 docs/relatorios/        fase-01a-plano.md, fase-01a.md
 public/                 robots.txt, chave do IndexNow
@@ -77,7 +77,7 @@ src/styles/global.css   estilo provisório só com os tokens
 src/tools/compress-image/  CompressImagePage.astro, ToolPanel.tsx, mount.ts, engine-client.ts, i18n/
 src/views/              Home, Legal, About, Contact, Licenses, Support, NotFound
 tests/unit/             13 arquivos, 122 testes
-tests/e2e/              7 specs, 152 testes por navegador (304 no total)
+tests/e2e/              7 specs, 153 testes por navegador (306 no total)
 ```
 
 ## pnpm verificar na máquina local
@@ -1027,6 +1027,8 @@ Resumo do pnpm verificar
 
 **Job de merge:** rodou depois do verificar verde e recusou a PR, com o [comentário](https://github.com/vmatusita/fileorca/pull/1#issuecomment-6534321978) "Merge automático: não. A PR mexe em .github/workflows/, então o merge fica para o Victor." O `pos-deploy` foi pulado, porque não houve merge. Enquanto a PR era rascunho, o job recusou sem comentar (§ 14).
 
+**Falha depois do relatório:** no commit `04fbe96` (só o relatório), a [execução 41134770912](https://github.com/vmatusita/fileorca/actions/runs/41134770912) reprovou um teste no WebKit: o de WCAG 2.4.11, com o foco no link "Compress image" do rodapé coberto pelo aviso de cookies. O mesmo teste tinha passado duas vezes no CI e passa no Windows. A correção (§ 36) não depende mais de o navegador respeitar o `scroll-padding`: o aviso rola a página no `focusin`. Um teste novo tira o `scroll-padding` e falhava nos dois navegadores antes da correção. Os dois testes do aviso passaram 80 vezes seguidas no local, e o `pnpm verificar` completo passou em 246,6 s (306 testes Playwright).
+
 ## Prévia do Workers Builds
 
 **Não abriu.** O Cloudflare comentou na PR (bot `cloudflare-workers-and-pages`, "Deploying Preview to Cloudflare", modelo "Preview Deployments by commit") e criou o check "Workers Builds: fileorca", mas todo build falhou e a coluna "Deployment URL" ficou vazia. Sem URL, não houve como conferir o status 200, o `X-Robots-Tag: noindex` e o `build.txt` da prévia.
@@ -1054,7 +1056,7 @@ Todas no `DECISOES.md`. As que mudam o que o plano diz ou que o Victor precisa c
 - **§ 33 · Sem ganho, o original volta sem metadados**, inclusive sem GPS, com o formato lido dos bytes.
 - **§ 34 · Anúncio só em fileorca.com** (as prévias recebem as mesmas variáveis de build) **e o trilho só a partir de 1280 px.**
 - **ADR-002 (Proposta)** sobre o modelo "Worker Previews" do Workers Builds.
-- As demais: § 4 a § 16 (do prompt e da plataforma), § 18 a § 22, § 25, § 27 a § 32, § 35.
+- As demais: § 4 a § 16 (do prompt e da plataforma), § 18 a § 22, § 25, § 27 a § 32, § 35 e § 36.
 
 ## Revisão adversarial
 
