@@ -86,6 +86,33 @@ test('the cookie notice never covers the keyboard focus (WCAG 2.4.11)', async ({
   }
 });
 
+// The WebKit of the Ubuntu runner once left the focus under the notice in spite of the
+// scroll-padding. The notice moves a focused element out from under itself, so the test takes the
+// scroll-padding away to stand for a browser that ignores it (DECISOES § 36).
+test('an element focused under the cookie notice moves above it, even without scroll-padding', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('/');
+  const notice = page.locator('#fo-cookie');
+  await expect(notice).toBeVisible();
+  const link = page.locator('footer a').first();
+  const covered = () => link.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return !(hit && (hit === element || element.contains(hit)));
+  });
+  await link.evaluate((element) => {
+    const box = document.getElementById('fo-cookie')!.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    window.scrollBy(0, rect.top + rect.height / 2 - (box.top + box.height / 2));
+  });
+  expect(await covered(), 'o link precisa começar sob o aviso').toBe(true);
+  await page.evaluate(() => document.documentElement.style.setProperty('scroll-padding-bottom', '0px'));
+  await link.focus();
+  expect(await covered()).toBe(false);
+  const gap = await link.evaluate((element) => document.getElementById('fo-cookie')!.getBoundingClientRect().top - element.getBoundingClientRect().bottom);
+  expect(gap).toBeGreaterThanOrEqual(0);
+});
+
 test('the search dialog has a visible close button', async ({ page }) => {
   await page.goto('/pt/');
   await page.getByRole('button', { name: /Buscar ferramentas/ }).click();

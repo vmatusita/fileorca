@@ -20,6 +20,9 @@ function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics
 // While visible, the notice reserves its height at the end of the page, so the keyboard focus is
 // never hidden under it (WCAG 2.4.11).
 function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8;var r=document.documentElement.style,b=document.body.style;r.scrollPaddingBottom=h?h+'px':'';b.paddingBottom=h?h+'px':'';}
+// WebKit does not always honour that scroll-padding when it reveals the focus, so a focused
+// element is moved out from under the notice before the browser reveals it (DECISOES § 36).
+document.addEventListener('focusin',function(e){var t=e.target;if(box.hidden||!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;var r=t.getBoundingClientRect(),end=box.getBoundingClientRect().top-8,d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(d)scrollBy(0,d);});
 function hide(){box.hidden=true;reserve();}
 function show(){box.hidden=false;reserve();}
 function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
