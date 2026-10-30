@@ -77,7 +77,10 @@ export function stripJpeg(bytes: Uint8Array): Uint8Array {
 
 const PNG_DROP = new Set(['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME']);
 
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
 export function stripPng(bytes: Uint8Array): Uint8Array {
+  if (!PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) throw new Error('not a PNG');
   const keep: Uint8Array[] = [bytes.subarray(0, 8)];
   let i = 8;
   while (i + 12 <= bytes.length) {
@@ -113,9 +116,20 @@ export function stripWebp(bytes: Uint8Array): Uint8Array {
   return concat([header, body]);
 }
 
-export function stripMetadata(bytes: Uint8Array, type: string): Uint8Array {
-  if (type === 'image/jpeg') return stripJpeg(bytes);
-  if (type === 'image/png') return stripPng(bytes);
-  if (type === 'image/webp') return stripWebp(bytes);
-  throw new Error(`no metadata stripper for ${type}`);
+/** The real format from the first bytes; the declared type comes from the file name. */
+export function sniffType(bytes: Uint8Array): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+  if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) return 'image/png';
+  const ascii = (from: number, to: number) => String.fromCharCode(...bytes.subarray(from, to));
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  return null;
+}
+
+/** Strips by the real format, whatever the file name says. */
+export function stripMetadata(bytes: Uint8Array): { bytes: Uint8Array; type: string } {
+  const type = sniffType(bytes);
+  if (type === 'image/jpeg') return { bytes: stripJpeg(bytes), type };
+  if (type === 'image/png') return { bytes: stripPng(bytes), type };
+  if (type === 'image/webp') return { bytes: stripWebp(bytes), type };
+  throw new Error('unknown image format');
 }

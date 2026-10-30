@@ -4,7 +4,8 @@
 // robots.txt fixed; no robots meta; JSON-LD parses; 404 out of sitemaps and hreflang.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
-import { validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
+import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
+import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
 import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
@@ -75,13 +76,13 @@ for (const page of allPages()) {
   } catch {
     problems.add(`${page.path}: og:image ${og} não existe no dist`);
   }
-  heads.push({
-    url,
-    alternates: root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => ({
-      hreflang: link.getAttribute('hreflang') ?? '',
-      href: link.getAttribute('href') ?? '',
-    })),
-  });
+  const alternates = root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => ({
+    hreflang: link.getAttribute('hreflang') ?? '',
+    href: link.getAttribute('href') ?? '',
+  }));
+  // The HTML must carry exactly the cluster the route map defines (a missing tag fails too).
+  for (const problem of compareAlternates(alternates, alternatesFor(page.route))) problems.add(`${page.path}: ${problem}`);
+  heads.push({ url, alternates });
 }
 for (const problem of validateHreflang(heads, { xDefaultLang: 'en', langTags: Object.values(LANG_TAG) })) problems.add(problem);
 

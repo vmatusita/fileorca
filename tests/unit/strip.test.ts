@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { jpegOrientation, stripJpeg, stripMetadata, stripPng, stripWebp } from '../../src/engine/image/strip.ts';
+import { jpegOrientation, sniffType, stripJpeg, stripMetadata, stripPng, stripWebp } from '../../src/engine/image/strip.ts';
 import { exifBlock, hasGps, segments } from '../e2e/lib/jpeg.ts';
 
 const read = (name: string) => new Uint8Array(readFileSync(`fixtures/images/${name}`));
@@ -81,8 +81,17 @@ describe('removedor de metadados (caso sem ganho)', () => {
     expect((stripped[4] ?? 0) | ((stripped[5] ?? 0) << 8)).toBe(stripped.length - 8);
   });
 
-  it('refuses types it does not know', () => {
-    expect(() => stripMetadata(new Uint8Array([1, 2]), 'image/gif')).toThrow();
+  it('picks the stripper from the bytes, not from the name: a JPEG called .png still loses its GPS', () => {
+    const jpeg = read('jpg-02-iphone6-paisagem-gps.jpg');
+    expect(sniffType(jpeg)).toBe('image/jpeg');
+    const out = stripMetadata(jpeg);
+    expect(out.type).toBe('image/jpeg');
+    expect(hasGps(out.bytes)).toBe(false);
+    expect(() => stripPng(jpeg)).toThrow(/not a PNG/);
+  });
+
+  it('refuses formats it does not know', () => {
+    expect(() => stripMetadata(new Uint8Array([0x47, 0x49, 0x46, 0x38]))).toThrow();
     expect(() => stripJpeg(new Uint8Array([0, 1, 2]))).toThrow();
   });
 });

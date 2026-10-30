@@ -2,7 +2,8 @@
 // CookieNotice (docs/design/components/CookieNotice): Accept and Decline for everyone, Decline
 // first, neither button is brand or sun. Hidden for good after a choice, and hidden where the
 // IAB __tcfapi says GDPR applies (Google's CMP takes over there). Non-modal: it never blocks.
-// With the AdSense anchor on screen it sits above it (--fo-anchor), never under it.
+// With the AdSense anchor on screen it sits above it (--fo-anchor), never under it, and it never
+// covers the keyboard focus (it reserves its height at the end of the page while visible).
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
 
@@ -16,15 +17,18 @@ var K=${JSON.stringify(CONSENT_STORAGE_KEY)},box=document.getElementById('fo-coo
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
 function save(v){try{localStorage.setItem(K,v);}catch(e){}}
 function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics_storage:v,ad_user_data:v,ad_personalization:v});}
-function hide(){box.hidden=true;}
-function show(){box.hidden=false;}
+// While visible, the notice reserves its height at the end of the page, so the keyboard focus is
+// never hidden under it (WCAG 2.4.11).
+function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8;var r=document.documentElement.style,b=document.body.style;r.scrollPaddingBottom=h?h+'px':'';b.paddingBottom=h?h+'px':'';}
+function hide(){box.hidden=true;reserve();}
+function show(){box.hidden=false;reserve();}
 function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
 box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent');save(v);apply(v);hide();});
 document.addEventListener('click',function(e){if(e.target.closest('[data-consent-change]')){try{localStorage.removeItem(K);}catch(x){}show();var f=box.querySelector('button');if(f)f.focus();}});
-function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}box.style.setProperty('--fo-anchor',h+'px');}
+function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
 if(stored()==='granted'||stored()==='denied')return;
-show();tcf()||window.addEventListener('load',tcf,{once:true});
+show();addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);tcf()||window.addEventListener('load',tcf,{once:true});
 })();`;
 ---
 <div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>

@@ -66,6 +66,26 @@ test('the cookie notice rises above the AdSense anchor instead of covering it', 
   }).toBeLessThanOrEqual(740 - 100);
 });
 
+test('the cookie notice never covers the keyboard focus (WCAG 2.4.11)', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  for (const path of ['/', '/compress-image/']) {
+    await page.goto(path);
+    await expect(page.locator('#fo-cookie')).toBeVisible();
+    for (let i = 0; i < 45; i += 1) {
+      await page.keyboard.press('Tab');
+      const covered = await page.evaluate(() => {
+        const element = document.activeElement as HTMLElement | null;
+        if (!element || element === document.body || element.closest('#fo-cookie')) return null;
+        const rect = element.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return null;
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return hit && (hit === element || element.contains(hit) || hit.contains(element)) ? null : `${element.tagName} ${element.textContent?.trim().slice(0, 40)}`;
+      });
+      expect(covered, `${path}: foco coberto`).toBeNull();
+    }
+  }
+});
+
 test('the search dialog has a visible close button', async ({ page }) => {
   await page.goto('/pt/');
   await page.getByRole('button', { name: /Buscar ferramentas/ }).click();

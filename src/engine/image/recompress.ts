@@ -90,14 +90,14 @@ export async function recompress(file: Blob, level: Level, onProgress: Progress 
   // A browser that cannot encode the type silently returns PNG; a copy that is not smaller is
   // never handed out. In both cases the original goes back, without its metadata.
   if (output.type !== type || output.size >= file.size) {
-    let stripped: Uint8Array;
+    let stripped: { bytes: Uint8Array; type: string };
     try {
-      stripped = stripMetadata(new Uint8Array(await file.arrayBuffer()), type);
+      stripped = stripMetadata(new Uint8Array(await file.arrayBuffer()));
     } catch {
       throw new EngineError('encode', 'could not remove the metadata of this file');
     }
     const outcome = output.type !== type ? 'cannot-encode' : 'no-gain';
-    return { blob: new Blob([stripped as BlobPart], { type }), width, height, outcome };
+    return { blob: new Blob([stripped.bytes as BlobPart], { type: stripped.type }), width, height, outcome };
   }
   return { blob: output, width, height, outcome: 'smaller' };
 }

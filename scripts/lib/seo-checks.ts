@@ -53,6 +53,19 @@ export function validateHreflang(pages: PageHead[], options: { xDefaultLang: str
   return problems;
 }
 
+/** The hreflang links found in a page against the ones its route requires. */
+export function compareAlternates(found: PageHead['alternates'], expected: PageHead['alternates']): string[] {
+  const key = (alt: { hreflang: string; href: string }) => `${alt.hreflang} ${alt.href}`;
+  const have = new Set(found.map(key));
+  const want = new Set(expected.map(key));
+  const missing = [...want].filter((item) => !have.has(item));
+  const extra = [...have].filter((item) => !want.has(item));
+  return [
+    ...(missing.length ? [`hreflang ausente: ${missing.join(', ')}`] : []),
+    ...(extra.length ? [`hreflang a mais: ${extra.join(', ')}`] : []),
+  ];
+}
+
 /** A urlset sitemap with the expected absolute URLs, no duplicates, under 50,000 entries. */
 export function validateSitemap(xml: string, expected: string[], origin: string): string[] {
   const problems: string[] = [];

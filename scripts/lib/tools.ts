@@ -40,6 +40,24 @@ export const ACTIONLINT: Tool = {
   },
 };
 
+/** shellcheck for actionlint, pinned so the local gate checks run: blocks like the CI does. */
+export const SHELLCHECK: Tool = {
+  name: 'shellcheck',
+  version: '0.11.0',
+  assets: {
+    'linux-x64': {
+      url: 'https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.gz',
+      sha256: 'b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6',
+      entry: 'shellcheck-v0.11.0/shellcheck',
+    },
+    'win32-x64': {
+      url: 'https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.zip',
+      sha256: '8a4e35ab0b331c85d73567b12f2a444df187f483e5079ceffa6bda1faa2e740e',
+      entry: 'shellcheck.exe',
+    },
+  },
+};
+
 /** Official LanguageTool distribution (LGPL-2.1, run locally; never distributed with the site). */
 export const LANGUAGETOOL: Tool = {
   name: 'languagetool',

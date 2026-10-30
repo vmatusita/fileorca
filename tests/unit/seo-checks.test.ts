@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
+import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
 import { alternatesFor, graph } from '../../src/seo/meta.ts';
 import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 import { ROUTES, routeById, type RouteDef } from '../../src/i18n/routes.ts';
@@ -50,6 +50,13 @@ describe('validador de hreflang', () => {
     const heads = Object.values(ptEs.paths).map((path) => ({ url: `${O}${path}`, alternates: alternatesFor(ptEs) }));
     expect(heads[0]?.alternates.map((alt) => alt.hreflang)).toEqual(['pt-BR', 'es']);
     expect(validateHreflang(heads, tags)).toEqual([]);
+  });
+
+  it('fails a page whose hreflang tags are missing or different from the route map', () => {
+    const expected = alternatesFor(routeById('privacy'));
+    expect(compareAlternates(expected, expected)).toEqual([]);
+    expect(compareAlternates([], expected).join()).toMatch(/ausente/);
+    expect(compareAlternates([...expected, { hreflang: 'fr', href: `${O}/fr/` }], expected).join()).toMatch(/a mais/);
   });
 
   it('is green for the real route map', () => {

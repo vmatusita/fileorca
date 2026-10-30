@@ -114,7 +114,7 @@ jobs:
         run: |
           if gh pr merge "$PR" --squash --delete-branch --match-head-commit "$HEAD_SHA"; then
             sha=''
-            for attempt in 1 2 3 4 5; do
+            for _ in 1 2 3 4 5; do
               sha=$(gh pr view "$PR" --json mergeCommit --jq '.mergeCommit.oid // empty')
               [[ "$sha" =~ ^[0-9a-f]{40}$ ]] && break
               sleep 5
