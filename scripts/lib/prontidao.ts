@@ -48,10 +48,10 @@ const FAKE_IDS: { label: string; pattern: RegExp }[] = [
 ];
 
 /** What the privacy policy must say about Google ads, per language (AdSense "Required content", DECISOES § 95). */
-const PRIVACY_TEXT: Record<Lang, { partner: RegExp; cookies: RegExp }> = {
-  en: { partner: /Google is the advertising partner/i, cookies: /third-party vendors, including Google, use cookies/i },
-  pt: { partner: /O Google é o parceiro de publicidade/i, cookies: /fornecedores terceiros, incluindo o Google, usam cookies/i },
-  es: { partner: /Google es el socio de publicidad/i, cookies: /proveedores externos, incluido Google, usan cookies/i },
+const PRIVACY_TEXT: Record<Lang, { partner: RegExp; cookies: RegExp; cookieless: RegExp }> = {
+  en: { partner: /Google is the advertising partner/i, cookies: /third-party vendors, including Google, use cookies/i, cookieless: /does not switch Google Analytics off: it then works without cookies/i },
+  pt: { partner: /O Google é o parceiro de publicidade/i, cookies: /fornecedores terceiros, incluindo o Google, usam cookies/i, cookieless: /não desliga o Google Analytics: ele passa a funcionar sem cookies/i },
+  es: { partner: /Google es el socio de publicidad/i, cookies: /proveedores externos, incluido Google, usan cookies/i, cookieless: /no apaga Google Analytics: entonces funciona sin cookies/i },
 };
 /** Where Google lets a visitor opt out of personalized ads (Ads Settings, now My Ad Center). */
 const ADS_SETTINGS = /^https:\/\/(?:adssettings\.google\.com|myadcenter\.google\.com|www\.google\.com\/settings\/ads)(?:\/|$)/;
@@ -237,6 +237,8 @@ export function checkRequiredPages(site: Site): Row[] {
       return [
         ...(want.partner.test(text) ? [] : ['o Google como parceiro de anúncios']),
         ...(want.cookies.test(text) ? [] : ['os cookies de terceiros, incluindo os do Google']),
+        // Consent Mode sends cookieless pings after a Decline: the policy says so (review b-04, DECISOES § 102).
+        ...(want.cookieless.test(text) ? [] : ['que o Google Analytics segue sem cookies depois da Recusa']),
         ...(hrefs.some((href) => ADS_SETTINGS.test(href)) ? [] : ['o link de opt-out (Ads Settings)']),
         ...(hrefs.some((href) => PARTNER_SITES.test(href)) ? [] : ['o link de como o Google usa dados de sites parceiros']),
         ...(text.includes(AUTHOR.name) ? [] : [`o controlador (${AUTHOR.name})`]),
@@ -249,7 +251,7 @@ export function checkRequiredPages(site: Site): Row[] {
     row(`O Contato mostra ${CONTACT_EMAIL}`, 'texto visível do <main> e link mailto, nos três idiomas', contact),
     row(
       'A Privacidade tem o que o AdSense pede',
-      'texto do <main> nos três idiomas: Google como parceiro, cookies de terceiros, links do Ads Settings e de sites parceiros, controlador e e-mail',
+      'texto do <main> nos três idiomas: Google como parceiro, cookies de terceiros, o Analytics sem cookies depois da Recusa, links do Ads Settings e de sites parceiros, controlador e e-mail',
       privacy,
     ),
   ];

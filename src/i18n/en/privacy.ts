@@ -80,6 +80,7 @@ export default {
         'Consent depends on where you are, using Google Consent Mode v2.',
         'In the European Union, the EEA (Iceland, Liechtenstein and Norway), the United Kingdom and Switzerland, analytics and ad storage are denied by default until you accept.',
         'Elsewhere, analytics and ad storage are granted by default, and you can decline in the cookie notice.',
+        'Declining, or not having accepted yet where consent is denied by default, does not switch Google Analytics off: it then works without cookies, and Google may still receive the page views and the events listed above, with no identifier stored in your browser.',
         'You can change your choice at any time with the button below.',
       ],
     },

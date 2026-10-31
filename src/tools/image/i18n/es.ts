@@ -40,6 +40,7 @@ export default {
     truncated: '{name} se corta antes de terminar, así que falta parte de la imagen. Descárgalo o expórtalo de nuevo e inténtalo otra vez.',
     decode: '{name} está dañado y Oli no puede leerlo. Prueba con otra copia del archivo.',
     encode: 'Este navegador no pudo guardar {name}. Inténtalo de nuevo en otro navegador.',
+    load: 'Oli no pudo cargar lo que necesita para leer {name}. Revisa tu conexión y vuelve a cargar la página.',
     tooLarge: '{name} es más grande de lo que este navegador puede procesar aquí. Prueba con una versión más pequeña de la imagen.',
     chooseAnother: 'Elegir otros archivos',
     some: 'No se pudieron leer {count} archivos; el resto está listo.',

@@ -43,9 +43,9 @@ const PAGES: SitePage[] = [
   ...LANGS.map((lang) => ({ id: 'not-found', lang, path: lang === 'en' ? '/404.html' : `/${lang}/404.html`, indexable: false, ads: false })),
 ];
 const PRIVACY: Record<Lang, string> = {
-  en: 'Google is the advertising partner of the site. Third-party vendors, including Google, use cookies to serve ads based on your prior visits.',
-  pt: 'O Google é o parceiro de publicidade do site. Fornecedores terceiros, incluindo o Google, usam cookies para exibir anúncios.',
-  es: 'Google es el socio de publicidad del sitio. Proveedores externos, incluido Google, usan cookies para mostrar anuncios.',
+  en: 'Google is the advertising partner of the site. Third-party vendors, including Google, use cookies to serve ads based on your prior visits. Declining does not switch Google Analytics off: it then works without cookies.',
+  pt: 'O Google é o parceiro de publicidade do site. Fornecedores terceiros, incluindo o Google, usam cookies para exibir anúncios. Recusar não desliga o Google Analytics: ele passa a funcionar sem cookies.',
+  es: 'Google es el socio de publicidad del sitio. Proveedores externos, incluido Google, usan cookies para mostrar anuncios. Rechazar no apaga Google Analytics: entonces funciona sin cookies.',
 };
 /** Plain prose of n words with no placeholder wording, different per page. */
 const prose = (n: number, seed: string): string => Array.from({ length: n }, (_, i) => (i % 9 === 0 ? `${seed}${i}` : 'files')).join(' ');
@@ -182,11 +182,12 @@ describe('gate:prontidao, (b) páginas obrigatórias', () => {
     expect(failing(checkRequiredPages(site))).toEqual(['O Contato mostra contato@fileorca.com: /contact/: contato@fileorca.com não aparece']);
   });
 
-  it('refuses a privacy policy without Google, the cookies, the links, the controller or the e-mail', () => {
+  it('refuses a privacy policy without Google, the cookies, the cookieless Analytics, the links, the controller or the e-mail', () => {
     const privacy = PAGES.find((page) => page.id === 'privacy' && page.lang === 'pt') as SitePage;
     const cuts: [RegExp, RegExp][] = [
       [/O Google é o parceiro de publicidade do site\./, /parceiro de anúncios/],
       [/Fornecedores terceiros, incluindo o Google, usam cookies/, /cookies de terceiros/],
+      [/Recusar não desliga o Google Analytics: ele passa a funcionar sem cookies./, /sem cookies depois da Recusa/],
       [/<li><a href="https:\/\/adssettings\.google\.com">Ads Settings<\/a><\/li>/, /opt-out/],
       [/<li><a href="https:\/\/policies\.google\.com\/technologies\/partner-sites">Partner sites<\/a><\/li>/, /sites parceiros/],
       [/Victor Yuki Matusita, /, /controlador/],

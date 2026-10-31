@@ -16,6 +16,8 @@ import { ARROWS, dragCorner, moveBox, nudgeBox, percents, type Arrow, type Corne
 export const KEY_PAUSE_MS = 350;
 
 const CORNERS: readonly Corner[] = ['nw', 'ne', 'sw', 'se'];
+/** Side of a handle on screen (--tap-min in components.css, the crop editor). */
+const HANDLE_PX = 48;
 
 export interface CropEditorProps {
   /** The picture to crop (an object URL; it never leaves the device). */
@@ -27,6 +29,8 @@ export interface CropEditorProps {
   ratio: number | null;
   /** Name of the box for assistive technology ("Crop area"). */
   label: string;
+  /** What the box covers, with its name: a group has no value of its own (F2 low 1). */
+  value: (box: Box) => string;
   /** Id of the line that tells how to use the keyboard. */
   helpId: string;
   onChange: (box: Box) => void;
@@ -42,7 +46,7 @@ interface Drag {
 
 const sameBox = (a: Box, b: Box) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 
-export default function CropEditor({ url, size, box, ratio, label, helpId, onChange }: CropEditorProps) {
+export default function CropEditor({ url, size, box, ratio, label, value, helpId, onChange }: CropEditorProps) {
   const [live, setLive] = useState<Box | null>(null);
   const liveRef = useRef<Box | null>(null);
   const boxRef = useRef(box);
@@ -82,9 +86,14 @@ export default function CropEditor({ url, size, box, ratio, label, helpId, onCha
   function onPointerDown(event: TargetedPointerEvent<HTMLDivElement>): void {
     if (event.button !== 0 && event.pointerType === 'mouse') return;
     const handle = (event.target as HTMLElement).closest<HTMLElement>('[data-corner]');
+    // The 48 px handles cover a small box: inside its edges the pointer moves it, the outer half of a handle resizes
+    // it (F2 low 3, review d-06, DECISOES § 102).
+    const rect = event.currentTarget.getBoundingClientRect();
+    const small = rect.width < 2 * HANDLE_PX || rect.height < 2 * HANDLE_PX;
+    const inside = event.clientX > rect.left && event.clientX < rect.right && event.clientY > rect.top && event.clientY < rect.bottom;
     drag.current = {
       pointerId: event.pointerId,
-      corner: (handle?.dataset['corner'] as Corner | undefined) ?? null,
+      corner: small && inside ? null : ((handle?.dataset['corner'] as Corner | undefined) ?? null),
       start: liveRef.current ?? boxRef.current,
       originX: event.clientX,
       originY: event.clientY,
@@ -137,7 +146,7 @@ export default function CropEditor({ url, size, box, ratio, label, helpId, onCha
         class="fo-crop__box"
         role="group"
         tabindex={0}
-        aria-label={label}
+        aria-label={`${label}, ${value(shown)}`}
         aria-describedby={helpId}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

@@ -637,6 +637,9 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
   - Nenhuma asserção mudou: segue exigindo um `tool_start`, um `tool_complete`, um `tool_error` e dois `download`.
 - `tests/e2e/navigation.spec.ts`, no teste "tool search loads on first use…": o localizador `getByText('Nenhuma ferramenta').or(…empty-title)` passou a `locator('[data-search-empty-title]')`, com o texto inteiro. A região de status da busca (§ 101) diz as mesmas palavras, então o texto sozinho achava dois elementos. A asserção é a mesma: o título do estado vazio traz a busca.
 - `tests/e2e/cookie-footer.spec.ts` (teste novo da F3), no caso "with the AdSense anchor and the notice at once…": depois de Recusar, com a âncora ainda na tela, o rodapé deixou de esperar 96 px e o `scroll-padding` deixou de esperar `auto`. A âncora agora mantém a própria reserva, de 108 px (§ 101). O teste passou a tirar a âncora e conferir que a reserva some por inteiro (96 px, `auto`, nenhum estilo inline). A asserção antiga afirmava o defeito c-02 da revisão.
+- `tests/e2e/image-smoke.spec.ts`, no teste do Crop: o nome acessível esperado da caixa passou de `'Crop area'` a `'Crop area, 1200 by 1200 pixels, at 0, 200'`. A caixa agora diz o que cobre (baixo 1 da F2, § 102), e a asserção antiga afirmava a falta do valor.
+- `tests/e2e/tool.spec.ts`, no teste "the work runs in the Web Worker…": o `console.log` do caminho virou asserção (achado a-03, § 102). O teste lê no próprio worker se ele tem `OffscreenCanvas`. Se tem, não pode haver pedido ao chunk `process`, que só o caminho da página importa; se não tem, o motor rodou na página. Com o mutante da revisão (motor sempre na página), o teste agora reprova no Chromium.
+- `tests/unit/consent.test.ts`: a lista de valores de `reason` do `tool_error` ganhou `load` (§ 102).
 
 ## § 100 · O removedor de metadados guarda só o que a imagem precisa (F3, 31/out/2026)
 
@@ -659,3 +662,33 @@ Achados médios confirmados pelos céticos e corrigidos, cada um com teste que f
 - **d-04 · o foco volta a quem abriu o aviso.** Depois de escolher no aviso reaberto pelo botão, o foco caía no `body` (WCAG 2.4.3). Agora ele volta ao botão "Mudar minha escolha". Teste por teclado.
 - **d-01 · a busca anuncia o "sem resultado".** O bloco vazio aparecia sem região viva (WCAG 4.1.3). O cético rebaixou de alto para médio, porque a busca é um atalho e não o fluxo principal. A `SearchBox` ganhou um `<p class="fo-sr" role="status">` fora do bloco escondido, que diz o mesmo título. Teste: a região diz "Nenhuma ferramenta chamada "heic"" e se esvazia quando há resultado.
 - **Custo no CI:** uns 7 testes de uma carga cada por navegador, de 3 a 8 s cada.
+
+## § 102 · Mais correções da revisão: motor, PDF, privacidade, voz, amarelo, anúncio do resultado e Crop (F3, 31/out/2026)
+
+Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem teste que falha no código de antes.
+
+- **a-01 · o motor que não carrega.** Se o chunk do motor não chega (sem rede, ou um chunk que sumiu depois de um deploy), um arquivo bom era chamado de "danificado" (`decode`) e nunca tentado de novo.
+  - Agora o painel usa um motivo próprio, `load`, que fica fora do `HOPELESS` e tem fala própria nos três idiomas: "Oli couldn't load what she needs to read {name}. Check your connection and reload the page."
+  - O `tool_error` leva `reason: 'load'`, um valor novo na lista fechada `ERROR_REASONS`, sem evento nem parâmetro novo.
+  - Teste em `tests/e2e/engine-paths.spec.ts`.
+- **a-02 · o worker do PDF que não sobe.** O `pdf-client.ts` não ouvia o `error` do worker, e o painel ficava em "Building your PDF" para sempre.
+  - Agora ele corre a montagem contra um `broken` (como o `engine-client.ts`), rejeita com `EngineUnavailable` e deixa o próximo PDF abrir um worker novo.
+  - O painel trata isso como `load`, e também o import dinâmico que falha.
+  - Teste: com o worker do PDF bloqueado, o painel termina na fala de `load`.
+- **a-03 · o caminho da página.** Um teste novo tira o `OffscreenCanvas` do worker do motor, nos dois navegadores, e exige o resultado pelo caminho da página. O teste antigo do worker passou a afirmar o caminho (ver a § 99).
+- **b-04 · o Analytics depois da Recusa.** O Consent Mode avançado manda pings sem cookie depois da Recusa (documentação do Google, support.google.com/analytics/answer/9976101). A Privacidade, nos três idiomas, passou a dizer isso na seção de consentimento, e o `gate:prontidao` confere a frase.
+- **d-03 (e o baixo 6 da F2) · o resultado anunciado uma vez.** O cartão tinha `aria-live="polite"`, e a região `role="status"` dizia a mesma frase. Num lote de N arquivos, o cartão falava N + 1 vezes, com números que ainda não eram os finais.
+  - O `aria-live` saiu do cartão, e a região de status passou a ser a única voz da ferramenta. Teste no `island.spec.ts`.
+  - **Desvio do README do ResultCard:** ele pede `aria-live` no cartão para o leitor de tela ouvir a fala da Oli. A fala continua sendo dita, só que uma vez, pela região de status.
+- **f-01 · o teste do amarelo.** O teste via só `var(--sun…)`. Agora procura também, fora do Baixar, o hex e o `rgb()` que só a família do amarelo usa no `tokens.css` (#FFC93C e #B8870F), com amostras que provam a regra.
+- **f-02 · o teste de voz.** O teste agora:
+  - cobre as oito palavras do README, com as variações ("supercharged", "magical", "mágica");
+  - recusa emoji;
+  - só aceita exclamação na fala de sucesso de cada ferramenta (`done` e `doneMany`), uma por fala.
+- **d-06 (baixo 3 da F2) · a caixa pequena do Crop.** As alças de 48 px cobriam uma caixa pequena, e o ponteiro só conseguia redimensioná-la. Quando a caixa tem menos de duas alças de lado, apertar dentro dela a move, e a metade de fora de cada alça ainda a redimensiona. O cético subiu o achado para médio.
+- **d-07 (baixo 1 da F2) · o valor da caixa do Crop.** Um `group` não tem valor próprio, então o nome acessível passou a dizer o que a caixa cobre: "Crop area, 480 by 480 pixels, at 80, 0". O nome acompanha as setas.
+- **Os outros baixos da F2:**
+  - 2 (faixa no erro do Crop), 4 (escolha na fila) e 5 (`aria-valuetext` do BeforeAfter): refutados pelos céticos. A evidência está no `REVISAO-F3.md`.
+  - 7 (sobretítulo e H1 do hub): corrigido na § 96.
+  - 8 (metadados do PDF): fica para a F5. A lente de privacidade gerou um PDF e achou só Producer e Creator "FileOrca", sem data, XMP nem Exif.
+- **Custo no CI:** uns quatro testes de uma carga por navegador (de 4 a 8 s cada), mais asserções em testes que já existem.

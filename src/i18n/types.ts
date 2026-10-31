@@ -293,6 +293,8 @@ export interface ImagePanelTexts {
     truncated: string;
     decode: string;
     encode: string;
+    /** The engine could not be loaded (offline, or the site changed since the page opened). */
+    load: string;
     tooLarge: string;
     /** "Choose other files" (DropZone error button). */
     chooseAnother: string;
@@ -408,6 +410,8 @@ export interface CropOptionsTexts {
   free: string;
   /** Name of the crop box (a group): "Crop area". */
   boxLabel: string;
+  /** What the box covers, said with its name (F2 low 1, DECISOES § 102): "{width} by {height} pixels, at {x}, {y}". */
+  boxValue: string;
   /** How to move it by keyboard: "Arrow keys move the box; Shift with the arrows changes its size." */
   keyboardHelp: string;
   x: string;

@@ -5,6 +5,7 @@
 //
 // Box edits are state of this component, never written to the URL or to an event.
 import { useRef } from 'preact/hooks';
+import { fmt } from '../../i18n/format.ts';
 import type { Box } from '../../engine/image/types.ts';
 import type { CropOptionsTexts } from '../../i18n/types.ts';
 import ImagePanel from '../image/ImagePanel.tsx';
@@ -61,7 +62,7 @@ function Options({ state, update, texts, files, selected }: OptionsProps<State, 
       />
       {selected && size && current && (
         <>
-          <CropEditor key={selected.id} url={selected.url ?? ''} size={size} box={current} ratio={ratio} label={texts.boxLabel} helpId="cr-keys" onChange={setBox} />
+          <CropEditor key={selected.id} url={selected.url ?? ''} size={size} box={current} ratio={ratio} label={texts.boxLabel} value={(shown) => fmt(texts.boxValue, { width: shown.width, height: shown.height, x: shown.x, y: shown.y })} helpId="cr-keys" onChange={setBox} />
           <p class="fo-field__help" id="cr-keys">
             {texts.keyboardHelp}
           </p>

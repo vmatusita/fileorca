@@ -82,7 +82,7 @@ describe('typed events', () => {
       expect(cleanParams('tool_complete', { tool: 'resize-image', lang: 'en', outcome }), outcome).toEqual({ tool: 'resize-image', lang: 'en', outcome });
     }
     expect(cleanParams('tool_complete', { tool: 'compress-image', lang: 'en', outcome: 'IMG_1.jpg' })).toEqual({ tool: 'compress-image', lang: 'en' });
-    for (const reason of ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large']) {
+    for (const reason of ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large', 'load']) {
       expect(cleanParams('tool_error', { tool: 'heic-to-jpg', lang: 'en', browser: 'safari-18', codec: 'image/heic', reason }), reason).toMatchObject({ reason, codec: 'image/heic' });
     }
     for (const codec of ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty']) {

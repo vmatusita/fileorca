@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Worker } from '@playwright/test';
 import { ROUTES } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
@@ -39,13 +39,21 @@ test.describe('Compress image (shared island)', () => {
   });
 
   test('the work runs in the Web Worker where the browser supports OffscreenCanvas', async ({ page }) => {
-    const workerSupported = await page.evaluate(() => typeof OffscreenCanvas !== 'undefined');
-    const workers: string[] = [];
-    page.on('worker', (worker) => workers.push(worker.url()));
+    const workers: Worker[] = [];
+    page.on('worker', (worker) => workers.push(worker));
+    // The page path imports the engine's process chunk; the worker carries its own copy and never asks for it.
+    const pagePath: string[] = [];
+    page.on('request', (request) => {
+      if (/\/_astro\/process[\w.-]*\.js$/.test(request.url())) pagePath.push(request.url());
+    });
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
-    expect(workers.some((url) => /\/_astro\/worker-[\w-]+\.js$/.test(url))).toBe(true);
-    if (!workerSupported) console.log('este navegador não tem OffscreenCanvas: o motor rodou na página (DECISOES § 22)');
+    const engine = workers.find((worker) => /\/_astro\/worker-[\w-]+\.js$/.test(worker.url()));
+    expect(engine, 'the engine worker started').toBeDefined();
+    // Review a-03 (DECISOES § 102): the path is asserted, not logged. The worker has an OffscreenCanvas, so nothing
+    // runs on the page; without one (the WebKit of Playwright on Windows), the engine ran on the page (DECISOES § 22).
+    const canvasInWorker = await engine!.evaluate(() => typeof OffscreenCanvas !== 'undefined');
+    expect(pagePath.length > 0, `OffscreenCanvas no worker: ${canvasInWorker}`).toBe(!canvasInWorker);
   });
 
   test('changing the option re-processes at once, without an Apply button, and keeps the focus', async ({ page }) => {

@@ -137,7 +137,8 @@ test.describe('crop-image', () => {
     // The editor shows the picked photo (the first), its box is a group the keyboard can reach, and the fields mirror it.
     const box = page.locator('.fo-crop__box');
     await expect(box).toHaveAttribute('role', 'group');
-    await expect(box).toHaveAccessibleName('Crop area');
+    // The name says what the box covers (F2 low 1, DECISOES § 102).
+    await expect(box).toHaveAccessibleName('Crop area, 1200 by 1200 pixels, at 0, 200');
     await expect(box).toHaveAccessibleDescription(/Arrow keys move the box/);
     await expect(page.locator('#cr-x')).toHaveValue('0');
     await expect(page.locator('#cr-y')).toHaveValue('200');
