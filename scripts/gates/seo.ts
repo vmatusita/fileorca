@@ -5,6 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
+import { HUB_ID, IMAGE_PAGE_IDS, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
@@ -27,16 +28,20 @@ for (const page of allPages()) {
   if (!title.endsWith(' | FileOrca') && !brandFirst) problems.add(`${page.path}: título sem " | FileOrca"`);
   if ((title.match(/FileOrca/g) ?? []).length > 1 && page.route.id === 'home') problems.add(`${page.path}: marca repetida no título`);
   const h1 = root.querySelector('h1')?.text.trim() ?? '';
-  if (page.route.id === 'compress-image' && !title.startsWith(h1)) problems.add(`${page.path}: título não começa pelo nome da ferramenta (${h1})`);
+  // Every tool and preset of the image registry: the title starts with the name of the tool (prompt F2, decision 9).
+  const titleIssue = titleProblem(page.route.id, title, h1);
+  if (titleIssue) problems.add(`${page.path}: ${titleIssue}`);
   if (description.length < 50 || description.length > 170) problems.add(`${page.path}: descrição com ${description.length} caracteres`);
   if (root.querySelector('meta[name="robots"]')) problems.add(`${page.path}: tem <meta name="robots"> (noindex é só por cabeçalho)`);
   const h1s = root.querySelectorAll('h1');
   if (h1s.length !== 1) problems.add(`${page.path}: ${h1s.length} H1`);
   const types = new Set<string>();
+  const nodes: LdNode[] = [];
   for (const script of root.querySelectorAll('script[type="application/ld+json"]')) {
     try {
-      const data = JSON.parse(script.text) as { '@graph'?: { '@type'?: string; logo?: string; name?: string }[] };
+      const data = JSON.parse(script.text) as { '@graph'?: (LdNode & { logo?: string; name?: string })[] };
       for (const node of data['@graph'] ?? []) {
+        nodes.push(node);
         if (node['@type']) types.add(node['@type']);
         if (node['@type'] === 'Organization' && (!node.logo || !existsSync(`${DIST}${new URL(node.logo).pathname}`))) {
           problems.add(`${page.path}: Organization sem logo que exista no dist`);
@@ -50,12 +55,8 @@ for (const page of allPages()) {
       problems.add(`${page.path}: JSON-LD inválido`);
     }
   }
-  const required: Record<string, string[]> = {
-    home: ['Organization', 'WebSite'],
-    'compress-image': ['Organization', 'BreadcrumbList', 'WebApplication'],
-    about: ['Organization', 'BreadcrumbList', 'Person', 'AboutPage'],
-  };
-  for (const type of required[page.route.id] ?? ['Organization']) {
+  // The tools and presets of the image registry carry a WebApplication; they and the hub carry a BreadcrumbList.
+  for (const type of requiredSchemaTypes(page.route.id)) {
     if (!types.has(type)) problems.add(`${page.path}: falta o schema ${type}`);
   }
   if (page.route.indexable && page.route.id !== 'home' && !types.has('BreadcrumbList')) problems.add(`${page.path}: falta o schema BreadcrumbList`);
@@ -70,6 +71,7 @@ for (const page of allPages()) {
   descriptions.set(description, page.path);
   const canonical = root.querySelector('link[rel="canonical"]')?.getAttribute('href');
   if (canonical !== url) problems.add(`${page.path}: canonical ${canonical ?? 'ausente'} em vez de ${url}`);
+  for (const issue of schemaProblems(page.route.id, nodes, url)) problems.add(`${page.path}: ${issue}`);
   const og = root.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '';
   try {
     readFileSync(`${DIST}${new URL(og).pathname}`);
@@ -96,6 +98,15 @@ for (const lang of LANGS) {
   const xml = readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8');
   for (const problem of validateSitemap(xml, sitemapUrls(lang), SITE_ORIGIN)) problems.add(`${sitemapPath(lang)}: ${problem}`);
 }
+// Every image tool, preset and the hub is in the English sitemap (the ones with only an English page are in no other).
+const englishSitemap = readFileSync(`${DIST}${sitemapPath('en')}`, 'utf8');
+const imageUrls: string[] = [];
+for (const id of [...IMAGE_PAGE_IDS, HUB_ID]) {
+  const path = ROUTES.find((candidate) => candidate.id === id)?.paths['en'];
+  if (path) imageUrls.push(new URL(path, SITE_ORIGIN).href);
+  else problems.add(`página ${id} do registro de imagem sem rota em inglês`);
+}
+for (const url of missingFromSitemap(englishSitemap, imageUrls)) problems.add(`${sitemapPath('en')}: falta ${url}`);
 for (const route of ROUTES.filter((candidate) => !candidate.indexable)) {
   for (const path of Object.values(route.paths)) {
     if (index.includes(path) || LANGS.some((lang) => readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8').includes(`${SITE_ORIGIN}${path}`))) {
