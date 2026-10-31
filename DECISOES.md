@@ -750,3 +750,22 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - **p2-motor-03:** o teste da caixa pequena do Crop prova que a metade de fora da alça ainda redimensiona. O mutante "caixa pequena nunca redimensiona" agora reprova.
   - **p2-integridade-02:** o teste do amarelo aceita `rgb()` com espaços e lê os `style` inline dos `.astro` e `.tsx`.
 - **Por quê:** a decisão 4 do prompt pede uma segunda passada até não sobrar crítico nem alto. Não sobrou nenhum. Os médios novos eram locais, e os baixos eram falhas dos testes novos desta run. Deixá-los seria entregar testes que não provam o que dizem.
+
+## § 105 · O tempo do CI na F3 e a proposta de um terceiro `--shard` do WebKit (F3, 31/out/2026)
+
+- **Medido** (o total de cada parte, do resumo do `verificar` no log):
+
+  | Run | Commit | `verificar` | Chromium | WebKit 1 de 2 | WebKit 2 de 2 |
+  | --- | --- | ---: | ---: | ---: | ---: |
+  | 41226056230 | `cf5fba8` (só o aviso) | 164,0 s | 391,0 s | 253,9 s | 430,8 s |
+  | 41231605642 | `803ba1b` | 160,2 s | 312,5 s | 368,1 s | 598,7 s |
+  | 41235192185 | `72f0c2d` | 202,0 s | 390,5 s | 383,2 s | 655,3 s (2 falhas, § 99) |
+  | 41236243545 | `0d2cb94` | 201,5 s | 315,2 s | 375,8 s | 644,4 s |
+
+- **O que a F3 somou:**
+  - o `gate:prontidao`, de 10 a 15 s na parte `verificar`;
+  - as specs novas (`cookie-footer`, `consent-choice`, `engine-paths` e `launch-claims`), uns 90 s somados no WebKit e uns 50 s no Chromium;
+  - os passos novos em specs que já existiam, poucos segundos.
+- **Por que a parte 2 do WebKit cresce:** ela fica com a matriz (uns 416 s somados nos 2 workers), o `image-smoke`, o `design` e o `launch-claims`. O mesmo runner variou de 30 a 40% entre execuções (§ 88), e a parte 2 foi de 431 s a 655 s entre a primeira e a última execução desta run.
+- **Decisão:** todas as partes ficaram abaixo de 700 s, e nenhum limite, `retries` ou tempo por teste mudou. Como a parte 2 do WebKit ficou a uns 50 s do alvo, o relatório propõe ao Victor dividir o WebKit em três partes (`--shard=1/3`, `2/3` e `3/3`), um ajuste do `.github/workflows/ci.yml` que é do Victor (ADR-003). O `verificar.ts` já aceita qualquer `--shard=i/n`, e o `verificar.test.ts` cobre isso.
+- **Alternativa:** mover a matriz para um projeto só dela, o que mexeria nos testes e no `.github/`.
