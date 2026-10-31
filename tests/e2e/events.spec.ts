@@ -9,6 +9,8 @@ async function lastEvent(page: Page, name: string) {
 
 test('the footer coffee link sends donate_click with place footer and the language', async ({ page }) => {
   await page.goto('/pt/sobre/');
+  // The open notice floats over the end of the page (DECISOES § 106): the choice comes first, as a person's would.
+  await dismissCookies(page);
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
   await page.locator('footer').getByRole('link', { name: 'Curtiu? Me paga um café' }).click();
   expect(await lastEvent(page, 'donate_click')).toEqual(['event', 'donate_click', { lang: 'pt', place: 'footer' }]);

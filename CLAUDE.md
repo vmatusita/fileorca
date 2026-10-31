@@ -193,3 +193,8 @@ Pegadinhas que a F3 achou:
 - Um worker sem `OffscreenCanvas` não faz trabalho de imagem: o motor roda na página, e o `warm()` não aquece o worker (§ 102). Para testar esse caminho nos dois navegadores, sirva o script do worker de imagem (o que não tem `PDFDocument`) com `delete globalThis.OffscreenCanvas;` na frente, por `page.route` (`tests/e2e/engine-paths.spec.ts`).
 - O `context.on('request')` do Playwright vê as requisições feitas de dentro dos workers, no Chromium e no WebKit (a lente de corretude provou). Uma prova de "nada sai" deve recusar método diferente de GET, corpo, outra origem e query string.
 - No Git Bash, `node -e "…"` com crases no texto JS executa as crases como comando do shell e estraga o texto (aconteceu com um § do DECISOES). Texto com crase vai para um arquivo, pela ferramenta de escrita, e o script Node o lê.
+
+## Ajuste: espaço do aviso de cookies
+
+- O aviso de cookies aberto flutua sobre o fim da página e não reserva espaço ali (DECISOES § 106). O espaço embaixo do rodapé (`--fo-bottom-room`) só abre quando um foco do teclado no fim da página ficaria embaixo do aviso, e quando a âncora do AdSense está na tela. Não volte a reservar a altura do aviso para todo mundo: no fim da página isso aparece como uma faixa vazia, que o Victor recusou duas vezes, primeiro clara (§ 91) e depois azul (§ 106).
+- Teste que clica em algo do fim do rodapé tem de fechar o aviso antes (`dismissCookies`), porque o card fica por cima do canto de baixo à esquerda.

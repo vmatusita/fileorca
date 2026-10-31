@@ -127,6 +127,10 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
         const smallest: string[] = [];
         for (const viewport of flip ? [...VIEWPORTS].reverse() : VIEWPORTS) {
           await page.setViewportSize(viewport);
+          // The island moves the comparison into the card or under it when the width crosses 768px, on the media query
+          // change and a re-render after it: two frames later the layout has settled. Measured before that, the
+          // comparison was once missing and the island once 17px into the rail's gap (DECISOES § 107).
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
           smallest.push(`${viewport.width}px ${(await check(viewport)).toFixed(0)}`);
         }
         flip = !flip;
