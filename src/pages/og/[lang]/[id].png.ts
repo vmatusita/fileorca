@@ -26,6 +26,7 @@ function heading(lang: Lang, id: RouteId): [string, string] {
 
 export const GET: APIRoute = async ({ params }) => {
   const [title, subtitle] = heading(params['lang'] as Lang, params['id'] as RouteId);
-  const png = await ogPng(title, subtitle);
+  // The tool page shows its tool icon beside the Oli.
+  const png = await ogPng(title, subtitle, params['id'] === 'compress-image' ? { tool: 'compress-image' } : {});
   return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });
 };

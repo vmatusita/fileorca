@@ -1,52 +1,148 @@
-// Build-time images: provisional app icon and the Open Graph cards (satori + resvg).
-// Satori cannot read woff2, so the OG text uses the .woff of @fontsource/figtree (OFL-1.1,
-// build only; DECISOES § 21). The Oli and the final logo enter in the F1b.
+// Build-time images: the app icon PNGs and the Open Graph cards (resvg + satori; DECISOES § 21).
+// The icon is docs/design/assets/Logo/app-icon.svg; the card puts the dark logo, the Oli (wave) and,
+// on a tool page, the tool icon on the deep sea. Satori reads the .woff of @fontsource/fredoka and
+// /figtree (OFL-1.1, devDependencies, the image does not distribute the font): static files, because
+// a variable font renders only its default instance. No colour here that is not a token of
+// docs/design/tokens.css.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 
-// Token values (docs/design/tokens.css): deep, on-deep, on-deep-muted, brand, water, sun is never used.
+// Token values: deep, on-deep, on-deep-muted, brand (opaque icon ground), on-cat (ink of the tool icon),
+// turquesa (image category) and the dark-theme water (the porthole behind the Oli).
 const DEEP = '#0C2B5E';
 const ON_DEEP = '#F7FAFD';
 const ON_DEEP_MUTED = '#B4C3D8';
 const BRAND = '#0B63F6';
-const WATER = '#D6E6FF';
+const ON_CAT = '#0F1B2D';
+const TURQUESA = '#14B8A6';
+const WATER_DEEP = '#14407E';
 
-/** Provisional app icon: a file with a folded corner on the brand blue. */
-export const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${BRAND}"/><path d="M20 14h17l9 9v27a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z" fill="${ON_DEEP}"/><path d="M37 14v9h9z" fill="${WATER}"/><path d="M18 40c5 0 5-3 10-3s5 3 10 3 5-3 8-3v13a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2z" fill="${WATER}"/></svg>`;
+const designAsset = (...parts: string[]): string => readFileSync(join(process.cwd(), 'docs', 'design', 'assets', ...parts), 'utf8').trim();
+const fontFile = (family: string, weight: number): Buffer =>
+  readFileSync(join(process.cwd(), 'node_modules', '@fontsource', family, 'files', `${family}-latin-${weight}-normal.woff`));
+const dataUri = (svg: string): string => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 
-export function iconPng(size: number): Buffer {
-  return new Resvg(ICON_SVG, { fitTo: { mode: 'width', value: size } }).render().asPng();
+/** The app icon (the Oli's face on the brand blue), as the SVG text: favicon, and the source of the PNGs. */
+export const APP_ICON_SVG = designAsset('Logo', 'app-icon.svg');
+/** Alias kept until the layout switches to APP_ICON_SVG. */
+export const ICON_SVG = APP_ICON_SVG;
+
+/** Square PNG of the app icon; `opaque` fills the rounded corners with the brand blue (iOS paints transparency black). */
+export function iconPng(size: number, options: { opaque?: boolean } = {}): Buffer {
+  return new Resvg(APP_ICON_SVG, {
+    fitTo: { mode: 'width', value: size },
+    font: { loadSystemFonts: false },
+    ...(options.opaque ? { background: BRAND } : {}),
+  }).render().asPng();
 }
 
-function font(weight: 400 | 700): Buffer {
-  return readFileSync(join(process.cwd(), 'node_modules', '@fontsource', 'figtree', 'files', `figtree-latin-${weight}-normal.woff`));
+// Card geometry (px of the 1200x630 canvas).
+const W = 1200;
+const H = 630;
+const PAD = 72;
+const TEXT_W = 590;
+const PORTHOLE = 440; // the water-coloured disc behind the Oli, inset from the right edge like the text from the left
+const PORTHOLE_X = W - 56 - PORTHOLE;
+const PORTHOLE_Y = (H - PORTHOLE) / 2;
+const OLI = 400;
+const TITLE_SIZES = [84, 74, 66, 58, 52] as const;
+const TITLE_MAX_LINES = 3;
+const TITLE_LINE = 1.1;
+
+let cache: { fredoka: Buffer; figtree: Buffer; logo: string; oli: string } | undefined;
+function assets() {
+  cache ??= {
+    fredoka: fontFile('fredoka', 600),
+    figtree: fontFile('figtree', 400),
+    logo: dataUri(designAsset('Logo', 'logo-dark.svg')),
+    oli: dataUri(designAsset('Oli', 'oli-wave.svg')),
+  };
+  return cache;
+}
+let compressIcon: string | undefined;
+function toolIcon(): string {
+  compressIcon ??= dataUri(designAsset('Icons', 'compress.svg').replace(/stroke="#[0-9A-Fa-f]{6}"/, `stroke="${ON_CAT}"`));
+  return compressIcon;
 }
 
 type Node = { type: string; props: Record<string, unknown> };
-const h = (type: string, style: Record<string, unknown>, children?: unknown): Node => ({ type, props: { style, children } });
+const h = (type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): Node => ({
+  type,
+  props: { style, children, ...extra },
+});
+const img = (src: string, width: number, height: number, style: Record<string, unknown> = {}): Node =>
+  h('img', { width, height, ...style }, undefined, { src, width, height });
 
-export async function ogPng(title: string, subtitle: string): Promise<Buffer> {
-  const tree = h('div', {
-    width: 1200, height: 630, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    padding: 72, background: DEEP, color: ON_DEEP, fontFamily: 'Figtree',
+function fonts() {
+  const { fredoka, figtree } = assets();
+  return [
+    { name: 'Fredoka', data: fredoka, weight: 600 as const, style: 'normal' as const },
+    { name: 'Figtree', data: figtree, weight: 400 as const, style: 'normal' as const },
+  ];
+}
+
+const titleStyle = (size: number, breakWord = false): Record<string, unknown> => ({
+  display: 'flex', width: TEXT_W, fontFamily: 'Fredoka', fontWeight: 600, fontSize: size, lineHeight: TITLE_LINE, color: ON_DEEP,
+  ...(breakWord ? { wordBreak: 'break-word' } : {}),
+});
+
+/**
+ * Largest title size that wraps in at most TITLE_MAX_LINES lines with no word wider than the column (the title laid
+ * out alone). When none fits, the smallest size with words allowed to break.
+ */
+async function titleSize(title: string): Promise<{ size: number; breakWord: boolean }> {
+  for (const size of TITLE_SIZES) {
+    let height = 0;
+    const svg = await satori(h('div', titleStyle(size), title) as never, {
+      width: TEXT_W,
+      height: H,
+      fonts: fonts(),
+      onNodeDetected: (node) => {
+        height = Math.max(height, node.height);
+      },
+    });
+    const ink = new Resvg(svg).getBBox();
+    if (height <= size * TITLE_LINE * TITLE_MAX_LINES + 1 && (ink?.width ?? 0) <= TEXT_W) return { size, breakWord: false };
+  }
+  return { size: TITLE_SIZES[TITLE_SIZES.length - 1] ?? 52, breakWord: true };
+}
+
+/** The tool icon in its rounded square, rimmed like the Oli (Espuma rim, ink line). */
+function toolTile(): Node {
+  return h('div', {
+    display: 'flex', position: 'absolute', left: PORTHOLE_X - 30, top: PORTHOLE_Y + PORTHOLE - 140, width: 156, height: 156, borderRadius: 40,
+    background: ON_DEEP, padding: 6, transform: 'rotate(-7deg)',
   }, [
-    h('div', { display: 'flex', fontSize: 40, fontWeight: 700 }, [
-      h('span', {}, 'File'), h('span', { color: WATER }, 'Orca'),
-    ]),
-    h('div', { display: 'flex', flexDirection: 'column', gap: 24, width: 1056 }, [
-      h('div', { fontSize: 64, fontWeight: 700, lineHeight: 1.15, width: 1056 }, title),
-      h('div', { fontSize: 32, color: ON_DEEP_MUTED, lineHeight: 1.3, width: 1056 }, subtitle),
+    h('div', {
+      display: 'flex', alignItems: 'center', justifyContent: 'center', width: 144, height: 144, borderRadius: 34,
+      background: TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
+    }, [img(toolIcon(), 88, 88)]),
+  ]);
+}
+
+export async function ogPng(title: string, subtitle: string, options: { tool?: 'compress-image' } = {}): Promise<Buffer> {
+  const { logo, oli } = assets();
+  const { size, breakWord } = await titleSize(title);
+  const tree = h('div', {
+    display: 'flex', position: 'relative', width: W, height: H, background: DEEP, color: ON_DEEP, fontFamily: 'Figtree',
+  }, [
+    h('div', {
+      display: 'flex', position: 'absolute', left: PORTHOLE_X, top: PORTHOLE_Y, width: PORTHOLE, height: PORTHOLE,
+      borderRadius: PORTHOLE / 2, background: WATER_DEEP,
+    }),
+    img(oli, OLI, OLI, { position: 'absolute', left: PORTHOLE_X + (PORTHOLE - OLI) / 2, top: PORTHOLE_Y + (PORTHOLE - OLI) / 2 }),
+    ...(options.tool ? [toolTile()] : []),
+    img(logo, 240, 72, { position: 'absolute', left: PAD - 14, top: 44 }),
+    h('div', {
+      display: 'flex', flexDirection: 'column', position: 'absolute', left: PAD, top: 150, width: TEXT_W, height: H - 150 - 64,
+      justifyContent: 'center', gap: 26,
+    }, [
+      h('div', titleStyle(size, breakWord), title),
+      h('div', { display: 'flex', width: TEXT_W, fontSize: 30, lineHeight: 1.3, color: ON_DEEP_MUTED }, subtitle),
     ]),
   ]);
-  const svg = await satori(tree as never, {
-    width: 1200,
-    height: 630,
-    fonts: [
-      { name: 'Figtree', data: font(400), weight: 400, style: 'normal' },
-      { name: 'Figtree', data: font(700), weight: 700, style: 'normal' },
-    ],
-  });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
+  const svg = await satori(tree as never, { width: W, height: H, fonts: fonts() });
+  return new Resvg(svg, { fitTo: { mode: 'width', value: W }, font: { loadSystemFonts: false } }).render().asPng();
 }
