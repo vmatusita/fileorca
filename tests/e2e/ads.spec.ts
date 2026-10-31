@@ -37,7 +37,7 @@ const TARGETS_WITH_COFFEE = `${TARGETS}, .fo-result__support`;
 const VIEWPORTS = [
   { width: 360, height: 740 },
   { width: 1280, height: 800 },
-];
+] as const;
 // The result states use small inputs (the clearance does not depend on the size of the photo): the 640 × 480 JPEG
 // drawn in the page for the tools that take a JPG, and the smallest fixture of the format for the converters, which
 // take one format each (a JPG would be refused and no result would show).
@@ -115,61 +115,84 @@ async function expectAdsOutsideThePanel(page: Page, label: string, adCount: numb
   expect(await page.locator('.fo-ad').count(), `${label}: o número de AdSlots mudou`).toBe(adCount);
 }
 
-// One load per page and width, walked through four states: at rest, while the first file is processed (the
+// One load per page and browser, walked through four states: at rest, while the first file is processed (the
 // WaterLevel), with the result and Download on screen, and with a batch of two (the queue, the comparison and
-// the ZIP card). Every state keeps 150px between each AdSlot and the Download, the fields, the crop box and its
-// handles, the queue, the comparison, the panel and the Oli, and none puts an AdSlot inside the panel.
-for (const viewport of VIEWPORTS) {
-  test.describe(`distância dos anúncios a ${viewport.width}×${viewport.height}`, () => {
-    test.use({ viewport });
+// the ZIP card). In every state the page is measured at 360×740 and at 1280×800 on the same load: the layout is
+// CSS (and a media query the island listens to, which a11y.spec.ts also relies on), so resizing the window in place
+// gives what a fresh load at that width gives, and the processing runs once instead of twice. Each state keeps
+// 150px between every AdSlot and the Download, the fields, the crop box and its handles, the queue, the
+// comparison, the panel and the Oli, and none puts an AdSlot inside the panel.
+test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
+  for (const path of TOOL_PAGES) {
+    test(`${path}: at rest, while processing, with the result and with a batch`, async ({ page }) => {
+      const gaps: string[] = [];
+      let flip = false;
+      /** Runs the check at both widths (the order alternates, so the window is resized once per state) and keeps the smallest gap of each. */
+      const atBothWidths = async (state: string, check: (viewport: (typeof VIEWPORTS)[number]) => Promise<number>): Promise<void> => {
+        const smallest: string[] = [];
+        for (const viewport of flip ? [...VIEWPORTS].reverse() : VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          smallest.push(`${viewport.width}px ${(await check(viewport)).toFixed(0)}`);
+        }
+        flip = !flip;
+        gaps.push(`${state}: ${smallest.join(', ')}`);
+      };
 
-    for (const path of TOOL_PAGES) {
-      test(`${path}: at rest, while processing, with the result and with a batch`, async ({ page }) => {
-        // The engine is held from the start: a pointer that rests over the panel (or the focus) warms the codecs
-        // and starts the worker before the first file, and an engine already running would not stay in processing.
-        const engine = await slowEngine(page);
-        await page.goto(path);
-        await hydrated(page);
-        await dismissCookies(page);
+      // The worker is held from the start: a pointer that rests over the panel (or the focus) warms the codecs and
+      // starts the worker before the first file, and an engine already running would not stay in processing.
+      const engine = await slowEngine(page);
+      await page.setViewportSize(VIEWPORTS[0]);
+      await page.goto(path);
+      await hydrated(page);
+      await dismissCookies(page);
+      const adCount = await page.locator('.fo-ad').count();
+      expect(adCount).toBeGreaterThan(0);
 
-        // At rest: nothing above the tool panel, the rail from 1280px, and the clearance from every target.
-        const adCount = await page.locator('.fo-ad').count();
-        expect(adCount).toBeGreaterThan(0);
+      // At rest: no content AdSlot above the tool panel, the rail from 1280px, and the clearance from every target.
+      await atBothWidths('repouso', async (viewport) => {
         const panel = (await boxes(page, '.fo-drop'))[0];
         expect(panel).toBeDefined();
         for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, 'AdSlot acima do painel').toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
         if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
-        const gaps = [await expectClearance(page, 'antes do arquivo')];
         await expectAdsOutsideThePanel(page, 'antes do arquivo', adCount);
-
-        // Processing: the worker is held, so the panel is the WaterLevel.
-        const batch = await smallFiles(page, path, 2);
-        await chooseImages(page, batch.slice(0, 1));
-        await expect(page.locator('.fo-level')).toBeVisible();
-        gaps.push(await expectClearance(page, 'processando'));
-        await expectAdsOutsideThePanel(page, 'processando', adCount);
-        engine.release();
-
-        // The result of one file.
-        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-        await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
-        for (const selector of ON_SCREEN[path] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
-        gaps.push(await expectClearance(page, 'com o resultado'));
-        await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
-
-        // A second batch on the result starts over: two files, the queue under the options, the card for both.
-        await chooseImages(page, batch);
-        await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
-        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-        await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
-        for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[path] ?? [])]) expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
-        gaps.push(await expectClearance(page, 'com a fila de dois arquivos'));
-        await expectAdsOutsideThePanel(page, 'com a fila de dois arquivos', adCount);
-        console.log(`${path} a ${viewport.width}px: menor vão ${gaps.map((gap) => gap.toFixed(0)).join(' / ')} px (repouso / processando / resultado / fila)`);
+        return expectClearance(page, 'antes do arquivo');
       });
-    }
-  });
-}
+
+      // Processing: the worker is held, so the panel is the WaterLevel.
+      const batch = await smallFiles(page, path, 2);
+      await chooseImages(page, batch.slice(0, 1));
+      await expect(page.locator('.fo-level')).toBeVisible();
+      await atBothWidths('processando', async () => {
+        await expectAdsOutsideThePanel(page, 'processando', adCount);
+        return expectClearance(page, 'processando');
+      });
+      engine.release();
+
+      // The result of one file.
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+      await atBothWidths('resultado', async () => {
+        for (const selector of ON_SCREEN[path] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
+        await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
+        return expectClearance(page, 'com o resultado');
+      });
+
+      // A second batch on the result starts over: two files, the queue under the options, the card for both.
+      await chooseImages(page, batch);
+      await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
+      await atBothWidths('fila', async () => {
+        for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[path] ?? [])]) {
+          expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
+        }
+        await expectAdsOutsideThePanel(page, 'com a fila de dois arquivos', adCount);
+        return expectClearance(page, 'com a fila de dois arquivos');
+      });
+      console.log(`${path} menor vão: ${gaps.join(' | ')}`);
+    });
+  }
+});
 
 // F1b: the same 150px in the other states of the panel and with the search dialog open and empty.
 async function measure(page: Page, label: string, selector?: string): Promise<void> {
