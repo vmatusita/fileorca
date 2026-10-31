@@ -70,9 +70,9 @@ describe('validador de hreflang', () => {
 });
 
 describe('sitemaps', () => {
-  // English: home, hub, 10 tools, 3 presets and the 6 legal and institutional pages; Portuguese and Spanish keep
+  // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages; Portuguese and Spanish keep
   // the 8 they had (home, Compress image and the 6 institutional pages).
-  const SIZES = { en: 21, pt: 8, es: 8 } as const;
+  const SIZES = { en: 19, pt: 8, es: 8 } as const;
 
   it('builds one valid sitemap per language and an index', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {
@@ -84,7 +84,7 @@ describe('sitemaps', () => {
 
   it('lists every image page and the hub in the English sitemap, and only Compress image in the others', () => {
     const imagePaths = [...Object.keys(IMAGE_PAGES), 'image-tools'].map((id) => routeById(id as RouteId).paths.en);
-    expect(imagePaths).toHaveLength(14);
+    expect(imagePaths).toHaveLength(12);
     for (const path of imagePaths) expect(sitemapUrls('en')).toContain(`${O}${path}`);
     for (const lang of ['pt', 'es'] as const) {
       const listed = new Set(sitemapUrls(lang));

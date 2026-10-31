@@ -23,8 +23,6 @@ export type RouteId =
   | 'heic-to-jpg'
   | 'webp-to-jpg'
   | 'png-to-jpg'
-  | 'avif-to-jpg'
-  | 'convert-to-webp'
   | 'image-to-pdf'
   | 'privacy'
   | 'terms'
@@ -136,8 +134,6 @@ function imageToolRoutes(): RouteDef[] {
     ['heic-to-jpg', 'heic-to-jpg'],
     ['webp-to-jpg', 'webp-to-jpg'],
     ['png-to-jpg', 'png-to-jpg'],
-    ['avif-to-jpg', 'avif-to-jpg'],
-    ['convert-to-webp', 'convert-to-webp'],
     ['image-to-pdf', 'image-to-pdf'],
   ];
   const presets: [RouteId, string, string][] = [

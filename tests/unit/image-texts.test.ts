@@ -54,9 +54,10 @@ describe('what the page hands to the island', () => {
     expect(chips.find((chip) => chip.target === 'resize-image')?.category).toBe('image');
   });
 
-  it('sends a refused HEIC or AVIF to the English converter, also from the translated pages', () => {
+  it('sends a refused HEIC to the English converter, also from the translated pages, and gives a refused AVIF no link at all', () => {
     expect(panelData('compress-image', 'pt').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
-    expect(panelData('compress-image', 'es').converters.avif).toEqual({ href: '/avif-to-jpg/', name: 'AVIF to JPG' });
+    expect(panelData('compress-image', 'es').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
+    for (const lang of ['en', 'pt', 'es'] as const) expect(panelData('compress-image', lang).converters.avif, lang).toBeUndefined();
   });
 
   it('builds the crumbs Home, Image tools, tool and preset in English; Home and tool in the other languages', () => {

@@ -11,7 +11,7 @@ import { ICONS } from '../../icons/icons.ts';
 import { buildAdsConfig } from '../../ads/config.ts';
 import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
-import { IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId } from './registry.ts';
+import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId } from './registry.ts';
 import { IMAGE_PANEL_TEXTS, imageToolTexts } from './texts.ts';
 import type { ChipData, ConverterLink, ImagePanelData } from './types.ts';
 
@@ -46,10 +46,23 @@ export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
 }
 
 /** The page a refused HEIC or AVIF is sent to: in Portuguese and Spanish that is the English page (the text says so). */
-function converterLink(tool: 'heic-to-jpg' | 'avif-to-jpg', lang: Lang): ConverterLink {
+function converterLink(tool: ImageToolId, lang: Lang): ConverterLink {
   const route = routeById(tool);
   const path = route.paths[lang] ?? route.paths.en ?? '/';
   return { href: path, name: (blurbOf(tool, lang) ?? blurbOf(tool, 'en'))?.name ?? tool };
+}
+
+/**
+ * The links of the refused formats that have a converter (CONVERTER_FOR). A format with no entry, such as
+ * AVIF in this release, has no link: the row says what the tool takes instead and points nowhere.
+ */
+function convertersFor(lang: Lang): ImagePanelData['converters'] {
+  const links: ImagePanelData['converters'] = {};
+  for (const format of ['heic', 'avif'] as const) {
+    const tool = CONVERTER_FOR[format];
+    if (tool) links[format] = converterLink(tool, lang);
+  }
+  return links;
 }
 
 /** The plain data of the island for a page, in a language. */
@@ -65,7 +78,7 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang): ImagePanelDa
     beforeAfter: def.beforeAfter,
     pdf: def.pdf === true,
     chips: chipsFor(id, lang),
-    converters: { heic: converterLink('heic-to-jpg', lang), avif: converterLink('avif-to-jpg', lang) },
+    converters: convertersFor(lang),
     // In Portuguese the coffee line leads to the support page until the Pix arrives (F6; DECISOES § 49).
     coffeeHref: lang === 'pt' ? pathFor('support', lang) : KOFI_URL,
     adsOn: buildAdsConfig().scriptEnabled,

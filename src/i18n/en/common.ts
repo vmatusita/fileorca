@@ -80,16 +80,6 @@ export default {
       description: 'Turn PNG into JPG, or JPG into PNG.',
       synonyms: ['png', 'jpg', 'jpeg', 'jpg to png', 'convert', 'transparent', 'image'],
     },
-    'avif-to-jpg': {
-      name: 'AVIF to JPG',
-      description: 'Turn AVIF images into JPG.',
-      synonyms: ['avif', 'convert', 'jpg', 'jpeg', 'image'],
-    },
-    'convert-to-webp': {
-      name: 'Convert to WebP',
-      description: 'Turn JPG and PNG into smaller WebP or AVIF files.',
-      synonyms: ['webp', 'avif', 'convert to avif', 'convert', 'smaller', 'jpg', 'jpeg', 'png', 'image'],
-    },
     'image-to-pdf': {
       name: 'Image to PDF',
       description: 'Put your images in one PDF, one image per page.',

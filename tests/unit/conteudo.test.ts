@@ -220,15 +220,15 @@ describe('portão de conteúdo: o site inteiro', () => {
 });
 
 describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
-  it('knows the 13 pages of the registry and nothing else', () => {
-    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(13);
+  it('knows the 11 pages of the registry and nothing else', () => {
+    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(11);
     for (const id of Object.keys(IMAGE_PAGES)) expect(isImagePage(id), id).toBe(true);
     for (const id of ['home', 'image-tools', 'privacy', 'not-found', 'constructor', 'toString']) expect(isImagePage(id), id).toBe(false);
   });
 
   it('finds every page of the registry in the route map: Compress image in three languages, the rest in English', () => {
     const found = allPages().filter((entry) => isImagePage(entry.route.id));
-    expect(found).toHaveLength(15);
+    expect(found).toHaveLength(13);
     for (const id of Object.keys(IMAGE_PAGES)) {
       const route = ROUTES.find((candidate) => candidate.id === id);
       expect(route, id).toBeDefined();
@@ -302,7 +302,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     const dir = join(root, 'site');
     build(dir);
     const result = run(dir);
-    expect(result.output).toMatch(/conteúdo: ok, 15 página\(s\) de ferramenta/);
+    expect(result.output).toMatch(/conteúdo: ok, 13 página\(s\) de ferramenta/);
     expect(result.status).toBe(0);
   });
 

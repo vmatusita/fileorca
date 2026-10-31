@@ -16,7 +16,7 @@ export default {
     caption: 'Rotate image: formats taken, output and limits',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC and AVIF photos go through HEIC to JPG or AVIF to JPG first.'],
+      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files are not accepted.'],
       ['Rotate', 'Right 90°, which is the default, Left 90° or 180°.'],
       ['Mirror', 'None, which is the default, Horizontal or Vertical. The mirror combines with the rotation.'],
       ['Batch', 'The rotation and the mirror you pick apply to every image in the batch. No limit on the number of images.'],

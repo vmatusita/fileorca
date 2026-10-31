@@ -12,8 +12,6 @@ export const IMAGE_TOOL_IDS = [
   'heic-to-jpg',
   'webp-to-jpg',
   'png-to-jpg',
-  'avif-to-jpg',
-  'convert-to-webp',
   'image-to-pdf',
 ] as const;
 export type ImageToolId = (typeof IMAGE_TOOL_IDS)[number];
@@ -48,8 +46,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     id: 'compress-image',
     accepts: PHOTO,
     icon: 'compress',
-    next: ['resize-image', 'image-to-pdf', 'convert-to-webp'],
-    related: ['resize-image', 'crop-image', 'convert-to-webp', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
+    next: ['resize-image', 'image-to-pdf'],
+    related: ['resize-image', 'crop-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg', 'image-to-pdf'],
     beforeAfter: 'always',
   },
   'resize-image': {
@@ -57,7 +55,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: PHOTO,
     icon: 'resize',
     next: ['compress-image', 'crop-image', 'image-to-pdf'],
-    related: ['compress-image', 'crop-image', 'rotate-image', 'convert-to-webp', 'heic-to-jpg', 'image-to-pdf'],
+    related: ['compress-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
     beforeAfter: 'never',
   },
   'crop-image': {
@@ -81,7 +79,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['heic'],
     icon: 'convert',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg'],
+    related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'png-to-jpg', 'crop-image'],
     beforeAfter: 'lossy',
   },
   'webp-to-jpg': {
@@ -89,7 +87,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['webp'],
     icon: 'convert',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['png-to-jpg', 'avif-to-jpg', 'heic-to-jpg', 'convert-to-webp', 'compress-image', 'resize-image'],
+    related: ['png-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
     beforeAfter: 'lossy',
   },
   'png-to-jpg': {
@@ -97,23 +95,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['png', 'jpeg'],
     icon: 'convert',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['webp-to-jpg', 'heic-to-jpg', 'avif-to-jpg', 'convert-to-webp', 'compress-image', 'image-to-pdf'],
-    beforeAfter: 'lossy',
-  },
-  'avif-to-jpg': {
-    id: 'avif-to-jpg',
-    accepts: ['avif'],
-    icon: 'convert',
-    next: ['compress-image', 'resize-image'],
-    related: ['webp-to-jpg', 'heic-to-jpg', 'png-to-jpg', 'convert-to-webp', 'compress-image', 'resize-image'],
-    beforeAfter: 'lossy',
-  },
-  'convert-to-webp': {
-    id: 'convert-to-webp',
-    accepts: ['jpeg', 'png'],
-    icon: 'convert',
-    next: ['resize-image', 'compress-image'],
-    related: ['compress-image', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg', 'resize-image', 'heic-to-jpg'],
+    related: ['webp-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
     beforeAfter: 'lossy',
   },
   'image-to-pdf': {
@@ -139,7 +121,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     parent: 'compress-image',
     accepts: PHOTO,
     icon: 'compress',
-    next: ['resize-image', 'image-to-pdf', 'convert-to-webp'],
+    next: ['resize-image', 'image-to-pdf'],
     related: ['compress-image', 'resize-image', 'crop-image', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
     beforeAfter: 'always',
   },
@@ -159,5 +141,8 @@ export function presetsOf(tool: ImageToolId): ImagePresetId[] {
   return IMAGE_PRESET_IDS.filter((id) => IMAGE_PAGES[id].parent === tool);
 }
 
-/** Where a refused format can go instead (HEIC and AVIF only open in their converters). */
-export const CONVERTER_FOR: Partial<Record<ImageFormat, ImageToolId>> = { heic: 'heic-to-jpg', avif: 'avif-to-jpg' };
+/**
+ * Where a refused format can go instead. Only HEIC has a converter in this release: an AVIF refused by
+ * another tool gets the "Try JPG, PNG or WebP" line with no link (AVIF to JPG is run 2b).
+ */
+export const CONVERTER_FOR: Partial<Record<ImageFormat, ImageToolId>> = { heic: 'heic-to-jpg' };

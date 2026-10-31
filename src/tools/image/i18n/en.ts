@@ -37,7 +37,7 @@ export default {
     empty: '{name} is empty, so there is nothing to read. Choose a file that has an image in it.',
     unsupported: "{name} isn't an image Oli can read. Try {formats}.",
     wrongTool: '{name} is a {format} file. Open it in {tool}.',
-    wrongFormat: '{name} is a {format} file. Try {formats}.',
+    wrongFormat: "{name} is in {format} format, which this tool doesn't take. Try {formats}.",
     truncated: '{name} stops before its end, so part of the image is missing. Download or export it again, then try once more.',
     decode: "{name} is damaged, so Oli can't read it. Try another copy of the file.",
     encode: "This browser couldn't save {name}. Try again in another browser.",

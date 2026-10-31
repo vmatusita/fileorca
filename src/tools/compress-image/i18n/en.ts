@@ -28,7 +28,7 @@ export default {
       ['Batch', 'No limit on the number of images. Several images download together as one ZIP.'],
       ['Already small', 'If the new copy would not be smaller, you get the original back, without its photo metadata.'],
       ['Photo metadata', 'Camera model, date and GPS location are removed from every file.'],
-      ['HEIC and AVIF', 'Not compressed here. Turn them into a JPG first with HEIC to JPG or AVIF to JPG.'],
+      ['HEIC and AVIF', 'Not compressed here. Turn a HEIC into a JPG first with HEIC to JPG. AVIF files are not accepted.'],
     ],
   },
   presets: {
@@ -64,7 +64,7 @@ export default {
     },
     {
       q: 'Can I compress an iPhone photo in HEIC?',
-      a: 'Not here: Compress image takes JPG, PNG and WebP. Turn the HEIC into a JPG with HEIC to JPG first, then compress the JPG if you want it smaller. AVIF files work the same way, with AVIF to JPG.',
+      a: 'Not here: Compress image takes JPG, PNG and WebP. Turn the HEIC into a JPG with HEIC to JPG first, then compress the JPG if you want it smaller.',
     },
   ],
   privacyHeading: 'Privacy',

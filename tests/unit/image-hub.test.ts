@@ -21,11 +21,11 @@ const render = async (View: typeof HomeView | typeof ImageToolsView, lang: Lang)
 const toolPaths = (lang: Lang) => IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? []);
 
 describe('home', () => {
-  it('shows the ten image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
+  it('shows the eight image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
     const page = await render(HomeView, 'en');
     expect(page.querySelectorAll('main .fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
-    expect(toolPaths('en')).toHaveLength(10);
-    expect(page.querySelectorAll('main .fo-tool h3')).toHaveLength(10);
+    expect(toolPaths('en')).toHaveLength(8);
+    expect(page.querySelectorAll('main .fo-tool h3')).toHaveLength(8);
     const more = page.querySelector('main .fo-more a');
     expect(more?.getAttribute('href')).toBe('/image-tools/');
     expect(more?.text).toBe('See all image tools and common sizes');
@@ -47,7 +47,7 @@ describe('home', () => {
 describe('footer', () => {
   const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child li a');
 
-  it('lists the hub first and then the ten tools in English', async () => {
+  it('lists the hub first and then the eight tools in English', async () => {
     const links = imageColumn(await render(HomeView, 'en'));
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/image-tools/', ...toolPaths('en')]);
     expect(links.map((link) => link.text).slice(0, 3)).toEqual(['Image tools', 'Compress image', 'Resize image']);
@@ -62,7 +62,7 @@ describe('footer', () => {
 });
 
 describe('hub /image-tools/', () => {
-  it('has the band, the grid of the ten tools, the presets table and the two AdSlots', async () => {
+  it('has the band, the grid of the eight tools, the presets table and the two AdSlots', async () => {
     const page = await render(ImageToolsView, 'en');
     expect(page.querySelectorAll('h1').map((h1) => h1.text)).toEqual(['Image tools']);
     const band = page.querySelector('main .fo-hubband.fo-cat--image');
@@ -78,7 +78,7 @@ describe('hub /image-tools/', () => {
     expect(page.querySelector('main .fo-ad--rail')).toBeNull();
   });
 
-  it('has the breadcrumb Home > Image tools, no hreflang and the CollectionPage with the ten tools', async () => {
+  it('has the breadcrumb Home > Image tools, no hreflang and the CollectionPage with the eight tools', async () => {
     const page = await render(ImageToolsView, 'en');
     const crumbs = page.querySelectorAll('.fo-crumbs li');
     expect(crumbs.map((crumb) => crumb.text.trim())).toEqual(['Home', 'Image tools']);
@@ -89,6 +89,6 @@ describe('hub /image-tools/', () => {
     const graph = JSON.parse(page.querySelector('script[type="application/ld+json"]')?.text ?? '{}') as { '@graph': { '@type': string; mainEntity?: { itemListElement: unknown[] } }[] };
     const types = graph['@graph'].map((node) => node['@type']);
     expect(types).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage']);
-    expect(graph['@graph'][2]?.mainEntity?.itemListElement).toHaveLength(10);
+    expect(graph['@graph'][2]?.mainEntity?.itemListElement).toHaveLength(8);
   });
 });

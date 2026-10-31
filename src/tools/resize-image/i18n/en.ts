@@ -16,7 +16,7 @@ export default {
     caption: 'Resize image: formats taken, output and limits',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC and AVIF photos go through HEIC to JPG or AVIF to JPG first.'],
+      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files are not accepted.'],
       ['By size', 'You type a width and a height in pixels. The proportions stay locked, and each image fits inside that box.'],
       ['By percentage', 'You type a percentage of the current width and height, the same for every image in the batch.'],
       ['Never enlarges', 'If you ask for more pixels than the image has, it keeps its original size, and the result says so.'],
