@@ -1,6 +1,6 @@
 # ADR-002: Prévia das PRs no modelo "Worker Previews" do Workers Builds
 
-**Status:** Proposta, confirmada pela prévia da PR #3: com o comando de build certo, o `npx wrangler preview` recusa rodar sem o bloco `previews` (ver "Atualização"). Decisão do Victor entre as opções 1 e 2
+**Status:** Aceita, opção 2: decidida pelo Victor em 31/out/2026, depois de a opção 1 não ter efeito pelo painel (ver "Atualização" e "Decisão")
 **Data:** 30/out/2026
 **Proposta por:** run F1a; atualizada pelo ajuste `ajuste-previa-build`
 **Afeta:** ADR-001 (itens 2 e 5), ficha F1a (`wrangler.jsonc`), critério 12 da F1a
@@ -64,3 +64,11 @@ O que isso muda:
 O Victor trocou o "Comando de preview" no painel (Configurações → Compilações → Base de Prévias), que passou a mostrar `npx wrangler versions upload`. Mesmo assim, o build refeito `b0d5cbc1` (commit `f8a293c`) e o build novo `0e470be5` (commit `c04a57d`, disparado depois da troca) registraram e rodaram `Executing user deploy command: npx wrangler preview` e pararam no mesmo erro do bloco `previews`. A documentação do Cloudflare diz que a troca vale a partir do próximo build e que o comando pode ser `npx wrangler versions upload`, mas também diz que, no modelo "Worker Previews", comandos próprios devem chamar `npx wrangler preview`. Falta confirmar se a troca foi salva ou se o painel a ignora neste modelo.
 
 Depois de o Victor salvar a troca de novo, o build `1cfc0742` (commit `14b8188`) também registrou e rodou `Executing user deploy command: npx wrangler preview` e parou no bloco `previews`. Três builds seguidos ignoraram o comando mostrado no painel, então, para este Worker no modelo "Worker Previews", a opção 1 não funciona pelo painel. Resta a opção 2 (`"previews": {}` no `wrangler.jsonc`), que depende da decisão do Victor nesta ADR.
+
+## Decisão (31/out/2026)
+
+O Victor aceitou a opção 2 na sessão do ajuste `ajuste-previa-build` ("Aceito, faça aqui"). O `wrangler.jsonc` ganha `"previews": {}`, e esta ADR vale como emenda aos itens 2 e 5 da ADR-001, que não é editada:
+
+- O contrato do `wrangler.jsonc` passa a ser `$schema`, `name`, `compatibility_date`, `assets`, `workers_dev`, `preview_urls` e `previews`, este sempre vazio. O portão "worker sem código" e o teste de plataforma recusam qualquer conteúdo dentro de `previews`, além de `main` e `run_worker_first`.
+- A prévia das PRs é a Preview URL do modelo "Worker Previews" (`<branch>-fileorca.<subdomínio>.workers.dev`), não mais a Version URL que a ADR-001 descreve. A regra `https://:version.:subdomain.workers.dev/*` do `_headers` também cobre esse endereço, e o `X-Robots-Tag: noindex` de `/*` vale enquanto `LAUNCHED` for `false`.
+- O "Comando de preview" do painel volta a ser o padrão, `npx wrangler preview` (passo do Victor).
