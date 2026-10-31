@@ -198,3 +198,15 @@ Pegadinhas que a F3 achou:
 
 - O aviso de cookies aberto flutua sobre o fim da página e não reserva espaço ali (DECISOES § 106). O espaço embaixo do rodapé (`--fo-bottom-room`) só abre quando um foco do teclado no fim da página ficaria embaixo do aviso, e quando a âncora do AdSense está na tela. Não volte a reservar a altura do aviso para todo mundo: no fim da página isso aparece como uma faixa vazia, que o Victor recusou duas vezes, primeiro clara (§ 91) e depois azul (§ 106).
 - Teste que clica em algo do fim do rodapé tem de fechar o aviso antes (`dismissCookies`), porque o card fica por cima do canto de baixo à esquerda.
+
+## Ajuste: WebKit em três partes
+
+- O CI passa a ter cinco partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`), `playwright (chromium)` e `playwright (webkit 1 de 3)`, `playwright (webkit 2 de 3)` e `playwright (webkit 3 de 3)` (`pnpm verificar --playwright=webkit --shard=i/3`). Isto substitui a descrição das partes na seção "Ajuste: CI em partes (ADR-003)", que fica como está; o resto daquela seção continua valendo (DECISOES § 108).
+- O `--shard` do Playwright, com `fullyParallel: true`, divide por contagem de testes na ordem dos arquivos. Hoje a parte 1 fica com o `a11y`, o `ads` e o `budgets`; a 2, com o `design`, os de cookies e o `coffee`; a 3, com a matriz, o `image-smoke` e o resto. Spec novo no começo da lista empurra para as partes seguintes testes que hoje estão nas primeiras. Antes de somar muitos testes, rode `pnpm exec playwright test --project=webkit --shard=i/3 --list` e veja onde caem.
+- O `tests/unit/verificar.test.ts` não lê o `ci.yml`: a lista de partes dele é escrita à mão e segue com `1/2` e `2/2`. A asserção tira o `--shard` antes de comparar, então prova a cobertura para qualquer número de partes.
+
+Pegadinhas que o ajuste achou:
+
+- Depois de um `gh run rerun <id>`, o `gh run view <id> --log` mostra a última tentativa. Para ler uma tentativa anterior, use `gh run view <id> --attempt <n> --log`, e o mesmo `--attempt` com `--json jobs`.
+- O tempo do job não é o tempo da parte. O `playwright install --with-deps` chegou a 356 s num rerun, porque o apt do runner estava lento, e esse tempo fica fora do `verificar` e do limite de 900 s. Compare as partes pelo `total` do resumo do `verificar` no log.
+- Na primeira execução com três partes, o `/` da parte 2 do WebKit caiu de 10,9 GB livres para 609 MB durante a Oli a 1280 × 800 do `design.spec.ts`, e o diagnóstico de disco não achou onde (DECISOES § 108). No rerun não aconteceu. Se uma parte do WebKit falhar com `ENOSPC`, comece pelas linhas `[disco]` dela.

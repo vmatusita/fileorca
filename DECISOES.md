@@ -792,3 +792,32 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 - **Causa:** a ilha decide por um `matchMedia('(min-width: 768px)')` se a comparação fica dentro do cartão ou embaixo dele. A troca só acontece no evento de mudança da media query e numa renderização logo depois. O `atBothWidths` media logo depois do `setViewportSize`, às vezes no meio da troca: a comparação ainda fora do lugar (sem caixa) ou o layout com a largura velha por um quadro.
 - **Decisão:** depois de cada `setViewportSize`, o `atBothWidths` espera dois quadros de animação (`requestAnimationFrame` duas vezes) antes de medir. Nenhuma asserção, distância ou alvo mudou. O teste inteiro passa (52 testes nos dois navegadores), e o caso intermitente passou 12 vezes em 12.
 - **Alternativa:** esperar uma condição específica da comparação, que só existe em parte das páginas e dos estados.
+
+## § 108 · O WebKit do CI em três partes (ajuste-ci-webkit-tres, 31/out/2026)
+
+- **Contexto:** na F3, a parte 2 do WebKit chegou a 644,4 s (§ 105), com alvo de 700 s e limite de 900 s, e o mesmo runner varia de 30 a 40% entre execuções (§ 88). A F4 vai somar umas 25 páginas aos testes. Com `fullyParallel: true`, o `--shard` do Playwright divide por contagem de testes, na ordem dos arquivos.
+- **Decisão:** a matriz do job `playwright` do `ci.yml` passa a ter `chromium`, `webkit 1 de 3`, `webkit 2 de 3` e `webkit 3 de 3`, com `--playwright=webkit --shard=1/3`, `2/3` e `3/3`. Com o `verificar`, o CI fica com cinco partes, cada uma com o limite de 900 s. O `merge` segue com `needs: [verificar, playwright]`, que espera todas as entradas da matriz. O Chromium segue numa parte só.
+- **O que não mudou:** nenhum teste, portão, limiar, timeout, `retries` ou número de workers, nem os outros jobs, o `pos-deploy.yml` e o `scripts/ci/`. O `scripts/verificar.ts` também não: o `plan()` já aceita `--shard=1/3`, `2/3` e `3/3` (conferido aqui).
+- **O `tests/unit/verificar.test.ts` ficou como está.** Ele não lê o `ci.yml`. A lista de partes dele é escrita à mão e segue com `1/2` e `2/2`. A ficha só manda ajustar teste ou script que leia a matriz, e nenhum lê (a revisão em contexto limpo procurou em `tests/` e `scripts/`). A asserção de cobertura tira o `--shard` antes de comparar, então vale para qualquer número de partes.
+- **Divisão:** 90, 89 e 89 testes, que somam os 268 do WebKit.
+  - A parte 1 fica com `a11y`, `ads` e 18 testes do `budgets`.
+  - A 2 fica com 3 do `budgets`, `coffee`, os de consentimento e cookies, o `design` inteiro e 2 do `engine-paths`.
+  - A 3 fica com o resto: a matriz, o `image-smoke`, o `events`, o `island`, o `navigation`, o `tool` e as specs menores de imagem.
+- **Medido** (o total de cada parte, do resumo do `verificar` no log):
+
+  | Execução | `verificar` | Chromium | WebKit 1 | WebKit 2 | WebKit 3 |
+  | --- | ---: | ---: | ---: | ---: | ---: |
+  | F3, 41236243545 (duas partes) | 201,5 s | 315,2 s | 375,8 s | 644,4 s | — |
+  | 41250641460, tentativa 1 | 137,7 s | 404,3 s | 186,5 s | 250,4 s | 567,3 s |
+  | 41250641460, tentativa 2 | 176,8 s | 395,7 s | 296,2 s | 200,9 s | 583,9 s |
+
+  A parte mais lenta caiu de 644,4 s para 567,3 s e 583,9 s. Todas ficaram abaixo de 700 s nas duas execuções.
+- **A parte 3 segue a mais pesada.** Ela fica com a matriz, que a divisão por contagem não separa, e tem 2 a 3 vezes o tempo das outras duas partes do WebKit. A folga dela para o alvo é de 116 a 133 s.
+- **Disco na parte 2:** na tentativa 1, o `/` da parte 2 caiu de 10,9 GB livres para 609 MB em uns 60 s, durante os testes da Oli a 1280 × 800 do `design.spec.ts`, o mesmo ponto da § 90. O espaço não voltou até o fim.
+  - Os 89 testes passaram.
+  - O `du` das pastas medidas e o `find` de arquivos acima de 200 MB não acharam o espaço.
+  - Na tentativa 2, a mesma parte ficou o tempo todo com uns 10,9 GB livres.
+  - Nas quatro execuções recentes com duas partes (41231605642, 41237303682, 41240391852 e 41241805727) e na F3, nenhuma parte desceu de 9,7 GB livres.
+  - Fica como risco registrado, sem contorno. Achar a causa pede mudar o diagnóstico (`scripts/lib/disco.ts`), que fica fora desta ficha.
+- **Por quê:** a ADR-003 manda dividir mais, num ajuste, quando uma parte passa de uns 700 s, e a § 105 propôs o terceiro `--shard`. Feito antes da F4, o ajuste deixa a PR da F4 sem mexer no `.github/`, e ela mescla sozinha.
+- **Alternativa:** mover a matriz para um projeto só dela (§ 105), o que mexeria nos testes. A outra seria uma quarta parte por contagem, que manteria a matriz quase inteira na última.
