@@ -708,3 +708,26 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - 7 (sobretítulo e H1 do hub): corrigido na § 96.
   - 8 (metadados do PDF): fica para a F5. A lente de privacidade gerou um PDF e achou só Producer e Creator "FileOrca", sem data, XMP nem Exif.
 - **Custo no CI:** uns quatro testes de uma carga por navegador (de 4 a 8 s cada), mais asserções em testes que já existem.
+
+## § 103 · O que a revisão deixa pendente, e com quem (F3, 31/out/2026)
+
+- **d-02 · os loops da Oli e do vapor (WCAG 2.2.2), do Victor.** A `wave` da Oli (3 s, `alternate`, infinita) e o vapor da caneca (1,8 s, infinito) começam sozinhos, passam de 5 s e não têm controle de pausa. O cético rebaixou o achado de alto para médio: o W3C ainda discute se `prefers-reduced-motion` basta (issue #3766), e o site já para tudo com a preferência (§ 44, § 57). A correção é local, mas muda uma regra do design system: o README da Oli fala em "loop", e a F1b já tinha deixado essa decisão para o Victor. Por isso ela não entrou aqui. São duas saídas:
+  - limitar cada loop a menos de 5 s e deixar a Oli em repouso (a lente propõe a `wave` em 4,5 s, uma vez, e o vapor em 2 ciclos), o que muda os testes de movimento do `design.spec.ts`;
+  - ou um controle de pausa.
+- **c-04 · o Aceitar do aviso próprio e a CMP na UE, do Victor antes de ligar os anúncios.** A escolha feita no aviso próprio numa página sem a CMP do Google (home, jurídicas, Apoio, 404) é reaplicada como `ad_*` concedido na página de ferramenta, antes de a mensagem do Google perguntar. Só existe com os anúncios ligados. São duas saídas:
+  - nas regiões negadas por padrão, reaplicar só o `analytics_storage`;
+  - ou carregar a CMP em toda página, o que muda a arquitetura e pede ADR.
+  O Victor confere o comportamento real na UE com a CMP publicada.
+- **c-08 · a detecção de bloqueador do café.** O ramo `!adsbygoogle.loaded` pode dar falso positivo com o script ainda carregando. Revisar com o anúncio real, ao ligar os anúncios.
+- **b-07 · a retenção do GA4, do Victor.** A Privacidade diz "o período configurado no Google Analytics". Quando o Victor fixar a retenção no GA4, o número entra nos três idiomas. Na produção, o Cloudflare manda os cabeçalhos `Nel`/`Report-To` (relatório de erro de rede para `a.nel.cloudflare.com`) e `Speculation-Rules: "/cdn-cgi/speculation"` (Speed Brain). Os dois vêm da configuração da zona, fora do repositório. São do Cloudflare, que já é quem entrega o site, então o texto do Show HN continua certo ("o único terceiro é o Google Analytics"). O Victor decide se desliga o Speed Brain.
+- **e-05 · `/_astro/*` em 404 com `immutable`.** O `_headers` não condiciona a regra ao status, e o hash muda a cada build. Só importa num rollback ou na defasagem de propagação de um deploy. A correção do a-01 (§ 102) cobre o efeito visível: a fala certa e nada travado.
+- **Baixos para a run 3b**, cada um com a correção proposta no `REVISAO-F3.md`:
+  - a-05: APNG perde a animação sem nota;
+  - a-06: pt e es fora do `ads.spec.ts`;
+  - b-06: GET com query e WebSocket fora da prova de "nada sai";
+  - e-02: régua de memória do lote longo, com o ZIP montado cedo;
+  - e-04: `favicon.ico` para o Google;
+  - f-03: cor funcional, raio, sombra e os "Nunca" do README sem portão;
+  - f-04: "1 files" no plural;
+  - f-06: reserva do aviso reaberto que não se recalcula ao mudar a largura.
+- **Por quê:** a decisão 4 do prompt (baixos só os da F2; médio só se local) e a régua de quem decide: design e anúncio ligado são do Victor.
