@@ -174,6 +174,9 @@
 .fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
 .fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
 .fo-result__actions .fo-btn--download { display: flex; width: 100%; }
+/* "Download all · ZIP 1.4 MB" is wider than the card on a phone (reflow, WCAG 1.4.10): the icon and the label stay
+   together and the size goes under them, centred. On a wide card it is still one line. */
+.fo-result__actions .fo-btn--download { flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
 .fo-placard { display: inline-grid; justify-items: center; margin-left: auto; padding: var(--space-2) var(--space-4) var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); rotate: -4deg; box-shadow: 0 4px 0 var(--stroke); }
 .fo-deep .fo-placard { border-color: var(--surface); box-shadow: none; }
 .fo-placard__n { font: 600 40px/44px var(--fo-font-display); letter-spacing: -0.01em; }
@@ -283,8 +286,10 @@
    .fo-crop__scrim  four slabs of the deep sea around the box (opacity, not a shadow)
    .fo-crop__box    the crop box (a focusable group: arrows move it, Shift with the arrows resizes it)
    .fo-crop__handle one per corner, a 20px dot inside a 48px target */
-/* The page keeps scrolling under a finger that is not on the box or a handle (those two stop it). */
-.fo-crop { --crop-max: 420px; --crop-ratio: 1.3333; --x: 0%; --y: 0%; --w: 100%; --h: 100%; position: relative; justify-self: center; width: min(100%, calc(var(--crop-max) * var(--crop-ratio))); aspect-ratio: var(--crop-ratio); user-select: none; }
+/* The page keeps scrolling under a finger that is not on the box or a handle (those two stop it). The handles are
+   centred on the corners of the box, so a box that spans the picture reaches half a handle (24px) past it: the
+   margin gives them that room inside the column, and the picture is that much narrower (reflow from 320px). */
+.fo-crop { --crop-max: 420px; --crop-ratio: 1.3333; --x: 0%; --y: 0%; --w: 100%; --h: 100%; position: relative; justify-self: center; margin: calc(var(--tap-min) / 2); width: min(calc(100% - var(--tap-min)), calc(var(--crop-max) * var(--crop-ratio))); aspect-ratio: var(--crop-ratio); user-select: none; }
 /* The edge is drawn over the picture (::after), so the picture and the box share one frame and the percentages match to the pixel. */
 .fo-crop__stage { position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface-sunken); }
 .fo-crop__stage::after { content: ""; position: absolute; inset: 0; border: var(--stroke-2) solid var(--stroke); border-radius: inherit; pointer-events: none; }
