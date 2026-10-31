@@ -22,9 +22,25 @@ async function done(page: Page): Promise<void> {
   await expect(page.locator('.fo-btn--download')).toBeFocused();
 }
 
-async function savedAs(page: Page, name: string): Promise<{ name: string; bytes: Buffer }> {
+/**
+ * A row's download: the name the island gives the link (read from the link itself, so it is the site's name on
+ * every platform), the name the browser saved it under and the bytes. WebKit on Linux saves "a (2).jpg" as
+ * "a_(2).jpg"; that is the browser's file name, not the site's.
+ */
+async function savedAs(page: Page, name: string): Promise<{ name: string; saved: string; bytes: Buffer }> {
+  await page.evaluate(() => {
+    const record = window as unknown as { foLinkNames?: string[] };
+    if (record.foLinkNames) return;
+    record.foLinkNames = [];
+    const click = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      record.foLinkNames?.push(this.download);
+      click.call(this);
+    };
+  });
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: `Download ${name}`, exact: true }).click()]);
-  return { name: download.suggestedFilename(), bytes: readFileSync((await download.path()) as string) };
+  const linkName = await page.evaluate(() => (window as unknown as { foLinkNames: string[] }).foLinkNames.at(-1) ?? '');
+  return { name: linkName, saved: download.suggestedFilename(), bytes: readFileSync((await download.path()) as string) };
 }
 
 test.describe('files that cannot be read, in the middle of a batch', () => {
@@ -95,6 +111,7 @@ test.describe('N files, N outputs', () => {
     for (const entry of entries) {
       const file = await savedAs(page, entry.name);
       expect(file.name).toBe(entry.name);
+      expect([entry.name, entry.name.replaceAll(' ', '_')], `${entry.name}: the browser saved it as ${file.saved}`).toContain(file.saved);
       expect(Buffer.compare(file.bytes, Buffer.from(entry.bytes)), `${entry.name}: row download equals the ZIP entry`).toBe(0);
     }
 
