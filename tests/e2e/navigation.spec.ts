@@ -65,6 +65,72 @@ test('tool search loads on first use, finds synonyms in any language and opens t
   await expect(page).toHaveURL(/\/pt\/comprimir-imagem\/$/);
 });
 
+// F2: the index has every image tool and preset, and each language shows only the pages it has.
+test('the search shows only the pages that exist in the language and never falls back to English', async ({ page }) => {
+  await page.goto('/pt/');
+  await page.keyboard.press('Control+K');
+  const dialog = page.locator('#fo-search-dialog');
+  const input = dialog.getByRole('combobox');
+  await expect(input).toBeFocused();
+  // Nothing typed: the one tool Portuguese has. 'compress' and 'jpg' match many pages in English, one here.
+  await expect(dialog.getByRole('option')).toHaveCount(1);
+  for (const query of ['compress', 'jpg', 'jpeg']) {
+    await input.fill(query);
+    await expect(dialog.getByRole('option'), query).toHaveText(/Comprimir imagem/);
+    await expect(dialog.getByRole('option'), query).toHaveCount(1);
+  }
+  // HEIC to JPG exists only in English: Portuguese finds nothing, and does not offer the English page.
+  await input.fill('heic');
+  await expect(dialog.locator('[data-search-empty]')).toBeVisible();
+  await expect(dialog.getByRole('option')).toHaveCount(0);
+  await expect(dialog.locator('[data-search-empty-title]')).toContainText('heic');
+});
+
+test('the English search finds the new tools and presets and opens the one chosen', async ({ page }) => {
+  await page.goto('/');
+  await page.keyboard.press('Control+K');
+  const dialog = page.locator('#fo-search-dialog');
+  const input = dialog.getByRole('combobox');
+  await expect(input).toBeFocused();
+  await input.fill('compress');
+  // Each row reads the name, then the category in small type.
+  const rows = (...names: string[]) => names.map((name) => `${name}Image`);
+  await expect(dialog.getByRole('option')).toHaveText(rows('Compress image', 'Compress image to 100 KB', 'Compress image to 1 MB'));
+  await input.fill('shrink');
+  await expect(dialog.getByRole('option')).toHaveCount(4);
+  await input.fill('jpg to pdf');
+  await expect(dialog.getByRole('option')).toHaveText(rows('Image to PDF'));
+  await input.fill('heif');
+  await expect(dialog.getByRole('option')).toHaveText(rows('HEIC to JPG'));
+  await input.press('Enter');
+  await expect(page).toHaveURL(/\/heic-to-jpg\/$/);
+  // From the arrows: the second result of 'compress' is the 100 KB preset.
+  await page.keyboard.press('Control+K');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('combobox').fill('compress');
+  await expect(dialog.getByRole('option')).toHaveCount(3);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/compress-image\/to-100kb\/$/);
+});
+
+test('the search box lists every page on a phone and scrolls, so the Close button stays on screen', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 667 });
+  await page.goto('/');
+  await page.keyboard.press('Control+K');
+  const dialog = page.locator('#fo-search-dialog');
+  await expect(dialog.getByRole('option')).toHaveCount(13);
+  const close = dialog.getByRole('button', { name: 'Close' });
+  await expect(close).toBeInViewport({ ratio: 1 });
+  // The list scrolls inside the box; the arrow keys keep the chosen row in view.
+  const list = dialog.getByRole('listbox');
+  expect(await list.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
+  for (let step = 0; step < 12; step += 1) await page.keyboard.press('ArrowDown');
+  await expect(dialog.getByRole('option').last()).toHaveAttribute('aria-selected', 'true');
+  await expect(dialog.getByRole('option').last()).toBeInViewport({ ratio: 1 });
+  await expect(close).toBeInViewport({ ratio: 1 });
+});
+
 test('the 404 page has a working tool search', async ({ page }) => {
   await page.goto('/es/404.html');
   const box = page.locator('[data-search-inline]').getByRole('combobox');

@@ -1,12 +1,14 @@
 ---
 // Footer (docs/design/components/Footer): the deep sea with the wave on its top edge; column titles are
-// H2; only links to pages that exist. Never an ad inside the footer. With the AdSense anchor on the
-// page, 96px of room at the bottom on the phone.
+// H2; only links to pages that exist. The Image column lists the tools that exist in the language and,
+// where the image hub exists (English), the hub first. Never an ad inside the footer. With the AdSense
+// anchor on the page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
-import { pathFor } from '../i18n/routes.ts';
+import { pathFor, routeById } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
+import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -17,6 +19,15 @@ interface Props {
 }
 const { lang, t, anchor } = Astro.props;
 const year = new Date().getUTCFullYear();
+const hub = routeById('image-tools').paths[lang];
+const image = [
+  ...(hub && t.imageTools ? [{ label: t.imageTools, href: hub }] : []),
+  ...IMAGE_TOOL_IDS.flatMap((id) => {
+    const href = routeById(id).paths[lang];
+    const blurb = t.tools[id];
+    return href && blurb ? [{ label: blurb.name, href }] : [];
+  }),
+];
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },
@@ -29,7 +40,7 @@ const site = [
   <div class="fo-footer__cols">
     <div>
       <h2>{t.footer.imageColumn}</h2>
-      <ul><li><a href={pathFor('compress-image', lang)}>{t.tools['compress-image'].name}</a></li></ul>
+      <ul>{image.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
     </div>
     <div>
       <h2>{t.footer.siteColumn}</h2>

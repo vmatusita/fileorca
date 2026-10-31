@@ -9,4 +9,6 @@ export default {
   intro: 'Ten tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
   toolsHeading: 'All image tools',
   presetsHeading: 'Common sizes and limits',
+  presetsCaption: 'Ready-made settings for common sizes and file limits',
+  presetsHead: ['Preset', 'What you get'],
 } satisfies ImageToolsTexts;

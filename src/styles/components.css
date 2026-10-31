@@ -343,6 +343,8 @@
 /* ---------- ToolCard grid ---------- */
 .fo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
 .fo-grid > li { display: grid; }
+/* A link under a grid ("See all image tools"). */
+.fo-more { margin: var(--space-4) 0 0; font-weight: 600; }
 .fo-tool { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; gap: var(--space-2); align-content: start; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-tool:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
 .fo-tool__icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--fo-cat, var(--brand-soft)); color: var(--on-cat); margin-bottom: var(--space-1); }
@@ -405,7 +407,8 @@
 .fo-search__field input { flex: 1; align-self: stretch; width: 0; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 18px/24px var(--fo-font-text); }
 .fo-search__field input:focus-visible { outline: none; }
 .fo-search__field input::placeholder { color: var(--ink-muted); opacity: 1; }
-.fo-search__list { list-style: none; margin: 0; padding: var(--space-2); display: grid; gap: 2px; }
+/* The list scrolls past eight rows (the index has thirteen pages), so the box and its Close button stay on a small screen. */
+.fo-search__list { list-style: none; margin: 0; padding: var(--space-2); display: grid; gap: 2px; max-height: min(50vh, 400px); overflow-y: auto; overscroll-behavior: contain; }
 .fo-search__item { display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-md); font-weight: 600; color: var(--ink); text-decoration: none; }
 .fo-search__item[aria-selected="true"] { background: var(--brand-soft); }
 .fo-search__item small { margin-left: auto; color: var(--ink-muted); font-size: 13px; font-weight: 500; }

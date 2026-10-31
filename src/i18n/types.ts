@@ -89,6 +89,8 @@ export interface HomeTexts extends PageMeta {
   toolsHeading: string;
   privacyHeading: string;
   privacyBody: string;
+  /** Link under the tool grid to the image hub, only in the languages that have the hub. */
+  hubLink?: string;
 }
 
 export interface LegalTexts extends PageMeta {
@@ -195,6 +197,10 @@ export interface ImageToolsTexts extends PageMeta {
   intro: string;
   toolsHeading: string;
   presetsHeading: string;
+  /** Visually hidden caption of the presets table. */
+  presetsCaption: string;
+  /** Column heads of the presets table: the preset, what comes out. */
+  presetsHead: [string, string];
 }
 
 /**
