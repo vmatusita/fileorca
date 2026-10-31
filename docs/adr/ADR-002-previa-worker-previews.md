@@ -1,9 +1,11 @@
 # ADR-002: Prévia das PRs no modelo "Worker Previews" do Workers Builds
 
-**Status:** Proposta (não aplicada; decisão do Victor)
+**Status:** Aceita, opção 2: decidida pelo Victor em 30/out/2026, depois de a opção 1 não ter efeito pelo painel (ver "Atualização" e "Decisão")
 **Data:** 30/out/2026
-**Proposta por:** run F1a
+**Proposta por:** run F1a; atualizada pelo ajuste `ajuste-previa-build`
 **Afeta:** ADR-001 (itens 2 e 5), ficha F1a (`wrangler.jsonc`), critério 12 da F1a
+
+> As seções Contexto, Opções, Proposta, "O que a run tentou" e "Antes de decidir" são o texto da F1a. A seção "Atualização", no fim, corrige o diagnóstico.
 
 ## Contexto
 
@@ -36,3 +38,37 @@ O CI do GitHub (Ubuntu 24.04) instala e builda o mesmo commit sem erro, então a
 ## Antes de decidir
 
 Abrir no painel o log do build mais recente da branch `fase-01a` e ver em que etapa ele para (instalação, `pnpm build` ou o comando de prévia). Se for o comando de prévia, vale a opção 1 (ou a 2). Se for a instalação, ajustar Node e pnpm (DECISOES § 17).
+
+## Atualização (30/out/2026, ajuste `ajuste-previa-build`)
+
+Depois do merge da F1a, o build de produção também falhou, e o Victor abriu o log no painel. O primeiro bloqueio não era o modelo "Worker Previews" nem o Node ou o pnpm: o comando de build salvo no painel era `pnpm buid`, sem o "l", e os builds lidos paravam antes de chegar ao comando de prévia.
+
+| Build | Commit | Node e pnpm detectados | Onde parou |
+| --- | --- | --- | --- |
+| `d925f68d` (prévia) | `bc0f703` | 26.13.0 e 12.16.1 | instalação ok ("Done in 7.2s using pnpm v12.16.1"); `Executing user build command: pnpm buid` → `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL`, `Command "buid" not found` |
+| `b9d3b134` (prévia) | `af28dfa` | 26.13.0 e 12.16.1 | instalação ok; etapa Building falhou em 2 s |
+| `adb0c2f3` (prévia) | `a120197` | 24.22.2 e 12.16.1 | instalação ok; etapa Building falhou em 2 s |
+| `8d03fd90` (prévia) | `9bb5ccf` | 24.22.2 e 10.34.9 | instalação ok; etapa Building falhou em 2 s |
+| `62a07a98` (produção) | `249307f` | 24.22.2 e 10.34.9 | instalação ok; `Command "buid" not found` |
+| `a49d23cc` (produção, refeito) | `249307f` | 24.22.2 e 10.34.9 | **passou** depois de o Victor corrigir o comando para `pnpm build`: 72 arquivos, deploy em fileorca.com |
+
+O que isso muda:
+
+- Com o comando de build errado, nenhum build podia chegar ao comando de prévia (`npx wrangler preview`): todos os logs lidos param na etapa Building, em 2 s. A hipótese do bloco `previews` não foi testada na F1a, e a diferença de tempo entre as tentativas da tabela anterior era fila e instalação, não progresso.
+- O Node 26 e o pnpm 12 instalam sem erro no Workers Builds. A razão do DECISOES § 17 não se sustenta (ver § 37).
+- A prévia da PR do ajuste (PR #3, commit `b562124`, build `f2790489`) foi o primeiro build de branch com o comando certo. A instalação e o `pnpm build` passaram (27 páginas, `build.txt` com `b562124`), e o comando de prévia falhou em 4 s com `✘ [ERROR] Your Wrangler configuration is missing a previews block to run this command. Add the following to your configuration file: { "previews": {} }`, no wrangler 4.156.0. O mecanismo descrito nesta ADR está confirmado, mas não era a causa das falhas da F1a, que paravam antes.
+- (Superado pela "Decisão", abaixo.) As opções e a proposta acima continuavam valendo: a opção 1 (trocar o comando de prévia no painel para `npx wrangler versions upload`) não muda o `wrangler.jsonc` nem a ADR-001; a opção 2 (`"previews": {}`) muda o contrato da ficha F1a e pede uma run de ajuste.
+
+### Tentativa da opção 1 (30/out/2026)
+
+O Victor trocou o "Comando de preview" no painel (Configurações → Compilações → Base de Prévias), que passou a mostrar `npx wrangler versions upload`. Mesmo assim, o build refeito `b0d5cbc1` (commit `f8a293c`) e o build novo `0e470be5` (commit `c04a57d`, disparado depois da troca) registraram e rodaram `Executing user deploy command: npx wrangler preview` e pararam no mesmo erro do bloco `previews`. A documentação do Cloudflare diz que a troca vale a partir do próximo build e que o comando pode ser `npx wrangler versions upload`, mas também diz que, no modelo "Worker Previews", comandos próprios devem chamar `npx wrangler preview`. Falta confirmar se a troca foi salva ou se o painel a ignora neste modelo.
+
+Depois de o Victor salvar a troca de novo, o build `1cfc0742` (commit `14b8188`) também registrou e rodou `Executing user deploy command: npx wrangler preview` e parou no bloco `previews`. Três builds seguidos ignoraram o comando mostrado no painel, então, para este Worker no modelo "Worker Previews", a opção 1 não funciona pelo painel. Resta a opção 2 (`"previews": {}` no `wrangler.jsonc`), que depende da decisão do Victor nesta ADR.
+
+## Decisão (30/out/2026)
+
+O Victor aceitou a opção 2 na sessão do ajuste `ajuste-previa-build` ("Aceito, faça aqui"). O `wrangler.jsonc` ganha `"previews": {}`, e esta ADR vale como emenda aos itens 2 e 5 da ADR-001, que não é editada:
+
+- O contrato do `wrangler.jsonc` passa a ser `$schema`, `name`, `compatibility_date`, `assets`, `workers_dev`, `preview_urls` e `previews`, este sempre vazio. O portão "worker sem código" e o teste de plataforma recusam qualquer conteúdo dentro de `previews`, além de `main` e `run_worker_first`.
+- A prévia das PRs é a Preview URL do modelo "Worker Previews" (`<branch>-fileorca.<subdomínio>.workers.dev`), não mais a Version URL que a ADR-001 descreve. A regra `https://:version.:subdomain.workers.dev/*` do `_headers` também cobre esse endereço, e o `X-Robots-Tag: noindex` de `/*` vale enquanto `LAUNCHED` for `false`.
+- O "Comando de preview" do painel volta a ser o padrão, `npx wrangler preview` (passo do Victor).

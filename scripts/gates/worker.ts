@@ -1,5 +1,6 @@
 // Gate: the Worker has no code (ADR-001, item 2). wrangler.jsonc has exactly the allowed fields,
-// and nothing in the repository or in dist/ could become Worker code.
+// including the empty previews block of ADR-002, and nothing in the repository or in dist/ could
+// become Worker code.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, listFiles, requireDist } from '../lib/dist.ts';
 import { parseJsonc } from '../lib/jsonc.ts';
@@ -7,9 +8,10 @@ import { parseJsonc } from '../lib/jsonc.ts';
 requireDist();
 const problems = new Problems();
 const config = parseJsonc(readFileSync('wrangler.jsonc', 'utf8')) as Record<string, unknown>;
-const expectedKeys = ['$schema', 'assets', 'compatibility_date', 'name', 'preview_urls', 'workers_dev'];
+const expectedKeys = ['$schema', 'assets', 'compatibility_date', 'name', 'preview_urls', 'previews', 'workers_dev'];
 const keys = Object.keys(config).sort();
 if (JSON.stringify(keys) !== JSON.stringify(expectedKeys)) problems.add(`wrangler.jsonc com campos ${keys.join(', ')}`);
+if (JSON.stringify(config['previews']) !== '{}') problems.add(`previews deve ser um objeto vazio: ${JSON.stringify(config['previews'])}`);
 if (config['name'] !== 'fileorca') problems.add('name diferente de "fileorca"');
 if (typeof config['compatibility_date'] !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(config['compatibility_date'])) {
   problems.add('compatibility_date não é uma data fixa');
