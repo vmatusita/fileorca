@@ -627,3 +627,11 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
   - a chave do IndexNow.
 - **Navegador:** só com `context.route` abortando todo domínio do Google (`.cache/f3/check-band.ts`), para nenhuma visita minha entrar no GA4. Assim a faixa do aviso foi medida na produção antes do merge: 202 px a 1280 e 216 px a 360, nos dois temas. Na prévia da PR (`736b1cd`), a medida deu 0 px nas quatro combinações. Na prévia, o `gtag.js` nem é pedido, por causa da trava de hostname.
 - **Por quê:** decisão 6 da ficha. Visita de navegador sem bloqueio contaria como tráfego no GA4.
+
+## § 99 · Testes que mudaram na F3, e por quê (F3, 31/out/2026)
+
+- `tests/unit/image-hub.test.ts`: o H1 esperado do hub mudou (§ 96).
+- `tests/e2e/island.spec.ts`, no teste "one tool_start and one tool_complete per batch…": falhou uma vez no WebKit 2 de 2 do CI (run 41227322450, commit `736b1cd`, nenhum arquivo do teste ou da ilha mudado) com 1 `download` em vez de 2. Aqui passou 8 vezes em 8 no WebKit.
+  - **A causa:** uma corrida do próprio teste. A opção Strong refaz o lote, e o cartão de resultado continua na tela nos primeiros 400 ms da nova execução (`showCard` com `!m.showLevel`). Por isso o `toBeVisible` passava na hora, e o clique em "Download a.jpg" podia cair no instante em que a linha era redesenhada.
+  - **A mudança:** o teste guarda o texto do Download do lote (o tamanho do ZIP), clica em Strong e espera esse texto mudar, ou seja, o ZIP novo pronto, antes de clicar na linha.
+  - Nenhuma asserção mudou: segue exigindo um `tool_start`, um `tool_complete`, um `tool_error` e dois `download`.

@@ -145,7 +145,11 @@ test.describe('events', () => {
     await chooseImages(page, [photos[0] as TestFile, junk('broken.jpg'), photos[1] as TestFile]);
     await done(page);
     await page.locator('.fo-btn--download').click();
+    // The option runs the batch again, and the card stays on screen for the first 400 ms of it: wait for the new
+    // ZIP (its size changes with Strong) so the row's Download is not clicked while the row is redrawn (DECISOES § 99).
+    const zip = (await page.locator('.fo-btn--download').textContent()) ?? '';
     await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
+    await expect(page.locator('.fo-btn--download')).not.toHaveText(zip, { timeout: 30_000 });
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'Download a.jpg' }).click();
     const events = (await dataLayer(page)).filter((entry) => entry[0] === 'event');
