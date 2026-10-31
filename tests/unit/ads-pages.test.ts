@@ -2,9 +2,8 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { getContainerRenderer } from '@astrojs/preact/container-renderer';
 import { loadRenderers } from 'astro:container';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import CompressImagePage from '../../src/tools/compress-image/CompressImagePage.astro';
-import To100kbPage from '../../src/tools/compress-image/presets/to-100kb/To100kbPage.astro';
-import To1mbPage from '../../src/tools/compress-image/presets/to-1mb/To1mbPage.astro';
+import { languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import LegalView from '../../src/views/LegalView.astro';
 import AboutView from '../../src/views/AboutView.astro';
 import ContactView from '../../src/views/ContactView.astro';
@@ -23,13 +22,22 @@ const STATES = {
   all: { PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: SLOTS, PUBLIC_ADS_ENABLED: 'true' },
 } as const;
 
-// The tool pages that exist: Compress image in the three languages, and the presets (English only).
-// A tool adds its page here when it is built; each one is the shared mold, so each has the same two AdSlots.
-const TOOL_PAGES = [
-  ...(['en', 'pt', 'es'] as const).map((lang) => ({ name: `compress-image ${lang}`, Page: CompressImagePage, lang })),
-  { name: 'compress-image-to-100kb en', Page: To100kbPage, lang: 'en' as const },
-  { name: 'compress-image-to-1mb en', Page: To1mbPage, lang: 'en' as const },
-];
+// Every tool page and preset page of the image registry, in each language its route has (the Compress image in
+// the three, the rest in English). They are found by their folder, so a tool declared in the registry with no page
+// fails the check below, and each one is the shared mold, so each has the same two AdSlots.
+type PageComponent = Parameters<AstroContainer['renderToString']>[0];
+const modules = import.meta.glob<{ default: PageComponent }>(
+  ['../../src/tools/*/*Page.astro', '../../src/tools/*/presets/*/*Page.astro', '!../../src/tools/image/*'],
+  { eager: true },
+);
+
+function idOf(file: string): ImagePageId {
+  const preset = /\/tools\/([\w-]+)\/presets\/([\w-]+)\//.exec(file);
+  return (preset ? `${preset[1]}-${preset[2]}` : (/\/tools\/([\w-]+)\//.exec(file)?.[1] ?? '')) as ImagePageId;
+}
+
+const PAGE_OF = new Map(Object.entries(modules).map(([file, module]) => [idOf(file), module.default] as const));
+const TOOL_PAGES = [...PAGE_OF].flatMap(([id, Page]) => languagesOf(routeById(id)).map((lang) => ({ name: `${id} ${lang}`, Page, lang })));
 
 const NO_ADS = [
   ['privacy', LegalView, { page: 'privacy' }],
@@ -49,6 +57,11 @@ beforeAll(async () => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('anúncio por página nos três estados', () => {
+  it('has a page component for every tool and preset of the registry, and none besides', () => {
+    expect([...PAGE_OF.keys()].sort()).toEqual(Object.keys(IMAGE_PAGES).sort());
+    expect(TOOL_PAGES.filter((page) => page.lang === 'en')).toHaveLength(Object.keys(IMAGE_PAGES).length);
+  });
+
   for (const [state, env] of Object.entries(STATES)) {
     it(`tool page vs every other page (${state})`, async () => {
       for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);

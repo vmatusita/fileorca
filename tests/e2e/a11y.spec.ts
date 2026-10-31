@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage } from './lib/page.ts';
+import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 
 // axe-core (WCAG 2.2 AA and best practices) on every page, at 360 and 1280px. It runs with reduced
 // motion (DECISOES § 57): the site animates only transform and opacity, so the colours axe checks are
@@ -211,5 +213,50 @@ test.describe('axe com um lote na tela, a 360 e 1280px, nos temas escuro e claro
     }
     gate.release();
     expect(found).toEqual([]);
+  });
+});
+
+// F2 (criterion 13): where axe reads each state of the image tools, in both themes at 360 and 1280px, on one load
+// per browser. The queue with ready and error rows, the batch card, the comparison and the WaterLevel with waiting
+// rows are the two tests above; the crop editor with a batch, the Resize fields (one of them in error), and the
+// options of Image to PDF, Rotate and Convert to WebP are in image-smoke.spec.ts ("axe on the option states"); the
+// refused file with the link to its converter, in the drop zone and in a row, is below.
+async function violationsEverywhere(page: Page): Promise<string[]> {
+  const found: string[] = [];
+  for (const combo of COMBOS) {
+    await page.setViewportSize({ width: combo.width, height: combo.height });
+    await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
+    const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+    for (const violation of results.violations) {
+      found.push(`${combo.width}px ${combo.colorScheme} · ${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`);
+    }
+  }
+  return found;
+}
+
+test.describe('axe com arquivo recusado, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('a HEIC refused by Compress image, in the drop zone and in a row, with the link to HEIC to JPG', async ({ page }) => {
+    const heic: TestFile = {
+      name: 'heic-08.heic',
+      mimeType: 'image/heic',
+      buffer: readFileSync(resolve('fixtures/images/heic-08-iphone13pro-paisagem-hdr-ios17.heic')),
+    };
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    // Every file refused: the error takes the drop zone, with the Oli line, the file and the link.
+    await chooseImages(page, [heic]);
+    await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
+    await expect(page.locator('.fo-drop__message a')).toHaveAttribute('href', '/heic-to-jpg/');
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'drop zone error').toEqual([]);
+    // One refused among good ones: the error is the row, the result is for the rest.
+    await chooseImages(page, [...(await jpegBatch(page, 2)), heic]);
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-file[data-state="error"] a')).toHaveAttribute('href', '/heic-to-jpg/');
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'error row').toEqual([]);
   });
 });
