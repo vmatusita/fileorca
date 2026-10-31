@@ -85,6 +85,15 @@ describe('FileCard da fila da F2', () => {
     expect(plain).not.toContain('fo-file__pick');
   });
 
+  it('a file name is put in the labels as it is: "$$", "$&" and "$\'" are not replacement patterns', async () => {
+    const dollars = await render({ state: 'done', name: 'cost$$1.jpg', category: 'image', labels, before: '1 MB', note: 'x', onDownload: noop });
+    expect(dollars).toContain('aria-label="Download cost$$1.jpg"');
+    const amp = await render({ state: 'waiting', name: "a$&b$'c.png", category: 'image', labels, status: 'Waiting', onCancel: noop });
+    expect(amp).toMatch(/aria-label="Cancel a\$&amp;b\$(&#39;|')c\.png"/);
+    const remove = await render({ state: 'error', name: 'x$`y.png', category: 'image', labels, reason: 'no', onRemove: noop });
+    expect(remove).toContain('aria-label="Remove x$`y.png"');
+  });
+
   it('error: the reason may carry a link to the tool that opens the file', async () => {
     const reason = ['IMG.heic is a HEIC file. Open it in ', h('a', { href: '/heic-to-jpg/' }, 'HEIC to JPG'), '.'];
     const html = await render({ state: 'error', name: 'IMG.heic', category: 'image', labels, reason, onRemove: noop });

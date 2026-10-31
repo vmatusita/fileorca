@@ -56,7 +56,8 @@ export type FileCardProps = {
   | { state: 'error'; reason: ComponentChildren; onRemove: () => void }
 );
 
-const named = (label: string, name: string) => label.replace('{name}', name);
+// A function as the replacement: a file name with "$&" or "$'" in it must not be read as a replacement pattern.
+const named = (label: string, name: string) => label.replace('{name}', () => name);
 
 export default function FileCard(props: FileCardProps) {
   const { name, category, labels, thumb } = props;
