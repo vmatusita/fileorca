@@ -2,6 +2,8 @@
 
 Run 1 de 2 da F1, branch `fase-01a`, PR [vmatusita/fileorca#1](https://github.com/vmatusita/fileorca/pull/1). Prompt em `docs/prompts/prompt-fase-01a.md`; plano da run (gabarito da revisão) em `docs/relatorios/fase-01a-plano.md`; decisões no `DECISOES.md` (§ 1 a § 36); proposta de arquitetura em `docs/adr/ADR-002-previa-worker-previews.md`.
 
+> **Atualização depois do merge (30/out/2026, ajuste `ajuste-previa-build`):** a falha do Workers Builds não era o modelo "Worker Previews" nem o Node ou o pnpm. O comando de build salvo no painel era `pnpm buid`; todo build instalava as dependências e parava em `Command "buid" not found`. O Victor corrigiu o comando, o build de produção passou e fileorca.com serve o `249307f` com `noindex` desde então. O merge (pendência 2) e a conferência do pós-deploy (pendência 3) também estão feitos: o pós-deploy reexecutado passou e a issue #2 foi fechada. As seções sobre a prévia, o § 17 e a pendência 1 abaixo ficaram como a run as escreveu; a causa real está na ADR-002 (Atualização), no DECISOES § 37 e em `docs/relatorios/ajuste-previa-build.md`.
+
 ## Resumo
 
 O repositório agora tem o app Astro 7 estático com a página-modelo Compress image (motor provisório num Web Worker com Comlink) nos três idiomas, as páginas jurídicas e institucionais, o SEO técnico, o consentimento, o AdSlot, os cabeçalhos gerados e o pipeline (CI com o job de merge e o pós-deploy). O `pnpm verificar` roda os 14 portões e está verde na máquina local e no CI. O que não fechou: a prévia do Workers Builds falha em todo commit, por um motivo que só aparece no log do painel do Cloudflare, que a run não acessa (ADR-002, primeira pendência do Victor).
@@ -1031,6 +1033,8 @@ Resumo do pnpm verificar
 
 ## Prévia do Workers Builds
 
+> **Atualização (ajuste `ajuste-previa-build`):** a causa era o comando de build `pnpm buid` no painel, não as hipóteses abaixo. Ver a ADR-002 e o DECISOES § 37.
+
 **Não abriu.** O Cloudflare comentou na PR (bot `cloudflare-workers-and-pages`, "Deploying Preview to Cloudflare", modelo "Preview Deployments by commit") e criou o check "Workers Builds: fileorca", mas todo build falhou e a coluna "Deployment URL" ficou vazia. Sem URL, não houve como conferir o status 200, o `X-Robots-Tag: noindex` e o `build.txt` da prévia.
 
 O que a run fez para isolar a causa, sem acesso ao log (que fica no painel do Cloudflare):
@@ -1095,7 +1099,8 @@ Nada. A imagem de OG saiu por página e idioma (sem a Oli, que é arte da F1b), 
 
 ## O que é do Victor, em passos
 
-1. **Destravar a prévia (bloqueia o critério 12 e talvez a produção).** No painel do Cloudflare, abra Workers & Pages → fileorca → Deployments/Builds e o log do build mais recente da branch `fase-01a` (os IDs estão na ADR-002). Veja em que etapa ele para:
+1. **Feito depois do merge:** o comando de build estava `pnpm buid`; o Victor corrigiu para `pnpm build` e o build de produção passou (ajuste `ajuste-previa-build`). O texto original da pendência segue para registro.
+   **Destravar a prévia (bloqueia o critério 12 e talvez a produção).** No painel do Cloudflare, abra Workers & Pages → fileorca → Deployments/Builds e o log do build mais recente da branch `fase-01a` (os IDs estão na ADR-002). Veja em que etapa ele para:
    - se for o comando de prévia (`wrangler preview` pedindo o bloco `previews`), decida a ADR-002: a opção 1 é trocar, em Settings → Build, o "Preview command" para `npx wrangler versions upload`; a opção 2 é pedir uma run curta que acrescente `"previews": {}` ao `wrangler.jsonc`;
    - se for a instalação ou o `pnpm build`, mande o trecho do log numa run curta de ajuste.
    Depois, use "Retry" no último build da branch e confira a prévia: `curl -sI <url da prévia>/` deve trazer `HTTP/2 200` e `x-robots-tag: noindex`, e `curl -s <url da prévia>/build.txt` deve trazer o commit da PR. Se a causa for a instalação, o build de produção depois do merge também falharia, então faça isto antes do merge.

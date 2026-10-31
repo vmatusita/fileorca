@@ -89,3 +89,9 @@ Pegadinhas que a F1a achou:
 - `git push` e `gh pr create --base main` na mesma linha casam com a regra de negação de push na main do `.claude/settings.json`: rode em comandos separados.
 - A API pública do LanguageTool proíbe requisição automatizada; o `lint:texto` sobe o servidor local (DECISOES § 24). No Windows sem Java, ele baixa o JRE fixado para `.cache/`.
 - O Workers Builds desta conta usa o modelo "Worker Previews" (`wrangler preview`), que pede um bloco `previews` no `wrangler.jsonc`; enquanto a ADR-002 não for decidida, a prévia depende do comando configurado no painel.
+
+## Ajuste da prévia: o que a F1a entendeu errado sobre o Workers Builds
+
+- A falha de todo build do Workers Builds na F1a era o comando de build salvo no painel (`pnpm buid`), não o Node 26, o pnpm 12 nem o bloco `previews`. O Node 26 e o pnpm 12 instalam sem erro ali (DECISOES § 37). O projeto segue em Node 24 e pnpm 10 até o Victor decidir voltar; as duas pegadinhas da F1a sobre isso valem só como registro.
+- Build do Workers Builds vermelho: o check do GitHub não traz o log. Antes de mudar código ou configuração, peça o log ao Victor (ou leia no Chrome dele, com a permissão dele) e procure a linha `Executing user build command`. Não deduza a causa pelo tempo até a falha.
+- A página de um build no painel mostra a configuração atual do Worker, não a da hora do build. O comando que de fato rodou está no log.
