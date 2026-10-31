@@ -10,19 +10,24 @@ Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado 
 
 | Teste | Ferramenta | Opções | Arquivos | Saídas | Recusados | Chromium | WebKit | Requisições para fora |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 6,3 s | 7,4 s | 0 |
-| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 5,8 s | 6,5 s | 0 |
-| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 2,6 s | 5,9 s | 0 |
-| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 13 | 5 | 8 | 8,4 s | 10,4 s | 0 |
-| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 7 | 5 | 2 | 7,6 s | 9,2 s | 0 |
-| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 5 | 3 | 2 | 6,9 s | 10,5 s | 0 |
-| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 5,9 s | 7,7 s | 0 |
-| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 5,7 s | 8,9 s | 0 |
-| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 1,1 s | 2,0 s | 0 |
-| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 9,3 s | 7,1 s | 0 |
-| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 6,0 s | 7,3 s | 0 |
-| `rotate-image` | `rotate-image` | Right 90° (default), no mirror | 16 | 10 | 6 | 6,2 s | 9,7 s | 0 |
-| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 1,3 s | 2,6 s | 0 |
+| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 7,2 s | 7,8 s | 0 |
+| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 5,8 s | 6,9 s | 0 |
+| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 3,4 s | 6,3 s | 0 |
+| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 6 | 2 | 4 | 4,4 s | 5,4 s | 0 |
+| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 3 | 2 | 1 | 4,2 s | 5,3 s | 0 |
+| `heic-to-jpg-c` | `heic-to-jpg` | JPG (default) | 7 | 3 | 4 | 5,9 s | 6,5 s | 0 |
+| `heic-to-jpg-d` | `heic-to-jpg` | JPG (default) | 4 | 3 | 1 | 4,3 s | 5,0 s | 0 |
+| `heic-to-jpg-png-b` | `heic-to-jpg` | PNG | 2 | 1 | 1 | 3,1 s | 4,5 s | 0 |
+| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 3 | 2 | 1 | 5,8 s | 7,7 s | 0 |
+| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 5,9 s | 7,4 s | 0 |
+| `png-to-jpg-photos-b` | `png-to-jpg` | JPG files go to PNG | 4 | 2 | 2 | 3,7 s | 5,7 s | 0 |
+| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 4 | 1 | 3 | 3,0 s | 4,3 s | 0 |
+| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 1,0 s | 2,2 s | 0 |
+| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 8,5 s | 7,2 s | 0 |
+| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 6,8 s | 7,4 s | 0 |
+| `rotate-image-photos` | `rotate-image` | Right 90° (default), no mirror | 6 | 3 | 3 | 2,8 s | 3,9 s | 0 |
+| `rotate-image-rest` | `rotate-image` | Right 90° (default), no mirror | 10 | 7 | 3 | 6,0 s | 7,5 s | 0 |
+| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 1,6 s | 2,8 s | 0 |
 
 ## `compress-image`
 
@@ -72,11 +77,11 @@ Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado 
 | --- | --- | --- | --- |
 | `heic-01-iphone11pro-retrato-livephoto.heic` | JPG (default) | ok · JPG 3024×4032 · 1,2 MB · abre | ok · JPG 3024×4032 · 1,2 MB · abre |
 | `heic-02-iphone11pro-retrato-livephoto.heic` | JPG (default) | ok · JPG 3024×4032 · 6,3 MB · abre | ok · JPG 3024×4032 · 6,3 MB · abre |
+| `heic-05-iphone13promax-retrato-orientacao6-hdr.heic` | JPG (default) | ok · JPG 3024×4032 · 3,2 MB · abre | ok · JPG 3024×4032 · 3,2 MB · abre |
+| `heic-06-iphone7-paisagem-gps.heic` | JPG (default) | ok · JPG 4032×3024 · 2,7 MB · abre | ok · JPG 4032×3024 · 2,7 MB · abre |
 | `heic-03-iphone11pro-retrato-livephoto.heic` | JPG (default) | ok · JPG 3024×4032 · 3,7 MB · abre | ok · JPG 3024×4032 · 3,7 MB · abre |
 | `heic-04-iphone11promax-retrato-livephoto-gps.heic` | JPG (default) | ok · JPG 2566×3313 · 1,4 MB · abre | ok · JPG 2566×3313 · 1,4 MB · abre |
 | `heic-10-visionpro-espacial-2imagens.heic` | JPG (default) | ok · JPG 2560×2560 · 1,2 MB · abre | ok · JPG 2560×2560 · 1,2 MB · abre |
-| `heic-05-iphone13promax-retrato-orientacao6-hdr.heic` | JPG (default) | ok · JPG 3024×4032 · 3,2 MB · abre | ok · JPG 3024×4032 · 3,2 MB · abre |
-| `heic-06-iphone7-paisagem-gps.heic` | JPG (default) | ok · JPG 4032×3024 · 2,7 MB · abre | ok · JPG 4032×3024 · 2,7 MB · abre |
 | `heic-07-iphone13pro-paisagem-profundidade-hdr-gps.heic` | JPG (default) | ok · JPG 4032×3024 · 1,5 MB · abre | ok · JPG 4032×3024 · 1,5 MB · abre |
 | `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | JPG (default) | ok · JPG 1512×850 · 309 KB · abre | ok · JPG 1512×850 · 309 KB · abre |
 | `heic-09-samsung-s10-retrato-orientacao6.heic` | JPG (default) | ok · JPG 3024×4032 · 2,0 MB · abre | ok · JPG 3024×4032 · 2,0 MB · abre |
@@ -88,11 +93,11 @@ Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado 
 | `gen-jpg-truncado.jpg` | JPG (default) | recusado (wrong-tool) | recusado (wrong-tool) |
 | `gen-vazio.jpg` | JPG (default) | recusado (empty) | recusado (empty) |
 | `gen-texto-extensao-png.png` | JPG (default) | recusado (unsupported) | recusado (unsupported) |
-| `heic-05-iphone13promax-retrato-orientacao6-hdr.heic` | PNG | ok · PNG 3024×4032 · 21,4 MB · abre | ok · PNG 3024×4032 · 15,8 MB · abre |
 | `heic-07-iphone13pro-paisagem-profundidade-hdr-gps.heic` | PNG | ok · PNG 4032×3024 · 10,7 MB · abre | ok · PNG 4032×3024 · 6,8 MB · abre |
+| `heic-05-iphone13promax-retrato-orientacao6-hdr.heic` | PNG | ok · PNG 3024×4032 · 21,4 MB · abre | ok · PNG 3024×4032 · 15,8 MB · abre |
 | `heic-10-visionpro-espacial-2imagens.heic` | PNG | ok · PNG 2560×2560 · 8,2 MB · abre | ok · PNG 2560×2560 · 5,4 MB · abre |
-| `gen-vazio.jpg` | PNG | recusado (empty) | recusado (empty) |
 | `gen-texto-extensao-png.png` | PNG | recusado (unsupported) | recusado (unsupported) |
+| `gen-vazio.jpg` | PNG | recusado (empty) | recusado (empty) |
 
 ## `image-to-pdf`
 
@@ -121,17 +126,17 @@ Um PDF com 10 páginas (10,5 MB em Chromium), uma imagem por página, na ordem d
 
 | Fixture | Opções | Chromium | WebKit |
 | --- | --- | --- | --- |
-| `jpg-01-pixel2-retrato-gps.jpg` | JPG files go to PNG | ok · PNG 3024×4032 · 22,0 MB · abre | ok · PNG 3024×4032 · 16,6 MB · abre |
 | `jpg-02-iphone6-paisagem-gps.jpg` | JPG files go to PNG | ok · PNG 3264×2448 · 14,1 MB · abre | ok · PNG 3264×2448 · 11,0 MB · abre |
 | `jpg-03-iphone5-paisagem-orientacao3-gps.jpg` | JPG files go to PNG | ok · PNG 3264×2448 · 12,7 MB · abre · orientação ok (Δ0.0) | ok · PNG 3264×2448 · 10,0 MB · abre · orientação ok (Δ0.0) |
+| `jpg-01-pixel2-retrato-gps.jpg` | JPG files go to PNG | ok · PNG 3024×4032 · 22,0 MB · abre | ok · PNG 3024×4032 · 16,6 MB · abre |
 | `gen-jpg-01-orientacao6.jpg` | JPG files go to PNG | ok · PNG 1200×1600 · 3,4 MB · abre · orientação ok (Δ0.0) | ok · PNG 1200×1600 · 2,6 MB · abre · orientação ok (Δ0.0) |
 | `gen-jpg-02-orientacao8.jpg` | JPG files go to PNG | ok · PNG 1600×1200 · 3,8 MB · abre · orientação ok (Δ0.0) | ok · PNG 1600×1200 · 3,0 MB · abre · orientação ok (Δ0.0) |
 | `gen-grande-4100x4100.jpg` | JPG files go to PNG | ok · PNG 4100×4100 · 218 KB · abre | ok · PNG 4100×4100 · 218 KB · abre |
+| `gen-avif.avif` | JPG files go to PNG | recusado (wrong-tool) | recusado (wrong-tool) |
+| `gen-jpg-truncado.jpg` | JPG files go to PNG | recusado (truncated) | recusado (truncated) |
 | `gen-webp-animada.webp` | JPG files go to PNG | recusado (wrong-tool) | recusado (wrong-tool) |
 | `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | JPG files go to PNG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-avif.avif` | JPG files go to PNG | recusado (wrong-tool) | recusado (wrong-tool) |
 | `gen-jpg-corrompido.jpg` | JPG files go to PNG | recusado (decode) | recusado (decode) |
-| `gen-jpg-truncado.jpg` | JPG files go to PNG | recusado (truncated) | recusado (truncated) |
 | `gen-png-transparente.png` | PNG files go to JPG | ok · JPG 800×600 · 121 KB · abre · transparência em branco | ok · JPG 800×600 · 122 KB · abre · transparência em branco |
 | `gen-png-extensao-jpg.jpg` | PNG files go to JPG | ok · JPG 640×480 · 123 KB · abre | ok · JPG 640×480 · 123 KB · abre |
 | `gen-webp-animada.webp` | PNG files go to JPG | recusado (wrong-tool) | recusado (wrong-tool) |
@@ -176,9 +181,9 @@ Um PDF com 10 páginas (10,5 MB em Chromium), uma imagem por página, na ordem d
 | `gen-png-extensao-jpg.jpg` | Right 90° (default), no mirror | ok · PNG 480×640 · 751 KB · abre | ok · PNG 480×640 · 643 KB · abre |
 | `gen-grande-4100x4100.jpg` | Right 90° (default), no mirror | ok · JPG 4100×4100 · 350 KB · abre | ok · JPG 4100×4100 · 350 KB · abre |
 | `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | Right 90° (default), no mirror | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-avif.avif` | Right 90° (default), no mirror | recusado (wrong-tool) | recusado (wrong-tool) |
 | `gen-jpg-corrompido.jpg` | Right 90° (default), no mirror | recusado (decode) | recusado (decode) |
 | `gen-jpg-truncado.jpg` | Right 90° (default), no mirror | recusado (truncated) | recusado (truncated) |
+| `gen-avif.avif` | Right 90° (default), no mirror | recusado (wrong-tool) | recusado (wrong-tool) |
 | `gen-vazio.jpg` | Right 90° (default), no mirror | recusado (empty) | recusado (empty) |
 | `gen-texto-extensao-png.png` | Right 90° (default), no mirror | recusado (unsupported) | recusado (unsupported) |
 

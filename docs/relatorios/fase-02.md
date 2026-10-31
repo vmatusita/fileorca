@@ -1,6 +1,6 @@
 # F2 · Imagem em inglês e lançamento: relatório
 
-Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 87. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
+Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 88. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
 
 ## Resumo
 
@@ -38,7 +38,7 @@ Mesmo assim, o CI não passa: com os 486 testes verdes, o `verificar` levou 1283
 | --- | --- | --- | --- |
 | 1 | `verificar` ≤ 900 s local e no CI; CI ≤ 800 s no commit final | **não, pelo tempo** | local **275,3 s** (seção abaixo); CI **1283,5 s** com os 486 testes verdes, acima do limite de 900 s; a decisão de dividir o Playwright é do Victor (ADR-003) (seção "CI na PR") |
 | 2 | 15 portões da F1b com o mesmo alcance, mais o `gate:conteudo`; sem `skip`, `fixme`, `retries`, `continue-on-error`; testes mudados listados | ok | `scripts/verificar.ts` só ganhou o `gate:conteudo`; `retries: 0` e 60 s por teste no `playwright.config.ts`; nenhum `skip`, `fixme`, `only` ou `continue-on-error` em `tests/` e `scripts/`; limiares e orçamentos iguais; § 82 lista cada teste mudado e o porquê, e a revisão conferiu linha a linha |
-| 3 | Matriz em Chromium e WebKit, tabela gerada da saída dos testes | ok | `tests/e2e/image-matrix.spec.ts` (13 testes por navegador) e `docs/relatorios/fase-02-matriz.md`, gerada por `scripts/fixtures/matrix-table.ts` a partir de `test-results/matriz/*.json` da execução do `verificar` abaixo; orientação por pixels na `jpg-03` e nas variantes 6 e 8; `heic-05` e `heic-09` pelas dimensões; transparência; recusa na linha do arquivo, com o resto do lote saindo |
+| 3 | Matriz em Chromium e WebKit, tabela gerada da saída dos testes | ok | `tests/e2e/image-matrix.spec.ts` (18 testes por navegador) e `docs/relatorios/fase-02-matriz.md`, gerada por `scripts/fixtures/matrix-table.ts` a partir de `test-results/matriz/*.json` de uma execução da matriz e dos presets nos dois navegadores, depois da § 88; orientação por pixels na `jpg-03` e nas variantes 6 e 8; `heic-05` e `heic-09` pelas dimensões; transparência; recusa na linha do arquivo, com o resto do lote saindo |
 | 4 | Nenhuma saída com GPS ou localização | ok | `metadataReport` (`tests/e2e/lib/images.ts`) em toda saída da matriz e dos presets (APP1 do JPG; `eXIf`, `iTXt`, `tEXt`, `zTXt` do PNG; `EXIF` e `XMP ` do WebP) e nos JPEG dentro do PDF (`tests/e2e/lib/pdf.ts`), `heic-10` incluída; o `stripJpeg` agora corta no EOI (§ 86) |
 | 5 | Corrompido, truncado, vazio e texto `.png` no meio do lote | ok | `image-batch.spec.ts` ("files that cannot be read, in the middle of a batch"): fala de erro em cada um, os outros saem, um lote novo funciona; também no meio de todo lote da matriz |
 | 6 | Lote e ZIP | ok | `image-batch.spec.ts`: N arquivos, N saídas; ZIP abre, sem compressão, nomes únicos com " (2)" e " (3)", cada entrada igual ao download da linha; um arquivo baixa direto; Ctrl+V nos dois navegadores; "Show 3 more" com 9 arquivos |
@@ -1509,6 +1509,7 @@ Resumo do pnpm verificar
 | [41196760652](https://github.com/vmatusita/fileorca/actions/runs/41196760652) | `d8b2af1` (rascunho, antes do hub) | parou no Vitest (4 testes à espera da leva do hub, do sitemap e das licenças) | — |
 | [41200291640](https://github.com/vmatusita/fileorca/actions/runs/41200291640) | `df918b2` (suíte inteira) | Playwright 1414 s, 532 testes, 4 falhas só do Ubuntu (§ 83) | 1456,8 s |
 | [41205310197](https://github.com/vmatusita/fileorca/actions/runs/41205310197) | `4b169ae` (depois da § 83, da § 85 e da § 86) | **os 486 testes verdes**; falha só o limite de 15 min | **1283,5 s** |
+| [41207385209](https://github.com/vmatusita/fileorca/actions/runs/41207385209) | `2100e9b` (só documentos a mais) | runner mais lento: Playwright 1544 s; dois lotes da matriz no WebKit passaram dos 60 s por teste (`heic-to-jpg-png` e `png-to-jpg-photos`), e outros chegaram a 59 s e 52 s; os lotes pesados foram divididos (§ 88) | 1601,0 s |
 
 Portões da execução 41205310197 (Ubuntu 24.04, Node 24, 2 workers), em segundos:
 
@@ -1562,23 +1563,28 @@ O commit deste relatório roda o CI mais uma vez, depois deste texto. O resultad
 
 ## Matriz de fixtures
 
-A tabela completa, ferramenta × fixture × navegador, está em [`fase-02-matriz.md`](fase-02-matriz.md), gerada da execução acima. Resumo por teste (tempo local, 6 workers):
+A tabela completa, ferramenta × fixture × navegador, está em [`fase-02-matriz.md`](fase-02-matriz.md), gerada de uma execução da matriz e dos presets nos dois navegadores, depois da divisão dos lotes da § 88. Resumo por teste (tempo local, 6 workers):
 
 | Teste | Ferramenta | Opções | Arquivos | Saídas | Recusados | Chromium | WebKit | Requisições para fora |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 6,3 s | 7,4 s | 0 |
-| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 5,8 s | 6,5 s | 0 |
-| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 2,6 s | 5,9 s | 0 |
-| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 13 | 5 | 8 | 8,4 s | 10,4 s | 0 |
-| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 7 | 5 | 2 | 7,6 s | 9,2 s | 0 |
-| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 5 | 3 | 2 | 6,9 s | 10,5 s | 0 |
-| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 5,9 s | 7,7 s | 0 |
-| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 5,7 s | 8,9 s | 0 |
-| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 1,1 s | 2,0 s | 0 |
-| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 9,3 s | 7,1 s | 0 |
-| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 6,0 s | 7,3 s | 0 |
-| `rotate-image` | `rotate-image` | Right 90° (default), no mirror | 16 | 10 | 6 | 6,2 s | 9,7 s | 0 |
-| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 1,3 s | 2,6 s | 0 |
+| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 7,2 s | 7,8 s | 0 |
+| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 5,8 s | 6,9 s | 0 |
+| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 3,4 s | 6,3 s | 0 |
+| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 6 | 2 | 4 | 4,4 s | 5,4 s | 0 |
+| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 3 | 2 | 1 | 4,2 s | 5,3 s | 0 |
+| `heic-to-jpg-c` | `heic-to-jpg` | JPG (default) | 7 | 3 | 4 | 5,9 s | 6,5 s | 0 |
+| `heic-to-jpg-d` | `heic-to-jpg` | JPG (default) | 4 | 3 | 1 | 4,3 s | 5,0 s | 0 |
+| `heic-to-jpg-png-b` | `heic-to-jpg` | PNG | 2 | 1 | 1 | 3,1 s | 4,5 s | 0 |
+| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 3 | 2 | 1 | 5,8 s | 7,7 s | 0 |
+| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 5,9 s | 7,4 s | 0 |
+| `png-to-jpg-photos-b` | `png-to-jpg` | JPG files go to PNG | 4 | 2 | 2 | 3,7 s | 5,7 s | 0 |
+| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 4 | 1 | 3 | 3,0 s | 4,3 s | 0 |
+| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 1,0 s | 2,2 s | 0 |
+| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 8,5 s | 7,2 s | 0 |
+| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 6,8 s | 7,4 s | 0 |
+| `rotate-image-photos` | `rotate-image` | Right 90° (default), no mirror | 6 | 3 | 3 | 2,8 s | 3,9 s | 0 |
+| `rotate-image-rest` | `rotate-image` | Right 90° (default), no mirror | 10 | 7 | 3 | 6,0 s | 7,5 s | 0 |
+| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 1,6 s | 2,8 s | 0 |
 
 ### Presets: bytes de cada saída
 
@@ -1718,6 +1724,7 @@ Conferido no commit `4b169ae`, por `curl` e com o Playwright, nos dois endereço
 - § 85: válvula (e) e (f).
 - § 86: correções da revisão.
 - § 87: CI acima de 900 s, sem mais cortes.
+- § 88: lotes pesados da matriz divididos para o limite de 60 s por teste.
 
 ADR-003 (Proposta): Playwright do CI em partes.
 

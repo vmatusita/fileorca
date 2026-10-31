@@ -162,14 +162,16 @@ CASES.push({
 });
 
 // ---- Rotate image: Right 90° turns every picture, the sides swap ---------------------------------------------------------------
-CASES.push({
-  id: 'rotate-image',
+// In two batches (the three big photos, then the rest with the animation): one batch of 16 took 52 s on a slow CI WebKit,
+// too close to the 60 s a test has (DECISOES § 88). Each batch has refused files in the middle; together, all of them.
+const rotateCase = (id: string, fixtures: readonly string[], refused: readonly string[], says: readonly string[]): MatrixCase => ({
+  id,
   tool: 'rotate-image',
   path: '/rotate-image/',
   options: 'Right 90° (default), no mirror',
-  batch: batchOf(PHOTO, GENERAL_REFUSED),
+  batch: batchOf([...fixtures], [...refused]),
   deliverable: 'files',
-  says: FIRST_FRAME,
+  says,
   outcome: outcomeFor(['jpeg', 'png', 'webp'], (fixture) => {
     const [width, height] = display(fixture);
     const format = realFormat(fixture);
@@ -184,6 +186,10 @@ CASES.push({
     };
   }),
 });
+CASES.push(
+  rotateCase('rotate-image-photos', BIG_PHOTOS, [SMALL.heic, BROKEN[0], BROKEN[1]], []),
+  rotateCase('rotate-image-rest', SMALL_PHOTOS, [SMALL.avif, BROKEN[2], BROKEN[3]], FIRST_FRAME),
+);
 
 // ---- HEIC to JPG/PNG: the main image of each file, in its display size --------------------------------------------------------
 const HEIC = fixturesOf('heic');
@@ -196,38 +202,28 @@ const heicOutcome = (to: 'jpeg' | 'png') =>
 const choosePng = async (page: Page): Promise<void> => {
   await page.locator('.fo-seg__opt', { hasText: 'PNG' }).click();
 };
-// The ten, in two batches of five with about the same number of megapixels each (heic-01 to 03, 05, 06, 07
-// and 09 are 12 MP; the libheif decode is the cost). heic-05 and heic-09 (the double-rotation trap) are in the second.
+// The ten, in four batches of two or three (heic-01 to 03, 05, 06, 07 and 09 are 12 MP; the libheif decode is the
+// cost): two batches of five took 59 s and 49 s on a slow CI WebKit, too close to the 60 s a test has (DECISOES § 88).
+// heic-05 and heic-09 (the double-rotation trap) are in the second and the fourth. The refused files are shared out,
+// each batch with some in the middle, all of them in the tool.
 const heicIds = (...numbers: number[]): string[] => HEIC.filter((name) => numbers.some((number) => name.startsWith(`heic-${String(number).padStart(2, '0')}-`)));
+const heicCase = (id: string, numbers: number[], refused: readonly string[], options = 'JPG (default)', format: 'jpeg' | 'png' = 'jpeg'): MatrixCase => ({
+  id,
+  tool: 'heic-to-jpg',
+  path: '/heic-to-jpg/',
+  options,
+  batch: batchOf(heicIds(...numbers), refused),
+  ...(format === 'png' ? { setup: choosePng } : {}),
+  deliverable: 'files',
+  outcome: heicOutcome(format),
+});
 CASES.push(
-  {
-    id: 'heic-to-jpg-a',
-    tool: 'heic-to-jpg',
-    path: '/heic-to-jpg/',
-    options: 'JPG (default)',
-    batch: batchOf(heicIds(1, 2, 3, 4, 10), HEIC_REFUSED),
-    deliverable: 'files',
-    outcome: heicOutcome('jpeg'),
-  },
-  {
-    id: 'heic-to-jpg-b',
-    tool: 'heic-to-jpg',
-    path: '/heic-to-jpg/',
-    options: 'JPG (default)',
-    batch: batchOf(heicIds(5, 6, 7, 8, 9), BROKEN.slice(0, 2)),
-    deliverable: 'files',
-    outcome: heicOutcome('jpeg'),
-  },
-  {
-    id: 'heic-to-jpg-png',
-    tool: 'heic-to-jpg',
-    path: '/heic-to-jpg/',
-    options: 'PNG',
-    batch: batchOf(heicIds(5, 7, 10), BROKEN.slice(2)),
-    setup: choosePng,
-    deliverable: 'files',
-    outcome: heicOutcome('png'),
-  },
+  heicCase('heic-to-jpg-a', [1, 2], HEIC_REFUSED.slice(0, 4)),
+  heicCase('heic-to-jpg-b', [5, 6], [BROKEN[0]]),
+  heicCase('heic-to-jpg-c', [3, 4, 10], HEIC_REFUSED.slice(4)),
+  heicCase('heic-to-jpg-d', [7, 8, 9], [BROKEN[1]]),
+  heicCase('heic-to-jpg-png', [5, 10], [BROKEN[2]], 'PNG', 'png'),
+  heicCase('heic-to-jpg-png-b', [7], [BROKEN[3]], 'PNG', 'png'),
 );
 
 // ---- WebP to JPG/PNG --------------------------------------------------------------------------------------------------------------
@@ -274,11 +270,13 @@ const swapTests = (fixtures: string[], refused: string[], id: string, options: s
     };
   }),
 });
-// JPG to PNG is the heavy half (a 12 MP photo becomes a PNG of tens of MB): the big photos in one batch.
+// JPG to PNG is the heavy half (a 12 MP photo becomes a PNG of tens of MB): the 12 MP photo alone, then the other two
+// big ones (the three in one batch passed the 60 s of a test on a slow CI WebKit, DECISOES § 88).
 const JPEGS = fixturesOf('jpeg');
 CASES.push(
   swapTests(fixturesOf('png'), [SMALL.webp, SMALL.heic, SMALL.avif, BROKEN[2], BROKEN[3]], 'png-to-jpg-png', 'PNG files go to JPG', ['Transparent areas became white']),
-  swapTests(BIG_PHOTOS, [SMALL.webp, SMALL.heic, SMALL.avif, BROKEN[0], BROKEN[1]], 'png-to-jpg-photos', 'JPG files go to PNG'),
+  swapTests(BIG_PHOTOS.slice(0, 1), [SMALL.webp, SMALL.heic, BROKEN[0]], 'png-to-jpg-photos', 'JPG files go to PNG'),
+  swapTests(BIG_PHOTOS.slice(1), [SMALL.avif, BROKEN[1]], 'png-to-jpg-photos-b', 'JPG files go to PNG'),
   swapTests(
     JPEGS.filter((name) => !BIG_PHOTOS.includes(name)),
     [SMALL.webp, SMALL.heic, SMALL.avif, BROKEN[0], BROKEN[1]],

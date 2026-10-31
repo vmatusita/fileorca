@@ -528,3 +528,15 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
   - Mais workers num runner de 2 vCPU, com trabalho de CPU (codecs WASM e axe), não reduzem o total, e a ficha pede a medida de várias execuções. O teste mais lento do WebKit (37 s) chegaria perto dos 60 s por teste.
   - O que pesa de verdade (a matriz e o axe em toda página, largura, tema e navegador) é alcance que a ficha não deixa tirar.
 - **Alternativa:** cortar (a) a (d) e as checagens repetidas e tentar workers 3 (provavelmente uns 1050 s a 1100 s, ainda acima de 900, com risco de teste instável).
+
+## § 88 · Os lotes pesados da matriz divididos para os 60 s de cada teste (F2, 31/out/2026)
+
+- **Contexto:** na execução 41207385209 (commit `2100e9b`, só documentos a mais que o anterior), o runner foi uns 40% mais lento. No WebKit, `heic-to-jpg-png` e `png-to-jpg-photos` passaram dos 60 s que cada teste tem, `heic-to-jpg-a` levou 59 s, `rotate-image` 52 s e `heic-to-jpg-b` 49 s. Na execução anterior, os mesmos ficaram entre 33 s e 46 s.
+- **Decisão:** dividir os lotes que chegam perto do limite, como a ficha permite: "um lote só é dividido quando não cabe em 60 s no WebKit do CI".
+  - O HEIC para JPG passa a quatro lotes (1 e 2; 5 e 6; 3, 4 e 10; 7, 8 e 9), e para PNG a dois (5 e 10; 7).
+  - Na PNG ↔ JPG, a foto de 12 MP vai sozinha e as outras duas grandes juntas.
+  - O Rotate passa a dois lotes: as fotos grandes e o resto, com a animação.
+  - Cada lote leva uma parte das recusas no meio, e todas as recusas continuam em cada ferramenta.
+  - Nenhuma fixture, opção ou checagem saiu. O tempo somado sobe pouco (uma carga de página a mais por lote), e cada teste fica com folga para a variação do runner. Localmente, nenhum lote passou de 8 s.
+- **Por quê:** um teste que passa ou falha conforme a velocidade do runner não serve de portão, e com a ADR-003 o mesmo teste rodaria no mesmo runner.
+- **Alternativa:** aumentar o tempo por teste (proibido pela ficha).
