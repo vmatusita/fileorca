@@ -1,0 +1,20 @@
+---
+// WebP to JPG (English only): the shared mold with this tool's panel.
+import ImageToolPage from '../image/ImageToolPage.astro';
+import WebpToJpgPanel from './Panel.tsx';
+import { panelData } from '../image/page.ts';
+import type { Lang } from '../../i18n/routes.ts';
+import type { SaveAsOptionsTexts } from '../../i18n/types.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const panel = panelData<SaveAsOptionsTexts>('webp-to-jpg', lang);
+---
+<ImageToolPage id="webp-to-jpg" lang={lang} panel={panel}>
+  <WebpToJpgPanel slot="panel" {...panel} />
+  <script>
+    import './mount.ts';
+  </script>
+</ImageToolPage>

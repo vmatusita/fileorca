@@ -1,0 +1,20 @@
+---
+// Rotate image (English only): the shared mold with this tool's panel.
+import ImageToolPage from '../image/ImageToolPage.astro';
+import RotatePanel from './Panel.tsx';
+import { panelData } from '../image/page.ts';
+import type { Lang } from '../../i18n/routes.ts';
+import type { RotateOptionsTexts } from '../../i18n/types.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const panel = panelData<RotateOptionsTexts>('rotate-image', lang);
+---
+<ImageToolPage id="rotate-image" lang={lang} panel={panel}>
+  <RotatePanel slot="panel" {...panel} />
+  <script>
+    import './mount.ts';
+  </script>
+</ImageToolPage>

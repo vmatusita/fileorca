@@ -1,0 +1,20 @@
+---
+// Resize image for a YouTube thumbnail (English only): the shared mold with the preset's own panel and texts.
+import ImageToolPage from '../../../image/ImageToolPage.astro';
+import YoutubeThumbnailPanel from './Panel.tsx';
+import { panelData } from '../../../image/page.ts';
+import type { Lang } from '../../../../i18n/routes.ts';
+import type { PresetOptionsTexts } from '../../../../i18n/types.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const panel = panelData<PresetOptionsTexts>('resize-image-youtube-thumbnail', lang);
+---
+<ImageToolPage id="resize-image-youtube-thumbnail" lang={lang} panel={panel}>
+  <YoutubeThumbnailPanel slot="panel" {...panel} />
+  <script>
+    import './mount.ts';
+  </script>
+</ImageToolPage>

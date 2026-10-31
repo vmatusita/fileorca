@@ -1,11 +1,29 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { chooseImage, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
+import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
 const CLEARANCE = 150;
-const TARGETS = '.fo-btn--download, input:not([type="file"]), select, textarea, .fo-seg, fieldset, .fo-drop, .fo-level, .fo-result, [data-oli]';
+// F2: the queue of files, the number fields (input:not([type="file"]) already holds them), the comparison, the crop
+// box with its corner handles and the next-step chips are measured too.
+const TARGETS = '.fo-btn--download, input:not([type="file"]), select, textarea, .fo-seg, fieldset, .fo-drop, .fo-level, .fo-result, [data-oli], .fo-filelist, .fo-file, .fo-input, .fo-ba, .fo-crop, .fo-crop__handle, .fo-next, .fo-queue__more';
+// The tool pages and presets that exist. A tool adds its path here when its page is built.
+const TOOL_PAGES = [
+  '/compress-image/',
+  '/compress-image/to-100kb/',
+  '/compress-image/to-1mb/',
+  '/resize-image/',
+  '/resize-image/youtube-thumbnail/',
+  '/crop-image/',
+  '/rotate-image/',
+  '/heic-to-jpg/',
+  '/webp-to-jpg/',
+  '/png-to-jpg/',
+  '/avif-to-jpg/',
+  '/convert-to-webp/',
+  '/image-to-pdf/',
+];
 // F1b: the coffee line of the result card is measured too (the card itself is already in TARGETS).
 const TARGETS_WITH_COFFEE = `${TARGETS}, .fo-result__support`;
 const VIEWPORTS = [
@@ -13,6 +31,12 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
 ];
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
+// The converters take one format each, so they get a small file of theirs (a JPG would be refused and no result would show).
+const PHOTO_OF: Record<string, string> = {
+  '/heic-to-jpg/': 'fixtures/images/heic-08-iphone13pro-paisagem-hdr-ios17.heic',
+  '/webp-to-jpg/': 'fixtures/images/gen-webp-exif-gps.webp',
+  '/avif-to-jpg/': 'fixtures/images/gen-avif.avif',
+};
 
 interface Box { kind: string; x: number; y: number; w: number; h: number }
 
@@ -53,25 +77,27 @@ for (const viewport of VIEWPORTS) {
   test.describe(`distância dos anúncios a ${viewport.width}×${viewport.height}`, () => {
     test.use({ viewport });
 
-    test('before the file and with the result and Download on screen', async ({ page }) => {
-      await page.goto('/compress-image/');
-      await hydrated(page);
-      await dismissCookies(page);
-      await expectClearance(page, 'antes do arquivo');
-      if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
-      await page.setInputFiles('input[type="file"]', PHOTO);
-      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-      await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
-      await expectClearance(page, 'com o resultado');
-    });
+    for (const path of TOOL_PAGES) {
+      test(`${path}: before the file and with the result and Download on screen`, async ({ page }) => {
+        await page.goto(path);
+        await hydrated(page);
+        await dismissCookies(page);
+        await expectClearance(page, 'antes do arquivo');
+        if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+        await page.setInputFiles('input[type="file"]', PHOTO_OF[path] ?? PHOTO);
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+        await expectClearance(page, 'com o resultado');
+      });
 
-    test('no AdSlot above the tool panel', async ({ page }) => {
-      await page.goto('/compress-image/');
-      await hydrated(page);
-      const panel = (await boxes(page, '.fo-drop'))[0];
-      expect(panel).toBeDefined();
-      for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y).toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
-    });
+      test(`${path}: no AdSlot above the tool panel`, async ({ page }) => {
+        await page.goto(path);
+        await hydrated(page);
+        const panel = (await boxes(page, '.fo-drop'))[0];
+        expect(panel).toBeDefined();
+        for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y).toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
+      });
+    }
   });
 }
 
@@ -111,6 +137,19 @@ for (const viewport of VIEWPORTS) {
       await dismissCookies(page);
       await useBadFile(page);
       await measure(page, 'erro');
+    });
+
+    test('with a batch: the queue, the error row, the comparison and the chips', async ({ page }) => {
+      await dismissCookies(page);
+      const photos = await jpegBatch(page, 8);
+      await chooseImages(page, [...photos.slice(0, 2), { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }, ...photos.slice(2)]);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(6);
+      await expect(page.locator('.fo-ba')).toHaveCount(1);
+      await expect(page.locator('.fo-next')).toBeVisible();
+      await measure(page, 'lote com a fila, o comparador e os atalhos');
+      await page.getByRole('button', { name: /^Show \d+ more$/ }).click();
+      await measure(page, 'fila inteira');
     });
 
     test('with the result and the coffee line', async ({ page }) => {
