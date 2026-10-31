@@ -11,13 +11,26 @@ import { pathToFileURL } from 'node:url';
 import { LANGUAGETOOL, JRE, ensureTool } from '../lib/tools.ts';
 
 const LANGUAGE: Record<string, string> = { en: 'en-US', pt: 'pt-BR', es: 'es' };
-const TEXT_FILE = /^src\/(?:i18n\/(en|pt|es)\/[\w-]+\.ts|tools\/[\w-]+\/i18n\/(en|pt|es)\.ts)$/;
+// Every text file the route map lists (src/i18n/routes.ts): page texts, a tool's texts, the texts
+// shared by the image tools and the texts of a preset (src/tools/<tool>/presets/<name>/i18n/<lang>.ts).
+// tests/unit/lint-texto-files.test.ts keeps this filter and the route map in step.
+export const TEXT_FILE = /^src\/(?:i18n\/(en|pt|es)\/[\w-]+\.ts|tools\/[\w-]+(?:\/presets\/[\w-]+)?\/i18n\/(en|pt|es)\.ts)$/;
 const SKIP_KEYS = new Set(['langCode', 'langSr', 'shortcut', 'pasteKey', 'synonyms', 'langNames', 'kbd']);
 const SAMPLES: Record<string, string> = { name: 'Victor', city: 'Curitiba', percent: '68%', query: 'mortgage', kbd: 'Ctrl V' };
 const CHUNK = 15_000;
 
 function git(args: string[]): string {
   return execFileSync('git', args, { encoding: 'utf8' }).trim();
+}
+
+/** Language of a site text file, or undefined when the path is not one. */
+export function textFileLang(file: string): string | undefined {
+  return TEXT_FILE.exec(file)?.slice(1).find(Boolean);
+}
+
+/** The site text files among `files` that exist, without repeats and sorted. */
+export function selectTextFiles(files: string[], exists: (file: string) => boolean = existsSync): string[] {
+  return [...new Set(files.map((file) => file.trim()).filter((file) => TEXT_FILE.test(file) && exists(file)))].sort();
 }
 
 /** Text files changed since the merge-base with the base branch (committed or not). */
@@ -32,7 +45,7 @@ export function changedTextFiles(): string[] {
     console.warn(`lint:texto: sem merge-base com ${base}; confere todos os textos`);
     files = git(['ls-files']).split('\n');
   }
-  return [...new Set(files.map((file) => file.trim()).filter((file) => TEXT_FILE.test(file) && existsSync(file)))].sort();
+  return selectTextFiles(files);
 }
 
 export function collectStrings(value: unknown, key = '', out: string[] = []): string[] {
@@ -133,7 +146,7 @@ if (import.meta.main) {
   }
   const byLang = new Map<string, string[]>();
   for (const file of files) {
-    const lang = TEXT_FILE.exec(file)?.slice(1).find(Boolean) ?? 'en';
+    const lang = textFileLang(file) ?? 'en';
     const module = (await import(pathToFileURL(resolve(file)).href)) as { default: unknown };
     byLang.set(lang, [...(byLang.get(lang) ?? []), ...collectStrings(module.default)]);
   }
