@@ -82,7 +82,8 @@ main :where(p, li) a:not([class]):hover, .fo-cookie a:hover { text-decoration-th
 .fo-table { width: 100%; border-collapse: collapse; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
 .fo-table th, .fo-table td { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--stroke-hair) solid var(--hairline); vertical-align: top; }
 .fo-table th { font-weight: 700; }
-.fo-table summary { display: flex; align-items: center; min-height: var(--tap-min); cursor: pointer; }
+/* 48px target, keeping the disclosure triangle of a list-item summary. */
+.fo-table summary { box-sizing: border-box; min-height: var(--tap-min); padding-block: 13px; color: var(--brand); font-weight: 600; cursor: pointer; }
 .fo-table pre { white-space: pre-wrap; font-size: 13px; line-height: 18px; max-height: 320px; overflow: auto; background: var(--surface-sunken); padding: var(--space-3); border-radius: var(--radius-xs); }
 
 /* Reduced motion: nothing animates or transitions on its own (the Oli stays still, the water rises

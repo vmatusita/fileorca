@@ -157,6 +157,17 @@ export async function reachCoffeeLine(page: Page): Promise<void> {
   await expect(page.locator('.fo-result .fo-result__support')).toBeVisible();
 }
 
+/**
+ * The coffee line in one use, for tests that only need it on screen (axe, ad distance): Accept, a
+ * count of two earlier uses, then the third. The rule itself is covered use by use in coffee.spec.ts.
+ */
+export async function coffeeLineInOneUse(page: Page): Promise<void> {
+  await dismissCookies(page, 'granted');
+  await page.evaluate(() => localStorage.setItem('fo-coffee', JSON.stringify({ uses: 2 })));
+  await useImage(page);
+  await expect(page.locator('.fo-result .fo-result__support')).toBeVisible();
+}
+
 /** A beat for effects and animations to start, so a "nothing shows" check is not vacuous. */
 export async function settle(page: Page, ms = 300): Promise<void> {
   await page.waitForTimeout(ms);

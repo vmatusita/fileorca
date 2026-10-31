@@ -1,9 +1,12 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { animationsDone, dismissCookies, hydrated, reachCoffeeLine, searchWithoutResult, useImage } from './lib/page.ts';
+import { animationsDone, coffeeLineInOneUse, dismissCookies, hydrated, searchWithoutResult, useImage } from './lib/page.ts';
 
-// axe-core (WCAG 2.2 AA and best practices) on every page, at 360 and 1280px.
+// axe-core (WCAG 2.2 AA and best practices) on every page, at 360 and 1280px. It runs with reduced
+// motion (DECISOES § 57): the site animates only transform and opacity, so the colours axe checks are
+// the same, the page is still, and the run fits the 15 minutes of pnpm verificar on the CI runner.
+// The motion itself is tested in design.spec.ts.
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
 
@@ -35,7 +38,7 @@ async function searchDialogOpen(page: Page): Promise<void> {
 async function coffeeLineOnScreen(page: Page): Promise<void> {
   await page.goto('/compress-image/');
   await hydrated(page);
-  await reachCoffeeLine(page);
+  await coffeeLineInOneUse(page);
   await animationsDone(page);
 }
 
@@ -48,7 +51,7 @@ async function searchWithoutResultOnScreen(page: Page): Promise<void> {
 
 for (const width of [360, 1280]) {
   test.describe(`axe a ${width}px, tema escuro`, () => {
-    test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, colorScheme: 'dark' });
+    test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, colorScheme: 'dark', reducedMotion: 'reduce' });
 
     for (const path of PAGES) {
       test(`${path}`, async ({ page }) => {
@@ -80,7 +83,7 @@ for (const width of [360, 1280]) {
   });
 
   test.describe(`axe a ${width}px`, () => {
-    test.use({ viewport: { width, height: width === 360 ? 740 : 800 } });
+    test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, reducedMotion: 'reduce' });
 
     for (const path of PAGES) {
       test(`${path}`, async ({ page }) => {

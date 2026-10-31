@@ -1,4 +1,4 @@
-// Build-time Oli sprite (F1b, decision 4). Assembles one <symbol> per pose from
+// Build-time Oli sprite (DECISOES § 43). Assembles one <symbol> per pose from
 // docs/design/assets/Oli/*.svg, plus the inline logo from Logo/logo-light.svg. A drawing that is the
 // same in two or more poses becomes ONE part (id oli-pN) referenced by <use>; oli-clip is declared
 // once and serves the poses and the logo; the unused clipPath "ic" of the peek is dropped. Path data

@@ -145,10 +145,11 @@ export default function ToolPanel({ lang, t, moreToolsHref, coffeeHref, adsOn }:
         format: FORMAT_NAME[file.type] ?? file.type,
       });
       setPhase('done');
-      if (newUse.current) {
-        // Only a file that came out smaller is a use (no coffee under "already optimized").
+      // Only a file that came out smaller is a use (no coffee under "already optimized"); a file that
+      // comes back unchanged still counts if a stronger level then shrinks it.
+      if (newUse.current && outcome.outcome === 'smaller') {
         newUse.current = false;
-        setCoffee(outcome.outcome === 'smaller' && countUse(adBlocked(adsOn)));
+        setCoffee(countUse(adBlocked(adsOn)));
       }
       setAnnounce(says(outcome.outcome, (1 - after / file.size) * 100, FORMAT_NAME[file.type] ?? file.type));
       track('tool_complete', { tool: TOOL, lang, outcome: outcome.outcome === 'smaller' ? 'smaller' : 'unchanged' });

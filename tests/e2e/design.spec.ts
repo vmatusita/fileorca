@@ -365,3 +365,89 @@ test.describe('largest contentful paint', () => {
     expect(last?.inSvg, `${label} is an svg`).toBe(false);
   });
 });
+
+// ---- regressions of the adversarial review (DECISOES § 40, § 42 and § 44) ------------------------
+
+test.describe('review regressions', () => {
+  test('reflow at 320px: no page and no tool state scrolls sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    const wide: string[] = [];
+    for (const path of PAGES) {
+      await page.goto(path);
+      const width = await page.evaluate(() => document.documentElement.scrollWidth);
+      if (width > 320) wide.push(`${path} ${width}px`);
+    }
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.setInputFiles('input[type="file"]', { name: 'IMG_20240101_123456_family_vacation_photo_final_v2.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+    await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
+    const error = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (error > 320) wide.push(`error with a long file name ${error}px`);
+    expect(wide).toEqual([]);
+  });
+
+  test('the prose keeps its width when the webfont replaces the fallback (no CLS from 68ch)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    let release = (): void => {};
+    const held = new Promise<void>((resolve) => (release = resolve));
+    await page.route('**/*.woff2', async (route) => {
+      await held;
+      await route.continue();
+    });
+    const figtreeLoaded = () => page.evaluate(() => [...document.fonts].some((face) => face.family.includes('Figtree') && !face.family.includes('Fallback') && face.status === 'loaded'));
+    await page.goto('/es/privacidad/', { waitUntil: 'domcontentloaded' });
+    expect(await figtreeLoaded()).toBe(false);
+    const before = await page.locator('article.fo-prose').evaluate((article) => article.getBoundingClientRect().width);
+    release();
+    await expect.poll(figtreeLoaded).toBe(true);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const after = await page.locator('article.fo-prose').evaluate((article) => article.getBoundingClientRect().width);
+    expect(after).toBe(before);
+  });
+
+  test('the segmented option keeps a focus ring after an arrow key', async ({ page }) => {
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.locator('input[name="ci-level"][value="recommended"]').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeFocused();
+    const outline = await page.locator('label.fo-seg__opt:has(input[value="strong"])').evaluate((label) => {
+      const style = getComputedStyle(label);
+      return `${style.outlineStyle} ${style.outlineWidth}`;
+    });
+    expect(outline).toBe('solid 3px');
+  });
+
+  test('the search placeholder is ink-muted, not the faint browser default', async ({ page }) => {
+    await page.goto('/404.html');
+    const colors = await page.evaluate(() => {
+      const input = document.querySelector('.fo-search__field input');
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--ink-muted)';
+      document.body.append(probe);
+      const inkMuted = getComputedStyle(probe).color;
+      probe.remove();
+      return { placeholder: input ? getComputedStyle(input, '::placeholder').color : '', inkMuted };
+    });
+    expect(colors.placeholder).toBe(colors.inkMuted);
+  });
+
+  test.describe('with reduced motion', () => {
+    test.use({ reducedMotion: 'reduce' });
+
+    test('a pressed button still sinks into its lip', async ({ page }) => {
+      await page.goto('/compress-image/');
+      const decline = page.locator('#fo-cookie [data-consent="denied"]');
+      await expect(decline).toBeVisible();
+      const box = await decline.boundingBox();
+      if (!box) throw new Error('no Decline button');
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      const pressed = await decline.evaluate((button) => getComputedStyle(button).transform);
+      await page.mouse.up();
+      expect(pressed).toBe('matrix(1, 0, 0, 1, 0, 4)');
+    });
+  });
+});

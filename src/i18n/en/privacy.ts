@@ -5,7 +5,7 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: October 30, 2026',
+  updated: 'Last updated: October 31, 2026',
   intro:
     'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
@@ -64,7 +64,7 @@ export default {
       heading: 'Your cookie choice in the browser',
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
-        "If you accept in the cookie notice, FileOrca also counts there how many files you finished in this browser, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it.",
+        "If you accept in the cookie notice, FileOrca also counts there how many files came out smaller in this browser, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
       ],
     },
     {

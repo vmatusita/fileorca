@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { chooseImage, dismissCookies, dragOver, hydrated, reachCoffeeLine, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
+import { chooseImage, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
@@ -114,7 +114,7 @@ for (const viewport of VIEWPORTS) {
     });
 
     test('with the result and the coffee line', async ({ page }) => {
-      await reachCoffeeLine(page);
+      await coffeeLineInOneUse(page);
       await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
     });
 
