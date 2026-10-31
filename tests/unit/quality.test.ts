@@ -25,7 +25,12 @@ describe('licenças', () => {
 
   it('splits what reaches the browser from build tools', () => {
     // The two fonts (OFL-1.1) are a browser dependency of the F1b: their .woff2 files ship with the site.
-    expect(browserPackages().map((pkg) => pkg.name)).toEqual(['@astrojs/preact', '@fontsource-variable/figtree', '@fontsource-variable/fredoka', 'astro', 'comlink', 'preact', 'tailwindcss']);
+    // The F2 adds the libraries of the image tools (jSquash codecs, libheif-js, @cantoo/pdf-lib, fflate).
+    expect(browserPackages().map((pkg) => pkg.name)).toEqual([
+      '@astrojs/preact', '@cantoo/pdf-lib', '@fontsource-variable/figtree', '@fontsource-variable/fredoka',
+      '@jsquash/avif', '@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/resize', '@jsquash/webp',
+      'astro', 'comlink', 'fflate', 'libheif-js', 'preact', 'tailwindcss',
+    ]);
     expect(buildPackages().map((pkg) => pkg.name)).toContain('satori');
     expect(buildPackages().map((pkg) => pkg.name)).not.toContain('preact');
   });

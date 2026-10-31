@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import preact from '@astrojs/preact';
 import tailwindcss from '@tailwindcss/vite';
 import { platformFiles } from './src/platform/build-files.ts';
+import { recordBundledModules } from './src/platform/bundle-record.ts';
 import { SITE_ORIGIN } from './src/platform/site.ts';
 
 // Everything the image tool pages share in the browser lands in one chunk, so a tool page loads two JS
@@ -24,6 +25,9 @@ const SHARED_ISLAND = new RegExp(
   ].join('|'),
 );
 
+// One instance for the page build and the worker build: both chunk sets go into one record (see bundle-record.ts).
+const bundleRecord = recordBundledModules();
+
 export default defineConfig({
   site: SITE_ORIGIN,
   output: 'static',
@@ -33,9 +37,10 @@ export default defineConfig({
   integrations: [preact(), platformFiles()],
   vite: {
     plugins: [tailwindcss()],
-    worker: { format: 'es' },
+    worker: { format: 'es', plugins: () => [bundleRecord] },
     build: {
       rolldownOptions: {
+        plugins: [bundleRecord],
         output: { codeSplitting: { groups: [{ name: 'island', test: SHARED_ISLAND }] } },
       },
     },
