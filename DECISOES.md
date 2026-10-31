@@ -795,7 +795,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
 ## § 108 · O WebKit do CI em três partes (ajuste-ci-webkit-tres, 31/out/2026)
 
-- **Contexto:** na F3, a parte 2 do WebKit chegou a 644,4 s (§ 105), com alvo de 700 s e limite de 900 s, e o mesmo runner varia de 30 a 40% entre execuções (§ 88). A F4 vai somar umas 25 páginas aos testes. Com `fullyParallel: true`, o `--shard` do Playwright divide por contagem de testes, na ordem dos arquivos.
+- **Contexto:** na F3, a parte 2 do WebKit chegou a 644,4 s (§ 105), com alvo de 700 s e limite de 900 s, e o mesmo runner varia de 30 a 40% entre execuções (§ 88 e § 105). A F4 vai somar umas 25 páginas aos testes. Com `fullyParallel: true`, o `--shard` do Playwright divide por contagem de testes, na ordem dos arquivos.
 - **Decisão:** a matriz do job `playwright` do `ci.yml` passa a ter `chromium`, `webkit 1 de 3`, `webkit 2 de 3` e `webkit 3 de 3`, com `--playwright=webkit --shard=1/3`, `2/3` e `3/3`. Com o `verificar`, o CI fica com cinco partes, cada uma com o limite de 900 s. O `merge` segue com `needs: [verificar, playwright]`, que espera todas as entradas da matriz. O Chromium segue numa parte só.
 - **O que não mudou:** nenhum teste, portão, limiar, timeout, `retries` ou número de workers, nem os outros jobs, o `pos-deploy.yml` e o `scripts/ci/`. O `scripts/verificar.ts` também não: o `plan()` já aceita `--shard=1/3`, `2/3` e `3/3` (conferido aqui).
 - **O `tests/unit/verificar.test.ts` ficou como está.** Ele não lê o `ci.yml`. A lista de partes dele é escrita à mão e segue com `1/2` e `2/2`. A ficha só manda ajustar teste ou script que leia a matriz, e nenhum lê (a revisão em contexto limpo procurou em `tests/` e `scripts/`). A asserção de cobertura tira o `--shard` antes de comparar, então vale para qualquer número de partes.
@@ -813,7 +813,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
   A parte mais lenta caiu de 644,4 s para 567,3 s e 583,9 s. Todas ficaram abaixo de 700 s nas duas execuções.
 - **A parte 3 segue a mais pesada.** Ela fica com a matriz, que a divisão por contagem não separa, e tem 2 a 3 vezes o tempo das outras duas partes do WebKit. A folga dela para o alvo é de 116 a 133 s.
-- **Disco na parte 2:** na tentativa 1, o `/` da parte 2 caiu de 10,9 GB livres para 609 MB em uns 60 s, durante os testes da Oli a 1280 × 800 do `design.spec.ts`, o mesmo ponto da § 90. O espaço não voltou até o fim.
+- **Disco na parte 2:** na tentativa 1, o `/` da parte 2 caiu de 10,9 GB livres para 609 MB em uns 60 s, em três degraus (2958, 4003 e 3327 MB). A janela começa nos testes da Oli a 1280 × 800 do `design.spec.ts` e segue pelos de movimento reduzido, de movimento e de regressão da mesma spec, a da § 90. O espaço não voltou até o fim.
   - Os 89 testes passaram.
   - O `du` das pastas medidas e o `find` de arquivos acima de 200 MB não acharam o espaço.
   - Na tentativa 2, a mesma parte ficou o tempo todo com uns 10,9 GB livres.

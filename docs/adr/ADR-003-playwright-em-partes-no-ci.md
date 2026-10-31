@@ -48,7 +48,7 @@ O Victor aceitou a opção 1. O ajuste `ajuste-ci-partes` a implementa com uma d
 
 ## Adendo (31/out/2026): WebKit em três partes
 
-Na F3, a parte 2 do WebKit chegou a 644,4 s, perto do alvo de 700 s (DECISOES § 105). O ajuste `ajuste-ci-webkit-tres` divide o WebKit em três partes antes da F4, como esta ADR manda quando uma parte passa de uns 700 s (DECISOES § 108).
+Na F3, a parte 2 do WebKit chegou a 644,4 s, perto do alvo de 700 s (DECISOES § 105). O ajuste `ajuste-ci-webkit-tres` divide o WebKit em três partes antes da F4, como manda a regra desta ADR no CLAUDE.md (seção "Ajuste: CI em partes (ADR-003)") quando uma parte passa de uns 700 s (DECISOES § 108).
 
 - **O que mudou:** a matriz do job `playwright` passa a `chromium`, `webkit 1 de 3`, `webkit 2 de 3` e `webkit 3 de 3` (`--playwright=webkit --shard=i/3`). O CI tem cinco partes, cada uma com o limite de 900 s, e o `merge` espera todas.
 - **O que não mudou:** o `scripts/verificar.ts`, que já aceitava qualquer `--shard=i/n`, e nenhum teste, portão, limiar, timeout, `retries` ou número de workers.

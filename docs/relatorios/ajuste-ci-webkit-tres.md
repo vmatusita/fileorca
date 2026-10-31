@@ -170,7 +170,7 @@ Leitura:
 
 - A parte mais lenta caiu uns 60 a 77 s, e a folga dela para o alvo foi de uns 56 s para 116 a 133 s.
 - A parte 3 tem de 2 a 3 vezes o tempo das outras duas partes do WebKit. Ela ficou com a matriz, que a divisão por contagem não separa.
-- O Chromium, que não mudou, foi de 315,2 s na F3 para 395,7 a 404,3 s. Isso fica um pouco acima da faixa que a § 105 mediu (312,5 a 391,0 s), mas dentro da variação de 30 a 40% do runner (§ 88).
+- O Chromium, que não mudou, foi de 315,2 s na F3 para 395,7 a 404,3 s. Isso fica um pouco acima da faixa que a § 105 mediu (312,5 a 391,0 s), mas dentro da variação de 30 a 40% do runner (§ 88 e § 105).
 - Quando a F4 somar testes no começo da lista (o `a11y` é o primeiro arquivo), cada parte cresce um terço deles em contagem. Os testes novos ficam nas primeiras partes, e a parte 3 recebe, além da matriz, o fim do `design.spec.ts` que hoje está na parte 2. Antes de juntar muitos testes, vale rodar o `--list` das três partes (CLAUDE.md, seção nova).
 
 ## Critério 6: o comentário do job `merge`
@@ -210,7 +210,7 @@ Nenhuma lente achou lacuna de requisito ou de correção. Houve um achado baixo:
 
 ## Risco registrado: o disco da parte 2 do WebKit
 
-Na tentativa 1, o diagnóstico de disco do `verificar` mostrou o `/` da parte 2 de 3 caindo de 10 897 MB livres às 23:04:44 para 609 MB às 23:05:44. A queda veio em três degraus de 3 a 4 GB, durante os testes "Oli boxes a 1280×800" do `design.spec.ts`:
+Na tentativa 1, o diagnóstico de disco do `verificar` mostrou o `/` da parte 2 de 3 caindo de 10 897 MB livres às 23:04:44 para 609 MB às 23:05:44. A queda veio em três degraus, de 2958, 4003 e 3327 MB, numa janela de 60 s do `design.spec.ts`. A janela começa nos testes "Oli boxes a 1280×800", que terminaram às 23:05:06 com 7939 MB livres, e segue pelos de "prefers-reduced-motion: reduce", "motion without the preference" e "review regressions":
 
 ```text
 [disco] 23:04:44 / usado 62412 MB, livre 10897 MB | ...
@@ -225,7 +225,7 @@ Na tentativa 1, o diagnóstico de disco do `verificar` mostrou o `/` da parte 2 
 - O `find / -xdev -type f -size +200M` não achou nenhum arquivo. O espaço está num lugar que o diagnóstico não enxerga, talvez arquivos apagados que algum processo ainda segura abertos.
 - O log da parte não tem nenhuma linha de erro ou queda do WebKit.
 
-É o mesmo ponto da § 90 (Oli animada a 1280 px), que tinha levado ao `ENOSPC`.
+É a mesma spec da § 90 (o `design.spec.ts`, que começa pela Oli animada a 1280 px), onde a queda tinha levado ao `ENOSPC`.
 
 - Na tentativa 2, a mesma parte ficou o tempo todo com uns 10,9 GB livres.
 - Na F3 (41236243545) e em quatro execuções recentes com duas partes (41231605642, 41237303682, 41240391852 e 41241805727), nenhuma parte desceu de 9,7 GB livres.
