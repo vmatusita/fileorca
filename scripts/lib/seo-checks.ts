@@ -66,6 +66,17 @@ export function compareAlternates(found: PageHead['alternates'], expected: PageH
   ];
 }
 
+/**
+ * robots.txt that blocks no crawler (Googlebot, Mediapartners-Google and the AI crawlers included: no
+ * Disallow with a path in any group) and points to the sitemap index (PLANO "Busca com IA").
+ */
+export function robotsProblems(robots: string, origin: string): string[] {
+  const problems: string[] = [];
+  if (!/^User-agent: \*$/m.test(robots) || !/^Allow: \/$/m.test(robots) || /^\s*Disallow:\s*\S/im.test(robots)) problems.push('robots.txt não libera tudo');
+  if (!robots.includes(`Sitemap: ${origin}/sitemap-index.xml`)) problems.push('robots.txt não aponta o índice de sitemaps');
+  return problems;
+}
+
 /** A urlset sitemap with the expected absolute URLs, no duplicates, under 50,000 entries. */
 export function validateSitemap(xml: string, expected: string[], origin: string): string[] {
   const problems: string[] = [];

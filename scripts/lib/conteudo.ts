@@ -171,10 +171,21 @@ export function checkPresetPage(html: string, others: Record<string, string>): s
   return [`só ${own.length} bloco(s) próprio(s) (${own.join(', ') || 'nenhum'}), pede pelo menos ${MIN_OWN_BLOCKS} que não existam na página-mãe nem nos presets irmãos; repetidos: ${shared.join(', ') || 'nenhum'}`];
 }
 
+/**
+ * Visible text of a page inside `selector` (the body by default), one space at each element boundary;
+ * scripts, styles, noscript, templates, SVG and the elements of `drop` are left out.
+ */
+export function visibleText(html: string, selector = 'body', drop: readonly string[] = []): string {
+  const root = parsePage(html);
+  for (const element of drop.length ? root.querySelectorAll(drop.join(', ')) : []) element.remove();
+  const scope = root.querySelector(selector);
+  if (!scope && selector !== 'body') return '';
+  return textOf(scope ?? root).replace(/\s+/g, ' ').trim();
+}
+
 /** Placeholder wording found in the visible text of a page (not in attributes, scripts or styles). */
 export function findPlaceholders(html: string): string[] {
-  const root = parsePage(html);
-  const text = textOf(root.querySelector('body') ?? root).replace(/\s+/g, ' ');
+  const text = visibleText(html);
   return PLACEHOLDERS.filter(({ pattern }) => pattern.test(text)).map(({ label }) => label);
 }
 
