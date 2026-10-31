@@ -1,0 +1,725 @@
+{
+  "_doc": "Oracle for the image fixtures in fixtures/images/. Written by hand from fixtures/ORIGEM.md (exiftool 13.60 + pillow-heif 1.8.1, columns \"Gravado\" and \"Aparece\") plus an independent ISO-BMFF/JPEG walk, and from the construction of each gen-* file. No engine code produced these numbers.\nPer file: format = what the BYTES are (never the extension); storedWidth/storedHeight = pixels as stored (HEIC: ispe of the primary item, before irot); displayWidth/displayHeight = size on screen after applying the orientation ONCE (HEIC: the container irot/imir, never the Exif tag on top of it);\norientation = Exif Orientation tag 1-8 (1 when there is none); hasGps = the GPS IFD pointer (Exif tag 0x8825) is present, which is what no output may carry; gpsKind = real (coordinates), zeroed (0/1 rationals, heic-10), empty (empty refs and 0/0 rationals, heic-09) or none;\nhasAlpha = the pixels carry real transparency; imageCount = top-level images in the file (heic-10 = 2, the primary is item 26); animated = more than one frame; expect = what the engine must do with the file: ok (decodes), empty (0 bytes), unsupported (not an image), truncated (cut short), decode (marker structure damaged, no browser decodes it).\nheif (HEIC only): majorBrand/compatibleBrands = the ftyp box; primaryItemId = pitm; primaryType = item type of the primary (grid in all ten); ispe = [w,h] of the primary; irot = degrees ANTICLOCKWISE stored in the irot property of the primary (null when absent); imir = null (no fixture has one); exifItem = an Exif item exists; exifItemIds, topLevelImageItemIds, auxiliaryItemIds, thumbnailItemIds = ids, so a parser test can prove the engine ignores gain maps, depth maps and thumbnails; iccDisplayP3 = the primary carries a Display P3 ICC profile (heic-09 has no colr at all, so it is sRGB).\nExif PixelXDimension/PixelYDimension are NOT reliable (heic-01..08 say 4032x3024 whatever the real size): never compare against them.\nGenerated files (gen-*, built by scripts/fixtures/generate.ts, SHA-256 in fixtures/ORIGEM.md): the values follow from the construction of each file. A null size means no reader can trust one (corrupt) or there is no image (text, empty). frameCount (animated WebP) = ANMF frames; pixels = width x height when a file exists to sit above a limit.",
+  "files": {
+    "heic-01-iphone11pro-retrato-livephoto.heic": {
+      "format": "heic",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 3024,
+      "storedHeight": 4032,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          3024,
+          4032
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          50
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Exif PixelXDimension/PixelYDimension say 4032x3024 but the image is 3024x4032 portrait with irot=0 and Orientation 1: never use Exif dimensions. Also carries an XMP item (application/rdf+xml)."
+      ]
+    },
+    "heic-02-iphone11pro-retrato-livephoto.heic": {
+      "format": "heic",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 3024,
+      "storedHeight": 4032,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          3024,
+          4032
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          50
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Exif PixelXDimension/PixelYDimension say 4032x3024 but the image is 3024x4032 portrait with irot=0 and Orientation 1: never use Exif dimensions. Also carries an XMP item (application/rdf+xml)."
+      ]
+    },
+    "heic-03-iphone11pro-retrato-livephoto.heic": {
+      "format": "heic",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 3024,
+      "storedHeight": 4032,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          3024,
+          4032
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          50
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Exif PixelXDimension/PixelYDimension say 4032x3024 but the image is 3024x4032 portrait with irot=0 and Orientation 1: never use Exif dimensions. Also carries an XMP item (application/rdf+xml)."
+      ]
+    },
+    "heic-04-iphone11promax-retrato-livephoto-gps.heic": {
+      "format": "heic",
+      "displayWidth": 2566,
+      "displayHeight": 3313,
+      "storedWidth": 2566,
+      "storedHeight": 3313,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "heic",
+          "mif1"
+        ],
+        "primaryItemId": 43,
+        "primaryType": "grid",
+        "ispe": [
+          2566,
+          3313
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          44
+        ],
+        "topLevelImageItemIds": [
+          43
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "No Exif Orientation tag (null) and irot=0. Exif PixelXDimension/PixelYDimension say 4032x3024 but the image is 2566x3313 (portrait): never use Exif dimensions. 42 tiles (7x6 of 512) cover 3072x3584 > 2566x3313: the grid output size crops the tile canvas."
+      ]
+    },
+    "heic-05-iphone13promax-retrato-orientacao6-hdr.heic": {
+      "format": "heic",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 4032,
+      "storedHeight": 3024,
+      "orientation": 6,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "MiHE",
+          "MiPr",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          4032,
+          3024
+        ],
+        "irot": 270,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          53
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [
+          51
+        ],
+        "thumbnailItemIds": [
+          50
+        ],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Double-rotation trap: primary grid is stored 4032x3024 with irot=270 (anticlockwise) = 90 clockwise; Exif Orientation is 6 as well. Orientation must be applied ONCE (container), never again from Exif. Wrong result is 4032x3024 (lying down) or upside-down. Correct: 3024x4032.",
+        "HDR gain map is auxiliary item 51 (2016x1512, irot 270) - must be ignored; thumbnail item 50 (320x240, irot 270) must be ignored."
+      ]
+    },
+    "heic-06-iphone7-paisagem-gps.heic": {
+      "format": "heic",
+      "displayWidth": 4032,
+      "displayHeight": 3024,
+      "storedWidth": 4032,
+      "storedHeight": 3024,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          4032,
+          3024
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          51
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [
+          50
+        ],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Has a 320x240 thumbnail item (50) - must be ignored."
+      ]
+    },
+    "heic-07-iphone13pro-paisagem-profundidade-hdr-gps.heic": {
+      "format": "heic",
+      "displayWidth": 4032,
+      "displayHeight": 3024,
+      "storedWidth": 4032,
+      "storedHeight": 3024,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "MiHE",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          4032,
+          3024
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          50
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [
+          52,
+          54
+        ],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Auxiliary items: 52 HDR gain map (2016x1512), 54 depth (768x576, urn:mpeg:hevc:2015:auxid:2). Both hidden, must be ignored. GPS is real (the owners published it)."
+      ]
+    },
+    "heic-08-iphone13pro-paisagem-hdr-ios17.heic": {
+      "format": "heic",
+      "displayWidth": 1512,
+      "displayHeight": 850,
+      "storedWidth": 1512,
+      "storedHeight": 850,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "MiHE",
+          "miaf",
+          "MiHB",
+          "heic"
+        ],
+        "primaryItemId": 7,
+        "primaryType": "grid",
+        "ispe": [
+          1512,
+          850
+        ],
+        "irot": 0,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          8
+        ],
+        "topLevelImageItemIds": [
+          7
+        ],
+        "auxiliaryItemIds": [
+          10
+        ],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Exif PixelXDimension/PixelYDimension say 4032x3024 but the image is 1512x850 (author downscaled): never use Exif dimensions. The HDR gain map (aux item 10, 756x426) carries a clap (756x425) - only on the aux image, not the primary."
+      ]
+    },
+    "heic-09-samsung-s10-retrato-orientacao6.heic": {
+      "format": "heic",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 4032,
+      "storedHeight": 3024,
+      "orientation": 6,
+      "hasGps": true,
+      "gpsKind": "empty",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "mif1",
+          "heic"
+        ],
+        "primaryItemId": 49,
+        "primaryType": "grid",
+        "ispe": [
+          4032,
+          3024
+        ],
+        "irot": 270,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          51
+        ],
+        "topLevelImageItemIds": [
+          49
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [
+          50
+        ],
+        "iccDisplayP3": false
+      },
+      "notes": [
+        "ORIGEM says this file has real GPS; it does not. The Exif has the GPS IFD pointer (tag 0x8825, tags 1-4) but LatRef/LonRef are empty strings and both rationals are 0/0: an empty placeholder. It still counts as \"GPS tag present\" (hasGps true), so it is a valid negative control, like heic-10.",
+        "Same double-rotation trap as heic-05 (irot=270 + Exif Orientation 6). No colr/ICC (treat as sRGB). meta box comes AFTER mdat, then a trailing non-standard box sefd. GPS DISCREPANCY: ORIGEM says real GPS; the file has the GPS IFD (tag 0x8825: tags 1-4) but LatRef/LonRef are empty strings and both rationals are 0/0 (empty placeholder). Treat like heic-10: tag present, no coordinates."
+      ]
+    },
+    "heic-10-visionpro-espacial-2imagens.heic": {
+      "format": "heic",
+      "displayWidth": 2560,
+      "displayHeight": 2560,
+      "storedWidth": 2560,
+      "storedHeight": 2560,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "zeroed",
+      "hasAlpha": false,
+      "imageCount": 2,
+      "expect": "ok",
+      "heif": {
+        "majorBrand": "heic",
+        "compatibleBrands": [
+          "heic",
+          "mif1"
+        ],
+        "primaryItemId": 26,
+        "primaryType": "grid",
+        "ispe": [
+          2560,
+          2560
+        ],
+        "irot": null,
+        "imir": null,
+        "exifItem": true,
+        "exifItemIds": [
+          54,
+          55
+        ],
+        "topLevelImageItemIds": [
+          26,
+          52
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": true
+      },
+      "notes": [
+        "Two top-level grid items (26 = primary/left eye, 52 = right eye) in a ster group (grpl). Output must be ONE file from item 26 (pitm). libheif-js decode() returns both ([0].is_primary()=true, [1]=false). GPS IFD present on the primary Exif (item 54): LatRef N, LonRef E, all rationals 0/1, AltRef 0, Alt 0/1 -> zeroed (0,0); tag must still vanish. The right-eye Exif (item 55) has no GPS. Primary has no irot/imir. Items carry 3 uuid properties each (Apple spatial metadata)."
+      ]
+    },
+    "jpg-01-pixel2-retrato-gps.jpg": {
+      "format": "jpeg",
+      "displayWidth": 3024,
+      "displayHeight": 4032,
+      "storedWidth": 3024,
+      "storedHeight": 4032,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "notes": [
+        "APP1 carries an embedded Exif thumbnail JPEG with its own SOI/SOF: a naive search for FFC0 finds the thumbnail first. Read SOF from top-level segments only.",
+        "APP1 (39,264 bytes) comes BEFORE JFIF (APP0); ICC_PROFILE APP2 is sRGB IEC61966-2.1 (596 bytes)."
+      ]
+    },
+    "jpg-02-iphone6-paisagem-gps.jpg": {
+      "format": "jpeg",
+      "displayWidth": 3264,
+      "displayHeight": 2448,
+      "storedWidth": 3264,
+      "storedHeight": 2448,
+      "orientation": 1,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "notes": [
+        "APP1 carries an embedded Exif thumbnail JPEG with its own SOI/SOF: a naive search for FFC0 finds the thumbnail first. Read SOF from top-level segments only."
+      ]
+    },
+    "jpg-03-iphone5-paisagem-orientacao3-gps.jpg": {
+      "format": "jpeg",
+      "displayWidth": 3264,
+      "displayHeight": 2448,
+      "storedWidth": 3264,
+      "storedHeight": 2448,
+      "orientation": 3,
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "notes": [
+        "Orientation 3 = rotate 180: dimensions do NOT change (3264x2448 stored and displayed), so only a pixel comparison (not size) detects a missing/doubled rotation.",
+        "APP1 carries an embedded Exif thumbnail JPEG with its own SOI/SOF: a naive search for FFC0 finds the thumbnail first. Read SOF from top-level segments only."
+      ]
+    },
+    "gen-jpg-01-orientacao6.jpg": {
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "jpeg",
+      "displayWidth": 1200,
+      "displayHeight": 1600,
+      "storedWidth": 1600,
+      "storedHeight": 1200,
+      "orientation": 6,
+      "notes": [
+        "jpg-01 reduced to 1200x1600 upright, stored turned 90 degrees counter-clockwise (1600x1200), so Orientation 6 (rotate 90 clockwise) shows it upright. The APP1 is the ORIGINAL one of jpg-01 with only the Orientation value changed from 1 to 6: GPS is kept.",
+        "The stale tags are left as they were (IFD0 ImageWidth/ImageLength and ExifIFD PixelXDimension/PixelYDimension say 3024x4032, the Exif thumbnail is the unrotated 189x252): never read size from them.",
+        "The browsers apply the Orientation by themselves; the stored pixels are what jpeg.ts withOrientation(bytes, 1) lets a test decode."
+      ]
+    },
+    "gen-jpg-02-orientacao8.jpg": {
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "jpeg",
+      "displayWidth": 1600,
+      "displayHeight": 1200,
+      "storedWidth": 1200,
+      "storedHeight": 1600,
+      "orientation": 8,
+      "notes": [
+        "jpg-02 at 1600x1200 upright, stored turned 90 degrees clockwise (1200x1600), so Orientation 8 (rotate 90 counter-clockwise) shows it upright. ORIGINAL APP1 of jpg-02, only the Orientation changed from 1 to 8: GPS is kept.",
+        "Stale tags as in the Orientation 6 file (3264x2448 in the Exif, thumbnail 160x120 unrotated)."
+      ]
+    },
+    "gen-png-transparente.png": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": true,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "png",
+      "displayWidth": 800,
+      "displayHeight": 600,
+      "storedWidth": 800,
+      "storedHeight": 600,
+      "orientation": 1,
+      "notes": [
+        "jpg-03 (upright) at 800x600 with an alpha fade: opaque in the middle (alpha 255), partly transparent around the middle of the edges, fully transparent (alpha 0) in the four corners. Colour type 6, chunks IHDR, IDAT..., IEND only.",
+        "Flattened on white the corners are white; flattened on black they would be black: that tells the conversions apart."
+      ]
+    },
+    "gen-webp-exif-gps.webp": {
+      "hasGps": true,
+      "gpsKind": "real",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "webp",
+      "displayWidth": 1600,
+      "displayHeight": 1200,
+      "storedWidth": 1600,
+      "storedHeight": 1200,
+      "orientation": 1,
+      "notes": [
+        "jpg-02 at 1600x1200 as lossy WebP in a VP8X container with the EXIF flag and an EXIF chunk after the image. The chunk holds the TIFF block of jpg-02 (real GPS, Orientation 1) without the \"Exif\\0\\0\" prefix, as the WebP spec says; readers must accept both."
+      ]
+    },
+    "gen-webp-animada.webp": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "webp",
+      "displayWidth": 320,
+      "displayHeight": 240,
+      "storedWidth": 320,
+      "storedHeight": 240,
+      "orientation": 1,
+      "animated": true,
+      "frameCount": 2,
+      "notes": [
+        "VP8X (animation flag), ANIM, two ANMF frames of 320x240, 500 ms each. Frame 1 is a red field (#d9381e), frame 2 a blue field (#1e5ad9), each with a white band and a ring. WebP to JPG/PNG must output frame 1 (red) and say so. The jSquash WebP decoder throws on it: the browser decode is the only way."
+      ]
+    },
+    "gen-avif.avif": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "avif",
+      "displayWidth": 1600,
+      "displayHeight": 1200,
+      "storedWidth": 1600,
+      "storedHeight": 1200,
+      "orientation": 1,
+      "heif": {
+        "majorBrand": "avif",
+        "compatibleBrands": [
+          "avif",
+          "mif1",
+          "miaf",
+          "MA1B"
+        ],
+        "primaryItemId": 1,
+        "primaryType": "av01",
+        "ispe": [
+          1600,
+          1200
+        ],
+        "irot": null,
+        "imir": null,
+        "exifItem": false,
+        "exifItemIds": [],
+        "topLevelImageItemIds": [
+          1
+        ],
+        "auxiliaryItemIds": [],
+        "thumbnailItemIds": [],
+        "iccDisplayP3": false
+      },
+      "notes": [
+        "jpg-03 with its Orientation 3 applied (turned 180 degrees) at 1600x1200, so the file is upright with no rotation property and no Exif. Encoded by @jsquash/avif in Node (single-thread build), quality 50, speed 8.",
+        "The AVIF side of the AVIF-or-HEIC sniffing case: major brand avif, mif1 among the compatible brands. Chromium decodes it; the WebKit 27.2 of Playwright on Windows does not (createImageBitmap rejects it), so a test that needs the pixels decodes it in Chromium only."
+      ]
+    },
+    "gen-jpg-truncado.jpg": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "truncated",
+      "format": "jpeg",
+      "displayWidth": 1600,
+      "displayHeight": 1200,
+      "storedWidth": 1600,
+      "storedHeight": 1200,
+      "orientation": 1,
+      "notes": [
+        "A 1600x1200 baseline JPEG of jpg-02 cut at 60% of its bytes: SOI, tables, SOF and the first rows of the scan are intact, there is no EOI. Chromium refuses to decode it; WebKit decodes the top part without an error. Both outcomes happen, so the engine must recognise the file by its structure (no EOI) and refuse it with the incomplete-file message."
+      ]
+    },
+    "gen-jpg-corrompido.jpg": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 0,
+      "expect": "decode",
+      "format": "jpeg",
+      "displayWidth": null,
+      "displayHeight": null,
+      "storedWidth": null,
+      "storedHeight": null,
+      "orientation": 1,
+      "notes": [
+        "A valid 800x600 JPEG of jpg-02 with its marker structure damaged: the length of the first DQT points into the scan data and the SOF height is 0. It starts with FF D8 FF and ends with FF D9, so a check of the first and last bytes accepts it. A marker walk throws (bad marker at 1520), and neither Chromium nor WebKit decodes it. The size is null because no reader can trust the SOF."
+      ]
+    },
+    "gen-png-extensao-jpg.jpg": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "png",
+      "displayWidth": 640,
+      "displayHeight": 480,
+      "storedWidth": 640,
+      "storedHeight": 480,
+      "orientation": 1,
+      "notes": [
+        "PNG bytes (jpg-02 at 640x480, opaque, RGBA colour type with all alpha 255) in a file called .jpg. The type comes from the bytes, so Compress image gives a .png back, Image to PDF embeds it as a PNG and the JPG tools treat it as a PNG."
+      ]
+    },
+    "gen-texto-extensao-png.png": {
+      "format": "text",
+      "displayWidth": null,
+      "displayHeight": null,
+      "storedWidth": null,
+      "storedHeight": null,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 0,
+      "expect": "unsupported",
+      "notes": [
+        "Two lines of UTF-8 text in a file called .png. Not an image: the tools refuse it with the not-an-image message and the rest of the batch goes on."
+      ]
+    },
+    "gen-vazio.jpg": {
+      "format": "empty",
+      "displayWidth": null,
+      "displayHeight": null,
+      "storedWidth": null,
+      "storedHeight": null,
+      "orientation": 1,
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 0,
+      "expect": "empty",
+      "notes": [
+        "0 bytes, called .jpg. Refused with the empty-file message."
+      ]
+    },
+    "gen-grande-4100x4100.jpg": {
+      "hasGps": false,
+      "gpsKind": "none",
+      "hasAlpha": false,
+      "imageCount": 1,
+      "expect": "ok",
+      "format": "jpeg",
+      "displayWidth": 4100,
+      "displayHeight": 4100,
+      "storedWidth": 4100,
+      "storedHeight": 4100,
+      "orientation": 1,
+      "pixels": 16810000,
+      "notes": [
+        "4100 x 4100 = 16,810,000 px, 32,784 above the 16,777,216 px (4096 x 4096) canvas limit of Safari on iPhone, so it takes the no-canvas path. A gradient and flat colour blocks with no Exif: small (about 190 KB) and cheap to decode. The boundary itself (4096 x 4096, not \"above\") belongs in a unit test of the decision function, not in a file."
+      ]
+    }
+  }
+}
