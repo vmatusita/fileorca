@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
+import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -127,13 +128,14 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   await page.goto('/');
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
-  await expect(dialog.getByRole('option')).toHaveCount(13);
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length;
+  await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });
   // The list scrolls inside the box; the arrow keys keep the chosen row in view.
   const list = dialog.getByRole('listbox');
   expect(await list.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
-  for (let step = 0; step < 12; step += 1) await page.keyboard.press('ArrowDown');
+  for (let step = 0; step < pages - 1; step += 1) await page.keyboard.press('ArrowDown');
   await expect(dialog.getByRole('option').last()).toHaveAttribute('aria-selected', 'true');
   await expect(dialog.getByRole('option').last()).toBeInViewport({ ratio: 1 });
   await expect(close).toBeInViewport({ ratio: 1 });
