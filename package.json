@@ -28,7 +28,8 @@
     "gate:dinheiro-saude": "node scripts/gates/dinheiro-saude.ts",
     "gate:actionlint": "node scripts/gates/actionlint.ts",
     "design:gerar": "node scripts/design/tema.ts && node scripts/design/folha.ts",
-    "screenshots": "node scripts/screenshots.ts"
+    "screenshots": "node scripts/screenshots.ts",
+    "fixtures": "node scripts/fixtures/generate.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
