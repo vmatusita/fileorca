@@ -561,6 +561,35 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
 - **Os outros três sintomas:** o aviso fecha (o `consent.spec.ts` clica em Aceitar e Recusar e espera o aviso escondido), não volta (o mesmo teste navega por três páginas depois da escolha) e a página não pula na carga (a reserva entra antes da primeira pintura, pelo script inline no fim do `body`; o CLS do Lighthouse está no relatório). Nenhum dos três se reproduziu.
 - **Alternativa:** dar ao `html` o fundo `--deep` (pintaria de azul o fim da página antes do rodapé enquanto ela carrega e muda o canvas do site inteiro) ou um elemento vazio depois do rodapé com a altura da reserva (mais marcação e o mesmo resultado).
 
+## § 92 · Revisão da F3: seis lentes sobre um commit fixo, numa worktree só de leitura (F3, 31/out/2026)
+
+- **Decisão:** a revisão cobre tudo o que está na `main` mais a correção do aviso, o `gate:prontidao` e o hub. O commit revisado é o do plano `docs/relatorios/fase-03-plano.md`, e o hash fica registrado no `REVISAO-F3.md`.
+- **O gabarito:** as fichas F1a, F1b e F2, os critérios dos prompts dessas runs, o CLAUDE.md, o DECISOES.md, o `docs/design/`, a "Nota para a F3" e os baixos da F2.
+- **As seis lentes:** corretude, privacidade, anúncio e consentimento, acessibilidade, desempenho e SEO técnico, e aderência ao design system. Cada lente é um subagente Sonnet em contexto limpo, que trabalha só por leitura numa worktree em `.claude/worktrees/revisao-f3`, com o próprio `pnpm install --frozen-lockfile` e o próprio `pnpm build`.
+- **Execução em paralelo:** cada lente tem a própria porta (`FO_PORT` de 4174 a 4179) e a própria pasta de saída do Playwright, para duas execuções nunca usarem o servidor uma da outra.
+- **O que a lente devolve:** cada achado com id, severidade, `arquivo:linha`, evidência rodada, a regra violada, a correção proposta e o custo no CI. Preferência de estilo não é achado.
+- **Por quê:** a ficha F3 pede revisão adversarial em subagentes paralelos. Uma worktree fixa evita que a revisão leia código que eu estou mudando, e a porta própria evita o problema da porta 4173 que a F2 achou.
+- **Alternativa:** revisar na pasta de trabalho. Seria mais barato, mas a lente leria arquivos no meio da edição.
+
+## § 93 · Severidade e cético por achado (F3, 31/out/2026)
+
+- **Decisão:** a severidade segue a decisão 3 do prompt da F3.
+  - **Crítico:** arquivo que sai, número na URL ou no GA4, "O que derruba conta", `noindex` ou `robots.txt` em produção, saída errada ou com GPS, merge ou pós-deploy quebrados.
+  - **Alto:** WCAG A ou AA no fluxo principal, desvio visível do design system em componente de toda página, erro funcional, item de prontidão, orçamento estourado ou promessa da Privacidade não cumprida.
+  - **Médio:** erro real de impacto pequeno, ou teste que não prova o que diz.
+  - **Baixo:** o resto.
+- **Os céticos:** cada crítico, alto e médio ganha um cético Sonnet próprio, em contexto limpo, que tenta refutar o achado. Ele reproduz o problema, lê a regra e procura teste que já cubra o caso. Os baixos de cada lente vão a um cético só, em lote. O veredito é confirmado, refutado com a evidência, ou rebaixado com a severidade nova. Só o confirmado segue.
+- **Por quê:** um achado plausível e errado custa uma correção desnecessária e um teste a mais no CI.
+
+## § 94 · O que se corrige na F3 (F3, 31/out/2026)
+
+- **Decisão:**
+  - Crítico e alto confirmados: sempre.
+  - Médio: quando a correção é local, isto é, não muda a arquitetura, não toca no que está fora do escopo e soma no máximo uns 30 s a uma parte do CI. Senão, vira pendência da run 3b.
+  - Baixo: só os oito herdados da F2. Os outros vão para o relatório.
+- **Regras das correções:** cada correção testável ganha um teste que falha sem ela, e cada uma entra num §. Achado em `.github/` ou `scripts/ci/` não é corrigido aqui: vira pendência com a correção proposta, para uma run de ajuste com o merge do Victor. As correções ficam num agente só, para não colidirem no CSS e na ilha.
+- **Segunda passada:** subagentes novos revisam só o diff das correções, até não sobrar crítico nem alto aberto.
+
 ## § 95 · `gate:prontidao`: o site pronto para o pedido do AdSense (F3, 31/out/2026)
 
 - **Decisão:** um portão novo, `pnpm gate:prontidao` (`scripts/gates/prontidao.ts`, lógica em `scripts/lib/prontidao.ts`), no `STEPS` do `verificar` logo depois do `gate:conteudo`, e por isso na parte `--sem-playwright` do CI. Ele imprime uma tabela item → ok ou FALHA → como conferiu e reprova se um item falha. São 18 itens:
