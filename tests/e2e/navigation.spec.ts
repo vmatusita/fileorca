@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { LAUNCHED } from '../../src/platform/site.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -14,20 +13,16 @@ test('a missing page gets the nearest 404 of its language, with status 404', asy
   }
 });
 
-test('pages are served with the generated headers (no X-Robots-Tag since the launch, noindex on the 404)', async ({ request }) => {
-  expect(LAUNCHED).toBe(true);
+test('pages are served with the generated headers (noindex while LAUNCHED = false)', async ({ request }) => {
   for (const path of ['/', '/compress-image/', '/pt/apoie/', '/build.txt']) {
     const response = await request.get(path);
     const headers = response.headers();
     expect(headers['x-content-type-options']).toBe('nosniff');
-    expect(headers['x-robots-tag'], path).toBeUndefined();
+    expect(headers['x-robots-tag']).toContain('noindex');
     expect(headers['content-security-policy']).toBe("frame-ancestors 'self'");
     expect(headers['strict-transport-security']).toBe('max-age=31536000; includeSubDomains');
     expect(headers['cross-origin-opener-policy']).toBeUndefined();
     expect(headers['cross-origin-embedder-policy']).toBeUndefined();
-  }
-  for (const path of ['/404', '/pt/404', '/es/404']) {
-    expect((await request.get(path)).headers()['x-robots-tag'], path).toContain('noindex');
   }
 });
 

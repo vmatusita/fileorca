@@ -1,6 +1,6 @@
 // Site-wide constants. Keep `LAUNCHED` on a single line in this exact form:
 // the post-deploy check reads it with `git show <sha>:src/platform/site.ts`.
-export const LAUNCHED = true;
+export const LAUNCHED = false;
 
 export const SITE_ORIGIN = 'https://fileorca.com';
 export const PRODUCTION_HOSTNAME = 'fileorca.com';
