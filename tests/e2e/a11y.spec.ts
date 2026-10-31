@@ -26,12 +26,26 @@ async function resultOnScreen(page: Page): Promise<void> {
   await animationsDone(page);
 }
 
+// F2: 'compress' finds Compress image and its two presets (3 options); 'heif' finds HEIC to JPG alone, so the
+// dialog is read with one result, as before.
 async function searchDialogOpen(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
   await page.keyboard.type('compress');
+  await expect(page.getByRole('option')).toHaveCount(3);
+  await page.keyboard.press('Control+A');
+  await page.keyboard.type('heif');
   await expect(page.getByRole('option')).toHaveCount(1);
+  await animationsDone(page);
+}
+
+// Nothing typed: the 13 pages are listed and the list scrolls inside the box.
+async function searchDialogListed(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Search tools/ }).click();
+  await expect(page.locator('#fo-search-dialog')).toBeVisible();
+  await expect(page.getByRole('option')).toHaveCount(13);
   await animationsDone(page);
 }
 
@@ -93,6 +107,11 @@ for (const width of [360, 1280]) {
       expect(await violations(page)).toEqual([]);
     });
 
+    test('search dialog open with every page listed', async ({ page }) => {
+      await searchDialogListed(page);
+      expect(await violations(page)).toEqual([]);
+    });
+
     test('tool page with the coffee line on screen', async ({ page }) => {
       await coffeeLineOnScreen(page);
       expect(await violations(page)).toEqual([]);
@@ -121,10 +140,15 @@ for (const width of [360, 1280]) {
       await page.goto('/');
       await page.getByRole('button', { name: /Search tools/ }).click();
       await expect(page.locator('#fo-search-dialog')).toBeVisible();
-      await page.keyboard.type('compress');
+      await page.keyboard.type('heif');
       await expect(page.getByRole('option')).toHaveCount(1);
       const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
       expect(results.violations.map((violation) => violation.id)).toEqual([]);
+    });
+
+    test('search dialog open with every page listed', async ({ page }) => {
+      await searchDialogListed(page);
+      expect(await violations(page)).toEqual([]);
     });
 
     test('tool page with the coffee line on screen', async ({ page }) => {

@@ -1,22 +1,31 @@
-// Index of the tool search, fetched only on first use (DECISOES § 15).
+// Index of the tool search, fetched only on first use (DECISOES § 15). It lists every image tool and
+// preset of the registry. An entry carries a name, a category and a link only for the languages where the
+// page exists; its terms (names and synonyms) come from every language that has the text, so a search
+// in one language still finds a synonym typed in another. The search shows an entry only in a language
+// that has its link (src/search/search.ts), so a page that exists only in English is not offered in
+// Portuguese or Spanish.
 import type { APIRoute } from 'astro';
-import { LANGS, pathFor } from '../i18n/routes.ts';
+import { LANGS, routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
+import { blurbOf } from '../tools/image/page.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
 
-const TOOLS = [{ id: 'compress-image', cat: 'image', icon: 'compress' }] as const;
-
 export function searchIndex(): SearchEntry[] {
-  return TOOLS.map(({ id, cat, icon }) => {
-    const entry: SearchEntry = { id, href: {}, name: {}, category: {}, cat, icon: ICONS[icon], terms: [] };
+  return (Object.keys(IMAGE_PAGES) as ImagePageId[]).map((id) => {
+    const def = IMAGE_PAGES[id];
+    const route = routeById(id);
+    const entry: SearchEntry = { id, href: {}, name: {}, category: {}, cat: def.pdf ? 'pdf' : 'image', icon: ICONS[def.icon], terms: [] };
     const terms = new Set<string>();
     for (const lang of LANGS) {
-      const tool = TEXTS[lang].common.tools[id];
-      entry.href[lang] = pathFor(id, lang);
-      entry.name[lang] = tool.name;
+      const path = route.paths[lang];
+      const blurb = path ? blurbOf(id, lang) : undefined;
+      if (!path || !blurb) continue;
+      entry.href[lang] = path;
+      entry.name[lang] = blurb.name;
       entry.category[lang] = TEXTS[lang].common.search.imageCategory;
-      for (const term of [tool.name, ...tool.synonyms]) terms.add(normalize(term));
+      for (const term of [blurb.name, ...blurb.synonyms]) terms.add(normalize(term));
     }
     entry.terms = [...terms];
     return entry;

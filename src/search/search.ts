@@ -22,11 +22,16 @@ export function normalize(text: string): string {
   return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 }
 
-/** Entries whose names or synonyms (any language) contain every word of the query. */
-export function filterEntries(entries: SearchEntry[], query: string): SearchEntry[] {
+/**
+ * Entries whose names or synonyms (any language) contain every word of the query. With a language, only the
+ * entries that have a page in it: a page that exists only in English is never offered in Portuguese or
+ * Spanish, and the search never falls back to the English link.
+ */
+export function filterEntries(entries: SearchEntry[], query: string, lang?: string): SearchEntry[] {
+  const here = lang === undefined ? entries : entries.filter((entry) => entry.href[lang] !== undefined);
   const words = normalize(query).split(/\s+/).filter(Boolean);
-  if (words.length === 0) return entries;
-  return entries.filter((entry) => words.every((word) => entry.terms.some((term) => term.includes(word))));
+  if (words.length === 0) return here;
+  return here.filter((entry) => words.every((word) => entry.terms.some((term) => term.includes(word))));
 }
 
 let index: Promise<SearchEntry[]> | null = null;
@@ -57,24 +62,28 @@ export function attach(root: HTMLElement): () => void {
   let active = -1;
 
   const go = (entry: SearchEntry | undefined) => {
-    if (entry) window.location.assign(entry.href[lang] ?? entry.href['en'] ?? '/');
+    const href = entry?.href[lang];
+    if (href) window.location.assign(href);
   };
 
   const select = (position: number) => {
     active = position;
     list.querySelectorAll('[role="option"]').forEach((option, i) => option.setAttribute('aria-selected', String(i === position)));
-    if (position >= 0) input.setAttribute('aria-activedescendant', `${list.id}-${position}`);
-    else input.removeAttribute('aria-activedescendant');
+    if (position >= 0) {
+      input.setAttribute('aria-activedescendant', `${list.id}-${position}`);
+      // The list scrolls past eight rows: the active row stays in view as the arrows move it.
+      list.children[position]?.scrollIntoView({ block: 'nearest' });
+    } else input.removeAttribute('aria-activedescendant');
   };
 
   const render = async () => {
-    results = filterEntries(await loadIndex(), input.value);
+    results = filterEntries(await loadIndex(), input.value, lang);
     list.replaceChildren(
       ...results.map((entry, i) => {
         const option = el('li', { id: `${list.id}-${i}`, role: 'option', 'aria-selected': 'false', class: `fo-search__item fo-cat--${entry.cat}` });
         const dot = el('span', { class: 'fo-chip__dot', 'aria-hidden': 'true' });
         dot.innerHTML = iconMarkup(entry.icon);
-        option.append(dot, entry.name[lang] ?? entry.id, el('small', {}, entry.category[lang] ?? ''));
+        option.append(dot, entry.name[lang] ?? '', el('small', {}, entry.category[lang] ?? ''));
         option.addEventListener('click', () => go(entry));
         return option;
       }),
