@@ -144,6 +144,14 @@ describe('gate:prontidao, (a) AdSense', () => {
     const unlocked = makeAdsBuild({ loader: (page) => page.ads });
     write(unlocked.dir, TOOL, readTool(unlocked).replace('location.hostname==="fileorca.com"', 'true'));
     expect(failing(checkAllBuild(unlocked)).join('\n')).toMatch(/sem a trava do hostname/);
+    // A locked unit push elsewhere on the page does not cover a loader without the lock (review c-03).
+    const push = '<script>if(location.hostname==="fileorca.com"){(window.adsbygoogle=window.adsbygoogle||[]).push({});}</script>';
+    const mixed = makeAdsBuild({ loader: (page) => page.ads });
+    write(mixed.dir, TOOL, readTool(mixed).replace('location.hostname==="fileorca.com"', 'true').replace('</main>', `${push}</main>`));
+    expect(failing(checkAllBuild(mixed))).toEqual([expect.stringMatching(/\/compress-image\/: carregador sem a trava do hostname/)]);
+    const openPush = makeAdsBuild({ loader: (page) => page.ads });
+    write(openPush.dir, TOOL, readTool(openPush).replace('</main>', `${push.replace('location.hostname==="fileorca.com"', 'true')}</main>`));
+    expect(failing(checkAllBuild(openPush))).toEqual([expect.stringMatching(/\/compress-image\/: push de unidade sem a trava do hostname/)]);
   });
 
   it('refuses the build of today with a meta tag, an ads.txt or an ad unit', () => {

@@ -2,10 +2,11 @@
 // CookieNotice (docs/design/components/CookieNotice): Accept and Decline for everyone, Decline
 // first, neither button is brand or sun. Hidden for good after a choice, and hidden where the
 // IAB __tcfapi says GDPR applies (Google's CMP takes over there). Non-modal: it never blocks.
-// With the AdSense anchor on screen it sits above it (--fo-anchor), never under it, and it never
-// covers the keyboard focus (it reserves its height at the end of the footer while visible).
+// With the AdSense anchor on screen it sits above it (--fo-anchor), never under it, and neither the
+// notice nor the anchor covers the keyboard focus (the room they need goes to the end of the footer).
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
+import { COFFEE_KEY } from '../tools/image/coffee.ts';
 
 interface Props {
   t: CommonTexts;
@@ -13,26 +14,34 @@ interface Props {
 }
 const { t, privacyHref } = Astro.props;
 const script = `(function(){
-var K=${JSON.stringify(CONSENT_STORAGE_KEY)},box=document.getElementById('fo-cookie');if(!box)return;
+var K=${JSON.stringify(CONSENT_STORAGE_KEY)},C=${JSON.stringify(COFFEE_KEY)},box=document.getElementById('fo-cookie'),anchor=0;if(!box)return;
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
 function save(v){try{localStorage.setItem(K,v);}catch(e){}}
 function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics_storage:v,ad_user_data:v,ad_personalization:v});}
-// While visible, the notice reserves its height (anchor included) at the end of the page, so the
-// keyboard focus is never hidden under it (WCAG 2.4.11). The room goes to the footer through
-// --fo-cookie-room, never to the body: the page still ends on the deep sea (DECISOES § 91).
-function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8;var r=document.documentElement.style;r.scrollPaddingBottom=h?h+'px':'';if(h)r.setProperty('--fo-cookie-room',h+'px');else r.removeProperty('--fo-cookie-room');}
-// WebKit does not always honour that scroll-padding when it reveals the focus, so a focused
-// element is moved out from under the notice before the browser reveals it (DECISOES § 36).
-document.addEventListener('focusin',function(e){var t=e.target;if(box.hidden||!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;var r=t.getBoundingClientRect(),end=box.getBoundingClientRect().top-8,d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(d)scrollBy(0,d);});
+// Decline erases at once the coffee count kept from an earlier Accept; only "don't show again" stays (DECISOES § 101).
+function forget(){try{var c=localStorage.getItem(C);if(c===null)return;var n=false;try{n=JSON.parse(c).never===true;}catch(x){}if(n)localStorage.setItem(C,'{"uses":0,"never":true}');else localStorage.removeItem(C);}catch(e){}}
+// While visible, the notice reserves its height (anchor included) at the end of the page, and so does the AdSense
+// anchor on its own, so the keyboard focus is never hidden under either (WCAG 2.4.11). The room goes to the footer
+// through --fo-bottom-room, never to the body: the page still ends on the deep sea (DECISOES § 91 and § 101).
+function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8,m=Math.max(h,anchor?anchor+8:0),r=document.documentElement.style;r.scrollPaddingBottom=m?m+'px':'';if(m)r.setProperty('--fo-bottom-room',m+'px');else r.removeProperty('--fo-bottom-room');}
+// WebKit does not always honour that scroll-padding when it reveals the focus, so a focused element is moved
+// out from under the notice, or the anchor when the notice is gone, before the browser reveals it (DECISOES § 36).
+document.addEventListener('focusin',function(e){var t=e.target,end;if(!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;if(!box.hidden)end=box.getBoundingClientRect().top-8;else if(anchor)end=innerHeight-anchor-8;else return;var r=t.getBoundingClientRect(),d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(d)scrollBy(0,d);});
 function hide(){box.hidden=true;reserve();}
 function show(){box.hidden=false;reserve();}
 function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
-box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent');save(v);apply(v);hide();});
-document.addEventListener('click',function(e){if(e.target.closest('[data-consent-change]')){try{localStorage.removeItem(K);}catch(x){}show();var f=box.querySelector('button');if(f)f.focus();}});
-function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}box.style.setProperty('--fo-anchor',h+'px');reserve();}
+// After a choice in a notice opened again by "Change my cookie choice", the focus goes back to that button (WCAG 2.4.3).
+var opener=null;
+box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent'),back=opener;opener=null;save(v);apply(v);if(v==='denied')forget();hide();if(back&&document.contains(back))back.focus();});
+// "Change my cookie choice" opens the notice again; the choice kept so far holds until a new one is made (§ 101).
+document.addEventListener('click',function(e){var c=e.target.closest('[data-consent-change]');if(c){opener=c;show();var f=box.querySelector('button');if(f)f.focus();}});
+function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}anchor=h;box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
 if(stored()==='granted'||stored()==='denied')return;
-show();addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);tcf()||window.addEventListener('load',tcf,{once:true});
+show();addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+// Google's CMP comes with the AdSense loader, often after the load event: look for it every 500 ms, for up to
+// 30 s, until it answers or the notice is gone (DECISOES § 101).
+var tries=0;(function look(){if(box.hidden||tcf()||++tries>60)return;setTimeout(look,500);})();
 })();`;
 ---
 <div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>

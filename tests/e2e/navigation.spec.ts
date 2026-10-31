@@ -68,7 +68,8 @@ test('tool search loads on first use, finds synonyms in any language and opens t
   await expect(dialog.getByRole('option')).toHaveText(/Comprimir imagem/);
   await expect(input).toHaveAttribute('aria-expanded', 'true');
   await input.fill('youtube downloader');
-  await expect(dialog.getByText('Nenhuma ferramenta', { exact: false }).or(dialog.locator('[data-search-empty-title]'))).toContainText('youtube downloader');
+  // The empty title (the status region says the same words since the F3, so the text alone matches two elements).
+  await expect(dialog.locator('[data-search-empty-title]')).toContainText('Nenhuma ferramenta chamada "youtube downloader"');
   await input.fill('reduzir');
   await input.press('Enter');
   await expect(page).toHaveURL(/\/pt\/comprimir-imagem\/$/);
@@ -93,6 +94,10 @@ test('the search shows only the pages that exist in the language and never falls
   await expect(dialog.locator('[data-search-empty]')).toBeVisible();
   await expect(dialog.getByRole('option')).toHaveCount(0);
   await expect(dialog.locator('[data-search-empty-title]')).toContainText('heic');
+  // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101).
+  await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "heic"');
+  await input.fill('jpg');
+  await expect(dialog.getByRole('status')).toHaveText('');
 });
 
 test('the English search finds the new tools and presets and opens the one chosen', async ({ page }) => {

@@ -58,6 +58,8 @@ const ADS_SETTINGS = /^https:\/\/(?:adssettings\.google\.com|myadcenter\.google\
 const PARTNER_SITES = /^https:\/\/(?:policies\.google\.com\/technologies\/partner-sites|www\.google\.com\/policies\/privacy\/partners)\/?$/;
 
 const LOADER = /adsbygoogle\.js|pagead2\.googlesyndication\.com/;
+const PUSH = /adsbygoogle\s*\|\|\s*\[\]\s*\)\s*\.push/;
+const HOSTNAME_LOCK = 'location.hostname==="fileorca.com"';
 const UNIT = /class="adsbygoogle"/;
 const META = /<meta name="google-adsense-account"[^>]*>/g;
 
@@ -168,7 +170,13 @@ export function checkAllBuild(site: Site): Row[] {
     }
     const loader = LOADER.test(html);
     if (loader !== page.ads) problems.push(`${page.path}: ${loader ? 'carregador numa página sem área de anúncio' : 'página de ferramenta sem o carregador'}`);
-    if (loader && !html.includes('location.hostname==="fileorca.com"')) problems.push(`${page.path}: carregador sem a trava do hostname`);
+    // Each script that loads AdSense or pushes a unit carries the lock itself; one locked script elsewhere in the
+    // page does not cover another (DECISOES § 101).
+    for (const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
+      const body = script[1] ?? '';
+      if (!LOADER.test(body) && !PUSH.test(body)) continue;
+      if (!body.includes(HOSTNAME_LOCK)) problems.push(`${page.path}: ${LOADER.test(body) ? 'carregador' : 'push de unidade'} sem a trava do hostname`);
+    }
     if (!page.ads && UNIT.test(html)) problems.push(`${page.path}: unidade de anúncio numa página sem área`);
   }
   return [

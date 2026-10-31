@@ -151,6 +151,45 @@ test('with the AdSense anchor and the notice at once, the anchor is not counted 
   }).toEqual({ below: 'ok', gap: 'ok' });
   await notice.getByRole('button', { name: 'Decline' }).click();
   await expect(notice).toBeHidden();
+  // With the notice gone, the anchor keeps its own room (100px + 8px): the end of the footer and the focus stay
+  // above it (DECISOES § 101). When the anchor goes too, nothing is left of the reservation.
+  await expect.poll(() => settled(page)).toEqual({ below: 'ok', gap: null, padding: '132px' });
+  expect(await released(page)).toMatchObject({ body: '0px', scrollPadding: '108px' });
+  await page.evaluate(() => document.querySelector('ins.adsbygoogle')?.remove());
   await expect.poll(() => settled(page)).toEqual({ below: 'ok', gap: null, padding: '96px' });
   expect(await released(page)).toEqual({ body: '0px', scrollPadding: 'auto', inline: '' });
+});
+
+// The AdSense anchor covers the bottom of the screen with or without the notice: no element that takes the
+// keyboard focus may end up under it (WCAG 2.4.11, DECISOES § 101). Same walk as the 45 Tabs of events.spec.ts.
+test('the AdSense anchor never covers the keyboard focus, with the notice already closed', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.addInitScript(() => {
+    (window as unknown as { adsbygoogle: unknown[] }).adsbygoogle = [];
+    localStorage.setItem('fo-consent', 'denied');
+  });
+  const response = await page.goto('/compress-image/');
+  expect(response?.status()).toBe(200);
+  await page.evaluate(() => {
+    document.querySelector('footer.fo-footer')!.classList.add('fo-footer--anchor');
+    const anchor = document.createElement('ins');
+    anchor.className = 'adsbygoogle';
+    anchor.setAttribute('data-anchor-status', 'displayed');
+    anchor.style.cssText = 'position:fixed;left:0;right:0;bottom:0;height:100px;display:block;z-index:30';
+    document.body.append(anchor);
+  });
+  await expect(page.locator('#fo-cookie')).toBeHidden();
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollPaddingBottom)).toBe('108px');
+  for (let i = 0; i < 45; i += 1) {
+    await page.keyboard.press('Tab');
+    const covered = await page.evaluate(() => {
+      const element = document.activeElement as HTMLElement | null;
+      if (!element || element === document.body) return null;
+      const rect = element.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return null;
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return hit && (hit === element || element.contains(hit) || hit.contains(element)) ? null : `${element.tagName} ${element.textContent?.trim().slice(0, 40)}`;
+    });
+    expect(covered, 'foco coberto pela âncora').toBeNull();
+  }
 });

@@ -185,7 +185,7 @@ Método da revisão adversarial (DECISOES § 92 a § 94):
 
 Pegadinhas que a F3 achou:
 
-- O `html` não tem fundo, então o fundo `--bg` do `body` pinta a tela inteira. Padding ou margem no `body` aparece como faixa clara depois do rodapé. Espaço reservado no fim da página vai no `.fo-footer` (`--fo-cookie-room`), nunca no `body` (§ 91).
+- O `html` não tem fundo, então o fundo `--bg` do `body` pinta a tela inteira. Padding ou margem no `body` aparece como faixa clara depois do rodapé. Espaço reservado no fim da página vai no `.fo-footer` (`--fo-bottom-room`, do aviso e da âncora), nunca no `body` (§ 91 e § 101).
 - Os screenshots de página do `pnpm screenshots` abrem com o consentimento já gravado, então o aviso de cookies não aparecia neles. A F3 acrescentou o fim da página com o aviso aberto, e a pasta passou a `docs/relatorios/fase-03/componentes/`. O script apaga a pasta dele antes de gravar: não ponha outros arquivos lá.
 - Navegador na produção só com `context.route` abortando os domínios do Google (`google`, `googletagmanager`, `google-analytics`, `doubleclick`, `gstatic`, `googlesyndication`), para a visita não entrar no GA4. A prévia em `*.workers.dev` nem pede o `gtag.js`.
 - Com várias lentes rodando o Playwright ao mesmo tempo, o WebKit do Windows chegou a travar no `page.goto` até em teste antigo e simples. Antes de achar que um teste do WebKit está errado, rode-o de novo com a máquina livre.

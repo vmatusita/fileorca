@@ -63,6 +63,61 @@ describe('removedor de metadados (caso sem ganho)', () => {
     expect(text(stripped)).toContain('IEND');
   });
 
+  // F3 (DECISOES § 100): what is kept is a list of the chunks a picture needs, so private and unknown chunks go too.
+  const SECRET = [...'GPSLatitude=25.4284S GPSLongitude=49.2733W'].map((c) => c.charCodeAt(0));
+  const latin = (bytes: Uint8Array) => Buffer.from(bytes).toString('latin1');
+
+  it('keeps only the picture chunks of a PNG: private and unknown chunks with GPS text go (caBX, zxIf, exIf, dSIG, vpAg, prVW)', () => {
+    const keepers = ['PLTE', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'bKGD', 'pHYs'];
+    const png = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ...pngChunk('IHDR', [0, 0, 0, 1, 0, 0, 0, 1, 8, 3, 0, 0, 0]),
+      ...keepers.flatMap((type) => pngChunk(type, [1, 2, 3])),
+      ...['caBX', 'zxIf', 'exIf', 'dSIG', 'vpAg', 'prVW', 'teSt'].flatMap((type) => pngChunk(type, SECRET)),
+      ...pngChunk('IDAT', [1, 2, 3]),
+      ...pngChunk('IEND', []),
+    ]);
+    const stripped = latin(stripPng(png));
+    expect(stripped).not.toContain('GPSLatitude');
+    for (const type of ['caBX', 'zxIf', 'exIf', 'dSIG', 'vpAg', 'prVW', 'teSt']) expect(stripped, type).not.toContain(type);
+    for (const type of ['IHDR', ...keepers, 'IDAT', 'IEND']) expect(stripped, type).toContain(type);
+  });
+
+  it('keeps APP0 only when it is JFIF and APP14 only when it is Adobe', () => {
+    const app = (marker: number, data: number[]) => [0xff, marker, (data.length + 2) >> 8, (data.length + 2) & 0xff, ...data];
+    const jpeg = new Uint8Array([
+      0xff, 0xd8,
+      ...app(0xe0, [...'JFIF\0'].map((c) => c.charCodeAt(0)).concat([1, 1, 0, 0, 1, 0, 1, 0, 0])),
+      ...app(0xe0, [...'JFXX\0'].map((c) => c.charCodeAt(0)).concat(SECRET)),
+      ...app(0xee, [...'Adobe'].map((c) => c.charCodeAt(0)).concat([0, 100, 0, 0, 0, 0, 1])),
+      ...app(0xee, [...'Other'].map((c) => c.charCodeAt(0)).concat(SECRET)),
+      ...app(0xdb, new Array(65).fill(1)),
+      0xff, 0xda, 0, 2, 1, 2, 3,
+      0xff, 0xd9,
+    ]);
+    const stripped = latin(stripJpeg(jpeg));
+    expect(stripped).not.toContain('GPSLatitude');
+    expect(stripped).toContain('JFIF');
+    expect(stripped).toContain('Adobe');
+  });
+
+  it('keeps only the picture chunks of a WebP: an unknown chunk with GPS text goes', () => {
+    const body = [
+      ...[...'WEBP'].map((c) => c.charCodeAt(0)),
+      ...riffChunk('VP8X', [0x2c, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+      ...riffChunk('ICCP', [1, 2, 3, 4]),
+      ...riffChunk('C2PA', SECRET),
+      ...riffChunk('XYZW', SECRET),
+      ...riffChunk('ALPH', [0, 1]),
+      ...riffChunk('VP8L', [0x2f, 0, 0, 0, 0]),
+    ];
+    const size = body.length;
+    const webp = new Uint8Array([...[...'RIFF'].map((c) => c.charCodeAt(0)), size & 0xff, (size >> 8) & 0xff, 0, 0, ...body]);
+    const stripped = latin(stripWebp(webp));
+    expect(stripped).not.toContain('GPSLatitude');
+    for (const type of ['VP8X', 'ICCP', 'ALPH', 'VP8L']) expect(stripped, type).toContain(type);
+  });
+
   it('drops EXIF and XMP chunks from a WebP, clears their flags and fixes the RIFF size', () => {
     const body = [
       ...[...'WEBP'].map((c) => c.charCodeAt(0)),

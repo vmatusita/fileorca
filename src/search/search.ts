@@ -54,6 +54,7 @@ export function attach(root: HTMLElement): () => void {
   const input = root.querySelector<HTMLInputElement>('input[role="combobox"]');
   const list = root.querySelector<HTMLUListElement>('[role="listbox"]');
   const empty = root.querySelector<HTMLElement>('[data-search-empty]');
+  const status = root.querySelector<HTMLElement>('[data-search-status]');
   if (!input || !list || !empty) return () => {};
   if (root.dataset['ready'] === 'true') return () => input.focus();
   root.dataset['ready'] = 'true';
@@ -92,10 +93,13 @@ export function attach(root: HTMLElement): () => void {
     list.hidden = none;
     empty.hidden = !none;
     input.setAttribute('aria-expanded', String(!none));
+    const said = none ? emptyTitle.replace('{query}', input.value.trim()) : '';
     if (none) {
       const title = empty.querySelector('[data-search-empty-title]');
-      if (title) title.textContent = emptyTitle.replace('{query}', input.value.trim());
+      if (title) title.textContent = said;
     }
+    // The status region speaks the empty state, which the hidden block alone does not (WCAG 4.1.3).
+    if (status) status.textContent = said;
     select(none ? -1 : 0);
   };
 

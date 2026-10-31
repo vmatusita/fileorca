@@ -34,4 +34,6 @@ const { t, id, dialog = false } = Astro.props;
     <p class="fo-muted">{t.search.emptyHint}</p>
     <Oli pose="peek" class="fo-search__peek" />
   </div>
+  <!-- Says "no tool called …" to a screen reader too; outside the hidden block so it is always in the tree (WCAG 4.1.3, DECISOES § 101). -->
+  <p class="fo-sr" role="status" data-search-status></p>
 </div>
