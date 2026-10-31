@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { ROUTES } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
-import { dataLayer, dismissCookies, downloadBytes, hydrated } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch } from './lib/page.ts';
 
 const GPS_PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 
@@ -170,4 +170,35 @@ test('the tool works in Portuguese and Spanish too', async ({ page }) => {
     // The other image tools exist only in English, so the only chip leads to the home of the language (DECISOES § 27).
     await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', path.startsWith('/pt/') ? '/pt/' : '/es/');
   }
+});
+
+// Image to PDF: the rows of a finished PDF have no button (the batch is one file), so "Show more" cannot hand the
+// focus to a button, and a new page size gives the same sentence again, which a live region only speaks when it has
+// been emptied in between.
+test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new sheet is announced again', async ({ page }) => {
+  await page.goto('/image-to-pdf/');
+  await hydrated(page);
+  await dismissCookies(page);
+  await chooseImages(page, await jpegBatch(page, 7));
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('.fo-btn--download')).toBeFocused();
+  await expect(page.locator('.fo-filelist [data-row]')).toHaveCount(6);
+  await expect(page.locator('.fo-filelist button')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Show 1 more' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listitem', { name: 'photo-7.jpg' })).toBeFocused();
+
+  const sentence = 'Done! Your PDF with 7 pages is ready.';
+  await expect(page.getByRole('status')).toHaveText(sentence);
+  await page.evaluate(() => {
+    const region = document.querySelector('[role="status"]');
+    const said: string[] = [];
+    (window as unknown as { __said: string[] }).__said = said;
+    if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
+  });
+  await page.locator('label.fo-seg__opt:has(input[name="pd-size"][value="letter"])').click();
+  await expect(page.locator('input[name="pd-size"][value="letter"]')).toBeChecked();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __said: string[] }).__said.at(-1) ?? ''), { timeout: 30_000 }).toBe(sentence);
+  const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+  expect(said, 'emptied when the PDF is built again, then the same sentence').toEqual(['', sentence]);
 });

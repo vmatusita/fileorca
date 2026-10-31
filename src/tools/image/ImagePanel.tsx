@@ -97,12 +97,21 @@ interface Model {
   newUse: boolean;
   focusDownload: boolean;
   broken: Set<string>;
+  /** The queue row whose control had the focus when the last render was asked for (the focus may be lost with it). */
+  rowFocus: number | null;
+  /** The focus was inside the slot (drop zone, WaterLevel or card) when the last render was asked for. */
+  slotFocus: boolean;
+  /** Rows that take the focus when the row that had it is gone: the next one, then the previous one. */
+  successors: number[];
+  /** A row that takes the focus once it is on screen (the first one that "Show N more" reveals). */
+  focusRowId: number | null;
 }
 
 function newModel(): Model {
   return {
     items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, hadCard: false, bundle: null,
     selected: null, expanded: false, announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
+    rowFocus: null, slotFocus: false, successors: [], focusRowId: null,
   };
 }
 
@@ -149,16 +158,33 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const model = useRef<Model>(newModel());
   const m = model.current;
   const [, setTick] = useState(0);
-  const render = () => setTick((tick) => tick + 1);
   const [over, setOver] = useState(0);
   const [state, setState] = useState<S>(tool.initial);
   const stateRef = useRef<S>(state);
   const wide = useWide();
   const rootRef = useRef<HTMLDivElement>(null);
+  const slotRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
+  const startOverRef = useRef<HTMLButtonElement>(null);
+  const levelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Every change goes through here. Before the page is drawn again it notes where the focus is, because a control
+   * that goes away with the new picture (a row that is removed or finished, the drop zone that gives way to the
+   * WaterLevel) takes the focus with it and the browser leaves it on the page. The effect below gives it back.
+   */
+  const render = () => {
+    const active = document.activeElement;
+    if (active && active !== document.body && rootRef.current?.contains(active)) {
+      const row = active.closest<HTMLElement>('[data-row]');
+      if (row) m.rowFocus = Number(row.dataset['row']);
+      else if (slotRef.current?.contains(active)) m.slotFocus = true;
+    }
+    setTick((tick) => tick + 1);
+  };
   const warmed = useRef(false);
   const formatName = (format: Sniffed | undefined): string => (format && format in t.formats ? t.formats[format as keyof ImagePanelTexts['formats']] : '');
   const nameOf = (item: Item) => item.file.name || t.fileFallback;
@@ -365,7 +391,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.completeSent = false;
     m.newUse = true;
     m.coffee = false;
-    m.announce = '';
+    m.announce = texts.progressLabel; // the status region speaks while the batch runs, then says how it ended
     m.focusDownload = true;
     m.broken = new Set();
     setOver(0);
@@ -378,7 +404,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     stateRef.current = next;
     setState(next);
     m.focusDownload = false; // an option changed: the focus stays on it
-    if (m.items.length > 0) void run();
+    if (m.items.length > 0) {
+      m.announce = ''; // a live region speaks only when its text changes: the same sentence needs an empty one before it
+      void run();
+    }
   }
 
   function startOver(): void {
@@ -396,6 +425,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   }
 
   function removeItem(item: Item): void {
+    const at = m.items.indexOf(item);
+    m.successors = [m.items[at + 1]?.id, m.items[at - 1]?.id].filter((id): id is number => id !== undefined);
     item.removed = true;
     item.cancel?.();
     release(item);
@@ -464,7 +495,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         const link = failure.source === 'heic' ? converters.heic : failure.source === 'avif' ? converters.avif : undefined;
         const format = formatName(failure.source);
         if (!link) return fmt(errors.wrongFormat, { name, format, formats: texts.formats });
-        const [before = '', after = ''] = fmt(errors.wrongTool, { name, format }).split('{tool}');
+        // The sentence is split before the file name goes in, so a name that holds "{tool}" cannot move the link.
+        const [before = '', after = ''] = errors.wrongTool.split('{tool}').map((part) => fmt(part, { name, format }));
         return (
           <>
             {before}
@@ -486,11 +518,37 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   useEffect(() => forgetWithoutConsent(), []);
 
+  /** A row of the queue takes the focus: its first button, or the row itself when it has none (a finished row of Image to PDF). */
+  function focusRow(id: number): boolean {
+    const row = listRef.current?.querySelector<HTMLElement>(`[data-row="${id}"]`);
+    const target = row?.querySelector<HTMLElement>('button, a[href]') ?? row;
+    target?.focus();
+    return Boolean(target);
+  }
+
   useEffect(() => {
     if (m.phase === 'done' && m.focusDownload && downloadRef.current) {
       m.focusDownload = false;
       downloadRef.current.focus();
     }
+    if (m.focusRowId !== null) {
+      focusRow(m.focusRowId);
+      m.focusRowId = null;
+    }
+    // The control that had the focus is gone and the page has it: the same row if it is still there (its Cancel gave
+    // way to its Download), else the next row, the previous one, and last the control the panel shows now.
+    const active = document.activeElement;
+    if (!active || active === document.body || active === document.documentElement) {
+      if (m.rowFocus !== null) {
+        const wanted = [m.rowFocus, ...m.successors];
+        if (!wanted.some(focusRow)) (levelRef.current ?? startOverRef.current ?? chooseRef.current ?? downloadRef.current)?.focus();
+      } else if (m.slotFocus) {
+        (levelRef.current ?? downloadRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+      }
+    }
+    m.rowFocus = null;
+    m.slotFocus = false;
+    m.successors = [];
   });
 
   useEffect(() => {
@@ -597,6 +655,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const valueText = total >= 2 ? fmt(t.progress.valueText, { percent: percent(progress, lang), done, total }) : percent(progress, lang);
     panel = (
       <div
+        ref={levelRef}
+        tabindex={-1}
         class="fo-level"
         role="progressbar"
         aria-label={texts.progressLabel}
@@ -673,7 +733,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
               <span class="fo-btn__meta">{more && !pdf ? `· ${zipTail.join(' · ')}` : `· ${fileSize(deliverable.size, lang)}`}</span>
             </a>
           )}
-          <button type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
+          <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
             {t.result.startOver}
           </button>
         </div>
@@ -805,7 +865,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     <div class="fo-queue">
       <div class="fo-filelist" role="list" aria-label={t.queue.label} ref={listRef}>
         {shown.map((item) => (
-          <div role="listitem" key={item.id} class="fo-filelist__row">
+          <div role="listitem" key={item.id} class="fo-filelist__row" data-row={item.id} tabindex={-1} aria-label={nameOf(item)}>
             <FileCard {...rowProps(item)} />
           </div>
         ))}
@@ -817,8 +877,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           aria-expanded="false"
           onClick={() => {
             m.expanded = true;
+            m.focusRowId = m.items[VISIBLE_ROWS]?.id ?? null; // the button goes away: the first new row takes the focus
             render();
-            window.setTimeout(() => listRef.current?.querySelectorAll<HTMLElement>('.fo-filelist__row')[VISIBLE_ROWS]?.querySelector<HTMLElement>('button')?.focus(), 0);
           }}
         >
           {fmt(t.queue.showMore, { count: hidden })}
@@ -836,7 +896,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   return (
     <div class="fo-tool-island" ref={rootRef}>
-      <div class="fo-slot" onPointerEnter={warmOnce}>
+      <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce}>
         {panel}
       </div>
       <p class="fo-sr" role="status">

@@ -51,27 +51,75 @@ function orientationSegment(orientation: number): Uint8Array {
   return new Uint8Array([0xff, 0xe1, length >> 8, length & 0xff, ...body]);
 }
 
+const ICC_ID = 'ICC_PROFILE\0';
+
+/** True for the APP2 segment (marker and length included) that carries a piece of the ICC colour profile. */
+function isIccSegment(segment: Uint8Array): boolean {
+  return String.fromCharCode(...segment.subarray(4, 4 + ICC_ID.length)) === ICC_ID;
+}
+
+/**
+ * The JPEG up to and including its own EOI, without Exif, XMP, IPTC, comments or any APP2 that is not the colour
+ * profile. What follows the EOI is never copied: camera files append whole other pictures there (the secondary
+ * images of an MPF file, the gain map of an Ultra HDR photo, the video of a motion photo), and those carry their own
+ * Exif, XMP and GPS; the MPF APP2 that points to them goes too. Progressive files have several scans, so the walk
+ * goes marker by marker and through the entropy-coded data of each one. 0xFF fill bytes between segments are padding.
+ */
 export function stripJpeg(bytes: Uint8Array): Uint8Array {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new Error('not a JPEG');
   const keep: Uint8Array[] = [bytes.subarray(0, 2)];
   let orientation = 1;
   let i = 2;
-  while (i + 4 <= bytes.length) {
+  while (i < bytes.length) {
     if (bytes[i] !== 0xff) throw new Error('bad JPEG marker');
-    const marker = bytes[i + 1] ?? 0;
-    if (marker === 0xda) break; // start of scan: the rest is image data
+    while (bytes[i + 1] === 0xff) i += 1; // fill bytes before a marker
+    const marker = bytes[i + 1];
+    if (marker === undefined || marker === 0x00 || marker === 0xd8) throw new Error('bad JPEG marker');
+    if (marker === 0xd9) {
+      keep.push(bytes.subarray(i, i + 2)); // EOI: the image ends here, whatever comes after it
+      break;
+    }
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      keep.push(bytes.subarray(i, i + 2));
+      i += 2;
+      continue;
+    }
+    if (i + 4 > bytes.length) throw new Error('JPEG segment cut short');
     const length = u16(bytes, i + 2, false);
+    if (length < 2 || i + 2 + length > bytes.length) throw new Error('bad JPEG segment length');
     const segment = bytes.subarray(i, i + 2 + length);
     const isApp = marker >= 0xe0 && marker <= 0xef;
     if (marker === 0xe1) orientation = Math.max(orientation, jpegOrientation(segment.subarray(4)));
-    // Keep JFIF (APP0), ICC profile (APP2), Adobe (APP14) and every non-APP segment; drop the
-    // rest (Exif and XMP in APP1, IPTC in APP13, comments).
-    const drop = (isApp && marker !== 0xe0 && marker !== 0xe2 && marker !== 0xee) || marker === 0xfe;
+    // Keep JFIF (APP0), the ICC profile (APP2), Adobe (APP14) and every non-APP segment; drop the rest
+    // (Exif and XMP in APP1, IPTC in APP13, MPF and any other APP2, comments).
+    const keepApp = marker === 0xe0 || marker === 0xee || (marker === 0xe2 && isIccSegment(segment));
+    const drop = (isApp && !keepApp) || marker === 0xfe;
     if (!drop) keep.push(segment);
     i += 2 + length;
+    if (marker === 0xda) {
+      // The entropy-coded data of the scan runs to the next marker; FF00 (a stuffed byte) and FFD0 to FFD7 (restart
+      // markers) belong to it, and so does an FF that is followed by another FF (fill).
+      const start = i;
+      for (;;) {
+        const ff = bytes.indexOf(0xff, i);
+        if (ff === -1 || ff + 1 >= bytes.length) {
+          i = bytes.length;
+          break;
+        }
+        const next = bytes[ff + 1] ?? 0;
+        if (next === 0x00 || (next >= 0xd0 && next <= 0xd7)) {
+          i = ff + 2;
+        } else if (next === 0xff) {
+          i = ff + 1;
+        } else {
+          i = ff;
+          break;
+        }
+      }
+      keep.push(bytes.subarray(start, i));
+    }
   }
   if (orientation > 1 && orientation <= 8) keep.splice(1, 0, orientationSegment(orientation));
-  keep.push(bytes.subarray(i));
   return concat(keep);
 }
 

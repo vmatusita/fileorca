@@ -20,7 +20,7 @@ export default {
       heading: 'Your files stay on your device',
       paragraphs: [
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
-        'The same goes for numbers. When calculators arrive, they will keep the numbers you type in the part of the address after the # sign. Your browser does not send that part to any server, and no analytics event carries those numbers.',
+        'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
       ],

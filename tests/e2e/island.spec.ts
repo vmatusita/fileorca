@@ -25,6 +25,8 @@ async function done(page: Page): Promise<void> {
 test.describe('a batch', () => {
   test('the WaterLevel counts the batch ("0%, 0 of 3 images") and the queue shows working and waiting rows', async ({ page }) => {
     const gate = await slowEngine(page);
+    // The focus is on "Choose images", as for someone who opened the picker with the keyboard.
+    await page.getByRole('button', { name: 'Choose images' }).focus();
     await chooseImages(page, await jpegBatch(page, 3));
     const level = page.locator('.fo-level');
     await expect(level).toBeVisible();
@@ -35,9 +37,14 @@ test.describe('a batch', () => {
     await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(3);
     await expect(page.locator('.fo-filelist [role="progressbar"]')).toHaveCount(1);
     await expect(page.locator('.fo-filelist').getByText('Waiting')).toHaveCount(2);
+    // The drop zone went away with the button that had the focus: the focus follows to the WaterLevel instead of
+    // falling to the page, and the status region says what is going on from the start of the batch.
+    await expect(level).toBeFocused();
+    await expect(page.getByRole('status')).toHaveText('Compressing images');
     gate.release();
     await done(page);
     await expect(page.locator('.fo-filelist .fo-file__gain')).toHaveCount(3);
+    await expect(page.getByRole('status')).toHaveText(/^Done! Your 3 images are \d+% lighter\.$/);
   });
 
   test('when every file fails the drop zone says so once and the rows say why', async ({ page }) => {
@@ -48,16 +55,49 @@ test.describe('a batch', () => {
     await expect(page.getByRole('alert')).toContainText("Oli couldn't read any of these 2 files");
     await expect(page.locator('.fo-file[data-state="error"]')).toHaveCount(2);
     await expect(page.getByRole('button', { name: 'Choose other files' })).toBeVisible();
-    // Removing a row takes it off the list; removing the last returns to the start.
-    await page.getByRole('button', { name: 'Remove x.jpg' }).click();
+    // Removing a row takes it off the list; removing the last returns to the start. With the keyboard, the focus
+    // does not fall to the page: with no row left it goes to the button that offers other files.
+    await page.getByRole('button', { name: 'Remove x.jpg' }).focus();
+    await page.keyboard.press('Enter');
     await expect(page.locator('.fo-filelist')).toHaveCount(0);
     await expect(page.getByRole('alert')).toContainText('y.png');
+    await expect(page.getByRole('button', { name: 'Choose other files' })).toBeFocused();
+
+    // Eight files that fail: six rows and "Show 2 more". A HEIC called "{tool}.heic" and a name with "$&" show as they are.
+    const heic = { name: '{tool}.heic', mimeType: 'image/heic', buffer: Buffer.from([0, 0, 0, 16, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63, 0, 0, 0, 0]) };
+    const names = ['cost$&1.jpg', 'junk-3.jpg', 'junk-4.jpg', 'junk-5.jpg', 'junk-6.jpg', 'junk-7.jpg', 'junk-8.jpg'];
+    await chooseImages(page, [heic, ...names.map(junk)]);
+    await expect(page.locator('.fo-file[data-state="error"]')).toHaveCount(6);
+    const heicRow = page.locator('.fo-file[data-state="error"]').first();
+    await expect(heicRow).toContainText('{tool}.heic is a HEIC file. Open it in HEIC to JPG.');
+    await expect(heicRow.getByRole('link', { name: 'HEIC to JPG' })).toHaveAttribute('href', '/heic-to-jpg/');
+    await expect(page.getByRole('button', { name: 'Remove cost$&1.jpg' })).toBeVisible();
+    // "Show 2 more" goes away when it is used: the first new row (the 7th) takes the focus.
+    await page.getByRole('button', { name: 'Show 2 more' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Remove junk-7.jpg' })).toBeFocused();
+    // A row in the middle is removed: the focus goes to the next row. The last one: to the previous row.
+    await page.getByRole('button', { name: 'Remove junk-4.jpg' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Remove junk-5.jpg' })).toBeFocused();
+    await page.getByRole('button', { name: 'Remove junk-8.jpg' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Remove junk-7.jpg' })).toBeFocused();
+    await expect(page.locator('.fo-file')).toHaveCount(6);
   });
 
   test('changing the level re-processes the whole batch at once and keeps the focus on the option', async ({ page }) => {
     await chooseImages(page, await jpegBatch(page, 3));
     await done(page);
     const before = readZip(await downloadBytes(page)).reduce((sum, entry) => sum + entry.size, 0);
+    // What the status region held over time, to see that it is emptied before the new sentence comes: a live
+    // region that gets the same text again says nothing.
+    await page.evaluate(() => {
+      const region = document.querySelector('[role="status"]');
+      const said: string[] = [];
+      (window as unknown as { __said: string[] }).__said = said;
+      if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
+    });
     await page.locator('input[name="ci-level"][value="recommended"]').focus();
     await page.keyboard.press('ArrowRight');
     await expect
@@ -70,6 +110,10 @@ test.describe('a batch', () => {
       }, { timeout: 30_000 })
       .toBeLessThan(before);
     await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeFocused();
+    await expect(page.getByRole('status')).toContainText('Done!');
+    const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+    expect(said[0], 'the sentence of the first run is cleared when the re-run starts').toBe('');
+    expect(said.at(-1)).toMatch(/^Done! Your 3 images are \d+% lighter\.$/);
   });
 });
 

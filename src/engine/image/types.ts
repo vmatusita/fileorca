@@ -95,7 +95,7 @@ export type FailureReason =
   | 'decode'
   /** No encoder could write the output. */
   | 'encode'
-  /** Bigger than this tool can handle in this browser (the no-canvas path is not wired here). */
+  /** Bigger than this browser can handle: more than WASM_MAX_PIXELS, or a PNG or animated WebP above the canvas limit. */
   | 'too-large';
 
 export interface EngineFailure {
@@ -110,6 +110,13 @@ export type Progress = (percent: number) => void;
 
 /** Above this many pixels the image skips the canvas (the Safari limit on the iPhone). */
 export const CANVAS_MAX_PIXELS = 16_777_216;
+
+/**
+ * The most pixels the no-canvas path decodes (50 MP: it covers the 48 MP phone photos). The WASM decoders and the
+ * transforms around them hold the pixels several times over (about 32 bytes per pixel at the peak, so 108 MP would
+ * need more than 3 GB), and a tab that runs out of memory dies without a word; above this the file is refused.
+ */
+export const WASM_MAX_PIXELS = 50_000_000;
 
 /** Display size and facts of a source, read without decoding the pixels. */
 export interface Probe {

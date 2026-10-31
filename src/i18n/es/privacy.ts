@@ -20,7 +20,7 @@ export default {
       heading: 'Tus archivos se quedan en tu dispositivo',
       paragraphs: [
         'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas crear una cuenta.',
-        'Con los números pasa lo mismo. Cuando lleguen las calculadoras, guardarán los números que escribas en la parte de la dirección que va después del signo #. El navegador no envía esa parte a ningún servidor, y ningún evento de analítica lleva esos números.',
+        'Los números siguen el mismo principio. Lo que escribes en una herramienta, como un ancho, un alto o un porcentaje, se queda en tu navegador: no se añade a la dirección de la página y ningún evento de analítica lleva esos números.',
         'Las herramientas de imagen, por ejemplo, guardan el resultado sin los metadatos de la foto, incluida la ubicación GPS.',
         'Puedes comprobarlo: abre la pestaña Red de tu navegador mientras usas una herramienta. Ninguna solicitud lleva tu archivo.',
       ],
