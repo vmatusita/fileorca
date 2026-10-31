@@ -129,6 +129,24 @@ export interface LicensesTexts extends PageMeta {
   licenseColumn: string;
   showText: string;
   sourceLabel: string;
+  /** Packages that enter the bundle inside another package (not in `dependencies`). */
+  bundledHeading: string;
+  bundledIntro: string;
+  /** "Comes with @cantoo/pdf-lib". */
+  viaLabel: string;
+  /** "Show the license of MozJPEG and libjpeg-turbo": a codec inside the package. */
+  showTextOf: string;
+  /** "Copied from github.com/…": a text the package does not ship. */
+  copiedFrom: string;
+  /** The LGPL notice for libheif (HEIC photos). */
+  lgplHeading: string;
+  lgplWhat: string;
+  lgplSeparate: string;
+  lgplReplace: string;
+  lgplSourceHeading: string;
+  /** What each source link is: the library, its HEVC decoder, the npm wrapper and the build repository. */
+  lgplRoles: { libheif: string; libde265: string; wrapper: string; build: string };
+  lgplTexts: string;
 }
 
 export interface SupportTexts extends PageMeta {
