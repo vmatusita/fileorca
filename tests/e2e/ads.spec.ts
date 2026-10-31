@@ -275,6 +275,25 @@ test('legal, institutional, home and 404 pages have no AdSlot and no ad code', a
   }
 });
 
+// F2: the hub /image-tools/ has no panel, field, Download or Oli on screen; what holds there is the order. Its one
+// content AdSlot sits under the grid of tools (never above them on the phone), the rail is the tool pages' one, and
+// none is within 150px of a visible Oli.
+test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
+  await page.goto('/image-tools/');
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+    const grid = await page.locator('.fo-grid').boundingBox();
+    const ad = await page.locator('.fo-ad--content').boundingBox();
+    expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+    expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+    for (const oli of await boxes(page, '[data-oli]')) {
+      for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
+    }
+  }
+});
+
 test('the AdSlot shows the accepted label per language, reserves its height and loads nothing without the variables', async ({ page }) => {
   for (const [path, label] of [['/compress-image/', 'Advertisements'], ['/pt/comprimir-imagem/', 'Publicidade'], ['/es/comprimir-imagen/', 'Anuncios']] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
