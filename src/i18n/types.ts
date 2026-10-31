@@ -2,7 +2,7 @@
 // text fails `pnpm tipos`. Values are plain strings (placeholders like {name} are filled by `fmt`),
 // which keeps lint:texto able to read every text without running page code.
 import type { Lang } from './routes.ts';
-import type { ImagePageId } from '../tools/image/registry.ts';
+import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -219,6 +219,12 @@ export interface ImageToolsTexts extends PageMeta {
   presetsCaption: string;
   /** Column heads of the presets table: the preset, what comes out. */
   presetsHead: [string, string];
+  /** The guide under the presets: which tool does which job (DECISOES § 96). */
+  guideHeading: string;
+  guideIntro: string;
+  /** One line per job: the text before the tool name, the tool (linked to its page), the text after it. */
+  guide: { before: string; tool: ImageToolId; after: string }[];
+  guideOutro: string;
 }
 
 /**
