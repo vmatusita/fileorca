@@ -33,7 +33,16 @@ export function watchDisk(): () => void {
   let last = '';
   const timer = setInterval(() => {
     const now = free();
-    if (now !== last) console.log(`[disco] ${new Date().toISOString().slice(11, 19)} ${now}`);
+    if (now !== last) {
+      // The Playwright artifacts (traces) of each worker and the browsers' own temporary folders, the biggest first.
+      const where = sh('du -sm test-results/.playwright-artifacts-* /tmp/playwright* /tmp/* 2>/dev/null | sort -rn | head -4')
+        .trim()
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => line.replace(/\s+/, ' MB '))
+        .join(', ');
+      console.log(`[disco] ${new Date().toISOString().slice(11, 19)} ${now}${where ? ` | maiores: ${where}` : ''}`);
+    }
     last = now;
   }, 20_000);
   timer.unref();

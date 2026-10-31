@@ -15,7 +15,10 @@ export default defineConfig({
   timeout: 60_000,
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
-    trace: 'retain-on-failure',
+    // The trace of a failing test keeps the DOM snapshots, the network and the sources, but not the screencast: on the
+    // Linux WebKit of the CI the frames of the animated pages piled up in each worker's trace resources until the disk
+    // was full (ENOSPC), once the CI ran WebKit alone in its jobs (DECISOES § 90).
+    trace: { mode: 'retain-on-failure', screenshots: false },
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
