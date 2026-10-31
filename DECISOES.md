@@ -540,3 +540,8 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
   - Nenhuma fixture, opção ou checagem saiu. O tempo somado sobe pouco (uma carga de página a mais por lote), e cada teste fica com folga para a variação do runner. Localmente, nenhum lote passou de 8 s.
 - **Por quê:** um teste que passa ou falha conforme a velocidade do runner não serve de portão, e com a ADR-003 o mesmo teste rodaria no mesmo runner.
 - **Alternativa:** aumentar o tempo por teste (proibido pela ficha).
+
+## § 89 · ADR-003 aceita: a F2 com o CI em partes (F2, 31/out/2026)
+
+- **Decisão:** o Victor aceitou a ADR-003, e o ajuste `ajuste-ci-partes` (PR #6, `de6a4f1` na `main`) a implementou. O `pnpm verificar` ganhou os modos `--sem-playwright` e `--playwright=<projeto> --shard=i/n`, e o CI roda quatro jobs em paralelo, cada um com o limite de 900 s: `verificar`, `playwright (chromium)`, `playwright (webkit 1 de 2)` e `playwright (webkit 2 de 2)`. A `fase-02` recebeu a `main` por merge. O único conflito foi o fim do CLAUDE.md, onde as duas seções novas ficaram, a da F2 e depois a do ajuste; o `scripts/verificar.ts` juntou sozinho o `gate:conteudo` da F2 aos modos do ajuste, e o `tests/unit/verificar.test.ts` confere que as partes cobrem todos os passos. A pegadinha da porta no CLAUDE.md agora cita o `FO_PORT`. A § 87 deixa de valer: o limite de 900 s passa a ser por parte.
+- **Por quê:** a ADR-003 e a resposta do Victor ("Aceito a ADR-003").

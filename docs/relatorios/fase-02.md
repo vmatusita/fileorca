@@ -1,6 +1,6 @@
 # F2 · Imagem em inglês e lançamento: relatório
 
-Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 88. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
+Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 89. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
 
 ## Resumo
 
@@ -31,6 +31,8 @@ O primeiro CI completo passou de 900 s. A ficha manda fazer primeiro o que não 
 - a ADR-003 propõe dividir o Playwright do CI em partes.
 
 Mesmo assim, o CI não passa: com os 486 testes verdes, o `verificar` levou 1283,5 s no runner de 2 vCPU, e o limite é 900 s. **A PR não mescla sozinha, e o site só lança depois da decisão da ADR-003 ou de um merge feito à mão pelo Victor** (seção "O que é do Victor").
+
+**Atualização (31/out/2026, depois da run):** o Victor aceitou a ADR-003, e o ajuste `ajuste-ci-partes` (PR [vmatusita/fileorca#6](https://github.com/vmatusita/fileorca/pull/6), commit `de6a4f1` na `main`) dividiu o `verificar` do CI em quatro jobs: os portões, o Chromium e o WebKit em duas partes, cada um com o limite de 900 s. A `fase-02` recebeu a `main` (§ 89), e o CI desta PR passa a rodar em partes. Pela soma medida, cada parte fica entre uns 360 e 520 s. O resultado da primeira execução em partes vai na resposta da run.
 
 ## Critérios de aceitação
 
@@ -1725,6 +1727,7 @@ Conferido no commit `4b169ae`, por `curl` e com o Playwright, nos dois endereço
 - § 86: correções da revisão.
 - § 87: CI acima de 900 s, sem mais cortes.
 - § 88: lotes pesados da matriz divididos para o limite de 60 s por teste.
+- § 89: ADR-003 aceita; a F2 com o CI em partes.
 
 ADR-003 (Proposta): Playwright do CI em partes.
 
@@ -1778,7 +1781,7 @@ Os itens (a) a (d) não foram cortados.
 
 ## O que é do Victor, em passos
 
-1. Decidir a ADR-003 (dividir o Playwright do CI em partes). Sem ela, esta PR não mescla sozinha: o `verificar` do CI passa de 900 s num job só de 2 vCPU, mesmo com todos os testes verdes (seção "CI na PR"). Ou seja, o lançamento depende desta decisão. As saídas são aplicar a opção 1 da ADR numa run curta (`ajuste-ci-partes`) e depois rodar o CI desta PR de novo, ou mesclar esta PR à mão sabendo que só o tempo falhou.
+1. ~~Decidir a ADR-003~~: aceita e implementada pelo ajuste `ajuste-ci-partes` (PR #6, mesclada pelo Victor). Com o CI em partes verde, o job de merge mescla esta PR sozinho, e o site lança.
 2. Depois do merge, no Search Console: enviar `https://fileorca.com/sitemap-index.xml` e pedir a indexação da home (`/`) e do hub (`/image-tools/`).
 3. No Bing Webmaster: enviar o mesmo sitemap.
 4. Conferir o fileorca.com no celular e no computador, nos dois temas, com uma foto do próprio celular em cada ferramenta: Compress, Resize, Crop, Rotate, HEIC to JPG, WebP to JPG, PNG ↔ JPG, Image to PDF e os três presets.
