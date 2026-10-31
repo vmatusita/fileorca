@@ -192,6 +192,8 @@ export interface CompressImageTexts extends PageMeta {
     startOver: string;
     /** Visually hidden word between the sizes: "to" / "para" / "a". */
     to: string;
+    /** The coffee line, after the Download (PLANO "Doações"); no exclamation (the Oli already said "Done!"). */
+    coffee: { text: string; button: string; hide: string };
   };
   next: { label: string; moreTools: string };
   howHeading: string;

@@ -7,8 +7,10 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import AdSlot from '../../ads/AdSlot.astro';
-import ToolPanel, { type ToolPanelProps } from './ToolPanel.tsx';
-import { routeById, type Lang } from '../../i18n/routes.ts';
+import ToolPanel, { PANEL_POSES, type ToolPanelProps } from './ToolPanel.tsx';
+import { pathFor, routeById, type Lang } from '../../i18n/routes.ts';
+import { KOFI_URL } from '../../platform/site.ts';
+import { buildAdsConfig } from '../../ads/config.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd, type Crumb } from '../../seo/meta.ts';
 
@@ -21,7 +23,14 @@ const t = TEXTS[lang]['compress-image'];
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
 const area = route.adArea ?? 'arquivos';
-const panelProps: ToolPanelProps = { lang, t, moreToolsHref: homePath(lang) };
+// In Portuguese the coffee line leads to the support page until the Pix arrives (F6; DECISOES § 49).
+const panelProps: ToolPanelProps = {
+  lang,
+  t,
+  moreToolsHref: homePath(lang),
+  coffeeHref: lang === 'pt' ? pathFor('support', lang) : KOFI_URL,
+  adsOn: buildAdsConfig().scriptEnabled,
+};
 const crumbs: Crumb[] = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path },
@@ -33,6 +42,7 @@ const crumbs: Crumb[] = [
   title={t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`}
   description={t.description}
   withAds
+  oli={PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(common.tools['compress-image'].name, t.description, path, lang)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />

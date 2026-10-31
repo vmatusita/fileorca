@@ -1,6 +1,7 @@
 ---
-// Home: the tools that exist today. No AdSlot on the home in the F1a.
+// Home: the tools that exist today, with the Oli waving next to the H1. No AdSlot on the home yet.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
 import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -22,13 +23,18 @@ const website = {
   publisher: { '@id': `${SITE_ORIGIN}/#organization` },
 };
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]}>
-  <h1 class="fo-h1">{t.h1}</h1>
-  <p class="fo-prose">{t.intro}</p>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]} oli={['wave']}>
+  <div class="fo-hero">
+    <div class="fo-hero__text">
+      <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+      <p class="fo-lead fo-prose">{t.intro}</p>
+    </div>
+    <Oli pose="wave" class="fo-hero__oli" />
+  </div>
   <section class="fo-section" aria-labelledby="tools">
     <h2 id="tools">{t.toolsHeading}</h2>
     <ul class="fo-grid">
-      <li><ToolCard href={pathFor('compress-image', lang)} name={tool.name} description={tool.description} category="image" /></li>
+      <li><ToolCard href={pathFor('compress-image', lang)} name={tool.name} description={tool.description} category="image" icon="compress" /></li>
     </ul>
   </section>
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">

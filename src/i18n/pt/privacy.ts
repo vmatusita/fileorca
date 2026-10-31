@@ -64,6 +64,7 @@ export default {
       heading: 'Sua escolha de cookies no navegador',
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
+        'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantos arquivos você terminou neste navegador, para o pedido de café aparecer só a partir do terceiro e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele.',
       ],
     },
     {

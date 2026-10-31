@@ -1,5 +1,7 @@
 // ToolSearch (docs/design/components/ToolSearch): combobox inside a modal <dialog>. This module and
-// the index (/search-index.json) load on first use only (DECISOES § 15).
+// the index (/search-index.json) load on first use only (DECISOES § 15). Each entry brings the icon of
+// its tool, so the results need no request of their own.
+import { iconMarkup } from '../icons/svg.ts';
 
 export interface SearchEntry {
   id: string;
@@ -8,6 +10,10 @@ export interface SearchEntry {
   /** display name per language */
   name: Record<string, string>;
   category: Record<string, string>;
+  /** design-system category class suffix (fo-cat--image) */
+  cat: string;
+  /** children of the tool icon (docs/design/assets/Icons) */
+  icon: string;
   /** every name and synonym in every language, normalized */
   terms: string[];
 }
@@ -65,8 +71,10 @@ export function attach(root: HTMLElement): () => void {
     results = filterEntries(await loadIndex(), input.value);
     list.replaceChildren(
       ...results.map((entry, i) => {
-        const option = el('li', { id: `${list.id}-${i}`, role: 'option', 'aria-selected': 'false', class: 'fo-search__item fo-cat--image' });
-        option.append(el('span', { class: 'fo-chip__dot', 'aria-hidden': 'true' }), entry.name[lang] ?? entry.id, el('small', {}, entry.category[lang] ?? ''));
+        const option = el('li', { id: `${list.id}-${i}`, role: 'option', 'aria-selected': 'false', class: `fo-search__item fo-cat--${entry.cat}` });
+        const dot = el('span', { class: 'fo-chip__dot', 'aria-hidden': 'true' });
+        dot.innerHTML = iconMarkup(entry.icon);
+        option.append(dot, entry.name[lang] ?? entry.id, el('small', {}, entry.category[lang] ?? ''));
         option.addEventListener('click', () => go(entry));
         return option;
       }),

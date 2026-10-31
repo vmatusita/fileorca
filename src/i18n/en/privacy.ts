@@ -64,6 +64,7 @@ export default {
       heading: 'Your cookie choice in the browser',
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
+        "If you accept in the cookie notice, FileOrca also counts there how many files you finished in this browser, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it.",
       ],
     },
     {

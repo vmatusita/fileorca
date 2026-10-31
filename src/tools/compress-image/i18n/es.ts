@@ -41,6 +41,11 @@ export default {
     download: 'Descargar',
     startOver: 'Empezar de nuevo',
     to: 'a',
+    coffee: {
+      text: 'Esta herramienta es gratis, sin límites y nunca sube tus archivos. Si te ahorró tiempo, un café ayuda a mantenerla así.',
+      button: 'Invítame un café',
+      hide: 'No mostrar de nuevo',
+    },
   },
   next: { label: 'Siguiente:', moreTools: 'Más herramientas' },
   howHeading: 'Cómo funciona',

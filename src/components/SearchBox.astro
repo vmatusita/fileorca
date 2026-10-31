@@ -1,15 +1,21 @@
 ---
 // ToolSearch markup (combobox + named listbox). Used inside the modal dialog and inline on the 404.
+// Without a result the Oli peeks from the bottom edge of the box (pose peek, in every page's sprite).
 import type { CommonTexts } from '../i18n/types.ts';
+import Icon from './Icon.astro';
+import Oli from './Oli.astro';
 
 interface Props {
   t: CommonTexts;
   id: string;
+  /** Inside the dialog: shows the Esc hint at the end of the field. */
+  dialog?: boolean;
 }
-const { t, id } = Astro.props;
+const { t, id, dialog = false } = Astro.props;
 ---
 <div class="fo-search">
   <div class="fo-search__field">
+    <Icon name="search" />
     <input
       type="search"
       role="combobox"
@@ -20,10 +26,12 @@ const { t, id } = Astro.props;
       autocomplete="off"
       placeholder={t.search.placeholder}
     />
+    {dialog && <span class="fo-kbd fo-desktop-only" aria-hidden="true">Esc</span>}
   </div>
   <ul class="fo-search__list" id={`${id}-list`} role="listbox" aria-label={t.search.listLabel} hidden></ul>
   <div class="fo-search__empty" data-search-empty data-title={t.search.emptyTitle} hidden>
     <p class="fo-h3" data-search-empty-title></p>
     <p class="fo-muted">{t.search.emptyHint}</p>
+    <Oli pose="peek" class="fo-search__peek" />
   </div>
 </div>

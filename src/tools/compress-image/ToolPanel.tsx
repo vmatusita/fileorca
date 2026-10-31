@@ -1,6 +1,7 @@
 // The tool panel island (the only Preact island of the tool page). DropZone, WaterLevel and
 // ResultCard share one slot; options re-process at once (no Apply button). Markup and classes
-// follow docs/design/components (v1.1); the look is provisional until the F1b.
+// follow docs/design/components (v1.1). The Oli boxes draw from the page sprite: changing the pose is
+// changing the <use> href, the same markup on the server and after hydration (DECISOES § 44).
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { JSX, TargetedMouseEvent } from 'preact';
 import type { Lang } from '../../i18n/routes.ts';
@@ -8,11 +9,45 @@ import type { CompressImageTexts } from '../../i18n/types.ts';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track } from '../../analytics/events.ts';
 import { isSupportedType, type Level } from '../../engine/image/recompress.ts';
+import { PRODUCTION_HOSTNAME } from '../../platform/site.ts';
+import type { Pose } from '../../oli/poses.ts';
+import Icon from '../../icons/Icon.tsx';
+import { countUse, dontShowAgain, isAdBlocked } from './coffee.ts';
+import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
+import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
+import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
+import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
+import homeIcon from '../../../docs/design/assets/Icons/home.svg?raw';
+import imageIcon from '../../../docs/design/assets/Icons/image.svg?raw';
+import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
 
 export interface ToolPanelProps {
   lang: Lang;
   t: CompressImageTexts;
   moreToolsHref: string;
+  /** Where the coffee line leads: Ko-fi, or the support page in Portuguese until the Pix (F6). */
+  coffeeHref: string;
+  /** The AdSense variables are filled in at build (the ad-blocker case of the coffee line). */
+  adsOn: boolean;
+}
+
+/** All the poses this island can show: the page puts them in its sprite. */
+export const PANEL_POSES: Pose[] = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
+
+function Oli({ pose, class: className }: { pose: Pose; class: string }) {
+  return (
+    <div class={className} data-oli={pose} aria-hidden="true">
+      <svg aria-hidden="true">
+        <use href={`#oli-${pose}`} />
+      </svg>
+    </div>
+  );
+}
+
+function adBlocked(adsOn: boolean): boolean {
+  const ads = (window as { adsbygoogle?: { loaded?: boolean } }).adsbygoogle;
+  const unit = document.querySelector<HTMLElement>('.fo-ad--content ins.adsbygoogle');
+  return isAdBlocked({ adsOn, production: location.hostname === PRODUCTION_HOSTNAME, loaded: ads?.loaded === true, unitHeight: unit ? unit.offsetHeight : null });
 }
 
 type Phase = 'idle' | 'over' | 'processing' | 'done' | 'error';
@@ -42,7 +77,7 @@ function imageFrom(list: FileList | DataTransferItemList | null | undefined): Fi
   return null;
 }
 
-export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
+export default function ToolPanel({ lang, t, moreToolsHref, coffeeHref, adsOn }: ToolPanelProps) {
   const says = (outcome: Result['outcome'], saved: number, format: string) =>
     outcome === 'smaller'
       ? fmt(t.result.done, { percent: percent(saved, lang) })
@@ -56,6 +91,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
   const [result, setResult] = useState<Result | null>(null);
   const [errorName, setErrorName] = useState('');
   const [announce, setAnnounce] = useState('');
+  const [coffee, setCoffee] = useState(false);
   const fileRef = useRef<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
@@ -63,6 +99,8 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
   const runRef = useRef(0);
   // Focus goes to Download when the card appears for a new file, not when an option re-runs it.
   const focusDownload = useRef(false);
+  // A use counts once per new file (an option re-run is the same use).
+  const newUse = useRef(false);
 
   useEffect(() => {
     if (phase === 'done' && focusDownload.current) {
@@ -105,6 +143,10 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
         format: FORMAT_NAME[file.type] ?? file.type,
       });
       setPhase('done');
+      if (newUse.current) {
+        newUse.current = false;
+        setCoffee(countUse(adBlocked(adsOn)));
+      }
       setAnnounce(says(outcome.outcome, (1 - after / file.size) * 100, FORMAT_NAME[file.type] ?? file.type));
       track('tool_complete', { tool: TOOL, lang, outcome: outcome.outcome === 'smaller' ? 'smaller' : 'unchanged' });
       if (outcome.outcome === 'cannot-encode') {
@@ -130,6 +172,8 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
     if (!file) return;
     fileRef.current = file;
     focusDownload.current = true;
+    newUse.current = true;
+    setCoffee(false);
     track('tool_start', { tool: TOOL, lang });
     if (!isSupportedType(file.type)) {
       runRef.current += 1;
@@ -149,6 +193,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
     runRef.current += 1;
     fileRef.current = null;
     setResult(null);
+    setCoffee(false);
     setPhase('idle');
     setAnnounce('');
     window.setTimeout(() => chooseRef.current?.focus(), 0);
@@ -201,10 +246,12 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
     />
   );
 
+
   const showProgress = phase === 'processing' && showLevel;
   const showResult = result !== null && (phase === 'done' || (phase === 'processing' && !showLevel));
   const dropState = phase === 'over' ? 'over' : phase === 'error' ? 'error' : undefined;
-  const oli = phase === 'over' ? 'gulp' : phase === 'error' ? 'oops' : 'wave';
+  const oli: Pose = phase === 'over' ? 'gulp' : phase === 'error' ? 'oops' : 'wave';
+  const badge = phase === 'over' ? downloadIcon : phase === 'error' ? alertIcon : uploadIcon;
   const kbd = t.drop.pasteKey;
   const [helpBefore, helpAfter] = t.drop.helpDesktop.split('{kbd}');
 
@@ -221,8 +268,9 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
         aria-valuetext={`${progress}%`}
         style={`--level:${progress}%`}
       >
-        <div class="fo-water fo-water--moving" />
-        <div class="fo-level__oli" data-oli="swim" aria-hidden="true" />
+        <div class="fo-water fo-water--moving">
+          <Oli pose="swim" class="fo-level__oli" />
+        </div>
         <div class="fo-level__text">
           <span class="fo-level__pct">{progress}%</span>
           <span class="fo-level__msg">{t.progress.working}</span>
@@ -235,12 +283,10 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
     panel = (
       <section class="fo-result fo-deep" aria-live="polite">
         <div class="fo-result__head">
-          <div class="fo-result__oli" data-oli="cheer" aria-hidden="true" />
-          <p class="fo-result__says">
-            {says(result.outcome, saved, result.format)}
-          </p>
+          <Oli pose="cheer" class="fo-result__oli" />
+          <p class="fo-result__says">{says(result.outcome, saved, result.format)}</p>
           {smaller && (
-            <div class="fo-placard">
+            <div class="fo-placard fo-pop">
               <span class="fo-placard__n">{MINUS + percent(saved, lang)}</span>
               <span class="fo-placard__l">{t.result.placardLabel}</span>
             </div>
@@ -270,12 +316,35 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
             download={result.name}
             onClick={() => track('download', { tool: TOOL, lang })}
           >
+            <Icon raw={downloadIcon} />
             {t.result.download} <span class="fo-btn__meta">{`· ${fileSize(result.after, lang)}`}</span>
           </a>
           <button type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
             {t.result.startOver}
           </button>
         </div>
+        {coffee && phase === 'done' && (
+          <div class="fo-result__support">
+            <p>{t.result.coffee.text}</p>
+            <div class="fo-result__support-actions">
+              <a class="fo-btn" href={coffeeHref} rel={coffeeHref.startsWith('/') ? undefined : 'noopener'} onClick={() => track('donate_click', { place: 'result', lang })}>
+                <Icon raw={coffeeIcon} class="fo-icon--sm" />
+                {t.result.coffee.button}
+              </a>
+              <button
+                type="button"
+                class="fo-btn fo-btn--ghost"
+                onClick={() => {
+                  dontShowAgain();
+                  setCoffee(false);
+                  downloadRef.current?.focus();
+                }}
+              >
+                {t.result.coffee.hide}
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     );
   } else {
@@ -284,8 +353,10 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
-        <div class="fo-drop__oli" data-oli={oli} aria-hidden="true" />
-        <div class="fo-drop__badge" aria-hidden="true" />
+        <Oli pose={oli} class="fo-drop__oli" />
+        <div class="fo-drop__badge" aria-hidden="true">
+          <Icon raw={badge} />
+        </div>
         {phase === 'over' ? (
           <>
             <p class="fo-drop__title">{t.drop.over}</p>
@@ -311,6 +382,7 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
               aria-describedby="ci-help"
               onClick={openPicker}
             >
+              <Icon raw={imageIcon} />
               {t.drop.choose}
             </button>
             <p class="fo-drop__help" id="ci-help">
@@ -359,12 +431,15 @@ export default function ToolPanel({ lang, t, moreToolsHref }: ToolPanelProps) {
             {t.next.label}
           </span>
           <a
-            class="fo-chip fo-cat--image"
+            class="fo-chip"
             href={moreToolsHref}
             onClick={() => track('next_step_click', { tool: TOOL, lang, target: 'home' })}
           >
-            <span class="fo-chip__dot" aria-hidden="true" />
+            <span class="fo-chip__dot" aria-hidden="true">
+              <Icon raw={homeIcon} />
+            </span>
             {t.next.moreTools}
+            <Icon raw={arrowIcon} />
           </a>
         </nav>
       )}

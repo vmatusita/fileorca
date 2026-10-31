@@ -1,17 +1,21 @@
 ---
-// Footer (docs/design/components/Footer): column titles are H2; only links to pages that exist.
-// Never an ad inside the footer. The wave on the top edge is the F1b's.
+// Footer (docs/design/components/Footer): the deep sea with the wave on its top edge; column titles are
+// H2; only links to pages that exist. Never an ad inside the footer. With the AdSense anchor on the
+// page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
 import { pathFor } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
+import Icon from './Icon.astro';
 
 interface Props {
   lang: Lang;
   t: CommonTexts;
+  /** The page loads AdSense (so the anchor may cover the bottom of the screen). */
+  anchor: boolean;
 }
-const { lang, t } = Astro.props;
+const { lang, t, anchor } = Astro.props;
 const year = new Date().getUTCFullYear();
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
@@ -21,7 +25,7 @@ const site = [
   { label: t.footer.contact, href: pathFor('contact', lang) },
 ];
 ---
-<footer class="fo-footer fo-deep">
+<footer class:list={['fo-footer fo-deep', { 'fo-footer--anchor': anchor }]}>
   <div class="fo-footer__cols">
     <div>
       <h2>{t.footer.imageColumn}</h2>
@@ -33,7 +37,7 @@ const site = [
     </div>
   </div>
   <div class="fo-footer__base">
-    <a class="fo-footer__coffee" href={pathFor('support', lang)} data-track="donate_click" data-track-place="footer">{t.footer.coffee}</a>
+    <a class="fo-footer__coffee" href={pathFor('support', lang)} data-track="donate_click" data-track-place="footer"><Icon name="coffee" />{t.footer.coffee}</a>
     <span>{fmt(t.footer.signature, { name: AUTHOR.name, city: AUTHOR.city })} · © {year}</span>
   </div>
 </footer>
