@@ -1,9 +1,9 @@
 # ADR-003: Dividir o Playwright do CI em partes
 
-**Status:** Proposta (decisão do Victor; nenhuma run aplica sem a decisão)
+**Status:** Aceita, opção 1, com o WebKit em duas partes: decidida pelo Victor em 31/out/2026 ("Aceito a ADR-003") e implementada pelo ajuste `ajuste-ci-partes`
 **Data:** 31/out/2026
 **Proposta por:** run F2 (a ficha manda escrever esta ADR se o `verificar` passar de 800 s no CI)
-**Afeta:** `.github/workflows/ci.yml` (fora de toda run), `scripts/verificar.ts`, `playwright.config.ts`, DECISOES § 57 e § 76
+**Afeta:** `.github/workflows/ci.yml`, `scripts/verificar.ts`, DECISOES § 57 e § 76
 
 ## Contexto
 
@@ -29,3 +29,19 @@ A opção 1. É a mais simples de ler no log, mantém o alcance inteiro e põe o
 - A mudança mexe em `.github/workflows/ci.yml`, e uma PR que mexe no pipeline não é mesclada sozinha (o job de merge recusa): o merge dessa PR é seu.
 - O job de merge (`scripts/ci/pode-mesclar.ts`) e o pós-deploy dependem do nome do job `verificar`; a divisão precisa manter um job de nome `verificar` (ou mudar o script, que também é do pipeline).
 - Com a decisão, uma run curta (`ajuste-ci-partes`) implementa e mede três execuções seguidas.
+
+## Decisão (31/out/2026)
+
+O Victor aceitou a opção 1. O ajuste `ajuste-ci-partes` a implementa com uma diferença, medida: o WebKit sozinho chega a uns 710 a 925 s com a suíte da F2, conforme a velocidade do runner, perto demais do limite. Por isso ele roda em duas partes (`--shard`).
+
+- **`scripts/verificar.ts`:** ganhou modos, e `tests/unit/verificar.test.ts` prova que as partes juntas são os mesmos passos do todo.
+  - Sem argumento, roda tudo, como antes.
+  - `--sem-playwright` roda todos os portões menos o Playwright.
+  - `--playwright=<projeto>`, com `--shard=i/n` opcional, roda o build e só aquela parte da suíte.
+  - Cada modo mantém o limite de 900 s.
+- **`.github/workflows/ci.yml`:** três jobs, um para cada parte, em runners próprios e ao mesmo tempo.
+  - O job `verificar` roda `--sem-playwright`.
+  - O job `playwright` é uma matriz com `chromium`, `webkit 1 de 2` e `webkit 2 de 2`, com `fail-fast: false` e o relatório do Playwright de cada parte num artefato.
+  - O job `merge` espera os dois. O pós-deploy não mudou.
+- **O que não muda:** nenhum portão, teste, limiar, orçamento, número de workers (2 por runner) ou tempo por teste.
+- **Custo:** os minutos do plano sobem pela instalação repetida em cada job, uns 2 min por job a mais.
