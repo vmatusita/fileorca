@@ -65,7 +65,8 @@ export function note(text: string): string {
         'quality only': 'só a qualidade',
         'transparency white': 'transparência em branco',
         'transparency white (said on the result)': 'transparência em branco (dito no resultado)',
-        'already fits: own format, no metadata': 'já cabia: mesmo formato, sem metadados',
+        'already fits: own format and no metadata': 'já cabia: mesmo formato e sem metadados',
+        'orientation ok': 'orientação ok',
         '16:9 from the centre': '16:9 pelo centro',
       };
       return known[part] ?? part;
@@ -81,6 +82,7 @@ function cell(file: RecordFile | undefined): string {
   if (!out) return 'ok';
   const parts = [`ok`, `${format(out.format)} ${out.width}×${out.height}`, size(out.bytes)];
   if (out.decoded === 'unsupported') parts.push('não abre neste navegador');
+  else if (out.decoded === 'pdf') parts.push('página do PDF');
   else parts.push('abre');
   if (out.note) parts.push(note(out.note));
   return parts.join(' · ');
@@ -102,7 +104,11 @@ function rowsOf(records: MatrixRecord[]): Row[] {
       rows.set(key, row);
     }
   }
-  return [...rows.values()];
+  // Option by option (in the order the tests ran them); in each, what came out first, in the order of the
+  // queue, and the refused files after it (they sat in the middle of the batch).
+  const optionOrder = [...new Set([...rows.values()].map((row) => row.options))];
+  const refused = (row: Row): number => (Object.values(row.byBrowser).some((file) => file?.status === 'refused') ? 1 : 0);
+  return [...rows.values()].sort((a, b) => optionOrder.indexOf(a.options) - optionOrder.indexOf(b.options) || refused(a) - refused(b));
 }
 
 const escape = (text: string): string => text.replaceAll('|', '\\|');

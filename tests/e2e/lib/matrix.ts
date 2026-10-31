@@ -424,7 +424,7 @@ export interface RecordFile {
   fixture: string;
   status: 'ok' | 'refused';
   /** ok: what came out. */
-  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'unsupported'; note: string };
+  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'unsupported' | 'pdf'; note: string };
   /** refused: the reason the page gave. */
   reason?: string;
 }
@@ -622,7 +622,7 @@ async function checkPdf(context: CheckContext, kase: MatrixCase, accepted: strin
         notes.push('alpha kept (soft mask)');
       }
     }
-    files.push({ fixture, status: 'ok', output: { name: `page ${index + 1}`, format: want.format, width: want.width, height: want.height, bytes: image.data.length, decoded: 'yes', note: notes.join(', ') } });
+    files.push({ fixture, status: 'ok', output: { name: `page ${index + 1}`, format: want.format, width: want.width, height: want.height, bytes: image.data.length, decoded: 'pdf', note: notes.join(', ') } });
   }
   return { files, pdf: { pages: pdf.pageCount, bytes: delivered.bytes.length } };
 }
@@ -637,7 +637,8 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
   await openTool(page, kase.path);
   await kase.setup?.(page);
   const loaded = Date.now() - started;
-  await page.setInputFiles('input[type="file"]', kase.batch.map(fixtureFile));
+  // By path: the files go from disk to the page as a person's would, without a copy through the protocol.
+  await page.setInputFiles('input[type="file"]', kase.batch.map((name) => resolve(DIR, name)));
   const uploaded = Date.now();
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 50_000 });
   const processed = Date.now() - uploaded;

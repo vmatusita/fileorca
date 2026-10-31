@@ -42,6 +42,7 @@ describe('size and note', () => {
     expect(note('orientation ok (Δ0.4)')).toBe('orientação ok (Δ0.4)');
     expect(note('alpha kept, first frame')).toBe('transparência mantida; primeiro quadro');
     expect(note('800 x 600 px on a 800 x 600 pt page')).toBe('800×600 px numa página de 800×600 pt');
+    expect(note('already fits: own format and no metadata, orientation ok')).toBe('já cabia: mesmo formato e sem metadados; orientação ok');
     expect(note('something new')).toBe('something new');
   });
 });
@@ -53,7 +54,7 @@ describe('buildTable', () => {
     record('heic-to-jpg-a', 'heic-to-jpg', 'chromium', 'JPG (default)', [ok('heic-05.heic', 'heic-05.jpg', 'jpeg', 3024, 4032, 900_000)]),
     record('heic-to-jpg-png', 'heic-to-jpg', 'chromium', 'PNG', [ok('heic-05.heic', 'heic-05.png', 'png', 3024, 4032, 9_000_000)]),
     record('convert-to-webp-avif', 'convert-to-webp', 'webkit', 'AVIF, Recommended', [ok('gen-avif.avif', 'x.avif', 'avif', 1600, 1200, 70_000, { decoded: 'unsupported' })], { avifDecode: false }),
-    record('image-to-pdf', 'image-to-pdf', 'chromium', 'Image size', [ok('jpg-01.jpg', 'page 1', 'jpeg', 3024, 4032, 1000)], { pdf: { pages: 1, bytes: 1_500_000 } }),
+    record('image-to-pdf', 'image-to-pdf', 'chromium', 'Image size', [ok('jpg-01.jpg', 'page 1', 'jpeg', 3024, 4032, 1000, { decoded: 'pdf' })], { pdf: { pages: 1, bytes: 1_500_000 } }),
   ];
   const presets: PresetRecord[] = [
     {
@@ -88,6 +89,7 @@ describe('buildTable', () => {
 
   it('says how many pages the PDF has, and gives the presets their own table with the bytes of each output', () => {
     expect(table).toContain('Um PDF com 1 páginas (1,5 MB em Chromium)');
+    expect(table).toContain('| `jpg-01.jpg` | Image size | ok · JPG 3024×4032 · 1 KB · página do PDF | — |');
     expect(table).toContain('### `/compress-image/to-100kb/`');
     expect(table).toContain('| `jpg-01.jpg` | 4.360.452 | 99.769 JPG (783×1044) | — | reduzida para 783×1044 px |');
   });

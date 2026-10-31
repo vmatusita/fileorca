@@ -103,7 +103,7 @@ for (const target of TARGETS) {
         expect(sniff(out.bytes), `${fixture} fits, so it keeps its format`).toBe(source.format);
         expect([width, height], `${fixture} fits, so it keeps its size`).toEqual([source.displayWidth, source.displayHeight]);
         if (fixture === WEBP_ANIMATED) expect(webpInfo(out.bytes).animated, 'the animation is still one').toBe(true);
-        note = 'already fits: own format, no metadata';
+        note = 'already fits: own format and no metadata';
       } else {
         expect(sniff(out.bytes), `${fixture} does not fit, so it becomes a JPG`).toBe('jpeg');
         expect(out.name, 'the output carries the JPG extension').toBe(`${baseOf(fixture)}.jpg`);
