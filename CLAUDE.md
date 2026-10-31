@@ -115,3 +115,10 @@ Pegadinhas que a F1b achou:
 - No Git Bash, `cat >> arquivo <<'EOF'` com texto longo em português falhou com "unexpected EOF": escreva com a ferramenta de edição.
 - O runner do CI é umas 5 vezes mais lento que a máquina local, e a Oli em loop deixou o axe quase 2 vezes mais lento lá: o `verificar` chegou a 758 s de 900. O `a11y.spec.ts` roda com movimento reduzido (§ 57). Antes de acrescentar testes pesados (vários envios, páginas com animação), confira o tempo do Playwright no log do CI (`gh run view <id> --log`).
 - `ch` segue a fonte em uso: largura em `ch` muda na troca da fonte (CLS). Use `--fo-measure` (rem).
+
+## Ajuste: CI em partes (ADR-003)
+
+- O CI roda o `pnpm verificar` em partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`, todos os portões menos o Playwright) e `playwright (chromium)`, `playwright (webkit 1 de 2)` e `playwright (webkit 2 de 2)` (`pnpm verificar --playwright=webkit --shard=1/2`). O `merge` espera todos. Na sua máquina, `pnpm verificar` sem argumento continua rodando tudo.
+- Para reproduzir uma parte que falhou só no CI, rode o mesmo comando do job, que está no nome do passo. Cada parte do Playwright sobe o relatório como artefato `playwright-report-<n>`.
+- Teste novo pesado vai para a parte em que cair pelo `--shard` do Playwright; confira o tempo de cada job no log (`gh run view <id> --log`). Se uma parte passar de uns 700 s, divida mais (outro `--shard`) num ajuste, nunca aumente o limite.
+- `tests/unit/verificar.test.ts` prova que as partes juntas são os mesmos passos do todo: um portão novo entra em `STEPS` e cai sozinho na parte certa.
