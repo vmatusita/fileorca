@@ -1,6 +1,9 @@
 # CI of every PR (ADR-001, item 5): pnpm verificar, then the merge job decides with
 # scripts/ci/pode-mesclar.ts, then the post-deploy check runs when the merge happened.
 # A merge made with the GITHUB_TOKEN does not fire `push`, so the post-deploy is called here.
+# ADR-003: pnpm verificar runs in parts, one job each, in parallel on 2-vCPU runners: every gate but the
+# Playwright suite (`verificar`), and the suite split by browser, WebKit in two shards (`playwright`). Each part
+# keeps the 900 s limit; together they are the whole of pnpm verificar (tests/unit/verificar.test.ts).
 name: CI
 
 on:
@@ -33,21 +36,53 @@ jobs:
         with:
           path: .cache
           key: tools-${{ runner.os }}-${{ hashFiles('scripts/lib/tools.ts') }}
-      - run: pnpm exec playwright install --with-deps chromium webkit
-      - name: pnpm verificar
-        run: pnpm verificar
+      # Lighthouse runs on the Chromium of Playwright.
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: pnpm verificar --sem-playwright
+        run: pnpm verificar --sem-playwright
         env:
           LINT_TEXTO_BASE: origin/${{ github.event.pull_request.base.ref }}
+
+  playwright:
+    name: playwright (${{ matrix.part }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - part: chromium
+            browser: chromium
+            args: --playwright=chromium
+          - part: webkit 1 de 2
+            browser: webkit
+            args: --playwright=webkit --shard=1/2
+          - part: webkit 2 de 2
+            browser: webkit
+            args: --playwright=webkit --shard=2/2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: pnpm verificar ${{ matrix.args }}
+        run: pnpm verificar ${{ matrix.args }}
       - name: Playwright report
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report/
           retention-days: 7
 
   merge:
-    needs: verificar
+    needs: [verificar, playwright]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
