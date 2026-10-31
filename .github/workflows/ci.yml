@@ -2,7 +2,7 @@
 # scripts/ci/pode-mesclar.ts, then the post-deploy check runs when the merge happened.
 # A merge made with the GITHUB_TOKEN does not fire `push`, so the post-deploy is called here.
 # ADR-003: pnpm verificar runs in parts, one job each, in parallel on 2-vCPU runners: every gate but the
-# Playwright suite (`verificar`), and the suite split by browser, WebKit in two shards (`playwright`). Each part
+# Playwright suite (`verificar`), and the suite split by browser, WebKit in three shards (`playwright`). Each part
 # keeps the 900 s limit; together they are the whole of pnpm verificar (tests/unit/verificar.test.ts).
 name: CI
 
@@ -54,12 +54,15 @@ jobs:
           - part: chromium
             browser: chromium
             args: --playwright=chromium
-          - part: webkit 1 de 2
+          - part: webkit 1 de 3
             browser: webkit
-            args: --playwright=webkit --shard=1/2
-          - part: webkit 2 de 2
+            args: --playwright=webkit --shard=1/3
+          - part: webkit 2 de 3
             browser: webkit
-            args: --playwright=webkit --shard=2/2
+            args: --playwright=webkit --shard=2/3
+          - part: webkit 3 de 3
+            browser: webkit
+            args: --playwright=webkit --shard=3/3
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
