@@ -3,14 +3,17 @@ import { basename, resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { imageSize, metadataReport, sniff } from './lib/images.ts';
+import { EVENT_PARAMS } from '../../src/analytics/events.ts';
+import { comparePixels, type Reference } from './lib/matrix.ts';
 import { parsePdf } from './lib/pdf.ts';
 import { readZip } from './lib/zip.ts';
 import { dataLayer, dismissCookies, downloadBytes, hydrated, type TestFile } from './lib/page.ts';
 
-// One quick pass over every tool of the Tools phase, in both browsers, with a small batch of fixtures:
-// the page loads, a file goes in, the result card shows, and what is behind Download opens, has the
-// format and the size the options ask for, and carries no Exif, XMP or GPS. The full matrix (every
-// fixture of every tool) is its own spec; this one proves each tool is wired end to end.
+// What the options of the Tools phase do when they CHANGE after a result is on screen (the batch is
+// processed again at once), the crop editor by pointer and by keyboard, the Resize fields, axe on those
+// states, and that nothing typed reaches the URL or an event. What each tool gives for each fixture by
+// default (format, size, orientation, transparency, no Exif, XMP or GPS, the refused files) is the
+// matrix, image-matrix.spec.ts; the presets are image-presets.spec.ts. Every assertion lives in one of them.
 
 const MIME: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', avif: 'image/avif' };
 const JPG_02 = 'jpg-02-iphone6-paisagem-gps.jpg'; // 3264 × 2448, with GPS
@@ -18,7 +21,6 @@ const JPG_01_ROT6 = 'gen-jpg-01-orientacao6.jpg'; // stored 1600 × 1200, shown 
 const PNG_ALPHA = 'gen-png-transparente.png'; // 800 × 600 with transparency
 const WEBP_GPS = 'gen-webp-exif-gps.webp'; // 1600 × 1200 with an Exif chunk that holds GPS
 const WEBP_ANIMATED = 'gen-webp-animada.webp'; // 320 × 240, two frames
-const AVIF = 'gen-avif.avif'; // 1600 × 1200
 const HEIC_08 = 'heic-08-iphone13pro-paisagem-hdr-ios17.heic'; // 1512 × 850 on screen
 
 function fixture(name: string): TestFile {
@@ -90,15 +92,13 @@ async function choose(page: Page, label: string): Promise<void> {
 }
 
 test.describe('resize-image', () => {
-  test('a result at once, the fields mirror half of the first photo, and the options change what comes out', async ({ page }) => {
+  test('the fields mirror half of the first photo, and the options change what comes out', async ({ page }) => {
     await open(page, '/resize-image/');
     await give(page, [JPG_02, PNG_ALPHA, WEBP_GPS]);
     await ready(page);
-    // Untouched: half of each image, and the two fields show half of the first one.
+    // Untouched (50% of each image, in the matrix): the two fields show half of the first one.
     await expect(page.locator('#rz-width')).toHaveValue('1632');
     await expect(page.locator('#rz-height')).toHaveValue('1224');
-    await expectOutputs(page, [`${JPG_02}:jpeg:1632x1224`, `${PNG_ALPHA}:png:400x300`, `${WEBP_GPS}:webp:800x600`]);
-    expectClean(await outputs(page));
 
     // A width: each photo fits inside width × height and keeps its proportions.
     await page.locator('#rz-width').fill('600');
@@ -123,22 +123,6 @@ test.describe('resize-image', () => {
     await expectOutputs(page, [`${JPG_02}:jpeg:1632x1224`, `${PNG_ALPHA}:png:400x300`, `${WEBP_GPS}:webp:800x600`]);
     await page.locator('#rz-percent').fill('25');
     await expectOutputs(page, [`${JPG_02}:jpeg:816x612`, `${PNG_ALPHA}:png:200x150`, `${WEBP_GPS}:webp:400x300`]);
-    expectClean(await outputs(page));
-  });
-});
-
-test.describe('resize-image/youtube-thumbnail', () => {
-  test('a 1280 × 720 JPG of at most 2 MB, cut from the centre, with the chip to Crop image', async ({ page }) => {
-    await open(page, '/resize-image/youtube-thumbnail/');
-    await give(page, [JPG_02]);
-    await ready(page);
-    const [out] = await outputs(page);
-    expect(out?.name).toBe(JPG_02);
-    expect(describe(out ? [out] : [])).toEqual([`${JPG_02}:jpeg:1280x720`]);
-    expect(out?.bytes.length).toBeLessThanOrEqual(2_000_000);
-    expectClean(out ? [out] : []);
-    await expect(page.locator('.fo-result__notes')).toContainText('cropped from the center');
-    await expect(page.locator('.fo-next').getByRole('link', { name: 'Crop image' })).toHaveAttribute('href', '/crop-image/');
   });
 });
 
@@ -149,8 +133,6 @@ test.describe('crop-image', () => {
     await expect(page.locator('.fo-crop')).toHaveCount(0);
     await give(page, [JPG_01_ROT6, JPG_02]);
     await ready(page);
-    await expectOutputs(page, [`${JPG_01_ROT6}:jpeg:1200x1200`, `${JPG_02}:jpeg:2448x2448`]);
-    expectClean(await outputs(page));
 
     // The editor shows the picked photo (the first), its box is a group the keyboard can reach, and the fields mirror it.
     const box = page.locator('.fo-crop__box');
@@ -225,83 +207,65 @@ test.describe('crop-image', () => {
 });
 
 test.describe('rotate-image', () => {
-  test('a quarter turn by default, then 180° and a mirror, for the whole batch', async ({ page }) => {
+  test('Left 90°, 180° and a mirror turn the whole batch the way they say', async ({ page }) => {
     await open(page, '/rotate-image/');
     await give(page, [JPG_01_ROT6, PNG_ALPHA]);
     await ready(page);
-    await expectOutputs(page, [`${JPG_01_ROT6}:jpeg:1600x1200`, `${PNG_ALPHA}:png:600x800`]);
-    expectClean(await outputs(page));
-    await choose(page, 'Left 90°');
-    await expectOutputs(page, [`${JPG_01_ROT6}:jpeg:1600x1200`, `${PNG_ALPHA}:png:600x800`]);
-    await choose(page, '180°');
-    await expectOutputs(page, [`${JPG_01_ROT6}:jpeg:1200x1600`, `${PNG_ALPHA}:png:800x600`]);
-    await choose(page, 'Horizontal');
-    await expectOutputs(page, [`${JPG_01_ROT6}:jpeg:1200x1600`, `${PNG_ALPHA}:png:800x600`]);
-    const outs = await outputs(page);
-    expect(outs.every((out) => metadataReport(out.bytes).orientation === null), 'no Orientation tag is left in the outputs').toBe(true);
+    // Right 90° (the default, with the pixels, in the matrix). Each choice re-processes the batch; the first
+    // photo is compared by pixels with the upright picture turned the same way (an Exif orientation is the
+    // turn: 8 = 90° left, 3 = 180°, 4 = mirrored top to bottom, which is 180° plus a horizontal mirror).
+    // Dimensions alone cannot tell Left from Right, so the poll waits for the pixels.
+    const references = new Map<string, Reference>();
+    const turnedLike = async (after: number): Promise<string> => {
+      try {
+        const [first] = await outputs(page);
+        if (!first) return 'no output';
+        const verdict = await comparePixels(page, first, 'jpeg', { from: JPG_01_ROT6, after, limit: 6 }, references);
+        return verdict.right < 6 && (verdict.closestWrong ?? 99) > verdict.right + 4 ? 'turned' : `Δ ${verdict.right.toFixed(1)}, closest wrong ${verdict.closestWrong?.toFixed(1)}`;
+      } catch {
+        return 'not ready';
+      }
+    };
+    for (const [label, after, sizes] of [
+      ['Left 90°', 8, [`${JPG_01_ROT6}:jpeg:1600x1200`, `${PNG_ALPHA}:png:600x800`]],
+      ['180°', 3, [`${JPG_01_ROT6}:jpeg:1200x1600`, `${PNG_ALPHA}:png:800x600`]],
+      ['Horizontal', 4, [`${JPG_01_ROT6}:jpeg:1200x1600`, `${PNG_ALPHA}:png:800x600`]],
+    ] as const) {
+      await choose(page, label);
+      await expect.poll(() => turnedLike(after), { timeout: 30_000, message: `${label} turns the picture` }).toBe('turned');
+      await expectOutputs(page, [...sizes]);
+    }
   });
 });
 
 test.describe('heic-to-jpg', () => {
-  test('a HEIC becomes a JPG from its main image, a JPG is sent to the right tool, and PNG works too', async ({ page }) => {
+  test('choosing PNG after a HEIC is on screen gives the PNG of the same main image', async ({ page }) => {
     await open(page, '/heic-to-jpg/');
-    await give(page, [HEIC_08, JPG_02]);
+    await give(page, [HEIC_08]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 55_000 });
-    // The JPG is refused in its row and the HEIC comes out on its own (one file, so no ZIP).
-    const outs = await outputs(page);
-    expect(describe(outs)).toEqual(['heic-08-iphone13pro-paisagem-hdr-ios17.jpg:jpeg:1512x850']);
-    expectClean(outs);
-    await expect(page.locator('.fo-filelist [data-state="error"]')).toHaveCount(1);
+    // JPG is the default (the matrix has all ten); the option re-processes at once and the name changes with the format.
     await choose(page, 'PNG');
     await expectOutputs(page, ['heic-08-iphone13pro-paisagem-hdr-ios17.png:png:1512x850']);
-    expectClean(await outputs(page));
   });
 });
 
 test.describe('webp-to-jpg', () => {
-  test('WebP files become JPG (an animation gives its first frame) and PNG on request', async ({ page }) => {
+  test('the result says an animation became its first frame, and PNG on request gives PNG files', async ({ page }) => {
     await open(page, '/webp-to-jpg/');
     await give(page, [WEBP_GPS, WEBP_ANIMATED]);
     await ready(page);
-    await expectOutputs(page, ['gen-webp-exif-gps.jpg:jpeg:1600x1200', 'gen-webp-animada.jpg:jpeg:320x240']);
-    expectClean(await outputs(page));
     await expect(page.locator('.fo-result__notes')).toContainText('first frame');
     await choose(page, 'PNG');
     await expectOutputs(page, ['gen-webp-exif-gps.png:png:1600x1200', 'gen-webp-animada.png:png:320x240']);
   });
 });
 
-test.describe('png-to-jpg', () => {
-  test('a PNG becomes a JPG (a PNG named .jpg too), a JPG becomes a PNG', async ({ page }) => {
-    await open(page, '/png-to-jpg/');
-    await give(page, [PNG_ALPHA, 'gen-png-extensao-jpg.jpg', JPG_02]);
-    await ready(page);
-    await expectOutputs(page, ['gen-png-transparente.jpg:jpeg:800x600', 'gen-png-extensao-jpg.jpg:jpeg:640x480', 'jpg-02-iphone6-paisagem-gps.png:png:3264x2448']);
-    const outs = await outputs(page);
-    expectClean(outs);
-    expect(outs.map((out) => sniff(out.bytes))).toEqual(['jpeg', 'jpeg', 'png']);
-    await expect(page.locator('.fo-result__notes')).toContainText('became white');
-  });
-});
-
-test.describe('avif-to-jpg', () => {
-  test('an AVIF becomes a JPG', async ({ page }) => {
-    await open(page, '/avif-to-jpg/');
-    await give(page, [AVIF]);
-    await ready(page);
-    const outs = await outputs(page);
-    expect(describe(outs)).toEqual(['gen-avif.jpg:jpeg:1600x1200']);
-    expectClean(outs);
-  });
-});
-
 test.describe('convert-to-webp', () => {
-  test('a JPG and a PNG become WebP, and AVIF when asked', async ({ page }) => {
+  test('Strong keeps the size, and AVIF on request re-processes the batch as AVIF', async ({ page }) => {
     await open(page, '/convert-to-webp/');
     await give(page, ['gen-jpg-02-orientacao8.jpg', PNG_ALPHA]);
     await ready(page);
-    await expectOutputs(page, ['gen-jpg-02-orientacao8.webp:webp:1600x1200', 'gen-png-transparente.webp:webp:800x600']);
-    expectClean(await outputs(page));
+    // WebP, Recommended is the default (the matrix has every fixture, and AVIF before the files go in).
     await choose(page, 'Strong');
     await expectOutputs(page, ['gen-jpg-02-orientacao8.webp:webp:1600x1200', 'gen-png-transparente.webp:webp:800x600']);
     await choose(page, 'AVIF');
@@ -311,11 +275,10 @@ test.describe('convert-to-webp', () => {
 });
 
 test.describe('image-to-pdf', () => {
-  test('one PDF with a page per image, in the order of the list, and the sheet changes only the PDF', async ({ page }) => {
+  test('the sheet changes only the PDF: Letter and A4 put every image on a sheet, in the order of the list', async ({ page }) => {
     await open(page, '/image-to-pdf/');
     await give(page, [JPG_01_ROT6, PNG_ALPHA, JPG_02]);
     await ready(page);
-    await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', 'fileorca-images.pdf');
     const sizes = async () => {
       const bytes = await downloadBytes(page);
       expect(sniff(bytes)).toBe('pdf');
@@ -325,7 +288,7 @@ test.describe('image-to-pdf', () => {
       expectClean([{ name: 'fileorca-images.pdf', bytes }]);
       return pdf.pages.map((pdfPage) => `${Math.round(pdfPage.width)}x${Math.round(pdfPage.height)}`);
     };
-    await expect.poll(sizes, { timeout: 30_000 }).toEqual(['1200x1600', '800x600', '3264x2448']);
+    // Image size, the default, is in the matrix: a page the size of each image.
     await choose(page, 'Letter');
     await expect.poll(sizes, { timeout: 30_000 }).toEqual(['612x792', '792x612', '792x612']);
     await choose(page, 'A4');
@@ -435,10 +398,23 @@ test.describe('typed numbers', () => {
       await expectOutputs(page, [shown]);
       expect(new URL(page.url()).search, 'no query string').toBe('');
       expect(new URL(page.url()).hash, 'no hash').toBe('');
-      const events = JSON.stringify(await dataLayer(page));
-      for (const typed of ['7771', '3331', '1777']) expect(events, 'a typed number in the events').not.toContain(typed);
-      const complete = (await dataLayer(page)).filter((entry) => entry[0] === 'event' && entry[1] === 'tool_complete');
+      const layer = await dataLayer(page);
+      const events = JSON.stringify(layer);
+      for (const typed of ['7771', '3331', '1777']) {
+        expect(events, 'a typed number in the events').not.toContain(typed);
+        expect(page.url(), 'a typed number in the URL').not.toContain(typed);
+      }
+      const complete = layer.filter((entry) => entry[0] === 'event' && entry[1] === 'tool_complete');
       expect(complete, 'one tool_complete for the batch').toEqual([['event', 'tool_complete', { tool, lang: 'en', outcome }]]);
+      // Every event is one of the closed list, carries only its own parameters, and names no file.
+      const sent = layer.filter((entry) => entry[0] === 'event');
+      expect(sent.length, 'the batch sent events').toBeGreaterThan(0);
+      for (const [, name, params] of sent) {
+        expect(Object.keys(EVENT_PARAMS), 'an event outside the closed list').toContain(name);
+        const allowed: readonly string[] = EVENT_PARAMS[name as keyof typeof EVENT_PARAMS];
+        for (const key of Object.keys(params as Record<string, unknown>)) expect(allowed, `${String(name)} sends ${key}`).toContain(key);
+        expect(JSON.stringify(params), `${String(name)} names a file`).not.toMatch(/jpg-02|iphone|\.jpe?g|\.png|\.webp/i);
+      }
     }
   });
 });
