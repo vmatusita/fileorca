@@ -12,7 +12,20 @@ export const OG_LOCALE: Record<Lang, string> = { en: 'en_US', pt: 'pt_BR', es: '
 
 export type RouteId =
   | 'home'
+  | 'image-tools'
   | 'compress-image'
+  | 'compress-image-to-100kb'
+  | 'compress-image-to-1mb'
+  | 'resize-image'
+  | 'resize-image-youtube-thumbnail'
+  | 'crop-image'
+  | 'rotate-image'
+  | 'heic-to-jpg'
+  | 'webp-to-jpg'
+  | 'png-to-jpg'
+  | 'avif-to-jpg'
+  | 'convert-to-webp'
+  | 'image-to-pdf'
   | 'privacy'
   | 'terms'
   | 'about'
@@ -50,9 +63,19 @@ export const ROUTES: readonly RouteDef[] = [
     paths: { en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' },
     indexable: true,
     view: 'src/tools/compress-image/',
-    texts: ['src/tools/compress-image/i18n/{lang}.ts'],
+    texts: ['src/tools/compress-image/i18n/{lang}.ts', 'src/tools/image/i18n/{lang}.ts'],
     adArea: 'arquivos',
   },
+  // The other image tools, their presets and the hub exist only in English for now (DECISOES § 58).
+  {
+    id: 'image-tools',
+    paths: { en: '/image-tools/' },
+    indexable: true,
+    view: 'src/views/ImageToolsView.astro',
+    texts: ['src/i18n/{lang}/image-tools.ts'],
+    adArea: 'arquivos',
+  },
+  ...imageToolRoutes(),
   {
     id: 'privacy',
     paths: { en: '/privacy/', pt: '/pt/privacidade/', es: '/es/privacidad/' },
@@ -103,6 +126,44 @@ export const ROUTES: readonly RouteDef[] = [
     texts: ['src/i18n/{lang}/not-found.ts'],
   },
 ];
+
+/** English-only image tools (folder src/tools/<slug>/) and presets (src/tools/<parent>/presets/<name>/). */
+function imageToolRoutes(): RouteDef[] {
+  const tools: [RouteId, string][] = [
+    ['resize-image', 'resize-image'],
+    ['crop-image', 'crop-image'],
+    ['rotate-image', 'rotate-image'],
+    ['heic-to-jpg', 'heic-to-jpg'],
+    ['webp-to-jpg', 'webp-to-jpg'],
+    ['png-to-jpg', 'png-to-jpg'],
+    ['avif-to-jpg', 'avif-to-jpg'],
+    ['convert-to-webp', 'convert-to-webp'],
+    ['image-to-pdf', 'image-to-pdf'],
+  ];
+  const presets: [RouteId, string, string][] = [
+    ['compress-image-to-100kb', 'compress-image', 'to-100kb'],
+    ['compress-image-to-1mb', 'compress-image', 'to-1mb'],
+    ['resize-image-youtube-thumbnail', 'resize-image', 'youtube-thumbnail'],
+  ];
+  return [
+    ...tools.map(([id, slug]): RouteDef => ({
+      id,
+      paths: { en: `/${slug}/` },
+      indexable: true,
+      view: `src/tools/${slug}/`,
+      texts: [`src/tools/${slug}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'],
+      adArea: 'arquivos',
+    })),
+    ...presets.map(([id, parent, name]): RouteDef => ({
+      id,
+      paths: { en: `/${parent}/${name}/` },
+      indexable: true,
+      view: `src/tools/${parent}/presets/${name}/`,
+      texts: [`src/tools/${parent}/presets/${name}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'],
+      adArea: 'arquivos',
+    })),
+  ];
+}
 
 export function routeById(id: RouteId): RouteDef {
   const route = ROUTES.find((candidate) => candidate.id === id);
