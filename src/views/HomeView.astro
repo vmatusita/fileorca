@@ -1,12 +1,16 @@
 ---
-// Home: the tools that exist today, with the Oli waving next to the H1. No AdSlot on the home yet.
+// Home: the image tools that exist in the language, with the Oli waving next to the H1. English shows all
+// ten and a link to the image hub; Portuguese and Spanish show only the tools they have (Compress image).
+// The cards come from the route map: a tool gets a card only with a path in this language. No AdSlot on
+// the home yet.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
-import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
+import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
+import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 
 interface Props {
   lang: Lang;
@@ -15,7 +19,13 @@ const { lang } = Astro.props;
 const route = routeById('home');
 const t = TEXTS[lang].home;
 const common = TEXTS[lang].common;
-const tool = common.tools['compress-image'];
+const hub = routeById('image-tools').paths[lang];
+const cards = IMAGE_TOOL_IDS.flatMap((id) => {
+  const href = routeById(id).paths[lang];
+  const blurb = common.tools[id];
+  if (!href || !blurb) return [];
+  return [{ id, href, blurb, icon: IMAGE_PAGES[id].icon, category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const) }];
+});
 const website = {
   '@type': 'WebSite',
   name: SITE_NAME,
@@ -34,8 +44,11 @@ const website = {
   <section class="fo-section" aria-labelledby="tools">
     <h2 id="tools">{t.toolsHeading}</h2>
     <ul class="fo-grid">
-      <li><ToolCard href={pathFor('compress-image', lang)} name={tool.name} description={tool.description} category="image" icon="compress" /></li>
+      {cards.map((card) => (
+        <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category={card.category} icon={card.icon} /></li>
+      ))}
     </ul>
+    {hub && t.hubLink && <p class="fo-more"><a href={hub}>{t.hubLink}</a></p>}
   </section>
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">
     <h2 id="privacy-home">{t.privacyHeading}</h2>

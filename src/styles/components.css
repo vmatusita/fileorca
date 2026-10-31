@@ -343,6 +343,8 @@
 /* ---------- ToolCard grid ---------- */
 .fo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
 .fo-grid > li { display: grid; }
+/* A link under a grid ("See all image tools"). */
+.fo-more { margin: var(--space-4) 0 0; font-weight: 600; }
 .fo-tool { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; gap: var(--space-2); align-content: start; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-tool:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
 .fo-tool__icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--fo-cat, var(--brand-soft)); color: var(--on-cat); margin-bottom: var(--space-1); }
