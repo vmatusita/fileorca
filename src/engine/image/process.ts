@@ -8,7 +8,7 @@
 import { decodeSource } from './decode.ts';
 import type { Decoded } from './decode.ts';
 import { blobOf, encodeAvifWork, encodeJpegMoz, encodeJpegNative, encodePngNative, encodeWebpWork, optimiseCleanPng, QUALITY } from './encode.ts';
-import { EngineError, reasonOf } from './errors.ts';
+import { EngineError, loading, reasonOf } from './errors.ts';
 import { centeredBox, coverPlan, resizeSize, sameBox } from './geometry.ts';
 import { clampBox, mosaic } from './pixels.ts';
 import type { Spin } from './pixels.ts';
@@ -131,7 +131,7 @@ function targetOps(run: Run, work: Work): TargetOps<Work> {
       return { handle, pixels: width * height };
     },
     async encode(handle, quality) {
-      const { encodeJpeg } = await import('./codecs/jpeg.ts');
+      const { encodeJpeg } = await loading(import('./codecs/jpeg.ts'));
       return encodeJpeg(handle.raster(), quality);
     },
     release(handle) {
@@ -289,7 +289,8 @@ async function compressPng(run: Run): Promise<EngineOutput> {
   let optimised: Uint8Array;
   try {
     optimised = await optimiseCleanPng(clean, run.info.width * run.info.height);
-  } catch {
+  } catch (error) {
+    if (error instanceof EngineError && error.reason === 'load') throw error;
     return originalStripped(run, 'cannot-encode');
   }
   run.onProgress(100);

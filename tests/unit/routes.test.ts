@@ -85,6 +85,33 @@ describe('mapa de rotas', () => {
       expect(text).not.toMatch(/\b(seamless|effortless|supercharge|AI-powered|revolutionary|best-in-class)\b/i);
     }
   });
+
+  // F3 (review f-02, DECISOES § 102): every word the design README forbids, with its endings ("supercharged",
+  // "magical", "mágica"); no emoji; and the one exclamation of a screen only in the success line of a tool.
+  it('keeps the voice of the design README: forbidden words, no emoji, one exclamation only on success', () => {
+    const strings = (value: unknown, path: string, out: [string, string][] = []): [string, string][] => {
+      if (typeof value === 'string') out.push([path, value]);
+      else if (value && typeof value === 'object') for (const [key, item] of Object.entries(value)) strings(item, `${path}.${key}`, out);
+      return out;
+    };
+    const forbidden = /\b(seamless\w*|effortless\w*|unlock\w*|supercharge\w*|magic\w*|m[áa]gic\w*|ai-powered|revolutionary|best-in-class)\b/i;
+    for (const sample of ['Unlock your photos', 'A magical way', 'Supercharged compression', 'Una forma mágica']) expect(sample).toMatch(forbidden);
+    let successLines = 0;
+    for (const lang of LANGS) {
+      const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)], lang);
+      expect(all.length).toBeGreaterThan(100);
+      for (const [path, text] of all) {
+        expect(text, path).not.toMatch(forbidden);
+        expect(text.replace(/[©®™]/g, ''), path).not.toMatch(/\p{Extended_Pictographic}/u);
+        if (/[!¡]/.test(text)) {
+          successLines += 1;
+          expect(path, `${path}: exclamação fora da fala de sucesso`).toMatch(/\.(done|doneMany)$/);
+          expect(text.match(/!/g)?.length, path).toBe(1);
+        }
+      }
+    }
+    expect(successLines, 'the success lines were found').toBeGreaterThan(0);
+  });
 });
 
 describe('formatting helpers', () => {

@@ -80,6 +80,7 @@ export default {
         'O consentimento depende de onde você está e usa o Consent Mode v2 do Google.',
         'Na União Europeia, no EEE (Islândia, Liechtenstein e Noruega), no Reino Unido e na Suíça, o armazenamento para medição de uso e para anúncios fica negado por padrão até você aceitar.',
         'Nos demais lugares, o armazenamento para medição de uso e para anúncios fica liberado por padrão, e você pode recusar no aviso de cookies.',
+        'Recusar, ou ainda não ter aceitado onde o consentimento é negado por padrão, não desliga o Google Analytics: ele passa a funcionar sem cookies, e o Google ainda pode receber as visualizações de página e os eventos da lista acima, sem nenhum identificador guardado no seu navegador.',
         'Para mudar a sua escolha quando quiser, use o botão abaixo.',
       ],
     },

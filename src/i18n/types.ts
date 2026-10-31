@@ -2,7 +2,7 @@
 // text fails `pnpm tipos`. Values are plain strings (placeholders like {name} are filled by `fmt`),
 // which keeps lint:texto able to read every text without running page code.
 import type { Lang } from './routes.ts';
-import type { ImagePageId } from '../tools/image/registry.ts';
+import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -219,6 +219,12 @@ export interface ImageToolsTexts extends PageMeta {
   presetsCaption: string;
   /** Column heads of the presets table: the preset, what comes out. */
   presetsHead: [string, string];
+  /** The guide under the presets: which tool does which job (DECISOES § 96). */
+  guideHeading: string;
+  guideIntro: string;
+  /** One line per job: the text before the tool name, the tool (linked to its page), the text after it. */
+  guide: { before: string; tool: ImageToolId; after: string }[];
+  guideOutro: string;
 }
 
 /**
@@ -287,6 +293,8 @@ export interface ImagePanelTexts {
     truncated: string;
     decode: string;
     encode: string;
+    /** The engine could not be loaded (offline, or the site changed since the page opened). */
+    load: string;
     tooLarge: string;
     /** "Choose other files" (DropZone error button). */
     chooseAnother: string;
@@ -402,6 +410,8 @@ export interface CropOptionsTexts {
   free: string;
   /** Name of the crop box (a group): "Crop area". */
   boxLabel: string;
+  /** What the box covers, said with its name (F2 low 1, DECISOES § 102): "{width} by {height} pixels, at {x}, {y}". */
+  boxValue: string;
   /** How to move it by keyboard: "Arrow keys move the box; Shift with the arrows changes its size." */
   keyboardHelp: string;
   x: string;

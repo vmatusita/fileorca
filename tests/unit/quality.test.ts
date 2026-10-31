@@ -48,6 +48,21 @@ describe('motor de imagem autocontido (lint)', () => {
   }, 30_000);
 });
 
+/**
+ * The hex values that only the yellow family of tokens.css uses (#FFC93C and #B8870F today; the dark ink of the
+ * yellow button's text and lip is shared with other tokens, so it is not yellow), as hex or rgb().
+ */
+const literalYellow = (() => {
+  const declared = [...readFileSync('docs/design/tokens.css', 'utf8').matchAll(/--([\w-]+):\s*([^;]+);/g)].map((match) => [match[1] ?? '', match[2] ?? ''] as const);
+  const family = new Set(['sun', 'on-sun', 'sun-edge', 'shadow-lip-sun', 'shadow-lip-on-deep']);
+  const hexes = (value: string) => (value.match(/#[0-9A-Fa-f]{6}\b/g) ?? []).map((hex) => hex.toUpperCase());
+  const elsewhere = new Set(declared.filter(([name]) => !family.has(name)).flatMap(([, value]) => hexes(value)));
+  const only = [...new Set(declared.filter(([name]) => family.has(name)).flatMap(([, value]) => hexes(value)))].filter((hex) => !elsewhere.has(hex));
+  // rgb() with commas or with spaces (second pass p2-integridade-02).
+  const rgb = (hex: string) => `rgba?\\(\\s*${parseInt(hex.slice(1, 3), 16)}[\\s,]+${parseInt(hex.slice(3, 5), 16)}[\\s,]+${parseInt(hex.slice(5, 7), 16)}\\b`;
+  return new RegExp([...only, ...only.map(rgb)].join('|'), 'i');
+})();
+
 describe('cores só dos tokens', () => {
   it('uses no hex colour outside docs/design/tokens.css in styles, components and pages', () => {
     const tokens = new Set([...readFileSync('docs/design/tokens.css', 'utf8').matchAll(/#[0-9A-Fa-f]{3,8}\b/g)].map((match) => match[0].toUpperCase()));
@@ -70,8 +85,20 @@ describe('cores só dos tokens', () => {
     // The whole yellow family: the fill, its text and edge, and the two yellow lips (tokens.json).
     const yellow = /var\(--(?:sun|on-sun|sun-edge|shadow-lip-sun|shadow-lip-on-deep)\)/;
     for (const { file, css } of sheets) {
-      const rules = css.split('}').filter((rule) => yellow.test(rule));
+      const rules = css.split('}').filter((rule) => yellow.test(rule) || literalYellow.test(rule));
       for (const rule of rules) expect(rule, file).toMatch(/fo-btn--download/);
     }
+    // The yellow written as itself, not through a token, is the same yellow (review f-01, DECISOES § 102).
+    expect(literalYellow.test('.fo-banner { background: #FFC93C }')).toBe(true);
+    expect(literalYellow.test('.fo-banner { box-shadow: 0 4px 0 #b8870f }')).toBe(true);
+    expect(literalYellow.test('.fo-banner { color: rgb(255, 201, 60) }')).toBe(true);
+    expect(literalYellow.test('.fo-banner { color: rgb(255 201 60 / 40%) }')).toBe(true);
+    expect(literalYellow.test('.fo-banner { background: var(--brand) }')).toBe(false);
+    // The same yellow in an inline style of a component or a page (second pass p2-integridade-02).
+    const inline = files('src', /\.(astro|tsx)$/).flatMap((file) =>
+      [...readFileSync(file, 'utf8').matchAll(/style=(?:"([^"]*)"|\{`([^`]*)`\}|\{\{([^}]*)\}\})/g)].map((match) => ({ file, css: match[1] ?? match[2] ?? match[3] ?? '' })),
+    );
+    expect(inline.length, 'inline styles were read').toBeGreaterThan(0);
+    for (const { file, css } of inline) expect(literalYellow.test(css), `${file}: ${css}`).toBe(false);
   });
 });

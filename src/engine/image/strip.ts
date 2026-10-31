@@ -52,6 +52,12 @@ function orientationSegment(orientation: number): Uint8Array {
 }
 
 const ICC_ID = 'ICC_PROFILE\0';
+const JFIF_ID = 'JFIF\0';
+const ADOBE_ID = 'Adobe';
+
+function startsWith(bytes: Uint8Array, at: number, id: string): boolean {
+  return String.fromCharCode(...bytes.subarray(at, at + id.length)) === id;
+}
 
 /** True for the APP2 segment (marker and length included) that carries a piece of the ICC colour profile. */
 function isIccSegment(segment: Uint8Array): boolean {
@@ -91,8 +97,12 @@ export function stripJpeg(bytes: Uint8Array): Uint8Array {
     const isApp = marker >= 0xe0 && marker <= 0xef;
     if (marker === 0xe1) orientation = Math.max(orientation, jpegOrientation(segment.subarray(4)));
     // Keep JFIF (APP0), the ICC profile (APP2), Adobe (APP14) and every non-APP segment; drop the rest
-    // (Exif and XMP in APP1, IPTC in APP13, MPF and any other APP2, comments).
-    const keepApp = marker === 0xe0 || marker === 0xee || (marker === 0xe2 && isIccSegment(segment));
+    // (Exif and XMP in APP1, IPTC in APP13, MPF and any other APP2, comments). An APP0 or APP14 is kept only when
+    // it is what its marker is for: a JFXX thumbnail or a private block under the same marker goes (DECISOES § 100).
+    const keepApp =
+      (marker === 0xe0 && startsWith(segment, 4, JFIF_ID)) ||
+      (marker === 0xee && startsWith(segment, 4, ADOBE_ID)) ||
+      (marker === 0xe2 && isIccSegment(segment));
     const drop = (isApp && !keepApp) || marker === 0xfe;
     if (!drop) keep.push(segment);
     i += 2 + length;
@@ -123,7 +133,18 @@ export function stripJpeg(bytes: Uint8Array): Uint8Array {
   return concat(keep);
 }
 
-const PNG_DROP = new Set(['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME']);
+/**
+ * The PNG chunks a picture needs: the critical ones, transparency, colour and gamma, resolution, the HDR
+ * colour chunks and the animation of an APNG. Everything else goes: text, eXIf, tIME and any private or
+ * unknown chunk (caBX, zxIf, exIf, vpAg, prVW…), which can carry Exif, GPS or a content credential (§ 100).
+ */
+const PNG_KEEP = new Set([
+  'IHDR', 'PLTE', 'IDAT', 'IEND', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'bKGD', 'pHYs', 'cICP', 'mDCV', 'cLLI',
+  'acTL', 'fcTL', 'fdAT',
+]);
+
+/** The WebP chunks a picture needs; EXIF, XMP and any unknown chunk go (§ 100). */
+const WEBP_KEEP = new Set(['VP8X', 'VP8 ', 'VP8L', 'ALPH', 'ANIM', 'ANMF', 'ICCP']);
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -135,7 +156,7 @@ export function stripPng(bytes: Uint8Array): Uint8Array {
     const length = u32(bytes, i, false);
     const type = String.fromCharCode(...bytes.subarray(i + 4, i + 8));
     const chunk = bytes.subarray(i, i + 12 + length);
-    if (!PNG_DROP.has(type)) keep.push(chunk);
+    if (PNG_KEEP.has(type)) keep.push(chunk);
     i += 12 + length;
     if (type === 'IEND') break;
   }
@@ -153,7 +174,7 @@ export function stripWebp(bytes: Uint8Array): Uint8Array {
     const size = u32(bytes, i + 4, true);
     const chunk = bytes.slice(i, i + 8 + size + (size % 2));
     if (type === 'VP8X') chunk[8] = (chunk[8] ?? 0) & ~0x0c; // clear the EXIF and XMP flags
-    if (type !== 'EXIF' && type !== 'XMP ') keep.push(chunk);
+    if (WEBP_KEEP.has(type)) keep.push(chunk);
     i += 8 + size + (size % 2);
   }
   const body = concat(keep);

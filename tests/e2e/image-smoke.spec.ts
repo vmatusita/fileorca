@@ -137,7 +137,8 @@ test.describe('crop-image', () => {
     // The editor shows the picked photo (the first), its box is a group the keyboard can reach, and the fields mirror it.
     const box = page.locator('.fo-crop__box');
     await expect(box).toHaveAttribute('role', 'group');
-    await expect(box).toHaveAccessibleName('Crop area');
+    // The name says what the box covers (F2 low 1, DECISOES § 102).
+    await expect(box).toHaveAccessibleName('Crop area, 1200 by 1200 pixels, at 0, 200');
     await expect(box).toHaveAccessibleDescription(/Arrow keys move the box/);
     await expect(page.locator('#cr-x')).toHaveValue('0');
     await expect(page.locator('#cr-y')).toHaveValue('200');
@@ -266,7 +267,14 @@ test.describe('image-to-pdf', () => {
     await give(page, [JPG_01_ROT6, PNG_ALPHA, JPG_02]);
     await ready(page);
     const sizes = async () => {
-      const bytes = await downloadBytes(page);
+      // While the PDF is built again for the new sheet, its link is gone for a moment: that is one more try of the
+      // poll, not a failure (it failed once on the Linux WebKit of the CI; DECISOES § 99).
+      let bytes: Uint8Array;
+      try {
+        bytes = await downloadBytes(page);
+      } catch {
+        return 'the PDF is being built again';
+      }
       expect(sniff(bytes)).toBe('pdf');
       const pdf = parsePdf(bytes);
       expect(pdf.info['Producer']).toBe('FileOrca');

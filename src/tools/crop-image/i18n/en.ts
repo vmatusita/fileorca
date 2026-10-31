@@ -69,6 +69,7 @@ export default {
       wide: '16:9',
       free: 'Free',
       boxLabel: 'Crop area',
+      boxValue: '{width} by {height} pixels, at {x}, {y}',
       keyboardHelp: 'Arrow keys move the box. Shift with the arrow keys changes its size.',
       x: 'X',
       y: 'Y',

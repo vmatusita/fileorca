@@ -552,3 +552,220 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
 - **Decisão:** o `trace` do `playwright.config.ts` passa a `{ mode: 'retain-on-failure', screenshots: false }`. O trace de um teste que falha mantém os snapshots do DOM, a rede e o código, e deixa de gravar o screencast. O diagnóstico de disco fica no `verificar` e também mede os artefatos do Playwright e as pastas do `/tmp`, para a próxima falha dizer onde o espaço foi. Nenhum teste, limiar ou tempo mudou.
 - **Por quê:** o trace guarda os quadros do screencast nos recursos do worker, que só se apagam quando o worker termina. Antes, cada worker alternava entre o Chromium e o WebKit e reiniciava o navegador; com o WebKit sozinho no job, dois workers acumulam quadros das páginas animadas até encher os 11 GB livres. Aqui no Windows o mesmo diretório ficou em poucos MB, porque o WebKit do Windows é outro build, e por isso a confirmação vem do CI.
 - **Alternativa:** um passo que libera disco no runner (mexe no `.github/` e só adia o problema) ou `workers: 1` no WebKit (o dobro do tempo).
+
+## § 91 · O aviso de cookies reserva o espaço no rodapé, não no `body` (F3, 31/out/2026)
+
+- **Contexto:** o Victor viu uma faixa clara embaixo do rodapé escuro enquanto o aviso de cookies está aberto (Chrome e Edge do Windows). A causa, provada: o `reserve()` do `CookieNotice.astro` punha no `document.body` um `padding-bottom` igual à altura do aviso + o `bottom` + 8 px (a garantia da § 36). O `html` não tem fundo próprio, então o fundo `--bg` do `body` pinta a tela inteira, e o `padding` do `body` fica depois do `.fo-footer` (o último elemento da página, fundo `--deep`). O teste novo `tests/e2e/cookie-footer.spec.ts` mediu, no código de antes, 216 px do `body` abaixo do rodapé a 360 px (nos dois navegadores) e, com a âncora do AdSense, 316 px com a última linha do rodapé a 105 px do aviso: a âncora era contada duas vezes (pelos 96 px do `.fo-footer--anchor` e pelo `bottom` do aviso).
+- **Decisão:** o script publica a altura que precisa reservar em `--fo-cookie-room` no `<html>` (e a tira quando o aviso some; a variável passou a `--fo-bottom-room` na § 101, quando a âncora ganhou reserva própria), e o `.fo-footer` soma essa variável ao padding de baixo. No celular com os anúncios ligados, o `.fo-footer--anchor` usa o maior entre os 96 px da âncora e o respiro normal + a reserva, porque a reserva já conta a âncora embaixo do aviso. O `scroll-padding-bottom` continua no `<html>` e o `focusin` da § 36 não mudou. Nenhuma cor, sombra, raio ou JS a mais; o script continua `is:inline`.
+- **Prova:** o `cookie-footer.spec.ts` carrega a home, a Compress image e a Privacidade uma vez por navegador e, no mesmo carregamento (§ 76), confere a 360 × 740, 768 × 1024 e 1280 × 800, nos temas claro e escuro, por `prefers-color-scheme` e por `html[data-theme]`, que `scrollHeight` menos o fim do rodapé dá no máximo 1 px, que a última linha do rodapé fica acima do aviso e que o rodapé tem fundo diferente do `body`. Depois de Aceitar ou Recusar: nenhum padding no `body`, nenhum `scroll-padding` e nenhum estilo inline no `html`, e o rodapé volta aos 24 px (ou aos 96 px com `.fo-footer--anchor` a 360 px). Um teste foca o último link do rodapé a 360 e 1280 px, com e sem `scroll-padding`. Antes da correção, 8 testes falharam e 2 passaram; depois, os 10 passam, e os testes de cookies do `events.spec.ts` e do `consent.spec.ts` passam sem mudança.
+- **Os outros três sintomas:** o aviso fecha (o `consent.spec.ts` clica em Aceitar e Recusar e espera o aviso escondido), não volta (o mesmo teste navega por três páginas depois da escolha) e a página não pula na carga (a reserva entra antes da primeira pintura, pelo script inline no fim do `body`; o CLS do Lighthouse está no relatório). Nenhum dos três se reproduziu.
+- **Alternativa:** dar ao `html` o fundo `--deep` (pintaria de azul o fim da página antes do rodapé enquanto ela carrega e muda o canvas do site inteiro) ou um elemento vazio depois do rodapé com a altura da reserva (mais marcação e o mesmo resultado).
+
+## § 92 · Revisão da F3: seis lentes sobre um commit fixo, numa worktree só de leitura (F3, 31/out/2026)
+
+- **Decisão:** a revisão cobre tudo o que está na `main` mais a correção do aviso, o `gate:prontidao` e o hub. O commit revisado é o do plano `docs/relatorios/fase-03-plano.md`, e o hash fica registrado no `REVISAO-F3.md`.
+- **O gabarito:** as fichas F1a, F1b e F2, os critérios dos prompts dessas runs, o CLAUDE.md, o DECISOES.md, o `docs/design/`, a "Nota para a F3" e os baixos da F2.
+- **As seis lentes:** corretude, privacidade, anúncio e consentimento, acessibilidade, desempenho e SEO técnico, e aderência ao design system. Cada lente é um subagente Sonnet em contexto limpo, que trabalha só por leitura numa worktree em `.claude/worktrees/revisao-f3`, com o próprio `pnpm install --frozen-lockfile` e o próprio `pnpm build`.
+- **Execução em paralelo:** cada lente tem a própria porta (`FO_PORT` de 4174 a 4179) e a própria pasta de saída do Playwright, para duas execuções nunca usarem o servidor uma da outra.
+- **O que a lente devolve:** cada achado com id, severidade, `arquivo:linha`, evidência rodada, a regra violada, a correção proposta e o custo no CI. Preferência de estilo não é achado.
+- **Por quê:** a ficha F3 pede revisão adversarial em subagentes paralelos. Uma worktree fixa evita que a revisão leia código que eu estou mudando, e a porta própria evita o problema da porta 4173 que a F2 achou.
+- **Alternativa:** revisar na pasta de trabalho. Seria mais barato, mas a lente leria arquivos no meio da edição.
+
+## § 93 · Severidade e cético por achado (F3, 31/out/2026)
+
+- **Decisão:** a severidade segue a decisão 3 do prompt da F3.
+  - **Crítico:** arquivo que sai, número na URL ou no GA4, "O que derruba conta", `noindex` ou `robots.txt` em produção, saída errada ou com GPS, merge ou pós-deploy quebrados.
+  - **Alto:** WCAG A ou AA no fluxo principal, desvio visível do design system em componente de toda página, erro funcional, item de prontidão, orçamento estourado ou promessa da Privacidade não cumprida.
+  - **Médio:** erro real de impacto pequeno, ou teste que não prova o que diz.
+  - **Baixo:** o resto.
+- **Os céticos:** cada crítico, alto e médio ganha um cético Sonnet próprio, em contexto limpo, que tenta refutar o achado. Ele reproduz o problema, lê a regra e procura teste que já cubra o caso. Os baixos de cada lente vão a um cético só, em lote. O veredito é confirmado, refutado com a evidência, ou rebaixado com a severidade nova. Só o confirmado segue.
+- **Por quê:** um achado plausível e errado custa uma correção desnecessária e um teste a mais no CI.
+
+## § 94 · O que se corrige na F3 (F3, 31/out/2026)
+
+- **Decisão:**
+  - Crítico e alto confirmados: sempre.
+  - Médio: quando a correção é local, isto é, não muda a arquitetura, não toca no que está fora do escopo e soma no máximo uns 30 s a uma parte do CI. Senão, vira pendência da run 3b.
+  - Baixo: só os oito herdados da F2. Os outros vão para o relatório.
+- **Regras das correções:** cada correção testável ganha um teste que falha sem ela, e cada uma entra num §. Achado em `.github/` ou `scripts/ci/` não é corrigido aqui: vira pendência com a correção proposta, para uma run de ajuste com o merge do Victor. As correções ficam num agente só, para não colidirem no CSS e na ilha.
+- **Segunda passada:** subagentes novos revisam só o diff das correções, até não sobrar crítico nem alto aberto.
+
+## § 95 · `gate:prontidao`: o site pronto para o pedido do AdSense (F3, 31/out/2026)
+
+- **Decisão:** um portão novo, `pnpm gate:prontidao` (`scripts/gates/prontidao.ts`, lógica em `scripts/lib/prontidao.ts`), no `STEPS` do `verificar` logo depois do `gate:conteudo`, e por isso na parte `--sem-playwright` do CI. Ele imprime uma tabela item → ok ou FALHA → como conferiu e reprova se um item falha. São 18 itens:
+  - **(a) AdSense pronto para o ID, sem anúncio ligado.** O portão faz dois builds extras do mesmo código, com `astro build --outDir .cache/prontidao/<nome>`: `client`, só com `PUBLIC_ADSENSE_CLIENT=ca-pub-0000000000000000` (o estado depois do passo 2 de "Como o anúncio liga", que é o que a revisão do AdSense vê), e `all`, com as três variáveis (unidades de teste e `PUBLIC_ADS_ENABLED=true`). No `client`, toda página tem uma `<meta name="google-adsense-account">` no `<head>` com o ID, o `/ads.txt` tem exatamente a linha `google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0` e não há carregador nem unidade. A linha está escrita à mão no portão, a partir da ajuda do AdSense (support.google.com/adsense/answer/12171612, lida em 31/out/2026), e nunca sai do `adsTxt()` do site. No `all`, o carregador está em toda página com área de anúncio, sempre com a trava do hostname, e em nenhuma outra (jurídicas, institucionais, home, 404). No `dist/` real (sem o ID), não há meta, `ads.txt`, carregador nem unidade, e os AdSlots são só o espaço neutro.
+  - **(b) Páginas obrigatórias.** Sobre, Contato, Privacidade, Termos, Licenças e Apoio existem nos três idiomas, indexáveis e com o arquivo no build (o handler de assets responde 200). As seis estão no rodapé de toda página, no idioma dela. O Contato mostra `contato@fileorca.com` com link `mailto`. A Privacidade, nos três idiomas, cita o Google como parceiro de publicidade e os cookies de terceiros (as frases da página "Required content" do AdSense, support.google.com/adsense/answer/1348695), e tem o link do Ads Settings (adssettings.google.com, myadcenter.google.com ou google.com/settings/ads), o link de sites parceiros (policies.google.com/technologies/partner-sites), o controlador e o e-mail.
+  - **(c) Nenhuma página "em breve".** O texto visível de todo HTML não tem os textos provisórios do `gate:conteudo` mais "under construction", "em construção" e "en construcción" (TODO e TBD só em maiúsculas, porque "todo" é palavra em português e espanhol). Nenhum arquivo de texto do build (HTML, JSON, XML, TXT, manifest), com os scripts, tem ID de mentira (`ca-pub-0000…`, `pub-0000…`, `G-XXXX…`, `example.com`). Os cartões da home de cada idioma e do hub são exatamente as ferramentas do registro naquele idioma, e cada item do `search-index.json` leva a uma página que existe e está no registro.
+  - **(d) Conteúdo de verdade.** Toda página indexável tem um H1, e nenhum H1, título ou descrição se repete. O `<main>` tem pelo menos **60 palavras** visíveis, sem o rótulo dos AdSlots: a página mais curta do site hoje é o Contato, com 74 em inglês e 78 em português e espanhol, e o 60 deixa folga para uma revisão de texto sem aceitar uma página vazia. Cada AdSlot pede **150 palavras** do `<main>`, mais ou menos uma tela de texto no celular a 16/26 px. As ferramentas têm de 242 a 372 palavras por AdSlot.
+  - **(e) Rastreável.** O `robots.txt` não tem `Disallow` com caminho em grupo nenhum (Googlebot e Mediapartners-Google incluídos), tem `Allow: /` e aponta o índice de sitemaps. Nenhuma página indexável tem `<meta name="robots">` ou `googlebot` com `noindex`, nem regra do `_headers` que vale em fileorca.com com `X-Robots-Tag: noindex`. O índice lista os três sitemaps, e cada URL deles é página indexável com o arquivo no build.
+- **Reuso:** a checagem do `robots.txt` saiu do `gate:seo` para `robotsProblems()` em `scripts/lib/seo-checks.ts`, e o `gate:seo` a chama. Ficou mais estrita: aceita espaço antes do `Disallow` e ignora maiúsculas. A leitura do `_headers` saiu do `gate:cabecalhos` para `headerBlocks()` em `scripts/lib/headers-file.ts`, ao lado do `patternApplies()` (`*` e `:nome` como o Cloudflare lê). O texto visível vem do `visibleText()`, exportado do `scripts/lib/conteudo.ts`, que o `findPlaceholders()` passou a usar. Os sitemaps passam pelo `validateSitemap()` e pelo `sitemapUrls()`. Nenhuma checagem dos portões antigos mudou de sentido.
+- **Custo:** os dois builds levam uns 22 s cada aqui. O portão inteiro leva uns 46 s. O registro do bundle (`.cache/bundle-modules.json`), que o `gate:licencas` lê, é guardado antes de cada build e devolvido depois, mesmo quando o build falha. O `dist/` nunca é tocado.
+- **Prova:** `tests/unit/prontidao.test.ts` monta sites de mentira numa pasta temporária. Um passa nos 14 itens do build de hoje, e os builds com o ID passam nos 4 deles. Depois, uma quebra de cada vez reprova o item certo: `ads.txt` com `ca-pub-`, com `RESELLER`, com linha a mais ou ausente; meta faltando ou com outro ID; carregador só com o ID, numa página jurídica ou sem a trava do hostname; meta, `ads.txt` ou unidade no build de hoje; página obrigatória faltando; rodapé sem o Apoio; Contato sem o e-mail; Privacidade sem cada um dos seis itens; "Coming soon", "Under construction", "Em breve", "em construção", "Próximamente", "en construcción", "Lorem ipsum" e "TODO" nos três idiomas, mas não o "todo" do português; ID de mentira num script; cartão e item de busca de ferramenta que não existe; título repetido e dois H1; `<main>` curto; AdSlot demais para o texto; `robots.txt` que bloqueia o Mediapartners-Google, que bloqueia um caminho para o Googlebot ou que não aponta os sitemaps; `noindex` por meta, pelo `/*` e por regra absoluta de fileorca.com; sitemap com página que não existe ou não é indexável.
+- **Alternativa:** conferir a meta e o `ads.txt` pelo Astro container no Vitest. Isso já existe no `ads-pages.test.ts` e no `ads.test.ts`, mas não prova o `dist/` que o Workers Builds publica. Também dava para fazer um build só, com as três variáveis, mas ele não mostra o estado com só o ID, que é o que a revisão do AdSense vê.
+
+## § 96 · O hub ganha o guia "qual ferramenta usar" e um H1 próprio (F3, 31/out/2026)
+
+- **Contexto:** a primeira execução do `gate:prontidao` reprovou o hub `/image-tools/` no item "Mais conteúdo que anúncio". O hub tem dois AdSlots (§ 77) para 193 palavras no `<main>`, e o resto do site tem pelo menos 242 por AdSlot. A ajuda do AdSense recusa sites com conteúdo insuficiente e telas que servem só para navegação. Era também um baixo que a F2 deixou para a F3: o sobretítulo e o H1 do hub eram iguais ("Image tools").
+- **Decisão:** o hub ganha, depois da tabela dos presets, a seção "Which tool do you need?". Ela tem um parágrafo de como as ferramentas funcionam, uma linha por ferramenta (o problema e a ferramenta, com link) e uma frase sobre os metadados. Cada afirmação sai do cartão ou da página da ferramenta. O H1 passa a "Eight image tools, zero uploads", como no `preview.html` do ToolCard ("10 tools, zero uploads"), e o sobretítulo segue "Image tools". O `<main>` do hub passa a mais de 300 palavras. Os textos novos estão em `ImageToolsTexts` (`guideHeading`, `guideIntro`, `guide`, `guideOutro`). Os AdSlots ficam como estão.
+- **Asserção que mudou:** em `tests/unit/image-hub.test.ts`, o H1 esperado deixou de ser `['Image tools']` e passou a `['Eight image tools, zero uploads']`. A asserção antiga afirmava o próprio baixo. Entrou também a asserção de que o sobretítulo é diferente do H1.
+- **Linhas que mudam com a 2b:** o "Eight" do H1, do título, da descrição e da introdução, e a lista do guia, que ganha as duas ferramentas novas.
+- **Alternativa:** tirar os AdSlots do hub (perde receita e contraria a § 77) ou baixar o limiar até o hub passar (a regra deixaria de medir alguma coisa).
+
+## § 97 · A produção conferida só por leitura (F3, 31/out/2026)
+
+- **Decisão:** antes do merge, a produção é conferida com `curl` (GET e HEAD). As saídas vão para o relatório. O que foi conferido:
+  - `build.txt` em `f549f1b`;
+  - `robots.txt` igual ao `public/robots.txt`;
+  - o índice e os três sitemaps iguais aos do `dist/` (19, 8 e 8 URLs);
+  - as 18 páginas obrigatórias com 200 e sem `x-robots-tag`;
+  - uma URL inexistente com 404;
+  - nenhum `/cdn-cgi/` nem `cloudflareinsights` em seis páginas;
+  - `http://`, `www` e `http://www` com 301 até `https://fileorca.com/` (`http://www` passa por `https://www` antes);
+  - `/ads.txt` com 404;
+  - HSTS, nosniff, Referrer-Policy e `frame-ancestors` na home;
+  - `immutable` nos `/_astro/` e `must-revalidate` no HTML;
+  - a chave do IndexNow.
+- **Navegador:** só com `context.route` abortando todo domínio do Google (`.cache/f3/check-band.ts`), para nenhuma visita minha entrar no GA4. Assim a faixa do aviso foi medida na produção antes do merge: 202 px a 1280 e 216 px a 360, nos dois temas. Na prévia da PR (`736b1cd`), a medida deu 0 px nas quatro combinações. Na prévia, o `gtag.js` nem é pedido, por causa da trava de hostname.
+- **Por quê:** decisão 6 da ficha. Visita de navegador sem bloqueio contaria como tráfego no GA4.
+
+## § 98 · Textos de lançamento e as provas do Show HN (F3, 31/out/2026)
+
+- **Decisão:** `docs/lancamento/` tem quatro arquivos: `README.md` (ordem, checklist e avisos), `show-hn.md`, `alternativeto.md` e `diretorios.md`. Os textos que vão para fora estão em inglês, e as explicações para o Victor em português. Nada foi enviado.
+- **Diretórios: 10, não 20** (a válvula da ficha permite). Nove candidatos exigem selo ou backlink, vendem link dofollow ou pacote de envio, ou dependem de voto, e ficaram de fora pela política de spam de links do Google. Quatro listas estão paradas ou fechadas, e oito páginas não abriram para a ferramenta de leitura (403, erro de certificado, 404). O BetaList, pago, ficou numa lista à parte. A lista com o motivo de cada um está no próprio arquivo.
+- **AlternativeTo:** o FAQ recusa "a collection or suite of simple online tools", com conversores e editores de foto entre os exemplos. A chance de aprovação é baixa, e o texto fica pronto mesmo assim, como manda a ficha. Os limites dos campos ficam atrás de login. O texto usa tamanhos conservadores (descrição curta de 140 caracteres, longa de 705) e registra a lacuna.
+- **Show HN:** o título principal tem 68 caracteres, e as variações têm 72, 78 e 78. As diretrizes do HN proíbem texto gerado ou editado por IA nos comentários, então o `README.md` e o `show-hn.md` pedem ao Victor que reescreva o título e o comentário com as próprias palavras. O rascunho vale como roteiro de fatos.
+- **As três afirmações técnicas e as provas:**
+  - **"No byte of your file leaves your browser":** `tests/e2e/launch-claims.spec.ts`, no Chromium e no WebKit, na Compress (MozJPEG), na HEIC to JPG (libheif) e na Image to PDF. Da carga até o download, toda requisição da página e dos workers é um GET para a própria origem, sem corpo.
+  - **"After the page and the codec load, the tool keeps working offline":** no mesmo teste, `context.setOffline(true)` depois do primeiro arquivo. O segundo arquivo é processado e baixado sem nenhuma requisição de rede.
+  - **"The only third-party traffic is Google Analytics":** na produção, com os domínios do Google bloqueados, a home e um uso real da Compress pediram só `fileorca.com` e `www.googletagmanager.com`. Fora da produção, o `consent.spec.ts` e a trava de hostname.
+- **Frase corrigida:** "Each tool runs in a Web Worker" virou "The image work runs in a Web Worker…", com a ressalva do navegador sem `OffscreenCanvas` no worker, onde o motor roda na página (§ 22).
+- **LanguageTool:** os 15 blocos em inglês passaram pelo LanguageTool local do `lint:texto`, com nenhum erro de gramática (37 apontamentos de nomes próprios e estilo). O alcance do portão não mudou.
+- **Custo do teste no CI:** três testes por navegador, uns 23 s no Chromium e 30 s no WebKit aqui. No WebKit, os três se dividem entre as duas partes do CI.
+- **Alternativa:** prova por um script fora do `verificar`. Ela não protegeria a afirmação pública de uma regressão futura.
+
+## § 99 · Testes que mudaram na F3, e por quê (F3, 31/out/2026)
+
+- `tests/unit/image-hub.test.ts`: o H1 esperado do hub mudou (§ 96).
+- `tests/e2e/island.spec.ts`, no teste "one tool_start and one tool_complete per batch…": falhou uma vez no WebKit 2 de 2 do CI (run 41227322450, commit `736b1cd`, nenhum arquivo do teste ou da ilha mudado) com 1 `download` em vez de 2. Aqui passou 8 vezes em 8 no WebKit.
+  - **A causa:** uma corrida do próprio teste. A opção Strong refaz o lote, e o cartão de resultado continua na tela nos primeiros 400 ms da nova execução (`showCard` com `!m.showLevel`). Por isso o `toBeVisible` passava na hora, e o clique em "Download a.jpg" podia cair no instante em que a linha era redesenhada.
+  - **A mudança:** o teste guarda o texto do Download do lote (o tamanho do ZIP), clica em Strong e espera esse texto mudar, ou seja, o ZIP novo pronto, antes de clicar na linha.
+  - Nenhuma asserção mudou: segue exigindo um `tool_start`, um `tool_complete`, um `tool_error` e dois `download`.
+- `tests/e2e/navigation.spec.ts`, no teste "tool search loads on first use…": o localizador `getByText('Nenhuma ferramenta').or(…empty-title)` passou a `locator('[data-search-empty-title]')`, com o texto inteiro. A região de status da busca (§ 101) diz as mesmas palavras, então o texto sozinho achava dois elementos. A asserção é a mesma: o título do estado vazio traz a busca.
+- `tests/e2e/cookie-footer.spec.ts` (teste novo da F3), no caso "with the AdSense anchor and the notice at once…": depois de Recusar, com a âncora ainda na tela, o rodapé deixou de esperar 96 px e o `scroll-padding` deixou de esperar `auto`. A âncora agora mantém a própria reserva, de 108 px (§ 101). O teste passou a tirar a âncora e conferir que a reserva some por inteiro (96 px, `auto`, nenhum estilo inline). A asserção antiga afirmava o defeito c-02 da revisão.
+- `tests/e2e/image-smoke.spec.ts`, no teste do Crop: o nome acessível esperado da caixa passou de `'Crop area'` a `'Crop area, 1200 by 1200 pixels, at 0, 200'`. A caixa agora diz o que cobre (baixo 1 da F2, § 102), e a asserção antiga afirmava a falta do valor.
+- `tests/e2e/tool.spec.ts`, no teste "the work runs in the Web Worker…": o `console.log` do caminho virou asserção (achado a-03, § 102). O teste lê no próprio worker se ele tem `OffscreenCanvas`. Se tem, não pode haver pedido ao chunk `process`, que só o caminho da página importa; se não tem, o motor rodou na página. Com o mutante da revisão (motor sempre na página), o teste agora reprova no Chromium.
+- `tests/unit/consent.test.ts`: a lista de valores de `reason` do `tool_error` ganhou `load` (§ 102).
+- `tests/e2e/image-smoke.spec.ts`, no teste "the sheet changes only the PDF…" da Image to PDF. Ele falhou uma vez no WebKit 2 de 2 do CI (run 41235192185, `72f0c2d`) com "no download link", dentro do `expect.poll`. Enquanto o PDF é montado de novo para a folha nova, o link some por um instante; o `downloadBytes` lança, e um `expect.poll` cujo callback lança desiste na hora em vez de tentar de novo. Agora a ausência do link é só mais uma tentativa da sondagem. O valor esperado (as dimensões de cada página em Letter e em A4) não mudou. O `image-crop.spec.ts` já tratava o mesmo instante com o `currentDownload()`.
+- `tests/e2e/engine-paths.spec.ts` (teste novo da F3), no caso "a codec that cannot load…". No WebKit do Linux, o worker tem `OffscreenCanvas` e busca os codecs ele mesmo, e o `page.route` não segura esses pedidos. Por isso o teste falhou no CI. Ele agora força o caminho da página, onde a página busca os codecs e o `page.route` vale nos dois navegadores. O caminho do worker carrega pelo mesmo `loading()` do motor.
+
+## § 100 · O removedor de metadados guarda só o que a imagem precisa (F3, 31/out/2026)
+
+- **Contexto:** os achados b-01 e a-04 da revisão (lentes de privacidade e de corretude, cada uma por conta própria) acharam o mesmo problema. O `strip.ts` era uma lista de bloqueio: no PNG tirava só `tEXt`, `zTXt`, `iTXt`, `eXIf` e `tIME`, e no WebP só `EXIF` e `XMP `. Chunks privados ou desconhecidos (`caBX` do C2PA, `zxIf`, `exIf`, `dSIG`, `vpAg`, `prVW`, `orNT`) passavam inteiros pela Compress de PNG, pelo caso "sem ganho" e pelos presets, com o cartão dizendo que os metadados saíram. Prova da lente: um PNG com texto de GPS nesses chunks saiu da `/compress-image/` com o texto, no Chromium e no WebKit. O cético rebaixou o b-01 de alto para médio, porque o critério nomeia GPS, Exif, XMP e IPTC nos lugares padrão, que já saíam.
+- **Decisão:** lista de permissão.
+  - **PNG:** ficam `IHDR`, `PLTE`, `IDAT`, `IEND`, `tRNS`, `gAMA`, `cHRM`, `sRGB`, `iCCP`, `sBIT`, `bKGD`, `pHYs`, `cICP`, `mDCV`, `cLLI` e os do APNG (`acTL`, `fcTL`, `fdAT`).
+  - **WebP:** ficam `VP8X` (sem os bits de EXIF e XMP), `VP8 `, `VP8L`, `ALPH`, `ANIM`, `ANMF` e `ICCP`.
+  - **JPEG:** o APP0 fica só se for JFIF, e o APP14 só se for Adobe. Um JFXX com miniatura ou um bloco privado com o mesmo marcador sai. O resto não mudou: o ICC fica, a Orientation mínima fica, e nada depois do EOI é copiado.
+- **Prova:** três testes novos em `tests/unit/strip.test.ts` falham no código antigo e passam no novo. São um PNG com os seis chunks privados e um desconhecido, todos com texto de GPS; um JPEG com JFXX e um APP14 que não é Adobe; e um WebP com dois chunks desconhecidos. Os testes antigos de `strip` e de `process` continuam verdes.
+
+## § 101 · Consentimento, âncora, busca e portão depois da revisão (F3, 31/out/2026)
+
+Achados médios confirmados pelos céticos e corrigidos, cada um com teste que falha no código de antes. As provas estão em `tests/e2e/consent-choice.spec.ts` (novo), `tests/e2e/cookie-footer.spec.ts`, `tests/e2e/navigation.spec.ts` e `tests/unit/prontidao.test.ts`.
+
+- **c-01 · a CMP que chega depois do `load`.** O aviso próprio olhava o `__tcfapi` duas vezes, na hora e no `load`, e nunca mais. A CMP do Google vem com o carregador do AdSense e pode chegar depois do `load`; aí os dois avisos ficavam juntos na UE. O aviso agora procura a CMP a cada 500 ms, por até 30 s, até ela responder ou o aviso sumir. Teste: a CMP definida 300 ms e 3 s depois do `load` esconde o aviso.
+- **c-02 · a âncora com o aviso fechado.** Sem o aviso, nada reservava espaço para a âncora, e o foco do teclado podia ficar inteiro debaixo dela (WCAG 2.4.11). A reserva passou a ser do aviso e da âncora: `--fo-bottom-room` e o `scroll-padding-bottom` valem o maior entre a altura do aviso e a da âncora mais 8 px. O `focusin` da § 36 usa o topo da âncora quando o aviso some. A variável `--fo-cookie-room` da § 91 virou `--fo-bottom-room`. Teste: âncora de 100 px, aviso recusado, 45 Tabs a 360 px e nenhum foco coberto. Uma asserção do teste da § 91 mudou; ver a § 99.
+- **c-03 · o portão e a trava do hostname.** O `gate:prontidao` procurava a trava na página inteira, e a trava do push de cada AdSlot bastava para aprovar um carregador sem trava. Agora cada script que carrega o AdSense ou empurra uma unidade precisa ter a trava dentro dele. Teste: carregador sem trava com push travado, e push sem trava, reprovam.
+- **b-02 · Recusar apaga a contagem do café na hora.** Antes, a contagem só era apagada quando uma ferramenta abria, e a Privacidade diz, nos três idiomas, que ela é apagada ao recusar. O script do aviso apaga a contagem no clique em Recusar, como o `forget()` do `coffee.ts`: o "não mostrar de novo" fica. Teste: Aceitar, contagem gravada, Recusar, contagem apagada; com "nunca", sobra `{uses: 0, never: true}`.
+- **b-03 · "Mudar minha escolha" guarda a escolha até haver outra.** O botão apagava a escolha antes de a pessoa escolher de novo. Quem abria e saía voltava ao padrão concedido fora da UE, sem nenhuma ação. Agora o botão só abre o aviso. Teste: Recusar, reabrir, sair sem escolher, e a página seguinte reaplica a Recusa.
+- **d-04 · o foco volta a quem abriu o aviso.** Depois de escolher no aviso reaberto pelo botão, o foco caía no `body` (WCAG 2.4.3). Agora ele volta ao botão "Mudar minha escolha". Teste por teclado.
+- **d-01 · a busca anuncia o "sem resultado".** O bloco vazio aparecia sem região viva (WCAG 4.1.3). O cético rebaixou de alto para médio, porque a busca é um atalho e não o fluxo principal. A `SearchBox` ganhou um `<p class="fo-sr" role="status">` fora do bloco escondido, que diz o mesmo título. Teste: a região diz "Nenhuma ferramenta chamada "heic"" e se esvazia quando há resultado.
+- **Custo no CI:** uns 7 testes de uma carga cada por navegador, de 3 a 8 s cada.
+
+## § 102 · Mais correções da revisão: motor, PDF, privacidade, voz, amarelo, anúncio do resultado e Crop (F3, 31/out/2026)
+
+Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem teste que falha no código de antes.
+
+- **a-01 · o motor que não carrega.** Se o chunk do motor não chega (sem rede, ou um chunk que sumiu depois de um deploy), um arquivo bom era chamado de "danificado" (`decode`) e nunca tentado de novo.
+  - Agora o painel usa um motivo próprio, `load`, que fica fora do `HOPELESS` e tem fala própria nos três idiomas: "Oli couldn't load what she needs to read {name}. Check your connection and reload the page."
+  - O `tool_error` leva `reason: 'load'`, um valor novo na lista fechada `ERROR_REASONS`, sem evento nem parâmetro novo.
+  - Teste em `tests/e2e/engine-paths.spec.ts`.
+- **a-02 · o worker do PDF que não sobe.** O `pdf-client.ts` não ouvia o `error` do worker, e o painel ficava em "Building your PDF" para sempre.
+  - Agora ele corre a montagem contra um `broken` (como o `engine-client.ts`), rejeita com `EngineUnavailable` e deixa o próximo PDF abrir um worker novo.
+  - O painel trata isso como `load`, e também o import dinâmico que falha.
+  - Teste: com o worker do PDF bloqueado, o painel termina na fala de `load`.
+- **e-01 · o caminho da página, de novo.** Um worker sem `OffscreenCanvas` não faz trabalho de imagem, mas o `warm()` do ponteiro sobre o painel baixava nele os codecs que a página depois baixava de novo (300 KB na Compress, 1,4 MB de libheif na HEIC). O `warm()` agora espera o `canvasInWorker()` e só aquece um worker que vai trabalhar. O teste do caminho da página exige cada `.wasm` uma vez só; no código de antes, o mesmo teste achou três repetidos. A trava da thread principal nesse caminho (de 2,4 a 3 s por foto grande) é do próprio caminho (Safari antes do 16.4) e não muda.
+- **a-03 · o caminho da página.** Um teste novo tira o `OffscreenCanvas` do worker do motor, nos dois navegadores, e exige o resultado pelo caminho da página. O teste antigo do worker passou a afirmar o caminho (ver a § 99).
+- **b-04 · o Analytics depois da Recusa.** O Consent Mode avançado manda pings sem cookie depois da Recusa (documentação do Google, support.google.com/analytics/answer/9976101). A Privacidade, nos três idiomas, passou a dizer isso na seção de consentimento, e o `gate:prontidao` confere a frase.
+- **d-03 (e o baixo 6 da F2) · o resultado anunciado uma vez.** O cartão tinha `aria-live="polite"`, e a região `role="status"` dizia a mesma frase. Num lote de N arquivos, o cartão falava N + 1 vezes, com números que ainda não eram os finais.
+  - O `aria-live` saiu do cartão, e a região de status passou a ser a única voz da ferramenta. Teste no `island.spec.ts`.
+  - **Desvio do README do ResultCard:** ele pede `aria-live` no cartão para o leitor de tela ouvir a fala da Oli. A fala continua sendo dita, só que uma vez, pela região de status.
+- **f-01 · o teste do amarelo.** O teste via só `var(--sun…)`. Agora procura também, fora do Baixar, o hex e o `rgb()` que só a família do amarelo usa no `tokens.css` (#FFC93C e #B8870F), com amostras que provam a regra.
+- **f-02 · o teste de voz.** O teste agora:
+  - cobre as oito palavras do README, com as variações ("supercharged", "magical", "mágica");
+  - recusa emoji;
+  - só aceita exclamação na fala de sucesso de cada ferramenta (`done` e `doneMany`), uma por fala.
+- **d-06 (baixo 3 da F2) · a caixa pequena do Crop.** As alças de 48 px cobriam uma caixa pequena, e o ponteiro só conseguia redimensioná-la. Quando a caixa tem menos de duas alças de lado, apertar dentro dela a move, e a metade de fora de cada alça ainda a redimensiona. O cético subiu o achado para médio.
+- **d-07 (baixo 1 da F2) · o valor da caixa do Crop.** Um `group` não tem valor próprio, então o nome acessível passou a dizer o que a caixa cobre: "Crop area, 480 by 480 pixels, at 80, 0". O nome acompanha as setas.
+- **Os outros baixos da F2:**
+  - 2 (faixa no erro do Crop), 4 (escolha na fila) e 5 (`aria-valuetext` do BeforeAfter): refutados pelos céticos. A evidência está no `REVISAO-F3.md`.
+  - 7 (sobretítulo e H1 do hub): corrigido na § 96.
+  - 8 (metadados do PDF): fica para a F5. A lente de privacidade gerou um PDF e achou só Producer e Creator "FileOrca", sem data, XMP nem Exif.
+- **Custo no CI:** uns quatro testes de uma carga por navegador (de 4 a 8 s cada), mais asserções em testes que já existem.
+
+## § 103 · O que a revisão deixa pendente, e com quem (F3, 31/out/2026)
+
+- **d-02 · os loops da Oli e do vapor (WCAG 2.2.2), do Victor.** A `wave` da Oli (3 s, `alternate`, infinita) e o vapor da caneca (1,8 s, infinito) começam sozinhos, passam de 5 s e não têm controle de pausa. O cético rebaixou o achado de alto para médio: o W3C ainda discute se `prefers-reduced-motion` basta (issue #3766), e o site já para tudo com a preferência (§ 44, § 57). A correção é local, mas muda uma regra do design system: o README da Oli fala em "loop", e a F1b já tinha deixado essa decisão para o Victor. Por isso ela não entrou aqui. São duas saídas:
+  - limitar cada loop a menos de 5 s e deixar a Oli em repouso (a lente propõe a `wave` em 4,5 s, uma vez, e o vapor em 2 ciclos), o que muda os testes de movimento do `design.spec.ts`;
+  - ou um controle de pausa.
+- **c-04 · o Aceitar do aviso próprio e a CMP na UE, do Victor antes de ligar os anúncios.** A escolha feita no aviso próprio numa página sem a CMP do Google (home, jurídicas, Apoio, 404) é reaplicada como `ad_*` concedido na página de ferramenta, antes de a mensagem do Google perguntar. Só existe com os anúncios ligados. São duas saídas:
+  - nas regiões negadas por padrão, reaplicar só o `analytics_storage`;
+  - ou carregar a CMP em toda página, o que muda a arquitetura e pede ADR.
+  O Victor confere o comportamento real na UE com a CMP publicada.
+- **c-08 · a detecção de bloqueador do café.** O ramo `!adsbygoogle.loaded` pode dar falso positivo com o script ainda carregando. Revisar com o anúncio real, ao ligar os anúncios.
+- **b-07 · a retenção do GA4, do Victor.** A Privacidade diz "o período configurado no Google Analytics". Quando o Victor fixar a retenção no GA4, o número entra nos três idiomas. Na produção, o Cloudflare manda os cabeçalhos `Nel`/`Report-To` (relatório de erro de rede para `a.nel.cloudflare.com`) e `Speculation-Rules: "/cdn-cgi/speculation"` (Speed Brain). Os dois vêm da configuração da zona, fora do repositório. São do Cloudflare, que já é quem entrega o site, então o texto do Show HN continua certo ("o único terceiro é o Google Analytics"). O Victor decide se desliga o Speed Brain.
+- **e-05 · `/_astro/*` em 404 com `immutable`.** O `_headers` não condiciona a regra ao status, e o hash muda a cada build. Só importa num rollback ou na defasagem de propagação de um deploy. A correção do a-01 (§ 102) cobre o efeito visível: a fala certa e nada travado.
+- **Baixos para a run 3b**, cada um com a correção proposta no `REVISAO-F3.md`:
+  - a-05: APNG perde a animação sem nota;
+  - a-06: pt e es fora do `ads.spec.ts`;
+  - b-06: GET com query e WebSocket fora da prova de "nada sai";
+  - e-02: régua de memória do lote longo, com o ZIP montado cedo;
+  - e-04: `favicon.ico` para o Google;
+  - f-03: cor funcional, raio, sombra e os "Nunca" do README sem portão;
+  - f-04: "1 files" no plural;
+  - f-06: reserva do aviso reaberto que não se recalcula ao mudar a largura.
+- **Por quê:** a decisão 4 do prompt (baixos só os da F2; médio só se local) e a régua de quem decide: design e anúncio ligado são do Victor.
+
+## § 104 · O que a segunda passada achou e foi corrigido (F3, 31/out/2026)
+
+- **Contexto:** a segunda passada rodou com três revisores novos (consentimento, motor e integridade dos testes) sobre o diff `736b1cd..1380bb8`. Os 19 achados corrigidos fecharam, cada um com a prova da primeira passada rodada contra o `dist/` novo e com mutantes dos testes novos. Não apareceu nenhum crítico nem alto. Apareceram dois médios, confirmados por céticos, e cinco baixos que dizem respeito aos testes e às correções desta run. Todos foram corrigidos aqui, porque são defeitos das próprias correções.
+- **p2-motor-01 (médio) · o codec que não carrega, dentro do motor.** O a-01 cobria o chunk do motor, mas um `.wasm` ou a cola JS de um codec que não chega ainda virava "danificado" (HEIC) ou "este navegador não grava JPG" (Compress).
+  - `FailureReason` ganhou `load`, e `loading()` em `src/engine/image/errors.ts` transforma em `EngineError('load')` a falha de cada carga sob demanda: os módulos de codec importados por `decode.ts`, `encode.ts`, `process.ts` e `work.ts`, a cola dos codecs do jSquash e o `compiled()` e o `bytesOf()` do `runtime.ts`.
+  - A Compress de PNG deixa passar o `load` em vez de devolver o original com a nota de "não grava".
+  - O motor segue autocontido.
+  - Teste: com os `.wasm` bloqueados, a HEIC to JPG e a Compress dizem para recarregar; depois de liberar a rede, uma troca de opção processa o arquivo de novo. Isso cobre também o p2-integridade-05 (o `load` fora do `HOPELESS`).
+- **p2-integridade-01 (médio) e p2-consentimento-02 (baixo) · o portão e o carregador por `src`.** A correção do c-03 conferia a trava só no corpo dos scripts. Um `<script src=".../adsbygoogle.js">`, o trecho que a ajuda do AdSense manda colar, passava. Agora qualquer `<script src>` do AdSense reprova, e o push é reconhecido em qualquer forma (`adsbygoogle….push(`). Teste: carregador por `src` e `window.adsbygoogle.push` sem trava reprovam.
+- **p2-consentimento-01 (baixo, regressão do c-01) · o aviso que piscava.** A busca a cada 500 ms tinha trocado a checagem no `load`. Com a CMP presente antes do `load` (o caso comum), o aviso próprio ficava meio segundo na tela. O aviso volta a olhar a CMP no `load`, além da busca de 30 s, sem abrir uma segunda cadeia. Teste: com a CMP definida no `DOMContentLoaded`, o aviso some até 100 ms depois do `load`.
+- **Testes reforçados:**
+  - **p2-integridade-03:** o `launch-claims.spec.ts` também recusa query string.
+  - **p2-integridade-04 e p2-motor-02:** o teste do `strip` confere os 18 chunks que a lista de permissão guarda no PNG, `fdAT`, `cICP`, `mDCV` e `cLLI` incluídos, e o `ANIM` e o `ANMF` no WebP.
+  - **p2-motor-03:** o teste da caixa pequena do Crop prova que a metade de fora da alça ainda redimensiona. O mutante "caixa pequena nunca redimensiona" agora reprova.
+  - **p2-integridade-02:** o teste do amarelo aceita `rgb()` com espaços e lê os `style` inline dos `.astro` e `.tsx`.
+- **Por quê:** a decisão 4 do prompt pede uma segunda passada até não sobrar crítico nem alto. Não sobrou nenhum. Os médios novos eram locais, e os baixos eram falhas dos testes novos desta run. Deixá-los seria entregar testes que não provam o que dizem.
+
+## § 105 · O tempo do CI na F3 e a proposta de um terceiro `--shard` do WebKit (F3, 31/out/2026)
+
+- **Medido** (o total de cada parte, do resumo do `verificar` no log):
+
+  | Run | Commit | `verificar` | Chromium | WebKit 1 de 2 | WebKit 2 de 2 |
+  | --- | --- | ---: | ---: | ---: | ---: |
+  | 41226056230 | `cf5fba8` (só o aviso) | 164,0 s | 391,0 s | 253,9 s | 430,8 s |
+  | 41231605642 | `803ba1b` | 160,2 s | 312,5 s | 368,1 s | 598,7 s |
+  | 41235192185 | `72f0c2d` | 202,0 s | 390,5 s | 383,2 s | 655,3 s (2 falhas, § 99) |
+  | 41236243545 | `0d2cb94` | 201,5 s | 315,2 s | 375,8 s | 644,4 s |
+
+- **O que a F3 somou:**
+  - o `gate:prontidao`, de 10 a 15 s na parte `verificar`;
+  - as specs novas (`cookie-footer`, `consent-choice`, `engine-paths` e `launch-claims`), uns 90 s somados no WebKit e uns 50 s no Chromium;
+  - os passos novos em specs que já existiam, poucos segundos.
+- **Por que a parte 2 do WebKit cresce:** ela fica com a matriz (uns 416 s somados nos 2 workers), o `image-smoke`, o `design` e o `launch-claims`. O mesmo runner variou de 30 a 40% entre execuções (§ 88), e a parte 2 foi de 431 s a 655 s entre a primeira e a última execução desta run.
+- **Decisão:** todas as partes ficaram abaixo de 700 s, e nenhum limite, `retries` ou tempo por teste mudou. Como a parte 2 do WebKit ficou a uns 50 s do alvo, o relatório propõe ao Victor dividir o WebKit em três partes (`--shard=1/3`, `2/3` e `3/3`), um ajuste do `.github/workflows/ci.yml` que é do Victor (ADR-003). O `verificar.ts` já aceita qualquer `--shard=i/n`, e o `verificar.test.ts` cobre isso.
+- **Alternativa:** mover a matriz para um projeto só dela, o que mexeria nos testes e no `.github/`.

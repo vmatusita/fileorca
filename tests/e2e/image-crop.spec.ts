@@ -317,4 +317,46 @@ test.describe('crop-image with the keyboard only', () => {
       }
     });
   });
+  // F2 lows 1 and 3 (review d-07 and d-06, DECISOES § 102): the box says what it covers, and a box smaller than two
+  // handles still moves with the pointer from inside it, while the outer half of a handle still resizes it.
+  test('the box says what it covers, and a small box moves with the pointer', async ({ page }) => {
+    await page.goto('/crop-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    const source = await generatedJpeg(page);
+    await chooseImages(page, [{ name: 'a.jpg', mimeType: 'image/jpeg', buffer: source }]);
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    const box = page.locator(BOX);
+    await expect(box).toHaveAccessibleName('Crop area, 480 by 480 pixels, at 80, 0');
+    await box.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(box).toHaveAccessibleName('Crop area, 480 by 480 pixels, at 86, 0');
+
+    await page.locator('#cr-width').focus();
+    await typeInFocusedField(page, '60');
+    await expectFields(page, { width: 60, height: 60 });
+    await box.scrollIntoViewIfNeeded();
+    const before = await box.boundingBox();
+    expect(before && before.width < 96, 'the box is smaller than two handles on screen').toBe(true);
+    if (!before) return;
+    const x = Number(await page.locator('#cr-x').inputValue());
+    await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(before.x + before.width / 2 + 40, before.y + before.height / 2 + 20, { steps: 4 });
+    await page.mouse.up();
+    await expect.poll(async () => Number(await page.locator('#cr-x').inputValue()), { message: 'the box moved right' }).toBeGreaterThan(x);
+    await expectFields(page, { width: 60, height: 60 });
+
+    // The outer half of a handle, outside the box, still resizes it (second pass p2-motor-03).
+    await box.scrollIntoViewIfNeeded();
+    const moved = await box.boundingBox();
+    expect(moved).not.toBeNull();
+    if (!moved) return;
+    const corner = { x: moved.x + moved.width + 12, y: moved.y + moved.height + 12 };
+    await page.mouse.move(corner.x, corner.y);
+    await page.mouse.down();
+    await page.mouse.move(corner.x + 25, corner.y + 25, { steps: 4 });
+    await page.mouse.up();
+    await expect.poll(async () => Number(await page.locator('#cr-width').inputValue()), { message: 'the box grew from its corner' }).toBeGreaterThan(60);
+  });
 });

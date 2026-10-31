@@ -3,6 +3,7 @@
 // LAUNCHED = false; build.txt carries a commit.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, requireDist } from '../lib/dist.ts';
+import { headerBlocks } from '../lib/headers-file.ts';
 import { WORKERS_DEV_PATTERN, headerRules, redirectRules, toHeadersFile, toRedirectsFile } from '../../src/platform/headers.ts';
 import { LAUNCHED } from '../../src/platform/site.ts';
 
@@ -14,10 +15,7 @@ const lower = headers.toLowerCase();
 for (const banned of ['cross-origin-opener-policy', 'cross-origin-embedder-policy']) {
   if (lower.includes(banned)) problems.add(`dist/_headers tem ${banned}`);
 }
-const blocks = new Map(headers.split(/\n\s*\n/).map((block) => {
-  const [pattern = '', ...lines] = block.split('\n').filter((line) => line && !line.startsWith('#'));
-  return [pattern.trim(), lines.map((line) => line.trim())] as const;
-}));
+const blocks = headerBlocks(headers);
 const site = blocks.get('/*') ?? [];
 for (const expected of [
   'X-Content-Type-Options: nosniff',

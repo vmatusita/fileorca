@@ -4,7 +4,7 @@
 // robots.txt fixed; no robots meta; JSON-LD parses; 404 out of sitemaps and hreflang.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
-import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
+import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
 import { HUB_ID, IMAGE_PAGE_IDS, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
@@ -118,7 +118,6 @@ for (const route of ROUTES.filter((candidate) => !candidate.indexable)) {
 // robots.txt: fixed, allows everything and points to the sitemap index.
 const robots = readFileSync(`${DIST}/robots.txt`, 'utf8');
 if (robots !== readFileSync('public/robots.txt', 'utf8')) problems.add('dist/robots.txt diferente de public/robots.txt');
-if (!/^User-agent: \*$/m.test(robots) || !/^Allow: \/$/m.test(robots) || /^Disallow: \S/m.test(robots)) problems.add('robots.txt não libera tudo');
-if (!robots.includes(`Sitemap: ${SITE_ORIGIN}/sitemap-index.xml`)) problems.add('robots.txt não aponta o índice de sitemaps');
+for (const problem of robotsProblems(robots, SITE_ORIGIN)) problems.add(problem);
 
 problems.finish('seo', `${heads.length} páginas indexáveis em ${LANGS.length} idiomas, hreflang recíproco, ${LANGS.length} sitemaps`);

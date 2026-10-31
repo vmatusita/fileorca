@@ -38,8 +38,24 @@ const SHOW_PROGRESS_AFTER_MS = 400;
 /** Rows shown before "Show N more". */
 const VISIBLE_ROWS = 6;
 const MINUS = '−';
+/**
+ * A file the panel could not hand to the engine: the engine, the page path or the PDF worker did not load (offline, or a
+ * chunk gone after a deploy). It is no fault of the file, so it says so and is tried again on the next run (§ 102).
+ */
+interface LoadFailure {
+  ok: false;
+  reason: 'load';
+  source?: undefined;
+}
+type Failure = EngineFailure | LoadFailure;
+type RunResult = EngineResult | LoadFailure;
+const LOAD_FAILED: LoadFailure = { ok: false, reason: 'load' };
+/** The error that means the engine's code did not arrive, as opposed to a file that failed. */
+const UNAVAILABLE = 'EngineUnavailable';
+const unavailable = (): Error => Object.assign(new Error('the engine could not load'), { name: UNAVAILABLE });
+
 /** These failures do not depend on the options: the file is not tried again when an option changes. */
-const HOPELESS = new Set<EngineFailure['reason']>(['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode']);
+const HOPELESS = new Set<Failure['reason']>(['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode']);
 
 type Phase = 'idle' | 'processing' | 'done' | 'error';
 
@@ -54,7 +70,7 @@ interface Item {
   /** What the current run will do with this file; null when there is nothing to redo. */
   next: { op: Operation; key: string } | null;
   output: EngineOutput | null;
-  failure: EngineFailure | null;
+  failure: Failure | null;
   /** tool_error already sent for this file. */
   reported: boolean;
   outUrl: string | null;
@@ -219,7 +235,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   // --- the run: every file one at a time, then the ZIP or the PDF ----------------------------------
 
-  function settle(item: Item, result: EngineResult, key: string): void {
+  function settle(item: Item, result: RunResult, key: string): void {
     releaseOutput(item);
     if (result.ok) {
       item.output = result;
@@ -250,7 +266,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   async function assemble(items: Item[], pdfKey: string): Promise<Omit<Bundle, 'url'> | null> {
     const names = outputNames(items);
     if (pdf) {
-      const { buildPdf } = await import('./pdf-client.ts');
+      const { buildPdf } = await import('./pdf-client.ts').catch(() => {
+        throw unavailable();
+      });
       const pages = items.flatMap((item) =>
         item.output ? [{ blob: item.output.blob, format: item.output.format === 'png' ? ('png' as const) : ('jpeg' as const), width: item.output.width, height: item.output.height }] : [],
       );
@@ -258,7 +276,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       return { kind: 'pdf', blob, name: items.length === 1 ? names[0] ?? PDF_BATCH_NAME : PDF_BATCH_NAME, key: pdfKey };
     }
     if (items.length < 2) return null;
-    const { zipFiles } = await import('./engine-client.ts');
+    const { zipFiles } = await import('./engine-client.ts').catch(() => {
+      throw unavailable();
+    });
     const blob = await zipFiles(items.flatMap((item, index) => (item.output ? [{ name: names[index] ?? `${index}.bin`, blob: item.output.blob }] : [])));
     return { kind: 'zip', blob, name: ZIP_NAME, key: '' };
   }
@@ -310,7 +330,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         const cancelled = new Promise<null>((resolve) => {
           item.cancel = () => resolve(null);
         });
-        let result: EngineResult | null;
+        let result: RunResult | null;
         try {
           result = engine
             ? await Promise.race([
@@ -322,9 +342,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
                 }),
                 cancelled,
               ])
-            : { ok: false, reason: 'decode' };
+            : LOAD_FAILED;
         } catch {
-          result = { ok: false, reason: 'decode' };
+          // processFile never rejects for a bad file (engine-client.ts): an exception here is code that did not load.
+          result = LOAD_FAILED;
         }
         item.cancel = null;
         if (m.runId !== id) return;
@@ -341,8 +362,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         let built: Omit<Bundle, 'url'> | null = null;
         try {
           built = await assemble(done, pdfKey);
-        } catch {
-          for (const item of done) settle(item, { ok: false, reason: 'encode' }, '');
+        } catch (error) {
+          // A PDF worker or a ZIP chunk that never arrived is a load failure; anything else is the browser failing to write.
+          const failure: RunResult = error instanceof Error && error.name === UNAVAILABLE ? LOAD_FAILED : { ok: false, reason: 'encode' };
+          for (const item of done) settle(item, failure, '');
         }
         // A newer run may have started while this one zipped: its own bundle replaces whatever this one made.
         if (m.runId !== id) return;
@@ -491,6 +514,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       case 'decode': return fmt(errors.decode, { name });
       case 'encode': return fmt(errors.encode, { name });
       case 'too-large': return fmt(errors.tooLarge, { name });
+      case 'load': return fmt(errors.load, { name });
       case 'wrong-tool': {
         const link = failure.source === 'heic' ? converters.heic : failure.source === 'avif' ? converters.avif : undefined;
         const format = formatName(failure.source);
@@ -691,8 +715,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const counted = more || pdf;
     const lead = more ? fmt(t.result.downloadZip, { size: fileSize(deliverable?.size ?? 0, lang) }) : '';
     const [zipHead = '', ...zipTail] = lead.split(' · ');
+    // No aria-live on the card: the status region below says the Oli's sentence once, with the final numbers. With
+    // both, a batch was read N + 1 times, with "Done!" and figures that were not final yet (DECISOES § 102).
     panel = (
-      <section class="fo-result fo-deep" aria-live="polite">
+      <section class="fo-result fo-deep">
         <div class="fo-result__head">
           <Oli pose="cheer" class="fo-result__oli" />
           <p class="fo-result__says">{saysFor(rows)}</p>

@@ -23,6 +23,7 @@
     "gate:seo": "node scripts/gates/seo.ts",
     "gate:links": "node scripts/gates/links.ts",
     "gate:conteudo": "node scripts/gates/conteudo.ts",
+    "gate:prontidao": "node scripts/gates/prontidao.ts",
     "gate:design": "node scripts/gates/design.ts",
     "gate:licencas": "node scripts/gates/licencas.ts",
     "gate:dinheiro-saude": "node scripts/gates/dinheiro-saude.ts",

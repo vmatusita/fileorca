@@ -154,3 +154,42 @@ Pegadinhas que a F2 achou:
 - Para reproduzir uma parte que falhou só no CI, rode o mesmo comando do job, que está no nome do passo. Cada parte do Playwright sobe o relatório como artefato `playwright-report-<n>`.
 - Teste novo pesado vai para a parte em que cair pelo `--shard` do Playwright; confira o tempo de cada job no log (`gh run view <id> --log`). Se uma parte passar de uns 700 s, divida mais (outro `--shard`) num ajuste, nunca aumente o limite.
 - `tests/unit/verificar.test.ts` prova que as partes juntas são os mesmos passos do todo: um portão novo entra em `STEPS` e cai sozinho na parte certa.
+
+## F3: revisão e prontidão
+
+O `gate:prontidao` (`scripts/gates/prontidao.ts`, com a lógica em `scripts/lib/prontidao.ts`) entra no `verificar` na parte `--sem-playwright`. Ele confere se o site está pronto para o pedido do AdSense (DECISOES § 95).
+
+- **O que confere.** Faz dois builds extras do mesmo código em `.cache/prontidao/`: `client`, só com o ID de teste `ca-pub-0000000000000000`, e `all`, com as três variáveis. Confere também o `dist/` real. São 18 itens:
+  - a meta tag e o `ads.txt` exatos;
+  - o carregador só nas ferramentas;
+  - nada de anúncio sem o ID;
+  - as seis páginas obrigatórias nos três idiomas e no rodapé;
+  - o Contato e a Privacidade com o que o AdSense pede;
+  - nenhum texto de obra nem ID de mentira;
+  - cartões e busca só do registro;
+  - H1, título e descrição próprios;
+  - 60 palavras no `<main>` e 150 palavras por AdSlot;
+  - `robots.txt`, `noindex` e sitemaps.
+- **O `dist/` fica intacto.** O registro do bundle (`.cache/bundle-modules.json`) é devolvido depois de cada build.
+- **Como acrescentar um item.** Escreva uma função `check…(site: Site): Row[]` no `scripts/lib/prontidao.ts` e chame-a no portão. No `tests/unit/prontidao.test.ts`, ponha um controle positivo (o site de mentira do `makeSite()` passa) e um negativo para cada quebra. A linha do `ads.txt` fica escrita à mão no portão, a partir da ajuda do AdSense, e nunca sai do `adsTxt()` do site.
+- **Reuso.** O `robots.txt` é conferido por `robotsProblems()` (`scripts/lib/seo-checks.ts`), o `_headers` é lido por `headerBlocks()` e `patternApplies()` (`scripts/lib/headers-file.ts`), e o texto visível vem de `visibleText()` (`scripts/lib/conteudo.ts`).
+
+Método da revisão adversarial (DECISOES § 92 a § 94):
+
+- Seis lentes Sonnet em contexto limpo: corretude, privacidade, anúncio, acessibilidade, desempenho e SEO, e design system.
+- Elas rodam sobre um commit fixo, numa worktree só de leitura (`git worktree add --detach .claude/worktrees/revisao-f3 <commit>`, com o próprio `pnpm install --frozen-lockfile` e `pnpm build`).
+- Cada lente tem o próprio `FO_PORT` (4174…4179) e a própria `--output`, e escreve só em `.cache/lente-<x>/` da worktree.
+- Cada achado crítico, alto ou médio tem um cético próprio que tenta refutar. Os baixos de cada lente vão a um cético só.
+- As correções ficam num agente só. Depois, uma segunda passada revisa o diff.
+- Remova a worktree no fim com `git worktree remove`.
+
+Pegadinhas que a F3 achou:
+
+- O `html` não tem fundo, então o fundo `--bg` do `body` pinta a tela inteira. Padding ou margem no `body` aparece como faixa clara depois do rodapé. Espaço reservado no fim da página vai no `.fo-footer` (`--fo-bottom-room`, do aviso e da âncora), nunca no `body` (§ 91 e § 101).
+- Os screenshots de página do `pnpm screenshots` abrem com o consentimento já gravado, então o aviso de cookies não aparecia neles. A F3 acrescentou o fim da página com o aviso aberto, e a pasta passou a `docs/relatorios/fase-03/componentes/`. O script apaga a pasta dele antes de gravar: não ponha outros arquivos lá.
+- Navegador na produção só com `context.route` abortando os domínios do Google (`google`, `googletagmanager`, `google-analytics`, `doubleclick`, `gstatic`, `googlesyndication`), para a visita não entrar no GA4. A prévia em `*.workers.dev` nem pede o `gtag.js`.
+- Com várias lentes rodando o Playwright ao mesmo tempo, o WebKit do Windows chegou a travar no `page.goto` até em teste antigo e simples. Antes de achar que um teste do WebKit está errado, rode-o de novo com a máquina livre.
+- Toda carga sob demanda do motor (um `import()` de codec, a cola do jSquash, o `.wasm`) passa pelo `loading()` de `src/engine/image/errors.ts`. Uma falha de carga vira `EngineError('load')`, com a fala "recarregue a página", e nunca "arquivo danificado". O `load` fica fora do `HOPELESS`, então a próxima execução tenta de novo (§ 102 e § 104). Um `import()` novo no motor sem o `loading()` volta a chamar um arquivo bom de "danificado".
+- Um worker sem `OffscreenCanvas` não faz trabalho de imagem: o motor roda na página, e o `warm()` não aquece o worker (§ 102). Para testar esse caminho nos dois navegadores, sirva o script do worker de imagem (o que não tem `PDFDocument`) com `delete globalThis.OffscreenCanvas;` na frente, por `page.route` (`tests/e2e/engine-paths.spec.ts`).
+- O `context.on('request')` do Playwright vê as requisições feitas de dentro dos workers, no Chromium e no WebKit (a lente de corretude provou). Uma prova de "nada sai" deve recusar método diferente de GET, corpo, outra origem e query string.
+- No Git Bash, `node -e "…"` com crases no texto JS executa as crases como comando do shell e estraga o texto (aconteceu com um § do DECISOES). Texto com crase vai para um arquivo, pela ferramenta de escrita, e o script Node o lê.

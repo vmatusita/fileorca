@@ -64,9 +64,11 @@ describe('footer', () => {
 describe('hub /image-tools/', () => {
   it('has the band, the grid of the eight tools, the presets table and the two AdSlots', async () => {
     const page = await render(ImageToolsView, 'en');
-    expect(page.querySelectorAll('h1').map((h1) => h1.text)).toEqual(['Image tools']);
+    // The eyebrow names the category and the H1 says something of its own, as in the ToolCard preview (DECISOES § 96).
+    expect(page.querySelectorAll('h1').map((h1) => h1.text)).toEqual(['Eight image tools, zero uploads']);
     const band = page.querySelector('main .fo-hubband.fo-cat--image');
     expect(band?.querySelector('.fo-eyebrow')?.text).toBe('Image tools');
+    expect(band?.querySelector('.fo-eyebrow')?.text).not.toBe(band?.querySelector('h1')?.text);
     expect(band?.querySelector('h1')?.getAttribute('class')).toBe('fo-h1 fo-h1--display');
     expect(page.querySelectorAll('main .fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
     // Image to PDF wears the PDF colour, the others the image colour.

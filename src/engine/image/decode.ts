@@ -12,7 +12,7 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import { beyondDecoding, decodePath, nativeIfSizeMatches } from './choice.ts';
-import { EngineError } from './errors.ts';
+import { EngineError, loading } from './errors.ts';
 import { clampBox, crop, displayP3ToSrgb, exifSpin, transform } from './pixels.ts';
 import type { Raster } from './pixels.ts';
 import type { Transform } from './bmff.ts';
@@ -72,7 +72,7 @@ async function canvasDecode(blob: Blob, info: SourceInfo): Promise<Decoded> {
 }
 
 async function wasmJpeg(bytes: Uint8Array, info: SourceInfo): Promise<Decoded> {
-  const { decodeJpeg } = await import('./codecs/jpeg.ts');
+  const { decodeJpeg } = await loading(import('./codecs/jpeg.ts'));
   const { image, truncated } = await decodeJpeg(arrayBufferOf(bytes));
   if (truncated) throw new EngineError('truncated', 'libjpeg: premature end of file');
   if (info.displayP3) displayP3ToSrgb(image);
@@ -83,7 +83,7 @@ async function wasmWebp(bytes: Uint8Array, info: SourceInfo): Promise<Decoded> {
   // The jSquash decoder (libwebp 1.0.2) cannot read animated files, and a picture this big
   // cannot go through a canvas to take the first frame.
   if (info.animated) throw new EngineError('too-large', 'animated WebP above the canvas limit');
-  const { decodeWebp } = await import('./codecs/webp.ts');
+  const { decodeWebp } = await loading(import('./codecs/webp.ts'));
   return { work: new RasterWork(await decodeWebp(arrayBufferOf(bytes))), viewable: true, alpha: info.alpha };
 }
 
@@ -108,7 +108,7 @@ export function applyContainerTransforms(image: Raster, transforms: readonly Tra
 async function heicDecode(bytes: Uint8Array, blob: Blob, info: SourceInfo, path: 'canvas' | 'wasm'): Promise<Decoded> {
   let alpha = false;
   const wasm = async (): Promise<Raster> => {
-    const { decodeHeic } = await import('./codecs/heic.ts');
+    const { decodeHeic } = await loading(import('./codecs/heic.ts'));
     const decoded = await decodeHeic(bytes);
     alpha = decoded.alpha;
     if (info.displayP3) displayP3ToSrgb(decoded.image);
@@ -125,7 +125,7 @@ async function heicDecode(bytes: Uint8Array, blob: Blob, info: SourceInfo, path:
 
 async function avifDecode(bytes: Uint8Array, blob: Blob, info: SourceInfo, path: 'canvas' | 'wasm'): Promise<Decoded> {
   const wasm = async (): Promise<Raster> => {
-    const { decodeAvif } = await import('./codecs/avif.ts');
+    const { decodeAvif } = await loading(import('./codecs/avif.ts'));
     // libavif leaves irot, imir and clap to the application, so the container's are applied here.
     const image = applyContainerTransforms(await decodeAvif(arrayBufferOf(bytes)), info.transforms);
     if (info.displayP3) displayP3ToSrgb(image);

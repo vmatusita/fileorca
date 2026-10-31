@@ -19,8 +19,11 @@ export type ToolId = ImagePageId;
 /** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
 export const OUTCOMES = ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed'] as const;
 export type Outcome = (typeof OUTCOMES)[number];
-/** Why one file did not come out (src/engine/image/types.ts FailureReason). */
-export const ERROR_REASONS = ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large'] as const;
+/**
+ * Why one file did not come out: the engine's FailureReason (src/engine/image/types.ts), or 'load' when the panel could
+ * not load the engine or the PDF worker (offline, or a chunk gone after a deploy; DECISOES § 102).
+ */
+export const ERROR_REASONS = ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large', 'load'] as const;
 export type ErrorReason = (typeof ERROR_REASONS)[number];
 /** The real format of the file as the engine read it from the bytes: a closed list, never a file type string. */
 export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty'] as const;

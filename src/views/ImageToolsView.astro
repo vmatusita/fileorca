@@ -1,7 +1,8 @@
 ---
 // The image hub /image-tools/ (docs/design/components/ToolCard, fo-hubband): eyebrow, H1 and one line in
-// the category band, the grid of the eight tools, one content AdSlot, the presets with their links and the
-// rail AdSlot like the tool pages. English only for now (DECISOES § 58), so the texts are the English file.
+// the category band, the grid of the eight tools, one content AdSlot, the presets with their links, the
+// guide of which tool does which job (DECISOES § 96) and the rail AdSlot like the tool pages. English only
+// for now (DECISOES § 58), so the texts are the English file.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
@@ -65,6 +66,14 @@ const list = tools.map((tool) => ({ name: tool.blurb.name, path: tool.href }));
         {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.blurb.name}</a></th><td>{preset.blurb.description}</td></tr>)}
       </tbody>
     </table>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="guide">
+    <h2 id="guide">{t.guideHeading}</h2>
+    <p>{t.guideIntro}</p>
+    <ul>
+      {t.guide.map((line) => <li>{line.before} <a href={routeById(line.tool).paths[lang]}>{common.tools[line.tool].name}</a> {line.after}</li>)}
+    </ul>
+    <p>{t.guideOutro}</p>
   </section>
   <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

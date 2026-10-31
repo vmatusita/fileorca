@@ -41,6 +41,7 @@ export default {
     truncated: '{name} stops before its end, so part of the image is missing. Download or export it again, then try once more.',
     decode: "{name} is damaged, so Oli can't read it. Try another copy of the file.",
     encode: "This browser couldn't save {name}. Try again in another browser.",
+    load: "Oli couldn't load what she needs to read {name}. Check your connection and reload the page.",
     tooLarge: '{name} is bigger than this browser can handle here. Try a smaller version of the image.',
     chooseAnother: 'Choose other files',
     some: "{count} files couldn't be read; the rest are ready.",
