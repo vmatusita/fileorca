@@ -1,0 +1,20 @@
+---
+// Compress image to 100 KB (English only): the shared mold with the preset's own panel and texts.
+import ImageToolPage from '../../../image/ImageToolPage.astro';
+import To100kbPanel from './Panel.tsx';
+import { panelData } from '../../../image/page.ts';
+import type { Lang } from '../../../../i18n/routes.ts';
+import type { PresetOptionsTexts } from '../../../../i18n/types.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const panel = panelData<PresetOptionsTexts>('compress-image-to-100kb', lang);
+---
+<ImageToolPage id="compress-image-to-100kb" lang={lang} panel={panel}>
+  <To100kbPanel slot="panel" {...panel} />
+  <script>
+    import './mount.ts';
+  </script>
+</ImageToolPage>
