@@ -61,15 +61,23 @@ async function open(browser: Browser, theme: Theme, width: number, path: string,
   return page;
 }
 
-/** Crops to the element, with room around it (the Oli sits above the DropZone; the wave above the footer). */
+/**
+ * Crops to the element, with room around it (the Oli sits above the DropZone; the wave above the footer). The clip
+ * is in page coordinates over a full-page capture, so an element taller than the window (the crop editor under its
+ * result card) comes out whole.
+ */
 async function shot(locator: Locator, name: string, pad: { top?: number; side?: number } = {}): Promise<void> {
   await locator.scrollIntoViewIfNeeded();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error(`${name}: element not visible`);
+  const box = await locator.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.left + scrollX, y: rect.top + scrollY, width: rect.width, height: rect.height };
+  });
+  if (box.width === 0 || box.height === 0) throw new Error(`${name}: element not visible`);
   const top = pad.top ?? 8;
   const side = pad.side ?? 8;
   await locator.page().screenshot({
     path: join(OUT, `${name}.png`),
+    fullPage: true,
     clip: { x: Math.max(0, box.x - side), y: Math.max(0, box.y - top), width: box.width + 2 * side, height: box.height + top + 8 },
   });
   console.log(`  ${name}.png`);
@@ -183,7 +191,7 @@ async function main(): Promise<void> {
 
       page = await open(browser, theme, 360, '/');
       await shot(page.locator('.fo-hero'), `home-hero-${theme}-360`);
-      await shot(page.locator('.fo-tool'), `tool-card-${theme}-360`, { top: 8 });
+      await shot(page.locator('.fo-tool').first(), `tool-card-${theme}-360`, { top: 8 });
       await page.getByRole('button', { name: /Search tools/ }).click();
       await page.locator('#fo-search-dialog input').fill('compress');
       await page.locator('#fo-search-dialog [role="option"]').first().waitFor();
