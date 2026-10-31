@@ -15,6 +15,9 @@
 :root {
   --fo-font-display: "Fredoka", "Fredoka Fallback", var(--font-display);
   --fo-font-text: "Figtree", "Figtree Fallback", var(--font-text);
+  /* The measure token (68ch) in Figtree, fixed in rem: ch follows the font in use, so 68ch would
+     widen the prose by 90px when Figtree replaces the fallback (CLS). The 0 of Figtree is 0.641em. */
+  --fo-measure: calc(68 * 0.641rem);
 }
 
 html { color-scheme: light; -webkit-text-size-adjust: 100%; }
@@ -63,7 +66,10 @@ main :where(p, li) a:not([class]):hover, .fo-cookie a:hover { text-decoration-th
   .fo-frame--rail { display: grid; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; align-items: start; }
   .fo-rail { display: block; padding-top: var(--space-5); }
 }
-.fo-prose { max-width: var(--measure); }
+.fo-prose { max-width: var(--fo-measure); }
+.fo-prose > h1 { margin-bottom: var(--space-4); }
+/* Reflow at 320px: long addresses in the legal texts break instead of widening the page. */
+.fo-prose :where(p, li) { overflow-wrap: anywhere; }
 .fo-prose h2 { font: 600 24px/30px var(--fo-font-display); margin: var(--space-8) 0 var(--space-2); }
 .fo-prose p, .fo-prose ul { margin: 0 0 var(--space-3); }
 .fo-prose ul { padding-left: var(--space-6); list-style: disc; }
@@ -76,11 +82,12 @@ main :where(p, li) a:not([class]):hover, .fo-cookie a:hover { text-decoration-th
 .fo-table { width: 100%; border-collapse: collapse; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
 .fo-table th, .fo-table td { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--stroke-hair) solid var(--hairline); vertical-align: top; }
 .fo-table th { font-weight: 700; }
+.fo-table summary { display: flex; align-items: center; min-height: var(--tap-min); cursor: pointer; }
 .fo-table pre { white-space: pre-wrap; font-size: 13px; line-height: 18px; max-height: 320px; overflow: auto; background: var(--surface-sunken); padding: var(--space-3); border-radius: var(--radius-xs); }
 
 /* Reduced motion: nothing animates or transitions on its own (the Oli stays still, the water rises
    without the wave, the placard is already there). */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .fo-btn:hover, .fo-tool:hover, .fo-chip:hover > .fo-icon:last-child { transform: none; }
+  .fo-btn:hover:not(:active), .fo-tool:hover, .fo-chip:hover > .fo-icon:last-child { transform: none; }
 }

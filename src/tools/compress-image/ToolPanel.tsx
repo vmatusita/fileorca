@@ -12,7 +12,7 @@ import { isSupportedType, type Level } from '../../engine/image/recompress.ts';
 import { PRODUCTION_HOSTNAME } from '../../platform/site.ts';
 import type { Pose } from '../../oli/poses.ts';
 import Icon from '../../icons/Icon.tsx';
-import { countUse, dontShowAgain, isAdBlocked } from './coffee.ts';
+import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from './coffee.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
@@ -113,6 +113,8 @@ export default function ToolPanel({ lang, t, moreToolsHref, coffeeHref, adsOn }:
     if (result) URL.revokeObjectURL(result.url);
   }, [result]);
 
+  useEffect(() => forgetWithoutConsent(), []);
+
   async function run(file: File, chosen: Level) {
     const id = ++runRef.current;
     setPhase('processing');
@@ -144,8 +146,9 @@ export default function ToolPanel({ lang, t, moreToolsHref, coffeeHref, adsOn }:
       });
       setPhase('done');
       if (newUse.current) {
+        // Only a file that came out smaller is a use (no coffee under "already optimized").
         newUse.current = false;
-        setCoffee(countUse(adBlocked(adsOn)));
+        setCoffee(outcome.outcome === 'smaller' && countUse(adBlocked(adsOn)));
       }
       setAnnounce(says(outcome.outcome, (1 - after / file.size) * 100, FORMAT_NAME[file.type] ?? file.type));
       track('tool_complete', { tool: TOOL, lang, outcome: outcome.outcome === 'smaller' ? 'smaller' : 'unchanged' });

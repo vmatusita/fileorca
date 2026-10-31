@@ -16,7 +16,8 @@ interface Pair {
 // (borders, focus rings and the Download button against the deep sea). Values come from tokens.json.
 const PAIRS: readonly Pair[] = [
   ...['bg', 'surface', 'surface-sunken', 'water', 'brand-soft', 'danger-soft', 'turquesa-soft', 'coral-soft', 'alga-soft', 'violeta-soft', 'lima-soft'].map((bg) => ({ fg: 'ink', bg, use: 'text' as const })),
-  ...['bg', 'surface', 'surface-sunken', 'ad-ground'].map((bg) => ({ fg: 'ink-muted', bg, use: 'text' as const })),
+  // ink-muted on water: the DropZone help line sits on the risen water while a file is over it.
+  ...['bg', 'surface', 'surface-sunken', 'ad-ground', 'water', 'brand-soft'].map((bg) => ({ fg: 'ink-muted', bg, use: 'text' as const })),
   { fg: 'brand', bg: 'bg', use: 'text' },
   { fg: 'brand', bg: 'surface', use: 'text' },
   { fg: 'danger', bg: 'bg', use: 'text' },

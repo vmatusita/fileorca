@@ -57,6 +57,7 @@
 .fo-btn--ghost:active { transform: none; }
 .fo-deep .fo-btn--ghost { color: var(--on-deep); }
 .fo-btn--lg { min-height: var(--button-lg); padding: 0 var(--space-8); font-size: 18px; line-height: 22px; }
+@media (max-width: 359px) { .fo-btn--lg { padding-inline: var(--space-4); } }
 .fo-btn--sm { min-height: 40px; padding: 0 var(--space-4); font-size: 15px; }
 .fo-btn--block { display: flex; width: 100%; }
 @media (max-width: 767px) { .fo-btn--block-mobile { display: flex; width: 100%; } }
@@ -177,7 +178,7 @@
 .fo-pop { animation: fo-pop var(--dur-cheer) var(--ease-spring) both; }
 @keyframes fo-pop { from { opacity: 0; transform: scale(0.6) rotate(-12deg); } }
 /* The coffee line: only with the file ready, after the Download, never yellow (§ 49). */
-.fo-result__support { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--on-deep-muted); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
+.fo-result__support { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 .fo-result__support p { margin: 0; }
 .fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .fo-result__support .fo-btn { margin-bottom: var(--lip); }
@@ -219,7 +220,9 @@
 .fo-seg__opt input { position: absolute; opacity: 0; pointer-events: none; }
 .fo-seg__opt:hover { color: var(--ink); }
 .fo-seg__opt:has(input:checked) { background: var(--surface); color: var(--ink); border-color: var(--stroke); }
-.fo-seg__opt:has(input:focus-visible) { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+/* Ring on any focus of the option (README: the ring on everything that takes focus): WebKit drops
+   :focus-visible after an arrow key moves through the radio group. */
+.fo-seg__opt:has(input:focus) { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-seg__opt small { display: block; font-weight: 500; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
 
 /* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
@@ -257,7 +260,7 @@
 .fo-faq summary::-webkit-details-marker { display: none; }
 .fo-faq summary .fo-icon { width: 32px; height: 32px; padding: 4px; box-sizing: border-box; border-radius: 50%; border: var(--stroke-2) solid var(--stroke); transition: transform var(--dur-base) var(--ease-out); }
 .fo-faq details[open] summary .fo-icon { transform: rotate(180deg); background: var(--brand-soft); }
-.fo-faq details > div { padding: 0 var(--space-10) var(--space-4) 0; color: var(--ink); max-width: var(--measure); }
+.fo-faq details > div { padding: 0 var(--space-10) var(--space-4) 0; color: var(--ink); max-width: var(--fo-measure); }
 .fo-faq details > div p { margin: 0 0 var(--space-2); }
 
 /* ---------- ToolCard grid ---------- */
@@ -303,7 +306,7 @@
 .fo-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--on-deep-muted); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
+.fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
 .fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; }
 .fo-footer__coffee .fo-icon { width: 20px; height: 20px; }
 
@@ -322,8 +325,9 @@
 .fo-search__field { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); min-height: 60px; border-bottom: var(--stroke-hair) solid var(--hairline); }
 .fo-search__field > .fo-icon { width: 20px; height: 20px; }
 .fo-search__field:focus-within { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-.fo-search__field input { flex: 1; align-self: stretch; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 18px/24px var(--fo-font-text); }
+.fo-search__field input { flex: 1; align-self: stretch; width: 0; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 18px/24px var(--fo-font-text); }
 .fo-search__field input:focus-visible { outline: none; }
+.fo-search__field input::placeholder { color: var(--ink-muted); opacity: 1; }
 .fo-search__list { list-style: none; margin: 0; padding: var(--space-2); display: grid; gap: 2px; }
 .fo-search__item { display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-md); font-weight: 600; color: var(--ink); text-decoration: none; }
 .fo-search__item[aria-selected="true"] { background: var(--brand-soft); }

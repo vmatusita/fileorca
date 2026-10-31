@@ -149,22 +149,23 @@ test.describe('coffee line rules (English)', () => {
     expect(await coffee(page)).toMatchObject({ never: true });
   });
 
-  test('Decline after the line showed stops the count and the line, even 8 days later', async ({ page }) => {
+  test('Decline after the line showed erases the count and stops the line, even 8 days later', async ({ page }) => {
     await open(page, '/compress-image/', true);
     await reachCoffeeLine(page);
-    const before = await coffee(page);
-    expect(before).toMatchObject({ uses: 3 });
+    expect(await coffee(page)).toMatchObject({ uses: 3 });
 
     await page.goto('/privacy/');
     await page.getByRole('button', { name: 'Change my cookie choice' }).click();
     await page.locator('#fo-cookie').getByRole('button', { name: 'Decline' }).click();
 
+    // Consent withdrawn: the tool page erases the count as soon as it loads (DECISOES § 49).
     await open(page, '/compress-image/');
+    expect(await coffee(page)).toBeNull();
     await skipDays(page, 8);
     await useImage(page);
     await settle(page);
     await expect(page.locator(LINE)).toHaveCount(0);
-    expect(await coffee(page)).toEqual(before);
+    expect(await coffee(page)).toBeNull();
   });
 });
 

@@ -100,7 +100,7 @@ async function main(): Promise<void> {
     for (const theme of THEMES) {
       console.log(`tema ${theme}`);
       for (const width of [360, 1280]) {
-        const page = await open(browser, theme, width, '/compress-image/', null);
+        const page = await open(browser, theme, width, '/compress-image/');
         await shot(page.locator('.fo-header'), `header-${theme}-${width}`, { top: 0, side: 0 });
         await page.screenshot({ path: join(OUT, `tool-page-${theme}-${width}.png`), fullPage: true });
         console.log(`  tool-page-${theme}-${width}.png`);
@@ -135,6 +135,13 @@ async function main(): Promise<void> {
       await drop(page, PHOTO);
       await page.locator('.fo-level').waitFor();
       await shot(page.locator('.fo-level'), `water-level-${theme}-360`);
+      // The engine is too fast to catch half-way, so the real component is set to 55% for one more shot.
+      await page.locator('.fo-level').evaluate((level) => {
+        (level as HTMLElement).style.setProperty('--level', '55%');
+        const pct = level.querySelector('.fo-level__pct');
+        if (pct) pct.textContent = '55%';
+      });
+      await shot(page.locator('.fo-level'), `water-level-55-${theme}-360`);
       release();
       await page.locator('.fo-result').waitFor();
       await shot(page.locator('.fo-result'), `result-card-${theme}-360`);
@@ -183,8 +190,12 @@ async function main(): Promise<void> {
       await shot(page.locator('.fo-filelist').first(), `file-card-${theme}-360`);
       await page.close();
 
-      page = await isolated(browser, theme, css, `<div style="display:grid;gap:16px;max-width:328px">${previewMarkup('OliMessage')}</div>`);
-      await shot(page.locator('.fo-says').first(), `oli-message-${theme}-360`, { top: 8 });
+      page = await isolated(browser, theme, css, `<div id="shot" style="display:grid;gap:16px;max-width:328px">${previewMarkup('OliMessage')}</div>`);
+      await shot(page.locator('#shot'), `oli-message-${theme}-360`, { top: 8 });
+      await page.close();
+
+      page = await isolated(browser, theme, css, `<div id="shot" style="display:grid;gap:12px;justify-items:start;max-width:328px">${previewMarkup('Button')}</div>`);
+      await shot(page.locator('#shot'), `button-${theme}-360`);
       await page.close();
     }
   } finally {

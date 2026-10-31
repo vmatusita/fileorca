@@ -8,6 +8,7 @@ import arrowIcon from '../../docs/design/assets/Icons/arrow-right.svg?raw';
 import checkIcon from '../../docs/design/assets/Icons/check.svg?raw';
 import closeIcon from '../../docs/design/assets/Icons/close.svg?raw';
 import downloadIcon from '../../docs/design/assets/Icons/download.svg?raw';
+import fileIcon from '../../docs/design/assets/Icons/file.svg?raw';
 import trashIcon from '../../docs/design/assets/Icons/trash.svg?raw';
 
 export interface FileCardLabels {
@@ -41,7 +42,7 @@ export default function FileCard(props: FileCardProps) {
     <div class={`fo-file fo-dogear fo-cat--${category}`} data-state={props.state === 'error' ? 'error' : undefined}>
       {props.state === 'error' ? (
         <div class="fo-file__thumb">
-          <Icon raw={alertIcon} />
+          <Icon raw={fileIcon} />
         </div>
       ) : thumb ? (
         <img class="fo-file__thumb" src={thumb} alt="" width={52} height={52} />

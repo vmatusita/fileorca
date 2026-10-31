@@ -2,8 +2,9 @@
 // browser, then at most once every 7 days, never after "don't show again". The count lives in
 // localStorage and is written only after the cookie notice's Accept: storing something that is not
 // strictly necessary needs consent in the EU (ePrivacy art. 5(3)), and the site does not know where the
-// person is. Without Accept nothing is written and the line never shows. "Don't show again" is the
-// person's own request and is always kept. With ads on, someone who blocks them sees it on the 1st use.
+// person is. Without Accept nothing is written and the line never shows; a count left from an earlier
+// Accept is erased (consent withdrawn). "Don't show again" is the person's own request and is always
+// kept. A use is a file that came out smaller. With ads on, someone who blocks them sees it on the 1st.
 import { CONSENT_STORAGE_KEY } from '../../analytics/consent.ts';
 
 export const COFFEE_KEY = 'fo-coffee';
@@ -55,16 +56,36 @@ function storage(): Storage | null {
   }
 }
 
+/** Without the Accept, a stored count goes away; only "don't show again" stays. */
+function forget(store: Storage): void {
+  const raw = store.getItem(COFFEE_KEY);
+  if (raw === null) return;
+  if (parseCoffee(raw).never) store.setItem(COFFEE_KEY, JSON.stringify({ uses: 0, never: true }));
+  else store.removeItem(COFFEE_KEY);
+}
+
+/** On load: a count kept from an Accept that was later withdrawn is erased. */
+export function forgetWithoutConsent(): void {
+  const store = storage();
+  if (!store) return;
+  try {
+    if (store.getItem(CONSENT_STORAGE_KEY) !== 'granted') forget(store);
+  } catch {
+    // private mode: nothing kept
+  }
+}
+
 /** Counts a successful use in this browser; returns whether the coffee line shows. */
 export function countUse(adsBlocked: boolean, now = Date.now()): boolean {
   const store = storage();
   if (!store) return false;
   try {
-    const { show, next } = decideCoffee(parseCoffee(store.getItem(COFFEE_KEY)), {
-      now,
-      consent: store.getItem(CONSENT_STORAGE_KEY) === 'granted',
-      adsBlocked,
-    });
+    const consent = store.getItem(CONSENT_STORAGE_KEY) === 'granted';
+    if (!consent) {
+      forget(store);
+      return false;
+    }
+    const { show, next } = decideCoffee(parseCoffee(store.getItem(COFFEE_KEY)), { now, consent, adsBlocked });
     if (next) store.setItem(COFFEE_KEY, JSON.stringify(next));
     return show;
   } catch {
