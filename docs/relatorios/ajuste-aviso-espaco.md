@@ -1,6 +1,6 @@
 # Ajuste · Espaço do aviso de cookies no fim da página: relatório
 
-Branch `ajuste-aviso-espaco`, a partir da `main` em `94a1428` (o merge da F3). Pedido: `docs/prompts/prompt-ajuste-aviso-espaco.md`. Decisão: `DECISOES.md` § 106. Run de 31/out/2026.
+Branch `ajuste-aviso-espaco`, a partir da `main` em `94a1428` (o merge da F3). Pedido: `docs/prompts/prompt-ajuste-aviso-espaco.md`. Decisões: `DECISOES.md` § 106 e § 107. Run de 31/out/2026.
 
 ## Resumo
 
@@ -51,6 +51,7 @@ Com a âncora do AdSense na tela, o rodapé ficava com 340 px. Sem foco, deveria
   - o `scroll-padding-bottom` segue contando o aviso e a âncora.
 - **`tests/e2e/cookie-footer.spec.ts`:** a expectativa nova e a largura de 1920 × 1035.
 - **`tests/e2e/events.spec.ts`:** o teste do `donate_click` do rodapé fecha o aviso antes de clicar no link do café.
+- **`tests/e2e/ads.spec.ts`** (§ 107): o CI da PR achou uma intermitência antiga, sem relação com o aviso. O teste media o layout logo depois de mudar a largura, enquanto a ilha ainda movia a comparação para dentro ou para fora do cartão. Agora ele espera dois quadros antes de medir, sem mudar nenhuma asserção.
 - **Documentos:** a decisão está no `DECISOES.md` § 106, e a regra ganhou uma seção curta no fim do CLAUDE.md.
 
 ## pnpm verificar local

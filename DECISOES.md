@@ -785,3 +785,10 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - `tests/e2e/events.spec.ts`, no teste "the footer coffee link sends donate_click…": ele fecha o aviso antes de clicar no link do café, porque o assunto dele é o evento e o card agora fica por cima do link no fim da página.
   - No código de antes, 8 testes do `cookie-footer.spec.ts` falharam com o rodapé a 240 px e 340 px; depois, os 178 testes de cookies, eventos, consentimento, café e axe passam nos dois navegadores.
 - **Alternativa:** deixar o aviso em posição `sticky` no fim do fluxo. No fim da página, o resultado seria o mesmo bloco ocupado embaixo do rodapé, o mesmo espaço que o Victor recusou.
+
+## § 107 · O `ads.spec.ts` espera o layout assentar depois de cada mudança de largura (ajuste-aviso-espaco, 31/out/2026)
+
+- **Contexto:** no CI da PR do ajuste (run 41240391852, WebKit 1 de 2), o teste "/webp-to-jpg/: at rest, while processing, with the result and with a batch" falhou com "com a fila de dois arquivos: AdSlot a 133px de fo-tool-island". Aqui, o mesmo teste falhou 3 vezes em 6 no Chromium, com "`.fo-ba` na tela com o resultado: 0". Em outras rodadas, ele passou 12 vezes em 12 no build da F2 (`f549f1b`), no merge da F3 (`94a1428`) e no próprio build do ajuste. Era intermitente e não tinha relação com o aviso de cookies.
+- **Causa:** a ilha decide por um `matchMedia('(min-width: 768px)')` se a comparação fica dentro do cartão ou embaixo dele. A troca só acontece no evento de mudança da media query e numa renderização logo depois. O `atBothWidths` media logo depois do `setViewportSize`, às vezes no meio da troca: a comparação ainda fora do lugar (sem caixa) ou o layout com a largura velha por um quadro.
+- **Decisão:** depois de cada `setViewportSize`, o `atBothWidths` espera dois quadros de animação (`requestAnimationFrame` duas vezes) antes de medir. Nenhuma asserção, distância ou alvo mudou. O teste inteiro passa (52 testes nos dois navegadores), e o caso intermitente passou 12 vezes em 12.
+- **Alternativa:** esperar uma condição específica da comparação, que só existe em parte das páginas e dos estados.
