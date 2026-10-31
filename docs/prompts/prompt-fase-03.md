@@ -1,0 +1,435 @@
+# F3 · Revisão e prontidão para o AdSense
+
+Prompt da run `fase-03` do FileOrca, gerado com a skill prompt-ultracode em 31/out/2026. Ele parte da ficha "F3 · Revisão e prontidão para o AdSense" do PLANO-FILEORCA.md e do estado da main em `f549f1b`: a F2 e o ajuste do CI em partes estão mesclados, e o site está lançado.
+
+O que o Victor trouxe nesta conversa:
+
+- O sitemap foi enviado e as ferramentas foram testadas: funcionam.
+- O aviso de cookies deixa uma faixa clara embaixo do rodapé enquanto está aberto. Ele viu no computador, no Chrome/Edge.
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode a F3 do FileOrca: revisão e prontidão para o AdSense. Ao terminar, o código que está na main (F1a, F1b, F2 e os dois ajustes) foi revisado contra o plano por uma revisão adversarial em seis lentes, com um cético por achado, registrada em `docs/relatorios/REVISAO-F3.md`. Todo achado crítico ou alto está corrigido, com teste, ou foi refutado com evidência. Isso inclui o bug que o Victor achou no aviso de cookies: a faixa clara embaixo do rodapé. Um portão novo, `gate:prontidao`, entra no `pnpm verificar` e prova que o site está pronto para o pedido do AdSense. Os textos de lançamento ficam prontos em `docs/lancamento/`: AlternativeTo, Show HN e 20 contatos de diretórios. Nenhuma ferramenta nova. O `pnpm verificar` fica verde na sua máquina e nas quatro partes do CI. Tudo vai numa PR da branch `fase-03`, com o relatório. A PR não toca em `.github/`, então o job de merge a mescla sozinho quando ela sai do rascunho com o CI verde. Depois do merge, o Victor liga o ID do AdSense e pede a revisão.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows: o shell é o Git Bash. O CI roda em Ubuntu, em quatro partes de até 900 s cada (ADR-003): `verificar` (`--sem-playwright`), `playwright (chromium)` e o WebKit em duas metades.
+
+A main está em `f549f1b` ou num commit mais novo. Confira com `git log --oneline -5`. O ajuste `ajuste-ci-partes` (PR #6) e a F2 (PR #5) estão mesclados, e o fileorca.com está no ar e indexável (`LAUNCHED = true`). O site tem:
+
+- oito ferramentas de imagem em inglês: Compress, Resize, Crop, Rotate/flip, HEIC to JPG/PNG, WebP to JPG/PNG, PNG ↔ JPG e Image to PDF;
+- três presets (`/compress-image/to-100kb/`, `/compress-image/to-1mb/`, `/resize-image/youtube-thumbnail/`) e o hub `/image-tools/`;
+- a home, a Compress image e as páginas institucionais em pt e es.
+
+Convert to WebP/AVIF e AVIF to JPG ficaram para a run 2b (§ 85), que ainda não rodou e não é desta run.
+
+O que o Victor fez e viu depois da F2 (31/out/2026):
+
+- Enviou o sitemap no Search Console.
+- Testou as ferramentas no celular e no computador. Todas funcionam.
+- Achou um bug no aviso de cookies. Enquanto o aviso está aberto, aparece uma faixa clara (margem) embaixo do rodapé escuro. Ele viu no computador, no Chrome/Edge do Windows. Não relatou outro sintoma: o aviso fecha, não volta e a página não pula. Mesmo assim, confira esses três sintomas.
+- Leitura do código, a confirmar: enquanto o aviso está visível, o `reserve()` do script em `src/components/CookieNotice.astro` põe no `document.body` um `padding-bottom` igual à altura do aviso, mais o `bottom`, mais 8 px. Ele faz isso para o foco nunca ficar embaixo do aviso (§ 36). O `body` tem o fundo `--bg`, e o `.fo-footer` (`.fo-deep`, fundo `--deep`) é o último elemento da página. Por isso sobra uma faixa clara abaixo dele. No computador, o aviso é um cartão de 440 px no canto esquerdo, mas a faixa ocupa a largura toda.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. O `CLAUDE.md` inteiro: as seções da F1a, do ajuste da prévia, da F1b, da F2 e do ajuste do CI em partes.
+3. O `PLANO-FILEORCA.md`. A ficha "F3 · Revisão e prontidão para o AdSense" do apêndice é o contrato. As fichas F1a, F1b e F2 são o gabarito da revisão. As "Decisões fechadas" não mudam. Use também estas seções: "Plataforma" (com a linha "Consentimento"), "Bibliotecas e licenças" e "Cabeçalhos", "Da run ao ar", "Orçamento de desempenho", "Molde da página de ferramenta", "Monetização" ("O que derruba conta", "Obrigatório antes do primeiro anúncio" e "Como o anúncio liga"), "Doações", "SEO agressivo" ("Técnico", "Regra da página programática" e "Links"), "Páginas obrigatórias" e os eventos do GA4 em "Metas".
+4. O `DECISOES.md`, § 1 a § 90. Esta run toca mais estes: § 8, § 9, § 12, § 20, § 34, § 35, § 36, § 55, § 57, § 68, § 75, § 76, § 79, § 81, § 83, § 85, § 86, § 89 e § 90.
+5. Em `docs/adr/`, a ADR-001, a ADR-002 e a ADR-003.
+6. O `docs/design/`: o README (voz, Oli, layout, acessibilidade) e, de cada componente que o site usa, o README e o `preview.html`. Comece pelo Footer e pelo CookieNotice. A pasta é só leitura (§ 2).
+7. Os relatórios. Do `docs/relatorios/fase-02.md`, leia "Revisão adversarial", "O que é do Victor" e "Nota para a F3". Leia também as revisões adversariais de `fase-01a.md` e `fase-01b.md`, o `ajuste-previa-build.md` e o `ajuste-ci-partes.md`.
+8. O código: `src/` inteiro, `tests/`, `scripts/` (sobretudo `verificar.ts`, `gates/` e `lib/`), `public/`, `astro.config.ts`, `lighthouserc.json`, `playwright.config.ts` e `wrangler.jsonc`.
+
+Você pode ler a web (WebSearch e WebFetch) para documentação e regras oficiais. Leia, entre elas:
+
+- os requisitos do AdSense para o site e para a política de privacidade, e o formato do `ads.txt`;
+- as regras do Show HN e as diretrizes do Hacker News;
+- as páginas de envio do AlternativeTo e dos diretórios.
+
+Ler não é mandar pedido a um serviço. Nada sai daqui além da leitura.
+
+# Escopo
+
+Dentro, em itens:
+
+1. O bug do aviso de cookies (decisão 1), corrigido primeiro e com teste antes da correção.
+2. A revisão adversarial das F1 e F2 contra o plano, em seis lentes, com um cético por achado (decisões 2 e 3), registrada em `docs/relatorios/REVISAO-F3.md`.
+3. A correção dos achados confirmados (decisão 4) e uma segunda passada da revisão sobre as correções.
+4. O portão `gate:prontidao`, com teste de unidade, dentro do `pnpm verificar` (decisão 5).
+5. A conferência de prontidão na produção, só por leitura (decisão 6).
+6. Os textos de lançamento em `docs/lancamento/` (decisão 7).
+7. Os screenshots do que mudou na tela, o relatório e uma seção nova no fim do CLAUDE.md.
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do CLAUDE.md. Isso inclui mandar qualquer coisa para fora: não envie o AlternativeTo, não poste no HN, não preencha formulário de diretório nem mande e-mail.
+- Ferramenta nova ou página nova de ferramenta. A 2b (Convert to WebP/AVIF e AVIF to JPG) é outra run. Calculadoras e componentes da F4. Tradução nova em pt e es. Pix (F6). Service worker (F8).
+- `.github/` inteiro e `scripts/ci/`. Uma PR que mexe em `.github/workflows/` não mescla sozinha. E o `pode-mesclar.ts` é a trava do merge automático, que uma run não muda por conta própria. Achado nessas pastas vira pendência para uma run de ajuste com o merge do Victor, com a correção proposta no relatório.
+- As variáveis do Workers Builds, a conta do AdSense, o Search Console, o Bing e o GA4. Ligar anúncio também fica fora: `PUBLIC_ADS_ENABLED` segue `false`, e nenhum script de anúncio entra no `dist/` de hoje.
+- Mudar os padrões do Consent Mode, as regiões ou a lista de eventos, a não ser por um achado confirmado da lente de privacidade, com teste.
+- Cor, raio, sombra, ícone ou pose fora de `docs/design/`. Amarelo (`sun`) fora do Baixar. Animação em JavaScript.
+- São só leitura: `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/`, `.claude/settings.json` e `docs/design/`. No `CLAUDE.md`, só uma seção nova no fim. No `DECISOES.md`, só § novos, a partir do § 91.
+- Dependência nova, em `dependencies` ou em `devDependencies`. O que existe basta: o `node-html-parser` para ler o `dist/`, o Playwright e o axe.
+- Tirar, pular, afrouxar ou mudar o sentido de teste que já existe. Os testes do aviso de cookies (`tests/e2e/events.spec.ts` e `tests/e2e/consent.spec.ts`) ficam como estão e precisam passar depois da correção. Se uma correção confirmada obrigar a mudar uma asserção (porque a asserção afirma o próprio bug), registre num § qual asserção mudou e por quê.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 91)
+
+1. **O aviso de cookies nunca deixa faixa clara embaixo do rodapé.** É um achado alto, do Victor: aparece em toda página e desvia do Footer do design system ("o rodapé é o fundo do mar"). Primeiro reproduza. Escreva um teste e-2-e que falha no código de hoje e cole essa falha no relatório. Só depois corrija a causa. Depois da correção, tem que valer:
+   - Com o aviso aberto e a página rolada até o fim, nada do fundo do `body` aparece abaixo do rodapé: o documento termina no rodapé, de fundo `deep`. Confira a 360 × 740, a 768 × 1024 e a 1280 × 800, nos temas claro e escuro, em Chromium e WebKit, na home, numa página de ferramenta e numa página jurídica. Use uma carga por página e navegador e mude a largura e o tema no mesmo carregamento, como na § 76. Uma medida simples: `scrollHeight` menos o fim do rodapé, em coordenadas do documento, dá no máximo 1 px.
+   - As garantias das § 35 e § 36 continuam. O aviso nunca cobre o foco: o teste de 45 Tabs e o teste sem `scroll-padding` passam sem mudança. Com a âncora do AdSense, o aviso fica acima dela.
+   - Depois de Aceitar e depois de Recusar, a reserva some inteira, sem padding no `body`, espaço extra no rodapé ou `scroll-padding` sobrando. O rodapé volta ao respiro normal ou, no celular com os anúncios ligados, aos 96 px da âncora (`.fo-footer--anchor`). O teste novo confere isso também.
+   - Nenhuma cor, sombra ou raio novo, e nenhum CLS. O LCP e o CLS do Lighthouse não pioram. O LCP pode continuar sendo o texto do aviso (§ 55).
+
+   Caminho sugerido, o mais simples. O script publica no `<html>` a altura que precisa reservar, numa variável CSS (por exemplo `--fo-cookie-room`), e o `.fo-footer` soma essa variável ao padding de baixo dele, em vez de pôr padding no `body`. O `scroll-padding-bottom` continua no `<html>`. Com a âncora e o aviso ao mesmo tempo, não conte a âncora duas vezes. Se outro caminho der as mesmas garantias com menos código, use-o e registre. Confira também os outros três sintomas (o aviso que não fecha, o que volta, a página que pula) e registre o que achou. Tire screenshots de antes e depois, com a página rolada até o fim e o aviso aberto, a 1280 e a 360 px, nos dois temas.
+
+2. **Revisão: seis lentes, sobre um commit fixo.** A revisão cobre tudo o que está na main. O gabarito são as fichas F1a, F1b e F2, os critérios dos prompts dessas runs (`docs/prompts/`), o CLAUDE.md, o DECISOES.md e o `docs/design/`. Entram também a "Nota para a F3" do relatório da F2 e os baixos que a F2 deixou para cá (decisão 8). As lentes são as da ficha:
+   - **(a) Corretude.** O motor, as oito ferramentas, os presets, o lote, o ZIP, o Ctrl+V, o erro por arquivo, o caminho sem canvas e o caminho sem `OffscreenCanvas` no worker. Inclui a integridade dos testes: teste que passaria sem a coisa existir (um 404 que passa, uma asserção vazia, um `expect` que nunca roda), contagens tiradas do lugar errado e portão que não reprova o que diz reprovar.
+   - **(b) Privacidade.** Nenhum arquivo sai do aparelho. Nenhum número digitado vai para a URL nem para o `dataLayer`. Os eventos usam a lista fechada. O `gtag.js` só carrega em fileorca.com. Também: o consentimento e o `localStorage`, COOP/COEP e `SharedArrayBuffer`, e se o que a Política de Privacidade promete, nos três idiomas, é o que o código faz.
+   - **(c) Política de anúncio e consentimento.** "O que derruba conta", item por item. A distância dos AdSlots e os lugares onde nunca há anúncio. O carregador só com as três variáveis e só no hostname. A meta tag e o `ads.txt`. As regras do café e da doação. O `__tcfapi`. Os textos de privacidade que o AdSense exige.
+   - **(d) Acessibilidade.** WCAG 2.2 AA no fluxo principal: teclado, foco visível e não coberto, `aria-live`, nomes acessíveis, contraste nos dois temas, reflow a 320 px e movimento reduzido. Entram os baixos de acessibilidade da decisão 8.
+   - **(e) Desempenho e SEO técnico.** Desempenho: os orçamentos de JS e de requisições, LCP, CLS e INP, a memória de um lote longo no celular, o caminho na página quando o worker não tem `OffscreenCanvas` e o tempo de cada parte do CI. SEO: títulos, canonical, hreflang, sitemaps, schema, `robots.txt`, `_headers`, a 404 e o IndexNow.
+   - **(f) Aderência ao design system.** Cada componente contra o README e o `preview.html` dele, lado a lado com o screenshot no mesmo tema e na mesma largura. Tokens, o amarelo só no Baixar, as nove poses fechadas da Oli com `aria-hidden` e a voz (sentence case, sem emoji, sem palavras proibidas, uma exclamação por tela).
+
+   Cada lente é um subagente Sonnet em contexto limpo, que não viu o código ser escrito. Ele trabalha só por leitura e prova o que diz: roda comandos, o Playwright e o axe, lê arquivos e tira screenshots. A revisão roda sobre um commit fixo, que você registra: o commit com a correção do aviso e o `gate:prontidao`. Ela roda numa worktree só de leitura (`git worktree add .claude/worktrees/revisao-f3 <commit>`, com o `pnpm install` e o build dela), nunca na pasta em que você está editando. A pasta `.claude/worktrees/` já está no `.gitignore` e fora do ESLint e do `tsconfig`. Lentes que sobem servidor ou Playwright usam cada uma a própria porta (`FO_PORT=4174`, `4175`…) e a própria pasta de saída (`--output`), porque duas execuções na 4173 usam o servidor uma da outra (CLAUDE.md). As lentes não editam arquivo do repositório e devolvem os achados neste formato:
+   - id (`a-01`, `b-03`…), título e severidade;
+   - arquivo:linha;
+   - evidência real: o comando com a saída, o trecho ou o screenshot;
+   - a regra violada (ficha, §, README do componente, critério WCAG ou política oficial com o link);
+   - a correção proposta e o custo estimado no tempo do CI.
+
+   As lentes apontam só lacunas de correção, de requisito ou de regra. Preferência de estilo não é achado.
+
+3. **Severidade e cético.**
+   - **Crítico:** um arquivo do usuário sai do aparelho; um número digitado vai para a URL ou para o GA4; uma violação de "O que derruba conta"; algo que tira o site do índice (`noindex` ou `robots.txt` barrando em produção); uma ferramenta que entrega arquivo errado ou com GPS; o merge automático ou o pós-deploy quebrados.
+   - **Alto:** uma falha de WCAG A ou AA no fluxo principal; um desvio visível do design system em componente que aparece em toda página (como a faixa do aviso); um erro funcional numa ferramenta ou num navegador; um item de prontidão do AdSense falhando; um orçamento estourado; uma promessa da Política de Privacidade que o código não cumpre.
+   - **Médio:** um erro real com impacto pequeno ou raro, ou um teste que não prova o que diz.
+   - **Baixo:** o resto que é lacuna de verdade.
+
+   Cada achado crítico, alto ou médio ganha um cético próprio, um subagente Sonnet em contexto limpo cujo trabalho é refutar o achado. Ele reproduz o problema, confere se a regra diz mesmo aquilo e vê se outro teste já cobre o caso. O veredito é "confirmado", "refutado" (com a evidência) ou "rebaixado" (com a nova severidade). Os baixos de cada lente passam por um cético só, em lote. Só o que for confirmado segue.
+
+4. **O que se corrige.**
+   - Críticos e altos confirmados: sempre.
+   - Médios: quando a correção é local. Local quer dizer que ela não muda a arquitetura, não toca no que está fora do escopo e não soma mais de uns 30 s a uma parte do CI. Senão, o médio vira pendência para uma run 3b.
+   - Baixos: só os herdados da F2 (decisão 8). Os outros vão para o relatório.
+
+   Cada correção que dá para testar ganha um teste que falha sem ela e passa com ela, e entra num § do DECISOES.md. Achado em `.github/` ou `scripts/ci/` não é corrigido aqui (Escopo). Depois das correções, uma segunda passada, de subagentes novos em contexto limpo, revisa só o diff das correções e confere se cada crítico e alto fechou. Repita até não sobrar crítico nem alto aberto.
+
+5. **`gate:prontidao`.** Um portão novo: o script `scripts/gates/prontidao.ts`, com a lógica em `scripts/lib/prontidao.ts`, o comando `pnpm gate:prontidao` no `package.json` e um passo novo em `STEPS` no `scripts/verificar.ts`. O passo cai na parte `--sem-playwright`, e o `tests/unit/verificar.test.ts` continua verde sem ser afrouxado. O teste de unidade `tests/unit/prontidao.test.ts` tem controles positivos e negativos, com `dist/` de mentira pequenos numa pasta temporária: uma página com "coming soon", uma Privacidade sem o Google, um `ads.txt` com a linha errada. Prove que cada um reprova. O portão imprime uma tabela item → ok ou falha → como conferiu. Ele confere, no mínimo:
+   - **(a) AdSense pronto para o ID, sem anúncio ligado.**
+     - Com `PUBLIC_ADSENSE_CLIENT` igual ao ID de teste `ca-pub-0000000000000000`, toda página tem o `<meta name="google-adsense-account">` com o ID, e o `/ads.txt` tem exatamente a linha que a ajuda oficial do AdSense manda, conferida na web: `google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0`.
+     - Nenhum carregador do AdSense entra sem as três variáveis, nem em página jurídica ou institucional.
+     - Sem o ID, que é o build real de hoje, não há meta tag, `ads.txt` nem script de anúncio em página nenhuma do `dist/`. O AdSlot mostra só o espaço neutro.
+     - Faça a conferência com o mesmo código que o build usa, nunca com uma cópia da lógica. Pode ser o Astro container (o `vitest.config.ts` já renderiza `.astro` com ele) ou um segundo build numa pasta em `.cache/`. O segundo build não sobrescreve o `dist/` que o Playwright e o Lighthouse usam e soma no máximo uns 90 s à parte `verificar` do CI.
+   - **(b) Páginas obrigatórias.**
+     - Sobre, Contato, Privacidade, Termos, Licenças e Apoio existem nos três idiomas, respondem 200 e estão no rodapé de toda página.
+     - O Contato mostra `contato@fileorca.com`.
+     - A Privacidade, nos três idiomas, cita o Google como parceiro de anúncios, os cookies de terceiros, o opt-out (Ads Settings), o link de como o Google usa dados de sites parceiros, o controlador (Victor Yuki Matusita) e o e-mail. Confira esses itens contra a página oficial do AdSense sobre o que a política de privacidade precisa ter, lida na web.
+   - **(c) Nenhuma página "em breve".** Nenhum HTML do `dist/` tem, nos três idiomas:
+     - texto de obra: coming soon, under construction, lorem ipsum, TODO, TBD, em breve, em construção, próximamente, en construcción;
+     - ID de mentira (`ca-pub-0000…`, `G-XXXX`, `example.com`);
+     - cartão, chip ou item de busca de ferramenta que não existe.
+
+     A home e o hub listam só o que o registro tem.
+   - **(d) Conteúdo de verdade.** O `gate:conteudo` já cobre as ferramentas. A prontidão exige ainda:
+     - em toda página indexável, H1, título e descrição próprios, sem repetir os de outra página;
+     - um mínimo de texto no `<main>`, que você fixa pelo que as páginas institucionais de hoje têm e registra;
+     - nenhuma página com mais AdSlot que conteúdo, por uma regra medida que você define e registra.
+   - **(e) Rastreável.**
+     - O `robots.txt` não bloqueia ninguém, inclusive o `Googlebot` e o `Mediapartners-Google`, e aponta o índice de sitemaps.
+     - Nenhuma página indexável tem `noindex` na meta ou no `_headers` de fileorca.com.
+     - O sitemap de cada idioma tem só páginas 200 e indexáveis.
+
+     Reuse as funções do `gate:seo` e do `gate:cabecalhos` em vez de duplicar a checagem.
+
+   Você pode acrescentar itens que o plano ou a ajuda oficial do AdSense pedem. Não tire nenhum.
+
+6. **Prontidão na produção, só por leitura.** Antes do merge, confira o fileorca.com com `curl` e cole as saídas no relatório:
+   - o `robots.txt` igual ao `public/robots.txt`;
+   - o `sitemap-index.xml` e os sitemaps de cada idioma;
+   - as páginas obrigatórias dos três idiomas com 200 e sem `x-robots-tag`;
+   - uma URL que não existe dando 404;
+   - nenhum `/cdn-cgi/` nem `cloudflareinsights` no HTML;
+   - `http://` e `www` levando com 301 a `https://fileorca.com/`;
+   - o `build.txt`;
+   - o `/ads.txt` dando 404 hoje, porque o ID ainda não existe.
+
+   Se usar navegador no fileorca.com, bloqueie com `page.route` toda requisição a domínios do Google, para nenhum acesso seu cair no GA4 como visita. Diferença entre a produção e o `dist/` é achado da lente (e).
+
+7. **Textos de lançamento em `docs/lancamento/`.** Os textos para fora ficam em inglês, e as explicações para o Victor em português. São quatro arquivos:
+   - **`README.md`:** o que é cada arquivo, a ordem e quando enviar, conforme a seção "Links" do plano. O AlternativeTo e os diretórios vão depois do merge da F3. O Show HN vai no dia seguinte ao merge, antes de ligar os anúncios. Inclua um checklist para o Victor.
+   - **`show-hn.md`:**
+     - o título começa por "Show HN:" e tem até 80 caracteres;
+     - o primeiro comentário diz quem fez, por quê, como funciona (Astro, Web Workers, codecs WASM, libheif) e como conferir;
+     - a conferência: "abra a aba Rede, nada sobe" e o teste do Wi-Fi desligado;
+     - a frase honesta sobre o Analytics (o GA4 com Consent Mode, só em fileorca.com) e sobre os anúncios, que ainda não estão ligados e vão pagar os custos;
+     - de duas a três variações de título.
+
+     Cada afirmação técnica do texto (nenhum byte do arquivo sai; a ferramenta segue funcionando offline depois de carregada; o que sai é só o Analytics) precisa de uma prova feita nesta run. Por exemplo, um teste ou script do Playwright no `dist/` com `context.setOffline(true)` depois de a página e o codec carregarem, e a lista de requisições. O relatório cita cada prova. O que não passar sai do texto.
+   - **`alternativeto.md`:** nome, descrição curta e longa nos limites que o próprio site pede (lidos na página de envio), tags, plataforma, licença e a lista de "alternativa a". Na lista entram só apps que existem no AlternativeTo e que o FileOrca de hoje substitui de verdade (por exemplo TinyPNG, Squoosh, iLoveIMG e conversores de HEIC), conferidos na web. Anote que iLovePDF e Smallpdf entram depois da F5.
+   - **`diretorios.md`:** 20 diretórios ou listas de "free tools", web apps, ferramentas de privacidade ou de imagem, reais e ativos. Abra a página de envio de cada um com o WebFetch na data da run. Prefira os grátis; os pagos vão numa lista à parte e não contam nos 20. Nunca entra esquema de link (diretório que vende link dofollow, troca de links, PBN), conforme as políticas de spam do Google. Cada linha traz:
+     - nome e URL da página de envio;
+     - como se envia (formulário, e-mail, PR no GitHub, conta), se pede conta e se é grátis;
+     - o tipo do link, quando o site declara, e os requisitos (logo, screenshots, tamanho do texto);
+     - a categoria sugerida, o texto pronto no tamanho pedido e o status "não enviado".
+
+     Onde o envio é por e-mail, o rascunho sai de `contato@fileorca.com`, assinado por Victor Yuki Matusita. Ordene por relevância e facilidade.
+
+   Os números de ferramentas saem do registro na hora da run. Marque as linhas que mudam quando a 2b entrar. Nada de "best", "#1", depoimento inventado ou número que não foi medido. Passe os textos em inglês pelo LanguageTool local que o `lint:texto` sobe e cole o resultado. Não mude o alcance do portão por isso.
+
+8. **Baixos que a F2 deixou para a F3** (relatório da F2, "Revisão adversarial"). Revise cada um e corrija os que se confirmarem:
+   - a caixa do Crop não expõe o valor;
+   - o erro dos campos do Crop não diz a faixa aceita;
+   - uma caixa muito pequena do Crop só se move pelo teclado;
+   - a escolha da foto na fila é só a miniatura e a borda;
+   - o BeforeAfter diz só "50", sem `aria-valuetext`;
+   - o resultado é anunciado duas vezes;
+   - o sobretítulo e o H1 do hub são iguais;
+   - o `PDFDocument` da semente não confere metadados por conta própria.
+
+   O último é da F5. Registre e não mexa, a não ser que a lente (b) ache GPS ou outro metadado num PDF de saída.
+
+9. **Tempo do CI.** Cada parte do CI fica abaixo de 900 s, com alvo de 700 s (ADR-003). Os testes novos são poucos e baratos: uma carga por página e navegador, com as larguras e os temas no mesmo carregamento. Se uma parte passar de 700 s, registre e proponha no relatório a divisão em mais um `--shard`, que é um ajuste de `.github/` para o Victor. Nunca aumente o limite, ligue `retries` ou aumente timeout.
+
+# Pontos de atenção
+
+- O aviso de cookies é um `<script is:inline>` sem dependência. Mantenha assim: nenhum JS a mais por página nem requisição a mais (os orçamentos do `budgets.spec.ts`).
+- O `focusin` da § 36 rola a página para tirar o foco de baixo do aviso. Se a reserva sair do `body`, prove nos dois navegadores que o último link do rodapé ainda fica acima do aviso quando recebe o foco, a 360 e a 1280 px.
+- Os temas: o `html[data-theme]` vence o `prefers-color-scheme`. Teste os dois caminhos que os testes atuais usam.
+- Lentes em paralelo e o Playwright: cada uma com o próprio `FO_PORT` e a própria pasta de saída, e nenhuma na pasta em que você edita.
+- No CI, o WebKit roda sozinho em duas partes. O trace já sai sem screencast (§ 90). Não volte a ligar o screencast.
+- Na produção, nada de visita de navegador sem bloquear o Google (decisão 6).
+- `exactOptionalPropertyTypes` no tsconfig e os tipos de evento de `preact` (CLAUDE.md).
+- No Git Bash, escreva arquivos com a ferramenta de edição, porque o heredoc engole `\\`. Rode `git push` e `gh pr create` em comandos separados.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. O teste novo do aviso falhou no código de antes, com a saída colada, e passa depois. Os testes de cookies que já existiam passam sem mudança. Os screenshots de antes e depois estão em `docs/relatorios/fase-03/`.
+2. O `docs/relatorios/REVISAO-F3.md` tem o método, o commit revisado e as seis lentes. Cada achado traz a evidência, o veredito do cético e o estado: corrigido no commit X e no § Y, pendência, ou refutado com a evidência.
+3. Nenhum achado crítico ou alto aberto. A segunda passada confirmou o fechamento de cada um.
+4. O `gate:prontidao` está no `STEPS`, verde no `dist/` real, com o teste de unidade verde e com controles negativos que reprovam. O `verificar.test.ts` está verde.
+5. A conferência de prontidão na produção (decisão 6) tem as saídas do `curl` coladas.
+6. O `docs/lancamento/` tem os quatro arquivos, com 20 diretórios (ou pelo menos 10, pela válvula). Cada um teve a URL aberta na data. O título do Show HN tem até 80 caracteres. Cada afirmação técnica tem a sua prova.
+7. O `pnpm verificar` está verde na sua máquina, com a saída e o tempo de cada portão, e nas quatro partes do CI, com o tempo de cada uma, todas abaixo de 900 s. Nenhum `skip`, `fixme`, `retries` ou `continue-on-error` novo.
+8. Na prévia da PR, o comentário do Workers Builds aparece. O Playwright confirma nela, a 1280 e a 360 px, que a faixa sumiu, com screenshot.
+9. Nenhuma dependência nova. Nada em `.github/`, `scripts/ci/` e nos arquivos só de leitura.
+10. Depois do merge, só por leitura: o `https://fileorca.com/build.txt` traz o commit do merge. O pós-deploy está verde (`gh run list --workflow pos-deploy.yml`). A faixa sumiu na produção, conferida com o navegador e o Google bloqueado.
+
+# Verificação: rode de verdade
+
+- Teste antes da correção, nas duas frentes: o bug do aviso e cada achado confirmado que dá para testar. Leia a falha, corrija a causa e repita até passar.
+- É proibido desligar, pular, marcar como skip, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no DECISOES.md.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e `pnpm verificar`, que já builda do zero) e guarde a saída completa. Rode o `pnpm screenshots` depois do último ajuste visual, para `docs/relatorios/fase-03/`. Veja como a F2 passou a pasta.
+- Depois de abrir a PR, acompanhe com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Leia o tempo de cada parte com `gh run view <id> --log`. Espere o comentário do Workers Builds por até 30 min, olhando a cada poucos minutos com `gh pr view <n> --comments`. Se o build do Workers Builds ficar vermelho, o check não traz o log e a causa não se deduz pelo tempo (CLAUDE.md): registre a pendência com o ID do build e siga.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O CLAUDE.md, a ficha F3 e o resto do plano.
+3. O `docs/design/` e o DECISOES.md.
+4. Na dúvida, a opção mais simples e reversível.
+
+Toda decisão que não está escrita aqui vira um § no DECISOES.md, com as alternativas e o porquê.
+
+Um achado que pede mudança de arquitetura (host, framework, estrutura, pipeline) vira uma ADR "Proposta" em `docs/adr/` e uma pendência. O resto segue.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos: uma página de diretório que não abre, a ajuda do AdSense fora do ar, o LanguageTool sem responder, o comentário do Workers Builds que não chega.
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar:
+
+1. Os diretórios caem de 20 para 10.
+2. Os médios corrigíveis viram pendência para a run 3b, a começar pelos de custo maior no CI.
+3. Os baixos herdados da F2 que não são de acessibilidade viram pendência.
+
+O que for cortado vai para o relatório como pendência, com o que falta.
+
+Nunca corte:
+
+- a revisão nas seis lentes, com os céticos;
+- a correção dos críticos e altos;
+- o `gate:prontidao`, com o teste dele;
+- a conferência na produção;
+- a correção do aviso de cookies, com o teste;
+- o Show HN e o AlternativeTo.
+
+# Git e segurança
+
+- Comece com `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-03.md` e `docs/prompts/prompt-fase-03.txt`, o prompt desta run. Crie a branch com `git switch -c fase-03`. Os dois arquivos entram sem edição no primeiro commit dela. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-03.txt`.
+- Commits pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Faça push só em marcos (uns seis na run inteira): cada push roda as quatro partes do CI e gasta minutos do plano grátis do GitHub.
+- Abra a PR cedo, em rascunho, logo depois da correção do aviso, com `gh pr create --draft --base main --head fase-03`, num comando separado do push. Assim o CI e a prévia andam enquanto a revisão roda. Título e descrição em português, com o resumo e o link do relatório.
+- A worktree da revisão (`.claude/worktrees/revisao-f3`) é só de leitura. Remova-a no fim com `git worktree remove`.
+- Rode `gh pr ready` só no fim, com o relatório, a revisão, os textos de lançamento e os screenshots commitados e o verificar local verde. Com o CI verde, o job de merge mescla sozinho e o Workers Builds publica. Depois do `ready`, acompanhe o CI até o fim. Se ele falhar, corrija e envie. Depois do merge, faça as conferências do critério 10 só por leitura e não abra outra PR: o que sobrar vai para a resposta final como pendência.
+- Nunca:
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh api` com método de escrita, `gh secret` ou `gh variable`;
+  - `wrangler deploy` em qualquer forma, inclusive `--dry-run`.
+
+  O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar**, com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - as fichas F1a, F1b, F2 e F3 e os critérios dos prompts dessas runs, transformados num checklist "requisito → onde está no código → que teste prova". Esse checklist vai para o plano e é dividido entre as lentes;
+   - o aviso de cookies: o script, o CSS, o rodapé, os testes que já existem e as § 35, § 36 e § 55;
+   - os portões que existem (`gate:seo`, `gate:cabecalhos`, `gate:conteudo`, `gate:links`) e o que deles a prontidão pode reusar; como o build gera a meta tag e o `ads.txt` a partir das variáveis;
+   - a regra oficial: os requisitos do AdSense para o site e para a privacidade, o `ads.txt`, as regras do Show HN e a página de envio do AlternativeTo, com os links lidos e a data.
+2. **Planejar.** Escreva `docs/relatorios/fase-03-plano.md`, autossuficiente. Ele traz:
+   - a causa do bug, provada, e a correção escolhida;
+   - o desenho do `gate:prontidao`, item por item;
+   - as seis lentes com o checklist de cada uma e o commit que será revisado;
+   - cada critério deste prompt ligado a um teste ou comando;
+   - a projeção do tempo do CI e a ordem de execução.
+
+   Ele é o gabarito da segunda passada.
+3. **Implementar** em fatias que terminam verdes, nesta ordem:
+   - o teste do aviso que falha, a correção e os screenshots de antes e depois; depois, a PR em rascunho;
+   - o `gate:prontidao` com o teste de unidade;
+   - o commit fixo da revisão, a worktree e as seis lentes em paralelo;
+   - os céticos;
+   - as correções, cada uma com teste e §;
+   - a segunda passada;
+   - a conferência na produção;
+   - o verificar limpo, os screenshots, o relatório e o `ready`.
+
+   Os textos de lançamento podem ir para um subagente Sonnet com acesso à web, em paralelo com a revisão, porque ele só escreve em `docs/lancamento/`. As provas técnicas do Show HN, você roda e cita. As correções ficam no modelo forte, num agente só, para não colidirem no CSS e na ilha.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-03.md` em português, commitado na branch antes do `gh pr ready`, com:
+
+- o resumo e o que mudou, por área, com a árvore do que nasceu ou mudou;
+- o bug do aviso: a causa, a falha do teste antes da correção, a correção e os screenshots de antes e depois;
+- o resumo da revisão (achados por lente e severidade, o que foi corrigido, refutado ou ficou pendente), apontando para o `REVISAO-F3.md`;
+- a tabela de prontidão: o que o `gate:prontidao` confere e o resultado, mais a conferência na produção com as saídas do `curl`;
+- a saída real e completa do `pnpm verificar` local, com o tempo de cada portão, e o link da execução verde do CI com o tempo de cada parte;
+- o Lighthouse das páginas do `lighthouserc.json` (desempenho, LCP com o elemento, CLS), antes e depois;
+- o link da prévia, o que você conferiu nela e, depois do merge, o que conferiu no fileorca.com;
+- as decisões novas, apontando os § do DECISOES.md;
+- o que a válvula cortou e o que fica para a 3b, se houver;
+- **a lista do que é do Victor, em passos:**
+  1. O passo 2 de "Como o anúncio liga", detalhado: abrir a conta do AdSense ou usar a que já existe (uma por pessoa) e adicionar o fileorca.com; pôr o `ca-pub-…` em `PUBLIC_ADSENSE_CLIENT` nas variáveis de build do Workers Builds; dar Retry no último build da main; conferir com `curl https://fileorca.com/ads.txt` e a meta tag na home (os comandos prontos); verificar o site e pedir a revisão.
+  2. O Show HN no dia seguinte ao merge, antes de ligar os anúncios.
+  3. O AlternativeTo e os contatos de diretórios, de 2 a 3 h.
+  4. O sitemap no Bing Webmaster, se ainda não foi.
+  5. As pendências de F1 e F2 que seguem abertas: os campos vazios do `docs/F0-SAIDA.md`, a busca reversa da Oli (bom fazer antes do Show HN, que mostra a Oli para muita gente), a foto do Sobre, o padrão da YouTube thumbnail (§ 60) e a HEIC no Safari.
+  6. Os achados em `.github/` ou `scripts/ci/`, se houver, para uma run de ajuste.
+  7. Gerar o prompt da 2b e o da F4.
+- uma nota para a F4: onde as calculadoras vão esbarrar no que a revisão achou (orçamentos, distância dos anúncios, campos e teclado).
+
+Acrescente no fim do CLAUDE.md uma seção curta, "F3: revisão e prontidão", com o `gate:prontidao` (o que confere e como acrescentar um item), o método da revisão (lentes, cético, worktree só de leitura, `FO_PORT` por lente) e as armadilhas que você achou. Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR e se o merge automático e o pós-deploy aconteceram.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o DECISOES.md, a descrição da PR e as explicações de `docs/lancamento/`. Em inglês: o código, os nomes de arquivo, os identificadores, os commits e os textos que vão para fora (HN, AlternativeTo, diretórios). Os textos do site ficam nos arquivos de tradução de cada idioma, com a voz de `docs/design/README.md`: sentence case, sem emoji, sem as palavras proibidas e com "tú" no espanhol.
+```
+
+## Como executar
+
+### 1. Antes de rodar (10 min)
+
+No PowerShell:
+
+```powershell
+cd C:\Users\vmatusita\projetos\fileorca
+git switch main
+git pull --ff-only
+git log -1 --oneline        # f549f1b (a F2) ou um merge seu mais novo
+git status                  # só docs/prompts/prompt-fase-03.md e .txt como não rastreados
+git config core.hooksPath   # tem que responder .githooks
+gh auth status              # logado na conta dona de vmatusita/fileorca
+claude --version            # o modo auto pede 2.1.83 ou mais
+powercfg /change standby-timeout-ac 0
+```
+
+Os dois arquivos do prompt já estão em `docs\prompts\`, e a run commita os dois no primeiro commit da branch.
+
+A run cria uma worktree temporária em `.claude\worktrees\revisao-f3` para a revisão e a remove no fim. Essa pasta está no `.gitignore`. Deixe o PC sem suspender e não mexa na pasta do repositório até a run terminar. Depois, volte o `standby-timeout-ac` ao seu valor.
+
+Esta run gasta mais token que código. São seis lentes de revisão, um cético por achado e uma segunda passada, além da pesquisa dos diretórios na web. Todos esses subagentes rodam em Sonnet, e o modelo forte fica com as correções. Comece com folga no limite semanal do Claude Code.
+
+### 2. Rodar
+
+Interativo, que é o recomendado:
+
+```powershell
+claude --model opus --permission-mode auto -n fase-03
+```
+
+Cole o conteúdo inteiro de `docs\prompts\prompt-fase-03.txt`, que começa por `ultracode`, e deixe rodando. Se cair ou o limite acabar, retome com `claude --resume fase-03` e mande: "continue de onde parou: leia docs/relatorios/fase-03-plano.md, docs/relatorios/REVISAO-F3.md, o git log da branch fase-03 e o estado da PR, e siga".
+
+Opcional: logo depois de colar o prompt, mande `/goal pnpm verificar verde, docs/relatorios/REVISAO-F3.md sem achado crítico ou alto aberto e a PR da fase-03 marcada como pronta`. Um avaliador separado confere essa condição a cada turno, e a run não termina antes de cumpri-la.
+
+Headless, se preferir disparar e sair:
+
+```powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Raw -Encoding utf8 docs\prompts\prompt-fase-03.txt |
+  claude -p --model opus --permission-mode auto --output-format json > $HOME\run-fase-03.json
+(Get-Content $HOME\run-fase-03.json | ConvertFrom-Json).session_id   # guarde: é o único jeito de retomar
+```
+
+**Por que o modo `auto`:** a run faz várias coisas sem perguntar:
+
+- builda;
+- roda o Playwright em várias portas;
+- cria e remove uma worktree;
+- lê a web;
+- faz commit e push da branch;
+- abre a PR e a marca como pronta.
+
+O `auto` deixa tudo isso passar e barra o que parece arriscado. As regras `deny` do `.claude/settings.json` valem em qualquer modo: push na main, `gh pr merge`, `wrangler deploy`, reset e amend. O prompt não pede nada disso, nem pede para mandar nada para fora: o HN, o AlternativeTo e os diretórios ficam só em rascunho.
+
+### 3. Acompanhar
+
+- A PR aparece cedo, em rascunho, em github.com/vmatusita/fileorca/pulls, logo depois da correção do aviso. Ela traz o link da prévia, e dá para conferir a faixa nela, no computador, antes do resto terminar.
+- A revisão sai em `docs/relatorios/REVISAO-F3.md` na branch. Os achados aparecem ali antes das correções.
+- **Atenção:** quando a run marca a PR como pronta e as quatro partes do CI ficam verdes, o merge é automático, e o Workers Builds publica.
+
+### 4. Ao voltar
+
+1. Leia `docs/relatorios/fase-03.md` e confira as evidências:
+   - a falha do teste do aviso antes da correção e os screenshots de antes e depois;
+   - a tabela de prontidão e as saídas do `curl` na produção;
+   - a saída do `pnpm verificar` e o tempo de cada parte do CI;
+   - o `REVISAO-F3.md`, com o veredito de cada cético.
+2. Confira a produção:
+   ```powershell
+   curl.exe -s https://fileorca.com/build.txt                  # o commit do merge
+   gh run list --workflow pos-deploy.yml --limit 3             # verde
+   git switch main; git pull --ff-only
+   ```
+   Abra o fileorca.com no computador, com uma aba anônima para o aviso aparecer, e role até o fim: o rodapé escuro vai até a borda de baixo.
+3. Siga a lista "O que é do Victor" do relatório, na ordem. O primeiro passo é o do AdSense: o `ca-pub-…` em `PUBLIC_ADSENSE_CLIENT`, o Retry no último build da main, a conferência do `ads.txt` e da meta tag, e o pedido de revisão. Depois vêm o Show HN no dia seguinte e o AlternativeTo e os diretórios (de 2 a 3 h).
+4. Gere o prompt da 2b (Convert to WebP/AVIF e AVIF to JPG, na vaga de folga) e o da F4.
+
+Se o resultado vier errado: depois de duas correções que não resolvem, não emende. Peça um prompt novo de run curta de ajuste, com o que aprendeu.
+
+## Suposições que fiz
+
+- **O "aceitar está bugando" é a faixa clara.** Você só marcou a faixa enquanto o aviso está aberto, no computador. A run confere os outros sintomas (o aviso que não fecha, o que volta, a página que pula) e registra o que achar. A correção sugerida leva o espaço que o aviso reserva para dentro do rodapé, que é escuro. Ela mantém a garantia de que o aviso nunca cobre o foco (§ 36).
+- **A F3 roda antes da 2b.** A revisão cobre as oito ferramentas que existem. Os textos de lançamento tiram a contagem do registro e marcam as linhas que mudam se a 2b entrar antes de você postar.
+- **A faixa conta como achado alto.** Ela aparece em toda página e desvia do design system, então a correção nunca é cortada.
+- **O que se corrige:**
+  - críticos e altos, sempre;
+  - médios, quando a correção é local e barata no CI;
+  - dos baixos, só os que a F2 deixou para a F3, sobretudo os de acessibilidade. O resto dos baixos vai para o relatório.
+- **`.github/` e `scripts/ci/` ficam fora.** Achado no pipeline ou no `pode-mesclar.ts` vira pendência para uma run de ajuste com o seu merge. Assim a PR da F3 mescla sozinha, e nenhuma run mexe na trava do merge automático.
+- **A produção é conferida só por leitura.** A run usa `curl` e, se abrir navegador no fileorca.com, bloqueia o Google para não sujar o GA4 com visitas de teste.
+- **O ID de teste `ca-pub-0000000000000000` só existe dentro do portão.** O build real continua sem ID até você criar a variável.
+- **Os textos para fora ficam em inglês, e você envia.** Cada afirmação técnica do Show HN, como "nada sobe" e "funciona com o Wi-Fi desligado", precisa de uma prova rodada na própria run. O que não passar sai do texto.
+- **Sitemap:** você disse que enviou. O envio no Bing Webmaster entra na sua lista "se ainda não foi".
+- **A busca reversa da Oli continua pendente.** Vale fazer antes do Show HN, que mostra a Oli para muita gente.
