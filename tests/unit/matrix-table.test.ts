@@ -24,7 +24,6 @@ const record = (id: string, tool: string, browser: string, options: string, file
   phases: { load: 500, download: 100, decode: 200 },
   requests: 20,
   outside: 0,
-  avifDecode: browser === 'chromium',
   files,
   ...extra,
 });
@@ -53,7 +52,7 @@ describe('buildTable', () => {
     record('compress-image', 'compress-image', 'webkit', 'Recommended', [ok('jpg-01.jpg', 'jpg-01.jpg', 'jpeg', 3024, 4032, 1_250_000, { note: 'orientation ok (Δ0.5)' }), refused('gen-vazio.jpg', 'empty')]),
     record('heic-to-jpg-a', 'heic-to-jpg', 'chromium', 'JPG (default)', [ok('heic-05.heic', 'heic-05.jpg', 'jpeg', 3024, 4032, 900_000)]),
     record('heic-to-jpg-png', 'heic-to-jpg', 'chromium', 'PNG', [ok('heic-05.heic', 'heic-05.png', 'png', 3024, 4032, 9_000_000)]),
-    record('convert-to-webp-avif', 'convert-to-webp', 'webkit', 'AVIF, Recommended', [ok('gen-avif.avif', 'x.avif', 'avif', 1600, 1200, 70_000, { decoded: 'unsupported' })], { avifDecode: false }),
+    record('webp-to-jpg', 'webp-to-jpg', 'webkit', 'JPG (default)', [ok('gen-webp-animada.webp', 'gen-webp-animada.jpg', 'jpeg', 1600, 1200, 70_000)]),
     record('image-to-pdf', 'image-to-pdf', 'chromium', 'Image size', [ok('jpg-01.jpg', 'page 1', 'jpeg', 3024, 4032, 1000, { decoded: 'pdf' })], { pdf: { pages: 1, bytes: 1_500_000 } }),
   ];
   const presets: PresetRecord[] = [
@@ -70,7 +69,7 @@ describe('buildTable', () => {
 
   it('has a section per tool, in the order the records came, with a row per fixture and options', () => {
     const tools = [...table.matchAll(/^## `([^`]+)`$/gm)].map((match) => match[1]);
-    expect(tools).toEqual(['compress-image', 'heic-to-jpg', 'convert-to-webp', 'image-to-pdf']);
+    expect(tools).toEqual(['compress-image', 'heic-to-jpg', 'webp-to-jpg', 'image-to-pdf']);
     // the same HEIC under two options is two rows, not one overwritten
     expect(table).toContain('| `heic-05.heic` | JPG (default) | ok · JPG 3024×4032 · 900 KB · abre | — |');
     expect(table).toContain('| `heic-05.heic` | PNG | ok · PNG 3024×4032 · 9,0 MB · abre | — |');
@@ -79,12 +78,13 @@ describe('buildTable', () => {
   it('shows what each browser did in its own column, a refusal as its reason, and a missing browser as a dash', () => {
     expect(table).toContain('| `jpg-01.jpg` | Recommended | ok · JPG 3024×4032 · 1,2 MB · abre | ok · JPG 3024×4032 · 1,3 MB · abre · orientação ok (Δ0.5) |');
     expect(table).toContain('| `gen-vazio.jpg` | Recommended | recusado (empty) | recusado (empty) |');
-    expect(table).toContain('| — | ok · AVIF 1600×1200 · 70 KB · não abre neste navegador |');
+    expect(table).toContain('| — | ok · JPG 1600×1200 · 70 KB · abre |');
   });
 
   it('summarises each test with its times and the requests that left the page', () => {
     expect(table).toContain('| `compress-image` | `compress-image` | Recommended | 2 | 1 | 1 | 4,2 s | 4,2 s | 0 |');
-    expect(table).toContain('Chromium: abre AVIF sozinho; WebKit: não abre AVIF sozinho');
+    // No tool writes an AVIF in this release, so the table has nothing to say about reading one.
+    expect(table).not.toMatch(/AVIF/);
   });
 
   it('says how many pages the PDF has, and gives the presets their own table with the bytes of each output', () => {

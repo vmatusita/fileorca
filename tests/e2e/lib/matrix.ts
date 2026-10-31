@@ -9,11 +9,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { expect, type Download, type Locator, type Page } from '@playwright/test';
-import { parseBmff } from './bmff.ts';
 import { imageSize, metadataReport, sniff, type Format, type MetadataReport } from './images.ts';
 import { exifBlock, tiffOrientation, withOrientation } from './jpeg.ts';
 import { dataLayer, dismissCookies, hydrated, type TestFile } from './page.ts';
-import { parsePdf, type PdfImage } from './pdf.ts';
+import { parsePdf, strictPdf, type PdfImage } from './pdf.ts';
 import { meanAbsDiff, orientGrid, thumbnail, type Thumbnail } from './pixels.ts';
 import { webpInfo } from './webp.ts';
 import { readZip } from './zip.ts';
@@ -71,11 +70,11 @@ export function batchOf(accepted: readonly string[], refused: readonly string[])
 }
 
 export const baseOf = (name: string): string => name.replace(/\.[^.]+$/, '');
-export const EXT: Record<string, string> = { jpeg: 'jpg', png: 'png', webp: 'webp', avif: 'avif' };
+export const EXT: Record<string, string> = { jpeg: 'jpg', png: 'png', webp: 'webp' };
 
 // ---- what a test expects of each fixture ----------------------------------------------------------------------
 
-export type OutFormat = 'jpeg' | 'png' | 'webp' | 'avif';
+export type OutFormat = 'jpeg' | 'png' | 'webp';
 
 /** Compare the output to the picture of a fixture (see pixels.ts for how the reference is built). */
 export interface PixelCheck {
@@ -118,8 +117,10 @@ export type Refusal = 'wrong-tool' | 'unsupported' | 'truncated' | 'decode' | 'e
 
 export interface Refuse {
   refuse: Refusal;
-  /** Link the row offers (HEIC and AVIF go to their converters): where it goes and how it is named. */
+  /** Link the row offers (only HEIC has a converter in this release): where it goes and how it is named. */
   link?: { href: string; name: string; sentence: RegExp };
+  /** A good file of a format with no converter: the whole line, which names what the tool takes, and no link in the row. */
+  plain?: RegExp;
 }
 
 export type Outcome = Expect | Refuse;
@@ -127,7 +128,7 @@ export const isRefusal = (outcome: Outcome): outcome is Refuse => 'refuse' in ou
 
 /** The line each reason shows in the row of the file (src/tools/image/i18n/en.ts, errors). */
 const REASON_TEXT: Record<Refusal, RegExp> = {
-  'wrong-tool': /is a (HEIC|AVIF|JPG|PNG|WebP|GIF) file\./,
+  'wrong-tool': /is (a HEIC file\.|in (AVIF|JPG|PNG|WebP|GIF) format, which this tool doesn't take\.)/,
   unsupported: /isn't an image Oli can read\./,
   truncated: /stops before its end/,
   decode: /is damaged/,
@@ -147,12 +148,21 @@ export function brokenRefusal(name: string): Refuse {
 }
 
 const HEIC_LINK = { href: '/heic-to-jpg/', name: 'HEIC to JPG', sentence: /is a HEIC file\. Open it in HEIC to JPG\./ };
-const AVIF_LINK = { href: '/avif-to-jpg/', name: 'AVIF to JPG', sentence: /is an? AVIF file\. Open it in AVIF to JPG\./ };
 
-/** A good file of a format the tool does not take: HEIC and AVIF point to their converters. */
-export function wrongTool(name: string): Refuse {
+/** How the line spells the format of the file it refuses. */
+const FORMAT_NAME: Partial<Record<Format, string>> = { jpeg: 'JPG', png: 'PNG', webp: 'WebP', avif: 'AVIF', gif: 'GIF' };
+
+/**
+ * A good file of a format the tool does not take. HEIC points to its converter. Every other format (AVIF
+ * included, which has no converter in this release) gets the line that names what the tool takes
+ * (`takes`, as the tool's panel says it) and no link at all.
+ */
+export function wrongTool(name: string, takes: string): Refuse {
   const format = oracle(name).format;
-  return format === 'heic' ? { refuse: 'wrong-tool', link: HEIC_LINK } : format === 'avif' ? { refuse: 'wrong-tool', link: AVIF_LINK } : { refuse: 'wrong-tool' };
+  if (format === 'heic') return { refuse: 'wrong-tool', link: HEIC_LINK };
+  const spelled = FORMAT_NAME[format];
+  if (!spelled) throw new Error(`no spelling for ${format}`);
+  return { refuse: 'wrong-tool', plain: new RegExp(`is in ${spelled} format, which this tool doesn't take\\. Try ${takes}\\.`) };
 }
 
 export interface MatrixCase {
@@ -257,28 +267,23 @@ export interface Decoded {
 
 export interface DecodeReport {
   files: Decoded[];
-  /** This browser can decode an AVIF on its own (the fixture decodes). */
-  avif: boolean;
 }
 
 const FFLATE = resolve('node_modules/fflate/umd/index.js');
 
 /**
  * Decodes what the Download link holds, in the page, without sending a byte through the protocol:
- * the page fetches its own blob, unpacks the ZIP with fflate and opens every entry as a bitmap. The
- * AVIF fixture is decoded too, to learn whether this browser can read an AVIF at all (the WebKit of
- * Playwright on Windows cannot), so an AVIF output is required to open only where one can.
+ * the page fetches its own blob, unpacks the ZIP with fflate and opens every entry as a bitmap.
  */
 export async function decodeInPage(page: Page): Promise<DecodeReport> {
   if (!(await page.evaluate(() => 'fflate' in window))) await page.addScriptTag({ path: FFLATE });
-  const avif = fixtureBytes('gen-avif.avif').toString('base64');
-  return page.evaluate(async (avifBase64) => {
+  return page.evaluate(async () => {
     const fflate = (window as unknown as { fflate: { unzipSync(zip: Uint8Array): Record<string, Uint8Array> } }).fflate;
     const link = document.querySelector<HTMLAnchorElement>('.fo-btn--download');
     if (!link) throw new Error('no download link');
     const data = new Uint8Array(await (await fetch(link.href)).arrayBuffer());
     const entries: [string, Uint8Array][] = data[0] === 0x50 && data[1] === 0x4b ? Object.entries(fflate.unzipSync(data)) : [[link.download, data]];
-    const types: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', avif: 'image/avif' };
+    const types: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
     const probe = document.createElement('canvas');
     probe.width = 1;
     probe.height = 1;
@@ -301,16 +306,8 @@ export async function decodeInPage(page: Page): Promise<DecodeReport> {
         files.push({ name, ok: false, width: 0, height: 0, cornerAlpha: [], error: String(error) });
       }
     }
-    let canAvif = false;
-    try {
-      const raw = Uint8Array.from(atob(avifBase64), (character) => character.charCodeAt(0));
-      (await createImageBitmap(new Blob([raw], { type: 'image/avif' }))).close();
-      canAvif = true;
-    } catch {
-      canAvif = false;
-    }
-    return { files, avif: canAvif };
-  }, avif);
+    return { files };
+  });
 }
 
 // ---- pixels ----------------------------------------------------------------------------------------------------
@@ -327,7 +324,7 @@ export function storedBox(box: [number, number, number, number], tag: number): [
   return [Math.min(ax, bx), Math.min(ay, by), Math.abs(bx - ax), Math.abs(by - ay)];
 }
 
-const MIME_OF: Record<OutFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', avif: 'image/avif' };
+const MIME_OF: Record<OutFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
 
 export interface Reference {
   /** The grey grid the output should show. */
@@ -388,11 +385,6 @@ export async function colours(page: Page, output: OutFile, format: OutFormat): P
 
 // ---- metadata ---------------------------------------------------------------------------------------------------
 
-/** An AVIF with an alpha plane: an auxiliary image whose auxC type names alpha. */
-export function avifHasAlpha(bytes: Uint8Array): boolean {
-  return parseBmff(bytes).items.some((item) => item.properties.some((property) => property.type === 'auxC' && 'auxType' in property && /alpha/i.test(property.auxType)));
-}
-
 /** True when the Exif block says nothing but the Orientation (what strip.ts leaves on a rotated JPEG that went back as it was). */
 export function orientationOnly(bytes: Uint8Array): boolean {
   const tiff = exifBlock(bytes);
@@ -424,7 +416,7 @@ export interface RecordFile {
   fixture: string;
   status: 'ok' | 'refused';
   /** ok: what came out. */
-  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'unsupported' | 'pdf'; note: string };
+  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'pdf'; note: string };
   /** refused: the reason the page gave. */
   reason?: string;
 }
@@ -443,7 +435,6 @@ export interface MatrixRecord {
   requests: number;
   /** Requests that left the page origin (the test fails when there is one, so a record says 0). */
   outside: number;
-  avifDecode: boolean;
   files: RecordFile[];
   /** image-to-pdf: pages of the PDF. */
   pdf?: { pages: number; bytes: number };
@@ -494,6 +485,11 @@ export async function expectRefusals(page: Page, kase: MatrixCase, events: unkno
       await expect(row.locator('.fo-file__err')).toContainText(refusal.link.sentence);
       await expect(row.getByRole('link', { name: refusal.link.name })).toHaveAttribute('href', refusal.link.href);
     }
+    if (refusal.plain) {
+      // The line names what the tool takes, and nothing in the row points to a page that does not exist.
+      await expect(row.locator('.fo-file__err')).toContainText(refusal.plain);
+      await expect(row.locator('a'), `${name}: no link in the row`).toHaveCount(0);
+    }
     record.push({ fixture: name, status: 'refused', reason: refusal.refuse });
   }
 }
@@ -504,8 +500,6 @@ export const sizeOfFixture = (name: string): number => fixtureBytes(name).length
 
 export interface CheckContext {
   page: Page;
-  /** This browser opens AVIF files by itself. */
-  avif: boolean;
   references: Map<string, Reference>;
 }
 
@@ -521,13 +515,8 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
   if (want.notBigger) expect(out.bytes.length, `${out.name} is not bigger than the ${input} bytes that went in`).toBeLessThanOrEqual(input);
   expectNoMetadata(out, want.tagMayStay ? { tagMayStay: true } : {});
 
-  let opens: 'yes' | 'unsupported' = 'yes';
-  if (want.format === 'avif' && !context.avif) {
-    opens = 'unsupported';
-  } else {
-    expect(decoded?.ok, `${out.name} opens in the browser: ${decoded?.error ?? 'not in the bundle'}`).toBe(true);
-    expect([decoded?.width, decoded?.height], `${out.name}: size once decoded`).toEqual([want.width, want.height]);
-  }
+  expect(decoded?.ok, `${out.name} opens in the browser: ${decoded?.error ?? 'not in the bundle'}`).toBe(true);
+  expect([decoded?.width, decoded?.height], `${out.name}: size once decoded`).toEqual([want.width, want.height]);
 
   const notes: string[] = [];
   if (want.format === 'webp') {
@@ -541,34 +530,31 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
     }
   }
   if (want.alpha === 'kept') {
-    if (want.format === 'avif') expect(avifHasAlpha(out.bytes), `${out.name}: the AVIF carries an alpha plane`).toBe(true);
-    if (opens === 'yes') expect(decoded?.cornerAlpha.every((alpha) => alpha < 40), `${out.name}: corners stay transparent (${decoded?.cornerAlpha.join(',')})`).toBe(true);
+    expect(decoded?.cornerAlpha.every((alpha) => alpha < 40), `${out.name}: corners stay transparent (${decoded?.cornerAlpha.join(',')})`).toBe(true);
     notes.push('alpha kept');
   }
   if (want.flatten || want.mostlyRed) {
-    if (opens === 'yes') {
-      const seen = await colours(page, out, want.format);
-      if (want.flatten) {
-        expect(decoded?.cornerAlpha.every((alpha) => alpha === 255), `${out.name} is opaque`).toBe(true);
-        const corner = seen.rgb.slice(0, 3);
-        const last = seen.rgb.slice(-3);
-        expect([...corner, ...last].every((value) => value >= 235), `${out.name}: transparent corners are white (${[...corner, ...last].map(Math.round).join(',')})`).toBe(true);
-        notes.push('flattened on white');
+    const seen = await colours(page, out, want.format);
+    if (want.flatten) {
+      expect(decoded?.cornerAlpha.every((alpha) => alpha === 255), `${out.name} is opaque`).toBe(true);
+      const corner = seen.rgb.slice(0, 3);
+      const last = seen.rgb.slice(-3);
+      expect([...corner, ...last].every((value) => value >= 235), `${out.name}: transparent corners are white (${[...corner, ...last].map(Math.round).join(',')})`).toBe(true);
+      notes.push('flattened on white');
+    }
+    if (want.mostlyRed) {
+      const cells = seen.rgb.length / 3;
+      let red = 0;
+      let blue = 0;
+      for (let cell = 0; cell < cells; cell += 1) {
+        red += seen.rgb[cell * 3] as number;
+        blue += seen.rgb[cell * 3 + 2] as number;
       }
-      if (want.mostlyRed) {
-        const cells = seen.rgb.length / 3;
-        let red = 0;
-        let blue = 0;
-        for (let cell = 0; cell < cells; cell += 1) {
-          red += seen.rgb[cell * 3] as number;
-          blue += seen.rgb[cell * 3 + 2] as number;
-        }
-        expect(red / cells, `${out.name} shows the first (red) frame: red ${Math.round(red / cells)}, blue ${Math.round(blue / cells)}`).toBeGreaterThan(blue / cells + 60);
-        notes.push('first frame is red');
-      }
+      expect(red / cells, `${out.name} shows the first (red) frame: red ${Math.round(red / cells)}, blue ${Math.round(blue / cells)}`).toBeGreaterThan(blue / cells + 60);
+      notes.push('first frame is red');
     }
   }
-  if (want.pixels && opens === 'yes') {
+  if (want.pixels) {
     const verdict = await comparePixels(page, out, want.format, want.pixels, context.references);
     expect(verdict.right, `${out.name}: mean difference to the upright picture`).toBeLessThan(want.pixels.limit);
     if (verdict.closestWrong !== null) {
@@ -576,7 +562,7 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
     }
     notes.push(`orientation ok (Δ${verdict.right.toFixed(1)})`);
   }
-  return { fixture, status: 'ok', output: { name: out.name, format: want.format, width: want.width, height: want.height, bytes: out.bytes.length, decoded: opens, note: notes.join(', ') } };
+  return { fixture, status: 'ok', output: { name: out.name, format: want.format, width: want.width, height: want.height, bytes: out.bytes.length, decoded: 'yes', note: notes.join(', ') } };
 }
 
 function pdfFormat(image: PdfImage): OutFormat {
@@ -589,6 +575,11 @@ async function checkPdf(context: CheckContext, kase: MatrixCase, accepted: strin
   expect(sniff(delivered.bytes)).toBe('pdf');
   const pdf = parsePdf(delivered.bytes);
   expect(pdf.pageCount, 'one page per image').toBe(accepted.length);
+  // The scanner above is lenient, so the same bytes also go through a strict check in Node (no page load): header,
+  // %%EOF, startxref, every xref entry, and a load by @cantoo/pdf-lib that finds the same number of pages.
+  const strict = await strictPdf(delivered.bytes);
+  expect(strict.problems, 'the PDF structure is sound').toEqual([]);
+  expect(strict.pageCount, 'pdf-lib loads the PDF and counts the same pages').toBe(pdf.pageCount);
   expect(pdf.info['Producer']).toBe('FileOrca');
   expect(pdf.info['Creator']).toBe('FileOrca');
   expect(Object.keys(pdf.info).filter((key) => /^(Title|Author|Subject|Keywords)$/.test(key)), 'no title, author or keywords').toEqual([]);
@@ -656,7 +647,7 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
   const downloading = Date.now();
   const delivered = await takeDownload(page);
   const downloaded = Date.now() - downloading;
-  const context: CheckContext = { page, avif: false, references: new Map() };
+  const context: CheckContext = { page, references: new Map() };
   const accepting: RecordFile[] = [];
   let pdfRecord: MatrixRecord['pdf'];
   let decodeMs = 0;
@@ -669,7 +660,6 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
     const decoding = Date.now();
     const report = await decodeInPage(page);
     decodeMs = Date.now() - decoding;
-    context.avif = report.avif;
     expect(outs.map((out) => out.name), 'one output per accepted file, in the order of the queue').toEqual(accepted.map((name) => (kase.outcome(name) as Expect).name));
     expect(new Set(outs.map((out) => out.name.toLowerCase())).size, 'names are unique').toBe(outs.length);
     for (const [index, fixture] of accepted.entries()) {
@@ -692,7 +682,6 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
     phases: { load: loaded, download: downloaded, decode: decodeMs },
     requests: log.urls.length,
     outside: log.outside().length,
-    avifDecode: context.avif,
     files: ordered,
     ...(pdfRecord ? { pdf: pdfRecord } : {}),
   };

@@ -23,8 +23,6 @@ const TOOL_PAGES = [
   '/heic-to-jpg/',
   '/webp-to-jpg/',
   '/png-to-jpg/',
-  '/avif-to-jpg/',
-  '/convert-to-webp/',
   '/image-to-pdf/',
 ];
 // The hub has no island: it is held to the same JS and request budgets, with at most the two files of a tool page.

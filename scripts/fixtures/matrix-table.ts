@@ -12,7 +12,6 @@ import { pathToFileURL } from 'node:url';
 import type { MatrixRecord, PresetRecord, RecordFile } from '../../tests/e2e/lib/matrix.ts';
 
 export const RECORDS_DIR = join('test-results', 'matriz');
-const BROWSERS = ['chromium', 'webkit'] as const;
 const BROWSER_NAME: Record<string, string> = { chromium: 'Chromium', webkit: 'WebKit' };
 
 export interface Records {
@@ -81,8 +80,7 @@ function cell(file: RecordFile | undefined): string {
   const out = file.output;
   if (!out) return 'ok';
   const parts = [`ok`, `${format(out.format)} ${out.width}×${out.height}`, size(out.bytes)];
-  if (out.decoded === 'unsupported') parts.push('não abre neste navegador');
-  else if (out.decoded === 'pdf') parts.push('página do PDF');
+  if (out.decoded === 'pdf') parts.push('página do PDF');
   else parts.push('abre');
   if (out.note) parts.push(note(out.note));
   return parts.join(' · ');
@@ -138,7 +136,7 @@ export function buildTable(records: Records): string {
     '',
   );
   out.push(
-    'Cada ferramenta recebeu a página uma vez por navegador e um lote só com todas as fixtures que aceita (pelo formato real dos bytes) e, no meio dele, as que recusa. Cada saída foi lida do ZIP (ou do PDF) em Node: formato real, dimensões de exibição conforme o oráculo `fixtures/images/expected.json` e as opções, se abre no navegador (o AVIF só onde o navegador sabe abri-lo), orientação por pixels contra a imagem em pé montada dos pixels gravados, transparência e ausência de Exif, XMP, IPTC e GPS. Cada recusa foi conferida na linha do arquivo, com a fala da Oli, o link quando há e o evento `tool_error`. Nenhuma requisição saiu de `127.0.0.1` em nenhum teste.',
+    'Cada ferramenta recebeu a página uma vez por navegador e um lote só com todas as fixtures que aceita (pelo formato real dos bytes) e, no meio dele, as que recusa. Cada saída foi lida do ZIP (ou do PDF) em Node: formato real, dimensões de exibição conforme o oráculo `fixtures/images/expected.json` e as opções, se abre no navegador, orientação por pixels contra a imagem em pé montada dos pixels gravados, transparência e ausência de Exif, XMP, IPTC e GPS. Cada recusa foi conferida na linha do arquivo, com a fala da Oli, o link quando há e o evento `tool_error`. Nenhuma requisição saiu de `127.0.0.1` em nenhum teste.',
     '',
   );
   out.push('Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado (motivo)` é a fala da Oli na linha do arquivo; `—` é fixture que aquele lote não trouxe.', '');
@@ -146,11 +144,6 @@ export function buildTable(records: Records): string {
 
   if (matrix.length > 0) {
     out.push('## Resumo por teste', '', ...summary(matrix), '');
-    const avif = BROWSERS.map((browser) => {
-      const found = matrix.find((record) => record.browser === browser && record.pdf === undefined);
-      return `${BROWSER_NAME[browser]}: ${found ? (found.avifDecode ? 'abre AVIF sozinho' : 'não abre AVIF sozinho') : '—'}`;
-    });
-    out.push(`Decodificação nativa de AVIF nesta máquina: ${avif.join('; ')}. Onde o navegador não abre AVIF, a saída em AVIF foi conferida só nos bytes (cabeçalho, dimensões, plano alfa e metadados).`, '');
     const tools = [...new Set(matrix.map((record) => record.tool))];
     for (const tool of tools) {
       const mine = matrix.filter((record) => record.tool === tool);
