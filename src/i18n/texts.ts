@@ -1,9 +1,10 @@
 // Every text of the site, per language. A language that misses a file or a key fails `pnpm tipos`.
+// The texts of the image tools and presets are in src/tools/image/texts.ts: a tool that exists only in
+// English has no entry in pt or es.
 import type { Lang } from './routes.ts';
 import type {
   AboutTexts,
   CommonTexts,
-  CompressImageTexts,
   ContactTexts,
   HomeTexts,
   LegalTexts,
@@ -38,9 +39,6 @@ import esSupport from './es/support.ts';
 import enNotFound from './en/not-found.ts';
 import ptNotFound from './pt/not-found.ts';
 import esNotFound from './es/not-found.ts';
-import enCompress from '../tools/compress-image/i18n/en.ts';
-import ptCompress from '../tools/compress-image/i18n/pt.ts';
-import esCompress from '../tools/compress-image/i18n/es.ts';
 
 export interface LangTexts {
   common: CommonTexts;
@@ -52,20 +50,23 @@ export interface LangTexts {
   licenses: LicensesTexts;
   support: SupportTexts;
   'not-found': NotFoundTexts;
-  'compress-image': CompressImageTexts;
 }
 
 export const TEXTS: Record<Lang, LangTexts> = {
   en: {
     common: enCommon, home: enHome, privacy: enPrivacy, terms: enTerms, about: enAbout, contact: enContact,
-    licenses: enLicenses, support: enSupport, 'not-found': enNotFound, 'compress-image': enCompress,
+    licenses: enLicenses, support: enSupport, 'not-found': enNotFound,
   },
   pt: {
     common: ptCommon, home: ptHome, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
-    licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound, 'compress-image': ptCompress,
+    licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound,
   },
   es: {
     common: esCommon, home: esHome, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
-    licenses: esLicenses, support: esSupport, 'not-found': esNotFound, 'compress-image': esCompress,
+    licenses: esLicenses, support: esSupport, 'not-found': esNotFound,
   },
 };
+
+// The image tools and presets keep their texts next to their code; English has all of them, Portuguese and Spanish
+// only the pages that exist there (tests/unit/image-texts.test.ts checks the map against the route map).
+export { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS, imageToolTexts } from '../tools/image/texts.ts';

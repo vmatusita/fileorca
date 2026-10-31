@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideCoffee, isAdBlocked, parseCoffee, USES_BEFORE_ASKING, WEEK_MS, type CoffeeState } from '../../src/tools/compress-image/coffee.ts';
+import { decideCoffee, isAdBlocked, parseCoffee, USES_BEFORE_ASKING, WEEK_MS, type CoffeeState } from '../../src/tools/image/coffee.ts';
 
 const NOW = Date.UTC(2026, 10, 1, 12);
 const accepted = { now: NOW, consent: true, adsBlocked: false };

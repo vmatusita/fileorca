@@ -1,75 +1,85 @@
-import type { CompressImageTexts } from '../../../i18n/types.ts';
+import type { CompressOptionsTexts, ImageToolTexts } from '../../../i18n/types.ts';
 
+// Bloques de la página Comprimir imagen (data-content: how, specs, faq, privacy, related) y los textos del
+// panel que muestra la isla compartida. Las filas de especificaciones dicen lo que el motor hace de verdad
+// (src/engine/image/): si cambian la calidad o los codificadores allí, cámbialos aquí. Solo esta herramienta
+// existe en español; la tabla de presets es solo de la página en inglés.
 export default {
-  title: 'Comprimir imagen en línea, sin subir archivos',
+  title: 'Comprimir imagen en línea, gratis y sin subir archivos',
   description:
-    'Comprime un JPG, PNG o WebP en tu navegador. El archivo se procesa en tu dispositivo, nunca se sube, y se eliminan los datos GPS de la foto.',
+    'Comprime imágenes JPG, PNG y WebP en tu navegador, una o varias a la vez. No se sube nada y se eliminan los metadatos de la foto, incluida la ubicación GPS.',
   h1: 'Comprimir imagen',
-  fileFallback: 'imagen',
-  drop: {
-    title: 'Suelta una imagen aquí',
-    choose: 'Elegir imagen',
-    helpDesktop: 'o pégala con {kbd} · JPG, PNG o WebP, una a la vez',
-    help: 'JPG, PNG o WebP, una a la vez',
-    pasteKey: 'Ctrl V',
-    over: 'Suéltalo, Oli está lista',
-    overHelp: 'Una imagen',
-    errorTitle: 'Uy, Oli no pudo leer este archivo',
-    errorHelp: '{name} no es una imagen que Oli pueda leer. Prueba con un JPG o PNG.',
-    chooseAnother: 'Elegir otro archivo',
-  },
-  options: {
-    legend: 'Compresión',
-    recommended: 'Recomendada',
-    recommendedHelp: 'mejor equilibrio',
-    strong: 'Fuerte',
-    strongHelp: 'menor tamaño',
-    pngNote: 'El PNG se guarda sin pérdida, así que el nivel solo cambia JPG y WebP.',
-  },
-  progress: {
-    label: 'Comprimiendo la imagen',
-    working: 'Oli se está encargando…',
-  },
-  result: {
-    done: '¡Listo! Tu imagen quedó un {percent} más ligera.',
-    unchanged: 'Esta imagen ya estaba optimizada, así que Oli conservó la imagen original, sin los metadatos de la foto.',
-    cannotEncode: 'Este navegador no puede guardar archivos {format}, así que Oli conservó la imagen original, sin los metadatos de la foto.',
-    placardLabel: 'más ligera',
-    before: 'Antes',
-    after: 'Después',
-    size: 'Tamaño',
-    download: 'Descargar',
-    startOver: 'Empezar de nuevo',
-    to: 'a',
-    coffee: {
-      text: 'Esta herramienta es gratis, sin límites y nunca sube tus archivos. Si te ahorró tiempo, un café ayuda a mantenerla así.',
-      button: 'Invítame un café',
-      hide: 'No mostrar de nuevo',
-    },
-  },
-  next: { label: 'Siguiente:', moreTools: 'Más herramientas' },
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Suelta una imagen JPG, PNG o WebP en el cuadro, elígela o pégala.',
-    'Oli vuelve a dibujar la imagen en tu navegador y la guarda de nuevo con la compresión que elegiste.',
-    'Descarga la copia más ligera. Tu archivo original no se toca.',
+    'Suelta las imágenes JPG, PNG o WebP en el cuadro, elige los archivos o pega las imágenes. Todas las que quieras.',
+    'Elige Recomendada o Fuerte. Oli comprime cada imagen en tu navegador, una tras otra, y rehace el lote si cambias el nivel.',
+    'Descarga una imagen o todas juntas en un ZIP. Tus archivos originales no se tocan.',
   ],
-  privacyHeading: 'Privacidad',
-  privacyNote:
-    'La imagen se procesa en tu dispositivo y nunca se envía a un servidor. La copia guardada también omite los metadatos de la foto, incluida la ubicación GPS.',
+  specsHeading: 'Qué entra y qué sale',
+  specs: {
+    caption: 'Lo que Comprimir imagen recibe y entrega',
+    head: ['Detalle', 'Qué pasa'],
+    rows: [
+      ['Formatos que acepta', 'JPG, PNG y WebP. Oli revisa lo que hay dentro del archivo, no su nombre.'],
+      ['JPG', 'Se guarda de nuevo con MozJPEG, un codificador hecho para generar archivos JPG más pequeños.'],
+      ['PNG', 'Se optimiza con OxiPNG, sin perder calidad. El nivel que elijas no lo cambia.'],
+      ['WebP', 'Se guarda de nuevo como WebP, con la calidad del nivel elegido.'],
+      ['Recomendada', 'JPG y WebP con calidad 75: el mejor equilibrio entre tamaño y aspecto.'],
+      ['Fuerte', 'JPG y WebP con calidad 55: el archivo más pequeño, con algo de pérdida en los detalles finos.'],
+      ['Lote', 'Sin límite de imágenes. Varias imágenes se descargan juntas en un solo ZIP.'],
+      ['Ya es pequeño', 'Si la copia nueva no queda más pequeña, recibes el original de vuelta, sin los metadatos de la foto.'],
+      ['Metadatos de la foto', 'El modelo de la cámara, la fecha y la ubicación GPS se quitan de todos los archivos.'],
+      ['HEIC y AVIF', 'No se comprimen aquí. Convierte el HEIC antes a JPG con HEIC to JPG (herramienta en inglés). Los archivos AVIF no se aceptan.'],
+    ],
+  },
   faqHeading: 'Preguntas',
   faq: [
     {
+      q: '¿Comprimir una imagen baja su calidad?',
+      a: 'En JPG y WebP se pierde un poco de detalle, porque el archivo se guarda de nuevo con parte de la información fuera. Con la compresión Recomendada la diferencia cuesta notarla en tamaño normal, y la Fuerte cambia más detalle por el archivo más pequeño posible. El PNG no pierde nada, porque Oli lo guarda sin pérdida. Tu archivo original nunca se modifica, así que siempre puedes volver a él.',
+    },
+    {
+      q: '¿Por qué mi PNG casi no se reduce?',
+      a: 'El PNG guarda cada píxel exactamente como está, así que queda poco que quitar, y una foto en PNG es grande porque los cambios pequeños de color son difíciles de compactar. Oli solo ordena el archivo, y eso suele ahorrar un poco. Si es una foto y no necesitas transparencia, guardarla como JPG o WebP suele dar un archivo mucho más pequeño.',
+    },
+    {
+      q: '¿Qué pasa con la ubicación GPS de mi foto?',
+      a: 'Oli guarda cada copia comprimida solo a partir de los píxeles, así que la ubicación GPS, el modelo de la cámara y la fecha de la foto no pasan al archivo nuevo. Vale también cuando el original vuelve sin cambios porque ya era pequeño: esa copia también sale sin los metadatos de la foto.',
+    },
+    {
+      q: '¿Puedo comprimir varias imágenes a la vez?',
+      a: 'Sí. Suelta o pega todas las imágenes que quieras: Oli las comprime una tras otra, y cada una tiene su propia descarga. Para llevártelas todas, un botón te da un ZIP. Un lote grande de fotos pesadas tarda más en un dispositivo modesto que en uno potente, porque el trabajo lo hace tu propio dispositivo.',
+    },
+    {
       q: '¿Mi imagen se sube a algún lugar?',
-      a: 'No. La compresión ocurre en tu dispositivo, dentro del navegador. Abre la pestaña Red del navegador mientras comprimes: ninguna solicitud lleva tu archivo.',
+      a: 'No. La compresión ocurre en tu dispositivo, dentro del navegador. Abre la pestaña Red del navegador mientras comprimes: ninguna solicitud lleva tus archivos.',
     },
     {
       q: '¿Por qué el archivo quedó del mismo tamaño?',
-      a: 'Algunas imágenes ya están bien comprimidas. Cuando la nueva copia no sería más pequeña, Oli te devuelve el original en lugar de un archivo más grande.',
+      a: 'Algunas imágenes ya están bien comprimidas. Cuando la nueva copia no sería más pequeña, Oli te devuelve el original en lugar de un archivo más grande, y esa copia también sale sin los metadatos de la foto.',
     },
     {
-      q: '¿Qué pasa con los datos de ubicación de mi foto?',
-      a: 'La copia comprimida se guarda sin los metadatos de la foto, así que la ubicación GPS, el modelo de la cámara y la fecha quedan fuera.',
+      q: '¿Puedo comprimir una foto de iPhone en HEIC?',
+      a: 'Aquí no: Comprimir imagen acepta JPG, PNG y WebP. Primero convierte el HEIC a JPG con HEIC to JPG, que está en inglés, y después comprime el JPG si quieres que quede más pequeño.',
     },
   ],
-} satisfies CompressImageTexts;
+  privacyHeading: 'Privacidad',
+  privacyNote:
+    'Las imágenes se procesan en tu dispositivo y nunca se envían a un servidor. Cada copia guardada también omite los metadatos de la foto, incluida la ubicación GPS.',
+  relatedHeading: 'Más herramientas',
+  panel: {
+    formats: 'JPG, PNG o WebP',
+    progressLabel: 'Comprimiendo las imágenes',
+    done: '¡Listo! Tu imagen quedó un {percent} más ligera.',
+    doneMany: '¡Listo! Tus {count} imágenes quedaron un {percent} más ligeras.',
+    placardLabel: 'más ligera',
+    options: {
+      legend: 'Compresión',
+      recommended: 'Recomendada',
+      recommendedHelp: 'mejor equilibrio',
+      strong: 'Fuerte',
+      strongHelp: 'menor tamaño',
+      pngNote: 'El PNG se guarda sin pérdida, así que el nivel solo cambia JPG y WebP.',
+    },
+  },
+} satisfies ImageToolTexts<CompressOptionsTexts>;

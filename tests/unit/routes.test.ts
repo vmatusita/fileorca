@@ -1,8 +1,10 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { LANGS, ROUTES, languagesOf, pageFileFor, textFilesFor } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
+import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
 import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
@@ -15,16 +17,23 @@ function pageFiles(dir = 'src/pages'): string[] {
 }
 
 describe('mapa de rotas', () => {
-  it('has the routes of the F1a, each equivalent in en, pt and es', () => {
-    expect(ROUTES.map((route) => route.id)).toEqual(['home', 'compress-image', 'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found']);
-    for (const route of ROUTES) expect(languagesOf(route)).toEqual([...LANGS]);
+  it('has the routes of the site, each equivalent in en, pt and es except the English-only image pages', () => {
+    expect(ROUTES.map((route) => route.id)).toEqual([
+      'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
+      'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
+    ]);
+    // Only Compress image is translated; the other tools, the presets and the hub exist in English only (DECISOES § 58).
+    const englishOnly = new Set(ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id));
+    expect(englishOnly.size).toBe(11);
+    for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
   it('uses the slugs of DECISOES § 4, English at the root, always with a trailing slash', () => {
     expect(ROUTES.find((route) => route.id === 'support')?.paths).toEqual({ en: '/support/', pt: '/pt/apoie/', es: '/es/apoyo/' });
     expect(ROUTES.find((route) => route.id === 'about')?.paths).toEqual({ en: '/about/', pt: '/pt/sobre/', es: '/es/acerca-de/' });
     for (const route of ROUTES) {
-      for (const lang of LANGS) {
+      for (const lang of languagesOf(route)) {
         const path = route.paths[lang] ?? '';
         if (route.id === 'not-found') expect(path).toMatch(/404\.html$/);
         else expect(path.endsWith('/')).toBe(true);
@@ -50,7 +59,7 @@ describe('mapa de rotas', () => {
   it('points every route at its view and text files', () => {
     for (const route of ROUTES) {
       expect(existsSync(route.view), route.view).toBe(true);
-      for (const lang of LANGS) for (const file of textFilesFor(route, lang)) expect(existsSync(file), file).toBe(true);
+      for (const lang of languagesOf(route)) for (const file of textFilesFor(route, lang)) expect(existsSync(file), file).toBe(true);
     }
   });
 
@@ -70,7 +79,8 @@ describe('mapa de rotas', () => {
     expect(TEXTS.en.support.h1).toBe('Free tools, made by one person');
     expect(TEXTS.es['not-found'].h1).toBe('Esta página se fue nadando.');
     for (const lang of LANGS) {
-      const text = JSON.stringify(TEXTS[lang]);
+      // The texts of the image tools and presets live apart from TEXTS (src/tools/image/texts.ts): they get the same scan.
+      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)]);
       expect(text).not.toMatch(/→|↔|\bup to 50\b/);
       expect(text).not.toMatch(/\b(seamless|effortless|supercharge|AI-powered|revolutionary|best-in-class)\b/i);
     }
@@ -90,13 +100,81 @@ describe('formatting helpers', () => {
 });
 
 describe('tool search', () => {
+  const COMPRESS = ['compress-image', 'compress-image-to-100kb', 'compress-image-to-1mb'];
+  const ids = (entries: ReturnType<typeof searchIndex>) => entries.map((entry) => entry.id);
+
+  it('indexes every image tool and preset of the registry, once, with a link only where the page exists', () => {
+    const index = searchIndex();
+    expect(ids(index)).toEqual(Object.keys(IMAGE_PAGES));
+    expect(index).toHaveLength(11);
+    expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
+    for (const entry of index) {
+      const route = routeById(entry.id as ImagePageId);
+      // The links, names and categories of an entry are exactly the languages of its route.
+      expect(Object.keys(entry.href), entry.id).toEqual(languagesOf(route));
+      expect(Object.keys(entry.name), entry.id).toEqual(languagesOf(route));
+      expect(Object.keys(entry.category), entry.id).toEqual(languagesOf(route));
+      expect(entry.href, entry.id).toEqual(route.paths);
+      expect(entry.terms.length, entry.id).toBeGreaterThan(2);
+    }
+    expect(index.find((entry) => entry.id === 'image-to-pdf')?.cat).toBe('pdf');
+    expect(index.find((entry) => entry.id === 'heic-to-jpg')?.cat).toBe('image');
+  });
+
   it('normalizes accents and finds synonyms of any language', () => {
     const index = searchIndex();
     expect(normalize('Diminuição')).toBe('diminuicao');
-    for (const query of ['compress', 'shrink', 'reduzir', 'achicar', 'COMPRIMIR imagem', 'jpg']) {
-      expect(filterEntries(index, query).map((entry) => entry.id), query).toEqual(['compress-image']);
+    // 'compress' finds Compress image and its two presets; the synonyms and other languages find the tool.
+    expect(ids(filterEntries(index, 'compress'))).toEqual(COMPRESS);
+    for (const query of ['reduzir', 'achicar', 'COMPRIMIR imagem']) {
+      expect(ids(filterEntries(index, query)), query).toEqual(['compress-image']);
     }
+    // 'shrink' is a synonym of both Compress image and Resize image, and of the two compress presets.
+    expect(ids(filterEntries(index, 'shrink'))).toEqual(['compress-image', 'resize-image', 'compress-image-to-100kb', 'compress-image-to-1mb']);
     expect(filterEntries(index, 'youtube downloader')).toEqual([]);
-    expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
+  });
+
+  it('finds each new tool by its names and synonyms', () => {
+    const index = searchIndex();
+    // 'jpg' finds many: every page that takes or makes a JPG.
+    const jpg = ids(filterEntries(index, 'jpg'));
+    expect(jpg.length).toBeGreaterThanOrEqual(10);
+    expect(jpg).toContain('heic-to-jpg');
+    expect(jpg).toContain('image-to-pdf');
+    expect(ids(filterEntries(index, 'jpeg'))).toEqual(jpg);
+    const expected: [string, string[]][] = [
+      ['heif', ['heic-to-jpg']],
+      ['iphone photo', ['heic-to-jpg']],
+      ['jpg to pdf', ['image-to-pdf']],
+      ['100kb', ['compress-image-to-100kb']],
+      ['1280x720', ['resize-image-youtube-thumbnail']],
+      ['mirror', ['rotate-image']],
+    ];
+    for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
+    // No AVIF page exists in this release (AVIF to JPG and Convert to WebP are run 2b), so the search must not offer one.
+    expect(filterEntries(index, 'avif')).toEqual([]);
+  });
+
+  it('shows in each language only the entries that exist in it, and never falls back to English', () => {
+    const index = searchIndex();
+    // English has all eleven; Portuguese and Spanish only Compress image.
+    expect(ids(filterEntries(index, '', 'en'))).toEqual(Object.keys(IMAGE_PAGES));
+    for (const lang of ['pt', 'es']) {
+      expect(ids(filterEntries(index, '', lang)), lang).toEqual(['compress-image']);
+      // A search for 'compress' lists Compress image only: its presets exist in English only.
+      expect(ids(filterEntries(index, 'compress', lang)), lang).toEqual(['compress-image']);
+      expect(ids(filterEntries(index, 'jpg', lang)), lang).toEqual(['compress-image']);
+    }
+    // 'heic' finds HEIC to JPG in English and nothing in Portuguese: that page does not exist there.
+    expect(ids(filterEntries(index, 'heic', 'en'))).toEqual(['heic-to-jpg']);
+    expect(filterEntries(index, 'heic', 'pt')).toEqual([]);
+    expect(filterEntries(index, 'heic', 'es')).toEqual([]);
+    // Every result has a name and a link in the language it is shown in.
+    for (const lang of LANGS) {
+      for (const entry of filterEntries(index, '', lang)) {
+        expect(entry.href[lang], `${entry.id} ${lang}`).toBeTruthy();
+        expect(entry.name[lang], `${entry.id} ${lang}`).toBeTruthy();
+      }
+    }
   });
 });

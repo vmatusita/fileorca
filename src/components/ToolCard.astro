@@ -8,7 +8,7 @@ interface Props {
   href: string;
   name: string;
   description: string;
-  category: 'image';
+  category: 'image' | 'pdf';
   icon: IconName;
 }
 const { href, name, description, category, icon } = Astro.props;

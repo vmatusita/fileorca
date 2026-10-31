@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { chooseImage, dismissCookies, dragOver, hydrated, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
+import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
 
 // F1b criteria 6 (the Oli boxes), 8 (reduced motion) and 9 (fonts), plus the LCP rule of criterion 3:
 // the Oli never is the largest contentful paint. Markup contract: DECISOES § 19 (the [data-oli]
@@ -12,6 +13,17 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
 ];
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
+
+/** The widths (px) at which the page, as it is now, scrolls sideways; the label says which state was measured. */
+async function sidewaysAt(page: Page, label: string, widths: number[]): Promise<string[]> {
+  const found: string[] = [];
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: 700 });
+    const scroll = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (scroll > width) found.push(`${label} at ${width}px scrolls to ${scroll}px`);
+  }
+  return found;
+}
 
 // ---- fonts (criterion 9) -------------------------------------------------------------------------
 
@@ -179,9 +191,14 @@ for (const viewport of VIEWPORTS) {
         await searchWithoutResult(page);
         await expectOlis(page, 'search without result', { pose: 'peek', selector: '.fo-search__empty .fo-search__peek' });
         const dialog = page.locator('#fo-search-dialog');
+        // 'heif' has one result (HEIC to JPG) and 'compress' has three (Compress image and its two presets).
+        await page.keyboard.press('Control+A');
+        await page.keyboard.type('heif');
+        await expect(dialog.getByRole('option')).toHaveCount(1);
+        await expect(dialog.locator('.fo-search__peek')).toBeHidden();
         await page.keyboard.press('Control+A');
         await page.keyboard.type('compress');
-        await expect(dialog.getByRole('option')).toHaveCount(1);
+        await expect(dialog.getByRole('option')).toHaveCount(3);
         await expect(dialog.locator('.fo-search__peek')).toBeHidden();
       });
     });
@@ -384,6 +401,50 @@ test.describe('review regressions', () => {
     await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
     const error = await page.evaluate(() => document.documentElement.scrollWidth);
     if (error > 320) wide.push(`error with a long file name ${error}px`);
+    // F2: a batch with long names, an error row and the comparison under the card. Two pictures are ready,
+    // so the card offers "Download all · ZIP", the widest label of the page (checked below at three widths).
+    const long = 'IMG_20240101_123456_family_vacation_photo_final_v2_without_spaces_in_the_name_at_all';
+    await page.setInputFiles('input[type="file"]', [
+      { name: `${long}.jpg`, mimeType: 'image/jpeg', buffer: readFileSync('fixtures/images/jpg-02-iphone6-paisagem-gps.jpg') },
+      { name: `${long}_2.jpg`, mimeType: 'image/jpeg', buffer: readFileSync('fixtures/images/gen-jpg-02-orientacao8.jpg') },
+      { name: `${long}.txt`, mimeType: 'text/plain', buffer: Buffer.from('x') },
+    ]);
+    await expect(page.locator('.fo-file[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-result .fo-btn--download')).toContainText('ZIP');
+    const batch = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (batch > 320) wide.push(`batch with long file names ${batch}px`);
+    wide.push(...(await sidewaysAt(page, 'en batch with the ZIP button', [360, 390])));
+    expect(wide).toEqual([]);
+  });
+
+  test('reflow: the ZIP button of pt and es and the crop handles stay inside the page from 320 px', async ({ page }) => {
+    const wide: string[] = [];
+    // WCAG 1.4.10: "Download all · ZIP 1.4 MB" is wider than the card on a phone; the label wraps instead of scrolling the page.
+    const compress = ROUTES.find((route) => route.id === 'compress-image');
+    for (const lang of ['pt', 'es'] as const) {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await page.goto(compress?.paths[lang] ?? '/');
+      await hydrated(page);
+      await dismissCookies(page);
+      await chooseImages(page, await jpegBatch(page, 2));
+      await expect(page.locator('.fo-result .fo-btn--download')).toContainText('ZIP', { timeout: 30_000 });
+      wide.push(...(await sidewaysAt(page, `${lang} batch with the ZIP button`, [320, 360, 390])));
+    }
+    // The crop handles are 48 px targets centred on the box corners, so a box that spans the picture sticks out half
+    // a handle on each side: a portrait photo with Square (320 px) and a landscape one with 16:9 (360 px).
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto('/crop-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.setInputFiles('input[type="file"]', 'fixtures/images/gen-jpg-01-orientacao6.jpg');
+    await expect(page.locator('.fo-crop__img')).toHaveAttribute('width', '1200', { timeout: 30_000 });
+    wide.push(...(await sidewaysAt(page, 'crop editor, portrait photo, Square', [320, 360, 390])));
+    await page.setInputFiles('input[type="file"]', 'fixtures/images/gen-jpg-02-orientacao8.jpg');
+    await expect(page.locator('.fo-crop__img')).toHaveAttribute('width', '1600', { timeout: 30_000 });
+    await page.locator('label.fo-seg__opt:has(input[name="cr-ratio"][value="wide"])').click();
+    await expect(page.locator('input[name="cr-ratio"][value="wide"]')).toBeChecked();
+    wide.push(...(await sidewaysAt(page, 'crop editor, landscape photo, 16:9', [360, 320, 390])));
     expect(wide).toEqual([]);
   });
 

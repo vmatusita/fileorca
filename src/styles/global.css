@@ -33,8 +33,8 @@ body {
 a { color: var(--brand); }
 /* Links inside running text are underlined, so colour is never the only cue (axe link-in-text-block).
    A link with a class (button, chip, card, breadcrumb) is styled by its component. */
-main :where(p, li) a:not([class]), .fo-cookie a { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-main :where(p, li) a:not([class]):hover, .fo-cookie a:hover { text-decoration-thickness: 3px; }
+main :where(p, li, td) a:not([class]), .fo-cookie a { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoration-thickness: 3px; }
 :where(a, button, input, select, textarea, summary, [tabindex], label.fo-seg__opt):focus-visible {
   outline: var(--stroke-3) solid var(--focus);
   outline-offset: 2px;
@@ -82,6 +82,10 @@ main :where(p, li) a:not([class]):hover, .fo-cookie a:hover { text-decoration-th
 .fo-table { width: 100%; border-collapse: collapse; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
 .fo-table th, .fo-table td { text-align: left; padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: var(--stroke-hair) solid var(--hairline); vertical-align: top; }
 .fo-table th { font-weight: 700; }
+/* Reflow at 320px: a long address in a cell breaks instead of widening the page. */
+.fo-table :where(th, td) { overflow-wrap: anywhere; }
+/* ...but a heading cell keeps its words whole: with "anywhere" the table shrinks the first column to one letter ("Detai l"). */
+.fo-table th { overflow-wrap: normal; }
 /* 48px target, keeping the disclosure triangle of a list-item summary. */
 .fo-table summary { box-sizing: border-box; min-height: var(--tap-min); padding-block: 13px; color: var(--brand); font-weight: 600; cursor: pointer; }
 .fo-table pre { white-space: pre-wrap; font-size: 13px; line-height: 18px; max-height: 320px; overflow: auto; background: var(--surface-sunken); padding: var(--space-3); border-radius: var(--radius-xs); }

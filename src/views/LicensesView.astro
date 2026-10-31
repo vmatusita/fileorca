@@ -1,10 +1,11 @@
 ---
-// /licenses, generated at build from `dependencies` plus fonts (DECISOES § 13).
+// /licenses, generated at build: the `dependencies`, the packages that come inside them and the fonts,
+// each with the license texts it requires, plus the LGPL notice for libheif (DECISOES § 13).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
-import { browserPackages } from '../platform/licenses.ts';
+import { bundledPackages, browserPackages, isSeparateFileOnly, lgplSources, type PackageLicense } from '../platform/licenses.ts';
 import { breadcrumbLd, homePath } from '../seo/meta.ts';
 
 interface Props {
@@ -14,34 +15,63 @@ const { lang } = Astro.props;
 const route = routeById('licenses');
 const t = TEXTS[lang].licenses;
 const common = TEXTS[lang].common;
-const all = browserPackages();
+const direct = browserPackages();
 const groups = [
-  { heading: t.packagesHeading, items: all.filter((item) => !item.font), empty: null },
-  { heading: t.fontsHeading, items: all.filter((item) => item.font), empty: t.noFonts },
+  { id: 'software', heading: t.packagesHeading, intro: null, items: direct.filter((item) => !item.font), empty: null },
+  { id: 'bundled', heading: t.bundledHeading, intro: t.bundledIntro, items: bundledPackages(), empty: null },
+  { id: 'fonts', heading: t.fontsHeading, intro: null, items: direct.filter((item) => item.font), empty: t.noFonts },
 ];
+const lgpl = direct.find((item) => isSeparateFileOnly(item.license));
+const lgplLinks = lgpl ? lgplSources(lgpl.version) : [];
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
+const anchor = (item: PackageLicense) => `pkg-${item.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}`;
 ---
 <BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <h1 class="fo-h1">{t.h1}</h1>
   <p class="fo-prose">{t.intro}</p>
+  {lgpl && (
+    <section class="fo-section fo-prose" id="lgpl" data-license-notice="lgpl">
+      <h2>{t.lgplHeading}</h2>
+      <p>{t.lgplWhat}</p>
+      <p>{t.lgplSeparate}</p>
+      <p>{t.lgplReplace}</p>
+      <h3 class="fo-h3">{t.lgplSourceHeading}</h3>
+      <ul>
+        {lgplLinks.map((link) => (
+          <li><a href={link.url} rel="noopener">{`${link.name} ${link.version}`}</a>: {t.lgplRoles[link.id]}</li>
+        ))}
+      </ul>
+      <p>{t.lgplTexts} <a href={`#${anchor(lgpl)}`}>{lgpl.name}</a></p>
+    </section>
+  )}
   {groups.map((group) => (
     <section class="fo-section">
       <h2>{group.heading}</h2>
+      {group.intro && <p class="fo-prose">{group.intro}</p>}
       {group.items.length === 0 ? <p>{group.empty}</p> : (
         <table class="fo-table">
           <thead><tr><th scope="col">{t.packageColumn}</th><th scope="col">{t.versionColumn}</th><th scope="col">{t.licenseColumn}</th></tr></thead>
           <tbody>
             {group.items.map((item) => (
-              <tr>
-                <td>{item.repository ? <a href={item.repository} rel="noopener">{item.name}</a> : item.name}</td>
+              <tr id={anchor(item)}>
+                <td>
+                  {item.repository ? <a href={item.repository} rel="noopener">{item.name}</a> : item.name}
+                  {item.via && <div class="fo-muted">{t.viaLabel} {item.via}</div>}
+                </td>
                 <td>{item.version}</td>
                 <td>
                   {item.license}
-                  {item.text && <details><summary>{t.showText}</summary><pre>{item.text}</pre></details>}
+                  {item.texts.map((entry) => (
+                    <details>
+                      <summary>{entry.label ? `${t.showTextOf} ${entry.label}` : t.showText}</summary>
+                      {entry.source && <p class="fo-muted">{t.copiedFrom} <a href={entry.source} rel="noopener">{entry.source.replace(/^https:\/\//, '')}</a></p>}
+                      <pre tabindex="0">{entry.text}</pre>
+                    </details>
+                  ))}
                 </td>
               </tr>
             ))}

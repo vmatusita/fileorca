@@ -1,24 +1,26 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { ROUTES } from '../../src/i18n/routes.ts';
+import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
-import { dataLayer, dismissCookies, downloadBytes, hydrated } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch } from './lib/page.ts';
 
 const GPS_PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 
-test.describe('Compress image (motor provisório)', () => {
+test.describe('Compress image (shared island)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/compress-image/');
     await hydrated(page);
     await dismissCookies(page);
   });
 
-  test('the fixture really has GPS, and the compressed copy has no metadata at all', async ({ page }) => {
+  test('the fixture really has GPS, and the compressed copy has no metadata at all', async ({ page, baseURL }) => {
     const original = new Uint8Array(readFileSync(GPS_PHOTO));
     expect(hasGps(original)).toBe(true);
     const outbound: string[] = [];
     page.on('request', (request) => {
       const url = new URL(request.url());
-      if (url.origin !== 'http://127.0.0.1:4173' && !url.protocol.startsWith('blob')) outbound.push(request.url());
+      if (url.origin !== new URL(baseURL ?? '').origin && !url.protocol.startsWith('blob')) outbound.push(request.url());
       if (request.method() !== 'GET') outbound.push(`${request.method()} ${request.url()}`);
     });
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
@@ -107,7 +109,7 @@ test.describe('Compress image (motor provisório)', () => {
     await expect(alert).toContainText("Oops, Oli couldn't read this file", { timeout: 30_000 });
     await expect(alert).toContainText('broken.jpg');
     await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Choose other files' })).toBeVisible();
   });
 
   test('an unsupported type is refused with the same message', async ({ page }) => {
@@ -144,10 +146,17 @@ test.describe('Compress image (motor provisório)', () => {
   test('the result offers the next step and Start over returns to the drop zone', async ({ page }) => {
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', '/');
+    // 2 to 4 chips, each one to a tool that exists (DECISOES § 58): the first leads to a page of the site.
+    const chips = page.locator('nav.fo-next a.fo-chip');
+    expect(await chips.count()).toBeGreaterThanOrEqual(2);
+    expect(await chips.count()).toBeLessThanOrEqual(4);
+    const href = await chips.first().getAttribute('href');
+    const target = ROUTES.find((route) => route.paths.en === href);
+    expect(target, `${href} is a page of the route map`).toBeDefined();
+    expect(IMAGE_PAGES['compress-image'].next).toContain(target?.id);
     await page.getByRole('button', { name: 'Start over' }).click();
     await expect(page.locator('.fo-drop')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Choose image' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Choose images' })).toBeFocused();
   });
 });
 
@@ -158,5 +167,38 @@ test('the tool works in Portuguese and Spanish too', async ({ page }) => {
     await dismissCookies(page);
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toContainText(done, { timeout: 30_000 });
+    // The other image tools exist only in English, so the only chip leads to the home of the language (DECISOES § 27).
+    await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', path.startsWith('/pt/') ? '/pt/' : '/es/');
   }
+});
+
+// Image to PDF: the rows of a finished PDF have no button (the batch is one file), so "Show more" cannot hand the
+// focus to a button, and a new page size gives the same sentence again, which a live region only speaks when it has
+// been emptied in between.
+test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new sheet is announced again', async ({ page }) => {
+  await page.goto('/image-to-pdf/');
+  await hydrated(page);
+  await dismissCookies(page);
+  await chooseImages(page, await jpegBatch(page, 7));
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('.fo-btn--download')).toBeFocused();
+  await expect(page.locator('.fo-filelist [data-row]')).toHaveCount(6);
+  await expect(page.locator('.fo-filelist button')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Show 1 more' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listitem', { name: 'photo-7.jpg' })).toBeFocused();
+
+  const sentence = 'Done! Your PDF with 7 pages is ready.';
+  await expect(page.getByRole('status')).toHaveText(sentence);
+  await page.evaluate(() => {
+    const region = document.querySelector('[role="status"]');
+    const said: string[] = [];
+    (window as unknown as { __said: string[] }).__said = said;
+    if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
+  });
+  await page.locator('label.fo-seg__opt:has(input[name="pd-size"][value="letter"])').click();
+  await expect(page.locator('input[name="pd-size"][value="letter"]')).toBeChecked();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __said: string[] }).__said.at(-1) ?? ''), { timeout: 30_000 }).toBe(sentence);
+  const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+  expect(said, 'emptied when the PDF is built again, then the same sentence').toEqual(['', sentence]);
 });

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { dataLayer, dismissCookies, hydrated } from './lib/page.ts';
+import { dataLayer, dismissCookies, hydrated, useImage } from './lib/page.ts';
 
 // donate_click, next_step_click and the cookie notice, end to end.
 
@@ -28,12 +28,29 @@ test('the next-step chip sends next_step_click', async ({ page }) => {
   await page.goto('/es/comprimir-imagen/');
   await hydrated(page);
   await dismissCookies(page);
-  await page.setInputFiles('input[type="file"]', 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg');
+  // A small generated photo through the shared helper, which waits for the result like every other spec: the
+  // chip comes with the result card, and the 8 MP photo took more than the 5 s an expect waits on the CI runner.
+  await useImage(page);
   const chip = page.locator('nav.fo-next a.fo-chip');
   await expect(chip).toHaveAttribute('href', '/es/');
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
   await chip.click();
   expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image', lang: 'es', target: 'home' }]);
+});
+
+test('an English chip names the tool it leads to, and the preset page names itself', async ({ page }) => {
+  await page.goto('/compress-image/to-100kb/');
+  await hydrated(page);
+  await dismissCookies(page);
+  // A small generated photo through the shared helper, which waits for the result like every other spec: the
+  // chip comes with the result card, and the 8 MP photo took more than the 5 s an expect waits on the CI runner.
+  await useImage(page);
+  const chip = page.locator('nav.fo-next a.fo-chip').first();
+  await expect(chip).toHaveAttribute('href', '/resize-image/');
+  await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+  await chip.click();
+  expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image-to-100kb', lang: 'en', target: 'resize-image' }]);
+  expect(await lastEvent(page, 'tool_start')).toEqual(['event', 'tool_start', { tool: 'compress-image-to-100kb', lang: 'en' }]);
 });
 
 test('the cookie notice has Decline first, two neutral buttons and no yellow', async ({ page }) => {

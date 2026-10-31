@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
-import { alternatesFor, graph } from '../../src/seo/meta.ts';
+import { alternatesFor, collectionPageLd, graph } from '../../src/seo/meta.ts';
 import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
-import { ROUTES, routeById, type RouteDef } from '../../src/i18n/routes.ts';
+import { ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
+import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 
 const O = 'https://fileorca.com';
 const tags = { xDefaultLang: 'en', langTags: ['en', 'pt-BR', 'es'] };
@@ -69,12 +70,35 @@ describe('validador de hreflang', () => {
 });
 
 describe('sitemaps', () => {
+  // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages; Portuguese and Spanish keep
+  // the 8 they had (home, Compress image and the 6 institutional pages).
+  const SIZES = { en: 19, pt: 8, es: 8 } as const;
+
   it('builds one valid sitemap per language and an index', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {
       expect(validateSitemap(sitemapXml(lang), sitemapUrls(lang), O)).toEqual([]);
-      expect(sitemapUrls(lang)).toHaveLength(8);
+      expect(sitemapUrls(lang), lang).toHaveLength(SIZES[lang]);
     }
     expect(sitemapIndexXml()).toContain(`<loc>${O}/sitemap-pt.xml</loc>`);
+  });
+
+  it('lists every image page and the hub in the English sitemap, and only Compress image in the others', () => {
+    const imagePaths = [...Object.keys(IMAGE_PAGES), 'image-tools'].map((id) => routeById(id as RouteId).paths.en);
+    expect(imagePaths).toHaveLength(12);
+    for (const path of imagePaths) expect(sitemapUrls('en')).toContain(`${O}${path}`);
+    for (const lang of ['pt', 'es'] as const) {
+      const listed = new Set(sitemapUrls(lang));
+      const imageRoutes = ROUTES.filter((route) => route.adArea === 'arquivos' && listed.has(`${O}${route.paths[lang]}`));
+      expect(imageRoutes.map((route) => route.id), lang).toEqual(['compress-image']);
+    }
+  });
+
+  it('gives a page that exists only in English no hreflang (no equivalent to point to)', () => {
+    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools'] as RouteId[]) {
+      if (id === 'compress-image') continue;
+      expect(alternatesFor(routeById(id)), id).toEqual([]);
+    }
+    expect(alternatesFor(routeById('compress-image')).map((alt) => alt.hreflang)).toEqual(['en', 'pt-BR', 'es', 'x-default']);
   });
 
   it('flags missing, extra, duplicated and foreign URLs', () => {
@@ -88,5 +112,24 @@ describe('sitemaps', () => {
 
   it('escapes the JSON-LD so a text cannot close the script tag', () => {
     expect(graph({ name: '</script><script>alert(1)</script>' })).not.toContain('</script>');
+  });
+
+  it('describes the hub as a CollectionPage listing its pages', () => {
+    const items = [
+      { name: 'Compress image', path: '/compress-image/' },
+      { name: 'Resize image', path: '/resize-image/' },
+    ];
+    const ld = collectionPageLd('Image tools', 'Ten free tools.', '/image-tools/', 'en', items) as Record<string, unknown>;
+    expect(ld).toMatchObject({ '@type': 'CollectionPage', name: 'Image tools', url: `${O}/image-tools/`, inLanguage: 'en' });
+    expect(ld['mainEntity']).toEqual({
+      '@type': 'ItemList',
+      numberOfItems: 2,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Compress image', url: `${O}/compress-image/` },
+        { '@type': 'ListItem', position: 2, name: 'Resize image', url: `${O}/resize-image/` },
+      ],
+    });
+    // No rating and no review: the plan allows none (gate:seo).
+    expect(JSON.stringify(ld)).not.toMatch(/aggregateRating|"review"/);
   });
 });

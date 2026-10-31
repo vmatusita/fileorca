@@ -20,8 +20,8 @@ export default {
       heading: 'Your files stay on your device',
       paragraphs: [
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
-        'The same goes for numbers. When calculators arrive, they will keep the numbers you type in the part of the address after the # sign. Your browser does not send that part to any server, and no analytics event carries those numbers.',
-        'The image tool, for example, saves a lighter copy of your picture that leaves out the photo metadata, including the GPS location.',
+        'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
+        'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
       ],
     },
@@ -64,7 +64,7 @@ export default {
       heading: 'Your cookie choice in the browser',
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
-        "If you accept in the cookie notice, FileOrca also counts there how many files came out smaller in this browser, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
+        "If you accept in the cookie notice, FileOrca also counts there how many image batches ended with at least one real result in this browser, such as a smaller, converted, rotated, cropped or resized image or a PDF, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
       ],
     },
     {

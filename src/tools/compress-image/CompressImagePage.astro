@@ -1,71 +1,20 @@
 ---
-// Tool page mold (docs/design/components/ToolPage): breadcrumb, H1 + PrivacySeal, the panel island,
-// options, next-step chips, then the first AdSlot (150px clearance built in), how-to, privacy note,
-// FAQ. From 1280px the 300x600 rail holds the side AdSlot (not sticky).
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Breadcrumb from '../../components/Breadcrumb.astro';
-import PrivacySeal from '../../components/PrivacySeal.astro';
-import Faq from '../../components/Faq.astro';
-import AdSlot from '../../ads/AdSlot.astro';
-import ToolPanel, { PANEL_POSES, type ToolPanelProps } from './ToolPanel.tsx';
-import { pathFor, routeById, type Lang } from '../../i18n/routes.ts';
-import { KOFI_URL } from '../../platform/site.ts';
-import { buildAdsConfig } from '../../ads/config.ts';
-import { TEXTS } from '../../i18n/texts.ts';
-import { breadcrumbLd, homePath, webApplicationLd, type Crumb } from '../../seo/meta.ts';
+// Compress image in English, Portuguese and Spanish: the shared mold with this tool's panel.
+import ImageToolPage from '../image/ImageToolPage.astro';
+import CompressPanel from './Panel.tsx';
+import { panelData } from '../image/page.ts';
+import type { Lang } from '../../i18n/routes.ts';
+import type { CompressOptionsTexts } from '../../i18n/types.ts';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const route = routeById('compress-image');
-const t = TEXTS[lang]['compress-image'];
-const common = TEXTS[lang].common;
-const path = route.paths[lang] ?? '/';
-const area = route.adArea ?? 'arquivos';
-// In Portuguese the coffee line leads to the support page until the Pix arrives (F6; DECISOES § 49).
-const panelProps: ToolPanelProps = {
-  lang,
-  t,
-  moreToolsHref: homePath(lang),
-  coffeeHref: lang === 'pt' ? pathFor('support', lang) : KOFI_URL,
-  adsOn: buildAdsConfig().scriptEnabled,
-};
-const crumbs: Crumb[] = [
-  { name: common.breadcrumb.home, path: homePath(lang) },
-  { name: t.h1, path },
-];
+const panel = panelData<CompressOptionsTexts>('compress-image', lang);
 ---
-<BaseLayout
-  lang={lang}
-  route={route}
-  title={t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`}
-  description={t.description}
-  withAds
-  oli={PANEL_POSES}
-  schema={[breadcrumbLd(crumbs), webApplicationLd(common.tools['compress-image'].name, t.description, path, lang)]}
->
-  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top">
-    <h1 class="fo-h1">{t.h1}</h1>
-    <PrivacySeal text={common.seal} />
-  </div>
-  <div id="fo-tool-root" data-props={JSON.stringify(panelProps)}><ToolPanel {...panelProps} /></div>
+<ImageToolPage id="compress-image" lang={lang} panel={panel}>
+  <CompressPanel slot="panel" {...panel} />
   <script>
     import './mount.ts';
   </script>
-  <AdSlot area={area} variant="content" label={common.adLabel} />
-  <section class="fo-section fo-prose" aria-labelledby="how">
-    <h2 id="how">{t.howHeading}</h2>
-    <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
-  </section>
-  <section class="fo-section fo-prose" aria-labelledby="privacy-note">
-    <h2 id="privacy-note">{t.privacyHeading}</h2>
-    <p>{t.privacyNote}</p>
-  </section>
-  <section class="fo-section" aria-labelledby="faq">
-    <h2 id="faq">{t.faqHeading}</h2>
-    <Faq items={t.faq} />
-  </section>
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
-</BaseLayout>
+</ImageToolPage>

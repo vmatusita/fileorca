@@ -7,7 +7,7 @@ export default {
   h1: 'Acerca de FileOrca',
   intro: [
     'FileOrca lo hace y lo mantiene una sola persona: Victor Yuki Matusita, desarrollador en Curitiba, Paraná, Brasil.',
-    'Es un conjunto de herramientas gratis que funcionan en tu navegador, en español, inglés y portugués, y vendrán más herramientas.',
+    'Es un conjunto de herramientas gratis que funcionan en tu navegador. Las herramientas de imagen están en inglés, y Comprimir imagen también está en español y portugués.',
   ],
   whyHeading: 'Por qué existe este sitio',
   why: [

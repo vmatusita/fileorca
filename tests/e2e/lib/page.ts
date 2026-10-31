@@ -38,7 +38,7 @@ const FILE_INPUT = 'input[type="file"]';
 const photos = new WeakMap<Page, Promise<Buffer>>();
 
 /** A small noisy JPEG drawn in the page (so it needs no fixture); built once per page. */
-function generatedJpeg(page: Page): Promise<Buffer> {
+export function generatedJpeg(page: Page): Promise<Buffer> {
   let made = photos.get(page);
   if (!made) {
     made = page
@@ -78,6 +78,69 @@ function generatedJpeg(page: Page): Promise<Buffer> {
 /** Hands a generated JPEG to the file input and returns at once (the panel goes to processing). */
 export async function chooseImage(page: Page, name = 'photo.jpg'): Promise<void> {
   await page.setInputFiles(FILE_INPUT, { name, mimeType: 'image/jpeg', buffer: await generatedJpeg(page) });
+}
+
+export interface TestFile {
+  name: string;
+  mimeType: string;
+  buffer: Buffer;
+}
+
+/** Hands several files to the file input at once: one batch. */
+export async function chooseImages(page: Page, files: TestFile[]): Promise<void> {
+  await page.setInputFiles(FILE_INPUT, files);
+}
+
+/** `count` copies of the generated JPEG with the names given (a number makes "photo-1.jpg", "photo-2.jpg"...). */
+export async function jpegBatch(page: Page, names: number | string[]): Promise<TestFile[]> {
+  const buffer = await generatedJpeg(page);
+  const list = typeof names === 'number' ? Array.from({ length: names }, (_, index) => `photo-${index + 1}.jpg`) : names;
+  return list.map((name) => ({ name, mimeType: 'image/jpeg', buffer }));
+}
+
+/** A DataTransfer in the page holding these files, for a paste or a drop. */
+async function transferOf(page: Page, files: TestFile[]) {
+  return page.evaluateHandle((entries) => {
+    const transfer = new DataTransfer();
+    for (const entry of entries) {
+      const bytes = Uint8Array.from(atob(entry.base64), (character) => character.charCodeAt(0));
+      transfer.items.add(new File([bytes], entry.name, { type: entry.mimeType }));
+    }
+    return transfer;
+  }, files.map((file) => ({ name: file.name, mimeType: file.mimeType, base64: file.buffer.toString('base64') })));
+}
+
+/**
+ * Ctrl+V with these files on the clipboard. `page.dispatchEvent('paste')` hands the page a null
+ * clipboardData in both browsers, so the event is built in the page with a DataTransfer.
+ * `from` is where the paste starts (the focused element in a real paste); the default is the body.
+ * Returns whether the page took the paste over (preventDefault).
+ */
+export async function pasteFiles(page: Page, files: TestFile[], from = 'body'): Promise<boolean> {
+  const transfer = await transferOf(page, files);
+  return page.evaluate(
+    ([target, data]) => {
+      const event = new ClipboardEvent('paste', { clipboardData: data as DataTransfer, bubbles: true, cancelable: true });
+      (document.querySelector(target as string) ?? document.body).dispatchEvent(event);
+      return event.defaultPrevented;
+    },
+    [from, transfer] as const,
+  );
+}
+
+/** Drops these files on an element (a drop on the result card must start a new batch, not open the file). */
+export async function dropFiles(page: Page, selector: string, files: TestFile[]): Promise<boolean> {
+  const transfer = await transferOf(page, files);
+  return page.evaluate(
+    ([target, data]) => {
+      const over = new DragEvent('dragover', { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true });
+      document.querySelector(target as string)?.dispatchEvent(over);
+      const drop = new DragEvent('drop', { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true });
+      document.querySelector(target as string)?.dispatchEvent(drop);
+      return over.defaultPrevented && drop.defaultPrevented;
+    },
+    [selector, transfer] as const,
+  );
 }
 
 /** One full use: a generated JPEG goes in and the result card shows with Download focused. */

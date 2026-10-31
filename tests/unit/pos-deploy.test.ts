@@ -7,6 +7,10 @@ import { INDEXNOW_KEY, LAUNCHED, parseLaunched } from '../../src/platform/site.t
 const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const parent = execFileSync('git', ['rev-parse', 'HEAD~1'], { encoding: 'utf8' }).trim();
 const robots = execFileSync('git', ['show', `${head}:public/robots.txt`]);
+// The last main commit before the launch (F1b, LAUNCHED = false): the check reads LAUNCHED from the
+// commit it is given, so the pre-launch rule is still tested on a commit that has it. CI clones the
+// whole history (fetch-depth: 0).
+const beforeLaunch = '503b8c37f597fb1e139b8410887fc70309712f0f';
 
 function fakeFetch(options: { robotsTag?: string | null; html?: string; robots?: Buffer; build?: string }): Fetcher {
   return async (url: string) => {
@@ -21,14 +25,21 @@ function fakeFetch(options: { robotsTag?: string | null; html?: string; robots?:
 
 describe('pós-deploy: conferência de produção', () => {
   it('passes with noindex (LAUNCHED = false), clean HTML and the same robots.txt', async () => {
-    expect(await checkProduction(head, fakeFetch({}))).toEqual({ ok: true, problems: [] });
+    const before = execFileSync('git', ['show', `${beforeLaunch}:public/robots.txt`]);
+    expect(await checkProduction(beforeLaunch, fakeFetch({ robots: before }))).toEqual({ ok: true, problems: [] });
   });
 
   it('fails without noindex, with an injected script, or with a robots.txt one byte off', async () => {
-    expect((await checkProduction(head, fakeFetch({ robotsTag: null }))).problems.join()).toMatch(/sem noindex/);
-    expect((await checkProduction(head, fakeFetch({ html: '<script src="/cdn-cgi/x.js"></script>' }))).problems.join()).toMatch(/cdn-cgi/);
+    const before = execFileSync('git', ['show', `${beforeLaunch}:public/robots.txt`]);
+    expect((await checkProduction(beforeLaunch, fakeFetch({ robotsTag: null, robots: before }))).problems.join()).toMatch(/sem noindex/);
+    expect((await checkProduction(head, fakeFetch({ robotsTag: null, html: '<script src="/cdn-cgi/x.js"></script>' }))).problems.join()).toMatch(/cdn-cgi/);
     const changed = Buffer.concat([robots, Buffer.from('\n')]);
-    expect((await checkProduction(head, fakeFetch({ robots: changed }))).problems.join()).toMatch(/robots\.txt/);
+    expect((await checkProduction(head, fakeFetch({ robotsTag: null, robots: changed }))).problems.join()).toMatch(/robots\.txt/);
+  });
+
+  it('passes without X-Robots-Tag after the launch (LAUNCHED = true) and fails when noindex is still there', async () => {
+    expect(await checkProduction(head, fakeFetch({ robotsTag: null }))).toEqual({ ok: true, problems: [] });
+    expect((await checkProduction(head, fakeFetch({}))).problems.join()).toMatch(/presente/);
   });
 
   it('accepts the commit itself or a later one in build.txt, and gives up at the deadline', async () => {
@@ -47,8 +58,9 @@ describe('pós-deploy', () => {
     expect(() => parseLaunched('const LAUNCHED = false')).toThrow();
   });
 
-  it('keeps LAUNCHED false in the F1a', () => {
-    expect(LAUNCHED).toBe(false);
+  it('launches the site in the F2: LAUNCHED is true, and it was false before', () => {
+    expect(LAUNCHED).toBe(true);
+    expect(parseLaunched(execFileSync('git', ['show', `${beforeLaunch}:src/platform/site.ts`], { encoding: 'utf8' }))).toBe(false);
   });
 
   it('accepts the commit itself or a later one, via git merge-base --is-ancestor', () => {

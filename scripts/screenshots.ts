@@ -1,9 +1,10 @@
-// pnpm screenshots: one PNG per component and theme for the report (DECISOES § 51), over dist/ (build
-// first), at 360px (Header, Footer and the tool page also at 1280px), cropped to the element, with
-// deviceScaleFactor 1. States come from the real flow (drag over, a broken file, a slowed engine, a real
-// photo, a third use with the cookies accepted); the FileCard and the OliMessage, which no page uses
-// yet, come from their design-system markup with the CSS of the build. Not part of pnpm verificar:
-// screenshots differ between Windows and Ubuntu.
+// pnpm screenshots: one PNG per component and theme for the report of the current run (DECISOES § 51), over
+// dist/ (build first), at 360px (Header, Footer, the tool page and the image hub also at 1280px), cropped to the
+// element, with deviceScaleFactor 1. States come from the real flow (drag over, a broken file, a slowed engine, a
+// real photo, a batch with a file that is not an image, a third use with the cookies accepted); the FileCard and
+// the OliMessage previews come from their design-system markup with the CSS of the build. F2: the queue while it
+// works and when it is done with an error row, the batch ResultCard, the BeforeAfter, the crop editor, the Resize
+// fields (also with an error) and the hub. Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -11,8 +12,21 @@ import { chromium, type Browser, type Locator, type Page } from '@playwright/tes
 import { requireDist } from './lib/dist.ts';
 
 const ORIGIN = 'http://127.0.0.1:4173';
-const OUT = 'docs/relatorios/fase-01b';
+const OUT = 'docs/relatorios/fase-02';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
+// The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
+const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
+
+/** A batch for the queue: copies of the photo under their own names, a text file among them, and the big photo last. */
+function batch(): { name: string; mimeType: string; buffer: Buffer }[] {
+  const photo = readFileSync(PHOTO);
+  return [
+    { name: 'beach-day.jpg', mimeType: 'image/jpeg', buffer: photo },
+    { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('not an image') },
+    { name: 'harbour.jpg', mimeType: 'image/jpeg', buffer: photo },
+    { name: 'portrait.jpg', mimeType: 'image/jpeg', buffer: readFileSync(BIG_PHOTO) },
+  ];
+}
 const THEMES = ['light', 'dark'] as const;
 type Theme = (typeof THEMES)[number];
 
@@ -42,19 +56,28 @@ async function open(browser: Browser, theme: Theme, width: number, path: string,
   );
   await page.goto(`${ORIGIN}${path}`);
   await page.evaluate(() => document.fonts.ready);
-  if (path.includes('compress') || path.includes('comprimir')) await page.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
+  // Any tool or preset page has the island root; the others (home, legal, 404) do not.
+  if ((await page.locator('#fo-tool-root').count()) > 0) await page.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
   return page;
 }
 
-/** Crops to the element, with room around it (the Oli sits above the DropZone; the wave above the footer). */
+/**
+ * Crops to the element, with room around it (the Oli sits above the DropZone; the wave above the footer). The clip
+ * is in page coordinates over a full-page capture, so an element taller than the window (the crop editor under its
+ * result card) comes out whole.
+ */
 async function shot(locator: Locator, name: string, pad: { top?: number; side?: number } = {}): Promise<void> {
   await locator.scrollIntoViewIfNeeded();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error(`${name}: element not visible`);
+  const box = await locator.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.left + scrollX, y: rect.top + scrollY, width: rect.width, height: rect.height };
+  });
+  if (box.width === 0 || box.height === 0) throw new Error(`${name}: element not visible`);
   const top = pad.top ?? 8;
   const side = pad.side ?? 8;
   await locator.page().screenshot({
     path: join(OUT, `${name}.png`),
+    fullPage: true,
     clip: { x: Math.max(0, box.x - side), y: Math.max(0, box.y - top), width: box.width + 2 * side, height: box.height + top + 8 },
   });
   console.log(`  ${name}.png`);
@@ -168,7 +191,7 @@ async function main(): Promise<void> {
 
       page = await open(browser, theme, 360, '/');
       await shot(page.locator('.fo-hero'), `home-hero-${theme}-360`);
-      await shot(page.locator('.fo-tool'), `tool-card-${theme}-360`, { top: 8 });
+      await shot(page.locator('.fo-tool').first(), `tool-card-${theme}-360`, { top: 8 });
       await page.getByRole('button', { name: /Search tools/ }).click();
       await page.locator('#fo-search-dialog input').fill('compress');
       await page.locator('#fo-search-dialog [role="option"]').first().waitFor();
@@ -185,6 +208,64 @@ async function main(): Promise<void> {
       page = await open(browser, theme, 360, '/support/');
       await shot(page.locator('.fo-support'), `support-card-${theme}-360`);
       await page.close();
+
+      // F2: the queue. The worker module is held back first, so every row waits with the WaterLevel on screen.
+      page = await open(browser, theme, 360, '/compress-image/');
+      let releaseWorker = (): void => {};
+      const workerHeld = new Promise<void>((resolve) => (releaseWorker = resolve));
+      await page.route(/\/_astro\/worker-[\w-]+\.js$/, async (route) => {
+        await workerHeld;
+        await route.continue();
+      });
+      await page.setInputFiles('input[type="file"]', batch());
+      await page.locator('.fo-filelist .fo-file').nth(3).waitFor();
+      await page.locator('.fo-level').waitFor();
+      await shot(page.locator('#fo-tool-root'), `queue-waiting-${theme}-360`);
+      releaseWorker();
+      // The big photo takes a while: rows ready, the error row and the one still working, on one screen.
+      await page.locator('.fo-file[data-state="error"]').waitFor();
+      try {
+        await page.locator('.fo-filelist [role="progressbar"]').waitFor({ timeout: 5_000 });
+        await shot(page.locator('.fo-filelist'), `queue-working-${theme}-360`);
+      } catch {
+        console.log('  queue-working: the batch finished before the shot (skipped)');
+      }
+      await page.locator('.fo-result').waitFor({ timeout: 60_000 });
+      await shot(page.locator('.fo-filelist'), `queue-done-${theme}-360`);
+      await shot(page.locator('.fo-result'), `result-card-batch-${theme}-360`);
+      await shot(page.locator('.fo-ba'), `before-after-${theme}-360`);
+      await page.close();
+
+      page = await open(browser, theme, 1280, '/compress-image/');
+      await page.setInputFiles('input[type="file"]', batch());
+      await page.locator('.fo-result').waitFor({ timeout: 60_000 });
+      await page.locator('.fo-ba').waitFor();
+      await shot(page.locator('#fo-tool-root'), `result-card-batch-${theme}-1280`, { top: 16 });
+      await page.close();
+
+      page = await open(browser, theme, 360, '/crop-image/');
+      await drop(page, PHOTO);
+      await page.locator('.fo-crop__box').waitFor();
+      await shot(page.locator('#fo-tool-root'), `crop-editor-${theme}-360`);
+      await page.close();
+
+      page = await open(browser, theme, 360, '/resize-image/');
+      await drop(page, PHOTO);
+      await page.locator('.fo-result').waitFor();
+      await shot(page.locator('.fo-fields').first(), `resize-fields-${theme}-360`);
+      await page.locator('#rz-width').fill('0');
+      await page.locator('#rz-width').blur();
+      await page.locator('.fo-fields [role="alert"]').first().waitFor();
+      await shot(page.locator('.fo-fields').first(), `resize-fields-error-${theme}-360`);
+      await page.close();
+
+      for (const width of [360, 1280]) {
+        page = await open(browser, theme, width, '/image-tools/');
+        await shot(page.locator('.fo-hubband'), `hub-band-${theme}-${width}`);
+        await page.screenshot({ path: join(OUT, `hub-page-${theme}-${width}.png`), fullPage: true });
+        console.log(`  hub-page-${theme}-${width}.png`);
+        await page.close();
+      }
 
       page = await isolated(browser, theme, css, `<div style="max-width:328px">${previewMarkup('FileCard')}</div>`);
       await shot(page.locator('.fo-filelist').first(), `file-card-${theme}-360`);

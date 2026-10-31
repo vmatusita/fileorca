@@ -1,0 +1,272 @@
+ultracode
+
+# Missão
+
+Rode a F2 do FileOrca, imagem em inglês, e lance o site. Ao terminar, o fileorca.com tem as 10 ferramentas de imagem do catálogo (Compress, Resize, Crop, Rotate/flip, HEIC to JPG/PNG, WebP to JPG/PNG, PNG ↔ JPG, AVIF to JPG, Convert to WebP/AVIF e Image to PDF), as páginas de preset com `entra` no `data/keywords.csv` e o hub `/image-tools/`, tudo em inglês, processando arquivo real no navegador: lote sem limite, arrastar, clicar e colar com Ctrl+V, ZIP do lote, orientação aplicada e nenhum metadado na saída, inclusive o GPS. A Compress image em português e espanhol passa a usar o mesmo motor, com os textos certos. `LAUNCHED` vira `true`. O `pnpm verificar` fica verde na sua máquina e no CI, em até 15 min em cada um. Tudo fica numa PR da branch `fase-02`, com o relatório. Esta PR não toca em `.github/`, então o job de merge a mescla sozinho assim que ela sai do rascunho com o CI verde, e esse merge publica e **lança** o site (meta: 8/nov). Por isso ela só sai do rascunho no fim, com tudo pronto e o relatório commitado.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows: o shell é o Git Bash, e o CI roda em Ubuntu 24.04. A main está em `503b8c3` (a F1b, PR #4), e o fileorca.com serve a F1b com `X-Robots-Tag: noindex` (`LAUNCHED = false`).
+
+Decisão do Victor ao gerar este prompt (31/out/2026): as páginas em português e espanhol que já existem ficam no ar e passam a ser indexadas no lançamento. Nenhuma página nova nasce nesses idiomas. Isso fecha a "Nota para a F2" do relatório da F1a.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. `CLAUDE.md` inteiro, com as seções da F1a, do ajuste da prévia e da F1b.
+3. `PLANO-FILEORCA.md`. A ficha "F2 · Imagem em inglês" do apêndice é o contrato, e as "Decisões fechadas" não mudam. Use também: "Catálogo por fase" e as "Regras de toda ferramenta" logo abaixo dele, "Idiomas e URLs", "Bibliotecas e licenças" e "Cabeçalhos", "Estrutura do repositório", "Da run ao ar" (o `LAUNCHED`), "Design" (princípios de UX e a lista "Nunca"), "A mascote" (momentos, falas e regras de anúncio), "Orçamento de desempenho", "Molde da página de ferramenta", "Doações", "SEO agressivo" ("Técnico" e "Regra da página programática") e os eventos do GA4 em "Metas".
+4. `DECISOES.md` (§ 1 a § 57). Os que esta run mais toca: § 4, § 6, § 7, § 10, § 11, § 12, § 15, § 19, § 20, § 22, § 23, § 25, § 27, § 29, § 33, § 34, § 40, § 43, § 44, § 46, § 49, § 52, § 53, § 54 e § 57.
+5. `docs/design/`: o README (voz e falas fixas, Oli, layout, acessibilidade) e, de cada um destes, o README e o `preview.html`: DropZone, WaterLevel, FileCard, ResultCard, Placard, BeforeAfter, OptionGroup, NumberField, NextStepChips, OliMessage, ToolCard (com o `fo-hubband`) e o molde ToolPage. A pasta é só leitura (§ 2).
+6. `docs/relatorios/fase-01b.md` ("Nota para a F2", "Revisão adversarial" e "CI na PR"), a "Nota para a F2" de `docs/relatorios/fase-01a.md` e `docs/F0-KEYWORDS.md`.
+7. `fixtures/ORIGEM.md` inteiro, sobretudo a conferência das imagens (colunas "Gravado" e "Aparece"), as "Notas para as runs" e as "Lacunas".
+8. O código: `src/tools/compress-image/`, `src/engine/image/` (`recompress.ts`, `strip.ts`, `worker.ts`), `src/components/FileCard.tsx`, `src/i18n/` (rotas, tipos e textos), `src/search/`, `src/seo/`, `src/analytics/events.ts`, `src/platform/` (`site.ts`, `headers.ts`, `licenses.ts`), `src/views/HomeView.astro`, `tests/`, `scripts/` (gates e lib), `scripts/serve-dist.ts`, `lighthouserc.json` e `playwright.config.ts`.
+
+Bibliotecas: as da tabela "Bibliotecas e licenças" do plano que esta fase usa, na versão estável atual de cada uma: `@jsquash/jpeg`, `@jsquash/webp`, `@jsquash/avif`, `@jsquash/oxipng`, `libheif-js`, `@cantoo/pdf-lib` e `fflate`. Antes de usar qualquer API, leia a documentação e os arquivos do pacote na versão instalada: como o jSquash carrega o `.wasm` dentro de um worker do Vite 8 com Rolldown e qual build dele roda numa thread só; onde o `libheif-js` deixa o `.wasm` separado do JS e como ele entrega a imagem principal; como o `@cantoo/pdf-lib` embute JPEG e PNG; a API de streaming do `fflate`. Não escreva de memória. Pacote publicado no próprio dia: fixe a versão anterior (CLAUDE.md).
+
+Você pode ler a web (WebSearch e WebFetch) para documentação, especificações oficiais e as perguntas reais que as pessoas fazem sobre cada ferramenta. Ler não é mandar pedido a um serviço; nada sai daqui além disso.
+
+# Escopo
+
+Dentro: a linha "Dentro" da ficha F2, com as decisões abaixo. Em itens:
+
+1. Fixtures geradas e o oráculo das imagens (decisão 11), num commit antes do motor.
+2. O motor de verdade em `src/engine/image/` e a montagem de PDF em `src/engine/pdf/` (decisão 7).
+3. A ilha compartilhada das ferramentas de imagem, com lote, fila, ZIP e colar (decisão 3), e a Compress image migrada para ela.
+4. As 10 ferramentas (decisões 2 e 6) e os presets (decisão 5).
+5. As páginas: molde da ferramenta com o conteúdo próprio, hub `/image-tools/`, home em inglês, busca, relacionadas e chips (decisões 8 e 9).
+6. O portão de conteúdo mínimo (decisão 10).
+7. A /licenses e o portão de licenças com as bibliotecas novas (decisão 13).
+8. `LAUNCHED = true` (decisão 12).
+9. Os textos da Compress image em pt e es que o comportamento novo muda (decisão 1).
+10. Screenshots dos estados novos (decisão 15).
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do CLAUDE.md.
+- `.github/` inteiro e `scripts/ci/`. O pipeline não é desta run, e uma PR que mexe em `.github/workflows/` não é mesclada sozinha.
+- As ferramentas de PDF além da Image to PDF (F5); calculadoras e os componentes delas (F4), menos o NumberField, que a Resize e a Crop usam; páginas novas ou tradução de ferramenta nova em pt e es, e o Pix (F6); anúncio ligado (`PUBLIC_ADS_ENABLED` segue `false`); service worker, tela offline e "compartilhar para a ferramenta" (F8).
+- Levar o arquivo de uma ferramenta para a outra: nesta fase os chips levam a pessoa, não o arquivo.
+- GIF, vídeo, remover fundo, aumentar resolução com IA e qualquer ferramenta fora das 10.
+- Cor, raio, sombra, ícone ou pose fora de `docs/design/`; amarelo (`sun`) fora do Baixar; animação em JavaScript.
+- Só leitura: `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/`, `.claude/settings.json` e `docs/design/`. No `CLAUDE.md`, só uma seção nova no fim; no `DECISOES.md`, só § novos; no `fixtures/ORIGEM.md`, só linhas novas em "Gerados por script" e o que a decisão 11 manda acrescentar.
+- Dependência nova: só as sete da lista acima e, se o caminho sem canvas precisar, o `@jsquash/resize` (decisão 7), em `dependencies` (vão ao navegador). Em `devDependencies`, nada que não seja indispensável; se um teste precisar ler metadado ou cabeçalho de imagem, escreva o leitor em `tests/e2e/lib/` (o `jpeg.ts` já faz isso para JPEG). Nada de `sharp`.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 58)
+
+1. **pt e es no ar.** As páginas que já existem em português e espanhol seguem no mapa de rotas e indexam no lançamento (decisão do Victor, 31/out/2026). Nenhum texto de pt ou es é escrito para página que só existe em inglês: os tipos de texto de `src/i18n/` passam a deixar uma ferramenta existir só em inglês, sem tradução de enfeite. A Compress image em pt e es usa o motor e a ilha novos; os textos dela que o comportamento novo muda (lote, ZIP, formatos aceitos e a frase "uma de cada vez" do § 25) são reescritos nos dois idiomas, com a voz do design system e "tú" no espanhol. Os chips dela seguem com o "Mais ferramentas" do § 27, e o breadcrumb segue sem hub (§ 6), porque o hub e as outras ferramentas só existem em inglês.
+
+2. **O que cada ferramenta aceita e entrega.** O tipo do arquivo sai sempre do conteúdo (a assinatura dos bytes), nunca da extensão: um PNG chamado `.jpg` é tratado como PNG e a saída leva a extensão certa. Arquivo vazio, que não é imagem ou de formato que a ferramenta não aceita é recusado com a fala da Oli, o nome do arquivo e o que fazer; o resto do lote segue.
+
+   | Ferramenta (slug) | Aceita | Opções (o padrão vem primeiro) | Saída |
+   | --- | --- | --- | --- |
+   | `compress-image` | JPG, PNG, WebP | Recommended / Strong (como hoje) | o mesmo formato; PNG sem perda pelo OxiPNG, JPG pelo MozJPEG |
+   | `resize-image` | JPG, PNG, WebP | By size (largura × altura em px, proporção travada) / By percentage | o mesmo formato |
+   | `crop-image` | JPG, PNG, WebP | Proporção: Square / 4:5 / 16:9 / Free, mais a caixa de corte | o mesmo formato |
+   | `rotate-image` | JPG, PNG, WebP | Girar: Right 90° / Left 90° / 180°; espelhar: None / Horizontal / Vertical | o mesmo formato |
+   | `heic-to-jpg` | HEIC, HEIF | JPG / PNG | JPG ou PNG |
+   | `webp-to-jpg` | WebP | JPG / PNG | JPG ou PNG |
+   | `png-to-jpg` | PNG, JPG | nenhuma: o sentido vem do arquivo (PNG vira JPG, JPG vira PNG) | JPG ou PNG |
+   | `avif-to-jpg` | AVIF | nenhuma | JPG |
+   | `convert-to-webp` | JPG, PNG | WebP / AVIF; Recommended / Strong | WebP ou AVIF |
+   | `image-to-pdf` | JPG, PNG, WebP | Page size: Image size / Letter / A4 | um PDF com o lote inteiro |
+
+   As ferramentas gerais (Compress, Resize, Crop, Rotate e Image to PDF) não aceitam HEIC nem AVIF nesta fase: a recusa diz o formato e leva, por link, à HEIC to JPG ou à AVIF to JPG. O motivo é simplicidade e o tempo do CI (cada HEIC aceito é mais um decodificador WASM de 12 MP por navegador); fica registrado como algo a rever. Cuidado ao detectar: HEIF e AVIF começam pela mesma caixa `ftyp` e podem dividir a marca `mif1`; decida pela marca principal e pela lista de marcas compatíveis.
+
+3. **A ilha compartilhada: lote, fila e ZIP.** Uma ilha Preact só por página (§ 23), comum às dez ferramentas (por exemplo em `src/tools/image/`), e cada ferramenta na própria pasta `src/tools/<slug>/`, com a página, o `mount.ts`, as opções, o `i18n/en.ts` e os testes, como manda a estrutura do plano. A Compress image migra para ela. Comportamento:
+   - lote sem limite; soltar, clicar e Ctrl+V (o colar vale na página da ferramenta, menos com o foco num campo de texto, na busca ou num diálogo);
+   - os arquivos são processados um de cada vez no worker; o WaterLevel do lote ocupa o lugar da DropZone só depois de 400 ms, com a contagem ("48%, 5 of 12 images");
+   - a fila de FileCards (§ 53) em `.fo-filelist`: pronto, processando com a `fo-bar` e erro com a razão em uma frase; com mais de 6 arquivos, 6 visíveis e "Show N more"; cada linha tem o download dela, secundário;
+   - um arquivo só baixa direto; o lote baixa num ZIP montado com o `fflate` no worker, sem recomprimir (os arquivos vão armazenados), com nomes únicos (" (2)", " (3)") e nome do ZIP em inglês; o ResultCard diz o total ("Download all · ZIP 9.4 MB") e, na compressão, a soma do ganho;
+   - o nome de cada saída é o do arquivo, com a extensão do formato de saída;
+   - mexer numa opção reprocessa o lote na hora, sem botão Aplicar, sem tirar o foco da opção; o foco vai para o Baixar quando o card aparece para um lote novo;
+   - "Start over" limpa a fila e revoga as URLs; a memória não cresce lote a lote (bitmaps fechados, URLs revogadas, saídas guardadas como `Blob`).
+
+4. **Eventos e café.** Um lote é uma tarefa: um `tool_start`, um `tool_complete` e, no café, um uso (§ 49), contado só quando o lote teve pelo menos uma saída de verdade (menor, na compressão; convertida, girada, cortada, redimensionada ou montada em PDF, nas outras). A contagem do café é uma só para todas as ferramentas, por navegador, e segue só com o Aceitar. Os eventos seguem a lista fechada do § 10: ganham os ids das ferramentas e os valores novos de `outcome`, `codec` e `reason`, com teste, e nenhum parâmetro novo. Nenhum número digitado (largura, altura, porcentagem, caixa de corte) vai para a URL nem para evento, e nenhum evento leva nome de arquivo.
+
+5. **Presets.** São as linhas `preset-imagem` com `decisao` igual a `entra` no `data/keywords.csv` da main quando a run começa. Hoje são três:
+   - `/compress-image/to-100kb/` e `/compress-image/to-1mb/`: cada saída fica com no máximo 100.000 e 1.000.000 bytes, o menor dos dois jeitos de ler "KB" e "MB" (serve também a quem conta em 1024). A saída é sempre JPG, porque formulário que pede "até 100 KB" quase sempre pede JPG; a transparência vira branco, e a tela diz isso. Arquivo que já cabe volta sem metadados (§ 33), no formato dele. O algoritmo estima a escala pela taxa de bytes por pixel, reduz a imagem antes e só então faz a busca binária da qualidade sobre a imagem reduzida, com um teto de tentativas; ele nunca recodifica a foto inteira de 12 MP várias vezes. Se nem a menor qualidade aceitável cabe, reduz mais as dimensões, e o resultado diz as dimensões novas.
+   - `/resize-image/youtube-thumbnail/`: 1280×720, JPG, até 2 MB, como manda a ajuda oficial do YouTube. Confira na própria página com WebFetch e cite o link com a data; se ela não abrir, use esses valores com o link e registre para o Victor conferir. Corte central para preencher o 16:9, com uma linha dizendo isso e o chip para a Crop image.
+   - Se o CSV trouxer outro preset com `entra` (o Victor pode ter mexido antes da run), a medida vem da ajuda oficial da rede, conferida na run, com a data. Sem fonte oficial que abra, o preset fica de fora e vira pendência.
+   - Toda página de preset passa na "Regra da página programática" do plano: muda o comportamento e tem pelo menos três blocos que não existem nas páginas irmãs (a especificação, os passos daquele caso e as perguntas daquele caso), conferidos pelo portão da decisão 10. O preset é página da ferramenta-mãe: a página-mãe tem a tabela dos presets com o link de cada um.
+
+6. **Detalhes por ferramenta.**
+   - Resize: nunca aumenta a imagem. Pedir mais pixels do que a foto tem mantém o tamanho original, e o resultado diz isso. Com a proporção travada, cada foto do lote cabe dentro de largura × altura. Campos no NumberField do design system.
+   - Crop: abre com Square, centralizado, para o resultado sair na hora. A caixa de corte se move e muda de tamanho com o ponteiro e com o teclado (setas movem, Shift+setas mudam o tamanho), e os mesmos valores (x, y, largura e altura em px) ficam em NumberFields, que é o caminho acessível. No lote, cada foto recebe o corte central na proporção escolhida, e a pessoa ajusta a caixa de uma foto escolhendo-a na fila.
+   - Rotate: o giro e o espelho valem para o lote inteiro e se combinam.
+   - HEIC to JPG/PNG: só a imagem principal do arquivo (o item primário, não a primeira da lista: a `heic-10` tem duas imagens, e a `heic-05`, a `heic-07` e a `heic-08` trazem mapas auxiliares), um arquivo de saída por HEIC.
+   - WebP to JPG/PNG: WebP animada vira o primeiro quadro, e o resultado diz isso.
+   - PNG ↔ JPG e as conversões para JPG: a transparência vira branco, e o resultado diz isso. JPG para PNG é sem perda.
+   - Convert to WebP/AVIF: a transparência fica. O esforço do codificador AVIF é fixado pelo tempo de quem usa (uma foto de 12 MP num notebook comum em segundos, não em minutos), medido e registrado com os números.
+   - Image to PDF: um PDF com uma imagem por página, na ordem da fila. "Image size" faz a página do tamanho da imagem; Letter e A4 põem a imagem inteira dentro da folha, com margem de 36 pt e orientação da folha escolhida por imagem. A imagem entra no PDF a partir dos pixels decodificados, com a orientação já aplicada (JPEG para foto, PNG quando há transparência), nunca com os bytes originais: o JPEG original levaria o Exif com o GPS para dentro do PDF. O PDF sai com Producer e Creator "FileOrca" e sem título, autor ou palavra-chave tirados dos nomes dos arquivos.
+
+7. **O motor.** Em `src/engine/image/`, sem importar nada de fora da pasta (o lint confere; ela vira código aberto depois da F5), atrás do worker com Comlink, e com o caminho na página quando o worker não tem `OffscreenCanvas` (§ 22).
+   - Primeiro o nativo (Canvas, `OffscreenCanvas`, `createImageBitmap` com a orientação da foto); WASM só onde o nativo não resolve, carregado quando chega o primeiro arquivo que precisa dele, com prefetch quando o ponteiro entra na zona ou o botão recebe o foco. Nenhum `.wasm` nem worker no JS inicial.
+   - Compressão com o MozJPEG (JPG), o OxiPNG (PNG) e o codificador WebP do jSquash; AVIF sempre pelo jSquash. Quando o `canvas.toBlob` devolve um tipo diferente do pedido (o Safari faz isso com WebP), o motor usa o codificador do jSquash.
+   - HEIC: no Safari que decodifica HEIC, o caminho nativo; no resto, o `libheif-js`, com o `.wasm` como arquivo separado e sem alteração. O caminho nativo só vale se as dimensões que ele entrega baterem com as que o próprio contêiner declara (`ispe` com `irot` e `imir`, lidos por um parser pequeno do motor); se não baterem, o motor usa o libheif. A escolha do caminho é testada no Vitest com decodificadores falsos, e o parser do contêiner contra as dez HEIC, com o oráculo da decisão 11.
+   - Orientação aplicada uma vez só: o JPG pela tag Orientation; o HEIC pelas transformações do contêiner, e a tag Orientation do Exif do HEIC não é aplicada de novo (a armadilha da `heic-05` e da `heic-09` no ORIGEM).
+   - Limite de área do canvas: acima de 16.777.216 px (o limite do Safari no iPhone; as fotos de 24 MP dos iPhones recentes passam dele), a imagem segue um caminho sem canvas, dos pixels do decodificador do jSquash ou do libheif até o codificador do jSquash, com corte, giro e espelho em código próprio no worker. A escolha é pelo número de pixels, igual em todo navegador, para os dois caminhos rodarem no Chromium e no WebKit. Redimensionar nesse caminho pode usar o `@jsquash/resize` (Apache-2.0, da mesma família), registrado como dependência nova. A saída é sRGB.
+   - Metadados: toda saída nova é recodificada a partir dos pixels, o que tira Exif, XMP, IPTC e GPS. Quando a saída não fica menor ou o navegador não grava o formato, volta o original pelo `strip` do § 33. Um arquivo com a tag de GPS zerada (a `heic-10`) também sai sem a tag.
+   - Nenhum `SharedArrayBuffer`, nenhuma build de várias threads do jSquash no `dist/` e nenhum cabeçalho COOP/COEP.
+   - A montagem do PDF fica em `src/engine/pdf/`, num worker, com o `@cantoo/pdf-lib`. É a semente do motor de PDF da F5.
+
+8. **BeforeAfter.** Como manda o README dele: na compressão (com os presets) e nas conversões com perda (para JPG, WebP e AVIF), nunca nas sem perda. A partir de 768 px fica dentro do ResultCard; no celular, onde o § 54 já aperta o card nos 380 px, pode ficar logo abaixo dele, antes dos chips. Ele aparece junto com o card e nunca empurra o Baixar depois que o card está na tela. No lote, compara o arquivo escolhido na fila (o primeiro, de início). O "antes" de um HEIC é a imagem decodificada, porque o Chromium não mostra HEIC.
+
+9. **As páginas.**
+   - Rotas novas no `src/i18n/routes.ts`, só com `en`, e slugs iguais aos do CSV: as 10 ferramentas, os presets que entraram (como subpasta da ferramenta) e o hub `/image-tools/`, todas com `adArea: 'arquivos'`.
+   - Toda página de ferramenta e de preset segue o molde ToolPage: breadcrumb Home › Image tools › ferramenta (› preset), H1 com a promessa e o PrivacySeal, painel, chips, o primeiro AdSlot, "How to" em três passos, especificações ou tabela de presets, perguntas reais (pelo menos quatro, pesquisadas, com resposta própria e sem copiar texto de ninguém), a nota de privacidade e a grade de relacionadas (até 6 ToolCards, só das que existem). Título que começa pelo nome da ferramenta, descrição própria, schema WebApplication e BreadcrumbList e a imagem de OG com o ícone da ferramenta (§ 50).
+   - Chips de próximo passo: de 2 a 4 por ferramenta, escolhidos pelo que a pessoa acabou de fazer (comprimiu? redimensionar, converter em PDF), só para ferramentas que existem (§ 6). O "Mais ferramentas" do § 27 sai do inglês.
+   - Hub `/image-tools/`: `fo-hubband` com sobretítulo, H1 e uma linha, a grade com as ferramentas e a lista dos presets. A home em inglês mostra a grade das ferramentas de imagem e o link para o hub; as homes de pt e es seguem só com a Compress image.
+   - Busca: o índice traz todas as ferramentas e os presets, com sinônimos ("shrink", "reduce size", "jpeg", "iphone photo", "heif", "jpg to pdf"). Em cada idioma a busca mostra só as páginas que existem nele.
+   - Menu de idioma numa página que só existe em inglês: nunca leva a uma página que não existe (§ 6). Como ele se apresenta fica com você, registrado.
+   - Sitemap e hreflang pelo mapa de rotas, como já são: página só em inglês não tem par em outro idioma.
+
+10. **Portão de conteúdo mínimo.** Um portão novo, `pnpm gate:conteudo`, entra no `pnpm verificar` depois dos links e lê o `dist/`. Os blocos são marcados com `data-content="…"`, para a checagem não depender do texto, como o `data-ymyl` do portão de dinheiro e saúde (`scripts/lib/ymyl.ts`). Em toda página de ferramenta e de preset ele exige: "how" com pelo menos três passos, "specs" com uma tabela, "faq" com pelo menos quatro perguntas, "privacy" e "related" com pelo menos um link. Na página de preset, exige ainda pelo menos três blocos cujo texto não aparece na página-mãe nem nos presets irmãos. Em todo o site, reprova título ou descrição repetidos entre páginas e qualquer "coming soon", "em breve", "lorem" ou equivalente. Ele nasce com teste de unidade que prova cada reprovação.
+
+11. **Fixtures e oráculo.** Antes do motor, num commit próprio:
+    - `scripts/fixtures/` em TypeScript, que roda igual no Windows e no Ubuntu, determinístico (sementes fixas), gera a partir das fixtures da F0: a `jpg-01` com Orientation 6 e a `jpg-02` com Orientation 8 (pixels girados de verdade e a tag Orientation trocada no próprio APP1 original, que leva o GPS junto); um PNG com transparência; um WebP com o chunk EXIF da `jpg-02` (com o GPS); um WebP animado de dois quadros; um AVIF; um JPG truncado e um com os dados corrompidos; um PNG com extensão `.jpg` e um arquivo de texto com extensão `.png`; um arquivo vazio; e uma imagem logo acima de 16.777.216 px, de conteúdo simples (para o caminho sem canvas custar pouco no CI). As geradas ficam pequenas (até uns 1600 px no lado maior), menos a grande. A foto de 12 MP da ficha já existe: é a `jpg-01` (3024×4032), como a maioria das HEIC.
+    - Para desenhar e codificar no script, use o Chromium do Playwright (canvas e `toBlob`) e montagem de bytes; o AVIF pode sair do codificador do `@jsquash/avif` no Node. Nada do código em teste gera o esperado.
+    - Cada arquivo gerado ganha uma linha em "Gerados por script" no ORIGEM, com o script e o SHA-256, e a licença da fonte (a das `jpg-*` é uso livre).
+    - O oráculo: `fixtures/images/expected.json`, com as dimensões de exibição esperadas de cada fixture (das colunas "Aparece" do ORIGEM, que vieram do exiftool e do pillow-heif, e da construção de cada gerada), se tem GPS, se tem transparência e quantas imagens tem. Os testes conferem a saída contra ele.
+
+12. **Lançamento.** `export const LAUNCHED = true;` em `src/platform/site.ts`, na mesma linha e na mesma forma, numa fatia própria, depois que tudo o que nunca se corta (válvula) estiver verde. O `_headers` de produção fica sem `X-Robots-Tag` para o fileorca.com; a regra de `*.workers.dev` e as regras dos 404 (§ 29) continuam. O § 11 manda o IndexNow só com as URLs das páginas que mudaram; as que não mudaram chegam pelo sitemap, que é tarefa do Victor (relatório).
+
+13. **Licenças.** A /licenses passa a listar todo pacote que chega ao navegador, inclusive as dependências transitivas que entram no bundle, cada um com a licença e o texto que ela exige. O `libheif-js` (LGPL-3.0) vai com o `.wasm` sem alteração num arquivo separado, o aviso da LGPL e o link do código-fonte da versão usada. A lista esperada de `browserPackages()` ganha as bibliotecas novas (mudança legítima, como no § 52), e o portão de licenças fica verde sem afrouxar nada.
+
+14. **Testes existentes.** As garantias dos testes atuais continuam valendo: nenhuma requisição para fora, o trabalho no worker, a opção que reprocessa sem Aplicar e sem tirar o foco, o foco no Baixar, o original sem metadados quando não há ganho, as alturas reservadas, a distância dos anúncios, o axe e os orçamentos. Onde o comportamento novo muda um seletor ou um texto (o "motor provisório", a frase de uma imagem por vez), adapte o teste, sem tirar a asserção, e liste cada teste mudado e o porquê no § dele.
+
+15. **Screenshots.** O `pnpm screenshots` (§ 51) ganha os estados novos em `docs/relatorios/fase-02/`: a fila com pronto, processando e erro; o ResultCard do lote; o BeforeAfter; o editor de corte; os campos da Resize; o hub; nos dois temas, a 360 px (o hub e uma ferramenta também a 1280). Os estados saem do fluxo real; nenhum gancho de teste no código do site.
+
+# Orçamento de tempo do CI (o maior risco desta run)
+
+Na F1b, o `pnpm verificar` levou 505 s no CI (Playwright 424 s, com 474 testes em 2 workers), e um push intermediário chegou a 758 s. O runner é umas 5 vezes mais lento que a sua máquina e varia uns 25 % entre execuções. A F2 traz dez ferramentas, codecs WASM e fotos de 12 MP. Se o verificar passar de 900 s, o CI reprova, a PR não mescla e o site não lança.
+
+- Alvo: até 800 s no CI no commit final.
+- Meça cedo: o primeiro push com a matriz de fixtures de uma ferramenta já mostra o custo por arquivo no runner. Leia o tempo de cada spec com `gh run view <id> --log` e projete o total antes de escrever as outras.
+- O que pode (nada disso reduz o alcance): uma página por ferramenta e navegador que recebe o lote inteiro de fixtures num envio só e confere cada saída a partir do ZIP; as conferências de bytes no Node; estados e larguras da mesma página no mesmo teste quando a medida permite; as fixtures geradas pequenas; o algoritmo de tamanho-alvo que não recodifica a foto inteira várias vezes; o PNG da HEIC to JPG/PNG conferido com a `heic-05`, a `heic-07` e a `heic-10`, e o JPG com as dez; os presets conferidos com uma foto grande, o PNG transparente e o WebP, porque o motor deles já passa pela matriz inteira da ferramenta-mãe; tirar uma checagem repetida entre specs só quando a mesma garantia continua conferida em outro lugar, registrado; mudar o número de workers do Playwright no CI só com a medida de estabilidade de várias execuções e registro, porque a F1a escolheu 2 por estabilidade (§ 57).
+- O que não pode: tirar navegador, página, largura, tema ou fixture; `retries`; aumentar timeout ou o limite de 900 s; mexer em `.github/`.
+- Se mesmo assim o CI passar de 800 s, a válvula corta na ordem (e) e (f) primeiro (as ferramentas cortadas levam os testes junto), e você escreve uma ADR "Proposta" em `docs/adr/` sobre dividir o Playwright do CI em partes, que é decisão do Victor.
+
+# Pontos de atenção (armadilhas conhecidas)
+
+- Hidratação do Preact: a ilha é renderizada no servidor e hidratada pelo `mount.ts` (§ 23). Marcação diferente entre servidor e cliente quebra a hidratação; use `href` no `<use>` da Oli e `stroke-width` em SVG (CLAUDE.md).
+- `.wasm` precisa sair com `Content-Type: application/wasm` no `scripts/serve-dist.ts` e no Cloudflare, e com o cache imutável dos assets; sem isso o `instantiateStreaming` falha. Confira na prévia.
+- O WebKit do Playwright no Windows não tem `OffscreenCanvas` no worker e o do Linux pode ter (CLAUDE.md, § 22); o provável é que nenhum dos dois decodifique HEIC sozinho, e aí o libheif roda nos dois; se algum decodificar, registre que caminho a matriz cobriu em cada navegador. Nada de gancho de teste no código do site para escolher o caminho.
+- JPG truncado: o navegador pode decodificar a parte que chegou sem dar erro. Decida e registre como o motor reconhece arquivo incompleto (falta do marcador de fim, por exemplo) e garanta que o corrompido nunca trava a página e que o lote segue.
+- `createImageBitmap` aplica a Orientation do JPG por padrão; o leitor de pixels dos testes não pode aplicar de novo. A saída não tem tag Orientation, então os pixels crus são a imagem de exibição.
+- Foto em Display P3 vira sRGB na saída; não grave o perfil P3 junto com pixels sRGB.
+- Requisições: a página da ferramenta faz 6 (Chromium) e 7 (WebKit) na primeira visita, e o limite é 8. A ilha nova não pode puxar arquivo de JS a mais no carregamento; worker, codecs e `.wasm` só no primeiro uso.
+- Altura: a fila de FileCards cresce abaixo do retângulo reservado do § 20, depois de a pessoa soltar os arquivos; o Baixar não se move depois que aparece.
+- O teste de distância já mede `[data-oli]`, o Baixar, os campos e o painel. Ele passa a medir também os NumberFields, as alças do corte e a fila.
+- `exactOptionalPropertyTypes` no tsconfig e os tipos de evento de `preact` (CLAUDE.md).
+- Voz: sentence case, sem emoji, sem as palavras proibidas do README, uma exclamação por tela, nenhum "up to 50" e nenhum limite de lote inventado. O `lint:texto` confere os textos novos.
+- Teste instável no WebKit do Ubuntu: corrija a causa. Não ligue `retries` nem aumente timeout.
+- Git Bash: escreva arquivos com a ferramenta de edição (heredoc engole `\\`) e rode `git push` e `gh pr create` em comandos separados.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. `pnpm verificar` verde na sua máquina e no CI da PR, em até 900 s em cada um, com o CI em até 800 s no commit final. Cole a saída e o tempo de cada portão.
+2. Os 15 portões da F1b ativos com o mesmo alcance, os mesmos limiares, orçamentos e listas (fora as listas de pacotes da decisão 13), mais o `gate:conteudo`. Nenhum `skip`, `fixme`, `retries` ou `continue-on-error`. Os testes mudados listados no § da decisão 14.
+3. Matriz de fixtures, em Chromium e WebKit, com a tabela ferramenta × fixture × navegador gerada da saída dos testes (não escrita à mão): toda fixture que a ferramenta aceita dá uma saída que abre (decodifica no navegador; o PDF abre e tem uma página por imagem), no formato e nas dimensões que o oráculo e as opções mandam, com a orientação certa (na `jpg-03` e nas variantes 6 e 8, pixels comparados com a imagem em pé de referência, montada no teste a partir dos pixels gravados; na `heic-05` e na `heic-09`, pelas dimensões, que denunciam a rotação dupla) e com a transparência mantida onde o formato permite; toda fixture que ela não aceita dá a fala de erro da Oli naquele arquivo, e o resto do lote sai.
+4. Nenhuma saída leva GPS nem outra localização: os leitores dos testes procuram Exif e XMP no JPG (APP1), no PNG (`eXIf`, `iTXt`, `tEXt`, `zTXt`), no WebP (chunks `EXIF` e `XMP `), no AVIF (item Exif) e dentro das imagens do PDF. Vale para todas as saídas da matriz, inclusive a `heic-10` com o GPS zerado.
+5. O corrompido, o truncado, o vazio e o texto com extensão `.png` mostram a fala de erro sem travar: com eles no meio do lote, os outros arquivos saem, e um lote novo funciona depois.
+6. Lote e ZIP: N arquivos dão N saídas; o ZIP abre, os nomes são únicos e o conteúdo é igual ao download de cada linha; um arquivo só baixa direto; Ctrl+V funciona nos dois navegadores; com mais de 6 arquivos aparece "Show N more".
+7. Presets: cada saída da `to-100kb` tem no máximo 100.000 bytes e é JPG, cada uma da `to-1mb` no máximo 1.000.000 bytes, e a `youtube-thumbnail` dá 1280×720 em JPG dentro do limite da fonte oficial.
+8. HEIC: as dez dão JPG nas dimensões da coluna "Aparece" (3024×4032 em pé na `heic-05` e na `heic-09`), a `heic-10` dá um arquivo só, com a imagem principal; o `.wasm` do libheif servido no `dist/` tem o mesmo SHA-256 do arquivo do pacote; a escolha entre o nativo e o libheif e o parser do contêiner passam no Vitest.
+9. Caminho sem canvas: a imagem acima de 16.777.216 px passa na Compress image e na Resize image (a Resize sai deste critério se a válvula (a) cortar), nos dois navegadores, e a escolha do caminho passa no Vitest.
+10. Privacidade: nenhuma requisição para fora do domínio ao processar, nos dois navegadores, em toda ferramenta; `crossOriginIsolated` é `false`, nenhuma página tem COOP ou COEP e nenhuma build de várias threads está no `dist/`; nenhum número digitado vai para a URL ou para o `dataLayer` (teste que digita na Resize e na Crop); eventos só com a lista fechada.
+11. Orçamentos: JS inicial até 80 KB gzip em toda página de ferramenta, de preset e no hub, sem worker nem `.wasm`; até 8 requisições na primeira página e até 3 novas na seguinte, nos três pares atuais e em `/compress-image/` → `/resize-image/` e `/image-tools/` → `/heic-to-jpg/`, nos dois navegadores. Cole os números.
+12. Lighthouse no celular em `/compress-image/` e em `/image-tools/` (o molde novo entra no `lighthouserc.json`): desempenho ≥ 90, CLS ≤ 0,05, LCP que não é a Oli.
+13. axe sem violação em toda página (o `a11y.spec.ts` já lê o mapa de rotas) e nos estados novos (fila com pronto e erro, ResultCard do lote, BeforeAfter, editor de corte, campos da Resize, opções da Image to PDF), nos dois temas, a 360 e a 1280 px. O editor de corte funciona só com o teclado.
+14. Nenhum AdSlot a menos de 150 px do Baixar, dos campos, das alças do corte, da fila, do painel ou da Oli, em toda página de ferramenta e de preset, em repouso e com o resultado, a 360×740 e a 1280×800; nenhum AdSlot dentro do painel ou no processamento.
+15. `gate:conteudo` verde, com o teste de unidade dele.
+16. `LAUNCHED = true`; o `_headers` sem `X-Robots-Tag` para o fileorca.com, com a regra de `*.workers.dev` e as dos 404 (teste e `gate:cabecalhos`).
+17. Sitemap em inglês com todas as páginas novas, hreflang só entre equivalentes, nenhuma página órfã e nenhum link quebrado (portões).
+18. /licenses com todo pacote que chega ao navegador, o aviso da LGPL e o link do código-fonte do libheif; `gate:licencas` verde.
+19. Prévia da PR: o comentário do Workers Builds aparece, as URLs respondem 200 com `x-robots-tag: noindex`, o `build.txt` traz o commit, o `.wasm` responde com `application/wasm` e o cache dos assets, e o Playwright converte a `heic-06` e comprime a `jpg-02` na prévia sem nenhuma requisição para fora, com screenshot.
+20. Depois do merge, só por leitura: o `https://fileorca.com/build.txt` traz o commit do merge; `/`, `/image-tools/` e `/heic-to-jpg/` respondem sem `x-robots-tag`; um `*.workers.dev` continua com noindex; o pós-deploy ficou verde (`gh run list --workflow pos-deploy.yml`) e disparou o IndexNow.
+
+# Verificação: rode de verdade
+
+- Cada fatia começa pelo teste do que ela entrega e termina com o `pnpm verificar` verde. O oráculo e as fixtures vêm antes do motor. Leia a falha, corrija a causa e repita até passar.
+- É proibido desligar, pular, marcar como skip, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no DECISOES.md.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e `pnpm verificar`, que já builda do zero) e guarde a saída completa para o relatório. Rode o `pnpm screenshots` depois do último ajuste visual.
+- Depois de abrir a PR, acompanhe o CI com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Espere o comentário do Workers Builds por até 30 min, olhando a cada poucos minutos com `gh pr view <n> --comments`, e confira a prévia com curl e Playwright (critério 19). Se o build do Workers Builds ficar vermelho, o check do GitHub não traz o log e a causa não se deduz pelo tempo (CLAUDE.md): registre a pendência com o ID do build e siga.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão: (1) este prompt; (2) o CLAUDE.md, a ficha F2 e o resto do plano; (3) docs/design/ e o DECISOES.md; (4) na dúvida, a opção mais simples e reversível. Toda decisão que não está escrita aqui vira um § no DECISOES.md, com as alternativas e o porquê.
+
+Se uma biblioteca não fizer o que o plano espera na versão atual (o `.wasm` separado do libheif, a build de uma thread do AVIF), leia o pacote, procure a saída que respeita as regras (licença, nenhum `SharedArrayBuffer`, arquivo separado para a LGPL) e registre. Não troque de biblioteca nem de arquitetura por conta própria: ADR "Proposta", pendência e o resto segue.
+
+Se faltar uma peça em docs/design/ (um ícone, um estado), use o que existe mais perto e registre; não desenhe ícone nem pose.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real (o comentário do Workers Builds que não chega, a ajuda do YouTube que não abre, o LanguageTool fora do ar) não para a run: siga com o resto e registre a pendência, com o que falta para resolver.
+
+Válvula de estouro, nesta ordem, se o tempo, o limite ou o orçamento do CI apertar (o do CI corta (e) e (f) primeiro): (a) o caminho sem canvas fica só na HEIC to JPG/PNG e na Compress image, e nas outras a imagem acima do limite recebe uma recusa clara; (b) o cancelar de cada linha da fila; (c) o ajuste da caixa de corte por foto no lote (o lote fica com o corte central, e a caixa se ajusta quando há uma foto só); (d) o BeforeAfter fora da Compress image e dos presets; (e) Convert to WebP/AVIF, para a run 2b; (f) AVIF to JPG, para a run 2b. O que for cortado vira pendência no relatório, com o que falta. Nunca corte: Compress image, Resize image, HEIC to JPG/PNG, Image to PDF e o `LAUNCHED = true` (a ficha), nem Crop, Rotate, WebP to JPG/PNG, PNG ↔ JPG, os presets com `entra`, o hub, a home, o lote com ZIP, o Ctrl+V, a orientação, a remoção dos metadados, o erro por arquivo, o portão de conteúdo e os testes dos critérios 3 a 8 e 10, que a ficha não deixa ir para a 2b.
+
+# Git e segurança
+
+- Comece com `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-02.md` e `docs/prompts/prompt-fase-02.txt`, o prompt desta run. Crie a branch com `git switch -c fase-02`. Os dois arquivos entram sem edição no primeiro commit dela. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-02.txt`.
+- Commits pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Push em marcos, não a cada commit: cada push roda o verificar no CI e gasta minutos do plano grátis do GitHub.
+- Abra a PR cedo, em rascunho, logo depois da primeira fatia com build (`gh pr create --draft --base main --head fase-02`, num comando separado do push). Assim o CI no Ubuntu, o tempo dele e a prévia andam enquanto você trabalha. Título e descrição em português, com o resumo e o link do relatório.
+- Rode `gh pr ready` só no fim, com o relatório e os screenshots commitados e o verificar local verde: com o CI verde, o job de merge mescla sozinho, o Workers Builds publica e o site está lançado. Depois do `ready`, acompanhe o CI até o fim. Se ele falhar, corrija e envie: o CI roda de novo e mescla quando ficar verde. Depois do merge, faça as conferências do critério 20 só por leitura. Depois do merge, não abra outra PR: o que sobrar vai para a resposta final como pendência.
+- Nunca: push na main, force push, `git reset --hard`, `--amend`, `--no-verify`, mexer em `core.hooksPath` ou em `.githooks/`, `gh pr merge`, `wrangler deploy` em qualquer forma (inclusive `--dry-run`), `gh api` com método de escrita, `gh secret` ou `gh variable`. O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. Explorar com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - a ficha F2 e as seções do plano listadas acima, transformadas em checklist ligado aos critérios deste prompt;
+   - em docs/design/, para cada componente do item 5 do Contexto, a marcação, as classes, os estados e o ARIA do `preview.html` contra o que o `src/` tem hoje;
+   - a documentação e os arquivos instalados das sete bibliotecas (e do `@jsquash/resize`, se for usar), com o que cada uma pede ao Vite 8, ao worker e ao `serve-dist.ts`;
+   - os testes e portões atuais: o que cada um mede, quais já leem o mapa de rotas e crescem sozinhos com as páginas novas, e o tempo de cada spec no log do CI verde da F1b (`gh run view 41169095121 --log`);
+   - as fixtures: o ORIGEM convertido no rascunho do `expected.json`, com os SHA-256 conferidos.
+2. Planejar: escreva `docs/relatorios/fase-02-plano.md`, autossuficiente. Ele traz a árvore de arquivos, os módulos com nome (o motor e os codecs, o parser do contêiner HEIF, a ilha compartilhada, a fila e o ZIP, o motor de PDF, o gerador de fixtures, o portão de conteúdo), cada critério deste prompt ligado a um teste ou comando, a projeção do tempo do CI, o que fica de fora e a ordem de execução. Ele é o gabarito da revisão.
+3. Implementar em fatias que terminam verdes, nesta ordem (o que vem antes é o que nunca se corta, e a ordem das ferramentas segue o volume do CSV):
+   - fixtures, oráculo e os leitores de metadado e de cabeçalho dos testes;
+   - motor: decodificar, orientar, transformar, codificar e tirar metadados, com o worker, os codecs sob demanda e o caminho sem canvas;
+   - a ilha compartilhada com lote, fila, ZIP e Ctrl+V, e a Compress image migrada (inglês, pt e es);
+   - PR em rascunho e a primeira medida do tempo do CI;
+   - Resize image; HEIC to JPG/PNG; Image to PDF com o motor de PDF;
+   - os presets;
+   - Crop image; Rotate image; WebP to JPG/PNG; PNG ↔ JPG;
+   - hub, home, busca, relacionadas, chips e o portão de conteúdo;
+   - licenças e `LAUNCHED = true`;
+   - AVIF to JPG; Convert to WebP/AVIF;
+   - o resto dos itens da válvula, os screenshots e o relatório.
+
+   Frentes que editam arquivos diferentes (o gerador de fixtures, os codecs do motor, o motor de PDF, o portão de conteúdo, os textos das páginas) podem rodar em worktrees separadas, e você integra. A ilha compartilhada e o CSS ficam com um agente só, para não colidir. Os textos das páginas em inglês e os de pt e es da Compress image podem ir para subagentes Sonnet, com a voz do README do design system. O motor, a ilha e os testes da matriz ficam no modelo forte.
+4. Revisão adversarial no fim, em contexto limpo, com subagentes Sonnet que não viram o código sendo escrito. Eles revisam contra este prompt, a ficha F2 e o `docs/relatorios/fase-02-plano.md`, em quatro lentes paralelas:
+   - arquivos certos: cada ferramenta com fixtures que eles mesmos escolhem, abrindo as saídas, conferindo formato, dimensões, orientação, transparência, metadados, o ZIP e o PDF, e tentando quebrar o lote (arquivos repetidos, corrompidos no meio, 30 arquivos, opção trocada durante o processamento);
+   - privacidade, anúncio e consentimento: requisições, números digitados, eventos, a distância dos AdSlots, o café e "O que derruba conta";
+   - acessibilidade e design system: cada componente contra o README e o `preview.html` dele (lado a lado com o screenshot, no mesmo tema e na mesma largura), o editor de corte só com o teclado, foco, `aria-live`, nomes acessíveis, estados no axe e a voz;
+   - desempenho, SEO e lançamento: orçamentos, LCP e CLS, o tempo do CI, a regra da página programática, títulos, hreflang, sitemap, o portão de conteúdo e os cabeçalhos com `LAUNCHED = true`.
+
+   Cada lente aponta só lacunas de correção ou de requisito, com arquivo:linha e evidência, nada de preferência de estilo. Corrija os achados críticos e altos, rode o verificar e revise de novo até limpar. Os médios e baixos que ficarem vão para o relatório.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-02.md` em português, commitado na branch antes do `gh pr ready`, com:
+- o que foi feito, por área, e a árvore do que nasceu ou mudou;
+- a saída real e completa do `pnpm verificar` local, com o tempo, e o link da execução verde do CI na PR, com o tempo de cada portão;
+- a matriz de fixtures (critério 3) e a tabela dos presets com os bytes de cada saída;
+- o Lighthouse das duas páginas (desempenho, LCP com o elemento, CLS), o JS inicial de cada página em KB gzip e as requisições por par;
+- os tempos do codificador AVIF e do libheif medidos, com a máquina;
+- os screenshots, por estado, nos dois temas, e os da prévia;
+- o link da prévia e o que você conferiu nela; e, depois do merge, o que você conferiu no fileorca.com (só leitura);
+- as decisões novas, apontando os § do DECISOES.md;
+- o que a revisão adversarial achou e o que foi corrigido;
+- o que a válvula cortou, se cortou algo, e o que falta para a run 2b;
+- a lista do que é do Victor, em passos: no Search Console, enviar o `sitemap-index.xml` e pedir a indexação da home e do hub; no Bing Webmaster, enviar o mesmo sitemap; conferir o fileorca.com no celular e no computador, nos dois temas, com uma foto do próprio celular em cada ferramenta; conferir a HEIC to JPG/PNG no Safari de um iPhone ou Mac, quando tiver um à mão, porque o caminho nativo do HEIC não roda no CI (e olhar o `tool_error` no GA4 nos primeiros dias); conferir a especificação da YouTube thumbnail, se ficou pendente; as pendências da F1a e da F1b que seguem abertas; e gerar o prompt da F3;
+- uma nota para a F3 (onde a revisão deve olhar com mais cuidado) e uma para a F5 (o que o motor de imagem precisa para virar código aberto e o que a semente do motor de PDF já faz).
+
+Acrescente no fim do CLAUDE.md uma seção curta, "F2: ferramentas de imagem", com os comandos novos (o gerador de fixtures e o `gate:conteudo`), como acrescentar uma ferramenta de imagem (pasta, rota, textos, ilha, testes da matriz) e as armadilhas que você achou. Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR e se o merge automático, o lançamento e o pós-deploy aconteceram.
+
+# Idioma
+
+Narrativa, plano, relatório, DECISOES.md e descrição da PR em português. Código, nomes de arquivo, identificadores e commits em inglês. Os textos do site ficam nos arquivos de tradução de cada idioma, com a voz de docs/design/README.md: sentence case, sem emoji, sem as palavras proibidas e com "tú" no espanhol.

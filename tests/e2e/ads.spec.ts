@@ -1,18 +1,73 @@
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { chooseImage, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
+import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
 const CLEARANCE = 150;
-const TARGETS = '.fo-btn--download, input:not([type="file"]), select, textarea, .fo-seg, fieldset, .fo-drop, .fo-level, .fo-result, [data-oli]';
+// F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
+// frames, labels and help lines), the comparison, the crop editor with its box and corner handles and the
+// next-step chips are measured too.
+const TARGETS = [
+  '.fo-btn--download', 'input:not([type="file"])', 'select', 'textarea', '.fo-seg', 'fieldset',
+  '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
+  '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more',
+  '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
+  '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
+].join(', ');
+// The tool pages and presets that exist. A tool adds its path here when its page is built.
+const TOOL_PAGES = [
+  '/compress-image/',
+  '/compress-image/to-100kb/',
+  '/compress-image/to-1mb/',
+  '/resize-image/',
+  '/resize-image/youtube-thumbnail/',
+  '/crop-image/',
+  '/rotate-image/',
+  '/heic-to-jpg/',
+  '/webp-to-jpg/',
+  '/png-to-jpg/',
+  '/image-to-pdf/',
+];
 // F1b: the coffee line of the result card is measured too (the card itself is already in TARGETS).
 const TARGETS_WITH_COFFEE = `${TARGETS}, .fo-result__support`;
 const VIEWPORTS = [
   { width: 360, height: 740 },
   { width: 1280, height: 800 },
-];
-const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
+] as const;
+// The result states use small inputs (the clearance does not depend on the size of the photo): the 640 × 480 JPEG
+// drawn in the page for the tools that take a JPG, and the smallest fixture of the format for the converters, which
+// take one format each (a JPG would be refused and no result would show).
+const SMALL_OF: Record<string, { fixture: string; mimeType: string }> = {
+  // Over 1 MB, so the preset has something to shrink and the comparison shows (the 128 KB JPEG already fits).
+  '/compress-image/to-1mb/': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' }, // 800 × 600, 1.1 MB
+  '/heic-to-jpg/': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' }, // 1512 × 850, 239 KB
+  '/webp-to-jpg/': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' }, // 1600 × 1200, 262 KB
+};
+
+// What each result must put on screen besides the card, so the clearance is measured against it and not against its
+// absence: the number fields of Resize, the crop editor with its box and corner handles, the comparison of the
+// tools that lose quality on purpose. Every result has the queue once there are two files (checked in the test).
+const ON_SCREEN: Record<string, string[]> = {
+  '/compress-image/': ['.fo-ba'],
+  '/compress-image/to-100kb/': ['.fo-ba'],
+  '/compress-image/to-1mb/': ['.fo-ba'],
+  '/resize-image/': ['#rz-width', '#rz-height', '.fo-input'],
+  '/resize-image/youtube-thumbnail/': ['.fo-ba'],
+  '/crop-image/': ['.fo-crop', '.fo-crop__box', '.fo-crop__handle', '#cr-x', '#cr-y', '#cr-width', '#cr-height'],
+  '/heic-to-jpg/': ['.fo-ba'],
+  '/webp-to-jpg/': ['.fo-ba'],
+};
+
+/** `count` small files this page accepts, with names of their own (a batch of two or more shows the queue). */
+async function smallFiles(page: Page, path: string, count: number): Promise<TestFile[]> {
+  const own = SMALL_OF[path];
+  if (!own) return jpegBatch(page, count);
+  const buffer = readFileSync(resolve('fixtures/images', own.fixture));
+  const extension = own.fixture.split('.').pop() ?? '';
+  return Array.from({ length: count }, (_, index) => ({ name: `photo-${index + 1}.${extension}`, mimeType: own.mimeType, buffer }));
+}
 
 interface Box { kind: string; x: number; y: number; w: number; h: number }
 
@@ -49,31 +104,90 @@ async function expectClearance(page: Page, label: string, selector = TARGETS): P
   return min;
 }
 
-for (const viewport of VIEWPORTS) {
-  test.describe(`distância dos anúncios a ${viewport.width}×${viewport.height}`, () => {
-    test.use({ viewport });
+/** No AdSlot inside the tool island (the panel, the options, the queue, the chips) and none added or removed by a state. */
+async function expectAdsOutsideThePanel(page: Page, label: string, adCount: number): Promise<void> {
+  expect(await page.locator('#fo-tool-root .fo-ad').count(), `${label}: AdSlot dentro do painel`).toBe(0);
+  expect(await page.locator('.fo-ad').count(), `${label}: o número de AdSlots mudou`).toBe(adCount);
+}
 
-    test('before the file and with the result and Download on screen', async ({ page }) => {
-      await page.goto('/compress-image/');
+// One load per page and browser, walked through four states: at rest, while the first file is processed (the
+// WaterLevel), with the result and Download on screen, and with a batch of two (the queue, the comparison and
+// the ZIP card). In every state the page is measured at 360×740 and at 1280×800 on the same load: the layout is
+// CSS (and a media query the island listens to, which a11y.spec.ts also relies on), so resizing the window in place
+// gives what a fresh load at that width gives, and the processing runs once instead of twice. Each state keeps
+// 150px between every AdSlot and the Download, the fields, the crop box and its handles, the queue, the
+// comparison, the panel and the Oli, and none puts an AdSlot inside the panel.
+test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
+  for (const path of TOOL_PAGES) {
+    test(`${path}: at rest, while processing, with the result and with a batch`, async ({ page }) => {
+      const gaps: string[] = [];
+      let flip = false;
+      /** Runs the check at both widths (the order alternates, so the window is resized once per state) and keeps the smallest gap of each. */
+      const atBothWidths = async (state: string, check: (viewport: (typeof VIEWPORTS)[number]) => Promise<number>): Promise<void> => {
+        const smallest: string[] = [];
+        for (const viewport of flip ? [...VIEWPORTS].reverse() : VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          smallest.push(`${viewport.width}px ${(await check(viewport)).toFixed(0)}`);
+        }
+        flip = !flip;
+        gaps.push(`${state}: ${smallest.join(', ')}`);
+      };
+
+      // The worker is held from the start: a pointer that rests over the panel (or the focus) warms the codecs and
+      // starts the worker before the first file, and an engine already running would not stay in processing.
+      const engine = await slowEngine(page);
+      await page.setViewportSize(VIEWPORTS[0]);
+      await page.goto(path);
       await hydrated(page);
       await dismissCookies(page);
-      await expectClearance(page, 'antes do arquivo');
-      if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
-      await page.setInputFiles('input[type="file"]', PHOTO);
+      const adCount = await page.locator('.fo-ad').count();
+      expect(adCount).toBeGreaterThan(0);
+
+      // At rest: no content AdSlot above the tool panel, the rail from 1280px, and the clearance from every target.
+      await atBothWidths('repouso', async (viewport) => {
+        const panel = (await boxes(page, '.fo-drop'))[0];
+        expect(panel).toBeDefined();
+        for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, 'AdSlot acima do painel').toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
+        if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+        await expectAdsOutsideThePanel(page, 'antes do arquivo', adCount);
+        return expectClearance(page, 'antes do arquivo');
+      });
+
+      // Processing: the worker is held, so the panel is the WaterLevel.
+      const batch = await smallFiles(page, path, 2);
+      await chooseImages(page, batch.slice(0, 1));
+      await expect(page.locator('.fo-level')).toBeVisible();
+      await atBothWidths('processando', async () => {
+        await expectAdsOutsideThePanel(page, 'processando', adCount);
+        return expectClearance(page, 'processando');
+      });
+      engine.release();
+
+      // The result of one file.
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
-      await expectClearance(page, 'com o resultado');
-    });
+      await atBothWidths('resultado', async () => {
+        for (const selector of ON_SCREEN[path] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
+        await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
+        return expectClearance(page, 'com o resultado');
+      });
 
-    test('no AdSlot above the tool panel', async ({ page }) => {
-      await page.goto('/compress-image/');
-      await hydrated(page);
-      const panel = (await boxes(page, '.fo-drop'))[0];
-      expect(panel).toBeDefined();
-      for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y).toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
+      // A second batch on the result starts over: two files, the queue under the options, the card for both.
+      await chooseImages(page, batch);
+      await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
+      await atBothWidths('fila', async () => {
+        for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[path] ?? [])]) {
+          expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
+        }
+        await expectAdsOutsideThePanel(page, 'com a fila de dois arquivos', adCount);
+        return expectClearance(page, 'com a fila de dois arquivos');
+      });
+      console.log(`${path} menor vão: ${gaps.join(' | ')}`);
     });
-  });
-}
+  }
+});
 
 // F1b: the same 150px in the other states of the panel and with the search dialog open and empty.
 async function measure(page: Page, label: string, selector?: string): Promise<void> {
@@ -113,6 +227,19 @@ for (const viewport of VIEWPORTS) {
       await measure(page, 'erro');
     });
 
+    test('with a batch: the queue, the error row, the comparison and the chips', async ({ page }) => {
+      await dismissCookies(page);
+      const photos = await jpegBatch(page, 8);
+      await chooseImages(page, [...photos.slice(0, 2), { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }, ...photos.slice(2)]);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(6);
+      await expect(page.locator('.fo-ba')).toHaveCount(1);
+      await expect(page.locator('.fo-next')).toBeVisible();
+      await measure(page, 'lote com a fila, o comparador e os atalhos');
+      await page.getByRole('button', { name: /^Show \d+ more$/ }).click();
+      await measure(page, 'fila inteira');
+    });
+
     test('with the result and the coffee line', async ({ page }) => {
       await coffeeLineInOneUse(page);
       await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
@@ -140,6 +267,25 @@ test('legal, institutional, home and 404 pages have no AdSlot and no ad code', a
     await page.goto(path);
     expect(await page.locator('.fo-ad').count(), path).toBe(0);
     expect(await page.locator('script[src*="adsbygoogle"], ins.adsbygoogle').count(), path).toBe(0);
+  }
+});
+
+// F2: the hub /image-tools/ has no panel, field, Download or Oli on screen; what holds there is the order. Its one
+// content AdSlot sits under the grid of tools (never above them on the phone), the rail is the tool pages' one, and
+// none is within 150px of a visible Oli.
+test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
+  await page.goto('/image-tools/');
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+    const grid = await page.locator('.fo-grid').boundingBox();
+    const ad = await page.locator('.fo-ad--content').boundingBox();
+    expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+    expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+    for (const oli of await boxes(page, '[data-oli]')) {
+      for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
+    }
   }
 });
 

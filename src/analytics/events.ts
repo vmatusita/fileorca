@@ -1,6 +1,7 @@
 // GA4 events with a closed list of parameters (PLANO, eventos do GA4; DECISOES § 10).
 // No event carries a file name, file content or a number the person typed.
 import type { Lang } from '../i18n/routes.ts';
+import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 
 export const EVENT_PARAMS = {
   tool_start: ['tool', 'lang'],
@@ -13,24 +14,40 @@ export const EVENT_PARAMS = {
 
 export type EventName = keyof typeof EVENT_PARAMS;
 
-export type ToolId = 'compress-image';
+/** Every image tool and preset page (registry.ts); the id is a page name, never a file name. */
+export type ToolId = ImagePageId;
+/** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
+export const OUTCOMES = ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed'] as const;
+export type Outcome = (typeof OUTCOMES)[number];
+/** Why one file did not come out (src/engine/image/types.ts FailureReason). */
+export const ERROR_REASONS = ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large'] as const;
+export type ErrorReason = (typeof ERROR_REASONS)[number];
+/** The real format of the file as the engine read it from the bytes: a closed list, never a file type string. */
+export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty'] as const;
+export type Codec = (typeof CODECS)[number];
 export type DonatePlace = 'result' | 'footer' | 'support_page';
 
 export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
-  tool_complete: { tool: ToolId; lang: Lang; outcome: 'smaller' | 'unchanged' };
+  tool_complete: { tool: ToolId; lang: Lang; outcome: Outcome };
   download: { tool: ToolId; lang: Lang };
-  next_step_click: { tool: ToolId; lang: Lang; target: string };
-  tool_error: { tool: ToolId; lang: Lang; browser: string; codec: string; reason: 'decode' | 'encode' | 'unsupported' };
+  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | 'home' };
+  tool_error: { tool: ToolId; lang: Lang; browser: string; codec: Codec; reason: ErrorReason };
   donate_click: { place: DonatePlace; lang: Lang };
 }
 
-/** Drops any parameter outside the list (defence in depth: the types already forbid them). */
+/** Parameters whose value comes from a closed list: anything else (a file type, a free string) is dropped. */
+const CLOSED_VALUES: Record<string, readonly string[]> = { outcome: OUTCOMES, reason: ERROR_REASONS, codec: CODECS };
+
+/** Drops any parameter outside the list, and any value outside a closed list (defence in depth: the types already forbid them). */
 export function cleanParams<N extends EventName>(name: N, params: Record<string, unknown>): Partial<EventMap[N]> {
   const allowed: readonly string[] = EVENT_PARAMS[name];
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(params)) {
-    if (allowed.includes(key) && (typeof value === 'string' || typeof value === 'number')) out[key] = value;
+    if (!allowed.includes(key) || (typeof value !== 'string' && typeof value !== 'number')) continue;
+    const closed = CLOSED_VALUES[key];
+    if (closed && !closed.includes(String(value))) continue;
+    out[key] = value;
   }
   return out as Partial<EventMap[N]>;
 }

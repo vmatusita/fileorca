@@ -8,6 +8,7 @@
 // runs everything, as on a laptop.
 import { spawn } from 'node:child_process';
 import { rmSync } from 'node:fs';
+import { watchDisk } from './lib/disco.ts';
 
 export interface Step {
   name: string;
@@ -25,6 +26,7 @@ export const STEPS: Step[] = [
   { name: 'worker sem código', command: 'pnpm run gate:worker' },
   { name: 'seo (hreflang, sitemaps, canonical, robots)', command: 'pnpm run gate:seo' },
   { name: 'links internos e páginas órfãs', command: 'pnpm run gate:links' },
+  { name: 'conteúdo mínimo das ferramentas e do site', command: 'pnpm run gate:conteudo' },
   { name: 'design (sprite, fontes, tema, movimento, setas)', command: 'pnpm run gate:design' },
   { name: 'licenças', command: 'pnpm run gate:licencas' },
   { name: 'conteúdo de dinheiro e saúde', command: 'pnpm run gate:dinheiro-saude' },
@@ -73,6 +75,7 @@ if (import.meta.main) {
   const started = Date.now();
   const timings: { name: string; ms: number; ok: boolean }[] = [];
   rmSync('dist', { recursive: true, force: true });
+  const stopWatchingDisk = watchDisk();
   for (const step of steps) {
     console.log(`\n▶ ${step.name}\n  $ ${step.command}`);
     const begin = Date.now();
@@ -80,6 +83,7 @@ if (import.meta.main) {
     timings.push({ name: step.name, ms: Date.now() - begin, ok: code === 0 });
     if (code !== 0) break;
   }
+  stopWatchingDisk();
   const total = Date.now() - started;
   console.log(`\nResumo do pnpm verificar (${label})`);
   for (const timing of timings) console.log(`  ${timing.ok ? 'ok   ' : 'FALHA'} ${seconds(timing.ms).padStart(8)}  ${timing.name}`);
