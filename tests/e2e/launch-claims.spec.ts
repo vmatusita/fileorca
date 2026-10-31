@@ -35,6 +35,8 @@ for (const { path, first, second, magic } of CASES) {
     expect(sent.length, 'the page, its scripts and the codec were requested').toBeGreaterThan(2);
     expect(sent.filter((request) => new URL(request.url).origin !== origin), 'nothing goes to another origin').toEqual([]);
     expect(sent.filter((request) => request.method !== 'GET' || request.body > 0), 'nothing is sent with a body').toEqual([]);
+    // Nor in the address: no request carries a query string (second pass p2-integridade-03).
+    expect(sent.filter((request) => new URL(request.url).search !== ''), 'nothing is sent in a query string').toEqual([]);
 
     // The network goes off; the next file goes through the same loaded worker and codec.
     await context.setOffline(true);

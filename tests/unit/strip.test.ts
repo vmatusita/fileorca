@@ -68,16 +68,20 @@ describe('removedor de metadados (caso sem ganho)', () => {
   const latin = (bytes: Uint8Array) => Buffer.from(bytes).toString('latin1');
 
   it('keeps only the picture chunks of a PNG: private and unknown chunks with GPS text go (caBX, zxIf, exIf, dSIG, vpAg, prVW)', () => {
-    const keepers = ['PLTE', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'bKGD', 'pHYs'];
+    // Every chunk the allowlist keeps, the APNG and HDR ones included (second pass p2-motor-02).
+    const keepers = ['PLTE', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'bKGD', 'pHYs', 'cICP', 'mDCV', 'cLLI', 'acTL', 'fcTL'];
     const png = new Uint8Array([
       0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
       ...pngChunk('IHDR', [0, 0, 0, 1, 0, 0, 0, 1, 8, 3, 0, 0, 0]),
       ...keepers.flatMap((type) => pngChunk(type, [1, 2, 3])),
       ...['caBX', 'zxIf', 'exIf', 'dSIG', 'vpAg', 'prVW', 'teSt'].flatMap((type) => pngChunk(type, SECRET)),
       ...pngChunk('IDAT', [1, 2, 3]),
+      ...pngChunk('fcTL', [4, 5]),
+      ...pngChunk('fdAT', [6, 7]),
       ...pngChunk('IEND', []),
     ]);
     const stripped = latin(stripPng(png));
+    expect(stripped).toContain('fdAT');
     expect(stripped).not.toContain('GPSLatitude');
     for (const type of ['caBX', 'zxIf', 'exIf', 'dSIG', 'vpAg', 'prVW', 'teSt']) expect(stripped, type).not.toContain(type);
     for (const type of ['IHDR', ...keepers, 'IDAT', 'IEND']) expect(stripped, type).toContain(type);
@@ -110,12 +114,14 @@ describe('removedor de metadados (caso sem ganho)', () => {
       ...riffChunk('XYZW', SECRET),
       ...riffChunk('ALPH', [0, 1]),
       ...riffChunk('VP8L', [0x2f, 0, 0, 0, 0]),
+      ...riffChunk('ANIM', [0, 0, 0, 0, 0, 0]),
+      ...riffChunk('ANMF', [1, 2, 3, 4]),
     ];
     const size = body.length;
     const webp = new Uint8Array([...[...'RIFF'].map((c) => c.charCodeAt(0)), size & 0xff, (size >> 8) & 0xff, 0, 0, ...body]);
     const stripped = latin(stripWebp(webp));
     expect(stripped).not.toContain('GPSLatitude');
-    for (const type of ['VP8X', 'ICCP', 'ALPH', 'VP8L']) expect(stripped, type).toContain(type);
+    for (const type of ['VP8X', 'ICCP', 'ALPH', 'VP8L', 'ANIM', 'ANMF']) expect(stripped, type).toContain(type);
   });
 
   it('drops EXIF and XMP chunks from a WebP, clears their flags and fixes the RIFF size', () => {

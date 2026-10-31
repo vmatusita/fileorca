@@ -26,6 +26,20 @@ for (const delay of [300, 3000]) {
   });
 }
 
+// The CMP that is there by the load event (the common case) hides the notice at the load event, not half a second
+// later (second pass p2-consentimento-01, DECISOES § 104).
+test('the notice goes away at the load event when the CMP arrived before it', async ({ page }) => {
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      (window as unknown as { __tcfapi: unknown }).__tcfapi = (command: string, _version: number, callback: (data: unknown, ok: boolean) => void) => {
+        if (command === 'addEventListener') callback({ gdprApplies: true, eventStatus: 'tcloaded', cmpStatus: 'loaded' }, true);
+      };
+    });
+  });
+  await page.goto('/compress-image/', { waitUntil: 'load' });
+  await expect(page.locator('#fo-cookie')).toBeHidden({ timeout: 100 });
+});
+
 test('Decline erases the coffee count at once, and keeps only "don\'t show again"', async ({ page }) => {
   await page.goto('/');
   await page.locator('#fo-cookie').getByRole('button', { name: 'Accept' }).click();

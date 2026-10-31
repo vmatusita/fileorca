@@ -14,6 +14,18 @@ export class EngineError extends Error {
   }
 }
 
+/**
+ * A promise for code the engine loads on first use (a codec module, its JS glue or its .wasm): failing to load it is
+ * 'load', never a damaged file or a browser that cannot write the format (DECISOES § 104).
+ */
+export async function loading<T>(promise: Promise<T>): Promise<T> {
+  try {
+    return await promise;
+  } catch (error) {
+    throw error instanceof EngineError ? error : new EngineError('load', 'the engine could not load a codec');
+  }
+}
+
 export function reasonOf(error: unknown, fallback: FailureReason): FailureReason {
   return error instanceof EngineError ? error.reason : fallback;
 }

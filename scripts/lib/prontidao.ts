@@ -58,7 +58,8 @@ const ADS_SETTINGS = /^https:\/\/(?:adssettings\.google\.com|myadcenter\.google\
 const PARTNER_SITES = /^https:\/\/(?:policies\.google\.com\/technologies\/partner-sites|www\.google\.com\/policies\/privacy\/partners)\/?$/;
 
 const LOADER = /adsbygoogle\.js|pagead2\.googlesyndication\.com/;
-const PUSH = /adsbygoogle\s*\|\|\s*\[\]\s*\)\s*\.push/;
+/** A unit push in any form: `(adsbygoogle=…||[]).push`, `window.adsbygoogle.push`, … */
+const PUSH = /adsbygoogle[^;]*\.push\s*\(/;
 const HOSTNAME_LOCK = 'location.hostname==="fileorca.com"';
 const UNIT = /class="adsbygoogle"/;
 const META = /<meta name="google-adsense-account"[^>]*>/g;
@@ -172,8 +173,14 @@ export function checkAllBuild(site: Site): Row[] {
     if (loader !== page.ads) problems.push(`${page.path}: ${loader ? 'carregador numa página sem área de anúncio' : 'página de ferramenta sem o carregador'}`);
     // Each script that loads AdSense or pushes a unit carries the lock itself; one locked script elsewhere in the
     // page does not cover another (DECISOES § 101).
-    for (const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
-      const body = script[1] ?? '';
+    for (const script of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
+      const body = script[2] ?? '';
+      // The site loads AdSense only from an inline script with the lock: a <script src> of AdSense (the snippet of the
+      // AdSense help) can carry no lock at all (second pass p2-integridade-01).
+      if (LOADER.test(script[1] ?? '')) {
+        problems.push(`${page.path}: carregador por <script src>, sem trava possível`);
+        continue;
+      }
       if (!LOADER.test(body) && !PUSH.test(body)) continue;
       if (!body.includes(HOSTNAME_LOCK)) problems.push(`${page.path}: ${LOADER.test(body) ? 'carregador' : 'push de unidade'} sem a trava do hostname`);
     }

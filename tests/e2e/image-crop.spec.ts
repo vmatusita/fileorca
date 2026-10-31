@@ -346,5 +346,17 @@ test.describe('crop-image with the keyboard only', () => {
     await page.mouse.up();
     await expect.poll(async () => Number(await page.locator('#cr-x').inputValue()), { message: 'the box moved right' }).toBeGreaterThan(x);
     await expectFields(page, { width: 60, height: 60 });
+
+    // The outer half of a handle, outside the box, still resizes it (second pass p2-motor-03).
+    await box.scrollIntoViewIfNeeded();
+    const moved = await box.boundingBox();
+    expect(moved).not.toBeNull();
+    if (!moved) return;
+    const corner = { x: moved.x + moved.width + 12, y: moved.y + moved.height + 12 };
+    await page.mouse.move(corner.x, corner.y);
+    await page.mouse.down();
+    await page.mouse.move(corner.x + 25, corner.y + 25, { steps: 4 });
+    await page.mouse.up();
+    await expect.poll(async () => Number(await page.locator('#cr-width').inputValue()), { message: 'the box grew from its corner' }).toBeGreaterThan(60);
   });
 });

@@ -9,6 +9,7 @@ import { defaultOptions } from '@jsquash/avif/meta.js';
 import decoderWasm from '@jsquash/avif/codec/dec/avif_dec.wasm?url';
 import encoderWasm from '@jsquash/avif/codec/enc/avif_enc.wasm?url';
 import type { Raster } from '../pixels.ts';
+import { loading } from '../errors.ts';
 import { compiled, copyOut, startEmscripten } from './runtime.ts';
 
 /**
@@ -38,7 +39,7 @@ let encoder: Promise<Encoder> | undefined;
 
 function decoderModule(): Promise<Decoder> {
   decoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/avif/codec/dec/avif_dec.js'), compiled(decoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/dec/avif_dec.js')), compiled(decoderWasm)]);
     return startEmscripten<Decoder>(factory, module);
   })();
   decoder.catch(() => (decoder = undefined));
@@ -47,7 +48,7 @@ function decoderModule(): Promise<Decoder> {
 
 function encoderModule(): Promise<Encoder> {
   encoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/avif/codec/enc/avif_enc.js'), compiled(encoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/enc/avif_enc.js')), compiled(encoderWasm)]);
     return startEmscripten<Encoder>(factory, module);
   })();
   encoder.catch(() => (encoder = undefined));

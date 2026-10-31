@@ -7,6 +7,7 @@ import { defaultOptions } from '@jsquash/jpeg/meta.js';
 import decoderWasm from '@jsquash/jpeg/codec/dec/mozjpeg_dec.wasm?url';
 import encoderWasm from '@jsquash/jpeg/codec/enc/mozjpeg_enc.wasm?url';
 import type { Raster } from '../pixels.ts';
+import { loading } from '../errors.ts';
 import { compiled, copyOut, startEmscripten } from './runtime.ts';
 
 interface Decoder {
@@ -23,7 +24,7 @@ let warnings: string[] = [];
 
 function decoderModule(): Promise<Decoder> {
   decoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js'), compiled(decoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js')), compiled(decoderWasm)]);
     return startEmscripten<Decoder>(factory, module, { printErr: (message) => warnings.push(message) });
   })();
   decoder.catch(() => (decoder = undefined));
@@ -32,7 +33,7 @@ function decoderModule(): Promise<Decoder> {
 
 function encoderModule(): Promise<Encoder> {
   encoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js'), compiled(encoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js')), compiled(encoderWasm)]);
     return startEmscripten<Encoder>(factory, module);
   })();
   encoder.catch(() => (encoder = undefined));

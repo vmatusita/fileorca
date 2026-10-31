@@ -39,9 +39,10 @@ function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
 if(stored()==='granted'||stored()==='denied')return;
 show();addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
-// Google's CMP comes with the AdSense loader, often after the load event: look for it every 500 ms, for up to
-// 30 s, until it answers or the notice is gone (DECISOES § 101).
-var tries=0;(function look(){if(box.hidden||tcf()||++tries>60)return;setTimeout(look,500);})();
+// Google's CMP comes with the AdSense loader, often after the load event: look for it at once, at the load event
+// (where it usually is by then), and every 500 ms for up to 30 s, until it answers or the notice is gone (§ 101, § 104).
+var tries=0,found=false;function look(){if(found||box.hidden)return;if(tcf()){found=true;return;}if(++tries<=60)setTimeout(look,500);}
+look();addEventListener('load',function(){if(!found&&!box.hidden&&tcf())found=true;},{once:true});
 })();`;
 ---
 <div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>

@@ -5,7 +5,7 @@
 // done with, which zeroes the canvases so the memory goes back at once.
 // Self-contained: nothing here imports from outside src/engine/image/.
 
-import { EngineError } from './errors.ts';
+import { EngineError, loading } from './errors.ts';
 import { clampBox, crop, flattenOnWhite, hasTransparency, spinMatrix, transform } from './pixels.ts';
 import type { Raster, Spin } from './pixels.ts';
 import type { Box } from './types.ts';
@@ -178,7 +178,7 @@ export class RasterWork implements Work {
 
   async scale(width: number, height: number): Promise<Work> {
     if (width === this.width && height === this.height) return new RasterWork(crop(this.pixels, { x: 0, y: 0, width, height }));
-    const { resizeRaster } = await import('./codecs/resize.ts');
+    const { resizeRaster } = await loading(import('./codecs/resize.ts'));
     return new RasterWork(await resizeRaster(this.pixels, width, height));
   }
 

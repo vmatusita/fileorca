@@ -93,6 +93,9 @@ export type FailureReason =
   | 'truncated'
   /** The bytes are damaged and no decoder could read them. */
   | 'decode'
+  /** The code of a codec (its module, its glue or its .wasm) could not be loaded: offline, or the site changed
+   * since the page opened. Never the file's fault, so it is tried again (DECISOES § 104). */
+  | 'load'
   /** No encoder could write the output. */
   | 'encode'
   /** Bigger than this browser can handle: more than WASM_MAX_PIXELS, or a PNG or animated WebP above the canvas limit. */

@@ -731,3 +731,20 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - f-04: "1 files" no plural;
   - f-06: reserva do aviso reaberto que não se recalcula ao mudar a largura.
 - **Por quê:** a decisão 4 do prompt (baixos só os da F2; médio só se local) e a régua de quem decide: design e anúncio ligado são do Victor.
+
+## § 104 · O que a segunda passada achou e foi corrigido (F3, 31/out/2026)
+
+- **Contexto:** a segunda passada rodou com três revisores novos (consentimento, motor e integridade dos testes) sobre o diff `736b1cd..1380bb8`. Os 19 achados corrigidos fecharam, cada um com a prova da primeira passada rodada contra o `dist/` novo e com mutantes dos testes novos. Não apareceu nenhum crítico nem alto. Apareceram dois médios, confirmados por céticos, e cinco baixos que dizem respeito aos testes e às correções desta run. Todos foram corrigidos aqui, porque são defeitos das próprias correções.
+- **p2-motor-01 (médio) · o codec que não carrega, dentro do motor.** O a-01 cobria o chunk do motor, mas um `.wasm` ou a cola JS de um codec que não chega ainda virava "danificado" (HEIC) ou "este navegador não grava JPG" (Compress).
+  - `FailureReason` ganhou `load`, e `loading()` em `src/engine/image/errors.ts` transforma em `EngineError('load')` a falha de cada carga sob demanda: os módulos de codec importados por `decode.ts`, `encode.ts`, `process.ts` e `work.ts`, a cola dos codecs do jSquash e o `compiled()` e o `bytesOf()` do `runtime.ts`.
+  - A Compress de PNG deixa passar o `load` em vez de devolver o original com a nota de "não grava".
+  - O motor segue autocontido.
+  - Teste: com os `.wasm` bloqueados, a HEIC to JPG e a Compress dizem para recarregar; depois de liberar a rede, uma troca de opção processa o arquivo de novo. Isso cobre também o p2-integridade-05 (o `load` fora do `HOPELESS`).
+- **p2-integridade-01 (médio) e p2-consentimento-02 (baixo) · o portão e o carregador por `src`.** A correção do c-03 conferia a trava só no corpo dos scripts. Um `<script src=".../adsbygoogle.js">`, o trecho que a ajuda do AdSense manda colar, passava. Agora qualquer `<script src>` do AdSense reprova, e o push é reconhecido em qualquer forma (`adsbygoogle….push(`). Teste: carregador por `src` e `window.adsbygoogle.push` sem trava reprovam.
+- **p2-consentimento-01 (baixo, regressão do c-01) · o aviso que piscava.** A busca a cada 500 ms tinha trocado a checagem no `load`. Com a CMP presente antes do `load` (o caso comum), o aviso próprio ficava meio segundo na tela. O aviso volta a olhar a CMP no `load`, além da busca de 30 s, sem abrir uma segunda cadeia. Teste: com a CMP definida no `DOMContentLoaded`, o aviso some até 100 ms depois do `load`.
+- **Testes reforçados:**
+  - **p2-integridade-03:** o `launch-claims.spec.ts` também recusa query string.
+  - **p2-integridade-04 e p2-motor-02:** o teste do `strip` confere os 18 chunks que a lista de permissão guarda no PNG, `fdAT`, `cICP`, `mDCV` e `cLLI` incluídos, e o `ANIM` e o `ANMF` no WebP.
+  - **p2-motor-03:** o teste da caixa pequena do Crop prova que a metade de fora da alça ainda redimensiona. O mutante "caixa pequena nunca redimensiona" agora reprova.
+  - **p2-integridade-02:** o teste do amarelo aceita `rgb()` com espaços e lê os `style` inline dos `.astro` e `.tsx`.
+- **Por quê:** a decisão 4 do prompt pede uma segunda passada até não sobrar crítico nem alto. Não sobrou nenhum. Os médios novos eram locais, e os baixos eram falhas dos testes novos desta run. Deixá-los seria entregar testes que não provam o que dizem.

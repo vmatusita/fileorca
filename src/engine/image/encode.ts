@@ -11,6 +11,7 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import type { Level } from './types.ts';
+import { loading } from './errors.ts';
 import type { Work } from './work.ts';
 
 /** Qualities of the tools. MozJPEG, libwebp and libaom scales are each their own. */
@@ -32,7 +33,7 @@ export function blobOf(bytes: Uint8Array, type: string): Blob {
 }
 
 export async function encodeJpegMoz(work: Work, quality: number): Promise<Blob> {
-  const { encodeJpeg } = await import('./codecs/jpeg.ts');
+  const { encodeJpeg } = await loading(import('./codecs/jpeg.ts'));
   return blobOf(await encodeJpeg(work.raster(), quality), 'image/jpeg');
 }
 
@@ -46,7 +47,7 @@ export async function encodeJpegNative(work: Work, quality: number = QUALITY.nat
 export async function encodePngNative(work: Work): Promise<Blob> {
   const blob = await work.nativeBlob('image/png');
   if (blob && blob.type === 'image/png') return blob;
-  const { encodePng } = await import('./codecs/png.ts');
+  const { encodePng } = await loading(import('./codecs/png.ts'));
   return blobOf(await encodePng(work.raster(), work.width * work.height > PNG_LEVEL_1_ABOVE ? 1 : 2), 'image/png');
 }
 
@@ -56,17 +57,17 @@ export async function encodeWebpWork(work: Work, quality: number, native: boolea
     const blob = await work.nativeBlob('image/webp', quality / 100);
     if (blob && blob.type === 'image/webp') return blob;
   }
-  const { encodeWebp } = await import('./codecs/webp.ts');
+  const { encodeWebp } = await loading(import('./codecs/webp.ts'));
   return blobOf(await encodeWebp(work.raster(), quality), 'image/webp');
 }
 
 export async function encodeAvifWork(work: Work, level: Level): Promise<Blob> {
-  const { encodeAvif } = await import('./codecs/avif.ts');
+  const { encodeAvif } = await loading(import('./codecs/avif.ts'));
   return blobOf(await encodeAvif(work.raster(), QUALITY.avif[level]), 'image/avif');
 }
 
 /** Lossless recompression of PNG bytes that strip.ts already cleaned (OxiPNG keeps every chunk it is given). */
 export async function optimiseCleanPng(clean: Uint8Array, pixels: number): Promise<Uint8Array> {
-  const { optimisePng } = await import('./codecs/png.ts');
+  const { optimisePng } = await loading(import('./codecs/png.ts'));
   return optimisePng(clean, pixels > PNG_LEVEL_1_ABOVE ? 1 : 2);
 }

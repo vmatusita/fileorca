@@ -50,6 +50,29 @@ test('a good file whose engine cannot load is not called damaged, and says to re
   expect(await errors(page)).toEqual(['load']);
 });
 
+// The codecs load inside the engine on first use: a .wasm that does not arrive is 'load' too, never a damaged file or a
+// browser that cannot write JPG, and the file is tried again when an option changes (review p2-motor-01, DECISOES § 104).
+test('a codec that cannot load says to reload, and the file is tried again once it can', async ({ page }) => {
+  await page.route(/\.wasm$/, (route) => route.abort());
+  await page.goto('/heic-to-jpg/');
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.setInputFiles('input[type="file"]', fixtureFile('heic-06-iphone7-paisagem-gps.heic'));
+  await expect(page.locator('.fo-drop').getByText(/Oli couldn't load what she needs to read [\w-]+\.heic\./)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/is damaged/)).toHaveCount(0);
+
+  await page.goto('/compress-image/');
+  await hydrated(page);
+  await page.setInputFiles('input[type="file"]', fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'));
+  await expect(page.locator('.fo-drop').getByText(LOAD)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/can't save|is damaged/)).toHaveCount(0);
+  expect(await errors(page)).toEqual(['load']);
+  // The network is back: the next run takes the same file again, since 'load' is no fault of the file.
+  await page.unroute(/\.wasm$/);
+  await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
+  await expect(page.locator('.fo-result')).toContainText(/Done! Your image is \d+% lighter\./, { timeout: 30_000 });
+});
+
 test('a PDF worker that cannot start ends in an error, not in "Building your PDF" for ever', async ({ page }) => {
   // The PDF worker is the worker chunk that carries pdf-lib; the image engine's worker goes through untouched.
   await page.route(/\/_astro\/worker-[\w-]+\.js$/, async (route) => {

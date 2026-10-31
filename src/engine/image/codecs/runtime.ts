@@ -6,6 +6,8 @@
 // multi-thread builds, the worker helpers and the SharedArrayBuffer probe into dist/.
 // Self-contained: nothing here imports from outside src/engine/image/.
 
+import { loading } from '../errors.ts';
+
 const compiledModules = new Map<string, Promise<WebAssembly.Module>>();
 const fetchedBytes = new Map<string, Promise<ArrayBuffer>>();
 
@@ -24,7 +26,7 @@ async function compileWasm(url: string): Promise<WebAssembly.Module> {
 export function compiled(url: string): Promise<WebAssembly.Module> {
   let module = compiledModules.get(url);
   if (!module) {
-    module = compileWasm(url);
+    module = loading(compileWasm(url));
     compiledModules.set(url, module);
     module.catch(() => compiledModules.delete(url));
   }
@@ -35,10 +37,12 @@ export function compiled(url: string): Promise<WebAssembly.Module> {
 export function bytesOf(url: string): Promise<ArrayBuffer> {
   let bytes = fetchedBytes.get(url);
   if (!bytes) {
-    bytes = fetch(url).then((response) => {
-      if (!response.ok) throw new Error(`could not fetch ${url}: ${response.status}`);
-      return response.arrayBuffer();
-    });
+    bytes = loading(
+      fetch(url).then((response) => {
+        if (!response.ok) throw new Error(`could not fetch ${url}: ${response.status}`);
+        return response.arrayBuffer();
+      }),
+    );
     fetchedBytes.set(url, bytes);
     bytes.catch(() => fetchedBytes.delete(url));
   }

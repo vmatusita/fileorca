@@ -149,6 +149,13 @@ describe('gate:prontidao, (a) AdSense', () => {
     const mixed = makeAdsBuild({ loader: (page) => page.ads });
     write(mixed.dir, TOOL, readTool(mixed).replace('location.hostname==="fileorca.com"', 'true').replace('</main>', `${push}</main>`));
     expect(failing(checkAllBuild(mixed))).toEqual([expect.stringMatching(/\/compress-image\/: carregador sem a trava do hostname/)]);
+    // The snippet of the AdSense help, a <script src>, can carry no lock; a push in another form needs the lock too.
+    const bySrc = makeAdsBuild();
+    write(bySrc.dir, TOOL, readTool(bySrc).replace('</head>', '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script></head>'));
+    expect(failing(checkAllBuild(bySrc))).toEqual([expect.stringMatching(/\/compress-image\/: carregador por <script src>, sem trava possível/)]);
+    const plainPush = makeAdsBuild({ loader: (page) => page.ads });
+    write(plainPush.dir, TOOL, readTool(plainPush).replace('</main>', '<script>window.adsbygoogle.push({});</script></main>'));
+    expect(failing(checkAllBuild(plainPush))).toEqual([expect.stringMatching(/\/compress-image\/: push de unidade sem a trava do hostname/)]);
     const openPush = makeAdsBuild({ loader: (page) => page.ads });
     write(openPush.dir, TOOL, readTool(openPush).replace('</main>', `${push.replace('location.hostname==="fileorca.com"', 'true')}</main>`));
     expect(failing(checkAllBuild(openPush))).toEqual([expect.stringMatching(/\/compress-image\/: push de unidade sem a trava do hostname/)]);

@@ -8,6 +8,7 @@ import { defaultOptions } from '@jsquash/webp/meta.js';
 import decoderWasm from '@jsquash/webp/codec/dec/webp_dec.wasm?url';
 import encoderWasm from '@jsquash/webp/codec/enc/webp_enc_simd.wasm?url';
 import type { Raster } from '../pixels.ts';
+import { loading } from '../errors.ts';
 import { compiled, copyOut, startEmscripten } from './runtime.ts';
 
 interface Decoder {
@@ -34,7 +35,7 @@ let encoder: Promise<Encoder> | undefined;
 
 function decoderModule(): Promise<Decoder> {
   decoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/webp/codec/dec/webp_dec.js'), compiled(decoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/webp/codec/dec/webp_dec.js')), compiled(decoderWasm)]);
     return startEmscripten<Decoder>(factory, module);
   })();
   decoder.catch(() => (decoder = undefined));
@@ -44,7 +45,7 @@ function decoderModule(): Promise<Decoder> {
 function encoderModule(): Promise<Encoder> {
   encoder ??= (async () => {
     if (!webpEncoderSupported()) throw new Error('this browser has no WebAssembly SIMD for the WebP encoder');
-    const [{ default: factory }, module] = await Promise.all([import('@jsquash/webp/codec/enc/webp_enc_simd.js'), compiled(encoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/webp/codec/enc/webp_enc_simd.js')), compiled(encoderWasm)]);
     return startEmscripten<Encoder>(factory, module);
   })();
   encoder.catch(() => (encoder = undefined));
@@ -54,7 +55,7 @@ function encoderModule(): Promise<Encoder> {
 /** Downloads and compiles the encoder (the decoder is only for photos above the canvas limit); nothing runs. */
 export async function warmWebp(): Promise<void> {
   if (!webpEncoderSupported()) return;
-  await Promise.all([import('@jsquash/webp/codec/enc/webp_enc_simd.js'), compiled(encoderWasm)]);
+  await Promise.all([loading(import('@jsquash/webp/codec/enc/webp_enc_simd.js')), compiled(encoderWasm)]);
 }
 
 /** Still WebP to pixels. Animated WebP throws (the native path reads its first frame). */
