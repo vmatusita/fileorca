@@ -380,14 +380,17 @@
 }
 
 /* ---------- Footer on the deep sea, with the wave on its top edge ---------- */
-.fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--space-6) var(--space-6); }
+/* While the cookie notice is open, its script puts the room it needs in --fo-cookie-room on <html>, and
+   the footer takes it at its end: the page still ends on the deep sea (DECISOES § 36, § 91). */
+.fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--space-6) calc(var(--space-6) + var(--fo-cookie-room, 0px)); }
 .fo-footer::before {
   content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: var(--deep);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
 }
-/* With ads on, the AdSense anchor covers the bottom of the phone screen: 96px of room (Footer README). */
-@media (max-width: 767px) { .fo-footer--anchor { padding-bottom: var(--space-24); } }
+/* With ads on, the AdSense anchor covers the bottom of the phone screen: 96px of room (Footer README).
+   The room of the cookie notice already counts the anchor under it, so the larger of the two wins. */
+@media (max-width: 767px) { .fo-footer--anchor { padding-bottom: max(var(--space-24), calc(var(--space-6) + var(--fo-cookie-room, 0px))); } }
 .fo-footer__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-6); max-width: var(--page-max); margin-inline: auto; }
 .fo-footer h2 { margin: 0 0 var(--space-2); font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-deep-muted); }
 .fo-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }

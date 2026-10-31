@@ -3,7 +3,7 @@
 // first, neither button is brand or sun. Hidden for good after a choice, and hidden where the
 // IAB __tcfapi says GDPR applies (Google's CMP takes over there). Non-modal: it never blocks.
 // With the AdSense anchor on screen it sits above it (--fo-anchor), never under it, and it never
-// covers the keyboard focus (it reserves its height at the end of the page while visible).
+// covers the keyboard focus (it reserves its height at the end of the footer while visible).
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
 
@@ -17,9 +17,10 @@ var K=${JSON.stringify(CONSENT_STORAGE_KEY)},box=document.getElementById('fo-coo
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
 function save(v){try{localStorage.setItem(K,v);}catch(e){}}
 function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics_storage:v,ad_user_data:v,ad_personalization:v});}
-// While visible, the notice reserves its height at the end of the page, so the keyboard focus is
-// never hidden under it (WCAG 2.4.11).
-function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8;var r=document.documentElement.style,b=document.body.style;r.scrollPaddingBottom=h?h+'px':'';b.paddingBottom=h?h+'px':'';}
+// While visible, the notice reserves its height (anchor included) at the end of the page, so the
+// keyboard focus is never hidden under it (WCAG 2.4.11). The room goes to the footer through
+// --fo-cookie-room, never to the body: the page still ends on the deep sea (DECISOES § 91).
+function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedStyle(box).bottom)||0)+8;var r=document.documentElement.style;r.scrollPaddingBottom=h?h+'px':'';if(h)r.setProperty('--fo-cookie-room',h+'px');else r.removeProperty('--fo-cookie-room');}
 // WebKit does not always honour that scroll-padding when it reveals the focus, so a focused
 // element is moved out from under the notice before the browser reveals it (DECISOES § 36).
 document.addEventListener('focusin',function(e){var t=e.target;if(box.hidden||!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;var r=t.getBoundingClientRect(),end=box.getBoundingClientRect().top-8,d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(d)scrollBy(0,d);});
