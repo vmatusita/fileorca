@@ -628,6 +628,21 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
 - **Navegador:** só com `context.route` abortando todo domínio do Google (`.cache/f3/check-band.ts`), para nenhuma visita minha entrar no GA4. Assim a faixa do aviso foi medida na produção antes do merge: 202 px a 1280 e 216 px a 360, nos dois temas. Na prévia da PR (`736b1cd`), a medida deu 0 px nas quatro combinações. Na prévia, o `gtag.js` nem é pedido, por causa da trava de hostname.
 - **Por quê:** decisão 6 da ficha. Visita de navegador sem bloqueio contaria como tráfego no GA4.
 
+## § 98 · Textos de lançamento e as provas do Show HN (F3, 31/out/2026)
+
+- **Decisão:** `docs/lancamento/` tem quatro arquivos: `README.md` (ordem, checklist e avisos), `show-hn.md`, `alternativeto.md` e `diretorios.md`. Os textos que vão para fora estão em inglês, e as explicações para o Victor em português. Nada foi enviado.
+- **Diretórios: 10, não 20** (a válvula da ficha permite). Nove candidatos exigem selo ou backlink, vendem link dofollow ou pacote de envio, ou dependem de voto, e ficaram de fora pela política de spam de links do Google. Quatro listas estão paradas ou fechadas, e oito páginas não abriram para a ferramenta de leitura (403, erro de certificado, 404). O BetaList, pago, ficou numa lista à parte. A lista com o motivo de cada um está no próprio arquivo.
+- **AlternativeTo:** o FAQ recusa "a collection or suite of simple online tools", com conversores e editores de foto entre os exemplos. A chance de aprovação é baixa, e o texto fica pronto mesmo assim, como manda a ficha. Os limites dos campos ficam atrás de login. O texto usa tamanhos conservadores (descrição curta de 140 caracteres, longa de 705) e registra a lacuna.
+- **Show HN:** o título principal tem 68 caracteres, e as variações têm 72, 78 e 78. As diretrizes do HN proíbem texto gerado ou editado por IA nos comentários, então o `README.md` e o `show-hn.md` pedem ao Victor que reescreva o título e o comentário com as próprias palavras. O rascunho vale como roteiro de fatos.
+- **As três afirmações técnicas e as provas:**
+  - **"No byte of your file leaves your browser":** `tests/e2e/launch-claims.spec.ts`, no Chromium e no WebKit, na Compress (MozJPEG), na HEIC to JPG (libheif) e na Image to PDF. Da carga até o download, toda requisição da página e dos workers é um GET para a própria origem, sem corpo.
+  - **"After the page and the codec load, the tool keeps working offline":** no mesmo teste, `context.setOffline(true)` depois do primeiro arquivo. O segundo arquivo é processado e baixado sem nenhuma requisição de rede.
+  - **"The only third-party traffic is Google Analytics":** na produção, com os domínios do Google bloqueados, a home e um uso real da Compress pediram só `fileorca.com` e `www.googletagmanager.com`. Fora da produção, o `consent.spec.ts` e a trava de hostname.
+- **Frase corrigida:** "Each tool runs in a Web Worker" virou "The image work runs in a Web Worker…", com a ressalva do navegador sem `OffscreenCanvas` no worker, onde o motor roda na página (§ 22).
+- **LanguageTool:** os 15 blocos em inglês passaram pelo LanguageTool local do `lint:texto`, com nenhum erro de gramática (37 apontamentos de nomes próprios e estilo). O alcance do portão não mudou.
+- **Custo do teste no CI:** três testes por navegador, uns 23 s no Chromium e 30 s no WebKit aqui. No WebKit, os três se dividem entre as duas partes do CI.
+- **Alternativa:** prova por um script fora do `verificar`. Ela não protegeria a afirmação pública de uma regressão futura.
+
 ## § 99 · Testes que mudaram na F3, e por quê (F3, 31/out/2026)
 
 - `tests/unit/image-hub.test.ts`: o H1 esperado do hub mudou (§ 96).
