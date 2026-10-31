@@ -92,7 +92,7 @@ export const UPSTREAM_TEXTS: Record<string, readonly { label: string; file: stri
 /**
  * LGPL packages and the conditions under which they may reach the browser (CLAUDE.md: LGPL-3.0 only as
  * a separate file). The gate checks them against dist/: the .wasm is byte-identical to the package's,
- * and the glue shares its chunk with nothing but the loader named here.
+ * and the glue shares its chunk with nothing but the loaders named here (none for libheif: its glue is a chunk of its own).
  */
 export interface SeparateFileRule {
   package: string;
@@ -109,7 +109,8 @@ export const SEPARATE_FILE_RULES: readonly SeparateFileRule[] = [
     package: 'libheif-js',
     wasm: 'libheif-wasm/libheif.wasm',
     glue: 'libheif-wasm/libheif.js',
-    loaders: ['src/engine/image/codecs/heic.ts'],
+    // The glue is a chunk of its own (astro.config.ts, the 'libheif' group): no loader shares it.
+    loaders: [],
   },
 ];
 

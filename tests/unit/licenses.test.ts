@@ -35,7 +35,7 @@ const LOADER = `${ROOT}/src/engine/image/codecs/heic.ts`;
 const PACKAGE_SHA = 'a'.repeat(64);
 const rule = SEPARATE_FILE_RULES[0]!;
 
-/** A dist where libheif is the way the gate wants it: the glue and its loader in one chunk, the .wasm apart. */
+/** A dist where libheif is the way the gate wants it: the glue alone in its chunk, the .wasm apart, the loader elsewhere. */
 function goodFacts(): DistFacts {
   return {
     wasm: [
@@ -44,7 +44,8 @@ function goodFacts(): DistFacts {
       { file: '_astro/mozjpeg_enc-DO-zoExo.wasm', sha256: 'b'.repeat(64) },
     ],
     chunks: [
-      { file: '_astro/heic-wrc4mF59.js', modules: [GLUE, WASM_URL, LOADER, '__vite-browser-external'], inlineWasm: false },
+      { file: '_astro/libheif-n4nZnanS.js', modules: [GLUE, '__vite-browser-external'], inlineWasm: false },
+      { file: '_astro/heic-wrc4mF59.js', modules: [WASM_URL, LOADER], inlineWasm: false },
       { file: '_astro/worker-C2Qald36.js', modules: [`${ROOT}/src/engine/image/worker.ts`, `${PNPM}/comlink@4.4.2/node_modules/comlink/dist/esm/comlink.mjs`], inlineWasm: false },
     ],
   };
@@ -99,14 +100,14 @@ describe('o bundle contra a lista da /licenses', () => {
 });
 
 describe('LGPL só como arquivo separado', () => {
-  it('passes for a .wasm apart and byte-identical, with the glue next to nothing but its loader', () => {
+  it('passes for a .wasm apart and byte-identical, with the glue alone in its chunk', () => {
     expect(checkSeparateFile(rule, PACKAGE_SHA, goodFacts(), ROOT)).toEqual([]);
   });
 
   it('passes when the library is not in the bundle at all', () => {
     const facts = goodFacts();
     facts.wasm = facts.wasm.filter((entry) => !entry.file.includes('libheif'));
-    facts.chunks = facts.chunks.filter((chunk) => !chunk.file.includes('heic'));
+    facts.chunks = facts.chunks.filter((chunk) => !chunk.file.includes('heic') && !chunk.file.includes('libheif'));
     expect(checkSeparateFile(rule, PACKAGE_SHA, facts, ROOT)).toEqual([]);
   });
 
@@ -137,10 +138,18 @@ describe('LGPL só como arquivo separado', () => {
     const problems = checkSeparateFile(rule, PACKAGE_SHA, facts, ROOT);
     expect(problems).toHaveLength(1);
     expect(problems[0]).toContain('comlink');
-    expect(problems[0]).toContain('heic-wrc4mF59.js');
+    expect(problems[0]).toContain('libheif-n4nZnanS.js');
   });
 
-  it('fails when the glue is merged into a chunk with first-party code other than its loader', () => {
+  it('fails when the glue is merged with its own loader (the layout before the libheif chunk group)', () => {
+    const facts = goodFacts();
+    facts.chunks[0]!.modules.push(LOADER);
+    const problems = checkSeparateFile(rule, PACKAGE_SHA, facts, ROOT);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('src/engine/image/codecs/heic.ts');
+  });
+
+  it('fails when the glue is merged into a chunk with any other first-party code', () => {
     const facts = goodFacts();
     facts.chunks[0]!.modules.push(`${ROOT}/src/engine/image/process.ts`);
     const problems = checkSeparateFile(rule, PACKAGE_SHA, facts, ROOT);
@@ -156,7 +165,7 @@ describe('LGPL só como arquivo separado', () => {
 
   it('fails when the .wasm is in dist but no chunk has the glue', () => {
     const facts = goodFacts();
-    facts.chunks = facts.chunks.filter((chunk) => !chunk.file.includes('heic'));
+    facts.chunks = facts.chunks.filter((chunk) => !chunk.file.includes('libheif'));
     expect(checkSeparateFile(rule, PACKAGE_SHA, facts, ROOT).join('\n')).toContain('nenhum chunk');
   });
 });

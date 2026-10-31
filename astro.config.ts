@@ -25,6 +25,10 @@ const SHARED_ISLAND = new RegExp(
   ].join('|'),
 );
 
+// libheif's JavaScript glue (LGPL-3.0) is a chunk of its own in the page and the worker builds, next to its
+// unmodified .wasm, so it can be replaced on its own (DECISOES § 7 and § 79; gate:licencas checks it).
+const LIBHEIF_GLUE = { name: 'libheif', test: /[\\/]libheif-js[\\/]libheif-wasm[\\/]libheif\.js$/ };
+
 // One instance for the page build and the worker build: both chunk sets go into one record (see bundle-record.ts).
 const bundleRecord = recordBundledModules();
 
@@ -37,11 +41,15 @@ export default defineConfig({
   integrations: [preact(), platformFiles()],
   vite: {
     plugins: [tailwindcss()],
-    worker: { format: 'es', plugins: () => [bundleRecord] },
+    worker: {
+      format: 'es',
+      plugins: () => [bundleRecord],
+      rolldownOptions: { output: { codeSplitting: { groups: [LIBHEIF_GLUE] } } },
+    },
     build: {
       rolldownOptions: {
         plugins: [bundleRecord],
-        output: { codeSplitting: { groups: [{ name: 'island', test: SHARED_ISLAND }] } },
+        output: { codeSplitting: { groups: [{ name: 'island', test: SHARED_ISLAND }, LIBHEIF_GLUE] } },
       },
     },
   },

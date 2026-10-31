@@ -94,9 +94,11 @@ export function checkSeparateFile(rule: SeparateFileRule, packageWasmSha256: str
     const name = basename(entry.file);
     return name.endsWith('.wasm') && (name.startsWith(`${stem}.`) || name.startsWith(`${stem}-`));
   });
+  // The chunks that carry the glue module itself (the package's ?url import of the .wasm is only a string
+  // and may sit with its loader).
   const glueChunks = facts.chunks.filter((chunk) => chunk.modules.some((id) => {
     const info = classifyModule(id, root);
-    return info.kind === 'package' && info.name === rule.package;
+    return info.kind === 'package' && info.name === rule.package && normalise(id).replace(/[?#].*$/, '').endsWith(`/${rule.glue}`);
   }));
 
   if (copies.length === 0 && glueChunks.length === 0) return problems; // the library is not in the bundle at all
