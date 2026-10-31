@@ -84,7 +84,7 @@ O Vitest passou com 48 arquivos e 778 testes, e o Playwright com 536 testes nos 
 
 ## CI e merge
 
-PREENCHER_CI
+A PR é desta branch, e o CI em partes a mescla quando as quatro partes passam. Este relatório entra antes do merge, então o CI, o merge e a conferência da produção (só leitura, com o Google bloqueado) ficam na resposta da run.
 
 ## O que é do Victor
 
