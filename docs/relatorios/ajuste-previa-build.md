@@ -27,7 +27,7 @@ Os builds do Workers Builds da F1a, de prévia e de produção, falhavam porque 
 | `a49d23cc` | produção, refeito | `249307f` | 24.22.2 e 10.34.9 | **passou** |
 | `f2790489` | prévia desta PR | `b562124` | 24.22.2 e 10.34.9 | instalação e build ok (27 páginas); `npx wrangler preview` falhou em 4 s: `✘ [ERROR] Your Wrangler configuration is missing a previews block to run this command` |
 
-A página de um build no painel mostra a configuração atual do Worker, não a da hora do build: depois da correção, o build `d925f68d` mostra `pnpm build` na configuração, e o log dele traz `Executing user build command: pnpm buid`.
+A configuração mostrada na página de um build nem sempre é a que rodou: depois da correção, o build `d925f68d` mostra `pnpm build` na configuração, e o log dele traz `Executing user build command: pnpm buid`. O que vale é o log.
 
 ## O que mudou
 
