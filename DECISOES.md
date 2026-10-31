@@ -205,3 +205,28 @@ O design system v1.1 já veio no pacote da F0 em `docs/design/` (ver `docs/desig
 
 - **Decisão:** o `wrangler.jsonc` ganha `"previews": {}` e a ADR-002 fica aceita na opção 2. O portão "worker sem código" e o teste de plataforma aceitam o campo só se for um objeto vazio.
 - **Por quê:** o Worker `fileorca` está no modelo "Worker Previews", em que o build das branches roda `npx wrangler preview`, e esse comando recusa rodar sem o bloco. Trocar o comando de prévia no painel para `npx wrangler versions upload` (opção 1) não teve efeito em três builds seguidos. O Victor escolheu a opção 2 na sessão. Bloco vazio: a prévia usa as mesmas configurações da produção, e nada de código entra no Worker.
+
+## § 39 · Conferência do design system v1.1 (F1b, 31/out/2026)
+
+- **Decisão:** as 12 correções da lista "Correções do design system v1.1" do plano já estão em `docs/design/`. Nada foi aplicado e `docs/design/` não muda nesta run.
+- **Item a item** (conferido nos arquivos, não só no `MUDANCAS-v1.1.md`):
+
+  | # | Correção | Resultado | Onde |
+  | --- | --- | --- | --- |
+  | 1 | DropZone sem `role="button"` nem `tabindex`; o botão leva o `aria-describedby` | aplicada | `components/DropZone/README.md:9`, `DropZone/preview.html:15,26-27`; nenhum `role="button"` ou `tabindex` nos `*.html` |
+  | 2 | WaterLevel e `fo-bar` com `aria-label` | aplicada | `WaterLevel/preview.html:15,28`; as barras de exemplo sem `role` (`WaterLevel/preview.html:29`, `FileCard/preview.html:23`) não são progressbar; no site cada `fo-bar` leva `role` e o nome do arquivo |
+  | 3 | Logo `role="img"` + `aria-label="FileOrca"`; "EN" visível no nome do idioma; 48 px | aplicada | `Header/preview.html:16,24,27,35`; `bundle.css:61,262-266` |
+  | 4 | ToolSearch como combobox | aplicada | `ToolSearch/preview.html:15-20,24`; `bundle.css:275-276` |
+  | 5 | Rodapé com H2; título do SupportCard no nível da página | aplicada | `Footer/preview.html:17-20`; `SupportCard/README.md:7`; `bundle.css:330` |
+  | 6 | Rótulo "Advertisements" / "Publicidade" / "Anuncios" em 12 px, sem `aria-label` | aplicada | `AdSlot/README.md:5-7`; `bundle.css:321` |
+  | 7 | Tema escuro também por `prefers-color-scheme` | aplicada | `tokens.css:3,48,78-109`; `bundle.css:6-7`; os dois blocos escuros são idênticos |
+  | 8 | Token `brand-on-deep` (#5AA2FF) | aplicada | `tokens.json:135-139`; `tokens.css:20`; 5,28:1 sobre `deep` |
+  | 9 | Fala da Oli em 20/26; WaterLevel com 340 px a partir de 768 px; ano do AmortTable com 48 px | aplicada | `tokens.css:162`; `bundle.css:111,245,254` |
+  | 10 | Seta como ícone `arrow-right` em `fo-icon--inline`, com "to" em `fo-sr` | aplicada | `FileCard/preview.html:18`; `bundle.css:14,16` |
+  | 11 | Nenhum "up to 50" | aplicada | só a proibição em `README.md:33` |
+  | 12 | Exemplos de financiamento ($1,896.20, $382,637, saldos e 15 anos) | aplicada | recalculado em centavos: `AmortTable/preview.html:17-20`, `ResultHero/preview.html:17-21`, `ScenarioCompare/preview.html:15-16` |
+
+- **Diferenças achadas (para o Victor, sem efeito na run):**
+  - O `MUDANCAS-v1.1.md` tem 13 itens, em outra ordem (o 9 do plano é o 11 dele, o 10 é o 12, o 11 é o 10 e o 12 é o 9; o 13, "notas corrigidas", não está no plano). A nota dele de que o artifact ainda mostra o v1 ficou velha.
+  - O artifact do design system vivo (https://claude.ai/artifact/ECjKLGYoW4JL72TKSNWDgT) foi lido em 31/out/2026: o `tokens.json` dele tem o mesmo conteúdo do `docs/design/tokens.json` (muda só a formatação do arquivo) e o README é o mesmo, sem o parágrafo de abertura do pacote. Vale `docs/design/`.
+- **Por quê:** o § 2 já registrava que o pacote veio no v1.1; o prompt da F1b manda conferir antes de implementar e só aplicar o que faltasse, num commit só.
