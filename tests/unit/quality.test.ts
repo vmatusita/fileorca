@@ -24,7 +24,8 @@ describe('licenças', () => {
   });
 
   it('splits what reaches the browser from build tools', () => {
-    expect(browserPackages().map((pkg) => pkg.name)).toEqual(['@astrojs/preact', 'astro', 'comlink', 'preact', 'tailwindcss']);
+    // The two fonts (OFL-1.1) are a browser dependency of the F1b: their .woff2 files ship with the site.
+    expect(browserPackages().map((pkg) => pkg.name)).toEqual(['@astrojs/preact', '@fontsource-variable/figtree', '@fontsource-variable/fredoka', 'astro', 'comlink', 'preact', 'tailwindcss']);
     expect(buildPackages().map((pkg) => pkg.name)).toContain('satori');
     expect(buildPackages().map((pkg) => pkg.name)).not.toContain('preact');
   });
@@ -55,8 +56,17 @@ describe('cores só dos tokens', () => {
   });
 
   it('keeps sun (yellow) only on the Download button', () => {
-    const css = readFileSync('src/styles/global.css', 'utf8');
-    const rules = css.split('}').filter((rule) => /var\(--sun\)|var\(--shadow-lip-sun\)/.test(rule));
-    for (const rule of rules) expect(rule).toMatch(/fo-btn--download/);
+    // Every stylesheet under src/styles and every <style> block of a component or page.
+    const sheets = [
+      ...files('src/styles', /\.css$/).map((file) => ({ file, css: readFileSync(file, 'utf8') })),
+      ...files('src', /\.astro$/).flatMap((file) => [...readFileSync(file, 'utf8').matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map((block) => ({ file, css: block[1] ?? '' }))),
+    ];
+    expect(sheets.length).toBeGreaterThan(0);
+    // The whole yellow family: the fill, its text and edge, and the two yellow lips (tokens.json).
+    const yellow = /var\(--(?:sun|on-sun|sun-edge|shadow-lip-sun|shadow-lip-on-deep)\)/;
+    for (const { file, css } of sheets) {
+      const rules = css.split('}').filter((rule) => yellow.test(rule));
+      for (const rule of rules) expect(rule, file).toMatch(/fo-btn--download/);
+    }
   });
 });

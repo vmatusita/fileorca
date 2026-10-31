@@ -1,0 +1,308 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { OLI_POSES, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars } from '../../scripts/lib/design-checks.ts';
+import { tokenNames } from '../../scripts/lib/theme.ts';
+
+const tokens: unknown = JSON.parse(readFileSync('docs/design/tokens.json', 'utf8'));
+const names = new Set(tokenNames(tokens));
+const siteStyles = readdirSync('src/styles')
+  .filter((file) => file.endsWith('.css') && file !== 'theme.css')
+  .map((file) => ({ file: `src/styles/${file}`, css: readFileSync(`src/styles/${file}`, 'utf8') }));
+
+describe('variáveis do tema', () => {
+  const definitions = ':root{--radius-xl:24px;--shadow-lift:0 1px 2px #0000000f,0 10px 24px -12px #0f1b2d38;--font-display:Fredoka,Figtree,ui-rounded,system-ui,sans-serif}';
+
+  it('accepts var(--token), the definitions that tokens.css makes, and variables outside the theme namespaces', () => {
+    const good = `${definitions}:root{--color-ink:var(--ink);--color-surface-sunken:var( --surface-sunken );--radius-xl:var(--radius-xl);--shadow-lift:var(--shadow-lift)!important;--font-display:var(--font-display);--tw-shadow:0 0 #0000;--space-4:16px;--ad-clearance:150px}`;
+    expect(checkThemeVars(good, names)).toEqual([]);
+    expect(checkThemeVars('/* --color-red-500:#f00 */:root{--color-ink: var(--ink);\n  --spacing-4: var(--space-4);}', names)).toEqual([]);
+  });
+
+  it('reports a value that is not a token, a fallback, an unknown token and a default Tailwind variable', () => {
+    for (const bad of ['--color-red-500:#ef4444', '--color-ink:var(--nope)', '--color-ink:var(--ink,#000)', '--font-sans:ui-sans-serif,system-ui', '--radius-2xl:1rem', '--shadow-md:0 4px 6px #0001', '--font-weight-bold:700', '--color-ink:#0f1b2d']) {
+      expect(checkThemeVars(`:root{--color-bg:var(--bg);${bad}}`, names), bad).toHaveLength(1);
+    }
+    expect(checkThemeVars(':root{--color-a:#fff;--radius-b:1px;--shadow-c:none}', names).join('\n')).toMatch(/--color-a[\s\S]*--radius-b[\s\S]*--shadow-c/);
+  });
+
+  it('is green for the generated theme and for tokens.css', () => {
+    expect(checkThemeVars(readFileSync('src/styles/theme.css', 'utf8'), names)).toEqual([]);
+    expect(checkThemeVars(readFileSync('docs/design/tokens.css', 'utf8'), names)).toEqual([]);
+  });
+});
+
+describe('color: só tokens de texto', () => {
+  it('accepts the text tokens, inherit and currentColor in any case, with !important, minified or not', () => {
+    const good = [
+      '.a{color:var(--ink)}.b{color:var(--ink-muted)!important}.c{color:var(--brand)}.d{color:var(--danger)}.e{color:var(--success)}',
+      '.f{color:var(--on-brand)}.g{color:var(--on-sun)}.h{color:var(--on-deep)}.i{color:var(--on-deep-muted)}.j{color:var(--on-cat)}.k{color:var(--on-violeta)}',
+      '.l{color:inherit}.m{color:currentColor}.n{color:CURRENTCOLOR !important}.o{color:Inherit}',
+      '.p {\n  color: var( --ink ) ;\n}\n/* color: red */\n.q { COLOR: var(--brand) !important; }',
+    ];
+    for (const css of good) expect(checkTextColors(css), css).toEqual([]);
+  });
+
+  it('ignores the properties that only end in color and the color-scheme', () => {
+    const css = '.a{background-color:#fff;border-color:red;-webkit-text-fill-color:red;text-decoration-color:red;outline-color:red;caret-color:red;accent-color:red;border-top-color:red;--my-color:red;color-scheme:dark}@media (prefers-color-scheme:dark){.b{background:red}}.color:hover{background:red}';
+    expect(checkTextColors(css)).toEqual([]);
+  });
+
+  it('reports hex, rgb, names, non-text tokens, fallbacks and keywords, naming the rule', () => {
+    for (const bad of ['#fff', 'rgb(0 0 0 / .5)', 'red', 'transparent', 'var(--surface)', 'var(--sun)', 'var(--deep)', 'var(--nope)', 'var(--ink,red)', 'color-mix(in srgb,var(--ink),red)', 'unset', 'initial']) {
+      const problems = checkTextColors(`.ok{color:var(--ink)}.alvo-ruim{color:${bad}!important}`);
+      expect(problems, bad).toHaveLength(1);
+      expect(problems[0], bad).toContain('.alvo-ruim');
+    }
+    expect(checkTextColors('.a{color:#fff}@media (min-width:768px){.b{color:red}}')).toHaveLength(2);
+  });
+
+  it('does not let a data: URI hide or fake a declaration', () => {
+    expect(checkTextColors('.a{background:url("data:image/svg+xml;color:red")}.b{color:var(--ink)}')).toEqual([]);
+    expect(checkTextColors('.a{background:url(data:image/svg+xml;utf8,<svg/>);color:red}')).toHaveLength(1);
+  });
+
+  it('applies to the site CSS', () => {
+    expect(siteStyles.length).toBeGreaterThan(0);
+    for (const { file, css } of siteStyles) expect(checkTextColors(css), file).toEqual([]);
+  });
+});
+
+describe('movimento: só transform, opacity, translate, scale e rotate', () => {
+  it('accepts allowed keyframes and transitions, minified, prefixed or with !important', () => {
+    const good = [
+      '@keyframes fo-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px);animation-timing-function:cubic-bezier(.65,0,.35,1)}}',
+      '@-webkit-keyframes x{from{-webkit-transform:none;opacity:0}to{opacity:1}}@keyframes y{to{translate:0 -4px;scale:1.1;rotate:3deg}}',
+      '.a{transition:transform .16s cubic-bezier(.2,.8,.2,1),opacity .16s ease}',
+      '.b{transition-property:transform,opacity}.c{transition:none}.d{transition-property:none}',
+      '.d{-webkit-transition:-webkit-transform .2s ease-out;-webkit-transition-property:-webkit-transform}',
+      '.e{transition:opacity var(--dur-quick) var(--ease-out)!important;transition:translate .2s steps(4,end) .1s}',
+      '.f{transition-duration:1ms!important;transition-timing-function:ease;transition-delay:0s;transition-behavior:allow-discrete}',
+      '.g { transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1) , scale 90ms linear ; }',
+      '.h{transition:opacity calc(var(--dur-base)*2) allow-discrete}',
+      '.i{animation:fo-float var(--dur-float) var(--ease-in-out) infinite;will-change:transform}',
+    ];
+    for (const css of good) expect(checkMotion(css), css).toEqual([]);
+  });
+
+  it('reports keyframes that touch anything else, and names the animation', () => {
+    for (const property of ['width', 'height', 'background-color', 'color', 'top', 'filter', 'box-shadow', '--level', 'margin-left', 'clip-path']) {
+      const problems = checkMotion(`@keyframes fo-bad{0%{opacity:0;${property}:0}100%{opacity:1}}`);
+      expect(problems, property).toHaveLength(1);
+      expect(problems[0], property).toContain('@keyframes fo-bad');
+    }
+    expect(checkMotion('@media (min-width:1px){@keyframes a{from{left:0}50%{top:0;transform:none}to{height:0}}}')).toHaveLength(3);
+    expect(checkMotion('@-webkit-keyframes a{from{-webkit-filter:blur(1px)}}')).toHaveLength(1);
+  });
+
+  it('reports "all", a shorthand item without a property, and properties that are not movement', () => {
+    const bad: Record<string, number> = {
+      'transition:all .2s': 1,
+      'transition:all': 1,
+      'transition:.2s': 1,
+      'transition:200ms ease-out': 1,
+      'transition:background-color .2s': 1,
+      'transition:opacity .2s,all .3s': 1,
+      'transition:opacity .2s,.3s ease': 1,
+      'transition:opacity .2s,color .2s,background-color .2s': 2,
+      'transition:color var(--dur-quick) var(--ease-out)': 1,
+      '-webkit-transition:all .2s': 1,
+      'transition:opacity .2s cubic-bezier(.2,.8,.2,1),all .2s cubic-bezier(.2,.8,.2,1)': 1,
+      'transition:var(--fo-transition)': 1,
+      'transition:inherit': 1,
+      'transition-property:all': 1,
+      'transition-property:transform,color': 1,
+      'transition-property:opacity,all!important': 1,
+      '-webkit-transition-property:-webkit-transform,margin': 1,
+      'transition-property:var(--x)': 1,
+    };
+    for (const [declaration, count] of Object.entries(bad)) {
+      const problems = checkMotion(`.ok{transition:opacity .2s}.alvo-ruim{${declaration}}`);
+      expect(problems, declaration).toHaveLength(count);
+      expect(problems[0], declaration).toContain('.alvo-ruim');
+    }
+    expect(checkMotion('.a{transition:all .2s}')[0]).toMatch(/"all"/);
+    expect(checkMotion('.a{transition:.2s}')[0]).toMatch(/equivale a "all"/);
+  });
+
+  it('applies to the site CSS', () => {
+    expect(siteStyles.length).toBeGreaterThan(0);
+    for (const { file, css } of siteStyles) expect(checkMotion(css), file).toEqual([]);
+  });
+});
+
+describe('fontes', () => {
+  const FREDOKA = '/_astro/fredoka-latin-wght-normal.BIKS5J3D.woff2';
+  const FIGTREE = '/_astro/figtree-latin-wght-normal.D_k1x-2c.woff2';
+  const face = (family: string, src: string) => `@font-face{font-family:${family};font-style:normal;font-display:swap;src:${src}}`;
+  const fredokaFace = face('Fredoka', `url(${FREDOKA})format("woff2")`);
+  const figtreeFace = face('Figtree', `url("${FIGTREE}") format("woff2")`);
+  const fallbackFace = face('"Fredoka Fallback"', 'local(Arial);size-adjust:104%');
+  const css = `${fredokaFace}${figtreeFace}${fallbackFace}`;
+  const preload = (href = FREDOKA, attributes = 'type="font/woff2" crossorigin') => `<link rel="preload" href="${href}" as="font" ${attributes}>`;
+  const page = (path: string, head = preload()) => ({ path, html: `<!doctype html><html><head>${head}<link rel="stylesheet" href="/_astro/x.css"></head><body></body></html>` });
+  const good = { css, pages: [page('/'), page('/pt/')], woff2Files: [FREDOKA, FIGTREE] };
+
+  it('accepts the two latin fonts, a local() fallback, one Fredoka preload per page and dist paths of any shape', () => {
+    expect(checkFonts(good)).toEqual([]);
+    expect(checkFonts({ ...good, woff2Files: ['dist\\_astro\\figtree-latin-wght-normal.D_k1x-2c.woff2', 'dist/_astro/fredoka-latin-wght-normal.BIKS5J3D.woff2'] })).toEqual([]);
+    expect(checkFonts({ ...good, css: `/* ${face('Inter', 'url(/x.woff2)')} */${css}` })).toEqual([]);
+  });
+
+  it('reports a third @font-face with url(), another family and a wrong or unhashed file', () => {
+    const cyrillic = face('Fredoka', 'url(/_astro/fredoka-cyrillic-wght-normal.AAAAAAAA.woff2)format("woff2")');
+    expect(checkFonts({ ...good, css: css + cyrillic }).join('\n')).toMatch(/3 @font-face com url/);
+    expect(checkFonts({ ...good, css: fredokaFace + face('Inter', 'url(/_astro/inter.AAAA.woff2)') }).join('\n')).toMatch(/família Inter[\s\S]*falta o @font-face com url\(\) de Figtree/);
+    expect(checkFonts({ ...good, css: face('Fredoka', 'url(/fonts/fredoka.woff2)') + figtreeFace }).join('\n')).toMatch(/Fredoka usa \/fonts\/fredoka\.woff2/);
+    expect(checkFonts({ ...good, css: face('Fredoka', 'url(/_astro/fredoka-latin-wght-normal.woff2)') + figtreeFace }).join('\n')).toMatch(/Fredoka usa/);
+    expect(checkFonts({ ...good, css: face('Fredoka', `url(${FREDOKA}),url(/_astro/fredoka-latin-wght-normal.OTHER123.woff)`) + figtreeFace }).join('\n')).toMatch(/Fredoka com 2 url/);
+    expect(checkFonts({ ...good, css: face('Fredoka', `url(${FREDOKA})`) + fredokaFace + figtreeFace }).join('\n')).toMatch(/3 @font-face|mais de um/);
+  });
+
+  it('reports an @font-face with neither url() nor local()', () => {
+    expect(checkFonts({ ...good, css: `${css}@font-face{font-family:Mystery;font-weight:400}` }).join('\n')).toMatch(/Mystery sem url\(\) nem local\(\)/);
+  });
+
+  it('reports any .woff2 in dist beyond the two the CSS uses, and a hash that differs from the CSS', () => {
+    expect(checkFonts({ ...good, woff2Files: [...good.woff2Files, '/_astro/fredoka-cyrillic-wght-normal.AAAAAAAA.woff2'] }).join('\n')).toMatch(/3 arquivo\(s\) \.woff2/);
+    expect(checkFonts({ ...good, woff2Files: [FREDOKA] }).join('\n')).toMatch(/1 arquivo\(s\) \.woff2/);
+    expect(checkFonts({ ...good, woff2Files: [] }).join('\n')).toMatch(/nenhum/);
+    expect(checkFonts({ ...good, woff2Files: ['/_astro/fredoka-latin-wght-normal.OTHER123.woff2', FIGTREE] }).join('\n')).toMatch(/2 arquivo\(s\) \.woff2/);
+  });
+
+  it('reports a page without the preload, with two, without type or crossorigin, or with another URL', () => {
+    const run = (head: string) => checkFonts({ ...good, pages: [page('/x/', head)] }).join('\n');
+    expect(run('')).toMatch(/\/x\/: 0 <link rel="preload" as="font">/);
+    expect(run(preload() + preload(FIGTREE))).toMatch(/2 <link rel="preload" as="font">/);
+    expect(run(preload(FREDOKA, 'crossorigin'))).toMatch(/sem type="font\/woff2"/);
+    expect(run(preload(FREDOKA, 'type="font/woff2"'))).toMatch(/sem crossorigin/);
+    expect(run(preload(FIGTREE))).toMatch(/preload aponta \/_astro\/figtree[\s\S]*o CSS usa \/_astro\/fredoka/);
+    expect(run(preload('/_astro/fredoka-latin-wght-normal.OTHER123.woff2'))).toMatch(/preload aponta/);
+    expect(run(`<link rel="preload" href="/x.css" as="style">${preload()}`)).toBe('');
+  });
+});
+
+describe('sprite da Oli', () => {
+  const sprite = [
+    '<svg class="fo-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;left:-9999px">',
+    '<defs><clipPath id="oli-clip"><rect width="64" height="64"/></clipPath></defs>',
+    '<symbol id="oli-p1" viewBox="0 0 64 64"><path d="M1 1"/></symbol>',
+    '<symbol id="oli-p12" viewBox="0 0 64 64"><path d="M2 2"/></symbol>',
+    '<symbol id="oli-wave" viewBox="0 0 64 64"><use href="#oli-p1"/><use href="#oli-p12"/><path d="M0 0" clip-path="url(#oli-clip)"/></symbol>',
+    '<symbol id="oli-peek" viewBox="0 0 64 64"><use href="#oli-p1"></use></symbol>',
+    '</svg>',
+  ].join('');
+  const box = (pose: string) => `<div class="fo-drop__oli" data-oli="${pose}" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 64 64"><use href="#oli-${pose}"/></svg></div>`;
+  const page = (body = box('wave'), svg = sprite) => `<!doctype html><html lang="en"><body>${svg}${body}</body></html>`;
+  const required = { requiredPoses: ['peek'] };
+  const problems = (html: string, options: { requiredPoses: readonly string[] } = required) => checkSprite(html, options).join('\n');
+
+  it('lists the nine poses of the closed list', () => {
+    expect(OLI_POSES).toEqual(['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek']);
+  });
+
+  it('accepts a sprite with parts, one oli-clip and boxes that use their own pose', () => {
+    expect(checkSprite(page(), required)).toEqual([]);
+    expect(checkSprite(page(box('wave') + box('peek')), required)).toEqual([]);
+    expect(checkSprite(page('<p>sem Oli</p>'), required)).toEqual([]);
+    expect(checkSprite(page('<p>sem Oli</p>'), { requiredPoses: [] })).toEqual([]);
+  });
+
+  it('reads camelCase markup (viewBox, clipPath) and self-closing <use/> as the browser does', () => {
+    expect(checkSprite(page(box('wave').replace('<use href="#oli-wave"/>', '<use href="#oli-wave"></use>')), required)).toEqual([]);
+    expect(problems(page(box('wave'), sprite.replace('<clipPath id="oli-clip">', '<mask id="oli-clip">').replace('</clipPath>', '</mask>')))).toMatch(/oli-clip é <mask>, deveria ser <clipPath>/);
+  });
+
+  it('reports repeated ids, a missing or repeated oli-clip and the ic clipPath', () => {
+    expect(problems(page(box('wave') + '<p id="a"></p><p id="a"></p>'))).toMatch(/id "a" repetido 2 vezes/);
+    expect(problems(page(box('wave') + '<svg><clipPath id="oli-clip"/></svg>'))).toMatch(/id "oli-clip" repetido 2 vezes/);
+    expect(problems(page(box('wave'), sprite.replace(/<defs>.*<\/defs>/, '').replace(' clip-path="url(#oli-clip)"', '')))).toMatch(/falta o clipPath oli-clip/);
+    expect(problems(page(box('wave') + '<svg><clipPath id="ic"><rect/></clipPath></svg>'))).toMatch(/id "ic"/);
+    expect(problems(page(box('wave') + '<svg><path id="oli-wave"/></svg>'))).toMatch(/id "oli-wave" repetido/);
+  });
+
+  it('reports a sprite that is missing, doubled, visible to screen readers, hidden or display:none', () => {
+    expect(problems(page(box('wave'), sprite.replace('class="fo-sprite"', 'class="other"')))).toMatch(/0 svg\.fo-sprite/);
+    expect(problems(page(box('wave') + sprite.replace(/id="[^"]*"/g, '')))).toMatch(/2 svg\.fo-sprite/);
+    expect(problems(page(box('wave'), sprite.replace(' aria-hidden="true"', '')))).toMatch(/sem aria-hidden/);
+    expect(problems(page(box('wave'), sprite.replace(' aria-hidden="true"', ' aria-hidden="false"')))).toMatch(/sem aria-hidden/);
+    expect(problems(page(box('wave'), sprite.replace('<svg class="fo-sprite"', '<svg class="fo-sprite" hidden')))).toMatch(/atributo hidden/);
+    expect(problems(page(box('wave'), sprite.replace('position:absolute', 'display: none')))).toMatch(/display:none/);
+    expect(problems(page(box('wave'), sprite.replace('position:absolute', 'DISPLAY:NONE !important')))).toMatch(/display:none/);
+  });
+
+  it('reports symbols outside the pose list and accepts parts oli-p<N> only', () => {
+    expect(problems(page(box('wave'), sprite.replace('</svg>', '<symbol id="oli-orca"><path/></symbol></svg>')))).toMatch(/símbolo oli-orca fora da lista/);
+    expect(problems(page(box('wave'), sprite.replace('</svg>', '<symbol id="oli-px"><path/></symbol><symbol id="oli-p"><path/></symbol></svg>')))).toMatch(/oli-px[\s\S]*oli-p fora da lista/);
+    expect(problems(page(box('wave'), sprite.replace('</svg>', '<symbol id="logo"><path/></symbol><symbol><path/></symbol></svg>')))).toBe('');
+  });
+
+  it('reports a [data-oli] box with a wrong pose, without aria-hidden or without exactly one svg and use', () => {
+    expect(problems(page(box('wave') + box('dolphin')))).toMatch(/\[data-oli="dolphin"\] com pose fora da lista/);
+    expect(problems(page(box('wave').replace('data-oli="wave" aria-hidden="true"', 'data-oli="wave"')))).toMatch(/\[data-oli="wave"\] sem aria-hidden/);
+    expect(problems(page('<div data-oli="wave" aria-hidden="true"></div>'))).toMatch(/0 <svg> filho/);
+    expect(problems(page('<div data-oli="wave" aria-hidden="true"><svg aria-hidden="true"><use href="#oli-wave"/></svg><svg aria-hidden="true"/></div>'))).toMatch(/2 <svg> filho/);
+    expect(problems(page('<div data-oli="wave" aria-hidden="true"><span><svg aria-hidden="true"><use href="#oli-wave"/></svg></span></div>'))).toMatch(/0 <svg> filho/);
+    expect(problems(page(box('wave').replace('<svg aria-hidden="true"', '<svg')))).toMatch(/<svg> filho está sem aria-hidden/);
+    expect(problems(page(box('wave').replace('<use href="#oli-wave"/>', '<use href="#oli-wave"/><use href="#oli-wave"/>')))).toMatch(/2 <use>/);
+    expect(problems(page(box('wave').replace('<use href="#oli-wave"/>', '')))).toMatch(/0 <use>/);
+    expect(problems(page(box('wave').replace('#oli-wave', '#oli-peek')))).toMatch(/em vez de #oli-wave/);
+  });
+
+  it('reports references to ids that do not exist', () => {
+    expect(problems(page(box('wave') + '<svg><use href="#nope"/></svg>'))).toMatch(/<use href="#nope"> aponta um id que não existe/);
+    expect(problems(page(box('wave'), sprite.replace('<use href="#oli-p12"/>', '<use href="#oli-p99"/>')))).toMatch(/#oli-p99/);
+    expect(problems(page(box('wave'), sprite.replace('url(#oli-clip)', 'url(#ic)')))).toMatch(/clip-path="url\(#ic\)" aponta um id que não existe/);
+    expect(problems(page(box('wave') + '<svg><path fill="url(#grad)"/></svg>'))).toMatch(/fill="url\(#grad\)"/);
+    expect(problems(page(box('wave') + '<svg><use href="https://example.com/a.svg#x"/></svg>'))).toBe('');
+  });
+
+  it('reports a pose the page shows or needs that has no symbol', () => {
+    expect(problems(page(box('wave') + box('swim')))).toMatch(/falta o símbolo oli-swim/);
+    expect(problems(page(), { requiredPoses: ['peek', 'gulp', 'cheer'] })).toMatch(/oli-gulp[\s\S]*oli-cheer/);
+    expect(problems(page(), { requiredPoses: ['peek', 'gulp'] })).not.toMatch(/oli-peek/);
+    expect(problems(page('<p>sem Oli</p>'), { requiredPoses: ['lost'] })).toMatch(/falta o símbolo oli-lost/);
+  });
+});
+
+describe('setas fora da fonte', () => {
+  const page = (body: string, head = '') => `<!doctype html><html><head><title>FileOrca</title>${head}</head><body>${body}</body></html>`;
+
+  it('accepts a page without → or ↔ in text, and arrows inside script and style', () => {
+    expect(checkArrows(page('<p>2.4 MB <svg aria-hidden="true"><use href="#ic-arrow-right"/></svg><span class="fo-sr">to</span> 780 KB, −68%, ← voltar, ⇒</p>'))).toEqual([]);
+    expect(checkArrows(page('<p>ok</p><script>const a = "→ ↔";</script><style>.a::before{content:"→"}</style>', '<script type="application/ld+json">{"name":"a → b"}</script>'))).toEqual([]);
+  });
+
+  it('reports → and ↔ in text, also as entities, with the text around them', () => {
+    const arrow = checkArrows(page('<p>Before 2.4 MB → after 780 KB</p>'));
+    expect(arrow).toHaveLength(1);
+    expect(arrow[0]).toContain('U+2192');
+    expect(arrow[0]).toContain('2.4 MB → after');
+    expect(checkArrows(page('<p>a ↔ b</p>'))[0]).toContain('U+2194');
+    expect(checkArrows(page('<p>a &rarr; b</p>'))).toHaveLength(1);
+    expect(checkArrows(page('<p>a &harr; b &#8594; c &#x2194; d</p>'))).toHaveLength(3);
+    expect(checkArrows(page('<p>x</p>', '<title>Seta → no título</title>'))).toHaveLength(1);
+    expect(checkArrows(page('<noscript>a → b</noscript>'))).toHaveLength(1);
+  });
+
+  it('caps the list and counts the rest', () => {
+    const problems = checkArrows(page(`<p>${'→ '.repeat(7)}</p>`));
+    expect(problems).toHaveLength(4);
+    expect(problems[3]).toMatch(/mais 4 seta/);
+  });
+});
+
+describe('uma folha de estilo só', () => {
+  const html = (head: string) => `<!doctype html><html><head>${head}</head><body></body></html>`;
+
+  it('accepts exactly one <link rel="stylesheet"> and no <style>', () => {
+    expect(checkSingleStylesheet(html('<link rel="stylesheet" href="/_astro/a.css"><link rel="preload" href="/_astro/f.woff2" as="font" crossorigin>'))).toEqual([]);
+  });
+
+  it('reports no stylesheet, two, an inline <style> and a <style> inside the body', () => {
+    expect(checkSingleStylesheet(html('')).join()).toMatch(/0 <link rel="stylesheet">/);
+    expect(checkSingleStylesheet(html('<link rel="stylesheet" href="/a.css"><link rel="stylesheet" href="/b.css">')).join()).toMatch(/2 <link rel="stylesheet">/);
+    expect(checkSingleStylesheet(html('<link rel="stylesheet" href="/a.css"><style>.a{color:red}</style>')).join()).toMatch(/1 elemento\(s\) <style>/);
+    expect(checkSingleStylesheet(html('<style>.a{}</style>')).join('\n')).toMatch(/0 <link[\s\S]*<style>/);
+    expect(checkSingleStylesheet('<link rel="stylesheet" href="/a.css"><svg><style>.a{}</style></svg>')).toHaveLength(1);
+  });
+});

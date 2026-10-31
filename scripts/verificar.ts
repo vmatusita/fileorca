@@ -18,6 +18,7 @@ const STEPS: Step[] = [
   { name: 'worker sem código', command: 'pnpm run gate:worker' },
   { name: 'seo (hreflang, sitemaps, canonical, robots)', command: 'pnpm run gate:seo' },
   { name: 'links internos e páginas órfãs', command: 'pnpm run gate:links' },
+  { name: 'design (sprite, fontes, tema, movimento, setas)', command: 'pnpm run gate:design' },
   { name: 'licenças', command: 'pnpm run gate:licencas' },
   { name: 'conteúdo de dinheiro e saúde', command: 'pnpm run gate:dinheiro-saude' },
   { name: 'actionlint', command: 'pnpm run gate:actionlint' },
