@@ -31,6 +31,14 @@ test('pages are served with the generated headers (no X-Robots-Tag since the lau
   }
 });
 
+// F2 (DECISOES § 84): a page that exists only in English offers the other languages' homes, never a missing page.
+test('on a page that exists only in English, the language menu leads to the home of each language', async ({ page }) => {
+  await page.goto('/heic-to-jpg/');
+  await page.getByRole('button', { name: /^EN/ }).click();
+  await expect(page.getByRole('link', { name: 'Português' })).toHaveAttribute('href', '/pt/');
+  await expect(page.getByRole('link', { name: 'Español' })).toHaveAttribute('href', '/es/');
+});
+
 test('the language button goes to the equivalent page', async ({ page }) => {
   await page.goto('/compress-image/');
   await page.getByRole('button', { name: /^EN/ }).click();
