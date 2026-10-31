@@ -2,7 +2,7 @@
 
 Gerada por `node scripts/fixtures/matrix-table.ts` a partir de `test-results/matriz/*.json`, que `tests/e2e/image-matrix.spec.ts` e `tests/e2e/image-presets.spec.ts` gravam a cada execução, em Chromium e WebKit. Nada aqui é escrito à mão: para refazer, rode as duas specs numa execução do Playwright (ela limpa o `test-results`) e o comando acima.
 
-Cada ferramenta recebeu a página uma vez por navegador e um lote só com todas as fixtures que aceita (pelo formato real dos bytes) e, no meio dele, as que recusa. Cada saída foi lida do ZIP (ou do PDF) em Node: formato real, dimensões de exibição conforme o oráculo `fixtures/images/expected.json` e as opções, se abre no navegador (o AVIF só onde o navegador sabe abri-lo), orientação por pixels contra a imagem em pé montada dos pixels gravados, transparência e ausência de Exif, XMP, IPTC e GPS. Cada recusa foi conferida na linha do arquivo, com a fala da Oli, o link quando há e o evento `tool_error`. Nenhuma requisição saiu de `127.0.0.1` em nenhum teste.
+Cada ferramenta recebeu a página uma vez por navegador e um lote só com todas as fixtures que aceita (pelo formato real dos bytes) e, no meio dele, as que recusa. Cada saída foi lida do ZIP (ou do PDF) em Node: formato real, dimensões de exibição conforme o oráculo `fixtures/images/expected.json` e as opções, se abre no navegador, orientação por pixels contra a imagem em pé montada dos pixels gravados, transparência e ausência de Exif, XMP, IPTC e GPS. Cada recusa foi conferida na linha do arquivo, com a fala da Oli, o link quando há e o evento `tool_error`. Nenhuma requisição saiu de `127.0.0.1` em nenhum teste.
 
 Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado (motivo)` é a fala da Oli na linha do arquivo; `—` é fixture que aquele lote não trouxe.
 
@@ -10,39 +10,19 @@ Legenda: `ok · formato largura×altura · tamanho · abre · notas`; `recusado 
 
 | Teste | Ferramenta | Opções | Arquivos | Saídas | Recusados | Chromium | WebKit | Requisições para fora |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `avif-to-jpg` | `avif-to-jpg` | JPG | 9 | 1 | 8 | 0,8 s | 2,2 s | 0 |
-| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 4,4 s | 5,6 s | 0 |
-| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 3,8 s | 5,2 s | 0 |
-| `convert-to-webp-avif` | `convert-to-webp` | AVIF, Recommended | 15 | 8 | 7 | 6,0 s | 7,2 s | 0 |
-| `convert-to-webp-webp-photos` | `convert-to-webp` | WebP, Recommended | 10 | 3 | 7 | 2,8 s | 6,7 s | 0 |
-| `convert-to-webp-webp-rest` | `convert-to-webp` | WebP, Recommended | 12 | 5 | 7 | 2,6 s | 4,7 s | 0 |
-| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 2,0 s | 4,9 s | 0 |
-| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 13 | 5 | 8 | 5,8 s | 8,3 s | 0 |
-| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 7 | 5 | 2 | 4,6 s | 7,1 s | 0 |
-| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 5 | 3 | 2 | 4,7 s | 8,4 s | 0 |
-| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 3,7 s | 5,8 s | 0 |
-| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 3,5 s | 7,0 s | 0 |
-| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 0,6 s | 1,6 s | 0 |
-| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 5,6 s | 5,5 s | 0 |
-| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 4,3 s | 5,9 s | 0 |
-| `rotate-image` | `rotate-image` | Right 90° (default), no mirror | 16 | 10 | 6 | 4,2 s | 7,7 s | 0 |
-| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 0,9 s | 2,3 s | 0 |
-
-Decodificação nativa de AVIF nesta máquina: Chromium: abre AVIF sozinho; WebKit: não abre AVIF sozinho. Onde o navegador não abre AVIF, a saída em AVIF foi conferida só nos bytes (cabeçalho, dimensões, plano alfa e metadados).
-
-## `avif-to-jpg`
-
-| Fixture | Opções | Chromium | WebKit |
-| --- | --- | --- | --- |
-| `gen-avif.avif` | JPG | ok · JPG 1600×1200 · 336 KB · abre · orientação ok (Δ0.7) | ok · JPG 1600×1200 · 336 KB · abre · orientação ok (Δ0.8) |
-| `gen-jpg-02-orientacao8.jpg` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-png-extensao-jpg.jpg` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-webp-animada.webp` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-jpg-corrompido.jpg` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-jpg-truncado.jpg` | JPG | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-vazio.jpg` | JPG | recusado (empty) | recusado (empty) |
-| `gen-texto-extensao-png.png` | JPG | recusado (unsupported) | recusado (unsupported) |
+| `compress-image-photos` | `compress-image` | Recommended | 9 | 3 | 6 | 6,3 s | 7,4 s | 0 |
+| `compress-image-rest` | `compress-image` | Recommended | 13 | 7 | 6 | 5,8 s | 6,5 s | 0 |
+| `crop-image` | `crop-image` | Square (default), centred | 16 | 10 | 6 | 2,6 s | 5,9 s | 0 |
+| `heic-to-jpg-a` | `heic-to-jpg` | JPG (default) | 13 | 5 | 8 | 8,4 s | 10,4 s | 0 |
+| `heic-to-jpg-b` | `heic-to-jpg` | JPG (default) | 7 | 5 | 2 | 7,6 s | 9,2 s | 0 |
+| `heic-to-jpg-png` | `heic-to-jpg` | PNG | 5 | 3 | 2 | 6,9 s | 10,5 s | 0 |
+| `image-to-pdf` | `image-to-pdf` | Image size (default) | 16 | 10 | 6 | 5,9 s | 7,7 s | 0 |
+| `png-to-jpg-photos` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 5,7 s | 8,9 s | 0 |
+| `png-to-jpg-png` | `png-to-jpg` | PNG files go to JPG | 7 | 2 | 5 | 1,1 s | 2,0 s | 0 |
+| `png-to-jpg-rest` | `png-to-jpg` | JPG files go to PNG | 8 | 3 | 5 | 9,3 s | 7,1 s | 0 |
+| `resize-image` | `resize-image` | Untouched: 50% of each image | 16 | 10 | 6 | 6,0 s | 7,3 s | 0 |
+| `rotate-image` | `rotate-image` | Right 90° (default), no mirror | 16 | 10 | 6 | 6,2 s | 9,7 s | 0 |
+| `webp-to-jpg` | `webp-to-jpg` | JPG (default) | 10 | 2 | 8 | 1,3 s | 2,6 s | 0 |
 
 ## `compress-image`
 
@@ -64,41 +44,6 @@ Decodificação nativa de AVIF nesta máquina: Chromium: abre AVIF sozinho; WebK
 | `gen-jpg-truncado.jpg` | Recommended | recusado (truncated) | recusado (truncated) |
 | `gen-vazio.jpg` | Recommended | recusado (empty) | recusado (empty) |
 | `gen-texto-extensao-png.png` | Recommended | recusado (unsupported) | recusado (unsupported) |
-
-## `convert-to-webp`
-
-| Fixture | Opções | Chromium | WebKit |
-| --- | --- | --- | --- |
-| `jpg-01-pixel2-retrato-gps.jpg` | AVIF, Recommended | ok · AVIF 3024×4032 · 633 KB · abre | ok · AVIF 3024×4032 · 633 KB · não abre neste navegador |
-| `jpg-02-iphone6-paisagem-gps.jpg` | AVIF, Recommended | ok · AVIF 3264×2448 · 311 KB · abre | ok · AVIF 3264×2448 · 311 KB · não abre neste navegador |
-| `jpg-03-iphone5-paisagem-orientacao3-gps.jpg` | AVIF, Recommended | ok · AVIF 3264×2448 · 181 KB · abre · orientação ok (Δ0.2) | ok · AVIF 3264×2448 · 181 KB · não abre neste navegador |
-| `gen-jpg-01-orientacao6.jpg` | AVIF, Recommended | ok · AVIF 1200×1600 · 156 KB · abre · orientação ok (Δ0.3) | ok · AVIF 1200×1600 · 156 KB · não abre neste navegador |
-| `gen-jpg-02-orientacao8.jpg` | AVIF, Recommended | ok · AVIF 1600×1200 · 131 KB · abre · orientação ok (Δ0.1) | ok · AVIF 1600×1200 · 131 KB · não abre neste navegador |
-| `gen-png-transparente.png` | AVIF, Recommended | ok · AVIF 800×600 · 41 KB · abre · transparência mantida | ok · AVIF 800×600 · 41 KB · não abre neste navegador · transparência mantida |
-| `gen-png-extensao-jpg.jpg` | AVIF, Recommended | ok · AVIF 640×480 · 38 KB · abre | ok · AVIF 640×480 · 38 KB · não abre neste navegador |
-| `gen-grande-4100x4100.jpg` | AVIF, Recommended | ok · AVIF 4100×4100 · 25 KB · abre | ok · AVIF 4100×4100 · 25 KB · não abre neste navegador |
-| `gen-webp-animada.webp` | AVIF, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | AVIF, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-avif.avif` | AVIF, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-jpg-corrompido.jpg` | AVIF, Recommended | recusado (decode) | recusado (decode) |
-| `gen-jpg-truncado.jpg` | AVIF, Recommended | recusado (truncated) | recusado (truncated) |
-| `gen-vazio.jpg` | AVIF, Recommended | recusado (empty) | recusado (empty) |
-| `gen-texto-extensao-png.png` | AVIF, Recommended | recusado (unsupported) | recusado (unsupported) |
-| `jpg-01-pixel2-retrato-gps.jpg` | WebP, Recommended | ok · WebP 3024×4032 · 1,1 MB · abre | ok · WebP 3024×4032 · 1,1 MB · abre |
-| `jpg-02-iphone6-paisagem-gps.jpg` | WebP, Recommended | ok · WebP 3264×2448 · 543 KB · abre | ok · WebP 3264×2448 · 543 KB · abre |
-| `jpg-03-iphone5-paisagem-orientacao3-gps.jpg` | WebP, Recommended | ok · WebP 3264×2448 · 388 KB · abre · orientação ok (Δ0.2) | ok · WebP 3264×2448 · 388 KB · abre · orientação ok (Δ0.4) |
-| `gen-jpg-01-orientacao6.jpg` | WebP, Recommended | ok · WebP 1200×1600 · 221 KB · abre · orientação ok (Δ0.3) | ok · WebP 1200×1600 · 221 KB · abre · orientação ok (Δ0.5) |
-| `gen-jpg-02-orientacao8.jpg` | WebP, Recommended | ok · WebP 1600×1200 · 200 KB · abre · orientação ok (Δ0.1) | ok · WebP 1600×1200 · 200 KB · abre · orientação ok (Δ0.5) |
-| `gen-png-transparente.png` | WebP, Recommended | ok · WebP 800×600 · 98 KB · abre · transparência mantida | ok · WebP 800×600 · 99 KB · abre · transparência mantida |
-| `gen-png-extensao-jpg.jpg` | WebP, Recommended | ok · WebP 640×480 · 55 KB · abre | ok · WebP 640×480 · 55 KB · abre |
-| `gen-grande-4100x4100.jpg` | WebP, Recommended | ok · WebP 4100×4100 · 59 KB · abre | ok · WebP 4100×4100 · 59 KB · abre |
-| `gen-webp-animada.webp` | WebP, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `heic-08-iphone13pro-paisagem-hdr-ios17.heic` | WebP, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-avif.avif` | WebP, Recommended | recusado (wrong-tool) | recusado (wrong-tool) |
-| `gen-jpg-corrompido.jpg` | WebP, Recommended | recusado (decode) | recusado (decode) |
-| `gen-jpg-truncado.jpg` | WebP, Recommended | recusado (truncated) | recusado (truncated) |
-| `gen-vazio.jpg` | WebP, Recommended | recusado (empty) | recusado (empty) |
-| `gen-texto-extensao-png.png` | WebP, Recommended | recusado (unsupported) | recusado (unsupported) |
 
 ## `crop-image`
 
