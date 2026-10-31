@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 // E2E over the static build, served like the Cloudflare assets handler (scripts/serve-dist.ts).
 // Chromium and WebKit, as the plan requires. Build first: pnpm build (pnpm verificar does).
-const PORT = 4173;
+// FO_PORT lets two checkouts run the suite at once (agent worktrees); CI and verificar use 4173.
+const PORT = Number(process.env['FO_PORT'] ?? 4173);
 
 export default defineConfig({
   testDir: 'tests/e2e',

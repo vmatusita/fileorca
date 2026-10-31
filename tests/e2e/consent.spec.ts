@@ -26,13 +26,13 @@ test.describe('Consent Mode v2 e aviso de cookies', () => {
       expect((global?.[2] as Record<string, string>)[key]).toBe('granted');
     }
     expect(entries[config]?.[1]).toBe('G-T4BBJN7S11');
-    expect(entries[config]?.[2]).toEqual({ page_location: 'http://127.0.0.1:4173/compress-image/' });
+    expect(entries[config]?.[2]).toEqual({ page_location: `${new URL(page.url()).origin}/compress-image/` });
   });
 
   test('page_location never carries the query string or the hash', async ({ page }) => {
     await page.goto('/compress-image/?q=123#principal=300000');
     const config = (await dataLayer(page)).find((entry) => entry[0] === 'config');
-    expect(config?.[2]).toEqual({ page_location: 'http://127.0.0.1:4173/compress-image/' });
+    expect(config?.[2]).toEqual({ page_location: `${new URL(page.url()).origin}/compress-image/` });
   });
 
   for (const [button, value] of [['Accept', 'granted'], ['Decline', 'denied']] as const) {

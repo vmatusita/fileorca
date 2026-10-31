@@ -14,13 +14,13 @@ test.describe('Compress image (shared island)', () => {
     await dismissCookies(page);
   });
 
-  test('the fixture really has GPS, and the compressed copy has no metadata at all', async ({ page }) => {
+  test('the fixture really has GPS, and the compressed copy has no metadata at all', async ({ page, baseURL }) => {
     const original = new Uint8Array(readFileSync(GPS_PHOTO));
     expect(hasGps(original)).toBe(true);
     const outbound: string[] = [];
     page.on('request', (request) => {
       const url = new URL(request.url());
-      if (url.origin !== 'http://127.0.0.1:4173' && !url.protocol.startsWith('blob')) outbound.push(request.url());
+      if (url.origin !== new URL(baseURL ?? '').origin && !url.protocol.startsWith('blob')) outbound.push(request.url());
       if (request.method() !== 'GET') outbound.push(`${request.method()} ${request.url()}`);
     });
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
