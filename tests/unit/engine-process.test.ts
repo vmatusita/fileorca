@@ -53,6 +53,17 @@ describe('process: the files it refuses, each with its reason and the format it 
     expect(await run(jpegShell(0, 0))).toEqual({ ok: false, reason: 'decode', source: 'jpeg' });
   });
 
+  it('a picture above 50 million pixels is refused as too large from its headers, but one that needs no decoding still goes back clean', async () => {
+    // 9000 × 6000 = 54 MP: the no-canvas decoders would hold it about 32 bytes per pixel, so no decoder is started.
+    const huge = jpegShell(9000, 6000);
+    expect(await run(huge)).toEqual({ ok: false, reason: 'too-large', source: 'jpeg' });
+    expect(await run(huge, { kind: 'convert', to: 'png' })).toEqual({ ok: false, reason: 'too-large', source: 'jpeg' });
+    expect(await run(huge, { kind: 'rotate', turn: 'right', flip: 'none' })).toEqual({ ok: false, reason: 'too-large', source: 'jpeg' });
+    // A target that the file already fits needs no pixel: it goes back without metadata.
+    const fits = ok(await run(huge, { kind: 'target', maxBytes: 1_000_000 }));
+    expect([fits.outcome, fits.width, fits.height]).toEqual(['fits', 9000, 6000]);
+  });
+
   it('never throws, whatever the bytes', async () => {
     let seed = 7;
     for (let i = 0; i < 40; i += 1) {

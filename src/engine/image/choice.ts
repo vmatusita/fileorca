@@ -7,13 +7,18 @@
 //      applies the Exif Orientation on top of it, gives other dimensions and is not trusted.
 // Self-contained: nothing here imports from outside src/engine/image/.
 
-import { CANVAS_MAX_PIXELS } from './types.ts';
+import { CANVAS_MAX_PIXELS, WASM_MAX_PIXELS } from './types.ts';
 
 export type DecodePath = 'canvas' | 'wasm';
 
 /** Up to and including CANVAS_MAX_PIXELS (4096 × 4096) is the canvas; one pixel more is not. */
 export function decodePath(width: number, height: number): DecodePath {
   return width * height <= CANVAS_MAX_PIXELS ? 'canvas' : 'wasm';
+}
+
+/** More pixels than the no-canvas path can hold in memory: the file is refused before any decoder runs. */
+export function beyondDecoding(width: number, height: number): boolean {
+  return width * height > WASM_MAX_PIXELS;
 }
 
 export interface Sized {

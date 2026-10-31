@@ -11,14 +11,14 @@
 // browser's canvas path converts on its own.
 // Self-contained: nothing here imports from outside src/engine/image/.
 
-import { decodePath, nativeIfSizeMatches } from './choice.ts';
+import { beyondDecoding, decodePath, nativeIfSizeMatches } from './choice.ts';
 import { EngineError } from './errors.ts';
 import { clampBox, crop, displayP3ToSrgb, exifSpin, transform } from './pixels.ts';
 import type { Raster } from './pixels.ts';
 import type { Transform } from './bmff.ts';
 import type { SourceInfo } from './probe.ts';
 import { mimeOf } from './sniff.ts';
-import type { ImageFormat } from './types.ts';
+import { WASM_MAX_PIXELS, type ImageFormat } from './types.ts';
 import { canvasAvailable, CanvasWork, RasterWork } from './work.ts';
 import type { Work } from './work.ts';
 
@@ -143,6 +143,10 @@ async function avifDecode(bytes: Uint8Array, blob: Blob, info: SourceInfo, path:
 /** Decodes the file into an upright picture; throws EngineError with the reason to show. */
 export async function decodeSource(bytes: Uint8Array, blob: Blob, info: SourceInfo): Promise<Decoded> {
   const path = decodePath(info.width, info.height);
+  // The size comes from the headers (probe), so a picture too big for the WASM decoders is refused before one is loaded.
+  if (path === 'wasm' && beyondDecoding(info.width, info.height)) {
+    throw new EngineError('too-large', `${info.width} × ${info.height} is more than the ${WASM_MAX_PIXELS} pixels the no-canvas path decodes`);
+  }
   switch (info.format) {
     case 'jpeg':
       return path === 'canvas' ? canvasDecode(blob, info) : wasmJpeg(bytes, info);

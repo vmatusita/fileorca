@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { decodePath, nativeIfSizeMatches } from '../../src/engine/image/choice.ts';
-import { applyContainerTransforms } from '../../src/engine/image/decode.ts';
+import { beyondDecoding, decodePath, nativeIfSizeMatches } from '../../src/engine/image/choice.ts';
+import { applyContainerTransforms, decodeSource } from '../../src/engine/image/decode.ts';
 import { makeRaster } from '../../src/engine/image/pixels.ts';
 import type { Raster } from '../../src/engine/image/pixels.ts';
-import { CANVAS_MAX_PIXELS } from '../../src/engine/image/types.ts';
+import { CANVAS_MAX_PIXELS, WASM_MAX_PIXELS } from '../../src/engine/image/types.ts';
+import type { ImageFormat } from '../../src/engine/image/types.ts';
 import { oracle } from './lib/oracle.ts';
 
 describe('choice: canvas or WASM, by pixel count alone', () => {
@@ -35,6 +36,33 @@ describe('choice: canvas or WASM, by pixel count alone', () => {
     }
     const large = Object.entries(oracle()).filter(([name]) => name.includes('grande'));
     for (const [name, entry] of large) expect(decodePath(entry.displayWidth, entry.displayHeight), name).toBe('wasm');
+  });
+});
+
+describe('choice: the ceiling of the no-canvas path (50 million pixels)', () => {
+  it('lets the 48 MP phone photos through and stops at 50 000 000 pixels, whatever the shape', () => {
+    expect(WASM_MAX_PIXELS).toBe(50_000_000);
+    expect(beyondDecoding(8000, 6000)).toBe(false); // 48 MP
+    expect(beyondDecoding(10_000, 5000)).toBe(false); // exactly 50 MP
+    expect(beyondDecoding(50_000_001, 1)).toBe(true);
+    expect(beyondDecoding(5000, 10_001)).toBe(true);
+    expect(beyondDecoding(12_000, 9000)).toBe(true); // 108 MP: about 3.4 GB at 32 bytes per pixel
+    expect(beyondDecoding(9000, 12_000)).toBe(beyondDecoding(12_000, 9000));
+  });
+
+  it('refuses every format above it before a decoder is loaded', async () => {
+    const source = (format: ImageFormat) => ({
+      format, width: 12_000, height: 9000, storedWidth: 12_000, storedHeight: 9000, orientation: 1, alpha: false, animated: false, displayP3: false, transforms: [],
+    });
+    for (const format of ['jpeg', 'png', 'webp', 'heic', 'avif'] as const) {
+      await expect(decodeSource(new Uint8Array(8), new Blob([]), source(format)), format).rejects.toMatchObject({ name: 'EngineError', reason: 'too-large' });
+    }
+  });
+
+  it('keeps the canvas limit where it was: 16 777 216 pixels, and the ceiling is above it', () => {
+    expect(decodePath(8000, 6000)).toBe('wasm');
+    expect(beyondDecoding(8000, 6000)).toBe(false);
+    expect(WASM_MAX_PIXELS).toBeGreaterThan(CANVAS_MAX_PIXELS);
   });
 });
 
