@@ -1,8 +1,8 @@
 # ADR-002: Prévia das PRs no modelo "Worker Previews" do Workers Builds
 
-**Status:** Proposta (não aplicada; decisão do Victor)
+**Status:** Proposta, em revisão: a falha que motivou esta ADR tinha outra causa (ver "Atualização"); o resultado da prévia da PR do ajuste fecha a questão
 **Data:** 30/out/2026
-**Proposta por:** run F1a
+**Proposta por:** run F1a; atualizada pelo ajuste `ajuste-previa-build`
 **Afeta:** ADR-001 (itens 2 e 5), ficha F1a (`wrangler.jsonc`), critério 12 da F1a
 
 ## Contexto
@@ -36,3 +36,22 @@ O CI do GitHub (Ubuntu 24.04) instala e builda o mesmo commit sem erro, então a
 ## Antes de decidir
 
 Abrir no painel o log do build mais recente da branch `fase-01a` e ver em que etapa ele para (instalação, `pnpm build` ou o comando de prévia). Se for o comando de prévia, vale a opção 1 (ou a 2). Se for a instalação, ajustar Node e pnpm (DECISOES § 17).
+
+## Atualização (30/out/2026, ajuste `ajuste-previa-build`)
+
+Depois do merge da F1a, o build de produção também falhou, e o Victor abriu o log no painel. A causa não era o modelo "Worker Previews" nem o Node ou o pnpm: o comando de build salvo no painel era `pnpm buid`, sem o "l".
+
+| Build | Commit | Node e pnpm detectados | Onde parou |
+| --- | --- | --- | --- |
+| `d925f68d` (prévia) | `bc0f703` | 26.13.0 e 12.16.1 | instalação ok ("Done in 7.2s using pnpm v12.16.1"); `Executing user build command: pnpm buid` → `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL`, `Command "buid" not found` |
+| `b9d3b134` (prévia) | `af28dfa` | 26.13.0 e 12.16.1 | instalação ok; etapa Building falhou em 2 s |
+| `adb0c2f3` (prévia) | `a120197` | 24.22.2 e 12.16.1 | instalação ok; etapa Building falhou em 2 s |
+| `8d03fd90` (prévia) | `9bb5ccf` | 24.22.2 e 10.34.9 | instalação ok; etapa Building falhou em 2 s |
+| `62a07a98` (produção) | `249307f` | 24.22.2 e 10.34.9 | instalação ok; `Command "buid" not found` |
+| `a49d23cc` (produção, refeito) | `249307f` | 24.22.2 e 10.34.9 | **passou** depois de o Victor corrigir o comando para `pnpm build`: 72 arquivos, deploy em fileorca.com |
+
+O que isso muda:
+
+- Com o comando de build errado, nenhum build podia chegar ao comando de prévia (`npx wrangler preview`): todos os logs lidos param na etapa Building, em 2 s. A hipótese do bloco `previews` nunca foi testada, e a diferença de tempo entre as tentativas da tabela anterior era ruído, não progresso.
+- O Node 26 e o pnpm 12 instalam sem erro no Workers Builds. A razão do DECISOES § 17 não se sustenta (ver § 37).
+- A prévia da PR do ajuste é o primeiro build de branch com o comando certo. Se ela abrir, a opção 2 desta ADR fica desnecessária e a opção 1 só vale se o Victor quiser Version URLs; se ela falhar no `wrangler preview`, o log diz se falta o bloco `previews`.
