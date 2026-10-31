@@ -82,10 +82,12 @@ describe('build.txt', () => {
 describe('Worker sem código', () => {
   const config = parseJsonc(readFileSync('wrangler.jsonc', 'utf8')) as Record<string, unknown>;
 
-  it('has exactly the fields ADR-001 allows', () => {
+  it('has exactly the fields ADR-001 and ADR-002 allow', () => {
     expect(Object.keys(config).sort()).toEqual(
-      ['$schema', 'assets', 'compatibility_date', 'name', 'preview_urls', 'workers_dev'].sort(),
+      ['$schema', 'assets', 'compatibility_date', 'name', 'preview_urls', 'previews', 'workers_dev'].sort(),
     );
+    // The empty previews block that "npx wrangler preview" needs (ADR-002): previews share the production settings.
+    expect(config['previews']).toEqual({});
     expect(config['name']).toBe('fileorca');
     expect(config['compatibility_date']).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(config['workers_dev']).toBe(true);

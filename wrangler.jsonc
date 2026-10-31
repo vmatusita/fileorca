@@ -1,4 +1,5 @@
 // Assets-only Worker (ADR-001). No `main`, no `run_worker_first`: a test fails if either appears.
+// The empty `previews` block is what `npx wrangler preview` needs for PR previews (ADR-002).
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "fileorca",
@@ -9,5 +10,6 @@
     "html_handling": "auto-trailing-slash"
   },
   "workers_dev": true,
-  "preview_urls": true
+  "preview_urls": true,
+  "previews": {}
 }
