@@ -230,3 +230,87 @@ O design system v1.1 já veio no pacote da F0 em `docs/design/` (ver `docs/desig
   - O `MUDANCAS-v1.1.md` tem 13 itens, em outra ordem (o 9 do plano é o 11 dele, o 10 é o 12, o 11 é o 10 e o 12 é o 9; o 13, "notas corrigidas", não está no plano). A nota dele de que o artifact ainda mostra o v1 ficou velha.
   - O artifact do design system vivo (https://claude.ai/artifact/ECjKLGYoW4JL72TKSNWDgT) foi lido em 31/out/2026: o `tokens.json` dele tem o mesmo conteúdo do `docs/design/tokens.json` (muda só a formatação do arquivo) e o README é o mesmo, sem o parágrafo de abertura do pacote. Vale `docs/design/`.
 - **Por quê:** o § 2 já registrava que o pacote veio no v1.1; o prompt da F1b manda conferir antes de implementar e só aplicar o que faltasse, num commit só.
+
+## § 40 · O contrato medido vale mais que o `bundle.css` (F1b, 31/out/2026)
+
+- **Decisão:** o `bundle.css` é a referência de estilo, não um import. O CSS do site traz só os componentes que existem nas páginas, com as mesmas classes `fo-*` e a marcação v1.1, em quatro arquivos que viram um CSS só por página: `src/styles/global.css` (entrada, base e molde), `theme.css` (gerado, § 41), `fonts.css` (§ 42) e `components.css`. Onde o `bundle.css` diverge do que os testes da F1a medem, vale o DECISOES: AdSlot com 300 e 644 px (§ 20; o `bundle.css` diz 280 e 624), `.fo-slot` com 380/340 px, a Oli do DropZone em `top:-86px; right:0` no celular (o molde ToolPage; o `bundle.css` diz `-58px`), o vão do trilho igual ao `ad-clearance` e as classes exatas dos testes (`fo-ad fo-ad--content`, só `fo-btn` nos botões de cookies).
+- **Ajustes desta run:** a opção do OptionGroup fica com 48 px (`tap-min`), porque os 44 px do `bundle.css` só davam 48 com `content-box`, e o preflight usa `border-box`; o `.fo-top` ganha 136 px à direita a partir de 768 px, para a Oli de 112 px não cobrir o H1; o sublinhado de "link dentro do texto" vale só para `a` sem classe (link com classe é vestido pelo componente; o Breadcrumb ganhou `fo-crumbs__link`).
+- **Por quê:** decisão 1 do prompt da F1b.
+
+## § 41 · Tema do Tailwind v4 gerado dos tokens (F1b, 31/out/2026)
+
+- **Decisão:** `src/styles/theme.css` é gerado de `docs/design/tokens.json` por `scripts/design/tema.ts` (`pnpm design:gerar`) e nunca editado à mão: `@theme reference inline { --*: initial; --color-<x>: var(--<x>); … }`, com cores, espaçamento (`--spacing-<n>: var(--space-<n>)`), raios, sombras, as duas famílias e os easings. O tema padrão do Tailwind sai inteiro; `reference inline` não emite nada em `:root` e evita o ciclo `--radius-xl: var(--radius-xl)` que `@theme inline` emitiria; os utilitários entram com `@import "tailwindcss/utilities.css" layer(utilities) source(none)`, então nenhum arquivo é varrido e nenhuma palavra de texto vira classe (o problema do § 18). O preflight passa para `layer(base)`.
+- **O amarelo fica fora do tema:** `sun`, `on-sun`, `sun-edge`, `shadow-lip-sun` e `shadow-lip-on-deep` não são mapeados, para nenhuma utilidade poder pintar amarelo; o `sun` existe só nas regras do `.fo-btn--download`.
+- **Testes:** `theme.test.ts` reprova o arquivo desatualizado e compila o tema com o `tailwindcss` para provar que não sai variável nem ciclo; o portão `design` reprova, no CSS do build, variável `--color-*`, `--radius-*`, `--shadow-*` ou `--font-*` cujo valor não seja um token (ou a própria definição do `tokens.css`).
+- **Alternativas:** `@theme inline` com valores literais (duplicaria os números do `tokens.css`); `@import "tailwindcss"` com `@source` restrito (comentários e textos dos componentes ainda gerariam utilitários, inclusive `transition`, que fere o § 44).
+
+## § 42 · Fontes: só os arquivos latinos, preload da Fredoka e fallback com métrica (F1b, 31/out/2026)
+
+- **Decisão:** `@fontsource-variable/fredoka` e `/figtree` 5.3.0 em `dependencies`, usados só pelo arquivo latino (`*-latin-wght-normal.woff2`), num `@font-face` próprio em `src/styles/fonts.css`, com os nomes `Fredoka` e `Figtree` do `tokens.css`, o `unicode-range` latino do pacote e `font-display: swap`. O CSS dos pacotes não é importado (traria latin-ext e hebrew, com os nomes "Fredoka Variable"). O `BaseLayout` faz preload só da Fredoka, importando o mesmo arquivo com `?url`: o Vite dá o mesmo nome com hash ao `url()` do CSS e ao preload (conferido no build), com `crossorigin`.
+- **Fallback:** faces "Fredoka Fallback" e "Figtree Fallback" sobre `local("Arial")`, Helvetica, Liberation Sans e Roboto, com `size-adjust` 100,5 % e 99,9 % (largura de um texto de amostra nos três idiomas na fonte contra a Arial, medida nos arquivos), `ascent-override` 96,9 % e 95,1 %, `descent-override` 23,5 % e 25 % e `line-gap-override` 0 % (as métricas `hhea` divididas pelo `size-adjust`). Como o `tokens.css` não muda, as pilhas do CSS são `--fo-font-display: "Fredoka", "Fredoka Fallback", var(--font-display)` e `--fo-font-text`, derivadas do token.
+- **Por quê:** decisão 3 do prompt. A API de fontes do Astro gera família com hash (`Fredoka-150d…`) e um `<style>` por página, o que quebraria o contrato do `tokens.css` e o "um CSS por página". Com as duas fontes, a página da ferramenta faz 7 requisições no WebKit (limite 8), e a home já baixa as duas, então o par home → ferramenta segue com 3 novas.
+
+## § 43 · Sprite da Oli montado no build (F1b, 31/out/2026)
+
+- **Decisão:** `src/oli/sprite.ts` lê `docs/design/assets/Oli/oli-*.svg` e `Logo/logo-light.svg` no build, confere a estrutura (falha com o nome do arquivo se a run 1c mudar o desenho de um jeito inesperado) e monta: um `<symbol id="oli-<pose>">` por pose; cada filho do grupo da pose que aparece igual, byte a byte, em duas ou mais das oito poses de corpo inteiro vira uma peça `oli-p<N>` (13 peças), referenciada por `<use>`; o `clipPath` `oli-clip` uma vez (é igual nas oito poses e no logo, e o build confere); a `peek` com o viewBox `0 18 128 80` e sem o `clipPath` `ic`, que nada usa. Os paths e atributos ficam como no arquivo (só os grupos vazios saem).
+- **Por página:** `OliSprite.astro`, no início do `<body>`, leva só os símbolos das poses da página (o `BaseLayout` recebe `oli` e sempre acrescenta a `peek`, por causa do diálogo de busca), as peças que eles e o logo usam e o `oli-clip`. O sprite é `<svg class="fo-sprite" aria-hidden="true" width="0" height="0">`, fora da tela por CSS, nunca `display:none`.
+- **Tamanho por pose** (símbolo + peças + `oli-clip`, UTF-8, sem compressão): wave 2653, gulp 2881, swim 2695, cheer 2756, oops 2813, buoy 2903, lost 3103, coffee 3079 e peek 1475 bytes; limite 4096. O `sprite.test.ts` confere os tamanhos, os nomes, os ids e a equivalência de pixels com o arquivo original no resvg (no máximo 8 pixels com diferença de canal acima de 32, em 65.536; o medido é 0 ou 1).
+
+## § 44 · A Oli nas caixas e o movimento só em CSS (F1b, 31/out/2026)
+
+- **Decisão:** toda caixa `[data-oli]` leva `<svg aria-hidden="true"><use href="#oli-<pose>"/></svg>`, sem viewBox no host (com viewBox a `peek` desloca 18 unidades). No `ToolPanel`, trocar a pose é trocar o `href` (`href`, não `xlink:href`, que o servidor e o cliente do Preact escrevem diferente). O `ToolPanel` exporta `PANEL_POSES` (`wave`, `gulp`, `swim`, `cheer`, `oops`), que a página põe no sprite.
+- **Movimento:** só `transform`, `opacity`, `translate`, `scale` e `rotate`. A `wave` flutua em loop (`dur-float`), a `gulp` cresce 5 % (`scale`, com transição), a `swim` balança em loop, a `cheer` salta uma vez (`dur-cheer`) no ResultCard, a Placard entra com `fo-pop` e o vapor do `coffee` sobe. A água do DropZone e do WaterLevel é uma camada da altura da caixa que desce com `translateY(100% - nível)`, e a crista da onda anda com `translateX`; no WaterLevel a Oli nada dentro dessa camada e sobe junto com ela (o `bottom` animado do `bundle.css` saiu). Botões, chips, opções e DropZone trocam de cor sem transição; só o `transform` transiciona.
+- **Movimento reduzido:** `animation: none` e `transition: none` em tudo, e o hover não desloca. O `bundle.css` usava 1 ms, o que deixaria animações finitas em `document.getAnimations()`.
+- **Testes:** o portão `design` reprova `@keyframes` ou `transition` que mexa em outra propriedade; o `design.spec.ts` confere `getAnimations()` vazio nos estados do fluxo com `reducedMotion: 'reduce'`, e não vazio sem ele.
+
+## § 45 · Logo, favicon e ícone do app (F1b, 31/out/2026)
+
+- **Decisão:** o logo do `logo-light.svg` vai inline no Header (`Logo.astro`), com a Oli espelhada feita só de `<use>` das peças do sprite (sem o `<defs>` próprio, usando o `oli-clip` da página) e o texto com "File" em `var(--ink)` e "Orca" em `var(--brand)` (classes `fo-logo__file` e `fo-logo__orca`), `role="img"` e `aria-label="FileOrca"`, 38 px de altura no celular e 44 px no computador, dentro do link de 48 px. O favicon é o `app-icon.svg` em data URI; os PNG de 192 e 512 e o `apple-touch-icon` de 180 (opaco, fundo `brand`, porque o iOS preenche transparência com preto) saem do mesmo arquivo pelo resvg. O logo do Organization segue `/icon-512.png`.
+
+## § 46 · Ícones inline (F1b, 31/out/2026)
+
+- **Decisão:** os 35 SVG de `docs/design/assets/Icons/` entram inline, com a raiz trocada por uma nossa: `class="fo-icon"`, `stroke="currentColor"` e `aria-hidden="true"`. Nas páginas Astro, `Icon.astro` lê todos por `import.meta.glob` no servidor; na ilha, cada ícone é importado com `?raw` (só os que ela usa vão para o JS) e desenhado por `Icon.tsx` com `dangerouslySetInnerHTML`, que o Preact mantém na hidratação. Na busca, o ícone da ferramenta vem dentro do `search-index.json`, sem requisição nova. Nada de sprite externo nem pacote de ícones.
+- **No celular** a busca do Header fica só com o ícone, num alvo de 48 px, e o texto "Search tools" vira texto escondido no mesmo botão, então o nome acessível não muda. Isso fecha o § 30.
+- **Setas:** nenhum texto do site usa "→" nem "↔" hoje; o portão `design` reprova os dois no HTML do build. Onde houver "antes → depois" (o FileCard), a seta é o ícone `arrow-right` em `fo-icon--inline` com "to" / "para" / "a" em `fo-sr`.
+
+## § 47 · Folha da Oli gerada do mesmo sprite (F1b, 31/out/2026)
+
+- **Decisão:** `docs/oli/folha.html` é gerada por `scripts/design/folha.ts` (`pnpm design:gerar`) com o `spriteMarkup` do site: as nove poses em 32, 64 e 512 px sobre o fundo claro e sobre o escuro (onde o aro aparece), e o ícone do app em 16 e 32 px como `<img>` em data URI (o `ic` dele não se repete). Abre por `file://`, sem rede e sem link para outro arquivo. O `folha.test.ts` reprova a folha desatualizada.
+
+## § 48 · SupportCard e página de apoio (F1b, 31/out/2026)
+
+- **Decisão:** o SupportCard leva a Oli `coffee` (96 px no celular, 128 px no computador), o título no nível da página (o H1, no estilo `h1`/`h1-mobile`, e não os 22 px do `bundle.css`, porque é o título da página), o texto da tabela de Doações, um botão secundário para o `KOFI_URL` com o ícone `coffee` e os valores sugeridos em texto. Não são três botões com valores: o link do Ko-fi não leva o valor. Nenhum script ou widget do Ko-fi; o `donate_click` segue com `place: "support_page"`. "Quem está por trás" e "o que o próximo café paga" ficam abaixo do card.
+
+## § 49 · Linha do café no ResultCard (F1b, 31/out/2026)
+
+- **Decisão:** a linha aparece só com o arquivo pronto, depois do Baixar e das estatísticas, com o texto da tabela de Doações (sem exclamação), um botão secundário (nunca `sun`) e "Não mostrar de novo". Regra (`src/tools/compress-image/coffee.ts`): cada arquivo que chega ao resultado é um uso (trocar a opção e reprocessar não conta outro); a linha aparece no 3º uso naquele navegador e depois no máximo uma vez a cada 7 dias. A contagem fica em `localStorage["fo-coffee"]` (`{ uses, shownAt, never }`) e só é gravada com `fo-consent = "granted"`; com Recusar ou sem escolha nada é gravado e a linha não aparece. "Não mostrar de novo" é gravado sempre, porque é pedido da própria pessoa.
+- **Quem bloqueia anúncio** vê a linha já no 1º uso (com o Aceitar), só quando as três variáveis do AdSense estão preenchidas no build, no fileorca.com, e o carregador do AdSense não rodou (`adsbygoogle.loaded`) ou a unidade de conteúdo ficou com altura 0. Testado na regra pura (`coffee.test.ts`); no navegador não dá para provocar, porque o anúncio só roda em fileorca.com (§ 34).
+- **Destino:** em inglês e espanhol, o Ko-fi; em português, até a F6 trazer o Pix, "Apoiar com um café" leva a /pt/apoie/. O clique manda `donate_click` com `place: "result"` (já estava na lista fechada do § 10).
+- **Política de privacidade:** a seção da escolha de cookies ganhou, nos três idiomas, um parágrafo dizendo que, com o Aceitar, o site conta ali os arquivos terminados para o pedido de café, e que essa contagem fica só no navegador e nunca sai dele.
+
+## § 50 · Imagem de Open Graph com o logo e a Oli (F1b, 31/out/2026)
+
+- **Decisão:** a mesma imagem por página indexável e idioma do § 21 (24 imagens de 1200×630), agora com o logo escuro (`logo-dark.svg`) no topo, o título em Fredoka 600 e o subtítulo em Figtree 400 (os `.woff` estáticos de `@fontsource/fredoka` e `@fontsource/figtree`, em `devDependencies`) e a Oli `wave` original num disco `water` (o do tema escuro) à direita. Na Compress image, o ícone `compress` num quadrado `turquesa` fica ao lado da Oli. Sem desenho novo da Oli; só cores de token.
+- **Atualiza o § 21:** o satori 0.63.2 lê woff2; o `.woff` segue por ser o que a F1a já usava. Só o subconjunto latino está carregado; um título fora dele pediria o `latin-ext`.
+
+## § 51 · Screenshots fora do verificar (F1b, 31/out/2026)
+
+- **Decisão:** `pnpm screenshots` (`scripts/screenshots.ts`) gera, sobre o `dist/` e com o Chromium do Playwright, um PNG por componente e por tema a 360 px (Header, Footer e a página da ferramenta também a 1280), recortado no elemento, com `deviceScaleFactor` 1 e movimento reduzido, em `docs/relatorios/fase-01b/`. Os estados saem do fluxo real (arrastar por cima, arquivo que não é imagem, motor segurado para o WaterLevel aparecer, foto real, 3º uso com o Aceitar para a linha do café). O FileCard e o OliMessage, que nenhuma página usa ainda, saem da marcação do `preview.html` deles com o CSS do build. Nenhum gancho de teste no código do site. Não entra no verificar, porque a imagem muda entre Windows e Ubuntu.
+
+## § 52 · Testes de qualidade com o mesmo alcance (F1b, 31/out/2026)
+
+- **Decisão:** a lista esperada de `browserPackages()` ganha `@fontsource-variable/figtree` e `@fontsource-variable/fredoka` (dependência nova legítima, que vai ao navegador; a /licenses lista as duas com OFL-1.1). O teste do amarelo passa a ler todo `src/styles/*.css` e os `<style>` dos `.astro`, e pega a família inteira (`sun`, `on-sun`, `sun-edge`, `shadow-lip-sun`, `shadow-lip-on-deep`); o de hex continua lendo todo `.css`, `.astro` e `.tsx` de `src/`. Nenhum limiar, orçamento ou lista da F1a mudou.
+- **Portão novo:** `pnpm gate:design` entra no verificar depois dos links e confere, no build, um CSS por página, o sprite (ids únicos, `oli-clip` uma vez, sem `ic`, poses da lista, `[data-oli]` com `aria-hidden` e o `<use>` certo, símbolos das poses que a página usa), as fontes (dois woff2 latinos, preload só da Fredoka com a mesma URL), as variáveis do tema, o movimento e as setas. O `color:` só com tokens de texto é conferido no CSS de `src/styles/` (no build, o preflight do Tailwind traz um `color-mix` no `::placeholder`). O Lighthouse ganha a asserção de CLS ≤ 0,05, e o portão reprova se o elemento LCP for a Oli.
+
+## § 53 · FileCard e OliMessage prontos, sem uso em página (F1b, 31/out/2026)
+
+- **Decisão:** o FileCard é um componente Preact (`src/components/FileCard.tsx`), porque a fila da F2 vive na ilha da ferramenta: estados pronto (tamanhos com a seta-ícone e o ganho em `success` com `check`), processando (`fo-bar` com `role="progressbar"` e o nome do arquivo, preenchida por `scaleX`) e erro (`danger-soft`, ícone `alert`), com os botões de linha nomeados pelo arquivo. O CSS do OliMessage também fica pronto para os avisos e a tela offline. Nenhum dos dois aparece numa página nesta fase.
+
+## § 54 · ResultCard no celular segue o molde ToolPage (F1b, 31/out/2026)
+
+- **Decisão:** abaixo de 768 px o ResultCard usa o molde do celular: Oli de 72 px, fala em 18/24 px, Baixar em bloco e "Start over" centralizado; a Placard fica escondida (o número já está na fala da Oli, e com ela o card passaria dos 380 px reservados do § 20). A partir de 768 px entram a Oli de 96 px, a fala em 20/26 e a Placard girada.
+- **Por quê:** o `ToolPage/preview.html` do celular não tem a Placard, e o § 20 reserva o mesmo retângulo para os três estados.
+
+## § 55 · O elemento LCP da página-modelo é o texto do aviso de cookies (F1b, 31/out/2026)
+
+- **Registro:** o Lighthouse não dispensa o aviso de cookies, e o parágrafo dele é o maior bloco de texto da primeira tela a 360 px (já era assim na F1a). O portão confere que o LCP não é a Oli nem um SVG; o H1 e a DropZone seguem sendo os maiores elementos do conteúdo. Fazer o LCP voltar ao H1 mexeria no aviso de consentimento, que está fora desta run.
