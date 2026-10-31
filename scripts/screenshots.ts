@@ -4,7 +4,8 @@
 // real photo, a batch with a file that is not an image, a third use with the cookies accepted); the FileCard and
 // the OliMessage previews come from their design-system markup with the CSS of the build. F2: the queue while it
 // works and when it is done with an error row, the batch ResultCard, the BeforeAfter, the crop editor, the Resize
-// fields (also with an error) and the hub. Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
+// fields (also with an error) and the hub. F3: the end of the page with the cookie notice open, at 360 and 1280px.
+// Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,7 +13,8 @@ import { chromium, type Browser, type Locator, type Page } from '@playwright/tes
 import { requireDist } from './lib/dist.ts';
 
 const ORIGIN = 'http://127.0.0.1:4173';
-const OUT = 'docs/relatorios/fase-02';
+// F3: a folder of its own under fase-03/, which also keeps the before and after shots of the cookie notice.
+const OUT = 'docs/relatorios/fase-03/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -188,6 +190,16 @@ async function main(): Promise<void> {
       page = await open(browser, theme, 360, '/compress-image/', null);
       await shot(page.locator('.fo-cookie'), `cookie-notice-${theme}-360`);
       await page.close();
+
+      // F3: the end of the page with the notice still open, where the light band of DECISOES § 91 showed.
+      for (const width of [360, 1280]) {
+        page = await open(browser, theme, width, '/', null);
+        await page.locator('#fo-cookie').waitFor();
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await page.screenshot({ path: join(OUT, `footer-cookie-open-${theme}-${width}.png`) });
+        console.log(`  footer-cookie-open-${theme}-${width}.png`);
+        await page.close();
+      }
 
       page = await open(browser, theme, 360, '/');
       await shot(page.locator('.fo-hero'), `home-hero-${theme}-360`);

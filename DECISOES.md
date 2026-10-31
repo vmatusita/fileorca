@@ -610,3 +610,20 @@ A decisão 14 do prompt: nenhuma asserção saiu; cada uma mudou de seletor, de 
 - **Asserção que mudou:** em `tests/unit/image-hub.test.ts`, o H1 esperado deixou de ser `['Image tools']` e passou a `['Eight image tools, zero uploads']`. A asserção antiga afirmava o próprio baixo. Entrou também a asserção de que o sobretítulo é diferente do H1.
 - **Linhas que mudam com a 2b:** o "Eight" do H1, do título, da descrição e da introdução, e a lista do guia, que ganha as duas ferramentas novas.
 - **Alternativa:** tirar os AdSlots do hub (perde receita e contraria a § 77) ou baixar o limiar até o hub passar (a regra deixaria de medir alguma coisa).
+
+## § 97 · A produção conferida só por leitura (F3, 31/out/2026)
+
+- **Decisão:** antes do merge, a produção é conferida com `curl` (GET e HEAD). As saídas vão para o relatório. O que foi conferido:
+  - `build.txt` em `f549f1b`;
+  - `robots.txt` igual ao `public/robots.txt`;
+  - o índice e os três sitemaps iguais aos do `dist/` (19, 8 e 8 URLs);
+  - as 18 páginas obrigatórias com 200 e sem `x-robots-tag`;
+  - uma URL inexistente com 404;
+  - nenhum `/cdn-cgi/` nem `cloudflareinsights` em seis páginas;
+  - `http://`, `www` e `http://www` com 301 até `https://fileorca.com/` (`http://www` passa por `https://www` antes);
+  - `/ads.txt` com 404;
+  - HSTS, nosniff, Referrer-Policy e `frame-ancestors` na home;
+  - `immutable` nos `/_astro/` e `must-revalidate` no HTML;
+  - a chave do IndexNow.
+- **Navegador:** só com `context.route` abortando todo domínio do Google (`.cache/f3/check-band.ts`), para nenhuma visita minha entrar no GA4. Assim a faixa do aviso foi medida na produção antes do merge: 202 px a 1280 e 216 px a 360, nos dois temas. Na prévia da PR (`736b1cd`), a medida deu 0 px nas quatro combinações. Na prévia, o `gtag.js` nem é pedido, por causa da trava de hostname.
+- **Por quê:** decisão 6 da ficha. Visita de navegador sem bloqueio contaria como tráfego no GA4.
