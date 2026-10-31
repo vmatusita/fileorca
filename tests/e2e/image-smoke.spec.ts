@@ -267,7 +267,14 @@ test.describe('image-to-pdf', () => {
     await give(page, [JPG_01_ROT6, PNG_ALPHA, JPG_02]);
     await ready(page);
     const sizes = async () => {
-      const bytes = await downloadBytes(page);
+      // While the PDF is built again for the new sheet, its link is gone for a moment: that is one more try of the
+      // poll, not a failure (it failed once on the Linux WebKit of the CI; DECISOES § 99).
+      let bytes: Uint8Array;
+      try {
+        bytes = await downloadBytes(page);
+      } catch {
+        return 'the PDF is being built again';
+      }
       expect(sniff(bytes)).toBe('pdf');
       const pdf = parsePdf(bytes);
       expect(pdf.info['Producer']).toBe('FileOrca');

@@ -53,6 +53,14 @@ test('a good file whose engine cannot load is not called damaged, and says to re
 // The codecs load inside the engine on first use: a .wasm that does not arrive is 'load' too, never a damaged file or a
 // browser that cannot write JPG, and the file is tried again when an option changes (review p2-motor-01, DECISOES § 104).
 test('a codec that cannot load says to reload, and the file is tried again once it can', async ({ page }) => {
+  // The page path, so the codecs are fetched by the page, where page.route holds in every browser (the WebKit of the
+  // Linux CI has OffscreenCanvas in the worker, whose own fetches page.route does not stop). The worker path loads
+  // its codecs through the same loading() of the engine.
+  await page.route(/\/_astro\/worker-[\w-]+\.js$/, async (route) => {
+    const response = await route.fetch();
+    const body = await response.text();
+    await route.fulfill({ response, body: body.includes('PDFDocument') ? body : `delete globalThis.OffscreenCanvas;\n${body}` });
+  });
   await page.route(/\.wasm$/, (route) => route.abort());
   await page.goto('/heic-to-jpg/');
   await hydrated(page);
