@@ -72,8 +72,15 @@ export async function zipFiles(entries: readonly ZipEntry[]): Promise<Blob> {
   return zipStored(entries);
 }
 
-/** Fetches the codecs a tool will need before the first file arrives. Never throws. */
+/**
+ * Fetches the codecs a tool will need before the first file arrives. Never throws. A worker without OffscreenCanvas
+ * does no image work (the page path loads its own copy of each codec), so it fetches nothing for nothing (review
+ * e-01, DECISOES § 102).
+ */
 export function warm(kinds: readonly WarmKind[]): void {
   const worker = current();
-  if (worker) void worker.api.warm([...kinds]).catch(() => {});
+  if (!worker) return;
+  void (async () => {
+    if (await Promise.race([worker.canvas, worker.broken.catch(() => false)])) await worker.api.warm([...kinds]);
+  })().catch(() => {});
 }

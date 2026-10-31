@@ -14,16 +14,23 @@ test('without OffscreenCanvas in the worker, the engine runs on the page and sti
     await route.fulfill({ response, body: body.includes('PDFDocument') ? body : `delete globalThis.OffscreenCanvas;\n${body}` });
   });
   const pagePath: string[] = [];
+  const wasm: string[] = [];
   page.on('request', (request) => {
     if (/\/_astro\/process[\w.-]*\.js$/.test(request.url())) pagePath.push(request.url());
+    if (/\.wasm$/.test(request.url())) wasm.push(new URL(request.url()).pathname.replace(/[-.][\w-]{8}\.wasm$/, '.wasm'));
   });
   await page.goto('/compress-image/');
   await hydrated(page);
   await dismissCookies(page);
+  // The pointer over the panel warms the engine first, as a person's would (review e-01).
+  await page.locator('.fo-slot').hover();
   await page.setInputFiles('input[type="file"]', fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'));
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 45_000 });
   await expect(page.locator('.fo-result')).toContainText(/Done! Your image is \d+% lighter\./);
   expect(pagePath.length, 'the page path imported the engine').toBeGreaterThan(0);
+  // Each codec is fetched once: the worker, which does no image work here, does not warm a copy of its own.
+  expect(wasm.length, 'a codec was fetched').toBeGreaterThan(0);
+  expect(wasm.filter((name, index) => wasm.indexOf(name) !== index), 'no codec fetched twice').toEqual([]);
 });
 
 const LOAD = /Oli couldn't load what she needs to read [\w-]+\.jpg\. Check your connection and reload the page\./;
