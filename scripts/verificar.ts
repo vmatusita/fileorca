@@ -8,6 +8,7 @@
 // runs everything, as on a laptop.
 import { spawn } from 'node:child_process';
 import { rmSync } from 'node:fs';
+import { watchDisk } from './lib/disco.ts';
 
 export interface Step {
   name: string;
@@ -74,6 +75,7 @@ if (import.meta.main) {
   const started = Date.now();
   const timings: { name: string; ms: number; ok: boolean }[] = [];
   rmSync('dist', { recursive: true, force: true });
+  const stopWatchingDisk = watchDisk();
   for (const step of steps) {
     console.log(`\n▶ ${step.name}\n  $ ${step.command}`);
     const begin = Date.now();
@@ -81,6 +83,7 @@ if (import.meta.main) {
     timings.push({ name: step.name, ms: Date.now() - begin, ok: code === 0 });
     if (code !== 0) break;
   }
+  stopWatchingDisk();
   const total = Date.now() - started;
   console.log(`\nResumo do pnpm verificar (${label})`);
   for (const timing of timings) console.log(`  ${timing.ok ? 'ok   ' : 'FALHA'} ${seconds(timing.ms).padStart(8)}  ${timing.name}`);
