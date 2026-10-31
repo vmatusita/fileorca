@@ -1,9 +1,11 @@
 # ADR-002: Prévia das PRs no modelo "Worker Previews" do Workers Builds
 
-**Status:** Proposta, em revisão: a falha que motivou esta ADR tinha outra causa (ver "Atualização"); o resultado da prévia da PR do ajuste fecha a questão
+**Status:** Proposta, confirmada pela prévia da PR #3: com o comando de build certo, o `npx wrangler preview` recusa rodar sem o bloco `previews` (ver "Atualização"). Decisão do Victor entre as opções 1 e 2
 **Data:** 30/out/2026
 **Proposta por:** run F1a; atualizada pelo ajuste `ajuste-previa-build`
 **Afeta:** ADR-001 (itens 2 e 5), ficha F1a (`wrangler.jsonc`), critério 12 da F1a
+
+> As seções Contexto, Opções, Proposta, "O que a run tentou" e "Antes de decidir" são o texto da F1a. A seção "Atualização", no fim, corrige o diagnóstico.
 
 ## Contexto
 
@@ -39,7 +41,7 @@ Abrir no painel o log do build mais recente da branch `fase-01a` e ver em que et
 
 ## Atualização (30/out/2026, ajuste `ajuste-previa-build`)
 
-Depois do merge da F1a, o build de produção também falhou, e o Victor abriu o log no painel. A causa não era o modelo "Worker Previews" nem o Node ou o pnpm: o comando de build salvo no painel era `pnpm buid`, sem o "l".
+Depois do merge da F1a, o build de produção também falhou, e o Victor abriu o log no painel. O primeiro bloqueio não era o modelo "Worker Previews" nem o Node ou o pnpm: o comando de build salvo no painel era `pnpm buid`, sem o "l", e os builds lidos paravam antes de chegar ao comando de prévia.
 
 | Build | Commit | Node e pnpm detectados | Onde parou |
 | --- | --- | --- | --- |
@@ -52,6 +54,7 @@ Depois do merge da F1a, o build de produção também falhou, e o Victor abriu o
 
 O que isso muda:
 
-- Com o comando de build errado, nenhum build podia chegar ao comando de prévia (`npx wrangler preview`): todos os logs lidos param na etapa Building, em 2 s. A hipótese do bloco `previews` nunca foi testada, e a diferença de tempo entre as tentativas da tabela anterior era ruído, não progresso.
+- Com o comando de build errado, nenhum build podia chegar ao comando de prévia (`npx wrangler preview`): todos os logs lidos param na etapa Building, em 2 s. A hipótese do bloco `previews` não foi testada na F1a, e a diferença de tempo entre as tentativas da tabela anterior era fila e instalação, não progresso.
 - O Node 26 e o pnpm 12 instalam sem erro no Workers Builds. A razão do DECISOES § 17 não se sustenta (ver § 37).
-- A prévia da PR do ajuste é o primeiro build de branch com o comando certo. Se ela abrir, a opção 2 desta ADR fica desnecessária e a opção 1 só vale se o Victor quiser Version URLs; se ela falhar no `wrangler preview`, o log diz se falta o bloco `previews`.
+- A prévia da PR do ajuste (PR #3, commit `b562124`, build `f2790489`) foi o primeiro build de branch com o comando certo. A instalação e o `pnpm build` passaram (27 páginas, `build.txt` com `b562124`), e o comando de prévia falhou em 4 s com `✘ [ERROR] Your Wrangler configuration is missing a previews block to run this command. Add the following to your configuration file: { "previews": {} }`, no wrangler 4.156.0. O mecanismo descrito nesta ADR está confirmado, mas não era a causa das falhas da F1a, que paravam antes.
+- As opções e a proposta acima continuam valendo: a opção 1 (trocar o comando de prévia no painel para `npx wrangler versions upload`) não muda o `wrangler.jsonc` nem a ADR-001; a opção 2 (`"previews": {}`) muda o contrato da ficha F1a e pede uma run de ajuste.
