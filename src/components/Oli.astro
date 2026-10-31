@@ -1,0 +1,12 @@
+---
+// A place of the Oli (DECISOES § 19 and § 44): the [data-oli] box, decorative, with the pose drawn from
+// the page sprite. The page must list the pose in BaseLayout's `oli` so its symbol is in the sprite.
+import type { Pose } from '../oli/poses.ts';
+
+interface Props {
+  pose: Pose;
+  class: string;
+}
+const { pose, class: className } = Astro.props;
+---
+<div class={className} data-oli={pose} aria-hidden="true"><svg aria-hidden="true"><use href={`#oli-${pose}`} /></svg></div>

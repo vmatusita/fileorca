@@ -1,0 +1,13 @@
+---
+// The Oli sprite of the page (DECISOES § 43): built at build time from docs/design/assets/Oli, with only
+// the symbols of the poses the page uses, the shared pieces they and the header logo reference, and
+// oli-clip once. Off-screen and aria-hidden, never display:none.
+import { loadSprite, spriteMarkup } from '../oli/sprite.ts';
+import type { Pose } from '../oli/poses.ts';
+
+interface Props {
+  poses: readonly Pose[];
+}
+const { poses } = Astro.props;
+---
+<Fragment set:html={spriteMarkup(loadSprite(), poses)} />
