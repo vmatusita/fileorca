@@ -1,0 +1,12 @@
+import type { ImageToolsTexts } from '../types.ts';
+
+export default {
+  title: 'Image tools: ten free tools, no upload',
+  description:
+    'Compress, resize, crop, rotate, convert and turn images into a PDF. Ten free image tools that run in your browser, with no upload and no account.',
+  eyebrow: 'Image tools',
+  h1: 'Image tools',
+  intro: 'Ten tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
+  toolsHeading: 'All image tools',
+  presetsHeading: 'Common sizes and limits',
+} satisfies ImageToolsTexts;

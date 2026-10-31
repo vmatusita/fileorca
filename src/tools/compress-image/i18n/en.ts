@@ -1,75 +1,89 @@
-import type { CompressImageTexts } from '../../../i18n/types.ts';
+import type { CompressOptionsTexts, ImageToolTexts } from '../../../i18n/types.ts';
 
+// Compress image page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the
+// shared island shows. The specs rows state the real behaviour of the engine (src/engine/image/): when the
+// quality numbers or the encoders change there, change them here.
 export default {
-  title: 'Compress image online, no upload',
+  title: 'Compress image online, free, no upload',
   description:
-    'Compress a JPG, PNG or WebP image in your browser. The file is processed on your device, never uploaded, and the GPS data in the photo is removed.',
+    'Compress JPG, PNG and WebP images in your browser, one or a whole batch. Nothing is uploaded, and the photo metadata, GPS location included, is removed.',
   h1: 'Compress image',
-  fileFallback: 'image',
-  drop: {
-    title: 'Drop an image here',
-    choose: 'Choose image',
-    helpDesktop: 'or paste with {kbd} · JPG, PNG or WebP, one at a time',
-    help: 'JPG, PNG or WebP, one at a time',
-    pasteKey: 'Ctrl V',
-    over: "Let go, Oli's ready",
-    overHelp: 'One image',
-    errorTitle: "Oops, Oli couldn't read this file",
-    errorHelp: "{name} isn't an image Oli can read. Try a JPG or PNG.",
-    chooseAnother: 'Choose another file',
-  },
-  options: {
-    legend: 'Compression',
-    recommended: 'Recommended',
-    recommendedHelp: 'best balance',
-    strong: 'Strong',
-    strongHelp: 'smallest',
-    pngNote: 'PNG is saved without loss, so the level only changes JPG and WebP.',
-  },
-  progress: {
-    label: 'Compressing image',
-    working: 'Oli is on it…',
-  },
-  result: {
-    done: 'Done! Your image is {percent} lighter.',
-    unchanged: 'This image was already optimized, so Oli kept the original image, without the photo metadata.',
-    cannotEncode: "This browser can't save {format} files, so Oli kept the original image, without the photo metadata.",
-    placardLabel: 'lighter',
-    before: 'Before',
-    after: 'After',
-    size: 'Size',
-    download: 'Download',
-    startOver: 'Start over',
-    to: 'to',
-    coffee: {
-      text: 'This tool is free, has no limits and never uploads your files. If it saved you time, a coffee helps keep it that way.',
-      button: 'Support with a coffee',
-      hide: "Don't show this again",
-    },
-  },
-  next: { label: 'Next:', moreTools: 'More tools' },
   howHeading: 'How it works',
   howSteps: [
-    'Drop a JPG, PNG or WebP image on the box, choose it, or paste it.',
-    'Oli redraws the image in your browser and saves it again with the compression you picked.',
-    'Download the lighter copy. Your original file stays untouched.',
+    'Drop your JPG, PNG or WebP images on the box, choose them, or paste them. Add as many as you like.',
+    'Pick Recommended or Strong. Oli compresses each image in your browser, one after another, and redoes the batch if you change the level.',
+    'Download one image, or all of them together in a ZIP. Your original files stay untouched.',
   ],
-  privacyHeading: 'Privacy',
-  privacyNote:
-    'The image is processed on your device and is never sent to a server. The saved copy also leaves out the photo metadata, including the GPS location.',
+  specsHeading: 'What goes in and what comes out',
+  specs: {
+    caption: 'What Compress image takes in and gives back',
+    head: ['Detail', 'What happens'],
+    rows: [
+      ['Formats it takes', 'JPG, PNG and WebP. Oli checks what is inside the file, not its name.'],
+      ['JPG', 'Saved again with MozJPEG, an encoder built to make smaller JPG files.'],
+      ['PNG', 'Optimized with OxiPNG, with no loss of quality. The level you pick does not change it.'],
+      ['WebP', 'Saved again as WebP, at the quality of the level you pick.'],
+      ['Recommended', 'JPG and WebP at quality 75: the best balance between size and looks.'],
+      ['Strong', 'JPG and WebP at quality 55: the smallest file, with some loss in fine detail.'],
+      ['Batch', 'No limit on the number of images. Several images download together as one ZIP.'],
+      ['Already small', 'If the new copy would not be smaller, you get the original back, without its photo metadata.'],
+      ['Photo metadata', 'Camera model, date and GPS location are removed from every file.'],
+      ['HEIC and AVIF', 'Not compressed here. Turn them into a JPG first with HEIC to JPG or AVIF to JPG.'],
+    ],
+  },
+  presets: {
+    heading: 'Compress to a target size',
+    caption: 'Presets of Compress image and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   faqHeading: 'Questions',
   faq: [
     {
+      q: 'Does compressing an image reduce its quality?',
+      a: 'JPG and WebP lose a little detail, because the file is saved again with some information left out. At Recommended the difference is hard to see at normal size, and Strong trades more detail for the smallest file. PNG loses nothing, because Oli saves it without loss. Your original file is never changed, so you can always go back to it.',
+    },
+    {
+      q: 'Why does my PNG barely get smaller?',
+      a: 'PNG keeps every pixel exactly as it is, so there is little to take out, and a photo saved as PNG is large because its tiny color changes are hard to pack. Oli only tidies the file, which often saves a little. If it is a photo and you do not need transparency, saving it as a JPG or WebP usually gives a much smaller file.',
+    },
+    {
+      q: 'What happens to the GPS location in my photo?',
+      a: 'Oli saves each compressed copy from the pixels alone, so the GPS location, the camera model and the date taken do not travel to the new file. That also holds when the original comes back unchanged because it was already small: that copy leaves without its photo metadata too.',
+    },
+    {
+      q: 'Can I compress many images at once?',
+      a: 'Yes. Drop or paste as many images as you like: Oli compresses them one after another, and each one gets its own download. When you want them all, one button gives you a ZIP. A big batch of large photos takes longer on a phone than on a computer, because your own device does the work.',
+    },
+    {
       q: 'Does my image get uploaded anywhere?',
-      a: "No. FileOrca compresses the image on your device, in your browser. Open your browser's Network tab while you compress: no request carries your file.",
+      a: "No. FileOrca compresses the images on your device, in your browser. Open your browser's Network tab while you compress: no request carries your files.",
     },
     {
       q: 'Why did the file come back the same size?',
-      a: 'Some images are already well compressed. When the new copy would not be smaller, Oli gives you back the original instead of a bigger file.',
+      a: 'Some images are already well compressed. When the new copy would not be smaller, Oli gives you back the original instead of a bigger file, and that copy has no photo metadata either.',
     },
     {
-      q: 'What happens to the location data in my photo?',
-      a: 'The compressed copy is saved without the photo metadata, so the GPS location, the camera model and the date are left out.',
+      q: 'Can I compress an iPhone photo in HEIC?',
+      a: 'Not here: Compress image takes JPG, PNG and WebP. Turn the HEIC into a JPG with HEIC to JPG first, then compress the JPG if you want it smaller. AVIF files work the same way, with AVIF to JPG.',
     },
   ],
-} satisfies CompressImageTexts;
+  privacyHeading: 'Privacy',
+  privacyNote:
+    'Images are processed on your device and are never sent to a server. Each saved copy also leaves out the photo metadata, including the GPS location.',
+  relatedHeading: 'More image tools',
+  panel: {
+    formats: 'JPG, PNG or WebP',
+    progressLabel: 'Compressing images',
+    done: 'Done! Your image is {percent} lighter.',
+    doneMany: 'Done! Your {count} images are {percent} lighter.',
+    placardLabel: 'lighter',
+    options: {
+      legend: 'Compression',
+      recommended: 'Recommended',
+      recommendedHelp: 'best balance',
+      strong: 'Strong',
+      strongHelp: 'smallest',
+      pngNote: 'PNG is saved without loss, so the level only changes JPG and WebP.',
+    },
+  },
+} satisfies ImageToolTexts<CompressOptionsTexts>;

@@ -5,7 +5,7 @@ export default {
   description:
     'The terms for using FileOrca, a set of free tools that run in your browser: your files, results, calculators, ads, donations and liability.',
   h1: 'Terms of use',
-  updated: 'Last updated: October 30, 2026',
+  updated: 'Last updated: October 31, 2026',
   intro:
     'These terms explain how you can use FileOrca. By using the site, you accept them. If you do not agree, please do not use the site.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'What FileOrca is',
       paragraphs: [
-        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators, in English, Portuguese and Spanish. Today the site has one tool, which compresses images. More tools are coming.',
+        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools: compress, resize, crop, rotate, convert and turn images into a PDF. They are in English, and the image compressor is also in Portuguese and Spanish.',
         'You do not need an account. Your files are processed on your device, not on a server, and they are never uploaded.',
       ],
     },

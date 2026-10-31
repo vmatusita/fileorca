@@ -49,17 +49,39 @@ async function searchWithoutResultOnScreen(page: Page): Promise<void> {
   await animationsDone(page);
 }
 
+// F2 (DECISOES § 76): each page loads once per browser and axe runs at both widths and in both themes
+// on that load. The site has no layout or theme decided by script at load, so resizing and switching
+// prefers-color-scheme in place gives the same page a fresh load would, with the same rules and reach.
+const COMBOS = [
+  { width: 360, height: 740, colorScheme: 'dark' },
+  { width: 360, height: 740, colorScheme: 'light' },
+  { width: 1280, height: 800, colorScheme: 'dark' },
+  { width: 1280, height: 800, colorScheme: 'light' },
+] as const;
+
+test.describe('axe em toda página, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const path of PAGES) {
+    test(`${path}`, async ({ page }) => {
+      const found: string[] = [];
+      for (const [index, combo] of COMBOS.entries()) {
+        await page.setViewportSize({ width: combo.width, height: combo.height });
+        await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
+        if (index === 0) await page.goto(path);
+        const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+        for (const violation of results.violations) {
+          found.push(`${combo.width}px ${combo.colorScheme} · ${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`);
+        }
+      }
+      expect(found).toEqual([]);
+    });
+  }
+});
+
 for (const width of [360, 1280]) {
   test.describe(`axe a ${width}px, tema escuro`, () => {
     test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, colorScheme: 'dark', reducedMotion: 'reduce' });
-
-    for (const path of PAGES) {
-      test(`${path}`, async ({ page }) => {
-        await page.goto(path);
-        const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
-        expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([]);
-      });
-    }
 
     test('tool page with the result on screen', async ({ page }) => {
       await resultOnScreen(page);
@@ -84,14 +106,6 @@ for (const width of [360, 1280]) {
 
   test.describe(`axe a ${width}px`, () => {
     test.use({ viewport: { width, height: width === 360 ? 740 : 800 }, reducedMotion: 'reduce' });
-
-    for (const path of PAGES) {
-      test(`${path}`, async ({ page }) => {
-        await page.goto(path);
-        const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
-        expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([]);
-      });
-    }
 
     test('tool page with the result on screen', async ({ page }) => {
       await page.goto('/compress-image/');

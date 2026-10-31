@@ -21,7 +21,7 @@ export default {
       paragraphs: [
         'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas crear una cuenta.',
         'Con los números pasa lo mismo. Cuando lleguen las calculadoras, guardarán los números que escribas en la parte de la dirección que va después del signo #. El navegador no envía esa parte a ningún servidor, y ningún evento de analítica lleva esos números.',
-        'La herramienta de imagen, por ejemplo, guarda una copia más ligera de tu imagen sin los metadatos de la foto, incluida la ubicación GPS.',
+        'Las herramientas de imagen, por ejemplo, guardan el resultado sin los metadatos de la foto, incluida la ubicación GPS.',
         'Puedes comprobarlo: abre la pestaña Red de tu navegador mientras usas una herramienta. Ninguna solicitud lleva tu archivo.',
       ],
     },
@@ -64,7 +64,7 @@ export default {
       heading: 'Tu elección de cookies en el navegador',
       paragraphs: [
         'FileOrca guarda tu elección sobre cookies en el almacenamiento local (local storage) de tu navegador, para que el aviso no vuelva cada vez. Este registro se queda en tu dispositivo. Para borrarlo, elimina los datos del sitio en tu navegador; el aviso volverá a aparecer.',
-        'Si aceptas en el aviso de cookies, FileOrca también cuenta allí cuántos archivos quedaron más pequeños en este navegador, para que el pedido de café aparezca solo a partir del tercero y como mucho una vez por semana; si pides no verlo más, eso también se guarda allí. Ese recuento se queda solo en tu navegador y nunca sale de él, y se borra si rechazas las cookies después.',
+        'Si aceptas en el aviso de cookies, FileOrca también cuenta allí cuántas veces usaste una herramienta y generó al menos un archivo nuevo en este navegador (un lote de archivos cuenta como una sola vez), para que el pedido de café aparezca solo a partir de la tercera vez y como mucho una vez por semana; si pides no verlo más, eso también se guarda allí. Ese recuento se queda solo en tu navegador y nunca sale de él, y se borra si rechazas las cookies después.',
       ],
     },
     {

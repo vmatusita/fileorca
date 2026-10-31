@@ -5,7 +5,7 @@ export default {
   description:
     'Los términos para usar FileOrca, herramientas gratis en tu navegador: tus archivos, resultados, calculadoras, anuncios, donaciones y responsabilidad.',
   h1: 'Términos de uso',
-  updated: 'Última actualización: 30 de octubre de 2026',
+  updated: 'Última actualización: 31 de octubre de 2026',
   intro:
     'Estos términos explican cómo puedes usar FileOrca. Al usar el sitio, los aceptas. Si no estás de acuerdo, por favor no uses el sitio.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras, en inglés, portugués y español. Hoy el sitio tiene una herramienta, que comprime imágenes. Vienen más en camino.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir. Las herramientas están en inglés, y Comprimir imagen también está en español y portugués.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },

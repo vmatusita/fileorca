@@ -21,7 +21,7 @@ export default {
       paragraphs: [
         'As ferramentas do FileOrca rodam no seu navegador. Os arquivos que você escolhe são processados no seu aparelho e nunca são enviados. O FileOrca não tem servidor que processe arquivos, e você não precisa criar conta.',
         'Com os números é a mesma coisa. Quando as calculadoras chegarem, elas vão guardar os números que você digitar na parte do endereço depois do sinal #. O navegador não envia essa parte a nenhum servidor, e nenhum evento de medição leva esses números.',
-        'A ferramenta de imagem, por exemplo, salva uma cópia mais leve da sua imagem sem os metadados da foto, inclusive a localização GPS.',
+        'As ferramentas de imagem, por exemplo, salvam o resultado sem os metadados da foto, inclusive a localização GPS.',
         'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo.',
       ],
     },
@@ -64,7 +64,7 @@ export default {
       heading: 'Sua escolha de cookies no navegador',
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
-        'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantos arquivos ficaram menores neste navegador, para o pedido de café aparecer só a partir do terceiro e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
+        'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantas vezes você usou uma ferramenta e ela gerou pelo menos um arquivo novo neste navegador (um lote de arquivos conta como uma vez só), para o pedido de café aparecer só a partir da terceira vez e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
       ],
     },
     {
