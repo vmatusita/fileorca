@@ -37,8 +37,11 @@ export type Operation =
   /** Crop to `box` (display pixels); without a box, the centred box of `ratio` (width / height). */
   | { kind: 'crop'; ratio: number | null; box?: Box }
   | { kind: 'rotate'; turn: Turn; flip: Flip }
-  /** Re-encode in another format; `level` only matters for WebP and AVIF. */
-  | { kind: 'convert'; to: OutputFormat; level?: Level }
+  /**
+   * Re-encode in another format; `level` only matters for WebP and AVIF. 'swap' is PNG to JPG and
+   * JPG to PNG: a PNG becomes a JPEG (transparency turns white), anything else becomes a PNG.
+   */
+  | { kind: 'convert'; to: OutputFormat | 'swap'; level?: Level }
   /** One page of a PDF: JPEG for photos, PNG when the image has transparency (src/engine/pdf/). */
   | { kind: 'pdf-page' };
 
@@ -114,3 +117,6 @@ export interface Probe {
   width: number;
   height: number;
 }
+
+/** Codec families the page can ask the worker to fetch ahead of the first file (pointer over the zone). */
+export type WarmKind = 'jpeg' | 'webp' | 'avif' | 'png' | 'resize' | 'heic';
