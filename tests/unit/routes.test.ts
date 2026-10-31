@@ -20,12 +20,12 @@ describe('mapa de rotas', () => {
   it('has the routes of the site, each equivalent in en, pt and es except the English-only image pages', () => {
     expect(ROUTES.map((route) => route.id)).toEqual([
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
-      'avif-to-jpg', 'convert-to-webp', 'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
     // Only Compress image is translated; the other tools, the presets and the hub exist in English only (DECISOES § 58).
     const englishOnly = new Set(ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id));
-    expect(englishOnly.size).toBe(13);
+    expect(englishOnly.size).toBe(11);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
@@ -106,7 +106,7 @@ describe('tool search', () => {
   it('indexes every image tool and preset of the registry, once, with a link only where the page exists', () => {
     const index = searchIndex();
     expect(ids(index)).toEqual(Object.keys(IMAGE_PAGES));
-    expect(index).toHaveLength(13);
+    expect(index).toHaveLength(11);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -146,17 +146,18 @@ describe('tool search', () => {
       ['heif', ['heic-to-jpg']],
       ['iphone photo', ['heic-to-jpg']],
       ['jpg to pdf', ['image-to-pdf']],
-      ['avif', ['avif-to-jpg', 'convert-to-webp']],
       ['100kb', ['compress-image-to-100kb']],
       ['1280x720', ['resize-image-youtube-thumbnail']],
       ['mirror', ['rotate-image']],
     ];
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
+    // No AVIF page exists in this release (AVIF to JPG and Convert to WebP are run 2b), so the search must not offer one.
+    expect(filterEntries(index, 'avif')).toEqual([]);
   });
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
     const index = searchIndex();
-    // English has all thirteen; Portuguese and Spanish only Compress image.
+    // English has all eleven; Portuguese and Spanish only Compress image.
     expect(ids(filterEntries(index, '', 'en'))).toEqual(Object.keys(IMAGE_PAGES));
     for (const lang of ['pt', 'es']) {
       expect(ids(filterEntries(index, '', lang)), lang).toEqual(['compress-image']);

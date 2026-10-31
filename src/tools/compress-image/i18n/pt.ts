@@ -29,7 +29,7 @@ export default {
       ['Lote', 'Sem limite de imagens. Várias imagens são baixadas juntas num só ZIP.'],
       ['Já está pequeno', 'Se a cópia nova não ficar menor, você recebe o original de volta, sem os metadados da foto.'],
       ['Metadados da foto', 'Modelo da câmera, data e localização GPS saem de todos os arquivos.'],
-      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme em JPG antes, com a HEIC to JPG ou a AVIF to JPG (ferramentas em inglês).'],
+      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a HEIC to JPG (ferramenta em inglês). Arquivos AVIF não são aceitos.'],
     ],
   },
   faqHeading: 'Perguntas',
@@ -60,7 +60,7 @@ export default {
     },
     {
       q: 'Posso comprimir uma foto do iPhone em HEIC?',
-      a: 'Aqui não: a Comprimir imagem aceita JPG, PNG e WebP. Primeiro transforme o HEIC em JPG com a HEIC to JPG, que está em inglês, e depois comprima o JPG se quiser que ele fique menor. Com arquivos AVIF é igual, usando a AVIF to JPG.',
+      a: 'Aqui não: a Comprimir imagem aceita JPG, PNG e WebP. Primeiro transforme o HEIC em JPG com a HEIC to JPG, que está em inglês, e depois comprima o JPG se quiser que ele fique menor.',
     },
   ],
   privacyHeading: 'Privacidade',

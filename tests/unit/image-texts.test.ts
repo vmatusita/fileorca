@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { fmt } from '../../src/i18n/format.ts';
 import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS, imageToolTexts } from '../../src/tools/image/texts.ts';
@@ -54,9 +55,31 @@ describe('what the page hands to the island', () => {
     expect(chips.find((chip) => chip.target === 'resize-image')?.category).toBe('image');
   });
 
-  it('sends a refused HEIC or AVIF to the English converter, also from the translated pages', () => {
+  it('sends a refused HEIC to the English converter, also from the translated pages, and gives a refused AVIF no link at all', () => {
     expect(panelData('compress-image', 'pt').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
-    expect(panelData('compress-image', 'es').converters.avif).toEqual({ href: '/avif-to-jpg/', name: 'AVIF to JPG' });
+    expect(panelData('compress-image', 'es').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
+    for (const lang of ['en', 'pt', 'es'] as const) expect(panelData('compress-image', lang).converters.avif, lang).toBeUndefined();
+  });
+
+  it('refuses an AVIF with the line that names what the tool takes, in every language the page exists in, and links to no page', () => {
+    const expected = {
+      en: "photo.avif is in AVIF format, which this tool doesn't take. Try JPG, PNG or WebP.",
+      pt: 'photo.avif é um arquivo AVIF. Tente um arquivo JPG, PNG ou WebP.',
+      es: 'photo.avif es un archivo AVIF. Prueba con un archivo JPG, PNG o WebP.',
+    } as const;
+    for (const id of IMAGE_PAGE_IDS) {
+      for (const lang of languagesOf(routeById(id))) {
+        const panel = IMAGE_PANEL_TEXTS[lang];
+        const { formats } = imageToolTexts(id, lang).panel;
+        const line = fmt(panel.errors.wrongFormat, { name: 'photo.avif', format: panel.formats.avif, formats });
+        expect(line, `${id} ${lang}`).toContain('photo.avif');
+        expect(line, `${id} ${lang}`).toContain(formats);
+        expect(line, `${id} ${lang}`).not.toMatch(/[{}]/);
+        if (id === 'compress-image') expect(line, lang).toBe(expected[lang]);
+        // No converter for AVIF in this release: the island is given no link for it, on any page.
+        expect(panelData(id, lang).converters.avif, `${id} ${lang}`).toBeUndefined();
+      }
+    }
   });
 
   it('builds the crumbs Home, Image tools, tool and preset in English; Home and tool in the other languages', () => {

@@ -282,7 +282,7 @@ export interface ImagePanelTexts {
     unsupported: string;
     /** A format another tool opens: "{name} is a {format} file. Open it in {tool}." ({tool} becomes a link). */
     wrongTool: string;
-    /** A format no tool here opens: "{name} is a {format} file. Try {formats}." */
+    /** A format this tool does not take and no converter here opens (AVIF, GIF): "{name} is in {format} format, which this tool doesn't take. Try {formats}." No link, no article before the format name. */
     wrongFormat: string;
     truncated: string;
     decode: string;
@@ -431,17 +431,6 @@ export interface SaveAsOptionsTexts {
   png: string;
   /** What changes between the two, in one line. */
   help: string;
-}
-
-export interface ConvertToOptionsTexts {
-  formatLegend: string;
-  webp: string;
-  avif: string;
-  levelLegend: string;
-  recommended: string;
-  recommendedHelp: string;
-  strong: string;
-  strongHelp: string;
 }
 
 export interface PdfOptionsTexts {

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { describedViolations } from './lib/axe.ts';
 import { imageSize, metadataReport, sniff } from './lib/images.ts';
 import { EVENT_PARAMS } from '../../src/analytics/events.ts';
 import { comparePixels, type Reference } from './lib/matrix.ts';
@@ -15,7 +15,7 @@ import { dataLayer, dismissCookies, downloadBytes, hydrated, type TestFile } fro
 // default (format, size, orientation, transparency, no Exif, XMP or GPS, the refused files) is the
 // matrix, image-matrix.spec.ts; the presets are image-presets.spec.ts. Every assertion lives in one of them.
 
-const MIME: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', avif: 'image/avif' };
+const MIME: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic' };
 const JPG_02 = 'jpg-02-iphone6-paisagem-gps.jpg'; // 3264 × 2448, with GPS
 const JPG_01_ROT6 = 'gen-jpg-01-orientacao6.jpg'; // stored 1600 × 1200, shown 1200 × 1600 (Orientation 6), with GPS
 const PNG_ALPHA = 'gen-png-transparente.png'; // 800 × 600 with transparency
@@ -260,20 +260,6 @@ test.describe('webp-to-jpg', () => {
   });
 });
 
-test.describe('convert-to-webp', () => {
-  test('Strong keeps the size, and AVIF on request re-processes the batch as AVIF', async ({ page }) => {
-    await open(page, '/convert-to-webp/');
-    await give(page, ['gen-jpg-02-orientacao8.jpg', PNG_ALPHA]);
-    await ready(page);
-    // WebP, Recommended is the default (the matrix has every fixture, and AVIF before the files go in).
-    await choose(page, 'Strong');
-    await expectOutputs(page, ['gen-jpg-02-orientacao8.webp:webp:1600x1200', 'gen-png-transparente.webp:webp:800x600']);
-    await choose(page, 'AVIF');
-    await expectOutputs(page, ['gen-jpg-02-orientacao8.avif:avif:1600x1200', 'gen-png-transparente.avif:avif:800x600']);
-    expectClean(await outputs(page));
-  });
-});
-
 test.describe('image-to-pdf', () => {
   test('the sheet changes only the PDF: Letter and A4 put every image on a sheet, in the order of the list', async ({ page }) => {
     await open(page, '/image-to-pdf/');
@@ -327,7 +313,6 @@ test.describe('crop-image with the keyboard only', () => {
 
 // axe on the option states of the Tools phase (WCAG 2.2 AA and best practices), in both themes at 360 and
 // 1280 px, on one load per state. The pages themselves (idle) are covered by a11y.spec.ts.
-const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 const COMBOS = [
   { width: 360, height: 740, colorScheme: 'dark' },
   { width: 360, height: 740, colorScheme: 'light' },
@@ -340,8 +325,7 @@ async function axeEverywhere(page: Page): Promise<string[]> {
   for (const combo of COMBOS) {
     await page.setViewportSize({ width: combo.width, height: combo.height });
     await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
-    const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
-    for (const violation of results.violations) found.push(`${combo.width}px ${combo.colorScheme} · ${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`);
+    found.push(...(await describedViolations(page, `${combo.width}px ${combo.colorScheme}`)));
   }
   return found;
 }
@@ -371,11 +355,10 @@ test.describe('axe on the option states', () => {
     expect(await axeEverywhere(page)).toEqual([]);
   });
 
-  test('the options of Image to PDF, Rotate and Convert to WebP with a result', async ({ page }) => {
+  test('the options of Image to PDF and Rotate with a result', async ({ page }) => {
     for (const [path, files] of [
       ['/image-to-pdf/', [JPG_01_ROT6, PNG_ALPHA]],
       ['/rotate-image/', [JPG_01_ROT6]],
-      ['/convert-to-webp/', [PNG_ALPHA]],
     ] as const) {
       await open(page, path);
       await give(page, [...files]);

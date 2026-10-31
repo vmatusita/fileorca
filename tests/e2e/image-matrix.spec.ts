@@ -38,12 +38,19 @@ const PHOTO = fixturesOf('jpeg', 'png', 'webp');
 /** The line the card adds when an animation became a still image (the animated WebP is in the batch). */
 const FIRST_FRAME = ['kept the first frame'] as const;
 
+/** What each tool says it takes in the refusal (the "formats" line of its panel texts, in its i18n/en.ts), by the formats it accepts. */
+const TAKES: Record<string, string> = { 'jpeg,png,webp': 'JPG, PNG or WebP', heic: 'HEIC or HEIF', webp: 'WebP', 'png,jpeg': 'PNG or JPG' };
+
 /** How a fixture that this tool cannot use is refused. */
 function refusal(fixture: string, accepts: readonly Format[]): Refuse | null {
   const entry = oracle(fixture);
   if (entry.expect === 'empty') return { refuse: 'empty' };
   if (entry.expect === 'unsupported') return { refuse: 'unsupported' };
-  if (!accepts.includes(entry.format)) return wrongTool(fixture);
+  if (!accepts.includes(entry.format)) {
+    const takes = TAKES[accepts.join()];
+    if (takes === undefined) throw new Error(`no "takes" text for ${accepts.join()}`);
+    return wrongTool(fixture, takes);
+  }
   if (entry.expect === 'truncated') return { refuse: 'truncated' };
   if (entry.expect === 'decode') return { refuse: 'decode' };
   return null;
@@ -74,7 +81,6 @@ const CASES: MatrixCase[] = [];
 // fixture: the big photos (12 MP and 8 MP) go in one batch, everything else in the other, both with the
 // refused files in the middle.
 const SMALL_PHOTOS = PHOTO.filter((name) => !BIG_PHOTOS.includes(name));
-const CONVERTIBLE = fixturesOf('jpeg', 'png');
 
 // ---- Compress image: keeps the format and the display size, never grows a file, no-canvas path included ----------------
 const compressCase = (id: string, accepted: string[]): MatrixCase => ({
@@ -279,52 +285,6 @@ CASES.push(
     'png-to-jpg-rest',
     'JPG files go to PNG',
   ),
-);
-
-// ---- AVIF to JPG ---------------------------------------------------------------------------------------------------------------------
-CASES.push({
-  id: 'avif-to-jpg',
-  tool: 'avif-to-jpg',
-  path: '/avif-to-jpg/',
-  options: 'JPG',
-  batch: batchOf(fixturesOf('avif'), [SMALL.jpeg, SMALL.png, SMALL.webp, SMALL.heic, ...BROKEN]),
-  deliverable: 'files',
-  outcome: outcomeFor(['avif'], (fixture) => {
-    const [width, height] = display(fixture);
-    return { name: sameName(fixture, 'jpeg'), format: 'jpeg', width, height, pixels: { from: JPG_03, limit: 8 } };
-  }),
-});
-
-// ---- Convert to WebP / AVIF ----------------------------------------------------------------------------------------------------------
-const CONVERT_ACCEPTS: Format[] = ['jpeg', 'png'];
-const chooseAvif = async (page: Page): Promise<void> => {
-  await page.locator('.fo-seg__opt', { hasText: 'AVIF' }).click();
-};
-const convertCase = (to: 'webp' | 'avif', fixtures: string[], refused: string[], id: string, setup?: MatrixCase['setup']): MatrixCase => ({
-  id,
-  tool: 'convert-to-webp',
-  path: '/convert-to-webp/',
-  options: `${to === 'webp' ? 'WebP' : 'AVIF'}, Recommended`,
-  batch: batchOf(fixtures, refused),
-  ...(setup ? { setup } : {}),
-  deliverable: 'files',
-  outcome: outcomeFor(CONVERT_ACCEPTS, (fixture) => {
-    const [width, height] = display(fixture);
-    return {
-      name: sameName(fixture, to),
-      format: to,
-      width,
-      height,
-      ...(fixture === TRANSPARENT ? { alpha: 'kept' as const } : {}),
-      ...pixelsOf(fixture, { limit: to === 'avif' ? 8 : CLOSE }),
-    };
-  }),
-});
-const CONVERT_REFUSED = [SMALL.webp, SMALL.heic, SMALL.avif, ...BROKEN];
-CASES.push(
-  convertCase('webp', BIG_PHOTOS, CONVERT_REFUSED, 'convert-to-webp-webp-photos'),
-  convertCase('webp', CONVERTIBLE.filter((name) => !BIG_PHOTOS.includes(name)), CONVERT_REFUSED, 'convert-to-webp-webp-rest'),
-  convertCase('avif', CONVERTIBLE, CONVERT_REFUSED, 'convert-to-webp-avif', chooseAvif),
 );
 
 // ---- Image to PDF --------------------------------------------------------------------------------------------------------------------

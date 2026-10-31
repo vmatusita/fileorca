@@ -20,8 +20,6 @@ import enRotate from '../rotate-image/i18n/en.ts';
 import enHeic from '../heic-to-jpg/i18n/en.ts';
 import enWebp from '../webp-to-jpg/i18n/en.ts';
 import enPng from '../png-to-jpg/i18n/en.ts';
-import enAvif from '../avif-to-jpg/i18n/en.ts';
-import enConvert from '../convert-to-webp/i18n/en.ts';
 import enPdf from '../image-to-pdf/i18n/en.ts';
 
 /** Page blocks and panel bits of any tool: the option texts are each tool's own shape. */
@@ -40,8 +38,6 @@ export const IMAGE_TOOL_TEXTS: Record<ImagePageId, Translations> = {
   'heic-to-jpg': { en: enHeic },
   'webp-to-jpg': { en: enWebp },
   'png-to-jpg': { en: enPng },
-  'avif-to-jpg': { en: enAvif },
-  'convert-to-webp': { en: enConvert },
   'image-to-pdf': { en: enPdf },
 };
 

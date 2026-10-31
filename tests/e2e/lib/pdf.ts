@@ -4,6 +4,11 @@
 // the PDF does not carry the location of the photo. Works on classic xref files (pdf-lib saved with
 // useObjectStreams: false) and, through the object stream decoder, on the default compressed layout.
 // It is not a general parser: no encryption, no incremental-update chains, no repair of broken files.
+//
+// The reader above is lenient on purpose (it finds objects by scanning), so at the end of the file there is
+// a strict check of the structure (strictPdf) that does not trust it: the header, %%EOF, the startxref offset,
+// every entry of the xref table, and a load by @cantoo/pdf-lib with the page count it finds.
+import { PDFDocument } from '@cantoo/pdf-lib';
 import { unzlibSync } from 'fflate';
 
 type Obj =
@@ -381,4 +386,113 @@ export function parsePdf(bytes: Uint8Array): PdfDocument {
     });
 
   return { version: s.slice(5, 8), pageCount: pages.length, pages, images, info, hasXmp, usesObjectStreams };
+}
+
+// ---- the strict check ------------------------------------------------------------------------------------------
+
+/** Reads with sticky patterns from a moving position, so nothing is skipped without being looked at. */
+class Cursor {
+  readonly s: string;
+  i: number;
+
+  constructor(s: string, start: number) {
+    this.s = s;
+    this.i = start;
+  }
+
+  take(pattern: RegExp): RegExpExecArray | null {
+    const sticky = new RegExp(pattern.source, 'y');
+    sticky.lastIndex = this.i;
+    const match = sticky.exec(this.s);
+    if (match) this.i += match[0].length;
+    return match;
+  }
+}
+
+/** The classic xref table at `start`: each entry is 20 bytes and each in-use one points at its own object. */
+function xrefTableProblems(s: string, start: number): string[] {
+  const problems: string[] = [];
+  const cursor = new Cursor(s, start + 4);
+  cursor.take(/[ \t\r\n]+/);
+  const SUBSECTION = /(\d+) (\d+)[ \t]*(?:\r\n|\n|\r)/;
+  const ENTRY = /(\d{10}) (\d{5}) ([nf])(?: \r| \n|\r\n)/;
+  let highest = -1;
+  let subsections = 0;
+  for (let header = cursor.take(SUBSECTION); header; header = cursor.take(SUBSECTION)) {
+    subsections += 1;
+    const first = Number(header[1]);
+    const count = Number(header[2]);
+    for (let index = 0; index < count; index += 1) {
+      const number = first + index;
+      const entry = cursor.take(ENTRY);
+      if (!entry) return [...problems, `xref entry ${number} is not the 20 bytes of "offset generation n|f"`];
+      const offset = Number(entry[1]);
+      const generation = Number(entry[2]);
+      if (entry[3] === 'f') {
+        if (number === 0 && generation !== 65535) problems.push('object 0 is not the head of the free list (generation 65535)');
+        continue;
+      }
+      if (!s.startsWith(`${number} ${generation} obj`, offset)) problems.push(`xref entry ${number} (offset ${offset}) does not point at "${number} ${generation} obj"`);
+      highest = Math.max(highest, number);
+    }
+  }
+  if (subsections === 0) problems.push('the xref table has no subsection');
+  cursor.take(/[ \t\r\n]*/);
+  if (!cursor.take(/trailer[ \t\r\n]/)) {
+    problems.push('no trailer after the xref table');
+    return problems;
+  }
+  const end = s.indexOf('startxref', cursor.i);
+  const dictionary = s.slice(cursor.i, end < 0 ? undefined : end);
+  const size = /\/Size\s+(\d+)/.exec(dictionary);
+  if (!size || Number(size[1]) !== highest + 1) problems.push(`the trailer /Size is ${size?.[1] ?? 'missing'}, not the highest object number + 1 (${highest + 1})`);
+  if (!/\/Root\s+\d+\s+\d+\s+R/.test(dictionary)) problems.push('the trailer has no /Root');
+  return problems;
+}
+
+/**
+ * What a PDF reader checks before it trusts the file instead of rebuilding it: the %PDF-x.y header, %%EOF at
+ * the end, a startxref whose offset points at an xref table (whose entries all point at their objects) or at
+ * an xref stream object. Empty when the structure is sound.
+ */
+export function pdfStructureProblems(bytes: Uint8Array): string[] {
+  const s = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('latin1');
+  const problems: string[] = [];
+  if (!/^%PDF-\d\.\d/.test(s)) problems.push('the file does not start with %PDF-x.y');
+  if (!/%%EOF[ \t\r\n]*$/.test(s.slice(-64))) problems.push('the file does not end with %%EOF');
+
+  const at = s.lastIndexOf('startxref');
+  const pointer = at < 0 ? null : /^startxref[ \t\r\n]+(\d+)[ \t\r\n]+%%EOF/.exec(s.slice(at, at + 64));
+  if (!pointer) return [...problems, 'no startxref followed by an offset and %%EOF'];
+  const offset = Number(pointer[1]);
+  if (offset <= 0 || offset >= at) return [...problems, `the startxref offset ${offset} is not inside the body of the file`];
+
+  if (/^xref[ \t\r\n]/.test(s.slice(offset, offset + 5))) {
+    problems.push(...xrefTableProblems(s, offset));
+  } else if (/^\d+ \d+ obj/.test(s.slice(offset, offset + 24))) {
+    // The dictionary of the object at that offset only: it ends at its own "stream" or "endobj".
+    const ends = ['stream', 'endobj'].map((keyword) => s.indexOf(keyword, offset)).filter((index) => index >= 0);
+    const head = s.slice(offset, ends.length > 0 ? Math.min(...ends) : offset + 512);
+    if (!/\/Type\s*\/XRef\b/.test(head)) problems.push(`the object at the startxref offset ${offset} is not an xref stream`);
+  } else {
+    problems.push(`the startxref offset ${offset} points at neither an xref table nor an xref stream object`);
+  }
+  return problems;
+}
+
+export interface StrictPdf {
+  problems: string[];
+  /** Pages @cantoo/pdf-lib counts, null when it could not load the file. */
+  pageCount: number | null;
+}
+
+/** The structure above plus a real load by @cantoo/pdf-lib (it stops at the first invalid object). */
+export async function strictPdf(bytes: Uint8Array): Promise<StrictPdf> {
+  const problems = pdfStructureProblems(bytes);
+  try {
+    const document = await PDFDocument.load(bytes, { updateMetadata: false, throwOnInvalidObject: true });
+    return { problems, pageCount: document.getPageCount() };
+  } catch (error) {
+    return { problems: [...problems, `@cantoo/pdf-lib cannot load the file: ${String(error)}`], pageCount: null };
+  }
 }

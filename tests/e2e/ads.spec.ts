@@ -28,8 +28,6 @@ const TOOL_PAGES = [
   '/heic-to-jpg/',
   '/webp-to-jpg/',
   '/png-to-jpg/',
-  '/avif-to-jpg/',
-  '/convert-to-webp/',
   '/image-to-pdf/',
 ];
 // F1b: the coffee line of the result card is measured too (the card itself is already in TARGETS).
@@ -46,7 +44,6 @@ const SMALL_OF: Record<string, { fixture: string; mimeType: string }> = {
   '/compress-image/to-1mb/': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' }, // 800 × 600, 1.1 MB
   '/heic-to-jpg/': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' }, // 1512 × 850, 239 KB
   '/webp-to-jpg/': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' }, // 1600 × 1200, 262 KB
-  '/avif-to-jpg/': { fixture: 'gen-avif.avif', mimeType: 'image/avif' }, // 1600 × 1200, 77 KB
 };
 
 // What each result must put on screen besides the card, so the clearance is measured against it and not against its
@@ -61,8 +58,6 @@ const ON_SCREEN: Record<string, string[]> = {
   '/crop-image/': ['.fo-crop', '.fo-crop__box', '.fo-crop__handle', '#cr-x', '#cr-y', '#cr-width', '#cr-height'],
   '/heic-to-jpg/': ['.fo-ba'],
   '/webp-to-jpg/': ['.fo-ba'],
-  '/avif-to-jpg/': ['.fo-ba'],
-  '/convert-to-webp/': ['.fo-ba'],
 };
 
 /** `count` small files this page accepts, with names of their own (a batch of two or more shows the queue). */

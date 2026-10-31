@@ -39,7 +39,7 @@ export interface ImagePanelData<O = object> {
   /** One PDF with the whole batch instead of one file per image. */
   pdf: boolean;
   chips: ChipData[];
-  /** Where a HEIC or an AVIF can go instead, for the "open it in …" link of a refused file. */
+  /** Where a HEIC or an AVIF can go instead, for the "open it in …" link of a refused file (CONVERTER_FOR: a format with no converter has no entry). */
   converters: { heic?: ConverterLink; avif?: ConverterLink };
   /** Where the coffee line leads: Ko-fi, or the support page in Portuguese until the Pix (F6). */
   coffeeHref: string;
