@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { dismissCookies, hydrated } from './lib/page.ts';
+import { chooseImage, dismissCookies, dragOver, hydrated, reachCoffeeLine, searchWithoutResult, slowEngine, useBadFile } from './lib/page.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
 const CLEARANCE = 150;
 const TARGETS = '.fo-btn--download, input:not([type="file"]), select, textarea, .fo-seg, fieldset, .fo-drop, .fo-level, .fo-result, [data-oli]';
+// F1b: the coffee line of the result card is measured too (the card itself is already in TARGETS).
+const TARGETS_WITH_COFFEE = `${TARGETS}, .fo-result__support`;
 const VIEWPORTS = [
   { width: 360, height: 740 },
   { width: 1280, height: 800 },
@@ -31,9 +33,9 @@ function distance(a: Box, b: Box): number {
   return Math.hypot(dx, dy);
 }
 
-async function expectClearance(page: Page, label: string): Promise<number> {
+async function expectClearance(page: Page, label: string, selector = TARGETS): Promise<number> {
   const ads = await boxes(page, '.fo-ad');
-  const targets = await boxes(page, TARGETS);
+  const targets = await boxes(page, selector);
   expect(ads.length, `${label}: nenhum AdSlot visível`).toBeGreaterThan(0);
   expect(targets.length).toBeGreaterThan(0);
   let min = Infinity;
@@ -69,6 +71,61 @@ for (const viewport of VIEWPORTS) {
       const panel = (await boxes(page, '.fo-drop'))[0];
       expect(panel).toBeDefined();
       for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y).toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
+    });
+  });
+}
+
+// F1b: the same 150px in the other states of the panel and with the search dialog open and empty.
+async function measure(page: Page, label: string, selector?: string): Promise<void> {
+  const gap = await expectClearance(page, label, selector);
+  console.log(`${label}: menor vão ${gap.toFixed(0)} px`);
+}
+
+for (const viewport of VIEWPORTS) {
+  test.describe(`distância dos anúncios nos outros estados a ${viewport.width}×${viewport.height}`, () => {
+    test.use({ viewport });
+
+    // The cookie choice is made by each test: the coffee line needs the Accept, the others the Decline.
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/compress-image/');
+      await hydrated(page);
+    });
+
+    test('with a file over the drop zone', async ({ page }) => {
+      await dismissCookies(page);
+      await dragOver(page);
+      await measure(page, 'arquivo em cima');
+    });
+
+    test('while processing (WaterLevel on screen)', async ({ page }) => {
+      await dismissCookies(page);
+      const engine = await slowEngine(page);
+      await chooseImage(page);
+      await expect(page.locator('.fo-level')).toBeVisible();
+      await measure(page, 'processando');
+      engine.release();
+      await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    });
+
+    test('with the error message', async ({ page }) => {
+      await dismissCookies(page);
+      await useBadFile(page);
+      await measure(page, 'erro');
+    });
+
+    test('with the result and the coffee line', async ({ page }) => {
+      await reachCoffeeLine(page);
+      await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
+    });
+
+    // With the dialog open the page behind it is untouched. The dialog itself sits 24px from the
+    // rail at 1280, so the full TARGETS list (the field, the empty message) does not apply there;
+    // what must stay 150px from every AdSlot is the Oli, and in the empty state that is the peek.
+    test('search dialog open without a result: the Oli keeps its distance', async ({ page }) => {
+      await dismissCookies(page);
+      await searchWithoutResult(page);
+      expect((await boxes(page, '[data-oli="peek"]')).length, 'a peek na tela').toBeGreaterThan(0);
+      await measure(page, 'busca sem resultado', '[data-oli]');
     });
   });
 }

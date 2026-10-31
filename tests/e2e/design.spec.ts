@@ -1,0 +1,367 @@
+import { expect, test, type Page } from '@playwright/test';
+import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
+import { chooseImage, dismissCookies, dragOver, hydrated, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
+
+// F1b criteria 6 (the Oli boxes), 8 (reduced motion) and 9 (fonts), plus the LCP rule of criterion 3:
+// the Oli never is the largest contentful paint. Markup contract: DECISOES § 19 (the [data-oli]
+// selector) and the F1b sprite (one <symbol id="oli-<pose>"> per pose, used through <svg><use>).
+
+const POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek'];
+const VIEWPORTS = [
+  { width: 360, height: 740 },
+  { width: 1280, height: 800 },
+];
+const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
+
+// ---- fonts (criterion 9) -------------------------------------------------------------------------
+
+test.describe('fonts', () => {
+  test('first visit to the tool page: only the two latin woff2, once each, and a Fredoka-only preload', async ({ page }) => {
+    const fonts: string[] = [];
+    page.on('request', (request) => {
+      const url = new URL(request.url());
+      if (url.pathname.endsWith('.woff2')) fonts.push(url.pathname);
+    });
+    await page.goto('/compress-image/');
+    await page.waitForLoadState('networkidle');
+    const state = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return {
+        // check() is true when no @font-face matches, so also look at the faces that are really loaded.
+        faces: [...document.fonts].map((face) => ({ family: face.family.replaceAll('"', ''), status: face.status })),
+        fredoka: document.fonts.check('600 28px Fredoka'),
+        figtree: document.fonts.check('400 16px Figtree'),
+      };
+    });
+    expect(fonts.map((path) => path.replace(/\.[\w-]+\.woff2$/, '')).sort(), `woff2 requests: ${fonts.join(', ')}`).toEqual([
+      '/_astro/figtree-latin-wght-normal',
+      '/_astro/fredoka-latin-wght-normal',
+    ]);
+    const preloads = await page.locator('link[rel="preload"][as="font"]').evaluateAll((links) =>
+      links.map((link) => ({ href: link.getAttribute('href'), type: link.getAttribute('type'), crossorigin: link.getAttribute('crossorigin') })),
+    );
+    expect(preloads).toHaveLength(1);
+    const fredoka = fonts.find((path) => path.includes('fredoka'));
+    expect(preloads[0]?.href).toBe(fredoka);
+    expect(preloads[0]?.type).toBe('font/woff2');
+    // `crossorigin` with no value (or "anonymous") makes the preload reusable by the @font-face fetch.
+    expect(['', 'anonymous']).toContain(preloads[0]?.crossorigin);
+    expect(state.faces).toEqual(expect.arrayContaining([{ family: 'Fredoka', status: 'loaded' }, { family: 'Figtree', status: 'loaded' }]));
+    expect(state.fredoka).toBe(true);
+    expect(state.figtree).toBe(true);
+  });
+
+  test('every page has exactly one font preload, the same Fredoka file, with crossorigin', async ({ request }) => {
+    const hrefs = new Set<string>();
+    for (const path of PAGES) {
+      const html = await (await request.get(path)).text();
+      const tags = (html.match(/<link\b[^>]*>/g) ?? []).filter((tag) => /\brel=["']?preload\b/.test(tag) && /\bas=["']?font\b/.test(tag));
+      expect(tags, `${path}: font preloads`).toHaveLength(1);
+      const tag = tags[0] ?? '';
+      expect(tag, `${path}: crossorigin`).toMatch(/\bcrossorigin\b/);
+      expect(tag, `${path}: type`).toMatch(/\btype=["']?font\/woff2\b/);
+      const href = /\bhref=["']?([^"'\s>]+)/.exec(tag)?.[1] ?? '';
+      expect(href, `${path}: href`).toMatch(/^\/_astro\/fredoka-latin-wght-normal\.[\w-]+\.woff2$/);
+      hrefs.add(href);
+    }
+    expect([...hrefs]).toHaveLength(1);
+  });
+});
+
+// ---- the Oli boxes (criterion 6) -----------------------------------------------------------------
+
+interface OliBox {
+  pose: string;
+  where: string;
+  ariaHidden: string | null;
+  width: number;
+  height: number;
+  svgHidden: string | null;
+  svgWidth: number;
+  svgHeight: number;
+  uses: number;
+  href: string | null;
+  symbol: string | null;
+}
+
+/** Every [data-oli] that takes room on screen, with what the contract asks of it. */
+async function visibleOlis(page: Page): Promise<OliBox[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('[data-oli]')].flatMap((node) => {
+      const box = node.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0 || getComputedStyle(node).visibility === 'hidden') return [];
+      const pose = node.dataset['oli'] ?? '';
+      const svg = node.querySelector(':scope > svg');
+      const uses = node.querySelectorAll(':scope > svg > use');
+      const svgBox = svg?.getBoundingClientRect();
+      return [
+        {
+          pose,
+          where: node.getAttribute('class') ?? node.tagName,
+          ariaHidden: node.getAttribute('aria-hidden'),
+          width: box.width,
+          height: box.height,
+          svgHidden: svg?.getAttribute('aria-hidden') ?? null,
+          svgWidth: svgBox?.width ?? 0,
+          svgHeight: svgBox?.height ?? 0,
+          uses: uses.length,
+          href: uses[0]?.getAttribute('href') ?? null,
+          symbol: document.getElementById(`oli-${pose}`)?.tagName.toLowerCase() ?? null,
+        },
+      ];
+    }),
+  );
+}
+
+async function expectOlis(page: Page, label: string, expected: { pose: string; selector: string }): Promise<void> {
+  const olis = await visibleOlis(page);
+  expect(olis.length, `${label}: no visible [data-oli]`).toBeGreaterThan(0);
+  for (const oli of olis) {
+    const id = `${label}: [data-oli="${oli.pose}"] (${oli.where})`;
+    expect(POSES, id).toContain(oli.pose);
+    expect(oli.ariaHidden, `${id} aria-hidden`).toBe('true');
+    expect(oli.width, `${id} width`).toBeGreaterThanOrEqual(32);
+    expect(oli.height, `${id} height`).toBeGreaterThanOrEqual(32);
+    expect(oli.uses, `${id} <svg><use> count`).toBe(1);
+    expect(oli.href, `${id} <use href>`).toBe(`#oli-${oli.pose}`);
+    expect(oli.symbol, `${id} sprite symbol`).toBe('symbol');
+    expect(oli.svgHidden, `${id} svg aria-hidden`).toBe('true');
+    expect(oli.svgWidth, `${id} svg width`).toBeGreaterThan(0);
+    expect(oli.svgHeight, `${id} svg height`).toBeGreaterThan(0);
+  }
+  // The box the state is about shows the pose the state calls for.
+  const wanted = page.locator(expected.selector);
+  await expect(wanted, `${label}: ${expected.selector}`).toHaveAttribute('data-oli', expected.pose);
+  expect(olis.some((oli) => oli.pose === expected.pose), `${label}: ${expected.pose} is not visible`).toBe(true);
+}
+
+for (const viewport of VIEWPORTS) {
+  test.describe(`Oli boxes a ${viewport.width}×${viewport.height}`, () => {
+    test.use({ viewport });
+
+    test.describe('tool page states', () => {
+      test.beforeEach(async ({ page }) => {
+        await page.goto('/compress-image/');
+        await hydrated(page);
+        await dismissCookies(page);
+      });
+
+      test('idle: wave', async ({ page }) => {
+        await expectOlis(page, 'idle', { pose: 'wave', selector: '.fo-drop__oli' });
+      });
+
+      test('a file over the drop zone: gulp', async ({ page }) => {
+        await dragOver(page);
+        await expectOlis(page, 'over', { pose: 'gulp', selector: '.fo-drop__oli' });
+      });
+
+      test('processing: swim', async ({ page }) => {
+        const engine = await slowEngine(page);
+        await chooseImage(page);
+        await expect(page.locator('.fo-level')).toBeVisible();
+        await expectOlis(page, 'processing', { pose: 'swim', selector: '.fo-level__oli' });
+        engine.release();
+        await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+      });
+
+      test('result: cheer, and only one Oli inside the card', async ({ page }) => {
+        await useImage(page);
+        await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+        await expectOlis(page, 'result', { pose: 'cheer', selector: '.fo-result__oli' });
+      });
+
+      test('error: oops', async ({ page }) => {
+        await useBadFile(page);
+        await expectOlis(page, 'error', { pose: 'oops', selector: '.fo-drop__oli' });
+      });
+
+      test('search without a result: the peek shows, and only then', async ({ page }) => {
+        await searchWithoutResult(page);
+        await expectOlis(page, 'search without result', { pose: 'peek', selector: '.fo-search__empty .fo-search__peek' });
+        const dialog = page.locator('#fo-search-dialog');
+        await page.keyboard.press('Control+A');
+        await page.keyboard.type('compress');
+        await expect(dialog.getByRole('option')).toHaveCount(1);
+        await expect(dialog.locator('.fo-search__peek')).toBeHidden();
+      });
+    });
+
+    test.describe('other pages', () => {
+      const CASES = [
+        { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'wave', selector: '[data-oli="wave"]' },
+        { name: '404', paths: ['/404.html', '/pt/404.html', '/es/404.html'], pose: 'lost', selector: '[data-oli="lost"]' },
+        { name: 'support', paths: ['/support/', '/pt/apoie/', '/es/apoyo/'], pose: 'coffee', selector: '.fo-support__oli' },
+      ];
+      for (const { name, paths, pose, selector } of CASES) {
+        for (const path of paths) {
+          test(`${name} ${path}: ${pose}`, async ({ page }) => {
+            await page.goto(path);
+            await expectOlis(page, `${name} ${path}`, { pose, selector });
+          });
+        }
+      }
+    });
+  });
+}
+
+// ---- reduced motion (criterion 8) ----------------------------------------------------------------
+
+/** What is animating or transitioning in the document, as readable strings. */
+async function animations(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    document.getAnimations().map((animation) => {
+      const target = (animation.effect as KeyframeEffect | null)?.target;
+      const name = 'animationName' in animation ? String(animation.animationName) : 'transitionProperty' in animation ? String(animation.transitionProperty) : animation.id;
+      return `${animation.constructor.name} ${name} on ${target?.getAttribute('class') ?? target?.tagName ?? '?'} (${animation.playState})`;
+    }),
+  );
+}
+
+async function running(page: Page): Promise<number> {
+  return page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === 'running').length);
+}
+
+test.describe('prefers-reduced-motion: reduce', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test.describe('tool page', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/compress-image/');
+      await hydrated(page);
+      await dismissCookies(page);
+    });
+
+    test('idle', async ({ page }) => {
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+
+    test('a file over the drop zone', async ({ page }) => {
+      await dragOver(page);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+
+    test('processing', async ({ page }) => {
+      const engine = await slowEngine(page);
+      await chooseImage(page);
+      await expect(page.locator('.fo-level')).toBeVisible();
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+      engine.release();
+      await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    });
+
+    test('result', async ({ page }) => {
+      await useImage(page);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+
+    test('error', async ({ page }) => {
+      await useBadFile(page);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+
+    test('result, start over and back to idle', async ({ page }) => {
+      await useImage(page);
+      await startOver(page);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+  });
+
+  for (const path of ['/support/', '/404.html']) {
+    test(`${path}`, async ({ page }) => {
+      await page.goto(path);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+  }
+});
+
+// The same pages without the preference do animate, so the checks above are not vacuous.
+test.describe('motion without the preference', () => {
+  test.use({ reducedMotion: 'no-preference' });
+
+  test('idle: the wave floats in a loop', async ({ page }) => {
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await expect.poll(() => running(page)).toBeGreaterThan(0);
+  });
+
+  test('processing: the swim loops', async ({ page }) => {
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    const engine = await slowEngine(page);
+    await chooseImage(page);
+    await expect(page.locator('.fo-level')).toBeVisible();
+    await expect.poll(() => running(page)).toBeGreaterThan(0);
+    engine.release();
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+  });
+
+  test('support page: the coffee steam rises in a loop', async ({ page }) => {
+    await page.goto('/support/');
+    await expect.poll(() => running(page)).toBeGreaterThan(0);
+  });
+});
+
+// ---- the Oli never is the LCP (criterion 3) ------------------------------------------------------
+
+interface Candidate {
+  tag: string;
+  className: string;
+  inOli: boolean;
+  inSvg: boolean;
+  size: number;
+}
+
+test.describe('largest contentful paint', () => {
+  test.use({ viewport: { width: 360, height: 740 } });
+
+  test('on the tool page the LCP element is not the Oli nor an svg', async ({ page, browserName }) => {
+    // The observer starts with the document, so no candidate is missed; entries are summarized
+    // when they arrive because the element can leave the DOM later.
+    await page.addInitScript(() => {
+      const seen: Candidate[] = [];
+      (window as unknown as { __lcp: Candidate[] }).__lcp = seen;
+      try {
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & { element?: Element | null; size?: number })[]) {
+            const element = entry.element ?? null;
+            seen.push({
+              tag: element?.tagName ?? 'none',
+              className: element?.getAttribute('class') ?? '',
+              inOli: !!element?.closest('[data-oli]'),
+              inSvg: !!element?.closest('svg') || element instanceof SVGElement,
+              size: entry.size ?? 0,
+            });
+          }
+        }).observe({ type: 'largest-contentful-paint', buffered: true });
+      } catch {
+        // the browser has no LCP entry type
+      }
+    });
+    await page.goto('/compress-image/');
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+    });
+    const supported = await page.evaluate(() => PerformanceObserver.supportedEntryTypes.includes('largest-contentful-paint'));
+    if (!supported) {
+      // Only Chromium reports LCP; WebKit joins the check on its own the day it ships the entry type.
+      expect(browserName).not.toBe('chromium');
+      return;
+    }
+    const entries = () => page.evaluate(() => (window as unknown as { __lcp: Candidate[] }).__lcp);
+    await expect.poll(async () => (await entries()).length).toBeGreaterThan(0);
+    const last = (await entries()).at(-1);
+    const label = `LCP element <${last?.tag}> .${last?.className} (${last?.size}px²)`;
+    expect(last?.inOli, `${label} is inside [data-oli]`).toBe(false);
+    expect(last?.inSvg, `${label} is an svg`).toBe(false);
+  });
+});
