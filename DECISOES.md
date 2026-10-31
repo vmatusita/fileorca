@@ -769,3 +769,19 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 - **Por que a parte 2 do WebKit cresce:** ela fica com a matriz (uns 416 s somados nos 2 workers), o `image-smoke`, o `design` e o `launch-claims`. O mesmo runner variou de 30 a 40% entre execuções (§ 88), e a parte 2 foi de 431 s a 655 s entre a primeira e a última execução desta run.
 - **Decisão:** todas as partes ficaram abaixo de 700 s, e nenhum limite, `retries` ou tempo por teste mudou. Como a parte 2 do WebKit ficou a uns 50 s do alvo, o relatório propõe ao Victor dividir o WebKit em três partes (`--shard=1/3`, `2/3` e `3/3`), um ajuste do `.github/workflows/ci.yml` que é do Victor (ADR-003). O `verificar.ts` já aceita qualquer `--shard=i/n`, e o `verificar.test.ts` cobre isso.
 - **Alternativa:** mover a matriz para um projeto só dela, o que mexeria nos testes e no `.github/`.
+
+## § 106 · O aviso de cookies não reserva espaço no fim da página, só para o foco do teclado (ajuste-aviso-espaco, 31/out/2026)
+
+- **Contexto:** depois do merge da F3, o Victor viu em fileorca.com, a uns 1920 px, uma área azul-escura vazia de uns 220 px embaixo do rodapé, que só sumia ao aceitar os cookies: "fica todo esse espaço até eu aceitar os cookies". A § 91 tinha tirado a faixa clara (o padding no `body`) e passado a reserva para o rodapé. A reserva continuou: a altura do aviso, para todo mundo, enquanto ele estava aberto. Medido no código de antes: o rodapé termina com 240 px de padding a 360 px (24 do respiro mais 216 de reserva) e com 340 px quando a âncora do AdSense está na tela.
+- **Decisão:** o aviso aberto flutua por cima do fim da página, como qualquer banner, e não reserva espaço ali. O espaço só abre quando a garantia da § 36 precisa dele: um elemento recebe o foco do teclado embaixo do aviso e a página já não tem como rolar o bastante. Nesse momento, o `focusin` abre a reserva do aviso no rodapé (`--fo-bottom-room`) e rola. A reserva fica aberta até o aviso sumir.
+- **O que não muda:**
+  - O `scroll-padding-bottom` segue contando o aviso e a âncora; ele não cria espaço na página, só serve para levar o foco para cima.
+  - A âncora do AdSense mantém a reserva própria enquanto está na tela (§ 101).
+  - O documento continua terminando no rodapé (§ 91).
+  - O teste de 45 Tabs e o teste sem `scroll-padding` passam sem mudança.
+- **A troca, aceita pelo pedido:** enquanto a pessoa não escolhe, o card cobre o canto de baixo à esquerda do rodapé no fim da página. A 1280 px ele cobre o link do café e parte da coluna Image; no celular, a base do rodapé. Quem usa mouse ou toque escolhe no próprio aviso, que segue não modal. O teclado nunca fica coberto.
+- **Testes que mudaram:**
+  - `tests/e2e/cookie-footer.spec.ts` (da F3): a volta pelas larguras e temas deixou de exigir a última linha do rodapé acima do aviso aberto. Agora exige o rodapé com o respiro normal de 24 px, sem reserva, e ganhou a largura de 1920 × 1035 do screenshot. O teste do último link do rodapé com foco também confere que a página segue terminando no rodapé. O teste da âncora confere que, sem foco, só a reserva da âncora existe (132 px) e que o foco no último link abre a reserva do aviso sem contar a âncora duas vezes.
+  - `tests/e2e/events.spec.ts`, no teste "the footer coffee link sends donate_click…": ele fecha o aviso antes de clicar no link do café, porque o assunto dele é o evento e o card agora fica por cima do link no fim da página.
+  - No código de antes, 8 testes do `cookie-footer.spec.ts` falharam com o rodapé a 240 px e 340 px; depois, os 178 testes de cookies, eventos, consentimento, café e axe passam nos dois navegadores.
+- **Alternativa:** deixar o aviso em posição `sticky` no fim do fluxo. No fim da página, o resultado seria o mesmo bloco ocupado embaixo do rodapé, o mesmo espaço que o Victor recusou.

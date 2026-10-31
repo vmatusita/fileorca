@@ -1,15 +1,17 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The cookie notice and the end of the page (DECISOES § 91). While the notice is open it reserves its
-// height so the focus is never under it (§ 36), but that room belongs to the footer: the document ends
-// at the footer, on the deep sea, and nothing of the body background shows below it. After Accept or
-// Decline the room goes away. One load per page and browser; the width and the theme change in place,
-// by prefers-color-scheme and by html[data-theme] (§ 76).
+// The cookie notice and the end of the page (DECISOES § 91 and § 106). The document ends at the footer, on the
+// deep sea, and nothing of the body background shows below it. The open notice floats over the end of the page and
+// reserves no room there: the room opens under the footer only when the keyboard focus needs it, so a focused element
+// is never under the notice (§ 36). After Accept or Decline nothing of it is left. One load per page and browser; the
+// width and the theme change in place, by prefers-color-scheme and by html[data-theme] (§ 76).
 
 const SIZES = [
   { width: 360, height: 740 },
   { width: 768, height: 1024 },
   { width: 1280, height: 800 },
+  // The window of the screenshot that showed the empty band (ajuste-aviso-espaco).
+  { width: 1920, height: 1035 },
 ] as const;
 const THEMES = ['light', 'dark'] as const;
 const HOW = ['media', 'attribute'] as const;
@@ -70,11 +72,12 @@ for (const { path, choice } of PAGES) {
           await page.setViewportSize(size);
           await theme(page, value, how);
           const label = `${path} ${size.width}px ${value} (${how})`;
-          // The notice re-measures itself on resize; poll until the page settles.
+          // The notice re-measures itself on resize; poll until the page settles. Nothing is reserved while no focus
+          // needs it: the footer ends with its normal 24px, and the notice floats over it (§ 106).
           await expect.poll(async () => {
             const at = await end(page);
-            return { below: at.below <= 1 ? 'ok' : at.below, footerAboveNotice: at.gap !== null && at.gap >= 0 ? 'ok' : at.gap };
-          }, { message: label }).toEqual({ below: 'ok', footerAboveNotice: 'ok' });
+            return { below: at.below <= 1 ? 'ok' : at.below, padding: at.padding };
+          }, { message: label }).toEqual({ below: 'ok', padding: '24px' });
           const colours = await page.evaluate(() => ({
             footer: getComputedStyle(document.querySelector('footer.fo-footer')!).backgroundColor,
             body: getComputedStyle(document.body).backgroundColor,
@@ -93,8 +96,8 @@ for (const { path, choice } of PAGES) {
   });
 }
 
-// With the room in the footer, the last link of the page still gets out from under the notice when it
-// takes the focus, with and without the scroll-padding (§ 36 stands for a browser that ignores it).
+// The last link of the page gets out from under the notice when it takes the focus, with and without the
+// scroll-padding (§ 36 stands for a browser that ignores it): the room under the footer opens for it (§ 106).
 test('the last footer link stays above the open notice when it takes the focus', async ({ page }) => {
   const response = await page.goto('/');
   expect(response?.status()).toBe(200);
@@ -118,6 +121,7 @@ test('the last footer link stays above the open notice when it takes the focus',
         };
       });
       expect(at, `${size.width}px, scroll-padding ${padding}`).toEqual({ visible: true, gap: true });
+      expect((await settled(page)).below, 'the page still ends at the footer').toBe('ok');
     }
   }
 });
@@ -143,8 +147,11 @@ test('with the AdSense anchor and the notice at once, the anchor is not counted 
     const box = await notice.boundingBox();
     return box ? box.y + box.height : 9999;
   }).toBeLessThanOrEqual(740 - 100);
-  // The footer ends the page and its last line sits just above the notice: the normal 24px of room plus the
-  // 8px margin of the reservation, not the 96px of the anchor on top of it.
+  // Without a focus that needs it, only the anchor's own room is there (24px + 100px + 8px), not the notice's (§ 106).
+  await expect.poll(() => settled(page)).toMatchObject({ below: 'ok', padding: '132px' });
+  // The last footer link takes the focus: the room of the notice opens, and the last line of the footer sits just above
+  // the notice, the normal 24px plus the 8px margin, not the 96px of the anchor on top of it (§ 91).
+  await page.locator('footer a').last().focus();
   await expect.poll(async () => {
     const at = await end(page);
     return { below: at.below <= 1 ? 'ok' : at.below, gap: at.gap !== null && at.gap >= 0 && at.gap <= 48 ? 'ok' : at.gap };
