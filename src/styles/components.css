@@ -214,6 +214,9 @@
 .fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
 .fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: flex-start; gap: var(--space-1); }
 .fo-file__err .fo-icon { width: 16px; height: 16px; margin-top: 2px; }
+/* The link to the tool that opens the file (HEIC to JPG): the brand blue is 4.3:1 on the soft red of the row, under the
+   4.5:1 of 14px text, so it takes the colour of the sentence and the underline says it is a link. */
+.fo-file__err a { color: inherit; font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .fo-file .fo-bar { margin-top: 6px; }
 .fo-filelist { display: grid; gap: var(--space-2); }
 /* Queue extras (the design has no state for them: tokens only, DECISOES § 59). The thumbnail is the toggle that picks
