@@ -1,6 +1,6 @@
 # F2 · Imagem em inglês e lançamento: relatório
 
-Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 86. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
+Branch `fase-02`, PR [vmatusita/fileorca#5](https://github.com/vmatusita/fileorca/pull/5). Prompt: `docs/prompts/prompt-fase-02.txt`. Plano: `docs/relatorios/fase-02-plano.md`. Decisões novas: `DECISOES.md` § 58 a § 87. ADR nova: `docs/adr/ADR-003-playwright-em-partes-no-ci.md` (Proposta). Matriz de fixtures: `docs/relatorios/fase-02-matriz.md`. Run de 31/out/2026.
 
 ## Resumo
 
