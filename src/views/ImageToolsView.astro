@@ -1,0 +1,70 @@
+---
+// The image hub /image-tools/ (docs/design/components/ToolCard, fo-hubband): eyebrow, H1 and one line in
+// the category band, the grid of the ten tools, one content AdSlot, the presets with their links and the
+// rail AdSlot like the tool pages. English only for now (DECISOES § 58), so the texts are the English file.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import { routeById } from '../i18n/routes.ts';
+import enCommon from '../i18n/en/common.ts';
+import t from '../i18n/en/image-tools.ts';
+import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
+import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
+
+interface Props {
+  lang: 'en';
+}
+const { lang } = Astro.props;
+const route = routeById('image-tools');
+const path = route.paths[lang] ?? '/image-tools/';
+const area = route.adArea ?? 'arquivos';
+const common = enCommon;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: common.imageTools, path },
+];
+const tools = IMAGE_TOOL_IDS.map((id) => ({
+  href: routeById(id).paths[lang] ?? '/',
+  blurb: common.tools[id],
+  icon: IMAGE_PAGES[id].icon,
+  category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const),
+}));
+const presets = IMAGE_PRESET_IDS.map((id) => ({ href: routeById(id).paths[lang] ?? '/', blurb: common.tools[id] }));
+const list = tools.map((tool) => ({ name: tool.blurb.name, path: tool.href }));
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list)]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-hubband fo-cat--image">
+    <span class="fo-eyebrow">{t.eyebrow}</span>
+    <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+    <p class="fo-muted">{t.intro}</p>
+  </div>
+  <section class="fo-section" aria-labelledby="tools">
+    <h2 id="tools">{t.toolsHeading}</h2>
+    <ul class="fo-grid">
+      {tools.map((tool) => (
+        <li><ToolCard href={tool.href} name={tool.blurb.name} description={tool.blurb.description} category={tool.category} icon={tool.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" aria-labelledby="presets">
+    <h2 id="presets">{t.presetsHeading}</h2>
+    <table class="fo-table">
+      <caption class="fo-sr">{t.presetsCaption}</caption>
+      <thead><tr><th scope="col">{t.presetsHead[0]}</th><th scope="col">{t.presetsHead[1]}</th></tr></thead>
+      <tbody>
+        {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.blurb.name}</a></th><td>{preset.blurb.description}</td></tr>)}
+      </tbody>
+    </table>
+  </section>
+  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
+</BaseLayout>

@@ -91,6 +91,28 @@ export function webApplicationLd(name: string, description: string, path: string
   };
 }
 
+/** A hub page (/image-tools/): a CollectionPage whose main entity is the list of the pages it links to. */
+export function collectionPageLd(name: string, description: string, path: string, lang: Lang, items: Crumb[]): JsonLd {
+  return {
+    '@type': 'CollectionPage',
+    name,
+    description,
+    url: absolute(path),
+    inLanguage: LANG_TAG[lang],
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: items.length,
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        url: absolute(item.path),
+      })),
+    },
+  };
+}
+
 export function graph(...nodes: JsonLd[]): string {
   // Escape "<" so a text can never close the script element.
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes }).replace(/</g, '\\u003c');
