@@ -24,3 +24,9 @@ Junto, no fim da resposta: "A ADR-002 e o relatório da F1a ainda dizem que a pr
 - Acrescentar ao CLAUDE.md uma seção que corrige as pegadinhas da F1a sobre o Workers Builds (só acrescentar).
 - Usar a prévia desta PR para responder se o `npx wrangler preview` funciona sem o bloco `previews`, e fechar a ADR-002 com esse resultado.
 - Relatório em `docs/relatorios/ajuste-previa-build.md`. A PR abre como rascunho até a prévia ser conferida; depois fica pronta para o merge automático do CI.
+
+## Pedidos seguintes, na mesma sessão
+
+1. O Claude propôs a opção 1 da ADR-002 (trocar o comando de prévia no painel). O Victor trocou e escreveu: "Troquei, confere aí". O Claude refez o build da prévia e enviou um commit novo: os dois builds ainda rodaram `npx wrangler preview`.
+2. O Claude pediu para conferir se a troca foi salva. O Victor: "Salvei de novo". Um terceiro build também rodou `npx wrangler preview`; o Claude parou de tentar (regra anti-loop) e perguntou: "Aceita a opção 2 (bloco `previews` no `wrangler.jsonc`) nesta PR?"
+3. O Victor: "Aceito, faça aqui". O escopo passou a incluir `"previews": {}` no `wrangler.jsonc`, o portão "worker sem código" e o teste de plataforma aceitando o campo só vazio, a ADR-002 aceita (opção 2), o DECISOES § 38 e a conferência da prévia (200, `noindex`, `build.txt` com o commit da PR).

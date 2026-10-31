@@ -2,7 +2,7 @@
 
 Run 1 de 2 da F1, branch `fase-01a`, PR [vmatusita/fileorca#1](https://github.com/vmatusita/fileorca/pull/1). Prompt em `docs/prompts/prompt-fase-01a.md`; plano da run (gabarito da revisão) em `docs/relatorios/fase-01a-plano.md`; decisões no `DECISOES.md` (§ 1 a § 36); proposta de arquitetura em `docs/adr/ADR-002-previa-worker-previews.md`.
 
-> **Atualização depois do merge (30/out/2026, ajuste `ajuste-previa-build`):** a falha dos builds do Workers Builds era o comando de build salvo no painel, `pnpm buid`: os logs lidos mostram a instalação ok, com Node 26 ou 24 e pnpm 12 ou 10, e a parada na etapa de build (`Command "buid" not found`). Com o comando corrigido, a prévia de PR passa do build e para no bloco `previews`, como a ADR-002 previa (prévia da PR #3). O Victor corrigiu o comando, o build de produção passou e fileorca.com serve o `249307f` com `noindex` desde então. O merge (pendência 2) e a conferência do pós-deploy (pendência 3) também estão feitos: o pós-deploy reexecutado passou e a issue #2 foi fechada. O texto abaixo sobre a prévia e o Node e o pnpm (Resumo, critério 12, seção da prévia, § 17 em "Decisões novas", revisão adversarial e pendências 1 e 8) ficou como a run o escreveu; a causa real está na ADR-002 (Atualização), no DECISOES § 37 e em `docs/relatorios/ajuste-previa-build.md`.
+> **Atualização depois do merge (30/out/2026, ajuste `ajuste-previa-build`):** a falha dos builds do Workers Builds era o comando de build salvo no painel, `pnpm buid`: os logs lidos mostram a instalação ok, com Node 26 ou 24 e pnpm 12 ou 10, e a parada na etapa de build (`Command "buid" not found`). Com o comando corrigido, a prévia de PR passou do build e parou no bloco `previews`, como a ADR-002 previa, e abriu depois de o Victor aceitar a opção 2 (`"previews": {}` no `wrangler.jsonc`, DECISOES § 38): o critério 12 ficou atendido pela prévia da PR #3. O Victor corrigiu o comando, o build de produção passou e fileorca.com serve o `249307f` com `noindex` desde então. O merge (pendência 2) e a conferência do pós-deploy (pendência 3) também estão feitos: o pós-deploy reexecutado passou e a issue #2 foi fechada. O texto abaixo sobre a prévia e o Node e o pnpm (Resumo, critério 12, seção da prévia, § 17 em "Decisões novas", revisão adversarial, pendências 1 e 8 e as menções à ADR-002 como Proposta) ficou como a run o escreveu; a causa real está na ADR-002 (Atualização), no DECISOES § 37 e em `docs/relatorios/ajuste-previa-build.md`.
 
 ## Resumo
 
@@ -1033,7 +1033,7 @@ Resumo do pnpm verificar
 
 ## Prévia do Workers Builds
 
-> **Atualização (ajuste `ajuste-previa-build`):** os builds paravam antes, no comando de build `pnpm buid` salvo no painel, e a troca de Node e pnpm não mudou nada. Com o comando corrigido, a prévia para no bloco `previews`, como a ADR-002 previa. Ver a ADR-002 e o DECISOES § 37.
+> **Atualização (ajuste `ajuste-previa-build`):** os builds paravam antes, no comando de build `pnpm buid` salvo no painel, e a troca de Node e pnpm não mudou nada. Com o comando corrigido, a prévia parou no bloco `previews`, como a ADR-002 previa, e abriu com `"previews": {}` (ADR-002 aceita, opção 2). Ver a ADR-002 e o DECISOES § 37 e § 38.
 
 **Não abriu.** O Cloudflare comentou na PR (bot `cloudflare-workers-and-pages`, "Deploying Preview to Cloudflare", modelo "Preview Deployments by commit") e criou o check "Workers Builds: fileorca", mas todo build falhou e a coluna "Deployment URL" ficou vazia. Sem URL, não houve como conferir o status 200, o `X-Robots-Tag: noindex` e o `build.txt` da prévia.
 
@@ -1099,7 +1099,7 @@ Nada. A imagem de OG saiu por página e idioma (sem a Oli, que é arte da F1b), 
 
 ## O que é do Victor, em passos
 
-1. **Feito depois do merge:** o comando de build estava `pnpm buid`; o Victor corrigiu para `pnpm build` e o build de produção passou (ajuste `ajuste-previa-build`); a prévia de PR ainda depende da decisão da ADR-002. O texto original da pendência segue para registro.
+1. **Feito depois do merge:** o comando de build estava `pnpm buid`; o Victor corrigiu para `pnpm build` e o build de produção passou (ajuste `ajuste-previa-build`); a prévia de PR abriu depois do bloco `previews` (ADR-002 aceita, § 38). O texto original da pendência segue para registro.
    **Destravar a prévia (bloqueia o critério 12 e talvez a produção).** No painel do Cloudflare, abra Workers & Pages → fileorca → Deployments/Builds e o log do build mais recente da branch `fase-01a` (os IDs estão na ADR-002). Veja em que etapa ele para:
    - se for o comando de prévia (`wrangler preview` pedindo o bloco `previews`), decida a ADR-002: a opção 1 é trocar, em Settings → Build, o "Preview command" para `npx wrangler versions upload`; a opção 2 é pedir uma run curta que acrescente `"previews": {}` ao `wrangler.jsonc`;
    - se for a instalação ou o `pnpm build`, mande o trecho do log numa run curta de ajuste.
