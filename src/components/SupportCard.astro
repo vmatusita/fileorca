@@ -1,0 +1,26 @@
+---
+// SupportCard (docs/design/components/SupportCard, DECISOES § 48): the Oli with her mug, the title at
+// the level of the page (the H1 on the support page), who makes the site and one neutral button to
+// Ko-fi, with the suggested amounts in text (the Ko-fi link carries no amount, so no amount buttons).
+// No Ko-fi script or widget.
+import type { SupportTexts } from '../i18n/types.ts';
+import { KOFI_URL } from '../platform/site.ts';
+import Icon from './Icon.astro';
+import Oli from './Oli.astro';
+
+interface Props {
+  t: SupportTexts;
+  level: 1 | 2 | 3;
+}
+const { t, level } = Astro.props;
+const Heading = `h${level}` as const;
+---
+<section class="fo-support" aria-labelledby="fo-support-title">
+  <Oli pose="coffee" class="fo-support__oli" />
+  <div>
+    <Heading id="fo-support-title">{t.h1}</Heading>
+    <p>{t.body}</p>
+    <a class="fo-btn" href={KOFI_URL} rel="noopener" data-track="donate_click" data-track-place="support_page"><Icon name="coffee" class="fo-icon--sm" />{t.button}</a>
+    <p class="fo-support__amounts">{t.amountsNote}</p>
+  </div>
+</section>

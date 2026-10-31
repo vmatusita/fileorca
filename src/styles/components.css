@@ -1,0 +1,342 @@
+/* Components of the design system v1.1 (docs/design/components), ported from bundle.css with the site's
+   contract (DECISOES § 40): motion only through transform, opacity, translate, scale and rotate (§ 44);
+   text colour only from the text tokens, never through a local variable; the reserved heights and Oli
+   boxes of § 19 and § 20. */
+
+/* ---------- Icons (inline SVG from docs/design/assets/Icons, § 46) ---------- */
+.fo-icon { width: var(--icon); height: var(--icon); flex: none; }
+.fo-icon--sm { width: var(--icon-sm); height: var(--icon-sm); }
+.fo-icon--inline { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; }
+
+/* ---------- Oli (sprite symbols through <use>, § 43 and § 44) ---------- */
+[data-oli] { flex: none; }
+[data-oli] > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+[data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
+[data-oli="gulp"] > svg { scale: 1.05; }
+[data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
+.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) infinite; }
+.oli-steam path:last-child { animation-delay: 600ms; }
+@keyframes fo-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
+@keyframes fo-bob { to { transform: translateY(-4px) rotate(-3deg); } }
+@keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
+@keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
+
+/* ---------- Dog-ear: the folded file corner (Oli's fin tip) and the category colours ---------- */
+.fo-dogear { position: relative; border-top-right-radius: 0 !important; }
+.fo-dogear::after {
+  content: ""; position: absolute; top: calc(-1 * var(--stroke-2)); right: calc(-1 * var(--stroke-2));
+  width: var(--dogear); height: var(--dogear);
+  background: linear-gradient(225deg, var(--fo-ground, var(--bg)) calc(50% - 1px), var(--stroke) calc(50% - 1px), var(--stroke) calc(50% + 1px), var(--fo-flap, var(--brand)) calc(50% + 1px));
+  border-left: var(--stroke-2) solid var(--stroke); border-bottom: var(--stroke-2) solid var(--stroke);
+  border-bottom-left-radius: var(--radius-xs);
+}
+.fo-cat--image { --fo-flap: var(--turquesa); --fo-cat: var(--turquesa); --fo-cat-soft: var(--turquesa-soft); }
+.fo-cat--pdf { --fo-flap: var(--coral); --fo-cat: var(--coral); --fo-cat-soft: var(--coral-soft); }
+.fo-cat--money { --fo-flap: var(--alga); --fo-cat: var(--alga); --fo-cat-soft: var(--alga-soft); }
+.fo-cat--home { --fo-flap: var(--violeta); --fo-cat: var(--violeta); --fo-cat-soft: var(--violeta-soft); }
+.fo-cat--util { --fo-flap: var(--lima); --fo-cat: var(--lima); --fo-cat-soft: var(--lima-soft); }
+
+/* ---------- Button: only what you can press has a lip; `sun` only on .fo-btn--download ---------- */
+.fo-btn {
+  appearance: none; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--control-h); padding: 0 var(--space-6); margin: 0 0 var(--lip);
+  border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lip);
+  font: 700 16px/20px var(--fo-font-text); text-decoration: none; white-space: nowrap; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-instant) var(--ease-out);
+}
+.fo-btn:hover { transform: translateY(-1px); }
+.fo-btn:active, .fo-btn.is-pressed { transform: translateY(var(--lip)); box-shadow: none; }
+.fo-btn--download { background: var(--sun); color: var(--on-sun); border-color: var(--sun-edge); box-shadow: var(--shadow-lip-sun); }
+.fo-deep .fo-btn--download { border-color: var(--sun); box-shadow: var(--shadow-lip-on-deep); }
+.fo-btn--download:active { box-shadow: none; }
+.fo-btn--brand { background: var(--brand); color: var(--on-brand); border-color: var(--brand-edge); box-shadow: var(--shadow-lip-brand); }
+.fo-btn--brand:active { box-shadow: none; }
+.fo-btn--ghost { background: transparent; border-color: transparent; box-shadow: none; padding: 0 var(--space-3); margin-bottom: 0; }
+.fo-btn--ghost:hover { transform: none; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.fo-btn--ghost:active { transform: none; }
+.fo-deep .fo-btn--ghost { color: var(--on-deep); }
+.fo-btn--lg { min-height: var(--button-lg); padding: 0 var(--space-8); font-size: 18px; line-height: 22px; }
+@media (max-width: 359px) { .fo-btn--lg { padding-inline: var(--space-4); } }
+.fo-btn--sm { min-height: 40px; padding: 0 var(--space-4); font-size: 15px; }
+.fo-btn--block { display: flex; width: 100%; }
+@media (max-width: 767px) { .fo-btn--block-mobile { display: flex; width: 100%; } }
+.fo-btn--icon { padding: 0; width: var(--tap-min); min-height: var(--tap-min); }
+.fo-btn__meta { font-weight: 500; }
+.fo-btn[disabled], .fo-btn[aria-disabled="true"] { background: var(--surface-sunken); color: var(--ink-muted); border-color: var(--hairline); box-shadow: none; transform: none; cursor: not-allowed; }
+.fo-btn[aria-busy="true"] { cursor: progress; }
+.fo-spin { width: 18px; height: 18px; border-radius: 50%; border: var(--stroke-2) solid currentColor; border-right-color: transparent; animation: fo-spin 700ms linear infinite; }
+@keyframes fo-spin { to { transform: rotate(1turn); } }
+
+/* ---------- Header ---------- */
+.fo-header { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
+@media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
+.fo-header__logo { display: inline-flex; align-items: center; min-height: var(--tap-min); margin-right: auto; border-radius: var(--radius-sm); }
+.fo-header__logo svg { display: block; width: auto; height: 38px; }
+@media (min-width: 768px) { .fo-header__logo svg { height: 44px; } }
+.fo-logo__file { fill: var(--ink); }
+.fo-logo__orca { fill: var(--brand); }
+.fo-header__search { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink-muted); font: 500 15px/20px var(--fo-font-text); cursor: pointer; }
+.fo-header__search .fo-icon { width: 20px; height: 20px; color: var(--ink); }
+/* On the phone the search is the icon alone (48px), its name still "Search tools" (§ 46). */
+@media (max-width: 767px) {
+  .fo-header__search { width: var(--tap-min); padding: 0; border-color: transparent; background: transparent; }
+  .fo-header__search-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+.fo-header__lang { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap-min); padding: 0 var(--space-2); border: 0; background: none; color: var(--ink); font: 700 15px/20px var(--fo-font-text); cursor: pointer; border-radius: var(--radius-pill); }
+.fo-header__lang .fo-icon { width: 20px; height: 20px; }
+.fo-header__lang .fo-icon--sm { width: 16px; height: 16px; }
+/* Language menu: a native popover, under the button where anchor positioning exists. */
+.fo-langmenu { position: fixed; inset: auto; top: 64px; right: var(--space-4); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
+@supports (position-anchor: --fo-lang) {
+  .fo-header__lang { anchor-name: --fo-lang; }
+  .fo-langmenu { position-anchor: --fo-lang; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); }
+}
+.fo-langmenu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.fo-langmenu a { display: flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; font-weight: 600; }
+.fo-langmenu a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.fo-langmenu a[aria-current] { background: var(--brand-soft); }
+
+/* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
+.fo-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-crumbs li { display: inline-flex; align-items: center; gap: 2px; }
+.fo-crumbs__link { color: var(--ink-muted); text-decoration: none; padding: 6px 2px; }
+.fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.fo-crumbs .fo-icon { width: 16px; height: 16px; }
+.fo-crumbs [aria-current] { color: var(--ink); font-weight: 600; }
+.fo-top { display: grid; gap: var(--space-2); padding-right: 96px; }
+@media (min-width: 768px) { .fo-top { padding-right: 136px; } }
+.fo-seal { justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px var(--space-3) 6px var(--space-2); border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--ink); font: 600 14px/20px var(--fo-font-text); }
+.fo-seal .fo-icon { color: var(--brand); width: 20px; height: 20px; }
+
+/* ---------- Water: the shared ocean of DropZone and WaterLevel. It rises by transform: the layer is as
+   tall as the box and slides down to show only --level of it; the wave crest slides sideways. ---------- */
+.fo-water { position: absolute; inset: 0; background: var(--water); transform: translateY(calc(100% - var(--level, 12%))); transition: transform var(--dur-base) var(--ease-out); pointer-events: none; }
+.fo-water::before {
+  content: ""; position: absolute; left: -48px; right: 0; top: -9px; height: 10px; background: inherit;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10'%3E%3Cpath d='M0 6 Q12 0 24 6 T48 6 V10 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 48px 10px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10'%3E%3Cpath d='M0 6 Q12 0 24 6 T48 6 V10 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 48px 10px;
+}
+.fo-water--moving::before, .fo-drop[data-state="over"] .fo-water::before { animation: fo-wave var(--dur-wave) linear infinite; }
+@keyframes fo-wave { to { transform: translateX(48px); } }
+
+/* ---------- Tool panel slot: DropZone, WaterLevel and ResultCard share it, so the page does not jump ---------- */
+.fo-tool-island { display: grid; gap: var(--space-4); }
+.fo-slot { display: grid; min-height: 380px; margin-top: var(--space-2); }
+@media (min-width: 768px) { .fo-slot { min-height: 340px; } }
+
+/* ---------- DropZone ---------- */
+.fo-drop { position: relative; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); text-align: center;
+  min-height: 300px; padding: var(--space-8) var(--space-6) var(--space-10); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); cursor: pointer; }
+.fo-drop__sea { position: absolute; inset: 0; border-radius: calc(var(--radius-xl) - var(--stroke-2)); overflow: hidden; pointer-events: none; }
+.fo-drop > :not(.fo-drop__sea):not(.fo-drop__oli) { position: relative; }
+.fo-drop:hover { border-color: var(--brand); }
+.fo-drop[data-state="over"] { border-style: solid; border-color: var(--brand); --level: 38%; }
+.fo-drop[data-state="error"] { border-style: solid; border-color: var(--danger); border-width: var(--stroke-3); }
+.fo-drop__badge { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand); transition: transform var(--dur-base) var(--ease-spring); }
+.fo-drop__badge .fo-icon { width: 30px; height: 30px; }
+.fo-drop[data-state="over"] .fo-drop__badge { transform: translateY(-4px) scale(1.06); }
+.fo-drop[data-state="error"] .fo-drop__badge { background: var(--danger-soft); color: var(--danger); }
+.fo-drop__title { margin: 0; font: 600 24px/30px var(--fo-font-display); }
+.fo-drop__help { margin: 0; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
+.fo-drop__message { display: grid; gap: var(--space-2); }
+/* A long file name in the error breaks instead of widening the page (reflow at 320px). */
+.fo-drop__message, .fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
+/* The Oli sits on the top edge, to the right of the H1 (ToolPage mold), box sizes of § 19. */
+.fo-drop__oli { position: absolute; top: -86px; right: 0; width: 88px; height: 88px; pointer-events: none; }
+.fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring); }
+@media (min-width: 768px) {
+  .fo-drop, .fo-level { min-height: 340px; }
+  .fo-drop__oli { width: 112px; height: 112px; top: -76px; right: var(--space-4); }
+}
+
+/* ---------- WaterLevel (progress): the Oli swims on the water, so she rises with it ---------- */
+.fo-level { position: relative; box-sizing: border-box; min-height: 300px; border: var(--stroke-2) solid var(--brand); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); display: grid; place-items: center; text-align: center; overflow: hidden; }
+.fo-level__text { position: relative; display: grid; gap: var(--space-1); z-index: 1; }
+.fo-level__pct { font: 600 40px/44px var(--fo-font-display); }
+.fo-level__msg { font: 500 20px/26px var(--fo-font-display); }
+.fo-level__count { font-size: 15px; color: var(--ink-muted); }
+.fo-level__oli { position: absolute; left: 50%; top: -62px; width: 72px; height: 72px; translate: 40px 0; }
+.fo-bar { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
+.fo-bar > i { position: absolute; inset: 0; border-radius: inherit; background: var(--brand); transform-origin: left center; transform: scaleX(var(--value, 0)); transition: transform var(--dur-base) var(--ease-out); }
+
+/* ---------- ResultCard + Placard, on the deep sea ---------- */
+.fo-deep { background: var(--deep); color: var(--on-deep); }
+.fo-result { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: center; }
+.fo-result__head { display: flex; align-items: center; gap: var(--space-3); min-height: 72px; }
+.fo-result__oli { width: 72px; height: 72px; }
+.fo-result__oli > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+.fo-result__says { margin: 0; font: 500 18px/24px var(--fo-font-display); flex: 1 1 0; min-width: 0; }
+.fo-result__stats { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; }
+.fo-result__stat dt { font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+.fo-result__stat dd { margin: 0; font: 600 24px/28px var(--fo-font-display); }
+.fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
+.fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
+.fo-result__actions .fo-btn--download { display: flex; width: 100%; }
+.fo-placard { display: inline-grid; justify-items: center; margin-left: auto; padding: var(--space-2) var(--space-4) var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); rotate: -4deg; box-shadow: 0 4px 0 var(--stroke); }
+.fo-deep .fo-placard { border-color: var(--surface); box-shadow: none; }
+.fo-placard__n { font: 600 40px/44px var(--fo-font-display); letter-spacing: -0.01em; }
+.fo-placard__l { font: 700 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-pop { animation: fo-pop var(--dur-cheer) var(--ease-spring) both; }
+@keyframes fo-pop { from { opacity: 0; transform: scale(0.6) rotate(-12deg); } }
+/* The coffee line: only with the file ready, after the Download, never yellow (§ 49). */
+.fo-result__support { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
+.fo-result__support p { margin: 0; }
+.fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.fo-result__support .fo-btn { margin-bottom: var(--lip); }
+.fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
+@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
+@media (min-width: 768px) {
+  .fo-result { padding: var(--space-6); gap: var(--space-5); }
+  .fo-result__head { min-height: 96px; }
+  .fo-result__oli { width: 96px; height: 96px; margin: -8px 0 -8px -8px; }
+  .fo-result__says { font-size: 20px; line-height: 26px; }
+  .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-items: start; }
+  .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+
+/* ---------- FileCard (ready for the F2 queue; no page uses it yet) ---------- */
+.fo-file { --fo-ground: var(--bg); box-sizing: border-box; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+.fo-file__thumb { width: 52px; height: 52px; border-radius: var(--radius-xs); object-fit: cover; background: var(--surface-sunken); display: grid; place-items: center; }
+.fo-file__name { margin: 0; font: 600 16px/22px var(--fo-font-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fo-file__meta { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: center; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-file__gain { color: var(--success); font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+.fo-file__gain .fo-icon { width: 16px; height: 16px; }
+.fo-file__actions { display: flex; gap: var(--space-1); align-items: center; }
+.fo-file__actions .fo-btn { margin-bottom: 0; }
+.fo-file[data-state="error"] { background: var(--danger-soft); border-color: var(--danger); }
+.fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
+.fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: center; gap: var(--space-1); }
+.fo-file__err .fo-icon { width: 16px; height: 16px; }
+.fo-file .fo-bar { margin-top: 6px; }
+.fo-filelist { display: grid; gap: var(--space-2); }
+
+/* ---------- OptionGroup ---------- */
+.fo-field { display: grid; gap: var(--space-2); border: 0; padding: 0; margin: 0; min-width: 0; }
+.fo-field__label { font: 600 15px/20px var(--fo-font-text); padding: 0; margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.fo-field__value { font: 600 20px/24px var(--fo-font-display); }
+.fo-field__help { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-seg { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-pill); background: var(--surface-sunken); }
+/* 48px options (tap-min): bundle.css says 44px, which the content-box of the previews turns into 48. */
+.fo-seg__opt { flex: 1; position: relative; display: grid; place-items: center; min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-pill); border: var(--stroke-2) solid transparent; font: 600 15px/20px var(--fo-font-text); color: var(--ink-muted); cursor: pointer; text-align: center; }
+.fo-seg__opt input { position: absolute; opacity: 0; pointer-events: none; }
+.fo-seg__opt:hover { color: var(--ink); }
+.fo-seg__opt:has(input:checked) { background: var(--surface); color: var(--ink); border-color: var(--stroke); }
+/* Ring on any focus of the option (README: the ring on everything that takes focus): WebKit drops
+   :focus-visible after an arrow key moves through the radio group. */
+.fo-seg__opt:has(input:focus) { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-seg__opt small { display: block; font-weight: 500; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+
+/* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
+.fo-says { display: flex; align-items: flex-end; gap: var(--space-2); }
+.fo-says__oli { width: 64px; height: 64px; }
+.fo-says__bubble { position: relative; margin-bottom: 10px; padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); border-bottom-left-radius: 4px; background: var(--surface); color: var(--ink); font: 500 20px/26px var(--fo-font-display); }
+.fo-says__bubble p { margin: 0; }
+.fo-says__bubble small { display: block; margin-top: 2px; font: 400 15px/22px var(--fo-font-text); color: var(--ink-muted); }
+.fo-says--error .fo-says__bubble { background: var(--danger-soft); border-color: var(--danger); }
+.fo-says--info .fo-says__bubble { background: var(--brand-soft); }
+
+/* ---------- NextStepChips ---------- */
+.fo-next { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.fo-next__label { font: 600 15px/20px var(--fo-font-text); color: var(--ink-muted); margin-right: var(--space-1); }
+.fo-chip { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-4) 0 var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font: 600 15px/20px var(--fo-font-text); text-decoration: none; }
+.fo-chip:hover { background: var(--brand-soft); }
+.fo-chip__dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--fo-cat, var(--brand-soft)); color: var(--ink); }
+:where(.fo-cat--image, .fo-cat--pdf, .fo-cat--money, .fo-cat--util) .fo-chip__dot { color: var(--on-cat); }
+.fo-cat--home .fo-chip__dot { color: var(--on-violeta); }
+.fo-chip__dot .fo-icon { width: 18px; height: 18px; }
+.fo-chip > .fo-icon:last-child { width: 18px; height: 18px; color: var(--ink-muted); transition: transform var(--dur-quick) var(--ease-out); }
+.fo-chip:hover > .fo-icon:last-child { transform: translateX(2px); color: var(--ink); }
+
+/* ---------- AdSlot: neutral, reserved height (§ 20), 150px clearance built in (margin-block) ---------- */
+.fo-ad { box-sizing: border-box; display: grid; grid-template-rows: auto 1fr; justify-items: center; gap: var(--space-2); padding: var(--space-2) 0 var(--space-3); border-radius: var(--radius-xs); background: var(--ad-ground); margin-block: var(--ad-clearance); }
+.fo-ad__label { font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-ad--content { min-height: 300px; width: 100%; }
+.fo-ad--rail { width: var(--rail); min-height: 644px; margin-block: 0; }
+.fo-ad ins { display: block; width: 100%; }
+
+/* ---------- Faq ---------- */
+.fo-faq { border-top: var(--stroke-2) solid var(--stroke); }
+.fo-faq details { border-bottom: var(--stroke-hair) solid var(--hairline); }
+.fo-faq summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); min-height: 56px; padding: var(--space-3) 0; font: 700 17px/24px var(--fo-font-text); cursor: pointer; }
+.fo-faq summary::-webkit-details-marker { display: none; }
+.fo-faq summary .fo-icon { width: 32px; height: 32px; padding: 4px; box-sizing: border-box; border-radius: 50%; border: var(--stroke-2) solid var(--stroke); transition: transform var(--dur-base) var(--ease-out); }
+.fo-faq details[open] summary .fo-icon { transform: rotate(180deg); background: var(--brand-soft); }
+.fo-faq details > div { padding: 0 var(--space-10) var(--space-4) 0; color: var(--ink); max-width: var(--fo-measure); }
+.fo-faq details > div p { margin: 0 0 var(--space-2); }
+
+/* ---------- ToolCard grid ---------- */
+.fo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.fo-grid > li { display: grid; }
+.fo-tool { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; gap: var(--space-2); align-content: start; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
+.fo-tool:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.fo-tool__icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--fo-cat, var(--brand-soft)); color: var(--on-cat); margin-bottom: var(--space-1); }
+.fo-cat--home .fo-tool__icon { color: var(--on-violeta); }
+.fo-tool__name { margin: 0; font: 700 18px/24px var(--fo-font-text); }
+.fo-tool__desc { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+
+/* ---------- Home, 404 and support heroes: the Oli at 96px on the phone, 128px from 768px ---------- */
+.fo-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
+.fo-hero__text { display: grid; gap: var(--space-3); }
+.fo-hero__oli { width: 96px; height: 96px; }
+@media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
+
+/* ---------- SupportCard ---------- */
+.fo-support { box-sizing: border-box; display: grid; grid-template-columns: 1fr; gap: var(--space-4); align-items: center; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
+.fo-support__oli { width: 96px; height: 96px; }
+.fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-2); font: 600 28px/34px var(--fo-font-display); }
+.fo-support p { margin: 0 0 var(--space-3); color: var(--ink-muted); }
+.fo-support .fo-btn { margin-bottom: var(--space-3); }
+.fo-support__amounts { font-size: 15px; line-height: 22px; }
+@media (min-width: 768px) {
+  .fo-support { grid-template-columns: auto minmax(0, 1fr); gap: var(--space-6); padding: var(--space-6); }
+  .fo-support__oli { width: 128px; height: 128px; }
+  .fo-support :is(h1, h2, h3) { font-size: 36px; line-height: 42px; letter-spacing: -0.01em; }
+}
+
+/* ---------- Footer on the deep sea, with the wave on its top edge ---------- */
+.fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--space-6) var(--space-6); }
+.fo-footer::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: var(--deep);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+}
+/* With ads on, the AdSense anchor covers the bottom of the phone screen: 96px of room (Footer README). */
+@media (max-width: 767px) { .fo-footer--anchor { padding-bottom: var(--space-24); } }
+.fo-footer__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-6); max-width: var(--page-max); margin-inline: auto; }
+.fo-footer h2 { margin: 0 0 var(--space-2); font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-deep-muted); }
+.fo-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
+.fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
+.fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; }
+.fo-footer__coffee .fo-icon { width: 20px; height: 20px; }
+
+/* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
+.fo-cookie { position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
+.fo-cookie[hidden] { display: none; }
+@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 440px; } }
+.fo-cookie p { margin: 0; font-size: 15px; line-height: 22px; }
+.fo-cookie a { font-weight: 600; }
+.fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+/* ---------- ToolSearch: native <dialog>, code and index loaded on first use (§ 15) ---------- */
+.fo-search-dialog { width: min(560px, calc(100% - 2 * var(--space-4))); margin: 10vh auto auto; padding: 0; border: 0; background: transparent; color: var(--ink); overflow: visible; }
+.fo-search-dialog::backdrop { background: var(--deep); opacity: 0.6; }
+.fo-search { box-sizing: border-box; width: 100%; max-width: 560px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); overflow: hidden; }
+.fo-search__field { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); min-height: 60px; border-bottom: var(--stroke-hair) solid var(--hairline); }
+.fo-search__field > .fo-icon { width: 20px; height: 20px; }
+.fo-search__field:focus-within { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.fo-search__field input { flex: 1; align-self: stretch; width: 0; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 18px/24px var(--fo-font-text); }
+.fo-search__field input:focus-visible { outline: none; }
+.fo-search__field input::placeholder { color: var(--ink-muted); opacity: 1; }
+.fo-search__list { list-style: none; margin: 0; padding: var(--space-2); display: grid; gap: 2px; }
+.fo-search__item { display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap-min); padding: 0 var(--space-3); border-radius: var(--radius-md); font-weight: 600; color: var(--ink); text-decoration: none; }
+.fo-search__item[aria-selected="true"] { background: var(--brand-soft); }
+.fo-search__item small { margin-left: auto; color: var(--ink-muted); font-size: 13px; font-weight: 500; }
+/* No result: the Oli peeks from the bottom edge of the box (the box clips her). */
+.fo-search__empty { position: relative; padding: var(--space-6) var(--space-4) 0; text-align: center; display: grid; justify-items: center; gap: var(--space-2); }
+.fo-search__empty p { margin: 0; }
+.fo-search__peek { width: 120px; height: 75px; margin-top: var(--space-2); }
+.fo-search-inline { max-width: 560px; }
+.fo-search-close { display: flex; justify-content: center; margin-top: var(--space-2); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }

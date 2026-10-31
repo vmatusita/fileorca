@@ -3,12 +3,13 @@ import type { APIRoute } from 'astro';
 import { LANGS, pathFor } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
+import { ICONS } from '../icons/icons.ts';
 
-const TOOLS = ['compress-image'] as const;
+const TOOLS = [{ id: 'compress-image', cat: 'image', icon: 'compress' }] as const;
 
 export function searchIndex(): SearchEntry[] {
-  return TOOLS.map((id) => {
-    const entry: SearchEntry = { id, href: {}, name: {}, category: {}, terms: [] };
+  return TOOLS.map(({ id, cat, icon }) => {
+    const entry: SearchEntry = { id, href: {}, name: {}, category: {}, cat, icon: ICONS[icon], terms: [] };
     const terms = new Set<string>();
     for (const lang of LANGS) {
       const tool = TEXTS[lang].common.tools[id];

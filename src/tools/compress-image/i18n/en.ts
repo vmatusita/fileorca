@@ -41,6 +41,11 @@ export default {
     download: 'Download',
     startOver: 'Start over',
     to: 'to',
+    coffee: {
+      text: 'This tool is free, has no limits and never uploads your files. If it saved you time, a coffee helps keep it that way.',
+      button: 'Support with a coffee',
+      hide: "Don't show this again",
+    },
   },
   next: { label: 'Next:', moreTools: 'More tools' },
   howHeading: 'How it works',

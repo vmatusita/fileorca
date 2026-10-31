@@ -41,6 +41,11 @@ export default {
     download: 'Baixar',
     startOver: 'Começar de novo',
     to: 'para',
+    coffee: {
+      text: 'Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café?',
+      button: 'Apoiar com um café',
+      hide: 'Não mostrar de novo',
+    },
   },
   next: { label: 'A seguir:', moreTools: 'Mais ferramentas' },
   howHeading: 'Como funciona',

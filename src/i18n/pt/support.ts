@@ -10,7 +10,7 @@ export default {
   who: 'Eu sou o Victor Yuki Matusita, dev em Curitiba. Faço e mantenho o FileOrca sozinho, então não tem equipe por trás: é uma pessoa só.',
   nextHeading: 'O que o próximo café paga',
   next: 'A Oli funciona à base de café, e o próximo café paga a próxima ferramenta da fila. A doação é opcional: não compra nada e não muda nada no site.',
-  button: 'Me pague um café',
+  button: 'Apoiar com um café',
   amountsNote:
     'Valores sugeridos no Ko-fi: US$ 3, 5 ou 10. O pagamento acontece no Ko-fi, que segue as próprias políticas.',
 } satisfies SupportTexts;

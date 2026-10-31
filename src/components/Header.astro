@@ -1,10 +1,13 @@
 ---
 // Header (docs/design/components/Header, v1.1): logo, tool search and language. No menu.
-// The logo art is the F1b's; the provisional logo is the wordmark in text.
+// The logo is inline (role="img", "FileOrca"); on the phone the search is the icon alone, still named
+// "Search tools" (DECISOES § 46, closes § 30). Logo, search and language are 48px targets.
 import type { Lang, RouteDef } from '../i18n/routes.ts';
 import { LANGS, languagesOf } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { homePath } from '../seo/meta.ts';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
 
 interface Props {
   lang: Lang;
@@ -21,12 +24,12 @@ const links = LANGS.map((code) => ({
 }));
 ---
 <header class="fo-header">
-  <a class="fo-header__logo" href={homePath(lang)} aria-label={t.header.homeLabel}>File<b>Orca</b></a>
+  <a class="fo-header__logo" href={homePath(lang)} aria-label={t.header.homeLabel}><Logo class="fo-logo" /></a>
   <button type="button" class="fo-header__search" data-search-open aria-haspopup="dialog" aria-keyshortcuts="Control+K">
-    <span>{t.header.search}</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">{t.search.shortcut}</span>
+    <Icon name="search" /><span class="fo-header__search-text">{t.header.search}</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">{t.search.shortcut}</span>
   </button>
   <button type="button" class="fo-header__lang" popovertarget="fo-langmenu">
-    {t.header.langCode}<span class="fo-sr">{t.header.langSr}</span>
+    <Icon name="globe" />{t.header.langCode}<span class="fo-sr">{t.header.langSr}</span><Icon name="chevron-down" class="fo-icon--sm fo-desktop-only" />
   </button>
   <nav id="fo-langmenu" class="fo-langmenu" popover aria-label={t.header.langMenuLabel}>
     <ul>

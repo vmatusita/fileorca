@@ -1,6 +1,8 @@
 ---
-// 404 with tool search (PLANO: "404 com busca de ferramentas"). Out of sitemap and hreflang.
+// 404 with tool search (PLANO: "404 com busca de ferramentas"), with the Oli in mask and snorkel ("This
+// page swam away."). Out of sitemap and hreflang.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Oli from '../components/Oli.astro';
 import SearchBox from '../components/SearchBox.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -14,9 +16,14 @@ const route = routeById('not-found');
 const t = TEXTS[lang]['not-found'];
 const common = TEXTS[lang].common;
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description}>
-  <h1 class="fo-h1">{t.h1}</h1>
-  <p class="fo-prose">{t.body}</p>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} oli={['lost']}>
+  <div class="fo-hero">
+    <div class="fo-hero__text">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p class="fo-prose">{t.body}</p>
+    </div>
+    <Oli pose="lost" class="fo-hero__oli" />
+  </div>
   <section class="fo-section fo-search-inline" aria-label={t.searchLabel} data-search-inline>
     <SearchBox t={common} id="fo-404-search" />
   </section>

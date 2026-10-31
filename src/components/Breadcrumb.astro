@@ -1,6 +1,8 @@
 ---
 // Breadcrumb (docs/design/components/Breadcrumb). Only links to pages that exist (DECISOES § 6).
+// The separator is the chevron-right icon inside each <li>, after its link.
 import type { Crumb } from '../seo/meta.ts';
+import Icon from './Icon.astro';
 
 interface Props {
   label: string;
@@ -12,7 +14,7 @@ const last = crumbs.length - 1;
 <nav aria-label={label}>
   <ol class="fo-crumbs">
     {crumbs.map((crumb, index) => (
-      <li>{index === last ? <span aria-current="page">{crumb.name}</span> : <a href={crumb.path}>{crumb.name}</a>}</li>
+      <li>{index === last ? <span aria-current="page">{crumb.name}</span> : <><a class="fo-crumbs__link" href={crumb.path}>{crumb.name}</a><Icon name="chevron-right" /></>}</li>
     ))}
   </ol>
 </nav>

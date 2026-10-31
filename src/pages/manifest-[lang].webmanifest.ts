@@ -1,4 +1,4 @@
-// Web app manifest per language (provisional icons until the F1b).
+// Web app manifest per language, with the app icon of docs/design/assets/Logo (DECISOES § 45).
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { LANGS, LANG_TAG, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';

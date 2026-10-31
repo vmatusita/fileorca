@@ -11,6 +11,12 @@ importers:
       '@astrojs/preact':
         specifier: ^6.1.1
         version: 6.1.1(@babel/core@7.29.7)(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(preact@11.1.0)(yaml@2.9.1)
+      '@fontsource-variable/figtree':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/fredoka':
+        specifier: ^5.3.0
+        version: 5.3.0
       astro:
         specifier: ^7.4.4
         version: 7.4.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
@@ -31,6 +37,9 @@ importers:
         specifier: ^4.14.0
         version: 4.14.0(playwright-core@1.64.1)
       '@fontsource/figtree':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/fredoka':
         specifier: ^5.3.0
         version: 5.3.0
       '@lhci/cli':
@@ -632,8 +641,17 @@ packages:
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
+  '@fontsource-variable/figtree@5.3.0':
+    resolution: {integrity: sha512-VRVodD7OiG7apQwE8/2fMjaqpY/a0qRJqL5HtYj8CKIVps+9amaFcdfKmDIf7iqYQx6iPLlArVXAfKeIZmVcNQ==}
+
+  '@fontsource-variable/fredoka@5.3.0':
+    resolution: {integrity: sha512-13w98iw2RcmYfZQRZPLSu+0YJK3HHm5A2XrpU26moFIAePmfiKfvkmEJUgkc8r5GNR+pbDijOueS1KdGAMAWmQ==}
+
   '@fontsource/figtree@5.3.0':
     resolution: {integrity: sha512-/iTcTXL1eRBGhvD7NN9dnKzXzWqDLVZVEUFI9xIxAC1G/hXU8tCyYeXCAuPOuvSYPInFUP7H6KLGgygmDfy1SA==}
+
+  '@fontsource/fredoka@5.3.0':
+    resolution: {integrity: sha512-s2IhjQ50wDnKkkaKmjhtL0rxQg6ITsVusiipM3m7zUwVZZbbCKsscNDkngwp28xVzfIt7neWrkgU1qKqyTycQg==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -5011,7 +5029,13 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
+  '@fontsource-variable/figtree@5.3.0': {}
+
+  '@fontsource-variable/fredoka@5.3.0': {}
+
   '@fontsource/figtree@5.3.0': {}
+
+  '@fontsource/fredoka@5.3.0': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

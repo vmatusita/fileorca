@@ -1,0 +1,184 @@
+ultracode
+
+# Missão
+
+Rode a F1b do FileOrca, o design system e a Oli (run 2 de 2 da F1). Ao terminar, o molde que a F1a montou tem a cara final do FileOrca: os tokens do design system v1.1 nos dois temas, a Fredoka e a Figtree, os componentes da F1 estilizados a partir de `docs/design/`, a Oli v1 num sprite com as nove poses, o logo, o favicon, o ícone do app, os ícones inline, a página de apoio com o SupportCard, a linha do café no ResultCard e a folha da Oli em `docs/oli/folha.html`. Nenhum portão da F1a piora e o `pnpm verificar` fica verde. Tudo fica numa PR da branch `fase-01b`, com o relatório. Esta PR não toca em `.github/`, então o job de merge a mescla sozinho assim que ela sai do rascunho com o CI verde, e o merge publica em fileorca.com (ainda com noindex). Por isso ela só sai do rascunho no fim, com o relatório commitado.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows: o shell é o Git Bash, e o CI roda em Ubuntu 24.04. A main está em `fdac2f2` (a F1a mais o ajuste `ajuste-previa-build`), e fileorca.com serve a F1a com `X-Robots-Tag: noindex` (`LAUNCHED = false`). O Victor não passou dado novo para esta run: o Ko-fi segue o § 3.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. `CLAUDE.md` inteiro, inclusive as seções "F1a: comandos e pegadinhas" e "Ajuste da prévia".
+3. `PLANO-FILEORCA.md`. A ficha "F1b · Design system e Oli" do apêndice e a lista "Correções do design system v1.1" logo abaixo dela são o contrato, e as "Decisões fechadas" não mudam. Use também as seções "Design: amigável, chamativo e rápido", "Paleta", "A mascote: Oli, a orca" (poses, regras técnicas, regras de anúncio e falas), "Orçamento de desempenho", "Molde da página de ferramenta", "Doações" e "SEO agressivo › Técnico" (OG com a Oli e Organization com o logo).
+4. `DECISOES.md` (§ 1 a § 38). Os que esta run mais toca: § 2, § 5, § 10, § 13, § 18 a § 21, § 23, § 27, § 28, § 30, § 35 e § 36.
+5. `docs/design/`: o README (voz, cor, tipografia, forma, movimento, Oli, ícones, layout e acessibilidade), `MUDANCAS-v1.1.md`, `tokens.json` e `tokens.css`, `components/README.md`, `components/bundle.css` e, de cada componente do item 4 do Escopo, o README e o `preview.html` (inclusive o molde ToolPage); `assets/Oli/` (nove poses), `assets/Logo/` (logo, wordmark e ícone do app), `assets/Icons/` (35 ícones) e `fonts/`. Essa pasta é a exportação do design system vivo, o artifact https://claude.ai/artifact/ECjKLGYoW4JL72TKSNWDgT, que também está no v1.1: a nota do `MUDANCAS-v1.1.md` que diz que ele ainda mostra o v1 ficou velha (em 30/out/2026, o tokens.json, o README e os desenhos da Oli dos dois batiam). Trabalhe sempre a partir da pasta. Se conseguir abrir o artifact, use os previews dele como referência visual a mais; se não conseguir (ele pede login no claude.ai), siga sem ele. Se achar diferença entre os dois, vale `docs/design/` (Decisões fechadas), e a diferença vai para o § da conferência do v1.1 e para a lista do Victor.
+6. `docs/relatorios/fase-01a.md` (sobretudo "Nota para a F1b" e "O que é do Victor") e `docs/relatorios/ajuste-previa-build.md`.
+7. O código que você vai vestir: `src/styles/global.css`, `src/layouts/BaseLayout.astro`, `src/components/`, `src/views/`, `src/tools/compress-image/` (o `ToolPanel.tsx` tem os estados e as caixas `[data-oli]`), `src/ads/`, `src/analytics/`, `src/seo/images.ts`, `src/pages/icon-[size].png.ts`, `src/platform/licenses.ts` e `tests/`.
+
+Fontes: instale `@fontsource-variable/fredoka` e `@fontsource-variable/figtree` na versão estável atual da major 5 (o plano conferiu a 5.3.0). Antes de usar qualquer API (o `@theme` e as fontes de classe do Tailwind v4, fontes e assets no Astro 7, `<img>` com SVG no satori), leia a documentação da versão instalada. Não escreva de memória.
+
+# Escopo
+
+Dentro: a linha "Dentro" da ficha F1b, com as decisões abaixo. Em itens:
+
+1. Conferir o v1.1. O pacote da F0 já veio no v1.1 (§ 2 e `MUDANCAS-v1.1.md`). Confira os 12 itens da lista do plano contra os arquivos de `docs/design/` e registre o resultado, item a item, num § novo. Se algum faltar, aplique em `docs/design/` num commit só. Fora isso, `docs/design/` é só leitura.
+2. Tokens claro e escuro no `@theme` do Tailwind v4, a partir do tokens.json (decisão 2), com o tema escuro por `prefers-color-scheme` e por `data-theme`, só com CSS.
+3. Fredoka e Figtree, só o subconjunto latino, com preload só da Fredoka (decisão 3).
+4. Os componentes da F1 estilizados a partir do `bundle.css` e dos guias: Button (com o lábio), DropZone (com a água e a Oli na borda), WaterLevel, ResultCard (no fundo do mar, com a Placard), FileCard e ToolCard (com a dobra), OptionGroup, OliMessage, PrivacySeal, NextStepChips, Header, Breadcrumb, ToolSearch, Faq, Footer (com a onda), AdSlot (neutro) e CookieNotice. O FileCard fica pronto para a F2, sem uso em página.
+5. O sprite da Oli com as nove poses v1 e a Oli posta em cada caixa `[data-oli]` (decisões 4 e 5); a home com a `wave`, o 404 com a `lost` e a busca sem resultado com a `peek`.
+6. Logo inline no Header, favicon, ícone do app (PNG de 192 e 512 e o `apple-touch-icon`) e o logo do schema Organization, a partir de `docs/design/assets/Logo/` (decisão 6).
+7. Ícones inline a partir de `docs/design/assets/Icons/` (decisão 7).
+8. `docs/oli/folha.html` (decisão 8).
+9. SupportCard na página de apoio e a linha do café no ResultCard, com o Ko-fi (decisões 9 e 10).
+10. Sobre: a curiosidade da orca já existe nos três idiomas; confira e vista com o estilo novo. A foto é a pendência 4 da F1a, que esta fase absorve. Se `public/about/victor.jpg` existir (na main, ou deixada pelo Victor como arquivo não rastreado, junto com o prompt), confira que ela não leva Exif, XMP nem GPS e, se levar, regrave sem metadados com o `strip` do § 33. Depois ligue a foto (com `width`, `height` e `alt`) e o `image` do schema Person. Se não existir, nada muda e a foto segue como pendência.
+11. Imagem de Open Graph com a Oli e o logo (decisão 11).
+12. Screenshots dos componentes para o relatório (decisão 12).
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do CLAUDE.md.
+- `.github/` inteiro e `scripts/ci/`. O pipeline não é desta run, e uma PR que mexe em `.github/workflows/` não é mesclada sozinha.
+- Pix (F6). BeforeAfter, lote, fila de FileCards, ZIP e motor de verdade (F2). Componentes de calculadora: NumberField, ResultHero, SplitChart, ScenarioCompare, AmortTable e ExportBar (F4). Service worker e tela offline (F8): a pose `buoy` entra no sprite e na folha, sem uso em página.
+- Animação em JavaScript; cor, raio ou sombra fora dos tokens; amarelo (`sun`) fora do Baixar.
+- Redesenhar, recolorir ou criar pose da Oli. Ajuste da Oli é a run 1c.
+- Rotas, slugs, SEO técnico, cabeçalhos, consentimento e a lógica do AdSlot: só o visual muda. A única mudança de texto jurídico é a frase da decisão 10 na política de privacidade. `LAUNCHED` continua `false`.
+- Só leitura: `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/`, `.claude/settings.json` e `docs/design/` (fora o item 1 do Escopo). No `CLAUDE.md`, só uma seção nova no fim; no `DECISOES.md`, só § novos.
+- Dependência nova: só as duas fontes, em `dependencies` (vão ao navegador), e, se a OG usar a Fredoka, `@fontsource/fredoka` em `devDependencies` (o satori não lê woff2). Nenhuma outra.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 39)
+
+1. O contrato que os testes da F1a medem não muda com o estilo: o seletor `[data-oli]` e os tamanhos das caixas (§ 19), as alturas reservadas do painel e dos AdSlots (§ 20), o vão do trilho igual ao `ad-clearance`, o aviso de cookies acima da âncora e sem cobrir o foco (§ 35 e § 36), o passe de axe nos dois temas e os orçamentos. Onde o `bundle.css` diverge desses valores (280 e 624 px no AdSlot, por exemplo), vale o DECISOES. O `bundle.css` é a referência de estilo, não um import: o CSS do site traz os componentes que existem nas páginas, com as mesmas classes `fo-*` e a marcação v1.1.
+2. O `@theme` do Tailwind v4 nasce dos tokens sem reabrir o problema do § 18. O tema padrão do Tailwind sai inteiro (cores, raios, sombras e fontes); os valores do tema apontam para as variáveis de `docs/design/tokens.css`, que já trocam de tema (no v4 isso costuma ser `@theme inline`; confira na doc instalada); e a detecção automática de classes não lê os textos do site. Cuidado com nome igual: `--radius-xl: var(--radius-xl)` é um ciclo. Se o `@theme` for gerado do tokens.json, gere por script, com um teste que reprova o arquivo desatualizado. Outro teste reprova, no CSS do build, variável de tema (`--color-*`, `--radius-*`, `--shadow-*`, `--font-*`) cujo valor não seja um token.
+3. Fontes só com os arquivos latinos (`fredoka-latin-wght-normal.woff2` e `figtree-latin-wght-normal.woff2`), num `@font-face` próprio, sem os outros subconjuntos do pacote. Preload só da Fredoka, com `crossorigin` e exatamente a URL com hash que o `@font-face` usa (senão a fonte baixa duas vezes). Fallback com métrica ajustada (`size-adjust` e afins), para o CLS ficar em até 0,05. Se usar a API de fontes do Astro, só com arquivo local do `node_modules`: o build não pode baixar nada fora do registro do npm.
+4. O sprite da Oli é montado no build a partir de `docs/design/assets/Oli/*.svg`, sem cópia à mão. Um `<symbol id="oli-<pose>">` por pose; uma peça com o mesmo desenho em mais de uma pose vira uma peça só, referenciada por `<use>` (nos previews, o aro, o corpo, a barbatana com a dobra e a mancha repetem os mesmos paths de pose para pose); o `clipPath` `oli-clip` é declarado uma vez por página e serve às poses e ao logo inline (sem cópia com o mesmo id); o `clipPath` `ic` da `peek` não entra. Cada página leva só os símbolos das poses que usa, inclusive as que o painel troca no cliente (a `peek` vai em toda página, porque toda página tem o diálogo de busca). O tamanho de uma pose é a soma dos bytes UTF-8 do `<symbol>` dela, das peças que ele referencia e do `oli-clip`, sem compressão, e vai até 4096. O sprite fica com `aria-hidden="true"` e fora da tela, nunca com `display: none` (um `clipPath` dentro de SVG com `display: none` deixa de funcionar em alguns navegadores).
+5. A Oli entra nas caixas `[data-oli]` como `<svg aria-hidden="true"><use href="#oli-<pose>"/></svg>`. Trocar a pose é trocar o `href`, com a mesma marcação no servidor e na hidratação. Movimento só em CSS e só com `transform` e `opacity` (e `translate`, `scale` e `rotate`): a `wave` flutua em loop de `dur-float`, a `gulp` cresce 5% com o arquivo em cima, a `swim` nada em loop, a `cheer` salta uma vez em `dur-cheer` no ResultCard e o vapor do `coffee` sobe. A água do DropZone e do WaterLevel sobe por `transform`, não por `height` ou `bottom` animados. Com `prefers-reduced-motion: reduce`, nenhuma animação nem transição roda.
+6. Logo: o do `logo-light.svg`, inline no Header, com "File" em `var(--ink)` e "Orca" em `var(--brand)`, `role="img"`, `aria-label="FileOrca"` e alvo de 48 px. Favicon: o `app-icon.svg`, em data URI como hoje (sem requisição). PNG de 192 e 512 e o `apple-touch-icon` (180) renderizados do `app-icon.svg` com o resvg, como o `iconPng` da F1a. O logo do Organization é o PNG de 512.
+7. Ícones: os SVG de `docs/design/assets/Icons/`, inline, com `stroke="currentColor"`, `class="fo-icon"` e `aria-hidden="true"`. Nada de sprite externo nem de pacote de ícones. No celular, a busca do Header vira só o ícone, com nome acessível (fecha o § 30). Toda seta "→" ou "↔" nos textos do site vira o ícone `arrow-right` em `fo-icon--inline`, com "to" / "para" / "a" em `fo-sr` (item 10 do v1.1).
+8. `docs/oli/folha.html` é gerada por script a partir do mesmo sprite do site e abre por `file://`, sem rede: as nove poses lado a lado em 32, 64 e 512 px e o ícone do app em 16 e 32 px, sobre o fundo claro e sobre o escuro (é no escuro que o aro da Oli aparece). Um teste reprova a folha desatualizada em relação ao sprite.
+9. SupportCard na página de apoio: o título do card é o H1 da página, com a Oli `coffee`, o texto da tabela de Doações do plano, um botão secundário "Support with a coffee" para o `KOFI_URL` e os valores sugeridos em texto (US$ 3, 5 ou 10, escolhidos no Ko-fi). Não são três botões com valores: o link do Ko-fi não leva o valor, e três botões que abrem a mesma página prometeriam o que não fazem. Nenhum script ou widget do Ko-fi. O `donate_click` segue com `place: "support_page"`.
+10. Linha do café no ResultCard, como manda a seção "Doações" do plano: só com o arquivo pronto, abaixo das estatísticas, nunca antes do Baixar nem no lugar dele; no 3º uso com sucesso naquele navegador e depois no máximo uma vez a cada 7 dias, com "não mostrar de novo"; textos da tabela do plano, sem repetir o "Done!" da Oli; botão secundário, nunca `sun`. A contagem fica no `localStorage` e só é gravada depois do Aceitar do aviso de cookies. Com Recusar ou sem escolha, nada é gravado e a linha não aparece. O motivo: guardar no aparelho algo que não é estritamente necessário pede consentimento na UE (ePrivacy, art. 5(3)), e o site não sabe de que país a pessoa vem. O "não mostrar de novo" é pedido da própria pessoa e é gravado sempre. A política de privacidade ganha uma frase nos três idiomas: essa contagem fica só no navegador e nunca sai dele. Em inglês e espanhol o botão leva ao Ko-fi; em português, até a F6 trazer o Pix, ele diz "Apoiar com um café" e leva a /pt/apoie/. O clique manda `donate_click` com `place: "result"` (se a lista fechada do § 10 restringe os valores de `place`, acrescente este). O caso "quem bloqueia anúncio vê a linha no 1º uso" só vale com os anúncios ligados: entra atrás de `PUBLIC_ADS_ENABLED`, com teste, ou sai pela válvula.
+11. OG: a mesma imagem por página e idioma do § 21, agora com o logo (versão escura) e a Oli `wave` ao lado do ícone da ferramenta, sobre o fundo do mar, sem desenho novo da Oli. Título em Fredoka se der (o woff do `@fontsource/fredoka`); se não der, segue a Figtree.
+12. Screenshots: um script `pnpm screenshots` (em TypeScript, fora do `pnpm verificar`) gera com o Playwright, sobre o `dist/`, um PNG por componente e por tema (claro e escuro), a 360 px (Header, Footer e a página da ferramenta também a 1280), em `docs/relatorios/fase-01b/`, recortado no elemento e com `deviceScaleFactor` 1. Os estados (DropZone em repouso, com arquivo em cima e com erro; WaterLevel; ResultCard com a Placard e com a linha do café; busca com e sem resultado) saem do fluxo real. O que não der para provocar assim (o FileCard e o WaterLevel, se o motor for rápido demais) sai de uma renderização isolada do componente com o CSS do build. Nenhum gancho de teste no código de produção. Comparação de screenshot não entra no verificar, porque muda entre Windows e Ubuntu.
+13. Os testes de qualidade mantêm o alcance: se o CSS do site for dividido em mais de um arquivo, os testes de hex e de amarelo passam a ler todos. A lista esperada de `browserPackages()` ganha as duas fontes. Isso é mudança legítima de dependência, não afrouxamento, e fica registrado.
+
+# Pontos de atenção (armadilhas conhecidas)
+
+- Orçamento de requisições: no WebKit, a página da ferramenta faz hoje 5 requisições na primeira visita (HTML, manifest, CSS e dois JS). As duas fontes levam a 7, e o limite é 8. Sprite, logo, ícones e favicon vão inline ou em data URI, nunca em arquivo próprio. Um CSS por página, como hoje.
+- A Oli não pode virar o elemento LCP: o H1 e a DropZone são o LCP. Confira o elemento no relatório do Lighthouse.
+- Ids repetidos: o sprite, o logo e os ícones inline não repetem `id` na página (o logo usa o `oli-clip` do sprite).
+- O contorno da Oli é preto-orca fixo nos dois temas, não o token `stroke` (que clareia no escuro). O aro branco fica sempre.
+- Texto só nos tokens de texto (`ink`, `ink-muted`, `brand`, `danger`, `success` e os `on-*` sobre o preenchimento que nomeiam). Sobre turquesa, coral, alga e lima, o texto é `on-cat` também no escuro. `deep` é igual nos dois temas, e dentro de `.fo-deep` o foco fica em `on-deep`.
+- A Fredoka não tem algarismos tabulares: número em tabela fica na Figtree, com `tabular-nums`.
+- Tailwind v4: a detecção automática lê qualquer arquivo do projeto e gera utilitário a partir de palavra de texto (é o que o § 18 evitou). Restrinja as fontes de classe.
+- Hidratação do Preact: o `ToolPanel` é renderizado no servidor e hidratado pelo `mount.ts` (§ 23). Marcação diferente entre servidor e cliente (um `<use>` a mais, um atributo trocado) quebra a hidratação.
+- Com `PUBLIC_ADS_ENABLED`, o rodapé ganha 96 px de respiro embaixo no celular, por causa da âncora (README do Footer).
+- O teste de distância já mede `[data-oli]`. Com a arte dentro, meça também com o diálogo de busca aberto e sem resultado (a `peek`) sobre a página da ferramenta, a 360×740 e a 1280×800.
+- Voz: sentence case, sem emoji, sem as palavras proibidas do README, "tú" no espanhol, nenhum "up to 50" e uma exclamação por tela. O `lint:texto` confere os textos novos nos três idiomas.
+- Teste instável no WebKit do Ubuntu (aconteceu na F1a): corrija a causa. Não ligue `retries` no Playwright nem aumente timeout para passar.
+- Git Bash: escreva arquivos com a ferramenta de edição (heredoc engole `\\`) e rode `git push` e `gh pr create` em comandos separados (CLAUDE.md).
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. `pnpm verificar` verde na sua máquina e no CI da PR, em até 15 min em cada um. Cole a saída e o tempo.
+2. Os 14 portões da F1a ativos, com o mesmo alcance e os mesmos limiares, orçamentos e listas (fora a lista de pacotes do navegador, decisão 13). Nenhum `skip`, `fixme`, `retries` ou `continue-on-error`.
+3. Lighthouse no celular na página-modelo em inglês: desempenho ≥ 90 (a F1a deu 100), CLS ≤ 0,05 e elemento LCP que não é a Oli.
+4. JS inicial da página da ferramenta ≤ 80 KB gzip (a F1a deu 13,2 KB) e requisições ≤ 8 na primeira página e ≤ 3 novas na seguinte, nos três pares do teste, nos dois navegadores. Cole os números.
+5. Sprite: nove símbolos com os nomes da lista fechada (`wave`, `gulp`, `swim`, `cheer`, `oops`, `buoy`, `lost`, `coffee`, `peek`); cada pose com até 4096 bytes pela medida da decisão 4, conferido por teste (cole a tabela); nenhum `id` repetido em nenhuma página do build (teste); `oli-clip` uma vez por página; sem o `ic`.
+6. Todo `[data-oli]` do build tem uma pose da lista, `aria-hidden="true"` e pelo menos 32 px na tela. Nenhum fica a menos de 150 px de um AdSlot, nos dois estados da página-modelo e com a busca aberta e sem resultado, a 360×740 e a 1280×800.
+7. Contraste: um teste unitário calcula, pela fórmula da WCAG e com os valores do tokens.json, cada par (texto, fundo) que o CSS do site usa, nos dois temas: ≥ 4,5:1 para texto, ≥ 3:1 para texto grande e para ícone que carrega sentido. Um teste estático reprova `color:` no CSS do site fora dos tokens de texto (e de `inherit` e `currentColor`). O axe segue sem violação nos dois temas, a 360 e a 1280 px, em todas as páginas, com o resultado na tela e com a busca aberta. Cole a tabela de pares.
+8. Movimento: um teste estático reprova `@keyframes` e `transition` que mexam em algo além de `transform`, `opacity`, `translate`, `scale` e `rotate`. Com `reducedMotion: 'reduce'` no Playwright, `document.getAnimations()` volta vazio em cada estado que o fluxo mostra (repouso, arquivo em cima, processando, resultado, página de apoio e 404).
+9. Fontes: só os dois woff2 latinos chegam ao navegador, cada um uma vez, e o preload é só o da Fredoka (teste). A `/licenses` lista a Fredoka e a Figtree com OFL-1.1, e o portão de licenças fica verde.
+10. Cores: os testes de hex e de amarelo só no Baixar passam lendo todo o CSS do site; o teste da decisão 2 passa; nenhum "→" nem "↔" em texto no HTML do build (teste).
+11. `docs/oli/folha.html` existe, abre sem rede, mostra as nove poses em 32, 64 e 512 px e o ícone em 16 e 32 px nos dois fundos, e o teste de folha atualizada passa.
+12. Linha do café, no Playwright: não aparece no 1º nem no 2º uso, aparece no 3º, some por 7 dias (com o relógio do Playwright), respeita o "não mostrar de novo", não grava nada sem o Aceitar e manda `donate_click` com `place: "result"`. A página de apoio tem o título do card como H1, a Oli `coffee`, o link do Ko-fi e nenhuma requisição para fora do domínio.
+13. Um screenshot por componente e por tema em `docs/relatorios/fase-01b/`, linkados no relatório.
+14. Prévia da PR: o comentário do Workers Builds aparece, a URL responde 200 com `x-robots-tag: noindex`, o `build.txt` traz o commit da PR, as duas fontes chegam com 200 e o cabeçalho de cache dos assets, e um screenshot da prévia (página da ferramenta a 360 px, nos dois temas) vai para o relatório.
+
+# Verificação: rode de verdade
+
+- Cada fatia começa pelo teste do que ela entrega (os testes dos critérios 5 a 12 nascem antes do estilo que conferem) e termina com o `pnpm verificar` verde. Leia a falha, corrija a causa e repita até passar.
+- É proibido desligar, pular, marcar como skip, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no DECISOES.md.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e `pnpm verificar`, que já builda do zero) e guarde a saída completa para o relatório. Rode o `pnpm screenshots` depois do último ajuste de estilo.
+- Depois de abrir a PR, acompanhe o CI com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Espere o comentário do Workers Builds por até 30 min, olhando a cada poucos minutos com `gh pr view <n> --comments`, e confira a prévia com curl e Playwright (critério 14). Se o build do Workers Builds ficar vermelho, o check do GitHub não traz o log e a causa não se deduz pelo tempo (CLAUDE.md): registre a pendência com o ID do build e siga.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão: (1) este prompt; (2) o CLAUDE.md, a ficha F1b e o resto do plano; (3) docs/design/ e o DECISOES.md; (4) na dúvida, a opção mais simples e reversível. Toda decisão que não está escrita aqui vira um § no DECISOES.md, com as alternativas e o porquê.
+
+Se docs/design/ e um valor que os testes da F1a medem divergirem, vale o valor medido (decisão 1). Se o teste estiver errado de fato, corrija o teste com a prova e registre.
+
+Se faltar uma peça em docs/design/ (uma pose, o logo, um ícone), não desenhe: a caixa fica sem a arte, o resto segue, e a falta vira pendência para a run 1c.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real (o comentário do Workers Builds que não chega, o LanguageTool fora do ar, um serviço caído) não para a run: siga com o resto e registre a pendência, com o que falta para resolver.
+
+A arquitetura é fixa. Se algo do host, do framework, da estrutura ou do pipeline parecer precisar mudar, escreva uma ADR nova com status "Proposta" em docs/adr/, deixe a mudança de fora e aponte no relatório.
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar: (a) a folha sai só em 64 e 512 px; (b) a OG da F1a fica como está, sem a Oli e o logo; (c) o caso "quem bloqueia anúncio" da linha do café sai; (d) o ToolSearch ganha o visual novo mas fica sem a `peek` e sem sinônimos novos, como a lista filtrada da F1a. O que for cortado vira pendência para uma run curta de ajuste (ou entra na 1c, se o Victor pedir a 1c). Nunca corte: os tokens, as fontes, Button, DropZone, WaterLevel, ResultCard com a Placard, OliMessage, AdSlot, a Oli (o sprite com as nove poses, nas caixas do painel), o logo, o ícone do app, o `pnpm verificar` com cada portão e os testes dos critérios 5 a 10.
+
+# Git e segurança
+
+- Comece com `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-01b.md` e `docs/prompts/prompt-fase-01b.txt`, o prompt desta run, e, se o Victor deixou, `public/about/victor.jpg`. Crie a branch com `git switch -c fase-01b`. Os dois arquivos do prompt entram sem edição no primeiro commit dela. A foto entra num commit próprio, só depois de conferida sem metadados: o original com GPS nunca vai para o histórico. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-01b.txt`.
+- Commits pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Push em marcos, não a cada commit: cada push roda o verificar no CI e gasta minutos do plano grátis do GitHub.
+- Abra a PR cedo, em rascunho, logo depois da primeira fatia com build (`gh pr create --draft --base main --head fase-01b`, num comando separado do push). Assim o CI no Ubuntu e a prévia andam enquanto você trabalha. Título e descrição em português, com o resumo e o link do relatório.
+- Rode `gh pr ready` só no fim, com o relatório e os screenshots commitados e o verificar local verde: com o CI verde, o job de merge mescla sozinho e o Workers Builds publica em fileorca.com. Depois do `ready`, acompanhe o CI até o fim. Se ele falhar, corrija e envie: o CI roda de novo e mescla quando ficar verde. Depois do merge, confira só por leitura que o `https://fileorca.com/build.txt` traz o commit do merge e que a página manda `x-robots-tag: noindex`, e veja o pós-deploy com `gh run list --workflow pos-deploy.yml`. Depois do merge, não abra outra PR: o que sobrar vai para a resposta final como pendência.
+- Nunca: push na main, force push, `git reset --hard`, `--amend`, `--no-verify`, mexer em `core.hooksPath` ou em `.githooks/`, `gh pr merge`, `wrangler deploy` em qualquer forma (inclusive `--dry-run`), `gh api` com método de escrita, `gh secret` ou `gh variable`. O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. Explorar com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - a ficha F1b, a lista do v1.1 e as seções do plano listadas acima, transformadas em checklist;
+   - em docs/design/, para cada componente do item 4 do Escopo, a marcação, as classes, os estados e o ARIA do preview.html contra o que o src/ tem hoje (o que muda e o que já está certo);
+   - os nove SVGs da Oli, o logo e o ícone do app: peças iguais entre poses, ids, clipPaths e o tamanho de cada pose montada; e os 35 ícones;
+   - a documentação das versões instaladas (Tailwind v4 `@theme` e fontes de classe, @fontsource-variable, fontes no Astro 7, `<img>` com SVG no satori);
+   - os testes da F1a: o que cada um mede e de que seletores e valores depende.
+2. Planejar: escreva `docs/relatorios/fase-01b-plano.md`, autossuficiente. Ele traz a árvore de arquivos, os módulos com nome (o montador do sprite, o gerador da folha, o script dos screenshots), cada critério deste prompt ligado a um teste ou comando, o que fica de fora e a ordem de execução. Ele é o gabarito da revisão.
+3. Implementar em fatias que terminam verdes, nesta ordem (o que vem antes é o que nunca se corta):
+   - conferência do v1.1, com o § dela;
+   - tokens no `@theme`, fontes e base (corpo, títulos, foco e links);
+   - PR em rascunho;
+   - sprite, a Oli nas caixas e a folha;
+   - logo, favicon, ícone do app, ícones e Header;
+   - painel: Button, DropZone, WaterLevel, ResultCard com a Placard, OptionGroup, OliMessage, PrivacySeal, NextStepChips e AdSlot;
+   - navegação e conteúdo: Breadcrumb, ToolCard, FileCard, ToolSearch com a `peek`, Faq, Footer com a onda e CookieNotice; home, 404 e Sobre;
+   - SupportCard, página de apoio e linha do café;
+   - OG;
+   - screenshots e relatório.
+
+   Frentes que editam arquivos diferentes (o montador do sprite e a folha, a OG, o script dos screenshots) podem rodar em worktrees separadas, e você integra. O CSS dos componentes fica com um agente só, para não colidir. Textos nos três idiomas e testes de tabela podem ir para subagentes Sonnet. O resto fica no modelo forte.
+4. Revisão adversarial no fim, em contexto limpo, com subagentes Sonnet que não viram o código sendo escrito. Eles revisam contra este prompt, a ficha F1b e o `docs/relatorios/fase-01b-plano.md`, em três lentes paralelas:
+   - aderência ao design system: cada componente contra o README e o preview.html dele (renderizando o preview.html e o screenshot do site no mesmo tema e na mesma largura, lado a lado), os tokens, as regras da Oli e a voz;
+   - acessibilidade e movimento: nomes acessíveis, títulos, foco, alvos de 48 px, contraste nos dois temas e movimento reduzido;
+   - desempenho, anúncio e privacidade: orçamentos, LCP e CLS, fontes, distância da Oli e da linha do café até os AdSlots, `localStorage` e consentimento, nenhum recurso de terceiros e "O que derruba conta".
+
+   Cada lente aponta só lacunas de correção ou de requisito, com arquivo:linha e evidência, nada de preferência de estilo. Corrija os achados críticos e altos, rode o verificar e revise de novo até limpar. Os médios e baixos que ficarem vão para o relatório.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-01b.md` em português, commitado na branch antes do `gh pr ready`, com:
+- o que foi feito, por área, e a árvore do que nasceu ou mudou;
+- a saída real e completa do `pnpm verificar` local, com o tempo, e o link da execução verde do CI na PR, com o tempo;
+- o Lighthouse da página-modelo (desempenho, LCP com o elemento, CLS), o JS inicial em KB gzip e as requisições contadas por página;
+- a tabela das nove poses com os bytes e a tabela de contraste (par, tema claro, tema escuro);
+- os screenshots, por componente, nos dois temas, e os da prévia;
+- o link da prévia e o que você conferiu nela;
+- o resultado da conferência do v1.1, item a item;
+- as decisões novas, apontando os § do DECISOES.md;
+- o que a revisão adversarial achou e o que foi corrigido;
+- o que a válvula cortou, se cortou algo;
+- a lista do que é do Victor, em passos: depois do merge automático, `git pull` e abrir `docs/oli/folha.html` no navegador; fazer a busca reversa da Oli no Google Lens (15 min) antes de rodar a F2, e pedir a run 1c se quiser ajuste; conferir fileorca.com no celular e no computador, nos dois temas; pôr a foto do Sobre, se ainda faltar; e as pendências da F1a e do ajuste que seguem abertas (campos do docs/F0-SAIDA.md, e-mail da marca, textos que dependem de conta, § 24, § 37 e o comando de prévia no painel);
+- uma nota para a F2: como usar a Oli, os ícones e o FileCard nas ferramentas novas (como trocar a pose, como acrescentar um ícone, onde fica cada coisa).
+
+Acrescente no fim do CLAUDE.md uma seção curta, "F1b: design system e Oli", com como o sprite, a folha e os ícones são montados e regenerados, o comando dos screenshots e as armadilhas que você achou. Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR e se o merge automático e o pós-deploy aconteceram.
+
+# Idioma
+
+Narrativa, plano, relatório, DECISOES.md e descrição da PR em português. Código, nomes de arquivo, identificadores e commits em inglês. Os textos do site ficam nos arquivos de tradução de cada idioma, com a voz de docs/design/README.md: sentence case, sem emoji, sem as palavras proibidas e com "tú" no espanhol.

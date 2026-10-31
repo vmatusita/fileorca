@@ -1,0 +1,12 @@
+---
+// The logo of logo-light.svg, inline (DECISOES § 45): the mirrored Oli drawn from the sprite pieces and
+// the wordmark with "File" in ink and "Orca" in brand, so it follows the theme. role="img" names it.
+import { loadSprite, logoMarkup } from '../oli/sprite.ts';
+import { SITE_NAME } from '../platform/site.ts';
+
+interface Props {
+  class: string;
+}
+const { class: className } = Astro.props;
+---
+<Fragment set:html={logoMarkup(loadSprite(), { className, label: SITE_NAME })} />

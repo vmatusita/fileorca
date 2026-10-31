@@ -1,0 +1,12 @@
+---
+// An inline icon (docs/design/assets/Icons): currentColor, decorative (aria-hidden). DECISOES § 46.
+import { ICONS } from '../icons/icons.ts';
+import type { IconName } from '../icons/svg.ts';
+
+interface Props {
+  name: IconName;
+  class?: string;
+}
+const { name, class: extra } = Astro.props;
+---
+<svg class:list={['fo-icon', extra]} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[name]} />

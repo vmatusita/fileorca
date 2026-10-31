@@ -1,5 +1,7 @@
 ---
 // Faq (docs/design/components/Faq): native <details>, first question open. No FAQPage schema.
+import Icon from './Icon.astro';
+
 interface Props {
   items: { q: string; a: string }[];
 }
@@ -8,7 +10,7 @@ const { items } = Astro.props;
 <div class="fo-faq">
   {items.map((item, index) => (
     <details open={index === 0}>
-      <summary>{item.q}</summary>
+      <summary>{item.q}<Icon name="chevron-down" /></summary>
       <div><p>{item.a}</p></div>
     </details>
   ))}
