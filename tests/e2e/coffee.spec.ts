@@ -2,10 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 import enSupport from '../../src/i18n/en/support.ts';
 import esSupport from '../../src/i18n/es/support.ts';
 import ptSupport from '../../src/i18n/pt/support.ts';
-import { dataLayer, dismissCookies, hydrated, nextUse, reachCoffeeLine, settle, useImage } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, hydrated, jpegBatch, nextUse, reachCoffeeLine, settle, useBadFile, useImage } from './lib/page.ts';
 
 // F1b criterion 12: the coffee line of the ResultCard and the support page.
-// Rule (PLANO "Doações", F1b decision 10): a "use" is a file that reached the result card. With the
+// Rule (PLANO "Doações", F1b decision 10; F2 decision 4): a "use" is a batch that reached the result card with at
+// least one real output (a file written anew: smaller, converted, turned...), one count for every image tool. With the
 // cookie choice "granted" each use is counted in localStorage 'fo-coffee' = {uses, shownAt?, never?}.
 // The line shows from the 3rd use and then at most once every 7 days; showing sets shownAt. Without
 // the choice, or after Decline, nothing is written and the line never shows. "Don't show this again"
@@ -116,6 +117,25 @@ test.describe('coffee line rules (English)', () => {
     const again = await coffee(page);
     expect(again?.uses).toBe(6);
     expect(again?.shownAt ?? 0).toBeGreaterThanOrEqual(shownAt + 7 * DAY);
+  });
+
+  test('a batch is one use however many files it has, an option re-run is not another, and a batch with nothing written is none', async ({ page }) => {
+    await open(page, '/compress-image/', true);
+    await dismissCookies(page, 'granted');
+    await chooseImages(page, await jpegBatch(page, 4));
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-btn--download')).toBeFocused();
+    expect(await coffee(page)).toEqual({ uses: 1 });
+    // The level changes and the whole batch is processed again: the same use.
+    await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
+    await settle(page, 1500);
+    await expect(page.locator('.fo-result')).toBeVisible();
+    expect(await coffee(page)).toEqual({ uses: 1 });
+    // A batch of which no file could be read is no use.
+    await page.getByRole('button', { name: 'Start over' }).click();
+    await useBadFile(page);
+    await settle(page);
+    expect(await coffee(page)).toEqual({ uses: 1 });
   });
 
   test('"Don\'t show this again" hides the line at once, is stored and holds after 7 days and a reload', async ({ page }) => {

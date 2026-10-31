@@ -43,6 +43,7 @@ export default {
     tooLarge: '{name} es más grande de lo que este navegador puede procesar aquí. Prueba con una versión más pequeña de la imagen.',
     chooseAnother: 'Elegir otros archivos',
     some: 'No se pudieron leer {count} archivos; el resto está listo.',
+    all: 'Oli no pudo leer ninguno de estos {count} archivos. La lista de abajo explica el motivo.',
   },
   result: {
     download: 'Descargar',
@@ -55,6 +56,7 @@ export default {
     files: 'Imágenes',
     count: '{count} imágenes',
     unchanged: 'Esta imagen ya estaba optimizada, así que Oli conservó la imagen original, sin los metadatos de la foto.',
+    unchangedMany: 'Estas imágenes ya estaban optimizadas, así que Oli conservó las imágenes originales, sin los metadatos de la foto.',
     cannotEncode: 'Este navegador no puede guardar archivos {format}, así que Oli conservó la imagen original, sin los metadatos de la foto.',
     notes: {
       flattened: 'Las zonas transparentes quedaron blancas, porque el JPG no tiene transparencia.',

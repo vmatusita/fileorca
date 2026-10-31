@@ -42,7 +42,8 @@ async function open(browser: Browser, theme: Theme, width: number, path: string,
   );
   await page.goto(`${ORIGIN}${path}`);
   await page.evaluate(() => document.fonts.ready);
-  if (path.includes('compress') || path.includes('comprimir')) await page.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
+  // Any tool or preset page has the island root; the others (home, legal, 404) do not.
+  if ((await page.locator('#fo-tool-root').count()) > 0) await page.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
   return page;
 }
 

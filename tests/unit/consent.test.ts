@@ -77,6 +77,36 @@ describe('typed events', () => {
     expect(cleanParams('download', { tool: 'compress-image', lang: { nested: true } })).toEqual({ tool: 'compress-image' });
   });
 
+  it('carries the new image values (F2) and drops anything outside the closed lists', () => {
+    for (const outcome of ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed']) {
+      expect(cleanParams('tool_complete', { tool: 'resize-image', lang: 'en', outcome }), outcome).toEqual({ tool: 'resize-image', lang: 'en', outcome });
+    }
+    expect(cleanParams('tool_complete', { tool: 'compress-image', lang: 'en', outcome: 'IMG_1.jpg' })).toEqual({ tool: 'compress-image', lang: 'en' });
+    for (const reason of ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large']) {
+      expect(cleanParams('tool_error', { tool: 'heic-to-jpg', lang: 'en', browser: 'safari-18', codec: 'image/heic', reason }), reason).toMatchObject({ reason, codec: 'image/heic' });
+    }
+    for (const codec of ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty']) {
+      expect(cleanParams('tool_error', { tool: 'compress-image', lang: 'pt', browser: 'chrome-141', codec, reason: 'decode' }), codec).toMatchObject({ codec });
+    }
+    // A file type string or a file name never gets through as a codec or a reason.
+    expect(cleanParams('tool_error', { tool: 'compress-image', lang: 'en', browser: 'chrome-141', codec: 'image/tiff', reason: 'broken.jpg' })).toEqual({ tool: 'compress-image', lang: 'en', browser: 'chrome-141' });
+    expect(cleanParams('next_step_click', { tool: 'compress-image', lang: 'en', target: 'resize-image' })).toEqual({ tool: 'compress-image', lang: 'en', target: 'resize-image' });
+    expect(cleanParams('next_step_click', { tool: 'image-to-pdf', lang: 'pt', target: 'home' })).toEqual({ tool: 'image-to-pdf', lang: 'pt', target: 'home' });
+  });
+
+  it('types every image page as a tool and refuses a file name there', () => {
+    const check = (fn: () => void) => fn;
+    check(() => {
+      const ok: EventMap['tool_complete'] = { tool: 'compress-image-to-100kb', lang: 'en', outcome: 'smaller' };
+      const pdf: EventMap['tool_start'] = { tool: 'image-to-pdf', lang: 'en' };
+      // @ts-expect-error a file name is not a tool
+      const bad: EventMap['tool_start'] = { tool: 'IMG_1.jpg', lang: 'en' };
+      // @ts-expect-error the outcome is a closed list
+      const worse: EventMap['tool_complete'] = { tool: 'compress-image', lang: 'en', outcome: 'done' };
+      return [ok, pdf, bad, worse];
+    });
+  });
+
   it('rejects unknown parameters at compile time', () => {
     const check = (fn: () => void) => fn;
     check(() => {

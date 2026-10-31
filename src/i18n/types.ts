@@ -268,6 +268,8 @@ export interface ImagePanelTexts {
     chooseAnother: string;
     /** Mixed batch: "{count} files couldn't be read; the rest are ready." */
     some: string;
+    /** Several files, none readable (under the DropZone error title; the list below says why): "{count}" */
+    all: string;
   };
   result: {
     download: string;
@@ -285,6 +287,8 @@ export interface ImagePanelTexts {
     count: string;
     /** Every file came back unchanged (no gain). */
     unchanged: string;
+    /** The same, for a batch of several images. */
+    unchangedMany: string;
     /** "This browser can't save {format} files, so Oli kept the original image, without the photo metadata." */
     cannotEncode: string;
     /** One line per engine note (src/engine/image/types.ts `Note`). */
@@ -435,63 +439,4 @@ export interface ToolBlurb {
   name: string;
   description: string;
   synonyms: string[];
-}
-
-export interface CompressImageTexts extends PageMeta {
-  h1: string;
-  /** Used when a file has no name. */
-  fileFallback: string;
-  drop: {
-    title: string;
-    choose: string;
-    /** Help line on desktop, with the paste shortcut: "or paste with {kbd} · JPG, PNG or WebP, one at a time" */
-    helpDesktop: string;
-    /** Help line on mobile: "JPG, PNG or WebP, one at a time" */
-    help: string;
-    pasteKey: string;
-    over: string;
-    overHelp: string;
-    errorTitle: string;
-    /** "{name} isn't an image Oli can read. Try a JPG or PNG." */
-    errorHelp: string;
-    chooseAnother: string;
-  };
-  options: {
-    legend: string;
-    recommended: string;
-    recommendedHelp: string;
-    strong: string;
-    strongHelp: string;
-    /** PNG is saved without loss: the level only changes JPG and WebP. */
-    pngNote: string;
-  };
-  progress: {
-    label: string;
-    working: string;
-  };
-  result: {
-    /** "Done! Your image is {percent} lighter." */
-    done: string;
-    /** No gain: the original image goes back, without its metadata. */
-    unchanged: string;
-    /** This browser cannot save the format: '{format}' is JPG, PNG or WebP. */
-    cannotEncode: string;
-    placardLabel: string;
-    before: string;
-    after: string;
-    size: string;
-    download: string;
-    startOver: string;
-    /** Visually hidden word between the sizes: "to" / "para" / "a". */
-    to: string;
-    /** The coffee line, after the Download (PLANO "Doações"); no exclamation (the Oli already said "Done!"). */
-    coffee: { text: string; button: string; hide: string };
-  };
-  next: { label: string; moreTools: string };
-  howHeading: string;
-  howSteps: string[];
-  privacyHeading: string;
-  privacyNote: string;
-  faqHeading: string;
-  faq: { q: string; a: string }[];
 }

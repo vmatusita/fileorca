@@ -1,11 +1,12 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { getContainerRenderer } from '@astrojs/preact/container-renderer';
 import { loadRenderers } from 'astro:container';
+import { h } from 'preact';
 import { beforeAll, describe, expect, it } from 'vitest';
 import FileCard, { type FileCardProps } from '../../src/components/FileCard.tsx';
 import { ICONS } from '../../src/icons/icons.ts';
 
-// The FileCard is ready for the F2 queue and no page uses it yet (DECISOES § 53), so this renders the
+// The FileCard is the row of the F2 queue (DECISOES § 53); this renders the
 // component itself and checks it against the markup of docs/design/components/FileCard/preview.html.
 const labels = { to: 'to', download: 'Download {name}', cancel: 'Cancel {name}', remove: 'Remove {name}' };
 const noop = () => {};
@@ -46,5 +47,47 @@ describe('FileCard pronto para a F2', () => {
     expect(html.match(/class="fo-file__thumb">([\s\S]*?)<\/div>/)?.[1]).toContain(ICONS.file);
     expect(html.match(/class="fo-file__err">([\s\S]*?)<\/span>/)?.[1]).toContain(ICONS.alert);
     expect(html).toContain('aria-label="Remove scan.tiff"');
+  });
+});
+
+describe('FileCard da fila da F2', () => {
+  const queueLabels = { ...labels, select: 'Show {name}' };
+
+  it('waiting: the status, no bar, a named cancel', async () => {
+    const html = await render({ state: 'waiting', name: 'b.png', category: 'image', labels, status: 'Waiting', onCancel: noop });
+    expect(html).toContain('Waiting');
+    expect(html).not.toContain('role="progressbar"');
+    expect(html).toContain('aria-label="Cancel b.png"');
+  });
+
+  it('done without a gain: a neutral note instead of the check, and the sizes only when there is an "after"', async () => {
+    const note = await render({ state: 'done', name: 'IMG_1.heic', category: 'image', labels, before: '2.4 MB', after: '3.1 MB', note: '4032 × 3024', downloadName: 'IMG_1.jpg', onDownload: noop });
+    expect(note).toContain('4032 × 3024');
+    expect(note).not.toContain('fo-file__gain');
+    expect(note).toContain('aria-label="Download IMG_1.jpg"');
+    const single = await render({ state: 'done', name: 'a.jpg', category: 'image', labels, before: '2.4 MB', note: 'Already optimized', onDownload: noop });
+    expect(single).toContain('2.4 MB');
+    expect(single).not.toContain('<span class="fo-sr">to</span>');
+    const noDownload = await render({ state: 'done', name: 'page.jpg', category: 'image', labels, before: '1 MB', note: '10 × 10' });
+    expect(noDownload).not.toContain('aria-label="Download');
+  });
+
+  it('a pick toggle names the file and says whether it is the one shown; without onSelect the thumb is plain', async () => {
+    const off = await render({ state: 'done', name: 'a.jpg', category: 'image', labels: queueLabels, before: '1 MB', after: '500 KB', gain: '−50%', onDownload: noop, onSelect: noop });
+    expect(off).toContain('class="fo-file__pick"');
+    expect(off).toContain('aria-pressed="false"');
+    expect(off).toContain('aria-label="Show a.jpg"');
+    expect(off).not.toContain('data-selected');
+    const on = await render({ state: 'done', name: 'a.jpg', category: 'image', labels: queueLabels, before: '1 MB', after: '500 KB', gain: '−50%', onDownload: noop, onSelect: noop, selected: true });
+    expect(on).toContain('aria-pressed="true"');
+    expect(on).toContain('data-selected="true"');
+    const plain = await render({ state: 'done', name: 'a.jpg', category: 'image', labels, before: '1 MB', after: '500 KB', gain: '−50%', onDownload: noop });
+    expect(plain).not.toContain('fo-file__pick');
+  });
+
+  it('error: the reason may carry a link to the tool that opens the file', async () => {
+    const reason = ['IMG.heic is a HEIC file. Open it in ', h('a', { href: '/heic-to-jpg/' }, 'HEIC to JPG'), '.'];
+    const html = await render({ state: 'error', name: 'IMG.heic', category: 'image', labels, reason, onRemove: noop });
+    expect(html).toMatch(/class="fo-file__err">[\s\S]*Open it in <a href="\/heic-to-jpg\/">HEIC to JPG<\/a>\./);
   });
 });

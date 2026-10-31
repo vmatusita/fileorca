@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import { chooseImage, dismissCookies, dragOver, hydrated, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
@@ -384,6 +385,16 @@ test.describe('review regressions', () => {
     await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
     const error = await page.evaluate(() => document.documentElement.scrollWidth);
     if (error > 320) wide.push(`error with a long file name ${error}px`);
+    // F2: a batch with long names, an error row and the comparison under the card.
+    const long = 'IMG_20240101_123456_family_vacation_photo_final_v2_without_spaces_in_the_name_at_all';
+    await page.setInputFiles('input[type="file"]', [
+      { name: `${long}.jpg`, mimeType: 'image/jpeg', buffer: readFileSync('fixtures/images/jpg-02-iphone6-paisagem-gps.jpg') },
+      { name: `${long}.txt`, mimeType: 'text/plain', buffer: Buffer.from('x') },
+    ]);
+    await expect(page.locator('.fo-file[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    const batch = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (batch > 320) wide.push(`batch with long file names ${batch}px`);
     expect(wide).toEqual([]);
   });
 

@@ -36,6 +36,19 @@ test('the next-step chip sends next_step_click', async ({ page }) => {
   expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image', lang: 'es', target: 'home' }]);
 });
 
+test('an English chip names the tool it leads to, and the preset page names itself', async ({ page }) => {
+  await page.goto('/compress-image/to-100kb/');
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.setInputFiles('input[type="file"]', 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg');
+  const chip = page.locator('nav.fo-next a.fo-chip').first();
+  await expect(chip).toHaveAttribute('href', '/resize-image/');
+  await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+  await chip.click();
+  expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image-to-100kb', lang: 'en', target: 'resize-image' }]);
+  expect(await lastEvent(page, 'tool_start')).toEqual(['event', 'tool_start', { tool: 'compress-image-to-100kb', lang: 'en' }]);
+});
+
 test('the cookie notice has Decline first, two neutral buttons and no yellow', async ({ page }) => {
   await page.goto('/');
   const buttons = page.locator('#fo-cookie button');

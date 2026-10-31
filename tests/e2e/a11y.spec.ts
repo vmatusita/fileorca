@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { animationsDone, coffeeLineInOneUse, dismissCookies, hydrated, searchWithoutResult, useImage } from './lib/page.ts';
+import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage } from './lib/page.ts';
 
 // axe-core (WCAG 2.2 AA and best practices) on every page, at 360 and 1280px. It runs with reduced
 // motion (DECISOES § 57): the site animates only transform and opacity, so the colours axe checks are
@@ -138,3 +138,54 @@ for (const width of [360, 1280]) {
     });
   });
 }
+
+// F2: a batch on the tool page. One load per browser, then both widths and both themes in place (the
+// comparison moves into the card and out of it as the width crosses 768px). Eight files with a bad one
+// among them: six rows and "Show 2 more", an error row, the batch card, the comparison and the chips.
+test.describe('axe com um lote na tela, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('the queue with ready and error rows, the batch card and the comparison', async ({ page }) => {
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    const photos = await jpegBatch(page, 7);
+    await chooseImages(page, [...photos.slice(0, 3), { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }, ...photos.slice(3)]);
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('button', { name: 'Show 2 more' })).toBeVisible();
+    await expect(page.locator('.fo-file[data-state="error"]')).toHaveCount(1);
+    await expect(page.locator('.fo-ba')).toHaveCount(1);
+    await animationsDone(page);
+    const found: string[] = [];
+    for (const combo of COMBOS) {
+      await page.setViewportSize({ width: combo.width, height: combo.height });
+      await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
+      const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+      for (const violation of results.violations) {
+        found.push(`${combo.width}px ${combo.colorScheme} · ${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`);
+      }
+    }
+    expect(found).toEqual([]);
+  });
+
+  test('the WaterLevel with the batch count, a working row and waiting rows', async ({ page }) => {
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    const gate = await slowEngine(page);
+    await chooseImages(page, await jpegBatch(page, 3));
+    await expect(page.locator('.fo-level')).toBeVisible();
+    await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(3);
+    const found: string[] = [];
+    for (const combo of COMBOS) {
+      await page.setViewportSize({ width: combo.width, height: combo.height });
+      await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
+      const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+      for (const violation of results.violations) {
+        found.push(`${combo.width}px ${combo.colorScheme} · ${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`);
+      }
+    }
+    gate.release();
+    expect(found).toEqual([]);
+  });
+});

@@ -3,6 +3,8 @@ import { getContainerRenderer } from '@astrojs/preact/container-renderer';
 import { loadRenderers } from 'astro:container';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import CompressImagePage from '../../src/tools/compress-image/CompressImagePage.astro';
+import To100kbPage from '../../src/tools/compress-image/presets/to-100kb/To100kbPage.astro';
+import To1mbPage from '../../src/tools/compress-image/presets/to-1mb/To1mbPage.astro';
 import LegalView from '../../src/views/LegalView.astro';
 import AboutView from '../../src/views/AboutView.astro';
 import ContactView from '../../src/views/ContactView.astro';
@@ -20,6 +22,14 @@ const STATES = {
   client: { PUBLIC_ADSENSE_CLIENT: CLIENT },
   all: { PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: SLOTS, PUBLIC_ADS_ENABLED: 'true' },
 } as const;
+
+// The tool pages that exist: Compress image in the three languages, and the presets (English only).
+// A tool adds its page here when it is built; each one is the shared mold, so each has the same two AdSlots.
+const TOOL_PAGES = [
+  ...(['en', 'pt', 'es'] as const).map((lang) => ({ name: `compress-image ${lang}`, Page: CompressImagePage, lang })),
+  { name: 'compress-image-to-100kb en', Page: To100kbPage, lang: 'en' as const },
+  { name: 'compress-image-to-1mb en', Page: To1mbPage, lang: 'en' as const },
+];
 
 const NO_ADS = [
   ['privacy', LegalView, { page: 'privacy' }],
@@ -42,12 +52,14 @@ describe('anúncio por página nos três estados', () => {
   for (const [state, env] of Object.entries(STATES)) {
     it(`tool page vs every other page (${state})`, async () => {
       for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);
+      for (const { name: page, Page, lang } of TOOL_PAGES) {
+        const tool = await container.renderToString(Page, { props: { lang } });
+        expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`), page).toBe(state !== 'none');
+        expect(tool.includes('adsbygoogle.js?client='), page).toBe(state === 'all');
+        expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
+        expect((tool.match(/class="fo-ad fo-ad--/g) ?? []).length, page).toBe(2);
+      }
       for (const lang of ['en', 'pt', 'es'] as const) {
-        const tool = await container.renderToString(CompressImagePage, { props: { lang } });
-        expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`)).toBe(state !== 'none');
-        expect(tool.includes('adsbygoogle.js?client=')).toBe(state === 'all');
-        expect((tool.match(/class="adsbygoogle"/g) ?? []).length).toBe(state === 'all' ? 2 : 0);
-        expect((tool.match(/class="fo-ad fo-ad--/g) ?? []).length).toBe(2);
         for (const [name, View, props] of NO_ADS) {
           const html = await container.renderToString(View, { props: { lang, ...props } });
           expect(html.includes('google-adsense-account'), `${name} ${lang}`).toBe(state !== 'none');

@@ -1,0 +1,50 @@
+// BeforeAfter (docs/design/components/BeforeAfter): the proof that the image got lighter without
+// getting ugly. Two stacked images, the one on top (the result) clipped by --pos; an invisible
+// range input over everything takes the pointer, touch and the arrow keys. The box takes the shape
+// of the real image (--ba-ratio), so it never changes size when the pictures finish loading and the
+// Download above it never moves. It starts at 50 %.
+import { useState } from 'preact/hooks';
+import Icon from '../../icons/Icon.tsx';
+import chevronIcon from '../../../docs/design/assets/Icons/chevron-right.svg?raw';
+
+export interface BeforeAfterProps {
+  /** Name of the range: "Compare before and after". */
+  label: string;
+  /** Displayable pictures: the original (or a decoded preview of it) and the result. */
+  beforeUrl: string;
+  afterUrl: string;
+  /** "Before · 2.4 MB" and "After · 780 KB". */
+  beforeTag: string;
+  afterTag: string;
+  /** Display size of the picture, for the shape of the box. */
+  width: number;
+  height: number;
+  /** The result picture cannot be shown in this browser (AVIF in a WebKit that cannot read it). */
+  onBroken?: () => void;
+}
+
+export default function BeforeAfter({ label, beforeUrl, afterUrl, beforeTag, afterTag, width, height, onBroken }: BeforeAfterProps) {
+  const [position, setPosition] = useState(50);
+  const ratio = width > 0 && height > 0 ? (width / height).toFixed(4) : '1.3333';
+  return (
+    <div class="fo-ba" style={`--pos:${position}%;--ba-ratio:${ratio}`}>
+      <img src={beforeUrl} alt="" decoding="async" />
+      <img class="fo-ba__after" src={afterUrl} alt="" decoding="async" onError={onBroken} />
+      <span class="fo-ba__tag fo-ba__tag--l">{beforeTag}</span>
+      <span class="fo-ba__tag fo-ba__tag--r">{afterTag}</span>
+      <input
+        class="fo-ba__range"
+        type="range"
+        min={0}
+        max={100}
+        value={position}
+        aria-label={label}
+        onInput={(event) => setPosition(Number(event.currentTarget.value))}
+      />
+      <span class="fo-ba__line" />
+      <span class="fo-ba__knob">
+        <Icon raw={chevronIcon} class="fo-icon--sm" />
+      </span>
+    </div>
+  );
+}

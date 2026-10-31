@@ -4,6 +4,26 @@ import tailwindcss from '@tailwindcss/vite';
 import { platformFiles } from './src/platform/build-files.ts';
 import { SITE_ORIGIN } from './src/platform/site.ts';
 
+// Everything the image tool pages share in the browser lands in one chunk, so a tool page loads two JS
+// files: its own mount entry (the tool's Panel, options and operation) and this chunk (the Preact runtime,
+// the shared island, the FileCard, the icons, the formatting and the events). The lazy parts are left out
+// on purpose: engine-client.ts and pdf-client.ts (Comlink and the workers load on the first file or when
+// the pointer enters the zone), and the engine itself, which only the workers import. DECISOES § 23 and § 59.
+const SHARED_ISLAND = new RegExp(
+  [
+    '[\\\\/]node_modules[\\\\/]preact[\\\\/]',
+    'preload-helper',
+    '[\\\\/]src[\\\\/]tools[\\\\/]image[\\\\/](?!engine-client|pdf-client)',
+    '[\\\\/]src[\\\\/]components[\\\\/]FileCard',
+    '[\\\\/]src[\\\\/]icons[\\\\/](?:Icon\\.tsx|svg\\.ts)',
+    '[\\\\/]docs[\\\\/]design[\\\\/]assets[\\\\/]Icons[\\\\/]',
+    '[\\\\/]src[\\\\/]i18n[\\\\/]format\\.ts',
+    '[\\\\/]src[\\\\/]analytics[\\\\/]',
+    '[\\\\/]src[\\\\/]platform[\\\\/]site\\.ts',
+    '[\\\\/]src[\\\\/]oli[\\\\/]poses\\.ts',
+  ].join('|'),
+);
+
 export default defineConfig({
   site: SITE_ORIGIN,
   output: 'static',
@@ -16,8 +36,7 @@ export default defineConfig({
     worker: { format: 'es' },
     build: {
       rolldownOptions: {
-        // One shared chunk for the Preact runtime, so a tool page loads two JS files (DECISOES § 23).
-        output: { codeSplitting: { groups: [{ name: 'preact-runtime', test: /[\\/]node_modules[\\/]preact[\\/]|preload-helper/ }] } },
+        output: { codeSplitting: { groups: [{ name: 'island', test: SHARED_ISLAND }] } },
       },
     },
   },

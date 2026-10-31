@@ -4,7 +4,8 @@
 // strictly necessary needs consent in the EU (ePrivacy art. 5(3)), and the site does not know where the
 // person is. Without Accept nothing is written and the line never shows; a count left from an earlier
 // Accept is erased (consent withdrawn). "Don't show again" is the person's own request and is always
-// kept. A use is a file that came out smaller. With ads on, someone who blocks them sees it on the 1st.
+// kept. A use is a batch with at least one real output (smaller, converted, turned, cropped, resized or
+// put into a PDF), and the count is one for all the image tools in this browser. With ads on, someone who blocks them sees it on the 1st.
 import { CONSENT_STORAGE_KEY } from '../../analytics/consent.ts';
 
 export const COFFEE_KEY = 'fo-coffee';

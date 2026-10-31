@@ -44,6 +44,7 @@ export default {
     tooLarge: '{name} is bigger than this browser can handle here. Try a smaller version of the image.',
     chooseAnother: 'Choose other files',
     some: "{count} files couldn't be read; the rest are ready.",
+    all: "Oli couldn't read any of these {count} files. The list below says why.",
   },
   result: {
     download: 'Download',
@@ -56,6 +57,7 @@ export default {
     files: 'Images',
     count: '{count} images',
     unchanged: 'This image was already optimized, so Oli kept the original image, without the photo metadata.',
+    unchangedMany: 'These images were already optimized, so Oli kept the original images, without the photo metadata.',
     cannotEncode: "This browser can't save {format} files, so Oli kept the original image, without the photo metadata.",
     notes: {
       flattened: 'Transparent areas became white, because JPG has no transparency.',

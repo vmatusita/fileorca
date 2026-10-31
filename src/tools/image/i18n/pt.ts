@@ -43,6 +43,7 @@ export default {
     tooLarge: '{name} é maior do que este navegador consegue processar aqui. Tente uma versão menor da imagem.',
     chooseAnother: 'Escolher outros arquivos',
     some: '{count} arquivos não puderam ser lidos; o resto está pronto.',
+    all: 'A Oli não conseguiu ler nenhum destes {count} arquivos. A lista abaixo diz o motivo.',
   },
   result: {
     download: 'Baixar',
@@ -55,6 +56,7 @@ export default {
     files: 'Imagens',
     count: '{count} imagens',
     unchanged: 'Essa imagem já estava otimizada, então a Oli manteve a imagem original, sem os metadados da foto.',
+    unchangedMany: 'Essas imagens já estavam otimizadas, então a Oli manteve as imagens originais, sem os metadados da foto.',
     cannotEncode: 'Este navegador não consegue salvar arquivos {format}, então a Oli manteve a imagem original, sem os metadados da foto.',
     notes: {
       flattened: 'As áreas transparentes ficaram brancas, porque o JPG não tem transparência.',

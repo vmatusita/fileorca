@@ -1,6 +1,7 @@
 ---
 // Faq (docs/design/components/Faq): native <details>, first question open. No FAQPage schema.
 import Icon from './Icon.astro';
+import RichText from './RichText.astro';
 
 interface Props {
   items: { q: string; a: string }[];
@@ -11,7 +12,7 @@ const { items } = Astro.props;
   {items.map((item, index) => (
     <details open={index === 0}>
       <summary>{item.q}<Icon name="chevron-down" /></summary>
-      <div><p>{item.a}</p></div>
+      <div><p><RichText text={item.a} /></p></div>
     </details>
   ))}
 </div>

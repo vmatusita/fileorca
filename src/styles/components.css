@@ -156,6 +156,7 @@
 .fo-level__pct { font: 600 40px/44px var(--fo-font-display); }
 .fo-level__msg { font: 500 20px/26px var(--fo-font-display); }
 .fo-level__count { font-size: 15px; color: var(--ink-muted); }
+.fo-level__msg--busy { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
 .fo-level__oli { position: absolute; left: 50%; top: -62px; width: 72px; height: 72px; translate: 40px 0; }
 .fo-bar { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
 .fo-bar > i { position: absolute; inset: 0; border-radius: inherit; background: var(--brand); transform-origin: left center; transform: scaleX(var(--value, 0)); transition: transform var(--dur-base) var(--ease-out); }
@@ -186,6 +187,8 @@
 .fo-result__support .fo-btn { margin-bottom: var(--lip); }
 .fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
 @media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
+/* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
+.fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
 @media (min-width: 768px) {
   .fo-result { padding: var(--space-6); gap: var(--space-5); }
   .fo-result__head { min-height: 96px; }
@@ -206,10 +209,19 @@
 .fo-file__actions .fo-btn { margin-bottom: 0; }
 .fo-file[data-state="error"] { background: var(--danger-soft); border-color: var(--danger); }
 .fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
-.fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: center; gap: var(--space-1); }
-.fo-file__err .fo-icon { width: 16px; height: 16px; }
+.fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: flex-start; gap: var(--space-1); }
+.fo-file__err .fo-icon { width: 16px; height: 16px; margin-top: 2px; }
 .fo-file .fo-bar { margin-top: 6px; }
 .fo-filelist { display: grid; gap: var(--space-2); }
+/* Queue extras (the design has no state for them: tokens only, DECISOES § 59). The thumbnail is the toggle that picks
+   the file the comparison or the crop box shows; the picked row gets the thick brand border (shape, not colour alone). */
+.fo-queue { display: grid; gap: var(--space-3); }
+.fo-queue__more { justify-self: center; }
+.fo-file__pick { appearance: none; box-sizing: border-box; display: block; width: 52px; height: 52px; padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
+.fo-file__pick .fo-file__thumb { display: grid; }
+.fo-file[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-3) - 1px); }
+.fo-file[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
+.fo-file__err > span { overflow-wrap: anywhere; }
 
 /* ---------- OptionGroup ---------- */
 .fo-field { display: grid; gap: var(--space-2); border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -235,6 +247,69 @@
 .fo-says__bubble small { display: block; margin-top: 2px; font: 400 15px/22px var(--fo-font-text); color: var(--ink-muted); }
 .fo-says--error .fo-says__bubble { background: var(--danger-soft); border-color: var(--danger); }
 .fo-says--info .fo-says__bubble { background: var(--brand-soft); }
+
+/* ---------- NumberField: the fields of Resize and Crop (inputmode decimal, never type=number) ---------- */
+.fo-input { box-sizing: border-box; display: flex; align-items: center; min-height: var(--control-h); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); overflow: hidden; }
+.fo-input:focus-within { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-input input, .fo-input select { flex: 1; min-width: 0; height: 100%; min-height: calc(var(--control-h) - 4px); border: 0; background: transparent; color: var(--ink); padding: 0 var(--space-4); font: 600 18px/24px var(--fo-font-text); font-variant-numeric: tabular-nums; outline: none; }
+.fo-input__affix { padding: 0 var(--space-4); align-self: stretch; display: grid; place-items: center; background: var(--surface-sunken); color: var(--ink-muted); font: 600 16px/20px var(--fo-font-text); }
+.fo-input__affix:first-child { border-right: var(--stroke-hair) solid var(--hairline); }
+.fo-input__affix:last-child { border-left: var(--stroke-hair) solid var(--hairline); }
+.fo-field[data-state="error"] .fo-input { border-color: var(--danger); border-width: var(--stroke-3); }
+.fo-field__error { margin: 0; display: flex; gap: var(--space-1); align-items: center; color: var(--danger); font: 600 14px/20px var(--fo-font-text); }
+.fo-field__error .fo-icon { width: 18px; height: 18px; }
+.fo-tag { display: inline-block; padding: 0 var(--space-2); border-radius: var(--radius-xs); background: var(--surface-sunken); color: var(--ink-muted); font: 700 11px/18px var(--fo-font-text); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 2px; }
+/* Fields side by side where they fit (width and height; x, y, width and height of the crop box). */
+.fo-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3) var(--space-4); align-items: start; }
+/* A label above its field sits one gap away (the legend of a group keeps its own margin). */
+.fo-field > .fo-field__label:is(label) { margin-bottom: 0; }
+
+/* ---------- BeforeAfter: the box takes the shape of the real picture (--ba-ratio), so nothing moves when it loads ---------- */
+.fo-ba { --pos: 50%; --ba-ratio: 1.3333; --ba-max: 360px; position: relative; box-sizing: border-box; justify-self: center; width: min(100%, calc(var(--ba-max) * var(--ba-ratio))); aspect-ratio: var(--ba-ratio); border-radius: var(--radius-lg); overflow: hidden; border: var(--stroke-2) solid var(--stroke); background: var(--surface-sunken); user-select: none; }
+.fo-deep .fo-ba { border-color: var(--surface); }
+.fo-ba img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.fo-ba__after { clip-path: inset(0 0 0 var(--pos)); }
+.fo-ba__line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 3px; translate: -50% 0; background: var(--surface); box-shadow: 0 0 0 1px var(--stroke); pointer-events: none; }
+.fo-ba__knob { position: absolute; top: 50%; left: var(--pos); width: 48px; height: 48px; translate: -50% -50%; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: var(--stroke-2) solid var(--stroke); box-shadow: var(--shadow-lip); pointer-events: none; }
+.fo-ba__range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; touch-action: pan-y; }
+.fo-ba__range:focus-visible ~ .fo-ba__knob { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-ba__tag { position: absolute; top: var(--space-3); padding: 4px var(--space-3); border-radius: var(--radius-pill); background: var(--deep); color: var(--on-deep); font: 600 13px/18px var(--fo-font-text); pointer-events: none; }
+.fo-ba__tag--l { left: var(--space-3); }
+.fo-ba__tag--r { right: var(--space-3); }
+
+/* ---------- Crop editor (the design has none: tokens only, DECISOES § 59) ----------
+   .fo-crop         the picture and the box; --x --y --w --h are percentages of the picture, --crop-ratio its shape
+   .fo-crop__stage  clips the picture and the scrim, so the handles can reach past the edge and keep a 48px target
+   .fo-crop__scrim  four slabs of the deep sea around the box (opacity, not a shadow)
+   .fo-crop__box    the crop box (a focusable group: arrows move it, Shift with the arrows resizes it)
+   .fo-crop__handle one per corner, a 20px dot inside a 48px target */
+/* The page keeps scrolling under a finger that is not on the box or a handle (those two stop it). */
+.fo-crop { --crop-max: 420px; --crop-ratio: 1.3333; --x: 0%; --y: 0%; --w: 100%; --h: 100%; position: relative; justify-self: center; width: min(100%, calc(var(--crop-max) * var(--crop-ratio))); aspect-ratio: var(--crop-ratio); user-select: none; }
+/* The edge is drawn over the picture (::after), so the picture and the box share one frame and the percentages match to the pixel. */
+.fo-crop__stage { position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface-sunken); }
+.fo-crop__stage::after { content: ""; position: absolute; inset: 0; border: var(--stroke-2) solid var(--stroke); border-radius: inherit; pointer-events: none; }
+.fo-crop__img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.fo-crop__scrim { position: absolute; background: var(--deep); opacity: 0.6; pointer-events: none; }
+.fo-crop__scrim[data-side="top"] { left: 0; right: 0; top: 0; height: var(--y); }
+.fo-crop__scrim[data-side="bottom"] { left: 0; right: 0; top: calc(var(--y) + var(--h)); bottom: 0; }
+.fo-crop__scrim[data-side="left"] { left: 0; width: var(--x); top: var(--y); height: var(--h); }
+.fo-crop__scrim[data-side="right"] { left: calc(var(--x) + var(--w)); right: 0; top: var(--y); height: var(--h); }
+.fo-crop__box { position: absolute; box-sizing: border-box; left: var(--x); top: var(--y); width: var(--w); height: var(--h); border: var(--stroke-2) solid var(--surface); cursor: move; touch-action: none; }
+.fo-crop__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-crop__handle { position: absolute; box-sizing: border-box; display: grid; place-items: center; width: var(--tap-min); height: var(--tap-min); margin: 0; padding: 0; border: 0; background: none; translate: -50% -50%; touch-action: none; }
+.fo-crop__handle::after { content: ""; width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
+.fo-crop__handle:focus-visible { outline: none; }
+.fo-crop__handle:focus-visible::after { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-crop__handle[data-corner="nw"] { left: 0; top: 0; cursor: nwse-resize; }
+.fo-crop__handle[data-corner="ne"] { left: 100%; top: 0; cursor: nesw-resize; }
+.fo-crop__handle[data-corner="sw"] { left: 0; top: 100%; cursor: nesw-resize; }
+.fo-crop__handle[data-corner="se"] { left: 100%; top: 100%; cursor: nwse-resize; }
+
+/* ---------- Hub band: the top of /image-tools/, the category soft colour as a fill (text is always ink) ---------- */
+.fo-hubband { box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-xl); background: var(--fo-cat-soft); color: var(--ink); display: grid; gap: var(--space-2); }
+.fo-hubband .fo-muted { color: var(--ink); }
+.fo-eyebrow { font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-hubband .fo-eyebrow { color: var(--ink); }
 
 /* ---------- NextStepChips ---------- */
 .fo-next { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
@@ -263,7 +338,7 @@
 .fo-faq summary .fo-icon { width: 32px; height: 32px; padding: 4px; box-sizing: border-box; border-radius: 50%; border: var(--stroke-2) solid var(--stroke); transition: transform var(--dur-base) var(--ease-out); }
 .fo-faq details[open] summary .fo-icon { transform: rotate(180deg); background: var(--brand-soft); }
 .fo-faq details > div { padding: 0 var(--space-10) var(--space-4) 0; color: var(--ink); max-width: var(--fo-measure); }
-.fo-faq details > div p { margin: 0 0 var(--space-2); }
+.fo-faq details > div p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
 
 /* ---------- ToolCard grid ---------- */
 .fo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }

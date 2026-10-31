@@ -1,0 +1,107 @@
+---
+// The tool page mold (docs/design/components/ToolPage; prompt F2 decision 9), shared by the ten image
+// tools and their presets: breadcrumb, H1 + PrivacySeal, the island, the first AdSlot (150px clearance
+// built in), then the blocks the content gate checks (data-content: how, specs, faq, privacy, related)
+// and the rail AdSlot (from 1280px, not sticky). The tool's page component fills two slots:
+//   panel   the tool's own Panel (server-rendered; its mount.ts hydrates it from data-props)
+//   default the <script> that imports that mount.ts. It must live in the tool's own component so
+//           Astro bundles one entry per tool (DECISOES § 23); here it would be one entry for all.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import PrivacySeal from '../../components/PrivacySeal.astro';
+import Faq from '../../components/Faq.astro';
+import RichText from '../../components/RichText.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import AdSlot from '../../ads/AdSlot.astro';
+import { routeById, type Lang } from '../../i18n/routes.ts';
+import { TEXTS } from '../../i18n/texts.ts';
+import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
+import { PANEL_POSES } from './Oli.tsx';
+import { imageToolTexts } from './texts.ts';
+import { blurbOf, crumbsFor, presetRows, relatedFor } from './page.ts';
+import type { ImagePageId } from './registry.ts';
+import type { ImagePanelData } from './types.ts';
+
+interface Props {
+  id: ImagePageId;
+  lang: Lang;
+  /** The same object the Panel was rendered with: it is the hydration contract (data-props). */
+  panel: ImagePanelData;
+}
+const { id, lang, panel } = Astro.props;
+const route = routeById(id);
+const t = imageToolTexts(id, lang);
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const area = route.adArea ?? 'arquivos';
+const crumbs = crumbsFor(id, lang);
+const related = relatedFor(id, lang);
+const presets = presetRows(id, lang);
+const name = blurbOf(id, lang)?.name ?? t.h1;
+const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={title}
+  description={t.description}
+  withAds
+  oli={PANEL_POSES}
+  schema={[breadcrumbLd(crumbs), webApplicationLd(name, t.description, path, lang)]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-top">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <PrivacySeal text={common.seal} />
+  </div>
+  <div id="fo-tool-root" data-props={JSON.stringify(panel)}><slot name="panel" /></div>
+  <slot />
+  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
+    <h2 id="how">{t.howHeading}</h2>
+    <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+  </section>
+  <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
+    <h2 id="specs">{t.specsHeading}</h2>
+    <table class="fo-table">
+      <caption class="fo-sr">{t.specs.caption}</caption>
+      <thead><tr><th scope="col">{t.specs.head[0]}</th><th scope="col">{t.specs.head[1]}</th></tr></thead>
+      <tbody>
+        {t.specs.rows.map(([detail, what]) => <tr><th scope="row">{detail}</th><td><RichText text={what} /></td></tr>)}
+      </tbody>
+    </table>
+    {t.presets && presets.length > 0 && (
+      <>
+        <h3 class="fo-h3" id="presets">{t.presets.heading}</h3>
+        <table class="fo-table">
+          <caption class="fo-sr">{t.presets.caption}</caption>
+          <thead><tr><th scope="col">{t.presets.head[0]}</th><th scope="col">{t.presets.head[1]}</th></tr></thead>
+          <tbody>
+            {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.name}</a></th><td>{preset.description}</td></tr>)}
+          </tbody>
+        </table>
+      </>
+    )}
+  </section>
+  <section class="fo-section" data-content="faq" aria-labelledby="faq">
+    <h2 id="faq">{t.faqHeading}</h2>
+    <Faq items={t.faq} />
+  </section>
+  <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
+    <h2 id="privacy-note">{t.privacyHeading}</h2>
+    <p>{t.privacyNote}</p>
+  </section>
+  <section class="fo-section" data-content="related" aria-labelledby="related">
+    <h2 id="related">{t.relatedHeading}</h2>
+    {related.length > 0 ? (
+      <ul class="fo-grid">
+        {related.map((card) => (
+          <li><ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon} /></li>
+        ))}
+      </ul>
+    ) : (
+      <p class="fo-prose"><a href={homePath(lang)}>{TEXTS[lang].home.toolsHeading}</a></p>
+    )}
+  </section>
+  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
+</BaseLayout>

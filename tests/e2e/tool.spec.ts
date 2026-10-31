@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { ROUTES } from '../../src/i18n/routes.ts';
+import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
 import { dataLayer, dismissCookies, downloadBytes, hydrated } from './lib/page.ts';
 
 const GPS_PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 
-test.describe('Compress image (motor provisório)', () => {
+test.describe('Compress image (shared island)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/compress-image/');
     await hydrated(page);
@@ -107,7 +109,7 @@ test.describe('Compress image (motor provisório)', () => {
     await expect(alert).toContainText("Oops, Oli couldn't read this file", { timeout: 30_000 });
     await expect(alert).toContainText('broken.jpg');
     await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Choose another file' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Choose other files' })).toBeVisible();
   });
 
   test('an unsupported type is refused with the same message', async ({ page }) => {
@@ -144,10 +146,17 @@ test.describe('Compress image (motor provisório)', () => {
   test('the result offers the next step and Start over returns to the drop zone', async ({ page }) => {
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', '/');
+    // 2 to 4 chips, each one to a tool that exists (DECISOES § 58): the first leads to a page of the site.
+    const chips = page.locator('nav.fo-next a.fo-chip');
+    expect(await chips.count()).toBeGreaterThanOrEqual(2);
+    expect(await chips.count()).toBeLessThanOrEqual(4);
+    const href = await chips.first().getAttribute('href');
+    const target = ROUTES.find((route) => route.paths.en === href);
+    expect(target, `${href} is a page of the route map`).toBeDefined();
+    expect(IMAGE_PAGES['compress-image'].next).toContain(target?.id);
     await page.getByRole('button', { name: 'Start over' }).click();
     await expect(page.locator('.fo-drop')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Choose image' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Choose images' })).toBeFocused();
   });
 });
 
@@ -158,5 +167,7 @@ test('the tool works in Portuguese and Spanish too', async ({ page }) => {
     await dismissCookies(page);
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toContainText(done, { timeout: 30_000 });
+    // The other image tools exist only in English, so the only chip leads to the home of the language (DECISOES § 27).
+    await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', path.startsWith('/pt/') ? '/pt/' : '/es/');
   }
 });

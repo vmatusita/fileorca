@@ -10,13 +10,14 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 
 // Token values: deep, on-deep, on-deep-muted, brand (opaque icon ground), on-cat (ink of the tool icon),
-// turquesa (image category) and the dark-theme water (the porthole behind the Oli).
+// turquesa and coral (image and PDF categories) and the dark-theme water (the porthole behind the Oli).
 const DEEP = '#0C2B5E';
 const ON_DEEP = '#F7FAFD';
 const ON_DEEP_MUTED = '#B4C3D8';
 const BRAND = '#0B63F6';
 const ON_CAT = '#0F1B2D';
 const TURQUESA = '#14B8A6';
+const CORAL = '#FF6B57';
 const WATER_DEEP = '#14407E';
 
 const designAsset = (...parts: string[]): string => readFileSync(join(process.cwd(), 'docs', 'design', 'assets', ...parts), 'utf8').trim();
@@ -61,10 +62,15 @@ function assets() {
   };
   return cache;
 }
-let compressIcon: string | undefined;
-function toolIcon(): string {
-  compressIcon ??= dataUri(designAsset('Icons', 'compress.svg').replace(/stroke="#[0-9A-Fa-f]{6}"/, `stroke="${ON_CAT}"`));
-  return compressIcon;
+const toolIcons = new Map<string, string>();
+/** An icon of docs/design/assets/Icons drawn in the ink of the tool tile (on-cat). */
+function toolIcon(name: string): string {
+  let icon = toolIcons.get(name);
+  if (!icon) {
+    icon = dataUri(designAsset('Icons', `${name}.svg`).replace(/stroke="#[0-9A-Fa-f]{6}"/, `stroke="${ON_CAT}"`));
+    toolIcons.set(name, icon);
+  }
+  return icon;
 }
 
 type Node = { type: string; props: Record<string, unknown> };
@@ -110,19 +116,25 @@ async function titleSize(title: string): Promise<{ size: number; breakWord: bool
 }
 
 /** The tool icon in its rounded square, rimmed like the Oli (Espuma rim, ink line). */
-function toolTile(): Node {
+function toolTile(tool: OgTool): Node {
   return h('div', {
     display: 'flex', position: 'absolute', left: PORTHOLE_X - 30, top: PORTHOLE_Y + PORTHOLE - 140, width: 156, height: 156, borderRadius: 40,
     background: ON_DEEP, padding: 6, transform: 'rotate(-7deg)',
   }, [
     h('div', {
       display: 'flex', alignItems: 'center', justifyContent: 'center', width: 144, height: 144, borderRadius: 34,
-      background: TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
-    }, [img(toolIcon(), 88, 88)]),
+      background: tool.category === 'pdf' ? CORAL : TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
+    }, [img(toolIcon(tool.icon), 88, 88)]),
   ]);
 }
 
-export async function ogPng(title: string, subtitle: string, options: { tool?: 'compress-image' } = {}): Promise<Buffer> {
+/** The tool icon beside the Oli: the name of an icon of the design system and the category colour of its tile. */
+export interface OgTool {
+  icon: string;
+  category: 'image' | 'pdf';
+}
+
+export async function ogPng(title: string, subtitle: string, options: { tool?: OgTool } = {}): Promise<Buffer> {
   const { logo, oli } = assets();
   const { size, breakWord } = await titleSize(title);
   const tree = h('div', {
@@ -133,7 +145,7 @@ export async function ogPng(title: string, subtitle: string, options: { tool?: '
       borderRadius: PORTHOLE / 2, background: WATER_DEEP,
     }),
     img(oli, OLI, OLI, { position: 'absolute', left: PORTHOLE_X + (PORTHOLE - OLI) / 2, top: PORTHOLE_Y + (PORTHOLE - OLI) / 2 }),
-    ...(options.tool ? [toolTile()] : []),
+    ...(options.tool ? [toolTile(options.tool)] : []),
     img(logo, 240, 72, { position: 'absolute', left: PAD - 14, top: 44 }),
     h('div', {
       display: 'flex', flexDirection: 'column', position: 'absolute', left: PAD, top: 150, width: TEXT_W, height: H - 150 - 64,

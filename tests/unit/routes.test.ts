@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { LANGS, ROUTES, languagesOf, pageFileFor, textFilesFor } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
+import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
 import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
@@ -15,16 +16,23 @@ function pageFiles(dir = 'src/pages'): string[] {
 }
 
 describe('mapa de rotas', () => {
-  it('has the routes of the F1a, each equivalent in en, pt and es', () => {
-    expect(ROUTES.map((route) => route.id)).toEqual(['home', 'compress-image', 'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found']);
-    for (const route of ROUTES) expect(languagesOf(route)).toEqual([...LANGS]);
+  it('has the routes of the site, each equivalent in en, pt and es except the English-only image pages', () => {
+    expect(ROUTES.map((route) => route.id)).toEqual([
+      'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
+      'avif-to-jpg', 'convert-to-webp', 'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
+    ]);
+    // Only Compress image is translated; the other tools, the presets and the hub exist in English only (DECISOES § 58).
+    const englishOnly = new Set(ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id));
+    expect(englishOnly.size).toBe(13);
+    for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
   it('uses the slugs of DECISOES § 4, English at the root, always with a trailing slash', () => {
     expect(ROUTES.find((route) => route.id === 'support')?.paths).toEqual({ en: '/support/', pt: '/pt/apoie/', es: '/es/apoyo/' });
     expect(ROUTES.find((route) => route.id === 'about')?.paths).toEqual({ en: '/about/', pt: '/pt/sobre/', es: '/es/acerca-de/' });
     for (const route of ROUTES) {
-      for (const lang of LANGS) {
+      for (const lang of languagesOf(route)) {
         const path = route.paths[lang] ?? '';
         if (route.id === 'not-found') expect(path).toMatch(/404\.html$/);
         else expect(path.endsWith('/')).toBe(true);
@@ -50,7 +58,7 @@ describe('mapa de rotas', () => {
   it('points every route at its view and text files', () => {
     for (const route of ROUTES) {
       expect(existsSync(route.view), route.view).toBe(true);
-      for (const lang of LANGS) for (const file of textFilesFor(route, lang)) expect(existsSync(file), file).toBe(true);
+      for (const lang of languagesOf(route)) for (const file of textFilesFor(route, lang)) expect(existsSync(file), file).toBe(true);
     }
   });
 
@@ -70,7 +78,8 @@ describe('mapa de rotas', () => {
     expect(TEXTS.en.support.h1).toBe('Free tools, made by one person');
     expect(TEXTS.es['not-found'].h1).toBe('Esta página se fue nadando.');
     for (const lang of LANGS) {
-      const text = JSON.stringify(TEXTS[lang]);
+      // The texts of the image tools and presets live apart from TEXTS (src/tools/image/texts.ts): they get the same scan.
+      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)]);
       expect(text).not.toMatch(/→|↔|\bup to 50\b/);
       expect(text).not.toMatch(/\b(seamless|effortless|supercharge|AI-powered|revolutionary|best-in-class)\b/i);
     }
