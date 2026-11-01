@@ -28,10 +28,10 @@ const texts: PdfToolTexts<DeleteTexts> = {
         'The new file',
         'Oli copies the pages you keep into a new PDF. The deleted pages, and what only they used, are left out, so the file gets smaller.',
       ],
-      ['Forms', 'Form fields on the pages you keep stay. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
+      ['Forms', 'Form fields on the remaining pages stay. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
       [
         'Bookmarks and links',
-        'Bookmarks that point to pages you keep stay, and so do links between those pages. Links to the web stay. Links to a deleted page are removed.',
+        'Bookmarks that point to the remaining pages stay, and so do links between those pages. Links to the web stay. Links to a deleted page are removed.',
       ],
       [
         'Details kept',
@@ -55,7 +55,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
     },
     {
       q: 'Will forms, links and bookmarks survive?',
-      a: 'Those on the pages you keep do. Form fields stay, bookmarks that point to kept pages stay, and so do links to the web and links between kept pages. Links to a page you deleted are removed, because there is nowhere left for them to go.',
+      a: 'Yes, on the remaining pages. Form fields stay, bookmarks that point to kept pages stay, and so do links to the web and links between kept pages. Links to a page you deleted are removed, because there is nowhere left for them to go.',
     },
     {
       q: 'Why is the new PDF smaller?',
