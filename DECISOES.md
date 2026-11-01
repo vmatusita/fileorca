@@ -821,3 +821,33 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - Fica como risco registrado, sem contorno. Achar a causa pede mudar o diagnóstico (`scripts/lib/disco.ts`), que fica fora desta ficha.
 - **Por quê:** a ADR-003 manda dividir mais, num ajuste, quando uma parte passa de uns 700 s, e a § 105 propôs o terceiro `--shard`. Feito antes da F4, o ajuste deixa a PR da F4 sem mexer no `.github/`, e ela mescla sozinha.
 - **Alternativa:** mover a matriz para um projeto só dela (§ 105), o que mexeria nos testes. A outra seria uma quarta parte por contagem, que manteria a matriz quase inteira na última.
+
+## § 109 · O diagnóstico de disco olha mais fundo quando o `/` cai, e o `find` do fim deixa de mentir (ajuste-ci-disco, 31/out/2026)
+
+- **Contexto:** na run 41250641460, tentativa 1, o `/` da parte `playwright (webkit 2 de 3)` caiu de 10 897 MB livres para 609 MB em 60 s, durante o `design.spec.ts`, e não voltou até o fim (§ 108). O diagnóstico de então só olhava `.`, `/tmp`, `/dev/shm` e `$HOME` com o `du`, além de um `find / -xdev -size +200M`.
+- **Correção da § 108:** a frase "o `find` de arquivos acima de 200 MB não achou o espaço" não vale. Aquele `find` nunca terminou.
+  - Em todas as partes das execuções 41231605642, 41236243545, 41241805727 e 41250641460, o "(nenhum)" saiu exatos 20,0 s depois do título, que era o timeout do `execSync`.
+  - O timeout matava só o `sh`, e o `sort` só imprime quando o `find` termina. Por isso o resultado vinha vazio e o `find` seguia órfão.
+  - Desde a § 90, o passo custava 20 s em cada parte e não dizia nada.
+- **Decisão:** o `scripts/lib/disco.ts` continua só lendo e só no Linux do CI.
+  - **Busca funda.** Roda quando o `/` perde mais de 2048 MB (no máximo duas vezes durante a execução, e de novo no fim se o espaço não voltou). Ela mostra:
+    - os arquivos apagados e ainda abertos no `/`, lidos do `/proc`, em blocos de disco, com os processos que os seguram e quantos processos não deu para ler, deste usuário e de outros;
+    - os arquivos acima de 20 MB gravados desde o início, começando por `/tmp`, `/home` e `/var`;
+    - o `du` de `/var/log`, `/var/tmp`, `/var/crash`, `/var/cache` e dos dumps de processo, e o `core_pattern`;
+    - os maiores processos.
+  - **A linha de base volta a subir** quando o espaço volta, então uma segunda queda também aparece.
+  - **O `find`.** Roda com `timeout -k 5` e `nice -n 19` dentro do próprio comando e escreve "(interrompido em N s, resultado parcial)" ou "(completo em N s)". O do fim olha só `/tmp`, `/var` e `/home`, onde uma execução grava, e passou a terminar em 2 a 4 s.
+  - **Nenhum erro do diagnóstico derruba a parte.** Cada seção da busca tem o próprio `try`.
+- **O que não mudou:** nenhum teste, portão, limiar, timeout, `retries` ou número de workers, nem o `.github/`.
+- **Teste novo:** `tests/unit/disco.test.ts`, com 8 testes.
+  - Sete testam as partes puras: o `df`, o gatilho com a linha de base, o resumo dos arquivos abertos, o `find` e o rótulo de corte.
+  - O último abre e apaga um arquivo e o acha no `/proc`. No Linux, ele roda de verdade no Vitest do job `verificar` do CI, e lá passou. Nos outros sistemas, o mesmo teste afirma que não há `/proc`, então ele nunca aparece como pulado.
+- **Medido** (PR #10, run 41255949928, com o WebKit em três partes da § 108):
+  - A parte 2 de 3 rodou cinco vezes: a primeira tentativa e mais quatro repetições só desse job.
+  - Todas passaram, com o mínimo entre 10 885 e 10 898 MB livres, e nenhuma busca funda disparou.
+  - Somadas as duas tentativas da run 41250641460, a queda apareceu 1 vez em 7 execuções da parte 2 de 3.
+- **Causa:** segue desconhecida. O que já dá para dizer:
+  - A queda não é de arquivo comum embaixo de `.` ou de `$HOME`.
+  - Os candidatos são um arquivo apagado e ainda aberto, ou um arquivo numa pasta que o `du` não olhava, como `/var/log` ou os dumps. A busca funda mostra os dois na próxima vez.
+- **Por quê:** o cartão desta run pediu o diagnóstico e a medida. Um `find` que estoura o tempo e diz "(nenhum)" engana quem lê o log.
+- **Alternativa:** um passo no workflow que libera disco ou junta mais dados, mas isso mexe no `.github/` e é do Victor (§ 90). A outra seria rodar o diagnóstico fundo em toda parte, a custo de até uns 60 s de `find` em cada uma.
