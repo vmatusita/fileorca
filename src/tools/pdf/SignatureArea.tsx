@@ -310,7 +310,8 @@ export default function SignatureArea(props: SignatureAreaProps) {
             class="fo-sign__file"
             type="file"
             accept="image/png,image/jpeg"
-            aria-describedby={`${id}-upload-help`}
+            aria-invalid={uploadError ? 'true' : undefined}
+            aria-describedby={uploadError ? `${id}-upload-error ${id}-upload-help` : `${id}-upload-help`}
             onChange={async (event) => {
               const file = event.currentTarget.files?.[0];
               event.currentTarget.value = '';
@@ -320,8 +321,14 @@ export default function SignatureArea(props: SignatureAreaProps) {
               onImage(made);
             }}
           />
+          {/* The failure is an alert of its own, tied to the input (DECISOES § 177): said once, the help stays as it was. */}
+          {uploadError && (
+            <p class="fo-field__error" id={`${id}-upload-error`} role="alert">
+              {texts.uploadError}
+            </p>
+          )}
           <p class="fo-field__help" id={`${id}-upload-help`}>
-            {uploadError ? texts.uploadError : texts.uploadHelp}
+            {texts.uploadHelp}
           </p>
         </div>
       )}

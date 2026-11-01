@@ -1,8 +1,8 @@
 // The password field (F5a, decision 6; DECISOES § 152): the NumberField's box with a "Show" toggle button
 // (aria-pressed, aria-controls) that switches the input between password and text. The label is visible, the rule is
-// a help line, and the error says the rule again, tied by aria-describedby with aria-invalid. `autocomplete` is
-// new-password in Protect PDF and current-password in Unlock PDF. Nothing typed here is kept or sent anywhere: it lives
-// in the panel's state until the page closes.
+// a help line, and the error says the rule again, tied by aria-describedby with aria-invalid, in an alert so it is
+// said when it shows (DECISOES § 177). `autocomplete` is new-password in Protect PDF and current-password in Unlock
+// PDF. Nothing typed here is kept or sent anywhere: it lives in the panel's state until the page closes.
 import { useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -55,7 +55,7 @@ export default function PasswordField({ id, label, value, onInput, autocomplete,
         </button>
       </div>
       {error && (
-        <p class="fo-field__error" id={errorId}>
+        <p class="fo-field__error" id={errorId} role="alert">
           <Icon raw={alertIcon} />
           {error}
         </p>

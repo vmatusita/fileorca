@@ -107,7 +107,11 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
             onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
             onSelectNone={() => update({ picked: [] })}
           />
-          {props.showErrors && state.picked.length === 0 && <p class="fo-field__error">{texts.pickNone}</p>}
+          {props.showErrors && state.picked.length === 0 && (
+            <p class="fo-field__error" role="alert">
+              {texts.pickNone}
+            </p>
+          )}
         </>
       )}
     </div>
@@ -312,7 +316,11 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
         onSelectNone={() => update({ picked: [] })}
       />
       {state.picked.length >= total && total > 0 && <p class="fo-field__error" role="alert">{texts.allPicked}</p>}
-      {props.showErrors && state.picked.length === 0 && <p class="fo-field__error">{texts.nonePicked}</p>}
+      {props.showErrors && state.picked.length === 0 && (
+        <p class="fo-field__error" role="alert">
+          {texts.nonePicked}
+        </p>
+      )}
     </div>
   );
 }
@@ -602,7 +610,11 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
           update({ order: next });
         }}
       />
-      {props.showErrors && (!state.order || state.order.every((page, i) => page === i)) && <p class="fo-field__error">{texts.unchanged}</p>}
+      {props.showErrors && (!state.order || state.order.every((page, i) => page === i)) && (
+        <p class="fo-field__error" role="alert">
+          {texts.unchanged}
+        </p>
+      )}
     </div>
   );
 }

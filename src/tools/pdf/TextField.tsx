@@ -1,6 +1,7 @@
 // A free-text field in the NumberField's style (F5a): the watermark text, the typed signature and the page ranges.
 // The value is committed after a short pause or on blur, like the NumberField; the error says the rule, tied by
-// aria-describedby. What is typed stays in the panel: it never goes to a URL, a name or an event (decision 8).
+// aria-describedby, in an alert so it is said when it shows (DECISOES § 177). What is typed stays in the panel: it
+// never goes to a URL, a name or an event (decision 8).
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -76,7 +77,7 @@ export default function TextField({ id, label, value, onCommit, help, error, inp
         )}
       </div>
       {error && (
-        <p class="fo-field__error" id={errorId}>
+        <p class="fo-field__error" id={errorId} role="alert">
           <Icon raw={alertIcon} />
           {error}
         </p>

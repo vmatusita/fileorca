@@ -152,6 +152,72 @@ for (const { name, path, prepare } of keyboardCases) {
   });
 }
 
+// ---- Errors are said, the toggles have their own names, the focus stays put (DECISOES § 177) ------------------------
+
+/** Clicks the label of a segmented option (the radio itself is hidden), as pdf-matrix.spec.ts does. */
+const option = (page: Page, label: string) => page.locator('.fo-seg__opt').filter({ hasText: label }).first().click();
+
+/** The sentence is in an alert of the panel (WCAG 4.1.3: said when it shows, with no focus move). */
+const alerted = (page: Page, text: string | RegExp) => expect(page.locator('#fo-tool-root [role="alert"]').filter({ hasText: text })).toBeVisible({ timeout: 15_000 });
+
+test('Unlock PDF: the wrong password is an alert', async ({ page }) => {
+  await openTool(page, '/unlock-pdf/');
+  await choosePdfs(page, [pdfFile('gen-cifrado-aes256.pdf')]);
+  const field = page.getByLabel('Password to open the PDF');
+  await field.fill('not the password');
+  await field.press('Enter');
+  await alerted(page, "That password didn't open gen-cifrado-aes256.pdf");
+});
+
+test('Protect PDF: the broken rule and the two passwords that differ are alerts', async ({ page }) => {
+  await openTool(page, '/protect-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await page.getByRole('button', { name: 'Protect PDFs' }).click();
+  await alerted(page, 'Use 4 to 100 characters.');
+  await page.getByLabel('Password', { exact: true }).fill('abcd');
+  await page.getByLabel('Confirm password').fill('abce');
+  await alerted(page, "The two passwords don't match");
+});
+
+test('Delete, Reorder and Split: the press of the action with nothing to do is an alert', async ({ page }) => {
+  for (const [path, action, sentence] of [
+    ['/delete-pdf-pages/', 'Delete pages', 'Pick at least one page to delete.'],
+    ['/reorder-pdf-pages/', 'Save new order', 'Move a page to save a new order.'],
+  ] as const) {
+    await openTool(page, path);
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+    await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+    await page.getByRole('button', { name: action }).click();
+    await alerted(page, sentence);
+  }
+  await openTool(page, '/split-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await option(page, 'Pick pages');
+  await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Split PDF' }).click();
+  await alerted(page, 'Pick at least one page first.');
+  await option(page, 'Page ranges');
+  await page.getByLabel('Pages for each file').fill('99-100');
+  await page.getByLabel('Pages for each file').press('Enter');
+  await alerted(page, 'Type page numbers like 1-3, 5, 8-10');
+});
+
+test('Watermark and Sign: text Oli cannot draw and an image that is not one are alerts', async ({ page }) => {
+  await openTool(page, '/watermark-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await page.getByLabel('Watermark text').fill('日本語');
+  await page.getByLabel('Watermark text').press('Enter');
+  await alerted(page, 'The watermark needs text Oli can draw.');
+
+  await openTool(page, '/sign-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await option(page, 'Upload');
+  const input = page.getByLabel('Choose a signature image');
+  await input.setInputFiles({ name: 'bad.png', mimeType: 'image/png', buffer: Buffer.from('not an image at all') });
+  await alerted(page, 'Oli can only use a PNG or JPG here.');
+  await expect(input).toHaveAttribute('aria-invalid', 'true');
+});
+
 test('Reorder PDF pages: the same new order by drag, by the buttons and by the keyboard', async ({ page }) => {
   const fixture = 'gen-paginas-mistas.pdf';
   const all = pdfOracle(fixture).markers ?? [];
