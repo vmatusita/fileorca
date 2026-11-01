@@ -367,7 +367,48 @@ export function checkArrows(html: string): string[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// g) one stylesheet
+// g) voice of the texts (F5a: the PDF texts, DECISOES § F5a-design-pdf)
+
+/** Words the design README forbids, with their endings ("supercharged", "magical", "mágica"). */
+export const FORBIDDEN_WORDS = /\b(?:seamless\w*|effortless\w*|unlock\w*|supercharge\w*|magic\w*|m[áa]gic\w*|ai-powered|revolutionary|best-in-class)\b/i;
+/**
+ * "Unlock PDF" is the name of a tool (the search term of data/keywords.csv), not the marketing verb the README forbids:
+ * the exact name (and its route id, which the hub's guide names) is taken out before the check, so "unlock" anywhere else still fails.
+ */
+export const TOOL_NAME = /\bUnlock PDF\b|\bunlock-pdf\b/g;
+/** The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. */
+const SUCCESS_LINE = /\.(?:done|doneMany)$/;
+
+function stringsOf(value: unknown, path: string, out: [string, string][] = []): [string, string][] {
+  if (typeof value === 'string') out.push([path, value]);
+  else if (value && typeof value === 'object') for (const [key, item] of Object.entries(value)) stringsOf(item, `${path}.${key}`, out);
+  return out;
+}
+
+/**
+ * The voice rules over every string of a texts object (docs/design/README, "Voz"): none of the forbidden marketing
+ * words, no emoji, no arrow the fonts cannot draw, no "up to 50", and an exclamation mark only once, in a success
+ * line. Returns the problems with the path of the string; `root` names the object in the messages.
+ */
+export function checkVoice(texts: unknown, root = 'texto'): string[] {
+  const problems: string[] = [];
+  for (const [path, text] of stringsOf(texts, root)) {
+    const clean = text.replace(TOOL_NAME, '');
+    const word = FORBIDDEN_WORDS.exec(clean)?.[0];
+    if (word) problems.push(`${path}: "${word}" é uma palavra que o README do design proíbe`);
+    if (/\p{Extended_Pictographic}/u.test(text.replace(/[©®™]/g, ''))) problems.push(`${path}: emoji no texto`);
+    if (/[→↔]/.test(text)) problems.push(`${path}: seta → ou ↔ (use o ícone arrow-right)`);
+    if (/\bup to 50\b/.test(text)) problems.push(`${path}: "up to 50" (um número que não foi medido)`);
+    if (/[!¡]/.test(text)) {
+      if (!SUCCESS_LINE.test(path)) problems.push(`${path}: exclamação fora da fala de sucesso`);
+      else if ((text.match(/!/g)?.length ?? 0) !== 1) problems.push(`${path}: a fala de sucesso tem de ter uma exclamação só`);
+    }
+  }
+  return problems;
+}
+
+// ---------------------------------------------------------------------------------------------
+// h) one stylesheet
 
 /** One CSS request per page: exactly one <link rel="stylesheet"> and no <style>. */
 export function checkSingleStylesheet(html: string): string[] {

@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { OLI_POSES, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars } from '../../scripts/lib/design-checks.ts';
+import { FORBIDDEN_WORDS, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
 import { tokenNames } from '../../scripts/lib/theme.ts';
 
 const tokens: unknown = JSON.parse(readFileSync('docs/design/tokens.json', 'utf8'));
@@ -304,5 +304,71 @@ describe('uma folha de estilo só', () => {
     expect(checkSingleStylesheet(html('<link rel="stylesheet" href="/a.css"><style>.a{color:red}</style>')).join()).toMatch(/1 elemento\(s\) <style>/);
     expect(checkSingleStylesheet(html('<style>.a{}</style>')).join('\n')).toMatch(/0 <link[\s\S]*<style>/);
     expect(checkSingleStylesheet('<link rel="stylesheet" href="/a.css"><svg><style>.a{}</style></svg>')).toHaveLength(1);
+  });
+});
+
+// ---- F5a: the voice of the PDF texts and the CSS block of the PDF island -------------------------------------------------
+
+describe('voz dos textos (F5a)', () => {
+  it('accepts plain texts, a success line with one exclamation and the name of the Unlock PDF tool', () => {
+    expect(checkVoice({ title: 'Merge PDF: combine PDF files in your browser', panel: { done: 'Done! Oli joined your PDFs into one.', doneMany: 'Done! Oli joined your {count} PDFs.' } })).toEqual([]);
+    expect(checkVoice({ line: 'Open it in Unlock PDF first.', guide: 'unlock-pdf removes the password.', title: 'Unlock PDF: remove a password' })).toEqual([]);
+    expect(checkVoice(['one', 'two', { three: 3, four: null }])).toEqual([]);
+  });
+
+  it('refuses each forbidden word of the README, with its endings, in English, Portuguese and Spanish', () => {
+    for (const word of ['seamless', 'seamlessly', 'effortless', 'effortlessly', 'Unlock your photos', 'unlocked files', 'supercharge', 'Supercharged compression', 'magic', 'A magical way', 'mágica', 'Una forma mágica', 'AI-powered', 'revolutionary', 'best-in-class']) {
+      expect(checkVoice({ a: word }), word).toHaveLength(1);
+      expect(FORBIDDEN_WORDS.test(word), word).toBe(true);
+    }
+  });
+
+  it('takes out the exact name Unlock PDF and nothing else', () => {
+    expect('Unlock PDF and unlock-pdf'.replace(TOOL_NAME, '')).toBe(' and ');
+    expect(checkVoice({ a: 'Unlock PDFs fast' })).toHaveLength(1);
+    expect(checkVoice({ a: 'Unlock your PDF' })).toHaveLength(1);
+    expect(checkVoice({ a: 'Use Unlock PDF to unlock the file' })).toHaveLength(1);
+  });
+
+  it('refuses an emoji, an arrow and "up to 50", and lets the copyright signs be', () => {
+    expect(checkVoice({ a: 'Done 🎉' })).toEqual(['texto.a: emoji no texto']);
+    expect(checkVoice({ a: 'Merge → split' })[0]).toMatch(/seta/);
+    // U+2194 is an emoji for Unicode as well, so it is reported twice.
+    expect(checkVoice({ a: 'a ↔ b' }).join('\n')).toMatch(/seta/);
+    expect(checkVoice({ a: 'Compress up to 50 files' })[0]).toMatch(/up to 50/);
+    expect(checkVoice({ a: '© 2026 FileOrca™ ®' })).toEqual([]);
+  });
+
+  it('allows an exclamation only once, in a success line (done, doneMany)', () => {
+    expect(checkVoice({ panel: { error: 'Oops! The file is broken.' } })).toEqual(['texto.panel.error: exclamação fora da fala de sucesso']);
+    expect(checkVoice({ panel: { note: '¡Listo!' } })).toEqual(['texto.panel.note: exclamação fora da fala de sucesso']);
+    expect(checkVoice({ panel: { done: 'Done! Oli did it!' } })).toEqual(['texto.panel.done: a fala de sucesso tem de ter uma exclamação só']);
+    expect(checkVoice({ panel: { doneMany: '¡Listo! Oli juntó tus PDFs.' } })).toEqual([]);
+    // The path names the string, so a deep one is found.
+    expect(checkVoice({ faq: [{ q: 'Is it free?', a: 'Yes! It is.' }] }, 'texts')).toEqual(['texts.faq.0.a: exclamação fora da fala de sucesso']);
+  });
+});
+
+describe('o bloco do CSS da ilha de PDF (F5a)', () => {
+  const components = readFileSync('src/styles/components.css', 'utf8');
+  const start = components.indexOf('/* ---- F5a:');
+  const block = start >= 0 ? components.slice(start) : '';
+
+  it('finds the block of the PDF island in components.css, with the pieces it styles', () => {
+    expect(start).toBeGreaterThan(0);
+    for (const selector of ['.fo-pages__grid', '.fo-page__main', '.fo-sign__pad', '.fo-sign__box', '.fo-pass__toggle', '.fo-merge__moves']) expect(block, selector).toContain(selector);
+  });
+
+  it('keeps its colours to the text tokens, its movement to the five properties and its theme variables to the tokens', () => {
+    expect(checkTextColors(block)).toEqual([]);
+    expect(checkMotion(block)).toEqual([]);
+    expect(checkThemeVars(block, names)).toEqual([]);
+  });
+
+  it('would catch a hex colour, a colour transition and a made-up theme variable in that block', () => {
+    expect(checkTextColors(`${block}\n.fo-sign__notice { color: #FFC93C; }`)).toHaveLength(1);
+    expect(checkMotion(`${block}\n.fo-page { transition: background-color 150ms; }`)).toHaveLength(1);
+    expect(checkMotion(`${block}\n.fo-page { transition: all 150ms; }`)).toHaveLength(1);
+    expect(checkThemeVars(`${block}\n:root { --color-sun-fake: #ffc93c; }`, names)).toHaveLength(1);
   });
 });
