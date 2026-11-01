@@ -254,7 +254,7 @@ Falhas no meio do caminho:
 | 41273044165 | `b3bb351` | WebKit 2 de 3 | O mesmo, nos dois hubs | o mesmo |
 | 41275792910 | `5d3f16b` | WebKit 3 de 3 | `ENOSPC` em dois testes de movimento do `design.spec.ts`, com o disco caindo e voltando em segundos | nada em teste; registrado na § 141 |
 | 41276724285 | `e45415e` | WebKit 3 de 3 | `ENOSPC` em dois testes de movimento reduzido da mesma spec | o mesmo |
-| 41278520009 | `93a5d2d` (este relatório) | WebKit 3 de 3 | `ENOSPC` em dois testes do `image-batch.spec.ts`, com o `/` a 2.611 MB livres | os specs de dinheiro passaram a se chamar `money-*.spec.ts` e o `design.spec.ts` voltou à parte 2 (§ 142); a parte que caiu rodou de novo |
+| 41278520009 | `93a5d2d` (este relatório) | WebKit 3 de 3 | `ENOSPC` em dois testes do `image-batch.spec.ts`, com o `/` a 2.611 MB livres | os specs de dinheiro passaram a se chamar `money-*.spec.ts` e o `design.spec.ts` voltou à parte 2 (§ 142); o commit dos nomes novos roda o CI inteiro de novo |
 
 Não há `skip`, `fixme`, `only`, `retries` nem `continue-on-error` novo: o `git diff 92f2b5b..HEAD -- tests playwright.config.ts | grep -E "test.(skip|fixme|only)|retries|continue-on-error"` dá vazio.
 

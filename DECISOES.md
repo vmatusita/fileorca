@@ -1134,6 +1134,6 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
     - parte 1: o `a11y`, o `ads` e o começo do `budgets`;
     - parte 2: o `design` inteiro (50 testes), o resto do `budgets`, o `coffee`, o `events` e os de cookies;
     - parte 3: a matriz e os testes de imagem, mais os de dinheiro.
-  - **O que não mudou:** nenhum teste, contagem, limite, `retries` ou workflow. A execução vermelha 41278520009 roda de novo só a parte que caiu (`gh run rerun --failed`), e o commit dos nomes novos roda o CI inteiro.
+  - **O que não mudou:** nenhum teste, contagem, limite, `retries` ou workflow. O commit dos nomes novos roda o CI inteiro de novo; a execução vermelha 41278520009 não foi repetida, para o `merge` não decidir sobre um commit antigo.
   - **Referências.** As do CLAUDE.md, das §§ desta run, do plano, da revisão e do relatório foram atualizadas para os nomes novos.
 - **Alternativa:** um quarto `--shard`, ou liberar disco no começo dos jobs do WebKit. As duas mexem no `.github/` e ficam com o Victor, com a proposta da § 141.
