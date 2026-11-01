@@ -435,8 +435,10 @@ export default function PdfPanel(props: PdfPanelData) {
       if (!done.some((item) => item.outcome === 'new') || !worthSaying(saved)) return many ? t.result.unchangedMany : t.result.unchanged;
       return fmt(many ? texts.doneMany : texts.done, { percent: percent(saved, lang), count: done.length });
     }
+    // {count} counts what came out: one output per file in a batch, the parts of a Split, the images of PDF to JPG (for one
+    // PDF of many pages it was the images said as PDFs, DECISOES § 178).
     const count = done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
-    return fmt(many || count > 1 ? texts.doneMany : texts.done, { count: many ? done.length : count, percent: '' });
+    return fmt(count > 1 ? texts.doneMany : texts.done, { count, percent: '' });
   }
 
   // --- the batch ----------------------------------------------------------------------------------------------------

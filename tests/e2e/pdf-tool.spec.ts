@@ -3,6 +3,7 @@ import { fmt } from '../../src/i18n/format.ts';
 import panel from '../../src/tools/pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
+import jpgTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
 import { violationIds } from './lib/axe.ts';
 import { REFUSAL_TEXT, choosePdfs, filesOf, openTool, pdfBytes, pdfFile, pdfOracle, rowReason, takePdfDownload } from './lib/pdf-tools.ts';
 import { readWithPdfjs } from './lib/pdfjs-read.ts';
@@ -77,6 +78,24 @@ test('Rotate PDF: the pages turned one by one in a file are not turned in the ne
   expect(out?.name).toBe('gen-ja-otimizado-rotated.pdf');
   const read = await readWithPdfjs(out?.bytes as Uint8Array);
   expect(read.pages.map((p) => p.rotate)).toEqual(new Array(12).fill(90));
+});
+
+test('PDF to JPG: the success line counts the images, for one PDF of many pages and for several PDFs', async ({ page }) => {
+  const says = page.locator('#fo-tool-root .fo-result__says');
+  const status = page.locator('#fo-tool-root [role="status"]');
+  for (const [names, sentence] of [
+    [['gen-paginas-mistas.pdf'], fmt(jpgTexts.panel.doneMany, { count: 8 })],
+    [['gen-paginas-mistas.pdf', 'gen-ja-otimizado.pdf'], fmt(jpgTexts.panel.doneMany, { count: 20 })],
+    [['pdf-escaneado-01-pagina-livro-cor.pdf'], jpgTexts.panel.done],
+  ] as const) {
+    await openTool(page, '/pdf-to-jpg/');
+    await choosePdfs(page, names.map((name) => pdfFile(name)));
+    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await expect(says).toHaveText(sentence);
+    await expect(status).toHaveText(sentence);
+    // One PDF is never "your 8 PDFs" (the line used to count the images as PDFs).
+    expect(await says.innerText()).not.toMatch(/\d+ PDFs/);
+  }
 });
 
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------

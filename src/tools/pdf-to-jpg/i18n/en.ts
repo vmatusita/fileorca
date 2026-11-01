@@ -62,8 +62,9 @@ const texts: PdfToolTexts<ImagesTexts> = {
   panel: {
     note: 'PDF files, as many as you like',
     progressLabel: 'Turning pages into images',
-    done: 'Done! Oli turned your PDF into images.',
-    doneMany: 'Done! Oli turned your {count} PDFs into images.',
+    // {count} is the number of images, for one PDF or several (DECISOES § 178).
+    done: 'Done! Oli turned your PDF into an image.',
+    doneMany: 'Done! Oli turned the pages into {count} images.',
     options: {
       formatLegend: 'Image format',
       jpg: 'JPG',
