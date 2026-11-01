@@ -1,0 +1,73 @@
+---
+// The PDF hub /pdf-tools/ (F5a, decision 7; the model of the image hub, DECISOES § 77 and § 96): eyebrow, H1 and one
+// line in the PDF band (coral), the grid of the 12 PDF tools in order of search volume with the Image to PDF card at the
+// end of its band (its page stays in the image hub, DECISOES § 148), one content AdSlot, the guide of which tool does
+// which job, how the files stay on the device, and the rail AdSlot. English only for now.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import { routeById } from '../i18n/routes.ts';
+import enCommon from '../i18n/en/common.ts';
+import t from '../i18n/en/pdf-tools.ts';
+import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { IMAGE_PAGES } from '../tools/image/registry.ts';
+
+interface Props {
+  lang: 'en';
+}
+const { lang } = Astro.props;
+const route = routeById(PDF_HUB_ID);
+const path = route.paths[lang] ?? '/pdf-tools/';
+const area = route.adArea ?? 'arquivos';
+const common = enCommon;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: common.pdfTools, path },
+];
+const pdfCards = PDF_TOOL_IDS.map((id) => ({ href: PDF_PAGES[id].path, name: common.pdf[id].name, description: common.pdf[id].description, icon: PDF_PAGES[id].icon }));
+const imageToPdf = { href: routeById('image-to-pdf').paths[lang] ?? '/image-to-pdf/', name: common.tools['image-to-pdf'].name, description: common.tools['image-to-pdf'].description, icon: IMAGE_PAGES['image-to-pdf'].icon };
+// Image to PDF has the volume of the first band (100K-1M), so it closes that band, after the four PDF tools of it.
+const cards = [...pdfCards.slice(0, 4), imageToPdf, ...pdfCards.slice(4)];
+const list = cards.map((card) => ({ name: card.name, path: card.href }));
+const nameOf = (id: (typeof t.guide)[number]['tool']) => (id === 'image-to-pdf' ? common.tools['image-to-pdf'].name : common.pdf[id].name);
+const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lang];
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list)]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-hubband fo-cat--pdf">
+    <span class="fo-eyebrow">{t.eyebrow}</span>
+    <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+    <p class="fo-muted">{t.intro}</p>
+  </div>
+  <section class="fo-section" aria-labelledby="tools">
+    <h2 id="tools">{t.toolsHeading}</h2>
+    <ul class="fo-grid">
+      {cards.map((card) => (
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category="pdf" icon={card.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" aria-labelledby="guide">
+    <h2 id="guide">{t.guideHeading}</h2>
+    <p>{t.guideIntro}</p>
+    <ul>
+      {t.guide.map((line) => <li>{line.before} <a href={hrefOf(line.tool)}>{nameOf(line.tool)}</a> {line.after}</li>)}
+    </ul>
+    <p>{t.guideOutro}</p>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="privacy">
+    <h2 id="privacy">{t.privacyHeading}</h2>
+    {t.privacy.map((paragraph) => <p>{paragraph}</p>)}
+  </section>
+  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
+</BaseLayout>

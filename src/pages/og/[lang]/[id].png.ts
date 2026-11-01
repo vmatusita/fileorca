@@ -1,6 +1,7 @@
 // Open Graph image per indexable page and language, generated at build. A tool or preset page shows its
 // tool icon beside the Oli (the registry's icon; Image to PDF in the PDF colour); the image hub shows the
-// image icon. A money page (calculator, hub, guide) shows its calculator's icon in the money colour (F4).
+// image icon. A money page (calculator, hub, guide) shows its calculator's icon in the money colour (F4). A PDF tool
+// shows its icon in the PDF colour, and the PDF hub the PDF icon (F5a).
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ROUTES, languagesOf, type Lang, type RouteId } from '../../../i18n/routes.ts';
 import { TEXTS, type LangTexts } from '../../../i18n/texts.ts';
@@ -12,6 +13,9 @@ import enCommon from '../../../i18n/en/common.ts';
 import enMoney from '../../../i18n/en/money-calculators.ts';
 import { CALC_PAGES, GUIDES, MONEY_HUB_ID, isCalcPage, isGuide } from '../../../tools/calc/registry.ts';
 import { SHARED, calcTexts } from '../../../tools/calc/page.ts';
+import enPdfTools from '../../../i18n/en/pdf-tools.ts';
+import { PDF_HUB_ID, PDF_PAGES, type PdfToolId } from '../../../tools/pdf/registry.ts';
+import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
 
 export const getStaticPaths: GetStaticPaths = () =>
   ROUTES.filter((route) => route.indexable).flatMap((route) =>
@@ -20,7 +24,9 @@ export const getStaticPaths: GetStaticPaths = () =>
 
 const isImagePage = (id: string): id is ImagePageId => Object.hasOwn(IMAGE_PAGES, id);
 
-type PlainId = Exclude<RouteId, ImagePageId | 'image-tools' | typeof MONEY_HUB_ID | keyof typeof CALC_PAGES | keyof typeof GUIDES>;
+const isPdfPage = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
+
+type PlainId = Exclude<RouteId, ImagePageId | 'image-tools' | typeof MONEY_HUB_ID | keyof typeof CALC_PAGES | keyof typeof GUIDES | PdfToolId | typeof PDF_HUB_ID>;
 
 function heading(lang: Lang, id: RouteId): [string, string] {
   const texts: LangTexts = TEXTS[lang];
@@ -30,6 +36,8 @@ function heading(lang: Lang, id: RouteId): [string, string] {
   if (isCalcPage(id)) return [calcTexts(id).h1, SHARED.page.seal];
   if (isGuide(id)) return [enCommon.guides[id].name, SHARED.page.seal];
   if (id === MONEY_HUB_ID) return [enMoney.h1, SHARED.page.seal];
+  if (isPdfPage(id)) return [PDF_TOOL_TEXTS[id].h1, seal];
+  if (id === PDF_HUB_ID) return [enPdfTools.h1, seal];
   return [texts[id as PlainId].h1, seal];
 }
 
@@ -39,6 +47,8 @@ function toolOf(id: RouteId): OgTool | undefined {
   if (isCalcPage(id)) return { icon: CALC_PAGES[id].icon, category: 'money' };
   if (isGuide(id)) return { icon: CALC_PAGES[GUIDES[id].calc].icon, category: 'money' };
   if (id === MONEY_HUB_ID) return { icon: 'calculator', category: 'money' };
+  if (isPdfPage(id)) return { icon: PDF_PAGES[id].icon, category: 'pdf' };
+  if (id === PDF_HUB_ID) return { icon: 'pdf', category: 'pdf' };
   return undefined;
 }
 

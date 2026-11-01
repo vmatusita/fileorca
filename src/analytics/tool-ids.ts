@@ -1,7 +1,7 @@
-// The closed list of pages an event may name in `tool` (DECISOES § 10 and § 113). Written out here, inside
+// The closed list of pages an event may name in `tool` (DECISOES § 10, § 113 and § 151). Written out here, inside
 // src/analytics/ (the shared island chunk), because a value import of the registries would pull their
 // pages' code into every tool page. tests/unit/consent.test.ts keeps both lists equal to the registries
-// (src/tools/image/registry.ts and src/tools/calc/registry.ts).
+// (src/tools/image/registry.ts, src/tools/calc/registry.ts and src/tools/pdf/registry.ts).
 
 export const IMAGE_EVENT_TOOLS = [
   'compress-image',
@@ -38,4 +38,19 @@ export const CALC_EVENT_TOOLS = [
   'loan-amortization-calculator-balloon-payment',
 ] as const;
 
-export const EVENT_TOOLS: readonly string[] = [...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS];
+export const PDF_EVENT_TOOLS = [
+  'merge-pdf',
+  'split-pdf',
+  'pdf-to-jpg',
+  'compress-pdf',
+  'rotate-pdf',
+  'delete-pdf-pages',
+  'add-page-numbers-to-pdf',
+  'sign-pdf',
+  'protect-pdf',
+  'unlock-pdf',
+  'reorder-pdf-pages',
+  'watermark-pdf',
+] as const;
+
+export const EVENT_TOOLS: readonly string[] = [...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS];

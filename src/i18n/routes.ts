@@ -11,6 +11,7 @@ import {
   type CalcPageId,
   type GuideId,
 } from '../tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS, type PdfToolId } from '../tools/pdf/registry.ts';
 
 export const LANGS = ['en', 'pt', 'es'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -36,6 +37,8 @@ export type RouteId =
   | 'image-to-pdf'
   | typeof MONEY_HUB_ID
   | CalcPageId
+  | typeof PDF_HUB_ID
+  | PdfToolId
   | GuideId
   | 'privacy'
   | 'terms'
@@ -89,6 +92,8 @@ export const ROUTES: readonly RouteDef[] = [
   ...imageToolRoutes(),
   // The money hub, its calculators, presets and guides exist only in English for now (F4; DECISOES § 110).
   ...moneyRoutes(),
+  // The PDF hub and the 12 PDF tools exist only in English for now (F5a; DECISOES § 58).
+  ...pdfRoutes(),
   {
     id: 'privacy',
     paths: { en: '/privacy/', pt: '/pt/privacidade/', es: '/es/privacidad/' },
@@ -218,6 +223,31 @@ function moneyRoutes(): RouteDef[] {
       view: 'src/views/GuideView.astro',
       texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, ...calcTexts(GUIDES[id].calc)],
       adArea: 'dinheiro',
+    })),
+  ];
+}
+
+/**
+ * English-only PDF pages (F5a): the hub and the 12 tools, all from the PDF registry. Every tool shares one mold and one
+ * island (src/tools/pdf/); its page blocks live in src/tools/<slug>/i18n/{lang}.ts, next to the shared panel texts.
+ */
+function pdfRoutes(): RouteDef[] {
+  return [
+    {
+      id: PDF_HUB_ID,
+      paths: { en: '/pdf-tools/' },
+      indexable: true,
+      view: 'src/views/PdfToolsView.astro',
+      texts: ['src/i18n/{lang}/pdf-tools.ts'],
+      adArea: 'arquivos',
+    },
+    ...PDF_TOOL_IDS.map((id): RouteDef => ({
+      id,
+      paths: { en: `/${id}/` },
+      indexable: true,
+      view: 'src/tools/pdf/',
+      texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts'],
+      adArea: 'arquivos',
     })),
   ];
 }

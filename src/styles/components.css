@@ -551,3 +551,52 @@
 .fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
+
+/* ---- F5a: the PDF island (DECISOES § 152) ----------------------------------------------------------------------
+   The pieces the design system does not have, built only from its tokens and the look of FileCard, ToolCard,
+   NumberField and Button: the page grid, the password field, the signature area and the reorderable merge list. */
+.fo-options-stack { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
+.fo-fields--stack { grid-template-columns: minmax(0, 1fr); margin-top: var(--space-4); max-width: 420px; }
+.fo-ready { display: grid; gap: var(--space-4); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); }
+.fo-ready__count { margin: 0; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
+.fo-seg--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: var(--radius-lg); }
+.fo-seg--grid .fo-seg__opt { border-radius: var(--radius-md); }
+.fo-check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font: 600 15px/20px var(--fo-font-text); color: var(--ink); align-self: end; }
+.fo-check input { width: 20px; height: 20px; accent-color: var(--brand); }
+
+/* Password field: the NumberField box with a text button inside it. */
+.fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--fo-font-text); cursor: pointer; }
+.fo-pass__toggle:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; }
+
+/* Page grid: cells in the FileCard's look, a picture drawn only while on screen. */
+.fo-pages { display: grid; gap: var(--space-3); }
+.fo-pages__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.fo-pages__count { margin: 0 auto 0 0; font: 600 15px/20px var(--fo-font-text); color: var(--ink); }
+.fo-pages__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-3); }
+.fo-page { --fo-ground: var(--bg); display: grid; gap: var(--space-1); padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
+.fo-page[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-2) - 1px); }
+.fo-page[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
+.fo-page__main { position: relative; display: grid; gap: var(--space-1); justify-items: center; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/18px var(--fo-font-text); }
+.fo-page__main:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+.fo-page__sheet { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--surface-sunken); overflow: hidden; }
+.fo-page__sheet img { max-width: 100%; max-height: 100%; object-fit: contain; background: var(--surface); }
+.fo-page__n { font-variant-numeric: tabular-nums; }
+.fo-page__badge { position: absolute; top: var(--space-1); left: var(--space-1); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
+.fo-page__moves { display: flex; justify-content: space-between; }
+.fo-page__move--back .fo-icon, .fo-merge__move--up .fo-icon { rotate: 180deg; }
+.fo-merge .fo-filelist__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.fo-merge__moves { display: flex; flex-direction: column; }
+.fo-merge__move .fo-icon { rotate: 90deg; }
+.fo-merge__move--up .fo-icon { rotate: -90deg; }
+
+/* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
+.fo-sign { display: grid; gap: var(--space-4); }
+.fo-sign__pad { width: 100%; max-width: 600px; aspect-ratio: 3; border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); touch-action: none; cursor: crosshair; }
+.fo-sign__file { font: 500 15px/20px var(--fo-font-text); color: var(--ink); }
+.fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
+.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
+.fo-sign__page img { width: 100%; height: 100%; object-fit: fill; }
+.fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
+.fo-sign__box img { display: block; width: 100%; height: auto; }
+.fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }

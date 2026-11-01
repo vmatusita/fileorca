@@ -80,7 +80,7 @@ export interface ReadPdf {
 /** Opens `bytes` with PDF.js (a password when given) and reads every page; throws when PDF.js cannot open it. */
 export async function readWithPdfjs(bytes: Uint8Array, password?: string): Promise<ReadPdf> {
   const lib = await library();
-  const task = lib.getDocument({ data: bytes.slice(), verbosity: 0, standardFontDataUrl: `${DATA}standard_fonts/`, cMapUrl: `${DATA}cmaps/`, wasmUrl: `${DATA}wasm/`, ...(password ? { password } : {}) });
+  const task = lib.getDocument({ data: new Uint8Array(bytes), verbosity: 0, standardFontDataUrl: `${DATA}standard_fonts/`, cMapUrl: `${DATA}cmaps/`, wasmUrl: `${DATA}wasm/`, ...(password ? { password } : {}) });
   try {
     const doc = await task.promise;
     const imageOps = new Set(['paintImageXObject', 'paintInlineImageXObject', 'paintImageMaskXObject', 'paintImageXObjectRepeat', 'paintSolidColorImageMask'].map((name) => lib.OPS[name]));
@@ -132,7 +132,7 @@ export async function opensWithoutPassword(bytes: Uint8Array): Promise<boolean> 
 /** Draws page `n` (1-based) at `scale` with PDF.js in Node and returns its RGBA pixels. */
 export async function drawWithPdfjs(bytes: Uint8Array, n: number, scale: number): Promise<{ data: Uint8ClampedArray; width: number; height: number }> {
   const lib = await library();
-  const task = lib.getDocument({ data: bytes.slice(), verbosity: 0, standardFontDataUrl: `${DATA}standard_fonts/`, cMapUrl: `${DATA}cmaps/`, wasmUrl: `${DATA}wasm/` });
+  const task = lib.getDocument({ data: new Uint8Array(bytes), verbosity: 0, standardFontDataUrl: `${DATA}standard_fonts/`, cMapUrl: `${DATA}cmaps/`, wasmUrl: `${DATA}wasm/` });
   try {
     const doc = await task.promise;
     const page = await doc.getPage(n);
