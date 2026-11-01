@@ -11,7 +11,7 @@
     ],
     "sha256": "7ee35d67e0702302703bcaa9ae85f9a0791e4c46a7055291b7d604d4e3c1fcb6"
   },
-  "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3",
+  "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc",
   "measuredOn": "2026-11-01",
   "environment": {
     "os": "Windows 10.0.26300",
@@ -52,7 +52,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cameras": {
           "value": 7,
@@ -78,7 +78,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "heicTotal": {
           "value": 18827311,
@@ -104,7 +104,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "gpsBefore": {
           "value": 3,
@@ -130,7 +130,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "gpsTagBefore": {
           "value": 5,
@@ -156,7 +156,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "jpgTotalChromium": {
           "value": 23571203,
@@ -185,7 +185,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioTotalChromium": {
           "value": 1.252,
@@ -214,7 +214,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMinChromium": {
           "value": 0.9257,
@@ -243,7 +243,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMaxChromium": {
           "value": 1.729,
@@ -272,7 +272,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMedianChromium": {
           "value": 1.33825,
@@ -301,7 +301,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "gpsAfterChromium": {
           "value": 0,
@@ -330,7 +330,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "sameSizeChromium": {
           "value": 10,
@@ -359,7 +359,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "jpgTotalWebkit": {
           "value": 23571203,
@@ -388,7 +388,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioTotalWebkit": {
           "value": 1.252,
@@ -417,7 +417,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMinWebkit": {
           "value": 0.9257,
@@ -446,7 +446,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMaxWebkit": {
           "value": 1.729,
@@ -475,7 +475,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "ratioMedianWebkit": {
           "value": 1.33825,
@@ -504,7 +504,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "gpsAfterWebkit": {
           "value": 0,
@@ -533,7 +533,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "sameSizeWebkit": {
           "value": 10,
@@ -562,7 +562,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "identicalBrowsers": {
           "value": 10,
@@ -591,7 +591,7 @@
             "path": "/heic-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -756,7 +756,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -777,7 +777,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPages": {
           "value": 1,
@@ -793,7 +793,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImages": {
           "value": 163975,
@@ -809,7 +809,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImageCount": {
           "value": 1,
@@ -825,7 +825,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImagesShare": {
           "value": 0.9764,
@@ -841,7 +841,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFonts": {
           "value": 0,
@@ -857,7 +857,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFontCount": {
           "value": 0,
@@ -873,7 +873,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFontsShare": {
           "value": 0,
@@ -889,7 +889,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanOtherShare": {
           "value": 0.0236,
@@ -905,7 +905,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportTotal": {
           "value": 3615137,
@@ -921,7 +921,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPages": {
           "value": 150,
@@ -937,7 +937,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportImages": {
           "value": 2865036,
@@ -953,7 +953,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportImageCount": {
           "value": 150,
@@ -969,7 +969,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportImagesShare": {
           "value": 0.7925,
@@ -985,7 +985,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportFonts": {
           "value": 0,
@@ -1001,7 +1001,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportFontCount": {
           "value": 0,
@@ -1017,7 +1017,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportFontsShare": {
           "value": 0,
@@ -1033,7 +1033,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportOtherShare": {
           "value": 0.2075,
@@ -1049,7 +1049,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formTotal": {
           "value": 146326,
@@ -1065,7 +1065,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPages": {
           "value": 2,
@@ -1081,7 +1081,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formImages": {
           "value": 0,
@@ -1097,7 +1097,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formImageCount": {
           "value": 0,
@@ -1113,7 +1113,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formImagesShare": {
           "value": 0,
@@ -1129,7 +1129,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formFonts": {
           "value": 18762,
@@ -1145,7 +1145,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formFontCount": {
           "value": 13,
@@ -1161,7 +1161,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formFontsShare": {
           "value": 0.1282,
@@ -1177,7 +1177,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formOtherShare": {
           "value": 0.8718,
@@ -1193,7 +1193,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookTotal": {
           "value": 5321132,
@@ -1209,7 +1209,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPages": {
           "value": 117,
@@ -1225,7 +1225,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookImages": {
           "value": 3468765,
@@ -1241,7 +1241,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookImageCount": {
           "value": 19,
@@ -1257,7 +1257,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookImagesShare": {
           "value": 0.6519,
@@ -1273,7 +1273,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFonts": {
           "value": 636106,
@@ -1289,7 +1289,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFontCount": {
           "value": 46,
@@ -1305,7 +1305,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFontsShare": {
           "value": 0.1195,
@@ -1321,7 +1321,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookOtherShare": {
           "value": 0.2286,
@@ -1337,7 +1337,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosTotal": {
           "value": 2917866,
@@ -1353,7 +1353,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPages": {
           "value": 4,
@@ -1369,7 +1369,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosImages": {
           "value": 2914714,
@@ -1385,7 +1385,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosImageCount": {
           "value": 4,
@@ -1401,7 +1401,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosImagesShare": {
           "value": 0.9989,
@@ -1417,7 +1417,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosFonts": {
           "value": 0,
@@ -1433,7 +1433,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosFontCount": {
           "value": 0,
@@ -1449,7 +1449,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosFontsShare": {
           "value": 0,
@@ -1465,7 +1465,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosOtherShare": {
           "value": 0.0011,
@@ -1481,7 +1481,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedTotal": {
           "value": 15537,
@@ -1497,7 +1497,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedPages": {
           "value": 12,
@@ -1513,7 +1513,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedImages": {
           "value": 0,
@@ -1529,7 +1529,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedImageCount": {
           "value": 0,
@@ -1545,7 +1545,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedImagesShare": {
           "value": 0,
@@ -1561,7 +1561,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedFonts": {
           "value": 0,
@@ -1577,7 +1577,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedFontCount": {
           "value": 0,
@@ -1593,7 +1593,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedFontsShare": {
           "value": 0,
@@ -1609,7 +1609,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedOtherShare": {
           "value": 1,
@@ -1625,7 +1625,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "accepted": {
           "value": 10,
@@ -1651,7 +1651,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "losslessUnchanged": {
           "value": 1,
@@ -1677,7 +1677,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "recommendedUnchanged": {
           "value": 1,
@@ -1703,7 +1703,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "strongUnchangedChromium": {
           "value": 7,
@@ -1732,7 +1732,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "strongUnchangedWebkit": {
           "value": 7,
@@ -1761,7 +1761,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanLossless": {
           "value": 167716,
@@ -1777,7 +1777,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanLosslessRatio": {
           "value": 0.9987,
@@ -1793,7 +1793,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanRecommended": {
           "value": 115495,
@@ -1809,7 +1809,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanRecommendedRatio": {
           "value": 0.6877,
@@ -1825,7 +1825,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanStrongChromium": {
           "value": 54102,
@@ -1844,7 +1844,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanStrongChromiumRatio": {
           "value": 0.3222,
@@ -1863,7 +1863,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanStrongWebkit": {
           "value": 54147,
@@ -1882,7 +1882,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanStrongWebkitRatio": {
           "value": 0.3224,
@@ -1901,7 +1901,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportLossless": {
           "value": 3094027,
@@ -1917,7 +1917,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportLosslessRatio": {
           "value": 0.8559,
@@ -1933,7 +1933,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportRecommended": {
           "value": 3094027,
@@ -1949,7 +1949,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportRecommendedRatio": {
           "value": 0.8559,
@@ -1965,7 +1965,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportStrongChromium": {
           "value": 3615137,
@@ -1984,7 +1984,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportStrongChromiumRatio": {
           "value": 1,
@@ -2003,7 +2003,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportStrongWebkit": {
           "value": 3615137,
@@ -2022,7 +2022,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportStrongWebkitRatio": {
           "value": 1,
@@ -2041,7 +2041,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formLossless": {
           "value": 129958,
@@ -2057,7 +2057,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formLosslessRatio": {
           "value": 0.8881,
@@ -2073,7 +2073,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formRecommended": {
           "value": 129958,
@@ -2089,7 +2089,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formRecommendedRatio": {
           "value": 0.8881,
@@ -2105,7 +2105,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formStrongChromium": {
           "value": 146326,
@@ -2124,7 +2124,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formStrongChromiumRatio": {
           "value": 1,
@@ -2143,7 +2143,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formStrongWebkit": {
           "value": 146326,
@@ -2162,7 +2162,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formStrongWebkitRatio": {
           "value": 1,
@@ -2181,7 +2181,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookLossless": {
           "value": 5309090,
@@ -2197,7 +2197,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookLosslessRatio": {
           "value": 0.9977,
@@ -2213,7 +2213,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookRecommended": {
           "value": 5309090,
@@ -2229,7 +2229,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookRecommendedRatio": {
           "value": 0.9977,
@@ -2245,7 +2245,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookStrongChromium": {
           "value": 5321132,
@@ -2264,7 +2264,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookStrongChromiumRatio": {
           "value": 1,
@@ -2283,7 +2283,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookStrongWebkit": {
           "value": 5321132,
@@ -2302,7 +2302,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookStrongWebkitRatio": {
           "value": 1,
@@ -2321,7 +2321,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosLossless": {
           "value": 2917039,
@@ -2337,7 +2337,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosLosslessRatio": {
           "value": 0.9997,
@@ -2353,7 +2353,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosRecommended": {
           "value": 950328,
@@ -2369,7 +2369,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosRecommendedRatio": {
           "value": 0.3257,
@@ -2385,7 +2385,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosStrongChromium": {
           "value": 353818,
@@ -2404,7 +2404,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosStrongChromiumRatio": {
           "value": 0.1213,
@@ -2423,7 +2423,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosStrongWebkit": {
           "value": 352268,
@@ -2442,7 +2442,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosStrongWebkitRatio": {
           "value": 0.1207,
@@ -2461,7 +2461,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedLossless": {
           "value": 15537,
@@ -2477,7 +2477,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedLosslessRatio": {
           "value": 1,
@@ -2493,7 +2493,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedRecommended": {
           "value": 15537,
@@ -2509,7 +2509,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedRecommendedRatio": {
           "value": 1,
@@ -2525,7 +2525,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedStrongChromium": {
           "value": 15537,
@@ -2544,7 +2544,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedStrongChromiumRatio": {
           "value": 1,
@@ -2563,7 +2563,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedStrongWebkit": {
           "value": 15537,
@@ -2582,7 +2582,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "optimizedStrongWebkitRatio": {
           "value": 1,
@@ -2601,7 +2601,7 @@
             "path": "/compress-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -2697,7 +2697,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compress": {
           "columns": [
@@ -2827,7 +2827,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -2854,7 +2854,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramFeedMinChromium": {
           "value": 229096,
@@ -2876,7 +2876,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramReelCoverMaxChromium": {
           "value": 76705,
@@ -2898,7 +2898,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramReelCoverMinChromium": {
           "value": 53584,
@@ -2920,7 +2920,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookProfileMaxChromium": {
           "value": 36623,
@@ -2942,7 +2942,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookProfileMinChromium": {
           "value": 26866,
@@ -2964,7 +2964,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverMaxChromium": {
           "value": 60378,
@@ -2986,7 +2986,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverMinChromium": {
           "value": 26642,
@@ -3008,7 +3008,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookLinkMaxChromium": {
           "value": 192897,
@@ -3030,7 +3030,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookLinkMinChromium": {
           "value": 96448,
@@ -3052,7 +3052,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xProfileMaxChromium": {
           "value": 50286,
@@ -3074,7 +3074,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xProfileMinChromium": {
           "value": 39890,
@@ -3096,7 +3096,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xHeaderMaxChromium": {
           "value": 129754,
@@ -3118,7 +3118,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xHeaderMinChromium": {
           "value": 55801,
@@ -3140,7 +3140,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPostMaxChromium": {
           "value": 413702,
@@ -3162,7 +3162,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPostMinChromium": {
           "value": 229096,
@@ -3184,7 +3184,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinProfileCoverMaxChromium": {
           "value": 89457,
@@ -3206,7 +3206,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinProfileCoverMinChromium": {
           "value": 39640,
@@ -3228,7 +3228,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPageCoverMaxChromium": {
           "value": 40232,
@@ -3250,7 +3250,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPageCoverMinChromium": {
           "value": 17607,
@@ -3272,7 +3272,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "youtubeBannerMaxChromium": {
           "value": 486714,
@@ -3294,7 +3294,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "youtubeBannerMinChromium": {
           "value": 300101,
@@ -3316,7 +3316,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pinterestPinMaxChromium": {
           "value": 402410,
@@ -3338,7 +3338,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pinterestPinMinChromium": {
           "value": 201596,
@@ -3360,7 +3360,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramFeedMaxWebkit": {
           "value": 516625,
@@ -3382,7 +3382,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramFeedMinWebkit": {
           "value": 247297,
@@ -3404,7 +3404,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramReelCoverMaxWebkit": {
           "value": 89899,
@@ -3426,7 +3426,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramReelCoverMinWebkit": {
           "value": 59676,
@@ -3448,7 +3448,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookProfileMaxWebkit": {
           "value": 40812,
@@ -3470,7 +3470,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookProfileMinWebkit": {
           "value": 30801,
@@ -3492,7 +3492,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverMaxWebkit": {
           "value": 69003,
@@ -3514,7 +3514,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverMinWebkit": {
           "value": 30487,
@@ -3536,7 +3536,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookLinkMaxWebkit": {
           "value": 218457,
@@ -3558,7 +3558,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookLinkMinWebkit": {
           "value": 110661,
@@ -3580,7 +3580,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xProfileMaxWebkit": {
           "value": 58037,
@@ -3602,7 +3602,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xProfileMinWebkit": {
           "value": 45319,
@@ -3624,7 +3624,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xHeaderMaxWebkit": {
           "value": 144055,
@@ -3646,7 +3646,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "xHeaderMinWebkit": {
           "value": 65707,
@@ -3668,7 +3668,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPostMaxWebkit": {
           "value": 464003,
@@ -3690,7 +3690,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPostMinWebkit": {
           "value": 247297,
@@ -3712,7 +3712,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinProfileCoverMaxWebkit": {
           "value": 99182,
@@ -3734,7 +3734,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinProfileCoverMinWebkit": {
           "value": 44975,
@@ -3756,7 +3756,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPageCoverMaxWebkit": {
           "value": 45397,
@@ -3778,7 +3778,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "linkedinPageCoverMinWebkit": {
           "value": 20774,
@@ -3800,7 +3800,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "youtubeBannerMaxWebkit": {
           "value": 537635,
@@ -3822,7 +3822,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "youtubeBannerMinWebkit": {
           "value": 350347,
@@ -3844,7 +3844,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pinterestPinMaxWebkit": {
           "value": 452978,
@@ -3866,7 +3866,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pinterestPinMinWebkit": {
           "value": 219740,
@@ -3888,7 +3888,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "sizes": {
           "value": 12,
@@ -3910,7 +3910,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "outputs": {
           "value": 36,
@@ -3932,7 +3932,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exactFrames": {
           "value": 1,
@@ -3954,7 +3954,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "withLimit": {
           "value": 24,
@@ -3976,7 +3976,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "underLimit": {
           "value": 24,
@@ -3998,7 +3998,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "largestOutput": {
           "value": 486714,
@@ -4020,7 +4020,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramPortraitWidth": {
           "value": 1080,
@@ -4039,7 +4039,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramPortraitHeight": {
           "value": 1440,
@@ -4058,7 +4058,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramLandscapeWidth": {
           "value": 1080,
@@ -4077,7 +4077,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "instagramLandscapeHeight": {
           "value": 810,
@@ -4096,7 +4096,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverLandscapeWidth": {
           "value": 420,
@@ -4115,7 +4115,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "facebookCoverLandscapeHeight": {
           "value": 315,
@@ -4134,7 +4134,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "thumbnailMaxChromium": {
           "value": 302690,
@@ -4156,7 +4156,7 @@
             "path": "/resize-image/youtube-thumbnail/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "thumbnailExactChromium": {
           "value": 3,
@@ -4178,7 +4178,7 @@
             "path": "/resize-image/youtube-thumbnail/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "thumbnailMaxWebkit": {
           "value": 343792,
@@ -4200,7 +4200,7 @@
             "path": "/resize-image/youtube-thumbnail/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "thumbnailExactWebkit": {
           "value": 3,
@@ -4222,7 +4222,7 @@
             "path": "/resize-image/youtube-thumbnail/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -4912,7 +4912,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "thumbnail": {
           "columns": [
@@ -4992,7 +4992,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {},
@@ -5200,7 +5200,7 @@
             "engine": "src/engine/image/codecs/webp.ts (libwebp through jSquash) in Node, at the quality of the site WebP encoder"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "webpTotal": {
           "value": 1991302,
@@ -5219,7 +5219,7 @@
             "engine": "src/engine/image/codecs/webp.ts (libwebp through jSquash) in Node, at the quality of the site WebP encoder"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "webpRatio": {
           "value": 0.2137,
@@ -5238,7 +5238,7 @@
             "engine": "src/engine/image/codecs/webp.ts (libwebp through jSquash) in Node, at the quality of the site WebP encoder"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifGpsBefore": {
           "value": 1,
@@ -5254,7 +5254,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "animatedFrames": {
           "value": 2,
@@ -5270,7 +5270,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backTotalChromium": {
           "value": 5512159,
@@ -5292,7 +5292,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backRatioChromium": {
           "value": 2.7681,
@@ -5314,7 +5314,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backVsOriginalChromium": {
           "value": 0.5916,
@@ -5336,7 +5336,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifGpsAfterChromium": {
           "value": 0,
@@ -5355,7 +5355,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifJpgBytesChromium": {
           "value": 510094,
@@ -5374,7 +5374,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "animatedJpgBytesChromium": {
           "value": 9633,
@@ -5393,7 +5393,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "firstFrameNoteChromium": {
           "value": 1,
@@ -5412,7 +5412,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backTotalWebkit": {
           "value": 5512159,
@@ -5434,7 +5434,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backRatioWebkit": {
           "value": 2.7681,
@@ -5456,7 +5456,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backVsOriginalWebkit": {
           "value": 0.5916,
@@ -5478,7 +5478,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifGpsAfterWebkit": {
           "value": 0,
@@ -5497,7 +5497,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifJpgBytesWebkit": {
           "value": 510094,
@@ -5516,7 +5516,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "animatedJpgBytesWebkit": {
           "value": 9633,
@@ -5535,7 +5535,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "firstFrameNoteWebkit": {
           "value": 1,
@@ -5554,7 +5554,7 @@
             "path": "/webp-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "exifWebpSize": {
           "value": 262648,
@@ -5570,7 +5570,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -5656,7 +5656,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -5680,7 +5680,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentCornersBefore": {
           "value": 4,
@@ -5696,7 +5696,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngTotalChromium": {
           "value": 48720193,
@@ -5718,7 +5718,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioChromium": {
           "value": 5.2286,
@@ -5740,7 +5740,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioMinChromium": {
           "value": 5.0348,
@@ -5762,7 +5762,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioMaxChromium": {
           "value": 5.4426,
@@ -5784,7 +5784,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backTotalChromium": {
           "value": 7443565,
@@ -5806,7 +5806,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backRatioChromium": {
           "value": 0.1528,
@@ -5828,7 +5828,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngIdenticalChromium": {
           "value": 3,
@@ -5847,7 +5847,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backPsnrMinChromium": {
           "value": 42.22,
@@ -5866,7 +5866,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backPsnrMaxChromium": {
           "value": 44.29,
@@ -5885,7 +5885,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentCornersWhiteChromium": {
           "value": 4,
@@ -5904,7 +5904,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentJpgBytesChromium": {
           "value": 121170,
@@ -5923,7 +5923,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "flattenedNoteChromium": {
           "value": 1,
@@ -5942,7 +5942,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngTotalWebkit": {
           "value": 37643451,
@@ -5964,7 +5964,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioWebkit": {
           "value": 4.0398,
@@ -5986,7 +5986,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioMinWebkit": {
           "value": 3.8039,
@@ -6008,7 +6008,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngRatioMaxWebkit": {
           "value": 4.2636,
@@ -6030,7 +6030,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backTotalWebkit": {
           "value": 7443565,
@@ -6052,7 +6052,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backRatioWebkit": {
           "value": 0.1977,
@@ -6074,7 +6074,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngIdenticalWebkit": {
           "value": 3,
@@ -6093,7 +6093,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backPsnrMinWebkit": {
           "value": 42.22,
@@ -6112,7 +6112,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "backPsnrMaxWebkit": {
           "value": 44.29,
@@ -6131,7 +6131,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentCornersWhiteWebkit": {
           "value": 4,
@@ -6150,7 +6150,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentJpgBytesWebkit": {
           "value": 121547,
@@ -6169,7 +6169,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "flattenedNoteWebkit": {
           "value": 1,
@@ -6188,7 +6188,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "transparentPngBytes": {
           "value": 1096229,
@@ -6204,7 +6204,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -6304,7 +6304,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -6328,7 +6328,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "withGps": {
           "value": 3,
@@ -6347,7 +6347,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "withCamera": {
           "value": 3,
@@ -6366,7 +6366,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "withDate": {
           "value": 3,
@@ -6385,7 +6385,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "heicFiles": {
           "value": 10,
@@ -6411,7 +6411,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "heicWithGps": {
           "value": 3,
@@ -6437,7 +6437,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "heicWithCamera": {
           "value": 10,
@@ -6463,7 +6463,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageBytesChromium": {
           "value": 2508875,
@@ -6485,7 +6485,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageRatioChromium": {
           "value": 0.2692,
@@ -6507,7 +6507,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageSameSizeChromium": {
           "value": 3,
@@ -6529,7 +6529,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageIdenticalChromium": {
           "value": 0,
@@ -6548,7 +6548,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImagePsnrMinChromium": {
           "value": 35.67,
@@ -6567,7 +6567,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageGpsChromium": {
           "value": 0,
@@ -6589,7 +6589,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageCameraChromium": {
           "value": 0,
@@ -6611,7 +6611,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageDateChromium": {
           "value": 0,
@@ -6633,7 +6633,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageOrientationChromium": {
           "value": 0,
@@ -6655,7 +6655,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageBytesChromium": {
           "value": 9242005,
@@ -6677,7 +6677,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageRatioChromium": {
           "value": 0.9918,
@@ -6699,7 +6699,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageSameSizeChromium": {
           "value": 3,
@@ -6721,7 +6721,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageIdenticalChromium": {
           "value": 3,
@@ -6740,7 +6740,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageGpsChromium": {
           "value": 0,
@@ -6762,7 +6762,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageCameraChromium": {
           "value": 0,
@@ -6784,7 +6784,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageDateChromium": {
           "value": 0,
@@ -6806,7 +6806,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageOrientationChromium": {
           "value": 1,
@@ -6828,7 +6828,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageBytesChromium": {
           "value": 5898635,
@@ -6850,7 +6850,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageRatioChromium": {
           "value": 0.633,
@@ -6872,7 +6872,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageSameSizeChromium": {
           "value": 0,
@@ -6894,7 +6894,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageIdenticalChromium": {
           "value": 0,
@@ -6913,7 +6913,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageGpsChromium": {
           "value": 0,
@@ -6935,7 +6935,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageCameraChromium": {
           "value": 0,
@@ -6957,7 +6957,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageDateChromium": {
           "value": 0,
@@ -6979,7 +6979,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageOrientationChromium": {
           "value": 0,
@@ -7001,7 +7001,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageBytesChromium": {
           "value": 7304610,
@@ -7023,7 +7023,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageRatioChromium": {
           "value": 0.7839,
@@ -7045,7 +7045,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageSameSizeChromium": {
           "value": 0,
@@ -7067,7 +7067,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageIdenticalChromium": {
           "value": 0,
@@ -7086,7 +7086,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageGpsChromium": {
           "value": 0,
@@ -7108,7 +7108,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageCameraChromium": {
           "value": 0,
@@ -7130,7 +7130,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageDateChromium": {
           "value": 0,
@@ -7152,7 +7152,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageOrientationChromium": {
           "value": 0,
@@ -7174,7 +7174,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgBytesChromium": {
           "value": 48720193,
@@ -7196,7 +7196,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgRatioChromium": {
           "value": 5.2286,
@@ -7218,7 +7218,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgSameSizeChromium": {
           "value": 3,
@@ -7240,7 +7240,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgIdenticalChromium": {
           "value": 3,
@@ -7259,7 +7259,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgGpsChromium": {
           "value": 0,
@@ -7281,7 +7281,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgCameraChromium": {
           "value": 0,
@@ -7303,7 +7303,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgDateChromium": {
           "value": 0,
@@ -7325,7 +7325,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgOrientationChromium": {
           "value": 0,
@@ -7347,7 +7347,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "imageToPdfBytesChromium": {
           "value": 7445652,
@@ -7369,7 +7369,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "imageToPdfGpsChromium": {
           "value": 0,
@@ -7391,7 +7391,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageBytesWebkit": {
           "value": 2508875,
@@ -7413,7 +7413,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageRatioWebkit": {
           "value": 0.2692,
@@ -7435,7 +7435,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageSameSizeWebkit": {
           "value": 3,
@@ -7457,7 +7457,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageIdenticalWebkit": {
           "value": 0,
@@ -7476,7 +7476,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImagePsnrMinWebkit": {
           "value": 35.67,
@@ -7495,7 +7495,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageGpsWebkit": {
           "value": 0,
@@ -7517,7 +7517,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageCameraWebkit": {
           "value": 0,
@@ -7539,7 +7539,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageDateWebkit": {
           "value": 0,
@@ -7561,7 +7561,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressImageOrientationWebkit": {
           "value": 0,
@@ -7583,7 +7583,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageBytesWebkit": {
           "value": 9242005,
@@ -7605,7 +7605,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageRatioWebkit": {
           "value": 0.9918,
@@ -7627,7 +7627,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageSameSizeWebkit": {
           "value": 3,
@@ -7649,7 +7649,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageIdenticalWebkit": {
           "value": 3,
@@ -7668,7 +7668,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageGpsWebkit": {
           "value": 0,
@@ -7690,7 +7690,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageCameraWebkit": {
           "value": 0,
@@ -7712,7 +7712,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageDateWebkit": {
           "value": 0,
@@ -7734,7 +7734,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "resizeImageOrientationWebkit": {
           "value": 1,
@@ -7756,7 +7756,7 @@
             "path": "/resize-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageBytesWebkit": {
           "value": 5898635,
@@ -7778,7 +7778,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageRatioWebkit": {
           "value": 0.633,
@@ -7800,7 +7800,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageSameSizeWebkit": {
           "value": 0,
@@ -7822,7 +7822,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageIdenticalWebkit": {
           "value": 0,
@@ -7841,7 +7841,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageGpsWebkit": {
           "value": 0,
@@ -7863,7 +7863,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageCameraWebkit": {
           "value": 0,
@@ -7885,7 +7885,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageDateWebkit": {
           "value": 0,
@@ -7907,7 +7907,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "cropImageOrientationWebkit": {
           "value": 0,
@@ -7929,7 +7929,7 @@
             "path": "/crop-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageBytesWebkit": {
           "value": 7304610,
@@ -7951,7 +7951,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageRatioWebkit": {
           "value": 0.7839,
@@ -7973,7 +7973,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageSameSizeWebkit": {
           "value": 0,
@@ -7995,7 +7995,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageIdenticalWebkit": {
           "value": 0,
@@ -8014,7 +8014,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageGpsWebkit": {
           "value": 0,
@@ -8036,7 +8036,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageCameraWebkit": {
           "value": 0,
@@ -8058,7 +8058,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageDateWebkit": {
           "value": 0,
@@ -8080,7 +8080,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "rotateImageOrientationWebkit": {
           "value": 0,
@@ -8102,7 +8102,7 @@
             "path": "/rotate-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgBytesWebkit": {
           "value": 37643451,
@@ -8124,7 +8124,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgRatioWebkit": {
           "value": 4.0398,
@@ -8146,7 +8146,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgSameSizeWebkit": {
           "value": 3,
@@ -8168,7 +8168,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgIdenticalWebkit": {
           "value": 3,
@@ -8187,7 +8187,7 @@
             "engine": "MozJPEG (jSquash) and a PNG reader in Node, the same decoder for the original and the copy"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgGpsWebkit": {
           "value": 0,
@@ -8209,7 +8209,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgCameraWebkit": {
           "value": 0,
@@ -8231,7 +8231,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgDateWebkit": {
           "value": 0,
@@ -8253,7 +8253,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pngToJpgOrientationWebkit": {
           "value": 0,
@@ -8275,7 +8275,7 @@
             "path": "/png-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "imageToPdfBytesWebkit": {
           "value": 7445652,
@@ -8297,7 +8297,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "imageToPdfGpsWebkit": {
           "value": 0,
@@ -8319,7 +8319,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -8503,7 +8503,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photos": {
           "columns": [
@@ -8548,7 +8548,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {
@@ -8576,7 +8576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanHeight72": {
           "value": 477,
@@ -8596,7 +8596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg72Chromium": {
           "value": 63728,
@@ -8616,7 +8616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng72Chromium": {
           "value": 347947,
@@ -8636,7 +8636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg72Webkit": {
           "value": 63774,
@@ -8656,7 +8656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng72Webkit": {
           "value": 262866,
@@ -8676,7 +8676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanWidth150": {
           "value": 770,
@@ -8696,7 +8696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanHeight150": {
           "value": 995,
@@ -8716,7 +8716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg150Chromium": {
           "value": 196972,
@@ -8736,7 +8736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng150Chromium": {
           "value": 1178523,
@@ -8756,7 +8756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg150Webkit": {
           "value": 197016,
@@ -8776,7 +8776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng150Webkit": {
           "value": 921547,
@@ -8796,7 +8796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanWidth300": {
           "value": 1540,
@@ -8816,7 +8816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanHeight300": {
           "value": 1990,
@@ -8836,7 +8836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg300Chromium": {
           "value": 528771,
@@ -8856,7 +8856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng300Chromium": {
           "value": 3834246,
@@ -8876,7 +8876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg300Webkit": {
           "value": 529370,
@@ -8896,7 +8896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPng300Webkit": {
           "value": 2618411,
@@ -8916,7 +8916,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPixels300vs150": {
           "value": 4,
@@ -8936,7 +8936,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg300vs150Chromium": {
           "value": 2.6845,
@@ -8956,7 +8956,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg150vs72Chromium": {
           "value": 3.0908,
@@ -8976,7 +8976,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPngVsJpg150Chromium": {
           "value": 5.9832,
@@ -8996,7 +8996,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg300vs150Webkit": {
           "value": 2.6869,
@@ -9016,7 +9016,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanJpg150vs72Webkit": {
           "value": 3.0893,
@@ -9036,7 +9036,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPngVsJpg150Webkit": {
           "value": 4.6775,
@@ -9056,7 +9056,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportWidth72": {
           "value": 610,
@@ -9076,7 +9076,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportHeight72": {
           "value": 786,
@@ -9096,7 +9096,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg72Chromium": {
           "value": 66260,
@@ -9116,7 +9116,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng72Chromium": {
           "value": 120056,
@@ -9136,7 +9136,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg72Webkit": {
           "value": 65955,
@@ -9156,7 +9156,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng72Webkit": {
           "value": 96906,
@@ -9176,7 +9176,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportWidth150": {
           "value": 1270,
@@ -9196,7 +9196,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportHeight150": {
           "value": 1637,
@@ -9216,7 +9216,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg150Chromium": {
           "value": 206898,
@@ -9236,7 +9236,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng150Chromium": {
           "value": 309684,
@@ -9256,7 +9256,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg150Webkit": {
           "value": 206446,
@@ -9276,7 +9276,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng150Webkit": {
           "value": 266926,
@@ -9296,7 +9296,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportWidth300": {
           "value": 2541,
@@ -9316,7 +9316,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportHeight300": {
           "value": 3275,
@@ -9336,7 +9336,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg300Chromium": {
           "value": 570965,
@@ -9356,7 +9356,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng300Chromium": {
           "value": 542076,
@@ -9376,7 +9376,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg300Webkit": {
           "value": 570419,
@@ -9396,7 +9396,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPng300Webkit": {
           "value": 440496,
@@ -9416,7 +9416,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPixels300vs150": {
           "value": 4.0028,
@@ -9436,7 +9436,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg300vs150Chromium": {
           "value": 2.7596,
@@ -9456,7 +9456,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg150vs72Chromium": {
           "value": 3.1225,
@@ -9476,7 +9476,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPngVsJpg150Chromium": {
           "value": 1.4968,
@@ -9496,7 +9496,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg300vs150Webkit": {
           "value": 2.763,
@@ -9516,7 +9516,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportJpg150vs72Webkit": {
           "value": 3.1301,
@@ -9536,7 +9536,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPngVsJpg150Webkit": {
           "value": 1.293,
@@ -9556,7 +9556,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formWidth72": {
           "value": 612,
@@ -9576,7 +9576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formHeight72": {
           "value": 792,
@@ -9596,7 +9596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg72Chromium": {
           "value": 111133,
@@ -9616,7 +9616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng72Chromium": {
           "value": 147786,
@@ -9636,7 +9636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg72Webkit": {
           "value": 118370,
@@ -9656,7 +9656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng72Webkit": {
           "value": 71173,
@@ -9676,7 +9676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formWidth150": {
           "value": 1275,
@@ -9696,7 +9696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formHeight150": {
           "value": 1650,
@@ -9716,7 +9716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg150Chromium": {
           "value": 325944,
@@ -9736,7 +9736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng150Chromium": {
           "value": 417815,
@@ -9756,7 +9756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg150Webkit": {
           "value": 332584,
@@ -9776,7 +9776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng150Webkit": {
           "value": 164141,
@@ -9796,7 +9796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formWidth300": {
           "value": 2550,
@@ -9816,7 +9816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formHeight300": {
           "value": 3300,
@@ -9836,7 +9836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg300Chromium": {
           "value": 826564,
@@ -9856,7 +9856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng300Chromium": {
           "value": 1024220,
@@ -9876,7 +9876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg300Webkit": {
           "value": 823351,
@@ -9896,7 +9896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPng300Webkit": {
           "value": 371564,
@@ -9916,7 +9916,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPixels300vs150": {
           "value": 4,
@@ -9936,7 +9936,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg300vs150Chromium": {
           "value": 2.5359,
@@ -9956,7 +9956,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg150vs72Chromium": {
           "value": 2.9329,
@@ -9976,7 +9976,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPngVsJpg150Chromium": {
           "value": 1.2819,
@@ -9996,7 +9996,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg300vs150Webkit": {
           "value": 2.4756,
@@ -10016,7 +10016,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formJpg150vs72Webkit": {
           "value": 2.8097,
@@ -10036,7 +10036,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPngVsJpg150Webkit": {
           "value": 0.4935,
@@ -10056,7 +10056,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookWidth72": {
           "value": 595,
@@ -10076,7 +10076,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookHeight72": {
           "value": 841,
@@ -10096,7 +10096,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg72Chromium": {
           "value": 55808,
@@ -10116,7 +10116,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng72Chromium": {
           "value": 110066,
@@ -10136,7 +10136,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg72Webkit": {
           "value": 56268,
@@ -10156,7 +10156,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng72Webkit": {
           "value": 74842,
@@ -10176,7 +10176,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookWidth150": {
           "value": 1240,
@@ -10196,7 +10196,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookHeight150": {
           "value": 1753,
@@ -10216,7 +10216,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg150Chromium": {
           "value": 190829,
@@ -10236,7 +10236,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng150Chromium": {
           "value": 308158,
@@ -10256,7 +10256,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg150Webkit": {
           "value": 191604,
@@ -10276,7 +10276,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng150Webkit": {
           "value": 185327,
@@ -10296,7 +10296,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookWidth300": {
           "value": 2480,
@@ -10316,7 +10316,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookHeight300": {
           "value": 3507,
@@ -10336,7 +10336,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg300Chromium": {
           "value": 538469,
@@ -10356,7 +10356,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng300Chromium": {
           "value": 797371,
@@ -10376,7 +10376,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg300Webkit": {
           "value": 539874,
@@ -10396,7 +10396,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPng300Webkit": {
           "value": 447820,
@@ -10416,7 +10416,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPixels300vs150": {
           "value": 4.0011,
@@ -10436,7 +10436,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg300vs150Chromium": {
           "value": 2.8217,
@@ -10456,7 +10456,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg150vs72Chromium": {
           "value": 3.4194,
@@ -10476,7 +10476,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPngVsJpg150Chromium": {
           "value": 1.6148,
@@ -10496,7 +10496,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg300vs150Webkit": {
           "value": 2.8177,
@@ -10516,7 +10516,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookJpg150vs72Webkit": {
           "value": 3.4052,
@@ -10536,7 +10536,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPngVsJpg150Webkit": {
           "value": 0.9672,
@@ -10556,7 +10556,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosWidth72": {
           "value": 792,
@@ -10576,7 +10576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosHeight72": {
           "value": 612,
@@ -10596,7 +10596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg72Chromium": {
           "value": 132924,
@@ -10616,7 +10616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng72Chromium": {
           "value": 762388,
@@ -10636,7 +10636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg72Webkit": {
           "value": 132347,
@@ -10656,7 +10656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng72Webkit": {
           "value": 634571,
@@ -10676,7 +10676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosWidth150": {
           "value": 1650,
@@ -10696,7 +10696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosHeight150": {
           "value": 1275,
@@ -10716,7 +10716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg150Chromium": {
           "value": 431376,
@@ -10736,7 +10736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng150Chromium": {
           "value": 2895727,
@@ -10756,7 +10756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg150Webkit": {
           "value": 431361,
@@ -10776,7 +10776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng150Webkit": {
           "value": 2328079,
@@ -10796,7 +10796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosWidth300": {
           "value": 3300,
@@ -10816,7 +10816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosHeight300": {
           "value": 2550,
@@ -10836,7 +10836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg300Chromium": {
           "value": 1135997,
@@ -10856,7 +10856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng300Chromium": {
           "value": 9232694,
@@ -10876,7 +10876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg300Webkit": {
           "value": 1135640,
@@ -10896,7 +10896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPng300Webkit": {
           "value": 6905387,
@@ -10916,7 +10916,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPixels300vs150": {
           "value": 4,
@@ -10936,7 +10936,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg300vs150Chromium": {
           "value": 2.6334,
@@ -10956,7 +10956,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg150vs72Chromium": {
           "value": 3.2453,
@@ -10976,7 +10976,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPngVsJpg150Chromium": {
           "value": 6.7128,
@@ -10996,7 +10996,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg300vs150Webkit": {
           "value": 2.6327,
@@ -11016,7 +11016,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosJpg150vs72Webkit": {
           "value": 3.2593,
@@ -11036,7 +11036,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPngVsJpg150Webkit": {
           "value": 5.3971,
@@ -11056,7 +11056,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "lowPpi": {
           "value": 72,
@@ -11076,7 +11076,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "mediumPpi": {
           "value": 150,
@@ -11096,7 +11096,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "highPpi": {
           "value": 300,
@@ -11116,7 +11116,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImageWidth": {
           "value": 770,
@@ -11132,7 +11132,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImagePpi": {
           "value": 150,
@@ -11148,7 +11148,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -12273,7 +12273,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -12294,7 +12294,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanParts": {
           "value": 1,
@@ -12310,7 +12310,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanSum": {
           "value": 167779,
@@ -12326,7 +12326,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanRatio": {
           "value": 0.9991,
@@ -12342,7 +12342,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFonts": {
           "value": 0,
@@ -12358,7 +12358,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPartFonts": {
           "value": 0,
@@ -12374,7 +12374,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanImages": {
           "value": 163975,
@@ -12390,7 +12390,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanPartImages": {
           "value": 163975,
@@ -12406,7 +12406,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportTotal": {
           "value": 3615137,
@@ -12422,7 +12422,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportParts": {
           "value": 150,
@@ -12438,7 +12438,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportSum": {
           "value": 4774926,
@@ -12454,7 +12454,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportRatio": {
           "value": 1.3208,
@@ -12470,7 +12470,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportFonts": {
           "value": 0,
@@ -12486,7 +12486,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPartFonts": {
           "value": 0,
@@ -12502,7 +12502,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportImages": {
           "value": 2865036,
@@ -12518,7 +12518,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportPartImages": {
           "value": 2865036,
@@ -12534,7 +12534,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formTotal": {
           "value": 146326,
@@ -12550,7 +12550,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formParts": {
           "value": 2,
@@ -12566,7 +12566,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formSum": {
           "value": 98048,
@@ -12582,7 +12582,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formRatio": {
           "value": 0.6701,
@@ -12598,7 +12598,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formFonts": {
           "value": 18762,
@@ -12614,7 +12614,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPartFonts": {
           "value": 29699,
@@ -12630,7 +12630,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formImages": {
           "value": 0,
@@ -12646,7 +12646,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formPartImages": {
           "value": 0,
@@ -12662,7 +12662,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "formFontsRatio": {
           "value": 1.5829,
@@ -12678,7 +12678,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookTotal": {
           "value": 5321132,
@@ -12694,7 +12694,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookParts": {
           "value": 117,
@@ -12710,7 +12710,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookSum": {
           "value": 31068572,
@@ -12726,7 +12726,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookRatio": {
           "value": 5.8387,
@@ -12742,7 +12742,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFonts": {
           "value": 636106,
@@ -12758,7 +12758,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPartFonts": {
           "value": 25325818,
@@ -12774,7 +12774,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookImages": {
           "value": 3468765,
@@ -12790,7 +12790,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookPartImages": {
           "value": 3468765,
@@ -12806,7 +12806,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFontsRatio": {
           "value": 39.8138,
@@ -12822,7 +12822,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosTotal": {
           "value": 2917866,
@@ -12838,7 +12838,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosParts": {
           "value": 4,
@@ -12854,7 +12854,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosSum": {
           "value": 2919170,
@@ -12870,7 +12870,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosRatio": {
           "value": 1.0004,
@@ -12886,7 +12886,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosFonts": {
           "value": 0,
@@ -12902,7 +12902,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPartFonts": {
           "value": 0,
@@ -12918,7 +12918,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosImages": {
           "value": 2914714,
@@ -12934,7 +12934,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosPartImages": {
           "value": 2914714,
@@ -12950,7 +12950,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "files": {
           "value": 5,
@@ -12971,7 +12971,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bigger": {
           "value": 3,
@@ -12992,7 +12992,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -13083,7 +13083,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -13105,7 +13105,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFormMerged": {
           "value": 241967,
@@ -13122,7 +13122,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "scanFormRatio": {
           "value": 0.7699,
@@ -13139,7 +13139,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosScanInputs": {
           "value": 3085804,
@@ -13156,7 +13156,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosScanMerged": {
           "value": 3084947,
@@ -13173,7 +13173,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "photosScanRatio": {
           "value": 0.9997,
@@ -13190,7 +13190,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFormInputs": {
           "value": 5467458,
@@ -13207,7 +13207,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFormMerged": {
           "value": 5386249,
@@ -13224,7 +13224,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "bookFormRatio": {
           "value": 0.9851,
@@ -13241,7 +13241,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportScanInputs": {
           "value": 3783075,
@@ -13258,7 +13258,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportScanMerged": {
           "value": 3773176,
@@ -13275,7 +13275,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "reportScanRatio": {
           "value": 0.9974,
@@ -13292,7 +13292,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "mixedActionsInputs": {
           "value": 10421,
@@ -13309,7 +13309,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "mixedActionsMerged": {
           "value": 8574,
@@ -13326,7 +13326,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "mixedActionsRatio": {
           "value": 0.8228,
@@ -13343,7 +13343,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pairs": {
           "value": 5,
@@ -13366,7 +13366,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "smaller": {
           "value": 5,
@@ -13389,7 +13389,7 @@
             "engine": "src/engine/pdf (qpdf, MozJPEG and pdf-lib in Node, the code of the site worker)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -13458,7 +13458,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
@@ -13482,7 +13482,7 @@
             "engine": "the metadata readers of the tests (Exif, GPS, XMP) and src/engine/image/probe.ts in Node"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfChromium": {
           "value": 7445652,
@@ -13504,7 +13504,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfRatioChromium": {
           "value": 0.7991,
@@ -13526,7 +13526,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfImagesChromium": {
           "value": 7443565,
@@ -13548,7 +13548,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressedChromium": {
           "value": 2508875,
@@ -13570,7 +13570,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressedRatioChromium": {
           "value": 0.2692,
@@ -13592,7 +13592,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterChromium": {
           "value": 3550707,
@@ -13614,7 +13614,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterRatioChromium": {
           "value": 0.3811,
@@ -13636,7 +13636,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterVsCompressedChromium": {
           "value": 1.4153,
@@ -13658,7 +13658,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfGpsChromium": {
           "value": 0,
@@ -13680,7 +13680,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfWebkit": {
           "value": 7445652,
@@ -13702,7 +13702,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfRatioWebkit": {
           "value": 0.7991,
@@ -13724,7 +13724,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfImagesWebkit": {
           "value": 7443565,
@@ -13746,7 +13746,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressedWebkit": {
           "value": 2508875,
@@ -13768,7 +13768,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "compressedRatioWebkit": {
           "value": 0.2692,
@@ -13790,7 +13790,7 @@
             "path": "/compress-image/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterWebkit": {
           "value": 3550707,
@@ -13812,7 +13812,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterRatioWebkit": {
           "value": 0.3811,
@@ -13834,7 +13834,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfAfterVsCompressedWebkit": {
           "value": 1.4153,
@@ -13856,7 +13856,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         },
         "pdfGpsWebkit": {
           "value": 0,
@@ -13878,7 +13878,7 @@
             "path": "/image-to-pdf/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "tables": {
@@ -13932,7 +13932,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "db6477117f1fdade2819cd04bd2fedf5e27bb8bc"
         }
       },
       "facts": {}
