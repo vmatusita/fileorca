@@ -6,6 +6,7 @@
 import { transfer, wrap, type Remote } from 'comlink';
 import type { PdfEngineApi } from '../../engine/pdf/worker.ts';
 import type { PdfPage, PdfPageSize } from '../../engine/pdf/build.ts';
+import type { ReportInput } from '../../engine/pdf/report.ts';
 
 interface PdfEngine {
   api: Remote<PdfEngineApi>;
@@ -45,5 +46,12 @@ export async function buildPdf(pages: readonly PageImage[], size: PdfPageSize): 
   );
   const { api, broken } = pdfEngine();
   const bytes = await Promise.race([api.build(transfer(prepared, prepared.map((page) => page.bytes.buffer)) as unknown as PdfPage[], size), broken]);
+  return new Blob([bytes as BlobPart], { type: 'application/pdf' });
+}
+
+/** The PDF of a money calculator, from the same worker (the calculators have no worker of their own). */
+export async function buildReport(input: ReportInput): Promise<Blob> {
+  const { api, broken } = pdfEngine();
+  const bytes = await Promise.race([api.report(input), broken]);
   return new Blob([bytes as BlobPart], { type: 'application/pdf' });
 }

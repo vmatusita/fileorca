@@ -1,0 +1,12 @@
+---
+// The schedule of a calculator, its own island after the first AdSlot (the page mold: chips, ad, schedule).
+// It reads the data-props of #fo-tool-root, so it carries no props of its own; mount.ts hydrates both.
+import CalcSchedule from './CalcSchedule.tsx';
+import type { CalcPanelData } from './types.ts';
+
+interface Props {
+  data: CalcPanelData;
+}
+const { data } = Astro.props;
+---
+<div id="fo-calc-schedule"><CalcSchedule data={data} /></div>

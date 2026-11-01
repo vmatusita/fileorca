@@ -430,3 +430,99 @@
 .fo-search__peek { width: 120px; height: 75px; margin-top: var(--space-2); }
 .fo-search-inline { max-width: 560px; }
 .fo-search-close { display: flex; justify-content: center; margin-top: var(--space-2); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+
+/* ---------- Money calculators (F4; DECISOES § 117): the island, ResultHero, SplitChart, ExportBar,
+   ScenarioCompare and AmortTable (docs/design/components). The ResultHero is .fo-rhero because .fo-hero is
+   the hero of the home. On a phone the result comes right after the main fields; from 768px they stand side by side. ---------- */
+.fo-calc { display: grid; gap: var(--space-5); }
+.fo-calc__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); align-content: start; }
+.fo-calc__fields > * { grid-column: 1 / -1; }
+.fo-calc__fields > .fo-field--half { grid-column: auto; }
+.fo-calc__moreheading { margin: var(--space-2) 0 0; }
+.fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
+.fo-calc__stale { margin: 0; }
+.fo-calc__compare, .fo-calc__next { grid-column: 1 / -1; }
+@media (min-width: 768px) {
+  .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); }
+  .fo-calc__main { grid-column: 1; grid-row: 1; }
+  .fo-calc__more { grid-column: 1; grid-row: 2; }
+  .fo-calc__result { grid-column: 2; grid-row: 1 / span 2; }
+}
+.fo-input .fo-input__unit { flex: 0 0 auto; width: auto; min-width: 64px; padding: 0 var(--space-3); align-self: stretch; background: var(--surface-sunken); color: var(--ink-muted); border-left: var(--stroke-hair) solid var(--hairline); font: 600 16px/20px var(--fo-font-text); }
+.fo-reviewed { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-debts { display: grid; gap: var(--space-4); justify-items: start; }
+.fo-debt { box-sizing: border-box; width: 100%; margin: 0; padding: var(--space-4); border: var(--stroke-2) solid var(--hairline); border-radius: var(--radius-lg); display: grid; gap: var(--space-3); }
+.fo-debt__name { padding: 0; font: 700 15px/20px var(--fo-font-text); }
+.fo-debt__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: var(--space-3); }
+.fo-debt__remove { justify-self: start; }
+
+.fo-rhero { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-3); }
+.fo-rhero__label { margin: 0; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep-muted); }
+.fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
+.fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
+.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
+.fo-rhero__sentence b { font-weight: 700; }
+.fo-rhero__oli { display: flex; justify-content: flex-end; align-items: flex-end; gap: var(--space-2); }
+.fo-rhero__oli .fo-placard { margin-left: 0; }
+.fo-rhero__orca { width: 72px; height: 72px; }
+@media (min-width: 768px) {
+  .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
+  .fo-rhero__num { font-size: 60px; line-height: 64px; }
+}
+.fo-split { display: grid; gap: var(--space-2); }
+.fo-split__bar { display: block; height: 20px; }
+.fo-split__principal { fill: var(--brand); }
+.fo-deep .fo-split__principal { fill: var(--brand-on-deep); }
+.fo-split__coral { fill: var(--coral); }
+.fo-split__hatch { fill: var(--on-cat); fill-opacity: 0.22; }
+.fo-split__gap { stroke: var(--surface); stroke-width: 3; }
+.fo-deep .fo-split__gap { stroke: var(--deep); }
+.fo-split__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 22px; }
+.fo-split__legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-split__legend b { font-variant-numeric: tabular-nums; }
+.fo-split__key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.fo-split__key--a { background: var(--brand); }
+.fo-deep .fo-split__key--a { background: var(--brand-on-deep); }
+.fo-split__key--b { background: var(--coral); background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--on-cat) 22%, transparent) 6px 8px); }
+
+.fo-export-wrap { display: grid; gap: var(--space-3); }
+.fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+.fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
+.fo-copied .fo-icon { width: 18px; height: 18px; }
+
+.fo-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.fo-scn { box-sizing: border-box; min-width: 0; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); padding: var(--space-4); display: grid; gap: var(--space-3); align-content: start; }
+.fo-scn__name { display: inline-flex; align-items: center; gap: var(--space-2); font: 700 15px/20px var(--fo-font-text); }
+.fo-scn__name i { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 700 13px/1 var(--fo-font-text); font-style: normal; background: var(--deep); color: var(--on-deep); }
+.fo-scn dl { margin: 0; display: grid; gap: var(--space-2); }
+.fo-scn dt { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.fo-scn dd { margin: 0; font: 600 24px/28px var(--fo-font-display); overflow-wrap: anywhere; }
+.fo-diff { grid-column: 1 / -1; margin: 0; display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 600 16px/22px var(--fo-font-text); }
+.fo-diff .fo-icon { flex: 0 0 auto; color: var(--brand); }
+@media (max-width: 379px) {
+  .fo-compare { grid-template-columns: 1fr; }
+  .fo-diff { order: -1; }
+}
+
+.fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
+.fo-calc-schedule > div { width: 100%; }
+.fo-amort-wrap { box-sizing: border-box; max-height: 70vh; overflow: auto; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
+.fo-amort-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-amort { width: 100%; border-collapse: separate; border-spacing: 0; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
+.fo-amort th { position: sticky; top: 0; text-align: right; font: 700 13px/18px var(--fo-font-text); color: var(--ink-muted); background: var(--surface); padding: var(--space-3) var(--space-4); border-bottom: var(--stroke-2) solid var(--stroke); white-space: nowrap; }
+.fo-amort th:first-child, .fo-amort td:first-child { text-align: left; }
+.fo-amort td { text-align: right; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); white-space: nowrap; }
+.fo-amort tbody tr:nth-child(even) td { background: var(--surface-sunken); }
+.fo-amort .fo-amort__year td { background: var(--surface); font-weight: 700; }
+.fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
+.fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
+.fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }
+.fo-amort .fo-amort__year button:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+.fo-example { display: grid; gap: var(--space-4); margin: var(--space-3) 0; }
+.fo-example caption { text-align: left; font: 700 15px/20px var(--fo-font-text); padding-bottom: var(--space-2); }
+@media (min-width: 768px) { .fo-example { grid-template-columns: 1fr 1fr; gap: var(--space-6); } }
+
+.fo-table-wrap { overflow-x: auto; }
+.fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }

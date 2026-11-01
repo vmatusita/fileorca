@@ -1,0 +1,131 @@
+---
+// The calculator page mold (PLANO "Molde da página de calculadora"; DECISOES § 117), shared by the 14
+// calculators and the 4 presets: breadcrumb; H1, the line it answers and "Reviewed by" (data-ymyl
+// "reviewed"); the island (fields, result, ExportBar, scenarios, chips); the first AdSlot, 150 px from the
+// chips; the schedule island; how to use; how it works (formula, assumptions, worked example from the
+// engine, official sources, educational notice: the data-ymyl blocks of gate:dinheiro-saude); the presets
+// table; the questions; the privacy note; the related grid; the rail AdSlot.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import PrivacySeal from '../../components/PrivacySeal.astro';
+import Faq from '../../components/Faq.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import AdSlot from '../../ads/AdSlot.astro';
+import { routeById, type Lang } from '../../i18n/routes.ts';
+import { TEXTS } from '../../i18n/texts.ts';
+import { fmt } from '../../i18n/format.ts';
+import { breadcrumbLd, personLd, webApplicationLd } from '../../seo/meta.ts';
+import { PANEL_POSES } from '../image/Oli.tsx';
+import CalcIsland from './CalcIsland.astro';
+import CalcScheduleRoot from './CalcScheduleRoot.astro';
+import Reviewed from './Reviewed.astro';
+import { SHARED, calcName, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample, REVIEWED } from './page.ts';
+import type { CalcPageId } from './registry.ts';
+
+interface Props {
+  id: CalcPageId;
+  lang: Lang;
+}
+const { id, lang } = Astro.props;
+const route = routeById(id);
+const t = calcTexts(id);
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const data = panelData(id, lang);
+const crumbs = crumbsFor(id, lang);
+const related = relatedFor(id);
+const presets = presetRows(id);
+const guide = guideOf(id);
+const example = workedExample(id, lang);
+const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  oli={PANEL_POSES}
+  schema={[breadcrumbLd(crumbs), webApplicationLd(calcName(id), t.description, path, lang, 'FinanceApplication'), personLd()]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-top">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <p class="fo-lead">{t.lead}</p>
+    <Reviewed />
+    <PrivacySeal text={SHARED.page.seal} />
+  </div>
+  <CalcIsland data={data} />
+  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
+  <CalcScheduleRoot data={data} />
+  <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
+    <h2 id="how">{t.howHeading}</h2>
+    <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+  </section>
+  {t.own?.map((block, index) => (
+    <section class="fo-section fo-prose" data-content="own" aria-labelledby={`own-${index}`}>
+      <h2 id={`own-${index}`}>{block.heading}</h2>
+      {block.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+    </section>
+  ))}
+  <section class="fo-section fo-prose" data-content="works" aria-labelledby="works">
+    <h2 id="works">{t.worksHeading}</h2>
+    <div data-ymyl="formula">
+      <h3 class="fo-h3">{t.formulaHeading}</h3>
+      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <div data-ymyl="premises">
+      <h3 class="fo-h3">{t.premisesHeading}</h3>
+      <ul>{t.panel.premises.map((premise) => <li>{premise}</li>)}</ul>
+    </div>
+    <div data-ymyl="example">
+      <h3 class="fo-h3">{t.exampleHeading}</h3>
+      <p>{t.exampleIntro}</p>
+      <div class="fo-example">
+        {[[SHARED.page.exampleInputs, example.inputs], [SHARED.page.exampleResults, example.results]].map(([caption, rows]) => (
+          <table class="fo-table">
+            <caption>{caption as string}</caption>
+            <tbody>{(rows as [string, string][]).map(([label, value]) => <tr><th scope="row">{label}</th><td>{value}</td></tr>)}</tbody>
+          </table>
+        ))}
+      </div>
+      <p>{example.sentence}</p>
+    </div>
+    <div data-ymyl="source">
+      <h3 class="fo-h3">{t.sourcesHeading}</h3>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{readAfter}</li>)}</ul>
+    </div>
+    {guide && <p><a href={guide.href}>{fmt(SHARED.page.guide, { title: guide.title })}</a></p>}
+    <div data-ymyl="disclaimer">
+      <h3 class="fo-h3">{SHARED.page.disclaimerHeading}</h3>
+      <p>{t.disclaimer}</p>
+    </div>
+  </section>
+  {t.presets && presets.length > 0 && (
+    <section class="fo-section fo-prose" aria-labelledby="presets">
+      <h2 id="presets">{t.presets.heading}</h2>
+      <table class="fo-table">
+        <caption class="fo-sr">{t.presets.caption}</caption>
+        <thead><tr><th scope="col">{t.presets.head[0]}</th><th scope="col">{t.presets.head[1]}</th></tr></thead>
+        <tbody>{presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.name}</a></th><td>{preset.description}</td></tr>)}</tbody>
+      </table>
+    </section>
+  )}
+  <section class="fo-section" data-content="faq" aria-labelledby="faq">
+    <h2 id="faq">{t.faqHeading}</h2>
+    <Faq items={t.faq} />
+  </section>
+  <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
+    <h2 id="privacy-note">{t.privacyHeading}</h2>
+    <p>{t.privacyNote}</p>
+  </section>
+  <section class="fo-section" data-content="related" aria-labelledby="related">
+    <h2 id="related">{t.relatedHeading}</h2>
+    <ul class="fo-grid">
+      {related.map((card) => (
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
+</BaseLayout>
