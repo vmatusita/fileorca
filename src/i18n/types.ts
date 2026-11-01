@@ -659,6 +659,8 @@ export interface PdfPanelTexts {
     load: string;
     /** A second file in a tool that works on one: "Oli works on one PDF at a time here. Start over to use {name}." */
     oneAtATime: string;
+    /** PDF to JPG, a file with no page in the typed range: "{name} has no page in that range, so Oli left it out." (DECISOES § 178) */
+    noPages: string;
     chooseAnother: string;
     some: string;
     all: string;

@@ -81,6 +81,7 @@ const texts: PdfPanelTexts = {
     encode: "This browser couldn't write the new PDF for {name}. Try again, or try another browser.",
     load: "Oli couldn't load what she needs for {name}. Check the connection and reload the page.",
     oneAtATime: 'Oli works on one PDF at a time here. Start over to use {name}.',
+    noPages: '{name} has no page in that range, so Oli left it out.',
     chooseAnother: 'Choose other files',
     some: "{count} files couldn't be used; the rest are ready.",
     all: "None of the {count} files could be used. Here's why, file by file:",

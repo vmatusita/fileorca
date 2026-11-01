@@ -38,7 +38,8 @@ const VISIBLE_ROWS = 6;
 const MINUS = '−';
 const UNAVAILABLE = 'EngineUnavailable';
 
-type Reason = PdfReason | 'one-at-a-time';
+/** Two reasons of the panel's own: a second file of a one-file tool, and a file the options leave nothing to do for. */
+type Reason = PdfReason | 'one-at-a-time' | 'no-pages';
 interface Failure {
   reason: Reason;
   source?: PdfSniffed;
@@ -179,7 +180,7 @@ export default function PdfPanel(props: PdfPanelData) {
   function refuse(item: Item, failure: Failure): void {
     item.failure = failure;
     item.status = 'error';
-    if (!item.reported && failure.reason !== 'one-at-a-time') {
+    if (!item.reported && failure.reason !== 'one-at-a-time' && failure.reason !== 'no-pages') {
       item.reported = true;
       track('tool_error', { ...tracked, browser: browserLabel(navigator.userAgent), codec: codecOf(failure), reason: failure.reason as ErrorReason });
     }
@@ -243,28 +244,33 @@ export default function PdfPanel(props: PdfPanelData) {
 
   // --- the run ----------------------------------------------------------------------------------------------------
 
-  /** The requests of this run: per file, or one for the whole list (Merge). */
-  function plan(): { items: Item[]; op: PdfOperation; key: string }[] | null {
+  /**
+   * The requests of this run: per file, or one for the whole list (Merge). No request at all: the options are not
+   * complete, and the field says why. A file of a batch with no request while others have one: these options leave it
+   * nothing to do (PDF to JPG, a range with none of its pages), so it is `skipped` and its row says so (DECISOES § 178).
+   */
+  function plan(): { requests: { items: Item[]; op: PdfOperation; key: string }[]; skipped: Item[] } | null {
     const views = m.items.filter(usable).map(viewOf);
     const ready = m.items.filter(usable);
     if (mode === 'merge') {
       const first = ready[0];
       const op = first ? tool.operation(stateRef.current, viewOf(first), views) : null;
-      return op ? [{ items: ready, op, key: keyOf(op) + ready.map((item) => item.id).join(',') }] : null;
+      return op ? { requests: [{ items: ready, op, key: keyOf(op) + ready.map((item) => item.id).join(',') }], skipped: [] } : null;
     }
     const chosen = one ? ready.slice(0, 1) : ready;
     const out: { items: Item[]; op: PdfOperation; key: string }[] = [];
+    const skipped: Item[] = [];
     for (const item of chosen) {
       const op = tool.operation(stateRef.current, viewOf(item), views);
-      if (!op) return null;
-      out.push({ items: [item], op, key: keyOf(op) });
+      if (op) out.push({ items: [item], op, key: keyOf(op) });
+      else skipped.push(item);
     }
-    return out.length > 0 ? out : null;
+    return out.length > 0 ? { requests: out, skipped } : null;
   }
 
   async function run(fromButton: boolean): Promise<void> {
-    const requests = plan();
-    if (!requests) {
+    const planned = plan();
+    if (!planned) {
       if (fromButton) {
         m.showErrors = true;
         render();
@@ -277,8 +283,16 @@ export default function PdfPanel(props: PdfPanelData) {
     // The press of the action is the person asking for the result: the focus goes to Download when it comes, whatever
     // was picked, moved or changed before (DECISOES § 176).
     if (fromButton) m.focusDownload = true;
+    const { requests, skipped } = planned;
+    // A skipped file that had outputs leaves the download: it is made again without them.
+    const dropped = skipped.some((item) => item.outputs);
+    for (const item of skipped) {
+      refuse(item, { reason: 'no-pages' });
+      item.outputs = null;
+      item.op = null;
+    }
     const work = requests.filter((request) => !(request.items.every((item) => item.op === request.key && item.outputs)));
-    if (work.length === 0 && (m.bundle || m.single)) {
+    if (work.length === 0 && !dropped && (m.bundle || m.single)) {
       m.phase = 'done';
       render();
       return;
@@ -720,6 +734,7 @@ export default function PdfPanel(props: PdfPanelData) {
       case 'encode': return fmt(e.encode, { name });
       case 'load': return fmt(e.load, { name });
       case 'one-at-a-time': return fmt(e.oneAtATime, { name });
+      case 'no-pages': return fmt(e.noPages, { name });
     }
   }
 

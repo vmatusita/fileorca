@@ -9,6 +9,9 @@ import { readWithPdfjs } from './lib/pdfjs-read.ts';
 
 // The PDF island in use (F5a): the flows the matrix does not cover, one page load each.
 
+/** Clicks the label of a segmented option (the radio itself is hidden), as pdf-matrix.spec.ts does. */
+const option = (page: Page, label: string) => page.locator('.fo-seg__opt').filter({ hasText: label }).first().click();
+
 test('Merge PDF: two files in the order of the list, the order changed with the buttons', async ({ page }) => {
   await openTool(page, '/merge-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-ja-otimizado.pdf')]);
@@ -32,6 +35,30 @@ test('Rotate PDF: a scan cut inside its image is refused on its row, with no dow
   expect(await rowReason(page, 'scan-cut.pdf')).toMatch(REFUSAL_TEXT['gen-cortado.pdf']);
   await expect(page.locator('#fo-tool-root .fo-btn--download')).toHaveCount(0);
   await expect(page.locator('#fo-tool-root .fo-drop [role="alert"]')).toContainText('stops before its end');
+});
+
+// ---- What the options of one file do to the next, and what the result line says (DECISOES § 178) ---------------------
+
+test('PDF to JPG: a range with no page of the file is a field error; in a batch only the file without those pages is refused', async ({ page }) => {
+  const field = page.getByLabel('Pages to turn into images');
+  // One 12-page PDF, pages 50-60: the field says so (before, the panel waited with nothing said).
+  await openTool(page, '/pdf-to-jpg/');
+  await option(page, 'Page range');
+  await field.fill('50-60');
+  await field.press('Enter');
+  await choosePdfs(page, [pdfFile('gen-ja-otimizado.pdf')]);
+  await expect(page.locator('#fo-tool-root [role="alert"]').filter({ hasText: 'using only pages the PDF has' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toHaveCount(0);
+
+  // An 8-page and a 12-page PDF, pages 10-12: the 12-page one gives its three pages, the other says why it gave none.
+  await openTool(page, '/pdf-to-jpg/');
+  await option(page, 'Page range');
+  await field.fill('10-12');
+  await field.press('Enter');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-ja-otimizado.pdf')]);
+  const out = filesOf(await takePdfDownload(page));
+  expect(out.map((file) => file.name).sort()).toEqual(['gen-ja-otimizado-page-10.jpg', 'gen-ja-otimizado-page-11.jpg', 'gen-ja-otimizado-page-12.jpg']);
+  expect(await rowReason(page, 'gen-paginas-mistas.pdf')).toBe(fmt(panel.errors.noPages, { name: 'gen-paginas-mistas.pdf' }));
 });
 
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
@@ -153,9 +180,6 @@ for (const { name, path, prepare } of keyboardCases) {
 }
 
 // ---- Errors are said, the toggles have their own names, the focus stays put (DECISOES § 177) ------------------------
-
-/** Clicks the label of a segmented option (the radio itself is hidden), as pdf-matrix.spec.ts does. */
-const option = (page: Page, label: string) => page.locator('.fo-seg__opt').filter({ hasText: label }).first().click();
 
 /** The sentence is in an alert of the panel (WCAG 4.1.3: said when it shows, with no focus move). */
 const alerted = (page: Page, text: string | RegExp) => expect(page.locator('#fo-tool-root [role="alert"]').filter({ hasText: text })).toBeVisible({ timeout: 15_000 });

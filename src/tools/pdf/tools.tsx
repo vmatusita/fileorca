@@ -152,9 +152,15 @@ function rangeFor(text: string, total: number): number[] | null {
   return pages.length > 0 ? pages : null;
 }
 
+/**
+ * The most pages a file of the batch has: a range that names a page past it names a page no file has, and the field
+ * says so (DECISOES § 178). With no file yet, any range is taken.
+ */
+const mostPages = (files: readonly { info: { pages: number } | null }[]): number => (files.length > 0 ? Math.max(...files.map((file) => file.info?.pages ?? 0)) : Number.MAX_SAFE_INTEGER);
+
 function ImagesOptions(props: PdfOptionsProps<ImagesState, ImagesTexts>) {
   const { state, update, texts } = props;
-  const wrong = state.pages === 'range' && state.range.trim() !== '' && parseRanges(state.range, Number.MAX_SAFE_INTEGER) === null;
+  const wrong = state.pages === 'range' && state.range.trim() !== '' && parseRanges(state.range, mostPages(props.files)) === null;
   return (
     <div class="fo-options-stack">
       <OptionGroup name="fo-images-format" legend={texts.formatLegend} value={state.format} note={texts.formatHelp} noteId="fo-images-format-note" choices={[{ value: 'jpeg', label: texts.jpg }, { value: 'png', label: texts.png }]} onChange={(format) => update({ format })} />
@@ -179,8 +185,10 @@ const images: PdfToolDef<ImagesState, ImagesTexts> = {
   initial: { format: 'jpeg', ppi: 150, pages: 'all', range: '' },
   success: 'converted',
   warm: ['pdfjs'],
-  operation: (state, file) => {
+  operation: (state, file, files) => {
     if (state.pages === 'all') return { kind: 'images', format: state.format, ppi: state.ppi, pages: null };
+    // A page no file has: the field's error, for every file. A file without any page of the range: its row says so.
+    if (parseRanges(state.range, mostPages(files)) === null) return null;
     const pages = rangeFor(state.range, file.info?.pages ?? 0);
     return pages ? { kind: 'images', format: state.format, ppi: state.ppi, pages } : null;
   },
