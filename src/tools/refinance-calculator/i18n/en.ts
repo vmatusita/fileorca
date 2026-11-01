@@ -2,7 +2,7 @@ import type { CalcPageTexts } from '../../calc/types.ts';
 
 export default {
   title: 'Refinance Calculator: Monthly Savings and Break-Even Month',
-  description: 'Compare your mortgage with a refinance: the new payment, the monthly savings, the month the closing costs pay off and the total cost of each loan.',
+  description: 'Compare your mortgage with refinancing it: the new payment, the monthly savings, the month the closing costs pay off and the total cost of each loan.',
   h1: 'Refinance calculator',
   lead: 'Whether a new loan pays off, and in which month it breaks even.',
   panel: {
@@ -34,7 +34,7 @@ export default {
       left: 'Paid off in',
       less: '{x} less',
       more: '{x} more',
-      diff: 'B costs {payment} a month and {total} in all, closing costs included.',
+      diff: 'B costs {paymentDiff} a month and {totalDiff} in all, closing costs included.',
       caption: 'Payment schedule of the new loan, by loan year',
       currentPayment: 'Current monthly payment',
       savings: 'Monthly savings',
@@ -55,7 +55,7 @@ export default {
       'No prepayment penalty, tax effect or change in escrow is included.',
     ],
   },
-  howHeading: 'How to use the refinance calculator',
+  howHeading: 'How to use this calculator',
   howSteps: [
     'Enter what you owe now, your current rate and how many months are left.',
     'Type the new rate and term you were quoted.',

@@ -9,6 +9,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { LANGUAGETOOL, JRE, ensureTool } from '../lib/tools.ts';
+import type { GUIDE_FACTS as GUIDE_FACTS_TYPE } from '../../src/tools/calc/guides.ts';
 
 const LANGUAGE: Record<string, string> = { en: 'en-US', pt: 'pt-BR', es: 'es' };
 // Every text file the route map lists (src/i18n/routes.ts): page texts, a tool's texts, the texts
@@ -48,12 +49,58 @@ export function changedTextFiles(): string[] {
   return selectTextFiles(files);
 }
 
-export function collectStrings(value: unknown, key = '', out: string[] = []): string[] {
+/**
+ * Values the money texts (F4) are filled with before the check, so LanguageTool reads a sentence as the page
+ * shows it: "costs {more} more" read as "costs more more" was a false grammar error. A placeholder of a money
+ * text without a sample here reads as an amount of money, which is what most of them are (DECISOES § 123).
+ */
+export const MONEY_SAMPLES: Record<string, string> = {
+  time: '3 years 4 months',
+  years: '30 years',
+  rate: '6.5%',
+  result: '5.13%',
+  apr: '15.09%',
+  front: '28%',
+  back: '36%',
+  n: '12',
+  count: '36',
+  month: '24',
+  how: 'monthly',
+  unit: 'years',
+  rule: 'the 28% housing limit',
+  date: 'October 31, 2026',
+  name: 'Victor Yuki Matusita',
+  paymentDiff: '$308 less',
+  totalDiff: '$3,490 more',
+  interestEffect: 'saves $212,238 of interest',
+  interestPart: 'pays $484 less interest',
+  timePart: 'is done 1 month sooner',
+};
+const MONEY_DEFAULT = '$1,234';
+
+/** A money text file: a calculator's or preset's texts, the texts the calculators share, the money hub or a guide. */
+export function isMoneyText(file: string): boolean {
+  return /^src\/(?:tools\/[\w-]+-calculator\/|tools\/calc\/i18n\/|i18n\/en\/(?:money-calculators|guide-[\w-]+)\.ts)/.test(file);
+}
+
+export function collectStrings(value: unknown, key = '', out: string[] = [], fill: (name: string) => string = (name) => SAMPLES[name] ?? name): string[] {
   if (SKIP_KEYS.has(key)) return out;
-  if (typeof value === 'string') out.push(value.replace(/\{(\w+)\}/g, (_, name: string) => SAMPLES[name] ?? name));
-  else if (Array.isArray(value)) for (const item of value) collectStrings(item, key, out);
-  else if (value && typeof value === 'object') for (const [child, item] of Object.entries(value)) collectStrings(item, child, out);
+  if (typeof value === 'string') out.push(value.replace(/\{(\w+)\}/g, (_, name: string) => fill(name)));
+  else if (Array.isArray(value)) for (const item of value) collectStrings(item, key, out, fill);
+  else if (value && typeof value === 'object') for (const [child, item] of Object.entries(value)) collectStrings(item, child, out, fill);
   return out;
+}
+
+/** How a file's placeholders are filled: a guide with the numbers its page shows, a money text with samples. */
+export async function fillFor(file: string): Promise<(name: string) => string> {
+  if (!isMoneyText(file)) return (name) => SAMPLES[name] ?? name;
+  const guide = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
+  if (guide) {
+    const { GUIDE_FACTS } = (await import(pathToFileURL(resolve('src/tools/calc/guides.ts')).href)) as { GUIDE_FACTS: typeof GUIDE_FACTS_TYPE };
+    const facts = GUIDE_FACTS[`guides-${guide}` as keyof typeof GUIDE_FACTS]().facts;
+    return (name) => facts[name] ?? MONEY_SAMPLES[name] ?? MONEY_DEFAULT;
+  }
+  return (name) => MONEY_SAMPLES[name] ?? MONEY_DEFAULT;
 }
 
 function chunks(texts: string[]): string[] {
@@ -148,7 +195,7 @@ if (import.meta.main) {
   for (const file of files) {
     const lang = textFileLang(file) ?? 'en';
     const module = (await import(pathToFileURL(resolve(file)).href)) as { default: unknown };
-    byLang.set(lang, [...(byLang.get(lang) ?? []), ...collectStrings(module.default)]);
+    byLang.set(lang, [...(byLang.get(lang) ?? []), ...collectStrings(module.default, '', [], await fillFor(file))]);
   }
   let server: { url: string; child: ChildProcess | null };
   try {

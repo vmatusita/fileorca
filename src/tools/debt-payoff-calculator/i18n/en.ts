@@ -25,7 +25,7 @@ export default {
       free: 'Debt-free in',
       interest: 'Interest',
       order: 'Payoff order',
-      diff: 'B {interest} and {time}.',
+      diff: 'B {interestPart} and {timePart}.',
       lessInterest: 'pays {x} less interest',
       moreInterest: 'pays {x} more interest',
       sameInterest: 'pays the same interest',

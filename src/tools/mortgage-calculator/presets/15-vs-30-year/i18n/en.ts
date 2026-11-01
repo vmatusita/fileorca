@@ -2,9 +2,9 @@ import type { CalcPageTexts } from '../../../../calc/types.ts';
 import { homePanel } from '../../../i18n/en.ts';
 
 export default {
-  title: '15 vs 30-Year Mortgage Calculator',
+  title: '15-Year vs 30-Year Mortgage Calculator',
   description: 'Put a 15-year and a 30-year mortgage side by side: the monthly payment, the total interest and how the balance falls each year, at the rates you choose.',
-  h1: '15 vs 30-year mortgage calculator',
+  h1: '15-year vs 30-year mortgage calculator',
   lead: 'What the shorter term costs a month, and what it saves in interest.',
   panel: {
     fields: {
@@ -22,7 +22,7 @@ export default {
       less: '{x} less',
       saves: 'saves {x} of interest',
       adds: 'adds {x} of interest',
-      diff: 'B costs {payment} a month and {interest}.',
+      diff: 'B costs {paymentDiff} a month and {interestEffect}.',
       principal: 'Principal',
       interestPart: 'Interest over 15 years',
       thirty: '30-year fixed',
@@ -47,7 +47,7 @@ export default {
       'Taxes, insurance, PMI and fees are left out, since they are the same for both terms.',
     ],
   },
-  howHeading: 'How to use the 15 vs 30-year calculator',
+  howHeading: 'How to use the 15-year vs 30-year calculator',
   howSteps: [
     'Enter the home price and the down payment.',
     'Type the rate you were quoted for each term; shorter terms are often quoted lower.',
@@ -82,7 +82,7 @@ export default {
     { label: 'Consumer Financial Protection Bureau, "Mortgages key terms"', href: 'https://www.consumerfinance.gov/consumer-tools/mortgages/answers/key-terms/' },
   ],
   disclaimer: 'This calculator is an educational tool, not financial advice and not a loan offer. Lenders quote rates for each term.',
-  faqHeading: 'Questions about 15 and 30-year mortgages',
+  faqHeading: 'Questions about 15-year and 30-year mortgages',
   faq: [
     {
       q: 'Why is the 15-year payment not double the 30-year one?',

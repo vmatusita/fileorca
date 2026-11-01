@@ -24,7 +24,7 @@ export default {
       total: 'Total',
       after: 'After, in {unit}',
       caption: 'Simple interest at the end of each year of the period',
-      scheduleHeading: 'Interest by year',
+      scheduleHeading: 'Interest for each year',
     },
     premises: [
       'Interest is charged on the principal only, never on earlier interest.',

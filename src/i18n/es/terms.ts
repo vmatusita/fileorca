@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir. Las herramientas están en inglés, y Comprimir imagen también está en español y portugués.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir, y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. Las herramientas y las calculadoras están en inglés, y Comprimir imagen también está en español y portugués.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },
@@ -46,7 +46,7 @@ export default {
     {
       heading: 'Las calculadoras son educativas, no asesoramiento',
       paragraphs: [
-        'FileOrca también tendrá calculadoras. Sirven solo para aprender e informarte. No son asesoramiento financiero, legal ni médico, y no reemplazan a un profesional calificado.',
+        'Las calculadoras sirven solo para aprender e informarte. No son asesoramiento financiero, legal ni médico, no son una oferta de crédito y no reemplazan a un profesional calificado. Quien decide cuánto puedes pedir prestado, y a qué tasa, es la entidad financiera, no una calculadora.',
         'Los resultados son estimaciones hechas con los números que escribes. La vida real puede ser distinta, así que consulta con un profesional calificado antes de tomar una decisión sobre dinero, asuntos legales o salud.',
       ],
     },

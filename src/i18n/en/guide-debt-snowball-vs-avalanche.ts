@@ -48,7 +48,7 @@ export default {
   formulaHeading: 'The method',
   formula: [
     'Budget = sum of the minimums + extra. Each month, every debt is charged its APR divided by 12 on its balance, rounded to the cent; every debt gets its minimum; what is left of the budget goes to the first debt in the chosen order, then the next.',
-    'Snowball orders the debts by their starting balance, smallest first. Avalanche orders them by APR, highest first.',
+    'Snowball orders the debts by their starting balance, with the smallest first. Avalanche orders them by APR, with the highest first.',
   ],
   premisesHeading: 'Assumptions',
   premises: [

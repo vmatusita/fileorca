@@ -76,8 +76,8 @@ export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
         a: { name: text(v, 'current'), rows: row(r.current.payment, r.current) },
         b: { name: text(v, 'new'), rows: row(r.new.payment, r.new, upfront) },
         diff: say(text(v, 'diff'), {
-          payment: lessOrMore(v, r.monthlySavings, l),
-          total: lessOrMore(v, r.costDiff, l),
+          paymentDiff: lessOrMore(v, r.monthlySavings, l),
+          totalDiff: lessOrMore(v, r.costDiff, l),
         }),
       },
       table: () => loanTable(r.new.rows, 12, s, text(v, 'caption')),
@@ -282,8 +282,8 @@ export const fifteenVsThirtyDef: CalcDef<FifteenVsThirtyInput, FifteenVsThirtyRe
       [text(v, 'paidOff'), duration(years * 12, s)],
     ];
     const diff = say(text(v, 'diff'), {
-      payment: fmt(text(v, r.paymentDiff >= 0 ? 'more' : 'less'), { x: dollars(Math.abs(r.paymentDiff), l) }),
-      interest: fmt(text(v, r.interestDiff >= 0 ? 'saves' : 'adds'), { x: dollars(Math.abs(r.interestDiff), l) }),
+      paymentDiff: fmt(text(v, r.paymentDiff >= 0 ? 'more' : 'less'), { x: dollars(Math.abs(r.paymentDiff), l) }),
+      interestEffect: fmt(text(v, r.interestDiff >= 0 ? 'saves' : 'adds'), { x: dollars(Math.abs(r.interestDiff), l) }),
     });
     const table = (): Table => ({
       caption: text(v, 'caption'),

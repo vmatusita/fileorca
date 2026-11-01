@@ -21,6 +21,7 @@ export default {
       paragraphs: [
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
         'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
+        'The money calculators work the same way. The prices, rates and balances you type are worked out on your device and are never sent anywhere. The PDF and the CSV of a calculator are made on your device too. Copy link puts your numbers after the # of the address it copies: that part of an address stays in the browser that opens it and is never sent to our server, and the page never adds it to the address on its own.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
       ],
@@ -45,6 +46,9 @@ export default {
         'Click on a next-step suggestion',
         'Tool error, with the browser and the file format',
         'Click on a donation link',
+        'First result of a calculator, with the name of the calculator only',
+        'Download of a calculator PDF or CSV, with the format only',
+        'Click on Copy link in a calculator, without the link',
       ],
     },
     {

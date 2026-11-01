@@ -97,7 +97,7 @@ export default {
     },
     {
       q: 'Does the renter really invest the difference?',
-      a: 'The comparison is only fair if both sides keep the money they save. If the renter would spend it, renting does worse than shown; set the return to zero to see the cash alone.',
+      a: 'The comparison is only fair if both sides keep the money they save. If the renter spent it instead, renting would do worse than shown; set the return to zero to see the cash alone.',
     },
   ],
   privacyHeading: 'Privacy',

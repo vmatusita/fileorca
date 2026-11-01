@@ -21,6 +21,7 @@ export default {
       paragraphs: [
         'As ferramentas do FileOrca rodam no seu navegador. Os arquivos que você escolhe são processados no seu aparelho e nunca são enviados. O FileOrca não tem servidor que processe arquivos, e você não precisa criar conta.',
         'Os números seguem o mesmo princípio. O que você digita em uma ferramenta, como uma largura, uma altura ou uma porcentagem, fica no seu navegador: não entra no endereço da página, e nenhum evento de medição leva esses números.',
+        'As calculadoras de dinheiro funcionam do mesmo jeito. Os preços, as taxas e os saldos que você digita são calculados no seu aparelho e nunca são enviados. O PDF e o CSV de uma calculadora também são gerados no seu aparelho. O botão de copiar o link põe os seus números depois do # do endereço copiado: essa parte do endereço fica no navegador que o abre e nunca vai para o nosso servidor, e a página nunca a acrescenta ao endereço por conta própria.',
         'As ferramentas de imagem, por exemplo, salvam o resultado sem os metadados da foto, inclusive a localização GPS.',
         'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo.',
       ],
@@ -45,6 +46,9 @@ export default {
         'Clique em uma sugestão de próximo passo',
         'Erro da ferramenta, com o navegador e o formato do arquivo',
         'Clique em um link de doação',
+        'Primeiro resultado de uma calculadora, só com o nome da calculadora',
+        'Download do PDF ou do CSV de uma calculadora, só com o formato',
+        'Clique em copiar o link de uma calculadora, sem o link',
       ],
     },
     {

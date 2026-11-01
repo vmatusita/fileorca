@@ -120,7 +120,7 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
     ];
     const interestPart = r.interestDiff === 0 ? text(v, 'sameInterest') : fmt(text(v, r.interestDiff > 0 ? 'lessInterest' : 'moreInterest'), { x: dollars(Math.abs(r.interestDiff), l) });
     const timePart = r.monthsDiff === 0 ? text(v, 'sameTime') : fmt(text(v, r.monthsDiff > 0 ? 'sooner' : 'later'), { x: duration(Math.abs(r.monthsDiff), s) });
-    const diff: Part[] = say(text(v, 'diff'), { interest: interestPart, time: timePart });
+    const diff: Part[] = say(text(v, 'diff'), { interestPart, timePart });
     const table = (): Table => ({
       caption: text(v, 'caption'),
       head: [text(v, 'year'), text(v, 'snowball'), text(v, 'avalanche')],
@@ -220,7 +220,7 @@ export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> 
       compare: {
         a: { name: text(v, 'now'), rows: side(r.current.payment, r.current.totalInterest, r.current.totalPaid, r.current.months) },
         b: { name: text(v, 'loan'), rows: side(r.new.payment, r.new.totalInterest + r.new.fee, r.new.totalPaid, r.new.count) },
-        diff: say(text(v, 'diff'), { payment: lessMore(r.paymentDiff), total: lessMore(r.costDiff) }),
+        diff: say(text(v, 'diff'), { paymentDiff: lessMore(r.paymentDiff), totalDiff: lessMore(r.costDiff) }),
       },
       table: () => loanTable(r.new.rows, 12, s, text(v, 'caption')),
       summary: [

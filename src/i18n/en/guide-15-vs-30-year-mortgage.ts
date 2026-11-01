@@ -1,9 +1,9 @@
 import type { GuideTexts } from '../types.ts';
 
 export default {
-  title: '15 vs 30-Year Mortgage: The Real Cost of Each Term',
+  title: '15-Year vs 30-Year Mortgage: The Real Cost of Each Term',
   description: 'What a 15-year mortgage costs a month and saves in interest against a 30-year one, worked out payment by payment at several rates, with a calculator.',
-  h1: '15 vs 30-year mortgage: the real cost',
+  h1: '15-year vs 30-year mortgage: the real cost',
   lead: 'The shorter term asks more each month and gives back far more in interest. Here is how much, with the numbers worked out.',
   intro: [
     'Most home buyers in the United States choose between two fixed-rate terms: 15 years and 30 years. The question sounds simple, but the two answers pull in opposite directions. The 30-year loan keeps the monthly payment low; the 15-year loan pays the house off in half the time and charges much less interest along the way.',

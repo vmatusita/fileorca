@@ -33,7 +33,7 @@ export default {
       free: 'Debt-free in',
       less: '{x} less',
       more: '{x} more',
-      diff: 'B costs {payment} a month and {total} in all.',
+      diff: 'B costs {paymentDiff} a month and {totalDiff} in all.',
       caption: 'Payment schedule of the consolidation loan, by loan year',
       currentPayment: 'Monthly payments now',
       loanAmount: 'New loan, with the fee',

@@ -19,7 +19,7 @@ export default {
     {
       heading: 'What FileOrca is',
       paragraphs: [
-        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools: compress, resize, crop, rotate, convert and turn images into a PDF. They are in English, and the image compressor is also in Portuguese and Spanish.',
+        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools (compress, resize, crop, rotate, convert and turn images into a PDF) and money calculators for loans, mortgages, debt and savings. They are in English, and the image compressor is also in Portuguese and Spanish.',
         'You do not need an account. Your files are processed on your device, not on a server, and they are never uploaded.',
       ],
     },
@@ -46,7 +46,7 @@ export default {
     {
       heading: 'Calculators are educational, not advice',
       paragraphs: [
-        'FileOrca will also have calculators. They are for learning and information only. They are not financial, legal or medical advice, and they do not replace a qualified professional.',
+        'The calculators are for learning and information only. They are not financial, legal or medical advice, they are not an offer of credit, and they do not replace a qualified professional. A lender, not a calculator, decides what you can borrow and at what rate.',
         'The results are estimates based on the numbers you type. Real life can differ, so check with a qualified professional before you make a decision about money, legal matters or health.',
       ],
     },

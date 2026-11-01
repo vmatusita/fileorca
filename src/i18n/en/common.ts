@@ -130,7 +130,7 @@ export default {
       synonyms: ['biweekly', 'bi-weekly', 'every two weeks', 'half payment', 'mortgage'],
     },
     'mortgage-calculator-15-vs-30-year': {
-      name: '15 vs 30-year mortgage',
+      name: '15-year vs 30-year mortgage',
       description: 'The two terms side by side: payment, interest and the difference.',
       synonyms: ['15 year', '30 year', '15 vs 30', 'mortgage term', 'mortgage'],
     },
@@ -142,7 +142,7 @@ export default {
   },
   guides: {
     'guides-15-vs-30-year-mortgage': {
-      name: '15 vs 30-year mortgage: the real cost',
+      name: '15-year vs 30-year mortgage: the real cost',
       description: 'What the shorter term costs a month and saves in interest, rate by rate.',
       synonyms: ['guide', '15 vs 30', 'mortgage term'],
     },
