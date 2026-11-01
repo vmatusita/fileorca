@@ -21,3 +21,6 @@ desktop.ini
 
 # Worktrees de subagentes
 .claude/worktrees/
+
+# Local preview configuration of the Claude desktop app
+.claude/launch.json
