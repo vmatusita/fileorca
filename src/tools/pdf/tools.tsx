@@ -499,7 +499,7 @@ function ProtectOptions({ state, update, texts, panel, showErrors }: PdfOptionsP
   const mismatch = (showErrors || state.confirm.length >= state.password.length) && state.confirm.length > 0 && state.confirm !== state.password;
   return (
     <div class="fo-fields fo-fields--stack">
-      <PasswordField id="fo-protect-password" label={texts.passwordLabel} value={state.password} onInput={(password) => update({ password })} autocomplete="new-password" help={texts.rule} error={ruleBroken && showErrors ? texts.rule : null} show={panel.password.show} hide={panel.password.hide} />
+      <PasswordField id="fo-protect-password" label={texts.passwordLabel} value={state.password} onInput={(password) => update({ password })} autocomplete="new-password" help={texts.rule} error={ruleBroken && showErrors ? texts.rule : null} show={panel.password.show} showName={panel.password.showPassword} />
       <PasswordField
         id="fo-protect-confirm"
         label={texts.confirmLabel}
@@ -508,7 +508,7 @@ function ProtectOptions({ state, update, texts, panel, showErrors }: PdfOptionsP
         autocomplete="new-password"
         error={mismatch || (showErrors && state.confirm !== state.password) ? texts.mismatch : null}
         show={panel.password.show}
-        hide={panel.password.hide}
+        showName={panel.password.showConfirm}
       />
     </div>
   );
@@ -546,7 +546,7 @@ function UnlockOptions({ state, update, texts, panel, file, failure, showErrors 
         help={texts.rule}
         error={wrong ? fmt(panel.errors.wrongPassword, { name: file.name }) : showErrors && state.draft.length === 0 ? texts.rule : null}
         show={panel.password.show}
-        hide={panel.password.hide}
+        showName={panel.password.showPassword}
         onEnter={submit}
       />
       <button type="button" class="fo-btn fo-btn--brand" onClick={submit}>

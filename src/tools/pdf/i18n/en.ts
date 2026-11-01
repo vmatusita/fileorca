@@ -65,7 +65,7 @@ const texts: PdfPanelTexts = {
     rangeHelp: 'For example 1-3, 5, 8-10',
     rangeError: 'Type page numbers from 1 to {total}, like 1-3, 5.',
   },
-  password: { show: 'Show', hide: 'Hide' },
+  password: { show: 'Show', showPassword: 'Show password', showConfirm: 'Show password confirmation' },
   errors: {
     title: "Oops, Oli couldn't use this file",
     empty: '{name} is empty. Choose the file again.',

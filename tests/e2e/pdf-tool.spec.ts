@@ -179,6 +179,26 @@ test('Protect PDF: the broken rule and the two passwords that differ are alerts'
   await alerted(page, "The two passwords don't match");
 });
 
+test('Protect PDF: each Show toggle names its field, and the name stays when it is pressed', async ({ page }) => {
+  await openTool(page, '/protect-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  // The file is read (the action takes the focus then), so nothing moves the focus after the press below.
+  await expect(page.getByRole('button', { name: 'Protect PDFs' })).toBeFocused({ timeout: 30_000 });
+  await expect(page.locator('#fo-tool-root .fo-pass__toggle')).toHaveCount(2);
+  const password = page.getByRole('button', { name: panel.password.showPassword, exact: true });
+  const confirm = page.getByRole('button', { name: panel.password.showConfirm, exact: true });
+  await expect(password).toHaveCount(1);
+  await expect(confirm).toHaveCount(1);
+  await expect(password).toHaveAttribute('aria-pressed', 'false');
+  await password.focus();
+  await page.keyboard.press('Space');
+  // Found again by the same name: pressing it changed the state, not the name (WAI-ARIA toggle button).
+  await expect(password).toHaveAttribute('aria-pressed', 'true');
+  await expect(password).toBeFocused();
+  await expect(page.locator('#fo-protect-password')).toHaveAttribute('type', 'text');
+  await expect(page.locator('#fo-protect-confirm')).toHaveAttribute('type', 'password');
+});
+
 test('Delete, Reorder and Split: the press of the action with nothing to do is an alert', async ({ page }) => {
   for (const [path, action, sentence] of [
     ['/delete-pdf-pages/', 'Delete pages', 'Pick at least one page to delete.'],

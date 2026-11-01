@@ -636,7 +636,11 @@ export interface PdfPanelTexts {
     rangeHelp: string;
     rangeError: string;
   };
-  password: { show: string; hide: string };
+  /**
+   * The toggle of a password field (DECISOES § 177): its visible text, and the name of each field's toggle, which starts
+   * with that text and never changes (the state is aria-pressed).
+   */
+  password: { show: string; showPassword: string; showConfirm: string };
   errors: {
     title: string;
     empty: string;

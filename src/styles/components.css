@@ -567,6 +567,8 @@
 /* Password field: the NumberField box with a text button inside it. */
 .fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--fo-font-text); cursor: pointer; }
 .fo-pass__toggle:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; }
+/* The toggle keeps its text in both states (DECISOES § 177): pressed, it takes the pressed look of the Merge handle. */
+.fo-pass__toggle[aria-pressed="true"] { background: var(--brand-soft); }
 
 /* Page grid: cells in the FileCard's look, a picture drawn only while on screen. */
 .fo-pages { display: grid; gap: var(--space-3); }

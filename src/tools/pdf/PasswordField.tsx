@@ -17,12 +17,14 @@ export interface PasswordFieldProps {
   help?: string;
   /** Shown instead of nothing when the value breaks the rule. */
   error?: string | null;
+  /** The visible text of the toggle ("Show"), the same in both states. */
   show: string;
-  hide: string;
+  /** The toggle's name, which starts with `show` and names the field ("Show password"); aria-pressed says the state. */
+  showName: string;
   onEnter?: () => void;
 }
 
-export default function PasswordField({ id, label, value, onInput, autocomplete, help, error, show, hide, onEnter }: PasswordFieldProps) {
+export default function PasswordField({ id, label, value, onInput, autocomplete, help, error, show, showName, onEnter }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
@@ -50,8 +52,10 @@ export default function PasswordField({ id, label, value, onInput, autocomplete,
             }
           }}
         />
-        <button type="button" class="fo-pass__toggle" aria-pressed={visible} aria-controls={id} onClick={() => setVisible(!visible)}>
-          {visible ? hide : show}
+        {/* One name in both states, with the field in it (two toggles on Protect PDF), and the state in aria-pressed:
+            a label that flipped to "Hide" while pressed said the opposite of the state (DECISOES § 177). */}
+        <button type="button" class="fo-pass__toggle" aria-label={showName} aria-pressed={visible} aria-controls={id} onClick={() => setVisible(!visible)}>
+          {show}
         </button>
       </div>
       {error && (
