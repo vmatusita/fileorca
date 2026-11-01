@@ -6,7 +6,7 @@ Cada caso abriu a página da ferramenta uma vez por navegador. As ferramentas de
 
 Legenda: `ok: o que foi conferido`, `refused: a fala da linha do arquivo` e `failed: a primeira linha do erro` (uma saída que não passou); `—` é uma linha que aquele navegador não gravou.
 
-Ao todo, 356 linhas: 270 conferidas e 84 recusas, e 2 falharam (Chromium 178, WebKit 178).
+Ao todo, 356 linhas: 272 conferidas e 84 recusas (Chromium 178, WebKit 178).
 
 ## Cobertura
 
@@ -19,7 +19,7 @@ Cada forma de rodar uma ferramenta contra as fixtures que ela aceita (as legíve
 | `pdf-to-jpg` | 11 | 11 | — |
 | `compress-pdf` | 10 | 10 | — |
 | `compress-pdf (lossless)` | 10 | 10 | — |
-| `compress-pdf (strong)` | 10 | 9 | gen-xref-estragada.pdf (Chromium: failed, WebKit: failed) |
+| `compress-pdf (strong)` | 10 | 10 | — |
 | `rotate-pdf` | 10 | 10 | — |
 | `delete-pdf-pages` | 10 | 10 | — |
 | `add-page-numbers-to-pdf` | 10 | 10 | — |
@@ -44,7 +44,7 @@ Cada forma de rodar uma ferramenta contra as fixtures que ela aceita (as legíve
 | `compress-strong-117` | `compress-pdf (strong)` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `compress-strong-300` | `compress-pdf (strong)` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `compress-strong-nasa` | `compress-pdf (strong)` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
-| `compress-strong-small` | `compress-pdf (strong)` | 6 ok · 4 recusadas · 1 falharam | 6 ok · 4 recusadas · 1 falharam |
+| `compress-strong-small` | `compress-pdf (strong)` | 7 ok · 4 recusadas | 7 ok · 4 recusadas |
 | `delete-117` | `delete-pdf-pages` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `delete-300` | `delete-pdf-pages` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `delete-nasa` | `delete-pdf-pages` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
@@ -199,7 +199,7 @@ Cada forma de rodar uma ferramenta contra as fixtures que ela aceita (as legíve
 | `gen-ja-otimizado.pdf` | `compress-strong-small` | ok: no gain, original bytes (15537) | ok: no gain, original bytes (15537) |
 | `pdf-escaneado-01-pagina-livro-cor.pdf` | `compress-strong-small` | ok: 167938 → 54102 bytes | ok: 167938 → 54147 bytes |
 | `pdf-formulario-irs-1040-2019.pdf` | `compress-strong-small` | ok: no gain, original bytes (146326) | ok: no gain, original bytes (146326) |
-| `gen-xref-estragada.pdf` | `compress-strong-small` | failed: strict structure: +   "the startxref offset 999999 is not inside the body of the file", | failed: strict structure: +   "the startxref offset 999999 is not inside the body of the file", |
+| `gen-xref-estragada.pdf` | `compress-strong-small` | ok: 2787 → 2075 bytes | ok: 2787 → 2075 bytes |
 
 ## `rotate-pdf`
 
