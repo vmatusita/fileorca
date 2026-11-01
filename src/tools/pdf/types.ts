@@ -27,6 +27,8 @@ export interface PdfIcons {
   trash: string;
   chevron: string;
   plus: string;
+  /** The handle of a row of the Merge list: Space picks it up, the arrow keys move it. */
+  reorder: string;
 }
 
 export interface PdfPanelData<O = object> {

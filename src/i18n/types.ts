@@ -595,6 +595,13 @@ export interface PdfPanelTexts {
     moveEarlier: string;
     moveLater: string;
     moved: string;
+    /**
+     * Merge list, keyboard (criterion 10): the handle of a row that Space picks up ("Pick up {name}"), what the status
+     * region says when it is picked up, and when it is dropped ("{name} dropped at number {position} of {total}.").
+     */
+    pickUp: string;
+    picked: string;
+    dropped: string;
     unchanged: string;
     /** In the slot before the action: "{count} PDFs ready" and "1 PDF ready". */
     ready: string;
@@ -616,6 +623,8 @@ export interface PdfPanelTexts {
     moved: string;
     /** "Page {n} picked up: use the arrow keys, then Space to drop it." */
     picked: string;
+    /** "Page {n} dropped at position {position}.": the drop is not a second "moved", so each move is said once. */
+    dropped: string;
     turn: string;
     turned: string;
     /** Keyboard help under the grid. */

@@ -584,7 +584,9 @@
 .fo-page__badge { position: absolute; top: var(--space-1); left: var(--space-1); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
 .fo-page__moves { display: flex; justify-content: space-between; }
 .fo-page__move--back .fo-icon, .fo-merge__move--up .fo-icon { rotate: 180deg; }
-.fo-merge .fo-filelist__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.fo-merge .fo-filelist__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.fo-merge .fo-filelist__row[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
+.fo-merge__grab[aria-pressed="true"] { background: var(--brand-soft); }
 .fo-merge__moves { display: flex; flex-direction: column; }
 .fo-merge__move .fo-icon { rotate: 90deg; }
 .fo-merge__move--up .fo-icon { rotate: -90deg; }

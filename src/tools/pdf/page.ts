@@ -77,7 +77,7 @@ export function panelData(id: PdfToolId): PdfPanelData {
       unlock: { href: unlock.paths.en ?? '/unlock-pdf/', name: enCommon.pdf['unlock-pdf'].name },
       imageToPdf: { href: pathFor('image-to-pdf', 'en'), name: enCommon.tools['image-to-pdf'].name },
     },
-    icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload },
+    icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload, reorder: ICONS.reorder },
     ink: lightInk(),
     coffeeHref: KOFI_URL,
     adsOn: buildAdsConfig().scriptEnabled,

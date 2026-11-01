@@ -149,7 +149,8 @@ export default function PageGrid(props: PageGridProps) {
         announce(fmt(texts.picked, { n: (sequence[position] ?? 0) + 1 }));
       } else {
         setGrabbed(null);
-        announce(fmt(texts.moved, { n: grabbed + 1, position: position + 1 }));
+        // The drop has its own sentence: the moves were said as they happened, so none is said twice (criterion 10).
+        announce(fmt(texts.dropped, { n: grabbed + 1, position: position + 1 }));
       }
     }
     if (event.key === 'Escape' && grabbed !== null) setGrabbed(null);

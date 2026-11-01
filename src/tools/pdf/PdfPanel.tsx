@@ -12,7 +12,7 @@
 // render(). Object URLs are revoked when replaced and at "Start over"; the grid's thumbnails go when they leave the
 // screen. Nothing typed (password, text, ranges, numbers) leaves this component except in the request to the worker.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { ComponentChildren, JSX, TargetedMouseEvent } from 'preact';
+import type { ComponentChildren, JSX, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track, type Codec, type ErrorReason, type Outcome } from '../../analytics/events.ts';
 import { PRODUCTION_HOSTNAME } from '../../platform/site.ts';
@@ -94,11 +94,13 @@ interface Model {
   showErrors: boolean;
   expanded: boolean;
   slotFocus: boolean;
+  /** Merge list, keyboard: the id of the row Space picked up (the arrow keys move it), or null. */
+  grabbed: number | null;
 }
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, bundle: null, single: null, notes: [],
-  announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
+  announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false, grabbed: null,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -422,6 +424,7 @@ export default function PdfPanel(props: PdfPanelData) {
   function teardown(): void {
     for (const item of m.items) item.removed = true;
     m.items = [];
+    m.grabbed = null;
     revoke(m.bundle);
     revoke(m.single);
     m.bundle = null;
@@ -499,6 +502,7 @@ export default function PdfPanel(props: PdfPanelData) {
 
   function removeItem(item: Item): void {
     item.removed = true;
+    if (m.grabbed === item.id) m.grabbed = null;
     m.items = m.items.filter((other) => other !== item);
     if (m.items.length === 0) {
       startOver();
@@ -515,14 +519,48 @@ export default function PdfPanel(props: PdfPanelData) {
     render();
   }
 
-  function moveItem(from: number, to: number): void {
+  /** `focus` is the control of the moved row that keeps the focus: the arrow buttons by default, the handle for the keyboard. */
+  function moveItem(from: number, to: number, focus = '.fo-merge__move:not([disabled])'): void {
     if (to < 0 || to >= m.items.length || from === to) return;
     const [item] = m.items.splice(from, 1);
     if (!item) return;
     m.items.splice(to, 0, item);
     if (m.phase === 'done') m.phase = 'ready';
     say(fmt(t.queue.moved, { name: item.file.name || t.fileFallback, position: to + 1, total: m.items.length }));
-    window.setTimeout(() => rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"] .fo-merge__move:not([disabled])`)?.focus(), 0);
+    window.setTimeout(() => rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"] ${focus}`)?.focus(), 0);
+  }
+
+  /** Space or Enter on a row's handle: picks the row up, or drops it where it is. Each is said once (WCAG 4.1.3). */
+  function toggleGrab(item: Item, position: number): void {
+    const name = item.file.name || t.fileFallback;
+    if (m.grabbed === item.id) {
+      m.grabbed = null;
+      say(fmt(t.queue.dropped, { name, position: position + 1, total: m.items.length }));
+    } else {
+      m.grabbed = item.id;
+      say(fmt(t.queue.picked, { name }));
+    }
+  }
+
+  /**
+   * Arrow keys on a handle (the keyboard alternative to dragging a row, WCAG 2.5.7): while a row is picked up they move
+   * it; otherwise they go to the handle of the next or previous row. Home and End go to the ends. Escape lets go.
+   */
+  function onGrabKey(event: TargetedKeyboardEvent<HTMLButtonElement>, item: Item, position: number): void {
+    const last = m.items.length - 1;
+    const target = event.key === 'ArrowUp' ? position - 1 : event.key === 'ArrowDown' ? position + 1 : event.key === 'Home' ? 0 : event.key === 'End' ? last : null;
+    if (target !== null) {
+      event.preventDefault();
+      const to = Math.min(last, Math.max(0, target));
+      if (m.grabbed === item.id) moveItem(position, to, '.fo-merge__grab');
+      else {
+        const other = m.items[to];
+        if (other) rootRef.current?.querySelector<HTMLElement>(`[data-row="${other.id}"] .fo-merge__grab`)?.focus();
+      }
+    } else if (event.key === 'Escape' && m.grabbed === item.id) {
+      m.grabbed = null;
+      render();
+    }
   }
 
   // --- events from the page -----------------------------------------------------------------------------------------
@@ -905,6 +943,7 @@ export default function PdfPanel(props: PdfPanelData) {
               key={item.id}
               class="fo-filelist__row"
               data-row={item.id}
+              data-grabbed={m.grabbed === item.id ? 'true' : undefined}
               draggable={mode === 'merge'}
               onDragStart={() => {
                 dragging.current = position;
@@ -919,6 +958,19 @@ export default function PdfPanel(props: PdfPanelData) {
                 dragging.current = null;
               }}
             >
+              {mode === 'merge' && (
+                <button
+                  type="button"
+                  class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__grab"
+                  aria-pressed={m.grabbed === item.id}
+                  aria-label={fmt(t.queue.pickUp, { name: nameOf(item) })}
+                  aria-describedby="fo-merge-help"
+                  onClick={() => toggleGrab(item, position)}
+                  onKeyDown={(event) => onGrabKey(event, item, position)}
+                >
+                  <Icon inner={icons.reorder} class="fo-icon--sm" />
+                </button>
+              )}
               <FileCard {...rowProps(item)} />
               {mode === 'merge' && (
                 <span class="fo-merge__moves">
@@ -933,7 +985,11 @@ export default function PdfPanel(props: PdfPanelData) {
             </div>
           ))}
         </div>
-        {mode === 'merge' && <p class="fo-field__help">{(texts.options as { help?: string }).help}</p>}
+        {mode === 'merge' && (
+          <p class="fo-field__help" id="fo-merge-help">
+            {(texts.options as { help?: string }).help}
+          </p>
+        )}
         {hidden > 0 && (
           <button
             type="button"
