@@ -106,6 +106,21 @@ describe('the published PDF.js', () => {
     });
   }
 
+  it('starts qcms (the ICC colour decoder, and the synchronous XHR that fetches its .wasm) only with useWorkerFetch on, which the engine turns off', () => {
+    // So the site serves neither qcms_bg.wasm nor a colour profile (they are left out of the data folder, see below), and a
+    // PDF with an ICC profile is drawn with PDF.js's own colour maths instead of asking for them.
+    let gate = '';
+    visit(publishedFile('legacy/build/pdf.worker.mjs'), (node) => {
+      if (ts.isClassDeclaration(node) && node.name?.text === 'IccColorSpace') {
+        for (const member of node.members) {
+          if (ts.isMethodDeclaration(member) && member.name.getText() === 'setOptions' && member.body?.statements[0]) gate = squash(member.body.statements[0].getText());
+        }
+      }
+    });
+    expect(gate).toBe('if(!useWorkerFetch){this.#useWasm=false;return;}');
+    expect(readFileSync('src/engine/pdf/pdfjs.ts', 'utf8')).toMatch(/useWorkerFetch: false/);
+  });
+
   it('has no isEvalSupported option left to turn off; should one come back, the engine has to set it to false', () => {
     const mentions = [...LEGACY, 'types/src/display/api.d.ts'].filter((file) => readFileSync(join(PUBLISHED, file), 'utf8').includes('isEvalSupported'));
     const engine = readFileSync('src/engine/pdf/pdfjs.ts', 'utf8');
