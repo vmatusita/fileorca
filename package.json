@@ -31,7 +31,8 @@
     "design:gerar": "node scripts/design/tema.ts && node scripts/design/folha.ts",
     "screenshots": "node scripts/screenshots.ts",
     "fixtures": "node scripts/fixtures/generate.ts",
-    "motor:exportar": "node scripts/oss/image-engine.ts"
+    "motor:exportar": "node scripts/oss/image-engine.ts",
+    "guias:medir": "node scripts/guides/measure.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
