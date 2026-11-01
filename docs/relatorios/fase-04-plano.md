@@ -162,11 +162,11 @@ Home em inglês: seção de dinheiro com as cinco de crédito e o link do hub, s
 | 1 | 18 páginas, hub e 5 guias com 200, H1, título e descrição | `routes.test.ts`, `gate:seo`, `gate:prontidao`, `budgets.spec.ts` (status 200), prévia |
 | 2 | Oráculo antes do motor; teste no centavo; mutante; SHA | `git log … -- fixtures/calc src/calc`, `calc-oracle.test.ts`, mutante com `CALC_FIXTURES_DIR` |
 | 3 | Exemplos externos | `OFFICIAL_CHECKS` no oráculo, `OFICIAIS.md`, casos no teste |
-| 4 | Privacidade dos números | `tests/e2e/calc-privacy.spec.ts` (sentinelas em todo campo, cronograma, PDF, CSV, link, chip, carga com `#`) |
+| 4 | Privacidade dos números | `tests/e2e/money-privacy.spec.ts` (sentinelas em todo campo, cronograma, PDF, CSV, link, chip, carga com `#`) |
 | 5 | Portões de dinheiro, conteúdo e prontidão | `gate:dinheiro-saude` (contagem = rotas `dinheiro`, zero reprova), `gate:conteudo`, `gate:prontidao`, controles em `ymyl/conteudo/prontidao.test.ts` |
 | 6 | Orçamento | `budgets.spec.ts` (`CALC_PAGES`, pares), teste do `dist/` |
-| 7 | 16 ms por tecla | `tests/e2e/calc-speed.spec.ts` (Chromium, 30 teclas por `page.evaluate`, p95 ≤ 16 ms, nenhuma linha de mês antes de abrir) |
-| 8 | CSV = oráculo, PDF | `calc.spec.ts` (CSV lido de volta contra o caso `full`), `strictPdf` e texto do content stream |
+| 7 | 16 ms por tecla | `tests/e2e/money-speed.spec.ts` (Chromium, 30 teclas por `page.evaluate`, p95 ≤ 16 ms, nenhuma linha de mês antes de abrir) |
+| 8 | CSV = oráculo, PDF | `money-calc.spec.ts` (CSV lido de volta contra o caso `full`), `strictPdf` e texto do content stream |
 | 9 | Lighthouse | `lighthouserc.json` com `/mortgage-calculator/` e `/guides/15-vs-30-year-mortgage/` |
 | 10 | Blogs | `docs/lancamento/blogs-financas.md` (20, LanguageTool) |
 | 11 | `pnpm verificar` e CI | saída local e `gh run view` |

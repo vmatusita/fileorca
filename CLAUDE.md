@@ -225,7 +225,7 @@ Comandos novos:
 | --- | --- |
 | `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python scripts/oracle/calc.py` | Regera `fixtures/calc/` (`--check` compara sem gravar, `--only <id>` faz uma calculadora). Fora do `verificar`: o CI lê as fixtures commitadas, e o `calc-oracle.test.ts` confere o SHA-256 do script |
 | `CALC_FIXTURES_DIR=<cópia> pnpm exec vitest run tests/unit/calc-oracle.test.ts` | A prova do mutante: uma cópia das fixtures com um centavo mudado tem de reprovar |
-| `pnpm exec playwright test tests/e2e/calc-speed.spec.ts --project=chromium` | A medida dos 16 ms por tecla (p50 e p95 no log, linhas `[16 ms]`) |
+| `pnpm exec playwright test tests/e2e/money-speed.spec.ts --project=chromium` | A medida dos 16 ms por tecla (p50 e p95 no log, linhas `[16 ms]`) |
 
 Convenção do dinheiro (DECISOES § 111 e § 127):
 
@@ -240,7 +240,7 @@ Como acrescentar uma calculadora:
 3. O id no `src/tools/calc/registry.ts` (`CALC_PAGES`: caminho, mãe, ícone, grupo, chips, relacionadas, guia e nome do arquivo) e em `CALC_EVENT_TOOLS` (`src/analytics/tool-ids.ts`); a rota sai sozinha de `moneyRoutes()`.
 4. A definição em `src/tools/calc/defs/` (campos com faixa fixa, `initial` igual ao `page-example`, `toInput`, `view`) e a entrada em `DEFS`.
 5. Os textos em `src/tools/<slug>/i18n/en.ts` (`CalcPageTexts`: o erro diz a faixa, os blocos que o `gate:conteudo` e o `gate:dinheiro-saude` pedem) e o cartão em `src/i18n/en/common.ts` (`calcs`); a página em `src/pages/<slug>/index.astro` com `<CalcTool id lang="en" />`.
-6. Testes: o `calc-defs.test.ts`, o `budgets.spec.ts`, o `ads.spec.ts`, o `calc-privacy.spec.ts` e o `a11y.spec.ts` já pegam a página pelo registro. Confira o resultado acima da dobra a 360 × 740 (o `ads.spec.ts` reprova).
+6. Testes: o `calc-defs.test.ts`, o `budgets.spec.ts`, o `ads.spec.ts`, o `money-privacy.spec.ts` e o `a11y.spec.ts` já pegam a página pelo registro. Confira o resultado acima da dobra a 360 × 740 (o `ads.spec.ts` reprova).
 
 Pegadinhas que a F4 achou:
 
@@ -254,8 +254,9 @@ Pegadinhas que a F4 achou:
 - No Git Bash, heredoc com apóstrofo (`cat <<'EOF'` com "mortgage pages'") quebra o comando: escreva o arquivo com a ferramenta de escrita. Script Python que grava texto no Windows troca LF por CRLF; o Git normaliza no commit.
 - Medida de tempo no WebKit anda de 1 em 1 ms: o teste dos 16 ms só afirma o limite no Chromium e imprime o WebKit.
 - A grade dos campos usa subgrid (§ 137): cada item ocupa duas linhas, e o `CalcField` tem dois filhos, o rótulo e o `.fo-field__body`. Um `fieldset` (grupo de opções) fica fora do subgrid, porque no WebKit ele deixava 12 px vazios. Componente novo na grade: confira a altura dele e a do vizinho nos dois navegadores.
-- Enquanto o resultado é um problema, ou fica velho por um campo a corrigir, o PDF e o CSV ficam desligados (§ 139). Um teste que precisa baixar arquivo tem de deixar a conta com resultado (o `calc-privacy.spec.ts` desce a sentinela até isso acontecer).
+- Enquanto o resultado é um problema, ou fica velho por um campo a corrigir, o PDF e o CSV ficam desligados (§ 139). Um teste que precisa baixar arquivo tem de deixar a conta com resultado (o `money-privacy.spec.ts` desce a sentinela até isso acontecer).
 - O `budgets.spec.ts` não usa o `networkidle`, que no WebKit do Linux nunca disparava nos hubs (§ 138). Teste novo que precise da página quieta: espere o `load` e um intervalo sem requisição, como o `settler` dele.
 - O `ENOSPC` do WebKit do CI segue o `design.spec.ts` em qualquer parte (§ 108, § 109 e § 141). Se uma parte cair assim, leia as linhas `[disco]` e rode de novo só ela; não mexa em teste.
 - No Git Bash, um `node -e "…"` com acento grave dentro de aspas duplas executa o trecho como comando (o texto some sem erro). Script com Markdown ou template literal vai para um arquivo, pela ferramenta de escrita.
 - Para provar que um teste falha sem a correção, nunca use `git checkout <commit> -- arquivo` com mudança não commitada no mesmo arquivo: o `checkout HEAD` de volta apaga a mudança. Rode o teste contra o `dist/` antigo (antes do build) ou injete a regra antiga no teste.
+- Os specs de dinheiro se chamam `money-*.spec.ts` para caírem depois do `design.spec.ts` na divisão do WebKit (§ 142). Com o nome `calc-*`, eles empurravam o `design.spec.ts` para a parte 3, junto com a matriz de imagens, e a parte caía por `ENOSPC`. Spec novo pesado: rode o `--list` das três partes antes do push e veja se o `design.spec.ts` continua na parte 2.

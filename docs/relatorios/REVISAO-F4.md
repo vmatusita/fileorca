@@ -91,11 +91,11 @@ Na coluna "Lente → cético", a primeira severidade é a da lente; depois vêm 
 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
-| COR-1 | médio → confirmado (médio) | APY para APR custa 22 ms por tecla (orçamento da decisão 4: 16 ms) e calcula a raiz 365 duas vezes | corrigido em `eba71cb`; teste: `calc-speed.spec.ts`, "APY into APR, daily" (p95 1,6 ms) |
+| COR-1 | médio → confirmado (médio) | APY para APR custa 22 ms por tecla (orçamento da decisão 4: 16 ms) e calcula a raiz 365 duas vezes | corrigido em `eba71cb`; teste: `money-speed.spec.ts`, "APY into APR, daily" (p95 1,6 ms) |
 | COR-2 | médio → confirmado (médio) | O FAQ da Personal loan manda zerar a tarifa financiada, e a página passa a mostrar a taxa nominal como APR | corrigido em `5d3f16b`; teste: `calc-defs.test.ts`, "the FAQ way to enter a fee added to the balance gives the true APR" |
-| COR-3 | médio → parcial (médio) | Estado de erro: o PDF da Savings goal leva '{deposit}' cru e o PDF de qualquer erro estoura a página | corrigido em `a5b1a50 e 5d3f16b`; teste: `calc-defs.test.ts` (pontas das faixas e estados de erro) e `calc.spec.ts` (DES-2, COR-3) |
-| COR-4 | médio → confirmado (médio) | Taxas pré-preenchidas sem a etiqueta 'example': taxa atual do Refinance e APR das dívidas | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "every prefilled rate carries the example tag" |
-| COR-5 | médio → parcial (baixo) | Guia do Refinance diz 'a new 30 years loan' | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "each guide links the calculator it embeds" (sem "N years loan") |
+| COR-3 | médio → parcial (médio) | Estado de erro: o PDF da Savings goal leva '{deposit}' cru e o PDF de qualquer erro estoura a página | corrigido em `a5b1a50 e 5d3f16b`; teste: `calc-defs.test.ts` (pontas das faixas e estados de erro) e `money-calc.spec.ts` (DES-2, COR-3) |
+| COR-4 | médio → confirmado (médio) | Taxas pré-preenchidas sem a etiqueta 'example': taxa atual do Refinance e APR das dívidas | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "every prefilled rate carries the example tag" |
+| COR-5 | médio → parcial (baixo) | Guia do Refinance diz 'a new 30 years loan' | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "each guide links the calculator it embeds" (sem "N years loan") |
 | COR-6 | baixo → confirmado (baixo) | Singular e plural errados com n = 1: '1 years', '1 days', '1 months', '1 payments' | pendente (baixo): "1 years", "1 payments" com n = 1; texto, sem número errado |
 | COR-7 | baixo → confirmado (baixo) | Com entrada = preço (empréstimo zero) os presets de hipoteca mostram frases sem sentido, e o oráculo não tem esse caso | pendente (baixo): entrada igual ao preço nos presets dá frase sem sentido; caso de borda raro |
 | COR-8 | baixo → confirmado (médio) | Extra payments: com extra abaixo de uns $5 por mês a frase diz que não há extra, ao lado de um valor de juros economizados | corrigido em `5d3f16b`; teste: `calc-defs.test.ts`, "an extra too small to end the loan sooner still says what it saves" |
@@ -114,8 +114,8 @@ Na coluna "Lente → cético", a primeira severidade é a da lente; depois vêm 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
 | PRI-1 | baixo → parcial (baixo) | O teste de privacidade deixa 14 sentinelas fora da busca e nunca digita nos campos de modo, nas linhas novas de dividas nem na entrada em % | pendente (baixo): o teste não digita nos campos que só aparecem com outro modo nem em linhas novas de dívidas; a sonda da lente cobriu 40 cenários e não achou vazamento |
-| PRI-2 | baixo → confirmado (baixo) | A asserção de que o link copiado foi lido nunca falha | corrigido em `5d3f16b`; teste: a própria asserção de `calc-privacy.spec.ts`, agora contra a sentinela no formato da página |
-| PRI-3 | baixo → confirmado (baixo) | Sem area de transferencia, o campo com o link fica com os numeros antigos depois de qualquer edicao | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "without a clipboard, the shown link follows the numbers" |
+| PRI-2 | baixo → confirmado (baixo) | A asserção de que o link copiado foi lido nunca falha | corrigido em `5d3f16b`; teste: a própria asserção de `money-privacy.spec.ts`, agora contra a sentinela no formato da página |
+| PRI-3 | baixo → confirmado (baixo) | Sem area de transferencia, o campo com o link fica com os numeros antigos depois de qualquer edicao | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "without a clipboard, the shown link follows the numbers" |
 | PRI-4 | baixo → parcial (baixo) | cleanParams so fecha tool, target, format, outcome, reason e codec; lang, place e browser aceitam qualquer texto, e o teste so prova os fechados | pendente (baixo): lang, place e browser aceitam qualquer texto no cleanParams; nenhum deles vem de campo digitado |
 | PRI-5 | baixo → refutado (baixo) | O # com os numeros fica no location.href durante a visita inteira e o teste nao ve nenhum script de terceiro que o leia (AdSense) | refutado pelo cético |
 
@@ -123,7 +123,7 @@ Na coluna "Lente → cético", a primeira severidade é a da lente; depois vêm 
 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
-| ANU-1 | médio → parcial (médio) | Com a Oli cheer e a Placa, um resultado de 7 dígitos ou mais alarga o ResultHero: o painel passa de 150 px do anúncio lateral e a página rola no celular | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "a long result with the cheer stays in its column" |
+| ANU-1 | médio → parcial (médio) | Com a Oli cheer e a Placa, um resultado de 7 dígitos ou mais alarga o ResultHero: o painel passa de 150 px do anúncio lateral e a página rola no celular | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "a long result with the cheer stays in its column" |
 | ANU-2 | médio → confirmado (médio) | Savings goal mostra o número 1.2,261,029,503,889,166e+.27 na legenda de juros quando a meta já está atingida, num valor que a faixa do campo aceita | corrigido em `8544ebe (oráculo) e a5b1a50 (motor)`; teste: `calc-oracle.test.ts` (casos too-large) e `calc-defs.test.ts` |
 | ANU-3 | médio → confirmado (médio) | Campos de taxa preenchidos com um valor de exemplo sem a etiqueta 'example' na Refinance e nas listas de dívidas | corrigido em `5d3f16b`; teste: o mesmo de COR-4 |
 | ANU-4 | baixo → confirmado (baixo) | As premissas do preset Biweekly se contradizem: 'juros uma vez por mês, taxa ÷ 12' e 'juros a cada duas semanas, taxa ÷ 26' | corrigido em `5d3f16b`; teste: `calc-defs.test.ts`, "Biweekly: the monthly rule of interest is said as the comparison" |
@@ -134,13 +134,13 @@ Na coluna "Lente → cético", a primeira severidade é a da lente; depois vêm 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
 | COR-1 | crítico → parcial (médio) | Savings goal mostra número quebrado ('$1.2,261,029,503,889,166e+.27') com valores dentro das faixas aceitas | corrigido em `8544ebe e a5b1a50`; teste: o mesmo de ANU-2 |
-| ACE-1 | médio → confirmado (médio) | O atraso de 500 ms do aria-live conta desde a última mudança do resultado, não desde a última tecla | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the hero speaks half a second after the last key press" |
-| ACE-2 | médio → parcial (médio) | O campo 'Home value change per year' (aceita negativo) usa inputmode="decimal", cujo teclado do iPhone não tem o sinal de menos | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the one field that takes a minus opens the text keyboard" |
+| ACE-1 | médio → confirmado (médio) | O atraso de 500 ms do aria-live conta desde a última mudança do resultado, não desde a última tecla | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the hero speaks half a second after the last key press" |
+| ACE-2 | médio → parcial (médio) | O campo 'Home value change per year' (aceita negativo) usa inputmode="decimal", cujo teclado do iPhone não tem o sinal de menos | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the one field that takes a minus opens the text keyboard" |
 | ACE-3 | médio → parcial (baixo) | A unidade do campo (years, months, %, $) é só visual: não entra no nome nem na descrição do campo | pendente (baixo): a unidade (years, %, $) é visual e o nome do campo não a traz; o erro diz a unidade |
-| DES-1 | médio → confirmado (médio) | Um campo ao lado de outro com ajuda ou erro estica e passa de 48 px (HOA dues fica com 86 a 96 px de altura na Mortgage) | corrigido em `b3bb351 e 5d3f16b`; teste: `calc.spec.ts`, "two fields side by side keep their inputs on one line" e "the box of every field is control-h high" |
-| ACE-4 | baixo → confirmado (médio) | O aria-label do SplitChart traz os valores mas não as porcentagens que o README pede | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the chart is named with whole dollars and both shares" |
-| ACE-5 | baixo → confirmado (baixo) | O cabeçalho fixo do cronograma cobre quase todo o botão de ano ao voltar com Shift+Tab | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the header never hides a year" |
-| ACE-6 | baixo → confirmado (médio) | Na lista de dívidas o foco vai para o body quando o botão focado some (décima dívida, última linha removida, mínimo) | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the keyboard focus stays in the list when debts come and go" |
+| DES-1 | médio → confirmado (médio) | Um campo ao lado de outro com ajuda ou erro estica e passa de 48 px (HOA dues fica com 86 a 96 px de altura na Mortgage) | corrigido em `b3bb351 e 5d3f16b`; teste: `money-calc.spec.ts`, "two fields side by side keep their inputs on one line" e "the box of every field is control-h high" |
+| ACE-4 | baixo → confirmado (médio) | O aria-label do SplitChart traz os valores mas não as porcentagens que o README pede | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the chart is named with whole dollars and both shares" |
+| ACE-5 | baixo → confirmado (baixo) | O cabeçalho fixo do cronograma cobre quase todo o botão de ano ao voltar com Shift+Tab | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the header never hides a year" |
+| ACE-6 | baixo → confirmado (médio) | Na lista de dívidas o foco vai para o body quando o botão focado some (décima dívida, última linha removida, mínimo) | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the keyboard focus stays in the list when debts come and go" |
 | ACE-7 | baixo → parcial (baixo) | A ordem de tabulação no computador pula para a coluna do resultado e volta (campos principais, ExportBar, campos opcionais) | pendente (baixo): no computador a tabulação vai aos campos principais, à coluna do resultado e volta aos opcionais; é a ordem do HTML, que o molde fixa |
 | ACE-8 | baixo → parcial (baixo) | Botões 'CSV' e o de mostrar o cronograma: nome fraco e rótulo que muda junto com aria-expanded | pendente (baixo): "CSV" e o botão do cronograma com nome fraco |
 | ACE-9 | baixo → parcial (baixo) | AmortTable sem cabeçalho de linha (th scope=row) e região e tabela com o mesmo nome | pendente (baixo): o cronograma sem th scope=row e a região com o mesmo nome da tabela |
@@ -151,24 +151,24 @@ Na coluna "Lente → cético", a primeira severidade é a da lente; depois vêm 
 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
-| SEO-1 | médio → parcial (baixo) | Os 5 guias embutem uma calculadora mas nao linkam a pagina dela (link interno so de ida) | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "each guide links the calculator it embeds" |
+| SEO-1 | médio → parcial (baixo) | Os 5 guias embutem uma calculadora mas nao linkam a pagina dela (link interno so de ida) | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "each guide links the calculator it embeds" |
 | SEO-2 | baixo → parcial (baixo) | Titulo e descricao da calculadora puxam o mesmo angulo do guia correspondente | pendente (baixo): título e descrição da calculadora e do guia puxam ângulos parecidos; a sobreposição medida do texto é de 18 a 25% |
-| SEO-3 | baixo → confirmado (baixo) | WebApplication.name de dois presets nao e o H1 nem o ultimo item do breadcrumb | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the pages name their calculator as their H1" |
+| SEO-3 | baixo → confirmado (baixo) | WebApplication.name de dois presets nao e o H1 nem o ultimo item do breadcrumb | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the pages name their calculator as their H1" |
 
 ### (f) Design system
 
 | Id | Lente → cético | Achado | Situação |
 | --- | --- | --- | --- |
 | DES-1 | alto → confirmado (alto) | Campo vizinho de outro com ajuda, etiqueta ou erro estica a caixa do input acima de control-h | corrigido em `b3bb351 e 5d3f16b`; teste: o mesmo de DES-1 da lente de acessibilidade |
-| DES-2 | médio → confirmado (médio) | Oli em cheer com a Placa '-' no estado de erro do resultado | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "a problem shows no Oli and turns the PDF and CSV off" |
+| DES-2 | médio → confirmado (médio) | Oli em cheer com a Placa '-' no estado de erro do resultado | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "a problem shows no Oli and turns the PDF and CSV off" |
 | DES-3 | médio → parcial (baixo) | O campo recusa o próprio formato ao editar no lugar e a fala do erro diz a faixa de um valor que está na faixa | pendente (baixo): o campo recusa o próprio formato ao editar no lugar ("1,2" no meio de "375,000"); a fala do erro diz a faixa |
 | DES-4 | médio → confirmado (médio) | Taxa pré-preenchida sem a etiqueta 'example' (Refinance, Debt payoff, Debt consolidation e dois guias) | corrigido em `5d3f16b`; teste: o mesmo de COR-4 |
-| DES-5 | baixo → confirmado (baixo) | A Placa do ResultHero entra sem .fo-pop | corrigido em `5d3f16b`; teste: `calc.spec.ts` (a Placa com `.fo-pop`) |
+| DES-5 | baixo → confirmado (baixo) | A Placa do ResultHero entra sem .fo-pop | corrigido em `5d3f16b`; teste: `money-calc.spec.ts` (a Placa com `.fo-pop`) |
 | DES-6 | baixo → confirmado (baixo) | SplitChart: aria-label sem porcentagens e valores com centavos enquanto a frase acima está em dólares inteiros | corrigido em `5d3f16b`; teste: o mesmo de ACE-4 |
-| DES-7 | baixo → confirmado (baixo) | Legenda do SplitChart quebra com um '·' solto a 360 px nos guias | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "its legend keeps the share with its amount" |
-| DES-8 | baixo → confirmado (baixo) | Falha do PDF diz o erro sem o ícone alert | corrigido em `e45415e`; teste: `calc.spec.ts`, "a PDF maker that cannot load" |
-| DES-9 | baixo → confirmado (baixo) | ScenarioCompare empilha em 372 a 379 px de viewport, onde o README manda ficar lado a lado | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the two scenarios stay side by side from 340px of column" |
-| DES-10 | baixo → confirmado (médio) | O saldo de fim de ano do AmortTable fica fora da tela a 360 px | corrigido em `5d3f16b`; teste: `calc.spec.ts`, "the balance of each year stays in the frame" |
+| DES-7 | baixo → confirmado (baixo) | Legenda do SplitChart quebra com um '·' solto a 360 px nos guias | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "its legend keeps the share with its amount" |
+| DES-8 | baixo → confirmado (baixo) | Falha do PDF diz o erro sem o ícone alert | corrigido em `e45415e`; teste: `money-calc.spec.ts`, "a PDF maker that cannot load" |
+| DES-9 | baixo → confirmado (baixo) | ScenarioCompare empilha em 372 a 379 px de viewport, onde o README manda ficar lado a lado | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the two scenarios stay side by side from 340px of column" |
+| DES-10 | baixo → confirmado (médio) | O saldo de fim de ano do AmortTable fica fora da tela a 360 px | corrigido em `5d3f16b`; teste: `money-calc.spec.ts`, "the balance of each year stays in the frame" |
 | DES-11 | baixo → parcial (baixo) | Tamanho do número do ResultHero e respiro do cartão no celular fora dos estilos nomeados e sem decisão registrada | registrado na DECISOES § 140 (os tamanhos do ResultHero no celular), sem mudança de código |
 
 ## A segunda passada
@@ -187,7 +187,7 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`ebfd6c1..5d
 
 | # | Severidade | Achado | Situação |
 | --- | --- | --- | --- |
-| 1 | médio | Com um campo a corrigir (resultado velho), o PDF e o CSV seguiam ligados e saíam com as entradas novas e o resultado antigo | corrigido em `381fc3f`; teste: `calc.spec.ts`, "a stale result (a field to fix) turns the PDF and CSV off" |
+| 1 | médio | Com um campo a corrigir (resultado velho), o PDF e o CSV seguiam ligados e saíam com as entradas novas e o resultado antigo | corrigido em `381fc3f`; teste: `money-calc.spec.ts`, "a stale result (a field to fix) turns the PDF and CSV off" |
 | 2 | médio | No WebKit, o subgrid deixava 12 px vazios embaixo de um grupo de opções (fieldset), e o número do resultado descia uns 12 px | corrigido em `381fc3f` (o fieldset ocupa uma linha, sem subgrid); teste: "a group of options keeps the 16px gap", que falhava só no WebKit |
 | 3 | baixo | O teste da Placa longa não chegava às regras dela: o passo de 320 px abria por link, sem tecla e sem a Oli | corrigido em `381fc3f`: o passo digita numa aba nova e confere a Placa de 13 caracteres dentro do cartão. Com as regras antigas injetadas, o cartão vai a 429 px e o teste acusa |
 | 4 | baixo | O teste das pontas das faixas pulava a lista de dívidas e a entrada | corrigido em `381fc3f` |

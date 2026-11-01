@@ -8,7 +8,7 @@ Run `fase-04`, de 31/out a 1/nov/2026. Ficha: `docs/prompts/prompt-fase-04.md`. 
 - Os motores ficam em `src/calc/`, sem dependência, e batem no centavo com um oráculo independente (numpy-financial 1.1.0 + laço em `decimal` + exemplos oficiais) em **3.039 casos**, gravados em `fixtures/calc/` antes do primeiro arquivo do motor.
 - Cada calculadora recalcula a cada tecla (p95 de até 2 ms no Chromium), mostra o resultado, o gráfico, os dois cenários onde compara e o cronograma recolhido por ano. Ela exporta PDF e CSV e guarda o cenário num link depois do `#`. Nenhum número digitado sai do aparelho, e o teste de privacidade prova isso nas 18 páginas e nos dois navegadores.
 - 20 rascunhos de contato com blogs de finanças em `docs/lancamento/blogs-financas.md`. Nada foi enviado.
-- Decisões novas: DECISOES § 110 a § 141.
+- Decisões novas: DECISOES § 110 a § 142.
 
 ## As páginas
 
@@ -85,7 +85,7 @@ Com as fixtures de verdade, o mesmo comando dá `Tests  21 passed (21)`.
 
 ## A privacidade dos números
 
-`tests/e2e/calc-privacy.spec.ts` roda nas 18 páginas e nos dois navegadores: 38 testes passaram no `verificar` final (18 páginas mais o teste do próprio buscador, em cada navegador). Desde a revisão, o teste tenta a sentinela seguinte, mais curta, quando a primeira transforma o resultado num problema (com o PDF e o CSV desligados), e volta o campo ao valor dele se nenhuma der resultado. Todas as sentinelas digitadas entram na busca. Em cada página ele:
+`tests/e2e/money-privacy.spec.ts` roda nas 18 páginas e nos dois navegadores: 38 testes passaram no `verificar` final (18 páginas mais o teste do próprio buscador, em cada navegador). Desde a revisão, o teste tenta a sentinela seguinte, mais curta, quando a primeira transforma o resultado num problema (com o PDF e o CSV desligados), e volta o campo ao valor dele se nenhuma der resultado. Todas as sentinelas digitadas entram na busca. Em cada página ele:
 
 1. digita uma sentinela longa e única em todo campo de número que está na tela, inclusive cada linha das listas de dívidas: 987654.32 (ou a maior que a faixa aceita) para dinheiro, 13.5791 para taxa e 287 para contagem;
 2. abre o cronograma, baixa o CSV e o PDF, copia o link, clica num chip e abre o link copiado numa carga nova;
@@ -97,11 +97,11 @@ Com as fixtures de verdade, o mesmo comando dá `Tests  21 passed (21)`.
 
 Nenhuma sentinela aparece. O único lugar com os números é o link copiado, depois do `#`, e o teste confere que ele traz a primeira sentinela de dinheiro em centavos.
 
-O `calc.spec.ts` prova o resto da decisão 6: a página lê o `#` uma vez, ignora o valor fora da faixa e o link de outra versão, e nunca chama `pushState` nem `replaceState`.
+O `money-calc.spec.ts` prova o resto da decisão 6: a página lê o `#` uma vez, ignora o valor fora da faixa e o link de outra versão, e nunca chama `pushState` nem `replaceState`.
 
 ## Os 16 ms por tecla
 
-`tests/e2e/calc-speed.spec.ts`: 30 teclas por calculadora, nas três da ficha e, desde a revisão (COR-1), na APY para APR com capitalização diária (Backspace no último dígito e um dígito novo, alternados, para cada tecla mudar o resultado), medidas dentro da página num `page.evaluate` só, do `input` ao `MutationObserver` ver o ResultHero mudar. Nenhuma linha de mês existe no DOM antes de o cronograma abrir. Saída do `verificar` final local:
+`tests/e2e/money-speed.spec.ts`: 30 teclas por calculadora, nas três da ficha e, desde a revisão (COR-1), na APY para APR com capitalização diária (Backspace no último dígito e um dígito novo, alternados, para cada tecla mudar o resultado), medidas dentro da página num `page.evaluate` só, do `input` ao `MutationObserver` ver o ResultHero mudar. Nenhuma linha de mês existe no DOM antes de o cronograma abrir. Saída do `verificar` final local:
 
 | Calculadora | Chromium p50 | Chromium p95 | WebKit p50 | WebKit p95 |
 | --- | --- | --- | --- | --- |
@@ -165,7 +165,7 @@ O detalhe está em `docs/relatorios/REVISAO-F4.md`. Foram seis lentes Sonnet em 
 
 ## Decisões novas
 
-DECISOES § 110 a § 141:
+DECISOES § 110 a § 142:
 
 - **§ 110 a § 123:** catálogo e ids, uma ilha com dois arquivos JS, a aritmética do dinheiro, o parser, os eventos, o link do cenário, o PDF e o CSV, as faixas, o molde da página, o hub, a home, o rodapé e a busca, os guias, e os portões de dinheiro, de conteúdo, de título e do `lint:texto`.
 - **§ 124:** o resultado acima da dobra no celular, com os campos principais em pares, rótulos curtos e o resto depois do resultado.
@@ -176,10 +176,11 @@ DECISOES § 110 a § 141:
 - **§ 134 a § 136:** os blogs, o Lighthouse e os screenshots com a medida dos 16 ms, e o JS antes e depois.
 - **§ 137 a § 140:** o subgrid dos campos, a espera do orçamento no lugar do `networkidle`, a revisão e as suas correções, e o ResultHero no celular.
 - **§ 141:** o `ENOSPC` do WebKit do CI, que voltou duas vezes na parte 3, com a hipótese e a proposta de ajuste.
+- **§ 142:** os specs de dinheiro se chamam `money-*.spec.ts`, para o `design.spec.ts` voltar à parte 2. Os testes novos o tinham empurrado para a parte 3, junto com a matriz de imagens.
 
 ## pnpm verificar local
 
-Execução limpa em 1/nov/2026, no commit `58de070`, o último com código ou teste. Depois dele entraram só este relatório e as §§ 136 e 141 do `DECISOES.md`.
+Execução limpa em 1/nov/2026, no commit `58de070`, o último com código de produção. Depois dele entraram este relatório, as §§ 136, 141 e 142 do `DECISOES.md` e a troca de nome dos três specs de dinheiro (`calc*.spec.ts` para `money-*.spec.ts`, § 142), sem mudança no conteúdo deles. Os 55 testes renomeados rodaram de novo aqui, no Chromium: 55 de 55 verdes.
 
 - **Ambiente:** Windows 11, Node 26.8.1 (o CI usa o 24 do `.node-version`) e pnpm 10.
 - **Install:** o `pnpm install --frozen-lockfile` passou (`install exit 0`).
@@ -253,6 +254,7 @@ Falhas no meio do caminho:
 | 41273044165 | `b3bb351` | WebKit 2 de 3 | O mesmo, nos dois hubs | o mesmo |
 | 41275792910 | `5d3f16b` | WebKit 3 de 3 | `ENOSPC` em dois testes de movimento do `design.spec.ts`, com o disco caindo e voltando em segundos | nada em teste; registrado na § 141 |
 | 41276724285 | `e45415e` | WebKit 3 de 3 | `ENOSPC` em dois testes de movimento reduzido da mesma spec | o mesmo |
+| 41278520009 | `93a5d2d` (este relatório) | WebKit 3 de 3 | `ENOSPC` em dois testes do `image-batch.spec.ts`, com o `/` a 2.611 MB livres | os specs de dinheiro passaram a se chamar `money-*.spec.ts` e o `design.spec.ts` voltou à parte 2 (§ 142); a parte que caiu rodou de novo |
 
 Não há `skip`, `fixme`, `only`, `retries` nem `continue-on-error` novo: o `git diff 92f2b5b..HEAD -- tests playwright.config.ts | grep -E "test.(skip|fixme|only)|retries|continue-on-error"` dá vazio.
 

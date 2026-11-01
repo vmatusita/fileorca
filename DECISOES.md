@@ -892,7 +892,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - A página nunca escreve na URL. O botão monta o texto e copia; vira "Link copied" por 2 s num `role="status"`; sem área de transferência, mostra o link num campo só de leitura.
   - A marca da primeira comemoração da Oli é `sessionStorage['fo-calc-cheer'] = '1'`, nunca um número.
   - O guia preenche a calculadora pelas props e não lê o `#`; o link que ele copia aponta para a página da calculadora.
-- **Prova:** `tests/e2e/calc-privacy.spec.ts`, nas 18 páginas e nos dois navegadores, digita sentinelas longas em todo campo, abre o cronograma, baixa PDF e CSV, copia o link, clica num chip e abre o link copiado. Depois procura cada sentinela, em toda forma que ela pode tomar e sem dígito colado, nas requisições (URL e corpo, de qualquer origem), no `dataLayer`, no título, no `location.search`, nos dois storages, nos cookies e nos nomes de arquivo.
+- **Prova:** `tests/e2e/money-privacy.spec.ts`, nas 18 páginas e nos dois navegadores, digita sentinelas longas em todo campo, abre o cronograma, baixa PDF e CSV, copia o link, clica num chip e abre o link copiado. Depois procura cada sentinela, em toda forma que ela pode tomar e sem dígito colado, nas requisições (URL e corpo, de qualquer origem), no `dataLayer`, no título, no `location.search`, nos dois storages, nos cookies e nos nomes de arquivo.
 
 ## § 115 · O PDF e o CSV (F4, 31/out/2026)
 
@@ -901,7 +901,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - **CSV.** Sai da ilha: BOM UTF-8, vírgula, ponto decimal sem milhar, aspas pela RFC 4180, CRLF, cabeçalho e as mesmas linhas da tabela (a tabela por ano ganha o ano como primeira coluna).
   - **Nomes fixos** do registro (`mortgage-schedule.pdf`), sem número.
   - **Falha.** Uma falha ao carregar o PDF mostra "Oli couldn't load the PDF maker. Reload the page and try again." num `role="alert"`, e a calculadora segue funcionando.
-- **Prova:** `tests/e2e/calc.spec.ts` lê o CSV de volta contra o cronograma do oráculo, linha por linha, nas seis calculadoras de cronograma, e confere o PDF da hipoteca no `strictPdf` e pelo texto do content stream (`tests/e2e/lib/pdf-text.ts`). `tests/unit/calc-report.test.ts` confere o relatório no Node.
+- **Prova:** `tests/e2e/money-calc.spec.ts` lê o CSV de volta contra o cronograma do oráculo, linha por linha, nas seis calculadoras de cronograma, e confere o PDF da hipoteca no `strictPdf` e pelo texto do content stream (`tests/e2e/lib/pdf-text.ts`). `tests/unit/calc-report.test.ts` confere o relatório no Node.
 
 ## § 116 · As faixas fixas dos campos (F4, 31/out/2026)
 
@@ -1005,13 +1005,13 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
 ## § 128 · O link do cenário se perdia numa carga rápida (F4, 1/nov/2026)
 
-- **Contexto:** o `mount.ts` aplica o link logo depois do `hydrate()`, e o Preact assina a store num `useEffect`, que roda depois. Numa carga rápida, a mudança chegava antes da assinatura e a página ficava com o exemplo. O `calc.spec.ts` pegou o defeito, que o teste de privacidade não via.
+- **Contexto:** o `mount.ts` aplica o link logo depois do `hydrate()`, e o Preact assina a store num `useEffect`, que roda depois. Numa carga rápida, a mudança chegava antes da assinatura e a página ficava com o exemplo. O `money-calc.spec.ts` pegou o defeito, que o teste de privacidade não via.
 - **Decisão:** o `useCalc` (`src/tools/calc/store.ts`) guarda o estado do render e, ao assinar, repinta se a store mudou no meio.
 
 ## § 129 · Tabela larga rola dentro da moldura, nunca a página (F4, 1/nov/2026)
 
 - **Contexto:** a 320 px, os cinco guias rolavam para o lado (de 536 a 713 px), porque as células sem quebra da tabela medida alargavam a coluna da página. O cronograma aberto fazia o mesmo (540 px).
-- **Decisão:** `.fo-table-wrap` e `.fo-amort-wrap` ganharam `width: 0; min-width: 100%`. A tabela rola dentro da moldura (que já era uma região com foco), e a página fica em 320 px. O teste de reflow do `design.spec.ts` pega os guias pelo mapa de rotas; o `calc.spec.ts` confere o cronograma aberto a 320 px.
+- **Decisão:** `.fo-table-wrap` e `.fo-amort-wrap` ganharam `width: 0; min-width: 100%`. A tabela rola dentro da moldura (que já era uma região com foco), e a página fica em 320 px. O teste de reflow do `design.spec.ts` pega os guias pelo mapa de rotas; o `money-calc.spec.ts` confere o cronograma aberto a 320 px.
 
 ## § 130 · A linha do café fica fora das calculadoras nesta fase (F4, 31/out/2026)
 
@@ -1042,7 +1042,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 - **Decisão:**
   - O `lighthouserc.json` ganhou `/mortgage-calculator/` e `/guides/15-vs-30-year-mortgage/`, com as mesmas asserções: desempenho ≥ 0.9 e CLS ≤ 0.05 na mediana. Na máquina local, os dois deram 99 de desempenho e CLS 0.000.
   - O `pnpm screenshots` grava em `docs/relatorios/fase-04/componentes/` (a pasta da F3 fica como estava), com os componentes de calculadora e as páginas de dinheiro a 360 e 1280 px, nos dois temas.
-  - O `tests/e2e/calc-speed.spec.ts` mede 30 teclas dentro da página, do evento `input` ao `MutationObserver` ver o ResultHero mudar, na Rent vs buy, na Debt payoff com 10 dívidas e no preset de pagamento extra. No Chromium, a p95 tem de ficar em até 16 ms; o WebKit mede e imprime, porque o relógio dele anda de 1 em 1 ms e a ficha fala do Chromium.
+  - O `tests/e2e/money-speed.spec.ts` mede 30 teclas dentro da página, do evento `input` ao `MutationObserver` ver o ResultHero mudar, na Rent vs buy, na Debt payoff com 10 dívidas e no preset de pagamento extra. No Chromium, a p95 tem de ficar em até 16 ms; o WebKit mede e imprime, porque o relógio dele anda de 1 em 1 ms e a ficha fala do Chromium.
 
 ## § 136 · O JS das páginas, antes e depois da F4 (F4, 1/nov/2026)
 
@@ -1065,7 +1065,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
 - **Contexto:** no screenshot de 1280 px, o campo de HOA ficava 34 px abaixo do de PMI, que tem uma linha de ajuda embaixo. O `.fo-field` esticava até a altura da linha da grade, e a sobra ia para as linhas `auto` dele, inclusive a da caixa: a caixa do HOA chegava a 86 px a 1280 e 96 px a 360, contra os 52 do `control-h`. As lentes de design e de acessibilidade acharam o mesmo (DES-1). A primeira tentativa, `align-items: start`, desalinhava ao contrário quando um rótulo quebrava em duas linhas ("Home insurance per year" a 360 px).
 - **Decisão:** o `CalcField` passa a ter dois filhos, o rótulo e o corpo (`.fo-field__body`: a caixa, a ajuda e o erro). Cada item da `.fo-calc__fields` ocupa duas linhas da grade, e o campo as usa com `grid-template-rows: subgrid`. Os dois campos de uma linha dividem a altura do rótulo, as caixas começam juntas e ficam com 52 px. A etiqueta "example" fica centrada no rótulo, que deixa de ter 21 px.
-- **Prova:** `calc.spec.ts`, "two fields side by side keep their inputs on one line" e "the box of every field is control-h high", a 360 e a 1280 px, com ajuda, etiqueta e erro.
+- **Prova:** `money-calc.spec.ts`, "two fields side by side keep their inputs on one line" e "the box of every field is control-h high", a 360 e a 1280 px, com ajuda, etiqueta e erro.
 
 ## § 138 · O orçamento espera a página ficar quieta sem o `networkidle` (F4, 1/nov/2026)
 
@@ -1101,7 +1101,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
 - **Decisão:**
   - **Tamanhos no celular.** Abaixo de 768 px, o número do ResultHero fica em 48/52 px e o cartão tem `space-5` de respiro. A partir de 768 px, valem os tamanhos do design system: 60/64 px e `space-6`. É o que deixa o resultado acima da dobra a 360 × 740 (§ 124). O README do ResultHero não fixa os tamanhos do celular, e a lente de design pediu o registro (DES-11).
-  - **Comemoração no fim do cartão.** A Oli em `cheer`, com a Placa, entra no fim do cartão, depois do gráfico. Na primeira tecla da visita, ela entrava acima do número e o empurrava 96 px para baixo, e no celular ele saía da dobra. Isso foi visto na prévia; o commit é o `69eb38e`, com teste no `calc.spec.ts`.
+  - **Comemoração no fim do cartão.** A Oli em `cheer`, com a Placa, entra no fim do cartão, depois do gráfico. Na primeira tecla da visita, ela entrava acima do número e o empurrava 96 px para baixo, e no celular ele saía da dobra. Isso foi visto na prévia; o commit é o `69eb38e`, com teste no `money-calc.spec.ts`.
 
 ## § 141 · O `ENOSPC` do WebKit voltou, agora na parte 3 (F4, 1/nov/2026)
 
@@ -1119,3 +1119,21 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - um `coredumpctl list` no fim das partes do WebKit;
   - desligar os core dumps dos navegadores no CI;
   - amostrar o disco a cada 2 s durante o `design.spec.ts`.
+
+## § 142 · Os specs de dinheiro se chamam `money-*` para o `design.spec.ts` voltar à parte 2 (F4, 1/nov/2026)
+
+- **Contexto:** depois dos testes novos da revisão (commit `5d3f16b`), a parte 3 do WebKit caiu por `ENOSPC` em três de quatro execuções: 41275792910, 41276724285 e 41278520009. A § 141 tem as duas primeiras.
+  - Na terceira, os testes que caíram foram outros: dois do `image-batch.spec.ts`. O `/` foi a 2.611 MB livres às 05:54:38.
+  - Na mesma hora havia um `WPEWebProcess` com 1,16 GB de memória, e 3 processos do próprio usuário não deixaram ler o `/proc`; os processos do WebKit rodam numa sandbox.
+  - Antes da revisão, a parte 3 passava.
+- **A causa provável:** o `--shard` divide por contagem de testes, na ordem dos arquivos (CLAUDE.md, "Ajuste: WebKit em três partes"). Os 55 testes de dinheiro do WebKit (`calc.spec.ts`, `calc-privacy.spec.ts` e `calc-speed.spec.ts`) entravam entre o `budgets` e o `coffee`. Eles empurraram 41 dos 50 testes do `design.spec.ts` para a parte 3, junto com a matriz e os lotes de imagem.
+  - A Oli em movimento e o processamento de imagem são os testes que mais pesam no WebKit, e passaram a rodar ao mesmo tempo, na mesma parte.
+  - Antes da F4, o `design.spec.ts` ficava na parte 2, com os de cookies e o do café.
+- **Decisão:**
+  - **Nomes novos.** Os três specs passam a se chamar `money-calc.spec.ts`, `money-privacy.spec.ts` e `money-speed.spec.ts` e caem depois do `design.spec.ts` na ordem. O `--list` das partes do WebKit fica assim:
+    - parte 1: o `a11y`, o `ads` e o começo do `budgets`;
+    - parte 2: o `design` inteiro (50 testes), o resto do `budgets`, o `coffee`, o `events` e os de cookies;
+    - parte 3: a matriz e os testes de imagem, mais os de dinheiro.
+  - **O que não mudou:** nenhum teste, contagem, limite, `retries` ou workflow. A execução vermelha 41278520009 roda de novo só a parte que caiu (`gh run rerun --failed`), e o commit dos nomes novos roda o CI inteiro.
+  - **Referências.** As do CLAUDE.md, das §§ desta run, do plano, da revisão e do relatório foram atualizadas para os nomes novos.
+- **Alternativa:** um quarto `--shard`, ou liberar disco no começo dos jobs do WebKit. As duas mexem no `.github/` e ficam com o Victor, com a proposta da § 141.
