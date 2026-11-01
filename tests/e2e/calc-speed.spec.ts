@@ -14,6 +14,8 @@ const CASES = [
   { name: 'rent vs buy', path: '/rent-vs-buy-calculator/', field: '#fo-calc-rent', base: '2200', debts: 0 },
   { name: 'debt payoff with 10 debts', path: '/debt-payoff-calculator/', field: '#fo-calc-x', base: '200', debts: 10 },
   { name: 'mortgage with extra payments', path: '/mortgage-calculator/extra-payments/', field: '#fo-calc-em', base: '200', debts: 0 },
+  // Review F4 (COR-1): APY into APR takes a 365th root for daily compounding; it cost 22 ms a key press.
+  { name: 'APY into APR, daily', path: '/apr-to-apy-calculator/#v=1&dir=apy-to-apr&c=365', field: '#fo-calc-r', base: '5.25', debts: 0 },
 ] as const;
 
 /** The texts a person makes with 30 presses: Backspace on the last digit, then a new digit, and again. */

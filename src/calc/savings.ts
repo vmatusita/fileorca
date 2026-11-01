@@ -195,5 +195,7 @@ export function aprFromApyHundredths(rate: number, comp: number): number {
 
 export function aprToApy(input: AprApyInput): AprApyResult {
   const convert = input.direction === 'apr-to-apy' ? apyHundredths : aprFromApyHundredths;
-  return { result: convert(input.rate, input.compounding), table: COMPOUNDINGS.map((comp): [Compounding, number] => [comp, convert(input.rate, comp)]) };
+  // The table already has the chosen compounding: its row is the result (one 365th root a key press, not two).
+  const table = COMPOUNDINGS.map((comp): [Compounding, number] => [comp, convert(input.rate, comp)]);
+  return { result: table.find(([comp]) => comp === input.compounding)?.[1] ?? convert(input.rate, input.compounding), table };
 }

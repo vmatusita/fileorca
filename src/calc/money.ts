@@ -144,11 +144,22 @@ export function cumulativeInterest(rows: readonly Row[]): number[] {
   return rows.map((row) => (total += row[2]));
 }
 
-/** floor(m^(1/k)) for m ≥ 0, by Newton's method on integers. */
+/**
+ * floor(m^(1/k)) for m ≥ 0, by Newton's method on integers, from above. The start comes from a floating-point
+ * estimate of log2(m) / k, nudged up: Newton then needs two or three steps, where the old start (a power of two)
+ * cost about k · ln 2 of them, 22 ms a key press for the 365th root of APY into APR (review F4, COR-1). The
+ * result is the same whole number: the floor of the root is unique, and a start below it falls back to the
+ * power of two.
+ */
 export function iroot(m: bigint, k: number): bigint {
   if (m < 2n) return m;
   const kb = big(k);
-  let x = 1n << big(Math.ceil(m.toString(2).length / k));
+  const bits = m.toString(2).length;
+  const shift = Math.max(0, bits - 64);
+  const log2root = (Math.log2(Number(m >> big(shift))) + shift) / k;
+  const scale = Math.max(0, Math.floor(log2root) - 52);
+  let x = (big(Math.ceil(2 ** (log2root - scale) * (1 + 1e-9))) + 1n) << big(scale);
+  if (x ** kb < m) x = 1n << big(Math.ceil(bits / k));
   for (;;) {
     const y = ((kb - 1n) * x + m / x ** (kb - 1n)) / kb;
     if (y >= x) return x;
