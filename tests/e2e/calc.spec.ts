@@ -223,6 +223,8 @@ test('a PDF maker that cannot load says to reload the page, and the calculator k
   await open(page, 'loan-amortization-calculator');
   await pdfButton(page).click();
   await expect(page.locator('.fo-export-wrap [role="alert"]')).toHaveText("Oli couldn't load the PDF maker. Reload the page and try again.");
+  // The error says it with the alert icon, as every error of the island does (review F4, DES-8).
+  await expect(page.locator('.fo-export-wrap [role="alert"] svg')).toHaveCount(1);
   await expect(pdfButton(page)).not.toHaveAttribute('aria-busy', 'true');
   const before = await heroNumber(page).textContent();
   await page.locator('#fo-calc-a').fill('30000');
