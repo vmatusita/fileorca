@@ -99,7 +99,10 @@ describe('a file cut short is refused, whatever the cut took', () => {
     expect(await inspectPdf(fixture('gen-cortado.pdf'))).toMatchObject({ ok: false, reason: 'truncated' });
   });
 
-  it('a complete file whose page names an image or a font that is not there is corrupted', async () => {
+  // A complete file whose resources name an object it does not have is read the way the PDF format says and PDF.js reads
+  // it: the entry is null, and an editor's leftover font is not damage. The same page in a file that stops before its end
+  // is the trace of a cut (DECISOES § 183: the second pass of the review found the complete one refused as corrupted).
+  it('a page that names a missing image or font: read when the file has its end, cut when it has not', async () => {
     for (const key of ['XObject', 'Font'] as const) {
       const doc = await PDFDocument.create({ updateMetadata: false });
       const page = doc.addPage([200, 200]);
@@ -107,7 +110,12 @@ describe('a file cut short is refused, whatever the cut took', () => {
       page.node.set(PDFName.of('Resources'), doc.context.obj({ [key]: { Missing: PDFRef.of(999) } }));
       const bytes = await doc.save({ useObjectStreams: false });
       expect(indexIsSound(bytes)).toBe(true);
-      await refused(bytes, 'corrupted');
+      expect(await inspectPdf(bytes), `${key}: a complete file`).toMatchObject({ ok: true });
+      // The same bytes without the last "%%EOF": the index still points inside, but the file has no end.
+      const end = Buffer.from(bytes).lastIndexOf('%%EOF');
+      const cutShort = bytes.slice(0, end);
+      expect(indexIsSound(cutShort)).toBe(true);
+      await refused(cutShort, 'truncated');
     }
   });
 });

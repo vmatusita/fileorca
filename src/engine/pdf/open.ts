@@ -55,12 +55,17 @@ function danglingResources(node: PDFPageLeaf): boolean {
   return false;
 }
 
-/** A page a viewer can draw: a MediaBox, content streams that exist, and the images and fonts its resources name. */
-function soundPage(page: PDFPage): boolean {
+/**
+ * A page a viewer can draw: a MediaBox, content streams that exist, and, in a file without its end, the images and fonts
+ * its resources name. In a file that has its end, a resource that leads nowhere is null, as the PDF format says and as
+ * PDF.js reads it (an editor's leftover font is not damage); only in a file that stops early is it the trace of a cut
+ * (DECISOES § 174 and § 183).
+ */
+function soundPage(page: PDFPage, ended: boolean): boolean {
   const node = page.node;
   if (!node.MediaBox()) return false;
   if (dangling(node, 'Contents')) return false;
-  if (danglingResources(node)) return false;
+  if (!ended && danglingResources(node)) return false;
   const contents = node.Contents();
   if (contents instanceof PDFArray) return contents.asArray().every((item) => !(item instanceof PDFRef) || node.context.lookup(item) instanceof PDFStream);
   return contents === undefined || contents instanceof PDFStream;
@@ -97,7 +102,7 @@ export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
   } catch {
     throw new PdfEngineError(ended ? 'corrupted' : 'truncated');
   }
-  if (pages.length === 0 || !pages.every(soundPage)) throw new PdfEngineError(ended ? 'corrupted' : 'truncated');
+  if (pages.length === 0 || !pages.every((page) => soundPage(page, ended))) throw new PdfEngineError(ended ? 'corrupted' : 'truncated');
   return { doc, lock: 'none', repaired: !indexIsSound(bytes) };
 }
 
