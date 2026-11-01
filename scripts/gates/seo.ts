@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
@@ -101,8 +101,8 @@ for (const lang of LANGS) {
 // Every image tool, preset and the hub is in the English sitemap (the ones with only an English page are in no other).
 const englishSitemap = readFileSync(`${DIST}${sitemapPath('en')}`, 'utf8');
 const imageUrls: string[] = [];
-// The money hub, calculators, presets and guides of the F4 too.
-for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS]) {
+// The money hub, calculators, presets and guides of the F4 too, and the PDF hub and tools of the F5a.
+for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS]) {
   const path = ROUTES.find((candidate) => candidate.id === id)?.paths['en'];
   if (path) imageUrls.push(new URL(path, SITE_ORIGIN).href);
   else problems.add(`página ${id} do registro de imagem sem rota em inglês`);
