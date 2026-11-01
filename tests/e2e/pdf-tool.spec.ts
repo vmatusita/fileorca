@@ -158,6 +158,30 @@ test('Reorder PDF pages: after a fast sweep through 300 pages, no picture points
   expect(errors, 'console errors and failed blob loads').toEqual([]);
 });
 
+// ---- The new pieces in the design system's patterns (DECISOES § 181) ----------------------------------------------------
+
+test('Merge PDF at 360 px: a refused file keeps a card the width of the list, its sentence on a few lines', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-cifrado-aes256.pdf'), pdfFile('gen-vazio.pdf')]);
+  for (const name of ['gen-cifrado-aes256.pdf', 'gen-vazio.pdf']) {
+    const row = page.locator('.fo-merge .fo-filelist__row').filter({ hasText: name });
+    await expect(row.locator('.fo-file__err')).toBeVisible({ timeout: 30_000 });
+    const [rowBox, cardBox, textBox] = await Promise.all([row.boundingBox(), row.locator('.fo-file').boundingBox(), row.locator('.fo-file > div:not([class])').boundingBox()]);
+    expect(cardBox?.width ?? 0, `${name}: the card takes the row`).toBeGreaterThanOrEqual((rowBox?.width ?? 0) - 1);
+    expect(textBox?.width ?? 0, `${name}: the text column`).toBeGreaterThanOrEqual(150);
+    // The same card in the list of Compress PDF, which has no handle or arrows, is 152 px tall; it was 412 px here.
+    expect(cardBox?.height ?? 999, `${name}: the card height`).toBeLessThan(160);
+    // The handle and the two arrows stay, under the card, with their full target size.
+    for (const control of [row.locator('.fo-merge__grab'), ...(await row.locator('.fo-merge__move').all())]) {
+      const box = await control.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(48);
+      expect(box?.y ?? 0).toBeGreaterThanOrEqual((cardBox?.y ?? 0) + (cardBox?.height ?? 0) - 1);
+    }
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+});
+
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
 // The same new order is made three ways on the same page load: by pointer drag, with the "earlier" and "later" buttons
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages

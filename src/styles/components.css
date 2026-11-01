@@ -592,6 +592,14 @@
 .fo-merge__moves { display: flex; flex-direction: column; }
 .fo-merge__move .fo-icon { rotate: 90deg; }
 .fo-merge__move--up .fo-icon { rotate: -90deg; }
+/* Below 480 px a row of the Merge list takes two lines: the card on its own, the handle and the arrows under it, so a
+   refused file's sentence keeps the width of the list instead of one word per line (DECISOES § 181). */
+@media (max-width: 479px) {
+  .fo-merge .fo-filelist__row { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "card card" "grab moves"; row-gap: var(--space-1); }
+  .fo-merge .fo-filelist__row > .fo-file { grid-area: card; }
+  .fo-merge__grab { grid-area: grab; }
+  .fo-merge__moves { grid-area: moves; flex-direction: row; justify-self: end; }
+}
 
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
 .fo-sign { display: grid; gap: var(--space-4); }
