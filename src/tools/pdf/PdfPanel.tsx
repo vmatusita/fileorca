@@ -667,7 +667,6 @@ export default function PdfPanel(props: PdfPanelData) {
       url: Promise<string | null>;
       done: (value: string | null) => void;
       users: number;
-      started: boolean;
     }
     const cache = new Map<number, Entry>();
     const waiting: { index: number; entry: Entry }[] = [];
@@ -692,7 +691,6 @@ export default function PdfPanel(props: PdfPanelData) {
           next.entry.done(null);
           continue;
         }
-        next.entry.started = true;
         drawing += 1;
         void draw(next.index).then((value) => {
           drawing -= 1;
@@ -709,7 +707,7 @@ export default function PdfPanel(props: PdfPanelData) {
           const url = new Promise<string | null>((resolve) => {
             done = resolve;
           });
-          entry = { url, done, users: 0, started: false };
+          entry = { url, done, users: 0 };
           cache.set(index, entry);
           waiting.push({ index, entry });
         }
