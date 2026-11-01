@@ -1,8 +1,20 @@
-import { closeSync, mkdtempSync, openSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { closeSync, existsSync, mkdtempSync, openSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { createTrigger, DROP_MB, MAX_LOOKS, openDeleted, parseDf, parseFind, shouldLook, summarizeOpenDeleted, type OpenDeleted } from '../../scripts/lib/disco.ts';
+import {
+  createTrigger,
+  cutLabel,
+  DROP_MB,
+  MAX_LOOKS,
+  openDeleted,
+  parseDf,
+  parseFind,
+  shouldLook,
+  summarizeOpenDeleted,
+  type OpenDeleted,
+} from '../../scripts/lib/disco.ts';
 
 // The disk diagnostics of the Linux CI (DECISOES § 90, § 108 e § 109): the parts that read and decide.
 describe('disco', () => {
@@ -48,12 +60,12 @@ describe('disco', () => {
       { pid: 11, command: 'WebKitNetworkPr', path: '/tmp/a (deleted)', key: '1:1', bytes: 3000 * mb },
       { pid: 12, command: 'MiniBrowser', path: '/home/runner/b (deleted)', key: '1:2', bytes: 4000 * mb },
     ];
-    expect(summarizeOpenDeleted(files, 3)).toEqual([
-      '7000 MB em 2 arquivo(s); 3 processo(s) sem leitura',
+    expect(summarizeOpenDeleted(files, { mine: 1, others: 3 })).toEqual([
+      '7000 MB em 2 arquivo(s); sem leitura: 1 processo(s) deste usuário e 3 de outros',
       '4000 MB /home/runner/b (deleted), aberto por MiniBrowser 12',
       '3000 MB /tmp/a (deleted), aberto por WebKitWebProces 10, WebKitNetworkPr 11',
     ]);
-    expect(summarizeOpenDeleted([], 0)).toEqual(['0 MB em 0 arquivo(s); 0 processo(s) sem leitura']);
+    expect(summarizeOpenDeleted([], { mine: 0, others: 0 })).toEqual(['0 MB em 0 arquivo(s); sem leitura: 0 processo(s) deste usuário e 0 de outros']);
   });
 
   it('reads find blocks as MB on disk, biggest first, and skips what is not a row', () => {
@@ -61,11 +73,24 @@ describe('disco', () => {
     expect(parseFind('')).toEqual([]);
   });
 
-  // /proc exists only on Linux: this runs in the Vitest of the CI (Ubuntu), the system the diagnostics are for.
-  it.runIf(process.platform === 'linux')('finds a file deleted while this process still holds it open', () => {
+  it('says when a find stopped at its own limit instead of reaching the end', () => {
+    expect(cutLabel(20.0, 20)).toBe('interrompido em 20 s, resultado parcial');
+    expect(cutLabel(19.2, 20)).toBe('interrompido em 20 s, resultado parcial');
+    expect(cutLabel(3.46, 20)).toBe('completo em 3.5 s');
+  });
+
+  // /proc exists only on Linux, the system of the CI runner, where this test runs in the Vitest of the verificar job.
+  // On other systems the same test proves there is no /proc to read, so it never shows as skipped.
+  it('finds a file deleted while this process still holds it open (on Linux; elsewhere there is no /proc)', () => {
+    if (process.platform !== 'linux') {
+      expect(existsSync('/proc/self/fd')).toBe(false);
+      expect(() => openDeleted(0)).toThrow();
+      return;
+    }
     const dir = mkdtempSync(join(tmpdir(), 'fo-disco-'));
     const path = join(dir, 'held.bin');
-    writeFileSync(path, Buffer.alloc(1048576, 1));
+    // Random bytes, so a compressing file system cannot make the blocks smaller than the size.
+    writeFileSync(path, randomBytes(1048576));
     const fd = openSync(path, 'r');
     unlinkSync(path);
     try {

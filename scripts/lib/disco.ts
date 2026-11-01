@@ -93,19 +93,34 @@ export interface OpenDeleted {
   bytes: number;
 }
 
+/** Processes whose descriptors could not be read: the ones of this user (a sandbox) are the blind spot that matters. */
+export interface Unreadable {
+  mine: number;
+  others: number;
+}
+
 /**
  * Files deleted but still held open on the file system `dev` (the one of / by default): df counts them, du and find
  * do not. Only this user's dumpable processes can be read; the others are counted, so an empty list proves nothing.
  */
-export function openDeleted(dev = statSync('/').dev): { files: OpenDeleted[]; unreadable: number } {
+export function openDeleted(dev = statSync('/').dev): { files: OpenDeleted[]; unreadable: Unreadable } {
   const files: OpenDeleted[] = [];
-  let unreadable = 0;
+  const unreadable: Unreadable = { mine: 0, others: 0 };
+  const uid = process.getuid?.();
   for (const pid of readdirSync('/proc').filter((name) => /^\d+$/.test(name))) {
     let fds: string[];
     try {
       fds = readdirSync(`/proc/${pid}/fd`);
     } catch (error) {
-      if ((error as { code?: string }).code !== 'ENOENT') unreadable += 1;
+      if ((error as { code?: string }).code === 'ENOENT') continue;
+      let owner: number | null = null;
+      try {
+        owner = Number(/^Uid:\s+(\d+)/m.exec(readFileSync(`/proc/${pid}/status`, 'utf8'))?.[1]);
+      } catch {
+        // The process ended while it was read.
+      }
+      if (owner === uid) unreadable.mine += 1;
+      else unreadable.others += 1;
       continue;
     }
     let command = '?';
@@ -130,7 +145,7 @@ export function openDeleted(dev = statSync('/').dev): { files: OpenDeleted[]; un
 }
 
 /** The biggest deleted-but-open files with the processes that hold them, each file once. */
-export function summarizeOpenDeleted(files: readonly OpenDeleted[], unreadable: number, top = 10): string[] {
+export function summarizeOpenDeleted(files: readonly OpenDeleted[], unreadable: Unreadable, top = 10): string[] {
   const unique = new Map<string, { path: string; bytes: number; holders: Set<string> }>();
   for (const file of files) {
     const entry = unique.get(file.key) ?? { path: file.path, bytes: file.bytes, holders: new Set<string>() };
@@ -140,7 +155,7 @@ export function summarizeOpenDeleted(files: readonly OpenDeleted[], unreadable: 
   const sorted = [...unique.values()].sort((a, b) => b.bytes - a.bytes);
   const total = sorted.reduce((sum, entry) => sum + entry.bytes, 0);
   return [
-    `${toMb(total)} MB em ${sorted.length} arquivo(s); ${unreadable} processo(s) sem leitura`,
+    `${toMb(total)} MB em ${sorted.length} arquivo(s); sem leitura: ${unreadable.mine} processo(s) deste usuário e ${unreadable.others} de outros`,
     ...sorted.slice(0, top).map((entry) => `${toMb(entry.bytes)} MB ${entry.path}, aberto por ${[...entry.holders].join(', ')}`),
   ];
 }
@@ -161,14 +176,20 @@ export function parseFind(text: string): string[] {
     .map((file) => `${toMb(file.bytes)} MB ${file.path}`);
 }
 
-/** A find under its own time limit, at the lowest priority; it prints what it saw and whether it reached the end. */
+/** Says whether a find stopped at its own limit, so a cut find is never read as "nothing found". */
+export function cutLabel(elapsedSeconds: number, limitSeconds: number): string {
+  return elapsedSeconds >= limitSeconds - 1 ? `interrompido em ${limitSeconds} s, resultado parcial` : `completo em ${elapsedSeconds.toFixed(1)} s`;
+}
+
+/**
+ * A find under its own time limit (timeout ends the find itself, so sort prints what it saw and nothing is left
+ * running), at the lowest CPU priority; it prints the files and whether it reached the end.
+ */
 function findFiles(args: string, seconds: number): string {
   const began = Date.now();
-  const text = sh(`timeout ${seconds} nice -n 19 ionice -c3 find ${args} -printf '%b\\t%p\\n' 2>/dev/null | sort -rn | head -15`, (seconds + 15) * 1000);
-  const elapsed = (Date.now() - began) / 1000;
+  const text = sh(`timeout -k 5 ${seconds} nice -n 19 find ${args} -printf '%b\\t%p\\n' 2>/dev/null | sort -rn | head -15`, (seconds + 15) * 1000);
   const lines = parseFind(text);
-  const cut = elapsed >= seconds - 1 ? `interrompido em ${seconds} s, resultado parcial` : `completo em ${elapsed.toFixed(1)} s`;
-  return [...(lines.length > 0 ? lines : ['(nenhum)']), `(${cut})`].join('\n');
+  return [...(lines.length > 0 ? lines : ['(nenhum)']), `(${cutLabel((Date.now() - began) / 1000, seconds)})`].join('\n');
 }
 
 /** One part of the deep look; a failure in it does not stop the others, and none fails the run. */
@@ -190,7 +211,10 @@ function deepLook(reason: string, startedAt: number): void {
     return summarizeOpenDeleted(files, unreadable).join('\n');
   });
   const minutes = Math.ceil((Date.now() - startedAt) / 60_000) + 1;
-  section(`arquivos acima de 20 MB gravados no / nos últimos ${minutes} min`, () => findFiles(`/ -xdev -type f -mmin -${minutes} -size +20M`, 60));
+  // Where a run writes first, so a cut find has already seen those; then the rest of /, minus what never changes.
+  section(`arquivos acima de 20 MB gravados no / nos últimos ${minutes} min`, () =>
+    findFiles(`/tmp /home /var /root /srv /opt /usr /etc -xdev -type f -mmin -${minutes} -size +20M`, 60),
+  );
   section('pastas do sistema (MB)', () => sh('du -xsm /var/log /var/tmp /var/crash /var/cache /var/lib/systemd/coredump 2>/dev/null'));
   section('core dumps', () => `core_pattern: ${sh('cat /proc/sys/kernel/core_pattern').trim() || '?'}\n${sh('ls -la /var/crash /var/lib/systemd/coredump 2>/dev/null | head -20')}`);
   section('maiores processos (RSS em KB)', () => sh('ps -eo pid,ppid,rss,etimes,comm --sort=-rss 2>/dev/null | head -12'));
@@ -229,7 +253,8 @@ export function watchDisk(): () => void {
     console.log(`[disco] fim: ${describeMounts(end)}`);
     console.log('[disco] maiores pastas (MB):');
     console.log(sh('du -xm --max-depth=2 . /tmp /dev/shm "$HOME" 2>/dev/null | sort -rn | head -20'));
-    // The whole / does not fit in 20 s on the runner (the find of § 108 never reached the end): only where a run writes.
+    // The whole / does not fit in 20 s on the runner (in run 41250641460 that find stopped at its 20 s limit in every
+    // part, DECISOES § 109): only where a run writes.
     section('arquivos acima de 200 MB em /tmp, /var e /home', () => findFiles('/tmp /var /home -xdev -type f -size +200M', 20));
     const startFree = rootFree(start);
     const endFree = rootFree(end);
