@@ -2,7 +2,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
+import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
@@ -367,5 +369,88 @@ test('the money hub keeps its one content AdSlot under the grids of calculators,
     expect(last && ad, `${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
     expect(ad!.y, `${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
     await expectClearance(page, `hub a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+  }
+});
+
+// F5a (prompt decision 12; DECISOES § F5a-estados-pdf): every PDF tool page, at 360x740 and 1280x800 on one load, in each
+// state the page reaches (tests/e2e/lib/pdf-states.ts): at rest, while the file is read (the engine held back, so the
+// panel is the WaterLevel), with the options and the page grid open, the Merge list, the password field or the signature
+// area, and with the result. Measured on top of TARGETS: the page grid with its cells and bar, the password field with its
+// toggle and error, the signature area (pad, file field, preview of the page, box and notice), the Merge list with its
+// move buttons, the ready card and the stack of options. No AdSlot above the tool on a phone, none inside the island or
+// added or removed by a state, and 150px from every target in every state.
+const PDF_TARGETS = [
+  TARGETS,
+  '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-fields--stack',
+  '.fo-pages', '.fo-pages__bar', '.fo-pages__count', '.fo-pages__grid', '.fo-page', '.fo-page__main', '.fo-page__moves',
+  '.fo-pass', '.fo-pass__toggle', '.fo-field__error',
+  '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box', '.fo-sign__notice',
+  '.fo-merge', '.fo-merge__moves',
+].join(', ');
+// What a state must put on screen besides the card, so the clearance is measured against it and not against its absence.
+const PDF_ON_SCREEN: Record<PdfState, string[]> = {
+  rest: ['.fo-drop'],
+  processing: ['.fo-level'],
+  ready: ['.fo-ready'],
+  list: ['.fo-ready', '.fo-merge', '.fo-merge__move'],
+  grid: ['.fo-pages', '.fo-pages__grid', '.fo-page', '.fo-page[data-selected="true"], .fo-page__moves, .fo-page__badge'],
+  password: ['.fo-pass', '.fo-pass__toggle', '.fo-pass .fo-field__error'],
+  signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign__notice'],
+  result: ['.fo-result', '.fo-btn--download'],
+};
+
+test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1280×800', () => {
+  for (const { id, path } of PDF_WALKS) {
+    test(`${path}: at rest, while reading, with the options and the result`, async ({ page }) => {
+      const gaps: string[] = [];
+      let adCount = 0;
+      let flip = false;
+      await page.setViewportSize(VIEWPORTS[0]);
+      await walkPdfTool(
+        page,
+        id,
+        async (state, note) => {
+          if (state === 'rest') {
+            adCount = await page.locator('.fo-ad').count();
+            expect(adCount, 'AdSlots da página').toBeGreaterThan(0);
+          }
+          const smallest: string[] = [];
+          // The order alternates, so the window is resized once per state.
+          for (const viewport of flip ? [...VIEWPORTS].reverse() : VIEWPORTS) {
+            await page.setViewportSize(viewport);
+            await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+            const label = `${state} (${note}) a ${viewport.width}px`;
+            const tool = (await boxes(page, '#fo-tool-root'))[0];
+            expect(tool, `${label}: a ferramenta na tela`).toBeDefined();
+            // No content AdSlot above the tool, on a phone or a computer, in any state.
+            for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+            if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+            for (const selector of PDF_ON_SCREEN[state]) expect((await boxes(page, selector)).length, `${label}: ${selector} na tela`).toBeGreaterThan(0);
+            await expectAdsOutsideThePanel(page, label, adCount);
+            smallest.push(`${viewport.width}px ${(await expectClearance(page, label, PDF_TARGETS)).toFixed(0)}`);
+          }
+          flip = !flip;
+          gaps.push(`${state}: ${smallest.join(', ')}`);
+        },
+        { hold: true },
+      );
+      console.log(`${path} menor vão: ${gaps.join(' | ')}`);
+    });
+  }
+});
+
+// The PDF hub, like the image and the money hubs: one content AdSlot under the grid of tools (never above them on a
+// phone), the rail from 1280px, and 150px from the grid and from every Oli on screen.
+test('the PDF hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
+  expect((await page.goto(`/${PDF_HUB_ID}/`))?.status()).toBe(200);
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+    const grid = await page.locator('main .fo-grid').boundingBox();
+    const ad = await page.locator('.fo-ad--content').boundingBox();
+    expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+    expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+    await expectClearance(page, `hub de PDF a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
   }
 });
