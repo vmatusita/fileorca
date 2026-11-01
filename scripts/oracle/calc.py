@@ -595,6 +595,10 @@ def savings_goal(inp: dict, full: bool = False) -> dict:
                 i = rate / (ONE * 12)
                 nper = float(npf.nper(i, -deposit, -current, goal)) if rate else (goal - current) / deposit
                 ensure(abs(len(rows) - math.ceil(nper - 1e-9)) <= 1, f'nper {len(rows)} vs numpy-financial {nper}')
+    # The balance only grows, so the last one is the largest: past 10^15 cents it is "too-large", as in
+    # compound interest (a goal already met, left for decades at a high rate).
+    if rows and rows[-1][3] > MAX_CENTS:
+        return {'error': 'too-large'}
     final = rows[-1][3] if rows else current
     deposited = deposit * len(rows)
     out = {'deposit': deposit, 'months': len(rows), 'final': final, 'deposited': deposited,
@@ -1063,6 +1067,11 @@ def savings_cases() -> list[dict]:
         case('already-there', 'grid', build_months(1000, 2000, 4, 12)),
         case('interest-alone', 'grid', build_months(2100, 2000, 12, 12)),
         case('too-long', 'grid', build_deposit(0, 0, 1)),
+        # A goal already met, left for 100 years at 40%: the balance passes 10^15 cents (review F4, ANU-2).
+        case('too-large', 'grid', build_months(100_000_000, 100_000_000, 40, 1200)),
+        case('too-large-small', 'grid', build_months(10_000, 10_000, 30, 1200)),
+        # Just under the cap: 100 years at 9.9% on $1,000,000 stays below 10^15 cents.
+        case('large-under-cap', 'grid', build_months(1_000_000, 1_000_000, 9.9, 1200)),
         *grid('grid-months', build_months, [1000, 20_000, 1_000_000], [0, 2000], [0, 4, 12], [1, 12, 36, 360]),
         *grid('grid-deposit', build_deposit, [0, 2000], [0, 4], [50, 500]),
     ]

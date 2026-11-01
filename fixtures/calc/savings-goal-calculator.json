@@ -2,11 +2,11 @@
   "calculator": "savings-goal-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "ad5f93f04a924f3971447d389d408b31acb287cbaa1fe2613bdeb4c42e220bc1",
+    "sha256": "79a4f3fbb191a9207606abf157cac6b44f554b1e8103761ff7b71e66693a37e0",
     "python": "3.13.18",
     "numpy": "2.5.4",
     "numpyFinancial": "1.1.0",
-    "date": "2026-10-31"
+    "date": "2026-11-01"
   },
   "units": {
     "money": "cents",
@@ -19,6 +19,9 @@
     {"id":"already-there","source":"grid","full":false,"input":{"goal":100000,"current":200000,"rate":40000,"mode":"months","months":12},"expected":{"deposit":0,"months":12,"final":208149,"deposited":0,"interest":8149,"yearEnd":[208149]}},
     {"id":"interest-alone","source":"grid","full":false,"input":{"goal":210000,"current":200000,"rate":120000,"mode":"months","months":12},"expected":{"deposit":0,"months":12,"final":225364,"deposited":0,"interest":25364,"yearEnd":[225364]}},
     {"id":"too-long","source":"grid","full":false,"input":{"goal":2000000,"current":0,"rate":0,"mode":"deposit","deposit":100},"expected":{"error":"too-long"}},
+    {"id":"too-large","source":"grid","full":false,"input":{"goal":10000000000,"current":10000000000,"rate":400000,"mode":"months","months":1200},"expected":{"error":"too-large"}},
+    {"id":"too-large-small","source":"grid","full":false,"input":{"goal":1000000,"current":1000000,"rate":300000,"mode":"months","months":1200},"expected":{"error":"too-large"}},
+    {"id":"large-under-cap","source":"grid","full":false,"input":{"goal":100000000,"current":100000000,"rate":99000,"mode":"months","months":1200},"expected":{"deposit":0,"months":1200,"final":1913713005831,"deposited":0,"interest":1913613005831,"yearEnd":[110361798,121797266,134417652,148345738,163717023,180681049,199402856,220064577,242867226,268032638,295805639,326456424,360283178,397614993,438815056,484284185,534464734,589844893,650963430,718414944,792855650,875009752,965676496,1065737945,1176167562,1298039670,1432539920,1580976815,1744794442,1925586520,2125111908,2345311716,2588328184,2856525527,3152512940,3479169971,3839674543,4237533871,4676618580,5161200360,5695993526,6286200882,6937564332,7656420749,8449763618,9325311075,10291580989,11357973843,12534864173,13833701505,15267121741,16849070088,18594936731,20521706552,22648124376,24994877321,27584796071,30443076979,33597527184,37078835155,40920869230,45161007125,49840499553,55004871544,60704365337,66994429178,73936256741,81597382467,90052338580,99383380187,109681285496,121046238971,133588805993,147431008501,162707512100,179566936176,198173299753,218707617177,241369659137,266379896155,293981643463,324443428130,358061601456,395163222065,436109237732,481297996914,531169124138,586207796929,646949465932,713985064106,787966755690,869614280868,959721957847,1059166410486,1168915096638,1290035720185,1423706618335,1571228225214,1734035723311,1913713005831]}},
     {"id":"grid-months-001","source":"grid","full":false,"input":{"goal":100000,"current":0,"rate":0,"mode":"months","months":1},"expected":{"deposit":100000,"months":1,"final":100000,"deposited":100000,"interest":0,"yearEnd":[100000]}},
     {"id":"grid-months-002","source":"grid","full":false,"input":{"goal":100000,"current":0,"rate":0,"mode":"months","months":12},"expected":{"deposit":8334,"months":12,"final":100008,"deposited":100008,"interest":0,"yearEnd":[100008]}},
     {"id":"grid-months-003","source":"grid","full":false,"input":{"goal":100000,"current":0,"rate":0,"mode":"months","months":36},"expected":{"deposit":2778,"months":36,"final":100008,"deposited":100008,"interest":0,"yearEnd":[33336,66672,100008]}},
