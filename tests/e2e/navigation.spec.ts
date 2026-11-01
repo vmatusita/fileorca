@@ -133,6 +133,27 @@ test('the English search finds the new tools and presets and opens the one chose
   await expect(page).toHaveURL(/\/compress-image\/to-100kb\/$/);
 });
 
+// DECISOES § 180: the first row is where Enter goes, so a tool typed by its name is never behind a neighbour that only
+// shares its words (Image to PDF has "pdf", "to" and "jpg", and used to say "merge").
+test('Enter on the name of a PDF tool opens that tool, not Image to PDF', async ({ page }) => {
+  await page.goto('/');
+  const dialog = page.locator('#fo-search-dialog');
+  for (const [query, path, first] of [
+    ['merge pdf', /\/merge-pdf\/$/, 'Merge PDFPDF'],
+    ['pdf to jpg', /\/pdf-to-jpg\/$/, 'PDF to JPGPDF'],
+    ['jpg to pdf', /\/image-to-pdf\/$/, 'Image to PDFImage'],
+  ] as const) {
+    await page.keyboard.press('Control+K');
+    await expect(dialog).toBeVisible();
+    const input = dialog.getByRole('combobox');
+    await input.fill(query);
+    await expect(dialog.getByRole('option').first(), query).toHaveText(first);
+    await expect(dialog.getByRole('option').first(), query).toHaveAttribute('aria-selected', 'true');
+    await input.press('Enter');
+    await expect(page, query).toHaveURL(path);
+  }
+});
+
 test('the search box lists every page on a phone and scrolls, so the Close button stays on screen', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 667 });
   await page.goto('/');

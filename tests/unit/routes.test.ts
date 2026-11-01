@@ -197,8 +197,8 @@ describe('tool search', () => {
     expect(searchIndex().some((entry) => ['image-tools', MONEY_HUB_ID, PDF_HUB_ID].includes(entry.id))).toBe(false);
     // Each PDF tool is found by its name and by a synonym typed in lower case, and only in English.
     const found = (query: string, lang = 'en') => ids(filterEntries(searchIndex(), query, lang));
-    // Image to PDF also says "merge" and "pdf", so it shows too, ahead of Merge PDF (image pages come first).
-    expect(found('merge pdf')).toEqual(['image-to-pdf', 'merge-pdf']);
+    // Image to PDF says "merge images" and "pdf", so it shows too, but after Merge PDF, whose name is the query (DECISOES § 180).
+    expect(found('merge pdf')).toEqual(['merge-pdf', 'image-to-pdf']);
     expect(found('combine')).toContain('merge-pdf');
     expect(found('password remover')).toEqual(['unlock-pdf']);
     expect(found('watermark')).toEqual(['watermark-pdf']);
@@ -240,6 +240,21 @@ describe('tool search', () => {
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
     // No AVIF page exists in this release (AVIF to JPG and Convert to WebP are run 2b), so the search must not offer one.
     expect(filterEntries(index, 'avif')).toEqual([]);
+  });
+
+  it('puts first the tool whose name is the query, where Enter goes, before the neighbours that only share its words (DECISOES § 180)', () => {
+    const index = searchIndex();
+    const first = (query: string) => ids(filterEntries(index, query, 'en'))[0];
+    // The names of the PDF tools: Image to PDF has "pdf", "to" and "jpg" in its terms, and used to say "merge" and
+    // "combine" (F2, before Merge PDF existed), so it came first and Enter opened the opposite tool.
+    for (const query of ['merge pdf', 'Merge PDF', 'merge', 'combine', 'combine pdf']) expect(first(query), query).toBe('merge-pdf');
+    for (const query of ['pdf to jpg', 'PDF to JPG', 'pdf to jpeg', 'pdf to image']) expect(first(query), query).toBe('pdf-to-jpg');
+    for (const query of ['jpg to pdf', 'image to pdf', 'merge images', 'combine images']) expect(first(query), query).toBe('image-to-pdf');
+    // Each one still finds the other as its neighbour, one arrow away.
+    expect(ids(filterEntries(index, 'pdf to jpg'))).toEqual(['pdf-to-jpg', 'image-to-pdf']);
+    expect(ids(filterEntries(index, 'merge'))).toEqual(['merge-pdf', 'image-to-pdf']);
+    // Inside one step the index order holds: every PDF tool says "pdf", and the image pages come first.
+    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS]);
   });
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {

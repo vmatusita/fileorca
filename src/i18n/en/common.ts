@@ -271,7 +271,7 @@ export default {
     'image-to-pdf': {
       name: 'Image to PDF',
       description: 'Put your images in one PDF, one image per page.',
-      synonyms: ['pdf', 'jpg to pdf', 'png to pdf', 'photo to pdf', 'combine', 'merge', 'jpg', 'jpeg', 'png', 'webp', 'image'],
+      synonyms: ['pdf', 'jpg to pdf', 'png to pdf', 'photo to pdf', 'combine images', 'merge images', 'jpg', 'jpeg', 'png', 'webp', 'image'],
     },
     'compress-image-to-100kb': {
       name: 'Compress image to 100 KB',

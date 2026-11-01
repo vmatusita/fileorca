@@ -23,15 +23,31 @@ export function normalize(text: string): string {
 }
 
 /**
- * Entries whose names or synonyms (any language) contain every word of the query. With a language, only the
- * entries that have a page in it: a page that exists only in English is never offered in Portuguese or
- * Spanish, and the search never falls back to the English link.
+ * How close an entry is to the query (DECISOES § 180): 0 when a name or synonym is the whole query, 1 when one
+ * holds the whole query as a phrase, 2 when every word is only found somewhere in its terms, and -1 when a word is
+ * not found at all. "pdf to jpg" is the name of PDF to JPG and only three loose words of Image to PDF.
+ */
+function closeness(entry: SearchEntry, phrase: string, words: readonly string[]): number {
+  if (entry.terms.includes(phrase)) return 0;
+  if (entry.terms.some((term) => term.includes(phrase))) return 1;
+  return words.every((word) => entry.terms.some((term) => term.includes(word))) ? 2 : -1;
+}
+
+/**
+ * Entries whose names or synonyms (any language) contain every word of the query, the closest first (closeness):
+ * the first one is where Enter goes, so a tool typed by its name is never behind a neighbour that only shares the
+ * words. Inside each step the index order holds. With a language, only the entries that have a page in it: a page
+ * that exists only in English is never offered in Portuguese or Spanish, and the search never falls back to the
+ * English link.
  */
 export function filterEntries(entries: SearchEntry[], query: string, lang?: string): SearchEntry[] {
   const here = lang === undefined ? entries : entries.filter((entry) => entry.href[lang] !== undefined);
   const words = normalize(query).split(/\s+/).filter(Boolean);
   if (words.length === 0) return here;
-  return here.filter((entry) => words.every((word) => entry.terms.some((term) => term.includes(word))));
+  const phrase = words.join(' ');
+  const ranked = here.map((entry) => ({ entry, step: closeness(entry, phrase, words) })).filter((item) => item.step >= 0);
+  // Array.prototype.sort is stable: inside a step, the index order is kept.
+  return ranked.sort((a, b) => a.step - b.step).map((item) => item.entry);
 }
 
 let index: Promise<SearchEntry[]> | null = null;
