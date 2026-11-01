@@ -222,7 +222,26 @@ Legenda: a severidade da lente → o veredito do cético. "Corrigido" leva o com
 
 ## A segunda passada
 
-PENDENTE
+Um revisor Sonnet em contexto limpo leu só o diff das correções (`7dab17c..6e35bdd`, 39 arquivos), na mesma worktree, movida para `6e35bdd` e com build próprio. Ele rodou o Vitest inteiro (1.192 testes) e, nos dois navegadores, o `pdf-tool`, o `pdf-privacy`, o `a11y` e o `ads` de PDF, o `design` e a matriz de imagens. Também reproduziu cada correção com sondas próprias e o motor de antes lado a lado.
+
+- **O CI:** ele conferiu a run 41342463565 (11 partes verdes) e o `ci.yml`.
+- **As regras:** nenhum teste existente pulado, afrouxado ou com timeout maior. As asserções que mudaram estão nas §§.
+
+| Id | Severidade | Achado | Destino |
+| --- | --- | --- | --- |
+| S-1 | médio | A checagem de recursos da § 174 recusava um PDF completo que cita uma fonte ou imagem ausente, que o formato lê como `null` e o PDF.js abre | Corrigido em `3fa0e14` (§ 183): a checagem vale só num arquivo sem o fim |
+| S-2 | médio | A prévia da Sign era desenhada de novo a cada render do painel (40 desenhos em 40 movimentos do ponteiro) | Corrigido em `93b1967` (§ 183): o efeito depende do id e da leitura do arquivo |
+| S-3 | baixo | Um PDF completo seguido de mais de 64 KB de lixo é recusado como cortado | Registrado na § 183: a janela de 64 KB fica, porque procurar no arquivo inteiro deixaria passar um corte de atualização incremental |
+| S-4 | baixo | Sem ganho, a reescrita reparada pode ficar maior que a entrada estragada (796 contra 767 bytes num PDF mínimo) | Registrado na § 183: "nunca sai um PDF quebrado" vem antes de "nunca maior"; nas fixtures ela é sempre menor |
+| S-5 | baixo | A fala da Merge perdeu a contagem de arquivos com a correção do A-8 | Corrigido em `93b1967` (§ 183) |
+| S-6 | baixo | Trocar o modo da assinatura deixava o nome da imagem enviada sem a assinatura | Corrigido em `93b1967` (§ 183) |
+
+Cada correção da segunda passada tem um teste que falhou contra o código de antes:
+
+- **S-1:** o `pdf-engine-open.test.ts` falhava com `{ ok: false, reason: 'corrupted' }`.
+- **S-2:** a prévia mostrava duas imagens.
+- **S-5:** a fala não tinha a contagem.
+- **S-6:** o nome continuava na tela.
 
 ## A worktree
 
