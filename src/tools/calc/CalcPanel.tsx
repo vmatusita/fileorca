@@ -6,7 +6,8 @@
 import { useMemo } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
-import { money, type NumberLang } from '../../calc/parse.ts';
+import { dollars, type NumberLang } from '../../calc/parse.ts';
+import { shares } from './SplitChart.tsx';
 import { DEFS } from './defs/index.ts';
 import Fields from './Fields.tsx';
 import ResultHero from './ResultHero.tsx';
@@ -59,7 +60,8 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       track('calc_complete', { tool: data.page, lang: data.lang });
     }
   };
-  const cheer = state.touched && typeof window !== 'undefined' && firstCheer();
+  // The visit's one cheer waits for a result: a problem (a payment under the interest) shows no Oli and keeps it.
+  const cheer = state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
   const cell = cellText(lang);
@@ -75,10 +77,13 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           view={view}
           touched={state.touched}
           cheer={cheer}
-          money={(cents) => money(cents, lang)}
-          splitName={(v) =>
-            v.split ? `${v.split.a.label} ${money(v.split.a.cents, lang)}. ${v.split.b.label} ${money(v.split.b.cents, lang)}.` : ''
-          }
+          money={(cents) => dollars(cents, lang)}
+          splitName={(v) => {
+            // In whole dollars, as the sentence above it says them, with the shares (README of the SplitChart).
+            if (!v.split) return '';
+            const [pa, pb] = shares(v.split.a.cents, v.split.b.cents);
+            return `${v.split.a.label} ${dollars(v.split.a.cents, lang)}, ${pa}%. ${v.split.b.label} ${dollars(v.split.b.cents, lang)}, ${pb}%.`;
+          }}
         />
         {state.stale && <p class="fo-field__help fo-calc__stale">{data.t.stale}</p>}
         <ExportBar
@@ -86,6 +91,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           lang={data.lang}
           t={data.t}
           icons={data.icons}
+          off={view.problem !== undefined}
           csv={() => save(new Blob([csvText(view.table(), data.t.year.replace(/\s*\{n\}/, ''))], { type: 'text/csv;charset=utf-8' }), `${data.file}.csv`)}
           pdf={async () => {
             const input = reportInput(

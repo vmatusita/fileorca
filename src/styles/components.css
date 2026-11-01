@@ -472,8 +472,11 @@
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
 .fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
 .fo-rhero__sentence b { font-weight: 700; }
-.fo-rhero__oli { display: flex; justify-content: flex-end; align-items: flex-end; gap: var(--space-2); }
-.fo-rhero__oli .fo-placard { margin-left: 0; }
+/* A long placard (a 7-digit result) wraps and shrinks instead of widening the card past the column (review F4,
+   ANU-1 and ACE-10). */
+.fo-rhero__oli { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; gap: var(--space-2); min-width: 0; }
+.fo-rhero__oli .fo-placard { margin-left: 0; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.fo-rhero__oli .fo-placard__n { overflow-wrap: anywhere; }
 .fo-rhero__orca { width: 72px; height: 72px; }
 @media (min-width: 768px) {
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
@@ -488,7 +491,9 @@
 .fo-split__gap { stroke: var(--surface); stroke-width: 3; }
 .fo-deep .fo-split__gap { stroke: var(--deep); }
 .fo-split__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 22px; }
-.fo-split__legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-split__legend li { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.fo-split__legend li > span { min-width: 0; overflow-wrap: anywhere; }
+.fo-split__legend .fo-split__key { flex: none; align-self: center; }
 .fo-split__legend b { font-variant-numeric: tabular-nums; }
 .fo-split__key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
 .fo-split__key--a { background: var(--brand); }
@@ -509,21 +514,25 @@
 .fo-scn dd { margin: 0; font: 600 24px/28px var(--fo-font-display); overflow-wrap: anywhere; }
 .fo-diff { grid-column: 1 / -1; margin: 0; display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 600 16px/22px var(--fo-font-text); }
 .fo-diff .fo-icon { flex: 0 0 auto; color: var(--brand); }
-@media (max-width: 379px) {
+@media (max-width: 371px) {
   .fo-compare { grid-template-columns: 1fr; }
   .fo-diff { order: -1; }
 }
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-calc-schedule > div { width: 100%; }
-.fo-amort-wrap { box-sizing: border-box; width: 0; min-width: 100%; max-height: 70vh; overflow: auto; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
+/* scroll-padding-top: a year button reached with Shift+Tab stops under the sticky header, not behind it. */
+.fo-amort-wrap { box-sizing: border-box; width: 0; min-width: 100%; max-height: 70vh; overflow: auto; scroll-padding-top: var(--tap-min); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
 .fo-amort-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-amort { width: 100%; border-collapse: separate; border-spacing: 0; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
-.fo-amort th { position: sticky; top: 0; text-align: right; font: 700 13px/18px var(--fo-font-text); color: var(--ink-muted); background: var(--surface); padding: var(--space-3) var(--space-4); border-bottom: var(--stroke-2) solid var(--stroke); white-space: nowrap; }
+.fo-amort th { position: sticky; top: 0; z-index: 2; text-align: right; font: 700 13px/18px var(--fo-font-text); color: var(--ink-muted); background: var(--surface); padding: var(--space-3) var(--space-4); border-bottom: var(--stroke-2) solid var(--stroke); white-space: nowrap; }
 .fo-amort th:first-child, .fo-amort td:first-child { text-align: left; }
 .fo-amort td { text-align: right; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); white-space: nowrap; }
 .fo-amort tbody tr:nth-child(even) td { background: var(--surface-sunken); }
 .fo-amort .fo-amort__year td { background: var(--surface); font-weight: 700; }
+/* The balance at the end of the year stays at the right edge of the frame: on a phone the table scrolls sideways
+   and that balance was out of sight (review F4, DES-10). */
+.fo-amort .fo-amort__year td:last-child { position: sticky; right: 0; z-index: 1; }
 .fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
 .fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }

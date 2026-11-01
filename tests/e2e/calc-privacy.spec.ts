@@ -7,6 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { CALC_PAGES, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
+import { display } from '../../src/tools/calc/form.ts';
 import type { FieldSpec, NumberSpec, Values } from '../../src/tools/calc/types.ts';
 import { dataLayer, dismissCookies, hydrated } from './lib/page.ts';
 
@@ -15,15 +16,15 @@ const RATES = ['13.5791', '7.3579', '1.3579'];
 const COUNTS = ['287', '97', '37', '7'];
 const SCALE = { money: 100, rate: 10_000, int: 1 } as const;
 
-/** The longest sentinel of a field's kind that its range takes (and that the field it depends on allows). */
-function sentinelFor(spec: NumberSpec, values: Values): string {
+/** The sentinels of a field's kind that its range takes (and that the field it depends on allows), longest first. */
+function sentinelsFor(spec: NumberSpec, values: Values): string[] {
   const list = spec.kind === 'money' ? MONEY : spec.kind === 'rate' ? RATES : COUNTS;
   const limit = typeof spec.atMost === 'function' ? spec.atMost(values) : spec.atMost ? Number(values[spec.atMost]) : Infinity;
-  const fits = list.find((text) => {
+  const fits = list.filter((text) => {
     const units = Math.round(Number(text) * SCALE[spec.kind]);
     return units >= spec.min && units <= spec.max && units <= limit;
   });
-  if (!fits) throw new Error(`no sentinel for ${spec.key}`);
+  if (fits.length === 0) throw new Error(`no sentinel for ${spec.key}`);
   return fits;
 }
 
@@ -102,16 +103,36 @@ for (const id of CALC_PAGE_IDS) {
     const def = DEFS[id];
     const typed: { text: string; kind: NumberSpec['kind'] }[] = [];
     const values: Values = { ...def.initial };
+    const download = page.locator('.fo-export .fo-btn--download');
+    /** The sentinels left in the fields, the ones the copied link carries. */
+    const kept: { text: string; kind: NumberSpec['kind'] }[] = [];
     for (const field of numberFields(def.fields, values)) {
-      const text = sentinelFor(field.spec, values);
       const input = page.locator(`#${field.id}`);
-      await input.fill(text);
-      await input.blur();
-      typed.push({ text, kind: field.spec.kind });
-      // Later limits (a balloon month and the term) read the values already typed.
-      values[field.spec.key] = Math.round(Number(text) * SCALE[field.spec.kind]);
+      const before = await input.inputValue();
+      const kept0 = values[field.spec.key];
+      // The longest sentinel first; if the result turns into a problem (debts over the limit), the PDF and the CSV
+      // are off (review F4, COR-3), so the next shorter one goes in. If none gives a result (a limit in percent
+      // that only grows the problem), the field goes back to its value. Every sentinel typed is searched for.
+      let left: string | null = null;
+      for (const text of sentinelsFor(field.spec, values)) {
+        await input.fill(text);
+        await input.blur();
+        typed.push({ text, kind: field.spec.kind });
+        // Later limits (a balloon month and the term) read the values already typed.
+        values[field.spec.key] = Math.round(Number(text) * SCALE[field.spec.kind]);
+        if (await download.isEnabled()) {
+          left = text;
+          break;
+        }
+      }
+      if (left === null) {
+        await input.fill(before);
+        await input.blur();
+        if (kept0 !== undefined) values[field.spec.key] = kept0;
+      } else kept.push({ text: left, kind: field.spec.kind });
     }
     expect(typed.length, 'sentinelas digitadas').toBeGreaterThan(0);
+    await expect(download, 'há resultado para exportar').toBeEnabled();
     const seen: string[] = [];
     const record = async () => {
       seen.push(JSON.stringify(await dataLayer(page)), await everywhere(page));
@@ -140,8 +161,10 @@ for (const id of CALC_PAGE_IDS) {
     await page.goto(copied);
     await hydrated(page);
     expect(new URL(page.url()).search).toBe('');
+    // The link was read: the first field shows its sentinel in the page's format (review F4, PRI-2: the old check
+    // compared the shown text with raw cents and could not fail).
     const first = numberFields(def.fields, values)[0];
-    if (first) await expect(page.locator(`#${first.id}`)).not.toHaveValue(new RegExp(`^${def.initial[first.spec.key] ?? 'x'}$`));
+    if (first) await expect(page.locator(`#${first.id}`)).toHaveValue(display(first.spec.kind, Number(values[first.spec.key]), 'en'));
     await record();
 
     // page_location goes without the # (DECISOES § 8).
@@ -151,7 +174,7 @@ for (const id of CALC_PAGE_IDS) {
     for (const { text, kind } of typed) for (const form of formsOf(text, kind)) if (pattern(form).test(haystack)) found.push(form);
     expect(found, 'sentinelas fora do aparelho').toEqual([]);
     // The copied link is where the numbers are: the first money sentinel, in cents.
-    const money = typed.find((entry) => entry.kind === 'money');
+    const money = kept.find((entry) => entry.kind === 'money');
     if (money) expect(copied).toContain(String(Math.round(Number(money.text) * 100)));
   });
 }

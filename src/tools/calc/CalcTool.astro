@@ -19,7 +19,7 @@ import { PANEL_POSES } from '../image/Oli.tsx';
 import CalcIsland from './CalcIsland.astro';
 import CalcScheduleRoot from './CalcScheduleRoot.astro';
 import Reviewed from './Reviewed.astro';
-import { SHARED, calcName, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample, REVIEWED } from './page.ts';
+import { SHARED, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample, REVIEWED } from './page.ts';
 import type { CalcPageId } from './registry.ts';
 
 interface Props {
@@ -46,7 +46,7 @@ const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
   description={t.description}
   withAds
   oli={PANEL_POSES}
-  schema={[breadcrumbLd(crumbs), webApplicationLd(calcName(id), t.description, path, lang, 'FinanceApplication'), personLd()]}
+  schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, 'FinanceApplication'), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <div class="fo-top fo-top--calc">

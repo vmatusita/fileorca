@@ -7,7 +7,7 @@ export default {
   lead: 'A lower rate saves money only after it has paid back the cost of getting it. Here is how to find that month, and a common shortcut that can mislead.',
   intro: [
     'Refinancing replaces your mortgage with a new loan, usually at a lower rate, and that new loan comes with closing costs: appraisal, title, lender fees. The break-even month is when what you save has paid those costs back. Before it, refinancing has cost you money; after it, it starts to save.',
-    'This guide works through one example with the engine of the calculator below: {balance} still owed at {rate}, with {left} left, refinanced into a new {newTerm} loan at an example rate of {newRate}, with {costs} of closing costs paid at closing.',
+    'This guide works through one example with the engine of the calculator below: {balance} still owed at {rate}, with {left} left, refinanced into a new loan of {newTerm} at an example rate of {newRate}, with {costs} of closing costs paid at closing.',
   ],
   calcHeading: 'Find the break-even of your loan',
   calcIntro: 'The calculator starts from the example of this guide. Every number in the text below comes from the same engine.',

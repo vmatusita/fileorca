@@ -71,7 +71,7 @@ export default {
     },
     {
       q: 'How is the origination fee charged?',
-      a: 'Here it comes out of the money you receive, which is how many lenders charge it. If yours adds it to the balance instead, enter the amount with the fee included and set the fee to zero.',
+      a: 'Here it comes out of the money you receive, which is how many lenders charge it. If yours adds it to the balance instead, enter the whole balance, fee included, as the amount, and the fee as a percent of that balance: the money you receive and the payments come out the same, and so does the APR.',
     },
     {
       q: 'Does a longer term save money?',

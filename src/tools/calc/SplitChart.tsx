@@ -38,14 +38,20 @@ export default function SplitChart({ a, b, name }: { a: SplitPart; b: SplitPart;
           {pa > 0 && pb > 0 && <line class="fo-split__gap" x1={`${pa}%`} x2={`${pa}%`} y1="0" y2="20" />}
         </g>
       </svg>
+      {/* The words of each item flow as one text, so a long label wraps like a sentence, the share stays with
+          its amount, and a long amount never widens the page. */}
       <ul class="fo-split__legend">
         <li>
           <i class="fo-split__key fo-split__key--a" />
-          {a.label} <b>{a.text}</b> · {pa}%
+          <span>
+            {a.label} <b>{a.text}</b>{` · ${pa}%`}
+          </span>
         </li>
         <li>
           <i class="fo-split__key fo-split__key--b" />
-          {b.label} <b>{b.text}</b> · {pb}%
+          <span>
+            {b.label} <b>{b.text}</b>{` · ${pb}%`}
+          </span>
         </li>
       </ul>
     </div>

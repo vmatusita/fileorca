@@ -189,3 +189,48 @@ describe('the CSV', () => {
     expect(csv).toBe('﻿Debt,Order\r\n"Debt 1, then ""Debt 2""",1234567.89\r\n');
   });
 });
+
+// Review F4: what the texts and the views say in the cases the lenses found.
+describe('after the review', () => {
+  it('Extra payments: an extra too small to end the loan sooner still says what it saves (COR-8)', () => {
+    const def = DEFS['mortgage-calculator-extra-payments'];
+    const view = viewOf(def, panelData('mortgage-calculator-extra-payments', 'en'), { ...def.initial, em: 100 });
+    const sentence = view.hero.sentence.map((part) => (typeof part === 'string' ? part : part.b)).join('');
+    expect(sentence).not.toMatch(/Without an extra payment/);
+    expect(sentence).toMatch(/you save \$\d/);
+  });
+
+  it('Personal loan: the FAQ way to enter a fee added to the balance gives the true APR (COR-2)', () => {
+    const faq = calcTexts('personal-loan-calculator').faq.map((item) => item.a).join(' ');
+    expect(faq).toContain('enter the whole balance, fee included, as the amount, and the fee as a percent of that balance');
+    // $15,000 received, $750 of fee added: a $15,750 balance at 11.5% for 36 months. The true APR solves
+    // 15,000 = payment × (1 − (1 + i)^−36) / i, worked out here by bisection, apart from the engine.
+    const view = viewOf(DEFS['personal-loan-calculator'], panelData('personal-loan-calculator', 'en'), { a: 1_575_000, r: 115_000, m: 36, f: Math.round((750 / 15_750) * 1_000_000) });
+    const payment = Number((view.summary.find(([label]) => /monthly payment/i.test(label))?.[1] ?? '').replace(/[$,]/g, ''));
+    let lo = 0;
+    let hi = 1;
+    for (let step = 0; step < 200; step += 1) {
+      const i = (lo + hi) / 2;
+      if ((payment * (1 - (1 + i) ** -36)) / i > 15_000) lo = i;
+      else hi = i;
+    }
+    const apr = Math.round(lo * 12 * 10_000) / 100;
+    const shown = view.summary.find(([label]) => label === 'APR')?.[1];
+    expect(shown).toBe(`${apr}%`);
+    expect(apr).toBeGreaterThan(14.5);
+  });
+
+  it('Biweekly: the monthly rule of interest is said as the comparison it is (ANU-4)', () => {
+    const premises = calcTexts('mortgage-calculator-biweekly').panel.premises;
+    expect(premises.filter((premise) => /^Interest is charged once a month/.test(premise))).toEqual([]);
+    expect(premises.some((premise) => premise.startsWith('The monthly loan it is compared with'))).toBe(true);
+  });
+
+  it("the privacy policy names the Oli's session mark, in the three languages (ANU-5)", async () => {
+    for (const lang of ['en', 'pt', 'es'] as const) {
+      const privacy = (await import(`../../src/i18n/${lang}/privacy.ts`)).default as { updated: string; sections: { paragraphs: string[] }[] };
+      expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(/session storage|armazenamento da sessão|almacenamiento de sesión/);
+      expect(privacy.updated, lang).not.toMatch(/31/);
+    }
+  });
+});

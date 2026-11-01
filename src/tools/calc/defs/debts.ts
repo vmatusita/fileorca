@@ -90,7 +90,7 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
   id: 'debt-payoff-calculator',
   fields: [
     money('x', 0, 1_000_000, { main: true }),
-    { kind: 'list', key: 'd', min: 1, max: 10, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('m', 0, 100_000)] },
+    { kind: 'list', key: 'd', min: 1, max: 10, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60, { example: true }), money('m', 0, 100_000)] },
   ],
   initial: {
     d: [
@@ -164,7 +164,7 @@ export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> 
   fields: [
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nm', 1, 120, { main: true, half: true }),
-    { kind: 'list', key: 'd', min: 1, max: 10, blank: { b: 100_000, r: 200_000, p: 5_000 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('p', 1, 100_000)] },
+    { kind: 'list', key: 'd', min: 1, max: 10, blank: { b: 100_000, r: 200_000, p: 5_000 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60, { example: true }), money('p', 1, 100_000)] },
     rate('f', 0, 20, { example: true }),
   ],
   initial: {

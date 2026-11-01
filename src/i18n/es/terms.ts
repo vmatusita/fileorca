@@ -5,7 +5,7 @@ export default {
   description:
     'Los términos para usar FileOrca, herramientas gratis en tu navegador: tus archivos, resultados, calculadoras, anuncios, donaciones y responsabilidad.',
   h1: 'Términos de uso',
-  updated: 'Última actualización: 31 de octubre de 2026',
+  updated: 'Última actualización: 1 de noviembre de 2026',
   intro:
     'Estos términos explican cómo puedes usar FileOrca. Al usar el sitio, los aceptas. Si no estás de acuerdo, por favor no uses el sitio.',
   sections: [

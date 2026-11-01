@@ -5,7 +5,7 @@ export default {
   description:
     'The terms for using FileOrca, a set of free tools that run in your browser: your files, results, calculators, ads, donations and liability.',
   h1: 'Terms of use',
-  updated: 'Last updated: October 31, 2026',
+  updated: 'Last updated: November 1, 2026',
   intro:
     'These terms explain how you can use FileOrca. By using the site, you accept them. If you do not agree, please do not use the site.',
   sections: [

@@ -21,6 +21,7 @@ export default {
       placard: 'interest saved',
       sentence: 'With the extra payments the loan is paid off in {time} instead of {base}, {saved} sooner, and you save {interest} of interest.',
       same: 'Without an extra payment the loan runs its {base}. Add an extra payment to see what it saves.',
+      sameTime: 'The extra payments are too small to end the loan a month sooner: it still runs {base}, and you save {interest} of interest.',
       principal: 'Principal',
       interestPart: 'Interest with extra payments',
       without: 'Without extra payments',

@@ -31,7 +31,10 @@ export default {
       scheduleHeading: 'Biweekly schedule',
     },
     premises: [
-      ...homePremises,
+      // The second home premise is the monthly loan's; here it is said as the comparison it is (review F4, ANU-4).
+      ...homePremises.map((premise, index) =>
+        index === 1 ? 'The monthly loan it is compared with is charged interest once a month at the yearly rate divided by 12, on the balance, and rounded to the cent.' : premise,
+      ),
       'A biweekly payment is half the monthly payment, rounded to the cent, paid 26 times a year: the same as 13 monthly payments a year.',
       'Interest is charged on the balance every two weeks at the yearly rate divided by 26. The time in months is the number of half payments × 12 ÷ 26, rounded up to a whole month.',
     ],

@@ -45,17 +45,39 @@ interface Props {
 export default function ResultHero({ view, touched, cheer, splitName, money }: Props) {
   const [spoken, setSpoken] = useState('');
   const timer = useRef<number | undefined>(undefined);
+  const section = useRef<HTMLElement>(null);
   const said = view.problem ?? `${view.hero.label}: ${view.hero.value}${view.hero.unit ?? ''}. ${plain(view.hero.sentence)}`;
+  const latest = useRef(said);
+  latest.current = said;
+
+  const speakLater = () => {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      timer.current = undefined;
+      setSpoken(latest.current);
+    }, SPEAK_AFTER_MS);
+  };
 
   useEffect(() => {
-    if (!touched) return;
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setSpoken(said), SPEAK_AFTER_MS);
-    return () => window.clearTimeout(timer.current);
+    if (touched) speakLater();
   }, [said, touched]);
 
+  // The half second counts from the last key press, not from the last change of the result: a key that leaves
+  // the number as it was ("6." or a thousands comma) also restarts a wait that is running (review F4, ACE-1).
+  useEffect(() => {
+    const island = section.current?.closest('.fo-calc');
+    const onInput = () => {
+      if (timer.current !== undefined) speakLater();
+    };
+    island?.addEventListener('input', onInput);
+    return () => {
+      island?.removeEventListener('input', onInput);
+      window.clearTimeout(timer.current);
+    };
+  }, []);
+
   return (
-    <section class="fo-rhero fo-deep" aria-label={view.hero.label}>
+    <section ref={section} class="fo-rhero fo-deep" aria-label={view.hero.label}>
       <p class="fo-rhero__label">{view.hero.label}</p>
       <p class="fo-rhero__num">
         <Value text={view.hero.value} />
@@ -71,9 +93,9 @@ export default function ResultHero({ view, touched, cheer, splitName, money }: P
       )}
       {/* The cheer comes in at the end of the card, under the chart: on the first key press nothing above the
           number moves, and on a phone the number stays above the fold. */}
-      {cheer && (
+      {cheer && !view.problem && (
         <div class="fo-rhero__oli" aria-hidden="true">
-          <div class="fo-placard">
+          <div class="fo-placard fo-pop">
             <span class="fo-placard__n">{view.placard.n}</span>
             <span class="fo-placard__l">{view.placard.l}</span>
           </div>

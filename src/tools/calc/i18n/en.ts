@@ -9,6 +9,8 @@ export interface CalcPageShared {
   exampleInputs: string;
   exampleResults: string;
   guide: string;
+  /** Under the calculator of a guide: the link to that calculator's own page. */
+  openCalc: string;
   disclaimerHeading: string;
   /** Visually hidden caption of the worked example table. */
   exampleCaption: string;
@@ -54,6 +56,7 @@ export default {
     exampleInputs: 'You enter',
     exampleResults: 'You get',
     guide: 'Read the guide: {title}',
+    openCalc: 'Open the {name} on its own page',
     disclaimerHeading: 'Educational tool',
     exampleCaption: 'The worked example: what goes in and what comes out',
   } satisfies CalcPageShared,

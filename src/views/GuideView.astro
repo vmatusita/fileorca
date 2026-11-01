@@ -18,8 +18,8 @@ import enCommon from '../i18n/en/common.ts';
 import type { GuideTexts } from '../i18n/types.ts';
 import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
 import { PANEL_POSES } from '../tools/image/Oli.tsx';
-import { GUIDES, MONEY_HUB_ID, type GuideId } from '../tools/calc/registry.ts';
-import { FIRST_PUBLISHED, REVIEWED, SHARED, cardOf, longDate, panelData } from '../tools/calc/page.ts';
+import { CALC_PAGES, GUIDES, MONEY_HUB_ID, type GuideId } from '../tools/calc/registry.ts';
+import { FIRST_PUBLISHED, REVIEWED, SHARED, calcTexts, cardOf, longDate, panelData } from '../tools/calc/page.ts';
 import { GUIDE_FACTS } from '../tools/calc/guides.ts';
 
 interface Props {
@@ -42,6 +42,11 @@ const crumbs = [
   { name: t.h1, path },
 ];
 const related = GUIDES[id].related.map(cardOf);
+// The calculator the guide embeds, by its own H1, linked under it (review F4, SEO-1): the first letter goes small
+// unless the name starts with an acronym ("APR to APY").
+const calcH1 = calcTexts(guide.calc).h1;
+const calcLabel = /^[A-Z][a-z]/.test(calcH1) ? calcH1[0]!.toLowerCase() + calcH1.slice(1) : calcH1;
+const calcPath = CALC_PAGES[guide.calc].path;
 const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
 const [noteBefore, noteAfter] = t.tableNote.split('{date}');
 const before = t.sections.slice(0, 2);
@@ -68,6 +73,7 @@ const after = t.sections.slice(2);
     <p>{fill(t.calcIntro)}</p>
   </section>
   <CalcIsland data={data} />
+  <p class="fo-guide__open"><a href={calcPath}>{fmt(SHARED.page.openCalc, { name: calcLabel })}</a></p>
   <CalcScheduleRoot data={data} />
   {before.map((section, index) => (
     <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>

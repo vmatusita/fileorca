@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { CALC_PAGES, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, GUIDES, type CalcPageId } from '../../src/tools/calc/registry.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
 import { strictPdf } from './lib/pdf.ts';
@@ -247,4 +247,178 @@ test('the ExportBar is PDF in yellow, then CSV, then Copy link, and the chips le
   for (const href of await page.locator('.fo-calc__next a').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))) {
     expect(Object.values(CALC_PAGES).some((entry) => entry.path === href), href).toBe(true);
   }
+});
+
+// ---- regressions of the review F4 (docs/relatorios/REVISAO-F4.md; DECISOES § 139) --------------------------
+
+test.describe('review F4 regressions', () => {
+  test('a problem shows no Oli and turns the PDF and CSV off; the cheer waits for a result (DES-2, COR-3)', async ({ page }) => {
+    await open(page, 'credit-card-payoff-calculator');
+    await page.locator('#fo-calc-pay').fill('10');
+    await expect(page.locator('.fo-rhero__sentence')).toContainText("doesn't cover the interest");
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(0);
+    await expect(pdfButton(page)).toBeDisabled();
+    await expect(csvButton(page)).toBeDisabled();
+    await expect(linkButton(page)).toBeEnabled();
+    await page.locator('#fo-calc-pay').fill('300');
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
+    await expect(page.locator('.fo-rhero__oli .fo-placard')).toHaveClass(/fo-pop/);
+    await expect(pdfButton(page)).toBeEnabled();
+  });
+
+  test('a long result with the cheer stays in its column and never scrolls the page sideways (ANU-1, ACE-10)', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await open(page, 'home-affordability-calculator');
+    await page.locator('#fo-calc-i').fill('800000');
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.locator('#fo-calc-i').fill('30000000');
+    const edge = await page.evaluate(() => {
+      const hero = document.querySelector('.fo-rhero')!.getBoundingClientRect();
+      const column = document.querySelector('.fo-calc__result')!.getBoundingClientRect();
+      return { hero: Math.round(hero.right), column: Math.round(column.right) };
+    });
+    expect(edge.hero).toBeLessThanOrEqual(edge.column);
+    // A 10-digit amount in the chart's legend wraps inside the card at 320px.
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto('about:blank');
+    await open(page, 'simple-interest-calculator', '#v=1&pr=10000000000&r=1000000&u=years&ty=100');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  });
+
+  test('the hero speaks half a second after the last key press, also one that leaves the number as it was (ACE-1)', async ({ page }) => {
+    await open(page, 'mortgage-calculator');
+    const heard = await page.evaluate(async () => {
+      const input = document.querySelector<HTMLInputElement>('#fo-calc-r')!;
+      const live = document.querySelector('.fo-rhero [aria-live="polite"]')!;
+      const wait = (ms: number) => new Promise((done) => window.setTimeout(done, ms));
+      const type = (text: string) => {
+        input.focus();
+        input.value = text;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+      type('6');
+      await wait(300);
+      type('6.'); // the number does not change
+      await wait(350);
+      const early = live.textContent;
+      await wait(400);
+      return { early, late: live.textContent };
+    });
+    expect(heard.early).toBe('');
+    expect(heard.late).toContain('Monthly payment: $');
+  });
+
+  test('the one field that takes a minus opens the text keyboard; the others the decimal one (ACE-2)', async ({ page }) => {
+    await open(page, 'rent-vs-buy-calculator');
+    await expect(page.locator('#fo-calc-ap')).toHaveAttribute('inputmode', 'text');
+    await expect(page.locator('#fo-calc-p')).toHaveAttribute('inputmode', 'decimal');
+  });
+
+  test('without a clipboard, the shown link follows the numbers as they change (PRI-3)', async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { value: undefined }));
+    await open(page, 'mortgage-calculator');
+    await linkButton(page).click();
+    await expect(page.locator('#fo-calc-link')).toHaveValue(/&p=37500000(&|$)/);
+    await page.locator('#fo-calc-p').fill('500000');
+    await expect(page.locator('#fo-calc-link')).toHaveValue(/&p=50000000(&|$)/);
+  });
+
+  test('the chart is named with whole dollars and both shares, and its legend keeps the share with its amount (ACE-4, DES-7)', async ({ page }) => {
+    await open(page, 'mortgage-calculator');
+    await expect(page.locator('.fo-split__bar')).toHaveAttribute('aria-label', 'Principal $300,000, 44%. Interest $382,637, 56%.');
+    await expect(page.locator('.fo-split__legend li > span').first()).toHaveText(/^Principal \$300,000 · 44%$/);
+  });
+
+  test('the keyboard focus stays in the list when debts come and go (ACE-6)', async ({ page }) => {
+    await open(page, 'debt-payoff-calculator');
+    const add = page.getByRole('button', { name: 'Add a debt' });
+    while ((await page.locator('.fo-debt').count()) < 10) {
+      await add.focus();
+      await page.keyboard.press('Enter');
+    }
+    await expect(page.locator('#fo-calc-d9b')).toBeFocused();
+    await page.locator('#fo-calc-d9-remove').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#fo-calc-d8-remove')).toBeFocused();
+    await page.locator('#fo-calc-d4-remove').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#fo-calc-d4-remove')).toBeFocused();
+    while ((await page.locator('.fo-debt').count()) > 1) {
+      await page.locator('.fo-debt__remove').last().focus();
+      await page.keyboard.press('Enter');
+    }
+    await expect(page.locator('#fo-calc-d-add')).toBeFocused();
+  });
+
+  test('on a phone the balance of each year stays in the frame of the schedule, and the header never hides a year (DES-10, ACE-5)', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await open(page, 'mortgage-calculator');
+    await page.getByRole('button', { name: 'Show the full schedule' }).click();
+    const inside = await page.evaluate(() => {
+      const frame = document.querySelector('.fo-amort-wrap')!.getBoundingClientRect();
+      const cell = document.querySelector('.fo-amort__year td:last-child')!.getBoundingClientRect();
+      return cell.left >= frame.left - 1 && cell.right <= frame.right + 1;
+    });
+    expect(inside).toBe(true);
+    const years = page.locator('.fo-amort__year button');
+    await years.last().focus();
+    for (let step = 0; step < 6; step += 1) await page.keyboard.press('Shift+Tab');
+    // WebKit scrolls the frame to the focus a moment after the key: the check waits for the scroll to settle.
+    const covered = () =>
+      page.evaluate(() => {
+        const button = document.activeElement as HTMLElement;
+        const box = button.getBoundingClientRect();
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        return !(hit && button.contains(hit));
+      });
+    await expect.poll(covered).toBe(false);
+  });
+
+  test('the two scenarios stay side by side from 340px of column (DES-9)', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await open(page, 'mortgage-calculator-15-vs-30-year');
+    expect(await page.locator('.fo-compare').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length)).toBe(2);
+  });
+
+  test('every prefilled rate carries the example tag (COR-4)', async ({ page }) => {
+    for (const [id, field] of [['refinance-calculator', 'r'], ['debt-payoff-calculator', 'd0r'], ['debt-consolidation-calculator', 'd0r']] as const) {
+      await open(page, id);
+      await expect(page.locator(`label[for="fo-calc-${field}"] .fo-tag`), id).toHaveText('example');
+    }
+  });
+
+  test('the box of every field is control-h high, next to help, a tag or an error (DES-1)', async ({ page }) => {
+    for (const width of [360, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const id of ['mortgage-calculator', 'rent-vs-buy-calculator', 'home-affordability-calculator', 'mortgage-calculator-extra-payments'] as const) {
+        await page.goto('about:blank');
+        await open(page, id);
+        if (id === 'mortgage-calculator') await page.locator('#fo-calc-r').fill('99');
+        // The field in error keeps the same box inside the 3px border of the design system: the others are compared.
+        const heights = await page.locator('.fo-calc .fo-field:not([data-state="error"]) .fo-input').evaluateAll((boxes) => [...new Set(boxes.map((box) => Math.round(box.getBoundingClientRect().height)))]);
+        expect(heights, `${id} a ${width}px`).toEqual([52]);
+      }
+    }
+  });
+
+  test('the pages name their calculator as their H1, and each guide links the calculator it embeds (SEO-3, SEO-1, COR-5)', async ({ page }) => {
+    for (const id of ['mortgage-calculator-extra-payments', 'mortgage-calculator-15-vs-30-year', 'mortgage-calculator'] as const) {
+      await page.goto(CALC_PAGES[id].path);
+      const names = await page.evaluate(() =>
+        [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap((node) => {
+          const data = JSON.parse(node.textContent ?? '{}');
+          const items: { '@type'?: string; name?: string }[] = Array.isArray(data) ? data : (data['@graph'] ?? [data]);
+          return items.filter((item) => item['@type'] === 'WebApplication').map((item) => item.name);
+        }),
+      );
+      expect(names, id).toEqual([await page.locator('h1').textContent()]);
+    }
+    for (const guide of Object.values(GUIDES)) {
+      await page.goto(guide.path);
+      await expect(page.locator(`main a[href="${CALC_PAGES[guide.calc].path}"]`).first(), guide.path).toBeAttached();
+      expect(await page.locator('main').textContent(), guide.path).not.toMatch(/\b\d+ years loan\b/);
+    }
+  });
 });

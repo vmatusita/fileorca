@@ -1,5 +1,6 @@
 // The form of a calculator, drawn from its field specs: number fields (CalcField), the down payment with
 // its unit menu, choices (OptionGroup or <select>) and the list of debts. No ad ever sits between them.
+import { useEffect, useRef } from 'preact/hooks';
 import OptionGroup from '../image/OptionGroup.tsx';
 import Icon from '../../icons/Icon.tsx';
 import { fmt } from '../../i18n/format.ts';
@@ -51,15 +52,42 @@ function NumberInput({ spec, values, problems, data, set, keyName, value, onValu
   );
 }
 
+/**
+ * The list of debts. Each row keeps a key of its own (removing the second debt no longer hands its fields to the
+ * third), and the keyboard focus never falls to the page when a button goes away: a debt added takes the focus to
+ * its first field; a debt removed, to the next Remove button, or to Add a debt when none is left (review F4, ACE-6).
+ */
 function DebtList(props: Props & { spec: ListSpec }) {
   const { spec, values, data, set } = props;
   const rows = values[spec.key] as Record<string, number>[];
+  const keys = useRef<number[]>([]);
+  const nextKey = useRef(0);
+  const focusNext = useRef<string | null>(null);
+  while (keys.current.length < rows.length) keys.current.push(nextKey.current++);
+  keys.current.length = rows.length;
+  useEffect(() => {
+    if (focusNext.current === null) return;
+    document.getElementById(focusNext.current)?.focus();
+    focusNext.current = null;
+  });
   const update = (index: number, key: string, value: number) =>
     set({ ...values, [spec.key]: rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)) });
+  const removeId = (index: number) => fieldId(`${spec.key}${index}-remove`);
+  const addId = fieldId(`${spec.key}-add`);
+  const remove = (index: number) => {
+    const left = rows.length - 1;
+    keys.current.splice(index, 1);
+    focusNext.current = left > spec.min ? removeId(Math.min(index, left - 1)) : addId;
+    set({ ...values, [spec.key]: rows.filter((_, i) => i !== index) });
+  };
+  const add = () => {
+    focusNext.current = fieldId(`${spec.key}${rows.length}${spec.item[0]?.key ?? ''}`);
+    set({ ...values, [spec.key]: [...rows, { ...spec.blank }] });
+  };
   return (
     <div class="fo-debts">
       {rows.map((row, index) => (
-        <fieldset class="fo-debt" key={index}>
+        <fieldset class="fo-debt" key={keys.current[index]}>
           <legend class="fo-debt__name">{fmt(data.t.row, { n: index + 1 })}</legend>
           <div class="fo-debt__fields">
             {spec.item.map((item) => (
@@ -74,11 +102,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
             ))}
           </div>
           {rows.length > spec.min && (
-            <button
-              type="button"
-              class="fo-btn fo-btn--ghost fo-debt__remove"
-              onClick={() => set({ ...values, [spec.key]: rows.filter((_, i) => i !== index) })}
-            >
+            <button type="button" id={removeId(index)} class="fo-btn fo-btn--ghost fo-debt__remove" onClick={() => remove(index)}>
               <Icon inner={data.icons.trash} class="fo-icon--sm" />
               <span>{fmt(data.t.removeRow, { n: index + 1 })}</span>
             </button>
@@ -86,7 +110,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
         </fieldset>
       ))}
       {rows.length < spec.max && (
-        <button type="button" class="fo-btn" onClick={() => set({ ...values, [spec.key]: [...rows, { ...spec.blank }] })}>
+        <button type="button" id={addId} class="fo-btn" onClick={add}>
           {data.t.addRow}
         </button>
       )}

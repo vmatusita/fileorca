@@ -1,6 +1,7 @@
 // NumberField of the calculators (docs/design/components/NumberField): a decimal field with its unit as an
 // affix. Never type="number" (it breaks the Portuguese comma and hides what the person typed);
-// inputmode="decimal" opens the right keyboard. Every valid key press reaches the account at once (no
+// inputmode="decimal" opens the right keyboard (the one field that takes a minus gets the text keyboard: the
+// decimal one of the iPhone has no minus sign). Every valid key press reaches the account at once (no
 // half-second pause, unlike the image tools' field); a value outside the field's fixed range shows the
 // range in words (aria-invalid, aria-describedby, the alert icon) and the last result stays. Leaving the
 // field writes the number back in the page's format. The typed number never goes to the URL or an event.
@@ -76,7 +77,7 @@ export default function CalcField(props: CalcFieldProps) {
             ref={input}
             id={id}
             type="text"
-            inputmode="decimal"
+            inputmode={negative ? 'text' : 'decimal'}
             autocomplete="off"
             spellcheck={false}
             value={draft}

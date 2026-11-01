@@ -34,7 +34,7 @@ export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
   id: 'refinance-calculator',
   fields: [
     money('b', 1_000, 20_000_000, { main: true, half: true }),
-    rate('r', 0, 40, { main: true, half: true }),
+    rate('r', 0, 40, { main: true, half: true, example: true }),
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nt', 1, 40, { main: true, half: true }),
     count('ml', 1, 480),
@@ -194,7 +194,8 @@ export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> 
       hero: {
         label: text(v, 'label'),
         value: dollars(r.interestSaved, l),
-        sentence: say(text(v, r.monthsSaved > 0 ? 'sentence' : 'same'), {
+        // An extra too small to end the loan a month sooner still saves interest: that sentence, not 'no extra'.
+        sentence: say(text(v, r.monthsSaved > 0 ? 'sentence' : r.interestSaved > 0 ? 'sameTime' : 'same'), {
           time: duration(r.extra.count, s),
           base: duration(r.base.count, s),
           saved: duration(r.monthsSaved, s),

@@ -5,7 +5,7 @@ export default {
   description:
     'Como o FileOrca trata seus dados: os arquivos ficam no aparelho, o que Google Analytics, AdSense e Cloudflare processam e seus direitos na LGPD e no GDPR.',
   h1: 'Política de privacidade',
-  updated: 'Última atualização: 31 de outubro de 2026',
+  updated: 'Última atualização: 1º de novembro de 2026',
   intro:
     'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
@@ -69,6 +69,7 @@ export default {
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
         'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantas vezes você usou uma ferramenta e ela gerou pelo menos um arquivo novo neste navegador (um lote de arquivos conta como uma vez só), para o pedido de café aparecer só a partir da terceira vez e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
+        'Nas calculadoras, a página guarda uma marca de sim ou não no armazenamento da sessão desta aba, para a Oli comemorar só no primeiro resultado da visita. Ela não tem nenhum número, nunca sai do navegador e some quando você fecha a aba.',
       ],
     },
     {
