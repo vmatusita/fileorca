@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
+import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -133,7 +134,8 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   await page.goto('/');
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
-  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length;
+  // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125).
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length;
   await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });

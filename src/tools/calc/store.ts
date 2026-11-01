@@ -1,7 +1,7 @@
 // The state one calculator's two islands share: the form and result (#fo-tool-root) and the schedule
 // (#fo-calc-schedule), which sits after the first AdSlot as the page mold asks. Both are hydrated by the
 // same mount entry and read this store, so a key press runs the account once and both repaint.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { problems, type Problems } from './form.ts';
 import type { CalcDef, CalcPanelData, CalcView, Values } from './types.ts';
 
@@ -54,6 +54,15 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
 /** The store's state, repainting the component on every change. */
 export function useCalc(store: CalcStore): CalcState {
   const [, repaint] = useState(0);
-  useEffect(() => store.subscribe(() => repaint((n) => n + 1)), [store]);
-  return store.get();
+  const state = store.get();
+  const seen = useRef(state);
+  seen.current = state;
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => repaint((n) => n + 1));
+    // A change made between the render and this effect repaints now: the scenario link is set right after
+    // hydrate(), before Preact runs the effects, and was lost when the page loaded fast.
+    if (store.get() !== seen.current) repaint((n) => n + 1);
+    return unsubscribe;
+  }, [store]);
+  return state;
 }

@@ -509,7 +509,7 @@
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-calc-schedule > div { width: 100%; }
-.fo-amort-wrap { box-sizing: border-box; max-height: 70vh; overflow: auto; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
+.fo-amort-wrap { box-sizing: border-box; width: 0; min-width: 100%; max-height: 70vh; overflow: auto; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
 .fo-amort-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-amort { width: 100%; border-collapse: separate; border-spacing: 0; font: 500 15px/22px var(--fo-font-text); font-variant-numeric: tabular-nums; }
 .fo-amort th { position: sticky; top: 0; text-align: right; font: 700 13px/18px var(--fo-font-text); color: var(--ink-muted); background: var(--surface); padding: var(--space-3) var(--space-4); border-bottom: var(--stroke-2) solid var(--stroke); white-space: nowrap; }
@@ -526,6 +526,8 @@
 .fo-example caption { text-align: left; font: 700 15px/20px var(--fo-font-text); padding-bottom: var(--space-2); }
 @media (min-width: 768px) { .fo-example { grid-template-columns: 1fr 1fr; gap: var(--space-6); } }
 
-.fo-table-wrap { overflow-x: auto; }
+/* width 0 and min-width 100%: the table scrolls inside its frame and its no-wrap cells never widen the page
+   column (the guides scrolled sideways at 320px). */
+.fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }

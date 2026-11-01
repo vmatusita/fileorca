@@ -140,3 +140,40 @@ test('the search dialog has a visible close button', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Fechar' }).click();
   await expect(dialog).toBeHidden();
 });
+
+// F4 (DECISOES § 113): the calculator events carry the page id, the language and a closed value, never a number.
+test.describe('the calculator events', () => {
+  test('calc_complete goes once, on the first change, never on load nor on a scenario link', async ({ page }) => {
+    await page.goto('/mortgage-calculator/#v=1&p=40000000');
+    await hydrated(page);
+    await dismissCookies(page);
+    await expect(page.locator('#fo-calc-p')).toHaveValue('400,000');
+    const sent = async () => (await dataLayer(page)).filter((entry) => entry[0] === 'event' && entry[1] === 'calc_complete');
+    expect(await sent()).toEqual([]);
+    for (const value of ['410000', '420000', '430000']) await page.locator('#fo-calc-p').fill(value);
+    expect(await sent()).toEqual([['event', 'calc_complete', { tool: 'mortgage-calculator', lang: 'en' }]]);
+  });
+
+  test('export_click names the format, share_click and next_step_click name the page and the target', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => undefined);
+    await page.goto('/mortgage-calculator/biweekly/');
+    await hydrated(page);
+    await dismissCookies(page);
+    const buttons = page.locator('.fo-export .fo-btn');
+    const csv = page.waitForEvent('download');
+    await buttons.nth(1).click();
+    await csv;
+    expect(await lastEvent(page, 'export_click')).toEqual(['event', 'export_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', format: 'csv' }]);
+    const pdf = page.waitForEvent('download');
+    await buttons.nth(0).click();
+    await pdf;
+    expect(await lastEvent(page, 'export_click')).toEqual(['event', 'export_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', format: 'pdf' }]);
+    await buttons.nth(2).click();
+    expect(await lastEvent(page, 'share_click')).toEqual(['event', 'share_click', { tool: 'mortgage-calculator-biweekly', lang: 'en' }]);
+    const chip = page.locator('.fo-calc__next a.fo-chip').first();
+    const href = (await chip.getAttribute('href')) ?? '';
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+    await chip.click();
+    expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', target: href.replaceAll('/', '-').replace(/^-|-$/g, '') }]);
+  });
+});
