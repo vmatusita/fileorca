@@ -1,10 +1,13 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultConsentFor } from '../../src/analytics/consent.ts';
-import { EVENT_PARAMS, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
-import { CALC_EVENT_TOOLS, IMAGE_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
+import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
+import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
 import { CALC_IDS } from '../../src/calc/index.ts';
 
 function runBootstrap(hostname: string, stored: string | null) {
@@ -153,5 +156,119 @@ describe('typed events', () => {
     expect(browserLabel('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36 Edg/141.0')).toBe('edge-141');
     expect(browserLabel('Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0')).toBe('firefox-140');
     expect(browserLabel('curl/8')).toBe('other');
+  });
+});
+
+// F5a (decision 11, DECISOES § F5a-eventos): the events of the PDF tools are the same ones as the image tools', with the
+// `tool` taken from the PDF registry; the outcome and the reason grow in closed lists, pinned here so that a new value
+// has to come with a change to this test; and no parameter carries a number, a range, a text, a password, a count of
+// pages or a file name. tests/e2e/events.spec.ts fires real runs and reads the dataLayer.
+describe('the events of the PDF tools (F5a)', () => {
+  /** What each PDF tool says it ended with: the oracle of the table, written here and not read from the tools. */
+  const SUCCESS = {
+    'merge-pdf': 'merged',
+    'split-pdf': 'split',
+    'pdf-to-jpg': 'converted',
+    'compress-pdf': 'smaller',
+    'rotate-pdf': 'rotated',
+    'delete-pdf-pages': 'deleted',
+    'add-page-numbers-to-pdf': 'numbered',
+    'sign-pdf': 'signed',
+    'protect-pdf': 'protected',
+    'unlock-pdf': 'unlocked',
+    'reorder-pdf-pages': 'reordered',
+    'watermark-pdf': 'watermarked',
+  } as const;
+  /** Smuggled in beside the allowed parameters of an event: a count, a range, a text, a password, a file name. */
+  const SMUGGLED = { pages: 300, count: 12, range: '1-3, 5', password: 'Orca-Sentinel-7391-Kq', text: 'CONFIDENTIAL', start: 7, fileName: 'contract.pdf', size: 123_456, ppi: 300, position: 'bottom-center' };
+
+  it('lists exactly the pages of the PDF registry as event tools, apart from the other two lists', () => {
+    expect([...PDF_EVENT_TOOLS]).toEqual([...PDF_TOOL_IDS]);
+    expect([...PDF_EVENT_TOOLS]).toEqual(Object.keys(PDF_PAGES));
+    for (const id of PDF_TOOL_IDS) expect(PDF_PAGES[id].id).toBe(id);
+    expect([...EVENT_TOOLS]).toEqual([...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS]);
+    expect(new Set(EVENT_TOOLS).size, 'no page name is in two lists').toBe(EVENT_TOOLS.length);
+    expect(Object.keys(SUCCESS)).toEqual([...PDF_TOOL_IDS]);
+  });
+
+  it('gives every PDF tool one outcome of the closed list, and the closed list is these words', () => {
+    for (const id of PDF_TOOL_IDS) {
+      expect(PDF_TOOLS[id].success, id).toBe(SUCCESS[id]);
+      expect(OUTCOMES as readonly string[], id).toContain(SUCCESS[id]);
+    }
+    // Pinned: a new outcome comes with a change here. 'unchanged' and 'failed' are the two that belong to no tool.
+    expect([...OUTCOMES].sort()).toEqual(
+      ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed', 'merged', 'split', 'deleted', 'numbered', 'reordered', 'watermarked', 'signed', 'protected', 'unlocked'].sort(),
+    );
+    for (const outcome of OUTCOMES) expect(cleanParams('tool_complete', { tool: 'merge-pdf', lang: 'en', outcome }), outcome).toEqual({ tool: 'merge-pdf', lang: 'en', outcome });
+    for (const outcome of ['merged-3', '300 pages', 'IMG_1.pdf', 'Merged', '']) {
+      expect(cleanParams('tool_complete', { tool: 'merge-pdf', lang: 'en', outcome }), outcome).toEqual({ tool: 'merge-pdf', lang: 'en' });
+    }
+  });
+
+  it('carries every reason of the PDF engine, as a closed list, and no reason of the panel that is not one', () => {
+    for (const reason of PDF_REASONS) expect(ERROR_REASONS as readonly string[], reason).toContain(reason);
+    // Pinned: the image engine's reasons and the PDF engine's, and nothing else.
+    expect([...ERROR_REASONS].sort()).toEqual(
+      ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large', 'load', 'not-pdf', 'corrupted', 'needs-password', 'wrong-password', 'restricted', 'not-encrypted'].sort(),
+    );
+    const error = { tool: 'unlock-pdf', lang: 'en', browser: 'chrome-141', codec: 'application/pdf' } as const;
+    for (const reason of PDF_REASONS) expect(cleanParams('tool_error', { ...error, reason }), reason).toEqual({ ...error, reason });
+    // 'one-at-a-time' is said on the row and never sent; a password, a name or a typed word is not a reason.
+    for (const reason of ['one-at-a-time', 'Orca-Sentinel-7391-Kq', 'contract.pdf', 'password is 12345']) {
+      expect(cleanParams('tool_error', { ...error, reason }), reason).toEqual(error);
+    }
+    for (const codec of CODECS) expect(cleanParams('tool_error', { ...error, reason: 'corrupted', codec }), codec).toMatchObject({ codec });
+    // A file type string or a name is not a codec: it is dropped.
+    expect(cleanParams('tool_error', { ...error, reason: 'corrupted', codec: 'contract.pdf' })).toEqual({ tool: 'unlock-pdf', lang: 'en', browser: 'chrome-141', reason: 'corrupted' });
+  });
+
+  it('names no parameter that could carry a number, a range, a text, a password, a count of pages or a file name', () => {
+    const names = new Set<string>();
+    for (const params of Object.values(EVENT_PARAMS)) for (const name of params) names.add(name);
+    expect([...names].sort()).toEqual(['browser', 'codec', 'format', 'lang', 'outcome', 'place', 'reason', 'target', 'tool']);
+  });
+
+  it('drops anything smuggled beside the parameters of a PDF event, whichever the event', () => {
+    for (const id of PDF_TOOL_IDS) {
+      const chip = PDF_PAGES[id].next[0] as string;
+      expect(cleanParams('tool_start', { tool: id, lang: 'en', ...SMUGGLED }), id).toEqual({ tool: id, lang: 'en' });
+      expect(cleanParams('tool_complete', { tool: id, lang: 'en', outcome: SUCCESS[id], ...SMUGGLED }), id).toEqual({ tool: id, lang: 'en', outcome: SUCCESS[id] });
+      expect(cleanParams('download', { tool: id, lang: 'en', ...SMUGGLED }), id).toEqual({ tool: id, lang: 'en' });
+      expect(cleanParams('next_step_click', { tool: id, lang: 'en', target: chip, ...SMUGGLED }), id).toEqual({ tool: id, lang: 'en', target: chip });
+      expect(cleanParams('tool_error', { tool: id, lang: 'en', browser: 'safari-18', codec: 'application/pdf', reason: 'wrong-password', ...SMUGGLED }), id).toEqual({
+        tool: id,
+        lang: 'en',
+        browser: 'safari-18',
+        codec: 'application/pdf',
+        reason: 'wrong-password',
+      });
+    }
+  });
+
+  it('keeps a typed value out of the values of the closed parameters: tool and target are page names', () => {
+    for (const value of ['contract.pdf', '/merge-pdf/#1-3', 'merge-pdf?pages=300', 'Orca-Sentinel-7391-Kq', '300']) {
+      expect(cleanParams('tool_start', { tool: value, lang: 'en' }), value).toEqual({ lang: 'en' });
+      expect(cleanParams('next_step_click', { tool: 'merge-pdf', lang: 'en', target: value }), value).toEqual({ tool: 'merge-pdf', lang: 'en' });
+    }
+    // The chips of every PDF page lead to pages of the registries (the PDF ones, or the image pages the registry names).
+    for (const id of PDF_TOOL_IDS) {
+      for (const target of PDF_PAGES[id].next) expect(cleanParams('next_step_click', { tool: id, lang: 'en', target }), `${id} → ${target}`).toEqual({ tool: id, lang: 'en', target });
+    }
+  });
+
+  it('types the PDF tools as tools and the outcome and the reason as closed lists', () => {
+    const check = (fn: () => void) => fn;
+    check(() => {
+      const ok: EventMap['tool_complete'] = { tool: 'watermark-pdf', lang: 'en', outcome: 'watermarked' };
+      const failed: EventMap['tool_error'] = { tool: 'unlock-pdf', lang: 'en', browser: 'chrome-141', codec: 'application/pdf', reason: 'wrong-password' };
+      // @ts-expect-error a file name is not a tool
+      const bad: EventMap['tool_start'] = { tool: 'contract.pdf', lang: 'en' };
+      // @ts-expect-error the outcome is a closed list
+      const worse: EventMap['tool_complete'] = { tool: 'merge-pdf', lang: 'en', outcome: 'merged 300 pages' };
+      // @ts-expect-error the reason is a closed list: the row's "one at a time" is never sent
+      const worst: EventMap['tool_error'] = { tool: 'merge-pdf', lang: 'en', browser: 'chrome-141', codec: 'application/pdf', reason: 'one-at-a-time' };
+      return [ok, failed, bad, worse, worst];
+    });
   });
 });
