@@ -3,8 +3,9 @@
 // page exists; its terms (names and synonyms) come from every language that has the text, so a search
 // in one language still finds a synonym typed in another. The search shows an entry only in a language
 // that has its link (src/search/search.ts), so a page that exists only in English is not offered in
-// Portuguese or Spanish. The money calculators and the guides (English only, F4) come after the image pages,
-// in the money category.
+// Portuguese or Spanish. The 12 PDF tools (English only, F5a) come after the image pages, in the PDF category,
+// and the money calculators and the guides (English only, F4) after them, in the money category. The hubs are not
+// listed, as the image hub is not (DECISOES § 160).
 import type { APIRoute } from 'astro';
 import { LANGS, routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -14,22 +15,32 @@ import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
 import enCommon from '../i18n/en/common.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../tools/calc/registry.ts';
+import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
-  return [...imageEntries(), ...moneyEntries()];
+  return [...imageEntries(), ...pdfEntries(), ...moneyEntries()];
 }
 
-/** A money page: English only, in the money category. */
-function moneyEntry(id: string, path: string, blurb: { name: string; synonyms: string[] }, icon: string): SearchEntry {
+/** A page that exists in English only: its category is the one of its area (money, PDF). */
+function englishEntry(id: string, path: string, blurb: { name: string; synonyms: string[] }, icon: string, cat: 'money' | 'pdf', category: string): SearchEntry {
   const terms = new Set([blurb.name, ...blurb.synonyms].map(normalize));
-  return { id, href: { en: path }, name: { en: blurb.name }, category: { en: enCommon.search.moneyCategory }, cat: 'money', icon, terms: [...terms] };
+  return { id, href: { en: path }, name: { en: blurb.name }, category: { en: category }, cat, icon, terms: [...terms] };
 }
 
 function moneyEntries(): SearchEntry[] {
+  const entry = (id: string, path: string, blurb: { name: string; synonyms: string[] }, icon: string) => englishEntry(id, path, blurb, icon, 'money', enCommon.search.moneyCategory);
   return [
-    ...CALC_PAGE_IDS.map((id) => moneyEntry(id, CALC_PAGES[id].path, enCommon.calcs[id], ICONS[CALC_PAGES[id].icon])),
-    ...GUIDE_IDS.map((id) => moneyEntry(id, GUIDES[id].path, enCommon.guides[id], ICONS[CALC_PAGES[GUIDES[id].calc].icon])),
+    ...CALC_PAGE_IDS.map((id) => entry(id, CALC_PAGES[id].path, enCommon.calcs[id], ICONS[CALC_PAGES[id].icon])),
+    ...GUIDE_IDS.map((id) => entry(id, GUIDES[id].path, enCommon.guides[id], ICONS[CALC_PAGES[GUIDES[id].calc].icon])),
   ];
+}
+
+/** The 12 PDF tools, in hub order, with the path of the route map (the same one the pages are built on). */
+function pdfEntries(): SearchEntry[] {
+  return PDF_TOOL_IDS.flatMap((id) => {
+    const path = routeById(id).paths['en'];
+    return path ? [englishEntry(id, path, enCommon.pdf[id], ICONS[PDF_PAGES[id].icon], 'pdf', enCommon.search.pdfCategory)] : [];
+  });
 }
 
 function imageEntries(): SearchEntry[] {

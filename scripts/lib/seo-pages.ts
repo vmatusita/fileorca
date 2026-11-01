@@ -3,9 +3,18 @@
 // from the registry the pages themselves are built from, so a new tool is covered the day it is declared.
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, GUIDES, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 /** Route id of the hub of the image tools. */
 export const HUB_ID = 'image-tools';
+
+/** Route ids of every page of the F5a: the PDF hub and the 12 PDF tools (src/tools/pdf/registry.ts). */
+export const PDF_PAGE_IDS: readonly string[] = [PDF_HUB_ID, ...PDF_TOOL_IDS];
+
+/** One of the 12 PDF tools (the hub is not a tool). */
+export function isPdfPage(routeId: string): boolean {
+  return (PDF_TOOL_IDS as readonly string[]).includes(routeId);
+}
 
 /** Route ids of every image tool and preset (src/tools/image/registry.ts). */
 export const IMAGE_PAGE_IDS: readonly string[] = Object.keys(IMAGE_PAGES);
@@ -29,6 +38,10 @@ export function requiredSchemaTypes(routeId: string): string[] {
   if (routeId === 'about') return ['Organization', 'BreadcrumbList', 'Person', 'AboutPage'];
   if (isImagePage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
   if (routeId === HUB_ID) return ['Organization', 'BreadcrumbList'];
+  // PDF pages (F5a, decision 7): the tools are the image tools' kind of page (WebApplication with no rating and a
+  // BreadcrumbList); the hub is a CollectionPage like the money hub, with no author node.
+  if (isPdfPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
+  if (routeId === PDF_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage'];
   // Money pages (F4, decision 8): WebApplication with no rating, BreadcrumbList and the author; the hub is a
   // CollectionPage; a guide is an Article by the author.
   if (isCalcPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication', 'Person'];
@@ -44,7 +57,7 @@ export function requiredSchemaTypes(routeId: string): string[] {
  */
 export function titleProblem(routeId: string, title: string, h1: string): string | null {
   if (isCalcPage(routeId)) return h1 !== '' && title.toLowerCase().startsWith(h1.toLowerCase()) ? null : `título não começa pelo nome da calculadora (${h1})`;
-  if (!isImagePage(routeId)) return null;
+  if (!isImagePage(routeId) && !isPdfPage(routeId)) return null;
   return h1 !== '' && title.startsWith(h1) ? null : `título não começa pelo nome da ferramenta (${h1})`;
 }
 
@@ -56,8 +69,8 @@ export interface LdNode {
 
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
-  const tool = isImagePage(routeId) || isCalcPage(routeId);
-  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId)) return [];
+  const tool = isImagePage(routeId) || isCalcPage(routeId) || isPdfPage(routeId);
+  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== PDF_HUB_ID) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
   if (tool && app && app.url !== canonical) problems.push(`WebApplication aponta ${app.url ?? 'para nada'} em vez de ${canonical}`);

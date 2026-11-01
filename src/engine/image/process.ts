@@ -23,6 +23,10 @@ import type { EngineFailure, EngineOutput, EngineResult, FailureReason, Flip, Im
 import { RasterWork } from './work.ts';
 import type { Work } from './work.ts';
 
+// The page path (engine-client.ts) loads this module on demand and must set the .wasm URLs before the first file;
+// re-exporting configureWasm from here puts it in the same chunk instead of costing a request of its own.
+export { configureWasm } from './codecs/wasm.ts';
+
 /** Formats strip.ts can clean without decoding (so a file with no gain can go back). */
 const STRIPPABLE: readonly ImageFormat[] = ['jpeg', 'png', 'webp'];
 const PREVIEW_LONGEST_SIDE = 1600;

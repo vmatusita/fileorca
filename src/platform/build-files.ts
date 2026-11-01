@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import { headerRules, redirectRules, toHeadersFile, toRedirectsFile } from './headers.ts';
+import { copyPdfjsData } from './pdfjs-data.ts';
 import { LAUNCHED } from './site.ts';
 
 /** Commit for build.txt: Workers Builds sets WORKERS_CI_COMMIT_SHA; elsewhere, git HEAD. */
@@ -12,7 +13,7 @@ export function buildCommit(env: NodeJS.ProcessEnv = process.env): string {
   return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 }
 
-/** Writes _headers, _redirects and build.txt into dist after the static build. */
+/** Writes _headers, _redirects and build.txt into dist after the static build, and copies PDF.js's data files (F5a). */
 export function platformFiles(): AstroIntegration {
   return {
     name: 'fileorca:platform-files',
@@ -23,7 +24,8 @@ export function platformFiles(): AstroIntegration {
         writeFileSync(`${out}/_redirects`, toRedirectsFile(redirectRules()));
         const commit = buildCommit();
         writeFileSync(`${out}/build.txt`, `${commit}\n`);
-        logger.info(`_headers, _redirects and build.txt (${commit.slice(0, 7)}) written`);
+        const pdfjs = copyPdfjsData(out);
+        logger.info(`_headers, _redirects and build.txt (${commit.slice(0, 7)}) written; ${pdfjs} PDF.js data files copied`);
       },
     },
   };

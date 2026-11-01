@@ -3,6 +3,7 @@
 import type { Lang } from '../i18n/routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { CalcPageId } from '../tools/calc/registry.ts';
+import type { ImageNeighbour, PdfToolId } from '../tools/pdf/registry.ts';
 import { EVENT_TOOLS } from './tool-ids.ts';
 
 export const EVENT_PARAMS = {
@@ -19,19 +20,27 @@ export const EVENT_PARAMS = {
 
 export type EventName = keyof typeof EVENT_PARAMS;
 
-/** Every image and money calculator page (the registries); the id is a page name, never a file name or a number. */
-export type ToolId = ImagePageId | CalcPageId;
+/** Every image, money calculator and PDF page (the registries); the id is a page name, never a file name or a number. */
+export type ToolId = ImagePageId | CalcPageId | PdfToolId;
 /** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
-export const OUTCOMES = ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed'] as const;
+export const OUTCOMES = [
+  'smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed',
+  // The PDF tools (F5a, DECISOES § 151).
+  'merged', 'split', 'deleted', 'numbered', 'reordered', 'watermarked', 'signed', 'protected', 'unlocked',
+] as const;
 export type Outcome = (typeof OUTCOMES)[number];
 /**
- * Why one file did not come out: the engine's FailureReason (src/engine/image/types.ts), or 'load' when the panel could
- * not load the engine or the PDF worker (offline, or a chunk gone after a deploy; DECISOES § 102).
+ * Why one file did not come out: the image engine's FailureReason (src/engine/image/types.ts), the PDF engine's
+ * PdfReason (src/engine/pdf/types.ts), or 'load' when the panel could not load the engine or the PDF worker (offline,
+ * or a chunk gone after a deploy; DECISOES § 102).
  */
-export const ERROR_REASONS = ['empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large', 'load'] as const;
+export const ERROR_REASONS = [
+  'empty', 'unsupported', 'wrong-tool', 'truncated', 'decode', 'encode', 'too-large', 'load',
+  'not-pdf', 'corrupted', 'needs-password', 'wrong-password', 'restricted', 'not-encrypted',
+] as const;
 export type ErrorReason = (typeof ERROR_REASONS)[number];
 /** The real format of the file as the engine read it from the bytes: a closed list, never a file type string. */
-export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty'] as const;
+export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'application/pdf', 'unknown', 'empty'] as const;
 export type Codec = (typeof CODECS)[number];
 export type DonatePlace = 'result' | 'footer' | 'support_page';
 /** What a calculator exported: a closed list (DECISOES § 113). */
@@ -42,7 +51,7 @@ export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
   tool_complete: { tool: ToolId; lang: Lang; outcome: Outcome };
   download: { tool: ToolId; lang: Lang };
-  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | CalcPageId | 'home' };
+  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | CalcPageId | PdfToolId | ImageNeighbour | 'home' };
   tool_error: { tool: ToolId; lang: Lang; browser: string; codec: Codec; reason: ErrorReason };
   donate_click: { place: DonatePlace; lang: Lang };
   /** Once per page load, on the first valid change the person makes (never on load, never from the # link). */

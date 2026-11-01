@@ -1,5 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
+import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES } from '../../src/analytics/events.ts';
+import { EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
+import unlockTexts from '../../src/tools/unlock-pdf/i18n/en.ts';
+import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
+import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import { dataLayer, dismissCookies, hydrated, useImage } from './lib/page.ts';
+import { BROKEN_PDFS, PDF_ORACLE, choosePdfs, openTool, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 
 // donate_click, next_step_click and the cookie notice, end to end.
 
@@ -175,5 +182,140 @@ test.describe('the calculator events', () => {
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
     await chip.click();
     expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', target: href.replaceAll('/', '-').replace(/^-|-$/g, '') }]);
+  });
+});
+
+// F5a (decision 11, DECISOES § 169): the events of the PDF tools, from real runs. The tool list of the events is
+// the registry's, the outcome and the reason come from closed lists, and nothing the person typed or chose (a password,
+// a watermark text, a file name) is in any event: the sentinels below are long and unique, so any trace of them is found.
+// tests/unit/consent.test.ts proves the same lists in Node, tool by tool.
+test.describe('the PDF tool events', () => {
+  /** A text a tool page must have (the type allows a tool without an action button). */
+  const must = (text: string | undefined): string => {
+    if (!text) throw new Error('the page has no such text');
+    return text;
+  };
+  const PASSWORD = 'Orca-Sentinel-7391-Kq';
+  const MARK = 'Orca-Mark-5521-Zt';
+  const NAME = 'Sentinel-Contract-4471';
+  const SENTINELS = [PASSWORD, MARK, NAME, '7391', '5521', '4471'];
+
+  type Sent = readonly [name: string, params: Record<string, unknown>];
+
+  const sent = async (page: Page): Promise<Sent[]> =>
+    (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => [entry[1] as string, entry[2] as Record<string, unknown>] as const);
+
+  /** One event: only the parameters of its event, every value a word from its closed list, never a number. */
+  function expectClosed([name, params]: Sent): void {
+    const allowed = (EVENT_PARAMS as Record<string, readonly string[]>)[name] ?? [];
+    for (const [key, value] of Object.entries(params)) {
+      expect(allowed, `${name}.${key} is a parameter of the event`).toContain(key);
+      expect(typeof value, `${name}.${key} is a word, not a number`).toBe('string');
+      const closed: Record<string, readonly string[]> = {
+        lang: ['en'],
+        tool: PDF_EVENT_TOOLS,
+        outcome: OUTCOMES,
+        reason: ERROR_REASONS,
+        codec: CODECS,
+        target: [...EVENT_TOOLS, 'home'],
+      };
+      if (key === 'browser') expect(value, `${name}.browser`).toMatch(/^(chrome|safari|firefox|edge)-\d+$/);
+      else expect(closed[key], `${name}.${key} has a closed list`).toContain(value);
+    }
+  }
+
+  /** Nothing of the run is in the dataLayer: not the typed text, not the password, not the name of the file. */
+  async function expectNoTrace(page: Page): Promise<void> {
+    const everything = JSON.stringify(await dataLayer(page));
+    for (const sentinel of SENTINELS) expect(everything, `"${sentinel}" is in the dataLayer`).not.toContain(sentinel);
+    expect(everything, 'a PDF file name in the dataLayer').not.toMatch(/\.pdf/i);
+  }
+
+  test('a PDF run sends tool_start, tool_complete, download and next_step_click with the registry name and closed values', async ({ page }) => {
+    await openTool(page, '/watermark-pdf/');
+    await page.getByLabel(watermarkTexts.panel.options.textLabel).fill(MARK);
+    await page.getByLabel(watermarkTexts.panel.options.textLabel).blur();
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf', `${NAME}.pdf`)]);
+    await page.getByRole('button', { name: must(watermarkTexts.panel.action) }).click();
+    await takePdfDownload(page);
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+    await page.locator('#fo-tool-root .fo-btn--download').click();
+    const chip = page.locator('nav.fo-next a.fo-chip').first();
+    const target = ((await chip.getAttribute('href')) ?? '').replaceAll('/', '');
+    await chip.click();
+
+    const events = await sent(page);
+    // The page name is the registry's, the outcome is this tool's word, the chip names the page it leads to.
+    expect(events).toEqual([
+      ['tool_start', { tool: 'watermark-pdf', lang: 'en' }],
+      ['tool_complete', { tool: 'watermark-pdf', lang: 'en', outcome: 'watermarked' }],
+      ['download', { tool: 'watermark-pdf', lang: 'en' }],
+      ['next_step_click', { tool: 'watermark-pdf', lang: 'en', target }],
+    ]);
+    expect(PDF_PAGES['watermark-pdf'].next as readonly string[], 'the chip leads to a page of the registry').toContain(target);
+    for (const event of events) expectClosed(event);
+    await expectNoTrace(page);
+  });
+
+  test('a PDF tool that refuses files sends tool_error with the reason and the format, nothing else', async ({ page }) => {
+    await openTool(page, '/merge-pdf/');
+    // Six files no merge can use, each under a name with the sentinel: they are refused one by one, on their own rows.
+    const refused = [...BROKEN_PDFS, 'gen-cifrado-aes256.pdf', 'gen-cifrado-dono.pdf'];
+    await choosePdfs(page, refused.map((name, i) => pdfFile(name, `${NAME}-${i}.pdf`)));
+    await expect(page.locator('.fo-filelist__row .fo-file__err')).toHaveCount(refused.length, { timeout: 30_000 });
+    await expect(page.getByRole('button', { name: must(mergeTexts.panel.action) })).toHaveCount(0);
+
+    const events = await sent(page);
+    const errors = events.filter(([name]) => name === 'tool_error');
+    expect(errors.map(([, params]) => `${String(params['reason'])} / ${String(params['codec'])}`).sort()).toEqual([
+      'empty / empty',
+      'needs-password / application/pdf',
+      'not-pdf / image/jpeg',
+      'not-pdf / unknown',
+      'restricted / application/pdf',
+      'truncated / application/pdf',
+    ]);
+    for (const [, params] of errors) expect(Object.keys(params).sort()).toEqual(['browser', 'codec', 'lang', 'reason', 'tool']);
+    // One start for the whole batch, and one end: nothing came out.
+    expect(events.filter(([name]) => name !== 'tool_error')).toEqual([
+      ['tool_start', { tool: 'merge-pdf', lang: 'en' }],
+      ['tool_complete', { tool: 'merge-pdf', lang: 'en', outcome: 'failed' }],
+    ]);
+    for (const event of events) expectClosed(event);
+    await expectNoTrace(page);
+  });
+
+  test('a wrong password is an event without the password, and the right one ends the run as "unlocked"', async ({ page }) => {
+    await openTool(page, '/unlock-pdf/');
+    await choosePdfs(page, [pdfFile('gen-cifrado-aes256.pdf', `${NAME}.pdf`)]);
+    const field = page.getByLabel(unlockTexts.panel.options.passwordLabel, { exact: true });
+    await field.fill(PASSWORD);
+    await page.getByRole('button', { name: must(unlockTexts.panel.options.submit) }).click();
+    await expect(page.getByText(/That password didn't open/).first()).toBeVisible({ timeout: 30_000 });
+    await field.fill(PDF_ORACLE.passwords['aes256'] ?? '');
+    await page.getByRole('button', { name: must(unlockTexts.panel.options.submit) }).click();
+    await takePdfDownload(page);
+
+    const events = await sent(page);
+    expect(events.map(([name]) => name)).toEqual(['tool_start', 'tool_error', 'tool_complete']);
+    expect(events[1]?.[1]).toMatchObject({ tool: 'unlock-pdf', lang: 'en', codec: 'application/pdf', reason: 'wrong-password' });
+    expect(Object.keys(events[1]?.[1] ?? {}).sort()).toEqual(['browser', 'codec', 'lang', 'reason', 'tool']);
+    expect(events[2]).toEqual(['tool_complete', { tool: 'unlock-pdf', lang: 'en', outcome: 'unlocked' }]);
+    for (const event of events) expectClosed(event);
+    // Neither the wrong password nor the right one, and not the name of the file.
+    expect(JSON.stringify(await dataLayer(page))).not.toContain(PDF_ORACLE.passwords['aes256'] ?? 'unreachable');
+    await expectNoTrace(page);
+  });
+
+  test('the hub lists exactly the PDF tools the events name', async ({ page }) => {
+    await page.goto('/pdf-tools/');
+    const hrefs = await page.locator('ul.fo-grid a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
+    const ids = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => (PDF_EVENT_TOOLS as readonly string[]).includes(id));
+    expect(ids).toEqual([...PDF_EVENT_TOOLS].filter((id) => ids.includes(id)));
+    expect(new Set(ids)).toEqual(new Set(PDF_EVENT_TOOLS));
+    // The one card that is not a PDF tool is the Image to PDF page, which has an event name of its own.
+    const others = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => !(PDF_EVENT_TOOLS as readonly string[]).includes(id));
+    expect(others).toEqual(['image-to-pdf']);
+    expect(EVENT_TOOLS).toContain('image-to-pdf');
   });
 });

@@ -13,6 +13,7 @@ import {
   checkContent,
   checkCrawlable,
   checkNothingUnfinished,
+  checkPdfPages,
   checkRequiredPages,
   checkTodayBuild,
   fileIn,
@@ -22,10 +23,12 @@ import {
   type Site,
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
-import { LANGS, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
-// one break at a time (positive and negative controls, prompt F3, decision 5).
+// one break at a time (positive and negative controls, prompt F3, decision 5). From the F5a the fake site can carry the
+// 12 PDF tools and the hub too (makeSite(change, true)), to prove the PDF cards, search and pages the same way.
 
 const ORIGIN = 'https://fileorca.com';
 const SLUGS: Record<string, Record<Lang, string>> = {
@@ -75,21 +78,46 @@ function write(dir: string, path: string, content: string): void {
   writeFileSync(file, content);
 }
 
-/** A complete fake site; `change` edits files after they are written. */
-function makeSite(change: (dir: string) => void = () => {}): Site {
+/** The PDF pages of a fake site with the PDF tools: the 12 of the registry and the hub, English only, with an ad area. */
+const PDF_FAKE: SitePage[] = [
+  ...PDF_TOOL_IDS.map((id) => ({ id, lang: 'en' as const, path: PDF_PAGES[id].path, indexable: true, ads: true })),
+  { id: PDF_HUB_ID, lang: 'en' as const, path: '/pdf-tools/', indexable: true, ads: true },
+];
+const PDF_PATHS = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
+const IMAGE_TO_PDF = '/image-to-pdf/';
+const cardsHtml = (paths: readonly string[]): string => paths.map((path) => `<a class="fo-tool" href="${path}">${path}</a>`).join('');
+
+/** A complete fake site; `change` edits files after they are written. With `pdf`, it has the PDF tools, their hub, cards and search too. */
+function makeSite(change: (dir: string) => void = () => {}, pdf = false): Site {
   const dir = mkdtempSync(join(tmpdir(), 'fo-prontidao-'));
   roots.push(dir);
-  for (const page of PAGES) write(dir, page.path, pageHtml(page));
+  const pages = pdf ? [...PAGES, ...PDF_FAKE] : PAGES;
+  for (const page of pages) write(dir, page.path, pageHtml(page));
+  if (pdf) {
+    // The home lists the PDF tools; the hub lists them and the Image to PDF card, whose page exists apart from the registry.
+    const home = PAGES.find((candidate) => candidate.id === 'home' && candidate.lang === 'en') as SitePage;
+    write(dir, home.path, pageHtml(home, (main) => `${main}${cardsHtml(PDF_PATHS)}`));
+    const hub = PDF_FAKE.find((candidate) => candidate.id === PDF_HUB_ID) as SitePage;
+    write(dir, hub.path, pageHtml(hub, (main) => `${main}${cardsHtml([...PDF_PATHS, IMAGE_TO_PDF])}`));
+    write(dir, IMAGE_TO_PDF, pageHtml({ id: 'image-to-pdf', lang: 'en', path: IMAGE_TO_PDF, indexable: true, ads: true }));
+  }
   write(dir, '/robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap-index.xml\n`);
   write(dir, '/sitemap-index.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${LANGS.map((lang) => `  <sitemap><loc>${ORIGIN}/sitemap-${lang}.xml</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
   for (const lang of LANGS) {
-    const urls = PAGES.filter((page) => page.lang === lang && page.indexable).map((page) => `  <url><loc>${ORIGIN}${page.path}</loc></url>`);
+    const urls = pages.filter((page) => page.lang === lang && page.indexable).map((page) => `  <url><loc>${ORIGIN}${page.path}</loc></url>`);
     write(dir, `/sitemap-${lang}.xml`, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);
   }
   write(dir, '/_headers', "/*\n  X-Content-Type-Options: nosniff\n\nhttps://:version.:subdomain.workers.dev/*\n  X-Robots-Tag: noindex\n\n/404\n  X-Robots-Tag: noindex\n");
-  write(dir, '/search-index.json', JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }]));
+  write(dir, '/search-index.json', JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...(pdf ? PDF_TOOL_IDS.map((id) => ({ id, href: { en: PDF_PAGES[id].path } })) : [])]));
   change(dir);
-  return { dir, pages: PAGES, tools: { en: [TOOL], pt: [], es: [] }, searchIds: ['compress-image'] };
+  const site: Site = { dir, pages, tools: { en: [TOOL], pt: [], es: [] }, searchIds: ['compress-image'] };
+  if (!pdf) return site;
+  return {
+    ...site,
+    searchIds: ['compress-image', ...PDF_TOOL_IDS],
+    cards: { home: { en: PDF_PATHS }, [PDF_HUB_ID]: { en: [...PDF_PATHS, IMAGE_TO_PDF] } },
+    pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
+  };
 }
 
 /** The same fake site after a build with the AdSense variables: a meta in every head, ads.txt, maybe the loader. */
@@ -262,11 +290,32 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
   });
 
-  it('builds the real site with the image and money cards and the search of both registries', () => {
+  it('builds the real site with the image, money and PDF cards and the search of the three registries', () => {
     const site = realSite('dist');
-    expect(site.cards?.['home']?.en).toEqual(['/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/']);
+    // F5a: the home also lists the 12 PDF tools of the PDF registry, after the five credit calculators.
+    expect(site.cards?.['home']?.en).toEqual([
+      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/',
+      ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),
+    ]);
     expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
-    expect(site.searchIds).toHaveLength(11 + 18 + 5);
+    // F5a: the search offers the 12 PDF tools as well.
+    expect(site.searchIds).toHaveLength(11 + 18 + 5 + PDF_TOOL_IDS.length);
+  });
+
+  it('builds the PDF part of the real site from the PDF registry: hub cards, search ids and the pages to look at', () => {
+    const site = realSite('dist');
+    expect(site.cards?.[PDF_HUB_ID]?.en).toEqual([...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path), '/image-to-pdf/']);
+    expect(site.cards?.[PDF_HUB_ID]?.pt).toBeUndefined();
+    expect(site.searchIds.slice(-PDF_TOOL_IDS.length)).toEqual([...PDF_TOOL_IDS]);
+    expect(site.pdf).toEqual([...PDF_TOOL_IDS, PDF_HUB_ID]);
+    // Each of them is a page of the route map, in English only, with an ad area.
+    for (const id of site.pdf ?? []) {
+      const route = ROUTES.find((candidate) => candidate.id === id);
+      expect(route, id).toBeDefined();
+      expect(route ? languagesOf(route) : [], id).toEqual(['en']);
+      expect(route?.adArea, id).toBeDefined();
+    }
+    expect(routeById('image-to-pdf').paths.en).toBe('/image-to-pdf/');
   });
 });
 
@@ -289,6 +338,108 @@ describe('gate:prontidao, (d) conteúdo de verdade', () => {
     const tool = PAGES.find((page) => page.ads) as SitePage;
     const site = makeSite((dir) => write(dir, tool.path, pageHtml(tool, (main) => main.replace(prose(400, 'compress-imageen'), prose(2 * MIN_WORDS_PER_AD - 20, 'x')))));
     expect(failing(checkContent(site))).toEqual([expect.stringMatching(/^Mais conteúdo que anúncio: \/compress-image\/: 2 AdSlot\(s\) para 2\d\d palavras/)]);
+  });
+});
+
+describe('gate:prontidao, as páginas de PDF (F5a)', () => {
+  const pdfSite = (change: (dir: string) => void = () => {}): Site => makeSite(change, true);
+  const fakeOf = (id: string): SitePage => PDF_FAKE.find((page) => page.id === id) as SitePage;
+  const MERGE = fakeOf('merge-pdf');
+  const HUB = fakeOf(PDF_HUB_ID);
+  const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
+  const allRows = (site: Site): Row[] => [...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
+
+  it('passes a site with the 12 PDF tools, their hub, cards and search on every item', () => {
+    const rows = allRows(pdfSite());
+    expect(failing(rows)).toEqual([]);
+    // The 14 items of before and the 3 rows of the PDF pages.
+    expect(rows).toHaveLength(14 + 3);
+    expect(checkPdfPages(pdfSite()).map((entry) => entry.ok)).toEqual([true, true, true]);
+    expect(PDF_FAKE).toHaveLength(13);
+  });
+
+  it('has nothing to look at in a site without PDF pages (the rows pass on no page)', () => {
+    expect(failing(checkPdfPages(makeSite()))).toEqual([]);
+  });
+
+  it('refuses a PDF tool that is not in the route map, not indexable, without an ad area or not in the build', () => {
+    const site = pdfSite();
+    const noRoute = { ...site, pages: site.pages.filter((page) => page.id !== 'merge-pdf') };
+    expect(failing(checkPdfPages(noRoute))).toEqual(['As páginas de PDF estão no mapa de rotas e no build: merge-pdf: sem página em inglês no mapa de rotas']);
+    const hidden = { ...site, pages: site.pages.map((page) => (page.id === 'split-pdf' ? { ...page, indexable: false } : page)) };
+    expect(failing(checkPdfPages(hidden))).toEqual(['As páginas de PDF estão no mapa de rotas e no build: /split-pdf/: não indexável']);
+    const noAds = { ...site, pages: site.pages.map((page) => (page.id === 'sign-pdf' ? { ...page, ads: false } : page)) };
+    expect(failing(checkPdfPages(noAds))).toEqual([expect.stringMatching(/\/sign-pdf\/: sem área de anúncio/)]);
+    const gone = pdfSite((dir) => rmSync(fileIn(dir, '/pdf-tools/')));
+    expect(failing(checkPdfPages(gone)).join('\n')).toContain('/pdf-tools/: não existe no build');
+  });
+
+  it('refuses a PDF page without an H1, with two, or with a title or description of its own that another page already has', () => {
+    const noTitle = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE).replace('<title>Title of /merge-pdf/ | FileOrca</title>', '')));
+    expect(failing(checkPdfPages(noTitle))).toEqual(['PDF: H1, título e descrição próprios: /merge-pdf/: sem title']);
+    const twoH1 = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE, (main) => `${main}<h1>Another</h1>`)));
+    expect(failing(checkPdfPages(twoH1))).toEqual(['PDF: H1, título e descrição próprios: /merge-pdf/: 2 H1']);
+    // Same title as the About page, same description as the compress-image page, same H1 as another PDF page.
+    const about = PAGES.find((page) => page.id === 'about' && page.lang === 'en') as SitePage;
+    const sameTitle = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE).replace('Title of /merge-pdf/', `Title of ${about.path}`)));
+    expect(failing(checkPdfPages(sameTitle))).toEqual([`PDF: H1, título e descrição próprios: /merge-pdf/: title igual ao de ${about.path}`]);
+    const sameDescription = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE).replace('Description of /merge-pdf/', `Description of ${TOOL}`)));
+    expect(failing(checkPdfPages(sameDescription))).toEqual([`PDF: H1, título e descrição próprios: /merge-pdf/: description igual ao de ${TOOL}`]);
+    const split = fakeOf('split-pdf');
+    const sameH1 = pdfSite((dir) => write(dir, split.path, pageHtml(split).replace('Heading of /split-pdf/', 'Heading of /merge-pdf/')));
+    expect(failing(checkPdfPages(sameH1)).join('\n')).toMatch(/\/(?:split|merge)-pdf\/: h1 igual ao de \/(?:merge|split)-pdf\//);
+    // The same break on the hub.
+    const hubTwin = pdfSite((dir) => write(dir, HUB.path, pageHtml(HUB, (main) => main).replace('Title of /pdf-tools/', 'Title of /merge-pdf/')));
+    expect(failing(checkPdfPages(hubTwin)).join('\n')).toMatch(/title igual ao de \/merge-pdf\//);
+  });
+
+  it(`refuses a PDF page with fewer than ${MIN_MAIN_WORDS} words in <main>, AdSlot labels not counted, and the hub too`, () => {
+    for (const page of [MERGE, HUB]) {
+      const thin = pdfSite((dir) =>
+        write(dir, page.path, pageHtml(page, () => `<h1>Heading of ${page.path}</h1><p>${prose(MIN_MAIN_WORDS - 5, 'p')}</p><div class="fo-ad fo-ad--content"><span>${prose(50, 'ad')}</span></div>`)),
+      );
+      expect(failing(checkPdfPages(thin)).join('\n'), page.path).toMatch(new RegExp(`PDF: texto mínimo e mais conteúdo que anúncio: ${page.path.replace(/\//g, '\\/')}: \\d+ palavras no <main>`));
+    }
+  });
+
+  it(`refuses a PDF page with less than ${MIN_WORDS_PER_AD} words for each AdSlot, and one without any AdSlot`, () => {
+    const dense = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE, (main) => main.replace(prose(400, 'merge-pdfen'), prose(2 * MIN_WORDS_PER_AD - 20, 'x')))));
+    expect(failing(checkPdfPages(dense))).toEqual([expect.stringMatching(/^PDF: texto mínimo e mais conteúdo que anúncio: \/merge-pdf\/: 2 AdSlot\(s\) para 2\d\d palavras/)]);
+    const bare = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE, (main) => main.replace(/<div class="fo-ad[\s\S]*$/, ''))));
+    expect(failing(checkPdfPages(bare))).toEqual(['PDF: texto mínimo e mais conteúdo que anúncio: /merge-pdf/: nenhum AdSlot na página']);
+  });
+
+  it('checks the cards of the PDF hub and of the home against the PDF registry', () => {
+    const hub = (cards: readonly string[]) => pdfSite((dir) => write(dir, HUB.path, pageHtml(HUB, (main) => `${main}${cardsHtml(cards)}`)));
+    const missing = hub(PDF_PATHS.slice(1));
+    expect(failing(checkNothingUnfinished(missing)).join('\n')).toMatch(/\/pdf-tools\/: faltam os cartões de \/merge-pdf\/, \/image-to-pdf\//);
+    const extra = hub([...PDF_PATHS, IMAGE_TO_PDF, '/pdf-ocr/']);
+    expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/\/pdf-tools\/: cartão para \/pdf-ocr\/, que não existe[\s\S]*cartões fora do registro: \/pdf-ocr\//);
+    const noImageCard = hub(PDF_PATHS);
+    expect(failing(checkNothingUnfinished(noImageCard))).toEqual([expect.stringMatching(/\/pdf-tools\/: faltam os cartões de \/image-to-pdf\//)]);
+    const noHomeSection = pdfSite((dir) => write(dir, '/', pageHtml(home)));
+    expect(failing(checkNothingUnfinished(noHomeSection)).join('\n')).toMatch(/\/: faltam os cartões de \/merge-pdf\/[^\n]*\/watermark-pdf\//);
+    const oneMissing = pdfSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}${cardsHtml(PDF_PATHS.filter((path) => path !== '/rotate-pdf/'))}`)));
+    expect(failing(checkNothingUnfinished(oneMissing))).toEqual([expect.stringMatching(/\/: faltam os cartões de \/rotate-pdf\/$/)]);
+    const strangeCard = pdfSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}${cardsHtml([...PDF_PATHS, '/pdf-ocr/'])}`)));
+    expect(failing(checkNothingUnfinished(strangeCard)).join('\n')).toMatch(/\/: cartão para \/pdf-ocr\/, que não existe[\s\S]*cartões fora do registro: \/pdf-ocr\//);
+  });
+
+  it('checks that the search has the 12 PDF tools of the registry, and only those', () => {
+    const entries = (ids: readonly string[]) => JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...ids.map((id) => ({ id, href: { en: `/${id}/` } }))]);
+    // Today's search has no PDF tool (the PDF pages are not in it yet): the item must say which ones are missing.
+    const none = pdfSite((dir) => write(dir, '/search-index.json', entries([])));
+    expect(failing(checkNothingUnfinished(none))).toEqual([`Cartões e busca só com o que existe: busca sem ${PDF_TOOL_IDS.join(', ')}`]);
+    const one = pdfSite((dir) => write(dir, '/search-index.json', entries(PDF_TOOL_IDS.filter((id) => id !== 'sign-pdf'))));
+    expect(failing(checkNothingUnfinished(one))).toEqual(['Cartões e busca só com o que existe: busca sem sign-pdf']);
+    const extra = pdfSite((dir) => write(dir, '/search-index.json', entries([...PDF_TOOL_IDS, 'pdf-ocr'])));
+    expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/busca: pdf-ocr leva a \/pdf-ocr\/, que não existe[\s\S]*busca com itens fora do registro: pdf-ocr/);
+    const dangling = pdfSite((dir) => {
+      write(dir, '/search-index.json', entries(PDF_TOOL_IDS));
+      rmSync(fileIn(dir, '/watermark-pdf/'));
+    });
+    expect(failing(checkNothingUnfinished(dangling)).join('\n')).toMatch(/busca: watermark-pdf leva a \/watermark-pdf\/, que não existe/);
+    expect(failing(checkNothingUnfinished(pdfSite()))).toEqual([]);
   });
 });
 

@@ -8,6 +8,7 @@
 //   node scripts/fixtures/generate.ts           write the files and print the ORIGEM rows
 //   node scripts/fixtures/generate.ts --check   generate in memory and compare with the files on disk
 //   node scripts/fixtures/generate.ts --no-webkit   skip the WebKit decode checks
+//   node scripts/fixtures/generate.ts --no-pdf      skip the PDF fixtures (scripts/fixtures/pdf.ts runs after the images, F5a)
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +18,7 @@ import { BrowserSession } from './lib/browser.ts';
 import { corruptJpegStructure, exifSegment, findExif, markerSegments, setOrientation, truncateJpeg, withSegmentAfterSoi } from './lib/jpeg.ts';
 import { fadeToTransparent, grayThumbnail, meanAbsDiff, rotate } from './lib/rgba.ts';
 import { animation, withExif } from './lib/webp.ts';
+import { generatePdfFixtures } from './pdf.ts';
 
 const DIR = fileURLToPath(new URL('../../fixtures/images/', import.meta.url));
 const SCRIPT = 'scripts/fixtures/generate.ts';
@@ -318,3 +320,5 @@ async function main(): Promise<void> {
 }
 
 await main();
+// The PDF fixtures (F5a) come with the same command and the same --check.
+if (!process.argv.includes('--no-pdf')) await generatePdfFixtures(process.argv.includes('--check'));

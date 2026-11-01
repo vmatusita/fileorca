@@ -5,8 +5,8 @@
 export const ICON_NAMES = [
   'alert', 'arrow-right', 'calculator', 'check', 'chevron-down', 'chevron-right', 'close', 'coffee', 'compress',
   'convert', 'crop', 'download', 'file', 'globe', 'heart', 'home', 'image', 'info', 'link', 'lock', 'merge',
-  'offline', 'paste', 'pdf', 'qr', 'resize', 'rotate', 'search', 'shield', 'sparkline', 'split', 'table',
-  'trash', 'unlock', 'upload',
+  'offline', 'page-number', 'paste', 'pdf', 'qr', 'reorder', 'resize', 'rotate', 'search', 'shield', 'sign',
+  'sparkline', 'split', 'table', 'trash', 'unlock', 'upload', 'watermark',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 

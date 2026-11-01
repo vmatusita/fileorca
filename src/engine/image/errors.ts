@@ -12,6 +12,14 @@ export class EngineError extends Error {
     this.name = 'EngineError';
     this.reason = reason;
   }
+
+  /**
+   * WebKit can evaluate the engine's modules twice in one worker (DECISOES § 172), so an error may come from the class of
+   * the other copy: it is an EngineError all the same, and keeps its reason.
+   */
+  static override [Symbol.hasInstance](value: unknown): value is EngineError {
+    return value instanceof Error && value.name === 'EngineError' && typeof (value as { reason?: unknown }).reason === 'string';
+  }
 }
 
 /**

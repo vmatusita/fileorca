@@ -9,6 +9,9 @@ import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
+import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
 
 function pageFiles(dir = 'src/pages'): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -23,17 +26,19 @@ describe('mapa de rotas', () => {
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
       'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
+      PDF_HUB_ID, ...PDF_TOOL_IDS,
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
     // Only Compress image is translated; the other image tools, their presets and hub (DECISOES § 58) and every money
-    // page (F4: the hub, the 18 calculators and the 5 guides, DECISOES § 110) exist in English only.
+    // page (F4: the hub, the 18 calculators and the 5 guides, DECISOES § 110) exist in English only, and so do the PDF
+    // hub and the 12 PDF tools (F5a, in the files area like the image tools).
     const englishOnly = new Set([
       ...ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id),
       MONEY_HUB_ID,
       ...CALC_PAGE_IDS,
       ...GUIDE_IDS,
     ]);
-    expect(englishOnly.size).toBe(11 + 1 + 18 + 5);
+    expect(englishOnly.size).toBe(11 + 13 + 1 + 18 + 5);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
@@ -99,7 +104,7 @@ describe('mapa de rotas', () => {
     expect(TEXTS.es['not-found'].h1).toBe('Esta página se fue nadando.');
     for (const lang of LANGS) {
       // The texts of the image tools and presets live apart from TEXTS (src/tools/image/texts.ts): they get the same scan.
-      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)]);
+      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null), ...(lang === 'en' ? [PDF_PANEL_TEXTS, PDF_TOOL_TEXTS, enPdfTools] : [])]);
       expect(text).not.toMatch(/→|↔|\bup to 50\b/);
       expect(text).not.toMatch(/\b(seamless|effortless|supercharge|AI-powered|revolutionary|best-in-class)\b/i);
     }
@@ -115,12 +120,18 @@ describe('mapa de rotas', () => {
     };
     const forbidden = /\b(seamless\w*|effortless\w*|unlock\w*|supercharge\w*|magic\w*|m[áa]gic\w*|ai-powered|revolutionary|best-in-class)\b/i;
     for (const sample of ['Unlock your photos', 'A magical way', 'Supercharged compression', 'Una forma mágica']) expect(sample).toMatch(forbidden);
+    // F5a: "Unlock PDF" is the name of a tool (the search term of data/keywords.csv), not the marketing verb the design
+    // README forbids: the exact name (and its route id, "unlock-pdf", which the hub's guide names) is taken out before the
+    // check, so "unlock" anywhere else still fails (DECISOES § 153).
+    const TOOL_NAME = /\bUnlock PDF\b|\bunlock-pdf\b/g;
+    for (const sample of ['Open it in Unlock PDF first.', 'Unlock PDF: remove a password']) expect(sample.replace(TOOL_NAME, '')).not.toMatch(forbidden);
+    for (const sample of ['Unlock your PDF', 'unlocked files', 'Unlock PDFs fast']) expect(sample.replace(TOOL_NAME, '')).toMatch(forbidden);
     let successLines = 0;
     for (const lang of LANGS) {
-      const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)], lang);
+      const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null), ...(lang === 'en' ? [PDF_PANEL_TEXTS, PDF_TOOL_TEXTS, enPdfTools] : [])], lang);
       expect(all.length).toBeGreaterThan(100);
       for (const [path, text] of all) {
-        expect(text, path).not.toMatch(forbidden);
+        expect(text.replace(TOOL_NAME, ''), path).not.toMatch(forbidden);
         expect(text.replace(/[©®™]/g, ''), path).not.toMatch(/\p{Extended_Pictographic}/u);
         if (/[!¡]/.test(text)) {
           successLines += 1;
@@ -151,13 +162,14 @@ describe('tool search', () => {
 
   it('indexes every image tool and preset of the registry, once, with a link only where the page exists', () => {
     const index = searchIndex();
-    // The image pages first, then the money calculators and guides of the F4 (English only, money category).
-    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS]);
-    expect(index).toHaveLength(11 + 18 + 5);
+    // The image pages first, then the 12 PDF tools of the F5a (English only, PDF category: F5a), then the money
+    // calculators and guides of the F4 (English only, money category).
+    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS]);
+    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + 5);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
-      if (entry.cat === 'money') expect(languagesOf(route), entry.id).toEqual(['en']);
+      if (entry.cat === 'money' || (entry.cat === 'pdf' && (PDF_TOOL_IDS as readonly string[]).includes(entry.id))) expect(languagesOf(route), entry.id).toEqual(['en']);
       // The links, names and categories of an entry are exactly the languages of its route.
       expect(Object.keys(entry.href), entry.id).toEqual(languagesOf(route));
       expect(Object.keys(entry.name), entry.id).toEqual(languagesOf(route));
@@ -169,16 +181,42 @@ describe('tool search', () => {
     expect(index.find((entry) => entry.id === 'heic-to-jpg')?.cat).toBe('image');
   });
 
+  it('indexes the 12 PDF tools from their registry: the PDF category, the hub order, the route paths and the blurb terms (F5a)', () => {
+    const entries = searchIndex().filter((entry) => (PDF_TOOL_IDS as readonly string[]).includes(entry.id));
+    expect(ids(entries)).toEqual([...PDF_TOOL_IDS]);
+    for (const entry of entries) {
+      const id = entry.id as (typeof PDF_TOOL_IDS)[number];
+      expect(entry.cat, id).toBe('pdf');
+      expect(entry.category, id).toEqual({ en: TEXTS.en.common.search.pdfCategory });
+      expect(entry.name, id).toEqual({ en: TEXTS.en.common.pdf?.[id].name });
+      expect(entry.href, id).toEqual({ en: routeById(id).paths['en'] });
+      expect(entry.icon, id).toBeTruthy();
+      for (const synonym of TEXTS.en.common.pdf?.[id].synonyms ?? []) expect(entry.terms, `${id} ${synonym}`).toContain(normalize(synonym));
+    }
+    // The hubs are not searchable pages: the image hub and the money hub are not in the index, and the PDF hub is not either.
+    expect(searchIndex().some((entry) => ['image-tools', MONEY_HUB_ID, PDF_HUB_ID].includes(entry.id))).toBe(false);
+    // Each PDF tool is found by its name and by a synonym typed in lower case, and only in English.
+    const found = (query: string, lang = 'en') => ids(filterEntries(searchIndex(), query, lang));
+    // Image to PDF says "merge images" and "pdf", so it shows too, but after Merge PDF, whose name is the query (DECISOES § 180).
+    expect(found('merge pdf')).toEqual(['merge-pdf', 'image-to-pdf']);
+    expect(found('combine')).toContain('merge-pdf');
+    expect(found('password remover')).toEqual(['unlock-pdf']);
+    expect(found('watermark')).toEqual(['watermark-pdf']);
+    expect(found('merge pdf', 'pt')).toEqual([]);
+    expect(found('merge pdf', 'es')).toEqual([]);
+  });
+
   it('normalizes accents and finds synonyms of any language', () => {
     const index = searchIndex();
     expect(normalize('Diminuição')).toBe('diminuicao');
-    // 'compress' finds Compress image and its two presets; the synonyms and other languages find the tool.
-    expect(ids(filterEntries(index, 'compress'))).toEqual(COMPRESS);
+    // 'compress' finds Compress image and its two presets, and (F5a) Compress PDF after them; the synonyms and other
+    // languages find the tool.
+    expect(ids(filterEntries(index, 'compress'))).toEqual([...COMPRESS, 'compress-pdf']);
     for (const query of ['reduzir', 'achicar', 'COMPRIMIR imagem']) {
       expect(ids(filterEntries(index, query)), query).toEqual(['compress-image']);
     }
-    // 'shrink' is a synonym of both Compress image and Resize image, and of the two compress presets.
-    expect(ids(filterEntries(index, 'shrink'))).toEqual(['compress-image', 'resize-image', 'compress-image-to-100kb', 'compress-image-to-1mb']);
+    // 'shrink' is a synonym of both Compress image and Resize image, and of the two compress presets (F5a: and of Compress PDF, "shrink pdf").
+    expect(ids(filterEntries(index, 'shrink'))).toEqual(['compress-image', 'resize-image', 'compress-image-to-100kb', 'compress-image-to-1mb', 'compress-pdf']);
     expect(filterEntries(index, 'youtube downloader')).toEqual([]);
   });
 
@@ -193,7 +231,8 @@ describe('tool search', () => {
     const expected: [string, string[]][] = [
       ['heif', ['heic-to-jpg']],
       ['iphone photo', ['heic-to-jpg']],
-      ['jpg to pdf', ['image-to-pdf']],
+      // F5a: PDF to JPG has all three words ("jpg", "to", "pdf") in its names, so it shows after Image to PDF.
+      ['jpg to pdf', ['image-to-pdf', 'pdf-to-jpg']],
       ['100kb', ['compress-image-to-100kb']],
       ['1280x720', ['resize-image-youtube-thumbnail']],
       ['mirror', ['rotate-image']],
@@ -203,10 +242,25 @@ describe('tool search', () => {
     expect(filterEntries(index, 'avif')).toEqual([]);
   });
 
+  it('puts first the tool whose name is the query, where Enter goes, before the neighbours that only share its words (DECISOES § 180)', () => {
+    const index = searchIndex();
+    const first = (query: string) => ids(filterEntries(index, query, 'en'))[0];
+    // The names of the PDF tools: Image to PDF has "pdf", "to" and "jpg" in its terms, and used to say "merge" and
+    // "combine" (F2, before Merge PDF existed), so it came first and Enter opened the opposite tool.
+    for (const query of ['merge pdf', 'Merge PDF', 'merge', 'combine', 'combine pdf']) expect(first(query), query).toBe('merge-pdf');
+    for (const query of ['pdf to jpg', 'PDF to JPG', 'pdf to jpeg', 'pdf to image']) expect(first(query), query).toBe('pdf-to-jpg');
+    for (const query of ['jpg to pdf', 'image to pdf', 'merge images', 'combine images']) expect(first(query), query).toBe('image-to-pdf');
+    // Each one still finds the other as its neighbour, one arrow away.
+    expect(ids(filterEntries(index, 'pdf to jpg'))).toEqual(['pdf-to-jpg', 'image-to-pdf']);
+    expect(ids(filterEntries(index, 'merge'))).toEqual(['merge-pdf', 'image-to-pdf']);
+    // Inside one step the index order holds: every PDF tool says "pdf", and the image pages come first.
+    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS]);
+  });
+
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
     const index = searchIndex();
-    // English has all eleven image pages and the 23 money pages; Portuguese and Spanish only Compress image.
-    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS]);
+    // English has all eleven image pages, the 12 PDF tools (F5a) and the 23 money pages; Portuguese and Spanish only Compress image.
+    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS]);
     for (const lang of ['pt', 'es']) {
       // No money page exists in Portuguese or Spanish yet (F6): 'mortgage' finds nothing there.
       expect(filterEntries(index, 'mortgage', lang), lang).toEqual([]);

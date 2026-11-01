@@ -9,7 +9,7 @@
 // The same look runs again at the end if / has not come back. Every find runs under its own time limit, at the
 // lowest priority, and says when it stopped before the end: a cut find is not "nothing found".
 import { execSync } from 'node:child_process';
-import { readdirSync, readFileSync, readlinkSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, readlinkSync, statSync, statfsSync } from 'node:fs';
 
 const ON = process.platform === 'linux' && Boolean(process.env['CI']);
 
@@ -218,7 +218,66 @@ function deepLook(reason: string, startedAt: number): void {
   section('pastas do sistema (MB)', () => sh('du -xsm /var/log /var/tmp /var/crash /var/cache /var/lib/systemd/coredump 2>/dev/null'));
   section('core dumps', () => `core_pattern: ${sh('cat /proc/sys/kernel/core_pattern').trim() || '?'}\n${sh('ls -la /var/crash /var/lib/systemd/coredump 2>/dev/null | head -20')}`);
   section('maiores processos (RSS em KB)', () => sh('ps -eo pid,ppid,rss,etimes,comm --sort=-rss 2>/dev/null | head -12'));
+  section('core dumps no journal', () => sh('coredumpctl list --no-pager 2>&1 | tail -10'));
+  // The processes that wrote the most since they started, read with sudo: the Node user cannot read the sandboxed WebKit
+  // processes; the runner has passwordless sudo, and -n never waits for one (F5a, DECISOES § 154).
+  section('maiores escritores (write_bytes)', () =>
+    sh(`sudo -n sh -c 'for p in /proc/[0-9]*; do echo "$(grep ^write_bytes $p/io 2>/dev/null | cut -d" " -f2) $(cat $p/comm 2>/dev/null) \${p#/proc/}"; done | sort -rn | head -8' 2>/dev/null`),
+  );
   console.log(`[disco] busca funda em ${((Date.now() - began) / 1000).toFixed(1)} s`);
+}
+
+/** Interval of the fine sampler of / (F5a, DECISOES § 154): the falls of § 108, § 141 and § 142 came and went in under a minute. */
+export const FINE_MS = 2_000;
+/** A line is printed only when / moved this much since the last line, so the log stays short. */
+export const FINE_STEP_MB = 256;
+
+export interface FineSummary {
+  minMb: number;
+  minAt: number;
+  /** The biggest fall between two samples, and when it ended. */
+  dropMb: number;
+  dropAt: number;
+}
+
+/**
+ * The fine sampler's memory: push() takes the free MB of / at a moment and returns the line to print when it moved
+ * FINE_STEP_MB since the last printed one (else null); summary() gives the lowest point and the steepest fall. Pure, so
+ * the unit test feeds it the series the CI logged (DECISOES § 141).
+ */
+export function createRecorder(startMb: number, step = FINE_STEP_MB): { push: (at: number, freeMb: number) => string | null; summary: () => FineSummary } {
+  let printed = startMb;
+  let previous = startMb;
+  const summary: FineSummary = { minMb: startMb, minAt: 0, dropMb: 0, dropAt: 0 };
+  return {
+    push(at, freeMb) {
+      if (freeMb < summary.minMb) {
+        summary.minMb = freeMb;
+        summary.minAt = at;
+      }
+      if (previous - freeMb > summary.dropMb) {
+        summary.dropMb = previous - freeMb;
+        summary.dropAt = at;
+      }
+      previous = freeMb;
+      if (Math.abs(freeMb - printed) < step) return null;
+      const line = `/ ${freeMb} MB livres (${freeMb > printed ? '+' : '−'}${Math.abs(freeMb - printed)} MB desde a última linha)`;
+      printed = freeMb;
+      return line;
+    },
+    summary: () => ({ ...summary }),
+  };
+}
+
+const clock = (at: number): string => new Date(at).toISOString().slice(11, 19);
+
+function rootFreeNow(): number | null {
+  try {
+    const stats = statfsSync('/');
+    return Math.round((stats.bavail * stats.bsize) / 1024 / 1024);
+  } catch {
+    return null;
+  }
 }
 
 /** Starts the sampler; the function it returns stops it and prints where the space went. */
@@ -227,6 +286,15 @@ export function watchDisk(): () => void {
   const startedAt = Date.now();
   const start = mounts();
   console.log(`[disco] início: ${describeMounts(start)}`);
+  // Every 2 s, only the free space of / (a statfs call, no process): it catches a fall the 20 s sample misses.
+  const fineStart = rootFreeNow();
+  const recorder = fineStart === null ? null : createRecorder(fineStart);
+  const fine = setInterval(() => {
+    const free = rootFreeNow();
+    const line = free === null || !recorder ? null : recorder.push(Date.now(), free);
+    if (line) console.log(`[disco] 2s ${clock(Date.now())} ${line}`);
+  }, FINE_MS);
+  fine.unref();
   const trigger = createTrigger(rootFree(start));
   let last = '';
   const timer = setInterval(() => {
@@ -249,6 +317,11 @@ export function watchDisk(): () => void {
   timer.unref();
   return () => {
     clearInterval(timer);
+    clearInterval(fine);
+    if (recorder) {
+      const { minMb, minAt, dropMb, dropAt } = recorder.summary();
+      console.log(`[disco] 2s resumo: mínimo de ${minMb} MB livres${minAt ? ` às ${clock(minAt)}` : ''}; maior queda em 2 s: ${dropMb} MB${dropAt ? ` às ${clock(dropAt)}` : ''}`);
+    }
     const end = mounts();
     console.log(`[disco] fim: ${describeMounts(end)}`);
     console.log('[disco] maiores pastas (MB):');

@@ -1,6 +1,7 @@
 // HEIC through libheif-js (LGPL-3.0), with the .wasm as its own unmodified file: the glue is
-// libheif-wasm/libheif.js and the wasm is imported by URL, so the site serves it byte for byte
-// as the package ships it (DECISOES § 7; the LGPL notice is on /licenses).
+// libheif-wasm/libheif.js and the wasm is fetched from the URL the host configured (wasm.ts), so the
+// host serves it byte for byte as the package ships it and anyone can replace it (DECISOES § 7; the
+// LGPL notice is on /licenses and in THIRD-PARTY-NOTICES.md of the exported package).
 //
 // The glue starts the module synchronously from wasmBinary, so the bytes are fetched first (and can
 // be prefetched). libheif lists top-level images in item-id order, not primary first, so the primary
@@ -11,15 +12,15 @@
 
 import libheif from 'libheif-js/libheif-wasm/libheif.js';
 import type { HeifDecoder, HeifImage, HeifModule } from 'libheif-js/libheif-wasm/libheif.js';
-import wasmUrl from 'libheif-js/libheif-wasm/libheif.wasm?url';
 import type { Raster } from '../pixels.ts';
 import { bytesOf } from './runtime.ts';
+import { wasmUrl } from './wasm.ts';
 
 let ready: Promise<{ heif: HeifModule; decoder: HeifDecoder }> | undefined;
 
 function start(): Promise<{ heif: HeifModule; decoder: HeifDecoder }> {
   ready ??= (async () => {
-    const wasmBinary = await bytesOf(wasmUrl);
+    const wasmBinary = await bytesOf(wasmUrl('heif'));
     let initialised: () => void = () => {};
     const done = new Promise<void>((resolve) => (initialised = resolve));
     const quiet = () => {};
@@ -33,7 +34,7 @@ function start(): Promise<{ heif: HeifModule; decoder: HeifDecoder }> {
 
 /** Downloads the .wasm into the HTTP cache and keeps the bytes; libheif itself starts on the first file. */
 export async function warmHeic(): Promise<void> {
-  await bytesOf(wasmUrl);
+  await bytesOf(wasmUrl('heif'));
 }
 
 export interface DecodedHeic {

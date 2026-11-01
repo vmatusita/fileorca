@@ -22,6 +22,7 @@ export default {
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
         'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
         'The money calculators work the same way. The prices, rates and balances you type are worked out on your device and are never sent anywhere. The PDF and the CSV of a calculator are made on your device too. Copy link puts your numbers after the # of the address it copies: that part of an address stays in the browser that opens it and is never sent to our server, and the page never adds it to the address on its own.',
+        'The PDF tools work the same way. Your PDF is read and written on your device, by PDF.js and qpdf, two open-source libraries that run in your browser. What you type there, such as a page range or the text of a watermark, stays in your browser. The password you type in Protect PDF or Unlock PDF never leaves your device and is not kept, not on a server and not in your browser. The signature you draw, upload or type in Sign PDF is not stored anywhere either.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
       ],
@@ -68,7 +69,7 @@ export default {
       heading: 'Your cookie choice in the browser',
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
-        "If you accept in the cookie notice, FileOrca also counts there how many image batches ended with at least one real result in this browser, such as a smaller, converted, rotated, cropped or resized image or a PDF, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
+        "If you accept in the cookie notice, FileOrca also counts there how many image or PDF batches ended with at least one real result in this browser, such as a smaller, converted, rotated, cropped or resized image or a new PDF, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
         "On the calculators, the page keeps one yes-or-no mark in this tab's session storage, so the Oli cheers only on the first result of the visit. It holds no number, never leaves the browser and is gone when you close the tab.",
       ],
     },

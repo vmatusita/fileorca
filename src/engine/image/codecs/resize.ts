@@ -4,23 +4,23 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import init, { resize } from '@jsquash/resize/lib/resize/pkg/squoosh_resize.js';
-import wasmUrl from '@jsquash/resize/lib/resize/pkg/squoosh_resize_bg.wasm?url';
 import type { Raster } from '../pixels.ts';
 import { compiled } from './runtime.ts';
+import { wasmUrl } from './wasm.ts';
 
 const LANCZOS3 = 3; // index in ['triangle', 'catrom', 'mitchell', 'lanczos3']
 
 let ready: Promise<unknown> | undefined;
 
 function start(): Promise<unknown> {
-  ready ??= compiled(wasmUrl).then((module) => init(module));
+  ready ??= compiled(wasmUrl('resize')).then((module) => init(module));
   ready.catch(() => (ready = undefined));
   return ready;
 }
 
 /** Downloads and compiles the module; nothing runs. */
 export async function warmResize(): Promise<void> {
-  await compiled(wasmUrl);
+  await compiled(wasmUrl('resize'));
 }
 
 /** Scales a picture to exactly width × height. Premultiplied alpha and linear light, as jSquash defaults. */

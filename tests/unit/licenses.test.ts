@@ -1,22 +1,40 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  PDFJS_SERVED,
+  PDF_PACKAGES,
   bundledPackageDirs,
   checkLicensesPage,
+  checkPdfjsData,
   checkRecordMatchesDist,
+  checkRequiredInBundle,
   checkSeparateFile,
+  checkWasmIdentity,
+  checkWasmTexts,
+  checkEmbeddedTexts,
   classifyModule,
   compareBundleWithList,
+  embeddedPackages,
+  licenseUrlsIn,
   readDistFacts,
+  readPackageHashes,
+  readPdfjsServed,
+  readPrebuiltFiles,
+  readWasmSources,
+  wasmStem,
   type DistFacts,
+  type ServedFile,
+  type WasmSource,
 } from '../../scripts/lib/licenses-check.ts';
+import { copyPdfjsData, pdfjsDataFiles, pdfjsDataPath, pdfjsPackageDir, pdfjsVersion } from '../../src/platform/pdfjs-data.ts';
 import {
   BUNDLED_TRANSITIVE,
   LIBDE265_VERSION,
   SEPARATE_FILE_RULES,
+  UPSTREAM_OWN_TEXTS,
   UPSTREAM_TEXT_DIR,
   UPSTREAM_TEXTS,
   browserPackages,
@@ -235,6 +253,260 @@ describe('o registro do bundle e o dist', () => {
   });
 });
 
+// ---- F5a: the PDF libraries, every .wasm and every PDF.js data file identical to the package's ------------------------------
+
+const sha = (char: string): string => char.repeat(64);
+
+describe('as bibliotecas de PDF no bundle (F5a)', () => {
+  const bundled = new Map<string, unknown>([['pdfjs-dist', {}], ['@neslinesli93/qpdf-wasm', {}], ['preact', {}]]);
+
+  it('passes when pdfjs-dist and qpdf-wasm are in the bundle', () => {
+    expect(PDF_PACKAGES).toEqual(['pdfjs-dist', '@neslinesli93/qpdf-wasm']);
+    expect(checkRequiredInBundle(bundled)).toEqual([]);
+  });
+
+  it('fails when one of the two is not in the bundle', () => {
+    expect(checkRequiredInBundle(new Map([['pdfjs-dist', {}]]))).toEqual(['@neslinesli93/qpdf-wasm não está no bundle, mas as ferramentas de PDF dependem dele']);
+    expect(checkRequiredInBundle(new Map([['@neslinesli93/qpdf-wasm', {}]]))).toEqual(['pdfjs-dist não está no bundle, mas as ferramentas de PDF dependem dele']);
+    expect(checkRequiredInBundle(new Map())).toHaveLength(2);
+  });
+
+  it('is listed on /licenses: both are browser dependencies with a license text', () => {
+    const names = browserPackages().map((pkg) => pkg.name);
+    for (const name of PDF_PACKAGES) expect(names, name).toContain(name);
+  });
+});
+
+describe('os arquivos de dados do PDF.js (F5a)', () => {
+  const FILES = ['wasm/jbig2.wasm', 'wasm/openjpeg.wasm', 'standard_fonts/FoxitSerif.pfb', 'cmaps/Adobe-Japan1-0.bcmap'];
+  // The same input the check takes, with the arrays and the map open to the changes of the tests.
+  interface Input { versions: string[]; version: string; served: ServedFile[]; source: Map<string, string>; expected: string[] }
+  const input = (change: (entry: Input) => void = () => {}): Input => {
+    const entry: Input = {
+      versions: ['6.4.299'],
+      version: '6.4.299',
+      served: FILES.map((file, index) => ({ file, sha256: sha(String(index)) })),
+      source: new Map(FILES.map((file, index) => [file, sha(String(index))])),
+      expected: [...FILES],
+    };
+    change(entry);
+    return entry;
+  };
+
+  it('passes when every file is served unchanged, in the folder of the installed version', () => {
+    expect(checkPdfjsData(input())).toEqual([]);
+  });
+
+  it('fails when a served file differs from the package file', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.splice(0, 1, { file: 'wasm/jbig2.wasm', sha256: sha('f') })));
+    expect(problems).toEqual([`wasm/jbig2.wasm no dist difere do arquivo do pdfjs-dist (SHA-256 ${'f'.repeat(12)}… no lugar de ${'0'.repeat(12)}…)`]);
+  });
+
+  it('fails when the build leaves out a file it means to copy', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.pop()));
+    expect(problems).toEqual(['falta cmaps/Adobe-Japan1-0.bcmap no dist (o build deveria copiá-lo)']);
+  });
+
+  it('fails when the folder is of another version, or there are two', () => {
+    expect(checkPdfjsData(input((entry) => { entry.versions = ['6.3.289']; })).join()).toMatch(/tem 6\.3\.289, esperado só 6\.4\.299/);
+    expect(checkPdfjsData(input((entry) => { entry.versions = ['6.4.299', '6.3.289']; })).join()).toMatch(/tem 6\.4\.299, 6\.3\.289, esperado só 6\.4\.299/);
+    expect(checkPdfjsData(input((entry) => { entry.versions = []; })).join()).toMatch(/tem nenhuma pasta/);
+  });
+
+  it('fails for a file of a kind /licenses has no text for: Liberation fonts, the colour profile, qcms, the scripting sandbox', () => {
+    for (const file of ['standard_fonts/LiberationSans-Regular.ttf', 'iccs/CGATS001Compat-v2-micro.icc', 'wasm/qcms_bg.wasm', 'wasm/quickjs-eval.wasm', 'wasm/jbig2_nowasm_fallback.js', 'cmaps/LICENSE', 'standard_fonts/LICENSE_LIBERATION']) {
+      const problems = checkPdfjsData(
+        input((entry) => {
+          entry.served.push({ file, sha256: sha('9') });
+          entry.source.set(file, sha('9'));
+        }),
+      );
+      expect(problems.join('\n'), file).toMatch(new RegExp(`${file.replace(/[.\\/]/g, '\\$&')} no dist não é de um tipo que a /licenses cobre`));
+    }
+  });
+
+  it('fails for a file that the package does not have', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.push({ file: 'cmaps/Made-Up-H.bcmap', sha256: sha('8') })));
+    expect(problems).toEqual(['cmaps/Made-Up-H.bcmap no dist não existe no pdfjs-dist instalado']);
+  });
+
+  it('knows the kinds the build copies: the two decoders, the CMaps and the Foxit fonts', () => {
+    expect(PDFJS_SERVED.map((entry) => entry.kind)).toEqual(['decodificador WebAssembly', 'CMap', 'fonte padrão da Foxit']);
+    for (const file of pdfjsDataFiles()) expect(PDFJS_SERVED.some((entry) => entry.pattern.test(file)), file).toBe(true);
+  });
+
+  it('proves it on the real package: the build list exists in pdfjs-dist, a copy passes and a changed byte fails', () => {
+    const version = pdfjsVersion();
+    const files = pdfjsDataFiles();
+    expect(files.length).toBeGreaterThan(100);
+    for (const file of files) expect(existsSync(join(pdfjsPackageDir(), file)), file).toBe(true);
+    // A dist with the copy the build makes (the files of the list), then the same with one byte of jbig2.wasm changed.
+    const dist = mkdtempSync(join(tmpdir(), 'fileorca-pdfjs-'));
+    try {
+      const out = join(dist, pdfjsDataPath());
+      expect(copyPdfjsData(dist)).toBe(files.length);
+      const read = () => readPdfjsServed(version, dist);
+      const sources = (served: { file: string }[]) => readPackageHashes(pdfjsPackageDir(), served.map((entry) => entry.file));
+      const clean = read();
+      expect(clean.versions).toEqual([version]);
+      expect(clean.served).toHaveLength(files.length);
+      expect(checkPdfjsData({ versions: clean.versions, version, served: clean.served, source: sources(clean.served), expected: files })).toEqual([]);
+      const target = join(out, 'wasm', 'jbig2.wasm');
+      const bytes = readFileSync(target);
+      bytes[bytes.length - 1] = (bytes[bytes.length - 1] ?? 0) ^ 0xff;
+      writeFileSync(target, bytes);
+      const changed = read();
+      expect(checkPdfjsData({ versions: changed.versions, version, served: changed.served, source: sources(changed.served), expected: files }).join('\n')).toMatch(/wasm\/jbig2\.wasm no dist difere do arquivo do pdfjs-dist/);
+    } finally {
+      rmSync(dist, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('os .wasm do dist contra os dos pacotes (F5a)', () => {
+  const QPDF = sha('1');
+  const MOZ = sha('2');
+  const sources: WasmSource[] = [
+    { pkg: '@neslinesli93/qpdf-wasm', file: 'dist/qpdf.wasm', sha256: QPDF },
+    { pkg: '@jsquash/jpeg', file: 'codec/enc/mozjpeg_enc.wasm', sha256: MOZ },
+    { pkg: 'pdfjs-dist', file: 'wasm/jbig2.wasm', sha256: sha('3') },
+  ];
+  const listed = new Set(['@neslinesli93/qpdf-wasm', '@jsquash/jpeg', 'pdfjs-dist']);
+  const good = [
+    { file: '_astro/qpdf-C3Giu3T4.wasm', sha256: QPDF },
+    { file: '_astro/mozjpeg_enc-DO-zoExo.wasm', sha256: MOZ },
+    { file: '_astro/mozjpeg_enc.DO-zoExo.wasm', sha256: MOZ },
+    { file: '_astro/pdfjs/6.4.299/wasm/jbig2.wasm', sha256: sha('3') },
+  ];
+
+  it('takes the name of the .wasm a package has, without the hash of the bundler', () => {
+    for (const [name, stem] of [['_astro/qpdf-C3Giu3T4.wasm', 'qpdf'], ['_astro/qpdf.C3Giu3T4.wasm', 'qpdf'], ['_astro/mozjpeg_enc-DO-zoExo.wasm', 'mozjpeg_enc'], ['_astro/squoosh_oxipng_bg-OFMN1KwG.wasm', 'squoosh_oxipng_bg'], ['_astro/webp_enc_simd.CFvKQ_80.wasm', 'webp_enc_simd']] as const) {
+      expect(wasmStem(name), name).toBe(stem);
+    }
+    for (const name of ['jbig2.wasm', 'wasm/openjpeg.wasm', 'qpdf-short.wasm', 'qpdf.js']) expect(wasmStem(name), name).toBeNull();
+  });
+
+  it('passes when every .wasm is identical to its package file, both copies of a name, and leaves the PDF.js ones to their own check', () => {
+    expect(checkWasmIdentity(good, sources, listed)).toEqual([]);
+  });
+
+  it('fails when a .wasm differs from the package file', () => {
+    const problems = checkWasmIdentity([{ file: '_astro/qpdf-C3Giu3T4.wasm', sha256: sha('e') }], sources, listed);
+    expect(problems).toEqual([`dist/_astro/qpdf-C3Giu3T4.wasm difere do qpdf.wasm de @neslinesli93/qpdf-wasm (SHA-256 ${'e'.repeat(12)}… no lugar de ${'1'.repeat(12)}…)`]);
+    // One copy of two changed is caught.
+    const one = checkWasmIdentity([good[1] as (typeof good)[number], { file: '_astro/mozjpeg_enc.DO-zoExo.wasm', sha256: sha('d') }], sources, listed);
+    expect(one).toHaveLength(1);
+    expect(one[0]).toContain('mozjpeg_enc.DO-zoExo.wasm difere do mozjpeg_enc.wasm de @jsquash/jpeg');
+  });
+
+  it('fails when no package has a .wasm of that name, or the name does not look like the bundler\'s', () => {
+    expect(checkWasmIdentity([{ file: '_astro/mystery-AbCdEf12.wasm', sha256: sha('7') }], sources, listed)).toEqual(['dist/_astro/mystery-AbCdEf12.wasm: nenhum pacote do navegador tem um mystery.wasm (de onde veio?)']);
+    expect(checkWasmIdentity([{ file: '_astro/qpdf.wasm', sha256: QPDF }], sources, listed)).toEqual(['dist/_astro/qpdf.wasm: o nome não segue o padrão <nome>-<hash>.wasm do bundler']);
+  });
+
+  it('fails for a .wasm outside _astro/ and for one from a package /licenses does not list', () => {
+    expect(checkWasmIdentity([{ file: 'tools/qpdf-C3Giu3T4.wasm', sha256: QPDF }], sources, listed)).toEqual(['dist/tools/qpdf-C3Giu3T4.wasm: .wasm fora de _astro/']);
+    expect(checkWasmIdentity([{ file: '_astro/pdfjs/6.4.299/wasm/deep.wasm', sha256: sha('3') }], sources, listed)).toEqual([]);
+    expect(checkWasmIdentity([{ file: '_astro/pdfjs/x/y/z/q.wasm', sha256: sha('3') }], sources, listed)).toEqual([]);
+    expect(checkWasmIdentity(good, sources, new Set(['@jsquash/jpeg']))).toEqual(['dist/_astro/qpdf-C3Giu3T4.wasm vem de @neslinesli93/qpdf-wasm, que a /licenses não lista']);
+  });
+
+  it('reads the .wasm of a package folder with their hashes and skips a nested node_modules', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fileorca-pkg-'));
+    try {
+      mkdirSync(join(dir, 'dist'), { recursive: true });
+      mkdirSync(join(dir, 'node_modules', 'other'), { recursive: true });
+      writeFileSync(join(dir, 'dist', 'qpdf.wasm'), 'one');
+      writeFileSync(join(dir, 'dist', 'qpdf.js'), 'js');
+      writeFileSync(join(dir, 'node_modules', 'other', 'other.wasm'), 'two');
+      expect(readWasmSources('p', dir)).toEqual([{ pkg: 'p', file: 'dist/qpdf.wasm', sha256: createHash('sha256').update('one').digest('hex') }]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('os textos de .wasm da /licenses (F5a)', () => {
+  const served = new Set(['jbig2.wasm', 'openjpeg.wasm', 'qpdf.wasm']);
+  const texts = (...labels: (string | null)[]) => [{ name: 'pdfjs-dist', texts: labels.map((label) => ({ label })) }];
+
+  it('passes when the .wasm of every "in x.wasm" text is served, and ignores texts that name no file', () => {
+    expect(checkWasmTexts(texts(null, 'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm', 'PDF.js glue of qcms_bg.wasm', 'Adobe CMaps', 'libwebp'), served)).toEqual([]);
+  });
+
+  it('fails for a text that says a library is in a .wasm the site does not serve (the qcms of PDF.js)', () => {
+    expect(checkWasmTexts(texts('qcms (colour management), in qcms_bg.wasm'), served)).toEqual(['pdfjs-dist: a /licenses tem um texto "qcms (colour management), in qcms_bg.wasm", mas o dist não serve qcms_bg.wasm']);
+  });
+
+  it('holds for the real list: no text of /licenses names a .wasm that the build does not copy or the bundler does not emit', () => {
+    // The .wasm of the build list and the ones the engines import with ?url (dist/_astro): the names without hash.
+    const copied = new Set(pdfjsDataFiles().filter((file) => file.endsWith('.wasm')).map((file) => basename(file)));
+    for (const name of ['qpdf.wasm', 'libheif.wasm']) copied.add(name);
+    const problems = checkWasmTexts(listedPackages().filter((pkg) => pkg.name === 'pdfjs-dist' || pkg.name === '@neslinesli93/qpdf-wasm'), copied);
+    expect(problems).toEqual([]);
+  });
+});
+
+describe('os pacotes compilados dentro de um arquivo pronto de outro (DECISOES § 179)', () => {
+  const CORE_JS = 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE';
+  const prebuilt = (embedded: string[], licenseUrls: string[] = [CORE_JS]) => [{ pkg: 'pdfjs-dist', file: 'pdfjs-dist/legacy/build/pdf.worker.mjs', embedded, licenseUrls }];
+  const declared = (entries: { embeds?: string; source: string; label: string }[]) => ({ 'pdfjs-dist': entries });
+  const coreJsText = { label: 'core-js 3.50.0, inside the PDF.js legacy build', source: CORE_JS, embeds: 'core-js' };
+
+  it('reads the webpack MODULE markers of a prebuilt file, scoped names too, and the license addresses its code names', () => {
+    const code = [
+      '// MODULE: ./node_modules/core-js/internals/a-callable.js',
+      '// MODULE: ./node_modules/core-js/modules/es.array.push.js',
+      '// MODULE: ./node_modules/@babel/runtime/helpers/x.js',
+      "  license: 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE',",
+      '// MODULE: ./src/core/worker.js',
+      'const x = "// MODULE: ./node_modules/not-at-line-start/y.js";',
+    ].join('\n');
+    expect(embeddedPackages(code)).toEqual(['@babel/runtime', 'core-js']);
+    expect(licenseUrlsIn(code)).toEqual([CORE_JS]);
+    expect(embeddedPackages('export const a = 1;')).toEqual([]);
+  });
+
+  it('passes when every package inside has a text of the version the code names', () => {
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([coreJsText]))).toEqual([]);
+    expect(checkEmbeddedTexts(prebuilt(['core-js'], []), declared([coreJsText]))).toEqual([]);
+  });
+
+  it('fails for a package inside with no text (core-js before the § 179), and for a text of another version', () => {
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([]))).toEqual(['core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.worker.mjs (pdfjs-dist) e a /licenses não tem o texto dele']);
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), {})).toHaveLength(1);
+    // A text of the outer package that covers something else does not count.
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([{ label: 'Adobe CMaps', source: 'https://example.org/LICENSE' }]))).toHaveLength(1);
+    const newer = 'https://github.com/zloirock/core-js/blob/v3.51.0/LICENSE';
+    expect(checkEmbeddedTexts(prebuilt(['core-js'], [newer]), declared([coreJsText]))).toEqual([
+      `pdfjs-dist/legacy/build/pdf.worker.mjs traz o core-js de ${newer}, mas o texto da /licenses ("core-js 3.50.0, inside the PDF.js legacy build") é de ${CORE_JS}`,
+    ]);
+  });
+
+  it('holds on the real files: the legacy build of PDF.js carries core-js 3.50.0 and only that, and /licenses has its MIT text', () => {
+    const dir = pdfjsPackageDir();
+    const record = { '_astro/pdf.js': [`${dir}/legacy/build/pdf.mjs`], '_astro/pdf.worker.js': [`${dir}/legacy/build/pdf.worker.mjs`, `${dir}/package.json`] };
+    const files = readPrebuiltFiles(record, dirname(dirname(dir)));
+    expect(files.map((file) => [file.file, file.embedded])).toEqual([
+      ['pdfjs-dist/legacy/build/pdf.mjs', ['core-js']],
+      ['pdfjs-dist/legacy/build/pdf.worker.mjs', ['core-js']],
+    ]);
+    for (const file of files) expect(file.licenseUrls.filter((url) => url.includes('/core-js/'))).toEqual([CORE_JS]);
+    expect(checkEmbeddedTexts(files, UPSTREAM_TEXTS)).toEqual([]);
+    // Negative control: the same files against the list without the core-js text fail, which is the gate before the § 179.
+    const without = { ...UPSTREAM_TEXTS, 'pdfjs-dist': (UPSTREAM_TEXTS['pdfjs-dist'] ?? []).filter((entry) => entry.embeds !== 'core-js') };
+    expect(checkEmbeddedTexts(files, without)).toEqual([
+      'core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.mjs (pdfjs-dist) e a /licenses não tem o texto dele',
+      'core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.worker.mjs (pdfjs-dist) e a /licenses não tem o texto dele',
+    ]);
+    // The modern build carries nothing: the check reads only files with the markers.
+    expect(readPrebuiltFiles({ '_astro/pdf.js': [`${dir}/build/pdf.mjs`] }, dirname(dirname(dir)))).toEqual([]);
+    const text = listedPackages().find((pkg) => pkg.name === 'pdfjs-dist')?.texts.find((entry) => entry.label === coreJsText.label);
+    expect(text?.text).toMatch(/^Copyright \(c\) 2013–2025 Denis Pushkarev \(zloirock\.ru\)\nCopyright \(c\) 2025–2026 CoreJS Company \(core-js\.io\)\n\nPermission is hereby granted, free of charge/);
+    expect(text?.source).toBe(CORE_JS);
+  });
+});
+
 describe('os pacotes e os textos de licença', () => {
   it('lists the direct dependencies and the packages that come inside them', () => {
     const names = listedPackages().map((pkg) => pkg.name);
@@ -273,6 +545,14 @@ describe('os pacotes e os textos de licença', () => {
       'libavif-1.0.1-LICENSE.txt': '10952217a6d404de8bf8a997fbea9b88f682df1fe98cb9b9f467ade641525639',
       'libaom-3.7.0-LICENSE.txt': '4764a286d8b2faeaf42f4418e7d7a28d58fc8fd4d00a3d0a7f44b0a4099de7f2',
       'libaom-3.7.0-PATENTS.txt': '661fb8e504744e95587b556b94a58343448300606a41bea8c7a9b97125696e61',
+      // F5a: qpdf 12.2.0 and the zlib and libjpeg-turbo commits its .wasm is built from (DECISOES § 143).
+      'qpdf-12.2.0-LICENSE.txt': 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30',
+      'qpdf-12.2.0-NOTICE.md': 'd590610848429da713cef608a0183dbf3c7726d738c3be6fa5b36c507444b645',
+      'zlib-21767c6-README.txt': 'fc2c3368901700f0acdeb1d8afeaca5923296768ec6824ecdf627aac396001fd',
+      'libjpeg-turbo-7aa2a89-LICENSE.md': '7d8683a7f048e715e08b4cada8b7f0d9a6ab8afad88ed09c1143ef764ecbc0f2',
+      'libjpeg-turbo-7aa2a89-README.ijg': '4b7b9f8c03bb8d60270dfd12684e70ab21e4abfd27e73905cd1a7c4cae6f5cdb',
+      // The LICENSE of the core-js 3.50.0 npm package, inside the PDF.js legacy build (DECISOES § 179).
+      'core-js-3.50.0-LICENSE.txt': 'b87653fff2d44426ab5cd4723cee3b1364dc8d35a0acdf098c54689543123bf8',
     };
     const entries = Object.values(UPSTREAM_TEXTS).flat();
     expect(entries.map((entry) => entry.file).sort()).toEqual(Object.keys(hashes).sort());
@@ -284,6 +564,40 @@ describe('os pacotes e os textos de licença', () => {
     expect(texts.find((entry) => entry.label === 'libavif 1.0.1')?.text).toContain('Copyright 2019 Joe Drago');
     expect(texts.find((entry) => entry.label === 'libaom 3.7.0')?.text).toContain('Alliance for Open Media');
     expect(texts.find((entry) => entry.label === 'libaom 3.7.0, patent license')?.source).toContain('PATENTS');
+  });
+
+  it('gives qpdf-wasm the ISC text of its repository and every library inside its .wasm, and PDF.js the decoders, CMaps and fonts it ships', () => {
+    // The package declares ISC but ships no text: the copy from its repository is its own text (DECISOES § 143).
+    expect(createHash('sha256').update(readFileSync(join(UPSTREAM_TEXT_DIR, UPSTREAM_OWN_TEXTS['@neslinesli93/qpdf-wasm']?.file ?? ''))).digest('hex')).toBe(
+      '68f98c117f69f4e2838603ebef2b05187a6fd2a1aefe0d4d4806a8fb5d3407b7',
+    );
+    const byName = new Map(listedPackages().map((pkg) => [pkg.name, pkg]));
+    const qpdf = byName.get('@neslinesli93/qpdf-wasm');
+    expect(qpdf?.license).toBe('ISC');
+    expect(qpdf?.text).toContain('ISC License');
+    expect(qpdf?.texts[0]?.source).toBe('https://github.com/neslinesli93/qpdf-wasm/blob/master/LICENSE');
+    expect(qpdf?.texts.map((entry) => entry.label)).toEqual([null, 'qpdf 12.2.0', 'qpdf 12.2.0, notices', 'zlib', 'libjpeg-turbo 2.1.1', 'libjpeg-turbo 2.1.1, the IJG license']);
+    expect(qpdf?.texts.find((entry) => entry.label === 'qpdf 12.2.0')?.text).toContain('Apache License');
+    expect(qpdf?.texts.find((entry) => entry.label === 'zlib')?.text).toContain('Jean-loup Gailly and Mark Adler');
+    const pdfjs = byName.get('pdfjs-dist');
+    expect(pdfjs?.license).toBe('Apache-2.0');
+    expect(pdfjs?.texts.map((entry) => entry.label)).toEqual([
+      null,
+      'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm',
+      'PDF.js glue of jbig2.wasm',
+      'OpenJPEG (JPEG 2000), in openjpeg.wasm',
+      'PDF.js glue of openjpeg.wasm',
+      // F5a: no text for the qcms library (LICENSE_QCMS): qcms_bg.wasm is not served (DECISOES § 144), so /licenses does not
+      // list it (checkWasmTexts in gate:licencas). The glue of qcms is JavaScript inside the PDF.js worker, so its text stays.
+      'PDF.js glue of qcms_bg.wasm',
+      'Adobe CMaps',
+      'Foxit standard fonts (PDFium)',
+      // DECISOES § 179: core-js is compiled into the legacy build, which ships no text of it.
+      'core-js 3.50.0, inside the PDF.js legacy build',
+    ]);
+    expect(pdfjs?.texts.some((entry) => /Marti Maria/.test(entry.text))).toBe(false);
+    // Nothing GPL among the texts: the Liberation fonts stay out of the dist (DECISOES § 144).
+    expect(pdfjs?.texts.some((entry) => /GNU GENERAL PUBLIC LICENSE/.test(entry.text))).toBe(false);
   });
 
   it('points to the source of the libheif version in use', () => {

@@ -4,6 +4,7 @@
 import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { CalcPageId, GuideId } from '../tools/calc/registry.ts';
+import type { PdfToolId } from '../tools/pdf/registry.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -32,6 +33,8 @@ export interface CommonTexts {
     imageColumn: string;
     /** The Money column, where the money calculators exist (English). */
     moneyColumn?: string;
+    /** The PDF column, where the PDF tools exist (English, F5a). */
+    pdfColumn?: string;
     siteColumn: string;
     about: string;
     privacy: string;
@@ -65,6 +68,7 @@ export interface CommonTexts {
     emptyHint: string;
     imageCategory: string;
     moneyCategory?: string;
+    pdfCategory?: string;
     shortcut: string;
   };
   /** Short names and one-line descriptions of the tools that exist in this language. */
@@ -76,6 +80,9 @@ export interface CommonTexts {
   calcs?: Record<CalcPageId, ToolBlurb>;
   guides?: Record<GuideId, ToolBlurb>;
   calcSeal?: string;
+  /** Name of the PDF hub and the cards of the PDF tools (English for now, F5a). */
+  pdfTools?: string;
+  pdf?: Record<PdfToolId, ToolBlurb>;
 }
 
 /** English has every image tool, preset and the hub. */
@@ -86,8 +93,10 @@ export interface EnCommonTexts extends CommonTexts {
   calcs: Record<CalcPageId, ToolBlurb>;
   guides: Record<GuideId, ToolBlurb>;
   calcSeal: string;
-  footer: CommonTexts['footer'] & { moneyColumn: string };
-  search: CommonTexts['search'] & { moneyCategory: string };
+  footer: CommonTexts['footer'] & { moneyColumn: string; pdfColumn: string };
+  search: CommonTexts['search'] & { moneyCategory: string; pdfCategory: string };
+  pdfTools: string;
+  pdf: Record<PdfToolId, ToolBlurb>;
 }
 
 export interface Section {
@@ -108,6 +117,8 @@ export interface HomeTexts extends PageMeta {
   hubLink?: string;
   /** The money section, only where the money calculators exist (English): heading, line and the hub link. */
   money?: { heading: string; intro: string; hubLink: string };
+  /** The PDF section, only where the PDF tools exist (English, F5a): heading, line and the hub link. */
+  pdf?: { heading: string; intro: string; hubLink: string };
 }
 
 export interface LegalTexts extends PageMeta {
@@ -536,4 +547,169 @@ export interface ToolBlurb {
   name: string;
   description: string;
   synonyms: string[];
+}
+
+/**
+ * The page blocks of a PDF tool (F5a, decision 9): like ToolPageContent, with "how to use" in three steps or more and
+ * no presets table.
+ */
+export type PdfPageContent = Omit<ToolPageContent, 'howSteps' | 'presets'> & {
+  /** Three steps or more, each one sentence. */
+  howSteps: string[];
+};
+
+/**
+ * Texts shared by every PDF tool panel (src/tools/pdf/i18n/en.ts): the drop zone, the queue, the page grid, the
+ * errors and the result card. Placeholders are filled by `fmt`.
+ */
+export interface PdfPanelTexts {
+  fileFallback: string;
+  drop: {
+    /** "Drop PDFs here" / "Drop a PDF here" */
+    titleMany: string;
+    titleOne: string;
+    chooseMany: string;
+    chooseOne: string;
+    /** Desktop help: "or paste with {kbd} · {note}" ({note} is the tool's own line). */
+    helpDesktop: string;
+    pasteKey: string;
+    over: string;
+    overCount: string;
+    overHelp: string;
+  };
+  progress: { working: string; reading: string; count: string; valueText: string };
+  queue: {
+    label: string;
+    showMore: string;
+    waiting: string;
+    reading: string;
+    working: string;
+    to: string;
+    download: string;
+    cancel: string;
+    remove: string;
+    /** "{count} pages" and "1 page" */
+    pages: string;
+    page: string;
+    /** Merge list: "Move {name} up" / "Move {name} down" and what the status region says after a move. */
+    moveEarlier: string;
+    moveLater: string;
+    moved: string;
+    /**
+     * Merge list, keyboard (criterion 10): the handle of a row that Space picks up ("Pick up {name}"), what the status
+     * region says when it is picked up, and when it is dropped ("{name} dropped at number {position} of {total}.").
+     */
+    pickUp: string;
+    picked: string;
+    dropped: string;
+    unchanged: string;
+    /** In the slot before the action: "{count} PDFs ready" and "1 PDF ready". */
+    ready: string;
+    readyOne: string;
+  };
+  grid: {
+    /** Name of the grid: "Pages of {name}". */
+    label: string;
+    /** Name of one page: "Page {n} of {total}", then ", rotated {degrees}°" and ", selected". */
+    page: string;
+    rotated: string;
+    selected: string;
+    selectedCount: string;
+    selectAll: string;
+    selectNone: string;
+    moveEarlier: string;
+    moveLater: string;
+    /** "Page {n} moved to position {position}." */
+    moved: string;
+    /** "Page {n} picked up: use the arrow keys, then Space to drop it." */
+    picked: string;
+    /** "Page {n} dropped at position {position}.": the drop is not a second "moved", so each move is said once. */
+    dropped: string;
+    turn: string;
+    turned: string;
+    /** Keyboard help under the grid. */
+    help: string;
+    helpOrder: string;
+    /** "Pick pages by number" field. */
+    rangeLabel: string;
+    rangeApply: string;
+    rangeHelp: string;
+    rangeError: string;
+  };
+  /**
+   * The toggle of a password field (DECISOES § 177): its visible text, and the name of each field's toggle, which starts
+   * with that text and never changes (the state is aria-pressed).
+   */
+  password: { show: string; showPassword: string; showConfirm: string };
+  errors: {
+    title: string;
+    empty: string;
+    notPdf: string;
+    /** An image named .pdf: "{name} is an image, not a PDF. Turn it into one with {tool}." ({tool} becomes a link). */
+    notPdfImage: string;
+    truncated: string;
+    corrupted: string;
+    /** "{name} needs a password to open. Remove it first with {tool}." ({tool} becomes a link). */
+    needsPassword: string;
+    restricted: string;
+    wrongPassword: string;
+    notEncrypted: string;
+    tooLarge: string;
+    encode: string;
+    load: string;
+    /** A second file in a tool that works on one: "Oli works on one PDF at a time here. Start over to use {name}." */
+    oneAtATime: string;
+    /** PDF to JPG, a file with no page in the typed range: "{name} has no page in that range, so Oli left it out." (DECISOES § 178) */
+    noPages: string;
+    chooseAnother: string;
+    some: string;
+    all: string;
+  };
+  result: {
+    download: string;
+    downloadZip: string;
+    zipping: string;
+    startOver: string;
+    before: string;
+    after: string;
+    files: string;
+    pages: string;
+    unchanged: string;
+    unchangedMany: string;
+    /** One line per engine note (src/engine/pdf/types.ts PdfNote). */
+    notes: { repaired: string; xfaRemoved: string; formLost: string; textFlattened: string; downscaled: string };
+    coffee: { text: string; button: string; hide: string };
+  };
+  next: { label: string; moreTools: string };
+}
+
+/** The panel bits of one PDF tool: the progress name, the Oli's success lines, the action button and its options. */
+export interface PdfToolPanelTexts<O = Record<string, never>> {
+  /** What the drop zone says the tool takes ("PDF files, as many as you like"). */
+  note: string;
+  progressLabel: string;
+  /** Oli's success line for one file and for several ({count}, {percent}). One exclamation. */
+  done: string;
+  doneMany: string;
+  /** The button of a tool that waits for it ("Merge PDFs"); left out by the tools that run when the file arrives. */
+  action?: string;
+  placardLabel?: string;
+  options: O;
+}
+
+export type PdfToolTexts<O = Record<string, never>> = PdfPageContent & { panel: PdfToolPanelTexts<O> };
+
+/** The PDF hub /pdf-tools/ (fo-hubband, the grid, the guide of which tool does which job, DECISOES § 96). */
+export interface PdfToolsTexts extends PageMeta {
+  eyebrow: string;
+  h1: string;
+  intro: string;
+  toolsHeading: string;
+  guideHeading: string;
+  guideIntro: string;
+  /** One line per job: the text before the tool name, the tool (linked), the text after it. */
+  guide: { before: string; tool: PdfToolId | 'image-to-pdf'; after: string }[];
+  guideOutro: string;
+  privacyHeading: string;
+  privacy: string[];
 }

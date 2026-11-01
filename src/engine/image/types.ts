@@ -42,7 +42,7 @@ export type Operation =
    * JPG to PNG: a PNG becomes a JPEG (transparency turns white), anything else becomes a PNG.
    */
   | { kind: 'convert'; to: OutputFormat | 'swap'; level?: Level }
-  /** One page of a PDF: JPEG for photos, PNG when the image has transparency (src/engine/pdf/). */
+  /** One page of a PDF: JPEG for photos, PNG when the image has transparency (what the Image to PDF tool embeds). */
   | { kind: 'pdf-page' };
 
 /** Facts the result card states in one line each. */

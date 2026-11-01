@@ -1,0 +1,626 @@
+ultracode
+
+# Missão
+
+Rode a F5a do FileOrca: PDF em inglês e o motor de imagem pronto para virar código aberto. Ao terminar, estão no ar, só em inglês:
+
+- as 12 ferramentas de PDF com `entra` no `data/keywords.csv`, processando PDF real no navegador, com o qpdf em WASM na compressão sem perda, na senha e no desbloqueio;
+- o hub `/pdf-tools/`.
+
+Toda ferramenta aceita arrastar e soltar e Ctrl+V. Onde a operação é a mesma para todos os arquivos, ela aceita lote e entrega um ZIP. Nenhum arquivo, senha ou texto digitado sai do aparelho, e um teste prova isso. Todo PDF que sai abre no PDF.js e passa no `qpdf --check`, e o Compress PDF nunca devolve um arquivo maior que o original.
+
+O `src/engine/image/` ganha um script que o exporta como um pacote MIT autônomo. Fora do repositório, esse pacote instala, compila e passa nos próprios testes. O repositório público é do Victor: a run só prepara.
+
+O CI ganha as partes que a suíte nova pede, cada uma abaixo de 700 s, e o diagnóstico do `ENOSPC` do WebKit (§ 141). O `pnpm verificar` fica verde na sua máquina e em todas as partes do CI. Tudo vai numa PR da branch `fase-05a`, com o relatório. A PR mexe no `.github/`, então o job de merge não a mescla: o merge é do Victor, depois do CI verde.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, e o shell é o Git Bash. O CI roda em Ubuntu, em partes de até 900 s cada (ADR-003).
+
+A main está em `6865938`, o merge da F4, ou num commit mais novo. Confira com `git log --oneline -8`.
+
+O que está no ar em fileorca.com, indexável (`LAUNCHED = true`):
+
+- oito ferramentas de imagem em inglês, três presets e o hub `/image-tools/`;
+- as 14 calculadoras de dinheiro, os 4 presets, o hub `/money-calculators/` e os 5 guias;
+- a home, a Compress image e as páginas institucionais também em pt e es.
+
+O que já existe de PDF:
+
+- `src/engine/pdf/` é a semente do motor de PDF. O `build.ts` monta o PDF da Image to PDF: uma imagem por página, Producer e Creator "FileOrca", sem data. O `report.ts` monta o PDF das calculadoras. O `worker.ts` expõe os dois por Comlink, e o `src/tools/image/pdf-client.ts` abre esse worker no primeiro uso (§ 102 e § 115). Os dois caminhos são contrato: a Image to PDF e o PDF das calculadoras continuam passando nos testes que já existem, e não baixam nada novo.
+- A regra "pasta autocontida" do `eslint.config.ts` já vale para `src/engine/image/` e `src/engine/pdf/`: pacote pode, caminho de fora da pasta não.
+- O `@cantoo/pdf-lib` já é dependência. O `pdfjs-dist` e o `@neslinesli93/qpdf-wasm` ainda não.
+- O `fixtures/pdf/` tem os 4 PDFs da F0, descritos no `fixtures/ORIGEM.md`:
+  - um escaneado colorido de 1 página;
+  - o escaneado da NASA, de 150 páginas em CCITT, linearizado, que dá 2 avisos no `qpdf --check`;
+  - o formulário 1040 do IRS, com AcroForm e XFA;
+  - as notas de 117 páginas com 55 fontes embutidas, em CC BY-SA 4.0.
+- O `tests/e2e/lib/pdf.ts` (`strictPdf`) e o `tests/e2e/lib/pdf-text.ts` já leem PDF no Node.
+- Não existe `src/tools/pdf/` ainda.
+- O item 8 da revisão da F2 (os metadados do PDF) ficou para a F5 (§ 102). O "O que a semente ainda não faz" e a "Nota para a F5" do `docs/relatorios/fase-02.md` listam o que falta no motor de PDF e no de imagem.
+
+Não são desta run e não se tocam: a 2b (§ 85), os achados baixos do `docs/relatorios/REVISAO-F4.md` e as pendências da § 103.
+
+O CI hoje tem cinco partes. Na última execução verde da F4 ([run 41277648653](https://github.com/vmatusita/fileorca/actions/runs/41277648653)), o total do `verificar` de cada uma foi:
+
+- `verificar` (`--sem-playwright`): 285,4 s;
+- `playwright (chromium)`: 529,4 s, com 404 testes;
+- `playwright (webkit 1 de 3)`: 427,1 s;
+- `playwright (webkit 2 de 3)`: 273,4 s;
+- `playwright (webkit 3 de 3)`: 664,2 s.
+
+Depois dela, a § 142 renomeou os specs de dinheiro e o `design.spec.ts` voltou à parte 2. A F5a soma 12 ferramentas, cada uma com as fixtures nos dois navegadores. Por isso a decisão 14 divide o CI nesta mesma PR. O `ENOSPC` do WebKit (§ 108, § 109 e § 141) ainda aparece, e a hipótese é um core dump grande que o `systemd-coredump` descarta.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. O `CLAUDE.md` inteiro: a seção da F2 (como uma ferramenta entra), a da F3 (o `gate:prontidao` e o método da revisão), as dos ajustes de CI e as pegadinhas da F4.
+3. O `PLANO-FILEORCA.md`. A ficha "F5 · PDF e guias em inglês (runs 5a e 5b)" do apêndice é o contrato: aqui vale a parte 5a. As "Decisões fechadas" não mudam. Leia também estas seções:
+   - "Catálogo por fase", com as regras de toda ferramenta, o "Compress PDF tem três modos" e o "Fora do escopo";
+   - "Bibliotecas e licenças", os "Cabeçalhos" e a "Estrutura do repositório";
+   - "Molde da página de ferramenta" e "Orçamento de desempenho";
+   - "O que derruba conta" e "Páginas obrigatórias";
+   - "Links" (as linhas do código aberto e do Product Hunt) e os eventos em "Metas".
+4. O `DECISOES.md`, do § 1 ao último. Esta run toca mais estes: § 13, § 22, § 23, § 33, § 46, § 49, § 54, § 57, § 58, § 59, § 61, § 64, § 65, § 67 a § 72, § 76 a § 81, § 84, § 85, § 86, § 90, § 95, § 96, § 102, § 106, § 108, § 109, § 110, § 115, § 136, § 138, § 141 e § 142. O próximo § livre é o 143, se nada entrou depois da F4.
+5. O `docs/design/`, que é só leitura (a única exceção são os ícones da decisão 6):
+   - o README (voz, Oli, layout, categorias de cor e acessibilidade);
+   - o README e o `preview.html` de DropZone, WaterLevel, FileCard, ResultCard, Placard, OptionGroup, NumberField, OliMessage, NextStepChips, Button, ToolCard, ToolPage, AdSlot, Faq e Breadcrumb;
+   - o `assets/Icons/README.md`.
+6. Os relatórios:
+   - do `docs/relatorios/fase-02.md`, a "Nota para a F5" e a pendência da "régua do lote longo";
+   - do `docs/relatorios/fase-04.md`, o "CI na PR" e as falhas por `ENOSPC`;
+   - o `docs/prompts/prompt-fase-02.md`, o modelo de uma fase que acrescenta ferramentas de arquivo.
+7. O código:
+   - `src/tools/image/` (`registry.ts`, `ImagePanel.tsx`, `types.ts`, `page.ts`, `ImageToolPage.astro`, `engine-client.ts`, `pdf-client.ts`, `names.ts`, `paste.ts`);
+   - `src/engine/image/` (`types.ts`, `worker.ts`, `work.ts`, `errors.ts`, `codecs/runtime.ts`) e `src/engine/pdf/`;
+   - `src/tools/calc/registry.ts`, o modelo de registro mais novo;
+   - `src/i18n/routes.ts`, `src/analytics/`, `src/platform/licenses.ts` e `bundle-record.ts`, `src/search/`, `src/views/ImageToolsView.astro` e `src/components/Footer.astro`;
+   - `astro.config.ts`, `eslint.config.ts`, `scripts/verificar.ts`, `scripts/fixtures/` e `scripts/lib/` (`conteudo.ts`, `prontidao.ts`, `disco.ts`);
+   - `.github/workflows/ci.yml`;
+   - `tests/e2e/` (`image-matrix`, `image-privacy`, `launch-claims`, `budgets`, `ads`, `a11y`, `engine-paths` e `lib/`) e `tests/unit/` (`verificar`, `quality`, `licenses`, `pdf-strict`, `pdf-build`, `fixtures`).
+
+Você pode ler a web (WebSearch e WebFetch) para documentação:
+
+- o PDF.js: notas da versão, opções do `getDocument`, `isEvalSupported`, worker, `wasmUrl`, `cMapUrl`, `standardFontDataUrl` e os navegadores que cada build cobre;
+- o manual do qpdf: `--check`, `--encrypt`, `--decrypt`, `--password`, `--object-streams`, `--compress-streams`, `--recompress-flate`, `--show-encryption`, `--show-crypto`, `--deterministic-id`, `--static-id` e `--static-aes-iv`;
+- as páginas dos pacotes no npm e no GitHub;
+- a ISO 32000 e o WCAG 2.2 (2.5.7, movimentos de arrastar).
+
+Ler não é mandar pedido a um serviço. Nada sai daqui além da leitura.
+
+# Escopo
+
+Dentro, em itens:
+
+1. As duas dependências novas (decisão 2).
+2. As fixtures geradas, num commit anterior a qualquer ferramenta (decisão 3).
+3. O motor de PDF em `src/engine/pdf/` e o carregamento sob demanda (decisões 4 e 5).
+4. A ilha das ferramentas de PDF, as peças novas e os ícones (decisão 6).
+5. As 12 páginas (decisão 1), o hub, a home, o rodapé, a busca, as relacionadas e os chips (decisão 7).
+6. O conteúdo de cada página, a Privacidade e os Termos (decisões 9 e 10).
+7. Os eventos (decisão 11).
+8. O teste de privacidade e segurança (decisão 8) e os portões e testes que crescem (decisão 12).
+9. O motor de imagem pronto para código aberto (decisão 13).
+10. O CI em mais partes e o diagnóstico do `ENOSPC` (decisão 14).
+11. A revisão adversarial final, as correções, os screenshots, o relatório e uma seção nova no fim do `CLAUDE.md`.
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do `CLAUDE.md`. Não crie o repositório público, não publique pacote no npm e não poste nada.
+- A 5b (os 10 guias e o kit do Product Hunt), a 2b, os baixos da F4 e a § 103.
+- PDF em português ou espanhol (F6) e o service worker (F8).
+- PDF para Word ou Excel, Word para PDF, editar o texto do PDF, OCR, preencher formulário e assinatura digital com certificado.
+- Abrir um PDF que pede senha sem a senha: nada de força bruta, lista de senhas ou recuperação.
+- No `.github/`, só o `ci.yml`, e só o que a decisão 14 pede. Também ficam fora:
+  - `scripts/ci/` e o `pos-deploy.yml`;
+  - o nome do job `verificar`, de que o `pode-mesclar.ts` e o pós-deploy dependem;
+  - o limite de 900 s por parte.
+- Dependência nova além das duas da decisão 2, em `dependencies` ou em `devDependencies`. Os testes usam os mesmos pacotes no Node.
+- Cor, raio, sombra ou pose fora de `docs/design/`. O amarelo (`sun`) vai só no Baixar. Nada de animação em JavaScript.
+- São só leitura:
+  - `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/` e `.claude/settings.json`;
+  - `docs/design/`, menos os ícones novos da decisão 6 e a lista do README dos ícones.
+  No `CLAUDE.md`, só uma seção nova no fim. No `DECISOES.md`, só § novos. Na ADR-003, só um adendo no fim.
+- Tirar, pular, afrouxar ou mudar o sentido de teste que já existe. As páginas de imagem e de dinheiro continuam passando no `budgets.spec.ts`, no `ads.spec.ts` e no `a11y.spec.ts` sem mudança de asserção. Se uma mudança legítima obrigar a mexer numa asserção, registre num § qual foi e por quê.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do próximo § livre)
+
+1. **Catálogo e ordem de construção.** As 12 linhas de PDF do `data/keywords.csv` têm `entra`, e todas estão no escopo. A URL é o slug com barra no fim, e o id da rota é o slug. A ordem abaixo põe primeiro as quatro que a ficha nunca corta, depois as do qpdf e as de página, e no fim as três que a válvula pode cortar.
+
+   1. **Merge PDF** (`/merge-pdf/`): dois ou mais PDFs viram um, na ordem da lista. A ordem muda arrastando, com botões e pelo teclado. Cada linha mostra o nome, as páginas e o tamanho.
+   2. **Split PDF** (`/split-pdf/`): um PDF por vez, com três modos:
+      - cada página num arquivo;
+      - por faixas ("1-3, 5, 8-10"), um arquivo por faixa;
+      - as páginas escolhidas na grade, num arquivo só.
+      Um arquivo baixa direto; vários viram um ZIP.
+   3. **PDF to JPG** (`/pdf-to-jpg/`): lote de PDFs, uma imagem por página.
+      - Formato JPG ou PNG.
+      - Resolução de 72, 150 (padrão) ou 300 ppi.
+      - Todas as páginas ou uma faixa.
+      - As imagens saem sem metadados.
+   4. **Compress PDF** (`/compress-pdf/`): lote, com os três modos do plano (decisão 4). O padrão é o Recomendado, e a Placa mostra a economia.
+   5. **Protect PDF** (`/protect-pdf/`): lote com a mesma senha. A senha vai num campo e numa confirmação. A cifra é AES-256 (qpdf, R6), com a senha de dono igual à de abrir e sem restrição de permissão.
+   6. **Unlock PDF** (`/unlock-pdf/`):
+      - o PDF que pede senha para abrir pede a senha na tela;
+      - o PDF que só tem senha de dono (restrições) sai sem as restrições, sem pedir nada;
+      - a senha errada dá a fala e deixa tentar de novo, sem limite de tentativas.
+      O texto diz para usar só em arquivos que a pessoa tem o direito de abrir e mudar.
+   7. **Rotate PDF** (`/rotate-pdf/`): gira 90, 180 ou 270 graus, sem perda (o `/Rotate` da página). Com um arquivo, gira página por página na grade ou todas. Num lote, gira todas as páginas de cada arquivo.
+   8. **Delete PDF pages** (`/delete-pdf-pages/`): um PDF por vez. As páginas se escolhem na grade ou por faixas. Apagar todas dá a fala, nunca um PDF vazio.
+   9. **Add page numbers** (`/add-page-numbers-to-pdf/`): lote.
+      - Seis posições.
+      - Os formatos "1", "Page 1", "Page 1 of N" e "1 of N".
+      - Número inicial e pular a primeira página.
+      - Fonte padrão do PDF.
+   10. **Reorder PDF pages** (`/reorder-pdf-pages/`): um PDF por vez. A ordem muda na grade, arrastando, com botões e pelo teclado, e há um "inverter a ordem". A válvula pode cortar.
+   11. **Watermark PDF** (`/watermark-pdf/`): lote. É uma marca de texto, com tamanho, opacidade e direção diagonal ou horizontal, no centro de todas as páginas. A marca de imagem fica para depois. A válvula pode cortar.
+   12. **Sign PDF** (`/sign-pdf/`): um PDF por vez. A válvula pode cortar.
+       - A assinatura sai de um desenho, de uma imagem PNG ou JPG, ou do nome digitado. O nome digitado vira imagem num canvas com a fonte do site, sem fonte nova.
+       - Ela vai para uma ou mais páginas, posicionada com o ponteiro, pelo teclado (setas movem; mais e menos mudam o tamanho) ou por campos.
+       - Ela é desenhada na página como imagem.
+       - O texto diz que é a imagem da assinatura, não uma assinatura digital com certificado, e não dá conselho jurídico.
+
+   Ferramenta que escolhe páginas (Split, Delete, Reorder, Sign e o Rotate página por página) trabalha num arquivo por vez, e a Unlock também, porque cada arquivo tem a sua senha. A página diz isso. Um segundo arquivo largado ali ganha a fala e nunca some em silêncio. O resto aceita lote, com o ZIP e os nomes únicos da § 69.
+
+2. **As duas dependências novas, e mais nenhuma.**
+   - `pdfjs-dist`, a versão estável mais nova (a linha 6.x em nov/2026), sempre 4.2.67 ou mais (CVE-2024-4367).
+   - `@neslinesli93/qpdf-wasm`, a 0.3.0 ou a mais nova.
+   - Pacote publicado no mesmo dia: fixe a versão anterior. Script de instalação só entra pelo `onlyBuiltDependencies` do `pnpm-workspace.yaml`, nunca por flag.
+   - Antes de usar, confira e registre:
+     - a licença de cada pacote (o PDF.js é Apache-2.0; o qpdf é Apache-2.0, e o pacote é ISC);
+     - que o qpdf é a build de uma thread, sem `SharedArrayBuffer`, `Atomics` nem pthread (procure no JS de cola e no `.wasm`);
+     - que o provedor de cripto do qpdf é o `native` (`--show-crypto`). O GnuTLS compilado dentro, que é LGPL, reprova;
+     - os componentes compilados dentro dos `.wasm` (no qpdf, a zlib e a libjpeg; no PDF.js, o OpenJPEG, o qcms e o JBIG2 do PDFium) e os arquivos de dados que forem para o `dist/` (cMaps, fontes padrão). Cada um entra na `/licenses` com o texto da licença dele, como os codecs do jSquash (§ 79). Componente copyleft ou não comercial dentro de um `.wasm` reprova a biblioteca.
+   - O `browserPackages()` do `quality.test.ts` passa a ter as duas. É uma mudança legítima, como a § 52.
+   - Se o `@neslinesli93/qpdf-wasm` não cumprir as regras, teste o `@jspawn/qpdf-wasm` (Apache-2.0) com as mesmas regras e registre a troca. Se nenhum cumprir, é bloqueio real:
+     - a Protect e a Unlock saem pela válvula;
+     - o modo sem perda do Compress usa só o `@cantoo/pdf-lib`;
+     - o relatório registra a pendência.
+
+3. **As fixtures vêm antes das ferramentas.**
+   - Um script novo em `scripts/fixtures/` (por exemplo `pdf.ts`, chamado pelo `pnpm fixtures`, com o mesmo `--check`) gera as fixtures. Ele roda no Node, com o `@cantoo/pdf-lib` e o qpdf em WASM.
+   - A geração é determinística: sem data, com `--deterministic-id` e, nas cifradas, `--static-id` e `--static-aes-iv`. O `--check` compara sem gravar.
+   - Elas entram em `fixtures/pdf/gen-*.pdf` com a origem, o comando e o SHA-256 no `fixtures/ORIGEM.md`, num commit anterior ao primeiro arquivo de ferramenta de PDF. O relatório prova a ordem com o `git log`.
+   - No mínimo:
+     - `gen-paginas-300`: 300 páginas, cada uma com o texto "Page N" (o marcador que prova a ordem);
+     - `gen-paginas-mistas`: Letter, A4, uma página deitada, páginas com `/Rotate` 90 e 270 e uma com a CropBox deslocada da MediaBox, cada uma com o marcador;
+     - `gen-ja-otimizado`: só texto, já passado pelo qpdf com object streams e flate recomprimido. O Compress tem de devolver o original;
+     - `gen-fotos`: páginas com fotos JPEG grandes, de fixtures cuja licença permite, ou geradas. O Recomendado tem de ganhar;
+     - três cifradas, com as senhas no `ORIGEM.md`: senha de abrir em AES-256, senha de abrir em RC4 de 128 bits (R3, o legado) e só senha de dono com restrições;
+     - `gen-acoes`: OpenAction com JavaScript, uma ação Launch, um link URI e uma anotação de link (o teste de segurança);
+     - os quebrados: xref estragada, cortado na metade, vazio, um JPG com nome `.pdf` e um texto com nome `.pdf`.
+   - O `fixtures/pdf/` inteiro fica abaixo de uns 15 MB. As variantes do PDF de 117 páginas seguem a CC BY-SA 4.0 dele.
+   - O esperado de cada fixture vai para `fixtures/pdf/expected.json`: páginas, tamanhos, rotação, marcadores, cifra e formulário. Ele sai de um leitor independente (o PDF.js no Node ou o `qpdf --json`), nunca do motor do FileOrca. É o modelo do `fixtures/images/expected.json`.
+
+4. **O motor de PDF** (`src/engine/pdf/`).
+   - **Autocontido**, como já é. Cada biblioteca pesada carrega dentro do worker só quando a operação precisa dela:
+     - o qpdf no Compress, na Protect e na Unlock;
+     - o PDF.js onde há leitura de página ou desenho.
+     A Image to PDF e o PDF das calculadoras não buscam nem o qpdf nem o PDF.js (um teste prova pelas requisições).
+   - **Nunca rejeita para a página.** A falha volta como `{ ok: false, reason }`, de uma lista fechada. A falha de carga passa pelo modelo do `loading()` (§ 102): vira `load`, com a fala "recarregue a página", e nunca "arquivo danificado".
+   - **O tipo vem dos bytes** (`%PDF-` no primeiro KB), nunca da extensão (§ 59).
+   - **PDF com senha.** Fora da Unlock, o PDF que pede senha para abrir e o que tem restrições de dono são recusados na linha dele, com a fala e o link para a Unlock PDF. A exceção é a PDF to JPG, que desenha o PDF com restrições. Nunca sai um PDF quebrado.
+   - **Metadados** (o item 8 da F2 se fecha aqui, com teste):
+     - o PDF da pessoa mantém o Info e o XMP dele;
+     - a ferramenta não acrescenta data, Producer, título nem nada que venha do aparelho (`updateMetadata: false`);
+     - documento novo (o resultado da Merge, as partes da Split) segue uma regra que você fixa e registra.
+   - **Geometria.** O número, a marca d'água e a assinatura se posicionam pela CropBox e pelo `/Rotate` de cada página, nunca só pela MediaBox. A `gen-paginas-mistas` prova.
+   - **Formulário, marcadores, links e anotações.** O que cada ferramenta mantém é decisão registrada, com teste na fixture do IRS. Quando algo se perde, a tela diz. O XFA também é decisão registrada.
+   - **Memória e thread principal:**
+     - a `gen-paginas-300` e a de 117 páginas passam em toda ferramenta que as aceita;
+     - o pdf-lib e o qpdf trabalham no worker, com os bytes passados por `transfer`;
+     - o desenho do PDF.js cede a vez entre as páginas;
+     - a miniatura só se desenha quando aparece, em resolução pequena, e é solta quando sai da tela;
+     - o MEMFS do qpdf é limpo depois de cada arquivo.
+   - **Os três modos do Compress:**
+     - **Sem perda:** qpdf com object streams gerados, streams comprimidos, flate recomprimido no nível 9 e recursos sem referência removidos.
+     - **Recomendado:** o sem perda, mais duas coisas, com os valores fixados e registrados antes de medir:
+       - toda imagem DCT (JPEG) RGB ou cinza de 8 bits é recodificada com o MozJPEG (`@jsquash/jpeg`, que já é dependência) numa qualidade fixa;
+       - as imagens acima de uma resolução efetiva fixa são reduzidas.
+       CMYK, YCCK, indexada, 16 bits, JPX, JBIG2 e CCITT ficam como estão. Cada imagem só é trocada se ficar menor. Onde a recodificação roda (no worker de PDF, importando o pacote, ou no worker de imagem) é escolha sua, registrada com a medida.
+     - **Forte:** cada página vira imagem pelo PDF.js numa resolução fixa e entra num PDF novo. O texto deixa de ser selecionável e o formulário e os links se perdem. A opção diz isso antes de a pessoa escolher.
+     - **Em qualquer modo:** resultado igual ou maior volta como o original, byte a byte, com a fala da Oli de que o arquivo já estava otimizado.
+     - **Qualidade:** a página 1 do Recomendado, desenhada e comparada com a original, fica acima de um limiar de PSNR que você fixa antes de medir (30 dB é o ponto de partida). Registre o número de cada fixture com foto.
+   - **Protect:** `qpdf --encrypt` em AES-256. **Unlock:** `qpdf --decrypt`, com `--password` quando o PDF pede. Nenhum PDF de saída da Unlock leva `/Encrypt`.
+   - **PDF.js endurecido:**
+     - `isEvalSupported: false`. Se a versão não tiver mais a opção, prove no JS publicado que o caminho de fontes e funções não usa `eval` nem `new Function`, e registre;
+     - sem XFA, sem scripting, sem camada de anotações e sem camada de texto: só canvas;
+     - o worker do PDF.js, os `.wasm`, os cMaps e as fontes padrão vêm da própria origem, copiados do pacote sem alteração, ou o recurso fica desligado. Nunca de CDN;
+     - a `gen-acoes` prova: nenhum diálogo, popup, navegação ou requisição além de GET da própria origem, e nenhum script do PDF roda.
+   - **A saída do qpdf** (`print` e `printErr`) é capturada, e nunca vai para o `console` com a senha.
+
+5. **O orçamento e o carregamento.**
+   - Toda página de ferramenta de PDF carrega exatamente 2 arquivos JS antes do primeiro uso (o `mount` e o chunk compartilhado), com no máximo 80 KB gzip.
+   - No máximo 8 requisições na primeira página e 3 novas na seguinte, nos dois sentidos: de imagem para PDF, de PDF para PDF e de calculadora para PDF.
+   - Nenhum worker, `.wasm`, PDF.js ou qpdf antes do primeiro arquivo. O aquecimento com o ponteiro sobre a zona (§ 61 e § 69) pode buscar só o que o primeiro arquivo buscaria.
+   - Nenhum código de ferramenta de PDF entra no chunk compartilhado. As páginas de imagem e de dinheiro mantêm o número de arquivos JS. Elas só crescem pelo que o chunk compartilhado ganhar de fato (ids e eventos), com a medida de antes e de depois, como a § 136.
+   - No `budgets.spec.ts`, o `TOOL_PAGES` e o `CALC_PAGES` não mudam. As páginas de PDF entram numa lista própria, lida do registro, com o número exato de arquivos.
+
+6. **A ilha, as peças novas e os ícones.**
+   - **Uma ilha para as 12** (o modelo da § 69 e da § 110), em `src/tools/pdf/`. O registro único é `src/tools/pdf/registry.ts`: id, caminho, o que aceita, ícone, lote ou um por vez, chips, até 6 relacionadas. As páginas, o hub, a busca e os testes leem esse registro.
+   - **Reuso.** Use a DropZone, a WaterLevel, o ResultCard, o FileCard, o OptionGroup, o NumberField, a OliMessage, os NextStepChips e a Placa da ilha das imagens onde servirem. A DropZone, a WaterLevel e o ResultCard ficam no mesmo lugar (§ 54). Painel em repouso acima da dobra a 360 × 740, como nas imagens. A linha do café segue a § 49 e a § 71.
+   - **Peças que o design system não tem:**
+     - a grade de páginas: miniatura, escolha, giro e posição;
+     - o campo de senha, com mostrar e esconder;
+     - a área de assinatura: desenhar, enviar imagem ou digitar, e posicionar.
+     Cada uma sai só dos tokens e do estilo de componentes que já existem: o visual do FileCard e do ToolCard, o campo do NumberField e as variantes do Button. Cada uma ganha um § com a marcação, os estados e o teclado, e screenshots nos dois temas. Nenhuma cor, raio ou sombra nova.
+   - **Acessibilidade:**
+     - todo arrastar tem alternativa de um ponteiro e de teclado (WCAG 2.5.7): botões "mover para antes" e "para depois", setas e Espaço para escolher;
+     - a mudança é dita uma vez pela região de status, e o foco nunca cai no `body` (§ 86);
+     - cada miniatura tem nome ("Page 3 of 12, rotated 90°, selected");
+     - a área de assinatura tem as alternativas de enviar e de digitar;
+     - o campo de senha tem rótulo, erro que diz a regra, `autocomplete="new-password"` na Protect e `current-password` na Unlock, e o botão de mostrar com `aria-pressed`.
+   - **Ícones.** Use os que existem: `merge`, `split`, `rotate`, `trash`, `image`, `compress`, `lock`, `unlock`, `pdf` e `file`. O README dos ícones manda desenhar um novo quando nenhum serve, e o caso de assinar e de marca d'água está lá. Os candidatos são assinar, marca d'água, número de página e reordenar. Cada um:
+     - sai na grade de 24 × 24, traço de 2 px, pontas e cantos redondos, com o traço Orca no arquivo;
+     - entra em `docs/design/assets/Icons/`, na lista do README dos ícones e no `ICON_NAMES`;
+     - ganha um § e aparece no relatório.
+     É a única mudança permitida em `docs/design/`.
+   - **A Oli** usa as poses da lista fechada. As falas novas seguem a voz do README:
+     - "precisa da senha";
+     - "senha errada";
+     - "já estava otimizado";
+     - "um arquivo por vez aqui";
+     - o que acontece com o formulário;
+     - o texto que deixa de ser selecionável no Forte.
+   - **Nomes dos arquivos de saída:** o modelo do `src/tools/image/names.ts`, com o nome original e um sufixo, único dentro do ZIP. Nenhum número digitado entra no nome.
+
+7. **Hub, home, rodapé, busca e relacionadas.**
+   - O `/pdf-tools/` segue o molde do `/image-tools/` (§ 77 e § 96):
+     - o `fo-hubband` com H1 próprio e a cor de categoria `coral`;
+     - a grade na ordem de volume;
+     - o guia "qual ferramenta usar";
+     - texto que dá as 150 palavras por AdSlot.
+     Como a Image to PDF aparece no hub (cartão para a página dela, que continua no hub de imagem) é decisão registrada.
+   - A home em inglês ganha a seção de PDF, e o rodapé ganha a coluna PDF em inglês, sem página órfã.
+   - A busca ganha as 12 (§ 78 e § 125). Os chips levam só a páginas que existem. Exemplos: depois do Merge, número de página e Compress; depois do Compress, Protect; depois do PDF to JPG, a Compress image; a Image to PDF e o Merge um para o outro.
+   - O schema é `WebApplication` sem nota, mais `BreadcrumbList`. A imagem de Open Graph de cada página sai do build, e o sitemap ganha as páginas.
+   - O hreflang segue a § 58 (página só em inglês), e o menu de idioma segue a § 84.
+
+8. **Privacidade e segurança: `tests/e2e/pdf-privacy.spec.ts`, nas 12 páginas e nos dois navegadores.**
+   - As sentinelas, longas e únicas:
+     - a senha (por exemplo `Orca-Sentinel-7391-Kq`);
+     - o texto da marca d'água;
+     - o número inicial da numeração;
+     - as faixas digitadas na Split, na Delete e na PDF to JPG;
+     - o nome digitado da assinatura;
+     - um marcador de texto dentro de uma fixture;
+     - um nome de arquivo.
+   - O fluxo: soltar o arquivo, mudar as opções, processar, baixar e clicar num chip.
+   - A busca, sem caractere colado antes ou depois, olha:
+     - toda requisição de qualquer origem, com método, URL e corpo, inclusive as dos workers. Só passa GET da própria origem, sem corpo, como o `launch-claims.spec.ts`;
+     - o `dataLayer`, o `document.title`, o `location.search` e o `location.hash`;
+     - o `localStorage`, o `sessionStorage`, os nomes do IndexedDB e os cookies;
+     - as mensagens do console (a senha);
+     - os nomes dos arquivos baixados. O nome original do arquivo, que é da própria pessoa, pode aparecer só ali.
+   - O PDF protegido não leva a senha em claro: o teste procura nos bytes.
+   - As regras do `image-privacy.spec.ts` (§ 80) passam a valer para o qpdf e o PDF.js: nenhum COOP ou COEP, nenhum `SharedArrayBuffer` e só builds de uma thread.
+   - O `launch-claims.spec.ts` ganha a Compress PDF (qpdf), a PDF to JPG (PDF.js) e a Protect PDF.
+
+9. **Conteúdo de cada página de PDF.**
+   - O H1 com a promessa e o PrivacySeal.
+   - O "como usar" em 3 passos ou mais.
+   - As especificações: o que aceita, os limites, o que se mantém (formulário, marcadores, links) e o que cada modo faz.
+   - Pelo menos 4 perguntas reais no Faq.
+   - A nota de privacidade e até 6 relacionadas.
+   - O `gate:conteudo` ganha esses blocos para as páginas de PDF, com controles positivos e negativos no `tests/unit/conteudo.test.ts`.
+   - O `gate:prontidao` passa a ler o registro de PDF: cartões e busca só do registro, H1, título e descrição próprios, 60 palavras no `<main>` e 150 por AdSlot.
+   - O título começa pelo nome da ferramenta. Nada de "best", "#1" ou número que não foi medido.
+
+10. **Privacidade e Termos nos três idiomas.**
+    - A Privacidade diz:
+      - que o PDF é lido e escrito no aparelho, pelo PDF.js e pelo qpdf;
+      - que a senha não sai do aparelho e não fica guardada;
+      - que a assinatura não fica guardada em lugar nenhum.
+    - Os Termos ganham as frases da Protect, da Unlock e da Sign (decisão 1).
+    - O Sobre muda só se listar o que o site tem.
+    - O pt e o es passam pelo `lint:texto`.
+
+11. **Eventos.**
+    - Os mesmos das imagens (§ 71), com o `tool` da lista fechada tirada do registro de PDF.
+    - O `outcome` e o `reason` crescem em listas fechadas, com teste. Exemplos de `reason`: `not-pdf`, `empty`, `corrupted`, `needs-password`, `wrong-password`, `restricted`, `too-large`, `load`.
+    - Nenhum parâmetro leva número, faixa, texto, senha, contagem de páginas ou nome de arquivo.
+    - Os testes ficam no `tests/unit/consent.test.ts` e no `events.spec.ts`.
+
+12. **Portões e testes que crescem.** Nenhum portão fica mais frouxo. Os specs novos se chamam `pdf-*.spec.ts`.
+    - **A matriz** (`tests/e2e/pdf-matrix.spec.ts`): cada ferramenta, cada fixture que ela aceita e os dois navegadores, com as recusas no meio do lote. Cada saída é baixada e conferida no Node:
+      - o `strictPdf`;
+      - o PDF.js (`pdfjs-dist` no Node) abre e o `getOperatorList` de cada página resolve;
+      - o `qpdf --check` (o WASM no Node) dá zero. Aviso só se o original tinha o mesmo, explicado;
+      - a conta da ferramenta contra o `expected.json`: contagem, ordem pelos marcadores, `/Rotate`, texto do número e da marca em cada página, imagem da assinatura na página certa e dentro da CropBox;
+      - sem `/Encrypt` depois da Unlock; R6 com AESv3 depois da Protect, abrindo só com a senha;
+      - imagens da PDF to JPG na contagem e nas dimensões pela resolução (com 1 px de folga) e sem Exif nem GPS;
+      - Compress menor ou igual ao original, e igual byte a byte quando não ganha.
+      Cada teste grava um JSON em `test-results/matriz-pdf/`, e um script monta `docs/relatorios/fase-05a-matriz.md` a partir deles, nunca à mão (o modelo da § 80).
+    - **O Vitest do motor**, no Node e com as fixtures, cobre a conta de cada operação a fundo. É mais barato que o navegador.
+    - **Caso pesado.** Se um caso passar do timeout do teste no CI, divida-o em mais testes que cubram todas as páginas. Nunca tire fixture nem página.
+    - **`ads.spec.ts`:** cada página de PDF e o hub, a 360 × 740 e a 1280 × 800, em repouso, com a grade aberta e com o resultado. Os alvos novos são a grade, o campo de senha, a área de assinatura e a lista do Merge, somados ao Baixar, aos campos, ao painel e à Oli.
+    - **`budgets.spec.ts`:** a lista de PDF (decisão 5) e os pares de navegação.
+    - **`a11y.spec.ts`:** cada página com os estados no mesmo carregamento (§ 76): repouso, grade com escolha, erro de senha, resultado e área de assinatura aberta.
+    - **`engine-paths.spec.ts`:** o caminho sem `OffscreenCanvas` no worker (§ 22) onde o desenho ou a recodificação dependem dele, nos dois navegadores.
+    - **O `gate:licencas`:** os dois pacotes, cada `.wasm` e arquivo de dados do `dist/` idêntico ao do pacote, e os textos na `/licenses`.
+    - **O `gate:design` e os testes de qualidade:** o amarelo só no Baixar e a voz nas falas novas.
+    - **O `lighthouserc.json`** ganha a `/compress-pdf/` e o `/pdf-tools/`, com desempenho 90 ou mais e CLS de até 0,05. As páginas que já estão lá não pioram.
+    - **O `pnpm screenshots`** grava as peças e as páginas de PDF nos dois temas, a 360 e a 1280 px, em `docs/relatorios/fase-05a/componentes/`. As pastas da F3 e da F4 ficam como estão.
+    - **A divisão em partes.** Antes de cada push com spec novo, rode o `--list` de cada parte e confira onde caem os testes. O `design.spec.ts` não muda de parte do WebKit sem registro (§ 142).
+
+13. **O motor de imagem pronto para código aberto.**
+    - **O que falta**, pela "Nota para a F5" da F2:
+      - separar o worker com Comlink do site: ele vira uma entrada opcional do pacote ou fica só no site, escolha registrada;
+      - o pacote funciona sem a sintaxe `?url` do Vite, com a URL de cada `.wasm` passada por opção;
+      - o README com o contrato e as decisões (§ 59 a § 66 e § 86);
+      - a licença MIT ("Copyright (c) 2026 Victor Yuki Matusita");
+      - um THIRD-PARTY-NOTICES tirado do `src/platform/licenses.ts`: os codecs do jSquash e os textos deles; o libheif em LGPL-3.0, como `.wasm` à parte, sem alteração e trocável, com os links do código.
+    - **Pode ser de dois jeitos**, com a escolha registrada:
+      - o site passa as URLs ao motor em tempo de execução, com o mesmo código nos dois lugares;
+      - ou o script troca, só na cópia exportada, um arquivo adaptador, declarado no README.
+    - **O site não muda de comportamento:**
+      - o `src/engine/image/worker.ts` mantém o nome e a saída `/_astro/worker-*.js`;
+      - os mesmos `.wasm`, idênticos aos do pacote;
+      - a matriz de imagem e todos os testes verdes;
+      - o JS das páginas de imagem não cresce (medido).
+    - **O script `scripts/oss/image-engine.ts`** (`pnpm motor:exportar`) grava `.cache/oss/fileorca-image-engine/` com:
+      - o código do motor;
+      - os testes unitários do motor (`tests/unit/engine-*.test.ts` e `strip.test.ts`), com os imports reescritos, e os auxiliares deles;
+      - só as fixtures cuja licença no `ORIGEM.md` permite redistribuir. Na dúvida, a fixture fica fora, e o teste que depende dela fica só no site;
+      - o `package.json`: nome `fileorca-image-engine`, versão 0.1.0, MIT, `type: module`, as dependências exatamente iguais aos pacotes que o motor importa, nas versões do site, e os scripts de tipos e de teste;
+      - o `tsconfig.json`, o `README.md` em inglês, o `LICENSE`, o `THIRD-PARTY-NOTICES.md` e o `.gitignore`.
+      Nada do site entra: nem o ID do GA4, o Ko-fi, a chave Pix ou o e-mail de contato. O domínio aparece só no link de crédito do README.
+    - **`pnpm motor:exportar --conferir`:** copia o pacote para uma pasta temporária fora do repositório e roda, com o npm, como um usuário comum, o `npm install`, o `tsc --noEmit` e o `vitest run`. O resultado tem de ser zero. Ele fica fora do `verificar`, porque usa a rede, e a saída vai colada no relatório.
+    - **`tests/unit/oss-image-engine.test.ts`**, dentro do `verificar`: exporta para uma pasta temporária e confere a estrutura, as licenças, que nenhum import sai do pacote, que nada do site entrou e que duas exportações seguidas são iguais.
+    - **`docs/lancamento/codigo-aberto.md`:** o passo a passo do Victor para criar o repositório público (nome sugerido `vmatusita/fileorca-image-engine`, descrição, tópicos, primeiro push da pasta exportada e como atualizar depois). Atualize o `docs/lancamento/README.md` com a ordem: depois do merge da F5a.
+
+14. **O CI em mais partes e o diagnóstico do `ENOSPC`.**
+    - **Só o `ci.yml` muda.** Ficam como estão:
+      - o job `verificar`, o `merge` e o `pos-deploy.yml`;
+      - as actions fixadas por SHA, o `fail-fast: false` e o artefato do relatório por parte;
+      - o limite de 900 s por parte e o `timeout-minutes`;
+      - nenhum `retries` e nenhum `continue-on-error`.
+    - **A divisão sai da medida.** Escolha o número de partes do Chromium (`--playwright=chromium --shard=i/n`) e do WebKit para que o total do `verificar` de cada parte fique em até 700 s no CI. A projeção parte dos tempos da F4 do Contexto e do `--list`. O esperado é o Chromium em 2 ou 3 partes e o WebKit em 4 ou 5. Meça no CI e ajuste num push a mais, se precisar.
+    - **Faça a divisão antes do primeiro push com a matriz de PDF**, para nenhuma execução estourar 900 s. O CI da PR roda o `ci.yml` da própria PR, então a divisão vale já nesse push.
+    - **O que acompanha a divisão:**
+      - a lista de partes do `tests/unit/verificar.test.ts`;
+      - a seção nova do `CLAUDE.md`, que descreve as partes novas e substitui a descrição das seções antigas, que ficam como estão;
+      - um "Adendo (F5a)" no fim da ADR-003, com a tabela de antes e depois;
+      - um §.
+    - **O `ENOSPC` (§ 141)**, em toda parte do WebKit (e do Chromium, se for barato):
+      - no fim, com `if: always()`, um passo com `coredumpctl list` (e o journal do `systemd-coredump`, se houver) e `df -h /`;
+      - os core dumps dos navegadores desligados no passo do Playwright, por exemplo com `ulimit -c 0` no mesmo shell ou pelo `core_pattern`, com a escolha justificada;
+      - no diagnóstico da § 109 (`scripts/lib/disco.ts`), a amostra do disco a cada 2 s durante o `design.spec.ts`, ainda só no Linux do CI, com o teste unitário dela.
+      Se uma parte cair por `ENOSPC`, leia as linhas `[disco]` e a saída do `coredumpctl`, rode de novo só ela (`gh run rerun <id> --failed`) e registre cada vez.
+    - **Minutos do GitHub.** Cada push roda todas as partes e gasta minutos do plano grátis. Faça push só em marcos (uns seis na run inteira) e registre no relatório os minutos de cada execução.
+
+# Pontos de atenção
+
+- As pegadinhas do `CLAUDE.md` valem todas. As que mais pegam aqui:
+  - no Git Bash, escreva arquivos com a ferramenta de edição, e não use `node -e` com crase;
+  - rode `git push` e `gh pr create` em comandos separados;
+  - cada execução paralela do Playwright usa o próprio `FO_PORT` e a própria `--output`;
+  - o WebKit do Windows trava com várias execuções ao mesmo tempo: antes de achar que um teste dele está errado, rode-o de novo com a máquina livre;
+  - o `exactOptionalPropertyTypes`, os tipos de evento de `preact` e o `stroke-width` em SVG.
+- O WebKit do Windows não tem `OffscreenCanvas` no worker (§ 22). O desenho do PDF.js e a recodificação do Recomendado precisam do caminho na página. O Linux do CI pode ser diferente, e os testes cobrem os dois caminhos.
+- O teto de pixels da § 65 vale para cada página desenhada. Na PDF to JPG a 300 ppi e no Forte, uma página grande demais desce a resolução e a linha diz isso. Nada estoura o canvas.
+- O PDF.js mais novo pode exigir navegador mais novo. Confira na documentação da versão que navegadores o build moderno cobre. Se ele não cobrir o Safari 16.4 (o piso que a § 61 já usa), use o build legacy, com a medida de tamanho registrada.
+- O JS de cola do qpdf tem imports de Node (`fs`, `path`). Configure o Vite para não empacotá-los, sem polyfill, e prove que nada só de Node chegou ao navegador.
+- O `@cantoo/pdf-lib` lança erro num PDF cifrado. Detecte a cifra cedo e devolva o `reason` fechado.
+- O `copyPages` do pdf-lib não junta o AcroForm. A fixture do IRS mostra o que acontece em cada ferramenta.
+- O `<script>` do Astro com `import()` puxa o `preload-helper` (F1a). Para o que carrega no primeiro uso, use o modelo `?worker&url` do `CLAUDE.md`, e mantenha os 2 arquivos.
+- O WebKit do Linux troca caracteres no nome do download (§ 83). O aviso de cookies cobre o canto de baixo à esquerda, então feche-o antes de clicar no fim do rodapé (§ 106).
+- O GA4 só carrega em fileorca.com (§ 8). Nos testes, o `dataLayer` existe, e é nele que o teste de privacidade procura.
+- Na produção, nada de visita de navegador sem bloquear os domínios do Google com `context.route` (`CLAUDE.md`, F3).
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. As 12 páginas e o hub respondem 200 no `dist/` e na prévia, cada um com o H1, o título e a descrição dele. Se a válvula cortar algo, a lista diz o que foi para a 5c.
+2. As fixtures estão num commit anterior ao primeiro arquivo de ferramenta de PDF, provado pelo `git log`. O `ORIGEM.md` tem a origem e o SHA-256 de cada uma, e o `pnpm fixtures --check` fica verde.
+3. A matriz fica verde nos dois navegadores, com toda ferramenta e toda fixture que ela aceita. Toda saída passa no `strictPdf`, no PDF.js e no `qpdf --check`, e na conta da ferramenta. Os quebrados dão a fala da Oli na linha deles, sem travar a página, e o resto do lote sai. A tabela `docs/relatorios/fase-05a-matriz.md` sai do script.
+4. O Compress:
+   - nunca devolve arquivo maior, em nenhum modo e em nenhuma fixture, provado por uma tabela de modo × fixture com o antes, o depois e a razão;
+   - sem ganho, devolve os mesmos bytes;
+   - o Recomendado ganha na `gen-fotos` e passa no limiar de PSNR, com os números;
+   - o aviso do Forte aparece antes da escolha.
+5. A Protect sai em AES-256 (o `qpdf --show-encryption` mostra R6 e AESv3) e o PDF.js só abre com a senha. As três cifradas saem da Unlock sem `/Encrypt` e abrem sem senha. A senha errada dá a fala e deixa tentar de novo.
+6. O `pdf-privacy.spec.ts` fica verde nos dois navegadores, nas 12 páginas, com a lista de sentinelas e de lugares.
+7. Em toda ferramenta que aceita a `gen-acoes`, ela não abre diálogo, popup, navegação nem requisição. O PDF.js roda com `isEvalSupported: false` (ou com a prova da decisão 4), sem camada de anotações nem de texto e sem CDN.
+8. O `budgets.spec.ts` fica verde:
+   - as páginas de PDF com 2 arquivos JS e dentro do orçamento;
+   - as de imagem e de dinheiro com o mesmo número de arquivos, e uma tabela do JS delas antes e depois;
+   - nenhum worker ou `.wasm` antes do primeiro arquivo;
+   - a Image to PDF e o PDF das calculadoras sem buscar o qpdf nem o PDF.js.
+9. No Chromium, nenhuma tarefa longa acima de 200 ms na thread principal enquanto a Merge, a Split (cada página num arquivo), o Compress sem perda e a numeração rodam na `gen-paginas-300`. A medida é feita dentro da página, com o `PerformanceObserver`, e o relatório traz o tempo de cada uma.
+10. O axe fica verde nos estados da decisão 12. Reordenar pelo teclado dá a mesma saída que arrastar, provado por teste. O foco nunca cai no `body`.
+11. O `ads.spec.ts` fica verde com os alvos novos.
+12. O Lighthouse no celular da `/compress-pdf/` e do `/pdf-tools/` dá desempenho 90 ou mais e CLS de até 0,05. As páginas que já estavam no `lighthouserc.json` não pioram.
+13. O `pnpm motor:exportar --conferir` dá zero numa pasta temporária fora do repositório, com a saída colada. O `oss-image-engine.test.ts` fica verde, e os testes de imagem do site não mudam.
+14. O `gate:licencas` fica verde com os dois pacotes e todo `.wasm` e arquivo de dados do `dist/`. A `/licenses` lista tudo. Não há `SharedArrayBuffer`, e o qpdf usa o cripto `native`.
+15. Todas as partes do CI ficam verdes, com uma tabela do total do `verificar` de cada uma: no alvo, até 700 s; sempre abaixo de 900 s. Os passos do diagnóstico do `ENOSPC` existem, com a saída deles. O `verificar.test.ts` e o `actionlint` ficam verdes. Não há `skip`, `fixme`, `only`, `retries` nem `continue-on-error` novo.
+16. O `pnpm verificar` inteiro fica verde na sua máquina, com a saída e o tempo de cada portão (ou as partes, pela regra da Verificação).
+17. Só as duas dependências novas entram em `dependencies`, e o `pnpm-lock.yaml` muda só por elas. O `git diff --stat origin/main...HEAD -- .github scripts/ci PLANO-FILEORCA.md docs/adr/ADR-001-plataforma-de-entrega.md .githooks .claude/settings.json docs/design` mostra só o `ci.yml` e os ícones novos com a lista do README deles.
+18. O comentário do Workers Builds aparece na PR. O Playwright confere na prévia, com o Google bloqueado, a Compress PDF e a Merge PDF a 360 e a 1280 px, com uma fixture e screenshot.
+
+# Verificação: rode de verdade
+
+- Na ordem: as fixtures; o teste do motor no Vitest, falhando enquanto o motor não existe; o motor até passar. O mesmo vale para cada página: os testes de matriz, anúncio, orçamento, axe e privacidade dela antes de dar a página por pronta.
+- Leia cada falha, corrija a causa e repita até passar. É proibido desligar, pular, marcar como skip, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no `DECISOES.md`.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e `pnpm verificar`, que já builda do zero) e guarde a saída completa. Se o todo passar de 900 s na sua máquina só pelo tamanho da suíte, rode as mesmas partes do CI em sequência, cole o resumo de cada uma e registre num § a medida e a proposta. O limite não muda.
+- Rode o `pnpm screenshots` depois do último ajuste visual e o `pnpm motor:exportar --conferir` depois da última mudança no motor de imagem.
+- Depois de abrir a PR, acompanhe com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Leia o total de cada parte no log (`gh run view <id> --log`).
+- Espere o comentário do Workers Builds por até 30 min, olhando a cada poucos minutos com `gh pr view <n> --comments`. Se o build do Workers Builds ficar vermelho, o check não traz o log e a causa não se deduz pelo tempo (`CLAUDE.md`): registre a pendência com o ID do build e siga.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O `CLAUDE.md`, a ficha F5 e o resto do plano.
+3. O `docs/design/` e o `DECISOES.md`.
+4. Na dúvida, a opção mais simples e reversível.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos:
+
+- a qualidade e a resolução do Recomendado e do Forte;
+- o limiar de PSNR;
+- o que cada ferramenta faz com o formulário e o XFA;
+- os metadados do documento novo;
+- os chunks;
+- o número de partes do CI.
+
+Uma mudança de arquitetura (host, framework, estrutura, pipeline além da divisão da decisão 14) vira uma ADR "Proposta" em `docs/adr/` e uma pendência. O resto segue.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- uma página de documentação que não abre;
+- um pacote que não cumpre as regras (decisão 2);
+- o LanguageTool sem responder;
+- o comentário do Workers Builds que não chega.
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar:
+
+1. A Sign PDF vai para a run 5c (branch `fase-05c`).
+2. A Watermark PDF vai para a 5c.
+3. A Reorder PDF pages vai para a 5c.
+
+O modelo é a § 85: saem a página, a rota, o cartão e todo link para ela, e nada fica "em breve". As peças do motor que a 5c reusa podem ficar, com os testes delas. O que for cortado vai para o relatório como pendência, com o que falta.
+
+Nunca corte:
+
+- a Merge, a Split, o Compress com os três modos e a PDF to JPG;
+- as fixtures e a matriz nos dois navegadores;
+- os testes de privacidade e de segurança;
+- a exportação do motor de imagem com o `--conferir`;
+- a divisão do CI;
+- a revisão adversarial final.
+
+A Protect e a Unlock só saem pelo bloqueio da decisão 2.
+
+# Git e segurança
+
+- **Começo.** Rode `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-05a.md` e `docs/prompts/prompt-fase-05a.txt`, o prompt desta run. Crie a branch com `git switch -c fase-05a`. Os dois arquivos entram sem edição no primeiro commit dela. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-05a.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). O commit das fixtures vem antes de qualquer arquivo de ferramenta de PDF.
+- **Push** só em marcos (decisão 14). Push de mudança no `.github/workflows/` pede o escopo `workflow` no token do `gh`. Se o push for recusado por isso, é bloqueio real: registre, siga com o trabalho local e deixe o pedido de `gh auth refresh -s workflow` na resposta final.
+- **A PR em rascunho, cedo.** Abra-a logo que a Merge estiver no ar no `dist/` com os testes dela verdes e o CI já dividido. Use `gh pr create --draft --base main --head fase-05a`, num comando separado do push. Título e descrição em português, com o resumo, o link do relatório e o aviso de que a PR muda o `ci.yml` e o merge é do Victor.
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **A worktree da revisão** (`.claude/worktrees/revisao-f5a`) é só de leitura. Remova-a no fim com `git worktree remove`.
+- **Fim.** Rode `gh pr ready` só no fim, com o relatório, a revisão, a tabela da matriz e os screenshots commitados e o verificar local verde. O job de merge vai comentar que a PR mexe no pipeline e fica com o Victor: é o esperado. Acompanhe o CI até o fim. Se ele falhar, corrija e envie. A run termina com a PR pronta e o CI verde, esperando o merge do Victor.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo create`;
+  - `npm publish`, ou mandar o pacote exportado para qualquer lugar;
+  - `wrangler deploy` em qualquer forma, inclusive `--dry-run`.
+
+  O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar**, com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) a ficha 5a, as seções do plano e as regras do `CLAUDE.md`, transformadas num checklist "requisito → onde vai ficar → que teste prova";
+   - (b) a arquitetura das ferramentas de imagem (registro, ilha, molde, chunks, orçamento, portões e matriz), e o jeito de as de PDF entrarem sem mudar os arquivos JS das páginas de imagem e de dinheiro;
+   - (c) as bibliotecas, com as fontes e as datas:
+     - o `pdfjs-dist`: versão, builds moderno e legacy, navegadores, opções do `getDocument` nessa versão, worker, arquivos `.wasm`, cMaps, fontes e as licenças de cada um, e o desenho no worker ou na página;
+     - o qpdf em WASM: versão do pacote e do qpdf, threads, provedor de cripto, uso no Node, MEMFS e as licenças do que está compilado dentro;
+   - (d) o que falta para o motor de imagem virar pacote: worker, `?url`, testes e auxiliares, licenças das fixtures e avisos. Volta com a lista de mudanças e os riscos para o site;
+   - (e) o CI: o tempo por spec das execuções da F4 (`gh run view 41277648653 --log`), as linhas `[disco]` da § 141 e a projeção das partes com a suíte nova.
+2. **Planejar.** Escreva `docs/relatorios/fase-05a-plano.md`, autossuficiente. Ele traz:
+   - as interfaces do motor de PDF e do registro;
+   - a lista de fixtures com o esperado;
+   - as opções e as saídas de cada ferramenta;
+   - a grade de páginas, o campo de senha e a área de assinatura;
+   - os chunks e o orçamento projetado;
+   - cada critério ligado a um teste ou comando;
+   - a projeção das partes do CI;
+   - o desenho da exportação do motor;
+   - a ordem de construção.
+
+   Ele é o gabarito da revisão.
+3. **Implementar** em fatias que terminam verdes, nesta ordem:
+   - as dependências, com a `/licenses` e o `gate:licencas`;
+   - as fixtures, num commit;
+   - o núcleo do motor (carga, tipo pelos bytes, cifra e os `reason`), com o Vitest;
+   - a ilha e a Merge inteira, com a matriz, o anúncio, o orçamento, o axe e a privacidade;
+   - a divisão do CI e o diagnóstico do `ENOSPC`; depois, o primeiro push e a PR em rascunho;
+   - a Split, a PDF to JPG e o Compress com os três modos;
+   - a Protect e a Unlock;
+   - a Rotate, a Delete e a numeração;
+   - a Reorder, a Watermark e a Sign;
+   - o hub, a home, o rodapé e a busca;
+   - a Privacidade e os Termos;
+   - a exportação do motor de imagem;
+   - o Lighthouse e os screenshots.
+
+   O código fica no modelo forte, num agente só, para não colidir na ilha, no CSS e no registro.
+4. **Revisão adversarial final**, no método da F3 (`CLAUDE.md`, F3, § 92 a § 94):
+   - Ela roda sobre um commit fixo, registrado, numa worktree só de leitura com o próprio `pnpm install --frozen-lockfile` e `pnpm build`. Cada lente usa um `FO_PORT` (4174 a 4179) e uma `--output` só dela.
+   - São seis lentes Sonnet em contexto limpo, contra este prompt e a ficha:
+     - (a) corretude dos PDFs: cada ferramenta, geometria, formulário, cifra, Compress nunca maior, e o pacote exportado;
+     - (b) privacidade, segurança e licenças: sentinelas, PDF.js endurecido, senha, PDF malicioso, `.wasm` e textos da `/licenses`;
+     - (c) anúncio e política: distâncias e textos honestos na Unlock, na Protect e na Sign;
+     - (d) acessibilidade (WCAG 2.2 AA): grade, alternativas ao arrastar, senha, assinatura e região de status;
+     - (e) desempenho e SEO: orçamento, tarefas longas, memória com 300 páginas, Lighthouse, schema, sitemaps e canibalização entre a Compress image e a Compress PDF;
+     - (f) aderência ao design system: tokens, peças novas, ícones, voz e Oli.
+   - Cada achado crítico, alto ou médio ganha um cético próprio, e os baixos de cada lente vão a um cético só.
+   - Crítico e alto confirmados: sempre corrigidos. Médio: corrigido se a correção é local. Baixo: vai para o relatório. Cada correção leva um teste que falha sem ela e um §.
+   - Depois, uma segunda passada revisa o diff das correções.
+   - Tudo fica em `docs/relatorios/REVISAO-F5a.md`. Remova a worktree no fim.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-05a.md` em português, commitado na branch antes do `gh pr ready`. Ele cita a última execução verde do CI com código ou teste, com o link e o total de cada parte. O CI do commit do relatório vai na resposta final.
+
+O relatório traz:
+
+- o resumo e a tabela das páginas: URL, o que faz, fixtures que aceita, JS inicial e requisições;
+- as fixtures: o `git log` que prova a ordem, a lista e de onde sai o esperado;
+- o resumo da matriz, apontando para o `fase-05a-matriz.md`;
+- a tabela do Compress: modo × fixture, com o antes, o depois, a razão e o PSNR;
+- as provas da Protect e da Unlock;
+- a saída do teste de privacidade e do de segurança, e o que eles procuram;
+- as tarefas longas e o tempo de cada ferramenta na `gen-paginas-300`;
+- o orçamento: as páginas de PDF, e as de imagem e de dinheiro antes e depois;
+- o Lighthouse das páginas do `lighthouserc.json`;
+- os screenshots, os ícones novos e as peças novas;
+- a exportação do motor: o que entrou, a saída do `--conferir` e o passo a passo do Victor;
+- as licenças novas;
+- o CI: a tabela das partes antes e depois, os minutos de cada execução e o que o diagnóstico do `ENOSPC` mostrou;
+- o resumo da revisão por lente e severidade, apontando para o `REVISAO-F5a.md`;
+- a saída real e completa do `pnpm verificar` local, com o tempo de cada portão;
+- o link da prévia e o que você conferiu nela;
+- as decisões novas, apontando os §;
+- o que a válvula cortou e o que fica para a 5c, se houver;
+- **a lista do que é do Victor, em passos:**
+  1. Ler a PR e dar o merge pelo GitHub ("Squash and merge"), com o CI verde. Depois, conferir o pós-deploy e o `build.txt`.
+  2. Abrir três ferramentas no celular e no computador: a Merge, o Compress e a ida e volta da Protect com a Unlock.
+  3. No Search Console, pedir a indexação do `/pdf-tools/`, da `/compress-pdf/` e da `/merge-pdf/`.
+  4. Criar o repositório público do motor de imagem, pelo `docs/lancamento/codigo-aberto.md`.
+  5. Olhar os ícones novos e as peças novas nos screenshots. Ajuste vira uma run curta.
+  6. Gerar o prompt da 5b (e o da 5c, se a válvula cortou). A 2b segue pendente.
+  7. As pendências que seguem abertas: a § 103, os baixos da F4 e o `docs/F0-SAIDA.md`.
+- **uma nota para a 5b:** o que os guias de arquivo podem medir por script nas fixtures (o Compress por modo, a PDF to JPG por resolução, as conversões de imagem), o que roda no Node e o que precisa do Playwright, e o que o kit do Product Hunt vai pedir;
+- **uma nota para a F6:** o PDF em português e espanhol (textos, a palavra "Page" da numeração, a cobertura do WinAnsi e os slugs).
+
+Acrescente no fim do `CLAUDE.md` uma seção curta, "F5a: ferramentas de PDF", com:
+
+- os comandos novos (fixtures de PDF, a tabela da matriz e o `motor:exportar`);
+- como acrescentar uma ferramenta de PDF, como a F2 fez para as imagens;
+- as regras do PDF.js e do qpdf;
+- as partes novas do CI, substituindo a descrição das seções antigas;
+- as armadilhas que você achou.
+
+Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR e o estado do CI, com a PR esperando o merge do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, a descrição da PR e as explicações de `docs/lancamento/`.
+
+Em inglês:
+
+- o código, os nomes de arquivo, os identificadores e os commits;
+- os textos das páginas;
+- o README, o LICENSE e os avisos do pacote exportado.
+
+Os textos do site ficam nos arquivos de tradução de cada idioma, com a voz de `docs/design/README.md`: sentence case, sem emoji e sem as palavras proibidas.

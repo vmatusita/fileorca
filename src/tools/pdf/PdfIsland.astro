@@ -1,0 +1,16 @@
+---
+// The PDF tool island, server-rendered from the same data-props the browser hydrates from (DECISOES § 23). This is the
+// only component with the PDF <script>, so the 12 PDF pages load one entry (src/tools/pdf/mount.ts) next to the shared
+// island chunk: two JS files (F5a, decision 5; the model of the calculators, § 110).
+import PdfPanel from './PdfPanel.tsx';
+import type { PdfPanelData } from './types.ts';
+
+interface Props {
+  data: PdfPanelData;
+}
+const { data } = Astro.props;
+---
+<div id="fo-tool-root" data-props={JSON.stringify(data)}><PdfPanel {...data} /></div>
+<script>
+  import './mount.ts';
+</script>

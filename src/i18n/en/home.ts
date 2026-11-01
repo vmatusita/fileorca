@@ -8,6 +8,11 @@ export default {
   intro: 'No account, no upload and no server processing. Pick a tool and the work happens on your device.',
   toolsHeading: 'Choose a tool',
   hubLink: 'See all image tools and common sizes',
+  pdf: {
+    heading: 'Work on a PDF',
+    intro: 'Merge, split, compress, rotate, protect and sign PDFs, or turn their pages into images. The PDF is read and written on your device, and a password never leaves it.',
+    hubLink: 'See all PDF tools',
+  },
   money: {
     heading: 'Work out a loan',
     intro: 'Mortgages, refinancing, car and personal loans: the payment, the interest and the whole schedule. Your numbers stay on your device.',

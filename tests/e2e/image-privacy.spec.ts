@@ -52,7 +52,8 @@ test.describe('no isolation headers, no multi-thread build', () => {
     expect(named, 'no file named after a multi-thread build').toEqual([]);
 
     // Every .wasm is one of the single-thread builds the engine asks for, and no script uses shared memory.
-    const allowed = /^(avif_dec|avif_enc|libheif|mozjpeg_dec|mozjpeg_enc|squoosh_oxipng_bg|squoosh_resize_bg|webp_dec|webp_enc_simd)\.wasm$/;
+    // F5a: qpdf and the two decoders of PDF.js (JPEG 2000; JBIG2 and CCITT), single-thread builds as well (DECISOES § 155).
+    const allowed = /^(avif_dec|avif_enc|libheif|mozjpeg_dec|mozjpeg_enc|squoosh_oxipng_bg|squoosh_resize_bg|webp_dec|webp_enc_simd|qpdf|jbig2|openjpeg)\.wasm$/;
     const wasm = files.filter((entry) => entry.name.endsWith('.wasm')).map((entry) => entry.name);
     expect(wasm.length).toBeGreaterThan(0);
     expect(wasm.filter((name) => !allowed.test(withoutHash(name))), 'only the .wasm files of the codecs in use').toEqual([]);

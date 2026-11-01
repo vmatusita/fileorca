@@ -6,21 +6,21 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import init, { optimise, optimise_raw } from '@jsquash/oxipng/codec/pkg/squoosh_oxipng.js';
-import wasmUrl from '@jsquash/oxipng/codec/pkg/squoosh_oxipng_bg.wasm?url';
 import type { Raster } from '../pixels.ts';
 import { compiled, copyOut } from './runtime.ts';
+import { wasmUrl } from './wasm.ts';
 
 let ready: Promise<unknown> | undefined;
 
 function start(): Promise<unknown> {
-  ready ??= compiled(wasmUrl).then((module) => init(module));
+  ready ??= compiled(wasmUrl('oxipng')).then((module) => init(module));
   ready.catch(() => (ready = undefined));
   return ready;
 }
 
 /** Downloads and compiles the module; nothing runs. */
 export async function warmPng(): Promise<void> {
-  await compiled(wasmUrl);
+  await compiled(wasmUrl('oxipng'));
 }
 
 /** Recompresses PNG bytes without loss. Ancillary chunks in the input stay: strip first. */

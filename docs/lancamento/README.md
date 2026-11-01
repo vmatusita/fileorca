@@ -13,6 +13,7 @@ Data das leituras: **31/out/2026**. Contagens do produto: **8 ferramentas de ima
 | `alternativeto.md` | Campos do formulário, descrição curta e longa, tags, plataforma, licença, lista "alternativa a" com o que o FileOrca substitui e o que não | Português + inglês |
 | `diretorios.md` | 10 diretórios e listas conferidos, texto pronto de cada um, lista de pagos, lista de excluídos e dos que não abriram | Português + inglês |
 | `blogs-financas.md` | 20 blogs de finanças pessoais dos EUA (F4): contato, post recente, artigo em que a calculadora ajuda, ângulo, rascunho do e-mail, status, descartados e resultado do LanguageTool | Português + inglês |
+| `codigo-aberto.md` | Passo a passo para criar o repositório público do motor de imagem (F5a): o que vai e o que não vai, nome, descrição e tópicos sugeridos, primeiro push, como atualizar, o que responder a "é código aberto?" | Português + inglês |
 
 ## Leia primeiro: três avisos
 
@@ -44,6 +45,7 @@ Se alguma prova não passar, tire a frase correspondente de **todos** os textos 
 | --- | --- | --- |
 | Depois do merge da F3 (mesmo dia) | AlternativeTo e os diretórios (`alternativeto.md`, `diretorios.md`) | De 2 a 3 h no total |
 | No dia seguinte ao merge da F3, **antes de ligar os anúncios** | Show HN (`show-hn.md`) | 15 min para postar e as primeiras horas para responder |
+| Depois do merge da F5a | Repositório público do motor de imagem (`codigo-aberto.md`) | Cerca de 1 h |
 | Só depois da F5b | Product Hunt | Não é desta run; não há texto aqui |
 
 Por que o AlternativeTo vem primeiro: a fila de revisão é longa e sem prazo. Por que o Show HN vem antes dos anúncios: o texto promete que os anúncios ainda não estão ligados, e quem lê o HN vai olhar a página com atenção.
@@ -60,7 +62,7 @@ Estimativa das 2 a 3 h: o AlternativeTo leva cerca de 1 h (conta, e-mail verific
 - [ ] Conferir se os anúncios continuam desligados. Se ligou antes do post, ajuste a frase "Ads are not on yet" em todos os textos.
 - [ ] O aviso de cookies do site hoje fala em "ads to keep FileOrca free". O comentário do HN diz que os anúncios ainda não estão ligados. Não é contradição, mas alguém pode apontar. Decida se ajusta o aviso ou responde com franqueza.
 - [ ] Abrir <https://fileorca.com/image-tools/> numa janela anônima e conferir que o aviso de cookies não cobre a ferramenta e que dá para usar sem cadastro.
-- [ ] Decidir a resposta para "é código aberto?". Nenhum texto desta pasta afirma nada sobre isso. Alguém vai perguntar no HN.
+- [ ] Decidir a resposta para "é código aberto?". Nenhum texto desta pasta afirma nada sobre isso. Alguém vai perguntar no HN. Depois do merge da F5a, o motor de imagem pode ficar aberto (MIT) e o site não: veja `codigo-aberto.md`, seção "Perguntas que vão aparecer".
 - [ ] Reescrever o título e o primeiro comentário do HN com as suas palavras (aviso 2).
 
 ### Show HN (dia seguinte ao merge da F3)
@@ -177,3 +179,30 @@ Por que em ondas: a primeira resposta mostra se o texto funciona, e dá para aju
 
 - **Leituras:** cerca de 125 sites e newsletters tentados em duas passadas e 20 aprovados; a seção "Descartados" do arquivo lista o resto e o motivo. Para cada um dos 20, a run abriu com o WebFetch a página de contato, um post recente, o artigo relevante e o que o blog diz sobre guest post, patrocínio e link.
 - **LanguageTool:** os 20 rascunhos em inglês passaram pelo LanguageTool local (versão 6.6, `en-US`, servidor na porta 8095, o mesmo jar do `lint:texto`). Zero apontamentos de gramática. O resultado completo está no fim de `blogs-financas.md`.
+
+## Código aberto (depois do merge da F5a)
+
+A run F5a deixou o motor de imagem pronto para virar um repositório público sob a licença MIT. **Nada foi criado nem enviado**: nenhum repositório, nenhum push, nenhum `npm publish` (regra do CLAUDE.md, "Fora de toda run"). O passo a passo está em `codigo-aberto.md`.
+
+### Ordem
+
+Só **depois do merge da F5a** na `main`, porque o pacote exportado é o motor como ele está na `main` (com os endereços dos `.wasm` passados em tempo de execução, o mesmo código no site e no pacote).
+
+| Quando | O que | Quanto tempo |
+| --- | --- | --- |
+| Dia do merge da F5a | `pnpm motor:exportar --conferir` na `main` e ler o resultado: tem de dar zero | Cerca de 5 min |
+| No mesmo dia ou depois | Criar `vmatusita/fileorca-image-engine` no GitHub, dar o primeiro push da pasta exportada e conferir a página (`codigo-aberto.md`) | Cerca de 1 h |
+| Antes do Show HN | Decidir a resposta para "é código aberto?" (a checklist acima): o motor de imagem é, o site não | 5 min |
+| A cada mudança em `src/engine/image/` | Exportar de novo para o clone e dar o push (`codigo-aberto.md`, "Como atualizar depois") | Cerca de 15 min |
+
+Por que não antes do merge: a F5a muda o motor (o carregamento dos `.wasm`) e acrescenta o exportador. Um pacote exportado de uma branch mais antiga não teria nenhum dos dois.
+
+### Checklist para o Victor
+
+- [ ] A F5a está mesclada e o CI da `main` está verde.
+- [ ] `pnpm motor:exportar --conferir` terminou com `zero` (precisa de rede).
+- [ ] Li o README, o THIRD-PARTY-NOTICES e o `fixtures/SOURCES.md` do pacote exportado.
+- [ ] Repositório criado vazio (sem README, `.gitignore` nem licença do GitHub), público, com a descrição e os tópicos sugeridos.
+- [ ] Primeiro push feito por mim, com a tag `v0.1.0`. O GitHub mostra "MIT license".
+- [ ] Não publicar no npm agora: o pacote é código-fonte TypeScript sem build.
+- [ ] Atualizar a resposta de "é código aberto?" nos textos do Show HN, se for usá-la. O campo de licença do AlternativeTo continua **Proprietary** (é do site).
