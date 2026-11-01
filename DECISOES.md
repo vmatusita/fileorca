@@ -1293,23 +1293,52 @@ Os valores foram fixados antes de medir.
 - **Contexto:** o README do design proíbe "unlock" como verbo de marketing ("Unlock your photos"), e o `tests/unit/routes.test.ts` procura a palavra em todo texto do site. "Unlock PDF" é o nome da ferramenta, o termo de busca do `data/keywords.csv`.
 - **Decisão:** o teste tira só o nome exato ("Unlock PDF") e o id da rota ("unlock-pdf", que o guia do hub cita) antes da busca, e passa a ler também os textos de PDF. Qualquer outro "unlock" continua reprovando, e o teste prova isso com amostras dos dois lados.
 
-## § 154 · O CI em oito partes, os core dumps desligados e a amostra de disco a cada 2 s (F5a, 1/nov/2026)
+## § 154 · O CI em onze partes, os core dumps desligados e a amostra de disco a cada 2 s (F5a, 1/nov/2026)
 
-- **As partes:** `verificar` (`--sem-playwright`), `chromium 1 de 2` e `2 de 2`, e `webkit 1 de 5` a `5 de 5`, cada uma com o limite de 900 s e o alvo de 700 s. O resto do workflow ficou como estava (adendo da ADR-003).
-- **Core dumps:** o `core_pattern` do runner manda os dumps ao `systemd-coredump`, então o `ulimit -c 0` sozinho não basta. Cada parte do Playwright troca o padrão por `|/bin/false` (`sudo -n sysctl`) e roda o `verificar` com `ulimit -c 0`. É a hipótese da § 141: um dump grande de um processo do WebKit encheria o disco.
-- **Diagnóstico em toda parte do Playwright, com `if: always()`:** `df -h / /tmp`, o `core_pattern`, o `coredumpctl list`, o journal do `systemd-coredump` e as linhas do kernel sobre OOM, segfault e falta de espaço. Cada comando termina em `|| true`.
+- **As partes:**
+  - `verificar` (`--sem-playwright`);
+  - `chromium 1 de 3` a `3 de 3`;
+  - `webkit 1 de 7` a `7 de 7`.
+  - Cada uma tem o limite de 900 s e o alvo de 700 s. O resto do workflow ficou como estava (adendo da ADR-003).
+- **Por que onze:**
+  - O primeiro push da PR teve o Chromium em 2 partes e o WebKit em 5. A run verde 41331507992 (`1d551fa`) deu de 220 a 545 s por parte, e o `verificar` foi a 469 s.
+  - Depois, a matriz passou a rodar toda ferramenta contra toda fixture (§ 175), e o `pdf-tool.spec.ts` foi de 3 para 22 testes (§ 176 a § 182).
+  - Com a mesma divisão, a parte 5 do WebKit teria a matriz inteira, o `pdf-privacy` e o `pdf-tool`, acima de 700 s pela medida local e a razão do CI.
+  - Com 6 partes, o `design.spec.ts` ficaria dividido com a matriz de imagens na mesma parte, a combinação das quedas de disco da § 142.
+  - Com 7 partes, ele fica inteiro na parte 4, com os de cookies e o `engine-paths`, longe da matriz de imagens (parte 5), e a matriz de PDF se divide entre as partes 6 e 7.
+  - O Chromium em 3 partes põe o dinheiro e todos os `pdf-*` na parte 3.
+  - A ficha esperava o WebKit em 4 ou 5 partes. O alvo de 700 s e a § 142 vêm antes da expectativa.
+- **Core dumps:** o `core_pattern` do runner é `|/usr/lib/systemd/systemd-coredump %P %u %g %s %t 9223372036854775808 %h %d`: os dumps vão ao `systemd-coredump` com um limite de 2^63 bytes, ou seja, sem limite, e o `ulimit -c 0` sozinho não os para.
+  - Cada parte do Playwright troca o padrão por `|/bin/false` (`sudo -n sysctl`) e roda o `verificar` com `ulimit -c 0`.
+  - É a hipótese da § 141: um dump grande de um processo do WebKit encheria o disco.
+- **Diagnóstico em toda parte do Playwright, com `if: always()`:**
+  - `df -h / /tmp`, o `core_pattern` e o `coredumpctl list`;
+  - o journal do `systemd-coredump`;
+  - as linhas do kernel sobre OOM, segfault e falta de espaço.
+  - Cada comando termina em `|| true`.
+  - Na run 41331507992, todas as partes disseram "No coredumps found.".
 - **O `scripts/lib/disco.ts`:**
   - mede o `/` a cada 2 s pelo `statfsSync` e imprime uma linha só quando o espaço livre mudou 256 MB (`createRecorder`);
   - no fim, resume o ponto mais baixo e a maior queda;
   - a busca funda ganha o journal dos core dumps e os processos que mais gravaram (`write_bytes`).
   - A amostra de 20 s da § 141 não pegava o fundo das quedas.
-- **Testes:** dois testes novos no `tests/unit/disco.test.ts`, um com a série da execução 41277648653 e um com disco parado. O `tests/unit/verificar.test.ts` ganhou a cobertura das partes novas.
-- **Divisão:** o `--list` foi conferido no primeiro push e de novo com todos os specs da F5a. É a mudança de parte que a § 142 pede para registrar.
-  - No primeiro push, o `design.spec.ts` ficou entre as partes 3 e 4 do WebKit, 43 e 7 testes.
-  - Com a suíte inteira, ele tem 48 testes na parte 3 (com o fim do `budgets`, o `coffee` e os de cookies, a companhia da parte 2 de antes da F4) e 2 na parte 4, que também tem a matriz de imagens.
-  - A parte 5 fica com os specs de dinheiro do fim e todos os `pdf-*`.
-  - No Chromium, a parte 1 fica com o `a11y`, o `ads`, o `budgets` e os de consentimento, e a parte 2 com o resto.
-  - Com os core dumps desligados, a parte 4 é também o teste da hipótese da § 141.
+  - Na run 41331507992, o mínimo foi de 9.254 a 10.756 MB livres por parte, e a maior queda em 2 s foi de 47 MB.
+- **Testes:**
+  - dois testes novos no `tests/unit/disco.test.ts`, um com a série da execução 41277648653 e um com disco parado;
+  - o `tests/unit/verificar.test.ts` cobre as partes novas.
+- **Divisão:** o `--list` de cada parte foi conferido a cada push com spec novo. É a mudança de parte que a § 142 pede para registrar.
+  - No WebKit em 7 partes:
+    - parte 1: o `a11y` (84);
+    - parte 2: o resto do `a11y`, o `ads` e o começo do `budgets`;
+    - parte 3: o `budgets` e o `coffee`;
+    - parte 4: os de consentimento e cookies, o `design` inteiro (50), o `engine-paths` e parte do `events`;
+    - parte 5: a matriz de imagens, os outros specs de imagem e o começo do dinheiro;
+    - parte 6: o dinheiro, a navegação, o `pdf-hardening` e metade da matriz de PDF;
+    - parte 7: a outra metade, o `pdf-privacy`, o `pdf-speed`, o `pdf-tool` e o `tool`.
+  - No Chromium em 3 partes:
+    - parte 1: o `a11y`, o `ads` e o começo do `budgets`;
+    - parte 2: o resto até a imagem;
+    - parte 3: o dinheiro e os `pdf-*`.
 
 ## § 155 · Os `.wasm` do PDF entram na lista do `image-privacy.spec.ts` (F5a, 1/nov/2026)
 
@@ -1652,7 +1681,7 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **`tests/unit/licenses.test.ts`:** o rótulo do qcms saiu, porque o arquivo não é servido (§ 163).
 - **`tests/e2e/image-privacy.spec.ts`:** a lista de `.wasm` ganhou os três do PDF (§ 155).
 
-## § 172 · O worker de imagem responde uma vez só no WebKit (F5a, 1/nov/2026)
+## § 172 · O worker de imagem, avaliado duas vezes pelo WebKit, responde uma vez e conhece os `.wasm` (F5a, 1/nov/2026)
 
 - **Contexto:** o defeito da § 168 no worker de PDF tem a mesma forma no worker de imagem. Os chunks dos codecs (`avif`, `heic`, `jpeg`, `png`, `resize`, `webp` e o `runtime`) importam do chunk de entrada do worker o ajudante CommonJS do bundler (conferido no `dist/`).
   - Num WebKit com `OffscreenCanvas` no worker (o Safari de hoje e, talvez, o WebKit do Linux do CI), o primeiro codec carregado faria o worker existir duas vezes. Cada arquivo seria processado duas vezes, com o dobro da memória no iPhone.
@@ -1664,3 +1693,127 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **Teste:** o `tests/unit/worker-once.test.ts` avalia a entrada de cada worker duas vezes no mesmo escopo, como o WebKit faz, e conta as chamadas do `expose()` com o Comlink substituído.
   - Sem a correção, o worker de imagem dá 2 e reprova.
   - O nome não começa por `engine-`, para o exportador não levar o teste ao pacote, porque ele também importa o worker de PDF.
+- **O que o CI mostrou depois** (run 41330210631, commit `84bc004`): as cinco partes do WebKit ficaram vermelhas, só nos testes de imagem, com o resultado que não vinha e as contagens da fila erradas.
+  - O worker de imagem do WebKit do Linux processa, e a exportação do motor (§ 165) tinha trocado as URLs fixas dos codecs por URLs mandadas ao worker numa mensagem (`configure`).
+  - Os chunks dos codecs importam da entrada do worker o `wasmUrl()` e o `loading()`, e não só o ajudante do bundler. Eles rodavam contra a segunda cópia, que nunca recebeu o `configure`, e todo codec falhava como `load`.
+  - O mesmo valeria para todo Safari com `OffscreenCanvas` no worker.
+- **A segunda correção** (commit `1d551fa`):
+  - o `configure` do worker guarda as URLs também no `globalThis` (`Symbol.for('fileorca.image-engine.wasm-urls')`), e a segunda cópia, ao nascer, as toma;
+  - o `EngineError` reconhece o erro da classe da outra cópia (`Symbol.hasInstance`, pelo nome e pela razão), então uma falha guarda a sua razão;
+  - dois testes novos no `worker-once.test.ts` falham sem a correção: a segunda cópia conhece as URLs, e o erro da outra cópia é um `EngineError` com a razão;
+  - a run 41331507992 ficou verde nas oito partes.
+- **O worker de PDF** só exporta o ajudante do bundler ao chunk do qpdf, e os arquivos dele são configurados no topo do módulo, então as duas cópias se configuram sozinhas.
+
+## § 173 · A revisão adversarial da F5a (F5a, 1/nov/2026)
+
+- **Como:** o método da F3 e da F4 (§ 92 a § 94 e § 139), com seis lentes Sonnet em contexto limpo sobre o commit `7dab17c`, numa worktree só de leitura, e 31 céticos (um por achado crítico, alto ou médio, e um por lente para os baixos).
+- **Resultado:** 53 achados, nenhum crítico. Depois dos céticos, ficaram 3 altos, 16 médios, 27 baixos e 7 refutados.
+- **Correções:** os altos e todos os médios foram corrigidos, cada um com um teste que falha sem a correção.
+  - Foram dois agentes Opus: um só na ilha, no motor e no CSS, como pede a ficha; outro numa worktree própria, para a matriz, a `/licenses` e a busca.
+  - O A-8 e o F-1 eram o mesmo defeito.
+  - Os baixos ficam no relatório.
+- **Achados novos das correções:** a matriz completa achou o Forte devolvendo um arquivo reparado ainda estragado, e a mesma run achou a área de assinatura guardando o nome depois do "Start over" (§ 182).
+- **Detalhe:** `docs/relatorios/REVISAO-F5a.md`, com a segunda passada sobre o diff das correções.
+
+## § 174 · PDF cortado no meio de uma imagem é recusado (F5a, 1/nov/2026)
+
+- **Achado A-1 (alto):** um PDF cortado no meio de uma imagem era aceito e devolvido sem a imagem, com "Done". Isso aconteceu em 31 de 32 pontos de corte de um escaneado, e a foto 4 da `gen-fotos` sumia. O `openPdf` só conferia a MediaBox e os `/Contents` de cada página.
+- **Decisão:** um PDF sem `%%EOF` e sem índice que aponte para dentro dele é cortado (`truncated`).
+  - Uma página cujos recursos citam uma imagem ou fonte que o arquivo não tem é recusada: cortada, ou danificada (`corrupted`) quando o arquivo tem fim.
+  - A `gen-xref-estragada` segue reparada, e a `gen-cortado` segue cortada.
+  - Um arquivo cortado depois do último objeto, sem nada visível perdido, também passa a ser recusado como cortado.
+- **Testes:**
+  - no `tests/unit/pdf-engine-open.test.ts`, cortes de 10% a 95% do escaneado, da `gen-fotos` e da `gen-xref-estragada`, e um arquivo inteiro com uma referência de imagem ou fonte quebrada;
+  - no `pdf-tool.spec.ts`, a recusa na linha da Rotate (commit `693ccf1`).
+
+## § 175 · A matriz de PDF roda toda ferramenta contra toda fixture que ela aceita (F5a, 1/nov/2026)
+
+- **Achado A-6 (de médio a alto pelo cético):** a matriz rodava a Delete, a Sign e a Reorder com uma fixture cada, a Split com 4 e a Protect com 3. Isso fere o critério 3 e a decisão 12 da ficha ("cada ferramenta, cada fixture que ela aceita e os dois navegadores").
+- **Decisão:** o `pdf-matrix.spec.ts` passou de 18 para 51 testes por navegador.
+  - Cada ferramenta, e cada modo da Compress, roda todas as fixtures que aceita.
+  - As pequenas vão num lote só, com as recusadas no meio. Nas ferramentas de um arquivo por vez, elas vão uma depois da outra, com "Start over".
+  - Cada arquivo grande (300 páginas, 117 páginas, o escaneado de 150 páginas) tem um teste próprio em cada ferramenta.
+  - Uma página sem marcador é reconhecida por uma chave lida pelo PDF.js (tamanho, giro, imagens, primeiras palavras).
+  - Os quatro casos do Forte nos arquivos grandes têm 240 s de limite. Um Forte num arquivo só não se divide, e nenhuma conferência foi afrouxada.
+- **A tabela** (`docs/relatorios/fase-05a-matriz.md`) abre com a cobertura. O script e o `tests/unit/pdf-matrix-table.test.ts` reprovam combinação faltando ou saída `failed`. Contra a tabela antiga, o teste dá 64 lacunas.
+- **Asserções que mudaram com a matriz:**
+  - o Forte usa a regra dos bytes originais sem ganho, já usada no Recomendado, porque o escaneado da NASA tem dois avisos do qpdf no original;
+  - a Protect afirma a recusa do arquivo só de dono;
+  - a Sign confere as imagens de cada página mais uma;
+  - a Reorder confere as chaves das páginas invertidas;
+  - os arquivos grandes saíram do lote pequeno para testes próprios.
+- **Commit:** `6c59e04`. A matriz completa achou o defeito do Forte da § 182.
+
+## § 176 · O foco depois do botão de ação vai para o Baixar (F5a, 1/nov/2026)
+
+- **Achado D-1 (alto):** depois do botão de ação, o foco caía no `<body>` (Delete, Reorder, Split com uma opção mudada), e o DropZone vazio piscava enquanto a Oli trabalhava. O `update()` limpava o pedido de foco, e o estado "processando" sem a WaterLevel caía no ramo do DropZone.
+- **Decisão:**
+  - Apertar a ação pede o resultado: o foco vai para o Baixar quando ele chega.
+  - Enquanto a Oli trabalha, o cartão de pronto fica no lugar, nunca o DropZone vazio.
+  - Nas ferramentas que rodam ao soltar, a WaterLevel da leitura continua na execução que vem logo depois.
+- **Teste:** no `pdf-tool.spec.ts`, Delete, Reorder e Split pelo teclado, nos dois navegadores. Depois do Enter na ação, o Baixar fica com o foco, e o DropZone nunca aparece entre o Enter e o resultado (commit `276dc79`).
+
+## § 177 · Erros anunciados, senha com nome estável e foco que não volta (F5a, 1/nov/2026)
+
+- **D-2 (de alto a médio):** os erros de campo do painel de PDF são alerta (`role=alert`), como o do NumberField.
+  - Isso vale para a senha errada, a regra e a confirmação da senha, a falta de escolha, a faixa, o texto da marca d'água e a imagem da assinatura.
+  - A falha do envio da assinatura tem linha própria e `aria-invalid` no campo (commit `b8b983c`).
+- **D-3:** o botão de mostrar a senha mantém o texto "Show" e um nome que diz o campo ("Show password", "Show password confirmation"). O estado fica só no `aria-pressed`, com o visual pressionado da alça do Merge (commit `901d4c3`).
+- **D-4:** a grade de páginas não guarda foco pendente quando a seta não move nada, e descarta o pendente quando o foco já está num controle fora dela (commit `594c647`).
+- **D-5:** na lista do Merge, o foco fica na mesma seta apertada da linha movida. Ele vai para a outra seta só quando a apertada fica desativada na ponta (commit `31d5c53`).
+- **Testes:** um por achado no `pdf-tool.spec.ts`, nos dois navegadores, cada um falhando sem a correção.
+
+## § 178 · Correções de corretude das ferramentas de PDF (F5a, 1/nov/2026)
+
+- **A-2:** Merge, Split e Delete levam o `/OCProperties` dos grupos que as páginas copiadas usam, com o estado ligado ou desligado de cada arquivo e a ordem do painel podada. Uma camada oculta continua oculta. O teste conta os pixels com o PDF.js (commit `aef7779`).
+- **A-3:** assinar páginas de formatos diferentes encaixa a caixa em cada página. A imagem sobe ou recua da borda, e só diminui se for mais alta que a página (commit `20c4a66`).
+- **A-4:** na PDF to JPG, uma faixa com página que nenhum arquivo tem é erro do campo, conferido contra o maior arquivo (commit `2b17781`).
+  - Num lote, o arquivo sem nenhuma página da faixa é recusado na linha dele ("has no page in that range"), e os outros saem.
+  - O `no-pages` é razão só do painel e não vai ao GA4, como o `one-at-a-time`.
+- **A-5:** uma ferramenta de lote declara as opções que são de um arquivo (`perFile`). Um arquivo novo que substitui os anteriores volta essas opções ao início. O Rotate declara as voltas e o escopo (commit `31e28b5`).
+- **A-8 e F-1:** a fala de sucesso conta o que saiu (commit `b8c53fe`).
+  - Na PDF to JPG, várias imagens dão "Done! Oli turned the pages into {count} images.".
+  - Uma imagem só dá "Done! Oli turned your PDF into an image.".
+- **Testes:** um por achado, no Vitest ou no `pdf-tool.spec.ts`, cada um falhando sem a correção.
+
+## § 179 · O core-js do PDF.js na `/licenses` (F5a, 1/nov/2026)
+
+- **Achado B-1:** o core-js 3.50.0 (MIT) vai compilado dentro do build legacy do PDF.js, sem texto na `/licenses`, e o `gate:licencas` não o via.
+- **Decisão:**
+  - O texto do LICENSE do pacote npm do core-js 3.50.0 entra em `src/platform/license-texts/`, listado no `pdfjs-dist` com o campo `embeds: 'core-js'`.
+  - O `gate:licencas` lê os marcadores `// MODULE: ./node_modules/<pacote>/` de todo arquivo pronto do bundle. Ele reprova pacote compilado sem texto ou com texto de outra versão.
+- **Teste:** um controle negativo no `tests/unit/licenses.test.ts` (commit `4abff84`).
+
+## § 180 · A busca leva ao nome pedido, e as miniaturas da grade não se atropelam (F5a, 1/nov/2026)
+
+- **E-1:** a busca mandava "merge pdf" e "pdf to jpg", com Enter, para a Image to PDF.
+  - Ela passa a ordenar por proximidade, mantendo a ordem do índice dentro de cada degrau:
+    - primeiro, nome ou sinônimo igual à busca;
+    - depois, um que contém a busca inteira;
+    - por fim, palavra por palavra.
+  - A Image to PDF troca os sinônimos "merge" e "combine" por "merge images" e "combine images".
+  - No `routes.test.ts`, "merge pdf" passa a vir antes de "image to pdf" (commit `f6806dc`).
+- **E-3:** as miniaturas da grade são compartilhadas por contagem, e a prévia da Sign segura a sua.
+  - Elas são desenhadas duas por vez.
+  - A que saiu da tela antes da vez não é desenhada.
+  - A resposta que chega depois que a célula saiu é descartada.
+  - O teste varre a grade de 300 páginas e falhava com 248 imagens de URL já revogada (commit `bcf06ec`).
+
+## § 181 · As peças novas no padrão do design system (F5a, 1/nov/2026)
+
+- **F-2:** abaixo de 480 px, a linha da lista do Merge vira duas: o cartão na largura da lista, e a alça e as setas embaixo. Antes, um arquivo recusado virava uma coluna de 412 px (commit `bc3b9e3`).
+- **F-3:** todo erro de campo do painel de PDF sai do FieldError: ícone de alerta, frase e `role=alert` (commit `4fcba88`).
+- **F-4:** no envio da assinatura, o campo nativo fica fora da vista, mas com foco, nome e teclado. O rótulo dele tem o visual de botão (ícone de envio, "Choose a signature image"), e o nome do arquivo escolhido aparece ao lado (commit `de70141`).
+- **Testes:** no `pdf-tool.spec.ts`, nos dois navegadores.
+
+## § 182 · O Forte não devolve um arquivo estragado, e a assinatura recomeça com o "Start over" (F5a, 1/nov/2026)
+
+- **Compress:** sem ganho, a Compress devolvia os bytes que entraram.
+  - Num arquivo cujo índice o pdf-lib teve de refazer, esses bytes são os estragados. A matriz completa (§ 175) achou o Forte devolvendo a `gen-xref-estragada` estragada, contra a decisão 4 da ficha ("Nunca sai um PDF quebrado") e a § 156.
+  - Agora, num arquivo reparado, o que volta sem ganho é a reescrita reparada pelo passo sem perda, tirada antes de o Recomendado mexer no documento. Isso vale nos três modos e no caminho da página do Forte.
+  - O `tests/unit/pdf-compress.test.ts` afirma que um arquivo reparado nunca volta com os bytes de entrada, e falha no Forte sem a correção. Quando o Forte não ganha, a saída é a mesma do Sem perda (commit `88b85bb`).
+- **Sign:** a área de assinatura guardava o nome digitado, o desenho e a imagem escolhida depois de o "Start over" limpar a assinatura no estado da ferramenta.
+  - O nome aparecia sem assinatura, e digitar o mesmo nome de novo não desenhava nada. Isso foi achado quando a matriz assinou um arquivo depois do outro.
+  - Agora a área separa a limpeza que ela mesma faz da limpeza da ferramenta, e na segunda recomeça.
+  - Uma chave (`key`) pelo arquivo foi tentada antes e desfeita: o arquivo só aparece depois de lido, e a área montava de novo no meio da escolha do modo.
+  - O teste no `pdf-tool.spec.ts` falhava com o campo ainda em "Orca Signer" (commit `6caccef`).

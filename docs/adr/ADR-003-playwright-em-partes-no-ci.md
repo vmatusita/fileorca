@@ -62,15 +62,41 @@ Na F3, a parte 2 do WebKit chegou a 644,4 s, perto do alvo de 700 s (DECISOES §
 
 - **Leitura:** a divisão é por contagem de testes (90, 89 e 89), não por tempo. A parte 3 fica com a matriz de fixtures e segue a mais lenta, com 116 a 133 s de folga para o alvo.
 
-## Adendo (F5a, 01/nov/2026): Chromium em duas partes, WebKit em cinco, e o diagnóstico do ENOSPC
+## Adendo (F5a, 01/nov/2026): Chromium em três partes, WebKit em sete, e o diagnóstico do ENOSPC
 
 A F5a soma as 12 ferramentas de PDF, com matriz, privacidade e estados novos no `a11y`, no `ads` e no `budgets`. A ficha da run (decisão 14) pede mais partes no CI, cada uma com alvo de 700 s e limite de 900 s, mexendo só no `ci.yml`.
 
 - **O que mudou:**
-  - a matriz do job `playwright` passa a ter sete partes: `chromium 1 de 2` e `chromium 2 de 2` (`--playwright=chromium --shard=i/2`), e `webkit 1 de 5` a `webkit 5 de 5` (`--playwright=webkit --shard=i/5`). Com o job `verificar`, o CI tem oito partes, e o `merge` espera todas;
-  - cada parte do Playwright desliga os core dumps. O `core_pattern` do runner manda o dump ao `systemd-coredump`, que não respeita só o `ulimit -c 0`. Por isso o passo "Core dumps off" troca o padrão por `|/bin/false` (com `sudo -n`), e o passo do `verificar` roda com `ulimit -c 0`;
-  - um passo final com `if: always()` imprime `df -h / /tmp`, o `core_pattern`, o `coredumpctl list`, o journal do `systemd-coredump` e as linhas do kernel sobre OOM, segfault e falta de espaço. Cada comando termina em `|| true`, sem `continue-on-error`;
-  - o `scripts/lib/disco.ts` passa a medir o `/` a cada 2 s e imprime uma linha só quando o espaço livre mudou 256 MB. No fim, resume o ponto mais baixo e a maior queda, e a busca funda ganha o journal dos core dumps e os processos que mais gravaram (DECISOES § 154).
-- **O que não mudou:** o `scripts/verificar.ts`, nenhum teste, portão, limiar, timeout, `retries` ou número de workers, o nome do job `verificar`, o `merge` e o `pos-deploy.yml`.
-- **Divisão:** o `--shard` segue a contagem de testes na ordem dos arquivos. Na primeira divisão, o `design.spec.ts` ficou entre as partes 3 e 4 do WebKit, e a matriz de imagens na parte 4. Os specs de PDF (`pdf-*`) caem na última parte de cada navegador.
-- **Tempos:** a tabela com o total do `verificar` de cada parte entra no relatório da F5a (`docs/relatorios/fase-05a.md`), medida nas execuções do CI da PR.
+  - **A matriz do job `playwright`:** dez partes.
+    - `chromium 1 de 3` a `chromium 3 de 3` (`--playwright=chromium --shard=i/3`);
+    - `webkit 1 de 7` a `webkit 7 de 7` (`--playwright=webkit --shard=i/7`).
+    - Com o job `verificar`, o CI tem onze partes, e o `merge` espera todas.
+    - O primeiro push da PR teve o Chromium em 2 e o WebKit em 5. Depois, a matriz de PDF passou a cobrir toda ferramenta contra toda fixture, e a divisão subiu para manter cada parte abaixo de 700 s e o `design.spec.ts` longe da matriz de imagens (DECISOES § 154).
+  - **Os core dumps:** cada parte do Playwright os desliga.
+    - O `core_pattern` do runner manda o dump ao `systemd-coredump` com limite de 2^63 bytes, e o `ulimit -c 0` sozinho não o para.
+    - Por isso, o passo "Core dumps off" troca o padrão por `|/bin/false` (com `sudo -n`), e o passo do `verificar` roda com `ulimit -c 0`.
+  - **O passo final** tem `if: always()` e imprime:
+    - `df -h / /tmp` e o `core_pattern`;
+    - o `coredumpctl list` e o journal do `systemd-coredump`;
+    - as linhas do kernel sobre OOM, segfault e falta de espaço.
+    - Cada comando termina em `|| true`, sem `continue-on-error`.
+  - **O `scripts/lib/disco.ts`** passa a medir o `/` a cada 2 s.
+    - Ele imprime uma linha só quando o espaço livre mudou 256 MB.
+    - No fim, resume o ponto mais baixo e a maior queda.
+    - A busca funda ganha o journal dos core dumps e os processos que mais gravaram.
+- **O que não mudou:**
+  - o `scripts/verificar.ts`;
+  - nenhum teste, portão, limiar, timeout, `retries` ou número de workers;
+  - o nome do job `verificar`, o `merge` e o `pos-deploy.yml`.
+- **Divisão:** o `--shard` segue a contagem de testes na ordem dos arquivos.
+  - No WebKit em 7 partes, o `design.spec.ts` fica inteiro na parte 4, sem a matriz de imagens, que cai na parte 5.
+  - A matriz de PDF se divide entre as partes 6 e 7.
+- **Tempos** (o total do `verificar` de cada parte, do resumo no log):
+
+  | Execução | `verificar` | Chromium | WebKit |
+  | --- | ---: | --- | --- |
+  | Antes: F4, [run 41277648653](https://github.com/vmatusita/fileorca/actions/runs/41277648653) | 285,4 s | 529,4 s (1 parte) | 427,1, 273,4 e 664,2 s (3 partes) |
+  | F5a com 2 + 5 partes: [run 41331507992](https://github.com/vmatusita/fileorca/actions/runs/41331507992) (`1d551fa`) | 469,3 s | 413,4 e 420,4 s | 520,2, 222,9, 220,1, 545,0 e 400,4 s |
+  | F5a com 3 + 7 partes: PENDENTE | | | |
+
+- **Disco:** na run 41331507992, todas as partes disseram "No coredumps found.". O mínimo do `/` ficou entre 9.254 e 10.756 MB livres, com no máximo 47 MB de queda em 2 s.
