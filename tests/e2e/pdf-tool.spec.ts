@@ -70,6 +70,88 @@ const must = (text: string | undefined): string => {
 /** The focus is on the control, never on the body (DECISOES § 86). */
 const focused = (control: Locator) => expect(control).toBeFocused();
 
+// ---- The press of the action asks for the result (DECISOES § 176) ---------------------------------------------------
+// After a page was picked, moved or an option changed, Enter on the action used to leave the focus on the body, and the
+// empty DropZone (with its "Choose a PDF") stood in the slot while the file was worked on. Now the ready card stays on
+// screen while Oli works and the focus goes to Download when it comes.
+
+/** From now on, whether the DropZone is put in the panel at any moment (a new element or a class turned into it). */
+async function watchDropZone(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const root = document.querySelector('#fo-tool-root');
+    if (!root) throw new Error('no tool root');
+    const seen = { drop: root.querySelector('.fo-drop') !== null };
+    (window as unknown as { __drop: typeof seen }).__drop = seen;
+    const isDrop = (node: Node): boolean => node instanceof Element && (node.matches('.fo-drop') || node.querySelector('.fo-drop') !== null);
+    new MutationObserver((records) => {
+      for (const record of records) {
+        if (record.type === 'attributes' && isDrop(record.target)) seen.drop = true;
+        for (const node of Array.from(record.addedNodes)) if (isDrop(node)) seen.drop = true;
+      }
+      if (root.querySelector('.fo-drop')) seen.drop = true;
+    }).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+}
+
+const dropZoneShown = (page: Page): Promise<boolean> => page.evaluate(() => (window as unknown as { __drop: { drop: boolean } }).__drop.drop);
+
+const keyboardCases: { name: string; path: string; prepare: (page: Page) => Promise<string> }[] = [
+  {
+    name: 'Delete PDF pages, Space on a page',
+    path: '/delete-pdf-pages/',
+    prepare: async (page) => {
+      const first = page.locator('.fo-pages__grid > li').first().locator('.fo-page__main');
+      await first.focus();
+      await page.keyboard.press('Space');
+      await expect(first).toHaveAttribute('aria-pressed', 'true');
+      return 'Delete 1 page';
+    },
+  },
+  {
+    name: 'Reorder PDF pages, one move by the keyboard',
+    path: '/reorder-pdf-pages/',
+    prepare: async (page) => {
+      const cell = (position: number) => page.locator('.fo-pages__grid > li').nth(position).locator('.fo-page__main');
+      await cell(1).focus();
+      await page.keyboard.press('Space');
+      await page.keyboard.press('ArrowLeft');
+      await expect(cell(0)).toBeFocused();
+      await page.keyboard.press('Space');
+      await expect(page.locator('.fo-pages__grid > li').first()).toHaveAttribute('data-page', '1');
+      return must(reorderTexts.panel.action);
+    },
+  },
+  {
+    name: 'Split PDF, page ranges typed',
+    path: '/split-pdf/',
+    prepare: async (page) => {
+      await page.getByRole('radio', { name: 'Every page' }).focus();
+      await page.keyboard.press('ArrowRight');
+      await expect(page.getByRole('radio', { name: 'Page ranges' })).toBeChecked();
+      const field = page.getByLabel('Pages for each file');
+      await field.focus();
+      await page.keyboard.type('1-3, 5');
+      await page.keyboard.press('Enter');
+      return 'Split PDF';
+    },
+  },
+];
+
+for (const { name, path, prepare } of keyboardCases) {
+  test(`${name}: Enter on the action puts the focus on Download, and the DropZone never shows meanwhile`, async ({ page }) => {
+    await openTool(page, path);
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+    await expect(page.locator('.fo-pages__grid > li, .fo-ready')).not.toHaveCount(0, { timeout: 30_000 });
+    if (path !== '/split-pdf/') await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+    const action = page.getByRole('button', { name: await prepare(page) });
+    await action.focus();
+    await watchDropZone(page);
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeFocused({ timeout: 30_000 });
+    expect(await dropZoneShown(page), 'the DropZone showed between the press and the result').toBe(false);
+  });
+}
+
 test('Reorder PDF pages: the same new order by drag, by the buttons and by the keyboard', async ({ page }) => {
   const fixture = 'gen-paginas-mistas.pdf';
   const all = pdfOracle(fixture).markers ?? [];

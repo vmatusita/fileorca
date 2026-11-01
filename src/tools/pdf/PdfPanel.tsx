@@ -274,6 +274,9 @@ export default function PdfPanel(props: PdfPanelData) {
       }
       return;
     }
+    // The press of the action is the person asking for the result: the focus goes to Download when it comes, whatever
+    // was picked, moved or changed before (DECISOES § 176).
+    if (fromButton) m.focusDownload = true;
     const work = requests.filter((request) => !(request.items.every((item) => item.op === request.key && item.outputs)));
     if (work.length === 0 && (m.bundle || m.single)) {
       m.phase = 'done';
@@ -281,11 +284,14 @@ export default function PdfPanel(props: PdfPanelData) {
       return;
     }
     const id = ++m.runId;
+    // A WaterLevel already on screen (the reading, before an auto tool's run) stays for the run: no other state flashes
+    // between the two (DECISOES § 176).
+    const levelShown = Boolean(levelRef.current?.isConnected);
     m.phase = 'processing';
     m.finished = 0;
     m.total = work.length;
     m.zipping = false;
-    m.showLevel = false;
+    m.showLevel = levelShown;
     m.showErrors = false;
     m.notes = [];
     for (const request of work) for (const item of request.items) item.status = 'waiting';
@@ -839,7 +845,9 @@ export default function PdfPanel(props: PdfPanelData) {
         )}
       </section>
     );
-  } else if (m.phase === 'ready' || (m.phase === 'done' && !delivered)) {
+  } else if (m.phase === 'ready' || m.phase === 'processing' || (m.phase === 'done' && !delivered)) {
+    // While Oli works and before the WaterLevel shows (400 ms), the ready card stays: the action that was pressed keeps
+    // the focus, and the empty DropZone never flashes in the slot (DECISOES § 176).
     const ready = m.items.filter(usable);
     const only = ready[0];
     panel = (
