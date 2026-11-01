@@ -8,11 +8,13 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { TargetedKeyboardEvent, TargetedPointerEvent } from 'preact';
 import { fmt } from '../../i18n/format.ts';
+import Icon from '../../icons/Icon.tsx';
 import NumberField from '../image/NumberField.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
 import FieldError from './FieldError.tsx';
 import TextField from './TextField.tsx';
 import type { SignTexts } from './option-texts.ts';
+import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
 
 export interface SignatureImage {
   png: Uint8Array;
@@ -170,6 +172,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
   const [mode, setMode] = useState<Mode>('draw');
   const [typed, setTyped] = useState('');
   const [uploadError, setUploadError] = useState(false);
+  const [chosen, setChosen] = useState<string | null>(null);
   const strokes = useRef<Point[][]>([]);
   const pad = useRef<HTMLCanvasElement>(null);
   const drawing = useRef<number | null>(null);
@@ -303,25 +306,32 @@ export default function SignatureArea(props: SignatureAreaProps) {
       )}
       {mode === 'upload' && (
         <div class="fo-field" data-state={uploadError ? 'error' : undefined}>
-          <label class="fo-field__label" for={`${id}-upload`}>
-            {texts.uploadLabel}
-          </label>
-          <input
-            id={`${id}-upload`}
-            class="fo-sign__file"
-            type="file"
-            accept="image/png,image/jpeg"
-            aria-invalid={uploadError ? 'true' : undefined}
-            aria-describedby={uploadError ? `${id}-upload-error ${id}-upload-help` : `${id}-upload-help`}
-            onChange={async (event) => {
-              const file = event.currentTarget.files?.[0];
-              event.currentTarget.value = '';
-              if (!file) return;
-              const made = await asImage(await uploadedImage(file));
-              setUploadError(made === null);
-              onImage(made);
-            }}
-          />
+          {/* The native input is out of sight and keeps the focus, the name and the keyboard; its label wears the site's
+              button, with the upload icon and the site's words, and the chosen file's name shows beside it (DECISOES § 181). */}
+          <div class="fo-sign__upload">
+            <input
+              id={`${id}-upload`}
+              class="fo-sign__file"
+              type="file"
+              accept="image/png,image/jpeg"
+              aria-invalid={uploadError ? 'true' : undefined}
+              aria-describedby={uploadError ? `${id}-upload-error ${id}-upload-help` : `${id}-upload-help`}
+              onChange={async (event) => {
+                const file = event.currentTarget.files?.[0];
+                event.currentTarget.value = '';
+                if (!file) return;
+                setChosen(file.name);
+                const made = await asImage(await uploadedImage(file));
+                setUploadError(made === null);
+                onImage(made);
+              }}
+            />
+            <label class="fo-btn fo-sign__choose" for={`${id}-upload`}>
+              <Icon raw={uploadIcon} />
+              {texts.uploadLabel}
+            </label>
+            {chosen && <span class="fo-sign__chosen">{chosen}</span>}
+          </div>
           {/* The failure is an alert of its own, tied to the input (DECISOES § 177): said once, the help stays as it was. */}
           {uploadError && <FieldError id={`${id}-upload-error`}>{texts.uploadError}</FieldError>}
           <p class="fo-field__help" id={`${id}-upload-help`}>

@@ -232,6 +232,44 @@ test('Delete, Reorder, Split and Sign: their field errors have the alert icon, i
   await errorsHaveIcons(page, 'Sign, an upload that is not an image');
 });
 
+test('Sign PDF, Upload: the control that opens the picker is a button of the site, by pointer and by keyboard', async ({ page }) => {
+  await openTool(page, '/sign-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.getByRole('button', { name: 'Sign PDF' })).toBeVisible({ timeout: 30_000 });
+  await option(page, 'Upload');
+  const input = page.getByLabel('Choose a signature image');
+  const control = page.locator('label[for="fo-sign-upload"]');
+  // The look of the site's buttons: the stroke, the target size, the upload icon and the site's own words.
+  await expect(control).toHaveClass(/\bfo-btn\b/);
+  await expect(control).toHaveText('Choose a signature image');
+  await expect(control.locator('svg.fo-icon')).toHaveCount(1);
+  expect((await control.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
+  expect(await control.evaluate((element) => getComputedStyle(element).borderTopWidth)).not.toBe('0px');
+  // The native control is out of sight, still the one the keyboard and a screen reader reach.
+  expect((await input.boundingBox())?.height ?? 0).toBeLessThanOrEqual(1);
+  // Tab from the "Upload" choice reaches the input, the button shows the focus ring, and Space opens the picker.
+  await page.getByRole('radio', { name: 'Upload' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(input).toBeFocused();
+  expect(await control.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none');
+  const [byKeyboard] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5_000 }), page.keyboard.press('Space')]);
+  expect(byKeyboard.isMultiple()).toBe(false);
+  const [byPointer] = await Promise.all([page.waitForEvent('filechooser'), control.click()]);
+  expect(byPointer.isMultiple()).toBe(false);
+  // A file chosen: its name shows next to the button, and the signature goes on the page.
+  await input.setInputFiles({ name: 'my-signature.png', mimeType: 'image/png', buffer: Buffer.from(await page.evaluate(async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 120;
+    canvas.height = 40;
+    const context = canvas.getContext('2d');
+    if (context) context.fillRect(10, 18, 100, 4);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    return [...new Uint8Array(await (blob as Blob).arrayBuffer())];
+  })) });
+  await expect(page.locator('.fo-sign__chosen')).toHaveText('my-signature.png');
+  await expect(page.locator('.fo-sign__box')).toBeVisible();
+});
+
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
 // The same new order is made three ways on the same page load: by pointer drag, with the "earlier" and "later" buttons
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages

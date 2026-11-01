@@ -604,7 +604,12 @@
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
 .fo-sign { display: grid; gap: var(--space-4); }
 .fo-sign__pad { width: 100%; max-width: 600px; aspect-ratio: 3; border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); touch-action: none; cursor: crosshair; }
-.fo-sign__file { font: 500 15px/20px var(--fo-font-text); color: var(--ink); }
+/* The signature upload (DECISOES § 181): the input out of sight but focusable, its label in the look of a button. */
+.fo-sign__upload { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.fo-sign__file { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; opacity: 0; }
+.fo-sign__choose { cursor: pointer; }
+.fo-sign__file:focus-visible + .fo-sign__choose { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-sign__chosen { min-width: 0; font: 500 15px/20px var(--fo-font-text); color: var(--ink-muted); overflow-wrap: anywhere; }
 .fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
 .fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
 .fo-sign__page img { width: 100%; height: 100%; object-fit: fill; }
