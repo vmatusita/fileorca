@@ -4,6 +4,8 @@
 // half-second pause, unlike the image tools' field); a value outside the field's fixed range shows the
 // range in words (aria-invalid, aria-describedby, the alert icon) and the last result stays. Leaving the
 // field writes the number back in the page's format. The typed number never goes to the URL or an event.
+// The label and the body (the box, the help, the error) are the two rows the calculator grid shares between
+// two fields side by side, so their boxes line up whatever is above or under them (DECISOES § 137).
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import Icon from '../../icons/Icon.tsx';
@@ -67,43 +69,45 @@ export default function CalcField(props: CalcFieldProps) {
         <span>{label}</span>
         {tag && <span class="fo-tag">{tag}</span>}
       </label>
-      <div class="fo-input">
-        {prefix && <span class="fo-input__affix">{prefix}</span>}
-        <input
-          ref={input}
-          id={id}
-          type="text"
-          inputmode="decimal"
-          autocomplete="off"
-          spellcheck={false}
-          value={draft}
-          aria-invalid={message ? 'true' : undefined}
-          aria-describedby={described || undefined}
-          onInput={(event) => {
-            const text = event.currentTarget.value;
-            setDraft(text);
-            const parsed = read(text);
-            setWrong(parsed === null);
-            if (parsed !== null && parsed !== value) onValue(parsed);
-          }}
-          onBlur={(event) => {
-            const parsed = read(event.currentTarget.value);
-            if (parsed !== null) setDraft(display(kind, parsed, lang));
-          }}
-        />
-        {unit ?? (suffix && <span class="fo-input__affix">{suffix}</span>)}
+      <div class="fo-field__body">
+        <div class="fo-input">
+          {prefix && <span class="fo-input__affix">{prefix}</span>}
+          <input
+            ref={input}
+            id={id}
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            spellcheck={false}
+            value={draft}
+            aria-invalid={message ? 'true' : undefined}
+            aria-describedby={described || undefined}
+            onInput={(event) => {
+              const text = event.currentTarget.value;
+              setDraft(text);
+              const parsed = read(text);
+              setWrong(parsed === null);
+              if (parsed !== null && parsed !== value) onValue(parsed);
+            }}
+            onBlur={(event) => {
+              const parsed = read(event.currentTarget.value);
+              if (parsed !== null) setDraft(display(kind, parsed, lang));
+            }}
+          />
+          {unit ?? (suffix && <span class="fo-input__affix">{suffix}</span>)}
+        </div>
+        {help && (
+          <p class="fo-field__help" id={helpId}>
+            {help}
+          </p>
+        )}
+        {message && (
+          <p class="fo-field__error" id={errorId} role="alert">
+            <Icon raw={alertIcon} />
+            {message}
+          </p>
+        )}
       </div>
-      {help && (
-        <p class="fo-field__help" id={helpId}>
-          {help}
-        </p>
-      )}
-      {message && (
-        <p class="fo-field__error" id={errorId} role="alert">
-          <Icon raw={alertIcon} />
-          {message}
-        </p>
-      )}
     </div>
   );
 }

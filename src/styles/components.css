@@ -435,8 +435,15 @@
    ScenarioCompare and AmortTable (docs/design/components). The ResultHero is .fo-rhero because .fo-hero is
    the hero of the home. On a phone the result comes right after the main fields; from 768px they stand side by side. ---------- */
 .fo-calc { display: grid; gap: var(--space-5); }
+/* Every item of the calculator grid takes two rows, and a field lays its label and its body (box, help, error) on
+   them with subgrid: two fields side by side share the label row, so their boxes line up when one label wraps or
+   one field has help under it (DECISOES § 137). */
 .fo-calc__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); align-content: start; }
-.fo-calc__fields > * { grid-column: 1 / -1; }
+.fo-calc__fields > * { grid-column: 1 / -1; grid-row: span 2; }
+.fo-calc__fields > .fo-field { grid-template-rows: subgrid; row-gap: var(--space-2); }
+.fo-field__body { display: grid; gap: var(--space-2); min-width: 0; align-content: start; }
+/* The "example" tag centred in the label row: on its baseline it made the row 21px, one more than its neighbour's. */
+.fo-calc__fields .fo-field__label { align-items: center; }
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
 .fo-calc__moreheading { margin: var(--space-2) 0 0; }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }

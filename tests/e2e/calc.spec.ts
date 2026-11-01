@@ -229,6 +229,16 @@ test('a PDF maker that cannot load says to reload the page, and the calculator k
   await expect(heroNumber(page)).not.toHaveText(before ?? '');
 });
 
+test('two fields side by side keep their inputs on one line, also next to a field with help under it', async ({ page }) => {
+  for (const width of [360, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    await open(page, 'mortgage-calculator');
+    const top = (id: string) => page.locator(`#fo-calc-${id}`).evaluate((node) => Math.round(node.getBoundingClientRect().top));
+    // PMI has a line of help under its input; HOA, next to it, has none.
+    for (const [left, right] of [['p', 'd'], ['r', 't'], ['tx', 'in'], ['pmi', 'hoa']] as const) expect(await top(right), `${left} e ${right} a ${width}px`).toBe(await top(left));
+  }
+});
+
 test('the ExportBar is PDF in yellow, then CSV, then Copy link, and the chips lead to calculators', async ({ page }) => {
   await open(page, 'mortgage-calculator');
   const buttons = page.locator('.fo-export .fo-btn');
