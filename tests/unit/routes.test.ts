@@ -9,6 +9,9 @@ import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
+import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
 
 function pageFiles(dir = 'src/pages'): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -23,17 +26,19 @@ describe('mapa de rotas', () => {
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
       'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
+      PDF_HUB_ID, ...PDF_TOOL_IDS,
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
     // Only Compress image is translated; the other image tools, their presets and hub (DECISOES § 58) and every money
-    // page (F4: the hub, the 18 calculators and the 5 guides, DECISOES § 110) exist in English only.
+    // page (F4: the hub, the 18 calculators and the 5 guides, DECISOES § 110) exist in English only, and so do the PDF
+    // hub and the 12 PDF tools (F5a, in the files area like the image tools).
     const englishOnly = new Set([
       ...ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id),
       MONEY_HUB_ID,
       ...CALC_PAGE_IDS,
       ...GUIDE_IDS,
     ]);
-    expect(englishOnly.size).toBe(11 + 1 + 18 + 5);
+    expect(englishOnly.size).toBe(11 + 13 + 1 + 18 + 5);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
@@ -99,7 +104,7 @@ describe('mapa de rotas', () => {
     expect(TEXTS.es['not-found'].h1).toBe('Esta página se fue nadando.');
     for (const lang of LANGS) {
       // The texts of the image tools and presets live apart from TEXTS (src/tools/image/texts.ts): they get the same scan.
-      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)]);
+      const text = JSON.stringify([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null), ...(lang === 'en' ? [PDF_PANEL_TEXTS, PDF_TOOL_TEXTS, enPdfTools] : [])]);
       expect(text).not.toMatch(/→|↔|\bup to 50\b/);
       expect(text).not.toMatch(/\b(seamless|effortless|supercharge|AI-powered|revolutionary|best-in-class)\b/i);
     }
@@ -115,12 +120,18 @@ describe('mapa de rotas', () => {
     };
     const forbidden = /\b(seamless\w*|effortless\w*|unlock\w*|supercharge\w*|magic\w*|m[áa]gic\w*|ai-powered|revolutionary|best-in-class)\b/i;
     for (const sample of ['Unlock your photos', 'A magical way', 'Supercharged compression', 'Una forma mágica']) expect(sample).toMatch(forbidden);
+    // F5a: "Unlock PDF" is the name of a tool (the search term of data/keywords.csv), not the marketing verb the design
+    // README forbids: the exact name (and its route id, "unlock-pdf", which the hub's guide names) is taken out before the
+    // check, so "unlock" anywhere else still fails (DECISOES § 153).
+    const TOOL_NAME = /\bUnlock PDF\b|\bunlock-pdf\b/g;
+    for (const sample of ['Open it in Unlock PDF first.', 'Unlock PDF: remove a password']) expect(sample.replace(TOOL_NAME, '')).not.toMatch(forbidden);
+    for (const sample of ['Unlock your PDF', 'unlocked files', 'Unlock PDFs fast']) expect(sample.replace(TOOL_NAME, '')).toMatch(forbidden);
     let successLines = 0;
     for (const lang of LANGS) {
-      const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null)], lang);
+      const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null), ...(lang === 'en' ? [PDF_PANEL_TEXTS, PDF_TOOL_TEXTS, enPdfTools] : [])], lang);
       expect(all.length).toBeGreaterThan(100);
       for (const [path, text] of all) {
-        expect(text, path).not.toMatch(forbidden);
+        expect(text.replace(TOOL_NAME, ''), path).not.toMatch(forbidden);
         expect(text.replace(/[©®™]/g, ''), path).not.toMatch(/\p{Extended_Pictographic}/u);
         if (/[!¡]/.test(text)) {
           successLines += 1;

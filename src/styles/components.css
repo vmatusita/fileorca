@@ -600,3 +600,10 @@
 .fo-sign__box img { display: block; width: 100%; height: auto; }
 .fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
+/* A rail of three choices with a help line each does not fit 320 px: below 480 px it wraps, and with help lines it stacks. */
+.fo-pdf-island .fo-seg { flex-wrap: wrap; }
+.fo-pdf-island .fo-seg__opt { flex: 1 0 auto; }
+@media (max-width: 479px) {
+  .fo-pdf-island .fo-seg:has(small) { flex-direction: column; border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:has(small) .fo-seg__opt { border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+}

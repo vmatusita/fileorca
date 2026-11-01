@@ -11,6 +11,9 @@ import LicensesView from '../../src/views/LicensesView.astro';
 import SupportView from '../../src/views/SupportView.astro';
 import HomeView from '../../src/views/HomeView.astro';
 import NotFoundView from '../../src/views/NotFoundView.astro';
+import PdfToolPage from '../../src/tools/pdf/PdfToolPage.astro';
+import PdfToolsView from '../../src/views/PdfToolsView.astro';
+import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 // Whole pages in the three states of the build variables: the meta tag goes on every page once
 // the client exists; the loader and the units only on tool pages, and only with all three.
@@ -27,7 +30,8 @@ const STATES = {
 // fails the check below, and each one is the shared mold, so each has the same two AdSlots.
 type PageComponent = Parameters<AstroContainer['renderToString']>[0];
 const modules = import.meta.glob<{ default: PageComponent }>(
-  ['../../src/tools/*/*Page.astro', '../../src/tools/*/presets/*/*Page.astro', '!../../src/tools/image/*'],
+  // The PDF mold (src/tools/pdf/, F5a) is one component for the 12 PDF tools: it is checked apart, below.
+  ['../../src/tools/*/*Page.astro', '../../src/tools/*/presets/*/*Page.astro', '!../../src/tools/image/*', '!../../src/tools/pdf/*'],
   { eager: true },
 );
 
@@ -37,7 +41,12 @@ function idOf(file: string): ImagePageId {
 }
 
 const PAGE_OF = new Map(Object.entries(modules).map(([file, module]) => [idOf(file), module.default] as const));
-const TOOL_PAGES = [...PAGE_OF].flatMap(([id, Page]) => languagesOf(routeById(id)).map((lang) => ({ name: `${id} ${lang}`, Page, lang })));
+const TOOL_PAGES: { name: string; Page: PageComponent; props: Record<string, unknown> }[] = [
+  ...[...PAGE_OF].flatMap(([id, Page]) => languagesOf(routeById(id)).map((lang) => ({ name: `${id} ${lang}`, Page, props: { lang } }))),
+  // F5a: the 12 PDF tools (one mold, told the tool by its id) and the PDF hub carry the same two AdSlots.
+  ...PDF_TOOL_IDS.map((id) => ({ name: `${id} en`, Page: PdfToolPage as PageComponent, props: { id } })),
+  { name: 'pdf-tools en', Page: PdfToolsView as PageComponent, props: { lang: 'en' } },
+];
 
 const NO_ADS = [
   ['privacy', LegalView, { page: 'privacy' }],
@@ -59,14 +68,15 @@ afterEach(() => vi.unstubAllEnvs());
 describe('anúncio por página nos três estados', () => {
   it('has a page component for every tool and preset of the registry, and none besides', () => {
     expect([...PAGE_OF.keys()].sort()).toEqual(Object.keys(IMAGE_PAGES).sort());
-    expect(TOOL_PAGES.filter((page) => page.lang === 'en')).toHaveLength(Object.keys(IMAGE_PAGES).length);
+    expect(TOOL_PAGES.filter((page) => page.props['lang'] === 'en' && !page.name.startsWith('pdf-tools'))).toHaveLength(Object.keys(IMAGE_PAGES).length);
+    expect(TOOL_PAGES.filter((page) => page.props['id'] !== undefined)).toHaveLength(PDF_TOOL_IDS.length);
   });
 
   for (const [state, env] of Object.entries(STATES)) {
     it(`tool page vs every other page (${state})`, async () => {
       for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);
-      for (const { name: page, Page, lang } of TOOL_PAGES) {
-        const tool = await container.renderToString(Page, { props: { lang } });
+      for (const { name: page, Page, props } of TOOL_PAGES) {
+        const tool = await container.renderToString(Page, { props });
         expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`), page).toBe(state !== 'none');
         expect(tool.includes('adsbygoogle.js?client='), page).toBe(state === 'all');
         expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
