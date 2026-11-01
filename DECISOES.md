@@ -1817,3 +1817,23 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
   - Agora a área separa a limpeza que ela mesma faz da limpeza da ferramenta, e na segunda recomeça.
   - Uma chave (`key`) pelo arquivo foi tentada antes e desfeita: o arquivo só aparece depois de lido, e a área montava de novo no meio da escolha do modo.
   - O teste no `pdf-tool.spec.ts` falhava com o campo ainda em "Orca Signer" (commit `6caccef`).
+
+## § 183 · A segunda passada da revisão (F5a, 1/nov/2026)
+
+- **Como:** um revisor Sonnet em contexto limpo leu só o diff das correções (`7dab17c..6e35bdd`), na worktree da revisão movida para `6e35bdd`, com o próprio build. Ele achou 2 médios e 4 baixos, nenhum crítico ou alto, e nenhuma correção que deixasse de resolver o achado.
+- **S-1 (médio), corrigido:** a checagem de recursos da § 174 recusava como danificado um PDF completo que cita, nos recursos de uma página, uma fonte ou imagem que o arquivo não tem.
+  - Pelo formato PDF, essa referência vale `null`, e o PDF.js lê o arquivo.
+  - A checagem passa a valer só num arquivo sem o fim, onde ela é o rastro de um corte.
+  - Os 15 cortes dos testes da § 174 continuam recusados.
+  - O teste novo do `pdf-engine-open.test.ts` afirma os dois lados (completo, lido; sem o `%%EOF`, cortado) e falha sem a correção.
+- **S-2 (médio), corrigido:** a prévia da página na Sign era desenhada de novo a cada render do painel, porque o efeito dependia da vista do arquivo, que o painel refaz a cada render. Com o `drop` da § 180, cada movimento da caixa soltava a imagem e pedia outra ao worker.
+  - O efeito passa a depender do id do arquivo e da leitura dele.
+  - O teste observa a prévia durante dez movimentos e falhava com duas imagens.
+- **S-5 (baixo), corrigido:** a correção do A-8 (§ 178) tirou a contagem da fala da Merge, que tem uma saída só. A Merge volta a dizer quantos arquivos juntou ("joined your 3 PDFs into one").
+- **S-6 (baixo), corrigido:** trocar o modo da assinatura deixava o nome da imagem enviada sem a assinatura dela. A troca de modo também apaga o nome e o erro do envio.
+- **S-3 (baixo), registrado:** o fim do arquivo (`%%EOF`) é procurado nos últimos 64 KB. Um PDF completo seguido de mais de 64 KB de lixo é recusado como cortado.
+  - Procurar no arquivo inteiro acharia o `%%EOF` de uma revisão anterior num arquivo de atualização incremental cortado no meio da última, e um corte desses voltaria a passar.
+  - Fica a janela de 64 KB.
+- **S-4 (baixo), registrado:** a reescrita reparada que a Compress devolve sem ganho (§ 182) pode ficar maior que a entrada estragada (num PDF mínimo, 796 contra 767 bytes). A decisão 4 da ficha ("Nunca sai um PDF quebrado") vem antes do "nunca maior".
+  - Nas fixtures, a reparada é menor que a entrada em todos os modos.
+- **Testes:** os quatro corrigidos têm teste no Vitest ou no `pdf-tool.spec.ts`, e cada um falhou contra o código de antes.

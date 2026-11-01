@@ -260,3 +260,76 @@ Pegadinhas que a F4 achou:
 - No Git Bash, um `node -e "…"` com acento grave dentro de aspas duplas executa o trecho como comando (o texto some sem erro). Script com Markdown ou template literal vai para um arquivo, pela ferramenta de escrita.
 - Para provar que um teste falha sem a correção, nunca use `git checkout <commit> -- arquivo` com mudança não commitada no mesmo arquivo: o `checkout HEAD` de volta apaga a mudança. Rode o teste contra o `dist/` antigo (antes do build) ou injete a regra antiga no teste.
 - Os specs de dinheiro se chamam `money-*.spec.ts` para caírem depois do `design.spec.ts` na divisão do WebKit (§ 142). Com o nome `calc-*`, eles empurravam o `design.spec.ts` para a parte 3, junto com a matriz de imagens, e a parte caía por `ENOSPC`. Spec novo pesado: rode o `--list` das três partes antes do push e veja se o `design.spec.ts` continua na parte 2.
+
+## F5a: ferramentas de PDF
+
+Comandos novos:
+
+| Comando | O que faz |
+| --- | --- |
+| `pnpm fixtures` | Regera também as 13 fixtures `gen-*` de `fixtures/pdf/` e o oráculo `fixtures/pdf/expected.json` (`scripts/fixtures/pdf.ts`; `--no-pdf` pula). Deterministas: o qpdf com `--static-id --static-aes-iv` e o `crypto.getRandomValues` trocado por um contador durante a cifra |
+| `node scripts/fixtures/pdf-matrix-table.ts` | Monta `docs/relatorios/fase-05a-matriz.md` a partir de `test-results/matriz-pdf/*.json`: rode antes o `pdf-matrix.spec.ts` nos dois navegadores, numa execução só do Playwright |
+| `pnpm motor:exportar` | Grava o pacote `fileorca-image-engine` em `.cache/oss/fileorca-image-engine/` (`--conferir` copia para uma pasta temporária fora do repositório e roda `npm install`, `tsc --noEmit` e `vitest run`; usa a rede e fica fora do `verificar`) |
+
+Como acrescentar uma ferramenta de PDF:
+
+1. O id em `PDF_TOOL_IDS` e a entrada em `PDF_PAGES` (`src/tools/pdf/registry.ts`): ícone, `files` (`batch`, `merge` ou `single`), `run` (`auto` ou `action`), sufixo do nome, chips (`next`) e até 6 relacionadas. A rota sai de `pdfRoutes()` (`src/i18n/routes.ts`), só em inglês; o id entra em `RouteId` e em `PDF_EVENT_TOOLS` (`src/analytics/tool-ids.ts`).
+2. A operação no motor: o tipo em `PdfOperation` (`src/engine/pdf/types.ts`) e o caso em `processPdf` (`src/engine/pdf/process.ts`), com o Vitest no Node sobre as fixtures antes da ilha. Falha volta como `{ ok: false, reason }` da lista fechada `PDF_REASONS`; razão nova entra também em `ERROR_REASONS` (`src/analytics/events.ts`).
+3. A definição na ilha: uma entrada em `PDF_TOOLS` (`src/tools/pdf/tools.tsx`), com `operation`, `success`, `warm` e, se houver, `Options`, `grid` e `actionLabel`. Nada de entrada nova: as 12 cabem no `PdfIsland.astro`, e a página carrega 2 arquivos JS.
+4. Os textos em `src/tools/<slug>/i18n/en.ts` (`PdfToolTexts`, com os blocos do `gate:conteudo`), a entrada em `PDF_TOOL_TEXTS` (`src/tools/pdf/texts.ts`) e o cartão em `src/i18n/en/common.ts` (`pdf`). A página é `src/pages/<slug>/index.astro` com `<PdfToolPage id="<slug>" />`.
+5. Testes: a ferramenta na matriz (`tests/e2e/pdf-matrix.spec.ts`), com cada fixture que ela aceita, as recusas no meio do lote e a conta conferida no Node contra o `expected.json`. O `budgets`, o `ads`, o `a11y`, o `pdf-privacy`, o `gate:seo`, o `gate:conteudo` e o `gate:prontidao` leem o registro.
+
+Regras do PDF.js e do qpdf:
+
+- O motor é `src/engine/pdf/`, autossuficiente. O PDF.js, o qpdf, o MozJPEG e o resize só carregam sob demanda, e cada `import()` passa pelo `loading()` de `errors.ts` (falha de carga é `load`, nunca "arquivo danificado"). Nada carrega antes do primeiro arquivo; o aquecimento só busca o que o primeiro arquivo buscaria.
+- PDF.js (§ 144): o build legacy, com `useWorkerFetch: false`, `useSystemFonts: false`, `enableXfa: false`, `AnnotationMode.DISABLE` e sem camada de texto nem scripting. A versão 6 não tem `isEvalSupported`; o teste de endurecimento prova no JS publicado que não há `eval` nem `new Function` no caminho de fontes e funções. Os dados vêm de `/_astro/pdfjs/<versão>/`, copiados sem mudança pelo `src/platform/pdfjs-data.ts`: os CMaps, as fontes da Foxit e dois `.wasm`. Liberation (GPL), `.icc`, qcms e quickjs não entram.
+- No worker, o PDF.js roda com o "worker falso" (`globalThis.pdfjsWorker`) e `OffscreenCanvas`. Sem `OffscreenCanvas` no worker (WebKit do Windows), o desenho vai para a página com a porta do `pdfjs-core.ts`. Teste os dois caminhos.
+- qpdf: `runQpdf(args, input)` com `IN` e `OUT` no lugar dos arquivos. A saída (`print` e `printErr`) fica capturada e nunca vai ao `console`, porque pode levar a senha. O MEMFS é limpo depois de cada execução, e a instância é refeita acima de 512 MB ou depois de um `abort`. No Node, o qpdf mexe no `process.exitCode`: o `scripts/lib/qpdf.ts` devolve o valor de antes.
+- Cifra: `--show-encryption` diz se o arquivo pede senha ("invalid password") ou não está cifrado ("File is not encrypted"). A Protect é `--encrypt --user-password=P --owner-password=P --bits=256 --`; a Unlock é `--decrypt`, com `--password=P` quando pede. Nunca força bruta.
+- pdf-lib: abra com `updateMetadata: false`, `ignoreEncryption: true`, `parseSpeed: Fastest` e `throwOnInvalidObject: false`. Documento novo copia páginas pelo `assemble.ts` (§ 145), nunca pelo `copyPages` direto, que puxa páginas de fora por links e campos.
+- Geometria: tudo o que se desenha na página passa por `toUser(box, rotate, vx, vy)` (`src/engine/pdf/geometry.ts`), sobre a CropBox e o /Rotate. O texto fica em pé na tela em toda rotação.
+
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)" e "Ajuste: WebKit em três partes", que ficam como estão.
+
+- **As partes:** são onze, cada uma num job com o limite de 900 s e o alvo de 700 s.
+  - o `verificar` (`--sem-playwright`);
+  - o `playwright (chromium 1 de 3)` ao `3 de 3` (`--playwright=chromium --shard=i/3`);
+  - o `playwright (webkit 1 de 7)` ao `7 de 7` (`--playwright=webkit --shard=i/7`).
+- **O que cada parte do Playwright faz:** desliga os core dumps e termina com o passo "Disk and core dumps" (`if: always()`). O `disco.ts` amostra o `/` a cada 2 s (§ 154).
+- **Antes de somar specs:** rode o `--list` de cada parte (Chromium em 3, WebKit em 7) e veja onde caem o `design.spec.ts` e a matriz de imagens.
+  - Hoje o `design.spec.ts` fica inteiro na parte 4 do WebKit, e a matriz de imagens na parte 5.
+  - Com 6 partes, os dois cairiam juntos (§ 142).
+- **O `tests/unit/verificar.test.ts`** traz as partes da F5a escritas à mão. Mudou o `ci.yml`, mude o teste.
+
+Pegadinhas que a F5a achou:
+
+- O `pnpm tipos` (`astro check`) confere também os specs: um `getByRole('button', { name: texts.panel.action })` com texto opcional reprova no CI. Rode o `pnpm tipos` antes do push, não só o Vitest e o Playwright.
+- Um arquivo que pede senha ou é restrito tem de contar como sem saída no painel (`HOPELESS` do `PdfPanel.tsx`). Senão ele entra no pedido da Merge, e a Merge inteira falha com "pede senha" em toda linha.
+- O campo de arquivo das ferramentas de um arquivo por vez é `multiple` mesmo assim: o segundo arquivo vira a recusa na linha, e o `setInputFiles` com dois arquivos funciona no teste.
+- As opções em segmento escondem o rádio: no teste, clique no rótulo `.fo-seg__opt` (o `.check()` do rádio trava).
+- A lista de linhas mostra 6 e esconde o resto atrás de "Show N more": um teste que lê a razão de uma linha escondida clica antes em `.fo-queue__more`.
+- O `readWithPdfjs` dos testes precisa de `new Uint8Array(bytes)`, não de um `Buffer` do Node.
+- O `removePage` com `addPage` do pdf-lib estraga a árvore de páginas (`CorruptPageTreeError`): o Reorder refaz a lista `Kids` da raiz e copia os atributos herdados.
+- O PDF.js no Node desenha com o `@napi-rs/canvas`, que vem como dependência opcional do `pdfjs-dist`: não é dependência nova e não entra no bundle.
+- A AES-256 R6 do qpdf sorteia o IV e a chave mesmo com `--static-aes-iv`: a fixture só fica determinista com o `crypto.getRandomValues` trocado durante a cifra.
+- O `--allow-weak-crypto` do qpdf vem antes do `--encrypt` na linha de comando.
+- `setCropBox` e `setMediaBox` do pdf-lib recebem x, y, largura e altura, não dois cantos.
+- **O WebKit avalia duas vezes a entrada de um worker de módulo** quando um chunk carregado sob demanda importa dela, e o bundler põe ali os ajudantes compartilhados (§ 168 e § 172). Todo módulo do worker passa a existir duas vezes.
+  - O `expose()` roda só na primeira cópia.
+  - Estado que o worker recebe por mensagem (as URLs dos `.wasm` do motor de imagem) fica também no `globalThis`, para a segunda cópia o tomar.
+  - Classe de erro reconhecida por `instanceof` precisa do `Symbol.hasInstance`.
+  - O `tests/unit/worker-once.test.ts` avalia as entradas duas vezes no mesmo escopo. Worker novo entra nele.
+- **O WebKit do Windows não processa imagem no worker** (sem `OffscreenCanvas`), então um defeito do caminho do worker só aparece no WebKit do Linux do CI. Foi assim que a run 41330210631 achou as ferramentas de imagem paradas.
+  - Mudança no motor de imagem ou no worker pede o CI antes de dar como pronta.
+- **A matriz de PDF roda toda ferramenta contra toda fixture que ela aceita** (§ 175).
+  - Ferramenta ou fixture nova entra nela, e o `pdf-matrix-table.test.ts` reprova lacuna.
+  - Regere a tabela com uma execução só, nos dois navegadores, e o `node scripts/fixtures/pdf-matrix-table.ts > docs/relatorios/fase-05a-matriz.md`.
+- **Arquivo reparado** (índice refeito pelo pdf-lib) nunca volta estragado: sem ganho, a Compress devolve a reescrita reparada, não os bytes de entrada (§ 182).
+- **Estado próprio de um componente de opções** (a área de assinatura) precisa recomeçar quando o "Start over" limpa o estado da ferramenta.
+  - Uma `key` pelo arquivo não serve, porque o arquivo só aparece depois de lido.
+- **O `pnpm screenshots` reusa o passeio de estados de `tests/e2e/lib/pdf-states.ts`.** O `expect` do Playwright funciona fora do runner.
+  - As miniaturas da grade são desenhadas só na tela, então o script espera as imagens das células visíveis.
+- **Agentes em worktree (Workflow com `isolation: 'worktree'`) nasceram da `main`**, não da branch da run. Cada um teve de avançar a própria branch (`git merge --ff-only fase-05a`) antes de trabalhar.
+  - No briefing de um agente em worktree, peça isso como primeiro passo.
+- **Três agentes de workflow eram Sonnet** e assinaram os commits como "Claude Sonnet 5.5": foram 15 de 76 commits da run. O histórico ficou com o nome verdadeiro de cada modelo, e nada foi reescrito (`--amend` é proibido).
+  - Para código, passe `model: 'opus'` ao agente.
