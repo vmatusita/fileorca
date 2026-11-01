@@ -34,7 +34,7 @@ describe('testOf', () => {
 
 describe('buildTable', () => {
   it('has a section per tool in the order of the registry, the ways of running Compress together and by name, whatever order the rows came in', () => {
-    const tools = [...table.matchAll(/^## `([^`]+)`$/gm)].map((match) => match[1]);
+    const tools = [...table.matchAll(/^## `([^`]+)`$/gm)].map((match) => match[1] as string);
     expect(tools).toEqual(['merge-pdf', 'compress-pdf (lossless)', 'compress-pdf (strong)', 'rotate-pdf', 'sign-pdf']);
     const registry = (tool: string) => PDF_TOOL_IDS.indexOf(tool.replace(/ \(.*\)$/, '') as (typeof PDF_TOOL_IDS)[number]);
     expect(tools.map(registry)).toEqual([...tools.map(registry)].sort((a, b) => a - b));
