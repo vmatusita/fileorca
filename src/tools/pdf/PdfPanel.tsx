@@ -674,13 +674,15 @@ export default function PdfPanel(props: PdfPanelData) {
     let drawing = 0;
     const key = `f${subject.id}`;
     const boxes = subject.info.boxes;
-    const draw = (index: number): Promise<string | null> => {
+    const draw = async (index: number): Promise<string | null> => {
       const box = boxes[index];
       const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
-      return client()
-        .then((engine) => engine.thumbnail(key, subject.file, index, 240, shownWidth))
-        .then((blob) => (blob ? URL.createObjectURL(blob) : null))
-        .catch(() => null);
+      try {
+        const blob = await (await client()).thumbnail(key, subject.file, index, 240, shownWidth);
+        return blob ? URL.createObjectURL(blob) : null;
+      } catch {
+        return null;
+      }
     };
     const pump = (): void => {
       while (drawing < THUMBS_AT_ONCE && waiting.length > 0) {
