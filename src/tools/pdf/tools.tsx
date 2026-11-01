@@ -429,11 +429,15 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
   useEffect(() => {
     if (!thumbnails || !file?.info) return undefined;
     let alive = true;
-    void thumbnails.get(state.page).then((url) => {
+    const shown = state.page;
+    void thumbnails.get(shown).then((url) => {
       if (alive) setPageUrl(url);
     });
+    // The preview holds its page's picture like a grid cell does, so a cell of the same page leaving the screen no
+    // longer lets it go under the preview (DECISOES § 180).
     return () => {
       alive = false;
+      thumbnails.drop(shown);
     };
   }, [thumbnails, file, state.page]);
   const ink = props.ink;

@@ -98,6 +98,66 @@ test('PDF to JPG: the success line counts the images, for one PDF of many pages 
   }
 });
 
+// ---- The page grid's pictures after a fast sweep (DECISOES § 180) -------------------------------------------------------
+// A cell that left before its picture came used to get it anyway, after the cache had let it go: the <img> pointed at
+// a revoked blob URL (ERR_FILE_NOT_FOUND in the console, a broken picture), and the worker drew every page swept past.
+
+test('Reorder PDF pages: after a fast sweep through 300 pages, no picture points at a released URL and the cells on screen fill in', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  page.on('requestfailed', (request) => {
+    if (request.url().startsWith('blob:')) errors.push(`failed ${request.url()}`);
+  });
+  await openTool(page, '/reorder-pdf-pages/');
+  await choosePdfs(page, [pdfFile('gen-paginas-300.pdf')]);
+  const cells = page.locator('.fo-pages__grid > li');
+  await expect(cells).toHaveCount(300, { timeout: 60_000 });
+  await expect(cells.first().locator('.fo-page__sheet img')).toBeVisible({ timeout: 30_000 });
+  // About a second from the top to the bottom of the grid and back to its middle.
+  for (let i = 0; i < 30; i += 1) {
+    await page.evaluate(() => window.scrollBy(0, 1200));
+    await page.waitForTimeout(25);
+  }
+  await page.evaluate(() => {
+    const grid = document.querySelector('.fo-pages__grid')?.getBoundingClientRect();
+    if (grid) window.scrollTo(0, window.scrollY + grid.top + grid.height / 2);
+  });
+  // Every cell on screen gets its picture.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const shown = [...document.querySelectorAll('.fo-pages__grid > li')].filter((cell) => {
+            const box = cell.getBoundingClientRect();
+            return box.bottom > 0 && box.top < innerHeight;
+          });
+          return shown.length > 0 && shown.every((cell) => {
+            const img = cell.querySelector<HTMLImageElement>('.fo-page__sheet img');
+            return img !== null && img.complete && img.naturalWidth > 0;
+          });
+        }),
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+  await page.waitForTimeout(500);
+  // No <img> of the grid points at a URL that was let go, and none failed to load.
+  const dead = await page.evaluate(async () => {
+    const out: string[] = [];
+    for (const img of document.querySelectorAll<HTMLImageElement>('.fo-pages__grid img')) {
+      try {
+        await (await fetch(img.src)).arrayBuffer();
+      } catch {
+        out.push(img.src);
+      }
+    }
+    return out;
+  });
+  expect(dead, 'pictures whose blob URL was revoked').toEqual([]);
+  expect(errors, 'console errors and failed blob loads').toEqual([]);
+});
+
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
 // The same new order is made three ways on the same page load: by pointer drag, with the "earlier" and "later" buttons
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages

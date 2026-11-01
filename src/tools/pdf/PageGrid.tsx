@@ -46,16 +46,27 @@ function Thumb({ index, thumbnails, turn }: { index: number; thumbnails: Thumbna
   useEffect(() => {
     const element = holder.current;
     if (!element || !thumbnails) return undefined;
-    let alive = true;
+    // Each stay on screen asks once and lets go once. An answer that comes after its stay ended is dropped: the cache
+    // already let that URL go, and an <img> on it would be broken (DECISOES § 180).
+    let stay = 0;
+    let held = false;
+    const leave = () => {
+      stay += 1;
+      if (held) thumbnails.drop(index);
+      held = false;
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
+            if (held) continue;
+            held = true;
+            const mine = ++stay;
             void thumbnails.get(index).then((value) => {
-              if (alive) setUrl(value);
+              if (mine === stay) setUrl(value);
             });
           } else {
-            thumbnails.drop(index);
+            leave();
             setUrl(null);
           }
         }
@@ -64,9 +75,8 @@ function Thumb({ index, thumbnails, turn }: { index: number; thumbnails: Thumbna
     );
     observer.observe(element);
     return () => {
-      alive = false;
       observer.disconnect();
-      thumbnails.drop(index);
+      leave();
     };
   }, [index, thumbnails]);
   return (

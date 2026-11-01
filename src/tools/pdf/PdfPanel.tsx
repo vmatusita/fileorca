@@ -34,6 +34,8 @@ import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
 
 const SHOW_PROGRESS_AFTER_MS = 400;
+/** Page pictures of the grid drawn at the same time: the worker draws one at a time, so two keep it busy (§ 180). */
+const THUMBS_AT_ONCE = 2;
 const VISIBLE_ROWS = 6;
 const MINUS = '−';
 const UNAVAILABLE = 'EngineUnavailable';
@@ -658,27 +660,69 @@ export default function PdfPanel(props: PdfPanelData) {
   const wantsGrid = Boolean(subject && tool.grid?.(state));
   const thumbnails = useMemo<Thumbnails | null>(() => {
     if (!subject?.info || !wantsGrid) return null;
-    const cache = new Map<number, Promise<string | null>>();
+    // One picture per page, shared by whoever shows it (a grid cell, the Sign preview) and let go when the last one does.
+    // Pictures are drawn THUMBS_AT_ONCE at a time, in the order asked; one whose cells all left before its turn is never
+    // drawn, so a fast sweep does not leave the worker drawing every page it passed (DECISOES § 180).
+    interface Entry {
+      url: Promise<string | null>;
+      done: (value: string | null) => void;
+      users: number;
+      started: boolean;
+    }
+    const cache = new Map<number, Entry>();
+    const waiting: { index: number; entry: Entry }[] = [];
+    let drawing = 0;
     const key = `f${subject.id}`;
     const boxes = subject.info.boxes;
+    const draw = (index: number): Promise<string | null> => {
+      const box = boxes[index];
+      const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
+      return client()
+        .then((engine) => engine.thumbnail(key, subject.file, index, 240, shownWidth))
+        .then((blob) => (blob ? URL.createObjectURL(blob) : null))
+        .catch(() => null);
+    };
+    const pump = (): void => {
+      while (drawing < THUMBS_AT_ONCE && waiting.length > 0) {
+        const next = waiting.shift();
+        if (!next) break;
+        if (next.entry.users === 0) {
+          next.entry.done(null);
+          continue;
+        }
+        next.entry.started = true;
+        drawing += 1;
+        void draw(next.index).then((value) => {
+          drawing -= 1;
+          next.entry.done(value);
+          pump();
+        });
+      }
+    };
     return {
       get(index) {
-        let url = cache.get(index);
-        if (!url) {
-          const box = boxes[index];
-          const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
-          url = client()
-            .then((engine) => engine.thumbnail(key, subject.file, index, 240, shownWidth))
-            .then((blob) => (blob ? URL.createObjectURL(blob) : null))
-            .catch(() => null);
-          cache.set(index, url);
+        let entry = cache.get(index);
+        if (!entry) {
+          let done: (value: string | null) => void = () => {};
+          const url = new Promise<string | null>((resolve) => {
+            done = resolve;
+          });
+          entry = { url, done, users: 0, started: false };
+          cache.set(index, entry);
+          waiting.push({ index, entry });
         }
+        entry.users += 1;
+        const url = entry.url;
+        pump();
         return url;
       },
       drop(index) {
-        const url = cache.get(index);
+        const entry = cache.get(index);
+        if (!entry) return;
+        entry.users -= 1;
+        if (entry.users > 0) return;
         cache.delete(index);
-        void url?.then((value) => value && URL.revokeObjectURL(value));
+        void entry.url.then((value) => value && URL.revokeObjectURL(value));
       },
     };
   }, [subject?.id, subject?.info, wantsGrid]);
