@@ -1837,3 +1837,26 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **S-4 (baixo), registrado:** a reescrita reparada que a Compress devolve sem ganho (§ 182) pode ficar maior que a entrada estragada (num PDF mínimo, 796 contra 767 bytes). A decisão 4 da ficha ("Nunca sai um PDF quebrado") vem antes do "nunca maior".
   - Nas fixtures, a reparada é menor que a entrada em todos os modos.
 - **Testes:** os quatro corrigidos têm teste no Vitest ou no `pdf-tool.spec.ts`, e cada um falhou contra o código de antes.
+
+## § 184 · O registro, a view e a ferramenta embutida dos guias de arquivo (F5b, 1/nov/2026)
+
+- **Registro:** `src/tools/guides/registry.ts` (`FILE_GUIDE_IDS`, `FILE_GUIDES`), só dados e nunca importado pela ilha. Cada guia tem o caminho, a ferramenta embutida, o hub e até 6 relacionadas. O `GUIDE_IDS` das calculadoras não muda: ele alimenta o `gate:dinheiro-saude` (24 de 24).
+- **View:** `src/views/FileGuideView.astro`, nova. A `GuideView` do dinheiro fica como está, presa à calculadora e aos blocos `data-ymyl`.
+- **Ferramenta de imagem embutida:** cada página de ferramenta embutida (`src/tools/<slug>/<Slug>Page.astro`) ganha `embed`, que troca o molde `ImageToolPage` por `src/tools/image/ImageToolEmbed.astro` (só o `#fo-tool-root` com o `data-props` e o slot). O `<script>` do `mount.ts` continua no mesmo componente, então a página da ferramenta e o guia carregam a mesma entrada, com o mesmo nome e hash, e o chunk `island`: dois arquivos.
+  - Alternativa recusada: um `<script>` num componente do guia. O Rolldown tiraria o `mount.ts` para um chunk comum, e a página da ferramenta passaria a três arquivos.
+  - Alternativa recusada: um componente `<Slug>Island.astro` por ferramenta. Renomearia a entrada das páginas que já estão no ar e mexeria no `ImageToolPage`.
+- **Ferramenta de PDF embutida:** o `PdfIsland.astro` de sempre, a entrada das 12 páginas.
+
+## § 185 · A tolerância do `pnpm guias:medir --check` (F5b, 1/nov/2026)
+
+- **Decisão, fixada antes da primeira medida que vai para o arquivo:** as medidas do Node comparam exatas. As do navegador comparam bytes e razões com até 2% de diferença relativa e PSNR com até 0,5 dB; dimensões, contagens e presença de metadado comparam exatas.
+- **Por quê:** o canvas do Chromium e do WebKit codifica diferente de uma versão para outra, e o Playwright atualiza os dois. Na mesma máquina e na mesma versão o resultado repete byte a byte (os protótipos da exploração repetiram), então a tolerância só cobre a troca de versão.
+- **Onde:** `TOLERANCE` em `scripts/guides/measure.ts`, gravada também no JSON (`tolerance`).
+
+## § 186 · A ferramenta do guia 6 sai de uma regra fixada antes da medida (F5b, 1/nov/2026)
+
+- **Regra:** entre as ferramentas de imagem que aceitam JPG, cada uma com a opção que menos mexe na foto e que se escolhe num passo só (sem desenhar caixa), vence a que devolve um JPG do mesmo tamanho na tela com o maior PSNR no pior caso contra os pixels do original; empate, o menor arquivo. Os dois navegadores têm de concordar.
+  - **As opções:** Compress image (Recommended, a mais leve das duas), Resize image (By percentage, 100), Crop image (Square, o padrão; a imagem inteira pede quatro campos), Rotate image (Right, o padrão; não existe girar zero), PNG to JPG (o padrão: o JPG vira PNG) e Image to PDF (o padrão).
+  - **O PSNR:** o original e a cópia passam pelo mesmo decodificador (MozJPEG no Node, ou o leitor de PNG dos testes). Tamanho diferente (o recorte, o giro, o PDF) fica fora.
+- **Amostra:** as três fotos reais com GPS das fixtures, no Chromium e no WebKit.
+- **Consequência:** o guia embute a ferramenta vencedora com a opção vencedora, por propriedade da página. Para isso o `ImagePanelData` ganha `initial`, aplicado no estado inicial do `ImagePanel`; nunca pela URL.
