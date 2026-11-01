@@ -216,3 +216,40 @@ Pegadinhas que o ajuste achou:
 - O `scripts/lib/disco.ts` (só no Linux do CI) faz uma busca funda quando o `/` perde mais de 2 GB: as linhas `[disco] busca funda:` trazem os arquivos apagados e ainda abertos (do `/proc`, com os processos), os arquivos grandes gravados desde o início, as pastas de `/var`, os dumps e os maiores processos (DECISOES § 109). Se uma parte falhar com `ENOSPC`, leia essas linhas antes de mexer em teste.
 - Todo `find` do diagnóstico roda com `timeout` e `nice` dentro do próprio comando e diz se foi "completo" ou "interrompido". Um `find` com o timeout do `execSync` em volta morre sem imprimir e deixa o processo órfão: foi assim que o `find` antigo disse "(nenhum)" por 20 s em toda parte, desde a § 90.
 - A busca funda só roda no Linux, então o `tests/unit/disco.test.ts` prova a leitura do `/proc` no Vitest do CI. No Windows, o mesmo teste só confere que não há `/proc`. Teste que depende do sistema ramifica por dentro e nunca usa `skip` nem `runIf`.
+
+## F4: calculadoras
+
+Comandos novos:
+
+| Comando | O que faz |
+| --- | --- |
+| `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python scripts/oracle/calc.py` | Regera `fixtures/calc/` (`--check` compara sem gravar, `--only <id>` faz uma calculadora). Fora do `verificar`: o CI lê as fixtures commitadas, e o `calc-oracle.test.ts` confere o SHA-256 do script |
+| `CALC_FIXTURES_DIR=<cópia> pnpm exec vitest run tests/unit/calc-oracle.test.ts` | A prova do mutante: uma cópia das fixtures com um centavo mudado tem de reprovar |
+| `pnpm exec playwright test tests/e2e/calc-speed.spec.ts --project=chromium` | A medida dos 16 ms por tecla (p50 e p95 no log, linhas `[16 ms]`) |
+
+Convenção do dinheiro (DECISOES § 111 e § 127):
+
+- Dinheiro em centavos inteiros; taxa em 1/10.000 de ponto percentual (6.5% = 65000, 100% = `ONE` = 1.000.000). Divisão em BigInt, metade para cima; juros de cada período ao centavo; a última parcela zera o saldo.
+- O valor esperado vem do oráculo, nunca do motor: mudou a convenção, mude o `scripts/oracle/calc.py`, regere as fixtures e commite antes do motor (o `git log -- fixtures/calc src/calc` mostra a ordem).
+- `src/calc/` não importa nada de fora da pasta (regra do ESLint, testada em `quality.test.ts`).
+
+Como acrescentar uma calculadora:
+
+1. O caso no oráculo (`scripts/oracle/calc.py`: a função, a grade, os aleatórios com semente `2026-10-31/<id>`, o `page-example` e, se houver, o exemplo oficial em `OFFICIAL_CHECKS` e no `fixtures/calc/OFICIAIS.md`). Regere e commite as fixtures.
+2. O motor em `src/calc/` e o id em `ENGINES` (`src/calc/index.ts`).
+3. O id no `src/tools/calc/registry.ts` (`CALC_PAGES`: caminho, mãe, ícone, grupo, chips, relacionadas, guia e nome do arquivo) e em `CALC_EVENT_TOOLS` (`src/analytics/tool-ids.ts`); a rota sai sozinha de `moneyRoutes()`.
+4. A definição em `src/tools/calc/defs/` (campos com faixa fixa, `initial` igual ao `page-example`, `toInput`, `view`) e a entrada em `DEFS`.
+5. Os textos em `src/tools/<slug>/i18n/en.ts` (`CalcPageTexts`: o erro diz a faixa, os blocos que o `gate:conteudo` e o `gate:dinheiro-saude` pedem) e o cartão em `src/i18n/en/common.ts` (`calcs`); a página em `src/pages/<slug>/index.astro` com `<CalcTool id lang="en" />`.
+6. Testes: o `calc-defs.test.ts`, o `budgets.spec.ts`, o `ads.spec.ts`, o `calc-privacy.spec.ts` e o `a11y.spec.ts` já pegam a página pelo registro. Confira o resultado acima da dobra a 360 × 740 (o `ads.spec.ts` reprova).
+
+Pegadinhas que a F4 achou:
+
+- No celular, o número do ResultHero tem de ficar acima de 740 px (§ 124). Campos principais: no máximo duas linhas de dois campos de meia largura, sem ajuda fixa, com rótulo que cabe numa linha ao lado da etiqueta "example" (até uns 75 px a 15 px de fonte). O que não cabe desce para depois do resultado. As páginas de preset têm a trilha de navegação em três linhas e ficam a 13 px da dobra.
+- A ilha tem duas raízes com uma store (`#fo-tool-root` e `#fo-calc-schedule`). Mudança feita na store logo depois do `hydrate()` (o link do cenário) precisa do `useCalc` que repinta se a store mudou antes da assinatura (§ 128).
+- Mesmo `#` na mesma página não recarrega: no teste, vá a `about:blank` antes de abrir outro link do cenário.
+- Tabela com células sem quebra numa página estreita: moldura com `width: 0; min-width: 100%` (`.fo-table-wrap`, `.fo-amort-wrap`), senão a página inteira rola para o lado a 320 px (§ 129).
+- O `lint:texto` preenche os `{placeholders}` dos textos de dinheiro com valores reais (`MONEY_SAMPLES` e os números do guia, § 123). Um placeholder novo sem amostra vira "$1,234": confira se a frase ainda faz sentido.
+- O PDF usa as fontes padrão (só WinAnsi): o `winAnsi()` troca o sinal de menos, as aspas curvas e o resto. Texto novo do PDF com caractere fora do WinAnsi some.
+- O uv desta máquina foi instalado pelo `winget` e não está no PATH do PowerShell nem do Git Bash: chame pelo caminho completo (`…\WinGet\Packages\astral-sh.uv_…\uv.exe`). Não há `python` no PATH; o `uv run … python -I script.py` serve para script de apoio também.
+- No Git Bash, heredoc com apóstrofo (`cat <<'EOF'` com "mortgage pages'") quebra o comando: escreva o arquivo com a ferramenta de escrita. Script Python que grava texto no Windows troca LF por CRLF; o Git normaliza no commit.
+- Medida de tempo no WebKit anda de 1 em 1 ms: o teste dos 16 ms só afirma o limite no Chromium e imprime o WebKit.

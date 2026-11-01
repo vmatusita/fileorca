@@ -851,3 +851,212 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - Os candidatos são um arquivo apagado e ainda aberto, ou um arquivo numa pasta que o `du` não olhava, como `/var/log` ou os dumps. A busca funda mostra os dois na próxima vez.
 - **Por quê:** o cartão desta run pediu o diagnóstico e a medida. Um `find` que estoura o tempo e diz "(nenhum)" engana quem lê o log.
 - **Alternativa:** um passo no workflow que libera disco ou junta mais dados, mas isso mexe no `.github/` e é do Victor (§ 90). A outra seria rodar o diagnóstico fundo em toda parte, a custo de até uns 60 s de `find` em cada uma.
+
+## § 110 · O catálogo de dinheiro, os ids de rota e uma ilha para todas as calculadoras (F4, 31/out/2026)
+
+- **Contexto:** a ficha da F4 põe no ar, só em inglês, as 14 calculadoras e os 4 presets com `entra` no `data/keywords.csv`, o hub `/money-calculators/` e 5 guias. Ela deixa a divisão em chunks e o número de arquivos JS por página para a run fixar.
+- **Decisão:**
+  - **Registro único.** `src/tools/calc/registry.ts` é só dado serializável: `CALC_TOOL_IDS` (o hub mostra as de crédito primeiro), `CALC_PRESET_IDS`, `GUIDE_IDS`, `MONEY_HUB_ID` e, por página, o caminho, a mãe, o ícone, o grupo, os chips, as relacionadas, o guia e o nome fixo do arquivo exportado. Páginas, hub, home, rodapé, busca, portões e testes leem dele.
+  - **Ids.** O id da rota é o slug com `/` trocado por `-` (`mortgage-calculator-extra-payments`); o do guia é `guides-<slug>`; o do hub, `money-calculators`. Toda rota de dinheiro tem `adArea: 'dinheiro'` e só o caminho em inglês (`moneyRoutes()` em `src/i18n/routes.ts`).
+  - **Uma ilha.** `src/tools/calc/CalcIsland.astro` é o único `<script>` das calculadoras e dos guias: a entrada `mount.ts` hidrata duas raízes com uma store só, `#fo-tool-root` (campos, ResultHero, ExportBar, cenários e chips) e `#fo-calc-schedule` (o cronograma), para o primeiro AdSlot ficar entre os chips e o cronograma. A entrada leva a ilha, as 18 definições (`src/tools/calc/defs/`) e `src/calc/` inteiro, porque a conta é síncrona a cada tecla.
+  - **Dois arquivos JS.** Toda página de calculadora, preset e guia carrega exatamente a entrada e o chunk `island`. O `astro.config.ts` não mudou. O `budgets.spec.ts` ganhou a lista `CALC_PAGES` (as 18 e os 5 guias, lidos do registro) com `CALC_JS_FILES = 2`, e o hub de dinheiro entrou em `HUB_PAGES`. O `TOOL_PAGES` das imagens não mudou.
+  - **Sob demanda.** O PDF só no clique, pelo worker de PDF que já existia (§ 115).
+- **Por quê:** uma entrada só faz a segunda calculadora custar só o HTML (1 requisição nova) e mantém as páginas de imagem com os mesmos 2 arquivos.
+- **Alternativa:** uma entrada por calculadora, que pouparia uns 10 KB por página e custaria uma requisição a mais de calculadora para calculadora; ou o motor num worker, que tiraria a conta síncrona e o teste dos 16 ms.
+
+## § 111 · A aritmética do dinheiro: centavos inteiros, taxa em décimos de milésimo e BigInt (F4, 31/out/2026)
+
+- **Decisão:** `src/calc/money.ts`, sem dependência nenhuma (uma regra do ESLint recusa pacote em `src/calc`, com teste em `tests/unit/quality.test.ts`).
+  - Dinheiro em centavos inteiros (number). Taxa como inteiro em 1/10.000 de ponto percentual: 6.5% = 65000, e 100% = `ONE` = 1.000.000.
+  - Divisões em BigInt com arredondamento metade para cima (para longe do zero); juros de cada período = saldo × taxa ÷ períodos por ano, ao centavo.
+  - Parcela pela fórmula fechada calculada como uma fração exata, arredondada ao centavo. A última parcela zera o saldo, no último período ou antes, quando a parcela cobre saldo e juros. Máximos (affordability) arredondados para baixo.
+  - Taxa mensal de outra capitalização = piso de 10^30 × ((1 + r/n)^(n/12) − 1), por raiz inteira de Newton.
+  - Laço acima de 1.200 meses dá o erro `too-long`; saldo acima de 10^15 centavos dá `too-large`.
+- **Por quê:** é a convenção do oráculo (§ 126), que só bate no centavo sem ponto flutuante.
+
+## § 112 · O número que a pessoa digita (F4, 31/out/2026)
+
+- **Decisão:** `src/calc/parse.ts` lê "1,234.56" em inglês, "1.234,56" em português e espanhol (e o espaço fino como milhar) direto para inteiro escalado, sem `parseFloat`; formata à mão, sem `Intl`, para o HTML do servidor e o do navegador serem iguais. Campo de texto com `inputmode="decimal"`, nunca `type="number"`; ao sair do campo o número volta no formato da página. Testes em `tests/unit/calc-parse.test.ts`.
+
+## § 113 · Os eventos das calculadoras, em listas fechadas (F4, 31/out/2026)
+
+- **Decisão:** três eventos novos no `EVENT_PARAMS`: `calc_complete` (`tool`, `lang`), uma vez por carga, na primeira mudança válida feita pela pessoa (nunca na carga nem na leitura do link); `export_click` (`tool`, `lang`, `format`: `pdf` ou `csv`); `share_click` (`tool`, `lang`). O `next_step_click` aceita as calculadoras como alvo.
+  - `tool` e `target` vêm de `src/analytics/tool-ids.ts` (as páginas de imagem e as 18 de dinheiro, escritas por extenso no grupo `island`), e `format` de `EXPORT_FORMATS`. Valor fora da lista cai, seja qual for.
+  - O `consent.test.ts` passou a listar os nove eventos e prova que um número digitado nunca passa (asserção mudada e registrada aqui). O `events.spec.ts` prova os quatro eventos de ponta a ponta.
+- **Por quê:** o critério 4 da ficha: nenhum número digitado vai para evento.
+
+## § 114 · O link do cenário e a privacidade dos números (F4, 31/out/2026)
+
+- **Decisão:** o link é `#v=1&<chave>=<valor>…`, com as chaves curtas dos campos e os valores em unidades do motor. A lista de dívidas vai como `d0b`, `d0r`, `d0m`…
+  - A página lê o `#` uma vez, depois da hidratação. Cada valor passa pela faixa do campo e o inválido é ignorado; outra versão ignora o link inteiro; um par que o link quebre (entrada acima do preço) volta à base dos dois.
+  - A página nunca escreve na URL. O botão monta o texto e copia; vira "Link copied" por 2 s num `role="status"`; sem área de transferência, mostra o link num campo só de leitura.
+  - A marca da primeira comemoração da Oli é `sessionStorage['fo-calc-cheer'] = '1'`, nunca um número.
+  - O guia preenche a calculadora pelas props e não lê o `#`; o link que ele copia aponta para a página da calculadora.
+- **Prova:** `tests/e2e/calc-privacy.spec.ts`, nas 18 páginas e nos dois navegadores, digita sentinelas longas em todo campo, abre o cronograma, baixa PDF e CSV, copia o link, clica num chip e abre o link copiado. Depois procura cada sentinela, em toda forma que ela pode tomar e sem dígito colado, nas requisições (URL e corpo, de qualquer origem), no `dataLayer`, no título, no `location.search`, nos dois storages, nos cookies e nos nomes de arquivo.
+
+## § 115 · O PDF e o CSV (F4, 31/out/2026)
+
+- **Decisão:**
+  - **PDF.** `src/engine/pdf/report.ts`, no worker de PDF que já existia (método `report`), com o `@cantoo/pdf-lib` e as fontes padrão (só WinAnsi; `winAnsi()` troca o que a fonte não tem). Página Letter, com o nome da calculadora, o que a pessoa digitou, os resultados, as premissas, o cronograma inteiro, o aviso de ferramenta educativa, "Made with the free calculators at fileorca.com" e "Page n of N". O `src/tools/image/pdf-client.ts` ganhou `buildReport`, carregado só no clique.
+  - **CSV.** Sai da ilha: BOM UTF-8, vírgula, ponto decimal sem milhar, aspas pela RFC 4180, CRLF, cabeçalho e as mesmas linhas da tabela (a tabela por ano ganha o ano como primeira coluna).
+  - **Nomes fixos** do registro (`mortgage-schedule.pdf`), sem número.
+  - **Falha.** Uma falha ao carregar o PDF mostra "Oli couldn't load the PDF maker. Reload the page and try again." num `role="alert"`, e a calculadora segue funcionando.
+- **Prova:** `tests/e2e/calc.spec.ts` lê o CSV de volta contra o cronograma do oráculo, linha por linha, nas seis calculadoras de cronograma, e confere o PDF da hipoteca no `strictPdf` e pelo texto do content stream (`tests/e2e/lib/pdf-text.ts`). `tests/unit/calc-report.test.ts` confere o relatório no Node.
+
+## § 116 · As faixas fixas dos campos (F4, 31/out/2026)
+
+- **Decisão:** cada campo tem uma faixa fixa, e a fala do erro diz a faixa ("Enter a rate from 0 to 40%."). A tabela completa está em `docs/relatorios/fase-04-plano.md`, seção 5. As principais:
+  - preço do imóvel de $10,000 a $20,000,000; prazo de 1 a 40 anos (Loan amortization, 1 a 50);
+  - juros de empréstimo de 0 a 40%; APR de cartão e de dívida de 0 a 60%;
+  - imposto do imóvel de $0 a $1,000,000 por ano; seguro de $0 a $100,000; PMI e HOA de $0 a $10,000 por mês;
+  - de 1 a 10 dívidas; meses de 1 a 1.200 onde há laço.
+- **Valor inválido:** mantém o último resultado, com `aria-invalid`, a mensagem ligada por `aria-describedby` e a linha "Fix the highlighted field to update the result.". `tests/unit/calc-defs.test.ts` confere cada erro contra a faixa do campo.
+
+## § 117 · O molde da página de calculadora (F4, 31/out/2026)
+
+- **Decisão:** `src/tools/calc/CalcTool.astro`, um molde para as 14 e os 4 presets (sem o sufixo `Page`, fora do glob do `ads-pages.test.ts`):
+  1. breadcrumb, H1, a linha do que a página responde, "Reviewed by … on … First published …" (`data-ymyl="reviewed"`, com `<time datetime>`) e o selo "Your numbers stay on your device";
+  2. a ilha: campos principais, ResultHero com SplitChart, ExportBar (PDF amarelo, CSV e Copy link, nessa ordem), os campos de baixo, ScenarioCompare onde a conta compara e os chips. Lado a lado a partir de 768 px; no celular, o resultado logo depois dos campos principais (§ 124);
+  3. o primeiro AdSlot, a 150 px dos chips;
+  4. o cronograma recolhido por ano, montado só ao abrir, com o primeiro ano aberto;
+  5. como usar, como funciona (fórmula, premissas, exemplo resolvido pelo motor, fontes e aviso), presets, perguntas, privacidade, relacionadas e o AdSlot do trilho.
+- **Nomes:** o ResultHero é `.fo-rhero`, porque `.fo-hero` é o herói da home. O schema é `WebApplication` com `applicationCategory: 'FinanceApplication'` e sem nota, mais `BreadcrumbList` e `Person`.
+- **Voz:** o `aria-live` do ResultHero fala 500 ms depois da última tecla e é a única voz do resultado. O "Link copied" tem o `role="status"` dele; o erro do campo tem `role="alert"`.
+
+## § 118 · O hub, a home, o rodapé e a busca (F4, 31/out/2026)
+
+- **Decisão:**
+  - **Hub.** `/money-calculators/` (`src/views/MoneyCalculatorsView.astro`), no molde do `/image-tools/`: o `fo-hubband` com H1, a grade (crédito primeiro, depois as educativas), um AdSlot de conteúdo, a tabela dos presets, a lista dos guias e "How these calculators work" com os blocos `data-ymyl`. Schema `CollectionPage`, `BreadcrumbList` e `Person`.
+  - **Home** em inglês: uma seção de dinheiro abaixo da de imagem, com as cinco de crédito (Mortgage, Refinance, Auto loan, Personal loan e Home affordability) e o link do hub, sem anúncio.
+  - **Rodapé** em inglês: a coluna Money, com o hub e as mesmas cinco. Nenhuma página fica órfã: as outras saem do hub, dos chips e das relacionadas.
+  - **Busca:** as 18 e os 5 guias, na categoria "Money calculators".
+- **Testes mudados:** o `image-hub.test.ts` passou a procurar os cartões de imagem só na seção "Choose a tool", porque a home ganhou a seção de dinheiro, e ganhou a asserção da seção nova.
+
+## § 119 · Os guias (F4, 31/out/2026)
+
+- **Decisão:** `/guides/<slug>/` (`src/views/GuideView.astro`, texto em `src/i18n/en/guide-<slug>.ts`).
+  - O texto tem de 800 a 1.500 palavras, contadas por teste em `tests/unit/calc-guides.test.ts`.
+  - A calculadora embutida é a mesma ilha, preenchida com o exemplo do texto por propriedade da página.
+  - Todo número do texto sai do motor no build (`src/tools/calc/guides.ts`), e o exemplo principal está nas fixtures como `guide:<slug>`.
+  - Cada guia tem uma tabela medida pelo motor no build, com a data (o custo dos dois prazos em várias taxas, por exemplo), e os blocos `data-ymyl`.
+  - O AdSlot vem só depois da calculadora. Schema `Article` com autor `Person`, `datePublished` e `dateModified`.
+- **Canibalização:** o guia responde "por quê" e "quando" e leva à calculadora; o título e o H1 não repetem os da calculadora.
+
+## § 120 · O portão de dinheiro conta as páginas pelo mapa de rotas (F4, 31/out/2026)
+
+- **Decisão:** o `gate:dinheiro-saude` exige que o número de páginas conferidas seja igual ao de rotas com `adArea: 'dinheiro'` (`expectedYmylPages()` em `scripts/lib/ymyl.ts`). Zero reprova. Hoje são 24 de 24: o hub, as 18 e os 5 guias. O `routes.test.ts` garante a área `dinheiro` em toda rota que sai do registro das calculadoras, dos guias e do hub, lendo os ids, não a URL. Nenhum domínio oficial novo entrou na lista: as fontes são do CFPB e do Federal Reserve.
+
+## § 121 · O portão de conteúdo nas calculadoras (F4, 31/out/2026)
+
+- **Decisão:** o `gate:conteudo` passou a conferir as 18 páginas pelo registro: "como usar" com 3 passos ou mais (`data-content="how"`), 4 perguntas ou mais, a nota de privacidade com "Your numbers stay on your device" e as relacionadas. Cada preset tem três blocos próprios (`data-content="own"`), que a mãe e os irmãos não têm.
+
+## § 122 · Título e H1 das páginas de dinheiro sem diferença de caixa (F4, 31/out/2026)
+
+- **Decisão:** o título vem em Title Case ("Mortgage Calculator with Taxes, Insurance and PMI") e o H1 em sentence case ("Mortgage calculator"), como o design system pede. O `titleProblem` de `scripts/lib/seo-pages.ts` compara sem caixa nas páginas de dinheiro, e só nelas.
+
+## § 123 · O `lint:texto` lê os textos de dinheiro como a pessoa os lê (F4, 31/out/2026)
+
+- **Decisão:** nos arquivos de texto de dinheiro (`isMoneyText`), o `lint:texto` troca cada `{placeholder}` por um valor realista antes de mandar ao LanguageTool local. Os guias usam os números que o motor dá à página (`fillFor`); as calculadoras usam as amostras de `MONEY_SAMPLES`; um nome sem amostra vira uma quantia ("$1,234"). Os outros textos seguem com o preenchimento da F1a. Teste em `tests/unit/lint-texto-money.test.ts`.
+- **Por quê:** "{payment} a month" virava "payment a month" e dava erro de gramática falso.
+
+## § 124 · No celular, o resultado acima da dobra a 360 × 740 (F4, 1/nov/2026)
+
+- **Contexto:** o teste novo do `ads.spec.ts` mediu o número do ResultHero entre 760 e 1.988 px na primeira versão. O topo da calculadora reservava 96 px à direita (o lugar da Oli da DropZone, que a calculadora não tem), os campos de taxa de meia largura quebravam em três linhas com a ajuda e a etiqueta "example", e as listas de dívidas vinham antes do resultado.
+- **Decisão:**
+  - `.fo-top--calc` tira os 96 px nas calculadoras e nos guias.
+  - Os campos principais ficam em no máximo duas linhas de dois campos de meia largura. Neles não há ajuda fixa, e o rótulo cabe numa linha com a etiqueta: "Interest rate" virou "Rate"; "15-year rate" virou "15-yr rate"; "Balloon due with payment" virou "Balloon with payment"; "Other debt payments per month" virou "Monthly debts"; "Yearly income before taxes" virou "Gross yearly income"; "New loan rate" virou "New rate". O que a ajuda dizia foi para os passos do "como usar".
+  - O que não cabe desce para depois do resultado, com um título: a troca da Auto loan, os meses restantes da Refinance, o prazo da Home affordability e o do preset de pagamento extra, a taxa da Savings goal, e as listas de dívidas da Debt payoff e da Debt consolidation.
+  - O modo da Credit card payoff e da Savings goal virou um `<select>` de meia largura ("I want to know": "The time" ou "The payment").
+  - A entrada perdeu a linha com a outra unidade ("$75,000.00" sob "20 %"): o menu de unidade converte. O "$" do campo saiu, porque o menu já mostra "$" ou "%".
+  - Três leads foram encurtados para duas linhas.
+  - Uma duração no ResultHero ("3 years 1 month") mantém os números grandes e as palavras no tamanho da unidade, numa linha só.
+- **Medido** (Chromium e WebKit, número do resultado a 360 × 740): de 590 a 727 px nas 18; as três páginas de preset da hipoteca ficam em 727 px, porque a trilha de navegação delas tem três linhas.
+- **Por quê:** é a decisão 5 da ficha. O teste vale para as 18 nos dois navegadores.
+- **Alternativa:** tirar o "Reviewed by" do topo (o molde do plano o põe lá) ou diminuir o ResultHero abaixo do design system.
+
+## § 125 · A busca em inglês conta as páginas de dinheiro (F4, 1/nov/2026)
+
+- **Decisão:** sem nada digitado, a busca lista 34 páginas em inglês: as 8 ferramentas e 3 presets de imagem, as 18 de dinheiro e os 5 guias. O `a11y.spec.ts` ("search dialog open with every page listed") e o `navigation.spec.ts` ("the search box lists every page on a phone") passaram a somar `CALC_PAGE_IDS` e `GUIDE_IDS` à conta, lida dos registros. Asserção mudada por construção; o teste segue igual.
+
+## § 126 · O oráculo, a correção do meio centavo e os exemplos oficiais (F4, 31/out/2026)
+
+- **Decisão:** `scripts/oracle/calc.py`, com numpy-financial 1.1.0 e um laço em `decimal`, gravou `fixtures/calc/` (18 arquivos, 3.034 casos) no commit `d1c0243`, antes de qualquer arquivo de `src/calc/` (`4397124`). Ele roda com `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python scripts/oracle/calc.py`, e o `--check` compara sem gravar. O cabeçalho de cada arquivo traz o SHA-256 do script (fim de linha LF) e as versões.
+- **Correção** (`305c0da`, antes do motor): um empréstimo de 1 mês de $15,000 a 29.99% tem parcela exata de $15,374.875. O oráculo elevava a taxa mensal dízima a uma potência em `decimal` e perdia o meio centavo. A parcela e o valor presente passaram a ser uma divisão inteira. Só 4 casos da grade mudaram.
+- **Exemplos oficiais:** os que batem pela convenção entram como casos marcados (H-24 do CFPB, Regulation Z Apêndice J, Regulation DD Apêndice A, as páginas do CFPB sobre carro e a documentação do numpy-financial). Os que só batem com outra convenção ficam de fora, com o motivo, em `fixtures/calc/OFICIAIS.md`: os juros de $3,024 do carro em 72 meses, o total do `ipmt`, o `fv` sem arredondamento e o ano 1 do exemplo de juros compostos do CFPB.
+- **Mutante:** uma cópia das fixtures com um centavo mudado (`CALC_FIXTURES_DIR`) reprova o `calc-oracle.test.ts` (saída no relatório da F4).
+
+## § 127 · As convenções que cada calculadora fixa (F4, 31/out/2026)
+
+- **Decisão:** as convenções valem para o motor e para o oráculo, e cada página as declara nas premissas:
+  - **Mortgage:** imposto e seguro anuais ÷ 12, metade para cima. PMI e HOA são mensais e o PMI não termina sozinho. A entrada vai em $ ou em % do preço.
+  - **Personal loan:** a tarifa sai do valor recebido. A APR é atuarial (Apêndice J) sobre as parcelas reais, em centésimos de ponto, metade para cima.
+  - **Auto:** financiado = preço + impostos e taxas − entrada − troca, nunca abaixo de zero.
+  - **Refinance:** o empate é o primeiro mês em que custos de fechamento + juros pagos no novo ≤ juros que o atual teria cobrado até ali. O atalho custos ÷ economia mensal também aparece.
+  - **Home affordability:** tetos de 28% e 36% (campos) sobre a renda bruta mensal, para baixo. O empréstimo máximo é o valor presente da parcela que sobra, para baixo.
+  - **Compound interest:** taxa mensal efetiva da capitalização escolhida (§ 111), depósito no começo ou no fim do mês.
+  - **Credit card:** APR ÷ 12 sobre o saldo, sem compra nova. Um pagamento que não cobre os juros do primeiro mês dá o mínimo.
+  - **Debt payoff:** orçamento constante (soma dos mínimos + extra). Snowball pelo menor saldo inicial, avalanche pelo maior APR, empate pela ordem digitada. O mínimo de uma dívida quitada fica no orçamento.
+  - **Rent vs buy:** o caminho mais barato investe a diferença do mês, e o inquilino começa com a entrada investida. Valor, manutenção e aluguel mudam uma vez por ano. Não há imposto de renda, dedução ou ganho de capital.
+  - **Biweekly:** 26 meias parcelas por ano (meia = parcela ÷ 2, metade para cima), com juros de cada quinzena à taxa ÷ 26. Os meses são as meias parcelas × 12 ÷ 26, para cima.
+  - **Balloon:** a parcela vem do prazo de amortização; o balão é o saldo depois da parcela do mês do balão.
+  - **Savings goal:** depósito no fim do mês; o depósito é o menor valor em centavos que chega à meta no prazo.
+  - **Simple interest:** ano de 365 dias.
+  - **APR to APY:** (1 + r/n)^n − 1 e o inverso, em duas casas, metade para cima (Regulation DD § 1030.3(f)(1)).
+
+## § 128 · O link do cenário se perdia numa carga rápida (F4, 1/nov/2026)
+
+- **Contexto:** o `mount.ts` aplica o link logo depois do `hydrate()`, e o Preact assina a store num `useEffect`, que roda depois. Numa carga rápida, a mudança chegava antes da assinatura e a página ficava com o exemplo. O `calc.spec.ts` pegou o defeito, que o teste de privacidade não via.
+- **Decisão:** o `useCalc` (`src/tools/calc/store.ts`) guarda o estado do render e, ao assinar, repinta se a store mudou no meio.
+
+## § 129 · Tabela larga rola dentro da moldura, nunca a página (F4, 1/nov/2026)
+
+- **Contexto:** a 320 px, os cinco guias rolavam para o lado (de 536 a 713 px), porque as células sem quebra da tabela medida alargavam a coluna da página. O cronograma aberto fazia o mesmo (540 px).
+- **Decisão:** `.fo-table-wrap` e `.fo-amort-wrap` ganharam `width: 0; min-width: 100%`. A tabela rola dentro da moldura (que já era uma região com foco), e a página fica em 320 px. O teste de reflow do `design.spec.ts` pega os guias pelo mapa de rotas; o `calc.spec.ts` confere o cronograma aberto a 320 px.
+
+## § 130 · A linha do café fica fora das calculadoras nesta fase (F4, 31/out/2026)
+
+- **Decisão:** a ilha das calculadoras não mostra a linha do café, como a ficha manda. O link do rodapé continua em toda página.
+
+## § 131 · O que a ilha das calculadoras reaproveita das imagens (F4, 31/out/2026)
+
+- **Decisão:**
+  - As páginas de calculadora passam `PANEL_POSES` ao layout, porque o ResultHero usa a pose `cheer`. O sprite é o mesmo das ferramentas de imagem.
+  - O `OptionGroup` e o `Icon.tsx` vêm de `src/tools/image/` e `src/icons/`. Os ícones da ilha chegam como miolo de SVG pelas props, para o chunk `island` das imagens não mudar de conteúdo.
+  - O `pdf-client.ts` de `src/tools/image/` ganhou `buildReport`, carregado só no clique.
+
+## § 132 · O nome "15-year vs 30-year" (F4, 31/out/2026)
+
+- **Decisão:** o preset e o guia escrevem "15-year vs 30-year" (o `data/keywords.csv` tem "15 vs 30 year"). É a forma que o LanguageTool aceitou sem aviso, e deixa claro que os dois números são prazos em anos. Na meia largura do celular, os rótulos dos campos são "15-yr rate" e "30-yr rate" (§ 124).
+
+## § 133 · O uv instalado nesta máquina para o oráculo (F4, 31/out/2026)
+
+- **Contexto:** a máquina não tinha Python nem o uv no PATH.
+- **Decisão:** o uv foi instalado uma vez pelo `winget` (pacote `astral-sh.uv`) e é chamado pelo caminho completo. Ele baixa o Python 3.13 e o numpy-financial 1.1.0 num ambiente temporário. Nada disso entra no `package.json`, no lockfile nem no CI: o CI lê as fixtures commitadas, e o `calc-oracle.test.ts` confere o SHA-256 do script.
+
+## § 134 · Os 20 blogs de finanças (F4, 31/out/2026)
+
+- **Decisão:** `docs/lancamento/blogs-financas.md` traz 20 blogs de finanças pessoais dos EUA, com o motivo da escolha, a página de contato lida e um rascunho de e-mail em inglês para cada um. Nada foi enviado nem preenchido: o envio é do Victor (fora de toda run).
+
+## § 135 · Lighthouse, screenshots e a medida dos 16 ms (F4, 1/nov/2026)
+
+- **Decisão:**
+  - O `lighthouserc.json` ganhou `/mortgage-calculator/` e `/guides/15-vs-30-year-mortgage/`, com as mesmas asserções: desempenho ≥ 0.9 e CLS ≤ 0.05 na mediana. Na máquina local, os dois deram 99 de desempenho e CLS 0.000.
+  - O `pnpm screenshots` grava em `docs/relatorios/fase-04/componentes/` (a pasta da F3 fica como estava), com os componentes de calculadora e as páginas de dinheiro a 360 e 1280 px, nos dois temas.
+  - O `tests/e2e/calc-speed.spec.ts` mede 30 teclas dentro da página, do evento `input` ao `MutationObserver` ver o ResultHero mudar, na Rent vs buy, na Debt payoff com 10 dívidas e no preset de pagamento extra. No Chromium, a p95 tem de ficar em até 16 ms; o WebKit mede e imprime, porque o relógio dele anda de 1 em 1 ms e a ficha fala do Chromium.
+
+## § 136 · O JS das páginas, antes e depois da F4 (F4, 1/nov/2026)
+
+- **Medido** com o `budgets.spec.ts` no Chromium, JS próprio em gzip com o inline. "Antes" é a `main` em `92f2b5b`, num worktree à parte; "depois" é a branch `fase-04`:
+
+| Página | Antes | Depois |
+| --- | --- | --- |
+| `/compress-image/` | 20,3 KB, 2 arquivos, 6 requisições | 20,6 KB, 2 arquivos, 6 requisições |
+| `/crop-image/` | 22,5 KB | 22,9 KB |
+| `/resize-image/` | 20,5 KB | 20,9 KB |
+| as outras de imagem | 20,1 a 20,3 KB | 20,4 a 20,7 KB |
+| `/image-tools/` | 3,3 KB, 0 arquivos, 4 requisições | 3,3 KB, 0 arquivos, 4 requisições |
+| as 18 de dinheiro e os 5 guias | (não existiam) | 37,5 KB, 2 arquivos, 6 requisições |
+| `/money-calculators/` | (não existia) | 3,6 KB, 0 arquivos, 4 requisições |
+
+- **Por que as de imagem subiram 0,3 a 0,4 KB:** o chunk `island` é o mesmo para imagem e dinheiro. Ele ganhou a lista de ids das calculadoras em `tool-ids.ts` e os eventos novos (§ 113).
+- **Pares:** de imagem para calculadora, 2 requisições novas (o HTML e a entrada); de calculadora para calculadora, 1 (o HTML); do hub para uma calculadora, 3 (o HTML, a entrada e o `island`). Todas cabem no orçamento de 3.
