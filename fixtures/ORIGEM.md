@@ -152,3 +152,12 @@ As runs acrescentam aqui o que gerarem a partir dos arquivos acima (variantes de
 | images/gen-texto-extensao-png.png | sem fonte externa: texto UTF-8 escrito no script, com extensão .png | scripts/fixtures/generate.ts · sha256 dc5d3985b7f3b212a58e0f82c66e705bad42ff54633581f41751cd43160c3774 | F2 |
 | images/gen-vazio.jpg | sem fonte externa: arquivo de 0 bytes com extensão .jpg | scripts/fixtures/generate.ts · sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 | F2 |
 | images/gen-grande-4100x4100.jpg | sem fonte externa, desenhada no script: 4100×4100 = 16.810.000 px (32.784 acima do limite do canvas), degradê e blocos de cor, sem metadados | scripts/fixtures/generate.ts · sha256 9b58a5919e0c67b27b8d2fe46c22e7612af01685280d06a4ca9306f0f3e52ea4 | F2 |
+
+## Oráculo das calculadoras (F4)
+
+Os arquivos de `fixtures/calc/` não vêm de fora: saem do oráculo independente `scripts/oracle/calc.py` (numpy-financial 1.1.0 e um laço de centavos em `decimal` do Python 3.13, metade para cima), rodado pelo `uv` fora do projeto Node e commitado antes de qualquer arquivo de `src/calc/` (DECISOES da F4). O CI nunca roda Python: só lê os JSON.
+
+| Arquivo | O que é | Script | Run |
+| --- | --- | --- | --- |
+| calc/<id-da-rota>.json (18 arquivos) | Casos de grade, 60 a 100 aleatórios com semente fixa (`2026-10-31/<id>`) e exemplos resolvidos; entradas em centavos e taxa em 1/10.000 de ponto percentual; esperado do laço de centavos, conferido pelo numpy-financial; cabeçalho com o SHA-256 do script, as versões e a data | `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python scripts/oracle/calc.py` · sha256 do script 14cf4c1d0468a143d93e06a6607c26310c6d112ac6ebcd4325e3b1c20da545c9 | F4 |
+| calc/OFICIAIS.md | Os exemplos de fonte oficial reproduzidos no centavo (CFPB H-24, Regulation DD Apêndice A, Regulation Z Apêndice J, documentação do numpy-financial) e os deixados de fora, com URL, data da leitura e motivo | escrito à mão a partir das páginas lidas em 31/out/2026 | F4 |
