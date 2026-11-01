@@ -9,7 +9,7 @@ import { resizeRaster } from '../../src/engine/image/codecs/resize.ts';
 import { configureWasm } from '../../src/engine/image/codecs/wasm.ts';
 import type { WasmUrls } from '../../src/engine/image/codecs/wasm.ts';
 import { decodeWebp, encodeWebp } from '../../src/engine/image/codecs/webp.ts';
-import { EngineError } from '../../src/engine/image/errors.ts';
+import type { EngineError } from '../../src/engine/image/errors.ts';
 import { makeRaster } from '../../src/engine/image/pixels.ts';
 import type { Raster } from '../../src/engine/image/pixels.ts';
 import { fixture, names } from './lib/oracle.ts';
