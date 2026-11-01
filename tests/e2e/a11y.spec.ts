@@ -7,6 +7,7 @@ import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { describedViolations } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
+import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 
 // axe-core (WCAG 2.2 AA and best practices, tests/e2e/lib/axe.ts) on every page, at 360 and 1280px, in both
 // themes. It runs with reduced motion (DECISOES § 57): the site animates only transform and opacity, so the
@@ -221,4 +222,32 @@ test.describe('axe nos estados da calculadora, a 360 e 1280px, nos temas escuro 
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'schedule open and Link copied').toEqual([]);
   });
+});
+
+// F5a (prompt decision 12; DECISOES § F5a-estados-pdf): the states of the PDF pages the page-by-page pass does not reach
+// (it reads each page as loaded, with the cookie notice open and before anything is chosen). Each PDF page is reached once
+// per browser (§ 76) and walked through its states by tests/e2e/lib/pdf-states.ts: at rest with the island hydrated, the
+// Merge list, the page grid with a selection (a page turned, moved or picked), the password field with its error (Protect:
+// the two passwords do not match; Unlock: the password is wrong), the signature area in its three ways to sign (draw, upload,
+// type, with the box on the preview of the page) and the result. axe runs at both widths and in both themes on each of them.
+const PDF_AXE_STATES: ReadonlySet<PdfState> = new Set<PdfState>(['rest', 'list', 'grid', 'password', 'signature', 'result']);
+
+test.describe('axe nos estados das ferramentas de PDF, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const { id, path } of PDF_WALKS) {
+    test(`${path}: at rest, with its options and with the result`, async ({ page }) => {
+      const found: string[] = [];
+      await walkPdfTool(
+        page,
+        id,
+        async (state, note) => {
+          if (!PDF_AXE_STATES.has(state)) return;
+          for (const violation of await violationsEverywhere(page)) found.push(`${state} (${note}): ${violation}`);
+        },
+        { hold: false },
+      );
+      expect(found).toEqual([]);
+    });
+  }
 });
