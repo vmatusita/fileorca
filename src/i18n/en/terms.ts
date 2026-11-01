@@ -19,7 +19,7 @@ export default {
     {
       heading: 'What FileOrca is',
       paragraphs: [
-        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools (compress, resize, crop, rotate, convert and turn images into a PDF) and money calculators for loans, mortgages, debt and savings. They are in English, and the image compressor is also in Portuguese and Spanish.',
+        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools (compress, resize, crop, rotate, convert and turn images into a PDF), PDF tools (merge, split, compress, rotate, number, sign, protect and more) and money calculators for loans, mortgages, debt and savings. They are in English, and the image compressor is also in Portuguese and Spanish.',
         'You do not need an account. Your files are processed on your device, not on a server, and they are never uploaded.',
       ],
     },
@@ -33,6 +33,15 @@ export default {
         'Make sure you have the right to process each file.',
         'Keep your originals. Check the result before you delete or replace anything.',
         'FileOrca cannot recover a file that is lost, deleted or damaged, because it never receives your files.',
+      ],
+    },
+    {
+      heading: 'PDF tools: passwords and signatures',
+      paragraphs: ['Three PDF tools come with their own terms. They add to everything else on this page.'],
+      list: [
+        'Protect PDF locks a PDF with the password you choose. The password is yours: FileOrca never receives it and cannot recover it, so a lost password means a PDF that nobody can open. Keep a copy of the original, without the password.',
+        'Unlock PDF is for files you have the right to open and to change. It never guesses or breaks a password: when a PDF needs a password to open, the tool asks you for it.',
+        'Sign PDF puts an image of your signature, drawn, uploaded or typed, on the pages you choose. It is a picture on the page, not a digital signature with a certificate, and it may not count as a qualified or legally recognized signature where you live. FileOrca gives no legal advice. If a document needs a certified signature, use a service that offers one.',
       ],
     },
     {

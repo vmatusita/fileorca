@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir, y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. Las herramientas y las calculadoras están en inglés, y Comprimir imagen también está en español y portugués.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir, herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. Las herramientas y las calculadoras están en inglés, y Comprimir imagen también está en español y portugués.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },
@@ -33,6 +33,15 @@ export default {
         'Asegúrate de tener derecho a procesar cada archivo.',
         'Guarda tus originales. Revisa el resultado antes de borrar o reemplazar algo.',
         'FileOrca no puede recuperar un archivo perdido, borrado o dañado, porque nunca recibe tus archivos.',
+      ],
+    },
+    {
+      heading: 'Herramientas de PDF: contraseñas y firmas',
+      paragraphs: ['Tres herramientas de PDF tienen reglas propias, que valen además de todo lo demás de esta página.'],
+      list: [
+        'Protect PDF cierra un PDF con la contraseña que tú eliges. La contraseña es tuya: FileOrca nunca la recibe y no puede recuperarla, así que una contraseña perdida deja el PDF cerrado para todos. Guarda una copia del original sin contraseña.',
+        'Unlock PDF sirve para archivos que tienes derecho a abrir y a modificar. Nunca adivina ni rompe una contraseña: cuando un PDF pide contraseña para abrirse, la herramienta te la pide a ti.',
+        'Sign PDF pone en las páginas que elijas una imagen de tu firma, dibujada, subida o escrita. Es una imagen en la página, no una firma digital con certificado, y puede no valer como firma cualificada ni tener validez jurídica donde vives. FileOrca no da asesoramiento legal. Si un documento exige una firma con certificado, usa un servicio que la ofrezca.',
       ],
     },
     {
