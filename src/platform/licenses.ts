@@ -71,15 +71,17 @@ const CODEC_LICENSE_FILES: Record<string, readonly { label: string; file: string
   '@jsquash/resize': [{ label: 'resize (Rust crate)', file: 'lib/resize/LICENSE.codec.md' }],
   // libheif's own license file: LGPL-3.0, the GPL-3.0 text it refers to, and the MIT license of its sample apps.
   'libheif-js': [{ label: 'libheif and libde265', file: 'libheif-wasm/LICENSE' }],
-  // What the site copies from pdfjs-dist besides its JavaScript (F5a, DECISOES § 144): the three .wasm decoders with
-  // the license of the library compiled in and of PDF.js's own glue, the CMaps and the Foxit standard fonts. The
-  // Liberation fonts (GPL-2.0 with a font exception) and the CC0 .icc are not copied, so their texts are not here.
+  // What the site ships from pdfjs-dist besides its JavaScript (F5a, DECISOES § 144): the two .wasm decoders with the
+  // license of the library compiled in, PDF.js's own glue of the three decoders (it is JavaScript inside the worker, so it
+  // ships even for qcms), the CMaps and the Foxit standard fonts. /licenses lists only what ships (gate:licencas,
+  // checkWasmTexts): qcms_bg.wasm, with the qcms library compiled into it (LICENSE_QCMS), is not copied because PDF.js loads
+  // it only with useWorkerFetch, which the site turns off, so that text is not here. The Liberation fonts (GPL-2.0 with a
+  // font exception) and the CC0 .icc are not copied either.
   'pdfjs-dist': [
     { label: 'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm', file: 'wasm/LICENSE_JBIG2' },
     { label: 'PDF.js glue of jbig2.wasm', file: 'wasm/LICENSE_PDFJS_JBIG2' },
     { label: 'OpenJPEG (JPEG 2000), in openjpeg.wasm', file: 'wasm/LICENSE_OPENJPEG' },
     { label: 'PDF.js glue of openjpeg.wasm', file: 'wasm/LICENSE_PDFJS_OPENJPEG' },
-    { label: 'qcms (colour management), in qcms_bg.wasm', file: 'wasm/LICENSE_QCMS' },
     { label: 'PDF.js glue of qcms_bg.wasm', file: 'wasm/LICENSE_PDFJS_QCMS' },
     { label: 'Adobe CMaps', file: 'cmaps/LICENSE' },
     { label: 'Foxit standard fonts (PDFium)', file: 'standard_fonts/LICENSE_FOXIT' },

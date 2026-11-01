@@ -1,18 +1,30 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  PDFJS_SERVED,
+  PDF_PACKAGES,
   bundledPackageDirs,
   checkLicensesPage,
+  checkPdfjsData,
   checkRecordMatchesDist,
+  checkRequiredInBundle,
   checkSeparateFile,
+  checkWasmIdentity,
+  checkWasmTexts,
   classifyModule,
   compareBundleWithList,
   readDistFacts,
+  readPackageHashes,
+  readPdfjsServed,
+  readWasmSources,
+  wasmStem,
   type DistFacts,
+  type WasmSource,
 } from '../../scripts/lib/licenses-check.ts';
+import { copyPdfjsData, pdfjsDataFiles, pdfjsDataPath, pdfjsPackageDir, pdfjsVersion } from '../../src/platform/pdfjs-data.ts';
 import {
   BUNDLED_TRANSITIVE,
   LIBDE265_VERSION,
@@ -236,6 +248,198 @@ describe('o registro do bundle e o dist', () => {
   });
 });
 
+// ---- F5a: the PDF libraries, every .wasm and every PDF.js data file identical to the package's ------------------------------
+
+const sha = (char: string): string => char.repeat(64);
+
+describe('as bibliotecas de PDF no bundle (F5a)', () => {
+  const bundled = new Map<string, unknown>([['pdfjs-dist', {}], ['@neslinesli93/qpdf-wasm', {}], ['preact', {}]]);
+
+  it('passes when pdfjs-dist and qpdf-wasm are in the bundle', () => {
+    expect(PDF_PACKAGES).toEqual(['pdfjs-dist', '@neslinesli93/qpdf-wasm']);
+    expect(checkRequiredInBundle(bundled)).toEqual([]);
+  });
+
+  it('fails when one of the two is not in the bundle', () => {
+    expect(checkRequiredInBundle(new Map([['pdfjs-dist', {}]]))).toEqual(['@neslinesli93/qpdf-wasm não está no bundle, mas as ferramentas de PDF dependem dele']);
+    expect(checkRequiredInBundle(new Map([['@neslinesli93/qpdf-wasm', {}]]))).toEqual(['pdfjs-dist não está no bundle, mas as ferramentas de PDF dependem dele']);
+    expect(checkRequiredInBundle(new Map())).toHaveLength(2);
+  });
+
+  it('is listed on /licenses: both are browser dependencies with a license text', () => {
+    const names = browserPackages().map((pkg) => pkg.name);
+    for (const name of PDF_PACKAGES) expect(names, name).toContain(name);
+  });
+});
+
+describe('os arquivos de dados do PDF.js (F5a)', () => {
+  const FILES = ['wasm/jbig2.wasm', 'wasm/openjpeg.wasm', 'standard_fonts/FoxitSerif.pfb', 'cmaps/Adobe-Japan1-0.bcmap'];
+  const input = (change: (entry: Parameters<typeof checkPdfjsData>[0]) => void = () => {}): Parameters<typeof checkPdfjsData>[0] => {
+    const entry = {
+      versions: ['6.4.299'],
+      version: '6.4.299',
+      served: FILES.map((file, index) => ({ file, sha256: sha(String(index)) })),
+      source: new Map(FILES.map((file, index) => [file, sha(String(index))])),
+      expected: [...FILES],
+    };
+    change(entry);
+    return entry;
+  };
+
+  it('passes when every file is served unchanged, in the folder of the installed version', () => {
+    expect(checkPdfjsData(input())).toEqual([]);
+  });
+
+  it('fails when a served file differs from the package file', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.splice(0, 1, { file: 'wasm/jbig2.wasm', sha256: sha('f') })));
+    expect(problems).toEqual([`wasm/jbig2.wasm no dist difere do arquivo do pdfjs-dist (SHA-256 ${'f'.repeat(12)}… no lugar de ${'0'.repeat(12)}…)`]);
+  });
+
+  it('fails when the build leaves out a file it means to copy', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.pop()));
+    expect(problems).toEqual(['falta cmaps/Adobe-Japan1-0.bcmap no dist (o build deveria copiá-lo)']);
+  });
+
+  it('fails when the folder is of another version, or there are two', () => {
+    expect(checkPdfjsData(input((entry) => { entry.versions = ['6.3.289']; })).join()).toMatch(/tem 6\.3\.289, esperado só 6\.4\.299/);
+    expect(checkPdfjsData(input((entry) => { entry.versions = ['6.4.299', '6.3.289']; })).join()).toMatch(/tem 6\.4\.299, 6\.3\.289, esperado só 6\.4\.299/);
+    expect(checkPdfjsData(input((entry) => { entry.versions = []; })).join()).toMatch(/tem nenhuma pasta/);
+  });
+
+  it('fails for a file of a kind /licenses has no text for: Liberation fonts, the colour profile, qcms, the scripting sandbox', () => {
+    for (const file of ['standard_fonts/LiberationSans-Regular.ttf', 'iccs/CGATS001Compat-v2-micro.icc', 'wasm/qcms_bg.wasm', 'wasm/quickjs-eval.wasm', 'wasm/jbig2_nowasm_fallback.js', 'cmaps/LICENSE', 'standard_fonts/LICENSE_LIBERATION']) {
+      const problems = checkPdfjsData(
+        input((entry) => {
+          entry.served.push({ file, sha256: sha('9') });
+          entry.source.set(file, sha('9'));
+        }),
+      );
+      expect(problems.join('\n'), file).toMatch(new RegExp(`${file.replace(/[.\\/]/g, '\\$&')} no dist não é de um tipo que a /licenses cobre`));
+    }
+  });
+
+  it('fails for a file that the package does not have', () => {
+    const problems = checkPdfjsData(input((entry) => entry.served.push({ file: 'cmaps/Made-Up-H.bcmap', sha256: sha('8') })));
+    expect(problems).toEqual(['cmaps/Made-Up-H.bcmap no dist não existe no pdfjs-dist instalado']);
+  });
+
+  it('knows the kinds the build copies: the two decoders, the CMaps and the Foxit fonts', () => {
+    expect(PDFJS_SERVED.map((entry) => entry.kind)).toEqual(['decodificador WebAssembly', 'CMap', 'fonte padrão da Foxit']);
+    for (const file of pdfjsDataFiles()) expect(PDFJS_SERVED.some((entry) => entry.pattern.test(file)), file).toBe(true);
+  });
+
+  it('proves it on the real package: the build list exists in pdfjs-dist, a copy passes and a changed byte fails', () => {
+    const version = pdfjsVersion();
+    const files = pdfjsDataFiles();
+    expect(files.length).toBeGreaterThan(100);
+    for (const file of files) expect(existsSync(join(pdfjsPackageDir(), file)), file).toBe(true);
+    // A dist with the copy the build makes (the files of the list), then the same with one byte of jbig2.wasm changed.
+    const dist = mkdtempSync(join(tmpdir(), 'fileorca-pdfjs-'));
+    try {
+      const out = join(dist, pdfjsDataPath());
+      expect(copyPdfjsData(dist)).toBe(files.length);
+      const read = () => readPdfjsServed(version, dist);
+      const sources = (served: { file: string }[]) => readPackageHashes(pdfjsPackageDir(), served.map((entry) => entry.file));
+      const clean = read();
+      expect(clean.versions).toEqual([version]);
+      expect(clean.served).toHaveLength(files.length);
+      expect(checkPdfjsData({ versions: clean.versions, version, served: clean.served, source: sources(clean.served), expected: files })).toEqual([]);
+      const target = join(out, 'wasm', 'jbig2.wasm');
+      const bytes = readFileSync(target);
+      bytes[bytes.length - 1] = (bytes[bytes.length - 1] ?? 0) ^ 0xff;
+      writeFileSync(target, bytes);
+      const changed = read();
+      expect(checkPdfjsData({ versions: changed.versions, version, served: changed.served, source: sources(changed.served), expected: files }).join('\n')).toMatch(/wasm\/jbig2\.wasm no dist difere do arquivo do pdfjs-dist/);
+    } finally {
+      rmSync(dist, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('os .wasm do dist contra os dos pacotes (F5a)', () => {
+  const QPDF = sha('1');
+  const MOZ = sha('2');
+  const sources: WasmSource[] = [
+    { pkg: '@neslinesli93/qpdf-wasm', file: 'dist/qpdf.wasm', sha256: QPDF },
+    { pkg: '@jsquash/jpeg', file: 'codec/enc/mozjpeg_enc.wasm', sha256: MOZ },
+    { pkg: 'pdfjs-dist', file: 'wasm/jbig2.wasm', sha256: sha('3') },
+  ];
+  const listed = new Set(['@neslinesli93/qpdf-wasm', '@jsquash/jpeg', 'pdfjs-dist']);
+  const good = [
+    { file: '_astro/qpdf-C3Giu3T4.wasm', sha256: QPDF },
+    { file: '_astro/mozjpeg_enc-DO-zoExo.wasm', sha256: MOZ },
+    { file: '_astro/mozjpeg_enc.DO-zoExo.wasm', sha256: MOZ },
+    { file: '_astro/pdfjs/6.4.299/wasm/jbig2.wasm', sha256: sha('3') },
+  ];
+
+  it('takes the name of the .wasm a package has, without the hash of the bundler', () => {
+    for (const [name, stem] of [['_astro/qpdf-C3Giu3T4.wasm', 'qpdf'], ['_astro/qpdf.C3Giu3T4.wasm', 'qpdf'], ['_astro/mozjpeg_enc-DO-zoExo.wasm', 'mozjpeg_enc'], ['_astro/squoosh_oxipng_bg-OFMN1KwG.wasm', 'squoosh_oxipng_bg'], ['_astro/webp_enc_simd.CFvKQ_80.wasm', 'webp_enc_simd']] as const) {
+      expect(wasmStem(name), name).toBe(stem);
+    }
+    for (const name of ['jbig2.wasm', 'wasm/openjpeg.wasm', 'qpdf-short.wasm', 'qpdf.js']) expect(wasmStem(name), name).toBeNull();
+  });
+
+  it('passes when every .wasm is identical to its package file, both copies of a name, and leaves the PDF.js ones to their own check', () => {
+    expect(checkWasmIdentity(good, sources, listed)).toEqual([]);
+  });
+
+  it('fails when a .wasm differs from the package file', () => {
+    const problems = checkWasmIdentity([{ file: '_astro/qpdf-C3Giu3T4.wasm', sha256: sha('e') }], sources, listed);
+    expect(problems).toEqual([`dist/_astro/qpdf-C3Giu3T4.wasm difere do qpdf.wasm de @neslinesli93/qpdf-wasm (SHA-256 ${'e'.repeat(12)}… no lugar de ${'1'.repeat(12)}…)`]);
+    // One copy of two changed is caught.
+    const one = checkWasmIdentity([good[1] as (typeof good)[number], { file: '_astro/mozjpeg_enc.DO-zoExo.wasm', sha256: sha('d') }], sources, listed);
+    expect(one).toHaveLength(1);
+    expect(one[0]).toContain('mozjpeg_enc.DO-zoExo.wasm difere do mozjpeg_enc.wasm de @jsquash/jpeg');
+  });
+
+  it('fails when no package has a .wasm of that name, or the name does not look like the bundler\'s', () => {
+    expect(checkWasmIdentity([{ file: '_astro/mystery-AbCdEf12.wasm', sha256: sha('7') }], sources, listed)).toEqual(['dist/_astro/mystery-AbCdEf12.wasm: nenhum pacote do navegador tem um mystery.wasm (de onde veio?)']);
+    expect(checkWasmIdentity([{ file: '_astro/qpdf.wasm', sha256: QPDF }], sources, listed)).toEqual(['dist/_astro/qpdf.wasm: o nome não segue o padrão <nome>-<hash>.wasm do bundler']);
+  });
+
+  it('fails for a .wasm outside _astro/ and for one from a package /licenses does not list', () => {
+    expect(checkWasmIdentity([{ file: 'tools/qpdf-C3Giu3T4.wasm', sha256: QPDF }], sources, listed)).toEqual(['dist/tools/qpdf-C3Giu3T4.wasm: .wasm fora de _astro/']);
+    expect(checkWasmIdentity([{ file: '_astro/pdfjs/6.4.299/wasm/deep.wasm', sha256: sha('3') }], sources, listed)).toEqual([]);
+    expect(checkWasmIdentity([{ file: '_astro/pdfjs/x/y/z/q.wasm', sha256: sha('3') }], sources, listed)).toEqual([]);
+    expect(checkWasmIdentity(good, sources, new Set(['@jsquash/jpeg']))).toEqual(['dist/_astro/qpdf-C3Giu3T4.wasm vem de @neslinesli93/qpdf-wasm, que a /licenses não lista']);
+  });
+
+  it('reads the .wasm of a package folder with their hashes and skips a nested node_modules', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fileorca-pkg-'));
+    try {
+      mkdirSync(join(dir, 'dist'), { recursive: true });
+      mkdirSync(join(dir, 'node_modules', 'other'), { recursive: true });
+      writeFileSync(join(dir, 'dist', 'qpdf.wasm'), 'one');
+      writeFileSync(join(dir, 'dist', 'qpdf.js'), 'js');
+      writeFileSync(join(dir, 'node_modules', 'other', 'other.wasm'), 'two');
+      expect(readWasmSources('p', dir)).toEqual([{ pkg: 'p', file: 'dist/qpdf.wasm', sha256: createHash('sha256').update('one').digest('hex') }]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('os textos de .wasm da /licenses (F5a)', () => {
+  const served = new Set(['jbig2.wasm', 'openjpeg.wasm', 'qpdf.wasm']);
+  const texts = (...labels: (string | null)[]) => [{ name: 'pdfjs-dist', texts: labels.map((label) => ({ label })) }];
+
+  it('passes when the .wasm of every "in x.wasm" text is served, and ignores texts that name no file', () => {
+    expect(checkWasmTexts(texts(null, 'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm', 'PDF.js glue of qcms_bg.wasm', 'Adobe CMaps', 'libwebp'), served)).toEqual([]);
+  });
+
+  it('fails for a text that says a library is in a .wasm the site does not serve (the qcms of PDF.js)', () => {
+    expect(checkWasmTexts(texts('qcms (colour management), in qcms_bg.wasm'), served)).toEqual(['pdfjs-dist: a /licenses tem um texto "qcms (colour management), in qcms_bg.wasm", mas o dist não serve qcms_bg.wasm']);
+  });
+
+  it('holds for the real list: no text of /licenses names a .wasm that the build does not copy or the bundler does not emit', () => {
+    // The .wasm of the build list and the ones the engines import with ?url (dist/_astro): the names without hash.
+    const copied = new Set(pdfjsDataFiles().filter((file) => file.endsWith('.wasm')).map((file) => basename(file)));
+    for (const name of ['qpdf.wasm', 'libheif.wasm']) copied.add(name);
+    const problems = checkWasmTexts(listedPackages().filter((pkg) => pkg.name === 'pdfjs-dist' || pkg.name === '@neslinesli93/qpdf-wasm'), copied);
+    expect(problems).toEqual([]);
+  });
+});
+
 describe('os pacotes e os textos de licença', () => {
   it('lists the direct dependencies and the packages that come inside them', () => {
     const names = listedPackages().map((pkg) => pkg.name);
@@ -314,11 +518,13 @@ describe('os pacotes e os textos de licença', () => {
       'PDF.js glue of jbig2.wasm',
       'OpenJPEG (JPEG 2000), in openjpeg.wasm',
       'PDF.js glue of openjpeg.wasm',
-      'qcms (colour management), in qcms_bg.wasm',
+      // F5a: no text for the qcms library (LICENSE_QCMS): qcms_bg.wasm is not served (DECISOES § 144), so /licenses does not
+      // list it (checkWasmTexts in gate:licencas). The glue of qcms is JavaScript inside the PDF.js worker, so its text stays.
       'PDF.js glue of qcms_bg.wasm',
       'Adobe CMaps',
       'Foxit standard fonts (PDFium)',
     ]);
+    expect(pdfjs?.texts.some((entry) => /Marti Maria/.test(entry.text))).toBe(false);
     // Nothing GPL among the texts: the Liberation fonts stay out of the dist (DECISOES § 144).
     expect(pdfjs?.texts.some((entry) => /GNU GENERAL PUBLIC LICENSE/.test(entry.text))).toBe(false);
   });
