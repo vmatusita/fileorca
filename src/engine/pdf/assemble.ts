@@ -9,6 +9,8 @@
 //  - the form fields whose widgets sit on copied pages come along, pruned to those widgets; a field name already taken
 //    by an earlier file gets " (2)"; the XFA form is not copied (it would describe pages that are not there);
 //  - the bookmarks that point at copied pages come along, in the order of the files, pointing at the new pages;
+//  - the layers (optional content) that the copied pages use, each one on or off as its file had it, so a layer the
+//    author hid stays hidden (DECISOES § 178);
 //  - the Info dictionary and the XMP metadata of the first file, as they are: nothing of the device (DECISOES § 145).
 // Self-contained: nothing here imports from outside src/engine/pdf/.
 
@@ -205,6 +207,66 @@ function outlineOf(source: SourcePlan): OutlineItem[] {
   return items(outlines.get(name('First')), 0);
 }
 
+/**
+ * The layers of the new document (DECISOES § 178): the optional content groups of each source that its copied pages
+ * use (the copier went through them with the pages), the ones that start off, and the order of the layer panel pruned
+ * to them. Without /OCProperties a viewer draws every layer, so a layer the author hid came back in Merge, Split and
+ * Delete. Each source keeps its own default state, read through its /BaseState.
+ */
+function writeLayers(dest: PDFDocument, order: readonly SourcePlan[]): void {
+  const groups: PDFRef[] = [];
+  const off: PDFRef[] = [];
+  const panel: PDFObject[] = [];
+  for (const source of order) {
+    const { doc, copier, traversed } = source;
+    const properties = lookup(doc, doc.catalog.get(name('OCProperties')));
+    if (!(properties instanceof PDFDict)) continue;
+    const listed = lookup(doc, properties.get(name('OCGs')));
+    if (!(listed instanceof PDFArray)) continue;
+    const config = lookup(doc, properties.get(name('D')));
+    const refs = (key: string): Set<PDFRef> => {
+      const value = config instanceof PDFDict ? lookup(doc, config.get(name(key))) : undefined;
+      return new Set(value instanceof PDFArray ? value.asArray().filter((item): item is PDFRef => item instanceof PDFRef) : []);
+    };
+    const offInSource = refs('OFF');
+    const onInSource = refs('ON');
+    const baseOff = config instanceof PDFDict && config.get(name('BaseState')) === name('OFF');
+    /** The group's reference in the new document, when a copied page uses it. */
+    const copied = (item: PDFObject): PDFRef | null => {
+      const mapped = item instanceof PDFRef ? traversed.get(item) : undefined;
+      return mapped instanceof PDFRef ? mapped : null;
+    };
+    for (const group of listed.asArray()) {
+      const mapped = copied(group);
+      if (!mapped || !(group instanceof PDFRef)) continue;
+      groups.push(mapped);
+      if (baseOff ? !onInSource.has(group) : offInSource.has(group)) off.push(mapped);
+    }
+    // The order of the layer panel: groups, labels and nested lists, without the groups no copied page uses.
+    const prune = (value: PDFObject | undefined, depth: number): PDFObject[] => {
+      const array = lookup(doc, value);
+      if (!(array instanceof PDFArray) || depth > 16) return [];
+      const out: PDFObject[] = [];
+      for (const item of array.asArray()) {
+        const inner = lookup(doc, item);
+        if (inner instanceof PDFArray) {
+          const nested = prune(inner, depth + 1);
+          if (nested.some((entry) => entry instanceof PDFRef || entry instanceof PDFArray)) out.push(dest.context.obj(nested));
+        } else if (item instanceof PDFRef) {
+          const mapped = copied(item);
+          if (mapped) out.push(mapped);
+        } else if (inner instanceof PDFString || inner instanceof PDFHexString) out.push(copier.copy(inner));
+      }
+      return out;
+    };
+    panel.push(...prune(config instanceof PDFDict ? config.get(name('Order')) : undefined, 0));
+  }
+  if (groups.length === 0) return;
+  const config = dest.context.obj({ BaseState: 'ON', OFF: off }) as PDFDict;
+  if (panel.length > 0) config.set(name('Order'), dest.context.obj(panel));
+  dest.catalog.set(name('OCProperties'), dest.context.obj({ OCGs: groups, D: config }));
+}
+
 /** Writes the bookmark tree into the new document and hangs it off its catalog. */
 function writeOutline(dest: PDFDocument, items: OutlineItem[]): void {
   if (items.length === 0) return;
@@ -377,7 +439,7 @@ export async function assemble(pages: readonly PageSource[]): Promise<{ doc: PDF
     dest.addPage(PDFPage.of(copied, newRef, dest));
   }
 
-  // 6. The form, the bookmarks and the metadata of the first file.
+  // 6. The form, the bookmarks, the layers and the metadata of the first file.
   if (topFields.length > 0 && formSource) {
     const formDoc = formSource.doc;
     const original = lookup(formDoc, formDoc.catalog.get(name('AcroForm'))) as PDFDict;
@@ -391,6 +453,7 @@ export async function assemble(pages: readonly PageSource[]): Promise<{ doc: PDF
   }
   const outline = order.flatMap((source) => outlineOf(source));
   writeOutline(dest, outline);
+  writeLayers(dest, order);
   const first = order[0];
   if (first) {
     const info = first.doc.context.trailerInfo.Info;

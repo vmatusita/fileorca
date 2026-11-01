@@ -6,7 +6,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { crc32 } from '../e2e/lib/zip.ts';
 import { processPdf } from '../../src/engine/pdf/process.ts';
 import type { PdfOperation, PdfResult, PdfSuccess } from '../../src/engine/pdf/types.ts';
-import { readWithPdfjs, opensWithoutPassword, type ReadPdf } from '../e2e/lib/pdfjs-read.ts';
+import { PDFDocument, PDFName, PDFString } from '@cantoo/pdf-lib';
+import { drawWithPdfjs, readWithPdfjs, opensWithoutPassword, type ReadPdf } from '../e2e/lib/pdfjs-read.ts';
 import { parsePdf, strictPdf } from '../e2e/lib/pdf.ts';
 import { qpdfCheck, qpdfEncryption } from '../../scripts/lib/qpdf.ts';
 import { ORACLE, fixture, nodeRenderer, oracle, useNodeAssets } from './lib/pdf-engine.ts';
@@ -121,6 +122,54 @@ describe('split, delete and reorder', () => {
     const notes = ok(await run({ kind: 'reorder', order: Array.from({ length: 117 }, (_, i) => 116 - i) }, 'pdf-grande-fontes-embutidas-117p.pdf'));
     expect((await sound(notes.outputs[0]?.bytes as Uint8Array)).outline).toHaveLength(oracle('pdf-grande-fontes-embutidas-117p.pdf').outline);
   }, 60_000);
+});
+
+// Layers (DECISOES § 178): a new document carries the /OCProperties of its sources, so a layer the author hid stays
+// hidden. Before, Merge, Split and Delete left it out and PDF.js drew the hidden layer.
+describe('layers', () => {
+  /** Two pages, each with a black band in a layer that is off by default and a visible band above it. */
+  async function layered(): Promise<Uint8Array> {
+    const doc = await PDFDocument.create({ updateMetadata: false });
+    const context = doc.context;
+    const ocg = context.register(context.obj({ Type: 'OCG', Name: PDFString.of('Hidden notes') }));
+    for (let i = 0; i < 2; i += 1) {
+      const page = doc.addPage([612, 792]);
+      page.node.set(PDFName.of('Resources'), context.obj({ Properties: { oc1: ocg } }));
+      const content = context.stream('0 g 72 600 468 60 re f /OC /oc1 BDC 0 g 72 300 468 100 re f EMC');
+      page.node.set(PDFName.of('Contents'), context.register(content));
+    }
+    doc.catalog.set(PDFName.of('OCProperties'), context.obj({ OCGs: [ocg], D: { OFF: [ocg], Order: [ocg] } }));
+    return doc.save({ useObjectStreams: false });
+  }
+  /** Dark pixels of page n in a band of the page (y from the top, in points at scale 1). */
+  async function ink(bytes: Uint8Array, n: number, top: number, bottom: number): Promise<number> {
+    const picture = await drawWithPdfjs(bytes, n, 1);
+    let dark = 0;
+    for (let y = top; y < bottom; y += 1) for (let x = 80; x < 530; x += 1) if ((picture.data[(y * picture.width + x) * 4] as number) < 128) dark += 1;
+    return dark;
+  }
+  const hidden = (bytes: Uint8Array, n: number) => ink(bytes, n, 400, 485);
+  const shown = (bytes: Uint8Array, n: number) => ink(bytes, n, 140, 185);
+
+  it('a layer that is off in the source stays off after Merge, Split and Delete', async () => {
+    const source = await layered();
+    expect(await hidden(source, 1)).toBe(0);
+    expect(await shown(source, 1)).toBeGreaterThan(10_000);
+    const outputs: [string, PdfResult][] = [
+      ['merge', await processPdf({ kind: 'merge' }, [source, source], null)],
+      ['split', await processPdf({ kind: 'split', parts: [[0], [1]] }, [source], null)],
+      ['delete', await processPdf({ kind: 'delete', remove: [1] }, [source], null)],
+    ];
+    for (const [label, result] of outputs) {
+      for (const output of ok(result).outputs) {
+        const pages = (await sound(output.bytes)).pages.length;
+        for (let n = 1; n <= pages; n += 1) {
+          expect(await shown(output.bytes, n), `${label}: the visible band of page ${n}`).toBeGreaterThan(10_000);
+          expect(await hidden(output.bytes, n), `${label}: the hidden layer of page ${n}`).toBe(0);
+        }
+      }
+    }
+  });
 });
 
 describe('rotate', () => {
