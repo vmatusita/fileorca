@@ -2,7 +2,9 @@
 // Home: the image tools that exist in the language, with the Oli waving next to the H1. English shows all
 // eight and a link to the image hub; Portuguese and Spanish show only the tools they have (Compress image).
 // The cards come from the route map: a tool gets a card only with a path in this language. No AdSlot on
-// the home yet. English also shows the five credit calculators and a link to the money hub (F4; DECISOES § 118).
+// the home yet. English also shows the 12 PDF tools and a link to the PDF hub (F5a, DECISOES § F5a-home-footer-search),
+// then the five credit calculators and a link to the money hub (F4; DECISOES § 118). Both sections read their registry
+// and show a card only for a page that has a path in the language, so Portuguese and Spanish show neither.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
@@ -12,6 +14,7 @@ import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import { CALC_PAGES, HOME_CALC_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 
 interface Props {
   lang: Lang;
@@ -27,6 +30,15 @@ const cards = IMAGE_TOOL_IDS.flatMap((id) => {
   if (!href || !blurb) return [];
   return [{ id, href, blurb, icon: IMAGE_PAGES[id].icon, category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const) }];
 });
+const pdfHub = routeById(PDF_HUB_ID).paths[lang];
+const pdfCards =
+  pdfHub && t.pdf && common.pdf
+    ? PDF_TOOL_IDS.flatMap((id) => {
+        const href = routeById(id).paths[lang];
+        const blurb = common.pdf?.[id];
+        return href && blurb ? [{ id, href, blurb, icon: PDF_PAGES[id].icon }] : [];
+      })
+    : [];
 const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
 const moneyCards = moneyHub && t.money && common.calcs ? HOME_CALC_IDS.map((id) => ({ href: CALC_PAGES[id].path, blurb: common.calcs?.[id], icon: CALC_PAGES[id].icon })) : [];
 const website = {
@@ -53,6 +65,18 @@ const website = {
     </ul>
     {hub && t.hubLink && <p class="fo-more"><a href={hub}>{t.hubLink}</a></p>}
   </section>
+  {pdfHub && t.pdf && pdfCards.length > 0 && (
+    <section class="fo-section" aria-labelledby="pdf-home">
+      <h2 id="pdf-home">{t.pdf.heading}</h2>
+      <p class="fo-prose">{t.pdf.intro}</p>
+      <ul class="fo-grid">
+        {pdfCards.map((card) => (
+          <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category="pdf" icon={card.icon} /></li>
+        ))}
+      </ul>
+      <p class="fo-more"><a href={pdfHub}>{t.pdf.hubLink}</a></p>
+    </section>
+  )}
   {moneyHub && t.money && moneyCards.length > 0 && (
     <section class="fo-section" aria-labelledby="money-home">
       <h2 id="money-home">{t.money.heading}</h2>

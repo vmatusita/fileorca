@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -110,20 +111,23 @@ test('the English search finds the new tools and presets and opens the one chose
   await input.fill('compress');
   // Each row reads the name, then the category in small type.
   const rows = (...names: string[]) => names.map((name) => `${name}Image`);
-  await expect(dialog.getByRole('option')).toHaveText(rows('Compress image', 'Compress image to 100 KB', 'Compress image to 1 MB'));
+  // F5a: the PDF tools come after the image pages, in their own category, so 'compress' also lists Compress PDF last
+  // (the first three rows and their order are what they were).
+  await expect(dialog.getByRole('option')).toHaveText([...rows('Compress image', 'Compress image to 100 KB', 'Compress image to 1 MB'), 'Compress PDFPDF']);
   await input.fill('shrink');
-  await expect(dialog.getByRole('option')).toHaveCount(4);
+  await expect(dialog.getByRole('option')).toHaveCount(5);
+  // F5a: PDF to JPG also has the words "jpg", "to" and "pdf" in its names, so it follows Image to PDF.
   await input.fill('jpg to pdf');
-  await expect(dialog.getByRole('option')).toHaveText(rows('Image to PDF'));
+  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF']);
   await input.fill('heif');
   await expect(dialog.getByRole('option')).toHaveText(rows('HEIC to JPG'));
   await input.press('Enter');
   await expect(page).toHaveURL(/\/heic-to-jpg\/$/);
-  // From the arrows: the second result of 'compress' is the 100 KB preset.
+  // From the arrows: the second result of 'compress' is the 100 KB preset (F5a: out of four, Compress PDF being the last).
   await page.keyboard.press('Control+K');
   await expect(dialog).toBeVisible();
   await dialog.getByRole('combobox').fill('compress');
-  await expect(dialog.getByRole('option')).toHaveCount(3);
+  await expect(dialog.getByRole('option')).toHaveCount(4);
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/compress-image\/to-100kb\/$/);
@@ -134,8 +138,8 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   await page.goto('/');
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
-  // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125).
-  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length;
+  // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125); F5a: and the PDF tools.
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length;
   await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });

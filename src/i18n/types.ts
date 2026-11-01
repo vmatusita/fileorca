@@ -117,6 +117,8 @@ export interface HomeTexts extends PageMeta {
   hubLink?: string;
   /** The money section, only where the money calculators exist (English): heading, line and the hub link. */
   money?: { heading: string; intro: string; hubLink: string };
+  /** The PDF section, only where the PDF tools exist (English, F5a): heading, line and the hub link. */
+  pdf?: { heading: string; intro: string; hubLink: string };
 }
 
 export interface LegalTexts extends PageMeta {

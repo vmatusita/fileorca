@@ -4,6 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { describedViolations } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 
@@ -56,14 +57,14 @@ async function resultOnScreen(page: Page): Promise<void> {
   await animationsDone(page);
 }
 
-// F2: 'compress' finds Compress image and its two presets (3 options); 'heif' finds HEIC to JPG alone, so the
-// dialog is read with one result, as before.
+// F2: 'compress' finds Compress image and its two presets (F5a: and Compress PDF, 4 options); 'heif' finds HEIC to JPG
+// alone, so the dialog is read with one result, as before.
 async function searchDialogOpen(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
   await page.keyboard.type('compress');
-  await expect(page.getByRole('option')).toHaveCount(3);
+  await expect(page.getByRole('option')).toHaveCount(4);
   await page.keyboard.press('Control+A');
   await page.keyboard.type('heif');
   await expect(page.getByRole('option')).toHaveCount(1);
@@ -71,12 +72,12 @@ async function searchDialogOpen(page: Page): Promise<void> {
 }
 
 // Nothing typed: every tool and preset page is listed and the list scrolls inside the box. F4: the English search
-// also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry.
+// also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry; F5a: and the PDF tools.
 async function searchDialogListed(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
-  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length);
+  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length);
   await animationsDone(page);
 }
 

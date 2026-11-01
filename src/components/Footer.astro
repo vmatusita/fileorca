@@ -2,7 +2,9 @@
 // Footer (docs/design/components/Footer): the deep sea with the wave on its top edge; column titles are
 // H2; only links to pages that exist. The Image column lists the tools that exist in the language and,
 // where the image hub exists (English), the hub first. The Money column, where the money hub exists
-// (English), lists the hub and the five credit calculators (DECISOES § 118). Never an ad inside the footer. With the AdSense
+// (English), lists the hub and the five credit calculators (DECISOES § 118). The PDF column, where the PDF hub exists
+// (English), lists the hub and the first six PDF tools in hub order (F5a, DECISOES § F5a-home-footer-search): every
+// PDF page is one click from the hub, so none is an orphan. Never an ad inside the footer. With the AdSense
 // anchor on the page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
 import { pathFor, routeById } from '../i18n/routes.ts';
@@ -11,7 +13,11 @@ import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import { CALC_PAGES, HOME_CALC_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import Icon from './Icon.astro';
+
+/** How many PDF tools the footer column lists after the hub: the six of the highest search volume. */
+const FOOTER_PDF_TOOLS = 6;
 
 interface Props {
   lang: Lang;
@@ -30,6 +36,18 @@ const image = [
     return href && blurb ? [{ label: blurb.name, href }] : [];
   }),
 ];
+const pdfHub = routeById(PDF_HUB_ID).paths[lang];
+const pdf =
+  pdfHub && t.pdfTools && t.pdf && t.footer.pdfColumn
+    ? [
+        { label: t.pdfTools, href: pdfHub },
+        ...PDF_TOOL_IDS.slice(0, FOOTER_PDF_TOOLS).flatMap((id) => {
+          const href = routeById(id).paths[lang];
+          const blurb = t.pdf?.[id];
+          return href && blurb ? [{ label: blurb.name, href }] : [];
+        }),
+      ]
+    : [];
 const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
 const money =
   moneyHub && t.moneyCalculators && t.calcs
@@ -49,6 +67,12 @@ const site = [
       <h2>{t.footer.imageColumn}</h2>
       <ul>{image.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
     </div>
+    {pdf.length > 0 && (
+      <div>
+        <h2>{t.footer.pdfColumn}</h2>
+        <ul>{pdf.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+      </div>
+    )}
     {money.length > 0 && (
       <div>
         <h2>{t.footer.moneyColumn}</h2>

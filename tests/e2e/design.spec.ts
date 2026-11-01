@@ -191,14 +191,14 @@ for (const viewport of VIEWPORTS) {
         await searchWithoutResult(page);
         await expectOlis(page, 'search without result', { pose: 'peek', selector: '.fo-search__empty .fo-search__peek' });
         const dialog = page.locator('#fo-search-dialog');
-        // 'heif' has one result (HEIC to JPG) and 'compress' has three (Compress image and its two presets).
+        // 'heif' has one result (HEIC to JPG) and 'compress' has four (Compress image, its two presets and, F5a, Compress PDF).
         await page.keyboard.press('Control+A');
         await page.keyboard.type('heif');
         await expect(dialog.getByRole('option')).toHaveCount(1);
         await expect(dialog.locator('.fo-search__peek')).toBeHidden();
         await page.keyboard.press('Control+A');
         await page.keyboard.type('compress');
-        await expect(dialog.getByRole('option')).toHaveCount(3);
+        await expect(dialog.getByRole('option')).toHaveCount(4);
         await expect(dialog.locator('.fo-search__peek')).toBeHidden();
       });
     });
