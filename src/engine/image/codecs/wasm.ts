@@ -1,8 +1,8 @@
 // Where the engine finds the .wasm files its codecs load on first use. The engine never imports a .wasm and never
-// builds a URL on its own: whoever hosts it hands the URLs over, once, before the first file. The site does it from
-// the URLs Vite gives (src/tools/image/engine-client.ts, in the page and, through the worker's `configure`, in the
-// worker); the exported package (scripts/oss/image-engine.ts) is this same code, and its users pass the URLs of
-// their own copies of the files. That is what keeps the engine free of the bundler's `?url` syntax (DECISOES § F5a-motor-aberto).
+// builds a URL on its own: whoever hosts it hands the URLs over, once, before the first file. The FileOrca site does
+// it with the URLs its bundler gives, on the page and, through the worker's `configure`, in the worker; the exported
+// package is this same code, and its users pass the URLs of their own copies of the files. That is what keeps the
+// engine free of the bundler's `?url` syntax.
 // Nothing has a default: a call that needs a file nobody configured fails as 'load', and the next attempt may work
 // once the URLs are set (DECISOES § 104).
 // Self-contained: nothing here imports from outside src/engine/image/.

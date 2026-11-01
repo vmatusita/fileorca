@@ -1,6 +1,6 @@
-// The public entry of the engine when it is used as a package (scripts/oss/image-engine.ts exports this folder as
-// fileorca-image-engine). The site does not import it: its pages load process.ts, zip.ts and the worker one by
-// one, on demand, to keep the initial JavaScript at two files. Here they are together, in the order of use:
+// The public entry of the engine when it is used as a package (fileorca-image-engine). The FileOrca site does not
+// import it: its pages load process.ts, zip.ts and the worker one by one, on demand, to keep the initial JavaScript at
+// two files. Here they are together, in the order of use:
 //
 //   configureWasm({ ... });                                    // once, with the URL of each .wasm file
 //   const result = await processImage(file, operation, accepts, onProgress);

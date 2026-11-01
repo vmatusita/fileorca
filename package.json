@@ -30,7 +30,8 @@
     "gate:actionlint": "node scripts/gates/actionlint.ts",
     "design:gerar": "node scripts/design/tema.ts && node scripts/design/folha.ts",
     "screenshots": "node scripts/screenshots.ts",
-    "fixtures": "node scripts/fixtures/generate.ts"
+    "fixtures": "node scripts/fixtures/generate.ts",
+    "motor:exportar": "node scripts/oss/image-engine.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
