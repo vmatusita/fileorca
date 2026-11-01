@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  createRecorder,
   createTrigger,
+  FINE_STEP_MB,
   cutLabel,
   DROP_MB,
   MAX_LOOKS,
@@ -101,5 +103,25 @@ describe('disco', () => {
       closeSync(fd);
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  // F5a (DECISOES § 154): the 2 s sampler of / prints a line only when it moved FINE_STEP_MB, and sums up the lowest point
+  // and the steepest fall. The series is the 20 s one of run 41277648653 (WebKit 3 de 3, DECISOES § 141), every 2 s.
+  it('prints a line only when / moved FINE_STEP_MB, and keeps the lowest point and the steepest fall', () => {
+    const recorder = createRecorder(10_878);
+    const series = [10_878, 10_800, 9_600, 8_187, 3_435, 3_500, 10_837];
+    const lines = series.map((free, i) => recorder.push(1_000 * (i + 1), free));
+    expect(lines.filter(Boolean)).toHaveLength(4);
+    expect(lines[1]).toBeNull();
+    expect(lines[2]).toContain('9600 MB livres (−1278 MB');
+    expect(lines[6]).toContain('+7402 MB');
+    expect(recorder.summary()).toEqual({ minMb: 3_435, minAt: 5_000, dropMb: 4_752, dropAt: 5_000 });
+    expect(FINE_STEP_MB).toBe(256);
+  });
+
+  it('says nothing for a steady disk', () => {
+    const recorder = createRecorder(5_000);
+    for (let i = 0; i < 30; i += 1) expect(recorder.push(i, 5_000 - (i % 3))).toBeNull();
+    expect(recorder.summary()).toMatchObject({ minMb: 4_998, dropMb: 1 });
   });
 });
