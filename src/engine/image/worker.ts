@@ -26,4 +26,13 @@ const api = {
 
 export type ImageEngineApi = typeof api;
 
-expose(api);
+// Once per worker. WebKit evaluates the entry script of a worker a second time when a chunk the worker loads on demand (a
+// codec) imports from it, as the bundler makes the codec chunks do for its CommonJS helper: every module of this file then
+// exists twice in the same worker, and a second expose() would run every call again (DECISOES § 172). The copy that answers
+// is the one that came first.
+const SCOPE = globalThis as unknown as Record<symbol, true | undefined>;
+const EXPOSED = Symbol.for('fileorca.image-engine.exposed');
+if (!SCOPE[EXPOSED]) {
+  SCOPE[EXPOSED] = true;
+  expose(api);
+}
