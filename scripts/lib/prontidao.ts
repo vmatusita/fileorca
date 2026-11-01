@@ -11,6 +11,7 @@ import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 import { AUTHOR, CONTACT_EMAIL, SITE_ORIGIN } from '../../src/platform/site.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, CALC_TOOL_IDS, GUIDE_IDS, HOME_CALC_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
 import { listFiles } from './dist.ts';
 import { headerBlocks, patternApplies } from './headers-file.ts';
@@ -82,11 +83,14 @@ export interface Site {
   tools: Record<Lang, string[]>;
   /**
    * More cards a page must list, by route id and language (F4): the home's money section (the five credit
-   * calculators) and the money hub (the 14 calculators), both from the calculator registry.
+   * calculators) and the money hub (the 14 calculators), both from the calculator registry. From the F5a, the
+   * home's PDF section and the PDF hub (the 12 tools and the Image to PDF card), from the PDF registry.
    */
   cards?: Record<string, Partial<Record<Lang, string[]>>>;
-  /** Ids the search index must offer: every page of both registries and the guides. */
+  /** Ids the search index must offer: every page of the three registries and the guides. */
   searchIds: string[];
+  /** Route ids of the PDF pages (F5a): the 12 tools of the PDF registry and the PDF hub. Each has a page of its own to check. */
+  pdf?: string[];
 }
 
 export interface Row {
@@ -108,11 +112,22 @@ export function realSite(dir: string): Site {
   const tools = Object.fromEntries(
     LANGS.map((lang) => [lang, IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? [])]),
   ) as Record<Lang, string[]>;
+  const pdfPaths = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
   const cards: Site['cards'] = {
-    home: { en: HOME_CALC_IDS.map((id) => CALC_PAGES[id].path) },
+    // The home lists the five credit calculators and, from the F5a, the 12 PDF tools (DECISOES § F5a-prontidao-pdf).
+    home: { en: [...HOME_CALC_IDS.map((id) => CALC_PAGES[id].path), ...pdfPaths] },
     [MONEY_HUB_ID]: { en: CALC_TOOL_IDS.map((id) => CALC_PAGES[id].path) },
+    // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.
+    [PDF_HUB_ID]: { en: [...pdfPaths, routeById('image-to-pdf').paths.en ?? '/image-to-pdf/'] },
   };
-  return { dir, pages, tools, cards, searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS] };
+  return {
+    dir,
+    pages,
+    tools,
+    cards,
+    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS, ...PDF_TOOL_IDS],
+    pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
+  };
 }
 
 /** File of a URL path in a built folder: '/pt/sobre/' -> <dir>/pt/sobre/index.html. */
@@ -323,11 +338,56 @@ export function checkNothingUnfinished(site: Site): Row[] {
 
 // ---- (d) Real content -----------------------------------------------------------------------------------
 
+/** What the content rules read from one page: its H1s, title, description, the words of <main> and its AdSlots. */
+interface PageFacts {
+  h1Count: number;
+  values: { h1: string; title: string; description: string };
+  words: number;
+  slots: number;
+}
+
+type Seen = Record<keyof PageFacts['values'], Map<string, string>>;
+
+const newSeen = (): Seen => ({ h1: new Map(), title: new Map(), description: new Map() });
+
+function factsOf(html: string): PageFacts {
+  const root = parse(html);
+  const h1s = root.querySelectorAll('h1');
+  return {
+    h1Count: h1s.length,
+    values: {
+      h1: normalizeText(h1s[0]?.text ?? ''),
+      title: normalizeText(root.querySelector('title')?.text ?? ''),
+      description: normalizeText(root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''),
+    },
+    words: words(visibleText(html, 'main', ['.fo-ad'])),
+    slots: (html.match(/class="fo-ad fo-ad--/g) ?? []).length,
+  };
+}
+
+/** One H1, and an H1, title and description that are not empty and not the same as another page's (`seen` has the earlier ones). */
+function ownProblems(path: string, facts: PageFacts, seen: Seen): string[] {
+  const problems: string[] = [];
+  if (facts.h1Count !== 1) problems.push(`${path}: ${facts.h1Count} H1`);
+  for (const [kind, value] of Object.entries(facts.values) as [keyof PageFacts['values'], string][]) {
+    if (!value) problems.push(`${path}: sem ${kind}`);
+    else if (seen[kind].has(value)) problems.push(`${path}: ${kind} igual ao de ${seen[kind].get(value)}`);
+    else seen[kind].set(value, path);
+  }
+  return problems;
+}
+
+const thinProblems = (path: string, facts: PageFacts): string[] =>
+  facts.words < MIN_MAIN_WORDS ? [`${path}: ${facts.words} palavras no <main>, pede ${MIN_MAIN_WORDS}`] : [];
+
+const adProblems = (path: string, facts: PageFacts): string[] =>
+  facts.slots && facts.words < facts.slots * MIN_WORDS_PER_AD ? [`${path}: ${facts.slots} AdSlot(s) para ${facts.words} palavras, pede ${MIN_WORDS_PER_AD} por AdSlot`] : [];
+
 export function checkContent(site: Site): Row[] {
   const own: string[] = [];
   const thin: string[] = [];
   const ads: string[] = [];
-  const seen = { h1: new Map<string, string>(), title: new Map<string, string>(), description: new Map<string, string>() };
+  const seen = newSeen();
   let indexable = 0;
   for (const page of site.pages.filter((candidate) => candidate.indexable)) {
     const html = read(site.dir, page.path);
@@ -336,28 +396,64 @@ export function checkContent(site: Site): Row[] {
       continue;
     }
     indexable += 1;
-    const root = parse(html);
-    const h1s = root.querySelectorAll('h1');
-    const values = {
-      h1: normalizeText(h1s[0]?.text ?? ''),
-      title: normalizeText(root.querySelector('title')?.text ?? ''),
-      description: normalizeText(root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''),
-    };
-    if (h1s.length !== 1) own.push(`${page.path}: ${h1s.length} H1`);
-    for (const [kind, value] of Object.entries(values) as [keyof typeof values, string][]) {
-      if (!value) own.push(`${page.path}: sem ${kind}`);
-      else if (seen[kind].has(value)) own.push(`${page.path}: ${kind} igual ao de ${seen[kind].get(value)}`);
-      else seen[kind].set(value, page.path);
-    }
-    const count = words(visibleText(html, 'main', ['.fo-ad']));
-    if (count < MIN_MAIN_WORDS) thin.push(`${page.path}: ${count} palavras no <main>, pede ${MIN_MAIN_WORDS}`);
-    const slots = (html.match(/class="fo-ad fo-ad--/g) ?? []).length;
-    if (slots && count < slots * MIN_WORDS_PER_AD) ads.push(`${page.path}: ${slots} AdSlot(s) para ${count} palavras, pede ${MIN_WORDS_PER_AD} por AdSlot`);
+    const facts = factsOf(html);
+    own.push(...ownProblems(page.path, facts, seen));
+    thin.push(...thinProblems(page.path, facts));
+    ads.push(...adProblems(page.path, facts));
   }
   return [
     row('H1, título e descrição próprios', `${indexable} páginas indexáveis: um H1 e nenhum H1, título ou descrição repetido`, own),
     row('Texto mínimo no <main>', `${MIN_MAIN_WORDS} palavras visíveis, sem o rótulo dos AdSlots (o Contato tem 74 hoje)`, thin),
     row('Mais conteúdo que anúncio', `${MIN_WORDS_PER_AD} palavras do <main> para cada AdSlot (uma tela de celular de texto por anúncio)`, ads),
+  ];
+}
+
+// ---- (d2) The PDF pages (F5a) ---------------------------------------------------------------------------------
+
+/**
+ * The 12 tools of the PDF registry and the PDF hub, each looked at on its own (prompt F5a, decision 9). The generic
+ * content items above already read every indexable page of the route map; these rows make the PDF pages
+ * explicit, so a page that drops out of the route map, loses its ad area or is not in the build fails here by
+ * name instead of silently leaving the generic items: the page exists and has an ad area, its H1, title and
+ * description are its own among all the pages, it has 60 words in <main> and 150 for each AdSlot.
+ */
+export function checkPdfPages(site: Site): Row[] {
+  const ids = site.pdf ?? [];
+  const present: string[] = [];
+  const own: string[] = [];
+  const thin: string[] = [];
+  const ads: string[] = [];
+  // The values the other pages already use: a PDF page may not repeat any of them.
+  const seen = newSeen();
+  const pdfPaths = new Set<string>();
+  for (const id of ids) {
+    const page = site.pages.find((candidate) => candidate.id === id && candidate.lang === 'en');
+    if (!page) present.push(`${id}: sem página em inglês no mapa de rotas`);
+    else {
+      pdfPaths.add(page.path);
+      if (!page.indexable) present.push(`${page.path}: não indexável`);
+      if (!page.ads) present.push(`${page.path}: sem área de anúncio (as páginas de PDF carregam AdSlots)`);
+      if (!exists(site.dir, page.path)) present.push(`${page.path}: não existe no build`);
+    }
+  }
+  for (const page of site.pages.filter((candidate) => candidate.indexable && !pdfPaths.has(candidate.path))) {
+    const html = read(site.dir, page.path);
+    if (html !== null) ownProblems(page.path, factsOf(html), seen);
+  }
+  for (const path of pdfPaths) {
+    const html = read(site.dir, path);
+    if (html === null) continue;
+    const facts = factsOf(html);
+    own.push(...ownProblems(path, facts, seen));
+    thin.push(...thinProblems(path, facts));
+    ads.push(...adProblems(path, facts));
+    if (facts.slots === 0) ads.push(`${path}: nenhum AdSlot na página`);
+  }
+  const what = `${ids.length} páginas do registro de PDF (as ferramentas e o hub)`;
+  return [
+    row('As páginas de PDF estão no mapa de rotas e no build', `${what}: em inglês, indexáveis, com área de anúncio e o arquivo no build`, present),
+    row('PDF: H1, título e descrição próprios', `${what}: um H1 e nenhum H1, título ou descrição igual ao de outra página do site`, own),
+    row('PDF: texto mínimo e mais conteúdo que anúncio', `${what}: ${MIN_MAIN_WORDS} palavras no <main> e ${MIN_WORDS_PER_AD} para cada AdSlot, e pelo menos um AdSlot`, [...thin, ...ads]),
   ];
 }
 

@@ -3,7 +3,9 @@
 // one with only PUBLIC_ADSENSE_CLIENT set to the test id (what the AdSense review will see) and one with the
 // three variables (the loader only on tool pages). The extra builds never touch dist/, which the Playwright
 // and Lighthouse steps use, and the bundle record that gate:licencas reads is put back as it was.
-// The checks are in scripts/lib/prontidao.ts, proven in tests/unit/prontidao.test.ts.
+// The checks are in scripts/lib/prontidao.ts, proven in tests/unit/prontidao.test.ts. From the F5a the cards of the
+// home and of the PDF hub and the search come from the PDF registry as well, and the 12 PDF tools and the hub each have
+// rows of their own (page, H1/title/description, 60 words and 150 per AdSlot).
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,6 +18,7 @@ import {
   checkContent,
   checkCrawlable,
   checkNothingUnfinished,
+  checkPdfPages,
   checkRequiredPages,
   checkTodayBuild,
   formatTable,
@@ -61,6 +64,7 @@ const rows: Row[] = [
   ...checkRequiredPages(today),
   ...checkNothingUnfinished(today),
   ...checkContent(today),
+  ...checkPdfPages(today),
   ...checkCrawlable(today),
 ];
 console.log(`\n${formatTable(rows)}\n`);
