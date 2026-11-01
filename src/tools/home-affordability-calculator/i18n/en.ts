@@ -22,7 +22,7 @@ export default {
     view: {
       label: 'Home price you can afford',
       placard: 'home price',
-      sentence: 'With {rule} setting the limit, your housing costs can be {housing} a month: {pi} of principal and interest, the rest taxes, insurance and HOA. That pays for a loan of {loan}.',
+      sentence: 'Under {rule}, your housing costs can be {housing} a month: {pi} of principal and interest, the rest taxes, insurance and HOA. That pays for a loan of {loan}.',
       ruleFront: 'the {front} housing limit',
       ruleBack: 'the {back} total debt limit',
       ruleBoth: 'both limits',

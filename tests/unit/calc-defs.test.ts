@@ -111,8 +111,17 @@ describe('the calculator definitions', () => {
     for (const id of CALC_PAGE_IDS) {
       const def = DEFS[id];
       for (const spec of def.fields) {
-        if (spec.kind !== 'money' && spec.kind !== 'rate' && spec.kind !== 'int') continue;
-        for (const value of [spec.min, spec.max]) check(id, { ...def.initial, [spec.key]: value });
+        if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int') {
+          for (const value of [spec.min, spec.max]) check(id, { ...def.initial, [spec.key]: value });
+        } else if (spec.kind === 'list') {
+          // Each item of the first debt at both ends (second pass of the review: the list was left out).
+          const rows = def.initial[spec.key] as Record<string, number>[];
+          for (const item of spec.item) for (const value of [item.min, item.max]) check(id, { ...def.initial, [spec.key]: rows.map((row, index) => (index === 0 ? { ...row, [item.key]: value } : row)) });
+        } else if (spec.kind === 'down') {
+          // The down payment in percent and in dollars, at both ends.
+          for (const rate of [0, 1_000_000]) check(id, { ...def.initial, [spec.unitKey]: 'percent', [spec.percentKey]: rate });
+          for (const cents of [0, Number(def.initial[spec.of])]) check(id, { ...def.initial, [spec.unitKey]: 'amount', [spec.key]: cents });
+        }
       }
     }
     check('savings-goal-calculator', { g: 10_000_000_000, s: 10_000_000_000, r: 400_000, md: 'months', m: 1200, dep: 0 });
@@ -230,7 +239,7 @@ describe('after the review', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {
       const privacy = (await import(`../../src/i18n/${lang}/privacy.ts`)).default as { updated: string; sections: { paragraphs: string[] }[] };
       expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(/session storage|armazenamento da sessão|almacenamiento de sesión/);
-      expect(privacy.updated, lang).not.toMatch(/31/);
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 1º de novembro de 2026', es: 'Última actualización: 1 de noviembre de 2026' }[lang]);
     }
   });
 });

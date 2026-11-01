@@ -282,11 +282,22 @@ test.describe('review F4 regressions', () => {
       return { hero: Math.round(hero.right), column: Math.round(column.right) };
     });
     expect(edge.hero).toBeLessThanOrEqual(edge.column);
-    // A 10-digit amount in the chart's legend wraps inside the card at 320px.
-    await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto('about:blank');
-    await open(page, 'simple-interest-calculator', '#v=1&pr=10000000000&r=1000000&u=years&ty=100');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    // At 320px a key press brings the cheer with a 13-character placard ($9,999,999,900) and a 10-digit amount in
+    // the chart's legend: both wrap inside the card (second pass of the review: the steps above did not reach the
+    // placard's own rules).
+    // A new tab is a new visit for the session mark, so the cheer comes again.
+    const fresh = await page.context().newPage();
+    await fresh.setViewportSize({ width: 320, height: 700 });
+    await open(fresh, 'simple-interest-calculator', '#v=1&pr=10000000000&r=1000000&u=years&ty=100');
+    await fresh.locator('#fo-calc-pr').fill('99999999');
+    await expect(fresh.locator('.fo-rhero__oli .fo-placard__n')).toHaveText('$9,999,999,900');
+    const inside = await fresh.evaluate(() => {
+      const card = document.querySelector('.fo-rhero')!.getBoundingClientRect();
+      const parts = [...document.querySelectorAll('.fo-rhero__oli .fo-placard, .fo-split__legend li > span')].map((node) => node.getBoundingClientRect());
+      return parts.every((box) => box.left >= card.left - 1 && box.right <= card.right + 1) && document.documentElement.scrollWidth <= 320;
+    });
+    expect(inside).toBe(true);
+    await fresh.close();
   });
 
   test('the hero speaks half a second after the last key press, also one that leaves the number as it was (ACE-1)', async ({ page }) => {
@@ -422,5 +433,56 @@ test.describe('review F4 regressions', () => {
       await expect(page.locator(`main a[href="${CALC_PAGES[guide.calc].path}"]`).first(), guide.path).toBeAttached();
       expect(await page.locator('main').textContent(), guide.path).not.toMatch(/\b\d+ years loan\b/);
     }
+  });
+});
+
+// ---- second pass of the review F4 (docs/relatorios/REVISAO-F4.md) ------------------------------------------
+
+test.describe('second pass of the review F4', () => {
+  test('a stale result (a field to fix) turns the PDF and CSV off, so new inputs never go with an old result', async ({ page }) => {
+    await open(page, 'mortgage-calculator-extra-payments');
+    await page.locator('#fo-calc-eo').fill('5000');
+    await page.locator('#fo-calc-eom').fill('300');
+    await page.locator('#fo-calc-t').fill('10');
+    await expect(page.locator('.fo-calc__stale')).toHaveText('Fix the highlighted field to update the result.');
+    await expect(pdfButton(page)).toBeDisabled();
+    await expect(csvButton(page)).toBeDisabled();
+    await page.locator('#fo-calc-eom').fill('100');
+    await expect(page.locator('.fo-calc__stale')).toHaveCount(0);
+    await expect(pdfButton(page)).toBeEnabled();
+  });
+
+  test('a group of options keeps the 16px gap to the next field, with no empty space under it', async ({ page }) => {
+    for (const width of [360, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const id of ['apr-to-apy-calculator', 'compound-interest-calculator', 'refinance-calculator'] as const) {
+        await page.goto('about:blank');
+        await open(page, id);
+        const gaps = await page.locator('.fo-calc__fields > fieldset').evaluateAll((sets) =>
+          sets.map((set) => {
+            const next = set.nextElementSibling;
+            const below = next ? next.getBoundingClientRect().top - set.getBoundingClientRect().bottom : 16;
+            const content = [...set.children].reduce((bottom, child) => Math.max(bottom, child.getBoundingClientRect().bottom), 0);
+            return { below: Math.round(below), empty: Math.round(set.getBoundingClientRect().bottom - content) };
+          }),
+        );
+        for (const gap of gaps) {
+          expect(gap.below, `${id} a ${width}px`).toBe(16);
+          expect(gap.empty, `${id} a ${width}px`).toBeLessThanOrEqual(2);
+        }
+      }
+    }
+  });
+
+  test('on a phone the Balance heading stays over the balance of the year', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await open(page, 'mortgage-calculator');
+    await page.getByRole('button', { name: 'Show the full schedule' }).click();
+    const column = await page.evaluate(() => {
+      const heading = document.querySelector('.fo-amort th:last-child')!.getBoundingClientRect();
+      const cell = document.querySelector('.fo-amort__year td:last-child')!.getBoundingClientRect();
+      return { heading: Math.round(heading.right), cell: Math.round(cell.right) };
+    });
+    expect(column.heading).toBe(column.cell);
   });
 });

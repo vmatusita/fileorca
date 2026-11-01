@@ -91,7 +91,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           lang={data.lang}
           t={data.t}
           icons={data.icons}
-          off={view.problem !== undefined}
+          off={view.problem !== undefined || state.stale}
           csv={() => save(new Blob([csvText(view.table(), data.t.year.replace(/\s*\{n\}/, ''))], { type: 'text/csv;charset=utf-8' }), `${data.file}.csv`)}
           pdf={async () => {
             const input = reportInput(
