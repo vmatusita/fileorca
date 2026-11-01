@@ -1,0 +1,17 @@
+---
+// The money calculator island, server-rendered from the same data-props the browser hydrates from (§ 23).
+// This is the only component with the calculator <script>, so every calculator page and every guide loads
+// one entry (src/tools/calc/mount.ts) next to the shared island chunk: two JS files (DECISOES § 110).
+// The schedule's own island (#fo-calc-schedule) is rendered by CalcScheduleRoot.astro, after the first AdSlot.
+import CalcPanel from './CalcPanel.tsx';
+import type { CalcPanelData } from './types.ts';
+
+interface Props {
+  data: CalcPanelData;
+}
+const { data } = Astro.props;
+---
+<div id="fo-tool-root" class="fo-calc-island" data-props={JSON.stringify(data)}><CalcPanel data={data} /></div>
+<script>
+  import './mount.ts';
+</script>

@@ -5,7 +5,7 @@ export default {
   description:
     'Como o FileOrca trata seus dados: os arquivos ficam no aparelho, o que Google Analytics, AdSense e Cloudflare processam e seus direitos na LGPD e no GDPR.',
   h1: 'Política de privacidade',
-  updated: 'Última atualização: 31 de outubro de 2026',
+  updated: 'Última atualização: 1º de novembro de 2026',
   intro:
     'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
@@ -21,6 +21,7 @@ export default {
       paragraphs: [
         'As ferramentas do FileOrca rodam no seu navegador. Os arquivos que você escolhe são processados no seu aparelho e nunca são enviados. O FileOrca não tem servidor que processe arquivos, e você não precisa criar conta.',
         'Os números seguem o mesmo princípio. O que você digita em uma ferramenta, como uma largura, uma altura ou uma porcentagem, fica no seu navegador: não entra no endereço da página, e nenhum evento de medição leva esses números.',
+        'As calculadoras de dinheiro funcionam do mesmo jeito. Os preços, as taxas e os saldos que você digita são calculados no seu aparelho e nunca são enviados. O PDF e o CSV de uma calculadora também são gerados no seu aparelho. O botão de copiar o link põe os seus números depois do # do endereço copiado: essa parte do endereço fica no navegador que o abre e nunca vai para o nosso servidor, e a página nunca a acrescenta ao endereço por conta própria.',
         'As ferramentas de imagem, por exemplo, salvam o resultado sem os metadados da foto, inclusive a localização GPS.',
         'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo.',
       ],
@@ -45,6 +46,9 @@ export default {
         'Clique em uma sugestão de próximo passo',
         'Erro da ferramenta, com o navegador e o formato do arquivo',
         'Clique em um link de doação',
+        'Primeiro resultado de uma calculadora, só com o nome da calculadora',
+        'Download do PDF ou do CSV de uma calculadora, só com o formato',
+        'Clique em copiar o link de uma calculadora, sem o link',
       ],
     },
     {
@@ -65,6 +69,7 @@ export default {
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
         'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantas vezes você usou uma ferramenta e ela gerou pelo menos um arquivo novo neste navegador (um lote de arquivos conta como uma vez só), para o pedido de café aparecer só a partir da terceira vez e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
+        'Nas calculadoras, a página guarda uma marca de sim ou não no armazenamento da sessão desta aba, para a Oli comemorar só no primeiro resultado da visita. Ela não tem nenhum número, nunca sai do navegador e some quando você fecha a aba.',
       ],
     },
     {

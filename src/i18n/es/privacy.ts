@@ -5,7 +5,7 @@ export default {
   description:
     'Cómo trata FileOrca tus datos: tus archivos no salen del dispositivo, qué procesan Google Analytics, AdSense y Cloudflare, y tus derechos (LGPD y RGPD).',
   h1: 'Política de privacidad',
-  updated: 'Última actualización: 31 de octubre de 2026',
+  updated: 'Última actualización: 1 de noviembre de 2026',
   intro:
     'Esta página explica qué pasa con tus datos en fileorca.com. En resumen: tus archivos nunca salen de tu dispositivo. Más abajo ves quién es el responsable, qué se recopila, quién lo recopila y cuáles son tus derechos.',
   sections: [
@@ -21,6 +21,7 @@ export default {
       paragraphs: [
         'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas crear una cuenta.',
         'Los números siguen el mismo principio. Lo que escribes en una herramienta, como un ancho, un alto o un porcentaje, se queda en tu navegador: no se añade a la dirección de la página y ningún evento de analítica lleva esos números.',
+        'Las calculadoras de dinero funcionan igual. Los precios, las tasas y los saldos que escribes se calculan en tu dispositivo y nunca se envían. El PDF y el CSV de una calculadora también se generan en tu dispositivo. El botón de copiar el enlace pone tus números después del # de la dirección copiada: esa parte de la dirección se queda en el navegador que la abre y nunca llega a nuestro servidor, y la página nunca la añade a la dirección por su cuenta.',
         'Las herramientas de imagen, por ejemplo, guardan el resultado sin los metadatos de la foto, incluida la ubicación GPS.',
         'Puedes comprobarlo: abre la pestaña Red de tu navegador mientras usas una herramienta. Ninguna solicitud lleva tu archivo.',
       ],
@@ -45,6 +46,9 @@ export default {
         'Clic en una sugerencia de siguiente paso',
         'Error de la herramienta, con el navegador y el formato del archivo',
         'Clic en un enlace de donación',
+        'Primer resultado de una calculadora, solo con el nombre de la calculadora',
+        'Descarga del PDF o del CSV de una calculadora, solo con el formato',
+        'Clic en copiar el enlace de una calculadora, sin el enlace',
       ],
     },
     {
@@ -65,6 +69,7 @@ export default {
       paragraphs: [
         'FileOrca guarda tu elección sobre cookies en el almacenamiento local (local storage) de tu navegador, para que el aviso no vuelva cada vez. Este registro se queda en tu dispositivo. Para borrarlo, elimina los datos del sitio en tu navegador; el aviso volverá a aparecer.',
         'Si aceptas en el aviso de cookies, FileOrca también cuenta allí cuántas veces usaste una herramienta y generó al menos un archivo nuevo en este navegador (un lote de archivos cuenta como una sola vez), para que el pedido de café aparezca solo a partir de la tercera vez y como mucho una vez por semana; si pides no verlo más, eso también se guarda allí. Ese recuento se queda solo en tu navegador y nunca sale de él, y se borra si rechazas las cookies después.',
+        'En las calculadoras, la página guarda una marca de sí o no en el almacenamiento de sesión de esta pestaña, para que Oli celebre solo con el primer resultado de la visita. No contiene ningún número, nunca sale del navegador y desaparece cuando cierras la pestaña.',
       ],
     },
     {

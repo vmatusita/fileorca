@@ -1,0 +1,92 @@
+import type { CalcPageTexts } from '../../calc/types.ts';
+
+export default {
+  title: 'Savings Goal Calculator: Monthly Deposit or Time to Goal',
+  description: 'Find the monthly deposit that reaches a savings goal by a date, or how many months a deposit takes, with interest, what you put in and a plan by month.',
+  h1: 'Savings goal calculator',
+  lead: 'The monthly deposit for a goal, or how long a deposit takes.',
+  panel: {
+    fields: {
+      g: { label: 'Savings goal', prefix: '$', error: 'Enter a goal from $1 to $100,000,000.' },
+      s: { label: 'Saved so far', prefix: '$', error: 'Enter from $0 to $100,000,000.' },
+      r: { label: 'Yearly rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      md: { label: 'I want to know', error: '' },
+      m: { label: 'Months to save', suffix: 'months', error: 'Enter from 1 to 1,200 months.' },
+      dep: { label: 'Deposit per month', prefix: '$', error: 'Enter a deposit from $0 to $1,000,000.' },
+    },
+    options: { md: { months: 'The deposit', deposit: 'The time' } },
+    moreHeading: 'Interest on your savings',
+    view: {
+      labelDeposit: 'Monthly deposit',
+      labelTime: 'Time to your goal',
+      unit: '/mo',
+      placardDeposit: 'per month',
+      placardTime: 'months',
+      sentenceMonths: 'Saving {deposit} a month for {time} at {rate} takes {saved} to {final}: {deposited} from you and {interest} of interest.',
+      sentenceDeposit: 'Saving {deposit} a month at {rate}, you reach {goal} in {time}, with {interest} of interest.',
+      alreadyThere: 'You already have enough to reach {goal} in that time, without new deposits.',
+      tooLong: 'At {deposit} a month the goal would take more than 100 years. Try a larger deposit.',
+      tooLarge: 'That balance is too large to show. Try a smaller amount, rate or number of months.',
+      yours: 'Your money',
+      interest: 'Interest',
+      final: 'Balance at the end',
+      deposited: 'Your deposits',
+      month: 'Month',
+      deposit: 'Deposit',
+      balance: 'Balance',
+      caption: 'Savings plan by month, grouped by year',
+      scheduleHeading: 'Savings plan',
+    },
+    premises: [
+      'Deposits are the same every month, made at the end of the month.',
+      'Interest is added once a month at the yearly rate divided by 12, on the balance, rounded to the cent.',
+      'The deposit for a date is the smallest whole-cent deposit that reaches the goal by then.',
+      'No taxes, fees or withdrawals are included.',
+    ],
+  },
+  howHeading: 'How to use the savings goal calculator',
+  howSteps: [
+    'Enter your goal, what you have saved and the yearly rate of the account.',
+    'Choose whether you want the deposit for a number of months, or the time with a deposit you pick.',
+    'Type the months or the deposit, and read the result.',
+    'Open the plan by month, or save it as a PDF or a CSV.',
+  ],
+  worksHeading: 'How the deposit and the time are worked out',
+  formulaHeading: 'The formula',
+  formula: [
+    'Each month: balance = balance + balance × r + deposit, with r the yearly rate divided by 12 and the interest rounded to the cent.',
+    'The deposit for a date starts from D = (goal − saved × (1 + r)^n) × r ÷ ((1 + r)^n − 1) and moves to the smallest whole-cent deposit that reaches the goal in n months. The time with a deposit is the first month the balance reaches the goal.',
+  ],
+  premisesHeading: 'Assumptions',
+  exampleHeading: 'Worked example',
+  exampleIntro: 'This is the example the calculator opens with, worked out by the same engine you use above.',
+  sourcesHeading: 'Sources',
+  sources: [
+    { label: 'Consumer Financial Protection Bureau, "How does compound interest work?"', href: 'https://www.consumerfinance.gov/ask-cfpb/how-does-compound-interest-work-en-1683/' },
+    { label: 'Consumer Financial Protection Bureau, Regulation DD, Appendix A, annual percentage yield calculation', href: 'https://www.consumerfinance.gov/rules-policy/regulations/1030/a/' },
+  ],
+  disclaimer: 'This calculator is an educational tool, not financial advice. The rate an account pays can change.',
+  faqHeading: 'Questions about savings goals',
+  faq: [
+    {
+      q: 'Why is the deposit lower than the goal divided by the months?',
+      a: 'Interest does part of the work, and what you have already saved grows too. At 0% the deposit is exactly what is left divided by the months, rounded up to the cent.',
+    },
+    {
+      q: 'Which rate should I use?',
+      a: 'The rate your savings account pays. If it shows an APY, the APR to APY calculator turns it into the yearly rate this calculator uses.',
+    },
+    {
+      q: 'What if I miss a month?',
+      a: 'The plan assumes a deposit every month. To catch up, run it again with what you have saved by then and the months that are left.',
+    },
+    {
+      q: 'Can it plan for a goal many years away?',
+      a: 'Up to 1,200 months. Over long periods prices also rise, so the goal itself may need to grow.',
+    },
+  ],
+  privacyHeading: 'Privacy',
+  privacyNote:
+    'Your numbers stay on your device. The calculator runs in your browser, so nothing you type is sent anywhere, and the link you copy keeps the numbers after the #, a part of the address your browser never sends.',
+  relatedHeading: 'Related calculators',
+} satisfies CalcPageTexts;

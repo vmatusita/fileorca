@@ -2,6 +2,8 @@
 // No event carries a file name, file content or a number the person typed.
 import type { Lang } from '../i18n/routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
+import type { CalcPageId } from '../tools/calc/registry.ts';
+import { EVENT_TOOLS } from './tool-ids.ts';
 
 export const EVENT_PARAMS = {
   tool_start: ['tool', 'lang'],
@@ -10,12 +12,15 @@ export const EVENT_PARAMS = {
   next_step_click: ['tool', 'lang', 'target'],
   tool_error: ['tool', 'lang', 'browser', 'codec', 'reason'],
   donate_click: ['place', 'lang'],
+  calc_complete: ['tool', 'lang'],
+  export_click: ['tool', 'lang', 'format'],
+  share_click: ['tool', 'lang'],
 } as const;
 
 export type EventName = keyof typeof EVENT_PARAMS;
 
-/** Every image tool and preset page (registry.ts); the id is a page name, never a file name. */
-export type ToolId = ImagePageId;
+/** Every image and money calculator page (the registries); the id is a page name, never a file name or a number. */
+export type ToolId = ImagePageId | CalcPageId;
 /** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
 export const OUTCOMES = ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed'] as const;
 export type Outcome = (typeof OUTCOMES)[number];
@@ -29,18 +34,32 @@ export type ErrorReason = (typeof ERROR_REASONS)[number];
 export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'unknown', 'empty'] as const;
 export type Codec = (typeof CODECS)[number];
 export type DonatePlace = 'result' | 'footer' | 'support_page';
+/** What a calculator exported: a closed list (DECISOES § 113). */
+export const EXPORT_FORMATS = ['pdf', 'csv'] as const;
+export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
   tool_complete: { tool: ToolId; lang: Lang; outcome: Outcome };
   download: { tool: ToolId; lang: Lang };
-  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | 'home' };
+  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | CalcPageId | 'home' };
   tool_error: { tool: ToolId; lang: Lang; browser: string; codec: Codec; reason: ErrorReason };
   donate_click: { place: DonatePlace; lang: Lang };
+  /** Once per page load, on the first valid change the person makes (never on load, never from the # link). */
+  calc_complete: { tool: CalcPageId; lang: Lang };
+  export_click: { tool: CalcPageId; lang: Lang; format: ExportFormat };
+  share_click: { tool: CalcPageId; lang: Lang };
 }
 
 /** Parameters whose value comes from a closed list: anything else (a file type, a free string) is dropped. */
-const CLOSED_VALUES: Record<string, readonly string[]> = { outcome: OUTCOMES, reason: ERROR_REASONS, codec: CODECS };
+const CLOSED_VALUES: Record<string, readonly string[]> = {
+  outcome: OUTCOMES,
+  reason: ERROR_REASONS,
+  codec: CODECS,
+  format: EXPORT_FORMATS,
+  tool: EVENT_TOOLS,
+  target: [...EVENT_TOOLS, 'home'],
+};
 
 /** Drops any parameter outside the list, and any value outside a closed list (defence in depth: the types already forbid them). */
 export function cleanParams<N extends EventName>(name: N, params: Record<string, unknown>): Partial<EventMap[N]> {

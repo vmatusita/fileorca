@@ -18,6 +18,7 @@ import {
   fileIn,
   formatTable,
   type Row,
+  realSite,
   type Site,
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
@@ -237,6 +238,35 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(failing(checkNothingUnfinished(card)).join('\n')).toMatch(/cartão para \/convert-to-webp\/, que não existe[\s\S]*fora do registro/);
     const search = makeSite((dir) => write(dir, '/search-index.json', JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, { id: 'avif-to-jpg', href: { en: '/avif-to-jpg/' } }])));
     expect(failing(checkNothingUnfinished(search)).join('\n')).toMatch(/busca: avif-to-jpg leva a \/avif-to-jpg\/, que não existe[\s\S]*fora do registro/);
+  });
+
+  it('checks the extra cards of a page from the calculator registry: the money ones the home must list (F4)', () => {
+    const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
+    const CALC = '/mortgage-calculator/';
+    const withMoney = (site: Site): Site => ({ ...site, cards: { home: { en: [CALC] } } });
+    const listed = withMoney(
+      makeSite((dir) => {
+        write(dir, CALC, pageHtml({ id: 'mortgage-calculator', lang: 'en', path: CALC, indexable: true, ads: true }));
+        write(dir, '/', pageHtml(home, (main) => `${main}<a class="fo-tool" href="${CALC}">Mortgage calculator</a>`));
+      }),
+    );
+    expect(failing(checkNothingUnfinished(listed))).toEqual([]);
+    // The registry asks for the mortgage card and the home has none: it is missing.
+    const missing = withMoney(makeSite((dir) => write(dir, CALC, pageHtml({ id: 'mortgage-calculator', lang: 'en', path: CALC, indexable: true, ads: true }))));
+    expect(failing(checkNothingUnfinished(missing)).join('\n')).toMatch(/faltam os cartões de \/mortgage-calculator\//);
+    // A calculator card the registry does not ask for (the home lists only its five) is refused.
+    const extra = makeSite((dir) => {
+      write(dir, CALC, pageHtml({ id: 'mortgage-calculator', lang: 'en', path: CALC, indexable: true, ads: true }));
+      write(dir, '/', pageHtml(home, (main) => `${main}<a class="fo-tool" href="${CALC}">Mortgage calculator</a>`));
+    });
+    expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
+  });
+
+  it('builds the real site with the image and money cards and the search of both registries', () => {
+    const site = realSite('dist');
+    expect(site.cards?.['home']?.en).toEqual(['/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/']);
+    expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
+    expect(site.searchIds).toHaveLength(11 + 18 + 5);
   });
 });
 

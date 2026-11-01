@@ -1,0 +1,132 @@
+---
+// A guide /guides/<slug>/ (F4, decision 10; DECISOES § 119): breadcrumb Home › Money calculators › title; H1,
+// the line it answers and "Reviewed by" with the dates; the introduction; the embedded calculator, filled
+// with the guide's example by property of the page (never by the URL), and its schedule; the text, whose
+// every result is filled in by the engines at build (src/tools/calc/guides.ts); one content AdSlot only after
+// the calculator; the table the engines measured, with its date; how it works (the data-ymyl blocks of
+// gate:dinheiro-saude); the related calculators; the rail AdSlot. Schema: Article, BreadcrumbList, Person.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import Reviewed from '../tools/calc/Reviewed.astro';
+import CalcIsland from '../tools/calc/CalcIsland.astro';
+import CalcScheduleRoot from '../tools/calc/CalcScheduleRoot.astro';
+import { routeById } from '../i18n/routes.ts';
+import { fmt } from '../i18n/format.ts';
+import enCommon from '../i18n/en/common.ts';
+import type { GuideTexts } from '../i18n/types.ts';
+import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
+import { PANEL_POSES } from '../tools/image/Oli.tsx';
+import { CALC_PAGES, GUIDES, MONEY_HUB_ID, type GuideId } from '../tools/calc/registry.ts';
+import { FIRST_PUBLISHED, REVIEWED, SHARED, calcTexts, cardOf, longDate, panelData } from '../tools/calc/page.ts';
+import { GUIDE_FACTS } from '../tools/calc/guides.ts';
+
+interface Props {
+  id: GuideId;
+  lang: 'en';
+}
+const { id, lang } = Astro.props;
+const texts = import.meta.glob<GuideTexts>('/src/i18n/en/guide-*.ts', { import: 'default', eager: true });
+const t = texts[`/src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`];
+if (!t) throw new Error(`no texts for ${id}`);
+const route = routeById(id);
+const path = GUIDES[id].path;
+const guide = GUIDE_FACTS[id]();
+const fill = (text: string): string => fmt(text, { ...guide.facts, date: longDate(REVIEWED) });
+const data = panelData(guide.calc, lang, { initial: guide.example, readLink: false });
+const common = enCommon;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: common.moneyCalculators, path: `/${MONEY_HUB_ID}/` },
+  { name: t.h1, path },
+];
+const related = GUIDES[id].related.map(cardOf);
+// The calculator the guide embeds, by its own H1, linked under it (review F4, SEO-1): the first letter goes small
+// unless the name starts with an acronym ("APR to APY").
+const calcH1 = calcTexts(guide.calc).h1;
+const calcLabel = /^[A-Z][a-z]/.test(calcH1) ? calcH1[0]!.toLowerCase() + calcH1.slice(1) : calcH1;
+const calcPath = CALC_PAGES[guide.calc].path;
+const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
+const [noteBefore, noteAfter] = t.tableNote.split('{date}');
+const before = t.sections.slice(0, 2);
+const after = t.sections.slice(2);
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  oli={PANEL_POSES}
+  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED), personLd()]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-top fo-top--calc">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <p class="fo-lead">{t.lead}</p>
+    <Reviewed />
+  </div>
+  <div class="fo-prose fo-guide">{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+  <section class="fo-section fo-prose" aria-labelledby="guide-calc">
+    <h2 id="guide-calc">{t.calcHeading}</h2>
+    <p>{fill(t.calcIntro)}</p>
+  </section>
+  <CalcIsland data={data} />
+  <p class="fo-guide__open"><a href={calcPath}>{fmt(SHARED.page.openCalc, { name: calcLabel })}</a></p>
+  <CalcScheduleRoot data={data} />
+  {before.map((section, index) => (
+    <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>
+      <h2 id={`part-${index}`}>{section.heading}</h2>
+      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
+    </section>
+  ))}
+  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
+  {after.map((section, index) => (
+    <section class="fo-section fo-prose" aria-labelledby={`part-${index + before.length}`}>
+      <h2 id={`part-${index + before.length}`}>{section.heading}</h2>
+      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
+    </section>
+  ))}
+  <section class="fo-section fo-prose" aria-labelledby="measured">
+    <h2 id="measured">{t.tableHeading}</h2>
+    <p>{fill(t.tableIntro)}</p>
+    <div class="fo-table-wrap" tabindex="0" role="region" aria-label={t.tableCaption}>
+      <table class="fo-table">
+        <caption class="fo-sr">{t.tableCaption}</caption>
+        <thead><tr>{guide.table.head.map((heading) => <th scope="col">{heading}</th>)}</tr></thead>
+        <tbody>{guide.table.rows.map((row) => <tr>{row.map((cell, index) => (index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}</tr>)}</tbody>
+      </table>
+    </div>
+    <p class="fo-reviewed">{noteBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{noteAfter}</p>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="works">
+    <h2 id="works">{t.formulaHeading}</h2>
+    <div data-ymyl="formula">{t.formula.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+    <div data-ymyl="premises">
+      <h3 class="fo-h3">{t.premisesHeading}</h3>
+      <ul>{t.premises.map((premise) => <li>{fill(premise)}</li>)}</ul>
+    </div>
+    <div data-ymyl="example">
+      <h3 class="fo-h3">{t.exampleHeading}</h3>
+      {t.example.map((paragraph) => <p>{fill(paragraph)}</p>)}
+    </div>
+    <div data-ymyl="source">
+      <h3 class="fo-h3">{t.sourcesHeading}</h3>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{readAfter}</li>)}</ul>
+    </div>
+    <div data-ymyl="disclaimer">
+      <h3 class="fo-h3">{t.disclaimerHeading}</h3>
+      <p>{t.disclaimer}</p>
+    </div>
+  </section>
+  <section class="fo-section" aria-labelledby="related">
+    <h2 id="related">{t.relatedHeading}</h2>
+    <ul class="fo-grid">
+      {related.map((card) => (
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
+</BaseLayout>

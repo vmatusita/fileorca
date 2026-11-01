@@ -1,0 +1,112 @@
+---
+// The money hub /money-calculators/ (F4; DECISOES § 118), on the mold of /image-tools/ (§ 77 and § 96):
+// eyebrow, H1 and one line in the money band; the calculators, the credit ones first; one content AdSlot;
+// the presets with their links; the guides; "how these calculators work" with the data-ymyl blocks of
+// gate:dinheiro-saude (formula, assumptions, a worked example from the engine, official sources, "Reviewed
+// by" and the notice); the rail AdSlot. English only for now.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import Reviewed from '../tools/calc/Reviewed.astro';
+import { routeById } from '../i18n/routes.ts';
+import enCommon from '../i18n/en/common.ts';
+import t from '../i18n/en/money-calculators.ts';
+import { breadcrumbLd, collectionPageLd, homePath, personLd } from '../seo/meta.ts';
+import { CALC_PAGES, CALC_PRESET_IDS, CALC_TOOL_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
+import { REVIEWED, SHARED, cardOf, longDate, workedExample } from '../tools/calc/page.ts';
+
+interface Props {
+  lang: 'en';
+}
+const { lang } = Astro.props;
+const route = routeById(MONEY_HUB_ID);
+const path = route.paths[lang] ?? '/money-calculators/';
+const common = enCommon;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: common.moneyCalculators, path },
+];
+const groups = [
+  { id: 'credit', heading: t.creditHeading, cards: CALC_TOOL_IDS.filter((id) => CALC_PAGES[id].group === 'credit').map(cardOf) },
+  { id: 'savings', heading: t.educationalHeading, cards: CALC_TOOL_IDS.filter((id) => CALC_PAGES[id].group === 'educational').map(cardOf) },
+];
+const presets = CALC_PRESET_IDS.map(cardOf);
+const guides = GUIDE_IDS.map((id) => ({ href: GUIDES[id].path, blurb: common.guides[id] }));
+const list = [...groups.flatMap((group) => group.cards), ...presets].map((card) => ({ name: card.name, path: card.href }));
+const example = workedExample('mortgage-calculator', lang);
+const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-hubband fo-cat--money">
+    <span class="fo-eyebrow">{t.eyebrow}</span>
+    <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+    <p class="fo-muted">{t.intro}</p>
+    <Reviewed />
+  </div>
+  {groups.map((group) => (
+    <section class="fo-section" aria-labelledby={`calcs-${group.id}`}>
+      <h2 id={`calcs-${group.id}`}>{group.heading}</h2>
+      <ul class="fo-grid">
+        {group.cards.map((card) => (
+          <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
+        ))}
+      </ul>
+    </section>
+  ))}
+  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" aria-labelledby="presets">
+    <h2 id="presets">{t.presetsHeading}</h2>
+    <table class="fo-table">
+      <caption class="fo-sr">{t.presetsCaption}</caption>
+      <thead><tr><th scope="col">{t.presetsHead[0]}</th><th scope="col">{t.presetsHead[1]}</th></tr></thead>
+      <tbody>
+        {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.name}</a></th><td>{preset.description}</td></tr>)}
+      </tbody>
+    </table>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="guides">
+    <h2 id="guides">{t.guidesHeading}</h2>
+    <ul>
+      {guides.map((guide) => <li><a href={guide.href}>{guide.blurb.name}</a>: {guide.blurb.description}</li>)}
+    </ul>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="works">
+    <h2 id="works">{t.worksHeading}</h2>
+    {t.worksIntro.map((paragraph) => <p>{paragraph}</p>)}
+    <div data-ymyl="formula">
+      <h3 class="fo-h3">{t.formulaHeading}</h3>
+      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <div data-ymyl="premises">
+      <h3 class="fo-h3">{t.premisesHeading}</h3>
+      <ul>{t.premises.map((premise) => <li>{premise}</li>)}</ul>
+    </div>
+    <div data-ymyl="example">
+      <h3 class="fo-h3">{t.exampleHeading}</h3>
+      <p>{t.exampleIntro}</p>
+      <table class="fo-table">
+        <caption class="fo-sr">{SHARED.page.exampleResults}</caption>
+        <tbody>{example.results.slice(0, 3).map(([label, value]) => <tr><th scope="row">{label}</th><td>{value}</td></tr>)}</tbody>
+      </table>
+      <p>{example.sentence}</p>
+    </div>
+    <div data-ymyl="source">
+      <h3 class="fo-h3">{t.sourcesHeading}</h3>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{readAfter}</li>)}</ul>
+    </div>
+    <div data-ymyl="disclaimer">
+      <h3 class="fo-h3">{t.disclaimerHeading}</h3>
+      <p>{t.disclaimer}</p>
+    </div>
+  </section>
+  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
+</BaseLayout>

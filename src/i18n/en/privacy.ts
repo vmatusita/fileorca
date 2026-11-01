@@ -5,7 +5,7 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: October 31, 2026',
+  updated: 'Last updated: November 1, 2026',
   intro:
     'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
@@ -21,6 +21,7 @@ export default {
       paragraphs: [
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
         'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
+        'The money calculators work the same way. The prices, rates and balances you type are worked out on your device and are never sent anywhere. The PDF and the CSV of a calculator are made on your device too. Copy link puts your numbers after the # of the address it copies: that part of an address stays in the browser that opens it and is never sent to our server, and the page never adds it to the address on its own.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
       ],
@@ -45,6 +46,9 @@ export default {
         'Click on a next-step suggestion',
         'Tool error, with the browser and the file format',
         'Click on a donation link',
+        'First result of a calculator, with the name of the calculator only',
+        'Download of a calculator PDF or CSV, with the format only',
+        'Click on Copy link in a calculator, without the link',
       ],
     },
     {
@@ -65,6 +69,7 @@ export default {
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
         "If you accept in the cookie notice, FileOrca also counts there how many image batches ended with at least one real result in this browser, such as a smaller, converted, rotated, cropped or resized image or a PDF, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
+        "On the calculators, the page keeps one yes-or-no mark in this tab's session storage, so the Oli cheers only on the first result of the visit. It holds no number, never leaves the browser and is gone when you close the tab.",
       ],
     },
     {

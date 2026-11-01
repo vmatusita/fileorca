@@ -3,6 +3,7 @@
 // which keeps lint:texto able to read every text without running page code.
 import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
+import type { CalcPageId, GuideId } from '../tools/calc/registry.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -29,6 +30,8 @@ export interface CommonTexts {
   seal: string;
   footer: {
     imageColumn: string;
+    /** The Money column, where the money calculators exist (English). */
+    moneyColumn?: string;
     siteColumn: string;
     about: string;
     privacy: string;
@@ -61,18 +64,30 @@ export interface CommonTexts {
     emptyTitle: string;
     emptyHint: string;
     imageCategory: string;
+    moneyCategory?: string;
     shortcut: string;
   };
   /** Short names and one-line descriptions of the tools that exist in this language. */
   tools: { 'compress-image': ToolBlurb } & Partial<Record<Exclude<ImagePageId, 'compress-image'>, ToolBlurb>>;
   /** Name of the image hub (breadcrumb, footer), where the hub exists. */
   imageTools?: string;
+  /** Name of the money hub, the cards of the calculators and guides, and the seal of their pages (English for now). */
+  moneyCalculators?: string;
+  calcs?: Record<CalcPageId, ToolBlurb>;
+  guides?: Record<GuideId, ToolBlurb>;
+  calcSeal?: string;
 }
 
 /** English has every image tool, preset and the hub. */
 export interface EnCommonTexts extends CommonTexts {
   tools: Record<ImagePageId, ToolBlurb>;
   imageTools: string;
+  moneyCalculators: string;
+  calcs: Record<CalcPageId, ToolBlurb>;
+  guides: Record<GuideId, ToolBlurb>;
+  calcSeal: string;
+  footer: CommonTexts['footer'] & { moneyColumn: string };
+  search: CommonTexts['search'] & { moneyCategory: string };
 }
 
 export interface Section {
@@ -91,6 +106,8 @@ export interface HomeTexts extends PageMeta {
   privacyBody: string;
   /** Link under the tool grid to the image hub, only in the languages that have the hub. */
   hubLink?: string;
+  /** The money section, only where the money calculators exist (English): heading, line and the hub link. */
+  money?: { heading: string; intro: string; hubLink: string };
 }
 
 export interface LegalTexts extends PageMeta {
@@ -225,6 +242,63 @@ export interface ImageToolsTexts extends PageMeta {
   /** One line per job: the text before the tool name, the tool (linked to its page), the text after it. */
   guide: { before: string; tool: ImageToolId; after: string }[];
   guideOutro: string;
+}
+
+/** A source a money page cites, with the official page's address. */
+export interface MoneySource {
+  label: string;
+  href: string;
+}
+
+/** The money hub /money-calculators/ (fo-hubband, the grid, presets, guides and "how these calculators work"). */
+export interface MoneyHubTexts extends PageMeta {
+  eyebrow: string;
+  h1: string;
+  intro: string;
+  creditHeading: string;
+  educationalHeading: string;
+  presetsHeading: string;
+  presetsCaption: string;
+  presetsHead: [string, string];
+  guidesHeading: string;
+  worksHeading: string;
+  worksIntro: string[];
+  formulaHeading: string;
+  formula: string[];
+  premisesHeading: string;
+  premises: string[];
+  exampleHeading: string;
+  exampleIntro: string;
+  sourcesHeading: string;
+  sources: MoneySource[];
+  disclaimerHeading: string;
+  disclaimer: string;
+}
+
+/** A guide /guides/<slug>/ (F4, decision 10): {placeholders} are numbers the engines work out at build. */
+export interface GuideTexts extends PageMeta {
+  h1: string;
+  lead: string;
+  intro: string[];
+  calcHeading: string;
+  calcIntro: string;
+  sections: { heading: string; paragraphs: string[] }[];
+  tableHeading: string;
+  tableIntro: string;
+  tableCaption: string;
+  /** Says the table was measured by the engine of the site, with the date: "{date}". */
+  tableNote: string;
+  formulaHeading: string;
+  formula: string[];
+  premisesHeading: string;
+  premises: string[];
+  exampleHeading: string;
+  example: string[];
+  sourcesHeading: string;
+  sources: MoneySource[];
+  disclaimerHeading: string;
+  disclaimer: string;
+  relatedHeading: string;
 }
 
 /**

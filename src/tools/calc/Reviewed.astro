@@ -1,0 +1,12 @@
+---
+// The "Reviewed by" line of every money page (PLANO "Confiança em dinheiro e saúde"): the author, the date
+// of the review and the date of first publication, as <time datetime> (gate:dinheiro-saude, "reviewed").
+import { AUTHOR } from '../../platform/site.ts';
+import { FIRST_PUBLISHED, REVIEWED, SHARED, longDate } from './page.ts';
+
+const [byBefore, byAfter = ''] = SHARED.page.reviewed.split('{date}');
+const [firstBefore, firstAfter = ''] = SHARED.page.firstPublished.split('{date}');
+---
+<p class="fo-reviewed" data-ymyl="reviewed">
+  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{`${byAfter} `}{firstBefore}<time datetime={FIRST_PUBLISHED}>{longDate(FIRST_PUBLISHED)}</time>{firstAfter}
+</p>

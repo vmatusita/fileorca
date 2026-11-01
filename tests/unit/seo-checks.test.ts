@@ -70,9 +70,10 @@ describe('validador de hreflang', () => {
 });
 
 describe('sitemaps', () => {
-  // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages; Portuguese and Spanish keep
-  // the 8 they had (home, Compress image and the 6 institutional pages).
-  const SIZES = { en: 19, pt: 8, es: 8 } as const;
+  // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages, plus the money hub, 14 calculators,
+  // 4 presets and 5 guides of the F4; Portuguese and Spanish keep the 8 they had (home, Compress image and the 6
+  // institutional pages).
+  const SIZES = { en: 19 + 24, pt: 8, es: 8 } as const;
 
   it('builds one valid sitemap per language and an index', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {

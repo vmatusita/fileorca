@@ -7,7 +7,7 @@ export default {
   h1: 'About FileOrca',
   intro: [
     'FileOrca is made and run by one person: Victor Yuki Matusita, a developer in Curitiba, Paraná, Brazil.',
-    'It is a set of free tools that run in your browser: eight image tools in English, and the image compressor in Portuguese and Spanish too.',
+    'It is a set of free tools that run in your browser: eight image tools and 18 money calculators in English, and the image compressor in Portuguese and Spanish too.',
   ],
   whyHeading: 'Why this site exists',
   why: [

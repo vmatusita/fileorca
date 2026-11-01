@@ -6,6 +6,7 @@ import { relative } from 'node:path';
 import { parse, NodeType, type HTMLElement, type Node } from 'node-html-parser';
 import { DEFAULT_LANG, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, presetsOf, type ImagePageId } from '../../src/tools/image/registry.ts';
+import { CALC_PAGES, calcPresetsOf, type CalcPageId } from '../../src/tools/calc/registry.ts';
 
 export const CONTENT_BLOCKS = ['how', 'specs', 'faq', 'privacy', 'related'] as const;
 export type ContentBlock = (typeof CONTENT_BLOCKS)[number];
@@ -140,6 +141,25 @@ export function checkToolPage(html: string): string[] {
   return problems;
 }
 
+/** The blocks of a money calculator page (prompt F4, decision 9): how-to, questions, the privacy note, related. */
+export const CALC_BLOCKS = ['how', 'faq', 'privacy', 'related'] as const;
+/** The privacy note of a calculator says this, in so many words (prompt F4, decision 9). */
+export const CALC_PRIVACY_PHRASE = 'your numbers stay on your device';
+
+/** Rule 1 for a calculator or calculator preset: its four blocks, and the privacy note says the numbers stay on the device. */
+export function checkCalcPage(html: string): string[] {
+  const root = parsePage(html);
+  const problems: string[] = [];
+  for (const name of CALC_BLOCKS) {
+    const blocks = blocksOf(root, name);
+    if (blocks.length === 0) problems.push(`sem o bloco ${name} (data-content="${name}")`);
+    else problems.push(...BLOCK_CHECKS[name](blocks));
+  }
+  const privacy = blocksOf(root, 'privacy').map(plainText).join(' ');
+  if (privacy && !privacy.includes(CALC_PRIVACY_PHRASE)) problems.push(`o bloco privacy não diz "${CALC_PRIVACY_PHRASE}"`);
+  return problems;
+}
+
 /** Elements with data-content that are not inside another one: each is counted once. */
 function topLevelBlocks(root: HTMLElement): HTMLElement[] {
   return root.querySelectorAll('[data-content]').filter((block) => {
@@ -232,6 +252,18 @@ export function comparisonPaths(id: ImagePageId, lang: Lang = DEFAULT_LANG): str
   return [parent, ...presetsOf(parent).filter((preset) => preset !== id)]
     .map((other) => routeById(other).paths[lang])
     .filter((path): path is string => path !== undefined);
+}
+
+/** The calculator page a route id names. */
+export function isCalcPage(id: string): id is CalcPageId {
+  return Object.hasOwn(CALC_PAGES, id);
+}
+
+/** Paths a calculator preset is compared against: its parent calculator, then the sibling presets. */
+export function calcComparisonPaths(id: CalcPageId): string[] {
+  const parent = CALC_PAGES[id].parent;
+  if (!parent) return [];
+  return [parent, ...calcPresetsOf(parent).filter((preset) => preset !== id)].map((other) => CALC_PAGES[other].path);
 }
 
 /** URL path of a dist file: 'dist/pt/sobre/index.html' -> '/pt/sobre/'; 'dist/404.html' -> '/404.html'. */

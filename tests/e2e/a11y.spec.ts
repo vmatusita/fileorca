@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
+import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { describedViolations } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 
@@ -69,12 +70,13 @@ async function searchDialogOpen(page: Page): Promise<void> {
   await animationsDone(page);
 }
 
-// Nothing typed: every tool and preset page is listed and the list scrolls inside the box.
+// Nothing typed: every tool and preset page is listed and the list scrolls inside the box. F4: the English search
+// also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry.
 async function searchDialogListed(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
-  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length);
+  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length);
   await animationsDone(page);
 }
 
@@ -186,5 +188,36 @@ test.describe('axe com arquivo recusado, a 360 e 1280px, nos temas escuro e clar
     await expect(page.locator('.fo-file[data-state="error"] a')).toHaveAttribute('href', '/heic-to-jpg/');
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'error row').toEqual([]);
+  });
+});
+
+// F4: the states of a calculator the page-by-page pass does not reach (the scenarios and the debt lists are on the
+// page at load, so that pass reads them): a field in error with the last result and the Oli's first cheer, the
+// schedule open with a second year open, and Copy link turned into "Link copied".
+test.describe('axe nos estados da calculadora, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('a field in error, the cheer, the open schedule and Link copied', async ({ page }) => {
+    await page.addInitScript(() => {
+      const clipboard = navigator.clipboard;
+      if (clipboard) clipboard.writeText = async () => undefined;
+    });
+    await page.goto('/mortgage-calculator/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.locator('#fo-calc-p').fill('400000');
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
+    await page.locator('#fo-calc-r').fill('99');
+    await expect(page.locator('#fo-calc-r-error')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'field in error and the cheer').toEqual([]);
+    await page.locator('#fo-calc-r').fill('6.5');
+    await page.getByRole('button', { name: 'Show the full schedule' }).click();
+    await page.locator('#fo-calc-schedule tr.fo-amort__year').nth(1).getByRole('button').click();
+    await expect(page.locator('#fo-calc-schedule tbody tr:not(.fo-amort__year)')).toHaveCount(24);
+    await page.locator('.fo-export .fo-btn').nth(2).click();
+    await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText('Link copied');
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'schedule open and Link copied').toEqual([]);
   });
 });

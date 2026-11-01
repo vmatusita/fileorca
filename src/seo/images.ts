@@ -18,6 +18,7 @@ const BRAND = '#0B63F6';
 const ON_CAT = '#0F1B2D';
 const TURQUESA = '#14B8A6';
 const CORAL = '#FF6B57';
+const ALGA = '#2FBF71';
 const WATER_DEEP = '#14407E';
 
 const designAsset = (...parts: string[]): string => readFileSync(join(process.cwd(), 'docs', 'design', 'assets', ...parts), 'utf8').trim();
@@ -123,7 +124,7 @@ function toolTile(tool: OgTool): Node {
   }, [
     h('div', {
       display: 'flex', alignItems: 'center', justifyContent: 'center', width: 144, height: 144, borderRadius: 34,
-      background: tool.category === 'pdf' ? CORAL : TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
+      background: tool.category === 'pdf' ? CORAL : tool.category === 'money' ? ALGA : TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
     }, [img(toolIcon(tool.icon), 88, 88)]),
   ]);
 }
@@ -131,7 +132,7 @@ function toolTile(tool: OgTool): Node {
 /** The tool icon beside the Oli: the name of an icon of the design system and the category colour of its tile. */
 export interface OgTool {
   icon: string;
-  category: 'image' | 'pdf';
+  category: 'image' | 'pdf' | 'money';
 }
 
 export async function ogPng(title: string, subtitle: string, options: { tool?: OgTool } = {}): Promise<Buffer> {

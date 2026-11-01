@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
@@ -307,4 +308,64 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
   const adsTxt = await page.request.get('/ads.txt');
   expect(adsTxt.status()).toBe(404);
   expect(readFileSync('dist/_headers', 'utf8')).not.toContain('ads.txt');
+});
+
+// F4 (prompt decision 13): every calculator, preset and guide, at 360x740 and 1280x800 on one load, with the
+// schedule closed and with one year open. Measured on top of TARGETS: the ResultHero, the three ExportBar buttons,
+// the ScenarioCompare, the schedule section and its table. No AdSlot above the tool on a phone, inside the island,
+// between the fields or inside the schedule; on a phone the result sits above the fold, right under the main fields.
+const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-export .fo-btn, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
+const MONEY_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path)];
+
+test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×800', () => {
+  for (const path of MONEY_PAGES) {
+    test(`${path}: with the schedule closed and with a year open`, async ({ page }) => {
+      await page.setViewportSize(VIEWPORTS[0]);
+      expect((await page.goto(path))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      const adCount = await page.locator('.fo-ad').count();
+      expect(adCount).toBeGreaterThan(0);
+      const measure = async (state: string) => {
+        for (const viewport of VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+          const label = `${state} a ${viewport.width}px`;
+          const tool = (await boxes(page, '#fo-tool-root'))[0];
+          expect(tool, label).toBeDefined();
+          // No content AdSlot above the tool, on a phone or a computer.
+          for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+          if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+          expect(await page.locator('#fo-calc-schedule .fo-ad, .fo-amort .fo-ad').count(), `${label}: AdSlot dentro do cronograma`).toBe(0);
+          await expectAdsOutsideThePanel(page, label, adCount);
+          await expectClearance(page, label, CALC_TARGETS);
+        }
+      };
+      // The result above the fold on a phone, on a calculator page (a guide opens with its text first).
+      if (CALC_PAGE_IDS.some((id) => CALC_PAGES[id].path === path)) {
+        await page.setViewportSize(VIEWPORTS[0]);
+        const number = await page.locator('.fo-rhero__num').boundingBox();
+        expect((number?.y ?? 999) + (number?.height ?? 0), 'número do resultado acima da dobra a 360×740').toBeLessThanOrEqual(740);
+      }
+      await measure('cronograma fechado');
+      await page.locator('#fo-calc-schedule button[aria-controls]').click();
+      await expect(page.locator('.fo-amort tbody tr').first()).toBeVisible();
+      await measure('um ano aberto');
+    });
+  }
+});
+
+test('the money hub keeps its one content AdSlot under the grids of calculators, at 360 and 1280px', async ({ page }) => {
+  await page.goto('/money-calculators/');
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+    const grids = await boxes(page, 'main .fo-grid');
+    const ad = await page.locator('.fo-ad--content').boundingBox();
+    const last = grids.at(-1);
+    expect(last && ad, `${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
+    expect(ad!.y, `${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
+    await expectClearance(page, `hub a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+  }
 });

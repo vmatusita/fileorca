@@ -48,6 +48,25 @@ describe('motor de imagem autocontido (lint)', () => {
   }, 30_000);
 });
 
+describe('motor de dinheiro sem dependências (lint)', () => {
+  const rule = 'fileorca/engine-self-contained';
+  const ids = async (code: string) => {
+    const [result] = await new ESLint().lintText(code, { filePath: 'src/calc/probe.ts' });
+    return result?.messages.map((message) => message.ruleId) ?? [];
+  };
+
+  it('reports an import from outside src/calc/, a dynamic one and a package', async () => {
+    expect(await ids("import { LANGS } from '../i18n/routes.ts';\nexport const x = LANGS;\n")).toContain(rule);
+    expect(await ids("export const load = () => import('../platform/site.ts');\n")).toContain(rule);
+    expect(await ids("export { fmt } from 'src/i18n/format.ts';\n")).toContain(rule);
+    expect(await ids("import { wrap } from 'comlink';\nexport const w = wrap;\n")).toContain(rule);
+  }, 30_000);
+
+  it('accepts a file of the same folder', async () => {
+    expect(await ids("import { interest } from './money.ts';\nexport const f = interest;\n")).not.toContain(rule);
+  }, 30_000);
+});
+
 /**
  * The hex values that only the yellow family of tokens.css uses (#FFC93C and #B8870F today; the dark ink of the
  * yellow button's text and lip is shared with other tokens, so it is not yellow), as hex or rgb().

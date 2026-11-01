@@ -2,6 +2,7 @@
 // built, so no other page and no other tool pays for it. The page talks to it through Comlink.
 import { expose, transfer } from 'comlink';
 import { buildPdf } from './build.ts';
+import { buildReport, type ReportInput } from './report.ts';
 import type { PdfPage, PdfPageSize } from './build.ts';
 
 const api = {
@@ -11,6 +12,11 @@ const api = {
    */
   build: async (pages: PdfPage[], size: PdfPageSize): Promise<Uint8Array> => {
     const bytes = await buildPdf(pages, size);
+    return transfer(bytes, [bytes.buffer as ArrayBuffer]);
+  },
+  /** The PDF of a money calculator: its inputs, result, assumptions and whole schedule (F4). */
+  report: async (input: ReportInput): Promise<Uint8Array> => {
+    const bytes = await buildReport(input);
     return transfer(bytes, [bytes.buffer as ArrayBuffer]);
   },
 };

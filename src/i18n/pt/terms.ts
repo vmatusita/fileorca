@@ -5,7 +5,7 @@ export default {
   description:
     'Os termos para usar o FileOrca, ferramentas grátis que rodam no navegador: seus arquivos, resultados, calculadoras, anúncios, doações e responsabilidade.',
   h1: 'Termos de uso',
-  updated: 'Última atualização: 31 de outubro de 2026',
+  updated: 'Última atualização: 1º de novembro de 2026',
   intro:
     'Estes termos explicam como você pode usar o FileOrca. Ao usar o site, você concorda com eles. Se não concordar, por favor, não use o site.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'O que é o FileOrca',
       paragraphs: [
-        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar e converter. As ferramentas estão em inglês, e a Comprimir imagem também está em português e espanhol.',
+        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar e converter, e calculadoras de dinheiro para empréstimos, financiamento imobiliário, dívidas e poupança. As ferramentas e as calculadoras estão em inglês, e a Comprimir imagem também está em português e espanhol.',
         'Você não precisa de conta. Seus arquivos são processados no seu aparelho, e não em um servidor, e nunca são enviados.',
       ],
     },
@@ -46,7 +46,7 @@ export default {
     {
       heading: 'Calculadoras são educativas, não aconselhamento',
       paragraphs: [
-        'O FileOrca também vai ter calculadoras. Elas servem só para aprender e se informar. Elas não constituem aconselhamento financeiro, jurídico nem médico e não substituem um profissional qualificado.',
+        'As calculadoras servem só para aprender e se informar. Elas não constituem aconselhamento financeiro, jurídico nem médico, não são oferta de crédito e não substituem um profissional qualificado. Quem decide quanto você pode pegar emprestado, e a que taxa, é a instituição financeira, não uma calculadora.',
         'Os resultados são estimativas feitas com os números que você digita. A vida real pode ser diferente, então confirme com um profissional qualificado antes de tomar uma decisão sobre dinheiro, questões jurídicas ou saúde.',
       ],
     },

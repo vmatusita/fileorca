@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HUB_ID, IMAGE_PAGE_IDS, isImagePage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
+import { HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, isImagePage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
@@ -98,5 +98,35 @@ describe('the English sitemap', () => {
       const listed = sitemapUrls(lang).filter((url) => urls.includes(url));
       expect(listed, `${lang} lists no English-only image page`).toEqual([]);
     }
+  });
+});
+
+describe('the money pages of the F4', () => {
+  it('asks each kind of money page for its schema types', () => {
+    expect(MONEY_PAGE_IDS).toHaveLength(1 + 18 + 5);
+    expect(requiredSchemaTypes('mortgage-calculator')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
+    expect(requiredSchemaTypes('mortgage-calculator-15-vs-30-year')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
+    expect(requiredSchemaTypes('money-calculators')).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);
+    expect(requiredSchemaTypes('guides-refinance-break-even')).toEqual(['Organization', 'BreadcrumbList', 'Article', 'Person']);
+  });
+
+  it('wants a calculator title to start with its name, in any case', () => {
+    expect(titleProblem('mortgage-calculator-extra-payments', 'Mortgage Calculator with Extra Payments | FileOrca', 'Mortgage calculator with extra payments')).toBeNull();
+    expect(titleProblem('mortgage-calculator', 'Monthly Payment Calculator | FileOrca', 'Mortgage calculator')).toMatch(/nome da calculadora/);
+    expect(titleProblem('mortgage-calculator', 'Mortgage Calculator | FileOrca', '')).toMatch(/nome da calculadora/);
+    // The image pages keep the exact comparison of the F2.
+    expect(titleProblem('compress-image', 'compress image | FileOrca', 'Compress image')).toMatch(/nome da ferramenta/);
+  });
+
+  it('checks the breadcrumb and the WebApplication of a calculator against its canonical', () => {
+    const canonical = `${O}/mortgage-calculator/`;
+    const good: LdNode[] = [
+      { '@type': 'WebApplication', url: canonical },
+      { '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }, { position: 2, item: `${O}/money-calculators/` }, { position: 3, item: canonical }] },
+    ];
+    expect(schemaProblems('mortgage-calculator', good, canonical)).toEqual([]);
+    expect(schemaProblems('mortgage-calculator', [{ '@type': 'WebApplication', url: `${O}/` }], canonical).join()).toMatch(/WebApplication aponta/);
+    const guide = `${O}/guides/rent-vs-buy-break-even/`;
+    expect(schemaProblems('guides-rent-vs-buy-break-even', [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }] }], guide).join()).toMatch(/termina em/);
   });
 });

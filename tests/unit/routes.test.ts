@@ -8,6 +8,7 @@ import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts
 import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
+import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
 
 function pageFiles(dir = 'src/pages'): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -17,16 +18,34 @@ function pageFiles(dir = 'src/pages'): string[] {
 }
 
 describe('mapa de rotas', () => {
-  it('has the routes of the site, each equivalent in en, pt and es except the English-only image pages', () => {
+  it('has the routes of the site, each equivalent in en, pt and es except the English-only image and money pages', () => {
     expect(ROUTES.map((route) => route.id)).toEqual([
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
       'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
-    // Only Compress image is translated; the other tools, the presets and the hub exist in English only (DECISOES § 58).
-    const englishOnly = new Set(ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id));
-    expect(englishOnly.size).toBe(11);
+    // Only Compress image is translated; the other image tools, their presets and hub (DECISOES § 58) and every money
+    // page (F4: the hub, the 18 calculators and the 5 guides, DECISOES § 110) exist in English only.
+    const englishOnly = new Set([
+      ...ROUTES.filter((route) => route.adArea === 'arquivos' && route.id !== 'compress-image').map((route) => route.id),
+      MONEY_HUB_ID,
+      ...CALC_PAGE_IDS,
+      ...GUIDE_IDS,
+    ]);
+    expect(englishOnly.size).toBe(11 + 1 + 18 + 5);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
+  });
+
+  it('puts every page of the calculator registry, every guide and the money hub in the money ad area, read from the registries', () => {
+    // The ids come from the registries, not from the URL: a calculator whose path does not end in "-calculator" is still checked.
+    const money = [MONEY_HUB_ID, ...Object.keys(CALC_PAGES), ...Object.keys(GUIDES)];
+    expect(money).toHaveLength(1 + 18 + 5);
+    for (const id of money) expect(routeById(id as Parameters<typeof routeById>[0]).adArea, id).toBe('dinheiro');
+    // And only them: no other route is in the money area (gate:dinheiro-saude checks exactly these pages).
+    expect(ROUTES.filter((route) => route.adArea === 'dinheiro').map((route) => route.id).sort()).toEqual([...money].sort());
+    for (const id of CALC_PAGE_IDS) expect(routeById(id).paths.en, id).toBe(CALC_PAGES[id].path);
+    for (const id of GUIDE_IDS) expect(routeById(id).paths.en, id).toBe(GUIDES[id].path);
   });
 
   it('uses the slugs of DECISOES § 4, English at the root, always with a trailing slash', () => {
@@ -132,11 +151,13 @@ describe('tool search', () => {
 
   it('indexes every image tool and preset of the registry, once, with a link only where the page exists', () => {
     const index = searchIndex();
-    expect(ids(index)).toEqual(Object.keys(IMAGE_PAGES));
-    expect(index).toHaveLength(11);
+    // The image pages first, then the money calculators and guides of the F4 (English only, money category).
+    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS]);
+    expect(index).toHaveLength(11 + 18 + 5);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
+      if (entry.cat === 'money') expect(languagesOf(route), entry.id).toEqual(['en']);
       // The links, names and categories of an entry are exactly the languages of its route.
       expect(Object.keys(entry.href), entry.id).toEqual(languagesOf(route));
       expect(Object.keys(entry.name), entry.id).toEqual(languagesOf(route));
@@ -184,9 +205,11 @@ describe('tool search', () => {
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
     const index = searchIndex();
-    // English has all eleven; Portuguese and Spanish only Compress image.
-    expect(ids(filterEntries(index, '', 'en'))).toEqual(Object.keys(IMAGE_PAGES));
+    // English has all eleven image pages and the 23 money pages; Portuguese and Spanish only Compress image.
+    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS]);
     for (const lang of ['pt', 'es']) {
+      // No money page exists in Portuguese or Spanish yet (F6): 'mortgage' finds nothing there.
+      expect(filterEntries(index, 'mortgage', lang), lang).toEqual([]);
       expect(ids(filterEntries(index, '', lang)), lang).toEqual(['compress-image']);
       // A search for 'compress' lists Compress image only: its presets exist in English only.
       expect(ids(filterEntries(index, 'compress', lang)), lang).toEqual(['compress-image']);

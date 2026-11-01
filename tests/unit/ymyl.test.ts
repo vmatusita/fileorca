@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { checkYmylPage } from '../../scripts/lib/ymyl.ts';
+import { checkYmylPage, countProblems, expectedYmylPages } from '../../scripts/lib/ymyl.ts';
+import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 
 // The F1a has no money or health page yet: the checker is proven on sample pages.
 const person = '<script type="application/ld+json">{"@graph":[{"@type":"Person","name":"Victor Yuki Matusita"}]}</script>';
@@ -40,5 +41,22 @@ describe('checador de dinheiro e saúde', () => {
     for (const text of ["Today's mortgage rates are 6.1%.", 'Rates are expected to fall next year.', 'Veja a taxa do dia.', 'We recommend this bank.']) {
       expect(checkYmylPage(good.replace('</main>', `<p>${text}</p></main>`), 'money').join(), text).toMatch(/proibido/);
     }
+  });
+});
+
+describe('contagem do portão de dinheiro e saúde (F4)', () => {
+  it('counts every indexed money and health route in each of its languages', () => {
+    expect(expectedYmylPages([{ adArea: 'dinheiro', indexable: true, languages: 1 }, { adArea: 'arquivos', indexable: true, languages: 3 }])).toBe(1);
+    expect(expectedYmylPages([{ adArea: 'dinheiro', indexable: false, languages: 1 }, { adArea: 'casa-saude', indexable: true, languages: 3 }])).toBe(3);
+    // The real route map: the money hub, the 18 calculators and the 5 guides, in English.
+    const routes = ROUTES.map((route) => ({ ...(route.adArea ? { adArea: route.adArea } : {}), indexable: route.indexable, languages: languagesOf(route).length }));
+    expect(expectedYmylPages(routes)).toBe(24);
+  });
+
+  it('accepts a count equal to the routes, and refuses zero pages and any other count', () => {
+    expect(countProblems(24, 24)).toEqual([]);
+    expect(countProblems(0, 24).join()).toMatch(/nenhuma página/);
+    expect(countProblems(0, 0).join()).toMatch(/nenhuma página/);
+    expect(countProblems(23, 24).join()).toMatch(/23 página\(s\) conferida\(s\), mas o mapa de rotas tem 24/);
   });
 });

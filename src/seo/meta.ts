@@ -74,15 +74,15 @@ export function breadcrumbLd(crumbs: Crumb[]): JsonLd {
   };
 }
 
-/** WebApplication without rating: no aggregateRating, no review (PLANO: "sem nota"). */
-export function webApplicationLd(name: string, description: string, path: string, lang: Lang): JsonLd {
+/** WebApplication without rating: no aggregateRating, no review (PLANO: "sem nota"). Calculators are FinanceApplication. */
+export function webApplicationLd(name: string, description: string, path: string, lang: Lang, category = 'MultimediaApplication'): JsonLd {
   return {
     '@type': 'WebApplication',
     name,
     description,
     url: absolute(path),
     inLanguage: LANG_TAG[lang],
-    applicationCategory: 'MultimediaApplication',
+    applicationCategory: category,
     operatingSystem: 'Any',
     browserRequirements: 'Requires JavaScript',
     isAccessibleForFree: true,
@@ -110,6 +110,23 @@ export function collectionPageLd(name: string, description: string, path: string
         url: absolute(item.path),
       })),
     },
+  };
+}
+
+/** A guide (F4): an Article by the author, with the date it was published and the date it was last reviewed. */
+export function articleLd(headline: string, description: string, path: string, lang: Lang, published: string, modified: string): JsonLd {
+  return {
+    '@type': 'Article',
+    headline,
+    description,
+    url: absolute(path),
+    mainEntityOfPage: absolute(path),
+    inLanguage: LANG_TAG[lang],
+    datePublished: published,
+    dateModified: modified,
+    author: { '@id': `${SITE_ORIGIN}/#victor` },
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    image: absolute(`/og/${lang}/${path.split('/').filter(Boolean).join('-')}.png`),
   };
 }
 
