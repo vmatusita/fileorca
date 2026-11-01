@@ -47,7 +47,7 @@ const texts: FileGuideTexts = {
       heading: 'When the file comes back the same',
       paragraphs: [
         'Compress PDF never hands back a file bigger than the one you gave it. When a mode cannot make the file smaller, you get the original back, byte for byte. Of the {accepted} files we compressed, Lossless gave {losslessUnchanged_word} back unchanged and Recommended {recommendedUnchanged_word}: a PDF that was already as small as the rewrite makes it.',
-        'Strong gave {strongUnchangedChromium_word} of the {accepted} back unchanged. Text pages drawn as pictures are heavier than the text itself, and a black and white scan stored as a picture of a page is already smaller than a photo of the same page. Strong is for PDFs made of photos, and almost nothing else.',
+        'Strong gave {strongUnchangedChromium_word} of the {accepted_word} back unchanged. Text pages drawn as pictures are heavier than the text itself, and a black and white scan stored as a picture of a page is already smaller than a photo of the same page. Strong is for PDFs made of photos, and almost nothing else.',
       ],
     },
     {
