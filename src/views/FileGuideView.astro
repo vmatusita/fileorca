@@ -1,0 +1,114 @@
+---
+// A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184): breadcrumb Home › Image tools (or PDF tools) ›
+// H1; the H1, the question it answers and the "Reviewed" line; the introduction; the embedded tool, the same island and
+// entry as the tool's own page (an image tool comes in through the "tool" slot from the page file; a PDF tool is the
+// PdfIsland of the 12 PDF pages), with the link to the tool's page; the first half of the text; one content AdSlot,
+// only after the tool; the second half; "What we measured", every cell from data/guides-measured.json, with the date,
+// the sample and the method; the sources, with the day they were read; the related pages; the rail AdSlot.
+// Schema: Article (author Person, datePublished, dateModified), BreadcrumbList and Person. The text blocks carry
+// data-guide-text, which gate:conteudo counts (800 to 1,500 words).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import PdfIsland from '../tools/pdf/PdfIsland.astro';
+import Reviewed from '../tools/guides/Reviewed.astro';
+import { routeById } from '../i18n/routes.ts';
+import { fmt } from '../i18n/format.ts';
+import enCommon from '../i18n/en/common.ts';
+import shared from '../i18n/en/file-guides.ts';
+import { articleLd, breadcrumbLd, personLd } from '../seo/meta.ts';
+import { PANEL_POSES } from '../tools/image/Oli.tsx';
+import { panelData as pdfPanelData } from '../tools/pdf/page.ts';
+import type { PdfToolId } from '../tools/pdf/registry.ts';
+import { FILE_GUIDES, type FileGuideId } from '../tools/guides/registry.ts';
+import { fillValues, guideTables, longDate, placeholdersIn } from '../tools/guides/measured.ts';
+import { GUIDE_PUBLISHED, GUIDE_REVIEWED, crumbsFor, guideTexts, relatedFor, toolInfo } from '../tools/guides/page.ts';
+
+interface Props {
+  id: FileGuideId;
+}
+const { id } = Astro.props;
+const lang = 'en';
+const def = FILE_GUIDES[id];
+const t = guideTexts(id);
+const route = routeById(id);
+const values = fillValues(id, t, [...placeholdersIn(t)]);
+const fill = (text: string): string => fmt(text, values);
+const crumbs = crumbsFor(id);
+const tool = toolInfo(def.tool);
+const tables = guideTables(id, shared, t);
+const related = relatedFor(id);
+const common = enCommon;
+const before = t.sections.slice(0, t.half);
+const after = t.sections.slice(t.half);
+const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  oli={PANEL_POSES}
+  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, def.path, lang, GUIDE_PUBLISHED, GUIDE_REVIEWED), personLd()]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-top fo-top--calc" data-guide-text>
+    <h1 class="fo-h1">{t.h1}</h1>
+    <p class="fo-lead">{fill(t.lead)}</p>
+    <Reviewed changed={fill(t.changed)} />
+  </div>
+  <div class="fo-prose fo-guide" data-guide-text>{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+  <section class="fo-section fo-prose" aria-labelledby="guide-tool" data-guide-text>
+    <h2 id="guide-tool">{t.toolHeading}</h2>
+    <p>{fill(t.toolIntro)}</p>
+  </section>
+  {tool.pdf ? <PdfIsland data={pdfPanelData(def.tool as PdfToolId)} /> : <slot name="tool" />}
+  <p class="fo-guide__open"><a href={tool.path}>{fmt(shared.openTool, { name: tool.name })}</a></p>
+  {before.map((section, index) => (
+    <section class="fo-section fo-prose" aria-labelledby={`part-${index}`} data-guide-text>
+      <h2 id={`part-${index}`}>{section.heading}</h2>
+      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
+      {section.list && <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>}
+    </section>
+  ))}
+  <AdSlot area="arquivos" variant="content" label={common.adLabel} />
+  {after.map((section, index) => (
+    <section class="fo-section fo-prose" aria-labelledby={`part-${index + before.length}`} data-guide-text>
+      <h2 id={`part-${index + before.length}`}>{section.heading}</h2>
+      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
+      {section.list && <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>}
+    </section>
+  ))}
+  <section class="fo-section fo-prose" aria-labelledby="measured" data-content="measured">
+    <h2 id="measured">{t.measuredHeading}</h2>
+    <p data-guide-text>{fill(t.measuredIntro)}</p>
+    {t.tables.map((table, index) => (
+      <>
+        {t.tables.length > 1 && <h3 class="fo-h3" id={`measured-${index}`}>{table.heading}</h3>}
+        <div class="fo-table-wrap" tabindex="0" role="region" aria-label={table.caption}>
+          <table class="fo-table">
+            <caption class="fo-sr">{table.caption}</caption>
+            <thead><tr>{table.head.map((heading) => <th scope="col">{heading}</th>)}</tr></thead>
+            <tbody>{(tables[index] ?? []).map((row) => <tr>{row.map((cell, column) => (column === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}</tr>)}</tbody>
+          </table>
+        </div>
+      </>
+    ))}
+    <p class="fo-reviewed" data-guide-text>{fill(t.measuredNote)}</p>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="sources" data-content="sources">
+    <h2 id="sources">{t.sourcesHeading}</h2>
+    <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={source.read}>{longDate(source.read)}</time>{readAfter}</li>)}</ul>
+  </section>
+  <section class="fo-section" aria-labelledby="related" data-content="related">
+    <h2 id="related">{t.relatedHeading}</h2>
+    <ul class="fo-grid">
+      {related.map((card) => (
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot slot="rail" area="arquivos" variant="rail" label={common.adLabel} />
+</BaseLayout>

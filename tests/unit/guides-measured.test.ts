@@ -11,6 +11,7 @@ import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts'
 import type { MeasuredFile, Method, Sample } from '../../src/tools/guides/measured-types.ts';
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
+import { globals, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
 
 const FILE = 'data/guides-measured.json';
 const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
@@ -113,16 +114,25 @@ describe('the measurements of the file guides', () => {
 
   it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
     const texts = import.meta.glob<{ facts?: Record<string, unknown> }>('/src/i18n/en/guide-*.ts', { import: 'default' });
+    const always = Object.keys(globals(measured));
     for (const id of FILE_GUIDE_IDS) {
       const file = `/src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`;
       const load = texts[file];
+      expect(load, `${file} exists`).toBeDefined();
       if (!load) continue;
       const source = readFileSync(`.${file}`, 'utf8');
       const official = Object.keys((await load()).facts ?? {});
-      const numbers = Object.keys(measured.guides[id].numbers);
-      const missing = [...source.matchAll(/\{(\w+)\}/g)].map((match) => match[1] as string).filter((name) => name !== 'date' && !numbers.includes(name) && !official.includes(name));
+      const missing = [...source.matchAll(/{(w+)}/g)]
+        .map((match) => match[1] as string)
+        .filter((name) => !always.includes(name) && !official.includes(name) && resolvePlaceholder(id, name, measured) === null);
       expect(missing, `${file}: placeholders with no measurement`).toEqual([]);
     }
+  });
+
+  it('read a placeholder with a suffix as a way of writing the number, and nothing else', () => {
+    expect(resolvePlaceholder('guides-heic-to-jpg-on-windows', 'ratioTotalChromium_more', measured)?.variant).toBe('more');
+    expect(resolvePlaceholder('guides-heic-to-jpg-on-windows', 'ratioTotalChromium_typed', measured)).toBeNull();
+    expect(resolvePlaceholder('guides-heic-to-jpg-on-windows', 'noSuchNumber', measured)).toBeNull();
   });
 });
 

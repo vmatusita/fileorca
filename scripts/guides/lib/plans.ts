@@ -608,6 +608,23 @@ async function pdfToJpg(ctx: Context): Promise<GuideMeasure> {
         g.n(`${key}Png${ppi}${B[browser]}`, find(name, 1, ppi, 'png', browser)[7] as number, 'bytes', one, how);
       }
     }
+    // What doubling the resolution does: four times the pixels, and how much more file in each format.
+    const area = (ppi: number): number => (find(name, 1, ppi, 'jpg', 'chromium')[5] as number) * (find(name, 1, ppi, 'jpg', 'chromium')[6] as number);
+    g.n(`${key}Pixels300vs150`, ratio(area(300), area(150)), 'ratio', one, must(methods[0], 'chromium'));
+    for (const browser of BROWSERS) {
+      const how = must(methods.find((m) => m.runner === 'playwright' && m.browser === browser), browser);
+      const bytes = (ppi: number, format: string): number => find(name, 1, ppi, format, browser)[7] as number;
+      g.n(`${key}Jpg300vs150${B[browser]}`, ratio(bytes(300, 'jpg'), bytes(150, 'jpg')), 'ratio', one, how);
+      g.n(`${key}Jpg150vs72${B[browser]}`, ratio(bytes(150, 'jpg'), bytes(72, 'jpg')), 'ratio', one, how);
+      g.n(`${key}PngVsJpg150${B[browser]}`, ratio(bytes(150, 'png'), bytes(150, 'jpg')), 'ratio', one, how);
+    }
+  }
+  // The resolution of each setting, measured on the output: pixels across the page of the tax form over its width in inches.
+  const formName = 'pdf-formulario-irs-1040-2019.pdf';
+  const formDoc = await breakdownPage(formName);
+  for (const [ppi, label] of [[72, 'low'], [150, 'medium'], [300, 'high']] as const) {
+    const width = find(formName, 1, ppi, 'jpg', 'chromium')[5] as number;
+    g.n(`${label}Ppi`, Math.round((width * 72) / formDoc.widthPt), 'ppi', sample([formName], 'page 1'), must(methods[0], 'chromium'));
   }
   // The scanned page carries one picture: its own pixels against the page size say the resolution it was scanned at.
   const scan = await embeddedPpi('pdf-escaneado-01-pagina-livro-cor.pdf');
@@ -615,6 +632,13 @@ async function pdfToJpg(ctx: Context): Promise<GuideMeasure> {
   g.n('scanImagePpi', scan.ppi, 'ppi', sample(['pdf-escaneado-01-pagina-livro-cor.pdf']), node(NODE_PDFLIB));
   g.t('images', ['file', 'page', 'ppi', 'format', 'browser', 'width', 'height', 'bytes'], rows, pages, methods);
   return g.done();
+}
+
+/** The width of page 1 in points (1/72 inch). */
+async function breakdownPage(name: string): Promise<{ widthPt: number }> {
+  const { PDFDocument } = await import('@cantoo/pdf-lib');
+  const doc = await PDFDocument.load(pdfFixture(name), { updateMetadata: false, ignoreEncryption: true });
+  return { widthPt: doc.getPage(0).getWidth() };
 }
 
 /** The width in pixels of the one image on page 1, and the ppi it makes over the page width. */

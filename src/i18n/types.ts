@@ -5,6 +5,7 @@ import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { CalcPageId, GuideId } from '../tools/calc/registry.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
+import type { FileGuideId } from '../tools/guides/registry.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -83,6 +84,8 @@ export interface CommonTexts {
   /** Name of the PDF hub and the cards of the PDF tools (English for now, F5a). */
   pdfTools?: string;
   pdf?: Record<PdfToolId, ToolBlurb>;
+  /** The cards of the file guides (English only, F5b). */
+  fileGuides?: Record<FileGuideId, ToolBlurb>;
 }
 
 /** English has every image tool, preset and the hub. */
@@ -97,6 +100,7 @@ export interface EnCommonTexts extends CommonTexts {
   search: CommonTexts['search'] & { moneyCategory: string; pdfCategory: string };
   pdfTools: string;
   pdf: Record<PdfToolId, ToolBlurb>;
+  fileGuides: Record<FileGuideId, ToolBlurb>;
 }
 
 export interface Section {
@@ -310,6 +314,94 @@ export interface GuideTexts extends PageMeta {
   disclaimerHeading: string;
   disclaimer: string;
   relatedHeading: string;
+}
+
+/** A source of a file guide: an official page read in this run, with the date it was read (ISO). */
+export interface FileGuideSource {
+  id: string;
+  label: string;
+  href: string;
+  read: string;
+}
+
+/** An official figure a file guide quotes, by placeholder: its text (with the number) and the source it comes from. */
+export interface FileGuideFact {
+  text: string;
+  source: string;
+}
+
+/** One table of the "What we measured" section of a file guide; the rows come from data/guides-measured.json. */
+export interface FileGuideTableTexts {
+  heading: string;
+  caption: string;
+  head: string[];
+  /** Row labels, where the rows are steps rather than files. */
+  labels?: string[];
+}
+
+/**
+ * A file guide /guides/<slug>/ (F5b, decisions 4 and 5). Every number in it is a {placeholder}: a measured value of
+ * data/guides-measured.json (src/tools/guides/measured.ts formats it), or an official figure of `facts` with its source.
+ * The only other digits allowed are the technical names of `names` (tests/unit/guides-numbers.test.ts).
+ */
+export interface FileGuideTexts extends PageMeta {
+  h1: string;
+  /** The question the guide answers, in one line under the H1. */
+  lead: string;
+  /** What the last review changed, after the "Reviewed" line. */
+  changed: string;
+  intro: string[];
+  toolHeading: string;
+  toolIntro: string;
+  /** The sections; the content AdSlot goes after the first `half` of them. */
+  sections: Section[];
+  half: number;
+  measuredHeading: string;
+  measuredIntro: string;
+  /** Says when, in what and on which files it was measured ("{date}", "{chromiumVersion}"…). */
+  measuredNote: string;
+  tables: FileGuideTableTexts[];
+  sourcesHeading: string;
+  sources: FileGuideSource[];
+  facts: Record<string, FileGuideFact>;
+  names: string[];
+  relatedHeading: string;
+}
+
+/** Texts every file guide shares (src/i18n/en/file-guides.ts). */
+export interface FileGuidesSharedTexts {
+  /** "Reviewed by {name} on {date}." */
+  reviewed: string;
+  /** "First published {date}." */
+  firstPublished: string;
+  /** "Open the {name} tool" */
+  openTool: string;
+  /** "Read on {date}" after a source. */
+  readOn: string;
+  /** A table cell of identical pixels. */
+  samePixels: string;
+  yes: string;
+  no: string;
+  /** An empty cell: nothing of that kind. */
+  none: string;
+  /** Compress gave the same file back. */
+  sameFile: string;
+  /** After a network figure that only an ad spec page gives. */
+  adSpec: string;
+  /** A limit the page does not give. */
+  notStated: string;
+  /** A PSNR where the copy is not the same size (a crop, a turn, a PDF). */
+  notComparable: string;
+  /** Between two sizes: "19 KB to 30 KB". */
+  becomes: string;
+  /** GPS kinds of a photo, as the tables say them. */
+  gps: { real: string; none: string; empty: string; zeroed: string; kept: string };
+  /** Readable names of the fixtures, by file name. */
+  fixtures: Record<string, string>;
+  /** "Read the guide: {title}" under a tool. */
+  guideLink: string;
+  /** Heading of the guides list of a hub. */
+  hubGuidesHeading: string;
 }
 
 /**

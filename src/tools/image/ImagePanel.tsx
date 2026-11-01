@@ -169,13 +169,13 @@ function release(item: Item): void {
 const infoOf = (item: Item): FileInfo => ({ id: item.id, name: item.file.name, size: item.file.size, width: item.width, height: item.height });
 
 export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S, O>) {
-  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, coffeeHref, adsOn, tool } = props;
+  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, coffeeHref, adsOn, tool, initial } = props;
   const { Options } = tool;
   const model = useRef<Model>(newModel());
   const m = model.current;
   const [, setTick] = useState(0);
   const [over, setOver] = useState(0);
-  const [state, setState] = useState<S>(tool.initial);
+  const [state, setState] = useState<S>(() => (initial ? { ...tool.initial, ...(initial as Partial<S>) } : tool.initial));
   const stateRef = useRef<S>(state);
   const wide = useWide();
   const rootRef = useRef<HTMLDivElement>(null);

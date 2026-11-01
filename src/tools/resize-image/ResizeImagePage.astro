@@ -1,6 +1,8 @@
 ---
-// Resize image (English only): the shared mold with this tool's panel.
+// Resize image (English only): the shared mold with this tool's panel. With `embed`, only the
+// island, for the guide that embeds this tool (DECISOES § 184): the <script> stays here, so both load the same entry.
 import ImageToolPage from '../image/ImageToolPage.astro';
+import ImageToolEmbed from '../image/ImageToolEmbed.astro';
 import ResizePanel from './Panel.tsx';
 import { panelData } from '../image/page.ts';
 import type { Lang } from '../../i18n/routes.ts';
@@ -8,13 +10,18 @@ import type { ResizeOptionsTexts } from '../../i18n/types.ts';
 
 interface Props {
   lang: Lang;
+  /** Only the island, for a guide. */
+  embed?: boolean;
+  /** Options the guide starts the tool with (never the URL). */
+  initial?: Record<string, unknown>;
 }
-const { lang } = Astro.props;
-const panel = panelData<ResizeOptionsTexts>('resize-image', lang);
+const { lang, embed = false, initial } = Astro.props;
+const panel = panelData<ResizeOptionsTexts>('resize-image', lang, initial);
+const Mold = embed ? ImageToolEmbed : ImageToolPage;
 ---
-<ImageToolPage id="resize-image" lang={lang} panel={panel}>
+<Mold id="resize-image" lang={lang} panel={panel}>
   <ResizePanel slot="panel" {...panel} />
   <script>
     import './mount.ts';
   </script>
-</ImageToolPage>
+</Mold>

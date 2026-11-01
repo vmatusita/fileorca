@@ -1,0 +1,19 @@
+---
+// An image tool without its page, for the guide that embeds it (F5b; DECISOES § 184): the same root, data-props and
+// Panel the tool page renders, and nothing around them. The tool's page component picks this mold instead of
+// ImageToolPage when it gets `embed`, so the <script> of its mount.ts stays in that component and the guide loads the
+// same entry file as the tool page, plus the shared island chunk.
+import type { Lang } from '../../i18n/routes.ts';
+import type { ImagePageId } from './registry.ts';
+import type { ImagePanelData } from './types.ts';
+
+interface Props {
+  id: ImagePageId;
+  lang: Lang;
+  /** The same object the Panel was rendered with: it is the hydration contract (data-props). */
+  panel: ImagePanelData;
+}
+const { panel } = Astro.props;
+---
+<div id="fo-tool-root" data-props={JSON.stringify(panel)}><slot name="panel" /></div>
+<slot />

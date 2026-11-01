@@ -9,9 +9,9 @@
       "scripts/guides/lib/record.ts",
       "scripts/guides/measure.ts"
     ],
-    "sha256": "efb4fcaa83d1aa8dc807b940459286692325dd2555d99a55dc96d7c3b9aeb0fb"
+    "sha256": "7ee35d67e0702302703bcaa9ae85f9a0791e4c46a7055291b7d604d4e3c1fcb6"
   },
-  "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e",
+  "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3",
   "measuredOn": "2026-11-01",
   "environment": {
     "os": "Windows 10.0.26300",
@@ -8576,7 +8576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanHeight72": {
           "value": 477,
@@ -8596,7 +8596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg72Chromium": {
           "value": 63728,
@@ -8616,7 +8616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng72Chromium": {
           "value": 347947,
@@ -8636,7 +8636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg72Webkit": {
           "value": 63774,
@@ -8656,7 +8656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng72Webkit": {
           "value": 262866,
@@ -8676,7 +8676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanWidth150": {
           "value": 770,
@@ -8696,7 +8696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanHeight150": {
           "value": 995,
@@ -8716,7 +8716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg150Chromium": {
           "value": 196972,
@@ -8736,7 +8736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng150Chromium": {
           "value": 1178523,
@@ -8756,7 +8756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg150Webkit": {
           "value": 197016,
@@ -8776,7 +8776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng150Webkit": {
           "value": 921547,
@@ -8796,7 +8796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanWidth300": {
           "value": 1540,
@@ -8816,7 +8816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanHeight300": {
           "value": 1990,
@@ -8836,7 +8836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg300Chromium": {
           "value": 528771,
@@ -8856,7 +8856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng300Chromium": {
           "value": 3834246,
@@ -8876,7 +8876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanJpg300Webkit": {
           "value": 529370,
@@ -8896,7 +8896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanPng300Webkit": {
           "value": 2618411,
@@ -8916,7 +8916,147 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanPixels300vs150": {
+          "value": 4,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanJpg300vs150Chromium": {
+          "value": 2.6845,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanJpg150vs72Chromium": {
+          "value": 3.0908,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanPngVsJpg150Chromium": {
+          "value": 5.9832,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanJpg300vs150Webkit": {
+          "value": 2.6869,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanJpg150vs72Webkit": {
+          "value": 3.0893,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "scanPngVsJpg150Webkit": {
+          "value": 4.6775,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-01-pagina-livro-cor.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportWidth72": {
           "value": 610,
@@ -8936,7 +9076,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportHeight72": {
           "value": 786,
@@ -8956,7 +9096,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg72Chromium": {
           "value": 66260,
@@ -8976,7 +9116,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng72Chromium": {
           "value": 120056,
@@ -8996,7 +9136,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg72Webkit": {
           "value": 65955,
@@ -9016,7 +9156,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng72Webkit": {
           "value": 96906,
@@ -9036,7 +9176,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportWidth150": {
           "value": 1270,
@@ -9056,7 +9196,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportHeight150": {
           "value": 1637,
@@ -9076,7 +9216,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg150Chromium": {
           "value": 206898,
@@ -9096,7 +9236,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng150Chromium": {
           "value": 309684,
@@ -9116,7 +9256,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg150Webkit": {
           "value": 206446,
@@ -9136,7 +9276,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng150Webkit": {
           "value": 266926,
@@ -9156,7 +9296,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportWidth300": {
           "value": 2541,
@@ -9176,7 +9316,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportHeight300": {
           "value": 3275,
@@ -9196,7 +9336,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg300Chromium": {
           "value": 570965,
@@ -9216,7 +9356,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng300Chromium": {
           "value": 542076,
@@ -9236,7 +9376,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportJpg300Webkit": {
           "value": 570419,
@@ -9256,7 +9396,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "reportPng300Webkit": {
           "value": 440496,
@@ -9276,7 +9416,147 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportPixels300vs150": {
+          "value": 4.0028,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportJpg300vs150Chromium": {
+          "value": 2.7596,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportJpg150vs72Chromium": {
+          "value": 3.1225,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportPngVsJpg150Chromium": {
+          "value": 1.4968,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportJpg300vs150Webkit": {
+          "value": 2.763,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportJpg150vs72Webkit": {
+          "value": 3.1301,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "reportPngVsJpg150Webkit": {
+          "value": 1.293,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-escaneado-02-relatorio-nasa-150p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formWidth72": {
           "value": 612,
@@ -9296,7 +9576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formHeight72": {
           "value": 792,
@@ -9316,7 +9596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg72Chromium": {
           "value": 111133,
@@ -9336,7 +9616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng72Chromium": {
           "value": 147786,
@@ -9356,7 +9636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg72Webkit": {
           "value": 118370,
@@ -9376,7 +9656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng72Webkit": {
           "value": 71173,
@@ -9396,7 +9676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formWidth150": {
           "value": 1275,
@@ -9416,7 +9696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formHeight150": {
           "value": 1650,
@@ -9436,7 +9716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg150Chromium": {
           "value": 325944,
@@ -9456,7 +9736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng150Chromium": {
           "value": 417815,
@@ -9476,7 +9756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg150Webkit": {
           "value": 332584,
@@ -9496,7 +9776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng150Webkit": {
           "value": 164141,
@@ -9516,7 +9796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formWidth300": {
           "value": 2550,
@@ -9536,7 +9816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formHeight300": {
           "value": 3300,
@@ -9556,7 +9836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg300Chromium": {
           "value": 826564,
@@ -9576,7 +9856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng300Chromium": {
           "value": 1024220,
@@ -9596,7 +9876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formJpg300Webkit": {
           "value": 823351,
@@ -9616,7 +9896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "formPng300Webkit": {
           "value": 371564,
@@ -9636,7 +9916,147 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formPixels300vs150": {
+          "value": 4,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formJpg300vs150Chromium": {
+          "value": 2.5359,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formJpg150vs72Chromium": {
+          "value": 2.9329,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formPngVsJpg150Chromium": {
+          "value": 1.2819,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formJpg300vs150Webkit": {
+          "value": 2.4756,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formJpg150vs72Webkit": {
+          "value": 2.8097,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "formPngVsJpg150Webkit": {
+          "value": 0.4935,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookWidth72": {
           "value": 595,
@@ -9656,7 +10076,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookHeight72": {
           "value": 841,
@@ -9676,7 +10096,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg72Chromium": {
           "value": 55808,
@@ -9696,7 +10116,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng72Chromium": {
           "value": 110066,
@@ -9716,7 +10136,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg72Webkit": {
           "value": 56268,
@@ -9736,7 +10156,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng72Webkit": {
           "value": 74842,
@@ -9756,7 +10176,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookWidth150": {
           "value": 1240,
@@ -9776,7 +10196,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookHeight150": {
           "value": 1753,
@@ -9796,7 +10216,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg150Chromium": {
           "value": 190829,
@@ -9816,7 +10236,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng150Chromium": {
           "value": 308158,
@@ -9836,7 +10256,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg150Webkit": {
           "value": 191604,
@@ -9856,7 +10276,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng150Webkit": {
           "value": 185327,
@@ -9876,7 +10296,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookWidth300": {
           "value": 2480,
@@ -9896,7 +10316,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookHeight300": {
           "value": 3507,
@@ -9916,7 +10336,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg300Chromium": {
           "value": 538469,
@@ -9936,7 +10356,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng300Chromium": {
           "value": 797371,
@@ -9956,7 +10376,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookJpg300Webkit": {
           "value": 539874,
@@ -9976,7 +10396,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "bookPng300Webkit": {
           "value": 447820,
@@ -9996,7 +10416,147 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookPixels300vs150": {
+          "value": 4.0011,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookJpg300vs150Chromium": {
+          "value": 2.8217,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookJpg150vs72Chromium": {
+          "value": 3.4194,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookPngVsJpg150Chromium": {
+          "value": 1.6148,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookJpg300vs150Webkit": {
+          "value": 2.8177,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookJpg150vs72Webkit": {
+          "value": 3.4052,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "bookPngVsJpg150Webkit": {
+          "value": 0.9672,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "pdf-grande-fontes-embutidas-117p.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosWidth72": {
           "value": 792,
@@ -10016,7 +10576,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosHeight72": {
           "value": 612,
@@ -10036,7 +10596,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg72Chromium": {
           "value": 132924,
@@ -10056,7 +10616,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng72Chromium": {
           "value": 762388,
@@ -10076,7 +10636,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg72Webkit": {
           "value": 132347,
@@ -10096,7 +10656,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng72Webkit": {
           "value": 634571,
@@ -10116,7 +10676,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosWidth150": {
           "value": 1650,
@@ -10136,7 +10696,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosHeight150": {
           "value": 1275,
@@ -10156,7 +10716,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg150Chromium": {
           "value": 431376,
@@ -10176,7 +10736,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng150Chromium": {
           "value": 2895727,
@@ -10196,7 +10756,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg150Webkit": {
           "value": 431361,
@@ -10216,7 +10776,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng150Webkit": {
           "value": 2328079,
@@ -10236,7 +10796,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosWidth300": {
           "value": 3300,
@@ -10256,7 +10816,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosHeight300": {
           "value": 2550,
@@ -10276,7 +10836,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg300Chromium": {
           "value": 1135997,
@@ -10296,7 +10856,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng300Chromium": {
           "value": 9232694,
@@ -10316,7 +10876,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosJpg300Webkit": {
           "value": 1135640,
@@ -10336,7 +10896,7 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "photosPng300Webkit": {
           "value": 6905387,
@@ -10356,7 +10916,207 @@
             "path": "/pdf-to-jpg/"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosPixels300vs150": {
+          "value": 4,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosJpg300vs150Chromium": {
+          "value": 2.6334,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosJpg150vs72Chromium": {
+          "value": 3.2453,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosPngVsJpg150Chromium": {
+          "value": 6.7128,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosJpg300vs150Webkit": {
+          "value": 2.6327,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosJpg150vs72Webkit": {
+          "value": 3.2593,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "photosPngVsJpg150Webkit": {
+          "value": 5.3971,
+          "unit": "ratio",
+          "sample": {
+            "files": [
+              "gen-fotos.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "lowPpi": {
+          "value": 72,
+          "unit": "ppi",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "mediumPpi": {
+          "value": 150,
+          "unit": "ppi",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
+        },
+        "highPpi": {
+          "value": 300,
+          "unit": "ppi",
+          "sample": {
+            "files": [
+              "pdf-formulario-irs-1040-2019.pdf"
+            ],
+            "count": 1,
+            "note": "page 1"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/pdf-to-jpg/"
+          },
+          "date": "2026-11-01",
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanImageWidth": {
           "value": 770,
@@ -10372,7 +11132,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         },
         "scanImagePpi": {
           "value": 150,
@@ -10388,7 +11148,7 @@
             "engine": "@cantoo/pdf-lib in Node (the library the engine opens files with)"
           },
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         }
       },
       "tables": {
@@ -11513,7 +12273,7 @@
             }
           ],
           "date": "2026-11-01",
-          "commit": "02cc02c08fe6e85fce2b539cd93038e7c5ccb97e"
+          "commit": "0851d18f60dd7c8d98fa8ac8384d1c901c6c8ae3"
         }
       },
       "facts": {}
