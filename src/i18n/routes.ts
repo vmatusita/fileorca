@@ -1,6 +1,16 @@
 // Route map with equivalence (PLANO "Idiomas e URLs"; DECISOES § 4).
 // Each row lists the URL of the same page in every language that has an equivalent version.
 // hreflang only links languages present in a row; the sitemap and IndexNow read this map too.
+import {
+  CALC_PAGES,
+  CALC_PRESET_IDS,
+  CALC_TOOL_IDS,
+  GUIDES,
+  GUIDE_IDS,
+  MONEY_HUB_ID,
+  type CalcPageId,
+  type GuideId,
+} from '../tools/calc/registry.ts';
 
 export const LANGS = ['en', 'pt', 'es'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -24,6 +34,9 @@ export type RouteId =
   | 'webp-to-jpg'
   | 'png-to-jpg'
   | 'image-to-pdf'
+  | typeof MONEY_HUB_ID
+  | CalcPageId
+  | GuideId
   | 'privacy'
   | 'terms'
   | 'about'
@@ -74,6 +87,8 @@ export const ROUTES: readonly RouteDef[] = [
     adArea: 'arquivos',
   },
   ...imageToolRoutes(),
+  // The money hub, its calculators, presets and guides exist only in English for now (F4; DECISOES § 110).
+  ...moneyRoutes(),
   {
     id: 'privacy',
     paths: { en: '/privacy/', pt: '/pt/privacidade/', es: '/es/privacidad/' },
@@ -157,6 +172,52 @@ function imageToolRoutes(): RouteDef[] {
       view: `src/tools/${parent}/presets/${name}/`,
       texts: [`src/tools/${parent}/presets/${name}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'],
       adArea: 'arquivos',
+    })),
+  ];
+}
+
+/**
+ * English-only money pages (F4): the hub, each calculator (folder src/tools/<slug>/), each preset
+ * (src/tools/<parent>/presets/<name>/) and each guide (src/views/GuideView.astro with src/i18n/<lang>/guide-<slug>.ts).
+ * The ids and paths come from the calculator registry. Every one of them is in the ad area "dinheiro", which
+ * is what gate:dinheiro-saude checks (DECISOES § 52).
+ */
+function moneyRoutes(): RouteDef[] {
+  const shared = 'src/tools/calc/i18n/{lang}.ts';
+  const calcTexts = (id: CalcPageId): string[] => {
+    const def = CALC_PAGES[id];
+    if (!def.parent) return [`src/tools/${id}/i18n/{lang}.ts`, shared];
+    const name = def.path.split('/').at(-2) ?? '';
+    return [`src/tools/${def.parent}/presets/${name}/i18n/{lang}.ts`, `src/tools/${def.parent}/i18n/{lang}.ts`, shared];
+  };
+  const calcView = (id: CalcPageId): string => {
+    const def = CALC_PAGES[id];
+    return def.parent ? `src/tools/${def.parent}/presets/${def.path.split('/').at(-2) ?? ''}/` : `src/tools/${id}/`;
+  };
+  return [
+    {
+      id: MONEY_HUB_ID,
+      paths: { en: '/money-calculators/' },
+      indexable: true,
+      view: 'src/views/MoneyCalculatorsView.astro',
+      texts: ['src/i18n/{lang}/money-calculators.ts'],
+      adArea: 'dinheiro',
+    },
+    ...[...CALC_TOOL_IDS, ...CALC_PRESET_IDS].map((id): RouteDef => ({
+      id,
+      paths: { en: CALC_PAGES[id].path },
+      indexable: true,
+      view: calcView(id),
+      texts: calcTexts(id),
+      adArea: 'dinheiro',
+    })),
+    ...GUIDE_IDS.map((id): RouteDef => ({
+      id,
+      paths: { en: GUIDES[id].path },
+      indexable: true,
+      view: 'src/views/GuideView.astro',
+      texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, ...calcTexts(GUIDES[id].calc)],
+      adArea: 'dinheiro',
     })),
   ];
 }

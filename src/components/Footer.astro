@@ -1,7 +1,8 @@
 ---
 // Footer (docs/design/components/Footer): the deep sea with the wave on its top edge; column titles are
 // H2; only links to pages that exist. The Image column lists the tools that exist in the language and,
-// where the image hub exists (English), the hub first. Never an ad inside the footer. With the AdSense
+// where the image hub exists (English), the hub first. The Money column, where the money hub exists
+// (English), lists the hub and the five credit calculators (DECISOES § 118). Never an ad inside the footer. With the AdSense
 // anchor on the page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
 import { pathFor, routeById } from '../i18n/routes.ts';
@@ -9,6 +10,7 @@ import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
+import { CALC_PAGES, MONEY_HUB_ID } from '../tools/calc/registry.ts';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -28,6 +30,12 @@ const image = [
     return href && blurb ? [{ label: blurb.name, href }] : [];
   }),
 ];
+const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
+const MONEY_LINKS = ['mortgage-calculator', 'refinance-calculator', 'auto-loan-calculator', 'personal-loan-calculator', 'home-affordability-calculator'] as const;
+const money =
+  moneyHub && t.moneyCalculators && t.calcs
+    ? [{ label: t.moneyCalculators, href: moneyHub }, ...MONEY_LINKS.map((id) => ({ label: t.calcs?.[id].name ?? id, href: CALC_PAGES[id].path }))]
+    : [];
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },
@@ -42,6 +50,12 @@ const site = [
       <h2>{t.footer.imageColumn}</h2>
       <ul>{image.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
     </div>
+    {money.length > 0 && (
+      <div>
+        <h2>{t.footer.moneyColumn}</h2>
+        <ul>{money.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+      </div>
+    )}
     <div>
       <h2>{t.footer.siteColumn}</h2>
       <ul>{site.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>

@@ -2,7 +2,7 @@
 // Home: the image tools that exist in the language, with the Oli waving next to the H1. English shows all
 // eight and a link to the image hub; Portuguese and Spanish show only the tools they have (Compress image).
 // The cards come from the route map: a tool gets a card only with a path in this language. No AdSlot on
-// the home yet.
+// the home yet. English also shows the five credit calculators and a link to the money hub (F4; DECISOES § 118).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
@@ -11,6 +11,7 @@ import { TEXTS } from '../i18n/texts.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
+import { CALC_PAGES, MONEY_HUB_ID, type CalcPageId } from '../tools/calc/registry.ts';
 
 interface Props {
   lang: Lang;
@@ -26,6 +27,9 @@ const cards = IMAGE_TOOL_IDS.flatMap((id) => {
   if (!href || !blurb) return [];
   return [{ id, href, blurb, icon: IMAGE_PAGES[id].icon, category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const) }];
 });
+const HOME_CALCS: CalcPageId[] = ['mortgage-calculator', 'refinance-calculator', 'auto-loan-calculator', 'personal-loan-calculator', 'home-affordability-calculator'];
+const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
+const moneyCards = moneyHub && t.money && common.calcs ? HOME_CALCS.map((id) => ({ href: CALC_PAGES[id].path, blurb: common.calcs?.[id], icon: CALC_PAGES[id].icon })) : [];
 const website = {
   '@type': 'WebSite',
   name: SITE_NAME,
@@ -50,6 +54,18 @@ const website = {
     </ul>
     {hub && t.hubLink && <p class="fo-more"><a href={hub}>{t.hubLink}</a></p>}
   </section>
+  {moneyHub && t.money && moneyCards.length > 0 && (
+    <section class="fo-section" aria-labelledby="money-home">
+      <h2 id="money-home">{t.money.heading}</h2>
+      <p class="fo-prose">{t.money.intro}</p>
+      <ul class="fo-grid">
+        {moneyCards.map((card) => (
+          <li><ToolCard href={card.href} name={card.blurb?.name ?? ''} description={card.blurb?.description ?? ''} category="money" icon={card.icon} /></li>
+        ))}
+      </ul>
+      <p class="fo-more"><a href={moneyHub}>{t.money.hubLink}</a></p>
+    </section>
+  )}
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">
     <h2 id="privacy-home">{t.privacyHeading}</h2>
     <p>{t.privacyBody}</p>
