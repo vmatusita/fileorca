@@ -4,11 +4,10 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import { defaultOptions } from '@jsquash/jpeg/meta.js';
-import decoderWasm from '@jsquash/jpeg/codec/dec/mozjpeg_dec.wasm?url';
-import encoderWasm from '@jsquash/jpeg/codec/enc/mozjpeg_enc.wasm?url';
 import type { Raster } from '../pixels.ts';
 import { loading } from '../errors.ts';
 import { compiled, copyOut, startEmscripten } from './runtime.ts';
+import { wasmUrl } from './wasm.ts';
 
 interface Decoder {
   decode(data: ArrayBuffer, preserveOrientation: boolean): Raster | null;
@@ -24,7 +23,7 @@ let warnings: string[] = [];
 
 function decoderModule(): Promise<Decoder> {
   decoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js')), compiled(decoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js')), compiled(wasmUrl('jpegDecoder'))]);
     return startEmscripten<Decoder>(factory, module, { printErr: (message) => warnings.push(message) });
   })();
   decoder.catch(() => (decoder = undefined));
@@ -33,7 +32,7 @@ function decoderModule(): Promise<Decoder> {
 
 function encoderModule(): Promise<Encoder> {
   encoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js')), compiled(encoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js')), compiled(wasmUrl('jpegEncoder'))]);
     return startEmscripten<Encoder>(factory, module);
   })();
   encoder.catch(() => (encoder = undefined));
@@ -42,7 +41,7 @@ function encoderModule(): Promise<Encoder> {
 
 /** Downloads and compiles both codecs (JS glue and .wasm); nothing runs. */
 export async function warmJpeg(): Promise<void> {
-  await Promise.all([import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js'), import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js'), compiled(decoderWasm), compiled(encoderWasm)]);
+  await Promise.all([import('@jsquash/jpeg/codec/dec/mozjpeg_dec.js'), import('@jsquash/jpeg/codec/enc/mozjpeg_enc.js'), compiled(wasmUrl('jpegDecoder')), compiled(wasmUrl('jpegEncoder'))]);
 }
 
 export interface DecodedJpeg {

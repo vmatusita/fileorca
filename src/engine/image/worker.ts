@@ -4,8 +4,11 @@
 // with a <canvas> (DECISOES § 22), and so do the WASM codecs it loads; only the ZIP and the codec warm-up
 // still go to the worker in that case.
 // The WASM codecs and the HEIF reader load inside process() when a file needs them, never here.
+// The worker knows no .wasm URL until the page sends them: the first message must be configure() (Comlink delivers
+// the messages in order, so the page can fire it and go on).
 import { expose } from 'comlink';
 import { warm } from './codecs/warm.ts';
+import { configureWasm } from './codecs/wasm.ts';
 import { processImage } from './process.ts';
 import { zipStored } from './zip.ts';
 
@@ -16,6 +19,8 @@ const api = {
   zip: zipStored,
   /** Fetches and compiles codecs ahead of the first file (pointer over the zone, focus on the button). */
   warm,
+  /** Where the .wasm files are (strings: a URL object does not cross the worker boundary). */
+  configure: configureWasm,
   canvasInWorker: async () => typeof OffscreenCanvas !== 'undefined',
 };
 

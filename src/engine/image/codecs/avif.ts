@@ -6,11 +6,10 @@
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import { defaultOptions } from '@jsquash/avif/meta.js';
-import decoderWasm from '@jsquash/avif/codec/dec/avif_dec.wasm?url';
-import encoderWasm from '@jsquash/avif/codec/enc/avif_enc.wasm?url';
 import type { Raster } from '../pixels.ts';
 import { loading } from '../errors.ts';
 import { compiled, copyOut, startEmscripten } from './runtime.ts';
+import { wasmUrl } from './wasm.ts';
 
 /**
  * Encoder effort: 0 is the slowest and smallest, 10 the fastest. Measured on a Ryzen 5 7600X with a
@@ -39,7 +38,7 @@ let encoder: Promise<Encoder> | undefined;
 
 function decoderModule(): Promise<Decoder> {
   decoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/dec/avif_dec.js')), compiled(decoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/dec/avif_dec.js')), compiled(wasmUrl('avifDecoder'))]);
     return startEmscripten<Decoder>(factory, module);
   })();
   decoder.catch(() => (decoder = undefined));
@@ -48,7 +47,7 @@ function decoderModule(): Promise<Decoder> {
 
 function encoderModule(): Promise<Encoder> {
   encoder ??= (async () => {
-    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/enc/avif_enc.js')), compiled(encoderWasm)]);
+    const [{ default: factory }, module] = await Promise.all([loading(import('@jsquash/avif/codec/enc/avif_enc.js')), compiled(wasmUrl('avifEncoder'))]);
     return startEmscripten<Encoder>(factory, module);
   })();
   encoder.catch(() => (encoder = undefined));
@@ -57,7 +56,7 @@ function encoderModule(): Promise<Encoder> {
 
 /** Downloads and compiles both codecs (JS glue and .wasm); nothing runs. */
 export async function warmAvif(): Promise<void> {
-  await Promise.all([import('@jsquash/avif/codec/dec/avif_dec.js'), import('@jsquash/avif/codec/enc/avif_enc.js'), compiled(decoderWasm), compiled(encoderWasm)]);
+  await Promise.all([import('@jsquash/avif/codec/dec/avif_dec.js'), import('@jsquash/avif/codec/enc/avif_enc.js'), compiled(wasmUrl('avifDecoder')), compiled(wasmUrl('avifEncoder'))]);
 }
 
 /** AVIF (8-bit) to pixels. */

@@ -1,11 +1,6 @@
-// Ambient types for the two kinds of import the codec loaders use that TypeScript cannot see:
-// the .wasm files imported by URL (Vite), and libheif-js, whose own libheif.d.ts lacks the
-// HeifDecoder and HeifImage classes. The jSquash glue modules are typed in the loaders themselves.
-
-declare module '*.wasm?url' {
-  const url: string;
-  export default url;
-}
+// Ambient types for the one import the codec loaders use that TypeScript cannot see: libheif-js, whose own
+// libheif.d.ts lacks the HeifDecoder and HeifImage classes. The jSquash glue modules are typed in the loaders
+// themselves. The engine imports no .wasm: the host passes their URLs (codecs/wasm.ts).
 
 declare module 'libheif-js/libheif-wasm/libheif.js' {
   /** One decoded top-level image of a HEIF file. Call free() when done. */

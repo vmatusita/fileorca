@@ -4,10 +4,28 @@
 // WebKit of Playwright on Windows), the same engine runs on the page with a <canvas> (DECISOES § 22);
 // the ZIP and the codecs warm-up still go to the worker. Calls never reject for a bad file: that comes
 // back as { ok: false, reason }. Only a worker that cannot start is turned into the page path.
+//
+// This is the only place that knows the bundler: the engine imports no .wasm (so it is the same code in the exported
+// package), and the files are named here, once, with Vite's `?url` (the file is copied unchanged and the import gives
+// its address). The worker gets the addresses by its first message; the page path sets them on the engine it loads.
+// The file stays out of the 'island' chunk (astro.config.ts), so the addresses cost the initial JS nothing.
 import { proxy, wrap, type Remote } from 'comlink';
+import avifDecoder from '@jsquash/avif/codec/dec/avif_dec.wasm?url';
+import avifEncoder from '@jsquash/avif/codec/enc/avif_enc.wasm?url';
+import jpegDecoder from '@jsquash/jpeg/codec/dec/mozjpeg_dec.wasm?url';
+import jpegEncoder from '@jsquash/jpeg/codec/enc/mozjpeg_enc.wasm?url';
+import oxipng from '@jsquash/oxipng/codec/pkg/squoosh_oxipng_bg.wasm?url';
+import resize from '@jsquash/resize/lib/resize/pkg/squoosh_resize_bg.wasm?url';
+import webpDecoder from '@jsquash/webp/codec/dec/webp_dec.wasm?url';
+import webpEncoder from '@jsquash/webp/codec/enc/webp_enc_simd.wasm?url';
+import heif from 'libheif-js/libheif-wasm/libheif.wasm?url';
+import type { WasmUrls } from '../../engine/image/codecs/wasm.ts';
 import type { ImageEngineApi } from '../../engine/image/worker.ts';
 import type { EngineResult, ImageFormat, Operation, Progress, WarmKind } from '../../engine/image/types.ts';
 import type { ZipEntry } from '../../engine/image/zip.ts';
+
+/** Strings, because only strings cross to the worker. */
+const WASM: Record<keyof WasmUrls, string> = { avifDecoder, avifEncoder, heif, jpegDecoder, jpegEncoder, oxipng, resize, webpDecoder, webpEncoder };
 
 interface Engine {
   api: Remote<ImageEngineApi>;
@@ -29,6 +47,8 @@ function start(): Engine {
     });
   });
   broken.catch(() => {});
+  // First message: the worker handles messages in order, so every call after this one finds the addresses set.
+  void api.configure(WASM).catch(() => {});
   return { api, broken, canvas: api.canvasInWorker().catch(() => false) };
 }
 
@@ -43,7 +63,8 @@ function current(): Engine | null {
 }
 
 async function onPage(file: Blob, op: Operation, accepts: readonly ImageFormat[], onProgress: Progress): Promise<EngineResult> {
-  const { processImage } = await import('../../engine/image/process.ts');
+  const { processImage, configureWasm } = await import('../../engine/image/process.ts');
+  configureWasm(WASM);
   return processImage(file, op, accepts, onProgress);
 }
 
