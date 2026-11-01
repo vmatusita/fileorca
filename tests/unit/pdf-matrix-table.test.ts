@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildTable, readRecords, testOf, type MatrixRecord } from '../../scripts/fixtures/pdf-matrix-table.ts';
+import { acceptedFixtures, buildTable, coverageGaps, readOracle, readRecords, readTable, testOf, type MatrixRecord } from '../../scripts/fixtures/pdf-matrix-table.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 const row = (test: string, tool: string, fixture: string, browser: string, result: string): MatrixRecord => ({ test, tool, fixture, browser, result });
@@ -80,6 +80,44 @@ describe('readRecords', () => {
 
   it('finds nothing in a folder that does not exist', () => {
     expect(readRecords(join(tmpdir(), 'no-such-matriz-pdf-folder'))).toEqual([]);
+  });
+});
+
+// DECISOES § 175: criterion 3 ("a matriz fica verde nos dois navegadores, com toda ferramenta e toda fixture que ela
+// aceita") read on the table the spec's records built, the way the adversarial review counted it.
+describe('the coverage of the matrix (DECISOES § 175)', () => {
+  const accepts = acceptedFixtures(readOracle());
+  const READABLE = ['gen-acoes.pdf', 'gen-fotos.pdf', 'gen-ja-otimizado.pdf', 'gen-paginas-300.pdf', 'gen-paginas-mistas.pdf', 'gen-xref-estragada.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf', 'pdf-escaneado-02-relatorio-nasa-150p.pdf', 'pdf-formulario-irs-1040-2019.pdf', 'pdf-grande-fontes-embutidas-117p.pdf'];
+
+  it('takes from the oracle what each way of running a tool accepts', () => {
+    expect(Object.keys(accepts).sort()).toEqual([...PDF_TOOL_IDS, 'compress-pdf (lossless)', 'compress-pdf (strong)'].sort());
+    for (const tool of [...PDF_TOOL_IDS.filter((id) => id !== 'unlock-pdf' && id !== 'pdf-to-jpg'), 'compress-pdf (lossless)', 'compress-pdf (strong)']) expect(accepts[tool], tool).toEqual(READABLE);
+    expect(accepts['pdf-to-jpg']).toEqual([...READABLE, 'gen-cifrado-dono.pdf'].sort());
+    expect(accepts['unlock-pdf']).toEqual(['gen-cifrado-aes256.pdf', 'gen-cifrado-dono.pdf', 'gen-cifrado-rc4-128.pdf']);
+  });
+
+  it('reads back the rows the table shows, by tool, fixture, test and browser', () => {
+    const back = readTable(table);
+    expect(back).toHaveLength(records.length);
+    for (const record of records) expect(back, `${record.tool} ${record.fixture} ${record.browser}`).toContainEqual(record);
+  });
+
+  it('finds a fixture with no ok line in a browser, and a fixture whose output failed, and nothing when both browsers say ok', () => {
+    const tiny = { 'sign-pdf': ['gen-acoes.pdf', 'gen-fotos.pdf'] };
+    const ok = (fixture: string, browser: string) => row('sign-small', 'sign-pdf', fixture, browser, 'ok: the signature image on each of 2 pages');
+    expect(coverageGaps([ok('gen-acoes.pdf', 'chromium'), ok('gen-acoes.pdf', 'webkit'), ok('gen-fotos.pdf', 'chromium'), ok('gen-fotos.pdf', 'webkit')], tiny)).toEqual([]);
+    expect(coverageGaps([ok('gen-acoes.pdf', 'chromium'), ok('gen-acoes.pdf', 'webkit'), ok('gen-fotos.pdf', 'chromium')], tiny)).toEqual(['sign-pdf: gen-fotos.pdf (WebKit: no ok line)']);
+    const failed = row('sign-small', 'sign-pdf', 'gen-fotos.pdf', 'webkit', 'failed: expect(received).toEqual(expected)');
+    expect(coverageGaps([ok('gen-acoes.pdf', 'chromium'), ok('gen-acoes.pdf', 'webkit'), ok('gen-fotos.pdf', 'chromium'), ok('gen-fotos.pdf', 'webkit'), failed], tiny)).toEqual(['sign-pdf: gen-fotos.pdf (WebKit: failed)']);
+    // A refusal is not coverage, and the table counts a failed line apart.
+    expect(coverageGaps([row('t', 'sign-pdf', 'gen-acoes.pdf', 'chromium', 'refused: x'), ok('gen-acoes.pdf', 'webkit')], { 'sign-pdf': ['gen-acoes.pdf'] })).toEqual(['sign-pdf: gen-acoes.pdf (Chromium: no ok line)']);
+    expect(buildTable([ok('gen-acoes.pdf', 'chromium'), failed], tiny)).toContain('| `sign-small` | `sign-pdf` | 1 ok · 0 recusadas | 0 ok · 0 recusadas · 1 falharam |');
+  });
+
+  it('holds on the committed table: every tool, every fixture it takes, both browsers, nothing failed', () => {
+    const committed = readTable(readFileSync('docs/relatorios/fase-05a-matriz.md', 'utf8'));
+    expect(committed.length).toBeGreaterThan(0);
+    expect(coverageGaps(committed, accepts)).toEqual([]);
   });
 });
 

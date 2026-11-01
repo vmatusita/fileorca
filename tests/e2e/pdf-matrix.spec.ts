@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { metadataReport } from './lib/images.ts';
 import { imageSize } from './lib/images.ts';
-import { readWithPdfjs, opensWithoutPassword } from './lib/pdfjs-read.ts';
+import { readWithPdfjs, opensWithoutPassword, type ReadPage, type ReadPdf } from './lib/pdfjs-read.ts';
 import { dataLayer } from './lib/page.ts';
 import { qpdfEncryption } from '../../scripts/lib/qpdf.ts';
 import {
@@ -36,10 +36,20 @@ import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 // The fixture matrix of the PDF tools (F5a, decision 12): every tool, every fixture it takes, both browsers, with the
 // refused files in the middle of the batch. Every output is downloaded and read in Node by readers that are not the
 // engine: the strict structure, qpdf --check, PDF.js (every page and its operator list), and the arithmetic of the tool
-// against fixtures/pdf/expected.json. A big file gets a test of its own, so no test runs past its timeout.
+// against fixtures/pdf/expected.json. Each test loads its page once. A tool that takes a batch gets the small fixtures in
+// one batch; a tool that takes one file at a time gets them one after the other ("Start over" in between). Each big file
+// (the 300 pages, the 117 pages, the 150-page NASA scan) gets a test of its own in every tool, so no test runs past its
+// timeout on the CI, and no fixture or page is left out (DECISOES § 175). tests/unit/pdf-matrix-table.test.ts proves the
+// coverage on the table this spec's records build.
 
 const SMALL = ['gen-paginas-mistas.pdf', 'gen-acoes.pdf', 'gen-fotos.pdf', 'gen-ja-otimizado.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf', 'pdf-formulario-irs-1040-2019.pdf', 'gen-xref-estragada.pdf'];
 const BIG = ['gen-paginas-300.pdf', 'pdf-grande-fontes-embutidas-117p.pdf', 'pdf-escaneado-02-relatorio-nasa-150p.pdf'];
+/** The short name of a big file in the name of its test and of its record. */
+const BIG_CASE: Record<string, string> = { 'gen-paginas-300.pdf': '300', 'pdf-grande-fontes-embutidas-117p.pdf': '117', 'pdf-escaneado-02-relatorio-nasa-150p.pdf': 'nasa' };
+const bigCase = (fixture: string): string => BIG_CASE[fixture] ?? fixture;
+/** A big file takes longer in WebKit on the CI runner (about 4 times this machine): its download gets more time. */
+const BIG_WAIT = 110_000;
+
 const markers = (name: string) => pdfOracle(name).markers ?? [];
 /** Clicks the label of a segmented option (the radio itself is hidden), the way image-smoke.spec.ts does. */
 const option = (page: Page, label: string | RegExp) => page.locator('.fo-seg__opt').filter({ hasText: label }).first().click();
@@ -48,11 +58,35 @@ const actionButton = (page: Page, texts: { panel: { action?: string } }) => {
   if (!texts.panel.action) throw new Error('this tool has no run button');
   return page.getByRole('button', { name: texts.panel.action });
 };
+const startOver = (page: Page) => page.getByRole('button', { name: 'Start over' }).click();
+/**
+ * The file is read and the panel is ready (its run button is there). A big file takes seconds to read, and an option
+ * set before that lands in fields the ready panel replaces: a page range typed then was gone when "Pick these" ran.
+ */
+const ready = (page: Page, texts: { panel: { action?: string } }, timeout = 30_000) => expect(actionButton(page, texts)).toBeVisible({ timeout });
 const pages = (name: string) => pdfOracle(name).pages ?? 0;
 const base = (name: string) => name.replace(/\.pdf$/, '');
 
 /** The batch with the refused files in the middle. */
 const withBroken = (files: readonly string[]) => [...files.slice(0, Math.ceil(files.length / 2)), ...BROKEN_PDFS, ...files.slice(Math.ceil(files.length / 2))];
+
+// What PDF.js reads of a fixture, read once per worker: the page of a tool's output is known again by its key.
+const originals = new Map<string, Promise<ReadPdf>>();
+const original = (name: string): Promise<ReadPdf> => {
+  let read = originals.get(name);
+  if (!read) {
+    read = readWithPdfjs(new Uint8Array(pdfBytes(name)));
+    originals.set(name, read);
+  }
+  return read;
+};
+/**
+ * A page as a reader tells it from the others: its "Page N" marker where the fixture has one, or else its shown size,
+ * its turn, its images and its first words (the scans, the IRS form and the 117 pages have no marker in the oracle).
+ */
+const pageKey = (p: ReadPage): string =>
+  p.marker ?? `${Math.round(p.shown.width)}x${Math.round(p.shown.height)} ${p.rotate}° ${p.images} images "${p.texts.map((t) => t.str).join(' ').replace(/\s+/g, ' ').trim().slice(0, 40)}"`;
+const keysOf = async (name: string): Promise<string[]> => (await original(name)).pages.map(pageKey);
 
 async function refusals(page: Page, tool: string, browser: string): Promise<MatrixRow[]> {
   const rows: MatrixRow[] = [];
@@ -72,7 +106,54 @@ const outputFor = (outs: { name: string; bytes: Uint8Array }[], fixture: string,
   return found?.bytes as Uint8Array;
 };
 
+/** The one file a tool that takes one file at a time gave back, with the name it must have. */
+async function onlyOutput(page: Page, fixture: string, tag: string, timeout?: number): Promise<Uint8Array> {
+  const outs = filesOf(await takePdfDownload(page, timeout));
+  expect(outs.map((out) => out.name)).toEqual([`${base(fixture)}-${tag}.pdf`]);
+  return outs[0]?.bytes as Uint8Array;
+}
+
+/** The first line of an error and what was received, without the colours of the terminal, for a row of the table. */
+function firstLine(error: unknown): string {
+  const lines = (error instanceof Error ? error.message : String(error)).replace(/\u001b\[[0-9;]*m/g, '').split('\n').map((line) => line.trim()).filter(Boolean);
+  // The first value of the "+" side of a diff (not its "Array [" or "Object {" opening), or the "Received" line.
+  const received = lines.find((line) => /^\+\s+(?!Array \[|Object \{|Received\b|\]|\})\S/.test(line)) ?? lines.find((line) => line.startsWith('Received'));
+  return [lines[0], received].filter(Boolean).join(': ').slice(0, 200);
+}
+
+/**
+ * Checks each fixture of a test in turn and records the rows (after `rows`, the refusals): a fixture whose check failed
+ * gets a "failed:" row with the first line of the error, and the test then fails with the first error. One broken output
+ * never hides what the other fixtures did, and the table says which one broke (DECISOES § 175).
+ */
+async function recordEach(name: string, who: { tool: string; browser: string }, rows: MatrixRow[], fixtures: readonly string[], check: (fixture: string) => Promise<string>): Promise<void> {
+  let first: unknown;
+  for (const fixture of fixtures) {
+    try {
+      rows.push({ ...who, fixture, result: await check(fixture) });
+    } catch (error) {
+      first ??= error;
+      rows.push({ ...who, fixture, result: `failed: ${firstLine(error)}` });
+    }
+  }
+  recordMatrix(`${name}-${who.browser}`, rows);
+  if (first !== undefined) throw first;
+}
+
+/** The fixtures one after the other on the page of a tool that takes one file at a time, "Start over" in between. */
+async function oneByOne(page: Page, name: string, who: { tool: string; browser: string }, fixtures: readonly string[], each: (fixture: string) => Promise<string>): Promise<void> {
+  let started = false;
+  await recordEach(name, who, [], fixtures, async (fixture) => {
+    if (started) await startOver(page);
+    started = true;
+    await choosePdfs(page, [pdfFile(fixture)]);
+    return each(fixture);
+  });
+}
+
 test.describe.configure({ timeout: 120_000 });
+
+// ---- Merge PDF --------------------------------------------------------------------------------------------------
 
 test('Merge PDF: the small fixtures, the refused ones in the middle', async ({ page, browserName }) => {
   await openTool(page, '/merge-pdf/');
@@ -110,6 +191,8 @@ test('Merge PDF: the three big fixtures, and the locked ones refused with the li
   recordMatrix(`merge-big-${browserName}`, rows);
 });
 
+// ---- Split PDF --------------------------------------------------------------------------------------------------
+
 test('Split PDF: every page of the mixed pages, and a second file told it waits', async ({ page, browserName }) => {
   await openTool(page, '/split-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-fotos.pdf')]);
@@ -122,6 +205,20 @@ test('Split PDF: every page of the mixed pages, and a second file told it waits'
     expect(read.pages.map((p) => [p.marker, p.rotate])).toEqual([[`Page ${i + 1}`, pdfOracle('gen-paginas-mistas.pdf').rotate?.[i]]]);
   }
   recordMatrix(`split-each-${browserName}`, [{ tool: 'split-pdf', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'ok: 8 files, one page each, turns kept' }, { tool: 'split-pdf', fixture: 'gen-fotos.pdf', browser: browserName, result: 'refused: one PDF at a time' }]);
+});
+
+test('Split PDF: every page of each other small fixture, one file after the other', async ({ page, browserName }) => {
+  await openTool(page, '/split-pdf/');
+  // The mixed pages and the IRS form are split in their own tests (every page; pages picked on the grid).
+  const files = ['gen-acoes.pdf', 'gen-fotos.pdf', 'gen-ja-otimizado.pdf', 'gen-xref-estragada.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf'];
+  await oneByOne(page, 'split-small', { tool: 'split-pdf', browser: browserName }, files, async (fixture) => {
+    await actionButton(page, splitTexts).click();
+    const outs = filesOf(await takePdfDownload(page));
+    expect(outs.map((out) => out.name), fixture).toEqual(Array.from({ length: pages(fixture) }, (_, i) => `${base(fixture)}-page-${i + 1}.pdf`));
+    const keys = await keysOf(fixture);
+    for (const [i, out] of outs.entries()) expect((await soundPdf(out.bytes)).pages.map(pageKey), `${fixture} page ${i + 1}`).toEqual([keys[i]]);
+    return `ok: ${pages(fixture)} files, one page each, in order`;
+  });
 });
 
 test('Split PDF: ranges of the 300 pages, named by part, never by the typed range', async ({ page, browserName }) => {
@@ -144,7 +241,7 @@ test('Split PDF: every page of the 117-page notes, and pages picked on the grid 
   const outs = filesOf(await takePdfDownload(page, 90_000));
   expect(outs).toHaveLength(117);
   for (const out of [outs[0], outs[58], outs[116]]) expect((await soundPdf(out?.bytes as Uint8Array)).pages).toHaveLength(1);
-  await page.getByRole('button', { name: 'Start over' }).click();
+  await startOver(page);
   await choosePdfs(page, [pdfFile('pdf-formulario-irs-1040-2019.pdf')]);
   await option(page, splitTexts.panel.options.pick);
   await page.getByRole('button', { name: /^Page 2 of 2/ }).click();
@@ -159,6 +256,25 @@ test('Split PDF: every page of the 117-page notes, and pages picked on the grid 
     { tool: 'split-pdf', fixture: 'pdf-formulario-irs-1040-2019.pdf', browser: browserName, result: 'ok: page 2 picked on the grid, its form fields kept' },
   ]);
 });
+
+test('Split PDF: the 150-page NASA scan in three ranges that cover every page', async ({ page, browserName }) => {
+  const fixture = 'pdf-escaneado-02-relatorio-nasa-150p.pdf';
+  await openTool(page, '/split-pdf/');
+  await choosePdfs(page, [pdfFile(fixture)]);
+  await option(page, splitTexts.panel.options.ranges);
+  await page.getByLabel(splitTexts.panel.options.rangesLabel).fill('1-50, 51-100, 101-150');
+  await actionButton(page, splitTexts).click();
+  const outs = filesOf(await takePdfDownload(page, BIG_WAIT));
+  await recordEach('split-nasa', { tool: 'split-pdf', browser: browserName }, [], [fixture], async () => {
+    expect(outs.map((out) => out.name)).toEqual([1, 2, 3].map((n) => `${base(fixture)}-part-${n}.pdf`));
+    const reads = [];
+    for (const out of outs) reads.push(await soundPdf(out.bytes));
+    expect(reads.flatMap((read) => read.pages.map(pageKey))).toEqual(await keysOf(fixture));
+    return 'ok: 3 parts of 50 pages, every page in order';
+  });
+});
+
+// ---- PDF to JPG -------------------------------------------------------------------------------------------------
 
 async function checkImages(outs: { name: string; bytes: Uint8Array }[], fixture: string, ppi: number, wanted: number[], format: 'jpeg' | 'png'): Promise<void> {
   const sizes = pdfOracle(fixture).sizes ?? [];
@@ -181,15 +297,16 @@ async function checkImages(outs: { name: string; bytes: Uint8Array }[], fixture:
 test('PDF to JPG: the small fixtures at 72 ppi, the owner-restricted one drawn, the locked one refused', async ({ page, browserName }) => {
   await openTool(page, '/pdf-to-jpg/');
   await option(page, imagesTexts.panel.options.low);
-  const files = ['gen-paginas-mistas.pdf', 'gen-acoes.pdf', 'gen-cifrado-dono.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf', 'pdf-formulario-irs-1040-2019.pdf', 'gen-xref-estragada.pdf'];
+  const files = [...SMALL.slice(0, 4), 'gen-cifrado-dono.pdf', ...SMALL.slice(4)];
   await choosePdfs(page, [...withBroken(files), 'gen-cifrado-aes256.pdf'].map((name) => pdfFile(name)));
   const rows = await refusals(page, 'pdf-to-jpg', browserName);
   expect(await rowReason(page, 'gen-cifrado-aes256.pdf')).toMatch(/needs a password/);
   const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of files) await checkImages(outs, fixture, 72, Array.from({ length: pages(fixture) }, (_, i) => i + 1), 'jpeg');
+  await recordEach('images-small', { tool: 'pdf-to-jpg', browser: browserName }, rows, files, async (fixture) => {
+    await checkImages(outs, fixture, 72, Array.from({ length: pages(fixture) }, (_, i) => i + 1), 'jpeg');
+    return `ok: ${pages(fixture)} JPG at 72 ppi, sizes within 1 px, no Exif`;
+  });
   expect(outs).toHaveLength(files.reduce((sum, name) => sum + pages(name), 0));
-  rows.push(...files.map((fixture) => ({ tool: 'pdf-to-jpg', fixture, browser: browserName, result: `ok: ${pages(fixture)} JPG at 72 ppi, sizes within 1 px, no Exif` })));
-  recordMatrix(`images-small-${browserName}`, rows);
 });
 
 test('PDF to JPG: PNG at 150 ppi of a range of each big file', async ({ page, browserName }) => {
@@ -207,74 +324,101 @@ test('PDF to JPG: PNG at 150 ppi of a range of each big file', async ({ page, br
   recordMatrix(`images-big-${browserName}`, [...BIG, 'gen-fotos.pdf'].map((fixture) => ({ tool: 'pdf-to-jpg', fixture, browser: browserName, result: 'ok: PNG at 150 ppi of pages 1, 2 and 117 (those it has)' })));
 });
 
-test('Compress PDF: Recommended on the small fixtures, never bigger, the original back when it does not gain', async ({ page, browserName }) => {
-  await openTool(page, '/compress-pdf/');
-  await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
-  const rows = await refusals(page, 'compress-pdf', browserName);
-  const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of SMALL) {
-    const original = pdfBytes(fixture);
-    const out = outputFor(outs, fixture, 'compressed');
-    expect(out.length, fixture).toBeLessThanOrEqual(original.length);
-    const same = Buffer.compare(Buffer.from(out), original) === 0;
-    await soundPdf(out, same ? { originalWarnings: pdfOracle(fixture).qpdf.warnings } : {});
-    rows.push({ tool: 'compress-pdf', fixture, browser: browserName, result: same ? `ok: already optimized, original bytes (${original.length})` : `ok: ${original.length} → ${out.length} bytes` });
-  }
-  expect(Buffer.compare(Buffer.from(outputFor(outs, 'gen-ja-otimizado.pdf', 'compressed')), pdfBytes('gen-ja-otimizado.pdf'))).toBe(0);
-  expect(outputFor(outs, 'gen-fotos.pdf', 'compressed').length).toBeLessThan(pdfBytes('gen-fotos.pdf').length * 0.6);
-  recordMatrix(`compress-recommended-${browserName}`, rows);
-});
+// ---- Compress PDF -----------------------------------------------------------------------------------------------
 
-test('Compress PDF: Lossless on the big fixtures, Strong said before the choice and run on three', async ({ page, browserName }) => {
-  await openTool(page, '/compress-pdf/');
-  await expect(page.getByText(compressTexts.panel.options.strongWarning)).toBeVisible();
-  await option(page, compressTexts.panel.options.lossless);
-  await choosePdfs(page, BIG.map((name) => pdfFile(name)));
-  const outs = filesOf(await takePdfDownload(page, 110_000));
-  const rows: MatrixRow[] = [];
+/** One output of Compress: never bigger, the same pages, and the original bytes (with the original's qpdf warnings) when it does not gain. */
+async function checkCompressed(out: Uint8Array, fixture: string): Promise<string> {
+  const original = pdfBytes(fixture);
+  expect(out.length, fixture).toBeLessThanOrEqual(original.length);
+  const same = Buffer.compare(Buffer.from(out), original) === 0;
+  const read = await soundPdf(out, same ? { originalWarnings: pdfOracle(fixture).qpdf.warnings } : {});
+  expect(read.pages, fixture).toHaveLength(pages(fixture));
+  return same ? `ok: no gain, original bytes (${original.length})` : `ok: ${original.length} → ${out.length} bytes`;
+}
+
+const COMPRESS_MODES = [
+  { mode: 'recommended', label: compressTexts.panel.options.recommended, tool: 'compress-pdf' },
+  { mode: 'lossless', label: compressTexts.panel.options.lossless, tool: 'compress-pdf (lossless)' },
+  { mode: 'strong', label: compressTexts.panel.options.strong, tool: 'compress-pdf (strong)' },
+] as const;
+
+for (const { mode, label, tool } of COMPRESS_MODES) {
+  test(`Compress PDF: ${mode} on the small fixtures, never bigger, the original back when it does not gain`, async ({ page, browserName }) => {
+    await openTool(page, '/compress-pdf/');
+    // Strong is said before it is chosen: it turns the pages into pictures.
+    await expect(page.getByText(compressTexts.panel.options.strongWarning)).toBeVisible();
+    await option(page, label);
+    await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
+    const rows = await refusals(page, tool, browserName);
+    const outs = filesOf(await takePdfDownload(page, 90_000));
+    await recordEach(`compress-${mode}-small`, { tool, browser: browserName }, rows, SMALL, (fixture) => checkCompressed(outputFor(outs, fixture, 'compressed'), fixture));
+    if (mode === 'recommended') {
+      expect(Buffer.compare(Buffer.from(outputFor(outs, 'gen-ja-otimizado.pdf', 'compressed')), pdfBytes('gen-ja-otimizado.pdf'))).toBe(0);
+      expect(outputFor(outs, 'gen-fotos.pdf', 'compressed').length).toBeLessThan(pdfBytes('gen-fotos.pdf').length * 0.6);
+    }
+  });
+
   for (const fixture of BIG) {
-    const out = outputFor(outs, fixture, 'compressed');
-    expect(out.length).toBeLessThanOrEqual(pdfBytes(fixture).length);
-    await soundPdf(out);
-    rows.push({ tool: 'compress-pdf (lossless)', fixture, browser: browserName, result: `ok: ${pdfBytes(fixture).length} → ${out.length} bytes` });
+    test(`Compress PDF: ${mode} on ${fixture}, never bigger`, async ({ page, browserName }) => {
+      // Strong draws every page of one file and cannot be split into smaller cases: the 150-page scan takes 24 s in the
+      // WebKit of this machine, about 105 s on the CI runner, so its cases get the time of two (DECISOES § 175).
+      if (mode === 'strong') test.setTimeout(240_000);
+      await openTool(page, '/compress-pdf/');
+      await option(page, label);
+      await choosePdfs(page, [pdfFile(fixture)]);
+      const out = await onlyOutput(page, fixture, 'compressed', mode === 'strong' ? 220_000 : BIG_WAIT);
+      await recordEach(`compress-${mode}-${bigCase(fixture)}`, { tool, browser: browserName }, [], [fixture], () => checkCompressed(out, fixture));
+    });
   }
-  await page.getByRole('button', { name: 'Start over' }).click();
-  await option(page, compressTexts.panel.options.strong);
-  const strong = ['gen-fotos.pdf', 'gen-paginas-mistas.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf'];
-  await choosePdfs(page, strong.map((name) => pdfFile(name)));
-  const strongOuts = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of strong) {
-    const out = outputFor(strongOuts, fixture, 'compressed');
-    expect(out.length).toBeLessThanOrEqual(pdfBytes(fixture).length);
-    const same = Buffer.compare(Buffer.from(out), pdfBytes(fixture)) === 0;
-    const read = await soundPdf(out);
-    expect(read.pages).toHaveLength(pages(fixture));
-    rows.push({ tool: 'compress-pdf (strong)', fixture, browser: browserName, result: same ? 'ok: no gain, original bytes' : `ok: pages as pictures, ${pdfBytes(fixture).length} → ${out.length} bytes` });
-  }
-  recordMatrix(`compress-lossless-strong-${browserName}`, rows);
+}
+
+// ---- Protect and Unlock -----------------------------------------------------------------------------------------
+
+const PASSWORD = 'Orca-Sentinel-7391-Kq';
+
+async function protectWith(page: Page): Promise<void> {
+  await page.getByLabel(protectTexts.panel.options.passwordLabel, { exact: true }).fill(PASSWORD);
+  await page.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(PASSWORD);
+  await actionButton(page, protectTexts).click();
+}
+
+/** R6 with AESv3, opens only with the password, every page there, and the password nowhere in the bytes. */
+async function checkProtected(out: Uint8Array, fixture: string): Promise<void> {
+  const shown = await qpdfEncryption(out, PASSWORD);
+  expect(shown.out).toEqual(expect.arrayContaining(['R = 6', 'stream encryption method: AESv3']));
+  expect(await opensWithoutPassword(out)).toBe(false);
+  const read = await soundPdf(out, { password: PASSWORD });
+  expect(read.pages.map((p) => p.marker), fixture).toEqual(markers(fixture));
+  expect(Buffer.from(out).includes(Buffer.from(PASSWORD, 'latin1'))).toBe(false);
+}
+
+test('Protect PDF: AES-256 with the same password on the small fixtures, the password nowhere in the bytes', async ({ page, browserName }) => {
+  await openTool(page, '/protect-pdf/');
+  await choosePdfs(page, [...withBroken(SMALL), 'gen-cifrado-dono.pdf'].map((name) => pdfFile(name)));
+  const rows = await refusals(page, 'protect-pdf', browserName);
+  const owner = await rowReason(page, 'gen-cifrado-dono.pdf');
+  expect(owner).toMatch(/editing restrictions/);
+  rows.push({ tool: 'protect-pdf', fixture: 'gen-cifrado-dono.pdf', browser: browserName, result: `refused: ${owner}` });
+  await protectWith(page);
+  const outs = filesOf(await takePdfDownload(page, 90_000));
+  await recordEach('protect-small', { tool: 'protect-pdf', browser: browserName }, rows, SMALL, async (fixture) => {
+    await checkProtected(outputFor(outs, fixture, 'protected'), fixture);
+    return 'ok: R6 AESv3, opens only with the password';
+  });
 });
 
-test('Protect PDF: AES-256 with the same password on a batch, the password nowhere in the bytes', async ({ page, browserName }) => {
-  const password = 'Orca-Sentinel-7391-Kq';
-  await openTool(page, '/protect-pdf/');
-  const files = ['gen-paginas-mistas.pdf', 'gen-fotos.pdf', 'gen-paginas-300.pdf'];
-  await choosePdfs(page, [...withBroken(files), 'gen-cifrado-dono.pdf'].map((name) => pdfFile(name)));
-  const rows = await refusals(page, 'protect-pdf', browserName);
-  await page.getByLabel(protectTexts.panel.options.passwordLabel, { exact: true }).fill(password);
-  await page.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(password);
-  await actionButton(page, protectTexts).click();
-  const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of files) {
-    const out = outputFor(outs, fixture, 'protected');
-    const shown = await qpdfEncryption(out, password);
-    expect(shown.out).toEqual(expect.arrayContaining(['R = 6', 'stream encryption method: AESv3']));
-    expect(await opensWithoutPassword(out)).toBe(false);
-    expect((await soundPdf(out, { password })).pages.map((p) => p.marker)).toEqual(markers(fixture));
-    expect(Buffer.from(out).includes(Buffer.from(password, 'latin1'))).toBe(false);
-    rows.push({ tool: 'protect-pdf', fixture, browser: browserName, result: 'ok: R6 AESv3, opens only with the password' });
-  }
-  recordMatrix(`protect-${browserName}`, rows);
-});
+for (const fixture of BIG) {
+  test(`Protect PDF: AES-256 on ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/protect-pdf/');
+    await choosePdfs(page, [pdfFile(fixture)]);
+    await protectWith(page);
+    const out = await onlyOutput(page, fixture, 'protected', BIG_WAIT);
+    await recordEach(`protect-${bigCase(fixture)}`, { tool: 'protect-pdf', browser: browserName }, [], [fixture], async () => {
+      await checkProtected(out, fixture);
+      return `ok: R6 AESv3, opens only with the password, ${pages(fixture)} pages`;
+    });
+  });
+}
 
 test('Unlock PDF: a wrong password said, then the right one; RC4 too; the owner-only file without asking', async ({ page, browserName }) => {
   const rows: MatrixRow[] = [];
@@ -302,26 +446,40 @@ test('Unlock PDF: a wrong password said, then the right one; RC4 too; the owner-
   expect(Buffer.from(owner?.bytes as Uint8Array).toString('latin1')).not.toMatch(/\/Encrypt\b/);
   await soundPdf(owner?.bytes as Uint8Array);
   rows.push({ tool: 'unlock-pdf', fixture: 'gen-cifrado-dono.pdf', browser: browserName, result: 'ok: restrictions removed without a password' });
-  await page.getByRole('button', { name: 'Start over' }).click();
+  await startOver(page);
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
   expect(await page.locator('.fo-drop__help').innerText()).toMatch(/nothing to remove/);
   rows.push({ tool: 'unlock-pdf', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'refused: no password or restrictions' });
   recordMatrix(`unlock-${browserName}`, rows);
 });
 
-test('Rotate PDF: every page of a batch a quarter to the right, on top of its own turn', async ({ page, browserName }) => {
+// ---- Rotate PDF -------------------------------------------------------------------------------------------------
+
+const turnedRight = (fixture: string) => (pdfOracle(fixture).rotate ?? []).map((turn) => (turn + 90) % 360);
+
+test('Rotate PDF: every page of a batch of the small fixtures a quarter to the right, on top of its own turn', async ({ page, browserName }) => {
   await openTool(page, '/rotate-pdf/');
-  const files = [...SMALL, 'gen-paginas-300.pdf'];
-  await choosePdfs(page, withBroken(files).map((name) => pdfFile(name)));
+  await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
   const rows = await refusals(page, 'rotate-pdf', browserName);
   const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of files) {
+  await recordEach('rotate-small', { tool: 'rotate-pdf', browser: browserName }, rows, SMALL, async (fixture) => {
     const read = await soundPdf(outputFor(outs, fixture, 'rotated'));
-    expect(read.pages.map((p) => p.rotate), fixture).toEqual((pdfOracle(fixture).rotate ?? []).map((turn) => (turn + 90) % 360));
-    rows.push({ tool: 'rotate-pdf', fixture, browser: browserName, result: 'ok: every /Rotate +90' });
-  }
-  recordMatrix(`rotate-batch-${browserName}`, rows);
+    expect(read.pages.map((p) => p.rotate), fixture).toEqual(turnedRight(fixture));
+    return 'ok: every /Rotate +90';
+  });
 });
+
+for (const fixture of BIG) {
+  test(`Rotate PDF: every page of ${fixture} a quarter to the right`, async ({ page, browserName }) => {
+    await openTool(page, '/rotate-pdf/');
+    await choosePdfs(page, [pdfFile(fixture)]);
+    const out = await onlyOutput(page, fixture, 'rotated', BIG_WAIT);
+    await recordEach(`rotate-${bigCase(fixture)}`, { tool: 'rotate-pdf', browser: browserName }, [], [fixture], async () => {
+      expect((await soundPdf(out)).pages.map((p) => p.rotate)).toEqual(turnedRight(fixture));
+      return `ok: every /Rotate +90, ${pages(fixture)} pages`;
+    });
+  });
+}
 
 test('Rotate PDF: page by page on the grid of one file', async ({ page, browserName }) => {
   await openTool(page, '/rotate-pdf/');
@@ -334,6 +492,37 @@ test('Rotate PDF: page by page on the grid of one file', async ({ page, browserN
   const before = pdfOracle('gen-paginas-mistas.pdf').rotate ?? [];
   expect((await soundPdf(out?.bytes as Uint8Array)).pages.map((p) => p.rotate)).toEqual(before.map((turn, i) => (i === 0 ? (turn + 180) % 360 : i === 3 ? (turn + 90) % 360 : turn)));
   recordMatrix(`rotate-pages-${browserName}`, [{ tool: 'rotate-pdf', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'ok: page 1 +180, page 4 +90, the rest as they were' }]);
+});
+
+
+// ---- Delete PDF pages -------------------------------------------------------------------------------------------
+
+/** Picks pages by number and deletes them: the pages left are the others, in order. A one-page file can lose none. */
+async function deletePages(page: Page, fixture: string, typed: string, gone: readonly number[], timeout?: number): Promise<string> {
+  await ready(page, deleteTexts, timeout);
+  await expect(page.getByText(`0 of ${pages(fixture)} pages picked`)).toBeVisible();
+  await page.getByLabel('Pick pages by number').fill(typed);
+  await page.getByRole('button', { name: 'Pick these' }).click();
+  await expect(page.getByText(`${gone.length} of ${pages(fixture)} pages picked`)).toBeVisible();
+  if (gone.length === pages(fixture)) {
+    await expect(page.getByText(deleteTexts.panel.options.allPicked)).toBeVisible();
+    return 'ok: its only page picked, "needs at least one page" said, nothing deleted';
+  }
+  await page.getByRole('button', { name: /^Delete/ }).first().click();
+  const read = await soundPdf(await onlyOutput(page, fixture, 'edited', timeout));
+  expect(read.pages.map(pageKey), fixture).toEqual((await keysOf(fixture)).filter((_, i) => !gone.includes(i + 1)));
+  return `ok: pages ${typed} out, ${pages(fixture) - gone.length} left in order`;
+}
+
+/** The first and the last page of a file (the second of two pages; the only one of one). */
+const ends = (n: number): { typed: string; gone: number[] } => (n === 1 ? { typed: '1', gone: [1] } : n === 2 ? { typed: '2', gone: [2] } : { typed: `1, ${n}`, gone: [1, n] });
+
+test('Delete PDF pages: the first and last page of each small fixture, one file after the other', async ({ page, browserName }) => {
+  await openTool(page, '/delete-pdf-pages/');
+  await oneByOne(page, 'delete-small', { tool: 'delete-pdf-pages', browser: browserName }, SMALL, (fixture) => {
+    const { typed, gone } = ends(pages(fixture));
+    return deletePages(page, fixture, typed, gone);
+  });
 });
 
 test('Delete PDF pages: pages picked by number on the 300 pages; every page picked is said, not done', async ({ page, browserName }) => {
@@ -350,68 +539,157 @@ test('Delete PDF pages: pages picked by number on the 300 pages; every page pick
   const read = await soundPdf(out?.bytes as Uint8Array);
   expect(read.pages.map((p) => p.marker)).toEqual(['Page 1', 'Page 300']);
   expect(out?.bytes.length ?? 0).toBeLessThan(pdfBytes('gen-paginas-300.pdf').length / 20);
-  recordMatrix(`delete-${browserName}`, [{ tool: 'delete-pdf-pages', fixture: 'gen-paginas-300.pdf', browser: browserName, result: 'ok: pages 2-299 out, every page picked refused' }]);
+  recordMatrix(`delete-300-${browserName}`, [{ tool: 'delete-pdf-pages', fixture: 'gen-paginas-300.pdf', browser: browserName, result: 'ok: pages 2-299 out, every page picked refused' }]);
 });
 
-test('Add page numbers: "Page N of M" at the bottom centre of the small fixtures and the 117 pages', async ({ page, browserName }) => {
+// The 300 pages have their own test above; the other two big files lose every page but the first and the last.
+for (const fixture of BIG.filter((name) => name !== 'gen-paginas-300.pdf')) {
+  test(`Delete PDF pages: every page but the first and the last of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/delete-pdf-pages/');
+    await oneByOne(page, `delete-${bigCase(fixture)}`, { tool: 'delete-pdf-pages', browser: browserName }, [fixture], () => {
+      const n = pages(fixture);
+      return deletePages(page, fixture, `2-${n - 1}`, Array.from({ length: n - 2 }, (_, i) => i + 2), BIG_WAIT);
+    });
+  });
+}
+
+// ---- Add page numbers -------------------------------------------------------------------------------------------
+
+/** "Page N of M" on every page, upright, at the bottom of the page as shown. */
+function checkNumbers(read: ReadPdf, fixture: string): void {
+  expect(read.pages, fixture).toHaveLength(pages(fixture));
+  read.pages.forEach((p, i) => {
+    const number = p.texts.find((text) => text.str === `Page ${i + 1} of ${read.pages.length}`);
+    expect(number, `${fixture} page ${i + 1}`).toBeDefined();
+    expect(number?.angle).toBe(0);
+    expect(number?.y ?? 0).toBeGreaterThan(p.shown.height - 40);
+  });
+}
+
+test('Add page numbers: "Page N of M" at the bottom centre of the small fixtures', async ({ page, browserName }) => {
   await openTool(page, '/add-page-numbers-to-pdf/');
   await option(page, numbersTexts.panel.options.pageNofTotal);
-  const files = [...SMALL, 'pdf-grande-fontes-embutidas-117p.pdf'];
-  await choosePdfs(page, withBroken(files).map((name) => pdfFile(name)));
+  await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
   const rows = await refusals(page, 'add-page-numbers-to-pdf', browserName);
   const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of files) {
-    const read = await soundPdf(outputFor(outs, fixture, 'numbered'));
-    read.pages.forEach((p, i) => {
-      const number = p.texts.find((text) => text.str === `Page ${i + 1} of ${read.pages.length}`);
-      expect(number, `${fixture} page ${i + 1}`).toBeDefined();
-      expect(number?.angle).toBe(0);
-      expect(number?.y ?? 0).toBeGreaterThan(p.shown.height - 40);
+  await recordEach('numbers-small', { tool: 'add-page-numbers-to-pdf', browser: browserName }, rows, SMALL, async (fixture) => {
+    checkNumbers(await soundPdf(outputFor(outs, fixture, 'numbered')), fixture);
+    return 'ok: "Page N of M" at the bottom centre, upright';
+  });
+});
+
+for (const fixture of BIG) {
+  test(`Add page numbers: "Page N of M" on every page of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/add-page-numbers-to-pdf/');
+    await option(page, numbersTexts.panel.options.pageNofTotal);
+    await choosePdfs(page, [pdfFile(fixture)]);
+    const out = await onlyOutput(page, fixture, 'numbered', BIG_WAIT);
+    await recordEach(`numbers-${bigCase(fixture)}`, { tool: 'add-page-numbers-to-pdf', browser: browserName }, [], [fixture], async () => {
+      checkNumbers(await soundPdf(out), fixture);
+      return `ok: "Page N of M" at the bottom centre of ${pages(fixture)} pages, upright`;
     });
-    rows.push({ tool: 'add-page-numbers-to-pdf', fixture, browser: browserName, result: 'ok: "Page N of M" at the bottom centre, upright' });
-  }
-  recordMatrix(`numbers-${browserName}`, rows);
-});
+  });
+}
 
-test('Reorder PDF pages: the reversed order of the mixed pages', async ({ page, browserName }) => {
-  await openTool(page, '/reorder-pdf-pages/');
-  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
-  await page.getByRole('button', { name: reorderTexts.panel.options.reverse }).click();
-  await actionButton(page, reorderTexts).click();
-  const [out] = filesOf(await takePdfDownload(page));
-  expect((await soundPdf(out?.bytes as Uint8Array)).pages.map((p) => p.marker)).toEqual([...markers('gen-paginas-mistas.pdf')].reverse());
-  recordMatrix(`reorder-${browserName}`, [{ tool: 'reorder-pdf-pages', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'ok: reversed' }]);
-});
+// ---- Sign PDF ---------------------------------------------------------------------------------------------------
 
-test('Watermark PDF: the text across every page of the small fixtures and the 300 pages', async ({ page, browserName }) => {
-  await openTool(page, '/watermark-pdf/');
-  const text = 'Orca-Mark-5521-Zt';
-  await page.getByLabel(watermarkTexts.panel.options.textLabel).fill(text);
-  await page.getByLabel(watermarkTexts.panel.options.textLabel).blur();
-  const files = [...SMALL, 'gen-paginas-300.pdf'];
-  await choosePdfs(page, withBroken(files).map((name) => pdfFile(name)));
-  const rows = await refusals(page, 'watermark-pdf', browserName);
-  await actionButton(page, watermarkTexts).click();
-  const outs = filesOf(await takePdfDownload(page, 90_000));
-  for (const fixture of files) {
-    const read = await soundPdf(outputFor(outs, fixture, 'watermarked'));
-    for (const [i, p] of read.pages.entries()) expect(p.texts.some((t) => t.str.includes(text)), `${fixture} page ${i + 1}`).toBe(true);
-    rows.push({ tool: 'watermark-pdf', fixture, browser: browserName, result: 'ok: the text on every page' });
-  }
-  recordMatrix(`watermark-${browserName}`, rows);
-});
-
-test('Sign PDF: a typed name on every page of the mixed pages, inside the visible box', async ({ page, browserName }) => {
-  await openTool(page, '/sign-pdf/');
-  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+/**
+ * A typed name on every page: each page has one image more than it had. Each file gets a name of its own: after "Start
+ * over" the name field keeps the name typed for the previous file while the signature is gone, and typing the same
+ * name again draws nothing (reported with DECISOES § 175, for the island).
+ */
+let signer = 0;
+async function signEveryPage(page: Page, fixture: string, timeout?: number): Promise<string> {
+  signer += 1;
+  await ready(page, signTexts, timeout);
   await option(page, signTexts.panel.options.type);
-  await page.getByLabel(signTexts.panel.options.typeLabel).fill('Orca Signer Nine');
+  await page.getByLabel(signTexts.panel.options.typeLabel).fill(`Orca Signer ${signer}`);
   await page.getByLabel(signTexts.panel.options.typeLabel).blur();
   await expect(page.locator('.fo-sign__box')).toBeVisible({ timeout: 20_000 });
   await option(page, signTexts.panel.options.allPages);
   await actionButton(page, signTexts).click();
-  const [out] = filesOf(await takePdfDownload(page));
-  const read = await soundPdf(out?.bytes as Uint8Array);
-  expect(read.pages.map((p) => p.images)).toEqual(new Array(8).fill(1));
-  recordMatrix(`sign-${browserName}`, [{ tool: 'sign-pdf', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'ok: the signature image on every page' }]);
+  const read = await soundPdf(await onlyOutput(page, fixture, 'signed', timeout));
+  expect(read.pages.map((p) => p.images), fixture).toEqual((await original(fixture)).pages.map((p) => p.images + 1));
+  return `ok: the signature image on each of ${pages(fixture)} pages`;
+}
+
+test('Sign PDF: a typed name on every page of each small fixture, one file after the other', async ({ page, browserName }) => {
+  await openTool(page, '/sign-pdf/');
+  await oneByOne(page, 'sign-small', { tool: 'sign-pdf', browser: browserName }, SMALL, (fixture) => signEveryPage(page, fixture));
 });
+
+for (const fixture of BIG) {
+  test(`Sign PDF: a typed name on every page of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/sign-pdf/');
+    await oneByOne(page, `sign-${bigCase(fixture)}`, { tool: 'sign-pdf', browser: browserName }, [fixture], () => signEveryPage(page, fixture, BIG_WAIT));
+  });
+}
+
+// ---- Reorder PDF pages ------------------------------------------------------------------------------------------
+
+/** The reversed order saved; a one-page file has no other order, and that is said. */
+async function reverseOrder(page: Page, fixture: string, timeout?: number): Promise<string> {
+  await ready(page, reorderTexts, timeout);
+  await page.getByRole('button', { name: reorderTexts.panel.options.reverse }).click();
+  await actionButton(page, reorderTexts).click();
+  if (pages(fixture) === 1) {
+    await expect(page.getByText(reorderTexts.panel.options.unchanged)).toBeVisible();
+    return 'ok: one page, "move a page" said, nothing written';
+  }
+  const read = await soundPdf(await onlyOutput(page, fixture, 'reordered', timeout));
+  expect(read.pages.map(pageKey), fixture).toEqual([...(await keysOf(fixture))].reverse());
+  return `ok: ${pages(fixture)} pages reversed`;
+}
+
+test('Reorder PDF pages: the reversed order of each small fixture, one file after the other', async ({ page, browserName }) => {
+  await openTool(page, '/reorder-pdf-pages/');
+  await oneByOne(page, 'reorder-small', { tool: 'reorder-pdf-pages', browser: browserName }, SMALL, (fixture) => reverseOrder(page, fixture));
+});
+
+for (const fixture of BIG) {
+  test(`Reorder PDF pages: the reversed order of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/reorder-pdf-pages/');
+    await oneByOne(page, `reorder-${bigCase(fixture)}`, { tool: 'reorder-pdf-pages', browser: browserName }, [fixture], () => reverseOrder(page, fixture, BIG_WAIT));
+  });
+}
+
+// ---- Watermark PDF ----------------------------------------------------------------------------------------------
+
+const MARK = 'Orca-Mark-5521-Zt';
+
+async function markWith(page: Page): Promise<void> {
+  await page.getByLabel(watermarkTexts.panel.options.textLabel).fill(MARK);
+  await page.getByLabel(watermarkTexts.panel.options.textLabel).blur();
+}
+
+function checkMarked(read: ReadPdf, fixture: string): void {
+  expect(read.pages, fixture).toHaveLength(pages(fixture));
+  for (const [i, p] of read.pages.entries()) expect(p.texts.some((t) => t.str.includes(MARK)), `${fixture} page ${i + 1}`).toBe(true);
+}
+
+test('Watermark PDF: the text across every page of the small fixtures', async ({ page, browserName }) => {
+  await openTool(page, '/watermark-pdf/');
+  await markWith(page);
+  await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
+  const rows = await refusals(page, 'watermark-pdf', browserName);
+  await actionButton(page, watermarkTexts).click();
+  const outs = filesOf(await takePdfDownload(page, 90_000));
+  await recordEach('watermark-small', { tool: 'watermark-pdf', browser: browserName }, rows, SMALL, async (fixture) => {
+    checkMarked(await soundPdf(outputFor(outs, fixture, 'watermarked')), fixture);
+    return 'ok: the text on every page';
+  });
+});
+
+for (const fixture of BIG) {
+  test(`Watermark PDF: the text across every page of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/watermark-pdf/');
+    await markWith(page);
+    await choosePdfs(page, [pdfFile(fixture)]);
+    await actionButton(page, watermarkTexts).click();
+    const out = await onlyOutput(page, fixture, 'watermarked', BIG_WAIT);
+    await recordEach(`watermark-${bigCase(fixture)}`, { tool: 'watermark-pdf', browser: browserName }, [], [fixture], async () => {
+      checkMarked(await soundPdf(out), fixture);
+      return `ok: the text on each of ${pages(fixture)} pages`;
+    });
+  });
+}
