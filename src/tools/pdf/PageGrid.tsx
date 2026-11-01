@@ -83,12 +83,19 @@ export default function PageGrid(props: PageGridProps) {
   const [active, setActive] = useState(0);
   const [grabbed, setGrabbed] = useState<number | null>(null);
   const list = useRef<HTMLUListElement>(null);
-  const focusAfter = useRef<number | null>(null);
+  /** The page the focus follows and the place it is going to: the focus is set once that page is there. */
+  const focusAfter = useRef<{ page: number; position: number } | null>(null);
   const dragging = useRef<number | null>(null);
 
   useEffect(() => {
-    if (focusAfter.current === null) return;
-    list.current?.querySelector<HTMLElement>(`[data-position="${focusAfter.current}"] .fo-page__main`)?.focus();
+    const wanted = focusAfter.current;
+    if (!wanted) return;
+    // A move sets this grid's own state at once and the panel's order a render later, so an effect can run for a render
+    // that still shows the old order. The focus waits until the moved page is in its new place: set earlier, it would land
+    // on whichever page stood there and stay on it when the cells were reordered (criterion 10: it follows the page).
+    const cell = list.current?.querySelector<HTMLElement>(`[data-position="${wanted.position}"]`);
+    if (cell?.dataset['page'] !== String(wanted.page)) return;
+    cell.querySelector<HTMLElement>('.fo-page__main')?.focus();
     focusAfter.current = null;
   });
 
@@ -114,8 +121,8 @@ export default function PageGrid(props: PageGridProps) {
 
   function move(from: number, to: number): void {
     if (to < 0 || to >= sequence.length || from === to) return;
+    focusAfter.current = { page: sequence[from] ?? 0, position: to };
     props.onMove?.(from, to);
-    focusAfter.current = to;
     setActive(to);
     announce(fmt(texts.moved, { n: (sequence[from] ?? 0) + 1, position: to + 1 }));
   }
@@ -128,7 +135,7 @@ export default function PageGrid(props: PageGridProps) {
       if (grabbed !== null) move(position, target);
       else {
         setActive(target);
-        focusAfter.current = target;
+        focusAfter.current = { page: sequence[target] ?? 0, position: target };
       }
       return;
     }
@@ -138,7 +145,7 @@ export default function PageGrid(props: PageGridProps) {
       if (grabbed !== null) move(position, target);
       else {
         setActive(target);
-        focusAfter.current = target;
+        focusAfter.current = { page: sequence[target] ?? 0, position: target };
       }
       return;
     }
@@ -191,6 +198,7 @@ export default function PageGrid(props: PageGridProps) {
               key={index}
               class="fo-page fo-dogear fo-cat--pdf"
               data-position={position}
+              data-page={index}
               data-selected={isSelected ? 'true' : undefined}
               data-grabbed={grabbed === index ? 'true' : undefined}
               style={`--page-ratio:${(shown.w / shown.h).toFixed(4)}`}
