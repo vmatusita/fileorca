@@ -90,6 +90,13 @@ export default function PageGrid(props: PageGridProps) {
   useEffect(() => {
     const wanted = focusAfter.current;
     if (!wanted) return;
+    // The focus left the grid for another control since (Pick none, Reverse order): the wait is over, and taking the
+    // focus back from that control would move it on the person's press (WCAG 3.2.2; DECISOES § 177).
+    const active = document.activeElement;
+    if (active && active !== document.body && !list.current?.contains(active)) {
+      focusAfter.current = null;
+      return;
+    }
     // A move sets this grid's own state at once and the panel's order a render later, so an effect can run for a render
     // that still shows the old order. The focus waits until the moved page is in its new place: set earlier, it would land
     // on whichever page stood there and stay on it when the cells were reordered (criterion 10: it follows the page).
@@ -127,26 +134,30 @@ export default function PageGrid(props: PageGridProps) {
     announce(fmt(texts.moved, { n: (sequence[from] ?? 0) + 1, position: to + 1 }));
   }
 
+  /**
+   * The focus goes to another cell. At an edge (ArrowLeft on the first page) nothing changes and nothing re-renders, so
+   * no wait is left behind for a later render to act on (DECISOES § 177).
+   */
+  function go(position: number, target: number): void {
+    if (target === position) return;
+    setActive(target);
+    focusAfter.current = { page: sequence[target] ?? 0, position: target };
+  }
+
   function onKey(event: TargetedKeyboardEvent<HTMLButtonElement>, position: number): void {
     const step: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns(), ArrowDown: columns() };
     if (event.key in step) {
       event.preventDefault();
       const target = Math.min(sequence.length - 1, Math.max(0, position + (step[event.key] as number)));
       if (grabbed !== null) move(position, target);
-      else {
-        setActive(target);
-        focusAfter.current = { page: sequence[target] ?? 0, position: target };
-      }
+      else go(position, target);
       return;
     }
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
       const target = event.key === 'Home' ? 0 : sequence.length - 1;
       if (grabbed !== null) move(position, target);
-      else {
-        setActive(target);
-        focusAfter.current = { page: sequence[target] ?? 0, position: target };
-      }
+      else go(position, target);
       return;
     }
     if ((event.key === ' ' || event.key === 'Enter') && mode === 'order') {

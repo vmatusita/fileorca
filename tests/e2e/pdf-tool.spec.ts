@@ -199,6 +199,42 @@ test('Protect PDF: each Show toggle names its field, and the name stays when it 
   await expect(page.locator('#fo-protect-confirm')).toHaveAttribute('type', 'password');
 });
 
+test('Split PDF and Reorder: an arrow key that moves nothing leaves no focus behind for the grid to take back', async ({ page }) => {
+  const cells = page.locator('.fo-pages__grid > li');
+  const first = cells.first().locator('.fo-page__main');
+
+  await openTool(page, '/split-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await option(page, 'Pick pages');
+  await expect(cells).toHaveCount(8, { timeout: 30_000 });
+  await first.focus();
+  await page.keyboard.press('Space');
+  await expect(first).toHaveAttribute('aria-pressed', 'true');
+  // ArrowLeft on the first page: nothing to move to. Then "Pick none", which changes the grid.
+  await page.keyboard.press('ArrowLeft');
+  const none = page.getByRole('button', { name: panel.grid.selectNone });
+  await none.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.fo-pages__count')).toHaveText(fmt(panel.grid.selectedCount, { count: 0, total: 8 }));
+  await page.waitForTimeout(150);
+  await expect(none).toBeFocused();
+
+  await openTool(page, '/reorder-pdf-pages/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(cells).toHaveCount(8, { timeout: 30_000 });
+  await first.focus();
+  await page.keyboard.press('ArrowLeft');
+  const reverse = page.getByRole('button', { name: must(reorderTexts.panel.options.reverse) });
+  await reverse.focus();
+  // Twice: the order goes back to the first, where page 1 stands at position 1 again.
+  await page.keyboard.press('Enter');
+  await expect(cells.first()).toHaveAttribute('data-page', '7');
+  await page.keyboard.press('Enter');
+  await expect(cells.first()).toHaveAttribute('data-page', '0');
+  await page.waitForTimeout(150);
+  await expect(reverse).toBeFocused();
+});
+
 test('Delete, Reorder and Split: the press of the action with nothing to do is an alert', async ({ page }) => {
   for (const [path, action, sentence] of [
     ['/delete-pdf-pages/', 'Delete pages', 'Pick at least one page to delete.'],
