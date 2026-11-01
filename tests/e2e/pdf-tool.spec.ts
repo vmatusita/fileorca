@@ -3,6 +3,7 @@ import { fmt } from '../../src/i18n/format.ts';
 import panel from '../../src/tools/pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
+import { violationIds } from './lib/axe.ts';
 import { choosePdfs, filesOf, openTool, pdfFile, pdfOracle, takePdfDownload } from './lib/pdf-tools.ts';
 import { readWithPdfjs } from './lib/pdfjs-read.ts';
 
@@ -111,6 +112,8 @@ test('Reorder PDF pages: the same new order by drag, by the buttons and by the k
   await page.keyboard.press('Space');
   await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(fmt(g.picked, { n: 4 }));
   await expect(main(3)).toHaveAttribute('aria-pressed', 'true');
+  // The page grid with a page in the hand is a state of its own for axe: names, pressed state and targets.
+  expect(await violationIds(page), 'axe on the grid with a page picked up').toEqual([]);
   for (const position of [3, 2, 1]) {
     await page.keyboard.press('ArrowLeft');
     await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(moved(position));
@@ -127,7 +130,7 @@ test('Reorder PDF pages: the same new order by drag, by the buttons and by the k
 
 test('Merge PDF: the same new order by drag, by the buttons and by the keyboard', async ({ page }) => {
   // Three files of different lengths, so the order of the pages in the output tells the order of the files.
-  const names = ['gen-paginas-mistas.pdf', 'gen-ja-otimizado.pdf', 'gen-fotos.pdf'] as const;
+  const names = ['gen-paginas-mistas.pdf', 'gen-ja-otimizado.pdf', 'gen-acoes.pdf'] as const;
   const last = names[2];
   const markersOf = (name: string) => pdfOracle(name).markers ?? [];
   // The last file goes to the front: two places up.
@@ -163,16 +166,16 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   // 1. Pointer: the last row is dragged onto the first. One move, said once.
   await row(2).dragTo(row(0));
   expect(await said(page, moved(1))).toEqual([moved(1)]);
-  expect(await merge()).toEqual({ name: 'gen-fotos-merged.pdf', markers: expected });
+  expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 
-  // 2. Buttons: "Move gen-fotos.pdf up" twice.
+  // 2. Buttons: "Move gen-acoes.pdf up" twice.
   await again();
   await page.getByRole('button', { name: fmt(q.moveEarlier, { name: last }) }).click();
   await expect(row(1).locator('.fo-file__name')).toHaveText(last);
   await page.getByRole('button', { name: fmt(q.moveEarlier, { name: last }) }).click();
   await expect(row(0).locator('.fo-file__name')).toHaveText(last);
   expect(await said(page, moved(1))).toEqual([moved(2), moved(1)]);
-  expect(await merge()).toEqual({ name: 'gen-fotos-merged.pdf', markers: expected });
+  expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 
   // 3. Keyboard: Space on the handle picks the row up, the arrow keys move it, Space drops it. The focus follows the row.
   await again();
@@ -180,6 +183,8 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   await page.keyboard.press('Space');
   await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(fmt(q.picked, { name: last }));
   await expect(handle(2)).toHaveAttribute('aria-pressed', 'true');
+  // The list with a row in the hand: the handle has a name, a pressed state and a target big enough (WCAG 2.5.8).
+  expect(await violationIds(page), 'axe on the Merge list with a row picked up').toEqual([]);
   for (const position of [2, 1]) {
     await page.keyboard.press('ArrowUp');
     await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(moved(position));
@@ -190,5 +195,5 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   expect(await said(page, dropped)).toEqual([fmt(q.picked, { name: last }), moved(2), moved(1), dropped]);
   await focused(handle(0));
   await expect(handle(0)).toHaveAttribute('aria-pressed', 'false');
-  expect(await merge()).toEqual({ name: 'gen-fotos-merged.pdf', markers: expected });
+  expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 });

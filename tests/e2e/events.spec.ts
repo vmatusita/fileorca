@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES, type EventName } from '../../src/analytics/events.ts';
+import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES } from '../../src/analytics/events.ts';
 import { EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import unlockTexts from '../../src/tools/unlock-pdf/i18n/en.ts';
