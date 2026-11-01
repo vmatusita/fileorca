@@ -93,10 +93,10 @@ processImage(file: Blob, op: Operation, accepts: readonly ImageFormat[], onProgr
 | `compress` (`level: 'recommended' \| 'strong'`) | Same format. JPG by MozJPEG (quality 75 or 55, progressive), WebP by libwebp (75 or 55), PNG losslessly by OxiPNG on the file's own bytes. |
 | `target` (`maxBytes`) | A JPG of at most `maxBytes`, found by measuring tiles of the photo and searching the quality. A file that already fits goes back clean. |
 | `resize` (`mode: 'size'` with `width` and `height`, or `mode: 'percent'`) | Fits inside the box, keeping the ratio. It never enlarges, and says so (`not-enlarged`). |
-| `cover` (`width`, `height`, `maxBytes`) | Exactly `width × height`: centre crop to the ratio, then scale. |
+| `cover` (`width`, `height`, `format: 'jpeg'`, `maxBytes`) | Exactly `width × height`: centre crop to the ratio, then scale, as a JPG of at most `maxBytes`. |
 | `crop` (`ratio`, optional `box`) | Crops to a box in display pixels, or to the centred box of a ratio. |
 | `rotate` (`turn`, `flip`) | Quarter turns and mirrors. |
-| `convert` (`to: 'jpeg' \| 'png' \| 'webp' \| 'avif' \| 'swap'`, `level`) | Re-encodes. `swap` is PNG to JPG (transparency turns white) and anything else to PNG. |
+| `convert` (`to: 'jpeg' \| 'png' \| 'webp' \| 'avif' \| 'swap'`, optional `level`) | Re-encodes. `level` only matters for WebP and AVIF. `swap` is PNG to JPG (transparency turns white) and anything else to PNG. |
 | `pdf-page` | Prepares a picture for a PDF page: JPG for photos, PNG when it has transparency. |
 
 Also exported: `warm(kinds)` (fetches and compiles codecs ahead of the first file; it never throws), `zipStored(entries)`, `sniff(bytes)`, `EngineError`, and the types. Limits: a picture goes through the canvas up to `CANVAS_MAX_PIXELS` (16,777,216), through WebAssembly above that, and is refused above `WASM_MAX_PIXELS` (50,000,000).
