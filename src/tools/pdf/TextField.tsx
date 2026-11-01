@@ -3,8 +3,7 @@
 // aria-describedby, in an alert so it is said when it shows (DECISOES § 177). What is typed stays in the panel: it
 // never goes to a URL, a name or an event (decision 8).
 import { useEffect, useRef, useState } from 'preact/hooks';
-import Icon from '../../icons/Icon.tsx';
-import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
+import FieldError from './FieldError.tsx';
 import { TYPING_PAUSE_MS } from '../image/NumberField.tsx';
 
 export interface TextFieldProps {
@@ -76,12 +75,7 @@ export default function TextField({ id, label, value, onCommit, help, error, inp
           </button>
         )}
       </div>
-      {error && (
-        <p class="fo-field__error" id={errorId} role="alert">
-          <Icon raw={alertIcon} />
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={errorId}>{error}</FieldError>}
       {help && (
         <p class="fo-field__help" id={helpId}>
           {help}

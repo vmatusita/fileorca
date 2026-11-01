@@ -10,6 +10,7 @@ import type { TargetedKeyboardEvent, TargetedPointerEvent } from 'preact';
 import { fmt } from '../../i18n/format.ts';
 import NumberField from '../image/NumberField.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
+import FieldError from './FieldError.tsx';
 import TextField from './TextField.tsx';
 import type { SignTexts } from './option-texts.ts';
 
@@ -322,22 +323,14 @@ export default function SignatureArea(props: SignatureAreaProps) {
             }}
           />
           {/* The failure is an alert of its own, tied to the input (DECISOES § 177): said once, the help stays as it was. */}
-          {uploadError && (
-            <p class="fo-field__error" id={`${id}-upload-error`} role="alert">
-              {texts.uploadError}
-            </p>
-          )}
+          {uploadError && <FieldError id={`${id}-upload-error`}>{texts.uploadError}</FieldError>}
           <p class="fo-field__help" id={`${id}-upload-help`}>
             {texts.uploadHelp}
           </p>
         </div>
       )}
       {mode === 'type' && <TextField id={`${id}-typed`} label={texts.typeLabel} value={typed} onCommit={setTyped} help={texts.typeHelp} maxLength={60} />}
-      {showErrors && !image && (
-        <p class="fo-field__error" role="alert">
-          {texts.missing}
-        </p>
-      )}
+      {showErrors && !image && <FieldError>{texts.missing}</FieldError>}
       <fieldset class="fo-field fo-sign__place">
         <legend class="fo-field__label">{texts.placeLegend}</legend>
         <div class="fo-sign__page" ref={frame} style={`--page-ratio:${pageRatio.toFixed(4)}`}>

@@ -4,8 +4,7 @@
 // said when it shows (DECISOES § 177). `autocomplete` is new-password in Protect PDF and current-password in Unlock
 // PDF. Nothing typed here is kept or sent anywhere: it lives in the panel's state until the page closes.
 import { useState } from 'preact/hooks';
-import Icon from '../../icons/Icon.tsx';
-import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
+import FieldError from './FieldError.tsx';
 
 export interface PasswordFieldProps {
   id: string;
@@ -58,12 +57,7 @@ export default function PasswordField({ id, label, value, onInput, autocomplete,
           {show}
         </button>
       </div>
-      {error && (
-        <p class="fo-field__error" id={errorId} role="alert">
-          <Icon raw={alertIcon} />
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={errorId}>{error}</FieldError>}
       {help && (
         <p class="fo-field__help" id={helpId}>
           {help}

@@ -182,6 +182,56 @@ test('Merge PDF at 360 px: a refused file keeps a card the width of the list, it
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
 
+/** Every field error on the panel has the alert icon before its sentence (docs/design/README: never only the colour). */
+async function errorsHaveIcons(page: Page, at: string): Promise<void> {
+  const lines = page.locator('#fo-tool-root .fo-field__error');
+  await expect(lines.first()).toBeVisible({ timeout: 15_000 });
+  for (const line of await lines.all()) {
+    await expect(line.locator(':scope > svg.fo-icon'), `${at}: "${await line.innerText()}"`).toHaveCount(1);
+    await expect(line).toHaveCSS('color', await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--danger)';
+      document.body.append(probe);
+      const color = getComputedStyle(probe).color;
+      probe.remove();
+      return color;
+    }));
+  }
+}
+
+test('Delete, Reorder, Split and Sign: their field errors have the alert icon, in the danger colour', async ({ page }) => {
+  await openTool(page, '/delete-pdf-pages/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Delete pages' }).click();
+  await errorsHaveIcons(page, 'Delete, nothing picked');
+  await page.getByRole('button', { name: panel.grid.selectAll }).click();
+  await errorsHaveIcons(page, 'Delete, every page picked');
+
+  await openTool(page, '/reorder-pdf-pages/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+  await page.getByRole('button', { name: must(reorderTexts.panel.action) }).click();
+  await errorsHaveIcons(page, 'Reorder, nothing moved');
+
+  await openTool(page, '/split-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await option(page, 'Pick pages');
+  await expect(page.locator('.fo-pages__grid > li')).toHaveCount(8, { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Split PDF' }).click();
+  await errorsHaveIcons(page, 'Split, nothing picked');
+
+  await openTool(page, '/sign-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.getByRole('button', { name: 'Sign PDF' })).toBeVisible({ timeout: 30_000 });
+  await page.getByRole('button', { name: 'Sign PDF' }).click();
+  await errorsHaveIcons(page, 'Sign, no signature');
+  await option(page, 'Upload');
+  await page.getByLabel('Choose a signature image').setInputFiles({ name: 'bad.png', mimeType: 'image/png', buffer: Buffer.from('not an image at all') });
+  await expect(page.locator('#fo-tool-root .fo-field__error').filter({ hasText: 'Oli can only use a PNG or JPG here.' })).toBeVisible();
+  await errorsHaveIcons(page, 'Sign, an upload that is not an image');
+});
+
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
 // The same new order is made three ways on the same page load: by pointer drag, with the "earlier" and "later" buttons
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages

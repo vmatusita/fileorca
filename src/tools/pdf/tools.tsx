@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { fmt } from '../../i18n/format.ts';
 import NumberField from '../image/NumberField.tsx';
+import FieldError from './FieldError.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
 import PageGrid from './PageGrid.tsx';
 import PasswordField from './PasswordField.tsx';
@@ -107,11 +108,7 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
             onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
             onSelectNone={() => update({ picked: [] })}
           />
-          {props.showErrors && state.picked.length === 0 && (
-            <p class="fo-field__error" role="alert">
-              {texts.pickNone}
-            </p>
-          )}
+          {props.showErrors && state.picked.length === 0 && <FieldError>{texts.pickNone}</FieldError>}
         </>
       )}
     </div>
@@ -325,12 +322,8 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
         onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
         onSelectNone={() => update({ picked: [] })}
       />
-      {state.picked.length >= total && total > 0 && <p class="fo-field__error" role="alert">{texts.allPicked}</p>}
-      {props.showErrors && state.picked.length === 0 && (
-        <p class="fo-field__error" role="alert">
-          {texts.nonePicked}
-        </p>
-      )}
+      {state.picked.length >= total && total > 0 && <FieldError>{texts.allPicked}</FieldError>}
+      {props.showErrors && state.picked.length === 0 && <FieldError>{texts.nonePicked}</FieldError>}
     </div>
   );
 }
@@ -624,11 +617,7 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
           update({ order: next });
         }}
       />
-      {props.showErrors && (!state.order || state.order.every((page, i) => page === i)) && (
-        <p class="fo-field__error" role="alert">
-          {texts.unchanged}
-        </p>
-      )}
+      {props.showErrors && (!state.order || state.order.every((page, i) => page === i)) && <FieldError>{texts.unchanged}</FieldError>}
     </div>
   );
 }
