@@ -5,6 +5,7 @@ import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registr
 import { chooseImage, dismissCookies, hydrated } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 import imagesTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 // Performance budgets (PLANO "Orçamento de desempenho"): initial JS of the tool page at most
 // 80 KB gzip (own-domain JS only, no WASM, inline scripts included); at most 8 own-domain
@@ -44,6 +45,12 @@ const PDF_PAGES_LIST = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
 const PDF_JS_FILES = 2;
 const PDF_ENGINE_FILE = /worker|comlink|\.wasm$|pdfjs|qpdf|pdf\.worker|\/_astro\/(?:pdf|pdf-client|client|render|process|zip)[-.]/;
 // What only the tools that need it may fetch: qpdf (Compress, Protect, Unlock) and PDF.js (page drawing).
+// F5b (prompt decision 4): the ten file guides, read from their registry and in a list of their own. Each embeds its tool
+// with the tool page's own entry (an image tool's mount entry, or the PDF island's) and the shared island chunk: exactly
+// two files, and nothing of the engine before the first file. The lists above do not change.
+const FILE_GUIDE_PAGES = FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].path);
+const FILE_GUIDE_JS_FILES = 2;
+const PDF_GUIDE_PAGES = FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'pdf-tools' && Object.hasOwn(PDF_PAGES, FILE_GUIDES[id].tool)).map((id) => FILE_GUIDES[id].path);
 const QPDF_FILE = /qpdf/;
 const PDFJS_FILE = /pdfjs|pdf\.worker/;
 
@@ -88,10 +95,11 @@ function track(page: Page, origin: string): Set<string> {
   return urls;
 }
 
-for (const path of [...TOOL_PAGES, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST]) {
+for (const path of [...TOOL_PAGES, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST, ...FILE_GUIDE_PAGES]) {
   const isTool = TOOL_PAGES.includes(path);
   const isCalc = CALC_PAGES.includes(path);
   const isPdf = PDF_PAGES_LIST.includes(path);
+  const isFileGuide = FILE_GUIDE_PAGES.includes(path);
   test(`initial JS and requests of ${path} fit the budgets, with no worker and no wasm`, async ({ page, baseURL }) => {
     const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
     const scripts = new Map<string, Buffer>();
@@ -116,12 +124,13 @@ for (const path of [...TOOL_PAGES, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIS
     if (isTool) expect(scripts.size, `arquivos de JS: ${[...scripts.keys()].join(', ')}`).toBe(2);
     else if (isCalc) expect(scripts.size, `arquivos de JS: ${[...scripts.keys()].join(', ')}`).toBe(CALC_JS_FILES);
     else if (isPdf) expect(scripts.size, `arquivos de JS: ${[...scripts.keys()].join(', ')}`).toBe(PDF_JS_FILES);
+    else if (isFileGuide) expect(scripts.size, `arquivos de JS: ${[...scripts.keys()].join(', ')}`).toBe(FILE_GUIDE_JS_FILES);
     else expect(scripts.size, `arquivos de JS: ${[...scripts.keys()].join(', ')}`).toBeLessThanOrEqual(2);
     // A calculator page never loads the PDF maker before the click (pdf-lib lives in the PDF worker).
     if (isCalc) expect([...requested].some((url) => /pdf-client|comlink/.test(url)), 'nada do PDF antes do clique').toBe(false);
     // A PDF page (and the PDF hub, which has no island) never loads the PDF engine (worker, Comlink, pdf-lib, qpdf, PDF.js and
     // their .wasm and data) before the first file.
-    if (isPdf || path === `/${PDF_HUB_ID}/`) expect([...requested].filter((url) => PDF_ENGINE_FILE.test(url)), 'nada do motor de PDF antes do primeiro arquivo').toEqual([]);
+    if (isPdf || path === `/${PDF_HUB_ID}/` || PDF_GUIDE_PAGES.includes(path)) expect([...requested].filter((url) => PDF_ENGINE_FILE.test(url)), 'nada do motor de PDF antes do primeiro arquivo').toEqual([]);
     expect([...requested].some((url) => /worker|\.wasm$/.test(url)), 'nenhum worker nem .wasm antes do primeiro arquivo').toBe(false);
     expect(requested.size, `requisições: ${[...requested].join(', ')}`).toBeLessThanOrEqual(REQUEST_BUDGET);
   });
@@ -159,6 +168,14 @@ for (const [first, second] of [
   ['/merge-pdf/', '/image-to-pdf/'],
   ['/mortgage-calculator/', '/merge-pdf/'],
   ['/merge-pdf/', '/mortgage-calculator/'],
+  // F5b: a guide loads its tool's entry, so from the tool to its guide and back it is the HTML only; from a hub to a guide
+  // it is the HTML and the two files; from an image guide to a PDF guide, the HTML and the PDF entry.
+  ['/heic-to-jpg/', '/guides/heic-to-jpg-on-windows/'],
+  ['/guides/heic-to-jpg-on-windows/', '/heic-to-jpg/'],
+  ['/compress-pdf/', '/guides/why-is-my-pdf-so-large/'],
+  ['/image-tools/', '/guides/social-media-image-sizes/'],
+  ['/pdf-tools/', '/guides/split-pdf-file-size/'],
+  ['/guides/jpg-vs-png/', '/guides/why-is-my-pdf-so-large/'],
 ] as const) {
   test(`requests: ${first} then ${second}`, async ({ page, baseURL }) => {
     const urls = track(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin);
