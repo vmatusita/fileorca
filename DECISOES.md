@@ -1060,3 +1060,57 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 
 - **Por que as de imagem subiram 0,3 a 0,4 KB:** o chunk `island` é o mesmo para imagem e dinheiro. Ele ganhou a lista de ids das calculadoras em `tool-ids.ts` e os eventos novos (§ 113).
 - **Pares:** de imagem para calculadora, 2 requisições novas (o HTML e a entrada); de calculadora para calculadora, 1 (o HTML); do hub para uma calculadora, 3 (o HTML, a entrada e o `island`). Todas cabem no orçamento de 3.
+
+## § 137 · Dois campos lado a lado dividem a linha do rótulo (subgrid) (F4, 1/nov/2026)
+
+- **Contexto:** no screenshot de 1280 px, o campo de HOA ficava 34 px abaixo do de PMI, que tem uma linha de ajuda embaixo. O `.fo-field` esticava até a altura da linha da grade, e a sobra ia para as linhas `auto` dele, inclusive a da caixa: a caixa do HOA chegava a 86 px a 1280 e 96 px a 360, contra os 52 do `control-h`. As lentes de design e de acessibilidade acharam o mesmo (DES-1). A primeira tentativa, `align-items: start`, desalinhava ao contrário quando um rótulo quebrava em duas linhas ("Home insurance per year" a 360 px).
+- **Decisão:** o `CalcField` passa a ter dois filhos, o rótulo e o corpo (`.fo-field__body`: a caixa, a ajuda e o erro). Cada item da `.fo-calc__fields` ocupa duas linhas da grade, e o campo as usa com `grid-template-rows: subgrid`. Os dois campos de uma linha dividem a altura do rótulo, as caixas começam juntas e ficam com 52 px. A etiqueta "example" fica centrada no rótulo, que deixa de ter 21 px.
+- **Prova:** `calc.spec.ts`, "two fields side by side keep their inputs on one line" e "the box of every field is control-h high", a 360 e a 1280 px, com ajuda, etiqueta e erro.
+
+## § 138 · O orçamento espera a página ficar quieta sem o `networkidle` (F4, 1/nov/2026)
+
+- **Contexto:** no CI, a parte 2 do WebKit falhou duas vezes seguidas no `budgets.spec.ts` dos hubs (o `/money-calculators/` na execução 41272269545; o `/image-tools/` e o `/money-calculators/` na 41273044165). O `page.waitForLoadState('networkidle')` estourou os 60 s. Os traces do artefato `playwright-report-2` mostram as cinco requisições de cada hub respondidas com 200 em menos de 2 s. A página estava quieta, e o evento do Playwright nunca veio. Na máquina local, a mesma parte passa inteira.
+- **Decisão:** o `budgets.spec.ts` espera de outro jeito, num `settler` próprio. Ele aguarda o evento `load` e depois 1 s sem requisição nova, com todas respondidas ou falhas. Também espera os corpos dos scripts que mede. É mais rígido que o `networkidle`, que pede 0,5 s. Passados 20 s sem a página assentar, o teste falha listando as requisições abertas, em vez de travar. Os limites do orçamento não mudaram, e nenhum `retries` entrou.
+- **Por quê:** a própria documentação do Playwright desaconselha o `networkidle`, e o trace provou que o site não segurava a rede.
+
+## § 139 · A revisão adversarial da F4 e o que ela corrigiu (F4, 1/nov/2026)
+
+- **Método** (F3, § 92 a § 94):
+  - **Lentes.** Seis lentes Sonnet em contexto limpo, sobre o commit `ebfd6c1`, na worktree só de leitura `.claude/worktrees/revisao-f4`, com install e build próprios. Cada lente teve a sua porta (4174 a 4179) e a sua pasta em `.cache/`.
+  - **Céticos.** Um cético por achado crítico, alto ou médio, e um por lente para os baixos, num total de 30 agentes.
+  - **Correções.** Feitas num agente só, com um teste que falha sem cada uma.
+  - **Segunda passada.** Revisou o diff `ebfd6c1..5d3f16b` e achou 2 médios e 5 baixos, todos corrigidos com teste em `5924a33` e `381fc3f`: o PDF e o CSV também ficam desligados com o resultado velho; o grupo de opções sai do subgrid; o cabeçalho "Balance" acompanha o saldo; e há casos do oráculo dos dois lados de 10^15 centavos.
+- **Resultado:**
+  - **Achados.** 54, sendo 2 refutados. Nenhum crítico ficou de pé: o único foi rebaixado a médio pelo cético. Ficou 1 alto (DES-1, § 137).
+  - **Corrigidos.** Todo achado de severidade média ou alta, depois do cético, e os baixos de correção local.
+  - **Pendentes.** Os outros baixos vão para o relatório. A tabela completa, com commit e teste de cada correção, está em `docs/relatorios/REVISAO-F4.md`.
+- **O que mudou de comportamento:**
+  - **Savings goal.** Passa a dar "too-large" acima de 10^15 centavos, como a Compound interest. O oráculo mudou antes (`8544ebe`) e o motor depois (`a5b1a50`), com três casos novos.
+  - **Problema no resultado.** Enquanto o resultado é um problema (um pagamento abaixo dos juros, dívidas acima do limite), o PDF e o CSV ficam desligados e a Oli não comemora. A comemoração da visita espera um resultado.
+  - **Voz do resultado.** A região viva do ResultHero fala 500 ms depois da última tecla, também a que não muda o número.
+  - **Campo que aceita negativo.** A valorização do imóvel abre o teclado de texto, porque o decimal do iPhone não tem o sinal de menos.
+  - **Raiz inteira.** O `iroot` começa de uma estimativa de ponto flutuante. São as mesmas raízes, conferidas uma a uma em 9.064 casos. A APY para APR caiu de 22 ms para 1,6 ms por tecla e entrou no teste dos 16 ms.
+  - **Textos.**
+    - O FAQ da Personal loan explica a tarifa somada ao saldo de modo que a APR fique certa.
+    - As premissas do Biweekly não se contradizem mais.
+    - A Privacidade, nos três idiomas, cita a marca de sessão da Oli, com a data de 1/nov/2026 (os Termos também ganharam a data).
+    - Cada guia linka a página da calculadora que embute.
+    - O schema `WebApplication` usa o H1.
+
+## § 140 · O ResultHero no celular e a comemoração no fim do cartão (F4, 1/nov/2026)
+
+- **Decisão:**
+  - **Tamanhos no celular.** Abaixo de 768 px, o número do ResultHero fica em 48/52 px e o cartão tem `space-5` de respiro. A partir de 768 px, valem os tamanhos do design system: 60/64 px e `space-6`. É o que deixa o resultado acima da dobra a 360 × 740 (§ 124). O README do ResultHero não fixa os tamanhos do celular, e a lente de design pediu o registro (DES-11).
+  - **Comemoração no fim do cartão.** A Oli em `cheer`, com a Placa, entra no fim do cartão, depois do gráfico. Na primeira tecla da visita, ela entrava acima do número e o empurrava 96 px para baixo, e no celular ele saía da dobra. Isso foi visto na prévia; o commit é o `69eb38e`, com teste no `calc.spec.ts`.
+
+## § 141 · O `ENOSPC` do WebKit voltou, agora na parte 3 (F4, 1/nov/2026)
+
+- **Contexto:** na execução 41275792910 (commit `5d3f16b`), a parte `playwright (webkit 3 de 3)` falhou em dois testes do `design.spec.ts` que a F4 não tocou: "processing: the swim loops" e "support page: the coffee steam rises in a loop". Os dois morreram com `browserContext.close: ENOSPC: no space left on device, write` às 05:21:04.
+- **O que o diagnóstico da § 109 mostrou:**
+  - Às 05:10:49, durante os testes da Oli a 1280 × 800, o `/` caiu de 10.883 para 7.737 MB livres. A busca funda disparou e não achou arquivo apagado e aberto, arquivo acima de 20 MB gravado, pasta de sistema grande nem core dump; o `find` foi interrompido em 60 s. O espaço voltou a 10.873 MB.
+  - Às 05:20:50, havia 10.220 MB livres. Os dois testes caíram 14 s depois, e às 05:21:05 o disco já estava com 10.880 MB livres. A amostra de 20 s não pegou o fundo da queda.
+- **O que se sabe:**
+  - A queda segue o `design.spec.ts` (Oli e movimento) no WebKit do Linux, qualquer que seja a parte em que ele cai. Na § 108 ela foi na parte 2.
+  - Ela some em segundos. Na F4, o `design.spec.ts` passou para a parte 3, porque as páginas novas empurram os testes pela divisão por contagem.
+  - As execuções 41274088572 (`5eee3a5`) e anteriores da mesma PR passaram nessa spec.
+- **Decisão:** nada muda em teste, `retries`, timeout ou workflow. A F4 não pode mexer no `.github/`, e o diagnóstico é de outro ajuste (§ 109). O commit seguinte roda o CI de novo. Fica a proposta para um ajuste: amostrar o disco a cada 2 s durante o `design.spec.ts` no Linux, ou gravar o trace desses testes fora do `/`.
