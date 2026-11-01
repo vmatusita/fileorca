@@ -11,7 +11,10 @@
 //    already as small as qpdf makes it, in all three modes), and when the outcome is "new" the file is smaller, passes
 //    qpdf --check and has the pages of the original;
 //  - Recommended gains on the photos (gen-fotos) and its page 1 stays above the PSNR threshold below;
-//  - Strong gives pages that are pictures, no text operators, each the size of the page as shown.
+//  - Strong gives pages that are pictures, no text operators, each the size of the page as shown;
+//  - a file whose index was damaged never comes back as the damaged bytes, in any mode: when nothing gains, it comes back
+//    repaired, the bytes of the Lossless rewrite (decision 4; DECISOES § 156 and § 182; the matrix found Strong giving the
+//    damaged gen-xref-estragada back).
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { STRONG_PPI, STRONG_QUALITY, imagesToPdf, processPdf, type RenderedPage } from '../../src/engine/pdf/process.ts';
 import type { CompressMode, PdfResult, PdfSuccess } from '../../src/engine/pdf/types.ts';
@@ -104,6 +107,11 @@ for (const mode of MODES) {
           // Never bigger; when nothing gained, the original itself.
           expect(out.length, `${name} ${mode}: never bigger`).toBeLessThanOrEqual(original.length);
           if (name === 'gen-ja-otimizado.pdf') expect(done.outcome, `${name} ${mode}: nothing left to gain`).toBe('unchanged');
+          const repaired = oracle(name).expect === 'repaired';
+          if (repaired) {
+            expect(sameBytes(out, original), `${name} ${mode}: never the damaged bytes back`).toBe(false);
+            expect(done.notes, `${name} ${mode}: said repaired`).toContain('repaired');
+          }
           let score: number | null = null;
           if (done.outcome === 'unchanged') {
             expect(sameBytes(out, original), `${name} ${mode}: the original, byte for byte`).toBe(true);
@@ -114,7 +122,12 @@ for (const mode of MODES) {
             expect(check.code, `${name} ${mode}: qpdf --check ${check.out.join(' | ')}`).toBe(0);
             const pages = await qpdf(['--show-npages', '/in/file.pdf'], { 'file.pdf': out });
             expect(pages.out, `${name} ${mode}: page count`).toEqual([String(oracle(name).pages)]);
-            if (mode === 'strong') await expectPicturePages(name, out);
+            if (mode === 'strong') {
+              // Pictures, unless they did not gain on a repaired file: then the repaired rewrite, the bytes Lossless gives.
+              const lossless = repaired ? succeeded((await compress(name, 'lossless')).result).outputs[0]?.bytes : undefined;
+              if (lossless && sameBytes(out, lossless)) expect(done.notes).not.toContain('text-flattened');
+              else await expectPicturePages(name, out);
+            }
             if (mode === 'recommended') {
               const before = await drawWithPdfjs(original, 1, PSNR_SCALE);
               const after = await drawWithPdfjs(out, 1, PSNR_SCALE);

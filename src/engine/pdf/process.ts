@@ -78,9 +78,26 @@ function smallerOrOriginal(original: Uint8Array, result: Uint8Array, notes: PdfN
   return done([{ bytes: result, kind: 'pdf' }], notes);
 }
 
+/**
+ * What Compress hands back when its result does not gain. The person's own bytes, untouched (§ 33), unless the file's
+ * index was damaged: a damaged file never goes back damaged (decision 4; DECISOES § 156 and § 182), so its fallback is
+ * the repaired rewrite through the lossless pass, taken before anything else changes the document.
+ */
+async function repairedBaseline(bytes: Uint8Array, opened: OpenedPdf): Promise<Uint8Array | null> {
+  return opened.repaired ? qpdfOrFail([...LOSSLESS_ARGS, 'IN', 'OUT'], await forQpdf(bytes, opened)) : null;
+}
+
+/** The result when it is smaller than what the person would otherwise get back (the original, or its repaired rewrite). */
+function smallerOrBaseline(original: Uint8Array, baseline: Uint8Array | null, result: Uint8Array, notes: PdfNote[]): PdfSuccess {
+  if (!baseline) return smallerOrOriginal(original, result, notes);
+  if (result.length < baseline.length) return done([{ bytes: result, kind: 'pdf' }], notes);
+  return done([{ bytes: baseline, kind: 'pdf' }], ['repaired']);
+}
+
 async function compress(bytes: Uint8Array, mode: 'lossless' | 'recommended' | 'strong', openRenderer: OpenRenderer | null): Promise<PdfSuccess> {
   const opened = await openUnlocked(bytes);
   const notes: PdfNote[] = opened.repaired ? ['repaired'] : [];
+  const baseline = await repairedBaseline(bytes, opened);
   if (mode === 'strong') {
     if (!openRenderer) throw new PdfEngineError('load');
     const renderer = await openRenderer(bytes);
@@ -90,7 +107,7 @@ async function compress(bytes: Uint8Array, mode: 'lossless' | 'recommended' | 's
       const result = await imagesToPdf(opened.doc, pages);
       const strongNotes: PdfNote[] = ['text-flattened'];
       if (opened.doc.catalog.has(PDFName.of('AcroForm'))) strongNotes.push('form-lost');
-      return smallerOrOriginal(bytes, result, [...notes, ...strongNotes]);
+      return smallerOrBaseline(bytes, baseline, result, [...notes, ...strongNotes]);
     } finally {
       await renderer.close();
     }
@@ -101,7 +118,7 @@ async function compress(bytes: Uint8Array, mode: 'lossless' | 'recommended' | 's
     if (replaced > 0) source = await opened.doc.save({ useObjectStreams: false, updateFieldAppearances: false });
   }
   const result = await qpdfOrFail([...LOSSLESS_ARGS, 'IN', 'OUT'], source);
-  return smallerOrOriginal(bytes, result, notes);
+  return smallerOrBaseline(bytes, baseline, result, notes);
 }
 
 /**
@@ -133,7 +150,8 @@ export async function strongFromPages(bytes: Uint8Array, pages: readonly Rendere
     const opened = await openUnlocked(bytes);
     const notes: PdfNote[] = opened.repaired ? ['repaired', 'text-flattened'] : ['text-flattened'];
     if (opened.doc.catalog.has(PDFName.of('AcroForm'))) notes.push('form-lost');
-    return smallerOrOriginal(bytes, await imagesToPdf(opened.doc, pages), notes);
+    const baseline = await repairedBaseline(bytes, opened);
+    return smallerOrBaseline(bytes, baseline, await imagesToPdf(opened.doc, pages), notes);
   } catch (error) {
     return failureOf(error, 'encode');
   }
