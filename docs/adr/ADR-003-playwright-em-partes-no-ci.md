@@ -97,6 +97,7 @@ A F5a soma as 12 ferramentas de PDF, com matriz, privacidade e estados novos no 
   | --- | ---: | --- | --- |
   | Antes: F4, [run 41277648653](https://github.com/vmatusita/fileorca/actions/runs/41277648653) | 285,4 s | 529,4 s (1 parte) | 427,1, 273,4 e 664,2 s (3 partes) |
   | F5a com 2 + 5 partes: [run 41331507992](https://github.com/vmatusita/fileorca/actions/runs/41331507992) (`1d551fa`) | 469,3 s | 413,4 e 420,4 s | 520,2, 222,9, 220,1, 545,0 e 400,4 s |
-  | F5a com 3 + 7 partes: PENDENTE | | | |
+  | F5a com 3 + 7 partes: [run 41342463565](https://github.com/vmatusita/fileorca/actions/runs/41342463565) (6e35bdd, a matriz completa) | 483,1 s | 334,1, 288,2 e 330,1 s | 331,7, 350,9, 167,6, 165,1, 277,4, 409,1 e 334,2 s |
 
-- **Disco:** na run 41331507992, todas as partes disseram "No coredumps found.". O mínimo do `/` ficou entre 9.254 e 10.756 MB livres, com no máximo 47 MB de queda em 2 s.
+- **Minutos:** a soma dos jobs foi de uns 42 min por push na F4, com 5 partes, e de uns 71 min na F5a, com 11 partes (run 41342463565).
+- **Disco:** nas runs 41331507992 e 41342463565, todas as partes do Playwright disseram "No coredumps found.". O mínimo do `/` ficou entre 9.254 e 10.756 MB livres, com no máximo 47 MB de queda em 2 s.
