@@ -12,6 +12,7 @@ Data das leituras: **31/out/2026**. Contagens do produto: **8 ferramentas de ima
 | `show-hn.md` | Título (com contagem e variações), URL a enviar, primeiro comentário, regras do HN resumidas, respostas a perguntas prováveis, seção "Provas" | Português + inglês |
 | `alternativeto.md` | Campos do formulário, descrição curta e longa, tags, plataforma, licença, lista "alternativa a" com o que o FileOrca substitui e o que não | Português + inglês |
 | `diretorios.md` | 10 diretórios e listas conferidos, texto pronto de cada um, lista de pagos, lista de excluídos e dos que não abriram | Português + inglês |
+| `blogs-financas.md` | 20 blogs de finanças pessoais dos EUA (F4): contato, post recente, artigo em que a calculadora ajuda, ângulo, rascunho do e-mail, status, descartados e resultado do LanguageTool | Português + inglês |
 
 ## Leia primeiro: três avisos
 
@@ -123,3 +124,56 @@ Quando as calculadoras (F4) e o PDF (F5) entrarem, a entrada 1 de `diretorios.md
 - **Provas:** as três afirmações do Show HN passaram, e a seção "Provas" de `show-hn.md` aponta cada prova.
 - **Show HN:** a frase "Each tool runs in a Web Worker" virou "The image work runs in a Web Worker…", com a ressalva do navegador sem `OffscreenCanvas` no worker, onde o motor roda na página.
 - Nenhum portão do `pnpm verificar` lê `docs/lancamento/`.
+
+## Blogs de finanças (depois do merge da F4)
+
+A run F4 deixou em `blogs-financas.md` o contato com **20 blogs de finanças pessoais dos EUA** (o número da ficha; o arquivo diz quais encaixam melhor e quais são frágeis). Cada blog tem a página de contato, um post recente, um artigo dele em que uma das calculadoras ajuda o leitor, o ângulo e o rascunho do e-mail em inglês. As páginas foram lidas em **31/out/2026**. **Nada foi enviado**: nenhum e-mail, formulário, conta ou comentário saiu da run. Os rascunhos foram redigidos com ajuda de IA: reescreva cada um com as suas palavras.
+
+### Ordem de envio
+
+Só depois do merge da F4, do deploy e da conferência das páginas no ar.
+
+| Quando | O que | Quanto tempo |
+| --- | --- | --- |
+| Dia do merge da F4 | Conferir as páginas no ar (checklist abaixo) e pedir a indexação do hub e da Mortgage no Search Console | Cerca de 1 h |
+| De 1 a 2 dias depois | Onda 1, os seis de maior encaixe e contato mais limpo: White Coat Investor, A Wealth of Common Sense, Debt Discipline, Clever Girl Finance, Wallet Hacks, Millennial Wealth (no máximo 3 por dia) | Cerca de 1 h |
+| De 3 a 5 dias depois | Onda 2: Physician on FIRE, My Money Blog, Making Sense of Cents, Retire by 40, Budgets Are Sexy, Financial Samurai | Cerca de 1 h |
+| De 6 a 8 dias depois | Onda 3: Lazy Man and Money, ESI Money, Jill on Money e Rob Berger (prioridade B) | Cerca de 1 h |
+| De 9 a 11 dias depois | Onda 4, só se as ondas anteriores deram resposta ou se sobrar vontade: Early Retirement Now, Bible Money Matters, Of Dollars And Data e Humble Dollar (prioridade C) | 30 min |
+| 10 dias depois do primeiro envio | Um lembrete só por blog, curto, e só para quem não respondeu e tem e-mail público. Depois disso, deixe quieto | 15 min |
+
+Por que em ondas: a primeira resposta mostra se o texto funciona, e dá para ajustar as ondas seguintes. Por que não todos de uma vez: são 20 pessoas que não conhecem o FileOrca, e um lote igual parece lista de envio em massa. Estimativa total, com a reescrita dos e-mails: de 2 a 3 h.
+
+### Checklist para o Victor
+
+**Antes de qualquer envio**
+
+- [ ] O merge da F4 e o deploy de produção aconteceram. Abrir cada URL citada nos rascunhos e conferir que devolve 200 e que a página faz o que o e-mail diz: `/mortgage-calculator/`, `/mortgage-calculator/extra-payments/`, `/mortgage-calculator/biweekly/`, `/mortgage-calculator/15-vs-30-year/`, `/refinance-calculator/`, `/auto-loan-calculator/`, `/home-affordability-calculator/`, `/rent-vs-buy-calculator/`, `/credit-card-payoff-calculator/`, `/debt-payoff-calculator/`, `/compound-interest-calculator/`, `/savings-goal-calculator/` e os guias `/guides/refinance-break-even/`, `/guides/rent-vs-buy-break-even/` e `/guides/extra-mortgage-payments/`.
+- [ ] Abrir `/mortgage-calculator/` no celular: mudar os números, tocar em "Copy link", abrir o link noutra aba e ver os mesmos números; baixar o PDF e o CSV. Anotar o que cada página exporta e ajustar nos rascunhos as frases "PDF" e "PDF or CSV".
+- [ ] Ler no relatório da F4 que o teste de privacidade passou (nenhum número vai para `?` na URL, para evento do GA4 nem para requisição). Se não passou, tire de **todos** os textos as frases "the numbers stay on the device" e a do "Copy link", como na regra das provas do Show HN, acima.
+- [ ] Se a válvula da F4 cortou alguma calculadora que um rascunho cita, tire a frase. Nenhum rascunho cita as três que a válvula pode cortar (consolidação de dívidas, juros simples, APR para APY).
+- [ ] A caixa `contato@fileorca.com` envia e recebe (mande um teste para você) e a resposta chega a você.
+- [ ] Reescrever cada e-mail com as suas palavras. Manter o detalhe do artigo do blog e conferir de novo que o artigo ainda diz aquilo.
+- [ ] No dia de cada envio, abrir de novo a página de contato do blog (regras mudam), ver que o post citado continua lá e ler a política de guest post ou de patrocínio, se houver.
+- [ ] Abrir no navegador os contatos que a run não conseguiu ler: Debt Discipline e Millennial Wealth (e-mail protegido ou ofuscado), Early Retirement Now e Bible Money Matters (e-mail em imagem) e Wallet Hacks (a página manda usar o primeiro nome do autor no domínio).
+- [ ] Millennial Wealth e Rob Berger: rodar na página o cenário do artigo do blog ($400,000, 30 anos, 6,71% com $75 extras; aporte de $208.33 por mês, 45 anos, 9,8%) e ver se o resultado é parecido com o do texto dele antes de dizer qualquer coisa sobre o número. Os rascunhos só citam os números dos artigos deles.
+
+**Em cada envio**
+
+- [ ] Um e-mail por vez, em texto simples, sem anexo, sem imagem de rastreio, sem parâmetro UTM nos links e sem cópia oculta para vários.
+- [ ] No máximo 3 envios por dia.
+- [ ] Nos blogs com formulário (Clever Girl Finance, Physician on FIRE, My Money Blog, Budgets Are Sexy, Lazy Man and Money, Rob Berger e Humble Dollar; Jill on Money tem formulário e e-mail, e o e-mail é melhor): ler os termos do formulário, colar o texto no campo da mensagem e informar `contato@fileorca.com` como e-mail. Enviar o formulário é ação sua.
+- [ ] Nunca pedir link, menção, post ou resenha. O rascunho só avisa que a ferramenta existe e diz isso numa frase.
+- [ ] Marcar o status em `blogs-financas.md` (de "não enviado" para "enviado em AAAA-MM-DD").
+
+**Depois**
+
+- [ ] Se o blog responder, responda você mesmo, em poucas linhas. Se pedirem preço, anúncio, "link placement" ou guest post com link: **recuse com educação**. Não entra link pago, troca de links, guest post em troca de link, nem lista ou site que vende link: são as práticas que a política de spam de links do Google trata como spam (<https://developers.google.com/search/docs/essentials/spam-policies#link-spam>, lida em 31/out/2026).
+- [ ] Se o blog citar uma calculadora, não peça texto nem âncora específicos. Se alguém apontar erro de conta, pare os envios, guarde o cenário (o "Copy link") e abra uma run de correção.
+- [ ] Se alguém pedir para não receber mais mensagens, anote no `blogs-financas.md` e não escreva de novo.
+- [ ] Registrar o resultado na linha do blog: respondeu, citou, recusou ou ficou sem resposta.
+
+### O que a run F4 fez com `blogs-financas.md`
+
+- **Leituras:** cerca de 125 sites e newsletters tentados em duas passadas e 20 aprovados; a seção "Descartados" do arquivo lista o resto e o motivo. Para cada um dos 20, a run abriu com o WebFetch a página de contato, um post recente, o artigo relevante e o que o blog diz sobre guest post, patrocínio e link.
+- **LanguageTool:** os 20 rascunhos em inglês passaram pelo LanguageTool local (versão 6.6, `en-US`, servidor na porta 8095, o mesmo jar do `lint:texto`). Zero apontamentos de gramática. O resultado completo está no fim de `blogs-financas.md`.
