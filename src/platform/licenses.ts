@@ -91,12 +91,26 @@ const CODEC_LICENSE_FILES: Record<string, readonly { label: string; file: string
 /** Folder of the license texts copied from upstream repositories, relative to the project root. */
 export const UPSTREAM_TEXT_DIR = 'src/platform/license-texts';
 
+/** A license text copied from upstream. */
+export interface UpstreamText {
+  label: string;
+  file: string;
+  source: string;
+  /**
+   * The npm package this text covers when that package is compiled into the outer package's own prebuilt JavaScript
+   * (a webpack build that ships in the outer package, so the bundle record sees only the outer file). The license gate
+   * reads the `// MODULE: ./node_modules/<name>/` markers of every such file in the bundle and fails on a package with
+   * no text here (DECISOES § 179).
+   */
+  embeds?: string;
+}
+
 /**
  * Codec licenses the package does not ship (@jsquash/avif has only its own). They were copied, read-only,
  * from the official upstream repositories at the versions compiled into the .wasm (libaom 3.7.0 is the
  * string inside avif_enc.wasm; libavif 1.0.1 is the tag in jSquash's codec Makefile).
  */
-export const UPSTREAM_TEXTS: Record<string, readonly { label: string; file: string; source: string }[]> = {
+export const UPSTREAM_TEXTS: Record<string, readonly UpstreamText[]> = {
   '@jsquash/avif': [
     { label: 'libavif 1.0.1', file: 'libavif-1.0.1-LICENSE.txt', source: 'https://github.com/AOMediaCodec/libavif/blob/v1.0.1/LICENSE' },
     { label: 'libaom 3.7.0', file: 'libaom-3.7.0-LICENSE.txt', source: 'https://aomedia.googlesource.com/aom/+/refs/tags/v3.7.0/LICENSE' },
@@ -110,6 +124,12 @@ export const UPSTREAM_TEXTS: Record<string, readonly { label: string; file: stri
     { label: 'zlib', file: 'zlib-21767c6-README.txt', source: 'https://github.com/madler/zlib/blob/21767c654d31d2dccdde4330529775c6c5fd5389/README' },
     { label: 'libjpeg-turbo 2.1.1', file: 'libjpeg-turbo-7aa2a89-LICENSE.md', source: 'https://github.com/ImageMagick/jpeg-turbo/blob/7aa2a898c564041a24b09d0a6e780aaa632d08d3/LICENSE.md' },
     { label: 'libjpeg-turbo 2.1.1, the IJG license', file: 'libjpeg-turbo-7aa2a89-README.ijg', source: 'https://github.com/ImageMagick/jpeg-turbo/blob/7aa2a898c564041a24b09d0a6e780aaa632d08d3/README.ijg' },
+  ],
+  // The legacy build of PDF.js (the Safari 16.4 floor, DECISOES § 144) has core-js 3.50.0 compiled into pdf.mjs and
+  // pdf.worker.mjs; pdfjs-dist ships only its own Apache-2.0 text (DECISOES § 179). The bytes are the LICENSE of the core-js
+  // 3.50.0 npm package, the version and the address the shared store of the bundled code names.
+  'pdfjs-dist': [
+    { label: 'core-js 3.50.0, inside the PDF.js legacy build', file: 'core-js-3.50.0-LICENSE.txt', source: 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE', embeds: 'core-js' },
   ],
 };
 

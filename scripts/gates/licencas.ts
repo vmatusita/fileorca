@@ -15,6 +15,8 @@
 //    dist/_astro/ and every PDF.js data file in dist/_astro/pdfjs/<version>/ (decoders, CMaps, fonts) is byte-identical
 //    to the file of the package it comes from, and nothing /licenses has no text for is served; a text that says
 //    "in x.wasm" has that x.wasm in dist/.
+// 7. (DECISOES § 179) A package compiled into another package's prebuilt file (core-js inside the legacy build of PDF.js,
+//    which the bundle record sees only as pdfjs-dist) has its own license text on /licenses, of the version the code names.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -29,11 +31,13 @@ import {
   checkSeparateFile,
   checkWasmIdentity,
   checkWasmTexts,
+  checkEmbeddedTexts,
   compareBundleWithList,
   readBundleRecord,
   readDistFacts,
   readPackageHashes,
   readPdfjsServed,
+  readPrebuiltFiles,
   readWasmSources,
   sha256,
   wasmStem,
@@ -44,6 +48,7 @@ import {
   SEPARATE_FILE_ONLY,
   SEPARATE_FILE_RULES,
   BUNDLED_TRANSITIVE,
+  UPSTREAM_TEXTS,
   bundledPackages,
   browserPackages,
   buildPackages,
@@ -105,6 +110,7 @@ for (const pkg of reaching.values()) {
 const listedNames = new Set([...browser, ...bundledList].map((pkg) => pkg.name));
 let distWasm = 0;
 let pdfjsFiles = 0;
+let prebuilt: ReturnType<typeof readPrebuiltFiles> = [];
 if (record) {
   for (const issue of checkRequiredInBundle(bundledDirs)) problems.add(`PDF: ${issue}`);
   const facts = readDistFacts(record);
@@ -120,6 +126,9 @@ if (record) {
   // The names of the .wasm the site serves, without the hash of the bundler (qpdf.wasm, jbig2.wasm), for the texts of /licenses.
   const served = new Set(facts.wasm.map((entry) => (wasmStem(entry.file) ? `${wasmStem(entry.file)}.wasm` : basename(entry.file))));
   for (const issue of checkWasmTexts([...browser, ...bundledList], served)) problems.add(`.wasm: ${issue}`);
+  // 7. (DECISOES § 179) What a prebuilt file of a package carries inside it (core-js in the PDF.js legacy build).
+  prebuilt = readPrebuiltFiles(record);
+  for (const issue of checkEmbeddedTexts(prebuilt, UPSTREAM_TEXTS)) problems.add(`dentro de outro pacote: ${issue}`);
 }
 {
   const version = pdfjsVersion();
@@ -178,5 +187,5 @@ if (informative.size) {
 }
 problems.finish(
   'licenças',
-  `${browser.length} dependências de navegador, ${BUNDLED_TRANSITIVE.length} dentro de outras, ${bundledDirs.size} pacotes no bundle, ${distWasm} .wasm e ${pdfjsFiles} arquivos do PDF.js idênticos aos dos pacotes, ${build.length} de build, ${Object.keys(tree).length} pacotes na árvore, /licenses em ${pages} idiomas`,
+  `${browser.length} dependências de navegador, ${BUNDLED_TRANSITIVE.length} dentro de outras, ${bundledDirs.size} pacotes no bundle, ${prebuilt.flatMap((file) => file.embedded).filter((name, i, all) => all.indexOf(name) === i).length} compilados dentro de ${prebuilt.length} arquivos prontos, ${distWasm} .wasm e ${pdfjsFiles} arquivos do PDF.js idênticos aos dos pacotes, ${build.length} de build, ${Object.keys(tree).length} pacotes na árvore, /licenses em ${pages} idiomas`,
 );

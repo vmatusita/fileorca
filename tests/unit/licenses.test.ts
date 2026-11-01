@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   PDFJS_SERVED,
@@ -14,11 +14,15 @@ import {
   checkSeparateFile,
   checkWasmIdentity,
   checkWasmTexts,
+  checkEmbeddedTexts,
   classifyModule,
   compareBundleWithList,
+  embeddedPackages,
+  licenseUrlsIn,
   readDistFacts,
   readPackageHashes,
   readPdfjsServed,
+  readPrebuiltFiles,
   readWasmSources,
   wasmStem,
   type DistFacts,
@@ -443,6 +447,66 @@ describe('os textos de .wasm da /licenses (F5a)', () => {
   });
 });
 
+describe('os pacotes compilados dentro de um arquivo pronto de outro (DECISOES § 179)', () => {
+  const CORE_JS = 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE';
+  const prebuilt = (embedded: string[], licenseUrls: string[] = [CORE_JS]) => [{ pkg: 'pdfjs-dist', file: 'pdfjs-dist/legacy/build/pdf.worker.mjs', embedded, licenseUrls }];
+  const declared = (entries: { embeds?: string; source: string; label: string }[]) => ({ 'pdfjs-dist': entries });
+  const coreJsText = { label: 'core-js 3.50.0, inside the PDF.js legacy build', source: CORE_JS, embeds: 'core-js' };
+
+  it('reads the webpack MODULE markers of a prebuilt file, scoped names too, and the license addresses its code names', () => {
+    const code = [
+      '// MODULE: ./node_modules/core-js/internals/a-callable.js',
+      '// MODULE: ./node_modules/core-js/modules/es.array.push.js',
+      '// MODULE: ./node_modules/@babel/runtime/helpers/x.js',
+      "  license: 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE',",
+      '// MODULE: ./src/core/worker.js',
+      'const x = "// MODULE: ./node_modules/not-at-line-start/y.js";',
+    ].join('\n');
+    expect(embeddedPackages(code)).toEqual(['@babel/runtime', 'core-js']);
+    expect(licenseUrlsIn(code)).toEqual([CORE_JS]);
+    expect(embeddedPackages('export const a = 1;')).toEqual([]);
+  });
+
+  it('passes when every package inside has a text of the version the code names', () => {
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([coreJsText]))).toEqual([]);
+    expect(checkEmbeddedTexts(prebuilt(['core-js'], []), declared([coreJsText]))).toEqual([]);
+  });
+
+  it('fails for a package inside with no text (core-js before the § 179), and for a text of another version', () => {
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([]))).toEqual(['core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.worker.mjs (pdfjs-dist) e a /licenses não tem o texto dele']);
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), {})).toHaveLength(1);
+    // A text of the outer package that covers something else does not count.
+    expect(checkEmbeddedTexts(prebuilt(['core-js']), declared([{ label: 'Adobe CMaps', source: 'https://example.org/LICENSE' }]))).toHaveLength(1);
+    const newer = 'https://github.com/zloirock/core-js/blob/v3.51.0/LICENSE';
+    expect(checkEmbeddedTexts(prebuilt(['core-js'], [newer]), declared([coreJsText]))).toEqual([
+      `pdfjs-dist/legacy/build/pdf.worker.mjs traz o core-js de ${newer}, mas o texto da /licenses ("core-js 3.50.0, inside the PDF.js legacy build") é de ${CORE_JS}`,
+    ]);
+  });
+
+  it('holds on the real files: the legacy build of PDF.js carries core-js 3.50.0 and only that, and /licenses has its MIT text', () => {
+    const dir = pdfjsPackageDir();
+    const record = { '_astro/pdf.js': [`${dir}/legacy/build/pdf.mjs`], '_astro/pdf.worker.js': [`${dir}/legacy/build/pdf.worker.mjs`, `${dir}/package.json`] };
+    const files = readPrebuiltFiles(record, dirname(dirname(dir)));
+    expect(files.map((file) => [file.file, file.embedded])).toEqual([
+      ['pdfjs-dist/legacy/build/pdf.mjs', ['core-js']],
+      ['pdfjs-dist/legacy/build/pdf.worker.mjs', ['core-js']],
+    ]);
+    for (const file of files) expect(file.licenseUrls.filter((url) => url.includes('/core-js/'))).toEqual([CORE_JS]);
+    expect(checkEmbeddedTexts(files, UPSTREAM_TEXTS)).toEqual([]);
+    // Negative control: the same files against the list without the core-js text fail, which is the gate before the § 179.
+    const without = { ...UPSTREAM_TEXTS, 'pdfjs-dist': (UPSTREAM_TEXTS['pdfjs-dist'] ?? []).filter((entry) => entry.embeds !== 'core-js') };
+    expect(checkEmbeddedTexts(files, without)).toEqual([
+      'core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.mjs (pdfjs-dist) e a /licenses não tem o texto dele',
+      'core-js está compilado dentro de pdfjs-dist/legacy/build/pdf.worker.mjs (pdfjs-dist) e a /licenses não tem o texto dele',
+    ]);
+    // The modern build carries nothing: the check reads only files with the markers.
+    expect(readPrebuiltFiles({ '_astro/pdf.js': [`${dir}/build/pdf.mjs`] }, dirname(dirname(dir)))).toEqual([]);
+    const text = listedPackages().find((pkg) => pkg.name === 'pdfjs-dist')?.texts.find((entry) => entry.label === coreJsText.label);
+    expect(text?.text).toMatch(/^Copyright \(c\) 2013–2025 Denis Pushkarev \(zloirock\.ru\)\nCopyright \(c\) 2025–2026 CoreJS Company \(core-js\.io\)\n\nPermission is hereby granted, free of charge/);
+    expect(text?.source).toBe(CORE_JS);
+  });
+});
+
 describe('os pacotes e os textos de licença', () => {
   it('lists the direct dependencies and the packages that come inside them', () => {
     const names = listedPackages().map((pkg) => pkg.name);
@@ -487,6 +551,8 @@ describe('os pacotes e os textos de licença', () => {
       'zlib-21767c6-README.txt': 'fc2c3368901700f0acdeb1d8afeaca5923296768ec6824ecdf627aac396001fd',
       'libjpeg-turbo-7aa2a89-LICENSE.md': '7d8683a7f048e715e08b4cada8b7f0d9a6ab8afad88ed09c1143ef764ecbc0f2',
       'libjpeg-turbo-7aa2a89-README.ijg': '4b7b9f8c03bb8d60270dfd12684e70ab21e4abfd27e73905cd1a7c4cae6f5cdb',
+      // The LICENSE of the core-js 3.50.0 npm package, inside the PDF.js legacy build (DECISOES § 179).
+      'core-js-3.50.0-LICENSE.txt': 'b87653fff2d44426ab5cd4723cee3b1364dc8d35a0acdf098c54689543123bf8',
     };
     const entries = Object.values(UPSTREAM_TEXTS).flat();
     expect(entries.map((entry) => entry.file).sort()).toEqual(Object.keys(hashes).sort());
@@ -526,6 +592,8 @@ describe('os pacotes e os textos de licença', () => {
       'PDF.js glue of qcms_bg.wasm',
       'Adobe CMaps',
       'Foxit standard fonts (PDFium)',
+      // DECISOES § 179: core-js is compiled into the legacy build, which ships no text of it.
+      'core-js 3.50.0, inside the PDF.js legacy build',
     ]);
     expect(pdfjs?.texts.some((entry) => /Marti Maria/.test(entry.text))).toBe(false);
     // Nothing GPL among the texts: the Liberation fonts stay out of the dist (DECISOES § 144).

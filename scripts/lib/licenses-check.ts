@@ -230,6 +230,73 @@ export function checkWasmTexts(packages: readonly { name: string; texts: readonl
   return problems;
 }
 
+// --- Packages compiled into a prebuilt file of another package (DECISOES § 179) ---
+
+/**
+ * The npm packages a prebuilt file of a package carries inside it, from the `// MODULE: ./node_modules/<name>/…`
+ * markers webpack leaves (the legacy build of PDF.js has core-js this way). The bundle record names only the outer
+ * file, so without this the gate cannot see them.
+ */
+export function embeddedPackages(code: string): string[] {
+  const found = new Set<string>();
+  for (const match of code.matchAll(/^\/\/ MODULE: \.\/node_modules\/((?:@[\w.-]+\/)?[\w.-]+)\//gm)) if (match[1]) found.add(match[1]);
+  return [...found].sort();
+}
+
+export interface PrebuiltFile {
+  /** The package the file belongs to. */
+  pkg: string;
+  /** The file, as the bundle record names it (for the message). */
+  file: string;
+  /** What embeddedPackages() found in it. */
+  embedded: readonly string[];
+  /** The license addresses the code itself names for the packages inside (core-js: `…/core-js/blob/v3.50.0/LICENSE`). */
+  licenseUrls: readonly string[];
+}
+
+/** Every `https://…/<name>/blob/<ref>/LICENSE` address in the code: the version a package inside says it is. */
+export function licenseUrlsIn(code: string): string[] {
+  return [...new Set([...code.matchAll(/https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/blob\/[\w.-]+\/LICENSE\b/g)].map((match) => match[0]))].sort();
+}
+
+/**
+ * Every package compiled into a prebuilt file in the bundle has a license text of its own on /licenses: an upstream
+ * text of the outer package that says it `embeds` that package. When the code names the license address of the
+ * package inside (`…/<name>/blob/<ref>/LICENSE`), the text is the one of that address, so a new version inside a new
+ * pdfjs-dist cannot keep the old text.
+ */
+export function checkEmbeddedTexts(files: readonly PrebuiltFile[], texts: Readonly<Record<string, readonly { embeds?: string; source: string; label: string }[]>>): string[] {
+  const problems: string[] = [];
+  for (const { pkg, file, embedded, licenseUrls } of files) {
+    for (const name of embedded) {
+      const text = (texts[pkg] ?? []).find((entry) => entry.embeds === name);
+      if (!text) {
+        problems.push(`${name} está compilado dentro de ${file} (${pkg}) e a /licenses não tem o texto dele`);
+        continue;
+      }
+      const named = licenseUrls.filter((url) => url.includes(`/${name}/blob/`));
+      if (named.length > 0 && !named.includes(text.source)) problems.push(`${file} traz o ${name} de ${named.join(', ')}, mas o texto da /licenses ("${text.label}") é de ${text.source}`);
+    }
+  }
+  return problems;
+}
+
+/** The prebuilt files of the bundle: every package module of the record whose code carries webpack MODULE markers. */
+export function readPrebuiltFiles(record: BundleRecord, root = process.cwd()): PrebuiltFile[] {
+  const seen = new Map<string, PrebuiltFile>();
+  for (const ids of Object.values(record)) {
+    for (const id of ids) {
+      const info = classifyModule(id, root);
+      const path = normalise(id).replace(/[?#].*$/, '');
+      if (info.kind !== 'package' || seen.has(path) || !/\.m?js$/.test(path) || !existsSync(path)) continue;
+      const code = readFileSync(path, 'utf8');
+      const embedded = embeddedPackages(code);
+      if (embedded.length > 0) seen.set(path, { pkg: info.name, file: `${info.name}/${path.slice(info.dir.length + 1)}`, embedded, licenseUrls: licenseUrlsIn(code) });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.file.localeCompare(b.file));
+}
+
 function squash(text: string): string {
   return text.replace(/\s+/g, ' ').trim();
 }
