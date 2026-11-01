@@ -272,6 +272,9 @@ export default function SignatureArea(props: SignatureAreaProps) {
           setMode(next);
           give(null);
           strokes.current = [];
+          // The image chosen in Upload goes with the signature it made, so its name does not stay without one (DECISOES § 183).
+          setChosen(null);
+          setUploadError(false);
         }}
       />
       {mode === 'draw' && (

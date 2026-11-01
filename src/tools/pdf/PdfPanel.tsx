@@ -438,8 +438,9 @@ export default function PdfPanel(props: PdfPanelData) {
       return fmt(many ? texts.doneMany : texts.done, { percent: percent(saved, lang), count: done.length });
     }
     // {count} counts what came out: one output per file in a batch, the parts of a Split, the images of PDF to JPG (for one
-    // PDF of many pages it was the images said as PDFs, DECISOES § 178).
-    const count = done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
+    // PDF of many pages it was the images said as PDFs, DECISOES § 178). The Merge says how many files went into its one
+    // PDF (DECISOES § 183).
+    const count = mode === 'merge' ? done.length : done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
     return fmt(count > 1 ? texts.doneMany : texts.done, { count, percent: '' });
   }
 

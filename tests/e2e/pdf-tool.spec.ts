@@ -251,6 +251,58 @@ test('Sign PDF: after Start over, the same typed name signs the next file', asyn
   }
 });
 
+// F5a, the second pass of the review (DECISOES § 183): three things the fixes of the first pass left behind.
+test('Sign PDF: moving the signature does not draw the page preview again', async ({ page }) => {
+  await openTool(page, '/sign-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.getByRole('button', { name: 'Sign PDF' })).toBeVisible({ timeout: 30_000 });
+  await option(page, 'Type');
+  await page.getByLabel('Type your name').fill('Orca Signer');
+  await page.getByLabel('Type your name').blur();
+  const box = page.locator('#fo-tool-root .fo-sign__box');
+  const preview = page.locator('#fo-tool-root .fo-sign__page > img');
+  await expect(box).toBeVisible({ timeout: 30_000 });
+  await expect(preview).toBeVisible({ timeout: 30_000 });
+  // Every picture the preview shows from now on, however briefly (the redraw is asynchronous).
+  await page.evaluate(() => {
+    const frame = document.querySelector('#fo-tool-root .fo-sign__page');
+    const seen = new Set<string>([frame?.querySelector('img')?.getAttribute('src') ?? '']);
+    (window as unknown as { previewSources: Set<string> }).previewSources = seen;
+    new MutationObserver(() => seen.add(frame?.querySelector('img')?.getAttribute('src') ?? '')).observe(frame as Node, { subtree: true, childList: true, attributes: true, attributeFilter: ['src'] });
+  });
+  await box.focus();
+  for (let step = 0; step < 10; step += 1) await page.keyboard.press('ArrowRight');
+  // Long enough for a picture drawn again in the worker to come back (a page of this file takes well under a second).
+  await page.waitForTimeout(1_500);
+  const sources = await page.evaluate(() => [...(window as unknown as { previewSources: Set<string> }).previewSources]);
+  // The same picture all along: every re-render of the panel used to let it go and draw it again in the worker.
+  expect(sources, 'the preview kept the picture it had before the moves').toHaveLength(1);
+});
+
+test('Merge PDF: the success line says how many files went into the one PDF', async ({ page }) => {
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, ['gen-paginas-mistas.pdf', 'gen-ja-otimizado.pdf', 'gen-acoes.pdf'].map((name) => pdfFile(name)));
+  await page.getByRole('button', { name: mergeTexts.panel.action ?? 'Merge PDF' }).click();
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('#fo-tool-root')).toContainText(fmt(mergeTexts.panel.doneMany, { count: 3 }));
+});
+
+test('Sign PDF: switching away from Upload lets the chosen image go with its signature', async ({ page }) => {
+  await openTool(page, '/sign-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.getByRole('button', { name: 'Sign PDF' })).toBeVisible({ timeout: 30_000 });
+  await option(page, 'Upload');
+  await page.getByLabel('Choose a signature image').setInputFiles('fixtures/images/gen-png-transparente.png');
+  const chosen = page.locator('#fo-tool-root .fo-sign__chosen');
+  await expect(chosen).toHaveText('gen-png-transparente.png');
+  await expect(page.locator('#fo-tool-root .fo-sign__box')).toBeVisible({ timeout: 30_000 });
+  await option(page, 'Draw');
+  await option(page, 'Upload');
+  // No signature now, so no name of an image either: the name said there was one.
+  await expect(page.locator('#fo-tool-root .fo-sign__box')).toHaveCount(0);
+  await expect(chosen).toHaveCount(0);
+});
+
 test('Sign PDF, Upload: the control that opens the picker is a button of the site, by pointer and by keyboard', async ({ page }) => {
   await openTool(page, '/sign-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);

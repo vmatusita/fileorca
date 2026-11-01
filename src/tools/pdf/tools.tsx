@@ -419,6 +419,8 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
   const total = pageCount(props);
   const box = file?.info?.boxes[state.page];
   const ratio = box ? ((box.rotate === 90 || box.rotate === 270 ? box.height / box.width : box.width / box.height)) : 0.77;
+  // The file view is made again on every render of the panel: the preview follows the file and its reading, not the view
+  // object, or every move of the box would let the picture go and draw it again (DECISOES § 183).
   useEffect(() => {
     if (!thumbnails || !file?.info) return undefined;
     let alive = true;
@@ -432,7 +434,7 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
       alive = false;
       thumbnails.drop(shown);
     };
-  }, [thumbnails, file, state.page]);
+  }, [thumbnails, file?.id, Boolean(file?.info), state.page]);
   const ink = props.ink;
   return (
     <div class="fo-options-stack">
