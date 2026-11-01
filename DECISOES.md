@@ -1055,7 +1055,7 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
 | `/resize-image/` | 20,5 KB | 20,9 KB |
 | as outras de imagem | 20,1 a 20,3 KB | 20,4 a 20,7 KB |
 | `/image-tools/` | 3,3 KB, 0 arquivos, 4 requisições | 3,3 KB, 0 arquivos, 4 requisições |
-| as 18 de dinheiro e os 5 guias | (não existiam) | 37,5 KB, 2 arquivos, 6 requisições |
+| as 18 de dinheiro e os 5 guias | (não existiam) | 37,5 KB, 2 arquivos, 6 requisições (38,0 KB depois das correções da revisão, § 139) |
 | `/money-calculators/` | (não existia) | 3,6 KB, 0 arquivos, 4 requisições |
 
 - **Por que as de imagem subiram 0,3 a 0,4 KB:** o chunk `island` é o mesmo para imagem e dinheiro. Ele ganhou a lista de ids das calculadoras em `tool-ids.ts` e os eventos novos (§ 113).
@@ -1113,4 +1113,9 @@ Achados médios confirmados e os baixos da F2 que se confirmaram. Cada um tem te
   - A queda segue o `design.spec.ts` (Oli e movimento) no WebKit do Linux, qualquer que seja a parte em que ele cai. Na § 108 ela foi na parte 2.
   - Ela some em segundos. Na F4, o `design.spec.ts` passou para a parte 3, porque as páginas novas empurram os testes pela divisão por contagem.
   - As execuções 41274088572 (`5eee3a5`) e anteriores da mesma PR passaram nessa spec.
-- **Decisão:** nada muda em teste, `retries`, timeout ou workflow. A F4 não pode mexer no `.github/`, e o diagnóstico é de outro ajuste (§ 109). O commit seguinte roda o CI de novo. Fica a proposta para um ajuste: amostrar o disco a cada 2 s durante o `design.spec.ts` no Linux, ou gravar o trace desses testes fora do `/`.
+- **A segunda vez seguida:** na execução 41276724285 (commit `e45415e`), na mesma parte, caíram outros dois testes da mesma spec: "result, start over and back to idle" e "/support/", com movimento reduzido. Foi às 05:24:4x, e a amostra pegou o `/` com 8.244 MB livres, ainda descendo. De novo a busca funda não achou arquivo, e 155 processos de outros usuários não puderam ser lidos.
+- **Hipótese, não provada:** o `core_pattern` do runner manda os dumps para o `systemd-coredump`, que roda como root. Um processo do WebKit que cai nessa spec geraria um dump grande. Ele encheria o `/` por segundos e seria descartado acima do limite do `systemd-coredump`, sem deixar arquivo. Isso explicaria a queda e a volta rápidas. Para confirmar, basta um `coredumpctl list` no fim das partes do WebKit.
+- **Decisão:** nada muda em teste, `retries`, timeout ou workflow. A F4 não pode mexer no `.github/`, e o diagnóstico é de outro ajuste (§ 109). Quando a parte cair por `ENOSPC`, roda de novo só ela (`gh run rerun --failed`, a prática do `CLAUDE.md`), e cada ocorrência vai para o relatório. Fica a proposta para um ajuste do Victor:
+  - um `coredumpctl list` no fim das partes do WebKit;
+  - desligar os core dumps dos navegadores no CI;
+  - amostrar o disco a cada 2 s durante o `design.spec.ts`.
