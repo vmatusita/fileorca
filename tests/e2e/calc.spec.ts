@@ -200,11 +200,17 @@ test('the scenario link is read once, invalid values are ignored, and the page n
 });
 
 test('the Oli cheers on the first result of the visit only, and the visit keeps a yes, never a number', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
   await open(page, 'personal-loan-calculator');
   const cheer = page.locator('.fo-rhero__oli');
   await expect(cheer).toHaveCount(0);
+  const top = () => heroNumber(page).evaluate((node) => Math.round(node.getBoundingClientRect().top + window.scrollY));
+  const before = await top();
   await page.locator('#fo-calc-a').fill('16000');
   await expect(cheer).toHaveCount(1);
+  // The cheer comes in under the chart: the number does not move, and on a phone it stays above the fold.
+  expect(await top()).toBe(before);
+  expect(await heroNumber(page).evaluate((node) => node.getBoundingClientRect().bottom + window.scrollY)).toBeLessThanOrEqual(740);
   expect(await page.evaluate(() => sessionStorage.getItem('fo-calc-cheer'))).toBe('1');
   await open(page, 'auto-loan-calculator');
   await page.locator('#fo-calc-p').fill('33000');

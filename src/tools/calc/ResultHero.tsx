@@ -56,15 +56,6 @@ export default function ResultHero({ view, touched, cheer, splitName, money }: P
 
   return (
     <section class="fo-rhero fo-deep" aria-label={view.hero.label}>
-      {cheer && (
-        <div class="fo-rhero__oli" aria-hidden="true">
-          <div class="fo-placard">
-            <span class="fo-placard__n">{view.placard.n}</span>
-            <span class="fo-placard__l">{view.placard.l}</span>
-          </div>
-          <Oli pose="cheer" class="fo-oli fo-rhero__orca" />
-        </div>
-      )}
       <p class="fo-rhero__label">{view.hero.label}</p>
       <p class="fo-rhero__num">
         <Value text={view.hero.value} />
@@ -77,6 +68,17 @@ export default function ResultHero({ view, touched, cheer, splitName, money }: P
           a={{ label: view.split.a.label, cents: view.split.a.cents, text: money(view.split.a.cents) }}
           b={{ label: view.split.b.label, cents: view.split.b.cents, text: money(view.split.b.cents) }}
         />
+      )}
+      {/* The cheer comes in at the end of the card, under the chart: on the first key press nothing above the
+          number moves, and on a phone the number stays above the fold. */}
+      {cheer && (
+        <div class="fo-rhero__oli" aria-hidden="true">
+          <div class="fo-placard">
+            <span class="fo-placard__n">{view.placard.n}</span>
+            <span class="fo-placard__l">{view.placard.l}</span>
+          </div>
+          <Oli pose="cheer" class="fo-oli fo-rhero__orca" />
+        </div>
       )}
       <p class="fo-sr" aria-live="polite">
         {spoken}
