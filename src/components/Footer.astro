@@ -10,7 +10,7 @@ import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { CALC_PAGES, MONEY_HUB_ID } from '../tools/calc/registry.ts';
+import { CALC_PAGES, HOME_CALC_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -31,10 +31,9 @@ const image = [
   }),
 ];
 const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
-const MONEY_LINKS = ['mortgage-calculator', 'refinance-calculator', 'auto-loan-calculator', 'personal-loan-calculator', 'home-affordability-calculator'] as const;
 const money =
   moneyHub && t.moneyCalculators && t.calcs
-    ? [{ label: t.moneyCalculators, href: moneyHub }, ...MONEY_LINKS.map((id) => ({ label: t.calcs?.[id].name ?? id, href: CALC_PAGES[id].path }))]
+    ? [{ label: t.moneyCalculators, href: moneyHub }, ...HOME_CALC_IDS.map((id) => ({ label: t.calcs?.[id].name ?? id, href: CALC_PAGES[id].path }))]
     : [];
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },

@@ -1,0 +1,157 @@
+// The calculator definitions against the oracle and against their own texts (F4; DECISOES § 110 to § 116): the
+// example each page starts with is the oracle's page-example case; every field's error says its range; every
+// view has its texts; the scenario link goes and comes back, and anything outside a field's range is ignored;
+// the CSV of a schedule is the oracle's schedule, cent for cent.
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { formatScaled } from '../../src/calc/parse.ts';
+import { DEFS } from '../../src/tools/calc/defs/index.ts';
+import { CALC_PAGES, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
+import { csvText } from '../../src/tools/calc/exports.ts';
+import { DECIMALS, inRange, linkHash, problems, readLink } from '../../src/tools/calc/form.ts';
+import { viewOf } from '../../src/tools/calc/store.ts';
+import type { FieldSpec, NumberSpec, Values } from '../../src/tools/calc/types.ts';
+
+interface Case {
+  id: string;
+  source: string;
+  full: boolean;
+  input: unknown;
+  expected: Record<string, unknown>;
+}
+const fixture = (id: string): Case[] => (JSON.parse(readFileSync(`fixtures/calc/${id}.json`, 'utf8')) as { cases: Case[] }).cases;
+
+/** Every number field of a definition, the list items included. */
+function numberSpecs(specs: readonly FieldSpec[]): NumberSpec[] {
+  return specs.flatMap((spec) => (spec.kind === 'list' ? spec.item : spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' ? [spec] : []));
+}
+
+/** How a range bound reads in an English error: $10,000 or $0.01, 40%, 1,200. */
+function bound(spec: NumberSpec, value: number): string {
+  if (spec.kind === 'money') return `$${formatScaled(value, 2, 'en', { min: value % 100 === 0 ? 0 : 2 })}`;
+  if (spec.kind === 'rate') return formatScaled(value, 4, 'en');
+  return formatScaled(value, 0, 'en');
+}
+
+describe('the calculator definitions', () => {
+  it('cover the 18 pages of the registry', () => {
+    expect(Object.keys(DEFS).sort()).toEqual([...CALC_PAGE_IDS].sort());
+    for (const id of CALC_PAGE_IDS) expect(DEFS[id].id).toBe(id);
+  });
+
+  it("start every page from the oracle's page-example case, and the engine gives that case's result", () => {
+    for (const id of CALC_PAGE_IDS) {
+      const def = DEFS[id];
+      const example = fixture(id).find((item) => item.id === 'page-example');
+      expect(example, id).toBeDefined();
+      expect(def.toInput(def.initial), id).toEqual(example?.input);
+      expect(problems(def.fields, def.initial), id).toEqual({});
+      for (const spec of numberSpecs(def.fields)) {
+        const values = spec.key in def.initial ? [Number(def.initial[spec.key])] : [];
+        for (const value of values) expect(inRange(spec, value), `${id} ${spec.key}`).toBe(true);
+      }
+    }
+  });
+
+  it('say the range of every number field in its error, in the words of the page', () => {
+    for (const id of CALC_PAGE_IDS) {
+      const texts = calcTexts(id).panel.fields;
+      for (const spec of numberSpecs(DEFS[id].fields)) {
+        const error = texts[spec.key]?.error ?? '';
+        expect(error, `${id} ${spec.key}`).toContain(bound(spec, spec.min).replace('-', '−'));
+        expect(error, `${id} ${spec.key}`).toContain(bound(spec, spec.max));
+      }
+      for (const spec of DEFS[id].fields) {
+        if (spec.kind === 'down') {
+          expect(texts[spec.key]?.over, id).toBeTruthy();
+          expect(texts[spec.percentKey]?.error, id).toMatch(/0 to 100%/);
+        }
+        if ((spec.kind === 'money' || spec.kind === 'int') && spec.atMost) expect(texts[spec.key]?.over, `${id} ${spec.key}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('render every view from its own texts, with no placeholder left', () => {
+    for (const id of CALC_PAGE_IDS) {
+      const def = DEFS[id];
+      const data = panelData(id, 'en');
+      const view = viewOf(def, data, def.initial);
+      const said = [view.hero.label, view.hero.value, ...view.hero.sentence.map((part) => (typeof part === 'string' ? part : part.b))].join(' ');
+      expect(said, id).not.toMatch(/\{\w+\}|undefined|NaN/);
+      expect(view.summary.length, id).toBeGreaterThan(0);
+      expect(view.premises.length, id).toBeGreaterThan(1);
+      const table = view.table();
+      expect(table.head.length, id).toBeGreaterThan(1);
+      for (const row of table.rows) expect(row.length, id).toBe(table.head.length);
+      expect(CALC_PAGES[id].file, id).not.toMatch(/\d{3,}/);
+    }
+  });
+});
+
+describe('the scenario link', () => {
+  it('goes and comes back with the same values on every page', () => {
+    for (const id of CALC_PAGE_IDS) {
+      const def = DEFS[id];
+      const hash = linkHash(def.fields, def.initial);
+      expect(hash, id).toMatch(/^#v=1&/);
+      expect(readLink(hash, def.fields, {} as Values), id).toEqual(expect.objectContaining(def.initial));
+      expect(hash, id).not.toMatch(/[?\s]/);
+    }
+  });
+
+  it('ignores without a word what is outside a range, unknown, malformed or of another version', () => {
+    const def = DEFS['mortgage-calculator'];
+    const base = def.initial;
+    const read = (hash: string) => readLink(hash, def.fields, base);
+    expect(read('#v=1&p=99999999999')).toEqual(base); // above $20,000,000
+    expect(read('#v=1&p=12.5')).toEqual(base); // not a whole number of cents
+    expect(read('#v=1&r=410000')).toEqual(base); // 41% is above the 40% of the field
+    expect(read('#v=1&du=pounds&t=0')).toEqual(base);
+    expect(read('#v=2&p=40000000')).toEqual(base);
+    expect(read('#p=40000000')).toEqual(base);
+    expect(read('#v=1&zz=1&p=40000000')).toEqual({ ...base, p: 40_000_000 });
+    // A pair the link breaks (a down payment above the price) keeps the values of the page.
+    expect(read('#v=1&du=amount&d=50000000')).toEqual(base);
+  });
+
+  it('reads the debts of a list, row by row, and stops at a broken row', () => {
+    const def = DEFS['debt-payoff-calculator'];
+    const hash = '#v=1&d0b=100000&d0r=200000&d0m=2500&d1b=50000&d1r=150000&x=0';
+    expect(readLink(hash, def.fields, def.initial)['d']).toEqual([{ b: 100_000, r: 200_000, m: 2_500 }]);
+  });
+
+  it('keeps the units of the engine: cents for money, 1/10,000 of a point for a rate', () => {
+    expect(DECIMALS).toEqual({ money: 2, rate: 4, int: 0 });
+  });
+});
+
+describe('the CSV', () => {
+  it('is the oracle schedule, cent for cent, read back from the file', () => {
+    const def = DEFS['mortgage-calculator'];
+    const view = viewOf(def, panelData('mortgage-calculator', 'en'), def.initial);
+    const csv = csvText(view.table(), 'Year');
+    expect(csv.startsWith('﻿Year,Payment,Amount,Principal,Interest,Balance\r\n')).toBe(true);
+    const lines = csv.slice(1).trimEnd().split('\r\n').slice(1).map((line) => line.split(','));
+    const oracle = fixture('mortgage-calculator').find((item) => item.id === 'design-system')?.expected['rows'] as number[][];
+    expect(oracle).toHaveLength(360);
+    expect(lines).toHaveLength(360);
+    const cents = (text: string) => Math.round(Number(text) * 100);
+    lines.forEach((line, index) => {
+      const [k, payment, interest, principal, balance] = oracle[index] ?? [];
+      expect(line[0], `row ${index + 1}`).toBe(`Year ${Math.floor(index / 12) + 1}`);
+      expect([Number(line[1]), cents(line[2] ?? ''), cents(line[3] ?? ''), cents(line[4] ?? ''), cents(line[5] ?? '')], `row ${index + 1}`).toEqual([
+        k,
+        payment,
+        principal,
+        interest,
+        balance,
+      ]);
+    });
+  });
+
+  it('quotes by RFC 4180 and never groups thousands', () => {
+    const csv = csvText({ caption: 'c', head: ['Debt', 'Order'], rows: [[{ text: 'Debt 1, then "Debt 2"' }, { cents: 123_456_789 }]] }, 'Year');
+    expect(csv).toBe('﻿Debt,Order\r\n"Debt 1, then ""Debt 2""",1234567.89\r\n');
+  });
+});

@@ -11,7 +11,7 @@ import { TEXTS } from '../i18n/texts.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { CALC_PAGES, MONEY_HUB_ID, type CalcPageId } from '../tools/calc/registry.ts';
+import { CALC_PAGES, HOME_CALC_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
 
 interface Props {
   lang: Lang;
@@ -27,9 +27,8 @@ const cards = IMAGE_TOOL_IDS.flatMap((id) => {
   if (!href || !blurb) return [];
   return [{ id, href, blurb, icon: IMAGE_PAGES[id].icon, category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const) }];
 });
-const HOME_CALCS: CalcPageId[] = ['mortgage-calculator', 'refinance-calculator', 'auto-loan-calculator', 'personal-loan-calculator', 'home-affordability-calculator'];
 const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
-const moneyCards = moneyHub && t.money && common.calcs ? HOME_CALCS.map((id) => ({ href: CALC_PAGES[id].path, blurb: common.calcs?.[id], icon: CALC_PAGES[id].icon })) : [];
+const moneyCards = moneyHub && t.money && common.calcs ? HOME_CALC_IDS.map((id) => ({ href: CALC_PAGES[id].path, blurb: common.calcs?.[id], icon: CALC_PAGES[id].icon })) : [];
 const website = {
   '@type': 'WebSite',
   name: SITE_NAME,

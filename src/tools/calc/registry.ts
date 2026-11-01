@@ -285,6 +285,15 @@ export const GUIDES: Record<GuideId, GuideDef> = {
   },
 };
 
+/** The five credit calculators the ficha never cuts: the home's money section and the footer's Money column list them. */
+export const HOME_CALC_IDS: readonly CalcToolId[] = [
+  'mortgage-calculator',
+  'refinance-calculator',
+  'auto-loan-calculator',
+  'personal-loan-calculator',
+  'home-affordability-calculator',
+];
+
 /** Presets of a calculator, in catalogue order. */
 export function calcPresetsOf(id: CalcToolId): CalcPresetId[] {
   return CALC_PRESET_IDS.filter((preset) => CALC_PAGES[preset].parent === id);

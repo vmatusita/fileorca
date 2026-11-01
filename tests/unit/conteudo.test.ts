@@ -4,13 +4,17 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
+  CALC_BLOCKS,
   CONTENT_BLOCKS,
   PLACEHOLDERS,
+  calcComparisonPaths,
+  checkCalcPage,
   checkPresetPage,
   checkSite,
   checkToolPage,
   comparisonPaths,
   findPlaceholders,
+  isCalcPage,
   isImagePage,
   isNotFoundPath,
   normalizeText,
@@ -20,6 +24,7 @@ import {
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
+import { CALC_PAGES, CALC_PRESET_IDS } from '../../src/tools/calc/registry.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
 const faq = (count: number, tag = 'Q'): string =>
@@ -219,6 +224,47 @@ describe('portão de conteúdo: o site inteiro', () => {
   });
 });
 
+/** A calculator page with the four blocks of the F4 (how, faq, privacy, related), each with the page's own tag. */
+function calcPage(tag: string, change: (html: string) => string = (html) => html): string {
+  const blocks = [
+    `<section data-content="how"><ol><li>Enter for ${tag}</li><li>Type for ${tag}</li><li>Read for ${tag}</li></ol></section>`,
+    `<section data-content="faq">${faq(4, tag)}</section>`,
+    '<section data-content="privacy"><p>Your numbers stay on your device. Nothing you type is sent anywhere.</p></section>',
+    `<section data-content="related"><ul><li><a href="/mortgage-calculator/">Mortgage calculator for ${tag}</a></li></ul></section>`,
+  ].join('');
+  return change(`<!doctype html><html><head><title>${tag} | FileOrca</title><meta name="description" content="Description of ${tag}"></head><body><main><h1>${tag}</h1>${blocks}</main></body></html>`);
+}
+
+describe('portão de conteúdo: blocos das calculadoras (F4)', () => {
+  it('accepts a complete calculator page', () => {
+    expect(checkCalcPage(calcPage('mortgage'))).toEqual([]);
+    expect(CALC_BLOCKS).toEqual(['how', 'faq', 'privacy', 'related']);
+  });
+
+  it('requires each of the four blocks', () => {
+    for (const name of CALC_BLOCKS)
+      expect(checkCalcPage(calcPage('m', (html) => html.replace(`data-content="${name}"`, 'data-x="y"'))).join('\n'), name).toMatch(new RegExp(`sem o bloco ${name}`));
+  });
+
+  it('needs 3 steps, 4 questions, a link and the privacy phrase', () => {
+    expect(checkCalcPage(calcPage('m', (html) => html.replace('<li>Read for m</li>', ''))).join()).toMatch(/how tem 2 passo/);
+    expect(checkCalcPage(calcPage('m', (html) => html.replace(faq(4, 'm'), faq(3, 'm')))).join()).toMatch(/faq tem 3 pergunta/);
+    expect(checkCalcPage(calcPage('m', (html) => html.replace('href="/mortgage-calculator/"', 'href="#top"'))).join()).toMatch(/related não tem nenhum link/);
+    const files = calcPage('m', (html) => html.replace('Your numbers stay on your device.', 'Your files never leave your device.'));
+    expect(checkCalcPage(files).join()).toMatch(/não diz "your numbers stay on your device"/);
+  });
+
+  it('knows the 18 calculator pages and compares a preset with its parent and siblings', () => {
+    expect(Object.keys(CALC_PAGES)).toHaveLength(18);
+    for (const id of Object.keys(CALC_PAGES)) expect(isCalcPage(id), id).toBe(true);
+    for (const id of ['home', 'money-calculators', 'compress-image', 'guides-refinance-break-even', 'constructor']) expect(isCalcPage(id), id).toBe(false);
+    expect(calcComparisonPaths('mortgage-calculator-biweekly')).toEqual(['/mortgage-calculator/', '/mortgage-calculator/extra-payments/', '/mortgage-calculator/15-vs-30-year/']);
+    expect(calcComparisonPaths('loan-amortization-calculator-balloon-payment')).toEqual(['/loan-amortization-calculator/']);
+    expect(calcComparisonPaths('mortgage-calculator')).toEqual([]);
+    for (const id of CALC_PRESET_IDS) expect(calcComparisonPaths(id), id).not.toContain(CALC_PAGES[id].path);
+  });
+});
+
 describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
   it('knows the 11 pages of the registry and nothing else', () => {
     expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(11);
@@ -282,6 +328,10 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   function build(dir: string): void {
     for (const entry of allPages()) {
       const id = entry.route.id;
+      if (isCalcPage(id)) {
+        write(dir, entry.path, calcPage(`${id} ${entry.lang}`));
+        continue;
+      }
       if (!isImagePage(id)) {
         write(dir, entry.path, `<html><head><title>${id} ${entry.lang}</title><meta name="description" content="Page ${id} ${entry.lang}"></head><body><p>${id}</p></body></html>`);
         continue;
@@ -302,8 +352,19 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     const dir = join(root, 'site');
     build(dir);
     const result = run(dir);
-    expect(result.output).toMatch(/conteúdo: ok, 13 página\(s\) de ferramenta/);
+    expect(result.output).toMatch(/conteúdo: ok, 13 página\(s\) de ferramenta e de preset, 18 de calculadora/);
     expect(result.status).toBe(0);
+  });
+
+  it('fails when a calculator loses its privacy phrase or a preset repeats its parent', () => {
+    const dir = join(root, 'calc');
+    build(dir);
+    write(dir, '/auto-loan-calculator/', calcPage('auto-loan-calculator en', (html) => html.replace('Your numbers stay on your device.', 'Private.')));
+    write(dir, '/mortgage-calculator/biweekly/', calcPage('mortgage-calculator en'));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/auto-loan-calculator/: o bloco privacy não diz');
+    expect(result.output).toMatch(/\/mortgage-calculator\/biweekly\/: só \d bloco\(s\) próprio/);
   });
 
   it('fails with the page and the block when a tool page loses one', () => {

@@ -51,3 +51,26 @@ export function checkYmylPage(html: string, hub: YmylHub): string[] {
   for (const pattern of BANNED) if (pattern.test(text)) problems.push(`texto proibido: ${pattern}`);
   return problems;
 }
+
+/** A route as the count needs it: its ad area and whether it is indexed. */
+export interface YmylRoute {
+  adArea?: string;
+  indexable: boolean;
+  /** Number of languages the route exists in. */
+  languages: number;
+}
+
+/** The money and health pages the gate must check: every indexed route of those areas, in every language (F4). */
+export function expectedYmylPages(routes: readonly YmylRoute[]): number {
+  return routes.filter((route) => route.indexable && (route.adArea === 'dinheiro' || route.adArea === 'casa-saude')).reduce((sum, route) => sum + route.languages, 0);
+}
+
+/**
+ * The count check: zero pages fails (a gate that checks nothing proves nothing, F4 decision 9), and so does a
+ * count different from the money and health routes of the route map.
+ */
+export function countProblems(checked: number, expected: number): string[] {
+  if (checked === 0) return ['nenhuma página de dinheiro ou saúde foi conferida'];
+  if (checked !== expected) return [`${checked} página(s) conferida(s), mas o mapa de rotas tem ${expected}`];
+  return [];
+}

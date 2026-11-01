@@ -2,6 +2,10 @@ import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultConsentFor } from '../../src/analytics/consent.ts';
 import { EVENT_PARAMS, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
+import { CALC_EVENT_TOOLS, IMAGE_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
+import { CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { CALC_IDS } from '../../src/calc/index.ts';
 
 function runBootstrap(hostname: string, stored: string | null) {
   const appended: string[] = [];
@@ -67,9 +71,37 @@ describe('Consent Mode v2 defaults', () => {
 
 describe('typed events', () => {
   it('has the closed list of the plan', () => {
-    expect(Object.keys(EVENT_PARAMS).sort()).toEqual(['donate_click', 'download', 'next_step_click', 'tool_complete', 'tool_error', 'tool_start']);
+    // The F4 adds calc_complete, export_click and share_click (DECISOES § 113).
+    expect(Object.keys(EVENT_PARAMS).sort()).toEqual([
+      'calc_complete', 'donate_click', 'download', 'export_click', 'next_step_click', 'share_click', 'tool_complete', 'tool_error', 'tool_start',
+    ]);
+    expect(EVENT_PARAMS.calc_complete).toEqual(['tool', 'lang']);
+    expect(EVENT_PARAMS.export_click).toEqual(['tool', 'lang', 'format']);
+    expect(EVENT_PARAMS.share_click).toEqual(['tool', 'lang']);
     expect(EVENT_PARAMS.tool_error).toEqual(['tool', 'lang', 'browser', 'codec', 'reason']);
     expect(EVENT_PARAMS.donate_click).toEqual(['place', 'lang']);
+  });
+
+  it('keeps the calculator events to closed lists: tool, target and format never carry a typed number (F4)', () => {
+    expect(cleanParams('calc_complete', { tool: 'mortgage-calculator', lang: 'en' })).toEqual({ tool: 'mortgage-calculator', lang: 'en' });
+    expect(cleanParams('export_click', { tool: 'refinance-calculator', lang: 'en', format: 'csv' })).toEqual({ tool: 'refinance-calculator', lang: 'en', format: 'csv' });
+    expect(cleanParams('export_click', { tool: 'mortgage-calculator', lang: 'en', format: '987654' })).toEqual({ tool: 'mortgage-calculator', lang: 'en' });
+    expect(cleanParams('share_click', { tool: 'mortgage-calculator', lang: 'en', price: 987_654.32 })).toEqual({ tool: 'mortgage-calculator', lang: 'en' });
+    // A tool or a target outside the registries is dropped, whatever it is.
+    expect(cleanParams('calc_complete', { tool: '987654.32', lang: 'en' })).toEqual({ lang: 'en' });
+    expect(cleanParams('next_step_click', { tool: 'mortgage-calculator', lang: 'en', target: 'refinance-calculator' })).toEqual({
+      tool: 'mortgage-calculator',
+      lang: 'en',
+      target: 'refinance-calculator',
+    });
+    expect(cleanParams('next_step_click', { tool: 'compress-image', lang: 'en', target: 'home' })).toEqual({ tool: 'compress-image', lang: 'en', target: 'home' });
+    expect(cleanParams('next_step_click', { tool: 'mortgage-calculator', lang: 'en', target: '/mortgage-calculator/#v=1' })).toEqual({ tool: 'mortgage-calculator', lang: 'en' });
+  });
+
+  it('lists exactly the pages of both registries as event tools', () => {
+    expect([...IMAGE_EVENT_TOOLS]).toEqual(Object.keys(IMAGE_PAGES));
+    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_PAGE_IDS].sort());
+    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_IDS].sort());
   });
 
   it('drops parameters outside the list and non-scalar values', () => {

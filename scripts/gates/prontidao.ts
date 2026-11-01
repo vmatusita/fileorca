@@ -26,7 +26,8 @@ import { BUNDLE_RECORD } from '../../src/platform/bundle-record.ts';
 
 requireDist();
 const ROOT = join(CACHE, 'prontidao');
-const TEST_SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' } });
+// The money pages of the F4 get test units too, so the hostname lock of their AdSlots is checked as well.
+const TEST_SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' }, dinheiro: { conteudo: '3333333333', lateral: '4444444444' } });
 
 /** astro build of the same code into .cache/prontidao/<name>, with the AdSense variables given. */
 function build(name: string, ads: Record<string, string>): string {

@@ -23,14 +23,23 @@ const toolPaths = (lang: Lang) => IMAGE_TOOL_IDS.flatMap((id) => routeById(id).p
 describe('home', () => {
   it('shows the eight image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
     const page = await render(HomeView, 'en');
-    expect(page.querySelectorAll('main .fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
+    // The image section is the one under "Choose a tool"; the money section of the F4 follows it (DECISOES § 118).
+    const tools = page.querySelector('main section[aria-labelledby="tools"]');
+    expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
     expect(toolPaths('en')).toHaveLength(8);
-    expect(page.querySelectorAll('main .fo-tool h3')).toHaveLength(8);
-    const more = page.querySelector('main .fo-more a');
+    expect(tools?.querySelectorAll('.fo-tool h3')).toHaveLength(8);
+    const more = tools?.querySelector('.fo-more a');
     expect(more?.getAttribute('href')).toBe('/image-tools/');
     expect(more?.text).toBe('See all image tools and common sizes');
     // The presets are not tools: they are linked from the hub and their parent page, not from the home grid.
     for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths.en}"]`)).toBeNull();
+    // The money section: the five credit calculators and the money hub, and no AdSlot on the home.
+    const money = page.querySelector('main section[aria-labelledby="money-home"]');
+    expect(money?.querySelectorAll('a.fo-tool').map((card) => card.getAttribute('href'))).toEqual([
+      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/',
+    ]);
+    expect(money?.querySelector('.fo-more a')?.getAttribute('href')).toBe('/money-calculators/');
+    expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
   it('keeps Portuguese and Spanish with Compress image only and no link to the hub', async () => {

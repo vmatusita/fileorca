@@ -10,6 +10,7 @@ import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n
 import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 import { AUTHOR, CONTACT_EMAIL, SITE_ORIGIN } from '../../src/platform/site.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
+import { CALC_PAGES, CALC_PAGE_IDS, CALC_TOOL_IDS, GUIDE_IDS, HOME_CALC_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
 import { listFiles } from './dist.ts';
 import { headerBlocks, patternApplies } from './headers-file.ts';
@@ -79,7 +80,12 @@ export interface Site {
   pages: SitePage[];
   /** Paths of the tools the home of each language (and the hub) must list: the registry, nothing else. */
   tools: Record<Lang, string[]>;
-  /** Ids the search index must offer: every page of the registry. */
+  /**
+   * More cards a page must list, by route id and language (F4): the home's money section (the five credit
+   * calculators) and the money hub (the 14 calculators), both from the calculator registry.
+   */
+  cards?: Record<string, Partial<Record<Lang, string[]>>>;
+  /** Ids the search index must offer: every page of both registries and the guides. */
   searchIds: string[];
 }
 
@@ -102,7 +108,11 @@ export function realSite(dir: string): Site {
   const tools = Object.fromEntries(
     LANGS.map((lang) => [lang, IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? [])]),
   ) as Record<Lang, string[]>;
-  return { dir, pages, tools, searchIds: Object.keys(IMAGE_PAGES) };
+  const cards: Site['cards'] = {
+    home: { en: HOME_CALC_IDS.map((id) => CALC_PAGES[id].path) },
+    [MONEY_HUB_ID]: { en: CALC_TOOL_IDS.map((id) => CALC_PAGES[id].path) },
+  };
+  return { dir, pages, tools, cards, searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS] };
 }
 
 /** File of a URL path in a built folder: '/pt/sobre/' -> <dir>/pt/sobre/index.html. */
@@ -278,12 +288,14 @@ export function checkNothingUnfinished(site: Site): Row[] {
     return FAKE_IDS.filter(({ pattern }) => pattern.test(source)).map(({ label }) => `${pathOfFile(file, site.dir)}: ${label}`);
   });
   const catalog: string[] = [];
-  for (const page of site.pages.filter((candidate) => candidate.id === 'home' || candidate.id === 'image-tools')) {
+  const listing = new Set(['home', 'image-tools', ...Object.keys(site.cards ?? {})]);
+  for (const page of site.pages.filter((candidate) => listing.has(candidate.id))) {
     const html = read(site.dir, page.path);
     if (html === null) continue;
     const cards = parse(html).querySelectorAll('main a.fo-tool').map((card) => card.getAttribute('href') ?? '');
     for (const href of cards) if (!exists(site.dir, href)) catalog.push(`${page.path}: cartão para ${href}, que não existe`);
-    const want = site.tools[page.lang];
+    const own = page.id === 'home' || page.id === 'image-tools' ? site.tools[page.lang] : [];
+    const want = [...own, ...(site.cards?.[page.id]?.[page.lang] ?? [])];
     const extra = cards.filter((href) => !want.includes(href));
     const absent = want.filter((href) => !cards.includes(href));
     if (extra.length) catalog.push(`${page.path}: cartões fora do registro: ${extra.join(', ')}`);
