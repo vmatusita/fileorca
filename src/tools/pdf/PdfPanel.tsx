@@ -471,6 +471,13 @@ export default function PdfPanel(props: PdfPanelData) {
         const fresh = { ...tool.initial, ...(tool.start?.(texts.options as never) ?? {}) };
         stateRef.current = fresh;
         setState(fresh);
+      } else if (tool.perFile) {
+        // The options of the batch stay; the ones of the last file go (DECISOES § 178).
+        const initial = tool.initial as Record<string, unknown>;
+        const fresh: Record<string, unknown> = { ...stateRef.current };
+        for (const key of tool.perFile as readonly string[]) fresh[key] = initial[key];
+        stateRef.current = fresh;
+        setState(fresh);
       }
       track('tool_start', tracked);
     } else {

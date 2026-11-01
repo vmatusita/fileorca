@@ -61,6 +61,24 @@ test('PDF to JPG: a range with no page of the file is a field error; in a batch 
   expect(await rowReason(page, 'gen-paginas-mistas.pdf')).toBe(fmt(panel.errors.noPages, { name: 'gen-paginas-mistas.pdf' }));
 });
 
+test('Rotate PDF: the pages turned one by one in a file are not turned in the next file dropped', async ({ page }) => {
+  await openTool(page, '/rotate-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  await option(page, 'Page by page');
+  const cells = page.locator('.fo-pages__grid > li .fo-page__main');
+  await expect(cells).toHaveCount(8, { timeout: 30_000 });
+  await cells.nth(0).click();
+  await cells.nth(2).click();
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  // A new file on the finished card, with no Start over: it comes out as the default turns it, all pages a quarter.
+  await choosePdfs(page, [pdfFile('gen-ja-otimizado.pdf')]);
+  const [out] = filesOf(await takePdfDownload(page));
+  expect(out?.name).toBe('gen-ja-otimizado-rotated.pdf');
+  const read = await readWithPdfjs(out?.bytes as Uint8Array);
+  expect(read.pages.map((p) => p.rotate)).toEqual(new Array(12).fill(90));
+});
+
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------
 // The same new order is made three ways on the same page load: by pointer drag, with the "earlier" and "later" buttons
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages

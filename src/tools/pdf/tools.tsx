@@ -288,6 +288,8 @@ const rotate: PdfToolDef<RotateState, RotatePdfTexts> = {
   success: 'rotated',
   warm: [],
   grid: (state) => state.scope === 'pick',
+  // The turns are of the pages of one file: a new file starts with none, and with every page turned (DECISOES § 178).
+  perFile: ['turns', 'scope'],
   operation: (state, _file, files) => {
     if (files.length > 1 || state.scope === 'all') return { kind: 'rotate', all: state.turn, pages: {} };
     return Object.values(state.turns).some((turn) => turn % 4 !== 0) ? { kind: 'rotate', all: 0, pages: state.turns } : null;

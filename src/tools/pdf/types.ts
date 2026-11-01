@@ -100,5 +100,10 @@ export interface PdfToolDef<S extends object, O = object> {
   actionLabel?: (state: S, texts: O, file: PdfFileView | null, fallback: string) => string;
   /** Thumbnails of the pages are drawn (a single-file tool with a page grid). */
   grid?: (state: S) => boolean;
+  /**
+   * Options of a batch tool that belong to one file (Rotate's page-by-page turns): back to `initial` when a new drop
+   * replaces the files, as every option of a single-file tool is (DECISOES § 178).
+   */
+  perFile?: readonly (keyof S)[];
   Options?: ComponentType<PdfOptionsProps<S, O>>;
 }
