@@ -227,6 +227,45 @@ describe('numbers, watermark and signature on the page as shown', () => {
     const read = await sound(result.outputs[0]?.bytes as Uint8Array);
     expect(read.pages.map((page) => page.images)).toEqual([0, 0, 0, 1, 0, 0, 1, 0]);
   });
+
+  // DECISOES § 178: the box is placed on the preview of one page, and every signed page gets it at the same fractions
+  // of its own size. On a page of another shape the image is taller than on the preview, so near the bottom edge it
+  // used to run off the page. Now it is moved up (and made smaller only if it is taller than the page) to stay whole.
+  it('keeps the whole signature on every page of another shape, moved up from the edge when needed', async () => {
+    const png = solidPng(40, 20, [220, 30, 30]);
+    const box = { x: 0.5, y: 0.8068, width: 0.5 };
+    const result = ok(await run({ kind: 'sign', image: png, pages: Array.from({ length: 8 }, (_, i) => i), box }, 'gen-paginas-mistas.pdf'));
+    const signed = result.outputs[0]?.bytes as Uint8Array;
+    await sound(signed);
+    for (let n = 1; n <= 8; n += 1) {
+      const plain = await drawWithPdfjs(fixture('gen-paginas-mistas.pdf'), n, 1);
+      const drawn = await drawWithPdfjs(signed, n, 1);
+      let left = drawn.width;
+      let right = -1;
+      let top = drawn.height;
+      let bottom = -1;
+      for (let y = 0; y < drawn.height; y += 1) {
+        for (let x = 0; x < drawn.width; x += 1) {
+          const i = (y * drawn.width + x) * 4;
+          const differs = [0, 1, 2].some((c) => Math.abs((drawn.data[i + c] as number) - (plain.data[i + c] as number)) > 40);
+          if (!differs) continue;
+          left = Math.min(left, x);
+          right = Math.max(right, x);
+          top = Math.min(top, y);
+          bottom = Math.max(bottom, y);
+        }
+      }
+      const width = right - left + 1;
+      const height = bottom - top + 1;
+      // The rule, on the page as shown: half its width, half as tall as wide, its top at 80.68 % or as low as it fits.
+      const w = box.width * drawn.width;
+      const h = w * 0.5;
+      expect(Math.abs(width - w), `page ${n}: width ${width} of ${drawn.width}`).toBeLessThan(3);
+      expect(Math.abs(height - h), `page ${n}: height ${height}, not cut at the edge`).toBeLessThan(3);
+      expect(Math.abs(top - Math.min(box.y * drawn.height, drawn.height - h)), `page ${n}: top ${top} of ${drawn.height}`).toBeLessThan(3);
+      expect(Math.abs(left - box.x * drawn.width), `page ${n}: left`).toBeLessThan(3);
+    }
+  }, 60_000);
 });
 
 describe('compress', () => {
@@ -313,6 +352,21 @@ function fixtureSignature(): Uint8Array {
     rows.push(0);
     for (let x = 0; x < width; x += 1) rows.push(20, 30, 60, Math.abs(y - 6 - Math.round(4 * Math.sin(x / 4))) < 2 ? 255 : 0);
   }
+  return rgbaPng(width, height, rows);
+}
+
+/** An opaque PNG of one colour: its whole box shows where it was drawn. */
+function solidPng(width: number, height: number, [r, g, b]: [number, number, number]): Uint8Array {
+  const rows: number[] = [];
+  for (let y = 0; y < height; y += 1) {
+    rows.push(0);
+    for (let x = 0; x < width; x += 1) rows.push(r, g, b, 255);
+  }
+  return rgbaPng(width, height, rows);
+}
+
+/** An 8-bit RGBA PNG of filtered rows (a 0 filter byte before each row). */
+function rgbaPng(width: number, height: number, rows: number[]): Uint8Array {
   const chunk = (type: string, data: Uint8Array): Buffer => {
     const body = Buffer.concat([Buffer.from(type, 'latin1'), Buffer.from(data)]);
     const length = Buffer.alloc(4);

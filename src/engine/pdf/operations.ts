@@ -151,9 +151,17 @@ export async function signPages(doc: PDFDocument, png: Uint8Array, pages: readon
     if (!page) continue;
     const { box: visible, rotate } = pageBox(page);
     const { width, height } = shownSize(visible, rotate);
-    const w = box.width * width;
-    const h = (w * image.height) / image.width;
-    const at = toUser(visible, rotate, box.x * width, height - box.y * height - h);
+    // The box was fitted to the page of the preview; a page of another shape makes the same width taller, so the image
+    // is moved in (and made smaller only when it is taller than the page) to stay whole on this page (DECISOES § 178).
+    let w = Math.min(box.width * width, width);
+    let h = (w * image.height) / image.width;
+    if (h > height) {
+      w *= height / h;
+      h = height;
+    }
+    const left = Math.min(Math.max(0, box.x * width), width - w);
+    const top = Math.min(Math.max(0, box.y * height), height - h);
+    const at = toUser(visible, rotate, left, height - top - h);
     page.drawImage(image, { x: at.x, y: at.y, width: w, height: h, rotate: degrees(at.angle) });
   }
 }
