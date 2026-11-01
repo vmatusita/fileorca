@@ -6,17 +6,21 @@
 // works and when it is done with an error row, the batch ResultCard, the BeforeAfter, the crop editor, the Resize
 // fields (also with an error) and the hub. F3: the end of the page with the cookie notice open, at 360 and 1280px.
 // F4: the calculator components and the money pages (a calculator, the hub, a guide and the debt list).
+// F5a: the PDF pieces in the states the PDF tools reach (DECISOES § 152 and § 170, walked by tests/e2e/lib/pdf-states.ts,
+// the same walk ads.spec.ts and a11y.spec.ts look at), some PDF pages whole, the PDF hub, the home's PDF section and the
+// four new icons beside their neighbours (§ 149), drawn in currentColor as the site draws them (src/icons/svg.ts).
 // Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium, type Browser, type Locator, type Page } from '@playwright/test';
 import { requireDist } from './lib/dist.ts';
+import { PDF_WALKS, walkPdfTool, type PdfState } from '../tests/e2e/lib/pdf-states.ts';
 
 const ORIGIN = 'http://127.0.0.1:4173';
-// F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 writes
-// under fase-04/ and leaves the F3 shots as they were.
-const OUT = 'docs/relatorios/fase-04/componentes';
+// F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
+// under fase-04/ and F5a writes under fase-05a/, leaving the F3 and F4 shots as they were.
+const OUT = 'docs/relatorios/fase-05a/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -31,6 +35,11 @@ function batch(): { name: string; mimeType: string; buffer: Buffer }[] {
     { name: 'portrait.jpg', mimeType: 'image/jpeg', buffer: readFileSync(BIG_PHOTO) },
   ];
 }
+/** The PDF pages shot whole (the others show the same mold), and the tools whose pieces are shot at 1280px too. */
+const PDF_WHOLE = ['/merge-pdf/', '/compress-pdf/', '/protect-pdf/', '/sign-pdf/'];
+const PDF_WIDE = new Set(['merge-pdf', 'split-pdf', 'protect-pdf', 'sign-pdf']);
+/** The new icons of F5a and the neighbours they sit beside in the PDF pages. */
+const PDF_ICONS = ['merge', 'split', 'sign', 'watermark', 'page-number', 'reorder', 'lock', 'unlock'];
 const THEMES = ['light', 'dark'] as const;
 type Theme = (typeof THEMES)[number];
 
@@ -312,6 +321,66 @@ async function main(): Promise<void> {
       await page.close();
       page = await open(browser, theme, 360, '/mortgage-calculator/15-vs-30-year/');
       await shot(page.locator('.fo-compare'), `scenario-compare-${theme}-360`);
+      await page.close();
+
+      // F5a: each PDF tool walked through its states on one load; the panel is shot in each state but the rest and the
+      // reading (the drop zone and the WaterLevel are the image ones), once per state.
+      for (const width of [360, 1280]) {
+        for (const { id } of PDF_WALKS) {
+          if (width === 1280 && !PDF_WIDE.has(id)) continue;
+          page = await browser.newPage({ baseURL: ORIGIN, viewport: { width, height: width < 768 ? 740 : 800 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce' });
+          await page.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+          const taken = new Map<PdfState, number>();
+          await walkPdfTool(
+            page,
+            id,
+            async (state) => {
+              if (state === 'rest' || state === 'processing') return;
+              const n = (taken.get(state) ?? 0) + 1;
+              taken.set(state, n);
+              // The thumbnails of the page grid are drawn in the PDF worker only while their cell is on screen: the grid
+              // comes into view and the shot waits for the pictures of the cells in sight.
+              const grid = page.locator('.fo-pages__grid');
+              if ((await grid.count()) > 0) {
+                await grid.scrollIntoViewIfNeeded();
+                await page.waitForFunction(
+                  () =>
+                    [...document.querySelectorAll('.fo-pages__grid .fo-page')]
+                      .filter((cell) => cell.getBoundingClientRect().top < innerHeight)
+                      .every((cell) => cell.querySelector('img')?.complete),
+                  null,
+                  { timeout: 30_000 },
+                );
+              }
+              await shot(page.locator('#fo-tool-root'), `pdf-${id}-${state}${n > 1 ? `-${n}` : ''}-${theme}-${width}`);
+            },
+            { hold: false },
+          );
+          await page.close();
+        }
+        for (const path of PDF_WHOLE) {
+          page = await open(browser, theme, width, path);
+          const name = path.split('/').filter(Boolean).at(-1) ?? 'page';
+          await page.screenshot({ path: join(OUT, `pdf-page-${name}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  pdf-page-${name}-${theme}-${width}.png`);
+          await page.close();
+        }
+        page = await open(browser, theme, width, '/pdf-tools/');
+        await shot(page.locator('.fo-hubband'), `pdf-hub-band-${theme}-${width}`);
+        await page.screenshot({ path: join(OUT, `pdf-hub-page-${theme}-${width}.png`), fullPage: true });
+        console.log(`  pdf-hub-page-${theme}-${width}.png`);
+        await page.close();
+        page = await open(browser, theme, width, '/');
+        await shot(page.locator('section[aria-labelledby="pdf-home"]'), `home-pdf-section-${theme}-${width}`);
+        await shot(page.locator('.fo-footer'), `footer-home-${theme}-${width}`, { top: 20, side: 0 });
+        await page.close();
+      }
+      const icons = PDF_ICONS.map((name) => {
+        const svg = readFileSync(`docs/design/assets/Icons/${name}.svg`, 'utf8').replace('stroke="#0F1B2D"', 'stroke="currentColor"');
+        return `<figure style="margin:0;display:grid;justify-items:center;gap:6px;color:var(--ink)"><span style="display:flex;gap:12px;align-items:end"><span style="width:24px;height:24px;display:block">${svg}</span><span style="width:48px;height:48px;display:block">${svg}</span></span><figcaption style="font:12px/1.2 sans-serif;color:var(--ink-muted)">${name}</figcaption></figure>`;
+      }).join('');
+      page = await isolated(browser, theme, css, `<div id="shot" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:328px;background:var(--bg)">${icons.replaceAll('<svg', '<svg width="100%" height="100%"')}</div>`);
+      await shot(page.locator('#shot'), `pdf-icons-${theme}-360`);
       await page.close();
 
       page = await isolated(browser, theme, css, `<div style="max-width:328px">${previewMarkup('FileCard')}</div>`);
