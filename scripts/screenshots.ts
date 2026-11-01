@@ -5,6 +5,7 @@
 // the OliMessage previews come from their design-system markup with the CSS of the build. F2: the queue while it
 // works and when it is done with an error row, the batch ResultCard, the BeforeAfter, the crop editor, the Resize
 // fields (also with an error) and the hub. F3: the end of the page with the cookie notice open, at 360 and 1280px.
+// F4: the calculator components and the money pages (a calculator, the hub, a guide and the debt list).
 // Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
@@ -13,8 +14,9 @@ import { chromium, type Browser, type Locator, type Page } from '@playwright/tes
 import { requireDist } from './lib/dist.ts';
 
 const ORIGIN = 'http://127.0.0.1:4173';
-// F3: a folder of its own under fase-03/, which also keeps the before and after shots of the cookie notice.
-const OUT = 'docs/relatorios/fase-03/componentes';
+// F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 writes
+// under fase-04/ and leaves the F3 shots as they were.
+const OUT = 'docs/relatorios/fase-04/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -278,6 +280,39 @@ async function main(): Promise<void> {
         console.log(`  hub-page-${theme}-${width}.png`);
         await page.close();
       }
+
+      // F4: the calculator components from the real page (fields, ResultHero with the SplitChart, ExportBar with
+      // Link copied, a field in error, ScenarioCompare, the schedule open by year) and the money pages whole.
+      for (const width of [360, 1280]) {
+        for (const path of ['/mortgage-calculator/', '/money-calculators/', '/guides/15-vs-30-year-mortgage/', '/debt-payoff-calculator/']) {
+          page = await open(browser, theme, width, path);
+          const name = path.split('/').filter(Boolean).at(-1) ?? 'page';
+          await page.screenshot({ path: join(OUT, `money-${name}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  money-${name}-${theme}-${width}.png`);
+          await page.close();
+        }
+      }
+      page = await open(browser, theme, 360, '/mortgage-calculator/');
+      await page.evaluate(() => {
+        const clipboard = navigator.clipboard;
+        if (clipboard) clipboard.writeText = async () => undefined;
+      });
+      await shot(page.locator('.fo-calc__main'), `number-fields-${theme}-360`);
+      await shot(page.locator('.fo-rhero'), `result-hero-${theme}-360`);
+      await page.locator('.fo-export .fo-btn').nth(2).click();
+      await page.locator('.fo-copied').waitFor();
+      await shot(page.locator('.fo-export-wrap'), `export-bar-copied-${theme}-360`);
+      await page.locator('#fo-calc-r').fill('99');
+      await page.locator('#fo-calc-r-error').waitFor();
+      await shot(page.locator('.fo-calc__main'), `number-fields-error-${theme}-360`);
+      await page.locator('#fo-calc-r').fill('6.5');
+      await page.getByRole('button', { name: 'Show the full schedule' }).click();
+      await page.locator('.fo-amort').waitFor();
+      await shot(page.locator('#fo-calc-schedule'), `amort-table-${theme}-360`);
+      await page.close();
+      page = await open(browser, theme, 360, '/mortgage-calculator/15-vs-30-year/');
+      await shot(page.locator('.fo-compare'), `scenario-compare-${theme}-360`);
+      await page.close();
 
       page = await isolated(browser, theme, css, `<div style="max-width:328px">${previewMarkup('FileCard')}</div>`);
       await shot(page.locator('.fo-filelist').first(), `file-card-${theme}-360`);
