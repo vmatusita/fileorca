@@ -79,7 +79,10 @@ function write(dir: string, path: string, content: string): void {
 }
 
 /** The PDF pages of a fake site with the PDF tools: the 12 of the registry and the hub, English only, with an ad area. */
-const PDF_FAKE: SitePage[] = [...PDF_TOOL_IDS, PDF_HUB_ID].map((id) => ({ id, lang: 'en', path: id === PDF_HUB_ID ? '/pdf-tools/' : PDF_PAGES[id].path, indexable: true, ads: true }));
+const PDF_FAKE: SitePage[] = [
+  ...PDF_TOOL_IDS.map((id) => ({ id, lang: 'en' as const, path: PDF_PAGES[id].path, indexable: true, ads: true })),
+  { id: PDF_HUB_ID, lang: 'en' as const, path: '/pdf-tools/', indexable: true, ads: true },
+];
 const PDF_PATHS = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
 const IMAGE_TO_PDF = '/image-to-pdf/';
 const cardsHtml = (paths: readonly string[]): string => paths.map((path) => `<a class="fo-tool" href="${path}">${path}</a>`).join('');

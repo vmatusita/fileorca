@@ -22,6 +22,7 @@ import {
   readWasmSources,
   wasmStem,
   type DistFacts,
+  type ServedFile,
   type WasmSource,
 } from '../../scripts/lib/licenses-check.ts';
 import { copyPdfjsData, pdfjsDataFiles, pdfjsDataPath, pdfjsPackageDir, pdfjsVersion } from '../../src/platform/pdfjs-data.ts';
@@ -274,8 +275,10 @@ describe('as bibliotecas de PDF no bundle (F5a)', () => {
 
 describe('os arquivos de dados do PDF.js (F5a)', () => {
   const FILES = ['wasm/jbig2.wasm', 'wasm/openjpeg.wasm', 'standard_fonts/FoxitSerif.pfb', 'cmaps/Adobe-Japan1-0.bcmap'];
-  const input = (change: (entry: Parameters<typeof checkPdfjsData>[0]) => void = () => {}): Parameters<typeof checkPdfjsData>[0] => {
-    const entry = {
+  // The same input the check takes, with the arrays and the map open to the changes of the tests.
+  interface Input { versions: string[]; version: string; served: ServedFile[]; source: Map<string, string>; expected: string[] }
+  const input = (change: (entry: Input) => void = () => {}): Input => {
+    const entry: Input = {
       versions: ['6.4.299'],
       version: '6.4.299',
       served: FILES.map((file, index) => ({ file, sha256: sha(String(index)) })),

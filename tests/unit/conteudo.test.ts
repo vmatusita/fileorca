@@ -31,7 +31,7 @@ import {
   type ContentBlock,
 } from '../../scripts/lib/conteudo.ts';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
-import { ROUTES, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS } from '../../src/tools/calc/registry.ts';
