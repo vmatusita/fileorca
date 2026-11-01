@@ -2,7 +2,7 @@
   "calculator": "credit-card-payoff-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "79a4f3fbb191a9207606abf157cac6b44f554b1e8103761ff7b71e66693a37e0",
+    "sha256": "137e9380763616e99b827ce915c478aae3a44079e289f26ec435c8a850949ab0",
     "python": "3.13.18",
     "numpy": "2.5.4",
     "numpyFinancial": "1.1.0",

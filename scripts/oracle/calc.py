@@ -1070,8 +1070,12 @@ def savings_cases() -> list[dict]:
         # A goal already met, left for 100 years at 40%: the balance passes 10^15 cents (review F4, ANU-2).
         case('too-large', 'grid', build_months(100_000_000, 100_000_000, 40, 1200)),
         case('too-large-small', 'grid', build_months(10_000, 10_000, 30, 1200)),
-        # Just under the cap: 100 years at 9.9% on $1,000,000 stays below 10^15 cents.
+        # A large balance far under the cap: 100 years at 9.9% on $1,000,000 (about 1.9 * 10^12 cents).
         case('large-under-cap', 'grid', build_months(1_000_000, 1_000_000, 9.9, 1200)),
+        # The edge (second pass of the review F4): 100 years on $1,000,000 at 16% ends a little under 10^15 cents,
+        # at 16.5% a little over it.
+        case('near-cap-under', 'grid', build_months(1_000_000, 1_000_000, 16, 1200)),
+        case('near-cap-over', 'grid', build_months(1_000_000, 1_000_000, 16.5, 1200)),
         *grid('grid-months', build_months, [1000, 20_000, 1_000_000], [0, 2000], [0, 4, 12], [1, 12, 36, 360]),
         *grid('grid-deposit', build_deposit, [0, 2000], [0, 4], [50, 500]),
     ]
