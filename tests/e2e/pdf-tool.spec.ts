@@ -235,6 +235,23 @@ test('Split PDF and Reorder: an arrow key that moves nothing leaves no focus beh
   await expect(reverse).toBeFocused();
 });
 
+test('Merge PDF: "Move down" keeps the focus on the same button of the moved row, so Enter twice moves it twice', async ({ page }) => {
+  const names = ['gen-paginas-mistas.pdf', 'gen-ja-otimizado.pdf', 'gen-acoes.pdf'] as const;
+  const row = (position: number) => page.locator('.fo-merge .fo-filelist__row').nth(position);
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, names.map((name) => pdfFile(name)));
+  await expect(page.getByRole('button', { name: must(mergeTexts.panel.action) })).toBeVisible({ timeout: 30_000 });
+  const down = page.getByRole('button', { name: fmt(panel.queue.moveLater, { name: names[0] }) });
+  await down.focus();
+  await page.keyboard.press('Enter');
+  await expect(row(1).locator('.fo-file__name')).toHaveText(names[0]);
+  await expect(down).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(row(2).locator('.fo-file__name')).toHaveText(names[0]);
+  // At the bottom "down" is disabled: the focus goes to "up" of the same row, never to the body.
+  await expect(page.getByRole('button', { name: fmt(panel.queue.moveEarlier, { name: names[0] }) })).toBeFocused();
+});
+
 test('Delete, Reorder and Split: the press of the action with nothing to do is an alert', async ({ page }) => {
   for (const [path, action, sentence] of [
     ['/delete-pdf-pages/', 'Delete pages', 'Pick at least one page to delete.'],

@@ -525,7 +525,10 @@ export default function PdfPanel(props: PdfPanelData) {
     render();
   }
 
-  /** `focus` is the control of the moved row that keeps the focus: the arrow buttons by default, the handle for the keyboard. */
+  /**
+   * `focus` is the control of the moved row that keeps the focus: the arrow button that was pressed (the other one when
+   * the row reached the end and it became disabled, DECISOES § 177), the handle for the keyboard.
+   */
   function moveItem(from: number, to: number, focus = '.fo-merge__move:not([disabled])'): void {
     if (to < 0 || to >= m.items.length || from === to) return;
     const [item] = m.items.splice(from, 1);
@@ -533,7 +536,10 @@ export default function PdfPanel(props: PdfPanelData) {
     m.items.splice(to, 0, item);
     if (m.phase === 'done') m.phase = 'ready';
     say(fmt(t.queue.moved, { name: item.file.name || t.fileFallback, position: to + 1, total: m.items.length }));
-    window.setTimeout(() => rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"] ${focus}`)?.focus(), 0);
+    window.setTimeout(() => {
+      const row = rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"]`);
+      (row?.querySelector<HTMLElement>(focus) ?? row?.querySelector<HTMLElement>('.fo-merge__move:not([disabled])'))?.focus();
+    }, 0);
   }
 
   /** Space or Enter on a row's handle: picks the row up, or drops it where it is. Each is said once (WCAG 4.1.3). */
@@ -982,10 +988,10 @@ export default function PdfPanel(props: PdfPanelData) {
               <FileCard {...rowProps(item)} />
               {mode === 'merge' && (
                 <span class="fo-merge__moves">
-                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--up" aria-label={fmt(t.queue.moveEarlier, { name: nameOf(item) })} disabled={position === 0} onClick={() => moveItem(position, position - 1)}>
+                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--up" aria-label={fmt(t.queue.moveEarlier, { name: nameOf(item) })} disabled={position === 0} onClick={() => moveItem(position, position - 1, '.fo-merge__move--up:not([disabled])')}>
                     <Icon inner={icons.chevron} class="fo-icon--sm" />
                   </button>
-                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move" aria-label={fmt(t.queue.moveLater, { name: nameOf(item) })} disabled={position === m.items.length - 1} onClick={() => moveItem(position, position + 1)}>
+                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--down" aria-label={fmt(t.queue.moveLater, { name: nameOf(item) })} disabled={position === m.items.length - 1} onClick={() => moveItem(position, position + 1, '.fo-merge__move--down:not([disabled])')}>
                     <Icon inner={icons.chevron} class="fo-icon--sm" />
                   </button>
                 </span>
