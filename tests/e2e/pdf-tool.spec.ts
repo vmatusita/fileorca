@@ -232,6 +232,25 @@ test('Delete, Reorder, Split and Sign: their field errors have the alert icon, i
   await errorsHaveIcons(page, 'Sign, an upload that is not an image');
 });
 
+// F5a (DECISOES § 182): Start over clears the tool's state, signature included, so the signature area starts fresh with
+// the next file. Before, its own fields kept the typed name while the signature was gone, and typing the same name again
+// drew nothing (found while the matrix signed one file after another).
+test('Sign PDF: after Start over, the same typed name signs the next file', async ({ page }) => {
+  await openTool(page, '/sign-pdf/');
+  const box = page.locator('#fo-tool-root .fo-sign__box');
+  const typed = page.getByLabel('Type your name');
+  for (const round of [1, 2]) {
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+    await expect(page.getByRole('button', { name: 'Sign PDF' })).toBeVisible({ timeout: 30_000 });
+    await option(page, 'Type');
+    await expect(typed, `round ${round}: the name field starts empty`).toHaveValue('');
+    await typed.fill('Orca Signer');
+    await typed.blur();
+    await expect(box, `round ${round}: the signature is on the preview`).toBeVisible({ timeout: 30_000 });
+    if (round === 1) await page.getByRole('button', { name: 'Start over' }).click();
+  }
+});
+
 test('Sign PDF, Upload: the control that opens the picker is a button of the site, by pointer and by keyboard', async ({ page }) => {
   await openTool(page, '/sign-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);

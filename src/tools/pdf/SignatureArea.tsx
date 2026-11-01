@@ -179,6 +179,12 @@ export default function SignatureArea(props: SignatureAreaProps) {
   const frame = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointer: number; startX: number; startY: number; box: SignatureBox } | null>(null);
   const ratio = image?.ratio ?? 1 / 3;
+  /** The last signature this area made, so it can tell its own clearing from the tool's (Start over). */
+  const own = useRef<SignatureImage | null>(null);
+  const give = (made: SignatureImage | null): void => {
+    own.current = made;
+    onImage(made);
+  };
 
   // The pad on screen draws in the text colour of the theme; the PNG is drawn again in the light ink.
   const repaint = () => {
@@ -197,7 +203,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
     }
   };
 
-  const finishDrawing = async () => onImage(await asImage(trimmed(drawStrokes(strokes.current, ink, 2))));
+  const finishDrawing = async () => give(await asImage(trimmed(drawStrokes(strokes.current, ink, 2))));
 
   const point = (event: TargetedPointerEvent<HTMLCanvasElement>): Point => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -208,12 +214,25 @@ export default function SignatureArea(props: SignatureAreaProps) {
     if (mode !== 'type') return undefined;
     let alive = true;
     void typedImage(typed, ink).then(asImage).then((made) => {
-      if (alive) onImage(made);
+      if (alive) give(made);
     });
     return () => {
       alive = false;
     };
   }, [typed, mode]);
+
+  // Start over clears the signature in the tool's state without the area asking: the area's own fields (the mode, the
+  // typed name, the pad, the chosen image) start fresh too, so a name on screen always has its signature (DECISOES § 182).
+  useEffect(() => {
+    if (image !== null || own.current === null) return;
+    own.current = null;
+    strokes.current = [];
+    repaint();
+    setTyped('');
+    setChosen(null);
+    setUploadError(false);
+    setMode('draw');
+  }, [image]);
 
   const shown = fitBox(box, ratio, pageRatio);
   const move = (dx: number, dy: number, grow = 0) => onBox(fitBox({ x: shown.x + dx, y: shown.y + dy, width: shown.width + grow }, ratio, pageRatio));
@@ -251,7 +270,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
         ]}
         onChange={(next) => {
           setMode(next);
-          onImage(null);
+          give(null);
           strokes.current = [];
         }}
       />
@@ -297,7 +316,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
             onClick={() => {
               strokes.current = [];
               repaint();
-              onImage(null);
+              give(null);
             }}
           >
             {texts.clear}
@@ -323,7 +342,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
                 setChosen(file.name);
                 const made = await asImage(await uploadedImage(file));
                 setUploadError(made === null);
-                onImage(made);
+                give(made);
               }}
             />
             <label class="fo-btn fo-sign__choose" for={`${id}-upload`}>
