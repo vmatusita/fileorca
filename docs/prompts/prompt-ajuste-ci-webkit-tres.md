@@ -1,0 +1,160 @@
+# Ajuste · WebKit do CI em três partes
+
+Prompt da run curta `ajuste-ci-webkit-tres` do FileOrca, gerado com a skill prompt-ultracode em 31/out/2026. Ela roda **antes da F4**, a partir da main em `60f84da`, o merge do `ajuste-aviso-espaco`.
+
+O que o Victor decidiu nesta conversa: dividir o WebKit em três partes num ajuste curto antes da F4, com o merge dele. Assim a PR da F4 não precisa mexer no `.github/` e mescla sozinha.
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode o ajuste `ajuste-ci-webkit-tres` do FileOrca: o WebKit do CI passa de duas para três partes, antes da F4. Ao terminar:
+
+- o job `playwright` do `.github/workflows/ci.yml` roda `chromium`, `webkit 1 de 3`, `webkit 2 de 3` e `webkit 3 de 3`, e o CI tem cinco partes ao todo, contando o `verificar`;
+- o `merge` continua esperando todas as partes;
+- o CI da própria PR está verde, com o tempo de cada parte medido em duas execuções.
+
+Nada mais muda: nenhum teste, portão, limiar, timeout, `retries` ou número de workers. A PR mexe em `.github/workflows/`, então o job de merge não a mescla e comenta isso na PR. O merge é do Victor.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, e o shell é o Git Bash. O CI roda em Ubuntu. A main está em `60f84da` ou num commit mais novo: confira com `git log --oneline -5`.
+
+Leia antes, nesta ordem de autoridade:
+
+1. Este prompt, que faz o papel da ficha.
+2. O `CLAUDE.md` inteiro, sobretudo a seção "Ajuste: CI em partes (ADR-003)".
+3. A `docs/adr/ADR-003-playwright-em-partes-no-ci.md`.
+4. No `DECISOES.md`, as § 87 a § 90 e a § 105.
+5. A seção "CI na PR" de `docs/relatorios/fase-03.md`.
+6. O `.github/workflows/ci.yml`, o `scripts/verificar.ts`, o `tests/unit/verificar.test.ts` e o `playwright.config.ts`.
+
+Por que agora:
+
+- Na F3, a parte 2 do WebKit chegou a 644 s, com alvo de 700 s e limite de 900 s.
+- O mesmo runner varia de 30 a 40% entre execuções (§ 88 e § 105).
+- A F4 vai somar umas 25 páginas novas aos testes. O Playwright roda com `fullyParallel: true`, então o `--shard` divide por contagem de testes, na ordem dos arquivos. Testes novos no começo da lista empurram para a última parte testes que hoje estão na primeira.
+- A ADR-003 manda dividir mais, num ajuste, quando uma parte passa de uns 700 s. A § 105 já propôs o terceiro `--shard` do WebKit.
+- O `scripts/verificar.ts` já aceita qualquer `--shard=i/n`.
+
+# Escopo
+
+Dentro:
+
+- A matriz do job `playwright` no `ci.yml`. As duas entradas do WebKit viram três: `part` igual a `webkit 1 de 3`, `webkit 2 de 3` e `webkit 3 de 3`, com `args` igual a `--playwright=webkit --shard=1/3`, `2/3` e `3/3`.
+- O comentário do topo do `ci.yml`, que fala em "WebKit in two shards".
+- Se algum teste ou script ler a matriz do `ci.yml` e esperar duas partes, ajuste-o para três, registre a mudança e diga por quê. Não mude o sentido de nenhuma asserção.
+- Um adendo datado no fim da ADR-003, com os tempos de antes e de depois. A ADR-003 não é só de leitura; só a ADR-001 é.
+- Um § novo no `DECISOES.md`: o § 108, se o último for o § 107.
+- Uma seção nova no fim do `CLAUDE.md`: "Ajuste: WebKit em três partes". Ela diz que as partes passam a ser cinco e que isso substitui a descrição das partes na seção "Ajuste: CI em partes (ADR-003)", que fica como está. As runs só acrescentam ao `CLAUDE.md`.
+- O relatório em `docs/relatorios/ajuste-ci-webkit-tres.md`.
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do `CLAUDE.md`.
+- Os outros jobs, o `pos-deploy.yml`, `scripts/ci/`, o `scripts/verificar.ts` (a não ser que um teste prove que ele não aceita `3/3`), os testes e o código do site.
+- O Chromium segue numa parte só.
+- São só leitura: `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/`, `.claude/settings.json` e `docs/design/`.
+- Os arquivos `docs/prompts/prompt-fase-04.md` e `docs/prompts/prompt-fase-04.txt` podem aparecer como não rastreados. São da próxima run: não os commite, não os apague e não os mova.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. O `pnpm gate:actionlint` passa, com a saída colada.
+2. A divisão das partes, com a contagem de testes de cada uma. Rode `pnpm exec playwright test --project=webkit --shard=1/3 --list`, e o mesmo para `2/3` e `3/3`, e cole a última linha de cada. A soma das três é o total de `pnpm exec playwright test --project=webkit --list`.
+3. O `pnpm verificar` local passa inteiro, com a saída e o tempo de cada portão.
+4. O CI da PR passa nas cinco partes. Cole o tempo de cada uma, tirado do resumo do `verificar` no log (`gh run view <id> --log`), e o tempo do job. Para a segunda medida, rode `gh run rerun <id>` uma vez e cole os tempos dessa execução também.
+5. Uma tabela com os tempos da F3 (run 41236243545: `verificar` 201,5 s, Chromium 315,2 s, WebKit 1 de 2 375,8 s, WebKit 2 de 2 644,4 s) ao lado dos tempos das duas execuções novas. O alvo é toda parte abaixo de 700 s, e o limite é 900 s.
+6. O comentário do job `merge` na PR, dizendo que a PR mexe no pipeline e fica para o Victor.
+7. O `git diff --stat origin/main...HEAD` mostra só o `ci.yml`, o `DECISOES.md`, a ADR-003, o `CLAUDE.md`, o relatório e os arquivos do prompt, mais o teste ou script do item da matriz, se houver um.
+
+# Verificação: rode de verdade
+
+Rode cada comando e leia a saída. Se algo falhar, corrija a causa e rode de novo. É proibido mudar limite, `retries`, workers ou timeout, e pular ou afrouxar teste.
+
+Se uma parte passar de 700 s:
+
+- em uma só das execuções, registre e siga;
+- nas duas, registre e proponha no relatório uma quarta parte, sem fazê-la.
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O `CLAUDE.md` e a ADR-003.
+3. Na dúvida, a opção mais simples e reversível, registrada no § novo.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca. Um teste que falha só no CI e passa aqui é investigado e registrado, nunca contornado.
+
+# Git e segurança
+
+- Comece com `git switch main` e `git pull --ff-only`. O `git status` só pode mostrar como não rastreados os arquivos do prompt desta run (`docs/prompts/prompt-ajuste-ci-webkit-tres.md` e `.txt`) e os da F4. Crie a branch com `git switch -c ajuste-ci-webkit-tres`. Os dois arquivos desta run entram sem edição no primeiro commit. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-ajuste-ci-webkit-tres.txt`.
+- Faça commits pequenos, com mensagem em inglês no padrão da main (Conventional Commits).
+- A ordem importa, porque o `ci.yml` cancela a execução em curso da PR a cada push novo (`concurrency` com `cancel-in-progress`):
+  1. Commit da mudança do `ci.yml` (e do teste ou script, se houver), com os critérios 1 a 3 verdes aqui.
+  2. O subagente revisor confere esse diff antes do primeiro push.
+  3. `git push -u origin ajuste-ci-webkit-tres` e, num comando separado, `gh pr create --base main --head ajuste-ci-webkit-tres`, com título e descrição em português.
+  4. Nenhum push até o fim da segunda medida: espere a primeira execução, rode `gh run rerun <id>` nela e espere a segunda.
+  5. Um commit final só de documentos: o relatório, o adendo da ADR-003, o § novo e a seção do `CLAUDE.md`, todos com os tempos medidos. Depois o push.
+- Nunca:
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - `gh pr merge`, `gh api` com método de escrita, `gh secret` ou `gh variable`;
+  - mexer em `core.hooksPath`, `.githooks/` ou `.claude/settings.json`;
+  - `wrangler deploy` em qualquer forma.
+
+  O `.claude/settings.json` nega esses comandos. Não tente contornar.
+- O push do commit final faz o CI rodar de novo, e não é preciso esperar essa última execução para terminar.
+
+# Como trabalhar
+
+Esta run é curta e não precisa de plano em arquivo. Antes do primeiro push, um subagente Sonnet confere o diff do `ci.yml` em contexto limpo, contra este prompt. Ele aponta só lacunas de requisito ou de correção, não estilo. Corrija o que ele achar.
+
+# Relatório final
+
+Escreva `docs/relatorios/ajuste-ci-webkit-tres.md` em português, com:
+
+- o resumo;
+- o que mudou;
+- as evidências dos critérios 1 a 7, com as saídas reais;
+- a tabela de tempos;
+- o § novo;
+- **o que é do Victor:**
+  1. Conferir as cinco partes verdes na PR.
+  2. Dar o merge pelo GitHub, com "Squash and merge", e apagar a branch.
+  3. Conferir o pós-deploy com `gh run list --workflow pos-deploy.yml --limit 1`.
+  4. Rodar `git switch main` e `git pull --ff-only` antes da F4.
+
+Termine a resposta final com um resumo de cinco linhas em português e o link da PR.
+
+# Idioma
+
+Narrativa, relatório, `DECISOES.md`, ADR, descrição da PR e a seção do `CLAUDE.md` em português. YAML, nomes, identificadores e commits em inglês.
+```
+
+## Como executar
+
+O passo a passo completo, que junta este ajuste e a F4, está em `docs/prompts/prompt-fase-04.md`, na seção "Como executar". Resumo:
+
+1. Faça o pré-voo da F4 (passo 1 de lá). O mesmo vale para as duas runs.
+2. Rode:
+
+   ```powershell
+   claude --model opus --permission-mode auto -n ajuste-ci-webkit-tres
+   ```
+
+   Cole o conteúdo inteiro de `docs\prompts\prompt-ajuste-ci-webkit-tres.txt` e deixe rodar. Ela leva uns 30 a 50 minutos, quase todos esperando o CI.
+3. Quando a PR estiver com as cinco partes verdes, dê o merge pelo GitHub ("Squash and merge"). O job de merge vai ter comentado que a PR mexe no pipeline e fica com você: é o esperado.
+4. Rode `git switch main` e `git pull --ff-only`, e só então rode a F4.
+
+**Por que o modo `auto`:** a run builda, roda o Playwright, faz commit e push da branch, abre a PR e dá um `gh run rerun`. O `auto` deixa isso passar. As regras `deny` do `.claude/settings.json` continuam barrando push na main, `gh pr merge` e `wrangler deploy`.
+
+## Suposições que fiz
+
+- **O WebKit vai para três partes, e o Chromium fica numa só.** Na F3, o Chromium levou 315 s, longe do alvo de 700 s.
+- **Duas medidas do CI bastam:** o push e um `gh run rerun`. O ajuste da ADR-003 mediu três, mas aqui só o número de partes muda.
+- **O § novo é o 108.** O último hoje é o § 107.
