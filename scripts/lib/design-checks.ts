@@ -367,7 +367,7 @@ export function checkArrows(html: string): string[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// g) voice of the texts (F5a: the PDF texts, DECISOES § F5a-design-pdf)
+// g) voice of the texts (F5a: the PDF texts, DECISOES § 164)
 
 /** Words the design README forbids, with their endings ("supercharged", "magical", "mágica"). */
 export const FORBIDDEN_WORDS = /\b(?:seamless\w*|effortless\w*|unlock\w*|supercharge\w*|magic\w*|m[áa]gic\w*|ai-powered|revolutionary|best-in-class)\b/i;

@@ -58,7 +58,7 @@ report(
 );
 report('setas', perPage((page) => checkArrows(page.html)), `${pages.length} páginas sem → nem ↔ no texto`);
 
-// The voice of the PDF pages as built (F5a, DECISOES § F5a-design-pdf): the visible text of each tool page and of the hub, and
+// The voice of the PDF pages as built (F5a, DECISOES § 164): the visible text of each tool page and of the hub, and
 // the texts the island gets in data-props (`t`, the panel bits every PDF tool shares, and `texts`, the tool's own), against the
 // rules of the README: no forbidden marketing word, no emoji, no arrow, and an exclamation only in a success line (`done`,
 // `doneMany`), so a visible text has none. The pages come from the PDF registry.

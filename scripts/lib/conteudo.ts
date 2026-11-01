@@ -162,7 +162,7 @@ export function checkCalcPage(html: string): string[] {
   return problems;
 }
 
-// ---- The PDF tool pages and the PDF hub (prompt F5a, decision 9; DECISOES § F5a-conteudo-pdf) ----------------------------
+// ---- The PDF tool pages and the PDF hub (prompt F5a, decision 9; DECISOES § 162) ----------------------------
 
 /** A PDF tool page shows at most this many related cards. */
 export const MAX_RELATED_CARDS = 6;

@@ -7,7 +7,7 @@
 // The 12 PDF tools and the PDF hub of the F5a come from the PDF registry (src/tools/pdf/registry.ts): each tool page has
 // the five blocks, an H1 and a title that start with the tool name, the PrivacySeal, specs that say what it takes, a limit,
 // what stays and what each mode does, four real questions, a privacy note, at most six related cards and no unmeasured
-// claim; the hub has a card and a guide link for each tool (DECISOES § F5a-conteudo-pdf).
+// claim; the hub has a card and a guide link for each tool (DECISOES § 162).
 // Across the whole dist/ (404s aside): no repeated title or description and no placeholder wording.
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';

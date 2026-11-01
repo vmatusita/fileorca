@@ -36,7 +36,7 @@ const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`];
 // the shared island chunk, exactly two files, read from the calculator registry.
 const CALC_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES_OF[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path)];
 const CALC_JS_FILES = 2;
-// The 12 PDF tools (F5a, prompt decision 5; DECISOES § F5a-orcamento-pdf), read from the PDF registry and in a list of their
+// The 12 PDF tools (F5a, prompt decision 5; DECISOES § 170), read from the PDF registry and in a list of their
 // own: one entry shared by all of them (PdfIsland) and the shared island chunk, exactly two files. TOOL_PAGES and
 // CALC_PAGES do not change. Before the first file a PDF page asks for nothing of the engine: no worker, no Comlink, no
 // .wasm, no pdf-lib, no PDF.js, no qpdf (the lazy chunks all have these names in dist/_astro).
@@ -176,7 +176,7 @@ for (const [first, second] of [
   });
 }
 
-// F5a (prompt decision 5; DECISOES § F5a-orcamento-pdf): who pays for which part of the PDF engine. The worker is one for
+// F5a (prompt decision 5; DECISOES § 170): who pays for which part of the PDF engine. The worker is one for
 // Image to PDF, the PDF of the calculators and the 12 PDF tools, but qpdf and PDF.js load inside it only for the
 // operation that needs them. Image to PDF and the PDF of a calculator write their file with pdf-lib alone; Compress PDF
 // brings qpdf with its first file and PDF to JPG brings PDF.js, each without the other. The last two tests are the

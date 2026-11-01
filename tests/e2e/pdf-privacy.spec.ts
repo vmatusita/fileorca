@@ -24,7 +24,7 @@ import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 
-// Privacy and security of the PDF tools in the browser (F5a, decision 8, criteria 6 and 7; DECISOES § F5a-sentinelas).
+// Privacy and security of the PDF tools in the browser (F5a, decision 8, criteria 6 and 7; DECISOES § 166).
 //
 // 1. On each of the 12 pages, in both browsers: a file whose name and text hold sentinels is dropped, the options are
 //    changed with more sentinels (the password, the watermark, the first number, the ranges, the signed name), the tool
@@ -589,7 +589,7 @@ test.describe('gen-acoes.pdf: nothing in the file runs', () => {
       expect(seen.console.filter((line) => /sentinel|script ran/i.test(line)), 'no script of the file wrote to the console').toEqual([]);
 
       // What came out. Pictures hold no action. A PDF opens in PDF.js and qpdf, and the tool put no action of its own in it:
-      // what it keeps of the file's own is measured and written for the report (DECISOES § F5a-acoes-ativas).
+      // what it keeps of the file's own is measured and written for the report (DECISOES § 167).
       const had = await activeContent(pdfBytes('gen-acoes.pdf'));
       const kept: Record<string, Awaited<ReturnType<typeof activeContent>>> = {};
       if (draws.gives === 'images') {
@@ -667,7 +667,7 @@ test('qpdf and PDF.js work on a page that is not cross-origin isolated, with the
 
   // A second file through the same worker: qpdf is fetched and started once for both. WebKit evaluated the entry script of
   // the worker again for the glue it loads, which made every module exist twice: qpdf was fetched twice, and every call
-  // ran twice (src/engine/pdf/worker.ts, the guard around expose(); DECISOES § F5a-worker-duas-vezes).
+  // ran twice (src/engine/pdf/worker.ts, the guard around expose(); DECISOES § 168).
   await startOver(page);
   await option(page, compressTexts.panel.options.lossless);
   await choosePdfs(page, [pdfFile('gen-ja-otimizado.pdf')]);

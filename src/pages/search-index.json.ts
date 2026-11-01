@@ -5,7 +5,7 @@
 // that has its link (src/search/search.ts), so a page that exists only in English is not offered in
 // Portuguese or Spanish. The 12 PDF tools (English only, F5a) come after the image pages, in the PDF category,
 // and the money calculators and the guides (English only, F4) after them, in the money category. The hubs are not
-// listed, as the image hub is not (DECISOES § F5a-home-footer-search).
+// listed, as the image hub is not (DECISOES § 160).
 import type { APIRoute } from 'astro';
 import { LANGS, routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';

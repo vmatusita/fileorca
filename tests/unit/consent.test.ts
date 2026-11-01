@@ -159,7 +159,7 @@ describe('typed events', () => {
   });
 });
 
-// F5a (decision 11, DECISOES § F5a-eventos): the events of the PDF tools are the same ones as the image tools', with the
+// F5a (decision 11, DECISOES § 169): the events of the PDF tools are the same ones as the image tools', with the
 // `tool` taken from the PDF registry; the outcome and the reason grow in closed lists, pinned here so that a new value
 // has to come with a change to this test; and no parameter carries a number, a range, a text, a password, a count of
 // pages or a file name. tests/e2e/events.spec.ts fires real runs and reads the dataLayer.

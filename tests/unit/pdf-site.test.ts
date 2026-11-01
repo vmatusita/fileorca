@@ -15,7 +15,7 @@ import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registr
 import { PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { PDF_PAGE_IDS, isPdfPage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
 
-// The PDF pages in the places that list them (F5a, DECISOES § F5a-home-footer-search): the home, the footer, the page
+// The PDF pages in the places that list them (F5a, DECISOES § 160): the home, the footer, the page
 // mold and the SEO checks. Every list is read from src/tools/pdf/registry.ts, so a tool declared there is covered the
 // day it is declared; Portuguese and Spanish have no PDF page and show none of it (DECISOES § 6).
 const O = 'https://fileorca.com';

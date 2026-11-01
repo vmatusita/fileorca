@@ -1,4 +1,4 @@
-// Exports src/engine/image/ as the standalone package fileorca-image-engine (F5a, DECISOES § F5a-motor-aberto).
+// Exports src/engine/image/ as the standalone package fileorca-image-engine (F5a, DECISOES § 165).
 //
 //   pnpm motor:exportar                 writes .cache/oss/fileorca-image-engine/
 //   pnpm motor:exportar --out <dir>     writes there instead

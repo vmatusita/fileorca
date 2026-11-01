@@ -114,7 +114,7 @@ export function realSite(dir: string): Site {
   ) as Record<Lang, string[]>;
   const pdfPaths = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
   const cards: Site['cards'] = {
-    // The home lists the five credit calculators and, from the F5a, the 12 PDF tools (DECISOES § F5a-prontidao-pdf).
+    // The home lists the five credit calculators and, from the F5a, the 12 PDF tools (DECISOES § 162).
     home: { en: [...HOME_CALC_IDS.map((id) => CALC_PAGES[id].path), ...pdfPaths] },
     [MONEY_HUB_ID]: { en: CALC_TOOL_IDS.map((id) => CALC_PAGES[id].path) },
     // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.

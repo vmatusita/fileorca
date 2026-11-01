@@ -1,4 +1,4 @@
-// The states each PDF tool page reaches in use (F5a, decision 12; DECISOES § F5a-estados-pdf), walked once per page load
+// The states each PDF tool page reaches in use (F5a, decision 12; DECISOES § 170), walked once per page load
 // and handed to the spec that looks at them: ads.spec.ts measures the distance of the AdSlots in each one, a11y.spec.ts
 // runs axe in each one. The flows are written once, here, so the two specs read the same states. Only small fixtures
 // go in (the heavy content checks are in the matrix, pdf-matrix.spec.ts) and every state is reached on one page load.

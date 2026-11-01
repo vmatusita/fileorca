@@ -9,7 +9,7 @@
 // package), and the files are named here, once, with Vite's `?url` (the file is copied unchanged and the import gives
 // its address). The worker gets the addresses by its first message; the page path sets them on the engine it loads.
 // The file stays out of the 'island' chunk (astro.config.ts), so the addresses cost the initial JS nothing.
-// The same engine is exported as an open source package (pnpm motor:exportar; DECISOES § F5a-motor-aberto).
+// The same engine is exported as an open source package (pnpm motor:exportar; DECISOES § 165).
 import { proxy, wrap, type Remote } from 'comlink';
 import avifDecoder from '@jsquash/avif/codec/dec/avif_dec.wasm?url';
 import avifEncoder from '@jsquash/avif/codec/enc/avif_enc.wasm?url';

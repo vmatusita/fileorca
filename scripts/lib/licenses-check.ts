@@ -119,7 +119,7 @@ export function checkSeparateFile(rule: SeparateFileRule, packageWasmSha256: str
   return problems;
 }
 
-// --- The libraries of the PDF tools (F5a, DECISOES § F5a-licencas-pdf) ---
+// --- The libraries of the PDF tools (F5a, DECISOES § 163) ---
 
 /** The two libraries the PDF tools bring: both must be in the bundle, or the PDF pages run on nothing. */
 export const PDF_PACKAGES: readonly string[] = ['pdfjs-dist', '@neslinesli93/qpdf-wasm'];

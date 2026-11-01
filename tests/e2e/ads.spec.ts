@@ -372,7 +372,7 @@ test('the money hub keeps its one content AdSlot under the grids of calculators,
   }
 });
 
-// F5a (prompt decision 12; DECISOES § F5a-estados-pdf): every PDF tool page, at 360x740 and 1280x800 on one load, in each
+// F5a (prompt decision 12; DECISOES § 170): every PDF tool page, at 360x740 and 1280x800 on one load, in each
 // state the page reaches (tests/e2e/lib/pdf-states.ts): at rest, while the file is read (the engine held back, so the
 // panel is the WaterLevel), with the options and the page grid open, the Merge list, the password field or the signature
 // area, and with the result. Measured on top of TARGETS: the page grid with its cells and bar, the password field with its

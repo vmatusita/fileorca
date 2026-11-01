@@ -1,4 +1,4 @@
-// The sentinels of the privacy test of the PDF tools (F5a, decision 8; DECISOES § F5a-sentinelas) and the search for
+// The sentinels of the privacy test of the PDF tools (F5a, decision 8; DECISOES § 166) and the search for
 // them. A sentinel is a value a person types or a mark inside a file that must never leave the tool: long, unique, and
 // nothing else on the site looks like it. The search is pure string work, so tests/unit/pdf-sentinels.test.ts can prove
 // that it finds what it must and says nothing otherwise, with no browser: a search that never fails proves nothing.

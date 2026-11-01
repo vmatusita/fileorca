@@ -129,7 +129,7 @@ export type PdfEngineApi = typeof api;
 // glue of qpdf) imports from it, as the bundler makes that chunk do for its CommonJS helper: every module of this file then
 // exists twice in the same worker. A second expose() would answer every call again (two runs of qpdf for one file, and a
 // second qpdf .wasm fetched and started), and Comlink keeps only the first answer (tests/e2e/launch-claims.spec.ts: Protect
-// PDF and Compress PDF offline, in WebKit; DECISOES § F5a-worker-duas-vezes). The copy that answers is the one that came first.
+// PDF and Compress PDF offline, in WebKit; DECISOES § 168). The copy that answers is the one that came first.
 const SCOPE = globalThis as unknown as Record<symbol, true | undefined>;
 const EXPOSED = Symbol.for('fileorca.pdf-engine.exposed');
 if (!SCOPE[EXPOSED]) {

@@ -185,7 +185,7 @@ test.describe('the calculator events', () => {
   });
 });
 
-// F5a (decision 11, DECISOES § F5a-eventos): the events of the PDF tools, from real runs. The tool list of the events is
+// F5a (decision 11, DECISOES § 169): the events of the PDF tools, from real runs. The tool list of the events is
 // the registry's, the outcome and the reason come from closed lists, and nothing the person typed or chose (a password,
 // a watermark text, a file name) is in any event: the sentinels below are long and unique, so any trace of them is found.
 // tests/unit/consent.test.ts proves the same lists in Node, tool by tool.

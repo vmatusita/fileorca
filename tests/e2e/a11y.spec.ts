@@ -224,7 +224,7 @@ test.describe('axe nos estados da calculadora, a 360 e 1280px, nos temas escuro 
   });
 });
 
-// F5a (prompt decision 12; DECISOES § F5a-estados-pdf): the states of the PDF pages the page-by-page pass does not reach
+// F5a (prompt decision 12; DECISOES § 170): the states of the PDF pages the page-by-page pass does not reach
 // (it reads each page as loaded, with the cookie notice open and before anything is chosen). Each PDF page is reached once
 // per browser (§ 76) and walked through its states by tests/e2e/lib/pdf-states.ts: at rest with the island hydrated, the
 // Merge list, the page grid with a selection (a page turned, moved or picked), the password field with its error (Protect:

@@ -194,7 +194,7 @@ export default function PdfPanel(props: PdfPanelData) {
       engine = null;
     }
     // A copy of the list: the person can move a row of the Merge list while the files are read (tests/e2e/pdf-privacy.spec.ts),
-    // and walking the live list would skip the file that took the place of the one being read (DECISOES § F5a-leitura).
+    // and walking the live list would skip the file that took the place of the one being read (DECISOES § 168).
     for (const item of [...m.items]) {
       if (m.runId !== id) return;
       if (item.status !== 'reading' || item.removed) continue;
