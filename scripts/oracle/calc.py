@@ -102,13 +102,24 @@ def share(amount: int, rate: int) -> int:
 
 
 def annuity_payment(principal: int, rate: int, n: int, ppy: int = 12) -> int:
+    """P = L*i*(1+i)^n / ((1+i)^n - 1) with i = rate/(ONE*ppy), written over whole numbers so that the
+    only rounding is the last division: a repeating i (6.5%/12) would otherwise lose an exact half cent."""
     if principal == 0:
         return 0
     if rate == 0:
         return half_up(D(principal) / D(n))
-    i = D(rate) / D(ONE * ppy)
-    f = (1 + i) ** n
-    return half_up(D(principal) * i * f / (f - 1))
+    d = ONE * ppy
+    grown = (d + rate) ** n
+    return half_up(D(principal * rate * grown) / D(d * (grown - d**n)))
+
+
+def present_value(pay: int, rate: int, n: int, ppy: int = 12) -> int:
+    """The largest loan `pay` amortizes: L = P*(1 - (1+i)^-n)/i over whole numbers, rounded down."""
+    if rate == 0:
+        return pay * n
+    d = ONE * ppy
+    grown = (d + rate) ** n
+    return floor_int(D(pay * d * (grown - d**n)) / D(rate * grown))
 
 
 def amortize(principal: int, rate: int, n, pay: int, ppy: int = 12, extra=None, limit: int | None = None):
@@ -298,11 +309,7 @@ def home_affordability(inp: dict, full: bool = False) -> dict:
         return {'frontCap': front, 'backCap': back, 'housingCap': housing, 'limit': limit, 'taxMonth': tax,
                 'insuranceMonth': ins, 'noRoom': True, 'maxPI': 0, 'maxLoan': 0, 'maxPrice': 0, 'payment': 0,
                 'monthlyTotal': 0}
-    if rate == 0:
-        loan = max_pi * n
-    else:
-        i = D(rate) / D(ONE * 12)
-        loan = floor_int(D(max_pi) * (1 - (1 + i) ** -n) / i)
+    loan = present_value(max_pi, rate, n)
     ref = float(npf.pv(rate / (ONE * 12), n, -max_pi))
     ensure(abs(loan - ref) <= 1 + 1e-9 * ref, f'pv {loan} vs numpy-financial {ref}')
     pay = annuity_payment(loan, rate, n)

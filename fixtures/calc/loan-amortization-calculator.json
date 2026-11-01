@@ -2,7 +2,7 @@
   "calculator": "loan-amortization-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "14cf4c1d0468a143d93e06a6607c26310c6d112ac6ebcd4325e3b1c20da545c9",
+    "sha256": "ad5f93f04a924f3971447d389d408b31acb287cbaa1fe2613bdeb4c42e220bc1",
     "python": "3.13.18",
     "numpy": "2.5.4",
     "numpyFinancial": "1.1.0",
