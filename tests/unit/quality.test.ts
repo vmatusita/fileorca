@@ -25,11 +25,12 @@ describe('licenças', () => {
 
   it('splits what reaches the browser from build tools', () => {
     // The two fonts (OFL-1.1) are a browser dependency of the F1b: their .woff2 files ship with the site.
-    // The F2 adds the libraries of the image tools (jSquash codecs, libheif-js, @cantoo/pdf-lib, fflate).
+    // The F2 adds the libraries of the image tools (jSquash codecs, libheif-js, @cantoo/pdf-lib, fflate). The F5a adds
+    // qpdf and PDF.js, the two libraries of the PDF tools (DECISOES § 143; a list that grows, as in § 52).
     expect(browserPackages().map((pkg) => pkg.name)).toEqual([
       '@astrojs/preact', '@cantoo/pdf-lib', '@fontsource-variable/figtree', '@fontsource-variable/fredoka',
-      '@jsquash/avif', '@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/resize', '@jsquash/webp',
-      'astro', 'comlink', 'fflate', 'libheif-js', 'preact', 'tailwindcss',
+      '@jsquash/avif', '@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/resize', '@jsquash/webp', '@neslinesli93/qpdf-wasm',
+      'astro', 'comlink', 'fflate', 'libheif-js', 'pdfjs-dist', 'preact', 'tailwindcss',
     ]);
     expect(buildPackages().map((pkg) => pkg.name)).toContain('satori');
     expect(buildPackages().map((pkg) => pkg.name)).not.toContain('preact');

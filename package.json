@@ -42,10 +42,12 @@
     "@jsquash/oxipng": "^2.3.0",
     "@jsquash/resize": "^2.1.1",
     "@jsquash/webp": "^1.5.0",
+    "@neslinesli93/qpdf-wasm": "^0.3.0",
     "astro": "^7.4.4",
     "comlink": "^4.4.2",
     "fflate": "^0.8.3",
     "libheif-js": "^1.23.5",
+    "pdfjs-dist": "^6.4.299",
     "preact": "^11.1.0",
     "tailwindcss": "^4.3.3"
   },

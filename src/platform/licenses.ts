@@ -71,6 +71,19 @@ const CODEC_LICENSE_FILES: Record<string, readonly { label: string; file: string
   '@jsquash/resize': [{ label: 'resize (Rust crate)', file: 'lib/resize/LICENSE.codec.md' }],
   // libheif's own license file: LGPL-3.0, the GPL-3.0 text it refers to, and the MIT license of its sample apps.
   'libheif-js': [{ label: 'libheif and libde265', file: 'libheif-wasm/LICENSE' }],
+  // What the site copies from pdfjs-dist besides its JavaScript (F5a, DECISOES § 144): the three .wasm decoders with
+  // the license of the library compiled in and of PDF.js's own glue, the CMaps and the Foxit standard fonts. The
+  // Liberation fonts (GPL-2.0 with a font exception) and the CC0 .icc are not copied, so their texts are not here.
+  'pdfjs-dist': [
+    { label: 'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm', file: 'wasm/LICENSE_JBIG2' },
+    { label: 'PDF.js glue of jbig2.wasm', file: 'wasm/LICENSE_PDFJS_JBIG2' },
+    { label: 'OpenJPEG (JPEG 2000), in openjpeg.wasm', file: 'wasm/LICENSE_OPENJPEG' },
+    { label: 'PDF.js glue of openjpeg.wasm', file: 'wasm/LICENSE_PDFJS_OPENJPEG' },
+    { label: 'qcms (colour management), in qcms_bg.wasm', file: 'wasm/LICENSE_QCMS' },
+    { label: 'PDF.js glue of qcms_bg.wasm', file: 'wasm/LICENSE_PDFJS_QCMS' },
+    { label: 'Adobe CMaps', file: 'cmaps/LICENSE' },
+    { label: 'Foxit standard fonts (PDFium)', file: 'standard_fonts/LICENSE_FOXIT' },
+  ],
 };
 
 /** Folder of the license texts copied from upstream repositories, relative to the project root. */
@@ -87,6 +100,23 @@ export const UPSTREAM_TEXTS: Record<string, readonly { label: string; file: stri
     { label: 'libaom 3.7.0', file: 'libaom-3.7.0-LICENSE.txt', source: 'https://aomedia.googlesource.com/aom/+/refs/tags/v3.7.0/LICENSE' },
     { label: 'libaom 3.7.0, patent license', file: 'libaom-3.7.0-PATENTS.txt', source: 'https://aomedia.googlesource.com/aom/+/refs/tags/v3.7.0/PATENTS' },
   ],
+  // qpdf 12.2.0 and what its .wasm is built with (the Dockerfile of neslinesli93/qpdf-wasm 0.3.0 pins zlib and the
+  // ImageMagick fork of libjpeg-turbo 2.1.1 by commit; DECISOES § 143). The npm package ships none of these texts.
+  '@neslinesli93/qpdf-wasm': [
+    { label: 'qpdf 12.2.0', file: 'qpdf-12.2.0-LICENSE.txt', source: 'https://github.com/qpdf/qpdf/blob/v12.2.0/LICENSE.txt' },
+    { label: 'qpdf 12.2.0, notices', file: 'qpdf-12.2.0-NOTICE.md', source: 'https://github.com/qpdf/qpdf/blob/v12.2.0/NOTICE.md' },
+    { label: 'zlib', file: 'zlib-21767c6-README.txt', source: 'https://github.com/madler/zlib/blob/21767c654d31d2dccdde4330529775c6c5fd5389/README' },
+    { label: 'libjpeg-turbo 2.1.1', file: 'libjpeg-turbo-7aa2a89-LICENSE.md', source: 'https://github.com/ImageMagick/jpeg-turbo/blob/7aa2a898c564041a24b09d0a6e780aaa632d08d3/LICENSE.md' },
+    { label: 'libjpeg-turbo 2.1.1, the IJG license', file: 'libjpeg-turbo-7aa2a89-README.ijg', source: 'https://github.com/ImageMagick/jpeg-turbo/blob/7aa2a898c564041a24b09d0a6e780aaa632d08d3/README.ijg' },
+  ],
+};
+
+/**
+ * The package's own license text when the package does not ship one: @neslinesli93/qpdf-wasm declares ISC in its
+ * package.json and keeps the text only in its repository (copied, read-only, from the master branch on 1/nov/2026).
+ */
+export const UPSTREAM_OWN_TEXTS: Record<string, { file: string; source: string }> = {
+  '@neslinesli93/qpdf-wasm': { file: 'qpdf-wasm-ISC-LICENSE.txt', source: 'https://github.com/neslinesli93/qpdf-wasm/blob/master/LICENSE' },
 };
 
 /**
@@ -167,8 +197,8 @@ export function findPackageDir(name: string, fromDir: string): string | null {
   }
 }
 
-function packageTexts(name: string, dir: string, root: string, own: string | null): LicenseText[] {
-  const texts: LicenseText[] = own ? [{ label: null, text: own, source: null }] : [];
+function packageTexts(name: string, dir: string, root: string, own: string | null, ownSource: string | null): LicenseText[] {
+  const texts: LicenseText[] = own ? [{ label: null, text: own, source: ownSource }] : [];
   for (const extra of CODEC_LICENSE_FILES[name] ?? []) {
     const from = extra.package ? findPackageDir(extra.package, dir) : dir;
     const path = from ? join(from, extra.file) : null;
@@ -185,14 +215,16 @@ function packageTexts(name: string, dir: string, root: string, own: string | nul
 export function readPackageAt(name: string, dir: string, root = process.cwd(), via: string | null = null): PackageLicense {
   const manifest = readJson(join(dir, 'package.json'));
   const license = typeof manifest.license === 'string' ? manifest.license : manifest.license?.type ?? 'UNKNOWN';
-  const own = existsSync(dir) ? licenseText(dir) : null;
+  const upstreamOwn = UPSTREAM_OWN_TEXTS[name];
+  const shipped = existsSync(dir) ? licenseText(dir) : null;
+  const own = shipped ?? (upstreamOwn ? readFileSync(join(root, UPSTREAM_TEXT_DIR, upstreamOwn.file), 'utf8').trim() : null);
   return {
     name,
     version: manifest.version,
     license,
     repository: repositoryUrl(manifest.repository),
     text: own,
-    texts: packageTexts(name, dir, root, own),
+    texts: packageTexts(name, dir, root, own, shipped ? null : (upstreamOwn?.source ?? null)),
     font: name.startsWith('@fontsource'),
     via,
   };

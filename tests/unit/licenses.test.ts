@@ -17,6 +17,7 @@ import {
   BUNDLED_TRANSITIVE,
   LIBDE265_VERSION,
   SEPARATE_FILE_RULES,
+  UPSTREAM_OWN_TEXTS,
   UPSTREAM_TEXT_DIR,
   UPSTREAM_TEXTS,
   browserPackages,
@@ -273,6 +274,12 @@ describe('os pacotes e os textos de licença', () => {
       'libavif-1.0.1-LICENSE.txt': '10952217a6d404de8bf8a997fbea9b88f682df1fe98cb9b9f467ade641525639',
       'libaom-3.7.0-LICENSE.txt': '4764a286d8b2faeaf42f4418e7d7a28d58fc8fd4d00a3d0a7f44b0a4099de7f2',
       'libaom-3.7.0-PATENTS.txt': '661fb8e504744e95587b556b94a58343448300606a41bea8c7a9b97125696e61',
+      // F5a: qpdf 12.2.0 and the zlib and libjpeg-turbo commits its .wasm is built from (DECISOES § 143).
+      'qpdf-12.2.0-LICENSE.txt': 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30',
+      'qpdf-12.2.0-NOTICE.md': 'd590610848429da713cef608a0183dbf3c7726d738c3be6fa5b36c507444b645',
+      'zlib-21767c6-README.txt': 'fc2c3368901700f0acdeb1d8afeaca5923296768ec6824ecdf627aac396001fd',
+      'libjpeg-turbo-7aa2a89-LICENSE.md': '7d8683a7f048e715e08b4cada8b7f0d9a6ab8afad88ed09c1143ef764ecbc0f2',
+      'libjpeg-turbo-7aa2a89-README.ijg': '4b7b9f8c03bb8d60270dfd12684e70ab21e4abfd27e73905cd1a7c4cae6f5cdb',
     };
     const entries = Object.values(UPSTREAM_TEXTS).flat();
     expect(entries.map((entry) => entry.file).sort()).toEqual(Object.keys(hashes).sort());
@@ -284,6 +291,36 @@ describe('os pacotes e os textos de licença', () => {
     expect(texts.find((entry) => entry.label === 'libavif 1.0.1')?.text).toContain('Copyright 2019 Joe Drago');
     expect(texts.find((entry) => entry.label === 'libaom 3.7.0')?.text).toContain('Alliance for Open Media');
     expect(texts.find((entry) => entry.label === 'libaom 3.7.0, patent license')?.source).toContain('PATENTS');
+  });
+
+  it('gives qpdf-wasm the ISC text of its repository and every library inside its .wasm, and PDF.js the decoders, CMaps and fonts it ships', () => {
+    // The package declares ISC but ships no text: the copy from its repository is its own text (DECISOES § 143).
+    expect(createHash('sha256').update(readFileSync(join(UPSTREAM_TEXT_DIR, UPSTREAM_OWN_TEXTS['@neslinesli93/qpdf-wasm']?.file ?? ''))).digest('hex')).toBe(
+      '68f98c117f69f4e2838603ebef2b05187a6fd2a1aefe0d4d4806a8fb5d3407b7',
+    );
+    const byName = new Map(listedPackages().map((pkg) => [pkg.name, pkg]));
+    const qpdf = byName.get('@neslinesli93/qpdf-wasm');
+    expect(qpdf?.license).toBe('ISC');
+    expect(qpdf?.text).toContain('ISC License');
+    expect(qpdf?.texts[0]?.source).toBe('https://github.com/neslinesli93/qpdf-wasm/blob/master/LICENSE');
+    expect(qpdf?.texts.map((entry) => entry.label)).toEqual([null, 'qpdf 12.2.0', 'qpdf 12.2.0, notices', 'zlib', 'libjpeg-turbo 2.1.1', 'libjpeg-turbo 2.1.1, the IJG license']);
+    expect(qpdf?.texts.find((entry) => entry.label === 'qpdf 12.2.0')?.text).toContain('Apache License');
+    expect(qpdf?.texts.find((entry) => entry.label === 'zlib')?.text).toContain('Jean-loup Gailly and Mark Adler');
+    const pdfjs = byName.get('pdfjs-dist');
+    expect(pdfjs?.license).toBe('Apache-2.0');
+    expect(pdfjs?.texts.map((entry) => entry.label)).toEqual([
+      null,
+      'JBIG2 and CCITT decoder (PDFium), in jbig2.wasm',
+      'PDF.js glue of jbig2.wasm',
+      'OpenJPEG (JPEG 2000), in openjpeg.wasm',
+      'PDF.js glue of openjpeg.wasm',
+      'qcms (colour management), in qcms_bg.wasm',
+      'PDF.js glue of qcms_bg.wasm',
+      'Adobe CMaps',
+      'Foxit standard fonts (PDFium)',
+    ]);
+    // Nothing GPL among the texts: the Liberation fonts stay out of the dist (DECISOES § 144).
+    expect(pdfjs?.texts.some((entry) => /GNU GENERAL PUBLIC LICENSE/.test(entry.text))).toBe(false);
   });
 
   it('points to the source of the libheif version in use', () => {
