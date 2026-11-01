@@ -87,6 +87,40 @@ describe('the calculator definitions', () => {
       expect(CALC_PAGES[id].file, id).not.toMatch(/\d{3,}/);
     }
   });
+
+  // Review F4 (COR-3 and ANU-2): every number field at the ends of its range, one at a time, and the savings goal
+  // that outgrew 10^15 cents. Whatever the view says (a result or a problem) and whatever goes to the PDF summary
+  // has its amounts filled in and no number in exponent notation.
+  it('render the ends of every range and the error states with every amount filled in', () => {
+    const withProblem = new Set<string>();
+    const check = (id: string, values: Values) => {
+      const def = DEFS[id as keyof typeof DEFS];
+      if (Object.keys(problems(def.fields, values)).length > 0) return;
+      const view = viewOf(def, panelData(id as keyof typeof DEFS, 'en'), values);
+      if (view.problem) withProblem.add(id);
+      const said = [
+        view.hero.value,
+        view.problem ?? '',
+        ...view.hero.sentence.map((part) => (typeof part === 'string' ? part : part.b)),
+        ...view.summary.flat(),
+        view.split ? `${view.split.a.cents} ${view.split.b.cents}` : '',
+      ].join(' | ');
+      expect(said, `${id} ${JSON.stringify(values)}`).not.toMatch(/\{\w+\}|undefined|NaN|e\+|Infinity/);
+      if (view.split) for (const cents of [view.split.a.cents, view.split.b.cents]) expect(Number.isSafeInteger(cents), id).toBe(true);
+    };
+    for (const id of CALC_PAGE_IDS) {
+      const def = DEFS[id];
+      for (const spec of def.fields) {
+        if (spec.kind !== 'money' && spec.kind !== 'rate' && spec.kind !== 'int') continue;
+        for (const value of [spec.min, spec.max]) check(id, { ...def.initial, [spec.key]: value });
+      }
+    }
+    check('savings-goal-calculator', { g: 10_000_000_000, s: 10_000_000_000, r: 400_000, md: 'months', m: 1200, dep: 0 });
+    check('savings-goal-calculator', { g: 2_000_000, s: 0, r: 0, md: 'deposit', m: 36, dep: 0 });
+    check('credit-card-payoff-calculator', { b: 650_000, r: 229_900, md: 'payment', pay: 1_000, m: 24 });
+    check('compound-interest-calculator', { i: 1_000_000_000, m: 100_000_000, r: 400_000, y: 80, c: '365', tm: 'begin' });
+    expect([...withProblem].sort()).toEqual(expect.arrayContaining(['compound-interest-calculator', 'credit-card-payoff-calculator', 'savings-goal-calculator']));
+  });
 });
 
 describe('the scenario link', () => {

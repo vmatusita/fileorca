@@ -110,12 +110,14 @@ export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
     const l = lang as NumberLang;
     const v = t.view;
     if ('error' in r) {
+      // The summary (and so the PDF) carries the same sentence as the hero, with its amount filled in.
+      const problem = r.error === 'too-large' ? text(v, 'tooLarge') : fmt(text(v, 'tooLong'), { deposit: cash(num(values, 'dep'), l) });
       return {
         hero: { label: text(v, 'labelTime'), value: '-', sentence: [] },
-        problem: fmt(text(v, 'tooLong'), { deposit: cash(num(values, 'dep'), l) }),
+        problem,
         placard: { n: '-', l: text(v, 'placardTime') },
         table: () => ({ caption: text(v, 'caption'), head: [text(v, 'month')], rows: [] }),
-        summary: [[text(v, 'labelTime'), text(v, 'tooLong')]],
+        summary: [[text(v, 'labelTime'), problem]],
         premises: t.premises,
       };
     }

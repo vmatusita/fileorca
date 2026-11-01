@@ -87,7 +87,7 @@ export type SavingsRow = [month: number, deposit: number, interest: number, bala
 
 export type SavingsResult =
   | { deposit: number; months: number; final: number; deposited: number; interest: number; yearEnd: number[]; rows: SavingsRow[] }
-  | { error: 'too-long' };
+  | { error: 'too-long' | 'too-large' };
 
 function savingsRun(current: number, rate: number, deposit: number, months: number): SavingsRow[] {
   const rows: SavingsRow[] = [];
@@ -138,6 +138,9 @@ export function savingsGoal(input: SavingsInput): SavingsResult {
       rows.push([rows.length + 1, deposit, it, balance]);
     }
   }
+  // The balance only grows: past MAX_CENTS it is "too-large", as in compound interest (a goal already met, left
+  // for decades at a high rate, outgrew what a number holds exactly).
+  if ((rows.at(-1)?.[3] ?? 0) > MAX_CENTS) return { error: 'too-large' };
   const final = rows.at(-1)?.[3] ?? current;
   const deposited = deposit * rows.length;
   const yearEnd: number[] = [];

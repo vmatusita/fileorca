@@ -26,6 +26,7 @@ export default {
       sentenceDeposit: 'Saving {deposit} a month at {rate}, you reach {goal} in {time}, with {interest} of interest.',
       alreadyThere: 'You already have enough to reach {goal} in that time, without new deposits.',
       tooLong: 'At {deposit} a month the goal would take more than 100 years. Try a larger deposit.',
+      tooLarge: 'That balance is too large to show. Try a smaller amount, rate or number of months.',
       yours: 'Your money',
       interest: 'Interest',
       final: 'Balance at the end',
