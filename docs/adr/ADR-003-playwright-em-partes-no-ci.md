@@ -61,3 +61,16 @@ Na F3, a parte 2 do WebKit chegou a 644,4 s, perto do alvo de 700 s (DECISOES §
   | Depois: a mesma run, tentativa 2 | 176,8 s | 395,7 s | 296,2 s | 200,9 s | 583,9 s |
 
 - **Leitura:** a divisão é por contagem de testes (90, 89 e 89), não por tempo. A parte 3 fica com a matriz de fixtures e segue a mais lenta, com 116 a 133 s de folga para o alvo.
+
+## Adendo (F5a, 01/nov/2026): Chromium em duas partes, WebKit em cinco, e o diagnóstico do ENOSPC
+
+A F5a soma as 12 ferramentas de PDF, com matriz, privacidade e estados novos no `a11y`, no `ads` e no `budgets`. A ficha da run (decisão 14) pede mais partes no CI, cada uma com alvo de 700 s e limite de 900 s, mexendo só no `ci.yml`.
+
+- **O que mudou:**
+  - a matriz do job `playwright` passa a ter sete partes: `chromium 1 de 2` e `chromium 2 de 2` (`--playwright=chromium --shard=i/2`), e `webkit 1 de 5` a `webkit 5 de 5` (`--playwright=webkit --shard=i/5`). Com o job `verificar`, o CI tem oito partes, e o `merge` espera todas;
+  - cada parte do Playwright desliga os core dumps. O `core_pattern` do runner manda o dump ao `systemd-coredump`, que não respeita só o `ulimit -c 0`. Por isso o passo "Core dumps off" troca o padrão por `|/bin/false` (com `sudo -n`), e o passo do `verificar` roda com `ulimit -c 0`;
+  - um passo final com `if: always()` imprime `df -h / /tmp`, o `core_pattern`, o `coredumpctl list`, o journal do `systemd-coredump` e as linhas do kernel sobre OOM, segfault e falta de espaço. Cada comando termina em `|| true`, sem `continue-on-error`;
+  - o `scripts/lib/disco.ts` passa a medir o `/` a cada 2 s e imprime uma linha só quando o espaço livre mudou 256 MB. No fim, resume o ponto mais baixo e a maior queda, e a busca funda ganha o journal dos core dumps e os processos que mais gravaram (DECISOES § 154).
+- **O que não mudou:** o `scripts/verificar.ts`, nenhum teste, portão, limiar, timeout, `retries` ou número de workers, o nome do job `verificar`, o `merge` e o `pos-deploy.yml`.
+- **Divisão:** o `--shard` segue a contagem de testes na ordem dos arquivos. Na primeira divisão, o `design.spec.ts` ficou entre as partes 3 e 4 do WebKit, e a matriz de imagens na parte 4. Os specs de PDF (`pdf-*`) caem na última parte de cada navegador.
+- **Tempos:** a tabela com o total do `verificar` de cada parte entra no relatório da F5a (`docs/relatorios/fase-05a.md`), medida nas execuções do CI da PR.
