@@ -31,13 +31,13 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
       ],
       [
         'Strong',
-        'Every page becomes a JPG picture at 100 ppi. The text can no longer be selected or searched, and form fields and links are lost. Oli says so before you choose it.',
+        'Every page becomes a JPG picture at 100 ppi. The text can no longer be selected or searched, and form fields, links and bookmarks are lost. Oli says so before you choose it.',
       ],
       ['Already optimized', 'If the result would not be smaller, you get your original back, byte for byte. Oli never gives you a bigger file.'],
       ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP.'],
       [
         'Details kept',
-        'In Lossless and Recommended the text, forms and links stay as they are, and so do the info fields and XMP metadata of your PDF. Oli adds no date, no Producer and nothing from your device.',
+        'In Lossless and Recommended the text, forms, links and bookmarks stay as they are, and so do the info fields and XMP metadata of your PDF. Oli adds no date, no Producer and nothing from your device.',
       ],
       [
         'Passwords and restrictions',
@@ -61,7 +61,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
     },
     {
       q: 'Can I still select the text and use the form after compressing?',
-      a: 'Yes at Lossless and Recommended. At Strong, no: every page becomes a picture, so the text cannot be selected or searched, and form fields and links are lost. Oli warns you before you choose it. If you need the text, stay on Recommended.',
+      a: 'Yes at Lossless and Recommended. At Strong, no: every page becomes a picture, so the text cannot be selected or searched, and form fields, links and bookmarks are lost. Oli warns you before you choose it. If you need the text, stay on Recommended.',
     },
     {
       q: 'Why did my PDF come back the same size?',
@@ -89,7 +89,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
       recommendedHelp: 'smaller photos',
       strong: 'Strong',
       strongHelp: 'smallest file',
-      strongWarning: 'Strong turns every page into a picture. The text can no longer be selected or searched, and form fields and links are lost.',
+      strongWarning: 'Strong turns every page into a picture. The text can no longer be selected or searched, and form fields, links and bookmarks are lost.',
     },
   },
 };

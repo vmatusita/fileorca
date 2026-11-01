@@ -5,26 +5,37 @@ import { dirname, join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   CALC_BLOCKS,
+  CLAIMS,
   CONTENT_BLOCKS,
+  MAX_RELATED_CARDS,
+  MIN_ANSWER_CHARS,
+  PDF_MODES,
+  PDF_SECRETS,
   PLACEHOLDERS,
   calcComparisonPaths,
   checkCalcPage,
+  checkPdfHub,
+  checkPdfPage,
   checkPresetPage,
   checkSite,
   checkToolPage,
   comparisonPaths,
+  findClaims,
   findPlaceholders,
   isCalcPage,
   isImagePage,
   isNotFoundPath,
+  isPdfPage,
   normalizeText,
   pathOfFile,
   type ContentBlock,
 } from '../../scripts/lib/conteudo.ts';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
+import { ROUTES, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
 const faq = (count: number, tag = 'Q'): string =>
@@ -265,6 +276,274 @@ describe('portão de conteúdo: blocos das calculadoras (F4)', () => {
   });
 });
 
+// ---- F5a: the PDF tool pages and the PDF hub (prompt F5a, decision 9) -------------------------------------------------
+
+const ANSWER = 'This answer says what the tool does in a few plain words, so a visitor can go on.';
+const pdfFaq = (count: number): string =>
+  `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>Question ${i + 1} about the tool?</summary><div><p>${ANSWER} (${i + 1})</p></div></details>`).join('')}</div>`;
+
+/** The mode rows a fake page of this tool carries: one row per mode, headed by the mode. */
+const modeRows = (id: PdfToolId): [string, string][] => (PDF_MODES[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
+
+const BASE_ROWS: [string, string][] = [
+  ['Files it takes', 'PDF files. Oli checks what is inside the file, not its name.'],
+  ['How many files', 'No limit on the number of files.'],
+  ['Form fields', 'Fields on the pages you keep stay.'],
+  ['Bookmarks and links', 'Bookmarks and the links between kept pages stay.'],
+];
+const tableOf = (rows: [string, string][]): string =>
+  `<section data-content="specs"><table><thead><tr><th scope="col">Detail</th><th scope="col">What happens</th></tr></thead><tbody>${rows.map(([head, text]) => `<tr><th scope="row">${head}</th><td>${text}</td></tr>`).join('')}</tbody></table></section>`;
+
+interface FakePdf {
+  id?: PdfToolId;
+  top?: string;
+  head?: string;
+  how?: string;
+  rows?: [string, string][];
+  faq?: string;
+  privacy?: string;
+  related?: string;
+  extra?: string;
+}
+
+/** A PDF tool page that passes every rule; each test changes one thing. */
+function pdfPage(fake: FakePdf = {}): string {
+  const id = fake.id ?? 'merge-pdf';
+  const name = enCommon.pdf[id].name;
+  const top = fake.top ?? `<div class="fo-top"><h1>${name}</h1><span class="fo-seal"><svg></svg>${enCommon.seal}</span></div>`;
+  const head = fake.head ?? `<title>${name}: do the job in your browser | FileOrca</title><meta name="description" content="${name} in your browser, with nothing uploaded.">`;
+  const how = fake.how ?? '<section data-content="how"><ol><li>Drop the PDF</li><li>Pick an option</li><li>Download the result</li></ol></section>';
+  const specs = tableOf(fake.rows ?? [...BASE_ROWS, ...modeRows(id)]);
+  const faq = `<section data-content="faq">${fake.faq ?? pdfFaq(4)}</section>`;
+  const secret = PDF_SECRETS[id];
+  const privacyText = `Your PDF is handled on your device, in your browser, and is never sent to a server.${secret ? ` Your ${secret.source.replace(/\\b/g, '')} is not kept.` : ''}`;
+  const privacy = fake.privacy ?? `<section data-content="privacy"><p>${privacyText}</p></section>`;
+  const related = fake.related ?? `<section data-content="related"><ul>${PDF_PAGES[id].related.slice(0, 3).map((target) => `<li><a class="fo-tool" href="/${target}/">${target}</a></li>`).join('')}</ul></section>`;
+  return `<!doctype html><html><head>${head}</head><body><main>${top}${how}${specs}${faq}${privacy}${related}${fake.extra ?? ''}</main></body></html>`;
+}
+
+const wantOf = (id: PdfToolId) => ({ id, name: enCommon.pdf[id].name, seal: enCommon.seal });
+const problemsOf = (html: string, id: PdfToolId = 'merge-pdf'): string => checkPdfPage(html, wantOf(id)).join('\n');
+
+describe('portão de conteúdo: as páginas de PDF (F5a)', () => {
+  it('reads the 12 tools from the PDF registry and tells them from every other route', () => {
+    expect(PDF_TOOL_IDS).toHaveLength(12);
+    for (const id of PDF_TOOL_IDS) expect(isPdfPage(id), id).toBe(true);
+    for (const id of [PDF_HUB_ID, 'home', 'image-to-pdf', 'compress-image', 'privacy', 'constructor', 'toString']) expect(isPdfPage(id), id).toBe(false);
+    // Every tool of the registry is a page of the route map, in English only.
+    for (const id of PDF_TOOL_IDS) {
+      const route = ROUTES.find((candidate) => candidate.id === id);
+      expect(route, id).toBeDefined();
+      expect(route ? languagesOf(route) : [], id).toEqual(['en']);
+      expect(route?.paths.en, id).toBe(PDF_PAGES[id].path);
+    }
+    // The mode and secret tables name only tools of the registry and only rows of some tool.
+    for (const id of [...Object.keys(PDF_MODES), ...Object.keys(PDF_SECRETS)]) expect(isPdfPage(id), id).toBe(true);
+  });
+
+  it('accepts a complete page for each of the 12 tools, with the mode rows and the secret word its tool needs', () => {
+    for (const id of PDF_TOOL_IDS) expect(checkPdfPage(pdfPage({ id }), wantOf(id)), id).toEqual([]);
+  });
+
+  it('keeps the rules of the five blocks (rule 1 runs first)', () => {
+    for (const name of CONTENT_BLOCKS) {
+      expect(problemsOf(pdfPage().replace(`data-content="${name}"`, 'data-x="y"')), name).toMatch(new RegExp(`sem o bloco ${name}`));
+    }
+    expect(problemsOf(pdfPage({ how: '<section data-content="how"><ol><li>Drop</li><li>Download</li></ol></section>' }))).toMatch(/how tem 2 passo/);
+  });
+
+  it('H1: needs one, and it starts with the tool name', () => {
+    const seal = `<span class="fo-seal">${enCommon.seal}</span>`;
+    expect(problemsOf(pdfPage({ top: `<div class="fo-top">${seal}</div>` }))).toMatch(/0 H1, pede 1/);
+    expect(problemsOf(pdfPage({ top: `<div class="fo-top"><h1>Merge PDF</h1><h1>Again</h1>${seal}</div>` }))).toMatch(/2 H1, pede 1/);
+    expect(problemsOf(pdfPage({ top: `<div class="fo-top"><h1>Combine files</h1>${seal}</div>` }))).toMatch(/o H1 "combine files" não começa pelo nome da ferramenta \("Merge PDF"\)/);
+    expect(checkPdfPage(pdfPage({ top: `<div class="fo-top"><h1>Merge PDF files</h1>${seal}</div>` }), wantOf('merge-pdf'))).toEqual([]);
+  });
+
+  it('PrivacySeal: needs the fixed text next to the H1', () => {
+    expect(problemsOf(pdfPage({ top: '<div class="fo-top"><h1>Merge PDF</h1></div>' }))).toMatch(/sem o PrivacySeal \(\.fo-seal\) junto do H1/);
+    expect(problemsOf(pdfPage({ top: `<div><h1>Merge PDF</h1></div><span class="fo-seal">${enCommon.seal}</span>` }))).toMatch(/sem o PrivacySeal/);
+    expect(problemsOf(pdfPage({ top: '<div class="fo-top"><h1>Merge PDF</h1><span class="fo-seal">Private</span></div>' }))).toMatch(/o PrivacySeal diz "private", o texto fixo é "Your files never leave your device"/);
+  });
+
+  it('title and description: the title starts with the tool name and the page has a description', () => {
+    expect(problemsOf(pdfPage({ head: '<title>Combine PDF files | FileOrca</title><meta name="description" content="x">' }))).toMatch(/o título "combine pdf files \| fileorca" não começa pelo nome da ferramenta/);
+    expect(problemsOf(pdfPage({ head: '<title>Merge PDF: join files | FileOrca</title>' }))).toMatch(/sem meta description/);
+    expect(problemsOf(pdfPage({ head: '<title>MERGE   pdf: join files</title><meta name="description" content="x">' }))).toBe('');
+  });
+
+  it('specs: say what the tool takes', () => {
+    const rows = BASE_ROWS.filter(([head]) => head !== 'Files it takes');
+    expect(problemsOf(pdfPage({ rows }))).toMatch(/não diz o que a ferramenta aceita/);
+  });
+
+  it('specs: state a limit', () => {
+    const rows: [string, string][] = BASE_ROWS.map(([head, text]) => (head === 'How many files' ? [head, 'Oli counts the files.'] : [head, text]));
+    expect(problemsOf(pdfPage({ rows }))).toMatch(/não diz um limite/);
+    for (const limit of ['One PDF at a time.', 'It must have 4 to 100 characters.', 'A page over 16.7 megapixels is scaled down.', 'Any whole number from 1 to 9999.']) {
+      const ok: [string, string][] = BASE_ROWS.map(([head, text]) => (head === 'How many files' ? [head, limit] : [head, text]));
+      expect(problemsOf(pdfPage({ rows: ok })), limit).toBe('');
+    }
+  });
+
+  it('specs: say what stays, form, bookmarks and links, each with its word', () => {
+    // The header counts as part of the row: "Form fields | Kept" says it, so the row is replaced whole.
+    const swap = (head: string, newHead: string, text: string): [string, string][] => BASE_ROWS.map(([h, t]) => (h === head ? [newHead, text] : [h, t]));
+    const noForm = BASE_ROWS.filter(([head]) => head !== 'Form fields');
+    expect(problemsOf(pdfPage({ rows: noForm }))).toMatch(/não diz o que acontece com formulário/);
+    const noBookmarks = swap('Bookmarks and links', 'Links', 'The links between kept pages stay.');
+    expect(problemsOf(pdfPage({ rows: noBookmarks }))).toMatch(/não diz o que acontece com marcadores/);
+    expect(problemsOf(pdfPage({ rows: noBookmarks }))).not.toMatch(/links|formulário/);
+    const noLinks = swap('Bookmarks and links', 'Bookmarks', 'Bookmarks that point to kept pages stay.');
+    expect(problemsOf(pdfPage({ rows: noLinks }))).toMatch(/não diz o que acontece com links/);
+    expect(problemsOf(pdfPage({ rows: noLinks }))).not.toMatch(/marcadores|formulário/);
+  });
+
+  it('specs: the tool that makes images is not asked what stays in a PDF', () => {
+    const rows = BASE_ROWS.filter(([head]) => head === 'Files it takes' || head === 'How many files');
+    expect(checkPdfPage(pdfPage({ id: 'pdf-to-jpg', rows: [...rows, ...modeRows('pdf-to-jpg')] }), wantOf('pdf-to-jpg'))).toEqual([]);
+    expect(checkPdfPage(pdfPage({ id: 'merge-pdf', rows }), wantOf('merge-pdf')).join()).toMatch(/formulário/);
+  });
+
+  it('specs: each mode of a tool has a row of its own', () => {
+    for (const id of Object.keys(PDF_MODES) as PdfToolId[]) {
+      for (const { mode } of PDF_MODES[id] ?? []) {
+        const rows = [...BASE_ROWS, ...modeRows(id).filter(([head]) => head !== mode)];
+        expect(problemsOf(pdfPage({ id, rows }), id), `${id}: ${mode}`).toContain(`não tem uma linha para o modo "${mode}"`);
+      }
+    }
+    // The three Compress modes are the ones of the spec, and a tool without modes is never asked for one.
+    expect((PDF_MODES['compress-pdf'] ?? []).map(({ mode }) => mode)).toEqual(['lossless', 'recommended', 'strong']);
+    expect(PDF_MODES['merge-pdf']).toBeUndefined();
+  });
+
+  it('faq: four real questions, each with a question mark, an answer and no repeat', () => {
+    expect(problemsOf(pdfPage({ faq: pdfFaq(3) }))).toMatch(/faq tem 3 pergunta/);
+    const noMark = `${pdfFaq(4)}<details><summary>Tell me more</summary><div><p>${ANSWER}</p></div></details>`;
+    expect(problemsOf(pdfPage({ faq: noMark }))).toMatch(/a pergunta "tell me more" do bloco faq não termina em \?/);
+    const thin = `${pdfFaq(4)}<details><summary>Does it work?</summary><div><p>Yes.</p></div></details>`;
+    expect(problemsOf(pdfPage({ faq: thin }))).toMatch(new RegExp(`a pergunta "does it work\\?" do bloco faq tem uma resposta de 4 caractere\\(s\\), pede pelo menos ${MIN_ANSWER_CHARS}`));
+    const twice = `${pdfFaq(4)}<details><summary>Question 1 about the tool?</summary><div><p>${ANSWER} again</p></div></details>`;
+    expect(problemsOf(pdfPage({ faq: twice }))).toMatch(/a pergunta "question 1 about the tool\?" aparece duas vezes/);
+    // A poor question is reported even when four others are fine; five real ones pass.
+    expect(problemsOf(pdfPage({ faq: pdfFaq(5) }))).toBe('');
+  });
+
+  it('privacy: says the work is done on the device and nothing is sent', () => {
+    const section = (text: string) => `<section data-content="privacy"><p>${text}</p></section>`;
+    expect(problemsOf(pdfPage({ privacy: section('Your PDFs are processed here, and nothing is shared with anyone else.') }))).toMatch(/não diz que o trabalho é feito no aparelho ou no navegador/);
+    expect(problemsOf(pdfPage({ privacy: section('Your PDFs are processed on your device, with care and some patience.') }))).toMatch(/não diz que o arquivo não é enviado/);
+    expect(problemsOf(pdfPage({ privacy: section('The work happens in your browser and your file does not leave your device.') }))).toBe('');
+  });
+
+  it('privacy: a tool that takes a password or a signature says so', () => {
+    const section = '<section data-content="privacy"><p>Your PDF is handled on your device, in your browser, and is never sent to a server.</p></section>';
+    expect(problemsOf(pdfPage({ id: 'protect-pdf', privacy: section }), 'protect-pdf')).toMatch(/não fala de password, que a ferramenta recebe/);
+    expect(problemsOf(pdfPage({ id: 'unlock-pdf', privacy: section }), 'unlock-pdf')).toMatch(/não fala de password/);
+    expect(problemsOf(pdfPage({ id: 'sign-pdf', privacy: section }), 'sign-pdf')).toMatch(/não fala de signature/);
+    expect(problemsOf(pdfPage({ id: 'merge-pdf', privacy: section }), 'merge-pdf')).toBe('');
+  });
+
+  it(`related: at most ${MAX_RELATED_CARDS} cards, counted by link`, () => {
+    const cards = (n: number) => `<section data-content="related"><ul>${Array.from({ length: n }, (_, i) => `<li><a href="/tool-${i}/">Tool ${i}</a></li>`).join('')}</ul></section>`;
+    expect(problemsOf(pdfPage({ related: cards(7) }))).toMatch(/o bloco related tem 7 cartões, no máximo 6/);
+    expect(problemsOf(pdfPage({ related: cards(6) }))).toBe('');
+    // A card repeated is one card.
+    const twice = '<section data-content="related"><ul><li><a href="/a/">A</a></li><li><a href="/a/">A again</a></li></ul></section>';
+    expect(problemsOf(pdfPage({ related: twice }))).toBe('');
+  });
+
+  it('claims: no best, #1 or unmeasured number in the title, the description or the text', () => {
+    const SAMPLES: Record<string, string> = {
+      best: 'The best way to merge PDFs.',
+      '#1': 'The #1 PDF tool.',
+      fastest: 'The fastest compressor around.',
+      'most popular': 'The most popular PDF tool.',
+      'economia medida': 'Saves up to 80% of the size.',
+      'ganho em %': 'Files come out 70% smaller.',
+      'número de usuários': '2 million users merge PDFs here.',
+      'tempo prometido': 'Done in 3 seconds.',
+    };
+    expect(Object.keys(SAMPLES).sort()).toEqual(CLAIMS.map((claim) => claim.label).sort());
+    for (const [label, text] of Object.entries(SAMPLES)) {
+      expect(findClaims(text), label).toEqual([label]);
+      expect(problemsOf(pdfPage({ extra: `<section><p>${text}</p></section>` })), `no texto: ${label}`).toContain(`afirmação sem medida na página: ${label}`);
+      expect(problemsOf(pdfPage({ head: `<title>Merge PDF: ${text} | FileOrca</title><meta name="description" content="x">` })), `no título: ${label}`).toContain(`afirmação sem medida na página: ${label}`);
+      expect(problemsOf(pdfPage({ head: `<title>Merge PDF | FileOrca</title><meta name="description" content="${text}">` })), `na descrição: ${label}`).toContain(`afirmação sem medida na página: ${label}`);
+    }
+  });
+
+  it('claims: the numbers the pages give as facts are not claims', () => {
+    for (const fact of [
+      'The text spans about 35%, 55% or 80% of the page diagonal, or of the page width.',
+      'Light is 15%, Medium is 30% (the default) and Strong is 50%.',
+      'JPG at quality 92, or PNG. 72 ppi for the screen, 150 ppi for general use or 300 ppi for printing.',
+      'It must have 4 to 100 characters. Any whole number from 1 to 9999. Page 1 of 12.',
+      'A page over 16.7 megapixels comes out at a lower resolution. AES-256 (revision 6). Diagonal runs at 45° on the screen.',
+      'A photo is saved again with MozJPEG at quality 75 and scaled down to 150 ppi. Every page becomes a JPG picture at 100 ppi.',
+    ]) expect(findClaims(fact), fact).toEqual([]);
+  });
+
+  it('claims: the AdSlot label and the scripts are not part of the text', () => {
+    expect(problemsOf(pdfPage({ extra: '<div class="fo-ad fo-ad--content"><span>The best ad</span></div><script>var best = "#1";</script>' }))).toBe('');
+  });
+});
+
+/** What the hub lists: the 12 tools of the PDF registry and the Image to PDF card. */
+const HUB = { name: enCommon.pdfTools, paths: [...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path), '/image-to-pdf/'] };
+interface FakeHub {
+  head?: string;
+  h1?: string;
+  cards?: readonly string[];
+  guide?: readonly string[] | null;
+  privacy?: string | null;
+  extra?: string;
+}
+/** A PDF hub that passes every rule; each test changes one thing. */
+function pdfHub(fake: FakeHub = {}): string {
+  const head = fake.head ?? `<title>${enCommon.pdfTools}: merge, split and more | FileOrca</title><meta name="description" content="Free PDF tools in your browser.">`;
+  const cards = (fake.cards ?? HUB.paths).map((path) => `<li><a class="fo-tool" href="${path}">${path}</a></li>`).join('');
+  const guide = fake.guide === null ? '' : `<section aria-labelledby="guide"><h2 id="guide">Which tool?</h2><ul>${(fake.guide ?? HUB.paths).map((path) => `<li><a href="${path}">${path}</a></li>`).join('')}</ul></section>`;
+  const privacy = fake.privacy === null ? '' : `<section aria-labelledby="privacy"><h2 id="privacy">Privacy</h2><p>${fake.privacy ?? 'Every tool works in your browser and no file is ever sent to a server.'}</p></section>`;
+  return `<!doctype html><html><head>${head}</head><body><main><h1>${fake.h1 ?? 'Free PDF tools that never upload your files'}</h1><ul>${cards}</ul>${guide}${privacy}${fake.extra ?? ''}</main></body></html>`;
+}
+
+describe('portão de conteúdo: o hub de PDF (F5a)', () => {
+  const hub = pdfHub;
+  const hubProblems = (html: string): string => checkPdfHub(html, HUB).join('\n');
+
+  it('accepts a complete hub', () => {
+    expect(checkPdfHub(hub(), HUB)).toEqual([]);
+  });
+
+  it('H1, title and description', () => {
+    expect(hubProblems(hub({ h1: 'Free tools that never upload your files' }))).toMatch(/não fala de PDF/);
+    expect(hubProblems(hub().replace(/<h1>.*?<\/h1>/, ''))).toMatch(/0 H1, pede 1/);
+    expect(hubProblems(hub({ head: '<title>Merge, split and more | FileOrca</title><meta name="description" content="x">' }))).toMatch(/não começa pelo nome do hub \("PDF tools"\)/);
+    expect(hubProblems(hub({ head: '<title>PDF tools: merge | FileOrca</title>' }))).toMatch(/sem meta description/);
+  });
+
+  it('cards: one for each tool of the registry and the Image to PDF card, no other and no repeat', () => {
+    expect(hubProblems(hub({ cards: HUB.paths.slice(1) }))).toContain(`faltam os cartões de ${HUB.paths[0]}`);
+    expect(hubProblems(hub({ cards: [...HUB.paths, '/convert-to-webp/'] }))).toContain('cartões fora do registro: /convert-to-webp/');
+    expect(hubProblems(hub({ cards: [...HUB.paths, '/merge-pdf/'] }))).toContain('um cartão aparece duas vezes');
+  });
+
+  it('guide: links to every tool', () => {
+    expect(hubProblems(hub({ guide: HUB.paths.filter((path) => path !== '/sign-pdf/') }))).toContain('o guia não leva a /sign-pdf/');
+    expect(hubProblems(hub({ guide: null }))).toMatch(/sem a seção do guia/);
+  });
+
+  it('privacy: a section that says the work is on the device and nothing is sent', () => {
+    expect(hubProblems(hub({ privacy: null }))).toMatch(/sem a seção de privacidade/);
+    expect(hubProblems(hub({ privacy: 'We take your privacy seriously.' }))).toMatch(/não diz que o trabalho é feito no aparelho e que nada é enviado/);
+  });
+
+  it('claims: the hub makes none either', () => {
+    expect(hubProblems(hub({ extra: '<p>The best PDF tools, the #1 choice.</p>' }))).toContain('afirmação sem medida na página: best');
+  });
+});
+
 describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
   it('knows the 11 pages of the registry and nothing else', () => {
     expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(11);
@@ -332,6 +611,14 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
         write(dir, entry.path, calcPage(`${id} ${entry.lang}`));
         continue;
       }
+      if (isPdfPage(id)) {
+        write(dir, entry.path, pdfPage({ id }));
+        continue;
+      }
+      if (id === PDF_HUB_ID) {
+        write(dir, entry.path, pdfHub());
+        continue;
+      }
       if (!isImagePage(id)) {
         write(dir, entry.path, `<html><head><title>${id} ${entry.lang}</title><meta name="description" content="Page ${id} ${entry.lang}"></head><body><p>${id}</p></body></html>`);
         continue;
@@ -365,6 +652,38 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.status).toBe(1);
     expect(result.output).toContain('/auto-loan-calculator/: o bloco privacy não diz');
     expect(result.output).toMatch(/\/mortgage-calculator\/biweekly\/: só \d bloco\(s\) próprio/);
+  });
+
+  it('counts the 12 PDF tools and the hub, read from the PDF registry', () => {
+    const dir = join(root, 'pdf-count');
+    build(dir);
+    expect(run(dir).output).toMatch(/18 de calculadora, 13 de PDF \(as ferramentas e o hub\)/);
+  });
+
+  it('fails when a PDF page loses its seal or breaks a rule, and when a PDF page or the hub is missing', () => {
+    const dir = join(root, 'pdf-rules');
+    build(dir);
+    write(dir, '/merge-pdf/', pdfPage({ id: 'merge-pdf', top: '<div class="fo-top"><h1>Merge PDF</h1></div>' }));
+    write(dir, '/compress-pdf/', pdfPage({ id: 'compress-pdf', rows: BASE_ROWS }));
+    write(dir, '/protect-pdf/', pdfPage({ id: 'protect-pdf', extra: '<p>The best way to protect a PDF.</p>' }));
+    rmSync(join(dir, fileForPath('/sign-pdf/')));
+    rmSync(join(dir, fileForPath(`/${PDF_HUB_ID}/`)));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/merge-pdf/: sem o PrivacySeal (.fo-seal) junto do H1');
+    expect(result.output).toContain('/compress-pdf/: o bloco specs não tem uma linha para o modo "lossless"');
+    expect(result.output).toContain('/protect-pdf/: afirmação sem medida na página: best');
+    expect(result.output).toContain('/sign-pdf/: a página não existe no dist');
+    expect(result.output).toContain('/pdf-tools/: a página não existe no dist');
+  });
+
+  it('fails when the hub drops a card of the registry', () => {
+    const dir = join(root, 'pdf-hub');
+    build(dir);
+    write(dir, `/${PDF_HUB_ID}/`, pdfHub({ cards: HUB.paths.filter((path) => path !== '/unlock-pdf/') }));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/pdf-tools/: faltam os cartões de /unlock-pdf/');
   });
 
   it('fails with the page and the block when a tool page loses one', () => {

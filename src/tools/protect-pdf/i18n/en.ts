@@ -26,7 +26,7 @@ const texts: PdfToolTexts<PasswordToolTexts> = {
       ['Encryption', 'AES-256 (revision 6), written by qpdf running in your browser.'],
       ['Open and owner password', 'The same password is used to open the file and as the owner password.'],
       ['Restrictions', 'None are added. Printing and copying stay allowed for whoever has the password.'],
-      ['What stays', 'The content of the pages is not changed: only the encryption is added. The document details of your file stay, and Oli adds no date, producer or anything from your device.'],
+      ['What stays', 'The content of the pages is not changed: only the encryption is added. Form fields, links and bookmarks stay as they were, and so do the document details of your file. Oli adds no date, producer or anything from your device.'],
       ['File name', 'A file called report.pdf comes out as report-protected.pdf. Your original is not changed.'],
       ['Batch', 'No limit on the number of files. Several files download together as one ZIP.'],
       ['Already protected', 'A PDF that already has a password or restrictions is turned down on its own line, with a link to Unlock PDF. The other files go on.'],
