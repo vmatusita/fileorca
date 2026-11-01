@@ -6,19 +6,30 @@ import type { Rule } from 'eslint';
 // src/engine/image/ becomes open source after the F5: nothing in it may import from outside the
 // folder (PLANO "Estrutura do repositório"; ADR-001, item 4). Packages are fine; relative paths
 // that leave the folder and absolute project paths are not. src/engine/pdf/ (the seed of the F5 PDF
-// engine) follows the same rule.
+// engine) follows the same rule. src/calc/ (the money engines, F4) is stricter: no package either, so the
+// engines that must match the oracle to the cent carry no dependency at all (DECISOES § 111).
 const ENGINES = ['src/engine/image', 'src/engine/pdf'];
+const NO_PACKAGES = ['src/calc'];
 
 const selfContained: Rule.RuleModule = {
-  meta: { type: 'problem', messages: { outside: '{{folder}}/ cannot import "{{source}}" from outside the folder.' }, schema: [{ type: 'string' }] },
+  meta: { type: 'problem', messages: {
+      outside: '{{folder}}/ cannot import "{{source}}" from outside the folder.',
+      package: '{{folder}}/ cannot import the package "{{source}}": it has no dependencies.',
+    },
+    schema: [{ type: 'string' }, { type: 'object', properties: { packages: { type: 'boolean' } }, additionalProperties: false }],
+  },
   create(context) {
     const file = context.filename.split('\\').join('/');
     const folder = String(context.options[0]);
+    const packages = (context.options[1] as { packages?: boolean } | undefined)?.packages !== false;
     const root = resolve(folder);
     const check = (node: Rule.Node, source: unknown) => {
       if (typeof source !== 'string') return;
       const isPath = source.startsWith('.') || source.startsWith('/') || source.startsWith('src/');
-      if (!isPath) return;
+      if (!isPath) {
+        if (!packages) context.report({ node, messageId: 'package', data: { source, folder } });
+        return;
+      }
       const target = source.startsWith('.') ? resolve(dirname(file), source) : resolve(source.replace(/^\//, ''));
       if (relative(root, target).startsWith('..')) context.report({ node, messageId: 'outside', data: { source, folder } });
     };
@@ -45,5 +56,10 @@ export default defineConfig(
     files: [`${folder}/**/*.ts`],
     plugins: { fileorca: { rules: { 'engine-self-contained': selfContained } } },
     rules: { 'fileorca/engine-self-contained': ['error', folder] as ['error', string] },
+  })),
+  ...NO_PACKAGES.map((folder) => ({
+    files: [`${folder}/**/*.ts`],
+    plugins: { fileorca: { rules: { 'engine-self-contained': selfContained } } },
+    rules: { 'fileorca/engine-self-contained': ['error', folder, { packages: false }] as ['error', string, { packages: boolean }] },
   })),
 );
