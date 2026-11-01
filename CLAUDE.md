@@ -333,3 +333,36 @@ Pegadinhas que a F5a achou:
   - No briefing de um agente em worktree, peça isso como primeiro passo.
 - **Três agentes de workflow eram Sonnet** e assinaram os commits como "Claude Sonnet 5.5": foram 15 de 76 commits da run. O histórico ficou com o nome verdadeiro de cada modelo, e nada foi reescrito (`--amend` é proibido).
   - Para código, passe `model: 'opus'` ao agente.
+
+## F5b: guias de arquivo e kit do Product Hunt
+
+Comandos novos:
+
+| Comando | O que faz |
+| --- | --- |
+| `pnpm guias:medir` | Mede o que os 10 guias de arquivo dizem, sobre o `dist/` (rode `pnpm build` antes) e no Node, e grava `data/guides-measured.json` (`--check` refaz e compara: Node exato, navegador com a tolerância da § 185; `--only <id>` mede um guia). Fora do `verificar` |
+| `pnpm lancamento:imagens` | Gera a miniatura (PNG e GIF da Oli) e a galeria do Product Hunt em `docs/lancamento/product-hunt/`, a partir do `dist/` e do `docs/design/`, e reescreve a tabela das imagens do `product-hunt.md`. Fora do `verificar` |
+
+Como acrescentar um guia de arquivo:
+
+1. O id `guides-<slug>` em `FILE_GUIDE_IDS` e a entrada em `FILE_GUIDES` (`src/tools/guides/registry.ts`): a ferramenta embutida, o hub e até 6 relacionadas. A rota sai de `fileGuideRoutes()`.
+2. As medidas: um plano em `scripts/guides/lib/plans.ts` (o caminho da pessoa: navegador onde o site escreve pelo canvas, Node onde é WASM ou pdf-lib), a tabela em `BUILDERS` de `src/tools/guides/measured.ts`, e `pnpm guias:medir`. O JSON entra num commit antes do texto.
+3. O texto em `src/i18n/en/guide-<slug>.ts` (`FileGuideTexts`): todo número é `{placeholder}` do JSON (com as variantes `_off`, `_more`, `_times`, `_change`, `_exact` e `_word`), fato oficial de `facts` com a fonte, ou nome técnico de `names`. O cartão vai em `enCommon.fileGuides`.
+4. A página `src/pages/guides/<slug>/index.astro`: guia de imagem passa `<XxxPage slot="tool" lang="en" embed />` (o componente da ferramenta ganha `embed` e, se precisar, `initial`); guia de PDF é só `<FileGuideView id />`.
+5. Testes: os portões, o `budgets`, o `ads`, o `a11y` e o `tool-guides.spec.ts` leem o registro. O caso do guia entra em `CASES` do `tool-guides.spec.ts`.
+
+Quando medir de novo: mudou o motor de imagem ou de PDF, o script de medidas (o teste compara o SHA-256), uma fixture, ou a versão do Playwright (o canvas muda). Depois, `pnpm guias:medir --check` tem de dar zero.
+
+A regra dos números: nenhum algarismo à mão num texto de guia (`tests/unit/guides-numbers.test.ts`). Contagem por extenso também é número à mão: use `{nome_word}` ou tire a contagem.
+
+Como o kit se mantém verdadeiro: o `tests/unit/launch-kit.test.ts` compara as contagens do `product-hunt.md` com os registros, as contagens de caracteres com os limites e cada imagem listada com o arquivo. Uma run que mudar uma contagem (a 2b) tem de atualizar o kit, e as imagens com `pnpm lancamento:imagens`.
+
+Pegadinhas que a F5b achou:
+
+- **A ferramenta embutida usa o `<script>` do componente da própria ferramenta** (§ 184). Um `<script>` que importe o mesmo `mount.ts` em outro componente faz o Rolldown tirar o módulo para um chunk comum, e a página da ferramenta passa a 3 arquivos.
+- **No Git Bash, heredoc troca `\\` por `\` mesmo com `<<'EOF'`**: um script `node` que escreve `"\\b"` numa string JS para gravar `\b` grava o caractere de backspace (0x08), invisível no `grep`. Código com barra invertida vai pela ferramenta de escrita. Para achar o estrago: `grep -rln $'\x08' --include=*.ts src scripts tests`.
+- **O `.text` do `node-html-parser` cola o texto de elementos vizinhos** ("MoreIn today's"). Para contar palavras ou procurar frases, use `structuredText`.
+- **O CSS do site não tem `--color-*`**: o tema é `@theme reference`, e as variáveis no build são `--deep`, `--on-deep`, `--bg`, `--stroke` e `--radius-lg`.
+- **`gifenc` é CommonJS no Node**: importe o default (`import gifenc from 'gifenc'`).
+- **O `node -e` e o heredoc do Git Bash** seguem as regras da F3 e da F4: texto com crase ou barra invertida vai para um arquivo.
+- **Uma consulta da busca que traz um guia muda por construção** (§ 190): dê ao guia termos que não colidam com as consultas dos testes, e uma frase com "jpeg" quando o nome diz "JPG".
