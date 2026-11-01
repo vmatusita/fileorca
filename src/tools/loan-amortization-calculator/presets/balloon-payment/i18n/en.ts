@@ -8,9 +8,9 @@ export default {
   panel: {
     fields: {
       a: { label: 'Loan amount', prefix: '$', error: 'Enter an amount from $100 to $100,000,000.' },
-      r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
-      t: { label: 'Amortization term', suffix: 'years', error: 'Enter a term from 1 to 40 years.', help: 'The term the payment is worked out on.' },
-      bm: { label: 'Balloon due with payment', error: 'Enter a payment number from 1 to 479.', over: 'Must come before the last payment of the amortization term.' },
+      r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      t: { label: 'Amortization term', suffix: 'years', error: 'Enter a term from 1 to 40 years.' },
+      bm: { label: 'Balloon with payment', error: 'Enter a payment number from 1 to 479.', over: 'Must come before the last payment of the amortization term.' },
     },
     view: {
       label: 'Balloon payment',

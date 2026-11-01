@@ -18,6 +18,21 @@ export function Sentence({ parts }: { parts: readonly Part[] }) {
   return <>{parts.map((part, index) => (typeof part === 'string' ? part : <b key={index}>{part.b}</b>))}</>;
 }
 
+/** The big number. A value with words ("2 years 9 months", "Year 7") keeps its numbers big and its words at the
+ * size of the unit, so it stays on one line on a phone; an amount ("$2,613.32") is drawn as it is. */
+export function Value({ text }: { text: string }) {
+  if (!/[a-z]/i.test(text)) return <>{text}</>;
+  return (
+    <>
+      {text
+        .split(/(\d[\d,.]*)/)
+        .map((piece) => piece.trim())
+        .filter(Boolean)
+        .map((piece, index) => (/^\d/.test(piece) ? <span key={index}>{piece}</span> : <small key={index}>{piece}</small>))}
+    </>
+  );
+}
+
 interface Props {
   view: CalcView;
   /** The person changed something: the region may speak. */
@@ -52,7 +67,7 @@ export default function ResultHero({ view, touched, cheer, splitName, money }: P
       )}
       <p class="fo-rhero__label">{view.hero.label}</p>
       <p class="fo-rhero__num">
-        {view.hero.value}
+        <Value text={view.hero.value} />
         {view.hero.unit && <small>{view.hero.unit}</small>}
       </p>
       <p class="fo-rhero__sentence">{view.problem ?? <Sentence parts={view.hero.sentence} />}</p>

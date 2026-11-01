@@ -33,11 +33,11 @@ function lessOrMore(v: Record<string, string>, cents: number, lang: NumberLang):
 export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
   id: 'refinance-calculator',
   fields: [
-    money('b', 1_000, 20_000_000, { main: true }),
+    money('b', 1_000, 20_000_000, { main: true, half: true }),
     rate('r', 0, 40, { main: true, half: true }),
-    count('ml', 1, 480, { main: true, half: true }),
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nt', 1, 40, { main: true, half: true }),
+    count('ml', 1, 480),
     money('c', 0, 1_000_000),
     { kind: 'choice', key: 'cm', options: ['cash', 'loan'] },
   ],
@@ -98,11 +98,11 @@ export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
 export const affordabilityDef: CalcDef<AffordabilityInput, AffordabilityResult> = {
   id: 'home-affordability-calculator',
   fields: [
-    money('i', 1_000, 100_000_000, { main: true }),
+    money('i', 1_000, 100_000_000, { main: true, half: true }),
     money('dt', 0, 1_000_000, { main: true, half: true }),
     money('d', 0, 100_000_000, { main: true, half: true }),
     rate('r', 0, 40, { main: true, half: true, example: true }),
-    count('t', 1, 40, { main: true, half: true }),
+    count('t', 1, 40, { half: true }),
     money('tx', 0, 1_000_000, { half: true }),
     money('in', 0, 100_000, { half: true }),
     money('hoa', 0, 10_000, { half: true }),
@@ -171,8 +171,9 @@ function extraInput(v: Values): ExtraPaymentsInput {
 export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> = {
   id: 'mortgage-calculator-extra-payments',
   fields: [
-    ...homeFields().slice(0, 4),
-    money('em', 0, 1_000_000, { main: true }),
+    ...homeFields().slice(0, 3),
+    money('em', 0, 1_000_000, { main: true, half: true }),
+    count('t', 1, 40, { half: true }),
     money('ey', 0, 10_000_000, { half: true }),
     money('eo', 0, 100_000_000, { half: true }),
     count('eom', 1, 480, { atMost: (v) => num(v, 't') * 12 }),

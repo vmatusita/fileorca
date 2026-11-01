@@ -11,11 +11,11 @@ export default {
       b: { label: 'Balance', prefix: '$', error: 'Enter a balance from $1 to $1,000,000.' },
       r: { label: 'APR', suffix: '%', error: 'Enter an APR from 0 to 60%.' },
       p: { label: 'Monthly payment', prefix: '$', error: 'Enter a payment from $1 to $100,000.' },
-      nr: { label: 'New loan rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      nr: { label: 'New rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
       nm: { label: 'New loan term', suffix: 'months', error: 'Enter a term from 1 to 120 months.' },
       f: { label: 'Origination fee', suffix: '%', error: 'Enter a fee from 0 to 20%.', help: 'Added to the new loan here.' },
     },
-    moreHeading: 'Fees',
+    moreHeading: 'Your debts',
     view: {
       label: 'New monthly payment',
       unit: '/mo',

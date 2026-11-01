@@ -65,11 +65,11 @@ export const personalLoanDef: CalcDef<PersonalLoanInput, PersonalLoanResult> = {
 export const autoLoanDef: CalcDef<AutoLoanInput, AutoLoanResult> = {
   id: 'auto-loan-calculator',
   fields: [
-    money('p', 500, 2_000_000, { main: true }),
+    money('p', 500, 2_000_000, { main: true, half: true }),
     money('d', 0, 2_000_000, { main: true, half: true }),
-    money('ti', 0, 2_000_000, { main: true, half: true }),
     rate('r', 0, 40, { main: true, half: true, example: true }),
     count('m', 1, 120, { main: true, half: true }),
+    money('ti', 0, 2_000_000),
     money('tf', 0, 500_000),
   ],
   initial: { p: 3_200_000, d: 400_000, ti: 600_000, r: 75_000, m: 60, tf: 240_000 },
@@ -144,10 +144,10 @@ export const loanAmortizationDef: CalcDef<LoanAmortizationInput, LoanAmortizatio
 export const balloonDef: CalcDef<BalloonInput, BalloonResult> = {
   id: 'loan-amortization-calculator-balloon-payment',
   fields: [
-    money('a', 100, 100_000_000, { main: true }),
+    money('a', 100, 100_000_000, { main: true, half: true }),
     rate('r', 0, 40, { main: true, half: true, example: true }),
     count('t', 1, 40, { main: true, half: true }),
-    count('bm', 1, 479, { main: true, atMost: (v) => num(v, 't') * 12 - 1 }),
+    count('bm', 1, 479, { main: true, half: true, atMost: (v) => num(v, 't') * 12 - 1 }),
   ],
   initial: { a: 20_000_000, r: 70_000, t: 30, bm: 84 },
   toInput: (v) => ({ amount: num(v, 'a'), rate: num(v, 'r'), years: num(v, 't'), balloonMonth: num(v, 'bm') }),

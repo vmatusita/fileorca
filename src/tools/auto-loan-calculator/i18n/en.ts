@@ -10,7 +10,7 @@ export default {
       p: { label: 'Car price', prefix: '$', error: 'Enter a price from $500 to $2,000,000.' },
       d: { label: 'Down payment', prefix: '$', error: 'Enter a down payment from $0 to $2,000,000.' },
       ti: { label: 'Trade-in value', prefix: '$', error: 'Enter a trade-in value from $0 to $2,000,000.' },
-      r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.', help: 'The rate the dealer or lender quoted.' },
+      r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
       m: { label: 'Loan term', suffix: 'months', error: 'Enter a term from 1 to 120 months.' },
       tf: {
         label: 'Sales tax, title and fees',
@@ -19,7 +19,7 @@ export default {
         help: 'One total, as the dealer quotes it: the rules change by state, so the page does not work them out.',
       },
     },
-    moreHeading: 'Taxes and fees',
+    moreHeading: 'Trade-in, taxes and fees',
     view: {
       label: 'Monthly payment',
       unit: '/mo',
@@ -43,9 +43,9 @@ export default {
   },
   howHeading: 'How to use the auto loan calculator',
   howSteps: [
-    "Enter the car's price, your down payment and the value of your trade-in.",
-    'Type the rate you were quoted and the term in months.',
-    'Add the sales tax, title and fees as one total to see what you finance.',
+    "Enter the car's price and your down payment.",
+    'Type the rate the dealer or lender quoted and the term in months.',
+    'Add the value of your trade-in, and the sales tax, title and fees as one total, to see what you finance.',
     'Open the schedule, or save it as a PDF or a CSV.',
   ],
   worksHeading: 'How the car payment is worked out',

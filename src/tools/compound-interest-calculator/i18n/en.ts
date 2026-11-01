@@ -4,7 +4,7 @@ export default {
   title: 'Compound Interest Calculator with Monthly Deposits',
   description: 'See how a balance grows with monthly deposits and yearly, quarterly, monthly or daily compounding: the final balance, the interest and a table by year.',
   h1: 'Compound interest calculator',
-  lead: 'How a balance grows with monthly deposits and the compounding you choose.',
+  lead: 'How a balance grows with monthly deposits and compounding.',
   panel: {
     fields: {
       i: { label: 'Starting amount', prefix: '$', error: 'Enter a starting amount from $0 to $10,000,000.' },

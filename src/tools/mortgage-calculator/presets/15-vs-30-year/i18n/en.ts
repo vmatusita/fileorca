@@ -11,8 +11,8 @@ export default {
       p: homePanel.fields['p']!,
       d: homePanel.fields['d']!,
       dp: homePanel.fields['dp']!,
-      r15: { label: '15-year rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
-      r30: { label: '30-year rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      r15: { label: '15-yr rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      r30: { label: '30-yr rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
     },
     view: {
       label: '15-year payment',

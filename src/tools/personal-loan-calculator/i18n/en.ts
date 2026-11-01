@@ -8,7 +8,7 @@ export default {
   panel: {
     fields: {
       a: { label: 'Loan amount', prefix: '$', error: 'Enter an amount from $100 to $1,000,000.' },
-      r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.', help: 'The rate on the offer, before any fee.' },
+      r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
       m: { label: 'Loan term', suffix: 'months', error: 'Enter a term from 1 to 120 months.' },
       f: { label: 'Origination fee', suffix: '%', error: 'Enter a fee from 0 to 20% of the loan.', help: 'Taken from the money you receive. Leave 0 if there is none.' },
     },

@@ -7,10 +7,10 @@ export default {
   lead: 'How much house fits your income, and which limit sets the price.',
   panel: {
     fields: {
-      i: { label: 'Yearly income before taxes', prefix: '$', error: 'Enter an income from $1,000 to $100,000,000.' },
-      dt: { label: 'Other debt payments per month', prefix: '$', error: 'Enter debt payments from $0 to $1,000,000.', help: 'Car, student loans, card minimums.' },
+      i: { label: 'Gross yearly income', prefix: '$', error: 'Enter an income from $1,000 to $100,000,000.' },
+      dt: { label: 'Monthly debts', prefix: '$', error: 'Enter debt payments from $0 to $1,000,000.' },
       d: { label: 'Down payment', prefix: '$', error: 'Enter a down payment from $0 to $100,000,000.' },
-      r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
       t: { label: 'Loan term', suffix: 'years', error: 'Enter a term from 1 to 40 years.' },
       tx: { label: 'Property tax per year', prefix: '$', error: 'Enter a property tax from $0 to $1,000,000.' },
       in: { label: 'Home insurance per year', prefix: '$', error: 'Enter an insurance cost from $0 to $100,000.' },
@@ -18,7 +18,7 @@ export default {
       fr: { label: 'Housing limit', suffix: '%', error: 'Enter a limit from 1 to 100% of income.', help: 'Housing costs over gross monthly income; 28% is a common rule of thumb.' },
       br: { label: 'Total debt limit', suffix: '%', error: 'Enter a limit from 1 to 100% of income.', help: 'All debts over gross monthly income; 36% is a common rule of thumb.' },
     },
-    moreHeading: 'Costs of the home and the limits',
+    moreHeading: 'Loan term, home costs and limits',
     view: {
       label: 'Home price you can afford',
       placard: 'home price',
@@ -51,7 +51,7 @@ export default {
   },
   howHeading: 'How to use the home affordability calculator',
   howSteps: [
-    'Enter your yearly income before taxes and what you pay a month on other debts.',
+    'Enter your yearly income before taxes and what you pay a month on other debts: car, student loans and card minimums.',
     'Add your down payment, the rate and the loan term.',
     'Fill in the yearly property tax and insurance and any HOA dues for the kind of home you want.',
     'Change the two limits to match your lender, and read which one sets the price.',

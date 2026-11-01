@@ -93,12 +93,12 @@ export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
 export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
   id: 'savings-goal-calculator',
   fields: [
-    money('g', 1, 100_000_000, { main: true }),
+    money('g', 1, 100_000_000, { main: true, half: true }),
     money('s', 0, 100_000_000, { main: true, half: true }),
-    rate('r', 0, 40, { main: true, half: true, example: true }),
-    { kind: 'choice', key: 'md', options: ['months', 'deposit'], main: true },
-    count('m', 1, 1200, { main: true, when: { key: 'md', is: 'months' } }),
-    money('dep', 0, 1_000_000, { main: true, when: { key: 'md', is: 'deposit' } }),
+    { kind: 'select', key: 'md', options: ['months', 'deposit'], main: true, half: true },
+    count('m', 1, 1200, { main: true, half: true, when: { key: 'md', is: 'months' } }),
+    money('dep', 0, 1_000_000, { main: true, half: true, when: { key: 'md', is: 'deposit' } }),
+    rate('r', 0, 40, { example: true }),
   ],
   initial: { g: 2_000_000, s: 200_000, r: 40_000, md: 'months', m: 36, dep: 50_000 },
   toInput: (v) =>
@@ -167,12 +167,12 @@ const TIME_KEY: Record<SimpleInterestInput['unit'], string> = { years: 'ty', mon
 export const simpleInterestDef: CalcDef<SimpleInterestInput, SimpleInterestResult> = {
   id: 'simple-interest-calculator',
   fields: [
-    money('pr', 0.01, 100_000_000, { main: true }),
+    money('pr', 0.01, 100_000_000, { main: true, half: true }),
     rate('r', 0, 100, { main: true, half: true, example: true }),
     { kind: 'select', key: 'u', options: ['years', 'months', 'days'], main: true, half: true },
-    count('ty', 0, 100, { main: true, when: { key: 'u', is: 'years' } }),
-    count('tmo', 0, 1200, { main: true, when: { key: 'u', is: 'months' } }),
-    count('td', 0, 36_500, { main: true, when: { key: 'u', is: 'days' } }),
+    count('ty', 0, 100, { main: true, half: true, when: { key: 'u', is: 'years' } }),
+    count('tmo', 0, 1200, { main: true, half: true, when: { key: 'u', is: 'months' } }),
+    count('td', 0, 36_500, { main: true, half: true, when: { key: 'u', is: 'days' } }),
   ],
   initial: { pr: 1_000_000, r: 50_000, u: 'years', ty: 3, tmo: 36, td: 1095 },
   toInput: (v) => {

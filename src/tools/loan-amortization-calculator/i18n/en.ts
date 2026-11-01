@@ -8,7 +8,7 @@ export default {
   panel: {
     fields: {
       a: { label: 'Loan amount', prefix: '$', error: 'Enter an amount from $100 to $100,000,000.' },
-      r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
+      r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
       t: { label: 'Loan term', suffix: 'years', error: 'Enter a term from 1 to 50 years.' },
     },
     view: {

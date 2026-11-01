@@ -4,7 +4,7 @@ export default {
   title: 'Debt Payoff Calculator: Snowball vs Avalanche',
   description: 'Compare the debt snowball and the debt avalanche for up to 10 debts with an extra monthly payment: months to debt-free, interest and payoff order.',
   h1: 'Debt payoff calculator',
-  lead: 'Smallest balance first or highest rate first: when each one makes you debt-free.',
+  lead: 'Snowball or avalanche: when each plan makes you debt-free.',
   panel: {
     fields: {
       d: { label: 'Your debts', error: '' },

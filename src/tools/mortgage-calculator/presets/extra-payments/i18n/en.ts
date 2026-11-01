@@ -5,7 +5,7 @@ export default {
   title: 'Mortgage Calculator with Extra Payments',
   description: 'See how many months and how much interest extra mortgage payments save: monthly, once a year or a single lump sum, side by side with the plain loan.',
   h1: 'Mortgage calculator with extra payments',
-  lead: 'How much sooner the loan ends, and the interest saved, when you pay a little more.',
+  lead: 'The interest saved and the time cut when you pay a little more.',
   panel: {
     ...homePanel,
     fields: {
@@ -15,7 +15,7 @@ export default {
       eo: { label: 'One extra payment', prefix: '$', error: 'Enter an extra payment from $0 to $100,000,000.' },
       eom: { label: 'With payment number', error: 'Enter a payment number from 1 to 480.', over: "Can't come after the last payment of the term." },
     },
-    moreHeading: 'More extra payments, taxes and fees',
+    moreHeading: 'Loan term, more extra payments and costs',
     view: {
       label: 'Interest saved',
       placard: 'interest saved',

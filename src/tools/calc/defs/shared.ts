@@ -47,11 +47,12 @@ export const rate = (key: string, minPct: number, maxPct: number, extra: Partial
 
 export const count = (key: string, min: number, max: number, extra: Partial<NumberSpec> = {}): NumberSpec => ({ kind: 'int', key, min, max, ...extra });
 
-/** The fields of a home loan, in the mortgage pages' order: price, down payment, rate, term, then the monthly costs. */
+/** The fields of a home loan, in the mortgage pages' order: price, down payment, rate, term, then the monthly costs.
+ * On a phone the four main ones go in two rows of two, so the result stays above the fold (DECISOES § 124). */
 export function homeFields(): FieldSpec[] {
   return [
-    money('p', 10_000, 20_000_000, { main: true }),
-    { kind: 'down', key: 'd', percentKey: 'dp', unitKey: 'du', of: 'p', max: 2_000_000_000, main: true },
+    money('p', 10_000, 20_000_000, { main: true, half: true }),
+    { kind: 'down', key: 'd', percentKey: 'dp', unitKey: 'du', of: 'p', max: 2_000_000_000, main: true, half: true },
     rate('r', 0, 40, { main: true, half: true, example: true }),
     count('t', 1, 40, { main: true, half: true }),
     money('tx', 0, 1_000_000, { half: true }),

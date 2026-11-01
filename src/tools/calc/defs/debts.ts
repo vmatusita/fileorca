@@ -33,11 +33,11 @@ function problemView(label: string, problem: string, premises: string[]): CalcVi
 export const creditCardDef: CalcDef<CardInput, CardResult> = {
   id: 'credit-card-payoff-calculator',
   fields: [
-    money('b', 1, 1_000_000, { main: true }),
+    money('b', 1, 1_000_000, { main: true, half: true }),
     rate('r', 0, 60, { main: true, half: true, example: true }),
-    { kind: 'choice', key: 'md', options: ['payment', 'months'], main: true },
-    money('pay', 1, 1_000_000, { main: true, when: { key: 'md', is: 'payment' } }),
-    count('m', 1, 600, { main: true, when: { key: 'md', is: 'months' } }),
+    { kind: 'select', key: 'md', options: ['payment', 'months'], main: true, half: true },
+    money('pay', 1, 1_000_000, { main: true, half: true, when: { key: 'md', is: 'payment' } }),
+    count('m', 1, 600, { main: true, half: true, when: { key: 'md', is: 'months' } }),
   ],
   initial: { b: 650_000, r: 229_900, md: 'payment', pay: 25_000, m: 24 },
   toInput: (v) =>
@@ -89,8 +89,8 @@ function orderText(plan: PayoffPlan, s: CalcSharedTexts): string {
 export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
   id: 'debt-payoff-calculator',
   fields: [
-    { kind: 'list', key: 'd', min: 1, max: 10, main: true, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('m', 0, 100_000)] },
     money('x', 0, 1_000_000, { main: true }),
+    { kind: 'list', key: 'd', min: 1, max: 10, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('m', 0, 100_000)] },
   ],
   initial: {
     d: [
@@ -162,9 +162,9 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
 export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> = {
   id: 'debt-consolidation-calculator',
   fields: [
-    { kind: 'list', key: 'd', min: 1, max: 10, main: true, blank: { b: 100_000, r: 200_000, p: 5_000 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('p', 1, 100_000)] },
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nm', 1, 120, { main: true, half: true }),
+    { kind: 'list', key: 'd', min: 1, max: 10, blank: { b: 100_000, r: 200_000, p: 5_000 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60), money('p', 1, 100_000)] },
     rate('f', 0, 20, { example: true }),
   ],
   initial: {

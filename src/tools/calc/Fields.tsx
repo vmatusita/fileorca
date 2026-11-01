@@ -3,7 +3,7 @@
 import OptionGroup from '../image/OptionGroup.tsx';
 import Icon from '../../icons/Icon.tsx';
 import { fmt } from '../../i18n/format.ts';
-import { ratePercent, money, type NumberLang } from '../../calc/parse.ts';
+import type { NumberLang } from '../../calc/parse.ts';
 import CalcField from './CalcField.tsx';
 import { visible, type Problems } from './form.ts';
 import type { CalcPanelData, FieldSpec, ListSpec, NumberSpec, Values } from './types.ts';
@@ -134,11 +134,8 @@ export function Field(props: Props & { spec: FieldSpec }) {
           <option value="percent">{data.t.units.percent}</option>
         </select>
       );
-      const shownHelp = percent
-        ? `${money(Math.round((price * Number(values[spec.percentKey])) / 1_000_000), lang)}`
-        : price > 0
-          ? ratePercent(Math.round((Number(values[spec.key]) * 1_000_000) / price / 100) * 100, lang)
-          : undefined;
+      // No line under the field with the other unit: on a phone the down payment is half a row, and that line
+      // pushed the result below the fold (DECISOES § 124). The unit menu switches and converts it.
       return (
         <CalcField
           id={fieldId(spec.key)}
@@ -149,10 +146,8 @@ export function Field(props: Props & { spec: FieldSpec }) {
           onValue={(value) => set({ ...values, [percent ? spec.percentKey : spec.key]: value })}
           lang={lang}
           label={texts.label}
-          help={shownHelp}
           error={percent ? (data.texts.fields[spec.percentKey]?.error ?? texts.error) : texts.error}
           over={props.problems[spec.key] === 'over' ? texts.over : undefined}
-          prefix={percent ? undefined : texts.prefix}
           half={spec.half}
           unit={unit}
         />

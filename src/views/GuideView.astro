@@ -57,7 +57,7 @@ const after = t.sections.slice(2);
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top">
+  <div class="fo-top fo-top--calc">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
     <Reviewed />

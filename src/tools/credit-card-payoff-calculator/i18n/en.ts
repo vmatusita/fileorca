@@ -8,12 +8,12 @@ export default {
   panel: {
     fields: {
       b: { label: 'Card balance', prefix: '$', error: 'Enter a balance from $1 to $1,000,000.' },
-      r: { label: 'APR', suffix: '%', error: 'Enter an APR from 0 to 60%.', help: 'The purchase APR on your statement.' },
+      r: { label: 'APR', suffix: '%', error: 'Enter an APR from 0 to 60%.' },
       md: { label: 'I want to know', error: '' },
       pay: { label: 'Payment per month', prefix: '$', error: 'Enter a payment from $1 to $1,000,000.' },
       m: { label: 'Months to pay it off', suffix: 'months', error: 'Enter from 1 to 600 months.' },
     },
-    options: { md: { payment: 'Time with my payment', months: 'Payment for a date' } },
+    options: { md: { payment: 'The time', months: 'The payment' } },
     view: {
       labelTime: 'Time to pay it off',
       labelPayment: 'Monthly payment',
@@ -40,7 +40,7 @@ export default {
   },
   howHeading: 'How to use the credit card payoff calculator',
   howSteps: [
-    'Enter the balance and the APR from your statement.',
+    'Enter the balance and the purchase APR from your statement.',
     'Choose whether you want the time with a payment you pick, or the payment for a number of months.',
     'Type the payment or the months, and read how long it takes or how much to pay.',
     'Open the schedule to see each month, or save it as a PDF or a CSV.',

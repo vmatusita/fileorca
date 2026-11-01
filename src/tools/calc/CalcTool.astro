@@ -49,7 +49,7 @@ const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
   schema={[breadcrumbLd(crumbs), webApplicationLd(calcName(id), t.description, path, lang, 'FinanceApplication'), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top">
+  <div class="fo-top fo-top--calc">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
     <Reviewed />

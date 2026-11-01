@@ -14,7 +14,8 @@ export default {
       m: { label: 'Months to save', suffix: 'months', error: 'Enter from 1 to 1,200 months.' },
       dep: { label: 'Deposit per month', prefix: '$', error: 'Enter a deposit from $0 to $1,000,000.' },
     },
-    options: { md: { months: 'Deposit for a date', deposit: 'Time with my deposit' } },
+    options: { md: { months: 'The deposit', deposit: 'The time' } },
+    moreHeading: 'Interest on your savings',
     view: {
       labelDeposit: 'Monthly deposit',
       labelTime: 'Time to your goal',

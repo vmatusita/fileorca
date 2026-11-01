@@ -6,7 +6,7 @@ export const homePanel: Omit<CalcPanelTexts, 'view' | 'premises'> = {
     p: { label: 'Home price', prefix: '$', error: 'Enter a home price from $10,000 to $20,000,000.' },
     d: { label: 'Down payment', prefix: '$', error: 'Enter a down payment from $0 to $20,000,000.', over: "Can't be more than the home price." },
     dp: { label: 'Down payment', error: 'Enter a down payment from 0 to 100% of the price.' },
-    r: { label: 'Interest rate', suffix: '%', error: 'Enter a rate from 0 to 40%.', help: 'Type the rate your lender quoted.' },
+    r: { label: 'Rate', suffix: '%', error: 'Enter a rate from 0 to 40%.' },
     t: { label: 'Loan term', suffix: 'years', error: 'Enter a term from 1 to 40 years.' },
     tx: { label: 'Property tax per year', prefix: '$', error: 'Enter a property tax from $0 to $1,000,000.' },
     in: { label: 'Home insurance per year', prefix: '$', error: 'Enter an insurance cost from $0 to $100,000.' },
