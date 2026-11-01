@@ -43,6 +43,11 @@ const BIG = ['gen-paginas-300.pdf', 'pdf-grande-fontes-embutidas-117p.pdf', 'pdf
 const markers = (name: string) => pdfOracle(name).markers ?? [];
 /** Clicks the label of a segmented option (the radio itself is hidden), the way image-smoke.spec.ts does. */
 const option = (page: Page, label: string | RegExp) => page.locator('.fo-seg__opt').filter({ hasText: label }).first().click();
+/** The run button of a tool that runs on a button: its label is in the tool's texts (only those tools have one). */
+const actionButton = (page: Page, texts: { panel: { action?: string } }) => {
+  if (!texts.panel.action) throw new Error('this tool has no run button');
+  return page.getByRole('button', { name: texts.panel.action });
+};
 const pages = (name: string) => pdfOracle(name).pages ?? 0;
 const base = (name: string) => name.replace(/\.pdf$/, '');
 
@@ -73,7 +78,7 @@ test('Merge PDF: the small fixtures, the refused ones in the middle', async ({ p
   await openTool(page, '/merge-pdf/');
   await choosePdfs(page, withBroken(SMALL).map((name) => pdfFile(name)));
   const rows = await refusals(page, 'merge-pdf', browserName);
-  await page.getByRole('button', { name: mergeTexts.panel.action }).click();
+  await actionButton(page, mergeTexts).click();
   const [out] = filesOf(await takePdfDownload(page));
   expect(out?.name).toBe('gen-paginas-mistas-merged.pdf');
   const read = await soundPdf(out?.bytes as Uint8Array);
@@ -95,7 +100,7 @@ test('Merge PDF: the three big fixtures, and the locked ones refused with the li
     await expect(page.locator('.fo-filelist__row').filter({ hasText: name }).getByRole('link', { name: 'Unlock PDF' })).toHaveAttribute('href', '/unlock-pdf/');
     rows.push({ tool: 'merge-pdf', fixture: name, browser: browserName, result: `refused: ${reason}` });
   }
-  await page.getByRole('button', { name: mergeTexts.panel.action }).click();
+  await actionButton(page, mergeTexts).click();
   const [out] = filesOf(await takePdfDownload(page, 90_000));
   const read = await soundPdf(out?.bytes as Uint8Array);
   expect(read.pages).toHaveLength(300 + 117 + 150);
@@ -109,7 +114,7 @@ test('Split PDF: every page of the mixed pages, and a second file told it waits'
   await openTool(page, '/split-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-fotos.pdf')]);
   expect(await rowReason(page, 'gen-fotos.pdf')).toMatch(/one PDF at a time/);
-  await page.getByRole('button', { name: splitTexts.panel.action }).click();
+  await actionButton(page, splitTexts).click();
   const outs = filesOf(await takePdfDownload(page));
   expect(outs.map((out) => out.name)).toEqual(Array.from({ length: 8 }, (_, i) => `gen-paginas-mistas-page-${i + 1}.pdf`));
   for (const [i, out] of outs.entries()) {
@@ -124,7 +129,7 @@ test('Split PDF: ranges of the 300 pages, named by part, never by the typed rang
   await choosePdfs(page, [pdfFile('gen-paginas-300.pdf')]);
   await option(page, splitTexts.panel.options.ranges);
   await page.getByLabel(splitTexts.panel.options.rangesLabel).fill('1-3, 150, 298-300');
-  await page.getByRole('button', { name: splitTexts.panel.action }).click();
+  await actionButton(page, splitTexts).click();
   const outs = filesOf(await takePdfDownload(page));
   expect(outs.map((out) => out.name)).toEqual(['gen-paginas-300-part-1.pdf', 'gen-paginas-300-part-2.pdf', 'gen-paginas-300-part-3.pdf']);
   const reads = await Promise.all(outs.map((out) => soundPdf(out.bytes)));
@@ -135,7 +140,7 @@ test('Split PDF: ranges of the 300 pages, named by part, never by the typed rang
 test('Split PDF: every page of the 117-page notes, and pages picked on the grid of the IRS form', async ({ page, browserName }) => {
   await openTool(page, '/split-pdf/');
   await choosePdfs(page, [pdfFile('pdf-grande-fontes-embutidas-117p.pdf')]);
-  await page.getByRole('button', { name: splitTexts.panel.action }).click();
+  await actionButton(page, splitTexts).click();
   const outs = filesOf(await takePdfDownload(page, 90_000));
   expect(outs).toHaveLength(117);
   for (const out of [outs[0], outs[58], outs[116]]) expect((await soundPdf(out?.bytes as Uint8Array)).pages).toHaveLength(1);
@@ -143,7 +148,7 @@ test('Split PDF: every page of the 117-page notes, and pages picked on the grid 
   await choosePdfs(page, [pdfFile('pdf-formulario-irs-1040-2019.pdf')]);
   await option(page, splitTexts.panel.options.pick);
   await page.getByRole('button', { name: /^Page 2 of 2/ }).click();
-  await page.getByRole('button', { name: splitTexts.panel.action }).click();
+  await actionButton(page, splitTexts).click();
   const [picked] = filesOf(await takePdfDownload(page));
   expect(picked?.name).toBe('pdf-formulario-irs-1040-2019-selected.pdf');
   const read = await soundPdf(picked?.bytes as Uint8Array);
@@ -257,7 +262,7 @@ test('Protect PDF: AES-256 with the same password on a batch, the password nowhe
   const rows = await refusals(page, 'protect-pdf', browserName);
   await page.getByLabel(protectTexts.panel.options.passwordLabel, { exact: true }).fill(password);
   await page.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(password);
-  await page.getByRole('button', { name: protectTexts.panel.action }).click();
+  await actionButton(page, protectTexts).click();
   const outs = filesOf(await takePdfDownload(page, 90_000));
   for (const fixture of files) {
     const out = outputFor(outs, fixture, 'protected');
@@ -372,7 +377,7 @@ test('Reorder PDF pages: the reversed order of the mixed pages', async ({ page, 
   await openTool(page, '/reorder-pdf-pages/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
   await page.getByRole('button', { name: reorderTexts.panel.options.reverse }).click();
-  await page.getByRole('button', { name: reorderTexts.panel.action }).click();
+  await actionButton(page, reorderTexts).click();
   const [out] = filesOf(await takePdfDownload(page));
   expect((await soundPdf(out?.bytes as Uint8Array)).pages.map((p) => p.marker)).toEqual([...markers('gen-paginas-mistas.pdf')].reverse());
   recordMatrix(`reorder-${browserName}`, [{ tool: 'reorder-pdf-pages', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'ok: reversed' }]);
@@ -386,7 +391,7 @@ test('Watermark PDF: the text across every page of the small fixtures and the 30
   const files = [...SMALL, 'gen-paginas-300.pdf'];
   await choosePdfs(page, withBroken(files).map((name) => pdfFile(name)));
   const rows = await refusals(page, 'watermark-pdf', browserName);
-  await page.getByRole('button', { name: watermarkTexts.panel.action }).click();
+  await actionButton(page, watermarkTexts).click();
   const outs = filesOf(await takePdfDownload(page, 90_000));
   for (const fixture of files) {
     const read = await soundPdf(outputFor(outs, fixture, 'watermarked'));
@@ -404,7 +409,7 @@ test('Sign PDF: a typed name on every page of the mixed pages, inside the visibl
   await page.getByLabel(signTexts.panel.options.typeLabel).blur();
   await expect(page.locator('.fo-sign__box')).toBeVisible({ timeout: 20_000 });
   await option(page, signTexts.panel.options.allPages);
-  await page.getByRole('button', { name: signTexts.panel.action }).click();
+  await actionButton(page, signTexts).click();
   const [out] = filesOf(await takePdfDownload(page));
   const read = await soundPdf(out?.bytes as Uint8Array);
   expect(read.pages.map((p) => p.images)).toEqual(new Array(8).fill(1));
