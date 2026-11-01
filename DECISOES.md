@@ -1860,3 +1860,45 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
   - **O PSNR:** o original e a cópia passam pelo mesmo decodificador (MozJPEG no Node, ou o leitor de PNG dos testes). Tamanho diferente (o recorte, o giro, o PDF) fica fora.
 - **Amostra:** as três fotos reais com GPS das fixtures, no Chromium e no WebKit.
 - **Consequência:** o guia embute a ferramenta vencedora com a opção vencedora, por propriedade da página. Para isso o `ImagePanelData` ganha `initial`, aplicado no estado inicial do `ImagePanel`; nunca pela URL.
+
+## § 187 · O `gate:seo` nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** cada guia de arquivo pede `Article`, `BreadcrumbList` e `Person`, como os guias de dinheiro, e o breadcrumb termina no próprio guia (`requiredSchemaTypes` e `schemaProblems` em `scripts/lib/seo-pages.ts`).
+- **O título:** começa pelo nome do guia (o do cartão, em `enCommon.fileGuides`), em Title Case, comparado sem caixa como na § 122. Nem o título nem o H1 têm ano, e nenhum dos dois começa pelo H1 da ferramenta embutida, que o portão lê na página dela no `dist/` (`fileGuideTitleProblems`).
+- **Por quê:** a ficha pede título sem ano e sem canibalizar a página da ferramenta. Por isso o guia 7 se chama "Which resolution to choose for PDF to JPG", e não "PDF to JPG: …".
+- **Testes:** controles positivos e negativos em `tests/unit/seo-pages.test.ts`. Os guias também entram no sitemap em inglês que o portão confere.
+
+## § 188 · O `gate:conteudo` e a voz nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** `checkFileGuide` (`scripts/lib/file-guides.ts`) confere cada guia do registro.
+  - Os blocos aparecem na ordem da decisão 4: breadcrumb, H1, "Reviewed" com as duas datas, introdução, uma só raiz `#fo-tool-root`, o link para a página da ferramenta, o AdSlot de conteúdo, "What we measured" com tabela em `.fo-table-wrap` e a data, as fontes com link `https` e a data da leitura, e até 6 relacionadas. São no máximo 2 AdSlots.
+  - O texto próprio tem de 800 a 1.500 palavras.
+  - Nenhuma frase de enchimento: "in today's world", "delve", "it's important to note", "in conclusion" e parentes.
+- **O que conta como palavra:** só os blocos `data-guide-text` da view (o topo, a introdução, as seções e as notas da medida). Ficam de fora a ferramenta, as tabelas, as fontes e os cartões. O texto de cada bloco é lido com quebra entre os elementos, para um título e o parágrafo seguinte não virarem uma palavra só.
+- **Voz:** o `gate:design` passa as regras de voz (`checkVoice`) no texto visível de cada guia, e o `tests/unit/guides-numbers.test.ts` passa as mesmas regras nos arquivos de texto.
+- **Testes:** controles positivos e negativos em `tests/unit/conteudo.test.ts`. O `dist` falso do teste do portão passou a ter os 10 guias.
+
+## § 189 · Nenhum número à mão nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** todo algarismo de um texto de guia fica num `{placeholder}`. Um placeholder é uma de três coisas:
+  - um número de `data/guides-measured.json`, num jeito de escrever fixo: `{nome}` no padrão da unidade, ou `{nome_off}`, `{nome_more}`, `{nome_times}`, `{nome_change}`, `{nome_exact}` e `{nome_word}`;
+  - um fato que a medida decidiu (a opção do guia 6);
+  - um fato oficial da lista curta do próprio guia (`facts`), com a fonte que o guia cita.
+- **Fora disso:** só os nomes técnicos de `names`, como "H.264", "W3C" e "Windows 11". O `src/tools/guides/measured.ts` só formata e nunca faz conta.
+- **O teste:** `tests/unit/guides-numbers.test.ts` reprova algarismo fora disso, em prosa, lista, título ou cabeçalho de tabela. Ele reprova também um fato cuja fonte o guia não cita, e uma fonte sem a data da leitura. No guia 3, cada página oficial de medida do JSON tem de estar entre as fontes. O teste tem controles positivos e negativos.
+- **Contagens em palavras:** contagens escritas por extenso ("three photos") também seriam número à mão. Os textos usam `{nome_word}` ou deixam a contagem de fora.
+- **`lint:texto`:** um guia de arquivo não é texto de dinheiro (`fileGuideOf`). Ele é preenchido com os valores que a página mostra, e os links e as datas das fontes (`href`, `read`) ficam fora da leitura. O teste está em `tests/unit/lint-texto-money.test.ts`.
+
+## § 190 · A busca e as contagens com os guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** os 10 guias entram no fim do índice da busca, na categoria do hub (Image ou PDF), com o nome e dois ou três termos que não colidem com as consultas dos testes.
+  - Os guias que dizem "JPG" no nome ganham uma frase com "jpeg", para "jpg" e "jpeg" continuarem achando a mesma lista na mesma ordem.
+  - Nenhum guia diz "merge", para "merge" seguir achando só Merge PDF e Image to PDF.
+- **O que mudou por construção** (a § 125 e a § 171 são o precedente):
+  - `routes.test.ts`: a lista de rotas ganha os 10 ids; as páginas só em inglês passam de 48 a 58; o índice da busca passa de 46 a 56 entradas.
+  - As consultas `jpg to pdf` e `heic` ganham o guia no fim.
+  - `pdf to jpg` passa a `pdf-to-jpg`, o guia de resolução e Image to PDF, porque o nome do guia diz "PDF to JPG". A ferramenta continua primeiro, que é onde vai o Enter (§ 180).
+  - `pdf` ganha os guias cujo nome diz PDF, depois das ferramentas.
+  - `seo-checks.test.ts`: o sitemap em inglês passa de 56 a 66 URLs.
+  - `prontidao.test.ts`: os ids da busca ganham os 10 guias.
+- **Por quê:** a ficha manda os guias para a busca. Nenhuma consulta perdeu o primeiro resultado, e nenhuma ferramenta saiu de uma lista.

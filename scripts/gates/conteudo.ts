@@ -8,6 +8,8 @@
 // the five blocks, an H1 and a title that start with the tool name, the PrivacySeal, specs that say what it takes, a limit,
 // what stays and what each mode does, four real questions, a privacy note, at most six related cards and no unmeasured
 // claim; the hub has a card and a guide link for each tool (DECISOES § 162).
+// The ten file guides of the F5b come from their registry (src/tools/guides/registry.ts): each one has the blocks of the
+// page in order, 800 to 1,500 words of its own text and no filler phrase (scripts/lib/file-guides.ts; DECISOES § 188).
 // Across the whole dist/ (404s aside): no repeated title or description and no placeholder wording.
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
@@ -31,6 +33,8 @@ import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
 
 requireDist();
 const problems = new Problems();
@@ -103,10 +107,29 @@ else {
 }
 if (pdfPages !== PDF_TOOL_IDS.length + 1) problems.add(`${pdfPages} página(s) de PDF conferida(s), o registro tem ${PDF_TOOL_IDS.length} ferramentas e o hub`);
 
+// The file guides, read from their registry: the route map must have each one, and the page must pass the guide rules.
+let guidePages = 0;
+const guideWordCounts: string[] = [];
+for (const id of FILE_GUIDE_IDS) {
+  const path = FILE_GUIDES[id].path;
+  if (!pages.some((page) => page.route.id === id)) problems.add(`${id}: o guia do registro não está no mapa de rotas`);
+  if (!existsSync(fileForPath(path))) {
+    problems.add(`${path}: a página não existe no dist`);
+    continue;
+  }
+  guidePages += 1;
+  const toolPath = routeById(FILE_GUIDES[id].tool).paths.en ?? '';
+  const html = read(path);
+  for (const problem of checkFileGuide(html, { toolPath })) problems.add(`${path}: ${problem}`);
+  guideWordCounts.push(`${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
+}
+if (guidePages !== FILE_GUIDE_IDS.length) problems.add(`${guidePages} guia(s) de arquivo conferido(s), o registro tem ${FILE_GUIDE_IDS.length}`);
+console.log(`palavras dos guias de arquivo: ${guideWordCounts.join(', ')}`);
+
 const sitePages = listFiles(DIST)
   .filter((file) => file.endsWith('.html'))
   .map((file) => ({ path: pathOfFile(file, DIST), html: readFileSync(file, 'utf8') }))
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub) e ${sitePages.length} página(s) do site conferida(s)`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo e ${sitePages.length} página(s) do site conferida(s)`);

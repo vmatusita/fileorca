@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, isImagePage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
+import { FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, fileGuideTitleProblems, isImagePage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
@@ -128,5 +128,23 @@ describe('the money pages of the F4', () => {
     expect(schemaProblems('mortgage-calculator', [{ '@type': 'WebApplication', url: `${O}/` }], canonical).join()).toMatch(/WebApplication aponta/);
     const guide = `${O}/guides/rent-vs-buy-break-even/`;
     expect(schemaProblems('guides-rent-vs-buy-break-even', [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }] }], guide).join()).toMatch(/termina em/);
+  });
+});
+
+describe('the file guides of the F5b (DECISOES § 187)', () => {
+  it('ask for an Article by the author, with a BreadcrumbList that ends at the guide', () => {
+    for (const id of FILE_GUIDE_PAGE_IDS) expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'Article', 'Person']);
+    const guide = `${O}/guides/jpg-vs-png/`;
+    expect(schemaProblems('guides-jpg-vs-png', [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }, { position: 2, item: guide }] }], guide)).toEqual([]);
+    expect(schemaProblems('guides-jpg-vs-png', [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }] }], guide).join()).toMatch(/termina em/);
+  });
+
+  it('start the title with the name of the guide, with no year, and never with the H1 of the tool they embed', () => {
+    const name = 'How to convert HEIC to JPG on Windows';
+    expect(fileGuideTitleProblems(name, 'How to Convert HEIC to JPG on Windows, Photo by Photo | FileOrca', name, 'HEIC to JPG')).toEqual([]);
+    expect(fileGuideTitleProblems(name, 'Convert HEIC to JPG on Windows | FileOrca', name, 'HEIC to JPG').join()).toMatch(/não começa pelo nome do guia/);
+    expect(fileGuideTitleProblems(name, 'How to Convert HEIC to JPG on Windows in 2026 | FileOrca', name, 'HEIC to JPG').join()).toMatch(/título com ano/);
+    expect(fileGuideTitleProblems(name, 'How to Convert HEIC to JPG on Windows | FileOrca', `${name} (2026)`, 'HEIC to JPG').join()).toMatch(/H1 com ano/);
+    expect(fileGuideTitleProblems('HEIC to JPG on Windows', 'HEIC to JPG on Windows | FileOrca', 'HEIC to JPG on Windows', 'HEIC to JPG').join()).toMatch(/começa pelo H1 da ferramenta/);
   });
 });

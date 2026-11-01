@@ -9,6 +9,8 @@ import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
 import { routeById } from '../i18n/routes.ts';
 import enCommon from '../i18n/en/common.ts';
+import shared from '../i18n/en/file-guides.ts';
+import { FILE_GUIDES, guidesOfHub } from '../tools/guides/registry.ts';
 import t from '../i18n/en/pdf-tools.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
@@ -33,6 +35,9 @@ const cards = [...pdfCards.slice(0, 4), imageToPdf, ...pdfCards.slice(4)];
 const list = cards.map((card) => ({ name: card.name, path: card.href }));
 const nameOf = (id: (typeof t.guide)[number]['tool']) => (id === 'image-to-pdf' ? common.tools['image-to-pdf'].name : common.pdf[id].name);
 const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lang];
+// The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
+// links, never cards (gate:prontidao counts the cards of a hub against the tool registry).
+const guides = guidesOfHub('pdf-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description }));
 ---
 <BaseLayout
   lang={lang}
@@ -68,6 +73,12 @@ const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lan
   <section class="fo-section fo-prose" aria-labelledby="privacy">
     <h2 id="privacy">{t.privacyHeading}</h2>
     {t.privacy.map((paragraph) => <p>{paragraph}</p>)}
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="guides">
+    <h2 id="guides">{shared.hubGuidesHeading}</h2>
+    <ul>
+      {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
+    </ul>
   </section>
   <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

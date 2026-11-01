@@ -16,7 +16,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'Each part is a whole PDF',
       paragraphs: [
-        'When Split PDF makes a part, it starts a new PDF and copies into it the pages of that part, with everything those pages use: the fonts, the pictures, the links and the form fields that sit on them. A picture that appears on one page goes into one part. A font used on every page goes into every part.',
+        'When Split PDF makes a part, it starts a new PDF and copies into it the pages of that part, with everything those pages use: the fonts, the pictures, the links and the form fields that sit on them. A picture that sits on a single page goes into a single part. A font used on every page goes into every part.',
         'That last point is the whole story. A PDF stores each font once and lets every page share it. Split it into one file per page, and each file needs its own copy.',
       ],
     },

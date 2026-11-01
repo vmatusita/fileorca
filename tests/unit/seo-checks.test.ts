@@ -73,8 +73,9 @@ describe('sitemaps', () => {
   // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages, plus the money hub, 14 calculators,
   // 4 presets and 5 guides of the F4; Portuguese and Spanish keep the 8 they had (home, Compress image and the 6
   // institutional pages).
-  // English: 19 pages of the F2 and F3, 24 of the money area (F4) and 13 of the PDF area (F5a).
-  const SIZES = { en: 19 + 24 + 13, pt: 8, es: 8 } as const;
+  // English: 19 pages of the F2 and F3, 24 of the money area (F4), 13 of the PDF area (F5a) and the 10 file guides (F5b;
+  // DECISOES § 190).
+  const SIZES = { en: 19 + 24 + 13 + 10, pt: 8, es: 8 } as const;
 
   it('builds one valid sitemap per language and an index', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {

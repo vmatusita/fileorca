@@ -9,6 +9,8 @@ import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
 import { routeById } from '../i18n/routes.ts';
 import enCommon from '../i18n/en/common.ts';
+import shared from '../i18n/en/file-guides.ts';
+import { FILE_GUIDES, guidesOfHub } from '../tools/guides/registry.ts';
 import t from '../i18n/en/image-tools.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
@@ -33,6 +35,9 @@ const tools = IMAGE_TOOL_IDS.map((id) => ({
 }));
 const presets = IMAGE_PRESET_IDS.map((id) => ({ href: routeById(id).paths[lang] ?? '/', blurb: common.tools[id] }));
 const list = tools.map((tool) => ({ name: tool.blurb.name, path: tool.href }));
+// The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
+// links, never cards (gate:prontidao counts the cards of a hub against the tool registry).
+const guides = guidesOfHub('image-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description }));
 ---
 <BaseLayout
   lang={lang}
@@ -74,6 +79,12 @@ const list = tools.map((tool) => ({ name: tool.blurb.name, path: tool.href }));
       {t.guide.map((line) => <li>{line.before} <a href={routeById(line.tool).paths[lang]}>{common.tools[line.tool].name}</a> {line.after}</li>)}
     </ul>
     <p>{t.guideOutro}</p>
+  </section>
+  <section class="fo-section fo-prose" aria-labelledby="guides">
+    <h2 id="guides">{shared.hubGuidesHeading}</h2>
+    <ul>
+      {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
+    </ul>
   </section>
   <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

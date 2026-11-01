@@ -24,7 +24,7 @@ const texts: FileGuideTexts = {
       heading: 'For the screen',
       paragraphs: [
         '{lowPpi} gives the smallest images. That is enough for a preview, a thumbnail or a picture in a chat, and the files are small: the first page of the form weighed {formJpg72Chromium}, and the first page of the lecture notes {bookJpg72Chromium}.',
-        'Small print gets hard to read at this setting once you zoom in. If someone will need to read the text in the image, go up one step.',
+        'Small print gets hard to read at this setting once you zoom in. If someone needs to read the text in the image, go up one step.',
       ],
     },
     {
@@ -59,10 +59,10 @@ const texts: FileGuideTexts = {
   half: 3,
   measuredHeading: 'What we measured',
   measuredIntro: 'The first page of each PDF at the three resolutions of the tool, in JPG and PNG. Pixels are width by height.',
-  measuredNote: 'Measured on {date} through the PDF to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, on pages 1 and 2 of the real PDFs of our tests and of a PDF of photos (the scanned page has one page). The pixels were the same in both browsers; the table shows the Chromium files.',
+  measuredNote: 'Measured on {date} through the PDF to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, on the first and the second page of the real PDFs of our tests and of a PDF of photos (the scanned book has a single page). The pixels were the same in both browsers; the table shows the Chromium files.',
   tables: [
     {
-      heading: 'Page 1 at each resolution',
+      heading: 'The first page at each resolution',
       caption: 'The first page of each PDF at each resolution: its size in pixels, and the size of the JPG and of the PNG',
       head: ['File', 'Resolution', 'Pixels', 'JPG', 'PNG'],
     },
@@ -73,7 +73,7 @@ const texts: FileGuideTexts = {
     { id: 'jpeg-org', label: 'JPEG committee: JPEG 1', href: 'https://jpeg.org/jpeg/', read: '2026-11-01' },
   ],
   facts: {},
-  names: ['Form 1040'],
+  names: ['Form 1040', 'W3C', 'JPEG 1'],
   relatedHeading: 'Related tools and guides',
 };
 

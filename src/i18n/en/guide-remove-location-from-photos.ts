@@ -11,7 +11,7 @@ const texts: FileGuideTexts = {
     'Some apps strip this data when you post, and some do not. Email, file transfers, cloud folders and many chat apps send the file as it is. If a photo shows your home, your child’s school or anywhere you would rather not pin, remove the location before the file leaves your hands.',
   ],
   toolHeading: 'Strip the metadata from your photos here',
-  toolIntro: 'This is Resize image, set to By percentage, 100: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
+  toolIntro: 'This is Resize image, set to {winnerOption}: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
   sections: [
     {
       heading: 'What our photos carried',
@@ -38,7 +38,7 @@ const texts: FileGuideTexts = {
       heading: 'Strip it from the file without changing the photo',
       paragraphs: [
         'Any tool on this site that writes an image writes it from the pixels, which leaves the metadata behind. Most of them also change the picture: they compress it, crop it, turn it or change its format. So we measured which one changes the photo least, by a rule fixed before the measurement: the same frame, the same format, and the pixels closest to the original.',
-        'Resize image at By percentage, 100 won. A photo that already has the size you ask for is not decoded or encoded again: the tool copies the picture data as it is and leaves the metadata out. Our photos came back with identical pixels, {resizeImageIdenticalChromium_word} of them, and only {resizeImageRatioChromium_off} lighter, the weight of the metadata.',
+        'Resize image at {winnerOption} won. A photo that already has the size you ask for is not decoded or encoded again: the tool copies the picture data as it is and leaves the metadata out. Our photos came back with identical pixels, {resizeImageIdenticalChromium_word} of them, and only {resizeImageRatioChromium_off} lighter, the weight of the metadata.',
       ],
     },
     {

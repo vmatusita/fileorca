@@ -12,6 +12,7 @@ import { tokenNames } from '../lib/theme.ts';
 import { visibleText } from '../lib/conteudo.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { routeById } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 requireDist();
 
@@ -79,6 +80,19 @@ for (const path of voicePaths) {
   for (const problem of [...checkVoice(visibleText(page.html), 'texto visível'), ...props]) voiceProblems.add(`${path}: ${problem}`);
 }
 report('voz das páginas de PDF', voiceProblems, `${voicePaths.length} páginas do registro de PDF (as ferramentas e o hub): texto visível e textos do painel sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
+
+// The file guides of the F5b, read from their registry: the same voice rules on the text a person reads (DECISOES § 188).
+const guideVoice = new Problems();
+for (const id of FILE_GUIDE_IDS) {
+  const path = FILE_GUIDES[id].path;
+  const page = pages.find((candidate) => candidate.path === path);
+  if (!page) {
+    guideVoice.add(`${path}: o guia do registro não existe no dist`);
+    continue;
+  }
+  for (const problem of checkVoice(visibleText(page.html), 'texto visível')) guideVoice.add(`${path}: ${problem}`);
+}
+report('voz dos guias de arquivo', guideVoice, `${FILE_GUIDE_IDS.length} guias do registro: texto visível sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
 
 // The CSS files the pages link, each with the pages that use it.
 const sheets = new Map<string, string[]>();

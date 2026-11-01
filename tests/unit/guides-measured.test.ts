@@ -124,7 +124,7 @@ describe('the measurements of the file guides', () => {
       const official = Object.keys((await load()).facts ?? {});
       const missing = [...source.matchAll(/{(w+)}/g)]
         .map((match) => match[1] as string)
-        .filter((name) => !always.includes(name) && !official.includes(name) && resolvePlaceholder(id, name, measured) === null);
+        .filter((name) => !always.includes(name) && !official.includes(name) && !(name in measured.guides[id].facts) && resolvePlaceholder(id, name, measured) === null);
       expect(missing, `${file}: placeholders with no measurement`).toEqual([]);
     }
   });

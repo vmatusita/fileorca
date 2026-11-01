@@ -17,6 +17,11 @@ import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
 import { PANEL_POSES } from './Oli.tsx';
+import { fmt } from '../../i18n/format.ts';
+import enCommon from '../../i18n/en/common.ts';
+import guideTexts from '../../i18n/en/file-guides.ts';
+import { FILE_GUIDES, guidesOfTool } from '../guides/registry.ts';
+import { IMAGE_TOOL_IDS } from './registry.ts';
 import { imageToolTexts } from './texts.ts';
 import { blurbOf, crumbsFor, presetRows, relatedFor } from './page.ts';
 import type { ImagePageId } from './registry.ts';
@@ -39,6 +44,10 @@ const related = relatedFor(id, lang);
 const presets = presetRows(id, lang);
 const name = blurbOf(id, lang)?.name ?? t.h1;
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
+// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots;
+// only in English, where the guides exist (DECISOES § 6).
+const tool = (IMAGE_TOOL_IDS as readonly string[]).includes(id) ? (id as (typeof IMAGE_TOOL_IDS)[number]) : null;
+const guides = lang === 'en' && tool ? guidesOfTool(tool).map((guide) => ({ href: FILE_GUIDES[guide].path, title: enCommon.fileGuides[guide].name })) : [];
 ---
 <BaseLayout
   lang={lang}
@@ -83,6 +92,11 @@ const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
       </>
     )}
   </section>
+  {guides.length > 0 && (
+    <div class="fo-section fo-prose fo-guide-links">
+      {guides.map((guide) => <p><a href={guide.href}>{fmt(guideTexts.guideLink, { title: guide.title })}</a></p>)}
+    </div>
+  )}
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
     <Faq items={t.faq} />

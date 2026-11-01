@@ -54,7 +54,7 @@ const texts: FileGuideTexts = {
       heading: 'If it is still too big',
       paragraphs: [
         'If the PDF is mostly text and still over the limit, compression will not get it there. Split it into parts and send them separately, or remove the pages that are not needed. If it is mostly photos, compress the photos before they go into the PDF, at a size that fits the page.',
-        'For a scan you are about to make, a lower resolution and gray instead of color give a much smaller file than any compression afterwards. And when the file has to stay whole, a link to a shared copy often goes where an attachment cannot.',
+        'For a scan you are about to make, a lower resolution and gray instead of color give a much smaller file than any compression afterward. And when the file has to stay whole, a link to a shared copy often goes where an attachment cannot.',
       ],
     },
   ],

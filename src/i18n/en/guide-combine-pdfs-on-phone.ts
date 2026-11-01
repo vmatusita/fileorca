@@ -51,7 +51,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'Before you merge',
       paragraphs: [
-        'Put the files in the order the reader should see them, and remove the pages that are not needed first: a merged PDF is easier to check than to fix. A PDF that asks for a password has to be unlocked before it can be merged; Merge PDF tells you which file is locked.',
+        'Put the files in the order the reader should see them, and remove the pages that are not needed first: a merged PDF is easier to check than to fix. A PDF that asks for a password has to be saved without it before it can be merged, which Unlock PDF does; Merge PDF tells you which file is locked.',
         'If the merged file is too big to send, compress it afterwards. Merging does not make files lighter by itself, apart from the small savings above.',
       ],
     },

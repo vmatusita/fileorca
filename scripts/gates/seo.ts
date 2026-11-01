@@ -5,7 +5,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import enCommon from '../../src/i18n/en/common.ts';
+import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
@@ -31,6 +33,13 @@ for (const page of allPages()) {
   // Every tool and preset of the image registry: the title starts with the name of the tool (prompt F2, decision 9).
   const titleIssue = titleProblem(page.route.id, title, h1);
   if (titleIssue) problems.add(`${page.path}: ${titleIssue}`);
+  // A file guide (F5b): its own name first, no year, and not the H1 of the tool it embeds (read from that tool's page).
+  if (isFileGuide(page.route.id)) {
+    const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[page.route.id as keyof typeof FILE_GUIDES].tool)?.paths['en'] ?? '';
+    const toolH1 = toolPath ? (readHtml(toolPath).querySelector('h1')?.text.trim() ?? '') : '';
+    if (!toolH1) problems.add(`${page.path}: a página da ferramenta embutida não tem H1`);
+    for (const issue of fileGuideTitleProblems(enCommon.fileGuides[page.route.id].name, title, h1, toolH1)) problems.add(`${page.path}: ${issue}`);
+  }
   if (description.length < 50 || description.length > 170) problems.add(`${page.path}: descrição com ${description.length} caracteres`);
   if (root.querySelector('meta[name="robots"]')) problems.add(`${page.path}: tem <meta name="robots"> (noindex é só por cabeçalho)`);
   const h1s = root.querySelectorAll('h1');
@@ -102,7 +111,7 @@ for (const lang of LANGS) {
 const englishSitemap = readFileSync(`${DIST}${sitemapPath('en')}`, 'utf8');
 const imageUrls: string[] = [];
 // The money hub, calculators, presets and guides of the F4 too, and the PDF hub and tools of the F5a.
-for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS]) {
+for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS]) {
   const path = ROUTES.find((candidate) => candidate.id === id)?.paths['en'];
   if (path) imageUrls.push(new URL(path, SITE_ORIGIN).href);
   else problems.add(`página ${id} do registro de imagem sem rota em inglês`);

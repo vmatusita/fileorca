@@ -39,7 +39,7 @@ const texts: FileGuideTexts = {
       heading: 'File size is rarely the problem',
       paragraphs: [
         'Resizing to a social media size makes a photo much lighter, because most of its pixels go. Of our resized photos, {underLimit} were for a size with a published limit, and all {underLimit} were under it. The largest file we made weighed {largestOutput}.',
-        'The tightest figure is the Facebook cover, which loads fastest under {fbCoverLimit}, according to Facebook. Our largest cover weighed {facebookCoverMaxChromium}. If a cover is still too heavy, compress it after resizing.',
+        'The tightest figure is the Facebook cover: Facebook says it loads fastest when it is under {fbCoverLimit}. Our largest cover weighed {facebookCoverMaxChromium}. If a cover is still too heavy, compress it after resizing.',
       ],
     },
     {

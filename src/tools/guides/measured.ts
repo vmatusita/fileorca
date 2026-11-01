@@ -85,6 +85,8 @@ export function resolvePlaceholder(id: FileGuideId, name: string, file: Measured
 export function fillValues(id: FileGuideId, texts: FileGuideTexts, used: readonly string[], file: MeasuredFile = MEASURED): Record<string, string> {
   const values: Record<string, string> = { ...globals(file) };
   for (const [name, fact] of Object.entries(texts.facts)) values[name] = fact.text;
+  // Plain facts the measurement settled (the tool and option guide 6 embeds).
+  for (const [name, fact] of Object.entries(file.guides[id].facts)) values[name] = fact;
   for (const name of used) {
     if (name in values) continue;
     const found = resolvePlaceholder(id, name, file);

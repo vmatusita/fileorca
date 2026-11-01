@@ -4,6 +4,7 @@
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, GUIDES, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
 
 /** Route id of the hub of the image tools. */
 export const HUB_ID = 'image-tools';
@@ -21,6 +22,9 @@ export const IMAGE_PAGE_IDS: readonly string[] = Object.keys(IMAGE_PAGES);
 
 /** Route ids of every money page of the F4: the hub, the calculators and presets, the guides (src/tools/calc/registry.ts). */
 export const MONEY_PAGE_IDS: readonly string[] = [MONEY_HUB_ID, ...Object.keys(CALC_PAGES), ...Object.keys(GUIDES)];
+
+/** Route ids of the ten file guides of the F5b (src/tools/guides/registry.ts). */
+export const FILE_GUIDE_PAGE_IDS: readonly string[] = [...FILE_GUIDE_IDS];
 
 /** A tool page or a preset page of the image tools. */
 export function isImagePage(routeId: string): boolean {
@@ -47,6 +51,8 @@ export function requiredSchemaTypes(routeId: string): string[] {
   if (isCalcPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication', 'Person'];
   if (routeId === MONEY_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage', 'Person'];
   if (Object.hasOwn(GUIDES, routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
+  // A file guide (F5b, decision 4) is an Article by the author, like a money guide.
+  if (isFileGuide(routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
   return ['Organization'];
 }
 
@@ -70,7 +76,7 @@ export interface LdNode {
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
   const tool = isImagePage(routeId) || isCalcPage(routeId) || isPdfPage(routeId);
-  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== PDF_HUB_ID) return [];
+  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
   if (tool && app && app.url !== canonical) problems.push(`WebApplication aponta ${app.url ?? 'para nada'} em vez de ${canonical}`);
@@ -78,6 +84,25 @@ export function schemaProblems(routeId: string, nodes: readonly LdNode[], canoni
   if (crumbs.some((crumb, index) => crumb.position !== index + 1)) problems.push('BreadcrumbList com posições fora de ordem');
   const last = crumbs.at(-1)?.item;
   if (crumbs.length > 0 && last !== canonical) problems.push(`BreadcrumbList termina em ${last ?? 'nada'} em vez de ${canonical}`);
+  return problems;
+}
+
+const YEAR = /\b(?:19|20)\d{2}\b/;
+
+/**
+ * A file guide (F5b, decisions 1 and 5): the title starts with the name of the guide in Title Case (compared without case,
+ * as for the money pages, DECISOES § 122), neither the title nor the H1 has a year, and neither starts with the H1 of the
+ * tool the guide embeds, so the guide does not compete with the tool page for the tool's own search.
+ */
+export function fileGuideTitleProblems(name: string, title: string, h1: string, toolH1: string): string[] {
+  const problems: string[] = [];
+  const plain = title.replace(/ \| FileOrca$/, '');
+  if (!plain.toLowerCase().startsWith(name.toLowerCase())) problems.push(`título não começa pelo nome do guia (${name})`);
+  if (YEAR.test(plain)) problems.push('título com ano');
+  if (YEAR.test(h1)) problems.push('H1 com ano');
+  const tool = toolH1.toLowerCase();
+  if (tool && plain.toLowerCase().startsWith(tool)) problems.push(`título começa pelo H1 da ferramenta (${toolH1})`);
+  if (tool && h1.toLowerCase().startsWith(tool)) problems.push(`H1 começa pelo H1 da ferramenta (${toolH1})`);
   return problems;
 }
 

@@ -8,7 +8,7 @@ const texts: FileGuideTexts = {
   changed: 'First version, with the measurements of {date}.',
   intro: [
     'The short answer: photos go in JPG, and graphics go in PNG. Screenshots, logos, charts, text and anything with a transparent background are graphics. A photo from a camera or a phone is a photo, even if it shows a document.',
-    'The longer answer is about what each format keeps. One throws away detail you will not miss to stay small, the other keeps every pixel exactly and pays for it in size. Which trade is right depends on the picture, and on what happens to it next.',
+    'The longer answer is about what each format keeps. One stays small by throwing away detail you will hardly notice; the other keeps every pixel exactly and pays for it in size. Which trade is right depends on the picture, and on what happens to it next.',
   ],
   toolHeading: 'Switch between PNG and JPG here',
   toolIntro: 'Drop a PNG and it becomes a JPG; drop a JPG and it becomes a PNG. Each file is converted in this browser tab, so nothing is uploaded, and a batch comes back as one ZIP.',
@@ -79,7 +79,7 @@ const texts: FileGuideTexts = {
     { id: 'jpeg-org', label: 'JPEG committee: JPEG 1', href: 'https://jpeg.org/jpeg/', read: '2026-11-01' },
   ],
   facts: {},
-  names: [],
+  names: ['W3C', 'JPEG 1'],
   relatedHeading: 'Related tools and guides',
 };
 

@@ -36,6 +36,8 @@ import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { FILLER, MAX_GUIDE_WORDS, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
 const faq = (count: number, tag = 'Q'): string =>
@@ -56,6 +58,28 @@ function page(blocks: Partial<Record<ContentBlock, string>> = {}, head = '<title
 }
 
 const without = (name: ContentBlock): string => page().replace(`data-content="${name}"`, 'data-x="y"');
+
+// A file guide (F5b), built the way FileGuideView renders one: the blocks in order and `words` words of its own text.
+const GUIDE_SENTENCE = 'The photo goes into the tool and comes back lighter than it was.';
+function guidePage(options: { words?: number; tool?: string; toolPath?: string; extra?: string; edit?: (html: string) => string } = {}): string {
+  const sentences = Math.ceil((options.words ?? 900) / 13);
+  const text = Array.from({ length: sentences }, () => GUIDE_SENTENCE).join(' ');
+  const html = `<!doctype html><html><head><title>A guide | FileOrca</title><meta name="description" content="A guide to a tool."></head><body><main>
+    <nav aria-label="Breadcrumb"><ol class="fo-crumbs"><li><a href="/">Home</a></li><li><span aria-current="page">A guide</span></li></ol></nav>
+    <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">A guide</h1><p class="fo-lead">What does the tool do?</p>
+    <p class="fo-reviewed">Reviewed by Victor on <time datetime="2026-11-01">November 1, 2026</time>. First published <time datetime="2026-11-01">November 1, 2026</time>.</p></div>
+    <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
+    ${options.tool ?? '<div id="fo-tool-root" data-props="{}"><div class="fo-tool-island"></div></div>'}
+    <p class="fo-guide__open"><a href="${options.toolPath ?? '/heic-to-jpg/'}">Open the HEIC to JPG tool</a></p>
+    <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p></section>
+    <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
+    <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
+    <p class="fo-reviewed">Measured on November 1, 2026.</p></section>
+    <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
+    <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
+  </main></body></html>`;
+  return options.edit ? options.edit(html) : html;
+}
 
 describe('portão de conteúdo: blocos das páginas de ferramenta', () => {
   it('accepts a complete page', () => {
@@ -584,6 +608,57 @@ describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
   });
 });
 
+describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () => {
+  const want = { toolPath: '/heic-to-jpg/' };
+
+  it('passes a guide with every block in order and 800 to 1,500 words of its own text', () => {
+    expect(guideWords(guidePage())).toBeGreaterThanOrEqual(MIN_GUIDE_WORDS);
+    expect(checkFileGuide(guidePage(), want)).toEqual([]);
+  });
+
+  it('counts only the text of the guide: not the tool, the tables, the sources or the cards', () => {
+    const base = guideWords(guidePage());
+    const padded = guidePage({ edit: (html) => html.replace('<td>1 MB</td>', `<td>${'cell '.repeat(400)}</td>`) });
+    expect(guideWords(padded)).toBe(base);
+  });
+
+  it('fails a guide that is too short or too long', () => {
+    expect(checkFileGuide(guidePage({ words: 700 }), want).join()).toMatch(/palavras de texto \(pede de 800 a 1500\)/);
+    expect(checkFileGuide(guidePage({ words: MAX_GUIDE_WORDS + 200 }), want).join()).toMatch(/palavras de texto/);
+  });
+
+  it('fails a guide without the tool, with two tools, or with a link to another tool', () => {
+    expect(checkFileGuide(guidePage({ tool: '' }), want)).toContain('sem a ferramenta embutida (#fo-tool-root)');
+    const twice = '<div id="fo-tool-root" data-props="{}"></div><div id="fo-tool-root" data-props="{}"></div>';
+    expect(checkFileGuide(guidePage({ tool: twice }), want)).toContain('2 raízes de ferramenta (pede 1)');
+    expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want).join()).toMatch(/o link da ferramenta leva a \/png-to-jpg\//);
+  });
+
+  it('fails a guide whose AdSlot comes before the tool, or that has a third AdSlot', () => {
+    const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(/<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements<\/span><\/div>/, '') });
+    expect(checkFileGuide(early, want).join()).toMatch(/a ferramenta embutida vem antes de o AdSlot de conteúdo|o AdSlot de conteúdo vem antes|vem antes de/);
+    const three = guidePage({ edit: (html) => html.replace('<section data-content="sources">', '<div class="fo-ad"></div><div class="fo-ad"></div><section data-content="sources">') });
+    expect(checkFileGuide(three, want)).toContain('3 AdSlots (no máximo 2)');
+  });
+
+  it('fails a guide whose measured table, date or sources are missing, and one with more than six related cards', () => {
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(/<div class="fo-table-wrap">.*?<\/div>/s, '') }), want)).toContain('a seção medida sem tabela em .fo-table-wrap');
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('Measured on November 1, 2026.', 'Measured recently.') }), want)).toContain('a seção medida sem a data da medida');
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(/<time datetime="2026-11-01">November 1, 2026<\/time>\.<\/li>/, '</li>') }), want).join()).toMatch(/fonte sem a data da leitura/);
+    const cards = Array.from({ length: 7 }, (_, i) => `<li><a class="fo-tool" href="/t${i}/">T</a></li>`).join('');
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(/<ul class="fo-grid">.*?<\/ul>/s, `<ul class="fo-grid">${cards}</ul>`) }), want)).toContain('7 relacionadas (no máximo 6)');
+  });
+
+  it('fails a filler phrase in the text of the guide (decision 5.7)', () => {
+    for (const phrase of ['In today’s world, photos are big.', 'Let us delve into the formats.', "It's important to note that JPG is lossy.", 'In conclusion, use JPG.']) {
+      expect(findFiller(phrase), phrase).not.toEqual([]);
+      expect(checkFileGuide(guidePage({ extra: phrase }), want).join(), phrase).toMatch(/frase de enchimento/);
+    }
+    expect(FILLER.map((entry) => entry.label)).toEqual(expect.arrayContaining(["in today's world", 'delve', "it's important to note", 'in conclusion']));
+    expect(findFiller('The conclusion of the measurement is in the table.')).toEqual([]);
+  });
+});
+
 describe('portão de conteúdo: o script sobre um dist de teste', () => {
   const root = mkdtempSync(join(tmpdir(), 'fileorca-conteudo-'));
   afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -617,6 +692,11 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
       }
       if (id === PDF_HUB_ID) {
         write(dir, entry.path, pdfHub());
+        continue;
+      }
+      if (isFileGuide(id)) {
+        const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[id].tool)?.paths.en ?? '/';
+        write(dir, entry.path, guidePage({ toolPath, edit: (html) => html.replace('<title>A guide | FileOrca</title>', `<title>${id} | FileOrca</title>`).replace('content="A guide to a tool."', `content="Guide ${id}."`) }));
         continue;
       }
       if (!isImagePage(id)) {
@@ -684,6 +764,18 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.output).toContain('/pdf-tools/: faltam os cartões de /unlock-pdf/');
+  });
+
+  it('checks the ten file guides of the registry, and fails when one loses its tool or is missing (F5b)', () => {
+    const dir = join(root, 'guides');
+    build(dir);
+    expect(run(dir).output).toMatch(/13 de PDF \(as ferramentas e o hub\), 10 guia\(s\) de arquivo/);
+    write(dir, '/guides/jpg-vs-png/', guidePage({ toolPath: '/png-to-jpg/', tool: '' }));
+    rmSync(join(dir, fileForPath('/guides/split-pdf-file-size/')));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
+    expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
   });
 
   it('fails with the page and the block when a tool page loses one', () => {
