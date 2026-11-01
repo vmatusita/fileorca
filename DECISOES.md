@@ -1896,9 +1896,62 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
   - Nenhum guia diz "merge", para "merge" seguir achando só Merge PDF e Image to PDF.
 - **O que mudou por construção** (a § 125 e a § 171 são o precedente):
   - `routes.test.ts`: a lista de rotas ganha os 10 ids; as páginas só em inglês passam de 48 a 58; o índice da busca passa de 46 a 56 entradas.
-  - As consultas `jpg to pdf` e `heic` ganham o guia no fim.
+  - As consultas `jpg to pdf` e `heic` ganham o guia no fim (`routes.test.ts`; a de `jpg to pdf` também no `navigation.spec.ts`).
   - `pdf to jpg` passa a `pdf-to-jpg`, o guia de resolução e Image to PDF, porque o nome do guia diz "PDF to JPG". A ferramenta continua primeiro, que é onde vai o Enter (§ 180).
   - `pdf` ganha os guias cujo nome diz PDF, depois das ferramentas.
   - `seo-checks.test.ts`: o sitemap em inglês passa de 56 a 66 URLs.
   - `prontidao.test.ts`: os ids da busca ganham os 10 guias.
 - **Por quê:** a ficha manda os guias para a busca. Nenhuma consulta perdeu o primeiro resultado, e nenhuma ferramenta saiu de uma lista.
+
+## § 191 · O kit do Product Hunt e o teste que o lê (F5b, 1/nov/2026)
+
+- **Decisão:** `docs/lancamento/product-hunt.md` no modelo do `show-hn.md`.
+  - As regras vêm só das páginas do Product Hunt, lidas em 1/nov/2026 e resumidas em português.
+  - Os textos que vão para fora estão em inglês: o nome, 3 taglines, 2 descrições, as tags sugeridas, o primeiro comentário como roteiro e as respostas prováveis.
+  - O arquivo traz as imagens com a legenda, as provas e o checklist do dia.
+- **O teste:** `tests/unit/launch-kit.test.ts`, no `verificar`, lê o arquivo e reprova:
+  - uma contagem do produto ("8 image tools", "15 guides"…) diferente dos registros;
+  - uma contagem de caracteres diferente do texto ou acima do limite lido;
+  - uma imagem listada que falte, tenha outro tamanho ou peso, passe do limite, não tenha legenda ou leve metadado da máquina;
+  - uma prova que cite um arquivo de teste que não existe.
+- **Por quê:** a ficha pede que o kit não minta quando uma run mudar uma contagem (a 2b). O `show-hn.md` marcava essas linhas com um comentário; aqui o teste as segura.
+- **Limites:** onde duas páginas oficiais discordam, vale o mais estreito, e o texto manda conferir no formulário. A miniatura fica até 2 MB (uma página diz 2 MB, outra 3 MB) e a galeria até 3 MB por imagem.
+- **Data do lançamento:** a primeira terça depois do merge, às 12:01 AM do Pacífico, 5h01 em Brasília (o horário de verão dos EUA acabou em 1/nov/2026). O texto também diz o limite de agendamento ("de amanhã até 30 dias") e que 3/nov/2026 é dia de eleição nos EUA.
+
+## § 192 · O GIF da Oli e o `gifenc` (F5b, 1/nov/2026)
+
+- **Decisão:** o GIF animado da miniatura (240 × 240) sai de quadros desenhados pelo `@resvg/resvg-js`, que já era `devDependency`.
+  - O desenho usa o SVG da pose (`docs/design/assets/Oli/`, só `wave` e `cheer`) e as cores dos tokens.
+  - O movimento sai dos keyframes do próprio site (`fo-float` e `fo-cheer`, lidos em `src/styles/components.css`), com a duração e a curva dos tokens (`dur-float`, `dur-cheer`, `ease-in-out`, `ease-spring`), calculados quadro a quadro.
+  - Uma paleta só, para a cor não piscar entre quadros.
+- **O codificador:** `gifenc` 1.0.3 (MIT, de 2022), a única `devDependency` nova, fixada na versão exata. O `pnpm-lock.yaml` mudou só por ela, e o `gate:licencas` fica verde. O pacote não traz tipos: a declaração está em `scripts/lancamento/gifenc.d.ts`.
+- **Alternativa recusada:** um codificador próprio em `scripts/`, com LZW e quantização feitos à mão. Daria mais código para testar e mais risco de GIF quebrado, para uma imagem que sai do `verificar`.
+- **Nada disso entra no bundle:** o script fica em `scripts/lancamento/`.
+
+## § 193 · A galeria do Product Hunt (F5b, 1/nov/2026)
+
+- **Decisão:** são 5 imagens de 1270 × 760, cada uma com um estado real do `dist/` servido, aberto no Chromium com o consentimento já escolhido (sem o aviso de cookies):
+  1. a home;
+  2. a HEIC to JPG com duas fotos do iPhone convertidas;
+  3. a Compress PDF com o PDF de fotos (`gen-fotos`);
+  4. a tabela medida do guia "Why is my PDF so large?";
+  5. a calculadora de financiamento com o exemplo.
+- **A moldura:** fundo `deep`, legenda em Fredoka na cor `on-deep` e o logo escuro, lidos das variáveis do CSS do próprio site.
+  - Na imagem 4, a moldura de rolagem da tabela (§ 129) é aberta só para a foto, para a tabela sair inteira.
+  - As poses que aparecem são as do site naquele estado: `wave` na home e `cheer` no resultado.
+  - O amarelo só aparece no Download dos screenshots.
+- **Por que 5:** a ficha pede de 3 a 6. Com 5, a galeria cobre as três áreas, um guia e a ferramenta mais buscada, sem repetir estado.
+
+## § 194 · O guia que entra no Lighthouse (F5b, 1/nov/2026)
+
+- **Decisão:** `/guides/why-is-my-pdf-so-large/` entra no `lighthouserc.json`.
+- **Por quê:** a ficha pede o guia de entrada mais pesada pela medida. No `budgets.spec.ts`, os guias de PDF carregam 36,8 KB gzip (a entrada do `PdfIsland` e o chunk `island`), contra 20,8 a 21,3 KB dos de imagem. Entre os quatro guias de PDF, que empatam no JS, esse é o do plano (guia 2) e o de mais texto.
+- **As páginas que já estavam** seguem na lista, com as mesmas asserções.
+
+## § 195 · Os hubs e as páginas das ferramentas levam aos guias (F5b, 1/nov/2026)
+
+- **Hubs:** o `/image-tools/` e o `/pdf-tools/` ganham a seção "Guides" (`aria-labelledby="guides"`; o id `guide` já é do "qual ferramenta usar"), uma linha por guia do hub, com link simples e sem `fo-tool`. O `checkNothingUnfinished` conta os cartões dos hubs contra o registro.
+- **Ferramentas:** a página de cada ferramenta embutida ganha um parágrafo `fo-guide-links` com o link para o guia dela.
+  - O link sai do registro (`guidesOfTool`) e fica fora de qualquer bloco `data-content`, entre as especificações e as perguntas, longe dos dois AdSlots. O `ads.spec.ts` confere os 150 px.
+  - Só em inglês, onde os guias existem (§ 6).
+  - A Resize image leva aos dois guias que a embutem: o das redes sociais e o da localização.

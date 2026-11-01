@@ -119,7 +119,8 @@ test('the English search finds the new tools and presets and opens the one chose
   await expect(dialog.getByRole('option')).toHaveCount(5);
   // F5a: PDF to JPG also has the words "jpg", "to" and "pdf" in its names, so it follows Image to PDF.
   await input.fill('jpg to pdf');
-  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF']);
+  // F5b: and the guide on PDF to JPG resolution, whose name has the three words too, last (DECISOES § 190).
+  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF', 'Which resolution to choose for PDF to JPGPDF']);
   await input.fill('heif');
   await expect(dialog.getByRole('option')).toHaveText(rows('HEIC to JPG'));
   await input.press('Enter');

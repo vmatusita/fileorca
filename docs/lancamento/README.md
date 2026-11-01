@@ -14,6 +14,8 @@ Data das leituras: **31/out/2026**. Contagens do produto: **8 ferramentas de ima
 | `diretorios.md` | 10 diretórios e listas conferidos, texto pronto de cada um, lista de pagos, lista de excluídos e dos que não abriram | Português + inglês |
 | `blogs-financas.md` | 20 blogs de finanças pessoais dos EUA (F4): contato, post recente, artigo em que a calculadora ajuda, ângulo, rascunho do e-mail, status, descartados e resultado do LanguageTool | Português + inglês |
 | `codigo-aberto.md` | Passo a passo para criar o repositório público do motor de imagem (F5a): o que vai e o que não vai, nome, descrição e tópicos sugeridos, primeiro push, como atualizar, o que responder a "é código aberto?" | Português + inglês |
+| `product-hunt.md` | Kit do Product Hunt (F5b): regras lidas na fonte com a data, nome, 3 taglines e 2 descrições com a contagem de caracteres, tópicos, primeiro comentário, perguntas prováveis, imagens com legenda, tamanho e peso, provas e checklist do dia | Português + inglês |
+| `product-hunt/` | Miniatura em PNG e GIF (240 × 240) e 5 imagens da galeria (1270 × 760), geradas por `pnpm lancamento:imagens` | Imagens |
 
 ## Leia primeiro: três avisos
 
@@ -46,7 +48,7 @@ Se alguma prova não passar, tire a frase correspondente de **todos** os textos 
 | Depois do merge da F3 (mesmo dia) | AlternativeTo e os diretórios (`alternativeto.md`, `diretorios.md`) | De 2 a 3 h no total |
 | No dia seguinte ao merge da F3, **antes de ligar os anúncios** | Show HN (`show-hn.md`) | 15 min para postar e as primeiras horas para responder |
 | Depois do merge da F5a | Repositório público do motor de imagem (`codigo-aberto.md`) | Cerca de 1 h |
-| Só depois da F5b | Product Hunt | Não é desta run; não há texto aqui |
+| Na primeira terça depois do merge da F5b, às 12:01 AM do Pacífico (5h01 de Brasília em novembro) | Product Hunt (`product-hunt.md` e `product-hunt/`) | Agendar na véspera; no dia, ficar disponível nas primeiras horas para responder |
 
 Por que o AlternativeTo vem primeiro: a fila de revisão é longa e sem prazo. Por que o Show HN vem antes dos anúncios: o texto promete que os anúncios ainda não estão ligados, e quem lê o HN vai olhar a página com atenção.
 
@@ -206,3 +208,21 @@ Por que não antes do merge: a F5a muda o motor (o carregamento dos `.wasm`) e a
 - [ ] Primeiro push feito por mim, com a tag `v0.1.0`. O GitHub mostra "MIT license".
 - [ ] Não publicar no npm agora: o pacote é código-fonte TypeScript sem build.
 - [ ] Atualizar a resposta de "é código aberto?" nos textos do Show HN, se for usá-la. O campo de licença do AlternativeTo continua **Proprietary** (é do site).
+
+## Product Hunt (depois do merge da F5b)
+
+A run F5b deixou em `product-hunt.md` o kit do lançamento no Product Hunt, e em `product-hunt/` as imagens. As regras foram lidas nas páginas do próprio Product Hunt em **1/nov/2026**. **Nada foi enviado**: nenhuma conta, post ou agendamento saiu da run. Os textos foram redigidos com ajuda de IA, e o Product Hunt não aceita comentário escrito por IA: reescreva o primeiro comentário e as respostas com as suas palavras.
+
+### Checklist para o Victor
+
+- [ ] Ler `product-hunt.md` inteiro, começando por "Leia antes de usar".
+- [ ] Conferir no dia as contagens (8 ferramentas de imagem, 3 presets, 12 de PDF, 14 calculadoras, 15 guias) e se os anúncios estão ligados.
+- [ ] Criar ou conferir a conta pessoal, com a sua foto (a Oli fica só no produto).
+- [ ] Pôr o link do repositório público do motor só se ele estiver no ar.
+- [ ] Agendar para a primeira terça depois do merge, às 12:01 AM do Pacífico.
+
+### O que a run F5b fez com esta pasta
+
+- **Um teste passa a ler esta pasta.** O `tests/unit/launch-kit.test.ts`, que roda no `pnpm verificar`, confere em `product-hunt.md` as contagens do produto contra os registros, a contagem de caracteres de cada texto contra os limites lidos, e cada imagem listada (tamanho, peso, legenda e nenhum metadado da máquina). A frase "Nenhum portão do `pnpm verificar` lê `docs/lancamento/`", da seção da F3, deixou de valer para o `product-hunt.md`.
+- **As imagens** saem de `pnpm lancamento:imagens` (fora do `verificar`), a partir do `dist/` e do `docs/design/`. Depois de qualquer mudança visual no site, rode de novo e commite as imagens com a tabela que o script reescreve.
+- **As provas** do kit somam às do Show HN os guias (dois casos novos no `launch-claims.spec.ts`) e o spec `tool-guides.spec.ts`.
