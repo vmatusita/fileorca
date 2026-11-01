@@ -4,7 +4,7 @@ import panel from '../../src/tools/pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import { violationIds } from './lib/axe.ts';
-import { choosePdfs, filesOf, openTool, pdfFile, pdfOracle, takePdfDownload } from './lib/pdf-tools.ts';
+import { REFUSAL_TEXT, choosePdfs, filesOf, openTool, pdfBytes, pdfFile, pdfOracle, rowReason, takePdfDownload } from './lib/pdf-tools.ts';
 import { readWithPdfjs } from './lib/pdfjs-read.ts';
 
 // The PDF island in use (F5a): the flows the matrix does not cover, one page load each.
@@ -22,6 +22,16 @@ test('Merge PDF: two files in the order of the list, the order changed with the 
   expect(out[0]?.name).toBe('gen-ja-otimizado-merged.pdf');
   const read = await readWithPdfjs(out[0]?.bytes as Uint8Array);
   expect(read.pages.map((p) => p.marker)).toEqual([...Array.from({ length: 12 }, (_, i) => `Page ${i + 1}`), ...Array.from({ length: 8 }, (_, i) => `Page ${i + 1}`)]);
+});
+
+test('Rotate PDF: a scan cut inside its image is refused on its row, with no download (DECISOES § 174)', async ({ page }) => {
+  const full = pdfBytes('pdf-escaneado-01-pagina-livro-cor.pdf');
+  const cut = { name: 'scan-cut.pdf', mimeType: 'application/pdf', buffer: full.subarray(0, Math.floor(full.length / 2)) };
+  await openTool(page, '/rotate-pdf/');
+  await choosePdfs(page, [cut]);
+  expect(await rowReason(page, 'scan-cut.pdf')).toMatch(REFUSAL_TEXT['gen-cortado.pdf']);
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toHaveCount(0);
+  await expect(page.locator('#fo-tool-root .fo-drop [role="alert"]')).toContainText('stops before its end');
 });
 
 // ---- Criterion 10 (prompt F5a, decision 6): the keyboard does what dragging does -------------------------------------

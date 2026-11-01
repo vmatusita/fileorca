@@ -1,8 +1,10 @@
 // The core of the PDF engine (F5a, decision 4): what a file is, from its bytes; the files refused and why; the lock of
 // an encrypted file; and what the panel shows before a tool runs. The expected values come from the oracle that PDF.js
 // and qpdf wrote (fixtures/pdf/expected.json), never from the engine.
+import { PDFDocument, PDFName, PDFRef } from '@cantoo/pdf-lib';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { inspectPdf } from '../../src/engine/pdf/open.ts';
+import { processPdf } from '../../src/engine/pdf/process.ts';
 import { boxOf, normalRotation, shownSize, toUser, visibleBox } from '../../src/engine/pdf/geometry.ts';
 import { headerOffset, indexIsSound, sniffPdf } from '../../src/engine/pdf/sniff.ts';
 import { ORACLE, fixture, oracle, useNodeAssets } from './lib/pdf-engine.ts';
@@ -64,6 +66,50 @@ describe('inspect: every fixture as the oracle says', () => {
       }
     });
   }
+});
+
+// A file cut short is refused whatever the cut took (DECISOES § 174). The fixture gen-cortado loses text, which the
+// page check always saw; a scan or a photo PDF cut inside its image used to come back "repaired", with the image gone.
+describe('a file cut short is refused, whatever the cut took', () => {
+  const cut = (name: string, fraction: number): Uint8Array => {
+    const full = fixture(name);
+    return full.slice(0, Math.floor(full.length * fraction));
+  };
+  const refused = async (bytes: Uint8Array, reason: 'truncated' | 'corrupted') => {
+    expect(await inspectPdf(bytes)).toMatchObject({ ok: false, reason });
+    expect(await processPdf({ kind: 'rotate', all: 1, pages: {} }, [bytes], null)).toMatchObject({ ok: false, reason });
+    expect(await processPdf({ kind: 'merge' }, [fixture('gen-paginas-mistas.pdf'), bytes], null)).toMatchObject({ ok: false, reason });
+  };
+
+  for (const percent of [10, 30, 50, 60, 80, 95]) {
+    it(`the scanned page cut at ${percent}% (its image is cut)`, async () => {
+      await refused(cut('pdf-escaneado-01-pagina-livro-cor.pdf', percent / 100), 'truncated');
+    });
+  }
+
+  for (const part of [28, 29, 30, 31]) {
+    it(`gen-fotos cut at ${part}/32 of its length (the fourth photo is cut)`, async () => {
+      await refused(cut('gen-fotos.pdf', part / 32), 'truncated');
+    });
+  }
+
+  it('gen-xref-estragada cut in its middle (pages lost), while the whole file stays repaired', async () => {
+    for (const fraction of [0.4, 0.45, 0.55, 0.65, 0.7]) await refused(cut('gen-xref-estragada.pdf', fraction), 'truncated');
+    expect(await inspectPdf(fixture('gen-xref-estragada.pdf'))).toMatchObject({ ok: true, repaired: true });
+    expect(await inspectPdf(fixture('gen-cortado.pdf'))).toMatchObject({ ok: false, reason: 'truncated' });
+  });
+
+  it('a complete file whose page names an image or a font that is not there is corrupted', async () => {
+    for (const key of ['XObject', 'Font'] as const) {
+      const doc = await PDFDocument.create({ updateMetadata: false });
+      const page = doc.addPage([200, 200]);
+      // An object number the file never writes: the reference leads nowhere.
+      page.node.set(PDFName.of('Resources'), doc.context.obj({ [key]: { Missing: PDFRef.of(999) } }));
+      const bytes = await doc.save({ useObjectStreams: false });
+      expect(indexIsSound(bytes)).toBe(true);
+      await refused(bytes, 'corrupted');
+    }
+  });
 });
 
 describe('geometry of the page as shown', () => {

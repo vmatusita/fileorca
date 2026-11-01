@@ -5,7 +5,7 @@
 // file: pdf-lib sees /Encrypt, and qpdf (loaded only for an encrypted file) tells a password from owner restrictions.
 // Self-contained: nothing here imports from outside src/engine/pdf/.
 
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRef, PDFStream, ParseSpeeds, type PDFPage } from '@cantoo/pdf-lib';
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRef, PDFStream, ParseSpeeds, type PDFObject, type PDFPage, type PDFPageLeaf } from '@cantoo/pdf-lib';
 import { PdfEngineError } from './errors.ts';
 import { boxOf, normalRotation, visibleBox, type Box } from './geometry.ts';
 import { lockOf } from './qpdf.ts';
@@ -30,11 +30,37 @@ function dangling(dict: PDFDict, key: string): boolean {
   return refs.some((ref) => dict.context.lookup(ref) === undefined);
 }
 
-/** A page a viewer can draw: a MediaBox, and content streams that exist. */
+/** The value itself, or what a reference points at (undefined for a reference that leads nowhere). */
+const resolved = (node: PDFPageLeaf, value: PDFObject | undefined): PDFObject | undefined => (value instanceof PDFRef ? node.context.lookup(value) : value);
+
+/**
+ * Whether the page's resources name an image (or form) or a font the file does not have (DECISOES § 174). A cut inside
+ * an image leaves the page and its /XObject entry whole while pdf-lib drops the unfinished object: without this check the
+ * page opened, and the tools handed back a page with the image gone.
+ */
+function danglingResources(node: PDFPageLeaf): boolean {
+  const raw = node.getInheritableAttribute(PDFName.of('Resources'));
+  if (raw === undefined) return false;
+  const resources = resolved(node, raw);
+  if (resources === undefined) return true;
+  if (!(resources instanceof PDFDict)) return false;
+  for (const [key, kind] of [['XObject', PDFStream], ['Font', PDFDict]] as const) {
+    const listed = resources.get(PDFName.of(key));
+    if (listed === undefined) continue;
+    const entries = resolved(node, listed);
+    if (entries === undefined) return true;
+    if (!(entries instanceof PDFDict)) continue;
+    for (const [, value] of entries.entries()) if (value instanceof PDFRef && !(node.context.lookup(value) instanceof kind)) return true;
+  }
+  return false;
+}
+
+/** A page a viewer can draw: a MediaBox, content streams that exist, and the images and fonts its resources name. */
 function soundPage(page: PDFPage): boolean {
   const node = page.node;
   if (!node.MediaBox()) return false;
   if (dangling(node, 'Contents')) return false;
+  if (danglingResources(node)) return false;
   const contents = node.Contents();
   if (contents instanceof PDFArray) return contents.asArray().every((item) => !(item instanceof PDFRef) || node.context.lookup(item) instanceof PDFStream);
   return contents === undefined || contents instanceof PDFStream;
@@ -51,6 +77,10 @@ export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
   if (kind !== 'pdf') throw Object.assign(new PdfEngineError('not-pdf'), { source: kind });
   if (bytes.length > MAX_PDF_BYTES) throw new PdfEngineError('too-large');
   const ended = hasEnd(bytes);
+  // No end and no index that points into the file: the file stops before its end (DECISOES § 174). pdf-lib's scan would
+  // read what is there and drop the object the cut went through, so a page could open without its image. A file with
+  // a broken index but an end (gen-xref-estragada) is still read by the scan and comes out repaired.
+  if (!ended && !indexIsSound(bytes)) throw new PdfEngineError('truncated');
   let doc: PDFDocument;
   try {
     doc = await PDFDocument.load(bytes, LOAD);
