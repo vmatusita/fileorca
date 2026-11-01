@@ -210,3 +210,9 @@ Pegadinhas que o ajuste achou:
 - Depois de um `gh run rerun <id>`, o `gh run view <id> --log` mostra a última tentativa. Para ler uma tentativa anterior, use `gh run view <id> --attempt <n> --log`, e o mesmo `--attempt` com `--json jobs`.
 - O tempo do job não é o tempo da parte. O `playwright install --with-deps` chegou a 356 s num rerun, porque o apt do runner estava lento, e esse tempo fica fora do `verificar` e do limite de 900 s. Compare as partes pelo `total` do resumo do `verificar` no log.
 - Na primeira execução com três partes, o `/` da parte 2 do WebKit caiu de 10,9 GB livres para 609 MB em 60 s do `design.spec.ts` (da Oli a 1280 × 800 às regressões da revisão), e o diagnóstico de disco não achou onde (DECISOES § 108). No rerun não aconteceu. Se uma parte do WebKit falhar com `ENOSPC`, comece pelas linhas `[disco]` dela.
+
+## Ajuste: diagnóstico de disco
+
+- O `scripts/lib/disco.ts` (só no Linux do CI) faz uma busca funda quando o `/` perde mais de 2 GB: as linhas `[disco] busca funda:` trazem os arquivos apagados e ainda abertos (do `/proc`, com os processos), os arquivos grandes gravados desde o início, as pastas de `/var`, os dumps e os maiores processos (DECISOES § 109). Se uma parte falhar com `ENOSPC`, leia essas linhas antes de mexer em teste.
+- Todo `find` do diagnóstico roda com `timeout` e `nice` dentro do próprio comando e diz se foi "completo" ou "interrompido". Um `find` com o timeout do `execSync` em volta morre sem imprimir e deixa o processo órfão: foi assim que o `find` antigo disse "(nenhum)" por 20 s em toda parte, desde a § 90.
+- A busca funda só roda no Linux, então o `tests/unit/disco.test.ts` prova a leitura do `/proc` no Vitest do CI. No Windows, o mesmo teste só confere que não há `/proc`. Teste que depende do sistema ramifica por dentro e nunca usa `skip` nem `runIf`.
