@@ -2561,15 +2561,22 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..08
   - a etiqueta "example" que desce de linha em "Coverage per gallon";
   - a folga de 3 px do teste dos menus na Square footage a 360 px, que supõe uma seta de 26 px.
 
-## § 283 · A parte 2 do WebKit passou do alvo de 700 s uma vez (F7, decisão 10)
+## § 283 · As partes 2 e 7 do WebKit passaram do alvo de 700 s, uma vez cada (F7, decisão 10)
 
-- **A medida:** a parte 2 do WebKit (`--playwright=webkit --shard=2/8`) tem a segunda metade do `a11y.spec.ts` (100 testes) e o começo do `ads.spec.ts` (46 testes). O `a11y` dessa metade é o mais pesado: o passeio de estados das ferramentas de PDF (de 18 a 37 s por teste no runner).
-  - Na [run 41449325645](https://github.com/vmatusita/fileorca/actions/runs/41449325645) (commit `69fb7f3`), ela levou 833,1 s: os testes somaram 1.243 s de `a11y` e 363 s de `ads`, em 2 workers.
-  - Na [run 41459127177](https://github.com/vmatusita/fileorca/actions/runs/41459127177) (commit `083f5a7`, com os mesmos testes nela), levou 690,0 s.
-  - As outras 12 partes ficaram abaixo de 700 s nas duas.
-- **A leitura:** a parte está perto do alvo e varia uns 140 s de um runner para outro. Ela não passou do limite de 900 s, então a divisão desta run fica como a ficha fixou (13 partes).
-- **A proposta,** numa run de ajuste, antes de somar testes de acessibilidade:
-  1. tirar o passeio de estados do `a11y.spec.ts` para um arquivo próprio que caia depois do `ads.spec.ts` na ordem dos nomes (por exemplo, `axe-states.spec.ts`). Assim, os testes pesados se dividem entre as partes 3 e 4 do WebKit, hoje as mais leves (245 a 432 s);
-  2. ou o WebKit em 9 partes.
+- **A parte 2 do WebKit** (`--playwright=webkit --shard=2/8`) tem a segunda metade do `a11y.spec.ts` (100 testes) e o começo do `ads.spec.ts` (46 testes). O `a11y` dessa metade é o mais pesado: o passeio de estados das ferramentas de PDF (de 18 a 37 s por teste no runner).
+- **A parte 7 do WebKit** tem os `money-*` (os três da F7 entre eles, com uns 200 s de testes) e 43 testes da matriz de PDF, que somam 740 s sozinhos.
+- **As medidas** (o total do `verificar` da parte, do resumo no log):
+
+  | Execução | Parte 2 | Parte 7 |
+  | --- | ---: | ---: |
+  | [run 41449325645](https://github.com/vmatusita/fileorca/actions/runs/41449325645) (`69fb7f3`) | **833,1 s** (1.243 s de `a11y` e 363 s de `ads` somados, em 2 workers) | 692,4 s |
+  | [run 41459127177](https://github.com/vmatusita/fileorca/actions/runs/41459127177) (`083f5a7`) | 690,0 s | 653,5 s |
+  | [run 41465872919](https://github.com/vmatusita/fileorca/actions/runs/41465872919) (`9d09714`, o código final) | 600,8 s | **730,0 s** |
+
+  As outras 11 partes ficaram abaixo de 700 s nas três.
+- **A leitura:** as duas partes estão perto do alvo e variam de 70 a 230 s de um runner para outro, com os mesmos testes. Nenhuma passou do limite de 900 s, então a divisão desta run fica como a ficha fixou (13 partes).
+- **A proposta,** numa run de ajuste, antes de somar testes de acessibilidade, de dinheiro ou de PDF:
+  1. tirar o passeio de estados do `a11y.spec.ts` para um arquivo próprio que caia depois do `ads.spec.ts` na ordem dos nomes (por exemplo, `axe-states.spec.ts`). Assim, os testes pesados se dividem entre as partes 3 e 4 do WebKit, hoje mais leves (de 245 a 432 s);
+  2. o WebKit em 9 partes, que também tira peso da parte 7.
 
   Antes de escolher, rode o `--list` das partes e confira onde caem o `design.spec.ts` e a matriz de imagens (§ 142).

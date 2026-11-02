@@ -1,0 +1,17 @@
+build.txt: 9d09714c142d323c9c246e240adcbc9ffecbbdd8
+360px /bmi-calculator/: 200 · h1 "BMI calculator" · resultado "23.6" · fim do número 708 px · tabela 324/324 px (largura do conteúdo/da moldura)
+360px /bmi-calculator/#v=1&u=metric: 200 · h1 "BMI calculator" · resultado "22.9" · fim do número 708 px · tabela 324/324 px (largura do conteúdo/da moldura)
+360px /due-date-calculator/: 200 · h1 "Due date calculator" · resultado "June14,2027" · fim do número 568 px · tabela 324/324 px (largura do conteúdo/da moldura)
+360px /ovulation-calculator/: 200 · h1 "Ovulation calculator" · resultado "November1,2026" · fim do número 590 px · tabela 324/324 px (largura do conteúdo/da moldura)
+360px /concrete-calculator/: 200 · h1 "Concrete calculator" · resultado "1.36cu yd" · fim do número 708 px · tabela 324/324 px (largura do conteúdo/da moldura)
+360px /home-calculators/: 200 · h1 "Calculators for home projects" · resultado "—"
+360px /health-calculators/: 200 · h1 "Calculators for adult health numbers" · resultado "—"
+360px /qr-code-generator/: qr-code.png 490×490 px, jsqr leu os bytes exatos
+1280px /bmi-calculator/: 200 · h1 "BMI calculator" · resultado "23.6" · fim do número 420 px · tabela 754/754 px (largura do conteúdo/da moldura)
+1280px /bmi-calculator/#v=1&u=metric: 200 · h1 "BMI calculator" · resultado "22.9" · fim do número 420 px · tabela 754/754 px (largura do conteúdo/da moldura)
+1280px /due-date-calculator/: 200 · h1 "Due date calculator" · resultado "June14,2027" · fim do número 448 px · tabela 754/754 px (largura do conteúdo/da moldura)
+1280px /ovulation-calculator/: 200 · h1 "Ovulation calculator" · resultado "November1,2026" · fim do número 420 px · tabela 754/754 px (largura do conteúdo/da moldura)
+1280px /concrete-calculator/: 200 · h1 "Concrete calculator" · resultado "1.36cu yd" · fim do número 420 px · tabela 754/754 px (largura do conteúdo/da moldura)
+1280px /home-calculators/: 200 · h1 "Calculators for home projects" · resultado "—"
+1280px /health-calculators/: 200 · h1 "Calculators for adult health numbers" · resultado "—"
+1280px /qr-code-generator/: qr-code.png 490×490 px, jsqr leu os bytes exatos
