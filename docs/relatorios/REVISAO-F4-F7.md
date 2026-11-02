@@ -32,15 +32,28 @@ Esta é a revisão das F4 a F7 que a run `fase-08` fez (decisão 17 da ficha), n
 - **Achados repetidos entre lentes:** o a-1 é o h-2 (o CET em notação exponencial) e o a-2 é o h-3 (o PDF das dívidas com o valor sobre o rótulo). O alto e os 9 médios são, então, 8 defeitos.
 - **Os céticos subiram** o d-3 e o d-4 de baixo para médio, e mantiveram o e-1 como alto (é o e-1 da F7, médio lá, mais grave agora: CLS de 0,12 a 0,27 a 360 e 393 px). **Desceram** g-1, g-2, g-3, b-1 e f-1 de médio para baixo. **Refutaram** dois: g-4 (a linha "Reviewed by" segue a ficha, que vence o plano) e f-3 (o botão pequeno do Pix é o D-12 da F5a, já pendente).
 - **Corrigidos (§ 305):** o alto e-1 e os médios h-1, h-2/a-1, h-3/a-2, d-1, d-3 e d-4, cada um com um teste:
-  - **e-1:** a trilha de navegação passa a ser uma linha só, que rola dentro dela (nada é cortado, e o foco do teclado rola até o link), e a fonte de reserva da Figtree foi recalibrada para a largura dela no peso do texto (101,2%). Teste: `tests/e2e/layout-shift.spec.ts` (o Chromium segura a Figtree até depois da primeira pintura e soma o CLS em 12 páginas a 360 e 393 px; no `29afbce` deu 0,19 no `/mortgage-calculator/`, agora no máximo 0,027; o WebKit compara a trilha e o H1 com e sem a Figtree);
+  - **e-1:** a trilha de navegação ganha uma face própria da Figtree, com `font-display: optional`, e fica com a fonte da primeira pintura; a fonte de reserva da Figtree foi recalibrada para 101,2%. A primeira versão (a trilha numa linha só que rola dentro dela) cortava links e foi trocada depois da segunda passada (s-1, abaixo). Teste: `tests/e2e/layout-shift.spec.ts` (de 320 a 412 px, com as páginas que ficaram na borda de uma linha em cada largura; o Chromium segura a Figtree até depois da primeira pintura e soma o CLS, até 0,05; o WebKit confere que a trilha e o H1 não mudam quando a fonte chega). Na varredura das 159 páginas, o máximo foi de 0,201 a 0,317 no `29afbce` para 0,032 a 0,048 de 320 a 393 px e 0,079 a 412 px (um parágrafo do `/pt/privacidade/`, que não depende da trilha);
   - **h-1:** o Sobre em inglês conta todas as áreas (`tests/unit/about-counts.test.ts`, contra os registros);
   - **h-2:** o CET acima de 10.000.000% ao ano vira um problema, com o PDF e o CSV desligados (`tests/unit/calc-defs.test.ts`, "after the review F4-F7");
   - **h-3:** no PDF, um valor que não cabe na linha do rótulo vai para a linha de baixo (`tests/unit/calc-report.test.ts`, lido de volta pelo PDF.js com 10 dívidas em pt, es e en);
-  - **d-1:** nas ferramentas de PDF com botão de ação, o status diz os prontos ou as recusas depois da leitura (`tests/e2e/pdf-tool.spec.ts`);
+  - **d-1:** nas ferramentas de PDF com botão de ação, o status diz os prontos ou as recusas depois da leitura, e no Merge com um PDF só, também o que falta (`tests/e2e/pdf-tool.spec.ts`);
   - **d-3:** o número e a frase do cartão de resultado quebram em vez de sair do cartão com o espaçamento de texto do WCAG 1.4.12 (`tests/e2e/calc-form.spec.ts`);
   - **d-4:** o erro de faixa espera 800 ms sem tecla ou a saída do campo; um número válido vai à conta na hora (`tests/e2e/calc-form.spec.ts`).
 - **O médio que ficou:** o e-2 (o cartão de resultado das ferramentas de imagem empurra as opções no celular, CLS de 0,064 a 0,072 depois da interação). A correção pede decidir onde ficam as opções no estado de resultado, o que muda o molde da página de ferramenta: não é local. Vai para o `PENDENCIAS.md`.
 - **Os baixos:** os 19 vão para o `docs/PENDENCIAS.md`, grupo 16, com a correção proposta de cada um.
+
+## A segunda passada
+
+Um revisor Sonnet em contexto limpo leu o diff das correções (`29afbce..f3abd07`), rodou o Vitest inteiro, os specs de calculadora, de PDF e de acessibilidade nos dois navegadores, e provou que cada teste novo reprova sem a correção. Achou 1 alto, 2 médios e 3 baixos. As correções estão na § 305.
+
+| Id | Sev. | Final | Achado | Destino |
+| --- | --- | --- | --- | --- |
+| s-1 | alto | alto | A trilha de uma linha que rola dentro dela (a primeira versão do e-1) cortava a página atual em 95 páginas a 320 px e links pais em 10, sem pista visual, e o anel de foco ficava sem até 98 px | corrigido: a trilha volta a quebrar, com a face `optional` da Figtree; o teste do e-1 confere que nenhum item passa da largura da trilha |
+| s-2 | médio | médio | O `size-adjust` de 101,2% regredia páginas fora da amostra do teste (0,078 no `/pt/calculadora-cartao-de-credito/` a 360 px), e o comentário dizia "peso 400" | corrigido: varredura das 159 páginas em cinco larguras, valor escolhido pelo máximo, teste com as páginas da borda de cada largura, comentário com o peso 500 |
+| s-3 | médio | médio | No Merge com um PDF pronto e um recusado, o status dizia "the rest are ready", e a tela, "Add at least one more PDF to merge." | corrigido: o status junta a recusa e o que falta (`pdf-tool.spec.ts`) |
+| s-4 | baixo | baixo | No PDF, o rótulo pode ficar sozinho no pé da página quando o valor desce (a correção do h-3); hoje não é alcançável | `PENDENCIAS.md`, grupo 16 |
+| s-5 | baixo | refutado | O teste do h-2 usaria valores fora da faixa: o revisor leu o máximo do IOF em centavos, mas o `money()` recebe reais (máximo de 50.000.000 centavos) | o teste ganhou a prova de que cada valor fica na faixa |
+| s-6 | baixo | baixo | O comentário do `DECIMALS` ficou acima do `SETTLE_MS` novo (`src/tools/calc/form.ts`) | corrigido: é um defeito do diff desta run |
 
 ## Os achados, lente por lente
 

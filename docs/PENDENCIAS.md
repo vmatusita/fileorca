@@ -32,10 +32,10 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 13. Conteúdo: a run 2b | 1 | Run 2b |
 | 14. Decisões do Victor | 12 | Victor decide |
 | 15. Tarefas do Victor | 12 | Victor faz |
-| 16. Revisão das F4 a F7 (F8) | 20 | Runs de ajuste de cada tipo |
+| 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 4 | Runs de ajuste e Victor |
 
-Total: 148 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 149 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -268,7 +268,7 @@ Fora do código. As duas primeiras são as que a ficha da F8 nomeia (decisão 3)
 
 ## 16. Revisão das F4 a F7 (F8)
 
-Os baixos da revisão das F4 a F7 feita na F8 (`docs/relatorios/REVISAO-F4-F7.md`), depois dos céticos, e o médio e-2, cuja correção não é local (muda o molde da página de ferramenta). Cada um vai para a run de ajuste do tipo dele; os ids repetem os da revisão.
+Os baixos da revisão das F4 a F7 feita na F8 (`docs/relatorios/REVISAO-F4-F7.md`), depois dos céticos, o baixo s-4 da segunda passada sobre as correções, e o médio e-2, cuja correção não é local (muda o molde da página de ferramenta). Cada um vai para a run de ajuste do tipo dele; os ids repetem os da revisão.
 
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
@@ -292,6 +292,7 @@ Os baixos da revisão das F4 a F7 feita na F8 (`docs/relatorios/REVISAO-F4-F7.md
 | F4-F7 f-4 | REVISAO-F4-F7.md f-4 | baixo | O mesmo componente NextStepChips tem três rótulos diferentes nas ferramentas de imagem, nas de PDF e nas calculadoras, nos três idiomas (src/tools/image/i18n/{en,pt,es}.ts:84,83,83 (next.label); src/tools/pdf/i18n/{en,pt,es}.ts:114,115,115; src/tools/calc/i18n/{en,pt,es}.ts:30,16,16 (nextLabel)) | Uma chave só por idioma ('Next step' / 'Próximo passo' / 'Siguiente paso'), usada pelos três painéis, sem dois-pontos. | Run de ajuste de layout |
 | F4-F7 f-5 | REVISAO-F4-F7.md f-5 | baixo | No rodapé em celular, o © fica separado do ano (pt a 360 px) e o ícone do café fica no meio das duas linhas do link (en 320 e 360, es 320 a 390) (src/components/Footer.astro:124 ('· © {year}' com espaços comuns); src/styles/components.css:470 (.fo-footer__coffee com align-items: center)) | '© 2026' com U+00A0 (ou span com white-space: nowrap) e align-items: flex-start no link do café, ou min-height 48 px com ícone alinhado à primeira linha. | Run de ajuste de layout |
 | F4-F7 f-6 | REVISAO-F4-F7.md f-6 | baixo | π (U+03C0) e ≤ (U+2264) caem fora do subconjunto latino de Fredoka e Figtree, e o gate:design só vigia as setas (src/i18n/en/home-calculators.ts:17; src/tools/concrete-calculator/i18n/en.ts:67; src/tools/square-footage-calculator/i18n/en.ts:57; src/i18n/en/guide-refinance-) | Escrever 'pi' e 'at most' / 'menor ou igual a' no texto, ou ampliar o checkArrows para um checkGlyphs que leia o unicode-range do CSS e reprove qualquer caractere fora dele (exceto licenças). | Run de ajuste de layout |
+| F4-F7 s-4 | REVISAO-F4-F7.md, segunda passada, s-4 | baixo | No PDF do relatório, o valor que desce para as linhas de baixo do rótulo (a correção do h-3) pode deixar o rótulo sozinho no pé da página e o valor na seguinte, ou partir o valor entre as páginas: o `room(pen, LINE)` antes do rótulo reserva uma linha só (src/engine/pdf/report.ts, `pairs()`). Hoje não acontece: só as calculadoras de dívida passam da linha, e o PDF delas cabe numa página; o ramo de várias linhas e a troca de página não têm teste. | Medir as linhas do valor antes de desenhar e chamar `room(pen, LINE * (1 + min(linhas, 2)))`; teste no `calc-report.test.ts` com linhas de enchimento antes do resultado (k = 44 e 45 na varredura do revisor). | Run de ajuste de exportação |
 
 ## 17. O que a F8 deixou
 
