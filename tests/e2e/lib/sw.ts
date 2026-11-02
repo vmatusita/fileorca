@@ -51,7 +51,10 @@ export async function allKept(page: Page): Promise<void> {
 export async function cacheKeys(page: Page): Promise<Record<string, string[]>> {
   return page.evaluate(async () => {
     const out: Record<string, string[]> = {};
-    for (const name of await caches.keys()) out[name] = (await (await caches.open(name)).keys()).map((request) => request.url);
+    for (const name of await caches.keys()) {
+      // caches.open() creates a cache that is missing: one the worker deleted in between is skipped.
+      if (await caches.has(name)) out[name] = (await (await caches.open(name)).keys()).map((request) => request.url);
+    }
     return out;
   });
 }
