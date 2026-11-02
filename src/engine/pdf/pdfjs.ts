@@ -71,6 +71,13 @@ class OffscreenFactory {
     target.canvas = null;
     target.context = null;
   }
+  /**
+   * The opaque context of the page canvas. PDF.js 6.5 asks the factory for it (BaseCanvasFactory#getNoAlphaContext);
+   * 6.4 took the same context from the canvas itself, so the drawing is the same in both.
+   */
+  getNoAlphaContext(canvas: OffscreenCanvas) {
+    return canvas.getContext('2d', { alpha: false, willReadFrequently: true });
+  }
 }
 
 /** No SVG filters in a worker (they need a document): PDF.js draws without them. */
