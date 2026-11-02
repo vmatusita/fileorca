@@ -126,6 +126,12 @@ function adBlocked(adsOn: boolean): boolean {
 const splitTag = (words: PdfPanelTexts['files'], mode: string | undefined, index: number): string =>
   mode === 'each' ? `${words.page}-${index}` : mode === 'ranges' ? `${words.part}-${index}` : words.selected;
 
+/** Whether the focus is in a field of the island where a person types (the file input is a button to them). */
+function typingIn(root: HTMLElement | null): boolean {
+  const active = document.activeElement;
+  return root !== null && active instanceof HTMLElement && root.contains(active) && active.matches('input:not([type="file"]):not([type="radio"]):not([type="checkbox"]), textarea');
+}
+
 const codecOf = (failure: Failure | null): Codec => {
   const source = failure?.source;
   if (failure?.reason === 'empty') return 'empty';
@@ -620,7 +626,9 @@ export default function PdfPanel(props: PdfPanelData) {
     }
     if (m.phase === 'ready' && m.focusAction && actionRef.current) {
       m.focusAction = false;
-      actionRef.current.focus();
+      // The options come with the ready card, a frame before this effect: a person already typing in one of their fields
+      // keeps it, and the keys never go to the action (DECISOES § 240).
+      if (!typingIn(rootRef.current)) actionRef.current.focus();
     }
     const active = document.activeElement;
     if ((!active || active === document.body) && m.slotFocus) (levelRef.current ?? downloadRef.current ?? actionRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
