@@ -8,7 +8,6 @@ import type { DateSpec, FieldSpec, ListSpec, NumberSpec, Values } from './types.
 
 export const LINK_VERSION = '1';
 
-/** Decimals a number field keeps: cents for money, four for a rate (1/10,000 of a point), none for a count. */
 /**
  * How long a field waits, after the last key, before a value out of its range shows the error, its alert and the stale
  * result: typing 425,000 in a field that starts at 10,000 passed through 4, 42, 425 and 4,250, and each one was announced
@@ -17,6 +16,7 @@ export const LINK_VERSION = '1';
  */
 export const SETTLE_MS = 800;
 
+/** Decimals a number field keeps: cents for money, four for a rate (1/10,000 of a point), none for a count. */
 export const DECIMALS: Record<'money' | 'rate' | 'int', number> = { money: 2, rate: 4, int: 0 };
 
 /** The decimals of a field: those of its kind, or the measure's own (F7: a length in hundredths of a foot). */

@@ -214,11 +214,14 @@ describe('the home and health definitions (F7)', () => {
 describe('after the review F4-F7', () => {
   it('the CET of the Brazilian loans never comes out in exponent: past 10,000,000 % a year it is a problem (h-2)', () => {
     const cases = [
-      ['br-personal-loan', { ...DEFS['br-personal-loan'].initial, a: 10_000, iof: 25_000_000 }],
-      ['br-vehicle-loan', { ...DEFS['br-vehicle-loan'].initial, p: 100_000, e: 0, n: 1, iof: 3_000_000 }],
+      // Values inside the ranges of the fields (second pass, s-5): the smallest credit and the costs at their top.
+      ['br-personal-loan', { ...DEFS['br-personal-loan'].initial, a: 10_000, n: 120, r: 200_000, iof: 50_000_000, tf: 50_000_000, c: 'financed' }],
+      ['br-vehicle-loan', { ...DEFS['br-vehicle-loan'].initial, p: 100_000, e: 0, n: 96, r: 150_000, iof: 50_000_000, tf: 50_000_000, c: 'financed' }],
     ] as const;
     for (const [id, values] of cases) {
       const def = DEFS[id];
+      expect(problems(def.fields, values as Values), id).toEqual({});
+      for (const spec of def.fields) if (spec.kind === 'money' || spec.kind === 'int' || spec.kind === 'rate') expect(inRange(spec, Number(values[spec.key as keyof typeof values])), `${id} ${spec.key}`).toBe(true);
       const view = viewOf(def, panelData(id, 'pt'), values as Values);
       expect(view.problem, id).toBeDefined();
       expect(JSON.stringify(view), id).not.toMatch(/e\+/);
