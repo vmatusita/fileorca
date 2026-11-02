@@ -39,7 +39,7 @@ import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n
 import enCommon from '../../src/i18n/en/common.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { FILLER, MAX_GUIDE_WORDS, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
@@ -938,7 +938,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   function build(dir: string): void {
     for (const entry of allPages()) {
       const id = entry.route.id;
-      if (isCalcPage(id) || isBrCalc(id)) {
+      if (isCalcPage(id) || isBrCalc(id) || isLifeCalc(id)) {
         write(dir, entry.path, calcPage(`${id} ${entry.lang}`, undefined, entry.lang));
         continue;
       }
@@ -975,7 +975,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   // each of their languages (18 in English, 5 in Spanish and the Brazilian ones once their rows are in the map; 18 before)
   // and the PDF pages (13 × 3; 13 before).
   const imageCount = allPages().filter((entry) => isImagePage(entry.route.id)).length;
-  const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id)).length;
+  // F7: and the 11 home and health calculators, in English (DECISOES § 259).
+  const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id) || isLifeCalc(entry.route.id)).length;
   const pdfCount = allPages().filter((entry) => isPdfPage(entry.route.id) || entry.route.id === PDF_HUB_ID).length;
 
   it('passes on a complete site, whose 404 pages repeat a title and hold placeholder wording', () => {

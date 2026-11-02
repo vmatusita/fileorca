@@ -276,9 +276,10 @@ const PART = /^oli-p\d+$/;
 /**
  * The Oli sprite of one page: unique ids, a single oli-clip clipPath and no `ic`, one hidden (but not
  * display:none) svg.fo-sprite, symbols named by the closed pose list, every [data-oli] box holding one
- * <use> of its own pose, no dangling reference, and a symbol for each pose the page shows or needs.
+ * <use> of its own pose, no dangling reference, and a symbol for each pose the page shows or needs. F7: a page may also
+ * forbid poses (the health calculators never cheer a result), and then their symbol must not be in the sprite at all.
  */
-export function checkSprite(html: string, options: { requiredPoses: readonly string[] }): string[] {
+export function checkSprite(html: string, options: { requiredPoses: readonly string[]; forbiddenPoses?: readonly string[] }): string[] {
   const root = parse(html);
   const problems: string[] = [];
 
@@ -342,6 +343,9 @@ export function checkSprite(html: string, options: { requiredPoses: readonly str
     }
   }
 
+  for (const pose of options.forbiddenPoses ?? []) {
+    if (symbolPoses.has(pose) || shown.has(pose)) problems.push(`a pose ${pose} está na página, que não pode mostrá-la`);
+  }
   for (const pose of new Set([...shown, ...options.requiredPoses])) {
     if (!symbolPoses.has(pose)) problems.push(`falta o símbolo oli-${pose} no sprite`);
   }

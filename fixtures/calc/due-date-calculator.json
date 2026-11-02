@@ -2,7 +2,7 @@
   "calculator": "due-date-calculator",
   "oracle": {
     "script": "scripts/oracle/calc_home_health.py",
-    "sha256": "704e587f6ece11e8db427dc6622c203015e82428ef7cbfc151c6e9c4ff9fd378",
+    "sha256": "1117cc6a2ec005cb7e038a78bdaceb5e1d7c083601a165b1b703a9d78d9be75a",
     "python": "3.13.18",
     "date": "2026-11-02",
     "nearTiesDrawnAgain": 0
@@ -229,6 +229,13 @@
     {"id":"grid-214","source":"grid","full":false,"input":{"method":"ivf5","date":"2099-12-31","today":"2100-10-07"},"expected":{"due":"2100-09-18","lmp":"2099-12-12","trimesters":["2099-12-12","2100-03-06","2100-06-26"],"fullTerm":"2100-09-11","status":"pregnant","age":{"weeks":42,"days":5}}},
     {"id":"grid-215","source":"grid","full":false,"input":{"method":"ivf5","date":"2099-12-31","today":"2100-10-27"},"expected":{"due":"2100-09-18","lmp":"2099-12-12","trimesters":["2099-12-12","2100-03-06","2100-06-26"],"fullTerm":"2100-09-11","status":"after","age":null}},
     {"id":"grid-216","source":"grid","full":false,"input":{"method":"ivf5","date":"2099-12-31","today":"2100-10-28"},"expected":{"due":"2100-09-18","lmp":"2099-12-12","trimesters":["2099-12-12","2100-03-06","2100-06-26"],"fullTerm":"2100-09-11","status":"after","age":null}},
+    {"id":"clock-new-year","source":"clock","full":false,"input":{"method":"lmp","date":"2027-12-25","today":"2028-01-03"},"expected":{"due":"2028-09-30","lmp":"2027-12-25","trimesters":["2027-12-25","2028-03-18","2028-07-08"],"fullTerm":"2028-09-23","status":"pregnant","age":{"weeks":1,"days":2}}},
+    {"id":"clock-leap-typed","source":"clock","full":false,"input":{"method":"lmp","date":"2028-02-29","today":"2028-03-01"},"expected":{"due":"2028-12-05","lmp":"2028-02-29","trimesters":["2028-02-29","2028-05-23","2028-09-12"],"fullTerm":"2028-11-28","status":"pregnant","age":{"weeks":0,"days":1}}},
+    {"id":"clock-leap-today","source":"clock","full":false,"input":{"method":"lmp","date":"2028-01-31","today":"2028-02-29"},"expected":{"due":"2028-11-06","lmp":"2028-01-31","trimesters":["2028-01-31","2028-04-24","2028-08-14"],"fullTerm":"2028-10-30","status":"pregnant","age":{"weeks":4,"days":1}}},
+    {"id":"clock-leap-ivf5","source":"clock","full":false,"input":{"method":"ivf5","date":"2028-02-29","today":"2028-02-29"},"expected":{"due":"2028-11-16","lmp":"2028-02-10","trimesters":["2028-02-10","2028-05-04","2028-08-24"],"fullTerm":"2028-11-09","status":"pregnant","age":{"weeks":2,"days":5}}},
+    {"id":"clock-example-11-03","source":"clock","full":false,"input":{"method":"lmp","date":"2026-09-07","today":"2026-11-03"},"expected":{"due":"2027-06-14","lmp":"2026-09-07","trimesters":["2026-09-07","2026-11-30","2027-03-22"],"fullTerm":"2027-06-07","status":"pregnant","age":{"weeks":8,"days":1}}},
+    {"id":"clock-example-11-04","source":"clock","full":false,"input":{"method":"lmp","date":"2026-09-07","today":"2026-11-04"},"expected":{"due":"2027-06-14","lmp":"2026-09-07","trimesters":["2026-09-07","2026-11-30","2027-03-22"],"fullTerm":"2027-06-07","status":"pregnant","age":{"weeks":8,"days":2}}},
+    {"id":"clock-longest-date","source":"clock","full":false,"input":{"method":"lmp","date":"2026-12-24","today":"2026-11-02"},"expected":{"due":"2027-09-30","lmp":"2026-12-24","trimesters":["2026-12-24","2027-03-18","2027-07-08"],"fullTerm":"2027-09-23","status":"before","age":null}},
     {"id":"nichd-ivf-day-3","source":"nih-numom2b","full":false,"input":{"method":"ivf3","date":"2026-03-17","today":"2026-04-01"},"expected":{"due":"2026-12-05","lmp":"2026-02-28","trimesters":["2026-02-28","2026-05-23","2026-09-12"],"fullTerm":"2026-11-28","status":"pregnant","age":{"weeks":4,"days":4}}},
     {"id":"nichd-ivf-day-5","source":"nih-numom2b","full":false,"input":{"method":"ivf5","date":"2026-03-17","today":"2026-04-01"},"expected":{"due":"2026-12-03","lmp":"2026-02-26","trimesters":["2026-02-26","2026-05-21","2026-09-10"],"fullTerm":"2026-11-26","status":"pregnant","age":{"weeks":4,"days":6}}},
     {"id":"nichd-40-weeks","source":"nichd","full":false,"input":{"method":"lmp","date":"2026-03-17","today":"2026-03-17"},"expected":{"due":"2026-12-22","lmp":"2026-03-17","trimesters":["2026-03-17","2026-06-09","2026-09-29"],"fullTerm":"2026-12-15","status":"pregnant","age":{"weeks":0,"days":0}}},

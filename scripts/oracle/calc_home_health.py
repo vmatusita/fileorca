@@ -610,6 +610,10 @@ def ovulation(inp: dict) -> dict:
 
 def ovulation_cases() -> list[dict]:
     out = [case('page-example', 'page-example', {'lmp': '2026-10-19', 'cycle': 28})]
+    # The days the browser tests type: the turn of a year, February 29 and the longest date the page writes.
+    out.append(case('clock-new-year', 'clock', {'lmp': '2027-12-25', 'cycle': 28}))
+    out.append(case('clock-leap', 'clock', {'lmp': '2028-02-29', 'cycle': 28}))
+    out.append(case('clock-longest-date', 'clock', {'lmp': '2027-09-17', 'cycle': 28}))
     n = 1
     for lmp in ('2000-01-01', '2024-02-10', '2026-12-20', '2027-02-27', '2028-02-28', '2099-12-31', '2099-10-01'):
         for cycle in (20, 21, 28, 35, 40):
@@ -725,6 +729,18 @@ def due_date_cases() -> list[dict]:
                     continue
                 out.append(case(f'grid-{n:03d}', 'grid', {'method': method, 'date': start, 'today': iso(today)}))
                 n += 1
+    # The days the browser tests fix the clock on (tests/e2e/money-health.spec.ts): the turn of a year, February 29 typed and
+    # as today, the example on the next two days, and the longest date the page writes (September 30).
+    for cid, inp in (
+        ('clock-new-year', {'method': 'lmp', 'date': '2027-12-25', 'today': '2028-01-03'}),
+        ('clock-leap-typed', {'method': 'lmp', 'date': '2028-02-29', 'today': '2028-03-01'}),
+        ('clock-leap-today', {'method': 'lmp', 'date': '2028-01-31', 'today': '2028-02-29'}),
+        ('clock-leap-ivf5', {'method': 'ivf5', 'date': '2028-02-29', 'today': '2028-02-29'}),
+        ('clock-example-11-03', {'method': 'lmp', 'date': '2026-09-07', 'today': '2026-11-03'}),
+        ('clock-example-11-04', {'method': 'lmp', 'date': '2026-09-07', 'today': '2026-11-04'}),
+        ('clock-longest-date', {'method': 'lmp', 'date': '2026-12-24', 'today': '2026-11-02'}),
+    ):
+        out.append(case(cid, 'clock', inp))
     # The NIH nuMoM2b dating table: a day-3 transfer + 263 days, a day-5 transfer + 261, an insemination + 266.
     out.append(case('nichd-ivf-day-3', 'nih-numom2b', {'method': 'ivf3', 'date': '2026-03-17', 'today': '2026-04-01'}))
     out.append(case('nichd-ivf-day-5', 'nih-numom2b', {'method': 'ivf5', 'date': '2026-03-17', 'today': '2026-04-01'}))
