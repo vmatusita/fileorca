@@ -66,7 +66,7 @@ export default {
   panel: {
     field: {
       label: 'Link or text',
-      placeholder: 'https://example.com',
+      placeholder: 'https://fileorca.com',
       help: 'Up to {max} characters. A letter with an accent counts as 2 and an emoji as 4.',
       count: '{count} of {max}',
     },
