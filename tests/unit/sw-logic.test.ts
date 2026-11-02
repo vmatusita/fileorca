@@ -6,12 +6,10 @@ import {
   cacheKey,
   cachesToDelete,
   isCacheable,
-  isListedPage,
   langOfPath,
   neverCached,
   offlineOrder,
   strategyFor,
-  titleOf,
   warmList,
   type RequestLike,
   type SwConfig,
@@ -144,22 +142,6 @@ describe('inbox', () => {
     expect(inboxExpired(String(now + 10 * 60_000), now)).toBe(true);
     expect(inboxExpired(null, now)).toBe(true);
     expect(inboxExpired('soon', now)).toBe(true);
-  });
-});
-
-describe('the list of the offline page', () => {
-  it('lists pages, not the offline and share pages or files', () => {
-    expect(isListedPage('/compress-image/', config)).toBe(true);
-    expect(isListedPage('/pt/', config)).toBe(true);
-    expect(isListedPage('/offline/', config)).toBe(false);
-    expect(isListedPage('/pt/abrir-com/', config)).toBe(false);
-    expect(isListedPage('/_astro/island.css', config)).toBe(false);
-  });
-
-  it('reads the title of a stored page', () => {
-    expect(titleOf('<html><head><title>Compress image &amp; photo | FileOrca</title></head>')).toBe('Compress image & photo | FileOrca');
-    expect(titleOf('<title></title>')).toBeNull();
-    expect(titleOf('<p>no title</p>')).toBeNull();
   });
 });
 

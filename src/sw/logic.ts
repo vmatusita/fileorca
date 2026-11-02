@@ -110,20 +110,3 @@ export function warmList(urls: unknown, origin: string, config: Pick<SwConfig, '
   }
   return [...keys];
 }
-
-/** Whether a cached path is a page for the list of the offline page (not an offline or share page, not a file). */
-export function isListedPage(pathname: string, config: Pick<SwConfig, 'offline' | 'share'>): boolean {
-  if (!pathname.endsWith('/')) return false;
-  if (config.share.includes(pathname)) return false;
-  return !SW_LANGS.some((lang) => config.offline[lang].page === pathname);
-}
-
-const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" };
-
-/** The text of the first <title> of an HTML page, or null. */
-export function titleOf(html: string): string | null {
-  const match = /<title>([^<]*)<\/title>/i.exec(html);
-  if (!match) return null;
-  const text = (match[1] ?? '').replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, name: string) => ENTITIES[name] ?? '').trim();
-  return text === '' ? null : text;
-}
