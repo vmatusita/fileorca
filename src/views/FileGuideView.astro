@@ -60,7 +60,7 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
     <Reviewed changed={fill(t.changed)} />
   </div>
   <div class="fo-prose fo-guide" data-guide-text>{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
-  <section class="fo-section fo-prose" aria-labelledby="guide-tool" data-guide-text>
+  <section class="fo-section fo-prose fo-guide__tool" aria-labelledby="guide-tool" data-guide-text>
     <h2 id="guide-tool">{t.toolHeading}</h2>
     <p>{fill(t.toolIntro)}</p>
   </section>

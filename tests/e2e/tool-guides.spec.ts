@@ -171,6 +171,46 @@ for (const id of FILE_GUIDE_IDS) {
   });
 }
 
+// The Oli of the panel sits on the top edge of the drop zone and rises 86 px above it (components.css). On a tool page
+// the H1 keeps her room on its right; in a guide the paragraph above the tool has to (DECISOES § 206). Every line of text
+// of the page is measured against her box, at the widths where she covered the end of that paragraph.
+const OLI_WIDTHS = [320, 360, 390, 600];
+
+for (const id of FILE_GUIDE_IDS) {
+  const guide = FILE_GUIDES[id];
+  test(`${guide.path}: the Oli of the panel covers no line of text, at ${OLI_WIDTHS.join(', ')} px`, async ({ page }) => {
+    const hits: string[] = [];
+    for (const width of OLI_WIDTHS) {
+      await page.setViewportSize({ width, height: 800 });
+      expect((await page.goto(guide.path))?.status(), `${guide.path} answers 200`).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      await expect(page.locator('#fo-tool-root [data-oli]').first()).toBeVisible();
+      const found = await page.evaluate(() => {
+        const olis = [...document.querySelectorAll('main [data-oli]')].map((oli) => oli.getBoundingClientRect()).filter((box) => box.width > 0 && box.height > 0);
+        const out: string[] = [];
+        const walker = document.createTreeWalker(document.querySelector('main') as Node, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const text = node.textContent ?? '';
+          if (!text.trim() || node.parentElement?.closest('.fo-sr, [aria-hidden="true"], [data-oli]')) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const line of range.getClientRects()) {
+            for (const oli of olis) {
+              const x = Math.min(line.right, oli.right) - Math.max(line.left, oli.left);
+              const y = Math.min(line.bottom, oli.bottom) - Math.max(line.top, oli.top);
+              if (x > 0.5 && y > 0.5) out.push(`"${text.trim().slice(0, 40)}" (${Math.round(x)} × ${Math.round(y)} px)`);
+            }
+          }
+        }
+        return out;
+      });
+      hits.push(...found.map((hit) => `${width} px: ${hit}`));
+    }
+    expect(hits, 'text under the Oli').toEqual([]);
+  });
+}
+
 test('every file guide has its case here, read from the registry', () => {
   expect(Object.keys(CASES).sort()).toEqual([...FILE_GUIDE_IDS].sort());
   for (const id of FILE_GUIDE_IDS) expect(CASES[id].files().length, id).toBeGreaterThan(0);
