@@ -1,64 +1,49 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
 import type { CalcSharedTexts } from '../types.ts';
+import type { CalcPageShared } from './en.ts';
 
-/** The page parts every calculator page shares (not sent to the island). */
-export interface CalcPageShared {
-  seal: string;
-  reviewed: string;
-  firstPublished: string;
-  readOn: string;
-  exampleInputs: string;
-  exampleResults: string;
-  guide: string;
-  /** Under the calculator of a guide: the link to that calculator's own page. */
-  openCalc: string;
-  disclaimerHeading: string;
-  /** Visually hidden caption of the worked example table. */
-  exampleCaption: string;
-}
-
+// The texts every Spanish calculator page shares (docs/i18n/es.md): the island's, sent in data-props, and the page's.
 export default {
   island: {
-    example: 'example',
-    pdf: 'Download PDF',
+    example: 'ejemplo',
+    pdf: 'Descargar PDF',
     csv: 'CSV',
-    copyLink: 'Copy link',
-    copied: 'Link copied',
-    copyThis: 'Copy this link',
-    exportFailed: "Oli couldn't load the PDF maker. Reload the page and try again.",
-    stale: 'Fix the highlighted field to update the result.',
-    nextLabel: 'Next step',
-    scheduleHeading: 'Payment schedule',
-    showSchedule: 'Show the full schedule',
-    hideSchedule: 'Hide the schedule',
-    year: 'Year {n}',
-    columns: { number: 'Payment', payment: 'Amount', principal: 'Principal', interest: 'Interest', balance: 'Balance' },
-    duration: { year: '1 year', years: '{n} years', month: '1 month', months: '{n} months', join: ' ', none: 'no time' },
-    addRow: 'Add a debt',
-    removeRow: 'Remove debt {n}',
-    row: 'Debt {n}',
-    unitLabel: 'Down payment in dollars or in percent of the price',
+    copyLink: 'Copiar enlace',
+    copied: 'Enlace copiado',
+    copyThis: 'Copia este enlace',
+    exportFailed: 'Oli no pudo cargar el generador de PDF. Recarga la página e inténtalo de nuevo.',
+    stale: 'Corrige el campo marcado para actualizar el resultado.',
+    nextLabel: 'Siguiente paso',
+    scheduleHeading: 'Tabla de amortización',
+    showSchedule: 'Ver la tabla completa',
+    hideSchedule: 'Ocultar la tabla',
+    year: 'Año {n}',
+    columns: { number: 'Pago', payment: 'Monto', principal: 'Capital', interest: 'Intereses', balance: 'Saldo' },
+    duration: { year: '1 año', years: '{n} años', month: '1 mes', months: '{n} meses', join: ' y ', none: '0 meses' },
+    addRow: 'Agregar una deuda',
+    removeRow: 'Quitar la deuda {n}',
+    row: 'Deuda {n}',
+    unitLabel: 'Pago inicial en dólares o en porcentaje del precio',
     units: { amount: '$', percent: '%' },
     pdfLabels: {
-      inputs: 'What you entered',
-      results: 'Results',
-      premises: 'Assumptions',
-      schedule: 'Schedule',
-      notice: 'Educational tool',
-      site: 'Made with the free calculators at fileorca.com',
-      page: 'Page {n} of {total}',
+      inputs: 'Lo que escribiste',
+      results: 'Resultados',
+      premises: 'Supuestos',
+      schedule: 'Tabla',
+      notice: 'Herramienta educativa',
+      site: 'Hecho con las calculadoras gratis de fileorca.com',
+      page: 'Página {n} de {total}',
     },
   } satisfies CalcSharedTexts,
   page: {
-    seal: 'Your numbers stay on your device',
-    reviewed: 'Reviewed by {name} on {date}.',
-    firstPublished: 'First published {date}.',
-    readOn: 'Read on {date}.',
-    exampleInputs: 'You enter',
-    exampleResults: 'You get',
-    guide: 'Read the guide: {title}',
-    openCalc: 'Open the {name} on its own page',
-    disclaimerHeading: 'Educational tool',
-    exampleCaption: 'The worked example: what goes in and what comes out',
+    seal: 'Tus números se quedan en tu dispositivo',
+    reviewed: 'Revisado por {name} el {date}.',
+    firstPublished: 'Publicado por primera vez el {date}.',
+    readOn: 'Leído el {date}.',
+    exampleInputs: 'Lo que escribes',
+    exampleResults: 'Lo que obtienes',
+    guide: 'Lee la guía: {title}',
+    openCalc: 'Abrir la {name} en su propia página',
+    disclaimerHeading: 'Herramienta educativa',
+    exampleCaption: 'El ejemplo resuelto: lo que entra y lo que sale',
   } satisfies CalcPageShared,
 };
