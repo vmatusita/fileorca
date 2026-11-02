@@ -66,8 +66,19 @@ function numberProblems(id: string, t: FileGuideTexts): string[] {
 /**
  * Words that carry a claim past the sample (prompt F5b, decision 5.4: "nas nossas 13 fotos", não "as fotos"; DECISOES
  * § 197): a guide says what its files did, not what files usually do, and does not lend a source more than it says.
+ * "Real PDFs" and "real files" call real what the test script wrote too (DECISOES § 208); "real phone photos" are real.
  */
-export const GENERAL = /\b(?:usually|often|most of the time|almost always|almost nothing|typically|rarely|in most cases|never a dramatic|says the same|most (?:PDFs|photos|files|people|sites|phones))\b/i;
+export const GENERAL = /\b(?:usually|usual|often|most of the time|almost always|almost nothing|almost free|typically|rarely|in most cases|never a dramatic|says the same|real (?:PDFs|files)|most (?:PDFs|photos|files|people|sites|phones))\b/i;
+
+/**
+ * {date} is the day of the measurement; the sources were read on their own day, which each source gives (DECISOES
+ * § 208). A sentence with {date} that speaks of the help pages or the sources dates them wrong.
+ */
+const SOURCES = /\b(?:help|developer|official|own) pages?\b|\bsources?\b|\bread on\b/i;
+
+function dateProblems(id: string, t: FileGuideTexts): string[] {
+  return prose(t, id).flatMap(([path, text]) => sentences(text).filter((sentence) => sentence.includes('{date}') && SOURCES.test(sentence)).map((sentence) => `${path}: {date} é a data da medida, não a da leitura das fontes: "${sentence}"`));
+}
 
 function generalProblems(id: string, t: FileGuideTexts): string[] {
   return prose(t, id).flatMap(([path, text]) => {
@@ -133,12 +144,23 @@ describe('the claims of the file guides stay inside their sample', () => {
     expect(FILE_GUIDE_IDS.flatMap((id) => sampleProblems(id, textsOf(id)))).toEqual([]);
   });
 
+  it('never give the sources the date of the measurement', () => {
+    expect(FILE_GUIDE_IDS.flatMap((id) => dateProblems(id, textsOf(id)))).toEqual([]);
+  });
+
   it('catch a generalization, a minimum called the best and a missing sample (controls)', () => {
     const only = (text: string): FileGuideTexts => ({ ...textsOf('guides-remove-location-from-photos'), intro: [text], sections: [], lead: '', toolIntro: '', measuredIntro: '', measuredNote: '', tables: [] });
     expect(generalProblems('control', only('A PDF of text usually gains almost nothing.')).join()).toMatch(/"usually" generaliza/);
     expect(generalProblems('control', only('Adobe says the same in its guide.')).join()).toMatch(/"says the same"/);
     expect(generalProblems('control', only('Most PDFs are small.')).join()).toMatch(/"Most PDFs"/);
     expect(generalProblems('control', only('On our files, Lossless took a quarter off.'))).toEqual([]);
+    expect(generalProblems('control', only('Pictures: the usual suspect')).join()).toMatch(/"usual"/);
+    expect(generalProblems('control', only('Merging is almost free.')).join()).toMatch(/"almost free"/);
+    expect(generalProblems('control', only('What we measured when we merged real PDFs.')).join()).toMatch(/"real PDFs"/);
+    expect(generalProblems('control', only('Measured on real files.')).join()).toMatch(/"real files"/);
+    expect(generalProblems('control', only('We took our real phone photos and the real documents.'))).toEqual([]);
+    expect(dateProblems('control', only('First version, with the measurements and the help pages of {date}.')).join()).toMatch(/não a da leitura das fontes/);
+    expect(dateProblems('control', only('Measured on {date} through the tool pages of this site. The help pages were read on the date given with each source.'))).toEqual([]);
     const location = 'guides-remove-location-from-photos';
     expect(directionInText(location, 'x', 'The closest it came was {compressImagePsnrMinChromium} of PSNR.').join()).toMatch(/é o mínimo/);
     expect(directionInText(location, 'x', 'It scored {compressImagePsnrMinChromium} of PSNR.').join()).toMatch(/é o mínimo/);

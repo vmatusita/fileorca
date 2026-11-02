@@ -8,7 +8,7 @@ const texts: FileGuideTexts = {
   changed: 'First version, with the measurements of {date}.',
   intro: [
     'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
-    'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged real PDFs.',
+    'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged {pairs_word} pairs of our test PDFs.',
   ],
   toolHeading: 'Combine your PDFs here',
   toolIntro: 'Choose two or more PDFs from your phone, drag them into the order you want and tap the button. They are joined in this browser tab, on the phone itself, and nothing is uploaded.',
@@ -37,14 +37,14 @@ const texts: FileGuideTexts = {
     {
       heading: 'What the merged file weighs',
       paragraphs: [
-        'We merged {pairs} pairs of our test PDFs and compared the merged file with the two files it came from. The merged file was never bigger than the two together, and in {smaller} of the {pairs} pairs it was a little smaller.',
-        'For two scanned or photo PDFs, merging is almost free: our PDF of photos and the scanned book page came out at {photosScanRatio} of their combined size. A PDF has some structure around its pages, and the merged file needs that structure once instead of twice.',
+        'We merged {pairs} pairs of our test PDFs and compared the merged file with the two files it came from. The merged file was never bigger than the two together, and it came out smaller in {smaller} of the {pairs} pairs, by very different amounts.',
+        'Our PDF of photos with the scanned book page, and the scanned NASA report with that same page, came out just under their combined size: {photosScanMerged_exact} against {photosScanInputs_exact}, and {reportScanMerged_exact} against {reportScanInputs_exact}. A PDF has some structure around its pages, and the merged file needs that structure once instead of twice; the pictures stay as they were. The lecture notes with the IRS form came out {bookFormRatio_off} smaller.',
       ],
     },
     {
       heading: 'When the merged file is clearly smaller',
       paragraphs: [
-        'One pair stood out. The scanned book page with the IRS form came out {scanFormRatio_off} smaller than the two files together. The form carries a second description of itself, in a format called XFA, that only some programs read, and Merge PDF leaves it out; the result tells you so next to the file. The form fields themselves are kept, so the form can still be filled in.',
+        'The scanned book page with the IRS form came out {scanFormRatio_off} smaller than the two files together. The form carries a second description of itself, in a format called XFA, that only some programs read, and Merge PDF leaves it out; the result tells you so next to the file. The form fields themselves are kept, so the form can still be filled in. Our PDF with pages of mixed sizes and our PDF with links and actions came out {mixedActionsRatio_off} smaller together: our test script wrote both without packing their structure, and the merged file is written packed.',
         'Nothing else is dropped on purpose. Bookmarks and links come along, and a field whose name already exists in another file gets a number added so both keep working.',
       ],
     },
@@ -52,7 +52,7 @@ const texts: FileGuideTexts = {
       heading: 'Before you merge',
       paragraphs: [
         'Put the files in the order the reader should see them, and remove the pages that are not needed first: a merged PDF is easier to check than to fix. A PDF that asks for a password has to be saved without it before it can be merged, which Unlock PDF does; Merge PDF tells you which file is locked.',
-        'If the merged file is too big to send, compress it afterwards. Merging does not make files lighter by itself, apart from the small savings above.',
+        'If the merged file is too big to send, compress it afterwards. Merging does not make files lighter by itself, apart from the savings above.',
       ],
     },
     {

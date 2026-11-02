@@ -2,13 +2,13 @@ import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
   title: 'How to Split a PDF, and Why the Parts Can Weigh More Than the Whole',
-  description: 'Why the parts of a split PDF can add up to far more than the original, measured on real files, and how to split so they do not.',
+  description: 'Why the parts of a split PDF can add up to far more than the original, measured on our test PDFs, and how to split so they do not.',
   h1: 'How to split a PDF, and why the parts can weigh more than the whole',
   lead: 'You split a big PDF to send it in pieces, and the pieces add up to more than the file you started with. Here is why that happens, and when it does not.',
   changed: 'First version, with the measurements of {date}.',
   intro: [
     'Splitting a PDF sounds like cutting paper: the pages go into separate piles and nothing is added. A PDF does not work like that. Each part has to be a complete PDF on its own, able to open anywhere, so it carries everything its pages need to show correctly, and Split PDF also gives every part a copy of the description of the original document.',
-    'How much that adds depends on the file. We split {files_word} PDFs of our tests, one part per page, and added the parts up: the parts of {bigger_word} of them weighed more than the whole, and those of the lecture notes {bookRatio_times} as much.',
+    'How much that adds depends on the file. We split {files_word} PDFs of our tests, one part per page, and added the parts up. The parts of {bigger_word} of them weighed more than the whole: those of the lecture notes {bookRatio_times} as much, those of the scanned NASA report {reportRatio_more} more, and those of the PDF of photos {photosGrowth_exact} more.',
   ],
   toolHeading: 'Split your PDF here',
   toolIntro: 'Drop a PDF, choose to split every page or type the ranges you want, and press the button. The parts are made in this browser tab and come back as one ZIP; nothing is uploaded.',
@@ -45,7 +45,7 @@ const texts: FileGuideTexts = {
       heading: 'How to split without the extra weight',
       paragraphs: [
         'Split into ranges, not single pages, when the pages share their fonts. A chapter in one part carries its fonts once, where its pages split apart carry them once each. Type the ranges you need in the tool, for example by chapter or by section, instead of splitting every page.',
-        'If you split to get under an email limit, check the total, not only each part: a part that fits can still be the first of many heavy ones. Each part also carries its own copy of the metadata: our scanned report came out about {reportGrowthPerPart} heavier per part, so fewer, larger parts repeat it fewer times. Compress PDF can make the pictures lighter before you split.',
+        'If you split to get under an email limit, check the total, not only each part: a part that fits can still be the first of many heavy ones. Each part of our scanned report added about {reportGrowthPerPart} to the total, and {reportMetadata} of that is its own copy of the metadata; the rest is its structure. Fewer, larger parts repeat both fewer times. Compress PDF can make the pictures lighter before you split.',
         'And if what you need is a shorter PDF rather than several, delete the pages you do not need instead. One file keeps its fonts once, however many pages go.',
       ],
     },

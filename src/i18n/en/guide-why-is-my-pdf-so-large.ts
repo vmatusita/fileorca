@@ -22,7 +22,7 @@ const texts: FileGuideTexts = {
       ],
     },
     {
-      heading: 'Pictures: the usual suspect',
+      heading: 'Pictures: the weight of our heaviest PDFs',
       paragraphs: [
         'A photo straight from a phone has millions of pixels, far more than a page needs on a screen or even in print. When such a photo goes into a PDF at full size, the PDF carries every pixel. A scan does the same: scanning at a high resolution, in color, makes each page a large picture.',
         'This is where the Recommended and Strong modes of Compress PDF can help, because pictures can lose detail nobody sees. A PDF with no pictures can only get lighter by a rewrite of its structure, and how much that gave on our files is in the next section.',

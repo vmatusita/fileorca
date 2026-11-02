@@ -17,6 +17,7 @@ import { GUIDE_PUBLISHED, GUIDE_REVIEWED } from '../../src/tools/guides/page.ts'
 import enCommon from '../../src/i18n/en/common.ts';
 import removeLocation from '../../src/i18n/en/guide-remove-location-from-photos.ts';
 import splitPdf from '../../src/i18n/en/guide-split-pdf-file-size.ts';
+import combinePdfs from '../../src/i18n/en/guide-combine-pdfs-on-phone.ts';
 
 const FILE = 'data/guides-measured.json';
 const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
@@ -85,6 +86,14 @@ function fileProblems(file: MeasuredFile): string[] {
     }
   }
   return problems;
+}
+
+/**
+ * The sentence of guide 6 names the tools the browsers wrote differently (DECISOES § 210): with no such tool it would
+ * read "with , the sizes differed", so an empty fact fails while the text reads it, and the sentence has to change.
+ */
+function differProblems(fact: string, text: string): string[] {
+  return text.includes('{browsersDiffer}') && fact.trim() === '' ? ['o guia 6 diz "with {browsersDiffer}" sem nenhuma ferramenta: os navegadores concordaram em todas, troque a frase'] : [];
 }
 
 /**
@@ -173,6 +182,29 @@ describe('the measurements of the file guides', () => {
     expect(text).not.toMatch(/small frame every PDF needs|barely grew|costs almost nothing extra/);
   });
 
+  it('say, in guide 8, how much each file that grew grew, and what of a part is metadata (DECISOES § 209)', () => {
+    const numbers = measured.guides['guides-split-pdf-file-size'].numbers;
+    const sentences = [splitPdf.intro, ...splitPdf.sections.map((section) => section.paragraphs)].flat().flatMap((paragraph) => paragraph.split(/(?<=[.!?])\s+/));
+    const counting = sentences.find((sentence) => /\{bigger(?:_\w+)?\}/.test(sentence));
+    expect(counting, 'a sentence counts the files that grew').toBeDefined();
+    // Every file whose parts weighed more is named in that sentence with its growth, the one of a few bytes too.
+    const grew = Object.keys(numbers).filter((name) => /Growth$/.test(name) && (numbers[name] as MeasuredNumber).value > 0).map((name) => name.replace(/Growth$/, ''));
+    expect(grew.length).toBe(numbers['bigger']?.value);
+    for (const key of grew) expect(counting, `the growth of ${key}`).toMatch(new RegExp(`\\{${key}(?:Growth|Ratio)(?:_\\w+)?\\}`));
+    // The growth per part and the metadata in it are said together: the XMP is part of it, not all of it.
+    expect(sentences.some((sentence) => sentence.includes('{reportGrowthPerPart}') && sentence.includes('{reportMetadata}'))).toBe(true);
+  });
+
+  it('say, in guide 9, how much smaller each merged pair came out (DECISOES § 208)', () => {
+    const numbers = measured.guides['guides-combine-pdfs-on-phone'].numbers;
+    const text = JSON.stringify(combinePdfs);
+    // Each pair by its change, or by its bytes where the change rounds to nothing.
+    for (const pair of Object.keys(numbers).filter((name) => /Ratio$/.test(name)).map((name) => name.replace(/Ratio$/, ''))) {
+      expect(text, `guide 9 says what ${pair} came to`).toMatch(new RegExp(`\\{${pair}(?:Ratio|Merged)(?:_\\w+)?\\}`));
+    }
+    expect(text).not.toMatch(/a little smaller|One pair stood out/);
+  });
+
   it('say, in guide 6, which tools the two browsers wrote differently, from the measurement (DECISOES § 202)', () => {
     const guide = measured.guides['guides-remove-location-from-photos'];
     const table = guide.tables['candidates'] as MeasuredTable;
@@ -187,6 +219,9 @@ describe('the measurements of the file guides', () => {
     // The guide says it through the fact, never as an agreement typed by hand.
     expect(JSON.stringify(removeLocation)).toContain('{browsersDiffer}');
     expect(JSON.stringify(removeLocation)).not.toMatch(/agreed on every tool/);
+    expect(differProblems(guide.facts['browsersDiffer'] ?? '', JSON.stringify(removeLocation))).toEqual([]);
+    // A new measurement where the two browsers agree on every tool leaves the sentence with no tool: it fails here.
+    expect(differProblems('', JSON.stringify(removeLocation)).join()).toMatch(/sem nenhuma ferramenta/);
   });
 
   it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
