@@ -518,10 +518,11 @@
 /* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
 .fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
-/* Below 360 px a menu or a date takes the whole row: half a row cut "Last period" and the year of the day (review F7,
-   d-3, f-4 and f-6; DECISOES § 277). The result above the fold is measured at 360 px (§ 124). */
+/* Below 360 px a menu or a date of a home or health calculator takes the whole row: half a row cut "Last period" and the
+   year of the day (review F7, d-3, f-4 and f-6; DECISOES § 277). The money pages keep their half rows there, the down
+   payment with its unit menu among them (second pass, s-1; § 282). The result above the fold is measured at 360 px (§ 124). */
 @media (max-width: 359px) {
-  .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
+  .fo-calc--home .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
 }
 .fo-calc__moreheading { margin: var(--space-2) 0 0; }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }

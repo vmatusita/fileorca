@@ -71,7 +71,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const fieldProps = { values, problems: state.problems, data, set, report: store.wrong };
 
   return (
-    <div class="fo-calc">
+    <div class={data.cat === 'home' ? 'fo-calc fo-calc--home' : 'fo-calc'}>
       <div class="fo-calc__fields fo-calc__main">
         <Fields {...fieldProps} specs={main} />
       </div>

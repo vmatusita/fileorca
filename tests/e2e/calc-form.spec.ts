@@ -4,11 +4,13 @@
 // and below 360 px a menu or a date takes the whole row; the unit of a field is in its description; a range error marks
 // the result stale and turns the PDF and the CSV off; a scenario link with several areas leaves the focus alone; a menu
 // keeps its height beside a field in error; the chosen option shows in high contrast; the QR placeholder is legible.
+// The second pass (§ 282): the money pages keep their half rows below 360 px, and the range error works there too.
 // The name puts this file before the design spec, in a light part of the WebKit (DECISOES § 142 and § 274).
 import { expect, test, type Page } from '@playwright/test';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { LIFE_CALC_IDS, type LifeCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import { csvButton, openCalc, pdfButton, scaled } from './lib/life-calc.ts';
+import { dismissCookies, hydrated } from './lib/page.ts';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => window.localStorage.setItem('fo-consent', 'denied'));
@@ -109,29 +111,70 @@ test('the unit of a field is in its accessible description (d-1)', async ({ page
   }
 });
 
-const STALE = 'Fix the highlighted field to update the result.';
+/** The line under a stale result, in the language of the page. */
+const STALE = {
+  en: 'Fix the highlighted field to update the result.',
+  pt: 'Corrija o campo destacado para atualizar o resultado.',
+  es: 'Corrige el campo marcado para actualizar el resultado.',
+} as const;
 
-test('a field out of its range marks the result stale and turns the PDF and the CSV off (g-1, DECISOES § 116)', async ({ page }) => {
-  const cases: [LifeCalcId, string, string, string][] = [
-    ['bmi-calculator', 'ag', '19', '35'],
-    ['calorie-calculator', 'ag', '80', '35'],
-    ['body-fat-calculator', 'ag', '15', '35'],
-    ['concrete-calculator', 'q', '0', '1'],
-    ['due-date-calculator', 'd', '1999-12-31', '2026-09-07'],
+/** The page of a calculator in a language, opened and hydrated. */
+async function openMoney(page: Page, id: AnyCalcId, lang: 'en' | 'pt' | 'es'): Promise<string> {
+  const path = moneyPage(id, lang)?.path;
+  if (!path) throw new Error(`no ${lang} page for ${id}`);
+  await page.goto('about:blank');
+  expect((await page.goto(path))?.status(), path).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  return path;
+}
+
+test('a field out of its range marks the result stale and turns the PDF and the CSV off (g-1, s-2, DECISOES § 116)', async ({ page }) => {
+  const cases: [AnyCalcId, 'en' | 'pt' | 'es', string, string, string][] = [
+    ['bmi-calculator', 'en', 'ag', '19', '35'],
+    ['calorie-calculator', 'en', 'ag', '80', '35'],
+    ['body-fat-calculator', 'en', 'ag', '15', '35'],
+    ['concrete-calculator', 'en', 'q', '0', '1'],
+    ['due-date-calculator', 'en', 'd', '1999-12-31', '2026-09-07'],
+    // The money pages follow the same rule (second pass, s-2): a rate over its range in English and Spanish, an amount
+    // under it in Portuguese.
+    ['mortgage-calculator', 'en', 'r', '99', '6.5'],
+    ['mortgage-calculator', 'es', 'r', '99', '6.5'],
+    ['br-personal-loan', 'pt', 'a', '0', '10000'],
   ];
-  for (const [id, key, wrong, right] of cases) {
-    await page.goto('about:blank');
-    await openCalc(page, id);
+  for (const [id, lang, key, wrong, right] of cases) {
+    await openMoney(page, id, lang);
     const field = page.locator(`#fo-calc-${key}`);
     await field.fill(wrong);
     await expect(field, `${id} ${wrong}`).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('.fo-calc__stale'), id).toHaveText(STALE);
+    await expect(page.locator('.fo-calc__stale'), id).toHaveText(STALE[lang]);
     await expect(pdfButton(page), id).toBeDisabled();
     await expect(csvButton(page), id).toBeDisabled();
     await field.fill(right);
     await expect(page.locator('.fo-calc__stale'), id).toHaveCount(0);
     await expect(pdfButton(page), id).toBeEnabled();
     await expect(csvButton(page), id).toBeEnabled();
+  }
+});
+
+test('below 360 px the money pages keep their half rows, the down payment beside the price among them (s-1)', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 320, height: 740 });
+  const pages = [
+    ...CALC_PAGE_IDS.map((id) => [id, 'en'] as const),
+    ...ES_CALC_IDS.map((id) => [id, 'es'] as const),
+    ...BR_CALC_IDS.map((id) => [id, 'pt'] as const),
+  ];
+  for (const [id, lang] of pages) {
+    const path = await openMoney(page, id, lang);
+    const wide = await page.locator('.fo-calc__main > .fo-field--half').evaluateAll((fields) =>
+      fields.flatMap((field) => {
+        const own = Math.round(field.getBoundingClientRect().width);
+        const grid = Math.round(field.parentElement?.getBoundingClientRect().width ?? 0);
+        return own >= grid ? [field.querySelector('input, select')?.id ?? '?'] : [];
+      }),
+    );
+    expect.soft(wide, path).toEqual([]);
   }
 });
 

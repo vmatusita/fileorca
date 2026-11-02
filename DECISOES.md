@@ -2542,3 +2542,34 @@ A unidade (ft, in, sq ft, cu ft, %, years, days) só existia num `span` visual: 
   - o problema do Body fat sem algarismo;
   - a palavra da fórmula em negrito na frase, nos dois sexos;
   - o texto das escolhas na Privacidade em en, pt e es e nas três notas.
+
+## § 282 · A segunda passada da revisão da F7 (F7, segunda passada, s-1 e s-2)
+
+Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..083f5a7`), na worktree da revisão, movida para o `083f5a7` e com o próprio build. Ele rodou o Vitest, os tipos, o lint, os portões, o `lint:texto` e 946 testes de Playwright por navegador. Não achou falha em nenhuma correção e deixou 2 achados baixos.
+
+- **s-1:** a regra da § 277 que põe um menu ou uma data na linha inteira abaixo de 360 px pegava qualquer campo de meia largura com um `select` dentro.
+  - Isso incluía a entrada (número com o menu de unidade) e os menus das calculadoras de dinheiro.
+  - A 320 px, o resultado da hipoteca descia de 658 para 754 px; o mesmo valia para a APR, o cartão, a meta de poupança, os juros simples e a hipoteca em espanhol.
+  - A regra passa a valer só nas páginas de casa e saúde: o painel delas ganha a classe `fo-calc--home`, que vem do `cat` da página. As de dinheiro voltam ao que eram.
+  - O teste novo do `calc-form.spec.ts` abre as calculadoras de dinheiro em en, es e pt a 320 px e confere que nenhum campo de meia largura ocupa a linha. Ele reprova no build do `083f5a7` (a entrada da hipoteca, o menu do cartão e outros) e passa no novo.
+- **s-2:** o teste do erro de faixa (§ 276) não tinha calculadora de dinheiro, embora a regra valha para elas.
+  - Entraram a hipoteca com taxa 99, em inglês e em espanhol, e o empréstimo pessoal brasileiro com valor 0, cada um com a linha no idioma da página.
+  - Esses casos reprovam no código revisado (`69fb7f3`), onde o erro de faixa não marcava o resultado velho.
+- **Observações sem defeito**, que ficam no relatório:
+  - uma corrida de foco na lista de áreas e de dívidas, anterior à F7, que só a automação alcança (menos de 16 ms entre digitar e apertar Enter no "Remove");
+  - datas da tabela da Ovulation que quebram no meio a 320 px ("November / 1, 2026");
+  - a etiqueta "example" que desce de linha em "Coverage per gallon";
+  - a folga de 3 px do teste dos menus na Square footage a 360 px, que supõe uma seta de 26 px.
+
+## § 283 · A parte 2 do WebKit passou do alvo de 700 s uma vez (F7, decisão 10)
+
+- **A medida:** a parte 2 do WebKit (`--playwright=webkit --shard=2/8`) tem a segunda metade do `a11y.spec.ts` (100 testes) e o começo do `ads.spec.ts` (46 testes). O `a11y` dessa metade é o mais pesado: o passeio de estados das ferramentas de PDF (de 18 a 37 s por teste no runner).
+  - Na [run 41449325645](https://github.com/vmatusita/fileorca/actions/runs/41449325645) (commit `69fb7f3`), ela levou 833,1 s: os testes somaram 1.243 s de `a11y` e 363 s de `ads`, em 2 workers.
+  - Na [run 41459127177](https://github.com/vmatusita/fileorca/actions/runs/41459127177) (commit `083f5a7`, com os mesmos testes nela), levou 690,0 s.
+  - As outras 12 partes ficaram abaixo de 700 s nas duas.
+- **A leitura:** a parte está perto do alvo e varia uns 140 s de um runner para outro. Ela não passou do limite de 900 s, então a divisão desta run fica como a ficha fixou (13 partes).
+- **A proposta,** numa run de ajuste, antes de somar testes de acessibilidade:
+  1. tirar o passeio de estados do `a11y.spec.ts` para um arquivo próprio que caia depois do `ads.spec.ts` na ordem dos nomes (por exemplo, `axe-states.spec.ts`). Assim, os testes pesados se dividem entre as partes 3 e 4 do WebKit, hoje as mais leves (245 a 432 s);
+  2. ou o WebKit em 9 partes.
+
+  Antes de escolher, rode o `--list` das partes e confira onde caem o `design.spec.ts` e a matriz de imagens (§ 142).
