@@ -164,7 +164,16 @@ Esta é a revisão final da run `fase-08` (passo 5 de "Como trabalhar" na ficha)
 
 ## A segunda passada
 
-(Em andamento.)
+Um revisor Sonnet em contexto limpo leu o diff das correções (`2f104be..7f99892`, 35 arquivos) numa worktree no `7f99892`. Ele provou com cópias alteradas do `dist/` que os testes novos do b-1, do b-4, do d-2 e do aviso de cookies reprovam sem a correção, conferiu que os 19 `controlled()` dos specs do worker têm o `workerOff()` antes, e rodou 80 testes de unidade, os specs do worker, do compartilhar, do salto de layout, do design, do axe nas páginas novas e de cookies, e os portões. Achou 1 médio e 3 baixos, todos no diff desta run. As correções estão na § 307.
+
+| Id | Sev. | Final | Achado | Destino |
+| --- | --- | --- | --- | --- |
+| s-1 | baixo | baixo | O `controllerchange` do b-1 mandava a lista de novo também na primeira instalação, e o worker baixava de novo a página, o manifest, o ícone e, no WebKit, os 2 JS (11 → 14 pedidos no Chromium, 17 → 22 no WebKit) | corrigido: o aviso só vai a um controlador que não é o worker que já tem a lista (`c!==w`) |
+| s-2 | médio | médio | O teste da fonte atrasada perdeu o limite de CLS e ainda se chamava "no layout shift"; o CLS dos parágrafos no Linux (0,257 e 0,125 no CI) não estava em lugar nenhum | corrigido em parte: o teste diz o que prova ("the breadcrumb, the H1 and the cookie notice keep their place…"); o CLS do texto fora do Windows vai para o `PENDENCIAS.md` (F8 s-2), porque a calibração por plataforma pede medida num Android |
+| s-3 | baixo | baixo | O parágrafo novo da Privacidade dizia que os arquivos compartilhados ficam na "parte do site guardada para o offline", e o parágrafo de cima, que nenhum arquivo entra nessa cópia; e uma frase tinha 47 palavras | corrigido nos três idiomas: os arquivos ficam num lugar próprio do armazenamento, separado da cópia das páginas, e a frase longa virou três |
+| s-4 | baixo | baixo | O teste de ida e volta da desativação falhava em 20 a 30 % das execuções com um worker só: o registro do recarregamento se juntava ao da desativação, ainda em curso | corrigido: o teste espera o `/sw.js` da desativação chegar e o registro sumir antes de religar (24 de 24 com um worker; 60 de 60 no spec, 10 vezes nos dois navegadores) |
+
+O revisor também apontou que o JSDoc do `checkFonts` e o título de um teste do `design-checks.test.ts` falavam só da face da trilha; os dois passaram a nomear a `Figtree Steady`.
 
 ## A worktree
 

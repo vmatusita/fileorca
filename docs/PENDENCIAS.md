@@ -33,9 +33,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 14. Decisões do Victor | 13 | Victor decide |
 | 15. Tarefas do Victor | 12 | Victor faz |
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
-| 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
+| 17. O que a F8 deixou | 23 | Runs de ajuste e Victor |
 
-Total: 169 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 170 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -324,6 +324,7 @@ O que a run da F8 achou fora da revisão das F4 a F7: no ensaio do Dependabot, n
 | F8 d-7 | REVISAO-F8.md d-7 | baixo | A frase principal dos OliMessage novos passa de uma linha no celular (src/i18n/{en,pt,es}/offline.ts (says) e open-with.ts (emptySays); docs/design/components/OliMessage/README.md:15) | Encurtar a frase principal (por exemplo 'Sem internet.' e deixar 'Esta página ainda não foi guardada.' no small) ou abrandar a regra do README, já que as falas fixas existentes também passam de uma linha. | Run de ajuste de layout |
 | F8 e-6 | REVISAO-F8.md e-6 | baixo (médio na lente) | No WebKit o 'warm' do service worker baixa de novo todos os arquivos da primeira página (+10 requisições, +273 KB em /compress-image/), e nenhum spec enxerga isso (src/sw/main.ts:53) | Medir no Safari/iOS real. Se confirmar, em vez de o worker rebuscar, a própria página (que usa o cache HTTP dela) grava os arquivos já carregados no Cache Storage pelo nome que o worker publica, ou o worker só guarda o que a ferramenta pedir depois de controlar a página. Acrescentar ao sw-offline.spec.ts uma afirmação sobre server.requests (contagem de pedidos depois do load) nos dois navegadores, com cache:'force-cache' no fetchAndStore para tirar o HTML repetido no Chromium. | Run de ajuste de desempenho |
 | F8 e-7 | REVISAO-F8.md e-7 | baixo (médio na lente) | O critério 12 ('o JS inicial muda só pelo script inline do registro') não vale ao pé da letra, e os bytes não estão registrados em lugar nenhum (docs/prompts/prompt-fase-08.txt (critério 12); astro.config.ts; src/tools/image/inbox.ts) | Registrar no relatório e num § os números acima (inline +392 B gzip; ilha +0,7 a +0,9 KB por causa do inbox, da fala offline e das correções F4-F7) e corrigir a frase do critério; o orçamento (budgets.ts) segue intacto. | Run de ajuste de desempenho |
+| F8 s-2 | REVISAO-F8.md, segunda passada, s-2; DECISOES § 305 | médio | Com a Figtree chegando depois da primeira pintura, o texto que muda de linha ainda move a página fora do Windows: no Chromium do Linux do CI, CLS de 0,257 no `/es/calculadora-de-deudas/` a 412 px e 0,125 no `/guides/debt-snowball-vs-avalanche/` a 375 px (no Windows, 0,046 e 0,008). A `Figtree Fallback` é calibrada sobre a Arial; no Android a fonte local é a Roboto, e no Linux a Liberation Sans se desenha diferente. O `layout-shift.spec.ts` afirma só a trilha, o H1 e o aviso, e imprime o CLS (`[cls]`). | Medir o CLS do texto com a fonte atrasada num Android real ou no Chromium do Linux com a Roboto e decidir entre uma face de reserva por plataforma (`local("Roboto")` com o `size-adjust` dela) ou a face que não troca também no texto da primeira dobra; depois, um limite de CLS no spec que valha no CI. | Run de ajuste de desempenho |
 
 ## Registrados (escolhas, não defeitos)
 
