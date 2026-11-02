@@ -12,9 +12,9 @@ import enOpenWith from '../../src/i18n/en/open-with.ts';
 
 const TEXTS = { en, pt, es };
 const SAYS = {
-  en: { android: 'On Android', next: /the next time you open FileOrca after an hour/, cleared: /if you clear the site data, open fileorca\.com once before you share again/, sent: /Android sends the shared files to fileorca\.com, which refuses them/, never: /never uploaded/ },
-  pt: { android: 'No Android', next: /na próxima vez que você abrir o FileOrca depois de uma hora/, cleared: /se você limpar os dados do site, abra o fileorca\.com uma vez antes de compartilhar de novo/, sent: /o Android envia os arquivos compartilhados ao fileorca\.com, que os recusa/, never: /nunca são enviados/ },
-  es: { android: 'En Android', next: /la próxima vez que abras FileOrca después de una hora/, cleared: /si borras los datos del sitio, abre fileorca\.com una vez antes de volver a compartir/, sent: /Android envía los archivos compartidos a fileorca\.com, que los rechaza/, never: /Nunca se suben/ },
+  en: { android: 'On Android', next: /the next time you open FileOrca after an hour/, cleared: /[Ii]f you clear the site data, open fileorca\.com once before you share again/, sent: /Android sends the shared files to fileorca\.com, which refuses them/, never: /never uploaded/ },
+  pt: { android: 'No Android', next: /na próxima vez que você abrir o FileOrca depois de uma hora/, cleared: /[Ss]e você limpar os dados do site, abra o fileorca\.com uma vez antes de compartilhar de novo/, sent: /o Android envia os arquivos compartilhados ao fileorca\.com, que os recusa/, never: /nunca são enviados/ },
+  es: { android: 'En Android', next: /la próxima vez que abras FileOrca después de una hora/, cleared: /[Ss]i borras los datos del sitio, abre fileorca\.com una vez antes de volver a compartir/, sent: /Android envía los archivos compartidos a fileorca\.com, que los rechaza/, never: /Nunca se suben/ },
 } as const;
 
 describe('the Privacy page on files shared with the app', () => {
