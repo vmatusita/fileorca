@@ -7,7 +7,7 @@ const texts: FileGuideTexts = {
   lead: 'You saved an image from a website and got a .webp file that your other apps will not take. Here is what it is, where it opens, and how to turn it into a JPG.',
   changed: 'First version, with the measurements of {date}.',
   intro: [
-    'WebP is an image format made by Google for the web. Websites use it because it is small, so pages load faster, and that is why a picture you save from a browser often arrives as a .webp file instead of a JPG or a PNG.',
+    'WebP is an image format made by Google for the web. Websites use it because it is small, so pages load faster, and that is why a picture you save from a browser can arrive as a .webp file instead of a JPG or a PNG.',
     'The browser you saved it from shows it without trouble. The trouble starts when the file leaves the browser: an older photo editor, an upload form that asks for a JPG, or a print shop may refuse it. Saving it as a JPG makes it open almost anywhere, but it does not make it better, and it does not make it smaller.',
   ],
   toolHeading: 'Save your WebP images as JPG here',
@@ -30,8 +30,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'What we did to test it',
       paragraphs: [
-        'We took our real phone photos, saved them as WebP with the engine of this site at its standard WebP quality, and then saved those WebP files as JPG with the tool above. We also ran a WebP that carries GPS data and an animated WebP through the same tool.',
-        'Our WebP copies weighed {webpTotal}, against {jpgTotal} for the original JPGs from the cameras. Do not read too much into that gap: the cameras saved their JPGs at a higher quality than our WebP copies, so this is not a fair race between the formats. It does show how much smaller a web image usually is than the photo it came from.',
+        'We took our {photos_word} real phone photos, saved them as WebP with the engine of this site at its standard WebP quality, and then saved those WebP files as JPG with the tool above. We also ran a WebP that carries GPS data and an animated WebP through the same tool.',
+        'Our WebP copies weighed {webpTotal}, against {jpgTotal} for the original JPGs from the cameras. Do not read too much into that gap: the cameras saved their JPGs at a higher quality than our WebP copies, so this is not a fair race between the formats. What it does show is what our WebP copies kept at the quality of this site’s encoder: {webpRatio} of the weight of the originals.',
       ],
     },
     {
@@ -52,13 +52,13 @@ const texts: FileGuideTexts = {
       heading: 'The location stays behind',
       paragraphs: [
         'The WebP format can carry Exif and XMP metadata, according to Google’s container specification, so a WebP can hold the GPS position and the camera details of a photo. Our test WebP with GPS data came out of the tool as a JPG with {exifGpsAfterChromium_word} GPS data.',
-        'That happens because each JPG is written from the pixels of the image, not copied from the file. It is usually what you want when you share a picture, but it also means the JPG is a new file: keep the WebP if you need the original as it was.',
+        'That happens because each JPG is written from the pixels of the image, not copied from the file. That is what you want when you share a picture and not its details, but it also means the JPG is a new file: keep the WebP if you need the original as it was.',
       ],
     },
   ],
   half: 3,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Our real phone photos, saved as WebP by the engine of this site, then saved as JPG with the tool above. The share in brackets is against the original camera JPG.',
+  measuredIntro: 'Our {photos_word} real phone photos, saved as WebP by the engine of this site, then saved as JPG with the tool above. The share in brackets is against the original camera JPG.',
   measuredNote: 'Measured on {date}. The WebP copies were written in Node with the WebP encoder of this site’s engine; the JPGs were made through the WebP to JPG page in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes. The table shows Chromium.',
   tables: [
     {

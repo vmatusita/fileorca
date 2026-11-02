@@ -44,7 +44,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'What the other tools did',
       paragraphs: [
-        'Compress image also removed the location and made the photos {compressImageRatioChromium_off} lighter, but by recompressing them: the closest it came to the original was {compressImagePsnrMinChromium} of PSNR, a measure of how close two images are. Good for sending, not for keeping. Crop image and Rotate image change the frame by design, and PNG to JPG turned the photos into PNG files {pngToJpgRatioChromium_times} the size.',
+        'Compress image also removed the location and made the photos {compressImageRatioChromium_off} lighter, but by recompressing them: its lowest score on our photos was {compressImagePsnrMinChromium} of PSNR, a measure of how close two images are, where higher is closer. Good for sending, not for keeping. Crop image and Rotate image change the frame by design, and PNG to JPG turned the photos into PNG files {pngToJpgRatioChromium_times} the size in Chromium and {pngToJpgRatioWebkit_times} in WebKit.',
         'None of them left GPS coordinates, camera names or dates in the photos, and the PDF from Image to PDF carried no GPS either. The table under "What we measured" has each tool.',
       ],
     },
@@ -64,13 +64,13 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Our real phone photos through each image tool that takes a JPG, each with the option that changes the photo least. The share is the size after against the originals, and pixels compares each copy with the original.',
-  measuredNote: 'Measured on {date} through the tool pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which agreed on every tool. The metadata and the pixels were read in Node, with the same decoder for the original and the copy. The table shows Chromium.',
+  measuredIntro: 'Our {photos_word} real phone photos through each image tool that takes a JPG, each with the option that changes the photo least. The share is the size after against the originals, and pixels compares each copy with the original on the worst of the photos.',
+  measuredNote: 'Measured on {date} through the tool pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The two browsers wrote files of the same size with {browsersSameSize_word} of the {candidates_word} tools; with {browsersDiffer}, the sizes differed. The metadata and the pixels were read in Node, with the same decoder for the original and the copy. The table shows Chromium.',
   tables: [
     {
       heading: 'Each tool on our photos',
-      caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, how close the pixels are, and how many photos kept GPS data',
-      head: ['Tool', 'Size after', 'Format', 'Same frame', 'Pixels', 'Photos with GPS left'],
+      caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, how close the pixels are on the worst photo, and how many photos kept GPS data',
+      head: ['Tool', 'Size after', 'Format', 'Same frame', 'Pixels, worst photo', 'Photos with GPS left'],
     },
   ],
   sourcesHeading: 'Sources',

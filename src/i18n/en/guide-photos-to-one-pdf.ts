@@ -8,7 +8,7 @@ const texts: FileGuideTexts = {
   changed: 'First version, with the measurements of {date}.',
   intro: [
     'A PDF of photos keeps them in order, prints each one on its own page and opens on any computer or phone. Many forms and offices also ask for exactly that: one PDF, not a set of images.',
-    'The catch is size. A PDF of phone photos is roughly as heavy as the photos themselves, which is often too heavy to attach. We measured what happens to the size, with and without compressing the photos first.',
+    'The catch is size. Put into one PDF, our {photos_word} phone photos made a file {pdfRatioChromium} as heavy as the photos themselves. We measured what happens to the size, with and without compressing the photos first.',
   ],
   toolHeading: 'Turn your photos into one PDF here',
   toolIntro: 'Drop your photos in the order you want them, or drag them into order. Each one becomes a page, the PDF is made in this browser tab, and nothing is uploaded.',
@@ -36,8 +36,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'How heavy the PDF gets',
       paragraphs: [
-        'Our real phone photos weighed {photosTotal} together. Put straight into one PDF, they made a file of {pdfChromium}, which is {pdfRatioChromium} of the photos. Almost all of that is the photos themselves: the pictures inside the PDF weighed {pdfImagesChromium}.',
-        'The PDF came out a little lighter than the photos only because the tool saves the pictures at its own quality, a bit lower than the phone cameras used. It is not compression in any real sense, and for email it is usually not enough.',
+        'Our {photos_word} real phone photos weighed {photosTotal} together. Put straight into one PDF, they made a file of {pdfChromium}, which is {pdfRatioChromium} of the photos. Almost all of that is the photos themselves: the pictures inside the PDF weighed {pdfImagesChromium}.',
+        'The PDF came out a little lighter than the photos only because the tool saves the pictures at its own quality, a bit lower than the phone cameras used. It is not compression in any real sense.',
       ],
     },
     {
@@ -70,7 +70,7 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Our real phone photos, straight into one PDF, and again after Compress image. The share is against the original photos.',
+  measuredIntro: 'Our {photos_word} real phone photos, straight into one PDF, and again after Compress image. The share is against the original photos.',
   measuredNote: 'Measured on {date} through the Image to PDF and Compress image pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes, on our real phone photos at the default settings. The pictures inside the PDF were counted with pdf-lib.',
   tables: [
     {

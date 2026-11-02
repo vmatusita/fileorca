@@ -23,7 +23,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'A photo saved as PNG is bigger, not better',
       paragraphs: [
-        'We took our real phone photos, which came out of the cameras as JPGs, and saved them as PNG with the tool above. Together the JPGs weighed {jpgTotal}. As PNG they weighed {pngTotalChromium} in Chromium, {pngRatioChromium_times} as much.',
+        'We took our {photos_word} real phone photos, which came out of the cameras as JPGs, and saved them as PNG with the tool above. Together the JPGs weighed {jpgTotal}. As PNG they weighed {pngTotalChromium} in Chromium, {pngRatioChromium_times} as much.',
         'The PNGs did not look any better. Each one held the same pixels as the JPG it came from, exactly: we compared them pixel by pixel, and {pngIdenticalChromium_word} of them were identical. A PNG cannot bring back the detail the camera already dropped when it wrote the JPG. It only stores what is left without losing more.',
       ],
     },
@@ -63,7 +63,7 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Our real phone photos, from the camera JPG to PNG with the tool above, and back to JPG. The last column compares the final JPG with the original pixels.',
+  measuredIntro: 'Our {photos_word} real phone photos, from the camera JPG to PNG with the tool above, and back to JPG. The last column compares the final JPG with the original pixels.',
   measuredNote: 'Measured on {date} through the PNG to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. Pixels were compared in Node, with the same decoder for the original and the copy. The back to JPG sizes were the same in both browsers.',
   tables: [
     {

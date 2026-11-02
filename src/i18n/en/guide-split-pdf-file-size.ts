@@ -7,8 +7,8 @@ const texts: FileGuideTexts = {
   lead: 'You split a big PDF to send it in pieces, and the pieces add up to more than the file you started with. Here is why that happens, and when it does not.',
   changed: 'First version, with the measurements of {date}.',
   intro: [
-    'Splitting a PDF sounds like cutting paper: the pages go into separate piles and nothing is added. A PDF does not work like that. Each part has to be a complete PDF on its own, able to open anywhere, so it carries everything its pages need to show correctly.',
-    'Most of the time that changes little. For some files it changes a lot. We split real PDFs, one part per page, and added the parts up to see which.',
+    'Splitting a PDF sounds like cutting paper: the pages go into separate piles and nothing is added. A PDF does not work like that. Each part has to be a complete PDF on its own, able to open anywhere, so it carries everything its pages need to show correctly, and Split PDF also gives every part a copy of the description of the original document.',
+    'How much that adds depends on the file. We split {files_word} PDFs of our tests, one part per page, and added the parts up: the parts of {bigger_word} of them weighed more than the whole, and those of the lecture notes {bookRatio_times} as much.',
   ],
   toolHeading: 'Split your PDF here',
   toolIntro: 'Drop a PDF, choose to split every page or type the ranges you want, and press the button. The parts are made in this browser tab and come back as one ZIP; nothing is uploaded.',
@@ -24,14 +24,14 @@ const texts: FileGuideTexts = {
       heading: 'Where the parts grew: fonts',
       paragraphs: [
         'Our lecture notes have {bookParts} pages set in many embedded fonts. Split into {bookParts} parts, they added up to {bookSum}, {bookRatio_times} the original {bookTotal}. Almost all of the growth was fonts: the whole file holds {bookFonts} of font data, and the parts together held {bookPartFonts}, {bookFontsRatio_times} as much.',
-        'The pictures did not grow at all. Each one sits on a single page, so it went into a single part, and the parts held {bookPartImages} of pictures, exactly what the whole file holds. Adobe notes that embedding a single font can add substantially to the size of a PDF; splitting multiplies that by the number of parts.',
+        'The pictures did not grow at all. Each one sits on a single page, so it went into a single part, and the parts held {bookPartImages} of pictures, exactly what the whole file holds. Adobe notes that adding a single font to a PDF can sometimes increase its size substantially; splitting can repeat that cost in every part that uses the font.',
       ],
     },
     {
-      heading: 'Where they barely grew: scans',
+      heading: 'Scans: what every part repeats',
       paragraphs: [
-        'A scanned document is one picture per page and almost no fonts, so there is little to copy twice. Our scanned NASA report has {reportParts} pages; split into {reportParts} parts it added up to {reportSum}, {reportRatio_more} more than the whole. The pictures were the same bytes; the growth is the small frame every PDF needs around its pages, repeated {reportParts} times.',
-        'Our PDF of photos behaved the same way: split page by page, the parts added up to {photosSum}, against {photosTotal} for the whole file.',
+        'A scanned document is one picture per page, and each picture goes into one part. Our scanned NASA report has {reportParts} pages; split into {reportParts} parts, it added up to {reportSum}, {reportRatio_more} more than the whole, with the pictures the same bytes as before. Most of the growth, {reportMetadataShare}, was the metadata of the document: a description of the file in a format called XMP, {reportMetadata} in the original. Split PDF copies it into every part, so the parts held {reportPartMetadata} of it. The rest is the small structure each part needs around its page.',
+        'Our PDF of photos carries no such description. Split into its {photosParts} pages, it grew by only {photosGrowth_exact}.',
       ],
     },
     {
@@ -45,21 +45,21 @@ const texts: FileGuideTexts = {
       heading: 'How to split without the extra weight',
       paragraphs: [
         'Split into ranges, not single pages, when the pages share their fonts. A chapter in one part carries its fonts once, where its pages split apart carry them once each. Type the ranges you need in the tool, for example by chapter or by section, instead of splitting every page.',
-        'If you split to get under an email limit, check the total, not only each part: a part that fits can still be the first of many heavy ones. For a PDF made of pictures, splitting costs almost nothing extra, and Compress PDF can make each picture lighter first.',
+        'If you split to get under an email limit, check the total, not only each part: a part that fits can still be the first of many heavy ones. Each part also carries its own copy of the metadata: our scanned report came out about {reportGrowthPerPart} heavier per part, so fewer, larger parts repeat it fewer times. Compress PDF can make the pictures lighter before you split.',
         'And if what you need is a shorter PDF rather than several, delete the pages you do not need instead. One file keeps its fonts once, however many pages go.',
       ],
     },
     {
       heading: 'What we measured on each file',
       paragraphs: [
-        'We split {files} PDFs into one part per page, the default of Split PDF, and added up the parts. The parts weighed more than the whole in {bigger} of them. The table shows each file, with its fonts before and after, since fonts are where the extra weight comes from.',
+        'We split {files} PDFs into one part per page, the default of Split PDF, and added up the parts. The parts weighed more than the whole in {bigger} of them. The table shows each file, with its fonts before and after, since fonts made most of the extra weight in our sample.',
       ],
     },
   ],
   half: 3,
   measuredHeading: 'What we measured',
   measuredIntro: 'Each PDF split into one part per page, the default of Split PDF. Change is all the parts against the whole file; fonts shows the font data of the whole file, then of all the parts together.',
-  measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on the real PDFs of our tests and a PDF of photos. Fonts and pictures were counted with pdf-lib, the library the engine opens files with.',
+  measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on {files_word} PDFs of our tests, the real documents and a PDF of photos. Fonts, pictures and metadata were counted with pdf-lib, the library the engine opens files with.',
   tables: [
     {
       heading: 'One part per page',

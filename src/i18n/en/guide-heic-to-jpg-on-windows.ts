@@ -30,7 +30,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'Let the transfer convert them',
       paragraphs: [
-        'When photos travel from an iPhone to a computer over a cable, Apple says the media may be converted to JPEG or H.264 on the way. The phone does this unless it is told to keep the originals: open Settings, tap Apps, tap Photos, then scroll down and tap Keep Originals. If you leave that setting off, the copies that reach the PC are often JPGs already.',
+        'When photos travel from an iPhone to a computer over a cable, Apple says the media may be converted to JPEG or H.264 on the way. The phone does this unless it is told to keep the originals: open Settings, tap Apps, tap Photos, then scroll down and tap Keep Originals. If you leave that setting off, the copies that reach the PC can already be JPGs.',
         'Microsoft points to a similar route without a cable: many devices convert HEIC photos to a more common format when the files are transferred or emailed, and OneDrive can convert photo files on its own. Both depend on how the photos travel, so they are worth knowing but hard to count on for a folder of files you already have.',
       ],
     },
@@ -45,7 +45,7 @@ const texts: FileGuideTexts = {
       heading: 'What converting did to our photos',
       paragraphs: [
         'We ran the converter on our {files} HEIC test photos, taken with {cameras} different camera models, from iPhones to a Samsung phone and an Apple Vision Pro. Together the HEIC files weighed {heicTotal}. The JPGs weighed {jpgTotalChromium}, which is {ratioTotalChromium_more} more.',
-        'That is the price of compatibility. Photo by photo the change went from {ratioMinChromium_change} to {ratioMaxChromium_change}, and the middle photo grew by {ratioMedianChromium_more}. A JPG packs the same picture less tightly than HEIC, so a converted photo is usually bigger, not smaller. If you need it smaller, compress or resize the JPG afterwards.',
+        'That is the price of compatibility. Photo by photo the change went from {ratioMinChromium_change} to {ratioMaxChromium_change}, and half of them grew by {ratioMedianChromium_more} or less. A JPG packs the same picture less tightly than HEIC, which is why our photos came out bigger together, not smaller. If you need it smaller, compress or resize the JPG afterwards.',
         'All {sameSizeChromium_word} JPGs kept the size in pixels of the photo as the phone shows it, turned the right way up.',
       ],
     },

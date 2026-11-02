@@ -7,7 +7,7 @@ const texts: FileGuideTexts = {
   lead: 'You have a few PDFs on your phone and need to send them as one. Here are the ways to do it there, without a computer, and what to expect from the result.',
   changed: 'First version, with the measurements of {date}.',
   intro: [
-    'Forms, receipts, a signed page and a scan of an ID often arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
+    'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
     'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged real PDFs.',
   ],
   toolHeading: 'Combine your PDFs here',
@@ -58,14 +58,14 @@ const texts: FileGuideTexts = {
     {
       heading: 'Sending the merged PDF',
       paragraphs: [
-        'A personal Gmail account sends attachments up to {gmailLimit}; above that, Google turns the attachment into a Drive link. If your merged PDF is near the limit, Compress PDF can usually bring a PDF of photos or scans well under it, and our guide to large PDFs explains which mode fits which file.',
+        'A personal Gmail account sends attachments up to {gmailLimit}; above that, Google turns the attachment into a Drive link. If your merged PDF is near the limit, Compress PDF may bring it under. In the measurements of our guide to large PDFs, it made a PDF of photos and a scanned color page much lighter, and a black and white scan only a little; that guide has each mode on each file.',
         'Check the merged file before you send it: open it, scroll through every page and make sure the order is right. It takes a minute, and it is much easier than explaining a missing page later.',
       ],
     },
   ],
   half: 4,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Pairs of our test PDFs merged in the order shown. Change is the merged file against the two files together.',
+  measuredIntro: 'We merged {pairs_word} pairs made from {pdfs_word} of our test PDFs, in the order shown. Change is the merged file against the two files together.',
   measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on pairs of the PDFs of our tests.',
   tables: [
     {

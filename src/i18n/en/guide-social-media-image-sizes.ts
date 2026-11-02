@@ -31,12 +31,12 @@ const texts: FileGuideTexts = {
     {
       heading: 'The YouTube thumbnail in one step',
       paragraphs: [
-        'YouTube asks for thumbnails in {ytRatio}, at least {ytMinWidth} wide, and its help page recommends {ytRecommended} for videos. Uploaded from the phone app, a thumbnail can weigh up to {ytPhoneLimit}.',
-        'The YouTube thumbnail preset does the crop and the resize at once: it cuts the photo to {ytRatio} around its center and makes it exactly the size in the table, small enough for the phone app. All {thumbnailExactChromium_word} of our photos came out at that exact size, and the largest weighed {thumbnailMaxChromium}.',
+        'YouTube’s help page recommends {ytRecommended} for video thumbnails, with a minimum width of {ytMinWidth}, and suggests the {ytRatio} shape. Uploaded from the phone app, a thumbnail can weigh up to {ytPhoneLimit}.',
+        'The YouTube thumbnail preset does the crop and the resize at once: it cuts the photo to {ytRatio} around its center and makes it {thumbnailWidth} × {thumbnailHeight}, smaller than the recommended size, so the file stays well under the limit of the phone app. All {thumbnailExactChromium_word} of our photos came out at that size, and the largest weighed {thumbnailMaxChromium}.',
       ],
     },
     {
-      heading: 'File size is rarely the problem',
+      heading: 'File size was not the problem for our photos',
       paragraphs: [
         'Resizing to a social media size makes a photo much lighter, because most of its pixels go. Of our resized photos, {underLimit} were for a size with a published limit, and all {underLimit} were under it. The largest file we made weighed {largestOutput}.',
         'The tightest figure is the Facebook cover: Facebook says it loads fastest when it is under {fbCoverLimit}. Our largest cover weighed {facebookCoverMaxChromium}. If a cover is still too heavy, compress it after resizing.',
@@ -53,7 +53,7 @@ const texts: FileGuideTexts = {
   ],
   half: 2,
   measuredHeading: 'What we measured',
-  measuredIntro: 'Each size published on the networks’ own pages, the sizes our phone photos came out at with Resize image, and the largest file at each size. The YouTube thumbnail row comes from the YouTube thumbnail preset.',
+  measuredIntro: 'Each size published on the networks’ own pages, the sizes our {photos_word} phone photos came out at with Resize image, and the largest file at each size. The YouTube thumbnail row gives the size YouTube recommends, and the size the YouTube thumbnail preset made.',
   measuredNote: 'Measured on {date} in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, through the Resize image page of this site (By size) and its YouTube thumbnail preset, on our real phone photos, in portrait and in landscape. The table shows Chromium; WebKit wrote slightly larger files at the same sizes.',
   tables: [
     {

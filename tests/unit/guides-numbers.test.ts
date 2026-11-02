@@ -10,6 +10,7 @@ import enCommon from '../../src/i18n/en/common.ts';
 import shared from '../../src/i18n/en/file-guides.ts';
 import type { FileGuideTexts } from '../../src/i18n/types.ts';
 import type { MeasuredFile } from '../../src/tools/guides/measured-types.ts';
+import { resolvePlaceholder } from '../../src/tools/guides/measured.ts';
 import { FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 
 const texts = import.meta.glob<FileGuideTexts>('/src/i18n/en/guide-*.ts', { import: 'default', eager: true });
@@ -61,6 +62,96 @@ function numberProblems(id: string, t: FileGuideTexts): string[] {
   for (const name of t.names) if (!/\d/.test(name)) problems.push(`${id}.names: "${name}" não tem algarismo (não precisa estar na lista)`);
   return problems;
 }
+
+/**
+ * Words that carry a claim past the sample (prompt F5b, decision 5.4: "nas nossas 13 fotos", não "as fotos"; DECISOES
+ * § 197): a guide says what its files did, not what files usually do, and does not lend a source more than it says.
+ */
+export const GENERAL = /\b(?:usually|often|most of the time|almost always|almost nothing|typically|rarely|in most cases|never a dramatic|says the same|most (?:PDFs|photos|files|people|sites|phones))\b/i;
+
+function generalProblems(id: string, t: FileGuideTexts): string[] {
+  return prose(t, id).flatMap(([path, text]) => {
+    const found = GENERAL.exec(text)?.[0];
+    return found ? [`${path}: "${found}" generaliza além da amostra`] : [];
+  });
+}
+
+/** Sentences of a text, kept whole around their placeholders. */
+const sentences = (text: string): string[] => text.split(/(?<=[.!?])\s+/);
+const LOW = /\b(?:lowest|least|smallest|lightest|worst|fewest|minimum)\b|\bas low as\b/i;
+const HIGH = /\b(?:highest|largest|heaviest|biggest|best|maximum)\b|\bup to\b/i;
+const CLAIMS_BEST = /\b(?:closest|best|highest)\b/i;
+
+/**
+ * A measured minimum or maximum says which one it is (DECISOES § 199): the sentence gives the range (the other end is
+ * there too) or a word of its direction, and a minimum is never called the best or the closest.
+ */
+function directionProblems(id: FileGuideId, t: FileGuideTexts, file: MeasuredFile = measured): string[] {
+  return prose(t, id).flatMap(([path, text]) => directionInText(id, path, text, file));
+}
+
+function directionInText(id: FileGuideId, path: string, text: string, file: MeasuredFile = measured): string[] {
+  const problems: string[] = [];
+  for (const sentence of sentences(text)) {
+    const names = [...sentence.matchAll(/\{(\w+)\}/g)].map((match) => match[1] as string);
+    const bases = names.map((name) => name.replace(/_[a-z]+$/, ''));
+    for (const name of names) {
+      const base = name.replace(/_[a-z]+$/, '');
+      const end = /(Min|Max)(?=[A-Z]|$)/.exec(base)?.[1];
+      if (!end || resolvePlaceholder(id, name, file) === null) continue;
+      const other = base.replace(/(Min|Max)(?=[A-Z]|$)/, end === 'Min' ? 'Max' : 'Min');
+      if (bases.includes(other)) continue;
+      if (end === 'Min' && (!LOW.test(sentence) || CLAIMS_BEST.test(sentence))) problems.push(`${path}: {${name}} é o mínimo, e a frase não diz isso: "${sentence}"`);
+      if (end === 'Max' && !HIGH.test(sentence)) problems.push(`${path}: {${name}} é o máximo, e a frase não diz isso: "${sentence}"`);
+    }
+  }
+  return problems;
+}
+
+/**
+ * The sample, stated (prompt F5b, decision 5.4; DECISOES § 203): the note under the table, or its introduction, names a
+ * measured count that is the sample of one of the guide's tables, so the reader knows how many files the numbers rest on.
+ */
+function sampleProblems(id: FileGuideId, t: FileGuideTexts, file: MeasuredFile = measured): string[] {
+  const sizes = new Set(Object.values(file.guides[id].tables).map((table) => table.sample.count));
+  const counts = [...`${t.measuredIntro} ${t.measuredNote}`.matchAll(/\{(\w+)\}/g)]
+    .map((match) => resolvePlaceholder(id, match[1] as string, file)?.number)
+    .filter((number) => number !== undefined && number.unit === 'count' && number.value === number.sample.count);
+  return counts.some((number) => number && sizes.has(number.value)) ? [] : [`${id}: a nota e a introdução da tabela não dizem quantos arquivos a amostra tem (${[...sizes].join(' ou ')})`];
+}
+
+describe('the claims of the file guides stay inside their sample', () => {
+  it('say what the sample did, never what files usually do', () => {
+    expect(FILE_GUIDE_IDS.flatMap((id) => generalProblems(id, textsOf(id)))).toEqual([]);
+  });
+
+  it('say whether a measured number is the lowest or the highest', () => {
+    expect(FILE_GUIDE_IDS.flatMap((id) => directionProblems(id, textsOf(id)))).toEqual([]);
+  });
+
+  it('state how many files each measurement rests on', () => {
+    expect(FILE_GUIDE_IDS.flatMap((id) => sampleProblems(id, textsOf(id)))).toEqual([]);
+  });
+
+  it('catch a generalization, a minimum called the best and a missing sample (controls)', () => {
+    const only = (text: string): FileGuideTexts => ({ ...textsOf('guides-remove-location-from-photos'), intro: [text], sections: [], lead: '', toolIntro: '', measuredIntro: '', measuredNote: '', tables: [] });
+    expect(generalProblems('control', only('A PDF of text usually gains almost nothing.')).join()).toMatch(/"usually" generaliza/);
+    expect(generalProblems('control', only('Adobe says the same in its guide.')).join()).toMatch(/"says the same"/);
+    expect(generalProblems('control', only('Most PDFs are small.')).join()).toMatch(/"Most PDFs"/);
+    expect(generalProblems('control', only('On our files, Lossless took a quarter off.'))).toEqual([]);
+    const location = 'guides-remove-location-from-photos';
+    expect(directionInText(location, 'x', 'The closest it came was {compressImagePsnrMinChromium} of PSNR.').join()).toMatch(/é o mínimo/);
+    expect(directionInText(location, 'x', 'It scored {compressImagePsnrMinChromium} of PSNR.').join()).toMatch(/é o mínimo/);
+    expect(directionInText(location, 'x', 'Its lowest score was {compressImagePsnrMinChromium} of PSNR.')).toEqual([]);
+    expect(directionInText('guides-heic-to-jpg-on-windows', 'x', 'It grew by {ratioMaxChromium_more}.').join()).toMatch(/é o máximo/);
+    expect(directionInText('guides-heic-to-jpg-on-windows', 'x', 'It went from {ratioMinChromium_change} to {ratioMaxChromium_change}.')).toEqual([]);
+    const heic = textsOf('guides-heic-to-jpg-on-windows');
+    expect(sampleProblems('guides-heic-to-jpg-on-windows', { ...heic, measuredIntro: 'Our photos.', measuredNote: 'Measured on {date}.' }).join()).toMatch(/não dizem quantos arquivos/);
+    // A count that is not the size of the sample does not state it.
+    expect(sampleProblems('guides-heic-to-jpg-on-windows', { ...heic, measuredIntro: 'Our photos.', measuredNote: '{gpsBefore} had GPS.' }).join()).toMatch(/não dizem quantos arquivos/);
+    expect(sampleProblems('guides-heic-to-jpg-on-windows', { ...heic, measuredIntro: 'Our {files} photos.', measuredNote: 'Measured on {date}.' })).toEqual([]);
+  });
+});
 
 describe('the numbers of the file guides', () => {
   it('are all placeholders, official figures with a source, or technical names', () => {

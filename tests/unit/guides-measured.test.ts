@@ -14,6 +14,8 @@ import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts
 import { compareNumbers, compareTables } from '../../scripts/guides/lib/compare.ts';
 import { globals, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
 import enCommon from '../../src/i18n/en/common.ts';
+import removeLocation from '../../src/i18n/en/guide-remove-location-from-photos.ts';
+import splitPdf from '../../src/i18n/en/guide-split-pdf-file-size.ts';
 
 const FILE = 'data/guides-measured.json';
 const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
@@ -152,6 +154,16 @@ describe('the measurements of the file guides', () => {
     expect(statedProblems({ ...youtube, stated: '' }).join()).toMatch(/no words of its page/);
   });
 
+  it('explain, in guide 8, the growth of the scans with the metadata every part repeats, as measured (DECISOES § 200)', () => {
+    const text = JSON.stringify(splitPdf);
+    for (const name of ['reportMetadata', 'reportPartMetadata', 'reportMetadataShare', 'reportGrowthPerPart']) {
+      expect(text, `guide 8 cites {${name}}`).toContain(`{${name}}`);
+      expect(measured.guides['guides-split-pdf-file-size'].numbers[name], `${name} is measured`).toBeDefined();
+    }
+    // The cause the first version gave, and its two readings of a growth of a third as nothing (A-5).
+    expect(text).not.toMatch(/small frame every PDF needs|barely grew|costs almost nothing extra/);
+  });
+
   it('say, in guide 6, which tools the two browsers wrote differently, from the measurement (DECISOES § 202)', () => {
     const guide = measured.guides['guides-remove-location-from-photos'];
     const table = guide.tables['candidates'] as MeasuredTable;
@@ -163,6 +175,9 @@ describe('the measurements of the file guides', () => {
     expect(guide.facts['browsersDiffer'], 'the fact the script wrote').toBe(names.join(' and '));
     expect(guide.numbers['browsersSameSize']?.value).toBe(tools.length - differ.length);
     expect(guide.numbers['candidates']?.value).toBe(tools.length);
+    // The guide says it through the fact, never as an agreement typed by hand.
+    expect(JSON.stringify(removeLocation)).toContain('{browsersDiffer}');
+    expect(JSON.stringify(removeLocation)).not.toMatch(/agreed on every tool/);
   });
 
   it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
