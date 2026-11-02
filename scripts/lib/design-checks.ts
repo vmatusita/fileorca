@@ -218,7 +218,7 @@ export interface FontsInput {
 
 /**
  * Only the two latin variable fonts reach the browser, each once; the @font-face URLs are the hashed
- * files in /_astro/, and the breadcrumb's face is the Figtree file itself, with font-display: optional; and each page preloads the Fredoka file alone, with the exact URL of the CSS
+ * files in /_astro/, and the face of the breadcrumb and the cookie notice (Figtree Steady) is the Figtree file itself, with font-display: optional; and each page preloads the Fredoka file alone, with the exact URL of the CSS
  * (a different URL would download the font twice).
  */
 export function checkFonts(input: FontsInput): string[] {

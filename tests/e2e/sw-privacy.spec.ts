@@ -57,6 +57,8 @@ test('nothing typed or opened enters a cache, nothing leaves by the worker, and 
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 60_000 });
 
   const keys = Object.entries(await cacheKeys(page)).flatMap(([name, urls]) => [name, ...urls]);
+  // The dump the report of the F8 shows (criterion 8): every cache and every key, after all of the above.
+  console.log(`[sw-chaves] ${browserName}: ${keys.map((key) => key.replace(server.origin, '')).join(' ')}`);
   expect(keys.length).toBeGreaterThan(5);
   for (const key of keys) {
     const path = key.replace(server.origin, '');

@@ -111,7 +111,7 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
 for (const [width, pages] of Object.entries(CASES)) {
   for (let start = 0; start < pages.length; start += CHUNK) {
     const chunk = pages.slice(start, start + CHUNK);
-    test(`no layout shift when Figtree arrives late, at ${width} px (${chunk[0]} and on)`, async ({ browser, browserName }) => {
+    test(`the breadcrumb, the H1 and the cookie notice keep their place when Figtree arrives late, at ${width} px (${chunk[0]} and on)`, async ({ browser, browserName }) => {
       const visits = [];
       for (const path of chunk) visits.push({ path, ...(await firstVisit(browser, browserName, path, Number(width))) });
       // Printed before any assertion, so a red run still shows the shift of every page of the chunk.
