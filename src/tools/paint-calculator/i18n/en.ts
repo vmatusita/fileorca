@@ -13,8 +13,8 @@ export default {
       he: { label: 'Wall height', suffix: 'ft', error: 'Enter a height from 1 to 30 ft.' },
       ar: { label: 'Total area', suffix: 'sq ft', error: 'Enter an area from 1 to 20,000 sq ft.' },
       cv: {
-        label: 'Coverage',
-        suffix: 'sq ft/gal',
+        label: 'Coverage per gallon',
+        suffix: 'sq ft',
         help: 'Check the can: the label says how many square feet a gallon covers.',
         error: 'Enter a coverage from 100 to 1,000 sq ft per gallon.',
       },

@@ -32,7 +32,7 @@ export default {
         error: 'Enter a weight from 0.01 to 5 tons per cubic yard.',
       },
     },
-    options: { m: { mulch: 'Mulch', gravel: 'Gravel' }, mo: { dims: 'Length × width', area: 'Total area' } },
+    options: { m: { mulch: 'Mulch', gravel: 'Gravel' }, mo: { dims: 'Dimensions', area: 'Total area' } },
     moreHeading: 'Bags and weight',
     view: {
       label: 'Volume needed',

@@ -11,7 +11,7 @@ export default {
       d: { label: 'Date', error: 'Enter a day from January 1, 2000 to December 31, 2099.' },
     },
     options: {
-      m: { lmp: 'Last period', conception: 'Conception', ivf3: 'IVF, day-3 embryo', ivf5: 'IVF, day-5 embryo' },
+      m: { lmp: 'Last period', conception: 'Conception', ivf3: 'IVF, day 3', ivf5: 'IVF, day 5' },
     },
     view: {
       label: 'Due date',
@@ -90,6 +90,6 @@ export default {
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your numbers stay on your device. The calculator runs in your browser, so the date you enter and today’s date are never sent anywhere, and the link you copy keeps the date after the #, a part of the address your browser never sends.',
+    'Your numbers stay on your device. The calculator runs in your browser, so the date you enter and today’s date are never sent anywhere, and the link you copy keeps the date and how it is counted after the #, a part of the address your browser never sends.',
   relatedHeading: 'Related calculators',
 } satisfies CalcPageTexts;

@@ -24,7 +24,9 @@ export default {
     moreHeading: 'Formula, hip and age',
     view: {
       label: 'Body fat',
-      sentence: 'By the Navy circumference equations, these measures give an estimated {percent}% body fat.',
+      sentence: 'By the Navy circumference equations, with the {sex} formula, these measures give an estimated {percent}% body fat.',
+      female: 'female',
+      male: 'male',
       method: 'Equation',
       formulaMale: 'Male: neck and waist at the navel',
       formulaFemale: 'Female: neck, waist at its narrowest and hip',
@@ -91,6 +93,6 @@ export default {
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your numbers stay on your device. The calculator runs in your browser, so your measures are never sent anywhere, and the link you copy keeps them after the #, a part of the address your browser never sends.',
+    'Your numbers stay on your device. The calculator runs in your browser, so your measures and the sex the formula uses are never sent anywhere, and the link you copy keeps them after the #, a part of the address your browser never sends.',
   relatedHeading: 'Related calculators',
 } satisfies CalcPageTexts;

@@ -26,7 +26,9 @@ export default {
     view: {
       label: 'Calories a day',
       unit: 'kcal',
-      sentence: 'At rest the equation gives {ree} kcal a day; times an activity level of {pal}, that is {tdee} kcal a day.',
+      sentence: 'By the {sex} formula, the equation gives {ree} kcal a day at rest; times an activity level of {pal}, that is {tdee} kcal a day.',
+      female: 'female',
+      male: 'male',
       ree: 'At rest (Mifflin-St Jeor)',
       pal: 'Activity level',
       scheduleHeading: 'How the number is made',
@@ -89,6 +91,6 @@ export default {
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your numbers stay on your device. The calculator runs in your browser, so your height, weight, age and activity level are never sent anywhere, and the link you copy keeps them after the #, a part of the address your browser never sends.',
+    'Your numbers stay on your device. The calculator runs in your browser, so your height, weight, age, activity level and the sex the formula uses are never sent anywhere, and the link you copy keeps them after the #, a part of the address your browser never sends.',
   relatedHeading: 'Related calculators',
 } satisfies CalcPageTexts;

@@ -18,7 +18,6 @@ export default {
       next: 'Next period',
       scheduleHeading: 'Your next six cycles',
       caption: 'Six cycles from the first day of your last period: the fertile window, the estimated ovulation and the next period',
-      colCycle: 'Cycle starts',
       colWindow: 'Fertile window',
       colOvulation: 'Ovulation',
       colNext: 'Next period',

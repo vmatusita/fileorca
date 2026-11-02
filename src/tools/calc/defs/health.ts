@@ -132,7 +132,8 @@ export const calorieDef: CalcDef<CalorieInput, CalorieResult> = {
       [text(v, 'label'), `${tdee} ${unit}`],
     ];
     return {
-      hero: { label: text(v, 'label'), value: tdee, unit, sentence: say(text(v, 'sentence'), { ree, pal, tdee }) },
+      // The sentence says which formula made the number: the sex comes after the result on a phone (review F7, g-3; DECISOES § 281).
+      hero: { label: text(v, 'label'), value: tdee, unit, sentence: say(text(v, 'sentence'), { sex: text(v, values['sx'] === 'male' ? 'male' : 'female'), ree, pal, tdee }) },
       placard: { n: tdee, l: text(v, 'label') },
       open: true,
       table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),
@@ -165,10 +166,12 @@ export const ovulationDef: CalcDef<OvulationInput, OvulationResult> = {
       },
       placard: { n: first ? day(first.ovulation) : '', l: text(v, 'label') },
       open: true,
+      // Three columns, so the table fits a 320 px phone: a cycle starts on the previous row's next period, and the first
+      // one on the day typed in (review F7, f-2; DECISOES § 275).
       table: () => ({
         caption: text(v, 'caption'),
-        head: [text(v, 'colCycle'), text(v, 'colWindow'), text(v, 'colOvulation'), text(v, 'colNext')],
-        rows: r.cycles.map((cycle) => [plain(day(cycle.start)), plain(window(cycle)), plain(day(cycle.ovulation)), plain(day(cycle.nextPeriod))]),
+        head: [text(v, 'colWindow'), text(v, 'colOvulation'), text(v, 'colNext')],
+        rows: r.cycles.map((cycle) => [plain(window(cycle)), plain(day(cycle.ovulation)), plain(day(cycle.nextPeriod))]),
       }),
       summary: first
         ? [
@@ -228,9 +231,10 @@ export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
     if ('error' in r) {
       const problem = text(v, r.error === 'domain' ? (male ? 'domainMale' : 'domainFemale') : 'range');
       return {
-        hero: { label: text(v, 'label'), value: '0', unit: '%', sentence: [] },
+        // A dash, as in the other calculators' problems: "0 %" read as a body fat (review F7, f-7; DECISOES § 281).
+        hero: { label: text(v, 'label'), value: '-', sentence: [] },
         problem,
-        placard: { n: '0', l: text(v, 'label') },
+        placard: { n: '-', l: text(v, 'label') },
         open: true,
         table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], [[text(v, 'label'), '—']]),
         summary: [[text(v, 'label'), '—']],
@@ -244,7 +248,7 @@ export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
       [text(v, 'label'), `${percent}%`],
     ];
     return {
-      hero: { label: text(v, 'label'), value: percent, unit: '%', sentence: say(text(v, 'sentence'), { percent }) },
+      hero: { label: text(v, 'label'), value: percent, unit: '%', sentence: say(text(v, 'sentence'), { sex: text(v, male ? 'male' : 'female'), percent }) },
       placard: { n: `${percent}%`, l: text(v, 'label') },
       open: true,
       table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),

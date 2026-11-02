@@ -173,7 +173,8 @@ export const LIFE_SAMPLES: Record<string, string> = {
   bmi: '23.6',
   category: 'Healthy Weight',
   band: '18.5 to 24.9',
-  // Calorie: "At rest the equation gives {ree} kcal a day; times an activity level of {pal}, that is {tdee} kcal a day."
+  // Calorie: "By the {sex} formula, the equation gives {ree} kcal a day at rest; times an activity level of {pal}, ..."
+  sex: 'female',
   ree: '1,376',
   pal: '1.6',
   tdee: '2,202',
@@ -181,7 +182,7 @@ export const LIFE_SAMPLES: Record<string, string> = {
   from: 'October 27, 2026',
   to: 'November 1, 2026',
   next: 'November 16, 2026',
-  // Body fat: "an estimated {percent}% body fat".
+  // Body fat: "with the {sex} formula, these measures give an estimated {percent}% body fat".
   percent: '25.9',
   // Due date: "Counted from a first day of the last period on {lmp}. {today}", with "{weeks} and {days}".
   lmp: 'September 7, 2026',
