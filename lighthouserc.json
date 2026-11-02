@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "url": ["/compress-image/", "/image-tools/", "/mortgage-calculator/", "/guides/15-vs-30-year-mortgage/", "/compress-pdf/", "/pdf-tools/", "/guides/why-is-my-pdf-so-large/"],
+      "url": ["/compress-image/", "/image-tools/", "/mortgage-calculator/", "/guides/15-vs-30-year-mortgage/", "/compress-pdf/", "/pdf-tools/", "/guides/why-is-my-pdf-so-large/", "/pt/simulador-sac-price/", "/pt/apoie/"],
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --disable-gpu",
