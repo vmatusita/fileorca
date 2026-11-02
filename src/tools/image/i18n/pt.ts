@@ -1,7 +1,7 @@
 import type { ImagePanelTexts } from '../../../i18n/types.ts';
 
 // Textos do painel comuns às ferramentas de imagem: a fila, os erros, o card de resultado e a comparação.
-// Só a Comprimir imagem existe em português; as outras ferramentas são só em inglês (F2, decisão 1).
+// Todas as ferramentas de imagem existem em português desde a F6 (docs/i18n/pt.md).
 export default {
   fileFallback: 'imagem',
   files: { zip: 'fileorca-imagens', pdf: 'fileorca-imagens' },

@@ -41,7 +41,7 @@ export default {
   title: 'Simulador de financiamento de veículo: parcela, juros e CET',
   description: 'Simule o financiamento do carro ou da moto: parcela, total pago e CET ao mês e ao ano, com IOF e tarifas financiados ou à vista. Grátis.',
   h1: 'Simulador de financiamento de veículo',
-  lead: 'Quanto fica a parcela do carro ou da moto, e quanto o crédito custa de verdade.',
+  lead: 'A parcela do veículo e quanto o crédito custa de verdade.',
   panel: {
     fields: {
       p: { label: 'Preço do veículo', prefix: 'R$', error: 'Digite um preço de R$ 1.000 a R$ 5.000.000.' },

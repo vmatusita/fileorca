@@ -45,7 +45,7 @@ export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
   return [{ href: homePath(lang), name: IMAGE_PANEL_TEXTS[lang].next.moreTools, target: 'home', icon: ICONS.home, category: 'none' }];
 }
 
-/** The page a refused HEIC or AVIF is sent to: in Portuguese and Spanish that is the English page (the text says so). */
+/** The page a refused HEIC or AVIF is sent to, in the language of the page (English where a language had no converter). */
 function converterLink(tool: ImageToolId, lang: Lang): ConverterLink {
   const route = routeById(tool);
   const path = route.paths[lang] ?? route.paths.en ?? '/';
