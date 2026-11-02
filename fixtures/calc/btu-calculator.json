@@ -2,7 +2,7 @@
   "calculator": "btu-calculator",
   "oracle": {
     "script": "scripts/oracle/calc_home_health.py",
-    "sha256": "704e587f6ece11e8db427dc6622c203015e82428ef7cbfc151c6e9c4ff9fd378",
+    "sha256": "1117cc6a2ec005cb7e038a78bdaceb5e1d7c083601a165b1b703a9d78d9be75a",
     "python": "3.13.18",
     "date": "2026-11-02",
     "nearTiesDrawnAgain": 0
