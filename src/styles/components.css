@@ -243,6 +243,11 @@
 /* Ring on any focus of the option (README: the ring on everything that takes focus): WebKit drops
    :focus-visible after an arrow key moves through the radio group. */
 .fo-seg__opt:has(input:focus) { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+/* High contrast (forced colours) paints the fill and the border of every option alike: an underline marks the chosen
+   one there (review F7, d-8; DECISOES § 280). */
+@media (forced-colors: active) {
+  .fo-seg__opt:has(input:checked) { text-decoration-line: underline; text-decoration-thickness: var(--stroke-3); text-underline-offset: 4px; }
+}
 .fo-seg__opt small { display: block; font-weight: 500; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
 
 /* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
@@ -261,6 +266,18 @@
 .fo-input__affix { padding: 0 var(--space-4); align-self: stretch; display: grid; place-items: center; background: var(--surface-sunken); color: var(--ink-muted); font: 600 16px/20px var(--fo-font-text); }
 .fo-input__affix:first-child { border-right: var(--stroke-hair) solid var(--hairline); }
 .fo-input__affix:last-child { border-left: var(--stroke-hair) solid var(--hairline); }
+/* The native arrow of a menu sits inside its box: a small right padding leaves the chosen text the room ("Rectangle" in
+   an area at 360 px; review F7, f-4; DECISOES § 277). */
+.fo-input select { padding-right: var(--space-2); }
+/* On a narrow phone the number gets the room of the paddings: "350" beside "sq ft", "20,000" in half a row (review F7,
+   d-2 and f-3; DECISOES § 277). */
+@media (max-width: 389px) {
+  .fo-input input { padding-inline: var(--space-3); }
+  .fo-input__affix { padding-inline: var(--space-2); }
+}
+@media (max-width: 359px) {
+  .fo-input input { padding-inline: var(--space-2); }
+}
 .fo-field[data-state="error"] .fo-input { border-color: var(--danger); border-width: var(--stroke-3); }
 /* The date field (F7, DECISOES § 262): the browser's own date input, a little tighter so "09/07/2026" and its calendar button fit half a row at 360 px. */
 .fo-input--date input { padding: 0 var(--space-3); font-size: 16px; }
@@ -283,6 +300,9 @@
 .fo-field[data-state="error"] .fo-qr__count { color: var(--danger); }
 .fo-input--area { align-items: stretch; }
 .fo-input--area textarea { flex: 1; min-width: 0; min-height: 120px; resize: vertical; border: 0; background: transparent; color: var(--ink); padding: var(--space-3) var(--space-4); font: 500 16px/24px var(--fo-font-text); outline: none; overflow-wrap: anywhere; }
+/* The browsers' placeholder is the text colour at half alpha, 3.3:1 in the light theme; the search box does the same
+   (review F7, d-9; DECISOES § 280). */
+.fo-input--area textarea::placeholder { color: var(--ink-muted); opacity: 1; }
 .fo-qr__out { display: grid; gap: var(--space-3); align-content: start; min-width: 0; }
 .fo-qr__preview { box-sizing: border-box; justify-self: center; display: grid; place-items: center; width: 100%; max-width: 320px; aspect-ratio: 1; border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface-sunken); overflow: hidden; }
 .fo-qr__preview[data-state="ready"] { border-style: solid; }
@@ -498,6 +518,11 @@
 /* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
 .fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
+/* Below 360 px a menu or a date takes the whole row: half a row cut "Last period" and the year of the day (review F7,
+   d-3, f-4 and f-6; DECISOES § 277). The result above the fold is measured at 360 px (§ 124). */
+@media (max-width: 359px) {
+  .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
+}
 .fo-calc__moreheading { margin: var(--space-2) 0 0; }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
 .fo-calc__stale { margin: 0; }
@@ -596,6 +621,14 @@
    and that balance was out of sight (review F4, DES-10). */
 .fo-amort .fo-amort__year td:last-child { position: sticky; right: 0; z-index: 1; }
 .fo-amort th:last-child { right: 0; z-index: 3; }
+/* A table that is the result itself (F7: no year groups, CalcView.open) has no sticky column: its last heading stood over
+   another column at 360 px. Its words wrap, so it fits the frame at 320 px with no sideways scroll (review F7, f-1 and
+   f-2; DECISOES § 275). */
+.fo-amort--flat th:last-child { right: auto; }
+.fo-amort--flat th, .fo-amort--flat td { white-space: normal; }
+@media (max-width: 479px) {
+  .fo-amort--flat th, .fo-amort--flat td { padding-inline: var(--space-2); }
+}
 .fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
 .fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }

@@ -19,9 +19,11 @@ export interface DateFieldProps {
   /** The range in words. */
   error: string;
   half?: boolean | undefined;
+  /** Tells the calculator whether the field shows its range error (§ 116, as in the CalcField). */
+  report?: ((id: string, wrong: boolean) => void) | undefined;
 }
 
-export default function DateField({ id, value, min, max, onValue, label, error, half }: DateFieldProps) {
+export default function DateField({ id, value, min, max, onValue, label, error, half, report }: DateFieldProps) {
   const [draft, setDraft] = useState(value);
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -33,6 +35,11 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
       setWrong(false);
     }
   }, [value]);
+
+  useEffect(() => {
+    report?.(id, wrong);
+    return () => report?.(id, false);
+  }, [report, id, wrong]);
 
   const read = (text: string) => {
     setDraft(text);

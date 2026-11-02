@@ -17,11 +17,19 @@ interface Props {
   problems: Problems;
   data: CalcPanelData;
   set: (values: Values) => void;
+  /** The store's record of the fields that show their range error (DECISOES § 116 and § 276). */
+  report?: ((id: string, wrong: boolean) => void) | undefined;
 }
 
 const fieldId = (key: string): string => `fo-calc-${key}`;
 
-function NumberInput({ spec, values, problems, data, set, keyName, value, onValue, label, textKey }: Props & {
+/**
+ * The list whose Add button below the result was just pressed. Only that press takes the focus to the new row: the rows of
+ * a scenario link, read after hydration, leave the focus and the scroll where they are (review F7, a-1; DECISOES § 278).
+ */
+let addedBelow: string | null = null;
+
+function NumberInput(props: Props & {
   spec: NumberSpec;
   keyName: string;
   value: number;
@@ -30,10 +38,9 @@ function NumberInput({ spec, values, problems, data, set, keyName, value, onValu
   /** The texts of the field when they depend on a row's menu ("x-circle"), else the spec's key. */
   textKey?: string;
 }) {
+  const { spec, problems, data, keyName, value, onValue, label, textKey } = props;
   const texts = (textKey ? data.texts.fields[textKey] : undefined) ?? data.texts.fields[spec.key];
   if (!texts) throw new Error(`no texts for field ${spec.key}`);
-  void values;
-  void set;
   return (
     <CalcField
       id={fieldId(keyName)}
@@ -54,6 +61,7 @@ function NumberInput({ spec, values, problems, data, set, keyName, value, onValu
       suffix={texts.suffix}
       tag={spec.example ? data.t.example : undefined}
       half={spec.half}
+      report={props.report}
     />
   );
 }
@@ -77,7 +85,8 @@ function DebtList(props: Props & { spec: ListSpec }) {
   // A row added by the Add button below the result (addBelow) takes the focus to its first control too.
   const length = useRef(rows.length);
   useEffect(() => {
-    if (focusNext.current === null && spec.addBelow && rows.length > length.current) focusNext.current = fieldId(`${spec.key}${rows.length - 1}${spec.pick?.key ?? spec.item[0]?.key ?? ''}`);
+    if (focusNext.current === null && addedBelow === spec.key && rows.length > length.current) focusNext.current = fieldId(`${spec.key}${rows.length - 1}${spec.pick?.key ?? spec.item[0]?.key ?? ''}`);
+    if (addedBelow === spec.key) addedBelow = null;
     length.current = rows.length;
     if (focusNext.current === null) return;
     document.getElementById(focusNext.current)?.focus();
@@ -166,7 +175,15 @@ export function AddRow({ spec, values, data, set }: Props & { spec: ListSpec }) 
   const rows = values[spec.key] as Record<string, number>[];
   if (rows.length >= spec.max) return null;
   return (
-    <button type="button" id={fieldId(`${spec.key}-add`)} class="fo-btn" onClick={() => set({ ...values, [spec.key]: [...rows, { ...spec.blank }] })}>
+    <button
+      type="button"
+      id={fieldId(`${spec.key}-add`)}
+      class="fo-btn"
+      onClick={() => {
+        addedBelow = spec.key;
+        set({ ...values, [spec.key]: [...rows, { ...spec.blank }] });
+      }}
+    >
       {listText(data, 'addRow')}
     </button>
   );
@@ -230,6 +247,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           hint={data.t.decimalHint}
           half={spec.half}
           unit={unit}
+          report={props.report}
         />
       );
     }
@@ -254,14 +272,17 @@ export function Field(props: Props & { spec: FieldSpec }) {
           <label class="fo-field__label" for={fieldId(spec.key)}>
             {texts?.label ?? spec.key}
           </label>
-          <div class="fo-input">
-            <select id={fieldId(spec.key)} value={String(values[spec.key])} onChange={(event) => set({ ...values, [spec.key]: event.currentTarget.value })}>
-              {spec.options.map((option) => (
-                <option key={option} value={option}>
-                  {labels[option] ?? option}
-                </option>
-              ))}
-            </select>
+          {/* In the field body like a number or a date: the box keeps its height when the field beside it shows an error (review F7, f-5; DECISOES § 277). */}
+          <div class="fo-field__body">
+            <div class="fo-input">
+              <select id={fieldId(spec.key)} value={String(values[spec.key])} onChange={(event) => set({ ...values, [spec.key]: event.currentTarget.value })}>
+                {spec.options.map((option) => (
+                  <option key={option} value={option}>
+                    {labels[option] ?? option}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       );
@@ -281,6 +302,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           label={texts.label}
           error={texts.error}
           half={spec.half}
+          report={props.report}
         />
       );
     }

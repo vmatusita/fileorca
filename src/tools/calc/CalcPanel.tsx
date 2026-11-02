@@ -68,7 +68,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   // A list whose Add button comes after the result (F7: the areas of the square footage).
   const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
-  const fieldProps = { values, problems: state.problems, data, set };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong };
 
   return (
     <div class="fo-calc">

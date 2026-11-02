@@ -42,10 +42,12 @@ export interface CalcFieldProps {
   half?: boolean | undefined;
   /** Replaces the suffix: the unit menu of the down payment. */
   unit?: ComponentChildren;
+  /** Tells the calculator whether the field shows its range error: the result on screen is then stale (§ 116). */
+  report?: ((id: string, wrong: boolean) => void) | undefined;
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit, report } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
@@ -59,6 +61,13 @@ export default function CalcField(props: CalcFieldProps) {
       setWrong(false);
     }
   }, [value, kind, lang, decimals]);
+
+  // A range error marks the result as the last one, with the line under it and the PDF and the CSV off (DECISOES § 116;
+  // review F7, g-1: an age under the minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276).
+  useEffect(() => {
+    report?.(id, wrong);
+    return () => report?.(id, false);
+  }, [report, id, wrong]);
 
   const read = (text: string): number | null => {
     const parsed = parseScaled(text, lang, places, negative);
@@ -74,7 +83,11 @@ export default function CalcField(props: CalcFieldProps) {
   const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
   const errorId = `${id}-error`;
   const helpId = `${id}-help`;
-  const described = [message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');
+  // The unit is part of what the field is: a screen reader says "Thickness, in" and not only "Thickness" (review F7, d-1; DECISOES § 279).
+  const prefixId = `${id}-prefix`;
+  const suffixId = `${id}-unit`;
+  const affix = !unit && suffix ? suffixId : null;
+  const described = [prefix ? prefixId : null, affix, message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
     <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={message ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
@@ -83,7 +96,11 @@ export default function CalcField(props: CalcFieldProps) {
       </label>
       <div class="fo-field__body">
         <div class="fo-input">
-          {prefix && <span class="fo-input__affix">{prefix}</span>}
+          {prefix && (
+            <span class="fo-input__affix" id={prefixId}>
+              {prefix}
+            </span>
+          )}
           <input
             ref={input}
             id={id}
@@ -106,7 +123,12 @@ export default function CalcField(props: CalcFieldProps) {
               if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />
-          {unit ?? (suffix && <span class="fo-input__affix">{suffix}</span>)}
+          {unit ??
+            (suffix && (
+              <span class="fo-input__affix" id={suffixId}>
+                {suffix}
+              </span>
+            ))}
         </div>
         {help && (
           <p class="fo-field__help" id={helpId}>
