@@ -460,7 +460,7 @@ Pegadinhas que a F7 achou:
 - **Campos estreitos** (§ 277). O `calc-form.spec.ts` lê os `DEFS` e confere, a 320 e 360 px:
   - cada número visível com o exemplo e com o máximo da faixa (`scrollWidth ≤ clientWidth`);
   - cada opção de cada menu, medida com a fonte do menu;
-  - o menu e a data na linha inteira abaixo de 360 px.
+  - o menu e a data na linha inteira abaixo de 360 px, só nas páginas de casa e saúde (`fo-calc--home`, § 282); as de dinheiro guardam as meias linhas, e o teste confere.
 
   Antes de criar um campo de meia largura com unidade longa, ou um menu com opção longa, rode esse spec.
 - **Alto contraste** (§ 280). O WebKit do Playwright não emula `forcedColors`. O teste ramifica por dentro, pelo `matchMedia('(forced-colors: active)')`: no Chromium afirma o sublinhado, no WebKit o fundo.
