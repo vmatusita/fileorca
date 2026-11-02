@@ -11,6 +11,7 @@ import {
   descriptionProblem,
   fileGuideTitleProblems,
   isImagePage,
+  isQrPage,
   missingFromSitemap,
   requiredSchemaTypes,
   schemaProblems,
@@ -19,7 +20,8 @@ import {
 } from '../../scripts/lib/seo-pages.ts';
 import { BR_CALC_IDS, BR_HUB_ID, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { ROUTES, routeById } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, routeById } from '../../src/i18n/routes.ts';
+import qrTexts from '../../src/tools/qr-code-generator/i18n/en.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 
 // The SEO checks that depend on what a page is (scripts/lib/seo-pages.ts, used by gate:seo): they read the
@@ -227,5 +229,38 @@ describe('the file guides of the F5b (DECISOES § 187)', () => {
     expect(fileGuideTitleProblems(name, 'How to Convert HEIC to JPG on Windows in 2026 | FileOrca', name, 'HEIC to JPG').join()).toMatch(/título com ano/);
     expect(fileGuideTitleProblems(name, 'How to Convert HEIC to JPG on Windows | FileOrca', `${name} (2026)`, 'HEIC to JPG').join()).toMatch(/H1 com ano/);
     expect(fileGuideTitleProblems('HEIC to JPG on Windows', 'HEIC to JPG on Windows | FileOrca', 'HEIC to JPG on Windows', 'HEIC to JPG').join()).toMatch(/começa pelo H1 da ferramenta/);
+  });
+});
+
+describe('the QR code generator of the F7 (decision 8)', () => {
+  const canonical = `${O}/qr-code-generator/`;
+
+  it('is a tool page of its own: a WebApplication and a BreadcrumbList, both ending at the page', () => {
+    expect(isQrPage(QR_ID)).toBe(true);
+    for (const id of ['compress-image', 'home', 'privacy', 'mortgage-calculator']) expect(isQrPage(id), id).toBe(false);
+    expect(requiredSchemaTypes(QR_ID)).toEqual(['Organization', 'BreadcrumbList', 'WebApplication']);
+    const crumbs = { '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }, { position: 2, item: canonical }] };
+    expect(schemaProblems(QR_ID, [{ '@type': 'WebApplication', url: canonical }, crumbs], canonical)).toEqual([]);
+    expect(schemaProblems(QR_ID, [{ '@type': 'WebApplication', url: `${O}/` }, crumbs], canonical).join()).toMatch(/WebApplication aponta/);
+    expect(schemaProblems(QR_ID, [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }] }], canonical).join()).toMatch(/termina em/);
+  });
+
+  it('starts the title with the H1 and asks 120 to 160 characters of description', () => {
+    expect(titleProblem(QR_ID, 'QR code generator for links and text, as PNG or SVG | FileOrca', 'QR code generator')).toBeNull();
+    expect(titleProblem(QR_ID, 'Free QR codes for links and text | FileOrca', 'QR code generator')).toMatch(/nome da ferramenta/);
+    expect(titleProblem(QR_ID, 'QR code generator | FileOrca', '')).toMatch(/nome da ferramenta/);
+    const text = (length: number): string => 'a'.repeat(length);
+    expect(descriptionProblem(QR_ID, 'en', text(120))).toBeNull();
+    expect(descriptionProblem(QR_ID, 'en', text(160))).toBeNull();
+    expect(descriptionProblem(QR_ID, 'en', text(119))).toBe('descrição com 119 caracteres (pede de 120 a 160 no gerador de QR code)');
+    expect(descriptionProblem(QR_ID, 'en', text(161))).toMatch(/descrição com 161 caracteres/);
+    // The other English pages keep 50 to 170.
+    expect(descriptionProblem('compress-image', 'en', text(60))).toBeNull();
+  });
+
+  it('holds for the page as it is written', () => {
+    expect(descriptionProblem(QR_ID, 'en', qrTexts.description)).toBeNull();
+    expect(titleProblem(QR_ID, `${qrTexts.title} | FileOrca`, qrTexts.h1)).toBeNull();
+    expect(routeById(QR_ID).paths.en).toBe('/qr-code-generator/');
   });
 });

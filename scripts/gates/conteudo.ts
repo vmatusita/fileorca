@@ -14,6 +14,8 @@
 // F6 (decision 9): every page in every language of the route map. The calculators of the registries in each language they
 // have (the Spanish ones of ES_CALC_IDS and the Brazilian ones too), with the privacy phrase of the language; the PDF tools
 // and the hub in the three languages, with the names, seal and words of the language (DECISOES § 162 extended).
+// F7 (decision 8): the QR code generator, from the route map (QR_ID): its four blocks, real questions, a privacy note that says
+// the text stays on the device and the link typed is never opened, and no unmeasured claim.
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
@@ -23,6 +25,7 @@ import {
   checkPdfHub,
   checkPdfPage,
   checkPresetPage,
+  checkQrPage,
   checkSite,
   checkToolPage,
   comparisonPaths,
@@ -31,7 +34,7 @@ import {
   isNotFoundPath,
   pathOfFile,
 } from '../lib/conteudo.ts';
-import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
@@ -132,6 +135,20 @@ if (pdfPages !== pdfWanted || pdfWanted < PDF_TOOL_IDS.length + 1) {
   problems.add(`${pdfPages} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfWanted} (as ${PDF_TOOL_IDS.length} ferramentas e o hub, em cada idioma)`);
 }
 
+// The QR code generator (F7), in every language of its route (English only).
+let qrPages = 0;
+const qrRoute = pages.find((page) => page.route.id === QR_ID)?.route;
+if (!qrRoute) problems.add(`${QR_ID}: a página não está no mapa de rotas`);
+for (const lang of qrRoute ? languagesOf(qrRoute) : []) {
+  const path = qrRoute?.paths[lang] ?? '';
+  if (!existsSync(fileForPath(path))) {
+    problems.add(`${path}: a página não existe no dist`);
+    continue;
+  }
+  qrPages += 1;
+  for (const problem of checkQrPage(read(path))) problems.add(`${path}: ${problem}`);
+}
+
 // The file guides, read from their registry: the route map must have each one, and the page must pass the guide rules.
 let guidePages = 0;
 const guideWordCounts: string[] = [];
@@ -157,4 +174,4 @@ const sitePages = listFiles(DIST)
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo e ${sitePages.length} página(s) do site conferida(s)`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s)`);
