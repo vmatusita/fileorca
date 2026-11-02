@@ -23,7 +23,7 @@ import {
   type Site,
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
-import { LANGS, QR_ID, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import {
   BR_CALC_IDS,
@@ -349,7 +349,7 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     }
     expect(Object.keys(site.cards ?? {}).sort()).toEqual(['home', 'money-calculators', PDF_HUB_ID, HOUSE_HUB_ID, HEALTH_HUB_ID, ...(pagePath(BR_HUB_ID, 'pt') ? [BR_HUB_ID] : [])].sort());
     // The home of pt and es does not change: none of the 14 F7 pages is a card there.
-    const f7 = new Set([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID].map((id) => routeById(id).paths.en));
+    const f7 = new Set(([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID] as RouteId[]).map((id) => routeById(id).paths.en));
     for (const lang of ['pt', 'es'] as const) expect((site.cards?.['home']?.[lang] ?? []).filter((path) => f7.has(path)), lang).toEqual([]);
     // The search ends with the 11 calculators in hub order and the QR code generator; the hubs are not search entries.
     expect(site.searchIds.slice(-12)).toEqual([...LIFE_CALC_IDS, QR_ID]);

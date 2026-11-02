@@ -7,7 +7,7 @@ import HomeView from '../../src/views/HomeView.astro';
 import PdfToolsView from '../../src/views/PdfToolsView.astro';
 import PdfToolPage from '../../src/tools/pdf/PdfToolPage.astro';
 import Header from '../../src/components/Header.astro';
-import { LANGS, LANG_TAG, QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, LANG_TAG, QR_ID, moneyHubId, pagePath, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
 import { HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
@@ -28,7 +28,7 @@ const toolPath = (id: (typeof PDF_TOOL_IDS)[number]) => routeById(id).paths['en'
 const hubPathIn = (lang: Lang) => routeById(PDF_HUB_ID).paths[lang] ?? '';
 const toolPathIn = (id: (typeof PDF_TOOL_IDS)[number], lang: Lang) => routeById(id).paths[lang] ?? '';
 /** The 14 English-only pages of the F7 (decision 1): the two hubs, the 11 home and health calculators and the QR code. */
-const F7_PATHS = [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID].map((id) => routeById(id).paths.en ?? '');
+const F7_PATHS = ([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID] as RouteId[]).map((id) => routeById(id).paths.en ?? '');
 
 let container: AstroContainer;
 beforeAll(async () => {
