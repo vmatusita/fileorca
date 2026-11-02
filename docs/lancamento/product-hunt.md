@@ -176,7 +176,7 @@ Geradas por `pnpm lancamento:imagens` (`scripts/lancamento/imagens.ts`), fora do
 | `thumbnail.png` | Miniatura (estática) | 240 × 240 | 9.954 bytes | The Oli, the FileOrca orca, waving on a round patch of sea. |
 | `thumbnail.gif` | Miniatura (animada) | 240 × 240 | 235.811 bytes | The Oli floating and waving, then jumping in a cheer, on a round patch of sea. |
 | `gallery-1.png` | Galeria | 1270 × 760 | 108.535 bytes | The FileOrca home page: the heading and the cards of the image tools. Caption: "Image, PDF and money tools that run in your browser". |
-| `gallery-2.png` | Galeria | 1270 × 760 | 151.226 bytes | HEIC to JPG with two iPhone photos converted: the result card, its Download button and the list of files. Caption: "HEIC to JPG: iPhone photos as JPGs, without uploading them". |
+| `gallery-2.png` | Galeria | 1270 × 760 | 151.228 bytes | HEIC to JPG with two iPhone photos converted: the result card, its Download button and the list of files. Caption: "HEIC to JPG: iPhone photos as JPGs, without uploading them". |
 | `gallery-3.png` | Galeria | 1270 × 760 | 115.062 bytes | Compress PDF with a PDF of photos: the result card with the size before and after, and its Download button. Caption: "Compress PDF: a PDF of photos made much lighter". |
 | `gallery-4.png` | Galeria | 1270 × 760 | 75.557 bytes | The guide "Why is my PDF so large?": its table of what takes the space in each test PDF, in pictures, fonts and everything else. Caption: "File guides with numbers measured on our test files". |
 | `gallery-5.png` | Galeria | 1270 × 760 | 165.127 bytes | The mortgage calculator with its example filled in: the fields and the monthly payment. Caption: "Money calculators that keep your numbers on your device". |
