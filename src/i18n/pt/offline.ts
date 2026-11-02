@@ -2,7 +2,7 @@ import type { OfflineTexts } from '../types.ts';
 
 // A página offline (F8, decisão 8; DECISOES § 289).
 export default {
-  title: 'Offline',
+  title: 'Sem internet',
   description:
     'O FileOrca guarda neste aparelho as páginas que você abre com internet, para elas funcionarem offline. Esta página ainda não foi guardada.',
   h1: 'Você está offline',
