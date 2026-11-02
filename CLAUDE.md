@@ -510,3 +510,6 @@ Pegadinhas que a F8 achou:
 - **`caches.open()` cria o cache que falta:** um teste que lista os caches enquanto o worker apaga um deles o recria. Leia os nomes com `caches.keys()` e confira com `caches.has()` antes de abrir.
 - **No Git Bash, ` ` e crases num `sed` ou num `node -e` somem.** Texto com barra invertida, crase ou apóstrofo vai num arquivo escrito pela ferramenta de escrita (como nas fases anteriores).
 - **O Victor não assistia o repositório:** issue sem responsável podia não dar e-mail. Por isso o `--assignee`.
+- **A trilha de navegação é uma linha só, que rola dentro dela** (§ 305). Deixá-la quebrar de novo traz de volta o CLS da primeira visita no celular (até 0,27 a 360 px), que o Lighthouse não vê porque mede a 412 px. O `tests/e2e/layout-shift.spec.ts` segura a Figtree até a primeira pintura e soma o CLS.
+- **A `Figtree Fallback` tem `size-adjust: 101.2%`, a largura da Figtree no peso do texto** (§ 305). No Chromium a fonte de reserva não engorda no negrito (a largura é a do peso 400); no WebKit, sim. Mudou a fonte ou o texto perto da borda: rode o `layout-shift.spec.ts`.
+- **O erro de faixa das calculadoras espera 800 ms sem tecla ou a saída do campo** (`SETTLE_MS`, § 305). Teste que digita um valor fora da faixa espera o alerta com `expect` (que já espera), nunca na hora.
