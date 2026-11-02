@@ -102,10 +102,10 @@ Taglines (limite de 60):
 
 Por que a primeira: diz as três áreas e a diferença, sem adjetivo nem número. A segunda põe "free" na frente, que é verdade e é o que o visitante procura. A terceira troca a categoria pelas ações mais buscadas.
 
-**Descrição A (443 caracteres):**
+**Descrição A (442 caracteres):**
 
 ```
-FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 8 image tools, 12 PDF tools and 14 money calculators, plus 15 guides, 10 of them with numbers measured on real test files. No sign-up: open a tool and drop a file.
+FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 8 image tools, 12 PDF tools and 14 money calculators, plus 15 guides, 10 of them with numbers measured on our test files. No sign-up: open a tool and drop a file.
 ```
 
 **Descrição B (313 caracteres):**
@@ -124,7 +124,7 @@ Escolha até 3 no formulário. Sugestões, pela ordem: **Productivity**, **Priva
 
 Poste como o primeiro comentário, logo que o lançamento entrar no ar. Reescreva com as suas palavras: o Product Hunt não quer comentário de IA.
 
-**Primeiro comentário (1544 caracteres):**
+**Primeiro comentário (1543 caracteres):**
 
 ```
 Hi Product Hunt! I'm Victor, a developer in Curitiba, Brazil, and I built FileOrca on my own.
@@ -135,7 +135,7 @@ What you can do today:
 - Images: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, and images into one PDF. 8 image tools and 3 presets for common limits.
 - PDFs: merge, split, compress, PDF to JPG, sign, add or remove a password, watermark, page numbers and more. 12 PDF tools.
 - Money: a mortgage calculator, refinance, loans, debt payoff and others. 14 money calculators.
-- 15 guides: 10 file guides with numbers measured on real test files with the same tools, and 5 money guides worked out by the engines of the calculators.
+- 15 guides: 10 file guides with numbers measured on our test files with the same tools, and 5 money guides worked out by the engines of the calculators.
 
 How it works: the site is static. The tools run in your browser, with WebAssembly codecs that load the first time you need them. Your file is not uploaded: open the Network tab in your browser's developer tools, use a tool, and you will see that no request carries it. After the page and the codec for your type of file have loaded, the tool keeps working if you go offline.
 
@@ -161,7 +161,7 @@ Só use o que for verdade no dia. Responda curto, com curiosidade e sem comparar
 
 - **"How do you make money?"** "Ads from Google AdSense, kept away from the tools, and an optional Ko-fi link. There is no paid plan." (Se os anúncios ainda não estiverem ligados, diga isso e que o AdSense vai pagar os custos quando estiverem. Provas 9 e 10.)
 - **"Why no upload? Isn't a server faster?"** "The work happens in your browser, so your file never leaves your device. Private photos and documents stay private, and there is no server holding copies." (Não diga que é mais rápido: a run não mediu velocidade. Prova 1.)
-- **"Are there limits?"** "You can drop a whole batch at once, or paste it with Ctrl+V. A very large photo or a very long PDF can be too much for the memory of an older phone." (Não invente um número. Prova 8.)
+- **"Are there limits?"** "You can drop a whole batch at once, or paste it with Ctrl+V. I have not tested the largest file each phone can open, so tell me if one fails." (Não invente um número nem diga o que um aparelho aguenta: a run não mediu memória. Prova 8.)
 - **"Which browsers?"** "Every tool is tested automatically in Chromium and in WebKit. I have not tested other browsers, so tell me if something fails in yours." (Afirme só os dois motores que os testes cobrem: o teste do kit reprova o nome de outro navegador. Prova 4.)
 - **"Is it open source?"** Se o repositório público do motor de imagem existir no dia, responda com o link dele: "The image engine is open source: <link>." Se não existir, **esta linha sai**: diga com franqueza que o site não é código aberto e que o que é verificável é a aba Network e as licenças em <https://fileorca.com/licenses/>.
 - **"What about my data / analytics?"** "Your files are never sent. The site uses Google Analytics with Consent Mode, only on fileorca.com, and there is a cookie notice with Accept and Decline." Não diga que recusar desliga o Analytics. (Provas 1 e 11.)
@@ -195,7 +195,7 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
    - **Prova:** `tests/e2e/budgets.spec.ts`: nenhuma página de ferramenta ou guia pede um worker ou um `.wasm` antes do primeiro arquivo, e cada uma carrega dois arquivos de JavaScript.
 4. **"tested automatically in Chromium and in WebKit".** Só esses dois motores: o teste do kit reprova o nome de outro navegador (Chrome, Edge, Firefox, Safari) nos textos em inglês.
    - **Prova:** `playwright.config.ts` (os dois projetos) e as partes do CI, que rodam a suíte inteira nos dois motores.
-5. **"10 of them with numbers measured on real test files" / "10 of them with measured numbers" / "10 file guides with numbers measured on real test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 10 guias de arquivo; os 5 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
+5. **"10 of them with numbers measured on our test files" / "10 of them with measured numbers" / "10 file guides with numbers measured on our test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 10 guias de arquivo; os 5 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
    - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 10 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data), `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão) e `tests/unit/calc-guides.test.ts` (os guias de dinheiro contra o motor e o oráculo). O `tests/unit/launch-kit.test.ts` reprova "measured" junto de outra contagem.
 6. **As contagens** (8 image tools, 3 presets, 12 PDF tools, 14 money calculators, 15 guides, 10 file guides, 5 money guides).
    - **Prova:** `tests/unit/launch-kit.test.ts` compara cada contagem deste arquivo com os registros (`src/tools/image/registry.ts`, `src/tools/pdf/registry.ts`, `src/tools/calc/registry.ts`, `src/tools/guides/registry.ts`).

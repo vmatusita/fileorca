@@ -67,8 +67,13 @@ function proofsOf(text: string): { claims: string[]; files: string[] }[] {
   }));
 }
 
-/** A sentence that makes a technical promise: where the file goes, offline, browsers, ads, analytics, account, batches. */
-const TECHNICAL = /\bupload\w*|\boffline\b|\bin your browser\b|\bon your device\b|\bnever leaves\b|\bnever sent\b|\bnot sent\b|\bAdSense\b|\bads?\b|\bAnalytics\b|\bConsent Mode\b|\bcookies?\b|\baccount\b|\bsign-up\b|\bZIP\b|Ctrl\+V|\bWebAssembly\b|\bNetwork tab\b|\bno request\b|\bChromium\b|\bWebKit\b|\bKo-fi\b/i;
+/**
+ * A sentence that makes a technical promise: where the file goes, offline, browsers, ads, analytics, account, batches,
+ * and what a device can take (memory, an older phone: DECISOES § 211).
+ */
+const TECHNICAL = /\bupload\w*|\boffline\b|\bin your browser\b|\bon your device\b|\bnever leaves\b|\bnever sent\b|\bnot sent\b|\bAdSense\b|\bads?\b|\bAnalytics\b|\bConsent Mode\b|\bcookies?\b|\baccount\b|\bsign-up\b|\bZIP\b|Ctrl\+V|\bWebAssembly\b|\bNetwork tab\b|\bno request\b|\bChromium\b|\bWebKit\b|\bKo-fi\b|\bmemory\b|\bolder (?:phones?|devices?|computers?)\b|\btoo much for\b/i;
+/** Part of the measured PDFs was written by the test script: they are test files, not "real test files" (§ 211). */
+const REAL_TEST_FILES = /\breal test files?\b/i;
 /** The engines the tests run: the projects of playwright.config.ts. Naming another browser claims a test nobody ran. */
 const BROWSER_NAMES = /\b(?:Chromium|WebKit|Chrome|Edge|Firefox|Safari|Opera|Brave|Vivaldi|Samsung Internet)\b/g;
 const TESTED = [...readFileSync('playwright.config.ts', 'utf8').matchAll(/name: '(\w+)'/g)].map((match) => (match[1] as string).toLowerCase());
@@ -86,7 +91,10 @@ function claimProblems(text: string): string[] {
     const word = FORBIDDEN_WORDS.exec(sentence.replace(TOOL_NAME, ''))?.[0];
     if (word) problems.push(`"${sentence}": "${word}" é palavra proibida (só o nome "Unlock PDF", § 153)`);
   }
-  for (const sentence of [...sentencesOf(english), ...proofsOf(text).flatMap((proof) => proof.claims)]) problems.push(...measuredProblems(sentence));
+  for (const sentence of [...sentencesOf(english), ...proofsOf(text).flatMap((proof) => proof.claims)]) {
+    problems.push(...measuredProblems(sentence));
+    if (REAL_TEST_FILES.test(sentence)) problems.push(`"${sentence}": parte dos arquivos medidos foi escrita pelo script de teste; diga "our test files"`);
+  }
   return problems;
 }
 
@@ -185,6 +193,9 @@ describe('the texts of the Product Hunt kit', () => {
     expect(measuredProblems('15 guides with measured numbers')).toHaveLength(1);
     expect(measuredProblems(`15 guides, ${COUNTS['file-guides']} of them with numbers measured on real test files`)).toEqual([]);
     expect(measuredProblems('File guides with numbers measured on real files')).toEqual([]);
+    expect(claimProblems(answer('There is no account, and 10 of them have numbers measured on real test files.')).join()).toMatch(/diga "our test files"/);
+    expect(claimProblems(answer('A very long PDF can be too much for the memory of an older phone.')).join()).toMatch(/memory of an older phone\.": afirmação técnica sem prova/);
+    expect(claimProblems(answer('I have not tested the largest file each phone can open, so tell me if one fails.'))).toEqual([]);
     expect(measuredProblems('Guides with numbers measured on real files')).toHaveLength(1);
     // A proof whose test file does not exist proves nothing.
     expect(claimProblems(kit.replace('`tests/e2e/consent.spec.ts`', '`tests/e2e/no-such.spec.ts`')).join()).toMatch(/Google Analytics with Consent Mode.*afirmação técnica sem prova/);
