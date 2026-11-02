@@ -464,8 +464,9 @@
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
 /* A file guide puts its heading and a paragraph right above the embedded tool, where a tool page has its H1: they keep
-   the same room on the right for the DropZone's Oli, so she never covers a word (DECISOES § 206). The prose keeps its
-   measure: the padding comes on top of max-width, and only takes width where the page is narrower than both. */
+   the same room on the right for the DropZone's Oli, so she never covers a word (DECISOES § 206 and § 212). The box is
+   border-box, so the room comes out of the measure: from 768px this heading and paragraph are 561px wide against the
+   697px of the rest of the prose, which is what keeps them clear of her at 768 and at 1280px too. */
 .fo-guide__tool { padding-right: 96px; }
 @media (min-width: 768px) { .fo-guide__tool { padding-right: 136px; } }
 .fo-debts { display: grid; gap: var(--space-4); justify-items: start; }

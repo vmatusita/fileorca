@@ -174,7 +174,7 @@ for (const id of FILE_GUIDE_IDS) {
 // The Oli of the panel sits on the top edge of the drop zone and rises 86 px above it (components.css). On a tool page
 // the H1 keeps her room on its right; in a guide the paragraph above the tool has to (DECISOES § 206). Every line of text
 // of the page is measured against her box, at the widths where she covered the end of that paragraph.
-const OLI_WIDTHS = [320, 360, 390, 600];
+const OLI_WIDTHS = [320, 360, 390, 600, 768, 1280];
 
 for (const id of FILE_GUIDE_IDS) {
   const guide = FILE_GUIDES[id];
