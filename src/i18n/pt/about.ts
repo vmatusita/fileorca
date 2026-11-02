@@ -7,7 +7,7 @@ export default {
   h1: 'Sobre o FileOrca',
   intro: [
     'O FileOrca é feito e mantido por uma pessoa só: Victor Yuki Matusita, dev em Curitiba, no Paraná.',
-    'É um conjunto de ferramentas grátis que rodam no seu navegador. As ferramentas de imagem, as de PDF e as calculadoras de dinheiro estão em inglês, e a Comprimir imagem também está em português e espanhol.',
+    'É um conjunto de ferramentas grátis que rodam no seu navegador: oito ferramentas de imagem, 12 de PDF e oito calculadoras de dinheiro feitas para o Brasil. As de imagem e as de PDF são as mesmas nos três idiomas do site.',
   ],
   whyHeading: 'Por que este site existe',
   why: [

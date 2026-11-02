@@ -6,8 +6,8 @@ export default {
     'Os programas de código aberto e as fontes que chegam ao seu navegador no FileOrca, com as licenças. Ferramentas usadas só para montar o site não entram.',
   h1: 'Licenças',
   intro:
-    'O FileOrca usa software de código aberto. Esta página lista os programas e as fontes que chegam ao seu navegador, com as respectivas licenças. As ferramentas usadas só para montar o site não entram, porque não são distribuídas.',
-  packagesHeading: 'Software',
+    'O FileOrca se apoia em programas de código aberto. Esta página lista os programas e as fontes que chegam ao seu navegador, com as respectivas licenças. As ferramentas usadas só para montar o site não entram, porque não são distribuídas.',
+  packagesHeading: 'Programas',
   fontsHeading: 'Fontes',
   noFonts: 'O site ainda não carrega nenhuma fonte da web.',
   packageColumn: 'Pacote',
@@ -15,7 +15,7 @@ export default {
   licenseColumn: 'Licença',
   showText: 'Mostrar o texto da licença',
   sourceLabel: 'Código-fonte',
-  bundledHeading: 'Software dentro de outro software',
+  bundledHeading: 'Programas dentro de outros programas',
   bundledIntro:
     'Estes pacotes não são instalados sozinhos. Cada um vem dentro de um pacote da lista acima e acaba nos arquivos que o seu navegador recebe.',
   viaLabel: 'Vem com',
