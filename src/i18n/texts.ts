@@ -14,6 +14,8 @@ import type {
   LicensesTexts,
   MoneyHubTexts,
   NotFoundTexts,
+  OfflineTexts,
+  OpenWithTexts,
   PdfToolsTexts,
   PtCommonTexts,
   SupportTexts,
@@ -45,6 +47,12 @@ import esSupport from './es/support.ts';
 import enNotFound from './en/not-found.ts';
 import ptNotFound from './pt/not-found.ts';
 import esNotFound from './es/not-found.ts';
+import enOffline from './en/offline.ts';
+import ptOffline from './pt/offline.ts';
+import esOffline from './es/offline.ts';
+import enOpenWith from './en/open-with.ts';
+import ptOpenWith from './pt/open-with.ts';
+import esOpenWith from './es/open-with.ts';
 import enImageTools from './en/image-tools.ts';
 import ptImageTools from './pt/image-tools.ts';
 import esImageTools from './es/image-tools.ts';
@@ -69,20 +77,22 @@ export interface LangTexts {
   licenses: LicensesTexts;
   support: SupportTexts;
   'not-found': NotFoundTexts;
+  offline: OfflineTexts;
+  'open-with': OpenWithTexts;
 }
 
 export const TEXTS: Record<Lang, LangTexts> = {
   en: {
     common: enCommon satisfies EnCommonTexts, 'image-tools': enImageTools, 'pdf-tools': enPdfTools, 'money-calculators': enMoney, home: enHome, privacy: enPrivacy, terms: enTerms, about: enAbout, contact: enContact,
-    licenses: enLicenses, support: enSupport, 'not-found': enNotFound,
+    licenses: enLicenses, support: enSupport, 'not-found': enNotFound, offline: enOffline, 'open-with': enOpenWith,
   },
   pt: {
     common: ptCommon satisfies PtCommonTexts, 'image-tools': ptImageTools, 'pdf-tools': ptPdfTools, 'money-calculators': ptMoney, home: ptHome, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
-    licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound,
+    licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound, offline: ptOffline, 'open-with': ptOpenWith,
   },
   es: {
     common: esCommon satisfies EsCommonTexts, 'image-tools': esImageTools, 'pdf-tools': esPdfTools, 'money-calculators': esMoney, home: esHome, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
-    licenses: esLicenses, support: esSupport, 'not-found': esNotFound,
+    licenses: esLicenses, support: esSupport, 'not-found': esNotFound, offline: esOffline, 'open-with': esOpenWith,
   },
 };
 

@@ -23,6 +23,8 @@ const SHARED_ISLAND = new RegExp(
     '[\\\\/]src[\\\\/]analytics[\\\\/]',
     '[\\\\/]src[\\\\/]platform[\\\\/]site\\.ts',
     '[\\\\/]src[\\\\/]oli[\\\\/]poses\\.ts',
+    // F8: what the islands and the service worker agree on (the share inbox; DECISOES § 290).
+    '[\\\\/]src[\\\\/]sw[\\\\/]shared\\.ts',
   ].join('|'),
 );
 

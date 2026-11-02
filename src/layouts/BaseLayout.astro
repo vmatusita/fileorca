@@ -1,7 +1,7 @@
 ---
 // Base layout of every page: technical SEO head, consent bootstrap first, the Fredoka preload, the Oli
-// sprite of the page, header, footer, cookie notice and the lazy tool search. Noindex comes only from the
-// _headers file (DECISOES § 12).
+// sprite of the page, header, footer, cookie notice, the lazy tool search and the registration of the service
+// worker (F8, after the load event). Noindex comes only from the _headers file (DECISOES § 12).
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -12,7 +12,8 @@ import { consentBootstrap } from '../analytics/consent.ts';
 import { LANG_TAG, OG_LOCALE, pathFor, type Lang, type RouteDef } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { absolute, alternatesFor, graph, ogImagePath, organizationLd, pageTitle } from '../seo/meta.ts';
-import { SITE_NAME } from '../platform/site.ts';
+import { SITE_NAME, SW_ENABLED } from '../platform/site.ts';
+import { swRegistration } from '../platform/sw-register.ts';
 import { APP_ICON_SVG } from '../seo/images.ts';
 import { buildAdsConfig } from '../ads/config.ts';
 import OliSprite from '../components/OliSprite.astro';
@@ -86,5 +87,6 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
     <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />
     <SearchDialog t={common} />
     <script is:inline set:html={trackScript} />
+    {SW_ENABLED && <script is:inline set:html={swRegistration()} />}
   </body>
 </html>

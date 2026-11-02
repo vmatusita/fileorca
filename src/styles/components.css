@@ -252,7 +252,8 @@
 
 /* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
 .fo-says { display: flex; align-items: flex-end; gap: var(--space-2); }
-.fo-says__oli { width: 64px; height: 64px; }
+.fo-says__oli { width: 64px; height: 64px; flex: none; }
+.fo-says__oli svg { width: 100%; height: 100%; display: block; }
 .fo-says__bubble { position: relative; margin-bottom: 10px; padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); border-bottom-left-radius: 4px; background: var(--surface); color: var(--ink); font: 500 20px/26px var(--fo-font-display); }
 .fo-says__bubble p { margin: 0; }
 .fo-says__bubble small { display: block; margin-top: 2px; font: 400 15px/22px var(--fo-font-text); color: var(--ink-muted); }
@@ -723,3 +724,24 @@
   .fo-pdf-island .fo-seg:has(small) { flex-direction: column; border-radius: var(--radius-lg); }
   .fo-pdf-island .fo-seg:has(small) .fo-seg__opt { border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
 }
+
+/* F8: the offline page (DECISOES § 289). */
+.fo-offline { max-width: var(--fo-measure); }
+.fo-offline .fo-says { margin-top: var(--space-6); }
+.fo-saved { margin: 0; padding-left: var(--space-6); list-style: disc; }
+.fo-saved li + li { margin-top: var(--space-2); }
+.fo-offline__home { margin-top: var(--space-8); }
+
+/* F8: the "Open with" page of the share target (DECISOES § 290). */
+.fo-openwith { max-width: 1040px; }
+.fo-openwith .fo-says { margin-top: var(--space-6); max-width: var(--fo-measure); }
+.fo-openwith__hubs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+.fo-openwith__hubs a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+.fo-openwith__lead { max-width: var(--fo-measure); margin: var(--space-3) 0 0; }
+.fo-shared { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-shared li { display: flex; flex-wrap: wrap; gap: 0 var(--space-3); padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
+.fo-shared__name { font-weight: 600; overflow-wrap: anywhere; }
+.fo-shared__meta { color: var(--ink-muted); }
+.fo-grid > li[hidden], .fo-openwith [data-group][hidden] { display: none; }
+.fo-tool__takes { font: 600 14px/20px var(--fo-font-text); color: var(--ink); }
+.fo-tool__takes:empty { display: none; }

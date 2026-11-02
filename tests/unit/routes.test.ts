@@ -61,7 +61,8 @@ describe('mapa de rotas', () => {
       // F7 (decision 1; DECISOES § 259): the two hubs, the 11 home and health calculators in hub order and the QR code
       // generator, after the file guides and before the institutional pages.
       HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID,
-      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
+      // F8 (DECISOES § 289 and § 290): the offline page and the page of the share target, before the 404.
+      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'offline', 'open-with', 'not-found',
     ]);
     expect([0, BR_IDS.length], 'the Brazilian money pages join the map together').toContain(brRoutes().length);
     // F7: the hubs and the 11 calculators are the area "casa-saude", and the QR code generator alone is "utilidades".
@@ -111,10 +112,15 @@ describe('mapa de rotas', () => {
     }
   });
 
-  it('keeps every path unique and leaves the 404 out of the index', () => {
+  it('keeps every path unique and leaves the 404, the offline page and the share page out of the index', () => {
     const paths = ROUTES.flatMap((route) => Object.values(route.paths));
     expect(new Set(paths).size).toBe(paths.length);
-    expect(ROUTES.filter((route) => !route.indexable).map((route) => route.id)).toEqual(['not-found']);
+    expect(ROUTES.filter((route) => !route.indexable).map((route) => route.id)).toEqual(['offline', 'open-with', 'not-found']);
+    // F8: in the three languages, with the slugs of the glossaries, no ads (DECISOES § 289 and § 290).
+    expect(routeById('offline').paths).toEqual({ en: '/offline/', pt: '/pt/offline/', es: '/es/sin-conexion/' });
+    expect(routeById('open-with').paths).toEqual({ en: '/open-with/', pt: '/pt/abrir-com/', es: '/es/abrir-con/' });
+    expect(routeById('offline').adArea).toBeUndefined();
+    expect(routeById('open-with').adArea).toBeUndefined();
   });
 
   it('has a page file for every route and no page outside the map', () => {

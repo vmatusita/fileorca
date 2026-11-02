@@ -3,7 +3,7 @@
 // It only stores files of its own origin, of the pages the person visited; what the person typed or opened never
 // enters a cache (no `?`, no `#`, no POST but the share inbox, which is deleted when a tool takes it).
 import { cacheKey, cachesToDelete, isCacheable, langOfPath, offlineOrder, strategyFor, warmList, type SwConfig, type SwLang } from './logic.ts';
-import { INBOX_CACHE, INBOX_NAME_HEADER, INBOX_TIME_HEADER, SHARE_FIELD, inboxEntryPath, pagesCacheName } from './shared.ts';
+import { INBOX_CACHE, INBOX_NAME_HEADER, INBOX_TIME_HEADER, SHARE_FIELD, inboxEntryPath, inboxExpired, pagesCacheName } from './shared.ts';
 
 declare const SW_CONFIG: SwConfig;
 
@@ -82,8 +82,22 @@ async function offlineAnswer(key: string): Promise<Response> {
   return Response.error();
 }
 
+/** The inbox a tool never took is deleted after INBOX_TTL_MS (decision 10), checked on every navigation. */
+async function dropStaleInbox(): Promise<void> {
+  try {
+    if (!(await caches.has(INBOX_CACHE))) return;
+    const inbox = await caches.open(INBOX_CACHE);
+    const first = (await inbox.keys())[0];
+    const response = first ? await inbox.match(first) : undefined;
+    if (!response || inboxExpired(response.headers.get(INBOX_TIME_HEADER), Date.now())) await caches.delete(INBOX_CACHE);
+  } catch {
+    // Checked again on the next navigation.
+  }
+}
+
 async function navigate(event: FetchEvent): Promise<Response> {
   const key = cacheKey(event.request.url);
+  event.waitUntil(dropStaleInbox());
   let response: Response;
   try {
     response = await fetch(event.request);

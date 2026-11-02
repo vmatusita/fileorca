@@ -1,0 +1,35 @@
+---
+// The offline page (F8, decision 8; DECISOES § 289): the service worker keeps it on install, in the language of the
+// page, and shows it for a page it did not keep. The Oli in buoy says the truth (this page was not saved), the list
+// of the pages this device keeps comes from the cache, and the home link. Noindex, out of the sitemap, no ads.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Oli from '../components/Oli.astro';
+import { ROUTES, routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { homePath } from '../seo/meta.ts';
+import { offlineListScript } from '../platform/offline-list.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('offline');
+const t = TEXTS[lang].offline;
+const skip = ROUTES.filter((other) => other.id === 'offline' || other.id === 'open-with').flatMap((other) => Object.values(other.paths));
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} oli={['buoy']}>
+  <div class="fo-offline">
+    <h1 class="fo-h1">{t.h1}</h1>
+    <div class="fo-says" role="status">
+      <Oli pose="buoy" class="fo-says__oli" />
+      <div class="fo-says__bubble"><p>{t.says}</p><small>{t.saysDetail}</small></div>
+    </div>
+    <section class="fo-section" aria-labelledby="fo-saved-title">
+      <h2 id="fo-saved-title">{t.savedHeading}</h2>
+      <ul class="fo-saved" data-saved hidden></ul>
+      <p data-saved-empty>{t.savedEmpty}</p>
+    </section>
+    <p class="fo-offline__home"><a href={homePath(lang)}>{t.homeLink}</a></p>
+  </div>
+  <script is:inline set:html={offlineListScript(skip)} />
+</BaseLayout>

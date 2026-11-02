@@ -3,6 +3,8 @@
 // `export` keywords, and joins them in one function scope after SW_CONFIG: a classic script, so every browser that
 // has service workers runs it, with no bundler chunk to share (the name never says "worker": DECISOES § 287).
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import type TypeScript from 'typescript';
 import type { SwConfig, SwLang } from './logic.ts';
 
 /** The files of the worker, in the order they are joined: each one only imports the ones before it. */
@@ -20,7 +22,8 @@ export function joinable(js: string, name: string): string {
 
 /** The text of /sw.js for a config. */
 export async function swScript(config: SwConfig): Promise<string> {
-  const ts = (await import('typescript')).default;
+  // require, not import(): the hook runs after Astro closed the Vite module runner that loaded the config.
+  const ts = createRequire(import.meta.url)('typescript') as typeof TypeScript;
   const parts = SW_FILES.map((name) => {
     const source = readFileSync(new URL(`./${name}`, import.meta.url), 'utf8');
     const { outputText } = ts.transpileModule(source, {

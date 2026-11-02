@@ -26,3 +26,10 @@ export function pagesCacheName(version: string): string {
 export function inboxEntryPath(index: number): string {
   return `${INBOX_ENTRY_PREFIX}${index}`;
 }
+
+/** An inbox entry is stale after INBOX_TTL_MS, or when its time is missing or in the future. */
+export function inboxExpired(stored: string | null, now: number): boolean {
+  if (stored === null || !/^\d+$/.test(stored)) return true;
+  const time = Number(stored);
+  return time > now + 60_000 || now - time > INBOX_TTL_MS;
+}

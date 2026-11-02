@@ -1,7 +1,7 @@
 // The rules of the service worker as pure functions (F8, decisions 5, 6, 8 and 10; DECISOES § 285 to § 290), tested
 // in tests/unit/sw-logic.test.ts. Only src/sw/shared.ts is imported: src/sw/build.ts stitches the three files of
 // src/sw/ into the classic script /sw.js, so nothing here may touch a global of the page or of the worker.
-import { CACHE_PREFIX, INBOX_ENTRY_PREFIX, INBOX_TTL_MS, pagesCacheName } from './shared.ts';
+import { CACHE_PREFIX, INBOX_ENTRY_PREFIX, pagesCacheName } from './shared.ts';
 
 export type SwLang = 'en' | 'pt' | 'es';
 export const SW_LANGS: readonly SwLang[] = ['en', 'pt', 'es'];
@@ -109,13 +109,6 @@ export function warmList(urls: unknown, origin: string, config: Pick<SwConfig, '
     keys.add(cacheKey(parsed.href));
   }
   return [...keys];
-}
-
-/** An inbox entry is stale after INBOX_TTL_MS, or when its time is missing or in the future. */
-export function inboxExpired(stored: string | null, now: number): boolean {
-  if (stored === null || !/^\d+$/.test(stored)) return true;
-  const time = Number(stored);
-  return time > now + 60_000 || now - time > INBOX_TTL_MS;
 }
 
 /** Whether a cached path is a page for the list of the offline page (not an offline or share page, not a file). */

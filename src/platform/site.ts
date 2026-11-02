@@ -2,6 +2,11 @@
 // the post-deploy check reads it with `git show <sha>:src/platform/site.ts`.
 export const LAUNCHED = true;
 
+// Kill switch of the service worker (F8, decision 7; DECISOES § 288). With false, the build writes a /sw.js that
+// deletes every cache of the site and unregisters itself, and the pages stop registering it. A short adjustment run
+// turns it off or back on (docs/OPERACAO.md).
+export const SW_ENABLED = true;
+
 export const SITE_ORIGIN = 'https://fileorca.com';
 export const PRODUCTION_HOSTNAME = 'fileorca.com';
 export const SITE_NAME = 'FileOrca';

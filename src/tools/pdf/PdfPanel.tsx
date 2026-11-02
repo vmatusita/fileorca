@@ -21,6 +21,7 @@ import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from '../image/coffee.ts';
 import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
+import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
@@ -656,6 +657,10 @@ export default function PdfPanel(props: PdfPanelData) {
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
+    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
+    void takeInbox(page).then((files) => {
+      if (files.length > 0) addFiles(files);
+    });
     return () => {
       document.removeEventListener('dragover', onDragOver);
       document.removeEventListener('drop', onDrop);

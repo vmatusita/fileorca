@@ -21,6 +21,7 @@ import Oli from './Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from './coffee.ts';
 import { EXTENSION, uniqueNames } from './names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
+import { takeInbox } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
 import type { FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -597,6 +598,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
+    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
+    void takeInbox(page).then((files) => {
+      if (files.length > 0) startBatch(files);
+    });
     return () => {
       document.removeEventListener('dragover', onDragOver);
       document.removeEventListener('drop', onDrop);
