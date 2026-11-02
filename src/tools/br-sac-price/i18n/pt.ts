@@ -21,7 +21,7 @@ export default {
       label: 'Primeira parcela no SAC',
       unit: '/mês',
       placard: 'na 1ª parcela do SAC',
-      sentence: 'No SAC a parcela começa em {sacFirst} e cai até {sacLast}. Na PRICE ela começa em {price} e fica quase igual nos {months}.',
+      sentence: 'No SAC a parcela vai de {sacFirst} a {sacLast}. Na PRICE ela começa em {price} e fica quase igual nos {months}.',
       withTr: 'Com a TR de {tr} ao mês, as parcelas sobem junto com o saldo corrigido.',
       noLoan: 'Com a entrada igual ao valor do imóvel não há o que financiar. Diminua a entrada para ver as parcelas.',
       sac: 'SAC',
