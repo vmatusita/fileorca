@@ -2,7 +2,7 @@
 // decision 9). They live apart from scripts/gates/seo.ts so Vitest can prove each one; the tool and preset ids come
 // from the registry the pages themselves are built from, so a new tool is covered the day it is declared.
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
@@ -33,10 +33,13 @@ export function descriptionProblem(routeId: string, lang: Lang, description: str
   return translated ? `descrição com ${length} caracteres (pede de ${range.min} a ${range.max} nas páginas de imagem e de PDF em pt e es)` : `descrição com ${length} caracteres`;
 }
 
-/** A money calculator page of any language: the English registry (and its Spanish pages) or a Brazilian one. */
+/** A calculator page of any language: the English money registry (and its Spanish pages), a Brazilian one, or a home or health one (F7). */
 function isAnyCalcPage(routeId: string): boolean {
-  return isCalcPage(routeId) || isBrCalc(routeId);
+  return isCalcPage(routeId) || isBrCalc(routeId) || isLifeCalc(routeId);
 }
+
+/** Route ids of the home and health pages of the F7: the two hubs and the 11 calculators, in English only. */
+export const LIFE_PAGE_IDS: readonly string[] = [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS];
 
 /** Route ids of every page of the F5a: the PDF hub and the 12 PDF tools (src/tools/pdf/registry.ts). */
 export const PDF_PAGE_IDS: readonly string[] = [PDF_HUB_ID, ...PDF_TOOL_IDS];
@@ -78,7 +81,7 @@ export function requiredSchemaTypes(routeId: string): string[] {
   // Money pages (F4, decision 8): WebApplication with no rating, BreadcrumbList and the author; the hub is a
   // CollectionPage; a guide is an Article by the author. F6: the Brazilian calculators and hub are the same kind of page.
   if (isAnyCalcPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication', 'Person'];
-  if (routeId === MONEY_HUB_ID || routeId === BR_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage', 'Person'];
+  if (routeId === MONEY_HUB_ID || routeId === BR_HUB_ID || routeId === HOUSE_HUB_ID || routeId === HEALTH_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage', 'Person'];
   if (Object.hasOwn(GUIDES, routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
   // A file guide (F5b, decision 4) is an Article by the author, like a money guide.
   if (isFileGuide(routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
@@ -105,7 +108,7 @@ export interface LdNode {
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
   const tool = isImagePage(routeId) || isAnyCalcPage(routeId) || isPdfPage(routeId);
-  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== BR_HUB_ID && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
+  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && !LIFE_PAGE_IDS.includes(routeId) && routeId !== BR_HUB_ID && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
   if (tool && app && app.url !== canonical) problems.push(`WebApplication aponta ${app.url ?? 'para nada'} em vez de ${canonical}`);

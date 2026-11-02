@@ -4,6 +4,7 @@ import {
   FILE_GUIDE_PAGE_IDS,
   HUB_ID,
   IMAGE_PAGE_IDS,
+  LIFE_PAGE_IDS,
   MONEY_PAGE_IDS,
   PDF_PAGE_IDS,
   TRANSLATED_DESCRIPTION_RANGE,
@@ -16,7 +17,7 @@ import {
   titleProblem,
   type LdNode,
 } from '../../scripts/lib/seo-pages.ts';
-import { BR_CALC_IDS, BR_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
@@ -160,6 +161,24 @@ describe('the description length and the Brazilian pages (F6)', () => {
     }
     expect(requiredSchemaTypes(BR_HUB_ID)).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);
     expect(schemaProblems(BR_HUB_ID, [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/pt/` }] }], `${O}/pt/calculadoras-financeiras/`).join()).toMatch(/termina em/);
+  });
+});
+
+describe('the home and health pages of the F7', () => {
+  it('asks each calculator for its WebApplication and author, and each hub for its CollectionPage', () => {
+    expect(LIFE_PAGE_IDS).toEqual([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS]);
+    expect(LIFE_PAGE_IDS).toHaveLength(2 + 11);
+    for (const id of LIFE_CALC_IDS) expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
+    for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID]) expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);
+  });
+
+  it('wants the title to start with the calculator name, and checks the breadcrumb and the WebApplication against the canonical', () => {
+    expect(titleProblem('bmi-calculator', 'BMI Calculator for Adults, in US or Metric Units | FileOrca', 'BMI calculator')).toBeNull();
+    expect(titleProblem('bmi-calculator', 'Body Mass Index for Adults | FileOrca', 'BMI calculator')).toMatch(/nome da calculadora/);
+    const canonical = `${O}/due-date-calculator/`;
+    expect(schemaProblems('due-date-calculator', [{ '@type': 'WebApplication', url: canonical }], canonical)).toEqual([]);
+    expect(schemaProblems('due-date-calculator', [{ '@type': 'WebApplication', url: `${O}/` }], canonical).join()).toMatch(/WebApplication aponta/);
+    expect(schemaProblems(HEALTH_HUB_ID, [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/` }] }], `${O}/health-calculators/`).join()).toMatch(/termina em/);
   });
 });
 
