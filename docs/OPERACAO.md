@@ -112,7 +112,12 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 
 Saído do ensaio do Dependabot da F8 (DECISOES § 299):
 
-- **`pdfjs-dist`:** o `tests/unit/licenses.test.ts` confere o texto de licença do `core-js` que vem dentro do PDF.js, e o `tests/unit/pdf-hardening.test.ts` lê o código publicado. Se a PR do grupo ficar vermelha por um deles, a correção é uma run curta que recopia o texto de licença ou relê o código novo; nunca afrouxar o teste.
+- **`pdfjs-dist` com outro `core-js` dentro (a próxima minor, 6.5, traz o 3.51.0):** a PR do grupo fica vermelha no `gate:licencas` e no `tests/unit/licenses.test.ts`, porque a /licenses tem o texto da versão anterior (DECISOES § 179). A correção é uma run curta numa branch de ajuste, mesclada antes de a PR do Dependabot ficar verde:
+  1. Compare o SHA-256 do LICENSE da versão nova do core-js (`https://github.com/zloirock/core-js/blob/v<versão>/LICENSE`) com o da cópia em `src/platform/license-texts/`.
+  2. Se o texto é o mesmo, renomeie a cópia com `git mv` para o nome da versão nova; se mudou, grave os bytes novos.
+  3. Troque o rótulo, o arquivo e o endereço da entrada do core-js em `src/platform/licenses.ts`, e a chave da tabela de hashes do `tests/unit/licenses.test.ts`.
+  4. Acrescente uma linha à § 179 do `DECISOES.md`.
+- **`pdfjs-dist`, de novo:** o `tests/unit/pdf-hardening.test.ts` lê o código publicado do PDF.js (sem `eval`, as fábricas do motor com todos os métodos das do PDF.js). Se ele reprovar, a correção é uma run curta que relê o código novo; nunca afrouxar o teste.
 - **`@cantoo/pdf-lib`, `@neslinesli93/qpdf-wasm`, `@jsquash/*`, `fflate`, `pdfjs-dist` ou `@playwright/test`:** depois do merge, rode `pnpm guias:medir --check` (com `pnpm build` antes). Se der diferença, uma run curta mede de novo com `pnpm guias:medir` e commita o `data/guides-measured.json`.
 - **Codecs (`@jsquash/*`, `libheif-js`, qpdf):** confira na página /licenses se as versões das bibliotecas compiladas mudaram (o teste não pega isso sozinho).
 
