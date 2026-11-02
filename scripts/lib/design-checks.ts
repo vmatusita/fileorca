@@ -196,6 +196,11 @@ const FONT_FILES: Readonly<Record<string, RegExp>> = {
   Fredoka: /^\/_astro\/fredoka-latin-wght-normal\.[\w-]+\.woff2$/,
   Figtree: /^\/_astro\/figtree-latin-wght-normal\.[\w-]+\.woff2$/,
 };
+/**
+ * A second face of the same file under a family of its own, with font-display: optional: the breadcrumb keeps the font
+ * of its first paint, so it never wraps into another row when Figtree arrives late (review F4-F7 e-1; DECISOES § 305).
+ */
+const FONT_ALIASES: Readonly<Record<string, string>> = { 'Figtree Trail': 'Figtree' };
 
 /** A dist path ('dist\_astro\a.woff2', 'dist/_astro/a.woff2') or a URL path as a '/_astro/a.woff2' URL path. */
 function asUrlPath(path: string): string {
@@ -212,25 +217,28 @@ export interface FontsInput {
 
 /**
  * Only the two latin variable fonts reach the browser, each once; the @font-face URLs are the hashed
- * files in /_astro/; and each page preloads the Fredoka file alone, with the exact URL of the CSS
+ * files in /_astro/, and the breadcrumb's face is the Figtree file itself, with font-display: optional; and each page preloads the Fredoka file alone, with the exact URL of the CSS
  * (a different URL would download the font twice).
  */
 export function checkFonts(input: FontsInput): string[] {
   const problems: string[] = [];
   const clean = stripComments(input.css);
-  const urlFaces: { family: string; urls: string[] }[] = [];
+  const urlFaces: { family: string; urls: string[]; display: string }[] = [];
   for (const face of clean.matchAll(/@font-face\s*\{([^}]*)\}/gi)) {
     const body = face[1] ?? '';
     const family = /font-family\s*:\s*([^;]+)/i.exec(body)?.[1]?.trim().replace(/^["']|["']$/g, '') ?? '(sem família)';
     const src = /(?:^|[;\s])src\s*:\s*([^;]+)/i.exec(body)?.[1] ?? '';
     const urls = [...src.matchAll(/url\(\s*(["']?)([^"')]+)\1\s*\)/gi)].map((match) => match[2] ?? '');
-    if (urls.length) urlFaces.push({ family, urls });
+    const display = /font-display\s*:\s*([^;]+)/i.exec(body)?.[1]?.trim() ?? '(nenhum)';
+    if (urls.length) urlFaces.push({ family, urls, display });
     else if (!/local\(/i.test(src)) problems.push(`@font-face ${family} sem url() nem local()`);
   }
 
-  if (urlFaces.length !== 2) problems.push(`${urlFaces.length} @font-face com url() (esperado 2: Fredoka e Figtree)`);
+  const aliasFaces = urlFaces.filter((face) => Object.hasOwn(FONT_ALIASES, face.family));
+  const mainFaces = urlFaces.filter((face) => !Object.hasOwn(FONT_ALIASES, face.family));
+  if (mainFaces.length !== 2) problems.push(`${mainFaces.length} @font-face com url() (esperado 2: Fredoka e Figtree)`);
   const urlOf = new Map<string, string>();
-  for (const face of urlFaces) {
+  for (const face of mainFaces) {
     const pattern = FONT_FILES[face.family];
     if (!pattern) {
       problems.push(`@font-face com url() para a família ${face.family} (só Fredoka e Figtree)`);
@@ -243,6 +251,15 @@ export function checkFonts(input: FontsInput): string[] {
     else urlOf.set(face.family, url);
   }
   for (const family of Object.keys(FONT_FILES)) if (!urlFaces.some((face) => face.family === family)) problems.push(`falta o @font-face com url() de ${family}`);
+  const aliasSeen = new Set<string>();
+  for (const face of aliasFaces) {
+    const base = FONT_ALIASES[face.family] ?? '';
+    if (aliasSeen.has(face.family)) problems.push(`mais de um @font-face com url() para ${face.family}`);
+    aliasSeen.add(face.family);
+    const url = urlOf.get(base);
+    if (face.urls.length !== 1 || face.urls[0] !== url) problems.push(`@font-face ${face.family} usa ${face.urls.join(', ')} (esperado o arquivo de ${base}, ${url ?? 'que falta'})`);
+    if (face.display !== 'optional') problems.push(`@font-face ${face.family} com font-display ${face.display} (esperado optional)`);
+  }
 
   const shipped = input.woff2Files.map(asUrlPath).sort();
   const expected = [...urlOf.values()].sort();

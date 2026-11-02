@@ -98,11 +98,10 @@
 .fo-langmenu a[aria-current] { background: var(--brand-soft); }
 
 /* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
-/* One line, whatever the font: a trail that wrapped into two lines when Figtree arrived pushed the tool 22 px down (CLS
-   up to 0.27 at 360 px; review F4-F7 e-1, DECISOES § 305). A trail longer than the screen scrolls inside itself, so no
-   link is cut, and contain keeps it from widening the page. */
-.fo-crumbs { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; contain: inline-size; align-items: center; gap: 2px; margin: -5px; padding: 5px; list-style: none; font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); white-space: nowrap; }
-.fo-crumbs li { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; }
+/* The trail wraps on a phone, as the Breadcrumb README allows, in the font of its first paint: Figtree Trail never swaps,
+   so the number of rows never changes when Figtree arrives late (review F4-F7 e-1 and its second pass, DECISOES § 305). */
+.fo-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; font: 500 14px/20px var(--fo-font-trail); color: var(--ink-muted); }
+.fo-crumbs li { display: inline-flex; align-items: center; gap: 2px; }
 .fo-crumbs__link { color: var(--ink-muted); text-decoration: none; padding: 6px 2px; }
 .fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .fo-crumbs .fo-icon { width: 16px; height: 16px; }
