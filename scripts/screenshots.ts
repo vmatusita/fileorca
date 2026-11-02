@@ -11,6 +11,8 @@
 // four new icons beside their neighbours (§ 149), drawn in currentColor as the site draws them (src/icons/svg.ts).
 // F5b: two file guides whole (an image one and a PDF one), at rest and with the embedded tool's result, and the guides list
 // of the image hub.
+// F6: the Portuguese and Spanish pages whole, at both widths: an image tool and a PDF tool with their result, a calculator
+// of each language, the Brazilian money hub, and the support page with its Pix (and the Pix block alone at 360px).
 // Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
@@ -21,8 +23,8 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from '../tests/e2e/lib/pdf-stat
 
 const ORIGIN = 'http://127.0.0.1:4173';
 // F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
-// under fase-04/, F5a under fase-05a/ and F5b writes under fase-05b/, leaving the older shots as they were.
-const OUT = 'docs/relatorios/fase-05b/componentes';
+// under fase-04/, F5a under fase-05a/, F5b under fase-05b/ and F6 writes under fase-06/, leaving the older shots as they were.
+const OUT = 'docs/relatorios/fase-06/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -413,6 +415,40 @@ async function main(): Promise<void> {
       page = await isolated(browser, theme, css, `<div id="shot" style="display:grid;gap:12px;justify-items:start;max-width:328px">${previewMarkup('Button')}</div>`);
       await shot(page.locator('#shot'), `button-${theme}-360`);
       await page.close();
+
+      // F6: Portuguese and Spanish. An image tool and a PDF tool with their result, the calculators and the Pix, whole.
+      for (const width of [360, 1280]) {
+        for (const [lang, path] of [['pt', '/pt/comprimir-imagem/'], ['es', '/es/comprimir-imagen/']] as const) {
+          page = await open(browser, theme, width, path);
+          await drop(page, PHOTO);
+          await page.locator('.fo-btn--download').waitFor({ timeout: 120_000 });
+          await page.screenshot({ path: join(OUT, `i18n-image-${lang}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  i18n-image-${lang}-${theme}-${width}.png`);
+          await page.close();
+        }
+        for (const lang of ['pt', 'es'] as const) {
+          page = await browser.newPage({ baseURL: ORIGIN, viewport: { width, height: width < 768 ? 740 : 800 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce' });
+          await page.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+          await walkPdfTool(
+            page,
+            'merge-pdf',
+            async (state) => {
+              if (state !== 'result') return;
+              await page.screenshot({ path: join(OUT, `i18n-pdf-merge-${lang}-${theme}-${width}.png`), fullPage: true });
+              console.log(`  i18n-pdf-merge-${lang}-${theme}-${width}.png`);
+            },
+            { hold: false, lang },
+          );
+          await page.close();
+        }
+        for (const [name, path] of [['sac-price-pt', '/pt/simulador-sac-price/'], ['card-pt', '/pt/calculadora-cartao-de-credito/'], ['hub-pt', '/pt/calculadoras-financeiras/'], ['mortgage-es', '/es/calculadora-de-hipoteca/'], ['support-pt', '/pt/apoie/']] as const) {
+          page = await open(browser, theme, width, path);
+          await page.screenshot({ path: join(OUT, `i18n-${name}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  i18n-${name}-${theme}-${width}.png`);
+          if (name === 'support-pt' && width === 360) await shot(page.locator('#pix'), `pix-${theme}-360`);
+          await page.close();
+        }
+      }
     }
   } finally {
     await browser.close();

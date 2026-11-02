@@ -2220,3 +2220,22 @@ O teste de reflow a 320 px achou três páginas de pt que rolavam para o lado:
 ## § 235 · A Imagem para PDF segue na categoria Imagem da busca (F6)
 
 O índice da busca passou a montar as entradas de todos os idiomas com uma função só, e a categoria escrita ao lado do nome passou a seguir a cor: a Imagem para PDF, que tem a cor de PDF, apareceu como "PDF" na busca em inglês (o `navigation.spec.ts` pegou). A função recebe a categoria separada da cor, e a Imagem para PDF volta à categoria Imagem, como antes da F6, nos três idiomas.
+
+## § 236 · O código das calculadoras brasileiras vai no arquivo comum das calculadoras (F6)
+
+As oito calculadoras brasileiras usam a mesma ilha das inglesas e das espanholas: o `mount.ts` das calculadoras leva as definições e os motores de todas, e cada página carrega dois arquivos JS (§ 110). Com isso, o JS inicial de uma calculadora em inglês passou de 38,5 KB para 42,8 KB gzip (o `budgets.spec.ts` do CI da F5b e o da F6), longe do teto de 80 KB. Separar o código brasileiro num segundo `mount` faria o Rolldown tirar o que as duas entradas dividem para um chunk comum, e toda calculadora passaria a três arquivos, o que o orçamento de requisições proíbe (a pegadinha da § 184); pôr esse código no grupo `island` levaria as calculadoras para as páginas de imagem. As páginas de imagem (20,9 KB a 21,1 KB) e de PDF (36,7 KB a 36,9 KB) ficaram praticamente iguais. Se uma fase futura juntar muito mais código às calculadoras, a separação por região vira uma ADR.
+
+## § 237 · As cinco calculadoras em espanhol (F6, decisão 6)
+
+As 5 (hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto) usam a definição, o motor, as fixtures e o exemplo inicial da página em inglês: `moneyRoutes()` dá a cada uma o caminho de `CALC_PAGES[id].es`, e o hreflang as liga ao inglês. Os textos são de `src/tools/<id>/i18n/es.ts` e os comuns de `src/tools/calc/i18n/es.ts`. O CSV tem a forma do inglês e o PDF é Carta (§ 222). Os chips e as relacionadas ficam entre as 5 (`next` e `related` de `es`), sem preset e sem guia, que só existem em inglês. As fontes: o CFPB tirou do ar o `consumerfinance.gov/es/` (§ 224), então cada página cita os PDFs em espanhol do CFPB que seguem no ar e, onde não há, a página em inglês com "(en inglés)" no rótulo. O `tests/unit/calc-i18n.test.ts` prova que as views en e es dão os mesmos valores (§ 233).
+
+## § 238 · Home, rodapé, busca, 404 e institucionais em pt e es (F6, decisão 7)
+
+- **Home e rodapé** de cada idioma mostram as ferramentas de imagem e de PDF do idioma e as calculadoras do idioma: em pt, as 8 brasileiras e o hub delas (`HOME_MONEY_IDS` e `HUB_MONEY_IDS` do registro); em es, as 5 e o hub em espanhol. Nenhum link leva a uma página que o idioma não tem.
+- **A busca** mostra em cada idioma só as páginas que ele tem (31 em pt, as de imagem, de PDF e as brasileiras; 28 em es), com os sinônimos dos três idiomas juntos, e nunca oferece a página em inglês (§ 233 e § 235).
+- **O 404 de pt e de es** tem a busca do idioma.
+- **As institucionais** (Sobre, Privacidade, Termos, Licenças, Contato e Apoie) de pt e es passaram a ter o conteúdo das inglesas, com as ferramentas de PDF e as calculadoras; a Privacidade de pt diz que o código do Pix é estático, montado com o site, que escolher um valor não faz requisição e que o Copiar código só manda o evento de clique em doação, sem o código e sem o valor; os Termos de pt dizem que a doação por Pix é voluntária e como pedir a devolução. A data de "Última atualização" de pt e es é 2 de novembro de 2026, por extenso (§ 223 e § 230).
+
+## § 239 · As traduções foram feitas por agentes em paralelo (F6, decisão 10)
+
+Sete agentes Opus, cada um numa worktree própria, cada um dono de arquivos que nenhum outro tocava: imagem em pt, PDF em pt, imagem em es, PDF em es, dinheiro em es, as institucionais de pt e as de es. O primeiro passo de cada um foi `git merge --ff-only fase-06` (a pegadinha da F5a), e o trabalho voltou à branch por merge (`5ada9f7` a `9a4481e`). Os textos de dinheiro em português, os motores, os registros e o Pix foram do agente principal. Um agente de testes de unidade, na árvore principal, atualizou os portões e os testes que liam só o inglês (§ 230 a § 232). Todos os commits da run levam o nome verdadeiro do modelo (Claude Opus 5.5).

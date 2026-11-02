@@ -71,7 +71,7 @@ export default {
   privacyHeading: 'Privacidade',
   privacyNote:
     'As imagens são processadas no seu aparelho e nunca são enviadas a um servidor. Cada cópia salva também deixa de fora os metadados da foto, inclusive a localização GPS.',
-  relatedHeading: 'Mais ferramentas',
+  relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',
     progressLabel: 'Comprimindo as imagens',
