@@ -53,6 +53,10 @@ test('the kill switch empties every cache of the site and unregisters; turned ba
   expect(response?.fromServiceWorker(), 'the page comes from the network only').toBe(false);
   expect(server.requests.slice(before).some((request) => request.pathname === '/compress-image/')).toBe(true);
   await page.waitForLoadState('load');
+  // The page registers /sw.js after its load, and it is still the kill switch: that registration must come and go first,
+  // or the one of the reload below joins it and is unregistered with it (second pass of the final review, s-4).
+  await expect.poll(() => server.requests.slice(before).some((request) => request.pathname === '/sw.js'), { timeout: 20_000 }).toBe(true);
+  await expect.poll(() => registrations(page), { timeout: 20_000 }).toBe(0);
 
   // Turned back on (a build with SW_ENABLED = true): the page registers it and it keeps pages again.
   server.override('/sw.js', null);

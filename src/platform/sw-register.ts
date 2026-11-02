@@ -21,8 +21,9 @@ export function swRegistration(): string {
     "if(w.state==='activated')w.postMessage(m());",
     "else w.addEventListener('statechange',function(){if(w.state==='activated')w.postMessage(m())});",
     // A new version takes the page over after the load (review F8 b-1; DECISOES § 307): the list went to the old worker,
-    // whose cache the new one deletes, so it goes again to the new one. Storing twice on the first install is harmless.
-    "navigator.serviceWorker.addEventListener('controllerchange',function(){var c=navigator.serviceWorker.controller;if(c)c.postMessage(m())})",
+    // whose cache the new one deletes, so it goes again to the new one. On the first install the new controller is the
+    // worker that already has the list, and it is not told twice (second pass, s-1).
+    "navigator.serviceWorker.addEventListener('controllerchange',function(){var c=navigator.serviceWorker.controller;if(c&&c!==w)c.postMessage(m())})",
     '}).catch(function(){})});',
   ].join('');
 }
