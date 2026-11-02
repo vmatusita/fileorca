@@ -77,6 +77,34 @@ test('a PDF shared in Portuguese goes to Rotate PDF by its island', async ({ pag
   expect(server.requests.some((request) => request.method === 'POST')).toBe(false);
 });
 
+// Review F8 d-2 (DECISOES § 307): the page painted "nothing to open" over shared files until its script read the inbox,
+// and the list then pushed the footer (CLS 0.25). Every frame until the files show is sampled.
+test('shared files: the page never says there is nothing to open, and nothing on screen moves', async ({ page, browserName }) => {
+  await visit(page, server, '/', { island: false });
+  await controlled(page);
+  await page.addInitScript(() => {
+    if (location.pathname !== '/open-with/') return;
+    const seen = { empty: false, cls: 0 };
+    (window as unknown as { __seen: typeof seen }).__seen = seen;
+    if (PerformanceObserver.supportedEntryTypes.includes('layout-shift')) {
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number })[]) seen.cls += entry.value;
+      }).observe({ type: 'layout-shift', buffered: true });
+    }
+    const look = () => {
+      if ([...document.querySelectorAll<HTMLElement>('[data-empty]')].some((element) => element.checkVisibility())) seen.empty = true;
+      if (!document.querySelector<HTMLElement>('[data-shared]')?.checkVisibility()) requestAnimationFrame(look);
+    };
+    document.addEventListener('DOMContentLoaded', look);
+  });
+  await share(page, '/open-with/', [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.locator('[data-files] li')).toHaveCount(1);
+  await page.waitForTimeout(300);
+  const seen = await page.evaluate(() => (window as unknown as { __seen: { empty: boolean; cls: number } }).__seen);
+  expect(seen.empty, 'the empty state showed before the files').toBe(false);
+  if (browserName === 'chromium') expect(seen.cls, 'layout shift of the page').toBeLessThan(0.05);
+});
+
 test('a file no tool takes: the files are listed and the page says so', async ({ page }) => {
   await visit(page, server, '/', { island: false });
   await controlled(page);

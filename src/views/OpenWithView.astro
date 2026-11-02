@@ -56,14 +56,23 @@ const groups = [
     data-unnamed={t.unnamed}
   >
     <h1 class="fo-h1">{t.h1}</h1>
-    <div class="fo-says fo-says--info" role="note" data-empty>
-      <Oli pose="wave" class="fo-says__oli" />
-      <div class="fo-says__bubble"><p>{t.emptySays}</p><small>{t.emptyDetail}</small></div>
-    </div>
-    <ul class="fo-openwith__hubs" data-empty>
-      <li><a href={pathFor('image-tools', lang)}>{common.imageTools}</a></li>
-      <li><a href={pathFor('pdf-tools', lang)}>{common.pdfTools}</a></li>
-    </ul>
+    {/* The empty state waits for the script to read the inbox: shown first, it said "nothing to open" over shared files
+        (review F8 d-2; DECISOES § 307). Without scripts, the noscript copy says it. */}
+    {[true, false].map((scripted) => {
+      const empty = (
+        <Fragment>
+          <div class="fo-says fo-says--info" role="note" data-empty hidden={scripted}>
+            <Oli pose="wave" class="fo-says__oli" />
+            <div class="fo-says__bubble"><p>{t.emptySays}</p><small>{t.emptyDetail}</small></div>
+          </div>
+          <ul class="fo-openwith__hubs" data-empty hidden={scripted}>
+            <li><a href={pathFor('image-tools', lang)}>{common.imageTools}</a></li>
+            <li><a href={pathFor('pdf-tools', lang)}>{common.pdfTools}</a></li>
+          </ul>
+        </Fragment>
+      );
+      return scripted ? empty : <noscript>{empty}</noscript>;
+    })}
     <div data-shared hidden>
       <p class="fo-openwith__lead">{t.lead}</p>
       <section class="fo-section" aria-labelledby="fo-shared-title">

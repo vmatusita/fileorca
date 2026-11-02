@@ -92,13 +92,14 @@ function show(root: HTMLElement, shared: Shared[]): void {
   root.querySelector<HTMLElement>('[data-shared]')?.removeAttribute('hidden');
 }
 
+/** No files (opened directly, or a browser without the worker): the page explains and leads to the hubs. */
+function showEmpty(root: HTMLElement): void {
+  for (const empty of root.querySelectorAll<HTMLElement>('[data-empty]')) empty.hidden = false;
+}
+
 const root = document.querySelector<HTMLElement>('[data-open-with]');
 if (root) {
   void readInbox(root)
-    .then((shared) => {
-      if (shared.length > 0) show(root, shared);
-    })
-    .catch(() => {
-      // The empty state stays: it explains and leads to the hubs.
-    });
+    .then((shared) => (shared.length > 0 ? show(root, shared) : showEmpty(root)))
+    .catch(() => showEmpty(root));
 }

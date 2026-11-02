@@ -739,7 +739,9 @@
 .fo-offline__home { margin-top: var(--space-8); }
 
 /* F8: the "Open with" page of the share target (DECISOES § 290). */
-.fo-openwith { max-width: 1040px; }
+/* The page waits for the inbox with the room of a screen, so the footer starts below the fold and nothing it shows
+   pushes what was on screen (the list and the cards moved the footer: CLS 0.25; review F8 d-2, DECISOES § 307). */
+.fo-openwith { max-width: 1040px; min-height: 100svh; }
 .fo-openwith .fo-says { margin-top: var(--space-6); max-width: var(--fo-measure); }
 .fo-openwith__hubs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
 .fo-openwith__hubs a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
