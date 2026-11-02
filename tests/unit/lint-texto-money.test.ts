@@ -1,8 +1,12 @@
 // How lint:texto fills the placeholders of the money texts (F4; DECISOES § 123): a guide with the numbers its
 // page shows, a calculator text with realistic samples, so LanguageTool reads the sentence the person reads.
 // The other texts keep the old filling (the placeholder's name, or the few samples of the F1a).
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { MONEY_SAMPLES, collectStrings, fileGuideOf, fillFor, isMoneyText } from '../../scripts/gates/lint-texto.ts';
+import { LIFE_SAMPLES, LIFE_SAMPLES_BY_KEY, MONEY_SAMPLES, collectStrings, fileGuideOf, fillFor, isLifeText, isMoneyText } from '../../scripts/gates/lint-texto.ts';
+import { LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 
 describe('lint:texto and the money texts', () => {
   it('knows which files are money texts', () => {
@@ -58,5 +62,81 @@ describe('lint:texto and the money texts', () => {
   it('keeps the old filling for the other texts', async () => {
     const fill = await fillFor('src/tools/compress-image/i18n/en.ts');
     expect(collectStrings({ a: 'Made by {name}: {count} files' }, '', [], fill)).toEqual(['Made by Victor: count files']);
+  });
+});
+
+// F7 (decision 11): the home and health calculators and their hubs are calculator texts, but not money. Their samples are
+// measures, counts and dates from the page examples of the oracle, apart from the money samples, where a name like "{x}"
+// is an amount of money.
+describe('lint:texto and the home and health texts (F7)', () => {
+  const LIFE_FILES = [...LIFE_CALC_IDS.map((id) => `src/tools/${id}/i18n/en.ts`), 'src/i18n/en/home-calculators.ts', 'src/i18n/en/health-calculators.ts'];
+
+  it('knows the texts of the 11 calculators and the two hubs, and never takes them for money', () => {
+    expect(LIFE_FILES).toHaveLength(13);
+    for (const file of LIFE_FILES) {
+      expect(existsSync(file), file).toBe(true);
+      expect(isLifeText(file), file).toBe(true);
+      expect(isMoneyText(file), file).toBe(false);
+    }
+    // Controls: the money calculators, the shared calculator texts, the money hub and the other texts are not.
+    for (const file of ['src/tools/mortgage-calculator/i18n/en.ts', 'src/tools/calc/i18n/en.ts', 'src/i18n/en/money-calculators.ts', 'src/tools/br-sac-price/i18n/pt.ts', 'src/i18n/en/home.ts', 'src/tools/compress-image/i18n/en.ts', 'src/tools/bmi-calculator.ts']) {
+      expect(isLifeText(file), file).toBe(false);
+    }
+    expect(isMoneyText('src/tools/mortgage-calculator/i18n/en.ts')).toBe(true);
+    expect(isMoneyText('src/tools/calc/i18n/en.ts')).toBe(true);
+  });
+
+  it('fills every placeholder of those texts with a sample of its own, never with money and never with the fallback', async () => {
+    let filled = 0;
+    for (const file of LIFE_FILES) {
+      const texts = ((await import(pathToFileURL(resolve(file)).href)) as { default: unknown }).default;
+      const names = new Set<string>();
+      collectStrings(texts, '', [], (name) => {
+        names.add(name);
+        return '';
+      });
+      for (const name of names) expect(Object.hasOwn(LIFE_SAMPLES, name), `${file}: {${name}} has no sample`).toBe(true);
+      const fill = await fillFor(file);
+      for (const line of collectStrings(texts, '', [], fill)) {
+        expect(line, file).not.toMatch(/\{\w+\}|\$\d/);
+        filled += 1;
+      }
+    }
+    expect(filled).toBeGreaterThan(100);
+  });
+
+  it('reads each sentence as its page shows it: lengths, counts, the singular for one, dates by extenso', async () => {
+    const tile = await fillFor('src/tools/tile-calculator/i18n/en.ts');
+    expect(collectStrings({ size: '{x} × {y} in', sentence: 'Counted for {size} tiles with {waste}% extra for cuts. Boxes of {per} to buy: {boxes}.' }, '', [], tile)).toEqual([
+      '15 × 12 in',
+      'Counted for 12 × 12 in tiles with 10% extra for cuts. Boxes of 10 to buy: 14.',
+    ]);
+    const due = await fillFor('src/tools/due-date-calculator/i18n/en.ts');
+    expect(collectStrings({ week: '{n} week', weeks: '{n} weeks', day: '{n} day', days: '{n} days', age: '{weeks} and {days}' }, '', [], due)).toEqual([
+      '1 week',
+      '2 weeks',
+      '1 day',
+      '2 days',
+      '8 weeks and 1 day',
+    ]);
+    const square = await fillFor('src/tools/square-footage-calculator/i18n/en.ts');
+    expect(collectStrings({ row: 'Area {n}', sentence: 'That is {yards} square yards. Areas added up: {n}.' }, '', [], square)).toEqual(['Area 2', 'That is 20.00 square yards. Areas added up: 2.']);
+    const fat = await fillFor('src/tools/body-fat-calculator/i18n/en.ts');
+    expect(collectStrings({ a: 'an estimated {percent}% body fat' }, '', [], fat)).toEqual(['an estimated 25.9% body fat']);
+    // A name with no sample reads as a plain number in these texts, never as money.
+    expect(collectStrings({ a: 'About {unknown} sq ft.' }, '', [], square)).toEqual(['About 12 sq ft.']);
+  });
+
+  it('leaves the money texts as they were: the same name still reads as money there (the other side of the samples)', async () => {
+    const refinance = await fillFor('src/tools/refinance-calculator/i18n/en.ts');
+    expect(collectStrings({ a: 'You would pay {x} less a month.', b: '{n} payments' }, '', [], refinance)).toEqual(['You would pay $1,234 less a month.', '12 payments']);
+    const debt = await fillFor('src/tools/debt-payoff-calculator/i18n/en.ts');
+    expect(collectStrings({ a: 'pays {x} less interest', b: 'Area {area}' }, '', [], debt)).toEqual(['pays $1,234 less interest', 'Area $1,234']);
+    // The F7 samples are not money samples: no money sample was added or changed for them.
+    for (const name of ['x', 'y', 'area', 'size', 'percent', 'from', 'to', 'next', 'base', 'per', 'buy']) expect(Object.hasOwn(MONEY_SAMPLES, name), name).toBe(false);
+    expect(MONEY_SAMPLES['n']).toBe('12');
+    // And the key-dependent sample of the singular never reaches a money text.
+    expect(collectStrings({ week: '{n} week' }, '', [], refinance)).toEqual(['12 week']);
+    expect(LIFE_SAMPLES_BY_KEY).toEqual({ week: { n: '1' }, day: { n: '1' } });
   });
 });
