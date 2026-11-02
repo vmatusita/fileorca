@@ -12,6 +12,7 @@ export default {
     decimalHint: 'Use vírgula nos decimais, como 11,5.',
     copyThis: 'Copie este link',
     exportFailed: 'A Oli não conseguiu carregar o gerador de PDF. Recarregue a página e tente de novo.',
+    exportOffline: 'Sem internet, e o gerador de PDF ainda não foi guardado. Baixe um PDF uma vez com internet e ele passa a funcionar offline também.',
     stale: 'Corrija o campo destacado para atualizar o resultado.',
     nextLabel: 'Próximo passo',
     scheduleHeading: 'Cronograma de parcelas',

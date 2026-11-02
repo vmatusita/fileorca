@@ -34,6 +34,7 @@ import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
+import offlineIcon from '../../../docs/design/assets/Icons/offline.svg?raw';
 
 const SHOW_PROGRESS_AFTER_MS = 400;
 /** Page pictures of the grid drawn at the same time: the worker draws one at a time, so two keep it busy (§ 180). */
@@ -116,6 +117,11 @@ const usable = (item: Item): boolean => item.info !== null && !item.removed && !
 const NOTE_KEY: Record<PdfNote, keyof PdfPanelData['t']['result']['notes'] | null> = {
   repaired: 'repaired', 'xfa-removed': 'xfaRemoved', 'form-lost': 'formLost', 'text-flattened': 'textFlattened', downscaled: 'downscaled', 'bookmarks-kept': null, 'form-kept': null,
 };
+
+/** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
+function offlineNow(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
 
 function adBlocked(adsOn: boolean): boolean {
   const ads = (window as { adsbygoogle?: { loaded?: boolean } }).adsbygoogle;
@@ -801,7 +807,7 @@ export default function PdfPanel(props: PdfPanelData) {
       case 'not-encrypted': return fmt(e.notEncrypted, { name });
       case 'too-large': return fmt(e.tooLarge, { name });
       case 'encode': return fmt(e.encode, { name });
-      case 'load': return fmt(e.load, { name });
+      case 'load': return fmt(offlineNow() ? e.offlineRow : e.load, { name });
       case 'one-at-a-time': return fmt(e.oneAtATime, { name });
       case 'no-pages': return fmt(e.noPages, { name });
     }
@@ -810,7 +816,9 @@ export default function PdfPanel(props: PdfPanelData) {
   const pagesLabel = (info: PdfInspect | null) => (info ? (info.pages === 1 ? t.queue.page : fmt(t.queue.pages, { count: info.pages })) : '');
   const done = m.items.filter((item) => item.status === 'done' && item.outputs);
   const delivered = m.single ?? m.bundle;
-  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : m.phase === 'error' ? 'error' : undefined;
+  // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
+  const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
+  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
   const showLevel = (m.phase === 'processing' && m.showLevel) || (m.phase === 'reading' && m.items.length > 0);
   const progress = m.zipping ? 100 : m.phase === 'reading' ? 0 : batchPercent(m.finished, m.total, 0);
   const actionText = texts.action ? (tool.actionLabel?.(state, texts.options as never, subject ? viewOf(subject) : null, texts.action) ?? texts.action) : '';
@@ -972,14 +980,24 @@ export default function PdfPanel(props: PdfPanelData) {
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
-        <Oli pose={dropState === 'over' ? 'gulp' : dropState === 'error' ? 'oops' : 'wave'} class="fo-drop__oli" />
+        <Oli pose={dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave'} class="fo-drop__oli" />
         <div class="fo-drop__badge" aria-hidden="true">
-          <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'error' ? alertIcon : uploadIcon} />
+          <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : dropState === 'error' ? alertIcon : uploadIcon} />
         </div>
         {dropState === 'over' ? (
           <>
             <p class="fo-drop__title">{t.drop.over}</p>
             <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
+          </>
+        ) : dropState === 'offline' ? (
+          <>
+            <div role="status" class="fo-drop__message">
+              <p class="fo-drop__title">{t.errors.offline}</p>
+              <p class="fo-drop__help">{t.errors.offlineHelp}</p>
+            </div>
+            <button ref={chooseRef} type="button" class="fo-btn" onClick={() => openPicker()}>
+              {t.errors.chooseAnother}
+            </button>
           </>
         ) : dropState === 'error' ? (
           <>

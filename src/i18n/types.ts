@@ -579,6 +579,10 @@ export interface ImagePanelTexts {
     encode: string;
     /** The engine could not be loaded (offline, or the site changed since the page opened). */
     load: string;
+    /** Offline, with the engine never kept (F8; DECISOES § 292): the Oli line (buoy), what to do, and the row of a file. */
+    offline: string;
+    offlineHelp: string;
+    offlineRow: string;
     tooLarge: string;
     /** "Choose other files" (DropZone error button). */
     chooseAnother: string;
@@ -861,6 +865,10 @@ export interface PdfPanelTexts {
     tooLarge: string;
     encode: string;
     load: string;
+    /** Offline, with the engine never kept (F8; DECISOES § 292): the Oli line (buoy), what to do, and the row of a file. */
+    offline: string;
+    offlineHelp: string;
+    offlineRow: string;
     /** A second file in a tool that works on one: "Oli works on one PDF at a time here. Start over to use {name}." */
     oneAtATime: string;
     /** PDF to JPG, a file with no page in the typed range: "{name} has no page in that range, so Oli left it out." (DECISOES § 178) */

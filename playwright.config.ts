@@ -19,6 +19,9 @@ export default defineConfig({
     // Linux WebKit of the CI the frames of the animated pages piled up in each worker's trace resources until the disk
     // was full (ENOSPC), once the CI ran WebKit alone in its jobs (DECISOES § 90).
     trace: { mode: 'retain-on-failure', screenshots: false },
+    // F8: the service worker would answer from its cache what page.route and context.route expect to see, so every
+    // spec runs without it; the specs of the service worker turn it on with test.use (DECISOES § 294).
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

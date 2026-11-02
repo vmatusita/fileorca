@@ -62,7 +62,12 @@ report(
     // F7 (decision 5): the health calculators never cheer a result, so their sprite has every tool pose but cheer.
     HEALTH_PATHS.has(page.path)
       ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer'] })
-      : checkSprite(page.html, { requiredPoses: page.html.includes('id="fo-tool-root"') ? [...PAGE_POSES, ...TOOL_POSES] : PAGE_POSES }),
+      : checkSprite(page.html, {
+          requiredPoses: page.html.includes('id="fo-tool-root"')
+            ? // F8: the image and PDF panels (their drop zone) also have the offline line in buoy (DECISOES § 292).
+              [...PAGE_POSES, ...TOOL_POSES, ...(page.html.includes('class="fo-drop"') ? ['buoy'] : [])]
+            : PAGE_POSES,
+        }),
   ),
   `${pages.length} páginas, ids únicos, um oli-clip, poses da lista fechada e caixas [data-oli] com o próprio símbolo`,
 );

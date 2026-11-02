@@ -1,8 +1,10 @@
 // Static server for dist/ used by Playwright and Lighthouse CI. It mimics the Cloudflare assets
 // handler of wrangler.jsonc: html_handling "auto-trailing-slash" (307 to the canonical form),
-// not_found_handling "404-page" (nearest 404.html, status 404) and the path rules of _headers.
+// not_found_handling "404-page" (nearest 404.html, status 404) and the path rules of _headers. A method other than GET
+// and HEAD gets 405 with an empty body, like the assets-only Worker (F8: the POST of the share target must never reach
+// the server; DECISOES § 294). The tests of the service worker build their own servers with createDistServer().
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { createServer, type Server } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
 const ROOT = 'dist';
@@ -80,26 +82,52 @@ export function resolve(pathname: string): { status: number; file?: string; loca
   }
 }
 
-const server = createServer((request, response) => {
-  const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
-  const result = resolve(url.pathname);
-  for (const rule of rules) {
-    if (rule.pattern.test(url.pathname)) for (const [name, value] of rule.headers) response.appendHeader(name, value);
-  }
-  if (result.location) {
-    response.writeHead(result.status, { Location: result.location + url.search });
-    response.end();
-    return;
-  }
-  if (!result.file) {
-    response.writeHead(result.status);
-    response.end();
-    return;
-  }
-  response.writeHead(result.status, { 'Content-Type': TYPES[extname(result.file)] ?? 'application/octet-stream' });
-  createReadStream(result.file).pipe(response);
-});
+export interface DistServerOptions {
+  /** Answers for some paths instead of the file in dist/ (the tests swap /sw.js). */
+  overrides?: Map<string, string>;
+  /** Called for every request, before the answer. */
+  onRequest?: (method: string, pathname: string) => void;
+}
+
+export function createDistServer(options: DistServerOptions = {}): Server {
+  return createServer((request, response) => {
+    const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
+    options.onRequest?.(request.method ?? 'GET', url.pathname);
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      response.writeHead(405, { Allow: 'GET, HEAD' });
+      response.end();
+      return;
+    }
+    const result = resolve(url.pathname);
+    for (const rule of rules) {
+      if (rule.pattern.test(url.pathname)) for (const [name, value] of rule.headers) response.appendHeader(name, value);
+    }
+    if (result.location) {
+      response.writeHead(result.status, { Location: result.location + url.search });
+      response.end();
+      return;
+    }
+    if (!result.file) {
+      response.writeHead(result.status);
+      response.end();
+      return;
+    }
+    const override = options.overrides?.get(url.pathname);
+    if (override !== undefined) {
+      response.writeHead(200, { 'Content-Type': TYPES[extname(url.pathname)] ?? 'application/octet-stream' });
+      response.end(override);
+      return;
+    }
+    response.writeHead(result.status, { 'Content-Type': TYPES[extname(result.file)] ?? 'application/octet-stream' });
+    createReadStream(result.file).pipe(response);
+  });
+}
 
 if (import.meta.main) {
+  const server = createDistServer({
+    onRequest: (method, pathname) => {
+      if (method !== 'GET' && method !== 'HEAD') console.log(`[serve-dist] ${method} ${pathname} 405`);
+    },
+  });
   server.listen(PORT, '127.0.0.1', () => console.log(`dist servido em http://127.0.0.1:${PORT} (ready)`));
 }

@@ -39,7 +39,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 | Erro | Oops, Oli couldn't read this file. Try a JPG or PNG. | Ops, a Oli não conseguiu ler esse arquivo. Tente um JPG ou PNG. | Uy, Oli no pudo leer este archivo. Prueba con un JPG o PNG. |
 | Arquivo em cima | Let go, Oli's ready | Pode soltar, a Oli está pronta | Suéltalo, Oli está lista |
 | 404 | This page swam away. | Essa página nadou para longe. | Esta página se fue nadando. |
-| Offline | No internet? No problem, Oli works offline. | Sem internet? Sem problema, a Oli funciona offline. | ¿Sin internet? No pasa nada: Oli funciona sin conexión. |
+| Offline | No internet? Oli keeps working on the pages you already opened. | Sem internet? A Oli segue funcionando nas páginas que você já abriu. | ¿Sin internet? Oli sigue funcionando en las páginas que ya abriste. |
 | Apoio | Oli runs on coffee. | A Oli funciona à base de café. | Oli funciona a base de café. |
 
 ## Cor
