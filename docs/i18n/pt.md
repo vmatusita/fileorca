@@ -1,0 +1,235 @@
+# Glossário · português do Brasil
+
+Glossário fixo do FileOrca em português (F6, decisão 3 do prompt; PLANO "Idiomas"). Todo texto do site em português segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em português e no HTML das páginas `/pt/` do `dist/`.
+
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md.
+
+## Registro
+
+- Informal e caloroso, com "você" (docs/design/README, "Voz"). Nunca "tu" nem "vocês" para falar com a pessoa.
+- Frases curtas, em sentence case: só a primeira letra maiúscula, fora nome próprio e sigla ("Comprimir imagem", "Juntar PDF").
+- Botão começa com verbo no infinitivo e não tem ponto: "Baixar", "Escolher imagens", "Copiar código".
+- A Oli fala dela em terceira pessoa, com artigo: "A Oli está cuidando disso…". O site fala com a pessoa.
+- Exclamação só no sucesso, uma por tela ("Prontinho!"). A linha do café e a placa não repetem.
+- Erro diz o que houve e o que fazer, sem culpar ninguém: "Ops, a Oli não conseguiu ler esse arquivo. Tente um JPG ou PNG."
+- Sem emoji, sem "mágica", "revolucionário", "turbinado", "sem esforço", "com IA".
+- O benefício é o número: "2,4 MB → 780 KB", "−68%", "você vai pagar R$ 382.637 de juros".
+- Português do Brasil, não de Portugal (ver "Nunca").
+
+## Formato de número, moeda e data
+
+| O quê | Como | Exemplo |
+| --- | --- | --- |
+| Decimal e milhar | vírgula decimal, ponto no milhar, sempre (também com 4 dígitos) | 1.234,56 · 20.000 px |
+| Tamanho de arquivo | uma casa abaixo de 100, espaço sem quebra antes da unidade | 2,4 MB · 780 KB |
+| Porcentagem | colada no número | 68% · 6,5% ao ano |
+| Moeda | "R$", espaço sem quebra, o número | R$ 1.234,56 · R$ 382.637 |
+| Data por extenso | dia, "de", mês minúsculo, "de", ano | 1 de novembro de 2026 |
+| Data curta (tabela) | dd/mm/aaaa | 01/11/2026 |
+| Taxa | sempre com o período | 1,5% ao mês · 12% ao ano |
+| CSV | ponto e vírgula separa as colunas, vírgula decimal, sem milhar, BOM UTF-8 | 1896,20;14375,00 |
+| PDF do relatório | página A4 | |
+
+As datas de "Revisado em" e "Última atualização" são o dia em Brasília.
+
+## Termos de arquivo
+
+| Inglês | Português | Observação |
+| --- | --- | --- |
+| file | arquivo | nunca "ficheiro" |
+| files | arquivos | |
+| image / photo | imagem / foto | |
+| batch | lote | "o lote inteiro", "em lote" |
+| ZIP | ZIP | "Baixar tudo · ZIP 4,2 MB" |
+| Download (botão) | Baixar | o verbo é "baixar"; "download" só como substantivo raro ("cada uma ganha o próprio download") |
+| Download all | Baixar tudo | |
+| drag and drop | arrastar e soltar | "Solte as imagens aqui" |
+| paste | colar | "ou cole com Ctrl V" |
+| choose | escolher | "Escolher imagens", "Escolher PDFs" |
+| upload (o site não faz) | enviar | "seu arquivo nem sai do aparelho", "sem upload" vale como bordão da marca |
+| device | aparelho | "Seu arquivo nem sai do aparelho" |
+| browser | navegador | |
+| phone | celular | |
+| computer | computador | |
+| metadata | metadados | "os metadados da foto" |
+| GPS location | localização GPS | |
+| compression | compressão | "Compressão: Recomendada, Forte" |
+| quality | qualidade | |
+| lossless | sem perda | |
+| page / pages | página / páginas | |
+| password | senha | |
+| start over | Começar de novo | |
+| show N more | Mostrar mais N | |
+| waiting / working | Na fila / Trabalhando | |
+| Already optimized | Já otimizada (imagem) / Já otimizado (PDF) | |
+| to (entre dois tamanhos, escondido) | para | "2,4 MB para 780 KB" no leitor de tela |
+| Advertisements | Publicidade | rótulo do AdSlot, a única palavra aceita |
+
+## Ferramentas e opções
+
+| Ferramenta (inglês) | Nome em português | Caminho |
+| --- | --- | --- |
+| Image tools (hub) | Ferramentas de imagem | /pt/ferramentas-de-imagem/ |
+| Compress image | Comprimir imagem | /pt/comprimir-imagem/ |
+| Compress to 100 KB | Comprimir imagem para 100 KB | /pt/comprimir-imagem/para-100kb/ |
+| Compress to 1 MB | Comprimir imagem para 1 MB | /pt/comprimir-imagem/para-1mb/ |
+| Resize image | Redimensionar imagem | /pt/redimensionar-imagem/ |
+| YouTube thumbnail | Miniatura do YouTube | /pt/redimensionar-imagem/miniatura-youtube/ |
+| Crop image | Cortar imagem | /pt/cortar-imagem/ |
+| Rotate image | Girar imagem | /pt/girar-imagem/ |
+| HEIC to JPG | HEIC para JPG | /pt/heic-para-jpg/ |
+| WebP to JPG | WebP para JPG | /pt/webp-para-jpg/ |
+| PNG to JPG | PNG para JPG | /pt/png-para-jpg/ |
+| Image to PDF | Imagem para PDF | /pt/imagem-para-pdf/ |
+| PDF tools (hub) | Ferramentas de PDF | /pt/ferramentas-pdf/ |
+| Merge PDF | Juntar PDF | /pt/juntar-pdf/ |
+| Split PDF | Dividir PDF | /pt/dividir-pdf/ |
+| Rotate PDF | Girar PDF | /pt/girar-pdf/ |
+| Delete pages | Excluir páginas do PDF | /pt/excluir-paginas-pdf/ |
+| Reorder pages | Organizar páginas do PDF | /pt/organizar-paginas-pdf/ |
+| PDF to JPG | PDF para JPG | /pt/pdf-para-jpg/ |
+| Page numbers | Numerar páginas do PDF | /pt/numerar-paginas-pdf/ |
+| Watermark | Marca d'água no PDF | /pt/marca-dagua-pdf/ |
+| Sign PDF | Assinar PDF | /pt/assinar-pdf/ |
+| Compress PDF | Comprimir PDF | /pt/comprimir-pdf/ |
+| Protect PDF | Proteger PDF | /pt/proteger-pdf/ |
+| Unlock PDF | Desbloquear PDF | /pt/desbloquear-pdf/ |
+
+Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O artigo do formato é masculino ("um JPG", "o PDF").
+
+| Opção (inglês) | Português |
+| --- | --- |
+| Compression · Recommended · Strong · Lossless | Compressão · Recomendada · Forte · Sem perda |
+| best balance · smallest | melhor equilíbrio · menor arquivo |
+| Resize · By size · By percentage · Width · Height | Redimensionar · Por tamanho · Por porcentagem · Largura · Altura |
+| Aspect ratio · Square · Free · Crop area | Proporção · Quadrado · Livre · Área do corte |
+| Rotate · Right 90° · Left 90° · 180° · Mirror · None · Horizontal · Vertical | Girar · 90° à direita · 90° à esquerda · 180° · Espelhar · Nenhum · Horizontal · Vertical |
+| Save as | Salvar como |
+| Page size · Image size · Letter · A4 | Tamanho da página · Tamanho da imagem · Carta · A4 |
+| Split by · Every page · Page ranges · Pick pages | Dividir por · Cada página · Intervalos de páginas · Escolher páginas |
+| Image format · Resolution · for the screen · general use · for printing | Formato da imagem · Resolução · para a tela · uso geral · para imprimir |
+| All pages · Page range · Page by page | Todas as páginas · Intervalo de páginas · Página por página |
+| Position · Top left · Top center · Bottom right… | Posição · Em cima à esquerda · Em cima no centro · Embaixo à direita… |
+| Format · Page 1 · Page 1 of 12 · 1 of 12 | Formato · Página 1 · Página 1 de 12 · 1 de 12 |
+| First number · Skip the first page | Primeiro número · Pular a primeira página |
+| Watermark text · CONFIDENTIAL · Size · Opacity · Light · Direction · Diagonal | Texto da marca d'água · CONFIDENCIAL · Tamanho · Opacidade · Clara · Direção · Diagonal |
+| Signature · Draw · Upload · Type · Clear | Assinatura · Desenhar · Imagem · Digitar · Limpar |
+| Password · Confirm password · Remove password | Senha · Confirme a senha · Tirar a senha |
+| Reverse order | Inverter a ordem |
+| Add more PDFs | Adicionar mais PDFs |
+
+## Nome do arquivo baixado
+
+Sem acento, em minúsculas, com hífen (o mesmo nome em todo sistema de arquivos).
+
+| Inglês | Português |
+| --- | --- |
+| `-merged` | `-juntado` |
+| `-split`, `-page-N`, `-part-N`, `-selected` | `-dividido`, `-pagina-N`, `-parte-N`, `-selecionadas` |
+| `-compressed` | `-comprimido` |
+| `-rotated` | `-girado` |
+| `-edited` | `-editado` |
+| `-reordered` | `-organizado` |
+| `-numbered` | `-numerado` |
+| `-watermarked` | `-marca-dagua` |
+| `-signed` | `-assinado` |
+| `-protected` | `-protegido` |
+| `-unlocked` | `-desbloqueado` |
+| `fileorca-images.zip`, `fileorca-images.pdf` | `fileorca-imagens.zip`, `fileorca-imagens.pdf` |
+| `fileorca-pdfs.zip`, `fileorca-pdf-images.zip` | `fileorca-pdfs.zip`, `fileorca-pdf-imagens.zip` |
+| `document.pdf` | `documento.pdf` |
+
+## Dinheiro (calculadoras adaptadas ao Brasil)
+
+| Conceito | Termo | Observação |
+| --- | --- | --- |
+| installment / monthly payment | parcela | "a primeira parcela", "parcela de R$ 1.896,20"; nunca "prestação mensal" no rótulo |
+| balance / loan balance | saldo devedor | "saldo" sozinho só na tabela |
+| amortization | amortização | a parte da parcela que abate o saldo |
+| interest | juros | sempre no plural ("os juros") |
+| interest rate | taxa de juros · juros ao mês · juros ao ano | taxa efetiva, sempre com o período |
+| effective rate | taxa efetiva | a única que o site usa (ver as premissas de cada página) |
+| down payment | entrada | |
+| term | prazo | em meses ("360 meses") |
+| financed amount | valor financiado | |
+| total paid | total pago | |
+| CET | CET (Custo Efetivo Total) | na primeira menção da página, por extenso |
+| IOF | IOF | imposto, sempre campo; nunca alíquota gravada |
+| TR | TR (Taxa Referencial) | campo "ao mês" |
+| fees | tarifas | "tarifa de cadastro" é exemplo de texto, não campo fixo |
+| insurance | seguros | "seguros e taxas por mês" no SAC × PRICE |
+| credit card statement | fatura | |
+| minimum payment | pagamento mínimo | |
+| revolving credit | rotativo | "o rotativo do cartão" |
+| installment plan | parcelamento | "parcelamento da fatura" |
+| early payoff / prepayment | amortização antecipada · liquidação antecipada | "antecipar R$ 10.000" |
+| shorter term · lower payment | reduzir o prazo · reduzir a parcela | |
+| snowball · avalanche | bola de neve · avalanche | |
+| compound interest | juros compostos | |
+| monthly deposit | aporte mensal | |
+| rent | aluguel | |
+| home price | valor do imóvel | |
+| property transfer tax · notary | ITBI · cartório | em % do valor do imóvel |
+| appreciation | valorização do imóvel | |
+| rent increase | reajuste do aluguel | |
+| return | rendimento | "rendimento do dinheiro investido" |
+| example (etiqueta) | exemplo | nunca "taxa de hoje" |
+| schedule | cronograma | "Ver o cronograma" |
+| Year N (do empréstimo) | Ano N | ano do contrato, não do calendário |
+
+Nomes das páginas: Calculadoras financeiras (hub), Simulador SAC × PRICE, Simulador de financiamento de veículo, Simulador de empréstimo, Amortização antecipada, Calculadora do cartão de crédito, Calculadora de dívidas, Calculadora de juros compostos, Alugar ou comprar. No PDF o "×" sai como "x" (WinAnsi).
+
+Nome do arquivo do PDF e do CSV: `simulacao-sac-price`, `financiamento-veiculo`, `simulacao-emprestimo`, `amortizacao-antecipada`, `cartao-de-credito`, `plano-de-dividas`, `juros-compostos`, `alugar-ou-comprar`.
+
+## Falas da Oli
+
+Da tabela de voz do docs/design/README.
+
+| Momento | Fala |
+| --- | --- |
+| Pronto | Prontinho! Sua imagem ficou 68% mais leve. |
+| Processando | A Oli está cuidando disso… |
+| Erro | Ops, a Oli não conseguiu ler esse arquivo. Tente um JPG ou PNG. |
+| Arquivo em cima | Pode soltar, a Oli está pronta |
+| 404 | Essa página nadou para longe. |
+| Offline | Sem internet? Sem problema, a Oli funciona offline. |
+| Apoio | A Oli funciona à base de café. |
+
+## Pedido de café e Pix
+
+Da tabela "Doações" do PLANO.
+
+| Lugar | Texto |
+| --- | --- |
+| Linha do card de resultado | Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café? |
+| Botão da linha | Pagar um café no Pix |
+| Rodapé | Curtiu? Me paga um café |
+| Título da página de apoio | Ferramentas grátis, feitas por uma pessoa só |
+| Valores | Qualquer valor · R$ 5 · R$ 10 · R$ 20 |
+| Botão do código | Copiar código |
+| Recebedor | Em nome de Victor Yuki Matusita |
+| "copia e cola" | Pix copia e cola |
+
+## Nunca
+
+Cada linha da tabela é um termo proibido nos textos em português e nas páginas `/pt/`. A comparação ignora maiúsculas e só casa a palavra inteira.
+
+| Termo | Use | Por quê |
+| --- | --- | --- |
+| ficheiro | arquivo | português de Portugal |
+| ficheiros | arquivos | português de Portugal |
+| ecrã | tela | português de Portugal |
+| telemóvel | celular | português de Portugal |
+| descarregar | baixar | português de Portugal |
+| utilizador | pessoa, você | português de Portugal |
+| palavra-passe | senha | português de Portugal |
+| fazer upload | enviar | anglicismo; o site não envia nada |
+| fazer o download | baixar | anglicismo |
+| deletar | excluir, apagar | anglicismo |
+| printar | capturar a tela | anglicismo |
+| clique aqui | um link com o nome do destino | link sem sentido para leitor de tela |
+| vocês | você | o site fala com uma pessoa |
+| hipoteca | financiamento imobiliário | no Brasil hipoteca é uma garantia, não o crédito |
+| taxa de hoje | um exemplo rotulado como exemplo | nada de taxa do dia (PLANO, "Confiança em dinheiro e saúde") |
+| taxa do dia | um exemplo rotulado como exemplo | idem |
+| juros de hoje | um exemplo rotulado como exemplo | idem |
