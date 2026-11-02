@@ -23,7 +23,12 @@ interface Fixture {
 }
 
 const DIR = process.env['CALC_FIXTURES_DIR'] ?? 'fixtures/calc';
-const SCRIPT = 'scripts/oracle/calc.py';
+/**
+ * The oracle of each calculator: scripts/oracle/calc.py for the English ones (F4) and scripts/oracle/calc_br.py for the
+ * ones adapted to Brazil (F6), a script of its own so the 18 English fixtures stay byte for byte (DECISOES § 225).
+ */
+const scriptOf = (calculator: string): string => (calculator.startsWith('br-') ? 'scripts/oracle/calc_br.py' : 'scripts/oracle/calc.py');
+const shaOf = (script: string): string => createHash('sha256').update(readFileSync(script, 'utf8').replaceAll('\r\n', '\n')).digest('hex');
 const fixtures: Fixture[] = readdirSync(DIR)
   .filter((file) => file.endsWith('.json'))
   .sort()
@@ -46,9 +51,14 @@ describe('the oracle fixtures', () => {
     expect(fixtures.map((fixture) => fixture.calculator).sort()).toEqual([...CALC_IDS].sort());
   });
 
-  it('was written by the current oracle script (SHA-256 of scripts/oracle/calc.py, LF line ends)', () => {
-    const sha = createHash('sha256').update(readFileSync(SCRIPT, 'utf8').replaceAll('\r\n', '\n')).digest('hex');
-    for (const fixture of fixtures) expect(fixture.oracle.sha256, `${fixture.calculator}: run the oracle again`).toBe(sha);
+  it('was written by the current oracle script (SHA-256 of scripts/oracle/calc.py or calc_br.py, LF line ends)', () => {
+    for (const fixture of fixtures) {
+      const script = scriptOf(fixture.calculator);
+      expect(fixture.oracle.script, fixture.calculator).toBe(script);
+      expect(fixture.oracle.sha256, `${fixture.calculator}: run the oracle again`).toBe(shaOf(script));
+    }
+    // Both scripts are there, and each one wrote at least one fixture.
+    expect(new Set(fixtures.map((fixture) => fixture.oracle.script))).toEqual(new Set(['scripts/oracle/calc.py', 'scripts/oracle/calc_br.py']));
   });
 
   it('pins numpy-financial 1.1.0', () => {
