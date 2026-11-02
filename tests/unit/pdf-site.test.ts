@@ -7,7 +7,8 @@ import HomeView from '../../src/views/HomeView.astro';
 import PdfToolsView from '../../src/views/PdfToolsView.astro';
 import PdfToolPage from '../../src/tools/pdf/PdfToolPage.astro';
 import Header from '../../src/components/Header.astro';
-import { LANGS, LANG_TAG, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, LANG_TAG, QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
@@ -26,6 +27,8 @@ const hubPath = routeById(PDF_HUB_ID).paths['en'] ?? '';
 const toolPath = (id: (typeof PDF_TOOL_IDS)[number]) => routeById(id).paths['en'] ?? '';
 const hubPathIn = (lang: Lang) => routeById(PDF_HUB_ID).paths[lang] ?? '';
 const toolPathIn = (id: (typeof PDF_TOOL_IDS)[number], lang: Lang) => routeById(id).paths[lang] ?? '';
+/** The 14 English-only pages of the F7 (decision 1): the two hubs, the 11 home and health calculators and the QR code. */
+const F7_PATHS = [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID].map((id) => routeById(id).paths.en ?? '');
 
 let container: AstroContainer;
 beforeAll(async () => {
@@ -47,11 +50,36 @@ describe('home', () => {
     expect(more?.getAttribute('href')).toBe(hubPath);
     expect(more?.text).toBe('See all PDF tools');
     // The order of the sections: the image tools, the PDF tools, the money calculators, then the privacy line.
+    // F7 (decision 9; DECISOES § 259): in English, after the money section, the home and health sections and the QR code.
     const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
-    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'privacy-home']);
+    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'house-home', 'health-home', 'qr-home', 'privacy-home']);
     // The home still has no AdSlot, and the Oli is still next to the H1 (above the fold rule of the home).
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
     expect(page.querySelectorAll('main .fo-hero [data-oli="wave"]')).toHaveLength(1);
+  });
+
+  it('has, in English, the home and health sections with every calculator of each hub in hub order and its hub link, then the QR code (F7, decision 9)', async () => {
+    const page = await render(HomeView, 'en');
+    for (const hub of ['house', 'health'] as const) {
+      const section = page.querySelector(`main section[aria-labelledby="${hub}-home"]`);
+      const texts = hub === 'house' ? TEXTS.en.home.house : TEXTS.en.home.health;
+      expect(section?.querySelector('h2')?.text, hub).toBe(texts?.heading);
+      // Every calculator of the hub, in the order of the hub, with the violet of the category (fill only).
+      expect(section?.querySelectorAll('a.fo-tool').map((card) => card.getAttribute('href')), hub).toEqual(LIFE_HUB_IDS[hub].map((id) => routeById(id).paths.en));
+      expect(section?.querySelectorAll('a.fo-tool h3').map((name) => name.text), hub).toEqual(LIFE_HUB_IDS[hub].map((id) => enCommon.calcs[id].name));
+      expect(section?.querySelectorAll('a.fo-tool.fo-cat--home'), hub).toHaveLength(LIFE_HUB_IDS[hub].length);
+      expect(section?.querySelector('.fo-more a')?.getAttribute('href'), hub).toBe(routeById(LIFE_HUB_ROUTE[hub]).paths.en);
+      expect(section?.querySelector('.fo-more a')?.text, hub).toBe(texts?.hubLink);
+    }
+    // The QR code generator has one card, in the lime of the utilities, and no hub link (it has no hub).
+    const qr = page.querySelector('main section[aria-labelledby="qr-home"]');
+    expect(qr?.querySelector('h2')?.text).toBe(TEXTS.en.home.qr?.heading);
+    expect(qr?.querySelectorAll('a.fo-tool').map((card) => card.getAttribute('href'))).toEqual([routeById(QR_ID).paths.en]);
+    expect(qr?.querySelectorAll('a.fo-tool.fo-cat--util')).toHaveLength(1);
+    expect(qr?.querySelector('a.fo-tool h3')?.text).toBe(enCommon.qr.name);
+    expect(qr?.querySelector('.fo-more')).toBeNull();
+    // Still no AdSlot on the home.
+    expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
   it('has the PDF section in Portuguese and Spanish too, with the 12 tools and the hub of the language, and links to no English PDF page', async () => {
@@ -72,6 +100,8 @@ describe('home', () => {
       for (const id of PDF_TOOL_IDS) expect(hrefs, `${lang} ${id}`).not.toContain(toolPath(id));
       expect(hrefs, lang).not.toContain(hubPath);
       expect(page.querySelectorAll('.fo-ad'), lang).toHaveLength(0);
+      // F7 (decision 9): nothing of the English-only home, health and QR pages, which do not exist in this language.
+      for (const path of F7_PATHS) expect(hrefs, `${lang} ${path}`).not.toContain(path);
     }
   });
 });
@@ -87,7 +117,23 @@ describe('footer', () => {
     expect(links.map((link) => link.getAttribute('href'))).toEqual([hubPath, ...PDF_TOOL_IDS.slice(0, 6).map(toolPath)]);
     expect(links.map((link) => link.text)).toEqual([enCommon.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => enCommon.pdf[id].name)]);
     // The columns, in the order of the site: image, PDF, money, FileOrca.
-    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'FileOrca']);
+    // F7 (decision 9; DECISOES § 259): in English, the Home, Health and Utilities columns come before FileOrca.
+    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'Home', 'Health', 'Utilities', 'FileOrca']);
+  });
+
+  it('has, in English, a Home and a Health column with the hub and every calculator of it, and a Utilities column with the QR code, so no F7 page is an orphan', async () => {
+    const page = await render(HomeView, 'en');
+    for (const [hub, title, name] of [['house', enCommon.footer.homeColumn, enCommon.homeCalculators], ['health', enCommon.footer.healthColumn, enCommon.healthCalculators]] as const) {
+      const links = column(page, title)?.querySelectorAll('li a') ?? [];
+      expect(links.map((link) => link.getAttribute('href')), hub).toEqual([routeById(LIFE_HUB_ROUTE[hub]).paths.en, ...LIFE_HUB_IDS[hub].map((id) => routeById(id).paths.en)]);
+      expect(links.map((link) => link.text), hub).toEqual([name, ...LIFE_HUB_IDS[hub].map((id) => enCommon.calcs[id].name)]);
+    }
+    const utility = column(page, enCommon.footer.utilityColumn)?.querySelectorAll('li a') ?? [];
+    expect(utility.map((link) => link.getAttribute('href'))).toEqual([routeById(QR_ID).paths.en]);
+    expect(utility.map((link) => link.text)).toEqual([enCommon.qr.name]);
+    // Every one of the 14 F7 pages is linked from the English footer.
+    const hrefs = new Set(page.querySelectorAll('footer a').map((link) => link.getAttribute('href') ?? ''));
+    for (const path of F7_PATHS) expect(hrefs.has(path), path).toBe(true);
   });
 
   it('has the PDF column in Portuguese and Spanish too: the hub of the language, then its first six tools (F6; no column before)', async () => {
@@ -103,6 +149,9 @@ describe('footer', () => {
       // No footer link to an English PDF page.
       const english = new Set([hubPath, ...PDF_TOOL_IDS.map(toolPath)]);
       expect(page.querySelectorAll('footer a').filter((link) => english.has(link.getAttribute('href') ?? '')), lang).toHaveLength(0);
+      // F7 (decision 9): the footer of pt and es does not change, and links to none of the English-only F7 pages.
+      const f7 = new Set(F7_PATHS);
+      expect(page.querySelectorAll('footer a').filter((link) => f7.has(link.getAttribute('href') ?? '')), lang).toHaveLength(0);
     }
   });
 });
