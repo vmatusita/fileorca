@@ -13,6 +13,8 @@
 // of the image hub.
 // F6: the Portuguese and Spanish pages whole, at both widths: an image tool and a PDF tool with their result, a calculator
 // of each language, the Brazilian money hub, and the support page with its Pix (and the Pix block alone at 360px).
+// F8: the offline page in the three languages, the "Open with" page with files and empty, and the offline line of a
+// tool kept without its engine, at both widths.
 // Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
@@ -23,9 +25,9 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from '../tests/e2e/lib/pdf-stat
 
 const ORIGIN = 'http://127.0.0.1:4173';
 // F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
-// under fase-04/, F5a under fase-05a/, F5b under fase-05b/, F6 under fase-06/ and F7 writes under fase-07/, leaving the older
-// shots as they were.
-const OUT = 'docs/relatorios/fase-07/componentes';
+// under fase-04/, F5a under fase-05a/, F5b under fase-05b/, F6 under fase-06/, F7 under fase-07/ and F8 writes under fase-08/,
+// leaving the older shots as they were.
+const OUT = 'docs/relatorios/fase-08/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -477,6 +479,85 @@ async function main(): Promise<void> {
         await page.screenshot({ path: join(OUT, `f7-qr-code-${theme}-${width}.png`), fullPage: true });
         console.log(`  f7-qr-code-${theme}-${width}.png`);
         await page.close();
+      }
+
+      // F8: the offline page in the three languages with the kept pages listed, the "Open with" page with an image and a
+      // PDF shared and empty, and the offline line of a tool kept without its engine. A context of its own each, with the
+      // service worker on (it keeps the pages first, then the network goes away for the tool).
+      for (const width of [360, 1280]) {
+        const viewport = { width, height: width < 768 ? 740 : 800 };
+        const fresh = async () => {
+          const context = await browser.newContext({ viewport, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce', serviceWorkers: 'allow' });
+          await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+          return context;
+        };
+        const controlled = async (target: Page) => {
+          await target.waitForFunction(() => navigator.serviceWorker.controller !== null, undefined, { timeout: 20_000 });
+          await target.waitForTimeout(1500);
+        };
+        for (const [lang, path, home] of [['en', '/offline/', '/'], ['pt', '/pt/offline/', '/pt/'], ['es', '/es/sin-conexion/', '/es/']] as const) {
+          const context = await fresh();
+          const tab = await context.newPage();
+          await tab.goto(`${ORIGIN}${home}`);
+          await controlled(tab);
+          await tab.goto(`${ORIGIN}${lang === 'en' ? '/compress-image/' : lang === 'pt' ? '/pt/juntar-pdf/' : '/es/calculadora-de-hipoteca/'}`);
+          await tab.waitForTimeout(1500);
+          await tab.goto(`${ORIGIN}${path}`);
+          await tab.locator('[data-saved] li').first().waitFor({ timeout: 10_000 });
+          await tab.evaluate(() => document.fonts.ready);
+          await tab.screenshot({ path: join(OUT, `f8-offline-${lang}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  f8-offline-${lang}-${theme}-${width}.png`);
+          await context.close();
+        }
+        {
+          const context = await fresh();
+          const tab = await context.newPage();
+          await tab.goto(`${ORIGIN}/open-with/`);
+          await tab.evaluate(() => document.fonts.ready);
+          await tab.screenshot({ path: join(OUT, `f8-open-with-empty-${theme}-${width}.png`), fullPage: true });
+          console.log(`  f8-open-with-empty-${theme}-${width}.png`);
+          await controlled(tab);
+          await tab.evaluate(() => {
+            const form = document.createElement('form');
+            form.id = 'fo-shot-share';
+            form.method = 'post';
+            form.enctype = 'multipart/form-data';
+            form.action = '/open-with/';
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.name = 'files';
+            input.multiple = true;
+            form.append(input);
+            document.body.append(form);
+          });
+          await tab.setInputFiles('#fo-shot-share input', [
+            { name: 'beach-day.jpg', mimeType: 'image/jpeg', buffer: readFileSync(PHOTO) },
+            { name: 'contract.pdf', mimeType: 'application/pdf', buffer: readFileSync('fixtures/pdf/gen-paginas-mistas.pdf') },
+          ]);
+          await Promise.all([tab.waitForURL('**/open-with/'), tab.evaluate(() => (document.getElementById('fo-shot-share') as HTMLFormElement).submit())]);
+          await tab.locator('[data-shared]').waitFor({ state: 'visible', timeout: 10_000 });
+          await tab.evaluate(() => document.fonts.ready);
+          await tab.screenshot({ path: join(OUT, `f8-open-with-files-${theme}-${width}.png`), fullPage: true });
+          console.log(`  f8-open-with-files-${theme}-${width}.png`);
+          await context.close();
+        }
+        {
+          const context = await fresh();
+          const tab = await context.newPage();
+          await tab.goto(`${ORIGIN}/rotate-image/`);
+          await tab.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
+          await controlled(tab);
+          await context.setOffline(true);
+          await tab.reload();
+          await tab.locator('#fo-tool-root[data-hydrated="true"]').waitFor();
+          await tab.setInputFiles('input[type="file"]', PHOTO);
+          await tab.locator('.fo-drop[data-state="offline"]').waitFor({ timeout: 20_000 });
+          await tab.evaluate(() => document.fonts.ready);
+          await shot(tab.locator('.fo-drop'), `f8-tool-offline-${theme}-${width}`, { top: 92 });
+          await tab.screenshot({ path: join(OUT, `f8-tool-offline-page-${theme}-${width}.png`), fullPage: true });
+          console.log(`  f8-tool-offline-page-${theme}-${width}.png`);
+          await context.close();
+        }
       }
     }
   } finally {

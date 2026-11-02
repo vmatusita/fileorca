@@ -9,7 +9,7 @@ export default {
   lead: 'Escolha uma ferramenta para os arquivos que você compartilhou. Eles ficam neste aparelho.',
   filesHeading: 'Seus arquivos',
   takesThis: 'Abre este arquivo',
-  takesAll: 'Abre os {total} arquivos',
+  takesAll: 'Abre todos os arquivos ({total})',
   takesSome: 'Abre {count} de {total} arquivos',
   noTool: 'Nenhuma ferramenta daqui abre esses arquivos. O FileOrca trabalha com JPG, PNG, WebP, HEIC e PDF.',
   emptySays: 'Nada para abrir por aqui.',
