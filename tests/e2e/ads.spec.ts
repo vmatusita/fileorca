@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, moneyPage } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage } from '../../src/tools/calc/registry.ts';
+import { DEFS } from '../../src/tools/calc/defs/index.ts';
+import { visible } from '../../src/tools/calc/form.ts';
+import type { ChoiceSpec, FieldSpec } from '../../src/tools/calc/types.ts';
 import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
@@ -387,6 +390,118 @@ test('the money hub keeps its one content AdSlot under the grids of calculators,
       const last = grids.at(-1);
       expect(last && ad, `${path} ${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
       expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
+      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+    }
+  }
+});
+
+// F7 (decision 11): the 11 home and health calculators, read from the registry, at 360x740 and 1280x800, with the targets
+// of the money calculators and the date field and the error line too. Their table is the result itself and shows open, with
+// no Show button (CalcView.open): it is measured as it loads, and the money test above, which opens a closed schedule, does
+// not change. The states: the example at load; a field out of its range (its error line on screen); a list with a row added
+// (the areas of the square footage); and, on a page with US and metric units, the metric load of its link (#v=1&u=metric).
+// On a phone the number of the result ends above 740px in every unit system (DECISOES § 124 and § 268). Every AdSlot of
+// these pages is in the ad area of the route map (casa-saude).
+const LIFE_TARGETS = `${CALC_TARGETS}, .fo-input--date, .fo-field__error`;
+
+/** What a person types to put a field out of its range: a number above every range of these pages, or a day before 2000. */
+function outOfRange(spec: FieldSpec): string {
+  return spec.kind === 'date' ? '1999-12-31' : '99999999';
+}
+
+test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360×740 e a 1280×800', () => {
+  for (const id of LIFE_CALC_IDS) {
+    const path = LIFE_CALC_PAGES[id].path;
+    test(`${path}: with the example, a field out of its range and every unit system`, async ({ page }) => {
+      const def = DEFS[id];
+      const area = routeById(id).adArea;
+      const gaps: string[] = [];
+      let adCount = 0;
+      const load = async (hash: string) => {
+        await page.setViewportSize(VIEWPORTS[0]);
+        await page.goto('about:blank');
+        expect((await page.goto(`${path}${hash}`))?.status()).toBe(200);
+        await hydrated(page);
+        await dismissCookies(page);
+        adCount = await page.locator('.fo-ad').count();
+        expect(adCount).toBeGreaterThan(0);
+        await expect(page.locator(`.fo-ad[data-ad-area="${area}"]`), 'AdSlots na área do mapa').toHaveCount(adCount);
+        // The table is open from the start, with no button to show it.
+        await expect(page.locator('#fo-schedule-table .fo-amort')).toBeVisible();
+        await expect(page.locator('#fo-calc-schedule button[aria-controls]')).toHaveCount(0);
+        // The result above the fold on a phone, in this unit system.
+        const number = await page.locator('.fo-rhero__num').boundingBox();
+        const end = (number?.y ?? 999) + (number?.height ?? 0);
+        gaps.push(`fim do número ${hash || 'no exemplo'}: ${end.toFixed(0)} px`);
+        expect(end, `${hash || 'exemplo'}: número do resultado acima da dobra a 360×740`).toBeLessThanOrEqual(740);
+      };
+      const measure = async (state: string) => {
+        let min = Infinity;
+        for (const viewport of VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+          const label = `${state} a ${viewport.width}px`;
+          const tool = (await boxes(page, '#fo-tool-root'))[0];
+          expect(tool, label).toBeDefined();
+          for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+          if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+          expect(await page.locator('#fo-calc-schedule .fo-ad, .fo-amort .fo-ad').count(), `${label}: AdSlot dentro da tabela`).toBe(0);
+          await expectAdsOutsideThePanel(page, label, adCount);
+          min = Math.min(min, await expectClearance(page, label, LIFE_TARGETS));
+        }
+        gaps.push(`${state}: ${min.toFixed(0)}`);
+      };
+
+      await load('');
+      await measure('exemplo');
+      // A list gets a row more (the areas of the square footage: the table grows with it).
+      for (const spec of def.fields) {
+        if (spec.kind !== 'list') continue;
+        const rows = await page.locator('#fo-tool-root fieldset.fo-debt').count();
+        await page.locator(`#fo-calc-${spec.key}-add`).click();
+        await expect(page.locator('#fo-tool-root fieldset.fo-debt')).toHaveCount(rows + 1);
+        await expect(page.locator('#fo-schedule-table tbody tr')).toHaveCount(rows + 1);
+        await measure('uma linha a mais');
+      }
+      // The first field of the page out of its range: the error line under it, the last result kept.
+      const first = def.fields.find((spec) => visible(spec, def.initial) && (spec.kind === 'date' || spec.kind === 'int' || spec.kind === 'dec' || spec.kind === 'list'));
+      expect(first, 'um campo para errar').toBeDefined();
+      if (first) {
+        const field = first.kind === 'list' ? `#fo-calc-${first.key}0${first.item[0]?.key ?? ''}` : `#fo-calc-${first.key}`;
+        await page.locator(field).fill(outOfRange(first.kind === 'list' ? (first.item[0] ?? first) : first));
+        await expect(page.locator(`${field}-error`)).toBeVisible();
+        await measure('campo fora da faixa');
+      }
+      // The other unit system, as its link opens it.
+      const units = def.fields.find((spec): spec is ChoiceSpec => spec.kind === 'choice' && spec.key === 'u');
+      for (const option of units?.options.slice(1) ?? []) {
+        await load(`#v=1&u=${option}`);
+        await expect(page.locator(`input[name="fo-calc-u"][value="${option}"]`)).toBeChecked();
+        await measure(`unidade ${option}`);
+      }
+      console.log(`${path} dobra e menor vão: ${gaps.join(' | ')}`);
+    });
+  }
+});
+
+// The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
+// phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
+test('the home and health hubs keep their one content AdSlot under the grid of calculators, at 360 and 1280px', async ({ page }) => {
+  for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID] as const) {
+    const route = routeById(id);
+    const path = route.paths.en ?? '';
+    expect(route.adArea, `${path}: área de anúncio`).toBe('casa-saude');
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+      await expect(page.locator('.fo-ad[data-ad-area="casa-saude"]')).toHaveCount(2);
+      const grids = await boxes(page, 'main .fo-grid');
+      const ad = await page.locator('.fo-ad--content').boundingBox();
+      const last = grids.at(-1);
+      expect(last && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(last!.y + last!.h);
       await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
     }
   }

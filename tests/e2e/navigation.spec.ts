@@ -1,11 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
-import { ROUTES, type Lang } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, type Lang } from '../../src/i18n/routes.ts';
 import ptCommon from '../../src/i18n/pt/common.ts';
+import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { filterEntries, type SearchEntry } from '../../src/search/search.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -84,8 +86,9 @@ test('tool search loads on first use, finds synonyms in any language and opens t
 
 // F2: the index has every image tool and preset, and each language shows only the pages it has. F6: Portuguese has the
 // image and PDF tools and the Brazilian calculators, read from the route map, and still never offers a page that exists
-// only in English (DECISOES § 233).
-const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+// only in English (DECISOES § 233). F7: and the home and health calculators and the QR code generator, English only, read
+// from the registry and the route map (the English count grows by construction, DECISOES § 259).
+const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
 const searchedIn = (lang: Lang): number => ROUTES.filter((route) => SEARCHED.has(route.id) && route.paths[lang]).length;
 const PT_NAMES = [...Object.values(ptCommon.tools), ...Object.values(ptCommon.pdf), ...Object.values(ptCommon.calcs)].map((blurb) => blurb.name);
 
@@ -177,8 +180,10 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
   // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125); F5a: and the PDF tools;
-  // F5b: and the file guides (DECISOES § 190).
-  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length;
+  // F5b: and the file guides (DECISOES § 190). F7: and the 11 home and health calculators and the QR code generator, read from
+  // the registry and the route map (the count grows by construction, DECISOES § 259).
+  const utilities = ROUTES.filter((route) => route.id === QR_ID && route.paths.en).length;
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities;
   await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });
@@ -198,6 +203,73 @@ test('the 404 page has a working tool search', async ({ page }) => {
   await box.fill('achicar');
   // F6: Compress PDF exists in Spanish and says "achicar pdf" too; Compress image comes first.
   await expect(page.locator('[data-search-inline]').getByRole('option').first()).toHaveText(/Comprimir imagen/);
+});
+
+// F7 (decision 9): the English search finds the home and health calculators by the words people use ("pregnancy", "AC size",
+// "cubic yards"), each in its category, and Enter opens the first one. Portuguese and Spanish do not have these pages: the
+// same words there never offer an English page (the search never falls back to English), only pages of the language.
+const LIFE_SEARCHES = [
+  ['pregnancy', ['due-date-calculator']],
+  ['ac size', ['btu-calculator']],
+  ['cubic yards', ['concrete-calculator', 'mulch-calculator']],
+] as const satisfies readonly (readonly [string, readonly LifeCalcId[]])[];
+const CATEGORY_OF = { house: enCommon.search.homeCategory, health: enCommon.search.healthCategory } as const;
+const lifeRow = (id: LifeCalcId): string => `${enCommon.calcs[id].name}${CATEGORY_OF[LIFE_CALC_PAGES[id].hub]}`;
+
+test('the English search finds the home and health calculators by their synonyms and opens the first one', async ({ page }) => {
+  const dialog = page.locator('#fo-search-dialog');
+  for (const [query, ids] of LIFE_SEARCHES) {
+    await page.goto('/');
+    await page.keyboard.press('Control+K');
+    await expect(dialog).toBeVisible();
+    const input = dialog.getByRole('combobox');
+    await input.fill(query);
+    const options = dialog.getByRole('option');
+    for (const [index, id] of ids.entries()) await expect(options.nth(index), `${query}: ${id}`).toHaveText(lifeRow(id));
+    await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+    await input.press('Enter');
+    await expect(page, query).toHaveURL(new RegExp(`${LIFE_CALC_PAGES[ids[0]].path}$`));
+  }
+});
+
+test('in Portuguese and Spanish the same words never offer a page that exists only in English', async ({ page, request }) => {
+  const index = (await (await request.get('/search-index.json')).json()) as SearchEntry[];
+  const englishOnly = index.filter((entry) => entry.href['en'] && !entry.href['pt'] && !entry.href['es']).map((entry) => entry.name['en'] ?? '');
+  for (const id of LIFE_CALC_IDS) expect(englishOnly, `${id} só em inglês no índice`).toContain(enCommon.calcs[id].name);
+  for (const lang of ['pt', 'es'] as const) {
+    const own = index.filter((entry) => entry.href[lang]).map((entry) => entry.name[lang] ?? '');
+    await page.goto(`/${lang}/`);
+    await page.keyboard.press('Control+K');
+    const dialog = page.locator('#fo-search-dialog');
+    const input = dialog.getByRole('combobox');
+    await expect(input).toBeFocused();
+    for (const [query] of LIFE_SEARCHES) {
+      await input.fill(query);
+      // What the dialog lists for this query in this language (the list repaints after the index answers): the count is
+      // waited for, so the rows read below are this query's and not the last one's.
+      const shown = filterEntries(index, query, lang);
+      await expect(dialog.getByRole('option'), `${lang} ${query}`).toHaveCount(shown.length);
+      if (shown.length === 0) await expect(dialog.locator('[data-search-empty-title]')).toContainText(query);
+      const rows = (await dialog.getByRole('option').allInnerTexts()).map((row) => row.replace(/\s+/g, ' ').trim());
+      for (const row of rows) {
+        expect(own.some((name) => row.startsWith(name)), `${lang} ${query}: ${row} é uma página do idioma`).toBe(true);
+        expect(englishOnly.some((name) => row.startsWith(name)), `${lang} ${query}: ${row} só existe em inglês`).toBe(false);
+      }
+    }
+  }
+});
+
+test('the English 404 page finds every home and health calculator by its name', async ({ page }) => {
+  expect((await page.goto('/nope/deep/'))?.status()).toBe(404);
+  const search = page.locator('[data-search-inline]');
+  const box = search.getByRole('combobox');
+  await box.click();
+  for (const id of LIFE_CALC_IDS) {
+    await box.fill(enCommon.calcs[id].name);
+    await expect(search.getByRole('option').first(), id).toHaveText(lifeRow(id));
+  }
+  await box.fill('pregnancy');
+  await expect(search.getByRole('option').first()).toHaveText(lifeRow('due-date-calculator'));
 });
 
 test('trailing slash: a path without it redirects', async ({ request }) => {
