@@ -1,37 +1,38 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
-// The PDF hub /pdf-tools/ in English (F5a, decision 7): the band, the grid of the PDF tools in order of search volume,
-// the guide of which tool does which job (DECISOES § 96) and how the files stay on the device.
+// O hub de PDF /pt/ferramentas-pdf/ em português (F6, decisão 4; o modelo é o hub /pdf-tools/, F5a e DECISOES § 96): a
+// faixa, a grade das ferramentas de PDF, o guia de qual ferramenta faz cada tarefa e como os arquivos ficam no aparelho.
+// Os guias de arquivo não existem em português, então este hub não fala deles.
 import type { PdfToolsTexts } from '../types.ts';
 
 const texts: PdfToolsTexts = {
-  title: 'PDF tools: merge, split, compress and more, in your browser',
-  description: 'Free PDF tools that run in your browser: merge, split, compress, convert to JPG, rotate, number, sign and protect PDFs without uploading them.',
+  title: 'Ferramentas de PDF: juntar, dividir, comprimir e mais, no navegador',
+  description:
+    'Ferramentas de PDF grátis que rodam no navegador: junte, divida, comprima, converta para JPG, gire, numere, assine e proteja PDFs sem enviar nada.',
   eyebrow: 'PDF',
-  h1: 'Free PDF tools that never upload your files',
-  intro: 'Merge, split, compress, convert, number, sign and protect PDFs. Every tool works on your device: no account, no upload, no limit on files.',
-  toolsHeading: 'Every PDF tool',
-  guideHeading: 'Which tool do you need?',
-  guideIntro: 'Most PDF jobs are one of these. Pick the line that sounds like yours.',
+  h1: 'Ferramentas de PDF grátis que nunca enviam seus arquivos',
+  intro: 'Junte, divida, comprima, converta, numere, assine e proteja PDFs. Toda ferramenta funciona no seu aparelho: sem conta, sem upload e sem limite de arquivos.',
+  toolsHeading: 'Todas as ferramentas de PDF',
+  guideHeading: 'De qual ferramenta você precisa?',
+  guideIntro: 'A maioria das tarefas com PDF é uma destas. Escolha a linha que parece com a sua.',
   guide: [
-    { before: 'Several PDFs that should be one file, in a set order:', tool: 'merge-pdf', after: 'puts them together and keeps their bookmarks and form fields.' },
-    { before: 'One long PDF and you only need some pages, or each page apart:', tool: 'split-pdf', after: 'cuts it by ranges, by picked pages or page by page.' },
-    { before: 'A PDF too big to email or upload to a form:', tool: 'compress-pdf', after: 'tidies its structure and, in the Recommended mode, makes its photos lighter.' },
-    { before: 'Pages you want as pictures, for a slide or a message:', tool: 'pdf-to-jpg', after: 'draws each page as a JPG or a PNG at the resolution you choose.' },
-    { before: 'Photos or scans that should become a PDF:', tool: 'image-to-pdf', after: 'puts one image on each page, in the order of the list.' },
-    { before: 'A scan that came out sideways or upside down:', tool: 'rotate-pdf', after: 'turns every page, or only the ones that need it, without redrawing them.' },
-    { before: 'Blank or unwanted pages in the middle:', tool: 'delete-pdf-pages', after: 'takes them out and keeps everything else as it was.' },
-    { before: 'Pages in the wrong order:', tool: 'reorder-pdf-pages', after: 'lets you drag them, or move them with buttons or the keyboard.' },
-    { before: 'A report or a thesis that needs numbered pages:', tool: 'add-page-numbers-to-pdf', after: 'writes the numbers where you want them, in one of four formats.' },
-    { before: 'A document to mark as a draft or as confidential:', tool: 'watermark-pdf', after: 'stamps your text across the middle of every page.' },
-    { before: 'A form or a letter to sign and send back:', tool: 'sign-pdf', after: 'places a drawn, uploaded or typed signature on the pages you pick.' },
-    { before: 'A PDF that should open only with a password:', tool: 'protect-pdf', after: 'locks it with AES-256 encryption.' },
-    { before: 'A PDF of yours that asks for a password every time:', tool: 'unlock-pdf', after: 'removes the password, once you type it, or the editing restrictions.' },
+    { before: 'Vários PDFs que deviam ser um arquivo só, numa ordem certa:', tool: 'merge-pdf', after: 'junta todos e mantém os marcadores e os campos de formulário.' },
+    { before: 'Um PDF longo do qual você só precisa de algumas páginas, ou de cada página separada:', tool: 'split-pdf', after: 'divide por intervalos, pelas páginas escolhidas ou página por página.' },
+    { before: 'Um PDF grande demais para mandar por e-mail ou anexar num formulário:', tool: 'compress-pdf', after: 'arruma a estrutura dele e, na compressão Recomendada, deixa as fotos mais leves.' },
+    { before: 'Páginas que você quer como imagem, para um slide ou uma mensagem:', tool: 'pdf-to-jpg', after: 'desenha cada página como JPG ou PNG, na resolução que você escolher.' },
+    { before: 'Fotos ou digitalizações que deviam virar um PDF:', tool: 'image-to-pdf', after: 'põe uma imagem em cada página, na ordem da lista.' },
+    { before: 'Uma digitalização que saiu de lado ou de cabeça para baixo:', tool: 'rotate-pdf', after: 'gira todas as páginas, ou só as que precisam, sem redesenhar nada.' },
+    { before: 'Páginas em branco ou que sobram no meio:', tool: 'delete-pdf-pages', after: 'tira essas páginas e deixa todo o resto como estava.' },
+    { before: 'Páginas fora de ordem:', tool: 'reorder-pdf-pages', after: 'deixa você arrastar as páginas ou mover cada uma pelos botões ou pelo teclado.' },
+    { before: 'Um relatório ou um TCC que precisa de páginas numeradas:', tool: 'add-page-numbers-to-pdf', after: 'escreve os números onde você quiser, num dos quatro formatos.' },
+    { before: 'Um documento para marcar como rascunho ou como confidencial:', tool: 'watermark-pdf', after: 'carimba o seu texto no meio de todas as páginas.' },
+    { before: 'Um formulário ou uma carta para assinar e devolver:', tool: 'sign-pdf', after: 'coloca uma assinatura desenhada, em imagem ou digitada nas páginas que você escolher.' },
+    { before: 'Um PDF que só deve abrir com senha:', tool: 'protect-pdf', after: 'tranca o arquivo com criptografia AES-256.' },
+    { before: 'Um PDF seu que pede senha toda vez:', tool: 'unlock-pdf', after: 'tira a senha, depois que você digita, ou as restrições de edição.' },
   ],
-  guideOutro: 'The tools chain well: merge first, then number the pages, then compress the result. Each one gives back a new file and leaves your original as it was.',
-  privacyHeading: 'Your PDFs stay on your device',
+  guideOutro: 'As ferramentas combinam bem: junte primeiro, depois numere as páginas e por fim comprima o resultado. Cada uma entrega um arquivo novo e deixa o seu original como era.',
+  privacyHeading: 'Seus PDFs ficam no seu aparelho',
   privacy: [
-    'Every PDF tool here reads and writes the file inside your browser. The PDF is opened with PDF.js, the reader Firefox uses, and changed with pdf-lib and qpdf, compiled to run in the page. Nothing is sent to a server, so there is no upload to wait for and no copy of your file anywhere else.',
-    'A password you type to protect or open a PDF stays in the page while you use it and is gone when you close it. A signature you draw, upload or type is not kept either. Open the Network tab of your browser while a tool runs: no request carries your file, your password or your text.',
+    'Toda ferramenta de PDF daqui lê e grava o arquivo dentro do seu navegador. O PDF é aberto com o PDF.js, o leitor que o Firefox usa, e alterado com o pdf-lib e o qpdf, compilados para rodar na página. Nada é enviado a um servidor, então não há envio para esperar nem cópia do seu arquivo em outro lugar.',
+    'A senha que você digita para proteger ou abrir um PDF fica na página enquanto você usa a ferramenta e some quando você fecha a página. A assinatura que você desenha, escolhe em imagem ou digita também não fica guardada. Abra a aba Rede do navegador enquanto uma ferramenta trabalha: nenhuma requisição leva o seu arquivo, a sua senha ou o seu texto.',
   ],
 };
 
