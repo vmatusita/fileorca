@@ -101,3 +101,15 @@ A F5a soma as 12 ferramentas de PDF, com matriz, privacidade e estados novos no 
 
 - **Minutos:** a soma dos jobs foi de uns 42 min por push na F4, com 5 partes, e de uns 71 min na F5a, com 11 partes (run 41342463565).
 - **Disco:** nas runs 41331507992 e 41342463565, todas as partes do Playwright disseram "No coredumps found.". O mínimo do `/` ficou entre 9.254 e 10.756 MB livres, com no máximo 47 MB de queda em 2 s.
+
+## Adendo (F7, 02/nov/2026): Chromium em quatro partes e WebKit em oito
+
+A F6 terminou com duas partes do Chromium acima do alvo de 700 s (727,3 s e 663,0 s na [run 41410030945](https://github.com/vmatusita/fileorca/actions/runs/41410030945), DECISOES § 243) e com a nota de que a próxima run que somasse páginas dividiria o Chromium em 4 partes primeiro. A F7 soma 14 páginas em inglês (11 calculadoras, 2 hubs e o QR code), e a ficha da run (decisão 10) fixa 13 partes.
+
+- **O que mudou:** só a matriz do job `playwright` e o comentário do topo do `ci.yml`.
+  - `chromium 1 de 4` a `chromium 4 de 4` (`--playwright=chromium --shard=i/4`);
+  - `webkit 1 de 8` a `webkit 8 de 8` (`--playwright=webkit --shard=i/8`).
+  - Com o job `verificar`, o CI tem treze partes, e o `merge` espera todas.
+- **O que não mudou:** o `scripts/verificar.ts`, os passos de cada job, o `merge`, o `pos-deploy.yml`, e nenhum teste, portão, limiar, timeout, `retries` ou número de workers.
+- **A prova:** o `tests/unit/verificar.test.ts` ganha as 13 partes escritas à mão e confere que juntas são os mesmos passos do todo.
+- **Tempos:** no relatório da F7 (`docs/relatorios/fase-07.md`), com o total do `verificar` de cada parte contra a F6.
