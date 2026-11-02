@@ -7,7 +7,7 @@ export default {
   h1: 'Acerca de FileOrca',
   intro: [
     'FileOrca lo hace y lo mantiene una sola persona: Victor Yuki Matusita, desarrollador en Curitiba, Paraná, Brasil.',
-    'Es un conjunto de herramientas gratis que funcionan en tu navegador. Las herramientas de imagen, las de PDF y las calculadoras de dinero están en inglés, y Comprimir imagen también está en español y portugués.',
+    'Es un conjunto de herramientas gratis que funcionan en tu navegador. En español tienes todas las herramientas de imagen, que son ocho, todas las de PDF, que son 12, y cinco calculadoras de dinero: hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto. El sitio también está en inglés y en portugués.',
   ],
   whyHeading: 'Por qué existe este sitio',
   why: [
@@ -15,7 +15,7 @@ export default {
     'Los anuncios cubren los costos del sitio y los cafés opcionales pagan nuevas herramientas. Tus archivos no forman parte del trato: el sitio nunca los recibe.',
   ],
   orcaHeading: 'Las orcas son delfines',
-  orca: 'Un dato curioso: la orca no es una ballena. Es un delfín, el miembro más grande de la familia de los delfines oceánicos. Oli, la orca de este sitio, también es un delfín.',
+  orca: 'Un dato curioso para terminar: la orca no es una ballena. Es un delfín, el miembro más grande de la familia de los delfines oceánicos. Oli, la orca de este sitio, también es un delfín.',
   linksHeading: 'Encuentra a Victor en internet',
   websiteLabel: 'Sitio web de Victor',
   linkedinLabel: 'Victor en LinkedIn',

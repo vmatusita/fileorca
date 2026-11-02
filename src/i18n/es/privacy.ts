@@ -5,26 +5,26 @@ export default {
   description:
     'Cómo trata FileOrca tus datos: tus archivos no salen del dispositivo, qué procesan Google Analytics, AdSense y Cloudflare, y tus derechos (LGPD y RGPD).',
   h1: 'Política de privacidad',
-  updated: 'Última actualización: 1 de noviembre de 2026',
+  updated: 'Última actualización: 2 de noviembre de 2026',
   intro:
     'Esta página explica qué pasa con tus datos en fileorca.com. En resumen: tus archivos nunca salen de tu dispositivo. Más abajo ves quién es el responsable, qué se recopila, quién lo recopila y cuáles son tus derechos.',
   sections: [
     {
       heading: 'Quién es el responsable',
       paragraphs: [
-        'El responsable del tratamiento de tus datos personales en fileorca.com (controlador, en la LGPD) es Victor Yuki Matusita, persona física y desarrollador de Curitiba, Paraná, Brasil. FileOrca está hecho y mantenido por una sola persona.',
+        'El responsable del tratamiento de tus datos personales en fileorca.com (controlador, en la LGPD) es Victor Yuki Matusita, persona física y desarrollador de Curitiba, Paraná, Brasil. FileOrca lo hace y lo mantiene una sola persona.',
         'Para cualquier duda sobre esta política o sobre tus datos, escribe a contato@fileorca.com. Puedes saber más sobre mí en https://vmatusita.com.br.',
       ],
     },
     {
       heading: 'Tus archivos se quedan en tu dispositivo',
       paragraphs: [
-        'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas crear una cuenta.',
-        'Los números siguen el mismo principio. Lo que escribes en una herramienta, como un ancho, un alto o un porcentaje, se queda en tu navegador: no se añade a la dirección de la página y ningún evento de analítica lleva esos números.',
-        'Las calculadoras de dinero funcionan igual. Los precios, las tasas y los saldos que escribes se calculan en tu dispositivo y nunca se envían. El PDF y el CSV de una calculadora también se generan en tu dispositivo. El botón de copiar el enlace pone tus números después del # de la dirección copiada: esa parte de la dirección se queda en el navegador que la abre y nunca llega a nuestro servidor, y la página nunca la añade a la dirección por su cuenta.',
-        'Las herramientas de PDF siguen el mismo principio. El PDF se lee y se escribe en tu dispositivo, con PDF.js y qpdf, dos bibliotecas de código abierto que funcionan en tu navegador. Lo que escribes ahí, como un rango de páginas o el texto de una marca de agua, se queda en tu navegador. La contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda, ni en un servidor ni en el navegador. La firma que dibujas, subes o escribes al firmar un PDF tampoco se guarda en ningún sitio.',
-        'Las herramientas de imagen, por ejemplo, guardan el resultado sin los metadatos de la foto, incluida la ubicación GPS.',
-        'Puedes comprobarlo: abre la pestaña Red de tu navegador mientras usas una herramienta. Ninguna solicitud lleva tu archivo.',
+        'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas una cuenta.',
+        'Con los números pasa lo mismo. Lo que escribes en una herramienta, como un ancho, un alto o un porcentaje, se queda en tu navegador: no se agrega a la dirección de la página y ningún evento de analítica lo lleva.',
+        'Las calculadoras de dinero funcionan igual. Los precios, las tasas y los saldos que escribes se calculan en tu dispositivo y nunca se envían a ningún lugar. El PDF y el CSV de una calculadora también se generan en tu dispositivo. Copiar enlace pone tus números después del # de la dirección que copia: esa parte de una dirección se queda en el navegador que la abre y nunca se envía a nuestro servidor, y la página nunca la agrega a la dirección por su cuenta.',
+        'Las herramientas de PDF funcionan igual. Tu PDF se lee y se escribe en tu dispositivo, con PDF.js y qpdf, dos bibliotecas de código abierto que funcionan en tu navegador. Lo que escribes ahí, como un rango de páginas o el texto de una marca de agua, se queda en tu navegador. La contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda, ni en un servidor ni en tu navegador. La firma que dibujas, tomas de una imagen o escribes al firmar un PDF tampoco se guarda en ningún lugar.',
+        'Las herramientas de imagen, por ejemplo, guardan una copia nueva de tu foto que deja fuera sus metadatos, incluida la ubicación GPS.',
+        'Puedes comprobarlo por tu cuenta. Abre la pestaña Red de tu navegador mientras usas una herramienta: ninguna solicitud lleva tu archivo.',
       ],
     },
     {
@@ -49,7 +49,7 @@ export default {
         'Clic en un enlace de donación',
         'Primer resultado de una calculadora, solo con el nombre de la calculadora',
         'Descarga del PDF o del CSV de una calculadora, solo con el formato',
-        'Clic en copiar el enlace de una calculadora, sin el enlace',
+        'Clic en Copiar enlace en una calculadora, sin el enlace',
       ],
     },
     {
@@ -69,7 +69,7 @@ export default {
       heading: 'Tu elección de cookies en el navegador',
       paragraphs: [
         'FileOrca guarda tu elección sobre cookies en el almacenamiento local (local storage) de tu navegador, para que el aviso no vuelva cada vez. Este registro se queda en tu dispositivo. Para borrarlo, elimina los datos del sitio en tu navegador; el aviso volverá a aparecer.',
-        'Si aceptas en el aviso de cookies, FileOrca también cuenta allí cuántas veces usaste una herramienta y generó al menos un archivo nuevo en este navegador (un lote de archivos cuenta como una sola vez), para que el pedido de café aparezca solo a partir de la tercera vez y como mucho una vez por semana; si pides no verlo más, eso también se guarda allí. Ese recuento se queda solo en tu navegador y nunca sale de él, y se borra si rechazas las cookies después.',
+        'Si aceptas en el aviso de cookies, FileOrca también cuenta allí cuántos lotes de imágenes o de PDF terminaron con al menos un resultado real en este navegador, como una imagen más ligera, convertida, rotada, recortada o redimensionada, o un PDF nuevo, para que el pedido de café aparezca solo a partir del tercero y como mucho una vez por semana; si pides no verlo más, eso también se guarda allí. Ese recuento se queda solo en tu navegador y nunca sale de él, y se borra si rechazas las cookies después.',
         'En las calculadoras, la página guarda una marca de sí o no en el almacenamiento de sesión de esta pestaña, para que Oli celebre solo con el primer resultado de la visita. No contiene ningún número, nunca sale del navegador y desaparece cuando cierras la pestaña.',
       ],
     },
