@@ -3,7 +3,8 @@
 // it its own address and the same-origin files it loaded, so the first page visited is kept too (the worker was not
 // there yet when it loaded): the scripts and stylesheets of the page, its preloads, manifest and icon, and what the
 // resource timing lists. Never the alternate or canonical links, which are other pages. The worker drops the query,
-// the fragment and anything it never stores (src/sw/logic.ts).
+// the fragment and anything it never stores (src/sw/logic.ts). When a new version takes the page over, the page tells it
+// again.
 // It never waits on navigator.serviceWorker.ready, which never settles where service workers are blocked (the
 // Playwright default of this repository resolves register() with undefined).
 export const WARM_SELECTOR = 'script[src],link[rel=stylesheet],link[rel=preload],link[rel=modulepreload],link[rel=manifest],link[rel=apple-touch-icon]';
@@ -18,7 +19,10 @@ export function swRegistration(): string {
     "performance.getEntriesByType('resource').forEach(function(e){u.push(e.name)});",
     "return{type:'warm',urls:u}};",
     "if(w.state==='activated')w.postMessage(m());",
-    "else w.addEventListener('statechange',function(){if(w.state==='activated')w.postMessage(m())})",
+    "else w.addEventListener('statechange',function(){if(w.state==='activated')w.postMessage(m())});",
+    // A new version takes the page over after the load (review F8 b-1; DECISOES § 307): the list went to the old worker,
+    // whose cache the new one deletes, so it goes again to the new one. Storing twice on the first install is harmless.
+    "navigator.serviceWorker.addEventListener('controllerchange',function(){var c=navigator.serviceWorker.controller;if(c)c.postMessage(m())})",
     '}).catch(function(){})});',
   ].join('');
 }

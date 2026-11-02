@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { CACHE_PREFIX, INBOX_CACHE, pagesCacheName } from '../../src/sw/shared.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
-import { allKept, controlled, kept, visit } from './lib/sw.ts';
+import { allKept, controlled, kept, offline, reloadOffline, visit } from './lib/sw.ts';
 
 test.use({ serviceWorkers: 'allow' });
 
@@ -60,7 +60,7 @@ test('the kill switch empties every cache of the site and unregisters; turned ba
   expect(await siteCaches(page)).toEqual([pagesCacheName(VERSION)]);
 });
 
-test('a new build deletes the caches of the old one and the inbox when it activates', async ({ page }) => {
+test('a new build deletes the caches of the old one and the inbox when it activates, and keeps the page that brought it', async ({ page, context }) => {
   await visit(page, server, '/compress-image/');
   await controlled(page);
   await allKept(page);
@@ -70,10 +70,14 @@ test('a new build deletes the caches of the old one and the inbox when it activa
   }, INBOX_CACHE);
   expect((await siteCaches(page)).sort()).toEqual([INBOX_CACHE, pagesCacheName(VERSION)].sort());
 
+  // The deploy: the next visit to the page finds the new /sw.js, and the new worker takes the page over after its load.
+  // The page and its files must be in the new cache right away, without another visit (review F8 b-1; DECISOES § 307).
   server.override('/sw.js', SCRIPT.replace(`"version":"${VERSION}"`, '"version":"next-build"'));
+  await page.goto(`${server.origin}/compress-image/`);
   await update(page);
   await expect.poll(() => siteCaches(page), { timeout: 20_000 }).toEqual([pagesCacheName('next-build')]);
-  await page.reload();
-  await kept(page, '/compress-image/');
+  await allKept(page);
+  await offline(context, server);
+  await reloadOffline(page);
   expect(await siteCaches(page)).toEqual([pagesCacheName('next-build')]);
 });
