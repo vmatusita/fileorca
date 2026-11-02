@@ -2,7 +2,7 @@
   "calculator": "br-credit-card",
   "oracle": {
     "script": "scripts/oracle/calc_br.py",
-    "sha256": "d82b7e7e32abb7d16e7178074e2ad808fdde3735c383af437d34483246cc0913",
+    "sha256": "c9fa213bd9fa99b55ebcf6483d5d10082ddae5e1f50fafe5f180c2efe5d82551",
     "python": "3.13.18",
     "numpy": "2.5.4",
     "numpyFinancial": "1.1.0",

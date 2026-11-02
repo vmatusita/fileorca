@@ -32,7 +32,7 @@ Conventions (PLANO "Regra das calculadoras"; DECISOES of the F4 and the F6):
   less what is paid up front, FCj the payments, in equal monthly periods (exponent j/12 of a year: the convention
   of the official example of Boletim nº 8, BCB and Senacon, 2014). CET per year = (1 + i)^12 - 1. Both in
   hundredths of a percent, half up; the year from the unrounded month.
-- A loop that would pass 1,200 months is the error "too-long".
+- A loop that would pass 1,200 months is the error "too-long"; a balance above 10^15 cents, "too-large".
 """
 
 from __future__ import annotations
@@ -63,6 +63,7 @@ S = 10_000  # rate units per percentage point
 ONE = 100 * S  # rate units per 1.0 (100%)
 J_ONE = 10**30  # the 30-decimal scale of a monthly rate
 MAX_MONTHS = 1200
+MAX_CENTS = 10**15  # a balance above this (R$ 10 trillion) is the error "too-large": past it a double loses cents
 
 
 class OracleError(Exception):
@@ -496,6 +497,8 @@ def compound(inp: dict, full: bool = False) -> dict:
     for m in range(1, months + 1):
         it = interest30(balance, j)
         balance += it + monthly
+        if balance > MAX_CENTS:
+            return {'error': 'too-large'}
         interest_y += it
         deposits_y += monthly
         if m % 12 == 0 or m == months:
