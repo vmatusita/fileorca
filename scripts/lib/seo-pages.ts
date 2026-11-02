@@ -5,7 +5,7 @@ import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
-import type { Lang } from '../../src/i18n/routes.ts';
+import { QR_ID, type Lang } from '../../src/i18n/routes.ts';
 
 /** Route id of the hub of the image tools. */
 export const HUB_ID = 'image-tools';
@@ -28,9 +28,19 @@ export const TRANSLATED_DESCRIPTION_RANGE = { min: 120, max: 160 } as const;
 export function descriptionProblem(routeId: string, lang: Lang, description: string): string | null {
   const length = description.length;
   const translated = lang !== 'en' && (isImagePage(routeId) || routeId === HUB_ID || routeId === PDF_HUB_ID || isPdfPage(routeId));
+  // The QR code generator asks the same 120 to 160 characters in English (prompt F7, decision 8).
+  if (isQrPage(routeId)) {
+    const { min, max } = TRANSLATED_DESCRIPTION_RANGE;
+    return length >= min && length <= max ? null : `descrição com ${length} caracteres (pede de ${min} a ${max} no gerador de QR code)`;
+  }
   const range = translated ? TRANSLATED_DESCRIPTION_RANGE : DESCRIPTION_RANGE;
   if (length >= range.min && length <= range.max) return null;
   return translated ? `descrição com ${length} caracteres (pede de ${range.min} a ${range.max} nas páginas de imagem e de PDF em pt e es)` : `descrição com ${length} caracteres`;
+}
+
+/** The QR code generator (prompt F7, decision 8): a tool page of its own kind, with no hub and no registry. */
+export function isQrPage(routeId: string): boolean {
+  return routeId === QR_ID;
 }
 
 /** A money calculator page of any language: the English registry (and its Spanish pages) or a Brazilian one. */
@@ -70,6 +80,8 @@ export function requiredSchemaTypes(routeId: string): string[] {
   if (routeId === 'home') return ['Organization', 'WebSite'];
   if (routeId === 'about') return ['Organization', 'BreadcrumbList', 'Person', 'AboutPage'];
   if (isImagePage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
+  // The QR code generator (F7): a WebApplication (UtilitiesApplication) and the BreadcrumbList Home › QR code generator.
+  if (isQrPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
   if (routeId === HUB_ID) return ['Organization', 'BreadcrumbList'];
   // PDF pages (F5a, decision 7): the tools are the image tools' kind of page (WebApplication with no rating and a
   // BreadcrumbList); the hub is a CollectionPage like the money hub, with no author node.
@@ -92,7 +104,7 @@ export function requiredSchemaTypes(routeId: string): string[] {
  */
 export function titleProblem(routeId: string, title: string, h1: string): string | null {
   if (isAnyCalcPage(routeId)) return h1 !== '' && title.toLowerCase().startsWith(h1.toLowerCase()) ? null : `título não começa pelo nome da calculadora (${h1})`;
-  if (!isImagePage(routeId) && !isPdfPage(routeId)) return null;
+  if (!isImagePage(routeId) && !isPdfPage(routeId) && !isQrPage(routeId)) return null;
   return h1 !== '' && title.startsWith(h1) ? null : `título não começa pelo nome da ferramenta (${h1})`;
 }
 
@@ -104,7 +116,7 @@ export interface LdNode {
 
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
-  const tool = isImagePage(routeId) || isAnyCalcPage(routeId) || isPdfPage(routeId);
+  const tool = isImagePage(routeId) || isAnyCalcPage(routeId) || isPdfPage(routeId) || isQrPage(routeId);
   if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== BR_HUB_ID && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
