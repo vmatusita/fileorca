@@ -35,7 +35,7 @@ const TOOL_PAGES = [
 ];
 // The hubs have no island: they are held to the same JS and request budgets, with at most the two files of a tool page.
 // F7: the home and health hubs too, read from the registry.
-const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`, ...[HOUSE_HUB_ID, HEALTH_HUB_ID].map((id) => routeById(id).paths.en ?? '')];
+const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`, ...([HOUSE_HUB_ID, HEALTH_HUB_ID] as const).map((id) => routeById(id).paths.en ?? '')];
 // The money calculators, their presets and the guides (F4; DECISOES § 110): one entry shared by all of them and
 // the shared island chunk, exactly two files, read from the calculator registry. F7 (decision 6; DECISOES § 257): the 11
 // home and health calculators come into the same island and are held to the same two files and the same 80 KB, with

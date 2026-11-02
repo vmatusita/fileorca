@@ -487,7 +487,7 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
 // The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
 // phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
 test('the home and health hubs keep their one content AdSlot under the grid of calculators, at 360 and 1280px', async ({ page }) => {
-  for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID]) {
+  for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID] as const) {
     const route = routeById(id);
     const path = route.paths.en ?? '';
     expect(route.adArea, `${path}: área de anúncio`).toBe('casa-saude');
