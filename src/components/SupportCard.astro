@@ -59,7 +59,7 @@ const receiver = pix ? fmt(pix.receiver, { name: PIX_NAME === AUTHOR.name.toUppe
             </div>
           </div>
         ))}
-        <p class="fo-pix__status" role="status" data-pix-copied={pix.copied}></p>
+        <p class="fo-pix__status" role="status" data-pix-copied={pix.copied} data-pix-failed={pix.copyFailed}></p>
         <p class="fo-support__amounts">{pix.note}</p>
       </div>
     )}
@@ -72,10 +72,18 @@ const receiver = pix ? fmt(pix.receiver, { name: PIX_NAME === AUTHOR.name.toUppe
     document.addEventListener('click', (event) => {
       const button = event.target instanceof Element ? event.target.closest('[data-pix-copy]') : null;
       const status = document.querySelector('[data-pix-copied]');
-      if (!button || !status || !navigator.clipboard) return;
-      navigator.clipboard.writeText(button.getAttribute('data-pix-copy') || '').then(() => {
-        status.textContent = status.getAttribute('data-pix-copied');
-      });
+      if (!button || !status) return;
+      const say = (key) => {
+        status.textContent = status.getAttribute(key);
+      };
+      // A browser without the clipboard, or one that refuses the copy, says how to copy by hand (DECISOES § 245).
+      if (!navigator.clipboard) return say('data-pix-failed');
+      navigator.clipboard.writeText(button.getAttribute('data-pix-copy') || '').then(() => say('data-pix-copied'), () => say('data-pix-failed'));
+    });
+    // Another amount is another code: the "copied" of the last one no longer holds.
+    document.addEventListener('change', (event) => {
+      const status = document.querySelector('[data-pix-copied]');
+      if (status && event.target instanceof Element && event.target.matches('input[name="fo-pix-amount"]')) status.textContent = '';
     });
   </script>
 )}

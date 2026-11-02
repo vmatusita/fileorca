@@ -19,6 +19,8 @@ const CASES = [
   // F6 (decision 9): the heaviest Brazilian ones. SAC × PRICE builds two schedules of 360 months with the 30-digit
   // monthly rate; the vehicle loan finds the CET by bisection; rent or buy runs 120 months of two paths with a SAC loan.
   { name: 'SAC × PRICE', path: '/pt/simulador-sac-price/', field: '#fo-calc-p', base: '500000', debts: 0 },
+  // Review F6 (e-1): with a TR the PRICE payment is worked out again every month; at 420 months it cost 58 ms a key press.
+  { name: 'SAC × PRICE with a TR, 420 months', path: '/pt/simulador-sac-price/#v=1&n=420&tr=1000', field: '#fo-calc-p', base: '500000', debts: 0 },
   { name: 'vehicle loan with the CET', path: '/pt/simulador-financiamento-veiculo/', field: '#fo-calc-p', base: '80000', debts: 0 },
   { name: 'rent or buy in Brazil', path: '/pt/alugar-ou-comprar/', field: '#fo-calc-al', base: '2500', debts: 0 },
 ] as const;

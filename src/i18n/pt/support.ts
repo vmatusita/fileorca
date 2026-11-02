@@ -23,6 +23,7 @@ export default {
     codeLabel: 'Pix copia e cola',
     copy: 'Copiar código',
     copied: 'Código copiado. Cole no app do seu banco, na opção Pix copia e cola.',
+    copyFailed: 'O navegador não deixou copiar. Selecione o código acima e copie, ou use o QR.',
     receiver: 'Em nome de {name}',
     note: 'Aponte a câmera do app do banco para o QR ou copie o código. O Pix cai na hora, e o site não fica sabendo quem pagou nem quanto. Se você pagou por engano, escreva pela página de Contato: eu devolvo pelo botão de devolução do próprio Pix, em até 90 dias.',
   },

@@ -44,6 +44,7 @@ function NumberInput({ spec, values, problems, data, set, keyName, value, onValu
       help={texts.help}
       error={texts.error}
       over={problems[keyName] === 'over' ? texts.over : undefined}
+      hint={data.t.decimalHint}
       prefix={texts.prefix}
       suffix={texts.suffix}
       tag={spec.example ? data.t.example : undefined}
@@ -172,6 +173,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           label={texts.label}
           error={percent ? (data.texts.fields[spec.percentKey]?.error ?? texts.error) : texts.error}
           over={props.problems[spec.key] === 'over' ? texts.over : undefined}
+          hint={data.t.decimalHint}
           half={spec.half}
           unit={unit}
         />

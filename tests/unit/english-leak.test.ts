@@ -312,4 +312,15 @@ describe('no English phrase on the pages of Portuguese and Spanish in dist/ (pro
       // Reading some 70 pages: the limit of the other tests that read many pages (pdf-site.test.ts).
     }, 60_000);
   }
+
+  // Review F6 (g-3; DECISOES § 250): the license texts the test leaves out are English, and the page says so, so a screen
+  // reader reads them with an English voice (WCAG 3.1.2, Language of Parts).
+  it('marks every license text of the pt and es Licenses pages as English', () => {
+    for (const page of pages.filter((candidate) => candidate.id === 'licenses')) {
+      const blocks = parse(readFileSync(fileForPath(page.path), 'utf8')).querySelectorAll('pre');
+      expect(blocks.length, page.path).toBeGreaterThan(10);
+      expect(blocks.filter((block) => block.getAttribute('lang') !== 'en').length, page.path).toBe(0);
+    }
+    expect(pages.filter((candidate) => candidate.id === 'licenses').map((page) => page.lang).sort()).toEqual(['es', 'pt']);
+  });
 });

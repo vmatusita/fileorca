@@ -23,6 +23,7 @@ export default {
     csv: 'CSV',
     copyLink: 'Copy link',
     copied: 'Link copied',
+    decimalHint: 'Use a dot for the decimals, like 6.5.',
     copyThis: 'Copy this link',
     exportFailed: "Oli couldn't load the PDF maker. Reload the page and try again.",
     stale: 'Fix the highlighted field to update the result.',

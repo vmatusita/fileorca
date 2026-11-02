@@ -9,6 +9,7 @@ export default {
     csv: 'CSV',
     copyLink: 'Copiar enlace',
     copied: 'Enlace copiado',
+    decimalHint: 'Usa punto en los decimales, como 6.5.',
     copyThis: 'Copia este enlace',
     exportFailed: 'Oli no pudo cargar el generador de PDF. Recarga la página e inténtalo de nuevo.',
     stale: 'Corrige el campo marcado para actualizar el resultado.',

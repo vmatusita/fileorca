@@ -67,9 +67,42 @@ export function sacRows(loan: number, j: bigint, n: number, tr: number): TrRow[]
   return rows;
 }
 
+/** Bits of the fixed point of the quick PRICE payment (DECISOES § 244). */
+const FAST_BITS = 192n;
+const FAST_ONE = 1n << FAST_BITS;
+const FAST_HALF = 1n << (FAST_BITS - 1n);
+/** How near a half cent the quick payment may fall before the exact one is worked out: 2^-60 of a cent, far above its error. */
+const FAST_MARGIN = 1n << (FAST_BITS - 60n);
+
+/**
+ * The payments annuity30 gives for one loan rate and every term from 1 to n months, without raising (1 + j) to the term
+ * each time (a 100-bit number to the 420th power cost 40 ms a key press in the page, DECISOES § 244). (1 + j)^m goes in
+ * fixed point of 192 bits, one multiplication a month, and a payment is L·j·q / (q − 1) in that fixed point. Its error is
+ * below 2^-120 of a cent for every input the fields take, so its half-up rounding is annuity30's unless the payment falls
+ * within 2^-60 of a cent of a half cent: then annuity30 itself is worked out.
+ */
+export function annuityByTerm(j: bigint, n: number): (principal: number, m: number) => number {
+  if (j === 0n) return (principal, m) => annuity30(principal, j, m);
+  const step = ((ROOT_ONE + j) << FAST_BITS) / ROOT_ONE;
+  const rate = (j << FAST_BITS) / ROOT_ONE;
+  const grown: bigint[] = [FAST_ONE];
+  for (let m = 1; m <= n; m += 1) grown.push(((grown[m - 1] as bigint) * step) >> FAST_BITS);
+  return (principal, m) => {
+    if (principal === 0) return 0;
+    const q = grown[m];
+    if (q === undefined) return annuity30(principal, j, m);
+    const scaled = (big(principal) * rate * q) / (q - FAST_ONE);
+    const fraction = scaled & (FAST_ONE - 1n);
+    const distance = fraction > FAST_HALF ? fraction - FAST_HALF : FAST_HALF - fraction;
+    if (distance <= FAST_MARGIN) return annuity30(principal, j, m);
+    return Number((scaled + FAST_HALF) >> FAST_BITS);
+  };
+}
+
 /** PRICE: with the TR at zero the first payment stays; with a TR it is worked out again on the corrected balance. */
 export function priceTrRows(loan: number, j: bigint, n: number, tr: number): TrRow[] {
   const first = annuity30(loan, j, n);
+  const payment = tr === 0 ? null : annuityByTerm(j, n);
   const rows: TrRow[] = [];
   let balance = loan;
   for (let k = 1; k <= n && balance > 0; k += 1) {
@@ -77,7 +110,7 @@ export function priceTrRows(loan: number, j: bigint, n: number, tr: number): TrR
     const corrected = balance + correction;
     const owed = interest30(corrected, j);
     const total = corrected + owed;
-    let paid = tr === 0 ? first : annuity30(corrected, j, n - k + 1);
+    let paid = payment === null ? first : payment(corrected, n - k + 1);
     if (k === n || paid >= total) paid = total;
     balance = total - paid;
     rows.push([k, paid, owed, paid - owed, balance, correction]);
@@ -297,19 +330,15 @@ export interface EarlyPayoffResult {
 }
 
 /** SAC that keeps one amortization until the balance is gone. */
-function fixedSacRows(principal: number, j: bigint, amort: number): Row[] {
-  const rows: Row[] = [];
-  let balance = principal;
-  for (let k = 1; balance > 0; k += 1) {
-    const owed = interest30(balance, j);
-    const part = Math.min(amort, balance);
-    balance -= part;
-    rows.push([k, part + owed, owed, part, balance]);
-  }
-  return rows;
-}
-
 const plainSac = (principal: number, j: bigint, n: number): Row[] => sacRows(principal, j, n, 0).map((row) => [row[0], row[1], row[2], row[3], row[4]]);
+
+/**
+ * SAC that reduces the term (review F6, a-3): the term is cut by the whole amortizations of today the prepayment covers, and
+ * the schedule keeps the contract's rule (balance over months to go), so a prepayment of zero leaves the contract as it is.
+ */
+function shorterSac(left: number, j: bigint, n: number, amort: number, prepay: number): Row[] {
+  return plainSac(left, j, Math.max(1, n - (amort > 0 ? Math.floor(prepay / amort) : 0)));
+}
 
 export function earlyPayoff(input: EarlyPayoffInput): EarlyPayoffResult {
   const j = monthRate30(input.rate);
@@ -324,7 +353,7 @@ export function earlyPayoff(input: EarlyPayoffInput): EarlyPayoffResult {
     lower = priceRows(left, j, input.months, annuity30(left, j, input.months));
   } else {
     base = plainSac(input.balance, j, input.months);
-    shorter = fixedSacRows(left, j, base[0]?.[3] ?? 0);
+    shorter = shorterSac(left, j, input.months, base[0]?.[3] ?? 0, input.prepay);
     lower = plainSac(left, j, input.months);
   }
   const baseTotals = totals(base);

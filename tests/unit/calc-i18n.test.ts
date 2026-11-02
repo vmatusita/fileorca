@@ -80,12 +80,15 @@ describe('the Portuguese CSV', () => {
     expect(width).toBeGreaterThan(4);
     for (const line of lines) expect(line.split(';').length, line).toBe(width);
     expect(csv).not.toMatch(/\d\.\d{2}(?:;|\r)/);
-    // Each oracle row of each plan is a CSV line: the payment, the interest, the amortization and the balance in "1234,56".
+    // Each oracle row of each plan is a CSV line: the payment with the insurance and fees of the month (review F6, a-2;
+    // DECISOES § 252), the interest, the amortization, the insurance and fees, and the balance, in "1234,56".
     const real = (value: number) => `${Math.trunc(value / 100)},${String(Math.abs(value) % 100).padStart(2, '0')}`;
+    const fees = Number(DEFS['br-sac-price'].initial['f']);
+    expect(fees).toBeGreaterThan(0);
     for (const rows of [expected.sac.rows, expected.price.rows]) {
       for (const row of [rows[0], rows[11], rows.at(-1)]) {
         const [n, payment, interest, amortization, balance] = row ?? [];
-        const wanted = [payment, interest, amortization, balance].map((value) => real(value ?? 0));
+        const wanted = [(payment ?? 0) + fees, interest, amortization, fees, balance].map((value) => real(value ?? 0));
         expect(lines.some((line) => { const cells = line.split(';'); return cells.includes(String(n)) && wanted.every((cell) => cells.includes(cell)); }), `linha ${n}: ${wanted.join(' ')}`).toBe(true);
       }
     }
@@ -118,7 +121,8 @@ describe('the calculator PDF by language', () => {
   it('writes the footer and the amounts in the language of the page', async () => {
     const pt = pdfTextLines(await pdfOf('br-sac-price', 'pt')).join('\n');
     expect(pt).toMatch(/Página 1 de \d+/);
-    expect(pt).toContain('R$ 4.604,95');
+    // The first SAC payment with the R$ 150 of insurance and fees, as the result says it (review F6, a-2; DECISOES § 252).
+    expect(pt).toContain('R$ 4.754,95');
     expect(pt).not.toContain('?');
     const es = pdfTextLines(await pdfOf('mortgage-calculator', 'es')).join('\n');
     expect(es).toContain('$2,396.20');

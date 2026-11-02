@@ -88,7 +88,7 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
         {[[shared.exampleInputs, example.inputs], [shared.exampleResults, example.results]].map(([caption, rows]) => (
           <table class="fo-table">
             <caption>{caption as string}</caption>
-            <tbody>{(rows as [string, string][]).map(([label, value]) => <tr><th scope="row">{label}</th><td>{value}</td></tr>)}</tbody>
+            <tbody>{(rows as [string, string][]).map(([label, value]) => <tr><th scope="row">{label}</th><td class:list={[{ 'fo-example__whole': !value.includes(' ') }]}>{value}</td></tr>)}</tbody>
           </table>
         ))}
       </div>

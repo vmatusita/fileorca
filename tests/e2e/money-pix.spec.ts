@@ -64,3 +64,63 @@ test('the amounts are a radio group with a name, and the code has a name for scr
   await expect(page.locator('.fo-pix:visible code')).toHaveText(fixture.codes[1]!.code);
   await expect(page.locator('.fo-pix:visible .fo-sr')).toHaveText(`${pix.codeLabel}: `);
 });
+
+// Review F6 (c-1, f-1 and f-6; DECISOES § 245): the four amounts stay inside the rail of the OptionGroup, and the copy
+// button inside its column and the card, at the phone widths.
+test('the amounts stay in their rail and the copy button in its column, from 320 to 390px', async ({ page }) => {
+  for (const width of [320, 360, 375, 390]) {
+    await page.setViewportSize({ width, height: 740 });
+    await page.goto('/pt/apoie/');
+    await page.waitForLoadState('load');
+    const boxes = await page.evaluate(() => {
+      const right = (el: Element | null) => (el ? el.getBoundingClientRect().right : NaN);
+      const options = [...document.querySelectorAll('.fo-pix-card .fo-seg__opt')];
+      const side = document.querySelector('.fo-pix:not([hidden]) .fo-pix__side');
+      const shown = [...document.querySelectorAll<HTMLElement>('.fo-pix')].find((block) => block.offsetParent !== null);
+      return {
+        rail: right(document.querySelector('.fo-pix-card .fo-seg')),
+        last: Math.max(...options.map(right)),
+        column: right(shown?.querySelector('.fo-pix__side') ?? side),
+        button: right(shown?.querySelector('[data-pix-copy]') ?? null),
+        card: right(document.querySelector('.fo-support')),
+        page: document.documentElement.scrollWidth,
+      };
+    });
+    expect(boxes.last, `${width}px: o último valor dentro do trilho`).toBeLessThanOrEqual(boxes.rail + 0.5);
+    expect(boxes.button, `${width}px: o botão dentro da coluna`).toBeLessThanOrEqual(boxes.column + 0.5);
+    expect(boxes.column, `${width}px: a coluna dentro do card`).toBeLessThanOrEqual(boxes.card + 0.5);
+    expect(boxes.page, `${width}px: a página não rola de lado`).toBeLessThanOrEqual(width);
+  }
+});
+
+// Review F6 (d-2, c-2 and d-3; DECISOES § 245): another amount clears the "copied" of the last code, and a copy the browser
+// refuses, or a browser with no clipboard, says how to copy by hand instead of saying nothing.
+test('another amount clears the status, and a refused copy says how to copy by hand', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.resolve() } });
+  });
+  await page.goto('/pt/apoie/');
+  await page.waitForLoadState('load');
+  await dismissCookies(page);
+  const status = page.locator('.fo-pix__status');
+  await page.locator('.fo-pix:visible').getByRole('button', { name: pix.copy }).click();
+  await expect(status).toHaveText(pix.copied);
+  await page.locator('.fo-pix-card .fo-seg__opt', { hasText: labelOf('10.00') }).click();
+  await expect(status).toHaveText('');
+
+  for (const clipboard of ['refuses', 'missing'] as const) {
+    const other = await page.context().newPage();
+    await other.addInitScript((kind) => {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: kind === 'missing' ? undefined : { writeText: () => Promise.reject(new Error('denied')) } });
+    }, clipboard);
+    const errors: string[] = [];
+    other.on('pageerror', (error) => errors.push(error.message));
+    await other.goto('/pt/apoie/');
+    await other.waitForLoadState('load');
+    await dismissCookies(other);
+    await other.locator('.fo-pix:visible').getByRole('button', { name: pix.copy }).click();
+    await expect(other.locator('.fo-pix__status'), clipboard).toHaveText(pix.copyFailed);
+    expect(errors, clipboard).toEqual([]);
+    await other.close();
+  }
+});

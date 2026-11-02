@@ -37,6 +37,7 @@ export default {
       interestSac: 'Juros no SAC',
       loan: 'Valor financiado',
       correction: 'Correção (TR)',
+      feesColumn: 'Seguros e taxas',
       correctionTotal: 'Correção pela TR (SAC / PRICE)',
       caption: 'Cronograma do SAC e da PRICE, por ano do contrato',
       compareLabel: 'SAC e PRICE lado a lado',

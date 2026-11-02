@@ -80,7 +80,8 @@ export default function ResultHero({ view, touched, cheer, splitName, money, per
   return (
     <section ref={section} class="fo-rhero fo-deep" aria-label={view.hero.label}>
       <p class="fo-rhero__label">{view.hero.label}</p>
-      <p class="fo-rhero__num">
+      {/* The length of the number sizes it to its card, so it never breaks in the middle (DECISOES § 246). */}
+      <p class="fo-rhero__num" style={`--fo-num-chars: ${[...view.hero.value].length}; --fo-num-unit: ${view.hero.unit ? 8 + [...view.hero.unit].length * 11 : 0}px`}>
         <Value text={view.hero.value} />
         {view.hero.unit && <small>{view.hero.unit}</small>}
       </p>

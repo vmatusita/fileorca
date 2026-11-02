@@ -230,3 +230,21 @@ test('the file words of pt and es differ from the English ones', () => {
     expect(IMAGE_PANEL_TEXTS[lang].files.zip).not.toBe(IMAGE_PANEL_TEXTS.en.files.zip);
   }
 });
+
+// Review F6 (f-2; DECISOES § 248): the "Image" way to sign, whose button has the longest label of the PDF tools, keeps the
+// page from scrolling sideways at 320px in the three languages ("Escolher a imagem da assinatura" went 19px past it).
+test('Sign PDF with an image to upload does not scroll sideways at 320px, in the three languages', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  for (const lang of ['en', ...LANGS] as const) {
+    const path = routeById('sign-pdf').paths[lang] ?? '';
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.setInputFiles('#fo-tool-root input[type="file"]', [pdfFile(`${MIXED}.pdf`)]);
+    await expect(page.locator('#fo-tool-root .fo-ready')).toBeVisible({ timeout: 30_000 });
+    const upload = (PDF_TOOL_TEXTS[lang]['sign-pdf'].panel as unknown as { options: { upload: string } }).options.upload;
+    await page.locator('#fo-tool-root .fo-seg__opt').filter({ hasText: upload }).first().click();
+    await expect(page.locator('#fo-tool-root .fo-sign__upload')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(320);
+  }
+});

@@ -31,6 +31,8 @@ export interface CalcFieldProps {
   error: string;
   /** The value passes the field it depends on: this text is shown while it does. */
   over?: string | undefined;
+  /** How the page writes decimals, added to the error when the text is not a number of its language. */
+  hint?: string | undefined;
   prefix?: string | undefined;
   suffix?: string | undefined;
   /** The "example" tag of a typed rate. */
@@ -41,7 +43,7 @@ export interface CalcFieldProps {
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, min, max, negative = false, value, onValue, lang, label, help, error, over, prefix, suffix, tag, half, unit } = props;
+  const { id, kind, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit } = props;
   const [draft, setDraft] = useState(() => display(kind, value, lang));
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -60,7 +62,10 @@ export default function CalcField(props: CalcFieldProps) {
     return parsed !== null && inRange({ min, max }, parsed) ? parsed : null;
   };
 
-  const message = wrong ? error : over;
+  // Text that is not a number of the page's language ("11.5" in Portuguese, "6,5" in Spanish) gets the range and how to
+  // write the decimals; a number out of the range gets the range alone (review F6, d-1; DECISOES § 251).
+  const unreadable = wrong && hint !== undefined && parseScaled(draft, lang, DECIMALS[kind], negative) === null;
+  const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
   const errorId = `${id}-error`;
   const helpId = `${id}-help`;
   const described = [message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');

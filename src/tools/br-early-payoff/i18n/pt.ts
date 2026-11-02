@@ -21,6 +21,8 @@ export default {
       placard: 'a menos de juros',
       sentence: 'Reduzindo o prazo, você termina {sooner} antes e deixa de pagar {savedShorter} de juros. Reduzindo a parcela, ela cai de {before} para {after}, e você deixa de pagar {savedLower}.',
       sentenceSac: 'Reduzindo o prazo, você termina {sooner} antes e deixa de pagar {savedShorter} de juros. Reduzindo a parcela, a próxima cai de {before} para {after}, e você deixa de pagar {savedLower}.',
+      sentenceSameTerm: 'Esse valor não chega a encurtar o prazo, mas você deixa de pagar {savedShorter} de juros. Reduzindo a parcela, ela cai de {before} para {after}, e você deixa de pagar {savedLower}.',
+      sentenceSacSameTerm: 'Esse valor não chega a encurtar o prazo, mas você deixa de pagar {savedShorter} de juros. Reduzindo a parcela, a próxima cai de {before} para {after}, e você deixa de pagar {savedLower}.',
       payoff: 'Com esse valor você quita o saldo inteiro e deixa de pagar {saved} de juros.',
       shorter: 'Reduzir o prazo',
       lower: 'Reduzir a parcela',
@@ -39,7 +41,7 @@ export default {
     premises: [
       'Os juros são a taxa efetiva ao mês do contrato, sobre o saldo de cada mês, arredondados ao centavo.',
       'O valor antecipado abate o saldo hoje, antes da próxima parcela, e os juros futuros incidem só sobre o que resta: é o desconto a valor presente pela taxa do contrato que a Resolução CMN nº 5.004/2022 manda usar, sem tarifa de liquidação.',
-      'Reduzir o prazo mantém a parcela (PRICE) ou a amortização (SAC) de hoje e termina antes. Reduzir a parcela mantém os meses que faltam e recalcula a parcela.',
+      'Reduzir o prazo mantém a parcela de hoje (PRICE) ou tira do prazo um mês para cada amortização de hoje que o valor antecipado cobre (SAC), e termina antes. Reduzir a parcela mantém os meses que faltam e recalcula a parcela.',
       'A parcela de hoje é a que o saldo, os juros e os meses que faltam dão. O contrato real pode ter seguros e taxas somados a ela, que não entram aqui.',
       'Vale para contratos com taxa prefixada. Financiamentos corrigidos pela TR ou por um índice seguem as regras do próprio contrato.',
     ],

@@ -134,6 +134,8 @@ export interface CalcSharedTexts {
   exportFailed: string;
   /** Shown while a field is wrong: the result stays the last one that worked. */
   stale: string;
+  /** Added to a field's error when what is typed is not a number of the page's language: how it writes decimals. */
+  decimalHint: string;
   nextLabel: string;
   scheduleHeading: string;
   showSchedule: string;

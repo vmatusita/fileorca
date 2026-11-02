@@ -217,6 +217,8 @@ export interface SupportPixTexts {
   copy: string;
   /** What the status region says after the copy. */
   copied: string;
+  /** What it says when the browser does not let the page copy (no clipboard, or the copy refused). */
+  copyFailed: string;
   /** The receiver, for the person to check: "Em nome de {name}". */
   receiver: string;
   /** The Pix is static: the site does not know who paid; refunds only through the Pix's own button. */

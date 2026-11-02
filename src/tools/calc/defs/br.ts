@@ -54,7 +54,14 @@ function problemView(label: string, problem: string, premises: string[]): CalcVi
  * Two or more schedules in one table, grouped by plan and loan year ("SAC · Ano 1"): the CSV and the PDF write the
  * group in the first column, and the schedule island draws each group as a year button (one table per page, F4).
  */
-function plansTable(plans: { name: string; rows: readonly (readonly number[])[] }[], s: CalcSharedTexts, caption: string, extraHead?: string): Table {
+function plansTable(
+  plans: { name: string; rows: readonly (readonly number[])[] }[],
+  s: CalcSharedTexts,
+  caption: string,
+  extraHead?: string,
+  /** Insurance and fees of every month (SAC × PRICE): in the payment, and in a column of their own (review F6, a-2; DECISOES § 252). */
+  fees?: { cents: number; head: string },
+): Table {
   const rows: Cell[][] = [];
   const groups: NonNullable<Table['groups']> = [];
   for (const plan of plans) {
@@ -62,13 +69,16 @@ function plansTable(plans: { name: string; rows: readonly (readonly number[])[] 
       const to = Math.min(from + 12, plan.rows.length);
       groups.push({ label: `${plan.name} · ${fmt(s.year, { n: year })}`, end: { cents: plan.rows[to - 1]![4]! }, from: rows.length, to: rows.length + (to - from) });
       for (const row of plan.rows.slice(from, to)) {
-        const cells: Cell[] = [{ text: String(row[0]) }, { cents: row[1]! }, { cents: row[3]! }, { cents: row[2]! }, { cents: row[4]! }];
+        const extra = fees && fees.cents > 0 ? fees.cents : 0;
+        const cells: Cell[] = [{ text: String(row[0]) }, { cents: row[1]! + extra }, { cents: row[3]! }, { cents: row[2]! }];
+        if (extra > 0) cells.push({ cents: extra });
+        cells.push({ cents: row[4]! });
         if (extraHead) cells.push({ cents: row[5] ?? 0 });
         rows.push(cells);
       }
     }
   }
-  const head = [s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance];
+  const head = [s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, ...(fees && fees.cents > 0 ? [fees.head] : []), s.columns.balance];
   return { caption, head: extraHead ? [...head, extraHead] : head, rows, groups };
 }
 
@@ -125,7 +135,11 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
       placard: { n: dollars(first(r.sac), ln), l: text(v, 'placard') },
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestSac'), cents: r.sac.totalInterest } },
       compare: { a: { name: text(v, 'sac'), rows: scenario(r.sac) }, b: { name: text(v, 'price'), rows: scenario(r.price) }, diff },
-      table: () => plansTable([{ name: text(v, 'sac'), rows: r.sac.rows }, { name: text(v, 'price'), rows: r.price.rows }], s, text(v, 'caption'), text(v, 'correction')),
+      table: () =>
+        plansTable([{ name: text(v, 'sac'), rows: r.sac.rows }, { name: text(v, 'price'), rows: r.price.rows }], s, text(v, 'caption'), text(v, 'correction'), {
+          cents: fees,
+          head: text(v, 'feesColumn'),
+        }),
       summary: [
         [text(v, 'loan'), cash(r.loan, ln)],
         [`${text(v, 'sac')}: ${text(v, 'first')}`, cash(first(r.sac), ln)],
@@ -230,7 +244,8 @@ export const brEarlyPayoffDef: CalcDef<EarlyPayoffInput, EarlyPayoffResult> = {
     const sentence: Part[] =
       r.left === 0
         ? say(text(v, 'payoff'), { saved: dollars(r.shorter.interestSaved, ln) })
-        : say(text(v, sac ? 'sentenceSac' : 'sentence'), {
+        : // A prepayment below one amortization does not shorten the term (review F6, g-1): the sentence says so.
+          say(text(v, `${sac ? 'sentenceSac' : 'sentence'}${r.shorter.monthsSaved > 0 ? '' : 'SameTerm'}`), {
             sooner: duration(r.shorter.monthsSaved, s),
             savedShorter: dollars(r.shorter.interestSaved, ln),
             before: cash(r.base.firstPayment, ln),

@@ -69,7 +69,7 @@ const anchor = (item: PackageLicense) => `pkg-${item.name.replace(/[^a-z0-9]+/gi
                     <details>
                       <summary>{entry.label ? `${t.showTextOf} ${entry.label}` : t.showText}</summary>
                       {entry.source && <p class="fo-muted">{t.copiedFrom} <a href={entry.source} rel="noopener">{entry.source.replace(/^https:\/\//, '')}</a></p>}
-                      <pre tabindex="0">{entry.text}</pre>
+                      <pre tabindex="0" lang={lang === 'en' ? undefined : 'en'}>{entry.text}</pre>
                     </details>
                   ))}
                 </td>
