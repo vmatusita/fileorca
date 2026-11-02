@@ -15,6 +15,7 @@ import { BR_CALC_PAGES, CALC_PAGES, LIFE_CALC_PAGES } from '../../src/tools/calc
 import { chooseImage, downloadBytes, generatedJpeg } from './lib/page.ts';
 import { choosePdfs, filesOf, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { pngPixels } from './lib/png.ts';
+import { violationIds } from './lib/axe.ts';
 import { WARM_SELECTOR } from '../../src/platform/sw-register.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
 import { allKept, cacheKeys, controlled, kept, offline, online, reloadOffline, visit } from './lib/sw.ts';
@@ -154,6 +155,7 @@ test('a page never visited shows the offline page of its language, with the buoy
   const hrefs = await saved.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
   expect(hrefs).toEqual(expect.arrayContaining(['/pt/', '/compress-image/']));
   expect(hrefs.some((href) => href?.includes('offline') || href?.includes('abrir'))).toBe(false);
+  expect(await violationIds(page), 'axe on the offline page with its list').toEqual([]);
   // An English path gets the English page, kept when the worker installed on an English page.
   await page.goto(`${server.origin}/resize-image/`);
   await expect(page.locator('h1')).toHaveText(offlineEn.h1);
@@ -174,6 +176,7 @@ test('a tool kept without its engine says so offline, in buoy, and works again w
   await expect(zone.locator('[role="status"]')).toContainText(imageTexts.errors.offline);
   await expect(zone.locator('[data-oli="buoy"]')).toHaveCount(1);
   await expect(page.locator('#fo-tool-root')).not.toContainText('reload the page');
+  expect(await violationIds(page), 'axe on the offline line of the tool').toEqual([]);
 
   // With the network back, the page is reloaded as the load line has always asked (a failed import() is not tried again
   // by every browser): the tool then loads its engine and works. In the WebKit of Playwright, setOffline(false) does not

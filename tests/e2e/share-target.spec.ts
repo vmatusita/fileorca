@@ -9,6 +9,7 @@ import pt from '../../src/i18n/pt/open-with.ts';
 import { fmt } from '../../src/i18n/format.ts';
 import { INBOX_CACHE, INBOX_TOOL_KEY } from '../../src/sw/shared.ts';
 import { downloadBytes, generatedJpeg } from './lib/page.ts';
+import { violationIds } from './lib/axe.ts';
 import { filesOf, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
 import { controlled, share, visit } from './lib/sw.ts';
@@ -49,6 +50,7 @@ test('an image and a PDF shared: the files, the tools that take them, and Compre
   await expect(page.locator('[data-tool="compress-image"] [data-takes]')).toHaveText(fmt(openWith.takesSome, { count: 1, total: 2 }));
   await expect(page.locator('[data-tool="split-pdf"] [data-takes]')).toHaveText(fmt(openWith.takesSome, { count: 1, total: 2 }));
   await expect(page.locator('[data-empty]').first()).toBeHidden();
+  expect(await violationIds(page), 'axe on the page with files').toEqual([]);
 
   await page.locator('[data-tool="compress-image"] a').click();
   await page.waitForURL('**/compress-image/');
