@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 import {
   cacheKey,
   cachesToDelete,
-  inboxExpired,
   isCacheable,
   isListedPage,
   langOfPath,
@@ -17,7 +16,7 @@ import {
   type RequestLike,
   type SwConfig,
 } from '../../src/sw/logic.ts';
-import { INBOX_CACHE, INBOX_TTL_MS, pagesCacheName } from '../../src/sw/shared.ts';
+import { INBOX_CACHE, INBOX_TTL_MS, inboxExpired, pagesCacheName } from '../../src/sw/shared.ts';
 import { joinable, offlineAssets, swScript } from '../../src/sw/build.ts';
 
 const ORIGIN = 'https://fileorca.com';
