@@ -239,6 +239,12 @@ export default function PdfPanel(props: PdfPanelData) {
     afterReading();
   }
 
+  /** "2 PDFs ready" under the action, or what Merge still needs; the same words on screen and in the status. */
+  function readyCount(count: number): string {
+    if (mode === 'merge' && count < 2) return (texts.options as { needMore?: string }).needMore ?? '';
+    return count === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count });
+  }
+
   function afterReading(): void {
     const ready = m.items.filter(usable);
     if (ready.length === 0) {
@@ -254,7 +260,10 @@ export default function PdfPanel(props: PdfPanelData) {
     if (runMode === 'auto') void run(false);
     else {
       m.focusAction = true;
-      m.announce = '';
+      // The focus goes to the action, so the status says what the reading found: the files ready, and the ones refused
+      // (review F4-F7 d-1; DECISOES § 305).
+      const refused = m.items.length - ready.length;
+      m.announce = refused > 0 ? fmt(t.errors.some, { count: refused }) : readyCount(ready.length);
       render();
     }
   }
@@ -953,7 +962,7 @@ export default function PdfPanel(props: PdfPanelData) {
         {one && only ? (
           <FileCard name={nameOf(only)} category="pdf" labels={{ to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove }} state="done" before={fileSize(only.file.size, lang)} note={pagesLabel(only.info)} />
         ) : (
-          <p class="fo-ready__count">{mode === 'merge' && ready.length < 2 ? (texts.options as { needMore?: string }).needMore : ready.length === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count: ready.length })}</p>
+          <p class="fo-ready__count">{readyCount(ready.length)}</p>
         )}
         <div class="fo-result__actions">
           {texts.action && (
