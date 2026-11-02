@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Worker } from '@playwright/test';
-import { ROUTES } from '../../src/i18n/routes.ts';
+import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
 import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch } from './lib/page.ts';
@@ -175,8 +175,11 @@ test('the tool works in Portuguese and Spanish too', async ({ page }) => {
     await dismissCookies(page);
     await page.setInputFiles('input[type="file"]', GPS_PHOTO);
     await expect(page.locator('.fo-result')).toContainText(done, { timeout: 30_000 });
-    // The other image tools exist only in English, so the only chip leads to the home of the language (DECISOES § 27).
-    await expect(page.locator('nav.fo-next a.fo-chip')).toHaveAttribute('href', path.startsWith('/pt/') ? '/pt/' : '/es/');
+    // F6: the other image tools exist in Portuguese and Spanish too, so the chips are the ones of the English page, each
+    // leading to the page of the same language (before, the only chip led to the home of the language; DECISOES § 27 and § 233).
+    const lang = path.startsWith('/pt/') ? 'pt' : 'es';
+    const hrefs = await page.locator('nav.fo-next a.fo-chip').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+    expect(hrefs).toEqual(IMAGE_PAGES['compress-image'].next.map((id) => routeById(id).paths[lang]));
   }
 });
 

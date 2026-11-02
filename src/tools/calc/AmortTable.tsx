@@ -18,6 +18,8 @@ export default function AmortTable({ table, cell, chevron }: { table: Table; cel
   );
   const body = table.groups
     ? table.groups.flatMap((group, index) => {
+        // The balance at the end of the year goes under the balance column (the SAC × PRICE has columns after it).
+        const end = table.endColumn ?? table.head.length - 1;
         const expanded = open.has(index);
         const toggle = () =>
           setOpen((current) => {
@@ -28,13 +30,14 @@ export default function AmortTable({ table, cell, chevron }: { table: Table; cel
           });
         return [
           <tr class="fo-amort__year" key={`y${index}`}>
-            <td colSpan={table.head.length - 1}>
+            <td colSpan={end}>
               <button type="button" aria-expanded={expanded} onClick={toggle}>
                 <Icon inner={chevron} />
                 {group.label}
               </button>
             </td>
             <td>{cell(group.end)}</td>
+            {end < table.head.length - 1 && <td colSpan={table.head.length - 1 - end} />}
           </tr>,
           ...(expanded ? table.rows.slice(group.from, group.to).map((cells, offset) => row(cells, group.from + offset)) : []),
         ];

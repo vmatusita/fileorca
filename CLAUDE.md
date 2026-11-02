@@ -374,3 +374,41 @@ Pegadinhas que a F5b achou:
   - nada generaliza além da amostra (a lista `GENERAL`: "usually", "often", "most PDFs", "usual", "almost free", "real PDFs"…);
   - a data da medida não vai para as fontes, que têm a própria data de leitura.
 - **No kit, toda frase técnica em inglês contém uma frase provada da seção "Provas"** (`launch-kit.test.ts`, § 205). Frase nova sobre envio, offline, navegador, anúncio, Analytics, cookie, conta, lote ou memória precisa de prova, ou sai.
+
+## F6: português e espanhol
+
+Comandos novos:
+
+| Comando | O que faz |
+| --- | --- |
+| `uv run --no-project --python 3.13 python -I scripts/oracle/pix.py` | Regera `fixtures/pix.json` (o exemplo do manual do BC e os quatro códigos do Pix), só com a biblioteca padrão; `--check` compara sem gravar |
+| `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python -I scripts/oracle/calc_br.py` | Regera `fixtures/calc/br-*.json`, as 8 calculadoras brasileiras (`--check`, `--only <id>`). O `calc.py` e as 18 fixtures em inglês não mudam |
+
+Como uma página ganha versão em pt e es:
+
+1. Imagem e PDF: o caminho entra na tabela `TRANSLATED_PATHS` de `src/i18n/routes.ts` (slug sem acento, glossário), o texto em `src/tools/<slug>/i18n/{pt,es}.ts` (o mesmo tipo do inglês, as mesmas chaves e `{placeholders}`), o cartão em `src/i18n/{pt,es}/common.ts` e o arquivo `src/pages/<lang>/<slug>/index.astro` com o molde da página inglesa e `lang`. O `CommonTexts` exige todas as ferramentas nos três idiomas.
+2. Dinheiro em espanhol: o bloco `es` na linha do `CALC_PAGES` (caminho, `file`, `next` e `related` só entre páginas do espanhol). A definição, o motor e as fixtures são os do inglês.
+3. Uma calculadora brasileira: o caso no `scripts/oracle/calc_br.py` e as fixtures num commit antes de tudo; o id `br-*` em `BR_CALC_IDS` e `BR_CALC_PAGES`, em `ENGINES`, em `DEFS` (`src/tools/calc/defs/br.ts`) e em `CALC_EVENT_TOOLS`; o texto em `src/tools/br-<slug>/i18n/pt.ts`; a rota sai de `brMoneyRoutes()`.
+
+Formato de cada idioma (docs/i18n/, DECISOES § 213 a § 223):
+
+- inglês e espanhol escrevem "1,234.56" e "2.4 MB"; o espanhol põe espaço sem quebra antes do "%" ("68 %"); português, "1.234,56", "2,4 MB" e "R$ 1.234,56". Datas por extenso pelo `src/i18n/dates.ts`. Nada de `Intl` no que a página mostra.
+- CSV: vírgula e ponto em inglês e espanhol; ponto e vírgula e vírgula decimal em português; BOM nos três. PDF do relatório em Letter (en, es) e A4 (pt, `paper: 'a4'`).
+- O nome do arquivo baixado vem dos textos (`panel.suffix`, `files`), e as palavras da numeração do PDF também (`pageWord`, `ofWord`); em inglês, os bytes de antes.
+
+O Pix: a chave aleatória está em `src/platform/pix.ts` (uma linha, copiada do `docs/F0-SAIDA.md`). O gerador reproduz o exemplo do manual e os quatro códigos do `fixtures/pix.json` (`tests/unit/pix.test.ts`); o QR é desenhado no build com o `qrcode` e lido de volta com o `jsqr` em cada SVG do `dist/pt/apoie/` (`tests/unit/pix-qr.test.ts`). A troca de valor é CSS (`:has(:checked)`) e o copiar é um script inline; o "Copiar código" manda o `donate_click` com o lugar `pix`.
+
+Pegadinhas que a F6 achou:
+
+- **O Vitest 5 guarda um cache de módulos em `node_modules/.vitest-cache`**, pela chave do conteúdo do arquivo. Um `import.meta.glob` que deveria ver arquivos novos (as pastas `br-*`) fica com o resultado velho enquanto o arquivo que chama o glob não muda. Se um teste diz que um texto "não existe" e o build acha, apague `node_modules/.vitest-cache` e rode de novo.
+- **No Node, `String.replace(a, b)` interpreta `$'`, `$&` e `$$` em `b`.** Um script que troca texto com "R$ " no meio duplicou metade de um arquivo de teste. Use `s.replace(a, () => b)` ou `split(a).join(b)`.
+- **No Git Bash, argumento que começa com "/" vira caminho do Windows** ("/pt/apoie/" virou "C:/Program Files/Git/pt/apoie/"). Para passar caminhos de URL a um script, use `MSYS_NO_PATHCONV=1`.
+- **O `lint:texto` do português reprova nome de opção depois de vírgula** ("Espaço pega a linha, ... e Espaço solta" deu `UPPERCASE_AFTER_COMMA`) e "não entram imposto" (`NON_IMPERSONAL_VERBS`). Ponha o nome entre aspas ou escreva "a tecla Espaço", "a opção Clara", "ficam de fora".
+- **O CFPB tirou do ar o `consumerfinance.gov/es/` em julho de 2026**: toda URL dali redireciona para o inglês. As páginas em espanhol citam os PDFs em espanhol de `files.consumerfinance.gov` e, onde não há, a página em inglês com "(en inglés)".
+- **Os moldes de PDF e de dinheiro e os hubs recebem `lang` com o padrão `'en'`**, porque testes antigos os renderizam sem idioma. `.map(cardOf)` passa o índice como segundo argumento: escreva `.map((id) => cardOf(id, lang))`.
+- **O número do resultado no celular** (§ 124) ficou com folga zero numa página em português (o veículo, a 740 px). Português e espanhol são mais longos: meça a 360 × 740 nos dois navegadores antes de escrever o lead e os rótulos de meia largura.
+- **Um rótulo com a etiqueta "exemplo" numa meia coluna** tem de caber a 360 px (palavra mais longa + 12 px + 72 px da etiqueta ≤ 158 px). A 320 px, a etiqueta desce de linha (`flex-wrap`, § 234); a 360 px isso empurraria o resultado para baixo da dobra. "Parcelamento" não coube; "Parcelado" cabe.
+- **Teste de pt e es no orçamento vai no `i18n-budgets.spec.ts`,** que cai entre o `design.spec.ts` e a matriz de imagens na ordem dos nomes. Dentro do `budgets.spec.ts`, os testes novos tinham levado os dois para a mesma parte do WebKit (§ 233). As medidas do orçamento estão em `tests/e2e/lib/budgets.ts`, e o passeio dos estados de PDF (`walkPdfTool`) recebe `lang`.
+- **O `gate:seo` pede de 120 a 160 caracteres na descrição** das páginas de imagem e de PDF em pt e es (as outras, de 50 a 170). Tradução fica mais longa: rode o portão depois de mudar uma descrição.
+- **Um `fill` logo depois de soltar um PDF** corria com o painel, que leva o foco ao botão da ação um quadro depois de mostrar as opções (§ 240). O painel agora deixa o foco num campo de texto onde ele já está. Um teste que precisa do foco num campo assim que ele aparece pode focá-lo por um `MutationObserver` na página, antes dos efeitos da ilha.
+- **O `.github/` não mudou,** mas com 1.038 testes por navegador a parte 1 do Chromium (o `a11y` inteiro) chegou a 764 s e a 3 a 711 s no CI, acima do alvo de 700 s (§ 243). A próxima run que somar páginas divide o Chromium em 4 partes primeiro. A estimativa pelo par em inglês errou para menos: os testes de pt e es custam mais no runner. Antes de somar testes, rode o `--list` das partes e compare com os tempos do último CI (`gh run view <id> --log`).

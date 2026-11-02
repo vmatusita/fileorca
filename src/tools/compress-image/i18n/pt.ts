@@ -2,8 +2,8 @@ import type { CompressOptionsTexts, ImageToolTexts } from '../../../i18n/types.t
 
 // Blocos da página Comprimir imagem (data-content: how, specs, faq, privacy, related) e os textos do painel
 // que a ilha compartilhada mostra. As linhas de especificação dizem o que o motor faz de verdade
-// (src/engine/image/): se a qualidade ou os codificadores mudarem lá, mude aqui. Só esta ferramenta existe em
-// português; a tabela de presets é só da página em inglês.
+// (src/engine/image/): se a qualidade ou os codificadores mudarem lá, mude aqui. Desde a F6 todas as ferramentas
+// de imagem e os presets existem em português, então a página também mostra a tabela dos presets.
 export default {
   title: 'Comprimir imagem online, grátis, sem upload',
   description:
@@ -29,8 +29,13 @@ export default {
       ['Lote', 'Sem limite de imagens. Várias imagens são baixadas juntas num só ZIP.'],
       ['Já está pequeno', 'Se a cópia nova não ficar menor, você recebe o original de volta, sem os metadados da foto.'],
       ['Metadados da foto', 'Modelo da câmera, data e localização GPS saem de todos os arquivos.'],
-      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a HEIC to JPG (ferramenta em inglês). Arquivos AVIF não são aceitos.'],
+      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a ferramenta HEIC para JPG. Arquivos AVIF não são aceitos.'],
     ],
+  },
+  presets: {
+    heading: 'Comprimir para um tamanho certo',
+    caption: 'Ajustes prontos da Comprimir imagem e o que cada um faz',
+    head: ['Ajuste pronto', 'O que faz'],
   },
   faqHeading: 'Perguntas',
   faq: [
@@ -60,13 +65,13 @@ export default {
     },
     {
       q: 'Posso comprimir uma foto do iPhone em HEIC?',
-      a: 'Aqui não: a Comprimir imagem aceita JPG, PNG e WebP. Primeiro transforme o HEIC em JPG com a HEIC to JPG, que está em inglês, e depois comprima o JPG se quiser que ele fique menor.',
+      a: 'Aqui não: a Comprimir imagem aceita JPG, PNG e WebP. Primeiro transforme o HEIC em JPG com a ferramenta HEIC para JPG, e depois comprima o JPG se quiser que ele fique menor.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
     'As imagens são processadas no seu aparelho e nunca são enviadas a um servidor. Cada cópia salva também deixa de fora os metadados da foto, inclusive a localização GPS.',
-  relatedHeading: 'Mais ferramentas',
+  relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',
     progressLabel: 'Comprimindo as imagens',

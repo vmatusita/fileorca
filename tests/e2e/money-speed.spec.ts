@@ -16,6 +16,13 @@ const CASES = [
   { name: 'mortgage with extra payments', path: '/mortgage-calculator/extra-payments/', field: '#fo-calc-em', base: '200', debts: 0 },
   // Review F4 (COR-1): APY into APR takes a 365th root for daily compounding; it cost 22 ms a key press.
   { name: 'APY into APR, daily', path: '/apr-to-apy-calculator/#v=1&dir=apy-to-apr&c=365', field: '#fo-calc-r', base: '5.25', debts: 0 },
+  // F6 (decision 9): the heaviest Brazilian ones. SAC × PRICE builds two schedules of 360 months with the 30-digit
+  // monthly rate; the vehicle loan finds the CET by bisection; rent or buy runs 120 months of two paths with a SAC loan.
+  { name: 'SAC × PRICE', path: '/pt/simulador-sac-price/', field: '#fo-calc-p', base: '500000', debts: 0 },
+  // Review F6 (e-1): with a TR the PRICE payment is worked out again every month; at 420 months it cost 58 ms a key press.
+  { name: 'SAC × PRICE with a TR, 420 months', path: '/pt/simulador-sac-price/#v=1&n=420&tr=1000', field: '#fo-calc-p', base: '500000', debts: 0 },
+  { name: 'vehicle loan with the CET', path: '/pt/simulador-financiamento-veiculo/', field: '#fo-calc-p', base: '80000', debts: 0 },
+  { name: 'rent or buy in Brazil', path: '/pt/alugar-ou-comprar/', field: '#fo-calc-al', base: '2500', debts: 0 },
 ] as const;
 
 /** The texts a person makes with 30 presses: Backspace on the last digit, then a new digit, and again. */

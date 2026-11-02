@@ -1,15 +1,21 @@
 // Every text of the site, per language. A language that misses a file or a key fails `pnpm tipos`.
-// The texts of the image tools and presets are in src/tools/image/texts.ts: a tool that exists only in
-// English has no entry in pt or es.
+// The texts of the image tools and presets are in src/tools/image/texts.ts, those of the PDF tools in
+// src/tools/pdf/texts.ts and those of the calculators next to each calculator.
 import type { Lang } from './routes.ts';
 import type {
   AboutTexts,
   CommonTexts,
   ContactTexts,
+  EnCommonTexts,
+  EsCommonTexts,
   HomeTexts,
+  ImageToolsTexts,
   LegalTexts,
   LicensesTexts,
+  MoneyHubTexts,
   NotFoundTexts,
+  PdfToolsTexts,
+  PtCommonTexts,
   SupportTexts,
 } from './types.ts';
 import enCommon from './en/common.ts';
@@ -39,9 +45,22 @@ import esSupport from './es/support.ts';
 import enNotFound from './en/not-found.ts';
 import ptNotFound from './pt/not-found.ts';
 import esNotFound from './es/not-found.ts';
+import enImageTools from './en/image-tools.ts';
+import ptImageTools from './pt/image-tools.ts';
+import esImageTools from './es/image-tools.ts';
+import enPdfTools from './en/pdf-tools.ts';
+import ptPdfTools from './pt/pdf-tools.ts';
+import esPdfTools from './es/pdf-tools.ts';
+import enMoney from './en/money-calculators.ts';
+import ptMoney from './pt/money-calculators.ts';
+import esMoney from './es/money-calculators.ts';
 
 export interface LangTexts {
   common: CommonTexts;
+  'image-tools': ImageToolsTexts;
+  'pdf-tools': PdfToolsTexts;
+  /** The money hub of the language: the English hub, its Spanish version, the Brazilian hub in Portuguese. */
+  'money-calculators': MoneyHubTexts;
   home: HomeTexts;
   privacy: LegalTexts;
   terms: LegalTexts;
@@ -54,15 +73,15 @@ export interface LangTexts {
 
 export const TEXTS: Record<Lang, LangTexts> = {
   en: {
-    common: enCommon, home: enHome, privacy: enPrivacy, terms: enTerms, about: enAbout, contact: enContact,
+    common: enCommon satisfies EnCommonTexts, 'image-tools': enImageTools, 'pdf-tools': enPdfTools, 'money-calculators': enMoney, home: enHome, privacy: enPrivacy, terms: enTerms, about: enAbout, contact: enContact,
     licenses: enLicenses, support: enSupport, 'not-found': enNotFound,
   },
   pt: {
-    common: ptCommon, home: ptHome, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
+    common: ptCommon satisfies PtCommonTexts, 'image-tools': ptImageTools, 'pdf-tools': ptPdfTools, 'money-calculators': ptMoney, home: ptHome, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
     licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound,
   },
   es: {
-    common: esCommon, home: esHome, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
+    common: esCommon satisfies EsCommonTexts, 'image-tools': esImageTools, 'pdf-tools': esPdfTools, 'money-calculators': esMoney, home: esHome, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
     licenses: esLicenses, support: esSupport, 'not-found': esNotFound,
   },
 };

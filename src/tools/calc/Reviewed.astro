@@ -1,12 +1,21 @@
 ---
 // The "Reviewed by" line of every money page (PLANO "Confiança em dinheiro e saúde"): the author, the date
-// of the review and the date of first publication, as <time datetime> (gate:dinheiro-saude, "reviewed").
+// of the review and the date of first publication, as <time datetime> (gate:dinheiro-saude, "reviewed"), in the
+// language of the page (the Spanish and Brazilian pages were born in the F6).
+import type { Lang } from '../../i18n/routes.ts';
 import { AUTHOR } from '../../platform/site.ts';
-import { FIRST_PUBLISHED, REVIEWED, SHARED, longDate } from './page.ts';
+import { FIRST_PUBLISHED_ON, REVIEWED_ON, SHARED_BY_LANG, longDate } from './page.ts';
 
-const [byBefore, byAfter = ''] = SHARED.page.reviewed.split('{date}');
-const [firstBefore, firstAfter = ''] = SHARED.page.firstPublished.split('{date}');
+interface Props {
+  lang?: Lang;
+}
+const { lang = 'en' } = Astro.props;
+const shared = SHARED_BY_LANG[lang].page;
+const reviewed = REVIEWED_ON[lang];
+const first = FIRST_PUBLISHED_ON[lang];
+const [byBefore, byAfter = ''] = shared.reviewed.split('{date}');
+const [firstBefore, firstAfter = ''] = shared.firstPublished.split('{date}');
 ---
 <p class="fo-reviewed" data-ymyl="reviewed">
-  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{`${byAfter} `}{firstBefore}<time datetime={FIRST_PUBLISHED}>{longDate(FIRST_PUBLISHED)}</time>{firstAfter}
+  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={reviewed}>{longDate(reviewed, lang)}</time>{`${byAfter} `}{firstBefore}<time datetime={first}>{longDate(first, lang)}</time>{firstAfter}
 </p>

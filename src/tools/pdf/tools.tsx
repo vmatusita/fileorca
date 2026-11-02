@@ -348,6 +348,9 @@ interface NumbersState {
   format: NumberFormat;
   start: number;
   skipFirst: boolean;
+  /** The words of the page's language, set by `start`. */
+  page?: string;
+  of?: string;
 }
 
 function NumbersOptions({ state, update, texts }: PdfOptionsProps<NumbersState, NumbersTexts>) {
@@ -399,6 +402,8 @@ const numbers: PdfToolDef<NumbersState, NumbersTexts> = {
   initial: { position: 'bottom-center', format: 'n', start: 1, skipFirst: false },
   success: 'numbered',
   warm: [],
+  // The words of the numbers come from the page (F6, decision 4); the English ones give the bytes of before.
+  start: (texts) => ({ page: texts.pageWord, of: texts.ofWord }),
   operation: (state) => ({ kind: 'numbers', ...state }),
   Options: NumbersOptions,
 };

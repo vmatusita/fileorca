@@ -1,8 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
+import { ROUTES, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import ptSupport from '../../src/i18n/pt/support.ts';
+import ptCalcShared from '../../src/tools/calc/i18n/pt.ts';
+import esCalcShared from '../../src/tools/calc/i18n/es.ts';
+import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
@@ -294,4 +297,113 @@ test.describe('axe nos guias de arquivo com a ferramenta embutida no resultado, 
       expect(await violationsEverywhere(page)).toEqual([]);
     });
   }
+});
+
+// F6 (decision 9): the same states in Portuguese and Spanish, where the words are longer and other: every image tool and
+// preset with its result, every PDF tool walked through its states with the labels of the language, a calculator of each
+// language with a field in error, the cheer, the schedule open and "Link copied", and the Pix of /pt/apoie/ with an amount
+// chosen and its code copied. The pages at load are read by the page-by-page pass above (the route map lists them).
+const TRANSLATED = ['pt', 'es'] as const;
+const IMAGE_FILE: Partial<Record<ImagePageId, { fixture: string; mimeType: string }>> = {
+  'heic-to-jpg': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' },
+  'webp-to-jpg': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' },
+  'png-to-jpg': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' },
+};
+
+test.describe('axe nas ferramentas de imagem em pt e es com o resultado, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const lang of TRANSLATED) {
+    for (const id of Object.keys(IMAGE_PAGES) as ImagePageId[]) {
+      const path = routeById(id).paths[lang] ?? '';
+      test(`${path} with the result`, async ({ page }) => {
+        expect((await page.goto(path))?.status()).toBe(200);
+        await hydrated(page);
+        await dismissCookies(page);
+        const own = IMAGE_FILE[id];
+        const files: TestFile[] = own ? [{ name: own.fixture, mimeType: own.mimeType, buffer: readFileSync(resolve('fixtures/images', own.fixture)) }] : await jpegBatch(page, 1);
+        await chooseImages(page, files);
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        await animationsDone(page);
+        expect(await violationsEverywhere(page)).toEqual([]);
+      });
+    }
+  }
+});
+
+test.describe('axe nos estados das ferramentas de PDF em pt e es, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const lang of TRANSLATED) {
+    for (const id of PDF_TOOL_IDS) {
+      test(`${routeById(id).paths[lang] ?? ''}: at rest, with its options and with the result`, async ({ page }) => {
+        const found: string[] = [];
+        await walkPdfTool(
+          page,
+          id,
+          async (state, note) => {
+            if (!PDF_AXE_STATES.has(state)) return;
+            for (const violation of await violationsEverywhere(page)) found.push(`${state} (${note}): ${violation}`);
+          },
+          { hold: false, lang },
+        );
+        expect(found).toEqual([]);
+      });
+    }
+  }
+});
+
+test.describe('axe nos estados da calculadora em pt e es, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const [lang, id, rate, shared] of [
+    ['pt', 'br-sac-price', '11,5', ptCalcShared],
+    ['es', 'mortgage-calculator', '6.5', esCalcShared],
+  ] as const) {
+    test(`${routeById(id).paths[lang] ?? ''}: a field in error, the cheer, the open schedule and the link copied`, async ({ page }) => {
+      await page.addInitScript(() => {
+        const clipboard = navigator.clipboard;
+        if (clipboard) clipboard.writeText = async () => undefined;
+      });
+      expect((await page.goto(routeById(id).paths[lang] ?? ''))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      await page.locator('#fo-calc-p').fill('400000');
+      await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
+      await page.locator('#fo-calc-r').fill('99');
+      await expect(page.locator('#fo-calc-r-error')).toBeVisible();
+      await animationsDone(page);
+      expect(await violationsEverywhere(page), 'field in error and the cheer').toEqual([]);
+      await page.locator('#fo-calc-r').fill(rate);
+      await page.getByRole('button', { name: shared.island.showSchedule }).click();
+      await page.locator('#fo-calc-schedule tr.fo-amort__year').nth(1).getByRole('button').click();
+      await expect(page.locator('#fo-calc-schedule tbody tr:not(.fo-amort__year)').first()).toBeVisible();
+      await page.locator('.fo-export .fo-btn').nth(2).click();
+      await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText(shared.island.copied);
+      await animationsDone(page);
+      expect(await violationsEverywhere(page), 'schedule open and the link copied').toEqual([]);
+    });
+  }
+});
+
+test.describe('axe no Pix de /pt/apoie/, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('an amount chosen and its code copied', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.resolve() } });
+    });
+    expect((await page.goto('/pt/apoie/'))?.status()).toBe(200);
+    await page.waitForLoadState('load');
+    await dismissCookies(page);
+    const pix = ptSupport.pix;
+    if (!pix) throw new Error('the Portuguese support page has no Pix texts');
+    await page.locator('.fo-pix-card .fo-seg__opt', { hasText: pix.amount.replace('{amount}', '10') }).click();
+    const shown = page.locator('.fo-pix:visible');
+    await expect(shown).toHaveCount(1);
+    await shown.getByRole('button', { name: pix.copy }).click();
+    await expect(page.locator('.fo-pix__status')).toHaveText(pix.copied);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page)).toEqual([]);
+  });
 });

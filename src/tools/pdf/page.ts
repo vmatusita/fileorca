@@ -1,9 +1,9 @@
 // Build-time side of a PDF tool page (server only: never import this from an island). It turns the registry, the texts
 // and the route map into the data the page and the island need: the panel props written into data-props, the crumbs,
-// the next-step chips and the related grid. Links go only to pages that exist (DECISOES § 6): the PDF pages exist in
-// English only, and so do the image pages they point at.
-import { pathFor, routeById } from '../../i18n/routes.ts';
-import enCommon from '../../i18n/en/common.ts';
+// the next-step chips and the related grid, in the language of the page. Links go only to pages that exist in that
+// language (DECISOES § 6): the PDF pages and the image pages they point at exist in the three languages since the F6.
+import { pathFor, type Lang } from '../../i18n/routes.ts';
+import { TEXTS } from '../../i18n/texts.ts';
 import { ICONS } from '../../icons/icons.ts';
 import { buildAdsConfig } from '../../ads/config.ts';
 import { KOFI_URL } from '../../platform/site.ts';
@@ -20,16 +20,19 @@ const MAX_RELATED = 6;
 type Target = PdfToolId | ImageNeighbour;
 const isPdf = (id: Target): id is PdfToolId => id in PDF_PAGES;
 
-/** Name, one line and synonyms of a PDF tool or of the image page it points at. */
-export function blurbOf(id: Target): { name: string; description: string } {
-  return isPdf(id) ? enCommon.pdf[id] : enCommon.tools[id];
+/** Name, one line and synonyms of a PDF tool or of the image page it points at, in the language. */
+export function blurbOf(id: Target, lang: Lang = 'en'): { name: string; description: string } {
+  const common = TEXTS[lang].common;
+  return isPdf(id) ? common.pdf[id] : common.tools[id];
 }
 
 const iconOf = (id: Target) => (isPdf(id) ? PDF_PAGES[id].icon : IMAGE_PAGES[id].icon);
 const categoryOf = (id: Target): 'pdf' | 'image' => (isPdf(id) || id === 'image-to-pdf' ? 'pdf' : 'image');
 
-export function chipsFor(id: PdfToolId): PdfChip[] {
-  return PDF_PAGES[id].next.slice(0, MAX_CHIPS).map((target) => ({ href: pathFor(target, 'en'), name: blurbOf(target).name, target, icon: ICONS[iconOf(target)], category: categoryOf(target) }));
+export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
+  return PDF_PAGES[id].next
+    .slice(0, MAX_CHIPS)
+    .map((target) => ({ href: pathFor(target, lang), name: blurbOf(target, lang).name, target, icon: ICONS[iconOf(target)], category: categoryOf(target) }));
 }
 
 export interface PdfRelatedCard {
@@ -40,16 +43,20 @@ export interface PdfRelatedCard {
   category: 'image' | 'pdf';
 }
 
-export function relatedFor(id: PdfToolId): PdfRelatedCard[] {
-  return PDF_PAGES[id].related.slice(0, MAX_RELATED).map((target) => ({ href: pathFor(target, 'en'), name: blurbOf(target).name, description: blurbOf(target).description, icon: iconOf(target), category: categoryOf(target) }));
+export function relatedFor(id: PdfToolId, lang: Lang = 'en'): PdfRelatedCard[] {
+  return PDF_PAGES[id].related.slice(0, MAX_RELATED).map((target) => {
+    const blurb = blurbOf(target, lang);
+    return { href: pathFor(target, lang), name: blurb.name, description: blurb.description, icon: iconOf(target), category: categoryOf(target) };
+  });
 }
 
 /** Home › PDF tools › tool. */
-export function crumbsFor(id: PdfToolId): Crumb[] {
+export function crumbsFor(id: PdfToolId, lang: Lang = 'en'): Crumb[] {
+  const common = TEXTS[lang].common;
   return [
-    { name: enCommon.breadcrumb.home, path: homePath('en') },
-    { name: enCommon.pdfTools, path: pathFor(PDF_HUB_ID, 'en') },
-    { name: PDF_TOOL_TEXTS[id].h1, path: pathFor(id, 'en') },
+    { name: common.breadcrumb.home, path: homePath(lang) },
+    { name: common.pdfTools, path: pathFor(PDF_HUB_ID, lang) },
+    { name: PDF_TOOL_TEXTS[lang][id].h1, path: pathFor(id, lang) },
   ];
 }
 
@@ -60,26 +67,31 @@ function lightInk(): string {
   return entry.value.light;
 }
 
-export function panelData(id: PdfToolId): PdfPanelData {
+/** Where the coffee line of the result card leads: the Pix on the Portuguese support page, Ko-fi elsewhere. */
+export function coffeeHrefFor(lang: Lang): string {
+  return lang === 'pt' ? `${pathFor('support', 'pt')}#pix` : KOFI_URL;
+}
+
+export function panelData(id: PdfToolId, lang: Lang = 'en'): PdfPanelData {
   const def = PDF_PAGES[id];
-  const texts = PDF_TOOL_TEXTS[id];
-  const unlock = routeById('unlock-pdf');
+  const texts = PDF_TOOL_TEXTS[lang][id];
   return {
-    lang: 'en',
+    lang,
     page: id,
-    t: PDF_PANEL_TEXTS,
+    t: PDF_PANEL_TEXTS[lang],
     texts: texts.panel,
     files: def.files,
     run: def.run,
-    suffix: def.suffix,
-    chips: chipsFor(id),
+    suffix: texts.panel.suffix,
+    chips: chipsFor(id, lang),
     links: {
-      unlock: { href: unlock.paths.en ?? '/unlock-pdf/', name: enCommon.pdf['unlock-pdf'].name },
-      imageToPdf: { href: pathFor('image-to-pdf', 'en'), name: enCommon.tools['image-to-pdf'].name },
+      unlock: { href: pathFor('unlock-pdf', lang), name: blurbOf('unlock-pdf', lang).name },
+      imageToPdf: { href: pathFor('image-to-pdf', lang), name: blurbOf('image-to-pdf', lang).name },
     },
     icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload, reorder: ICONS.reorder },
     ink: lightInk(),
-    coffeeHref: KOFI_URL,
+    coffeeHref: coffeeHrefFor(lang),
     adsOn: buildAdsConfig().scriptEnabled,
   };
 }
+

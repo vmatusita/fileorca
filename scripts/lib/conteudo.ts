@@ -3,6 +3,9 @@
 // DECISOES § 58 and on). Pages mark each block with data-content="…" so the check does not depend on
 // wording, the same way data-ymyl works in scripts/lib/ymyl.ts. Pure functions over HTML strings,
 // returning problem strings in Portuguese; scripts/gates/conteudo.ts loops over dist/ and prints them.
+// F6 (decision 9): the rules that look for words (the privacy phrase of a calculator, the specs, privacy note and claims of
+// a PDF page and of the PDF hub) take the language of the page, with the words of docs/i18n/pt.md and es.md; English keeps
+// the lists of the F4 and the F5a as they were.
 import { relative } from 'node:path';
 import { parse, NodeType, type HTMLElement, type Node } from 'node-html-parser';
 import { DEFAULT_LANG, routeById, type Lang } from '../../src/i18n/routes.ts';
@@ -147,9 +150,21 @@ export function checkToolPage(html: string): string[] {
 export const CALC_BLOCKS = ['how', 'faq', 'privacy', 'related'] as const;
 /** The privacy note of a calculator says this, in so many words (prompt F4, decision 9). */
 export const CALC_PRIVACY_PHRASE = 'your numbers stay on your device';
+/**
+ * The same phrase in each language (prompt F6, decision 9): the `calcSeal` of src/i18n/<lang>/common.ts and the seal of
+ * the calculator texts, in the words of docs/i18n/pt.md and docs/i18n/es.md ("aparelho", "dispositivo"), lower case.
+ */
+export const CALC_PRIVACY_PHRASES: Record<Lang, string> = {
+  en: CALC_PRIVACY_PHRASE,
+  pt: 'seus números ficam no seu aparelho',
+  es: 'tus números se quedan en tu dispositivo',
+};
 
-/** Rule 1 for a calculator or calculator preset: its four blocks, and the privacy note says the numbers stay on the device. */
-export function checkCalcPage(html: string): string[] {
+/**
+ * Rule 1 for a calculator or calculator preset: its four blocks, and the privacy note says the numbers stay on the device,
+ * in the language of the page (English by default, as before the F6).
+ */
+export function checkCalcPage(html: string, lang: Lang = DEFAULT_LANG): string[] {
   const root = parsePage(html);
   const problems: string[] = [];
   for (const name of CALC_BLOCKS) {
@@ -157,8 +172,9 @@ export function checkCalcPage(html: string): string[] {
     if (blocks.length === 0) problems.push(`sem o bloco ${name} (data-content="${name}")`);
     else problems.push(...BLOCK_CHECKS[name](blocks));
   }
+  const phrase = CALC_PRIVACY_PHRASES[lang];
   const privacy = blocksOf(root, 'privacy').map(plainText).join(' ');
-  if (privacy && !privacy.includes(CALC_PRIVACY_PHRASE)) problems.push(`o bloco privacy não diz "${CALC_PRIVACY_PHRASE}"`);
+  if (privacy && !privacy.includes(phrase)) problems.push(`o bloco privacy não diz "${phrase}"`);
   return problems;
 }
 
@@ -186,10 +202,49 @@ export const CLAIMS: { label: string; pattern: RegExp }[] = [
   { label: 'tempo prometido', pattern: /\b(?:in|within|under|less than)\s+(?:just\s+)?\d+\s*(?:seconds?|secs?|ms|minutes?)\b/i },
 ];
 
-/** Claims found in a text, by label. */
-export function findClaims(text: string): string[] {
+/**
+ * Word boundaries that know accents: JavaScript's \b only sees ASCII letters, so "até" or "límite" would never end a
+ * word. `L` and `R` stand before and after a word in the Portuguese and Spanish rules below (with the `u` flag).
+ */
+const L = '(?<![\\p{L}\\p{N}])';
+const R = '(?![\\p{L}\\p{N}])';
+const words = (source: string): RegExp => new RegExp(source.replaceAll('<', L).replaceAll('>', R), 'iu');
+
+/**
+ * The same claims in Portuguese and Spanish (prompt F6, decision 9), with the labels of the English list. A superlative
+ * is the article, at most one noun and the word ("a melhor forma", "o compressor mais rápido", "la herramienta más
+ * rápida"): the comparative alone ("fica melhor", "abre mais rápido", "mais rápido que") is a plain sentence, as "better"
+ * and "faster" are in English. "Mais popular" and "más popular" are claims anywhere, as "most popular" is. The numbers
+ * tied to a promise follow the English rule word for word.
+ */
+export const CLAIMS_BY_LANG: Record<Lang, { label: string; pattern: RegExp }[]> = {
+  en: CLAIMS,
+  pt: [
+    { label: 'best', pattern: words('<(?:[oa]s?|d[oa]s?|n[oa]s?) melhor(?:es)?>') },
+    { label: '#1', pattern: words('#\\s?1>|<n[º°]\\s?1>|<n[úu]mero (?:um|1)>') },
+    { label: 'fastest', pattern: words('<(?:[oa]s?)(?:\\s+\\p{L}+)?\\s+mais r[áa]pid[oa]s?>(?!\\s+(?:que|do)>)') },
+    { label: 'most popular', pattern: words('<mais popular(?:es)?>|<(?:[oa]s?)(?:\\s+\\p{L}+)?\\s+mais (?:confi[áa]ve(?:l|is)|poderos[oa]s?|potentes?|precis[oa]s?)>|<(?:mais bem|melhor) avaliad[oa]s?>|<confiad[oa]s? por>') },
+    { label: 'economia medida', pattern: words('<(?:at[ée]|economiz[ae]\\w*|reduz\\w*|diminu[ií]\\w*|corta\\w*|encolhe\\w*|menor em)>[^.!?]{0,30}<\\d[\\d.,]*\\s*(?:%|x>|×|vezes>)') },
+    { label: 'ganho em %', pattern: words('<\\d[\\d.,]*\\s*(?:%|x|×)\\s*(?:menor(?:es)?|mais (?:leve|r[áa]pid[oa])s?|menos|mais|melhor(?:es)?)>') },
+    { label: 'número de usuários', pattern: words('<\\d[\\d.,]*\\s*(?:mil|milh[ãa]o|milh[õo]es|bilh[ãa]o|bilh[õo]es|k)\\+?\\s+(?:de\\s+)?(?:usu[áa]rios|pessoas|clientes|arquivos|pdfs|documentos|downloads)>') },
+    { label: 'tempo prometido', pattern: words('<(?:em|dentro de|em menos de|menos de)\\s+(?:apenas\\s+|s[óo]\\s+)?\\d+\\s*(?:segundos?|s|ms|minutos?)>') },
+  ],
+  es: [
+    { label: 'best', pattern: words('<(?:el|la|los|las|lo|del) mejor(?:es)?>') },
+    { label: '#1', pattern: words('#\\s?1>|<n\\.?[º°]\\s?1>|<n[úu]mero (?:uno|1)>') },
+    { label: 'fastest', pattern: words('<(?:el|la|los|las|lo)(?:\\s+\\p{L}+)?\\s+m[áa]s r[áa]pid[oa]s?>(?!\\s+que>)') },
+    { label: 'most popular', pattern: words('<m[áa]s popular(?:es)?>|<(?:el|la|los|las|lo)(?:\\s+\\p{L}+)?\\s+m[áa]s (?:confiables?|potentes?|poderos[oa]s?|precis[oa]s?)>|<mejor valorad[oa]s?>|<con la confianza de>') },
+    { label: 'economia medida', pattern: words('<(?:hasta|ahorra\\w*|reduce\\w*|reduc[ií]\\w*|disminu\\w*|recorta\\w*|m[áa]s pequeñ[oa] en)>[^.!?]{0,30}<\\d[\\d.,]*\\s*(?:%|x>|×|veces>)') },
+    { label: 'ganho em %', pattern: words('<\\d[\\d.,]*\\s*(?:%|x|×)\\s*(?:m[áa]s (?:pequeñ[oa]|liger[oa]|r[áa]pid[oa])s?|menos|m[áa]s|mejor(?:es)?)>') },
+    { label: 'número de usuários', pattern: words('<\\d[\\d.,]*\\s*(?:mil|mill[óo]n|millones|k)\\+?\\s+(?:de\\s+)?(?:usuarios|personas|clientes|archivos|pdf|documentos|descargas)>') },
+    { label: 'tempo prometido', pattern: words('<(?:en|dentro de|en menos de|menos de)\\s+(?:solo\\s+|apenas\\s+)?\\d+\\s*(?:segundos?|s|ms|minutos?)>') },
+  ],
+};
+
+/** Claims found in a text, by label, by the rules of its language (English by default, as before the F6). */
+export function findClaims(text: string, lang: Lang = DEFAULT_LANG): string[] {
   const flat = text.replace(/\s+/g, ' ');
-  return CLAIMS.filter(({ pattern }) => pattern.test(flat)).map(({ label }) => label);
+  return CLAIMS_BY_LANG[lang].filter(({ pattern }) => pattern.test(flat)).map(({ label }) => label);
 }
 
 /** What a PDF tool page must carry besides the five blocks. */
@@ -199,6 +254,8 @@ export interface PdfPageWant {
   /** The fixed text of the PrivacySeal. */
   seal: string;
   id: PdfToolId;
+  /** The language of the page, whose words the rules look for (F6); English when left out. */
+  lang?: Lang;
 }
 
 /** The tools whose result is images, not a PDF: what stays in a PDF (form, bookmarks, links) does not apply to them. */
@@ -270,6 +327,134 @@ export const PDF_SECRETS: Partial<Record<PdfToolId, RegExp>> = {
 const PRIVACY_DEVICE = /\b(?:your device|in your browser)\b/i;
 const PRIVACY_NOT_SENT = /\b(?:never|not|nothing|no)\b[^.]*\b(?:sent|uploaded|upload|server|leaves?)\b/i;
 
+/**
+ * The words the PDF rules look for, per language (prompt F6, decision 9). English is the F5a list, unchanged; Portuguese
+ * and Spanish say the same things in the words of docs/i18n/pt.md and docs/i18n/es.md ("aceita"/"acepta", "senha"/
+ * "contraseña", "aparelho"/"dispositivo", "enviar"/"subir"), with the accent-aware boundaries of `words()`. An English
+ * page read with the Portuguese or Spanish rules fails them: a page left in English is not a translation.
+ */
+export interface PdfLangRules {
+  /** The header of the specs row that says what the tool takes. */
+  takes: RegExp;
+  /** The specs state a limit. */
+  limit: RegExp;
+  /** What stays in the file: its form fields, its bookmarks and its links. */
+  kept: readonly { label: string; pattern: RegExp }[];
+  /** The modes of each tool, with a sample header in the language (the same tools and as many modes as in English). */
+  modes: Partial<Record<PdfToolId, readonly { mode: string; header: RegExp }[]>>;
+  /** The secret a privacy note names, for the tools that take one. */
+  secrets: Partial<Record<PdfToolId, RegExp>>;
+  /** Where the work happens, and that nothing is sent. */
+  device: RegExp;
+  notSent: RegExp;
+}
+
+export const PDF_RULES: Record<Lang, PdfLangRules> = {
+  en: { takes: SPEC_TAKES, limit: SPEC_LIMIT, kept: SPEC_KEPT, modes: PDF_MODES, secrets: PDF_SECRETS, device: PRIVACY_DEVICE, notSent: PRIVACY_NOT_SENT },
+  pt: {
+    takes: words('<aceit[ao]s?>|<recebe>|^arquivos$'),
+    limit: words('<(?:sem limite|limite|por vez|de cada vez|um de cada vez|no m[áa]ximo|pelo menos|no m[íi]nimo|grandes? demais|m[áa]ximo|quant[oa]s (?:você )?quiser)>|<(?:at[ée]|acima de|mais de) \\d|<\\d+ (?:a|até) \\d+>'),
+    kept: [
+      { label: 'formulário', pattern: words('<formul[áa]rios?>') },
+      { label: 'marcadores', pattern: words('<marcador(?:es)?>') },
+      { label: 'links', pattern: words('<links?>') },
+    ],
+    modes: {
+      'split-pdf': [
+        { mode: 'cada página', header: words('<(?:cada|toda) p[áa]gina>') },
+        { mode: 'intervalos de páginas', header: words('<intervalos?>') },
+        { mode: 'escolher páginas', header: words('<escolh') },
+      ],
+      'pdf-to-jpg': [
+        { mode: 'formato', header: words('<formatos?>') },
+        { mode: 'resolução', header: words('<resolu[çc][ãa]o>|<ppi>') },
+        { mode: 'páginas', header: words('^p[áa]ginas$') },
+      ],
+      'compress-pdf': [
+        { mode: 'sem perda', header: words('<sem perda>') },
+        { mode: 'recomendada', header: words('<recomendad[oa]>') },
+        { mode: 'forte', header: words('<forte>') },
+      ],
+      'rotate-pdf': [
+        { mode: 'todas as páginas', header: words('<todas as p[áa]ginas>') },
+        { mode: 'página por página', header: words('<p[áa]gina por p[áa]gina>') },
+      ],
+      'add-page-numbers-to-pdf': [
+        { mode: 'posição', header: words('<posi[çc][ãa]o>') },
+        { mode: 'formato', header: words('<formatos?>') },
+      ],
+      'sign-pdf': [
+        { mode: 'desenhar', header: words('<desenh') },
+        { mode: 'imagem', header: words('<imagem>|<envi') },
+        { mode: 'digitar', header: words('<digit') },
+      ],
+      'unlock-pdf': [
+        { mode: 'só restrições', header: words('<restri[çc]') },
+        { mode: 'senha para abrir', header: words('<senha>') },
+      ],
+      'watermark-pdf': [
+        { mode: 'tamanho', header: words('<tamanho>') },
+        { mode: 'opacidade', header: words('<opacidade>') },
+        { mode: 'direção', header: words('<dire[çc][ãa]o>') },
+      ],
+    },
+    secrets: { 'protect-pdf': /\bsenha\b/i, 'unlock-pdf': /\bsenha\b/i, 'sign-pdf': /\bassinatura\b/i },
+    device: words('<(?:seu aparelho|do aparelho|no aparelho|seu navegador|no navegador)>'),
+    notSent: words('<(?:nunca|n[ãa]o|nada|nem|sem|nenhum|nenhuma)>[^.]*<(?:enviad[oa]s?|envia|enviamos|enviar|upload|servidor|sai|saem)>'),
+  },
+  es: {
+    takes: words('<acepta>|<aceptad[oa]s?>|<recibe>|^archivos$'),
+    limit: words('<(?:sin l[íi]mite|l[íi]mite|a la vez|de (?:uno|una) en (?:uno|una)|como m[áa]ximo|al menos|como m[íi]nimo|demasiado grandes?|m[áa]ximo|(?:los|las|cuantos|cuantas) que quieras|cuantos quieras|cuantas quieras)>|<(?:hasta|m[áa]s de) \\d|<\\d+ (?:a|hasta) \\d+>'),
+    kept: [
+      { label: 'formulário', pattern: words('<formularios?>') },
+      { label: 'marcadores', pattern: words('<marcador(?:es)?>') },
+      { label: 'links', pattern: words('<(?:enlaces?|v[íi]nculos?)>') },
+    ],
+    modes: {
+      'split-pdf': [
+        { mode: 'cada página', header: words('<cada p[áa]gina>') },
+        { mode: 'rangos de páginas', header: words('<rangos?>') },
+        { mode: 'elegir páginas', header: words('<eleg') },
+      ],
+      'pdf-to-jpg': [
+        { mode: 'formato', header: words('<formatos?>') },
+        { mode: 'resolución', header: words('<resoluci[óo]n>|<ppi>') },
+        { mode: 'páginas', header: words('^p[áa]ginas$') },
+      ],
+      'compress-pdf': [
+        { mode: 'sin pérdida', header: words('<sin p[ée]rdida>') },
+        { mode: 'recomendada', header: words('<recomendad[oa]>') },
+        { mode: 'fuerte', header: words('<fuerte>') },
+      ],
+      'rotate-pdf': [
+        { mode: 'todas las páginas', header: words('<todas las p[áa]ginas>') },
+        { mode: 'página por página', header: words('<p[áa]gina por p[áa]gina>') },
+      ],
+      'add-page-numbers-to-pdf': [
+        { mode: 'posición', header: words('<posici[óo]n>') },
+        { mode: 'formato', header: words('<formatos?>') },
+      ],
+      'sign-pdf': [
+        { mode: 'dibujar', header: words('<dibuj') },
+        { mode: 'imagen', header: words('<imagen>|<sub') },
+        { mode: 'escribir', header: words('<escrib|<escrit') },
+      ],
+      'unlock-pdf': [
+        { mode: 'solo restricciones', header: words('<restricci') },
+        { mode: 'contraseña para abrir', header: words('<contraseñas?>') },
+      ],
+      'watermark-pdf': [
+        { mode: 'tamaño', header: words('<tamaño>') },
+        { mode: 'opacidad', header: words('<opacidad>') },
+        { mode: 'dirección', header: words('<direcci[óo]n>') },
+      ],
+    },
+    secrets: { 'protect-pdf': /\bcontraseña\b/i, 'unlock-pdf': /\bcontraseña\b/i, 'sign-pdf': /\bfirma\b/i },
+    device: words('<(?:tu dispositivo|en tu navegador|en el navegador)>'),
+    notSent: words('<(?:nunca|no|nada|sin|ning[úu]n|ninguna)>[^.]*<(?:env[íi]a|env[íi]an|enviad[oa]s?|enviar|sube|suben|subid[oa]s?|subir|servidor|sale|salen)>'),
+  },
+};
+
 function specRows(root: HTMLElement): { header: string; text: string }[] {
   return blocksOf(root, 'specs')
     .flatMap((block) => selfOrInside(block, 'tr'))
@@ -277,17 +462,18 @@ function specRows(root: HTMLElement): { header: string; text: string }[] {
     .map((row) => ({ header: plainText(row.querySelector('th') ?? row), text: plainText(row) }));
 }
 
-function pdfSpecsProblems(root: HTMLElement, id: PdfToolId): string[] {
+function pdfSpecsProblems(root: HTMLElement, id: PdfToolId, lang: Lang): string[] {
   const rows = specRows(root);
   if (rows.length === 0) return []; // checkToolPage already said the table is missing
+  const rules = PDF_RULES[lang];
   const problems: string[] = [];
   const all = rows.map((row) => row.text).join(' ');
-  if (!rows.some((row) => SPEC_TAKES.test(row.header))) problems.push('o bloco specs não diz o que a ferramenta aceita (uma linha "Takes" ou "Files")');
-  if (!SPEC_LIMIT.test(all)) problems.push('o bloco specs não diz um limite (quantos arquivos, o tamanho ou "um por vez")');
+  if (!rows.some((row) => rules.takes.test(row.header))) problems.push('o bloco specs não diz o que a ferramenta aceita (uma linha "Takes" ou "Files")');
+  if (!rules.limit.test(all)) problems.push('o bloco specs não diz um limite (quantos arquivos, o tamanho ou "um por vez")');
   if (!IMAGE_RESULT.includes(id)) {
-    for (const { label, pattern } of SPEC_KEPT) if (!pattern.test(all)) problems.push(`o bloco specs não diz o que acontece com ${label}`);
+    for (const { label, pattern } of rules.kept) if (!pattern.test(all)) problems.push(`o bloco specs não diz o que acontece com ${label}`);
   }
-  for (const { mode, header } of PDF_MODES[id] ?? []) {
+  for (const { mode, header } of rules.modes[id] ?? []) {
     if (!rows.some((row) => header.test(row.header))) problems.push(`o bloco specs não tem uma linha para o modo "${mode}"`);
   }
   return problems;
@@ -313,13 +499,14 @@ function pdfFaqProblems(root: HTMLElement): string[] {
   return problems;
 }
 
-function pdfPrivacyProblems(root: HTMLElement, id: PdfToolId): string[] {
+function pdfPrivacyProblems(root: HTMLElement, id: PdfToolId, lang: Lang): string[] {
   const text = blocksOf(root, 'privacy').map(plainText).join(' ');
   if (!text) return [];
+  const rules = PDF_RULES[lang];
   const problems: string[] = [];
-  if (!PRIVACY_DEVICE.test(text)) problems.push('o bloco privacy não diz que o trabalho é feito no aparelho ou no navegador');
-  if (!PRIVACY_NOT_SENT.test(text)) problems.push('o bloco privacy não diz que o arquivo não é enviado');
-  const secret = PDF_SECRETS[id];
+  if (!rules.device.test(text)) problems.push('o bloco privacy não diz que o trabalho é feito no aparelho ou no navegador');
+  if (!rules.notSent.test(text)) problems.push('o bloco privacy não diz que o arquivo não é enviado');
+  const secret = rules.secrets[id];
   if (secret && !secret.test(text)) problems.push(`o bloco privacy não fala de ${secret.source.replace(/\\b/g, '')}, que a ferramenta recebe`);
   return problems;
 }
@@ -339,9 +526,11 @@ function pdfRelatedProblems(root: HTMLElement): string[] {
  * sits with the PrivacySeal; the title starts with the tool name too; the specs say what the tool takes, a limit,
  * what stays (form, bookmarks, links) and what each mode does; four real questions; a privacy note that says the
  * work is done on the device, that nothing is sent and, for a password or a signature, that it is not kept; at most
- * six related cards; and no best, #1 or unmeasured number (CLAIMS).
+ * six related cards; and no best, #1 or unmeasured number (CLAIMS). F6: the words are looked for in the language of the
+ * page (`want.lang`, PDF_RULES and CLAIMS_BY_LANG).
  */
 export function checkPdfPage(html: string, want: PdfPageWant): string[] {
+  const lang = want.lang ?? DEFAULT_LANG;
   const root = parsePage(html);
   const problems = checkToolPage(html);
   const name = normalizeText(want.name);
@@ -360,9 +549,9 @@ export function checkPdfPage(html: string, want: PdfPageWant): string[] {
   if (!title.startsWith(name)) problems.push(`o título "${title}" não começa pelo nome da ferramenta ("${want.name}")`);
   if (normalizeText(root.querySelector('meta[name="description"]')?.getAttribute('content') ?? '') === '') problems.push('sem meta description');
 
-  problems.push(...pdfSpecsProblems(root, want.id), ...pdfFaqProblems(root), ...pdfPrivacyProblems(root, want.id), ...pdfRelatedProblems(root));
+  problems.push(...pdfSpecsProblems(root, want.id, lang), ...pdfFaqProblems(root), ...pdfPrivacyProblems(root, want.id, lang), ...pdfRelatedProblems(root));
 
-  const claims = findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`);
+  const claims = findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`, lang);
   for (const claim of claims) problems.push(`afirmação sem medida na página: ${claim}`);
   return problems;
 }
@@ -371,6 +560,8 @@ export function checkPdfPage(html: string, want: PdfPageWant): string[] {
 export interface PdfHubWant {
   name: string;
   paths: readonly string[];
+  /** The language of the hub (F6); English when left out. */
+  lang?: Lang;
 }
 
 /**
@@ -379,6 +570,8 @@ export interface PdfHubWant {
  * on the device, and no best, #1 or unmeasured number. The hub has no PrivacySeal: like the image hub, it is a list.
  */
 export function checkPdfHub(html: string, want: PdfHubWant): string[] {
+  const lang = want.lang ?? DEFAULT_LANG;
+  const rules = PDF_RULES[lang];
   const root = parsePage(html);
   const problems: string[] = [];
   const h1s = root.querySelectorAll('h1');
@@ -406,9 +599,9 @@ export function checkPdfHub(html: string, want: PdfHubWant): string[] {
   const privacy = root.querySelector('section[aria-labelledby="privacy"]');
   const privacyText = privacy ? plainText(privacy) : '';
   if (!privacy) problems.push('sem a seção de privacidade (aria-labelledby="privacy")');
-  else if (!PRIVACY_DEVICE.test(privacyText) || !PRIVACY_NOT_SENT.test(privacyText)) problems.push('a seção de privacidade não diz que o trabalho é feito no aparelho e que nada é enviado');
+  else if (!rules.device.test(privacyText) || !rules.notSent.test(privacyText)) problems.push('a seção de privacidade não diz que o trabalho é feito no aparelho e que nada é enviado');
 
-  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`)) {
+  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`, lang)) {
     problems.push(`afirmação sem medida na página: ${claim}`);
   }
   return problems;
@@ -518,11 +711,16 @@ export function isCalcPage(id: string): id is CalcPageId {
   return Object.hasOwn(CALC_PAGES, id);
 }
 
-/** Paths a calculator preset is compared against: its parent calculator, then the sibling presets. */
-export function calcComparisonPaths(id: CalcPageId): string[] {
+/**
+ * Paths a calculator preset is compared against in one language: its parent calculator, then the sibling presets (F6:
+ * the pages of that language only; the presets are English only today, so the other languages have none to compare).
+ */
+export function calcComparisonPaths(id: CalcPageId, lang: Lang = DEFAULT_LANG): string[] {
   const parent = CALC_PAGES[id].parent;
   if (!parent) return [];
-  return [parent, ...calcPresetsOf(parent).filter((preset) => preset !== id)].map((other) => CALC_PAGES[other].path);
+  return [parent, ...calcPresetsOf(parent).filter((preset) => preset !== id)]
+    .map((other) => (lang === DEFAULT_LANG ? CALC_PAGES[other].path : routeById(other).paths[lang]))
+    .filter((path): path is string => path !== undefined);
 }
 
 /** URL path of a dist file: 'dist/pt/sobre/index.html' -> '/pt/sobre/'; 'dist/404.html' -> '/404.html'. */

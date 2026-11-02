@@ -6,7 +6,9 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import HomeView from '../../src/views/HomeView.astro';
 import PdfToolsView from '../../src/views/PdfToolsView.astro';
 import PdfToolPage from '../../src/tools/pdf/PdfToolPage.astro';
-import { LANGS, routeById, type Lang } from '../../src/i18n/routes.ts';
+import Header from '../../src/components/Header.astro';
+import { LANGS, LANG_TAG, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { ogImagePath } from '../../src/seo/meta.ts';
@@ -17,10 +19,13 @@ import { PDF_PAGE_IDS, isPdfPage, missingFromSitemap, requiredSchemaTypes, schem
 
 // The PDF pages in the places that list them (F5a, DECISOES § 160): the home, the footer, the page
 // mold and the SEO checks. Every list is read from src/tools/pdf/registry.ts, so a tool declared there is covered the
-// day it is declared; Portuguese and Spanish have no PDF page and show none of it (DECISOES § 6).
+// day it is declared. Before the F6, Portuguese and Spanish had no PDF page and showed none of it (DECISOES § 6); since
+// the F6 (decision 4) the PDF hub and the 12 tools exist in the three languages, and each language links to its own pages.
 const O = 'https://fileorca.com';
 const hubPath = routeById(PDF_HUB_ID).paths['en'] ?? '';
 const toolPath = (id: (typeof PDF_TOOL_IDS)[number]) => routeById(id).paths['en'] ?? '';
+const hubPathIn = (lang: Lang) => routeById(PDF_HUB_ID).paths[lang] ?? '';
+const toolPathIn = (id: (typeof PDF_TOOL_IDS)[number], lang: Lang) => routeById(id).paths[lang] ?? '';
 
 let container: AstroContainer;
 beforeAll(async () => {
@@ -49,13 +54,24 @@ describe('home', () => {
     expect(page.querySelectorAll('main .fo-hero [data-oli="wave"]')).toHaveLength(1);
   });
 
-  it('shows no PDF section in Portuguese and Spanish, and links to no PDF page', async () => {
+  it('has the PDF section in Portuguese and Spanish too, with the 12 tools and the hub of the language, and links to no English PDF page', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
-      expect(page.querySelector('#pdf-home'), lang).toBeNull();
-      const hrefs = page.querySelectorAll('a').map((link) => link.getAttribute('href') ?? '');
+      const section = page.querySelector('main section[aria-labelledby="pdf-home"]');
+      expect(section?.querySelector('h2')?.text, lang).toBe(TEXTS[lang].home.pdf?.heading);
+      expect(section?.querySelectorAll('a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(PDF_TOOL_IDS.map((id) => toolPathIn(id, lang)));
+      expect(section?.querySelectorAll('a.fo-tool h3').map((name) => name.text), lang).toEqual(PDF_TOOL_IDS.map((id) => TEXTS[lang].common.pdf[id].name));
+      expect(section?.querySelectorAll('a.fo-tool.fo-cat--pdf'), lang).toHaveLength(PDF_TOOL_IDS.length);
+      expect(section?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(hubPathIn(lang));
+      expect(section?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.pdf?.hubLink);
+      // The image tools, the PDF tools, the money section where the language has a money hub, then the privacy line.
+      const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
+      expect(order, lang).toEqual(['tools', 'pdf-home', ...(pagePath(moneyHubId(lang), lang) ? ['money-home'] : []), 'privacy-home']);
+      // § 6: the English PDF pages are never linked from a page in another language.
+      const hrefs = page.querySelectorAll('a:not([hreflang])').map((link) => link.getAttribute('href') ?? '');
       for (const id of PDF_TOOL_IDS) expect(hrefs, `${lang} ${id}`).not.toContain(toolPath(id));
       expect(hrefs, lang).not.toContain(hubPath);
+      expect(page.querySelectorAll('.fo-ad'), lang).toHaveLength(0);
     }
   });
 });
@@ -74,12 +90,19 @@ describe('footer', () => {
     expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'FileOrca']);
   });
 
-  it('has no PDF column in Portuguese and Spanish', async () => {
+  it('has the PDF column in Portuguese and Spanish too: the hub of the language, then its first six tools (F6; no column before)', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
+      const common = TEXTS[lang].common;
+      const links = column(page, common.footer.pdfColumn)?.querySelectorAll('li a') ?? [];
+      expect(links.map((link) => link.getAttribute('href')), lang).toEqual([hubPathIn(lang), ...PDF_TOOL_IDS.slice(0, 6).map((id) => toolPathIn(id, lang))]);
+      expect(links.map((link) => link.text), lang).toEqual([common.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => common.pdf[id].name)]);
+      // The columns in the order of the site: image, PDF, money (where the language has a money hub), FileOrca.
       const titles = page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text);
-      expect(titles, lang).not.toContain('PDF');
-      expect(page.querySelectorAll('footer a').filter((link) => (link.getAttribute('href') ?? '').includes('pdf')), lang).toHaveLength(0);
+      expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.siteColumn]);
+      // No footer link to an English PDF page.
+      const english = new Set([hubPath, ...PDF_TOOL_IDS.map(toolPath)]);
+      expect(page.querySelectorAll('footer a').filter((link) => english.has(link.getAttribute('href') ?? '')), lang).toHaveLength(0);
     }
   });
 });
@@ -114,26 +137,51 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
     // The WebApplication is named like the H1 of the tool and sits in the free multimedia category, like the image tools.
     const merge = await container.renderToString(PdfToolPage as Parameters<AstroContainer['renderToString']>[0], { props: { id: 'merge-pdf' } });
     const app = parse(merge).querySelectorAll('script[type="application/ld+json"]').map((script) => script.text).join('');
-    expect(app).toContain(`"name":"${PDF_TOOL_TEXTS['merge-pdf'].h1}"`);
+    expect(app).toContain(`"name":"${PDF_TOOL_TEXTS.en['merge-pdf'].h1}"`);
     expect(app).toContain('"isAccessibleForFree":true');
   }, 60_000);
 
-  it('is English only: no hreflang cluster (DECISOES § 58), and the language menu leads to the home of the other languages (§ 84)', async () => {
+  it('has the reciprocal hreflang cluster of the three languages with the x-default in English, and the language menu leads to the equivalent page (F6)', async () => {
+    // Before the F6 the PDF pages were English only: no hreflang (DECISOES § 58), and the language menu led to the home of
+    // the other languages (§ 84). Since the F6 (decisions 2 and 4) each one is a translation, in every language.
     for (const { id, render: renderPage } of pages) {
+      const paths = routeById(id as Parameters<typeof routeById>[0]).paths;
+      const cluster = [['en', `${O}${paths.en}`], ['pt-BR', `${O}${paths.pt}`], ['es', `${O}${paths.es}`], ['x-default', `${O}${paths.en}`]];
       const root = parse(await renderPage());
-      expect(root.querySelectorAll('link[rel="alternate"][hreflang]'), id).toHaveLength(0);
+      expect(root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), id).toEqual(cluster);
       const menu = root.querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
-      const own = routeById(id as Parameters<typeof routeById>[0]).paths['en'];
-      expect(menu, id).toEqual([['en', own], ['pt-BR', '/pt/'], ['es', '/es/']]);
+      expect(menu, id).toEqual([['en', paths.en], ['pt-BR', paths.pt], ['es', paths.es]]);
+    }
+    // The pages in Portuguese and Spanish carry the same cluster and their own canonical.
+    for (const lang of ['pt', 'es'] as const) {
+      const merge = parse(await container.renderToString(PdfToolPage as Parameters<AstroContainer['renderToString']>[0], { props: { id: 'merge-pdf', lang } }));
+      const hub = parse(await container.renderToString(PdfToolsView as Parameters<AstroContainer['renderToString']>[0], { props: { lang } }));
+      for (const [id, root] of [['merge-pdf', merge], [PDF_HUB_ID, hub]] as const) {
+        const paths = routeById(id).paths;
+        expect(root.querySelector('link[rel="canonical"]')?.getAttribute('href'), `${id} ${lang}`).toBe(`${O}${paths[lang]}`);
+        expect(root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => link.getAttribute('hreflang')), `${id} ${lang}`).toEqual(['en', 'pt-BR', 'es', 'x-default']);
+        expect(root.querySelector('html')?.getAttribute('lang'), `${id} ${lang}`).toBe(LANG_TAG[lang]);
+      }
     }
   }, 60_000);
 
-  it('is in the English sitemap and in no other', () => {
-    const urls = PDF_PAGE_IDS.map((id) => `${O}${routeById(id as Parameters<typeof routeById>[0]).paths['en']}`);
-    expect(urls).toHaveLength(PDF_TOOL_IDS.length + 1);
-    expect(missingFromSitemap(sitemapXml('en'), urls)).toEqual([]);
-    for (const lang of LANGS.filter((candidate) => candidate !== 'en')) {
-      expect(sitemapUrls(lang).filter((url) => urls.includes(url)), lang).toEqual([]);
+  it('keeps § 84 for what stays English only: the language menu of a PDF file guide leads to the home of the other languages', async () => {
+    // The example of § 84 moved from the PDF pages, which have a translation since the F6, to a file guide (English only, F5b).
+    const guide = FILE_GUIDE_IDS.find((id) => FILE_GUIDES[id].hub === 'pdf-tools');
+    expect(guide).toBeDefined();
+    const route = routeById(guide ?? 'guides-split-pdf-file-size');
+    const root = parse(await container.renderToString(Header as Parameters<AstroContainer['renderToString']>[0], { props: { lang: 'en', route, t: TEXTS.en.common } }));
+    const menu = root.querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+    expect(menu).toEqual([['en', route.paths.en], ['pt-BR', '/pt/'], ['es', '/es/']]);
+  });
+
+  it('is in the sitemap of each of its languages, with the path of that language (F6; English only before)', () => {
+    for (const lang of LANGS) {
+      const urls = PDF_PAGE_IDS.map((id) => `${O}${routeById(id as Parameters<typeof routeById>[0]).paths[lang]}`);
+      expect(urls, lang).toHaveLength(PDF_TOOL_IDS.length + 1);
+      expect(missingFromSitemap(sitemapXml(lang), urls), lang).toEqual([]);
+      // And never in the sitemap of another language.
+      for (const other of LANGS.filter((candidate) => candidate !== lang)) expect(sitemapUrls(other).filter((url) => urls.includes(url)), `${lang} in ${other}`).toEqual([]);
     }
   });
 });
@@ -154,7 +202,7 @@ describe('the SEO checks that know the PDF pages (scripts/lib/seo-pages.ts)', ()
 
   it('wants the title of a PDF tool to start with its name, and flags a canonical it does not match', () => {
     for (const id of PDF_TOOL_IDS) {
-      const name = PDF_TOOL_TEXTS[id].h1;
+      const name = PDF_TOOL_TEXTS.en[id].h1;
       expect(titleProblem(id, `${name}: online and free | FileOrca`, name), id).toBeNull();
       expect(titleProblem(id, 'Free PDF tools | FileOrca', name), id).toMatch(/não começa pelo nome da ferramenta/);
       expect(titleProblem(id, `${name} | FileOrca`, ''), id).toMatch(/não começa/);
@@ -181,7 +229,8 @@ describe('Privacy, Terms and About in the three languages (decision 10)', () => 
     const want: Record<Lang, RegExp[]> = {
       en: [/read and written on your device, by PDF\.js and qpdf/, /password you type in Protect PDF or Unlock PDF never leaves your device and is not kept/, /signature you draw, upload or type in Sign PDF is not stored anywhere/],
       pt: [/lido e gravado no seu aparelho, pelo PDF\.js e pelo qpdf/, /senha que você digita ao proteger ou desbloquear um PDF não sai do seu aparelho e não fica guardada/, /assinatura que você desenha, envia ou digita ao assinar um PDF também não fica guardada em lugar nenhum/],
-      es: [/se lee y se escribe en tu dispositivo, con PDF\.js y qpdf/, /contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda/, /firma que dibujas, subes o escribes al firmar un PDF tampoco se guarda en ningún sitio/],
+      // F6: the Spanish wording follows docs/i18n/es.md ("subir" is only what the site never does; "ningún lugar", not "ningún sitio").
+      es: [/se lee y se escribe en tu dispositivo, con PDF\.js y qpdf/, /contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda/, /firma que dibujas, tomas de una imagen o escribes al firmar un PDF tampoco se guarda en ningún lugar/],
     };
     for (const lang of LANGS) for (const pattern of want[lang]) expect(text('privacy', lang), `${lang} ${pattern}`).toMatch(pattern);
   });
@@ -193,15 +242,16 @@ describe('Privacy, Terms and About in the three languages (decision 10)', () => 
         /Unlock PDF is for files you have the right to open and to change[^\n]*never guesses or breaks a password[^\n]*asks you for it/,
         /Sign PDF puts an image of your signature[^\n]*not a digital signature with a certificate[^\n]*gives no legal advice/,
       ],
+      // F6 (decision 4): the tools have their names of the language now (docs/i18n), so Terms names them so.
       pt: [
-        /Protect PDF tranca um PDF com a senha que você escolhe[^\n]*nunca a recebe e não consegue recuperá-la/,
-        /Unlock PDF serve para arquivos que você tem o direito de abrir e de alterar[^\n]*nunca adivinha nem quebra uma senha[^\n]*pede a senha a você/,
-        /Sign PDF põe nas páginas que você escolher uma imagem da sua assinatura[^\n]*não uma assinatura digital com certificado[^\n]*não dá conselho jurídico/,
+        /Proteger PDF tranca um PDF com a senha que você escolhe[^\n]*nunca a recebe e não consegue recuperá-la/,
+        /Desbloquear PDF serve para arquivos que você tem o direito de abrir e de alterar[^\n]*nunca adivinha nem quebra uma senha[^\n]*pede a senha a você/,
+        /Assinar PDF põe nas páginas que você escolher uma imagem da sua assinatura[^\n]*não uma assinatura digital com certificado[^\n]*não dá conselho jurídico/,
       ],
       es: [
-        /Protect PDF cierra un PDF con la contraseña que tú eliges[^\n]*nunca la recibe y no puede recuperarla/,
-        /Unlock PDF sirve para archivos que tienes derecho a abrir y a modificar[^\n]*Nunca adivina ni rompe una contraseña[^\n]*te la pide a ti/,
-        /Sign PDF pone en las páginas que elijas una imagen de tu firma[^\n]*no una firma digital con certificado[^\n]*no da asesoramiento legal/,
+        /Proteger PDF bloquea un PDF con la contraseña que tú eliges[^\n]*nunca la recibe y no puede recuperarla/,
+        /Desbloquear PDF sirve para archivos que tienes derecho a abrir y a modificar[^\n]*Nunca adivina ni rompe una contraseña[^\n]*te la pide a ti/,
+        /Firmar PDF pone en las páginas que elijas una imagen de tu firma[^\n]*no una firma digital con certificado[^\n]*no da asesoramiento legal/,
       ],
     };
     for (const lang of LANGS) for (const pattern of want[lang]) expect(text('terms', lang), `${lang} ${pattern}`).toMatch(pattern);

@@ -40,11 +40,12 @@ test('the next-step chip sends next_step_click', async ({ page }) => {
   // A small generated photo through the shared helper, which waits for the result like every other spec: the
   // chip comes with the result card, and the 8 MP photo took more than the 5 s an expect waits on the CI runner.
   await useImage(page);
-  const chip = page.locator('nav.fo-next a.fo-chip');
-  await expect(chip).toHaveAttribute('href', '/es/');
+  // F6: Resize image exists in Spanish, so the first chip leads to it instead of the home (DECISOES § 233).
+  const chip = page.locator('nav.fo-next a.fo-chip').first();
+  await expect(chip).toHaveAttribute('href', '/es/redimensionar-imagen/');
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
   await chip.click();
-  expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image', lang: 'es', target: 'home' }]);
+  expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image', lang: 'es', target: 'resize-image' }]);
 });
 
 test('an English chip names the tool it leads to, and the preset page names itself', async ({ page }) => {

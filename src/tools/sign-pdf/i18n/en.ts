@@ -61,6 +61,7 @@ const texts: PdfToolTexts<SignTexts> = {
     'Your PDF is signed on your device and is never sent to a server. Your signature is not saved anywhere.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'signed',
     note: 'one PDF at a time',
     progressLabel: 'Signing your PDF',
     done: 'Done! Oli placed your signature on the PDF.',

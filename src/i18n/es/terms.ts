@@ -5,7 +5,7 @@ export default {
   description:
     'Los términos para usar FileOrca, herramientas gratis en tu navegador: tus archivos, resultados, calculadoras, anuncios, donaciones y responsabilidad.',
   h1: 'Términos de uso',
-  updated: 'Última actualización: 1 de noviembre de 2026',
+  updated: 'Última actualización: 2 de noviembre de 2026',
   intro:
     'Estos términos explican cómo puedes usar FileOrca. Al usar el sitio, los aceptas. Si no estás de acuerdo, por favor no uses el sitio.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, cambiar el tamaño, recortar y convertir, herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. Las herramientas y las calculadoras están en inglés, y Comprimir imagen también está en español y portugués.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, redimensionar, recortar, rotar, convertir y pasar imágenes a un PDF; herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, entre otras; y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. En español están todas las herramientas de imagen y de PDF, y cinco calculadoras: hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },
@@ -37,17 +37,17 @@ export default {
     },
     {
       heading: 'Herramientas de PDF: contraseñas y firmas',
-      paragraphs: ['Tres herramientas de PDF tienen reglas propias, que valen además de todo lo demás de esta página.'],
+      paragraphs: ['Tres herramientas de PDF tienen sus propias reglas, que se suman a todo lo demás de esta página.'],
       list: [
-        'Protect PDF cierra un PDF con la contraseña que tú eliges. La contraseña es tuya: FileOrca nunca la recibe y no puede recuperarla, así que una contraseña perdida deja el PDF cerrado para todos. Guarda una copia del original sin contraseña.',
-        'Unlock PDF sirve para archivos que tienes derecho a abrir y a modificar. Nunca adivina ni rompe una contraseña: cuando un PDF pide contraseña para abrirse, la herramienta te la pide a ti.',
-        'Sign PDF pone en las páginas que elijas una imagen de tu firma, dibujada, subida o escrita. Es una imagen en la página, no una firma digital con certificado, y puede no valer como firma cualificada ni tener validez jurídica donde vives. FileOrca no da asesoramiento legal. Si un documento exige una firma con certificado, usa un servicio que la ofrezca.',
+        'Proteger PDF bloquea un PDF con la contraseña que tú eliges. La contraseña es tuya: FileOrca nunca la recibe y no puede recuperarla, así que, si la pierdes, nadie podrá abrir ese PDF. Guarda una copia del original, sin la contraseña.',
+        'Desbloquear PDF sirve para archivos que tienes derecho a abrir y a modificar. Nunca adivina ni rompe una contraseña: cuando un PDF pide contraseña para abrirse, la herramienta te la pide a ti.',
+        'Firmar PDF pone en las páginas que elijas una imagen de tu firma, que puedes dibujar, tomar de una imagen o escribir. Es una imagen sobre la página, no una firma digital con certificado, y puede que no cuente como firma calificada ni reconocida legalmente donde vives. FileOrca no da asesoramiento legal. Si un documento necesita una firma con certificado, usa un servicio que la ofrezca.',
       ],
     },
     {
       heading: 'Resultados sin garantía',
       paragraphs: [
-        'FileOrca se ofrece "tal cual" y "según disponibilidad", sin costo. Los resultados varían según el archivo y el navegador, y una herramienta puede funcionar de una forma en tu dispositivo y de otra en el de otra persona.',
+        'FileOrca se ofrece "tal cual" y "según disponibilidad", sin costo. Los resultados varían según el archivo y el navegador, y una herramienta puede funcionar de una forma en tu dispositivo y de otra en otro dispositivo.',
         'No hay garantía de que una herramienta funcione con todos los archivos, de que el resultado se ajuste a lo que necesitas ni de que el sitio esté siempre disponible y sin errores.',
         'Revisa cada resultado antes de usarlo.',
       ],
@@ -55,7 +55,7 @@ export default {
     {
       heading: 'Las calculadoras son educativas, no asesoramiento',
       paragraphs: [
-        'Las calculadoras sirven solo para aprender e informarte. No son asesoramiento financiero, legal ni médico, no son una oferta de crédito y no reemplazan a un profesional calificado. Quien decide cuánto puedes pedir prestado, y a qué tasa, es la entidad financiera, no una calculadora.',
+        'Las calculadoras sirven solo para aprender e informarte. No son asesoramiento financiero, legal ni médico, no son una oferta de crédito y no reemplazan a un profesional calificado. Quien decide cuánto puedes pedir prestado, y a qué tasa, es el prestamista, no una calculadora.',
         'Los resultados son estimaciones hechas con los números que escribes. La vida real puede ser distinta, así que consulta con un profesional calificado antes de tomar una decisión sobre dinero, asuntos legales o salud.',
       ],
     },

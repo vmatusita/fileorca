@@ -1,9 +1,10 @@
 import type { ImagePanelTexts } from '../../../i18n/types.ts';
 
 // Textos do painel comuns às ferramentas de imagem: a fila, os erros, o card de resultado e a comparação.
-// Só a Comprimir imagem existe em português; as outras ferramentas são só em inglês (F2, decisão 1).
+// Todas as ferramentas de imagem existem em português desde a F6 (docs/i18n/pt.md).
 export default {
   fileFallback: 'imagem',
+  files: { zip: 'fileorca-imagens', pdf: 'fileorca-imagens' },
   drop: {
     title: 'Solte as imagens aqui',
     choose: 'Escolher imagens',
@@ -35,7 +36,7 @@ export default {
     title: 'Ops, a Oli não conseguiu ler esse arquivo',
     empty: '{name} está vazio, então não há nada para ler. Escolha um arquivo que tenha uma imagem.',
     unsupported: '{name} não é uma imagem que a Oli consiga ler. Tente um arquivo {formats}.',
-    wrongTool: '{name} é um arquivo {format}. Abra-o em {tool} (em inglês).',
+    wrongTool: '{name} é um arquivo {format}. Abra-o em {tool}.',
     wrongFormat: '{name} é um arquivo {format}. Tente um arquivo {formats}.',
     truncated: '{name} termina antes da hora, então falta parte da imagem. Baixe ou exporte o arquivo de novo e tente outra vez.',
     decode: '{name} está danificado e a Oli não consegue lê-lo. Tente outra cópia do arquivo.',
@@ -70,7 +71,7 @@ export default {
     metadata: 'A Oli removeu os metadados da foto, inclusive a localização GPS.',
     coffee: {
       text: 'Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café?',
-      button: 'Apoiar com um café',
+      button: 'Pagar um café no Pix',
       hide: 'Não mostrar de novo',
     },
   },

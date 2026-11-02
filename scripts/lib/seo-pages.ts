@@ -2,12 +2,41 @@
 // decision 9). They live apart from scripts/gates/seo.ts so Vitest can prove each one; the tool and preset ids come
 // from the registry the pages themselves are built from, so a new tool is covered the day it is declared.
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES, GUIDES, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
+import type { Lang } from '../../src/i18n/routes.ts';
 
 /** Route id of the hub of the image tools. */
 export const HUB_ID = 'image-tools';
+
+/**
+ * Route ids of the Brazilian money pages (prompt F6, decision 5): the hub and the eight calculators, in Portuguese only.
+ * They are not in MONEY_PAGE_IDS, whose pages all have an English version that the English sitemap must list.
+ */
+export const BR_PAGE_IDS: readonly string[] = [BR_HUB_ID, ...BR_CALC_IDS];
+
+/** The length of every meta description, in characters (F1a). */
+export const DESCRIPTION_RANGE = { min: 50, max: 170 } as const;
+/**
+ * The image and PDF pages in Portuguese and Spanish (tools, presets and both hubs) have a description of 120 to 160
+ * characters (prompt F6, decision 4). English and the other pages keep DESCRIPTION_RANGE.
+ */
+export const TRANSLATED_DESCRIPTION_RANGE = { min: 120, max: 160 } as const;
+
+/** A problem with the length of a page's description, or null. */
+export function descriptionProblem(routeId: string, lang: Lang, description: string): string | null {
+  const length = description.length;
+  const translated = lang !== 'en' && (isImagePage(routeId) || routeId === HUB_ID || routeId === PDF_HUB_ID || isPdfPage(routeId));
+  const range = translated ? TRANSLATED_DESCRIPTION_RANGE : DESCRIPTION_RANGE;
+  if (length >= range.min && length <= range.max) return null;
+  return translated ? `descrição com ${length} caracteres (pede de ${range.min} a ${range.max} nas páginas de imagem e de PDF em pt e es)` : `descrição com ${length} caracteres`;
+}
+
+/** A money calculator page of any language: the English registry (and its Spanish pages) or a Brazilian one. */
+function isAnyCalcPage(routeId: string): boolean {
+  return isCalcPage(routeId) || isBrCalc(routeId);
+}
 
 /** Route ids of every page of the F5a: the PDF hub and the 12 PDF tools (src/tools/pdf/registry.ts). */
 export const PDF_PAGE_IDS: readonly string[] = [PDF_HUB_ID, ...PDF_TOOL_IDS];
@@ -47,9 +76,9 @@ export function requiredSchemaTypes(routeId: string): string[] {
   if (isPdfPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
   if (routeId === PDF_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage'];
   // Money pages (F4, decision 8): WebApplication with no rating, BreadcrumbList and the author; the hub is a
-  // CollectionPage; a guide is an Article by the author.
-  if (isCalcPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication', 'Person'];
-  if (routeId === MONEY_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage', 'Person'];
+  // CollectionPage; a guide is an Article by the author. F6: the Brazilian calculators and hub are the same kind of page.
+  if (isAnyCalcPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication', 'Person'];
+  if (routeId === MONEY_HUB_ID || routeId === BR_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage', 'Person'];
   if (Object.hasOwn(GUIDES, routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
   // A file guide (F5b, decision 4) is an Article by the author, like a money guide.
   if (isFileGuide(routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
@@ -62,7 +91,7 @@ export function requiredSchemaTypes(routeId: string): string[] {
  * sentence case, so for those the comparison ignores case (DECISOES § 122).
  */
 export function titleProblem(routeId: string, title: string, h1: string): string | null {
-  if (isCalcPage(routeId)) return h1 !== '' && title.toLowerCase().startsWith(h1.toLowerCase()) ? null : `título não começa pelo nome da calculadora (${h1})`;
+  if (isAnyCalcPage(routeId)) return h1 !== '' && title.toLowerCase().startsWith(h1.toLowerCase()) ? null : `título não começa pelo nome da calculadora (${h1})`;
   if (!isImagePage(routeId) && !isPdfPage(routeId)) return null;
   return h1 !== '' && title.startsWith(h1) ? null : `título não começa pelo nome da ferramenta (${h1})`;
 }
@@ -75,8 +104,8 @@ export interface LdNode {
 
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
-  const tool = isImagePage(routeId) || isCalcPage(routeId) || isPdfPage(routeId);
-  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
+  const tool = isImagePage(routeId) || isAnyCalcPage(routeId) || isPdfPage(routeId);
+  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && routeId !== BR_HUB_ID && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
   if (tool && app && app.url !== canonical) problems.push(`WebApplication aponta ${app.url ?? 'para nada'} em vez de ${canonical}`);

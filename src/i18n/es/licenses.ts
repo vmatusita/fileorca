@@ -23,7 +23,7 @@ export default {
   copiedFrom: 'Copiado de',
   lgplHeading: 'Fotos HEIC y la LGPL',
   lgplWhat:
-    'Las fotos HEIC se abren con libheif, una biblioteca libre bajo la GNU Lesser General Public License, versión 3 (LGPL-3.0). Llega a tu navegador por el paquete libheif-js, que también incluye libde265, el decodificador de vídeo que necesitan las fotos HEIC, bajo la misma licencia.',
+    'Las fotos HEIC se abren con libheif, una biblioteca libre bajo la GNU Lesser General Public License, versión 3 (LGPL-3.0). Llega a tu navegador por el paquete libheif-js, que también incluye libde265, el decodificador de video que necesitan las fotos HEIC, bajo la misma licencia.',
   lgplSeparate:
     'FileOrca usa libheif sin ningún cambio. La biblioteca compilada es el archivo libheif.wasm, y el sitio lo entrega como un archivo aparte, byte a byte como lo publica el paquete. El JavaScript que lo inicia es el del propio paquete, tratado solo por la herramienta que construye el sitio.',
   lgplReplace:

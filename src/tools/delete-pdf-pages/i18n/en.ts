@@ -70,6 +70,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
   privacyNote: 'Your PDF is read and rewritten on your device, in your browser, and is never sent to a server. Your original file stays untouched.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'edited',
     note: 'one PDF at a time',
     progressLabel: 'Deleting pages',
     done: 'Done! The pages are gone.',

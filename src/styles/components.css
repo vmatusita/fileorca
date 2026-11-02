@@ -373,6 +373,28 @@
 .fo-support p { margin: 0 0 var(--space-3); color: var(--ink-muted); }
 .fo-support .fo-btn { margin-bottom: var(--space-3); }
 .fo-support__amounts { font-size: 15px; line-height: 22px; }
+/* The Pix of the Portuguese support page (SupportCard, .fo-pix; F6, decision 8). Only the block of the checked amount
+   shows: the choice is CSS, no island. The QR is a white square in both themes (the one hex the design system allows
+   for it), its modules in deep, the same in both themes. */
+.fo-support > div { min-width: 0; }
+.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-5); min-width: 0; }
+.fo-pix-card .fo-seg__opt { padding: 0 var(--space-2); white-space: nowrap; }
+/* Below 390px the four amounts fit only with less room around each one, and "Qualquer valor" may break into two lines (F6; DECISOES § 245). */
+@media (max-width: 389px) { .fo-pix-card .fo-seg__opt { padding: 0 var(--space-1); } .fo-pix-card .fo-seg__opt:first-child { white-space: normal; } }
+.fo-support .fo-pix-card :is(h2, h3, h4) { margin: 0; font: 700 18px/24px var(--fo-font-text); letter-spacing: 0; }
+.fo-pix { display: none; grid-template-columns: 112px minmax(0, 1fr); gap: var(--space-4); align-items: center; min-width: 0; }
+.fo-pix-card:has(input[value="any"]:checked) .fo-pix[data-pix="any"],
+.fo-pix-card:has(input[value="5"]:checked) .fo-pix[data-pix="5"],
+.fo-pix-card:has(input[value="10"]:checked) .fo-pix[data-pix="10"],
+.fo-pix-card:has(input[value="20"]:checked) .fo-pix[data-pix="20"] { display: grid; }
+.fo-pix__qr { width: 112px; height: 112px; padding: 6px; box-sizing: border-box; background: #FFFFFF; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); }
+.fo-pix__qr path { fill: var(--deep); }
+.fo-pix__side { display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
+.fo-pix__side .fo-btn { margin-bottom: 0; max-width: 100%; white-space: normal; }
+.fo-pix__code { display: flex; gap: var(--space-2); align-items: center; width: 100%; }
+.fo-pix__code code { flex: 1; width: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 13px/20px ui-monospace, monospace; color: var(--ink-muted); }
+.fo-pix__receiver { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.fo-pix__status:empty { display: none; }
 @media (min-width: 768px) {
   .fo-support { grid-template-columns: auto minmax(0, 1fr); gap: var(--space-6); padding: var(--space-6); }
   .fo-support__oli { width: 128px; height: 128px; }
@@ -446,7 +468,8 @@
 .fo-calc__fields > fieldset { grid-row: auto; }
 .fo-field__body { display: grid; gap: var(--space-2); min-width: 0; align-content: start; }
 /* The "example" tag centred in the label row: on its baseline it made the row 21px, one more than its neighbour's. */
-.fo-calc__fields .fo-field__label { align-items: center; }
+/* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
+.fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
 .fo-calc__moreheading { margin: var(--space-2) 0 0; }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
@@ -475,9 +498,12 @@
 .fo-debt__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: var(--space-3); }
 .fo-debt__remove { justify-self: start; }
 
-.fo-rhero { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-3); }
+.fo-rhero { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-3); container-type: inline-size; }
 .fo-rhero__label { margin: 0; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep-muted); }
-.fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
+/* The number never breaks inside: ResultHero measures it (--fo-num-em, its numbers in em; --fo-num-px, its words, unit and
+   gaps), and its size is what fits the card (cqi), never past 48px (60px from 768px; DECISOES § 246 and § 253). */
+.fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); font-size: min(48px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
+.fo-rhero__num > span { white-space: nowrap; }
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
 .fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
 .fo-rhero__sentence b { font-weight: 700; }
@@ -489,7 +515,7 @@
 .fo-rhero__orca { width: 72px; height: 72px; }
 @media (min-width: 768px) {
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
-  .fo-rhero__num { font-size: 60px; line-height: 64px; }
+  .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
 }
 .fo-split { display: grid; gap: var(--space-2); }
 .fo-split__bar { display: block; height: 20px; }
@@ -550,6 +576,10 @@
 
 .fo-example { display: grid; gap: var(--space-4); margin: var(--space-3) 0; }
 .fo-example caption { text-align: left; font: 700 15px/20px var(--fo-font-text); padding-bottom: var(--space-2); }
+/* A value of the worked example breaks only at its spaces, never inside a number ("R$ 1.084.638,20" keeps its no-break space);
+   a value with no space at all ("−$3,489.77") never breaks (DECISOES § 247). */
+.fo-example td { overflow-wrap: normal; }
+.fo-example .fo-example__whole { white-space: nowrap; }
 @media (min-width: 768px) { .fo-example { grid-template-columns: 1fr 1fr; gap: var(--space-6); } }
 
 /* width 0 and min-width 100%: the table scrolls inside its frame and its no-wrap cells never widen the page
@@ -612,6 +642,8 @@
 .fo-sign__pad { width: 100%; max-width: 600px; aspect-ratio: 3; border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); touch-action: none; cursor: crosshair; }
 /* The signature upload (DECISOES § 181): the input out of sight but focusable, its label in the look of a button. */
 .fo-sign__upload { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+/* The button of the image breaks its label when the column is narrower than it (pt at 320px; DECISOES § 248). */
+.fo-sign__upload .fo-btn { max-width: 100%; white-space: normal; }
 .fo-sign__file { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; opacity: 0; }
 .fo-sign__choose { cursor: pointer; }
 .fo-sign__file:focus-visible + .fo-sign__choose { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }

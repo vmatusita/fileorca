@@ -58,6 +58,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
     'Your PDF is read and written on your device, in your browser, and is never sent to a server. The thumbnails are drawn there too.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'reordered',
     note: 'one PDF at a time',
     progressLabel: 'Reordering pages',
     done: 'Done! Oli put your pages in the new order.',

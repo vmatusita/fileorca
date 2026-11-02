@@ -22,6 +22,13 @@ export const TEXT_FILE = /^src\/(?:i18n\/(en|pt|es)\/[\w-]+\.ts|tools\/[\w-]+(?:
 // href and read are the links and dates of a guide's sources (F5b): data, not prose.
 const SKIP_KEYS = new Set(['langCode', 'langSr', 'shortcut', 'pasteKey', 'synonyms', 'langNames', 'kbd', 'href', 'read']);
 const SAMPLES: Record<string, string> = { name: 'Victor', city: 'Curitiba', percent: '68%', query: 'mortgage', kbd: 'Ctrl V' };
+/** The same samples in the format of Portuguese and Spanish (F6): "68 %" with a no-break space in Spanish. */
+const SAMPLES_BY_LANG: Record<string, Record<string, string>> = {
+  en: SAMPLES,
+  pt: { ...SAMPLES, query: 'comprimir' },
+  es: { ...SAMPLES, percent: '68\u00a0%', query: 'comprimir' },
+};
+const samplesOf = (file: string): Record<string, string> => SAMPLES_BY_LANG[textFileLang(file) ?? 'en'] ?? SAMPLES;
 const CHUNK = 15_000;
 
 function git(args: string[]): string {
@@ -82,6 +89,55 @@ export const MONEY_SAMPLES: Record<string, string> = {
 };
 const MONEY_DEFAULT = '$1,234';
 
+/**
+ * The money samples of the Portuguese pages (the calculators adapted to Brazil) and of the Spanish ones (F6): numbers,
+ * money and dates in the format of each language (docs/i18n), so a sentence reads as the page shows it. A placeholder
+ * without a sample reads as money: "R$ 1.234,56" in Portuguese, "$1,234.56" in Spanish (DECISOES § 227).
+ */
+export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, string>; fallback: string }> = {
+  en: { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT },
+  pt: {
+    samples: {
+      time: '3 anos e 4 meses',
+      months: '30 anos',
+      years: '10',
+      sooner: '8 anos',
+      snow: '1 ano e 2 meses',
+      aval: '1 ano e 2 meses',
+      rate: '6,5%',
+      tr: '0,1%',
+      cetYear: '26,57%',
+      cetMonth: '1,98%',
+      x: 'R$ 1.234,56',
+      n: '12',
+      count: '36',
+      date: '1 de novembro de 2026',
+      name: 'Victor Yuki Matusita',
+      interestPart: 'paga R$ 484 a menos de juros',
+      timePart: 'termina 1 mês antes',
+      amount: '5',
+    },
+    fallback: 'R$ 1.234,56',
+  },
+  es: {
+    samples: {
+      time: '3 años 4 meses',
+      years: '30 años',
+      rate: '6.5\u00a0%',
+      result: '5.13\u00a0%',
+      apr: '15.09\u00a0%',
+      n: '12',
+      count: '36',
+      month: '24',
+      how: 'mensual',
+      unit: 'años',
+      date: '1 de noviembre de 2026',
+      name: 'Victor Yuki Matusita',
+    },
+    fallback: '$1,234.56',
+  },
+};
+
 /** The id of a file guide (F5b) whose texts this is, or undefined: src/i18n/en/guide-<slug>.ts of a guide in FILE_GUIDE_IDS. */
 export function fileGuideOf(file: string): FileGuideId | undefined {
   const slug = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
@@ -89,10 +145,13 @@ export function fileGuideOf(file: string): FileGuideId | undefined {
   return (FILE_GUIDE_IDS as readonly string[]).includes(id) ? (id as FileGuideId) : undefined;
 }
 
-/** A money text file: a calculator's or preset's texts, the texts the calculators share, the money hub or a money guide. */
+/**
+ * A money text file: a calculator's or preset's texts (also the Brazilian calculators, src/tools/br-*), the texts the
+ * calculators share, a money hub of any language or a money guide.
+ */
 export function isMoneyText(file: string): boolean {
   if (fileGuideOf(file)) return false;
-  return /^src\/(?:tools\/[\w-]+-calculator\/|tools\/calc\/i18n\/|i18n\/en\/(?:money-calculators|guide-[\w-]+)\.ts)/.test(file);
+  return /^src\/(?:tools\/(?:[\w-]+-calculator|br-[\w-]+)\/|tools\/calc\/i18n\/|i18n\/(?:en|pt|es)\/money-calculators\.ts|i18n\/en\/guide-[\w-]+\.ts)/.test(file);
 }
 
 export function collectStrings(value: unknown, key = '', out: string[] = [], fill: (name: string) => string = (name) => SAMPLES[name] ?? name): string[] {
@@ -115,14 +174,16 @@ export async function fillFor(file: string): Promise<(name: string) => string> {
     const values = fillValues(fileGuide, texts, [...placeholdersIn(texts)]);
     return (name) => values[name] ?? SAMPLES[name] ?? name;
   }
-  if (!isMoneyText(file)) return (name) => SAMPLES[name] ?? name;
+  const samples = samplesOf(file);
+  if (!isMoneyText(file)) return (name) => samples[name] ?? name;
   const guide = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
   if (guide) {
     const { GUIDE_FACTS } = (await import(pathToFileURL(resolve('src/tools/calc/guides.ts')).href)) as { GUIDE_FACTS: typeof GUIDE_FACTS_TYPE };
     const facts = GUIDE_FACTS[`guides-${guide}` as keyof typeof GUIDE_FACTS]().facts;
     return (name) => facts[name] ?? MONEY_SAMPLES[name] ?? MONEY_DEFAULT;
   }
-  return (name) => MONEY_SAMPLES[name] ?? MONEY_DEFAULT;
+  const money = MONEY_SAMPLES_BY_LANG[textFileLang(file) ?? 'en'] ?? { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT };
+  return (name) => money.samples[name] ?? money.fallback;
 }
 
 function chunks(texts: string[]): string[] {

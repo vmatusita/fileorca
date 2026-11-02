@@ -60,6 +60,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     'Your PDFs are drawn on your device and are never sent to a server. The images come out without Exif data or GPS location.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'page',
     note: 'PDF files, as many as you like',
     progressLabel: 'Turning pages into images',
     // {count} is the number of images, for one PDF or several (DECISOES § 178).

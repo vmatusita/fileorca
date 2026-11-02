@@ -3,7 +3,7 @@
 // which keeps lint:texto able to read every text without running page code.
 import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
-import type { CalcPageId, GuideId } from '../tools/calc/registry.ts';
+import type { BrCalcId, CalcPageId, EsCalcId, GuideId, MoneyPageId } from '../tools/calc/registry.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
 import type { FileGuideId } from '../tools/guides/registry.ts';
 
@@ -32,10 +32,8 @@ export interface CommonTexts {
   seal: string;
   footer: {
     imageColumn: string;
-    /** The Money column, where the money calculators exist (English). */
-    moneyColumn?: string;
-    /** The PDF column, where the PDF tools exist (English, F5a). */
-    pdfColumn?: string;
+    moneyColumn: string;
+    pdfColumn: string;
     siteColumn: string;
     about: string;
     privacy: string;
@@ -68,39 +66,43 @@ export interface CommonTexts {
     emptyTitle: string;
     emptyHint: string;
     imageCategory: string;
-    moneyCategory?: string;
-    pdfCategory?: string;
+    moneyCategory: string;
+    pdfCategory: string;
     shortcut: string;
   };
-  /** Short names and one-line descriptions of the tools that exist in this language. */
-  tools: { 'compress-image': ToolBlurb } & Partial<Record<Exclude<ImagePageId, 'compress-image'>, ToolBlurb>>;
-  /** Name of the image hub (breadcrumb, footer), where the hub exists. */
-  imageTools?: string;
-  /** Name of the money hub, the cards of the calculators and guides, and the seal of their pages (English for now). */
-  moneyCalculators?: string;
-  calcs?: Record<CalcPageId, ToolBlurb>;
+  /** Short names and one-line descriptions of the image tools and presets (all of them exist in every language, F6). */
+  tools: Record<ImagePageId, ToolBlurb>;
+  /** Name of the image hub (breadcrumb, footer). */
+  imageTools: string;
+  /** Name of the language's money hub and the seal of its money pages. */
+  moneyCalculators: string;
+  calcSeal: string;
+  /** The cards of the money calculators that exist in this language (exact per language, below). */
+  calcs: Partial<Record<MoneyPageId, ToolBlurb>>;
+  /** The cards of the money guides (English only, F4). */
   guides?: Record<GuideId, ToolBlurb>;
-  calcSeal?: string;
-  /** Name of the PDF hub and the cards of the PDF tools (English for now, F5a). */
-  pdfTools?: string;
-  pdf?: Record<PdfToolId, ToolBlurb>;
+  /** Name of the PDF hub and the cards of the PDF tools. */
+  pdfTools: string;
+  pdf: Record<PdfToolId, ToolBlurb>;
   /** The cards of the file guides (English only, F5b). */
   fileGuides?: Record<FileGuideId, ToolBlurb>;
 }
 
-/** English has every image tool, preset and the hub. */
+/** English has every calculator, preset and guide. */
 export interface EnCommonTexts extends CommonTexts {
-  tools: Record<ImagePageId, ToolBlurb>;
-  imageTools: string;
-  moneyCalculators: string;
   calcs: Record<CalcPageId, ToolBlurb>;
   guides: Record<GuideId, ToolBlurb>;
-  calcSeal: string;
-  footer: CommonTexts['footer'] & { moneyColumn: string; pdfColumn: string };
-  search: CommonTexts['search'] & { moneyCategory: string; pdfCategory: string };
-  pdfTools: string;
-  pdf: Record<PdfToolId, ToolBlurb>;
   fileGuides: Record<FileGuideId, ToolBlurb>;
+}
+
+/** Portuguese has the eight calculators adapted to Brazil (prompt F6, decision 5). */
+export interface PtCommonTexts extends CommonTexts {
+  calcs: Record<BrCalcId, ToolBlurb>;
+}
+
+/** Spanish has five of the English calculators, translated (prompt F6, decision 6). */
+export interface EsCommonTexts extends CommonTexts {
+  calcs: Record<EsCalcId, ToolBlurb>;
 }
 
 export interface Section {
@@ -117,12 +119,12 @@ export interface HomeTexts extends PageMeta {
   toolsHeading: string;
   privacyHeading: string;
   privacyBody: string;
-  /** Link under the tool grid to the image hub, only in the languages that have the hub. */
-  hubLink?: string;
-  /** The money section, only where the money calculators exist (English): heading, line and the hub link. */
-  money?: { heading: string; intro: string; hubLink: string };
-  /** The PDF section, only where the PDF tools exist (English, F5a): heading, line and the hub link. */
-  pdf?: { heading: string; intro: string; hubLink: string };
+  /** Link under the tool grid to the image hub. */
+  hubLink: string;
+  /** The money section: heading, line and the hub link. */
+  money: { heading: string; intro: string; hubLink: string };
+  /** The PDF section: heading, line and the hub link. */
+  pdf: { heading: string; intro: string; hubLink: string };
 }
 
 export interface LegalTexts extends PageMeta {
@@ -194,6 +196,33 @@ export interface SupportTexts extends PageMeta {
   next: string;
   button: string;
   amountsNote: string;
+  /** The Pix block of the Portuguese page (PLANO "Doações"; F6, decision 8): only where the Pix exists. */
+  pix?: SupportPixTexts;
+}
+
+export interface SupportPixTexts {
+  /** Heading of the block, one level under the card's title: "Um café no Pix". */
+  heading: string;
+  /** Name of the amount choice (OptionGroup): "Valor". */
+  legend: string;
+  /** The choice with no amount: "Qualquer valor". */
+  any: string;
+  /** An amount, from the BR Code's "5.00": "R$ {amount}". */
+  amount: string;
+  /** Name of the QR: "QR code do Pix, {amount}" ({amount}: "qualquer valor" or "R$ 5"). */
+  qrLabel: string;
+  anyLower: string;
+  /** Name of the code field (the "copia e cola"). */
+  codeLabel: string;
+  copy: string;
+  /** What the status region says after the copy. */
+  copied: string;
+  /** What it says when the browser does not let the page copy (no clipboard, or the copy refused). */
+  copyFailed: string;
+  /** The receiver, for the person to check: "Em nome de {name}". */
+  receiver: string;
+  /** The Pix is static: the site does not know who paid; refunds only through the Pix's own button. */
+  note: string;
 }
 
 export interface NotFoundTexts extends PageMeta {
@@ -251,7 +280,7 @@ export interface ImageToolsTexts extends PageMeta {
   presetsCaption: string;
   /** Column heads of the presets table: the preset, what comes out. */
   presetsHead: [string, string];
-  /** The guide under the presets: which tool does which job (DECISOES § 96). */
+  /** The guide under the presets: which tool does which job (DECISOES § 96); `tool` is linked to its page. */
   guideHeading: string;
   guideIntro: string;
   /** One line per job: the text before the tool name, the tool (linked to its page), the text after it. */
@@ -272,10 +301,11 @@ export interface MoneyHubTexts extends PageMeta {
   intro: string;
   creditHeading: string;
   educationalHeading: string;
-  presetsHeading: string;
-  presetsCaption: string;
-  presetsHead: [string, string];
-  guidesHeading: string;
+  /** The presets and the guides exist only in English (prompt F6, decisions 5 and 6). */
+  presetsHeading?: string;
+  presetsCaption?: string;
+  presetsHead?: [string, string];
+  guidesHeading?: string;
   worksHeading: string;
   worksIntro: string[];
   formulaHeading: string;
@@ -411,6 +441,8 @@ export interface FileGuidesSharedTexts {
 export interface ImagePanelTexts {
   /** Used when a file has no name. */
   fileFallback: string;
+  /** Base names of the batch downloads, in the language (docs/i18n): the ZIP and the one PDF of Image to PDF. */
+  files: { zip: string; pdf: string };
   drop: {
     /** "Drop images here" */
     title: string;
@@ -656,6 +688,11 @@ export type PdfPageContent = Omit<ToolPageContent, 'howSteps' | 'presets'> & {
  */
 export interface PdfPanelTexts {
   fileFallback: string;
+  /**
+   * The words of the output file names, in the language (docs/i18n): the tag of one page or one part of Split and PDF to
+   * JPG ("page-3", "part-2", "selected"), the base names of the ZIPs and the name of a PDF that has none.
+   */
+  files: { page: string; part: string; selected: string; zip: string; imagesZip: string; document: string };
   drop: {
     /** "Drop PDFs here" / "Drop a PDF here" */
     titleMany: string;
@@ -777,6 +814,8 @@ export interface PdfPanelTexts {
 
 /** The panel bits of one PDF tool: the progress name, the Oli's success lines, the action button and its options. */
 export interface PdfToolPanelTexts<O = Record<string, never>> {
+  /** The suffix of the output name ("report-merged.pdf"), in the language; in English, the registry's `suffix`. */
+  suffix: string;
   /** What the drop zone says the tool takes ("PDF files, as many as you like"). */
   note: string;
   progressLabel: string;

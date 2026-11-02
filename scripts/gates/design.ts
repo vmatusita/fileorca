@@ -10,8 +10,8 @@ import { DIST, Problems, listFiles, requireDist } from '../lib/dist.ts';
 import { checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkThemeVars, checkVoice } from '../lib/design-checks.ts';
 import { tokenNames } from '../lib/theme.ts';
 import { visibleText } from '../lib/conteudo.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { routeById } from '../../src/i18n/routes.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { languagesOf, routeById, type RouteId } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 requireDist();
@@ -62,10 +62,15 @@ report('setas', perPage((page) => checkArrows(page.html)), `${pages.length} pág
 // The voice of the PDF pages as built (F5a, DECISOES § 164): the visible text of each tool page and of the hub, and
 // the texts the island gets in data-props (`t`, the panel bits every PDF tool shares, and `texts`, the tool's own), against the
 // rules of the README: no forbidden marketing word, no emoji, no arrow, and an exclamation only in a success line (`done`,
-// `doneMany`), so a visible text has none. The pages come from the PDF registry.
-const voicePaths = [...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path), routeById(PDF_HUB_ID).paths.en ?? '/pdf-tools/'];
+// `doneMany`), so a visible text has none. The pages come from the PDF registry. F6: in every language of the route (the
+// three since the F6), with the marketing words of that language too (FORBIDDEN_WORDS_BY_LANG).
+const voiceIds: RouteId[] = [...PDF_TOOL_IDS, PDF_HUB_ID];
+const voicePages = voiceIds.flatMap((id) => {
+  const route = routeById(id);
+  return languagesOf(route).map((lang) => ({ lang, path: route.paths[lang] ?? '' }));
+});
 const voiceProblems = new Problems();
-for (const path of voicePaths) {
+for (const { lang, path } of voicePages) {
   const page = pages.find((candidate) => candidate.path === path);
   if (!page) {
     voiceProblems.add(`${path}: a página do registro de PDF não existe no dist`);
@@ -74,12 +79,12 @@ for (const path of voicePaths) {
   const root = parse(page.html);
   const props = root.querySelectorAll('[data-props]').flatMap((element) => {
     const parsed = JSON.parse(element.getAttribute('data-props') ?? '{}') as { t?: unknown; texts?: unknown };
-    return [checkVoice(parsed.t, 'data-props.t'), checkVoice(parsed.texts, 'data-props.texts')].flat();
+    return [checkVoice(parsed.t, 'data-props.t', lang), checkVoice(parsed.texts, 'data-props.texts', lang)].flat();
   });
   // visibleText puts a space at every element boundary, so "…AES-256.<a>Unlock PDF</a><p>Remove…" reads "Unlock PDF Remove".
-  for (const problem of [...checkVoice(visibleText(page.html), 'texto visível'), ...props]) voiceProblems.add(`${path}: ${problem}`);
+  for (const problem of [...checkVoice(visibleText(page.html), 'texto visível', lang), ...props]) voiceProblems.add(`${path}: ${problem}`);
 }
-report('voz das páginas de PDF', voiceProblems, `${voicePaths.length} páginas do registro de PDF (as ferramentas e o hub): texto visível e textos do painel sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
+report('voz das páginas de PDF', voiceProblems, `${voicePages.length} páginas do registro de PDF (as ferramentas e o hub, em cada idioma): texto visível e textos do painel sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
 
 // The file guides of the F5b, read from their registry: the same voice rules on the text a person reads (DECISOES § 188).
 const guideVoice = new Problems();

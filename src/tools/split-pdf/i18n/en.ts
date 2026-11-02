@@ -60,6 +60,7 @@ const texts: PdfToolTexts<SplitTexts> = {
     'Your PDF is read and cut on your device and is never sent to a server. Every part is made in your browser too.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'split',
     note: 'one PDF at a time',
     progressLabel: 'Splitting the PDF',
     done: 'Done! Oli cut your PDF.',

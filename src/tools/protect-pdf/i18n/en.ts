@@ -61,6 +61,7 @@ const texts: PdfToolTexts<PasswordToolTexts> = {
     'Your PDFs are encrypted on your device and are never sent to a server. The password is not saved and does not leave your device.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'protected',
     note: 'PDF files, as many as you like',
     progressLabel: 'Protecting PDFs',
     done: 'Done! Your PDF now asks for a password.',

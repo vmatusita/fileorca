@@ -4,7 +4,7 @@ import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultCons
 import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
 import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
 import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
@@ -103,7 +103,8 @@ describe('typed events', () => {
 
   it('lists exactly the pages of both registries as event tools', () => {
     expect([...IMAGE_EVENT_TOOLS]).toEqual(Object.keys(IMAGE_PAGES));
-    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_PAGE_IDS].sort());
+    // The 18 English calculators and, since the F6, the 8 adapted to Brazil (DECISOES § 226).
+    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS].sort());
     expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_IDS].sort());
   });
 

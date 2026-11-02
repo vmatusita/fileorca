@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FORBIDDEN_WORDS, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
+import { FORBIDDEN_WORDS, FORBIDDEN_WORDS_BY_LANG, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
 import { tokenNames } from '../../scripts/lib/theme.ts';
 
 const tokens: unknown = JSON.parse(readFileSync('docs/design/tokens.json', 'utf8'));
@@ -346,6 +346,37 @@ describe('voz dos textos (F5a)', () => {
     expect(checkVoice({ panel: { doneMany: '¡Listo! Oli juntó tus PDFs.' } })).toEqual([]);
     // The path names the string, so a deep one is found.
     expect(checkVoice({ faq: [{ q: 'Is it free?', a: 'Yes! It is.' }] }, 'texts')).toEqual(['texts.faq.0.a: exclamação fora da fala de sucesso']);
+  });
+
+  it('takes out the English file suffix of Unlock PDF at its key, in the texts and in the data-props the island gets, and nowhere else', () => {
+    // The texts file (panel.suffix) and the built page (data-props.texts.suffix, what gate:design reads) both pass.
+    expect(checkVoice({ panel: { suffix: 'unlocked' } }, 'src/tools/unlock-pdf/i18n/en.ts')).toEqual([]);
+    expect(checkVoice({ suffix: 'unlocked' }, 'data-props.texts')).toEqual([]);
+    // The same word at another key, another value at that key, or the key under another root still fails.
+    expect(checkVoice({ note: 'unlocked' }, 'data-props.texts')).toHaveLength(1);
+    expect(checkVoice({ suffix: 'unlocked files' }, 'data-props.texts')).toHaveLength(1);
+    expect(checkVoice({ suffix: 'unlocked' }, 'data-props.t')).toHaveLength(1);
+  });
+
+  it('adds the marketing words of Portuguese and Spanish for a text of that language (F6), and English keeps its list', () => {
+    expect(FORBIDDEN_WORDS_BY_LANG.en).toBeNull();
+    // Positive controls: each word of the glossaries is refused in its language, with its endings.
+    const refused: Record<'pt' | 'es', string[]> = {
+      pt: ['Uma ferramenta revolucionária', 'Compressão revolucionário', 'Compressão turbinada', 'Junte PDFs sem esforço', 'Feito com IA', 'Um app movido a IA'],
+      es: ['Una herramienta revolucionaria', 'Compresión revolucionarios', 'Une PDF sin esfuerzo', 'Hecho con IA', 'Una app impulsada por IA'],
+    };
+    for (const lang of ['pt', 'es'] as const) {
+      for (const text of refused[lang]) {
+        expect(checkVoice({ a: text }, 'texto', lang), `${lang} ${text}`).toHaveLength(1);
+        // The same text read as English passes the English list: the words are of their own language.
+        expect(checkVoice({ a: text }), `en ${text}`).toEqual([]);
+      }
+      // The English list holds in Portuguese and Spanish too: an English marketing word left in a translation fails.
+      expect(checkVoice({ a: 'Junte PDFs seamless' }, 'texto', lang), lang).toHaveLength(1);
+    }
+    // Negative controls: the words that only look like them pass.
+    for (const text of ['A Oli comprime a foto.', 'Ela não faz esforço nenhum para o navegador.', 'Comprima com a opção Forte.', 'Revolução de 1930']) expect(checkVoice({ a: text }, 'texto', 'pt'), text).toEqual([]);
+    for (const text of ['Oli comprime la foto.', 'Comprime con la opción Fuerte.', 'Con ayuda de Oli, sin subir nada.']) expect(checkVoice({ a: text }, 'texto', 'es'), text).toEqual([]);
   });
 });
 

@@ -1,9 +1,10 @@
 import type { ImagePanelTexts } from '../../../i18n/types.ts';
 
 // Textos del panel comunes a las herramientas de imagen: la cola, los errores, la tarjeta de resultado y
-// la comparación. Solo Comprimir imagen existe en español; las demás herramientas son solo en inglés (F2, decisión 1).
+// la comparación. Desde la F6, todas las herramientas de imagen existen en español (decisión 4).
 export default {
   fileFallback: 'imagen',
+  files: { zip: 'fileorca-imagenes', pdf: 'fileorca-imagenes' },
   drop: {
     title: 'Suelta las imágenes aquí',
     choose: 'Elegir imágenes',
@@ -22,8 +23,8 @@ export default {
   queue: {
     label: 'Archivos',
     showMore: 'Mostrar {count} más',
-    waiting: 'En cola',
-    working: 'Trabajando',
+    waiting: 'En espera',
+    working: 'Procesando',
     to: 'a',
     download: 'Descargar {name}',
     cancel: 'Cancelar {name}',
@@ -35,7 +36,7 @@ export default {
     title: 'Uy, Oli no pudo leer este archivo',
     empty: '{name} está vacío, así que no hay nada que leer. Elige un archivo que tenga una imagen.',
     unsupported: '{name} no es una imagen que Oli pueda leer. Prueba con un archivo {formats}.',
-    wrongTool: '{name} es un archivo {format}. Ábrelo en {tool} (en inglés).',
+    wrongTool: '{name} es un archivo {format}. Ábrelo en {tool}.',
     wrongFormat: '{name} es un archivo {format}. Prueba con un archivo {formats}.',
     truncated: '{name} se corta antes de terminar, así que falta parte de la imagen. Descárgalo o expórtalo de nuevo e inténtalo otra vez.',
     decode: '{name} está dañado y Oli no puede leerlo. Prueba con otra copia del archivo.',

@@ -1,12 +1,14 @@
 // The calculator definitions against the oracle and against their own texts (F4; DECISOES § 110 to § 116): the
 // example each page starts with is the oracle's page-example case; every field's error says its range; every
 // view has its texts; the scenario link goes and comes back, and anything outside a field's range is ignored;
-// the CSV of a schedule is the oracle's schedule, cent for cent.
+// the CSV of a schedule is the oracle's schedule, cent for cent. Since the F6 the same holds for the eight calculators
+// adapted to Brazil (in Portuguese) and the five Spanish pages, each in the format of its language (DECISOES § 226).
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { formatScaled } from '../../src/calc/parse.ts';
+import { formatScaled, type NumberLang } from '../../src/calc/parse.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { CALC_PAGES, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import type { Lang } from '../../src/i18n/routes.ts';
 import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
 import { DECIMALS, inRange, linkHash, problems, readLink } from '../../src/tools/calc/form.ts';
@@ -27,21 +29,32 @@ function numberSpecs(specs: readonly FieldSpec[]): NumberSpec[] {
   return specs.flatMap((spec) => (spec.kind === 'list' ? spec.item : spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' ? [spec] : []));
 }
 
-/** How a range bound reads in an English error: $10,000 or $0.01, 40%, 1,200. */
-function bound(spec: NumberSpec, value: number): string {
-  if (spec.kind === 'money') return `$${formatScaled(value, 2, 'en', { min: value % 100 === 0 ? 0 : 2 })}`;
-  if (spec.kind === 'rate') return formatScaled(value, 4, 'en');
-  return formatScaled(value, 0, 'en');
+/** How a range bound reads in an error of the page's language: $10,000 or $0.01, 40%, 1,200; R$ 10.000 in Portuguese. */
+function bound(spec: NumberSpec, value: number, lang: Lang = 'en'): string {
+  const l = lang as NumberLang;
+  if (spec.kind === 'money') return `${lang === 'pt' ? 'R$ ' : '$'}${formatScaled(value, 2, l, { min: value % 100 === 0 ? 0 : 2 })}`;
+  if (spec.kind === 'rate') return formatScaled(value, 4, l);
+  return formatScaled(value, 0, l);
 }
 
+/** Every money page with its language: the 18 English ones, the 8 Brazilian ones and the 5 Spanish versions. */
+const PAGES: [MoneyPageId, Lang][] = [
+  ...CALC_PAGE_IDS.map((id): [MoneyPageId, Lang] => [id, 'en']),
+  ...BR_CALC_IDS.map((id): [MoneyPageId, Lang] => [id, 'pt']),
+  ...ES_CALC_IDS.map((id): [MoneyPageId, Lang] => [id, 'es']),
+];
+/** Each definition once, with the language of its first page. */
+const DEF_IDS: [MoneyPageId, Lang][] = PAGES.filter(([id], index) => PAGES.findIndex(([other]) => other === id) === index);
+
 describe('the calculator definitions', () => {
-  it('cover the 18 pages of the registry', () => {
-    expect(Object.keys(DEFS).sort()).toEqual([...CALC_PAGE_IDS].sort());
-    for (const id of CALC_PAGE_IDS) expect(DEFS[id].id).toBe(id);
+  // The 18 of the F4 and, since the F6, the 8 adapted to Brazil (DECISOES § 226).
+  it('cover the 26 pages of the two registries', () => {
+    expect(Object.keys(DEFS).sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS].sort());
+    for (const [id] of DEF_IDS) expect(DEFS[id].id).toBe(id);
   });
 
   it("start every page from the oracle's page-example case, and the engine gives that case's result", () => {
-    for (const id of CALC_PAGE_IDS) {
+    for (const [id] of DEF_IDS) {
       const def = DEFS[id];
       const example = fixture(id).find((item) => item.id === 'page-example');
       expect(example, id).toBeDefined();
@@ -55,17 +68,17 @@ describe('the calculator definitions', () => {
   });
 
   it('say the range of every number field in its error, in the words of the page', () => {
-    for (const id of CALC_PAGE_IDS) {
-      const texts = calcTexts(id).panel.fields;
+    for (const [id, lang] of PAGES) {
+      const texts = calcTexts(id, lang).panel.fields;
       for (const spec of numberSpecs(DEFS[id].fields)) {
         const error = texts[spec.key]?.error ?? '';
-        expect(error, `${id} ${spec.key}`).toContain(bound(spec, spec.min).replace('-', '−'));
-        expect(error, `${id} ${spec.key}`).toContain(bound(spec, spec.max));
+        expect(error, `${id} ${lang} ${spec.key}`).toContain(bound(spec, spec.min, lang).replace('-', '−'));
+        expect(error, `${id} ${lang} ${spec.key}`).toContain(bound(spec, spec.max, lang));
       }
       for (const spec of DEFS[id].fields) {
         if (spec.kind === 'down') {
           expect(texts[spec.key]?.over, id).toBeTruthy();
-          expect(texts[spec.percentKey]?.error, id).toMatch(/0 to 100%/);
+          expect(texts[spec.percentKey]?.error, `${id} ${lang}`).toMatch(/0 (?:to|a) 100\u00a0?%/);
         }
         if ((spec.kind === 'money' || spec.kind === 'int') && spec.atMost) expect(texts[spec.key]?.over, `${id} ${spec.key}`).toBeTruthy();
       }
@@ -73,9 +86,9 @@ describe('the calculator definitions', () => {
   });
 
   it('render every view from its own texts, with no placeholder left', () => {
-    for (const id of CALC_PAGE_IDS) {
+    for (const [id, lang] of PAGES) {
       const def = DEFS[id];
-      const data = panelData(id, 'en');
+      const data = panelData(id, lang);
       const view = viewOf(def, data, def.initial);
       const said = [view.hero.label, view.hero.value, ...view.hero.sentence.map((part) => (typeof part === 'string' ? part : part.b))].join(' ');
       expect(said, id).not.toMatch(/\{\w+\}|undefined|NaN/);
@@ -84,7 +97,7 @@ describe('the calculator definitions', () => {
       const table = view.table();
       expect(table.head.length, id).toBeGreaterThan(1);
       for (const row of table.rows) expect(row.length, id).toBe(table.head.length);
-      expect(CALC_PAGES[id].file, id).not.toMatch(/\d{3,}/);
+      expect(moneyPage(id, lang)?.file, id).not.toMatch(/\d{3,}/);
     }
   });
 
@@ -93,10 +106,10 @@ describe('the calculator definitions', () => {
   // has its amounts filled in and no number in exponent notation.
   it('render the ends of every range and the error states with every amount filled in', () => {
     const withProblem = new Set<string>();
-    const check = (id: string, values: Values) => {
+    const check = (id: string, values: Values, lang: Lang = 'en') => {
       const def = DEFS[id as keyof typeof DEFS];
       if (Object.keys(problems(def.fields, values)).length > 0) return;
-      const view = viewOf(def, panelData(id as keyof typeof DEFS, 'en'), values);
+      const view = viewOf(def, panelData(id as keyof typeof DEFS, lang), values);
       if (view.problem) withProblem.add(id);
       const said = [
         view.hero.value,
@@ -108,19 +121,22 @@ describe('the calculator definitions', () => {
       expect(said, `${id} ${JSON.stringify(values)}`).not.toMatch(/\{\w+\}|undefined|NaN|e\+|Infinity/);
       if (view.split) for (const cents of [view.split.a.cents, view.split.b.cents]) expect(Number.isSafeInteger(cents), id).toBe(true);
     };
-    for (const id of CALC_PAGE_IDS) {
+    for (const [id, lang] of DEF_IDS) {
       const def = DEFS[id];
+      const check1 = (values: Values) => check(id, values, lang);
       for (const spec of def.fields) {
         if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int') {
-          for (const value of [spec.min, spec.max]) check(id, { ...def.initial, [spec.key]: value });
+          for (const value of [spec.min, spec.max]) check1({ ...def.initial, [spec.key]: value });
         } else if (spec.kind === 'list') {
           // Each item of the first debt at both ends (second pass of the review: the list was left out).
           const rows = def.initial[spec.key] as Record<string, number>[];
-          for (const item of spec.item) for (const value of [item.min, item.max]) check(id, { ...def.initial, [spec.key]: rows.map((row, index) => (index === 0 ? { ...row, [item.key]: value } : row)) });
+          for (const item of spec.item) for (const value of [item.min, item.max]) check1({ ...def.initial, [spec.key]: rows.map((row, index) => (index === 0 ? { ...row, [item.key]: value } : row)) });
         } else if (spec.kind === 'down') {
           // The down payment in percent and in dollars, at both ends.
-          for (const rate of [0, 1_000_000]) check(id, { ...def.initial, [spec.unitKey]: 'percent', [spec.percentKey]: rate });
-          for (const cents of [0, Number(def.initial[spec.of])]) check(id, { ...def.initial, [spec.unitKey]: 'amount', [spec.key]: cents });
+          for (const rate of [0, 1_000_000]) check1({ ...def.initial, [spec.unitKey]: 'percent', [spec.percentKey]: rate });
+          for (const cents of [0, Number(def.initial[spec.of])]) check1({ ...def.initial, [spec.unitKey]: 'amount', [spec.key]: cents });
+        } else if (spec.kind === 'choice' || spec.kind === 'select') {
+          for (const option of spec.options) check1({ ...def.initial, [spec.key]: option });
         }
       }
     }
@@ -128,13 +144,19 @@ describe('the calculator definitions', () => {
     check('savings-goal-calculator', { g: 2_000_000, s: 0, r: 0, md: 'deposit', m: 36, dep: 0 });
     check('credit-card-payoff-calculator', { b: 650_000, r: 229_900, md: 'payment', pay: 1_000, m: 24 });
     check('compound-interest-calculator', { i: 1_000_000_000, m: 100_000_000, r: 400_000, y: 80, c: '365', tm: 'begin' });
-    expect([...withProblem].sort()).toEqual(expect.arrayContaining(['compound-interest-calculator', 'credit-card-payoff-calculator', 'savings-goal-calculator']));
+    // The Brazilian error states: a balance past 10^15 cents, IOF and fees up front above the credit, nothing to finance.
+    check('br-compound-interest', { i: 1_000_000_000, a: 100_000_000, ry: 600_000, rm: 50_000, u: 'month', n: 600 }, 'pt');
+    check('br-personal-loan', { a: 10_000, n: 12, r: 20_000, iof: 500_000, tf: 0, c: 'upfront' }, 'pt');
+    check('br-sac-price', { p: 50_000_000, du: 'percent', d: 0, dp: 1_000_000, n: 360, r: 110_000, tr: 0, f: 0 }, 'pt');
+    expect([...withProblem].sort()).toEqual(
+      expect.arrayContaining(['br-compound-interest', 'br-personal-loan', 'br-sac-price', 'compound-interest-calculator', 'credit-card-payoff-calculator', 'savings-goal-calculator']),
+    );
   });
 });
 
 describe('the scenario link', () => {
   it('goes and comes back with the same values on every page', () => {
-    for (const id of CALC_PAGE_IDS) {
+    for (const [id] of DEF_IDS) {
       const def = DEFS[id];
       const hash = linkHash(def.fields, def.initial);
       expect(hash, id).toMatch(/^#v=1&/);
@@ -239,7 +261,9 @@ describe('after the review', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {
       const privacy = (await import(`../../src/i18n/${lang}/privacy.ts`)).default as { updated: string; sections: { paragraphs: string[] }[] };
       expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(/session storage|armazenamento da sessão|almacenamiento de sesión/);
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 1º de novembro de 2026', es: 'Última actualización: 1 de noviembre de 2026' }[lang]);
+      // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
+      // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
     }
   });
 });

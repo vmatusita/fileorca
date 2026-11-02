@@ -16,6 +16,7 @@ import {
 } from './loans.ts';
 import { rentVsBuy } from './rent-vs-buy.ts';
 import { aprToApy, compoundInterest, savingsGoal, simpleInterest } from './savings.ts';
+import { brCompound, brDebtPayoff, brPersonalLoan, creditCard, earlyPayoff, rentOrBuy, sacPrice, vehicleLoan } from './br.ts';
 
 export const ENGINES = {
   'mortgage-calculator': mortgage,
@@ -36,6 +37,15 @@ export const ENGINES = {
   'debt-consolidation-calculator': debtConsolidation,
   'simple-interest-calculator': simpleInterest,
   'apr-to-apy-calculator': aprToApy,
+  // The calculators adapted to Brazil (F6; oracle: scripts/oracle/calc_br.py).
+  'br-sac-price': sacPrice,
+  'br-vehicle-loan': vehicleLoan,
+  'br-personal-loan': brPersonalLoan,
+  'br-early-payoff': earlyPayoff,
+  'br-credit-card': creditCard,
+  'br-debt-payoff': brDebtPayoff,
+  'br-compound-interest': brCompound,
+  'br-rent-or-buy': rentOrBuy,
 } as const;
 
 export type CalcId = keyof typeof ENGINES;

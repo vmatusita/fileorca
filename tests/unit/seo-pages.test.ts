@@ -1,5 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, fileGuideTitleProblems, isImagePage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
+import {
+  BR_PAGE_IDS,
+  FILE_GUIDE_PAGE_IDS,
+  HUB_ID,
+  IMAGE_PAGE_IDS,
+  MONEY_PAGE_IDS,
+  PDF_PAGE_IDS,
+  TRANSLATED_DESCRIPTION_RANGE,
+  descriptionProblem,
+  fileGuideTitleProblems,
+  isImagePage,
+  missingFromSitemap,
+  requiredSchemaTypes,
+  schemaProblems,
+  titleProblem,
+  type LdNode,
+} from '../../scripts/lib/seo-pages.ts';
+import { BR_CALC_IDS, BR_HUB_ID } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
@@ -96,8 +113,53 @@ describe('the English sitemap', () => {
     expect(missingFromSitemap(sitemapXml('en'), urls)).toEqual([]);
     for (const lang of ['pt', 'es'] as const) {
       const listed = sitemapUrls(lang).filter((url) => urls.includes(url));
-      expect(listed, `${lang} lists no English-only image page`).toEqual([]);
+      expect(listed, `${lang} lists no English URL of an image page`).toEqual([]);
+      // F6 (decision 4): they list the same pages at the paths of their language (none of them but Compress image before).
+      const own = [...IMAGE_PAGE_IDS, HUB_ID].map((id) => `${O}${ROUTES.find((route) => route.id === id)?.paths[lang] ?? ''}`);
+      expect(missingFromSitemap(sitemapXml(lang), own), lang).toEqual([]);
     }
+  });
+});
+
+describe('the description length and the Brazilian pages (F6)', () => {
+  const text = (length: number): string => 'a'.repeat(length);
+
+  it('keeps 50 to 170 characters for every English page and for the pages that are not image or PDF ones', () => {
+    for (const id of ['compress-image', 'image-tools', 'merge-pdf', 'pdf-tools', 'mortgage-calculator', 'about']) {
+      expect(descriptionProblem(id, 'en', text(50)), id).toBeNull();
+      expect(descriptionProblem(id, 'en', text(170)), id).toBeNull();
+      expect(descriptionProblem(id, 'en', text(49)), id).toBe('descrição com 49 caracteres');
+      expect(descriptionProblem(id, 'en', text(171)), id).toBe('descrição com 171 caracteres');
+    }
+    // The Spanish calculators and the institutional pages keep the old range too.
+    expect(descriptionProblem('mortgage-calculator', 'es', text(60))).toBeNull();
+    expect(descriptionProblem('about', 'pt', text(60))).toBeNull();
+  });
+
+  it('asks 120 to 160 characters of the image and PDF pages in Portuguese and Spanish (decision 4)', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...PDF_PAGE_IDS]) {
+        expect(descriptionProblem(id, lang, text(120)), `${lang} ${id}`).toBeNull();
+        expect(descriptionProblem(id, lang, text(160)), `${lang} ${id}`).toBeNull();
+        expect(descriptionProblem(id, lang, text(119)), `${lang} ${id}`).toMatch(/descrição com 119 caracteres \(pede de 120 a 160/);
+        expect(descriptionProblem(id, lang, text(161)), `${lang} ${id}`).toMatch(/descrição com 161 caracteres/);
+      }
+    }
+    expect(TRANSLATED_DESCRIPTION_RANGE).toEqual({ min: 120, max: 160 });
+  });
+
+  it('treats the Brazilian calculators and hub as money pages, and keeps them out of the English list', () => {
+    expect(BR_PAGE_IDS).toEqual([BR_HUB_ID, ...BR_CALC_IDS]);
+    for (const id of BR_PAGE_IDS) expect(MONEY_PAGE_IDS, id).not.toContain(id);
+    for (const id of BR_CALC_IDS) {
+      expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
+      expect(titleProblem(id, 'Simulador SAC × PRICE: compare os dois sistemas | FileOrca', 'Simulador SAC × PRICE'), id).toBeNull();
+      expect(titleProblem(id, 'Compare os sistemas | FileOrca', 'Simulador SAC × PRICE'), id).toMatch(/nome da calculadora/);
+      const canonical = `${O}/pt/simulador-sac-price/`;
+      expect(schemaProblems(id, [{ '@type': 'WebApplication', url: `${O}/pt/` }], canonical).join(), id).toMatch(/WebApplication aponta/);
+    }
+    expect(requiredSchemaTypes(BR_HUB_ID)).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);
+    expect(schemaProblems(BR_HUB_ID, [{ '@type': 'BreadcrumbList', itemListElement: [{ position: 1, item: `${O}/pt/` }] }], `${O}/pt/calculadoras-financeiras/`).join()).toMatch(/termina em/);
   });
 });
 

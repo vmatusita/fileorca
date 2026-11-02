@@ -2,12 +2,16 @@
 // Each row lists the URL of the same page in every language that has an equivalent version.
 // hreflang only links languages present in a row; the sitemap and IndexNow read this map too.
 import {
+  BR_CALC_IDS,
+  BR_CALC_PAGES,
+  BR_HUB_ID,
   CALC_PAGES,
   CALC_PRESET_IDS,
   CALC_TOOL_IDS,
   GUIDES,
   GUIDE_IDS,
   MONEY_HUB_ID,
+  type BrCalcId,
   type CalcPageId,
   type GuideId,
 } from '../tools/calc/registry.ts';
@@ -20,7 +24,8 @@ export const DEFAULT_LANG: Lang = 'en';
 
 /** BCP 47 tags for <html lang>, hreflang and og:locale. */
 export const LANG_TAG: Record<Lang, string> = { en: 'en', pt: 'pt-BR', es: 'es' };
-export const OG_LOCALE: Record<Lang, string> = { en: 'en_US', pt: 'pt_BR', es: 'es_ES' };
+/** og:locale; the Spanish pages are for the Hispanic audience of the US (prompt F6, decision 1; DECISOES § 214). */
+export const OG_LOCALE: Record<Lang, string> = { en: 'en_US', pt: 'pt_BR', es: 'es_US' };
 
 export type RouteId =
   | 'home'
@@ -38,6 +43,8 @@ export type RouteId =
   | 'image-to-pdf'
   | typeof MONEY_HUB_ID
   | CalcPageId
+  | typeof BR_HUB_ID
+  | BrCalcId
   | typeof PDF_HUB_ID
   | PdfToolId
   | GuideId
@@ -66,6 +73,37 @@ export interface RouteDef {
   adArea?: AdArea;
 }
 
+/**
+ * The paths of the image and PDF pages in Portuguese and Spanish (prompt F6, decision 2): the same page translated,
+ * so each row links the three languages in hreflang, with the x-default in English.
+ */
+const TRANSLATED_PATHS: Partial<Record<RouteId, { pt: string; es: string }>> = {
+  'image-tools': { pt: '/pt/ferramentas-de-imagem/', es: '/es/herramientas-de-imagen/' },
+  'compress-image-to-100kb': { pt: '/pt/comprimir-imagem/para-100kb/', es: '/es/comprimir-imagen/a-100kb/' },
+  'compress-image-to-1mb': { pt: '/pt/comprimir-imagem/para-1mb/', es: '/es/comprimir-imagen/a-1mb/' },
+  'resize-image': { pt: '/pt/redimensionar-imagem/', es: '/es/redimensionar-imagen/' },
+  'resize-image-youtube-thumbnail': { pt: '/pt/redimensionar-imagem/miniatura-youtube/', es: '/es/redimensionar-imagen/miniatura-youtube/' },
+  'crop-image': { pt: '/pt/cortar-imagem/', es: '/es/recortar-imagen/' },
+  'rotate-image': { pt: '/pt/girar-imagem/', es: '/es/rotar-imagen/' },
+  'heic-to-jpg': { pt: '/pt/heic-para-jpg/', es: '/es/heic-a-jpg/' },
+  'webp-to-jpg': { pt: '/pt/webp-para-jpg/', es: '/es/webp-a-jpg/' },
+  'png-to-jpg': { pt: '/pt/png-para-jpg/', es: '/es/png-a-jpg/' },
+  'image-to-pdf': { pt: '/pt/imagem-para-pdf/', es: '/es/imagen-a-pdf/' },
+  'pdf-tools': { pt: '/pt/ferramentas-pdf/', es: '/es/herramientas-pdf/' },
+  'merge-pdf': { pt: '/pt/juntar-pdf/', es: '/es/unir-pdf/' },
+  'split-pdf': { pt: '/pt/dividir-pdf/', es: '/es/dividir-pdf/' },
+  'rotate-pdf': { pt: '/pt/girar-pdf/', es: '/es/rotar-pdf/' },
+  'delete-pdf-pages': { pt: '/pt/excluir-paginas-pdf/', es: '/es/eliminar-paginas-pdf/' },
+  'reorder-pdf-pages': { pt: '/pt/organizar-paginas-pdf/', es: '/es/ordenar-paginas-pdf/' },
+  'pdf-to-jpg': { pt: '/pt/pdf-para-jpg/', es: '/es/pdf-a-jpg/' },
+  'add-page-numbers-to-pdf': { pt: '/pt/numerar-paginas-pdf/', es: '/es/numerar-paginas-pdf/' },
+  'watermark-pdf': { pt: '/pt/marca-dagua-pdf/', es: '/es/marca-de-agua-pdf/' },
+  'sign-pdf': { pt: '/pt/assinar-pdf/', es: '/es/firmar-pdf/' },
+  'compress-pdf': { pt: '/pt/comprimir-pdf/', es: '/es/comprimir-pdf/' },
+  'protect-pdf': { pt: '/pt/proteger-pdf/', es: '/es/proteger-pdf/' },
+  'unlock-pdf': { pt: '/pt/desbloquear-pdf/', es: '/es/desbloquear-pdf/' },
+};
+
 export const ROUTES: readonly RouteDef[] = [
   {
     id: 'home',
@@ -82,19 +120,20 @@ export const ROUTES: readonly RouteDef[] = [
     texts: ['src/tools/compress-image/i18n/{lang}.ts', 'src/tools/image/i18n/{lang}.ts'],
     adArea: 'arquivos',
   },
-  // The other image tools, their presets and the hub exist only in English for now (DECISOES § 58).
   {
     id: 'image-tools',
-    paths: { en: '/image-tools/' },
+    paths: { en: '/image-tools/', ...TRANSLATED_PATHS['image-tools'] },
     indexable: true,
     view: 'src/views/ImageToolsView.astro',
     texts: ['src/i18n/{lang}/image-tools.ts'],
     adArea: 'arquivos',
   },
   ...imageToolRoutes(),
-  // The money hub, its calculators, presets and guides exist only in English for now (F4; DECISOES § 110).
+  // The money hub and five calculators also exist in Spanish; the presets and guides only in English (F6).
   ...moneyRoutes(),
-  // The PDF hub and the 12 PDF tools exist only in English for now (F5a; DECISOES § 58).
+  // The Brazilian money hub and the eight calculators adapted to Brazil, only in Portuguese (F6, decision 5).
+  ...brMoneyRoutes(),
+  // The PDF hub and the 12 PDF tools exist in the three languages (F6).
   ...pdfRoutes(),
   // The ten file guides exist only in English (F5b; DECISOES § 58 and § 184).
   ...fileGuideRoutes(),
@@ -149,7 +188,7 @@ export const ROUTES: readonly RouteDef[] = [
   },
 ];
 
-/** English-only image tools (folder src/tools/<slug>/) and presets (src/tools/<parent>/presets/<name>/). */
+/** The image tools (folder src/tools/<slug>/) and presets (src/tools/<parent>/presets/<name>/), in the three languages. */
 function imageToolRoutes(): RouteDef[] {
   const tools: [RouteId, string][] = [
     ['resize-image', 'resize-image'],
@@ -168,7 +207,7 @@ function imageToolRoutes(): RouteDef[] {
   return [
     ...tools.map(([id, slug]): RouteDef => ({
       id,
-      paths: { en: `/${slug}/` },
+      paths: { en: `/${slug}/`, ...TRANSLATED_PATHS[id] },
       indexable: true,
       view: `src/tools/${slug}/`,
       texts: [`src/tools/${slug}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'],
@@ -176,7 +215,7 @@ function imageToolRoutes(): RouteDef[] {
     })),
     ...presets.map(([id, parent, name]): RouteDef => ({
       id,
-      paths: { en: `/${parent}/${name}/` },
+      paths: { en: `/${parent}/${name}/`, ...TRANSLATED_PATHS[id] },
       indexable: true,
       view: `src/tools/${parent}/presets/${name}/`,
       texts: [`src/tools/${parent}/presets/${name}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'],
@@ -186,10 +225,11 @@ function imageToolRoutes(): RouteDef[] {
 }
 
 /**
- * English-only money pages (F4): the hub, each calculator (folder src/tools/<slug>/), each preset
+ * The money pages of the F4: the hub, each calculator (folder src/tools/<slug>/), each preset
  * (src/tools/<parent>/presets/<name>/) and each guide (src/views/GuideView.astro with src/i18n/<lang>/guide-<slug>.ts).
  * The ids and paths come from the calculator registry. Every one of them is in the ad area "dinheiro", which
- * is what gate:dinheiro-saude checks (DECISOES § 52).
+ * is what gate:dinheiro-saude checks (DECISOES § 52). The hub and the five calculators of ES_CALC_IDS also have a
+ * Spanish page, their equivalent (prompt F6, decision 6); the presets and guides exist only in English.
  */
 function moneyRoutes(): RouteDef[] {
   const shared = 'src/tools/calc/i18n/{lang}.ts';
@@ -206,7 +246,7 @@ function moneyRoutes(): RouteDef[] {
   return [
     {
       id: MONEY_HUB_ID,
-      paths: { en: '/money-calculators/' },
+      paths: { en: '/money-calculators/', es: '/es/calculadoras-financieras/' },
       indexable: true,
       view: 'src/views/MoneyCalculatorsView.astro',
       texts: ['src/i18n/{lang}/money-calculators.ts'],
@@ -214,7 +254,7 @@ function moneyRoutes(): RouteDef[] {
     },
     ...[...CALC_TOOL_IDS, ...CALC_PRESET_IDS].map((id): RouteDef => ({
       id,
-      paths: { en: CALC_PAGES[id].path },
+      paths: { en: CALC_PAGES[id].path, ...(CALC_PAGES[id].es ? { es: CALC_PAGES[id].es.path } : {}) },
       indexable: true,
       view: calcView(id),
       texts: calcTexts(id),
@@ -232,14 +272,40 @@ function moneyRoutes(): RouteDef[] {
 }
 
 /**
- * English-only PDF pages (F5a): the hub and the 12 tools, all from the PDF registry. Every tool shares one mold and one
+ * The money pages adapted to Brazil (F6, decision 5): pages of their own, only in Portuguese, with no pair in hreflang.
+ * The hub reads src/i18n/pt/money-calculators.ts (the language's money hub texts); each calculator, its folder
+ * src/tools/<id>/ with i18n/pt.ts. Every one is in the ad area "dinheiro", which gate:dinheiro-saude checks.
+ */
+function brMoneyRoutes(): RouteDef[] {
+  return [
+    {
+      id: BR_HUB_ID,
+      paths: { pt: '/pt/calculadoras-financeiras/' },
+      indexable: true,
+      view: 'src/views/MoneyCalculatorsView.astro',
+      texts: ['src/i18n/{lang}/money-calculators.ts'],
+      adArea: 'dinheiro',
+    },
+    ...BR_CALC_IDS.map((id): RouteDef => ({
+      id,
+      paths: { pt: BR_CALC_PAGES[id].path },
+      indexable: true,
+      view: `src/tools/${id}/`,
+      texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/calc/i18n/{lang}.ts'],
+      adArea: 'dinheiro',
+    })),
+  ];
+}
+
+/**
+ * The PDF pages (F5a), in the three languages since the F6: the hub and the 12 tools, all from the PDF registry. Every tool shares one mold and one
  * island (src/tools/pdf/); its page blocks live in src/tools/<slug>/i18n/{lang}.ts, next to the shared panel texts.
  */
 function pdfRoutes(): RouteDef[] {
   return [
     {
       id: PDF_HUB_ID,
-      paths: { en: '/pdf-tools/' },
+      paths: { en: '/pdf-tools/', ...TRANSLATED_PATHS[PDF_HUB_ID] },
       indexable: true,
       view: 'src/views/PdfToolsView.astro',
       texts: ['src/i18n/{lang}/pdf-tools.ts'],
@@ -247,7 +313,7 @@ function pdfRoutes(): RouteDef[] {
     },
     ...PDF_TOOL_IDS.map((id): RouteDef => ({
       id,
-      paths: { en: `/${id}/` },
+      paths: { en: `/${id}/`, ...TRANSLATED_PATHS[id] },
       indexable: true,
       view: 'src/tools/pdf/',
       texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts'],
@@ -282,6 +348,16 @@ export function routeById(id: RouteId): RouteDef {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route) throw new Error(`unknown route ${id}`);
   return route;
+}
+
+/** The path of a page in a language, or undefined where the page does not exist (no row, or no version there). */
+export function pagePath(id: RouteId, lang: Lang): string | undefined {
+  return ROUTES.find((candidate) => candidate.id === id)?.paths[lang];
+}
+
+/** The money hub of a language: the Brazilian hub in Portuguese, the English hub (and its Spanish version) elsewhere. */
+export function moneyHubId(lang: Lang): typeof MONEY_HUB_ID | typeof BR_HUB_ID {
+  return lang === 'pt' ? BR_HUB_ID : MONEY_HUB_ID;
 }
 
 export function pathFor(id: RouteId, lang: Lang): string {

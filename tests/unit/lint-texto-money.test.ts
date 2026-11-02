@@ -17,6 +17,20 @@ describe('lint:texto and the money texts', () => {
     for (const file of ['src/tools/compress-image/i18n/en.ts', 'src/tools/image/i18n/en.ts', 'src/i18n/en/privacy.ts', 'src/i18n/pt/home.ts']) expect(isMoneyText(file), file).toBe(false);
   });
 
+  // F6 (DECISOES § 227): the Brazilian calculators, the money hubs of pt and es and the Spanish calculators are money
+  // texts, filled in the format of their language.
+  it('knows the money texts of Portuguese and Spanish and fills them in their format', async () => {
+    for (const file of ['src/tools/br-sac-price/i18n/pt.ts', 'src/i18n/pt/money-calculators.ts', 'src/i18n/es/money-calculators.ts', 'src/tools/mortgage-calculator/i18n/es.ts', 'src/tools/calc/i18n/pt.ts'])
+      expect(isMoneyText(file), file).toBe(true);
+    for (const file of ['src/tools/br-sac-price.ts', 'src/i18n/pt/privacy.ts', 'src/tools/compress-image/i18n/es.ts']) expect(isMoneyText(file), file).toBe(false);
+    const pt = await fillFor('src/tools/br-sac-price/i18n/pt.ts');
+    expect(collectStrings({ a: 'Você paga {total} em {time}, com juros de {rate}.' }, '', [], pt)).toEqual(['Você paga R$ 1.234,56 em 3 anos e 4 meses, com juros de 6,5%.']);
+    const es = await fillFor('src/tools/mortgage-calculator/i18n/es.ts');
+    expect(collectStrings({ a: 'Pagas {total} en {time} a {rate}.' }, '', [], es)).toEqual(['Pagas $1,234.56 en 3 años 4 meses a 6.5\u00a0%.']);
+    const plain = await fillFor('src/tools/compress-image/i18n/es.ts');
+    expect(collectStrings({ a: 'Un {percent} más ligera.' }, '', [], plain)).toEqual(['Un 68\u00a0% más ligera.']);
+  });
+
   it('fills a guide with the numbers the engines give its page', async () => {
     const fill = await fillFor('src/i18n/en/guide-15-vs-30-year-mortgage.ts');
     expect(collectStrings({ a: 'The 15-year loan costs {p15}: {more} more each month, on {date}.' }, '', [], fill)).toEqual([

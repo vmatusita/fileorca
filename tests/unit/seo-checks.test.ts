@@ -4,6 +4,9 @@ import { alternatesFor, collectionPageLd, graph } from '../../src/seo/meta.ts';
 import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 import { ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, ES_CALC_IDS, GUIDE_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 const O = 'https://fileorca.com';
 const tags = { xDefaultLang: 'en', langTags: ['en', 'pt-BR', 'es'] };
@@ -70,38 +73,52 @@ describe('validador de hreflang', () => {
 });
 
 describe('sitemaps', () => {
-  // English: home, hub, 8 tools, 3 presets and the 6 legal and institutional pages, plus the money hub, 14 calculators,
-  // 4 presets and 5 guides of the F4; Portuguese and Spanish keep the 8 they had (home, Compress image and the 6
-  // institutional pages).
   // English: 19 pages of the F2 and F3, 24 of the money area (F4), 13 of the PDF area (F5a) and the 10 file guides (F5b;
-  // DECISOES § 190).
-  const SIZES = { en: 19 + 24 + 13 + 10, pt: 8, es: 8 } as const;
+  // DECISOES § 190). F6: Portuguese and Spanish had 8 (home, Compress image and the 6 institutional pages); they get the
+  // other 11 pages of the image area and the 13 of the PDF area (decision 4), Spanish the money hub and its five
+  // calculators (decision 6), Portuguese the Brazilian money pages once their rows are in the map (decision 5).
+  const brRows = ROUTES.filter((route) => route.id === BR_HUB_ID || isBrCalc(route.id)).length;
+  const SIZES = { en: 19 + 24 + 13 + 10, pt: 8 + 11 + 13 + brRows, es: 8 + 11 + 13 + 1 + ES_CALC_IDS.length } as const;
 
-  it('builds one valid sitemap per language and an index', () => {
+  it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
+    expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
     for (const lang of ['en', 'pt', 'es'] as const) {
       expect(validateSitemap(sitemapXml(lang), sitemapUrls(lang), O)).toEqual([]);
       expect(sitemapUrls(lang), lang).toHaveLength(SIZES[lang]);
+      // The count of the map itself: every indexable route that has a path in the language, once.
+      expect(sitemapUrls(lang), lang).toHaveLength(ROUTES.filter((route) => route.indexable && route.paths[lang] !== undefined).length);
     }
     expect(sitemapIndexXml()).toContain(`<loc>${O}/sitemap-pt.xml</loc>`);
   });
 
-  it('lists every image page and the hub in the English sitemap, and only Compress image in the others', () => {
-    const imagePaths = [...Object.keys(IMAGE_PAGES), 'image-tools'].map((id) => routeById(id as RouteId).paths.en);
-    expect(imagePaths).toHaveLength(12);
-    for (const path of imagePaths) expect(sitemapUrls('en')).toContain(`${O}${path}`);
-    for (const lang of ['pt', 'es'] as const) {
+  it('lists every image and PDF page and both hubs in the sitemap of each language (F6; before, only Compress image outside English)', () => {
+    const ids = [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS] as RouteId[];
+    expect(ids).toHaveLength(12 + 13);
+    for (const lang of ['en', 'pt', 'es'] as const) {
       const listed = new Set(sitemapUrls(lang));
-      const imageRoutes = ROUTES.filter((route) => route.adArea === 'arquivos' && listed.has(`${O}${route.paths[lang]}`));
-      expect(imageRoutes.map((route) => route.id), lang).toEqual(['compress-image']);
+      for (const id of ids) expect(listed.has(`${O}${routeById(id).paths[lang] ?? '-'}`), `${lang} ${id}`).toBe(true);
+      // Each sitemap lists the pages of its own language only.
+      for (const url of listed) expect(url.startsWith(lang === 'en' ? `${O}/` : `${O}/${lang}/`), url).toBe(true);
+      if (lang === 'en') for (const url of listed) expect(/^https:\/\/fileorca\.com\/(?:pt|es)\//.test(url), url).toBe(false);
     }
   });
 
-  it('gives a page that exists only in English no hreflang (no equivalent to point to)', () => {
-    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools'] as RouteId[]) {
-      if (id === 'compress-image') continue;
-      expect(alternatesFor(routeById(id)), id).toEqual([]);
+  it('gives a page that exists only in English no hreflang (no equivalent to point to), and every image and PDF page the cluster of the three languages', () => {
+    // F6: the image and PDF pages are translations now, so each one has the reciprocal cluster with the x-default in English
+    // (only Compress image had it before). The file guides, the money presets and guides and the calculators without a
+    // Spanish page stay English only, with no hreflang.
+    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS] as RouteId[]) {
+      const route = routeById(id);
+      expect(alternatesFor(route).map((alt) => alt.hreflang), id).toEqual(['en', 'pt-BR', 'es', 'x-default']);
+      expect(alternatesFor(route).map((alt) => alt.href), id).toEqual([`${O}${route.paths.en}`, `${O}${route.paths.pt}`, `${O}${route.paths.es}`, `${O}${route.paths.en}`]);
     }
-    expect(alternatesFor(routeById('compress-image')).map((alt) => alt.hreflang)).toEqual(['en', 'pt-BR', 'es', 'x-default']);
+    const englishOnly = [...FILE_GUIDE_IDS, ...GUIDE_IDS, ...CALC_PAGE_IDS.filter((id) => !(ES_CALC_IDS as readonly string[]).includes(id))] as RouteId[];
+    expect(englishOnly).toHaveLength(10 + 5 + 13);
+    for (const id of englishOnly) expect(alternatesFor(routeById(id)), id).toEqual([]);
+    // The Spanish money pages pair with the English ones (decision 6): en, es and the x-default.
+    for (const id of [MONEY_HUB_ID, ...ES_CALC_IDS] as RouteId[]) expect(alternatesFor(routeById(id)).map((alt) => alt.hreflang), id).toEqual(['en', 'es', 'x-default']);
+    // The Brazilian pages have no pair (decision 2), so no hreflang at all.
+    for (const route of ROUTES.filter((candidate) => candidate.id === BR_HUB_ID || isBrCalc(candidate.id))) expect(alternatesFor(route), route.id).toEqual([]);
   });
 
   it('flags missing, extra, duplicated and foreign URLs', () => {

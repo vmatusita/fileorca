@@ -4,6 +4,7 @@ import type { PdfPanelTexts } from '../../../i18n/types.ts';
 
 const texts: PdfPanelTexts = {
   fileFallback: 'document',
+  files: { page: 'page', part: 'part', selected: 'selected', zip: 'fileorca-pdfs', imagesZip: 'fileorca-pdf-images', document: 'document' },
   drop: {
     titleMany: 'Drop PDFs here',
     titleOne: 'Drop a PDF here',

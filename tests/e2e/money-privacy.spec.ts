@@ -4,8 +4,14 @@
 // (as typed, grouped, in cents or rate units, whole), with no digit glued before or after it, in: every request
 // URL and body of any origin, the dataLayer, document.title, location.search, localStorage, sessionStorage, the
 // cookies and the names of the downloaded files. None is found. The copied link is the one place with the numbers.
+// F6 (decision 9): the five Spanish calculators and the eight Brazilian ones too, with each sentinel typed as a person
+// types it in the page's language (a decimal comma in Portuguese) and searched in the forms of every language.
 import { expect, test, type Page } from '@playwright/test';
-import { CALC_PAGES, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import type { Lang } from '../../src/i18n/routes.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import enShared from '../../src/tools/calc/i18n/en.ts';
+import ptShared from '../../src/tools/calc/i18n/pt.ts';
+import esShared from '../../src/tools/calc/i18n/es.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { display } from '../../src/tools/calc/form.ts';
 import type { FieldSpec, NumberSpec, Values } from '../../src/tools/calc/types.ts';
@@ -28,17 +34,32 @@ function sentinelsFor(spec: NumberSpec, values: Values): string[] {
   return fits;
 }
 
-/** Every form a typed value could take on its way out: as typed, with a thousands comma, in engine units, whole. */
+/**
+ * Every form a typed value could take on its way out: as typed, with a thousands comma, in engine units, whole. F6: and the
+ * Portuguese forms of the same number (decimal comma, thousands dot), whatever the page's language.
+ */
 function formsOf(text: string, kind: NumberSpec['kind']): string[] {
   const [whole = '', fraction = ''] = text.split('.');
   const forms = new Set([text, String(Math.round(Number(text) * SCALE[kind]))]);
+  if (fraction) forms.add(`${whole},${fraction}`);
   if (kind === 'money') {
     forms.add(`${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${fraction}`);
+    forms.add(`${whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${fraction}`);
     forms.add(whole);
   }
-  if (kind === 'rate') forms.add(String(Number(text) / 100));
+  if (kind === 'rate') {
+    forms.add(String(Number(text) / 100));
+    forms.add(String(Number(text) / 100).replace('.', ','));
+  }
   return [...forms].filter((form) => form.length >= 3);
 }
+
+/** What a person types for a sentinel in a language: the decimal comma in Portuguese. */
+const typedIn = (text: string, lang: Lang): string => (lang === 'pt' ? text.replace('.', ',') : text);
+
+/** The shared island texts of each language: the schedule button and the "link copied" status. */
+const SHARED = { en: enShared, pt: ptShared, es: esShared } as const;
+const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** A sentinel form with no digit glued before or after it. */
 const pattern = (form: string): RegExp => new RegExp(`(?<![0-9])${form.replace(/[.]/g, '\\.')}(?![0-9])`);
@@ -69,8 +90,10 @@ async function everywhere(page: Page): Promise<string> {
 }
 
 test('the sentinel search finds every form and ignores a number inside another one', () => {
-  expect(formsOf('987654.32', 'money').sort()).toEqual(['987,654.32', '987654', '987654.32', '98765432'].sort());
-  expect(formsOf('13.5791', 'rate').sort()).toEqual(['0.135791', '135791', '13.5791'].sort());
+  expect(formsOf('987654.32', 'money').sort()).toEqual(['987,654.32', '987.654,32', '987654', '987654,32', '987654.32', '98765432'].sort());
+  expect(formsOf('13.5791', 'rate').sort()).toEqual(['0,135791', '0.135791', '135791', '13,5791', '13.5791'].sort());
+  expect(typedIn('987654.32', 'pt')).toBe('987654,32');
+  expect(typedIn('987654.32', 'es')).toBe('987654.32');
   expect(formsOf('287', 'int')).toEqual(['287']);
   const found = (form: string, text: string) => pattern(form).test(text);
   expect(found('987654.32', 'GET https://x.test/?p=987654.32')).toBe(true);
@@ -79,8 +102,16 @@ test('the sentinel search finds every form and ignores a number inside another o
   expect(found('287', 'id 12873 and 2870')).toBe(false);
 });
 
-for (const id of CALC_PAGE_IDS) {
-  const path = CALC_PAGES[id].path;
+const PAGES: { id: MoneyPageId; lang: Lang }[] = [
+  ...CALC_PAGE_IDS.map((id) => ({ id, lang: 'en' as const })),
+  ...ES_CALC_IDS.map((id) => ({ id, lang: 'es' as const })),
+  ...BR_CALC_IDS.map((id) => ({ id, lang: 'pt' as const })),
+];
+
+for (const { id, lang } of PAGES) {
+  const own = moneyPage(id, lang);
+  if (!own) throw new Error(`${id} has no page in ${lang}`);
+  const path = own.path;
   test(`${path}: no typed number leaves the device`, async ({ page, context }) => {
     test.setTimeout(60_000);
     const outgoing: string[] = [];
@@ -115,7 +146,7 @@ for (const id of CALC_PAGE_IDS) {
       // that only grows the problem), the field goes back to its value. Every sentinel typed is searched for.
       let left: string | null = null;
       for (const text of sentinelsFor(field.spec, values)) {
-        await input.fill(text);
+        await input.fill(typedIn(text, lang));
         await input.blur();
         typed.push({ text, kind: field.spec.kind });
         // Later limits (a balloon month and the term) read the values already typed.
@@ -138,7 +169,7 @@ for (const id of CALC_PAGE_IDS) {
       seen.push(JSON.stringify(await dataLayer(page)), await everywhere(page));
     };
 
-    await page.getByRole('button', { name: /show the full schedule/i }).click();
+    await page.getByRole('button', { name: new RegExp(escape(SHARED[lang].island.showSchedule), 'i') }).click();
     await expect(page.locator('#fo-schedule-table table')).toBeVisible();
     const names: string[] = [];
     for (const button of [page.locator('.fo-export .fo-btn').nth(1), page.locator('.fo-export .fo-btn--download')]) {
@@ -146,9 +177,9 @@ for (const id of CALC_PAGE_IDS) {
       await button.click();
       names.push((await download).suggestedFilename());
     }
-    expect(names).toEqual([`${CALC_PAGES[id].file}.csv`, `${CALC_PAGES[id].file}.pdf`]);
+    expect(names).toEqual([`${own.file}.csv`, `${own.file}.pdf`]);
     await page.locator('.fo-export .fo-btn').nth(2).click();
-    await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText(/link copied/i);
+    await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText(new RegExp(escape(SHARED[lang].island.copied), 'i'));
     const copied = await page.evaluate(() => (window as unknown as { foCopied?: string }).foCopied ?? (document.querySelector<HTMLInputElement>('#fo-calc-link')?.value ?? ''));
     expect(copied).toMatch(/#v=1&/);
     expect(new URL(copied).search).toBe('');
@@ -164,7 +195,7 @@ for (const id of CALC_PAGE_IDS) {
     // The link was read: the first field shows its sentinel in the page's format (review F4, PRI-2: the old check
     // compared the shown text with raw cents and could not fail).
     const first = numberFields(def.fields, values)[0];
-    if (first) await expect(page.locator(`#${first.id}`)).toHaveValue(display(first.spec.kind, Number(values[first.spec.key]), 'en'));
+    if (first) await expect(page.locator(`#${first.id}`)).toHaveValue(display(first.spec.kind, Number(values[first.spec.key]), lang));
     await record();
 
     // page_location goes without the # (DECISOES § 8).

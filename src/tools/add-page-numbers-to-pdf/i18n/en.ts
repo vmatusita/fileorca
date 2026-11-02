@@ -60,6 +60,7 @@ const texts: PdfToolTexts<NumbersTexts> = {
     'Your PDFs are numbered on your device and are never sent to a server. The new file keeps the details of the original and gets none from your device.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'numbered',
     note: 'PDF files, as many as you like',
     progressLabel: 'Adding page numbers',
     done: 'Done! Oli numbered your pages.',
@@ -77,6 +78,8 @@ const texts: PdfToolTexts<NumbersTexts> = {
       pageN: 'Page 1',
       pageNofTotal: 'Page 1 of 12',
       nOfTotal: '1 of 12',
+      pageWord: 'Page',
+      ofWord: 'of',
       startLabel: 'First number',
       startError: 'Type a whole number from 1 to 9999.',
       skipFirst: 'Skip the first page',

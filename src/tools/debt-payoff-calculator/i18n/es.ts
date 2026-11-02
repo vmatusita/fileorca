@@ -1,0 +1,95 @@
+import type { CalcPageTexts } from '../../calc/types.ts';
+
+export default {
+  title: 'Calculadora de deudas: bola de nieve o avalancha',
+  description: 'Compara la bola de nieve y la avalancha para hasta 10 deudas con un pago adicional al mes: los meses hasta quedar libre de deudas, los intereses y el orden.',
+  h1: 'Calculadora de deudas',
+  lead: 'Bola de nieve o avalancha: cuándo te deja libre de deudas cada plan.',
+  panel: {
+    fields: {
+      d: { label: 'Tus deudas', error: '' },
+      b: { label: 'Saldo', prefix: '$', error: 'Escribe un saldo de $1 a $1,000,000.' },
+      r: { label: 'APR', suffix: '%', error: 'Escribe una APR de 0 a 60 %.' },
+      m: { label: 'Pago mínimo', prefix: '$', error: 'Escribe un pago mínimo de $0 a $100,000.' },
+      x: { label: 'Pago adicional al mes', prefix: '$', error: 'Escribe un pago adicional de $0 a $1,000,000.', help: 'Además de todos los pagos mínimos.' },
+    },
+    view: {
+      label: 'Presupuesto mensual',
+      unit: '/mes',
+      placard: 'al mes',
+      sentence: 'Con este presupuesto, la bola de nieve te deja libre de deudas en {snow} con {snowInterest} de intereses, y la avalancha en {aval} con {avalInterest}.',
+      tooLow: 'Un presupuesto de {budget} no cubre los intereses del primer mes. Sube el pago adicional hasta que el presupuesto sea de al menos {minimum}.',
+      tooLong: 'Con {budget} al mes, las deudas tardarían más de 100 años en quedar pagadas. Agrega un pago adicional.',
+      snowball: 'Bola de nieve',
+      avalanche: 'Avalancha',
+      free: 'Libre de deudas en',
+      interest: 'Intereses',
+      order: 'Orden de pago',
+      diff: 'B {interestPart} y {timePart}.',
+      lessInterest: 'paga {x} menos de intereses',
+      moreInterest: 'paga {x} más de intereses',
+      sameInterest: 'paga los mismos intereses',
+      sooner: 'termina {x} antes',
+      later: 'termina {x} después',
+      sameTime: 'termina en el mismo tiempo',
+      caption: 'Lo que todavía se debe de todas las deudas al final de cada año, con cada método',
+      year: 'Año',
+      compareLabel: 'Bola de nieve y avalancha lado a lado',
+      scheduleHeading: 'Saldo por año',
+    },
+    premises: [
+      'Cada mes pagas el mínimo de cada deuda, y el resto del presupuesto (los mínimos más el pago adicional) va a una deuda a la vez.',
+      'La bola de nieve paga primero el saldo inicial más pequeño; la avalancha paga primero la APR más alta. En un empate se mantiene el orden en que las escribiste.',
+      'Cuando terminas de pagar una deuda, su pago mínimo se queda en el presupuesto y pasa a la siguiente deuda.',
+      'Los intereses de cada deuda son su APR dividida entre 12, por su saldo, redondeados al centavo. No se suman cargos nuevos.',
+    ],
+  },
+  howHeading: 'Cómo usar la calculadora de deudas',
+  howSteps: [
+    'Escribe cada deuda, hasta 10, con su saldo, su tasa porcentual anual (APR) y su pago mínimo.',
+    'Escribe cuánto puedes pagar cada mes además de los mínimos.',
+    'Compara la bola de nieve y la avalancha: los meses hasta quedar libre de deudas, los intereses y el orden.',
+    'Abre el saldo por año, o guarda el plan en PDF o CSV.',
+  ],
+  worksHeading: 'Cómo se calculan los dos métodos',
+  formulaHeading: 'El método',
+  formula: [
+    'Presupuesto = suma de los pagos mínimos + pago adicional. Cada mes: los intereses de cada deuda (saldo × APR ÷ 12, redondeados al centavo), luego el mínimo de cada deuda, y luego lo que queda del presupuesto va a la primera deuda en el orden elegido.',
+    'El mes termina cuando se aplican todos los pagos, y el ciclo sigue hasta que todos los saldos llegan a cero. Los dos métodos usan el mismo presupuesto, así que la única diferencia es el orden.',
+  ],
+  premisesHeading: 'Supuestos',
+  exampleHeading: 'Ejemplo resuelto',
+  exampleIntro: 'Este es el ejemplo con el que empieza la calculadora, calculado por el mismo motor que usas arriba.',
+  sourcesHeading: 'Fuentes',
+  sources: [
+    {
+      label: 'Oficina para la Protección Financiera del Consumidor (CFPB), "Plan de acción contra la deuda", con las dos formas de pagar: primero la deuda más pequeña o primero la tasa de interés más alta (PDF, en español)',
+      href: 'https://files.consumerfinance.gov/f/documents/cfpb_YMYG_toolkit_spanish_debt_action_plan_ADA3.21.pdf',
+    },
+    { label: 'CFPB, cómo reducir tus deudas (en inglés)', href: 'https://www.consumerfinance.gov/archive/blog/how-reduce-your-debt/' },
+  ],
+  disclaimer: 'Esta calculadora es una herramienta educativa, no asesoría financiera. Tus prestamistas fijan los intereses y los pagos mínimos de tus deudas.',
+  faqHeading: 'Preguntas sobre cómo pagar deudas',
+  faq: [
+    {
+      q: '¿Qué es la bola de nieve?',
+      a: 'Pagas el mínimo de cada deuda y pones todo lo adicional en el saldo más pequeño. Cuando lo terminas de pagar, ese pago pasa a la siguiente deuda más pequeña. El CFPB lo describe como pagar primero la deuda más pequeña.',
+    },
+    {
+      q: '¿Qué es la avalancha?',
+      a: 'Es el mismo plan, pero lo adicional va primero a la deuda con la tasa de interés más alta. Por lo general paga menos intereses; cuánto menos depende de tus deudas.',
+    },
+    {
+      q: '¿Cuál debo elegir?',
+      a: 'La calculadora te muestra los dos con tus propias deudas. Algunas personas prefieren los logros rápidos de terminar con los saldos pequeños; otras prefieren pagar menos intereses. Los dos funcionan si sigues pagando.',
+    },
+    {
+      q: '¿Y si un pago mínimo es menor que los intereses de esa deuda?',
+      a: 'Esa deuda crece mientras lo adicional va a otra. El plan funciona igual siempre que el presupuesto total sea mayor que los intereses del primer mes; si no, la calculadora te dice cuánto presupuesto hace falta.',
+    },
+  ],
+  privacyHeading: 'Privacidad',
+  privacyNote:
+    'Tus números se quedan en tu dispositivo. La calculadora funciona en tu navegador, así que nada de lo que escribes se envía a ninguna parte, y el enlace que copias guarda los números después del #, una parte de la dirección que tu navegador nunca envía.',
+  relatedHeading: 'Calculadoras relacionadas',
+} satisfies CalcPageTexts;

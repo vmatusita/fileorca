@@ -5,6 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { browserPackages, buildPackages, isAllowedLicense, isForbiddenLicense } from '../../src/platform/licenses.ts';
 import { checkVoice } from '../../scripts/lib/design-checks.ts';
 import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
+import ptPdfTools from '../../src/i18n/pt/pdf-tools.ts';
+import esPdfTools from '../../src/i18n/es/pdf-tools.ts';
+import { LANGS, type Lang } from '../../src/i18n/routes.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 function files(dir: string, pattern: RegExp): string[] {
@@ -154,7 +157,8 @@ describe('a ilha de PDF e as cores (F5a)', () => {
   it('uses no hex colour and no yellow in the PDF code: the island, the 12 tool folders, the engine, the hub', () => {
     const tokens = new Set([...readFileSync('docs/design/tokens.css', 'utf8').matchAll(/#[0-9A-Fa-f]{3,8}\b/g)].map((match) => match[0].toUpperCase()));
     const folders = ['src/tools/pdf', 'src/engine/pdf', ...PDF_TOOL_IDS.map((id) => `src/tools/${id}`)];
-    const scanned = [...folders.flatMap((dir) => files(dir, /\.(ts|tsx|astro|css)$/)), 'src/views/PdfToolsView.astro', 'src/i18n/en/pdf-tools.ts'];
+    // F6: the hub texts of the three languages (the tool folders already hold their pt.ts and es.ts).
+    const scanned = [...folders.flatMap((dir) => files(dir, /\.(ts|tsx|astro|css)$/)), 'src/views/PdfToolsView.astro', ...LANGS.map((lang) => `src/i18n/${lang}/pdf-tools.ts`)];
     expect(scanned.length).toBeGreaterThan(40);
     const offenders: string[] = [];
     for (const file of scanned) {
@@ -167,25 +171,33 @@ describe('a ilha de PDF e as cores (F5a)', () => {
 });
 
 describe('a voz dos textos de PDF (F5a)', () => {
-  // Read from the files, by the PDF registry: the panel texts, the 12 tool pages and the hub.
-  const modules = import.meta.glob<unknown>('/src/tools/*/i18n/en.ts', { import: 'default', eager: true });
-  const textsOf = (slug: string): unknown => modules[`/src/tools/${slug}/i18n/en.ts`];
+  // Read from the files, by the PDF registry: the panel texts, the 12 tool pages and the hub. F6: in the three languages
+  // (English only before), each with the marketing words of its language too (checkVoice with the language).
+  const modules: Record<Lang, Record<string, unknown>> = {
+    en: import.meta.glob<unknown>('/src/tools/*/i18n/en.ts', { import: 'default', eager: true }),
+    pt: import.meta.glob<unknown>('/src/tools/*/i18n/pt.ts', { import: 'default', eager: true }),
+    es: import.meta.glob<unknown>('/src/tools/*/i18n/es.ts', { import: 'default', eager: true }),
+  };
+  const hubs: Record<Lang, unknown> = { en: enPdfTools, pt: ptPdfTools, es: esPdfTools };
+  const textsOf = (slug: string, lang: Lang = 'en'): unknown => modules[lang][`/src/tools/${slug}/i18n/${lang}.ts`];
   const count = (value: unknown): number => (typeof value === 'string' ? 1 : value && typeof value === 'object' ? Object.values(value).reduce<number>((sum, item) => sum + count(item), 0) : 0);
 
-  it('reads the panel texts, the text of each of the 12 tools and the hub', () => {
+  it('reads the panel texts, the text of each of the 12 tools and the hub, in each language', () => {
     expect(PDF_TOOL_IDS).toHaveLength(12);
-    expect(textsOf('pdf')).toBeDefined();
-    for (const id of PDF_TOOL_IDS) expect(textsOf(id), id).toBeDefined();
-    expect(enPdfTools.title).toBeDefined();
-    expect(count(textsOf('pdf')) + PDF_TOOL_IDS.reduce((sum, id) => sum + count(textsOf(id)), 0) + count(enPdfTools)).toBeGreaterThan(500);
+    for (const lang of LANGS) {
+      expect(textsOf('pdf', lang), lang).toBeDefined();
+      for (const id of PDF_TOOL_IDS) expect(textsOf(id, lang), `${lang} ${id}`).toBeDefined();
+      expect((hubs[lang] as { title?: string }).title, lang).toBeDefined();
+      expect(count(textsOf('pdf', lang)) + PDF_TOOL_IDS.reduce((sum, id) => sum + count(textsOf(id, lang)), 0) + count(hubs[lang]), lang).toBeGreaterThan(500);
+    }
   });
 
   it('passes the voice rules of the README: no forbidden word, emoji or arrow, one exclamation only in a success line', () => {
-    const problems = [
-      ...checkVoice(textsOf('pdf'), 'src/tools/pdf/i18n/en.ts'),
-      ...PDF_TOOL_IDS.flatMap((id) => checkVoice(textsOf(id), `src/tools/${id}/i18n/en.ts`)),
-      ...checkVoice(enPdfTools, 'src/i18n/en/pdf-tools.ts'),
-    ];
+    const problems = LANGS.flatMap((lang) => [
+      ...checkVoice(textsOf('pdf', lang), `src/tools/pdf/i18n/${lang}.ts`, lang),
+      ...PDF_TOOL_IDS.flatMap((id) => checkVoice(textsOf(id, lang), `src/tools/${id}/i18n/${lang}.ts`, lang)),
+      ...checkVoice(hubs[lang], `src/i18n/${lang}/pdf-tools.ts`, lang),
+    ]);
     expect(problems).toEqual([]);
   });
 
@@ -193,17 +205,23 @@ describe('a voz dos textos de PDF (F5a)', () => {
     for (const id of PDF_TOOL_IDS) {
       expect(checkVoice({ ...(textsOf(id) as object), extra: 'A seamless way to merge' }, id), id).toHaveLength(1);
       expect(checkVoice({ ...(textsOf(id) as object), extra: 'Wow! A tool' }, id), id).toHaveLength(1);
+      // F6: the same breaks in the Portuguese and Spanish files, and a marketing word of the language.
+      expect(checkVoice({ ...(textsOf(id, 'pt') as object), extra: 'Uma ferramenta revolucionária' }, id, 'pt'), `pt ${id}`).toHaveLength(1);
+      expect(checkVoice({ ...(textsOf(id, 'es') as object), extra: '¡Guau! Una herramienta' }, id, 'es'), `es ${id}`).toHaveLength(1);
     }
     expect(checkVoice({ ...(textsOf('pdf') as object), extra: 'Done 🎉' }, 'panel')).toHaveLength(1);
     expect(checkVoice({ ...enPdfTools, extra: 'Unlock the power of PDF' }, 'hub')).toHaveLength(1);
+    expect(checkVoice({ ...(hubs.es as object), extra: 'Une PDF sin esfuerzo' }, 'hub', 'es')).toHaveLength(1);
   });
 
-  it('has a success line with its exclamation in every tool that processes files', () => {
-    let lines = 0;
-    for (const id of PDF_TOOL_IDS) {
-      const panel = (textsOf(id) as { panel?: { done?: string } }).panel;
-      if (panel?.done?.includes('!')) lines += 1;
+  it('has a success line with its exclamation in every tool that processes files, in each language', () => {
+    for (const lang of LANGS) {
+      let lines = 0;
+      for (const id of PDF_TOOL_IDS) {
+        const panel = (textsOf(id, lang) as { panel?: { done?: string } }).panel;
+        if (panel?.done?.includes('!')) lines += 1;
+      }
+      expect(lines, lang).toBeGreaterThan(0);
     }
-    expect(lines).toBeGreaterThan(0);
   });
 });

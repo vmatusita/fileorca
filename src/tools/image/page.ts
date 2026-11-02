@@ -1,8 +1,8 @@
 // Build-time side of an image tool page (server only: never import this from an island). It turns the
 // registry, the texts and the route map into the plain data the page and the island need: the panel
 // props that go into data-props, the crumbs, the next-step chips, the related grid and the preset
-// table. A link is only made to a page that exists in the language of the page (DECISOES § 6), so
-// Portuguese and Spanish, where only Compress image exists, get no chip to a missing tool.
+// table. A link is only made to a page that exists in the language of the page (DECISOES § 6); every image page
+// exists in the three languages since the F6, and the filters stay for a page that may not.
 import { languagesOf, pathFor, routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import type { ImageToolPanelTexts, ToolBlurb } from '../../i18n/types.ts';
@@ -45,7 +45,7 @@ export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
   return [{ href: homePath(lang), name: IMAGE_PANEL_TEXTS[lang].next.moreTools, target: 'home', icon: ICONS.home, category: 'none' }];
 }
 
-/** The page a refused HEIC or AVIF is sent to: in Portuguese and Spanish that is the English page (the text says so). */
+/** The page a refused HEIC or AVIF is sent to, in the language of the page (English where a language had no converter). */
 function converterLink(tool: ImageToolId, lang: Lang): ConverterLink {
   const route = routeById(tool);
   const path = route.paths[lang] ?? route.paths.en ?? '/';
@@ -79,14 +79,14 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Rec
     pdf: def.pdf === true,
     chips: chipsFor(id, lang),
     converters: convertersFor(lang),
-    // In Portuguese the coffee line leads to the support page until the Pix arrives (F6; DECISOES § 49).
-    coffeeHref: lang === 'pt' ? pathFor('support', lang) : KOFI_URL,
+    // In Portuguese the coffee line leads to the Pix of the support page (PLANO "Doações"; F6, decision 8).
+    coffeeHref: lang === 'pt' ? `${pathFor('support', lang)}#pix` : KOFI_URL,
     adsOn: buildAdsConfig().scriptEnabled,
     ...(initial ? { initial } : {}),
   };
 }
 
-/** Home › Image tools › tool (› preset). The hub crumb only where the hub exists (English); Portuguese and Spanish go Home › tool. */
+/** Home › Image tools › tool (› preset), in the language of the page. */
 export function crumbsFor(id: ImagePageId, lang: Lang): Crumb[] {
   const def = IMAGE_PAGES[id];
   const common = TEXTS[lang].common;
@@ -108,7 +108,7 @@ export interface RelatedCard {
   category: 'image' | 'pdf';
 }
 
-/** The related grid: tools that exist in this language, at most six. Empty in Portuguese and Spanish. */
+/** The related grid: tools that exist in this language, at most six. */
 export function relatedFor(id: ImagePageId, lang: Lang): RelatedCard[] {
   return IMAGE_PAGES[id].related
     .filter((tool) => existsIn(tool, lang))

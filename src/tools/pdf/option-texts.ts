@@ -91,6 +91,9 @@ export interface NumbersTexts {
   pageN: string;
   pageNofTotal: string;
   nOfTotal: string;
+  /** The words the page numbers are written with, as the examples above show them: "Page" and "of". */
+  pageWord: string;
+  ofWord: string;
   startLabel: string;
   startError: string;
   skipFirst: string;

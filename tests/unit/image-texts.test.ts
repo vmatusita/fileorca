@@ -22,8 +22,16 @@ describe('texts of the image pages against the route map', () => {
     for (const lang of LANGS) expect(Object.keys(IMAGE_PANEL_TEXTS[lang]).sort()).toEqual(Object.keys(IMAGE_PANEL_TEXTS.en).sort());
   });
 
-  it('refuses the texts of a page in a language it does not exist in', () => {
-    expect(() => imageToolTexts('resize-image', 'pt')).toThrow(/no pt texts/);
+  it('gives each page the texts of its own language, now that every page exists in the three (F6, decision 4)', () => {
+    // Before the F6 a page without a translation had no texts there, and imageToolTexts refused it ('no pt texts'). Every
+    // image page is in the three languages now, so the map has no gap to refuse (the type makes a missing language fail
+    // to compile): each language gets its own file, never the English one standing in.
+    for (const id of IMAGE_PAGE_IDS) {
+      expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
+      for (const lang of LANGS) expect(imageToolTexts(id, lang), `${id} ${lang}`).toBe(IMAGE_TOOL_TEXTS[id][lang]);
+      expect(imageToolTexts(id, 'pt'), id).not.toBe(imageToolTexts(id, 'en'));
+      expect(imageToolTexts(id, 'es'), id).not.toBe(imageToolTexts(id, 'en'));
+    }
     expect(imageToolTexts('compress-image', 'es').h1).toBe('Comprimir imagen');
   });
 
@@ -43,10 +51,22 @@ describe('what the page hands to the island', () => {
       expect(chips.length, id).toBeLessThanOrEqual(4);
       for (const chip of chips) expect(chip.href.endsWith('/'), chip.href).toBe(true);
     }
-    const pt = chipsFor('compress-image', 'pt');
-    expect(pt).toHaveLength(1);
-    expect(pt[0]).toMatchObject({ href: '/pt/', target: 'home', name: 'Mais ferramentas' });
-    expect(chipsFor('compress-image', 'es')[0]).toMatchObject({ href: '/es/', target: 'home' });
+    // F6: every image tool exists in Portuguese and Spanish, so the chips there are the English ones, each with the path and
+    // the name of the language (before, Compress image had only the home chip in pt and es). The home chip stays the
+    // fallback for a page with no tool to offer in its language, with the text of the panel.
+    for (const id of IMAGE_PAGE_IDS) {
+      const targets = chipsFor(id, 'en').map((chip) => chip.target);
+      for (const lang of ['pt', 'es'] as const) {
+        const chips = chipsFor(id, lang);
+        expect(chips.map((chip) => chip.target), `${id} ${lang}`).toEqual(targets);
+        for (const chip of chips) {
+          expect(chip.href, `${id} ${lang}`).toBe(routeById(chip.target as ImagePageId).paths[lang]);
+          expect(chip.href.startsWith(`/${lang}/`), chip.href).toBe(true);
+          expect(chip.name, `${id} ${lang}`).toBe(blurbOf(chip.target as ImagePageId, lang)?.name);
+        }
+      }
+    }
+    expect(IMAGE_PANEL_TEXTS.pt.next.moreTools).toBe('Mais ferramentas');
   });
 
   it('gives Image to PDF the PDF colour and the other tools the image colour', () => {
@@ -55,9 +75,11 @@ describe('what the page hands to the island', () => {
     expect(chips.find((chip) => chip.target === 'resize-image')?.category).toBe('image');
   });
 
-  it('sends a refused HEIC to the English converter, also from the translated pages, and gives a refused AVIF no link at all', () => {
-    expect(panelData('compress-image', 'pt').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
-    expect(panelData('compress-image', 'es').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
+  it('sends a refused HEIC to the converter of the page language, and gives a refused AVIF no link at all', () => {
+    expect(panelData('compress-image', 'en').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
+    // F6: HEIC to JPG exists in Portuguese and Spanish, so the translated pages send there (to the English page before).
+    expect(panelData('compress-image', 'pt').converters.heic).toEqual({ href: '/pt/heic-para-jpg/', name: 'HEIC para JPG' });
+    expect(panelData('compress-image', 'es').converters.heic).toEqual({ href: '/es/heic-a-jpg/', name: 'HEIC a JPG' });
     for (const lang of ['en', 'pt', 'es'] as const) expect(panelData('compress-image', lang).converters.avif, lang).toBeUndefined();
   });
 
@@ -82,25 +104,46 @@ describe('what the page hands to the island', () => {
     }
   });
 
-  it('builds the crumbs Home, Image tools, tool and preset in English; Home and tool in the other languages', () => {
+  it('builds the crumbs Home, Image tools, tool and preset in every language (F6: the hub exists in pt and es now)', () => {
     expect(crumbsFor('compress-image-to-100kb', 'en').map((crumb) => crumb.path)).toEqual(['/', '/image-tools/', '/compress-image/', '/compress-image/to-100kb/']);
     expect(crumbsFor('compress-image', 'en').map((crumb) => crumb.path)).toEqual(['/', '/image-tools/', '/compress-image/']);
-    expect(crumbsFor('compress-image', 'pt').map((crumb) => crumb.path)).toEqual(['/pt/', '/pt/comprimir-imagem/']);
+    // Before the F6 the Portuguese crumbs were Home and the tool, with no hub to point to.
+    expect(crumbsFor('compress-image', 'pt').map((crumb) => crumb.path)).toEqual(['/pt/', '/pt/ferramentas-de-imagem/', '/pt/comprimir-imagem/']);
+    expect(crumbsFor('compress-image-to-100kb', 'es').map((crumb) => crumb.path)).toEqual(['/es/', '/es/herramientas-de-imagen/', '/es/comprimir-imagen/', '/es/comprimir-imagen/a-100kb/']);
+    for (const lang of LANGS) {
+      for (const id of IMAGE_PAGE_IDS) {
+        const crumbs = crumbsFor(id, lang);
+        expect(crumbs.at(-1)?.path, `${id} ${lang}`).toBe(routeById(id).paths[lang]);
+        expect(crumbs[1]?.path, `${id} ${lang}`).toBe(routeById('image-tools').paths[lang]);
+      }
+    }
   });
 
   it('lists related tools and presets only where they exist', () => {
     expect(relatedFor('compress-image', 'en').length).toBeLessThanOrEqual(6);
     expect(relatedFor('compress-image', 'en').length).toBeGreaterThan(0);
-    expect(relatedFor('compress-image', 'pt')).toEqual([]);
     expect(presetRows('compress-image', 'en').map((row) => row.href)).toEqual(['/compress-image/to-100kb/', '/compress-image/to-1mb/']);
-    expect(presetRows('compress-image', 'pt')).toEqual([]);
     expect(presetRows('compress-image-to-1mb', 'en')).toEqual([]);
+    // F6: the related tools and the presets exist in Portuguese and Spanish now, so the grid and the table there are the
+    // English ones, each with the path of the language (both were empty before).
+    const idOfEnglishPath = new Map(IMAGE_PAGE_IDS.map((id) => [routeById(id).paths.en, id]));
+    for (const lang of ['pt', 'es'] as const) {
+      for (const id of IMAGE_PAGE_IDS) {
+        const related = relatedFor(id, lang);
+        const english = relatedFor(id, 'en').map((card) => idOfEnglishPath.get(card.href));
+        expect(related.map((card) => card.href), `${id} ${lang}`).toEqual(english.map((other) => (other ? routeById(other).paths[lang] : 'unknown')));
+        for (const card of related) expect(card.href.startsWith(`/${lang}/`), card.href).toBe(true);
+      }
+      expect(presetRows('compress-image', lang).map((row) => row.href), lang).toEqual(['compress-image-to-100kb', 'compress-image-to-1mb'].map((id) => routeById(id as ImagePageId).paths[lang]));
+      expect(presetRows('compress-image-to-1mb', lang), lang).toEqual([]);
+    }
   });
 
-  it('has a blurb for every page in English, and in Portuguese and Spanish for Compress image', () => {
-    for (const id of IMAGE_PAGE_IDS) expect(blurbOf(id, 'en')?.name, id).toBeTruthy();
+  it('has a blurb for every page in every language (F6; before, only Compress image had one in Portuguese and Spanish)', () => {
+    for (const lang of LANGS) for (const id of IMAGE_PAGE_IDS) expect(blurbOf(id, lang)?.name, `${id} ${lang}`).toBeTruthy();
     expect(blurbOf('compress-image', 'pt')?.name).toBe('Comprimir imagem');
-    expect(blurbOf('resize-image', 'pt')).toBeUndefined();
+    expect(blurbOf('resize-image', 'pt')?.name).toBe('Redimensionar imagem');
+    expect(blurbOf('resize-image', 'es')?.name).toBe('Redimensionar imagen');
     expect(IMAGE_PAGES['image-to-pdf'].pdf).toBe(true);
   });
 });

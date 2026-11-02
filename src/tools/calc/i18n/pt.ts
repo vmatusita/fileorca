@@ -1,0 +1,50 @@
+import type { CalcSharedTexts } from '../types.ts';
+import type { CalcPageShared } from './en.ts';
+
+// Textos que toda calculadora em português divide (docs/i18n/pt.md): os da ilha, que vão no data-props, e os da página.
+export default {
+  island: {
+    example: 'exemplo',
+    pdf: 'Baixar PDF',
+    csv: 'CSV',
+    copyLink: 'Copiar link',
+    copied: 'Link copiado',
+    decimalHint: 'Use vírgula nos decimais, como 11,5.',
+    copyThis: 'Copie este link',
+    exportFailed: 'A Oli não conseguiu carregar o gerador de PDF. Recarregue a página e tente de novo.',
+    stale: 'Corrija o campo destacado para atualizar o resultado.',
+    nextLabel: 'Próximo passo',
+    scheduleHeading: 'Cronograma de parcelas',
+    showSchedule: 'Ver o cronograma completo',
+    hideSchedule: 'Esconder o cronograma',
+    year: 'Ano {n}',
+    columns: { number: 'Nº', payment: 'Parcela', principal: 'Amortização', interest: 'Juros', balance: 'Saldo devedor' },
+    duration: { year: '1 ano', years: '{n} anos', month: '1 mês', months: '{n} meses', join: ' e ', none: 'nenhum tempo' },
+    addRow: 'Adicionar uma dívida',
+    removeRow: 'Remover a dívida {n}',
+    row: 'Dívida {n}',
+    unitLabel: 'Entrada em reais ou em porcentagem do valor do imóvel',
+    units: { amount: 'R$', percent: '%' },
+    pdfLabels: {
+      inputs: 'O que você digitou',
+      results: 'Resultados',
+      premises: 'Premissas',
+      schedule: 'Cronograma',
+      notice: 'Ferramenta educativa',
+      site: 'Feito com as calculadoras grátis do fileorca.com',
+      page: 'Página {n} de {total}',
+    },
+  } satisfies CalcSharedTexts,
+  page: {
+    seal: 'Seus números ficam no seu aparelho',
+    reviewed: 'Revisado por {name} em {date}.',
+    firstPublished: 'Publicado pela primeira vez em {date}.',
+    readOn: 'Lido em {date}.',
+    exampleInputs: 'Você digita',
+    exampleResults: 'Você recebe',
+    guide: 'Leia o guia: {title}',
+    openCalc: 'Abrir a {name} na página dela',
+    disclaimerHeading: 'Ferramenta educativa',
+    exampleCaption: 'O exemplo resolvido: o que entra e o que sai',
+  } satisfies CalcPageShared,
+};

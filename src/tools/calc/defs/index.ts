@@ -1,7 +1,7 @@
 // Every calculator definition, by page id: the island imports this map, so the one calculator entry
-// (src/tools/calc/mount.ts) carries the 18 definitions and the engines, and moving from one calculator to
+// (src/tools/calc/mount.ts) carries the 26 definitions and the engines (the 8 Brazilian ones since the F6), and moving from one calculator to
 // another costs only the HTML (DECISOES § 110).
-import type { CalcPageId } from '../registry.ts';
+import type { MoneyPageId } from '../registry.ts';
 import type { CalcDef } from '../types.ts';
 import { creditCardDef, consolidationDef, debtPayoffDef } from './debts.ts';
 import { affordabilityDef, biweeklyDef, extraPaymentsDef, fifteenVsThirtyDef, refinanceDef } from './homes.ts';
@@ -9,6 +9,7 @@ import { autoLoanDef, balloonDef, loanAmortizationDef, personalLoanDef } from '.
 import { mortgageDef } from './mortgage.ts';
 import { rentVsBuyDef } from './rent.ts';
 import { aprApyDef, compoundDef, savingsGoalDef, simpleInterestDef } from './savings.ts';
+import { brCompoundDef, brCreditCardDef, brDebtPayoffDef, brEarlyPayoffDef, brPersonalLoanDef, brRentOrBuyDef, brSacPriceDef, brVehicleLoanDef } from './br.ts';
 
 const defs = [
   mortgageDef,
@@ -29,6 +30,14 @@ const defs = [
   biweeklyDef,
   fifteenVsThirtyDef,
   balloonDef,
+  brSacPriceDef,
+  brVehicleLoanDef,
+  brPersonalLoanDef,
+  brEarlyPayoffDef,
+  brCreditCardDef,
+  brDebtPayoffDef,
+  brCompoundDef,
+  brRentOrBuyDef,
 ] as unknown as CalcDef[];
 
-export const DEFS = Object.fromEntries(defs.map((def) => [def.id, def])) as Record<CalcPageId, CalcDef>;
+export const DEFS = Object.fromEntries(defs.map((def) => [def.id, def])) as Record<MoneyPageId, CalcDef>;

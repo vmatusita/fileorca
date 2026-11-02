@@ -6,12 +6,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
-import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 import { AUTHOR, CONTACT_EMAIL, SITE_ORIGIN } from '../../src/platform/site.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES, CALC_PAGE_IDS, CALC_TOOL_IDS, GUIDE_IDS, HOME_CALC_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, HOME_MONEY_IDS, HUB_MONEY_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
 import { listFiles } from './dist.ts';
@@ -105,7 +105,13 @@ function row(item: string, how: string, problems: string[]): Row {
   return { item, ok: problems.length === 0, how, problems };
 }
 
-/** The real site: every page of the route map, the tools of the registry. */
+/**
+ * The real site: every page of the route map, the tools of the registry. F6 (decision 7): the cards of each language from
+ * the registries and the map, so the home, the money hub and the PDF hub of Portuguese and Spanish are held to what exists
+ * there: the home lists the money calculators of HOME_MONEY_IDS[lang] (when the language has a money hub, moneyHubId) and
+ * the PDF tools of the language; each money hub lists HUB_MONEY_IDS[lang]; the PDF hub of each language its 12 tools and
+ * Image to PDF.
+ */
 export function realSite(dir: string): Site {
   const pages = ROUTES.flatMap((route) =>
     languagesOf(route).map((lang) => ({ id: route.id, lang, path: route.paths[lang] ?? '/', indexable: route.indexable, ads: route.adArea !== undefined })),
@@ -113,21 +119,28 @@ export function realSite(dir: string): Site {
   const tools = Object.fromEntries(
     LANGS.map((lang) => [lang, IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? [])]),
   ) as Record<Lang, string[]>;
-  const pdfPaths = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
-  const cards: Site['cards'] = {
-    // The home lists the five credit calculators and, from the F5a, the 12 PDF tools (DECISOES § 162).
-    home: { en: [...HOME_CALC_IDS.map((id) => CALC_PAGES[id].path), ...pdfPaths] },
-    [MONEY_HUB_ID]: { en: CALC_TOOL_IDS.map((id) => CALC_PAGES[id].path) },
+  const pdfPaths = (lang: Lang): string[] => PDF_TOOL_IDS.flatMap((id) => pagePath(id, lang) ?? []);
+  const moneyPaths = (ids: readonly MoneyPageId[], lang: Lang): string[] => ids.flatMap((id) => (moneyPage(id, lang) ? (pagePath(id, lang) ?? []) : []));
+  const cards: NonNullable<Site['cards']> = { home: {} };
+  for (const lang of LANGS) {
+    const hub = moneyHubId(lang);
+    const hasMoneyHub = pagePath(hub, lang) !== undefined;
+    // The home lists the five credit calculators of the language and, from the F5a, the 12 PDF tools (DECISOES § 162).
+    if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang)] };
+    if (hasMoneyHub) cards[hub] = { ...cards[hub], [lang]: moneyPaths(HUB_MONEY_IDS[lang], lang) };
     // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.
-    [PDF_HUB_ID]: { en: [...pdfPaths, routeById('image-to-pdf').paths.en ?? '/image-to-pdf/'] },
-  };
+    const image = pagePath('image-to-pdf', lang);
+    if (pagePath(PDF_HUB_ID, lang)) cards[PDF_HUB_ID] = { ...cards[PDF_HUB_ID], [lang]: [...pdfPaths(lang), ...(image ? [image] : [])] };
+  }
+  // The Brazilian calculators are search entries once their rows are in the map (prompt F6, decision 5).
+  const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
   return {
     dir,
     pages,
     tools,
     cards,
     // F5b: the ten file guides are search entries too (DECISOES § 190).
-    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS],
+    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...brazilian, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS],
     pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
   };
 }
@@ -149,6 +162,9 @@ function htmlFiles(dir: string): { path: string; html: string }[] {
     .filter((file) => file.endsWith('.html'))
     .map((file) => ({ path: pathOfFile(file, dir), html: readFileSync(file, 'utf8') }));
 }
+
+/** The languages as the gate's table names them. */
+const LANG_NAMES: Record<Lang, string> = { en: 'inglês', pt: 'português', es: 'espanhol' };
 
 function langOfPath(path: string): Lang {
   return (LANGS.find((lang) => lang !== 'en' && path.startsWith(`/${lang}/`)) ?? 'en') as Lang;
@@ -367,14 +383,22 @@ function factsOf(html: string): PageFacts {
   };
 }
 
-/** One H1, and an H1, title and description that are not empty and not the same as another page's (`seen` has the earlier ones). */
+/**
+ * One H1, and an H1, title and description that are not empty and not the same as another page's (`seen` has the earlier
+ * ones). The title and the description are compared across the whole site. F6: the H1 is compared within the language
+ * of the page, because the H1 of a tool is its name (prompt F6, decision 4) and the glossaries give some tools the same
+ * name in Portuguese and Spanish ("Dividir PDF", "Comprimir PDF", "Proteger PDF", "Desbloquear PDF"): two language
+ * versions of one page, linked by hreflang, are not two pages that repeat each other. Two pages of one language still may
+ * not share an H1.
+ */
 function ownProblems(path: string, facts: PageFacts, seen: Seen): string[] {
   const problems: string[] = [];
   if (facts.h1Count !== 1) problems.push(`${path}: ${facts.h1Count} H1`);
   for (const [kind, value] of Object.entries(facts.values) as [keyof PageFacts['values'], string][]) {
+    const key = kind === 'h1' ? `${langOfPath(path)} ${value}` : value;
     if (!value) problems.push(`${path}: sem ${kind}`);
-    else if (seen[kind].has(value)) problems.push(`${path}: ${kind} igual ao de ${seen[kind].get(value)}`);
-    else seen[kind].set(value, path);
+    else if (seen[kind].has(key)) problems.push(`${path}: ${kind} igual ao de ${seen[kind].get(key)}`);
+    else seen[kind].set(key, path);
   }
   return problems;
 }
@@ -418,6 +442,9 @@ export function checkContent(site: Site): Row[] {
  * explicit, so a page that drops out of the route map, loses its ad area or is not in the build fails here by
  * name instead of silently leaving the generic items: the page exists and has an ad area, its H1, title and
  * description are its own among all the pages, it has 60 words in <main> and 150 for each AdSlot.
+ * F6 (decision 4): every language of the PDF pages, not only English. Each PDF page must exist in English and in every
+ * language any PDF page of the site has (the 12 tools and the hub are translated together), so a page that drops out of
+ * one language fails by name too.
  */
 export function checkPdfPages(site: Site): Row[] {
   const ids = site.pdf ?? [];
@@ -428,10 +455,14 @@ export function checkPdfPages(site: Site): Row[] {
   // The values the other pages already use: a PDF page may not repeat any of them.
   const seen = newSeen();
   const pdfPaths = new Set<string>();
+  const languages = LANGS.filter((lang) => lang === 'en' || site.pages.some((page) => ids.includes(page.id) && page.lang === lang));
   for (const id of ids) {
-    const page = site.pages.find((candidate) => candidate.id === id && candidate.lang === 'en');
-    if (!page) present.push(`${id}: sem página em inglês no mapa de rotas`);
-    else {
+    for (const lang of languages) {
+      const page = site.pages.find((candidate) => candidate.id === id && candidate.lang === lang);
+      if (!page) {
+        present.push(lang === 'en' ? `${id}: sem página em inglês no mapa de rotas` : `${id}: sem página em ${lang} no mapa de rotas`);
+        continue;
+      }
       pdfPaths.add(page.path);
       if (!page.indexable) present.push(`${page.path}: não indexável`);
       if (!page.ads) present.push(`${page.path}: sem área de anúncio (as páginas de PDF carregam AdSlots)`);
@@ -453,7 +484,7 @@ export function checkPdfPages(site: Site): Row[] {
   }
   const what = `${ids.length} páginas do registro de PDF (as ferramentas e o hub)`;
   return [
-    row('As páginas de PDF estão no mapa de rotas e no build', `${what}: em inglês, indexáveis, com área de anúncio e o arquivo no build`, present),
+    row('As páginas de PDF estão no mapa de rotas e no build', `${what}: em ${languages.map((lang) => LANG_NAMES[lang]).join(', ')}, indexáveis, com área de anúncio e o arquivo no build`, present),
     row('PDF: H1, título e descrição próprios', `${what}: um H1 e nenhum H1, título ou descrição igual ao de outra página do site`, own),
     row('PDF: texto mínimo e mais conteúdo que anúncio', `${what}: ${MIN_MAIN_WORDS} palavras no <main> e ${MIN_WORDS_PER_AD} para cada AdSlot, e pelo menos um AdSlot`, [...thin, ...ads]),
   ];

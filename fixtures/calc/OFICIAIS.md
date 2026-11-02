@@ -34,3 +34,24 @@ A regra do oráculo é a do plano: parcela arredondada ao centavo, juros de cada
 | Ponto de equilíbrio de **27 meses** ($2,500 / $91) | Federal Reserve, "A Consumer's Guide to Mortgage Refinancings": <https://www.federalreserve.gov/pubs/refinancings/> (update de 27/ago/2008) | Usa a economia depois do imposto (fator 0.72) e parcelas em dólares inteiros ($1,199 e $1,073, quando a conta dá $1,199.10 e $1,073.64). A calculadora não trata imposto. |
 | Apêndice J (c)(1)(ii) a (v), (c)(2) e seguintes | CFPB, Apêndice J | Primeiro período ou primeira parcela irregular, períodos semimensais, trimestrais ou semanais: a Personal loan só tem parcelas mensais iguais com o primeiro período regular. |
 | Apêndice A da Regulation DD, Partes I.A, I.B, I.C, I.E e II | CFPB, Apêndice A | Partem dos juros em dólares de um prazo em dias (ou de taxas em degraus), não de uma taxa nominal com capitalização, que é a entrada da APR to APY. |
+
+## Brasil (F6): as calculadoras adaptadas
+
+O oráculo é o `scripts/oracle/calc_br.py`. Fontes lidas em 1º/nov/2026, nos sites do Banco Central (bcb.gov.br) e do governo federal (gov.br).
+
+### Reproduzidos
+
+| Caso | Calculadora | Fonte | O que a fonte publica | O que o oráculo dá |
+| --- | --- | --- | --- | --- |
+| `boletim-8-cet` | `br-personal-loan` | Boletim Consumo e Finanças nº 8, "Custo Efetivo Total" (BCB e Senacon, 30/jul/2014): <https://www.gov.br/mj/pt-br/assuntos/seus-direitos/consumidor/Anexos/boletimconsumofinancas08-cet-2013-custo-efetivo-total.pdf> | R$ 1.000 financiados a 12% ao ano, 5 parcelas de **R$ 205,73**, tarifa de R$ 50 e IOF de R$ 10 pagos à vista: **CET de 43,93% ao ano (3,08% ao mês)** | Com a taxa no campo de quatro casas (0,9489% ao mês): parcela de R$ 205,73, R$ 940 liberados, CET de 43,93% ao ano e 3,08% ao mês |
+| `in-83-demonstrativo` | `br-personal-loan` | Instrução Normativa BCB nº 83/2021, art. 2 (o demonstrativo do CET): <https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Instru%C3%A7%C3%A3o%20Normativa%20BCB&numero=83> | R$ 1.000 solicitados, R$ 80 de despesas financiadas, 1% ao mês, 24 parcelas de **R$ 50,84**, valor financiado **R$ 1.080** | Parcela de R$ 50,84 e R$ 1.080 financiados |
+
+### Deixados de fora, com o motivo
+
+| Exemplo | Fonte | Motivo |
+| --- | --- | --- |
+| Total das parcelas de **R$ 1.220,16** | IN BCB 83, a mesma tabela | A tabela multiplica a parcela por 24 (24 × R$ 50,84). Pela regra do plano a última parcela zera o saldo, e o total dá R$ 1.220,14. A parcela e o valor financiado entram. A tabela não publica o CET. |
+| CET de **120,10% ao ano** (6,79% ao mês) | Guia de Excelência na Oferta de Produtos e Serviços Financeiros, Operações de Crédito, 3ª edição (BCB): <https://www.bcb.gov.br/content/cidadaniafinanceira/documentos_cidadania/guia_de_excelencia/guia_de_excelencia_oferta_de_produtos_servi%C3%A7os_financeiros.pdf> | R$ 10.000 em 36 parcelas de R$ 736,44 dão CET de 116,18% ao ano: o exemplo inclui custos de uns R$ 175 que o texto não revela. Não é reproduzível. |
+| As quatro simulações da Calculadora do Cidadão | <https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormFinanciamentoPrestacoesFixas.do?method=exibirFormFinanciamentoPrestacoesFixas> | A página só mostra as entradas; o resultado aparece depois de enviar o formulário, o que a run não faz. |
+| SAC e PRICE com números | BCB (Nota Técnica nº 56/2025 e Calculadora do Cidadão) | Nenhuma fonte oficial lida publica um cronograma SAC ou PRICE com números. A convenção segue a descrição da Nota Técnica nº 56, e o oráculo é o único árbitro. |
+| Teto do cartão com números | Lei 14.690/2023, art. 28; Res. CMN 4.549, arts. 2-A a 2-D | A lei e a resolução não trazem exemplo numérico. As notícias oficiais (gov.br, dezembro de 2023 e janeiro de 2024) dizem "R$ 1.000 de dívida, no máximo R$ 1.000 de juros"; o caso `cap-bites` testa o teto. |

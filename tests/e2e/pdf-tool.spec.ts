@@ -732,3 +732,27 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   await expect(handle(0)).toHaveAttribute('aria-pressed', 'false');
   expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 });
+
+// DECISOES § 240: the options and their fields come with the ready card, and the island moves the focus to the action
+// in an effect that runs a frame later. A field the person is already in keeps the focus and what is typed in it (before,
+// the keys typed in that frame went to the action button, and a range typed in the Delete pages field was lost).
+test('Delete PDF pages: a field focused as the file is read keeps the focus and what is typed in it', async ({ page }) => {
+  await openTool(page, '/delete-pdf-pages/');
+  // The page focuses the range field the moment it appears, as a quick person would, before the island's effects run.
+  await page.evaluate(() => {
+    new MutationObserver((_, observer) => {
+      const field = document.getElementById('fo-delete-pick');
+      if (!field) return;
+      field.focus();
+      observer.disconnect();
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+  await choosePdfs(page, [pdfFile('gen-ja-otimizado.pdf')]);
+  const field = page.getByLabel('Pick pages by number');
+  await expect(field).toBeVisible({ timeout: 30_000 });
+  // Two frames and a task: the island's effects have run.
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done, 100)))));
+  await expect(field).toBeFocused();
+  await page.keyboard.type('2-3');
+  await expect(field).toHaveValue('2-3');
+});

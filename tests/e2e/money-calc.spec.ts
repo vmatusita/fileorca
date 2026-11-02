@@ -5,10 +5,14 @@
 import { readFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { CALC_PAGES, GUIDES, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import enShared from '../../src/tools/calc/i18n/en.ts';
+import esShared from '../../src/tools/calc/i18n/es.ts';
+import ptShared from '../../src/tools/calc/i18n/pt.ts';
+import sacPriceTexts from '../../src/tools/br-sac-price/i18n/pt.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
-import { strictPdf } from './lib/pdf.ts';
+import { parsePdf, strictPdf } from './lib/pdf.ts';
 import { pdfTextLines } from './lib/pdf-text.ts';
 
 interface OracleCase {
@@ -485,4 +489,222 @@ test.describe('second pass of the review F4', () => {
     });
     expect(column.heading).toBe(column.cell);
   });
+});
+
+// F6 (decisions 1, 5 and 6): the files of the Spanish and Portuguese pages, saved from the page. The Spanish mortgage has
+// the English oracle's schedule in the English CSV shape, with the Spanish header and year, and a Letter PDF; the
+// Brazilian SAC × PRICE has its oracle's two schedules in the Portuguese CSV (semicolon, decimal comma, BOM) and an A4 PDF.
+test.describe('F6: the CSV and the PDF in Spanish and Portuguese', () => {
+  test('the Spanish mortgage CSV is the English oracle schedule in Spanish words, and its PDF is Letter', async ({ page }) => {
+    const es = moneyPage('mortgage-calculator', 'es');
+    expect((await page.goto(es?.path ?? ''))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const { name, bytes } = await saved(page, csvButton(page));
+    expect(name).toBe(`${es?.file}.csv`);
+    const text = bytes.toString('utf8');
+    expect(text.startsWith('﻿'), 'BOM UTF-8').toBe(true);
+    const lines = text.slice(1).split('\r\n');
+    expect(lines.pop(), 'the file ends with CRLF').toBe('');
+    const [header, ...rows] = lines.map((line) => line.split(','));
+    const s = esShared.island;
+    expect(header).toEqual([s.year.replace(/\s*\{n\}/, ''), s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance]);
+    const expected = (pageCase('mortgage-calculator').expected.rows ?? []).map(([n, payment, interest, principal, balance]) => [
+      s.year.replace('{n}', String(Math.ceil((n ?? 0) / 12))),
+      String(n),
+      ...[payment, principal, interest, balance].map((cents) => (Number(cents) / 100).toFixed(2)),
+    ]);
+    expect(rows).toEqual(expected);
+
+    const pdf = await saved(page, pdfButton(page));
+    expect(pdf.name).toBe(`${es?.file}.pdf`);
+    const read = parsePdf(new Uint8Array(pdf.bytes));
+    for (const sheet of read.pages) expect([sheet.width, sheet.height]).toEqual([612, 792]);
+    const drawn = pdfTextLines(new Uint8Array(pdf.bytes));
+    expect(drawn).toContain('$682,636.71');
+    const last = drawn.lastIndexOf('360');
+    expect(drawn.slice(last - 1, last + 5)).toEqual([s.year.replace('{n}', '30'), '360', '$1,900.91', '$1,890.67', '$10.24', '$0.00']);
+  });
+
+  test('the SAC × PRICE CSV has both oracle schedules with semicolons and the decimal comma, and its PDF is A4', async ({ page }) => {
+    const pt = moneyPage('br-sac-price', 'pt');
+    expect((await page.goto(pt?.path ?? ''))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const { name, bytes } = await saved(page, csvButton(page));
+    expect(name).toBe(`${pt?.file}.csv`);
+    const text = bytes.toString('utf8');
+    expect(text.startsWith('﻿'), 'BOM UTF-8').toBe(true);
+    const lines = text.slice(1).split('\r\n');
+    expect(lines.pop(), 'the file ends with CRLF').toBe('');
+    const [header, ...rows] = lines.map((line) => line.split(';'));
+    const s = ptShared.island;
+    const v = sacPriceTexts.panel.view;
+    expect(header).toEqual([s.year.replace(/\s*\{n\}/, ''), s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, v.feesColumn, s.columns.balance, v.correction]);
+    // The oracle's row is [number, payment, interest, principal, balance, correction]; the table puts principal first, and the
+    // payment carries the insurance and fees of the month, in a column of their own too (review F6, a-2; DECISOES § 252).
+    const fees = Number(DEFS['br-sac-price'].initial['f']);
+    const real = (cents: number) => `${Math.trunc(cents / 100)},${String(Math.abs(cents) % 100).padStart(2, '0')}`;
+    const fixture = JSON.parse(readFileSync('fixtures/calc/br-sac-price.json', 'utf8')) as { cases: { id: string; expected: { sac: { rows: number[][] }; price: { rows: number[][] } } }[] };
+    const example = fixture.cases.find((entry) => entry.id === 'page-example')?.expected;
+    const expected = (['sac', 'price'] as const).flatMap((plan) =>
+      (example?.[plan].rows ?? []).map(([n, payment, interest, principal, balance, correction]) => [
+        `${v[plan]} · ${s.year.replace('{n}', String(Math.ceil((n ?? 0) / 12)))}`,
+        String(n),
+        ...[Number(payment) + fees, principal, interest, fees, balance, correction].map((cents) => real(Number(cents))),
+      ]),
+    );
+    expect(fees).toBeGreaterThan(0);
+    expect(rows.length).toBe(720);
+    expect(rows).toEqual(expected);
+
+    const pdf = await saved(page, pdfButton(page));
+    expect(pdf.name).toBe(`${pt?.file}.pdf`);
+    const read = parsePdf(new Uint8Array(pdf.bytes));
+    for (const sheet of read.pages) expect([sheet.width, sheet.height]).toEqual([595.28, 841.89]);
+    const drawn = pdfTextLines(new Uint8Array(pdf.bytes)).join('\n');
+    expect(drawn).toContain('R$ 4.754,95');
+    expect(drawn).toMatch(/Página 1 de \d+/);
+  });
+});
+
+// Review F6 (f-3; DECISOES § 246): the number of the ResultHero, with its unit, stays on one line from 320 to 1280px on every
+// calculator in the three languages, with the example it opens with. Before, "R$ 166.010,85" broke in the middle from 768px
+// ("R$ 166.010,8" and "5"), and the Portuguese "/mês" went to a line of its own.
+test('the ResultHero number and its unit stay on one line at 320, 360, 768 and 1280px, in the three languages', async ({ page }) => {
+  test.setTimeout(120_000);
+  const paths = [
+    ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
+    ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''),
+    ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
+  ];
+  const broken: string[] = [];
+  const english = new Set(CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path));
+  // Second pass (DECISOES § 253): a long whole amount typed in, "$22,222,828", which used to break at 320, 768 and 1280px.
+  const typed = `${CALC_PAGES['compound-interest-calculator'].path}#v=1&i=58900000&m=0&r=120000&y=30`;
+  for (const path of [...paths, typed]) {
+    await page.setViewportSize({ width: 320, height: 900 });
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await page.evaluate(() => document.fonts.ready);
+    for (const width of [320, 360, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const { lines, size } = await page.locator('.fo-rhero__num').first().evaluate((num) => ({
+        lines: Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight)),
+        size: parseFloat(getComputedStyle(num).fontSize),
+      }));
+      if (lines !== 1) broken.push(`${path} a ${width}px: ${lines} linhas`);
+      // The English numbers fit at their full size with their example: they stay at 48px, and 60px from 768px, as before.
+      if (english.has(path) && size < (width >= 768 ? 60 : 48)) broken.push(`${path} a ${width}px: ${size}px`);
+    }
+  }
+  expect(broken).toEqual([]);
+});
+
+// Review F6 (f-4; DECISOES § 247): no value of the worked example breaks inside a word or a number, at 320, 360 and 1280px, on
+// every calculator in the three languages ("R$ 1.084.638,2" and "0" before, and "$375,000.0" and "0" in Spanish); a value
+// may wrap at a space, and the page never scrolls sideways.
+test('the values of the worked example never break inside a number at 320, 360 and 1280px, in the three languages', async ({ page }) => {
+  test.setTimeout(120_000);
+  const paths = [
+    ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
+    ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''),
+    ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
+  ];
+  const broken: string[] = [];
+  for (const path of paths) {
+    await page.setViewportSize({ width: 320, height: 900 });
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await page.evaluate(() => document.fonts.ready);
+    for (const width of [320, 360, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const cells = await page.locator('.fo-example td').evaluateAll((tds) =>
+        tds.flatMap((td) => {
+          // Every run of characters with no ordinary space between them (a number, with its no-break space) is on one line.
+          const tops: { char: string; top: number }[] = [];
+          const walker = document.createTreeWalker(td, NodeFilter.SHOW_TEXT);
+          for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+            const text = node.textContent ?? '';
+            for (let i = 0; i < text.length; i += 1) {
+              const range = document.createRange();
+              range.setStart(node, i);
+              range.setEnd(node, i + 1);
+              const rect = range.getClientRects()[0];
+              if (rect) tops.push({ char: text[i] ?? '', top: Math.round(rect.top) });
+            }
+          }
+          let token: number[] = [];
+          const split: string[] = [];
+          for (const { char, top } of [...tops, { char: ' ', top: 0 }]) {
+            if (char === ' ') {
+              if (new Set(token).size > 1) split.push(td.textContent ?? '');
+              token = [];
+            } else token.push(top);
+          }
+          return split.slice(0, 1);
+        }),
+      );
+      expect(await page.locator('.fo-example td').count(), path).toBeGreaterThan(0);
+      for (const cell of cells) broken.push(`${path} a ${width}px: "${cell}"`);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${path} a ${width}px`).toBeLessThanOrEqual(width);
+    }
+  }
+  expect(broken).toEqual([]);
+});
+
+// Review F6 (d-1; DECISOES § 251): text that is not a number of the page's language gets the range and how the page writes
+// decimals (WCAG 3.3.3); a number out of the range gets the range alone, in the three languages.
+test('a decimal written the way of another language gets the range and how to write it', async ({ page }) => {
+  for (const [lang, path, wrong, out] of [
+    ['pt', moneyPage('br-sac-price', 'pt')?.path ?? '', '11.5', '99'],
+    ['es', moneyPage('mortgage-calculator', 'es')?.path ?? '', '6,5', '99'],
+    ['en', CALC_PAGES['mortgage-calculator'].path, '6,5', '99'],
+  ] as const) {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const hint = { en: enShared, pt: ptShared, es: esShared }[lang].island.decimalHint;
+    const field = page.locator('#fo-calc-r');
+    const error = page.locator('#fo-calc-r-error');
+    await field.fill(wrong);
+    await expect(error, `${lang} ${wrong}`).toContainText(hint);
+    await field.fill(out);
+    await expect(error, `${lang} ${out}`).toBeVisible();
+    await expect(error, `${lang} ${out}`).not.toContainText(hint);
+    // Second pass (DECISOES § 254): letters and an empty field are not a matter of decimals, and a whole-number field takes none.
+    for (const text of ['abc', '']) {
+      await field.fill(text);
+      await expect(error, `${lang} "${text}"`).toBeVisible();
+      await expect(error, `${lang} "${text}"`).not.toContainText(hint);
+    }
+    await field.fill(lang === 'pt' ? '11,5' : '6.5');
+    const term = page.locator('#fo-calc-n, #fo-calc-t').first();
+    await term.fill(lang === 'pt' ? '12,5' : '30.5');
+    const termError = page.locator('#fo-calc-n-error, #fo-calc-t-error').first();
+    await expect(termError, `${lang} prazo`).toBeVisible();
+    await expect(termError, `${lang} prazo`).not.toContainText(hint);
+  }
+});
+
+// Second pass of the review F6 (DECISOES § 256): in the SAC × PRICE schedule, whose last columns are the insurance and fees
+// and the TR correction, the balance at the end of each year sits under "Saldo devedor", not under the last column.
+test('the year rows of the SAC × PRICE schedule put the balance under its column', async ({ page }) => {
+  const pt = moneyPage('br-sac-price', 'pt');
+  expect((await page.goto(pt?.path ?? ''))?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.getByRole('button', { name: ptShared.island.showSchedule }).click();
+  await expect(page.locator('.fo-amort tr.fo-amort__year').first()).toBeVisible();
+  const columns = await page.locator('.fo-amort').evaluate((table) => {
+    const head = [...table.querySelectorAll('thead th')].map((th) => th.textContent?.trim() ?? '');
+    const year = table.querySelector('tr.fo-amort__year');
+    let column = 0;
+    let balanceAt = -1;
+    for (const cell of [...(year?.children ?? [])] as HTMLTableCellElement[]) {
+      if (/R\$/.test(cell.textContent ?? '')) balanceAt = column;
+      column += cell.colSpan;
+    }
+    return { head, balanceAt, width: column };
+  });
+  expect(columns.width).toBe(columns.head.length);
+  expect(columns.head[columns.balanceAt]).toBe(ptShared.island.columns.balance);
 });
