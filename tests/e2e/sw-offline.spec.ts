@@ -15,6 +15,7 @@ import { BR_CALC_PAGES, CALC_PAGES, LIFE_CALC_PAGES } from '../../src/tools/calc
 import { chooseImage, downloadBytes, generatedJpeg } from './lib/page.ts';
 import { choosePdfs, filesOf, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { pngPixels } from './lib/png.ts';
+import { WARM_SELECTOR } from '../../src/platform/sw-register.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
 import { allKept, cacheKeys, controlled, kept, offline, online, reloadOffline, visit } from './lib/sw.ts';
 
@@ -185,4 +186,37 @@ test('a tool kept without its engine says so offline, in buoy, and works again w
   } else {
     test.info().annotations.push({ type: 'webkit', description: 'setOffline(false) does not reach the service worker; the online path is covered with the worker blocked' });
   }
+});
+
+// The budget with the worker on (criterion 12; DECISOES § 287): the tool page still loads its 2 JS files and nothing of
+// the engine before the first file. After the load event the page fetches /sw.js, and the worker (Chromium shows its
+// requests) fetches only files of the site: the offline page of the language and its files, and the page's own files
+// again, mostly from the HTTP cache. The list goes to the log for the report.
+test('with the worker on, a tool page keeps its 2 JS files and no engine before the first file', async ({ page, context, browserName }) => {
+  const seen: { path: string; after: boolean; worker: boolean }[] = [];
+  let loaded = false;
+  context.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === server.origin) seen.push({ path: url.pathname, after: loaded, worker: request.serviceWorker() !== null });
+  });
+  await page.goto(`${server.origin}/compress-image/`);
+  await page.waitForLoadState('load');
+  loaded = true;
+  await controlled(page);
+  await allKept(page);
+  await kept(page, '/offline/');
+  const before = seen.filter((entry) => !entry.after && !entry.worker);
+  const scripts = new Set(before.filter((entry) => /^\/_astro\/.*\.js$/.test(entry.path)).map((entry) => entry.path));
+  expect(scripts.size, [...scripts].join(', ')).toBe(2);
+  for (const entry of seen) expect(entry.path, 'no engine before the first file').not.toMatch(/worker|\.wasm$/);
+  // The browser fetches the worker's script itself: the server sees it, the context does not.
+  expect(server.requests.some((request) => request.pathname === '/sw.js')).toBe(true);
+  const byWorker = [...new Set(seen.filter((entry) => entry.worker).map((entry) => entry.path))].sort();
+  if (browserName === 'chromium') {
+    // The files the page names (its scripts, stylesheet, preloads, manifest and icon) or fetched: decision 4.
+    const named = await page.evaluate((selector) => [...document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>(selector)].map((tag) => new URL('src' in tag ? tag.src : tag.href).pathname), WARM_SELECTOR);
+    const pageFiles = new Set(['/compress-image/', '/sw.js', ...named, ...before.map((entry) => entry.path)]);
+    for (const path of byWorker) expect(path === '/offline/' || pageFiles.has(path), `${path} is a file of the page or of the offline page`).toBe(true);
+  }
+  console.log(`[sw-orcamento] ${browserName}: antes do load ${before.length} pedidos (${scripts.size} JS); depois: /sw.js e ${byWorker.length} pelo worker: ${byWorker.join(' ')}`);
 });

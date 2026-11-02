@@ -41,5 +41,5 @@ export function sizeLabel(bytes: number, lang: OpenWithLang): string {
   const tenths = unit === 0 || value >= 100 ? null : Math.round(value * 10);
   const whole = String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, lang === 'pt' ? '.' : ',');
   const body = tenths === null ? whole : `${Math.floor(tenths / 10)}${lang === 'pt' ? ',' : '.'}${tenths % 10}`;
-  return `${body} ${units[unit]}`;
+  return `${body} ${units[unit]}`;
 }

@@ -11,7 +11,7 @@ import { INBOX_CACHE, INBOX_TOOL_KEY } from '../../src/sw/shared.ts';
 import { downloadBytes, generatedJpeg } from './lib/page.ts';
 import { filesOf, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
-import { controlled, visit } from './lib/sw.ts';
+import { controlled, share, visit } from './lib/sw.ts';
 import type { TestFile } from './lib/page.ts';
 
 test.use({ serviceWorkers: 'allow' });
@@ -23,31 +23,6 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   await server.close();
 });
-
-/** What Android does: a POST of navigation, multipart, with the files in the field of the manifest. */
-async function share(page: Page, action: string, files: TestFile[]): Promise<void> {
-  await page.evaluate((target) => {
-    const form = document.createElement('form');
-    form.id = 'fo-test-share';
-    form.method = 'post';
-    form.enctype = 'multipart/form-data';
-    form.action = target;
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.name = 'files';
-    input.multiple = true;
-    form.append(input);
-    document.body.append(form);
-  }, action);
-  await page.setInputFiles('#fo-test-share input', files);
-  const posted = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname === action);
-  await page.evaluate(() => (document.getElementById('fo-test-share') as HTMLFormElement).submit());
-  const response = await posted;
-  expect(response.fromServiceWorker(), 'the service worker answered the POST').toBe(true);
-  expect(response.status()).toBe(303);
-  await page.waitForURL(`**${action}`);
-  await expect(page.locator('[data-shared]')).toBeVisible();
-}
 
 const inboxState = (page: Page) =>
   page.evaluate(async ([name, key]) => ({ inbox: await caches.has(name), choice: sessionStorage.getItem(key) }), [INBOX_CACHE, INBOX_TOOL_KEY] as const);
@@ -114,4 +89,15 @@ test('opened directly, with no files, the page explains and leads to the hubs', 
   await expect(page.locator('.fo-says')).toContainText(openWith.emptySays);
   await expect(page.locator('.fo-openwith__hubs a')).toHaveCount(2);
   await expect(page.locator('[data-shared]')).toBeHidden();
+});
+
+test('the three manifests of the build: the icons, the id and the action of the share target answer', async ({ request }) => {
+  for (const lang of ['en', 'pt', 'es'] as const) {
+    const response = await request.get(`${server.origin}/manifest-${lang}.webmanifest`);
+    expect(response.status()).toBe(200);
+    const manifest = (await response.json()) as { id: string; start_url: string; icons: { src: string }[]; share_target: { action: string } };
+    expect(manifest.id).toBe(manifest.start_url);
+    for (const icon of manifest.icons) expect((await request.get(`${server.origin}${icon.src}`)).status(), icon.src).toBe(200);
+    expect((await request.get(`${server.origin}${manifest.share_target.action}`)).status(), manifest.share_target.action).toBe(200);
+  }
 });

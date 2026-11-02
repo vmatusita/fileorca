@@ -1,7 +1,7 @@
 // What the specs of the service worker share (F8; DECISOES § 294): wait for the worker to control the page and to keep
 // a page, read every cache key, and turn the network off for real (the test server closes) with the browser offline.
 import { expect, type BrowserContext, type Page } from '@playwright/test';
-import { dismissCookies, hydrated } from './page.ts';
+import { dismissCookies, hydrated, type TestFile } from './page.ts';
 import type { SwServer } from './sw-server.ts';
 
 /** The page is controlled by the worker (it registers after the load event and claims the page when it activates). */
@@ -84,4 +84,29 @@ export async function reloadOffline(page: Page, { island = true } = {}): Promise
   expect(response?.status(), 'the kept page answers 200').toBe(200);
   expect(response?.fromServiceWorker(), 'the page comes from the service worker').toBe(true);
   if (island) await hydrated(page);
+}
+
+/** What Android does: a POST of navigation, multipart, with the files in the field of the manifest. */
+export async function share(page: Page, action: string, files: TestFile[]): Promise<void> {
+  await page.evaluate((target) => {
+    const form = document.createElement('form');
+    form.id = 'fo-test-share';
+    form.method = 'post';
+    form.enctype = 'multipart/form-data';
+    form.action = target;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'files';
+    input.multiple = true;
+    form.append(input);
+    document.body.append(form);
+  }, action);
+  await page.setInputFiles('#fo-test-share input', files);
+  const posted = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname === action);
+  await page.evaluate(() => (document.getElementById('fo-test-share') as HTMLFormElement).submit());
+  const response = await posted;
+  expect(response.fromServiceWorker(), 'the service worker answered the POST').toBe(true);
+  expect(response.status()).toBe(303);
+  await page.waitForURL(`**${action}`);
+  await expect(page.locator('[data-shared]')).toBeVisible();
 }

@@ -35,4 +35,13 @@ if (!existsSync(`${DIST}/404.html`) || !existsSync(`${DIST}/pt/404.html`) || !ex
   problems.add('faltam dist/404.html, dist/pt/404.html ou dist/es/404.html');
 }
 if (existsSync(`${DIST}/pt/404/index.html`) || existsSync(`${DIST}/es/404/index.html`)) problems.add('404 emitido como pasta (404/index.html)');
-problems.finish('worker sem código', 'só assets em ./dist, sem main, sem run_worker_first, sem _worker.js e sem functions/');
+// F8 (DECISOES § 287): /sw.js is the browser's service worker, a static file of the assets like any other. It is never
+// the Worker's code: no main points at it, and it holds no Worker entry (export default, fetch handler of a module).
+const sw = existsSync(`${DIST}/sw.js`) ? readFileSync(`${DIST}/sw.js`, 'utf8') : null;
+if (sw === null) problems.add('dist/sw.js não existe');
+else {
+  if (!sw.startsWith('// /sw.js of fileorca.com, built by src/sw/build.ts')) problems.add('dist/sw.js não é o que src/sw/build.ts gera');
+  if (/^\s*(?:import|export)\b/m.test(sw)) problems.add('dist/sw.js tem import ou export (seria módulo, não o script clássico do navegador)');
+  if (JSON.stringify(config).includes('sw.js')) problems.add('wrangler.jsonc cita sw.js');
+}
+problems.finish('worker sem código', 'só assets em ./dist, sem main, sem run_worker_first, sem _worker.js e sem functions/; o sw.js é arquivo estático');
