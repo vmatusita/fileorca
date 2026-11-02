@@ -2460,3 +2460,11 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **As cores:** módulos `#000000` sobre `#FFFFFF` no arquivo baixado e na prévia, nos dois temas: um QR é lido como escuro sobre claro por toda câmera. Os hex só existem em `qr.ts` (atributos do SVG e `fillStyle` do canvas), nunca no CSS, no modelo da exceção do QR do Pix no README do design.
 - **O resto:** nomes fixos `qr-code.png` e `qr-code.svg`; o SVG é montado pelo nosso código, sem o texto da pessoa; a caixa de texto tem `autocomplete="off"`, `spellcheck={false}` e `autocapitalize="off"` (o corretor avançado do Chrome envia o texto ao Google); o selo diz "Your text never leaves your device"; as relacionadas são Resize image, PNG to JPG, Image to PDF e Compress image; a /licenses credita o "QRCode for JavaScript" de Kazuhiko Arase, de onde o núcleo do `qrcode` vem; o `gate:licencas` reprova `qrcode` ou `dijkstrajs` no `island` ou em mais de um chunk.
 - **Testes:** `tests/unit/qr.test.ts` (o SVG rasterizado pelo `@resvg/resvg-js` e lido pelo `jsqr` em todas as 40 versões) e `tests/e2e/qr-code.spec.ts` (o PNG e o SVG baixados, com e sem a Oli, um endereço curto, um longo, acento e emoji e o maior permitido, o `binaryData` igual aos bytes UTF-8, a privacidade do texto e os eventos sem ele), mais o QR no `ads.spec.ts`, no `a11y.spec.ts` e no `budgets.spec.ts`.
+
+## § 273 · O teste de 90 dias de casa e saúde começa em 2 de novembro de 2026 (F7, decisão 12)
+
+- **Início:** 2/nov/2026, o dia em Brasília em que a run abriu a PR da F7 (o plano estimava por volta de 25/fev/2027 para o fim, contando de uma F7 mais tardia).
+- **Fim:** 31/jan/2027, 90 dias depois.
+- **O que olhar no fim:** no Search Console, as impressões de cada uma das 11 calculadoras de casa e saúde (e dos dois hubs) nos 90 dias, contadas a partir do dia em que as páginas entraram em produção.
+- **Gatilho do backlog** (PLANO, "Backlog com gatilho"): as calculadoras de casa e de saúde com impressão nos 90 dias ganham versão em português e em espanhol, numa run própria; as sem impressão ficam só em inglês.
+- **Atenção:** se o merge da PR acontecer dias depois, as páginas só passam a contar dali; o fim continua em 31/jan/2027, e a leitura deve dizer quantos dias de produção cada página teve.
