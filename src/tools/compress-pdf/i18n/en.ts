@@ -76,6 +76,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   privacyNote: 'PDFs are compressed on your device, in your browser, and are never sent to a server. Your original files stay untouched.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'compressed',
     note: 'PDF files, as many as you like',
     progressLabel: 'Compressing PDFs',
     done: 'Done! Oli made it {percent} lighter.',

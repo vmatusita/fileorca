@@ -5,6 +5,7 @@ import type { PdfInspect, PdfOperation } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts, PdfToolPanelTexts } from '../../i18n/types.ts';
 import type { Outcome } from '../../analytics/events.ts';
 import type { ImageNeighbour, PdfPageDef, PdfToolId } from './registry.ts';
+import type { Lang } from '../../i18n/routes.ts';
 
 export interface PdfChip {
   href: string;
@@ -32,7 +33,7 @@ export interface PdfIcons {
 }
 
 export interface PdfPanelData<O = object> {
-  lang: 'en';
+  lang: Lang;
   page: PdfToolId;
   t: PdfPanelTexts;
   texts: PdfToolPanelTexts<O>;

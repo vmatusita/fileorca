@@ -67,6 +67,7 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
   privacyNote: 'PDFs are rotated on your device, in your browser, and are never sent to a server. Your original files stay untouched.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'rotated',
     note: 'PDF files, as many as you like',
     progressLabel: 'Rotating PDFs',
     done: 'Done! Oli turned your PDF.',

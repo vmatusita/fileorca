@@ -22,9 +22,10 @@ import Oli from '../image/Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from '../image/coffee.ts';
 import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
-import { IMAGES_ZIP_NAME, PDF_ZIP_NAME, pdfOutputNames } from './names.ts';
+import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
 import type { PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
+import type { PdfPanelTexts } from '../../i18n/types.ts';
 import type { PdfFileView, PdfPanelData, Thumbnails } from './types.ts';
 import type * as ClientModule from './client.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -121,8 +122,9 @@ function adBlocked(adsOn: boolean): boolean {
   return isAdBlocked({ adsOn, production: location.hostname === PRODUCTION_HOSTNAME, loaded: ads?.loaded === true, unitHeight: unit ? unit.offsetHeight : null });
 }
 
-/** The tag of a part of a split: the page of "each page", the part of the ranges, "selected" for the picked pages. */
-const splitTag = (mode: string | undefined, index: number): string => (mode === 'each' ? `page-${index}` : mode === 'ranges' ? `part-${index}` : 'selected');
+/** The tag of a part of a split, in the words of the page: the page of "each page", the part of the ranges, "selected". */
+const splitTag = (words: PdfPanelTexts['files'], mode: string | undefined, index: number): string =>
+  mode === 'each' ? `${words.page}-${index}` : mode === 'ranges' ? `${words.part}-${index}` : words.selected;
 
 const codecOf = (failure: Failure | null): Codec => {
   const source = failure?.source;
@@ -372,7 +374,7 @@ export default function PdfPanel(props: PdfPanelData) {
       (item.outputs ?? []).map((output) => ({
         source: item.file.name,
         output,
-        tag: output.kind !== 'pdf' ? `page-${output.index ?? 1}` : page === 'split-pdf' ? splitTag((stateRef.current as { mode?: string }).mode, output.index ?? 1) : suffix,
+        tag: output.kind !== 'pdf' ? `${t.files.page}-${output.index ?? 1}` : page === 'split-pdf' ? splitTag(t.files, (stateRef.current as { mode?: string }).mode, output.index ?? 1) : suffix,
       })),
     );
     const names = pdfOutputNames(
@@ -387,7 +389,7 @@ export default function PdfPanel(props: PdfPanelData) {
       const output = entries[0].output;
       const type = output.kind === 'pdf' ? 'application/pdf' : output.kind === 'png' ? 'image/png' : 'image/jpeg';
       const blob = new Blob([output.bytes as BlobPart], { type });
-      m.single = { blob, url: URL.createObjectURL(blob), name: names[0] ?? 'document.pdf' };
+      m.single = { blob, url: URL.createObjectURL(blob), name: names[0] ?? `${t.files.document}.pdf` };
     } else if (entries.length > 1) {
       m.zipping = true;
       render();
@@ -395,7 +397,7 @@ export default function PdfPanel(props: PdfPanelData) {
         const engine = await client();
         const blob = await engine.zip(entries.map((entry, i) => ({ name: names[i] ?? `${i}.bin`, blob: new Blob([entry.output.bytes as BlobPart]) })));
         if (m.runId !== id) return;
-        m.bundle = { blob, url: URL.createObjectURL(blob), name: page === 'pdf-to-jpg' ? IMAGES_ZIP_NAME : PDF_ZIP_NAME };
+        m.bundle = { blob, url: URL.createObjectURL(blob), name: `${page === 'pdf-to-jpg' ? t.files.imagesZip : t.files.zip}.zip` };
       } catch {
         for (const item of done) refuse(item, { reason: 'load' });
       }

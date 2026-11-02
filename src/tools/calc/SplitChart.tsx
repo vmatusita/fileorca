@@ -18,7 +18,8 @@ export function shares(a: number, b: number): [number, number] {
   return [first, 100 - first];
 }
 
-export default function SplitChart({ a, b, name }: { a: SplitPart; b: SplitPart; name: string }) {
+/** `percent` writes a share as the page's language does: 68% (en, pt), 68 % (es). */
+export default function SplitChart({ a, b, name, percent }: { a: SplitPart; b: SplitPart; name: string; percent: (value: number) => string }) {
   const [pa, pb] = shares(a.cents, b.cents);
   return (
     <div class="fo-split">
@@ -44,13 +45,13 @@ export default function SplitChart({ a, b, name }: { a: SplitPart; b: SplitPart;
         <li>
           <i class="fo-split__key fo-split__key--a" />
           <span>
-            {a.label} <b>{a.text}</b>{` · ${pa}%`}
+            {a.label} <b>{a.text}</b>{` · ${percent(pa)}`}
           </span>
         </li>
         <li>
           <i class="fo-split__key fo-split__key--b" />
           <span>
-            {b.label} <b>{b.text}</b>{` · ${pb}%`}
+            {b.label} <b>{b.text}</b>{` · ${percent(pb)}`}
           </span>
         </li>
       </ul>

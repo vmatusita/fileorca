@@ -42,7 +42,7 @@ export interface ToolInfo {
 
 export function toolInfo(tool: FileGuideTool): ToolInfo {
   if (isPdfTool(tool)) {
-    return { name: enCommon.pdf[tool].name, h1: PDF_TOOL_TEXTS[tool].h1, path: PDF_PAGES[tool].path, icon: PDF_PAGES[tool].icon, category: 'pdf', pdf: true };
+    return { name: enCommon.pdf[tool].name, h1: PDF_TOOL_TEXTS.en[tool].h1, path: PDF_PAGES[tool].path, icon: PDF_PAGES[tool].icon, category: 'pdf', pdf: true };
   }
   const def = IMAGE_PAGES[tool];
   return { name: enCommon.tools[tool].name, h1: imageToolTexts(tool, 'en').h1, path: pathFor(tool, 'en'), icon: def.icon, category: def.pdf ? 'pdf' : 'image', pdf: false };

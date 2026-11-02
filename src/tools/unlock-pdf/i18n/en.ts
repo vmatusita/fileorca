@@ -58,6 +58,7 @@ const texts: PdfToolTexts<UnlockTexts> = {
     'Your PDF and the password you type are handled on your device, in your browser, and are never sent to a server. Oli does not keep them.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'unlocked',
     note: 'one PDF at a time',
     progressLabel: 'Removing protection',
     done: 'Done! Oli took the protection off your PDF.',

@@ -60,15 +60,26 @@ export function reorderPages(doc: PDFDocument, order: readonly number[]): void {
 export const NUMBER_SIZE = 10;
 export const NUMBER_MARGIN = 28;
 
-/** The text of one number ("Page" is English on every page until the F6). */
-export function numberText(format: NumberFormat, n: number, last: number): string {
+/** The words of a page number, in the language of the page that asks (F6, decision 4). */
+export interface NumberWords {
+  page: string;
+  of: string;
+}
+
+/** The English words: an operation that names none gets these, so the English output never changes. */
+export const ENGLISH_NUMBER_WORDS: NumberWords = { page: 'Page', of: 'of' };
+
+/** The text of one number, in the words of the page ("Page 3 of 12", "Página 3 de 12"), in WinAnsi. */
+export function numberText(format: NumberFormat, n: number, last: number, words: NumberWords = ENGLISH_NUMBER_WORDS): string {
+  const page = winAnsi(words.page);
+  const of = winAnsi(words.of);
   switch (format) {
     case 'page-n':
-      return `Page ${n}`;
+      return `${page} ${n}`;
     case 'page-n-of-total':
-      return `Page ${n} of ${last}`;
+      return `${page} ${n} ${of} ${last}`;
     case 'n-of-total':
-      return `${n} of ${last}`;
+      return `${n} ${of} ${last}`;
     default:
       return String(n);
   }
@@ -78,7 +89,11 @@ export function numberText(format: NumberFormat, n: number, last: number): strin
  * Numbers the pages. With `skipFirst` the first page gets none and the second one gets `start`; "of N" is the last
  * number written (DECISOES § 146).
  */
-export async function numberPages(doc: PDFDocument, options: { position: Position; format: NumberFormat; start: number; skipFirst: boolean }): Promise<void> {
+export async function numberPages(
+  doc: PDFDocument,
+  options: { position: Position; format: NumberFormat; start: number; skipFirst: boolean; page?: string; of?: string },
+): Promise<void> {
+  const words: NumberWords = { page: options.page ?? ENGLISH_NUMBER_WORDS.page, of: options.of ?? ENGLISH_NUMBER_WORDS.of };
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const pages = doc.getPages();
   const numbered = options.skipFirst ? pages.length - 1 : pages.length;
@@ -87,7 +102,7 @@ export async function numberPages(doc: PDFDocument, options: { position: Positio
   pages.forEach((page, index) => {
     if (options.skipFirst && index === 0) return;
     const n = options.start + index - (options.skipFirst ? 1 : 0);
-    const text = numberText(options.format, n, last);
+    const text = numberText(options.format, n, last, words);
     const { box, rotate } = pageBox(page);
     const { width, height } = shownSize(box, rotate);
     const textWidth = font.widthOfTextAtSize(text, NUMBER_SIZE);

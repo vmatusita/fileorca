@@ -60,6 +60,7 @@ const texts: PdfToolTexts<WatermarkTexts> = {
     'Your PDFs and the watermark text are handled on your device, in your browser, and are never sent to a server.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'watermarked',
     note: 'PDF files, as many as you like',
     progressLabel: 'Adding watermarks',
     done: 'Done! Oli added the watermark to your PDF.',

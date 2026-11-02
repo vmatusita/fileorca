@@ -69,7 +69,8 @@ export type PdfOperation =
   | { kind: 'reorder'; order: number[] }
   /** Quarter turns clockwise per page (0 to 3); an empty list turns every page by `all`. */
   | { kind: 'rotate'; all: number; pages: Record<number, number> }
-  | { kind: 'numbers'; position: Position; format: NumberFormat; start: number; skipFirst: boolean }
+  /** `page` and `of` are the words of the page's language ("Página", "de"); without them, "Page" and "of". */
+  | { kind: 'numbers'; position: Position; format: NumberFormat; start: number; skipFirst: boolean; page?: string; of?: string }
   | { kind: 'watermark'; text: string; size: 'small' | 'medium' | 'large'; opacity: 'light' | 'medium' | 'strong'; direction: 'diagonal' | 'horizontal' }
   /** The signature as a PNG, the pages it goes on, and its box as fractions of the page as shown (top left corner and width). */
   | { kind: 'sign'; image: Uint8Array; pages: number[]; box: { x: number; y: number; width: number } }

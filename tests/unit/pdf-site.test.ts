@@ -114,7 +114,7 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
     // The WebApplication is named like the H1 of the tool and sits in the free multimedia category, like the image tools.
     const merge = await container.renderToString(PdfToolPage as Parameters<AstroContainer['renderToString']>[0], { props: { id: 'merge-pdf' } });
     const app = parse(merge).querySelectorAll('script[type="application/ld+json"]').map((script) => script.text).join('');
-    expect(app).toContain(`"name":"${PDF_TOOL_TEXTS['merge-pdf'].h1}"`);
+    expect(app).toContain(`"name":"${PDF_TOOL_TEXTS.en['merge-pdf'].h1}"`);
     expect(app).toContain('"isAccessibleForFree":true');
   }, 60_000);
 
@@ -154,7 +154,7 @@ describe('the SEO checks that know the PDF pages (scripts/lib/seo-pages.ts)', ()
 
   it('wants the title of a PDF tool to start with its name, and flags a canonical it does not match', () => {
     for (const id of PDF_TOOL_IDS) {
-      const name = PDF_TOOL_TEXTS[id].h1;
+      const name = PDF_TOOL_TEXTS.en[id].h1;
       expect(titleProblem(id, `${name}: online and free | FileOrca`, name), id).toBeNull();
       expect(titleProblem(id, 'Free PDF tools | FileOrca', name), id).toMatch(/não começa pelo nome da ferramenta/);
       expect(titleProblem(id, `${name} | FileOrca`, ''), id).toMatch(/não começa/);

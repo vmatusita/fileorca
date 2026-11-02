@@ -1,18 +1,17 @@
 ---
 // Footer (docs/design/components/Footer): the deep sea with the wave on its top edge; column titles are
-// H2; only links to pages that exist. The Image column lists the tools that exist in the language and,
-// where the image hub exists (English), the hub first. The Money column, where the money hub exists
-// (English), lists the hub and the five credit calculators (DECISOES § 118). The PDF column, where the PDF hub exists
-// (English), lists the hub and the first six PDF tools in hub order (F5a, DECISOES § 160): every
-// PDF page is one click from the hub, so none is an orphan. Never an ad inside the footer. With the AdSense
+// H2; only links to pages that exist in the language. The Image column lists the hub and the tools. The Money column
+// lists the language's money hub and its five credit calculators (DECISOES § 118; F6: the Brazilian hub and calculators
+// in Portuguese, the Spanish ones in Spanish). The PDF column lists the hub and the first six PDF tools in hub order (F5a,
+// DECISOES § 160): every PDF page is one click from the hub, so none is an orphan. Never an ad inside the footer. With the AdSense
 // anchor on the page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
-import { pathFor, routeById } from '../i18n/routes.ts';
+import { moneyHubId, pagePath, pathFor, routeById } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { CALC_PAGES, HOME_CALC_IDS, MONEY_HUB_ID } from '../tools/calc/registry.ts';
+import { HOME_MONEY_IDS } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import Icon from './Icon.astro';
 
@@ -48,11 +47,17 @@ const pdf =
         }),
       ]
     : [];
-const moneyHub = routeById(MONEY_HUB_ID).paths[lang];
-const money =
-  moneyHub && t.moneyCalculators && t.calcs
-    ? [{ label: t.moneyCalculators, href: moneyHub }, ...HOME_CALC_IDS.map((id) => ({ label: t.calcs?.[id].name ?? id, href: CALC_PAGES[id].path }))]
-    : [];
+const moneyHub = pagePath(moneyHubId(lang), lang);
+const money = moneyHub
+  ? [
+      { label: t.moneyCalculators, href: moneyHub },
+      ...HOME_MONEY_IDS[lang].flatMap((id) => {
+        const href = pagePath(id, lang);
+        const blurb = t.calcs[id];
+        return href && blurb ? [{ label: blurb.name, href }] : [];
+      }),
+    ]
+  : [];
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },

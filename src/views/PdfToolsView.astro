@@ -2,33 +2,35 @@
 // The PDF hub /pdf-tools/ (F5a, decision 7; the model of the image hub, DECISOES § 77 and § 96): eyebrow, H1 and one
 // line in the PDF band (coral), the grid of the 12 PDF tools in order of search volume with the Image to PDF card at the
 // end of its band (its page stays in the image hub, DECISOES § 148), one content AdSlot, the guide of which tool does
-// which job, how the files stay on the device, and the rail AdSlot. English only for now.
+// which job, how the files stay on the device, and the rail AdSlot, in the language of the page. The file guides exist
+// only in English, so only the English hub lists them (F5b note; F6, decision 4).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
-import { routeById } from '../i18n/routes.ts';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
 import enCommon from '../i18n/en/common.ts';
 import shared from '../i18n/en/file-guides.ts';
 import { FILE_GUIDES, guidesOfHub } from '../tools/guides/registry.ts';
-import t from '../i18n/en/pdf-tools.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { IMAGE_PAGES } from '../tools/image/registry.ts';
 
 interface Props {
-  lang: 'en';
+  lang?: Lang;
 }
-const { lang } = Astro.props;
+const { lang = 'en' } = Astro.props;
 const route = routeById(PDF_HUB_ID);
 const path = route.paths[lang] ?? '/pdf-tools/';
 const area = route.adArea ?? 'arquivos';
-const common = enCommon;
+const common = TEXTS[lang].common;
+const t = TEXTS[lang]['pdf-tools'];
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: common.pdfTools, path },
 ];
-const pdfCards = PDF_TOOL_IDS.map((id) => ({ href: PDF_PAGES[id].path, name: common.pdf[id].name, description: common.pdf[id].description, icon: PDF_PAGES[id].icon }));
+const pdfCards = PDF_TOOL_IDS.map((id) => ({ href: routeById(id).paths[lang] ?? PDF_PAGES[id].path, name: common.pdf[id].name, description: common.pdf[id].description, icon: PDF_PAGES[id].icon }));
 const imageToPdf = { href: routeById('image-to-pdf').paths[lang] ?? '/image-to-pdf/', name: common.tools['image-to-pdf'].name, description: common.tools['image-to-pdf'].description, icon: IMAGE_PAGES['image-to-pdf'].icon };
 // Image to PDF has the volume of the first band (100K-1M), so it closes that band, after the four PDF tools of it.
 const cards = [...pdfCards.slice(0, 4), imageToPdf, ...pdfCards.slice(4)];
@@ -37,7 +39,7 @@ const nameOf = (id: (typeof t.guide)[number]['tool']) => (id === 'image-to-pdf' 
 const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lang];
 // The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
 // links, never cards (gate:prontidao counts the cards of a hub against the tool registry).
-const guides = guidesOfHub('pdf-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description }));
+const guides = lang === 'en' ? guidesOfHub('pdf-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description })) : [];
 ---
 <BaseLayout
   lang={lang}
@@ -74,11 +76,13 @@ const guides = guidesOfHub('pdf-tools').map((id) => ({ href: FILE_GUIDES[id].pat
     <h2 id="privacy">{t.privacyHeading}</h2>
     {t.privacy.map((paragraph) => <p>{paragraph}</p>)}
   </section>
-  <section class="fo-section fo-prose" aria-labelledby="guides">
-    <h2 id="guides">{shared.hubGuidesHeading}</h2>
-    <ul>
-      {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
-    </ul>
-  </section>
+  {guides.length > 0 && (
+    <section class="fo-section fo-prose" aria-labelledby="guides">
+      <h2 id="guides">{shared.hubGuidesHeading}</h2>
+      <ul>
+        {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
+      </ul>
+    </section>
+  )}
   <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

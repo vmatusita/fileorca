@@ -5,6 +5,7 @@ import type { ImagePanelTexts } from '../../../i18n/types.ts';
 // screen lives in the tool's success line, never here. No text names a batch limit: there is none.
 export default {
   fileFallback: 'image',
+  files: { zip: 'fileorca-images', pdf: 'fileorca-images' },
   drop: {
     title: 'Drop images here',
     choose: 'Choose images',

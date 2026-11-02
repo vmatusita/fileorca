@@ -2,7 +2,7 @@
 // The tool page mold for the 12 PDF tools (docs/design/components/ToolPage; F5a, decision 9): breadcrumb, H1 +
 // PrivacySeal, the island, the first AdSlot (150 px clearance built in), then the blocks the content gate checks
 // (data-content: how, specs, faq, privacy, related) and the rail AdSlot (from 1280 px, not sticky). The same blocks as
-// ImageToolPage.astro, with "how it works" in three steps or more.
+// ImageToolPage.astro, with "how it works" in three steps or more. The same mold serves the three languages (F6).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
@@ -10,7 +10,7 @@ import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import AdSlot from '../../ads/AdSlot.astro';
-import { routeById } from '../../i18n/routes.ts';
+import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, webApplicationLd } from '../../seo/meta.ts';
 import { PANEL_POSES } from '../image/Oli.tsx';
@@ -25,20 +25,21 @@ import type { PdfToolId } from './registry.ts';
 
 interface Props {
   id: PdfToolId;
+  lang?: Lang;
 }
-const { id } = Astro.props;
-const lang = 'en';
+const { id, lang = 'en' } = Astro.props;
 const route = routeById(id);
-const t = PDF_TOOL_TEXTS[id];
+const t = PDF_TOOL_TEXTS[lang][id];
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
 const area = route.adArea ?? 'arquivos';
-const crumbs = crumbsFor(id);
-const related = relatedFor(id);
-const data = panelData(id);
+const crumbs = crumbsFor(id, lang);
+const related = relatedFor(id, lang);
+const data = panelData(id, lang);
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
-// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots.
-const guides = guidesOfTool(id).map((guide) => ({ href: FILE_GUIDES[guide].path, title: enCommon.fileGuides[guide].name }));
+// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots;
+// only in English, where the guides exist (DECISOES § 6; F6, decision 4).
+const guides = lang === 'en' ? guidesOfTool(id).map((guide) => ({ href: FILE_GUIDES[guide].path, title: enCommon.fileGuides[guide].name })) : [];
 ---
 <BaseLayout
   lang={lang}

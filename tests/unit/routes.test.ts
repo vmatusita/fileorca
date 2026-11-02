@@ -5,7 +5,7 @@ import { LANGS, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor } from
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
-import { fileSize, fmt, percent } from '../../src/i18n/format.ts';
+import { fileSize, fmt, groupDigits, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
@@ -14,6 +14,7 @@ import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_SUFFIX } from '../../scripts/lib/design-checks.ts';
 
 function pageFiles(dir = 'src/pages'): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -145,7 +146,8 @@ describe('mapa de rotas', () => {
       const all = strings([TEXTS[lang], IMAGE_PANEL_TEXTS[lang], ...Object.values(IMAGE_TOOL_TEXTS).map((texts) => texts[lang] ?? null), ...(lang === 'en' ? [PDF_PANEL_TEXTS, PDF_TOOL_TEXTS, enPdfTools] : [])], lang);
       expect(all.length).toBeGreaterThan(100);
       for (const [path, text] of all) {
-        expect(text.replace(TOOL_NAME, ''), path).not.toMatch(forbidden);
+        // The English file suffix of Unlock PDF ("-unlocked.pdf") is a file name, not the verb (DECISOES § 215).
+        expect(FILE_SUFFIX(path, text).replace(TOOL_NAME, ''), path).not.toMatch(forbidden);
         expect(text.replace(/[©®™]/g, ''), path).not.toMatch(/\p{Extended_Pictographic}/u);
         if (/[!¡]/.test(text)) {
           successLines += 1;
@@ -167,6 +169,13 @@ describe('formatting helpers', () => {
     expect(fileSize(2_400_000, 'en')).toBe('2.4\u00a0MB');
     expect(fileSize(2_400_000, 'pt')).toBe('2,4\u00a0MB');
     expect(fileSize(780_000, 'es')).toBe('780\u00a0KB');
+    // Spanish writes sizes as English since the F6 (DECISOES \u00a7 213); it wrote "2,4 MB" before.
+    expect(fileSize(2_400_000, 'es')).toBe('2.4\u00a0MB');
+    expect(fileSize(999_600, 'en')).toBe('1,000\u00a0KB');
+    expect(fileSize(999_600, 'pt')).toBe('1.000\u00a0KB');
+    expect(fileSize(312, 'pt')).toBe('312\u00a0B');
+    expect(groupDigits(20_000, 'es')).toBe('20,000');
+    expect(groupDigits(20_000, 'pt')).toBe('20.000');
   });
 });
 

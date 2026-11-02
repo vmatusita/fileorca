@@ -1,14 +1,14 @@
 // Reading and writing the numbers people type, in the format of each language (PLANO "Regra das
-// calculadoras": "o campo aceita o formato da página"). English writes 1,234.56; Portuguese 1.234,56;
-// Spanish 1.234,56 or 1 234,56. The site only shows English for now; the F6 pages use the other two.
+// calculadoras": "o campo aceita o formato da página"). English and Spanish write 1,234.56 (the Spanish
+// pages are for the Hispanic audience of the US, prompt F6 decision 1); Portuguese writes 1.234,56.
 // A number becomes a whole number at a fixed scale (cents, rate units) straight from its digits, with no
 // floating point in between, so what the person typed is exactly what the engine gets.
 
 export type NumberLang = 'en' | 'pt' | 'es';
 
-const DECIMAL: Record<NumberLang, string> = { en: '.', pt: ',', es: ',' };
-/** Thousands separators each language accepts (Spanish also takes a space, a no-break or a thin one). */
-const GROUP: Record<NumberLang, string> = { en: ',', pt: '.', es: '.   ' };
+const DECIMAL: Record<NumberLang, string> = { en: '.', pt: ',', es: '.' };
+/** Thousands separators each language accepts. */
+const GROUP: Record<NumberLang, string> = { en: ',', pt: '.', es: ',' };
 
 /** Escapes text for a RegExp (inside or outside a character class). */
 const escape = (chars: string): string => chars.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
@@ -46,12 +46,9 @@ export function parseScaled(text: string, lang: NumberLang, decimals: number, ne
   return sign < 0 && value !== 0 ? -value : value;
 }
 
-/** Groups the digits of a whole number with the language's thousands separator. */
+/** Groups the digits of a whole number with the language's thousands separator (also four digits: 1,234). */
 function grouped(digits: string, lang: NumberLang): string {
-  const sep = lang === 'en' ? ',' : lang === 'pt' ? '.' : ' ';
-  // Spanish only groups numbers of five digits or more (RAE): 1234 but 12 345.
-  if (lang === 'es' && digits.length <= 4) return digits;
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, GROUP[lang]);
 }
 
 export interface ScaledFormat {
@@ -74,19 +71,20 @@ export function formatScaled(value: number, decimals: number, lang: NumberLang, 
   return negative ? `${minus}${body}` : body;
 }
 
-/** Cents as money with the cents: $1,896.20. */
-export function money(cents: number, lang: NumberLang, minus: ScaledFormat['minus'] = '−'): string {
-  const body = formatScaled(Math.abs(cents), 2, lang, { min: 2 });
-  const sign = cents < 0 ? minus : '';
-  return lang === 'en' ? `${sign}$${body}` : `${sign}${body} $`;
+/** The currency sign before the number: $1,896.20 (en, es) and R$ 1.896,20 (pt, with a no-break space). */
+function withCurrency(sign: string, body: string, lang: NumberLang): string {
+  return lang === 'pt' ? `${sign}R$ ${body}` : `${sign}$${body}`;
 }
 
-/** Cents as whole dollars, half up: $682,637 (the totals of a sentence). */
+/** Cents as money with the cents: $1,896.20, R$ 1.896,20. */
+export function money(cents: number, lang: NumberLang, minus: ScaledFormat['minus'] = '−'): string {
+  return withCurrency(cents < 0 ? minus : '', formatScaled(Math.abs(cents), 2, lang, { min: 2 }), lang);
+}
+
+/** Cents as whole units, half up: $682,637, R$ 682.637 (the totals of a sentence). */
 export function dollars(cents: number, lang: NumberLang, minus: ScaledFormat['minus'] = '−'): string {
   const whole = Math.floor((Math.abs(cents) + 50) / 100);
-  const sign = cents < 0 && whole > 0 ? minus : '';
-  const body = formatScaled(whole, 0, lang);
-  return lang === 'en' ? `${sign}$${body}` : `${sign}${body} $`;
+  return withCurrency(cents < 0 && whole > 0 ? minus : '', formatScaled(whole, 0, lang), lang);
 }
 
 /** Rate units (1/10,000 of a point) as a percent: 6.5%, 29.99%, 0%. Spanish puts a no-break space before %. */

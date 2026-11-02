@@ -1,6 +1,6 @@
 // The PDF of a money calculator (F4; DECISOES § 115): the calculator's name, what the person entered, the
 // result, the assumptions, the whole schedule, the educational notice and the site address, on Letter
-// pages, in the standard Helvetica fonts (no font file is embedded). The island hands over strings that
+// pages (A4 for the Portuguese pages, F6 decision 5), in the standard Helvetica fonts (no font file is embedded). The island hands over strings that
 // are already formatted; the standard fonts only encode WinAnsi, so every string goes through `winAnsi`
 // first (a typographic minus becomes "-", a no-break space a space). Like build.ts: Producer and Creator
 // "FileOrca" and nothing else in the Info dictionary (no title with numbers, no dates), object streams off.
@@ -16,9 +16,12 @@ export interface ReportInput {
   table: { head: string[]; rows: string[][] };
   notice: string;
   labels: { inputs: string; results: string; premises: string; schedule: string; notice: string; site: string; page: string };
+  /** The paper: Letter when left out (the English and Spanish pages), A4 for the Portuguese ones. */
+  paper?: 'a4';
 }
 
-const PAGE = { width: 612, height: 792 };
+/** Page sizes in points: US Letter, and A4 as build.ts has it. */
+const PAPER = { letter: { width: 612, height: 792 }, a4: { width: 595.28, height: 841.89 } };
 const MARGIN = 48;
 const BODY = 10;
 const SMALL = 8.5;
@@ -49,6 +52,7 @@ export function winAnsi(text: string): string {
 
 interface Pen {
   doc: PDFDocument;
+  size: { width: number; height: number };
   page: PDFPage;
   y: number;
   regular: PDFFont;
@@ -56,8 +60,8 @@ interface Pen {
 }
 
 function newPage(pen: Pen): void {
-  pen.page = pen.doc.addPage([PAGE.width, PAGE.height]);
-  pen.y = PAGE.height - MARGIN;
+  pen.page = pen.doc.addPage([pen.size.width, pen.size.height]);
+  pen.y = pen.size.height - MARGIN;
 }
 
 function room(pen: Pen, needed: number): void {
@@ -80,7 +84,7 @@ function wrap(text: string, font: PDFFont, size: number, width: number): string[
 }
 
 function paragraph(pen: Pen, text: string, size = BODY, font = pen.regular): void {
-  for (const line of wrap(winAnsi(text), font, size, PAGE.width - 2 * MARGIN)) {
+  for (const line of wrap(winAnsi(text), font, size, pen.size.width - 2 * MARGIN)) {
     room(pen, LINE);
     pen.page.drawText(line, { x: MARGIN, y: pen.y, size, font });
     pen.y -= LINE;
@@ -100,14 +104,14 @@ function pairs(pen: Pen, rows: [string, string][]): void {
     pen.page.drawText(winAnsi(label), { x: MARGIN, y: pen.y, size: BODY, font: pen.regular });
     const text = winAnsi(value);
     const width = pen.bold.widthOfTextAtSize(text, BODY);
-    pen.page.drawText(text, { x: PAGE.width - MARGIN - width, y: pen.y, size: BODY, font: pen.bold });
+    pen.page.drawText(text, { x: pen.size.width - MARGIN - width, y: pen.y, size: BODY, font: pen.bold });
     pen.y -= LINE;
   }
 }
 
 /** The table: the first column to the left, the numbers to the right, the header again on every page. */
 function table(pen: Pen, head: string[], rows: string[][]): void {
-  const width = PAGE.width - 2 * MARGIN;
+  const width = pen.size.width - 2 * MARGIN;
   const first = width * 0.2;
   const rest = (width - first) / Math.max(1, head.length - 1);
   const draw = (cells: string[], font: PDFFont) => {
@@ -136,10 +140,12 @@ export async function buildReport(input: ReportInput): Promise<Uint8Array> {
   const doc = await PDFDocument.create({ updateMetadata: false });
   doc.setProducer('FileOrca');
   doc.setCreator('FileOrca');
+  const size = PAPER[input.paper ?? 'letter'];
   const pen: Pen = {
     doc,
-    page: doc.addPage([PAGE.width, PAGE.height]),
-    y: PAGE.height - MARGIN,
+    size,
+    page: doc.addPage([size.width, size.height]),
+    y: size.height - MARGIN,
     regular: await doc.embedFont(StandardFonts.Helvetica),
     bold: await doc.embedFont(StandardFonts.HelveticaBold),
   };

@@ -19,7 +19,7 @@ import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import BeforeAfter from './BeforeAfter.tsx';
 import Oli from './Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from './coffee.ts';
-import { EXTENSION, PDF_BATCH_NAME, ZIP_NAME, uniqueNames } from './names.ts';
+import { EXTENSION, uniqueNames } from './names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
 import type { FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
@@ -273,14 +273,14 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         item.output ? [{ blob: item.output.blob, format: item.output.format === 'png' ? ('png' as const) : ('jpeg' as const), width: item.output.width, height: item.output.height }] : [],
       );
       const blob = await buildPdf(pages, pdfKey as 'image' | 'letter' | 'a4');
-      return { kind: 'pdf', blob, name: items.length === 1 ? names[0] ?? PDF_BATCH_NAME : PDF_BATCH_NAME, key: pdfKey };
+      return { kind: 'pdf', blob, name: items.length === 1 ? names[0] ?? `${t.files.pdf}.pdf` : `${t.files.pdf}.pdf`, key: pdfKey };
     }
     if (items.length < 2) return null;
     const { zipFiles } = await import('./engine-client.ts').catch(() => {
       throw unavailable();
     });
     const blob = await zipFiles(items.flatMap((item, index) => (item.output ? [{ name: names[index] ?? `${index}.bin`, blob: item.output.blob }] : [])));
-    return { kind: 'zip', blob, name: ZIP_NAME, key: '' };
+    return { kind: 'zip', blob, name: `${t.files.zip}.zip`, key: '' };
   }
 
   async function run(): Promise<void> {

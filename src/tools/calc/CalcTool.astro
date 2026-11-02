@@ -4,7 +4,8 @@
 // "reviewed"); the island (fields, result, ExportBar, scenarios, chips); the first AdSlot, 150 px from the
 // chips; the schedule island; how to use; how it works (formula, assumptions, worked example from the
 // engine, official sources, educational notice: the data-ymyl blocks of gate:dinheiro-saude); the presets
-// table; the questions; the privacy note; the related grid; the rail AdSlot.
+// table; the questions; the privacy note; the related grid; the rail AdSlot. It serves the English pages, their
+// Spanish versions and the Brazilian calculators, each in its language; the presets and guides only in English (F6).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
@@ -19,25 +20,27 @@ import { PANEL_POSES } from '../image/Oli.tsx';
 import CalcIsland from './CalcIsland.astro';
 import CalcScheduleRoot from './CalcScheduleRoot.astro';
 import Reviewed from './Reviewed.astro';
-import { SHARED, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample, REVIEWED } from './page.ts';
-import type { CalcPageId } from './registry.ts';
+import { SHARED_BY_LANG, SOURCES_READ_ON, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
+import type { MoneyPageId } from './registry.ts';
 
 interface Props {
-  id: CalcPageId;
+  id: MoneyPageId;
   lang: Lang;
 }
 const { id, lang } = Astro.props;
 const route = routeById(id);
-const t = calcTexts(id);
+const t = calcTexts(id, lang);
+const shared = SHARED_BY_LANG[lang].page;
+const read = SOURCES_READ_ON[lang];
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
 const data = panelData(id, lang);
 const crumbs = crumbsFor(id, lang);
-const related = relatedFor(id);
-const presets = presetRows(id);
-const guide = guideOf(id);
+const related = relatedFor(id, lang);
+const presets = presetRows(id, lang);
+const guide = guideOf(id, lang);
 const example = workedExample(id, lang);
-const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
+const [readBefore, readAfter] = shared.readOn.split('{date}');
 ---
 <BaseLayout
   lang={lang}
@@ -52,8 +55,8 @@ const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
   <div class="fo-top fo-top--calc">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
-    <Reviewed />
-    <PrivacySeal text={SHARED.page.seal} />
+    <Reviewed lang={lang} />
+    <PrivacySeal text={shared.seal} />
   </div>
   <CalcIsland data={data} />
   <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
@@ -82,7 +85,7 @@ const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
       <h3 class="fo-h3">{t.exampleHeading}</h3>
       <p>{t.exampleIntro}</p>
       <div class="fo-example">
-        {[[SHARED.page.exampleInputs, example.inputs], [SHARED.page.exampleResults, example.results]].map(([caption, rows]) => (
+        {[[shared.exampleInputs, example.inputs], [shared.exampleResults, example.results]].map(([caption, rows]) => (
           <table class="fo-table">
             <caption>{caption as string}</caption>
             <tbody>{(rows as [string, string][]).map(([label, value]) => <tr><th scope="row">{label}</th><td>{value}</td></tr>)}</tbody>
@@ -93,11 +96,11 @@ const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
     </div>
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
-      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{readAfter}</li>)}</ul>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
     </div>
-    {guide && <p><a href={guide.href}>{fmt(SHARED.page.guide, { title: guide.title })}</a></p>}
+    {guide && <p><a href={guide.href}>{fmt(shared.guide, { title: guide.title })}</a></p>}
     <div data-ymyl="disclaimer">
-      <h3 class="fo-h3">{SHARED.page.disclaimerHeading}</h3>
+      <h3 class="fo-h3">{shared.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>
   </section>

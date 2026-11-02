@@ -376,6 +376,12 @@ export const FORBIDDEN_WORDS = /\b(?:seamless\w*|effortless\w*|unlock\w*|superch
  * the exact name (and its route id, which the hub's guide names) is taken out before the check, so "unlock" anywhere else still fails.
  */
 export const TOOL_NAME = /\bUnlock PDF\b|\bunlock-pdf\b/g;
+/**
+ * The suffix of the files Unlock PDF gives back in English, "report-unlocked.pdf" (F5a): a file name, not the marketing
+ * verb. Since the F6 it lives in the texts (`panel.suffix`), so only that exact value at that exact key is taken out
+ * (DECISOES § 215); "unlocked" anywhere else still fails.
+ */
+export const FILE_SUFFIX = (path: string, text: string): string => (/\.panel\.suffix$/.test(path) && text === 'unlocked' ? '' : text);
 /** The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. */
 const SUCCESS_LINE = /\.(?:done|doneMany)$/;
 
@@ -393,7 +399,7 @@ function stringsOf(value: unknown, path: string, out: [string, string][] = []): 
 export function checkVoice(texts: unknown, root = 'texto'): string[] {
   const problems: string[] = [];
   for (const [path, text] of stringsOf(texts, root)) {
-    const clean = text.replace(TOOL_NAME, '');
+    const clean = FILE_SUFFIX(path, text).replace(TOOL_NAME, '');
     const word = FORBIDDEN_WORDS.exec(clean)?.[0];
     if (word) problems.push(`${path}: "${word}" é uma palavra que o README do design proíbe`);
     if (/\p{Extended_Pictographic}/u.test(text.replace(/[©®™]/g, ''))) problems.push(`${path}: emoji no texto`);

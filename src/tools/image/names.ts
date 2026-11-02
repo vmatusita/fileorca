@@ -5,7 +5,7 @@ import type { OutputFormat } from '../../engine/image/types.ts';
 
 export const EXTENSION: Record<OutputFormat | 'pdf', string> = { jpeg: 'jpg', png: 'png', webp: 'webp', avif: 'avif', pdf: 'pdf' };
 
-/** Name of the ZIP of a batch (English on every page, DECISOES § 58). */
+/** Name of the ZIP of a batch on the English pages; every page takes the name of its language from its panel texts (`files`). */
 export const ZIP_NAME = 'fileorca-images.zip';
 /** Name of the PDF of a batch of several images; one image gives the PDF the name of its file. */
 export const PDF_BATCH_NAME = 'fileorca-images.pdf';

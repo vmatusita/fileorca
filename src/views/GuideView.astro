@@ -41,7 +41,7 @@ const crumbs = [
   { name: common.moneyCalculators, path: `/${MONEY_HUB_ID}/` },
   { name: t.h1, path },
 ];
-const related = GUIDES[id].related.map(cardOf);
+const related = GUIDES[id].related.map((target) => cardOf(target, 'en'));
 // The calculator the guide embeds, by its own H1, linked under it (review F4, SEO-1): the first letter goes small
 // unless the name starts with an acronym ("APR to APY").
 const calcH1 = calcTexts(guide.calc).h1;

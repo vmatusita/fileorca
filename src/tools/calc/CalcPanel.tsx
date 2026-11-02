@@ -7,6 +7,7 @@ import { useMemo } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
 import { dollars, type NumberLang } from '../../calc/parse.ts';
+import { percent } from '../../i18n/format.ts';
 import { shares } from './SplitChart.tsx';
 import { DEFS } from './defs/index.ts';
 import Fields from './Fields.tsx';
@@ -78,11 +79,12 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           touched={state.touched}
           cheer={cheer}
           money={(cents) => dollars(cents, lang)}
+          percent={(value) => percent(value, lang)}
           splitName={(v) => {
-            // In whole dollars, as the sentence above it says them, with the shares (README of the SplitChart).
+            // In whole units, as the sentence above it says them, with the shares (README of the SplitChart).
             if (!v.split) return '';
             const [pa, pb] = shares(v.split.a.cents, v.split.b.cents);
-            return `${v.split.a.label} ${dollars(v.split.a.cents, lang)}, ${pa}%. ${v.split.b.label} ${dollars(v.split.b.cents, lang)}, ${pb}%.`;
+            return `${v.split.a.label} ${dollars(v.split.a.cents, lang)}, ${percent(pa, lang)}. ${v.split.b.label} ${dollars(v.split.b.cents, lang)}, ${percent(pb, lang)}.`;
           }}
         />
         {state.stale && <p class="fo-field__help fo-calc__stale">{data.t.stale}</p>}
@@ -92,7 +94,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           t={data.t}
           icons={data.icons}
           off={view.problem !== undefined || state.stale}
-          csv={() => save(new Blob([csvText(view.table(), data.t.year.replace(/\s*\{n\}/, ''))], { type: 'text/csv;charset=utf-8' }), `${data.file}.csv`)}
+          csv={() => save(new Blob([csvText(view.table(), data.t.year.replace(/\s*\{n\}/, ''), lang)], { type: 'text/csv;charset=utf-8' }), `${data.file}.csv`)}
           pdf={async () => {
             const input = reportInput(
               {
@@ -105,6 +107,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
                 cell,
               },
               data.t,
+              lang,
             );
             save(await reportPdf(input), `${data.file}.pdf`);
           }}

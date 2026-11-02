@@ -19,9 +19,9 @@ export function Sentence({ parts }: { parts: readonly Part[] }) {
 }
 
 /** The big number. A value with words ("2 years 9 months", "Year 7") keeps its numbers big and its words at the
- * size of the unit, so it stays on one line on a phone; an amount ("$2,613.32") is drawn as it is. */
+ * size of the unit, so it stays on one line on a phone; an amount ("$2,613.32", "R$ 2.613,32") is drawn as it is. */
 export function Value({ text }: { text: string }) {
-  if (!/[a-z]/i.test(text)) return <>{text}</>;
+  if (!/[a-z]/i.test(text.replace(/^−?R\$\s?/, ''))) return <>{text}</>;
   return (
     <>
       {text
@@ -40,9 +40,10 @@ interface Props {
   cheer: boolean;
   splitName: (view: CalcView) => string;
   money: (cents: number) => string;
+  percent: (value: number) => string;
 }
 
-export default function ResultHero({ view, touched, cheer, splitName, money }: Props) {
+export default function ResultHero({ view, touched, cheer, splitName, money, percent }: Props) {
   const [spoken, setSpoken] = useState('');
   const timer = useRef<number | undefined>(undefined);
   const section = useRef<HTMLElement>(null);
@@ -87,6 +88,7 @@ export default function ResultHero({ view, touched, cheer, splitName, money }: P
       {view.split && !view.problem && (
         <SplitChart
           name={splitName(view)}
+          percent={percent}
           a={{ label: view.split.a.label, cents: view.split.a.cents, text: money(view.split.a.cents) }}
           b={{ label: view.split.b.label, cents: view.split.b.cents, text: money(view.split.b.cents) }}
         />

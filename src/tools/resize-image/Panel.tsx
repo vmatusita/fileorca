@@ -6,7 +6,7 @@
 // the fields show into the box, so nothing is processed twice and nothing the person did not choose is
 // kept. The typed numbers stay in this component: they are never written to the URL or to an event.
 import type { ResizeOptionsTexts } from '../../i18n/types.ts';
-import { fmt } from '../../i18n/format.ts';
+import { fmt, groupDigits } from '../../i18n/format.ts';
 import ImagePanel from '../image/ImagePanel.tsx';
 import NumberField from '../image/NumberField.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
@@ -46,7 +46,7 @@ export function shownBox(state: Pick<State, 'width' | 'height'>, files: readonly
 
 function Options({ state, update, texts, files, lang }: OptionsProps<State, ResizeOptionsTexts>) {
   const box = shownBox(state, files);
-  const tooBig = fmt(texts.invalid, { max: MAX_PX.toLocaleString(lang) });
+  const tooBig = fmt(texts.invalid, { max: groupDigits(MAX_PX, lang) });
   return (
     <>
       <OptionGroup

@@ -4,7 +4,10 @@
 // the document.
 import { baseName, uniqueNames } from '../image/names.ts';
 
-/** Name of the ZIP of a batch of PDFs, and of the ZIP of page images (English on every page, like the images). */
+/**
+ * Name of the ZIP of a batch of PDFs, and of the ZIP of page images, on the English pages. Every page takes the words
+ * of its own language from its panel texts (`files`, docs/i18n); tests/unit/pdf-texts.test.ts ties English to these.
+ */
 export const PDF_ZIP_NAME = 'fileorca-pdfs.zip';
 export const IMAGES_ZIP_NAME = 'fileorca-pdf-images.zip';
 

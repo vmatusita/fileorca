@@ -60,6 +60,7 @@ const texts: PdfToolTexts<MergeTexts> = {
     'Your PDFs are read and joined on your device and are never sent to a server. The merged file is made in your browser too.',
   relatedHeading: 'Related tools',
   panel: {
+    suffix: 'merged',
     note: 'PDF files, as many as you like',
     progressLabel: 'Merging PDFs',
     done: 'Done! Oli joined your PDFs into one.',

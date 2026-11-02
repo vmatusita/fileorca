@@ -3,7 +3,7 @@
 // (src/tools/calc/defs/<id>.ts); the page writes the plain data of the island into data-props
 // (CalcPanelData), and the texts arrive there too, so the browser never loads a text file.
 import type { Lang } from '../../i18n/routes.ts';
-import type { CalcPageId } from './registry.ts';
+import type { MoneyPageId } from './registry.ts';
 
 /** A value of the form: a number in engine units, a choice, or a list of rows (the debts). */
 export type Value = number | string | Record<string, number>[];
@@ -156,7 +156,7 @@ export interface CalcSharedTexts {
 export interface CalcChip {
   href: string;
   name: string;
-  target: CalcPageId;
+  target: MoneyPageId;
   /** Inner markup of the icon, read at build. */
   icon: string;
 }
@@ -164,7 +164,7 @@ export interface CalcChip {
 /** Everything the page writes into data-props (DECISOES § 23: the island hydrates from what the server rendered). */
 export interface CalcPanelData {
   lang: Lang;
-  page: CalcPageId;
+  page: MoneyPageId;
   /** The calculator's name (PDF title). */
   name: string;
   t: CalcSharedTexts;
@@ -186,7 +186,7 @@ export interface CalcPanelData {
 
 /** The behaviour of one calculator (never serialised). */
 export interface CalcDef<I = unknown, R = unknown> {
-  id: CalcPageId;
+  id: MoneyPageId;
   fields: FieldSpec[];
   /** The example the page starts with: `toInput(initial)` is the page-example case of the oracle. */
   initial: Values;

@@ -4,6 +4,7 @@ import type { ImagePanelTexts } from '../../../i18n/types.ts';
 // Só a Comprimir imagem existe em português; as outras ferramentas são só em inglês (F2, decisão 1).
 export default {
   fileFallback: 'imagem',
+  files: { zip: 'fileorca-imagens', pdf: 'fileorca-imagens' },
   drop: {
     title: 'Solte as imagens aqui',
     choose: 'Escolher imagens',
