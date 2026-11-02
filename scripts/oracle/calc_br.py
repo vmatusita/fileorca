@@ -211,14 +211,14 @@ def sac_rows(loan: int, j: int, n: int, tr: int):
     """SAC with the TR: [k, payment, interest, amortization, balance, correction]."""
     rows, balance = [], loan
     for k in range(1, n + 1):
+        if balance == 0:
+            break
         correction = share(balance, tr)
         corrected = balance + correction
         it = interest30(corrected, j)
         amort = corrected if k == n else div_half_up(corrected, n - k + 1)
         balance = corrected - amort
         rows.append([k, amort + it, it, amort, balance, correction])
-        if balance == 0:
-            break
     return rows
 
 

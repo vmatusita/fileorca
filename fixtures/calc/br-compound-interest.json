@@ -2,7 +2,7 @@
   "calculator": "br-compound-interest",
   "oracle": {
     "script": "scripts/oracle/calc_br.py",
-    "sha256": "1f2a4074ed2dffd3cecc4a562438b6854964e69019d53d139a14af29a2350412",
+    "sha256": "d82b7e7e32abb7d16e7178074e2ad808fdde3735c383af437d34483246cc0913",
     "python": "3.13.18",
     "numpy": "2.5.4",
     "numpyFinancial": "1.1.0",
