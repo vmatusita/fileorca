@@ -1,97 +1,96 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { CompressPdfTexts } from '../../pdf/option-texts.ts';
 
-// Compress PDF page blocks (how, specs, faq, privacy, related) and the panel bits the shared PDF island shows. The
-// specs rows state the real behaviour of the engine (src/engine/pdf/process.ts): when the modes, the JPEG quality or
-// the resolutions change there, change them here.
+// Compress PDF page blocks (how, specs, faq, privacy, related) and the panel bits the shared PDF island shows, in
+// Spanish (docs/i18n/es.md). The specs rows state the real behaviour of the engine (src/engine/pdf/process.ts), as the
+// English file does: when the modes, the JPEG quality or the resolutions change there, change them here and in en.ts.
 const texts: PdfToolTexts<CompressPdfTexts> = {
-  title: 'Compress PDF: make PDF files smaller in your browser',
+  title: 'Comprimir PDF: haz tus archivos PDF más pequeños en tu navegador',
   description:
-    'Make PDF files smaller in your browser, one or a whole batch. Pick lossless, recommended or strong. Nothing is uploaded, and you never get a bigger file.',
-  h1: 'Compress PDF',
-  howHeading: 'How it works',
+    'Haz tus PDF más pequeños en el navegador, uno o todo un lote. Elige sin pérdida, recomendada o fuerte. No se sube nada y nunca recibes un archivo más grande.',
+  h1: 'Comprimir PDF',
+  howHeading: 'Cómo funciona',
   howSteps: [
-    'Drop your PDF files on the box, choose them, or paste them. Add as many as you like.',
-    'Pick Lossless, Recommended or Strong. Oli compresses each PDF in your browser, one after another, and redoes the batch if you change the level.',
-    'Download one PDF, or all of them together in a ZIP. Your original files stay untouched.',
+    'Suelta tus archivos PDF en el cuadro, elígelos o pégalos, todos los que quieras.',
+    'Elige Sin pérdida, Recomendada o Fuerte, y Oli comprime cada PDF en tu navegador, uno tras otro, y rehace el lote si cambias el nivel.',
+    'Descarga un PDF o todos juntos en un ZIP; tus archivos originales no se tocan.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'Qué entra y qué sale',
   specs: {
-    caption: 'What Compress PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'Lo que Comprimir PDF recibe y entrega',
+    head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Files it takes', 'PDF files, as many as you like. Oli checks what is inside the file, not its name.'],
+      ['Archivos que acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro del archivo, no su nombre.'],
       [
-        'Lossless',
-        'qpdf tidies the structure of the file: it packs objects together, compresses the streams again at zlib level 9 and drops leftovers. Nothing you can see changes.',
+        'Sin pérdida',
+        'qpdf ordena la estructura del archivo: agrupa los objetos, vuelve a comprimir los flujos con zlib en el nivel 9 y descarta lo que sobra. Nada de lo que ves cambia.',
       ],
       [
-        'Recommended',
-        'The default. It does what Lossless does, and also saves color and gray JPEG photos again with MozJPEG at quality 75. A photo with more than 150 ppi at its largest size on the page is scaled down to 150 ppi. Other images stay as they are, and a photo is replaced only if the new one is smaller.',
+        'Recomendada',
+        'La opción predeterminada. Hace lo mismo que Sin pérdida y, además, vuelve a guardar las fotos JPEG en color y en escala de grises con MozJPEG, con calidad 75. Una foto con más de 150 ppp en su tamaño más grande en la página se reduce a 150 ppp (píxeles por pulgada). Las demás imágenes quedan como están, y una foto solo se reemplaza si la nueva es más pequeña.',
       ],
       [
-        'Strong',
-        'Every page becomes a JPG picture at 100 ppi. The text can no longer be selected or searched, and form fields, links and bookmarks are lost. Oli says so before you choose it.',
+        'Fuerte',
+        'Cada página se convierte en una imagen JPG a 100 ppp. El texto ya no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores. Oli te lo avisa antes de que lo elijas.',
       ],
-      ['Already optimized', 'If the result would not be smaller, you get your original back, byte for byte. Oli never gives you a bigger file.'],
-      ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP.'],
+      ['Ya optimizado', 'Si el resultado no fuera más pequeño, recibes tu original de vuelta, byte por byte. Oli nunca te da un archivo más grande.'],
+      ['Lote', 'Sin límite de archivos. Cada uno tiene su propia descarga, y dos o más llegan juntos en un ZIP.'],
       [
-        'Details kept',
-        'In Lossless and Recommended the text, forms, links and bookmarks stay as they are, and so do the info fields and XMP metadata of your PDF. Oli adds no date, no Producer and nothing from your device.',
-      ],
-      [
-        'Passwords and restrictions',
-        'A PDF that needs a password to open, or that has editing restrictions, is refused on its own line, with a link to Unlock PDF. The other files carry on.',
+        'Lo que se conserva',
+        'En Sin pérdida y Recomendada, el texto, los formularios, los enlaces y los marcadores quedan como están, igual que los campos de información y los metadatos XMP de tu PDF. Oli no agrega fecha, ni el campo Producer, ni nada de tu dispositivo.',
       ],
       [
-        'Damaged files',
-        'A file that is empty, cut short or not a PDF is refused on its own line. A file with a damaged index (xref) is repaired while Oli reads it.',
+        'Contraseñas y restricciones',
+        'Un PDF que necesita contraseña para abrirse, o que tiene restricciones de edición, se rechaza en su propia línea, con un enlace a Desbloquear PDF. Los demás archivos siguen adelante.',
+      ],
+      [
+        'Archivos dañados',
+        'Un archivo vacío, cortado o que no es un PDF se rechaza en su propia línea. Un archivo con el índice (xref) dañado se repara mientras Oli lo lee.',
       ],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Preguntas',
   faq: [
     {
-      q: 'How much smaller will my PDF get?',
-      a: 'It depends on what is inside. A PDF full of photos can shrink a lot at Recommended, while a PDF that is mostly text has little to take out. Oli shows the size before and after for each file, so you see the real saving, and Strong is the level that goes furthest.',
+      q: '¿Cuánto más pequeño quedará mi PDF?',
+      a: 'Depende de lo que tenga dentro. Un PDF lleno de fotos puede reducirse mucho con Recomendada, mientras que un PDF casi todo de texto tiene poco que quitar. Oli muestra el tamaño de antes y de después de cada archivo, para que veas el ahorro real, y Fuerte es el nivel que más reduce.',
     },
     {
-      q: 'Does compressing reduce the quality of my PDF?',
-      a: 'Lossless changes nothing you can see. Recommended saves photos again as JPEG at quality 75, which can cost a little fine detail, but the text stays sharp and selectable. Strong turns every page into a picture at 100 ppi, so small print looks softer when you zoom in.',
+      q: '¿Comprimir baja la calidad de mi PDF?',
+      a: 'Sin pérdida no cambia nada de lo que ves. Recomendada vuelve a guardar las fotos como JPEG con calidad 75, lo que puede costar un poco de detalle fino, pero el texto sigue nítido y se puede seleccionar. Fuerte convierte cada página en una imagen a 100 ppp, así que la letra pequeña se ve menos nítida al hacer zoom.',
     },
     {
-      q: 'Can I still select the text and use the form after compressing?',
-      a: 'Yes at Lossless and Recommended. At Strong, no: every page becomes a picture, so the text cannot be selected or searched, and form fields, links and bookmarks are lost. Oli warns you before you choose it. If you need the text, stay on Recommended.',
+      q: '¿Puedo seguir seleccionando el texto y usando el formulario después de comprimir?',
+      a: 'Sí con Sin pérdida y Recomendada. Con Fuerte, no: cada página se convierte en una imagen, así que el texto no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores. Oli te avisa antes de que lo elijas. Si necesitas el texto, quédate en Recomendada.',
     },
     {
-      q: 'Why did my PDF come back the same size?',
-      a: 'Some PDFs are already well packed. When the result would not be smaller, Oli gives you the original back, byte for byte, instead of a bigger file, and says it was already optimized. If you can live with pictures instead of text, Strong may still make it smaller.',
+      q: '¿Por qué mi PDF volvió con el mismo tamaño?',
+      a: 'Algunos PDF ya están bien compactados. Cuando el resultado no sería más pequeño, Oli te devuelve el original, byte por byte, en lugar de un archivo más grande, y te dice que ya estaba optimizado. Si puedes aceptar imágenes en lugar de texto, Fuerte quizá lo reduzca de todos modos.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, with qpdf and PDF.js. Open your browser's Network tab while you compress: no request carries your files.",
+      q: '¿Mi PDF se sube a algún lugar?',
+      a: 'No. FileOrca lee y escribe tu PDF en tu dispositivo, en tu navegador, con qpdf y PDF.js. Abre la pestaña Red de tu navegador mientras comprimes: ninguna solicitud lleva tus archivos.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote: 'PDFs are compressed on your device, in your browser, and are never sent to a server. Your original files stay untouched.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidad',
+  privacyNote: 'Los PDF se comprimen en tu dispositivo, en tu navegador, y nunca se envían a un servidor. Tus archivos originales no se tocan.',
+  relatedHeading: 'Herramientas relacionadas',
   panel: {
-    suffix: 'compressed',
-    note: 'PDF files, as many as you like',
-    progressLabel: 'Compressing PDFs',
-    done: 'Done! Oli made it {percent} lighter.',
-    doneMany: 'Done! Oli made your {count} PDFs {percent} lighter.',
-    placardLabel: 'lighter',
+    suffix: 'comprimido',
+    note: 'Archivos PDF, todos los que quieras',
+    progressLabel: 'Comprimiendo los PDF',
+    done: '¡Listo! Tu PDF quedó un {percent} más ligero.',
+    doneMany: '¡Listo! Tus {count} PDF quedaron un {percent} más ligeros.',
+    placardLabel: 'más ligero',
     options: {
-      legend: 'Compression',
-      lossless: 'Lossless',
-      losslessHelp: 'no visible change',
-      recommended: 'Recommended',
-      recommendedHelp: 'smaller photos',
-      strong: 'Strong',
-      strongHelp: 'smallest file',
-      strongWarning: 'Strong turns every page into a picture. The text can no longer be selected or searched, and form fields, links and bookmarks are lost.',
+      legend: 'Compresión',
+      lossless: 'Sin pérdida',
+      losslessHelp: 'sin cambios visibles',
+      recommended: 'Recomendada',
+      recommendedHelp: 'fotos más ligeras',
+      strong: 'Fuerte',
+      strongHelp: 'archivo más pequeño',
+      strongWarning: 'Fuerte convierte cada página en una imagen. El texto ya no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores.',
     },
   },
 };

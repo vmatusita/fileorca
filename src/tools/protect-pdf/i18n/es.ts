@@ -1,78 +1,76 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
-// Protect PDF page blocks (how, specs, faq, privacy) and the panel bits this tool adds to the shared PDF panel texts.
-// The specs rows state the real behaviour of the engine (src/engine/pdf/qpdf.ts): AES-256 revision 6, one password to
-// open and to own, no restriction added. When the encryption changes there, change it here.
+// Protect PDF page blocks (how, specs, faq, privacy) and the panel bits this tool adds to the shared PDF panel texts, in
+// Spanish (docs/i18n/es.md). The specs rows state the real behaviour of the engine (src/engine/pdf/qpdf.ts), as the
+// English file does: AES-256 revision 6, one password to open and to own, no restriction added.
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { PasswordToolTexts } from '../../pdf/option-texts.ts';
 
 const texts: PdfToolTexts<PasswordToolTexts> = {
-  title: 'Protect PDF: add a password to a PDF in your browser',
+  title: 'Proteger PDF: ponle contraseña a un PDF en tu navegador',
   description:
-    'Add a password to PDF files in your browser with AES-256 encryption, one file or a whole batch. Nothing is uploaded, and your password is never saved.',
-  h1: 'Protect PDF',
-  howHeading: 'How it works',
+    'Ponle contraseña a tus PDF en el navegador con cifrado AES-256, a un archivo o a un lote entero. No se sube nada y tu contraseña nunca se guarda.',
+  h1: 'Proteger PDF',
+  howHeading: 'Cómo funciona',
   howSteps: [
-    'Drop your PDFs on the box, choose them, or paste them with Ctrl V. Add as many as you like.',
-    'Type a password, then type it again to confirm. Use 4 to 100 characters.',
-    'Press Protect PDFs. Oli encrypts each file in your browser, with the same password for all of them.',
-    'Download one PDF, or all of them together in a ZIP. Write the password down: nobody can recover it for you.',
+    'Suelta tus PDF en el cuadro, elígelos o pégalos con Ctrl V, todos los que quieras.',
+    'Escribe una contraseña de 4 a 100 caracteres y vuelve a escribirla para confirmarla.',
+    'Presiona Proteger PDF y Oli cifra cada archivo en tu navegador, con la misma contraseña para todos.',
+    'Descarga un PDF o todos juntos en un ZIP, y anota la contraseña, porque nadie puede recuperarla por ti.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'Qué entra y qué sale',
   specs: {
-    caption: 'What Protect PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'Lo que Proteger PDF recibe y entrega',
+    head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Takes', 'PDF files, as many as you like. Oli checks what is inside the file, not its name.'],
-      ['Password', 'One password for the whole batch, typed twice. It must have 4 to 100 characters.'],
-      ['Encryption', 'AES-256 (revision 6), written by qpdf running in your browser.'],
-      ['Open and owner password', 'The same password is used to open the file and as the owner password.'],
-      ['Restrictions', 'None are added. Printing and copying stay allowed for whoever has the password.'],
-      ['What stays', 'The content of the pages is not changed: only the encryption is added. Form fields, links and bookmarks stay as they were, and so do the document details of your file. Oli adds no date, producer or anything from your device.'],
-      ['File name', 'A file called report.pdf comes out as report-protected.pdf. Your original is not changed.'],
-      ['Batch', 'No limit on the number of files. Several files download together as one ZIP.'],
-      ['Already protected', 'A PDF that already has a password or restrictions is turned down on its own line, with a link to Unlock PDF. The other files go on.'],
-      ['Forgotten password', 'FileOrca does not keep the password and cannot recover it. Keep a copy somewhere safe.'],
+      ['Qué acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro del archivo, no su nombre.'],
+      ['Contraseña', 'Una sola contraseña para todo el lote, escrita dos veces. Debe tener de 4 a 100 caracteres.'],
+      ['Cifrado', 'AES-256 (revisión 6), aplicado por qpdf, que funciona en tu navegador.'],
+      ['Contraseña para abrir y de propietario', 'La misma contraseña sirve para abrir el archivo y como contraseña de propietario.'],
+      ['Restricciones', 'No se agrega ninguna. Imprimir y copiar siguen permitidos para quien tenga la contraseña.'],
+      ['Lo que se conserva', 'El contenido de las páginas no cambia: solo se agrega el cifrado. Los campos de formulario, los enlaces y los marcadores quedan como estaban, igual que los datos del documento. Oli no agrega fecha, ni el nombre de un programa, ni nada de tu dispositivo.'],
+      ['Nombre del archivo', 'Un archivo llamado informe.pdf sale como informe-protegido.pdf. Tu original no cambia.'],
+      ['Lote', 'Sin límite de archivos. Varios archivos se descargan juntos en un ZIP.'],
+      ['Ya protegido', 'Un PDF que ya tiene contraseña o restricciones se rechaza en su propia línea, con un enlace a Desbloquear PDF. Los demás archivos siguen adelante.'],
+      ['Contraseña olvidada', 'FileOrca no guarda la contraseña y no puede recuperarla. Guarda una copia en un lugar seguro.'],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Preguntas',
   faq: [
     {
-      q: 'How do I put a password on a PDF?',
-      a: 'Drop the PDF, type a password twice and press Protect PDFs. Oli encrypts the file in your browser, and the new PDF asks for the password whenever someone opens it. Your original file stays as it was.',
+      q: '¿Cómo le pongo contraseña a un PDF?',
+      a: 'Suelta el PDF, escribe una contraseña dos veces y presiona Proteger PDF. Oli cifra el archivo en tu navegador, y el PDF nuevo pide la contraseña cada vez que alguien lo abre. Tu archivo original queda como estaba.',
     },
     {
-      q: 'What if I forget the password?',
-      a: 'FileOrca does not store your password, so it cannot recover it, and the protected file cannot be opened without it. Keep the password in a safe place, and keep your original PDF until you have checked that the protected copy opens.',
+      q: '¿Qué pasa si olvido la contraseña?',
+      a: 'FileOrca no guarda tu contraseña, así que no puede recuperarla, y el archivo protegido no se puede abrir sin ella. Guarda la contraseña en un lugar seguro y conserva tu PDF original hasta comprobar que la copia protegida se abre.',
     },
     {
-      q: 'How strong is the protection?',
-      a: 'The file is encrypted with AES-256, a standard encryption for PDF files. The password matters most: a short or common one is easy to guess, so choose a long one that you do not use anywhere else. The rule here is 4 to 100 characters, and longer is safer.',
+      q: '¿Qué tan fuerte es la protección?',
+      a: 'El archivo se cifra con AES-256, un cifrado estándar para archivos PDF. Lo que más importa es la contraseña: una corta o común es fácil de adivinar, así que elige una larga que no uses en ningún otro lugar. La regla aquí es de 4 a 100 caracteres, y cuanto más larga, más segura.',
     },
     {
-      q: 'Can I protect many PDFs at once?',
-      a: 'Yes. Drop as many files as you like: they all get the same password, and each one comes out as its own file ending in -protected. When you want them all, one button gives you a ZIP.',
+      q: '¿Puedo proteger muchos PDF a la vez?',
+      a: 'Sí. Suelta todos los archivos que quieras: todos reciben la misma contraseña, y cada uno sale como su propio archivo terminado en -protegido. Cuando los quieras todos, un botón te da un ZIP.',
     },
     {
-      q: 'Are my PDF and my password uploaded?',
-      a: 'No. Oli reads the PDF and encrypts it on your device, in your browser, with qpdf. Neither the file nor the password is sent to a server, and the password is not saved.',
+      q: '¿Mi PDF y mi contraseña se suben a algún lugar?',
+      a: 'No. Oli lee el PDF y lo cifra en tu dispositivo, en tu navegador, con qpdf. Ni el archivo ni la contraseña se envían a un servidor, y la contraseña no se guarda.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote:
-    'Your PDFs are encrypted on your device and are never sent to a server. The password is not saved and does not leave your device.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidad',
+  privacyNote: 'Tus PDF se cifran en tu dispositivo y nunca se envían a un servidor. La contraseña no se guarda y no sale de tu dispositivo.',
+  relatedHeading: 'Herramientas relacionadas',
   panel: {
-    suffix: 'protected',
-    note: 'PDF files, as many as you like',
-    progressLabel: 'Protecting PDFs',
-    done: 'Done! Your PDF now asks for a password.',
-    doneMany: 'Done! Your {count} PDFs now ask for a password.',
-    action: 'Protect PDFs',
+    suffix: 'protegido',
+    note: 'Archivos PDF, todos los que quieras',
+    progressLabel: 'Protegiendo los PDF',
+    done: '¡Listo! Tu PDF ahora pide contraseña.',
+    doneMany: '¡Listo! Tus {count} PDF ahora piden contraseña.',
+    action: 'Proteger PDF',
     options: {
-      passwordLabel: 'Password',
-      confirmLabel: 'Confirm password',
-      rule: 'Use 4 to 100 characters.',
-      mismatch: "The two passwords don't match. Type the same one in both fields.",
+      passwordLabel: 'Contraseña',
+      confirmLabel: 'Confirma la contraseña',
+      rule: 'Usa de 4 a 100 caracteres.',
+      mismatch: 'Las dos contraseñas no coinciden. Escribe la misma en los dos campos.',
     },
   },
 };
