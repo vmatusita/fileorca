@@ -86,8 +86,15 @@ test('a file no tool takes: the files are listed and the page says so', async ({
   await expect(page.locator('[data-tool]:visible')).toHaveCount(0);
 });
 
-test('opened directly, with no files, the page explains and leads to the hubs', async ({ page }) => {
+test('opened directly, with no files, the page explains and leads to the hubs, with at most 2 JS files', async ({ page }) => {
+  const scripts = new Set<string>();
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === server.origin && url.pathname.endsWith('.js')) scripts.add(url.pathname);
+  });
   await visit(page, server, '/open-with/', { island: false });
+  await page.waitForLoadState('load');
+  expect(scripts.size, [...scripts].join(', ')).toBeLessThanOrEqual(2);
   await expect(page.locator('.fo-says')).toContainText(openWith.emptySays);
   await expect(page.locator('.fo-openwith__hubs a')).toHaveCount(2);
   await expect(page.locator('[data-shared]')).toBeHidden();
