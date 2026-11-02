@@ -25,6 +25,7 @@ import {
 } from '../../scripts/lib/prontidao.ts';
 import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
 // one break at a time (positive and negative controls, prompt F3, decision 5). From the F5a the fake site can carry the
@@ -298,8 +299,8 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
       ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),
     ]);
     expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
-    // F5a: the search offers the 12 PDF tools as well.
-    expect(site.searchIds).toHaveLength(11 + 18 + 5 + PDF_TOOL_IDS.length);
+    // F5a: the search offers the 12 PDF tools as well; F5b: and the 10 file guides (DECISOES § 190).
+    expect(site.searchIds).toHaveLength(11 + 18 + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length);
   });
 
   it('builds the PDF part of the real site from the PDF registry: hub cards, search ids and the pages to look at', () => {

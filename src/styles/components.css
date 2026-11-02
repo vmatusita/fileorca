@@ -463,6 +463,12 @@
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
+/* A file guide puts its heading and a paragraph right above the embedded tool, where a tool page has its H1: they keep
+   the same room on the right for the DropZone's Oli, so she never covers a word (DECISOES § 206 and § 212). The box is
+   border-box, so the room comes out of the measure: from 768px this heading and paragraph are 561px wide against the
+   697px of the rest of the prose, which is what keeps them clear of her at 768 and at 1280px too. */
+.fo-guide__tool { padding-right: 96px; }
+@media (min-width: 768px) { .fo-guide__tool { padding-right: 136px; } }
 .fo-debts { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-debt { box-sizing: border-box; width: 100%; margin: 0; padding: var(--space-4); border: var(--stroke-2) solid var(--hairline); border-radius: var(--radius-lg); display: grid; gap: var(--space-3); }
 .fo-debt__name { padding: 0; font: 700 15px/20px var(--fo-font-text); }

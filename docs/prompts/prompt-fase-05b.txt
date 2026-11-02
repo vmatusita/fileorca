@@ -1,0 +1,560 @@
+ultracode
+
+# Missão
+
+Rode a F5b do FileOrca: os 10 guias de arquivo em inglês e o kit do Product Hunt. Ao terminar:
+
+- estão no ar, só em inglês, 10 guias em `/guides/<slug>/`. Cada um tem uma ferramenta de imagem ou de PDF embutida e funcionando, e um dado próprio medido por script nas fixtures, com a data, a amostra e o método;
+- todo número de um guia sai de um arquivo de medidas gerado por script, ou de uma fonte oficial lida nesta run, com o link e a data. Um teste reprova número escrito à mão;
+- os hubs `/image-tools/` e `/pdf-tools/`, a busca e a página de cada ferramenta embutida levam aos guias;
+- o kit do Product Hunt está em `docs/lancamento/`: as regras do Product Hunt lidas na fonte, os textos em inglês, as imagens geradas por script a partir do site real e a prova de cada afirmação num teste.
+
+Nada é postado, enviado ou publicado. O `pnpm verificar` fica verde na sua máquina e em todas as partes do CI. Tudo vai numa PR da branch `fase-05b`, com o relatório. A PR não mexe no `.github/`, então o job de merge a mescla sozinho quando ela sai do rascunho com o CI verde.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, e o shell é o Git Bash. O CI roda em Ubuntu, em 11 partes de até 900 s cada, com o alvo de 700 s (ADR-003 e o adendo da F5a).
+
+A main está em `51d5104`, o merge da F5a, ou num commit mais novo. Confira com `git log --oneline -8`.
+
+O que está no ar em fileorca.com, indexável (`LAUNCHED = true`):
+
+- 8 ferramentas de imagem, 3 presets e o hub `/image-tools/`;
+- as 12 ferramentas de PDF e o hub `/pdf-tools/`;
+- as 14 calculadoras de dinheiro, os 4 presets, o hub `/money-calculators/` e os 5 guias de dinheiro em `/guides/<slug>/`;
+- a home, a Compress image e as páginas institucionais também em pt e es.
+
+O que já existe para guias:
+
+- Os guias de dinheiro (§ 119): `src/views/GuideView.astro`, os textos em `src/i18n/en/guide-<slug>.ts`, os números calculados pelos motores no build (`src/tools/calc/guides.ts`), o registro `GUIDES` e `GUIDE_IDS` em `src/tools/calc/registry.ts` e as rotas em `src/i18n/routes.ts`, com `adArea: 'dinheiro'`.
+- A `GuideView` é feita para a calculadora: blocos `data-ymyl`, a `CalcIsland` e o breadcrumb do dinheiro. Os 5 guias de dinheiro são contrato: continuam passando em tudo, com o `gate:dinheiro-saude` em 24 de 24, sem mudança de asserção.
+- A ilha de imagem: o `ImagePanel` é a ilha de todas as ferramentas de imagem (§ 69), com uma entrada por ferramenta (`src/tools/<slug>/mount.ts`, § 23) e o grupo `island` (§ 70). A página monta pelo `ImageToolPage.astro`, com `#fo-tool-root` e `data-props`.
+- A ilha de PDF: um `PdfIsland.astro` para as 12 (§ 148), e a página monta pelo `PdfToolPage.astro`.
+- Toda página de ferramenta carrega exatamente 2 arquivos JS antes do primeiro uso.
+
+O que já existe para medir (a "Nota para a 5b" de `docs/relatorios/fase-05a.md`):
+
+- **Sem navegador:**
+  - o Compress PDF por modo (o `tests/unit/pdf-compress.test.ts` já imprime a tabela);
+  - os tamanhos e o tempo de cada operação de PDF no Node (o `src/engine/pdf/` roda no Node);
+  - as conversões de imagem pelo motor exportado (`pnpm motor:exportar`; o `fileorca-image-engine` roda no Node sem canvas);
+  - a PDF to JPG por resolução, com o PDF.js no Node e o `@napi-rs/canvas`, como os testes fazem.
+- **Com o Playwright:** o caminho de canvas das imagens, as miniaturas e o tempo na thread principal.
+- **As fixtures:** `fixtures/images/` (10 HEIC de 6 aparelhos, 3 JPG reais com GPS e as variantes geradas, como o WebP com Exif e GPS, o WebP animado, o PNG transparente e o AVIF) e `fixtures/pdf/` (4 reais e 13 geradas). A origem, a licença e o SHA-256 estão em `fixtures/ORIGEM.md`, e o esperado em cada `expected.json`.
+
+O que já existe para o lançamento:
+
+- `docs/lancamento/README.md` tem a ordem dos envios e a linha "Só depois da F5b | Product Hunt | Não é desta run; não há texto aqui".
+- `docs/lancamento/show-hn.md` é o modelo do kit:
+  - as regras lidas na fonte, com a data;
+  - os textos que vão para fora em inglês, e as explicações em português;
+  - uma seção "Provas", com cada afirmação ligada a um teste;
+  - o aviso de que o texto foi redigido com ajuda de IA e deve ser reescrito pelo Victor.
+- O `tests/e2e/launch-claims.spec.ts` prova as três afirmações do Show HN: nenhum byte do arquivo sai do navegador; depois de a página e o codec carregarem, a ferramenta segue funcionando offline; o único tráfego de terceiros é o Google Analytics.
+- O plano diz, para o Product Hunt: "Na primeira terça depois do merge da F5b (você posta; a run deixa textos e imagens em docs/lancamento/)" e "a Oli rende galeria, avatar e GIF". Fora do site, a Oli usa só as poses `wave` e `cheer` (tabela da seção "A mascote").
+- O repositório público do motor de imagem é um passo do Victor depois da F5a e pode não existir ainda.
+
+O CI na última execução verde da F5a ([run 41344610873](https://github.com/vmatusita/fileorca/actions/runs/41344610873), commit `2975fc6`), pelo total do `verificar` de cada parte:
+
+- `verificar` (`--sem-playwright`): 401,0 s;
+- Chromium, 3 partes: 345,0 s, 292,0 s e 260,6 s;
+- WebKit, 7 partes: 350,3 s, 217,4 s, 143,2 s, 120,4 s, 406,1 s, 415,1 s e 322,4 s.
+
+Cada execução do CI gasta uns 69 min de runner. O repositório é privado, no GitHub Free, com 2.000 min por mês. O `pnpm verificar` local da F5a deu 715,2 s, com o limite de 900 s.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele faz o papel da ficha da run e vence o resto.
+2. O `CLAUDE.md` inteiro, em especial:
+   - a F2 (como uma ferramenta entra) e a F3 (o `gate:prontidao` e o método da revisão);
+   - a F4 (os guias, o `lint:texto` com placeholders e as pegadinhas);
+   - a F5a (o PDF, as partes do CI e as pegadinhas dos agentes em worktree).
+3. O `PLANO-FILEORCA.md`. A ficha "F5 · PDF e guias em inglês (runs 5a e 5b)" do apêndice é o contrato: aqui vale a parte 5b. As "Decisões fechadas" não mudam. Leia também estas seções:
+   - "Conteúdo de apoio" (o dado próprio, o checklist, sem ano no título, "Revisado em");
+   - "Links" (a linha do Product Hunt) e "A mascote" (as poses fora do site e as regras de anúncio da Oli);
+   - "Molde da página de ferramenta" e "Orçamento de desempenho";
+   - "SEO agressivo dentro das regras" e "O que derruba conta".
+4. O `DECISOES.md`, do § 1 ao último. Esta run toca mais estes:
+   - § 23, § 49, § 54, § 58, § 69, § 70, § 71, § 77, § 78, § 84 e § 85;
+   - § 92 a § 96, § 106 e § 110;
+   - § 119 a § 125, § 129, § 136, § 138 e § 142;
+   - § 148, § 153, § 154, § 160, § 162, § 164, § 166, § 170, § 171, § 172 e § 175.
+
+   O próximo § livre é o 184, se nada entrou depois da F5a.
+5. O `docs/design/`, que é só leitura:
+   - o README (voz, Oli, layout, acessibilidade e as palavras proibidas);
+   - o README e o `preview.html` do ToolPage, ToolCard, Breadcrumb, AdSlot, Oli, OliMessage e Placard;
+   - `assets/Oli/` (as poses `wave` e `cheer`) e `assets/Logo/`.
+6. Os relatórios e prompts:
+   - o `docs/relatorios/fase-05a.md` (a "Nota para a 5b", a tabela do Compress e o CI) e o `REVISAO-F5a.md`;
+   - o `docs/relatorios/fase-04.md` (o checklist dos guias) e a decisão 10 do `docs/prompts/prompt-fase-04.md`, o modelo dos guias;
+   - o `docs/lancamento/README.md` e o `show-hn.md`.
+7. O código:
+   - `src/views/GuideView.astro`, `src/tools/calc/guides.ts`, `registry.ts` e `page.ts`, e `src/i18n/routes.ts`;
+   - `src/tools/image/` (`registry.ts`, `ImageToolPage.astro`, `page.ts`, `types.ts`) e uma página de ferramenta inteira, como `src/tools/heic-to-jpg/`;
+   - `src/tools/pdf/` (`registry.ts`, `PdfToolPage.astro`, `PdfIsland.astro`, `texts.ts`);
+   - `src/views/ImageToolsView.astro`, `PdfToolsView.astro` e `MoneyCalculatorsView.astro` (a lista dos guias);
+   - `src/search/`, `src/pages/og/`, `src/seo/meta.ts`;
+   - `scripts/lib/` (`conteudo.ts`, `prontidao.ts`, `seo-pages.ts`), `scripts/gates/lint-texto.ts`, `scripts/screenshots.ts` e `scripts/oss/image-engine.ts`;
+   - `tests/e2e/` (`a11y`, `ads`, `budgets`, `design`, `navigation`, `launch-claims`, `image-privacy`, `pdf-privacy` e `lib/`) e `tests/unit/` (`calc-guides`, `conteudo`, `prontidao`, `routes`, `verificar`, `quality`, `licenses`, `pdf-compress`).
+
+Você pode ler a web (WebSearch e WebFetch) para:
+
+- as páginas oficiais dos fatos dos guias (Microsoft, Apple, Google, Meta, X, LinkedIn, YouTube e outras que um guia precisar);
+- as páginas oficiais do Product Hunt (regras de postagem, guia de lançamento, campos e tamanhos de mídia, regras da comunidade);
+- a documentação dos pacotes.
+
+Ler não é mandar pedido a um serviço. Não entre em conta, não crie conta e não preencha formulário.
+
+# Escopo
+
+Dentro, em itens:
+
+1. O script de medidas e o arquivo que ele grava, num commit anterior ao texto de qualquer guia (decisão 3).
+2. A página do guia de arquivo, com a ferramenta embutida, o registro e as rotas (decisão 4).
+3. Os 10 guias (decisões 2 e 5).
+4. Hubs, páginas das ferramentas, busca, Open Graph e sitemaps (decisão 6).
+5. Os portões e testes que crescem (decisão 7).
+6. O kit do Product Hunt (decisão 8).
+7. O Lighthouse, os screenshots, a revisão adversarial final, as correções, o relatório e uma seção nova no fim do `CLAUDE.md`.
+
+Fora (não toque):
+
+- Tudo da seção "Fora de toda run" do `CLAUDE.md`:
+  - não poste no Product Hunt nem em lugar nenhum;
+  - não crie conta e não mande e-mail;
+  - não crie o repositório público do motor.
+- O `.github/` inteiro (a única exceção está na decisão 9), `scripts/ci/`, `PLANO-FILEORCA.md`, `docs/adr/ADR-001-plataforma-de-entrega.md`, `.githooks/` e `.claude/settings.json`.
+- O `docs/design/`, que é só leitura: nenhum ícone, pose, cor, raio ou sombra nova. O amarelo (`sun`) vai só no Baixar.
+- A 2b (§ 85), os 27 baixos da revisão da F5a, os baixos da F4 e a § 103.
+- Guias em português ou espanhol (o plano deixa os 15 guias só em inglês) e uma página índice `/guides/`.
+- Ferramenta ou preset novo.
+- Os motores de imagem e de PDF. Você só os lê e os chama. A exceção é um defeito de corretude que uma medida achar: ele é corrigido com um teste que falha sem a correção e registrado num §, e mais nada muda no motor.
+- Dependência nova em `dependencies`. Em `devDependencies`, no máximo uma, só para o GIF (decisão 8).
+- Tirar, pular, afrouxar ou mudar o sentido de teste que já existe:
+  - as páginas de imagem, de PDF e de dinheiro e os 5 guias de dinheiro continuam passando no `budgets.spec.ts`, no `ads.spec.ts` e no `a11y.spec.ts` sem mudança de asserção;
+  - uma asserção que muda por construção (a contagem da busca lida dos registros, como a § 125 e a § 171) ganha um § com o que mudou e por quê.
+- No `CLAUDE.md`, só uma seção nova no fim. No `DECISOES.md`, só § novos.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do próximo § livre)
+
+1. **Caminhos e ids.**
+   - Os 10 guias ficam em `/guides/<slug>/`, só em inglês (§ 58). O id da rota é `guides-<slug>`, como na § 119, e a área de anúncio é `adArea: 'arquivos'`.
+   - O breadcrumb é Home › o hub da ferramenta embutida (Image tools ou PDF tools) › o H1.
+   - Não há página índice `/guides/`, como na F4.
+   - O título começa pelo nome do guia, em Title Case, e o H1 vem em sentence case (§ 122). Nenhum dos dois leva ano.
+
+2. **Os temas.** Cada guia embute uma ferramenta que já está no ar, a que vem entre parênteses.
+   - Os três primeiros vêm do plano e não mudam.
+   - Os títulos podem mudar.
+   - Um tema dos outros sete pode trocar por outro que leve à mesma ferramenta, se a medida não sustentar o original. A troca vai num §.
+
+   1. **"How to convert HEIC to JPG on Windows"** (HEIC to JPG). Medido: as 10 HEIC das fixtures convertidas com o padrão da ferramenta, com o tamanho antes e depois, as dimensões e o GPS antes e depois. Os fatos do Windows (o que o sistema abre, as extensões, onde se troca o formato da câmera do iPhone) só entram com página da Microsoft ou da Apple.
+   2. **"Why is my PDF so large?"** (Compress PDF). Medido:
+      - o que ocupa o espaço em cada PDF real das fixtures (imagens, fontes e o resto);
+      - os três modos contra as fixtures, com o antes, o depois e a razão, inclusive os casos em que o arquivo volta igual.
+   3. **"Social media image sizes"** (Resize image, com um link para o preset do YouTube). A tabela de medidas sai só das páginas oficiais de cada rede, lidas nesta run, com o link e a data. A rede cuja página oficial não abrir fica fora da tabela e vira pendência. Medido: as fotos das fixtures que a ferramenta aceita, redimensionadas para cada medida da tabela, com o tamanho de saída e o limite de peso que a rede publica, se publica.
+   4. **"How to open WebP images and save them as JPG"** (WebP to JPG). Medido:
+      - o WebP e o JPG das mesmas fotos (o motor gera os WebP na própria medida, sem fixture nova);
+      - o que acontece com o WebP animado e com os metadados.
+   5. **"JPG or PNG: which one to use"** (PNG to JPG). Medido: as mesmas fotos em PNG e em JPG, e o PNG transparente (o que acontece com a transparência).
+   6. **"How to remove location data from photos before you share them"**. A ferramenta embutida é a de imagem que menos muda a foto entre as que aceitam JPG, escolhida pela medida (tamanho e PSNR) e registrada. Medido:
+      - quais das fotos reais das fixtures têm GPS, modelo da câmera e data;
+      - que a saída não leva nada disso (`metadataReport`), com o custo em tamanho e em qualidade;
+      - as HEIC, pela HEIC to JPG.
+   7. **"PDF to JPG: which resolution to choose"** (PDF to JPG). Medido: os pixels e o tamanho das imagens por resolução (72, 150 e 300 ppi) e por formato, nos PDFs reais, com a amostra de páginas dita.
+   8. **"How to split a PDF, and why the parts can weigh more than the whole"** (Split PDF). Medido: a soma das partes contra o original em cada PDF real, por causa das fontes e imagens copiadas em cada parte.
+   9. **"How to combine PDFs on a phone"** (Merge PDF). Medido: o tamanho juntado contra a soma das entradas, em pares de fixtures. Os caminhos nativos (Arquivos no iPhone, e o Android se houver fonte oficial) só entram com fonte oficial.
+   10. **"How to turn photos into one PDF"** (Image to PDF). Medido: as fotos reais num PDF, antes e depois de comprimir as fotos primeiro (Compress image).
+
+   Ficam no hub de imagem os guias 1, 3, 4, 5, 6 e 10, e no hub de PDF os guias 2, 7, 8 e 9.
+
+3. **As medidas vêm antes do texto.**
+   - **O script.** Um script, por exemplo `scripts/guides/measure.ts`, chamado por `pnpm guias:medir`, mede tudo e grava um JSON versionado, por exemplo `data/guides-measured.json`.
+   - **O que vai no JSON**, para cada número de cada guia:
+     - o valor;
+     - a amostra: os arquivos e quantos são;
+     - o método: Node com qual motor, ou Playwright com qual navegador e versão;
+     - a data e o commit.
+
+     O JSON leva também o SHA-256 do script.
+   - **Meça pelo caminho que a pessoa usa.**
+     - Onde o site codifica no navegador (canvas), meça sobre o `dist/` com o Playwright, no Chromium, e também no WebKit se o resultado mudar. O texto diz o navegador e a data.
+     - Onde o caminho é WASM ou pdf-lib (MozJPEG, qpdf, PDF.js, pdf-lib), vale o Node com o mesmo código, e o texto diz isso.
+   - **A ordem.** O JSON entra num commit anterior ao texto de qualquer guia, e o relatório prova com o `git log`. Os guias leem os números só desse JSON, no build, em `{placeholders}`, como a § 119 e a § 123.
+   - **O `--check`.** O `pnpm guias:medir --check` refaz as medidas e compara. As do Node comparam exatas. As do navegador comparam com uma tolerância que você fixa e registra antes da primeira medida, porque o canvas muda com a versão.
+   - **Fora do `verificar`**, como o `pnpm fixtures`. No `verificar`, um teste do Vitest confere:
+     1. que o SHA-256 do script é o que está no JSON (mudou o script, meça de novo);
+     2. a estrutura, a data, a amostra e o método de cada número;
+     3. que todo placeholder de cada guia existe no JSON;
+     4. que uma parte determinista das medidas, refeita no Node (por exemplo a soma das partes da Split e um modo do Compress), dá exatamente o que está no JSON. É a prova de que o JSON saiu do script.
+   - **As fixtures.** As medidas usam as fixtures que existem. Um caso que falte é gerado por script, sem baixar nada, e registrado no `fixtures/ORIGEM.md` com o SHA-256, como na F2 e na F5a.
+   - **Defeito.** Se uma medida achar um defeito de corretude num motor, ele é corrigido com teste e §, e a medida é refeita.
+
+4. **A página do guia de arquivo.**
+   - **Uma view para os 10**, por exemplo `src/views/FileGuideView.astro`.
+     - Os textos ficam em `src/i18n/en/guide-<slug>.ts`.
+     - Há um registro único, lido pelas páginas, pelos hubs, pela busca, pelos portões e pelos testes, no modelo do `GUIDES` das calculadoras. Onde ele mora é escolha sua, registrada.
+     - A `GuideView` do dinheiro só pode ser generalizada se os 5 guias de dinheiro continuarem passando em tudo sem mudança de asserção.
+   - **A ordem, de cima para baixo:**
+     1. o breadcrumb;
+     2. o H1, a linha que diz a pergunta que o guia responde e o "Reviewed", com o autor e as datas;
+     3. a introdução;
+     4. a ferramenta embutida e o link "Open the <ferramenta> tool";
+     5. a primeira metade do texto;
+     6. um AdSlot de conteúdo, só depois da ferramenta;
+     7. a segunda metade;
+     8. a tabela "What we measured", com a data, a amostra e o método;
+     9. as fontes, com os links oficiais e a data da leitura;
+     10. as relacionadas: até 6 ferramentas ou guias que existem;
+     11. o AdSlot do trilho.
+   - **O schema** é `Article` (autor `Person`, `datePublished` e `dateModified`), `BreadcrumbList` e `Person`.
+   - **A ferramenta embutida é a mesma da página dela:**
+     - a mesma ilha e a mesma entrada (o `mount.ts` da ferramenta, ou o `PdfIsland`);
+     - o mesmo Panel, com um só `#fo-tool-root` por página, o `data-props` e as `PANEL_POSES`;
+     - as opções começam por propriedade da página, nunca pela URL;
+     - arrastar e soltar, Ctrl+V, lote e ZIP funcionam como na página dela;
+     - os eventos são os mesmos da página dela, e o GA4 separa pela página.
+   - **O orçamento:**
+     - exatamente 2 arquivos JS antes do primeiro uso (a entrada da ferramenta e o chunk compartilhado), com no máximo 80 KB gzip;
+     - no máximo 8 requisições na primeira página e 3 novas na seguinte;
+     - nenhum worker nem `.wasm` antes do primeiro arquivo;
+     - nada dos guias entra no chunk compartilhado. As páginas de imagem, de PDF e de dinheiro mantêm o número de arquivos JS, com a medida de antes e de depois (o modelo da § 136).
+   - **O anúncio:**
+     - nada acima da ferramenta no celular;
+     - nada a menos de 150 px do painel, dos campos, do Baixar ou da Oli, em repouso e com resultado;
+     - o AdSlot só vem depois da ferramenta, com 150 palavras por AdSlot.
+   - **O tamanho:** de 800 a 1.500 palavras por guia, contadas por teste.
+
+5. **O texto de cada guia** (o modelo da decisão 10 da F4). É escrito pelo modelo forte no agente principal, não por subagente, e passa num checklist fixo que o relatório mostra item por item:
+   1. **Nenhum número à mão.** Todo número sai do JSON, ou é:
+      - um fato oficial numa lista curta do próprio guia, com a fonte (uma medida de rede social, um limite de anexo);
+      - um nome técnico (AES-256, Windows 11).
+
+      O teste da decisão 7 reprova o resto.
+   2. **Fato com fonte.** Todo fato de sistema, aplicativo ou rede (Windows, iPhone, Android, Instagram e os outros) tem uma fonte oficial lida nesta run, com o link e a data. O que não abre não entra.
+   3. **Nada que vence logo.** Nada de preço, versão de aplicativo de terceiro ou coisa que muda todo mês, a não ser com fonte oficial e data. Nada de ano no título. O "Revisado em" diz o que mudou.
+   4. **Honestidade:**
+      - a ferramenta recodifica a imagem;
+      - o Compress nunca devolve arquivo maior;
+      - o texto diz o que se perde: a transparência, a animação e o texto selecionável no modo Forte;
+      - a medida diz o tamanho da amostra e não generaliza além dela ("nas nossas 13 fotos", não "as fotos").
+   5. **Sem canibalização.** O guia responde por quê, quando e como, e leva à ferramenta. O título e o H1 não repetem os da página da ferramenta.
+   6. **A voz do `docs/design/README.md`:** sentence case, sem emoji, sem as palavras proibidas (a § 153 vale), e a Oli só na ferramenta.
+   7. **Sem enchimento:** nenhuma frase como "in today's world", "delve", "it's important to note" ou "in conclusion".
+   8. **Gramática:** zero erro de gramática no `lint:texto`, com os placeholders preenchidos pelos valores medidos (o modelo da § 123).
+
+6. **Hubs, ferramentas, busca e SEO.**
+   - O `/image-tools/` e o `/pdf-tools/` ganham a lista dos guias deles, no modelo da lista de guias do `/money-calculators/`: um H2 e uma linha por guia.
+   - A página de cada ferramenta embutida ganha uma linha com o link para o guia dela, fora do painel e fora dos 150 px do anúncio. O link sai de um campo do registro, como o guia das calculadoras.
+   - A busca ganha os 10, na categoria da área. As contagens dos testes da busca vêm dos registros, por construção, com um §.
+   - Cada guia tem a imagem de Open Graph do build, com a Oli segurando o ícone da ferramenta, no modelo da F4. Ele entra no sitemap, o hreflang segue a § 58 (só inglês), e o menu de idioma segue a § 84.
+   - Nenhuma página fica órfã (`gate:links`).
+
+7. **Os portões e testes que crescem.**
+   - **`gate:conteudo`:** os blocos da decisão 4 em cada guia de arquivo e as 800 a 1.500 palavras, com controles positivos e negativos no `tests/unit/conteudo.test.ts`.
+   - **`gate:prontidao`:** passa a ler o registro novo, com:
+     - H1, título e descrição próprios;
+     - 60 palavras no `<main>` e 150 por AdSlot;
+     - cartões e busca só do registro.
+   - **O teste dos números:** reprova algarismo fora de placeholder que não esteja na lista curta do guia, com fonte. Tem controles positivos e negativos.
+   - **`lint:texto`:** preenche os placeholders dos guias de arquivo com os valores do JSON.
+   - **`budgets.spec.ts`:** uma lista nova, lida do registro, com exatamente 2 arquivos. As listas que existem não mudam.
+   - **`ads.spec.ts`:** cada guia, com a ferramenta em repouso e com resultado, a 360 × 740 e a 1280 × 800.
+   - **`a11y.spec.ts`:** cada guia, e a ferramenta embutida com resultado.
+   - **`design.spec.ts`:** o reflow a 320 px. A tabela medida fica em `.fo-table-wrap` (§ 129).
+   - **Um spec novo**, com um nome que caia no fim da lista (por exemplo `tool-guides.spec.ts`; veja a decisão 9). Nos dois navegadores e para cada guia, ele:
+     1. solta a fixture do guia, espera o resultado e baixa;
+     2. confere a saída como a página da ferramenta confere (abre, tem o formato pedido e não leva GPS);
+     3. confere a privacidade como o `image-privacy.spec.ts` e o `pdf-privacy.spec.ts`: só GET da própria origem, sem corpo nem query string, e o nome do arquivo só no nome do download.
+   - **`launch-claims.spec.ts`:** ganha um guia de imagem e um de PDF.
+   - **`lighthouserc.json`:** ganha um guia de arquivo, o de entrada mais pesada pela medida, com desempenho 90 ou mais e CLS de até 0,05. As páginas que já estavam não pioram.
+   - Os guias de dinheiro e os testes deles não mudam.
+
+8. **O kit do Product Hunt.**
+   - **Arquivos:**
+     - `docs/lancamento/product-hunt.md`, com as explicações em português e os textos que vão para fora em inglês;
+     - as imagens em `docs/lancamento/product-hunt/`.
+
+     O `docs/lancamento/README.md` ganha a linha do kit e o momento do envio (a primeira terça depois do merge da F5b), no lugar de "não há texto aqui".
+   - **As regras do Product Hunt**, lidas na fonte nesta run, com a data, e resumidas em português como no `show-hn.md`:
+     - quem pode postar;
+     - como funciona o dia do lançamento e quando ele começa. Confirme a hora: em novembro, 0h01 no horário do Pacífico é 5h01 em Brasília;
+     - o que é proibido (pedir voto, várias contas e o resto);
+     - o que dizem de texto gerado por IA;
+     - os campos e os limites: nome, tagline, descrição, tópicos, links, galeria, miniatura e primeiro comentário.
+
+     Página que não abrir: o campo diz "conferir no formulário", com a fonte oficial mais recente que você achou.
+   - **Os textos, em inglês:**
+     - 3 opções de tagline e 2 de descrição, cada uma com a contagem de caracteres feita por script, dentro do limite lido;
+     - os tópicos;
+     - o primeiro comentário do criador, como roteiro de fatos, com o aviso para o Victor reescrever com as palavras dele (como no `show-hn.md`);
+     - as respostas às perguntas prováveis: como o site ganha dinheiro (anúncio e Ko-fi), por que não há upload, os limites, os navegadores e se é código aberto. A linha do código aberto leva o link do repositório público do motor só se ele existir no dia; se não, a linha sai;
+     - o checklist do dia do lançamento e o que não fazer.
+   - **As provas:**
+     - Cada afirmação técnica do kit aponta para um teste que passa (`launch-claims.spec.ts`, `image-privacy.spec.ts`, `pdf-privacy.spec.ts`, `budgets.spec.ts`). Afirmação sem teste não entra.
+     - As contagens do produto (ferramentas, presets, calculadoras e guias) saem dos registros. Um teste do Vitest compara as contagens escritas no kit com os registros e reprova quando elas não batem. Assim, quando a 2b ou outra run mudar uma contagem, o kit tem de ser atualizado.
+   - **As imagens**, geradas por um script (por exemplo `pnpm lancamento:imagens`, fora do `verificar`). A fonte é o site real (o `dist/` servido, sem o aviso de cookies) e o `docs/design/` (tokens, fontes, a Oli só nas poses `wave` e `cheer`, e o logo). O script gera:
+     - a miniatura;
+     - a galeria, com de 3 a 6 imagens no tamanho que o Product Hunt pede;
+     - o GIF animado da Oli.
+
+     As regras das imagens:
+     - Os screenshots mostram estados reais com fixtures reais, por exemplo o Compress PDF da `gen-fotos` com os números medidos.
+     - Nada inventado: nenhuma contagem falsa, depoimento, logo de terceiro, selo do Product Hunt ou marca do Product Hunt.
+     - Cor só dos tokens, e o amarelo só no Baixar que aparece num screenshot.
+     - Cada imagem fica dentro do tamanho e do peso lidos, sem metadados da máquina.
+     - O `.md` lista cada imagem com a legenda (o texto alternativo), o tamanho e o peso.
+   - **O GIF:**
+     - Os quadros saem da animação da Oli de forma determinista: pausando as animações de CSS em tempos fixos, ou desenhando o SVG com o `satori` e o `@resvg/resvg-js`, que já são dependências de desenvolvimento.
+     - Para codificar, use no máximo uma `devDependency` com licença da lista (por exemplo o `gifenc`, MIT) ou um codificador pequeno seu em `scripts/`. É escolha sua, registrada.
+     - Nada disso entra no bundle, e o `gate:licencas` fica verde.
+
+9. **O CI e os minutos.**
+   - **Não mexa no `.github/`.**
+   - **Antes de cada push com testes novos,** rode o `--list` de cada parte:
+     - `pnpm exec playwright test --project=chromium --shard=i/3 --list`;
+     - `pnpm exec playwright test --project=webkit --shard=i/7 --list`.
+
+     O `design.spec.ts` e o `image-matrix.spec.ts` têm de ficar em partes diferentes (hoje, a 4 e a 5 do WebKit; § 142). O nome do spec novo é escolhido para cair no fim da lista. Se isso não bastar, registre a medida.
+   - **O tempo das partes:**
+     - Uma parte acima de 700 s: registre a medida e a proposta de uma run de ajuste (`CLAUDE.md`).
+     - Uma parte que reprovar por passar de 900 s: aí divida o `ci.yml`, no modelo da decisão 14 da F5a. Nesse caso o merge passa a ser do Victor (o job recusa PR que muda o pipeline), e isso vai num § e na descrição da PR.
+   - **Os minutos.** Cada execução do CI gasta uns 69 min de runner, e o CI só roda com PR aberta (`pull_request`). A prévia do Workers Builds sai de qualquer push da branch, em `https://fase-05b-fileorca.vmatusita.workers.dev`, sem gastar minutos. Por isso:
+     - faça push da branch nos marcos, para ter a prévia;
+     - abra a PR só quando o `pnpm verificar` local estiver verde (veja "Git e segurança").
+
+# Armadilhas conhecidas
+
+- As do `CLAUDE.md`, da F1a à F5a. Em especial:
+  - heredoc e `node -e` com crase no Git Bash: escreva arquivos com a ferramenta de escrita;
+  - o `exactOptionalPropertyTypes`, e o `pnpm tipos` antes do push (ele confere os specs);
+  - a porta 4173 com `reuseExistingServer`: em outra worktree, use `FO_PORT`;
+  - agentes em worktree nascem da `main`: o primeiro passo deles é `git merge --ff-only fase-05b`;
+  - agentes de workflow Sonnet assinam como Sonnet: para código, passe `model: 'opus'`;
+  - o WebKit avalia duas vezes a entrada de um worker (§ 172), e o WebKit do Windows não tem `OffscreenCanvas` no worker nem decodifica AVIF;
+  - o `serve-dist` devolve o 404 mais próximo: teste de página exige status 200;
+  - o aviso de cookies cobre o canto de baixo à esquerda: feche-o antes (`dismissCookies`).
+- O `#fo-tool-root` é único por página.
+- A entrada de cada ferramenta de imagem é uma só (§ 23). O `<script>` que importa o `mount.ts` fica no componente da ferramenta, para o Astro gerar uma entrada por ferramenta. Um guia que importe de outro jeito pode criar um terceiro arquivo JS.
+- As ferramentas de imagem que não são a HEIC to JPG aceitam só JPG, PNG e WebP (`PHOTO` no registro). A amostra de cada medida respeita o que a ferramenta aceita, e o texto diz a amostra.
+- O valor medido no canvas muda com a versão do navegador: grave a versão no JSON, e o texto diz "measured in <navegador> on <data>".
+- Na produção, nada de visita de navegador sem bloquear os domínios do Google com `context.route` (`CLAUDE.md`, F3).
+- As páginas oficiais de algumas redes (Instagram, Facebook, X) e do Product Hunt podem não abrir no WebFetch. Tente outra página oficial da mesma empresa (central de ajuda, documentação para desenvolvedores). Nunca use um site de terceiros como fonte de uma medida: o que não abre vira pendência.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. Os 10 guias respondem 200 no `dist/` e na prévia, cada um com o H1, o título, a descrição e o schema dele. Se a válvula cortar algo, a lista diz o que foi para a 5c.
+2. O JSON das medidas está num commit anterior ao texto do primeiro guia, provado pelo `git log`. O teste das medidas fica verde, e o `pnpm guias:medir --check` dá zero, com a saída colada.
+3. Em cada guia, a ferramenta embutida funciona nos dois navegadores (o spec novo), e a saída passa nas mesmas conferências da página da ferramenta.
+4. Cada guia mostra o checklist da decisão 5 item por item, com 800 a 1.500 palavras, nenhum número à mão (o teste) e as fontes com a data.
+5. O `budgets.spec.ts` fica verde, com os guias em 2 arquivos. Uma tabela mostra o JS das páginas de imagem, de PDF e de dinheiro antes e depois, com o mesmo número de arquivos.
+6. O `ads.spec.ts`, o `a11y.spec.ts`, o reflow do `design.spec.ts`, o spec novo e o `launch-claims.spec.ts` ficam verdes.
+7. O Lighthouse no celular do guia escolhido dá desempenho 90 ou mais e CLS de até 0,05. As páginas que já estavam no `lighthouserc.json` não pioram.
+8. O `gate:conteudo`, o `gate:prontidao`, o `gate:seo`, o `gate:links`, o `gate:licencas` e o `lint:texto` ficam verdes.
+9. O kit do Product Hunt traz:
+   - as regras com a data;
+   - os textos com a contagem feita por script, dentro dos limites;
+   - cada afirmação com o teste dela, e o teste das contagens verde;
+   - as imagens nos tamanhos lidos, geradas pelo script e listadas com legenda;
+   - o GIF, ou a pendência pela válvula.
+10. Todas as partes do CI ficam verdes, com uma tabela do total do `verificar` de cada uma. Não há `skip`, `fixme`, `only`, `retries` nem `continue-on-error` novo. O `git diff --stat origin/main...HEAD -- .github scripts/ci PLANO-FILEORCA.md docs/adr/ADR-001-plataforma-de-entrega.md .githooks .claude/settings.json docs/design` sai vazio (ou só com o `ci.yml`, pela exceção da decisão 9).
+11. O `pnpm verificar` inteiro fica verde na sua máquina, com a saída e o tempo de cada portão (ou as partes, pela regra da Verificação).
+12. Nada entra em `dependencies`. Em `devDependencies`, no máximo a do GIF, e o `pnpm-lock.yaml` muda só por ela.
+13. A prévia tem o `build.txt` com o commit. O Playwright confere nela, com o Google bloqueado, um guia de imagem e um de PDF a 360 e a 1280 px, com uma fixture e screenshot.
+14. A PR é mesclada pelo job de merge depois do `gh pr ready`. O pós-deploy fica verde, e o `build.txt` de produção mostra o commit do merge. Esse critério vai na resposta final, não no relatório.
+
+# Verificação: rode de verdade
+
+- Na ordem: o script de medidas e o JSON (num commit); o teste das medidas; a view e o guia 1 de ponta a ponta, com todos os testes dele verdes; depois os outros, cada um com os testes dele verdes antes do próximo.
+- Leia cada falha, corrija a causa e repita até passar. É proibido desligar, pular, marcar como skip, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar. Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no `DECISOES.md`.
+- No fim, rode o verificar inteiro numa execução limpa (`pnpm install --frozen-lockfile` e `pnpm verificar`, que já builda do zero) e guarde a saída completa. Se o todo passar de 900 s na sua máquina só pelo tamanho da suíte, rode as mesmas partes do CI em sequência, cole o resumo de cada uma e registre num § a medida e a proposta. O limite não muda.
+- Rode depois da última mudança de cada coisa:
+  - o `pnpm guias:medir --check`, depois da última mudança nos guias, nas fixtures ou num motor;
+  - o `pnpm lancamento:imagens`, depois da última mudança no kit ou no visual;
+  - o `pnpm screenshots`, depois do último ajuste visual. A pasta é `docs/relatorios/fase-05b/componentes/`, com dois guias nos dois temas a 360 e a 1280 px. As pastas antigas ficam como estão.
+- Depois de abrir a PR, acompanhe com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Leia o total de cada parte no log (`gh run view <id> --log`, com o `--attempt` do `CLAUDE.md` depois de um rerun).
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O `CLAUDE.md`, a ficha F5 e o resto do plano.
+3. O `docs/design/` e o `DECISOES.md`.
+4. Na dúvida, a opção mais simples e reversível.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos:
+
+- a view nova ou a generalizada, e onde mora o registro;
+- a ferramenta do guia 6;
+- a tolerância das medidas do navegador;
+- o guia que entra no Lighthouse;
+- o codificador do GIF;
+- o número e o conteúdo das imagens da galeria.
+
+Uma mudança de arquitetura (host, framework, estrutura, pipeline) vira uma ADR "Proposta" em `docs/adr/` e uma pendência. O resto segue.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- uma página oficial que não abre;
+- a página do Product Hunt que não abre;
+- o LanguageTool sem responder;
+- o comentário do Workers Builds que não chega.
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar:
+
+1. O GIF do kit vira pendência, e a miniatura fica em PNG.
+2. Os guias 9 e 10 vão para a run 5c (branch `fase-05c`).
+3. Os guias 7 e 8 vão para a 5c.
+
+O modelo é a § 85: saem a página, a rota, o cartão e todo link para ela, e nada fica "em breve". As medidas desses guias podem ficar no JSON. O que for cortado vai para o relatório como pendência, com o que falta.
+
+Nunca corte:
+
+- os guias 1, 2 e 3, os do plano;
+- o script de medidas e o teste dele;
+- os testes de privacidade, orçamento, anúncio e acessibilidade dos guias;
+- os textos do kit com as provas, a miniatura e pelo menos 3 imagens da galeria;
+- a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo.** Rode `git switch main` e `git pull --ff-only`. Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-05b.md` e `docs/prompts/prompt-fase-05b.txt`, o prompt desta run. Crie a branch com `git switch -c fase-05b`. Os dois arquivos entram sem edição no primeiro commit dela. Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-05b.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). O commit das medidas vem antes do texto de qualquer guia.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push, e o CI não roda sem PR.
+- **A PR em rascunho, só com o verificar local verde,** todos os guias e o kit commitados. Use `gh pr create --draft --base main --head fase-05b`, num comando separado do push. Título e descrição em português, com o resumo e o link do relatório.
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **A worktree da revisão** (`.claude/worktrees/revisao-f5b`) é só de leitura. Remova-a no fim com `git worktree remove`.
+- **Fim:**
+  1. Com o CI verde no rascunho, commite o relatório (citando essa execução), a revisão e os screenshots.
+  2. Faça o push e rode logo em seguida `gh pr ready`. A concorrência do CI cancela a execução do push e fica a do `ready_for_review`.
+  3. O job de merge mescla com o CI verde. Acompanhe até o merge. Se o CI falhar, corrija e envie.
+  4. Depois do merge, confira o pós-deploy (`gh run list --workflow pos-deploy.yml --limit 1`) e o `build.txt` de produção com o `curl`, sem navegador.
+
+  A run termina com a PR mesclada e o pós-deploy verde, ou com a pendência dita na resposta final.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo create`;
+  - postar, enviar formulário, criar conta ou subir arquivo para qualquer serviço;
+  - `npm publish` ou `wrangler deploy` em qualquer forma, inclusive `--dry-run`.
+
+  O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar**, com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) a ficha 5b, as seções do plano e as regras do `CLAUDE.md`, transformadas num checklist "requisito → onde vai ficar → que teste prova";
+   - (b) a arquitetura dos guias de dinheiro e das páginas de ferramenta: como embutir uma ferramenta de imagem (uma entrada por ferramenta) e uma de PDF num guia com 2 arquivos JS, e o que os portões e os testes leem (registros e mapa de rotas);
+   - (c) os caminhos de medida: para cada guia, que caminho o site usa em cada navegador (canvas ou WASM), o que roda no Node, o que pede o Playwright e o que os testes atuais já medem;
+   - (d) as fontes oficiais dos fatos dos guias (decisões 2 e 5): o link, a data e o fato exato de cada uma, e o que não abriu;
+   - (e) o Product Hunt: as regras, os campos e os limites, os tamanhos de mídia, o dia e a hora do lançamento e a regra sobre IA, com o link e a data; e o modelo do `docs/lancamento/show-hn.md`;
+   - (f) o CI: o tempo por spec da run 41344610873 e a projeção do `--list` com os testes novos.
+2. **Planejar.** Escreva `docs/relatorios/fase-05b-plano.md`, autossuficiente. Ele traz:
+   - as interfaces do registro e da view;
+   - a lista dos guias, com a ferramenta, o slug, o hub, as medidas e as fontes;
+   - o formato do JSON e o método de cada medida;
+   - como a ferramenta é embutida, e o orçamento projetado;
+   - o kit: textos, imagens e provas;
+   - cada critério ligado a um teste ou comando;
+   - a projeção das partes do CI;
+   - a ordem de construção.
+
+   Ele é o gabarito da revisão.
+3. **Implementar** em fatias que terminam verdes, nesta ordem:
+   - o script de medidas, o JSON e o teste deles, num commit;
+   - a view, o registro, as rotas, a ferramenta embutida e o guia 1 inteiro, com todos os testes;
+   - os guias 2 e 3;
+   - os guias 4 a 10;
+   - os hubs, as páginas das ferramentas e a busca;
+   - o kit do Product Hunt: textos, provas, o teste das contagens, as imagens e o GIF;
+   - o Lighthouse e os screenshots.
+
+   O código e os textos dos guias ficam no modelo forte, num agente só, para não colidir no registro, no CSS e nos textos.
+4. **Revisão adversarial final**, no método da F3 (`CLAUDE.md`, F3, § 92 a § 94):
+   - Ela roda sobre um commit fixo, registrado, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile` e `pnpm build`. Cada lente usa um `FO_PORT` (4174 a 4179) e uma `--output` só dela.
+   - São seis lentes Sonnet em contexto limpo, contra este prompt e a ficha:
+     - (a) corretude dos números e dos fatos: cada número de cada guia rastreado até o JSON ou a fonte oficial; uma amostra das medidas refeita por conta própria; cada afirmação do kit com o teste dela;
+     - (b) privacidade e segurança: a ferramenta embutida não deixa nada sair; as imagens do kit não levam dado pessoal nem metadado da máquina;
+     - (c) anúncio e política: as distâncias nos guias, a política de conteúdo do AdSense e as regras do Product Hunt (nada de pedir voto, nada que imite a marca deles);
+     - (d) acessibilidade (WCAG 2.2 AA): os títulos, a tabela medida e os links dos guias, a ferramenta embutida e as legendas das imagens do kit;
+     - (e) desempenho e SEO: orçamento, Lighthouse, schema `Article`, títulos sem ano, canibalização entre guia e ferramenta, links internos e sitemap;
+     - (f) aderência ao design system e à voz: os textos, os tokens e as poses nas imagens do kit (só `wave` e `cheer`) e o amarelo só no Baixar.
+   - Cada achado crítico, alto ou médio ganha um cético próprio, e os baixos de cada lente vão a um cético só.
+   - Crítico e alto confirmados: sempre corrigidos. Médio: corrigido se a correção é local. Baixo: vai para o relatório. Cada correção leva um teste que falha sem ela e um §.
+   - Depois, uma segunda passada revisa o diff das correções.
+   - Tudo fica em `docs/relatorios/REVISAO-F5b.md`. Remova a worktree no fim.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-05b.md` em português, commitado na branch antes do `gh pr ready`. Ele cita a última execução verde do CI com código ou teste, com o link e o total de cada parte.
+
+O relatório traz:
+
+- o resumo e a tabela dos guias: URL, ferramenta, hub, palavras, o que foi medido (amostra, método e data), as fontes, o JS inicial e as requisições;
+- o `git log` que prova as medidas antes dos textos;
+- o checklist da decisão 5, item por item, em cada guia;
+- a saída do teste dos números, do teste das medidas e do `pnpm guias:medir --check`;
+- a saída do spec novo e do `launch-claims.spec.ts`;
+- o orçamento dos guias, e as páginas de imagem, de PDF e de dinheiro antes e depois;
+- o Lighthouse das páginas do `lighthouserc.json`;
+- os screenshots;
+- o kit do Product Hunt:
+  - o que tem;
+  - as regras lidas, com a data;
+  - cada afirmação ligada ao teste dela, e as contagens ligadas ao teste delas;
+  - as imagens, com o tamanho e o peso de cada uma, e o GIF;
+- o CI: a tabela das partes antes e depois, onde o `--list` pôs os specs e os minutos de cada execução;
+- o resumo da revisão por lente e severidade, apontando para o `REVISAO-F5b.md`;
+- a saída real e completa do `pnpm verificar` local, com o tempo de cada portão;
+- o link da prévia e o que você conferiu nela;
+- as decisões novas, apontando os §;
+- o que a válvula cortou e o que fica para a 5c, se houver;
+- **a lista do que é do Victor, em passos:**
+  1. O merge é automático. Conferir na PR o merge, o pós-deploy e o `build.txt` (a resposta final da run traz os três).
+  2. Abrir dois guias no celular e no computador e usar a ferramenta embutida.
+  3. No Search Console, pedir a indexação dos três guias do plano.
+  4. Ler o `docs/lancamento/product-hunt.md`:
+     - reescrever o primeiro comentário com as próprias palavras;
+     - conferir no dia as contagens e os tamanhos;
+     - criar ou conferir a conta no Product Hunt;
+     - agendar para a primeira terça depois do merge, na hora lida;
+     - pôr o link do repositório público do motor só se ele estiver no ar.
+  5. Uma vez por ano, com as fontes das calculadoras: revisar o guia das medidas das redes sociais e rodar o `pnpm guias:medir` de novo.
+  6. As pendências que seguem abertas: a 2b, os baixos da F4 e da F5a, a § 103, o `docs/F0-SAIDA.md` e o que esta run deixou para a 5c.
+  7. Gerar o prompt da F6 (e o da 5c, se a válvula cortou).
+- **uma nota para a F6:**
+  - os guias ficam em inglês (plano);
+  - o que os hubs em português e espanhol fazem com os links para os guias, já que o hreflang só liga equivalentes;
+  - que textos das ferramentas embutidas mudam com o idioma;
+- **uma nota para a F8:** os guias no service worker (offline), e a regra de medir de novo quando um motor muda.
+
+Acrescente no fim do `CLAUDE.md` uma seção curta, "F5b: guias de arquivo e kit do Product Hunt", com:
+
+- os comandos novos (`guias:medir` e `lancamento:imagens`);
+- como acrescentar um guia de arquivo;
+- quando medir de novo: mudou o motor de imagem ou de PDF, o script de medidas ou uma fixture;
+- a regra dos números;
+- como o kit se mantém verdadeiro (o teste das contagens);
+- as armadilhas que você achou.
+
+Não apague nada do que já existe.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR e o estado do merge e do pós-deploy.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, a descrição da PR e as explicações de `docs/lancamento/`.
+
+Em inglês:
+
+- o código, os nomes de arquivo, os identificadores e os commits;
+- os textos dos guias e do site;
+- os textos do kit que vão para fora.
+
+Os textos do site ficam nos arquivos de tradução, com a voz de `docs/design/README.md`: sentence case, sem emoji e sem as palavras proibidas.

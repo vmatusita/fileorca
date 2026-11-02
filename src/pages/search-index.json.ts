@@ -5,7 +5,8 @@
 // that has its link (src/search/search.ts), so a page that exists only in English is not offered in
 // Portuguese or Spanish. The 12 PDF tools (English only, F5a) come after the image pages, in the PDF category,
 // and the money calculators and the guides (English only, F4) after them, in the money category. The hubs are not
-// listed, as the image hub is not (DECISOES § 160).
+// listed, as the image hub is not (DECISOES § 160). The ten file guides (English only, F5b) come last, each in the category
+// of its hub, image or PDF, with its name as its only term (DECISOES § 190).
 import type { APIRoute } from 'astro';
 import { LANGS, routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -16,13 +17,14 @@ import { ICONS } from '../icons/icons.ts';
 import enCommon from '../i18n/en/common.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../tools/guides/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
-  return [...imageEntries(), ...pdfEntries(), ...moneyEntries()];
+  return [...imageEntries(), ...pdfEntries(), ...moneyEntries(), ...fileGuideEntries()];
 }
 
 /** A page that exists in English only: its category is the one of its area (money, PDF). */
-function englishEntry(id: string, path: string, blurb: { name: string; synonyms: string[] }, icon: string, cat: 'money' | 'pdf', category: string): SearchEntry {
+function englishEntry(id: string, path: string, blurb: { name: string; synonyms: string[] }, icon: string, cat: 'money' | 'pdf' | 'image', category: string): SearchEntry {
   const terms = new Set([blurb.name, ...blurb.synonyms].map(normalize));
   return { id, href: { en: path }, name: { en: blurb.name }, category: { en: category }, cat, icon, terms: [...terms] };
 }
@@ -33,6 +35,16 @@ function moneyEntries(): SearchEntry[] {
     ...CALC_PAGE_IDS.map((id) => entry(id, CALC_PAGES[id].path, enCommon.calcs[id], ICONS[CALC_PAGES[id].icon])),
     ...GUIDE_IDS.map((id) => entry(id, GUIDES[id].path, enCommon.guides[id], ICONS[CALC_PAGES[GUIDES[id].calc].icon])),
   ];
+}
+
+/** The file guides, in registry order: the icon of the tool each one embeds, the category of its hub. */
+function fileGuideEntries(): SearchEntry[] {
+  return FILE_GUIDE_IDS.map((id) => {
+    const def = FILE_GUIDES[id];
+    const icon = def.tool in PDF_PAGES ? PDF_PAGES[def.tool as keyof typeof PDF_PAGES].icon : IMAGE_PAGES[def.tool as ImagePageId].icon;
+    const pdf = def.hub === 'pdf-tools';
+    return englishEntry(id, def.path, enCommon.fileGuides[id], ICONS[icon], pdf ? 'pdf' : 'image', pdf ? enCommon.search.pdfCategory : enCommon.search.imageCategory);
+  });
 }
 
 /** The 12 PDF tools, in hub order, with the path of the route map (the same one the pages are built on). */

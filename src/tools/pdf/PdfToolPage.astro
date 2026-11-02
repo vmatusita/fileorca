@@ -17,6 +17,10 @@ import { PANEL_POSES } from '../image/Oli.tsx';
 import PdfIsland from './PdfIsland.astro';
 import { crumbsFor, panelData, relatedFor } from './page.ts';
 import { PDF_TOOL_TEXTS } from './texts.ts';
+import { fmt } from '../../i18n/format.ts';
+import enCommon from '../../i18n/en/common.ts';
+import guideTexts from '../../i18n/en/file-guides.ts';
+import { FILE_GUIDES, guidesOfTool } from '../guides/registry.ts';
 import type { PdfToolId } from './registry.ts';
 
 interface Props {
@@ -33,6 +37,8 @@ const crumbs = crumbsFor(id);
 const related = relatedFor(id);
 const data = panelData(id);
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
+// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots.
+const guides = guidesOfTool(id).map((guide) => ({ href: FILE_GUIDES[guide].path, title: enCommon.fileGuides[guide].name }));
 ---
 <BaseLayout
   lang={lang}
@@ -64,6 +70,11 @@ const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
       </tbody>
     </table>
   </section>
+  {guides.length > 0 && (
+    <div class="fo-section fo-prose fo-guide-links">
+      {guides.map((guide) => <p><a href={guide.href}>{fmt(guideTexts.guideLink, { title: guide.title })}</a></p>)}
+    </div>
+  )}
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
     <Faq items={t.faq} />

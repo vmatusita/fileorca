@@ -1837,3 +1837,243 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **S-4 (baixo), registrado:** a reescrita reparada que a Compress devolve sem ganho (§ 182) pode ficar maior que a entrada estragada (num PDF mínimo, 796 contra 767 bytes). A decisão 4 da ficha ("Nunca sai um PDF quebrado") vem antes do "nunca maior".
   - Nas fixtures, a reparada é menor que a entrada em todos os modos.
 - **Testes:** os quatro corrigidos têm teste no Vitest ou no `pdf-tool.spec.ts`, e cada um falhou contra o código de antes.
+
+## § 184 · O registro, a view e a ferramenta embutida dos guias de arquivo (F5b, 1/nov/2026)
+
+- **Registro:** `src/tools/guides/registry.ts` (`FILE_GUIDE_IDS`, `FILE_GUIDES`), só dados e nunca importado pela ilha. Cada guia tem o caminho, a ferramenta embutida, o hub e até 6 relacionadas. O `GUIDE_IDS` das calculadoras não muda: ele alimenta o `gate:dinheiro-saude` (24 de 24).
+- **View:** `src/views/FileGuideView.astro`, nova. A `GuideView` do dinheiro fica como está, presa à calculadora e aos blocos `data-ymyl`.
+- **Ferramenta de imagem embutida:** cada página de ferramenta embutida (`src/tools/<slug>/<Slug>Page.astro`) ganha `embed`, que troca o molde `ImageToolPage` por `src/tools/image/ImageToolEmbed.astro` (só o `#fo-tool-root` com o `data-props` e o slot). O `<script>` do `mount.ts` continua no mesmo componente, então a página da ferramenta e o guia carregam a mesma entrada, com o mesmo nome e hash, e o chunk `island`: dois arquivos.
+  - Alternativa recusada: um `<script>` num componente do guia. O Rolldown tiraria o `mount.ts` para um chunk comum, e a página da ferramenta passaria a três arquivos.
+  - Alternativa recusada: um componente `<Slug>Island.astro` por ferramenta. Renomearia a entrada das páginas que já estão no ar e mexeria no `ImageToolPage`.
+- **Ferramenta de PDF embutida:** o `PdfIsland.astro` de sempre, a entrada das 12 páginas.
+
+## § 185 · A tolerância do `pnpm guias:medir --check` (F5b, 1/nov/2026)
+
+- **Decisão, fixada antes da primeira medida que vai para o arquivo:** as medidas do Node comparam exatas. As do navegador comparam bytes e razões com até 2% de diferença relativa e PSNR com até 0,5 dB; dimensões, contagens e presença de metadado comparam exatas.
+- **Por quê:** o canvas do Chromium e do WebKit codifica diferente de uma versão para outra, e o Playwright atualiza os dois. Na mesma máquina e na mesma versão o resultado repete byte a byte (os protótipos da exploração repetiram), então a tolerância só cobre a troca de versão.
+- **Onde:** `TOLERANCE` em `scripts/guides/measure.ts`, gravada também no JSON (`tolerance`).
+
+## § 186 · A ferramenta do guia 6 sai de uma regra fixada antes da medida (F5b, 1/nov/2026)
+
+- **Regra:** entre as ferramentas de imagem que aceitam JPG, cada uma com a opção que menos mexe na foto e que se escolhe num passo só (sem desenhar caixa), vence a que devolve um JPG do mesmo tamanho na tela com o maior PSNR no pior caso contra os pixels do original; empate, o menor arquivo. Os dois navegadores têm de concordar.
+  - **As opções:** Compress image (Recommended, a mais leve das duas), Resize image (By percentage, 100), Crop image (Square, o padrão; a imagem inteira pede quatro campos), Rotate image (Right, o padrão; não existe girar zero), PNG to JPG (o padrão: o JPG vira PNG) e Image to PDF (o padrão).
+  - **O PSNR:** o original e a cópia passam pelo mesmo decodificador (MozJPEG no Node, ou o leitor de PNG dos testes). Tamanho diferente (o recorte, o giro, o PDF) fica fora.
+- **Amostra:** as três fotos reais com GPS das fixtures, no Chromium e no WebKit.
+- **Consequência:** o guia embute a ferramenta vencedora com a opção vencedora, por propriedade da página. Para isso o `ImagePanelData` ganha `initial`, aplicado no estado inicial do `ImagePanel`; nunca pela URL.
+
+## § 187 · O `gate:seo` nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** cada guia de arquivo pede `Article`, `BreadcrumbList` e `Person`, como os guias de dinheiro, e o breadcrumb termina no próprio guia (`requiredSchemaTypes` e `schemaProblems` em `scripts/lib/seo-pages.ts`).
+- **O título:** começa pelo nome do guia (o do cartão, em `enCommon.fileGuides`), em Title Case, comparado sem caixa como na § 122. Nem o título nem o H1 têm ano, e nenhum dos dois começa pelo H1 da ferramenta embutida, que o portão lê na página dela no `dist/` (`fileGuideTitleProblems`).
+- **Por quê:** a ficha pede título sem ano e sem canibalizar a página da ferramenta. Por isso o guia 7 se chama "Which resolution to choose for PDF to JPG", e não "PDF to JPG: …".
+- **Testes:** controles positivos e negativos em `tests/unit/seo-pages.test.ts`. Os guias também entram no sitemap em inglês que o portão confere.
+
+## § 188 · O `gate:conteudo` e a voz nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** `checkFileGuide` (`scripts/lib/file-guides.ts`) confere cada guia do registro.
+  - Os blocos aparecem na ordem da decisão 4: breadcrumb, H1, "Reviewed" com as duas datas, introdução, uma só raiz `#fo-tool-root`, o link para a página da ferramenta, o AdSlot de conteúdo, "What we measured" com tabela em `.fo-table-wrap` e a data, as fontes com link `https` e a data da leitura, e até 6 relacionadas. São no máximo 2 AdSlots.
+  - O texto próprio tem de 800 a 1.500 palavras.
+  - Nenhuma frase de enchimento: "in today's world", "delve", "it's important to note", "in conclusion" e parentes.
+- **O que conta como palavra:** só os blocos `data-guide-text` da view (o topo, a introdução, as seções e as notas da medida). Ficam de fora a ferramenta, as tabelas, as fontes e os cartões. O texto de cada bloco é lido com quebra entre os elementos, para um título e o parágrafo seguinte não virarem uma palavra só.
+- **Voz:** o `gate:design` passa as regras de voz (`checkVoice`) no texto visível de cada guia, e o `tests/unit/guides-numbers.test.ts` passa as mesmas regras nos arquivos de texto.
+- **Testes:** controles positivos e negativos em `tests/unit/conteudo.test.ts`. O `dist` falso do teste do portão passou a ter os 10 guias.
+
+## § 189 · Nenhum número à mão nos guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** todo algarismo de um texto de guia fica num `{placeholder}`. Um placeholder é uma de três coisas:
+  - um número de `data/guides-measured.json`, num jeito de escrever fixo: `{nome}` no padrão da unidade, ou `{nome_off}`, `{nome_more}`, `{nome_times}`, `{nome_change}`, `{nome_exact}` e `{nome_word}`;
+  - um fato que a medida decidiu (a opção do guia 6);
+  - um fato oficial da lista curta do próprio guia (`facts`), com a fonte que o guia cita.
+- **Fora disso:** só os nomes técnicos de `names`, como "H.264", "W3C" e "Windows 11". O `src/tools/guides/measured.ts` só formata e nunca faz conta.
+- **O teste:** `tests/unit/guides-numbers.test.ts` reprova algarismo fora disso, em prosa, lista, título ou cabeçalho de tabela. Ele reprova também um fato cuja fonte o guia não cita, e uma fonte sem a data da leitura. No guia 3, cada página oficial de medida do JSON tem de estar entre as fontes. O teste tem controles positivos e negativos.
+- **Contagens em palavras:** contagens escritas por extenso ("three photos") também seriam número à mão. Os textos usam `{nome_word}` ou deixam a contagem de fora.
+- **`lint:texto`:** um guia de arquivo não é texto de dinheiro (`fileGuideOf`). Ele é preenchido com os valores que a página mostra, e os links e as datas das fontes (`href`, `read`) ficam fora da leitura. O teste está em `tests/unit/lint-texto-money.test.ts`.
+
+## § 190 · A busca e as contagens com os guias de arquivo (F5b, 1/nov/2026)
+
+- **Decisão:** os 10 guias entram no fim do índice da busca, na categoria do hub (Image ou PDF), com o nome e dois ou três termos que não colidem com as consultas dos testes.
+  - Os guias que dizem "JPG" no nome ganham uma frase com "jpeg", para "jpg" e "jpeg" continuarem achando a mesma lista na mesma ordem.
+  - Nenhum guia diz "merge", para "merge" seguir achando só Merge PDF e Image to PDF.
+- **O que mudou por construção** (a § 125 e a § 171 são o precedente):
+  - `routes.test.ts`: a lista de rotas ganha os 10 ids; as páginas só em inglês passam de 48 a 58; o índice da busca passa de 46 a 56 entradas.
+  - As consultas `jpg to pdf` e `heic` ganham o guia no fim (`routes.test.ts`; a de `jpg to pdf` também no `navigation.spec.ts`).
+  - `pdf to jpg` passa a `pdf-to-jpg`, o guia de resolução e Image to PDF, porque o nome do guia diz "PDF to JPG". A ferramenta continua primeiro, que é onde vai o Enter (§ 180).
+  - `pdf` ganha os guias cujo nome diz PDF, depois das ferramentas.
+  - `seo-checks.test.ts`: o sitemap em inglês passa de 56 a 66 URLs.
+  - `prontidao.test.ts`: os ids da busca ganham os 10 guias.
+- **Por quê:** a ficha manda os guias para a busca. Nenhuma consulta perdeu o primeiro resultado, e nenhuma ferramenta saiu de uma lista.
+
+## § 191 · O kit do Product Hunt e o teste que o lê (F5b, 1/nov/2026)
+
+- **Decisão:** `docs/lancamento/product-hunt.md` no modelo do `show-hn.md`.
+  - As regras vêm só das páginas do Product Hunt, lidas em 1/nov/2026 e resumidas em português.
+  - Os textos que vão para fora estão em inglês: o nome, 3 taglines, 2 descrições, as tags sugeridas, o primeiro comentário como roteiro e as respostas prováveis.
+  - O arquivo traz as imagens com a legenda, as provas e o checklist do dia.
+- **O teste:** `tests/unit/launch-kit.test.ts`, no `verificar`, lê o arquivo e reprova:
+  - uma contagem do produto ("8 image tools", "15 guides"…) diferente dos registros;
+  - uma contagem de caracteres diferente do texto ou acima do limite lido;
+  - uma imagem listada que falte, tenha outro tamanho ou peso, passe do limite, não tenha legenda ou leve metadado da máquina;
+  - uma prova que cite um arquivo de teste que não existe.
+- **Por quê:** a ficha pede que o kit não minta quando uma run mudar uma contagem (a 2b). O `show-hn.md` marcava essas linhas com um comentário; aqui o teste as segura.
+- **Limites:** onde duas páginas oficiais discordam, vale o mais estreito, e o texto manda conferir no formulário. A miniatura fica até 2 MB (uma página diz 2 MB, outra 3 MB) e a galeria até 3 MB por imagem.
+- **Data do lançamento:** a primeira terça depois do merge, às 12:01 AM do Pacífico, 5h01 em Brasília (o horário de verão dos EUA acabou em 1/nov/2026). O texto também diz o limite de agendamento ("de amanhã até 30 dias") e que 3/nov/2026 é dia de eleição nos EUA.
+
+## § 192 · O GIF da Oli e o `gifenc` (F5b, 1/nov/2026)
+
+- **Decisão:** o GIF animado da miniatura (240 × 240) sai de quadros desenhados pelo `@resvg/resvg-js`, que já era `devDependency`.
+  - O desenho usa o SVG da pose (`docs/design/assets/Oli/`, só `wave` e `cheer`) e as cores dos tokens.
+  - O movimento sai dos keyframes do próprio site (`fo-float` e `fo-cheer`, lidos em `src/styles/components.css`), com a duração e a curva dos tokens (`dur-float`, `dur-cheer`, `ease-in-out`, `ease-spring`), calculados quadro a quadro.
+  - Uma paleta só, para a cor não piscar entre quadros.
+- **O codificador:** `gifenc` 1.0.3 (MIT, de 2022), a única `devDependency` nova, fixada na versão exata. O `pnpm-lock.yaml` mudou só por ela, e o `gate:licencas` fica verde. O pacote não traz tipos: a declaração está em `scripts/lancamento/gifenc.d.ts`.
+- **Alternativa recusada:** um codificador próprio em `scripts/`, com LZW e quantização feitos à mão. Daria mais código para testar e mais risco de GIF quebrado, para uma imagem que sai do `verificar`.
+- **Nada disso entra no bundle:** o script fica em `scripts/lancamento/`.
+
+## § 193 · A galeria do Product Hunt (F5b, 1/nov/2026)
+
+- **Decisão:** são 5 imagens de 1270 × 760, cada uma com um estado real do `dist/` servido, aberto no Chromium com o consentimento já escolhido (sem o aviso de cookies):
+  1. a home;
+  2. a HEIC to JPG com duas fotos do iPhone convertidas;
+  3. a Compress PDF com o PDF de fotos (`gen-fotos`);
+  4. a tabela medida do guia "Why is my PDF so large?";
+  5. a calculadora de financiamento com o exemplo.
+- **A moldura:** fundo `deep`, legenda em Fredoka na cor `on-deep` e o logo escuro, lidos das variáveis do CSS do próprio site.
+  - Na imagem 4, a moldura de rolagem da tabela (§ 129) é aberta só para a foto, para a tabela sair inteira.
+  - As poses que aparecem são as do site naquele estado: `wave` na home e `cheer` no resultado.
+  - O amarelo só aparece no Download dos screenshots.
+- **Por que 5:** a ficha pede de 3 a 6. Com 5, a galeria cobre as três áreas, um guia e a ferramenta mais buscada, sem repetir estado.
+
+## § 194 · O guia que entra no Lighthouse (F5b, 1/nov/2026)
+
+- **Decisão:** `/guides/why-is-my-pdf-so-large/` entra no `lighthouserc.json`.
+- **Por quê:** a ficha pede o guia de entrada mais pesada pela medida. No `budgets.spec.ts`, os guias de PDF carregam 36,8 KB gzip (a entrada do `PdfIsland` e o chunk `island`), contra 20,8 a 21,3 KB dos de imagem. Entre os quatro guias de PDF, que empatam no JS, esse é o do plano (guia 2) e o de mais texto.
+- **As páginas que já estavam** seguem na lista, com as mesmas asserções.
+
+## § 195 · Os hubs e as páginas das ferramentas levam aos guias (F5b, 1/nov/2026)
+
+- **Hubs:** o `/image-tools/` e o `/pdf-tools/` ganham a seção "Guides" (`aria-labelledby="guides"`; o id `guide` já é do "qual ferramenta usar"), uma linha por guia do hub, com link simples e sem `fo-tool`. O `checkNothingUnfinished` conta os cartões dos hubs contra o registro.
+- **Ferramentas:** a página de cada ferramenta embutida ganha um parágrafo `fo-guide-links` com o link para o guia dela.
+  - O link sai do registro (`guidesOfTool`) e fica fora de qualquer bloco `data-content`, entre as especificações e as perguntas, longe dos dois AdSlots. O `ads.spec.ts` confere os 150 px.
+  - Só em inglês, onde os guias existem (§ 6).
+  - A Resize image leva aos dois guias que a embutem: o das redes sociais e o da localização.
+
+## § 196 · O `--check` compara cada coluna pelo método dela (F5b, revisão final, A-6)
+
+- **Achado:** o `compareTables` do `scripts/guides/measure.ts` dava a tolerância de 2% a uma tabela inteira quando algum método dela era o Playwright, e tirava a unidade do nome da coluna (`/bytes$/`). Numa tabela mista, uma coluna do Node (o Lossless e o Recommended do guia 2) passava com 1,9% a mais, e uma do navegador (`strongBytesChromium`) era comparada exata, contra a decisão 3 da ficha e a § 185.
+- **Mudou:** cada tabela do JSON ganha `kinds`, um por coluna, com quem mediu (`node` ou `playwright`) e a unidade (ou `label`). O plano declara a coluna ao montar a tabela (`label`, `inNode`, `inBrowser`, em `scripts/guides/lib/record.ts`), e uma coluna do navegador numa tabela sem método do navegador é erro. A comparação saiu para `scripts/guides/lib/compare.ts`, que o teste importa (o `measure.ts` mede ao ser importado): Node exato, navegador com a tolerância da unidade, rótulo igual.
+- **De quebra:** as quatro fixtures geradas da tabela do Compress que não tinham número gêmeo exato (`gen-acoes`, `gen-paginas-300`, `gen-paginas-mistas`, `gen-xref-estragada`) ganham os números do Lossless e do Recommended (§ 197).
+- **Teste:** `tests/unit/guides-measured.test.ts`, "guias:medir --check compares each column by who measured it": sobre a tabela do Compress, o Lossless e o Recommended mudados em 1,9% reprovam, o Forte do Chromium e do WebKit mudado em 1,9% passa, e em 2,5% reprova; o mesmo para os números. O `fileProblems` reprova tabela sem um `kind` por coluna.
+
+## § 197 · O guia 2 diz o que se mediu, e um teste reprova a generalização (F5b, revisão final, A-4 e A-10)
+
+- **Achado:** o guia "Why is my PDF so large?" dizia que o Compress "gains almost nothing on a PDF of text", que a reescrita sem perda é "a modest gain, never a dramatic one", que "Most PDFs are small" e que o peso é "almost always one of two things", com "Adobe says the same". A própria tabela mostra o Lossless tirando de 26% a 40% dos PDFs só de texto gerados pelo script das fixtures (escritos sem object streams) e de 0% a 14% dos documentos reais. A página da Adobe diz "can directly impact" e "can sometimes increase", mais fraco que o texto.
+- **Mudou:** o texto cita o que se mediu, por placeholder: o Lossless no PDF longo só de texto (`textOnlyLosslessRatio`), os bytes que ele tirou das notas de aula (`bookLosslessSaved`) e do PDF de fotos (`photosLosslessSaved`, no lugar do "2.9 MB to 2.9 MB"), e a amostra de "what takes the space" (`spaceFiles`). A nota da tabela diz quais PDFs são documentos reais e quais o script de teste escreveu, e a descrição troca "real files" por "our test PDFs". A Adobe entra com a hesitação dela. Saem também "usually email", "often goes" e "a much smaller file than any compression afterward".
+- **Medida nova:** o plano do guia 2 grava o Lossless e o Recommended das quatro fixtures geradas que faltavam (§ 196), o `LosslessSaved` de cada PDF e o `spaceFiles`.
+- **Teste:** `tests/unit/guides-numbers.test.ts`, "say what the sample did, never what files usually do": a lista `GENERAL` (usually, often, rarely, typically, most of the time, almost always, almost nothing, in most cases, never a dramatic, says the same, most PDFs, most photos e as outras) reprova a frase em qualquer texto de guia de arquivo, com controles positivo e negativo. Antes da correção, 18 frases em 6 guias caíam nela.
+
+## § 198 · O tamanho oficial é só o que a página diz (F5b, revisão final, A-2, C-8 e A-9)
+
+- **Achado:** a linha da miniatura do YouTube punha "1,280 × 720" na coluna "Official size". A página citada (https://support.google.com/youtube/answer/72431, relida em 1/nov/2026 sem login) não traz 1280 nem 720: recomenda 3840 × 2160 para vídeos, largura mínima de 640, sugere 16:9 ("try to upload") e dá 2 MB no celular. O 1280 × 720 é o que o preset do site faz (§ 60).
+- **Mudou:** cada `OfficialSize` ganha `stated`, as palavras da página que dão o tamanho e o limite, como lidas. A linha do YouTube passa a 3840 × 2160 com o limite de 2 MB, e a coluna "Our photos came out" mostra o 1280 × 720 que o preset fez, medido nas saídas (`thumbnailWidth` e `thumbnailHeight`; o tamanho do preset só fica no script para contar as saídas exatas). O texto troca "asks for thumbnails in 16:9" por "suggests the 16:9 shape" e "exactly the size in the table" pelo tamanho medido.
+- **As palavras de cada página:** relidas em 1/nov/2026. As páginas do Instagram devolvem só "Help Center" ao leitor e a do X devolve 403, então as palavras delas são o texto da própria página como o buscador o mostra.
+- **De quebra (baixos):** o "(ad specs)" repetido do Pinterest sai (C-8), e a linha diz que o limite de 20 MB é o do computador ("uploaded from a computer"; a página dá 32 MB no app, A-9). O título "File size is rarely the problem" vira "File size was not the problem for our photos".
+- **Teste:** `tests/unit/guides-measured.test.ts`, "take an official size only from the words of its page": a largura e a altura (ou a largura e uma razão que dá a altura) e o limite têm de estar no `stated`. Controles: o 3840 × 2160 com as palavras da página passa, o 1280 × 720 com as mesmas palavras reprova, e um limite que a página não dá reprova.
+
+## § 199 · O mínimo e o máximo dizem a direção (F5b, revisão final, A-3)
+
+- **Achado:** o guia 6 dizia "the closest it came to the original was 35.7 dB". O número é o mínimo das três fotos (`compressImagePsnrMinChromium`, o pior caso); a melhor foto deu 39,2 dB. A coluna "Pixels" mostrava o mínimo sem dizer.
+- **Mudou:** a frase diz "its lowest score on our photos", e que mais alto é mais perto. A coluna passa a "Pixels, worst photo", e a legenda e a introdução da tabela dizem que ela mostra a pior das fotos.
+- **Teste:** `tests/unit/guides-numbers.test.ts`, "say whether a measured number is the lowest or the highest": um placeholder medido com `Min` ou `Max` no nome tem, na mesma frase, a outra ponta (uma faixa) ou uma palavra da direção (lowest, worst, largest, up to…), e um mínimo nunca vem com closest, best ou highest. Controles com a frase antiga, com uma frase sem direção e com a faixa.
+
+## § 200 · O guia 8 mede o que as partes repetem: os metadados (F5b, revisão final, A-5 e F-4)
+
+- **Achado:** o guia 8 explicava os 32% a mais das partes do relatório da NASA com "the small frame every PDF needs around its pages". Cerca de 80% do crescimento é o XMP do documento (6.202 B), copiado em cada uma das 150 partes (930.300 B), porque um documento novo leva os metadados do primeiro arquivo (§ 145). O título "Where they barely grew: scans" e a frase "splitting costs almost nothing extra" chamavam de quase nada um terço a mais, e a introdução dizia "Most of the time that changes little" com 3 dos 5 PDFs mais pesados em partes.
+- **Mudou:** o `breakdown` do `scripts/guides/lib/node-pdf.ts` passa a contar os streams de metadados (`/Type /Metadata` ou `/Subtype /XML`), e o plano do guia 8 grava, para cada PDF, os metadados do original e das partes, o crescimento, o crescimento por parte e a parte do crescimento que é metadado (`reportMetadataShare`, 80%). O texto diz isso com placeholders, renomeia o título para "Scans: what every part repeats", troca a frase final pelo custo por parte (`reportGrowthPerPart`) e a introdução pela amostra (`{files_word}`, `{bigger_word}`, `{bookRatio_times}`). O PDF de fotos diz o crescimento ao byte (`photosGrowth_exact`), no lugar do "2.9 MB against 2.9 MB" (F-9). A frase da Adobe ganha o "sometimes" da página (A-10).
+- **O motor não muda:** copiar os metadados para cada parte é a decisão da § 145; só a medida e o texto mudaram.
+- **Testes:** `tests/unit/guides-measured.test.ts`, "Split PDF: the metadata each part of the NASA report repeats is what the file says" (a divisão refeita no Node dá os mesmos bytes de metadados e de crescimento do JSON, e o metadado é mais da metade do crescimento) e "explain, in guide 8, the growth of the scans with the metadata every part repeats" (o texto cita os quatro números e não traz mais as frases antigas).
+
+## § 201 · As outras generalizações dos guias (F5b, revisão final, F-4)
+
+- **Achado:** além dos guias 2 e 8, o guia 4 dizia "how much smaller a web image usually is" sobre três fotos com WebP do próprio motor, e o guia 9 dizia que o Compress "can usually bring a PDF of photos or scans well under" o limite, contra o scan preto e branco do guia 2, que quase não encolhe.
+- **Mudou:** o guia 4 diz quanto as cópias WebP pesaram, na qualidade do codificador do site (`webpRatio`); o guia 9 diz o que as medidas do guia 2 mostraram (o PDF de fotos e a página escaneada em cores bem mais leves, o scan preto e branco pouco) e aponta para ele. A mesma regra da § 197 pegou e corrigiu "usually" e "often" nos guias 1, 4, 9 e 10: no guia 1, as fotos convertidas "came out bigger together" (uma ficou menor) e "half of them grew by … or less" no lugar de "the middle photo grew by" (A-11); no guia 10, o PDF das fotos ficou "{pdfRatioChromium} as heavy" no lugar de "roughly as heavy … which is often too heavy".
+- **Teste:** o mesmo da § 197.
+
+## § 202 · O guia 6 diz onde os navegadores diferiram, por um fato da medida (F5b, revisão final, A-8)
+
+- **Achado:** a nota da tabela do guia 6 dizia que o Chromium e o WebKit "agreed on every tool", e o PNG to JPG deu 48,7 MB no Chromium e 37,6 MB no WebKit. A frase "PNG files 5.2 times the size" não dizia o navegador.
+- **Mudou:** o plano grava o fato `browsersDiffer` (os nomes das candidatas cujo tamanho de saída difere entre os navegadores, hoje "PNG to JPG") e os números `browsersSameSize` e `candidates`. A nota diz "The two browsers wrote files of the same size with {browsersSameSize_word} of the {candidates_word} tools; with {browsersDiffer}, the sizes differed", e a frase do PNG diz os dois navegadores (`pngToJpgRatioChromium_times` e `pngToJpgRatioWebkit_times`).
+- **Teste:** `tests/unit/guides-measured.test.ts`, "say, in guide 6, which tools the two browsers wrote differently, from the measurement": o fato e os números são refeitos a partir das linhas da tabela, e o texto usa `{browsersDiffer}` e não diz mais "agreed on every tool".
+
+## § 203 · Cada guia diz o tamanho da amostra (F5b, revisão final, F-3)
+
+- **Achado:** o guia 10 não dizia em lugar nenhum quantas fotos mediu, e os guias 4, 5 e 7 só deixavam a contagem implícita na tabela ("our real phone photos", "the real PDFs of our tests"), contra a decisão 5.4 da ficha.
+- **Mudou:** os planos dos guias 3, 4, 5 e 10 gravam `photos`, o do 7 grava `files` e o do 9 grava `pdfs` (os arquivos dos pares). A introdução ou a nota da tabela de cada guia diz a contagem por placeholder (`{photos_word}`, `{files_word}`, `{pdfs_word}`, `{spaceFiles_word}`), e as frases de medida dos guias 4, 5 e 10 também.
+- **Teste:** `tests/unit/guides-numbers.test.ts`, "state how many files each measurement rests on": a introdução ou a nota da tabela de cada guia tem um placeholder de contagem medida igual à amostra de uma das tabelas dele. Antes, 9 dos 10 guias reprovavam (o guia 1 já dizia `{files}`). Controles: sem contagem, com uma contagem que não é a amostra (`{gpsBefore}`) e com `{files}`.
+
+## § 204 · O kit diz "measured" só dos 10 guias de arquivo (F5b, revisão final, A-1, C-1, B-1 e F-5)
+
+- **Achado:** as descrições A e B e o primeiro comentário do `docs/lancamento/product-hunt.md` diziam que os 15 guias tinham números medidos em arquivos de teste. Só os 10 guias de arquivo têm; os 5 de dinheiro são calculados pelos motores das calculadoras. O teste do kit conferia só o 15.
+- **Mudou:** "15 guides, 10 of them with numbers measured on real test files" nas descrições, e "10 file guides … and 5 money guides worked out by the engines of the calculators" no comentário. A prova 5 e a legenda da galeria 4 seguem o mesmo recorte: a legenda fica "File guides with numbers measured on our test files", porque a tabela da imagem tem dois PDFs que o script de teste escreveu (§ 197), e a imagem foi refeita com `pnpm lancamento:imagens`. As contagens de caracteres foram refeitas (443, 313 e 1.544).
+- **Teste:** `tests/unit/launch-kit.test.ts` ganha as contagens `file-guides` e `money-guides` (frases "N file guides" e "N money guides" e a linha de contagens) e a regra de "measured": numa frase em inglês ou numa prova, a contagem mais próxima antes de "measured" é a de `FILE_GUIDE_IDS`, ou a frase diz "file guides". Controles com as três frases antigas e com a legenda antiga.
+
+## § 205 · Cada frase técnica do kit traz uma frase provada (F5b, revisão final, A-7, C-2, C-7 e F-14)
+
+- **Achado:** o kit afirmava além das provas: "Once a tool has loaded, it keeps working if you go offline" (o teste só prova o segundo arquivo do mesmo codec; o `show-hn.md` e a § 98 dizem "after the page and the codec load"), "Use a current Chrome, Edge, Firefox or Safari" (os testes rodam só Chromium e WebKit), respostas sem prova citada (anúncios longe das ferramentas, Analytics com Consent Mode, aviso de cookies, Ko-fi, "No limit on how many files", "no account"), o "unlock" solto numa lista (§ 153), uma origem que falava de "most sites" e a legenda da galeria 5 sem prova.
+- **Mudou:** a frase de offline volta à ressalva do codec; a resposta dos navegadores nomeia só os dois motores testados; "No limit on how many files" e "For most files the device is fast enough" saem; o "unlock" vira "add or remove a password"; a origem sai, com uma nota para o Victor contar a dele sem falar de outros sites. A seção "Provas" passa a ter, no título de cada item, as frases provadas entre aspas, e ganha os itens dos anúncios (`ads.spec.ts`), do Ko-fi (`coffee.spec.ts`), do Analytics e do aviso (`consent.spec.ts`, `consent-choice.spec.ts`) e dos números das calculadoras (`money-privacy.spec.ts`). A prova de "There is no account" ganha uma asserção de verdade no `tests/unit/routes.test.ts` ("has no page of an account").
+- **Teste:** `tests/unit/launch-kit.test.ts`, "tie every technical sentence in English to a proof…": cada frase em inglês (blocos, taglines, respostas e legendas) que fale de envio, offline, navegador, anúncio, Analytics, cookie, conta, lote, ZIP, Ctrl+V ou WebAssembly tem de conter uma frase de uma prova cujos arquivos existem; offline sem "codec", um navegador fora dos projetos do `playwright.config.ts`, uma palavra proibida fora do nome "Unlock PDF" e "most sites" reprovam. Controles: uma resposta técnica sem prova, a resposta antiga dos navegadores, a frase antiga de offline, o "unlock" solto (e "Unlock PDF", que passa), a origem antiga e uma prova cujo arquivo não existe.
+
+## § 206 · A Oli do painel não cobre o texto do guia (F5b, revisão final, F-1 e D-1)
+
+- **Achado:** abaixo de 768 px, a Oli da DropZone (`.fo-drop__oli`, 86 px acima da borda do painel) cobria as últimas palavras do parágrafo logo acima da ferramenta, nos 10 guias, no Chromium e no WebKit. Na página da ferramenta o H1 guarda esse lugar (`.fo-top`, 96 px à direita, 136 px a partir de 768); no guia, o parágrafo tinha a largura toda.
+- **Mudou:** a seção do título e do parágrafo da ferramenta no `FileGuideView.astro` ganha a classe `fo-guide__tool`, com o mesmo `padding-right` do `.fo-top` (96 px, 136 px a partir de 768), em `src/styles/components.css`. Sem cor nova nem token novo. Como o `.fo-prose` limita a largura do conteúdo, o recuo só tira largura onde a página é mais estreita que a medida de leitura mais o recuo; no computador o texto fica igual.
+- **Teste:** `tests/e2e/tool-guides.spec.ts`, "the Oli of the panel covers no line of text": em cada guia, a 320, 360, 390 e 600 px, nenhum retângulo de linha de texto do `<main>` cruza a caixa de `[data-oli]`. O spec fica no fim da divisão do CI, e o `--list` das partes mostra o `design.spec.ts` inteiro na parte 4 do WebKit e a matriz de imagens na parte 5.
+
+## § 207 · As datas dos guias de arquivo seguem o dia da medida (F5b, revisão final)
+
+- **Achado:** a medida refeita pelas correções da revisão saiu com a data de 2/nov/2026, porque o `pnpm guias:medir` grava o dia em UTC e já passava da meia-noite UTC (21h48 de 1/nov em Brasília). Os guias passaram a dizer "Reviewed … November 1, 2026 … with the measurements of November 2, 2026": a revisão antes da medida que ela mostra.
+- **Mudou:** o `GUIDE_REVIEWED` e o `GUIDE_PUBLISHED` (`src/tools/guides/page.ts`) passam a 2026-11-02, o dia em UTC da última medida e do merge desta run. O script continua gravando o dia em UTC; as fontes lidas em 1/nov seguem com essa data.
+- **Teste:** `tests/unit/guides-measured.test.ts`, "are never newer than the review and publication dates the guides show": o `measuredOn` do JSON não pode ser depois do `GUIDE_REVIEWED` nem do `GUIDE_PUBLISHED`. Antes da mudança: "reviewed 2026-11-01, measured 2026-11-02".
+
+## § 208 · As fontes têm a data delas, e o que sobrou das generalizações sai (F5b, segunda passada, itens 1 e 3)
+
+- **Achado:** o "changed" do guia 3 dizia "with the measurements and the help pages of {date}". O `{date}` é o dia da medida (2/nov, § 207), e as 11 fontes foram lidas em 1/nov, como diz cada fonte. Sobravam também frases do tipo que a § 197 tirou: "Pictures: the usual suspect" (guia 2), "measured on real files" na descrição do guia 8, "when we merged real PDFs", "merging is almost free" (sustentado por um par só) e "in 5 of the 5 pairs it was a little smaller" (com −23% e −18% na tabela) no guia 9.
+- **Mudou:**
+  - O guia 3 diz a data da medida e que as páginas foram lidas na data de cada fonte, sem data à mão.
+  - O título do guia 2 vira "Pictures: the weight of our heaviest PDFs", e a descrição do guia 8 diz "our test PDFs".
+  - O guia 9 diz o que cada par deu. Os dois pares que arredondam para 100% vêm em bytes (`_exact`); os outros vêm com a queda de cada um. O par gerado (−18%) é explicado: o script de teste escreveu os dois PDFs sem object streams, e o Merge grava com elas (`saveDoc` de `src/engine/pdf/process.ts`). Saem "One pair stood out" (A-11) e as "small savings".
+- **Teste:**
+  - A lista `GENERAL` de `tests/unit/guides-numbers.test.ts` ganha "usual", "almost free", "real PDFs" e "real files". "Real phone photos" e "real documents" seguem permitidos, e há controles para os dois lados.
+  - "never give the sources the date of the measurement": uma frase com `{date}` que fale de help pages, sources ou "read on" reprova.
+  - `tests/unit/guides-measured.test.ts`, "say, in guide 9, how much smaller each merged pair came out": cada par do JSON aparece no texto pela razão ou pelos bytes.
+  - Antes da correção: 4 frases na lista, o "changed" do guia 3 e `guide 9 cites {bookFormRatio}`.
+
+## § 209 · O guia 8 diz quanto cresceu cada arquivo, e quanto da parte é metadado (F5b, segunda passada, item 7)
+
+- **Achado:** a introdução dizia que as partes de "three of them" pesaram mais, e um deles cresceu 1.304 bytes (0% na tabela). A frase do fim dizia "about 7.7 KB heavier per part", que é o crescimento por parte inteiro; o XMP é 6,2 KB dele.
+- **Mudou:** a introdução nomeia os três arquivos, cada um com o seu crescimento: `{bookRatio_times}`, `{reportRatio_more}` e `{photosGrowth_exact}`. A frase do fim diz que cada parte do relatório somou cerca de `{reportGrowthPerPart}`, dos quais `{reportMetadata}` são a cópia dos metadados e o resto é estrutura.
+- **Teste:** `tests/unit/guides-measured.test.ts`, "say, in guide 8, how much each file that grew grew, and what of a part is metadata".
+  - A frase que conta os arquivos que cresceram (`{bigger}`) cita a razão ou o crescimento de cada arquivo com `Growth` positivo no JSON.
+  - O número desses arquivos é o `bigger`.
+  - `{reportGrowthPerPart}` e `{reportMetadata}` vêm na mesma frase.
+  - Antes: "the growth of report: expected 'We split {files_word} PDFs…' to match".
+
+## § 210 · O fato vazio não deixa a frase do guia 6 sem ferramenta (F5b, segunda passada, item 9)
+
+- **Achado:** "with {browsersDiffer}, the sizes differed" vira "with , the sizes differed" numa medida nova em que os dois navegadores concordem em todas as ferramentas.
+- **Mudou:** o teste do guia 6 exige o fato `browsersDiffer` não vazio enquanto o texto o lê. Uma medida em que os navegadores concordem reprova até a frase mudar. O texto não muda.
+- **Teste:** `tests/unit/guides-measured.test.ts`, "say, in guide 6, which tools the two browsers wrote differently", com a função `differProblems`. O controle com o fato vazio reprova ("sem nenhuma ferramenta"), e o fato medido ("PNG to JPG") passa.
+
+## § 211 · O kit diz "our test files" e não promete o que um aparelho aguenta (F5b, segunda passada, itens 2 e 11)
+
+- **Achado:** a descrição A, o primeiro comentário e o título da prova 5 diziam "real test files". Parte dos PDFs medidos foi escrita pelo script (`gen-*`), a mesma razão da legenda da galeria 4 (§ 204). A resposta "Are there limits?" dizia que "a very large photo or a very long PDF can be too much for the memory of an older phone", e a run nunca mediu memória.
+- **Mudou:** os três textos dizem "measured on our test files". A resposta dos limites diz "I have not tested the largest file each phone can open, so tell me if one fails". Não diz "measured", que a § 204 reserva aos guias de arquivo. As contagens de caracteres passam a 442, 313 e 1.543. A § 204 fica como está.
+- **Teste:** `tests/unit/launch-kit.test.ts`.
+  - O `claimProblems` reprova "real test files" num texto em inglês ou numa prova.
+  - O `TECHNICAL` ganha "memory", "older phone" e "too much for", que pedem prova.
+  - Há controles com "real test files", com a frase antiga da memória e com a nova, que passa.
+  - Antes: quatro frases com "real test files" e a da memória sem prova.
+
+## § 212 · O recuo da Oli estreita o texto também no computador, e o teste vai a 768 e 1280 px (F5b, segunda passada, itens 4 e 5)
+
+- **Achado:** a § 206 e o comentário do `components.css` diziam que, no computador, o texto do guia ficava igual. A seção `.fo-guide__tool` é `border-box`, então o recuo sai da medida de leitura. Medido no Chromium, o título e o parágrafo acima da ferramenta têm 561 px a 768, 1024 e 1280 px, contra os 697 px do resto da prosa; a 360 px têm 232 px, contra 328 px. O teste da Oli não passava pelas larguras com o recuo de 136 px.
+- **O que acontece de fato:** o recuo é necessário também no computador. Com ele zerado a partir de 768 px, a Oli cobre a última linha do parágrafo a 768 e a 1280 px em todos os guias (por exemplo "768 px: 'Drop a PDF and it is compressed in this ' (46 × 8 px)"). A coluna da ferramenta tem a largura da prosa, e a Oli fica dentro dela. O layout fica como está; só o comentário muda. A § 206 não foi editada.
+- **Teste:** `tests/e2e/tool-guides.spec.ts`, "the Oli of the panel covers no line of text", passa a 320, 360, 390, 600, 768 e 1280 px. A falha acima saiu de uma execução com o recuo de 768 px em diante zerado por uma folha de estilo injetada no próprio teste, que não ficou no código. O `--list` das partes mostra o `design.spec.ts` inteiro na parte 4 do WebKit (50 testes) e a matriz de imagens na parte 5 (18). O número de testes não mudou.

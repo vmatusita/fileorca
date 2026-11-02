@@ -66,7 +66,7 @@ function convertersFor(lang: Lang): ImagePanelData['converters'] {
 }
 
 /** The plain data of the island for a page, in a language. */
-export function panelData<O = object>(id: ImagePageId, lang: Lang): ImagePanelData<O> {
+export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Record<string, unknown>): ImagePanelData<O> {
   const def = IMAGE_PAGES[id];
   const texts = imageToolTexts(id, lang);
   return {
@@ -82,6 +82,7 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang): ImagePanelDa
     // In Portuguese the coffee line leads to the support page until the Pix arrives (F6; DECISOES § 49).
     coffeeHref: lang === 'pt' ? pathFor('support', lang) : KOFI_URL,
     adsOn: buildAdsConfig().scriptEnabled,
+    ...(initial ? { initial } : {}),
   };
 }
 

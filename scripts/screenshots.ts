@@ -9,6 +9,8 @@
 // F5a: the PDF pieces in the states the PDF tools reach (DECISOES § 152 and § 170, walked by tests/e2e/lib/pdf-states.ts,
 // the same walk ads.spec.ts and a11y.spec.ts look at), some PDF pages whole, the PDF hub, the home's PDF section and the
 // four new icons beside their neighbours (§ 149), drawn in currentColor as the site draws them (src/icons/svg.ts).
+// F5b: two file guides whole (an image one and a PDF one), at rest and with the embedded tool's result, and the guides list
+// of the image hub.
 // Not part of pnpm verificar: screenshots differ between Windows and Ubuntu.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
@@ -19,8 +21,8 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from '../tests/e2e/lib/pdf-stat
 
 const ORIGIN = 'http://127.0.0.1:4173';
 // F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
-// under fase-04/ and F5a writes under fase-05a/, leaving the F3 and F4 shots as they were.
-const OUT = 'docs/relatorios/fase-05a/componentes';
+// under fase-04/, F5a under fase-05a/ and F5b writes under fase-05b/, leaving the older shots as they were.
+const OUT = 'docs/relatorios/fase-05b/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -381,6 +383,23 @@ async function main(): Promise<void> {
       }).join('');
       page = await isolated(browser, theme, css, `<div id="shot" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:328px;background:var(--bg)">${icons.replaceAll('<svg', '<svg width="100%" height="100%"')}</div>`);
       await shot(page.locator('#shot'), `pdf-icons-${theme}-360`);
+      await page.close();
+
+      // F5b: the file guides, whole, at both widths: the HEIC guide at rest and with a result, the PDF guide at rest; and
+      // the guides list of the image hub.
+      for (const width of [360, 1280]) {
+        page = await open(browser, theme, width, '/guides/heic-to-jpg-on-windows/');
+        await shot(page.locator('main'), `guide-heic-${theme}-${width}`, { top: 0, side: 0 });
+        await drop(page, 'fixtures/images/heic-08-iphone13pro-paisagem-hdr-ios17.heic');
+        await page.locator('.fo-btn--download').waitFor({ timeout: 120_000 });
+        await shot(page.locator('#fo-tool-root'), `guide-heic-result-${theme}-${width}`);
+        await page.close();
+        page = await open(browser, theme, width, '/guides/why-is-my-pdf-so-large/');
+        await shot(page.locator('main'), `guide-pdf-${theme}-${width}`, { top: 0, side: 0 });
+        await page.close();
+      }
+      page = await open(browser, theme, 360, '/image-tools/');
+      await shot(page.locator('section[aria-labelledby="guides"]'), `image-hub-guides-${theme}-360`);
       await page.close();
 
       page = await isolated(browser, theme, css, `<div style="max-width:328px">${previewMarkup('FileCard')}</div>`);

@@ -2,9 +2,14 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
+import { routeById } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
+
+const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
@@ -452,5 +457,84 @@ test('the PDF hub keeps its one content AdSlot under the grid of tools, at 360 a
     expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
     expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
     await expectClearance(page, `hub de PDF a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+  }
+});
+
+// F5b (prompt decision 7): every file guide, at 360x740 and 1280x800 on one load, with the embedded tool at rest and with
+// a result. The guide is the tool page's island with text around it, so the targets are the tool's own (TARGETS, and the
+// PDF ones for a PDF guide). No AdSlot above the tool on a phone or a computer, none inside the island, and 150px from
+// every target. A PDF guide walks the tool through the same states as its own page (tests/e2e/lib/pdf-states.ts).
+const GUIDE_ON_SCREEN: Partial<Record<FileGuideId, string[]>> = {
+  'guides-heic-to-jpg-on-windows': ['.fo-ba'],
+  'guides-open-webp-save-as-jpg': ['.fo-ba'],
+  'guides-social-media-image-sizes': ['#rz-width', '#rz-height', '.fo-input'],
+  // The location guide starts Resize image at By percentage, 100 (DECISOES § 186).
+  'guides-remove-location-from-photos': ['#rz-percent', '.fo-input'],
+};
+
+async function guideSpots(page: Page, label: string, adCount: number, selector: string): Promise<number> {
+  let min = Infinity;
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+    const at = `${label} a ${viewport.width}px`;
+    const tool = (await boxes(page, '#fo-tool-root'))[0];
+    expect(tool, `${at}: a ferramenta na tela`).toBeDefined();
+    for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${at}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+    if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+    await expectAdsOutsideThePanel(page, at, adCount);
+    min = Math.min(min, await expectClearance(page, at, selector));
+  }
+  return min;
+}
+
+test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 1280×800', () => {
+  for (const id of FILE_GUIDE_IDS) {
+    const guide = FILE_GUIDES[id];
+    test(`${guide.path}: with the tool at rest and with a result`, async ({ page }) => {
+      await page.setViewportSize(VIEWPORTS[0]);
+      const gaps: string[] = [];
+      if (isPdfTool(guide.tool)) {
+        let adCount = 0;
+        await walkPdfTool(
+          page,
+          guide.tool,
+          async (state, note) => {
+            if (state === 'rest') adCount = await page.locator('.fo-ad').count();
+            gaps.push(`${state}: ${(await guideSpots(page, `${state} (${note})`, adCount, PDF_TARGETS)).toFixed(0)}`);
+          },
+          { hold: false, path: guide.path },
+        );
+        expect(gaps.some((gap) => gap.startsWith('result')), 'o passeio chegou ao resultado').toBe(true);
+      } else {
+        expect((await page.goto(guide.path))?.status()).toBe(200);
+        await hydrated(page);
+        await dismissCookies(page);
+        const adCount = await page.locator('.fo-ad').count();
+        expect(adCount).toBeGreaterThan(0);
+        gaps.push(`repouso: ${(await guideSpots(page, 'repouso', adCount, TARGETS)).toFixed(0)}`);
+        const toolPath = routeById(guide.tool).paths.en ?? '/';
+        await chooseImages(page, await smallFiles(page, toolPath, 1));
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
+        gaps.push(`resultado: ${(await guideSpots(page, 'resultado', adCount, TARGETS)).toFixed(0)}`);
+      }
+      console.log(`${guide.path} menor vão: ${gaps.join(' | ')}`);
+    });
+  }
+});
+
+// The line that links a tool to its guide sits outside the panel and 150px from both AdSlots (prompt decision 6).
+test('the guide line of each embedded tool stays 150px from every AdSlot, at 360 and 1280px', async ({ page }) => {
+  const tools = [...new Set(FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].tool))];
+  for (const tool of tools) {
+    const path = routeById(tool).paths.en ?? '/';
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await expect(page.locator('.fo-guide-links a').first(), `${path}: a linha do guia`).toBeVisible();
+      expect(await page.locator('#fo-tool-root .fo-guide-links').count(), `${path}: a linha dentro do painel`).toBe(0);
+      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-guide-links');
+    }
   }
 });

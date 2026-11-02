@@ -10,13 +10,17 @@ import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { LANGUAGETOOL, JRE, ensureTool } from '../lib/tools.ts';
 import type { GUIDE_FACTS as GUIDE_FACTS_TYPE } from '../../src/tools/calc/guides.ts';
+import type * as MEASURED_MODULE from '../../src/tools/guides/measured.ts';
+import type { FileGuideTexts } from '../../src/i18n/types.ts';
+import { FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 
 const LANGUAGE: Record<string, string> = { en: 'en-US', pt: 'pt-BR', es: 'es' };
 // Every text file the route map lists (src/i18n/routes.ts): page texts, a tool's texts, the texts
 // shared by the image tools and the texts of a preset (src/tools/<tool>/presets/<name>/i18n/<lang>.ts).
 // tests/unit/lint-texto-files.test.ts keeps this filter and the route map in step.
 export const TEXT_FILE = /^src\/(?:i18n\/(en|pt|es)\/[\w-]+\.ts|tools\/[\w-]+(?:\/presets\/[\w-]+)?\/i18n\/(en|pt|es)\.ts)$/;
-const SKIP_KEYS = new Set(['langCode', 'langSr', 'shortcut', 'pasteKey', 'synonyms', 'langNames', 'kbd']);
+// href and read are the links and dates of a guide's sources (F5b): data, not prose.
+const SKIP_KEYS = new Set(['langCode', 'langSr', 'shortcut', 'pasteKey', 'synonyms', 'langNames', 'kbd', 'href', 'read']);
 const SAMPLES: Record<string, string> = { name: 'Victor', city: 'Curitiba', percent: '68%', query: 'mortgage', kbd: 'Ctrl V' };
 const CHUNK = 15_000;
 
@@ -78,8 +82,16 @@ export const MONEY_SAMPLES: Record<string, string> = {
 };
 const MONEY_DEFAULT = '$1,234';
 
-/** A money text file: a calculator's or preset's texts, the texts the calculators share, the money hub or a guide. */
+/** The id of a file guide (F5b) whose texts this is, or undefined: src/i18n/en/guide-<slug>.ts of a guide in FILE_GUIDE_IDS. */
+export function fileGuideOf(file: string): FileGuideId | undefined {
+  const slug = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
+  const id = slug ? `guides-${slug}` : '';
+  return (FILE_GUIDE_IDS as readonly string[]).includes(id) ? (id as FileGuideId) : undefined;
+}
+
+/** A money text file: a calculator's or preset's texts, the texts the calculators share, the money hub or a money guide. */
 export function isMoneyText(file: string): boolean {
+  if (fileGuideOf(file)) return false;
   return /^src\/(?:tools\/[\w-]+-calculator\/|tools\/calc\/i18n\/|i18n\/en\/(?:money-calculators|guide-[\w-]+)\.ts)/.test(file);
 }
 
@@ -91,8 +103,18 @@ export function collectStrings(value: unknown, key = '', out: string[] = [], fil
   return out;
 }
 
-/** How a file's placeholders are filled: a guide with the numbers its page shows, a money text with samples. */
+/**
+ * How a file's placeholders are filled: a guide with the numbers its page shows, a money text with samples. A file guide
+ * (F5b) is filled from data/guides-measured.json and its own official facts, the values its page shows (DECISOES § 189).
+ */
 export async function fillFor(file: string): Promise<(name: string) => string> {
+  const fileGuide = fileGuideOf(file);
+  if (fileGuide) {
+    const { fillValues, placeholdersIn } = (await import(pathToFileURL(resolve('src/tools/guides/measured.ts')).href)) as typeof MEASURED_MODULE;
+    const texts = ((await import(pathToFileURL(resolve(file)).href)) as { default: FileGuideTexts }).default;
+    const values = fillValues(fileGuide, texts, [...placeholdersIn(texts)]);
+    return (name) => values[name] ?? SAMPLES[name] ?? name;
+  }
   if (!isMoneyText(file)) return (name) => SAMPLES[name] ?? name;
   const guide = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
   if (guide) {

@@ -1,0 +1,19 @@
+---
+// The "Reviewed" line of a file guide (prompt F5b, decision 4; PLANO "Conteúdo de apoio"): the author, the date of the
+// review and of first publication as <time datetime>, and what the review changed. No data-ymyl: the file guides are in
+// the ad area "arquivos", outside gate:dinheiro-saude.
+import { AUTHOR } from '../../platform/site.ts';
+import shared from '../../i18n/en/file-guides.ts';
+import { longDate } from './measured.ts';
+import { GUIDE_PUBLISHED, GUIDE_REVIEWED } from './page.ts';
+
+interface Props {
+  changed: string;
+}
+const { changed } = Astro.props;
+const [byBefore, byAfter = ''] = shared.reviewed.split('{date}');
+const [firstBefore, firstAfter = ''] = shared.firstPublished.split('{date}');
+---
+<p class="fo-reviewed">
+  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={GUIDE_REVIEWED}>{longDate(GUIDE_REVIEWED)}</time>{`${byAfter} `}{firstBefore}<time datetime={GUIDE_PUBLISHED}>{longDate(GUIDE_PUBLISHED)}</time>{`${firstAfter} ${changed}`}
+</p>

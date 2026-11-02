@@ -45,6 +45,8 @@ export interface ImagePanelData<O = object> {
   coffeeHref: string;
   /** The AdSense variables are filled in at build (the ad-blocker case of the coffee line). */
   adsOn: boolean;
+  /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
+  initial?: Record<string, unknown>;
 }
 
 /** A file of the queue, as the tool sees it when it builds an operation. */

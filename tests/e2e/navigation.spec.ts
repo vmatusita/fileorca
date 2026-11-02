@@ -3,6 +3,7 @@ import { LAUNCHED } from '../../src/platform/site.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
   for (const [path, lang, heading] of [
@@ -118,7 +119,8 @@ test('the English search finds the new tools and presets and opens the one chose
   await expect(dialog.getByRole('option')).toHaveCount(5);
   // F5a: PDF to JPG also has the words "jpg", "to" and "pdf" in its names, so it follows Image to PDF.
   await input.fill('jpg to pdf');
-  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF']);
+  // F5b: and the guide on PDF to JPG resolution, whose name has the three words too, last (DECISOES § 190).
+  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF', 'Which resolution to choose for PDF to JPGPDF']);
   await input.fill('heif');
   await expect(dialog.getByRole('option')).toHaveText(rows('HEIC to JPG'));
   await input.press('Enter');
@@ -159,8 +161,9 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   await page.goto('/');
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
-  // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125); F5a: and the PDF tools.
-  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length;
+  // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125); F5a: and the PDF tools;
+  // F5b: and the file guides (DECISOES § 190).
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length;
   await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });

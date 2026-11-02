@@ -12,6 +12,7 @@ import {
   type GuideId,
 } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS, type PdfToolId } from '../tools/pdf/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../tools/guides/registry.ts';
 
 export const LANGS = ['en', 'pt', 'es'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -40,6 +41,7 @@ export type RouteId =
   | typeof PDF_HUB_ID
   | PdfToolId
   | GuideId
+  | FileGuideId
   | 'privacy'
   | 'terms'
   | 'about'
@@ -94,6 +96,8 @@ export const ROUTES: readonly RouteDef[] = [
   ...moneyRoutes(),
   // The PDF hub and the 12 PDF tools exist only in English for now (F5a; DECISOES § 58).
   ...pdfRoutes(),
+  // The ten file guides exist only in English (F5b; DECISOES § 58 and § 184).
+  ...fileGuideRoutes(),
   {
     id: 'privacy',
     paths: { en: '/privacy/', pt: '/pt/privacidade/', es: '/es/privacidad/' },
@@ -250,6 +254,28 @@ function pdfRoutes(): RouteDef[] {
       adArea: 'arquivos',
     })),
   ];
+}
+
+/**
+ * English-only file guides (F5b): src/views/FileGuideView.astro with src/i18n/<lang>/guide-<slug>.ts, the shared guide
+ * texts and the texts of the tool the guide embeds. The ids and paths come from the guide registry; every one is in the
+ * ad area "arquivos", like the tool it embeds.
+ */
+function fileGuideRoutes(): RouteDef[] {
+  return FILE_GUIDE_IDS.map((id): RouteDef => {
+    const tool = FILE_GUIDES[id].tool;
+    const toolTexts = (PDF_TOOL_IDS as readonly string[]).includes(tool)
+      ? [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts']
+      : [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'];
+    return {
+      id,
+      paths: { en: FILE_GUIDES[id].path },
+      indexable: true,
+      view: 'src/views/FileGuideView.astro',
+      texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, 'src/i18n/{lang}/file-guides.ts', ...toolTexts],
+      adArea: 'arquivos',
+    };
+  });
 }
 
 export function routeById(id: RouteId): RouteDef {

@@ -7,7 +7,8 @@ import compressPdfTexts from '../../src/tools/compress-pdf/i18n/en.ts';
 import imagesPdfTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
 import protectPdfTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 
-// The technical claims of the launch texts (docs/lancamento/show-hn.md; DECISOES § 98), proven over the dist/
+// The technical claims of the launch texts (docs/lancamento/show-hn.md and, from the F5b, product-hunt.md; DECISOES § 98),
+// proven over the dist/
 // in both browsers, on a JPEG codec, the libheif decoder, the PDF worker and, since F5a, qpdf (Compress PDF,
 // Protect PDF) and PDF.js (PDF to JPG):
 // 1. no byte of the file leaves the browser: every request the page and its workers make is a GET to the
@@ -70,6 +71,16 @@ const CASES: Case[] = [
       await page.getByLabel(protectPdfTexts.panel.options.confirmLabel, { exact: true }).fill(PASSWORD);
       await page.getByRole('button', { name: actionOf(protectPdfTexts) }).click();
     },
+  },
+  // F5b (prompt decision 7): the same claims through a file guide, which embeds the tool with its own island and entry.
+  { path: '/guides/heic-to-jpg-on-windows/', first: 'heic-06-iphone7-paisagem-gps.heic', second: 'heic-04-iphone11promax-retrato-livephoto-gps.heic', magic: JPEG },
+  {
+    path: '/guides/why-is-my-pdf-so-large/',
+    first: 'gen-fotos.pdf',
+    second: 'gen-paginas-mistas.pdf',
+    magic: PDF,
+    load: (name) => pdfFile(name),
+    setup: (page) => option(page, compressPdfTexts.panel.options.lossless),
   },
 ];
 

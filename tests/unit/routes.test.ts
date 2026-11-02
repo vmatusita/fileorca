@@ -12,6 +12,8 @@ import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID } from '../.
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
+import enCommon from '../../src/i18n/en/common.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 function pageFiles(dir = 'src/pages'): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -27,6 +29,7 @@ describe('mapa de rotas', () => {
       'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
       PDF_HUB_ID, ...PDF_TOOL_IDS,
+      ...FILE_GUIDE_IDS,
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
     // Only Compress image is translated; the other image tools, their presets and hub (DECISOES § 58) and every money
@@ -38,7 +41,8 @@ describe('mapa de rotas', () => {
       ...CALC_PAGE_IDS,
       ...GUIDE_IDS,
     ]);
-    expect(englishOnly.size).toBe(11 + 13 + 1 + 18 + 5);
+    // F5b: the 10 file guides, in the files area, are English only too (DECISOES § 190).
+    expect(englishOnly.size).toBe(11 + 13 + 10 + 1 + 18 + 5);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(englishOnly.has(route.id) ? ['en'] : [...LANGS]);
   });
 
@@ -78,6 +82,16 @@ describe('mapa de rotas', () => {
     for (const file of expected) expect(existsSync(file), file).toBe(true);
     const pages = pageFiles().filter((file) => file.endsWith('.astro'));
     expect(pages.sort()).toEqual([...expected].sort());
+  });
+
+  it('has no page of an account: no sign-in, sign-up, login or profile, the proof of "There is no account" in the launch kit (DECISOES § 205)', () => {
+    const ACCOUNT = /(?:^|[/-])(?:login|log-?in|sign-?in|sign-?up|register|account|profile|my-?files|entrar|cadastro|conta|cuenta|registro|perfil)(?:[/-]|$)/i;
+    const paths = ROUTES.flatMap((route) => Object.values(route.paths));
+    expect(paths.filter((path) => ACCOUNT.test(path))).toEqual([]);
+    expect(pageFiles().filter((file) => ACCOUNT.test(file.replace(/^src\/pages/, '').replace(/\/index\.astro$/, '')))).toEqual([]);
+    // The rule sees an account page (control).
+    expect(ACCOUNT.test('/account/')).toBe(true);
+    expect(ACCOUNT.test('/pt/entrar/')).toBe(true);
   });
 
   it('points every route at its view and text files', () => {
@@ -164,8 +178,9 @@ describe('tool search', () => {
     const index = searchIndex();
     // The image pages first, then the 12 PDF tools of the F5a (English only, PDF category: F5a), then the money
     // calculators and guides of the F4 (English only, money category).
-    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS]);
-    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + 5);
+    // F5b: the 10 file guides come last, in the category of their hub (DECISOES § 190).
+    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + 5 + FILE_GUIDE_IDS.length);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -232,7 +247,8 @@ describe('tool search', () => {
       ['heif', ['heic-to-jpg']],
       ['iphone photo', ['heic-to-jpg']],
       // F5a: PDF to JPG has all three words ("jpg", "to", "pdf") in its names, so it shows after Image to PDF.
-      ['jpg to pdf', ['image-to-pdf', 'pdf-to-jpg']],
+      // F5b: the guide on PDF to JPG resolution has the three words too, and shows last (DECISOES § 190).
+      ['jpg to pdf', ['image-to-pdf', 'pdf-to-jpg', 'guides-pdf-to-jpg-resolution']],
       ['100kb', ['compress-image-to-100kb']],
       ['1280x720', ['resize-image-youtube-thumbnail']],
       ['mirror', ['rotate-image']],
@@ -251,16 +267,19 @@ describe('tool search', () => {
     for (const query of ['pdf to jpg', 'PDF to JPG', 'pdf to jpeg', 'pdf to image']) expect(first(query), query).toBe('pdf-to-jpg');
     for (const query of ['jpg to pdf', 'image to pdf', 'merge images', 'combine images']) expect(first(query), query).toBe('image-to-pdf');
     // Each one still finds the other as its neighbour, one arrow away.
-    expect(ids(filterEntries(index, 'pdf to jpg'))).toEqual(['pdf-to-jpg', 'image-to-pdf']);
+    // F5b: the guide on PDF to JPG resolution says "pdf to jpg" in its name, so it comes before Image to PDF (DECISOES § 190).
+    expect(ids(filterEntries(index, 'pdf to jpg'))).toEqual(['pdf-to-jpg', 'guides-pdf-to-jpg-resolution', 'image-to-pdf']);
     expect(ids(filterEntries(index, 'merge'))).toEqual(['merge-pdf', 'image-to-pdf']);
     // Inside one step the index order holds: every PDF tool says "pdf", and the image pages come first.
-    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS]);
+    // F5b: then the file guides whose names say PDF, in registry order (DECISOES § 190).
+    const pdfGuides = FILE_GUIDE_IDS.filter((id) => /\bpdf/i.test(enCommon.fileGuides[id].name));
+    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS, ...pdfGuides]);
   });
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
     const index = searchIndex();
     // English has all eleven image pages, the 12 PDF tools (F5a) and the 23 money pages; Portuguese and Spanish only Compress image.
-    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS]);
+    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
     for (const lang of ['pt', 'es']) {
       // No money page exists in Portuguese or Spanish yet (F6): 'mortgage' finds nothing there.
       expect(filterEntries(index, 'mortgage', lang), lang).toEqual([]);
@@ -270,7 +289,8 @@ describe('tool search', () => {
       expect(ids(filterEntries(index, 'jpg', lang)), lang).toEqual(['compress-image']);
     }
     // 'heic' finds HEIC to JPG in English and nothing in Portuguese: that page does not exist there.
-    expect(ids(filterEntries(index, 'heic', 'en'))).toEqual(['heic-to-jpg']);
+    // F5b: and the HEIC guide after it (DECISOES § 190).
+    expect(ids(filterEntries(index, 'heic', 'en'))).toEqual(['heic-to-jpg', 'guides-heic-to-jpg-on-windows']);
     expect(filterEntries(index, 'heic', 'pt')).toEqual([]);
     expect(filterEntries(index, 'heic', 'es')).toEqual([]);
     // Every result has a name and a link in the language it is shown in.

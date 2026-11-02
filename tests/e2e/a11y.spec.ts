@@ -4,7 +4,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { describedViolations } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
@@ -73,12 +74,13 @@ async function searchDialogOpen(page: Page): Promise<void> {
 }
 
 // Nothing typed: every tool and preset page is listed and the list scrolls inside the box. F4: the English search
-// also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry; F5a: and the PDF tools.
+// also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry; F5a: and the PDF tools;
+// F5b: and the file guides (DECISOES § 190).
 async function searchDialogListed(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
-  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length);
+  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length);
   await animationsDone(page);
 }
 
@@ -248,6 +250,48 @@ test.describe('axe nos estados das ferramentas de PDF, a 360 e 1280px, nos temas
         { hold: false },
       );
       expect(found).toEqual([]);
+    });
+  }
+});
+
+// F5b (prompt decision 7): every file guide with its embedded tool showing a result. The guide at rest is already read by
+// the page-by-page pass above (the route map lists it). An image guide gets one small file the tool takes; a PDF guide walks
+// its tool to the result, the state the tool's own page is read in.
+const GUIDE_FILE: Record<string, { fixture: string; mimeType: string }> = {
+  'heic-to-jpg': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' },
+  'webp-to-jpg': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' },
+};
+
+test.describe('axe nos guias de arquivo com a ferramenta embutida no resultado, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const id of FILE_GUIDE_IDS) {
+    const guide = FILE_GUIDES[id];
+    test(`${guide.path} with the result`, async ({ page }) => {
+      if (Object.hasOwn(PDF_PAGES, guide.tool)) {
+        let read = false;
+        await walkPdfTool(
+          page,
+          guide.tool as PdfToolId,
+          async (state) => {
+            if (state !== 'result') return;
+            expect(await violationsEverywhere(page)).toEqual([]);
+            read = true;
+          },
+          { hold: false, path: guide.path },
+        );
+        expect(read, 'o passeio chegou ao resultado').toBe(true);
+        return;
+      }
+      expect((await page.goto(guide.path))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      const own = GUIDE_FILE[guide.tool];
+      const files: TestFile[] = own ? [{ name: own.fixture, mimeType: own.mimeType, buffer: readFileSync(resolve('fixtures/images', own.fixture)) }] : await jpegBatch(page, 1);
+      await chooseImages(page, files);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await animationsDone(page);
+      expect(await violationsEverywhere(page)).toEqual([]);
     });
   }
 });

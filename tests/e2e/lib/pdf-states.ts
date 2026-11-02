@@ -50,10 +50,11 @@ const option = (page: Page, label: string) => page.locator('#fo-tool-root .fo-se
  * have ended. With `hold`, the engine's worker is held back until the file is chosen, so the WaterLevel state exists and
  * `visit('processing')` is called; without it that state is skipped (the worker may answer before anyone looks).
  */
-export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, options: { hold: boolean }): Promise<void> {
+export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, options: { hold: boolean; path?: string }): Promise<void> {
   // The worker is held before the load: a pointer resting over the panel starts it before the first file.
   const gate = options.hold ? await slowEngine(page) : null;
-  await openTool(page, PDF_PAGES[id].path);
+  // `path` walks the same tool where a file guide embeds it (F5b); the tool's own page by default.
+  await openTool(page, options.path ?? PDF_PAGES[id].path);
 
   const seen = async (state: PdfState, note = ''): Promise<void> => {
     await animationsDone(page);

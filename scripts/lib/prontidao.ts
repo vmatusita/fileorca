@@ -12,6 +12,7 @@ import { AUTHOR, CONTACT_EMAIL, SITE_ORIGIN } from '../../src/platform/site.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PAGE_IDS, CALC_TOOL_IDS, GUIDE_IDS, HOME_CALC_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
 import { listFiles } from './dist.ts';
 import { headerBlocks, patternApplies } from './headers-file.ts';
@@ -125,7 +126,8 @@ export function realSite(dir: string): Site {
     pages,
     tools,
     cards,
-    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS, ...PDF_TOOL_IDS],
+    // F5b: the ten file guides are search entries too (DECISOES § 190).
+    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS],
     pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
   };
 }
