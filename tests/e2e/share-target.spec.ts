@@ -90,7 +90,8 @@ test('opened directly, with no files, the page explains and leads to the hubs, w
   const scripts = new Set<string>();
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (url.origin === server.origin && url.pathname.endsWith('.js')) scripts.add(url.pathname);
+    // /sw.js is the worker the page registers after the load event, not a file of the page (WebKit reports it here).
+    if (url.origin === server.origin && url.pathname.endsWith('.js') && url.pathname !== '/sw.js') scripts.add(url.pathname);
   });
   await visit(page, server, '/open-with/', { island: false });
   await page.waitForLoadState('load');
