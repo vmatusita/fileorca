@@ -2,7 +2,7 @@
   "calculator": "paint-calculator",
   "oracle": {
     "script": "scripts/oracle/calc_home_health.py",
-    "sha256": "19597198095aee6b2a7ddc792995b78034fb1f2818348bf74ef4dd8b3ac36474",
+    "sha256": "704e587f6ece11e8db427dc6622c203015e82428ef7cbfc151c6e9c4ff9fd378",
     "python": "3.13.18",
     "date": "2026-11-02",
     "nearTiesDrawnAgain": 0

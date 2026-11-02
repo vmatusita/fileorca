@@ -166,7 +166,9 @@ def square_footage(inp: dict) -> dict:
 
 
 def square_footage_cases() -> list[dict]:
-    out = [case('page-example', 'page-example', {'areas': [{'shape': 'rect', 'x': 1400, 'y': 1200}, {'shape': 'triangle', 'x': 600, 'y': 400}]})]
+    # One area, so the result stays above the fold on a phone (DECISOES § 268); the two-area example stays as a grid case.
+    out = [case('page-example', 'page-example', {'areas': [{'shape': 'rect', 'x': 1500, 'y': 1200}]})]
+    out.append(case('two-areas', 'grid', {'areas': [{'shape': 'rect', 'x': 1400, 'y': 1200}, {'shape': 'triangle', 'x': 600, 'y': 400}]}))
     corners = [1, 2, 99, 100, 1250, 29_999, 30_000]
     n = 1
     for shape in SHAPES:

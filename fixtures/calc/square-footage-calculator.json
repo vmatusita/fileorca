@@ -2,7 +2,7 @@
   "calculator": "square-footage-calculator",
   "oracle": {
     "script": "scripts/oracle/calc_home_health.py",
-    "sha256": "19597198095aee6b2a7ddc792995b78034fb1f2818348bf74ef4dd8b3ac36474",
+    "sha256": "704e587f6ece11e8db427dc6622c203015e82428ef7cbfc151c6e9c4ff9fd378",
     "python": "3.13.18",
     "date": "2026-11-02",
     "nearTiesDrawnAgain": 0
@@ -12,7 +12,8 @@
     "area": "hundredths of a square foot (sqft) and of a square yard (sqyd)"
   },
   "cases": [
-    {"id":"page-example","source":"page-example","full":false,"input":{"areas":[{"shape":"rect","x":1400,"y":1200},{"shape":"triangle","x":600,"y":400}]},"expected":{"items":[{"sqft":16800},{"sqft":1200}],"sqft":18000,"sqyd":2000}},
+    {"id":"page-example","source":"page-example","full":false,"input":{"areas":[{"shape":"rect","x":1500,"y":1200}]},"expected":{"items":[{"sqft":18000}],"sqft":18000,"sqyd":2000}},
+    {"id":"two-areas","source":"grid","full":false,"input":{"areas":[{"shape":"rect","x":1400,"y":1200},{"shape":"triangle","x":600,"y":400}]},"expected":{"items":[{"sqft":16800},{"sqft":1200}],"sqft":18000,"sqyd":2000}},
     {"id":"grid-001","source":"grid","full":false,"input":{"areas":[{"shape":"rect","x":1,"y":1}]},"expected":{"items":[{"sqft":0}],"sqft":0,"sqyd":0}},
     {"id":"grid-002","source":"grid","full":false,"input":{"areas":[{"shape":"rect","x":1,"y":1000}]},"expected":{"items":[{"sqft":10}],"sqft":10,"sqyd":1}},
     {"id":"grid-003","source":"grid","full":false,"input":{"areas":[{"shape":"rect","x":1,"y":30000}]},"expected":{"items":[{"sqft":300}],"sqft":300,"sqyd":33}},
