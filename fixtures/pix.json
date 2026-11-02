@@ -1,0 +1,38 @@
+{
+  "oracle": {
+    "script": "scripts/oracle/pix.py",
+    "sha256": "54410727cc5c0d141965208fe18473fe7fb81cd807c6b45cc938f2d355577b21",
+    "python": "3.13.18",
+    "date": "2026-11-02"
+  },
+  "manual": {
+    "source": "Manual de Padrões para Iniciação do Pix 2.10.0, § 2.6.3",
+    "key": "123e4567-e12b-12d1-a456-426655440000",
+    "name": "Fulano de Tal",
+    "city": "BRASILIA",
+    "code": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
+  },
+  "receiver": {
+    "key": "1647afcb-3eb8-4fee-8dfe-d5ef477fb13c",
+    "name": "VICTOR YUKI MATUSITA",
+    "city": "CURITIBA"
+  },
+  "codes": [
+    {
+      "amount": null,
+      "code": "00020126580014br.gov.bcb.pix01361647afcb-3eb8-4fee-8dfe-d5ef477fb13c5204000053039865802BR5920VICTOR YUKI MATUSITA6008CURITIBA62070503***63041A96"
+    },
+    {
+      "amount": "5.00",
+      "code": "00020126580014br.gov.bcb.pix01361647afcb-3eb8-4fee-8dfe-d5ef477fb13c52040000530398654045.005802BR5920VICTOR YUKI MATUSITA6008CURITIBA62070503***630424F8"
+    },
+    {
+      "amount": "10.00",
+      "code": "00020126580014br.gov.bcb.pix01361647afcb-3eb8-4fee-8dfe-d5ef477fb13c520400005303986540510.005802BR5920VICTOR YUKI MATUSITA6008CURITIBA62070503***6304D23E"
+    },
+    {
+      "amount": "20.00",
+      "code": "00020126580014br.gov.bcb.pix01361647afcb-3eb8-4fee-8dfe-d5ef477fb13c520400005303986540520.005802BR5920VICTOR YUKI MATUSITA6008CURITIBA62070503***63045E5A"
+    }
+  ]
+}
