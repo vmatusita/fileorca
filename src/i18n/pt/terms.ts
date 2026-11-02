@@ -5,7 +5,7 @@ export default {
   description:
     'Os termos para usar o FileOrca, ferramentas grátis que rodam no navegador: seus arquivos, resultados, calculadoras, anúncios, doações e responsabilidade.',
   h1: 'Termos de uso',
-  updated: 'Última atualização: 1º de novembro de 2026',
+  updated: 'Última atualização: 2 de novembro de 2026',
   intro:
     'Estes termos explicam como você pode usar o FileOrca. Ao usar o site, você concorda com eles. Se não concordar, por favor, não use o site.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'O que é o FileOrca',
       paragraphs: [
-        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar e converter, ferramentas de PDF, como juntar, dividir, comprimir, numerar, assinar e proteger, e calculadoras de dinheiro para empréstimos, financiamento imobiliário, dívidas e poupança. As ferramentas e as calculadoras estão em inglês, e a Comprimir imagem também está em português e espanhol.',
+        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar, girar, converter e transformar imagens em PDF, ferramentas de PDF, como juntar, dividir, comprimir, numerar, assinar e proteger, entre outras, e calculadoras de dinheiro para financiamentos, empréstimos, cartão de crédito, dívidas e investimentos. Em português, são oito calculadoras feitas para o Brasil: o Simulador SAC × PRICE, o Simulador de financiamento de veículo, o Simulador de empréstimo, a Amortização antecipada, a Calculadora do cartão de crédito, a Calculadora de dívidas, a Calculadora de juros compostos e o Alugar ou comprar.',
         'Você não precisa de conta. Seus arquivos são processados no seu aparelho, e não em um servidor, e nunca são enviados.',
       ],
     },
@@ -39,9 +39,9 @@ export default {
       heading: 'Ferramentas de PDF: senhas e assinaturas',
       paragraphs: ['Três ferramentas de PDF têm regras próprias, que valem além de tudo o que está nesta página.'],
       list: [
-        'A Protect PDF tranca um PDF com a senha que você escolhe. A senha é sua: o FileOrca nunca a recebe e não consegue recuperá-la, então uma senha perdida deixa o PDF fechado para todo mundo. Guarde uma cópia do original sem a senha.',
-        'A Unlock PDF serve para arquivos que você tem o direito de abrir e de alterar. Ela nunca adivinha nem quebra uma senha: quando um PDF pede senha para abrir, a ferramenta pede a senha a você.',
-        'A Sign PDF põe nas páginas que você escolher uma imagem da sua assinatura, desenhada, enviada ou digitada. É uma imagem na página, e não uma assinatura digital com certificado, e pode não valer como assinatura qualificada ou com validade jurídica onde você mora. O FileOrca não dá conselho jurídico. Se o documento exige assinatura com certificado, use um serviço que a ofereça.',
+        'A Proteger PDF tranca um PDF com a senha que você escolhe. A senha é sua: o FileOrca nunca a recebe e não consegue recuperá-la, então uma senha perdida deixa o PDF fechado para todo mundo. Guarde uma cópia do original sem a senha.',
+        'A Desbloquear PDF serve para arquivos que você tem o direito de abrir e de alterar. Ela nunca adivinha nem quebra uma senha: quando um PDF pede senha para abrir, a ferramenta pede a senha a você.',
+        'A Assinar PDF põe nas páginas que você escolher uma imagem da sua assinatura, desenhada, enviada ou digitada. É uma imagem na página, e não uma assinatura digital com certificado, e pode não valer como assinatura qualificada ou com validade jurídica onde você mora. O FileOrca não dá conselho jurídico. Se o documento exige assinatura com certificado, use um serviço que a ofereça.',
       ],
     },
     {
@@ -77,8 +77,8 @@ export default {
       paragraphs: [
         'Para continuar grátis, o FileOrca mostra, ou vai mostrar, anúncios do Google AdSense. O Google é o parceiro de publicidade. A página de Privacidade explica como funcionam os anúncios e os cookies.',
         'Os anúncios, e os sites para onde eles levam, vêm de terceiros. O FileOrca não controla o conteúdo deles e não se responsabiliza por ele.',
-        'Doar é opcional. O FileOrca tem um link para o Ko-fi, onde você pode deixar uma doação. O pagamento acontece no Ko-fi, sob as políticas dele.',
-        'A doação é voluntária. Ela não compra nada e não muda nada no site.',
+        'Doar é opcional. O FileOrca tem um link para o Ko-fi, onde você pode deixar uma doação. O pagamento acontece no Ko-fi, sob as políticas dele. Na página de apoio, você também pode doar por Pix. O código do Pix é estático, gerado pelo site quando ele é montado, e o pagamento vai do app do seu banco direto para a conta de quem recebe, sem passar pelo site: o site não fica sabendo quem pagou nem quanto.',
+        'A doação é voluntária. Ela não compra nada e não muda nada no site. Se você pedir a devolução de um Pix, ela só é feita pelo botão de devolução do próprio Pix, que o Regulamento do Pix deixa quem recebe usar em até 90 dias.',
       ],
     },
     {

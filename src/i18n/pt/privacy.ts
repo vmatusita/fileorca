@@ -5,7 +5,7 @@ export default {
   description:
     'Como o FileOrca trata seus dados: os arquivos ficam no aparelho, o que Google Analytics, AdSense e Cloudflare processam e seus direitos na LGPD e no GDPR.',
   h1: 'Política de privacidade',
-  updated: 'Última atualização: 1º de novembro de 2026',
+  updated: 'Última atualização: 2 de novembro de 2026',
   intro:
     'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
@@ -21,10 +21,10 @@ export default {
       paragraphs: [
         'As ferramentas do FileOrca rodam no seu navegador. Os arquivos que você escolhe são processados no seu aparelho e nunca são enviados. O FileOrca não tem servidor que processe arquivos, e você não precisa criar conta.',
         'Os números seguem o mesmo princípio. O que você digita em uma ferramenta, como uma largura, uma altura ou uma porcentagem, fica no seu navegador: não entra no endereço da página, e nenhum evento de medição leva esses números.',
-        'As calculadoras de dinheiro funcionam do mesmo jeito. Os preços, as taxas e os saldos que você digita são calculados no seu aparelho e nunca são enviados. O PDF e o CSV de uma calculadora também são gerados no seu aparelho. O botão de copiar o link põe os seus números depois do # do endereço copiado: essa parte do endereço fica no navegador que o abre e nunca vai para o nosso servidor, e a página nunca a acrescenta ao endereço por conta própria.',
-        "As ferramentas de PDF seguem o mesmo princípio. O PDF é lido e gravado no seu aparelho, pelo PDF.js e pelo qpdf, duas bibliotecas de código aberto que rodam no navegador. O que você digita ali, como uma faixa de páginas ou o texto de uma marca d'água, fica no seu navegador. A senha que você digita ao proteger ou desbloquear um PDF não sai do seu aparelho e não fica guardada, nem em servidor, nem no navegador. A assinatura que você desenha, envia ou digita ao assinar um PDF também não fica guardada em lugar nenhum.",
-        'As ferramentas de imagem, por exemplo, salvam o resultado sem os metadados da foto, inclusive a localização GPS.',
-        'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo.',
+        'As calculadoras de dinheiro funcionam do mesmo jeito. Os preços, as taxas e os saldos que você digita são calculados no seu aparelho e nunca são enviados. O PDF e o CSV de uma calculadora também são gerados no seu aparelho. O botão Copiar link põe os seus números depois do # do endereço copiado: essa parte do endereço fica no navegador que o abre e nunca vai para o nosso servidor, e a página nunca a acrescenta ao endereço por conta própria.',
+        "As ferramentas de PDF seguem o mesmo princípio. O PDF é lido e gravado no seu aparelho, pelo PDF.js e pelo qpdf, duas bibliotecas de código aberto que rodam no navegador. O que você digita ali, como um intervalo de páginas ou o texto de uma marca d'água, fica no seu navegador. A senha que você digita ao proteger ou desbloquear um PDF não sai do seu aparelho e não fica guardada, nem em servidor, nem no navegador. A assinatura que você desenha, envia ou digita ao assinar um PDF também não fica guardada em lugar nenhum.",
+        'As ferramentas de imagem, por exemplo, salvam uma cópia nova da sua foto sem os metadados, inclusive a localização GPS.',
+        'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo. O mesmo vale para o Pix da página de apoio: o código é estático, gerado pelo site quando ele é montado, e já vem na página. Escolher um valor não faz nenhuma requisição, e o clique em Copiar código só manda ao Google Analytics o evento de clique em doação da lista abaixo, sem o código e sem o valor. O site não fica sabendo quem pagou nem quanto, porque o pagamento vai do app do banco de quem paga direto para a conta de quem recebe; como em todo Pix, o extrato dessa conta mostra o nome de quem pagou e o valor. Se alguém pedir a devolução, ela só é feita pelo botão de devolução do próprio Pix, que o Regulamento do Pix deixa quem recebe usar em até 90 dias.',
       ],
     },
     {
@@ -43,13 +43,13 @@ export default {
       list: [
         'Ferramenta iniciada',
         'Ferramenta concluída',
-        'Download',
+        'Clique em Baixar',
         'Clique em uma sugestão de próximo passo',
         'Erro da ferramenta, com o navegador e o formato do arquivo',
-        'Clique em um link de doação',
+        'Clique em um link de doação ou no botão Copiar código do Pix',
         'Primeiro resultado de uma calculadora, só com o nome da calculadora',
-        'Download do PDF ou do CSV de uma calculadora, só com o formato',
-        'Clique em copiar o link de uma calculadora, sem o link',
+        'PDF ou CSV baixado de uma calculadora, só com o formato',
+        'Clique em Copiar link numa calculadora, sem o link',
       ],
     },
     {
@@ -69,12 +69,12 @@ export default {
       heading: 'Sua escolha de cookies no navegador',
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
-        'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantas vezes você usou uma ferramenta e ela gerou pelo menos um arquivo novo neste navegador (um lote de arquivos conta como uma vez só), para o pedido de café aparecer só a partir da terceira vez e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
+        'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantos lotes de imagens ou de PDFs terminaram com pelo menos um resultado de verdade neste navegador, como uma imagem menor, convertida, girada, cortada ou redimensionada, ou um PDF novo, para o pedido de café aparecer só a partir do terceiro e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
         'Nas calculadoras, a página guarda uma marca de sim ou não no armazenamento da sessão desta aba, para a Oli comemorar só no primeiro resultado da visita. Ela não tem nenhum número, nunca sai do navegador e some quando você fecha a aba.',
       ],
     },
     {
-      heading: 'E-mails',
+      heading: 'Seus e-mails',
       paragraphs: [
         'Os e-mails enviados para contato@fileorca.com são encaminhados pelo Cloudflare Email Routing para uma caixa do Gmail. Eu uso essas mensagens só para responder a você.',
       ],
@@ -93,7 +93,7 @@ export default {
     {
       heading: 'Bases legais',
       paragraphs: [
-        'O FileOrca segue o GDPR (o Regulamento Geral de Proteção de Dados da União Europeia) e a LGPD (Lei nº 13.709/2018). As bases legais são:',
+        'O FileOrca segue o GDPR (o Regulamento Geral de Proteção de Dados da União Europeia) e a LGPD (Lei nº 13.709/2018, a Lei Geral de Proteção de Dados Pessoais do Brasil). As bases legais são:',
       ],
       list: [
         'Consentimento (GDPR, art. 6(1)(a); LGPD, art. 7º, I) para o Google Analytics e para os cookies de anúncio, quando a lei exige. Você pode retirá-lo a qualquer momento.',
