@@ -42,6 +42,7 @@ import {
   UPSTREAM_TEXTS,
   browserPackages,
   bundledPackages,
+  findPackageDir,
   isAllowedLicense,
   isSeparateFileOnly,
   lgplSources,
@@ -339,6 +340,15 @@ describe('a biblioteca do gerador de QR code no bundle (F7)', () => {
     expect(byName.get('dijkstrajs')?.text).toMatch(/Wyatt Baldwin[\s\S]*Licensed under the MIT license/);
     expect(byName.get('dijkstrajs')?.via).toBe('qrcode');
   });
+
+  it('carries the notice of Kazuhiko Arase, which the minifier drops from the code, exactly as the installed qrcode has it', () => {
+    const notice = listedPackages().find((pkg) => pkg.name === 'qrcode')?.texts.find((entry) => entry.label?.startsWith('QRCode for JavaScript'));
+    expect(notice?.text).toContain('Copyright (c) 2009 Kazuhiko Arase');
+    expect(notice?.source).toBe('https://unpkg.com/qrcode@1.5.4/lib/core/qrcode.js');
+    const installed = readFileSync(join(findPackageDir('qrcode', process.cwd()) ?? '', 'lib/core/qrcode.js'), 'utf8');
+    expect(installed).toContain(readFileSync(join(UPSTREAM_TEXT_DIR, 'qrcode-1.5.4-qrcode-for-javascript.txt'), 'utf8').trimEnd());
+    expect(browserPackages().find((pkg) => pkg.name === 'qrcode')?.version).toBe('1.5.4');
+  });
 });
 
 describe('os arquivos de dados do PDF.js (F5a)', () => {
@@ -617,6 +627,8 @@ describe('os pacotes e os textos de licença', () => {
       'libjpeg-turbo-7aa2a89-README.ijg': '4b7b9f8c03bb8d60270dfd12684e70ab21e4abfd27e73905cd1a7c4cae6f5cdb',
       // The LICENSE of the core-js 3.50.0 npm package, inside the PDF.js legacy build (DECISOES § 179).
       'core-js-3.50.0-LICENSE.txt': 'b87653fff2d44426ab5cd4723cee3b1364dc8d35a0acdf098c54689543123bf8',
+      // F7: the notice of Kazuhiko Arase's QRCode for JavaScript at the top of qrcode 1.5.4's lib/core/qrcode.js.
+      'qrcode-1.5.4-qrcode-for-javascript.txt': '746098406af06d2bed157818aed05b43c823f757a650b8bed4b8d2b6797ee8c7',
     };
     const entries = Object.values(UPSTREAM_TEXTS).flat();
     expect(entries.map((entry) => entry.file).sort()).toEqual(Object.keys(hashes).sort());

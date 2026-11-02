@@ -133,6 +133,12 @@ export const UPSTREAM_TEXTS: Record<string, readonly UpstreamText[]> = {
   'pdfjs-dist': [
     { label: 'core-js 3.50.0, inside the PDF.js legacy build', file: 'core-js-3.50.0-LICENSE.txt', source: 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE', embeds: 'core-js' },
   ],
+  // The matrix code of qrcode is Kazuhiko Arase's "QRCode for JavaScript" (MIT), whose notice lives only in the comment at the
+  // top of lib/core/qrcode.js, which the minifier drops (F7, decision 8). The text is that comment, byte for byte, as the npm
+  // package of qrcode 1.5.4 ships it; licenses.test.ts finds it in the installed file.
+  qrcode: [
+    { label: 'QRCode for JavaScript (Kazuhiko Arase), the notice in lib/core/qrcode.js', file: 'qrcode-1.5.4-qrcode-for-javascript.txt', source: 'https://unpkg.com/qrcode@1.5.4/lib/core/qrcode.js' },
+  ],
 };
 
 /**
