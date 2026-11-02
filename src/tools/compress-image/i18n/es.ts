@@ -2,8 +2,8 @@ import type { CompressOptionsTexts, ImageToolTexts } from '../../../i18n/types.t
 
 // Bloques de la página Comprimir imagen (data-content: how, specs, faq, privacy, related) y los textos del
 // panel que muestra la isla compartida. Las filas de especificaciones dicen lo que el motor hace de verdad
-// (src/engine/image/): si cambian la calidad o los codificadores allí, cámbialos aquí. Solo esta herramienta
-// existe en español; la tabla de presets es solo de la página en inglés.
+// (src/engine/image/): si cambian la calidad o los codificadores allí, cámbialos aquí. Desde la F6, los dos
+// ajustes predefinidos (a 100 KB y a 1 MB) también existen en español, así que la página muestra su tabla.
 export default {
   title: 'Comprimir imagen en línea, gratis y sin subir archivos',
   description:
@@ -29,8 +29,13 @@ export default {
       ['Lote', 'Sin límite de imágenes. Varias imágenes se descargan juntas en un solo ZIP.'],
       ['Ya es pequeño', 'Si la copia nueva no queda más pequeña, recibes el original de vuelta, sin los metadatos de la foto.'],
       ['Metadatos de la foto', 'El modelo de la cámara, la fecha y la ubicación GPS se quitan de todos los archivos.'],
-      ['HEIC y AVIF', 'No se comprimen aquí. Convierte el HEIC antes a JPG con HEIC to JPG (herramienta en inglés). Los archivos AVIF no se aceptan.'],
+      ['HEIC y AVIF', 'No se comprimen aquí. Primero convierte el HEIC en JPG con HEIC a JPG. Los archivos AVIF no se aceptan.'],
     ],
+  },
+  presets: {
+    heading: 'Comprimir a un tamaño objetivo',
+    caption: 'Ajustes predefinidos de Comprimir imagen y qué hace cada uno',
+    head: ['Ajuste predefinido', 'Qué hace'],
   },
   faqHeading: 'Preguntas',
   faq: [
@@ -60,13 +65,13 @@ export default {
     },
     {
       q: '¿Puedo comprimir una foto de iPhone en HEIC?',
-      a: 'Aquí no: Comprimir imagen acepta JPG, PNG y WebP. Primero convierte el HEIC a JPG con HEIC to JPG, que está en inglés, y después comprime el JPG si quieres que quede más pequeño.',
+      a: 'Aquí no: Comprimir imagen acepta JPG, PNG y WebP. Primero convierte el HEIC en JPG con HEIC a JPG, y después comprime el JPG si quieres que quede más pequeño.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Las imágenes se procesan en tu dispositivo y nunca se envían a un servidor. Cada copia guardada también omite los metadatos de la foto, incluida la ubicación GPS.',
-  relatedHeading: 'Más herramientas',
+    'Las imágenes se procesan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Cada copia guardada también omite los metadatos de la foto, incluida la ubicación GPS.',
+  relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',
     progressLabel: 'Comprimiendo las imágenes',
@@ -78,7 +83,7 @@ export default {
       recommended: 'Recomendada',
       recommendedHelp: 'mejor equilibrio',
       strong: 'Fuerte',
-      strongHelp: 'menor tamaño',
+      strongHelp: 'archivo más pequeño',
       pngNote: 'El PNG se guarda sin pérdida, así que el nivel solo cambia JPG y WebP.',
     },
   },
