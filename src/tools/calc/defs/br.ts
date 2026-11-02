@@ -159,11 +159,18 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
 
 // --- credit with the CET (vehicle, personal) -----------------------------------------------------------------
 
+/**
+ * The CET a year above this, in hundredths of a percent (10,000,000 %), is past what the page writes whole: costs at the
+ * top of their ranges on a tiny credit gave "6.09.029.304.277.568e+,29%" (review F4-F7 h-2; DECISOES § 305).
+ */
+export const CET_YEAR_LIMIT = 1_000_000_000;
+
 function creditView(r: CreditResult, values: Values, t: CalcPanelTexts, s: CalcSharedTexts, lang: string): CalcView {
   const ln = l(lang);
   const v = t.view;
   if (r.credit === 0) return problemView(text(v, 'label'), text(v, 'noLoan'), t.premises);
   if (r.released <= 0 || r.cetYear === null || r.cetMonth === null) return problemView(text(v, 'label'), text(v, 'costsTooHigh'), t.premises);
+  if (r.cetYear > CET_YEAR_LIMIT) return problemView(text(v, 'label'), text(v, 'cetTooHigh'), t.premises);
   const cet = { cetYear: hundredthsPercent(r.cetYear, ln), cetMonth: hundredthsPercent(r.cetMonth, ln) };
   return {
     hero: {
