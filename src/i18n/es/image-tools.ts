@@ -1,30 +1,29 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
 import type { ImageToolsTexts } from '../types.ts';
 
 export default {
-  title: 'Image tools: eight free tools, no upload',
+  title: 'Herramientas de imagen: ocho gratis, sin subir archivos',
   description:
-    'Compress, resize, crop, rotate, convert and turn images into a PDF. Eight free image tools that run in your browser, with no upload and no account.',
-  eyebrow: 'Image tools',
-  h1: 'Eight image tools, zero uploads',
-  intro: 'Eight tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
-  toolsHeading: 'All image tools',
-  presetsHeading: 'Common sizes and limits',
-  presetsCaption: 'Ready-made settings for common sizes and file limits',
-  presetsHead: ['Preset', 'What you get'],
-  guideHeading: 'Which tool do you need?',
+    'Comprime, redimensiona, recorta, rota, convierte y pasa imágenes a PDF. Ocho herramientas de imagen gratis en tu navegador, sin subir nada ni crear cuenta.',
+  eyebrow: 'Herramientas de imagen',
+  h1: 'Ocho herramientas de imagen, sin subir nada',
+  intro: 'Ocho herramientas para comprimir, redimensionar, recortar, rotar, convertir y combinar imágenes, todo en tu navegador y sin subir nada.',
+  toolsHeading: 'Todas las herramientas de imagen',
+  presetsHeading: 'Tamaños y límites comunes',
+  presetsCaption: 'Ajustes predefinidos para tamaños comunes y límites de archivo',
+  presetsHead: ['Ajuste predefinido', 'Qué obtienes'],
+  guideHeading: '¿Qué herramienta necesitas?',
   guideIntro:
-    'Every tool works the same way. You drop one image or a whole batch, Oli processes each file on your device, and you download the results one by one or together in a ZIP. Nothing is uploaded, so the size of a batch depends only on your device.',
+    'Todas las herramientas funcionan igual. Sueltas una imagen o un lote entero, Oli procesa cada archivo en tu dispositivo, y descargas los resultados uno por uno o juntos en un ZIP. No se sube nada, así que el tamaño de un lote depende solo de tu dispositivo.',
   guide: [
-    { before: 'A form or an email turns down a big photo:', tool: 'compress-image', after: 'makes the file lighter, and the presets above aim at 100 KB or 1 MB.' },
-    { before: 'A site asks for exact dimensions:', tool: 'resize-image', after: 'sets the width and the height in pixels or by percentage.' },
-    { before: 'Only part of the picture matters:', tool: 'crop-image', after: 'keeps that part, as a square, 4:5, 16:9 or a free shape.' },
-    { before: 'A photo came out sideways:', tool: 'rotate-image', after: 'turns it 90° or 180°, or mirrors it.' },
-    { before: 'An iPhone photo does not open on your computer:', tool: 'heic-to-jpg', after: 'turns the HEIC file into a JPG or a PNG.' },
-    { before: 'A WebP image has to be a JPG or a PNG:', tool: 'webp-to-jpg', after: 'converts it.' },
-    { before: 'A PNG has to be a JPG, or a JPG a PNG:', tool: 'png-to-jpg', after: 'converts it either way.' },
-    { before: 'Several pictures have to go as one document:', tool: 'image-to-pdf', after: 'puts them in one PDF, one image per page.' },
+    { before: 'Un formulario o un correo rechaza una foto grande:', tool: 'compress-image', after: 'hace que el archivo pese menos, y los ajustes predefinidos de arriba apuntan a 100 KB o 1 MB.' },
+    { before: 'Un sitio pide dimensiones exactas:', tool: 'resize-image', after: 'fija el ancho y el alto en píxeles o por porcentaje.' },
+    { before: 'Solo importa una parte de la imagen:', tool: 'crop-image', after: 'conserva esa parte, en cuadrado, 4:5, 16:9 o en forma libre.' },
+    { before: 'Una foto salió de lado:', tool: 'rotate-image', after: 'la gira 90° o 180°, o la refleja.' },
+    { before: 'Una foto del iPhone no se abre en tu computadora:', tool: 'heic-to-jpg', after: 'convierte el archivo HEIC en un JPG o un PNG.' },
+    { before: 'Una imagen WebP tiene que ser un JPG o un PNG:', tool: 'webp-to-jpg', after: 'la convierte.' },
+    { before: 'Un PNG tiene que ser un JPG, o un JPG un PNG:', tool: 'png-to-jpg', after: 'lo convierte en cualquiera de los dos sentidos.' },
+    { before: 'Varias imágenes tienen que ir en un solo documento:', tool: 'image-to-pdf', after: 'las pone en un solo PDF, una imagen por página.' },
   ],
   guideOutro:
-    'Each tool also leaves the photo metadata out of the copy you download, so the GPS location of a phone photo stays with you.',
+    'Además, cada herramienta deja los metadatos de la foto fuera de la copia que descargas, así que la ubicación GPS de una foto del teléfono se queda contigo.',
 } satisfies ImageToolsTexts;
