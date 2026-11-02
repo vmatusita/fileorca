@@ -2337,7 +2337,23 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 
 - **`tests/unit/ymyl.test.ts`:** a contagem do portão soma os 2 hubs e as 11 calculadoras de casa e saúde (`life = 13`).
 - **`tests/unit/calc-oracle.test.ts`:** o conjunto de scripts do oráculo passa de dois para três; o `numpyFinancial` é exigido só nos dois de dinheiro, e o de casa e saúde (sem pacote) tem de gravar `nearTiesDrawnAgain`.
-- (A lista completa entra no fim da run, depois dos testes e dos portões.)
+- **`tests/unit/calc-defs.test.ts`:**
+  - as definições passam de 26 para 37;
+  - o link do cenário não leva o `today` do Due date, que a ilha lê do aparelho;
+  - a "última atualização" da Privacidade em inglês passa a 2 de novembro de 2026.
+- **`tests/unit/routes.test.ts`:**
+  - a ordem do mapa ganha os 2 hubs, as 11 calculadoras e o QR depois dos guias de arquivo;
+  - as páginas só em inglês somam 14;
+  - o índice da busca e a lista vazia em inglês ganham as 11 calculadoras e o QR no fim.
+- **`tests/unit/seo-checks.test.ts`:** o sitemap em inglês soma as linhas `casa-saude` e `utilidades`, lidas do mapa.
+- **`tests/unit/consent.test.ts`:** `CALC_EVENT_TOOLS` soma `LIFE_CALC_IDS`, e `EVENT_TOOLS` ganha `UTILITY_EVENT_TOOLS` no fim.
+- **`tests/unit/pdf-site.test.ts`:** a home em inglês ganha as seções de casa, saúde e QR depois da de dinheiro; o rodapé em inglês ganha as colunas Home, Health e Utilities antes de FileOrca.
+- **`tests/unit/prontidao.test.ts`:** os cartões da home em inglês somam as 6 de casa, as 5 de saúde e o QR; a busca soma 12, e as 12 ferramentas de PDF deixam de fechar a lista.
+- **`tests/unit/conteudo.test.ts`:** a contagem de calculadoras do portão soma as 11 (42 páginas).
+- **`tests/unit/design-checks.test.ts` e `scripts/gates/design.ts`:** as páginas de saúde pedem todas as poses da ilha menos `cheer`, que passa a ser proibida nelas (a regra antiga exigia o símbolo em toda página de ferramenta).
+- **`tests/e2e/a11y.spec.ts` e `tests/e2e/navigation.spec.ts`:** o diálogo e a caixa da busca listam as 11 calculadoras e o QR (de 56 para 68 em inglês), lidos dos registros.
+- **`tests/e2e/budgets.spec.ts`:** `HUB_PAGES` e a lista de calculadoras só crescem.
+- **`tests/e2e/money-speed.spec.ts`:** os casos do BMI e da Square footage com 10 áreas têm a tabela aberta, então o "nenhuma linha antes de abrir" vale só para as de dinheiro.
 
 ## § 260 · A tabela da Energy Star e a ordem dos ajustes do BTU (F7, decisão 5.6)
 
@@ -2410,3 +2426,37 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **Decisão:** `isLifeText` separa os textos das 11 calculadoras e dos 2 hubs; eles são preenchidos por `LIFE_SAMPLES` (valores dos exemplos do oráculo) e `LIFE_SAMPLES_BY_KEY` (o "{n} week" e o "{n} day" leem 1). Um placeholder sem amostra vira "12", nunca dinheiro. Os textos de dinheiro ficam como estavam, e o `lint-texto-money.test.ts` prova os dois lados.
 - **Corrigido:** o LanguageTool local achou 7 erros nos textos novos (Paint, Square footage, Concrete e Body fat), reescritos ("Gallons to buy, rounded up: {buy}.", "the labels on paint cans", "subtract doors"...). Depois: 0 erros.
 - **Prontidão:** o `gate:prontidao` confere os cartões das seções novas da home em inglês, os dois hubs na ordem de `LIFE_HUB_IDS` e a busca com as 11 calculadoras e o QR no fim; o build com as três variáveis ganhou unidades de teste para as áreas `casa-saude` e `utilidades`, para a trava do hostname valer também nessas páginas.
+
+## § 270 · O JS das calculadoras com as 11 novas (F7, decisão 6)
+
+- **Medido** pelo `budgets.spec.ts` (JS inicial em gzip, o build da `main` contra o da `fase-07`):
+
+  | Página | Antes | Depois |
+  | --- | ---: | ---: |
+  | `/mortgage-calculator/` | 43,4 KB | 50,6 KB |
+  | `/bmi-calculator/` | não existia | 50,6 KB |
+  | `/compress-image/` | 21,1 KB | 21,2 KB |
+  | `/merge-pdf/` | 36,9 KB | 37,0 KB |
+  | `/home-calculators/` e `/health-calculators/` | não existiam | 3,4 KB |
+
+- **Leitura:** a entrada comum das calculadoras passou de 23,2 para 30,4 KB com as 11 definições e os motores (§ 236), e cada página de calculadora continua com 2 arquivos JS, com 63% do teto de 80 KB. Não foi preciso a ADR de separação por região.
+- **Imagem e PDF:** o chunk `island` cresceu 93 bytes em gzip pelas listas fechadas de eventos (§ 263: os 11 ids, o `qr-code-generator`, `png` e `svg`), que moram em `src/analytics/` de propósito (§ 113). Nenhum código de calculadora nem do QR entrou ali: o `budgets.spec.ts` prova pelo `.cache/bundle-modules.json` que nenhum arquivo das páginas de imagem e de PDF tem módulo da F7.
+
+## § 271 · O `qrcode` entra no bundle como ES modules (F7, decisão 8)
+
+- **Achado:** com o `import { create } from 'qrcode/lib/core/qrcode.js'`, a página do QR carregava 3 arquivos JS: a entrada, o `island` e o `rolldown-runtime.*.js` (0,4 KB gzip). O `qrcode` e o `dijkstrajs` são CommonJS, o Rolldown os embrulha num ajudante (`__commonJS`) e põe esse ajudante num chunk que ele divide com os chunks preguiçosos das ferramentas de imagem (HEIC, libheif, o cliente do PDF).
+- **Tentado:** pôr o runtime no grupo `island` (o Rolldown não oferece esse módulo aos grupos: a sonda no `test` nunca o viu) e `experimentalInlineCommonChunks` (pede `preserveEntrySignatures: false`, que o build do Astro não aceita, nem no ambiente `client`).
+- **Decisão:** o plugin `qrcodeEsm()` (`src/platform/qrcode-esm.ts`, no `astro.config.ts`) entrega ao bundler os arquivos de `qrcode/lib/core/` e o `dijkstra.js` como ES modules: cada `require('./x')` vira o import padrão daquele módulo, o arquivo roda com `module` e `exports` locais, e `module.exports` é o export padrão (mais os nomes de `exports.nome =`). O código deles é CommonJS simples (requires no topo, com texto fixo, sem ciclo); o plugin recusa um `require` que não seja texto fixo. Os ids dos módulos continuam os arquivos de `node_modules`, então o registro do bundle e o `gate:licencas` veem os mesmos pacotes.
+- **Depois:** 2 arquivos JS na página do QR; o `island` com o mesmo hash; as páginas de imagem, de PDF e de calculadora com os mesmos arquivos. O `budgets.spec.ts` passa a conferir os 2 arquivos do QR, e o `tests/unit/qrcode-esm.test.ts` roda os arquivos convertidos como ES modules no Node e prova a mesma matriz do pacote, em três textos.
+- **Alternativa:** aceitar o terceiro arquivo com um registro (0,4 KB e uma requisição), ou copiar o `qrcode` para o repositório já em ES modules (código de terceiro fora do `node_modules`, que o `gate:licencas` não veria).
+- **Não é arquitetura:** o host, o framework e o pipeline não mudam; o plugin é do build, como o `recordBundledModules` e o `platformFiles`.
+
+## § 272 · O gerador de QR code (F7, decisão 8)
+
+- **A matriz:** `create([{ data: bytes, mode: 'byte' }], { errorCorrectionLevel: 'H' })`, com os bytes do `TextEncoder`; o teste prova o nível H (`bit === 2`) e que um nível inválido viraria M em silêncio. O `qrcode` 1.5.4 não emite ECI: o modo byte leva o UTF-8 cru.
+- **O limite:** 1.273 bytes de UTF-8, a capacidade da versão 40 em H. A leitura pelo `jsqr` prova o maior permitido com a Oli no meio, no menor PNG (740 px a 4 px por módulo), no Node e nos dois navegadores, então o limite não precisou baixar. O erro diz o limite e que acento conta 2 e emoji 4; a contagem fica ao lado do rótulo, fora do alerta, para o leitor de tela não repetir o alerta a cada tecla. Texto vazio ou só de espaços não gera QR; o erro só aparece depois que a pessoa digitou.
+- **A Oli:** o ícone do app (`docs/design/assets/Logo/app-icon.svg`, com o clip renomeado `fo-qr-oli`) num quadro branco centrado e alinhado à grade, de lado ímpar = 2 × arredondamento((0,22 × n − 1) / 2) + 1 módulos, com 10% de margem; os módulos sob o quadro não são desenhados. Em 160 leituras (4 textos por versão, da 1 à 40) não houve falha; a sondagem leu até 30% na versão 1 e 46% na 40. Ligada por padrão; desligada, o QR sai sem logo.
+- **O PNG:** do `<canvas>` da página (sem worker), em escala inteira de pixels por módulo, porque o `jsqr` falha com escala fracionária (512 px fixos leram 16 de 25 conteúdos): "Small", "Medium" e "Large" miram 512, 1.024 e 2.048 px, com escala = máx(4, piso(alvo ÷ (n + 8))), e a tela diz o tamanho real. O fundo branco é pintado antes (um pixel transparente o `jsqr` lê como preto).
+- **As cores:** módulos `#000000` sobre `#FFFFFF` no arquivo baixado e na prévia, nos dois temas: um QR é lido como escuro sobre claro por toda câmera. Os hex só existem em `qr.ts` (atributos do SVG e `fillStyle` do canvas), nunca no CSS, no modelo da exceção do QR do Pix no README do design.
+- **O resto:** nomes fixos `qr-code.png` e `qr-code.svg`; o SVG é montado pelo nosso código, sem o texto da pessoa; a caixa de texto tem `autocomplete="off"`, `spellcheck={false}` e `autocapitalize="off"` (o corretor avançado do Chrome envia o texto ao Google); o selo diz "Your text never leaves your device"; as relacionadas são Resize image, PNG to JPG, Image to PDF e Compress image; a /licenses credita o "QRCode for JavaScript" de Kazuhiko Arase, de onde o núcleo do `qrcode` vem; o `gate:licencas` reprova `qrcode` ou `dijkstrajs` no `island` ou em mais de um chunk.
+- **Testes:** `tests/unit/qr.test.ts` (o SVG rasterizado pelo `@resvg/resvg-js` e lido pelo `jsqr` em todas as 40 versões) e `tests/e2e/qr-code.spec.ts` (o PNG e o SVG baixados, com e sem a Oli, um endereço curto, um longo, acento e emoji e o maior permitido, o `binaryData` igual aos bytes UTF-8, a privacidade do texto e os eventos sem ele), mais o QR no `ads.spec.ts`, no `a11y.spec.ts` e no `budgets.spec.ts`.

@@ -322,6 +322,24 @@ test.describe('axe nos estados das calculadoras de casa e saúde, a 360 e 1280px
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'a day out of its range').toEqual([]);
   });
+
+  // F7 (decision 11): the QR code generator with a code made (the preview, the options and both Download buttons), then with
+  // a text over the limit (the error with the alert, and no code).
+  test('QR code generator: with a code, then with a text over the limit', async ({ page }) => {
+    expect((await page.goto('/qr-code-generator/'))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const box = page.locator('#fo-tool-root textarea');
+    await box.fill('https://fileorca.com/qr-code-generator/');
+    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'a code').toEqual([]);
+    await box.fill('x'.repeat(1_274));
+    await expect(box).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#fo-tool-root .fo-field__error[role="alert"]')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'over the limit').toEqual([]);
+  });
 });
 
 // F5a (prompt decision 12; DECISOES § 170): the states of the PDF pages the page-by-page pass does not reach

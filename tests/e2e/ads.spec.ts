@@ -484,6 +484,48 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
   }
 });
 
+// F7 (decision 8): the QR code generator, in the ad area "utilidades": no AdSlot above the tool on a phone or inside the
+// island, the rail from 1280px, and 150px from the text box, the preview with the Oli, the options and the two Download
+// buttons, at rest, with a code made and with the error of a text over the limit.
+const QR_TARGETS = `${TARGETS}, .fo-qr, .fo-qr__form, .fo-qr__preview, .fo-qr__code, .fo-qr__oli, .fo-qr__actions, .fo-qr__out, .fo-btn, .fo-field__error`;
+
+test('the QR code generator keeps every AdSlot 150px from the tool, at rest, with a code and with an error', async ({ page }) => {
+  const path = routeById('qr-code-generator').paths.en ?? '';
+  expect(routeById('qr-code-generator').adArea).toBe('utilidades');
+  await page.setViewportSize(VIEWPORTS[0]);
+  expect((await page.goto(path))?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  const adCount = await page.locator('.fo-ad').count();
+  expect(adCount).toBeGreaterThan(0);
+  await expect(page.locator('.fo-ad[data-ad-area="utilidades"]')).toHaveCount(adCount);
+  const gaps: string[] = [];
+  const measure = async (state: string) => {
+    let min = Infinity;
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+      const label = `${state} a ${viewport.width}px`;
+      const tool = (await boxes(page, '#fo-tool-root'))[0];
+      expect(tool, label).toBeDefined();
+      for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+      if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+      await expectAdsOutsideThePanel(page, label, adCount);
+      min = Math.min(min, await expectClearance(page, label, QR_TARGETS));
+    }
+    gaps.push(`${state}: ${min.toFixed(0)}`);
+  };
+  await measure('repouso');
+  const box = page.locator('#fo-tool-root textarea');
+  await box.fill('https://fileorca.com/qr-code-generator/');
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
+  await measure('com o QR');
+  await box.fill('x'.repeat(1_274));
+  await expect(page.locator('#fo-tool-root .fo-field__error')).toBeVisible();
+  await measure('acima do limite');
+  console.log(`${path} menor vão: ${gaps.join(' | ')}`);
+});
+
 // The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
 // phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
 test('the home and health hubs keep their one content AdSlot under the grid of calculators, at 360 and 1280px', async ({ page }) => {
