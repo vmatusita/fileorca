@@ -83,12 +83,17 @@ export const bmiDef: CalcDef<BodyInput, BmiResult> = {
     const value = tenth(r.bmi, l);
     const name = (category: BmiCategory) => text(v, `cat-${category}`);
     const band = (category: BmiCategory) => text(v, `band-${category}`);
-    const lines: [string, string][] = BMI_CATEGORIES.map((category) => [name(category), band(category)]);
     return {
       hero: { label: text(v, 'label'), value, sentence: say(text(v, 'sentence'), { bmi: value, category: name(r.category), band: band(r.category) }) },
       placard: { n: value, l: text(v, 'label') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colCategory'), text(v, 'colBmi')], lines),
+      // The CDC categories, with the person's BMI in the row of its category (in words in the cell, never by colour), so the
+      // CSV and the PDF carry the result too.
+      table: () => ({
+        caption: text(v, 'caption'),
+        head: [text(v, 'colCategory'), text(v, 'colBmi'), text(v, 'colYours')],
+        rows: BMI_CATEGORIES.map((category) => [plain(name(category)), plain(band(category)), plain(category === r.category ? value : '')]),
+      }),
       summary: [
         [text(v, 'label'), value],
         [text(v, 'category'), name(r.category)],

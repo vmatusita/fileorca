@@ -77,15 +77,15 @@ const categoryBand = (category: BmiResult['category']): string => bv[`band-${cat
 const bmi: Health<BodyInput, BmiResult> = {
   id: 'bmi-calculator',
   cases: ['grid-001', 'random-001'],
-  head: [bv.colCategory, bv.colBmi],
+  head: [bv.colCategory, bv.colBmi, bv.colYours],
   fill: (page, input) => fillBody(page, input),
   result(_input, expected) {
     const value = tenth(expected.bmi);
     return {
       hero: value,
       sentence: filled(bv.sentence, { bmi: value, category: categoryName(expected.category), band: categoryBand(expected.category) }),
-      // The table is the CDC's categories, the same for every BMI; the oracle's category is in the sentence.
-      rows: CATEGORIES.map((category) => [categoryName(category), categoryBand(category)]),
+      // The table is the CDC's categories, with the BMI in the row of the oracle's category.
+      rows: CATEGORIES.map((category) => [categoryName(category), categoryBand(category), category === expected.category ? value : '']),
     };
   },
 };
@@ -222,63 +222,21 @@ const dueDate: Health<DueDateInput, DueDateResult> = {
 const HEALTH = [bmi, calorie, ovulation, bodyFat, dueDate] as unknown as readonly Health<unknown, unknown>[];
 
 /**
- * Days the fixture has no case for, worked out by the oracle itself (scripts/oracle/calc_home_health.py, `due_date` and
- * `ovulation`, run with uv on 2/nov/2026), never by the engine: a last period at the turn of the year and on February 29,
- * 2028, and the example on November 3 and 4, 2026.
+ * The days the clock is fixed on: the "clock" cases of the oracle (scripts/oracle/calc_home_health.py, source "clock"),
+ * read from the fixtures like every other expected value: a last period at the turn of the year, February 29, 2028 typed
+ * and as today, the example on November 3 and 4, 2026, and the longest date the page writes (September 30, 2027).
  */
-const ORACLE_DUE: readonly { input: DueDateInput; expected: Pick<DueDateResult, 'due' | 'lmp' | 'trimesters' | 'fullTerm' | 'status' | 'age'> }[] = [
-  {
-    input: { method: 'lmp', date: '2027-12-25', today: '2028-01-03' },
-    expected: { due: '2028-09-30', lmp: '2027-12-25', trimesters: ['2027-12-25', '2028-03-18', '2028-07-08'], fullTerm: '2028-09-23', status: 'pregnant', age: { weeks: 1, days: 2 } },
-  },
-  {
-    input: { method: 'lmp', date: '2028-02-29', today: '2028-03-01' },
-    expected: { due: '2028-12-05', lmp: '2028-02-29', trimesters: ['2028-02-29', '2028-05-23', '2028-09-12'], fullTerm: '2028-11-28', status: 'pregnant', age: { weeks: 0, days: 1 } },
-  },
-  {
-    input: { method: 'lmp', date: '2028-01-31', today: '2028-02-29' },
-    expected: { due: '2028-11-06', lmp: '2028-01-31', trimesters: ['2028-01-31', '2028-04-24', '2028-08-14'], fullTerm: '2028-10-30', status: 'pregnant', age: { weeks: 4, days: 1 } },
-  },
-  {
-    input: { method: 'ivf5', date: '2028-02-29', today: '2028-02-29' },
-    expected: { due: '2028-11-16', lmp: '2028-02-10', trimesters: ['2028-02-10', '2028-05-04', '2028-08-24'], fullTerm: '2028-11-09', status: 'pregnant', age: { weeks: 2, days: 5 } },
-  },
-];
+const dueCase = (caseId: string) => oracleCase<DueDateInput, DueDateResult>('due-date-calculator', caseId);
+const cycleCase = (caseId: string) => oracleCase<OvulationInput, OvulationResult>('ovulation-calculator', caseId);
+const ORACLE_DUE = ['clock-new-year', 'clock-leap-typed', 'clock-leap-today', 'clock-leap-ivf5'].map(dueCase);
 const EXAMPLE_ON = {
-  '2026-11-03': { weeks: 8, days: 1 },
-  '2026-11-04': { weeks: 8, days: 2 },
+  '2026-11-03': dueCase('clock-example-11-03').expected.age ?? { weeks: -1, days: -1 },
+  '2026-11-04': dueCase('clock-example-11-04').expected.age ?? { weeks: -1, days: -1 },
 } as const;
-const ORACLE_CYCLES: readonly { input: OvulationInput; expected: OvulationResult }[] = [
-  {
-    input: { lmp: '2027-12-25', cycle: 28 },
-    expected: {
-      cycles: [
-        { start: '2027-12-25', fertileStart: '2028-01-02', ovulation: '2028-01-07', nextPeriod: '2028-01-22' },
-        { start: '2028-01-22', fertileStart: '2028-01-30', ovulation: '2028-02-04', nextPeriod: '2028-02-19' },
-        { start: '2028-02-19', fertileStart: '2028-02-27', ovulation: '2028-03-03', nextPeriod: '2028-03-18' },
-        { start: '2028-03-18', fertileStart: '2028-03-26', ovulation: '2028-03-31', nextPeriod: '2028-04-15' },
-        { start: '2028-04-15', fertileStart: '2028-04-23', ovulation: '2028-04-28', nextPeriod: '2028-05-13' },
-        { start: '2028-05-13', fertileStart: '2028-05-21', ovulation: '2028-05-26', nextPeriod: '2028-06-10' },
-      ],
-    },
-  },
-  {
-    input: { lmp: '2028-02-29', cycle: 28 },
-    expected: {
-      cycles: [
-        { start: '2028-02-29', fertileStart: '2028-03-08', ovulation: '2028-03-13', nextPeriod: '2028-03-28' },
-        { start: '2028-03-28', fertileStart: '2028-04-05', ovulation: '2028-04-10', nextPeriod: '2028-04-25' },
-        { start: '2028-04-25', fertileStart: '2028-05-03', ovulation: '2028-05-08', nextPeriod: '2028-05-23' },
-        { start: '2028-05-23', fertileStart: '2028-05-31', ovulation: '2028-06-05', nextPeriod: '2028-06-20' },
-        { start: '2028-06-20', fertileStart: '2028-06-28', ovulation: '2028-07-03', nextPeriod: '2028-07-18' },
-        { start: '2028-07-18', fertileStart: '2028-07-26', ovulation: '2028-07-31', nextPeriod: '2028-08-15' },
-      ],
-    },
-  },
-];
+const ORACLE_CYCLES = ['clock-new-year', 'clock-leap'].map(cycleCase);
 /** The longest dates the page writes ("September" and two digits): a due date and an ovulation on September 30, 2027. */
-const LONG_DUE = { input: { method: 'lmp', date: '2026-12-24', today: '2026-11-02' }, due: '2027-09-30' } as const;
-const LONG_CYCLE = { input: { lmp: '2027-09-17', cycle: 28 }, ovulation: '2027-09-30' } as const;
+const LONG_DUE = { input: dueCase('clock-longest-date').input, due: dueCase('clock-longest-date').expected.due } as const;
+const LONG_CYCLE = { input: cycleCase('clock-longest-date').input, ovulation: cycleCase('clock-longest-date').expected.cycles[0]?.ovulation ?? '' } as const;
 
 /** Noon of a day on the page's clock, in the time zone of the browser: today is that day wherever the test runs. */
 async function today(page: Page, day: string): Promise<void> {
