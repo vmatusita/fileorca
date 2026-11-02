@@ -2580,3 +2580,160 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..08
   2. o WebKit em 9 partes, que também tira peso da parte 7.
 
   Antes de escolher, rode o `--list` das partes e confira onde caem o `design.spec.ts` e a matriz de imagens (§ 142).
+
+## § 284 · A abertura da F8: o prompt, o primeiro push e a prova do aviso de deploy (F8, decisão 15)
+
+- **O prompt:** os dois arquivos `docs/prompts/prompt-fase-08.md` e `.txt` não estavam na pasta antes da branch. A run gravou o prompt como recebeu em `docs/prompts/prompt-fase-08.txt`, como a ficha manda nesse caso, e ele entrou sozinho no primeiro commit (`15fab5b`). Não há `.md`.
+- **A prova:** com a branch no GitHub, `gh workflow run pos-deploy.yml --ref main -f commit=15fab5b2419980d6fba683ec88c8480e576e5e74 -f wait_minutes=2` ([execução 41488759711](https://github.com/vmatusita/fileorca/actions/runs/41488759711)). O checkout com `fetch-depth: 0` achou o commit da branch, sem erro de `rev-parse`; o log tem "Esperando … (até 2 min)", quatro "build.txt traz 29afbce, ainda sem 15fab5b" e "O deploy de 15fab5b não chegou em 2 min."; o passo "Abrir issue" ficou verde e abriu a [issue #16](https://github.com/vmatusita/fileorca/issues/16), comentada.
+- **Antes do disparo,** a leitura do `scripts/ci/pos-deploy.ts`: a espera que não chega sai com `process.exit(1)` antes do `checkProduction` e do IndexNow.
+- **A repetição:** a run mudou o `pos-deploy.yml` (o responsável da issue, § 301), então a prova rodou de novo com `--ref fase-08` ([execução 41497600846](https://github.com/vmatusita/fileorca/actions/runs/41497600846)), com as mesmas linhas no log e a [issue #17](https://github.com/vmatusita/fileorca/issues/17) já atribuída ao Victor, comentada.
+
+## § 285 · A estratégia do cache do service worker (F8, decisões 4 e 5)
+
+- **A tabela** (`src/sw/logic.ts`, `strategyFor`):
+
+  | Pedido | Estratégia | Entra no cache? |
+  | --- | --- | --- |
+  | Outra origem | sem `respondWith` | nunca |
+  | Mesma origem, método diferente de GET (fora o compartilhar) | sem `respondWith` | nunca |
+  | POST na ação do compartilhar | a caixa de entrada e um 303 para a página em GET (§ 290) | só na caixa |
+  | Pedido com `Range` | sem `respondWith` | nunca |
+  | `/build.txt`, `/cdn-cgi/*`, `/ads.txt`, `/robots.txt`, `/sitemap*.xml`, a chave do IndexNow, `/sw.js` | sem `respondWith` | nunca |
+  | Navegação | rede primeiro; sem rede, a cópia; sem cópia, a página offline do idioma, depois a de outro idioma guardada | 200 `basic` sem redirecionamento |
+  | `/_astro/*` | cache primeiro (o nome leva o hash) | 200 `basic` sem redirecionamento |
+  | O resto da mesma origem | rede primeiro, com a cópia como reserva | 200 `basic` sem redirecionamento |
+
+- **A navegação usa `fetch(event.request)`:** o 307 do `auto-trailing-slash` volta como `opaqueredirect`, que o navegador segue; nunca entra no cache. Responder uma navegação com uma resposta `redirected: true` daria erro de rede no Chromium e no WebKit (a exploração mediu).
+- **A primeira página:** o worker não existia quando ela carregou. O script de registro manda, quando o worker ativa, o endereço da página e os arquivos dela: as tags (`script[src]`, a folha de estilo, os preloads, o manifest e o ícone) e o que o `performance` lista. Nunca os `alternate` e o `canonical`, que são outras páginas. O worker passa a lista pela mesma regra (`warmList`) e busca o que falta, quase tudo do cache HTTP. As tags entraram porque o relógio falso do Playwright esvazia o `performance` no WebKit (o teste do Due date achou), e uma página real pode ter o mesmo problema.
+- **O motor** entra no cache quando a ferramenta o carrega com rede, no primeiro arquivo, como qualquer `/_astro/*`. Nada se baixa só para o offline, fora a página offline do idioma e os arquivos dela (§ 289).
+- **Alternativas:** cache primeiro para todo GET (o online passaria a servir cópia velha de HTML e de manifest); guardar o site de antemão (fora da ficha).
+
+## § 286 · A chave e o que nunca entra no cache (F8, decisão 5)
+
+- **A chave** é `origin + pathname` em todo `put` e `match`, sem `?` e sem `#`. O `#` chega no `request.url` da navegação nos dois navegadores (exploração); a chave o tira antes de qualquer coisa.
+- **Nunca entra:** os caminhos que o build passa em `SW_CONFIG.never` (`src/platform/build-files.ts`, `SW_NEVER`: `/build.txt`, `/ads.txt`, `/robots.txt`, `/sw.js` e `/<chave do IndexNow>.txt`), mais `/cdn-cgi/*`, os sitemaps e as entradas sintéticas da caixa. Resposta 206, 404, opaca, `opaqueredirect` ou redirecionada nunca entra (`isCacheable`).
+- **Prova:** `tests/unit/sw-logic.test.ts` e o `tests/e2e/sw-privacy.spec.ts`, que lê as chaves de todos os caches depois de links do cenário, números, arquivos e um compartilhar.
+
+## § 287 · O arquivo `/sw.js`, o registro e o cabeçalho (F8, decisão 6)
+
+- **O build:** `src/sw/build.ts` costura `src/sw/shared.ts`, `logic.ts` e `main.ts` num script clássico: o compilador do `typescript` (já é dependência) tira os tipos, os `import` relativos e os `export` saem, e tudo vai numa função depois do `SW_CONFIG` (o commit do `build.txt`, as páginas offline e os arquivos delas, as ações do compartilhar e os caminhos de `never`). Um `import` ou `export` que ele não sabe juntar reprova o build. O `typescript` vem por `createRequire`: o gancho `astro:build:done` roda depois que o Astro fecha o carregador de módulos do Vite, e um `import()` ali falha.
+- **Por que não o Vite:** um chunk emitido pelo Rolldown dividiria módulos com a ilha; o `?worker&url` dá nome com hash dentro de `/_astro/`, e a ficha pede `/sw.js` na raiz, com escopo `/`. O nome não tem "worker" (o orçamento reprova).
+- **Os tipos:** `main.ts` declara os tipos do worker que usa, sem `lib: webworker`, que brigaria com o DOM no mesmo `tsconfig`.
+- **O registro:** um script inline no `BaseLayout` (`src/platform/sw-register.ts`), depois do `load`, só onde há `serviceWorker`. Ele nunca espera o `ready`: com `serviceWorkers: 'block'` o `register()` resolve `undefined` e o `ready` nunca resolve.
+- **O cabeçalho:** `/sw.js` com `Cache-Control: no-cache`, conferido pelo `gate:cabecalhos`, que também exige o `dist/sw.js`. O `gate:worker` passa a afirmar que o `sw.js` é o arquivo que o `src/sw/build.ts` gera, sem `import` nem `export`, e que o `wrangler.jsonc` não o cita: é arquivo estático dos assets, não código de Worker.
+
+## § 288 · A desativação de emergência (F8, decisão 7)
+
+- **A constante:** `SW_ENABLED` em `src/platform/site.ts`. Com `false`, o build grava o mesmo script com `enabled: false`: no `install`, `skipWaiting`; no `activate`, apaga todo cache `fileorca-*` e se desregistra; sem `fetch`, tudo vai à rede. O `BaseLayout` deixa de registrar.
+- **O manifest perde o `share_target`** com a desativação: sem worker, o POST do Android cairia no 405 do Cloudflare.
+- **Sem recarregar as abas abertas:** um `client.navigate()` faria a pessoa perder o arquivo que estava processando. As abas abertas param de usar o cache na hora (sem `fetch`) e saem do controle na próxima navegação.
+- **Prova:** `tests/e2e/sw-killswitch.spec.ts`, com o servidor do teste trocando o `/sw.js` pela versão com `enabled: false` e depois pela normal, nos dois navegadores.
+
+## § 289 · A página offline (F8, decisão 8)
+
+- **Os slugs:** `/offline/`, `/pt/offline/` e `/es/sin-conexion/`, pelos glossários ("offline" em pt, "sin conexión" em es). O título em pt é "Sem internet", porque "Offline" repetia o do inglês (o `gate:conteudo` reprova título repetido).
+- **O que mostra:** o H1, o `OliMessage` offline (`buoy`, `role="status"`, tom `surface`) dizendo que esta página ainda não foi guardada, a lista das páginas guardadas (um script inline que lê o cache e o `<title>` de cada página, como texto, sem as páginas offline e do compartilhar) e o link da home.
+- **O que o worker guarda:** no `install`, a página offline do idioma das janelas abertas, com a folha de estilo e as duas fontes latinas dela (lidas do HTML e do CSS do build). Cada navegação guardada garante a do idioma dela.
+- **O desvio da tabela de falas:** a linha "Offline" ("No internet? No problem, Oli works offline.") prometia que tudo funciona offline. Ela passa a dizer "No internet? Oli keeps working on the pages you already opened." em `docs/design/README.md` e nos glossários. O `PLANO-FILEORCA.md` (linha 289) não pode ser editado (`.claude/settings.json`) e fica com a frase antiga: este § é o registro.
+
+## § 290 · O compartilhar: a página "Abrir com", a caixa de entrada e a entrega (F8, decisões 1 e 10)
+
+- **Os slugs:** `/open-with/`, `/pt/abrir-com/` e `/es/abrir-con/`.
+- **A caixa:** o Cache Storage `fileorca-inbox`, com as entradas `/__fileorca-inbox/<n>` (um contador, nunca o nome), o nome codificado e a hora em cabeçalhos. Cache Storage em vez de IndexedDB: a página e a ilha leem com a mesma API do resto, sem código de IndexedDB.
+- **O prazo:** uma hora. A caixa se apaga depois da entrega, no `activate` de um worker novo, e depois do prazo (o worker confere em cada navegação; a página e a ilha ignoram entrada vencida).
+- **A escolha:** o clique num cartão grava no `sessionStorage` da aba `{tool, order}`, sem nome de arquivo. A ordem põe primeiro os arquivos que a ferramenta aceita, para uma ferramenta de um arquivo receber um que ela abre.
+- **A entrega:** `takeInbox(page)`, em `src/tools/image/inbox.ts` (no chunk `island`), chamado na montagem do `ImagePanel` e do `PdfPanel`: os arquivos vão ao `startBatch` e ao `addFiles`, o caminho do soltar, e a recusa na linha é a de hoje.
+- **A página:** os 20 cartões (8 de imagem e 12 de PDF) saem do registro no build, escondidos, com o `ToolCard` (que ganhou um `slot` para a linha "Abre N de M arquivos"). O script (`src/share/client.ts`) lê os primeiros 64 KB de cada arquivo e usa os `sniff` dos motores. Ele não importa nada do chunk `island`: os nomes da caixa vêm de atributos da página, e o tamanho é escrito por uma cópia do `fileSize()` que o `tests/unit/open-with.test.ts` compara com a original. A página carrega 2 arquivos JS: a entrada e o chunk `sniff`, que o chunk preguiçoso `process` também importa.
+- **O servidor nunca recebe o POST:** o `serve-dist` responde 405 a método diferente de GET e HEAD, como o Cloudflare (a exploração mediu no `wrangler dev`), e o teste confere o log do servidor.
+
+## § 291 · O manifest: o `id` e o `share_target` (F8, decisão 9)
+
+- **O `id`** é o `start_url` de hoje (`/`, `/pt/`, `/es/`), escrito: quem já instalou continua com o mesmo app.
+- **O `share_target`:** a ação da página "Abrir com" do idioma, `POST`, `multipart/form-data`, um campo `files` com o `accept` de `shareAccept()` (`src/share/tools.ts`): os tipos e as extensões de JPG, PNG, WebP e HEIC (as ferramentas de imagem) e o PDF. Sem `text` nem `url`.
+- **Prova:** `tests/unit/open-with.test.ts` (os três manifests contra os registros) e o teste dos manifests no `tests/e2e/share-target.spec.ts` (os ícones e a ação respondem 200 no `dist/`).
+
+## § 292 · A fala offline numa ferramenta guardada sem o motor (F8, decisão 4)
+
+- **Imagem e PDF:** quando todo arquivo falhou com `load` e o navegador diz que está offline (`navigator.onLine === false`), a zona de soltar vai ao estado `offline`: `role="status"`, a `buoy`, o ícone `offline` e o texto "No internet, and this tool isn't fully saved yet. Use it once with internet and it'll work offline too." A linha de cada arquivo diz "Oli needs the internet once to open {name} here." Com rede, a fala de hoje ("recarregue a página") não muda.
+- **A `buoy` nas páginas:** só nas que têm as ilhas de imagem e de PDF (`FILE_PANEL_POSES`: as ferramentas e os guias de arquivo), e o `gate:design` exige a pose onde há zona de soltar.
+- **As calculadoras:** o PDF delas carrega o gerador só no clique. Offline, sem o gerador guardado, o `ExportBar` diz "No internet, and the PDF maker isn't saved yet. Download a PDF once with internet and it works offline too." em vez de "recarregue a página". O CSV não depende de nada.
+
+## § 293 · A troca de versão: os caches velhos saem, sem navigation preload (F8, decisão 5)
+
+- No `activate`, o worker apaga todo cache `fileorca-*` que não é o da versão dele, inclusive a caixa de entrada. Os `/_astro/*` não atravessam versões.
+- `skipWaiting` e `clients.claim` nos dois modos. Uma aba antiga que pedir um chunk que o deploy apagou recebe a fala `load` de hoje.
+- **Sem navigation preload:** ele só ajuda quando a resposta vem da rede, e o ganho (50 a 250 ms de partida do worker) não paga o código a mais. Fica registrado.
+- **Prova:** o segundo teste do `sw-killswitch.spec.ts` troca o `/sw.js` por um de outra versão e confere que só o cache novo fica.
+
+## § 294 · Os testes do service worker (F8)
+
+- **`serviceWorkers: 'block'`** é o padrão do `playwright.config.ts`: com o worker, o `page.route` e o `context.route` deixam de ver o que ele responde. Os specs `sw-offline`, `sw-privacy`, `sw-killswitch` e `share-target` ligam com `test.use({ serviceWorkers: 'allow' })`.
+- **Um servidor por teste** (`tests/e2e/lib/sw-server.ts`, com a lógica do `serve-dist`): origem limpa, troca do `/sw.js`, e a rede desligada de verdade (o servidor fecha e derruba as conexões), com `context.setOffline(true)` para o `navigator.onLine`.
+- **WebKit:** os specs rodam nos dois navegadores. Onde o WebKit difere, o teste ramifica por dentro: ele não informa os pedidos do worker (a prova de "nada sai" pelo worker é do Chromium, e a regra é provada no Vitest), e o `setOffline(false)` não chega ao worker (a volta da rede numa ferramenta sem motor é afirmada só no Chromium).
+- **O relógio:** o Due date é guardado com o relógio real e conferido offline com o relógio fixado, porque o relógio falso do Playwright esvazia o `performance` no WebKit.
+
+## § 295 · O GA4 na F8: nenhum evento novo (F8, decisão 19)
+
+- Nenhum evento novo. O uso da "Abrir com" não é contado: a ficha não pede, e o evento teria de passar pelas listas fechadas sem levar dado de arquivo. Offline, o `gtag` não é carregado de novo (a cópia da página traz o `dataLayer`, e o script do Google é de outra origem, que o worker não guarda); nada fica numa fila.
+
+## § 296 · O leitor de YAML dos testes (F8)
+
+- `tests/unit/lib/mini-yaml.ts` lê o subconjunto que os arquivos do repositório usam (mapas, listas, listas em linha, aspas, comentários e blocos `|` e `>`), e recusa âncora, chave repetida, recuo estranho e mais de um documento. Os testes do `dependabot.yml`, do `ci.yml` e dos eventos de merge o usam. **Por quê:** a ficha pede o teste sem dependência nova, e não há parser de YAML entre as dependências.
+
+## § 297 · Os eventos de exemplo da regra de merge (F8, decisão 13)
+
+- **As fixtures:** 16 arquivos em `fixtures/merge-events/`, cada um com o payload `pull_request` só com os campos que o job lê, os arquivos do `git diff` (ou um rename que o teste refaz num repositório de rascunho) e a saída do `fetch-metadata` (`update-type`, o maior do grupo, e `dependency-group`).
+- **O caminho do job:** o `tests/unit/merge-events.test.ts` lê o job `merge` do `ci.yml`, monta o `env` do passo Decide a partir do evento, roda o `git diff --no-renames` do job no rename, roda o `jq` do próprio `ci.yml` onde ele existe (no Ubuntu é obrigatório: o teste reprova sem ele no Linux) e compara com a versão em TypeScript, e roda o CLI com o `GITHUB_OUTPUT`. No Windows, sem `jq`, o teste confere que o `jq` do `ci.yml` é o da main.
+- **A chamada do CLI não muda:** o job roda o `pode-mesclar.ts` da base; uma chamada nova chegaria ao script velho e a PR ficaria vermelha. O teste fixa a chamada, o `git diff` e o `jq` da main.
+
+## § 298 · O `.github/dependabot.yml` (F8, decisão 11)
+
+- **Ecossistemas:** `npm` (o pnpm é lido pelo `pnpm-lock.yaml`, lockfile 9.0) e `github-actions`, os dois em `/`.
+- **Agenda:** `monthly` (dia 1), às 06:00 de São Paulo (`timezone: America/Sao_Paulo`). O `day` só vale para `weekly`.
+- **`cooldown: { default-days: 7 }`:** nada publicado há menos de uma semana. Sem configurar, o padrão seria 3 dias.
+- **`open-pull-requests-limit`:** 3 no npm (o grupo e até duas majors; a primeira leva de hoje tem uma major fora dos `ignore`), 1 nas actions. Cada PR roda o CI inteiro (uns 135 minutos de Actions com 15 partes).
+- **`versioning-strategy: increase`:** reescreve a versão exata e o `~` para a nova, em vez de juntar com `||`.
+- **`commit-message`:** `chore` no npm (`chore(deps): …` e `chore(deps-dev): …`) e `ci` nas actions, com `include: scope`.
+- **`labels: []`:** o Dependabot criaria os rótulos `dependencies` e `javascript` no repositório, que é configuração fora do repositório.
+- **`ignore`, cada um com a razão escrita em cima:**
+  - `@types/node` major: segue o major do `.node-version` (§ 17 e § 37);
+  - `typescript` minor e major: o `typescript-eslint` aceita até `<6.1.0` e o `@astrojs/check` só o 5 e o 6 (§ 17); TypeScript sobe numa run;
+  - `qrcode`, inteiro: o `qrcodeEsm()` reescreve o `lib/core` dele por versão, e o aviso de licença é fixado por SHA-256 (§ 271).
+  - O `packageManager` não é dependência para o Dependabot: não precisa de `ignore`, e o pnpm sobe à mão.
+- **O que não entra:** revisores, `pull_request_target`, segredos. `rebase-strategy` fica no padrão: com o limite de 3 PRs, os rebases são poucos, e sem rebase a PR com conflito no lockfile não se mesclaria.
+- **Prova:** `tests/unit/dependabot.test.ts`. O GitHub só valida o arquivo depois do merge na main: tarefa do Victor no `OPERACAO.md`.
+
+## § 299 · O ensaio do Dependabot (F8, decisão 12)
+
+- O resultado entra aqui quando o ensaio terminar.
+
+## § 300 · O alerta de CI vermelho numa PR do Dependabot (F8, decisão 14)
+
+- **O job `alerta-dependabot`** no `ci.yml`: `needs: [verificar, playwright, merge]`, `if: failure() && github.event.pull_request.user.login == 'dependabot[bot]'`, `permissions` só `issues: write` e `pull-requests: write`. Sem checkout: só o `gh`, com o número da PR, nunca o título nem a branch.
+- **O `merge` no `needs`,** além do que a ficha pediu: uma falha do `fetch-metadata` ou do `gh pr merge` numa PR do Dependabot também avisa.
+- **Uma issue por PR:** "CI vermelho na PR #N do Dependabot", procurada pelo título exato entre as abertas; o próximo vermelho da mesma PR vira comentário. O job também comenta na PR.
+- **Prova:** o `gate:actionlint` e o `tests/unit/ci-workflows.test.ts`. A prova ao vivo só vem com uma PR real vermelha (o `OPERACAO.md` diz o que olhar no primeiro ciclo).
+
+## § 301 · As issues dos workflows atribuídas ao dono do repositório (F8)
+
+- **O achado:** o Victor não assiste o repositório (`subscribers_count: 0`), e o GitHub só manda e-mail de issue para quem assiste, foi atribuído ou mencionado. As issues do `github-actions[bot]` podiam não chegar.
+- **A decisão:** todo `gh issue create` dos workflows leva `--assignee "$OWNER"` (`github.repository_owner`): o pós-deploy, as duas do job de merge e o alerta do Dependabot. O `OPERACAO.md` pede também o Watch do repositório.
+- **Alternativa:** mencionar `@vmatusita` no corpo. A atribuição é mais limpa e aparece no filtro "Assigned to me".
+
+## § 302 · O WebKit em 10 partes (F8, decisão 2; terceiro adendo da ADR-003)
+
+- **A medida:** na [run 41465872919](https://github.com/vmatusita/fileorca/actions/runs/41465872919), a parte 7 do WebKit chegou a 730 s e a 2 já tinha passado de 700 s (§ 283).
+- **A projeção:** com os specs novos (`sw-offline`, `sw-privacy`, `sw-killswitch`, `share-target`), o WebKit em 8 partes passaria de 700 s em 98 % dos sorteios; em 10, a pior parte fica perto de 630 a 650 s. O Chromium em 4 aguenta.
+- **A decisão:** WebKit em 10 partes, Chromium em 4 e o `verificar`: 15 partes. O passeio de estados do `a11y` fica onde está (com 10 partes ele não muda a pior parte; vai para o `PENDENCIAS.md` como reserva). Os nomes `sw-*` e `share-target` caem depois de `qr-code`, e o `design.spec.ts` e o `image-matrix.spec.ts` seguem em partes diferentes (§ 142).
+- **O teste:** o `tests/unit/verificar.test.ts` lê a matriz do próprio `ci.yml` e confere que as 15 partes cobrem o todo.
+
+## § 303 · O `docs/OPERACAO.md` (F8, decisão 16)
+
+- Uma seção por alerta (como chega, o que quer dizer, o que fazer com os comandos, quando vira run curta), a revisão mensal como lista, a anual, as tarefas de configuração do Victor e o ponteiro para o `PENDENCIAS.md`.
+- **Prova:** `tests/unit/operacao.test.ts`: todo `pnpm` citado é script do `package.json` (ou comando do próprio pnpm), todo caminho e workflow existe, os títulos de issue são exatamente os dos workflows, e cada alerta da ficha tem a seção dele.
+
+## § 304 · O `docs/PENDENCIAS.md` (F8, decisão 3)
+
+- A lista única do que ficou aberto, agrupada por tipo de run (saúde e fontes, contas, exportação, texto e voz, acessibilidade, layout, PDF, SEO, testes, desempenho, CI, kit, a 2b, decisões e tarefas do Victor), com id, fonte, severidade, defeito, correção proposta e quem resolve.
+- Conferida contra o código de hoje: o que uma fase já corrigiu fica numa seção à parte.
+- **Prova:** `tests/unit/pendencias.test.ts`: os itens que a ficha nomeia, as seis colunas de cada linha, e uma linha para cada baixo das duas revisões da F8.
