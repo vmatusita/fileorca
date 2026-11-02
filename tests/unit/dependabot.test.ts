@@ -64,7 +64,9 @@ describe('.github/dependabot.yml', () => {
 
   it('adds no labels, reviewers, assignees, registries or secrets', () => {
     for (const update of updates) {
-      for (const key of ['labels', 'reviewers', 'assignees', 'registries', 'milestone']) expect(update[key], key).toBeUndefined();
+      // An empty list, so Dependabot creates no label in the repository (its default would).
+      expect(update['labels']).toEqual([]);
+      for (const key of ['reviewers', 'assignees', 'registries', 'milestone']) expect(update[key], key).toBeUndefined();
     }
     expect(config['registries']).toBeUndefined();
     expect(SOURCE).not.toMatch(/secrets\.|pull_request_target/);

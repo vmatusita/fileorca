@@ -16,6 +16,8 @@ updates:
       default-days: 7
     # The group and up to two majors; each PR runs the whole CI (about 130 minutes of Actions).
     open-pull-requests-limit: 3
+    # No labels: Dependabot would create "dependencies" and "javascript" in the repository (DECISOES § 298).
+    labels: []
     # Rewrites exact and "~" ranges to the new version instead of widening them with "||".
     versioning-strategy: increase
     commit-message:
@@ -44,6 +46,7 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 1
+    labels: []
     commit-message:
       prefix: ci
       include: scope
