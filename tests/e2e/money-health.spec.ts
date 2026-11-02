@@ -110,7 +110,7 @@ const calorie: Health<CalorieInput, CalorieResult> = {
     const pal = scaled(input.pal, 2);
     return {
       hero: `${tdee} ${cv.unit}`,
-      sentence: filled(cv.sentence, { ree, pal, tdee }),
+      sentence: filled(cv.sentence, { sex: input.sex === 'male' ? cv.male : cv.female, ree, pal, tdee }),
       rows: [
         [cv.ree, `${ree} ${cv.unit}`],
         [cv.pal, pal],
@@ -127,7 +127,7 @@ const ov = ovulationTexts.panel.view;
 const ovulation: Health<OvulationInput, OvulationResult> = {
   id: 'ovulation-calculator',
   cases: ['grid-001', 'random-001'],
-  head: [ov.colCycle, ov.colWindow, ov.colOvulation, ov.colNext],
+  head: [ov.colWindow, ov.colOvulation, ov.colNext],
   async fill(page, input) {
     await type(page, 'd', input.lmp);
     await type(page, 'c', String(input.cycle));
@@ -139,7 +139,6 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
       hero: longDay(first.ovulation),
       sentence: filled(ov.sentence, { from: longDay(first.fertileStart), to: longDay(first.ovulation), next: longDay(first.nextPeriod) }),
       rows: expected.cycles.map((cycle) => [
-        longDay(cycle.start),
         filled(ov.window, { from: longDay(cycle.fertileStart), to: longDay(cycle.ovulation) }),
         longDay(cycle.ovulation),
         longDay(cycle.nextPeriod),
@@ -175,7 +174,7 @@ const bodyFat: Health<BodyFatInput, { percent: number }> = {
     const percent = tenth(expected.percent);
     return {
       hero: `${percent}%`,
-      sentence: filled(fv.sentence, { percent }),
+      sentence: filled(fv.sentence, { sex: input.sex === 'male' ? fv.male : fv.female, percent }),
       rows: [
         [fv.method, input.sex === 'male' ? fv.formulaMale : fv.formulaFemale],
         [fv.label, `${percent}%`],

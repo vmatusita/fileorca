@@ -209,6 +209,55 @@ describe('the home and health definitions (F7)', () => {
   });
 });
 
+// ---- review F7 (docs/relatorios/REVISAO-F7.md, DECISOES § 274) ------------------------------------------------------
+
+describe('after the review F7', () => {
+  it('Body fat: measures the equation cannot take show a dash, never "0 %" as a body fat (f-7)', () => {
+    const def = DEFS['body-fat-calculator'];
+    const data = panelData('body-fat-calculator', 'en');
+    for (const values of [{ ...def.initial, nk: 300, wa: 200 }, { ...def.initial, sx: 'male', nk: 300, wa: 200 }]) {
+      const view = viewOf(def, data, values);
+      expect(view.problem).toBeDefined();
+      expect(view.hero.value).toBe('-');
+      expect(view.hero.unit).toBeUndefined();
+      expect(view.placard.n).not.toMatch(/\d/);
+    }
+  });
+
+  it('Calorie and Body fat: the sentence of the result says which formula made the number (g-3)', () => {
+    for (const id of ['calorie-calculator', 'body-fat-calculator'] as const) {
+      const def = DEFS[id];
+      const data = panelData(id, 'en');
+      for (const sex of ['female', 'male'] as const) {
+        const parts = viewOf(def, data, { ...def.initial, sx: sex }).hero.sentence;
+        const bold = parts.flatMap((part) => (typeof part === 'string' ? [] : [part.b]));
+        expect(bold, `${id} ${sex}`).toContain(sex);
+      }
+    }
+  });
+
+  it('the privacy policy says the copied link carries the choices too, in the three languages (b-1)', async () => {
+    // The links of the health pages carry choices besides numbers and dates: the units, the sex, how the due date is counted.
+    const choices = LIFE_CALC_IDS.flatMap((id) => {
+      const def = DEFS[id];
+      return linkHash(def.fields, def.initial)
+        .slice(1)
+        .split('&')
+        .map((pair) => pair.split('=')[1] ?? '')
+        .filter((value) => !/^-?\d+$/.test(value) && !/^\d{4}-\d{2}-\d{2}$/.test(value));
+    });
+    expect(choices).toEqual(expect.arrayContaining(['us', 'female', 'lmp']));
+    const said = { en: /Copy link carries[^.]*choices/, pt: /link que elas copiam leva[^.]*escolhas/, es: /enlace que copian lleva[^.]*opciones/ };
+    for (const lang of ['en', 'pt', 'es'] as const) {
+      const privacy = (await import(`../../src/i18n/${lang}/privacy.ts`)).default as { sections: { paragraphs: string[] }[] };
+      expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(said[lang]);
+    }
+    expect(calcTexts('calorie-calculator').privacyNote).toMatch(/sex the formula uses/);
+    expect(calcTexts('body-fat-calculator').privacyNote).toMatch(/sex the formula uses/);
+    expect(calcTexts('due-date-calculator').privacyNote).toMatch(/how it is counted/);
+  });
+});
+
 describe('the scenario link', () => {
   it('goes and comes back with the same values on every page', () => {
     for (const [id] of DEF_IDS) {
