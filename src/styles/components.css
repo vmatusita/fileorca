@@ -98,8 +98,11 @@
 .fo-langmenu a[aria-current] { background: var(--brand-soft); }
 
 /* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
-.fo-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); }
-.fo-crumbs li { display: inline-flex; align-items: center; gap: 2px; }
+/* One line, whatever the font: a trail that wrapped into two lines when Figtree arrived pushed the tool 22 px down (CLS
+   up to 0.27 at 360 px; review F4-F7 e-1, DECISOES § 305). A trail longer than the screen scrolls inside itself, so no
+   link is cut, and contain keeps it from widening the page. */
+.fo-crumbs { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; contain: inline-size; align-items: center; gap: 2px; margin: -5px; padding: 5px; list-style: none; font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); white-space: nowrap; }
+.fo-crumbs li { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; }
 .fo-crumbs__link { color: var(--ink-muted); text-decoration: none; padding: 6px 2px; }
 .fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .fo-crumbs .fo-icon { width: 16px; height: 16px; }
@@ -557,9 +560,11 @@
 /* The number never breaks inside: ResultHero measures it (--fo-num-em, its numbers in em; --fo-num-px, its words, unit and
    gaps), and its size is what fits the card (cqi), never past 48px (60px from 768px; DECISOES § 246 and § 253). */
 .fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); font-size: min(48px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
-.fo-rhero__num > span { white-space: nowrap; }
+/* The number keeps whole lines but breaks rather than run out of the card, as with the text spacing of WCAG 1.4.12
+   (review F4-F7 d-3; DECISOES § 305). */
+.fo-rhero__num > span { min-width: 0; overflow-wrap: anywhere; }
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
-.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
+.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
 .fo-rhero__sentence b { font-weight: 700; }
 /* A long placard (a 7-digit result) wraps and shrinks instead of widening the card past the column (review F4,
    ANU-1 and ACE-10). */

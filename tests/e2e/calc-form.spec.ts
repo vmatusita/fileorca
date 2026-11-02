@@ -238,3 +238,47 @@ test('the placeholder of the QR box reads at 4.5:1 or more in both themes (d-9)'
     expect(ratio, scheme).toBeGreaterThanOrEqual(4.5);
   }
 });
+
+// ---- After the review F4-F7 (DECISOES § 305) ------------------------------------------------------------------------
+
+test('a valid number typed key by key never shows the range error on the way, and a wrong one shows it after a pause (d-4)', async ({ page }) => {
+  await page.goto(moneyPage('mortgage-calculator', 'en')?.path ?? '');
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.evaluate(() => {
+    const seen = { alerts: 0, invalid: 0 };
+    (window as unknown as { __seen: typeof seen }).__seen = seen;
+    new MutationObserver((records) => {
+      for (const record of records) {
+        if (record.type === 'attributes' && (record.target as Element).getAttribute('aria-invalid') === 'true') seen.invalid += 1;
+        for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"]') || node.querySelector('[role="alert"]'))) seen.alerts += 1;
+      }
+    }).observe(document.getElementById('fo-tool-root') as HTMLElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-invalid'] });
+  });
+  const field = page.locator('#fo-calc-p');
+  await field.click();
+  await field.press('ControlOrMeta+a');
+  await field.pressSequentially('425000', { delay: 60 });
+  await expect(page.locator('.fo-rhero__num')).toContainText(/\d/);
+  expect(await page.evaluate(() => (window as unknown as { __seen: { alerts: number; invalid: number } }).__seen)).toEqual({ alerts: 0, invalid: 0 });
+  // A value that stays out of the range is said, after the pause or when the field is left.
+  await field.fill('42');
+  await expect(page.locator('#fo-tool-root [role="alert"]')).toBeVisible();
+  await expect(field).toHaveAttribute('aria-invalid', 'true');
+});
+
+test('with the text spacing of WCAG 1.4.12 the result card keeps its number and its sentence inside, at 320 px (d-3)', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  for (const path of [moneyPage('loan-amortization-calculator-balloon-payment', 'en')?.path ?? '', moneyPage('br-early-payoff', 'pt')?.path ?? '']) {
+    await page.goto(path);
+    await hydrated(page);
+    await page.addStyleTag({ content: '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }' });
+    const overflow = await page.evaluate(() =>
+      ['.fo-rhero', '.fo-rhero__num', '.fo-rhero__sentence'].flatMap((selector) => {
+        const element = document.querySelector(selector);
+        return element && element.scrollWidth > element.clientWidth + 1 ? [`${selector} ${element.scrollWidth} > ${element.clientWidth}`] : [];
+      }),
+    );
+    expect(overflow, path).toEqual([]);
+  }
+});
