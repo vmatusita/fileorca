@@ -23,9 +23,22 @@ import {
   type Site,
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
-import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { BR_CALC_IDS, ES_CALC_IDS, HOME_MONEY_IDS, HUB_MONEY_IDS } from '../../src/tools/calc/registry.ts';
+import {
+  BR_CALC_IDS,
+  BR_HUB_ID,
+  ES_CALC_IDS,
+  HEALTH_HUB_ID,
+  HOME_MONEY_IDS,
+  HOUSE_HUB_ID,
+  HUB_MONEY_IDS,
+  LIFE_CALC_IDS,
+  LIFE_CALC_PAGES,
+  LIFE_HUB_IDS,
+  LIFE_HUB_ROUTE,
+  type LifeCalcId,
+} from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
@@ -295,9 +308,13 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
   it('builds the real site with the image, money and PDF cards and the search of the three registries', () => {
     const site = realSite('dist');
     // F5a: the home also lists the 12 PDF tools of the PDF registry, after the five credit calculators.
+    // F7 (decision 9; DECISOES § 259): and, after them, the 6 home and the 5 health calculators and the QR code generator.
     expect(site.cards?.['home']?.en).toEqual([
       '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/',
       ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),
+      ...LIFE_HUB_IDS.house.map((id) => LIFE_CALC_PAGES[id].path),
+      ...LIFE_HUB_IDS.health.map((id) => LIFE_CALC_PAGES[id].path),
+      '/qr-code-generator/',
     ]);
     expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
     // F6 (decision 7): the home of each language lists its money calculators (HOME_MONEY_IDS, when the language has its money
@@ -317,7 +334,34 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     // calculators once their rows are in the map.
     const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
     expect([0, BR_CALC_IDS.length]).toContain(brazilian.length);
-    expect(site.searchIds).toHaveLength(11 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length);
+    // F7 (decision 9; DECISOES § 259): and the 11 home and health calculators and the QR code generator.
+    expect(site.searchIds).toHaveLength(11 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
+  });
+
+  it('builds the F7 part of the real site from the calculator registry: the home cards, the two hubs and the search, in English only (F7, decision 9)', () => {
+    const site = realSite('dist');
+    // Each hub lists its calculators in the order of the registry, and nothing else; neither hub exists in pt or es.
+    for (const hub of ['house', 'health'] as const) {
+      const id = LIFE_HUB_ROUTE[hub];
+      expect(site.cards?.[id]?.en, hub).toEqual(LIFE_HUB_IDS[hub].map((calc) => routeById(calc).paths.en));
+      expect(site.cards?.[id]?.pt, hub).toBeUndefined();
+      expect(site.cards?.[id]?.es, hub).toBeUndefined();
+    }
+    expect(Object.keys(site.cards ?? {}).sort()).toEqual(['home', 'money-calculators', PDF_HUB_ID, HOUSE_HUB_ID, HEALTH_HUB_ID, ...(pagePath(BR_HUB_ID, 'pt') ? [BR_HUB_ID] : [])].sort());
+    // The home of pt and es does not change: none of the 14 F7 pages is a card there.
+    const f7 = new Set([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID].map((id) => routeById(id).paths.en));
+    for (const lang of ['pt', 'es'] as const) expect((site.cards?.['home']?.[lang] ?? []).filter((path) => f7.has(path)), lang).toEqual([]);
+    // The search ends with the 11 calculators in hub order and the QR code generator; the hubs are not search entries.
+    expect(site.searchIds.slice(-12)).toEqual([...LIFE_CALC_IDS, QR_ID]);
+    expect(site.searchIds).not.toContain(HOUSE_HUB_ID);
+    expect(site.searchIds).not.toContain(HEALTH_HUB_ID);
+    // The 14 pages are pages of the route map, English only, with an ad area: they get the loader and the content rows.
+    for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID]) {
+      const pages = site.pages.filter((page) => page.id === id);
+      expect(pages.map((page) => page.lang), id).toEqual(['en']);
+      expect(pages[0]?.ads, id).toBe(true);
+      expect(pages[0]?.indexable, id).toBe(true);
+    }
   });
 
   it('builds the PDF part of the real site from the PDF registry: hub cards, search ids and the pages to look at', () => {
@@ -328,7 +372,9 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     for (const lang of ['pt', 'es'] as const) {
       expect(site.cards?.[PDF_HUB_ID]?.[lang], lang).toEqual([...PDF_TOOL_IDS.map((id) => routeById(id).paths[lang]), routeById('image-to-pdf').paths[lang]]);
     }
-    expect(site.searchIds.slice(-PDF_TOOL_IDS.length)).toEqual([...PDF_TOOL_IDS]);
+    // F7 (decision 9; DECISOES § 259): the 12 PDF tools come right before the 11 home and health calculators and the QR
+    // code generator, which close the search (they closed it before the F7).
+    expect(site.searchIds.slice(-PDF_TOOL_IDS.length - 12, -12)).toEqual([...PDF_TOOL_IDS]);
     expect(site.pdf).toEqual([...PDF_TOOL_IDS, PDF_HUB_ID]);
     // Each of them is a page of the route map, in the three languages since the F6 (English only before), with an ad area.
     for (const id of site.pdf ?? []) {
@@ -531,6 +577,85 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
     });
     expect(failing(checkNothingUnfinished(dangling)).join('\n')).toMatch(/busca: watermark-pdf leva a \/watermark-pdf\/, que não existe/);
     expect(failing(checkNothingUnfinished(pdfSite()))).toEqual([]);
+  });
+});
+
+describe('gate:prontidao, as páginas de casa, saúde e QR (F7, decision 11)', () => {
+  const HOUSE_PATHS = LIFE_HUB_IDS.house.map((id) => LIFE_CALC_PAGES[id].path);
+  const HEALTH_PATHS = LIFE_HUB_IDS.health.map((id) => LIFE_CALC_PAGES[id].path);
+  const QR = '/qr-code-generator/';
+  const HUB_PATH: Record<'house' | 'health', string> = { house: '/home-calculators/', health: '/health-calculators/' };
+  const LIFE_FAKE: SitePage[] = [
+    ...LIFE_CALC_IDS.map((id) => ({ id, lang: 'en' as const, path: LIFE_CALC_PAGES[id].path, indexable: true, ads: true })),
+    { id: HOUSE_HUB_ID, lang: 'en' as const, path: HUB_PATH.house, indexable: true, ads: true },
+    { id: HEALTH_HUB_ID, lang: 'en' as const, path: HUB_PATH.health, indexable: true, ads: true },
+    { id: QR_ID, lang: 'en' as const, path: QR, indexable: true, ads: true },
+  ];
+  const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
+  const hubPage = (hub: 'house' | 'health') => LIFE_FAKE.find((page) => page.path === HUB_PATH[hub]) as SitePage;
+  const entries = (ids: readonly string[]) =>
+    JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...ids.map((id) => ({ id, href: { en: id === QR_ID ? QR : LIFE_CALC_PAGES[id as LifeCalcId].path } }))]);
+  /**
+   * A fake site with the 14 F7 pages, as the real one has them: the home lists the 11 calculators and the QR code, each hub
+   * its calculators in registry order, the search the 11 and the QR code. `change` edits files after they are written.
+   */
+  const lifeSite = (change: (dir: string) => void = () => {}): Site => {
+    const site = makeSite((dir) => {
+      for (const page of LIFE_FAKE) write(dir, page.path, pageHtml(page));
+      write(dir, home.path, pageHtml(home, (main) => `${main}${cardsHtml([...HOUSE_PATHS, ...HEALTH_PATHS, QR])}`));
+      for (const hub of ['house', 'health'] as const) write(dir, HUB_PATH[hub], pageHtml(hubPage(hub), (main) => `${main}${cardsHtml(hub === 'house' ? HOUSE_PATHS : HEALTH_PATHS)}`));
+      write(dir, '/search-index.json', entries([...LIFE_CALC_IDS, QR_ID]));
+      change(dir);
+    });
+    return {
+      ...site,
+      pages: [...site.pages, ...LIFE_FAKE],
+      searchIds: [...site.searchIds, ...LIFE_CALC_IDS, QR_ID],
+      cards: { home: { en: [...HOUSE_PATHS, ...HEALTH_PATHS, QR] }, [HOUSE_HUB_ID]: { en: HOUSE_PATHS }, [HEALTH_HUB_ID]: { en: HEALTH_PATHS } },
+    };
+  };
+
+  it('passes a site with the home and health calculators, their hubs, the QR code, cards and search (positive control)', () => {
+    const site = lifeSite();
+    expect(failing([...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site)])).toEqual([]);
+    expect(LIFE_FAKE).toHaveLength(14);
+  });
+
+  it('refuses a hub that misses a calculator, lists one of the other hub, or lists a page that does not exist', () => {
+    const hub = (which: 'house' | 'health', cards: readonly string[]) => lifeSite((dir) => write(dir, HUB_PATH[which], pageHtml(hubPage(which), (main) => `${main}${cardsHtml(cards)}`)));
+    expect(failing(checkNothingUnfinished(hub('house', HOUSE_PATHS.filter((path) => path !== '/tile-calculator/'))))).toEqual([
+      'Cartões e busca só com o que existe: /home-calculators/: faltam os cartões de /tile-calculator/',
+    ]);
+    // A health calculator on the home hub is a card the registry does not ask of it.
+    expect(failing(checkNothingUnfinished(hub('house', [...HOUSE_PATHS, '/bmi-calculator/'])))).toEqual([
+      'Cartões e busca só com o que existe: /home-calculators/: cartões fora do registro: /bmi-calculator/',
+    ]);
+    const ghost = failing(checkNothingUnfinished(hub('health', [...HEALTH_PATHS, '/pregnancy-week-by-week/']))).join('\n');
+    expect(ghost).toMatch(/\/health-calculators\/: cartão para \/pregnancy-week-by-week\/, que não existe[\s\S]*cartões fora do registro: \/pregnancy-week-by-week\//);
+    // The cards come from the registry and its order is the one of the hub (any order of the same cards passes the item).
+    expect(failing(checkNothingUnfinished(hub('health', [...HEALTH_PATHS].reverse())))).toEqual([]);
+  });
+
+  it('refuses a home without the QR code card, without a health calculator, or with a hub where the registry wants calculators', () => {
+    const homeWith = (cards: readonly string[]) => lifeSite((dir) => write(dir, home.path, pageHtml(home, (main) => `${main}${cardsHtml(cards)}`)));
+    expect(failing(checkNothingUnfinished(homeWith([...HOUSE_PATHS, ...HEALTH_PATHS])))).toEqual(['Cartões e busca só com o que existe: /: faltam os cartões de /qr-code-generator/']);
+    expect(failing(checkNothingUnfinished(homeWith([...HOUSE_PATHS, ...HEALTH_PATHS.slice(1), QR])))).toEqual(['Cartões e busca só com o que existe: /: faltam os cartões de /bmi-calculator/']);
+    expect(failing(checkNothingUnfinished(homeWith([...HOUSE_PATHS, ...HEALTH_PATHS, QR, HUB_PATH.health])))).toEqual([
+      'Cartões e busca só com o que existe: /: cartões fora do registro: /health-calculators/',
+    ]);
+  });
+
+  it('refuses a search without the QR code or a calculator, or with a hub, and a QR code card whose page is not in the build', () => {
+    const search = (ids: readonly string[]) => lifeSite((dir) => write(dir, '/search-index.json', entries(ids)));
+    expect(failing(checkNothingUnfinished(search(LIFE_CALC_IDS)))).toEqual(['Cartões e busca só com o que existe: busca sem qr-code-generator']);
+    expect(failing(checkNothingUnfinished(search([...LIFE_CALC_IDS.filter((id) => id !== 'due-date-calculator'), QR_ID])))).toEqual([
+      'Cartões e busca só com o que existe: busca sem due-date-calculator',
+    ]);
+    const withHub = lifeSite((dir) => write(dir, '/search-index.json', JSON.stringify([...JSON.parse(entries([...LIFE_CALC_IDS, QR_ID])), { id: HOUSE_HUB_ID, href: { en: HUB_PATH.house } }])));
+    expect(failing(checkNothingUnfinished(withHub))).toEqual(['Cartões e busca só com o que existe: busca com itens fora do registro: home-calculators']);
+    const noQrPage = failing(checkNothingUnfinished(lifeSite((dir) => rmSync(fileIn(dir, QR))))).join('\n');
+    expect(noQrPage).toMatch(/\/: cartão para \/qr-code-generator\/, que não existe/);
+    expect(noQrPage).toMatch(/busca: qr-code-generator leva a \/qr-code-generator\/, que não existe/);
   });
 });
 

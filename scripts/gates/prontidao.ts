@@ -5,7 +5,9 @@
 // and Lighthouse steps use, and the bundle record that gate:licencas reads is put back as it was.
 // The checks are in scripts/lib/prontidao.ts, proven in tests/unit/prontidao.test.ts. From the F5a the cards of the
 // home and of the PDF hub and the search come from the PDF registry as well, and the 12 PDF tools and the hub each have
-// rows of their own (page, H1/title/description, 60 words and 150 per AdSlot).
+// rows of their own (page, H1/title/description, 60 words and 150 per AdSlot). From the F7 (decision 11), the home in
+// English lists the home and health calculators and the QR code generator, the two new hubs list their calculators in
+// the order of the registry, and the search offers the 11 calculators and the QR code generator, all read from the registry.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -29,8 +31,14 @@ import { BUNDLE_RECORD } from '../../src/platform/bundle-record.ts';
 
 requireDist();
 const ROOT = join(CACHE, 'prontidao');
-// The money pages of the F4 get test units too, so the hostname lock of their AdSlots is checked as well.
-const TEST_SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' }, dinheiro: { conteudo: '3333333333', lateral: '4444444444' } });
+// The money pages of the F4 get test units too, so the hostname lock of their AdSlots is checked as well. F7: and the
+// home and health pages ("casa-saude") and the QR code generator ("utilidades").
+const TEST_SLOTS = JSON.stringify({
+  arquivos: { conteudo: '1111111111', lateral: '2222222222' },
+  dinheiro: { conteudo: '3333333333', lateral: '4444444444' },
+  'casa-saude': { conteudo: '5555555555', lateral: '6666666666' },
+  utilidades: { conteudo: '7777777777', lateral: '8888888888' },
+});
 
 /** astro build of the same code into .cache/prontidao/<name>, with the AdSense variables given. */
 function build(name: string, ads: Record<string, string>): string {
