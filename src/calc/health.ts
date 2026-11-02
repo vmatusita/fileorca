@@ -44,7 +44,7 @@ export interface BodyInput {
 }
 
 /** Tenths of an inch. */
-const heightTenthsIn = (input: BodyInput): number => input.feet * 120 + input.inches;
+const heightTenthsIn = (input: { feet: number; inches: number }): number => input.feet * 120 + input.inches;
 
 // --- BMI (CDC) ------------------------------------------------------------------------------------------------------
 

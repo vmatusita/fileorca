@@ -20,18 +20,24 @@ import { PANEL_POSES } from '../image/Oli.tsx';
 import CalcIsland from './CalcIsland.astro';
 import CalcScheduleRoot from './CalcScheduleRoot.astro';
 import Reviewed from './Reviewed.astro';
-import { SHARED_BY_LANG, SOURCES_READ_ON, calcTexts, crumbsFor, guideOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
-import type { MoneyPageId } from './registry.ts';
+import { SHARED_BY_LANG, calcTexts, crumbsFor, datesOf, guideOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
+import { calcAreaOf, type AnyCalcId } from './registry.ts';
 
 interface Props {
-  id: MoneyPageId;
+  id: AnyCalcId;
   lang: Lang;
 }
 const { id, lang } = Astro.props;
 const route = routeById(id);
 const t = calcTexts(id, lang);
 const shared = SHARED_BY_LANG[lang].page;
-const read = SOURCES_READ_ON[lang];
+const read = datesOf(id, lang).read;
+// The area of the page (F7): the ad area, the category colour, the schema and the Oli's poses (no cheer on health).
+const area = calcAreaOf(id);
+const adArea = area === 'money' ? 'dinheiro' : 'casa-saude';
+const category = area === 'money' ? 'money' : 'home';
+const appCategory = area === 'money' ? 'FinanceApplication' : area === 'health' ? 'HealthApplication' : 'UtilitiesApplication';
+const poses = area === 'health' ? PANEL_POSES.filter((pose) => pose !== 'cheer') : PANEL_POSES;
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
 const data = panelData(id, lang);
@@ -48,18 +54,18 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   title={t.title}
   description={t.description}
   withAds
-  oli={PANEL_POSES}
-  schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, 'FinanceApplication'), personLd()]}
+  oli={poses}
+  schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, appCategory), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <div class="fo-top fo-top--calc">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
-    <Reviewed lang={lang} />
+    <Reviewed lang={lang} of={id} />
     <PrivacySeal text={shared.seal} />
   </div>
   <CalcIsland data={data} />
-  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
+  <AdSlot area={adArea} variant="content" label={common.adLabel} />
   <CalcScheduleRoot data={data} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
@@ -126,9 +132,9 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
       {related.map((card) => (
-        <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category={category} icon={card.icon} /></li>
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
+  <AdSlot slot="rail" area={adArea} variant="rail" label={common.adLabel} />
 </BaseLayout>

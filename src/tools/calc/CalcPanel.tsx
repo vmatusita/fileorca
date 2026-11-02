@@ -62,7 +62,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
     }
   };
   // The visit's one cheer waits for a result: a problem (a payment under the interest) shows no Oli and keeps it.
-  const cheer = state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
+  const cheer = data.cheer && state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
   const cell = cellText(lang);
@@ -103,6 +103,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
                 results: view.summary,
                 premises: view.premises,
                 table: view.table(),
+                tableHeading: data.texts.view['scheduleHeading'],
                 notice: data.notice,
                 cell,
               },
@@ -133,7 +134,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           {data.chips.map((chip) => (
             <a
               key={chip.href}
-              class="fo-chip fo-cat--money"
+              class={`fo-chip fo-cat--${data.cat}`}
               href={chip.href}
               onClick={() => track('next_step_click', { tool: data.page, lang: data.lang, target: chip.target })}
             >

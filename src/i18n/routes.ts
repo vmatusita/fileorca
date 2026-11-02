@@ -10,10 +10,15 @@ import {
   CALC_TOOL_IDS,
   GUIDES,
   GUIDE_IDS,
+  HEALTH_HUB_ID,
+  HOUSE_HUB_ID,
+  LIFE_CALC_IDS,
+  LIFE_CALC_PAGES,
   MONEY_HUB_ID,
   type BrCalcId,
   type CalcPageId,
   type GuideId,
+  type LifeCalcId,
 } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS, type PdfToolId } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../tools/guides/registry.ts';
@@ -49,6 +54,10 @@ export type RouteId =
   | PdfToolId
   | GuideId
   | FileGuideId
+  | typeof HOUSE_HUB_ID
+  | typeof HEALTH_HUB_ID
+  | LifeCalcId
+  | typeof QR_ID
   | 'privacy'
   | 'terms'
   | 'about'
@@ -58,6 +67,9 @@ export type RouteId =
   | 'not-found';
 
 export type AdArea = 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilidades';
+
+/** The QR code generator (prompt F7, decision 8): English only, in the ad area "utilidades", with no hub. */
+export const QR_ID = 'qr-code-generator';
 
 export interface RouteDef {
   id: RouteId;
@@ -137,6 +149,16 @@ export const ROUTES: readonly RouteDef[] = [
   ...pdfRoutes(),
   // The ten file guides exist only in English (F5b; DECISOES § 58 and § 184).
   ...fileGuideRoutes(),
+  // The home and health hubs and their 11 calculators, only in English (F7, decision 1).
+  ...lifeRoutes(),
+  {
+    id: QR_ID,
+    paths: { en: '/qr-code-generator/' },
+    indexable: true,
+    view: 'src/tools/qr-code-generator/',
+    texts: ['src/tools/qr-code-generator/i18n/{lang}.ts'],
+    adArea: 'utilidades',
+  },
   {
     id: 'privacy',
     paths: { en: '/privacy/', pt: '/pt/privacidade/', es: '/es/privacidad/' },
@@ -342,6 +364,51 @@ function fileGuideRoutes(): RouteDef[] {
       adArea: 'arquivos',
     };
   });
+}
+
+/**
+ * The home and health pages of the F7 (decision 1): the two hubs (src/views/LifeCalculatorsView.astro with
+ * src/i18n/<lang>/home-calculators.ts or health-calculators.ts) and the 11 calculators (folder src/tools/<slug>/ with
+ * i18n/en.ts), only in English, with no pair in hreflang. Every one is in the ad area "casa-saude", which
+ * gate:dinheiro-saude checks with the official sources of its hub (ymylHubOf).
+ */
+function lifeRoutes(): RouteDef[] {
+  return [
+    {
+      id: HOUSE_HUB_ID,
+      paths: { en: '/home-calculators/' },
+      indexable: true,
+      view: 'src/views/LifeCalculatorsView.astro',
+      texts: ['src/i18n/{lang}/home-calculators.ts'],
+      adArea: 'casa-saude',
+    },
+    {
+      id: HEALTH_HUB_ID,
+      paths: { en: '/health-calculators/' },
+      indexable: true,
+      view: 'src/views/LifeCalculatorsView.astro',
+      texts: ['src/i18n/{lang}/health-calculators.ts'],
+      adArea: 'casa-saude',
+    },
+    ...LIFE_CALC_IDS.map((id): RouteDef => ({
+      id,
+      paths: { en: LIFE_CALC_PAGES[id].path },
+      indexable: true,
+      view: `src/tools/${id}/`,
+      texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/calc/i18n/{lang}.ts'],
+      adArea: 'casa-saude',
+    })),
+  ];
+}
+
+/** The hub whose official sources gate:dinheiro-saude asks of a page: money, home or health (prompt F7, decision 7). */
+export function ymylHubOf(id: RouteId): 'money' | 'house' | 'health' | null {
+  const route = ROUTES.find((candidate) => candidate.id === id);
+  if (route?.adArea === 'dinheiro') return 'money';
+  if (route?.adArea !== 'casa-saude') return null;
+  if (id === HOUSE_HUB_ID) return 'house';
+  if (id === HEALTH_HUB_ID) return 'health';
+  return (LIFE_CALC_IDS as readonly string[]).includes(id) ? LIFE_CALC_PAGES[id as LifeCalcId].hub : null;
 }
 
 export function routeById(id: RouteId): RouteDef {

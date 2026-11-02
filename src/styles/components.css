@@ -262,6 +262,8 @@
 .fo-input__affix:first-child { border-right: var(--stroke-hair) solid var(--hairline); }
 .fo-input__affix:last-child { border-left: var(--stroke-hair) solid var(--hairline); }
 .fo-field[data-state="error"] .fo-input { border-color: var(--danger); border-width: var(--stroke-3); }
+/* The date field (F7, DECISOES § 262): the browser's own date input, a little tighter so "09/07/2026" and its calendar button fit half a row at 360 px. */
+.fo-input--date input { padding: 0 var(--space-3); font-size: 16px; }
 .fo-field__error { margin: 0; display: flex; gap: var(--space-1); align-items: center; color: var(--danger); font: 600 14px/20px var(--fo-font-text); }
 .fo-field__error .fo-icon { width: 18px; height: 18px; }
 .fo-tag { display: inline-block; padding: 0 var(--space-2); border-radius: var(--radius-xs); background: var(--surface-sunken); color: var(--ink-muted); font: 700 11px/18px var(--fo-font-text); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 2px; }

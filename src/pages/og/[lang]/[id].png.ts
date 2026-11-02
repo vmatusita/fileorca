@@ -3,15 +3,32 @@
 // image icon. A money page (calculator, hub, guide) shows its calculator's icon in the money colour (F4). A PDF tool
 // shows its icon in the PDF colour, and the PDF hub the PDF icon (F5a). A file guide shows the icon of the tool it embeds, in
 // the colour of its hub (F5b). Every heading is in the language of the page (F6): the Brazilian calculators and hub show
-// their own names in Portuguese.
+// their own names in Portuguese. The home and health pages (F7) show their icon in the violet of their category, the QR code its
+// icon in the lime of the utilities; all of them only in English.
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { ROUTES, languagesOf, type Lang, type RouteId } from '../../../i18n/routes.ts';
+import { QR_ID, ROUTES, languagesOf, type Lang, type RouteId } from '../../../i18n/routes.ts';
 import { TEXTS, type LangTexts } from '../../../i18n/texts.ts';
 import { ogPng, type OgTool } from '../../../seo/images.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../../tools/image/registry.ts';
 import { imageToolTexts } from '../../../tools/image/texts.ts';
 import enCommon from '../../../i18n/en/common.ts';
-import { BR_CALC_PAGES, BR_HUB_ID, CALC_PAGES, GUIDES, MONEY_HUB_ID, isBrCalc, isCalcPage, isGuide, isMoneyCalc } from '../../../tools/calc/registry.ts';
+import {
+  BR_CALC_PAGES,
+  BR_HUB_ID,
+  CALC_PAGES,
+  GUIDES,
+  HEALTH_HUB_ID,
+  HOUSE_HUB_ID,
+  LIFE_CALC_PAGES,
+  MONEY_HUB_ID,
+  isBrCalc,
+  isCalcPage,
+  isGuide,
+  isLifeCalc,
+  isMoneyCalc,
+  type LifeCalcId,
+} from '../../../tools/calc/registry.ts';
+import { LIFE_HUB_TEXTS } from '../../../i18n/life-hubs.ts';
 import { SHARED_BY_LANG, calcTexts } from '../../../tools/calc/page.ts';
 import { PDF_HUB_ID, PDF_PAGES, type PdfToolId } from '../../../tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
@@ -28,7 +45,20 @@ const isPdfPage = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
 
 type PlainId = Exclude<
   RouteId,
-  ImagePageId | 'image-tools' | typeof MONEY_HUB_ID | typeof BR_HUB_ID | keyof typeof CALC_PAGES | keyof typeof BR_CALC_PAGES | keyof typeof GUIDES | PdfToolId | typeof PDF_HUB_ID | FileGuideId
+  | ImagePageId
+  | 'image-tools'
+  | typeof MONEY_HUB_ID
+  | typeof BR_HUB_ID
+  | keyof typeof CALC_PAGES
+  | keyof typeof BR_CALC_PAGES
+  | keyof typeof GUIDES
+  | PdfToolId
+  | typeof PDF_HUB_ID
+  | FileGuideId
+  | LifeCalcId
+  | typeof HOUSE_HUB_ID
+  | typeof HEALTH_HUB_ID
+  | typeof QR_ID
 >;
 
 function heading(lang: Lang, id: RouteId): [string, string] {
@@ -37,7 +67,10 @@ function heading(lang: Lang, id: RouteId): [string, string] {
   const moneySeal = SHARED_BY_LANG[lang].page.seal;
   if (isImagePage(id)) return [imageToolTexts(id, lang).h1, seal];
   if (id === 'image-tools') return [texts['image-tools'].h1, seal];
-  if (isMoneyCalc(id)) return [calcTexts(id, lang).h1, moneySeal];
+  if (isMoneyCalc(id) || isLifeCalc(id)) return [calcTexts(id, lang).h1, moneySeal];
+  if (id === HOUSE_HUB_ID) return [LIFE_HUB_TEXTS.house.h1, moneySeal];
+  if (id === HEALTH_HUB_ID) return [LIFE_HUB_TEXTS.health.h1, moneySeal];
+  if (id === QR_ID) return [enCommon.qr.name, seal];
   if (isGuide(id)) return [enCommon.guides[id].name, moneySeal];
   if (id === MONEY_HUB_ID || id === BR_HUB_ID) return [texts['money-calculators'].h1, moneySeal];
   if (isPdfPage(id)) return [PDF_TOOL_TEXTS[lang][id].h1, seal];
@@ -51,6 +84,10 @@ function toolOf(id: RouteId): OgTool | undefined {
   if (id === 'image-tools') return { icon: 'image', category: 'image' };
   if (isCalcPage(id)) return { icon: CALC_PAGES[id].icon, category: 'money' };
   if (isBrCalc(id)) return { icon: BR_CALC_PAGES[id].icon, category: 'money' };
+  if (isLifeCalc(id)) return { icon: LIFE_CALC_PAGES[id].icon, category: 'home' };
+  if (id === HOUSE_HUB_ID) return { icon: 'home', category: 'home' };
+  if (id === HEALTH_HUB_ID) return { icon: 'heart', category: 'home' };
+  if (id === QR_ID) return { icon: 'qr', category: 'util' };
   if (isGuide(id)) return { icon: CALC_PAGES[GUIDES[id].calc].icon, category: 'money' };
   if (id === MONEY_HUB_ID || id === BR_HUB_ID) return { icon: 'calculator', category: 'money' };
   if (isPdfPage(id)) return { icon: PDF_PAGES[id].icon, category: 'pdf' };

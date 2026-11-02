@@ -1,11 +1,11 @@
-// What the money calculator island is made of (DECISOES § 110): one island for the 18 calculators, as § 69
-// did for the image tools. A calculator declares its fields and its account in a definition
+// What the calculator island is made of (DECISOES § 110): one island for every calculator (money since the F4, home and
+// health since the F7, § 257), as § 69 did for the image tools. A calculator declares its fields and its account in a definition
 // (src/tools/calc/defs/<id>.ts); the page writes the plain data of the island into data-props
 // (CalcPanelData), and the texts arrive there too, so the browser never loads a text file.
 import type { Lang } from '../../i18n/routes.ts';
-import type { MoneyPageId } from './registry.ts';
+import type { AnyCalcId } from './registry.ts';
 
-/** A value of the form: a number in engine units, a choice, or a list of rows (the debts). */
+/** A value of the form: a number in engine units, a choice or a day ("2026-03-17"), or a list of rows (the debts, the areas). */
 export type Value = number | string | Record<string, number>[];
 export type Values = Record<string, Value>;
 
@@ -20,9 +20,14 @@ interface FieldBase {
   half?: boolean;
 }
 
-/** A number field. Money is in cents, a rate in 1/10,000 of a point, a count is whole. */
+/**
+ * A number field. Money is in cents, a rate in 1/10,000 of a point, a count is whole; a measure ('dec', F7) is a whole
+ * number of 10^-decimals of its unit (a length in hundredths of a foot, a weight in tenths of a pound).
+ */
 export interface NumberSpec extends FieldBase {
-  kind: 'money' | 'rate' | 'int';
+  kind: 'money' | 'rate' | 'int' | 'dec';
+  /** The decimals of a measure ('dec' only). */
+  decimals?: number;
   min: number;
   max: number;
   /** The value cannot pass another field's value (a key) or a limit worked out from the values (a balloon month and the term). */
@@ -57,9 +62,24 @@ export interface ListSpec extends FieldBase {
   item: NumberSpec[];
   /** A new row starts with these values. */
   blank: Record<string, number>;
+  /**
+   * A menu each row has before its numbers (the shape of an area, F7), kept in the row as the index of its option. The
+   * label of an item may depend on it ("x-circle" before "x" in the texts), and `hide` says the options that hide an item.
+   */
+  pick?: { key: string; options: readonly string[]; hide?: Record<string, readonly number[]> };
 }
 
-export type FieldSpec = NumberSpec | DownSpec | ChoiceSpec | ListSpec;
+/**
+ * A day of the calendar (F7: the first day of the last period, a conception or a transfer), from the browser's own date
+ * field, as "2026-03-17", between two fixed days. Never a Date with a time zone: the engine counts whole days.
+ */
+export interface DateSpec extends FieldBase {
+  kind: 'date';
+  min: string;
+  max: string;
+}
+
+export type FieldSpec = NumberSpec | DownSpec | ChoiceSpec | ListSpec | DateSpec;
 
 /** A piece of the result sentence: plain text, or a number in bold. */
 export type Part = string | { b: string };
@@ -69,8 +89,11 @@ export interface Scenario {
   rows: [label: string, value: string][];
 }
 
-/** A cell of the schedule: money (cents), or plain text. The CSV writes cents as 1896.20. */
-export type Cell = { cents: number } | { text: string };
+/**
+ * A cell of the schedule: money (cents), a measure (a whole number of 10^-decimals, F7), or plain text. The CSV writes cents
+ * as 1896.20 and a measure with its decimals, never with a thousands separator.
+ */
+export type Cell = { cents: number } | { text: string } | { scaled: number; decimals: number };
 
 export interface Table {
   caption: string;
@@ -89,6 +112,8 @@ export interface CalcView {
   problem?: string;
   /** The one number the Oli's placard shows. */
   placard: { n: string; l: string };
+  /** The rows of the table are the result itself (the areas, the cycles, the dates): shown open, with no Show button (F7). */
+  open?: boolean;
   /** Principal against interest, or deposits against interest (cents). */
   split?: { a: { label: string; cents: number }; b: { label: string; cents: number } };
   compare?: { a: Scenario; b: Scenario; diff: Part[] };
@@ -160,7 +185,7 @@ export interface CalcSharedTexts {
 export interface CalcChip {
   href: string;
   name: string;
-  target: MoneyPageId;
+  target: AnyCalcId;
   /** Inner markup of the icon, read at build. */
   icon: string;
 }
@@ -168,7 +193,7 @@ export interface CalcChip {
 /** Everything the page writes into data-props (DECISOES § 23: the island hydrates from what the server rendered). */
 export interface CalcPanelData {
   lang: Lang;
-  page: MoneyPageId;
+  page: AnyCalcId;
   /** The calculator's name (PDF title). */
   name: string;
   t: CalcSharedTexts;
@@ -184,16 +209,25 @@ export interface CalcPanelData {
   /** Base name of the exports (registry `file`). */
   file: string;
   chips: CalcChip[];
+  /** The Oli may cheer the first result (never on a health page, F7). */
+  cheer: boolean;
+  /** The colour of the chips: the money category or the home and health one (violet fill, F7). */
+  cat: 'money' | 'home';
   /** Icons the island draws, read at build: pdf, table, link, check, info, chevron, alert, trash, arrow. */
   icons: Record<'pdf' | 'table' | 'link' | 'check' | 'info' | 'chevron' | 'alert' | 'trash' | 'arrow', string>;
 }
 
 /** The behaviour of one calculator (never serialised). */
 export interface CalcDef<I = unknown, R = unknown> {
-  id: MoneyPageId;
+  id: AnyCalcId;
   fields: FieldSpec[];
   /** The example the page starts with: `toInput(initial)` is the page-example case of the oracle. */
   initial: Values;
+  /**
+   * The account needs today's date (the weeks of a pregnancy, F7): `initial.today` is the example's day, and the island
+   * puts the device's local day there once, after hydration (never from the link, never written to it).
+   */
+  today?: boolean;
   toInput(values: Values): I;
   compute(input: I): R;
   view(result: R, values: Values, t: CalcPanelTexts, shared: CalcSharedTexts, lang: Lang): CalcView;

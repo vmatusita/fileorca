@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, redimensionar, recortar, rotar, convertir y pasar imágenes a un PDF; herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, entre otras; y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. En español están todas las herramientas de imagen y de PDF, y cinco calculadoras: hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, redimensionar, recortar, rotar, convertir y pasar imágenes a un PDF; herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, entre otras; y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. En español están todas las herramientas de imagen y de PDF, y cinco calculadoras: hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto. Solo en inglés, el sitio también tiene calculadoras para la casa, que estiman materiales como concreto, pintura y baldosas, calculadoras de salud, como las del IMC y de la fecha probable de parto, y un generador de códigos QR.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },
@@ -57,6 +57,15 @@ export default {
       paragraphs: [
         'Las calculadoras sirven solo para aprender e informarte. No son asesoramiento financiero, legal ni médico, no son una oferta de crédito y no reemplazan a un profesional calificado. Quien decide cuánto puedes pedir prestado, y a qué tasa, es el prestamista, no una calculadora.',
         'Los resultados son estimaciones hechas con los números que escribes. La vida real puede ser distinta, así que consulta con un profesional calificado antes de tomar una decisión sobre dinero, asuntos legales o salud.',
+      ],
+    },
+    {
+      heading: 'Calculadoras de salud y de casa, y códigos QR',
+      paragraphs: ['Algunas herramientas, que solo existen en inglés, tienen sus propias reglas, que se suman a todo lo demás de esta página.'],
+      list: [
+        'Las calculadoras de salud (IMC, calorías, ovulación, grasa corporal y fecha probable de parto) son herramientas educativas para adultos de 18 años o más. No son asesoramiento médico, no dan un diagnóstico y no reemplazan a un médico. Cada resultado es una estimación hecha con una fórmula publicada: habla con un médico u otro profesional de la salud sobre lo que significa para ti. La calculadora de ovulación no puede decir cuándo habrá o no un embarazo, así que no la uses para evitarlo.',
+        'Las calculadoras de casa (superficie en pies cuadrados, concreto, mantillo y grava, pintura, baldosas y BTU del aire acondicionado) dan estimaciones para ayudarte a comprar materiales. Revisa la etiqueta de cada bolsa, lata y caja, y consulta a un contratista o a la tienda antes de un pedido grande.',
+        'El generador de códigos QR arma el código a partir del texto que escribes, tal cual. FileOrca no revisa ese texto ni el sitio al que lleva. Escanea el código con tu teléfono y comprueba adónde lleva antes de imprimirlo o compartirlo.',
       ],
     },
     {

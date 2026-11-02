@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { BANNED, OFFICIAL_SOURCES, checkYmylPage, countProblems, expectedYmylPages } from '../../scripts/lib/ymyl.ts';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, ES_CALC_IDS, GUIDE_IDS, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { BANNED, BANNED_HEALTH, OFFICIAL_SOURCES, checkYmylPage, countProblems, expectedYmylPages } from '../../scripts/lib/ymyl.ts';
+import { ROUTES, languagesOf, ymylHubOf, type RouteId } from '../../src/i18n/routes.ts';
+import {
+  BR_CALC_IDS,
+  BR_HUB_ID,
+  CALC_PAGE_IDS,
+  ES_CALC_IDS,
+  GUIDE_IDS,
+  HEALTH_CALC_IDS,
+  HEALTH_HUB_ID,
+  HOUSE_CALC_IDS,
+  HOUSE_HUB_ID,
+  isBrCalc,
+} from '../../src/tools/calc/registry.ts';
 
 // The F1a has no money or health page yet: the checker is proven on sample pages.
 const person = '<script type="application/ld+json">{"@graph":[{"@type":"Person","name":"Victor Yuki Matusita"}]}</script>';
@@ -73,6 +84,66 @@ describe('checador de dinheiro e saúde', () => {
   });
 });
 
+describe('as fontes de casa e de saúde (F7, decisão 7)', () => {
+  const withSource = (href: string) => good.replace('https://www.consumerfinance.gov/owning-a-home/', href);
+
+  it('takes Energy Star, energy.gov and NIST as the official sources of the home pages, and nothing that only looks like them', () => {
+    expect(OFFICIAL_SOURCES.house).toEqual(['energystar.gov', 'energy.gov', 'nist.gov']);
+    for (const href of ['https://www.energystar.gov/products/room_air_conditioners', 'https://www.energy.gov/energysaver/insulation', 'https://www.nist.gov/pml/owm/si-units-length']) {
+      expect(checkYmylPage(withSource(href), 'house'), href).toEqual([]);
+    }
+    for (const href of ['https://www.cdc.gov/bmi/', 'https://www.consumerfinance.gov/', 'https://energystar.gov.evil.test/', 'https://www.homedepot.com/c/calculators', 'https://notnist.gov/']) {
+      expect(checkYmylPage(withSource(href), 'house').join(), href).toMatch(/fonte oficial/);
+    }
+  });
+
+  it('asks a health page for a health source, never a home one', () => {
+    expect(checkYmylPage(withSource('https://www.nist.gov/pml/owm/si-units-mass'), 'health').join()).toMatch(/fonte oficial/);
+    expect(checkYmylPage(withSource('https://www.cdc.gov/bmi/adult-calculator/'), 'health')).toEqual([]);
+  });
+
+  it('refuses on a health page a weight goal, a diet, a calorie deficit and the cycle as birth control, and lets the plain words through', () => {
+    const health = withSource('https://www.cdc.gov/bmi/adult-calculator/');
+    // Positive controls: each one is refused.
+    const refused = [
+      'Your ideal weight is 150 lb.',
+      'You should lose some weight.',
+      'Set a weight-loss goal for the month.',
+      'Lose 10 pounds by summer.',
+      'The healthy weight range for your height is 128 to 168 lb.',
+      'Keep a calorie deficit of 500 kcal a day.',
+      'Eat 1,800 calories a day to lose weight.',
+      'Follow this meal plan.',
+      'Track your macros.',
+      'Use the fertile window as birth control.',
+      'These are your safe days.',
+    ];
+    for (const text of refused) expect(checkYmylPage(health.replace('</main>', `<p>${text}</p></main>`), 'health').join(), text).toMatch(/proibido/);
+    // Negative controls: the words of the health pages, with the CDC category names, pass.
+    const allowed = [
+      'In the CDC categories for adults, a BMI of 23.6 is in Healthy Weight, the range from 18.5 to 24.9.',
+      'At rest the equation gives 1,376 kcal a day; times an activity level of 1.6, that is 2,202 kcal a day.',
+      'It cannot tell you when you will or will not get pregnant: do not use it to prevent pregnancy.',
+      'Talk with a doctor or a registered dietitian about your own needs.',
+      'Weight in pounds and height in inches.',
+    ];
+    for (const text of allowed) expect(checkYmylPage(health.replace('</main>', `<p>${text}</p></main>`), 'health'), text).toEqual([]);
+    // Each pattern refuses at least one sample, and the money pages keep their own list.
+    for (const pattern of BANNED_HEALTH) expect(refused.some((text) => pattern.test(text)), String(pattern)).toBe(true);
+    expect(checkYmylPage(good.replace('</main>', '<p>Track your macros.</p></main>'), 'money')).toEqual([]);
+  });
+
+  it('reads the hub of each page from the route map: money, home or health', () => {
+    expect(ymylHubOf('mortgage-calculator')).toBe('money');
+    expect(ymylHubOf(BR_HUB_ID)).toBe('money');
+    expect(ymylHubOf(HOUSE_HUB_ID)).toBe('house');
+    expect(ymylHubOf(HEALTH_HUB_ID)).toBe('health');
+    for (const id of HOUSE_CALC_IDS) expect(ymylHubOf(id), id).toBe('house');
+    for (const id of HEALTH_CALC_IDS) expect(ymylHubOf(id), id).toBe('health');
+    for (const id of ['compress-image', 'merge-pdf', 'qr-code-generator', 'privacy'] as RouteId[]) expect(ymylHubOf(id), id).toBeNull();
+  });
+});
+
 describe('contagem do portão de dinheiro e saúde (F4)', () => {
   it('counts every indexed money and health route in each of its languages', () => {
     expect(expectedYmylPages([{ adArea: 'dinheiro', indexable: true, languages: 1 }, { adArea: 'arquivos', indexable: true, languages: 3 }])).toBe(1);
@@ -85,7 +156,10 @@ describe('contagem do portão de dinheiro e saúde (F4)', () => {
     expect(english).toBe(24);
     const brazilian = ROUTES.filter((route) => route.id === BR_HUB_ID || isBrCalc(route.id)).length;
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brazilian);
-    expect(expectedYmylPages(routes)).toBe(english + 1 + ES_CALC_IDS.length + brazilian);
+    // F7 (decision 1): the two hubs and the 11 home and health calculators, in English only (DECISOES § 259).
+    const life = 2 + HOUSE_CALC_IDS.length + HEALTH_CALC_IDS.length;
+    expect(life).toBe(13);
+    expect(expectedYmylPages(routes)).toBe(english + 1 + ES_CALC_IDS.length + brazilian + life);
   });
 
   it('accepts a count equal to the routes, and refuses zero pages and any other count', () => {

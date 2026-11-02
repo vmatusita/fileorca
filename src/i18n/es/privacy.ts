@@ -22,6 +22,8 @@ export default {
         'Las herramientas de FileOrca funcionan en tu navegador. Los archivos que eliges se procesan en tu dispositivo y nunca se suben. FileOrca no tiene ningún servidor que los procese, y no necesitas una cuenta.',
         'Con los números pasa lo mismo. Lo que escribes en una herramienta, como un ancho, un alto o un porcentaje, se queda en tu navegador: no se agrega a la dirección de la página y ningún evento de analítica lo lleva.',
         'Las calculadoras de dinero funcionan igual. Los precios, las tasas y los saldos que escribes se calculan en tu dispositivo y nunca se envían a ningún lugar. El PDF y el CSV de una calculadora también se generan en tu dispositivo. Copiar enlace pone tus números después del # de la dirección que copia: esa parte de una dirección se queda en el navegador que la abre y nunca se envía a nuestro servidor, y la página nunca la agrega a la dirección por su cuenta.',
+        'Las calculadoras de casa y de salud, que solo existen en inglés, funcionan igual. Las medidas que escribes, como la estatura, el peso, la cintura o un área, y las fechas que indicas, como el primer día de la última menstruación o la fecha de la concepción o de la transferencia del embrión, se calculan en tu dispositivo y nunca se envían a ningún lugar. El enlace que copian lleva solo esos números y esas fechas, después del # de la dirección, la parte que el navegador nunca envía. La calculadora de la fecha probable de parto lee la fecha de hoy en el reloj de tu dispositivo, y esa fecha tampoco se envía nunca.',
+        'El generador de códigos QR, que también existe solo en inglés, funciona igual. El código se arma en tu navegador a partir del texto o la dirección que escribes, y ese texto se queda en tu dispositivo: no se agrega a la dirección de la página, ningún evento de analítica lo lleva, no se guarda en tu navegador ni en una cookie y no aparece en el nombre de los archivos que descargas, qr-code.png y qr-code.svg. FileOrca nunca abre la dirección que escribes ni le hace ninguna solicitud.',
         'Las herramientas de PDF funcionan igual. Tu PDF se lee y se escribe en tu dispositivo, con PDF.js y qpdf, dos bibliotecas de código abierto que funcionan en tu navegador. Lo que escribes ahí, como un rango de páginas o el texto de una marca de agua, se queda en tu navegador. La contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda, ni en un servidor ni en tu navegador. La firma que dibujas, tomas de una imagen o escribes al firmar un PDF tampoco se guarda en ningún lugar.',
         'Las herramientas de imagen, por ejemplo, guardan una copia nueva de tu foto que deja fuera sus metadatos, incluida la ubicación GPS.',
         'Puedes comprobarlo por tu cuenta. Abre la pestaña Red de tu navegador mientras usas una herramienta: ninguna solicitud lleva tu archivo.',
@@ -38,7 +40,7 @@ export default {
       heading: 'Analítica (Google Analytics 4)',
       paragraphs: [
         'Para saber qué herramientas ayudan a las personas, FileOrca usa Google Analytics 4, un servicio de Google. Lo que puede guardar en tu navegador depende de la opción que elijas en el aviso de cookies, como se explica en la sección sobre consentimiento, más abajo.',
-        'Google Analytics mide las vistas de página y una lista fija de eventos. Ningún evento lleva nombres de archivo, el contenido de los archivos ni números que escribas. Los eventos son:',
+        'Google Analytics mide las vistas de página y una lista fija de eventos. Ningún evento lleva nombres de archivo, el contenido de los archivos ni los números, las fechas o los textos que escribas. Los eventos son:',
       ],
       list: [
         'Herramienta iniciada',
@@ -48,7 +50,7 @@ export default {
         'Error de la herramienta, con el navegador y el formato del archivo',
         'Clic en un enlace de donación',
         'Primer resultado de una calculadora, solo con el nombre de la calculadora',
-        'Descarga del PDF o del CSV de una calculadora, solo con el formato',
+        'Descarga del PDF o del CSV de una calculadora, o de un código QR en PNG o SVG, solo con el formato',
         'Clic en Copiar enlace en una calculadora, sin el enlace',
       ],
     },

@@ -10,6 +10,13 @@ import { readLink } from './form.ts';
 import { createStore } from './store.ts';
 import type { CalcPanelData } from './types.ts';
 
+/** The device's local day as "2026-11-02": 10 p.m. in Brasília is still today, whatever the day is in UTC. */
+function localToday(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
 const root = document.getElementById('fo-tool-root');
 if (root?.dataset['props']) {
   const data = JSON.parse(root.dataset['props']) as CalcPanelData;
@@ -23,5 +30,7 @@ if (root?.dataset['props']) {
     const linked = readLink(window.location.hash, def.fields, start);
     if (linked !== start) store.set(linked, false);
   }
+  // The weeks of a pregnancy count from the device's own day, read once and never written anywhere (F7, decision 3).
+  if (def.today) store.set({ ...store.get().values, today: localToday() }, false);
   root.dataset['hydrated'] = 'true';
 }

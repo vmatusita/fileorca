@@ -2,12 +2,14 @@
 // example each page starts with is the oracle's page-example case; every field's error says its range; every
 // view has its texts; the scenario link goes and comes back, and anything outside a field's range is ignored;
 // the CSV of a schedule is the oracle's schedule, cent for cent. Since the F6 the same holds for the eight calculators
-// adapted to Brazil (in Portuguese) and the five Spanish pages, each in the format of its language (DECISOES § 226).
+// adapted to Brazil (in Portuguese) and the five Spanish pages, each in the format of its language (DECISOES § 226). Since the
+// F7 the same holds for the 11 home and health calculators (English only): their measures say their range with their
+// decimals, the US and the metric examples are both oracle cases, and a date or a row's menu goes and comes back in the link.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { formatScaled, type NumberLang } from '../../src/calc/parse.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
@@ -26,30 +28,32 @@ const fixture = (id: string): Case[] => (JSON.parse(readFileSync(`fixtures/calc/
 
 /** Every number field of a definition, the list items included. */
 function numberSpecs(specs: readonly FieldSpec[]): NumberSpec[] {
-  return specs.flatMap((spec) => (spec.kind === 'list' ? spec.item : spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' ? [spec] : []));
+  return specs.flatMap((spec) => (spec.kind === 'list' ? spec.item : spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' || spec.kind === 'dec' ? [spec] : []));
 }
 
-/** How a range bound reads in an error of the page's language: $10,000 or $0.01, 40%, 1,200; R$ 10.000 in Portuguese. */
+/** How a range bound reads in an error of the page's language: $10,000 or $0.01, 40%, 1,200; R$ 10.000 in Portuguese; a measure as 0.01 or 2,500 (F7). */
 function bound(spec: NumberSpec, value: number, lang: Lang = 'en'): string {
   const l = lang as NumberLang;
   if (spec.kind === 'money') return `${lang === 'pt' ? 'R$ ' : '$'}${formatScaled(value, 2, l, { min: value % 100 === 0 ? 0 : 2 })}`;
   if (spec.kind === 'rate') return formatScaled(value, 4, l);
+  if (spec.kind === 'dec') return formatScaled(value, spec.decimals ?? 0, l);
   return formatScaled(value, 0, l);
 }
 
-/** Every money page with its language: the 18 English ones, the 8 Brazilian ones and the 5 Spanish versions. */
-const PAGES: [MoneyPageId, Lang][] = [
-  ...CALC_PAGE_IDS.map((id): [MoneyPageId, Lang] => [id, 'en']),
-  ...BR_CALC_IDS.map((id): [MoneyPageId, Lang] => [id, 'pt']),
-  ...ES_CALC_IDS.map((id): [MoneyPageId, Lang] => [id, 'es']),
+/** Every calculator page with its language: the 18 English money ones, the 8 Brazilian ones, the 5 Spanish versions and the 11 home and health ones (F7). */
+const PAGES: [AnyCalcId, Lang][] = [
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
+  ...BR_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'pt']),
+  ...ES_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
+  ...LIFE_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
 ];
 /** Each definition once, with the language of its first page. */
-const DEF_IDS: [MoneyPageId, Lang][] = PAGES.filter(([id], index) => PAGES.findIndex(([other]) => other === id) === index);
+const DEF_IDS: [AnyCalcId, Lang][] = PAGES.filter(([id], index) => PAGES.findIndex(([other]) => other === id) === index);
 
 describe('the calculator definitions', () => {
-  // The 18 of the F4 and, since the F6, the 8 adapted to Brazil (DECISOES § 226).
-  it('cover the 26 pages of the two registries', () => {
-    expect(Object.keys(DEFS).sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS].sort());
+  // The 18 of the F4, since the F6 the 8 adapted to Brazil (DECISOES § 226), and since the F7 the 11 home and health ones.
+  it('cover the 37 pages of the three registries', () => {
+    expect(Object.keys(DEFS).sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS, ...LIFE_CALC_IDS].sort());
     for (const [id] of DEF_IDS) expect(DEFS[id].id).toBe(id);
   });
 
@@ -125,8 +129,12 @@ describe('the calculator definitions', () => {
       const def = DEFS[id];
       const check1 = (values: Values) => check(id, values, lang);
       for (const spec of def.fields) {
-        if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int') {
+        if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' || spec.kind === 'dec') {
           for (const value of [spec.min, spec.max]) check1({ ...def.initial, [spec.key]: value });
+        } else if (spec.kind === 'date') {
+          // F7: the first and the last day the field takes, and a pregnancy whose today is before or long after them.
+          for (const day of [spec.min, spec.max]) check1({ ...def.initial, [spec.key]: day });
+          if (def.today) for (const today of ['1999-01-01', '2026-11-02', '2120-01-01']) check1({ ...def.initial, today });
         } else if (spec.kind === 'list') {
           // Each item of the first debt at both ends (second pass of the review: the list was left out).
           const rows = def.initial[spec.key] as Record<string, number>[];
@@ -154,13 +162,62 @@ describe('the calculator definitions', () => {
   });
 });
 
+describe('the home and health definitions (F7)', () => {
+  it('start the metric system from its own oracle example, and keep each system\'s values apart (DECISOES § 261)', () => {
+    for (const id of ['bmi-calculator', 'calorie-calculator', 'body-fat-calculator'] as const) {
+      const def = DEFS[id];
+      const metric = fixture(id).find((item) => item.id === 'page-example-metric');
+      expect(metric, id).toBeDefined();
+      expect(def.toInput({ ...def.initial, u: 'metric' }), id).toEqual(metric?.input);
+      expect(def.initial['u'], id).toBe('us');
+      // The US and the metric fields are different keys: switching never touches the other system's values.
+      const keys = (system: string) => def.fields.filter((spec) => spec.when?.key === 'u' && spec.when.is === system).map((spec) => spec.key);
+      expect(keys('us').filter((key) => keys('metric').includes(key)), id).toEqual([]);
+    }
+  });
+
+  it('carry a date and a row menu in the link, and ignore a day that is not real or is out of range (DECISOES § 262)', () => {
+    const due = DEFS['due-date-calculator'];
+    expect(readLink('#v=1&m=ivf5&d=2027-02-28', due.fields, due.initial)).toEqual({ ...due.initial, m: 'ivf5', d: '2027-02-28' });
+    for (const bad of ['2027-02-29', '1999-12-31', '2100-01-01', '2027-2-3', 'March 17, 2026']) {
+      expect(readLink(`#v=1&d=${encodeURIComponent(bad)}`, due.fields, due.initial)['d'], bad).toBe(due.initial['d']);
+    }
+    expect(linkHash(due.fields, due.initial)).not.toContain('today');
+    const area = DEFS['square-footage-calculator'];
+    expect(readLink('#v=1&a0s=2&a0x=1000&a0y=1000', area.fields, area.initial)['a']).toEqual([{ s: 2, x: 1000, y: 1000 }]);
+    expect(readLink('#v=1&a0s=3&a0x=1000&a0y=1000', area.fields, area.initial)['a']).toEqual(area.initial['a']);
+  });
+
+  it('have the CDC category of every BMI in the oracle, in words', () => {
+    const def = DEFS['bmi-calculator'];
+    const data = panelData('bmi-calculator', 'en');
+    for (const item of fixture('bmi-calculator')) {
+      const expected = item.expected as { bmi: number; category: string };
+      const input = item.input as { unit: string; feet: number; inches: number; pounds: number; cm: number; kg: number };
+      const view = viewOf(def, data, { ...def.initial, u: input.unit, ft: input.feet, in: input.inches, lb: input.pounds, cm: input.cm, kg: input.kg });
+      expect(view.summary.find(([label]) => label === 'CDC category')?.[1], item.id).toBe(data.texts.view[`cat-${expected.category}`]);
+    }
+  });
+
+  it('never let the Oli cheer a health result, and keep the violet category on the home and health pages', () => {
+    for (const id of LIFE_CALC_IDS) {
+      const data = panelData(id, 'en');
+      expect(data.cat, id).toBe('home');
+      expect(data.cheer, id).toBe(!['bmi-calculator', 'calorie-calculator', 'ovulation-calculator', 'body-fat-calculator', 'due-date-calculator'].includes(id));
+    }
+    expect(panelData('mortgage-calculator', 'en')).toEqual(expect.objectContaining({ cheer: true, cat: 'money' }));
+  });
+});
+
 describe('the scenario link', () => {
   it('goes and comes back with the same values on every page', () => {
     for (const [id] of DEF_IDS) {
       const def = DEFS[id];
       const hash = linkHash(def.fields, def.initial);
       expect(hash, id).toMatch(/^#v=1&/);
-      expect(readLink(hash, def.fields, {} as Values), id).toEqual(expect.objectContaining(def.initial));
+      // Today's day (the due date, F7) is never in the link: the island reads it from the device.
+      const carried = Object.fromEntries(Object.entries(def.initial).filter(([key]) => key !== 'today'));
+      expect(readLink(hash, def.fields, {} as Values), id).toEqual(expect.objectContaining(carried));
       expect(hash, id).not.toMatch(/[?\s]/);
     }
   });
@@ -263,7 +320,8 @@ describe('after the review', () => {
       expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(/session storage|armazenamento da sessão|almacenamiento de sesión/);
       // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
       // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
+      // F7 (decision 9): the English page changed for the home and health calculators and the QR code (DECISOES § 259).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
     }
   });
 });

@@ -83,6 +83,35 @@ export const BR_HUB_ID = 'br-money-calculators';
 /** Any money calculator page: the English ones (with their Spanish versions) and the Brazilian ones. */
 export type MoneyPageId = CalcPageId | BrCalcId;
 
+/**
+ * The home calculators of the F7 (prompt F7, decision 1), in hub order: the floor of the search volume times the top bid
+ * (data/README.md). Not HOME_CALC_IDS, which are the money calculators of the home page.
+ */
+export const HOUSE_CALC_IDS = [
+  'square-footage-calculator',
+  'concrete-calculator',
+  'mulch-calculator',
+  'paint-calculator',
+  'tile-calculator',
+  'btu-calculator',
+] as const;
+export type HouseCalcId = (typeof HOUSE_CALC_IDS)[number];
+
+/** The health calculators of the F7, in hub order (the Due date has a bid of 0.36 and comes last). For adults only. */
+export const HEALTH_CALC_IDS = ['bmi-calculator', 'calorie-calculator', 'ovulation-calculator', 'body-fat-calculator', 'due-date-calculator'] as const;
+export type HealthCalcId = (typeof HEALTH_CALC_IDS)[number];
+
+/** A home or health calculator: English only, no pair in hreflang, in the ad area "casa-saude" (prompt F7, decision 1). */
+export type LifeCalcId = HouseCalcId | HealthCalcId;
+export const LIFE_CALC_IDS: readonly LifeCalcId[] = [...HOUSE_CALC_IDS, ...HEALTH_CALC_IDS];
+export const HOUSE_HUB_ID = 'home-calculators';
+export const HEALTH_HUB_ID = 'health-calculators';
+/** The hub a home or health calculator belongs to: it picks the hub page, the breadcrumb and the official sources of the gate. */
+export type LifeHub = 'house' | 'health';
+
+/** Any calculator page the one island serves: money (English, Spanish, Brazilian), home and health. */
+export type AnyCalcId = MoneyPageId | LifeCalcId;
+
 /** A money page in a language other than English: its own path, export file name and links, all within that language. */
 export interface CalcLangPage {
   path: string;
@@ -467,6 +496,142 @@ export const BR_CALC_PAGES: Record<BrCalcId, BrCalcPageDef> = {
   },
 };
 
+/**
+ * A home or health calculator page (prompt F7, decisions 1 and 6; DECISOES § 257): a registry beside the money one, so
+ * nothing that reads CALC_PAGES (the money pages, with their schedules, presets and Spanish versions) takes them in.
+ * The hub is read here: it picks the hub page, the breadcrumb, the category colour and the official sources of
+ * gate:dinheiro-saude. The chips and the related grid stay inside the hub.
+ */
+export interface LifeCalcPageDef {
+  id: LifeCalcId;
+  path: string;
+  hub: LifeHub;
+  icon: IconName;
+  /** Next-step chips: 1 to 4 calculators of the same hub. */
+  next: readonly LifeCalcId[];
+  /** Related grid at the end of the page: up to 6, of the same hub. */
+  related: readonly LifeCalcId[];
+  /** Base name of the PDF and the CSV: fixed, never a number or a date the person typed. */
+  file: string;
+}
+
+const life = (id: LifeCalcId, hub: LifeHub, icon: IconName, next: readonly LifeCalcId[], related: readonly LifeCalcId[], file: string): LifeCalcPageDef => ({
+  id,
+  path: `/${id}/`,
+  hub,
+  icon,
+  next,
+  related,
+  file,
+});
+
+export const LIFE_CALC_PAGES: Record<LifeCalcId, LifeCalcPageDef> = {
+  'square-footage-calculator': life(
+    'square-footage-calculator',
+    'house',
+    'home',
+    ['paint-calculator', 'tile-calculator', 'concrete-calculator'],
+    ['tile-calculator', 'paint-calculator', 'concrete-calculator', 'mulch-calculator', 'btu-calculator'],
+    'square-footage',
+  ),
+  'concrete-calculator': life(
+    'concrete-calculator',
+    'house',
+    'calculator',
+    ['square-footage-calculator', 'mulch-calculator'],
+    ['square-footage-calculator', 'mulch-calculator', 'tile-calculator', 'paint-calculator', 'btu-calculator'],
+    'concrete-estimate',
+  ),
+  'mulch-calculator': life(
+    'mulch-calculator',
+    'house',
+    'calculator',
+    ['square-footage-calculator', 'concrete-calculator'],
+    ['concrete-calculator', 'square-footage-calculator', 'paint-calculator', 'tile-calculator', 'btu-calculator'],
+    'mulch-gravel-estimate',
+  ),
+  'paint-calculator': life(
+    'paint-calculator',
+    'house',
+    'calculator',
+    ['square-footage-calculator', 'tile-calculator'],
+    ['square-footage-calculator', 'tile-calculator', 'btu-calculator', 'concrete-calculator', 'mulch-calculator'],
+    'paint-estimate',
+  ),
+  'tile-calculator': life(
+    'tile-calculator',
+    'house',
+    'table',
+    ['square-footage-calculator', 'paint-calculator'],
+    ['square-footage-calculator', 'paint-calculator', 'concrete-calculator', 'mulch-calculator', 'btu-calculator'],
+    'tile-estimate',
+  ),
+  'btu-calculator': life(
+    'btu-calculator',
+    'house',
+    'home',
+    ['square-footage-calculator', 'paint-calculator'],
+    ['square-footage-calculator', 'paint-calculator', 'tile-calculator', 'concrete-calculator', 'mulch-calculator'],
+    'btu-estimate',
+  ),
+  'bmi-calculator': life(
+    'bmi-calculator',
+    'health',
+    'heart',
+    ['body-fat-calculator', 'calorie-calculator'],
+    ['body-fat-calculator', 'calorie-calculator', 'ovulation-calculator', 'due-date-calculator'],
+    'bmi-result',
+  ),
+  'calorie-calculator': life(
+    'calorie-calculator',
+    'health',
+    'calculator',
+    ['bmi-calculator', 'body-fat-calculator'],
+    ['bmi-calculator', 'body-fat-calculator', 'ovulation-calculator', 'due-date-calculator'],
+    'calorie-estimate',
+  ),
+  'ovulation-calculator': life(
+    'ovulation-calculator',
+    'health',
+    'heart',
+    ['due-date-calculator'],
+    ['due-date-calculator', 'bmi-calculator', 'calorie-calculator', 'body-fat-calculator'],
+    'ovulation-calendar',
+  ),
+  'body-fat-calculator': life(
+    'body-fat-calculator',
+    'health',
+    'heart',
+    ['bmi-calculator', 'calorie-calculator'],
+    ['bmi-calculator', 'calorie-calculator', 'ovulation-calculator', 'due-date-calculator'],
+    'body-fat-estimate',
+  ),
+  'due-date-calculator': life(
+    'due-date-calculator',
+    'health',
+    'heart',
+    ['ovulation-calculator'],
+    ['ovulation-calculator', 'bmi-calculator', 'calorie-calculator', 'body-fat-calculator'],
+    'due-date',
+  ),
+};
+
+export function isLifeCalc(id: string): id is LifeCalcId {
+  return Object.hasOwn(LIFE_CALC_PAGES, id);
+}
+
+/** The calculators of a home or health hub, in hub order. */
+export const LIFE_HUB_IDS: Record<LifeHub, readonly LifeCalcId[]> = { house: HOUSE_CALC_IDS, health: HEALTH_CALC_IDS };
+/** The route id of each F7 hub. */
+export const LIFE_HUB_ROUTE: Record<LifeHub, typeof HOUSE_HUB_ID | typeof HEALTH_HUB_ID> = { house: HOUSE_HUB_ID, health: HEALTH_HUB_ID };
+
+/** What a calculator page is about: money (the F4 and the F6), home or health (the F7). */
+export type CalcArea = 'money' | LifeHub;
+
+export function calcAreaOf(id: AnyCalcId): CalcArea {
+  return isLifeCalc(id) ? LIFE_CALC_PAGES[id].hub : 'money';
+}
+
 /** The calculators the home's money section and the footer's money column list, per language. */
 export const HOME_MONEY_IDS: Record<Lang, readonly MoneyPageId[]> = {
   en: HOME_CALC_IDS,
@@ -483,18 +648,24 @@ export const HUB_MONEY_IDS: Record<Lang, readonly MoneyPageId[]> = {
 
 /** The page of a money calculator in one language, or null where it does not exist (prompt F6, decision 2). */
 export interface MoneyPage {
-  id: MoneyPageId;
+  id: AnyCalcId;
   path: string;
   file: string;
   icon: IconName;
-  group: 'credit' | 'educational';
-  next: readonly MoneyPageId[];
-  related: readonly MoneyPageId[];
+  /** Its block in the money hub, or the home or health hub of an F7 calculator. */
+  group: 'credit' | 'educational' | LifeHub;
+  next: readonly AnyCalcId[];
+  related: readonly AnyCalcId[];
   parent?: CalcToolId;
   guide?: GuideId;
 }
 
-export function moneyPage(id: MoneyPageId, lang: Lang): MoneyPage | null {
+/** The page of any calculator in one language, or null where it does not exist (the home and health ones only in English). */
+export function moneyPage(id: AnyCalcId, lang: Lang): MoneyPage | null {
+  if (isLifeCalc(id)) {
+    const def = LIFE_CALC_PAGES[id];
+    return lang === 'en' ? { id, path: def.path, file: def.file, icon: def.icon, group: def.hub, next: def.next, related: def.related } : null;
+  }
   if (isBrCalc(id)) {
     const def = BR_CALC_PAGES[id];
     return lang === 'pt' ? { id, path: def.path, file: def.file, icon: def.icon, group: def.group, next: def.next, related: def.related } : null;

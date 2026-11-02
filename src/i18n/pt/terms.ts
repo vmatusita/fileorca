@@ -19,7 +19,7 @@ export default {
     {
       heading: 'O que é o FileOrca',
       paragraphs: [
-        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar, girar, converter e transformar imagens em PDF, ferramentas de PDF, como juntar, dividir, comprimir, numerar, assinar e proteger, entre outras, e calculadoras de dinheiro para financiamentos, empréstimos, cartão de crédito, dívidas e investimentos. Em português, são oito calculadoras feitas para o Brasil: o Simulador SAC × PRICE, o Simulador de financiamento de veículo, o Simulador de empréstimo, a Amortização antecipada, a Calculadora do cartão de crédito, a Calculadora de dívidas, a Calculadora de juros compostos e o Alugar ou comprar.',
+        'O FileOrca é um site com ferramentas grátis que rodam no navegador. Ele foi pensado para imagens, PDFs e calculadoras. Hoje o site tem ferramentas de imagem, como comprimir, redimensionar, cortar, girar, converter e transformar imagens em PDF, ferramentas de PDF, como juntar, dividir, comprimir, numerar, assinar e proteger, entre outras, e calculadoras de dinheiro para financiamentos, empréstimos, cartão de crédito, dívidas e investimentos. Em português, são oito calculadoras feitas para o Brasil: o Simulador SAC × PRICE, o Simulador de financiamento de veículo, o Simulador de empréstimo, a Amortização antecipada, a Calculadora do cartão de crédito, a Calculadora de dívidas, a Calculadora de juros compostos e o Alugar ou comprar. Só em inglês, o site também tem calculadoras de casa, para estimar material como concreto, tinta e piso, calculadoras de saúde, como as de IMC e de data provável do parto, e um gerador de QR code.',
         'Você não precisa de conta. Seus arquivos são processados no seu aparelho, e não em um servidor, e nunca são enviados.',
       ],
     },
@@ -57,6 +57,15 @@ export default {
       paragraphs: [
         'As calculadoras servem só para aprender e se informar. Elas não constituem aconselhamento financeiro, jurídico nem médico, não são oferta de crédito e não substituem um profissional qualificado. Quem decide quanto você pode pegar emprestado, e a que taxa, é a instituição financeira, não uma calculadora.',
         'Os resultados são estimativas feitas com os números que você digita. A vida real pode ser diferente, então confirme com um profissional qualificado antes de tomar uma decisão sobre dinheiro, questões jurídicas ou saúde.',
+      ],
+    },
+    {
+      heading: 'Calculadoras de saúde e de casa e QR codes',
+      paragraphs: ['Algumas ferramentas, que existem só em inglês, têm regras próprias, que valem além de tudo o que está nesta página.'],
+      list: [
+        'As calculadoras de saúde (IMC, calorias, ovulação, gordura corporal e data provável do parto) são ferramentas educativas para adultos a partir de 18 anos. Elas não são recomendação médica, não dão diagnóstico e não substituem um médico. Cada resultado é uma estimativa feita com uma fórmula publicada: converse com um médico ou outro profissional de saúde sobre o que ele significa para você. A calculadora de ovulação não diz quando você vai ou não engravidar, então não a use para evitar gravidez.',
+        'As calculadoras de casa (área em pés quadrados, concreto, cobertura de solo e cascalho, tinta, piso e azulejo, e BTU do ar-condicionado) dão estimativas para ajudar você a comprar material. Confira a embalagem de cada saco, lata e caixa e consulte um profissional ou a loja antes de uma compra grande.',
+        'O gerador de QR code monta o código a partir do texto que você digita, do jeito que ele está. O FileOrca não confere esse texto nem o site para onde ele leva. Leia o código com o celular e confira aonde ele leva antes de imprimir ou compartilhar.',
       ],
     },
     {

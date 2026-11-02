@@ -16,6 +16,9 @@ export default {
     imageColumn: 'Image',
     moneyColumn: 'Money',
     pdfColumn: 'PDF',
+    homeColumn: 'Home',
+    healthColumn: 'Health',
+    utilityColumn: 'Utilities',
     siteColumn: 'FileOrca',
     about: 'About',
     privacy: 'Privacy',
@@ -45,10 +48,20 @@ export default {
     imageCategory: 'Image',
     moneyCategory: 'Money calculators',
     pdfCategory: 'PDF',
+    homeCategory: 'Home calculators',
+    healthCategory: 'Health calculators',
+    utilityCategory: 'Utilities',
     shortcut: 'Ctrl K',
   },
   imageTools: 'Image tools',
   moneyCalculators: 'Money calculators',
+  homeCalculators: 'Home calculators',
+  healthCalculators: 'Health calculators',
+  qr: {
+    name: 'QR code generator',
+    description: 'A QR code of your link or text, with Oli in the middle, as PNG or SVG.',
+    synonyms: ['qr', 'qr code', 'qr generator', 'qr maker', 'link to qr', 'url to qr', 'barcode'],
+  },
   pdfTools: 'PDF tools',
   pdf: {
     'merge-pdf': {
@@ -203,6 +216,62 @@ export default {
       name: 'Balloon loan calculator',
       description: 'The payment of a balloon loan and what is left due at the end.',
       synonyms: ['balloon', 'balloon payment', 'balloon loan', 'amortization', 'interest'],
+    },
+    // The home and health calculators (F7, decision 9), in hub order.
+    'square-footage-calculator': {
+      name: 'Square footage calculator',
+      description: 'The area of a room or a yard in square feet and square yards, shape by shape.',
+      synonyms: ['square feet', 'square footage', 'sq ft', 'square yards', 'floor area', 'room size'],
+    },
+    'concrete-calculator': {
+      name: 'Concrete calculator',
+      description: 'The cubic yards of a slab, a footing or a round column, and the bags to buy.',
+      synonyms: ['concrete', 'cement', 'cubic yards', 'slab', 'footing', 'post hole', 'bags of concrete'],
+    },
+    'mulch-calculator': {
+      name: 'Mulch and gravel calculator',
+      description: 'The cubic yards and bags of mulch or gravel for a bed, and the tons of gravel.',
+      synonyms: ['mulch', 'gravel', 'cubic yards', 'garden bed', 'landscaping stone', 'tons of gravel'],
+    },
+    'paint-calculator': {
+      name: 'Paint calculator',
+      description: 'The gallons of paint for the walls of a room, after the doors and windows.',
+      synonyms: ['paint', 'gallons of paint', 'wall paint', 'coats of paint', 'painting a room'],
+    },
+    'tile-calculator': {
+      name: 'Tile calculator',
+      description: 'The tiles and boxes for a floor or a wall, with a little extra for cuts.',
+      synonyms: ['tile', 'tiles', 'floor tile', 'wall tile', 'backsplash', 'boxes of tile'],
+    },
+    'btu-calculator': {
+      name: 'BTU calculator',
+      description: 'The air conditioner size of a room, from the Energy Star table.',
+      synonyms: ['btu', 'ac size', 'air conditioner size', 'window ac', 'room ac', 'cooling capacity'],
+    },
+    'bmi-calculator': {
+      name: 'BMI calculator',
+      description: 'Your body mass index and the CDC adult category it falls in.',
+      synonyms: ['bmi', 'body mass index', 'height and weight', 'bmi for adults'],
+    },
+    'calorie-calculator': {
+      name: 'Calorie calculator',
+      description: 'The calories your body uses at rest and over a day, by Mifflin-St Jeor.',
+      synonyms: ['calories', 'tdee', 'bmr', 'resting energy', 'mifflin st jeor', 'kcal per day'],
+    },
+    'ovulation-calculator': {
+      name: 'Ovulation calculator',
+      description: 'Your estimated ovulation days and fertile windows for the next six cycles.',
+      synonyms: ['ovulation', 'fertile window', 'fertile days', 'menstrual cycle', 'trying to conceive'],
+    },
+    'body-fat-calculator': {
+      name: 'Body fat calculator',
+      description: 'Your body fat percentage from a tape measure, by the Navy formula.',
+      synonyms: ['body fat', 'body fat percentage', 'navy method', 'tape measure', 'neck and waist'],
+    },
+    'due-date-calculator': {
+      name: 'Due date calculator',
+      description: 'The due date of a pregnancy, the weeks along today and when each trimester starts.',
+      synonyms: ['due date', 'pregnancy', 'weeks pregnant', 'conception date', 'ivf due date', 'trimester'],
     },
   },
   guides: {

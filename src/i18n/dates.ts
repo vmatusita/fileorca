@@ -1,6 +1,6 @@
 // Dates written out in the language of the page (prompt F6, decision 1): "October 31, 2026", "1 de novembro de 2026",
-// "1 de noviembre de 2026". Build-time only (never imported by an island), and by hand, without Intl, so the build and
-// every browser write the same thing (DECISOES § 112). The dates a page carries ("Reviewed on", "Last updated") are the
+// "1 de noviembre de 2026". By hand, without Intl, so the build and every browser write the same thing (DECISOES § 112).
+// Since the F7 the calculator island also writes the days of a pregnancy and of a cycle with it (DECISOES § 262). The dates a page carries ("Reviewed on", "Last updated") are the
 // day in Brasília (DECISOES § 207), written as an ISO day.
 import type { Lang } from './routes.ts';
 

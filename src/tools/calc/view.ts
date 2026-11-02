@@ -2,16 +2,17 @@
 // a number of months as "3 years 4 months", the inputs as the PDF lists them, and the cells as the screen
 // writes them. The schedule runs by payment number and loan year, never by calendar date (prompt F4).
 import { fmt } from '../../i18n/format.ts';
-import { money, ratePercent, type NumberLang } from '../../calc/parse.ts';
+import { formatScaled, money, ratePercent, type NumberLang } from '../../calc/parse.ts';
+import { longDate } from '../../i18n/dates.ts';
 import type { Row } from '../../calc/money.ts';
 import { display, visible } from './form.ts';
 import type { CalcPanelData, CalcSharedTexts, Cell, FieldSpec, Table, Values } from './types.ts';
 
-/** A cell as the screen and the PDF write it: money with cents. */
+/** A cell as the screen and the PDF write it: money with cents, a measure with its decimals (F7), or the text. */
 export const cellText =
   (lang: NumberLang) =>
   (cell: Cell): string =>
-    'cents' in cell ? money(cell.cents, lang) : cell.text;
+    'cents' in cell ? money(cell.cents, lang) : 'scaled' in cell ? formatScaled(cell.scaled, cell.decimals, lang, { min: cell.decimals }) : cell.text;
 
 /** The schedule of a loan: one row per payment, grouped by loan year (`perYear` payments a year). */
 export function loanTable(rows: readonly Row[], perYear: number, s: CalcSharedTexts, caption: string, numberHead = s.columns.number): Table {
@@ -38,12 +39,16 @@ export function duration(months: number, s: CalcSharedTexts): string {
   return parts.length ? parts.join(s.duration.join) : s.duration.none;
 }
 
-/** A number field's value as the PDF lists it: money with cents, a rate, a count with its unit. */
-function valueText(kind: 'money' | 'rate' | 'int', value: number, lang: NumberLang, suffix?: string): string {
+/** A number field's value as the PDF lists it: money with cents, a rate, a count or a measure with its unit. */
+function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: NumberLang, suffix?: string, decimals?: number): string {
   if (kind === 'money') return money(value, lang);
   if (kind === 'rate') return ratePercent(value, lang);
-  return suffix ? `${display('int', value, lang)} ${suffix}` : display('int', value, lang);
+  const number = display(kind, value, lang, decimals);
+  return suffix ? `${number} ${suffix}` : number;
 }
+
+/** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */
+const rowName = (data: CalcPanelData): string => data.texts.view['row'] ?? data.t.row;
 
 /** What the person entered, label and value, for the PDF (only the fields on screen). */
 export function inputRows(specs: readonly FieldSpec[], values: Values, data: CalcPanelData): [string, string][] {
@@ -55,9 +60,14 @@ export function inputRows(specs: readonly FieldSpec[], values: Values, data: Cal
     const label = texts?.label ?? spec.key;
     if (spec.kind === 'list') {
       const rows = values[spec.key] as Record<string, number>[];
+      const pick = spec.pick;
       rows.forEach((row, index) => {
-        const parts = spec.item.map((item) => valueText(item.kind, row[item.key] ?? 0, lang, data.texts.fields[item.key]?.suffix));
-        out.push([fmt(data.t.row, { n: index + 1 }), parts.join(', ')]);
+        const at = pick ? (row[pick.key] ?? 0) : 0;
+        const items = spec.item.filter((item) => !pick?.hide?.[item.key]?.includes(at));
+        const parts = items.map((item) => valueText(item.kind, row[item.key] ?? 0, lang, data.texts.fields[item.key]?.suffix, item.decimals));
+        const option = pick ? (pick.options[at] ?? '') : '';
+        const value = pick ? `${data.texts.options?.[pick.key]?.[option] ?? option}: ${parts.join(' × ')}` : parts.join(', ');
+        out.push([fmt(rowName(data), { n: index + 1 }), value]);
       });
     } else if (spec.kind === 'down') {
       const percent = values[spec.unitKey] === 'percent';
@@ -65,7 +75,8 @@ export function inputRows(specs: readonly FieldSpec[], values: Values, data: Cal
     } else if (spec.kind === 'choice' || spec.kind === 'select') {
       const value = String(values[spec.key]);
       out.push([label, data.texts.options?.[spec.key]?.[value] ?? value]);
-    } else out.push([label, valueText(spec.kind, Number(values[spec.key]), lang, texts?.suffix)]);
+    } else if (spec.kind === 'date') out.push([label, longDate(String(values[spec.key]), data.lang)]);
+    else out.push([label, valueText(spec.kind, Number(values[spec.key]), lang, texts?.suffix, 'decimals' in spec ? spec.decimals : undefined)]);
   }
   return out;
 }
