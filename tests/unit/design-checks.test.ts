@@ -159,13 +159,13 @@ describe('fontes', () => {
   });
 
   it("accepts the breadcrumb's face of the Figtree file with font-display: optional, and nothing else under that family (DECISOES § 305)", () => {
-    const trail = (src = `url("${FIGTREE}") format("woff2")`, display = 'optional') => `@font-face{font-family:"Figtree Trail";font-style:normal;font-display:${display};src:${src}}`;
+    const trail = (src = `url("${FIGTREE}") format("woff2")`, display = 'optional') => `@font-face{font-family:"Figtree Steady";font-style:normal;font-display:${display};src:${src}}`;
     expect(checkFonts({ ...good, css: css + trail() })).toEqual([]);
-    expect(checkFonts({ ...good, css: css + trail(undefined, 'swap') }).join('\n')).toMatch(/Figtree Trail com font-display swap \(esperado optional\)/);
-    expect(checkFonts({ ...good, css: css + trail(`url(${FREDOKA})`) }).join('\n')).toMatch(/Figtree Trail usa .*fredoka.*esperado o arquivo de Figtree/);
-    expect(checkFonts({ ...good, css: css + trail('url(/_astro/figtree-latin-wght-normal.OTHER123.woff2)') }).join('\n')).toMatch(/Figtree Trail usa/);
-    expect(checkFonts({ ...good, css: css + trail() + trail() }).join('\n')).toMatch(/mais de um @font-face com url\(\) para Figtree Trail/);
-    expect(checkFonts({ ...good, css: fredokaFace + trail() }).join('\n')).toMatch(/falta o @font-face com url\(\) de Figtree[\s\S]*Figtree Trail usa/);
+    expect(checkFonts({ ...good, css: css + trail(undefined, 'swap') }).join('\n')).toMatch(/Figtree Steady com font-display swap \(esperado optional\)/);
+    expect(checkFonts({ ...good, css: css + trail(`url(${FREDOKA})`) }).join('\n')).toMatch(/Figtree Steady usa .*fredoka.*esperado o arquivo de Figtree/);
+    expect(checkFonts({ ...good, css: css + trail('url(/_astro/figtree-latin-wght-normal.OTHER123.woff2)') }).join('\n')).toMatch(/Figtree Steady usa/);
+    expect(checkFonts({ ...good, css: css + trail() + trail() }).join('\n')).toMatch(/mais de um @font-face com url\(\) para Figtree Steady/);
+    expect(checkFonts({ ...good, css: fredokaFace + trail() }).join('\n')).toMatch(/falta o @font-face com url\(\) de Figtree[\s\S]*Figtree Steady usa/);
   });
 
   it('reports an @font-face with neither url() nor local()', () => {

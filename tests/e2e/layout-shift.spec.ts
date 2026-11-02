@@ -1,9 +1,9 @@
 // The layout shift of the first visit on a phone, when Figtree arrives after the first paint (review F4-F7 e-1 and its
 // second pass; DECISOES § 305). The fallback font was narrower than Figtree, so a breadcrumb that fit in one row went to
-// two and pushed the tool 22 px down: CLS from 0.12 to 0.27 at 320 to 412 px, which Lighthouse never saw. The trail now
-// has its own face of Figtree, with font-display: optional, and the fallback font is calibrated. The Figtree file is held
-// until the page has painted, then released, and the breadcrumb and the H1 must stay where the first paint put them, in
-// both browsers. The rest of the text still swaps fonts: Chromium sums its layout shift and prints it, with what moved,
+// two and pushed the tool 22 px down: CLS from 0.12 to 0.27 at 320 to 412 px, which Lighthouse never saw. The trail and
+// the cookie notice of the first visit now take a face of Figtree with font-display: optional, and the fallback font is
+// calibrated. The Figtree file is held until the page has painted, then released, and the breadcrumb, the H1 and the
+// notice must stay where the first paint put them, in both browsers. The rest of the text still swaps fonts: Chromium sums its layout shift and prints it, with what moved,
 // but does not judge it here, because the fallback renders differently on each system (the CLS of a paragraph that
 // loses a line was 0.046 on Windows and 0.257 on the Linux of the CI, on the same page; DECISOES § 305).
 import { expect, test, type Browser, type Page } from '@playwright/test';
@@ -45,23 +45,29 @@ async function painted(page: Page): Promise<void> {
   );
 }
 
-/** How tall the breadcrumb is, where the H1 ends, and how far an item of the trail passes its width (nothing cut). */
-async function top(page: Page): Promise<{ crumbs: number; h1: number; over: number }> {
+/** How tall the breadcrumb is, where the H1 ends, how far an item of the trail passes its width (nothing cut), and where
+ * the cookie notice of the first visit starts and how tall it is. */
+async function top(page: Page): Promise<{ crumbs: number; h1: number; over: number; notice: string }> {
   return page.evaluate(() => {
     const trail = document.querySelector('.fo-crumbs');
     return {
       crumbs: trail?.getBoundingClientRect().height ?? -1,
       h1: document.querySelector('h1')?.getBoundingClientRect().bottom ?? -1,
       over: trail ? trail.scrollWidth - trail.clientWidth : 0,
+      notice: (() => {
+        const box = document.getElementById('fo-cookie');
+        if (!box || box.hidden) return 'hidden';
+        const rect = box.getBoundingClientRect();
+        return `${rect.top} ${rect.height}`;
+      })(),
     };
   });
 }
 
-/** A first visit (a context of its own, nothing in memory), with Figtree held until the page has painted. */
+/** A first visit (a context of its own, nothing in memory, no choice of cookies yet), with Figtree held until the page has painted. */
 async function firstVisit(browser: Browser, browserName: string, path: string, width: number): Promise<{ before: Awaited<ReturnType<typeof top>>; after: Awaited<ReturnType<typeof top>>; cls: number; moved: string[] }> {
   const context = await browser.newContext({ viewport: { width, height: 800 }, deviceScaleFactor: 2.625, reducedMotion: 'reduce', serviceWorkers: 'block' });
   await context.addInitScript(() => {
-    localStorage.setItem('fo-consent', 'denied');
     const shifts = { cls: 0, moved: [] as string[] };
     (window as unknown as { __shifts: typeof shifts }).__shifts = shifts;
     if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
@@ -112,7 +118,7 @@ for (const [width, pages] of Object.entries(CASES)) {
       if (browserName === 'chromium') console.log(`[cls] ${browserName} ${width}: ${visits.map(({ path, cls, moved }) => `${path} ${cls.toFixed(3)}${cls > 0.01 ? ` (${moved.join('; ')})` : ''}`).join(', ')}`);
       for (const { path, before, after, moved } of visits) {
         expect(after.over, `${path}: the trail cuts nothing at ${width} px`).toBeLessThanOrEqual(0);
-        expect(after, `${path} at ${width} px: the breadcrumb and the H1 stay where the first paint put them (moved: ${moved.join('; ') || 'nothing'})`).toEqual(before);
+        expect(after, `${path} at ${width} px: the breadcrumb, the H1 and the notice stay where the first paint put them (moved: ${moved.join('; ') || 'nothing'})`).toEqual(before);
       }
     });
   }

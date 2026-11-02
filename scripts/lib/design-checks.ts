@@ -197,10 +197,11 @@ const FONT_FILES: Readonly<Record<string, RegExp>> = {
   Figtree: /^\/_astro\/figtree-latin-wght-normal\.[\w-]+\.woff2$/,
 };
 /**
- * A second face of the same file under a family of its own, with font-display: optional: the breadcrumb keeps the font
- * of its first paint, so it never wraps into another row when Figtree arrives late (review F4-F7 e-1; DECISOES § 305).
+ * A second face of the same file under a family of its own, with font-display: optional: the breadcrumb and the cookie
+ * notice keep the font of their first paint, so they never wrap again when Figtree arrives late (review F4-F7 e-1;
+ * DECISOES § 305).
  */
-const FONT_ALIASES: Readonly<Record<string, string>> = { 'Figtree Trail': 'Figtree' };
+const FONT_ALIASES: Readonly<Record<string, string>> = { 'Figtree Steady': 'Figtree' };
 
 /** A dist path ('dist\_astro\a.woff2', 'dist/_astro/a.woff2') or a URL path as a '/_astro/a.woff2' URL path. */
 function asUrlPath(path: string): string {
