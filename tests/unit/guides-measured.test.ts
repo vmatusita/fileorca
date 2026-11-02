@@ -13,6 +13,7 @@ import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
 import { compareNumbers, compareTables } from '../../scripts/guides/lib/compare.ts';
 import { globals, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import { GUIDE_PUBLISHED, GUIDE_REVIEWED } from '../../src/tools/guides/page.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import removeLocation from '../../src/i18n/en/guide-remove-location-from-photos.ts';
 import splitPdf from '../../src/i18n/en/guide-split-pdf-file-size.ts';
@@ -133,6 +134,14 @@ describe('the measurements of the file guides', () => {
     expect(problems.some((problem) => problem.includes('date 2020-01-01'))).toBe(true);
     expect(problems.some((problem) => problem.includes('my-photo.jpg is not a fixture'))).toBe(true);
     expect(problems.some((problem) => problem.includes('typed: value'))).toBe(true);
+  });
+
+  // DECISOES § 207: the "Reviewed" line and the Article schema never date the review or the publication before the
+  // day the numbers they show were measured (the script stamps the UTC day).
+  it('are never newer than the review and publication dates the guides show', () => {
+    expect(GUIDE_REVIEWED >= measured.measuredOn, `reviewed ${GUIDE_REVIEWED}, measured ${measured.measuredOn}`).toBe(true);
+    expect(GUIDE_PUBLISHED >= measured.measuredOn, `published ${GUIDE_PUBLISHED}, measured ${measured.measuredOn}`).toBe(true);
+    expect(GUIDE_REVIEWED >= GUIDE_PUBLISHED).toBe(true);
   });
 
   it('settle the tool of guide 6, and the registry embeds that tool (DECISOES § 186)', () => {

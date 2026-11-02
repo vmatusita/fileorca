@@ -12,9 +12,12 @@ import { PDF_PAGES, type PdfToolId } from '../pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../pdf/texts.ts';
 import { FILE_GUIDES, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
 
-/** The day this run reviewed the ten guides, and when they were first published (prompt F5b). */
-export const GUIDE_REVIEWED = '2026-11-01';
-export const GUIDE_PUBLISHED = '2026-11-01';
+/**
+ * The day this run reviewed the ten guides, and when they were first published (prompt F5b). In UTC, like the date
+ * pnpm guias:medir stamps, and never before it (DECISOES § 207): the last measurement and the merge fall on this day.
+ */
+export const GUIDE_REVIEWED = '2026-11-02';
+export const GUIDE_PUBLISHED = '2026-11-02';
 
 const texts = import.meta.glob<FileGuideTexts>('/src/i18n/en/guide-*.ts', { import: 'default', eager: true });
 
