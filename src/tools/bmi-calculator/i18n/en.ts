@@ -24,6 +24,7 @@ export default {
       caption: 'The CDC categories of adult BMI, by the BMI rounded to one decimal',
       colCategory: 'Category',
       colBmi: 'BMI',
+      colYours: 'Your BMI',
       'cat-underweight': 'Underweight',
       'cat-healthy': 'Healthy Weight',
       'cat-overweight': 'Overweight',

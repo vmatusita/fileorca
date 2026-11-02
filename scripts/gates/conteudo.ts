@@ -34,7 +34,7 @@ import {
 import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, isBrCalc, moneyPage } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
@@ -69,11 +69,12 @@ for (const page of pages) {
 }
 
 // The calculators of the registries, in every language of the route map: the English ones (and the Spanish page of the
-// five of ES_CALC_IDS) and the Brazilian ones, each with the privacy phrase of its language (F6).
+// five of ES_CALC_IDS), the Brazilian ones, each with the privacy phrase of its language (F6), and since the F7 the 11 home
+// and health ones, in English.
 let calcPages = 0;
 for (const page of pages) {
   const id = page.route.id;
-  if (!isCalcPage(id) && !isBrCalc(id)) continue;
+  if (!isCalcPage(id) && !isBrCalc(id) && !isLifeCalc(id)) continue;
   calcPages += 1;
   if (!existsSync(fileForPath(page.path))) {
     problems.add(`${page.path}: a página não existe no dist`);
@@ -93,7 +94,7 @@ for (const page of pages) {
 // ES_CALC_IDS, Portuguese for the Brazilian ones whose rows are in the map. A row missing from the map, or a language the
 // map drops, makes the count differ.
 const brInMap = BR_CALC_IDS.filter((id) => pages.some((page) => page.route.id === id));
-const calcWanted = [...CALC_PAGE_IDS, ...brInMap].reduce((sum, id) => sum + LANGS.filter((lang) => moneyPage(id, lang) !== null).length, 0);
+const calcWanted = [...CALC_PAGE_IDS, ...brInMap, ...LIFE_CALC_IDS].reduce((sum, id) => sum + LANGS.filter((lang) => moneyPage(id, lang) !== null).length, 0);
 if (calcPages !== calcWanted) problems.add(`${calcPages} página(s) de calculadora conferida(s), os registros têm ${calcWanted} (cada calculadora em cada idioma dela)`);
 
 // The PDF tools, read from the PDF registry (never a hand list), in every language of their route (F6): the route map must

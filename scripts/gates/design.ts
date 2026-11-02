@@ -12,6 +12,7 @@ import { tokenNames } from '../lib/theme.ts';
 import { visibleText } from '../lib/conteudo.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { languagesOf, routeById, type RouteId } from '../../src/i18n/routes.ts';
+import { HEALTH_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 requireDist();
@@ -45,6 +46,9 @@ function report(name: string, problems: Problems, ok: string): void {
   for (const problem of problems.list) console.error(`  - ${problem}`);
 }
 
+/** The pages of the health calculators, read from the registry and the route map. */
+const HEALTH_PATHS = new Set(HEALTH_CALC_IDS.flatMap((id) => languagesOf(routeById(id)).map((lang) => routeById(id).paths[lang] ?? '')));
+
 function perPage(check: (page: { path: string; html: string }) => string[]): Problems {
   const problems = new Problems();
   for (const page of pages) for (const problem of check(page)) problems.add(`${page.path}: ${problem}`);
@@ -54,7 +58,12 @@ function perPage(check: (page: { path: string; html: string }) => string[]): Pro
 report('folha de estilo única', perPage((page) => checkSingleStylesheet(page.html)), `${pages.length} páginas, cada uma com um <link rel="stylesheet"> e nenhum <style>`);
 report(
   'sprite da Oli',
-  perPage((page) => checkSprite(page.html, { requiredPoses: page.html.includes('id="fo-tool-root"') ? [...PAGE_POSES, ...TOOL_POSES] : PAGE_POSES })),
+  perPage((page) =>
+    // F7 (decision 5): the health calculators never cheer a result, so their sprite has every tool pose but cheer.
+    HEALTH_PATHS.has(page.path)
+      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer'] })
+      : checkSprite(page.html, { requiredPoses: page.html.includes('id="fo-tool-root"') ? [...PAGE_POSES, ...TOOL_POSES] : PAGE_POSES }),
+  ),
   `${pages.length} páginas, ids únicos, um oli-clip, poses da lista fechada e caixas [data-oli] com o próprio símbolo`,
 );
 report('setas', perPage((page) => checkArrows(page.html)), `${pages.length} páginas sem → nem ↔ no texto`);

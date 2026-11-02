@@ -23,8 +23,9 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from '../tests/e2e/lib/pdf-stat
 
 const ORIGIN = 'http://127.0.0.1:4173';
 // F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
-// under fase-04/, F5a under fase-05a/, F5b under fase-05b/ and F6 writes under fase-06/, leaving the older shots as they were.
-const OUT = 'docs/relatorios/fase-06/componentes';
+// under fase-04/, F5a under fase-05a/, F5b under fase-05b/, F6 under fase-06/ and F7 writes under fase-07/, leaving the older
+// shots as they were.
+const OUT = 'docs/relatorios/fase-07/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -448,6 +449,34 @@ async function main(): Promise<void> {
           if (name === 'support-pt' && width === 360) await shot(page.locator('#pix'), `pix-${theme}-360`);
           await page.close();
         }
+      }
+
+      // F7: a home calculator, a health one in both units, the due date, the QR code with a code made and both hubs.
+      for (const width of [360, 1280]) {
+        const pages = [
+          ['concrete', '/concrete-calculator/'],
+          ['square-footage', '/square-footage-calculator/'],
+          ['bmi-us', '/bmi-calculator/'],
+          ['bmi-metric', '/bmi-calculator/#v=1&u=metric'],
+          ['due-date', '/due-date-calculator/'],
+          ['home-hub', '/home-calculators/'],
+          ['health-hub', '/health-calculators/'],
+        ] as const;
+        for (const [name, path] of pages) {
+          page = await open(browser, theme, width, path);
+          await page.screenshot({ path: join(OUT, `f7-${name}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  f7-${name}-${theme}-${width}.png`);
+          await page.close();
+        }
+        page = await open(browser, theme, width, '/qr-code-generator/');
+        const box = page.locator('textarea').first();
+        if (await box.count()) {
+          await box.fill('https://fileorca.com/qr-code-generator/');
+          await page.locator('.fo-qr svg, [data-qr-preview] svg').first().waitFor({ timeout: 10_000 }).catch(() => undefined);
+        }
+        await page.screenshot({ path: join(OUT, `f7-qr-code-${theme}-${width}.png`), fullPage: true });
+        console.log(`  f7-qr-code-${theme}-${width}.png`);
+        await page.close();
       }
     }
   } finally {
