@@ -5,7 +5,7 @@ export default {
   description:
     'The terms for using FileOrca, a set of free tools that run in your browser: your files, results, calculators, ads, donations and liability.',
   h1: 'Terms of use',
-  updated: 'Last updated: November 1, 2026',
+  updated: 'Last updated: November 2, 2026',
   intro:
     'These terms explain how you can use FileOrca. By using the site, you accept them. If you do not agree, please do not use the site.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'What FileOrca is',
       paragraphs: [
-        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools (compress, resize, crop, rotate, convert and turn images into a PDF), PDF tools (merge, split, compress, rotate, number, sign, protect and more) and money calculators for loans, mortgages, debt and savings. They are in English, and the image compressor is also in Portuguese and Spanish.',
+        'FileOrca is a website with free tools that run in your browser. It is built for images, PDFs and calculators. Today the site has image tools (compress, resize, crop, rotate, convert and turn images into a PDF), PDF tools (merge, split, compress, rotate, number, sign, protect and more), money calculators for loans, mortgages, debt and savings, home calculators for materials such as concrete, paint and tile, health calculators such as BMI and due date, and a QR code generator. Everything is in English. The image and PDF tools are also in Portuguese and Spanish, and so are some money calculators: eight made for Brazil in Portuguese and five in Spanish.',
         'You do not need an account. Your files are processed on your device, not on a server, and they are never uploaded.',
       ],
     },
@@ -57,6 +57,15 @@ export default {
       paragraphs: [
         'The calculators are for learning and information only. They are not financial, legal or medical advice, they are not an offer of credit, and they do not replace a qualified professional. A lender, not a calculator, decides what you can borrow and at what rate.',
         'The results are estimates based on the numbers you type. Real life can differ, so check with a qualified professional before you make a decision about money, legal matters or health.',
+      ],
+    },
+    {
+      heading: 'Health and home calculators, and QR codes',
+      paragraphs: ['Some tools come with their own terms. They add to everything else on this page.'],
+      list: [
+        'The health calculators (BMI, Calorie, Ovulation, Body fat and Due date) are educational tools for adults 18 and older. They are not medical advice, they do not diagnose anything, and they do not replace a doctor. Each result is an estimate from a published formula: talk with a doctor or another health professional about what it means for you. The Ovulation calculator cannot tell you when you will or will not get pregnant, so do not use it to prevent pregnancy.',
+        'The home calculators (Square footage, Concrete, Mulch and gravel, Paint, Tile and BTU) give estimates to help you buy materials. Check the label of every bag, can and box, and ask a contractor or the store before a large order.',
+        'The QR code generator makes the code from the text you type, as it is. FileOrca does not check that text or the site it leads to. Scan the code with your phone and check where it leads before you print it or share it.',
       ],
     },
     {

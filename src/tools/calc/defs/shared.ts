@@ -47,6 +47,16 @@ export const rate = (key: string, minPct: number, maxPct: number, extra: Partial
 
 export const count = (key: string, min: number, max: number, extra: Partial<NumberSpec> = {}): NumberSpec => ({ kind: 'int', key, min, max, ...extra });
 
+/** A measure (F7): a whole number of 10^-decimals of its unit (a length in hundredths of a foot, a weight in tenths of a pound). */
+export const measure = (key: string, decimals: number, min: number, max: number, extra: Partial<NumberSpec> = {}): NumberSpec => ({
+  kind: 'dec',
+  key,
+  decimals,
+  min,
+  max,
+  ...extra,
+});
+
 /** The fields of a home loan, in the mortgage pages' order: price, down payment, rate, term, then the monthly costs.
  * On a phone the four main ones go in two rows of two, so the result stays above the fold (DECISOES § 124). */
 export function homeFields(): FieldSpec[] {

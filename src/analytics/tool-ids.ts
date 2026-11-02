@@ -45,7 +45,22 @@ export const CALC_EVENT_TOOLS = [
   'br-debt-payoff',
   'br-compound-interest',
   'br-rent-or-buy',
+  // The home and health calculators (F7).
+  'square-footage-calculator',
+  'concrete-calculator',
+  'mulch-calculator',
+  'paint-calculator',
+  'tile-calculator',
+  'btu-calculator',
+  'bmi-calculator',
+  'calorie-calculator',
+  'ovulation-calculator',
+  'body-fat-calculator',
+  'due-date-calculator',
 ] as const;
+
+/** The QR code generator (F7, decision 8): its downloads send export_click with the format, never the text. */
+export const UTILITY_EVENT_TOOLS = ['qr-code-generator'] as const;
 
 export const PDF_EVENT_TOOLS = [
   'merge-pdf',
@@ -62,4 +77,4 @@ export const PDF_EVENT_TOOLS = [
   'watermark-pdf',
 ] as const;
 
-export const EVENT_TOOLS: readonly string[] = [...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS];
+export const EVENT_TOOLS: readonly string[] = [...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS, ...UTILITY_EVENT_TOOLS];

@@ -4,15 +4,17 @@
 // language of the page (the Spanish and Brazilian pages were born in the F6).
 import type { Lang } from '../../i18n/routes.ts';
 import { AUTHOR } from '../../platform/site.ts';
-import { FIRST_PUBLISHED_ON, REVIEWED_ON, SHARED_BY_LANG, longDate } from './page.ts';
+import { SHARED_BY_LANG, datesOf, longDate } from './page.ts';
+import type { AnyCalcId, CalcArea } from './registry.ts';
 
 interface Props {
   lang?: Lang;
+  /** The page (or the hub's area): the home and health pages carry the days of the F7. */
+  of?: AnyCalcId | CalcArea;
 }
-const { lang = 'en' } = Astro.props;
+const { lang = 'en', of = 'money' } = Astro.props;
 const shared = SHARED_BY_LANG[lang].page;
-const reviewed = REVIEWED_ON[lang];
-const first = FIRST_PUBLISHED_ON[lang];
+const { reviewed, first } = datesOf(of, lang);
 const [byBefore, byAfter = ''] = shared.reviewed.split('{date}');
 const [firstBefore, firstAfter = ''] = shared.firstPublished.split('{date}');
 ---

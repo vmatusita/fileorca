@@ -3,14 +3,29 @@
 // calculator, from the `input` event to the MutationObserver seeing the ResultHero change. In Chromium the p95 is
 // at most 16 ms; WebKit runs the same 30 presses and prints its times (the criterion names Chromium). Every press
 // changes the result (Backspace on the last digit, then a new digit), and no month row is in the DOM before the
-// schedule is opened.
+// schedule is opened. F7 (decision 11): the BMI and the square footage with 10 areas, whose tables are the result itself
+// and show open; the BMI alternates two weights, because a tenth of a pound seldom moves a BMI of one decimal.
 import { expect, test } from '@playwright/test';
 import { dismissCookies, hydrated } from './lib/page.ts';
 
 const BUDGET_MS = 16;
 const PRESSES = 30;
 
-const CASES = [
+interface Case {
+  name: string;
+  path: string;
+  field: string;
+  base: string;
+  debts: number;
+  /** The button that adds a row ("Add a debt" when left out). */
+  add?: string;
+  /** The texts typed instead of the Backspace-and-digit presses. */
+  texts?: readonly string[];
+  /** The page's table is its result and shows open (F7): its rows are in the DOM from the start. */
+  open?: boolean;
+}
+
+const CASES: readonly Case[] = [
   { name: 'rent vs buy', path: '/rent-vs-buy-calculator/', field: '#fo-calc-rent', base: '2200', debts: 0 },
   { name: 'debt payoff with 10 debts', path: '/debt-payoff-calculator/', field: '#fo-calc-x', base: '200', debts: 10 },
   { name: 'mortgage with extra payments', path: '/mortgage-calculator/extra-payments/', field: '#fo-calc-em', base: '200', debts: 0 },
@@ -23,7 +38,10 @@ const CASES = [
   { name: 'SAC × PRICE with a TR, 420 months', path: '/pt/simulador-sac-price/#v=1&n=420&tr=1000', field: '#fo-calc-p', base: '500000', debts: 0 },
   { name: 'vehicle loan with the CET', path: '/pt/simulador-financiamento-veiculo/', field: '#fo-calc-p', base: '80000', debts: 0 },
   { name: 'rent or buy in Brazil', path: '/pt/alugar-ou-comprar/', field: '#fo-calc-al', base: '2500', debts: 0 },
-] as const;
+  // F7 (decision 11).
+  { name: 'BMI', path: '/bmi-calculator/', field: '#fo-calc-lb', base: '160', debts: 0, texts: Array.from({ length: PRESSES }, (_, i) => (i % 2 ? '160' : '200')), open: true },
+  { name: 'square footage with 10 areas', path: '/square-footage-calculator/', field: '#fo-calc-a0x', base: '14', debts: 10, add: 'Add an area', open: true },
+];
 
 /** The texts a person makes with 30 presses: Backspace on the last digit, then a new digit, and again. */
 function presses(base: string): string[] {
@@ -43,7 +61,7 @@ for (const kase of CASES) {
     await hydrated(page);
     await dismissCookies(page);
     if (kase.debts > 0) {
-      const add = page.getByRole('button', { name: 'Add a debt' });
+      const add = page.getByRole('button', { name: kase.add ?? 'Add a debt' });
       while ((await page.locator('.fo-debt').count()) < kase.debts) await add.click();
       await expect(page.locator('.fo-debt')).toHaveCount(kase.debts);
     }
@@ -81,12 +99,12 @@ for (const kase of CASES) {
         }
         return { times: measured, missed: lost, monthRows: document.querySelectorAll('#fo-calc-schedule tr').length };
       },
-      { selector: kase.field, texts: presses(kase.base) },
+      { selector: kase.field, texts: kase.texts ? [...kase.texts] : presses(kase.base) },
     );
 
     expect(missed, 'presses that did not change the ResultHero').toBe(0);
     expect(times).toHaveLength(PRESSES);
-    expect(monthRows, 'no month row before the schedule is opened').toBe(0);
+    if (!kase.open) expect(monthRows, 'no month row before the schedule is opened').toBe(0);
     const sorted = [...times].sort((a, b) => a - b);
     const p50 = percentile(sorted, 0.5);
     const p95 = percentile(sorted, 0.95);

@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { BR_PAGE_IDS, FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, descriptionProblem, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { BR_PAGE_IDS, FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, LIFE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, descriptionProblem, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
@@ -116,7 +116,7 @@ for (const lang of LANGS) {
 const sitemapOf = Object.fromEntries(LANGS.map((lang) => [lang, readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8')])) as Record<Lang, string>;
 const registryUrls: Record<Lang, string[]> = { en: [], pt: [], es: [] };
 const brazilian = BR_PAGE_IDS.filter((id) => ROUTES.some((candidate) => candidate.id === id));
-for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...brazilian]) {
+for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...LIFE_PAGE_IDS, ...brazilian]) {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route?.paths['en'] && !brazilian.includes(id)) problems.add(`página ${id} do registro de imagem sem rota em inglês`);
   for (const lang of LANGS) {

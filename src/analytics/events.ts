@@ -2,7 +2,7 @@
 // No event carries a file name, file content or a number the person typed.
 import type { Lang } from '../i18n/routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
-import type { MoneyPageId } from '../tools/calc/registry.ts';
+import type { AnyCalcId } from '../tools/calc/registry.ts';
 import type { ImageNeighbour, PdfToolId } from '../tools/pdf/registry.ts';
 import { EVENT_TOOLS } from './tool-ids.ts';
 
@@ -20,8 +20,8 @@ export const EVENT_PARAMS = {
 
 export type EventName = keyof typeof EVENT_PARAMS;
 
-/** Every image, money calculator and PDF page (the registries); the id is a page name, never a file name or a number. */
-export type ToolId = ImagePageId | MoneyPageId | PdfToolId;
+/** Every image, calculator and PDF page and the QR code (the registries); the id is a page name, never a file name or a number. */
+export type ToolId = ImagePageId | AnyCalcId | PdfToolId | 'qr-code-generator';
 /** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
 export const OUTCOMES = [
   'smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed',
@@ -45,21 +45,21 @@ export type Codec = (typeof CODECS)[number];
 /** Where a donation link was clicked: a closed list (DECISOES § 10); `pix` is the Copy code of the Pix (F6, § 216). */
 export const DONATE_PLACES = ['result', 'footer', 'support_page', 'pix'] as const;
 export type DonatePlace = (typeof DONATE_PLACES)[number];
-/** What a calculator exported: a closed list (DECISOES § 113). */
-export const EXPORT_FORMATS = ['pdf', 'csv'] as const;
+/** What a calculator exported, and since the F7 what the QR code generator saved: a closed list (DECISOES § 113 and § 263). */
+export const EXPORT_FORMATS = ['pdf', 'csv', 'png', 'svg'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
   tool_complete: { tool: ToolId; lang: Lang; outcome: Outcome };
   download: { tool: ToolId; lang: Lang };
-  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | MoneyPageId | PdfToolId | ImageNeighbour | 'home' };
+  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | AnyCalcId | PdfToolId | ImageNeighbour | 'home' };
   tool_error: { tool: ToolId; lang: Lang; browser: string; codec: Codec; reason: ErrorReason };
   donate_click: { place: DonatePlace; lang: Lang };
   /** Once per page load, on the first valid change the person makes (never on load, never from the # link). */
-  calc_complete: { tool: MoneyPageId; lang: Lang };
-  export_click: { tool: MoneyPageId; lang: Lang; format: ExportFormat };
-  share_click: { tool: MoneyPageId; lang: Lang };
+  calc_complete: { tool: AnyCalcId; lang: Lang };
+  export_click: { tool: AnyCalcId | 'qr-code-generator'; lang: Lang; format: ExportFormat };
+  share_click: { tool: AnyCalcId; lang: Lang };
 }
 
 /** Parameters whose value comes from a closed list: anything else (a file type, a free string) is dropped. */

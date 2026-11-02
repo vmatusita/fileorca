@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
 import { alternatesFor, collectionPageLd, graph } from '../../src/seo/meta.ts';
 import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
-import { ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, ES_CALC_IDS, GUIDE_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, ES_CALC_IDS, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
@@ -78,10 +78,19 @@ describe('sitemaps', () => {
   // other 11 pages of the image area and the 13 of the PDF area (decision 4), Spanish the money hub and its five
   // calculators (decision 6), Portuguese the Brazilian money pages once their rows are in the map (decision 5).
   const brRows = ROUTES.filter((route) => route.id === BR_HUB_ID || isBrCalc(route.id)).length;
-  const SIZES = { en: 19 + 24 + 13 + 10, pt: 8 + 11 + 13 + brRows, es: 8 + 11 + 13 + 1 + ES_CALC_IDS.length } as const;
+  // F7 (decision 9; DECISOES § 259): English gets the pages of the areas "casa-saude" and "utilidades", read from the map
+  // (the two hubs, the 11 home and health calculators and the QR code generator); pt and es do not change.
+  const f7Rows = ROUTES.filter((route) => route.adArea === 'casa-saude' || route.adArea === 'utilidades').map((route) => route.id);
+  const SIZES = { en: 19 + 24 + 13 + 10 + f7Rows.length, pt: 8 + 11 + 13 + brRows, es: 8 + 11 + 13 + 1 + ES_CALC_IDS.length } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
+    expect(f7Rows, 'the F7 rows of the map').toEqual([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID]);
+    // Every F7 page is in the English sitemap, and in no other.
+    for (const id of f7Rows) {
+      expect(sitemapUrls('en'), id).toContain(`${O}${routeById(id).paths.en ?? '-'}`);
+      expect(Object.keys(routeById(id).paths), id).toEqual(['en']);
+    }
     for (const lang of ['en', 'pt', 'es'] as const) {
       expect(validateSitemap(sitemapXml(lang), sitemapUrls(lang), O)).toEqual([]);
       expect(sitemapUrls(lang), lang).toHaveLength(SIZES[lang]);
@@ -115,6 +124,8 @@ describe('sitemaps', () => {
     const englishOnly = [...FILE_GUIDE_IDS, ...GUIDE_IDS, ...CALC_PAGE_IDS.filter((id) => !(ES_CALC_IDS as readonly string[]).includes(id))] as RouteId[];
     expect(englishOnly).toHaveLength(10 + 5 + 13);
     for (const id of englishOnly) expect(alternatesFor(routeById(id)), id).toEqual([]);
+    // F7 (decision 1): the two hubs, the 11 home and health calculators and the QR code generator have no pair either.
+    for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID] as RouteId[]) expect(alternatesFor(routeById(id)), id).toEqual([]);
     // The Spanish money pages pair with the English ones (decision 6): en, es and the x-default.
     for (const id of [MONEY_HUB_ID, ...ES_CALC_IDS] as RouteId[]) expect(alternatesFor(routeById(id)).map((alt) => alt.hreflang), id).toEqual(['en', 'es', 'x-default']);
     // The Brazilian pages have no pair (decision 2), so no hreflang at all.

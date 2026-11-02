@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES } from '../../src/analytics/events.ts';
-import { EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { CALC_EVENT_TOOLS, EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
+import { LIFE_CALC_PAGES } from '../../src/tools/calc/registry.ts';
 import unlockTexts from '../../src/tools/unlock-pdf/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
@@ -183,6 +184,113 @@ test.describe('the calculator events', () => {
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
     await chip.click();
     expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', target: href.replaceAll('/', '-').replace(/^-|-$/g, '') }]);
+  });
+});
+
+// F7 (decision 11; DECISOES § 263): a home calculator and a health one, end to end. The first valid change sends
+// calc_complete once (a value out of the field's range sends nothing); the CSV, the PDF, Copy link and the first chip send
+// export_click with the format, share_click and next_step_click with the page it leads to. Every event carries only its
+// parameters (tool, lang, format or target), with the page id of the registry, and nothing typed: no measure in any form,
+// no date in any way it can be written.
+test.describe('the home and health calculator events', () => {
+  type Sent = readonly [name: string, params: Record<string, unknown>];
+  const sent = async (page: Page): Promise<Sent[]> =>
+    (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => [entry[1] as string, entry[2] as Record<string, unknown>] as const);
+
+  /** Only the parameters of its event, every value a word of a closed list: the page, the language, the format, the target. */
+  function expectClosed([name, params]: Sent): void {
+    const allowed: readonly string[] = (EVENT_PARAMS as Record<string, readonly string[]>)[name] ?? [];
+    for (const [key, value] of Object.entries(params)) {
+      expect(allowed, `${name}.${key} is a parameter of the event`).toContain(key);
+      expect(typeof value, `${name}.${key} is a word, not a number`).toBe('string');
+    }
+    expect(CALC_EVENT_TOOLS as readonly string[], `${name}.tool`).toContain(params['tool']);
+    if ('target' in params) expect(CALC_EVENT_TOOLS as readonly string[], `${name}.target`).toContain(params['target']);
+    if ('format' in params) expect(['pdf', 'csv'], `${name}.format`).toContain(params['format']);
+  }
+
+  /** Saves the CSV and the PDF, copies the link and clicks the first chip (its link held back), as a person would. */
+  async function exportShareAndChip(page: Page): Promise<string> {
+    const buttons = page.locator('.fo-export .fo-btn');
+    for (const button of [buttons.nth(1), buttons.nth(0)]) {
+      const saved = page.waitForEvent('download');
+      await button.click();
+      await saved;
+    }
+    await buttons.nth(2).click();
+    const chip = page.locator('.fo-calc__next a.fo-chip').first();
+    const href = (await chip.getAttribute('href')) ?? '';
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+    await chip.click();
+    return href;
+  }
+
+  test('a home calculator: calc_complete once on the first valid change, then export, share and the chip, with no measure', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => undefined);
+    const id = 'square-footage-calculator';
+    const own = LIFE_CALC_PAGES[id];
+    expect((await page.goto(own.path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    expect(await sent(page), 'nada no carregamento').toEqual([]);
+    // Out of the range (0.01 to 300 ft): the field says so, the result stays, nothing is sent.
+    await page.locator('#fo-calc-a0x').fill('987.65');
+    await expect(page.locator('#fo-calc-a0x-error')).toBeVisible();
+    expect(await sent(page), 'nada com um valor fora da faixa').toEqual([]);
+    for (const [field, value] of [['#fo-calc-a0x', '287.53'], ['#fo-calc-a0y', '263.41'], ['#fo-calc-a0x', '241.87']] as const) await page.locator(field).fill(value);
+    expect(await sent(page)).toEqual([['calc_complete', { tool: id, lang: 'en' }]]);
+    const href = await exportShareAndChip(page);
+    const target = own.next[0];
+    expect(href).toBe(target ? LIFE_CALC_PAGES[target].path : '');
+    const events = await sent(page);
+    expect(events).toEqual([
+      ['calc_complete', { tool: id, lang: 'en' }],
+      ['export_click', { tool: id, lang: 'en', format: 'csv' }],
+      ['export_click', { tool: id, lang: 'en', format: 'pdf' }],
+      ['share_click', { tool: id, lang: 'en' }],
+      ['next_step_click', { tool: id, lang: 'en', target }],
+    ]);
+    for (const event of events) expectClosed(event);
+    const everything = JSON.stringify(await dataLayer(page));
+    for (const typed of ['987.65', '98765', '287.53', '28753', '263.41', '26341', '241.87', '24187']) expect(everything, `"${typed}" is in the dataLayer`).not.toContain(typed);
+  });
+
+  test('a health calculator: calc_complete once on the first valid date, then export, share and the chip, with no date', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => undefined);
+    const id = 'due-date-calculator';
+    const own = LIFE_CALC_PAGES[id];
+    expect((await page.goto(own.path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    expect(await sent(page), 'nada no carregamento').toEqual([]);
+    // A day out of the field's fixed range (2000 to 2099): the error, the last result, no event.
+    const date = page.locator('#fo-calc-d');
+    await date.fill('1999-12-31');
+    await expect(page.locator('#fo-calc-d-error')).toBeVisible();
+    expect(await sent(page), 'nada com um dia fora da faixa').toEqual([]);
+    await date.fill('2026-03-17');
+    await expect(page.locator('#fo-calc-d-error')).toHaveCount(0);
+    await page.locator('#fo-calc-m').selectOption('ivf5');
+    await date.fill('2026-04-09');
+    expect(await sent(page)).toEqual([['calc_complete', { tool: id, lang: 'en' }]]);
+    const href = await exportShareAndChip(page);
+    const target = own.next[0];
+    expect(href).toBe(target ? LIFE_CALC_PAGES[target].path : '');
+    const events = await sent(page);
+    expect(events).toEqual([
+      ['calc_complete', { tool: id, lang: 'en' }],
+      ['export_click', { tool: id, lang: 'en', format: 'csv' }],
+      ['export_click', { tool: id, lang: 'en', format: 'pdf' }],
+      ['share_click', { tool: id, lang: 'en' }],
+      ['next_step_click', { tool: id, lang: 'en', target }],
+    ]);
+    for (const event of events) expectClosed(event);
+    const everything = JSON.stringify(await dataLayer(page));
+    for (const day of ['1999-12-31', '2026-03-17', '03/17/2026', '3/17/2026', 'March 17, 2026', '20260317', '2026-04-09', '04/09/2026', '4/9/2026', 'April 9, 2026', '20260409']) {
+      expect(everything, `"${day}" is in the dataLayer`).not.toContain(day);
+    }
+    // Nor the method, a word the person chose: the events carry only their closed parameters.
+    expect(everything).not.toContain('ivf5');
   });
 });
 

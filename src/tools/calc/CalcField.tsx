@@ -12,12 +12,14 @@ import type { ComponentChildren } from 'preact';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import { parseScaled, type NumberLang } from '../../calc/parse.ts';
-import { DECIMALS, display, inRange } from './form.ts';
+import { decimalsOf, display, inRange } from './form.ts';
 import type { NumberSpec } from './types.ts';
 
 export interface CalcFieldProps {
   id: string;
   kind: NumberSpec['kind'];
+  /** The decimals of a measure ('dec', F7). */
+  decimals?: number | undefined;
   min: number;
   max: number;
   negative?: boolean;
@@ -40,11 +42,14 @@ export interface CalcFieldProps {
   half?: boolean | undefined;
   /** Replaces the suffix: the unit menu of the down payment. */
   unit?: ComponentChildren;
+  /** Tells the calculator whether the field shows its range error: the result on screen is then stale (§ 116). */
+  report?: ((id: string, wrong: boolean) => void) | undefined;
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit } = props;
-  const [draft, setDraft] = useState(() => display(kind, value, lang));
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit, report } = props;
+  const places = decimalsOf(kind, decimals);
+  const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
@@ -52,13 +57,20 @@ export default function CalcField(props: CalcFieldProps) {
   // field, unless the person is typing in it right now.
   useEffect(() => {
     if (document.activeElement !== input.current) {
-      setDraft(display(kind, value, lang));
+      setDraft(display(kind, value, lang, decimals));
       setWrong(false);
     }
-  }, [value, kind, lang]);
+  }, [value, kind, lang, decimals]);
+
+  // A range error marks the result as the last one, with the line under it and the PDF and the CSV off (DECISOES § 116;
+  // review F7, g-1: an age under the minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276).
+  useEffect(() => {
+    report?.(id, wrong);
+    return () => report?.(id, false);
+  }, [report, id, wrong]);
 
   const read = (text: string): number | null => {
-    const parsed = parseScaled(text, lang, DECIMALS[kind], negative);
+    const parsed = parseScaled(text, lang, places, negative);
     return parsed !== null && inRange({ min, max }, parsed) ? parsed : null;
   };
 
@@ -67,11 +79,15 @@ export default function CalcField(props: CalcFieldProps) {
   // (review F6, d-1; DECISOES § 251 and § 254).
   const swapped = draft.replace(/[.,]/g, (mark) => (mark === '.' ? ',' : '.'));
   const unreadable =
-    wrong && hint !== undefined && kind !== 'int' && parseScaled(draft, lang, DECIMALS[kind], negative) === null && parseScaled(swapped, lang, DECIMALS[kind], negative) !== null;
+    wrong && hint !== undefined && places > 0 && parseScaled(draft, lang, places, negative) === null && parseScaled(swapped, lang, places, negative) !== null;
   const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
   const errorId = `${id}-error`;
   const helpId = `${id}-help`;
-  const described = [message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');
+  // The unit is part of what the field is: a screen reader says "Thickness, in" and not only "Thickness" (review F7, d-1; DECISOES § 279).
+  const prefixId = `${id}-prefix`;
+  const suffixId = `${id}-unit`;
+  const affix = !unit && suffix ? suffixId : null;
+  const described = [prefix ? prefixId : null, affix, message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
     <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={message ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
@@ -80,7 +96,11 @@ export default function CalcField(props: CalcFieldProps) {
       </label>
       <div class="fo-field__body">
         <div class="fo-input">
-          {prefix && <span class="fo-input__affix">{prefix}</span>}
+          {prefix && (
+            <span class="fo-input__affix" id={prefixId}>
+              {prefix}
+            </span>
+          )}
           <input
             ref={input}
             id={id}
@@ -100,10 +120,15 @@ export default function CalcField(props: CalcFieldProps) {
             }}
             onBlur={(event) => {
               const parsed = read(event.currentTarget.value);
-              if (parsed !== null) setDraft(display(kind, parsed, lang));
+              if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />
-          {unit ?? (suffix && <span class="fo-input__affix">{suffix}</span>)}
+          {unit ??
+            (suffix && (
+              <span class="fo-input__affix" id={suffixId}>
+                {suffix}
+              </span>
+            ))}
         </div>
         {help && (
           <p class="fo-field__help" id={helpId}>

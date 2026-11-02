@@ -1,5 +1,5 @@
-// Content check for the image tool and preset pages, the calculators, the PDF tools and hub (prompt F5a, decision 9)
-// and for the whole site (prompt F2, decision 10;
+// Content check for the image tool and preset pages, the calculators, the PDF tools and hub (prompt F5a, decision 9),
+// the QR code generator (prompt F7, decision 8) and for the whole site (prompt F2, decision 10;
 // DECISOES § 58 and on). Pages mark each block with data-content="…" so the check does not depend on
 // wording, the same way data-ymyl works in scripts/lib/ymyl.ts. Pure functions over HTML strings,
 // returning problem strings in Portuguese; scripts/gates/conteudo.ts loops over dist/ and prints them.
@@ -602,6 +602,38 @@ export function checkPdfHub(html: string, want: PdfHubWant): string[] {
   else if (!rules.device.test(privacyText) || !rules.notSent.test(privacyText)) problems.push('a seção de privacidade não diz que o trabalho é feito no aparelho e que nada é enviado');
 
   for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`, lang)) {
+    problems.push(`afirmação sem medida na página: ${claim}`);
+  }
+  return problems;
+}
+
+// ---- The QR code generator (prompt F7, decision 8) ----------------------------------------------------------------------
+
+/** The blocks of the QR code generator page: how to use it, the questions, the privacy note and the related tools. */
+export const QR_BLOCKS = ['how', 'faq', 'privacy', 'related'] as const;
+/** What the privacy note of the QR page says, in so many words: the text is the person's, and it stays with them. */
+export const QR_PRIVACY_PHRASE = 'your text stays on your device';
+/** And that the page never opens, or sends a request to, the address typed in the box. */
+const QR_NEVER_OPENS = /\bnever opens\b/;
+
+/**
+ * Rule 6 (F7): the QR code generator page. Its four blocks (three steps or more, four real questions or more, the privacy
+ * note, at least one related link); the privacy note says the text stays on the device and the page never opens the link
+ * typed; and no best, #1 or unmeasured number (CLAIMS).
+ */
+export function checkQrPage(html: string): string[] {
+  const root = parsePage(html);
+  const problems: string[] = [];
+  for (const name of QR_BLOCKS) {
+    const blocks = blocksOf(root, name);
+    if (blocks.length === 0) problems.push(`sem o bloco ${name} (data-content="${name}")`);
+    // Questions are real ones, as on a PDF page: a question mark, an answer of some length, each asked once.
+    else problems.push(...(name === 'faq' ? pdfFaqProblems(root) : BLOCK_CHECKS[name](blocks)));
+  }
+  const privacy = blocksOf(root, 'privacy').map(plainText).join(' ');
+  if (privacy && !privacy.includes(QR_PRIVACY_PHRASE)) problems.push(`o bloco privacy não diz "${QR_PRIVACY_PHRASE}"`);
+  if (privacy && !QR_NEVER_OPENS.test(privacy)) problems.push('o bloco privacy não diz que a página nunca abre o endereço digitado ("never opens")');
+  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`)) {
     problems.push(`afirmação sem medida na página: ${claim}`);
   }
   return problems;

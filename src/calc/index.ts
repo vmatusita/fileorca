@@ -17,6 +17,8 @@ import {
 import { rentVsBuy } from './rent-vs-buy.ts';
 import { aprToApy, compoundInterest, savingsGoal, simpleInterest } from './savings.ts';
 import { brCompound, brDebtPayoff, brPersonalLoan, creditCard, earlyPayoff, rentOrBuy, sacPrice, vehicleLoan } from './br.ts';
+import { btu, concrete, mulch, paint, squareFootage, tile } from './home.ts';
+import { bmi, bodyFat, calorie, dueDate, ovulation } from './health.ts';
 
 export const ENGINES = {
   'mortgage-calculator': mortgage,
@@ -46,6 +48,18 @@ export const ENGINES = {
   'br-debt-payoff': brDebtPayoff,
   'br-compound-interest': brCompound,
   'br-rent-or-buy': rentOrBuy,
+  // The home and health calculators (F7; oracle: scripts/oracle/calc_home_health.py).
+  'square-footage-calculator': squareFootage,
+  'concrete-calculator': concrete,
+  'mulch-calculator': mulch,
+  'paint-calculator': paint,
+  'tile-calculator': tile,
+  'btu-calculator': btu,
+  'bmi-calculator': bmi,
+  'calorie-calculator': calorie,
+  'ovulation-calculator': ovulation,
+  'body-fat-calculator': bodyFat,
+  'due-date-calculator': dueDate,
 } as const;
 
 export type CalcId = keyof typeof ENGINES;

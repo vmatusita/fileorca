@@ -1,14 +1,14 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { LANGS, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
 import { fileSize, fmt, groupDigits, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
-import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES, MONEY_HUB_ID, isBrCalc, isLifeCalc, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
@@ -22,17 +22,23 @@ const isBrPage = (id: string): boolean => BR_IDS.includes(id);
 /** The Brazilian rows the map has today: none or all nine (the count is read from the map, never written here). */
 const brRoutes = () => ROUTES.filter((route) => isBrPage(route.id));
 const ES_IDS: readonly string[] = ES_CALC_IDS;
+/** The 14 pages of the F7 (prompt F7, decision 1): the two hubs, the 11 home and health calculators and the QR code generator. */
+const LIFE_IDS: readonly string[] = [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID];
+/** The search category of a home or health calculator: the one of its hub (F7, decision 9). */
+const CALC_HUB_CATEGORY = (id: LifeCalcId): string => (LIFE_CALC_PAGES[id].hub === 'house' ? enCommon.search.homeCategory : enCommon.search.healthCategory);
 
 /**
  * The languages each page has after the F6 (decisions 2, 4 and 6), from the registries: the image and PDF pages, the
  * home, the institutional pages and the 404 in the three languages; the money hub and the five calculators of ES_CALC_IDS
  * in English and Spanish; the Brazilian pages in Portuguese only; the money presets, the other calculators, the money
- * guides and the file guides in English only.
+ * guides and the file guides in English only. F7 (decision 1): the two hubs, the 11 home and health calculators and the
+ * QR code generator in English only, with no pair in hreflang.
  */
 function languagesFor(id: string): Lang[] {
   if (isBrPage(id)) return ['pt'];
   if (id === MONEY_HUB_ID || ES_IDS.includes(id)) return ['en', 'es'];
   if (Object.hasOwn(CALC_PAGES, id) || Object.hasOwn(GUIDES, id) || isFileGuide(id)) return ['en'];
+  if (LIFE_IDS.includes(id)) return ['en'];
   return [...LANGS];
 }
 
@@ -52,9 +58,17 @@ describe('mapa de rotas', () => {
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
       PDF_HUB_ID, ...PDF_TOOL_IDS,
       ...FILE_GUIDE_IDS,
+      // F7 (decision 1; DECISOES § 259): the two hubs, the 11 home and health calculators in hub order and the QR code
+      // generator, after the file guides and before the institutional pages.
+      HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID,
       'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'not-found',
     ]);
     expect([0, BR_IDS.length], 'the Brazilian money pages join the map together').toContain(brRoutes().length);
+    // F7: the hubs and the 11 calculators are the area "casa-saude", and the QR code generator alone is "utilidades".
+    expect(LIFE_CALC_IDS).toHaveLength(11);
+    expect(ROUTES.filter((route) => route.adArea === 'casa-saude').map((route) => route.id)).toEqual([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS]);
+    expect(ROUTES.filter((route) => route.adArea === 'utilidades').map((route) => route.id)).toEqual([QR_ID]);
+    for (const id of LIFE_CALC_IDS) expect(isLifeCalc(id), id).toBe(true);
     // F6 (decisions 2 and 4): every image page, the image hub, the PDF hub and the 12 PDF tools are translations, in the
     // three languages (before the F6 only Compress image was, DECISOES § 58). What stays English only: the 10 file guides
     // (F5b, DECISOES § 190), the 5 money guides, the 4 money presets and the 9 calculators without a Spanish page.
@@ -62,7 +76,9 @@ describe('mapa de rotas', () => {
     expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + 1);
     for (const id of everyLanguage) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
     const englishOnly = ROUTES.filter((route) => languagesFor(route.id).length === 1 && languagesFor(route.id)[0] === 'en').map((route) => route.id);
-    expect(englishOnly).toHaveLength(FILE_GUIDE_IDS.length + GUIDE_IDS.length + CALC_PAGE_IDS.length - ES_CALC_IDS.length);
+    // F7 (DECISOES § 259): plus the 14 English-only pages of the F7 (2 hubs, 11 calculators and the QR code generator).
+    expect(englishOnly).toHaveLength(FILE_GUIDE_IDS.length + GUIDE_IDS.length + CALC_PAGE_IDS.length - ES_CALC_IDS.length + LIFE_IDS.length);
+    expect(LIFE_IDS).toHaveLength(14);
     expect(CALC_PAGE_IDS.length - ES_CALC_IDS.length, 'the English-only calculators and presets').toBe(13);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(languagesFor(route.id));
   });
@@ -212,9 +228,11 @@ describe('tool search', () => {
     // The image pages first, then the 12 PDF tools of the F5a (PDF category), then the money calculators and guides of
     // the F4 (money category; F6: the Brazilian calculators after the English ones, once their rows are in the map).
     // F5b: the 10 file guides come last, in the category of their hub (DECISOES § 190).
+    // F7 (decision 9; DECISOES § 259): the 11 home and health calculators in hub order, then the QR code generator, come
+    // last, after the file guides (the hubs are not searchable pages, as the money hub is not).
     const br = BR_CALC_IDS.filter((id) => brRoutes().some((route) => route.id === id));
-    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
-    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length);
+    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
+    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -229,6 +247,18 @@ describe('tool search', () => {
     }
     expect(index.find((entry) => entry.id === 'image-to-pdf')?.cat).toBe('pdf');
     expect(index.find((entry) => entry.id === 'heic-to-jpg')?.cat).toBe('image');
+    // F7 (decision 9): the home and health calculators have the violet of their category and the category of their hub;
+    // the QR code generator has the lime of the utilities. None of them, nor the two new hubs, has a page in pt or es.
+    for (const id of LIFE_CALC_IDS) {
+      const found = index.find((entry) => entry.id === id);
+      expect(found?.cat, id).toBe('home');
+      expect(found?.category, id).toEqual({ en: CALC_HUB_CATEGORY(id) });
+    }
+    const qr = index.find((entry) => entry.id === QR_ID);
+    expect(qr?.cat).toBe('util');
+    expect(qr?.category).toEqual({ en: enCommon.search.utilityCategory });
+    expect(qr?.href).toEqual({ en: '/qr-code-generator/' });
+    expect(index.some((entry) => [HOUSE_HUB_ID, HEALTH_HUB_ID].includes(entry.id))).toBe(false);
   });
 
   it('indexes the 12 PDF tools from their registry: the PDF category, the hub order, the route paths and the blurb terms (F5a)', () => {
@@ -326,10 +356,25 @@ describe('tool search', () => {
     // English has all eleven image pages, the 12 PDF tools (F5a) and the 23 money pages. F6: Portuguese and Spanish have
     // the eleven image pages and the 12 PDF tools too (only Compress image before); Spanish has the five calculators of
     // ES_CALC_IDS, and Portuguese the Brazilian ones once their rows are in the map.
+    // F7 (decision 9; DECISOES § 259): English ends with the 11 home and health calculators and the QR code generator;
+    // Portuguese and Spanish do not change, since none of those pages exists in them.
     const br = BR_CALC_IDS.filter((id) => brRoutes().some((route) => route.id === id));
-    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
     expect(ids(filterEntries(index, '', 'pt'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...br]);
     expect(ids(filterEntries(index, '', 'es'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS.filter((id) => ES_IDS.includes(id))]);
+    // F7 (decision 9): the synonyms of the new categories find their page in English, and nothing in Portuguese or Spanish,
+    // which never fall back to an English page.
+    const F7_QUERIES: [string, string][] = [
+      ['pregnancy', 'due-date-calculator'],
+      ['ac size', 'btu-calculator'],
+      ['cubic yards', 'concrete-calculator'],
+      ['bmi', 'bmi-calculator'],
+      ['qr code', QR_ID],
+    ];
+    for (const [query, id] of F7_QUERIES) {
+      expect(ids(filterEntries(index, query, 'en')), query).toContain(id);
+      for (const lang of ['pt', 'es'] as const) expect(ids(filterEntries(index, query, lang)).filter((found) => LIFE_IDS.includes(found)), `${query} ${lang}`).toEqual([]);
+    }
     // 'mortgage' finds nothing in Portuguese: the Brazilian pages are adaptations with no English page, so no English term.
     // In Spanish it finds the Spanish mortgage calculator, and none of the English-only presets and guides it finds in English.
     expect(filterEntries(index, 'mortgage', 'pt')).toEqual([]);

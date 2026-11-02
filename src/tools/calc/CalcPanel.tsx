@@ -10,7 +10,7 @@ import { dollars, type NumberLang } from '../../calc/parse.ts';
 import { percent } from '../../i18n/format.ts';
 import { shares } from './SplitChart.tsx';
 import { DEFS } from './defs/index.ts';
-import Fields from './Fields.tsx';
+import Fields, { AddRow } from './Fields.tsx';
 import ResultHero from './ResultHero.tsx';
 import ExportBar from './ExportBar.tsx';
 import ScenarioCompare from './ScenarioCompare.tsx';
@@ -62,14 +62,16 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
     }
   };
   // The visit's one cheer waits for a result: a problem (a payment under the interest) shows no Oli and keeps it.
-  const cheer = state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
+  const cheer = data.cheer && state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
+  // A list whose Add button comes after the result (F7: the areas of the square footage).
+  const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
-  const fieldProps = { values, problems: state.problems, data, set };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong };
 
   return (
-    <div class="fo-calc">
+    <div class={data.cat === 'home' ? 'fo-calc fo-calc--home' : 'fo-calc'}>
       <div class="fo-calc__fields fo-calc__main">
         <Fields {...fieldProps} specs={main} />
       </div>
@@ -103,6 +105,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
                 results: view.summary,
                 premises: view.premises,
                 table: view.table(),
+                tableHeading: data.texts.view['scheduleHeading'],
                 notice: data.notice,
                 cell,
               },
@@ -114,9 +117,12 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           link={() => `${window.location.origin}${data.linkPath}${linkHash(def.fields, values)}`}
         />
       </div>
-      {more.length > 0 && (
+      {(more.length > 0 || addBelow.length > 0) && (
         <div class="fo-calc__fields fo-calc__more">
           {data.texts.moreHeading && <h2 class="fo-h3 fo-calc__moreheading">{data.texts.moreHeading}</h2>}
+          {addBelow.map((spec) => (
+            <AddRow {...fieldProps} key={spec.key} specs={[]} spec={spec} />
+          ))}
           <Fields {...fieldProps} specs={more} />
         </div>
       )}
@@ -133,7 +139,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           {data.chips.map((chip) => (
             <a
               key={chip.href}
-              class="fo-chip fo-cat--money"
+              class={`fo-chip fo-cat--${data.cat}`}
               href={chip.href}
               onClick={() => track('next_step_click', { tool: data.page, lang: data.lang, target: chip.target })}
             >

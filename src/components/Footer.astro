@@ -3,15 +3,16 @@
 // H2; only links to pages that exist in the language. The Image column lists the hub and the tools. The Money column
 // lists the language's money hub and its five credit calculators (DECISOES § 118; F6: the Brazilian hub and calculators
 // in Portuguese, the Spanish ones in Spanish). The PDF column lists the hub and the first six PDF tools in hub order (F5a,
-// DECISOES § 160): every PDF page is one click from the hub, so none is an orphan. Never an ad inside the footer. With the AdSense
+// DECISOES § 160): every PDF page is one click from the hub, so none is an orphan. In English, the Home and Health columns
+// list their hub and every calculator of it, and the Utilities column the QR code generator (F7, decision 9). Never an ad inside the footer. With the AdSense
 // anchor on the page, 96px of room at the bottom on the phone.
 import type { Lang } from '../i18n/routes.ts';
-import { moneyHubId, pagePath, pathFor, routeById } from '../i18n/routes.ts';
+import { QR_ID, moneyHubId, pagePath, pathFor, routeById } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { HOME_MONEY_IDS } from '../tools/calc/registry.ts';
+import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, type LifeHub } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import Icon from './Icon.astro';
 
@@ -58,6 +59,23 @@ const money = moneyHub
       }),
     ]
   : [];
+/** The home and health columns (English only, F7): the hub and every calculator of it, so none is an orphan. */
+const life = (hubId: LifeHub, name: string | undefined, title: string | undefined) => {
+  const hubPath = pagePath(LIFE_HUB_ROUTE[hubId], lang);
+  if (!hubPath || !name || !title) return null;
+  const links = [
+    { label: name, href: hubPath },
+    ...LIFE_HUB_IDS[hubId].flatMap((id) => {
+      const href = pagePath(id, lang);
+      const blurb = t.calcs[id];
+      return href && blurb ? [{ label: blurb.name, href }] : [];
+    }),
+  ];
+  return { title, links };
+};
+const lifeColumns = [life('house', t.homeCalculators, t.footer.homeColumn), life('health', t.healthCalculators, t.footer.healthColumn)].filter((column) => column !== null);
+const qrPath = pagePath(QR_ID, lang);
+const utility = qrPath && t.qr && t.footer.utilityColumn ? { title: t.footer.utilityColumn, links: [{ label: t.qr.name, href: qrPath }] } : null;
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },
@@ -82,6 +100,18 @@ const site = [
       <div>
         <h2>{t.footer.moneyColumn}</h2>
         <ul>{money.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+      </div>
+    )}
+    {lifeColumns.map((column) => (
+      <div>
+        <h2>{column.title}</h2>
+        <ul>{column.links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+      </div>
+    ))}
+    {utility && (
+      <div>
+        <h2>{utility.title}</h2>
+        <ul>{utility.links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
       </div>
     )}
     <div>

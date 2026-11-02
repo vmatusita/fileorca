@@ -5,7 +5,8 @@
 // on wording. Rates of the day, rate forecasts and product recommendations are refused.
 import { parse } from 'node-html-parser';
 
-export type YmylHub = 'money' | 'health';
+/** The hub of a page: its official sources (F7, decision 7: the home calculators have a list of their own). */
+export type YmylHub = 'money' | 'house' | 'health';
 
 export const REQUIRED_BLOCKS = ['formula', 'premises', 'example', 'reviewed', 'disclaimer'] as const;
 
@@ -15,6 +16,9 @@ export const REQUIRED_BLOCKS = ['formula', 'premises', 'example', 'reviewed', 'd
  */
 export const OFFICIAL_SOURCES: Record<YmylHub, string[]> = {
   money: ['consumerfinance.gov', 'federalreserve.gov', 'bcb.gov.br', 'planalto.gov.br'],
+  // F7 (decision 5): the Energy Star table and adjustments of a room air conditioner, the area formulas of energy.gov, and
+  // the exact unit conversions of NIST (DECISOES § 258).
+  house: ['energystar.gov', 'energy.gov', 'nist.gov'],
   health: ['cdc.gov', 'who.int', 'nih.gov', 'gov.br'],
 };
 
@@ -33,6 +37,25 @@ export const BANNED = [
   /\b(?:os )?juros (?:v[aã]o|devem|tendem a) (?:subir|cair|baixar)\b/i,
   /\b(?:las )?tasas(?: de inter[eé]s)? (?:subir[aá]n|bajar[aá]n|van a (?:subir|bajar)|deber[ií]an (?:subir|bajar))\b/i,
   /\brecomendamos (?:este|esse|o|a|el|la) (?:banco|financeira|cart[aã]o|empr[eé]stimo|financiamento|prestamista|tarjeta|pr[eé]stamo)\b/i,
+];
+
+/**
+ * F7 (decision 7): what a health page never says. A goal of weight to lose or gain, a healthy weight range worked out for
+ * a height, an "ideal weight", a calorie deficit or surplus, calories to eat to lose weight, a diet or meal plan, macros,
+ * and the calendar of a cycle offered as birth control. The CDC's own category name "Healthy Weight" stays allowed.
+ */
+export const BANNED_HEALTH = [
+  /\bideal (?:body )?weight\b/i,
+  /\byou (?:should|need to|must) (?:lose|gain|cut)\b/i,
+  /\b(?:weight[- ]loss|weight[- ]gain) (?:goal|target|plan)\b/i,
+  /\b(?:lose|drop|gain) \d+(?:\.\d+)? ?(?:lb|lbs|pounds|kg|kilograms)\b/i,
+  /\bhealthy weight (?:range )?for (?:your|a|this) height\b/i,
+  /\bcalorie (?:deficit|surplus)\b/i,
+  /\b(?:eat|cut|consume)\b[^.]{0,40}\bcalories\b[^.]{0,20}\bto (?:lose|gain)\b/i,
+  /\b(?:diet|meal) plan\b/i,
+  /\bmacros\b/i,
+  /\bbirth control\b/i,
+  /\bsafe days\b/i,
 ];
 
 export function checkYmylPage(html: string, hub: YmylHub): string[] {
@@ -60,7 +83,7 @@ export function checkYmylPage(html: string, hub: YmylHub): string[] {
   });
   if (!author) problems.push('sem autor (schema Person Victor Yuki Matusita)');
   const text = root.querySelector('main')?.text ?? root.text;
-  for (const pattern of BANNED) if (pattern.test(text)) problems.push(`texto proibido: ${pattern}`);
+  for (const pattern of hub === 'health' ? [...BANNED, ...BANNED_HEALTH] : BANNED) if (pattern.test(text)) problems.push(`texto proibido: ${pattern}`);
   return problems;
 }
 

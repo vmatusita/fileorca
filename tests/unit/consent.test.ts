@@ -1,10 +1,11 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultConsentFor } from '../../src/analytics/consent.ts';
-import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
-import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { CODECS, ERROR_REASONS, EVENT_PARAMS, EXPORT_FORMATS, OUTCOMES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
+import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS, UTILITY_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
+import { QR_ID } from '../../src/i18n/routes.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
 import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
@@ -104,8 +105,29 @@ describe('typed events', () => {
   it('lists exactly the pages of both registries as event tools', () => {
     expect([...IMAGE_EVENT_TOOLS]).toEqual(Object.keys(IMAGE_PAGES));
     // The 18 English calculators and, since the F6, the 8 adapted to Brazil (DECISOES § 226).
-    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS].sort());
+    // F7 (DECISOES § 259 and § 263): and the 11 home and health calculators, after them, in hub order.
+    expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_PAGE_IDS, ...BR_CALC_IDS, ...LIFE_CALC_IDS].sort());
     expect([...CALC_EVENT_TOOLS].sort()).toEqual([...CALC_IDS].sort());
+    expect(CALC_EVENT_TOOLS.slice(-LIFE_CALC_IDS.length)).toEqual([...LIFE_CALC_IDS]);
+    expect(new Set(CALC_EVENT_TOOLS).size, 'no calculator twice').toBe(CALC_EVENT_TOOLS.length);
+    // F7 (decision 8): the QR code generator is the one utility, in a list of its own.
+    expect([...UTILITY_EVENT_TOOLS]).toEqual([QR_ID]);
+  });
+
+  it('carries the QR code formats in export_click and drops any other (F7, decision 8; DECISOES § 263)', () => {
+    for (const format of ['png', 'svg'] as const) {
+      expect(cleanParams('export_click', { tool: QR_ID, lang: 'en', format }), format).toEqual({ tool: QR_ID, lang: 'en', format });
+    }
+    expect(EXPORT_FORMATS).toEqual(['pdf', 'csv', 'png', 'svg']);
+    // A format outside the closed list falls, and so does anything typed into the QR, smuggled as a format or a parameter.
+    for (const format of ['jpg', 'PNG', 'gif', 'https://example.com/', 'qr-code.png', '512']) {
+      expect(cleanParams('export_click', { tool: QR_ID, lang: 'en', format }), format).toEqual({ tool: QR_ID, lang: 'en' });
+    }
+    expect(cleanParams('export_click', { tool: QR_ID, lang: 'en', format: 'png', text: 'https://example.com/', size: 1024, logo: true })).toEqual({ tool: QR_ID, lang: 'en', format: 'png' });
+    // The home and health calculators export PDF and CSV like the money ones; a typed measure is no format.
+    expect(cleanParams('export_click', { tool: 'bmi-calculator', lang: 'en', format: 'csv' })).toEqual({ tool: 'bmi-calculator', lang: 'en', format: 'csv' });
+    expect(cleanParams('export_click', { tool: 'due-date-calculator', lang: 'en', format: '2026-03-17' })).toEqual({ tool: 'due-date-calculator', lang: 'en' });
+    expect(cleanParams('calc_complete', { tool: 'bmi-calculator', lang: 'en', bmi: 24.2, weight: 160 })).toEqual({ tool: 'bmi-calculator', lang: 'en' });
   });
 
   it('drops parameters outside the list and non-scalar values', () => {
@@ -187,7 +209,8 @@ describe('the events of the PDF tools (F5a)', () => {
     expect([...PDF_EVENT_TOOLS]).toEqual([...PDF_TOOL_IDS]);
     expect([...PDF_EVENT_TOOLS]).toEqual(Object.keys(PDF_PAGES));
     for (const id of PDF_TOOL_IDS) expect(PDF_PAGES[id].id).toBe(id);
-    expect([...EVENT_TOOLS]).toEqual([...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS]);
+    // F7 (decision 8; DECISOES § 259 and § 263): the list of the utilities (the QR code generator) comes last.
+    expect([...EVENT_TOOLS]).toEqual([...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS, ...UTILITY_EVENT_TOOLS]);
     expect(new Set(EVENT_TOOLS).size, 'no page name is in two lists').toBe(EVENT_TOOLS.length);
     expect(Object.keys(SUCCESS)).toEqual([...PDF_TOOL_IDS]);
   });

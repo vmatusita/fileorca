@@ -36,6 +36,17 @@ describe('verificar em partes', () => {
     expect(plan(['--playwright=webkit', '--shard=7/7']).label).toBe('Playwright no webkit, parte 7 de 7');
   });
 
+  // F7 (second adendo of ADR-003): Chromium in four shards and WebKit in eight, the 13 parts of the ci.yml.
+  it('covers the whole suite between the 13 parts of the F7, and each shard runs its own slice', () => {
+    const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
+    const parts = [['--sem-playwright'], ...shards('chromium', 4), ...shards('webkit', 8)];
+    expect(parts).toHaveLength(13);
+    const commands = new Set(parts.flatMap((part) => plan(part).steps.map((step) => step.command.replace(/ --.*$/, ''))));
+    expect([...commands].sort()).toEqual(STEPS.map((step) => step.command).sort());
+    expect(plan(['--playwright=chromium', '--shard=4/4']).steps.map((step) => step.command)).toEqual(['pnpm run build', 'pnpm run e2e --project=chromium --shard=4/4']);
+    expect(plan(['--playwright=webkit', '--shard=8/8']).label).toBe('Playwright no webkit, parte 8 de 8');
+  });
+
   it('refuses what it does not know', () => {
     for (const args of [['--playwright=firefox'], ['--playwright'], ['--shard=1/2'], ['--playwright=webkit', '--shard=3/2'], ['--playwright=webkit', '--shard=0/2'], ['--sem-playwright', '--playwright=webkit'], ['--tudo']]) {
       expect(() => plan(args), args.join(' ')).toThrow();

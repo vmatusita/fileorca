@@ -12,9 +12,15 @@ import type { CalcSharedTexts, Cell, Table } from './types.ts';
 /** The separator of the CSV columns: a semicolon where the decimal is a comma (Portuguese), a comma elsewhere. */
 export const CSV_SEPARATOR: Record<Lang, string> = { en: ',', pt: ';', es: ',' };
 
-/** A cell as the CSV writes it: cents as 1896.20 (1896,20 in Portuguese; no thousands separator, ASCII minus), text as it is. */
+/**
+ * A cell as the CSV writes it: cents as 1896.20 (1896,20 in Portuguese; no thousands separator, ASCII minus), a measure with
+ * its decimals (1234.50, F7), text as it is.
+ */
 export function csvCell(cell: Cell, lang: Lang = 'en'): string {
-  return 'cents' in cell ? formatScaled(cell.cents, 2, lang === 'pt' ? 'pt' : 'en', { min: 2, group: false, minus: '-' }) : cell.text;
+  const numbers = lang === 'pt' ? 'pt' : 'en';
+  if ('cents' in cell) return formatScaled(cell.cents, 2, numbers, { min: 2, group: false, minus: '-' });
+  if ('scaled' in cell) return formatScaled(cell.scaled, cell.decimals, numbers, { min: cell.decimals, group: false, minus: '-' });
+  return cell.text;
 }
 
 function quote(text: string, separator: string): string {
@@ -50,6 +56,8 @@ export function save(blob: Blob, name: string): void {
 
 export interface ReportParts {
   title: string;
+  /** The heading of the table in the PDF: the calculator's own (F7: "Your areas"), else "Schedule". */
+  tableHeading?: string | undefined;
   inputs: [string, string][];
   results: [string, string][];
   premises: string[];
@@ -70,7 +78,7 @@ export function reportInput(parts: ReportParts, t: CalcSharedTexts, lang: Lang =
     premises: parts.premises,
     table: { head: table.groups ? [t.year.replace(/\s*\{n\}/, ''), ...table.head] : [...table.head], rows },
     notice: parts.notice,
-    labels: t.pdfLabels,
+    labels: parts.tableHeading ? { ...t.pdfLabels, schedule: parts.tableHeading } : t.pdfLabels,
     ...(lang === 'pt' ? { paper: 'a4' as const } : {}),
   };
 }

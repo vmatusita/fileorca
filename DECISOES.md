@@ -2314,3 +2314,269 @@ A coluna de seguros e taxas da § 252 levou a tabela do SAC × PRICE a 8 colunas
 - **A linha de cada ano** do cronograma punha o saldo do fim do ano na última coluna, que no SAC × PRICE é "Correção (TR)". A tabela agora diz a coluna do saldo (`endColumn`), e a linha do ano a usa. O teste do `money-calc.spec.ts` reprova no `8b74716` e passa no novo.
 - **A fórmula da amortização antecipada** dizia "o saldo menor com a mesma parcela (reduzir o prazo)" também para o SAC, que agora encurta o prazo pelas amortizações cobertas (§ 249). O texto diz as duas regras.
 - **Com R$ 0 antecipado**, a frase dizia "Esse valor não chega a encurtar o prazo, mas você deixa de pagar R$ 0 de juros". Agora diz "Sem valor a antecipar, o contrato segue como está: digite quanto você quer adiantar." O `calc-br-early.test.ts` confere nos dois sistemas.
+
+## § 257 · As calculadoras de casa e saúde num registro irmão do de dinheiro (F7, decisão 1)
+
+- **Decisão:** as 11 calculadoras da F7 ficam em `LIFE_CALC_PAGES` (`src/tools/calc/registry.ts`), ao lado de `CALC_PAGES` e de `BR_CALC_PAGES`, com `HOUSE_CALC_IDS` e `HEALTH_CALC_IDS` na ordem dos hubs, `HOUSE_HUB_ID = 'home-calculators'` e `HEALTH_HUB_ID = 'health-calculators'`. Cada linha diz o caminho, o hub (`house` ou `health`), o ícone, os chips, as relacionadas (só do mesmo hub) e o nome fixo do PDF e do CSV. `AnyCalcId = MoneyPageId | LifeCalcId` é o tipo da ilha (`CalcDef.id`, `CalcPanelData.page`, `DEFS`), e `calcAreaOf(id)` diz `money`, `house` ou `health`. A área decide o AdSlot (`dinheiro` ou `casa-saude`), a cor (`money` ou `home`, o violeta só como preenchimento), o hub do breadcrumb, o `WebApplication` (`FinanceApplication`, `UtilitiesApplication` ou `HealthApplication`), a comemoração da Oli (nunca na saúde) e a lista de fontes do `gate:dinheiro-saude`.
+- **Por quê:** o que lê `CALC_PAGES` supõe dinheiro (cronograma, centavos, presets, versão em espanhol); estender aquele registro levaria as páginas novas para testes e portões que não fazem sentido para elas. O registro irmão repete o que a F6 fez com as calculadoras brasileiras. `HOME_CALC_IDS` continua sendo "as calculadoras de dinheiro da home".
+- **Alternativa:** estender `CALC_PAGES` com `area` e `hub` (mais simples no tipo, mas cada teste de dinheiro teria de filtrar por área).
+- **Uma ilha só:** as 11 definições e os motores entram no `mount.ts` comum (§ 110 e § 236); toda página de calculadora continua com 2 arquivos JS.
+
+## § 258 · Medidas, contas exatas e o `exact` onde entram π e log10 (F7, decisões 2 a 4)
+
+- **Decisão:** um campo de medida é `kind: 'dec'` com `decimals` (`NumberSpec`): um número inteiro de 10^-decimais da unidade, lido pelo `parse.ts` sem `parseFloat`. Comprimento em centésimos de pé ou de polegada, área em centésimos de pé quadrado, peso e circunferência em décimos. O `DECIMALS` do dinheiro não muda; `decimalsOf()` e `display()` com `decimals` cobrem a medida. Na tabela, a célula `{ scaled, decimals }` sai com as casas fixas na tela, no PDF e no CSV (sem separador de milhar no CSV).
+- **As contas:** área, volume, BMI, calorias, galões e peças são frações em BigInt (`src/calc/home.ts`, `src/calc/health.ts`), arredondadas uma vez, no fim, metade para cima, na casa mostrada; o que se compra é o teto da conta exata. As conversões são as exatas do NIST (HB 44, Apêndice C, e SP 811): 1 in = 2,54 cm; 1 lb = 0,45359237 kg; 1 ft = 12 in; 1 yd³ = 27 ft³; 1 ft³ = 1.728 in³; tonelada curta = 2.000 lb.
+- **π e log10:** o círculo (Square footage, Concrete redondo) e a gordura corporal usam `Math.PI` e `Math.log10`. O resultado leva `exact`, o valor antes do arredondamento; o oráculo (`scripts/oracle/calc_home_health.py`, `decimal` com 50 dígitos) grava o mesmo `exact` com 30 algarismos, e o `calc-oracle.test.ts` exige o valor mostrado igual e a diferença do `exact` abaixo de 1e-9 (`exactGaps`, com o próprio controle). O oráculo refaz o sorteio quando o valor mostrado fica a menos de 1e-9 de um empate de arredondamento (ou um teto a menos de 1e-9 de um inteiro) e grava quantos refez em `nearTiesDrawnAgain` (1 caso, no Concrete).
+- **Faixas:** as dimensões ficam pequenas o bastante para o erro do ponto flutuante não chegar perto de 1e-9 (Square footage até 300 ft por lado; Concrete redondo até 240 polegadas de diâmetro e de profundidade).
+- **Fontes de casa:** a lista do `gate:dinheiro-saude` ganha `house`: `energystar.gov`, `energy.gov` e `nist.gov`, com controles positivos e negativos no `ymyl.test.ts`. A página escolhe a lista pelo hub (`ymylHubOf`, `src/i18n/routes.ts`). A de saúde não precisou de domínio novo: cada página de saúde cita ao menos um `cdc.gov` ou `nih.gov` (CDC, PubMed, PMC, NICHD, NIDDK); as outras fontes que ela cita (womenshealth.gov, medlineplus.gov, army.mil) são oficiais e ficam como leitura complementar.
+- **Teste:** `calc-oracle.test.ts` (11 fixtures novas, 2.421 casos), o mutante (`CALC_FIXTURES_DIR`, um BMI e um `exact` mudados: reprovam os dois) e o `--check` do oráculo.
+
+## § 259 · Asserções que mudaram porque o site cresceu (F7)
+
+A ficha permite mudar um valor esperado que cresceu com o site, com registro. Nenhuma asserção perdeu o sentido:
+
+- **`tests/unit/ymyl.test.ts`:** a contagem do portão soma os 2 hubs e as 11 calculadoras de casa e saúde (`life = 13`).
+- **`tests/unit/calc-oracle.test.ts`:** o conjunto de scripts do oráculo passa de dois para três; o `numpyFinancial` é exigido só nos dois de dinheiro, e o de casa e saúde (sem pacote) tem de gravar `nearTiesDrawnAgain`.
+- **`tests/unit/calc-defs.test.ts`:**
+  - as definições passam de 26 para 37;
+  - o link do cenário não leva o `today` do Due date, que a ilha lê do aparelho;
+  - a "última atualização" da Privacidade em inglês passa a 2 de novembro de 2026.
+- **`tests/unit/routes.test.ts`:**
+  - a ordem do mapa ganha os 2 hubs, as 11 calculadoras e o QR depois dos guias de arquivo;
+  - as páginas só em inglês somam 14;
+  - o índice da busca e a lista vazia em inglês ganham as 11 calculadoras e o QR no fim.
+- **`tests/unit/seo-checks.test.ts`:** o sitemap em inglês soma as linhas `casa-saude` e `utilidades`, lidas do mapa.
+- **`tests/unit/consent.test.ts`:** `CALC_EVENT_TOOLS` soma `LIFE_CALC_IDS`, e `EVENT_TOOLS` ganha `UTILITY_EVENT_TOOLS` no fim.
+- **`tests/unit/pdf-site.test.ts`:** a home em inglês ganha as seções de casa, saúde e QR depois da de dinheiro; o rodapé em inglês ganha as colunas Home, Health e Utilities antes de FileOrca.
+- **`tests/unit/prontidao.test.ts`:** os cartões da home em inglês somam as 6 de casa, as 5 de saúde e o QR; a busca soma 12, e as 12 ferramentas de PDF deixam de fechar a lista.
+- **`tests/unit/conteudo.test.ts`:** a contagem de calculadoras do portão soma as 11 (42 páginas).
+- **`tests/unit/design-checks.test.ts` e `scripts/gates/design.ts`:** as páginas de saúde pedem todas as poses da ilha menos `cheer`, que passa a ser proibida nelas (a regra antiga exigia o símbolo em toda página de ferramenta).
+- **`tests/e2e/a11y.spec.ts` e `tests/e2e/navigation.spec.ts`:** o diálogo e a caixa da busca listam as 11 calculadoras e o QR (de 56 para 68 em inglês), lidos dos registros.
+- **`tests/e2e/budgets.spec.ts`:** `HUB_PAGES` e a lista de calculadoras só crescem.
+- **`tests/e2e/money-speed.spec.ts`:** os casos do BMI e da Square footage com 10 áreas têm a tabela aberta, então o "nenhuma linha antes de abrir" vale só para as de dinheiro.
+
+## § 260 · A tabela da Energy Star e a ordem dos ajustes do BTU (F7, decisão 5.6)
+
+- **A tabela:** a de https://www.energystar.gov/products/room_air_conditioners, lida em 2/nov/2026, transcrita no oráculo e no motor (`ENERGY_STAR_ROWS`). Cada linha vai do primeiro número até o segundo, sem incluí-lo ("150 up to 250" começa em 150), e a última inclui 2.500 sq ft. Fora de 100 a 2.500 sq ft, o campo diz a faixa.
+- **O "34,00":** a cópia da tabela em https://www.energystar.gov/most-efficient/me-certified-room-ac/ escreve a última capacidade "34,00"; a página principal escreve 34,000, com as mesmas 13 linhas antes. O oráculo usa 34,000 e o `fixtures/calc/OFICIAIS.md` registra o erro de digitação.
+- **A ordem:** a Energy Star não fixa a ordem dos ajustes. A página aplica, nesta ordem: o valor da tabela; menos 10% com muita sombra ou mais 10% com muito sol (uma escolha só, sobre o valor da tabela); mais 600 BTU por pessoa além de duas; mais 4.000 BTU na cozinha. Como o valor da tabela é múltiplo de 1.000, o resultado é sempre inteiro, sem arredondamento.
+- **Alternativa:** somar pessoas e cozinha antes do percentual (daria 60 a 400 BTU a mais com sol e 60 a 400 a menos com sombra); ficou a ordem em que a fonte lista os ajustes, com o percentual sobre o número que a própria tabela dá.
+
+## § 261 · Trocar de unidade não converte: cada sistema guarda os próprios valores (F7, decisão 2)
+
+- **Decisão:** BMI, Calorie e Body fat têm o OptionGroup "US / Metric" (US primeiro). Cada sistema tem os próprios campos e chaves (pés, polegadas e libras; centímetros e quilos; no Body fat, as circunferências em polegadas `nk`, `wa`, `hp` e em centímetros `nkc`, `wac`, `hpc`). Trocar mostra os campos do outro sistema com os valores dele: o exemplo da unidade ou o que a pessoa digitou nele antes. A unidade vai no link do cenário (`u=metric`), nunca no armazenamento do aparelho.
+- **Por quê:** converter na troca arredonda (160 lb viram 72,6 kg, que voltam como 160,1 lb), e o resultado mudaria só porque a pessoa trocou de unidade. Os dois exemplos são casos `page-example` do oráculo.
+- **Alternativa:** converter o que está digitado ao trocar (mais cômodo para quem digitou num sistema e quer ver no outro, com o arredondamento acima).
+- **Teste:** o spec de saúde troca de unidade nos dois navegadores e confere o resultado do exemplo métrico contra o oráculo.
+
+## § 262 · O campo de data é o do navegador, com faixa fixa (F7, decisão 6)
+
+- **Decisão:** `DateSpec` (`kind: 'date'`) e `DateField.tsx`: o `<input type="date">` nativo, com `min` e `max`, o rótulo e o FieldError do design system (ícone de alerta, `role="alert"`), feito só com tokens. O valor é o dia "AAAA-MM-DD", o mesmo em qualquer idioma do aparelho; o link leva `d=2026-09-07`, e o `readLink` confere que é um dia real e está na faixa. A faixa é fixa, de 1/jan/2000 a 31/dez/2099, para não mudar com o dia em que a página abre. Dia vazio, incompleto ou fora da faixa mostra o erro com a faixa, e o resultado fica o último que deu certo.
+- **Por quê:** o campo nativo dá o calendário do telefone, cabe em meia linha (o resultado fica acima da dobra a 360 × 740) e não depende de formato de data do idioma. Três campos (mês, dia, ano) pediriam uma linha a mais.
+- **As datas da tela:** saem por extenso pelo `src/i18n/dates.ts`, sem `Intl`, que a ilha passa a importar (era só do build).
+- **Hoje:** o Due date tem `today: true`. O exemplo da página usa o dia do exemplo (2/nov/2026); depois da hidratação, o `mount.ts` põe o dia local do aparelho (`getFullYear`, `getMonth`, `getDate`, nunca UTC), uma vez, sem passar pelo link e sem escrever nele. O motor só vê dias inteiros (`src/calc/dates.ts`, o calendário gregoriano em números inteiros).
+
+## § 263 · Os eventos da F7 (F7, decisões 6 e 8)
+
+- **Calculadoras:** os 11 ids entram em `CALC_EVENT_TOOLS` (`src/analytics/tool-ids.ts`); `calc_complete`, `export_click` e `share_click` aceitam `AnyCalcId`.
+- **QR:** a lista nova `UTILITY_EVENT_TOOLS = ['qr-code-generator']` entra em `EVENT_TOOLS`, e `EXPORT_FORMATS` ganha `png` e `svg`. Baixar o QR manda `export_click` com `tool: 'qr-code-generator'` e o formato; nada do texto.
+- **Teste:** `consent.test.ts` (as listas iguais aos registros) e `events.spec.ts`.
+
+## § 264 · As datas das páginas de casa e saúde (F7, decisão 6)
+
+- **Decisão:** `LIFE_REVIEWED`, `LIFE_FIRST_PUBLISHED` e `LIFE_SOURCES_READ_ON` (`src/tools/calc/page.ts`) são 2/nov/2026, o dia em Brasília em que a run escreveu as páginas e leu as fontes (§ 207 e § 223). `datesOf(id ou área, lang)` dá os três dias de uma página ou de um hub; as páginas de dinheiro continuam com os dias delas. O `Reviewed.astro` recebe `of` (a página ou a área).
+
+## § 265 · As convenções de saúde, conferidas nas fontes (F7, decisão 5)
+
+- **Idade mínima:** todas as páginas de saúde dizem "for adults 18 and older". O BMI aceita idade de 20 a 120, porque as faixas de adulto do CDC são para 20 anos ou mais ("This BMI calculator is for adults 20 and older"); o Calorie aceita de 19 a 78, as idades da amostra de Mifflin e St Jeor (498 adultos saudáveis de 19 a 78 anos); o Body fat aceita de 18 a 120. Cada página diz qual mínimo vale e por quê.
+- **BMI:** a fórmula do CDC (703 × lb ÷ in², ou kg ÷ m²), arredondada a uma casa, e a faixa lida desse número mostrado, como a calculadora do CDC escreve as faixas (18.5 to 24.9, 25.0 to 29.9...). Com o valor cru, 24,96 cairia em Healthy Weight pela tabela "to less than 25" e em Overweight pela de uma casa; ficou a de uma casa, a da calculadora do CDC. Os nomes são os do CDC, em texto, nunca só por cor (Underweight; Healthy Weight; Overweight; Class 1, Class 2 e Class 3 Obesity).
+- **Calorie:** Mifflin-St Jeor nas formas por sexo do artigo de 1990 (10 × kg + 6,25 × cm − 5 × idade + 5 ou − 161). Não há fonte oficial dos fatores 1,2 a 1,9. O fator é o nível de atividade física (PAL) do NIH Body Weight Planner, um campo de 1.4 a 2.5 com o exemplo 1.6, que é o padrão do próprio planner, e a ajuda diz a origem. O apêndice do modelo (NIDDK) usa o PAL sobre o repouso do Mifflin-St Jeor. O rótulo do sexo diz "Sex used by the formula".
+- **Ovulation:** a ovulação no dia (ciclo − 14) do ciclo, isto é, início + ciclo − 15 dias: o dia 14 de um ciclo de 28, como o NICHD ("Around day 12 to 14 in an average 28-day cycle") e o calculador da Office on Women's Health contam. O prompt partia da "próxima menstruação − 14", que dá o dia 15; a convenção mudou um dia para bater com as fontes, e as premissas da página dizem isso. A janela fértil é a dos 5 dias antes da ovulação e o dia dela. O ciclo vai de 20 a 40 dias, a faixa do calculador da OWH; a página diz que ciclos fora de 24 a 38 dias valem uma conversa com médico ou enfermeira, que é estimativa e que não serve para evitar gravidez.
+- **Body fat:** as equações de Hodgdon e Beckett (1984) em polegadas, conferidas em três fontes abertas (os relatórios do DTIC deram 403): Foulis 2023 e Schuna 2013 no PMC, e o post do Exército de 2019. O métrico é dividido por 2,54 antes. Uma diferença de zero ou menos (cintura menos pescoço; cintura mais quadril menos pescoço) não tem logaritmo e vira o aviso de conferir as medidas; um resultado fora de 0,1% a 99,9% também. Sem faixa nem classificação. A página diz, pela fonte (army.mil, julho de 2026), que o Exército trocou o teste de fita pela razão cintura-altura, e nunca chama o resultado de padrão militar atual. A DoDI 1308.03 não abriu (403); a página não cita o que ela diz.
+- **Due date:** 280 dias da última menstruação (NICHD: cerca de 40 semanas); 266 da concepção; 263 de uma transferência de embrião de 3 dias e 261 de um de 5 dias (NIH, estudo nuMoM2b, PMC4387083). O texto inteiro do ACOG CO 700 não abriu (403 no acog.org; só o resumo no PubMed): os números vêm do NIH, e o resumo do CO 700 fica como fonte da regra de que a ultrassonografia do começo prevalece. Sem fonte oficial para o ajuste pela duração do ciclo, a página diz que a regra supõe ciclo de cerca de 28 dias. Os trimestres são os do NICHD (semanas 1 a 12, 13 a 28 e 29 a 40: começam nos dias 0, 84 e 196); o termo completo começa na semana 39 (dia 273). A idade gestacional de hoje aparece de 0 a 300 dias (até 42 semanas e 6 dias); antes do primeiro dia, a frase diz que ainda não há semanas; depois de 300 dias, que passou de 42 semanas.
+- **Tom:** nenhuma exclamação, elogio ou julgamento no resultado; a Oli não comemora (o sprite das páginas de saúde não leva a pose `cheer`); o aviso diz que não é recomendação médica e manda procurar um profissional de saúde.
+
+## § 266 · As convenções de casa (F7, decisão 5)
+
+- **Square footage:** uma lista de 1 a 10 áreas (`a0s`, `a0x`, `a0y` no link, como a lista de dívidas da § 114), cada uma com o menu de forma (`ListSpec.pick`): retângulo (comprimento × largura) e triângulo (comprimento × largura ÷ 2), como a Energy Star mede um cômodo, e círculo (π × diâmetro² ÷ 4, pelo NIST, que escreve 0,7854 × d²; a página usa π). O total vem da soma exata, não da soma das linhas arredondadas.
+- **Concrete:** laje ou sapata (comprimento e largura em pés, espessura em polegadas) ou redonda (diâmetro e profundidade em polegadas, para um furo de poste ou uma coluna), com quantidade e folga; sacos de 40, 60 e 80 lb pelo rendimento de cada um, um campo com exemplos 0,30, 0,45 e 0,60 cu ft. Não há fonte oficial do rendimento do saco: o rótulo é de exemplo e a página manda conferir a embalagem.
+- **Mulch & gravel:** o slug é `mulch-calculator`; o nome, "Mulch and gravel calculator". A área por comprimento e largura ou digitada; o saco de mulch (exemplo 2 cu ft) e o de gravel (exemplo 0,5 cu ft) são campos separados; a densidade do gravel (exemplo 1,28 tonelada curta por jarda cúbica) vem da tabela de conversão da EPA ("Gravel, loose: 1 cubic yard, 2,565 lb").
+- **Paint:** perímetro × pé-direito ou a área digitada, menos portas (exemplo 21 sq ft) e janelas (exemplo 15 sq ft); o rendimento é campo (exemplo 350 sq ft por galão); a EPA usa 400 sq ft por galão como padrão de modelo e cita 250 a 400 como faixa da indústria. Aberturas que cobrem a parede inteira viram o aviso "nada a pintar", com o PDF e o CSV desligados.
+- **Tile:** peças = teto da área × 144 × (1 + folga) ÷ área da peça; caixas = teto das peças ÷ peças por caixa, e 0 quer dizer "não sei". A junta fica fora da conta (premissa).
+
+## § 267 · O que uma página de saúde nunca diz (F7, decisão 7)
+
+- **Decisão:** `BANNED_HEALTH` (`scripts/lib/ymyl.ts`) vale nas páginas do hub de saúde, além do `BANNED` de sempre: "ideal weight", "you should lose", meta de perda ou ganho de peso, "lose 10 pounds", faixa de peso saudável para a altura, déficit ou superávit de calorias, "eat … calories to lose", plano de dieta ou de refeições, "macros", "birth control" e "safe days". O nome de faixa do CDC "Healthy Weight" continua permitido.
+- **Teste:** `ymyl.test.ts`, com um controle positivo por padrão, controles negativos com as frases das páginas e a prova de que a lista de dinheiro não muda.
+
+## § 268 · O resultado das páginas novas acima da dobra a 360 × 740 (F7, decisão 6)
+
+- **Medido** (Chromium, 360 × 740, o fim do número do ResultHero): na primeira versão, o BMI, o Concrete e o BTU ficavam em 764 px; o Calorie e o Body fat em 864; o Mulch em 820; a Square footage em 1.184. O que passava: o `lead` em três linhas (84 px), dois OptionGroups (unidade e sexo) com duas linhas de campos, o H1 e o breadcrumb da Square footage e do Mulch em duas linhas, e a lista de áreas com o botão de acrescentar.
+- **Decisão:**
+  - o `lead` dessas páginas cabe numa linha a 360 px ("Your BMI from your height and weight.");
+  - o sexo da fórmula (Calorie e Body fat) vem depois do resultado, com o nível de atividade, o quadril e a idade; o OptionGroup de unidade fica antes, com duas linhas de campos de meia largura;
+  - no Mulch, o material (e o saco e a densidade de cada um) vem depois do resultado: o volume, que é o número do ResultHero, não depende dele;
+  - na Square footage, o exemplo tem uma área só (15 × 12 ft; o oráculo mudou antes, em `6955512`, e o exemplo de duas áreas ficou como caso da grade), e o botão "Add an area" vem depois do resultado (`ListSpec.addBelow`): as áreas continuam antes dele, e uma área acrescentada leva o foco ao menu de forma dela.
+- **Depois:** de 568 a 714 px nas 11, nos dois sistemas de unidade; o `ads.spec.ts` prova nos dois navegadores.
+- **Alternativa:** um OptionGroup e um campo lado a lado numa linha (o `fieldset` fica fora do subgrid, § 137) ou a lista de áreas em três colunas a 360 px (os campos ficariam com uns 77 px).
+
+## § 269 · O `lint:texto` lê os textos de casa e saúde com amostras próprias (F7, decisão 11)
+
+- **Achado:** o `lint:texto` trata todo `src/tools/*-calculator/` como texto de dinheiro e preenche cada `{placeholder}` com uma amostra de `MONEY_SAMPLES` (§ 123); sem amostra, vira "$1,234". Nas páginas novas, `{x}`, `{area}`, `{bmi}` ou `{weeks}` virariam dinheiro, e o `{x}` já é dinheiro no Refinance.
+- **Decisão:** `isLifeText` separa os textos das 11 calculadoras e dos 2 hubs; eles são preenchidos por `LIFE_SAMPLES` (valores dos exemplos do oráculo) e `LIFE_SAMPLES_BY_KEY` (o "{n} week" e o "{n} day" leem 1). Um placeholder sem amostra vira "12", nunca dinheiro. Os textos de dinheiro ficam como estavam, e o `lint-texto-money.test.ts` prova os dois lados.
+- **Corrigido:** o LanguageTool local achou 7 erros nos textos novos (Paint, Square footage, Concrete e Body fat), reescritos ("Gallons to buy, rounded up: {buy}.", "the labels on paint cans", "subtract doors"...). Depois: 0 erros.
+- **Prontidão:** o `gate:prontidao` confere os cartões das seções novas da home em inglês, os dois hubs na ordem de `LIFE_HUB_IDS` e a busca com as 11 calculadoras e o QR no fim; o build com as três variáveis ganhou unidades de teste para as áreas `casa-saude` e `utilidades`, para a trava do hostname valer também nessas páginas.
+
+## § 270 · O JS das calculadoras com as 11 novas (F7, decisão 6)
+
+- **Medido** pelo `budgets.spec.ts` (JS inicial em gzip, o build da `main` contra o da `fase-07`):
+
+  | Página | Antes | Depois |
+  | --- | ---: | ---: |
+  | `/mortgage-calculator/` | 43,4 KB | 50,6 KB |
+  | `/bmi-calculator/` | não existia | 50,6 KB |
+  | `/compress-image/` | 21,1 KB | 21,2 KB |
+  | `/merge-pdf/` | 36,9 KB | 37,0 KB |
+  | `/home-calculators/` e `/health-calculators/` | não existiam | 3,4 KB |
+
+- **Leitura:** a entrada comum das calculadoras passou de 23,2 para 30,4 KB com as 11 definições e os motores (§ 236), e cada página de calculadora continua com 2 arquivos JS, com 63% do teto de 80 KB. Não foi preciso a ADR de separação por região.
+- **Imagem e PDF:** o chunk `island` cresceu 93 bytes em gzip pelas listas fechadas de eventos (§ 263: os 11 ids, o `qr-code-generator`, `png` e `svg`), que moram em `src/analytics/` de propósito (§ 113). Nenhum código de calculadora nem do QR entrou ali: o `budgets.spec.ts` prova pelo `.cache/bundle-modules.json` que nenhum arquivo das páginas de imagem e de PDF tem módulo da F7.
+
+## § 271 · O `qrcode` entra no bundle como ES modules (F7, decisão 8)
+
+- **Achado:** com o `import { create } from 'qrcode/lib/core/qrcode.js'`, a página do QR carregava 3 arquivos JS: a entrada, o `island` e o `rolldown-runtime.*.js` (0,4 KB gzip). O `qrcode` e o `dijkstrajs` são CommonJS, o Rolldown os embrulha num ajudante (`__commonJS`) e põe esse ajudante num chunk que ele divide com os chunks preguiçosos das ferramentas de imagem (HEIC, libheif, o cliente do PDF).
+- **Tentado:** pôr o runtime no grupo `island` (o Rolldown não oferece esse módulo aos grupos: a sonda no `test` nunca o viu) e `experimentalInlineCommonChunks` (pede `preserveEntrySignatures: false`, que o build do Astro não aceita, nem no ambiente `client`).
+- **Decisão:** o plugin `qrcodeEsm()` (`src/platform/qrcode-esm.ts`, no `astro.config.ts`) entrega ao bundler os arquivos de `qrcode/lib/core/` e o `dijkstra.js` como ES modules: cada `require('./x')` vira o import padrão daquele módulo, o arquivo roda com `module` e `exports` locais, e `module.exports` é o export padrão (mais os nomes de `exports.nome =`). O código deles é CommonJS simples (requires no topo, com texto fixo, sem ciclo); o plugin recusa um `require` que não seja texto fixo. Os ids dos módulos continuam os arquivos de `node_modules`, então o registro do bundle e o `gate:licencas` veem os mesmos pacotes.
+- **Depois:** 2 arquivos JS na página do QR; o `island` com o mesmo hash; as páginas de imagem, de PDF e de calculadora com os mesmos arquivos. O `budgets.spec.ts` passa a conferir os 2 arquivos do QR, e o `tests/unit/qrcode-esm.test.ts` roda os arquivos convertidos como ES modules no Node e prova a mesma matriz do pacote, em três textos.
+- **Alternativa:** aceitar o terceiro arquivo com um registro (0,4 KB e uma requisição), ou copiar o `qrcode` para o repositório já em ES modules (código de terceiro fora do `node_modules`, que o `gate:licencas` não veria).
+- **Não é arquitetura:** o host, o framework e o pipeline não mudam; o plugin é do build, como o `recordBundledModules` e o `platformFiles`.
+
+## § 272 · O gerador de QR code (F7, decisão 8)
+
+- **A matriz:** `create([{ data: bytes, mode: 'byte' }], { errorCorrectionLevel: 'H' })`, com os bytes do `TextEncoder`; o teste prova o nível H (`bit === 2`) e que um nível inválido viraria M em silêncio. O `qrcode` 1.5.4 não emite ECI: o modo byte leva o UTF-8 cru.
+- **O limite:** 1.273 bytes de UTF-8, a capacidade da versão 40 em H. A leitura pelo `jsqr` prova o maior permitido com a Oli no meio, no menor PNG (740 px a 4 px por módulo), no Node e nos dois navegadores, então o limite não precisou baixar. O erro diz o limite e que acento conta 2 e emoji 4; a contagem fica ao lado do rótulo, fora do alerta, para o leitor de tela não repetir o alerta a cada tecla. Texto vazio ou só de espaços não gera QR; o erro só aparece depois que a pessoa digitou.
+- **A Oli:** o ícone do app (`docs/design/assets/Logo/app-icon.svg`, com o clip renomeado `fo-qr-oli`) num quadro branco centrado e alinhado à grade, de lado ímpar = 2 × arredondamento((0,22 × n − 1) / 2) + 1 módulos, com 10% de margem; os módulos sob o quadro não são desenhados. Em 160 leituras (4 textos por versão, da 1 à 40) não houve falha; a sondagem leu até 30% na versão 1 e 46% na 40. Ligada por padrão; desligada, o QR sai sem logo.
+- **O PNG:** do `<canvas>` da página (sem worker), em escala inteira de pixels por módulo, porque o `jsqr` falha com escala fracionária (512 px fixos leram 16 de 25 conteúdos): "Small", "Medium" e "Large" miram 512, 1.024 e 2.048 px, com escala = máx(4, piso(alvo ÷ (n + 8))), e a tela diz o tamanho real. O fundo branco é pintado antes (um pixel transparente o `jsqr` lê como preto).
+- **As cores:** módulos `#000000` sobre `#FFFFFF` no arquivo baixado e na prévia, nos dois temas: um QR é lido como escuro sobre claro por toda câmera. Os hex só existem em `qr.ts` (atributos do SVG e `fillStyle` do canvas), nunca no CSS, no modelo da exceção do QR do Pix no README do design.
+- **O resto:** nomes fixos `qr-code.png` e `qr-code.svg`; o SVG é montado pelo nosso código, sem o texto da pessoa; a caixa de texto tem `autocomplete="off"`, `spellcheck={false}` e `autocapitalize="off"` (o corretor avançado do Chrome envia o texto ao Google); o selo diz "Your text never leaves your device"; as relacionadas são Resize image, PNG to JPG, Image to PDF e Compress image; a /licenses credita o "QRCode for JavaScript" de Kazuhiko Arase, de onde o núcleo do `qrcode` vem; o `gate:licencas` reprova `qrcode` ou `dijkstrajs` no `island` ou em mais de um chunk.
+- **Testes:** `tests/unit/qr.test.ts` (o SVG rasterizado pelo `@resvg/resvg-js` e lido pelo `jsqr` em todas as 40 versões) e `tests/e2e/qr-code.spec.ts` (o PNG e o SVG baixados, com e sem a Oli, um endereço curto, um longo, acento e emoji e o maior permitido, o `binaryData` igual aos bytes UTF-8, a privacidade do texto e os eventos sem ele), mais o QR no `ads.spec.ts`, no `a11y.spec.ts` e no `budgets.spec.ts`.
+
+## § 273 · O teste de 90 dias de casa e saúde começa em 2 de novembro de 2026 (F7, decisão 12)
+
+- **Início:** 2/nov/2026, o dia em Brasília em que a run abriu a PR da F7 (o plano estimava por volta de 25/fev/2027 para o fim, contando de uma F7 mais tardia).
+- **Fim:** 31/jan/2027, 90 dias depois.
+- **O que olhar no fim:** no Search Console, as impressões de cada uma das 11 calculadoras de casa e saúde (e dos dois hubs) nos 90 dias, contadas a partir do dia em que as páginas entraram em produção.
+- **Gatilho do backlog** (PLANO, "Backlog com gatilho"): as calculadoras de casa e de saúde com impressão nos 90 dias ganham versão em português e em espanhol, numa run própria; as sem impressão ficam só em inglês.
+- **Atenção:** se o merge da PR acontecer dias depois, as páginas só passam a contar dali; o fim continua em 31/jan/2027, e a leitura deve dizer quantos dias de produção cada página teve.
+
+## § 274 · A revisão adversarial da F7 (F7, 2/nov/2026)
+
+- **Método:** o da F3 (§ 92 a § 94), com sete lentes Sonnet em contexto limpo: corretude, privacidade e segurança, anúncio e política, acessibilidade, desempenho e SEO, design system e voz, e saúde e confiança. Elas rodaram sobre o commit `69fb7f3`, numa worktree só de leitura (`.claude/worktrees/revisao-f7`), cada uma com o próprio `FO_PORT` (4174 a 4180). Cada achado crítico, alto ou médio teve um cético próprio; os baixos de cada lente, um cético só. Foram 39 agentes.
+- **Números:** 49 achados (8 altos, 18 médios e 23 baixos, na gravidade da lente). Depois dos céticos: nenhum crítico, 1 alto, 16 médios, 25 baixos e 7 refutados.
+- **Corrigidos:** o alto (f-1, § 275) e 15 dos 16 médios (§ 275 a § 281), cada um com um teste que reprova no build do `69fb7f3` e passa no novo. Cinco baixos saíram junto, porque eram o mesmo defeito de um médio: a-2 (g-1), d-6 (g-3), d-10 e g-6 (f-7) e d-12 (f-2).
+- **Não corrigido:** o e-1, o CLS de 0,20 a 320 a 390 px com escala 1. O breadcrumb quebra em duas linhas quando a Figtree chega e empurra a ferramenta 22 px. A correção mexe no breadcrumb de todas as páginas do site ou no carregamento das fontes (§ 241), então não é local. Fica como pendência no relatório, com as duas saídas da lente: reservar duas linhas no breadcrumb abaixo de 420 px, ou uma ADR "Proposta" para pré-carregar a Figtree.
+- **Os baixos restantes** vão para o relatório (`docs/relatorios/REVISAO-F7.md`).
+- **Os testes novos:** `tests/e2e/calc-form.spec.ts` (8 testes por navegador) e o bloco "after the review F7" do `tests/unit/calc-defs.test.ts` (3 testes). O nome `calc-form` põe o spec antes do `design.spec.ts`, numa parte leve do WebKit (§ 142).
+
+## § 275 · As tabelas abertas do resultado cabem a 320 px, sem coluna fixa (F7, revisão f-1 e f-2)
+
+- **O defeito:** a 360 px, o último cabeçalho das tabelas abertas (§ 260) ficava grudado na borda direita e aparecia sobre outra coluna. O "Your BMI" ficava sobre a faixa do CDC, e o "Square feet" sobre o tamanho da área. A regra vinha das tabelas por ano (F4, DES-10), em que o saldo do fim do ano também fica fixo; nas tabelas abertas as células não ficavam.
+- **A segunda parte:** a Ovulation (842 px numa moldura de 324) e a Due date (434 px) escondiam a resposta atrás da rolagem lateral.
+- **A decisão:** uma tabela sem grupos por ano ganha a classe `fo-amort--flat`. Ela não tem coluna fixa, o texto das células quebra linha, e o respiro lateral cai para 8 px abaixo de 480 px. As tabelas por ano do dinheiro não mudam.
+- **A Ovulation passa a 3 colunas:** janela fértil, ovulação e próxima menstruação. A coluna "Cycle starts" repetia a próxima menstruação da linha de cima e, na primeira linha, o dia digitado. A legenda já dizia essas três coisas. Com as 4 colunas e a quebra de linha, a tabela pedia 349 px a 320.
+- **O teste:** a 320 e a 360 px, nas 11 páginas e nos dois navegadores, a moldura não rola para o lado, e cada cabeçalho fica sobre as células da própria coluna.
+
+## § 276 · O erro de faixa de um campo deixa o resultado velho, com o PDF e o CSV desligados (F7, revisão g-1 e a-2)
+
+- **O defeito:** a § 116 diz que um valor inválido mantém o último resultado "com a linha 'Fix the highlighted field to update the result.'", e a § 139 desliga o PDF e o CSV com o resultado velho. Mas o erro de faixa de um campo nunca chegava ao estado da calculadora. Só um problema entre campos (o `atMost`, a entrada maior que o preço) marcava o resultado velho. Sem a linha, o PDF e o CSV seguiam ligados.
+- **Na saúde:** com idade 16 no BMI, a página seguia com o resultado de adulto e baixava um PDF com "Age 35 years", a idade do exemplo.
+- **A decisão:** o `CalcField` e o `DateField` avisam o store (`wrong(id, is)`) quando mostram ou deixam de mostrar o erro de faixa, e quando somem da tela. O resultado fica velho enquanto houver um campo assim, e aparecem a linha e o PDF e o CSV desligados, como a § 116 e a § 139 dizem.
+- **Vale para todas as calculadoras,** também as de dinheiro: é a regra da F4 cumprida, não uma regra nova.
+- **O teste:** a idade abaixo do mínimo no BMI, no Calorie e no Body fat, a quantidade 0 no Concrete e um dia fora da faixa na Due date mostram a linha e desligam o PDF e o CSV. O valor certo devolve os três.
+
+## § 277 · Os campos estreitos mostram o número, o menu e a data inteiros (F7, revisão d-2, f-3, f-4, f-5, d-3 e f-6)
+
+- **O número:** a cobertura da Paint mostrava "35(" a 360 px e "3" a 320, ao lado de "sq ft/gal". Os máximos da faixa também saíam cortados em campos de meia largura: "20,000" no Tile, "2,500" no BTU, "120" na idade e "0.45" no Concrete a 320 px.
+  - Abaixo de 390 px, o respiro do campo cai de 16 para 12 px e o da unidade para 8 px; abaixo de 360 px, o do campo cai para 8 px.
+  - O campo da Paint passa a "Coverage per gallon", com a unidade "sq ft".
+- **O menu:** o texto escolhido saía cortado.
+  - "Length × width" na Mulch, em toda largura; "Rectangle" numa área a 360 px; "Room walls" e "Last period" a 320 px; "IVF, day-3 embryo" a 360.
+  - O respiro direito do menu cai para 8 px (a seta nativa fica dentro da caixa).
+  - Os rótulos passam a "Dimensions", "IVF, day 3" e "IVF, day 5". A explicação da transferência segue no texto da página.
+- **A data:** o ano saía cortado a 320 px ("07/09/202").
+  - Abaixo de 360 px, um menu ou uma data dos campos principais ocupa a linha inteira.
+  - O resultado acima da dobra segue medido a 360 px (§ 124), onde nada muda de linha.
+- **A altura do menu:** o menu esticava até 102 px quando o campo ao lado mostrava erro. Ele passa a ficar no `.fo-field__body`, como o número e a data.
+- **Os testes:**
+  - a 320 e a 360 px, nas 11 páginas, cada número visível mostra inteiros o exemplo e o máximo da faixa (`scrollWidth ≤ clientWidth`);
+  - cada opção de cada menu cabe à esquerda da seta, medida com a fonte do próprio menu;
+  - abaixo de 360 px, o menu e a data ocupam a linha;
+  - na Paint, o menu não muda de altura com o erro do campo ao lado.
+
+## § 278 · O link do cenário não leva o foco para a última área (F7, revisão a-1)
+
+O efeito da lista de áreas movia o foco para a última linha sempre que a lista crescia. Abrir um link da Square footage com 10 áreas levava o foco ao menu da décima e rolava a página 2.604 px. Agora só o clique no "Add an area" de baixo do resultado marca a lista (`addedBelow`), e só essa marca move o foco. As linhas que o link traz, lidas depois da hidratação, deixam o foco e a rolagem onde estão. O teste abre o link com 3 áreas e confere o foco fora da lista e o `scrollY` em 0. Depois, o "Add an area" leva o foco ao menu da quarta área.
+
+## § 279 · A unidade do campo entra na descrição dele (F7, revisão d-1)
+
+A unidade (ft, in, sq ft, cu ft, %, years, days) só existia num `span` visual: o leitor de tela dizia "Thickness, 4" no Concrete, que mistura pés e polegadas. Agora o prefixo e o sufixo têm `id` e entram no `aria-describedby` do campo, antes do erro e da ajuda. O menu de unidade da entrada (dinheiro) tem o próprio `aria-label` e não muda. O teste confere, nas 11 páginas, que a descrição de cada campo com unidade contém a unidade.
+
+## § 280 · A opção escolhida no alto contraste e o placeholder do QR (F7, revisão d-8 e d-9)
+
+- **O alto contraste:** no modo de cores forçadas, o fundo e a borda da opção escolhida do OptionGroup somem. US e Metric, ou On e Off, ficavam iguais.
+  - Ali a opção escolhida ganha um sublinhado de 3 px (`text-decoration`, que segue a cor do texto forçada). Nenhuma cor de sistema entra no CSS.
+  - O teste emula `forcedColors: 'active'` no Chromium. O WebKit não emula o modo, então ali o teste confere o fundo da opção escolhida.
+- **O placeholder do QR:** os navegadores pintam o placeholder com a cor do texto a 50% de alfa. Isso dá 3,34:1 no tema claro.
+  - A caixa do QR usa `--ink-muted` com opacidade 1, como a busca já fazia.
+  - O teste mede 4,5:1 ou mais nos dois temas.
+
+## § 281 · O Body fat sem "0 %", a fórmula na frase do resultado e a Privacidade com as escolhas (F7, revisão f-7, g-3 e b-1)
+
+- **O "0 %":** medidas que a equação da Marinha não aceita mostravam "Body fat 0 %" no número grande, um valor de saúde falso. Agora o número é um travessão, sem unidade, como nos problemas das calculadoras de dinheiro.
+- **A fórmula:** o sexo da fórmula fica depois do resultado no celular (§ 268), e a frase do Calorie e do Body fat não dizia qual fórmula fez o número. Com as mesmas medidas, o Body fat dá 25,9% pela feminina e 10,9% pela masculina. Agora a frase diz "By the female formula" ou "with the male formula", com a palavra em negrito. O `lint:texto` ganhou a amostra `sex`.
+- **A Privacidade:** a página prometia que o link copiado levava "só" números e datas. Mas ele leva também as escolhas: a unidade, o sexo da fórmula, a forma de contar a data do parto, a forma do concreto e o resto.
+  - O texto passa a dizer isso nos três idiomas.
+  - As notas de privacidade do Calorie, do Body fat e da Due date também.
+  - A data de atualização continua 2 de novembro de 2026.
+- **Os testes:** no `calc-defs.test.ts`:
+  - o problema do Body fat sem algarismo;
+  - a palavra da fórmula em negrito na frase, nos dois sexos;
+  - o texto das escolhas na Privacidade em en, pt e es e nas três notas.
+
+## § 282 · A segunda passada da revisão da F7 (F7, segunda passada, s-1 e s-2)
+
+Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..083f5a7`), na worktree da revisão, movida para o `083f5a7` e com o próprio build. Ele rodou o Vitest, os tipos, o lint, os portões, o `lint:texto` e 946 testes de Playwright por navegador. Não achou falha em nenhuma correção e deixou 2 achados baixos.
+
+- **s-1:** a regra da § 277 que põe um menu ou uma data na linha inteira abaixo de 360 px pegava qualquer campo de meia largura com um `select` dentro.
+  - Isso incluía a entrada (número com o menu de unidade) e os menus das calculadoras de dinheiro.
+  - A 320 px, o resultado da hipoteca descia de 658 para 754 px; o mesmo valia para a APR, o cartão, a meta de poupança, os juros simples e a hipoteca em espanhol.
+  - A regra passa a valer só nas páginas de casa e saúde: o painel delas ganha a classe `fo-calc--home`, que vem do `cat` da página. As de dinheiro voltam ao que eram.
+  - O teste novo do `calc-form.spec.ts` abre as calculadoras de dinheiro em en, es e pt a 320 px e confere que nenhum campo de meia largura ocupa a linha. Ele reprova no build do `083f5a7` (a entrada da hipoteca, o menu do cartão e outros) e passa no novo.
+- **s-2:** o teste do erro de faixa (§ 276) não tinha calculadora de dinheiro, embora a regra valha para elas.
+  - Entraram a hipoteca com taxa 99, em inglês e em espanhol, e o empréstimo pessoal brasileiro com valor 0, cada um com a linha no idioma da página.
+  - Esses casos reprovam no código revisado (`69fb7f3`), onde o erro de faixa não marcava o resultado velho.
+- **Observações sem defeito**, que ficam no relatório:
+  - uma corrida de foco na lista de áreas e de dívidas, anterior à F7, que só a automação alcança (menos de 16 ms entre digitar e apertar Enter no "Remove");
+  - datas da tabela da Ovulation que quebram no meio a 320 px ("November / 1, 2026");
+  - a etiqueta "example" que desce de linha em "Coverage per gallon";
+  - a folga de 3 px do teste dos menus na Square footage a 360 px, que supõe uma seta de 26 px.
+
+## § 283 · As partes 2 e 7 do WebKit passaram do alvo de 700 s, uma vez cada (F7, decisão 10)
+
+- **A parte 2 do WebKit** (`--playwright=webkit --shard=2/8`) tem a segunda metade do `a11y.spec.ts` (100 testes) e o começo do `ads.spec.ts` (46 testes). O `a11y` dessa metade é o mais pesado: o passeio de estados das ferramentas de PDF (de 18 a 37 s por teste no runner).
+- **A parte 7 do WebKit** tem os `money-*` (os três da F7 entre eles, com uns 200 s de testes) e 43 testes da matriz de PDF, que somam 740 s sozinhos.
+- **As medidas** (o total do `verificar` da parte, do resumo no log):
+
+  | Execução | Parte 2 | Parte 7 |
+  | --- | ---: | ---: |
+  | [run 41449325645](https://github.com/vmatusita/fileorca/actions/runs/41449325645) (`69fb7f3`) | **833,1 s** (1.243 s de `a11y` e 363 s de `ads` somados, em 2 workers) | 692,4 s |
+  | [run 41459127177](https://github.com/vmatusita/fileorca/actions/runs/41459127177) (`083f5a7`) | 690,0 s | 653,5 s |
+  | [run 41465872919](https://github.com/vmatusita/fileorca/actions/runs/41465872919) (`9d09714`, o código final) | 600,8 s | **730,0 s** |
+
+  As outras 11 partes ficaram abaixo de 700 s nas três.
+- **A leitura:** as duas partes estão perto do alvo e variam de 70 a 230 s de um runner para outro, com os mesmos testes. Nenhuma passou do limite de 900 s, então a divisão desta run fica como a ficha fixou (13 partes).
+- **A proposta,** numa run de ajuste, antes de somar testes de acessibilidade, de dinheiro ou de PDF:
+  1. tirar o passeio de estados do `a11y.spec.ts` para um arquivo próprio que caia depois do `ads.spec.ts` na ordem dos nomes (por exemplo, `axe-states.spec.ts`). Assim, os testes pesados se dividem entre as partes 3 e 4 do WebKit, hoje mais leves (de 245 a 432 s);
+  2. o WebKit em 9 partes, que também tira peso da parte 7.
+
+  Antes de escolher, rode o `--list` das partes e confira onde caem o `design.spec.ts` e a matriz de imagens (§ 142).

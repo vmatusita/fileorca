@@ -6,11 +6,23 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
-import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 import { AUTHOR, CONTACT_EMAIL, SITE_ORIGIN } from '../../src/platform/site.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, HOME_MONEY_IDS, HUB_MONEY_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import {
+  BR_CALC_IDS,
+  CALC_PAGE_IDS,
+  GUIDE_IDS,
+  HOME_MONEY_IDS,
+  HUB_MONEY_IDS,
+  LIFE_CALC_IDS,
+  LIFE_HUB_IDS,
+  LIFE_HUB_ROUTE,
+  moneyPage,
+  type LifeHub,
+  type MoneyPageId,
+} from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
@@ -85,7 +97,8 @@ export interface Site {
   /**
    * More cards a page must list, by route id and language (F4): the home's money section (the five credit
    * calculators) and the money hub (the 14 calculators), both from the calculator registry. From the F5a, the
-   * home's PDF section and the PDF hub (the 12 tools and the Image to PDF card), from the PDF registry.
+   * home's PDF section and the PDF hub (the 12 tools and the Image to PDF card), from the PDF registry. From the F7, the
+   * home's home, health and QR sections and the two hubs of home and health calculators (LIFE_HUB_IDS).
    */
   cards?: Record<string, Partial<Record<Lang, string[]>>>;
   /** Ids the search index must offer: every page of the three registries and the guides. */
@@ -121,16 +134,26 @@ export function realSite(dir: string): Site {
   ) as Record<Lang, string[]>;
   const pdfPaths = (lang: Lang): string[] => PDF_TOOL_IDS.flatMap((id) => pagePath(id, lang) ?? []);
   const moneyPaths = (ids: readonly MoneyPageId[], lang: Lang): string[] => ids.flatMap((id) => (moneyPage(id, lang) ? (pagePath(id, lang) ?? []) : []));
+  /** The calculators of a home or health hub that exist in the language, in hub order; none where the hub does not exist (F7). */
+  const lifePaths = (hub: LifeHub, lang: Lang): string[] => (pagePath(LIFE_HUB_ROUTE[hub], lang) ? LIFE_HUB_IDS[hub].flatMap((id) => pagePath(id, lang) ?? []) : []);
   const cards: NonNullable<Site['cards']> = { home: {} };
   for (const lang of LANGS) {
     const hub = moneyHubId(lang);
     const hasMoneyHub = pagePath(hub, lang) !== undefined;
     // The home lists the five credit calculators of the language and, from the F5a, the 12 PDF tools (DECISOES § 162).
-    if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang)] };
+    // F7 (decision 9): then the home and the health calculators and the QR code generator, where they exist (English only).
+    const qr = pagePath(QR_ID, lang);
+    const life = [...lifePaths('house', lang), ...lifePaths('health', lang), ...(qr ? [qr] : [])];
+    if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang), ...life] };
     if (hasMoneyHub) cards[hub] = { ...cards[hub], [lang]: moneyPaths(HUB_MONEY_IDS[lang], lang) };
     // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.
     const image = pagePath('image-to-pdf', lang);
     if (pagePath(PDF_HUB_ID, lang)) cards[PDF_HUB_ID] = { ...cards[PDF_HUB_ID], [lang]: [...pdfPaths(lang), ...(image ? [image] : [])] };
+    // F7 (decision 9): each home or health hub lists its calculators, in the order of the registry, and nothing else.
+    for (const lifeHub of ['house', 'health'] as const) {
+      const id = LIFE_HUB_ROUTE[lifeHub];
+      if (pagePath(id, lang)) cards[id] = { ...cards[id], [lang]: lifePaths(lifeHub, lang) };
+    }
   }
   // The Brazilian calculators are search entries once their rows are in the map (prompt F6, decision 5).
   const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
@@ -139,8 +162,9 @@ export function realSite(dir: string): Site {
     pages,
     tools,
     cards,
-    // F5b: the ten file guides are search entries too (DECISOES § 190).
-    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...brazilian, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS],
+    // F5b: the ten file guides are search entries too (DECISOES § 190). F7 (decision 9): and, last, the 11 home and health
+    // calculators and the QR code generator (the hubs are not search entries, as the money hub is not).
+    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...brazilian, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS, ...LIFE_CALC_IDS, QR_ID],
     pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
   };
 }

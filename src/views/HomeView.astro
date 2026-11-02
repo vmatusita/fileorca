@@ -1,17 +1,18 @@
 ---
 // Home: the image tools that exist in the language, with the Oli waving next to the H1, and a link to the image hub;
 // the 12 PDF tools and a link to the PDF hub (F5a, DECISOES § 160); the language's credit calculators and a link to its
-// money hub (F4, DECISOES § 118; F6: the Brazilian ones in Portuguese, the five translated ones in Spanish). The cards
-// come from the route map and the registries: a page gets a card only with a path in this language. No AdSlot.
+// money hub (F4, DECISOES § 118; F6: the Brazilian ones in Portuguese, the five translated ones in Spanish); in English, the
+// home and health calculators with links to their hubs and the QR code generator (F7, decision 9). The cards come from the
+// route map and the registries: a page gets a card only with a path in this language. No AdSlot.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
-import { moneyHubId, pagePath, routeById, type Lang } from '../i18n/routes.ts';
+import { QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { HOME_MONEY_IDS, moneyPage } from '../tools/calc/registry.ts';
+import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, moneyPage, type LifeHub } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 
 interface Props {
@@ -46,6 +47,19 @@ const moneyCards = moneyHub
       return page && href && blurb ? [{ href, blurb, icon: page.icon }] : [];
     })
   : [];
+/** The home and the health sections: the calculators of each hub that exist in the language (English only). */
+const lifeSections = (['house', 'health'] as LifeHub[]).flatMap((hubId) => {
+  const texts = hubId === 'house' ? t.house : t.health;
+  const href = pagePath(LIFE_HUB_ROUTE[hubId], lang);
+  const cards = LIFE_HUB_IDS[hubId].flatMap((id) => {
+    const page = moneyPage(id, lang);
+    const blurb = common.calcs[id];
+    return page && blurb ? [{ href: page.path, blurb, icon: page.icon }] : [];
+  });
+  return texts && href && cards.length > 0 ? [{ id: hubId, texts, href, cards }] : [];
+});
+const qrPath = pagePath(QR_ID, lang);
+const qr = qrPath && t.qr && common.qr ? { href: qrPath, texts: t.qr, blurb: common.qr } : null;
 const website = {
   '@type': 'WebSite',
   name: SITE_NAME,
@@ -92,6 +106,27 @@ const website = {
         ))}
       </ul>
       <p class="fo-more"><a href={moneyHub}>{t.money.hubLink}</a></p>
+    </section>
+  )}
+  {lifeSections.map((section) => (
+    <section class="fo-section" aria-labelledby={`${section.id}-home`}>
+      <h2 id={`${section.id}-home`}>{section.texts.heading}</h2>
+      <p class="fo-prose">{section.texts.intro}</p>
+      <ul class="fo-grid">
+        {section.cards.map((card) => (
+          <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category="home" icon={card.icon} /></li>
+        ))}
+      </ul>
+      <p class="fo-more"><a href={section.href}>{section.texts.hubLink}</a></p>
+    </section>
+  ))}
+  {qr && (
+    <section class="fo-section" aria-labelledby="qr-home">
+      <h2 id="qr-home">{qr.texts.heading}</h2>
+      <p class="fo-prose">{qr.texts.intro}</p>
+      <ul class="fo-grid">
+        <li><ToolCard href={qr.href} name={qr.blurb.name} description={qr.blurb.description} category="util" icon="qr" /></li>
+      </ul>
     </section>
   )}
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">

@@ -8,13 +8,13 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
 import type { Lang } from '../../i18n/routes.ts';
-import type { MoneyPageId } from './registry.ts';
+import type { AnyCalcId } from './registry.ts';
 import type { CalcSharedTexts } from './types.ts';
 
 export const COPIED_MS = 2000;
 
 interface Props {
-  page: MoneyPageId;
+  page: AnyCalcId;
   lang: Lang;
   t: CalcSharedTexts;
   icons: { pdf: string; table: string; link: string; check: string; alert: string };

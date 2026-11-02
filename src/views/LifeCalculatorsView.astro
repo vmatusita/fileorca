@@ -1,0 +1,95 @@
+---
+// The home and health hubs, /home-calculators/ and /health-calculators/ (F7, decision 9), on the mold of the money hub
+// (DECISOES § 118): eyebrow, H1, one line and "Reviewed by" in the violet band of the category; the calculators in the
+// order of the registry; one content AdSlot; "how these calculators work" with the data-ymyl blocks of
+// gate:dinheiro-saude (formula, assumptions, a worked example from the engine, official sources, the notice); the rail
+// AdSlot. English only.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ToolCard from '../components/ToolCard.astro';
+import AdSlot from '../ads/AdSlot.astro';
+import Reviewed from '../tools/calc/Reviewed.astro';
+import { routeById } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { LIFE_HUB_TEXTS } from '../i18n/life-hubs.ts';
+import { breadcrumbLd, collectionPageLd, homePath, personLd } from '../seo/meta.ts';
+import { LIFE_HUB_IDS, LIFE_HUB_ROUTE, type LifeHub } from '../tools/calc/registry.ts';
+import { SHARED_BY_LANG, cardOf, datesOf, longDate, workedExample } from '../tools/calc/page.ts';
+
+interface Props {
+  hub: LifeHub;
+}
+const { hub } = Astro.props;
+const lang = 'en';
+const route = routeById(LIFE_HUB_ROUTE[hub]);
+const path = route.paths.en ?? '/';
+const common = TEXTS.en.common;
+const t = LIFE_HUB_TEXTS[hub];
+const shared = SHARED_BY_LANG.en.page;
+const name = hub === 'house' ? common.homeCalculators : common.healthCalculators;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: name ?? t.h1, path },
+];
+const cards = LIFE_HUB_IDS[hub].map((id) => cardOf(id, lang));
+const list = cards.map((card) => ({ name: card.name, path: card.href }));
+/** The worked example: the first calculator of the hub, the one the search sends the most people to. */
+const example = workedExample(LIFE_HUB_IDS[hub][0] ?? 'bmi-calculator', lang);
+const [readBefore, readAfter] = shared.readOn.split('{date}');
+const read = datesOf(hub, lang).read;
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={t.description}
+  withAds
+  schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-hubband fo-cat--home">
+    <span class="fo-eyebrow">{t.eyebrow}</span>
+    <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+    <p class="fo-muted">{t.intro}</p>
+    <Reviewed lang={lang} of={hub} />
+  </div>
+  <section class="fo-section" aria-labelledby="calcs">
+    <h2 id="calcs">{t.listHeading}</h2>
+    <ul class="fo-grid">
+      {cards.map((card) => (
+        <li><ToolCard href={card.href} name={card.name} description={card.description} category="home" icon={card.icon} /></li>
+      ))}
+    </ul>
+  </section>
+  <AdSlot area="casa-saude" variant="content" label={common.adLabel} />
+  <section class="fo-section fo-prose" aria-labelledby="works">
+    <h2 id="works">{t.worksHeading}</h2>
+    {t.worksIntro.map((paragraph) => <p>{paragraph}</p>)}
+    <div data-ymyl="formula">
+      <h3 class="fo-h3">{t.formulaHeading}</h3>
+      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <div data-ymyl="premises">
+      <h3 class="fo-h3">{t.premisesHeading}</h3>
+      <ul>{t.premises.map((premise) => <li>{premise}</li>)}</ul>
+    </div>
+    <div data-ymyl="example">
+      <h3 class="fo-h3">{t.exampleHeading}</h3>
+      <p>{t.exampleIntro}</p>
+      <table class="fo-table">
+        <caption class="fo-sr">{shared.exampleResults}</caption>
+        <tbody>{example.results.slice(0, 3).map(([label, value]) => <tr><th scope="row">{label}</th><td>{value}</td></tr>)}</tbody>
+      </table>
+      <p>{example.sentence}</p>
+    </div>
+    <div data-ymyl="source">
+      <h3 class="fo-h3">{t.sourcesHeading}</h3>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
+    </div>
+    <div data-ymyl="disclaimer">
+      <h3 class="fo-h3">{t.disclaimerHeading}</h3>
+      <p>{t.disclaimer}</p>
+    </div>
+  </section>
+  <AdSlot slot="rail" area="casa-saude" variant="rail" label={common.adLabel} />
+</BaseLayout>

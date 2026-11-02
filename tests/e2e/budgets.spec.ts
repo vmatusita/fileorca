@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { CALC_PAGES as CALC_PAGES_OF, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { readFileSync } from 'node:fs';
+import { CALC_PAGES as CALC_PAGES_OF, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES } from '../../src/tools/calc/registry.ts';
+import { routeById } from '../../src/i18n/routes.ts';
+import { BUNDLE_RECORD, type BundleRecord } from '../../src/platform/bundle-record.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, dismissCookies, hydrated } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
@@ -13,7 +16,8 @@ import { PDF_ENGINE_FILE, expectInitialBudget, expectNextPage, settler } from '.
 // so a URL already fetched does not count again). The measures are in tests/e2e/lib/budgets.ts since the F6, which
 // holds the Portuguese and Spanish pages to them in i18n-budgets.spec.ts.
 // Every tool page and preset that exists (a tool adds its path here when its page is built): each one loads
-// its own entry and the shared island chunk, and never a worker or a .wasm before the first file.
+// its own entry and the shared island chunk, and never a worker or a .wasm before the first file. F7: the QR code
+// generator too (QR_PAGE): its entry, with the qrcode library as ES modules (DECISOES § 271), and the island chunk.
 const TOOL_PAGES = [
   '/compress-image/',
   '/compress-image/to-100kb/',
@@ -30,10 +34,14 @@ const TOOL_PAGES = [
   '/image-to-pdf/',
 ];
 // The hubs have no island: they are held to the same JS and request budgets, with at most the two files of a tool page.
-const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`];
+// F7: the home and health hubs too, read from the registry.
+const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`, ...([HOUSE_HUB_ID, HEALTH_HUB_ID] as const).map((id) => routeById(id).paths.en ?? '')];
 // The money calculators, their presets and the guides (F4; DECISOES § 110): one entry shared by all of them and
-// the shared island chunk, exactly two files, read from the calculator registry.
-const CALC_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES_OF[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path)];
+// the shared island chunk, exactly two files, read from the calculator registry. F7 (decision 6; DECISOES § 257): the 11
+// home and health calculators come into the same island and are held to the same two files and the same 80 KB, with
+// nothing of the PDF maker, no worker and no .wasm before the click.
+const LIFE_PAGES = LIFE_CALC_IDS.map((id) => LIFE_CALC_PAGES[id].path);
+const CALC_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES_OF[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path), ...LIFE_PAGES];
 const CALC_JS_FILES = 2;
 // The 12 PDF tools (F5a, prompt decision 5; DECISOES § 170), read from the PDF registry and in a list of their
 // own: one entry shared by all of them (PdfIsland) and the shared island chunk, exactly two files. TOOL_PAGES and
@@ -51,8 +59,9 @@ const PDF_GUIDE_PAGES = FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'p
 const QPDF_FILE = /qpdf/;
 const PDFJS_FILE = /pdfjs|pdf\.worker/;
 
-for (const path of [...TOOL_PAGES, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST, ...FILE_GUIDE_PAGES]) {
-  const isTool = TOOL_PAGES.includes(path);
+const QR_PAGE = '/qr-code-generator/';
+for (const path of [...TOOL_PAGES, QR_PAGE, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST, ...FILE_GUIDE_PAGES]) {
+  const isTool = TOOL_PAGES.includes(path) || path === QR_PAGE;
   const isCalc = CALC_PAGES.includes(path);
   const isPdf = PDF_PAGES_LIST.includes(path);
   const isFileGuide = FILE_GUIDE_PAGES.includes(path);
@@ -105,6 +114,12 @@ for (const [first, second] of [
   ['/image-tools/', '/guides/social-media-image-sizes/'],
   ['/pdf-tools/', '/guides/split-pdf-file-size/'],
   ['/guides/jpg-vs-png/', '/guides/why-is-my-pdf-so-large/'],
+  // F7: one island for every calculator, so from a money calculator to a home or health one, and between two of them, it is
+  // the HTML only; from a hub to one of its calculators, the HTML and the two files; from the home to a hub, the HTML.
+  ['/mortgage-calculator/', '/bmi-calculator/'],
+  ['/square-footage-calculator/', '/due-date-calculator/'],
+  ['/home-calculators/', '/square-footage-calculator/'],
+  ['/', '/health-calculators/'],
 ] as const) {
   test(`requests: ${first} then ${second}`, async ({ page, baseURL }) => {
     await expectNextPage(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, first, second);
@@ -205,4 +220,64 @@ test('PDF to JPG fetches the worker and PDF.js with its first file, and never qp
   // pdf.worker-*.js when the worker has an OffscreenCanvas or render-*.js and pdfjs-core-*.js when the page draws (DECISOES § 22).
   for (const part of [/comlink/, /\/_astro\/client[-.]/, /\/_astro\/pdf[-.][\w-]+\.js$/, /pdfjs-core|pdf\.worker/]) expect([...urls].some((url) => part.test(url) && PDF_ENGINE_FILE.test(url)), `${part} é um arquivo do motor`).toBe(true);
   expect([...urls].filter((url) => QPDF_FILE.test(url)), 'sem qpdf').toEqual([]);
+});
+
+// F7 (decision 6; DECISOES § 257): one island for every calculator. Each home and health calculator loads the very same JS
+// files, name and hash, as a money calculator: their definitions and engines came into the one calculator entry, never into
+// a file of their own.
+test('the home and health calculators load the very same JS files as a money calculator', async ({ page, baseURL }) => {
+  const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
+  const seen = new Set<string>();
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === origin && request.resourceType() === 'script') seen.add(url.pathname);
+  });
+  const { settled } = settler(page);
+  const money = CALC_PAGES_OF['mortgage-calculator'].path;
+  expect((await page.goto(money))?.status(), money).toBe(200);
+  await settled();
+  const own = [...seen].sort();
+  expect(own).toHaveLength(CALC_JS_FILES);
+  for (const path of LIFE_PAGES) {
+    seen.clear();
+    await page.goto('about:blank');
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await settled();
+    expect([...seen].sort(), `${path} = ${money}`).toEqual(own);
+  }
+});
+
+// F7 (decisions 8 and 11): the image and PDF pages keep the JS they had. What the F7 brought (the home and health engines and
+// definitions, the date field and the dates of the island, the QR code generator and its library) is in no file an image or a
+// PDF page loads: the build's record of the bundle (.cache/bundle-modules.json, written by pnpm build) says which modules each
+// file holds. The control: a calculator page's files do hold the calculator modules, so the pattern sees the real names.
+const F7_MODULE = /\/src\/calc\/(?:home|health|dates)\.ts$|\/src\/i18n\/dates\.ts$|\/src\/tools\/calc\/|\/src\/tools\/qr-code-generator\/|\/node_modules\/\.pnpm\/(?:qrcode|dijkstrajs)@/;
+
+test('the image and PDF pages load nothing of the home and health calculators or of the QR code generator', async ({ page, baseURL }) => {
+  const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
+  const record = JSON.parse(readFileSync(BUNDLE_RECORD, 'utf8')) as BundleRecord;
+  const seen = new Set<string>();
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.origin === origin && request.resourceType() === 'script') seen.add(url.pathname);
+  });
+  const { settled } = settler(page);
+  const modulesOf = async (path: string): Promise<string[]> => {
+    seen.clear();
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    await settled();
+    expect(seen.size, `${path}: arquivos de JS`).toBeGreaterThan(0);
+    return [...seen].flatMap((file) => {
+      const modules = record[file.replace(/^\//, '')];
+      expect(modules, `${file} no registro do bundle`).toBeDefined();
+      return modules ?? [];
+    });
+  };
+  for (const path of [...TOOL_PAGES, ...PDF_PAGES_LIST]) {
+    expect((await modulesOf(path)).filter((id) => F7_MODULE.test(id)), `${path}: código da F7`).toEqual([]);
+  }
+  const calc = await modulesOf(LIFE_PAGES[0] ?? '/bmi-calculator/');
+  for (const part of [/\/src\/calc\/home\.ts$/, /\/src\/calc\/health\.ts$/, /\/src\/tools\/calc\//]) {
+    expect(calc.some((id) => part.test(id) && F7_MODULE.test(id)), `${part} é um módulo da calculadora`).toBe(true);
+  }
 });

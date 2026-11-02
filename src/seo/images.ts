@@ -19,6 +19,10 @@ const ON_CAT = '#0F1B2D';
 const TURQUESA = '#14B8A6';
 const CORAL = '#FF6B57';
 const ALGA = '#2FBF71';
+// F7: the home and health category (violet, with its own white text and icon colour) and the utilities (lime).
+const VIOLETA = '#6C47F5';
+const ON_VIOLETA = '#FFFFFF';
+const LIMA = '#9BD84A';
 const WATER_DEEP = '#14407E';
 
 const designAsset = (...parts: string[]): string => readFileSync(join(process.cwd(), 'docs', 'design', 'assets', ...parts), 'utf8').trim();
@@ -65,14 +69,24 @@ function assets() {
 }
 const toolIcons = new Map<string, string>();
 /** An icon of docs/design/assets/Icons drawn in the ink of the tool tile (on-cat). */
-function toolIcon(name: string): string {
-  let icon = toolIcons.get(name);
+function toolIcon(name: string, stroke = ON_CAT): string {
+  const key = `${name} ${stroke}`;
+  let icon = toolIcons.get(key);
   if (!icon) {
-    icon = dataUri(designAsset('Icons', `${name}.svg`).replace(/stroke="#[0-9A-Fa-f]{6}"/, `stroke="${ON_CAT}"`));
-    toolIcons.set(name, icon);
+    icon = dataUri(designAsset('Icons', `${name}.svg`).replace(/stroke="#[0-9A-Fa-f]{6}"/, `stroke="${stroke}"`));
+    toolIcons.set(key, icon);
   }
   return icon;
 }
+
+/** The fill of a category tile and the colour of the icon on it (tokens.json: on-violeta on violet, on-cat on the rest). */
+const TILE: Record<OgTool['category'], { fill: string; ink: string }> = {
+  image: { fill: TURQUESA, ink: ON_CAT },
+  pdf: { fill: CORAL, ink: ON_CAT },
+  money: { fill: ALGA, ink: ON_CAT },
+  home: { fill: VIOLETA, ink: ON_VIOLETA },
+  util: { fill: LIMA, ink: ON_CAT },
+};
 
 type Node = { type: string; props: Record<string, unknown> };
 const h = (type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): Node => ({
@@ -124,15 +138,15 @@ function toolTile(tool: OgTool): Node {
   }, [
     h('div', {
       display: 'flex', alignItems: 'center', justifyContent: 'center', width: 144, height: 144, borderRadius: 34,
-      background: tool.category === 'pdf' ? CORAL : tool.category === 'money' ? ALGA : TURQUESA, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
-    }, [img(toolIcon(tool.icon), 88, 88)]),
+      background: TILE[tool.category].fill, border: `3px solid ${ON_CAT}`, boxSizing: 'border-box',
+    }, [img(toolIcon(tool.icon, TILE[tool.category].ink), 88, 88)]),
   ]);
 }
 
 /** The tool icon beside the Oli: the name of an icon of the design system and the category colour of its tile. */
 export interface OgTool {
   icon: string;
-  category: 'image' | 'pdf' | 'money';
+  category: 'image' | 'pdf' | 'money' | 'home' | 'util';
 }
 
 export async function ogPng(title: string, subtitle: string, options: { tool?: OgTool } = {}): Promise<Buffer> {

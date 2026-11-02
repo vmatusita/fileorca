@@ -5,7 +5,7 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: November 1, 2026',
+  updated: 'Last updated: November 2, 2026',
   intro:
     'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
@@ -22,6 +22,8 @@ export default {
         'FileOrca tools run in your browser. The files you choose are processed on your device and are never uploaded. FileOrca has no server that processes them, and you do not need an account.',
         'The same goes for numbers. What you type in a tool, such as a width, a height or a percentage, stays in your browser: it is not added to the address of the page, and no analytics event carries it.',
         'The money calculators work the same way. The prices, rates and balances you type are worked out on your device and are never sent anywhere. The PDF and the CSV of a calculator are made on your device too. Copy link puts your numbers after the # of the address it copies: that part of an address stays in the browser that opens it and is never sent to our server, and the page never adds it to the address on its own.',
+        "The home and health calculators work the same way. The measurements you type, such as a height, a weight, a waist or an area, and the dates you enter, such as the first day of the last period or a conception or transfer date, are worked out on your device and are never sent anywhere. Their Copy link carries those numbers and dates and the choices you made, such as the units, the sex the formula uses or how the due date is counted, after the # of the address, the part your browser never sends. The Due date calculator reads today's date from the clock of your device, and that date is never sent anywhere either.",
+        'The QR code generator works the same way. The code is made in your browser from the text or address you type, and that text stays on your device: it is not added to the address of the page, no analytics event carries it, it is not kept in your browser or in a cookie, and it is not in the name of the files you save, qr-code.png and qr-code.svg. FileOrca never opens the address you type and never sends a request to it.',
         'The PDF tools work the same way. Your PDF is read and written on your device, by PDF.js and qpdf, two open-source libraries that run in your browser. What you type there, such as a page range or the text of a watermark, stays in your browser. The password you type in Protect PDF or Unlock PDF never leaves your device and is not kept, not on a server and not in your browser. The signature you draw, upload or type in Sign PDF is not stored anywhere either.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
         'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
@@ -38,7 +40,7 @@ export default {
       heading: 'Analytics (Google Analytics 4)',
       paragraphs: [
         'To see which tools help people, FileOrca uses Google Analytics 4, a service from Google. What it can store in your browser depends on the choice you make in the cookie notice, as described in the section on consent below.',
-        'Google Analytics measures page views and a fixed list of events. No event carries file names, file contents or numbers you type. The events are:',
+        'Google Analytics measures page views and a fixed list of events. No event carries file names, file contents, or the numbers, dates or text you type. The events are:',
       ],
       list: [
         'Tool started',
@@ -48,7 +50,7 @@ export default {
         'Tool error, with the browser and the file format',
         'Click on a donation link',
         'First result of a calculator, with the name of the calculator only',
-        'Download of a calculator PDF or CSV, with the format only',
+        'Download of a calculator PDF or CSV, or of a QR code as PNG or SVG, with the format only',
         'Click on Copy link in a calculator, without the link',
       ],
     },

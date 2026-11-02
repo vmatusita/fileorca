@@ -412,3 +412,56 @@ Pegadinhas que a F6 achou:
 - **O `gate:seo` pede de 120 a 160 caracteres na descrição** das páginas de imagem e de PDF em pt e es (as outras, de 50 a 170). Tradução fica mais longa: rode o portão depois de mudar uma descrição.
 - **Um `fill` logo depois de soltar um PDF** corria com o painel, que leva o foco ao botão da ação um quadro depois de mostrar as opções (§ 240). O painel agora deixa o foco num campo de texto onde ele já está. Um teste que precisa do foco num campo assim que ele aparece pode focá-lo por um `MutationObserver` na página, antes dos efeitos da ilha.
 - **O `.github/` não mudou,** mas com 1.038 testes por navegador a parte 1 do Chromium (o `a11y` inteiro) chegou a 764 s e a 3 a 711 s no CI, acima do alvo de 700 s (§ 243). A próxima run que somar páginas divide o Chromium em 4 partes primeiro. A estimativa pelo par em inglês errou para menos: os testes de pt e es custam mais no runner. Antes de somar testes, rode o `--list` das partes e compare com os tempos do último CI (`gh run view <id> --log`).
+
+## F7: casa, saúde e QR code
+
+Comandos novos:
+
+| Comando | O que faz |
+| --- | --- |
+| `uv run --no-project --python 3.13 python -I scripts/oracle/calc_home_health.py` | Regera as 11 fixtures de casa e saúde (`fixtures/calc/<id>.json`), só com a biblioteca padrão (`fractions`, `decimal` com 50 dígitos, `datetime`); `--check` compara sem gravar, `--only <id>` faz uma calculadora. Os outros dois oráculos não mudam |
+
+Como uma calculadora de casa ou de saúde entra:
+
+1. O caso no `scripts/oracle/calc_home_health.py` (a função, a grade, os aleatórios com semente `2026-11-02/<id>`, o `page-example` e, se houver, o exemplo oficial em `OFFICIAL_CHECKS` e no `fixtures/calc/OFICIAIS.md`). Onde entra π ou log10, a saída leva `exact` (30 algarismos) e o oráculo refaz o sorteio perto de um empate. Regere e commite as fixtures antes do motor.
+2. O motor em `src/calc/home.ts` ou `health.ts` (frações em BigInt, `Math.PI`/`Math.log10` só onde precisa, dias por `src/calc/dates.ts`) e o id em `ENGINES`.
+3. O id em `HOUSE_CALC_IDS` ou `HEALTH_CALC_IDS` e a linha em `LIFE_CALC_PAGES` (`src/tools/calc/registry.ts`): o hub (`house` ou `health`) decide o AdSlot (`casa-saude`), a cor (`home`, violeta só no preenchimento), o breadcrumb, a lista de fontes do `gate:dinheiro-saude` (`ymylHubOf`), a comemoração da Oli (nunca na saúde) e o `WebApplication`. O id entra em `CALC_EVENT_TOOLS`; a rota sai de `lifeRoutes()`.
+4. A definição em `src/tools/calc/defs/house.ts` ou `health.ts` e a entrada em `DEFS`: medidas com `measure(key, decimais, min, max)` (`kind: 'dec'`), datas com `DateSpec` (`<input type="date">`, faixa fixa), a lista com menu de linha (`ListSpec.pick`) e o botão de acrescentar depois do resultado (`addBelow`); `today: true` se a conta precisa do dia do aparelho; a tabela do resultado com `open: true`.
+5. Os textos em `src/tools/<id>/i18n/en.ts` (`CalcPageTexts`; o erro de cada campo diz a faixa com as casas da medida) e o cartão em `enCommon.calcs`; a página `src/pages/<id>/index.astro` com `<CalcTool id lang="en" />`.
+6. Os testes que leem o registro pegam a página nova (`calc-defs`, `calc-oracle`, `a11y`, `ads`, `budgets`, `money-life-privacy`); o caso dela entra no `money-home.spec.ts` ou no `money-health.spec.ts`.
+
+O hub de cada uma é lido de `LIFE_HUB_IDS` (a ordem) e de `src/i18n/life-hubs.ts` (os textos, só em inglês), pela view `src/views/LifeCalculatorsView.astro`.
+
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes" e "F5a", que ficam como estão.
+
+- **As partes:** são treze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` (`--playwright=chromium --shard=i/4`) e o `playwright (webkit 1 de 8)` ao `8 de 8` (`--playwright=webkit --shard=i/8`).
+- **Antes de somar specs:** rode o `--list` de cada parte (Chromium em 4, WebKit em 8) e veja onde caem o `design.spec.ts` e o `image-matrix.spec.ts`, que nunca podem ficar na mesma parte do WebKit (§ 142).
+- **O `tests/unit/verificar.test.ts`** traz as 13 partes escritas à mão. Mudou o `ci.yml`, mude o teste.
+
+O QR code:
+
+- Fica em `src/tools/qr-code-generator/` (a ilha, a conta em `qr.ts`, sem DOM, e o único `<script>` da página no componente dela). Página `/qr-code-generator/`, só em inglês, área `utilidades`, sem hub nem link do cenário.
+- O `qrcode` está em `dependencies` só por esta página: o import é o caminho fundo `qrcode/lib/core/qrcode.js` (22 módulos e o `dijkstrajs`), estático, e nada do chunk `island` importa o QR. O plugin `qrcodeEsm()` (`src/platform/qrcode-esm.ts`) entrega esses arquivos CommonJS ao bundler como ES modules (§ 271), e a página carrega 2 arquivos JS. O `gate:licencas` reprova `qrcode` ou `dijkstrajs` no `island` ou em mais de um chunk.
+- A leitura é provada pelo `jsqr` (o `binaryData` igual aos bytes UTF-8 do texto), no Node (`tests/unit/qr.test.ts`, o SVG rasterizado pelo `@resvg/resvg-js`) e nos dois navegadores (`tests/e2e/qr-code.spec.ts`, o PNG e o SVG baixados, com e sem a Oli).
+
+Pegadinhas que a F7 achou:
+
+- **No Node, `String.replace(a, b)` interpreta `$'` no texto novo** (de novo, como na F6): um teste com `'R$ ' : '$'}` virou meio arquivo. Em script de remendo, use sempre `t.replace(a, () => b)`.
+- **O `lead` de uma calculadora em três linhas** custa 56 px a 360 px: com um OptionGroup e duas linhas de campos de meia largura, o resultado passa da dobra. O `lead` das páginas com OptionGroup cabe numa linha.
+- **Um pacote CommonJS numa página faz o Rolldown carregar o `rolldown-runtime.*.js`** (o ajudante `__commonJS`), que ele divide com os chunks preguiçosos: um terceiro arquivo JS. O runtime não entra em grupo de `codeSplitting` e o `experimentalInlineCommonChunks` não roda no build do Astro. Para CommonJS simples, converta para ES module no build, como o `qrcodeEsm()` (§ 271), e prove a contagem no `budgets.spec.ts`.
+- **O `jsqr` só lê com pixels por módulo inteiros**: o PNG do QR sai numa escala inteira, nunca num tamanho fixo de 512 px.
+- **Datas:** o motor só vê dias inteiros; o "hoje" é lido pela ilha com `getFullYear()`, `getMonth()` e `getDate()` do aparelho, nunca do UTC. Nos testes, fixe o relógio com `page.clock` e o fuso no contexto.
+- **O WebFetch não abre** acog.org, apps.dtic.mil nem esd.whs.mil (403), e o NCBI Bookshelf pede reCAPTCHA: a fonte vira o PubMed, o PMC ou outra página oficial do mesmo órgão, e o que não abriu fica como pendência.
+
+## F7: o que a revisão mudou nos formulários das calculadoras
+
+- **Erro de faixa vai ao store** (§ 276). O `CalcField` e o `DateField` recebem `report` (o `wrong(id, is)` do store) e avisam quando mostram ou deixam de mostrar o erro de faixa. Enquanto houver um campo assim, o resultado fica velho: aparece a linha "Fix the highlighted field…", e o PDF e o CSV ficam desligados. Campo novo que valida a própria faixa passa o `report` adiante, como o `NumberInput` do `Fields.tsx`.
+- **Tabela aberta** (§ 275). Uma tabela sem grupos por ano (`CalcView.open`) sai com `fo-amort--flat`: sem coluna fixa e com texto que quebra. Ela tem de caber a 320 px. O `calc-form.spec.ts` mede isso nas páginas de casa e saúde.
+- **Campos estreitos** (§ 277). O `calc-form.spec.ts` lê os `DEFS` e confere, a 320 e 360 px:
+  - cada número visível com o exemplo e com o máximo da faixa (`scrollWidth ≤ clientWidth`);
+  - cada opção de cada menu, medida com a fonte do menu;
+  - o menu e a data na linha inteira abaixo de 360 px, só nas páginas de casa e saúde (`fo-calc--home`, § 282); as de dinheiro guardam as meias linhas, e o teste confere.
+
+  Antes de criar um campo de meia largura com unidade longa, ou um menu com opção longa, rode esse spec.
+- **Alto contraste** (§ 280). O WebKit do Playwright não emula `forcedColors`. O teste ramifica por dentro, pelo `matchMedia('(forced-colors: active)')`: no Chromium afirma o sublinhado, no WebKit o fundo.
+- **Foco das áreas** (§ 278). Só o clique no "Add an area" move o foco para a linha nova (`addedBelow`, estado do módulo `Fields.tsx`). As linhas que o link do cenário traz não mexem no foco.

@@ -22,6 +22,8 @@ export default {
         'As ferramentas do FileOrca rodam no seu navegador. Os arquivos que você escolhe são processados no seu aparelho e nunca são enviados. O FileOrca não tem servidor que processe arquivos, e você não precisa criar conta.',
         'Os números seguem o mesmo princípio. O que você digita em uma ferramenta, como uma largura, uma altura ou uma porcentagem, fica no seu navegador: não entra no endereço da página, e nenhum evento de medição leva esses números.',
         'As calculadoras de dinheiro funcionam do mesmo jeito. Os preços, as taxas e os saldos que você digita são calculados no seu aparelho e nunca são enviados. O PDF e o CSV de uma calculadora também são gerados no seu aparelho. O botão Copiar link põe os seus números depois do # do endereço copiado: essa parte do endereço fica no navegador que o abre e nunca vai para o nosso servidor, e a página nunca a acrescenta ao endereço por conta própria.',
+        'As calculadoras de casa e de saúde, que existem só em inglês, funcionam do mesmo jeito. As medidas que você digita, como altura, peso, cintura ou área, e as datas que você informa, como o primeiro dia da última menstruação ou a data da concepção ou da transferência do embrião, são calculadas no seu aparelho e nunca são enviadas. O link que elas copiam leva esses números, essas datas e as escolhas que você fez, como as unidades, o sexo que a fórmula usa ou a forma de contar a data do parto, depois do # do endereço, a parte que o navegador nunca envia. A calculadora da data provável do parto lê a data de hoje no relógio do seu aparelho, e essa data também nunca é enviada.',
+        'O gerador de QR code, que também existe só em inglês, segue o mesmo princípio. O código é montado no seu navegador a partir do texto ou do endereço que você digita, e esse texto fica no seu aparelho: não entra no endereço da página, nenhum evento de medição o leva, ele não fica guardado no navegador nem em cookie e não entra no nome dos arquivos que você baixa, qr-code.png e qr-code.svg. O FileOrca nunca abre o endereço digitado nem faz requisição a ele.',
         "As ferramentas de PDF seguem o mesmo princípio. O PDF é lido e gravado no seu aparelho, pelo PDF.js e pelo qpdf, duas bibliotecas de código aberto que rodam no navegador. O que você digita ali, como um intervalo de páginas ou o texto de uma marca d'água, fica no seu navegador. A senha que você digita ao proteger ou desbloquear um PDF não sai do seu aparelho e não fica guardada, nem em servidor, nem no navegador. A assinatura que você desenha, envia ou digita ao assinar um PDF também não fica guardada em lugar nenhum.",
         'As ferramentas de imagem, por exemplo, salvam uma cópia nova da sua foto sem os metadados, inclusive a localização GPS.',
         'Dá para conferir: abra a aba Rede do navegador enquanto usa uma ferramenta. Nenhuma requisição leva o seu arquivo. O mesmo vale para o Pix da página de apoio: o código é estático, gerado pelo site quando ele é montado, e já vem na página. Escolher um valor não faz nenhuma requisição, e o clique em Copiar código só manda ao Google Analytics o evento de clique em doação da lista abaixo, sem o código e sem o valor. O site não fica sabendo quem pagou nem quanto, porque o pagamento vai do app do banco de quem paga direto para a conta de quem recebe; como em todo Pix, o extrato dessa conta mostra o nome de quem pagou e o valor. Se alguém pedir a devolução, ela só é feita pelo botão de devolução do próprio Pix, que o Regulamento do Pix deixa quem recebe usar em até 90 dias.',
@@ -38,7 +40,7 @@ export default {
       heading: 'Medição de uso (Google Analytics 4)',
       paragraphs: [
         'Para saber quais ferramentas ajudam as pessoas, o FileOrca usa o Google Analytics 4, um serviço do Google. O que ele pode guardar no seu navegador depende da escolha que você faz no aviso de cookies, como explicado na seção sobre consentimento, mais abaixo.',
-        'O Google Analytics mede as visualizações de página e uma lista fixa de eventos. Nenhum evento leva nomes de arquivo, o conteúdo dos arquivos ou números que você digita. Os eventos são:',
+        'O Google Analytics mede as visualizações de página e uma lista fixa de eventos. Nenhum evento leva nomes de arquivo, o conteúdo dos arquivos ou os números, as datas e os textos que você digita. Os eventos são:',
       ],
       list: [
         'Ferramenta iniciada',
@@ -48,7 +50,7 @@ export default {
         'Erro da ferramenta, com o navegador e o formato do arquivo',
         'Clique em um link de doação ou no botão Copiar código do Pix',
         'Primeiro resultado de uma calculadora, só com o nome da calculadora',
-        'PDF ou CSV baixado de uma calculadora, só com o formato',
+        'PDF ou CSV baixado de uma calculadora, ou QR code baixado em PNG ou SVG, só com o formato',
         'Clique em Copiar link numa calculadora, sem o link',
       ],
     },

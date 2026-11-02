@@ -3,7 +3,7 @@
 // which keeps lint:texto able to read every text without running page code.
 import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
-import type { BrCalcId, CalcPageId, EsCalcId, GuideId, MoneyPageId } from '../tools/calc/registry.ts';
+import type { AnyCalcId, BrCalcId, CalcPageId, EsCalcId, GuideId, LifeCalcId } from '../tools/calc/registry.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
 import type { FileGuideId } from '../tools/guides/registry.ts';
 
@@ -34,6 +34,10 @@ export interface CommonTexts {
     imageColumn: string;
     moneyColumn: string;
     pdfColumn: string;
+    /** The home and health columns and the QR code (English only, F7). */
+    homeColumn?: string;
+    healthColumn?: string;
+    utilityColumn?: string;
     siteColumn: string;
     about: string;
     privacy: string;
@@ -68,6 +72,10 @@ export interface CommonTexts {
     imageCategory: string;
     moneyCategory: string;
     pdfCategory: string;
+    /** "Home calculators", "Health calculators" and "Utilities" (English only, F7). */
+    homeCategory?: string;
+    healthCategory?: string;
+    utilityCategory?: string;
     shortcut: string;
   };
   /** Short names and one-line descriptions of the image tools and presets (all of them exist in every language, F6). */
@@ -77,8 +85,12 @@ export interface CommonTexts {
   /** Name of the language's money hub and the seal of its money pages. */
   moneyCalculators: string;
   calcSeal: string;
-  /** The cards of the money calculators that exist in this language (exact per language, below). */
-  calcs: Partial<Record<MoneyPageId, ToolBlurb>>;
+  /** The cards of the calculators that exist in this language (exact per language, below). */
+  calcs: Partial<Record<AnyCalcId, ToolBlurb>>;
+  /** The names of the home and health hubs and the QR code card (English only, F7). */
+  homeCalculators?: string;
+  healthCalculators?: string;
+  qr?: ToolBlurb;
   /** The cards of the money guides (English only, F4). */
   guides?: Record<GuideId, ToolBlurb>;
   /** Name of the PDF hub and the cards of the PDF tools. */
@@ -88,9 +100,14 @@ export interface CommonTexts {
   fileGuides?: Record<FileGuideId, ToolBlurb>;
 }
 
-/** English has every calculator, preset and guide. */
+/** English has every calculator, preset and guide, and the home and health calculators and the QR code of the F7. */
 export interface EnCommonTexts extends CommonTexts {
-  calcs: Record<CalcPageId, ToolBlurb>;
+  calcs: Record<CalcPageId | LifeCalcId, ToolBlurb>;
+  homeCalculators: string;
+  healthCalculators: string;
+  qr: ToolBlurb;
+  footer: CommonTexts['footer'] & { homeColumn: string; healthColumn: string; utilityColumn: string };
+  search: CommonTexts['search'] & { homeCategory: string; healthCategory: string; utilityCategory: string };
   guides: Record<GuideId, ToolBlurb>;
   fileGuides: Record<FileGuideId, ToolBlurb>;
 }
@@ -125,6 +142,10 @@ export interface HomeTexts extends PageMeta {
   money: { heading: string; intro: string; hubLink: string };
   /** The PDF section: heading, line and the hub link. */
   pdf: { heading: string; intro: string; hubLink: string };
+  /** The home, health and QR code sections (English only, F7, decision 9). */
+  house?: { heading: string; intro: string; hubLink: string };
+  health?: { heading: string; intro: string; hubLink: string };
+  qr?: { heading: string; intro: string };
 }
 
 export interface LegalTexts extends PageMeta {
@@ -306,6 +327,29 @@ export interface MoneyHubTexts extends PageMeta {
   presetsCaption?: string;
   presetsHead?: [string, string];
   guidesHeading?: string;
+  worksHeading: string;
+  worksIntro: string[];
+  formulaHeading: string;
+  formula: string[];
+  premisesHeading: string;
+  premises: string[];
+  exampleHeading: string;
+  exampleIntro: string;
+  sourcesHeading: string;
+  sources: MoneySource[];
+  disclaimerHeading: string;
+  disclaimer: string;
+}
+
+/**
+ * The home and the health hubs (/home-calculators/ and /health-calculators/, F7, decision 9), on the mold of the money hub:
+ * English only, with the data-ymyl blocks of "How these calculators work".
+ */
+export interface LifeHubTexts extends PageMeta {
+  eyebrow: string;
+  h1: string;
+  intro: string;
+  listHeading: string;
   worksHeading: string;
   worksIntro: string[];
   formulaHeading: string;

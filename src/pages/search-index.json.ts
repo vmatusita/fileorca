@@ -6,29 +6,36 @@
 // Portuguese or Spanish. The 12 PDF tools come after the image pages, in the PDF category, then the money calculators
 // in the money category: the English ones (five of them also in Spanish), the eight Brazilian ones (only in Portuguese,
 // F6) and the money guides (English only, F4). The hubs are not listed, as the image hub is not (DECISOES § 160). The
-// ten file guides (English only, F5b) come last, each in the category of its hub, image or PDF, with its name as its
-// only term (DECISOES § 190).
+// ten file guides (English only, F5b) come next, each in the category of its hub, image or PDF, with its name as its
+// only term (DECISOES § 190). Last, in English only, the home and health calculators, in the categories "Home
+// calculators" and "Health calculators" with the violet of their category, and the QR code generator in "Utilities"
+// (F7, decision 9).
 import type { APIRoute } from 'astro';
-import { LANGS, ROUTES, type Lang, type RouteId } from '../i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, type Lang, type RouteId } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import type { ToolBlurb } from '../i18n/types.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
 import enCommon from '../i18n/en/common.ts';
-import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES } from '../tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../tools/guides/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
-  return [...imageEntries(), ...pdfEntries(), ...moneyEntries(), ...fileGuideEntries()];
+  return [...imageEntries(), ...pdfEntries(), ...moneyEntries(), ...fileGuideEntries(), ...lifeEntries()];
 }
 
-type Cat = 'money' | 'pdf' | 'image';
-const CATEGORY: Record<Cat, (lang: Lang) => string> = {
+/** The colour of an entry (the design system's category class) and the category written beside its name. */
+type Cat = 'money' | 'pdf' | 'image' | 'home' | 'util';
+type Area = 'money' | 'pdf' | 'image' | 'house' | 'health' | 'util';
+const CATEGORY: Record<Area, (lang: Lang) => string> = {
   image: (lang) => TEXTS[lang].common.search.imageCategory,
   pdf: (lang) => TEXTS[lang].common.search.pdfCategory,
   money: (lang) => TEXTS[lang].common.search.moneyCategory,
+  house: (lang) => TEXTS[lang].common.search.homeCategory ?? '',
+  health: (lang) => TEXTS[lang].common.search.healthCategory ?? '',
+  util: (lang) => TEXTS[lang].common.search.utilityCategory ?? '',
 };
 
 /**
@@ -37,7 +44,7 @@ const CATEGORY: Record<Cat, (lang: Lang) => string> = {
  * colour (`cat`) and the category written beside the name (`area`) are the same but for Image to PDF, which has the
  * PDF colour and stays in the image category, as before the F6.
  */
-function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => ToolBlurb | undefined, area: Cat = cat): SearchEntry[] {
+function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => ToolBlurb | undefined, area: Area = cat as Area): SearchEntry[] {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route) return [];
   const found: SearchEntry = { id, href: {}, name: {}, category: {}, cat, icon, terms: [] };
@@ -83,6 +90,14 @@ function fileGuideEntries(): SearchEntry[] {
     const blurb = enCommon.fileGuides[id];
     return entry(id, def.hub === 'pdf-tools' ? 'pdf' : 'image', ICONS[icon], (lang) => (lang === 'en' ? blurb : undefined));
   });
+}
+
+/** The home and health calculators in hub order, then the QR code generator (English only, F7). */
+function lifeEntries(): SearchEntry[] {
+  return [
+    ...LIFE_CALC_IDS.flatMap((id) => entry(id, 'home', ICONS[LIFE_CALC_PAGES[id].icon], (lang) => (lang === 'en' ? enCommon.calcs[id] : undefined), LIFE_CALC_PAGES[id].hub)),
+    ...entry(QR_ID, 'util', ICONS.qr, (lang) => (lang === 'en' ? enCommon.qr : undefined)),
+  ];
 }
 
 export const GET: APIRoute = () =>

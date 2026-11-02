@@ -194,7 +194,7 @@ describe('sprite da Oli', () => {
   const box = (pose: string) => `<div class="fo-drop__oli" data-oli="${pose}" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 64 64"><use href="#oli-${pose}"/></svg></div>`;
   const page = (body = box('wave'), svg = sprite) => `<!doctype html><html lang="en"><body>${svg}${body}</body></html>`;
   const required = { requiredPoses: ['peek'] };
-  const problems = (html: string, options: { requiredPoses: readonly string[] } = required) => checkSprite(html, options).join('\n');
+  const problems = (html: string, options: { requiredPoses: readonly string[]; forbiddenPoses?: readonly string[] } = required) => checkSprite(html, options).join('\n');
 
   it('lists the nine poses of the closed list', () => {
     expect(OLI_POSES).toEqual(['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek']);
@@ -261,6 +261,12 @@ describe('sprite da Oli', () => {
     expect(problems(page(), { requiredPoses: ['peek', 'gulp', 'cheer'] })).toMatch(/oli-gulp[\s\S]*oli-cheer/);
     expect(problems(page(), { requiredPoses: ['peek', 'gulp'] })).not.toMatch(/oli-peek/);
     expect(problems(page('<p>sem Oli</p>'), { requiredPoses: ['lost'] })).toMatch(/falta o símbolo oli-lost/);
+  });
+
+  // F7 (decision 5): a health calculator never cheers, so the pose is forbidden there.
+  it('reports a forbidden pose that the sprite holds or the page shows, and passes without it', () => {
+    expect(problems(page(), { requiredPoses: ['peek'], forbiddenPoses: ['cheer'] })).not.toMatch(/cheer/);
+    expect(problems(page(box('cheer')), { requiredPoses: ['peek'], forbiddenPoses: ['cheer'] })).toMatch(/a pose cheer está na página/);
   });
 });
 

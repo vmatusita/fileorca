@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { ROUTES, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { longDate } from '../../src/i18n/dates.ts';
 import ptSupport from '../../src/i18n/pt/support.ts';
 import ptCalcShared from '../../src/tools/calc/i18n/pt.ts';
 import esCalcShared from '../../src/tools/calc/i18n/es.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { describedViolations } from './lib/axe.ts';
@@ -78,12 +79,16 @@ async function searchDialogOpen(page: Page): Promise<void> {
 
 // Nothing typed: every tool and preset page is listed and the list scrolls inside the box. F4: the English search
 // also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry; F5a: and the PDF tools;
-// F5b: and the file guides (DECISOES § 190).
+// F5b: and the file guides (DECISOES § 190). F7: and the 11 home and health calculators and the QR code generator, read from
+// the registry and the route map (the count grows by construction, DECISOES § 259).
 async function searchDialogListed(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
-  await expect(page.getByRole('option')).toHaveCount(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length);
+  const utilities = ROUTES.filter((route) => route.id === QR_ID && route.paths.en).length;
+  await expect(page.getByRole('option')).toHaveCount(
+    IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities,
+  );
   await animationsDone(page);
 }
 
@@ -226,6 +231,114 @@ test.describe('axe nos estados da calculadora, a 360 e 1280px, nos temas escuro 
     await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText('Link copied');
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'schedule open and Link copied').toEqual([]);
+  });
+});
+
+// F7 (decision 11): the states of the home and health calculators the page-by-page pass does not reach (it reads each page
+// as loaded, with the example's result and its open table): a home result with an area added (a triangle, so the two rows
+// have their shape menus and the table has two areas) and the Oli's first cheer, then a field out of its range
+// (aria-invalid and the alert, the last result kept); a health result in US units and in metric units (no cheer on a
+// health page); and the date field, with a day and with a day out of its range. The values typed and the results expected
+// are cases of the oracle (fixtures/calc, written before the engines).
+interface LifeCase {
+  source: string;
+  input: Record<string, number | string>;
+  expected: Record<string, unknown>;
+}
+
+/** The first random case of the oracle that matches. */
+function lifeCase(id: LifeCalcId, match: (input: LifeCase['input']) => boolean): LifeCase {
+  const cases = (JSON.parse(readFileSync(resolve(`fixtures/calc/${id}.json`), 'utf8')) as { cases: LifeCase[] }).cases;
+  const found = cases.find((entry) => entry.source === 'random' && match(entry.input));
+  if (!found) throw new Error(`no oracle case of ${id}`);
+  return found;
+}
+
+/** A measure as typed: tenths of a pound or of a centimeter as "172.5". */
+const tenths = (value: number | string | undefined): string => (Number(value) / 10).toFixed(1);
+
+test.describe('axe nos estados das calculadoras de casa e saúde, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('square footage: an area added with its result and the cheer, then a field out of its range', async ({ page }) => {
+    expect((await page.goto(LIFE_CALC_PAGES['square-footage-calculator'].path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.locator('#fo-calc-a-add').click();
+    await expect(page.locator('#fo-tool-root fieldset.fo-debt')).toHaveCount(2);
+    await page.locator('#fo-calc-a1s').selectOption('1');
+    await page.locator('#fo-calc-a1x').fill('8');
+    await page.locator('#fo-calc-a1y').fill('6.5');
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
+    await expect(page.locator('#fo-schedule-table tbody tr')).toHaveCount(2);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'an area added, the result and the cheer').toEqual([]);
+    await page.locator('#fo-calc-a0x').fill('987');
+    await expect(page.locator('#fo-calc-a0x')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#fo-calc-a0x-error[role="alert"]')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'a field out of its range').toEqual([]);
+  });
+
+  test('BMI: the result in US units and in metric units', async ({ page }) => {
+    expect((await page.goto(LIFE_CALC_PAGES['bmi-calculator'].path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const us = lifeCase('bmi-calculator', (input) => input['unit'] === 'us');
+    await page.locator('#fo-calc-ft').fill(String(us.input['feet']));
+    await page.locator('#fo-calc-in').fill(tenths(us.input['inches']));
+    await page.locator('#fo-calc-lb').fill(tenths(us.input['pounds']));
+    await expect(page.locator('.fo-rhero__num')).toHaveText(tenths(us.expected['bmi'] as number));
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(0);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'US units').toEqual([]);
+    await page.locator('.fo-seg__opt', { has: page.locator('input[name="fo-calc-u"][value="metric"]') }).click();
+    await expect(page.locator('#fo-calc-kg')).toBeVisible();
+    const metric = lifeCase('bmi-calculator', (input) => input['unit'] === 'metric');
+    await page.locator('#fo-calc-cm').fill(tenths(metric.input['cm']));
+    await page.locator('#fo-calc-kg').fill(tenths(metric.input['kg']));
+    await expect(page.locator('.fo-rhero__num')).toHaveText(tenths(metric.expected['bmi'] as number));
+    await expect(page.locator('.fo-rhero__oli')).toHaveCount(0);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'metric units').toEqual([]);
+  });
+
+  test('due date: the date field with a day, then with a day out of its range', async ({ page }) => {
+    expect((await page.goto(LIFE_CALC_PAGES['due-date-calculator'].path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const date = page.locator('#fo-calc-d');
+    const lmp = lifeCase('due-date-calculator', (input) => input['method'] === 'lmp');
+    // The hero sets the words and the numbers of a date in pieces of their own, with gaps instead of spaces (§ 246 and § 253).
+    const due = longDate(String(lmp.expected['due']), 'en').replace(/\s+/g, '');
+    await date.fill(String(lmp.input['date']));
+    await expect(page.locator('.fo-rhero__num')).toHaveText(due);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'a day').toEqual([]);
+    await date.fill('1999-12-31');
+    await expect(date).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#fo-calc-d-error[role="alert"]')).toBeVisible();
+    await expect(page.locator('.fo-rhero__num')).toHaveText(due);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'a day out of its range').toEqual([]);
+  });
+
+  // F7 (decision 11): the QR code generator with a code made (the preview, the options and both Download buttons), then with
+  // a text over the limit (the error with the alert, and no code).
+  test('QR code generator: with a code, then with a text over the limit', async ({ page }) => {
+    expect((await page.goto('/qr-code-generator/'))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const box = page.locator('#fo-tool-root textarea');
+    await box.fill('https://fileorca.com/qr-code-generator/');
+    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'a code').toEqual([]);
+    await box.fill('x'.repeat(1_274));
+    await expect(box).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#fo-tool-root .fo-field__error[role="alert"]')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'over the limit').toEqual([]);
   });
 });
 

@@ -16,11 +16,14 @@ import {
   PDF_MODES,
   PDF_SECRETS,
   PLACEHOLDERS,
+  QR_BLOCKS,
+  QR_PRIVACY_PHRASE,
   calcComparisonPaths,
   checkCalcPage,
   checkPdfHub,
   checkPdfPage,
   checkPresetPage,
+  checkQrPage,
   checkSite,
   checkToolPage,
   comparisonPaths,
@@ -35,11 +38,12 @@ import {
   type ContentBlock,
 } from '../../scripts/lib/conteudo.ts';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
-import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
+import qrTexts from '../../src/tools/qr-code-generator/i18n/en.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { FILLER, MAX_GUIDE_WORDS, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
@@ -330,6 +334,56 @@ describe('portão de conteúdo: blocos das calculadoras (F4)', () => {
     expect(checkCalcPage(calcPage('m', undefined, 'pt')).join()).toMatch(/não diz "your numbers stay on your device"/);
     // The default stays English, as in the F4.
     expect(checkCalcPage(calcPage('m'))).toEqual([]);
+  });
+});
+
+// ---- F7, decision 8: the QR code generator page ---------------------------------------------------------------------
+
+/** A QR page with its four blocks, made from the real texts of src/tools/qr-code-generator/i18n/en.ts. */
+function qrPage(change: (html: string) => string = (html) => html): string {
+  const t = qrTexts;
+  const questions = t.faq.map((item) => `<details><summary>${item.q}</summary><div><p>${item.a}</p></div></details>`).join('');
+  const blocks = [
+    `<section data-content="how"><ol>${t.howSteps.map((step) => `<li>${step}</li>`).join('')}</ol></section>`,
+    `<section data-content="faq"><div class="fo-faq">${questions}</div></section>`,
+    `<section data-content="privacy"><p>${t.privacyNote}</p></section>`,
+    `<section data-content="related"><ul><li><a class="fo-tool" href="/resize-image/">Resize image</a></li></ul></section>`,
+  ].join('');
+  return change(`<!doctype html><html><head><title>${t.title} | FileOrca</title><meta name="description" content="${t.description}"></head><body><main><h1>${t.h1}</h1>${blocks}</main></body></html>`);
+}
+
+describe('portão de conteúdo: o gerador de QR code (F7)', () => {
+  it('accepts the page built from its real texts (positive control)', () => {
+    expect(QR_BLOCKS).toEqual(['how', 'faq', 'privacy', 'related']);
+    expect(checkQrPage(qrPage())).toEqual([]);
+    expect(qrTexts.howSteps.length).toBeGreaterThanOrEqual(3);
+    expect(qrTexts.faq.length).toBeGreaterThanOrEqual(4);
+    expect(normalizeText(qrTexts.privacyNote)).toContain(QR_PRIVACY_PHRASE);
+  });
+
+  it('requires each of the four blocks', () => {
+    for (const name of QR_BLOCKS) expect(checkQrPage(qrPage((html) => html.replace(`data-content="${name}"`, 'data-x="y"'))).join('\n'), name).toMatch(new RegExp(`sem o bloco ${name}`));
+  });
+
+  it('needs 3 steps, 4 real questions and a related link', () => {
+    const steps = qrPage((html) => html.replace(/<section data-content="how"><ol>(.*?)<\/ol>/, (_match, items: string) => `<section data-content="how"><ol>${items.split('</li>').slice(0, 2).join('</li>')}</li></ol>`));
+    expect(checkQrPage(steps).join()).toMatch(/how tem 2 passo/);
+    const three = qrPage((html) => html.replace(/<div class="fo-faq">(.*?)<\/div><\/section>/, (_match, items: string) => `<div class="fo-faq">${items.split('</details>').slice(0, 3).join('</details>')}</details></div></section>`));
+    expect(checkQrPage(three).join()).toMatch(/faq tem 3 pergunta/);
+    const noMark = qrPage((html) => html.replace(`${qrTexts.faq[0]?.q}`, 'Do these QR codes expire'));
+    expect(checkQrPage(noMark).join()).toMatch(/não termina em \?/);
+    expect(checkQrPage(qrPage((html) => html.replace('href="/resize-image/"', 'href="#top"'))).join()).toMatch(/related não tem nenhum link/);
+  });
+
+  it('wants the privacy note to say the text stays on the device and the link typed is never opened', () => {
+    const files = qrPage((html) => html.replace('Your text stays on your device.', 'Your files never leave your device.'));
+    expect(checkQrPage(files).join()).toContain(`o bloco privacy não diz "${QR_PRIVACY_PHRASE}"`);
+    const opens = qrPage((html) => html.replace('FileOrca never opens the link you type and never sends a request to it.', 'FileOrca may check the link.'));
+    expect(checkQrPage(opens).join()).toMatch(/nunca abre o endereço digitado/);
+  });
+
+  it('flags an unmeasured claim', () => {
+    expect(checkQrPage(qrPage((html) => html.replace('</main>', '<p>The best QR code maker.</p></main>'))).join()).toMatch(/afirmação sem medida na página: best/);
   });
 });
 
@@ -938,7 +992,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   function build(dir: string): void {
     for (const entry of allPages()) {
       const id = entry.route.id;
-      if (isCalcPage(id) || isBrCalc(id)) {
+      if (isCalcPage(id) || isBrCalc(id) || isLifeCalc(id)) {
         write(dir, entry.path, calcPage(`${id} ${entry.lang}`, undefined, entry.lang));
         continue;
       }
@@ -948,6 +1002,11 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
       }
       if (id === PDF_HUB_ID) {
         write(dir, entry.path, pdfHub({ lang: entry.lang }));
+        continue;
+      }
+      // F7: the QR code generator, with its real texts.
+      if (id === QR_ID) {
+        write(dir, entry.path, qrPage());
         continue;
       }
       if (isFileGuide(id)) {
@@ -975,7 +1034,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   // each of their languages (18 in English, 5 in Spanish and the Brazilian ones once their rows are in the map; 18 before)
   // and the PDF pages (13 × 3; 13 before).
   const imageCount = allPages().filter((entry) => isImagePage(entry.route.id)).length;
-  const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id)).length;
+  // F7: and the 11 home and health calculators, in English (DECISOES § 259).
+  const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id) || isLifeCalc(entry.route.id)).length;
   const pdfCount = allPages().filter((entry) => isPdfPage(entry.route.id) || entry.route.id === PDF_HUB_ID).length;
 
   it('passes on a complete site, whose 404 pages repeat a title and hold placeholder wording', () => {
@@ -1068,6 +1128,21 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.status).toBe(1);
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
+  });
+
+  it('checks the QR code generator from the route map, and fails when it loses a block or is missing (F7)', () => {
+    const dir = join(root, 'qr');
+    build(dir);
+    const ok = run(dir);
+    expect(ok.status).toBe(0);
+    expect(ok.output).toMatch(/10 guia\(s\) de arquivo, 1 do gerador de QR code e \d+ página\(s\) do site/);
+    const path = routeById(QR_ID).paths.en ?? '';
+    write(dir, path, qrPage((html) => html.replace(/<section data-content="privacy">.*?<\/section>/, '')));
+    const lost = run(dir);
+    expect(lost.status).toBe(1);
+    expect(lost.output).toContain(`${path}: sem o bloco privacy`);
+    rmSync(join(dir, fileForPath(path)));
+    expect(run(dir).output).toContain(`${path}: a página não existe no dist`);
   });
 
   it('fails with the page and the block when a tool page loses one', () => {

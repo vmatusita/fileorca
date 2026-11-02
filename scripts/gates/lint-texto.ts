@@ -13,6 +13,7 @@ import type { GUIDE_FACTS as GUIDE_FACTS_TYPE } from '../../src/tools/calc/guide
 import type * as MEASURED_MODULE from '../../src/tools/guides/measured.ts';
 import type { FileGuideTexts } from '../../src/i18n/types.ts';
 import { FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 
 const LANGUAGE: Record<string, string> = { en: 'en-US', pt: 'pt-BR', es: 'es' };
 // Every text file the route map lists (src/i18n/routes.ts): page texts, a tool's texts, the texts
@@ -138,6 +139,72 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
   },
 };
 
+/**
+ * The samples of the home and health calculators and their hubs (F7, decision 11): measures, counts and dates as their
+ * pages show them, from the page examples of the oracle (fixtures/calc/<id>.json). They are apart from the money samples
+ * because some names mean something else there: "{x}" is an amount of money on a money page ("You would pay {x} less")
+ * and a length on Square footage and Tile ("{x} × {y} in"). A placeholder of these texts without a sample reads as a plain
+ * number, never as money.
+ */
+export const LIFE_SAMPLES: Record<string, string> = {
+  // Square footage: "That is {yards} square yards. Areas added up: {n}." and the sides of an area.
+  yards: '20.00',
+  n: '2',
+  x: '15',
+  y: '12',
+  // Concrete and Mulch & gravel: "That is {feet} cu ft with {waste}% extra, or {bags} bags of {bag} cu ft".
+  feet: '36.67',
+  waste: '10',
+  bags: '62',
+  bag: '2',
+  tons: '1.58',
+  // Paint: "That is {area} sq ft to paint, times {coats} for the coats, at {coverage} sq ft a gallon. ... buy {buy} gal."
+  area: '333',
+  coats: '2',
+  coverage: '350',
+  buy: '2',
+  // Tile: "Counted for {size} tiles with {waste}% extra for cuts. Boxes of {per} to buy: {boxes}."
+  size: '12 × 12 in',
+  per: '10',
+  boxes: '14',
+  // BTU: "The Energy Star table gives {base} BTU per hour".
+  base: '9,000',
+  // BMI: "a BMI of {bmi} is in {category}, the range from {band}".
+  bmi: '23.6',
+  category: 'Healthy Weight',
+  band: '18.5 to 24.9',
+  // Calorie: "By the {sex} formula, the equation gives {ree} kcal a day at rest; times an activity level of {pal}, ..."
+  sex: 'female',
+  ree: '1,376',
+  pal: '1.6',
+  tdee: '2,202',
+  // Ovulation: "Your fertile window is about {from} to {to}, and your next period about {next}."
+  from: 'October 27, 2026',
+  to: 'November 1, 2026',
+  next: 'November 16, 2026',
+  // Body fat: "with the {sex} formula, these measures give an estimated {percent}% body fat".
+  percent: '25.9',
+  // Due date: "Counted from a first day of the last period on {lmp}. {today}", with "{weeks} and {days}".
+  lmp: 'September 7, 2026',
+  today: 'Today the pregnancy is 8 weeks and 1 day along.',
+  age: '8 weeks and 1 day',
+  weeks: '8 weeks',
+  days: '1 day',
+};
+/**
+ * A sample that depends on the string it fills (F7): "{n} week" and "{n} day" are the singular forms, which the page shows
+ * only for 1; "{n} weeks", "{n} days" and "Area {n}" read with the plural sample.
+ */
+export const LIFE_SAMPLES_BY_KEY: Record<string, Record<string, string>> = { week: { n: '1' }, day: { n: '1' } };
+const LIFE_DEFAULT = '12';
+
+/** A text file of the home and health calculators or of their hubs (F7): src/tools/<id>/i18n/<lang>.ts or the hub texts. */
+export function isLifeText(file: string): boolean {
+  const tool = /^src\/tools\/([\w-]+)\/i18n\/(?:en|pt|es)\.ts$/.exec(file)?.[1];
+  if (tool) return (LIFE_CALC_IDS as readonly string[]).includes(tool);
+  return /^src\/i18n\/(?:en|pt|es)\/(?:home|health)-calculators\.ts$/.test(file);
+}
+
 /** The id of a file guide (F5b) whose texts this is, or undefined: src/i18n/en/guide-<slug>.ts of a guide in FILE_GUIDE_IDS. */
 export function fileGuideOf(file: string): FileGuideId | undefined {
   const slug = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
@@ -147,16 +214,20 @@ export function fileGuideOf(file: string): FileGuideId | undefined {
 
 /**
  * A money text file: a calculator's or preset's texts (also the Brazilian calculators, src/tools/br-*), the texts the
- * calculators share, a money hub of any language or a money guide.
+ * calculators share, a money hub of any language or a money guide. F7: the texts of the home and health calculators are
+ * calculator texts but not money (isLifeText), filled with their own samples.
  */
 export function isMoneyText(file: string): boolean {
-  if (fileGuideOf(file)) return false;
+  if (fileGuideOf(file) || isLifeText(file)) return false;
   return /^src\/(?:tools\/(?:[\w-]+-calculator|br-[\w-]+)\/|tools\/calc\/i18n\/|i18n\/(?:en|pt|es)\/money-calculators\.ts|i18n\/en\/guide-[\w-]+\.ts)/.test(file);
 }
 
-export function collectStrings(value: unknown, key = '', out: string[] = [], fill: (name: string) => string = (name) => SAMPLES[name] ?? name): string[] {
+/** How a placeholder is filled: by its name and, for the few samples that depend on it, the key of the string (F7). */
+export type Fill = (name: string, key: string) => string;
+
+export function collectStrings(value: unknown, key = '', out: string[] = [], fill: Fill = (name) => SAMPLES[name] ?? name): string[] {
   if (SKIP_KEYS.has(key)) return out;
-  if (typeof value === 'string') out.push(value.replace(/\{(\w+)\}/g, (_, name: string) => fill(name)));
+  if (typeof value === 'string') out.push(value.replace(/\{(\w+)\}/g, (_, name: string) => fill(name, key)));
   else if (Array.isArray(value)) for (const item of value) collectStrings(item, key, out, fill);
   else if (value && typeof value === 'object') for (const [child, item] of Object.entries(value)) collectStrings(item, child, out, fill);
   return out;
@@ -166,7 +237,7 @@ export function collectStrings(value: unknown, key = '', out: string[] = [], fil
  * How a file's placeholders are filled: a guide with the numbers its page shows, a money text with samples. A file guide
  * (F5b) is filled from data/guides-measured.json and its own official facts, the values its page shows (DECISOES § 189).
  */
-export async function fillFor(file: string): Promise<(name: string) => string> {
+export async function fillFor(file: string): Promise<Fill> {
   const fileGuide = fileGuideOf(file);
   if (fileGuide) {
     const { fillValues, placeholdersIn } = (await import(pathToFileURL(resolve('src/tools/guides/measured.ts')).href)) as typeof MEASURED_MODULE;
@@ -174,6 +245,8 @@ export async function fillFor(file: string): Promise<(name: string) => string> {
     const values = fillValues(fileGuide, texts, [...placeholdersIn(texts)]);
     return (name) => values[name] ?? SAMPLES[name] ?? name;
   }
+  // F7: the home and health calculators and their hubs, with measures, counts and dates, never money.
+  if (isLifeText(file)) return (name, key) => LIFE_SAMPLES_BY_KEY[key]?.[name] ?? LIFE_SAMPLES[name] ?? LIFE_DEFAULT;
   const samples = samplesOf(file);
   if (!isMoneyText(file)) return (name) => samples[name] ?? name;
   const guide = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];

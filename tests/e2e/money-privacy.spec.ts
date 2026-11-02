@@ -20,7 +20,8 @@ import { dataLayer, dismissCookies, hydrated } from './lib/page.ts';
 const MONEY = ['987654.32', '98765.43', '9876.54', '987.65'];
 const RATES = ['13.5791', '7.3579', '1.3579'];
 const COUNTS = ['287', '97', '37', '7'];
-const SCALE = { money: 100, rate: 10_000, int: 1 } as const;
+/** Engine units per typed unit. The money pages have no measure ('dec', F7): money-life-privacy.spec.ts covers those. */
+const SCALE: Record<NumberSpec['kind'], number> = { money: 100, rate: 10_000, int: 1, dec: 1 };
 
 /** The sentinels of a field's kind that its range takes (and that the field it depends on allows), longest first. */
 function sentinelsFor(spec: NumberSpec, values: Values): string[] {

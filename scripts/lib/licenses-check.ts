@@ -129,6 +129,42 @@ export function checkRequiredInBundle(bundled: ReadonlyMap<string, unknown>, req
   return required.filter((name) => !bundled.has(name)).map((name) => `${name} não está no bundle, mas as ferramentas de PDF dependem dele`);
 }
 
+// --- The library of the QR code generator (F7, decision 8) ---
+
+/** What the QR code generator brings to the browser: qrcode and the one package it carries (dijkstrajs). */
+export const QR_PACKAGES: readonly string[] = ['qrcode', 'dijkstrajs'];
+
+/** The chunk every tool page loads (astro.config.ts, the 'island' group): the QR library never goes into it. */
+export const SHARED_ISLAND_CHUNK = /^_astro\/island[.-][\w-]+\.js$/;
+
+/**
+ * The QR library stays on its page: qrcode and dijkstrajs are both in the bundle, each in one chunk only, the same one, and
+ * that chunk is not the shared `island` (which would put them on every image, PDF and calculator page). Of qrcode, only the
+ * matrix (`lib/core/`) is bundled: the page draws the code itself, so the renderers of the package's index stay out.
+ */
+export function checkQrBundle(record: BundleRecord, root = process.cwd()): string[] {
+  const problems: string[] = [];
+  const found = new Map<string, Set<string>>();
+  for (const [chunk, ids] of Object.entries(record)) {
+    for (const id of ids) {
+      const info = classifyModule(id, root);
+      if (info.kind !== 'package' || !QR_PACKAGES.includes(info.name)) continue;
+      found.set(info.name, (found.get(info.name) ?? new Set()).add(chunk));
+      const path = normalise(id).replace(/[?#].*$/, '');
+      if (info.name === 'qrcode' && !path.startsWith(`${info.dir}/lib/core/`)) problems.push(`qrcode traz ${path.slice(info.dir.length + 1)} ao bundle, fora de lib/core/ (só a matriz é usada)`);
+    }
+  }
+  for (const name of QR_PACKAGES) {
+    const chunks = [...(found.get(name) ?? [])].sort();
+    if (chunks.length === 0) problems.push(`${name} não está no bundle, mas o gerador de QR code depende dele`);
+    for (const chunk of chunks.filter((file) => SHARED_ISLAND_CHUNK.test(file))) problems.push(`${name} está no chunk compartilhado ${chunk}, que toda página de ferramenta carrega`);
+    if (chunks.length > 1) problems.push(`${name} está em ${chunks.length} chunks (${chunks.join(', ')}), pede 1`);
+  }
+  const homes = new Set(QR_PACKAGES.flatMap((name) => [...(found.get(name) ?? [])]));
+  if (homes.size > 1 && QR_PACKAGES.every((name) => found.get(name)?.size === 1)) problems.push(`qrcode e dijkstrajs estão em chunks diferentes (${[...homes].sort().join(', ')}), pede o mesmo`);
+  return problems;
+}
+
 /**
  * The files of pdfjs-dist the site may serve, and nothing else (DECISOES § 144): the two WebAssembly decoders, the
  * CMaps and the Foxit fonts. Each is a kind whose license text is on /licenses; the Liberation fonts (GPL-2.0), the
