@@ -1,74 +1,73 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { ReorderTexts } from '../../pdf/option-texts.ts';
 
 // Reorder PDF pages page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the shared PDF
-// island shows. The specs rows state the real behaviour of the engine (src/engine/pdf/): when it changes there, change them here.
+// island shows, in Spanish (docs/i18n/es.md). The specs rows state the real behaviour of the engine (src/engine/pdf/),
+// as the English file does: when it changes there, change them here and in en.ts.
 const texts: PdfToolTexts<ReorderTexts> = {
-  title: 'Reorder PDF pages: drag pages into a new order in your browser',
+  title: 'Ordenar páginas de PDF: arrástralas a un nuevo orden en tu navegador',
   description:
-    'Rearrange the pages of a PDF by dragging thumbnails, using the arrows or the keyboard. It all happens in your browser, and nothing is uploaded.',
-  h1: 'Reorder PDF pages',
-  howHeading: 'How it works',
+    'Cambia el orden de las páginas de un PDF arrastrando las miniaturas, con las flechas o con el teclado. Todo pasa en tu navegador y no se sube nada.',
+  h1: 'Ordenar páginas de PDF',
+  howHeading: 'Cómo funciona',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page.',
-    'Drag a page to its new place, use the arrows on each page, or use the keyboard: Space picks a page up, the arrow keys move it, Space drops it. Reverse order flips the whole PDF.',
-    'Press Save new order, then download the new PDF. Your original file stays untouched.',
+    'Suelta un PDF en el cuadro, elígelo o pégalo: Oli trabaja con un PDF a la vez y muestra una miniatura de cada página.',
+    'Arrastra una página a su nuevo lugar, usa las flechas de cada página o el teclado (Espacio toma una página, las flechas la mueven y Espacio la suelta), o pon todo el PDF al revés con Invertir el orden.',
+    'Presiona Guardar el nuevo orden y descarga el PDF nuevo; tu archivo original no se toca.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'Qué entra y qué sale',
   specs: {
-    caption: 'What Reorder PDF pages takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'Lo que Ordenar páginas de PDF recibe y entrega',
+    head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Files', 'One PDF at a time. Oli checks that it is a PDF from what is inside the file, not from its name.'],
-      ['Thumbnails', 'Oli draws a small picture of every page with PDF.js, so you can see what you are moving.'],
-      ['Moving pages', 'Drag a page to its new place, or use the buttons on each page to move it one place earlier or later.'],
-      ['Keyboard', 'The arrow keys move between pages. Space picks a page up, the arrow keys move it, and Space drops it.'],
-      ['Reverse order', 'One button puts the last page first and the first page last.'],
-      ['What changes', 'Only the order of the pages. The pages themselves, their links, bookmarks and form fields stay the same.'],
-      ['What stays', 'Document properties and metadata stay as they were, and Oli adds no date or device information. Only the XFA form layer, which most PDF apps cannot read, is removed; the regular form fields keep working.'],
-      ['Protected or damaged PDFs', 'A PDF with a password to open, or with restrictions, is refused with a link to Unlock PDF. A damaged index is repaired while the pages are read.'],
-      ['What you get', 'A new PDF with the pages in your order. Your original file is not changed.'],
+      ['Archivos', 'Un PDF a la vez. Oli comprueba que es un PDF por lo que hay dentro del archivo, no por su nombre.'],
+      ['Miniaturas', 'Oli dibuja una imagen pequeña de cada página con PDF.js, para que veas lo que estás moviendo.'],
+      ['Mover páginas', 'Arrastra una página a su nuevo lugar o usa los botones de cada página para moverla un lugar antes o después.'],
+      ['Teclado', 'Las flechas del teclado pasan de una página a otra. Espacio toma una página, las flechas la mueven y Espacio la suelta.'],
+      ['Invertir el orden', 'Un botón pone la última página primero y la primera página al final.'],
+      ['Lo que cambia', 'Solo el orden de las páginas. Las páginas en sí, sus enlaces, sus marcadores y sus campos de formulario siguen iguales.'],
+      ['Lo que se conserva', 'Las propiedades y los metadatos del documento quedan como estaban, y Oli no agrega fecha ni datos del dispositivo. Solo se quita la capa de formulario XFA, que la mayoría de las aplicaciones de PDF no puede leer; los campos de formulario normales siguen funcionando.'],
+      ['PDF protegidos o dañados', 'Un PDF con contraseña para abrirlo, o con restricciones, se rechaza con un enlace a Desbloquear PDF. Un índice dañado se repara mientras se leen las páginas.'],
+      ['Lo que recibes', 'Un PDF nuevo con las páginas en tu orden. Tu archivo original no cambia.'],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Preguntas',
   faq: [
     {
-      q: 'How do I change the order of pages in a PDF?',
-      a: 'Drop the PDF, then drag each page to where you want it, or use the arrows on the page. When the order looks right, press Save new order and download the new file. Reverse order flips the whole document in one press.',
+      q: '¿Cómo cambio el orden de las páginas de un PDF?',
+      a: 'Suelta el PDF y arrastra cada página adonde la quieras, o usa las flechas de la página. Cuando el orden se vea bien, presiona Guardar el nuevo orden y descarga el archivo nuevo. Con Invertir el orden, todo el documento queda al revés de una sola vez.',
     },
     {
-      q: 'Can I move pages with the keyboard?',
-      a: 'Yes. Use the arrow keys to move between pages, press Space to pick one up, use the arrow keys to move it, then press Space to drop it. The buttons on each page work with the keyboard too.',
+      q: '¿Puedo mover páginas con el teclado?',
+      a: 'Sí. Usa las flechas para pasar de una página a otra, presiona Espacio para tomar una, muévela con las flechas y presiona Espacio para soltarla. Los botones de cada página también funcionan con el teclado.',
     },
     {
-      q: 'Will links, bookmarks and form fields still work?',
-      a: 'Yes. Reordering changes only the order of the pages, so links and bookmarks still lead to the same pages and form fields keep their place on them. Page numbers already printed on the pages stay where they are, so they may no longer be in order.',
+      q: '¿Los enlaces, los marcadores y los campos de formulario siguen funcionando?',
+      a: 'Sí. Ordenar solo cambia el orden de las páginas, así que los enlaces y los marcadores siguen llevando a las mismas páginas y los campos de formulario mantienen su lugar en ellas. Los números de página que ya estaban impresos en las páginas se quedan donde están, así que quizá ya no queden en orden.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: "No. Oli reads and writes the PDF on your device, in your browser. PDF.js draws the thumbnails and the new file is built right there. Open your browser's Network tab while you use the tool: no request carries your files.",
+      q: '¿Mi PDF se sube a algún lugar?',
+      a: 'No. Oli lee y escribe el PDF en tu dispositivo, en tu navegador. PDF.js dibuja las miniaturas y el archivo nuevo se arma allí mismo. Abre la pestaña Red de tu navegador mientras usas la herramienta: ninguna solicitud lleva tus archivos.',
     },
     {
-      q: 'Can I reorder a PDF that has a password?',
-      a: 'Not directly. A PDF that needs a password to open, or that has restrictions, is refused with a link to Unlock PDF. Take the protection off there first, then come back and reorder the pages.',
+      q: '¿Puedo ordenar un PDF que tiene contraseña?',
+      a: 'No directamente. Un PDF que necesita contraseña para abrirse, o que tiene restricciones, se rechaza con un enlace a Desbloquear PDF. Quita allí la protección primero y después vuelve para ordenar las páginas.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote:
-    'Your PDF is read and written on your device, in your browser, and is never sent to a server. The thumbnails are drawn there too.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidad',
+  privacyNote: 'Tu PDF se lee y se escribe en tu dispositivo, en tu navegador, y nunca se envía a un servidor. Las miniaturas también se dibujan allí.',
+  relatedHeading: 'Herramientas relacionadas',
   panel: {
-    suffix: 'reordered',
-    note: 'one PDF at a time',
-    progressLabel: 'Reordering pages',
-    done: 'Done! Oli put your pages in the new order.',
-    doneMany: 'Done! Oli put the pages of {count} PDFs in the new order.',
-    action: 'Save new order',
+    suffix: 'ordenado',
+    note: 'un PDF a la vez',
+    progressLabel: 'Ordenando las páginas',
+    done: '¡Listo! Oli puso tus páginas en el nuevo orden.',
+    doneMany: '¡Listo! Oli puso las páginas de {count} PDF en el nuevo orden.',
+    action: 'Guardar el nuevo orden',
     options: {
-      help: 'Drag a page to its new place, or use the arrows on each page.',
-      reverse: 'Reverse order',
-      unchanged: 'Move a page to save a new order.',
+      help: 'Arrastra una página a su nuevo lugar o usa las flechas de cada página.',
+      reverse: 'Invertir el orden',
+      unchanged: 'Mueve una página para guardar un nuevo orden.',
     },
   },
 };

@@ -1,76 +1,75 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
-// Merge PDF page blocks (how, specs, faq, privacy, related) and the panel bits its island shows. The specs rows
-// state the real behaviour of the PDF engine (src/engine/pdf/): when it changes there, change them here.
+// Merge PDF page blocks (how, specs, faq, privacy, related) and the panel bits its island shows, in Spanish
+// (docs/i18n/es.md). The specs rows state the real behaviour of the PDF engine (src/engine/pdf/), as the English file
+// does: when it changes there, change them here and in en.ts.
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { MergeTexts } from '../../pdf/option-texts.ts';
 
 const texts: PdfToolTexts<MergeTexts> = {
-  title: 'Merge PDF: combine PDF files in your browser',
+  title: 'Unir PDF: combina archivos PDF en tu navegador',
   description:
-    'Merge PDF files into one, in the order you choose. It runs in your browser, so nothing is uploaded, and form fields, bookmarks and links stay.',
-  h1: 'Merge PDF',
-  howHeading: 'How it works',
+    'Une archivos PDF en uno solo, en el orden que elijas. Funciona en tu navegador, sin subir nada, y conserva campos de formulario, marcadores y enlaces.',
+  h1: 'Unir PDF',
+  howHeading: 'Cómo funciona',
   howSteps: [
-    'Drop two or more PDFs on the box, choose them, or paste them. Use Add more PDFs to put more files in the list.',
-    'Put the files in the order you want: drag a row, press the arrow buttons on it, or move it with the keyboard.',
-    'Press Merge PDFs. Oli joins the files in your browser, in the order of the list.',
-    'Download the merged PDF. Your original files stay untouched.',
+    'Suelta dos o más PDF en el cuadro, elígelos o pégalos, y usa Agregar más PDF para sumar archivos a la lista.',
+    'Pon los archivos en el orden que quieras: arrastra una fila, presiona sus botones de flecha o muévela con el teclado.',
+    'Presiona Unir PDF y Oli junta los archivos en tu navegador, en el orden de la lista.',
+    'Descarga el PDF unido; tus archivos originales no se tocan.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'Qué entra y qué sale',
   specs: {
-    caption: 'What Merge PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'Lo que Unir PDF recibe y entrega',
+    head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['What it takes', 'Two or more PDFs. Oli checks what is inside each file, not its name or its ending.'],
-      ['Order', 'The pages follow the order of the list. Each row shows the file name, its number of pages and its size.'],
-      ['How many files', 'No limit on the number of files. Your own device is the limit.'],
-      ['Form fields', 'Fields on the copied pages are kept. When two files have a field with the same name, the later one gets " (2)" added.'],
-      ['Bookmarks and links', 'Bookmarks that point to a copied page are kept, and so are the links between copied pages. Links to a web address stay.'],
-      ['XFA forms', 'The XFA layer, which only Adobe apps read, is removed. The regular form fields still work.'],
-      ['Document info', 'The merged PDF takes the title, author and other metadata of the first file. Oli adds no date, no producer name and nothing from your device.'],
-      ['PDFs with a password', 'A PDF with a password to open, or with editing restrictions, is turned away on its own row, with a link to Unlock PDF.'],
-      ['Damaged files', 'A file that is empty, cut short or not a PDF is turned away on its own row. A file with a damaged index is repaired while Oli reads it.'],
-      ['The result', 'One file, named after the first PDF with -merged added, like report-merged.pdf.'],
+      ['Qué acepta', 'Dos o más PDF. Oli revisa lo que hay dentro de cada archivo, no su nombre ni su extensión.'],
+      ['Orden', 'Las páginas siguen el orden de la lista. Cada fila muestra el nombre del archivo, su número de páginas y su tamaño.'],
+      ['Cuántos archivos', 'Sin límite de archivos. El límite es tu propio dispositivo.'],
+      ['Campos de formulario', 'Los campos de las páginas copiadas se conservan. Cuando dos archivos tienen un campo con el mismo nombre, al del segundo se le agrega " (2)".'],
+      ['Marcadores y enlaces', 'Se conservan los marcadores que apuntan a una página copiada y los enlaces entre páginas copiadas. Los enlaces a una dirección web también se quedan.'],
+      ['Formularios XFA', 'Se quita la capa XFA, que solo leen las aplicaciones de Adobe. Los campos de formulario normales siguen funcionando.'],
+      ['Información del documento', 'El PDF unido toma el título, el autor y los demás metadatos del primer archivo. Oli no agrega fecha, ni el nombre de un programa, ni nada de tu dispositivo.'],
+      ['PDF con contraseña', 'Un PDF con contraseña para abrirlo, o con restricciones de edición, se rechaza en su propia fila, con un enlace a Desbloquear PDF.'],
+      ['Archivos dañados', 'Un archivo vacío, cortado o que no es un PDF se rechaza en su propia fila. Un archivo con el índice dañado se repara mientras Oli lo lee.'],
+      ['El resultado', 'Un solo archivo, con el nombre del primer PDF y -unido al final, como informe-unido.pdf.'],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Preguntas',
   faq: [
     {
-      q: 'How do I change the order of the files?',
-      a: 'Drag a row to a new place, or press the arrow buttons on the row to move it up or down. You can also move a row with the keyboard. Oli joins the files in the order the list shows when you press Merge PDFs.',
+      q: '¿Cómo cambio el orden de los archivos?',
+      a: 'Arrastra una fila a otro lugar o presiona sus botones de flecha para subirla o bajarla. También puedes mover una fila con el teclado. Oli junta los archivos en el orden que muestra la lista cuando presionas Unir PDF.',
     },
     {
-      q: 'Will form fields, bookmarks and links still work after merging?',
-      a: 'Yes, for the pages that Oli copies. Form fields on those pages stay, and so do bookmarks that point to them and links between them. Links to the web stay as well, while a link to a page that is not in the merged file goes away. If two files have a field with the same name, the second one is renamed with " (2)" so both keep their own value.',
+      q: '¿Los campos de formulario, los marcadores y los enlaces siguen funcionando después de unir?',
+      a: 'Sí, en las páginas que Oli copia. Los campos de formulario de esas páginas se quedan, igual que los marcadores que apuntan a ellas y los enlaces entre ellas. Los enlaces a la web también se quedan, mientras que un enlace a una página que no está en el archivo unido desaparece. Si dos archivos tienen un campo con el mismo nombre, el del segundo se renombra con " (2)" para que cada uno conserve su propio valor.',
     },
     {
-      q: 'Can I merge a PDF that has a password?',
-      a: 'Not as it is. Oli turns away a PDF that needs a password to open, or that has editing restrictions, and shows a link to Unlock PDF. Remove the password there first, then add the result to your list here.',
+      q: '¿Puedo unir un PDF que tiene contraseña?',
+      a: 'Tal como está, no. Oli rechaza un PDF que necesita contraseña para abrirse, o que tiene restricciones de edición, y muestra un enlace a Desbloquear PDF. Quita allí la contraseña primero y después agrega el resultado a tu lista aquí.',
     },
     {
-      q: 'Is there a limit on how many PDFs I can merge?',
-      a: 'Oli sets no limit on the number of files. The limit is your device: a long list of big PDFs takes more memory and more time on a phone than on a computer.',
+      q: '¿Hay un límite de PDF que puedo unir?',
+      a: 'Oli no pone límite al número de archivos. El límite es tu dispositivo: una lista larga de PDF grandes usa más memoria y tarda más en un teléfono que en una computadora.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: 'No. The PDFs are read and written on your device, inside your browser, and nothing is sent to a server. Open the Network tab of your browser while you merge: no request carries your files.',
+      q: '¿Mi PDF se sube a algún lugar?',
+      a: 'No. Los PDF se leen y se escriben en tu dispositivo, dentro de tu navegador, y nada se envía a un servidor. Abre la pestaña Red de tu navegador mientras unes los archivos: ninguna solicitud lleva tus archivos.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote:
-    'Your PDFs are read and joined on your device and are never sent to a server. The merged file is made in your browser too.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidad',
+  privacyNote: 'Tus PDF se leen y se unen en tu dispositivo y nunca se envían a un servidor. El archivo unido también se crea en tu navegador.',
+  relatedHeading: 'Herramientas relacionadas',
   panel: {
-    suffix: 'merged',
-    note: 'PDF files, as many as you like',
-    progressLabel: 'Merging PDFs',
-    done: 'Done! Oli joined your PDFs into one.',
-    doneMany: 'Done! Oli joined your {count} PDFs into one.',
-    action: 'Merge PDFs',
+    suffix: 'unido',
+    note: 'Archivos PDF, todos los que quieras',
+    progressLabel: 'Uniendo los PDF',
+    done: '¡Listo! Oli juntó tus PDF en uno solo.',
+    doneMany: '¡Listo! Oli juntó tus {count} PDF en uno solo.',
+    action: 'Unir PDF',
     options: {
-      add: 'Add more PDFs',
-      help: 'Drag a row to move it, or use the arrow buttons on the row. With the keyboard, Space picks a row up, the arrow keys move it, and Space drops it. The files join in the order of this list.',
-      needMore: 'Add at least one more PDF to merge.',
+      add: 'Agregar más PDF',
+      help: 'Arrastra una fila para moverla o usa sus botones de flecha. Con el teclado, Espacio toma una fila, las flechas la mueven y Espacio la suelta. Los archivos se juntan en el orden de esta lista.',
+      needMore: 'Agrega al menos un PDF más para unir.',
     },
   },
 };
