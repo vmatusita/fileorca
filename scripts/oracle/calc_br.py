@@ -342,22 +342,17 @@ def personal_loan(inp: dict, full: bool = False) -> dict:
 # --- early payoff ---------------------------------------------------------------------------------------
 
 
-def fixed_sac_rows(balance: int, j: int, amort: int):
-    """SAC that keeps a fixed amortization until the balance is gone (reduce the term)."""
-    rows, k = [], 0
-    while balance > 0:
-        k += 1
-        ensure(k <= MAX_MONTHS, 'runaway sac')
-        it = interest30(balance, j)
-        a = min(amort, balance)
-        balance -= a
-        rows.append([k, a + it, it, a, balance])
-    return rows
-
-
 def plain_sac_rows(balance: int, j: int, n: int):
     """SAC with the amortization = balance / months to go (no TR)."""
     return [row[:5] for row in sac_rows(balance, j, n, 0)]
+
+
+def shorter_sac_rows(left: int, j: int, n: int, amort: int, prepay: int):
+    """SAC that reduces the term (review F6, a-3): the term is cut by the whole amortizations of today the prepayment covers,
+    and the schedule keeps the rule of the contract (balance / months to go), so a prepayment of zero leaves the contract
+    as it is. Before, a fixed amortization against the contract's rounding gave cents of saving, even negative, for zero."""
+    term = max(1, n - (prepay // amort if amort else 0))
+    return plain_sac_rows(left, j, term)
 
 
 def early_payoff(inp: dict, full: bool = False) -> dict:
@@ -374,8 +369,11 @@ def early_payoff(inp: dict, full: bool = False) -> dict:
     else:
         base = plain_sac_rows(balance, j, n)
         amort = base[0][3] if base else 0
-        shorter = fixed_sac_rows(left, j, amort)
+        shorter = shorter_sac_rows(left, j, n, amort, prepay)
         lower = plain_sac_rows(left, j, n)
+    if prepay == 0:
+        # Nothing prepaid, nothing saved, in both systems and both ways.
+        ensure(shorter == base and lower == base, 'a prepayment of zero changed the schedule')
 
     def part(rows, saved: bool) -> dict:
         out = totals(rows)
