@@ -42,7 +42,9 @@ export type ErrorReason = (typeof ERROR_REASONS)[number];
 /** The real format of the file as the engine read it from the bytes: a closed list, never a file type string. */
 export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'application/pdf', 'unknown', 'empty'] as const;
 export type Codec = (typeof CODECS)[number];
-export type DonatePlace = 'result' | 'footer' | 'support_page';
+/** Where a donation link was clicked: a closed list (DECISOES § 10); `pix` is the Copy code of the Pix (F6, § 216). */
+export const DONATE_PLACES = ['result', 'footer', 'support_page', 'pix'] as const;
+export type DonatePlace = (typeof DONATE_PLACES)[number];
 /** What a calculator exported: a closed list (DECISOES § 113). */
 export const EXPORT_FORMATS = ['pdf', 'csv'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
@@ -66,6 +68,7 @@ const CLOSED_VALUES: Record<string, readonly string[]> = {
   reason: ERROR_REASONS,
   codec: CODECS,
   format: EXPORT_FORMATS,
+  place: DONATE_PLACES,
   tool: EVENT_TOOLS,
   target: [...EVENT_TOOLS, 'home'],
 };

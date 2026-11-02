@@ -18,7 +18,8 @@ const LINE = '.fo-result .fo-result__support';
 
 const LANGS = [
   { lang: 'en', tool: '/compress-image/', link: 'Support with a coffee', hide: "Don't show this again", href: KOFI },
-  { lang: 'pt', tool: '/pt/comprimir-imagem/', link: 'Apoiar com um café', hide: 'Não mostrar de novo', href: '/pt/apoie/' },
+  // Portuguese: the Pix block of the support page since the F6 (PLANO "Doações"; DECISOES § 216).
+  { lang: 'pt', tool: '/pt/comprimir-imagem/', link: 'Pagar um café no Pix', hide: 'Não mostrar de novo', href: '/pt/apoie/#pix' },
   { lang: 'es', tool: '/es/comprimir-imagen/', link: 'Invítame un café', hide: 'No mostrar de nuevo', href: KOFI },
 ] as const;
 
@@ -254,10 +255,11 @@ for (const { lang, tool, link, hide, href } of LANGS) {
     await anchor.click();
     expect(await lastEvent(page, 'donate_click')).toEqual(['event', 'donate_click', { lang, place: 'result' }]);
     if (lang === 'pt') {
-      // Until the Pix comes (F6) the Portuguese button goes to the support page.
+      // The Portuguese button goes to the Pix block of the support page (F6, decision 8; DECISOES § 216).
       await blockLinks(page, false);
       await anchor.click();
-      await expect(page).toHaveURL(/\/pt\/apoie\/$/);
+      await expect(page).toHaveURL(/\/pt\/apoie\/#pix$/);
+      await expect(page.locator('#pix')).toBeInViewport();
     }
   });
 }

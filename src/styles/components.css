@@ -373,6 +373,26 @@
 .fo-support p { margin: 0 0 var(--space-3); color: var(--ink-muted); }
 .fo-support .fo-btn { margin-bottom: var(--space-3); }
 .fo-support__amounts { font-size: 15px; line-height: 22px; }
+/* The Pix of the Portuguese support page (SupportCard, .fo-pix; F6, decision 8). Only the block of the checked amount
+   shows: the choice is CSS, no island. The QR is a white square in both themes (the one hex the design system allows
+   for it), its modules in deep, the same in both themes. */
+.fo-support > div { min-width: 0; }
+.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-5); min-width: 0; }
+.fo-pix-card .fo-seg__opt { padding: 0 var(--space-2); white-space: nowrap; }
+.fo-support .fo-pix-card :is(h2, h3, h4) { margin: 0; font: 700 18px/24px var(--fo-font-text); letter-spacing: 0; }
+.fo-pix { display: none; grid-template-columns: 112px minmax(0, 1fr); gap: var(--space-4); align-items: center; min-width: 0; }
+.fo-pix-card:has(input[value="any"]:checked) .fo-pix[data-pix="any"],
+.fo-pix-card:has(input[value="5"]:checked) .fo-pix[data-pix="5"],
+.fo-pix-card:has(input[value="10"]:checked) .fo-pix[data-pix="10"],
+.fo-pix-card:has(input[value="20"]:checked) .fo-pix[data-pix="20"] { display: grid; }
+.fo-pix__qr { width: 112px; height: 112px; padding: 6px; box-sizing: border-box; background: #FFFFFF; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); }
+.fo-pix__qr path { fill: var(--deep); }
+.fo-pix__side { display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
+.fo-pix__side .fo-btn { margin-bottom: 0; }
+.fo-pix__code { display: flex; gap: var(--space-2); align-items: center; width: 100%; }
+.fo-pix__code code { flex: 1; width: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 13px/20px ui-monospace, monospace; color: var(--ink-muted); }
+.fo-pix__receiver { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.fo-pix__status:empty { display: none; }
 @media (min-width: 768px) {
   .fo-support { grid-template-columns: auto minmax(0, 1fr); gap: var(--space-6); padding: var(--space-6); }
   .fo-support__oli { width: 128px; height: 128px; }

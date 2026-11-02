@@ -2077,3 +2077,70 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **Achado:** a § 206 e o comentário do `components.css` diziam que, no computador, o texto do guia ficava igual. A seção `.fo-guide__tool` é `border-box`, então o recuo sai da medida de leitura. Medido no Chromium, o título e o parágrafo acima da ferramenta têm 561 px a 768, 1024 e 1280 px, contra os 697 px do resto da prosa; a 360 px têm 232 px, contra 328 px. O teste da Oli não passava pelas larguras com o recuo de 136 px.
 - **O que acontece de fato:** o recuo é necessário também no computador. Com ele zerado a partir de 768 px, a Oli cobre a última linha do parágrafo a 768 e a 1280 px em todos os guias (por exemplo "768 px: 'Drop a PDF and it is compressed in this ' (46 × 8 px)"). A coluna da ferramenta tem a largura da prosa, e a Oli fica dentro dela. O layout fica como está; só o comentário muda. A § 206 não foi editada.
 - **Teste:** `tests/e2e/tool-guides.spec.ts`, "the Oli of the panel covers no line of text", passa a 320, 360, 390, 600, 768 e 1280 px. A falha acima saiu de uma execução com o recuo de 768 px em diante zerado por uma folha de estilo injetada no próprio teste, que não ficou no código. O `--list` das partes mostra o `design.spec.ts` inteiro na parte 4 do WebKit (50 testes) e a matriz de imagens na parte 5 (18). O número de testes não mudou.
+
+## § 213 · O espanhol escreve número como nos EUA; o português, dinheiro como "R$ 1.234,56" (F6, decisão 1)
+
+- **Decisão do Victor (1º/nov/2026):** as páginas em espanhol são para o público hispânico dos EUA, e o espanhol do site inteiro passa a escrever número como o inglês: "1,234.56", "2.4 MB", "20,000 px". O "68 %" com espaço sem quebra continua, porque é a voz do design system. O português segue com "1.234,56".
+- **Mudou:**
+  - `src/calc/parse.ts`: no espanhol, ponto decimal e vírgula no milhar, também com quatro dígitos ("1,234"). Sai a regra da RAE que a § 112 tinha posto (agrupar só a partir de cinco dígitos, com espaço sem quebra). A § 112 vale como estava para o inglês e o português.
+  - `money()` e `dollars()`: "R$ 1.234,56" no português (com espaço sem quebra), "$1,234.56" no espanhol. Antes os dois escreviam "1.234,56 $".
+  - `src/i18n/format.ts`: o `fileSize` passa a ser escrito à mão, sem `Intl` (a § 112 já pedia isso para o que a página mostra), e ganha o `groupDigits`, que substitui o `toLocaleString` do Redimensionar ("20,000" / "20.000").
+- **Testes que mudaram por construção** (modelo da § 171): `tests/unit/calc-parse.test.ts` deixa de aceitar "1.234,56", "1 234,56" e "12 345,6" no espanhol e passa a recusá-los; espera "1,234" e "12,345" onde esperava "1234" e "12 345"; `money(123_456, 'pt')` passa de "1.234,56 $" a "R$ 1.234,56"; `hundredthsPercent(513, 'es')` passa de "5,13 %" a "5.13 %". `tests/unit/routes.test.ts` ganha o "2.4 MB" do espanhol, o "1,000 KB" e o `groupDigits`.
+
+## § 214 · O `og:locale` do espanhol é `es_US` (F6, decisão 1)
+
+- **Alternativas:** `es_ES` (o de antes, que fala com a Espanha), `es_LA` (o rótulo do Facebook para a América Latina, que não é código de região) e `es_US`.
+- **Escolha:** `es_US`, o público que o Victor decidiu para o espanhol do dinheiro, e o mesmo do formato de número. As ferramentas de arquivo servem a América Latina também, mas o `og:locale` é um só por idioma no mapa (`OG_LOCALE`). Nenhum teste fixava o valor.
+
+## § 215 · O sufixo "unlocked" do nome de arquivo não é a palavra proibida (F6)
+
+- **Achado:** o sufixo do arquivo baixado passou do registro para os textos (`panel.suffix`, para seguir o idioma). O teste de voz (`checkVoice` e o `routes.test.ts`) leu "unlocked" do Unlock PDF e reprovou pela palavra proibida "unlock".
+- **Decisão:** o nome de arquivo "relatorio-unlocked.pdf" existe desde a F5a e não muda em inglês; é nome técnico, como o id `unlock-pdf` que a § 153 já tira da conta. O `FILE_SUFFIX` de `scripts/lib/design-checks.ts` tira só o valor exato "unlocked" na chave exata `.panel.suffix`; "unlocked" em qualquer outro texto continua reprovando. Os controles da § 153 ("unlocked files" reprova) seguem no teste.
+
+## § 216 · A linha do café em português leva ao Pix, e o "Copiar código" é o lugar `pix` do `donate_click` (F6, decisão 8)
+
+- **Mudou:** o botão da linha do café no card de resultado, em português, diz "Pagar um café no Pix" (tabela "Doações" do PLANO) e leva a `/pt/apoie/#pix`, nas ferramentas de imagem e de PDF. Até a F6 dizia "Apoiar com um café" e levava a `/pt/apoie/` (§ 49).
+- **Evento:** o "Copiar código" manda o `donate_click` com o lugar novo `pix`. O Pix fica separado do Ko-fi da mesma página (`support_page`), para os 60 dias de medição do PLANO dizerem qual dos dois é usado. A lista de lugares virou constante fechada (`DONATE_PLACES`) e entrou no `cleanParams`, como as outras listas da § 10.
+- **Testes:** `tests/unit/pix.test.ts` ("keeps the place pix and drops a place outside the list"); `tests/e2e/coffee.spec.ts` muda por construção o texto e o destino do botão em português, e passa a conferir que o `#pix` fica na tela depois do clique.
+
+## § 217 · O Pix: oráculo, gerador, QR em SVG e a troca de valor só com CSS (F6, decisão 8)
+
+- **Fontes, lidas em 1º/nov/2026 no bcb.gov.br:** Manual de Padrões para Iniciação do Pix, versão 2.10.0 (19/ago/2026), § 2.6 (QR estático), com o exemplo `…63041D3D`; Manual do BR Code 2.0.1; Regulamento do Pix (Resolução BCB nº 1/2020), arts. 40 a 41-B (devolução iniciada pelo recebedor, em até 90 dias; o MED não cobre arrependimento). A versão 2.11.0-rc1 (29/out/2026) não muda a seção do QR estático.
+- **O código:** os campos 00, 26 (GUI e a chave do `docs/F0-SAIDA.md`), 52, 53, 54 só com valor, 58, 59 (`VICTOR YUKI MATUSITA`), 60 (`CURITIBA`), 62 com 05 `***` e 63 (CRC16-CCITT, 0x1021, início 0xFFFF). Sem o campo 01, que é opcional e não aparece no exemplo estático do manual.
+- **Ordem dos commits:** `scripts/oracle/pix.py` e `fixtures/pix.json` (commit `2b03121`) vêm antes do gerador `src/platform/pix.ts`. O oráculo usa só a biblioteca padrão (o CRC é o `binascii.crc_hqx`), lê a chave e o nome do `docs/F0-SAIDA.md` e para se não reproduzir o exemplo do manual.
+- **QR:** o pacote `qrcode` 1.5.4 (MIT), em `devDependencies` e só no build. Nível de correção M: o manual não fixa nível, e M é o comum para código lido da tela; os quatro códigos (144 a 153 caracteres) ficam na versão 7 (45 × 45 módulos). Zona de silêncio de 4 módulos, fundo `#FFFFFF` (a exceção do design system para o QR do Pix) e módulos em `currentColor`, pintados com o token `deep` pelo CSS (igual nos dois temas). A prova é o `tests/unit/pix-qr.test.ts`: cada SVG do `dist/pt/apoie/` é rasterizado com o `@resvg/resvg-js` e lido pelo `jsqr` 1.4.0 (Apache-2.0, `devDependencies`), e devolve o código do JSON.
+- **Troca de valor sem ilha:** os quatro blocos estão no HTML; o CSS mostra o do rádio marcado (`:has(input[value="5"]:checked)`). O copiar é um `<script is:inline>` de nove linhas (`navigator.clipboard.writeText`), sem requisição. O card permite encolher (`.fo-support > div { min-width: 0 }`) para o código ter reticências a 360 px.
+
+## § 218 · Onde moram os caminhos por idioma e como os tipos passam a exigir os textos (F6, decisões 2 e 4)
+
+- **Caminhos:** a tabela `TRANSLATED_PATHS` de `src/i18n/routes.ts` dá os caminhos pt e es das páginas de imagem e de PDF e dos dois hubs (a tabela da decisão 2). As 5 calculadoras em espanhol têm `es: { path, file, next, related }` na própria linha do `CALC_PAGES`. As 8 brasileiras ficam num registro ao lado, `BR_CALC_PAGES` (com o hub `br-money-calculators`), para nada que lê o `CALC_PAGES` (todo ele com página em inglês) herdar uma página sem inglês. `MoneyPageId` junta os dois; `moneyPage(id, lang)` devolve a página de um idioma ou `null`.
+- **Tipos:** o `CommonTexts` passa a exigir, em todo idioma, as 11 de imagem, as 12 de PDF, os nomes dos hubs e as categorias da busca; `calcs` é exato por idioma (`EnCommonTexts`, `PtCommonTexts`, `EsCommonTexts`). Os mapas `IMAGE_TOOL_TEXTS` e `PDF_TOOL_TEXTS` exigem os três idiomas. Os hubs entraram no `TEXTS[lang]`.
+- **Os moldes** de PDF, de dinheiro e dos hubs recebem `lang` (com o padrão `'en'` onde um teste já os renderizava sem idioma). A linha do guia e a seção de guias só aparecem em inglês.
+
+## § 219 · O nome do arquivo baixado segue o idioma (F6, decisão 4)
+
+- **Mudou:** o sufixo do PDF (`panel.suffix`), as partes do Dividir e do PDF para JPG (`page`, `part`, `selected`), os nomes dos ZIPs e o `documento.pdf` vêm dos textos do painel (`files`), com os valores dos glossários (`docs/i18n/`). Em inglês os valores são os de antes (o registro e as constantes de `names.ts`, que ficam para os testes).
+- **Os nomes de lote da imagem** (`fileorca-images.zip` e `.pdf`) também passam a seguir o idioma ("fileorca-imagens", "fileorca-imagenes"), o que muda o ZIP da Comprimir imagem em pt e es, a única página que já existia. A § 58 dizia "English on every page" porque só havia inglês.
+
+## § 220 · A palavra da numeração de páginas vem da página (F6, decisão 4)
+
+- **Mudou no motor de PDF:** a operação `numbers` ganha `page?` e `of?`, opcionais. Sem elas, "Page" e "of": os testes do motor que não as passam e a saída em inglês não mudam um byte (a página em inglês manda "Page" e "of", o mesmo texto). As palavras passam pelo `winAnsi()`. Na ilha, o `start` da ferramenta põe as palavras dos textos (`pageWord`, `ofWord` de `NumbersTexts`) no estado, como a marca d'água já fazia com o texto padrão.
+
+## § 221 · O PDF do relatório de dinheiro em A4 no português: terceira mudança no motor de PDF (F6, decisão 5)
+
+- **Mudou:** `ReportInput.paper?: 'a4'`; sem ele, Letter, como antes. O tamanho de A4 é o do `build.ts` (595,28 × 841,89 pt). A ilha só põe `paper: 'a4'` numa página em português.
+- **Por que é uma terceira mudança:** o prompt permite no motor de PDF o texto que vem da página e a correção de defeito com teste. A decisão 5 do mesmo prompt pede o PDF em A4 em português, então o tamanho tem de entrar no motor. Em inglês e espanhol a saída não muda.
+
+## § 222 · O CSV por idioma (F6, decisões 1, 5 e 6)
+
+- **Mudou:** `csvText(table, yearHeading, lang)`: no português, ponto e vírgula entre as colunas e vírgula decimal ("1896,20"); no inglês e no espanhol, vírgula e ponto, como antes. BOM UTF-8 e CRLF nos três. Uma célula com o separador do idioma vai entre aspas.
+
+## § 223 · As datas por extenso e no dia de Brasília (F6, decisão 1)
+
+- **Mudou:** `src/i18n/dates.ts` escreve "October 31, 2026", "1 de novembro de 2026" e "1 de noviembre de 2026", à mão (fora da ilha). As páginas de dinheiro em pt e es nasceram na F6: `REVIEWED_ON` e `FIRST_PUBLISHED_ON` dizem o dia em Brasília em que a run as revisou, e `SOURCES_READ_ON` o dia em que as fontes foram lidas (1º/nov/2026). As inglesas ficam com 31/out/2026.
+
+## § 224 · Os glossários e o que eles proíbem (F6, decisão 3)
+
+- **Arquivos:** `docs/i18n/pt.md` e `docs/i18n/es.md`, escritos antes de qualquer tradução: registro, formato, termos de arquivo, ferramentas e opções, nomes de arquivo, dinheiro, falas da Oli, pedido de café e a lista "Nunca".
+- **Escolhas:** em português, "Baixar", "arquivo", "aparelho", "celular", "lote"; "upload" só no bordão "sem upload"; "parcela" e "saldo devedor" no dinheiro; nada de português de Portugal. Em espanhol, "Descargar", "archivo", "dispositivo", "computadora", "teléfono/celular", "tú"; no dinheiro, os termos do CFPB em espanhol ("pago mensual", "pago inicial", "tasa porcentual anual (APR)"), nunca "enganche", "cuota mensual" nem "tasa de porcentaje anual".
+- **O site do CFPB em espanhol saiu do ar:** todo `consumerfinance.gov/es/` redireciona para o inglês desde julho de 2026 (lido em 1º/nov/2026). As páginas em espanhol citam os PDFs em espanhol do CFPB que seguem no ar e, onde não há, a página em inglês do CFPB com "(en inglés)" no rótulo, como a decisão 6 já previa.

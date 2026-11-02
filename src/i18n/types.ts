@@ -196,6 +196,31 @@ export interface SupportTexts extends PageMeta {
   next: string;
   button: string;
   amountsNote: string;
+  /** The Pix block of the Portuguese page (PLANO "Doações"; F6, decision 8): only where the Pix exists. */
+  pix?: SupportPixTexts;
+}
+
+export interface SupportPixTexts {
+  /** Heading of the block, one level under the card's title: "Um café no Pix". */
+  heading: string;
+  /** Name of the amount choice (OptionGroup): "Valor". */
+  legend: string;
+  /** The choice with no amount: "Qualquer valor". */
+  any: string;
+  /** An amount, from the BR Code's "5.00": "R$ {amount}". */
+  amount: string;
+  /** Name of the QR: "QR code do Pix, {amount}" ({amount}: "qualquer valor" or "R$ 5"). */
+  qrLabel: string;
+  anyLower: string;
+  /** Name of the code field (the "copia e cola"). */
+  codeLabel: string;
+  copy: string;
+  /** What the status region says after the copy. */
+  copied: string;
+  /** The receiver, for the person to check: "Em nome de {name}". */
+  receiver: string;
+  /** The Pix is static: the site does not know who paid; refunds only through the Pix's own button. */
+  note: string;
 }
 
 export interface NotFoundTexts extends PageMeta {

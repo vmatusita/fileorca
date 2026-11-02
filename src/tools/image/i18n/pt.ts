@@ -71,7 +71,7 @@ export default {
     metadata: 'A Oli removeu os metadados da foto, inclusive a localização GPS.',
     coffee: {
       text: 'Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café?',
-      button: 'Apoiar com um café',
+      button: 'Pagar um café no Pix',
       hide: 'Não mostrar de novo',
     },
   },
