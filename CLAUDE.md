@@ -366,3 +366,11 @@ Pegadinhas que a F5b achou:
 - **`gifenc` é CommonJS no Node**: importe o default (`import gifenc from 'gifenc'`).
 - **O `node -e` e o heredoc do Git Bash** seguem as regras da F3 e da F4: texto com crase ou barra invertida vai para um arquivo.
 - **Uma consulta da busca que traz um guia muda por construção** (§ 190): dê ao guia termos que não colidam com as consultas dos testes, e uma frase com "jpeg" quando o nome diz "JPG".
+- **O `pnpm guias:medir` grava o dia em UTC.** Depois das 21h em Brasília a data da medida já é a do dia seguinte. O `GUIDE_REVIEWED` e o `GUIDE_PUBLISHED` (`src/tools/guides/page.ts`) nunca ficam antes do `measuredOn`, e o teste reprova (§ 207).
+- **Porta do Playwright para o `guias:medir`:** use de 4174 a 4189. O `fetch` do Node recusa algumas portas ("bad port"), como a 4190, e aí o script não acha o servidor.
+- **As regras de texto que a revisão acrescentou** (`tests/unit/guides-numbers.test.ts`, § 197 a § 203 e § 208):
+  - a frase diz a amostra (com placeholder de contagem);
+  - um mínimo ou um máximo diz a direção;
+  - nada generaliza além da amostra (a lista `GENERAL`: "usually", "most", "usual", "almost free", "real PDFs"…);
+  - a data da medida não vai para as fontes, que têm a própria data de leitura.
+- **No kit, toda frase técnica em inglês contém uma frase provada da seção "Provas"** (`launch-kit.test.ts`, § 205). Frase nova sobre envio, offline, navegador, anúncio, Analytics, cookie, conta, lote ou memória precisa de prova, ou sai.
