@@ -5,7 +5,6 @@
 // as ES modules: each `require()` becomes the default import of that module, the file runs with a local `module` and
 // `exports`, and `module.exports` is the default export (plus the names assigned to `exports.name`). The module ids stay
 // the files in node_modules, so the bundle record and gate:licencas see the same packages. Build-time only.
-import type { Plugin } from 'vite';
 
 /** The CommonJS files the QR code generator bundles: the core of qrcode and the dijkstrajs it requires. */
 export const QRCODE_CJS = /[\\/]node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:qrcode[\\/]lib[\\/]core[\\/][\w-]+\.js|dijkstrajs[\\/]dijkstra\.js)$/;
@@ -24,11 +23,11 @@ export function cjsToEsm(code: string, id: string): string {
   return [...imports, 'const module = { exports: {} };', 'const exports = module.exports;', body, 'export default module.exports;', ...named, ''].join('\n');
 }
 
-export function qrcodeEsm(): Plugin {
+export function qrcodeEsm() {
   return {
     name: 'fileorca:qrcode-esm',
-    enforce: 'pre',
-    transform(code, id) {
+    enforce: 'pre' as const,
+    transform(code: string, id: string): { code: string; map: null } | null {
       if (!QRCODE_CJS.test(id)) return null;
       return { code: cjsToEsm(code, id), map: null };
     },
