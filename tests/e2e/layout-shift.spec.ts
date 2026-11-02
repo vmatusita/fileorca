@@ -2,8 +2,10 @@
 // second pass; DECISOES § 305). The fallback font was narrower than Figtree, so a breadcrumb that fit in one row went to
 // two and pushed the tool 22 px down: CLS from 0.12 to 0.27 at 320 to 412 px, which Lighthouse never saw. The trail now
 // has its own face of Figtree, with font-display: optional, and the fallback font is calibrated. The Figtree file is held
-// until the page has painted, then released: in Chromium the shifts are summed; WebKit reports no layout shift, so there
-// the breadcrumb and the H1 are measured before and after the font arrives.
+// until the page has painted, then released, and the breadcrumb and the H1 must stay where the first paint put them, in
+// both browsers. The rest of the text still swaps fonts: Chromium sums its layout shift and prints it, with what moved,
+// but does not judge it here, because the fallback renders differently on each system (the CLS of a paragraph that
+// loses a line was 0.046 on Windows and 0.257 on the Linux of the CI, on the same page; DECISOES § 305).
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
 // Each width with the pages whose trail sat on the edge of a row there, in the sweeps of every page (before the
@@ -56,15 +58,22 @@ async function top(page: Page): Promise<{ crumbs: number; h1: number; over: numb
 }
 
 /** A first visit (a context of its own, nothing in memory), with Figtree held until the page has painted. */
-async function firstVisit(browser: Browser, browserName: string, path: string, width: number): Promise<{ before: Awaited<ReturnType<typeof top>>; after: Awaited<ReturnType<typeof top>>; cls: number }> {
+async function firstVisit(browser: Browser, browserName: string, path: string, width: number): Promise<{ before: Awaited<ReturnType<typeof top>>; after: Awaited<ReturnType<typeof top>>; cls: number; moved: string[] }> {
   const context = await browser.newContext({ viewport: { width, height: 800 }, deviceScaleFactor: 2.625, reducedMotion: 'reduce', serviceWorkers: 'block' });
   await context.addInitScript(() => {
     localStorage.setItem('fo-consent', 'denied');
-    (window as unknown as { __cls: number }).__cls = 0;
+    const shifts = { cls: 0, moved: [] as string[] };
+    (window as unknown as { __shifts: typeof shifts }).__shifts = shifts;
     if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
+    type Shift = PerformanceEntry & { value: number; hadRecentInput: boolean; sources: { node: Node | null; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[] };
     new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
-        if (!entry.hadRecentInput) (window as unknown as { __cls: number }).__cls += entry.value;
+      for (const entry of list.getEntries() as Shift[]) {
+        if (entry.hadRecentInput) continue;
+        shifts.cls += entry.value;
+        for (const { node, previousRect, currentRect } of entry.sources) {
+          const name = node instanceof Element ? `<${node.tagName.toLowerCase()} class="${node.className}">` : `"${(node?.textContent ?? '').trim().slice(0, 24)}"`;
+          shifts.moved.push(`${entry.value.toFixed(3)} ${name} y ${Math.round(previousRect.y)}→${Math.round(currentRect.y)}`);
+        }
       }
     }).observe({ type: 'layout-shift', buffered: true });
   });
@@ -88,28 +97,23 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
   await painted(page);
   await page.waitForTimeout(200);
   const after = await top(page);
-  const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+  const { cls, moved } = await page.evaluate(() => (window as unknown as { __shifts: { cls: number; moved: string[] } }).__shifts);
   await context.close();
-  return { before, after, cls };
+  return { before, after, cls, moved };
 }
 
 for (const [width, pages] of Object.entries(CASES)) {
   for (let start = 0; start < pages.length; start += CHUNK) {
     const chunk = pages.slice(start, start + CHUNK);
     test(`no layout shift when Figtree arrives late, at ${width} px (${chunk[0]} and on)`, async ({ browser, browserName }) => {
-      const results: string[] = [];
-      for (const path of chunk) {
-        const { before, after, cls } = await firstVisit(browser, browserName, path, Number(width));
+      const visits = [];
+      for (const path of chunk) visits.push({ path, ...(await firstVisit(browser, browserName, path, Number(width))) });
+      // Printed before any assertion, so a red run still shows the shift of every page of the chunk.
+      if (browserName === 'chromium') console.log(`[cls] ${browserName} ${width}: ${visits.map(({ path, cls, moved }) => `${path} ${cls.toFixed(3)}${cls > 0.01 ? ` (${moved.join('; ')})` : ''}`).join(', ')}`);
+      for (const { path, before, after, moved } of visits) {
         expect(after.over, `${path}: the trail cuts nothing at ${width} px`).toBeLessThanOrEqual(0);
-        if (browserName === 'chromium') {
-          results.push(`${path} ${cls.toFixed(3)}`);
-          expect(cls, `${path} at ${width} px`).toBeLessThanOrEqual(0.05);
-          expect(after.crumbs, `${path}: the breadcrumb keeps its height at ${width} px`).toBe(before.crumbs);
-        } else {
-          expect(after, `${path} at ${width} px: the breadcrumb and the H1 stay where the first paint put them`).toEqual(before);
-        }
+        expect(after, `${path} at ${width} px: the breadcrumb and the H1 stay where the first paint put them (moved: ${moved.join('; ') || 'nothing'})`).toEqual(before);
       }
-      if (results.length) console.log(`[cls] ${browserName} ${width}: ${results.join(', ')}`);
     });
   }
 }
