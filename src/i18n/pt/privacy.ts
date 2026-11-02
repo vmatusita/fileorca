@@ -30,6 +30,15 @@ export default {
       ],
     },
     {
+      heading: 'A cópia guardada para usar offline',
+      paragraphs: [
+        'Quando você abre uma página do FileOrca com internet, o seu navegador guarda uma cópia dessa página e dos arquivos do site de que ela precisa, como os scripts, os estilos, as fontes e o motor de uma ferramenta que você usou, para a página funcionar também offline. Essa cópia fica no seu aparelho, no armazenamento do navegador, e o FileOrca nunca a recebe.',
+        'Os seus arquivos e os seus números nunca entram nessa cópia. Ela guarda só arquivos de fileorca.com, em endereços sem a parte depois do ? ou do #, então o que você digita, abre ou salva fica de fora.',
+        'Para apagar a cópia, limpe os dados do site fileorca.com nas configurações do navegador, ou desinstale o app do FileOrca, se você o instalou.',
+        'No Android, quando você compartilha imagens ou PDFs com o app do FileOrca instalado, eles esperam no seu aparelho até você escolher uma ferramenta. Eles são apagados assim que a ferramenta os recebe, ou depois de uma hora, se você não escolher nenhuma. Eles nunca são enviados. Quando você escolhe uma ferramenta, a página anota nesta aba qual foi a escolhida, e nada mais.',
+      ],
+    },
+    {
       heading: 'Entrega do site (Cloudflare)',
       paragraphs: [
         'O FileOrca é um site estático, entregue pela Cloudflare. Quando o seu navegador pede uma página, a Cloudflare processa dados técnicos da requisição, como o endereço IP e o navegador, para entregar e proteger o site.',
@@ -120,6 +129,7 @@ export default {
         'Dados de anúncios: o Google os guarda de acordo com as próprias políticas.',
         'Escolha de cookies: fica no seu navegador, e você pode apagá-la quando quiser limpando os dados do site.',
         'E-mails: guardados só pelo tempo necessário para responder a você.',
+        'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou depois de uma hora.',
       ],
     },
     {

@@ -30,6 +30,15 @@ export default {
       ],
     },
     {
+      heading: 'The copy kept for offline use',
+      paragraphs: [
+        'When you open a page of FileOrca with internet, your browser keeps a copy of that page and of the files of the site it needs, such as its scripts, styles and fonts and the engine of a tool you used, so the page works offline too. This copy stays on your device, in the storage of your browser, and FileOrca never receives it.',
+        'Your files and your numbers never go into this copy. It keeps only files of fileorca.com, at addresses without the part after the ? or the #, so what you type, open or save stays out of it.',
+        'To delete the copy, clear the site data of fileorca.com in the settings of your browser, or uninstall the FileOrca app if you installed it.',
+        'On Android, when you share images or PDFs with the installed FileOrca app, they wait on your device until you choose a tool. They are deleted as soon as the tool takes them, or after an hour if you choose none. They are never uploaded. When you pick a tool, the page notes in this tab which tool you chose, and nothing else.',
+      ],
+    },
+    {
       heading: 'Site delivery (Cloudflare)',
       paragraphs: [
         'FileOrca is a static site delivered by Cloudflare. When your browser asks for a page, Cloudflare processes technical request data, such as your IP address and browser, to deliver and protect the site.',
@@ -120,6 +129,7 @@ export default {
         'Ad data: Google keeps it under its own policies.',
         'Cookie choice: stays in your browser, and you can delete it at any time by clearing the site data.',
         'E-mails: kept only as long as needed to answer you.',
+        'Offline copy: stays in your browser until you clear the site data or uninstall the app. Files shared with the app are deleted when a tool takes them, or after an hour.',
       ],
     },
     {
