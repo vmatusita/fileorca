@@ -2032,3 +2032,48 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **Achado:** a medida refeita pelas correções da revisão saiu com a data de 2/nov/2026, porque o `pnpm guias:medir` grava o dia em UTC e já passava da meia-noite UTC (21h48 de 1/nov em Brasília). Os guias passaram a dizer "Reviewed … November 1, 2026 … with the measurements of November 2, 2026": a revisão antes da medida que ela mostra.
 - **Mudou:** o `GUIDE_REVIEWED` e o `GUIDE_PUBLISHED` (`src/tools/guides/page.ts`) passam a 2026-11-02, o dia em UTC da última medida e do merge desta run. O script continua gravando o dia em UTC; as fontes lidas em 1/nov seguem com essa data.
 - **Teste:** `tests/unit/guides-measured.test.ts`, "are never newer than the review and publication dates the guides show": o `measuredOn` do JSON não pode ser depois do `GUIDE_REVIEWED` nem do `GUIDE_PUBLISHED`. Antes da mudança: "reviewed 2026-11-01, measured 2026-11-02".
+
+## § 208 · As fontes têm a data delas, e o que sobrou das generalizações sai (F5b, segunda passada, itens 1 e 3)
+
+- **Achado:** o "changed" do guia 3 dizia "with the measurements and the help pages of {date}". O `{date}` é o dia da medida (2/nov, § 207), e as 11 fontes foram lidas em 1/nov, como diz cada fonte. Sobravam também frases do tipo que a § 197 tirou: "Pictures: the usual suspect" (guia 2), "measured on real files" na descrição do guia 8, "when we merged real PDFs", "merging is almost free" (sustentado por um par só) e "in 5 of the 5 pairs it was a little smaller" (com −23% e −18% na tabela) no guia 9.
+- **Mudou:**
+  - O guia 3 diz a data da medida e que as páginas foram lidas na data de cada fonte, sem data à mão.
+  - O título do guia 2 vira "Pictures: the weight of our heaviest PDFs", e a descrição do guia 8 diz "our test PDFs".
+  - O guia 9 diz o que cada par deu. Os dois pares que arredondam para 100% vêm em bytes (`_exact`); os outros vêm com a queda de cada um. O par gerado (−18%) é explicado: o script de teste escreveu os dois PDFs sem object streams, e o Merge grava com elas (`saveDoc` de `src/engine/pdf/process.ts`). Saem "One pair stood out" (A-11) e as "small savings".
+- **Teste:**
+  - A lista `GENERAL` de `tests/unit/guides-numbers.test.ts` ganha "usual", "almost free", "real PDFs" e "real files". "Real phone photos" e "real documents" seguem permitidos, e há controles para os dois lados.
+  - "never give the sources the date of the measurement": uma frase com `{date}` que fale de help pages, sources ou "read on" reprova.
+  - `tests/unit/guides-measured.test.ts`, "say, in guide 9, how much smaller each merged pair came out": cada par do JSON aparece no texto pela razão ou pelos bytes.
+  - Antes da correção: 4 frases na lista, o "changed" do guia 3 e `guide 9 cites {bookFormRatio}`.
+
+## § 209 · O guia 8 diz quanto cresceu cada arquivo, e quanto da parte é metadado (F5b, segunda passada, item 7)
+
+- **Achado:** a introdução dizia que as partes de "three of them" pesaram mais, e um deles cresceu 1.304 bytes (0% na tabela). A frase do fim dizia "about 7.7 KB heavier per part", que é o crescimento por parte inteiro; o XMP é 6,2 KB dele.
+- **Mudou:** a introdução nomeia os três arquivos, cada um com o seu crescimento: `{bookRatio_times}`, `{reportRatio_more}` e `{photosGrowth_exact}`. A frase do fim diz que cada parte do relatório somou cerca de `{reportGrowthPerPart}`, dos quais `{reportMetadata}` são a cópia dos metadados e o resto é estrutura.
+- **Teste:** `tests/unit/guides-measured.test.ts`, "say, in guide 8, how much each file that grew grew, and what of a part is metadata".
+  - A frase que conta os arquivos que cresceram (`{bigger}`) cita a razão ou o crescimento de cada arquivo com `Growth` positivo no JSON.
+  - O número desses arquivos é o `bigger`.
+  - `{reportGrowthPerPart}` e `{reportMetadata}` vêm na mesma frase.
+  - Antes: "the growth of report: expected 'We split {files_word} PDFs…' to match".
+
+## § 210 · O fato vazio não deixa a frase do guia 6 sem ferramenta (F5b, segunda passada, item 9)
+
+- **Achado:** "with {browsersDiffer}, the sizes differed" vira "with , the sizes differed" numa medida nova em que os dois navegadores concordem em todas as ferramentas.
+- **Mudou:** o teste do guia 6 exige o fato `browsersDiffer` não vazio enquanto o texto o lê. Uma medida em que os navegadores concordem reprova até a frase mudar. O texto não muda.
+- **Teste:** `tests/unit/guides-measured.test.ts`, "say, in guide 6, which tools the two browsers wrote differently", com a função `differProblems`. O controle com o fato vazio reprova ("sem nenhuma ferramenta"), e o fato medido ("PNG to JPG") passa.
+
+## § 211 · O kit diz "our test files" e não promete o que um aparelho aguenta (F5b, segunda passada, itens 2 e 11)
+
+- **Achado:** a descrição A, o primeiro comentário e o título da prova 5 diziam "real test files". Parte dos PDFs medidos foi escrita pelo script (`gen-*`), a mesma razão da legenda da galeria 4 (§ 204). A resposta "Are there limits?" dizia que "a very large photo or a very long PDF can be too much for the memory of an older phone", e a run nunca mediu memória.
+- **Mudou:** os três textos dizem "measured on our test files". A resposta dos limites diz "I have not tested the largest file each phone can open, so tell me if one fails". Não diz "measured", que a § 204 reserva aos guias de arquivo. As contagens de caracteres passam a 442, 313 e 1.543. A § 204 fica como está.
+- **Teste:** `tests/unit/launch-kit.test.ts`.
+  - O `claimProblems` reprova "real test files" num texto em inglês ou numa prova.
+  - O `TECHNICAL` ganha "memory", "older phone" e "too much for", que pedem prova.
+  - Há controles com "real test files", com a frase antiga da memória e com a nova, que passa.
+  - Antes: quatro frases com "real test files" e a da memória sem prova.
+
+## § 212 · O recuo da Oli estreita o texto também no computador, e o teste vai a 768 e 1280 px (F5b, segunda passada, itens 4 e 5)
+
+- **Achado:** a § 206 e o comentário do `components.css` diziam que, no computador, o texto do guia ficava igual. A seção `.fo-guide__tool` é `border-box`, então o recuo sai da medida de leitura. Medido no Chromium, o título e o parágrafo acima da ferramenta têm 561 px a 768, 1024 e 1280 px, contra os 697 px do resto da prosa; a 360 px têm 232 px, contra 328 px. O teste da Oli não passava pelas larguras com o recuo de 136 px.
+- **O que acontece de fato:** o recuo é necessário também no computador. Com ele zerado a partir de 768 px, a Oli cobre a última linha do parágrafo a 768 e a 1280 px em todos os guias (por exemplo "768 px: 'Drop a PDF and it is compressed in this ' (46 × 8 px)"). A coluna da ferramenta tem a largura da prosa, e a Oli fica dentro dela. O layout fica como está; só o comentário muda. A § 206 não foi editada.
+- **Teste:** `tests/e2e/tool-guides.spec.ts`, "the Oli of the panel covers no line of text", passa a 320, 360, 390, 600, 768 e 1280 px. A falha acima saiu de uma execução com o recuo de 768 px em diante zerado por uma folha de estilo injetada no próprio teste, que não ficou no código. O `--list` das partes mostra o `design.spec.ts` inteiro na parte 4 do WebKit (50 testes) e a matriz de imagens na parte 5 (18). O número de testes não mudou.
