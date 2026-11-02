@@ -17,6 +17,8 @@
 //    "in x.wasm" has that x.wasm in dist/.
 // 7. (DECISOES § 179) A package compiled into another package's prebuilt file (core-js inside the legacy build of PDF.js,
 //    which the bundle record sees only as pdfjs-dist) has its own license text on /licenses, of the version the code names.
+// 8. (F7, decision 8) The QR code generator's library stays on its page: qrcode and dijkstrajs in one chunk, the same one,
+//    never the shared island chunk every tool page loads, and of qrcode only the matrix (lib/core/).
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -32,6 +34,7 @@ import {
   checkWasmIdentity,
   checkWasmTexts,
   checkEmbeddedTexts,
+  checkQrBundle,
   compareBundleWithList,
   readBundleRecord,
   readDistFacts,
@@ -113,6 +116,8 @@ let pdfjsFiles = 0;
 let prebuilt: ReturnType<typeof readPrebuiltFiles> = [];
 if (record) {
   for (const issue of checkRequiredInBundle(bundledDirs)) problems.add(`PDF: ${issue}`);
+  // 8. (F7) The QR code generator.
+  for (const issue of checkQrBundle(record)) problems.add(`QR: ${issue}`);
   const facts = readDistFacts(record);
   distWasm = facts.wasm.filter((entry) => !entry.file.startsWith('_astro/pdfjs/')).length;
   const sourceDirs = new Map<string, string>();

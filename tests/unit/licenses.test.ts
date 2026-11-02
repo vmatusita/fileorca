@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   PDFJS_SERVED,
   PDF_PACKAGES,
+  QR_PACKAGES,
+  SHARED_ISLAND_CHUNK,
   bundledPackageDirs,
   checkLicensesPage,
   checkPdfjsData,
@@ -15,6 +17,7 @@ import {
   checkWasmIdentity,
   checkWasmTexts,
   checkEmbeddedTexts,
+  checkQrBundle,
   classifyModule,
   compareBundleWithList,
   embeddedPackages,
@@ -274,6 +277,67 @@ describe('as bibliotecas de PDF no bundle (F5a)', () => {
   it('is listed on /licenses: both are browser dependencies with a license text', () => {
     const names = browserPackages().map((pkg) => pkg.name);
     for (const name of PDF_PACKAGES) expect(names, name).toContain(name);
+  });
+});
+
+// ---- F7, decision 8: the library of the QR code generator stays on its own page -----------------------------------------
+
+describe('a biblioteca do gerador de QR code no bundle (F7)', () => {
+  const QR = `${PNPM}/qrcode@1.5.4/node_modules/qrcode`;
+  const core = (file: string): string => `${QR}/lib/core/${file}`;
+  const DIJKSTRA = `${PNPM}/qrcode@1.5.4/node_modules/dijkstrajs/dijkstra.js`;
+  const ENTRY = '_astro/QrTool.astro_astro_type_script_index_0_lang.BaprFXds.js';
+  const ISLAND = '_astro/island.B96aGO_S.js';
+  /** The bundle as the build makes it: the matrix and dijkstrajs in the QR page's own entry, nothing of them in the island. */
+  const good = () => ({
+    [ENTRY]: [core('qrcode.js'), core('segments.js'), core('byte-data.js'), DIJKSTRA, `${ROOT}/src/tools/qr-code-generator/qr.ts`],
+    [ISLAND]: [`${PNPM}/preact@11.1.0/node_modules/preact/dist/preact.mjs`, `${ROOT}/src/tools/image/OptionGroup.tsx`],
+    '_astro/CompressImagePage.astro_astro_type_script_index_0_lang.Bn3BoR6T.js': [`${ROOT}/src/tools/compress-image/Panel.tsx`],
+  });
+
+  it('passes when qrcode and dijkstrajs are in one chunk, the same one, and it is not the shared island', () => {
+    expect(QR_PACKAGES).toEqual(['qrcode', 'dijkstrajs']);
+    expect(checkQrBundle(good(), ROOT)).toEqual([]);
+    expect(SHARED_ISLAND_CHUNK.test(ISLAND)).toBe(true);
+    expect(SHARED_ISLAND_CHUNK.test(ENTRY)).toBe(false);
+  });
+
+  it('fails when either of them goes into the island chunk every tool page loads', () => {
+    const record = good();
+    record[ISLAND].push(DIJKSTRA);
+    record[ENTRY] = record[ENTRY].filter((id) => id !== DIJKSTRA);
+    expect(checkQrBundle(record, ROOT)).toEqual([`dijkstrajs está no chunk compartilhado ${ISLAND}, que toda página de ferramenta carrega`, `qrcode e dijkstrajs estão em chunks diferentes (${ENTRY}, ${ISLAND}), pede o mesmo`]);
+    const both = { [ISLAND]: [...good()[ENTRY], ...good()[ISLAND]] };
+    expect(checkQrBundle(both, ROOT)).toEqual([
+      `qrcode está no chunk compartilhado ${ISLAND}, que toda página de ferramenta carrega`,
+      `dijkstrajs está no chunk compartilhado ${ISLAND}, que toda página de ferramenta carrega`,
+    ]);
+  });
+
+  it('fails when a package is in more than one chunk, or missing from the bundle', () => {
+    const twice = { ...good(), '_astro/other.Abc12345.js': [core('version.js')] };
+    expect(checkQrBundle(twice, ROOT)).toEqual([`qrcode está em 2 chunks (${ENTRY}, _astro/other.Abc12345.js), pede 1`]);
+    const none = { [ISLAND]: good()[ISLAND] };
+    expect(checkQrBundle(none, ROOT)).toEqual(['qrcode não está no bundle, mas o gerador de QR code depende dele', 'dijkstrajs não está no bundle, mas o gerador de QR code depende dele']);
+  });
+
+  it('fails when the bundle takes more of qrcode than the matrix (the renderers of its index)', () => {
+    const record = good();
+    record[ENTRY].push(`${QR}/lib/renderer/svg-tag.js`, `${QR}/lib/browser.js`);
+    expect(checkQrBundle(record, ROOT)).toEqual([
+      'qrcode traz lib/renderer/svg-tag.js ao bundle, fora de lib/core/ (só a matriz é usada)',
+      'qrcode traz lib/browser.js ao bundle, fora de lib/core/ (só a matriz é usada)',
+    ]);
+  });
+
+  it('is listed on /licenses: qrcode is a browser dependency and dijkstrajs comes inside it, both MIT with a text', () => {
+    expect(browserPackages().map((pkg) => pkg.name)).toContain('qrcode');
+    expect(BUNDLED_TRANSITIVE).toContainEqual({ name: 'dijkstrajs', via: 'qrcode' });
+    const byName = new Map(listedPackages().map((pkg) => [pkg.name, pkg]));
+    for (const name of QR_PACKAGES) expect(byName.get(name)?.license, name).toBe('MIT');
+    expect(byName.get('qrcode')?.text).toMatch(/Copyright \(c\) 2012 Ryan Day[\s\S]*Permission is hereby granted, free of charge/);
+    expect(byName.get('dijkstrajs')?.text).toMatch(/Wyatt Baldwin[\s\S]*Licensed under the MIT license/);
+    expect(byName.get('dijkstrajs')?.via).toBe('qrcode');
   });
 });
 
