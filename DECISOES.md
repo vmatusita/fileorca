@@ -2403,3 +2403,10 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
   - na Square footage, o exemplo tem uma área só (15 × 12 ft; o oráculo mudou antes, em `6955512`, e o exemplo de duas áreas ficou como caso da grade), e o botão "Add an area" vem depois do resultado (`ListSpec.addBelow`): as áreas continuam antes dele, e uma área acrescentada leva o foco ao menu de forma dela.
 - **Depois:** de 568 a 714 px nas 11, nos dois sistemas de unidade; o `ads.spec.ts` prova nos dois navegadores.
 - **Alternativa:** um OptionGroup e um campo lado a lado numa linha (o `fieldset` fica fora do subgrid, § 137) ou a lista de áreas em três colunas a 360 px (os campos ficariam com uns 77 px).
+
+## § 269 · O `lint:texto` lê os textos de casa e saúde com amostras próprias (F7, decisão 11)
+
+- **Achado:** o `lint:texto` trata todo `src/tools/*-calculator/` como texto de dinheiro e preenche cada `{placeholder}` com uma amostra de `MONEY_SAMPLES` (§ 123); sem amostra, vira "$1,234". Nas páginas novas, `{x}`, `{area}`, `{bmi}` ou `{weeks}` virariam dinheiro, e o `{x}` já é dinheiro no Refinance.
+- **Decisão:** `isLifeText` separa os textos das 11 calculadoras e dos 2 hubs; eles são preenchidos por `LIFE_SAMPLES` (valores dos exemplos do oráculo) e `LIFE_SAMPLES_BY_KEY` (o "{n} week" e o "{n} day" leem 1). Um placeholder sem amostra vira "12", nunca dinheiro. Os textos de dinheiro ficam como estavam, e o `lint-texto-money.test.ts` prova os dois lados.
+- **Corrigido:** o LanguageTool local achou 7 erros nos textos novos (Paint, Square footage, Concrete e Body fat), reescritos ("Gallons to buy, rounded up: {buy}.", "the labels on paint cans", "subtract doors"...). Depois: 0 erros.
+- **Prontidão:** o `gate:prontidao` confere os cartões das seções novas da home em inglês, os dois hubs na ordem de `LIFE_HUB_IDS` e a busca com as 11 calculadoras e o QR no fim; o build com as três variáveis ganhou unidades de teste para as áreas `casa-saude` e `utilidades`, para a trava do hostname valer também nessas páginas.
