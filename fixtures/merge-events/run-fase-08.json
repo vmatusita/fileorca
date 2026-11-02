@@ -1,0 +1,32 @@
+{
+  "description": "Branch de run fase-08",
+  "event": {
+    "action": "synchronize",
+    "number": 209,
+    "pull_request": {
+      "number": 209,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "fase-08",
+        "sha": "00d1f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/sw/logic.ts",
+    "docs/OPERACAO.md"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Branch de run (fase-08) com o verificar verde: merge automático."
+  }
+}

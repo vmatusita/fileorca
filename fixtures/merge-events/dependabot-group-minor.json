@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot em grupo (npm-minor-patch): o update-type é o maior do grupo",
+  "event": {
+    "action": "synchronize",
+    "number": 203,
+    "pull_request": {
+      "number": 203,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/npm_and_yarn/npm-minor-patch-3f9c2a1b7e",
+        "sha": "00cbf8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-minor",
+    "dependency-group": "npm-minor-patch"
+  },
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Dependabot minor: merge automático."
+  }
+}

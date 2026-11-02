@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot sem update-type (por exemplo, uma atualização de segurança)",
+  "event": {
+    "action": "synchronize",
+    "number": 206,
+    "pull_request": {
+      "number": 206,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/npm_and_yarn/fflate-0.8.4",
+        "sha": "00cef8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "",
+    "dependency-group": ""
+  },
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "Atualização de tipo desconhecido (vazio) do Dependabot: o merge fica para o Victor."
+  }
+}

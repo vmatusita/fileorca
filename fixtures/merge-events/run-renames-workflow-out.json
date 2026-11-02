@@ -1,0 +1,34 @@
+{
+  "description": "Rename de um workflow para fora da pasta: o git diff --no-renames lista os dois lados",
+  "event": {
+    "action": "synchronize",
+    "number": 215,
+    "pull_request": {
+      "number": 215,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "ajuste-ci-partes",
+        "sha": "00d7f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": {
+    "rename": [
+      ".github/workflows/old.yml",
+      "docs/old.yml"
+    ]
+  },
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "A PR mexe em .github/workflows/, então o merge fica para o Victor."
+  }
+}

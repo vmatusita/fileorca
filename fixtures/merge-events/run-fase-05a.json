@@ -1,0 +1,31 @@
+{
+  "description": "Branch de run fase-05a",
+  "event": {
+    "action": "synchronize",
+    "number": 210,
+    "pull_request": {
+      "number": 210,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "fase-05a",
+        "sha": "00d2f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/engine/pdf/process.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Branch de run (fase-05a) com o verificar verde: merge automático."
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot major em PR própria",
+  "event": {
+    "action": "synchronize",
+    "number": 205,
+    "pull_request": {
+      "number": 205,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/npm_and_yarn/typescript-7.0.0",
+        "sha": "00cdf8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-major",
+    "dependency-group": ""
+  },
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "Atualização major do Dependabot: o merge fica para o Victor."
+  }
+}

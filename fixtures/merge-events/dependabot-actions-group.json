@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot de GitHub Actions: mexe em .github/workflows/",
+  "event": {
+    "action": "synchronize",
+    "number": 207,
+    "pull_request": {
+      "number": 207,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/github_actions/actions-minor-patch-a1b2c3d4e5",
+        "sha": "00cff8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/pos-deploy.yml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-patch",
+    "dependency-group": "actions-minor-patch"
+  },
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "A PR mexe em .github/workflows/, então o merge fica para o Victor."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "description": "PR em rascunho da fase-08",
+  "event": {
+    "action": "opened",
+    "number": 213,
+    "pull_request": {
+      "number": 213,
+      "draft": true,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "fase-08",
+        "sha": "00d5f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/sw/logic.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "false",
+    "reason": "PR em rascunho: o merge espera ela ficar pronta."
+  }
+}

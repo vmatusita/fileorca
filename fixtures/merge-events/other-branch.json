@@ -1,0 +1,31 @@
+{
+  "description": "Branch qualquer",
+  "event": {
+    "action": "synchronize",
+    "number": 212,
+    "pull_request": {
+      "number": 212,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "feature/offline-cache",
+        "sha": "00d4f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/sw/logic.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "A branch feature/offline-cache não é fase-* nem ajuste-*: o merge fica para o Victor."
+  }
+}
