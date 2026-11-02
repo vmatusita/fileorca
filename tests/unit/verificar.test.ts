@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { plan, STEPS } from '../../scripts/verificar.ts';
+import { workflowJobs } from './lib/merge-job.ts';
 
 // ADR-003: the CI runs pnpm verificar in parts, one job each. The parts together must be the same steps as the
 // whole, so no gate is lost when the run is split.
@@ -45,6 +47,19 @@ describe('verificar em partes', () => {
     expect([...commands].sort()).toEqual(STEPS.map((step) => step.command).sort());
     expect(plan(['--playwright=chromium', '--shard=4/4']).steps.map((step) => step.command)).toEqual(['pnpm run build', 'pnpm run e2e --project=chromium --shard=4/4']);
     expect(plan(['--playwright=webkit', '--shard=8/8']).label).toBe('Playwright no webkit, parte 8 de 8');
+  });
+
+  // F8 (third adendo of ADR-003; DECISOES § 302): Chromium in four shards and WebKit in ten, the 15 parts of the ci.yml,
+  // read from the matrix of the workflow itself so the test follows it.
+  it('covers the whole suite between the 15 parts of the F8, the same as the matrix of ci.yml', () => {
+    const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
+    const parts = [['--sem-playwright'], ...shards('chromium', 4), ...shards('webkit', 10)];
+    expect(parts).toHaveLength(15);
+    const commands = new Set(parts.flatMap((part) => plan(part).steps.map((step) => step.command.replace(/ --.*$/, ''))));
+    expect([...commands].sort()).toEqual(STEPS.map((step) => step.command).sort());
+    expect(plan(['--playwright=webkit', '--shard=10/10']).label).toBe('Playwright no webkit, parte 10 de 10');
+    const matrix = (workflowJobs(readFileSync('.github/workflows/ci.yml', 'utf8'))['playwright']?.['strategy'] as { matrix: { include: { args: string }[] } }).matrix.include;
+    expect(matrix.map((entry) => entry.args.split(' '))).toEqual(parts.slice(1));
   });
 
   it('refuses what it does not know', () => {
