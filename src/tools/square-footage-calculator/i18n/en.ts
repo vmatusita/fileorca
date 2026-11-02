@@ -75,7 +75,7 @@ export default {
     },
     {
       q: 'How do I enter feet and inches?',
-      a: 'Divide the inches by 12 and add them to the feet: 6 inches is 0.5 ft, so 12 ft 6 in is 12.5 ft. Three inches is 0.25 ft, and 9 inches is 0.75 ft.',
+      a: 'Divide the inches by 12 and add them to the feet: 6 inches make 0.5 ft, so 12 ft 6 in is 12.5 ft. Three inches make 0.25 ft, and 9 inches make 0.75 ft.',
     },
     {
       q: 'How many square feet are in a square yard?',

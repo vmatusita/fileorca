@@ -89,7 +89,7 @@ export default {
     },
     {
       q: 'How much extra should I add?',
-      a: 'The extra covers spills, an uneven base and forms that bow. The example uses 10%; your supplier or contractor can tell you what to add for your job.',
+      a: 'The extra is for spills, an uneven base and forms that bow. The example uses 10%; your supplier or contractor can tell you what to add for your job.',
     },
     {
       q: 'Can I work out post holes or a round form tube?',

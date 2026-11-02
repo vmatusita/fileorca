@@ -27,7 +27,7 @@ export default {
       sentence: 'By the Navy circumference equations, these measures give an estimated {percent}% body fat.',
       method: 'Equation',
       formulaMale: 'Male: neck and waist at the navel',
-      formulaFemale: 'Female: neck, narrowest waist and hip',
+      formulaFemale: 'Female: neck, waist at its narrowest and hip',
       domainMale: 'The waist has to be larger than the neck for the equation. Check both measures.',
       domainFemale: 'The waist and hip together have to be larger than the neck for the equation. Check the measures.',
       range: 'These measures give a result outside 0.1% to 99.9%, so the equation cannot estimate it. Check them.',

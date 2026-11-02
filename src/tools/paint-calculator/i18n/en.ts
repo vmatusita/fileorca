@@ -39,7 +39,7 @@ export default {
       label: 'Paint needed',
       unit: 'gal',
       placard: 'gallons to buy',
-      sentence: 'That is {area} sq ft to paint, times {coats} for the coats, at {coverage} sq ft a gallon. Rounded up, buy {buy} gal.',
+      sentence: 'That is {area} sq ft to paint, times {coats} for the coats, at {coverage} sq ft a gallon. Gallons to buy, rounded up: {buy}.',
       noArea: 'The doors and windows cover the whole wall, so there is nothing left to paint. Check how many there are and their areas.',
       areaUnit: 'sq ft',
       wall: 'Wall area',
@@ -69,7 +69,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'Wall area = perimeter × wall height, in feet, or the area you type. Area to paint = wall area − doors × area of a door − windows × area of a window.',
-    'Gallons = area to paint × coats ÷ coverage in square feet per gallon, and the gallons to buy are that number rounded up. The coverage comes from the can: the EPA Wall Paint Exposure Model takes 400 sq ft per gallon as its default, from paint can labels, and the calculator starts at 350 as an example.',
+    'Gallons = area to paint × coats ÷ coverage in square feet per gallon, and the gallons to buy are that number rounded up. The coverage comes from the can: the EPA Wall Paint Exposure Model takes 400 sq ft per gallon as its default, from the labels on paint cans, and the calculator starts at 350 as an example.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -89,10 +89,10 @@ export default {
     },
     {
       q: 'How much does a gallon of paint cover?',
-      a: 'The can says, and it changes with the paint and the wall. The EPA Wall Paint Exposure Model uses 400 sq ft per gallon as its default, taken from paint can labels. The calculator starts at 350 as an example: type the number on your can.',
+      a: 'The can says, and it changes with the paint and the wall. The EPA Wall Paint Exposure Model uses 400 sq ft per gallon as its default, taken from the labels on paint cans. The calculator starts at 350 as an example: type the number on your can.',
     },
     {
-      q: 'Does the calculator take out doors and windows?',
+      q: 'Does the calculator subtract doors and windows?',
       a: 'Yes, at the areas you give: in the example, 21 sq ft for a door of 3 by 7 ft and 15 sq ft for a window of 3 by 5 ft. Set both counts to 0 to paint the whole wall.',
     },
     {
