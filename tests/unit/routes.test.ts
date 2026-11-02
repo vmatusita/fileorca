@@ -84,6 +84,16 @@ describe('mapa de rotas', () => {
     expect(pages.sort()).toEqual([...expected].sort());
   });
 
+  it('has no page of an account: no sign-in, sign-up, login or profile, the proof of "There is no account" in the launch kit (DECISOES § 205)', () => {
+    const ACCOUNT = /(?:^|[/-])(?:login|log-?in|sign-?in|sign-?up|register|account|profile|my-?files|entrar|cadastro|conta|cuenta|registro|perfil)(?:[/-]|$)/i;
+    const paths = ROUTES.flatMap((route) => Object.values(route.paths));
+    expect(paths.filter((path) => ACCOUNT.test(path))).toEqual([]);
+    expect(pageFiles().filter((file) => ACCOUNT.test(file.replace(/^src\/pages/, '').replace(/\/index\.astro$/, '')))).toEqual([]);
+    // The rule sees an account page (control).
+    expect(ACCOUNT.test('/account/')).toBe(true);
+    expect(ACCOUNT.test('/pt/entrar/')).toBe(true);
+  });
+
   it('points every route at its view and text files', () => {
     for (const route of ROUTES) {
       expect(existsSync(route.view), route.view).toBe(true);

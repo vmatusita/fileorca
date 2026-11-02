@@ -11,6 +11,7 @@ import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { CALC_TOOL_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FORBIDDEN_WORDS, TOOL_NAME } from '../../scripts/lib/design-checks.ts';
 import { pngChunks } from '../e2e/lib/png.ts';
 
 const KIT = 'docs/lancamento/product-hunt.md';
@@ -24,6 +25,9 @@ const COUNTS = {
   'pdf-tools': PDF_TOOL_IDS.length,
   calculators: CALC_TOOL_IDS.length,
   guides: GUIDE_IDS.length + FILE_GUIDE_IDS.length,
+  /** Only the file guides have numbers measured on test files; the money guides' come from the engines (DECISOES § 204). */
+  'file-guides': FILE_GUIDE_IDS.length,
+  'money-guides': GUIDE_IDS.length,
 };
 
 /** Limits read on 2026-11-01 (the kit's table "Campos e limites"). */
@@ -36,7 +40,64 @@ const PHRASES: [RegExp, keyof typeof COUNTS][] = [
   [/\b(\d+) PDF tools\b/g, 'pdf-tools'],
   [/\b(\d+) money calculators\b/g, 'calculators'],
   [/\b(\d+) guides\b/g, 'guides'],
+  [/\b(\d+) file guides\b/g, 'file-guides'],
+  [/\b(\d+) money guides\b/g, 'money-guides'],
 ];
+
+// ---- what the English texts may claim (DECISOES § 204 and § 205) ---------------------------------------------------
+
+/** The texts of the kit that go out in English: the code blocks, the taglines, the suggested answers and the captions. */
+function englishOf(text: string): string[] {
+  const out = [...text.matchAll(/```\n([\s\S]*?)\n```/g)].map((match) => match[1] as string);
+  out.push(...[...text.matchAll(/^- \*\*\(\d+\)\*\* `([^`]+)`$/gm)].map((match) => match[1] as string));
+  const questions = text.slice(text.indexOf('## Perguntas prováveis'), text.indexOf('## Imagens'));
+  for (const line of questions.matchAll(/^- \*\*"[^"]+"\*\* (.*)$/gm)) out.push(...[...(line[1] as string).matchAll(/"([^"]+)"/g)].map((match) => match[1] as string));
+  out.push(...[...text.matchAll(/Caption: "([^"]+)"/g)].map((match) => match[1] as string));
+  return out;
+}
+
+const sentencesOf = (texts: readonly string[]): string[] => texts.flatMap((text) => text.split(/(?<=[.!?])\s+|\n+/)).map((sentence) => sentence.trim()).filter(Boolean);
+
+/** The claims of the section "Provas": the quoted phrases of each item's heading, with the files the item cites. */
+function proofsOf(text: string): { claims: string[]; files: string[] }[] {
+  const section = text.slice(text.indexOf('## Provas'), text.indexOf('## O que ficou fora'));
+  return section.split(/\n(?=\d+\. \*\*)/).slice(1).map((item) => ({
+    claims: [...(/^\d+\. \*\*(.+?)\*\*/.exec(item)?.[1] ?? '').matchAll(/"([^"]+)"/g)].map((match) => (match[1] as string).replace(/[.,]$/, '')),
+    files: [...item.matchAll(/`((?:tests|src|scripts)\/[\w./-]+\.ts|playwright\.config\.ts)`/g)].map((match) => match[1] as string),
+  }));
+}
+
+/** A sentence that makes a technical promise: where the file goes, offline, browsers, ads, analytics, account, batches. */
+const TECHNICAL = /\bupload\w*|\boffline\b|\bin your browser\b|\bon your device\b|\bnever leaves\b|\bnever sent\b|\bnot sent\b|\bAdSense\b|\bads?\b|\bAnalytics\b|\bConsent Mode\b|\bcookies?\b|\baccount\b|\bsign-up\b|\bZIP\b|Ctrl\+V|\bWebAssembly\b|\bNetwork tab\b|\bno request\b|\bChromium\b|\bWebKit\b|\bKo-fi\b/i;
+/** The engines the tests run: the projects of playwright.config.ts. Naming another browser claims a test nobody ran. */
+const BROWSER_NAMES = /\b(?:Chromium|WebKit|Chrome|Edge|Firefox|Safari|Opera|Brave|Vivaldi|Samsung Internet)\b/g;
+const TESTED = [...readFileSync('playwright.config.ts', 'utf8').matchAll(/name: '(\w+)'/g)].map((match) => (match[1] as string).toLowerCase());
+
+function claimProblems(text: string): string[] {
+  const problems: string[] = [];
+  const proven = proofsOf(text).filter((proof) => proof.files.length > 0 && proof.files.every((file) => existsSync(file))).flatMap((proof) => proof.claims.map((claim) => claim.toLowerCase()));
+  const english = englishOf(text);
+  for (const sentence of sentencesOf(english)) {
+    const lower = sentence.toLowerCase();
+    if (TECHNICAL.test(sentence) && !proven.some((claim) => lower.includes(claim))) problems.push(`"${sentence}": afirmação técnica sem prova na seção Provas`);
+    if (/\boffline\b/i.test(sentence) && !/\bcodec\b/i.test(sentence)) problems.push(`"${sentence}": offline só depois que a página e o codec carregam (show-hn.md)`);
+    for (const name of sentence.match(BROWSER_NAMES) ?? []) if (!TESTED.includes(name.toLowerCase())) problems.push(`"${sentence}": ${name} não é um motor que os testes rodam (${TESTED.join(', ')})`);
+    if (/\b(?:most|many|other) (?:sites|tools|services|apps)\b/i.test(sentence)) problems.push(`"${sentence}": fala de outros sites sem prova`);
+    const word = FORBIDDEN_WORDS.exec(sentence.replace(TOOL_NAME, ''))?.[0];
+    if (word) problems.push(`"${sentence}": "${word}" é palavra proibida (só o nome "Unlock PDF", § 153)`);
+  }
+  for (const sentence of [...sentencesOf(english), ...proofsOf(text).flatMap((proof) => proof.claims)]) problems.push(...measuredProblems(sentence));
+  return problems;
+}
+
+/** "measured" goes with the file guides only: the nearest count before it is theirs, or the sentence says "file guides". */
+function measuredProblems(sentence: string): string[] {
+  const at = sentence.toLowerCase().search(/\bmeasured\b/);
+  if (at < 0) return [];
+  const last = [...sentence.slice(0, at).matchAll(/\b(\d+)\b/g)].at(-1)?.[1];
+  const ok = last ? Number(last) === COUNTS['file-guides'] : /\bfile guides?\b/i.test(sentence.slice(0, at));
+  return ok ? [] : [`"${sentence}": "measured" vale só para os ${COUNTS['file-guides']} guias de arquivo`];
+}
 
 function countProblems(text: string): string[] {
   const problems: string[] = [];
@@ -103,6 +164,30 @@ describe('the texts of the Product Hunt kit', () => {
     const files = [...proofs.matchAll(/`((?:tests|src|scripts)\/[\w./-]+\.ts|playwright\.config\.ts)`/g)].map((match) => match[1] as string);
     expect(files.length).toBeGreaterThan(5);
     for (const file of files) expect(existsSync(file), file).toBe(true);
+  });
+
+  it('tie every technical sentence in English to a proof, and claim only what the proofs cover (DECISOES § 204 and § 205)', () => {
+    expect(englishOf(kit).length, 'the English texts are found').toBeGreaterThan(10);
+    expect(proofsOf(kit).flatMap((proof) => proof.claims).length, 'the claims of the proofs are found').toBeGreaterThan(10);
+    expect(TESTED).toEqual(['chromium', 'webkit']);
+    expect(claimProblems(kit)).toEqual([]);
+  });
+
+  it('fail an answer with no proof, an untested browser, offline without the codec, a loose "unlock" and "measured" on all guides (controls)', () => {
+    const answer = (text: string): string => kit.replace(/(- \*\*"How do you make money\?"\*\* )"[^"]+"/, `$1"${text}"`);
+    expect(claimProblems(answer('Ads never show next to a download.')).join()).toMatch(/Ads never show next to a download\.": afirmação técnica sem prova/);
+    expect(claimProblems(answer('Every tool is tested automatically in Chromium and in WebKit. Use a current Chrome, Edge, Firefox or Safari.')).join()).toMatch(/Chrome não é um motor.*Firefox não é um motor/);
+    expect(claimProblems(answer('Once a tool has loaded, it keeps working if you go offline.')).join()).toMatch(/offline só depois que a página e o codec carregam/);
+    expect(claimProblems(answer('There is no account. You can protect, unlock and watermark PDFs.')).join()).toMatch(/"unlock" é palavra proibida/);
+    expect(claimProblems(answer('There is no account. Unlock PDF removes a password.'))).toEqual([]);
+    expect(claimProblems(answer('There is no account, and most sites want you to upload it first.')).join()).toMatch(/fala de outros sites/);
+    expect(measuredProblems('plus 15 guides whose numbers were measured on real test files')).toHaveLength(1);
+    expect(measuredProblems('15 guides with measured numbers')).toHaveLength(1);
+    expect(measuredProblems(`15 guides, ${COUNTS['file-guides']} of them with numbers measured on real test files`)).toEqual([]);
+    expect(measuredProblems('File guides with numbers measured on real files')).toEqual([]);
+    expect(measuredProblems('Guides with numbers measured on real files')).toHaveLength(1);
+    // A proof whose test file does not exist proves nothing.
+    expect(claimProblems(kit.replace('`tests/e2e/consent.spec.ts`', '`tests/e2e/no-such.spec.ts`')).join()).toMatch(/Google Analytics with Consent Mode.*afirmação técnica sem prova/);
   });
 
   it('say no forbidden word, no "fastest", "best" or "#1" in the English texts', () => {

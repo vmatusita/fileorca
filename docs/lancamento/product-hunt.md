@@ -102,16 +102,16 @@ Taglines (limite de 60):
 
 Por que a primeira: diz as três áreas e a diferença, sem adjetivo nem número. A segunda põe "free" na frente, que é verdade e é o que o visitante procura. A terceira troca a categoria pelas ações mais buscadas.
 
-**Descrição A (437 caracteres):**
+**Descrição A (443 caracteres):**
 
 ```
-FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 8 image tools, 12 PDF tools and 14 money calculators, plus 15 guides whose numbers were measured on real test files. No sign-up: open a tool and drop a file.
+FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 8 image tools, 12 PDF tools and 14 money calculators, plus 15 guides, 10 of them with numbers measured on real test files. No sign-up: open a tool and drop a file.
 ```
 
-**Descrição B (301 caracteres):**
+**Descrição B (313 caracteres):**
 
 ```
-Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 8 image tools, 12 PDF tools, 14 money calculators and 15 guides with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
+Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 8 image tools, 12 PDF tools, 14 money calculators and 15 guides, 10 of them with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
 ```
 
 Por que a A: começa pelo que é e pela diferença, lista o que dá para fazer com os nomes que as pessoas buscam (HEIC, WebP) e termina no que a pessoa faz primeiro. A B é a curta, para quando a página de produto já mostrar a lista na galeria.
@@ -124,20 +124,20 @@ Escolha até 3 no formulário. Sugestões, pela ordem: **Productivity**, **Priva
 
 Poste como o primeiro comentário, logo que o lançamento entrar no ar. Reescreva com as suas palavras: o Product Hunt não quer comentário de IA.
 
-**Primeiro comentário (1506 caracteres):**
+**Primeiro comentário (1544 caracteres):**
 
 ```
 Hi Product Hunt! I'm Victor, a developer in Curitiba, Brazil, and I built FileOrca on my own.
 
-It started with a small annoyance: to make a photo smaller or turn an iPhone HEIC into a JPG, most sites want you to upload it first. That work can happen on your own device, so I built the tools to do it there.
+FileOrca does the work in your browser: you can make a photo smaller or turn an iPhone HEIC into a JPG without uploading it.
 
 What you can do today:
 - Images: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, and images into one PDF. 8 image tools and 3 presets for common limits.
-- PDFs: merge, split, compress, PDF to JPG, sign, protect, unlock, watermark, page numbers and more. 12 PDF tools.
+- PDFs: merge, split, compress, PDF to JPG, sign, add or remove a password, watermark, page numbers and more. 12 PDF tools.
 - Money: a mortgage calculator, refinance, loans, debt payoff and others. 14 money calculators.
-- 15 guides, where every number was measured on real test files with the same tools.
+- 15 guides: 10 file guides with numbers measured on real test files with the same tools, and 5 money guides worked out by the engines of the calculators.
 
-How it works: the site is static. The tools run in your browser, with WebAssembly codecs that load the first time you need them. Your file is not uploaded: open the Network tab in your browser's developer tools, use a tool, and you will see that no request carries it. Once a tool has loaded, it keeps working if you go offline.
+How it works: the site is static. The tools run in your browser, with WebAssembly codecs that load the first time you need them. Your file is not uploaded: open the Network tab in your browser's developer tools, use a tool, and you will see that no request carries it. After the page and the codec for your type of file have loaded, the tool keeps working if you go offline.
 
 There is no account. You can drop one file or a whole batch, paste with Ctrl+V, and get a batch back as one ZIP.
 
@@ -148,7 +148,9 @@ I would love your feedback: what file did you try, did it work, and what tool is
 
 Notas sobre o texto:
 
-- As afirmações técnicas do comentário são as da seção "Provas": o arquivo não é enviado (Network tab), a ferramenta segue funcionando offline depois de carregar, e as contagens dos registros.
+- As afirmações técnicas do comentário são as da seção "Provas": o arquivo não é enviado (Network tab), a ferramenta segue funcionando offline depois que a página e o codec do tipo de arquivo carregaram, os anúncios fora das ferramentas, o Ko-fi, a ausência de conta, o lote com Ctrl+V e ZIP, e as contagens dos registros. O `tests/unit/launch-kit.test.ts` reprova uma frase técnica em inglês que não contenha uma das frases provadas.
+- O comentário não conta a história de como o site nasceu: a run não sabe essa história. Se quiser contá-la, escreva com as suas palavras, sem falar de outros sites.
+- "measured" vale só para os 10 guias de arquivo. Os 5 guias de dinheiro têm os números calculados pelos motores das calculadoras, sem arquivo de teste.
 - A frase "ads from Google AdSense" só vale **se os anúncios estiverem ligados no dia**. Se não estiverem, troque por "Ads are not on yet. When they are, Google AdSense will pay the costs. There is also an optional Ko-fi link."
 - O comentário não diz se o código é aberto. Veja a pergunta abaixo.
 - A exclamação do "Hi Product Hunt!" é do tom do site, mas reescreva como você cumprimentaria.
@@ -157,12 +159,12 @@ Notas sobre o texto:
 
 Só use o que for verdade no dia. Responda curto, com curiosidade e sem comparar para ganhar.
 
-- **"How do you make money?"** "Ads from Google AdSense, kept away from the tools, and an optional Ko-fi link. There is no paid plan." (Se os anúncios ainda não estiverem ligados, diga isso e que o AdSense vai pagar os custos quando estiverem.)
-- **"Why no upload? Isn't a server faster?"** "For most files the device is fast enough, and it means your file never leaves it. Private photos and documents stay private, and there is no server holding copies."
-- **"Are there limits?"** "No limit on how many files you drop at once. The real limit is your device's memory: a very large photo or a very long PDF can be too much for an older phone." (Não invente um número.)
-- **"Which browsers?"** "Every tool is tested automatically in Chromium and in WebKit. Use a current Chrome, Edge, Firefox or Safari." (Afirme só os dois motores que os testes cobrem.)
+- **"How do you make money?"** "Ads from Google AdSense, kept away from the tools, and an optional Ko-fi link. There is no paid plan." (Se os anúncios ainda não estiverem ligados, diga isso e que o AdSense vai pagar os custos quando estiverem. Provas 9 e 10.)
+- **"Why no upload? Isn't a server faster?"** "The work happens in your browser, so your file never leaves your device. Private photos and documents stay private, and there is no server holding copies." (Não diga que é mais rápido: a run não mediu velocidade. Prova 1.)
+- **"Are there limits?"** "You can drop a whole batch at once, or paste it with Ctrl+V. A very large photo or a very long PDF can be too much for the memory of an older phone." (Não invente um número. Prova 8.)
+- **"Which browsers?"** "Every tool is tested automatically in Chromium and in WebKit. I have not tested other browsers, so tell me if something fails in yours." (Afirme só os dois motores que os testes cobrem: o teste do kit reprova o nome de outro navegador. Prova 4.)
 - **"Is it open source?"** Se o repositório público do motor de imagem existir no dia, responda com o link dele: "The image engine is open source: <link>." Se não existir, **esta linha sai**: diga com franqueza que o site não é código aberto e que o que é verificável é a aba Network e as licenças em <https://fileorca.com/licenses/>.
-- **"What about my data / analytics?"** "Your files are never sent. The site uses Google Analytics with Consent Mode, only on fileorca.com, and there is a cookie notice with Accept and Decline." Não diga que recusar desliga o Analytics.
+- **"What about my data / analytics?"** "Your files are never sent. The site uses Google Analytics with Consent Mode, only on fileorca.com, and there is a cookie notice with Accept and Decline." Não diga que recusar desliga o Analytics. (Provas 1 e 11.)
 
 ## Imagens
 
@@ -174,35 +176,43 @@ Geradas por `pnpm lancamento:imagens` (`scripts/lancamento/imagens.ts`), fora do
 | `thumbnail.png` | Miniatura (estática) | 240 × 240 | 9.954 bytes | The Oli, the FileOrca orca, waving on a round patch of sea. |
 | `thumbnail.gif` | Miniatura (animada) | 240 × 240 | 235.811 bytes | The Oli floating and waving, then jumping in a cheer, on a round patch of sea. |
 | `gallery-1.png` | Galeria | 1270 × 760 | 108.535 bytes | The FileOrca home page: the heading and the cards of the image tools. Caption: "Image, PDF and money tools that run in your browser". |
-| `gallery-2.png` | Galeria | 1270 × 760 | 151.228 bytes | HEIC to JPG with two iPhone photos converted: the result card, its Download button and the list of files. Caption: "HEIC to JPG: iPhone photos as JPGs, without uploading them". |
+| `gallery-2.png` | Galeria | 1270 × 760 | 151.226 bytes | HEIC to JPG with two iPhone photos converted: the result card, its Download button and the list of files. Caption: "HEIC to JPG: iPhone photos as JPGs, without uploading them". |
 | `gallery-3.png` | Galeria | 1270 × 760 | 115.062 bytes | Compress PDF with a PDF of photos: the result card with the size before and after, and its Download button. Caption: "Compress PDF: a PDF of photos made much lighter". |
-| `gallery-4.png` | Galeria | 1270 × 760 | 73.179 bytes | The guide "Why is my PDF so large?": its table of what takes the space in each test PDF, in pictures, fonts and everything else. Caption: "Guides with numbers measured on real files". |
+| `gallery-4.png` | Galeria | 1270 × 760 | 75.557 bytes | The guide "Why is my PDF so large?": its table of what takes the space in each test PDF, in pictures, fonts and everything else. Caption: "File guides with numbers measured on our test files". |
 | `gallery-5.png` | Galeria | 1270 × 760 | 165.127 bytes | The mortgage calculator with its example filled in: the fields and the monthly payment. Caption: "Money calculators that keep your numbers on your device". |
 <!-- fim das imagens -->
 
 ## Provas
 
-Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da run F5b (relatório em `docs/relatorios/fase-05b.md`).
+Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da run F5b (relatório em `docs/relatorios/fase-05b.md`). As frases entre aspas no título de cada item são as frases provadas: o `tests/unit/launch-kit.test.ts` reprova uma frase técnica dos textos em inglês (sobre envio, offline, navegadores, anúncios, Analytics, conta e lote) que não contenha uma delas, e uma prova cujo arquivo de teste não exista.
 
-1. **"Your file is not uploaded" / "no request carries it".** Nenhum byte do arquivo sai do navegador.
+1. **"not uploaded" / "never upload your files" / "without uploading" / "no request carries it" / "never sent" / "never leaves your device" / "in your browser".** Nenhum byte do arquivo sai do navegador.
    - **Prova:** `tests/e2e/launch-claims.spec.ts`, no Chromium e no WebKit, na Compress image, na HEIC to JPG, na Image to PDF, na Compress PDF, na PDF to JPG, na Protect PDF e, desde a F5b, dentro de dois guias (HEIC to JPG e Compress PDF embutidas). Da carga da página até o download, cada requisição da página e dos workers é um GET para a própria origem, sem corpo e sem query string.
    - **Também:** `tests/e2e/image-privacy.spec.ts`, `tests/e2e/pdf-privacy.spec.ts` e `tests/e2e/tool-guides.spec.ts` (o nome do arquivo só aparece no nome do download).
-2. **"Once a tool has loaded, it keeps working if you go offline."**
-   - **Prova:** o mesmo `launch-claims.spec.ts`: depois do primeiro arquivo, `context.setOffline(true)`, e o segundo arquivo é processado e baixado sem nenhuma requisição de rede.
-3. **"WebAssembly codecs that load the first time you need them."**
+2. **"the tool keeps working if you go offline".** Só depois que a página e o codec do tipo de arquivo carregaram (a frase do `docs/lancamento/show-hn.md`); o teste do kit reprova a frase de offline que não fale do codec.
+   - **Prova:** o mesmo `tests/e2e/launch-claims.spec.ts`: depois do primeiro arquivo, `context.setOffline(true)`, e o segundo arquivo, que usa o mesmo codec do primeiro, é processado e baixado sem nenhuma requisição de rede. Um arquivo que precise de outro codec (na Compress PDF, um PDF de fotos depois de um PDF de texto) não está provado offline.
+3. **"WebAssembly codecs that load the first time you need them".**
    - **Prova:** `tests/e2e/budgets.spec.ts`: nenhuma página de ferramenta ou guia pede um worker ou um `.wasm` antes do primeiro arquivo, e cada uma carrega dois arquivos de JavaScript.
-4. **"Every tool is tested automatically in Chromium and in WebKit."**
+4. **"tested automatically in Chromium and in WebKit".** Só esses dois motores: o teste do kit reprova o nome de outro navegador (Chrome, Edge, Firefox, Safari) nos textos em inglês.
    - **Prova:** `playwright.config.ts` (os dois projetos) e as partes do CI, que rodam a suíte inteira nos dois motores.
-5. **"15 guides, where every number was measured on real test files."**
-   - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 10 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data) e `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão). Os 5 guias de dinheiro têm os números calculados pelos motores no build (`tests/unit/calc-guides.test.ts`).
-6. **As contagens** (8 image tools, 3 presets, 12 PDF tools, 14 money calculators, 15 guides).
+5. **"10 of them with numbers measured on real test files" / "10 of them with measured numbers" / "10 file guides with numbers measured on real test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 10 guias de arquivo; os 5 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
+   - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 10 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data), `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão) e `tests/unit/calc-guides.test.ts` (os guias de dinheiro contra o motor e o oráculo). O `tests/unit/launch-kit.test.ts` reprova "measured" junto de outra contagem.
+6. **As contagens** (8 image tools, 3 presets, 12 PDF tools, 14 money calculators, 15 guides, 10 file guides, 5 money guides).
    - **Prova:** `tests/unit/launch-kit.test.ts` compara cada contagem deste arquivo com os registros (`src/tools/image/registry.ts`, `src/tools/pdf/registry.ts`, `src/tools/calc/registry.ts`, `src/tools/guides/registry.ts`).
-7. **"There is no account."**
-   - **Prova:** `tests/unit/routes.test.ts` lista todas as rotas do site, e nenhuma é de conta ou login.
-8. **"Paste with Ctrl+V, and get a batch back as one ZIP."**
-   - **Prova:** `tests/e2e/image-batch.spec.ts` ("one ZIP with unique names that opens…" e "takes every image of the clipboard as one batch…"), no Chromium e no WebKit.
+7. **"There is no account" / "No sign-up".**
+   - **Prova:** `tests/unit/routes.test.ts`: a lista de rotas é a do mapa, nenhuma página fica fora dele, e nenhum caminho nem página é de conta, login, cadastro ou perfil ("has no page of an account").
+8. **"paste with Ctrl+V" / "paste it with Ctrl+V" / "a whole batch" / "as one ZIP".**
+   - **Prova:** `tests/e2e/image-batch.spec.ts` ("one ZIP with unique names that opens…", "more than 6 files show 6 rows…" e "takes every image of the clipboard as one batch…"), no Chromium e no WebKit.
+9. **"outside the tools" / "kept away from the tools".**
+   - **Prova:** `tests/e2e/ads.spec.ts`: nenhum AdSlot dentro do `#fo-tool-root`, nada a menos de 150 px do painel, dos campos, do Baixar e da Oli, e nada acima da ferramenta no celular, em cada ferramenta e guia, em repouso, processando e com resultado.
+10. **"an optional Ko-fi link".**
+    - **Prova:** `tests/e2e/coffee.spec.ts`: a linha do Ko-fi aparece só no terceiro uso, some com "Don't show this again" e não aparece com o consentimento recusado.
+11. **"Google Analytics with Consent Mode, only on fileorca.com" / "a cookie notice with Accept and Decline".**
+    - **Prova:** `tests/e2e/consent.spec.ts` ("consent defaults come before config…", "Accept/Decline updates consent…" e "no gtag.js and no request to Google outside fileorca.com") e `tests/e2e/consent-choice.spec.ts`.
+12. **"keep your numbers on your device".** A legenda da galeria 5.
+    - **Prova:** `tests/e2e/money-privacy.spec.ts` ("no typed number leaves the device"), em cada calculadora e guia de dinheiro.
 
-<!-- contagens: image-tools=8 image-presets=3 pdf-tools=12 calculators=14 guides=15 -->
+<!-- contagens: image-tools=8 image-presets=3 pdf-tools=12 calculators=14 guides=15 file-guides=10 money-guides=5 -->
 
 ## O que ficou fora do texto de propósito
 

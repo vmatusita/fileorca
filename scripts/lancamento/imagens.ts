@@ -221,7 +221,7 @@ const SHOTS: Shot[] = [
   },
   {
     file: 'gallery-4.png',
-    caption: 'Guides with numbers measured on real files',
+    caption: 'File guides with numbers measured on our test files',
     alt: 'The guide "Why is my PDF so large?": its table of what takes the space in each test PDF, in pictures, fonts and everything else.',
     take: async (page) => {
       await open(page, '/guides/why-is-my-pdf-so-large/');
