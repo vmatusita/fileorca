@@ -36,6 +36,15 @@ export const CALC_EVENT_TOOLS = [
   'mortgage-calculator-biweekly',
   'mortgage-calculator-15-vs-30-year',
   'loan-amortization-calculator-balloon-payment',
+  // The calculators adapted to Brazil (F6).
+  'br-sac-price',
+  'br-vehicle-loan',
+  'br-personal-loan',
+  'br-early-payoff',
+  'br-credit-card',
+  'br-debt-payoff',
+  'br-compound-interest',
+  'br-rent-or-buy',
 ] as const;
 
 export const PDF_EVENT_TOOLS = [

@@ -2,6 +2,8 @@
 // Each row lists the URL of the same page in every language that has an equivalent version.
 // hreflang only links languages present in a row; the sitemap and IndexNow read this map too.
 import {
+  BR_CALC_IDS,
+  BR_CALC_PAGES,
   BR_HUB_ID,
   CALC_PAGES,
   CALC_PRESET_IDS,
@@ -129,6 +131,8 @@ export const ROUTES: readonly RouteDef[] = [
   ...imageToolRoutes(),
   // The money hub and five calculators also exist in Spanish; the presets and guides only in English (F6).
   ...moneyRoutes(),
+  // The Brazilian money hub and the eight calculators adapted to Brazil, only in Portuguese (F6, decision 5).
+  ...brMoneyRoutes(),
   // The PDF hub and the 12 PDF tools exist in the three languages (F6).
   ...pdfRoutes(),
   // The ten file guides exist only in English (F5b; DECISOES § 58 and § 184).
@@ -262,6 +266,32 @@ function moneyRoutes(): RouteDef[] {
       indexable: true,
       view: 'src/views/GuideView.astro',
       texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, ...calcTexts(GUIDES[id].calc)],
+      adArea: 'dinheiro',
+    })),
+  ];
+}
+
+/**
+ * The money pages adapted to Brazil (F6, decision 5): pages of their own, only in Portuguese, with no pair in hreflang.
+ * The hub reads src/i18n/pt/money-calculators.ts (the language's money hub texts); each calculator, its folder
+ * src/tools/<id>/ with i18n/pt.ts. Every one is in the ad area "dinheiro", which gate:dinheiro-saude checks.
+ */
+function brMoneyRoutes(): RouteDef[] {
+  return [
+    {
+      id: BR_HUB_ID,
+      paths: { pt: '/pt/calculadoras-financeiras/' },
+      indexable: true,
+      view: 'src/views/MoneyCalculatorsView.astro',
+      texts: ['src/i18n/{lang}/money-calculators.ts'],
+      adArea: 'dinheiro',
+    },
+    ...BR_CALC_IDS.map((id): RouteDef => ({
+      id,
+      paths: { pt: BR_CALC_PAGES[id].path },
+      indexable: true,
+      view: `src/tools/${id}/`,
+      texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/calc/i18n/{lang}.ts'],
       adArea: 'dinheiro',
     })),
   ];
