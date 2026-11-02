@@ -12,7 +12,7 @@ export default {
       f: { label: 'Valor da fatura', prefix: 'R$', error: 'Digite uma fatura de R$ 10 a R$ 100.000.' },
       m: { label: 'Pagamento mínimo', prefix: 'R$', error: 'Digite um mínimo de R$ 0 a R$ 100.000.', over: 'O mínimo não pode passar da fatura.' },
       rr: { label: 'Rotativo', suffix: '% a.m.', error: 'Digite juros de 0 a 30% ao mês.' },
-      rp: { label: 'Parcelamento', suffix: '% a.m.', error: 'Digite juros de 0 a 20% ao mês.' },
+      rp: { label: 'Parcelado', suffix: '% a.m.', error: 'Digite juros de 0 a 20% ao mês.' },
       n: { label: 'Número de parcelas', suffix: 'parcelas', error: 'Digite de 1 a 48 parcelas.' },
       iof: { label: 'IOF do parcelamento', prefix: 'R$', error: 'Digite um IOF de R$ 0 a R$ 10.000.', help: 'O valor em reais que o cartão mostra na simulação do parcelamento.' },
     },

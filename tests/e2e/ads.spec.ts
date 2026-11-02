@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
-import { routeById } from '../../src/i18n/routes.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
+import { ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
@@ -38,6 +39,12 @@ const TOOL_PAGES = [
   '/png-to-jpg/',
   '/image-to-pdf/',
 ];
+// F6 (decision 9): the same pages in Portuguese and Spanish, read from the route map, with the same states and the
+// same targets as the English page (SMALL_OF and ON_SCREEN are read through the English path of each one).
+const TRANSLATED = ['pt', 'es'] as const;
+const TRANSLATED_TOOL_PAGES = TRANSLATED.flatMap((lang) => (Object.keys(IMAGE_PAGES) as ImagePageId[]).map((id) => routeById(id).paths[lang] ?? ''));
+const ENGLISH_OF = new Map(ROUTES.flatMap((route) => TRANSLATED.flatMap((lang) => (route.paths[lang] ? [[route.paths[lang], route.paths.en ?? '']] : []))));
+const english = (path: string): string => ENGLISH_OF.get(path) ?? path;
 // F1b: the coffee line of the result card is measured too (the card itself is already in TARGETS).
 const TARGETS_WITH_COFFEE = `${TARGETS}, .fo-result__support`;
 const VIEWPORTS = [
@@ -70,7 +77,7 @@ const ON_SCREEN: Record<string, string[]> = {
 
 /** `count` small files this page accepts, with names of their own (a batch of two or more shows the queue). */
 async function smallFiles(page: Page, path: string, count: number): Promise<TestFile[]> {
-  const own = SMALL_OF[path];
+  const own = SMALL_OF[english(path)];
   if (!own) return jpegBatch(page, count);
   const buffer = readFileSync(resolve('fixtures/images', own.fixture));
   const extension = own.fixture.split('.').pop() ?? '';
@@ -126,7 +133,7 @@ async function expectAdsOutsideThePanel(page: Page, label: string, adCount: numb
 // 150px between every AdSlot and the Download, the fields, the crop box and its handles, the queue, the
 // comparison, the panel and the Oli, and none puts an AdSlot inside the panel.
 test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
-  for (const path of TOOL_PAGES) {
+  for (const path of [...TOOL_PAGES, ...TRANSLATED_TOOL_PAGES]) {
     test(`${path}: at rest, while processing, with the result and with a batch`, async ({ page }) => {
       const gaps: string[] = [];
       let flip = false;
@@ -179,7 +186,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
       await atBothWidths('resultado', async () => {
-        for (const selector of ON_SCREEN[path] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
+        for (const selector of ON_SCREEN[english(path)] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
         await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
         return expectClearance(page, 'com o resultado');
       });
@@ -190,7 +197,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
       await atBothWidths('fila', async () => {
-        for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[path] ?? [])]) {
+        for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[english(path)] ?? [])]) {
           expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
         }
         await expectAdsOutsideThePanel(page, 'com a fila de dois arquivos', adCount);
@@ -286,17 +293,20 @@ test('legal, institutional, home and 404 pages have no AdSlot and no ad code', a
 // content AdSlot sits under the grid of tools (never above them on the phone), the rail is the tool pages' one, and
 // none is within 150px of a visible Oli.
 test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
-  await page.goto('/image-tools/');
-  for (const viewport of VIEWPORTS) {
-    await page.setViewportSize(viewport);
-    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
-    const grid = await page.locator('.fo-grid').boundingBox();
-    const ad = await page.locator('.fo-ad--content').boundingBox();
-    expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
-    expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
-    for (const oli of await boxes(page, '[data-oli]')) {
-      for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
+  // F6: in the three languages.
+  for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById('image-tools').paths[lang] ?? '')) {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+      const grid = await page.locator('.fo-grid').boundingBox();
+      const ad = await page.locator('.fo-ad--content').boundingBox();
+      expect(grid && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+      for (const oli of await boxes(page, '[data-oli]')) {
+        for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${path} ${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
+      }
     }
   }
 });
@@ -322,7 +332,9 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
 // the ScenarioCompare, the schedule section and its table. No AdSlot above the tool on a phone, inside the island,
 // between the fields or inside the schedule; on a phone the result sits above the fold, right under the main fields.
 const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-export .fo-btn, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
-const MONEY_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path)];
+// F6: the Spanish calculators and the Brazilian ones too, read from the registry, with the result above the fold.
+const CALCULATOR_PATHS = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''), ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? '')];
+const MONEY_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path), ...CALCULATOR_PATHS.slice(CALC_PAGE_IDS.length)];
 
 test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×800', () => {
   for (const path of MONEY_PAGES) {
@@ -349,7 +361,7 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
         }
       };
       // The result above the fold on a phone, on a calculator page (a guide opens with its text first).
-      if (CALC_PAGE_IDS.some((id) => CALC_PAGES[id].path === path)) {
+      if (CALCULATOR_PATHS.includes(path)) {
         await page.setViewportSize(VIEWPORTS[0]);
         const number = await page.locator('.fo-rhero__num').boundingBox();
         expect((number?.y ?? 999) + (number?.height ?? 0), 'número do resultado acima da dobra a 360×740').toBeLessThanOrEqual(740);
@@ -363,17 +375,20 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
 });
 
 test('the money hub keeps its one content AdSlot under the grids of calculators, at 360 and 1280px', async ({ page }) => {
-  await page.goto('/money-calculators/');
-  for (const viewport of VIEWPORTS) {
-    await page.setViewportSize(viewport);
-    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
-    const grids = await boxes(page, 'main .fo-grid');
-    const ad = await page.locator('.fo-ad--content').boundingBox();
-    const last = grids.at(-1);
-    expect(last && ad, `${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
-    expect(ad!.y, `${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
-    await expectClearance(page, `hub a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+  // F6: the Spanish hub and the Brazilian one too.
+  for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById(moneyHubId(lang)).paths[lang] ?? '')) {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+      const grids = await boxes(page, 'main .fo-grid');
+      const ad = await page.locator('.fo-ad--content').boundingBox();
+      const last = grids.at(-1);
+      expect(last && ad, `${path} ${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
+      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
+      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+    }
   }
 });
 
@@ -404,8 +419,11 @@ const PDF_ON_SCREEN: Record<PdfState, string[]> = {
   result: ['.fo-result', '.fo-btn--download'],
 };
 
+// F6: the same walk on the Portuguese and Spanish pages, with the labels of the language.
+const PDF_WALKS_ALL = [...PDF_WALKS.map((walk) => ({ ...walk, lang: 'en' as const })), ...TRANSLATED.flatMap((lang) => PDF_WALKS.map(({ id }) => ({ id, path: routeById(id).paths[lang] ?? '', lang })))];
+
 test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1280×800', () => {
-  for (const { id, path } of PDF_WALKS) {
+  for (const { id, path, lang } of PDF_WALKS_ALL) {
     test(`${path}: at rest, while reading, with the options and the result`, async ({ page }) => {
       const gaps: string[] = [];
       let adCount = 0;
@@ -437,7 +455,7 @@ test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1
           flip = !flip;
           gaps.push(`${state}: ${smallest.join(', ')}`);
         },
-        { hold: true },
+        { hold: true, lang },
       );
       console.log(`${path} menor vão: ${gaps.join(' | ')}`);
     });
@@ -447,16 +465,19 @@ test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1
 // The PDF hub, like the image and the money hubs: one content AdSlot under the grid of tools (never above them on a
 // phone), the rail from 1280px, and 150px from the grid and from every Oli on screen.
 test('the PDF hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
-  expect((await page.goto(`/${PDF_HUB_ID}/`))?.status()).toBe(200);
-  for (const viewport of VIEWPORTS) {
-    await page.setViewportSize(viewport);
-    await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-    await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
-    const grid = await page.locator('main .fo-grid').boundingBox();
-    const ad = await page.locator('.fo-ad--content').boundingBox();
-    expect(grid && ad, `${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
-    expect(ad!.y, `${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
-    await expectClearance(page, `hub de PDF a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+  // F6: in the three languages.
+  for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById(PDF_HUB_ID).paths[lang] ?? '')) {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
+      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
+      const grid = await page.locator('main .fo-grid').boundingBox();
+      const ad = await page.locator('.fo-ad--content').boundingBox();
+      expect(grid && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+    }
   }
 });
 

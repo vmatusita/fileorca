@@ -2,14 +2,13 @@
 // and handed to the spec that looks at them: ads.spec.ts measures the distance of the AdSlots in each one, a11y.spec.ts
 // runs axe in each one. The flows are written once, here, so the two specs read the same states. Only small fixtures
 // go in (the heavy content checks are in the matrix, pdf-matrix.spec.ts) and every state is reached on one page load.
+// F6: the walk reads the labels it clicks from the texts of the page's language, so it walks the Portuguese and Spanish
+// pages the same way (English by default, with the same labels as before).
 import { expect, type Page } from '@playwright/test';
+import { fmt } from '../../../src/i18n/format.ts';
+import { routeById, type Lang } from '../../../src/i18n/routes.ts';
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../../src/tools/pdf/registry.ts';
-import imagesTexts from '../../../src/tools/pdf-to-jpg/i18n/en.ts';
-import protectTexts from '../../../src/tools/protect-pdf/i18n/en.ts';
-import rotateTexts from '../../../src/tools/rotate-pdf/i18n/en.ts';
-import signTexts from '../../../src/tools/sign-pdf/i18n/en.ts';
-import splitTexts from '../../../src/tools/split-pdf/i18n/en.ts';
-import unlockTexts from '../../../src/tools/unlock-pdf/i18n/en.ts';
+import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../../src/tools/pdf/texts.ts';
 import { animationsDone, slowEngine } from './page.ts';
 import { PDF_ORACLE, choosePdfs, openTool, pdfFile } from './pdf-tools.ts';
 
@@ -45,16 +44,23 @@ const SENTINEL = 'Orca-Sentinel-7391-Kq';
 /** Clicks the label of a segmented option (the radio itself is hidden). */
 const option = (page: Page, label: string) => page.locator('#fo-tool-root .fo-seg__opt').filter({ hasText: label }).first().click();
 
+/** The option labels of a PDF tool in a language (each tool has its own shape; the walk reads only strings). */
+const optionsOf = (id: PdfToolId, lang: Lang): Record<string, string> => (PDF_TOOL_TEXTS[lang][id].panel as unknown as { options: Record<string, string> }).options;
+const escaped = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Walks one PDF tool page through its states on a single load: `visit` is called on each one, after the finite animations
  * have ended. With `hold`, the engine's worker is held back until the file is chosen, so the WaterLevel state exists and
  * `visit('processing')` is called; without it that state is skipped (the worker may answer before anyone looks).
  */
-export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, options: { hold: boolean; path?: string }): Promise<void> {
+export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, options: { hold: boolean; path?: string; lang?: Lang }): Promise<void> {
+  const lang = options.lang ?? 'en';
+  const labels = optionsOf(id, lang);
+  const grid = PDF_PANEL_TEXTS[lang].grid;
   // The worker is held before the load: a pointer resting over the panel starts it before the first file.
   const gate = options.hold ? await slowEngine(page) : null;
-  // `path` walks the same tool where a file guide embeds it (F5b); the tool's own page by default.
-  await openTool(page, options.path ?? PDF_PAGES[id].path);
+  // `path` walks the same tool where a file guide embeds it (F5b); the tool's own page, in its language, by default.
+  await openTool(page, options.path ?? routeById(id).paths[lang] ?? PDF_PAGES[id].path);
 
   const seen = async (state: PdfState, note = ''): Promise<void> => {
     await animationsDone(page);
@@ -99,7 +105,7 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await enter([MIXED]);
       await waitReady();
       await seen('ready', 'every page, no grid');
-      await option(page, splitTexts.panel.options.pick);
+      await option(page, labels['pick'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);
       await cells.nth(0).locator('.fo-page__main').click();
       await cells.nth(2).locator('.fo-page__main').click();
@@ -110,7 +116,7 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       break;
     }
     case 'pdf-to-jpg': {
-      await option(page, imagesTexts.panel.options.low);
+      await option(page, labels['low'] ?? '');
       await enter([SCAN]);
       await result('one page at 72 ppi');
       break;
@@ -123,11 +129,11 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
     case 'rotate-pdf': {
       await enter([MIXED]);
       await result('every page turned');
-      await option(page, rotateTexts.panel.options.pick);
+      await option(page, labels['pick'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);
       await waitReady();
       await seen('grid', 'page by page, no page turned yet');
-      await root.getByRole('button', { name: /^Turn page 1 \(/ }).click();
+      await root.getByRole('button', { name: new RegExp(`^${escaped(fmt(grid.turn, { n: 1 }))} \\(`) }).click();
       await result('page 1 turned on the grid');
       break;
     }
@@ -152,18 +158,18 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await enter([MIXED]);
       await waitReady();
       await seen('signature', 'draw: the empty pad');
-      await option(page, signTexts.panel.options.upload);
+      await option(page, labels['upload'] ?? '');
       await expect(root.locator('.fo-sign__file')).toBeVisible();
       await seen('signature', 'upload: the file field');
-      await option(page, signTexts.panel.options.type);
-      const typed = root.getByLabel(signTexts.panel.options.typeLabel);
+      await option(page, labels['type'] ?? '');
+      const typed = root.getByLabel(labels['typeLabel'] ?? '');
       await typed.fill('Orca Signer');
       await typed.blur();
       await expect(root.locator('.fo-sign__box')).toBeVisible({ timeout: 30_000 });
       // The preview of the page (the box holds the signature's own picture, which is another img).
       await expect(root.locator('.fo-sign__page > img')).toBeVisible({ timeout: 30_000 });
       await seen('signature', 'type: the name on the preview of the page');
-      await option(page, signTexts.panel.options.pickPages);
+      await option(page, labels['pickPages'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);
       await cells.nth(0).locator('.fo-page__main').click();
       await cells.nth(1).locator('.fo-page__main').click();
@@ -177,11 +183,11 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await enter([MIXED]);
       await waitReady();
       await seen('ready', 'the two empty password fields');
-      await root.getByLabel(protectTexts.panel.options.passwordLabel, { exact: true }).fill(SENTINEL);
-      await root.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(`${SENTINEL.slice(0, -2)}Zz`);
+      await root.getByLabel(labels['passwordLabel'] ?? '', { exact: true }).fill(SENTINEL);
+      await root.getByLabel(labels['confirmLabel'] ?? '', { exact: true }).fill(`${SENTINEL.slice(0, -2)}Zz`);
       await expect(root.locator('.fo-pass .fo-field__error')).toBeVisible();
       await seen('password', 'the two passwords do not match');
-      await root.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(SENTINEL);
+      await root.getByLabel(labels['confirmLabel'] ?? '', { exact: true }).fill(SENTINEL);
       await action.click();
       await result('protected');
       break;
@@ -189,15 +195,15 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
     case 'unlock-pdf': {
       await enter(['gen-cifrado-aes256.pdf']);
       await waitReady();
-      const field = root.getByLabel(unlockTexts.panel.options.passwordLabel, { exact: true });
+      const field = root.getByLabel(labels['passwordLabel'] ?? '', { exact: true });
       await expect(field).toBeVisible();
       await seen('ready', 'the password field, nothing typed');
       await field.fill('not-the-password');
-      await root.getByRole('button', { name: unlockTexts.panel.options.submit }).click();
+      await root.getByRole('button', { name: labels['submit'] ?? '' }).click();
       await expect(root.locator('.fo-pass .fo-field__error')).toBeVisible({ timeout: 30_000 });
       await seen('password', 'a wrong password');
       await field.fill(PDF_ORACLE.passwords['aes256'] ?? '');
-      await root.getByRole('button', { name: unlockTexts.panel.options.submit }).click();
+      await root.getByRole('button', { name: labels['submit'] ?? '' }).click();
       await result('unlocked');
       break;
     }
@@ -206,7 +212,7 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await waitReady();
       await expect(cells).toHaveCount(MIXED_PAGES);
       await seen('ready', 'the pages in their own order');
-      await root.getByRole('button', { name: 'Move page 1 later' }).click();
+      await root.getByRole('button', { name: fmt(grid.moveLater, { n: 1 }) }).click();
       await seen('grid', 'page 1 moved later');
       await action.click();
       await result('reordered');

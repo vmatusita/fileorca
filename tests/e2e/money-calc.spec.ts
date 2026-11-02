@@ -5,10 +5,13 @@
 import { readFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { CALC_PAGES, GUIDES, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, GUIDES, moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import esShared from '../../src/tools/calc/i18n/es.ts';
+import ptShared from '../../src/tools/calc/i18n/pt.ts';
+import sacPriceTexts from '../../src/tools/br-sac-price/i18n/pt.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
-import { strictPdf } from './lib/pdf.ts';
+import { parsePdf, strictPdf } from './lib/pdf.ts';
 import { pdfTextLines } from './lib/pdf-text.ts';
 
 interface OracleCase {
@@ -484,5 +487,79 @@ test.describe('second pass of the review F4', () => {
       return { heading: Math.round(heading.right), cell: Math.round(cell.right) };
     });
     expect(column.heading).toBe(column.cell);
+  });
+});
+
+// F6 (decisions 1, 5 and 6): the files of the Spanish and Portuguese pages, saved from the page. The Spanish mortgage has
+// the English oracle's schedule in the English CSV shape, with the Spanish header and year, and a Letter PDF; the
+// Brazilian SAC × PRICE has its oracle's two schedules in the Portuguese CSV (semicolon, decimal comma, BOM) and an A4 PDF.
+test.describe('F6: the CSV and the PDF in Spanish and Portuguese', () => {
+  test('the Spanish mortgage CSV is the English oracle schedule in Spanish words, and its PDF is Letter', async ({ page }) => {
+    const es = moneyPage('mortgage-calculator', 'es');
+    expect((await page.goto(es?.path ?? ''))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const { name, bytes } = await saved(page, csvButton(page));
+    expect(name).toBe(`${es?.file}.csv`);
+    const text = bytes.toString('utf8');
+    expect(text.startsWith('﻿'), 'BOM UTF-8').toBe(true);
+    const lines = text.slice(1).split('\r\n');
+    expect(lines.pop(), 'the file ends with CRLF').toBe('');
+    const [header, ...rows] = lines.map((line) => line.split(','));
+    const s = esShared.island;
+    expect(header).toEqual([s.year.replace(/\s*\{n\}/, ''), s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance]);
+    const expected = (pageCase('mortgage-calculator').expected.rows ?? []).map(([n, payment, interest, principal, balance]) => [
+      s.year.replace('{n}', String(Math.ceil((n ?? 0) / 12))),
+      String(n),
+      ...[payment, principal, interest, balance].map((cents) => (Number(cents) / 100).toFixed(2)),
+    ]);
+    expect(rows).toEqual(expected);
+
+    const pdf = await saved(page, pdfButton(page));
+    expect(pdf.name).toBe(`${es?.file}.pdf`);
+    const read = parsePdf(new Uint8Array(pdf.bytes));
+    for (const sheet of read.pages) expect([sheet.width, sheet.height]).toEqual([612, 792]);
+    const drawn = pdfTextLines(new Uint8Array(pdf.bytes));
+    expect(drawn).toContain('$682,636.71');
+    const last = drawn.lastIndexOf('360');
+    expect(drawn.slice(last - 1, last + 5)).toEqual([s.year.replace('{n}', '30'), '360', '$1,900.91', '$1,890.67', '$10.24', '$0.00']);
+  });
+
+  test('the SAC × PRICE CSV has both oracle schedules with semicolons and the decimal comma, and its PDF is A4', async ({ page }) => {
+    const pt = moneyPage('br-sac-price', 'pt');
+    expect((await page.goto(pt?.path ?? ''))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const { name, bytes } = await saved(page, csvButton(page));
+    expect(name).toBe(`${pt?.file}.csv`);
+    const text = bytes.toString('utf8');
+    expect(text.startsWith('﻿'), 'BOM UTF-8').toBe(true);
+    const lines = text.slice(1).split('\r\n');
+    expect(lines.pop(), 'the file ends with CRLF').toBe('');
+    const [header, ...rows] = lines.map((line) => line.split(';'));
+    const s = ptShared.island;
+    const v = sacPriceTexts.panel.view;
+    expect(header).toEqual([s.year.replace(/\s*\{n\}/, ''), s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance, v.correction]);
+    // The oracle's row is [number, payment, interest, principal, balance, correction]; the table puts principal first.
+    const real = (cents: number) => `${Math.trunc(cents / 100)},${String(Math.abs(cents) % 100).padStart(2, '0')}`;
+    const fixture = JSON.parse(readFileSync('fixtures/calc/br-sac-price.json', 'utf8')) as { cases: { id: string; expected: { sac: { rows: number[][] }; price: { rows: number[][] } } }[] };
+    const example = fixture.cases.find((entry) => entry.id === 'page-example')?.expected;
+    const expected = (['sac', 'price'] as const).flatMap((plan) =>
+      (example?.[plan].rows ?? []).map(([n, payment, interest, principal, balance, correction]) => [
+        `${v[plan]} · ${s.year.replace('{n}', String(Math.ceil((n ?? 0) / 12)))}`,
+        String(n),
+        ...[payment, principal, interest, balance, correction].map((cents) => real(Number(cents))),
+      ]),
+    );
+    expect(rows.length).toBe(720);
+    expect(rows).toEqual(expected);
+
+    const pdf = await saved(page, pdfButton(page));
+    expect(pdf.name).toBe(`${pt?.file}.pdf`);
+    const read = parsePdf(new Uint8Array(pdf.bytes));
+    for (const sheet of read.pages) expect([sheet.width, sheet.height]).toEqual([595.28, 841.89]);
+    const drawn = pdfTextLines(new Uint8Array(pdf.bytes)).join('\n');
+    expect(drawn).toContain('R$ 4.604,95');
+    expect(drawn).toMatch(/Página 1 de \d+/);
   });
 });

@@ -33,9 +33,11 @@ const CATEGORY: Record<Cat, (lang: Lang) => string> = {
 
 /**
  * One entry per page: the link, the name and the category in each language where the page has a path and a card,
- * and the terms of every one of those languages. A page with no row in the route map (not built) gets no entry.
+ * and the terms of every one of those languages. A page with no row in the route map (not built) gets no entry. The
+ * colour (`cat`) and the category written beside the name (`area`) are the same but for Image to PDF, which has the
+ * PDF colour and stays in the image category, as before the F6.
  */
-function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => ToolBlurb | undefined): SearchEntry[] {
+function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => ToolBlurb | undefined, area: Cat = cat): SearchEntry[] {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route) return [];
   const found: SearchEntry = { id, href: {}, name: {}, category: {}, cat, icon, terms: [] };
@@ -46,7 +48,7 @@ function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => Too
     if (!path || !blurb) continue;
     found.href[lang] = path;
     found.name[lang] = blurb.name;
-    found.category[lang] = CATEGORY[cat](lang);
+    found.category[lang] = CATEGORY[area](lang);
     for (const term of [blurb.name, ...blurb.synonyms]) terms.add(normalize(term));
   }
   found.terms = [...terms];
@@ -55,7 +57,7 @@ function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => Too
 
 function imageEntries(): SearchEntry[] {
   return (Object.keys(IMAGE_PAGES) as ImagePageId[]).flatMap((id) =>
-    entry(id, IMAGE_PAGES[id].pdf ? 'pdf' : 'image', ICONS[IMAGE_PAGES[id].icon], (lang) => TEXTS[lang].common.tools[id]),
+    entry(id, IMAGE_PAGES[id].pdf ? 'pdf' : 'image', ICONS[IMAGE_PAGES[id].icon], (lang) => TEXTS[lang].common.tools[id], 'image'),
   );
 }
 

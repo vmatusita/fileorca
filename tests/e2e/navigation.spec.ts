@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
+import { ROUTES, type Lang } from '../../src/i18n/routes.ts';
+import ptCommon from '../../src/i18n/pt/common.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
@@ -35,9 +37,10 @@ test('pages are served with the generated headers (no X-Robots-Tag since the lau
   }
 });
 
-// F2 (DECISOES § 84): a page that exists only in English offers the other languages' homes, never a missing page.
+// F2 (DECISOES § 84): a page that exists only in English offers the other languages' homes, never a missing page. F6: HEIC to
+// JPG has its Portuguese and Spanish pages now, so the example is a file guide, which stays in English (DECISOES § 233).
 test('on a page that exists only in English, the language menu leads to the home of each language', async ({ page }) => {
-  await page.goto('/heic-to-jpg/');
+  await page.goto('/guides/heic-to-jpg-on-windows/');
   await page.getByRole('button', { name: /^EN/ }).click();
   await expect(page.getByRole('link', { name: 'Português' })).toHaveAttribute('href', '/pt/');
   await expect(page.getByRole('link', { name: 'Español' })).toHaveAttribute('href', '/es/');
@@ -68,7 +71,8 @@ test('tool search loads on first use, finds synonyms in any language and opens t
   const input = dialog.getByRole('combobox');
   await expect(input).toBeFocused();
   await input.fill('shrink');
-  await expect(dialog.getByRole('option')).toHaveText(/Comprimir imagem/);
+  // F6: the English synonym finds the Portuguese pages, Compress image first (its presets, Resize image and Compress PDF follow).
+  await expect(dialog.getByRole('option').first()).toHaveText(/Comprimir imagem/);
   await expect(input).toHaveAttribute('aria-expanded', 'true');
   await input.fill('youtube downloader');
   // The empty title (the status region says the same words since the F3, so the text alone matches two elements).
@@ -78,27 +82,38 @@ test('tool search loads on first use, finds synonyms in any language and opens t
   await expect(page).toHaveURL(/\/pt\/comprimir-imagem\/$/);
 });
 
-// F2: the index has every image tool and preset, and each language shows only the pages it has.
+// F2: the index has every image tool and preset, and each language shows only the pages it has. F6: Portuguese has the
+// image and PDF tools and the Brazilian calculators, read from the route map, and still never offers a page that exists
+// only in English (DECISOES § 233).
+const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+const searchedIn = (lang: Lang): number => ROUTES.filter((route) => SEARCHED.has(route.id) && route.paths[lang]).length;
+const PT_NAMES = [...Object.values(ptCommon.tools), ...Object.values(ptCommon.pdf), ...Object.values(ptCommon.calcs)].map((blurb) => blurb.name);
+
 test('the search shows only the pages that exist in the language and never falls back to English', async ({ page }) => {
   await page.goto('/pt/');
   await page.keyboard.press('Control+K');
   const dialog = page.locator('#fo-search-dialog');
   const input = dialog.getByRole('combobox');
   await expect(input).toBeFocused();
-  // Nothing typed: the one tool Portuguese has. 'compress' and 'jpg' match many pages in English, one here.
-  await expect(dialog.getByRole('option')).toHaveCount(1);
+  // Nothing typed: every page Portuguese has (31 in the F6, fewer than the English list).
+  expect(searchedIn('pt')).toBeLessThan(searchedIn('en'));
+  await expect(dialog.getByRole('option')).toHaveCount(searchedIn('pt'));
+  // 'compress' and 'jpg' match pages that exist in Portuguese: every row is the Portuguese name of one of them.
   for (const query of ['compress', 'jpg', 'jpeg']) {
     await input.fill(query);
-    await expect(dialog.getByRole('option'), query).toHaveText(/Comprimir imagem/);
-    await expect(dialog.getByRole('option'), query).toHaveCount(1);
+    const rows = await dialog.getByRole('option').allInnerTexts();
+    expect(rows.length, query).toBeGreaterThan(0);
+    for (const row of rows) expect(PT_NAMES.some((name) => row.replace(/\s+/g, ' ').startsWith(name)), `${query}: ${row}`).toBe(true);
   }
-  // HEIC to JPG exists only in English: Portuguese finds nothing, and does not offer the English page.
-  await input.fill('heic');
+  await input.fill('compress');
+  await expect(dialog.getByRole('option').first()).toHaveText(/Comprimir imagem/);
+  // The mortgage calculator exists in English and Spanish only: Portuguese finds nothing, and does not offer the English page.
+  await input.fill('mortgage');
   await expect(dialog.locator('[data-search-empty]')).toBeVisible();
   await expect(dialog.getByRole('option')).toHaveCount(0);
-  await expect(dialog.locator('[data-search-empty-title]')).toContainText('heic');
+  await expect(dialog.locator('[data-search-empty-title]')).toContainText('mortgage');
   // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101).
-  await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "heic"');
+  await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "mortgage"');
   await input.fill('jpg');
   await expect(dialog.getByRole('status')).toHaveText('');
 });
@@ -181,7 +196,8 @@ test('the 404 page has a working tool search', async ({ page }) => {
   const box = page.locator('[data-search-inline]').getByRole('combobox');
   await box.click();
   await box.fill('achicar');
-  await expect(page.locator('[data-search-inline]').getByRole('option')).toHaveText(/Comprimir imagen/);
+  // F6: Compress PDF exists in Spanish and says "achicar pdf" too; Compress image comes first.
+  await expect(page.locator('[data-search-inline]').getByRole('option').first()).toHaveText(/Comprimir imagen/);
 });
 
 test('trailing slash: a path without it redirects', async ({ request }) => {
