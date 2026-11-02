@@ -7,7 +7,7 @@ import type { SplitTexts } from '../../pdf/option-texts.ts';
 const texts: PdfToolTexts<SplitTexts> = {
   title: 'Dividir PDF: separa páginas o rangos en tu navegador',
   description:
-    'Divide un PDF en páginas sueltas, rangos de páginas o las páginas que elijas. Funciona en tu navegador, sin subir nada, y conserva los formularios y los marcadores.',
+    'Divide un PDF en páginas sueltas, rangos o las páginas que elijas. Funciona en tu navegador, sin subir nada, y conserva los formularios y los marcadores.',
   h1: 'Dividir PDF',
   howHeading: 'Cómo funciona',
   howSteps: [
