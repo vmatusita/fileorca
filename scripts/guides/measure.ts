@@ -7,14 +7,13 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { requireDist } from '../lib/dist.ts';
 import { FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
-import type { Cell, GuideMeasure, MeasuredFile, MeasuredNumber, MeasuredTable } from '../../src/tools/guides/measured-types.ts';
+import type { GuideMeasure, MeasuredFile } from '../../src/tools/guides/measured-types.ts';
 import { BROWSERS, openSession, osName, serve, type BrowserName, type Session } from './lib/browser.ts';
+import { TOLERANCE, compareNumbers, compareTables } from './lib/compare.ts';
 import { PLANS, type Context } from './lib/plans.ts';
 import { headCommit, scriptFiles, scriptHash } from './lib/record.ts';
 
 export const OUT = 'data/guides-measured.json';
-/** DECISOES § 185: fixed before the first measurement. */
-export const TOLERANCE = { bytesRelative: 0.02, psnrDb: 0.5 };
 
 const args = process.argv.slice(2);
 const check = args.includes('--check');
@@ -56,50 +55,6 @@ try {
 }
 const versions: Record<BrowserName, string> = { chromium: '', webkit: '' };
 for (const name of BROWSERS) versions[name] = sessions.has(name) ? (await sessions.get(name) as Session).version : '';
-
-// ---- compare ---------------------------------------------------------------------------------------------------
-
-function close(a: number, b: number, unit: string, browser: boolean): boolean {
-  if (a === b) return true;
-  if (!browser) return false;
-  if (unit === 'bytes') return Math.abs(a - b) <= TOLERANCE.bytesRelative * Math.max(Math.abs(a), Math.abs(b));
-  if (unit === 'db') return Math.abs(a - b) <= TOLERANCE.psnrDb;
-  if (unit === 'ratio') return Math.abs(a - b) <= TOLERANCE.bytesRelative * Math.max(Math.abs(a), Math.abs(b));
-  return false;
-}
-
-function compareNumbers(id: string, before: Record<string, MeasuredNumber>, after: Record<string, MeasuredNumber>, problems: string[]): void {
-  for (const name of new Set([...Object.keys(before), ...Object.keys(after)])) {
-    const a = before[name];
-    const b = after[name];
-    if (!a || !b) {
-      problems.push(`${id}.${name}: ${a ? 'not measured now' : 'new number'}`);
-      continue;
-    }
-    if (!close(a.value, b.value, a.unit, a.method.runner === 'playwright')) problems.push(`${id}.${name}: ${a.value} in the file, ${b.value} now (${a.unit}, ${a.method.runner})`);
-  }
-}
-
-function compareTables(id: string, before: Record<string, MeasuredTable>, after: Record<string, MeasuredTable>, problems: string[]): void {
-  for (const name of new Set([...Object.keys(before), ...Object.keys(after)])) {
-    const a = before[name];
-    const b = after[name];
-    if (!a || !b || a.rows.length !== b.rows.length || a.columns.join() !== b.columns.join()) {
-      problems.push(`${id} table ${name}: a different shape`);
-      continue;
-    }
-    const browser = a.methods.some((how) => how.runner === 'playwright');
-    a.rows.forEach((row, r) =>
-      row.forEach((cell: Cell, c) => {
-        const other = b.rows[r]?.[c];
-        const column = a.columns[c] ?? '';
-        const unit = /bytes$/i.test(column) ? 'bytes' : /db$/i.test(column) ? 'db' : 'exact';
-        const same = typeof cell === 'number' && typeof other === 'number' ? close(cell, other, unit, browser) : cell === other;
-        if (!same) problems.push(`${id} table ${name}, row ${r + 1}, ${column}: ${String(cell)} in the file, ${String(other)} now`);
-      }),
-    );
-  }
-}
 
 const hash = scriptHash(files);
 if (check) {

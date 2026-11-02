@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Cell, MeasuredNumber, MeasuredTable, Method, Sample, Unit } from '../../../src/tools/guides/measured-types.ts';
+import type { Cell, ColumnKind, MeasuredNumber, MeasuredTable, Method, Sample, Unit } from '../../../src/tools/guides/measured-types.ts';
 
 export const SCRIPT_DIR = 'scripts/guides';
 
@@ -53,9 +53,18 @@ export function num(stamp: Stamp, value: number, unit: Unit, sampled: Sample, me
   return { value, unit, sample: sampled, method, date: stamp.date, commit: stamp.commit };
 }
 
-export function table(stamp: Stamp, columns: string[], rows: Cell[][], sampled: Sample, methods: Method[]): MeasuredTable {
+/** A column of a table: its name, who measured it and its unit (a label is a name, a browser, a format). */
+export type Column = [name: string, runner: ColumnKind['runner'], unit: ColumnKind['unit']];
+/** A label column, and a column measured in Node or in the browser. */
+export const label = (name: string): Column => [name, 'node', 'label'];
+export const inNode = (name: string, unit: Unit): Column => [name, 'node', unit];
+export const inBrowser = (name: string, unit: ColumnKind['unit']): Column => [name, 'playwright', unit];
+
+export function table(stamp: Stamp, columns: Column[], rows: Cell[][], sampled: Sample, methods: Method[]): MeasuredTable {
   for (const row of rows) if (row.length !== columns.length) throw new Error(`a row has ${row.length} cells for ${columns.length} columns`);
-  return { columns, rows, sample: sampled, methods, date: stamp.date, commit: stamp.commit };
+  const kinds = columns.map(([, runner, unit]) => ({ runner, unit }));
+  if (kinds.some((kind) => kind.runner === 'playwright') && !methods.some((how) => how.runner === 'playwright')) throw new Error('a browser column in a table measured with no browser');
+  return { columns: columns.map(([name]) => name), kinds, rows, sample: sampled, methods, date: stamp.date, commit: stamp.commit };
 }
 
 export const sum = (values: readonly number[]): number => values.reduce((total, value) => total + value, 0);

@@ -12,7 +12,8 @@ import { webpFrames } from '../../../tests/e2e/lib/webp.ts';
 import { BROWSERS, bytesFile, download, drop, fileOf, imageResult, method, openTool, option, stem, typeField, type BrowserName, type Out, type Session } from './browser.ts';
 import { NODE_IMAGE, NODE_PIXELS, NODE_WEBP, imageFixture, photoFacts, pixelsOf, psnrOf, shownSize, webpOf, type Pixels } from './node-image.ts';
 import { NODE_PDFLIB, NODE_PDF_ENGINE, breakdown, compress, merge, pdfFixture, splitEach } from './node-pdf.ts';
-import { decibels, median, num, ratio, sample, sum, table, type Stamp } from './record.ts';
+import { decibels, inBrowser, inNode, label, median, num, ratio, sample, sum, table, type Column, type Stamp } from './record.ts';
+import enCommon from '../../../src/i18n/en/common.ts';
 
 export interface Context {
   stamp: Stamp;
@@ -30,7 +31,7 @@ function collector(stamp: Stamp) {
       if (name in numbers) throw new Error(`number ${name} measured twice`);
       numbers[name] = num(stamp, value, unit, sampled, how);
     },
-    t(name: string, columns: string[], rows: Cell[][], sampled: Sample, methods: Method[]): void {
+    t(name: string, columns: Column[], rows: Cell[][], sampled: Sample, methods: Method[]): void {
       tables[name] = table(stamp, columns, rows, sampled, methods);
     },
     fact(name: string, value: string): void {
@@ -131,7 +132,7 @@ async function heicToJpg(ctx: Context): Promise<GuideMeasure> {
     const b = out.webkit.get(stem(input.name));
     return a !== undefined && b !== undefined && Buffer.compare(Buffer.from(a), Buffer.from(b)) === 0;
   }).length, 'count', all, must(methods[1], 'method'));
-  g.t('files', ['file', 'camera', 'heicBytes', 'width', 'height', 'jpgBytesChromium', 'jpgBytesWebkit', 'gpsBefore', 'gpsAfter'], inputs.map((input, index) => {
+  g.t('files', [label('file'), label('camera'), inNode('heicBytes', 'bytes'), inNode('width', 'px'), inNode('height', 'px'), inBrowser('jpgBytesChromium', 'bytes'), inBrowser('jpgBytesWebkit', 'bytes'), label('gpsBefore'), inBrowser('gpsAfter', 'label')], inputs.map((input, index) => {
     const fact = facts[index] as (typeof facts)[number];
     const c = must(out.chromium.get(stem(input.name)), input.name);
     const w = must(out.webkit.get(stem(input.name)), input.name);
@@ -152,6 +153,13 @@ const PDF_KEY = {
 } as const;
 type PdfKey = keyof typeof PDF_KEY;
 const PDF_KEYS = Object.keys(PDF_KEY) as PdfKey[];
+/** The other files Compress PDF takes, written by the fixture script (fixtures/ORIGEM.md); the text cites them too. */
+const OTHER_COMPRESS: Record<string, string> = {
+  actions: 'gen-acoes.pdf',
+  textOnly: 'gen-paginas-300.pdf',
+  mixed: 'gen-paginas-mistas.pdf',
+  damaged: 'gen-xref-estragada.pdf',
+};
 /** What Compress PDF takes: the readable fixtures and the one it repairs (fixtures/pdf/expected.json). */
 const COMPRESSIBLE = [
   'gen-acoes.pdf', 'gen-fotos.pdf', 'gen-ja-otimizado.pdf', 'gen-paginas-300.pdf', 'gen-paginas-mistas.pdf', 'gen-xref-estragada.pdf',
@@ -179,7 +187,8 @@ async function pdfLarge(ctx: Context): Promise<GuideMeasure> {
     g.n(`${key}OtherShare`, ratio(parts.other, parts.total), 'ratio', one, lib);
     rows.push([name, parts.pages, parts.total, parts.images, parts.imageCount, parts.fonts, parts.fontCount, parts.other]);
   }
-  g.t('space', ['file', 'pages', 'totalBytes', 'imageBytes', 'images', 'fontBytes', 'fonts', 'otherBytes'], rows, named, [lib]);
+  g.n('spaceFiles', PDF_KEYS.length, 'count', named, lib);
+  g.t('space', [label('file'), inNode('pages', 'count'), inNode('totalBytes', 'bytes'), inNode('imageBytes', 'bytes'), inNode('images', 'count'), inNode('fontBytes', 'bytes'), inNode('fonts', 'count'), inNode('otherBytes', 'bytes')], rows, named, [lib]);
 
   const accepted = sample(COMPRESSIBLE, 'every fixture Compress PDF takes: the readable ones and the one it repairs');
   g.n('accepted', COMPRESSIBLE.length, 'count', accepted, engine);
@@ -215,18 +224,30 @@ async function pdfLarge(ctx: Context): Promise<GuideMeasure> {
     const name = PDF_KEY[key];
     const before = pdfFixture(name).length;
     const one = sample([name]);
-    for (const [mode, label, how] of [
+    for (const [mode, suffix, how] of [
       ['lossless', 'Lossless', engine],
       ['recommended', 'Recommended', engine],
       ['strongChromium', 'StrongChromium', strongChromium],
       ['strongWebkit', 'StrongWebkit', strongWebkit],
     ] as const) {
       const after = must(modes[mode]?.[name], `${mode} ${name}`);
-      g.n(`${key}${label}`, after, 'bytes', one, how);
-      g.n(`${key}${label}Ratio`, ratio(after, before), 'ratio', one, how);
+      g.n(`${key}${suffix}`, after, 'bytes', one, how);
+      g.n(`${key}${suffix}Ratio`, ratio(after, before), 'ratio', one, how);
+    }
+    g.n(`${key}LosslessSaved`, before - must(modes['lossless']?.[name], `lossless ${name}`), 'bytes', one, engine);
+  }
+  // The files of the Compress table that are not in the table of what takes the space: the Node modes, which the text
+  // cites (DECISOES § 197), and an exact twin for each cell the --check compares.
+  for (const [key, name] of Object.entries(OTHER_COMPRESS)) {
+    const before = pdfFixture(name).length;
+    const one = sample([name]);
+    for (const [mode, suffix] of [['lossless', 'Lossless'], ['recommended', 'Recommended']] as const) {
+      const after = must(modes[mode]?.[name], `${mode} ${name}`);
+      g.n(`${key}${suffix}`, after, 'bytes', one, engine);
+      g.n(`${key}${suffix}Ratio`, ratio(after, before), 'ratio', one, engine);
     }
   }
-  g.t('compress', ['file', 'beforeBytes', 'losslessBytes', 'recommendedBytes', 'strongBytesChromium', 'strongBytesWebkit'], COMPRESSIBLE.map((name) => [
+  g.t('compress', [label('file'), inNode('beforeBytes', 'bytes'), inNode('losslessBytes', 'bytes'), inNode('recommendedBytes', 'bytes'), inBrowser('strongBytesChromium', 'bytes'), inBrowser('strongBytesWebkit', 'bytes')], COMPRESSIBLE.map((name) => [
     name, pdfFixture(name).length, must(modes['lossless']?.[name], name), must(modes['recommended']?.[name], name), must(modes['strongChromium']?.[name], name), must(modes['strongWebkit']?.[name], name),
   ]), accepted, [engine, strongChromium, strongWebkit]);
   return g.done();
@@ -235,26 +256,38 @@ async function pdfLarge(ctx: Context): Promise<GuideMeasure> {
 // ---- 3. Social media image sizes ---------------------------------------------------------------------------------
 
 const READ = '2026-11-01';
-/** Read on the networks' own help pages on 2026-11-01 (prompt F5b, decision 2.3). A limit is stored in bytes, 1 MB = 1,000,000. */
+/**
+ * Read on the networks' own help pages on 2026-11-01 (prompt F5b, decision 2.3). A limit is stored in bytes, 1 MB =
+ * 1,000,000. `stated` keeps the words of the page that give the size and the limit (DECISOES § 198): the test checks
+ * that each size is in them. The Instagram and X pages give a reader only "Help Center" or an HTTP 403, so their words
+ * are the page's own text as the search engine shows it.
+ */
 export const OFFICIAL_SIZES: OfficialSize[] = [
-  { id: 'instagram-feed', network: 'Instagram', use: 'Feed photo at its tallest ratio, 3:4', width: 1080, height: 1440, limit: null, ad: false, source: { href: 'https://help.instagram.com/1631821640426723/?locale=en_US', title: 'Image resolution of photos you share on Instagram', read: READ } },
-  { id: 'instagram-reel-cover', network: 'Instagram', use: 'Reel cover photo', width: 420, height: 654, limit: null, ad: false, source: { href: 'https://help.instagram.com/1038071743007909/?locale=en_US', title: 'Reel size & aspect ratios on Instagram', read: READ } },
-  { id: 'facebook-profile', network: 'Facebook', use: 'Page profile picture', width: 320, height: 320, limit: null, ad: false, source: { href: 'https://www.facebook.com/help/125379114252045?locale=en_US', title: 'Facebook Page profile picture and cover photo dimensions', read: READ } },
-  { id: 'facebook-cover', network: 'Facebook', use: 'Page cover photo, fastest under 100 KB', width: 851, height: 315, limit: 100_000, ad: false, source: { href: 'https://www.facebook.com/help/125379114252045?locale=en_US', title: 'Facebook Page profile picture and cover photo dimensions', read: READ } },
-  { id: 'facebook-link', network: 'Facebook', use: 'Image of a shared link', width: 1200, height: 630, limit: 8_000_000, ad: false, source: { href: 'https://developers.facebook.com/documentation/sharing/webmasters/images', title: 'Images in Link Shares', read: READ } },
-  { id: 'x-profile', network: 'X', use: 'Profile photo', width: 400, height: 400, limit: 2_000_000, ad: false, source: { href: 'https://help.x.com/en/managing-your-account/common-issues-when-uploading-profile-photo', title: 'Help with uploading a profile photo', read: READ } },
-  { id: 'x-header', network: 'X', use: 'Header photo', width: 1500, height: 500, limit: null, ad: false, source: { href: 'https://help.x.com/en/managing-your-account/common-issues-when-uploading-profile-photo', title: 'Help with uploading a profile photo', read: READ } },
-  { id: 'linkedin-post', network: 'LinkedIn', use: 'Photo in a post, recommended width at the tallest ratio, 4:5', width: 1080, height: 1350, limit: 5_000_000, ad: false, source: { href: 'https://www.linkedin.com/help/lms/answer/a527229?lang=en', title: 'Share photos on LinkedIn', read: READ } },
-  { id: 'linkedin-profile-cover', network: 'LinkedIn', use: 'Profile cover image', width: 1584, height: 396, limit: 8_000_000, ad: false, source: { href: 'https://www.linkedin.com/help/linkedin/answer/a568217/add-or-change-the-background-photo-on-your-profile?lang=en', title: 'Add or change the cover image on your profile', read: READ } },
-  { id: 'linkedin-page-cover', network: 'LinkedIn', use: 'Page cover image', width: 1512, height: 256, limit: 3_000_000, ad: false, source: { href: 'https://www.linkedin.com/help/linkedin/answer/a563309/image-specifications-for-your-linkedin-pages-and-career-pages?lang=en', title: 'Image specifications for your LinkedIn Pages and Career Pages', read: READ } },
-  { id: 'youtube-banner', network: 'YouTube', use: 'Channel banner, smallest upload', width: 2048, height: 1152, limit: 6_000_000, ad: false, source: { href: 'https://support.google.com/youtube/answer/10456525?hl=en', title: 'Manage your channel branding', read: READ } },
-  { id: 'pinterest-pin', network: 'Pinterest', use: 'Pin, from the ad specs', width: 1000, height: 1500, limit: 20_000_000, ad: true, source: { href: 'https://help.pinterest.com/en/business/article/pinterest-product-specs', title: 'Review ad specs', read: READ } },
+  { id: 'instagram-feed', network: 'Instagram', use: 'Feed photo at its tallest ratio, 3:4', width: 1080, height: 1440, limit: null, ad: false, stated: "When you share a photo that has a width between 320 and 1080 pixels, we keep that photo at its original resolution as long as the photo's aspect ratio is between 1.91:1 and 3:4.", source: { href: 'https://help.instagram.com/1631821640426723/?locale=en_US', title: 'Image resolution of photos you share on Instagram', read: READ } },
+  { id: 'instagram-reel-cover', network: 'Instagram', use: 'Reel cover photo', width: 420, height: 654, limit: null, ad: false, stated: 'Instagram recommends 420px by 654px (or 1:1.55 ratio).', source: { href: 'https://help.instagram.com/1038071743007909/?locale=en_US', title: 'Reel size & aspect ratios on Instagram', read: READ } },
+  { id: 'facebook-profile', network: 'Facebook', use: 'Page profile picture', width: 320, height: 320, limit: null, ad: false, stated: 'Should be 320 pixels wide and 320 pixels tall for best quality.', source: { href: 'https://www.facebook.com/help/125379114252045?locale=en_US', title: 'Facebook Page profile picture and cover photo dimensions', read: READ } },
+  { id: 'facebook-cover', network: 'Facebook', use: 'Page cover photo, fastest under 100 KB', width: 851, height: 315, limit: 100_000, ad: false, stated: "Loads fastest as an sRGB JPG file that's 851 pixels wide, 315 pixels tall and less than 100 kilobytes.", source: { href: 'https://www.facebook.com/help/125379114252045?locale=en_US', title: 'Facebook Page profile picture and cover photo dimensions', read: READ } },
+  { id: 'facebook-link', network: 'Facebook', use: 'Image of a shared link', width: 1200, height: 630, limit: 8_000_000, ad: false, stated: 'Use images that are at least 1200 x 630 pixels for the best display on high resolution devices. The size of the image file must not exceed 8 MB.', source: { href: 'https://developers.facebook.com/documentation/sharing/webmasters/images', title: 'Images in Link Shares', read: READ } },
+  { id: 'x-profile', network: 'X', use: 'Profile photo', width: 400, height: 400, limit: 2_000_000, ad: false, stated: 'Use JPEG, GIF, or PNG files under 2MB with recommended dimensions of 400x400 pixels.', source: { href: 'https://help.x.com/en/managing-your-account/common-issues-when-uploading-profile-photo', title: 'Help with uploading a profile photo', read: READ } },
+  { id: 'x-header', network: 'X', use: 'Header photo', width: 1500, height: 500, limit: null, ad: false, stated: 'Header photo, also known as a "banner" (recommended dimensions are 1500x500 pixels).', source: { href: 'https://help.x.com/en/managing-your-account/common-issues-when-uploading-profile-photo', title: 'Help with uploading a profile photo', read: READ } },
+  { id: 'linkedin-post', network: 'LinkedIn', use: 'Photo in a post, recommended width at the tallest ratio, 4:5', width: 1080, height: 1350, limit: 5_000_000, ad: false, stated: "Photo must be at least 552 (w) x 276 (h) pixels, but we recommend 1080 (w) pixels to better connect with your audience. The photo's aspect ratio can range from 3:1 to 4:5 (width:height). The size limit for an upload is 5 MB.", source: { href: 'https://www.linkedin.com/help/lms/answer/a527229?lang=en', title: 'Share photos on LinkedIn', read: READ } },
+  { id: 'linkedin-profile-cover', network: 'LinkedIn', use: 'Profile cover image', width: 1584, height: 396, limit: 8_000_000, ad: false, stated: 'Lesser than 8MB. 1584 (w) x 396 (h) pixels (recommended).', source: { href: 'https://www.linkedin.com/help/linkedin/answer/a568217/add-or-change-the-background-photo-on-your-profile?lang=en', title: 'Add or change the cover image on your profile', read: READ } },
+  { id: 'linkedin-page-cover', network: 'LinkedIn', use: 'Page cover image', width: 1512, height: 256, limit: 3_000_000, ad: false, stated: 'Cover image: 1512 (w) x 256 (h) pixels. All images must be PNG or JPEG files and have a maximum size of 3MB.', source: { href: 'https://www.linkedin.com/help/linkedin/answer/a563309/image-specifications-for-your-linkedin-pages-and-career-pages?lang=en', title: 'Image specifications for your LinkedIn Pages and Career Pages', read: READ } },
+  { id: 'youtube-banner', network: 'YouTube', use: 'Channel banner, smallest upload', width: 2048, height: 1152, limit: 6_000_000, ad: false, stated: 'Minimum dimension for upload: 2048 x 1152 px with an aspect ratio of 16:9. File size: 6 MB or smaller.', source: { href: 'https://support.google.com/youtube/answer/10456525?hl=en', title: 'Manage your channel branding', read: READ } },
+  { id: 'pinterest-pin', network: 'Pinterest', use: 'Pin, uploaded from a computer', width: 1000, height: 1500, limit: 20_000_000, ad: true, stated: 'We recommend using a 2:3 aspect ratio, or 1000 x 1500 pixels. Max file size: Desktop 20 MB, In-app 32 MB.', source: { href: 'https://help.pinterest.com/en/business/article/pinterest-product-specs', title: 'Review ad specs', read: READ } },
 ];
-/** The YouTube thumbnail: 16:9, at least 640 px wide, 2 MB on the phone app (the preset makes 1280 × 720 under 2,000,000 bytes). */
+/**
+ * The YouTube thumbnail as its help page gives it (DECISOES § 198): 3840 × 2160 recommended, at least 640 pixels wide,
+ * 16:9 suggested, 2 MB from the phone app. The preset of the site makes a smaller frame on purpose, so the file stays
+ * under those 2 MB (DECISOES § 60); that frame is measured on the outputs, never written here as the official size.
+ */
 export const YOUTUBE_THUMBNAIL: OfficialSize = {
-  id: 'youtube-thumbnail', network: 'YouTube', use: 'Video thumbnail, 16:9, uploaded from the phone app', width: 1280, height: 720, limit: 2_000_000, ad: false,
+  id: 'youtube-thumbnail', network: 'YouTube', use: 'Video thumbnail, recommended size, uploaded from the phone app', width: 3840, height: 2160, limit: 2_000_000, ad: false,
+  stated: 'Have a resolution of 3840 x 2160 pixels for videos, with a minimum width of 640 pixels for videos. For videos, try to upload a thumbnail with an aspect ratio of 16:9. Mobile: 2 MB for video thumbnails or 10 MB for podcasts.',
   source: { href: 'https://support.google.com/youtube/answer/72431?hl=en', title: 'Add custom thumbnails on YouTube', read: READ },
 };
+/** What the preset's own operation makes (src/tools/resize-image/presets/youtube-thumbnail/Panel.tsx). */
+const YOUTUBE_PRESET = { width: 1280, height: 720 };
 
 async function socialSizes(ctx: Context): Promise<GuideMeasure> {
   const g = collector(ctx.stamp);
@@ -296,6 +329,7 @@ async function socialSizes(ctx: Context): Promise<GuideMeasure> {
     }
   }
   const chromiumHow = must(methods[0], 'chromium');
+  g.n('photos', PHOTOS.length, 'count', photos, node(NODE_IMAGE));
   g.n('sizes', OFFICIAL_SIZES.length, 'count', photos, chromiumHow);
   g.n('outputs', outputs, 'count', photos, chromiumHow);
   g.n('exactFrames', exact, 'count', photos, chromiumHow);
@@ -313,7 +347,7 @@ async function socialSizes(ctx: Context): Promise<GuideMeasure> {
   const cover = at('facebook-cover', 'jpg-02-iphone6-paisagem-gps.jpg', 'chromium');
   g.n('facebookCoverLandscapeWidth', cover[3] as number, 'px', sample([cover[1] as string]), chromiumHow);
   g.n('facebookCoverLandscapeHeight', cover[4] as number, 'px', sample([cover[1] as string]), chromiumHow);
-  g.t('resized', ['size', 'photo', 'browser', 'width', 'height', 'bytes', 'underLimit'], rows, photos, methods);
+  g.t('resized', [label('size'), label('photo'), label('browser'), inBrowser('width', 'px'), inBrowser('height', 'px'), inBrowser('bytes', 'bytes'), inBrowser('underLimit', 'label')], rows, photos, methods);
 
   // The YouTube preset: centre crop to 16:9, then exactly 1280 × 720, a JPEG under 2,000,000 bytes.
   const thumbRows: Cell[][] = [];
@@ -328,13 +362,21 @@ async function socialSizes(ctx: Context): Promise<GuideMeasure> {
       const bytes = must(run.by.get(stem(photo)), `${photo} thumbnail`);
       const size = shownSize(bytes);
       sizes.push(bytes.length);
-      if (size.width === YOUTUBE_THUMBNAIL.width && size.height === YOUTUBE_THUMBNAIL.height) exactThumbs += 1;
+      if (size.width === YOUTUBE_PRESET.width && size.height === YOUTUBE_PRESET.height) exactThumbs += 1;
       thumbRows.push([photo, browser, size.width, size.height, bytes.length]);
     }
     g.n(`thumbnailMax${B[browser]}`, Math.max(...sizes), 'bytes', photos, run.how);
     g.n(`thumbnailExact${B[browser]}`, exactThumbs, 'count', photos, run.how);
+    if (browser === 'chromium') {
+      // The frame the preset made, read on its outputs (one shape for every photo, or the guide could not name one).
+      const shapes = new Set(thumbRows.filter((row) => row[1] === browser).map((row) => `${String(row[2])}x${String(row[3])}`));
+      if (shapes.size !== 1) throw new Error(`the YouTube preset made ${shapes.size} shapes`);
+      const first = must(thumbRows.find((row) => row[1] === browser), 'a thumbnail');
+      g.n('thumbnailWidth', first[2] as number, 'px', photos, run.how);
+      g.n('thumbnailHeight', first[3] as number, 'px', photos, run.how);
+    }
   }
-  g.t('thumbnail', ['photo', 'browser', 'width', 'height', 'bytes'], thumbRows, photos, thumbHow);
+  g.t('thumbnail', [label('photo'), label('browser'), inBrowser('width', 'px'), inBrowser('height', 'px'), inBrowser('bytes', 'bytes')], thumbRows, photos, thumbHow);
   return g.done([...OFFICIAL_SIZES, YOUTUBE_THUMBNAIL]);
 }
 
@@ -351,6 +393,7 @@ async function webpToJpg(ctx: Context): Promise<GuideMeasure> {
   const photos = sample(PHOTOS, 'the three real phone photos, each written as WebP by the engine at the quality of the site WebP encoder');
   const jpgTotal = sum(PHOTOS.map((photo) => imageFixture(photo).length));
   const webpTotal = sum([...copies.values()].map((bytes) => bytes.length));
+  g.n('photos', PHOTOS.length, 'count', photos, node(NODE_IMAGE));
   g.n('jpgTotal', jpgTotal, 'bytes', photos, made);
   g.n('webpTotal', webpTotal, 'bytes', photos, made);
   g.n('webpRatio', ratio(webpTotal, jpgTotal), 'ratio', photos, made);
@@ -378,7 +421,7 @@ async function webpToJpg(ctx: Context): Promise<GuideMeasure> {
     for (const photo of PHOTOS) rows.push([photo, browser, imageFixture(photo).length, must(copies.get(photo), photo).length, out(photo).length]);
   }
   g.n('exifWebpSize', imageFixture(WEBP_EXIF).length, 'bytes', exifSample, meta);
-  g.t('copies', ['photo', 'browser', 'originalJpgBytes', 'webpBytes', 'jpgFromWebpBytes'], rows, photos, methods);
+  g.t('copies', [label('photo'), label('browser'), inNode('originalJpgBytes', 'bytes'), inNode('webpBytes', 'bytes'), inBrowser('jpgFromWebpBytes', 'bytes')], rows, photos, methods);
   return g.done();
 }
 
@@ -393,6 +436,7 @@ async function jpgVsPng(ctx: Context): Promise<GuideMeasure> {
   const originals = new Map<string, Pixels>();
   for (const photo of PHOTOS) originals.set(photo, await pixelsOf(imageFixture(photo)));
   const jpgTotal = sum(PHOTOS.map((photo) => imageFixture(photo).length));
+  g.n('photos', PHOTOS.length, 'count', photos, node(NODE_IMAGE));
   g.n('jpgTotal', jpgTotal, 'bytes', photos, node(NODE_IMAGE));
   const rows: Cell[][] = [];
   const methods: Method[] = [pixels];
@@ -445,7 +489,7 @@ async function jpgVsPng(ctx: Context): Promise<GuideMeasure> {
     g.n(`flattenedNote${B[browser]}`, /white|transparen/i.test(back.notes) ? 1 : 0, 'count', transparent, back.how);
   }
   g.n('transparentPngBytes', imageFixture(TRANSPARENT).length, 'bytes', transparent, node(NODE_IMAGE));
-  g.t('roundTrip', ['photo', 'browser', 'jpgBytes', 'pngBytes', 'backBytes', 'pngPsnrDb', 'backPsnrDb'], rows, photos, methods);
+  g.t('roundTrip', [label('photo'), label('browser'), inNode('jpgBytes', 'bytes'), inBrowser('pngBytes', 'bytes'), inBrowser('backBytes', 'bytes'), inBrowser('pngPsnrDb', 'db'), inBrowser('backPsnrDb', 'db')], rows, photos, methods);
   return g.done();
 }
 
@@ -459,6 +503,9 @@ interface Candidate {
   setup?: (page: Page) => Promise<void>;
   pdf?: true;
 }
+
+/** The name a tool card gives a tool, for the facts the text reads. */
+const toolName = (tool: string): string => (enCommon.tools as Record<string, { name: string }>)[tool]?.name ?? (enCommon.pdf as Record<string, { name: string }>)[tool]?.name ?? tool;
 
 const CANDIDATES: Candidate[] = [
   { tool: 'compress-image', path: '/compress-image/', option: 'Recommended, the lighter of its two levels' },
@@ -541,9 +588,15 @@ async function removeLocation(ctx: Context): Promise<GuideMeasure> {
   const winner = pick('chromium');
   if (pick('webkit') !== winner) throw new Error(`the browsers disagree on the tool that changes the photo least: ${winner} and ${pick('webkit')}`);
   g.fact('winner', winner);
+  // Where the two browsers wrote files of different sizes, from the rows (the measured note says it from this fact).
+  const after = (tool: string, browser: BrowserName): Cell => must(rows.find((row) => row[0] === tool && row[1] === browser), `${tool} in ${browser}`)[3] ?? null;
+  const differ = CANDIDATES.filter((candidate) => after(candidate.tool, 'chromium') !== after(candidate.tool, 'webkit')).map((candidate) => toolName(candidate.tool));
+  g.fact('browsersDiffer', differ.join(' and '));
+  g.n('candidates', CANDIDATES.length, 'count', photos, meta);
+  g.n('browsersSameSize', CANDIDATES.length - differ.length, 'count', photos, must(methods.find((how) => how.runner === 'playwright'), 'a browser'));
   g.fact('winnerOption', must(CANDIDATES.find((candidate) => candidate.tool === winner), winner).option);
-  g.t('candidates', ['tool', 'browser', 'beforeBytes', 'afterBytes', 'format', 'sameSize', 'psnrDb', 'withGps', 'withCamera'], rows, photos, methods);
-  g.t('photos', ['photo', 'camera', 'taken', 'gps'], PHOTOS.map((photo, index) => {
+  g.t('candidates', [label('tool'), label('browser'), inNode('beforeBytes', 'bytes'), inBrowser('afterBytes', 'bytes'), inBrowser('format', 'label'), inBrowser('sameSize', 'label'), inBrowser('psnrDb', 'db'), inBrowser('withGps', 'count'), inBrowser('withCamera', 'count')], rows, photos, methods);
+  g.t('photos', [label('photo'), label('camera'), label('taken'), label('gps')], PHOTOS.map((photo, index) => {
     const fact = before[index] as (typeof before)[number];
     return [photo, fact.camera, fact.taken, fact.gps];
   }), photos, [meta]);
@@ -567,6 +620,7 @@ const TO_JPG_KEY: Record<string, string> = {
 async function pdfToJpg(ctx: Context): Promise<GuideMeasure> {
   const g = collector(ctx.stamp);
   const pages = sample(TO_JPG, 'pages 1 and 2 of each PDF (the scanned page has only page 1)');
+  g.n('files', TO_JPG.length, 'count', pages, node(NODE_PDFLIB));
   const rows: Cell[][] = [];
   const methods: Method[] = [];
   for (const browser of BROWSERS) {
@@ -622,15 +676,15 @@ async function pdfToJpg(ctx: Context): Promise<GuideMeasure> {
   // The resolution of each setting, measured on the output: pixels across the page of the tax form over its width in inches.
   const formName = 'pdf-formulario-irs-1040-2019.pdf';
   const formDoc = await breakdownPage(formName);
-  for (const [ppi, label] of [[72, 'low'], [150, 'medium'], [300, 'high']] as const) {
+  for (const [ppi, level] of [[72, 'low'], [150, 'medium'], [300, 'high']] as const) {
     const width = find(formName, 1, ppi, 'jpg', 'chromium')[5] as number;
-    g.n(`${label}Ppi`, Math.round((width * 72) / formDoc.widthPt), 'ppi', sample([formName], 'page 1'), must(methods[0], 'chromium'));
+    g.n(`${level}Ppi`, Math.round((width * 72) / formDoc.widthPt), 'ppi', sample([formName], 'page 1'), must(methods[0], 'chromium'));
   }
   // The scanned page carries one picture: its own pixels against the page size say the resolution it was scanned at.
   const scan = await embeddedPpi('pdf-escaneado-01-pagina-livro-cor.pdf');
   g.n('scanImageWidth', scan.width, 'px', sample(['pdf-escaneado-01-pagina-livro-cor.pdf']), node(NODE_PDFLIB));
   g.n('scanImagePpi', scan.ppi, 'ppi', sample(['pdf-escaneado-01-pagina-livro-cor.pdf']), node(NODE_PDFLIB));
-  g.t('images', ['file', 'page', 'ppi', 'format', 'browser', 'width', 'height', 'bytes'], rows, pages, methods);
+  g.t('images', [label('file'), label('page'), label('ppi'), label('format'), label('browser'), inBrowser('width', 'px'), inBrowser('height', 'px'), inBrowser('bytes', 'bytes')], rows, pages, methods);
   return g.done();
 }
 
@@ -681,12 +735,19 @@ async function splitSize(ctx: Context): Promise<GuideMeasure> {
     g.n(`${key}Images`, split.original.images, 'bytes', one, engine);
     g.n(`${key}PartImages`, split.partImages, 'bytes', one, engine);
     if (split.original.fonts > 0) g.n(`${key}FontsRatio`, ratio(split.partFonts, split.original.fonts), 'ratio', one, engine);
+    // Each part gets the XMP of the document (DECISOES § 145): measured, so the text can say how much of the growth it is.
+    const growth = split.sum - split.original.total;
+    g.n(`${key}Metadata`, split.original.metadata, 'bytes', one, engine);
+    g.n(`${key}PartMetadata`, split.partMetadata, 'bytes', one, engine);
+    g.n(`${key}Growth`, growth, 'bytes', one, engine);
+    g.n(`${key}GrowthPerPart`, Math.round(growth / split.parts), 'bytes', one, engine);
+    if (growth > 0 && split.partMetadata > split.original.metadata) g.n(`${key}MetadataShare`, ratio(split.partMetadata - split.original.metadata, growth), 'ratio', one, engine);
     if (split.sum > split.original.total) bigger += 1;
     rows.push([name, split.parts, split.original.total, split.sum, split.original.fonts, split.partFonts, split.original.images, split.partImages, split.notes.join(', ')]);
   }
   g.n('files', SPLIT.length, 'count', all, engine);
   g.n('bigger', bigger, 'count', all, engine);
-  g.t('parts', ['file', 'parts', 'originalBytes', 'partsBytes', 'originalFontBytes', 'partsFontBytes', 'originalImageBytes', 'partsImageBytes', 'notes'], rows, all, [engine]);
+  g.t('parts', [label('file'), inNode('parts', 'count'), inNode('originalBytes', 'bytes'), inNode('partsBytes', 'bytes'), inNode('originalFontBytes', 'bytes'), inNode('partsFontBytes', 'bytes'), inNode('originalImageBytes', 'bytes'), inNode('partsImageBytes', 'bytes'), label('notes')], rows, all, [engine]);
   return g.done();
 }
 
@@ -718,8 +779,9 @@ async function combine(ctx: Context): Promise<GuideMeasure> {
     rows.push([a, b, inputs, merged.merged, merged.notes.join(', ')]);
   }
   g.n('pairs', PAIRS.length, 'count', all, engine);
+  g.n('pdfs', all.count, 'count', all, engine);
   g.n('smaller', smaller, 'count', all, engine);
-  g.t('pairs', ['first', 'second', 'inputBytes', 'mergedBytes', 'notes'], rows, all, [engine]);
+  g.t('pairs', [label('first'), label('second'), inNode('inputBytes', 'bytes'), inNode('mergedBytes', 'bytes'), label('notes')], rows, all, [engine]);
   return g.done();
 }
 
@@ -729,6 +791,7 @@ async function photosToPdf(ctx: Context): Promise<GuideMeasure> {
   const g = collector(ctx.stamp);
   const photos = sample(PHOTOS, 'the three real phone photos, in one PDF, then compressed first with Compress image (Recommended)');
   const total = sum(PHOTOS.map((photo) => imageFixture(photo).length));
+  g.n('photos', PHOTOS.length, 'count', photos, node(NODE_IMAGE));
   g.n('photosTotal', total, 'bytes', photos, node(NODE_IMAGE));
   const rows: Cell[][] = [];
   const methods: Method[] = [];
@@ -755,7 +818,7 @@ async function photosToPdf(ctx: Context): Promise<GuideMeasure> {
     g.n(`pdfGps${B[browser]}`, metadataReport(pdf).gps ? 1 : 0, 'count', photos, direct.how);
     rows.push([browser, total, pdf.length, compressedTotal, pdfAfter.length]);
   }
-  g.t('pdfs', ['browser', 'photosBytes', 'pdfBytes', 'compressedBytes', 'pdfAfterBytes'], rows, photos, methods);
+  g.t('pdfs', [label('browser'), inNode('photosBytes', 'bytes'), inBrowser('pdfBytes', 'bytes'), inBrowser('compressedBytes', 'bytes'), inBrowser('pdfAfterBytes', 'bytes')], rows, photos, methods);
   return g.done();
 }
 

@@ -31,6 +31,8 @@ export interface Breakdown {
   /** Font programs (FontFile, FontFile2, FontFile3), each counted once however many fonts share it. */
   fontCount: number;
   other: number;
+  /** Metadata streams (/Type /Metadata, /Subtype /XML: the XMP of the document), counted inside `other` too. */
+  metadata: number;
 }
 
 export async function breakdown(bytes: Uint8Array): Promise<Breakdown> {
@@ -47,6 +49,7 @@ export async function breakdown(bytes: Uint8Array): Promise<Breakdown> {
   let images = 0;
   let imageCount = 0;
   let fonts = 0;
+  let metadata = 0;
   for (const [ref, object] of doc.context.enumerateIndirectObjects()) {
     if (!(object instanceof PDFRawStream)) continue;
     const length = object.contents.length;
@@ -55,9 +58,11 @@ export async function breakdown(bytes: Uint8Array): Promise<Breakdown> {
       imageCount += 1;
     } else if (fontFiles.has(ref.toString())) {
       fonts += length;
+    } else if (object.dict.get(PDFName.of('Type'))?.toString() === '/Metadata' || object.dict.get(PDFName.of('Subtype'))?.toString() === '/XML') {
+      metadata += length;
     }
   }
-  return { total: bytes.length, pages: doc.getPageCount(), images, imageCount, fonts, fontCount: fontFiles.size, other: bytes.length - images - fonts };
+  return { total: bytes.length, pages: doc.getPageCount(), images, imageCount, fonts, fontCount: fontFiles.size, other: bytes.length - images - fonts, metadata };
 }
 
 function success(result: PdfResult, what: string): Extract<PdfResult, { ok: true }> {
@@ -90,6 +95,8 @@ export interface SplitMeasure {
   /** The bytes of images and fonts summed over every part. */
   partImages: number;
   partFonts: number;
+  /** The metadata streams summed over every part (each part gets the document's XMP, DECISOES § 145). */
+  partMetadata: number;
   notes: string[];
 }
 
@@ -103,13 +110,15 @@ export async function splitEach(name: string): Promise<SplitMeasure> {
   let sumBytes = 0;
   let partImages = 0;
   let partFonts = 0;
+  let partMetadata = 0;
   for (const out of result.outputs) {
     sumBytes += out.bytes.length;
     const part = await breakdown(out.bytes);
     partImages += part.images;
     partFonts += part.fonts;
+    partMetadata += part.metadata;
   }
-  return { original, parts: result.outputs.length, sum: sumBytes, partImages, partFonts, notes: [...result.notes] };
+  return { original, parts: result.outputs.length, sum: sumBytes, partImages, partFonts, partMetadata, notes: [...result.notes] };
 }
 
 export interface MergeMeasure {

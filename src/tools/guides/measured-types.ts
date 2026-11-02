@@ -31,9 +31,21 @@ export interface MeasuredNumber {
 
 export type Cell = string | number | boolean | null;
 
+/**
+ * What one column of a table holds: who measured it and in which unit. pnpm guias:medir --check reads it to compare a
+ * Node column exactly and a browser column within the tolerance (DECISOES § 185); a label (a file name, a browser, a
+ * format) is compared as it is.
+ */
+export interface ColumnKind {
+  runner: 'node' | 'playwright';
+  unit: Unit | 'label';
+}
+
 /** The raw rows behind a guide's "What we measured" table; the page formats them. */
 export interface MeasuredTable {
   columns: string[];
+  /** One per column, in the same order. */
+  kinds: ColumnKind[];
   rows: Cell[][];
   sample: Sample;
   methods: Method[];
@@ -52,6 +64,8 @@ export interface OfficialSize {
   limit: number | null;
   /** Ad specs are labelled as such: the network publishes no organic figure. */
   ad: boolean;
+  /** The words of the page that give the size and the limit, as read on `source.read` (tests/unit/guides-measured.test.ts). */
+  stated: string;
   source: { href: string; title: string; read: string };
 }
 

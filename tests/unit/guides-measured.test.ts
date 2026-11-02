@@ -8,10 +8,12 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
-import type { MeasuredFile, Method, Sample } from '../../src/tools/guides/measured-types.ts';
+import type { MeasuredFile, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample } from '../../src/tools/guides/measured-types.ts';
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
+import { compareNumbers, compareTables } from '../../scripts/guides/lib/compare.ts';
 import { globals, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import enCommon from '../../src/i18n/en/common.ts';
 
 const FILE = 'data/guides-measured.json';
 const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
@@ -67,6 +69,8 @@ function fileProblems(file: MeasuredFile): string[] {
     for (const [name, table] of Object.entries(guide.tables)) {
       const where = `${id} table ${name}`;
       if (table.rows.length === 0) problems.push(`${where}: no rows`);
+      if (!Array.isArray(table.kinds) || table.kinds.length !== table.columns.length) problems.push(`${where}: a kind for each of the ${table.columns.length} columns (who measured it, in which unit)`);
+      else if (table.kinds.some((kind) => !['node', 'playwright'].includes(kind.runner) || ![...UNITS, 'label'].includes(kind.unit))) problems.push(`${where}: a column of an unknown kind`);
       for (const row of table.rows) if (row.length !== table.columns.length) problems.push(`${where}: a row of ${row.length} cells for ${table.columns.length} columns`);
       if (table.methods.length === 0) problems.push(`${where}: no method`);
       problems.push(...sampleProblems(where, table.sample), ...table.methods.flatMap((how) => methodProblems(where, how)), ...stampProblems(where, table));
@@ -74,7 +78,28 @@ function fileProblems(file: MeasuredFile): string[] {
     for (const size of guide.official ?? []) {
       if (!/^https:\/\//.test(size.source.href) || !size.source.title || !/^\d{4}-\d{2}-\d{2}$/.test(size.source.read)) problems.push(`${id}: the source of ${size.id}`);
       if (!(size.width > 0 && size.height > 0)) problems.push(`${id}: the size of ${size.id}`);
+      problems.push(...statedProblems(size).map((problem) => `${id}: ${problem}`));
     }
+  }
+  return problems;
+}
+
+/**
+ * An official size is only what its page says (prompt F5b, decision 2.3; DECISOES § 198): the width and the height (or
+ * the width and a ratio that gives the height) and the limit appear in the words recorded from the page, never a size
+ * the site's own preset makes.
+ */
+function statedProblems(size: OfficialSize): string[] {
+  const words = size.stated ?? '';
+  if (!words.trim()) return [`${size.id}: no words of its page`];
+  const numbers = new Set([...words.replace(/(\d),(\d{3})/g, '$1$2').matchAll(/\d+(?:\.\d+)?/g)].map((match) => Number(match[0])));
+  const ratios = [...words.matchAll(/(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)/g)].map((match) => [Number(match[1]), Number(match[2])] as const);
+  const problems: string[] = [];
+  if (!numbers.has(size.width)) problems.push(`${size.id}: ${size.width} wide is not in the words of its page`);
+  if (!numbers.has(size.height) && !ratios.some(([w, h]) => Math.round((size.width * h) / w) === size.height)) problems.push(`${size.id}: ${size.height} tall is not in the words of its page`);
+  if (size.limit !== null) {
+    const said = new RegExp(`(?:^|[^\\d.])(?:${size.limit / 1e6}\\s?MB|${size.limit / 1e3}\\s?(?:KB|kilobytes))\\b`, 'i');
+    if (!said.test(words)) problems.push(`${size.id}: the limit of ${size.limit} bytes is not in the words of its page`);
   }
   return problems;
 }
@@ -112,6 +137,34 @@ describe('the measurements of the file guides', () => {
     expect(measured.guides['guides-remove-location-from-photos'].facts['winner']).toBe(FILE_GUIDES['guides-remove-location-from-photos'].tool);
   });
 
+  it('take an official size only from the words of its page, and fail a size the page does not give (DECISOES § 198)', () => {
+    const youtube: OfficialSize = {
+      id: 'youtube-thumbnail', network: 'YouTube', use: 'Video thumbnail', width: 3840, height: 2160, limit: 2_000_000, ad: false,
+      stated: 'Have a resolution of 3840 x 2160 pixels for videos, with a minimum width of 640 pixels for videos. Mobile: 2 MB for video thumbnails.',
+      source: { href: 'https://support.google.com/youtube/answer/72431?hl=en', title: 'Add custom thumbnails on YouTube', read: '2026-11-01' },
+    };
+    expect(statedProblems(youtube)).toEqual([]);
+    // The width and a ratio of the page give the height (Instagram: 1080 wide at 3:4).
+    expect(statedProblems({ ...youtube, width: 1080, height: 1440, limit: null, stated: 'a width between 320 and 1080 pixels, an aspect ratio between 1.91:1 and 3:4' })).toEqual([]);
+    // The size the site's preset makes is not on the page: it cannot stand as the official one.
+    expect(statedProblems({ ...youtube, width: 1280, height: 720 }).join()).toMatch(/1280 wide is not in the words.*720 tall is not in the words/);
+    expect(statedProblems({ ...youtube, limit: 50_000_000, stated: youtube.stated.replace('2 MB', '') }).join()).toMatch(/the limit of 50000000 bytes/);
+    expect(statedProblems({ ...youtube, stated: '' }).join()).toMatch(/no words of its page/);
+  });
+
+  it('say, in guide 6, which tools the two browsers wrote differently, from the measurement (DECISOES § 202)', () => {
+    const guide = measured.guides['guides-remove-location-from-photos'];
+    const table = guide.tables['candidates'] as MeasuredTable;
+    const at = (column: string): number => table.columns.indexOf(column);
+    const bytes = (tool: string, browser: string): unknown => table.rows.find((row) => row[at('tool')] === tool && row[at('browser')] === browser)?.[at('afterBytes')];
+    const tools = [...new Set(table.rows.map((row) => String(row[at('tool')])))];
+    const differ = tools.filter((tool) => bytes(tool, 'chromium') !== bytes(tool, 'webkit'));
+    const names = differ.map((tool) => (enCommon.tools as Record<string, { name: string }>)[tool]?.name ?? (enCommon.pdf as Record<string, { name: string }>)[tool]?.name ?? tool);
+    expect(guide.facts['browsersDiffer'], 'the fact the script wrote').toBe(names.join(' and '));
+    expect(guide.numbers['browsersSameSize']?.value).toBe(tools.length - differ.length);
+    expect(guide.numbers['candidates']?.value).toBe(tools.length);
+  });
+
   it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
     const texts = import.meta.glob<{ facts?: Record<string, unknown> }>('/src/i18n/en/guide-*.ts', { import: 'default' });
     const always = Object.keys(globals(measured));
@@ -136,6 +189,46 @@ describe('the measurements of the file guides', () => {
   });
 });
 
+describe('guias:medir --check compares each column by who measured it (DECISOES § 185 and § 196)', () => {
+  const ID = 'guides-why-is-my-pdf-so-large';
+  /** The Compress PDF table mixes Node columns (Lossless, Recommended) and browser columns (Strong, on the canvas). */
+  const mutated = (column: string, factor: number): string[] => {
+    const before = measured.guides[ID].tables;
+    const after = JSON.parse(JSON.stringify(before)) as Record<string, MeasuredTable>;
+    const table = after['compress'] as MeasuredTable;
+    const at = table.columns.indexOf(column);
+    const row = table.rows.find((cells) => cells[0] === 'gen-fotos.pdf') as MeasuredTable['rows'][number];
+    row[at] = Math.round((row[at] as number) * factor);
+    const problems: string[] = [];
+    compareTables(ID, before, after, problems);
+    return problems;
+  };
+
+  it('fails a Node value moved by 1.9% in a table that mixes Node and browser columns', () => {
+    expect(mutated('losslessBytes', 1.019).join()).toMatch(/row 2, losslessBytes/);
+    expect(mutated('recommendedBytes', 0.981).join()).toMatch(/row 2, recommendedBytes/);
+  });
+
+  it('passes a browser value moved within 2%, and fails one moved past it', () => {
+    expect(mutated('strongBytesChromium', 1.019)).toEqual([]);
+    expect(mutated('strongBytesWebkit', 0.981)).toEqual([]);
+    expect(mutated('strongBytesChromium', 1.025).join()).toMatch(/row 2, strongBytesChromium/);
+  });
+
+  it('compares the measured numbers the same way, by the method of each one', () => {
+    const before = measured.guides[ID].numbers;
+    const bump = (name: string, factor: number): string[] => {
+      const after = JSON.parse(JSON.stringify(before)) as Record<string, MeasuredNumber>;
+      (after[name] as MeasuredNumber).value = Math.round((after[name] as MeasuredNumber).value * factor);
+      const problems: string[] = [];
+      compareNumbers(ID, before, after, problems);
+      return problems;
+    };
+    expect(bump('photosRecommended', 1.019).join()).toMatch(/photosRecommended/);
+    expect(bump('photosStrongChromium', 1.019)).toEqual([]);
+  });
+});
+
 describe('a deterministic part, measured again in Node with the same code', () => {
   const numbers = (id: (typeof FILE_GUIDE_IDS)[number]) => measured.guides[id].numbers;
   const value = (id: (typeof FILE_GUIDE_IDS)[number], name: string): number => {
@@ -152,6 +245,15 @@ describe('a deterministic part, measured again in Node with the same code', () =
     expect(book.sum).toBe(value('guides-split-pdf-file-size', 'bookSum'));
     expect(book.parts).toBe(value('guides-split-pdf-file-size', 'bookParts'));
   });
+
+  it('Split PDF: the metadata each part of the NASA report repeats is what the file says (DECISOES § 200)', async () => {
+    const report = await splitEach('pdf-escaneado-02-relatorio-nasa-150p.pdf');
+    expect(report.original.metadata).toBe(value('guides-split-pdf-file-size', 'reportMetadata'));
+    expect(report.partMetadata).toBe(value('guides-split-pdf-file-size', 'reportPartMetadata'));
+    expect(report.sum - report.original.total).toBe(value('guides-split-pdf-file-size', 'reportGrowth'));
+    // Most of the growth of the scans is that copy, not the frame of each part (the guide says so with these numbers).
+    expect(value('guides-split-pdf-file-size', 'reportMetadataShare')).toBeGreaterThan(0.5);
+  }, 60_000);
 
   it('Compress PDF: Lossless and Recommended on the scanned page give the file values', async () => {
     expect((await compress('pdf-escaneado-01-pagina-livro-cor.pdf', 'lossless')).after).toBe(value('guides-why-is-my-pdf-so-large', 'scanLossless'));
