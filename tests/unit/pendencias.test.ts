@@ -35,7 +35,9 @@ describe('docs/PENDENCIAS.md', () => {
   it('has a row for every low finding of the reviews of the F8', () => {
     for (const review of ['docs/relatorios/REVISAO-F4-F7.md', 'docs/relatorios/REVISAO-F8.md']) {
       if (!existsSync(review)) continue;
-      const lows = [...readFileSync(review, 'utf8').matchAll(/^\| ([a-h]\d?-\d+) \| [^|]*\| baixo \|/gm)].map((match) => match[1]);
+      // The fourth column of the tables is the final severity, after the skeptic.
+      const lows = [...readFileSync(review, 'utf8').matchAll(/^\| ([a-h]\d?-\d+) \| [^|]+\| [^|]+\| baixo \|/gm)].map((match) => match[1]);
+      expect(lows.length, review).toBeGreaterThan(0);
       const prefix = review.includes('F8') ? 'F8' : 'F4-F7';
       for (const low of lows) expect(DOC, `${prefix} ${low}`).toContain(`${prefix} ${low}`);
     }
