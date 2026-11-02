@@ -4,7 +4,7 @@ export default {
   title: 'Calorie Calculator: Daily Calories by Mifflin-St Jeor',
   description: 'Estimate the calories your body uses at rest and over a whole day from your sex, age, height, weight and activity level, by the Mifflin-St Jeor equation.',
   h1: 'Calorie calculator',
-  lead: 'The calories your body uses at rest and over a day, by the Mifflin-St Jeor equation.',
+  lead: 'The calories your body uses in a day.',
   panel: {
     fields: {
       u: { label: 'Units', error: '' },
@@ -22,7 +22,7 @@ export default {
       },
     },
     options: { u: { us: 'US', metric: 'Metric' }, sx: { female: 'Female', male: 'Male' } },
-    moreHeading: 'Activity',
+    moreHeading: 'Formula and activity',
     view: {
       label: 'Calories a day',
       unit: 'kcal',

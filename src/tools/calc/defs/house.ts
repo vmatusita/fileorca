@@ -41,7 +41,8 @@ function twoColumns(caption: string, head: [string, string], lines: readonly [st
 
 // --- square footage -------------------------------------------------------------------------------------------------
 
-export const SQUARE_FOOTAGE_EXAMPLE: Values = { a: [{ s: 0, x: 1400, y: 1200 }, { s: 1, x: 600, y: 400 }] };
+/** One area, so the result stays above the fold on a phone (DECISOES § 268). */
+export const SQUARE_FOOTAGE_EXAMPLE: Values = { a: [{ s: 0, x: 1500, y: 1200 }] };
 
 export const squareFootageDef: CalcDef<SquareFootageInput, SquareFootageResult> = {
   id: 'square-footage-calculator',
@@ -53,6 +54,7 @@ export const squareFootageDef: CalcDef<SquareFootageInput, SquareFootageResult> 
       max: 10,
       main: true,
       pick: { key: 's', options: SHAPES, hide: { y: [2] } },
+      addBelow: true,
       item: [measure('x', 2, 1, 30_000, { half: true }), measure('y', 2, 1, 30_000, { half: true })],
       blank: { s: 0, x: 1000, y: 1000 },
     },
@@ -165,12 +167,14 @@ export const MULCH_EXAMPLE: Values = { m: 'mulch', mo: 'dims', l: 2000, w: 1000,
 export const mulchDef: CalcDef<MulchInput, MulchResult> = {
   id: 'mulch-calculator',
   fields: [
-    { kind: 'choice', key: 'm', options: ['mulch', 'gravel'], main: true },
     { kind: 'select', key: 'mo', options: ['dims', 'area'], main: true, half: true },
     measure('de', 2, 1, 3_600, { main: true, half: true }),
     measure('l', 2, 1, 50_000, { main: true, half: true, when: { key: 'mo', is: 'dims' } }),
     measure('w', 2, 1, 50_000, { main: true, half: true, when: { key: 'mo', is: 'dims' } }),
     measure('ar', 2, 1, 25_000_000, { main: true, half: true, when: { key: 'mo', is: 'area' } }),
+    // The volume does not depend on the material: the material, its bag and the density of gravel come after the result
+    // on a phone, so the result stays above the fold (DECISOES § 124 and § 268).
+    { kind: 'choice', key: 'm', options: ['mulch', 'gravel'] },
     measure('bm', 2, 1, 1_000, { half: true, example: true, when: { key: 'm', is: 'mulch' } }),
     measure('bg', 2, 1, 1_000, { half: true, example: true, when: { key: 'm', is: 'gravel' } }),
     measure('dn', 2, 1, 500, { half: true, example: true, when: { key: 'm', is: 'gravel' } }),

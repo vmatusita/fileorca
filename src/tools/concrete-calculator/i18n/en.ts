@@ -4,7 +4,7 @@ export default {
   title: 'Concrete Calculator for Slabs, Footings and Round Columns',
   description: 'Work out the cubic yards of concrete for a slab, a footing or a round column, with extra for waste, and how many 40, 60 or 80 lb bags to buy.',
   h1: 'Concrete calculator',
-  lead: 'How much concrete a slab, a footing or a round column takes, in cubic yards and in bags.',
+  lead: 'Cubic yards and bags for a pour.',
   panel: {
     fields: {
       sh: { label: 'Shape', error: '' },

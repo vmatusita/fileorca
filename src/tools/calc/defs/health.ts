@@ -106,8 +106,9 @@ export const calorieDef: CalcDef<CalorieInput, CalorieResult> = {
   id: 'calorie-calculator',
   fields: [
     ...bodyFields({ min: 19, max: 78 }).slice(0, 1),
-    { kind: 'choice', key: 'sx', options: ['female', 'male'], main: true },
     ...bodyFields({ min: 19, max: 78 }).slice(1),
+    // After the result on a phone, with the activity level: the result stays above the fold (DECISOES § 124 and § 268).
+    { kind: 'choice', key: 'sx', options: ['female', 'male'] },
     measure('pa', 2, 140, 250, { example: true }),
   ],
   initial: CALORIE_EXAMPLE,
@@ -187,7 +188,6 @@ export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
   id: 'body-fat-calculator',
   fields: [
     { kind: 'choice', key: 'u', options: ['us', 'metric'], main: true },
-    { kind: 'choice', key: 'sx', options: ['female', 'male'], main: true },
     count('ft', 3, 8, { main: true, half: true, when: US }),
     measure('in', 1, 0, 119, { main: true, half: true, when: US }),
     measure('cm', 1, 915, 2_743, { main: true, half: true, when: METRIC }),
@@ -195,6 +195,8 @@ export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
     measure('wa', 1, 150, 800, { main: true, half: true, when: US }),
     measure('nkc', 1, 200, 760, { main: true, half: true, when: METRIC }),
     measure('wac', 1, 380, 2_030, { main: true, half: true, when: METRIC }),
+    // The formula's sex, the hip and the age come after the result on a phone (DECISOES § 268).
+    { kind: 'choice', key: 'sx', options: ['female', 'male'] },
     measure('hp', 1, 200, 800, { half: true, when: US }),
     measure('hpc', 1, 500, 2_030, { half: true, when: METRIC }),
     count('ag', 18, 120, { half: true }),

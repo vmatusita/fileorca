@@ -4,7 +4,7 @@ export default {
   title: 'BTU Calculator: Room Air Conditioner Size by Energy Star',
   description: 'Find the size of a room air conditioner in BTU per hour from the Energy Star table, adjusted for sun or shade, the people in the room and a kitchen.',
   h1: 'BTU calculator',
-  lead: 'The size of a room air conditioner, in BTU per hour, from the Energy Star table.',
+  lead: 'The AC size a room needs, in BTU.',
   panel: {
     fields: {
       ar: { label: 'Room area', suffix: 'sq ft', error: 'Enter an area from 100 to 2,500 sq ft, the range of the Energy Star table.' },

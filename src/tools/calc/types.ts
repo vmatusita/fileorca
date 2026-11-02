@@ -67,6 +67,8 @@ export interface ListSpec extends FieldBase {
    * label of an item may depend on it ("x-circle" before "x" in the texts), and `hide` says the options that hide an item.
    */
   pick?: { key: string; options: readonly string[]; hide?: Record<string, readonly number[]> };
+  /** The Add button comes with the fields after the result, so a phone keeps the result above the fold (F7, DECISOES § 268). */
+  addBelow?: boolean;
 }
 
 /**

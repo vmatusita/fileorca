@@ -74,7 +74,11 @@ function DebtList(props: Props & { spec: ListSpec }) {
   const focusNext = useRef<string | null>(null);
   while (keys.current.length < rows.length) keys.current.push(nextKey.current++);
   keys.current.length = rows.length;
+  // A row added by the Add button below the result (addBelow) takes the focus to its first control too.
+  const length = useRef(rows.length);
   useEffect(() => {
+    if (focusNext.current === null && spec.addBelow && rows.length > length.current) focusNext.current = fieldId(`${spec.key}${rows.length - 1}${spec.pick?.key ?? spec.item[0]?.key ?? ''}`);
+    length.current = rows.length;
     if (focusNext.current === null) return;
     document.getElementById(focusNext.current)?.focus();
     focusNext.current = null;
@@ -148,12 +152,23 @@ function DebtList(props: Props & { spec: ListSpec }) {
           )}
         </fieldset>
       ))}
-      {rows.length < spec.max && (
+      {rows.length < spec.max && !spec.addBelow && (
         <button type="button" id={addId} class="fo-btn" onClick={add}>
           {listText(data, 'addRow')}
         </button>
       )}
     </div>
+  );
+}
+
+/** The Add button of a list whose rows come before the result and whose button comes after it (ListSpec.addBelow). */
+export function AddRow({ spec, values, data, set }: Props & { spec: ListSpec }) {
+  const rows = values[spec.key] as Record<string, number>[];
+  if (rows.length >= spec.max) return null;
+  return (
+    <button type="button" id={fieldId(`${spec.key}-add`)} class="fo-btn" onClick={() => set({ ...values, [spec.key]: [...rows, { ...spec.blank }] })}>
+      {listText(data, 'addRow')}
+    </button>
   );
 }
 

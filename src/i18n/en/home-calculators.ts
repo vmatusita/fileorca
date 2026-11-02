@@ -24,7 +24,7 @@ export default {
     'The results are estimates for buying materials, with no allowance for spills, uneven ground or the cuts a pro would plan, beyond the extra you type.',
   ],
   exampleHeading: 'A worked example',
-  exampleIntro: 'The square footage calculator opens with a 14 by 12 ft room and a triangle of 6 by 4 ft. The engine gives:',
+  exampleIntro: 'The square footage calculator opens with a room of 15 by 12 feet. The engine gives:',
   sourcesHeading: 'Sources',
   sources: [
     { label: 'ENERGY STAR, "Room Air Conditioners": how to measure a room, and the capacity table', href: 'https://www.energystar.gov/products/room_air_conditioners' },

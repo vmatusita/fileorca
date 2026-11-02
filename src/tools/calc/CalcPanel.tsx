@@ -10,7 +10,7 @@ import { dollars, type NumberLang } from '../../calc/parse.ts';
 import { percent } from '../../i18n/format.ts';
 import { shares } from './SplitChart.tsx';
 import { DEFS } from './defs/index.ts';
-import Fields from './Fields.tsx';
+import Fields, { AddRow } from './Fields.tsx';
 import ResultHero from './ResultHero.tsx';
 import ExportBar from './ExportBar.tsx';
 import ScenarioCompare from './ScenarioCompare.tsx';
@@ -65,6 +65,8 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const cheer = data.cheer && state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
+  // A list whose Add button comes after the result (F7: the areas of the square footage).
+  const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
   const fieldProps = { values, problems: state.problems, data, set };
 
@@ -115,9 +117,12 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           link={() => `${window.location.origin}${data.linkPath}${linkHash(def.fields, values)}`}
         />
       </div>
-      {more.length > 0 && (
+      {(more.length > 0 || addBelow.length > 0) && (
         <div class="fo-calc__fields fo-calc__more">
           {data.texts.moreHeading && <h2 class="fo-h3 fo-calc__moreheading">{data.texts.moreHeading}</h2>}
+          {addBelow.map((spec) => (
+            <AddRow {...fieldProps} key={spec.key} specs={[]} spec={spec} />
+          ))}
           <Fields {...fieldProps} specs={more} />
         </div>
       )}

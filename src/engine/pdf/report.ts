@@ -41,6 +41,8 @@ const REPLACE: Record<string, string> = {
   '”': '"',
   '…': '...',
   '×': 'x',
+  // F7: the circle of the home calculators.
+  'π': 'pi',
 };
 
 export function winAnsi(text: string): string {

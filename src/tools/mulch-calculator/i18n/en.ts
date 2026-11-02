@@ -4,7 +4,7 @@ export default {
   title: 'Mulch and Gravel Calculator in Cubic Yards, Bags and Tons',
   description: 'Work out the cubic yards of mulch or gravel for a bed from its size and depth, the bags to buy and, for gravel, the weight in short tons.',
   h1: 'Mulch and gravel calculator',
-  lead: 'How much mulch or gravel a bed takes, in cubic yards, in bags and, for gravel, in tons.',
+  lead: 'Yards and bags of mulch or gravel.',
   panel: {
     fields: {
       m: { label: 'Material', error: '' },

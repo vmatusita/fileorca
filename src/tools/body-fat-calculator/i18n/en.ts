@@ -4,7 +4,7 @@ export default {
   title: 'Body Fat Calculator by the Navy Tape Measure Method',
   description: 'Estimate your body fat percentage from your height and your neck, waist and hip measures, by the Navy circumference equations of 1984, in US or metric units.',
   h1: 'Body fat calculator',
-  lead: 'Your body fat percentage from a tape measure, by the Navy circumference equations.',
+  lead: 'Body fat from a few tape measures.',
   panel: {
     fields: {
       u: { label: 'Units', error: '' },
@@ -21,7 +21,7 @@ export default {
       ag: { label: 'Age', suffix: 'years', error: 'Enter an age from 18 to 120. The calculator is for adults.' },
     },
     options: { u: { us: 'US', metric: 'Metric' }, sx: { female: 'Female', male: 'Male' } },
-    moreHeading: 'Hip and age',
+    moreHeading: 'Formula, hip and age',
     view: {
       label: 'Body fat',
       sentence: 'By the Navy circumference equations, these measures give an estimated {percent}% body fat.',

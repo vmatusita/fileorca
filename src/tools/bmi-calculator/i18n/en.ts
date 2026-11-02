@@ -4,7 +4,7 @@ export default {
   title: 'BMI Calculator for Adults, in US or Metric Units',
   description: 'Work out your body mass index from your height and weight, in feet and pounds or in centimeters and kilograms, and see the CDC adult category it falls in.',
   h1: 'BMI calculator',
-  lead: 'Your body mass index from your height and weight, with the CDC category for adults.',
+  lead: 'Your BMI from your height and weight.',
   panel: {
     fields: {
       u: { label: 'Units', error: '' },

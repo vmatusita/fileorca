@@ -44,7 +44,8 @@ function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: 
   if (kind === 'money') return money(value, lang);
   if (kind === 'rate') return ratePercent(value, lang);
   const number = display(kind, value, lang, decimals);
-  return suffix ? `${number} ${suffix}` : number;
+  // A percent sticks to its number (10%); any other unit follows a space (12.5 ft).
+  return suffix ? (suffix === '%' ? `${number}%` : `${number} ${suffix}`) : number;
 }
 
 /** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */

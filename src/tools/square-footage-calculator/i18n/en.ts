@@ -4,7 +4,7 @@ export default {
   title: 'Square Footage Calculator for Rooms, Triangles and Circles',
   description: 'Work out the area of a room or a yard in square feet and square yards, adding up rectangles, triangles and circles, with a table of each shape.',
   h1: 'Square footage calculator',
-  lead: 'The area of a room or a yard in square feet and square yards, shape by shape.',
+  lead: 'Square feet of a room or a yard.',
   panel: {
     fields: {
       a: { label: 'Your areas', error: '' },
