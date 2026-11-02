@@ -3,6 +3,7 @@ import preact from '@astrojs/preact';
 import tailwindcss from '@tailwindcss/vite';
 import { platformFiles } from './src/platform/build-files.ts';
 import { recordBundledModules } from './src/platform/bundle-record.ts';
+import { qrcodeEsm } from './src/platform/qrcode-esm.ts';
 import { SITE_ORIGIN } from './src/platform/site.ts';
 
 // Everything the image tool pages share in the browser lands in one chunk, so a tool page loads two JS
@@ -40,7 +41,8 @@ export default defineConfig({
   build: { format: 'preserve' },
   integrations: [preact(), platformFiles()],
   vite: {
-    plugins: [tailwindcss()],
+    // The QR code library as ES modules, so the QR page loads 2 JS files (DECISOES § 271).
+    plugins: [tailwindcss(), qrcodeEsm()],
     worker: {
       format: 'es',
       plugins: () => [bundleRecord],

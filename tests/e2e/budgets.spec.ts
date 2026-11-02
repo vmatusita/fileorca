@@ -17,7 +17,7 @@ import { PDF_ENGINE_FILE, expectInitialBudget, expectNextPage, settler } from '.
 // holds the Portuguese and Spanish pages to them in i18n-budgets.spec.ts.
 // Every tool page and preset that exists (a tool adds its path here when its page is built): each one loads
 // its own entry and the shared island chunk, and never a worker or a .wasm before the first file. F7: the QR code
-// generator (/qr-code-generator/) is held to its two files and to these budgets by its own spec (qr-code.spec.ts), not here.
+// generator too (QR_PAGE): its entry, with the qrcode library as ES modules (DECISOES § 271), and the island chunk.
 const TOOL_PAGES = [
   '/compress-image/',
   '/compress-image/to-100kb/',
@@ -59,8 +59,9 @@ const PDF_GUIDE_PAGES = FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'p
 const QPDF_FILE = /qpdf/;
 const PDFJS_FILE = /pdfjs|pdf\.worker/;
 
-for (const path of [...TOOL_PAGES, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST, ...FILE_GUIDE_PAGES]) {
-  const isTool = TOOL_PAGES.includes(path);
+const QR_PAGE = '/qr-code-generator/';
+for (const path of [...TOOL_PAGES, QR_PAGE, ...HUB_PAGES, ...CALC_PAGES, ...PDF_PAGES_LIST, ...FILE_GUIDE_PAGES]) {
+  const isTool = TOOL_PAGES.includes(path) || path === QR_PAGE;
   const isCalc = CALC_PAGES.includes(path);
   const isPdf = PDF_PAGES_LIST.includes(path);
   const isFileGuide = FILE_GUIDE_PAGES.includes(path);
