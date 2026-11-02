@@ -55,3 +55,27 @@ O oráculo é o `scripts/oracle/calc_br.py`. Fontes lidas em 1º/nov/2026, nos s
 | As quatro simulações da Calculadora do Cidadão | <https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormFinanciamentoPrestacoesFixas.do?method=exibirFormFinanciamentoPrestacoesFixas> | A página só mostra as entradas; o resultado aparece depois de enviar o formulário, o que a run não faz. |
 | SAC e PRICE com números | BCB (Nota Técnica nº 56/2025 e Calculadora do Cidadão) | Nenhuma fonte oficial lida publica um cronograma SAC ou PRICE com números. A convenção segue a descrição da Nota Técnica nº 56, e o oráculo é o único árbitro. |
 | Teto do cartão com números | Lei 14.690/2023, art. 28; Res. CMN 4.549, arts. 2-A a 2-D | A lei e a resolução não trazem exemplo numérico. As notícias oficiais (gov.br, dezembro de 2023 e janeiro de 2024) dizem "R$ 1.000 de dívida, no máximo R$ 1.000 de juros"; o caso `cap-bites` testa o teto. |
+
+## Casa e saúde (F7)
+
+O `scripts/oracle/calc_home_health.py` só usa a biblioteca padrão do Python (`fractions`, `decimal` com 50 dígitos e `datetime`). As tabelas que a conta usa (a da Energy Star, as faixas do CDC) estão transcritas no próprio script, e cada exemplo publicado que bate com a convenção entra como caso marcado e é conferido em `OFFICIAL_CHECKS`. Todas as páginas foram lidas em **2/nov/2026**.
+
+### Reproduzidos
+
+| Caso | Calculadora | Fonte | O que a fonte publica | O que o oráculo dá |
+| --- | --- | --- | --- | --- |
+| `cdc-5-ft-8-in-200-lb` | `bmi-calculator` | CDC, "BMI Frequently Asked Questions": <https://www.cdc.gov/bmi/faq/index.html> | Um adulto de 5 pés e 8 polegadas com 200 libras tem **BMI de 30.4** (faixa Obesity) | 703 × 200 ÷ 68² = 30,4066…, mostrado 30.4, Class 1 Obesity |
+| `energystar-12-ft-6-in` | `square-footage-calculator` | Energy Star, "Room Air Conditioners", passo 1: <https://www.energystar.gov/products/room_air_conditioners> | "12 ft., 6 inches, is 12.5 ft." | Um retângulo de 12.5 × 10 ft dá 125.00 sq ft |
+| `energystar-row-01` a `energystar-row-14` | `btu-calculator` | Energy Star, a mesma página, tabela "Area To Be Cooled (square feet) / Capacity Needed (BTUs per hour)" | As 14 linhas, de 100 a 2.500 sq ft: 5,000 a **34,000** BTU por hora | O piso de cada linha, sem ajuste, dá a capacidade da linha |
+| `nichd-ivf-day-3` e `nichd-ivf-day-5` | `due-date-calculator` | NIH, nuMoM2b (estudo do NICHD), PMC4387083: <https://pmc.ncbi.nlm.nih.gov/articles/PMC4387083/> | Data provável = transferência **+ 263 dias** (embrião de 3 dias) e **+ 261 dias** (de 5 dias); inseminação + 266 | 17/mar/2026 + 263 = 5/dez/2026; + 261 = 3/dez/2026 |
+| `nichd-40-weeks` | `due-date-calculator` | NICHD, "About Pregnancy": <https://www.nichd.nih.gov/health/topics/pregnancy/conditioninfo> | "about 40 weeks ... from the last menstrual period to delivery" | Última menstruação + 280 dias |
+
+### Deixados de fora, com o motivo
+
+| Exemplo | Fonte | Motivo |
+| --- | --- | --- |
+| A última linha da tabela escrita **"34,00"** | Energy Star, "ENERGY STAR Certified Room Air Conditioners": <https://www.energystar.gov/most-efficient/me-certified-room-ac/> | Erro de digitação da cópia da tabela: a página principal (acima) traz 34,000, com as mesmas 13 linhas antes dela. O oráculo usa 34,000. |
+| "If the room measures 525 square feet, look for ... 14,000 Btu/hr" | Energy Star, folheto de junho de 2003: <https://www.energystar.gov/ia/partners/manuf_res/marketing_res/ROOM_AIRCONDITIONER.pdf> | Na tabela de 2003 a linha era "500 to 700"; a de hoje é "450 up to 550" = 12,000 e "550 up to 700" = 14,000. O oráculo segue a tabela de hoje. |
+| O cálculo de 46.73% e 38.62% de gordura | Exército dos EUA, "DCS G-1, Health Promotion Policy" (2019): <https://api.army.mil/e2/c/downloads/566092.pdf> | O exemplo arredonda cada logaritmo a 2 casas e tem dois erros de digitação (73,387 no lugar de 78,387; "LOG10(71)"). Sem arredondar, as equações de Hodgdon e Beckett dão 47,31% e 38,57%. |
+| O dia da ovulação do calculador da Office on Women's Health | OWH, "Ovulation calculator": <https://www.womenshealth.gov/ovulation-calculator> | Não há exemplo publicado, só o código da página: a ovulação no dia (ciclo − 14) do ciclo, que é o que o oráculo faz (DECISOES da F7). |
+| O texto inteiro do ACOG Committee Opinion 700 | <https://pubmed.ncbi.nlm.nih.gov/28426621/> (só o resumo abriu; o acog.org deu 403) | Os 280, 266, 263 e 261 dias vêm do NICHD e do PMC4387083. O resumo do CO 700 entra só como fonte da regra de que a ultrassonografia do começo da gravidez prevalece. |
