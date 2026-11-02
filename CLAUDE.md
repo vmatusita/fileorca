@@ -371,6 +371,6 @@ Pegadinhas que a F5b achou:
 - **As regras de texto que a revisão acrescentou** (`tests/unit/guides-numbers.test.ts`, § 197 a § 203 e § 208):
   - a frase diz a amostra (com placeholder de contagem);
   - um mínimo ou um máximo diz a direção;
-  - nada generaliza além da amostra (a lista `GENERAL`: "usually", "most", "usual", "almost free", "real PDFs"…);
+  - nada generaliza além da amostra (a lista `GENERAL`: "usually", "often", "most PDFs", "usual", "almost free", "real PDFs"…);
   - a data da medida não vai para as fontes, que têm a própria data de leitura.
 - **No kit, toda frase técnica em inglês contém uma frase provada da seção "Provas"** (`launch-kit.test.ts`, § 205). Frase nova sobre envio, offline, navegador, anúncio, Analytics, cookie, conta, lote ou memória precisa de prova, ou sai.
