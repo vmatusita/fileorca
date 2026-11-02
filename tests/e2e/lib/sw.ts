@@ -1,8 +1,25 @@
 // What the specs of the service worker share (F8; DECISOES § 294): wait for the worker to control the page and to keep
 // a page, read every cache key, and turn the network off for real (the test server closes) with the browser offline.
 import { expect, type BrowserContext, type Page } from '@playwright/test';
+import { SW_ENABLED } from '../../../src/platform/site.ts';
+import { CACHE_PREFIX } from '../../../src/sw/shared.ts';
 import { dismissCookies, hydrated, type TestFile } from './page.ts';
 import type { SwServer } from './sw-server.ts';
+
+/**
+ * With the kill switch on (SW_ENABLED = false, DECISOES § 288), a test of the worker proves, inside itself, that the
+ * worker is gone, and ends (review F8 b-2; DECISOES § 307): the page registers nothing, the browser keeps no
+ * registration and no cache of the site. With the switch off, it does nothing and returns false.
+ */
+export async function workerOff(page: Page, server: SwServer): Promise<boolean> {
+  if (SW_ENABLED) return false;
+  await visit(page, server, '/', { island: false });
+  expect(await page.content(), 'the page registers no worker').not.toContain('serviceWorker.register');
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length), 'no registration').toBe(0);
+  expect(await page.evaluate(async (prefix) => (await caches.keys()).filter((name) => name.startsWith(prefix)), CACHE_PREFIX), 'no cache of the site').toEqual([]);
+  return true;
+}
 
 /** The page is controlled by the worker (it registers after the load event and claims the page when it activates). */
 export async function controlled(page: Page): Promise<void> {

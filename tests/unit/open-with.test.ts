@@ -15,6 +15,7 @@ import { ordered, readChoice } from '../../src/tools/image/inbox.ts';
 import { manifestFor } from '../../src/pages/manifest-[lang].webmanifest.ts';
 import { SHARE_FIELD } from '../../src/sw/shared.ts';
 import { swRegistration, WARM_SELECTOR } from '../../src/platform/sw-register.ts';
+import { SW_ENABLED } from '../../src/platform/site.ts';
 
 describe('the tools of the share target', () => {
   it('are the image and PDF tools of the registries, never presets or guides', () => {
@@ -35,7 +36,9 @@ describe('the tools of the share target', () => {
 
 describe('the manifests', () => {
   it.each(LANGS)('%s: what installing asks for, the id of today and the share target of the language', (lang) => {
-    const manifest = manifestFor(lang) as Record<string, unknown> & { icons: { src: string; sizes: string }[]; share_target: Record<string, unknown> };
+    // The build's manifest has the share target while the worker is on (SW_ENABLED; review F8 b-2, DECISOES § 307).
+    expect('share_target' in manifestFor(lang)).toBe(SW_ENABLED);
+    const manifest = manifestFor(lang, true) as Record<string, unknown> & { icons: { src: string; sizes: string }[]; share_target: Record<string, unknown> };
     const start = lang === 'en' ? '/' : `/${lang}/`;
     expect(manifest).toMatchObject({ name: 'FileOrca', short_name: 'FileOrca', start_url: start, id: start, scope: '/', display: 'standalone' });
     expect(manifest.icons.map((icon) => icon.sizes)).toEqual(['192x192', '512x512']);

@@ -6,9 +6,10 @@
 // caches of the old one and the inbox.
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { SW_ENABLED } from '../../src/platform/site.ts';
 import { CACHE_PREFIX, INBOX_CACHE, pagesCacheName } from '../../src/sw/shared.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
-import { allKept, controlled, kept, offline, reloadOffline, visit } from './lib/sw.ts';
+import { allKept, controlled, kept, offline, reloadOffline, visit, workerOff } from './lib/sw.ts';
 
 test.use({ serviceWorkers: 'allow' });
 
@@ -28,13 +29,14 @@ const siteCaches = (page: Page) => page.evaluate(async (prefix) => (await caches
 const registrations = (page: Page) => page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length);
 const update = (page: Page) => page.evaluate(async () => (await navigator.serviceWorker.getRegistration())?.update());
 
-test('the built /sw.js is on, at the version of build.txt', () => {
-  expect(SCRIPT).toContain('"enabled":true');
+test('the built /sw.js follows SW_ENABLED, at the version of build.txt', () => {
+  expect(SCRIPT).toContain(`"enabled":${String(SW_ENABLED)}`);
   expect(SCRIPT).toContain(`"version":"${VERSION}"`);
 });
 
 test('the kill switch empties every cache of the site and unregisters; turned back on, it keeps pages again', async ({ page }) => {
   await visit(page, server, '/compress-image/');
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await allKept(page);
   await visit(page, server, '/pt/', { island: false });
@@ -62,6 +64,7 @@ test('the kill switch empties every cache of the site and unregisters; turned ba
 
 test('a new build deletes the caches of the old one and the inbox when it activates, and keeps the page that brought it', async ({ page, context }) => {
   await visit(page, server, '/compress-image/');
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await allKept(page);
   // An inbox nobody took.

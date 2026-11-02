@@ -18,7 +18,7 @@ import { pngPixels } from './lib/png.ts';
 import { violationIds } from './lib/axe.ts';
 import { WARM_SELECTOR } from '../../src/platform/sw-register.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
-import { allKept, cacheKeys, controlled, kept, offline, online, reloadOffline, visit } from './lib/sw.ts';
+import { allKept, cacheKeys, controlled, kept, offline, online, reloadOffline, visit, workerOff } from './lib/sw.ts';
 
 test.use({ serviceWorkers: 'allow' });
 
@@ -52,6 +52,7 @@ async function exportBoth(page: Page): Promise<void> {
 
 test('Compress image and Rotate PDF, used once with the network, work offline with other files', async ({ page, context }) => {
   await visit(page, server, '/compress-image/');
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await compress(page, 'first.jpg');
   await visit(page, server, '/rotate-pdf/');
@@ -82,6 +83,7 @@ test('a money calculator in English and one in Portuguese recalculate and export
   const portuguese = BR_CALC_PAGES['br-sac-price'].path;
   for (const path of [english, portuguese]) {
     await visit(page, server, path);
+    if (await workerOff(page, server)) return;
     await controlled(page);
     // Used once with the network: the PDF maker loads on the first PDF and is kept then (DECISOES § 292).
     await exportBoth(page);
@@ -106,6 +108,7 @@ test('the Due date offline still reads today from the device clock', async ({ pa
   // tell the worker its files (src/platform/sw-register.ts also reads the page's own tags).
   const path = LIFE_CALC_PAGES['due-date-calculator'].path;
   await visit(page, server, path);
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await kept(page, path);
   await allKept(page);
@@ -121,6 +124,7 @@ test('the Due date offline still reads today from the device clock', async ({ pa
 
 test('the QR code offline: the PNG read by jsQR gives the text back', async ({ page, context }) => {
   await visit(page, server, '/qr-code-generator/');
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await kept(page, '/qr-code-generator/');
   await allKept(page);
@@ -138,6 +142,7 @@ test('the QR code offline: the PNG read by jsQR gives the text back', async ({ p
 
 test('a page never visited shows the offline page of its language, with the buoy and the kept pages', async ({ page, context }) => {
   await visit(page, server, '/pt/', { island: false });
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await visit(page, server, '/compress-image/');
   await kept(page, '/pt/');
@@ -163,6 +168,7 @@ test('a page never visited shows the offline page of its language, with the buoy
 
 test('a tool kept without its engine says so offline, in buoy, and works again with the network', async ({ page, context, browserName }) => {
   await visit(page, server, '/rotate-image/');
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await kept(page, '/rotate-image/');
   await allKept(page);
@@ -191,6 +197,36 @@ test('a tool kept without its engine says so offline, in buoy, and works again w
   }
 });
 
+// The two traps of the ficha, through the worker (review F8 b-4; DECISOES § 307): a navigation answered with a redirect
+// must pass the 307 of the address without its slash on to the browser (a fetch of the URL alone would hand over a
+// redirected response, which both browsers refuse for a navigation), and no 404, of a page or of a /_astro/ file,
+// enters a cache.
+test('the worker passes on the redirect of an address without its slash, and never keeps a 404', async ({ page }) => {
+  await visit(page, server, '/', { island: false });
+  if (await workerOff(page, server)) return;
+  await controlled(page);
+  await kept(page, '/');
+  const before = Object.values(await cacheKeys(page)).flat();
+
+  const redirected = await page.goto(`${server.origin}/rotate-pdf`);
+  expect(redirected?.status(), 'the page at the end of the redirect').toBe(200);
+  expect(new URL(page.url()).pathname).toBe('/rotate-pdf/');
+  await controlled(page);
+  await kept(page, '/rotate-pdf/');
+
+  const missing = await page.goto(`${server.origin}/no-such-page/`);
+  expect(missing?.status(), 'a page that does not exist').toBe(404);
+  expect(await page.evaluate(async () => (await fetch('/_astro/no-such-file.js')).status), 'a /_astro/ file that does not exist').toBe(404);
+  await page.waitForTimeout(500);
+
+  const added = Object.values(await cacheKeys(page))
+    .flat()
+    .filter((key) => !before.includes(key))
+    .map((key) => new URL(key).pathname);
+  expect(added.filter((path) => !path.startsWith('/_astro/') && path !== '/rotate-pdf/'), 'only the page at the end of the redirect').toEqual([]);
+  expect(added.filter((path) => /no-such|\/rotate-pdf$/.test(path)), 'no key without the slash and no 404').toEqual([]);
+});
+
 // The budget with the worker on (criterion 12; DECISOES § 287): the tool page still loads its 2 JS files and nothing of
 // the engine before the first file. After the load event the page fetches /sw.js, and the worker (Chromium shows its
 // requests) fetches only files of the site: the offline page of the language and its files, and the page's own files
@@ -205,6 +241,7 @@ test('with the worker on, a tool page keeps its 2 JS files and no engine before 
   await page.goto(`${server.origin}/compress-image/`);
   await page.waitForLoadState('load');
   loaded = true;
+  if (await workerOff(page, server)) return;
   await controlled(page);
   await allKept(page);
   await kept(page, '/offline/');

@@ -10,7 +10,7 @@ import { INBOX_CACHE } from '../../src/sw/shared.ts';
 import { chooseImage, generatedJpeg, type TestFile } from './lib/page.ts';
 import { choosePdfs, filesOf, pdfBytes, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
-import { allKept, cacheKeys, controlled, share, visit } from './lib/sw.ts';
+import { allKept, cacheKeys, controlled, share, visit, workerOff } from './lib/sw.ts';
 
 test.use({ serviceWorkers: 'allow' });
 
@@ -31,6 +31,7 @@ test('nothing typed or opened enters a cache, nothing leaves by the worker, and 
     if (request.serviceWorker()) fromWorker.push(request.url());
   });
   await visit(page, server, '/', { island: false });
+  if (await workerOff(page, server)) return;
   await controlled(page);
 
   // Links of the scenario with numbers, and numbers typed.
