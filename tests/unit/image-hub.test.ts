@@ -5,12 +5,14 @@ import { parse } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 import HomeView from '../../src/views/HomeView.astro';
 import ImageToolsView from '../../src/views/ImageToolsView.astro';
-import { routeById, type Lang } from '../../src/i18n/routes.ts';
+import { ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 
 // The pages that list the image tools (home, footer, hub) are driven by the route map: a tool appears in a
-// language only when its route has a path there, so Portuguese and Spanish show Compress image alone and
-// never a link to a page that does not exist (DECISOES § 6).
+// language only when its route has a path there, and never with a link to a page that does not exist (DECISOES § 6).
+// Before the F6, Portuguese and Spanish showed Compress image alone; since the F6 (decision 4) every image page and the
+// hub exist in the three languages, so pt and es show what English shows, with the paths of their language.
 let container: AstroContainer;
 beforeAll(async () => {
   container = await AstroContainer.create({ renderers: await loadRenderers([getContainerRenderer()]) });
@@ -42,12 +44,20 @@ describe('home', () => {
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
-  it('keeps Portuguese and Spanish with Compress image only and no link to the hub', async () => {
+  it('shows the eight image tools in Portuguese and Spanish too, with the link to the hub of the language, and links only to pages of the language', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
-      expect(page.querySelectorAll('main .fo-grid a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(toolPaths(lang));
-      expect(toolPaths(lang), lang).toHaveLength(1);
-      expect(page.querySelector('main .fo-more'), lang).toBeNull();
+      const tools = page.querySelector('main section[aria-labelledby="tools"]');
+      expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(toolPaths(lang));
+      expect(toolPaths(lang), lang).toHaveLength(IMAGE_TOOL_IDS.length);
+      expect(tools?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(routeById('image-tools').paths[lang]);
+      expect(tools?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.hubLink);
+      for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths[lang]}"]`), `${lang} ${id}`).toBeNull();
+      // § 6: every link of the page (the language menu aside, which leads to the other languages) is a page of this language.
+      const own = new Set(ROUTES.flatMap((route) => route.paths[lang] ?? []));
+      const internal = page.querySelectorAll('a[href^="/"]:not([hreflang])').map((link) => (link.getAttribute('href') ?? '').split('#')[0] ?? '');
+      expect(internal.length, lang).toBeGreaterThan(20);
+      expect(internal.filter((href) => !own.has(href)), lang).toEqual([]);
       expect(page.querySelectorAll('a').filter((link) => link.getAttribute('href')?.startsWith('/image-tools')), lang).toHaveLength(0);
     }
   });
@@ -62,10 +72,11 @@ describe('footer', () => {
     expect(links.map((link) => link.text).slice(0, 3)).toEqual(['Image tools', 'Compress image', 'Resize image']);
   });
 
-  it('lists only Compress image in Portuguese and Spanish, with no hub', async () => {
+  it('lists the hub first and then the eight tools in Portuguese and Spanish too (F6; only Compress image before)', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const links = imageColumn(await render(HomeView, lang));
-      expect(links.map((link) => link.getAttribute('href')), lang).toEqual(toolPaths(lang));
+      expect(links.map((link) => link.getAttribute('href')), lang).toEqual([routeById('image-tools').paths[lang], ...toolPaths(lang)]);
+      expect(links.map((link) => link.text), lang).toEqual([TEXTS[lang].common.imageTools, ...IMAGE_TOOL_IDS.map((id) => TEXTS[lang].common.tools[id].name)]);
     }
   });
 });
@@ -89,17 +100,30 @@ describe('hub /image-tools/', () => {
     expect(page.querySelector('main .fo-ad--rail')).toBeNull();
   });
 
-  it('has the breadcrumb Home > Image tools, no hreflang and the CollectionPage with the eight tools', async () => {
+  it('has the breadcrumb Home > Image tools, the hreflang cluster of the three languages and the CollectionPage with the eight tools', async () => {
     const page = await render(ImageToolsView, 'en');
     const crumbs = page.querySelectorAll('.fo-crumbs li');
     expect(crumbs.map((crumb) => crumb.text.trim())).toEqual(['Home', 'Image tools']);
     expect(crumbs[0]?.querySelector('a')?.getAttribute('href')).toBe('/');
     expect(crumbs[1]?.querySelector('[aria-current="page"]')?.text).toBe('Image tools');
-    expect(page.querySelectorAll('link[rel="alternate"][hreflang]')).toHaveLength(0);
+    // F6 (decision 4): the hub is translated, so it carries the reciprocal cluster with the x-default in English (it had no
+    // hreflang while it existed in English only, DECISOES § 58).
+    const O = 'https://fileorca.com';
+    const hub = routeById('image-tools').paths;
+    const cluster = [['en', `${O}${hub.en}`], ['pt-BR', `${O}${hub.pt}`], ['es', `${O}${hub.es}`], ['x-default', `${O}${hub.en}`]];
+    expect(page.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')])).toEqual(cluster);
     expect(page.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://fileorca.com/image-tools/');
     const graph = JSON.parse(page.querySelector('script[type="application/ld+json"]')?.text ?? '{}') as { '@graph': { '@type': string; mainEntity?: { itemListElement: unknown[] } }[] };
     const types = graph['@graph'].map((node) => node['@type']);
     expect(types).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage']);
     expect(graph['@graph'][2]?.mainEntity?.itemListElement).toHaveLength(8);
+    // The Portuguese and Spanish hubs carry the same cluster, their own canonical and the crumbs of their language.
+    for (const lang of ['pt', 'es'] as const) {
+      const translated = await render(ImageToolsView, lang);
+      expect(translated.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), lang).toEqual(cluster);
+      expect(translated.querySelector('link[rel="canonical"]')?.getAttribute('href'), lang).toBe(`${O}${hub[lang]}`);
+      expect(translated.querySelectorAll('.fo-crumbs li').map((crumb) => crumb.text.trim()), lang).toEqual([TEXTS[lang].common.breadcrumb.home, TEXTS[lang].common.imageTools]);
+      expect(translated.querySelectorAll('main .fo-grid a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(toolPaths(lang));
+    }
   });
 });

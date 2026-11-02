@@ -11,6 +11,9 @@
 // The ten file guides of the F5b come from their registry (src/tools/guides/registry.ts): each one has the blocks of the
 // page in order, 800 to 1,500 words of its own text and no filler phrase (scripts/lib/file-guides.ts; DECISOES § 188).
 // Across the whole dist/ (404s aside): no repeated title or description and no placeholder wording.
+// F6 (decision 9): every page in every language of the route map. The calculators of the registries in each language they
+// have (the Spanish ones of ES_CALC_IDS and the Brazilian ones too), with the privacy phrase of the language; the PDF tools
+// and the hub in the three languages, with the names, seal and words of the language (DECISOES § 162 extended).
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
@@ -28,11 +31,11 @@ import {
   isNotFoundPath,
   pathOfFile,
 } from '../lib/conteudo.ts';
-import { routeById } from '../../src/i18n/routes.ts';
-import enCommon from '../../src/i18n/en/common.ts';
+import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
+import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, isBrCalc, moneyPage } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
 
@@ -65,47 +68,68 @@ for (const page of pages) {
   for (const problem of checkPresetPage(html, others)) problems.add(`${page.path}: ${problem}`);
 }
 
+// The calculators of the registries, in every language of the route map: the English ones (and the Spanish page of the
+// five of ES_CALC_IDS) and the Brazilian ones, each with the privacy phrase of its language (F6).
 let calcPages = 0;
 for (const page of pages) {
   const id = page.route.id;
-  if (!isCalcPage(id)) continue;
+  if (!isCalcPage(id) && !isBrCalc(id)) continue;
   calcPages += 1;
   if (!existsSync(fileForPath(page.path))) {
     problems.add(`${page.path}: a página não existe no dist`);
     continue;
   }
   const html = read(page.path);
-  for (const problem of checkCalcPage(html)) problems.add(`${page.path}: ${problem}`);
-  if (!CALC_PAGES[id].parent) continue;
+  for (const problem of checkCalcPage(html, page.lang)) problems.add(`${page.path}: ${problem}`);
+  if (!isCalcPage(id) || !CALC_PAGES[id].parent) continue;
   const others: Record<string, string> = {};
-  for (const path of calcComparisonPaths(id)) {
+  for (const path of calcComparisonPaths(id, page.lang)) {
     if (existsSync(fileForPath(path))) others[path] = read(path);
     else problems.add(`${page.path}: a página ${path}, usada na comparação, não existe no dist`);
   }
   for (const problem of checkPresetPage(html, others)) problems.add(`${page.path}: ${problem}`);
 }
-if (calcPages !== Object.keys(CALC_PAGES).length) problems.add(`${calcPages} calculadora(s) conferida(s), o registro tem ${Object.keys(CALC_PAGES).length}`);
+// Every language the registries give a calculator is a page the gate read: English for the 18, Spanish for the five of
+// ES_CALC_IDS, Portuguese for the Brazilian ones whose rows are in the map. A row missing from the map, or a language the
+// map drops, makes the count differ.
+const brInMap = BR_CALC_IDS.filter((id) => pages.some((page) => page.route.id === id));
+const calcWanted = [...CALC_PAGE_IDS, ...brInMap].reduce((sum, id) => sum + LANGS.filter((lang) => moneyPage(id, lang) !== null).length, 0);
+if (calcPages !== calcWanted) problems.add(`${calcPages} página(s) de calculadora conferida(s), os registros têm ${calcWanted} (cada calculadora em cada idioma dela)`);
 
-// The PDF tools, read from the PDF registry (never a hand list): the route map must have each one, and the page must
-// pass the PDF rules; the hub lists the 12 and the Image to PDF card, and the guide links to each of them.
+// The PDF tools, read from the PDF registry (never a hand list), in every language of their route (F6): the route map must
+// have each one, and the page must pass the PDF rules in its language; the hub lists the 12 and the Image to PDF card of its
+// language, and the guide links to each of them.
 let pdfPages = 0;
+let pdfWanted = 0;
 for (const id of PDF_TOOL_IDS) {
-  const path = PDF_PAGES[id].path;
-  if (!existsSync(fileForPath(path))) {
-    problems.add(`${path}: a página não existe no dist`);
+  const route = pages.find((page) => page.route.id === id)?.route;
+  for (const lang of route ? languagesOf(route) : []) {
+    const path = route?.paths[lang] ?? '';
+    pdfWanted += 1;
+    if (!existsSync(fileForPath(path))) {
+      problems.add(`${path}: a página não existe no dist`);
+      continue;
+    }
+    pdfPages += 1;
+    const common = TEXTS[lang].common;
+    for (const problem of checkPdfPage(read(path), { id, name: common.pdf[id].name, seal: common.seal, lang })) problems.add(`${path}: ${problem}`);
+  }
+}
+const hub = routeById(PDF_HUB_ID);
+for (const lang of languagesOf(hub)) {
+  const hubPath = hub.paths[lang] ?? '/pdf-tools/';
+  pdfWanted += 1;
+  if (!existsSync(fileForPath(hubPath))) {
+    problems.add(`${hubPath}: a página não existe no dist`);
     continue;
   }
   pdfPages += 1;
-  for (const problem of checkPdfPage(read(path), { id, name: enCommon.pdf[id].name, seal: enCommon.seal })) problems.add(`${path}: ${problem}`);
+  const paths = [...PDF_TOOL_IDS, 'image-to-pdf' as const].flatMap((id) => routeById(id).paths[lang] ?? []);
+  for (const problem of checkPdfHub(read(hubPath), { name: TEXTS[lang].common.pdfTools, paths, lang })) problems.add(`${hubPath}: ${problem}`);
 }
-const hubPath = routeById(PDF_HUB_ID).paths.en ?? '/pdf-tools/';
-if (!existsSync(fileForPath(hubPath))) problems.add(`${hubPath}: a página não existe no dist`);
-else {
-  pdfPages += 1;
-  const paths = [...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path), routeById('image-to-pdf').paths.en ?? '/image-to-pdf/'];
-  for (const problem of checkPdfHub(read(hubPath), { name: enCommon.pdfTools, paths })) problems.add(`${hubPath}: ${problem}`);
+if (pdfPages !== pdfWanted || pdfWanted < PDF_TOOL_IDS.length + 1) {
+  problems.add(`${pdfPages} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfWanted} (as ${PDF_TOOL_IDS.length} ferramentas e o hub, em cada idioma)`);
 }
-if (pdfPages !== PDF_TOOL_IDS.length + 1) problems.add(`${pdfPages} página(s) de PDF conferida(s), o registro tem ${PDF_TOOL_IDS.length} ferramentas e o hub`);
 
 // The file guides, read from their registry: the route map must have each one, and the page must pass the guide rules.
 let guidePages = 0;

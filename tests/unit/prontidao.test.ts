@@ -23,8 +23,9 @@ import {
   type Site,
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
-import { LANGS, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { BR_CALC_IDS, ES_CALC_IDS, HOME_MONEY_IDS, HUB_MONEY_IDS } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
@@ -299,21 +300,41 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
       ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),
     ]);
     expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
-    // F5a: the search offers the 12 PDF tools as well; F5b: and the 10 file guides (DECISOES § 190).
-    expect(site.searchIds).toHaveLength(11 + 18 + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length);
+    // F6 (decision 7): the home of each language lists its money calculators (HOME_MONEY_IDS, when the language has its money
+    // hub) and its 12 PDF tools, all with the paths of the language; the Spanish money hub lists the five Spanish
+    // calculators; the Brazilian hub its own once its row is in the map. Before the F6 only English had cards to check.
+    for (const lang of ['pt', 'es'] as const) {
+      const hub = moneyHubId(lang);
+      const money = pagePath(hub, lang) ? HOME_MONEY_IDS[lang].map((id) => pagePath(id, lang)) : [];
+      expect(site.cards?.['home']?.[lang], lang).toEqual([...money, ...PDF_TOOL_IDS.map((id) => pagePath(id, lang))]);
+      for (const path of site.cards?.['home']?.[lang] ?? []) expect(path.startsWith(`/${lang}/`), path).toBe(true);
+      if (pagePath(hub, lang)) expect(site.cards?.[hub]?.[lang], lang).toEqual(HUB_MONEY_IDS[lang].map((id) => pagePath(id, lang)));
+      else expect(site.cards?.[hub]?.[lang], lang).toBeUndefined();
+    }
+    expect(site.cards?.['money-calculators']?.es).toEqual(ES_CALC_IDS.map((id) => pagePath(id, 'es')));
+    expect(site.cards?.['money-calculators']?.pt).toBeUndefined();
+    // F5a: the search offers the 12 PDF tools as well; F5b: and the 10 file guides (DECISOES § 190); F6: and the Brazilian
+    // calculators once their rows are in the map.
+    const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
+    expect([0, BR_CALC_IDS.length]).toContain(brazilian.length);
+    expect(site.searchIds).toHaveLength(11 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length);
   });
 
   it('builds the PDF part of the real site from the PDF registry: hub cards, search ids and the pages to look at', () => {
     const site = realSite('dist');
     expect(site.cards?.[PDF_HUB_ID]?.en).toEqual([...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path), '/image-to-pdf/']);
-    expect(site.cards?.[PDF_HUB_ID]?.pt).toBeUndefined();
+    // F6 (decision 4): the PDF hub of Portuguese and Spanish lists the 12 tools and Image to PDF of its language (no PDF
+    // hub there before, so no cards).
+    for (const lang of ['pt', 'es'] as const) {
+      expect(site.cards?.[PDF_HUB_ID]?.[lang], lang).toEqual([...PDF_TOOL_IDS.map((id) => routeById(id).paths[lang]), routeById('image-to-pdf').paths[lang]]);
+    }
     expect(site.searchIds.slice(-PDF_TOOL_IDS.length)).toEqual([...PDF_TOOL_IDS]);
     expect(site.pdf).toEqual([...PDF_TOOL_IDS, PDF_HUB_ID]);
-    // Each of them is a page of the route map, in English only, with an ad area.
+    // Each of them is a page of the route map, in the three languages since the F6 (English only before), with an ad area.
     for (const id of site.pdf ?? []) {
       const route = ROUTES.find((candidate) => candidate.id === id);
       expect(route, id).toBeDefined();
-      expect(route ? languagesOf(route) : [], id).toEqual(['en']);
+      expect(route ? languagesOf(route) : [], id).toEqual([...LANGS]);
       expect(route?.adArea, id).toBeDefined();
     }
     expect(routeById('image-to-pdf').paths.en).toBe('/image-to-pdf/');
@@ -327,6 +348,26 @@ describe('gate:prontidao, (d) conteúdo de verdade', () => {
     expect(failing(checkContent(repeated))).toEqual(['H1, título e descrição próprios: /terms/: title igual ao de /about/']);
     const twoH1 = makeSite((dir) => write(dir, about.path, pageHtml(about, (main) => `${main}<h1>Another</h1>`)));
     expect(failing(checkContent(twoH1))).toEqual(['H1, título e descrição próprios: /about/: 2 H1']);
+  });
+
+  it('compares the H1 within one language (F6): "Dividir PDF" in Portuguese and in Spanish is one page in two languages; two pages of a language still may not share it', () => {
+    const about = (lang: Lang) => PAGES.find((page) => page.id === 'about' && page.lang === lang) as SitePage;
+    const terms = PAGES.find((page) => page.id === 'terms' && page.lang === 'pt') as SitePage;
+    const h1 = (page: SitePage, text: string) => pageHtml(page).replace(`<h1>Heading of ${page.path}</h1>`, `<h1>${text}</h1>`);
+    // Positive control: the same H1 in Portuguese and in Spanish (and in English) passes.
+    const across = makeSite((dir) => {
+      for (const lang of LANGS) write(dir, about(lang).path, h1(about(lang), 'Dividir PDF'));
+    });
+    expect(failing(checkContent(across))).toEqual([]);
+    // Negative control: the same H1 on two Portuguese pages fails, as two English pages do.
+    const within = makeSite((dir) => {
+      write(dir, about('pt').path, h1(about('pt'), 'Dividir PDF'));
+      write(dir, terms.path, h1(terms, 'Dividir PDF'));
+    });
+    expect(failing(checkContent(within))).toEqual([`H1, título e descrição próprios: ${terms.path}: h1 igual ao de ${about('pt').path}`]);
+    // The title is still compared across languages: a Portuguese page with the title of an English one fails.
+    const title = makeSite((dir) => write(dir, about('pt').path, pageHtml(about('pt')).replace(`Title of ${about('pt').path}`, `Title of ${about('en').path}`)));
+    expect(failing(checkContent(title))).toEqual([`H1, título e descrição próprios: ${about('pt').path}: title igual ao de ${about('en').path}`]);
   });
 
   it(`refuses a page with fewer than ${MIN_MAIN_WORDS} words in <main>, AdSlot labels not counted`, () => {
@@ -373,6 +414,55 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
     expect(failing(checkPdfPages(noAds))).toEqual([expect.stringMatching(/\/sign-pdf\/: sem área de anúncio/)]);
     const gone = pdfSite((dir) => rmSync(fileIn(dir, '/pdf-tools/')));
     expect(failing(checkPdfPages(gone)).join('\n')).toContain('/pdf-tools/: não existe no build');
+  });
+
+  it('looks at every language of the PDF pages (F6): a translated page that drops out of the map or the build fails by name', () => {
+    // The fake site with the PDF pages in Portuguese as well, at the paths of the route map.
+    const PT_PDF: SitePage[] = PDF_FAKE.map((page) => ({ ...page, lang: 'pt' as const, path: routeById(page.id as Parameters<typeof routeById>[0]).paths.pt ?? '' }));
+    const ptSite = (change: (dir: string) => void = () => {}): Site => {
+      const site = pdfSite((dir) => {
+        for (const page of PT_PDF) write(dir, page.path, pageHtml(page));
+        change(dir);
+      });
+      return { ...site, pages: [...site.pages, ...PT_PDF] };
+    };
+    // Positive control: every PDF page in both languages passes, and the row says which languages it read.
+    const rows = checkPdfPages(ptSite());
+    expect(failing(rows)).toEqual([]);
+    expect(rows[0]?.how).toContain('em inglês, português');
+    // A Portuguese page missing from the map, one missing from the build, and one without an ad area.
+    const site = ptSite();
+    const noRoute = { ...site, pages: site.pages.filter((page) => !(page.id === 'merge-pdf' && page.lang === 'pt')) };
+    expect(failing(checkPdfPages(noRoute))).toEqual(['As páginas de PDF estão no mapa de rotas e no build: merge-pdf: sem página em pt no mapa de rotas']);
+    const split = routeById('split-pdf').paths.pt ?? '';
+    const gone = ptSite((dir) => rmSync(fileIn(dir, split)));
+    expect(failing(checkPdfPages(gone))).toEqual([`As páginas de PDF estão no mapa de rotas e no build: ${split}: não existe no build`]);
+    const noAds = { ...site, pages: site.pages.map((page) => (page.id === 'sign-pdf' && page.lang === 'pt' ? { ...page, ads: false } : page)) };
+    expect(failing(checkPdfPages(noAds))).toEqual([expect.stringMatching(new RegExp(`${(routeById('sign-pdf').paths.pt ?? '').replace(/\//g, '\\/')}: sem área de anúncio`))]);
+    // A Portuguese page with the title of its English page is a repeat, as between two English pages.
+    const merge = PT_PDF.find((page) => page.id === 'merge-pdf') as SitePage;
+    const twin = ptSite((dir) => write(dir, merge.path, pageHtml(merge).replace(`Title of ${merge.path}`, 'Title of /merge-pdf/')));
+    expect(failing(checkPdfPages(twin)).join('\n')).toMatch(/title igual ao de \/merge-pdf\//);
+    // The English page stays required on its own: a site whose PDF pages are only in Portuguese fails for English.
+    const ptOnly = { ...site, pages: site.pages.filter((page) => !(PDF_FAKE.includes(page))) };
+    expect(failing(checkPdfPages(ptOnly)).join('\n')).toContain('merge-pdf: sem página em inglês no mapa de rotas');
+  });
+
+  it('checks the cards of the home of each language against what the registries give it (F6)', () => {
+    // The Portuguese home of the fake site lists the Portuguese PDF tools; the registry asks for them, so it passes, and
+    // the English paths on the Portuguese home are refused.
+    const PT_PATHS = PDF_TOOL_IDS.map((id) => routeById(id).paths.pt ?? '');
+    const ptHome = PAGES.find((page) => page.id === 'home' && page.lang === 'pt') as SitePage;
+    const withPt = (cards: readonly string[]): Site => {
+      const site = pdfSite((dir) => {
+        for (const path of PT_PATHS) write(dir, path, pageHtml({ id: 'pdf', lang: 'pt', path, indexable: true, ads: true }));
+        write(dir, ptHome.path, pageHtml(ptHome, (main) => `${main}${cardsHtml(cards)}`));
+      });
+      return { ...site, cards: { ...site.cards, home: { ...site.cards?.['home'], pt: PT_PATHS } } };
+    };
+    expect(failing(checkNothingUnfinished(withPt(PT_PATHS)))).toEqual([]);
+    expect(failing(checkNothingUnfinished(withPt(PDF_PATHS))).join('\n')).toMatch(/\/pt\/: cartões fora do registro: \/merge-pdf\/[\s\S]*\/pt\/: faltam os cartões de \/pt\/juntar-pdf\//);
+    expect(failing(checkNothingUnfinished(withPt(PT_PATHS.slice(1)))).join('\n')).toMatch(/\/pt\/: faltam os cartões de \/pt\/juntar-pdf\/$/);
   });
 
   it('refuses a PDF page without an H1, with two, or with a title or description of its own that another page already has', () => {

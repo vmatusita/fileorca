@@ -261,7 +261,9 @@ describe('after the review', () => {
     for (const lang of ['en', 'pt', 'es'] as const) {
       const privacy = (await import(`../../src/i18n/${lang}/privacy.ts`)).default as { updated: string; sections: { paragraphs: string[] }[] };
       expect(privacy.sections.flatMap((section) => section.paragraphs).join(' '), lang).toMatch(/session storage|armazenamento da sessão|almacenamiento de sesión/);
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 1º de novembro de 2026', es: 'Última actualización: 1 de noviembre de 2026' }[lang]);
+      // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
+      // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 1, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
     }
   });
 });

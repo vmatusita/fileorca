@@ -2,6 +2,7 @@
 // tests/unit/design-checks.test.ts proves each one on small inputs. They return Portuguese problem
 // messages; an empty list means ok. The CSS ones also work on minified CSS (Lightning CSS output).
 import { parse, type HTMLElement } from 'node-html-parser';
+import type { Lang } from '../../src/i18n/routes.ts';
 
 /** The closed list of Oli poses (DECISOES § 19 and the F1b prompt, decision 4). */
 export const OLI_POSES: readonly string[] = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek'];
@@ -379,9 +380,21 @@ export const TOOL_NAME = /\bUnlock PDF\b|\bunlock-pdf\b/g;
 /**
  * The suffix of the files Unlock PDF gives back in English, "report-unlocked.pdf" (F5a): a file name, not the marketing
  * verb. Since the F6 it lives in the texts (`panel.suffix`), so only that exact value at that exact key is taken out
- * (DECISOES § 215); "unlocked" anywhere else still fails.
+ * (DECISOES § 215); "unlocked" anywhere else still fails. The island gets the panel texts as `texts` in its data-props, so
+ * gate:design reads the same key there as `data-props.texts.suffix`.
  */
-export const FILE_SUFFIX = (path: string, text: string): string => (/\.panel\.suffix$/.test(path) && text === 'unlocked' ? '' : text);
+export const FILE_SUFFIX = (path: string, text: string): string => (/(?:\.panel|^data-props\.texts)\.suffix$/.test(path) && text === 'unlocked' ? '' : text);
+/**
+ * F6 (decision 9): the same marketing words in Portuguese and Spanish, from the "Registro" of docs/i18n/pt.md and es.md
+ * ("revolucionário", "turbinado", "sem esforço", "com IA"; "revolucionario", "sin esfuerzo", "con IA"). "Mágica" and
+ * "mágico" are in FORBIDDEN_WORDS already. A text in Portuguese or Spanish is held to its own list and to the English one,
+ * so an English word left in a translation fails too. The boundaries know accents (\b does not).
+ */
+export const FORBIDDEN_WORDS_BY_LANG: Record<Lang, RegExp | null> = {
+  en: null,
+  pt: /(?<![\p{L}\p{N}])(?:revolucion[áa]ri\p{L}*|turbinad\p{L}*|sem esfor[çc]o|com IA|movid[oa]s? (?:a|por) IA)(?![\p{L}\p{N}])/iu,
+  es: /(?<![\p{L}\p{N}])(?:revolucionari\p{L}*|sin esfuerzo|con IA|impulsad[oa]s? por IA)(?![\p{L}\p{N}])/iu,
+};
 /** The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. */
 const SUCCESS_LINE = /\.(?:done|doneMany)$/;
 
@@ -394,13 +407,15 @@ function stringsOf(value: unknown, path: string, out: [string, string][] = []): 
 /**
  * The voice rules over every string of a texts object (docs/design/README, "Voz"): none of the forbidden marketing
  * words, no emoji, no arrow the fonts cannot draw, no "up to 50", and an exclamation mark only once, in a success
- * line. Returns the problems with the path of the string; `root` names the object in the messages.
+ * line. Returns the problems with the path of the string; `root` names the object in the messages. F6: `lang` adds the
+ * marketing words of that language (FORBIDDEN_WORDS_BY_LANG); English, the default, is the check of the F5a.
  */
-export function checkVoice(texts: unknown, root = 'texto'): string[] {
+export function checkVoice(texts: unknown, root = 'texto', lang: Lang = 'en'): string[] {
   const problems: string[] = [];
+  const own = FORBIDDEN_WORDS_BY_LANG[lang];
   for (const [path, text] of stringsOf(texts, root)) {
     const clean = FILE_SUFFIX(path, text).replace(TOOL_NAME, '');
-    const word = FORBIDDEN_WORDS.exec(clean)?.[0];
+    const word = FORBIDDEN_WORDS.exec(clean)?.[0] ?? own?.exec(clean)?.[0];
     if (word) problems.push(`${path}: "${word}" é uma palavra que o README do design proíbe`);
     if (/\p{Extended_Pictographic}/u.test(text.replace(/[©®™]/g, ''))) problems.push(`${path}: emoji no texto`);
     if (/[→↔]/.test(text)) problems.push(`${path}: seta → ou ↔ (use o ícone arrow-right)`);

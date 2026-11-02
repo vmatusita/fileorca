@@ -5,11 +5,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { BR_PAGE_IDS, FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, descriptionProblem, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
-import { LANGS, LANG_TAG, ROUTES } from '../../src/i18n/routes.ts';
+import { LANGS, LANG_TAG, ROUTES, type Lang } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
 import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 
@@ -40,7 +40,9 @@ for (const page of allPages()) {
     if (!toolH1) problems.add(`${page.path}: a página da ferramenta embutida não tem H1`);
     for (const issue of fileGuideTitleProblems(enCommon.fileGuides[page.route.id].name, title, h1, toolH1)) problems.add(`${page.path}: ${issue}`);
   }
-  if (description.length < 50 || description.length > 170) problems.add(`${page.path}: descrição com ${description.length} caracteres`);
+  // 50 to 170 characters; the image and PDF pages in Portuguese and Spanish 120 to 160 (prompt F6, decision 4).
+  const descriptionIssue = descriptionProblem(page.route.id, page.lang, description);
+  if (descriptionIssue) problems.add(`${page.path}: ${descriptionIssue}`);
   if (root.querySelector('meta[name="robots"]')) problems.add(`${page.path}: tem <meta name="robots"> (noindex é só por cabeçalho)`);
   const h1s = root.querySelectorAll('h1');
   if (h1s.length !== 1) problems.add(`${page.path}: ${h1s.length} H1`);
@@ -107,16 +109,27 @@ for (const lang of LANGS) {
   const xml = readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8');
   for (const problem of validateSitemap(xml, sitemapUrls(lang), SITE_ORIGIN)) problems.add(`${sitemapPath(lang)}: ${problem}`);
 }
-// Every image tool, preset and the hub is in the English sitemap (the ones with only an English page are in no other).
-const englishSitemap = readFileSync(`${DIST}${sitemapPath('en')}`, 'utf8');
-const imageUrls: string[] = [];
-// The money hub, calculators, presets and guides of the F4 too, and the PDF hub and tools of the F5a.
-for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS]) {
-  const path = ROUTES.find((candidate) => candidate.id === id)?.paths['en'];
-  if (path) imageUrls.push(new URL(path, SITE_ORIGIN).href);
-  else problems.add(`página ${id} do registro de imagem sem rota em inglês`);
+// Every image tool, preset and the hub is in the English sitemap; the money hub, calculators, presets and guides of the
+// F4 too, the PDF hub and tools of the F5a and the file guides of the F5b. F6: each one is also in the sitemap of every
+// other language its route has (the image and PDF pages in pt and es, the Spanish money pages), and in no sitemap of a
+// language it does not have. The Brazilian pages (Portuguese only, no English route) are read once their rows are in the map.
+const sitemapOf = Object.fromEntries(LANGS.map((lang) => [lang, readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8')])) as Record<Lang, string>;
+const registryUrls: Record<Lang, string[]> = { en: [], pt: [], es: [] };
+const brazilian = BR_PAGE_IDS.filter((id) => ROUTES.some((candidate) => candidate.id === id));
+for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...brazilian]) {
+  const route = ROUTES.find((candidate) => candidate.id === id);
+  if (!route?.paths['en'] && !brazilian.includes(id)) problems.add(`página ${id} do registro de imagem sem rota em inglês`);
+  for (const lang of LANGS) {
+    const path = route?.paths[lang];
+    if (!path) continue;
+    const url = new URL(path, SITE_ORIGIN).href;
+    registryUrls[lang].push(url);
+    for (const other of LANGS.filter((candidate) => candidate !== lang)) {
+      if (!missingFromSitemap(sitemapOf[other], [url]).length) problems.add(`${sitemapPath(other)}: ${url} é de outro idioma`);
+    }
+  }
 }
-for (const url of missingFromSitemap(englishSitemap, imageUrls)) problems.add(`${sitemapPath('en')}: falta ${url}`);
+for (const lang of LANGS) for (const url of missingFromSitemap(sitemapOf[lang], registryUrls[lang])) problems.add(`${sitemapPath(lang)}: falta ${url}`);
 for (const route of ROUTES.filter((candidate) => !candidate.indexable)) {
   for (const path of Object.values(route.paths)) {
     if (index.includes(path) || LANGS.some((lang) => readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8').includes(`${SITE_ORIGIN}${path}`))) {

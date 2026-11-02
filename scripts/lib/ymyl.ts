@@ -9,18 +9,30 @@ export type YmylHub = 'money' | 'health';
 
 export const REQUIRED_BLOCKS = ['formula', 'premises', 'example', 'reviewed', 'disclaimer'] as const;
 
+/**
+ * F6 (decision 5): planalto.gov.br, where the Brazilian laws and decrees are published (Lei 14.690/2023, Decreto
+ * 6.306/2007), is an official source of the money pages, next to the Banco Central (bcb.gov.br).
+ */
 export const OFFICIAL_SOURCES: Record<YmylHub, string[]> = {
-  money: ['consumerfinance.gov', 'federalreserve.gov', 'bcb.gov.br'],
+  money: ['consumerfinance.gov', 'federalreserve.gov', 'bcb.gov.br', 'planalto.gov.br'],
   health: ['cdc.gov', 'who.int', 'nih.gov', 'gov.br'],
 };
 
-const BANNED = [
+export const BANNED = [
   /today'?s (?:mortgage |interest )?rates?/i,
   /taxa (?:de juros )?(?:de|do) hoje/i,
   /taxa do dia/i,
   /tasas? (?:de inter[eé]s )?(?:de|del) hoy/i,
   /we recommend (?:this|the) (?:bank|lender|card|loan)/i,
   /rates? (?:will|are expected to) (?:rise|fall|drop|go)/i,
+  // F6: the Portuguese and Spanish forms the lines above miss (docs/i18n/pt.md and es.md, "Nunca"): the plural "taxas de
+  // hoje", "os juros de hoje" and "las tasas de hoy" with an article, a forecast of the rates and a recommendation.
+  /\btaxas (?:de juros )?(?:de|do) hoje\b/i,
+  /\bjuros (?:de|do) hoje\b/i,
+  /\b(?:as )?taxas(?: de juros)? (?:v[aã]o|devem|tendem a|v[aã]o voltar a) (?:subir|cair|baixar)\b/i,
+  /\b(?:os )?juros (?:v[aã]o|devem|tendem a) (?:subir|cair|baixar)\b/i,
+  /\b(?:las )?tasas(?: de inter[eé]s)? (?:subir[aá]n|bajar[aá]n|van a (?:subir|bajar)|deber[ií]an (?:subir|bajar))\b/i,
+  /\brecomendamos (?:este|esse|o|a|el|la) (?:banco|financeira|cart[aã]o|empr[eé]stimo|financiamento|prestamista|tarjeta|pr[eé]stamo)\b/i,
 ];
 
 export function checkYmylPage(html: string, hub: YmylHub): string[] {
