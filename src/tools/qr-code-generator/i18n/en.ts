@@ -44,7 +44,7 @@ export default {
     },
     {
       q: 'Why does a long text make a denser code?',
-      a: 'A QR code grows with what it holds. A short link like https://fileorca.com/ fits in a grid of 29 squares a side, and the longest text takes 177. Fewer squares means bigger ones, which a camera reads from farther away.',
+      a: 'A QR code grows with what it holds. A short link like https://fileorca.com/ fits in a grid of 29 squares a side, and the longest text takes 177. Fewer squares mean bigger ones, which a camera reads from farther away.',
     },
     {
       q: 'Should I download the PNG or the SVG?',
