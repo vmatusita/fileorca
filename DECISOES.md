@@ -2392,3 +2392,14 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 
 - **Decisão:** `BANNED_HEALTH` (`scripts/lib/ymyl.ts`) vale nas páginas do hub de saúde, além do `BANNED` de sempre: "ideal weight", "you should lose", meta de perda ou ganho de peso, "lose 10 pounds", faixa de peso saudável para a altura, déficit ou superávit de calorias, "eat … calories to lose", plano de dieta ou de refeições, "macros", "birth control" e "safe days". O nome de faixa do CDC "Healthy Weight" continua permitido.
 - **Teste:** `ymyl.test.ts`, com um controle positivo por padrão, controles negativos com as frases das páginas e a prova de que a lista de dinheiro não muda.
+
+## § 268 · O resultado das páginas novas acima da dobra a 360 × 740 (F7, decisão 6)
+
+- **Medido** (Chromium, 360 × 740, o fim do número do ResultHero): na primeira versão, o BMI, o Concrete e o BTU ficavam em 764 px; o Calorie e o Body fat em 864; o Mulch em 820; a Square footage em 1.184. O que passava: o `lead` em três linhas (84 px), dois OptionGroups (unidade e sexo) com duas linhas de campos, o H1 e o breadcrumb da Square footage e do Mulch em duas linhas, e a lista de áreas com o botão de acrescentar.
+- **Decisão:**
+  - o `lead` dessas páginas cabe numa linha a 360 px ("Your BMI from your height and weight.");
+  - o sexo da fórmula (Calorie e Body fat) vem depois do resultado, com o nível de atividade, o quadril e a idade; o OptionGroup de unidade fica antes, com duas linhas de campos de meia largura;
+  - no Mulch, o material (e o saco e a densidade de cada um) vem depois do resultado: o volume, que é o número do ResultHero, não depende dele;
+  - na Square footage, o exemplo tem uma área só (15 × 12 ft; o oráculo mudou antes, em `6955512`, e o exemplo de duas áreas ficou como caso da grade), e o botão "Add an area" vem depois do resultado (`ListSpec.addBelow`): as áreas continuam antes dele, e uma área acrescentada leva o foco ao menu de forma dela.
+- **Depois:** de 568 a 714 px nas 11, nos dois sistemas de unidade; o `ads.spec.ts` prova nos dois navegadores.
+- **Alternativa:** um OptionGroup e um campo lado a lado numa linha (o `fieldset` fica fora do subgrid, § 137) ou a lista de áreas em três colunas a 360 px (os campos ficariam com uns 77 px).
