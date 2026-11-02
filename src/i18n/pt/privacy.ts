@@ -35,7 +35,7 @@ export default {
         'Quando você abre uma página do FileOrca com internet, o seu navegador guarda uma cópia dessa página e dos arquivos do site de que ela precisa, como os scripts, os estilos, as fontes e o motor de uma ferramenta que você usou, para a página funcionar também offline. Essa cópia fica no seu aparelho, no armazenamento do navegador, e o FileOrca nunca a recebe.',
         'Os seus arquivos e os seus números nunca entram nessa cópia. Ela guarda só arquivos de fileorca.com, em endereços sem a parte depois do ? ou do #, então o que você digita, abre ou salva fica de fora.',
         'Para apagar a cópia, limpe os dados do site fileorca.com nas configurações do navegador, ou desinstale o app do FileOrca, se você o instalou.',
-        'No Android, quando você compartilha imagens ou PDFs com o app do FileOrca instalado, eles esperam no seu aparelho até você escolher uma ferramenta. Eles são apagados assim que a ferramenta os recebe, ou depois de uma hora, se você não escolher nenhuma. Eles nunca são enviados. Quando você escolhe uma ferramenta, a página anota nesta aba qual foi a escolhida, e nada mais.',
+        'No Android, quando você compartilha imagens ou PDFs com o app do FileOrca instalado, a parte do site que o navegador guarda para o uso offline os mantém no seu aparelho até você escolher uma ferramenta, e eles não são enviados. Eles são apagados quando a ferramenta os recebe; se você não escolher nenhuma, eles são apagados na próxima vez que você abrir o FileOrca depois de uma hora. Essa parte é guardada na sua primeira visita com internet: se você limpar os dados do site, abra o fileorca.com uma vez antes de compartilhar de novo, porque sem ela o Android envia os arquivos compartilhados ao fileorca.com, que os recusa e não os guarda. Quando você escolhe uma ferramenta, a página anota nesta aba qual foi a escolhida, e nada mais.',
       ],
     },
     {
@@ -129,7 +129,7 @@ export default {
         'Dados de anúncios: o Google os guarda de acordo com as próprias políticas.',
         'Escolha de cookies: fica no seu navegador, e você pode apagá-la quando quiser limpando os dados do site.',
         'E-mails: guardados só pelo tempo necessário para responder a você.',
-        'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou depois de uma hora.',
+        'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora.',
       ],
     },
     {

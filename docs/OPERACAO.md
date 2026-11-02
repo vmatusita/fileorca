@@ -91,6 +91,8 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 
 - **Sinais:** páginas velhas que não atualizam depois de um deploy, uma ferramenta que só funciona em aba anônima, ou um pico de `tool_error` com `load` logo depois de um deploy.
 - **O que fazer:** uma run curta de ajuste que troca `SW_ENABLED` para `false` em `src/platform/site.ts` (DECISOES § 288). O build passa a publicar um `/sw.js` que apaga todos os caches do site e se desregistra, as páginas deixam de registrar e o manifest perde o compartilhar. Na próxima visita de cada pessoa, tudo volta a vir só da rede.
+- **Os testes acompanham a chave:** os specs do service worker e do compartilhar, o teste dos manifests e o do `/sw.js` leem o `SW_ENABLED` e, com ele em `false`, conferem que não há registro, cache nem compartilhar (DECISOES § 307). A run só troca a constante e roda o `pnpm verificar`.
+- **O app já instalado no Android:** o aplicativo guarda o compartilhar do manifest antigo até o Chrome atualizá-lo, o que pode levar dias. Nessa janela, quem compartilha um arquivo com o app manda o arquivo ao fileorca.com, que responde 405 e não guarda nada (o mesmo acontece depois de a pessoa apagar os dados do site; a Privacidade diz isso). Desligue só por um defeito que justifique essa janela, e volte a ligar assim que der.
 - Corrigido o defeito, outra run curta volta o `SW_ENABLED` para `true`.
 
 ## Pico de `tool_error` no GA4

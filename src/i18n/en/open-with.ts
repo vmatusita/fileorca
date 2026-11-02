@@ -4,7 +4,7 @@ import type { OpenWithTexts } from '../types.ts';
 export default {
   title: 'Open with',
   description:
-    'Choose a FileOrca tool for the images and PDFs you shared from your phone. The files stay on your device and never go anywhere else.',
+    'Choose a FileOrca tool for the images and PDFs you shared from your phone. The files wait on your device.',
   h1: 'Open with FileOrca',
   lead: 'Choose a tool for the files you shared. They stay on this device.',
   filesHeading: 'Your files',
