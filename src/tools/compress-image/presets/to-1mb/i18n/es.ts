@@ -37,7 +37,7 @@ export default {
     },
     {
       q: '¿Puedo mantener el formato original, como PNG?',
-      a: 'El resultado es un JPG, porque una foto PNG no se puede reducir a un tamaño fijo sin cambiar sus píxeles, y el JPG se acepta casi en todas partes. Un archivo que ya cabe vuelve en su propio formato.',
+      a: 'El resultado es un JPG, porque una foto PNG no se puede reducir a un tamaño fijo sin cambiar sus píxeles, y el JPG se acepta casi en todas partes. Un archivo que ya cumple el límite se queda con su formato original.',
     },
     {
       q: '¿Cuánta calidad pierdo a 1 MB?',

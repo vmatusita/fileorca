@@ -13,7 +13,7 @@ export default {
   worksHeading: 'Cómo funcionan estas calculadoras',
   worksIntro: [
     'Cada calculadora de esta página funciona en tu navegador. Tú escribes los números, también la tasa de interés: el valor con el que empieza un campo es un ejemplo, no una tasa que alguien te ofrezca. El resultado cambia mientras escribes, y puedes abrir la tabla completa, guardarla en PDF o CSV, o copiar un enlace que guarda tus números después del #.',
-    'Todas trabajan en centavos, como lo hace un prestamista. Los intereses de cada mes se redondean al centavo y el último pago cierra el saldo, así que la tabla que descargas cuadra exactamente. Los motores se comprobaron con un oráculo independiente hecho con numpy-financial y con ejemplos resueltos de la Oficina para la Protección Financiera del Consumidor (CFPB).',
+    'Todas trabajan en centavos, como lo hace un prestamista. Los intereses de cada mes se redondean al centavo y el último pago cierra el saldo, así que la tabla que descargas coincide al centavo. Los motores se comprobaron con un oráculo independiente hecho con numpy-financial y con ejemplos resueltos de la Oficina para la Protección Financiera del Consumidor (CFPB).',
   ],
   formulaHeading: 'La fórmula de las calculadoras de préstamos',
   formula: [

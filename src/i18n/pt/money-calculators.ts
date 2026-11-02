@@ -23,7 +23,7 @@ export default {
   premisesHeading: 'Premissas',
   premises: [
     'Nenhuma calculadora usa tabela oficial: IOF, TR, CET e as taxas de juros são campos.',
-    'Não entram imposto de renda, seguros que mudam com o saldo nem custos que você não digita.',
+    'Ficam de fora o imposto de renda, os seguros que mudam com o saldo e os custos que você não digita.',
     'O resultado serve para comparar caminhos; o contrato e a proposta trazem os números exatos.',
   ],
   exampleHeading: 'Exemplo',

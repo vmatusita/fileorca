@@ -38,7 +38,7 @@ export default {
     },
     {
       q: '¿Recortar baja la calidad de una imagen?',
-      a: 'Recortar quita píxeles y no estira los que quedan, así que la parte que conservas es tan nítida como el original. JPG y WebP se guardan de nuevo después del recorte, y ese es el único cambio. El PNG se guarda sin pérdida.',
+      a: 'Al recortar se eliminan píxeles y no se estiran los que quedan, así que la parte que conservas es tan nítida como el original. JPG y WebP se guardan de nuevo después del recorte, y ese es el único cambio. El PNG se guarda sin pérdida.',
     },
     {
       q: '¿Puedo recortar sin una forma fija?',

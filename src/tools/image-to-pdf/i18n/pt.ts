@@ -8,7 +8,7 @@ export default {
   howHeading: 'Como transformar imagens em PDF',
   howSteps: [
     'Solte as imagens na caixa, escolha os arquivos ou cole com Ctrl V.',
-    'Escolha Tamanho da imagem, Carta ou A4 para as páginas e confira se a lista está na ordem que você quer.',
+    'Escolha "Tamanho da imagem", "Carta" ou "A4" para as páginas e confira se a lista está na ordem que você quer.',
     'Baixe o seu PDF.',
   ],
   specsHeading: 'Especificações',

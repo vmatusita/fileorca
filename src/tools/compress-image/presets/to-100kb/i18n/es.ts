@@ -29,7 +29,7 @@ export default {
   faq: [
     {
       q: '¿Por qué un formulario pide una imagen de menos de 100 KB?',
-      a: 'Los formularios de solicitud, los portales de exámenes y los envíos de documentos de identidad suelen poner límites pequeños, para que sus servidores guarden y carguen millones de archivos rápido. El límite casi siempre es el peso del archivo, a veces junto con un tamaño en píxeles, así que lee lo que pide tu formulario.',
+      a: 'Los formularios de solicitud, los portales de exámenes y los envíos de documentos de identidad suelen poner límites pequeños, para que sus servidores guarden y carguen millones de archivos con rapidez. El límite casi siempre es el peso del archivo, a veces junto con un tamaño en píxeles, así que lee lo que pide tu formulario.',
     },
     {
       q: '¿100 KB es lo mismo que 100,000 bytes?',

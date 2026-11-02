@@ -12,7 +12,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte um PDF na caixa, escolha o arquivo ou cole: a Oli trabalha com um PDF por vez e mostra uma miniatura de cada página.',
-    'Arraste uma página para o novo lugar, use as setas dela ou o teclado (Espaço pega, as setas movem, Espaço solta), ou aperte Inverter a ordem para virar o PDF inteiro.',
+    'Arraste uma página para o novo lugar, use as setas dela ou o teclado (a tecla Espaço pega, as setas movem e a tecla Espaço solta), ou aperte Inverter a ordem para virar o PDF inteiro.',
     'Aperte Salvar a nova ordem e baixe o PDF novo, enquanto o seu arquivo original continua intacto.',
   ],
   specsHeading: 'O que entra e o que sai',

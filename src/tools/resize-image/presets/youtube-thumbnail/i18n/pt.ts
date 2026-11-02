@@ -18,10 +18,10 @@ export default {
     rows: [
       ['Tamanho', '1280 × 720 pixels, uma imagem 16:9.'],
       ['Formato', 'Sempre um JPG, salvo para ficar abaixo de 2 MB, o limite das miniaturas personalizadas adicionadas pelo celular.'],
-      ['Imagem que não é 16:9', 'É cortada a partir do centro para preencher o quadro, e uma linha no resultado avisa. A forma da imagem nunca é distorcida.'],
+      ['Imagem que não é 16:9', 'É cortada a partir do centro para preencher o quadro, e uma linha no resultado avisa. A imagem nunca fica deformada.'],
       ['Outra parte da imagem', 'Corte a imagem antes na ferramenta Cortar imagem para escolher a parte que fica, e depois traga para cá.'],
       ['Transparência', 'As áreas transparentes ficam brancas, porque o JPG não tem transparência.'],
-      ['O que o YouTube pede', 'Ajuda do YouTube, Adicionar miniaturas personalizadas (https://support.google.com/youtube/answer/72431, consultada em 31 de outubro de 2026): 16:9, pelo menos 640 pixels de largura, JPG ou PNG, e 3840 × 2160 recomendado para vídeos. O FileOrca faz 1280 × 720, que fica dentro dessas regras.'],
+      ['O que o YouTube pede', 'Ajuda do YouTube sobre miniaturas personalizadas (https://support.google.com/youtube/answer/72431, consultada em 31 de outubro de 2026): 16:9, pelo menos 640 pixels de largura, JPG ou PNG, e 3840 × 2160 recomendado para vídeos. O FileOrca faz 1280 × 720, que fica dentro dessas regras.'],
       ['Dados da foto', 'Exif, XMP, IPTC e GPS ficam fora de toda miniatura.'],
     ],
   },
@@ -37,7 +37,7 @@ export default {
     },
     {
       q: 'O que acontece se a minha imagem não for 16:9?',
-      a: 'A Oli corta a imagem a partir do centro para preencher o quadro, então as bordas saem e a forma da imagem nunca é distorcida. Se a parte importante estiver fora do centro, use antes a ferramenta Cortar imagem para escolher a parte, e depois traga o resultado para cá.',
+      a: 'A Oli corta a imagem a partir do centro para preencher o quadro, então as bordas saem e a imagem nunca fica deformada. Se a parte importante estiver fora do centro, use antes a ferramenta Cortar imagem para escolher a parte, e depois traga o resultado para cá.',
     },
     {
       q: 'Por que minha miniatura fica borrada?',

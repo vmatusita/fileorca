@@ -48,7 +48,7 @@ export default {
   formulaHeading: 'A conta',
   formula: [
     'Todo mês o saldo rende os juros do mês, saldo × i, e recebe o aporte. No mês seguinte, os juros incidem também sobre os juros que já entraram: são os juros sobre juros.',
-    'Com a taxa ao ano a, a taxa do mês é i = (1 + a)^(1/12) − 1, a que rende exatamente a em 12 meses. Sem arredondar, o saldo final seria V × (1 + i)^n + A × ((1 + i)^n − 1) ÷ i.',
+    'Com a taxa ao ano a, a taxa do mês é i = (1 + a)^(1/12) − 1: em 12 meses, essa taxa mensal rende exatamente a taxa anual. Sem arredondar, o saldo final seria V × (1 + i)^n + A × ((1 + i)^n − 1) ÷ i.',
   ],
   premisesHeading: 'Premissas',
   exampleHeading: 'Exemplo resolvido',

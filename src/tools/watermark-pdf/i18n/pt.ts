@@ -25,7 +25,7 @@ const texts: PdfToolTexts<WatermarkTexts> = {
       ['Tipo de marca', "Só texto. Esta ferramenta não coloca marca d'água de imagem."],
       ['Onde fica', 'No centro de cada página, em cinza. A posição segue a página como ela aparece na tela, com a área de corte e o giro.'],
       ['Tamanho', 'Pequeno, Médio ou Grande: o texto ocupa cerca de 35%, 55% ou 80% da diagonal da página, ou da largura quando a marca é horizontal. Uma palavra curta nunca fica mais alta que um terço da página.'],
-      ['Opacidade', 'Clara é 15%, Média é 30% (o padrão) e Forte é 50%. Quanto mais clara a marca, mais fácil ler a página por baixo.'],
+      ['Opacidade', 'A opção Clara é 15%, a Média é 30% (o padrão) e a Forte é 50%. Quanto mais clara a marca, mais fácil ler a página por baixo.'],
       ['Direção', 'A diagonal fica a 45° na tela. A horizontal atravessa a página em linha reta.'],
       ['Fonte e caracteres', 'Helvetica Bold. Funcionam as letras do alfabeto latino básico e os acentos comuns, e as aspas curvas e os travessões viram aspas retas e hífen. Os outros caracteres ficam de fora da marca, e a ajuda embaixo do campo de texto avisa.'],
       ['Como entra', 'A marca é desenhada na própria página, não numa camada que sai com um clique. Quem tem um editor de PDF ainda consegue tirar a marca, então ela identifica o arquivo, mas não tranca.'],

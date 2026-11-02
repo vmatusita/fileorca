@@ -74,7 +74,7 @@ export default {
     },
     {
       q: '¿Y si mi pago no cubre los intereses?',
-      a: 'Entonces el saldo nunca baja. La calculadora te lo dice y te muestra el pago mensual más pequeño con el que empieza a bajar.',
+      a: 'Entonces el saldo nunca disminuye. La calculadora te lo dice y te muestra el pago mensual más pequeño con el que empieza a bajar.',
     },
     {
       q: '¿Por qué mi estado de cuenta puede mostrar intereses un poco distintos?',

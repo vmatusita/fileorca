@@ -23,7 +23,7 @@ const texts: PdfToolTexts<NumbersTexts> = {
     rows: [
       ['O que aceita', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro do arquivo, não o nome dele.'],
       ['Posição', 'Seis lugares: em cima ou embaixo, e à esquerda, no centro ou à direita. O padrão é embaixo no centro.'],
-      ['Formato', 'Quatro formatos: 1, Página 1, Página 1 de 12 e 1 de 12. As palavras "Página" e "de" saem em português, como nos exemplos.'],
+      ['Formato', 'Quatro formatos: "1", "Página 1", "Página 1 de 12" e "1 de 12". As palavras "Página" e "de" saem em português, como nos exemplos.'],
       ['Primeiro número', 'Qualquer número inteiro de 1 a 9.999. O padrão é 1.'],
       ['Pular a primeira página', 'A primeira página fica sem número, e a segunda recebe o primeiro número que você escolheu. Nos formatos com "de", o total é o número da última página.'],
       ['Aparência do número', 'Helvetica, 10 pt, preto, a 28 pt da borda da página. A medida vale para a página como ela aparece na tela, com a área de corte e o giro de cada página.'],

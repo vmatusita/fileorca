@@ -42,7 +42,7 @@ export default {
     },
     {
       q: 'Qual é a diferença entre girar e espelhar?',
-      a: 'Girar roda a imagem em torno do centro, como virar uma foto impressa em cima da mesa. Espelhar inverte a imagem como se você a visse num espelho: Horizontal troca a esquerda pela direita, e Vertical troca o alto pelo baixo. Um texto numa imagem espelhada fica ao contrário.',
+      a: 'Girar roda a imagem em torno do centro, como virar uma foto impressa em cima da mesa. Espelhar inverte a imagem como se você a visse num espelho: a opção Horizontal troca a esquerda pela direita, e a opção Vertical troca o alto pelo baixo. Um texto numa imagem espelhada fica ao contrário.',
     },
     {
       q: 'Dá para girar uma imagem em 45° ou em outro ângulo?',

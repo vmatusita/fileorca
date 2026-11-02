@@ -5,9 +5,9 @@ import type { DeleteTexts } from '../../pdf/option-texts.ts';
 // Spanish (docs/i18n/es.md). The specs rows state the real behaviour of the engine (src/engine/pdf/process.ts), as the
 // English file does: the pages you keep are copied into a new document.
 const texts: PdfToolTexts<DeleteTexts> = {
-  title: 'Eliminar páginas de PDF: quita páginas de un PDF en tu navegador',
+  title: 'Eliminar páginas de PDF: borra las que sobran en tu navegador',
   description:
-    'Quita páginas de un PDF en tu navegador. Elígelas en una cuadrícula de miniaturas o escribe números como 1-3, 5. No se sube nada y tu original no cambia.',
+    'Elimina páginas de un PDF en tu navegador. Elígelas en una cuadrícula de miniaturas o escribe números como 1-3, 5. No se sube nada y tu original no cambia.',
   h1: 'Eliminar páginas de PDF',
   howHeading: 'Cómo funciona',
   howSteps: [

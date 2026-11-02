@@ -138,7 +138,7 @@ export default {
     },
     'delete-pdf-pages': {
       name: 'Eliminar páginas de PDF',
-      description: 'Quita páginas de un PDF y quédate con el resto.',
+      description: 'Elimina las páginas que sobran de un PDF y conserva el resto.',
       synonyms: ['eliminar páginas', 'borrar páginas', 'quitar páginas', 'quitar página del pdf', 'pdf'],
     },
     'add-page-numbers-to-pdf': {
