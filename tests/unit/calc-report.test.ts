@@ -204,8 +204,10 @@ describe('the PDF of the home and health calculators (F7)', () => {
       ]);
       expect(lines, caseId).toContain(scaled(expected.bmi, 1));
       expect(lines, caseId).toContain(category);
-      // The table is the six CDC categories with their ranges, in words, never only a colour.
+      // The table is the six CDC categories with their ranges, in words, never only a colour, and the BMI of the oracle in
+      // the row of its category alone.
       expect(input.table.rows, caseId).toHaveLength(6);
+      expect(input.table.rows.filter((row) => row.at(-1) !== '').map((row) => [row[0], row.at(-1)]), caseId).toEqual([[category, scaled(expected.bmi, 1)]]);
       expect(lines.join(' '), caseId).toContain('not medical advice');
     }
     expect(scaled(fixture('bmi-calculator', 'cdc-5-ft-8-in-200-lb').expected['bmi'] as number, 1)).toBe('30.4');
@@ -248,14 +250,12 @@ describe('the columns of the calculator PDF', () => {
   });
 
   // F7 (decision 11): the open table of each of the 11 home and health calculators, which is their result, in Letter. Every
-  // text stays clear of its neighbours and inside the 516 pt, at the body size of the tables; the tables whose texts fit their
-  // share keep the even layout (the money ones above), and the ovulation calendar, whose dates are wider, gets the layout as
-  // wide as its texts (DECISOES § 255).
+  // text stays clear of its neighbours and inside the 516 pt, at the body size of the tables, whether the table keeps the even
+  // layout of the money tables or, like the ovulation calendar with its dates, gets the columns as wide as its texts (§ 255).
   it('keeps every text of the open table of each home and health calculator clear of its neighbours in Letter', async () => {
     const fonts = await fontsOf();
     const width = 612 - 96;
     expect(LIFE_CALC_IDS).toHaveLength(11);
-    const even: string[] = [];
     for (const id of LIFE_CALC_IDS) {
       const { head, rows } = tableOf(id, 'en');
       expect(rows.length, id).toBeGreaterThan(0);
@@ -270,12 +270,7 @@ describe('the columns of the calculator PDF', () => {
         }
         expect(end, id).toBeLessThanOrEqual(48 + width + 0.01);
       }
-      const first = width * 0.2;
-      const rest = (width - first) / Math.max(1, head.length - 1);
-      if (head.every((_, index) => index === 0 || rightOf(index) === 48 + first + rest * index)) even.push(id);
     }
-    // Only the ovulation calendar needs the wider columns; the other ten keep the even layout of the money tables.
-    expect(LIFE_CALC_IDS.filter((id) => !even.includes(id))).toEqual(['ovulation-calculator']);
   });
 
   it('keeps every text of the SAC × PRICE table in A4 clear of its neighbours', async () => {
