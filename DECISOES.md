@@ -2468,3 +2468,77 @@ A ficha permite mudar um valor esperado que cresceu com o site, com registro. Ne
 - **O que olhar no fim:** no Search Console, as impressões de cada uma das 11 calculadoras de casa e saúde (e dos dois hubs) nos 90 dias, contadas a partir do dia em que as páginas entraram em produção.
 - **Gatilho do backlog** (PLANO, "Backlog com gatilho"): as calculadoras de casa e de saúde com impressão nos 90 dias ganham versão em português e em espanhol, numa run própria; as sem impressão ficam só em inglês.
 - **Atenção:** se o merge da PR acontecer dias depois, as páginas só passam a contar dali; o fim continua em 31/jan/2027, e a leitura deve dizer quantos dias de produção cada página teve.
+
+## § 274 · A revisão adversarial da F7 (F7, 2/nov/2026)
+
+- **Método:** o da F3 (§ 92 a § 94), com sete lentes Sonnet em contexto limpo: corretude, privacidade e segurança, anúncio e política, acessibilidade, desempenho e SEO, design system e voz, e saúde e confiança. Elas rodaram sobre o commit `69fb7f3`, numa worktree só de leitura (`.claude/worktrees/revisao-f7`), cada uma com o próprio `FO_PORT` (4174 a 4180). Cada achado crítico, alto ou médio teve um cético próprio; os baixos de cada lente, um cético só. Foram 39 agentes.
+- **Números:** 49 achados (8 altos, 18 médios e 23 baixos, na gravidade da lente). Depois dos céticos: nenhum crítico, 1 alto, 16 médios, 25 baixos e 7 refutados.
+- **Corrigidos:** o alto (f-1, § 275) e 15 dos 16 médios (§ 275 a § 281), cada um com um teste que reprova no build do `69fb7f3` e passa no novo. Cinco baixos saíram junto, porque eram o mesmo defeito de um médio: a-2 (g-1), d-6 (g-3), d-10 e g-6 (f-7) e d-12 (f-2).
+- **Não corrigido:** o e-1, o CLS de 0,20 a 320 a 390 px com escala 1. O breadcrumb quebra em duas linhas quando a Figtree chega e empurra a ferramenta 22 px. A correção mexe no breadcrumb de todas as páginas do site ou no carregamento das fontes (§ 241), então não é local. Fica como pendência no relatório, com as duas saídas da lente: reservar duas linhas no breadcrumb abaixo de 420 px, ou uma ADR "Proposta" para pré-carregar a Figtree.
+- **Os baixos restantes** vão para o relatório (`docs/relatorios/REVISAO-F7.md`).
+- **Os testes novos:** `tests/e2e/calc-form.spec.ts` (8 testes por navegador) e o bloco "after the review F7" do `tests/unit/calc-defs.test.ts` (3 testes). O nome `calc-form` põe o spec antes do `design.spec.ts`, numa parte leve do WebKit (§ 142).
+
+## § 275 · As tabelas abertas do resultado cabem a 320 px, sem coluna fixa (F7, revisão f-1 e f-2)
+
+- **O defeito:** a 360 px, o último cabeçalho das tabelas abertas (§ 260) ficava grudado na borda direita e aparecia sobre outra coluna. O "Your BMI" ficava sobre a faixa do CDC, e o "Square feet" sobre o tamanho da área. A regra vinha das tabelas por ano (F4, DES-10), em que o saldo do fim do ano também fica fixo; nas tabelas abertas as células não ficavam.
+- **A segunda parte:** a Ovulation (842 px numa moldura de 324) e a Due date (434 px) escondiam a resposta atrás da rolagem lateral.
+- **A decisão:** uma tabela sem grupos por ano ganha a classe `fo-amort--flat`. Ela não tem coluna fixa, o texto das células quebra linha, e o respiro lateral cai para 8 px abaixo de 480 px. As tabelas por ano do dinheiro não mudam.
+- **A Ovulation passa a 3 colunas:** janela fértil, ovulação e próxima menstruação. A coluna "Cycle starts" repetia a próxima menstruação da linha de cima e, na primeira linha, o dia digitado. A legenda já dizia essas três coisas. Com as 4 colunas e a quebra de linha, a tabela pedia 349 px a 320.
+- **O teste:** a 320 e a 360 px, nas 11 páginas e nos dois navegadores, a moldura não rola para o lado, e cada cabeçalho fica sobre as células da própria coluna.
+
+## § 276 · O erro de faixa de um campo deixa o resultado velho, com o PDF e o CSV desligados (F7, revisão g-1 e a-2)
+
+- **O defeito:** a § 116 diz que um valor inválido mantém o último resultado "com a linha 'Fix the highlighted field to update the result.'", e a § 139 desliga o PDF e o CSV com o resultado velho. Mas o erro de faixa de um campo nunca chegava ao estado da calculadora. Só um problema entre campos (o `atMost`, a entrada maior que o preço) marcava o resultado velho. Sem a linha, o PDF e o CSV seguiam ligados.
+- **Na saúde:** com idade 16 no BMI, a página seguia com o resultado de adulto e baixava um PDF com "Age 35 years", a idade do exemplo.
+- **A decisão:** o `CalcField` e o `DateField` avisam o store (`wrong(id, is)`) quando mostram ou deixam de mostrar o erro de faixa, e quando somem da tela. O resultado fica velho enquanto houver um campo assim, e aparecem a linha e o PDF e o CSV desligados, como a § 116 e a § 139 dizem.
+- **Vale para todas as calculadoras,** também as de dinheiro: é a regra da F4 cumprida, não uma regra nova.
+- **O teste:** a idade abaixo do mínimo no BMI, no Calorie e no Body fat, a quantidade 0 no Concrete e um dia fora da faixa na Due date mostram a linha e desligam o PDF e o CSV. O valor certo devolve os três.
+
+## § 277 · Os campos estreitos mostram o número, o menu e a data inteiros (F7, revisão d-2, f-3, f-4, f-5, d-3 e f-6)
+
+- **O número:** a cobertura da Paint mostrava "35(" a 360 px e "3" a 320, ao lado de "sq ft/gal". Os máximos da faixa também saíam cortados em campos de meia largura: "20,000" no Tile, "2,500" no BTU, "120" na idade e "0.45" no Concrete a 320 px.
+  - Abaixo de 390 px, o respiro do campo cai de 16 para 12 px e o da unidade para 8 px; abaixo de 360 px, o do campo cai para 8 px.
+  - O campo da Paint passa a "Coverage per gallon", com a unidade "sq ft".
+- **O menu:** o texto escolhido saía cortado.
+  - "Length × width" na Mulch, em toda largura; "Rectangle" numa área a 360 px; "Room walls" e "Last period" a 320 px; "IVF, day-3 embryo" a 360.
+  - O respiro direito do menu cai para 8 px (a seta nativa fica dentro da caixa).
+  - Os rótulos passam a "Dimensions", "IVF, day 3" e "IVF, day 5". A explicação da transferência segue no texto da página.
+- **A data:** o ano saía cortado a 320 px ("07/09/202").
+  - Abaixo de 360 px, um menu ou uma data dos campos principais ocupa a linha inteira.
+  - O resultado acima da dobra segue medido a 360 px (§ 124), onde nada muda de linha.
+- **A altura do menu:** o menu esticava até 102 px quando o campo ao lado mostrava erro. Ele passa a ficar no `.fo-field__body`, como o número e a data.
+- **Os testes:**
+  - a 320 e a 360 px, nas 11 páginas, cada número visível mostra inteiros o exemplo e o máximo da faixa (`scrollWidth ≤ clientWidth`);
+  - cada opção de cada menu cabe à esquerda da seta, medida com a fonte do próprio menu;
+  - abaixo de 360 px, o menu e a data ocupam a linha;
+  - na Paint, o menu não muda de altura com o erro do campo ao lado.
+
+## § 278 · O link do cenário não leva o foco para a última área (F7, revisão a-1)
+
+O efeito da lista de áreas movia o foco para a última linha sempre que a lista crescia. Abrir um link da Square footage com 10 áreas levava o foco ao menu da décima e rolava a página 2.604 px. Agora só o clique no "Add an area" de baixo do resultado marca a lista (`addedBelow`), e só essa marca move o foco. As linhas que o link traz, lidas depois da hidratação, deixam o foco e a rolagem onde estão. O teste abre o link com 3 áreas e confere o foco fora da lista e o `scrollY` em 0. Depois, o "Add an area" leva o foco ao menu da quarta área.
+
+## § 279 · A unidade do campo entra na descrição dele (F7, revisão d-1)
+
+A unidade (ft, in, sq ft, cu ft, %, years, days) só existia num `span` visual: o leitor de tela dizia "Thickness, 4" no Concrete, que mistura pés e polegadas. Agora o prefixo e o sufixo têm `id` e entram no `aria-describedby` do campo, antes do erro e da ajuda. O menu de unidade da entrada (dinheiro) tem o próprio `aria-label` e não muda. O teste confere, nas 11 páginas, que a descrição de cada campo com unidade contém a unidade.
+
+## § 280 · A opção escolhida no alto contraste e o placeholder do QR (F7, revisão d-8 e d-9)
+
+- **O alto contraste:** no modo de cores forçadas, o fundo e a borda da opção escolhida do OptionGroup somem. US e Metric, ou On e Off, ficavam iguais.
+  - Ali a opção escolhida ganha um sublinhado de 3 px (`text-decoration`, que segue a cor do texto forçada). Nenhuma cor de sistema entra no CSS.
+  - O teste emula `forcedColors: 'active'` no Chromium. O WebKit não emula o modo, então ali o teste confere o fundo da opção escolhida.
+- **O placeholder do QR:** os navegadores pintam o placeholder com a cor do texto a 50% de alfa. Isso dá 3,34:1 no tema claro.
+  - A caixa do QR usa `--ink-muted` com opacidade 1, como a busca já fazia.
+  - O teste mede 4,5:1 ou mais nos dois temas.
+
+## § 281 · O Body fat sem "0 %", a fórmula na frase do resultado e a Privacidade com as escolhas (F7, revisão f-7, g-3 e b-1)
+
+- **O "0 %":** medidas que a equação da Marinha não aceita mostravam "Body fat 0 %" no número grande, um valor de saúde falso. Agora o número é um travessão, sem unidade, como nos problemas das calculadoras de dinheiro.
+- **A fórmula:** o sexo da fórmula fica depois do resultado no celular (§ 268), e a frase do Calorie e do Body fat não dizia qual fórmula fez o número. Com as mesmas medidas, o Body fat dá 25,9% pela feminina e 10,9% pela masculina. Agora a frase diz "By the female formula" ou "with the male formula", com a palavra em negrito. O `lint:texto` ganhou a amostra `sex`.
+- **A Privacidade:** a página prometia que o link copiado levava "só" números e datas. Mas ele leva também as escolhas: a unidade, o sexo da fórmula, a forma de contar a data do parto, a forma do concreto e o resto.
+  - O texto passa a dizer isso nos três idiomas.
+  - As notas de privacidade do Calorie, do Body fat e da Due date também.
+  - A data de atualização continua 2 de novembro de 2026.
+- **Os testes:** no `calc-defs.test.ts`:
+  - o problema do Body fat sem algarismo;
+  - a palavra da fórmula em negrito na frase, nos dois sexos;
+  - o texto das escolhas na Privacidade em en, pt e es e nas três notas.

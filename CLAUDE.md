@@ -452,3 +452,16 @@ Pegadinhas que a F7 achou:
 - **O `jsqr` só lê com pixels por módulo inteiros**: o PNG do QR sai numa escala inteira, nunca num tamanho fixo de 512 px.
 - **Datas:** o motor só vê dias inteiros; o "hoje" é lido pela ilha com `getFullYear()`, `getMonth()` e `getDate()` do aparelho, nunca do UTC. Nos testes, fixe o relógio com `page.clock` e o fuso no contexto.
 - **O WebFetch não abre** acog.org, apps.dtic.mil nem esd.whs.mil (403), e o NCBI Bookshelf pede reCAPTCHA: a fonte vira o PubMed, o PMC ou outra página oficial do mesmo órgão, e o que não abriu fica como pendência.
+
+## F7: o que a revisão mudou nos formulários das calculadoras
+
+- **Erro de faixa vai ao store** (§ 276). O `CalcField` e o `DateField` recebem `report` (o `wrong(id, is)` do store) e avisam quando mostram ou deixam de mostrar o erro de faixa. Enquanto houver um campo assim, o resultado fica velho: aparece a linha "Fix the highlighted field…", e o PDF e o CSV ficam desligados. Campo novo que valida a própria faixa passa o `report` adiante, como o `NumberInput` do `Fields.tsx`.
+- **Tabela aberta** (§ 275). Uma tabela sem grupos por ano (`CalcView.open`) sai com `fo-amort--flat`: sem coluna fixa e com texto que quebra. Ela tem de caber a 320 px. O `calc-form.spec.ts` mede isso nas páginas de casa e saúde.
+- **Campos estreitos** (§ 277). O `calc-form.spec.ts` lê os `DEFS` e confere, a 320 e 360 px:
+  - cada número visível com o exemplo e com o máximo da faixa (`scrollWidth ≤ clientWidth`);
+  - cada opção de cada menu, medida com a fonte do menu;
+  - o menu e a data na linha inteira abaixo de 360 px.
+
+  Antes de criar um campo de meia largura com unidade longa, ou um menu com opção longa, rode esse spec.
+- **Alto contraste** (§ 280). O WebKit do Playwright não emula `forcedColors`. O teste ramifica por dentro, pelo `matchMedia('(forced-colors: active)')`: no Chromium afirma o sublinhado, no WebKit o fundo.
+- **Foco das áreas** (§ 278). Só o clique no "Add an area" move o foco para a linha nova (`addedBelow`, estado do módulo `Fields.tsx`). As linhas que o link do cenário traz não mexem no foco.
