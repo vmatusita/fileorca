@@ -263,7 +263,10 @@ export default function PdfPanel(props: PdfPanelData) {
       // The focus goes to the action, so the status says what the reading found: the files ready, and the ones refused
       // (review F4-F7 d-1; DECISOES § 305).
       const refused = m.items.length - ready.length;
-      m.announce = refused > 0 ? fmt(t.errors.some, { count: refused }) : readyCount(ready.length);
+      // Merge with one PDF left after the refusals also says what it still needs, as the screen does (second pass, s-3).
+      const needs = mode === 'merge' && ready.length < 2;
+      const some = fmt(t.errors.some, { count: refused });
+      m.announce = refused === 0 ? readyCount(ready.length) : needs ? `${some} ${readyCount(ready.length)}` : some;
       render();
     }
   }

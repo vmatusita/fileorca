@@ -770,4 +770,9 @@ test('a PDF tool with an action says, once the files are read, how many are read
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-ja-otimizado.pdf'), { name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf') }]);
   await expect(page.getByRole('button', { name: 'Merge PDFs' })).toBeFocused({ timeout: 30_000 });
   await expect(status).toHaveText(fmt(panel.errors.some, { count: 1 }));
+
+  // One PDF left after the refusals: Merge says the refusal and what it still needs (second pass, s-3).
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), { name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf') }]);
+  await expect(status).toHaveText(`${fmt(panel.errors.some, { count: 1 })} ${mergeTexts.panel.options.needMore}`, { timeout: 30_000 });
 });
