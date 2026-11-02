@@ -2705,7 +2705,15 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..08
 
 ## § 299 · O ensaio do Dependabot (F8, decisão 12)
 
-- O resultado entra aqui quando o ensaio terminar.
+- **Onde:** uma worktree descartável de `dda73f2` (a `fase-08` da hora), removida no fim. Nenhuma dependência mudou na branch.
+- **A leva de minor e patch de hoje** (estratégia `increase`): `astro` 7.4.4 → 7.4.5, `preact` 11.1.0 → 11.1.1, `wrangler` 4.156.0 → 4.156.2, `eslint` ~10.13.0 → ~10.14.0, `pdfjs-dist` 6.4.299 → 6.5.438 e `vitest` 5.0.5 → 5.1.0. As fixadas em versão exata (`qrcode`, `@types/qrcode`, `gifenc`, `jsqr`) já estão na última. Com o `cooldown` de 7 dias, um ciclo hoje levaria só o `eslint`; o de 1º de dezembro leva as seis.
+- **O que quebrou e o destino de cada falha:**
+  1. **O PDF.js 6.5 chama `canvasFactory.getNoAlphaContext()` no `render()`,** e a `OffscreenFactory` do motor (`src/engine/pdf/pdfjs.ts`) não tinha o método: todo desenho de página no worker do Chromium falhava com "This browser couldn't write the new PDF". **Destino:** a correção entrou nesta run (o método, que a 6.4 já fazia pelo canvas, e um teste no `pdf-hardening.test.ts` que exige nas fábricas do motor todo método público das fábricas-base do PDF.js instalado). Um `ignore` do `pdfjs-dist >= 6.5.0` seguraria também as correções de segurança do PDF.js, por isso não.
+  2. **O build legacy do PDF.js 6.5 traz o core-js 3.51.0,** e a /licenses tem o texto do 3.50.0: reprovam o `gate:licencas` e o `licenses.test.ts`. O texto da licença é o mesmo (SHA-256 igual), mas a regra da § 179 pede o texto da versão. **Destino:** (a) o teste dos arquivos reais passa a ler a versão do `src/platform/licenses.ts` em vez de repetir o literal; (c) recopiar o texto e trocar a entrada é um passo do `docs/OPERACAO.md` ("Depois de certas PRs"), numa run curta antes de a PR do grupo ficar verde.
+  3. **Um teste do `pdf-engine-ops.test.ts` estoura os 5 s** com a suíte inteira e a máquina carregada pelas lentes da revisão, com e sem a atualização (2 de 3 rodadas em cada). Sozinho, leva 1,3 s. **Destino:** nenhum do Dependabot; vai para o `PENDENCIAS.md` (o tempo do teste não muda).
+- **Depois dos ajustes:** todos os portões verdes (o `lhci` com desempenho de 99 a 100), o Vitest com 1.460 de 1.460 (com `--maxWorkers=6`, pela falha 3), e o `budgets`, o `image-smoke` e o `pdf-tool` com 152 de 152 no Chromium e no WebKit. O `guias:medir --check` deu zero diferença no PDF to JPG e no Compress forte.
+- **A primeira leva de majors:** `typescript` 7.0.2, `@types/node` 26.6.6 e `node-html-parser` 9.0.6. Com os `ignore` do `typescript` e do `@types/node`, sobra uma PR de major (o `node-html-parser`), que fica para o Victor. Por isso o limite de 3 PRs abertas no npm.
+- **Nenhum `ignore` novo saiu do ensaio.**
 
 ## § 300 · O alerta de CI vermelho numa PR do Dependabot (F8, decisão 14)
 
