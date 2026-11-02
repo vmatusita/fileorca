@@ -24,6 +24,7 @@ export default {
       sentenceSameTerm: 'Esse valor não chega a encurtar o prazo, mas você deixa de pagar {savedShorter} de juros. Reduzindo a parcela, ela cai de {before} para {after}, e você deixa de pagar {savedLower}.',
       sentenceSacSameTerm: 'Esse valor não chega a encurtar o prazo, mas você deixa de pagar {savedShorter} de juros. Reduzindo a parcela, a próxima cai de {before} para {after}, e você deixa de pagar {savedLower}.',
       payoff: 'Com esse valor você quita o saldo inteiro e deixa de pagar {saved} de juros.',
+      nothing: 'Sem valor a antecipar, o contrato segue como está: digite quanto você quer adiantar.',
       shorter: 'Reduzir o prazo',
       lower: 'Reduzir a parcela',
       term: 'Prazo que falta',
@@ -56,7 +57,7 @@ export default {
   worksHeading: 'Como a economia é calculada',
   formulaHeading: 'A conta',
   formula: [
-    'A calculadora monta três cronogramas: o contrato sem antecipar, o saldo menor com a mesma parcela (reduzir o prazo) e o saldo menor com os mesmos meses (reduzir a parcela). Na PRICE a parcela é P = S × i × (1 + i)^n ÷ ((1 + i)^n − 1); no SAC a amortização é o saldo dividido pelos meses que faltam.',
+    'A calculadora monta três cronogramas: o contrato sem antecipar, o saldo menor com o prazo encurtado (reduzir o prazo: na PRICE com a mesma parcela, no SAC com um mês a menos para cada amortização de hoje que o valor cobre) e o saldo menor com os mesmos meses (reduzir a parcela). Na PRICE a parcela é P = S × i × (1 + i)^n ÷ ((1 + i)^n − 1); no SAC a amortização é o saldo dividido pelos meses que faltam.',
     'Os juros que você deixa de pagar são os juros do contrato sem antecipar menos os juros de cada cronograma novo.',
   ],
   premisesHeading: 'Premissas',

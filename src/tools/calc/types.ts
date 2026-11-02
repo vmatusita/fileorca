@@ -78,6 +78,8 @@ export interface Table {
   rows: Cell[][];
   /** Rows grouped by loan year: the year rows are buttons, the first year starts open. */
   groups?: { label: string; end: Cell; from: number; to: number }[];
+  /** The column of the balance, where a year row shows the balance at its end; the last one when not given (DECISOES § 256). */
+  endColumn?: number;
 }
 
 /** What the result looks like for one set of values (CalcDef.view). */

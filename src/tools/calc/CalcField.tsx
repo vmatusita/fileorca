@@ -62,9 +62,12 @@ export default function CalcField(props: CalcFieldProps) {
     return parsed !== null && inRange({ min, max }, parsed) ? parsed : null;
   };
 
-  // Text that is not a number of the page's language ("11.5" in Portuguese, "6,5" in Spanish) gets the range and how to
-  // write the decimals; a number out of the range gets the range alone (review F6, d-1; DECISOES § 251).
-  const unreadable = wrong && hint !== undefined && parseScaled(draft, lang, DECIMALS[kind], negative) === null;
+  // A number written with the other separators ("11.5" in Portuguese, "6,5" in Spanish) gets the range and how to write the
+  // decimals; anything else (a number out of the range, an empty field, letters, a whole-number field) gets the range alone
+  // (review F6, d-1; DECISOES § 251 and § 254).
+  const swapped = draft.replace(/[.,]/g, (mark) => (mark === '.' ? ',' : '.'));
+  const unreadable =
+    wrong && hint !== undefined && kind !== 'int' && parseScaled(draft, lang, DECIMALS[kind], negative) === null && parseScaled(swapped, lang, DECIMALS[kind], negative) !== null;
   const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
   const errorId = `${id}-error`;
   const helpId = `${id}-help`;

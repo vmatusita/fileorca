@@ -579,14 +579,22 @@ test('the ResultHero number and its unit stay on one line at 320, 360, 768 and 1
     ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
   ];
   const broken: string[] = [];
-  for (const path of paths) {
+  const english = new Set(CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path));
+  // Second pass (DECISOES § 253): a long whole amount typed in, "$22,222,828", which used to break at 320, 768 and 1280px.
+  const typed = `${CALC_PAGES['compound-interest-calculator'].path}#v=1&i=58900000&m=0&r=120000&y=30`;
+  for (const path of [...paths, typed]) {
     await page.setViewportSize({ width: 320, height: 900 });
     expect((await page.goto(path))?.status(), path).toBe(200);
     await page.evaluate(() => document.fonts.ready);
     for (const width of [320, 360, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 });
-      const lines = await page.locator('.fo-rhero__num').first().evaluate((num) => Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight)));
+      const { lines, size } = await page.locator('.fo-rhero__num').first().evaluate((num) => ({
+        lines: Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight)),
+        size: parseFloat(getComputedStyle(num).fontSize),
+      }));
       if (lines !== 1) broken.push(`${path} a ${width}px: ${lines} linhas`);
+      // The English numbers fit at their full size with their example: they stay at 48px, and 60px from 768px, as before.
+      if (english.has(path) && size < (width >= 768 ? 60 : 48)) broken.push(`${path} a ${width}px: ${size}px`);
     }
   }
   expect(broken).toEqual([]);
@@ -662,5 +670,41 @@ test('a decimal written the way of another language gets the range and how to wr
     await field.fill(out);
     await expect(error, `${lang} ${out}`).toBeVisible();
     await expect(error, `${lang} ${out}`).not.toContainText(hint);
+    // Second pass (DECISOES § 254): letters and an empty field are not a matter of decimals, and a whole-number field takes none.
+    for (const text of ['abc', '']) {
+      await field.fill(text);
+      await expect(error, `${lang} "${text}"`).toBeVisible();
+      await expect(error, `${lang} "${text}"`).not.toContainText(hint);
+    }
+    await field.fill(lang === 'pt' ? '11,5' : '6.5');
+    const term = page.locator('#fo-calc-n, #fo-calc-t').first();
+    await term.fill(lang === 'pt' ? '12,5' : '30.5');
+    const termError = page.locator('#fo-calc-n-error, #fo-calc-t-error').first();
+    await expect(termError, `${lang} prazo`).toBeVisible();
+    await expect(termError, `${lang} prazo`).not.toContainText(hint);
   }
+});
+
+// Second pass of the review F6 (DECISOES § 256): in the SAC × PRICE schedule, whose last columns are the insurance and fees
+// and the TR correction, the balance at the end of each year sits under "Saldo devedor", not under the last column.
+test('the year rows of the SAC × PRICE schedule put the balance under its column', async ({ page }) => {
+  const pt = moneyPage('br-sac-price', 'pt');
+  expect((await page.goto(pt?.path ?? ''))?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.getByRole('button', { name: ptShared.island.showSchedule }).click();
+  await expect(page.locator('.fo-amort tr.fo-amort__year').first()).toBeVisible();
+  const columns = await page.locator('.fo-amort').evaluate((table) => {
+    const head = [...table.querySelectorAll('thead th')].map((th) => th.textContent?.trim() ?? '');
+    const year = table.querySelector('tr.fo-amort__year');
+    let column = 0;
+    let balanceAt = -1;
+    for (const cell of [...(year?.children ?? [])] as HTMLTableCellElement[]) {
+      if (/R\$/.test(cell.textContent ?? '')) balanceAt = column;
+      column += cell.colSpan;
+    }
+    return { head, balanceAt, width: column };
+  });
+  expect(columns.width).toBe(columns.head.length);
+  expect(columns.head[columns.balanceAt]).toBe(ptShared.island.columns.balance);
 });

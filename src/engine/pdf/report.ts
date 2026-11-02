@@ -109,18 +109,47 @@ function pairs(pen: Pen, rows: [string, string][]): void {
   }
 }
 
-/** The table: the first column to the left, the numbers to the right, the header again on every page. */
-function table(pen: Pen, head: string[], rows: string[][]): void {
-  const width = pen.size.width - 2 * MARGIN;
+/** Room between two columns of the table, in points. */
+const COLUMN_GAP = 6;
+
+/**
+ * Where each column of the table ends (its numbers end there) and the size of the text. The first column is a fifth of the
+ * width and the others share the rest, as since the F4, whenever every text fits its share (every English table): the
+ * drawing, and so the bytes, stay as they were. A table whose text would run into the next column (the SAC × PRICE in A4,
+ * with its column of insurance and fees) gets columns as wide as their widest text instead, and a smaller type if they
+ * still do not fit (review F6, second pass; DECISOES § 255).
+ */
+export function columnLayout(left: number, width: number, head: string[], rows: string[][], fonts: { regular: PDFFont; bold: PDFFont }): { rightOf: (index: number) => number; size: number } {
+  const measure = (size: number) =>
+    head.map((label, index) => Math.max(fonts.bold.widthOfTextAtSize(winAnsi(label), size), ...rows.map((cells) => fonts.regular.widthOfTextAtSize(winAnsi(cells[index] ?? ''), size))));
+  const widest = measure(SMALL);
   const first = width * 0.2;
   const rest = (width - first) / Math.max(1, head.length - 1);
+  if (widest.every((need, index) => need + COLUMN_GAP <= (index === 0 ? first : rest))) return { rightOf: (index) => left + first + rest * index, size: SMALL };
+  const gaps = COLUMN_GAP * head.length;
+  const text = widest.reduce((sum, need) => sum + need, 0);
+  const size = text + gaps > width ? (SMALL * (width - gaps)) / text : SMALL;
+  const columns = measure(size).map((need) => need + COLUMN_GAP);
+  const spare = Math.max(0, width - columns.reduce((sum, column) => sum + column, 0)) / Math.max(1, head.length - 1);
+  const rights: number[] = [];
+  let x = left;
+  columns.forEach((column, index) => {
+    x += column + (index === 0 ? 0 : spare);
+    rights.push(x);
+  });
+  return { rightOf: (index) => rights[index] ?? left + width, size };
+}
+
+/** The table: the first column to the left, the numbers to the right, the header again on every page. */
+function table(pen: Pen, head: string[], rows: string[][]): void {
+  const { rightOf, size } = columnLayout(MARGIN, pen.size.width - 2 * MARGIN, head, rows, pen);
   const draw = (cells: string[], font: PDFFont) => {
     cells.forEach((value, index) => {
       const text = winAnsi(value);
-      if (index === 0) pen.page.drawText(text, { x: MARGIN, y: pen.y, size: SMALL, font });
+      if (index === 0) pen.page.drawText(text, { x: MARGIN, y: pen.y, size, font });
       else {
-        const right = MARGIN + first + rest * index;
-        pen.page.drawText(text, { x: right - font.widthOfTextAtSize(text, SMALL), y: pen.y, size: SMALL, font });
+        const right = rightOf(index);
+        pen.page.drawText(text, { x: right - font.widthOfTextAtSize(text, size), y: pen.y, size, font });
       }
     });
     pen.y -= LINE - 2;

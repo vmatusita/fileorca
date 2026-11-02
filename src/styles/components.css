@@ -500,10 +500,9 @@
 
 .fo-rhero { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-3); container-type: inline-size; }
 .fo-rhero__label { margin: 0; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep-muted); }
-/* The number never breaks inside: its size comes down with its length (--fo-num-chars, from ResultHero) and the width of the
-   card (cqi) less the unit (--fo-num-unit, 11px a character of the 20px unit), never past 48px (60px from 768px); about 0.47em a
-   character in Fredoka (DECISOES § 246). */
-.fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); font-size: min(48px, calc((100cqi - var(--fo-num-unit, 0px)) / (var(--fo-num-chars, 9) * 0.47))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
+/* The number never breaks inside: ResultHero measures it (--fo-num-em, its numbers in em; --fo-num-px, its words, unit and
+   gaps), and its size is what fits the card (cqi), never past 48px (60px from 768px; DECISOES § 246 and § 253). */
+.fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); font-size: min(48px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
 .fo-rhero__num > span { white-space: nowrap; }
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
 .fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
@@ -516,7 +515,7 @@
 .fo-rhero__orca { width: 72px; height: 72px; }
 @media (min-width: 768px) {
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
-  .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-unit, 0px)) / (var(--fo-num-chars, 9) * 0.47))); line-height: 64px; }
+  .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
 }
 .fo-split { display: grid; gap: var(--space-2); }
 .fo-split__bar { display: block; height: 20px; }

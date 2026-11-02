@@ -38,6 +38,22 @@ describe('the quick PRICE payment', () => {
     expect(compared).toBeGreaterThan(5_000);
   });
 
+  // Second pass (DECISOES § 255): a payment that is exactly a half cent is where the fixed point could round the wrong way
+  // (at 5% a month over one month, 30 cents give 31.5); the quick payment works those out with annuity30 itself.
+  it('rounds the exact half cents as annuity30 does, by working them out exactly', () => {
+    const j = monthRate30(50_000);
+    const payment = annuityByTerm(j, 2);
+    let ties = 0;
+    for (let principal = 1; principal <= 2_000; principal += 1) {
+      const exact = annuity30(principal, j, 1);
+      if ((principal * 105) % 100 === 50) ties += 1;
+      expect(payment(principal, 1), `${principal} centavos`).toBe(exact);
+    }
+    expect(ties).toBeGreaterThan(50);
+    expect(payment(30, 1)).toBe(32);
+    expect(payment(10, 1)).toBe(11);
+  });
+
   it('gives annuity30 for a rate of zero, a principal of zero and a term past the table', () => {
     expect(annuityByTerm(0n, 12)(120_000, 12)).toBe(annuity30(120_000, 0n, 12));
     const j = yearRate30(110_000);

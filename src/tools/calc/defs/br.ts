@@ -79,7 +79,7 @@ function plansTable(
     }
   }
   const head = [s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, ...(fees && fees.cents > 0 ? [fees.head] : []), s.columns.balance];
-  return { caption, head: extraHead ? [...head, extraHead] : head, rows, groups };
+  return { caption, head: extraHead ? [...head, extraHead] : head, rows, groups, endColumn: head.length - 1 };
 }
 
 // --- SAC x PRICE ------------------------------------------------------------------------------------------
@@ -244,14 +244,17 @@ export const brEarlyPayoffDef: CalcDef<EarlyPayoffInput, EarlyPayoffResult> = {
     const sentence: Part[] =
       r.left === 0
         ? say(text(v, 'payoff'), { saved: dollars(r.shorter.interestSaved, ln) })
-        : // A prepayment below one amortization does not shorten the term (review F6, g-1): the sentence says so.
-          say(text(v, `${sac ? 'sentenceSac' : 'sentence'}${r.shorter.monthsSaved > 0 ? '' : 'SameTerm'}`), {
-            sooner: duration(r.shorter.monthsSaved, s),
-            savedShorter: dollars(r.shorter.interestSaved, ln),
-            before: cash(r.base.firstPayment, ln),
-            after: cash(r.lower.firstPayment, ln),
-            savedLower: dollars(r.lower.interestSaved, ln),
-          });
+        : num(values, 'x') === 0
+          ? // Nothing prepaid: nothing changes, and the sentence says so (review F6, second pass; DECISOES § 256).
+            [text(v, 'nothing')]
+          : // A prepayment below one amortization does not shorten the term (review F6, g-1): the sentence says so.
+            say(text(v, `${sac ? 'sentenceSac' : 'sentence'}${r.shorter.monthsSaved > 0 ? '' : 'SameTerm'}`), {
+              sooner: duration(r.shorter.monthsSaved, s),
+              savedShorter: dollars(r.shorter.interestSaved, ln),
+              before: cash(r.base.firstPayment, ln),
+              after: cash(r.lower.firstPayment, ln),
+              savedLower: dollars(r.lower.interestSaved, ln),
+            });
     const gap = r.shorter.interestSaved - r.lower.interestSaved;
     return {
       hero: { label: text(v, 'label'), value: cash(r.shorter.interestSaved, ln), sentence },

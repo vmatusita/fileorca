@@ -54,3 +54,14 @@ describe('the early payoff', () => {
     }
   });
 });
+
+describe('the early payoff with nothing prepaid', () => {
+  // Second pass of the review F6 (DECISOES § 256): "mas você deixa de pagar R$ 0 de juros" did not make sense.
+  it('says the contract stays as it is, in both systems', () => {
+    for (const system of ['sac', 'price']) {
+      const sentence = sentenceOf({ x: 0, sys: system });
+      expect(sentence, system).toContain('o contrato segue como está');
+      expect(sentence, system).not.toContain('R$ 0');
+    }
+  });
+});
