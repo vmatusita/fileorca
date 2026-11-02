@@ -56,6 +56,8 @@ export const BUNDLED_TRANSITIVE: readonly { name: string; via: string }[] = [
   { name: 'tslib', via: '@cantoo/pdf-lib' },
   { name: '@preact/signals', via: '@astrojs/preact' },
   { name: '@preact/signals-core', via: '@preact/signals' },
+  // The QR code generator (F7, decision 8): lib/core/segments.js of qrcode requires it.
+  { name: 'dijkstrajs', via: 'qrcode' },
 ];
 
 /**
