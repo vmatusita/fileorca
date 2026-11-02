@@ -1,74 +1,74 @@
-// F6: esqueleto copiado do inglês até a tradução substituir este arquivo (o english-leak.test.ts reprova o que sobrar).
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { UnlockTexts } from '../../pdf/option-texts.ts';
 
-// Unlock PDF page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the shared PDF island
-// shows. The specs rows state the real behaviour of the engine (src/engine/pdf/): when it changes there, change them here.
+// Blocos da página Desbloquear PDF (data-content: how, specs, faq, privacy, related) e os textos do painel que a ilha de
+// PDF mostra. As linhas de especificação dizem o que o motor faz de verdade (src/engine/pdf/): se ele mudar lá, mude
+// aqui e no inglês.
 const texts: PdfToolTexts<UnlockTexts> = {
-  title: 'Unlock PDF: remove a PDF password in your browser',
+  title: 'Desbloquear PDF: tire a senha de um PDF no navegador',
   description:
-    'Open a password-protected PDF or take its restrictions off, right in your browser. The file and the password stay on your device and are never uploaded.',
-  h1: 'Unlock PDF',
-  howHeading: 'How it works',
+    'Abra um PDF protegido por senha ou tire as restrições dele, no próprio navegador. O arquivo e a senha ficam no seu aparelho e nunca são enviados.',
+  h1: 'Desbloquear PDF',
+  howHeading: 'Como funciona',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time, because each file has its own password.',
-    'If the PDF only has restrictions, Oli takes them off straight away. If it needs a password to open, type it in the box and press Remove password.',
-    'Download the new PDF. It opens without a password, and your original file stays untouched.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole, um PDF por vez, porque cada arquivo tem a própria senha.',
+    'Se o PDF só tem restrições, a Oli tira tudo na hora; se ele pede senha para abrir, digite a senha na caixa e aperte Tirar a senha.',
+    'Baixe o PDF novo, que abre sem senha, enquanto o seu arquivo original continua intacto.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'O que entra e o que sai',
   specs: {
-    caption: 'What Unlock PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'O que a Desbloquear PDF recebe e entrega',
+    head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Files', 'One PDF at a time. Oli checks that it is a PDF from what is inside the file, not from its name.'],
-      ['Restrictions only', 'A PDF that opens freely but blocks things like editing, printing or copying loses those restrictions at once. Oli asks for nothing.'],
-      ['Password to open', 'A PDF that asks for a password when you open it needs that password here. Type it in the box and press Remove password.'],
-      ['Wrong password', 'Oli says the password did not open the file, and you can try again as many times as you need.'],
-      ['Kinds of protection', 'AES-256, AES-128 and the old RC4 protection, handled by qpdf running in your browser.'],
-      ['No guessing', 'Without the right password the file stays closed: Oli does not guess or break passwords. Use this only on files you have the right to open and change.'],
-      ['What stays', 'Pages, text, images, form fields, links, bookmarks and document properties stay as they were. Only the protection goes.'],
-      ['What you get', 'A new PDF with no password and no restrictions. Your original file is not changed.'],
-      ['Nothing to remove', 'A PDF with no password and no restrictions has nothing to take off, so Oli tells you that instead of giving the same file back.'],
+      ['Arquivos', 'Um PDF por vez. A Oli confere que é um PDF pelo que há dentro do arquivo, não pelo nome.'],
+      ['Só restrições', 'Um PDF que abre livremente, mas bloqueia coisas como editar, imprimir ou copiar, perde essas restrições na hora. A Oli não pede nada.'],
+      ['Senha para abrir', 'Um PDF que pede senha quando você abre precisa dessa senha aqui. Digite a senha na caixa e aperte Tirar a senha.'],
+      ['Senha errada', 'A Oli avisa que a senha não abriu o arquivo, e você pode tentar de novo quantas vezes precisar.'],
+      ['Tipos de proteção', 'AES-256, AES-128 e a antiga proteção RC4, tratadas pelo qpdf rodando no seu navegador.'],
+      ['Sem adivinhar', 'Sem a senha certa, o arquivo continua fechado: a Oli não adivinha nem quebra senhas. Use só em arquivos que você tem o direito de abrir e alterar.'],
+      ['O que fica', 'As páginas, o texto, as imagens, os campos de formulário, os links, os marcadores e as propriedades do documento ficam como eram. Só a proteção sai.'],
+      ['O que você recebe', 'Um PDF novo, sem senha e sem restrições. O seu arquivo original não muda.'],
+      ['Nada para tirar', 'Um PDF sem senha e sem restrições não tem nada para tirar, então a Oli avisa isso em vez de devolver o mesmo arquivo.'],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Perguntas',
   faq: [
     {
-      q: 'What is the difference between a password to open and restrictions?',
-      a: 'A password to open stops anyone from reading the PDF at all, so you need it here. Restrictions are set by whoever made the file: you can read it, but things like editing, printing or copying text are blocked. Oli takes restrictions off by itself and only asks for a password when the file needs one to open.',
+      q: 'Qual é a diferença entre senha para abrir e restrições?',
+      a: 'A senha para abrir impede qualquer pessoa de ler o PDF, então você precisa dela aqui. As restrições são definidas por quem fez o arquivo: dá para ler, mas coisas como editar, imprimir ou copiar o texto ficam bloqueadas. A Oli tira as restrições sozinha e só pede senha quando o arquivo precisa de uma para abrir.',
     },
     {
-      q: 'Can I open a PDF if I forgot the password?',
-      a: 'No. Oli needs the right password and does not guess or break passwords, so a file without it stays closed. If the file is yours to open, ask the person who made it for the password or for a copy without one.',
+      q: 'Consigo abrir um PDF se esqueci a senha?',
+      a: 'Não. A Oli precisa da senha certa e não adivinha nem quebra senhas, então um arquivo sem ela continua fechado. Se o arquivo é seu para abrir, peça a senha a quem fez o PDF, ou uma cópia sem senha.',
     },
     {
-      q: 'Is it fine to remove the password from any PDF?',
-      a: "Use this only on files you have the right to open and change, such as your own documents or files whose owner allowed it. Removing a password does not give you permission to share or edit someone else's work. When in doubt, ask the owner first.",
+      q: 'Posso tirar a senha de qualquer PDF?',
+      a: 'Use só em arquivos que você tem o direito de abrir e alterar, como os seus próprios documentos ou arquivos cujo dono permitiu. Tirar uma senha não dá a você permissão para compartilhar ou editar o trabalho de outra pessoa. Na dúvida, pergunte ao dono antes.',
     },
     {
-      q: 'Is my PDF or my password uploaded?',
-      a: "No. Oli reads and writes the PDF on your device, in your browser, with qpdf running inside the page. Neither the file nor the password you type is sent anywhere. Open your browser's Network tab while you use the tool: no request carries your files.",
+      q: 'Meu PDF ou a minha senha são enviados para algum lugar?',
+      a: 'Não. A Oli lê e grava o PDF no seu aparelho, no navegador, com o qpdf rodando dentro da página. Nem o arquivo nem a senha que você digita vão para lugar nenhum. Abra a aba Rede do navegador enquanto usa a ferramenta: nenhuma requisição leva os seus arquivos.',
     },
     {
-      q: 'Which kinds of protection does it handle?',
-      a: 'AES-256, AES-128 and the older RC4 protection. Oli removes only the protection, so the pages, text, forms, links and bookmarks stay as they were.',
+      q: 'Que tipos de proteção ela consegue tirar?',
+      a: 'AES-256, AES-128 e a proteção RC4, mais antiga. A Oli tira só a proteção, então as páginas, o texto, os formulários, os links e os marcadores ficam como eram.',
     },
   ],
-  privacyHeading: 'Privacy',
+  privacyHeading: 'Privacidade',
   privacyNote:
-    'Your PDF and the password you type are handled on your device, in your browser, and are never sent to a server. Oli does not keep them.',
-  relatedHeading: 'Related tools',
+    'Seu PDF e a senha que você digita são tratados no seu aparelho, no navegador, e nunca são enviados a um servidor. A Oli não guarda nenhum dos dois.',
+  relatedHeading: 'Ferramentas relacionadas',
   panel: {
-    suffix: 'unlocked',
-    note: 'one PDF at a time',
-    progressLabel: 'Removing protection',
-    done: 'Done! Oli took the protection off your PDF.',
-    doneMany: 'Done! Oli took the protection off {count} PDFs.',
+    suffix: 'desbloqueado',
+    note: 'um PDF por vez',
+    progressLabel: 'Tirando a proteção',
+    done: 'Prontinho! A Oli tirou a proteção do seu PDF.',
+    doneMany: 'Prontinho! A Oli tirou a proteção de {count} PDFs.',
     options: {
-      passwordLabel: 'Password to open the PDF',
-      rule: 'Type the password of this PDF to continue.',
-      submit: 'Remove password',
-      ask: 'This PDF needs a password to open. Type it, then press Remove password.',
+      passwordLabel: 'Senha para abrir o PDF',
+      rule: 'Digite a senha deste PDF para continuar.',
+      submit: 'Tirar a senha',
+      ask: 'Este PDF pede senha para abrir. Digite a senha e aperte Tirar a senha.',
     },
   },
 };
