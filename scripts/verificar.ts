@@ -1,5 +1,5 @@
 // pnpm verificar: every gate of the project, in order, with the time of each one (CLAUDE.md).
-// Each step is also a package.json script, so a gate can run alone (see CLAUDE.md, F1a section).
+// Each step is also a package.json script, so a gate can run alone (see the F1a table in CLAUDE.md, "Comandos").
 // Stops at the first failure; nothing here is optional or skipped.
 //
 // The CI runs it in parts, one job each (ADR-003): `--sem-playwright` runs every gate except the Playwright suite;

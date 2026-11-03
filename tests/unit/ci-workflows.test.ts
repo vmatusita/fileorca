@@ -45,9 +45,16 @@ function afterExclusiveClasses(all: Jobs): string[] {
     .sort();
 }
 
-/** Those jobs whose if has no explicit status function: always(), cancelled() (as in !cancelled()) or failure(). */
+/**
+ * Those jobs whose if has no explicit status function (always(), cancelled() as in !cancelled(), or failure()), or that
+ * call success() anywhere: success() written out looks at every ancestor too, so it skips the job like the implicit one
+ * (the second pass of the review of the F9, R2-7).
+ */
 function withoutStatusFunction(all: Jobs): string[] {
-  return afterExclusiveClasses(all).filter((job) => !/\b(?:always|cancelled|failure)\(\)/.test(String(all[job]?.['if'])));
+  return afterExclusiveClasses(all).filter((job) => {
+    const condition = String(all[job]?.['if']);
+    return !/\b(?:always|cancelled|failure)\(\)/.test(condition) || /\bsuccess\(\)/.test(condition);
+  });
 }
 
 /** Every `gh issue create` of a workflow text, with its title and whether it is assigned to the owner. */
@@ -220,6 +227,8 @@ describe('the classes of the CI and the ci-ok', () => {
     expect(withoutStatusFunction(mutated)).toEqual(['merge']);
     const removed = workflowJobs(CI.replace(merge, "needs.ci-ok.result == 'success' && github.event.pull_request.draft == false"));
     expect(withoutStatusFunction(removed)).toEqual(['merge']);
+    const both = workflowJobs(CI.replace(merge, "success() && needs.ci-ok.result == 'success' && !cancelled() && github.event.pull_request.draft == false"));
+    expect(withoutStatusFunction(both)).toEqual(['merge']);
   });
 
   it('reads the classification from the base branch, with the copy of the PR only while the base has none', () => {

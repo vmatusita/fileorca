@@ -37,7 +37,7 @@ Host, framework, estrutura do repositório e pipeline não mudam numa run. Se a 
 
 DNS, configuração da zona, Worker e variáveis do Workers Builds no Cloudflare; deploy direto com wrangler; configurações do repositório no GitHub; criar contas; enviar e-mail, post ou pedido a qualquer serviço; publicar repositório; código de Worker (o Worker é só assets); formulário que colete cartão de crédito; dependência com licença fora da lista (MIT, Apache-2.0, BSD, ISC, 0BSD, MPL-2.0, OFL-1.1 para fontes e LGPL-3.0 só em arquivo separado; nunca AGPL nem licença não comercial).
 
-Também fora (F9): criar, mudar ou apagar rótulos do GitHub (`gh label`), e importar, mudar, desativar ou apagar rulesets. As duas coisas são do Victor.
+Também fora (F9): criar, renomear ou apagar rótulos do repositório (`gh label`), e importar, mudar, desativar ou apagar rulesets. As duas coisas são do Victor. Pôr e tirar o rótulo `ci` de uma PR continua permitido (regra 1).
 
 ## Testes
 
@@ -79,7 +79,7 @@ Valem a partir da F9, que as escreve no CLAUDE.md. Somam-se às de "Execução p
 Notas à regra 1, da revisão da F9 (DECISOES § 327 e § 338):
 
 - O rótulo `ci` só existe depois que o Victor o cria (Issues → Labels). Sem ele, a execução completa sai do `gh pr ready`, e o `gh pr ready --undo` volta a PR ao rascunho entre uma execução e outra. A run nunca cria o rótulo.
-- O fim da run: com tudo commitado, rode o `gh pr ready` antes do último push, para o último commit ganhar uma execução só, a completa; ou espere a execução leve do último push terminar antes do `gh pr ready`. Nunca o push seguido logo do `gh pr ready`: a execução leve cancelada deixa um `ci-ok` vermelho no mesmo commit, ao lado do verde da completa.
+- O fim da run: com tudo commitado, rode o `gh pr ready` antes do último push, para o último commit ganhar uma execução só, a completa; ou espere a execução leve do último push terminar antes do `gh pr ready`. Evite o push seguido logo do `gh pr ready`: a execução leve cancelada deixa um `ci-ok` vermelho no mesmo commit, ao lado do verde da completa. A ficha de cada run vence: se ela mandar o push e o `gh pr ready` em seguida, espere a execução leve terminar entre os dois.
 
 ## Índice: mexeu em X, leia docs/claude/X.md
 

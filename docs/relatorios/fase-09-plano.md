@@ -15,6 +15,7 @@ Gabarito da revisão adversarial final. A ficha é o `docs/prompts/prompt-fase-0
    - Tudo o que a run empurra fica público na hora: a auditoria continua só em `.cache/`.
    - Os minutos do Actions de um repositório público não são cobrados. O `ci:custo` calcula "como num repositório privado", como a ficha pede.
    - A linha de base já rodou nas máquinas de repositório público. A comparação de custo é justa: mesmas máquinas antes e depois.
+   - **Nota depois das medidas:** a frase acima não se confirmou. O tipo de máquina mudou entre a linha de base e as execuções da PR (o `/` foi de 72 para 145 GB, e os mesmos testes ficaram uns 30 % mais rápidos), por causa desconhecida. O relatório usa também uma conta controlada (DECISOES § 338 e § 339).
    - Configuração lida por GET: nenhum ruleset, aprovação de PR de fork em `first_time_contributors`, secret scanning e push protection desligados, relato privado desligado, Wiki e Projects ligados. Os passos 3 a 6 da seção F do `PLANO-MELHORIAS.md` ficam urgentes. Nada disso é desta run.
 2. **O rótulo `ci` não existe.** A run não cria rótulo. Vale o caminho da ficha: a execução completa sai do `gh pr ready`. Se ela falhar, `gh pr ready --undo`, a correção, e `gh pr ready` de novo.
 3. **O `PLANO-FILEORCA.md` não tem diff.** A linha do Victor não está lá: a run não toca no arquivo e registra a pendência.
