@@ -2874,3 +2874,47 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..08
 - **Os arquivos compartilhados** (`src/i18n/{pt,es}/common.ts`, as homes, o glossário) ficaram com o agente principal: os redatores devolveram os cartões e os termos novos na resposta, e o agente principal os integrou. Assim nenhum par de agentes mexeu no mesmo arquivo.
 - **Os stubs:** enquanto os lotes eram escritos, cada arquivo de texto novo existia como cópia do inglês marcada `// STUB-IDIOMAS`, para o build e os testes rodarem. Nenhum stub chega à PR (o `english-leak.test.ts` reprova texto inglês numa página de pt e es, e a busca pelo marcador fica no relatório).
 - **A leitura de cada lote:** o agente principal leu cada lote contra o glossário e rodou o `lint:texto` antes de o lote entrar na branch.
+
+## § 317 · O glossário do ajuste "idiomas" (ajuste idiomas, decisão 7)
+
+- **O que entrou:** em `docs/i18n/pt.md`, o QR code (a seção nova, o nome da página e os nomes dos arquivos) e os 10 guias de arquivo (nomes, caminhos, termos e os rótulos de sistema como as páginas de suporte em português escrevem); em `docs/i18n/es.md`, o mesmo para o QR e os guias, e o resto do dinheiro dos EUA (os termos do Toolkit hipotecario, dos formulários H-28 e do glossário do CFPB, conferidos em 3/nov/2026). Os termos vieram dos redatores de cada lote; o agente principal os juntou e conferiu com os textos.
+- **Duas correções do que a F6 escreveu:**
+  - **A data do glossário do CFPB:** o `es.md` dizia "abril de 2021". Os arquivos que existem são o "Spanish-English glossary of financial terms" de março de 2024 (o que o site segue) e a edição de abril de 2022; não há uma de 2021.
+  - **O motivo da linha "Nunca" de "tasa de porcentaje anual":** dizia "o CFPB não usa essa forma", e o glossário do CFPB de 2024 e o do FDIC usam. A regra continua (o site escreve "tasa porcentual anual (APR)", como o Toolkit, os formulários H-28 e a FTC); o motivo passou a dizer isso.
+- **APY:** fica "rendimiento porcentual anual (APY)", como a F6 e a calculadora de interés compuesto já escrevem. Alternativa: "porcentaje de rendimiento anual", a forma do FDIC (o CFPB não tem o termo em espanhol). Ficar com a forma do site evita duas grafias do mesmo termo e casa com "tasa porcentual anual".
+- **"Declaración de Cierre":** os textos novos usam a forma do formulário H-28(G) e do Toolkit. O texto do préstamo personal da F6 diz "Divulgación de Cierre" (a forma do glossário do CFPB): a página antiga não muda nesta run, e a diferença vai para o `PENDENCIAS.md`.
+- **"Carro" e "coche":** nenhum texto em espanhol usa "coche" (de outros países) nem "carro" (forma da FTC); a página diz "auto". "Préstamo para carro" fica só entre os sinônimos da busca, porque é como muita gente procura. Nenhum dos dois entrou no "Nunca", porque o teste do glossário leria também os sinônimos e os endereços das fontes.
+- **"Quincenal":** fora dos textos e dos sinônimos (§ 309). Não entrou no "Nunca" porque uma frase que explique a diferença precisaria da palavra.
+
+## § 318 · Os portões e os testes com idioma (ajuste idiomas, decisão 8)
+
+- **`gate:seo`:** o título de um guia de arquivo é comparado com o nome do cartão do idioma da página e com o H1 da ferramenta no idioma; um guia sem nome no cartão do idioma vira problema (antes um nome vazio aprovaria qualquer título). O QR entrou na checagem de sitemap por registro (`SITEMAP_REGISTRY_IDS`).
+- **`gate:conteudo`:** o QR é conferido no idioma de cada página, com a frase de privacidade de cada um ("your text stays on your device", "seu texto fica no seu aparelho", "tu texto se queda en tu dispositivo") e o "never opens"/"nunca abre"; os guias, nos três idiomas (10 × 3, e o mapa de rotas tem de bater com o registro). A data da medida é procurada no formato do idioma, com os meses do `src/i18n/dates.ts`. O `FILLER` ganhou listas de pt e es (sem "hoy en día" e "nos dias de hoje", que são texto normal); pt e es também passam pela lista inglesa. O limite de 800 a 1.500 palavras não mudou.
+- **`gate:design`:** a voz dos guias de arquivo nos três idiomas (só o texto visível, como na F5b) e a das outras 21 páginas novas (QR em pt e es, as 13 páginas e o hub de dinheiro em es, os 5 guias de dinheiro em es), no texto visível e no `data-props` (`scripts/lib/voice-pages.ts`). As 5 calculadoras da F6 em es e as outras páginas antigas ficam de fora: é a pendência F7 f-11, que vale para elas.
+- **`lint:texto`:** os guias de arquivo de pt e es são preenchidos pelo `fillValues` no formato do idioma, e os guias de dinheiro em es pelo `GUIDE_FACTS[id]('es')`; o espanhol ganhou amostras para os placeholders das calculadoras novas que não são dinheiro (`front`, `back`, `rule`, `paymentDiff`, `totalDiff`, `interestEffect`, `interestPart`, `timePart`, `base`, e por página onde o nome muda de sentido), e o QR para `{max}`, `{count}` e `{side}`. O portão importa os módulos pelo Node: o `measured.ts` e o `guides.ts` não usam `import.meta.glob`.
+- **Os specs:**
+  - **`qr-code.spec.ts`** roda em en, pt e es: em pt e es, um teste de ida e volta por idioma (PNG e SVG, com e sem a Oli, lidos pelo jsqr com o `binaryData` igual aos bytes UTF-8 de um texto com "ação", "año", "ñandú" e emoji) e o de privacidade (nada sai, o evento leva o `lang` e não o texto, a caixa com `autocomplete`, `spellcheck` e `autocapitalize` desligados).
+  - **`money-es.spec.ts`** (novo, o nome cai entre `money-calc` e `money-health`): as 18 páginas em es em 6 blocos de 3, cada um no limite padrão de 60 s; o ResultHero e as linhas da tabela aberta iguais aos do inglês (como números), o CSV contra a fixture do oráculo (o mapa depende da calculadora: cronograma linha a linha, saldos de fim de ano, o APY, a última linha dos juros simples) e o PDF em Letter com os rótulos em espanhol. Com o mapa do oráculo trocado de propósito, 5 dos 6 blocos reprovam.
+  - **`money-calc.spec.ts` e `calc-form.spec.ts`:** os testes que percorrem todas as páginas de dinheiro (44) vão em blocos de 15, com os 120 s de antes por bloco (§ 306).
+  - **`tool-guides.spec.ts`:** os 30 guias; em pt e es um teste por guia faz as duas provas (a ferramenta funciona no idioma e a Oli não cobre linha), com o limite de 90 s que o teste da ferramenta já tinha.
+  - **`ads.spec.ts`:** as 18 páginas de dinheiro em es com a regra dos 740 px, os 5 guias de dinheiro em es, os guias de arquivo nos três idiomas e o QR em pt e es.
+  - **`i18n-budgets.spec.ts`:** o orçamento e o par em `SAME_FILES` (os mesmos arquivos JS do inglês) para as 40 páginas.
+  - **`navigation.spec.ts`:** o exemplo de página só em inglês passa a ser o `/bmi-calculator/` (o guia ganhou par); a busca e o 404 de pt e es acham o QR pelos sinônimos da ficha e as páginas novas.
+  - **`layout-shift.spec.ts`:** a varredura da § 305 refeita nas 45 páginas de pt e es, de 320 a 412 px, nos dois navegadores (a § 305 olhava só o Chromium); as páginas na borda entraram em `CASES`.
+  - **`a11y.spec.ts`:** o QR com código e acima do limite em cada idioma; mais nada (o spec já domina a parte 1 do Chromium).
+
+## § 319 · Casa e saúde: a escolha para o gatilho da § 273 (ajuste idiomas, decisão 10)
+
+- **A escolha do Victor, de 2/nov/2026, para quando o gatilho vier** (31/jan/2027, § 273):
+  - **casa só em espanhol:** as 6 calculadoras usam unidades dos EUA (pés, jardas, galões), e o mulch não é coisa do Brasil;
+  - **saúde em português e em espanhol,** com o sistema métrico como padrão em português.
+- **Nesta run** nada de código, rota ou texto de casa e saúde mudou. A nota entrou na linha "90 dias" do `docs/PENDENCIAS.md`.
+
+## § 320 · O CI em 19 partes (ajuste idiomas, decisão 9; na linha da ADR-003, que não muda)
+
+- **A projeção** (exploração e, com o tempo por spec da execução 41548317129 e o modelo de partição do `--shard`, que reproduz a F8 com erro de 1 a 3 %): as 40 páginas somam uns 250 testes por navegador; com as partes da F8, a parte 9 do WebKit iria a uns 732 s e a 1 do Chromium a 653 s. A parte `verificar` iria de 674,8 s a uns 715 s (o `lint:texto` com a diff desta PR, o build e o Vitest crescem; o Lighthouse sozinho são 382,6 s). A variância entre execuções do mesmo código chega a ±35 %.
+- **A decisão:** Chromium em 5 partes, WebKit em 12, e a parte `verificar` em duas: `--sem-playwright --sem-lighthouse` (todos os portões menos o Lighthouse) e `--lighthouse` (o build e o Lighthouse). São opções novas do `scripts/verificar.ts`. O job `verificar` virou uma matriz de duas entradas com o mesmo id, então o `needs` do `merge` e do `alerta-dependabot` não muda; só a parte do Lighthouse instala o Chromium.
+- **Alternativas:** dividir só o Playwright (a parte `verificar` passaria do alvo de 700 s e pediria outro ajuste do `ci.yml` logo depois); tirar o Vitest da parte `verificar` (fica desequilibrado: uns 160 s contra 555 s); encaixar o Lighthouse numa parte do Chromium (a mais leve iria a 690 a 860 s).
+- **O `design.spec.ts` e o `image-matrix.spec.ts`** ficam em partes diferentes do WebKit (§ 142): pelo `--list`, o `design` cai inteiro na parte 6 e a matriz de imagens na 9, com o `i18n-budgets` entre elas.
+- **O custo:** cada execução passa de 15 para 19 jobs, de uns 141 para uns 165 minutos cobrados (`docs/OPERACAO.md`).
+- **A prova:** o `tests/unit/verificar.test.ts` lê as duas matrizes do `ci.yml` e confere que as 19 partes cobrem o todo, cada portão numa parte só; recusa as combinações que não conhece. Com o `ci.yml` no diff, o merge desta PR é do Victor (§ 297).
