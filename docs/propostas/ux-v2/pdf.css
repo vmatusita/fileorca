@@ -1,0 +1,174 @@
+/* FileOrca UX v2 (F10) · UX-11, the pieces of the PDF tools (pdf-pieces.html).
+   Loaded after ../../design/components/bundle.css and proto.css. Colours: only var(--token); no new token.
+   Sections:
+     1. the catalogue page (pp-*): blocks, before and after, the paper of a PDF page
+     2. the site today: the F5a rules of src/styles/components.css that bundle.css does not have, copied as they are
+        (the "before" of every block is drawn with them)
+     3. the proposal, scoped to .pp-new (the "after" of every block). In the F13 the same rules go to
+        src/styles/components.css without the .pp-new prefix (the specification writes them out). */
+
+/* ---------- 1. The catalogue page ---------- */
+.pp-intro { display: grid; gap: var(--space-3); }
+.pp-howto { display: grid; gap: var(--space-1); margin: 0; padding-left: var(--space-6); list-style: disc; color: var(--ink); }
+.pp-block { margin-top: var(--space-12); display: grid; gap: var(--space-3); min-width: 0; }
+.pp-block__title { font: 600 24px/30px var(--font-display); color: var(--ink); }
+.pp-sub { margin-top: var(--space-4); font: 700 18px/26px var(--font-text); color: var(--ink); }
+.pp-block__lead { color: var(--ink); }
+.pp-fixes { font: 600 14px/20px var(--font-text); color: var(--ink-muted); }
+.pp-pair { display: grid; gap: var(--space-8); min-width: 0; }
+.pp-case { margin: 0; display: grid; gap: var(--space-3); min-width: 0; padding-top: var(--space-3); border-top: var(--stroke-2) dashed var(--hairline); }
+.pp-case__cap { font: 600 14px/20px var(--font-text); color: var(--ink-muted); }
+.pp-case--after .pp-case__cap { color: var(--ink); }
+.pp-case__note { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.pp-stage { display: grid; gap: var(--space-4); min-width: 0; }
+
+/* The paper of a PDF page: a PDF is paper in both themes, so it carries data-theme="light" (tokens.css takes the
+   attribute on any element) and stays white with grey lines when the page around it is dark. Decorative. */
+.pp-paper { box-sizing: border-box; display: grid; align-content: start; gap: 7%; height: 100%; aspect-ratio: var(--page-ratio, 0.7727); padding: 14% 11%; background: var(--surface); }
+.pp-paper > i { display: block; height: 3px; border-radius: 2px; background: var(--hairline); }
+.pp-paper > i.pp-paper__h { width: 58%; height: 6px; background: var(--ink-muted); }
+.pp-paper > i.pp-paper__s { width: 62%; }
+/* In a grid cell the paper stands in for the site's <img>: absolutely placed, so it never widens the grid track. */
+.fo-page__sheet { position: relative; }
+.fo-page__sheet > .pp-paper { position: absolute; top: 0; bottom: 0; left: 50%; height: 100%; width: auto; transform: translateX(-50%); }
+.fo-sign__page .pp-paper { width: 100%; height: 100%; gap: 4%; padding: 9% 9%; }
+.fo-sign__page .pp-paper > i.pp-paper__h { height: 10px; }
+.pp-sig { display: block; width: 100%; height: auto; color: var(--ink); }
+
+/* The 4x detail of one letter of the preview (F5a F-5): the stretched thumbnail and the page drawn at the box's width. */
+.pp-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.pp-zoom__box { flex: none; width: 96px; height: 96px; display: grid; place-items: center; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); }
+.pp-zoom__paper { width: 92px; height: 92px; display: grid; place-items: center; border-radius: 4px; background: var(--surface); }
+.pp-zoom__paper svg { width: 56px; height: 78px; }
+.pp-zoom .pp-case__note { flex: 1 1 200px; }
+.pp-px-a { fill: var(--ink); }
+.pp-px-b { fill: var(--ink-muted); }
+.pp-px-c { fill: var(--hairline); }
+.pp-px-path { fill: none; stroke: var(--ink); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* A static picture of the focus ring (the real one shows on :focus-visible). */
+.pp-ring { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+
+/* ---------- 2. The site today (src/styles/components.css, F5a; tokens only) ---------- */
+/* Where bundle.css and the site differ, the site wins (DECISOES § 40). */
+.fo-field { border: 0; padding: 0; margin: 0; min-width: 0; }
+.fo-field__label { padding: 0; margin-bottom: var(--space-2); }
+.fo-field > .fo-field__label:is(label) { margin-bottom: 0; }
+.fo-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3) var(--space-4); align-items: start; }
+.fo-seg { border: 0; }
+.fo-seg__opt:has(input:focus) { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-file { grid-template-columns: 52px minmax(0, 1fr) auto; color: var(--ink); }
+.fo-file__thumb { display: grid; place-items: center; }
+.fo-queue { display: grid; gap: var(--space-3); }
+
+.fo-options-stack { display: grid; gap: var(--space-4); }
+.fo-fields--stack { grid-template-columns: minmax(0, 1fr); max-width: 420px; }
+.fo-ready { display: grid; gap: var(--space-4); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); }
+.fo-seg--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: var(--radius-lg); }
+.fo-seg--grid .fo-seg__opt { border-radius: var(--radius-md); }
+.fo-check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font: 600 15px/20px var(--font-text); color: var(--ink); align-self: end; }
+.fo-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--brand); }
+.fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--font-text); cursor: pointer; }
+.fo-pass__toggle:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; }
+.fo-pass__toggle[aria-pressed="true"] { background: var(--brand-soft); }
+
+.fo-pages { display: grid; gap: var(--space-3); }
+.fo-pages__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.fo-pages__count { margin: 0 auto 0 0; font: 600 15px/20px var(--font-text); color: var(--ink); }
+.fo-pages__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-3); }
+/* bundle.css uses .fo-page and .fo-page__main for the ToolPage preview (a 360 px page); the site's are the grid cell. */
+.fo-page { --fo-ground: var(--bg); box-sizing: border-box; width: auto; min-width: 0; display: grid; gap: var(--space-1); padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
+.fo-page[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-2) - 1px); }
+.fo-page[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
+.fo-page__main { position: relative; display: grid; gap: var(--space-1); justify-items: center; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/18px var(--font-text); }
+.fo-page__main:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+.fo-page__sheet { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--surface-sunken); overflow: hidden; }
+.fo-page__n { font-variant-numeric: tabular-nums; }
+.fo-page__moves { display: flex; justify-content: space-between; }
+.fo-page__move--back .fo-icon, .fo-merge__move--up .fo-icon { rotate: 180deg; }
+
+.fo-merge .fo-filelist__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.fo-merge__grab[aria-pressed="true"] { background: var(--brand-soft); }
+.fo-merge__moves { display: flex; flex-direction: column; }
+.fo-merge__move .fo-icon { rotate: 90deg; }
+.fo-merge__move--up .fo-icon { rotate: -90deg; }
+@media (max-width: 479px) {
+  .fo-merge .fo-filelist__row { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "card card" "grab moves"; row-gap: var(--space-1); }
+  .fo-merge .fo-filelist__row > .fo-file { grid-area: card; }
+  .fo-merge__grab { grid-area: grab; }
+  .fo-merge__moves { grid-area: moves; flex-direction: row; justify-self: end; }
+}
+
+.fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
+.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
+.fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
+.fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--font-text); }
+
+/* A rail of three choices with a help line each does not fit 320 px: below 480 px it wraps, and with help lines it stacks. */
+.fo-pdf-island .fo-seg { flex-wrap: wrap; }
+.fo-pdf-island .fo-seg__opt { flex: 1 0 auto; }
+@media (max-width: 479px) {
+  .fo-pdf-island .fo-seg:has(small) { flex-direction: column; border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:has(small) .fo-seg__opt { border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+}
+
+/* ---------- 3. The proposal (UX-11), scoped to .pp-new ---------- */
+
+/* 3.1 The page grid. F5a D-7: the picked page carries a check, not only colour and border width. The mark sits in the
+   number row, on the cell's surface (never over the page picture, which is white in both themes). */
+.pp-new .fo-page__n { display: inline-flex; align-items: center; gap: var(--space-2); }
+.pp-new .fo-page__check { box-sizing: border-box; display: inline-grid; place-items: center; width: 24px; height: 24px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--on-brand); }
+.pp-new .fo-page__check .fo-icon { width: 16px; height: 16px; stroke-width: 3; visibility: hidden; }
+.pp-new .fo-page[data-selected="true"] .fo-page__check { background: var(--brand); border-color: var(--brand-edge); }
+.pp-new .fo-page[data-selected="true"] .fo-page__check .fo-icon { visibility: visible; }
+/* F5a F-8: the 3 px border moves the fold out with it, as the FileCard already does (components.css:231). */
+.pp-new .fo-page[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
+/* F5a F-14 (bar): below 480 px the count takes its own line and the two buttons share the next one. */
+@media (max-width: 479px) {
+  .pp-new .fo-pages__count { flex-basis: 100%; }
+  .pp-new .fo-pages__count ~ .fo-btn { flex: 1 1 0; }
+}
+/* F5a D-12: no PDF piece uses .fo-btn--sm (40 px) any more; Pick all, Pick none, Clear and Reverse order take the
+   normal size (control-h, 52 px) at every width, so the markup of the "after" has no --sm and no rule is needed. */
+
+/* 3.2 The signature box. F5a D-9: the frame no longer clips, so the system's ring (3 px, 2 px away) is whole at every
+   edge; the picture keeps the inner radius instead. The sheet inside the frame is paper in both themes
+   (data-theme="light"): the dashed box and its ring keep the light theme's brand and focus on white (5.09:1), and the
+   part of the ring outside the frame is 3.13:1 on the dark surface (pair UX11-7). */
+.pp-new .fo-sign__page { overflow: visible; }
+.pp-new .fo-sign__sheet { position: absolute; inset: 0; border-radius: calc(var(--radius-xs) - var(--stroke-2)); background: var(--surface); }
+.pp-new .fo-sign__sheet > .pp-paper { border-radius: inherit; }
+.pp-new .fo-sign__sheet .fo-sign__box:focus-visible { outline-color: var(--focus); }
+
+/* 3.3 The note (F5a F-10): the system's notice, brand-soft with the info icon (docs/design/README, "Cor"); the
+   ScenarioCompare difference (.fo-diff) is the same piece. */
+.fo-note { margin: 0; display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--font-text); }
+.fo-note > .fo-icon { flex: none; margin-top: -1px; color: var(--brand); }
+
+/* 3.4 The PDF file card. F5a F-6: the pdf icon in the category's soft colour instead of an empty square.
+   F5a F-7: on the ready card the fold cuts with the card's own ground. */
+.pp-new .fo-cat--pdf:not([data-state="error"]) > .fo-file__thumb { background: var(--fo-cat-soft); color: var(--ink); }
+.pp-new .fo-ready .fo-file { --fo-ground: var(--surface); }
+/* F5a D-8: in the Merge list the name is who the row is: up to two lines, broken anywhere. */
+.pp-new .fo-merge .fo-file__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; overflow-wrap: anywhere; }
+
+/* 3.5 The move arrows (D-23): an arrow that moves is a button, with the stroke and the lip (the default variant, like the
+   download of a row); a disabled one keeps the Button README's disabled look (sunken, hairline, no lip). */
+.pp-new .fo-merge__moves, .pp-new .fo-page__moves { gap: var(--space-1); }
+@media (max-width: 479px) {
+  .pp-new .fo-merge__moves { gap: var(--space-2); }
+}
+
+/* 3.6 The yes-or-no choice (F5a F-11): the OptionGroup takes the checkbox's place beside First number; below 480 px it
+   takes the whole row, so its two options are never narrower than 140 px. */
+@media (max-width: 479px) {
+  .pp-new .fo-fields > .fo-options { grid-column: 1 / -1; }
+}
+
+/* 3.7 The rail of three choices (F5a F-14): below 480 px, without help lines, the options share one row of equal
+   columns (the look of .fo-seg--grid), and a long label breaks in two lines inside its 48 px. */
+@media (max-width: 479px) {
+  .pp-new .fo-pdf-island .fo-seg:not(:has(small)) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-radius: var(--radius-lg); }
+  .pp-new .fo-pdf-island .fo-seg:not(:has(small)) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
+}
