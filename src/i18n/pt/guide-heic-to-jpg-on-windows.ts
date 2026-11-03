@@ -1,94 +1,93 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Convert HEIC to JPG on Windows, Photo by Photo or All at Once',
-  description: 'Why Windows will not open your iPhone photos, the settings that avoid HEIC, and what changes in size and location when the photos become JPGs.',
-  h1: 'How to convert HEIC to JPG on Windows',
-  lead: 'Your iPhone saved the photo as HEIC, and Windows will not open it, or a website will not take it. Here is why, and how to end up with a JPG.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Como converter HEIC para JPG no Windows, uma foto ou todas de uma vez',
+  description: 'Por que o Windows não abre as fotos do iPhone, os ajustes que evitam o HEIC e o que muda no tamanho e na localização quando as fotos viram JPG.',
+  h1: 'Como converter HEIC para JPG no Windows',
+  lead: 'Seu iPhone salvou a foto em HEIC, e o Windows não abre o arquivo, ou um site não aceita. Veja por que isso acontece e como chegar a um JPG.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'HEIC is the file Apple writes when an iPhone or iPad saves photos in its High Efficiency format, which is built on HEIF. The picture is the same as in a JPG, but it is packed more tightly, so the phone keeps more photos in the same space. The catch is everywhere else: Windows needs extra software to show it, and many upload forms still ask for a JPG.',
-    'You can fix this in different places. You can teach Windows to read HEIC, you can tell the iPhone to stop writing it, or you can convert the files you already have. Each one solves a different part of the problem, and the last one is the only one that gives you JPG files to send anywhere.',
+    'HEIC é o arquivo que a Apple grava quando um iPhone ou iPad salva as fotos no formato Alta Eficiência, que se baseia no HEIF. A imagem é a mesma de um JPG, mas fica guardada de um jeito mais compacto, e por isso cabem mais fotos no mesmo espaço do celular. O problema aparece em todo o resto: o Windows precisa de um programa a mais para mostrar o arquivo, e muitos formulários de envio ainda pedem JPG.',
+    'Dá para resolver isso em lugares diferentes. Você pode ensinar o Windows a ler HEIC, pode pedir ao iPhone que pare de gravar nesse formato ou pode converter os arquivos que já tem. Cada caminho resolve uma parte do problema, e só o último entrega arquivos JPG que você pode mandar para qualquer lugar.',
   ],
-  toolHeading: 'Convert your HEIC photos here',
-  toolIntro: 'Drop one HEIC photo or a whole batch. Each one becomes a JPG inside this browser tab, so the photos are never uploaded, and a batch comes back as one ZIP.',
+  toolHeading: 'Converta suas fotos HEIC aqui',
+  toolIntro: 'Solte uma foto HEIC ou um lote inteiro. Cada uma vira JPG dentro desta aba do navegador, então as fotos nunca são enviadas, e um lote volta num só ZIP.',
   sections: [
     {
-      heading: 'Why Windows asks for an extension',
+      heading: 'Por que o Windows pede uma extensão',
       paragraphs: [
-        'Windows does not read HEIC on its own. When you open one in the Photos app, Microsoft says you may see the message "You need an extension to use this file." The fix Microsoft gives is a pair of extensions from the Microsoft Store: HEIF Image Extensions, which is {heifPrice}, and HEVC Video Extensions, which costs {hevcPrice}. Microsoft says you need both, even if you only plan to look at photos, and that the Photos app has to be restarted after they are installed.',
-        'That is a good fix if all you want is to look at the photos on your own PC. It does not change the files, though. They are still HEIC, so the website, the shared folder or the person you send them to may still be unable to open them.',
+        'O Windows não lê HEIC sozinho. Quando você abre um arquivo desses no aplicativo Fotos, a Microsoft avisa que pode aparecer a mensagem "Você precisa de uma extensão para usar este arquivo". A solução que a Microsoft dá são duas extensões da Microsoft Store: as Extensões de Imagem HEIF, que são {heifPrice}, e as Extensões de Vídeo HEVC, que custam {hevcPrice}. Segundo a Microsoft, você precisa das duas, mesmo que só pretenda ver fotos, e o aplicativo Fotos tem de ser reiniciado depois da instalação.',
+        'É uma boa saída se você só quer ver as fotos no seu próprio computador. Só que ela não muda os arquivos. Eles continuam em HEIC, então o site, a pasta compartilhada ou a pessoa que recebe as fotos pode continuar sem conseguir abrir.',
       ],
     },
     {
-      heading: 'Stop the iPhone from writing HEIC',
+      heading: 'Faça o iPhone parar de gravar em HEIC',
       paragraphs: [
-        'If most of your photos end up on Windows, you can switch the camera to JPG for everything you take from now on. Apple describes the setting: open Settings, tap Camera, tap Formats, then tap Most Compatible. From then on the camera saves photos as JPEG and videos as H.264. Choosing High Efficiency goes back to HEIF and HEVC, which take less space on the phone.',
-        'Apple also recommends Most Compatible when you transfer photos to a Windows PC, together with its Apple Devices app from the Microsoft Store. This only changes the photos you take after the switch. The ones already on the phone stay HEIC.',
+        'Se as suas fotos vão parar no Windows, você pode passar a câmera para JPG em tudo o que fotografar daqui em diante. A Apple descreve o ajuste: abra Ajustes, toque em Câmera, toque em Formatos e, em seguida, toque em Mais Compatível. A partir daí, a câmera salva as fotos em JPEG e os vídeos em H.264. Escolher Alta Eficiência volta para HEIF e HEVC, que ocupam menos espaço no celular.',
+        'A Apple também recomenda o Mais Compatível para quem transfere fotos para um PC com Windows, junto com o app Dispositivos Apple, da Microsoft Store. Isso só muda as fotos que você tirar depois do ajuste. As que já estão no celular continuam em HEIC.',
       ],
     },
     {
-      heading: 'Let the transfer convert them',
+      heading: 'Deixe a transferência converter',
       paragraphs: [
-        'When photos travel from an iPhone to a computer over a cable, Apple says the media may be converted to JPEG or H.264 on the way. The phone does this unless it is told to keep the originals: open Settings, tap Apps, tap Photos, then scroll down and tap Keep Originals. If you leave that setting off, the copies that reach the PC can already be JPGs.',
-        'Microsoft points to a similar route without a cable: many devices convert HEIC photos to a more common format when the files are transferred or emailed, and OneDrive can convert photo files on its own. Both depend on how the photos travel, so they are worth knowing but hard to count on for a folder of files you already have.',
+        'Quando as fotos vão do iPhone para o computador pelo cabo, a Apple diz que elas podem ser convertidas em JPEG ou H.264 no caminho. O celular faz isso a não ser que você peça para manter os originais: abra Ajustes, toque em Apps e em Fotos, role para baixo e toque em Manter Originais. Se você não escolher essa opção, as cópias que chegam ao PC já podem ser JPG.',
+        'A Microsoft aponta um caminho parecido, sem cabo: muitos aparelhos convertem fotos HEIC para um formato mais comum quando os arquivos são transferidos ou enviados por e-mail, e o OneDrive pode converter arquivos de foto sozinho. Os dois dependem de como as fotos viajam, então vale conhecer, mas é difícil contar com eles para uma pasta de arquivos que você já tem.',
       ],
     },
     {
-      heading: 'Convert the files you already have',
+      heading: 'Converta os arquivos que você já tem',
       paragraphs: [
-        'For photos that are already HEIC on your PC or in a download folder, a converter is the direct way. The tool on this page reads each HEIC file with libheif, the same open decoder for every browser, turns the main picture upright and writes a new JPG from its pixels. You can drop one file or a whole folder of them, and the ZIP keeps the original names with a .jpg ending.',
-        'Nothing is sent anywhere. The conversion runs in your browser tab, which is also why it works for private photos: the network tab of your browser shows no request carrying the file.',
+        'Para fotos que já estão em HEIC no seu computador ou na pasta de downloads, um conversor é o caminho direto. A ferramenta desta página lê cada HEIC com o libheif, o mesmo decodificador aberto em todos os navegadores, deixa a imagem principal na posição certa e grava um JPG novo a partir dos pixels. Você pode soltar um arquivo ou uma pasta inteira, e o ZIP mantém os nomes originais, com a terminação .jpg.',
+        'Nada é enviado a lugar nenhum. A conversão roda na aba do navegador, e é por isso que ela serve para fotos privadas: a aba Rede do navegador não mostra nenhuma requisição levando o arquivo.',
       ],
     },
     {
-      heading: 'What converting did to our photos',
+      heading: 'O que a conversão fez com as nossas fotos',
       paragraphs: [
-        'We ran the converter on our {files} HEIC test photos, taken with {cameras} different camera models, from iPhones to a Samsung phone and an Apple Vision Pro. Together the HEIC files weighed {heicTotal}. The JPGs weighed {jpgTotalChromium}, which is {ratioTotalChromium_more} more.',
-        'That is the price of compatibility. Photo by photo the change went from {ratioMinChromium_change} to {ratioMaxChromium_change}, and half of them grew by {ratioMedianChromium_more} or less. A JPG packs the same picture less tightly than HEIC, which is why our photos came out bigger together, not smaller. If you need it smaller, compress or resize the JPG afterwards.',
-        'All {sameSizeChromium_word} JPGs kept the size in pixels of the photo as the phone shows it, turned the right way up.',
+        'Rodamos o conversor nas nossas {files} fotos HEIC de teste, tiradas com {cameras} modelos de câmera diferentes, de iPhones a um celular Samsung e um Apple Vision Pro. Juntos, os arquivos HEIC pesavam {heicTotal}. Os JPGs pesaram {jpgTotalChromium}, ou seja, {ratioTotalChromium_more} a mais.',
+        'Esse é o preço da compatibilidade. Foto a foto, a mudança foi de {ratioMinChromium_change} a {ratioMaxChromium_change}, e metade delas cresceu {ratioMedianChromium_more} ou menos. O JPG guarda a mesma imagem de um jeito menos compacto que o HEIC, e por isso as nossas fotos saíram maiores no total, e não menores. Se você precisa de um arquivo menor, comprima ou redimensione o JPG depois.',
+        'Todos os {sameSizeChromium_word} JPGs mantiveram o tamanho em pixels da foto como o celular a mostra, na posição certa.',
       ],
     },
     {
-      heading: 'The location does not come along',
+      heading: 'A localização não vem junto',
       paragraphs: [
-        'A photo can carry where it was taken. Of our {files} photos, {gpsBefore} had real GPS coordinates, and {gpsTagBefore} had a GPS tag of some kind, filled or empty. After the conversion, the number of JPGs with any GPS data in them was {gpsAfterChromium}.',
-        'This is on purpose: the tool writes each JPG from the pixels, so the location, the camera details and the other metadata of the HEIC stay behind. If you want the location kept, for a photo map or an album, keep the HEIC original, or use the export of your photo app instead.',
+        'Uma foto pode guardar o lugar onde foi tirada. Das nossas {files} fotos, {gpsBefore} tinham coordenadas de GPS de verdade, e {gpsTagBefore} tinham algum tipo de marcação de GPS, preenchida ou vazia. Depois da conversão, o número de JPGs com algum dado de GPS foi {gpsAfterChromium}.',
+        'Isso é de propósito: a ferramenta grava cada JPG a partir dos pixels, então a localização, os dados da câmera e os outros metadados do HEIC ficam para trás. Se você quer manter a localização, para um mapa de fotos ou um álbum, guarde o HEIC original ou use a exportação do seu app de fotos.',
       ],
     },
     {
-      heading: 'What else stays in the HEIC',
+      heading: 'O que mais fica no HEIC',
       paragraphs: [
-        'Converting re-encodes the picture, so the JPG is a new file, not a copy of the HEIC with a new name. Some HEIC files also hold more than one picture. Only the main picture becomes the JPG: the depth map of a portrait shot and the second picture of a spatial photo are left out.',
-        'Your HEIC files are never changed. Keep them as the originals and send the JPGs, and you lose nothing.',
+        'Converter codifica a imagem de novo, então o JPG é um arquivo novo, e não uma cópia do HEIC com outro nome. Alguns arquivos HEIC também guardam mais de uma imagem. Só a imagem principal vira o JPG: o mapa de profundidade de uma foto de retrato e a segunda imagem de uma foto espacial ficam de fora.',
+        'Seus arquivos HEIC nunca são alterados. Guarde os originais e mande os JPGs, e você não perde nada.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Every HEIC test photo of this site, converted with the defaults of the tool above. Change is the JPG against the HEIC.',
-  measuredNote: 'Measured on {date} in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, through the HEIC to JPG page of this site, on our {files} HEIC test photos. The table shows Chromium; WebKit gave the same bytes for {identicalBrowsers_word} of the {files} photos.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Todas as fotos HEIC de teste deste site, convertidas com o padrão da ferramenta acima. A mudança compara o JPG com o HEIC.',
+  measuredNote: 'Medido em {date} no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, pela página HEIC para JPG deste site, nas nossas {files} fotos HEIC de teste. A tabela mostra o Chromium; o WebKit deu os mesmos bytes em {identicalBrowsers_wordf} das {files} fotos.',
   tables: [
     {
-      heading: 'Our HEIC photos as JPG',
-      caption: 'Each HEIC test photo: its camera, its size as HEIC and as JPG, the change, its size in pixels, and its GPS before and after',
-      head: ['Camera', 'HEIC', 'JPG', 'Change', 'Pixels', 'GPS before', 'GPS after'],
+      heading: 'Nossas fotos HEIC em JPG',
+      caption: 'Cada foto HEIC de teste: a câmera, o tamanho em HEIC e em JPG, a mudança, o tamanho em pixels e o GPS antes e depois',
+      head: ['Câmera', 'HEIC', 'JPG', 'Mudança', 'Pixels', 'GPS antes', 'GPS depois'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'ms-photos', label: 'Microsoft Support: Photos app Video Editor error, can’t view this file type', href: 'https://support.microsoft.com/en-us/windows/apps/photos/photos-app-video-editor-error-can-t-view-this-file-type', read: '2026-11-01' },
-    { id: 'ms-heif', label: 'Microsoft Store: HEIF Image Extension', href: 'https://apps.microsoft.com/detail/9pmmsr1cgpwg?hl=en-US&gl=US', read: '2026-11-01' },
-    { id: 'apple-heif', label: 'Apple Support: Using HEIF or HEVC media on Apple devices', href: 'https://support.apple.com/en-us/116944', read: '2026-11-01' },
-    { id: 'apple-transfer', label: 'Apple Support: Transfer photos from your iPhone or iPad', href: 'https://support.apple.com/en-us/120267', read: '2026-11-01' },
+    { id: 'ms-photos', label: 'Suporte da Microsoft: Erro do Editor de Vídeo do aplicativo Fotos, não é possível exibir esse tipo de arquivo', href: 'https://support.microsoft.com/pt-br/windows/apps/photos/photos-app-video-editor-error-can-t-view-this-file-type', read: '2026-11-03' },
+    { id: 'ms-heif', label: 'Microsoft Store: Extensão da Imagem HEIF', href: 'https://apps.microsoft.com/detail/9pmmsr1cgpwg?hl=pt-BR&gl=BR', read: '2026-11-03' },
+    { id: 'apple-heif', label: 'Suporte da Apple: Como usar mídias HEIF ou HEVC em dispositivos Apple', href: 'https://support.apple.com/pt-br/116944', read: '2026-11-03' },
+    { id: 'apple-transfer', label: 'Suporte da Apple: Transferir fotos e vídeos do iPhone ou iPad para um Mac ou PC', href: 'https://support.apple.com/pt-br/120267', read: '2026-11-03' },
   ],
   facts: {
-    heifPrice: { text: 'free', source: 'ms-photos' },
-    hevcPrice: { text: '$0.99', source: 'ms-photos' },
+    heifPrice: { text: 'grátis', source: 'ms-photos' },
+    hevcPrice: { text: 'US$ 0,99', source: 'ms-photos' },
   },
   names: ['H.264'],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;

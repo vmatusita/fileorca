@@ -1,87 +1,86 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'JPG or PNG: Which One to Use, Measured on the Same Photos',
-  description: 'When to save as JPG and when as PNG, with the sizes we measured on the same photos in both formats and what happens to a transparent image.',
-  h1: 'JPG or PNG: which one to use',
-  lead: 'Both formats open everywhere, so the choice is about what the picture is. Here is the rule, and what we measured when the same photos went both ways.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'JPG ou PNG: qual usar, medido nas mesmas fotos',
+  description: 'Quando salvar em JPG e quando em PNG, com os tamanhos que medimos nas mesmas fotos nos dois formatos e o que acontece com uma imagem transparente.',
+  h1: 'JPG ou PNG: qual usar',
+  lead: 'Os dois formatos abrem em qualquer lugar, então a escolha depende do que a imagem é. Veja a regra e o que medimos quando as mesmas fotos foram de um formato para o outro.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'The short answer: photos go in JPG, and graphics go in PNG. Screenshots, logos, charts, text and anything with a transparent background are graphics. A photo from a camera or a phone is a photo, even if it shows a document.',
-    'The longer answer is about what each format keeps. One stays small by throwing away detail you will hardly notice; the other keeps every pixel exactly and pays for it in size. Which trade is right depends on the picture, and on what happens to it next.',
+    'A resposta curta: foto vai em JPG, e imagem gráfica vai em PNG. Capturas de tela, logos, gráficos, textos e qualquer imagem com fundo transparente são imagens gráficas. Uma foto tirada com câmera ou celular é foto, mesmo que mostre um documento.',
+    'A resposta longa fala do que cada formato guarda. Um fica pequeno jogando fora detalhes que você mal percebe; o outro guarda cada pixel exatamente e paga por isso em tamanho. A troca certa depende da imagem e do que vai acontecer com ela depois.',
   ],
-  toolHeading: 'Switch between PNG and JPG here',
-  toolIntro: 'Drop a PNG and it becomes a JPG; drop a JPG and it becomes a PNG. Each file is converted in this browser tab, so nothing is uploaded, and a batch comes back as one ZIP.',
+  toolHeading: 'Troque entre PNG e JPG aqui',
+  toolIntro: 'Solte um PNG e ele vira JPG; solte um JPG e ele vira PNG. Cada arquivo é convertido nesta aba do navegador, então nada é enviado, e um lote volta num só ZIP.',
   sections: [
     {
-      heading: 'How each format stores a picture',
+      heading: 'Como cada formato guarda uma imagem',
       paragraphs: [
-        'PNG is lossless. Its specification, published by the W3C, says the compression should preserve all information, and it supports an optional alpha channel, which is how transparency is stored. A PNG opened and saved again is the same picture, pixel for pixel.',
-        'JPG is lossy. The JPEG committee describes it as a DCT based lossy image format: it splits the picture into small blocks and keeps the broad shapes and colors of each one, dropping fine detail the eye notices least. That is why a photo is so much smaller as a JPG, and why sharp edges and flat colors can show small smudges around them.',
+        'O PNG é sem perda. A especificação dele, publicada pelo W3C, diz que a compressão deve preservar toda a informação, e o formato aceita um canal alfa opcional, que é onde fica a transparência. Um PNG aberto e salvo de novo é a mesma imagem, pixel por pixel.',
+        'O JPG é com perda. O comitê JPEG descreve esse formato como uma compressão com perda baseada em DCT: ele divide a imagem em blocos pequenos e guarda as formas e as cores gerais de cada um, jogando fora os detalhes finos que o olho menos percebe. É por isso que uma foto fica tão menor em JPG, e é por isso que bordas nítidas e cores chapadas podem mostrar pequenas manchas em volta.',
       ],
     },
     {
-      heading: 'A photo saved as PNG is bigger, not better',
+      heading: 'Uma foto salva em PNG fica maior, não melhor',
       paragraphs: [
-        'We took our {photos_word} real phone photos, which came out of the cameras as JPGs, and saved them as PNG with the tool above. Together the JPGs weighed {jpgTotal}. As PNG they weighed {pngTotalChromium} in Chromium, {pngRatioChromium_times} as much.',
-        'The PNGs did not look any better. Each one held the same pixels as the JPG it came from, exactly: we compared them pixel by pixel, and {pngIdenticalChromium_word} of them were identical. A PNG cannot bring back the detail the camera already dropped when it wrote the JPG. It only stores what is left without losing more.',
+        'Pegamos as nossas {photos_wordf} fotos de celular de verdade, que saíram das câmeras em JPG, e salvamos em PNG com a ferramenta acima. Juntos, os JPGs pesavam {jpgTotal}. Em PNG, pesaram {pngTotalChromium} no Chromium, {pngRatioChromium_times} o peso dos JPGs.',
+        'Os PNGs não ficaram nem um pouco melhores. Cada um guardou exatamente os mesmos pixels do JPG de onde veio: comparamos pixel por pixel, e {pngIdenticalChromium_word} deles eram idênticos. Um PNG não traz de volta o detalhe que a câmera já jogou fora quando gravou o JPG. Ele só guarda o que sobrou, sem perder mais nada.',
       ],
     },
     {
-      heading: 'Browsers write PNG differently',
+      heading: 'Cada navegador grava o PNG de um jeito',
       paragraphs: [
-        'The same photos saved as PNG in WebKit weighed {pngTotalWebkit}, {pngRatioWebkit_times} the JPGs, against {pngRatioChromium_times} in Chromium. Both PNGs hold exactly the same pixels. The difference is only in how hard each browser works to pack them, which shows that two PNGs of one picture can differ a lot in size and still be the same image.',
+        'As mesmas fotos salvas em PNG no WebKit pesaram {pngTotalWebkit}, {pngRatioWebkit_times} o peso dos JPGs, contra {pngRatioChromium_times} no Chromium. Os dois PNGs guardam exatamente os mesmos pixels. A diferença está só no esforço de cada navegador para compactar esses pixels, o que mostra que dois PNGs da mesma imagem podem ter tamanhos bem diferentes e continuar sendo a mesma imagem.',
       ],
     },
     {
-      heading: 'Back to JPG: close, but not the same',
+      heading: 'De volta ao JPG: perto, mas não igual',
       paragraphs: [
-        'We then saved those PNGs back as JPG. The new JPGs weighed {backTotalChromium}, less than the camera originals, because the tool saves at a high quality but not as high as the cameras did.',
-        'They are not the original files, and not quite the original pictures. Measured against the original pixels, the round trip scored between {backPsnrMinChromium} and {backPsnrMaxChromium} of PSNR, a measure of how close two images are. At that level the differences are very hard to see, but each lossy save adds a little more. Keep your originals, and convert from them.',
+        'Depois salvamos esses PNGs de volta em JPG. Os JPGs novos pesaram {backTotalChromium}, menos que os originais das câmeras, porque a ferramenta salva numa qualidade alta, mas não tão alta quanto a das câmeras.',
+        'Eles não são os arquivos originais, nem exatamente as imagens originais. Comparada com os pixels originais, a ida e volta ficou entre {backPsnrMinChromium} e {backPsnrMaxChromium} de PSNR, uma medida de quanto duas imagens se parecem. Nesse nível as diferenças são muito difíceis de ver, mas cada salvamento com perda acrescenta um pouco mais. Guarde seus originais e converta a partir deles.',
       ],
     },
     {
-      heading: 'Transparency decides it',
+      heading: 'A transparência decide',
       paragraphs: [
-        'JPG has no transparency. Our test PNG has transparent corners, {transparentCornersBefore_word} of them, and in the JPG all {transparentCornersWhiteChromium_word} turned white, as the tool tells you next to the file. The file went from {transparentPngBytes} to {transparentJpgBytesChromium}.',
-        'That is fine for a picture that sits on a white page, and wrong for a logo that has to sit on a colored background or on top of a photo. If an image has transparency you want to keep, keep it as PNG.',
+        'O JPG não tem transparência. Nosso PNG de teste tem cantos transparentes, {transparentCornersBefore_word} ao todo, e no JPG os {transparentCornersWhiteChromium_word} ficaram brancos, como a ferramenta avisa ao lado do arquivo. O arquivo foi de {transparentPngBytes} para {transparentJpgBytesChromium}.',
+        'Isso não é problema para uma imagem que fica sobre uma página branca, mas é errado para um logo que precisa ficar sobre um fundo colorido ou em cima de uma foto. Se a imagem tem uma transparência que você quer manter, deixe em PNG.',
       ],
     },
     {
-      heading: 'A rule you can keep',
+      heading: 'Uma regra para guardar',
       paragraphs: [
-        'Use JPG for photos you share, email or upload, especially when size matters. Use PNG for screenshots, text, logos, icons and anything with transparency, and for a picture you will edit again and again, since every JPG save loses a little.',
-        'When a site will not take your PNG, or a PNG photo is too big to send, convert it to JPG. When you need a graphic to stay sharp, do not convert it to JPG at all.',
+        'Use JPG para as fotos que você compartilha, manda por e-mail ou envia a um site, principalmente quando o tamanho importa. Use PNG para capturas de tela, textos, logos, ícones e tudo o que tem transparência, e para uma imagem que você vai editar várias vezes, já que cada salvamento em JPG perde um pouco.',
+        'Quando um site não aceita o seu PNG, ou uma foto em PNG fica grande demais para mandar, converta para JPG. Quando uma imagem gráfica precisa continuar nítida, não converta para JPG.',
       ],
     },
     {
-      heading: 'And WebP?',
+      heading: 'E o WebP?',
       paragraphs: [
-        'WebP can do both jobs. Google describes it as a format with lossy compression, like JPG, and lossless compression with transparency, like PNG. Websites use it because it is small. It opens in browsers, but some apps and upload forms still refuse it; our guide on WebP covers where it opens and how to save it as a JPG.',
+        'O WebP faz os dois papéis. O Google o descreve como um formato com compressão com perda, como o JPG, e sem perda e com transparência, como o PNG. Os sites usam esse formato porque ele é leve. Ele abre nos navegadores, mas alguns apps e formulários ainda recusam o arquivo; o nosso guia sobre WebP mostra onde ele abre e como salvar como JPG.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Our {photos_word} real phone photos, from the camera JPG to PNG with the tool above, and back to JPG. The last column compares the final JPG with the original pixels.',
-  measuredNote: 'Measured on {date} through the PNG to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. Pixels were compared in Node, with the same decoder for the original and the copy. The back to JPG sizes were the same in both browsers.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, do JPG da câmera para PNG com a ferramenta acima, e de volta para JPG. A última coluna compara o JPG final com os pixels originais.',
+  measuredNote: 'Medido em {date} pela página PNG para JPG deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}. Os pixels foram comparados no Node, com o mesmo decodificador para o original e para a cópia. Os tamanhos de volta em JPG foram iguais nos dois navegadores.',
   tables: [
     {
-      heading: 'The same photos in both formats',
-      caption: 'Each photo: the camera JPG, the PNG made from it in Chromium and in WebKit, the JPG made back from the PNG, and how close that JPG is to the original',
-      head: ['Photo', 'JPG', 'PNG in Chromium', 'PNG in WebKit', 'Back to JPG', 'Against the original'],
+      heading: 'As mesmas fotos nos dois formatos',
+      caption: 'Cada foto: o JPG da câmera, o PNG feito a partir dele no Chromium e no WebKit, o JPG feito de volta a partir do PNG e o quanto esse JPG se parece com o original',
+      head: ['Foto', 'JPG', 'PNG no Chromium', 'PNG no WebKit', 'De volta em JPG', 'Comparado ao original'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-01' },
-    { id: 'google-webp', label: 'Google for Developers: An image format for the Web', href: 'https://developers.google.com/speed/webp?hl=en', read: '2026-11-01' },
-    { id: 'jpeg-org', label: 'JPEG committee: JPEG 1', href: 'https://jpeg.org/jpeg/', read: '2026-11-01' },
+    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
+    { id: 'google-webp', label: 'Google for Developers: Um formato de imagem para a Web', href: 'https://developers.google.com/speed/webp?hl=pt-br', read: '2026-11-03' },
+    { id: 'jpeg-org', label: 'Comitê JPEG: JPEG 1 (em inglês)', href: 'https://jpeg.org/jpeg/', read: '2026-11-03' },
   ],
   facts: {},
   names: ['W3C', 'JPEG 1'],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;
