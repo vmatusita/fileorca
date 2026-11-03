@@ -1,0 +1,156 @@
+/* FileOrca UX v2 (F10) · UX-15, the sea in the hubs and the night sea. Loaded after proto.css by hub-sea.html and
+   night-sea.html. Colours: only var(--token) from tokens.css and the two --proposta- tokens of proto.css section 9
+   (UX-15 · mar à noite, used only by night-sea.html Alternative B).
+   The wave is the footer's own wave (src/styles/components.css:459-462, the path "M0 10 C20 2 40 2 60 10 S100 18
+   120 10", 120 x 16 px) drawn as a CSS mask on an element, the way the site already draws the footer: an element with
+   a token colour, never a background image.
+   Sections:
+     1. the two wave masks
+     2. the hub band as an aquarium (hub-sea.html, Alternatives A and B; "hoje" is today's band)
+     3. the scenes of Alternative B (hub-sea.html)
+     4. the waterline of the deep cards and the footer (night-sea.html, Alternatives A and B)
+     5. the night sea of Alternative B (night-sea.html)
+     6. site parity for the pieces night-sea.html shows (ResultCard, ResultHero, ExportBar, components.css) */
+
+/* ---------- 1. The wave masks ---------- */
+/* "below" fills under the curve (the water seen from the side, as on top of the footer); "above" fills over it (the
+   air left above the water inside a card that is full of sea). */
+:root {
+  --sea-wave-below: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E");
+  --sea-wave-above: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V0 H0Z'/%3E%3C/svg%3E");
+}
+
+/* ---------- 2. The hub band as an aquarium (hub-sea.html) ---------- */
+/* <div class="fo-hubband fo-cat--image sea-band">eyebrow, H1, line[, Reviewed]
+     <div class="sea-band__sea" aria-hidden="true"><span class="sea-band__crest"></span><span class="sea-band__water"></span>
+       [<svg class="sea-scene">…</svg>] <div class="sea-band__oli" data-oli="swim" aria-hidden="true">…</div></div></div>
+   --sea-h is the height of the water, --sea-room the bottom padding of the band (the water, the crest and the Oli).
+   The text never goes under the water: the padding keeps it above the crest. */
+.sea-band { position: relative; overflow: hidden; }
+html[data-alt="a"] .sea-band { --sea-h: 40px; --sea-room: 80px; }
+html[data-alt="b"] .sea-band { --sea-h: 64px; --sea-room: 104px; }
+@media (min-width: 768px) {
+  html[data-alt="a"] .sea-band { --sea-h: 48px; --sea-room: 88px; }
+  html[data-alt="b"] .sea-band { --sea-h: 88px; --sea-room: 128px; }
+}
+html:not([data-alt="hoje"]) .sea-band { padding-bottom: var(--sea-room); }
+/* In the dark theme the band is surface, not the muddy *-soft (G-21): the category colour moves to the crest. */
+html:not([data-alt="hoje"])[data-theme="dark"] .sea-band { background: var(--surface); }
+@media (prefers-color-scheme: dark) {
+  html:not([data-alt="hoje"]):not([data-theme="light"]) .sea-band { background: var(--surface); }
+}
+.sea-band__sea { position: absolute; left: 0; right: 0; bottom: 0; height: var(--sea-h); pointer-events: none; }
+/* The crest: the same wave 3 px higher, in the full category colour, under the water (DOM order). What shows is a
+   3 px line that follows the wave. Decorative, like the folded corner: the category is said by the eyebrow and H1. */
+.sea-band__crest { position: absolute; left: 0; right: 0; bottom: calc(var(--sea-h) + 2px); height: 16px; background: var(--fo-cat);
+  -webkit-mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px; mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px; }
+/* The water: the token water, with the footer's wave on top. Still (no fo-water--moving): nothing moves on its own. */
+.sea-band__water { position: absolute; inset: 0; background: var(--water); }
+.sea-band__water::before { content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: inherit;
+  -webkit-mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px; mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px; }
+/* The Oli swim, 72 px, on the right of the band, looking left at the H1, half under the water (her eye stays above
+   the line). At 1280 px her right edge is 24 px inside the band: 174 px from the rail, never closer than 150. */
+.sea-band__oli { position: absolute; right: var(--space-4); bottom: calc(var(--sea-h) - 34px); width: 72px; height: 72px; }
+@media (min-width: 768px) { .sea-band__oli { right: var(--space-6); } }
+/* WCAG 2.2.2: the bob of the swim pose runs 3 times (3 x 1600 ms = 4.8 s, under 5 s) and stops; with reduced
+   motion, proto.css section 2 stops it entirely. */
+.sea-band__oli > svg { animation-iteration-count: 3; }
+/* Prototype only: the line that says a hub exists only in English. */
+.sea-proto-note { margin: 0; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
+/* Site parity for the band (components.css:367-370, 543). */
+.fo-hubband { color: var(--ink); }
+.fo-hubband .fo-muted, .fo-hubband .fo-eyebrow { color: var(--ink); }
+.fo-reviewed { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+
+/* ---------- 3. The scenes of Alternative B (hub-sea.html) ---------- */
+/* One inline SVG per category hub, 240 x 64 viewBox, at most 2 KB, aria-hidden, on the floor of the band and under
+   the water, on the left (the Oli is on the right). Fills by class, never by colour: sc-cat is the category colour,
+   sc-paper the surface, sc-mark the stroke, sc-weed the category colour as a line. Strokes stay 2 px at any size. */
+.sea-scene { position: absolute; left: var(--space-4); bottom: 0; width: 180px; height: 48px; overflow: visible; }
+@media (min-width: 768px) { .sea-scene { left: var(--space-6); width: 270px; height: 72px; } }
+.sea-scene * { vector-effect: non-scaling-stroke; }
+.sea-scene .sc-cat { fill: var(--fo-cat); stroke: var(--stroke); stroke-width: 2; stroke-linejoin: round; }
+.sea-scene .sc-paper { fill: var(--surface); stroke: var(--stroke); stroke-width: 2; stroke-linejoin: round; }
+.sea-scene .sc-mark { fill: none; stroke: var(--stroke); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sea-scene .sc-weed { fill: none; stroke: var(--fo-cat); stroke-width: 4; stroke-linecap: round; }
+.sea-scene .sc-bub { fill: none; stroke: var(--stroke); stroke-width: 1.5; }
+
+/* ---------- 4. The waterline of the deep cards and the footer (night-sea.html, A and B) ---------- */
+/* .fo-result.sea-top and .fo-rhero.sea-top: the card is the panel full of sea. Inside its top padding, a 16 px strip
+   of air (surface, the panel's own colour) ends in the footer's wave, with a 2 px crest under it. The card keeps its
+   border, its radius and its size: nothing moves (CLS 0). --sea-crest is stroke in A and --proposta-crista in B. */
+.sea-top, .sea-footer { --sea-crest: var(--stroke); }
+html:not([data-alt="hoje"]) .sea-top::before,
+html:not([data-alt="hoje"]) .sea-top::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 16px; pointer-events: none;
+  border-radius: calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)) 0 0;
+  -webkit-mask: var(--sea-wave-above) repeat-x 0 0 / 120px 16px; mask: var(--sea-wave-above) repeat-x 0 0 / 120px 16px;
+}
+html:not([data-alt="hoje"]) .sea-top::before { top: 2px; background: var(--sea-crest); }
+html:not([data-alt="hoje"]) .sea-top::after { top: 0; background: var(--surface); }
+/* The head of the ResultCard (the Oli jumps out at the line) stays above the strip. */
+.sea-top .fo-result__head { position: relative; z-index: 1; }
+/* The footer already has the wave (::before, deep); A and B add the same 2 px crest above it. */
+html:not([data-alt="hoje"]) .sea-footer::before { z-index: 1; }
+html:not([data-alt="hoje"]) .sea-footer::after {
+  content: ""; position: absolute; left: 0; right: 0; top: -17px; height: 16px; z-index: 0; pointer-events: none; background: var(--sea-crest);
+  -webkit-mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px; mask: var(--sea-wave-below) repeat-x 0 0 / 120px 16px;
+}
+
+/* ---------- 5. The night sea of Alternative B (night-sea.html; mudança de regra: "deep igual nos dois temas") ---------- */
+/* --proposta-mar-noite is deep in the light theme and, in the dark one, a navy a little darker than the floor (bg):
+   the result goes down into the sea instead of floating above it (G-07). --proposta-crista is stroke-black in the
+   light theme and a moonlit blue in the dark one. Both in proto.css section 9, with their pairs in the README. */
+html[data-alt="b"] .sea-top, html[data-alt="b"] .sea-footer { --sea-crest: var(--proposta-crista); }
+html[data-alt="b"] .fo-deep { background: var(--proposta-mar-noite); }
+html[data-alt="b"] .fo-footer::before { background: var(--proposta-mar-noite); }
+html[data-alt="b"] .fo-deep .fo-split__gap { stroke: var(--proposta-mar-noite); }
+
+/* ---------- 6. Site parity (src/styles/components.css:166-200, 555-590; bundle.css has the older ResultCard) ---------- */
+.fo-result { padding: var(--space-5); gap: var(--space-4); align-content: center; }
+.fo-result__head { min-height: 72px; }
+.fo-result__says { font: 500 18px/24px var(--font-display); flex: 1 1 0; min-width: 0; }
+.fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
+.fo-result__actions .fo-btn--download { display: flex; width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
+.fo-result .fo-placard { margin-left: auto; }
+@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
+.fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+@media (min-width: 768px) {
+  .fo-result { padding: var(--space-6); gap: var(--space-5); }
+  .fo-result__head { min-height: 96px; }
+  .fo-result__says { font-size: 20px; line-height: 26px; }
+  .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-items: start; }
+  .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+.fo-rhero { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-3); container-type: inline-size; }
+.fo-rhero__label { margin: 0; font: 600 15px/20px var(--font-text); color: var(--on-deep-muted); }
+.fo-rhero__num { margin: 0; font: 600 48px/52px var(--font-display); font-size: min(48px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
+.fo-rhero__num > span { min-width: 0; overflow-wrap: anywhere; }
+.fo-rhero__num small { font: 600 20px/24px var(--font-display); color: var(--on-deep-muted); }
+.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
+.fo-rhero__sentence b { font-weight: 700; }
+@media (min-width: 768px) {
+  .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
+  .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
+}
+.fo-split { display: grid; gap: var(--space-2); }
+.fo-split__bar { display: block; width: 100%; height: 20px; }
+.fo-split__principal { fill: var(--brand); }
+.fo-deep .fo-split__principal { fill: var(--brand-on-deep); }
+.fo-split__coral { fill: var(--coral); }
+.fo-split__hatch { fill: var(--on-cat); fill-opacity: 0.22; }
+.fo-split__gap { stroke: var(--surface); stroke-width: 3; }
+.fo-deep .fo-split__gap { stroke: var(--deep); }
+.fo-split__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 22px; }
+.fo-split__legend li { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.fo-split__legend li > span { min-width: 0; overflow-wrap: anywhere; }
+.fo-split__legend b { font-variant-numeric: tabular-nums; }
+.fo-split__key { flex: none; align-self: center; width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.fo-split__key--a { background: var(--brand); }
+.fo-deep .fo-split__key--a { background: var(--brand-on-deep); }
+.fo-split__key--b { background: var(--coral); }
+.fo-export-wrap { display: grid; gap: var(--space-3); }
+.fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+.fo-calc__result { display: grid; gap: var(--space-4); }
+/* The top of the tool and calculator pages in night-sea.html: H1, lead, Reviewed and the PrivacySeal. */
+.ns-top { display: grid; gap: var(--space-2); justify-items: start; }

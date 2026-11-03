@@ -229,3 +229,23 @@ html[data-lang="es"] [data-when-lang]:not([data-when-lang~="es"]) { display: non
     --proposta-danger-on-deep: #FF8A80;
   }
 }
+
+/* 9 · UX-15 · mar à noite (night-sea.html, Alternative B only; a rule change: "deep é igual nos dois temas").
+   --proposta-mar-noite: the deep of the theme. Light = deep; dark = a navy a little darker than bg (1,01:1 against it),
+   so the result goes down into the sea instead of floating above the floor (G-07).
+   --proposta-crista: the 2 px waterline on the wave of the deep cards and the footer. Light = the stroke black;
+   dark = a moonlit blue. Pairs UX15-N1 to UX15-N7 in the README. */
+:root, [data-theme="light"] {
+  --proposta-mar-noite: #0C2B5E;
+  --proposta-crista: #0F1B2D;
+}
+[data-theme="dark"] {
+  --proposta-mar-noite: #051230;
+  --proposta-crista: #9DB7DA;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --proposta-mar-noite: #051230;
+    --proposta-crista: #9DB7DA;
+  }
+}
