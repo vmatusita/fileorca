@@ -42,6 +42,8 @@ const CASES: Record<number, string[]> = {
     // that fits with Figtree and not with the fallback font moves the tool 30 px when Figtree arrives (CLS 0.041 and 0.051
     // in Chromium). The trail and the H1 stay; the CLS of these pages is printed, so it is seen again when it changes.
     spanish('refinance-calculator'), spanish('debt-consolidation-calculator'), spanish('compound-interest-calculator'), spanish('simple-interest-calculator'),
+    // Second pass of the review (R2-01): the longer lead of the rent vs buy page took one more row with the fallback font.
+    spanish('rent-vs-buy-calculator'),
   ],
   375: [
     '/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/',

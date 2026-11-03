@@ -355,7 +355,7 @@ describe('the CSV', () => {
       const def = DEFS[id];
       const view = viewOf(def, panelData(id, 'es'), def.initial);
       const csv = csvText(view.table(), 'Año', 'es');
-      expect(csv.includes(' '), `${id}: espaço sem quebra no CSV`).toBe(false);
+      expect(csv.includes('\u00A0'), `${id}: espaço sem quebra no CSV`).toBe(false);
     }
     const def = DEFS['apr-to-apy-calculator'];
     const rows = (lang: Lang) => csvText(viewOf(def, panelData('apr-to-apy-calculator', lang), def.initial).table(), 'Year', lang).slice(1).trimEnd().split('\r\n').slice(1);

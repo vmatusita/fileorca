@@ -22,7 +22,7 @@ export function csvCell(cell: Cell, lang: Lang = 'en'): string {
   const numbers = lang === 'pt' ? 'pt' : 'en';
   if ('cents' in cell) return formatScaled(cell.cents, 2, numbers, { min: 2, group: false, minus: '-' });
   if ('scaled' in cell) return formatScaled(cell.scaled, cell.decimals, numbers, { min: cell.decimals, group: false, minus: '-' });
-  return cell.text.replace(/(\d) %/g, '$1%');
+  return cell.text.replace(/(\d)\u00A0%/g, '$1%');
 }
 
 function quote(text: string, separator: string): string {

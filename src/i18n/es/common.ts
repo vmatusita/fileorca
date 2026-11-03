@@ -222,7 +222,7 @@ export default {
     },
     'rent-vs-buy-calculator': {
       name: 'Calculadora de alquilar o comprar',
-      description: 'Tu valor neto alquilando y comprando, y el año en que comprar alcanza a alquilar.',
+      description: 'Tu valor neto alquilando y comprando, y cuándo comprar alcanza a alquilar.',
       synonyms: ['alquilar o comprar', 'rentar o comprar', 'alquilar vs comprar', 'comprar casa', 'alquiler', 'renta', 'valor neto', 'hipoteca'],
     },
     'savings-goal-calculator': {

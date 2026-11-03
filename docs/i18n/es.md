@@ -247,7 +247,7 @@ Os 5 guias de dinheiro:
 | square (módulo) | cuadrito | |
 | Link or text · the text box | Enlace o texto · el cuadro | |
 | Oli in the middle · On · Off | Oli en el centro · Activada · Desactivada | no feminino, pela Oli |
-| PNG size · Small · Medium · Large | Tamaño del PNG · Chico · Mediano · Grande | "Chico", a palavra de tamanho do espanhol dos EUA: com "Pequeño", as três opções não cabiam a 320 px (DECISOES § 321) |
+| PNG size · Small · Medium · Large | Tamaño del PNG · Chico · Mediano · Grande | "Chico", a palavra de tamanho do espanhol dos EUA: com "Pequeño", as três opções não cabiam a 320 px (DECISOES § 321). Só no QR: a Marca de agua PDF da F6 segue com "Pequeño · Mediano · Grande", e a diferença é a pendência "Idiomas R2-04" |
 | Download PNG · Download SVG | Descargar PNG · Descargar SVG | |
 | Preview · Error correction | Vista previa · Corrección de errores | |
 | short link · expire · tracking | enlace acortado · vencer · rastreo | |
