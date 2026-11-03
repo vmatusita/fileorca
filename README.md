@@ -29,7 +29,7 @@ O `pnpm verificar` para na primeira falha e mostra o tempo de cada passo. Cada p
 
 **Todos os direitos reservados** (veja o `LICENSE`). O repositório é público para leitura, mas nenhuma licença é concedida: copiar, modificar ou redistribuir o código pede autorização por escrito.
 
-O motor de imagem (`src/engine/image/`) é a exceção: ele é distribuído à parte, sob a licença MIT, no repositório separado `fileorca-image-engine`. O `pnpm motor:exportar` gera esse pacote a partir deste repositório, e o passo a passo da publicação está em `docs/lancamento/codigo-aberto.md`.
+O motor de imagem (`src/engine/image/`) será a exceção: ele vai ser distribuído à parte, sob a licença MIT, no repositório separado `fileorca-image-engine`, quando esse repositório for publicado (ele ainda não existe). O `pnpm motor:exportar` gera esse pacote a partir deste repositório, e o passo a passo da publicação está em `docs/lancamento/codigo-aberto.md`.
 
 Os arquivos de terceiros mantêm as próprias licenças: as dependências (a lista está na página `/licenses` do site), as fontes e as fixtures de teste (`fixtures/ORIGEM.md`).
 

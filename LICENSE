@@ -8,9 +8,10 @@ Service require, that is, viewing it and forking it on GitHub.
 
 Exceptions:
 
-- The copy of the image engine (src/engine/image/) published in the separate
-  fileorca-image-engine repository, exported by `pnpm motor:exportar`, is
-  licensed under the MIT License. That license covers that copy.
+- The copy of the image engine (src/engine/image/) exported by
+  `pnpm motor:exportar` will be licensed under the MIT License when it is
+  published in the separate fileorca-image-engine repository, which does not
+  exist yet. That license will cover that copy, once published.
 - Third-party files keep their own licenses: the dependencies, the fonts
   (SIL Open Font License 1.1), the license texts in
   src/platform/license-texts/ and the test fixtures listed in
@@ -24,5 +25,5 @@ Este repositório é público para leitura. Nenhuma licença é concedida: é
 proibido copiar, modificar, distribuir, sublicenciar ou usar este código, no
 todo ou em parte, sem autorização por escrito do titular. As exceções acima
 valem também aqui: a cópia MIT do motor de imagem no repositório
-fileorca-image-engine e os arquivos de terceiros, cada um com a própria
-licença.
+fileorca-image-engine, quando ele for publicado, e os arquivos de terceiros,
+cada um com a própria licença.
