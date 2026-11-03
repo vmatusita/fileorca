@@ -39,6 +39,8 @@ const size = (bytes: number, f: GuideFormat): string => unit(fileSize(bytes, f.l
 const pct = (value: number, f: GuideFormat): string => percent(value, f.lang);
 const signed = (value: number, f: GuideFormat): string => (value > 0 ? `+${pct(value, f)}` : value < 0 ? `−${pct(-value, f)}` : pct(0, f));
 const decibels = (value: number, f: GuideFormat): string => unit(`${decimal(value, f)} dB`, f);
+/** "150 ppi", and "150 ppp" in Spanish, the unit the PDF to JPG tool shows on the same page (review C-1). */
+const resolution = (value: number, f: GuideFormat): string => unit(fmt(f.shared.ppi, { n: grouped(value, f) }), f);
 /** A small count in words, in the gender of what it counts ("two photos", "duas fotos", "dos fotos"). */
 const inWords = (value: number, f: GuideFormat, gender: 'masculine' | 'feminine'): string => f.shared.numbers[gender][value] ?? grouped(value, f);
 
@@ -59,7 +61,7 @@ export const VARIANTS = {
       case 'db':
         return decibels(n.value, f);
       case 'ppi':
-        return unit(`${grouped(n.value, f)} ppi`, f);
+        return resolution(n.value, f);
       case 'count':
         return grouped(n.value, f);
     }
@@ -286,7 +288,7 @@ const BUILDERS: Record<FileGuideId, Builder> = {
       const png = t.rows.find((other) => col(t, other, 'file') === col(t, row, 'file') && col(t, other, 'page') === 1 && col(t, other, 'ppi') === col(t, row, 'ppi') && col(t, other, 'browser') === 'chromium' && col(t, other, 'format') === 'png');
       return [
         label(c, String(col(t, row, 'file'))),
-        unit(`${grouped(Number(col(t, row, 'ppi')), c.f)} ppi`, c.f),
+        resolution(Number(col(t, row, 'ppi')), c.f),
         pixels(col(t, row, 'width'), col(t, row, 'height'), c.f),
         cellSize(col(t, row, 'bytes'), c.f),
         png ? cellSize(col(t, png, 'bytes'), c.f) : '',

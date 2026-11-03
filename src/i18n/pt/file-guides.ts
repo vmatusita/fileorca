@@ -40,6 +40,7 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
   times: '{n} vezes',
   timesOne: '{n} vez',
   bytes: '{n} bytes',
+  ppi: '{n} ppi',
   // Os nomes técnicos acima que têm algarismo (tests/unit/guides-numbers.test.ts).
   names: ['Pixel 2', 'iPhone 6', 'iPhone 5', 'Formulário 1040'],
 };

@@ -40,6 +40,8 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
   times: '{n} veces',
   timesOne: '{n} vez',
   bytes: '{n} bytes',
+  // "ppp" (píxeles por pulgada), como la herramienta PDF a JPG lo escribe en la misma página.
+  ppi: '{n} ppp',
   // Los nombres técnicos de arriba que tienen dígitos (tests/unit/guides-numbers.test.ts).
   names: ['Pixel 2', 'iPhone 6', 'iPhone 5', 'Formulario 1040'],
 };

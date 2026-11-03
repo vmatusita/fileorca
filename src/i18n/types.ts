@@ -564,6 +564,8 @@ export interface FileGuidesSharedTexts {
   timesOne: string;
   /** Bytes to the byte, {name_exact}: "{n} bytes". */
   bytes: string;
+  /** A resolution, the unit of a "ppi" measure: "{n} ppi", and "{n} ppp" in Spanish, as the PDF to JPG tool writes it. */
+  ppi: string;
 }
 
 /**

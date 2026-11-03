@@ -40,6 +40,7 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
   times: '{n} times',
   timesOne: '{n} times',
   bytes: '{n} bytes',
+  ppi: '{n} ppi',
   // The technical names above that carry digits (tests/unit/guides-numbers.test.ts).
   names: ['Pixel 2', 'iPhone 6', 'iPhone 5', 'Form 1040'],
 };
