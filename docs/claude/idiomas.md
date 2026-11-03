@@ -79,3 +79,9 @@ Pegadinhas que o ajuste achou:
 - **Datas:** o `guias:medir` grava o dia em UTC, e a revisão e a publicação das páginas novas ficaram num dia só, 3/nov/2026, que é o UTC da medida e o dia de Brasília da revisão (§ 312). A data de uma página nova nunca fica antes do `measuredOn`.
 - **O LanguageTool lê "for" como verbo dentro de uma frase em português** ("Meta for Developers" deu erro de concordância): nome próprio inglês no meio da frase vai traduzido ou com "(em inglês)".
 - **A documentação da Apple em `/la/` tem o título em inglês** e o texto em espanhol; a de `/br/` tem o título em português. O rótulo da fonte segue o título que a página mostra (§ 321, R2-06).
+
+## F9: CI e repositório público
+
+Pegadinhas que a F9 achou:
+
+- **Até um comentário em `scripts/guides/` muda o SHA-256** que o `tests/unit/guides-measured.test.ts` confere contra o `data/guides-measured.json`: a F9 trocou um comentário do `scripts/guides/lib/browser.ts` e o teste reprovou. Mexer ali pede o `pnpm guias:medir` de novo; para só atualizar uma referência num comentário, deixe como está.

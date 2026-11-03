@@ -17,7 +17,7 @@ const PORT = Number(process.env['FO_PORT'] ?? 4173);
 export const ORIGIN = `http://127.0.0.1:${PORT}`;
 /** A batch of three 12 MP photos in the WebKit of Windows (no OffscreenCanvas in the worker: the page does the work). */
 const RESULT_TIMEOUT = 300_000;
-/** Google's domains are never reached from a measurement (docs/claude/anuncios.md, F3). */
+/** Google's domains are never reached from a measurement (CLAUDE.md, F3). */
 const GOOGLE = /google|googletagmanager|google-analytics|doubleclick|gstatic|googlesyndication/;
 
 export function osName(): string {
