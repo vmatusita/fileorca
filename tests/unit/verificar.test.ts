@@ -61,9 +61,9 @@ describe('verificar em partes', () => {
   });
 
   // The languages adjustment (fourth adendo of ADR-003; DECISOES § 320): the gates in two parts (all but Lighthouse, and
-  // Lighthouse), Chromium in five shards and WebKit in thirteen: the 20 parts of the ci.yml, read from the matrices of the
-  // workflow itself so the test follows it.
-  it('covers the whole suite between the 20 parts of the languages adjustment, the same as the matrices of ci.yml', () => {
+  // Lighthouse), Chromium in five shards and WebKit in thirteen: the 20 parts of the ci.yml, written here by hand since
+  // the F9. The parts of ci.yml itself are read by ciParts() in the tests of the F9 below (the review of the F9, D-3).
+  it('covers the whole suite between the 20 parts of the languages adjustment, written out by hand', () => {
     const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
     const gates = [['--sem-playwright', '--sem-lighthouse'], ['--lighthouse']];
     const parts = [...gates, ...shards('chromium', 5), ...shards('webkit', 13)];
