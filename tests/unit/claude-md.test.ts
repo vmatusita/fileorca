@@ -3,7 +3,7 @@
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { claudeMdProblems, goneLines, indexEntries, linesOf, MARKER, MAX_BYTES, newRules, type ClaudeMdInput } from './lib/claude-md.ts';
+import { claudeMdProblems, coreLines, goneLines, indexEntries, linesOf, MARKER, MAX_BYTES, newRules, type ClaudeMdInput } from './lib/claude-md.ts';
 
 // The main of before the F9. If the main moves before the F9 is merged, the new lines of its CLAUDE.md go, word for
 // word, to the topic file in docs/claude/, and this constant moves to that new commit of the main.
@@ -51,6 +51,20 @@ describe('the slim CLAUDE.md', () => {
     // source of truth 2 to 4, and the pull request opened at the end).
     expect((gone as string[]).length).toBe(24);
     expect((gone as string[]).filter((line) => /Isto substitui|As partes:\*\* são|^ {2}- o `/.test(line)).length).toBe(12);
+  });
+
+  // The review of the F9 (E-3). The § gave to the core the sections from "O projeto em cinco linhas" to "Idioma" (35
+  // lines, the gone ones aside) and the command tables of the phases with the lines that open them (44 lines).
+  it('keeps in the CLAUDE.md itself the lines of before the F9 that the § gave to the core', () => {
+    const gone = new Set(goneLines(REAL.decisoes) as string[]);
+    const kept = coreLines(REAL.before, gone);
+    expect(Array.isArray(kept), String(kept)).toBe(true);
+    expect((kept as { line: string }[]).length).toBe(79);
+    const core = new Set(linesOf(REAL.core));
+    for (const { line } of kept as { line: string }[]) expect(core.has(line), line).toBe(true);
+    // None of them is also in a topic file: the core is the one place of each.
+    const topics = new Set(Object.values(REAL.topics).flatMap(linesOf));
+    expect((kept as { line: string }[]).filter(({ line }) => topics.has(line) && !/^(?:\| Comando \||\| --- \||Comandos novos:)/.test(line))).toEqual([]);
   });
 
   it('reads the six rules of every run from PLANO-MELHORIAS.md', () => {
@@ -124,6 +138,21 @@ describe('the controls: the same check fails on altered copies', () => {
     const problems = claudeMdProblems({ ...REAL, decisoes });
     expect(problems[0]).toContain('DECISOES.md has no § with the title');
     expect(problems.filter((problem) => problem.includes('is in no file'))).toHaveLength(24);
+  });
+
+  it('fails when a line of the core moves from the CLAUDE.md to a file of docs/claude/', () => {
+    for (const line of [
+      '- Nenhuma página recebe COOP/COEP; nenhuma ferramenta usa SharedArrayBuffer.',
+      '| `pnpm serve` | Serve o `dist/` como o Cloudflare (barra no fim, 404 mais próximo, `_headers`) |',
+    ]) {
+      expect(REAL.core).toContain(`${line}\n`);
+      const core = REAL.core.replace(`${line}\n`, '');
+      const topics = { ...REAL.topics, 'ci.md': `${REAL.topics['ci.md'] ?? ''}\n${line}\n` };
+      const problems = claudeMdProblems({ ...REAL, core, topics });
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(/^line \d+ of the CLAUDE\.md of before the F9 belongs to the core and is not in CLAUDE\.md: /);
+      expect(problems[0]?.endsWith(line)).toBe(true);
+    }
   });
 
   it('fails when a rule of every run is not in the CLAUDE.md, word for word', () => {

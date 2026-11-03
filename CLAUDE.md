@@ -37,6 +37,8 @@ Host, framework, estrutura do repositório e pipeline não mudam numa run. Se a 
 
 DNS, configuração da zona, Worker e variáveis do Workers Builds no Cloudflare; deploy direto com wrangler; configurações do repositório no GitHub; criar contas; enviar e-mail, post ou pedido a qualquer serviço; publicar repositório; código de Worker (o Worker é só assets); formulário que colete cartão de crédito; dependência com licença fora da lista (MIT, Apache-2.0, BSD, ISC, 0BSD, MPL-2.0, OFL-1.1 para fontes e LGPL-3.0 só em arquivo separado; nunca AGPL nem licença não comercial).
 
+Também fora (F9): criar, mudar ou apagar rótulos do GitHub (`gh label`), e importar, mudar, desativar ou apagar rulesets. As duas coisas são do Victor.
+
 ## Testes
 
 - `pnpm verificar` roda tudo (tipos, lint, Vitest, Playwright em Chromium e WebKit, axe, Lighthouse CI, licenças, hreflang, links, órfãs, orçamentos de JS e de requisições, distância dos anúncios, cabeçalhos, Worker sem código, conteúdo de dinheiro e saúde, lint:texto).
@@ -49,6 +51,7 @@ DNS, configuração da zona, Worker e variáveis do Workers Builds no Cloudflare
 - Anúncio: nada a menos de 150 px (`ad-clearance`) do Baixar, dos campos, do painel ou da Oli; nada acima da ferramenta no celular, dentro do painel, no processamento, no cronograma ou nas páginas jurídicas. Só âncora e vinheta como formatos automáticos.
 - Design: docs/design/ manda. Nenhuma cor fora dos tokens; amarelo (`sun`) só no Baixar; a Oli tem nove poses fechadas e é `aria-hidden`.
 - Nenhuma página recebe COOP/COEP; nenhuma ferramenta usa SharedArrayBuffer.
+- O repositório é público, com as `refs/pull/*`, os logs e os artefatos do Actions: nenhum dado pessoal, token ou segredo, e nenhum achado da auditoria (valor, coordenada, nem o arquivo ou a pessoa onde ele está), entra em arquivo do Git, mensagem de commit, PR, log ou artefato. A auditoria fica só em `.cache/`, e os textos dizem só quantos achados há de cada tipo.
 
 ## Como a run termina
 
@@ -73,16 +76,21 @@ Valem a partir da F9, que as escreve no CLAUDE.md. Somam-se às de "Execução p
 5. **Custo no relatório.** O relatório traz o `pnpm ci:custo <id>` da última execução do CI: minutos de job, tempo de parede e número de jobs.
 6. **Agentes em worktree:** o primeiro passo é `git merge --ff-only <branch da run>`, e todo merge leva o trailer `Co-Authored-By` (`git merge --no-ff -F <arquivo>`).
 
+Notas à regra 1, da revisão da F9 (DECISOES § 327 e § 338):
+
+- O rótulo `ci` só existe depois que o Victor o cria (Issues → Labels). Sem ele, a execução completa sai do `gh pr ready`, e o `gh pr ready --undo` volta a PR ao rascunho entre uma execução e outra. A run nunca cria o rótulo.
+- O fim da run: com tudo commitado, rode o `gh pr ready` antes do último push, para o último commit ganhar uma execução só, a completa; ou espere a execução leve do último push terminar antes do `gh pr ready`. Nunca o push seguido logo do `gh pr ready`: a execução leve cancelada deixa um `ci-ok` vermelho no mesmo commit, ao lado do verde da completa.
+
 ## Índice: mexeu em X, leia docs/claude/X.md
 
 Cada arquivo de docs/claude/ guarda, com o texto igual, as seções de fase e as pegadinhas do tema dele, na ordem em que entraram. Leia só o arquivo do que a tarefa toca (regra 4 acima). As linhas que a F9 tirou deste arquivo, com o porquê de cada uma, estão no DECISOES.md, no § "O CLAUDE.md enxuto e a pasta docs/claude/".
 
-- Mexeu no CI (`.github/`, partes, `ci:custo`, disco e `ENOSPC`), no `verificar`, no Dependabot, na regra de merge, no Workers Builds, no Node, no pnpm, no Vite ou no Vitest: `docs/claude/ci.md`.
-- Mexeu no motor ou numa ferramenta de imagem, num worker, no caminho sem `OffscreenCanvas` ou no QR code: `docs/claude/imagem.md`.
+- Mexeu no CI (`.github/`, partes, `ci:custo`, disco e `ENOSPC`), no `verificar`, no Dependabot, na regra de merge, no Workers Builds, no Node, no pnpm, no Vite ou no Vitest, ou escreveu código e pode cair nas pegadinhas gerais (o Astro e o `build.format`, que faz de toda página um `.../index.astro`; o TypeScript e o `exactOptionalPropertyTypes`; o `pnpm tipos`, que confere também os specs): `docs/claude/ci.md`.
+- Mexeu no motor ou numa ferramenta de imagem, num worker, no caminho sem `OffscreenCanvas`, no QR code, ou na ilha de uma ferramenta e no `mount.ts` que a hidrata: `docs/claude/imagem.md`.
 - Mexeu numa ferramenta de PDF, no PDF.js, no qpdf, no pdf-lib ou na matriz de PDF: `docs/claude/pdf.md`.
-- Mexeu numa calculadora (dinheiro, Brasil, casa ou saúde), num oráculo, num campo do formulário ou no resultado acima da dobra: `docs/claude/calculadoras.md`.
-- Mexeu numa página em pt ou es, no formato de um idioma, no `lint:texto`, num guia de arquivo, no `guias:medir` ou no kit do Product Hunt: `docs/claude/idiomas.md`.
-- Mexeu no CSS, nos tokens, na Oli, num ícone, nas fontes e no CLS, no aviso de cookies ou no `pnpm screenshots`: `docs/claude/design-e-oli.md`.
+- Mexeu numa calculadora (dinheiro, Brasil, casa ou saúde), num oráculo, num campo do formulário ou no resultado acima da dobra: `docs/claude/calculadoras.md`. Um oráculo roda pelo `uv`, cuja pegadinha (fora do PATH nesta máquina) está no arquivo do Git Bash.
+- Mexeu numa página em pt ou es, no formato de um idioma, no `lint:texto`, num guia de arquivo, no `guias:medir` ou no kit do Product Hunt: `docs/claude/idiomas.md`. O `lint:texto` tem também uma pegadinha no arquivo das calculadoras (os placeholders dos textos de dinheiro).
+- Mexeu no CSS, nos tokens, na Oli, num ícone, nas fontes e no CLS, no aviso de cookies, no Preact (os tipos de evento vêm de `preact`, e o SVG sem `compat`) ou no `pnpm screenshots`: `docs/claude/design-e-oli.md`. O `pnpm screenshots` tem pegadinhas também no arquivo do service worker e no de PDF.
 - Mexeu no service worker, no offline, na página "Abrir com" ou no compartilhar: `docs/claude/service-worker.md`.
 - Mexeu em anúncio, no `gate:prontidao`, no GA4 ou no Pix: `docs/claude/anuncios.md`.
 - Escreveu ou mudou um spec do Playwright, mexeu numa porta, no WebKit ou na divisão dos testes nas partes: `docs/claude/playwright.md`.

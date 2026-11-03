@@ -2,6 +2,8 @@
 // every line of the CLAUDE.md of before the F9 is still in the CLAUDE.md or in a file of docs/claude/, word for word,
 // unless the § lists it as gone; the CLAUDE.md fits in 25,600 bytes; the index cites every file of docs/claude/ once
 // and nothing else; and the rules of every run of PLANO-MELHORIAS.md are in the CLAUDE.md, word for word.
+// The review of the F9 (E-3): the lines of before the F9 that the § gave to the core stay in the CLAUDE.md itself, so
+// a rule that no run breaks cannot move to a topic file that only some runs read.
 // A pure function, so the tests run it on the real files and on altered copies (the controls).
 
 /** The most the CLAUDE.md may weigh, in UTF-8 bytes (decision 7: 25 KB). */
@@ -14,6 +16,25 @@ export const MARKER = 'Linhas que saíram do CLAUDE.md de bbd30c8, texto igual:'
 export const INDEX_HEADING = '## Índice';
 /** The heading of the rules of every run in PLANO-MELHORIAS.md. */
 export const RULES_HEADING = '## Regras novas de toda run';
+/** The first heading of a phase in the CLAUDE.md of before the F9: every line above it went to the core (§ 331). */
+export const FIRST_PHASE_HEADING = '## F1a: ';
+/** The lines of the phase sections that went to the core: the command tables and the lines that open them (§ 331). */
+const CORE_IN_PHASES = /^(?:\| |Comandos novos:$|Scripts do `package\.json`|Rodar um teste só: )/;
+
+/**
+ * The lines of the CLAUDE.md of before the F9 that the § gave to the core, with their line numbers: the sections from
+ * "O projeto em cinco linhas" to "Idioma" and the command tables of the phases, minus the lines the § lists as gone.
+ */
+export function coreLines(before: string, gone: ReadonlySet<string>): { at: number; line: string }[] | string {
+  const lines = linesOf(before).map((line) => line.trimEnd());
+  const phases = lines.findIndex((line) => line.startsWith(FIRST_PHASE_HEADING));
+  if (phases < 0) return `the CLAUDE.md of before the F9 has no heading "${FIRST_PHASE_HEADING}"`;
+  return lines.flatMap((line, at) => {
+    if (line.trim() === '' || gone.has(line)) return [];
+    if (at >= phases && !CORE_IN_PHASES.test(line)) return [];
+    return [{ at: at + 1, line }];
+  });
+}
 
 export interface ClaudeMdInput {
   /** The CLAUDE.md of before the F9. */
@@ -105,10 +126,15 @@ export function claudeMdProblems(input: ClaudeMdInput): string[] {
     if (now.has(line)) problems.push(`the § lists as gone a line that is still in CLAUDE.md or docs/claude/: ${line}`);
   }
 
+  // The core of before the F9 stays in the CLAUDE.md itself, not only somewhere in docs/claude/.
+  const core = new Set(linesOf(input.core).map((line) => line.trimEnd()));
+  const kept = coreLines(input.before, goneSet);
+  if (typeof kept === 'string') problems.push(kept);
+  else for (const { at, line } of kept) if (!core.has(line)) problems.push(`line ${at} of the CLAUDE.md of before the F9 belongs to the core and is not in CLAUDE.md: ${line}`);
+
   // The rules of every run of PLANO-MELHORIAS.md, word for word, in the CLAUDE.md itself.
   const rules = newRules(input.plano);
   if (rules.filter((line) => /^\d+\. /.test(line)).length !== 6) problems.push(`PLANO-MELHORIAS.md does not have the six rules under "${RULES_HEADING}"`);
-  const core = new Set(linesOf(input.core).map((line) => line.trimEnd()));
   for (const rule of rules) if (!core.has(rule.trimEnd())) problems.push(`CLAUDE.md lacks the rule of every run: ${rule}`);
 
   return problems;
