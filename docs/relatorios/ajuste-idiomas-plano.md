@@ -54,7 +54,7 @@ O hub `/es/calculadoras-financieras/` já existe e passa a listar as 14 calculad
 
 ## 2. Os lotes de texto e quem escreve
 
-Agentes Opus em worktree (decisão 7). Os quatro lotes da ficha, os dois maiores divididos em duas partes pelo tamanho (§ 318): cada parte tem um agente só, e o glossário vem antes.
+Agentes Opus em worktree (decisão 7). Os quatro lotes da ficha, os dois maiores divididos em duas partes pelo tamanho (§ 316): cada parte tem um agente só, e o glossário vem antes.
 
 | Lote | Agente | Arquivos |
 | --- | --- | --- |
@@ -74,7 +74,7 @@ Escritos pelo agente principal: `src/i18n/{pt,es}/file-guides.ts` (palavras do f
 - **Tipos.** `PtCommonTexts` e `EsCommonTexts` exigem `qr`, `fileGuides`, `footer.utilityColumn`, `search.utilityCategory` (e `guides` em es); `TranslatedHomeTexts` exige a seção do QR; `EsMoneyHubTexts` exige os presets e os guias. `GuideTexts<Id>` ganha `words` (as palavras dos fatos e da tabela). `FileGuidesSharedTexts` ganha `numbers` (masculino e feminino), `times`, `timesOne` e `bytes`; `FileGuideTexts.measuredTerms`.
 - **Formatação dos guias de arquivo** (`src/tools/guides/measured.ts`): `GuideFormat` com o idioma; tamanho, `%`, separadores, `dB`, `ppi`, "vezes/veces" e as contagens por extenso no idioma, com U+00A0 entre número e unidade em pt e es; `{x_wordf}`; `measuredTerm()` traduz as palavras inglesas do JSON e para o build se faltar uma.
 - **Guias de dinheiro** (`src/tools/calc/guides.ts`): `GUIDE_FACTS[id](lang)`, com dólares, taxas e durações no idioma e as palavras do `words` de cada guia.
-- **Moldes e páginas.** `FileGuideView`, `GuideView`, `Reviewed` (os dois), `QrTool`, `MoneyCalculatorsView`, `ImageToolsView`, `PdfToolsView`, `ImageToolPage`, `PdfToolPage`, `search-index.json`, os cartões OG e o `articleLd` (imagem pelo id da rota) recebem o idioma. `presetRows` e `guideOf` servem o es. As datas: `IDIOMAS_DAY = 2026-11-03` para as páginas de dinheiro em es e os guias novos (§ 316).
+- **Moldes e páginas.** `FileGuideView`, `GuideView`, `Reviewed` (os dois), `QrTool`, `MoneyCalculatorsView`, `ImageToolsView`, `PdfToolsView`, `ImageToolPage`, `PdfToolPage`, `search-index.json`, os cartões OG e o `articleLd` (imagem pelo id da rota) recebem o idioma. `presetRows` e `guideOf` servem o es. As datas: `IDIOMAS_DAY = 2026-11-03` para as páginas de dinheiro em es e os guias novos (§ 312).
 - **Os 40 arquivos de página** em `src/pages/{pt,es}/…/index.astro`.
 
 ## 4. Portões e testes (fatias seguintes)
