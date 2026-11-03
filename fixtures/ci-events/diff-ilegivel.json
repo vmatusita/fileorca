@@ -1,0 +1,33 @@
+{
+  "description": "Diff que o job não consegue ler (commit que não existe): completo",
+  "event": {
+    "action": "synchronize",
+    "number": 260,
+    "pull_request": {
+      "number": 260,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00104f8ccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": {
+    "unreadable": true
+  },
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, sem diff legível: tudo."
+  }
+}

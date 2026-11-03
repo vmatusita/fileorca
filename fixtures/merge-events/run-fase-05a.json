@@ -11,7 +11,10 @@
       },
       "head": {
         "ref": "fase-05a",
-        "sha": "00d2f8cccccccccccccccccccccccccccccccccc"
+        "sha": "00d2f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
       },
       "base": {
         "ref": "main",

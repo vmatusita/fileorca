@@ -1,0 +1,33 @@
+{
+  "description": "PR de fork pronta, com código: a tabela vale igual",
+  "event": {
+    "action": "opened",
+    "number": 248,
+    "pull_request": {
+      "number": 248,
+      "draft": false,
+      "user": {
+        "login": "alguem-de-fora"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00f8f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "alguem-de-fora/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/platform/site.ts"
+  ],
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, com código: tudo."
+  }
+}

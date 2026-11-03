@@ -11,7 +11,10 @@
       },
       "head": {
         "ref": "dependabot/npm_and_yarn/typescript-7.0.0",
-        "sha": "00cdf8cccccccccccccccccccccccccccccccccc"
+        "sha": "00cdf8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
       },
       "base": {
         "ref": "main",

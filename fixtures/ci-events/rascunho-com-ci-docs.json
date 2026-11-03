@@ -1,0 +1,41 @@
+{
+  "description": "Linha 3: rascunho com o rótulo ci, só documentação",
+  "event": {
+    "action": "synchronize",
+    "number": 244,
+    "pull_request": {
+      "number": 244,
+      "draft": true,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [
+        {
+          "name": "documentation"
+        },
+        {
+          "name": "ci"
+        }
+      ],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00f4f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "docs/OPERACAO.md",
+    "README.md"
+  ],
+  "expected": {
+    "classe": "portões",
+    "motivo": "PR em rascunho com o rótulo ci, só documentação: o build e os portões, sem o Playwright e sem o Lighthouse."
+  }
+}

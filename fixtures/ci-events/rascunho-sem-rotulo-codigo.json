@@ -1,0 +1,34 @@
+{
+  "description": "Linha 1: rascunho sem o rótulo, com código",
+  "event": {
+    "action": "opened",
+    "number": 241,
+    "pull_request": {
+      "number": 241,
+      "draft": true,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00f1f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "scripts/verificar.ts",
+    "docs/relatorios/fase-09.md"
+  ],
+  "expected": {
+    "classe": "leve",
+    "motivo": "PR em rascunho sem o rótulo ci: tipos, lint e Vitest."
+  }
+}

@@ -1,0 +1,2592 @@
+{
+ "run": {
+  "attempt": 1,
+  "conclusion": "success",
+  "createdAt": "2026-11-03T06:31:05Z",
+  "databaseId": 41590377930,
+  "event": "pull_request",
+  "headBranch": "ajuste-idiomas",
+  "headSha": "85135801497bf86f5cba3e390d6686b21b3d97a3",
+  "jobs": [
+   {
+    "completedAt": "2026-11-03T06:44:07Z",
+    "conclusion": "success",
+    "databaseId": 125767176256,
+    "name": "verificar (lighthouse)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:17Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:33Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:43Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:48Z",
+      "conclusion": "success",
+      "name": "Cache pinned tools (actionlint, LanguageTool, JRE)",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:43Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:12Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 7,
+      "startedAt": "2026-11-03T06:36:48Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:05Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --lighthouse",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:05Z",
+      "conclusion": "success",
+      "name": "Post Cache pinned tools (actionlint, LanguageTool, JRE)",
+      "number": 13,
+      "startedAt": "2026-11-03T06:44:05Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:05Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 14,
+      "startedAt": "2026-11-03T06:44:05Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:05Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 15,
+      "startedAt": "2026-11-03T06:44:05Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:06Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 16,
+      "startedAt": "2026-11-03T06:44:05Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:06Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 17,
+      "startedAt": "2026-11-03T06:44:06Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176256"
+   },
+   {
+    "completedAt": "2026-11-03T06:45:56Z",
+    "conclusion": "success",
+    "databaseId": 125767176443,
+    "name": "playwright (webkit 9 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:20Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:24Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:20Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:37Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:48Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:37Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:29Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:48Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:29Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:29Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:51Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=9/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:29Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:51Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:45:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:51Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:45:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:51Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:45:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:51Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:45:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:52Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:45:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:45:52Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:45:52Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176443"
+   },
+   {
+    "completedAt": "2026-11-03T06:42:19Z",
+    "conclusion": "success",
+    "databaseId": 125767176480,
+    "name": "playwright (chromium 3 de 5)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:25Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:38Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:25Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:47Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:11Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:47Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:11Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:15Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=chromium --shard=3/5",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:15Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:42:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:15Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:42:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:15Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:42:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:16Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:42:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:16Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:42:16Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:16Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:42:16Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176480"
+   },
+   {
+    "completedAt": "2026-11-03T06:43:18Z",
+    "conclusion": "success",
+    "databaseId": 125767176487,
+    "name": "playwright (webkit 2 de 13)",
+    "startedAt": "2026-11-03T06:36:14Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:16Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:25Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:16Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:32Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:25Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:46Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:32Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:56Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:46Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:31Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:31Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:31Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:15Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=2/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:31Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:15Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:43:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:15Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:43:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:15Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:43:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:15Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:43:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:16Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:43:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:16Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:43:16Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176487"
+   },
+   {
+    "completedAt": "2026-11-03T06:41:55Z",
+    "conclusion": "success",
+    "databaseId": 125767176496,
+    "name": "playwright (webkit 1 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:20Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:23Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:20Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:39Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:47Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:39Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:47Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:23Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=1/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:51Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:52Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:41:51Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176496"
+   },
+   {
+    "completedAt": "2026-11-03T06:44:37Z",
+    "conclusion": "success",
+    "databaseId": 125767176526,
+    "name": "playwright (webkit 3 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:26Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:41Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:26Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:53Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:41Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:27Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:53Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:27Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:27Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:33Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=3/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:27Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:33Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:44:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:33Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:44:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:33Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:44:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:34Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:44:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:34Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:44:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:34Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:44:34Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176526"
+   },
+   {
+    "completedAt": "2026-11-03T06:41:19Z",
+    "conclusion": "success",
+    "databaseId": 125767176531,
+    "name": "verificar (portões)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:38Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:47Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:55Z",
+      "conclusion": "success",
+      "name": "Cache pinned tools (actionlint, LanguageTool, JRE)",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:47Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:55Z",
+      "conclusion": "skipped",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 7,
+      "startedAt": "2026-11-03T06:36:55Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --sem-playwright --sem-lighthouse",
+      "number": 8,
+      "startedAt": "2026-11-03T06:36:55Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "Post Cache pinned tools (actionlint, LanguageTool, JRE)",
+      "number": 13,
+      "startedAt": "2026-11-03T06:41:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 14,
+      "startedAt": "2026-11-03T06:41:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 15,
+      "startedAt": "2026-11-03T06:41:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 16,
+      "startedAt": "2026-11-03T06:41:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:14Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 17,
+      "startedAt": "2026-11-03T06:41:14Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176531"
+   },
+   {
+    "completedAt": "2026-11-03T06:42:28Z",
+    "conclusion": "success",
+    "databaseId": 125767176567,
+    "name": "playwright (webkit 10 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:18Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:25Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:18Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:40Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:25Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:49Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:40Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:31Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:49Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:31Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:31Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:24Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=10/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:31Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:24Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:42:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:24Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:42:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:24Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:42:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:24Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:42:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:25Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:42:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:25Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:42:25Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176567"
+   },
+   {
+    "completedAt": "2026-11-03T06:44:55Z",
+    "conclusion": "success",
+    "databaseId": 125767176601,
+    "name": "playwright (webkit 13 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:20Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:24Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:20Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:37Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:46Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:37Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:25Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:46Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:25Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:25Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:51Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=13/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:25Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:44:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:44:52Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:44:52Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:44:52Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:44:52Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:52Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:44:52Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176601"
+   },
+   {
+    "completedAt": "2026-11-03T06:42:42Z",
+    "conclusion": "success",
+    "databaseId": 125767176610,
+    "name": "playwright (webkit 11 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:38Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:46Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:46Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:22Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:37Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=11/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:37Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:42:37Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:37Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:42:37Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:38Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:42:37Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:38Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:42:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:38Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:42:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:42:38Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:42:38Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176610"
+   },
+   {
+    "completedAt": "2026-11-03T06:44:00Z",
+    "conclusion": "success",
+    "databaseId": 125767176611,
+    "name": "playwright (chromium 1 de 5)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:38Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:45Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:38Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:04Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:45Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:04Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:56Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=chromium --shard=1/5",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:56Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:43:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:56Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:43:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:56Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:43:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:56Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:43:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:57Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:43:56Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:57Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:43:57Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176611"
+   },
+   {
+    "completedAt": "2026-11-03T06:46:04Z",
+    "conclusion": "success",
+    "databaseId": 125767176614,
+    "name": "playwright (chromium 2 de 5)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:24Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:36Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:24Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:47Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:11Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:47Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:11Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:00Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=chromium --shard=2/5",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:00Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:46:00Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:00Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:46:00Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:00Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:46:00Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:00Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:46:00Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:01Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:46:00Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:01Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:46:01Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176614"
+   },
+   {
+    "completedAt": "2026-11-03T06:43:40Z",
+    "conclusion": "success",
+    "databaseId": 125767176616,
+    "name": "playwright (webkit 4 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:13Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:13Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:26Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:41Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:26Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:53Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:41Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:28Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:53Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:28Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:28Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:36Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=4/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:28Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:36Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:43:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:36Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:43:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:36Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:43:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:36Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:43:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:37Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:43:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:37Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:43:37Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176616"
+   },
+   {
+    "completedAt": "2026-11-03T06:46:45Z",
+    "conclusion": "success",
+    "databaseId": 125767176628,
+    "name": "playwright (chromium 5 de 5)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:23Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:34Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:45Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:07Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:45Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:07Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:07Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:42Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=chromium --shard=5/5",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:07Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:42Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:46:42Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:42Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:46:42Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:43Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:46:42Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:43Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:46:43Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:43Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:46:43Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:43Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:46:43Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176628"
+   },
+   {
+    "completedAt": "2026-11-03T06:43:38Z",
+    "conclusion": "success",
+    "databaseId": 125767176647,
+    "name": "playwright (webkit 12 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:18Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:21Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:18Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:35Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:21Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:44Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:35Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:17Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:44Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:17Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:34Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=12/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:34Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:43:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:34Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:43:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:34Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:43:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:35Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:43:34Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:35Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:43:35Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:35Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:43:35Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176647"
+   },
+   {
+    "completedAt": "2026-11-03T06:41:26Z",
+    "conclusion": "success",
+    "databaseId": 125767176656,
+    "name": "playwright (webkit 7 de 13)",
+    "startedAt": "2026-11-03T06:36:16Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:26Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:30Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:26Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:42Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:52Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:42Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:28Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:52Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:28Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:28Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:23Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=7/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:28Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:23Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:41:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:23Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:41:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:23Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:41:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:23Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:41:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:24Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:41:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:24Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:41:24Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176656"
+   },
+   {
+    "completedAt": "2026-11-03T06:41:34Z",
+    "conclusion": "success",
+    "databaseId": 125767176726,
+    "name": "playwright (webkit 8 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:12Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:12Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:29Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:43Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:29Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:51Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:43Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:38:17Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:51Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:38:17Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:38:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=8/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:38:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:30Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:41:30Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176726"
+   },
+   {
+    "completedAt": "2026-11-03T06:44:18Z",
+    "conclusion": "success",
+    "databaseId": 125767176732,
+    "name": "playwright (webkit 5 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:19Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:26Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:19Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:40Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:26Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:50Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:40Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:33Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:50Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:33Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:14Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=5/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:33Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:14Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:44:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:14Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:44:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:14Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:44:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:15Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:44:14Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:15Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:44:15Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:44:15Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:44:15Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176732"
+   },
+   {
+    "completedAt": "2026-11-03T06:43:07Z",
+    "conclusion": "success",
+    "databaseId": 125767176749,
+    "name": "playwright (chromium 4 de 5)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:13Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:10Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:23Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:13Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:31Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:23Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:46Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:31Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:53Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:46Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:20Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps chromium",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:53Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:20Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:20Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=chromium --shard=4/5",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:20Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:43:04Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:43:04Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176749"
+   },
+   {
+    "completedAt": "2026-11-03T06:41:20Z",
+    "conclusion": "success",
+    "databaseId": 125767176755,
+    "name": "playwright (webkit 6 de 13)",
+    "startedAt": "2026-11-03T06:36:09Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:36:11Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:36:09Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:18Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:36:11Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:22Z",
+      "conclusion": "success",
+      "name": "Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 3,
+      "startedAt": "2026-11-03T06:36:18Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:36Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 4,
+      "startedAt": "2026-11-03T06:36:22Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:36:45Z",
+      "conclusion": "success",
+      "name": "Run pnpm install --frozen-lockfile",
+      "number": 5,
+      "startedAt": "2026-11-03T06:36:36Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:30Z",
+      "conclusion": "success",
+      "name": "Run pnpm exec playwright install --with-deps webkit",
+      "number": 6,
+      "startedAt": "2026-11-03T06:36:45Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:37:30Z",
+      "conclusion": "success",
+      "name": "Core dumps off",
+      "number": 7,
+      "startedAt": "2026-11-03T06:37:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:17Z",
+      "conclusion": "success",
+      "name": "pnpm verificar --playwright=webkit --shard=6/13",
+      "number": 8,
+      "startedAt": "2026-11-03T06:37:30Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:17Z",
+      "conclusion": "success",
+      "name": "Disk and core dumps",
+      "number": 9,
+      "startedAt": "2026-11-03T06:41:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:17Z",
+      "conclusion": "skipped",
+      "name": "Playwright report",
+      "number": 10,
+      "startedAt": "2026-11-03T06:41:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:17Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 18,
+      "startedAt": "2026-11-03T06:41:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:17Z",
+      "conclusion": "success",
+      "name": "Post Run pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413",
+      "number": 19,
+      "startedAt": "2026-11-03T06:41:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:18Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 20,
+      "startedAt": "2026-11-03T06:41:17Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:41:18Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 21,
+      "startedAt": "2026-11-03T06:41:18Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125767176755"
+   },
+   {
+    "completedAt": "2026-11-03T06:47:16Z",
+    "conclusion": "success",
+    "databaseId": 125770735205,
+    "name": "merge",
+    "startedAt": "2026-11-03T06:46:48Z",
+    "status": "completed",
+    "steps": [
+     {
+      "completedAt": "2026-11-03T06:46:50Z",
+      "conclusion": "success",
+      "name": "Set up job",
+      "number": 1,
+      "startedAt": "2026-11-03T06:46:49Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:46:57Z",
+      "conclusion": "success",
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 2,
+      "startedAt": "2026-11-03T06:46:50Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:03Z",
+      "conclusion": "success",
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 3,
+      "startedAt": "2026-11-03T06:46:57Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:03Z",
+      "conclusion": "skipped",
+      "name": "Dependabot metadata",
+      "number": 4,
+      "startedAt": "2026-11-03T06:47:03Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:03Z",
+      "conclusion": "success",
+      "name": "Decide",
+      "number": 5,
+      "startedAt": "2026-11-03T06:47:03Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:04Z",
+      "conclusion": "success",
+      "name": "Comment why it was not merged",
+      "number": 6,
+      "startedAt": "2026-11-03T06:47:03Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:04Z",
+      "conclusion": "skipped",
+      "name": "Merge",
+      "number": 7,
+      "startedAt": "2026-11-03T06:47:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:04Z",
+      "conclusion": "success",
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "number": 13,
+      "startedAt": "2026-11-03T06:47:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:04Z",
+      "conclusion": "success",
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "number": 14,
+      "startedAt": "2026-11-03T06:47:04Z",
+      "status": "completed"
+     },
+     {
+      "completedAt": "2026-11-03T06:47:04Z",
+      "conclusion": "success",
+      "name": "Complete job",
+      "number": 15,
+      "startedAt": "2026-11-03T06:47:04Z",
+      "status": "completed"
+     }
+    ],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125770735205"
+   },
+   {
+    "completedAt": "2026-11-03T06:47:17Z",
+    "conclusion": "skipped",
+    "databaseId": 125770908169,
+    "name": "alerta-dependabot",
+    "startedAt": "2026-11-03T06:47:17Z",
+    "status": "completed",
+    "steps": [],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125770908169"
+   },
+   {
+    "completedAt": "2026-11-03T06:47:17Z",
+    "conclusion": "skipped",
+    "databaseId": 125770908709,
+    "name": "pos-deploy",
+    "startedAt": "2026-11-03T06:47:17Z",
+    "status": "completed",
+    "steps": [],
+    "url": "https://github.com/vmatusita/fileorca/actions/runs/41590377930/job/125770908709"
+   }
+  ],
+  "status": "completed"
+ },
+ "logs": {
+  "125767176256": "verificar (lighthouse)\tpnpm verificar --lighthouse\t2026-11-03T06:44:05.0550936Z Resumo do pnpm verificar (Lighthouse)\nverificar (lighthouse)\tpnpm verificar --lighthouse\t2026-11-03T06:44:05.0551554Z   ok      22.3 s  build (astro build do zero)\nverificar (lighthouse)\tpnpm verificar --lighthouse\t2026-11-03T06:44:05.0555325Z   ok     385.4 s  lighthouse ci\nverificar (lighthouse)\tpnpm verificar --lighthouse\t2026-11-03T06:44:05.0556019Z   total 411.7 s (limite 900 s)",
+  "125767176443": "playwright (webkit 9 de 13)\tpnpm verificar --playwright=webkit --shard=9/13\t2026-11-03T06:45:51.2846059Z Resumo do pnpm verificar (Playwright no webkit, parte 9 de 13)\nplaywright (webkit 9 de 13)\tpnpm verificar --playwright=webkit --shard=9/13\t2026-11-03T06:45:51.2847211Z   ok      21.5 s  build (astro build do zero)\nplaywright (webkit 9 de 13)\tpnpm verificar --playwright=webkit --shard=9/13\t2026-11-03T06:45:51.2848429Z   ok     475.6 s  playwright (webkit, parte 9 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 9 de 13)\tpnpm verificar --playwright=webkit --shard=9/13\t2026-11-03T06:45:51.2849284Z   total 501.6 s (limite 900 s)",
+  "125767176480": "playwright (chromium 3 de 5)\tpnpm verificar --playwright=chromium --shard=3/5\t2026-11-03T06:42:15.7358671Z Resumo do pnpm verificar (Playwright no chromium, parte 3 de 5)\nplaywright (chromium 3 de 5)\tpnpm verificar --playwright=chromium --shard=3/5\t2026-11-03T06:42:15.7359726Z   ok      23.6 s  build (astro build do zero)\nplaywright (chromium 3 de 5)\tpnpm verificar --playwright=chromium --shard=3/5\t2026-11-03T06:42:15.7361057Z   ok     276.3 s  playwright (chromium, parte 3 de 5, axe, anúncios, orçamentos)\nplaywright (chromium 3 de 5)\tpnpm verificar --playwright=chromium --shard=3/5\t2026-11-03T06:42:15.7362049Z   total 303.1 s (limite 900 s)",
+  "125767176487": "playwright (webkit 2 de 13)\tpnpm verificar --playwright=webkit --shard=2/13\t2026-11-03T06:43:15.2818376Z Resumo do pnpm verificar (Playwright no webkit, parte 2 de 13)\nplaywright (webkit 2 de 13)\tpnpm verificar --playwright=webkit --shard=2/13\t2026-11-03T06:43:15.2818917Z   ok      20.2 s  build (astro build do zero)\nplaywright (webkit 2 de 13)\tpnpm verificar --playwright=webkit --shard=2/13\t2026-11-03T06:43:15.2819778Z   ok     319.0 s  playwright (webkit, parte 2 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 2 de 13)\tpnpm verificar --playwright=webkit --shard=2/13\t2026-11-03T06:43:15.2820326Z   total 343.1 s (limite 900 s)",
+  "125767176496": "playwright (webkit 1 de 13)\tpnpm verificar --playwright=webkit --shard=1/13\t2026-11-03T06:41:51.4590690Z Resumo do pnpm verificar (Playwright no webkit, parte 1 de 13)\nplaywright (webkit 1 de 13)\tpnpm verificar --playwright=webkit --shard=1/13\t2026-11-03T06:41:51.4594284Z   ok      12.3 s  build (astro build do zero)\nplaywright (webkit 1 de 13)\tpnpm verificar --playwright=webkit --shard=1/13\t2026-11-03T06:41:51.4595092Z   ok     252.3 s  playwright (webkit, parte 1 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 1 de 13)\tpnpm verificar --playwright=webkit --shard=1/13\t2026-11-03T06:41:51.4605816Z   total 267.9 s (limite 900 s)",
+  "125767176526": "playwright (webkit 3 de 13)\tpnpm verificar --playwright=webkit --shard=3/13\t2026-11-03T06:44:33.6465255Z Resumo do pnpm verificar (Playwright no webkit, parte 3 de 13)\nplaywright (webkit 3 de 13)\tpnpm verificar --playwright=webkit --shard=3/13\t2026-11-03T06:44:33.6466113Z   ok      21.3 s  build (astro build do zero)\nplaywright (webkit 3 de 13)\tpnpm verificar --playwright=webkit --shard=3/13\t2026-11-03T06:44:33.6467279Z   ok     399.6 s  playwright (webkit, parte 3 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 3 de 13)\tpnpm verificar --playwright=webkit --shard=3/13\t2026-11-03T06:44:33.6468276Z   total 425.5 s (limite 900 s)",
+  "125767176531": "verificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0276986Z Resumo do pnpm verificar (sem o Playwright e sem o Lighthouse)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0277679Z   ok      15.6 s  tipos (astro check)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0285151Z   ok       7.7 s  lint (eslint)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0285655Z   ok      15.3 s  build (astro build do zero)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0286163Z   ok     121.6 s  vitest\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0286933Z   ok       0.4 s  cabeçalhos gerados\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0287745Z   ok       0.5 s  worker sem código\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0288325Z   ok       0.9 s  seo (hreflang, sitemaps, canonical, robots)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0289061Z   ok       0.9 s  links internos e páginas órfãs\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0289778Z   ok       1.9 s  conteúdo mínimo das ferramentas e do site\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0290631Z   ok      31.8 s  prontidão para o AdSense (dois builds extras em .cache/)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0291827Z   ok       2.1 s  design (sprite, fontes, tema, movimento, setas)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0292466Z   ok       5.1 s  licenças\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0293040Z   ok       0.7 s  conteúdo de dinheiro e saúde\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0293571Z   ok       0.5 s  actionlint\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0294077Z   ok      48.6 s  lint:texto (LanguageTool)\nverificar (portões)\tpnpm verificar --sem-playwright --sem-lighthouse\t2026-11-03T06:41:14.0294628Z   total 258.4 s (limite 900 s)",
+  "125767176567": "playwright (webkit 10 de 13)\tpnpm verificar --playwright=webkit --shard=10/13\t2026-11-03T06:42:24.5581467Z Resumo do pnpm verificar (Playwright no webkit, parte 10 de 13)\nplaywright (webkit 10 de 13)\tpnpm verificar --playwright=webkit --shard=10/13\t2026-11-03T06:42:24.5583403Z   ok      14.5 s  build (astro build do zero)\nplaywright (webkit 10 de 13)\tpnpm verificar --playwright=webkit --shard=10/13\t2026-11-03T06:42:24.5584285Z   ok     275.4 s  playwright (webkit, parte 10 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 10 de 13)\tpnpm verificar --playwright=webkit --shard=10/13\t2026-11-03T06:42:24.5586845Z   total 293.0 s (limite 900 s)",
+  "125767176601": "playwright (webkit 13 de 13)\tpnpm verificar --playwright=webkit --shard=13/13\t2026-11-03T06:44:51.9806467Z Resumo do pnpm verificar (Playwright no webkit, parte 13 de 13)\nplaywright (webkit 13 de 13)\tpnpm verificar --playwright=webkit --shard=13/13\t2026-11-03T06:44:51.9807628Z   ok      24.4 s  build (astro build do zero)\nplaywright (webkit 13 de 13)\tpnpm verificar --playwright=webkit --shard=13/13\t2026-11-03T06:44:51.9810410Z   ok     419.2 s  playwright (webkit, parte 13 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 13 de 13)\tpnpm verificar --playwright=webkit --shard=13/13\t2026-11-03T06:44:51.9811563Z   total 446.4 s (limite 900 s)",
+  "125767176610": "playwright (webkit 11 de 13)\tpnpm verificar --playwright=webkit --shard=11/13\t2026-11-03T06:42:37.8976852Z Resumo do pnpm verificar (Playwright no webkit, parte 11 de 13)\nplaywright (webkit 11 de 13)\tpnpm verificar --playwright=webkit --shard=11/13\t2026-11-03T06:42:37.8977285Z   ok      14.6 s  build (astro build do zero)\nplaywright (webkit 11 de 13)\tpnpm verificar --playwright=webkit --shard=11/13\t2026-11-03T06:42:37.8978066Z   ok     297.3 s  playwright (webkit, parte 11 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 11 de 13)\tpnpm verificar --playwright=webkit --shard=11/13\t2026-11-03T06:42:37.8978561Z   total 314.6 s (limite 900 s)",
+  "125767176611": "playwright (chromium 1 de 5)\tpnpm verificar --playwright=chromium --shard=1/5\t2026-11-03T06:43:56.5902611Z Resumo do pnpm verificar (Playwright no chromium, parte 1 de 5)\nplaywright (chromium 1 de 5)\tpnpm verificar --playwright=chromium --shard=1/5\t2026-11-03T06:43:56.5905448Z   ok      15.7 s  build (astro build do zero)\nplaywright (chromium 1 de 5)\tpnpm verificar --playwright=chromium --shard=1/5\t2026-11-03T06:43:56.5906863Z   ok     395.4 s  playwright (chromium, parte 1 de 5, axe, anúncios, orçamentos)\nplaywright (chromium 1 de 5)\tpnpm verificar --playwright=chromium --shard=1/5\t2026-11-03T06:43:56.5907361Z   total 411.8 s (limite 900 s)",
+  "125767176614": "playwright (chromium 2 de 5)\tpnpm verificar --playwright=chromium --shard=2/5\t2026-11-03T06:46:00.4090064Z Resumo do pnpm verificar (Playwright no chromium, parte 2 de 5)\nplaywright (chromium 2 de 5)\tpnpm verificar --playwright=chromium --shard=2/5\t2026-11-03T06:46:00.4090794Z   ok      22.7 s  build (astro build do zero)\nplaywright (chromium 2 de 5)\tpnpm verificar --playwright=chromium --shard=2/5\t2026-11-03T06:46:00.4092023Z   ok     501.3 s  playwright (chromium, parte 2 de 5, axe, anúncios, orçamentos)\nplaywright (chromium 2 de 5)\tpnpm verificar --playwright=chromium --shard=2/5\t2026-11-03T06:46:00.4092830Z   total 528.6 s (limite 900 s)",
+  "125767176616": "playwright (webkit 4 de 13)\tpnpm verificar --playwright=webkit --shard=4/13\t2026-11-03T06:43:36.4024517Z Resumo do pnpm verificar (Playwright no webkit, parte 4 de 13)\nplaywright (webkit 4 de 13)\tpnpm verificar --playwright=webkit --shard=4/13\t2026-11-03T06:43:36.4036824Z   ok      21.7 s  build (astro build do zero)\nplaywright (webkit 4 de 13)\tpnpm verificar --playwright=webkit --shard=4/13\t2026-11-03T06:43:36.4038043Z   ok     342.6 s  playwright (webkit, parte 4 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 4 de 13)\tpnpm verificar --playwright=webkit --shard=4/13\t2026-11-03T06:43:36.4038738Z   total 367.4 s (limite 900 s)",
+  "125767176628": "playwright (chromium 5 de 5)\tpnpm verificar --playwright=chromium --shard=5/5\t2026-11-03T06:46:42.8492059Z Resumo do pnpm verificar (Playwright no chromium, parte 5 de 5)\nplaywright (chromium 5 de 5)\tpnpm verificar --playwright=chromium --shard=5/5\t2026-11-03T06:46:42.8493730Z   ok      22.2 s  build (astro build do zero)\nplaywright (chromium 5 de 5)\tpnpm verificar --playwright=chromium --shard=5/5\t2026-11-03T06:46:42.8495262Z   ok     549.7 s  playwright (chromium, parte 5 de 5, axe, anúncios, orçamentos)\nplaywright (chromium 5 de 5)\tpnpm verificar --playwright=chromium --shard=5/5\t2026-11-03T06:46:42.8496173Z   total 574.7 s (limite 900 s)",
+  "125767176647": "playwright (webkit 12 de 13)\tpnpm verificar --playwright=webkit --shard=12/13\t2026-11-03T06:43:34.7793078Z Resumo do pnpm verificar (Playwright no webkit, parte 12 de 13)\nplaywright (webkit 12 de 13)\tpnpm verificar --playwright=webkit --shard=12/13\t2026-11-03T06:43:34.7793899Z   ok      16.9 s  build (astro build do zero)\nplaywright (webkit 12 de 13)\tpnpm verificar --playwright=webkit --shard=12/13\t2026-11-03T06:43:34.7795025Z   ok     357.6 s  playwright (webkit, parte 12 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 12 de 13)\tpnpm verificar --playwright=webkit --shard=12/13\t2026-11-03T06:43:34.7795489Z   total 377.3 s (limite 900 s)",
+  "125767176656": "playwright (webkit 7 de 13)\tpnpm verificar --playwright=webkit --shard=7/13\t2026-11-03T06:41:23.3108574Z Resumo do pnpm verificar (Playwright no webkit, parte 7 de 13)\nplaywright (webkit 7 de 13)\tpnpm verificar --playwright=webkit --shard=7/13\t2026-11-03T06:41:23.3109612Z   ok      22.7 s  build (astro build do zero)\nplaywright (webkit 7 de 13)\tpnpm verificar --playwright=webkit --shard=7/13\t2026-11-03T06:41:23.3110909Z   ok     208.8 s  playwright (webkit, parte 7 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 7 de 13)\tpnpm verificar --playwright=webkit --shard=7/13\t2026-11-03T06:41:23.3111812Z   total 234.6 s (limite 900 s)",
+  "125767176726": "playwright (webkit 8 de 13)\tpnpm verificar --playwright=webkit --shard=8/13\t2026-11-03T06:41:30.0626449Z Resumo do pnpm verificar (Playwright no webkit, parte 8 de 13)\nplaywright (webkit 8 de 13)\tpnpm verificar --playwright=webkit --shard=8/13\t2026-11-03T06:41:30.0627737Z   ok      23.5 s  build (astro build do zero)\nplaywright (webkit 8 de 13)\tpnpm verificar --playwright=webkit --shard=8/13\t2026-11-03T06:41:30.0629168Z   ok     164.3 s  playwright (webkit, parte 8 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 8 de 13)\tpnpm verificar --playwright=webkit --shard=8/13\t2026-11-03T06:41:30.0630109Z   total 191.6 s (limite 900 s)",
+  "125767176732": "playwright (webkit 5 de 13)\tpnpm verificar --playwright=webkit --shard=5/13\t2026-11-03T06:44:14.6587980Z Resumo do pnpm verificar (Playwright no webkit, parte 5 de 13)\nplaywright (webkit 5 de 13)\tpnpm verificar --playwright=webkit --shard=5/13\t2026-11-03T06:44:14.6590747Z   ok      17.5 s  build (astro build do zero)\nplaywright (webkit 5 de 13)\tpnpm verificar --playwright=webkit --shard=5/13\t2026-11-03T06:44:14.6593330Z   ok     373.6 s  playwright (webkit, parte 5 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 5 de 13)\tpnpm verificar --playwright=webkit --shard=5/13\t2026-11-03T06:44:14.6597683Z   total 400.7 s (limite 900 s)",
+  "125767176749": "playwright (chromium 4 de 5)\tpnpm verificar --playwright=chromium --shard=4/5\t2026-11-03T06:43:04.2961186Z Resumo do pnpm verificar (Playwright no chromium, parte 4 de 5)\nplaywright (chromium 4 de 5)\tpnpm verificar --playwright=chromium --shard=4/5\t2026-11-03T06:43:04.2961579Z   ok      15.8 s  build (astro build do zero)\nplaywright (chromium 4 de 5)\tpnpm verificar --playwright=chromium --shard=4/5\t2026-11-03T06:43:04.2962300Z   ok     323.5 s  playwright (chromium, parte 4 de 5, axe, anúncios, orçamentos)\nplaywright (chromium 4 de 5)\tpnpm verificar --playwright=chromium --shard=4/5\t2026-11-03T06:43:04.2966360Z   total 343.6 s (limite 900 s)",
+  "125767176755": "playwright (webkit 6 de 13)\tpnpm verificar --playwright=webkit --shard=6/13\t2026-11-03T06:41:17.5253262Z Resumo do pnpm verificar (Playwright no webkit, parte 6 de 13)\nplaywright (webkit 6 de 13)\tpnpm verificar --playwright=webkit --shard=6/13\t2026-11-03T06:41:17.5254075Z   ok      18.4 s  build (astro build do zero)\nplaywright (webkit 6 de 13)\tpnpm verificar --playwright=webkit --shard=6/13\t2026-11-03T06:41:17.5255058Z   ok     202.8 s  playwright (webkit, parte 6 de 13, axe, anúncios, orçamentos)\nplaywright (webkit 6 de 13)\tpnpm verificar --playwright=webkit --shard=6/13\t2026-11-03T06:41:17.5255908Z   total 226.7 s (limite 900 s)",
+  "125770735205": ""
+ }
+}

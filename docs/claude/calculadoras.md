@@ -1,0 +1,83 @@
+# Calculadoras
+
+O que as runs aprenderam sobre as calculadoras de dinheiro, do Brasil, de casa e de saúde, os oráculos e os formulários, com o texto igual ao do CLAUDE.md até a F9 e sob o cabeçalho de origem (a versão de uma calculadora em pt ou es está em `idiomas.md`); as runs acrescentam no fim, numa seção nova.
+
+## F4: calculadoras
+
+Convenção do dinheiro (DECISOES § 111 e § 127):
+
+- Dinheiro em centavos inteiros; taxa em 1/10.000 de ponto percentual (6.5% = 65000, 100% = `ONE` = 1.000.000). Divisão em BigInt, metade para cima; juros de cada período ao centavo; a última parcela zera o saldo.
+- O valor esperado vem do oráculo, nunca do motor: mudou a convenção, mude o `scripts/oracle/calc.py`, regere as fixtures e commite antes do motor (o `git log -- fixtures/calc src/calc` mostra a ordem).
+- `src/calc/` não importa nada de fora da pasta (regra do ESLint, testada em `quality.test.ts`).
+
+Como acrescentar uma calculadora:
+
+1. O caso no oráculo (`scripts/oracle/calc.py`: a função, a grade, os aleatórios com semente `2026-10-31/<id>`, o `page-example` e, se houver, o exemplo oficial em `OFFICIAL_CHECKS` e no `fixtures/calc/OFICIAIS.md`). Regere e commite as fixtures.
+2. O motor em `src/calc/` e o id em `ENGINES` (`src/calc/index.ts`).
+3. O id no `src/tools/calc/registry.ts` (`CALC_PAGES`: caminho, mãe, ícone, grupo, chips, relacionadas, guia e nome do arquivo) e em `CALC_EVENT_TOOLS` (`src/analytics/tool-ids.ts`); a rota sai sozinha de `moneyRoutes()`.
+4. A definição em `src/tools/calc/defs/` (campos com faixa fixa, `initial` igual ao `page-example`, `toInput`, `view`) e a entrada em `DEFS`.
+5. Os textos em `src/tools/<slug>/i18n/en.ts` (`CalcPageTexts`: o erro diz a faixa, os blocos que o `gate:conteudo` e o `gate:dinheiro-saude` pedem) e o cartão em `src/i18n/en/common.ts` (`calcs`); a página em `src/pages/<slug>/index.astro` com `<CalcTool id lang="en" />`.
+6. Testes: o `calc-defs.test.ts`, o `budgets.spec.ts`, o `ads.spec.ts`, o `money-privacy.spec.ts` e o `a11y.spec.ts` já pegam a página pelo registro. Confira o resultado acima da dobra a 360 × 740 (o `ads.spec.ts` reprova).
+
+Pegadinhas que a F4 achou:
+
+- No celular, o número do ResultHero tem de ficar acima de 740 px (§ 124). Campos principais: no máximo duas linhas de dois campos de meia largura, sem ajuda fixa, com rótulo que cabe numa linha ao lado da etiqueta "example" (até uns 75 px a 15 px de fonte). O que não cabe desce para depois do resultado. As páginas de preset têm a trilha de navegação em três linhas e ficam a 13 px da dobra.
+- A ilha tem duas raízes com uma store (`#fo-tool-root` e `#fo-calc-schedule`). Mudança feita na store logo depois do `hydrate()` (o link do cenário) precisa do `useCalc` que repinta se a store mudou antes da assinatura (§ 128).
+- Mesmo `#` na mesma página não recarrega: no teste, vá a `about:blank` antes de abrir outro link do cenário.
+- Tabela com células sem quebra numa página estreita: moldura com `width: 0; min-width: 100%` (`.fo-table-wrap`, `.fo-amort-wrap`), senão a página inteira rola para o lado a 320 px (§ 129).
+- O `lint:texto` preenche os `{placeholders}` dos textos de dinheiro com valores reais (`MONEY_SAMPLES` e os números do guia, § 123). Um placeholder novo sem amostra vira "$1,234": confira se a frase ainda faz sentido.
+- O PDF usa as fontes padrão (só WinAnsi): o `winAnsi()` troca o sinal de menos, as aspas curvas e o resto. Texto novo do PDF com caractere fora do WinAnsi some.
+- Medida de tempo no WebKit anda de 1 em 1 ms: o teste dos 16 ms só afirma o limite no Chromium e imprime o WebKit.
+- A grade dos campos usa subgrid (§ 137): cada item ocupa duas linhas, e o `CalcField` tem dois filhos, o rótulo e o `.fo-field__body`. Um `fieldset` (grupo de opções) fica fora do subgrid, porque no WebKit ele deixava 12 px vazios. Componente novo na grade: confira a altura dele e a do vizinho nos dois navegadores.
+- Enquanto o resultado é um problema, ou fica velho por um campo a corrigir, o PDF e o CSV ficam desligados (§ 139). Um teste que precisa baixar arquivo tem de deixar a conta com resultado (o `money-privacy.spec.ts` desce a sentinela até isso acontecer).
+
+## F6: português e espanhol
+
+Pegadinhas que a F6 achou:
+
+- **O número do resultado no celular** (§ 124) ficou com folga zero numa página em português (o veículo, a 740 px). Português e espanhol são mais longos: meça a 360 × 740 nos dois navegadores antes de escrever o lead e os rótulos de meia largura.
+- **Um rótulo com a etiqueta "exemplo" numa meia coluna** tem de caber a 360 px (palavra mais longa + 12 px + 72 px da etiqueta ≤ 158 px). A 320 px, a etiqueta desce de linha (`flex-wrap`, § 234); a 360 px isso empurraria o resultado para baixo da dobra. "Parcelamento" não coube; "Parcelado" cabe.
+
+## F7: casa, saúde e QR code
+
+Como uma calculadora de casa ou de saúde entra:
+
+1. O caso no `scripts/oracle/calc_home_health.py` (a função, a grade, os aleatórios com semente `2026-11-02/<id>`, o `page-example` e, se houver, o exemplo oficial em `OFFICIAL_CHECKS` e no `fixtures/calc/OFICIAIS.md`). Onde entra π ou log10, a saída leva `exact` (30 algarismos) e o oráculo refaz o sorteio perto de um empate. Regere e commite as fixtures antes do motor.
+2. O motor em `src/calc/home.ts` ou `health.ts` (frações em BigInt, `Math.PI`/`Math.log10` só onde precisa, dias por `src/calc/dates.ts`) e o id em `ENGINES`.
+3. O id em `HOUSE_CALC_IDS` ou `HEALTH_CALC_IDS` e a linha em `LIFE_CALC_PAGES` (`src/tools/calc/registry.ts`): o hub (`house` ou `health`) decide o AdSlot (`casa-saude`), a cor (`home`, violeta só no preenchimento), o breadcrumb, a lista de fontes do `gate:dinheiro-saude` (`ymylHubOf`), a comemoração da Oli (nunca na saúde) e o `WebApplication`. O id entra em `CALC_EVENT_TOOLS`; a rota sai de `lifeRoutes()`.
+4. A definição em `src/tools/calc/defs/house.ts` ou `health.ts` e a entrada em `DEFS`: medidas com `measure(key, decimais, min, max)` (`kind: 'dec'`), datas com `DateSpec` (`<input type="date">`, faixa fixa), a lista com menu de linha (`ListSpec.pick`) e o botão de acrescentar depois do resultado (`addBelow`); `today: true` se a conta precisa do dia do aparelho; a tabela do resultado com `open: true`.
+5. Os textos em `src/tools/<id>/i18n/en.ts` (`CalcPageTexts`; o erro de cada campo diz a faixa com as casas da medida) e o cartão em `enCommon.calcs`; a página `src/pages/<id>/index.astro` com `<CalcTool id lang="en" />`.
+6. Os testes que leem o registro pegam a página nova (`calc-defs`, `calc-oracle`, `a11y`, `ads`, `budgets`, `money-life-privacy`); o caso dela entra no `money-home.spec.ts` ou no `money-health.spec.ts`.
+
+O hub de cada uma é lido de `LIFE_HUB_IDS` (a ordem) e de `src/i18n/life-hubs.ts` (os textos, só em inglês), pela view `src/views/LifeCalculatorsView.astro`.
+
+Pegadinhas que a F7 achou:
+
+- **O `lead` de uma calculadora em três linhas** custa 56 px a 360 px: com um OptionGroup e duas linhas de campos de meia largura, o resultado passa da dobra. O `lead` das páginas com OptionGroup cabe numa linha.
+- **Datas:** o motor só vê dias inteiros; o "hoje" é lido pela ilha com `getFullYear()`, `getMonth()` e `getDate()` do aparelho, nunca do UTC. Nos testes, fixe o relógio com `page.clock` e o fuso no contexto.
+- **O WebFetch não abre** acog.org, apps.dtic.mil nem esd.whs.mil (403), e o NCBI Bookshelf pede reCAPTCHA: a fonte vira o PubMed, o PMC ou outra página oficial do mesmo órgão, e o que não abriu fica como pendência.
+
+## F7: o que a revisão mudou nos formulários das calculadoras
+
+- **Erro de faixa vai ao store** (§ 276). O `CalcField` e o `DateField` recebem `report` (o `wrong(id, is)` do store) e avisam quando mostram ou deixam de mostrar o erro de faixa. Enquanto houver um campo assim, o resultado fica velho: aparece a linha "Fix the highlighted field…", e o PDF e o CSV ficam desligados. Campo novo que valida a própria faixa passa o `report` adiante, como o `NumberInput` do `Fields.tsx`.
+- **Tabela aberta** (§ 275). Uma tabela sem grupos por ano (`CalcView.open`) sai com `fo-amort--flat`: sem coluna fixa e com texto que quebra. Ela tem de caber a 320 px. O `calc-form.spec.ts` mede isso nas páginas de casa e saúde.
+- **Campos estreitos** (§ 277). O `calc-form.spec.ts` lê os `DEFS` e confere, a 320 e 360 px:
+  - cada número visível com o exemplo e com o máximo da faixa (`scrollWidth ≤ clientWidth`);
+  - cada opção de cada menu, medida com a fonte do menu;
+  - o menu e a data na linha inteira abaixo de 360 px, só nas páginas de casa e saúde (`fo-calc--home`, § 282); as de dinheiro guardam as meias linhas, e o teste confere.
+
+  Antes de criar um campo de meia largura com unidade longa, ou um menu com opção longa, rode esse spec.
+- **Foco das áreas** (§ 278). Só o clique no "Add an area" move o foco para a linha nova (`addedBelow`, estado do módulo `Fields.tsx`). As linhas que o link do cenário traz não mexem no foco.
+
+## F8: piloto automático
+
+Pegadinhas que a F8 achou:
+
+- **O erro de faixa das calculadoras espera 800 ms sem tecla ou a saída do campo** (`SETTLE_MS`, § 305). Teste que digita um valor fora da faixa espera o alerta com `expect` (que já espera), nunca na hora.
+
+## Ajuste: idiomas
+
+Pegadinhas que o ajuste achou:
+
+- **A regra dos 740 px (§ 124) é medida só com a Figtree** (o `ads.spec.ts`). Na primeira visita, com a fonte de reserva, um lead ou um rótulo mais longo ganha uma linha e gasta a folga: o lead completo da Alquilar o comprar em es levou o número de 712 a 740 px e o CLS de 0 a 0,020 (§ 321, R2-01). Texto novo perto da dobra: rode o `layout-shift.spec.ts` na largura da página e confira o CLS que ele imprime.
+- **Um rótulo de meia largura com duas palavras quebra inteiro** e leva a etiqueta "ejemplo" para a linha de baixo na fonte de reserva ("Tasa nueva", "Tasa anual"). A regra da F6 (palavra mais longa + 12 + 72 ≤ 158 px) não vê isso (pendência "Idiomas E-2").

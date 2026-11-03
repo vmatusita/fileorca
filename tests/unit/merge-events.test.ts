@@ -9,7 +9,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { command, mergeSteps, prJsonLikeJq, readOutputs, render, stepNamed, type MergeEventFixture } from './lib/merge-job.ts';
+import { command, mergeSteps, prJsonLikeJq, readOutputs, render, REPOSITORY, stepNamed, type MergeEventFixture } from './lib/merge-job.ts';
 
 const DIR = 'fixtures/merge-events';
 const CI = readFileSync('.github/workflows/ci.yml', 'utf8');
@@ -20,13 +20,19 @@ const run = decideStep.run ?? '';
 const scratch = mkdtempSync(join(tmpdir(), 'fo-merge-events-'));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
-// The jq of the job, kept here so a change to it in ci.yml is seen on machines without jq (Windows).
+// The jq of the job, kept here so a change to it in ci.yml is seen on machines without jq (Windows). F9 (decision 9;
+// DECISOES § 333): it adds the repository of the head branch, this repository and its owner, which the new script needs
+// and the script of the base before the F9 ignores.
 const JQ_ON_MAIN = [
   'jq -n --arg head "$HEAD_REF" --arg author "$AUTHOR" --argjson draft "$DRAFT" \\',
+  '--arg headRepo "$HEAD_REPO" --arg repo "$REPO" --arg repoOwner "$REPO_OWNER" \\',
   '--rawfile files "$RUNNER_TEMP/files.txt" \\',
-  `'{headRefName: $head, isDraft: $draft, author: {login: $author}, files: ($files | split("\\n") | map(select(length > 0)) | map({path: .}))}' \\`,
+  `'{headRefName: $head, isDraft: $draft, author: {login: $author}, headRepo: $headRepo, repo: $repo, repoOwner: $repoOwner, files: ($files | split("\\n") | map(select(length > 0)) | map({path: .}))}' \\`,
   '> "$RUNNER_TEMP/pr.json"',
 ].join('\n');
+// The script the fixtures run: the one of this checkout, or another one (MERGE_SCRIPT=<path>) to prove that the cases of
+// the F9 fail without the protection, with the script of main before the F9 (docs/relatorios/fase-09.md).
+const SCRIPT = process.env['MERGE_SCRIPT'] ?? 'scripts/ci/pode-mesclar.ts';
 // The call of the CLI on main. It must not change with this PR: the job runs the script of the base (DECISOES § 297).
 const CLI_ON_MAIN = 'node "$RUNNER_TEMP/ci/pode-mesclar.ts" "$RUNNER_TEMP/pr.json" "$UPDATE_TYPE"';
 const DIFF_ON_MAIN = 'git -c core.quotePath=false diff --no-renames --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"';
@@ -80,6 +86,9 @@ describe('the merge job of ci.yml, as the fixtures read it', () => {
       AUTHOR: '${{ github.event.pull_request.user.login }}',
       DRAFT: '${{ github.event.pull_request.draft }}',
       UPDATE_TYPE: '${{ steps.dependabot.outputs.update-type }}',
+      HEAD_REPO: '${{ github.event.pull_request.head.repo.full_name }}',
+      REPO: '${{ github.repository }}',
+      REPO_OWNER: '${{ github.repository_owner }}',
     });
     expect(metadataStep.if).toBe("github.event.pull_request.user.login == 'dependabot[bot]'");
     expect(metadataStep.id).toBe('dependabot');
@@ -108,8 +117,16 @@ describe('the merge job of ci.yml, as the fixtures read it', () => {
       'run-touches-workflows',
       'run-renames-workflow-out',
       'run-dependabot-config',
+      // F9 (decision 9; DECISOES § 333): a fork with the name of a run branch, another author of this repository, an
+      // event without the repository of the head; Dependabot and the owner are the cases above.
+      'fork-run-branch',
+      'other-author-run-branch',
+      'missing-head-repo',
     ]) {
       expect(names).toContain(name);
+    }
+    for (const fixture of fixtures.filter((candidate) => candidate.name !== 'missing-head-repo')) {
+      expect((fixture.event.pull_request['head'] as { repo?: { full_name?: string } }).repo?.full_name, fixture.name).toMatch(/^[\w.-]+\/[\w.-]+$/);
     }
     const group = fixtures.find((fixture) => fixture.name === 'dependabot-group-minor');
     expect(group?.fetchMetadata).toEqual({ 'update-type': 'version-update:semver-minor', 'dependency-group': 'npm-minor-patch' });
@@ -123,9 +140,9 @@ describe.each(fixtures)('merge event $name', (fixture) => {
     const isBot = fixture.event.pull_request['user'] && (fixture.event.pull_request['user'] as { login: string }).login === 'dependabot[bot]';
     // The metadata step runs only for Dependabot; otherwise its outputs are empty.
     expect(fixture.fetchMetadata === null).toBe(!isBot);
-    const context = { github: { event: fixture.event }, steps: { dependabot: { outputs: isBot ? fixture.fetchMetadata : {} } } };
+    const context = { github: { event: fixture.event, ...REPOSITORY }, steps: { dependabot: { outputs: isBot ? fixture.fetchMetadata : {} } } };
     const env = Object.fromEntries(Object.entries(decideStep.env ?? {}).map(([key, value]) => [key, render(value, context)])) as Record<
-      'HEAD_REF' | 'AUTHOR' | 'DRAFT' | 'UPDATE_TYPE',
+      'HEAD_REF' | 'AUTHOR' | 'DRAFT' | 'UPDATE_TYPE' | 'HEAD_REPO' | 'REPO' | 'REPO_OWNER',
       string
     >;
 
@@ -146,7 +163,7 @@ describe.each(fixtures)('merge event $name', (fixture) => {
       writeFileSync(join(dir, 'pr.json'), JSON.stringify(expectedJson));
     }
 
-    copyFileSync('scripts/ci/pode-mesclar.ts', join(dir, 'ci', 'pode-mesclar.ts'));
+    copyFileSync(SCRIPT, join(dir, 'ci', 'pode-mesclar.ts'));
     const output = join(dir, 'github-output.txt');
     writeFileSync(output, '');
     execFileSync(process.execPath, [join(dir, 'ci', 'pode-mesclar.ts'), join(dir, 'pr.json'), env.UPDATE_TYPE], {

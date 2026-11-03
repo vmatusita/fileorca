@@ -2954,3 +2954,509 @@ A revisão das cinco lentes (`docs/relatorios/REVISAO-ajuste-idiomas.md`) confir
 - **A correção.** O teste espera o foco no botão da ação, que é o que o painel garante, e só então foca a página. O painel não mudou: o foco na ação é o comportamento da § 240.
 - **Alternativas.** Mudar o painel para não mover o foco quando a pessoa já está numa página da grade (mudança de produto que a ficha não pede, e a § 240 já trata o caso dos campos de texto); um `waitForTimeout` (proibido: esperar tempo em vez de estado).
 - **A prova.** O teste passou três vezes seguidas em cada navegador nesta máquina, e o CI da PR roda a parte de novo.
+
+## § 323 · O pnpm ci:custo e a linha de base (F9, decisão 1)
+
+- **O comando:** `pnpm ci:custo <run-id> [--attempt n]` (`scripts/ci/custo.ts`). Ele só lê, pelo `gh`: `gh run view --json` para os jobs e os passos e `gh run view --job <id> --log` para o log de cada job que rodou. O `.claude/settings.json` nega o `gh api` com método, e o script não precisa dele.
+- **Por job, mostra:**
+  - a duração e o minuto cobrado: a duração arredondada para cima, como num repositório privado;
+  - o preparo: do início do job ao início do passo cujo nome começa com `pnpm verificar`;
+  - os três passos que mais pesam;
+  - o `total` e os passos do resumo do `verificar`, lidos do log.
+
+  Jobs pulados aparecem como pulados, com 0 minuto.
+- **Na execução, mostra:**
+  - a soma dos minutos cobrados;
+  - o tempo de parede, do início do primeiro job que rodou ao fim do último;
+  - quantos jobs rodaram e quantos foram pulados;
+  - a classe, lida da linha `classificar: classe <x>` do log da classificação. Sem o job, é "completo (CI de antes da F9)"; com o job e sem a linha, "desconhecida".
+
+  Depois da tabela vêm três linhas: os jobs que rodaram o build, o maior preparo dos jobs do Playwright (com quantos passaram de 90 s) e o maior `total` (com quantos passaram do alvo de 700 s).
+- **A saída** é Markdown, pronta para o relatório. A conta é a função pura `summarize()`. O `tests/unit/ci-custo.test.ts` roda sobre a execução gravada em `fixtures/ci-custo/run-41590377930.json`: o JSON do `gh` e, por job, só as linhas do log que o script lê. O mesmo teste confere que o script não chama o `gh` com método nem com outra coisa que `run view`.
+- **A linha de base** é a execução `41590377930`: a última verde da PR #19 (ajuste idiomas), commit `8513580`, evento `ready_for_review`, tentativa 1. O `pnpm ci:custo 41590377930` dá:
+  - 157 minutos cobrados e 11,1 min de parede;
+  - 21 jobs que rodaram e 2 pulados;
+  - preparo dos jobs do Playwright de 55 a 128 s, com 1 de 18 acima de 90 s (o `webkit 8 de 13`, com 86 s de `playwright install`);
+  - o maior `total` em 574,7 s (`chromium 5 de 5`), com nenhuma parte acima de 700 s;
+  - os 20 builds, um por parte, de 12 a 24 s.
+
+  As outras execuções verdes da mesma PR deram 166 (`41584397815`) e 160 minutos (`41571847874`, com uma parte vermelha). O "uns 170" do prompt é a estimativa da § 320.
+- **Alternativas:**
+  - ler os logs pela API de jobs (`gh api .../jobs/<id>/logs`), que é o mesmo dado com outro formato de linha;
+  - calcular o custo pelo `billable` da API de uso (`/actions/runs/<id>/timing`), que não existe para repositório público e não dá o preparo.
+
+## § 324 · O build uma vez por execução (F9, decisão 2)
+
+- **O job `build`** roda `pnpm verificar --build` e sobe o artefato `site`: o `dist/` e o `.cache/bundle-modules.json`, com `include-hidden-files: true` (o `upload-artifact` da v4.4 em diante ignora caminho oculto, e o `.cache/` é oculto), `if-no-files-found: error` e retenção de 1 dia. O registro do bundle vai junto porque o `gate:licencas` e o `budgets.spec.ts` (`BUNDLE_RECORD`) o leem.
+- **As partes que usam o build** (`portoes`, `lighthouse` e as 18 do `playwright`) baixam o artefato e rodam o `verificar` com `--dist-pronto`. No `portoes`, o cache das ferramentas (`.cache/` inteiro, chave do `tools.ts`) vem antes do download, então o `bundle-modules.json` do artefato vence o de um cache velho. O `upload-artifact` da v4 em diante não sobrescreve um nome na mesma execução, e só o `build` sobe o `site`.
+- **As opções do `scripts/verificar.ts`:**
+  - `--build`: só o passo do build (apaga o `dist/` antes, como sempre);
+  - `--dist-pronto`: modificador de qualquer parte. Não apaga o `dist/`, tira o build do plano e para antes do primeiro passo se o `dist/build.txt` não for o `git rev-parse HEAD` do checkout (`distProblem()`). No CI de PR, todos os jobs de uma execução fazem o checkout do mesmo commit de merge (`github.sha`), que é o que o `build-files.ts` grava;
+  - `--leve`: tipos, lint, build e Vitest (§ 326).
+
+  Sem as opções, o `plan()` faz o que fazia, e os testes das partes antigas continuam valendo.
+- **O `gate:prontidao`** continua com os dois builds extras dele em `.cache/prontidao/`: é um portão, não o build do site.
+- **Os nomes.** `--build` segue o `--lighthouse` (uma parte que roda uma coisa só); `--dist-pronto` segue o `--sem-playwright` (português, como os outros). Alternativas: `--so-build` e `--usar-dist` (mais longas e menos claras).
+- **Alternativa recusada:** o build dentro do job `portoes`, com o upload no meio. O `needs` é por job: as partes do Playwright esperariam os portões inteiros.
+- **A prova:**
+  - o `tests/unit/verificar.test.ts` lê as partes do `ci.yml` (`scripts/lib/ci-parts.ts`) e confere que juntas são o `pnpm verificar` inteiro, com o build uma vez, cada portão uma vez e o `e2e` uma vez por parte;
+  - o `tests/unit/ci-workflows.test.ts` confere que só o job `build` roda o build, que o upload leva o registro e que cada parte baixa o artefato depois do cache.
+
+  O teste do ajuste idiomas que lia as duas matrizes do `ci.yml` (`matrixOf('verificar')`) perdeu essa leitura, porque o job `verificar` deixou de existir. As asserções dele sobre o `plan()` ficaram, e a do `ci.yml` passou ao teste novo, mais forte: as partes vêm do arquivo e o build conta uma vez.
+- **O tamanho do artefato** (revisão da F9, C-2; medido com `gh api repos/vmatusita/fileorca/actions/runs/41660597548/artifacts`, só leitura): o `site` tem 23.038.126 bytes (23,0 MB) na execução 41660597548, e 23.038.125 na 41658317282. É o único artefato de uma execução verde (os relatórios do Playwright só sobem numa falha), um por execução completa ou de documentação, e expira 24 h depois do upload. O `dist/` sem compressão tem uns 46 MB.
+- **A retenção de 1 dia e o rerun** (revisão da F9, A-3 e C-4): um `gh run rerun <id> --failed` feito mais de 24 h depois da execução roda só a parte vermelha, que não acha mais o artefato e falha no download. O `docs/OPERACAO.md` e o `docs/claude/ci.md` dizem que o `--failed` só vale em até 24 h e que, depois, a saída é o "Re-run all jobs" (que refaz o `build`) ou um push. A retenção não mudou: a ficha manda 1 dia. Se o "Re-run all jobs" tropeça no upload de um `site` que já existe na execução (o `upload-artifact` sem `overwrite` falha com nome repetido) não foi testado.
+
+## § 325 · O preparo dos jobs do Playwright (F9, decisão 3)
+
+- **O que é o preparo:** do início do job ao início do passo que roda o `pnpm verificar`. Inclui o checkout, o Node e o pnpm, o `pnpm install`, o navegador, os pacotes do sistema e o download do artefato. O `pnpm ci:custo` mede cada job, não a média.
+- **Onde estava o tempo** (linha de base, execução 41590377930): o preparo foi de 55 a 128 s, com mediana de uns 75 s e 1 dos 18 jobs acima de 90 s.
+  - O `playwright install --with-deps` levava de 19 a 27 s no Chromium e de 33 a 45 s no WebKit, com 86 s no pior caso.
+  - A parte lenta é o `apt` do WebKit: uns 180 pacotes e 114 MB. O download do navegador leva de 3 a 8 s.
+  - O `setup-node` levava de 11 a 17 s (o Node 24.22.2 não vem na imagem do runner, mais o cache do pnpm), e o `pnpm install`, de 7 a 12 s.
+- **Abordagem 1, medida na execução 41658317282:** checkout raso, e logo depois o `npx playwright@<versão do lockfile> install --with-deps <navegador>` em segundo plano (`setsid nohup`, com a saída num arquivo), enquanto o job baixa o artefato e prepara o Node e o pnpm.
+  - A versão sai do `pnpm-lock.yaml` (a linha `'@playwright/test@x.y.z':`), então o navegador é a mesma revisão que o `@playwright/test` instalado procura.
+  - Um passo "Wait for the browser" espera o status do processo e falha se a instalação falhou, mostrando o fim do log dela. A espera era de até 300 s; passou a 1.200 s depois da execução final 41677467607 (abaixo).
+  - O job do Lighthouse faz o mesmo, com o Chromium.
+  - **Resultado:** o preparo dos 18 jobs foi de 41 a 116 s, com mediana de 53 s. Só o WebKit 13 de 13 passou de 90 s: 116 s, com 79 s de espera pelo navegador.
+- **Abordagem 2, medida na execução 41660597548:** a 1, mais o `dpkg` sem `fsync` (`force-unsafe-io`) e sem o gatilho do `man-db`. A instalação passou a ser feita em duas etapas, os pacotes do sistema e depois o navegador, cada uma com o próprio tempo no log (linhas `[navegador]`).
+  - **Resultado:** o preparo foi de 40 a 122 s, com mediana de 56 s. Só o WebKit 7 de 13 passou de 90 s: 122 s.
+  - **Os pacotes do sistema** levaram de 13 a 33 s no Chromium e de 32 a 62 s no WebKit, com 99 s no WebKit 7. O navegador levou de 4 a 13 s.
+- **A conclusão:** o critério "até 90 s em cada job" não fechou. Nas duas execuções, 17 dos 18 jobs ficaram em até 90 s (antes, 17 de 18 também, com mediana de uns 75 s). Em cada execução, um job do WebKit passou, pela variação do `apt` dos pacotes do sistema, e não pelo trabalho do job. A mediana caiu uns 20 s. O passo de espera passa a mostrar a linha "Fetched" do `apt`, para separar um espelho lento de um `dpkg` lento. A pendência "F9 preparo" fica para a F9b.
+- **A opção B,** a imagem oficial `mcr.microsoft.com/playwright:v1.64.1-noble` rodada por um passo `docker run`, não foi medida: as duas medidas permitidas foram para a opção A. Contra a B pesavam:
+  - 990 MB de camadas, com os três navegadores;
+  - o Node 26 da imagem, quando o projeto pede o 24;
+  - o diagnóstico de disco pela metade dentro do contêiner;
+  - o disco: a § 141 registra `ENOSPC` com 72 GB. As máquinas desta run têm 145 GB, mas a linha de base rodou numa de 72 GB, e a máquina mudou entre a linha de base e a F9 (§ 339).
+- **Alternativa recusada: o navegador em cache pelo `actions/cache`.** A documentação do Playwright desaconselha, porque restaurar leva o mesmo que baixar. O cache de uma PR só serve à própria PR, então a primeira execução seria fria. E o `apt`, que é a parte lenta, não se guarda assim.
+- **As proteções da § 154 não mudaram.** Nos logs das 18 partes da execução 41658317282 aparecem:
+  - o passo "Core dumps off" (`kernel.core_pattern = |/bin/false`) antes do `verificar`;
+  - o `ulimit -c 0` no passo;
+  - o passo "Disk and core dumps", com o `df` e o `core_pattern: |/bin/false`;
+  - as linhas `[disco]`.
+
+  O `tests/unit/ci-workflows.test.ts` fixa os passos. O disco livre mínimo das partes foi de 81 a 85 GB, contra 7 a 10 GB na linha de base: outra máquina (abaixo, § 339).
+- **O que a revisão da F9 corrigiu neste registro** (C-5 e B-5):
+  - **A abordagem 2 não deu ganho separável da 1.** As medianas foram 53 s (1) e 56 s (2), e os máximos 116 s e 122 s: o `dpkg` sem `fsync` e sem o `man-db` não mudou o preparo de forma que se meça em duas execuções. A queda de uns 20 s na mediana é das duas contra a linha de base (uns 75 s), e vem da instalação em segundo plano. A variante 2 ficou no `ci.yml` porque não piorou nada e dá o tempo de cada fase no log (linhas `[navegador]`), que a F9b vai usar.
+  - **A opção B ficou sem medida por escolha, não por limite.** A ficha deixava medir duas opções, e a run gastou as duas em variantes da A, pelas razões acima. Medir a B é da F9b (pendência "F9 preparo").
+  - **A linha "Fetched" do `apt`** entrou no passo de espera depois da última execução completa da F9 e ainda não apareceu num log; o `docs/claude/ci.md` diz que o passo "passa a mostrar" a linha.
+  - **O `npx --yes playwright@<versão>`** baixa do registro do npm a versão exata que o `pnpm-lock.yaml` fixa, e o npm confere o hash que o registro publica para ela; uma versão publicada não muda. O que ele não faz é conferir esse pacote contra o `integrity` do `pnpm-lock.yaml`, como o `pnpm install --frozen-lockfile` fazia antes da F9 com o navegador. Conferir contra o lockfile (o `dist.integrity` de `npm view` contra a linha do lockfile, ou o navegador depois do `pnpm install`) fica para a F9b (pendência "F9 npx integridade"). O workflow só lê (`contents: read`) e não usa segredo, e o runner é descartável.
+- **A execução final (41677467607) parou no preparo.** No WebKit 1 de 13, o `apt` travou baixando os pacotes do sistema do espelho `azure.archive.ubuntu.com` (o `apt-get update` levou 1 s; o download dos pacotes parou no meio), e a espera de 300 s se esgotou. As outras partes seguiram. No fluxo de antes da F9, a instalação no primeiro plano só parava no limite de 30 min do job, e já tinha levado 356 s (§ 108). O limite de 300 s era um defeito do desenho, não do teste. A espera passou a 1.200 s, abaixo dos 30 min do job. Pela ficha, a PR voltou a rascunho (`gh pr ready --undo`), a correção entrou e a PR ficou pronta de novo, o que deu mais uma execução completa. A linha "Fetched" do log da 41677467607 mostra que o `apt-get update` foi rápido e o download dos pacotes é que parou, o que aponta para o espelho, e não para o `dpkg` (pendência "F9 preparo").
+- **Abordagem 3, depois da execução 41677467607:** o checkout esparso, sem `docs/relatorios/`, nos jobs `build`, `lighthouse` e `playwright` (`sparse-checkout` com `/*` e `!/docs/relatorios/`, em modo não cone; o `actions/checkout` fixado baixa então só os blobs do padrão, com `--filter=blob:none`). Nessa execução, o checkout raso da árvore inteira (448 MB versionados, 392 MB deles capturas de tela de `docs/relatorios/`) levou de 13 a 132 s, e foi a maior parte dos preparos acima de 90 s (8 de 18, com o `apt` mais lento que nas outras). No teste local, a árvore esparsa tem 59 MB. Nada do que esses jobs rodam lê `docs/relatorios/` (o `tests/unit/ci-workflows.test.ts` confere o código, fora dos comentários). A medida dela vai na descrição da PR, com o `ci:custo` da execução final; se o critério dos 90 s ainda não fechar, a pendência "F9 preparo" fica com a melhor medida das três.
+
+## § 326 · Quando o CI roda: as classes (F9, decisão 4)
+
+- **O script** é o `scripts/ci/classificar.ts`, com a função pura `classify()` e um CLI que lê o JSON do job e escreve `classe` e `motivo` no `GITHUB_OUTPUT`, e a linha `classificar: classe <x> - <motivo>` no log (o `ci:custo` a lê). O job `classificar` lê o script da base, como o `pode-mesclar.ts`; nesta PR a base não o tem e o job usa a cópia da própria PR.
+- **A chamada do CLI** recebe um arquivo JSON (`isDraft`, `labels` e `files`, montado pelo `jq`), não argumentos soltos. Um campo novo entra no JSON sem mudar a chamada, que fica fixa depois de ir para a main (a regra da § 297, que o `tests/unit/ci-events.test.ts` fixa em `CLI_ON_MAIN`).
+- **A tabela** é a da ficha:
+  - rascunho sem o rótulo `ci`: `leve`;
+  - rascunho com o rótulo, ou PR pronta: `completo`, ou `portões` quando todo arquivo do diff é documentação.
+
+  "Só documentação" é todo arquivo em `docs/`, fora de `docs/design/` e de `docs/oli/`, ou um `.md` da raiz. O `LICENSE` não é `.md` e conta como código. Diff vazio, ou que o job não consegue ler (o `git diff` falhou), conta como `completo`.
+- **A lista foi conferida:**
+  - nenhum spec do Playwright lê `docs/` nem um `.md` da raiz: os `readFileSync` dos specs vão a `fixtures/`, `dist/`, `node_modules/` e `.cache/`, e as menções a `docs/` são comentários;
+  - o Lighthouse lê só o `dist/` e o `.lighthouseci/`;
+  - o build não importa nada de `docs/` fora de `docs/design/` e `docs/oli/`.
+
+  O Vitest e os portões leem `docs/` (o `operacao.test.ts`, o `pendencias.test.ts`, o `launch-kit.test.ts` e o teste do `CLAUDE.md`) e rodam na classe `portões`.
+- **O gatilho** ganhou o `labeled`. Um rótulo qualquer recalcula a classe, como um `synchronize`, e o `cancel-in-progress` cancela a execução em andamento. O `unlabeled` e o `converted_to_draft` não disparam. O Dependabot não põe rótulo (`labels: []`).
+- **O pulo** é por `if` de job, nunca por `paths`. O `ci-ok` (§ 327) roda sempre.
+- **O job `leve`** constrói o próprio `dist/`, porque o Vitest o lê (o `pix-qr.test.ts`). Alternativa: baixar o artefato do job `build`, que custaria um job a mais em todo push de rascunho.
+- **A prova:** os 20 eventos de `fixtures/ci-events/` (um por linha da tabela, mais o fork, o `labeled` com outro rótulo, o `ready_for_review`, o `reopened`, o diff misto, as bordas de `docs/design/`, `docs/oli/`, `.md` fora da raiz, `LICENSE`, diff vazio e diff ilegível) passam pelo caminho do job no `tests/unit/ci-events.test.ts`:
+  - o `env` do passo renderizado do evento (o `render()` ganhou o `toJSON(a.*.b)`);
+  - o bloco do `git diff` rodado de verdade num repositório de rascunho, para o diff ilegível;
+  - o `jq` real onde existe;
+  - o CLI escrevendo no `GITHUB_OUTPUT`.
+
+  O `pronta-docs` sai `portões`.
+
+## § 327 · O ci-ok (F9, decisão 5)
+
+- **O job** tem o id e o nome `ci-ok`, sem matriz, `if: always()` e `needs` com os seis jobs de verificação (`classificar`, `leve`, `build`, `portoes`, `lighthouse` e `playwright`). Um job pulado conta como aprovado num check obrigatório, por isso ele nunca é pulado.
+- **A regra** é o `scripts/ci/ci-ok.ts` (função pura `verdict()` sobre o `toJSON(needs)`):
+  - verde só com a classe saída e cada job em `success`, ou em `skipped` quando a classe não pede aquele job;
+  - vermelho com `failure`, com `cancelled`, com `skipped` de um job pedido, sem classe e com um job da lista fora do `needs` (um `ci.yml` que deixou de esperar um job).
+
+  Os jobs de cada classe estão em `REQUIRED`, e o teste confere que o `needs` do `ci-ok` é a união deles.
+- **O script vem da base**, como o `pode-mesclar.ts`. Uma PR que não mexe em `.github/workflows/` não pode trocar a regra do próprio check e ter o merge automático; nesta PR a base não o tem e o job usa a cópia da PR. O job faz o checkout raso do commit de merge e um `git fetch --depth=1` do commit da base, sem `|| true`: se o fetch falhar, o job falha, e nunca cai na cópia da PR. Por isso é o único checkout que guarda as credenciais (o token só lê).
+- **Alternativa recusada:** a regra escrita em `bash` e `jq` no próprio `ci.yml`, que também ficaria protegida (o merge recusa PR que mexe em workflow), mas não teria teste no Windows.
+- **O `merge`** passa a esperar o `ci-ok` e só roda com ele verde, com a PR pronta (o `merge` de rascunho só dizia "rascunho"; pulá-lo economiza um minuto por push) e fora de fork (§ 333). O `alerta-dependabot` espera o `ci-ok` e o `merge`.
+- **Execução cancelada.** Com `always()`, o `ci-ok` de uma execução cancelada roda e sai vermelho; a execução nova do mesmo commit (um `labeled`, ou o `gh pr ready` logo depois de um push) termina depois, com o próprio `ci-ok`. Aconteceu nesta PR: a execução do push de `8727853` foi cancelada pelo `ready_for_review`, e o `ci-ok` dela saiu vermelho. A frase de antes ("o da execução nova é o que vale", "ficou vermelho até a completa terminar verde") não tinha prova, e a API a desmente no commit: os dois check runs `ci-ok` (o vermelho da cancelada e o verde da 41658317282) continuam no `8727853`, em suítes diferentes, mesmo com `filter=latest`, e o `statusCheckRollup` dele ficou `FAILURE`. O que não se sabe: se o ruleset, que exige só o `ci-ok`, recusa o merge por causa do vermelho velho. Não foi testado, porque não há ruleset; a documentação do GitHub não diz qual de dois check runs de mesmo nome num commit vale (abaixo, "A revisão da F9").
+- **O merge pulado na primeira execução completa (41658317282).** O `ci-ok` ficou verde e o `merge` foi pulado. O `success()` implícito do `if` de um job olha também os ancestrais indiretos, e o `leve` é ancestral do `merge` através do `ci-ok`: numa execução completa ou de documentação ele é sempre pulado, então o merge automático nunca aconteceria. O `merge` passa a `needs.ci-ok.result == 'success' && !cancelled() && …` e o `pos-deploy` a `needs.merge.result == 'success' && !cancelled() && …`: com uma função de status no `if`, o GitHub não acrescenta o `success()`. O `tests/unit/ci-workflows.test.ts` ganhou a regra geral (todo job depois do `leve` e do `build`, que se excluem, tem função de status explícita: `ci-ok`, `merge`, `alerta-dependabot` e `pos-deploy`), que reprova o `if` de antes.
+- **A prova:**
+  - o `tests/unit/ci-ok.test.ts` reprova cada resultado ruim em cada job de cada classe, a classificação ausente, falha, pulada, vazia ou desconhecida, um job pedido e pulado, e o `needs` ilegível, e roda o CLI;
+  - o `tests/unit/ci-workflows.test.ts` confere o job e o `merge`.
+- **A revisão da F9** (achados A-1, A-2, A-4, A-5, B-1, D-1 e F-1):
+  - **O estado de rascunho na hora (A-2).** A classe sai do payload do evento. No fim de uma run, o `synchronize` de um push (rascunho) e o `ready_for_review` chegam com um segundo de diferença, e o `cancel-in-progress` fica com a execução enfileirada por último, numa ordem que o GitHub não garante: se a do push vencesse, uma PR pronta ficaria com o `ci-ok` verde da classe `leve`. O job `ci-ok` passou a ler o estado da PR com `gh api "repos/$GH_REPO/pulls/$PR" --jq .draft` (com `permissions: contents: read, pull-requests: read` no job, e `GH_TOKEN`, `GH_REPO` e `PR` só no passo Verdict) e a passá-lo ao script em `PR_DRAFT_NOW`, sem mudar a chamada do CLI. O `verdict(needs, draftNow?)` dá vermelho para a classe `leve` com `draftNow === false`, com a linha "a classe é leve, mas a PR está pronta: esta execução veio de um evento de rascunho; a execução completa tem de rodar". Sem a variável, ou com outro valor que `true` e `false`, o CLI falha. As outras classes rodam tudo o que pedem, rascunho ou não. Alternativas recusadas: ler o estado no `classificar` (a corrida continua entre o `classificar` e o fim da execução, e o `ci-ok` é o que o ruleset lê); usar só o payload (é a falha).
+  - **O veredito tem de aparecer (A-4).** O shell padrão de um `run:` sem `shell:` é `bash -e {0}`, sem `pipefail`, e o workflow não tem `defaults`. O passo Verdict liga o `pipefail`, grava a saída do script com `tee` num arquivo e só fica verde com `grep -qx 'ci-ok: verde'` nele. Um script que nunca chega ao veredito (um Node sem `import.meta.main`, que viria do `.node-version` da própria PR) falha o passo. O `tests/unit/ci-workflows.test.ts` roda o fim do passo em `bash -e` contra o script de verdade e contra scripts que não dizem nada, dizem vermelho ou saem com 1.
+  - **O script sozinho (A-5).** O teste do CLI copia o `ci-ok.ts` para uma pasta temporária e roda de lá, como o job faz em `$RUNNER_TEMP/ci/`: um import de arquivo irmão falharia no Vitest, e não só depois de ir para a `main`.
+  - **A função de status explícita (D-1).** A regra geral do `ci-workflows.test.ts` aceitava `success()`, que é o mesmo que o implícito. Agora aceita só `always()`, `cancelled()` (como em `!cancelled()`) e `failure()`, com um controle que põe `success() &&` no `if` do `merge` e outro que tira o `!cancelled()`, e espera a falha.
+  - **O `ci-ok` duplicado (A-1, B-1 e F-1).** O `if: always()` do `ci-ok` fica, porque a ficha da F9 o manda. O `alerta-dependabot` ganhou `!cancelled()` (`failure() && !cancelled() && …`): o `ci-ok` de uma execução cancelada sai vermelho, e uma PR do Dependabot cuja execução é cancelada (um rebase, um rótulo) não pode abrir a issue "CI vermelho". O texto do `docs/claude/ci.md` e o item acima dizem o que a API mostrou e o que não se sabe. O fim de run passou a ser outro, acrescentado (nunca trocado) numa nota à regra 1 do `CLAUDE.md` e no `docs/claude/ci.md`: rodar o `gh pr ready` antes do último push, para o último commit ganhar uma execução só, a completa, ou esperar a execução leve terminar antes do `gh pr ready`. O `docs/OPERACAO.md` diz o que fazer se o merge for recusado por um `ci-ok` vermelho de execução cancelada (rodar de novo a cancelada com `gh run rerun <id>`, ou um push; não testado). Testar com o ruleset ativo, e escolher entre `always()` e `!cancelled()` se ele bloquear, é do Victor (pendência "F9 ci-ok duplicado").
+- **A segunda passada da revisão (R2-1, R2-3 e R2-7).**
+  - O fim de run do `CLAUDE.md` (o `gh pr ready` antes do último push, ou esperar a execução leve entre os dois) refina a ficha da F9, que diz "o push e logo em seguida o `gh pr ready`". A ficha de cada run vence, e a nota diz isso. Nesta run, o fim foi o push, a espera da execução leve e o `gh pr ready`, na ordem da ficha.
+  - O `docs/claude/ci.md` diz como fazer a completa rodar quando o `ci-ok` sai vermelho com a classe `leve` numa PR pronta (`gh pr ready --undo` e `gh pr ready`, ou rodar de novo a execução do `ready_for_review`), e que um erro passageiro do `gh api` pede só rodar de novo.
+  - O teste da função de status reprova também um `success()` escrito em qualquer ponto do `if`, mesmo ao lado de `!cancelled()`.
+
+## § 328 · Os miúdos do CI (F9, decisão 6)
+
+- **`fetch-depth: 0` só onde o histórico é lido:** no `classificar` (o `git diff` três pontos pede o merge-base), no `leve` e no `portoes` (o Vitest lê o `HEAD~1`, o `503b8c3` e o `CLAUDE.md` de antes da F9, e o `lint:texto` faz o diff contra a base) e no `merge`. O `build`, o `lighthouse`, as 18 partes do Playwright e o `ci-ok` fazem o checkout raso. O `build.txt` só pede o `git rev-parse HEAD`, que funciona raso.
+- **`persist-credentials: false`** em todo checkout menos o do `ci-ok` (§ 327).
+- **O comentário do topo do `ci.yml`** descreve o CI novo: as classes, os jobs, o artefato, o preparo, o `ci-ok` e a guarda de fork.
+- **O cache das ferramentas** guardava a pasta `.cache/` inteira, uns 555 MB por PR com os builds do `gate:prontidao` e um `bundle-modules.json` velho (o limite de cache do repositório é de 10 GB, e as PRs já ocupavam 8,56 GB). Ele passa a guardar só as pastas das ferramentas fixadas (`.cache/actionlint-*`, `shellcheck-*`, `languagetool-*` e `jre-*`). O download do artefato continua depois dele, e o `tests/unit/ci-workflows.test.ts` confere os dois. O cache de uma PR só serve à própria PR, e a `main` não gera cache, então a primeira execução de cada PR é fria.
+- **O `mini-yaml.ts`** foi de `tests/unit/lib/` para `scripts/lib/`, porque o `pnpm verificar --partes` lê o `ci.yml` com ele. O `tests/unit/lib/mini-yaml.ts` o reexporta, e os testes não mudam o import. A classe `Reader` trocou a "parameter property" por um campo comum: o Node roda o arquivo por remoção de tipos, que não aceita essa sintaxe.
+
+## § 329 · O pnpm verificar --partes (F9, decisão 6; fecha a § 242)
+
+- **O que faz:**
+  - lê as partes do `.github/workflows/ci.yml` pelo `scripts/lib/ci-parts.ts` (cada linha `pnpm verificar <args>` dos passos, na ordem dos jobs, com o `${{ matrix.args }}` expandido por entrada da matriz), menos a do job `leve`, que é a classe do rascunho e não parte do todo;
+  - roda cada uma como um `node scripts/verificar.ts <args>` próprio, em sequência: primeiro o `--build`, depois as 20 com `--dist-pronto`. Cada parte tem o próprio limite de 900 s e imprime o próprio resumo;
+  - para na primeira que falha e mostra o tempo de cada parte e a soma.
+- **Na máquina local**, o `CI` não está definido, então o Playwright usa o número de workers padrão, e os tempos não se comparam com os do CI.
+- **A prova:** o `tests/unit/verificar.test.ts` confere que as partes do `ci.yml` são o build e as 20 do ajuste idiomas com `--dist-pronto`, e que juntas são o todo, com o build uma vez. A execução real está no relatório.
+
+## § 330 · O teste lento do F8 ensaio-3 (F9, decisão 6; fecha a pendência)
+
+- **O teste:** "keeps the links that stay inside a part and drops the ones that lead out of it", do `tests/unit/pdf-engine-ops.test.ts`. Ele estourava os 5 s do Vitest com a suíte inteira numa máquina carregada (§ 299, falha 3). Nesta run estourou de novo uma vez, com os agentes rodando ao lado (5.009 ms).
+- **A causa, no próprio teste:** ele lia com o PDF.js as 117 páginas do `pdf-grande-fontes-embutidas-117p.pdf`, com o texto, as anotações e a lista de operadores de cada página, só para achar a primeira página com 30 links e a contagem dela. Era a maior parte do tempo. O motor (`src/`) não tem culpa: o split de uma página e a leitura da saída são rápidos.
+- **A correção:** a contagem de links de cada página vem do oráculo `fixtures/pdf/expected.json`, que guarda a leitura do PDF.js no momento em que a fixture foi feita (`scripts/fixtures/pdf.ts`), independente do motor. O teste confere que o oráculo tem as 117 páginas e que a página existe. A saída continua lida pelo PDF.js e pelo qpdf, e as asserções são as mesmas, mais uma (a saída tem uma página). O tempo limite do teste não mudou.
+- **As medidas, todas nesta máquina:**
+  - sozinho, três vezes: de 1.735, 1.699 e 1.714 ms para 325, 303 e 313 ms;
+  - o Vitest inteiro três vezes com o Playwright rodando ao lado (`chromium --shard=2/5`, 2 workers): as três rodadas passaram, com 96 arquivos e 1.664 testes, e o teste levou 224, 181 e 147 ms.
+- **Alternativa recusada:** ler só a página certa da fonte com o PDF.js. Seria mais rápido que antes, mas ainda pediria para abrir o PDF de 5 MB, que o oráculo já leu.
+
+## § 331 · O CLAUDE.md enxuto e a pasta docs/claude/ (F9, decisão 7)
+
+- **O tamanho.** O `CLAUDE.md` de `bbd30c8` (a main de antes da F9) tinha 78.256 bytes e 557 linhas, e entrava inteiro no contexto de cada agente e subagente. O novo tem 15.119 bytes, abaixo dos 25.600 da ficha. Os dez arquivos de `docs/claude/` somam 70.602 bytes: `ci.md` 11.253, `idiomas.md` 10.713, `calculadoras.md` 9.999, `pdf.md` 7.256, `imagem.md` 7.167, `design-e-oli.md` 6.438, `windows-git-bash.md` 5.908, `service-worker.md` 4.856, `playwright.md` 4.261 e `anuncios.md` 2.751. Depois, a seção da F9 (o CI novo e as pegadinhas da run) levou o `ci.md` a 16.053 bytes e o `windows-git-bash.md` a 6.660; o `CLAUDE.md` não mudou. Esses números são os do primeiro registro; os de agora estão no item "Os tamanhos depois da revisão", abaixo.
+- **O núcleo, no `CLAUDE.md`:** a abertura; o projeto; a fonte de verdade, com a ordem nova da decisão 12; a arquitetura fixa; o Git; o que fica fora de toda run; os testes; as regras que nenhuma run quebra; como a run termina; o idioma; as "Regras novas de toda run" do `PLANO-MELHORIAS.md`, com o texto literal das linhas 62 a 69 dele, sob "Regras de toda run (PLANO-MELHORIAS.md)"; o índice "mexeu em X, leia `docs/claude/X.md`", uma linha por arquivo; e as tabelas de comandos de todas as fases (F1a, F2, F4, F5a, F5b, F6 e F7, cada uma com a linha que a abre), mais a tabela nova da F9.
+- **Como as linhas foram.** Por script, do `git show bbd30c8:CLAUDE.md`: cada linha não vazia tem um destino (o núcleo, um arquivo de tema, ou a lista abaixo), e o script grava o texto lido, sem redigitar. A linha com U+00A0 (o `sed` da F8) foi junto. Dentro de cada arquivo, as linhas seguem a ordem do arquivo antigo, sob o cabeçalho `##` de origem.
+- **O destino de cada seção:**
+  - "O projeto em cinco linhas" até "Idioma": no núcleo, com as linhas reescritas abaixo.
+  - "F1a: comandos e pegadinhas": a tabela e o "Rodar um teste só" no núcleo. As pegadinhas: Node e pnpm, `CI=true`, Astro e Vite, `exactOptionalPropertyTypes` e Worker Previews no `ci.md`; Preact no `design-e-oli.md`; `mount.ts` no `imagem.md`; o WebKit sem `OffscreenCanvas` no `playwright.md`; o heredoc e o push com a PR na mesma linha no `windows-git-bash.md`; o LanguageTool no `idiomas.md`.
+  - "Ajuste da prévia": inteiro no `ci.md`.
+  - "F1b": o CSS, o tema, a Oli, os ícones, o `pnpm screenshots` e as pegadinhas de CSS e SVG no `design-e-oli.md`; o `cat >>` no `windows-git-bash.md`; o runner 5 vezes mais lento no `ci.md`.
+  - "F2": a tabela no núcleo; o passo a passo e as pegadinhas do motor no `imagem.md`; o colar, o `serve-dist` e a porta 4173 no `playwright.md`; o `pos-deploy.test.ts` no `ci.md`.
+  - "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes" e "Ajuste: diagnóstico de disco": no `ci.md`, menos as linhas que saíram.
+  - "F3": o `gate:prontidao` e o navegador na produção sem o Google no `anuncios.md`; o método da revisão adversarial e o `node -e` no `windows-git-bash.md`; o fundo do `body` e os screenshots com o aviso no `design-e-oli.md`; o `loading()` e o worker sem `OffscreenCanvas` no `imagem.md`; o WebKit travado e o `context.on('request')` no `playwright.md`.
+  - "Ajuste: espaço do aviso de cookies": a regra no `design-e-oli.md`; o `dismissCookies` no `playwright.md`.
+  - "F4": a tabela no núcleo; a convenção do dinheiro, o passo a passo e as pegadinhas de calculadora no `calculadoras.md`; o uv, o heredoc, o `node -e` e o `git checkout` no `windows-git-bash.md`; o `networkidle` e os `money-*.spec.ts` no `playwright.md`; o `ENOSPC` no `ci.md`.
+  - "F5a": a tabela no núcleo; o passo a passo, as regras do PDF.js, do qpdf e do pdf-lib e as pegadinhas de PDF no `pdf.md`; o worker avaliado duas vezes e o WebKit do Windows sem imagem no worker no `imagem.md`; o que cada parte do Playwright faz (§ 154) e o `pnpm tipos` no `ci.md`; os agentes em worktree no `windows-git-bash.md`.
+  - "F5b": a tabela no núcleo; o guia de arquivo, a regra dos números, o kit e as pegadinhas de texto no `idiomas.md`; o `--color-*` no `design-e-oli.md`; a porta do `guias:medir` no `playwright.md`; o heredoc e o `node -e` no `windows-git-bash.md`.
+  - "F6": a tabela no núcleo; o passo a passo de pt e es, o formato de cada idioma e as pegadinhas de texto no `idiomas.md`; o Pix no `anuncios.md`; o cache do Vitest e o "`.github/` não mudou" no `ci.md`; o número do resultado e o rótulo com "exemplo" no `calculadoras.md`; o `i18n-budgets.spec.ts` no `playwright.md`; o `fill` depois de soltar o PDF no `pdf.md`; o `String.replace` e o "/" no `windows-git-bash.md`.
+  - "F7: casa, saúde e QR code": a tabela no núcleo; a calculadora de casa ou saúde, os hubs, o `lead`, as datas e o WebFetch no `calculadoras.md`; o QR code, o CommonJS e o `jsqr` no `imagem.md`; o `design.spec.ts` e o `image-matrix.spec.ts` nunca na mesma parte no `ci.md`; o `String.replace` no `windows-git-bash.md`.
+  - "F7: o que a revisão mudou nos formulários das calculadoras": no `calculadoras.md`, menos o alto contraste, no `playwright.md`.
+  - "F8": o service worker, o compartilhar e as pegadinhas deles no `service-worker.md`; o Dependabot, a regra de merge, o `verificar.test.ts` e o `--assignee` no `ci.md`; as fontes e o CLS no `design-e-oli.md`; o relógio falso, o teste do site inteiro e o `axe-pdf-states.spec.ts` no `playwright.md`; o `SETTLE_MS` no `calculadoras.md`; o `sed` no `windows-git-bash.md`.
+  - "Ajuste: idiomas": a introdução e "Como uma página ganha versão num idioma" no `idiomas.md`; o `verificar.test.ts` e a estimativa das partes no `ci.md`; os 740 px e o rótulo de duas palavras no `calculadoras.md`; o foco da ação no `pdf.md`; o ` `, o trailer dos merges e o `git worktree remove` no `windows-git-bash.md`.
+- **O critério de tema.** Cada linha de conteúdo vai para um arquivo só, o do assunto dela: o comportamento de uma ferramenta, para o arquivo dela; um macete do Playwright, do navegador ou do runner, para o `playwright.md`; o CI, o `verificar`, o Dependabot, a regra de merge, o Workers Builds e as ferramentas do projeto (Node, pnpm, Astro, Vite e Vitest), para o `ci.md`; o shell, o Git, as worktrees e os agentes, para o `windows-git-bash.md`. Os julgamentos: o método da revisão adversarial foi para o `windows-git-bash.md` (é trabalho de worktree e de agente); os guias de arquivo e o kit do Product Hunt, para o `idiomas.md` (são regras de texto); o QR code, para o `imagem.md`; o Pix, para o `anuncios.md` (a receita); os passos de uma calculadora em pt e es (antigas 390, 391, 532 e 533) ficaram só no `idiomas.md`, e a abertura do `calculadoras.md` aponta para lá. Só se repetem os cabeçalhos `##` de origem e as linhas que abrem uma lista ("Pegadinhas que a F4 achou:"): cada arquivo leva os das linhas dele.
+- **O que é texto novo.** No núcleo: a abertura, os itens 2 a 6 da fonte de verdade, a linha da PR em rascunho, a linha do ruleset (`docs/ops/ruleset-main.json`, a quarta camada, que o Victor importa no GitHub), a seção das regras de toda run, o índice, o "Comandos" com os subtítulos de cada fase e a tabela da F9. Em `docs/claude/`: o título e a frase de abertura de cada arquivo e, no `ci.md`, a linha "Partes do CI (o que continua valendo depois da F9, que tirou a lista das partes de então):" antes das quatro regras das partes cuja linha de abertura saiu (as antigas 298, 438, 501 e 542). Também são texto novo as seções "F9: …" do fim do `ci.md` (o CI novo e as pegadinhas da run), do `windows-git-bash.md` e do `idiomas.md` (pegadinhas da run), e o que a revisão da F9 acrescentou (abaixo).
+- **A regra de nunca apagar muda uma vez** (mudança 4 do contrato do `PLANO-MELHORIAS.md`). A abertura do `CLAUDE.md` diz que a F9 compactou o arquivo uma vez e que, daqui em diante, as runs acrescentam no arquivo do tema em `docs/claude/` (seção nova no fim), e o `CLAUDE.md` só muda no núcleo e no índice, também só acrescentando; nunca apagam nem afrouxam uma regra. Um arquivo novo de `docs/claude/` entra com uma linha no índice.
+- **A prova.** O `tests/unit/claude-md.test.ts` (a lógica é a função pura `claudeMdProblems`, em `tests/unit/lib/claude-md.ts`) lê o `CLAUDE.md` de `bbd30c8` pelo `git show` e reprova:
+  - uma linha não vazia dele que não esteja, igual, no `CLAUDE.md` ou num arquivo de `docs/claude/` (a linha inteira, sem os espaços do fim, nunca um pedaço), a não ser que esteja no bloco abaixo;
+  - uma linha do bloco que ainda esteja no `CLAUDE.md` ou em `docs/claude/`, ou que não seja do arquivo antigo;
+  - o `CLAUDE.md` acima de 25.600 bytes;
+  - um arquivo de `docs/claude/` fora do índice, um item do índice sem arquivo ou um arquivo citado em duas linhas do índice;
+  - uma linha da seção "Regras novas de toda run" do `PLANO-MELHORIAS.md` que não esteja, igual, no `CLAUDE.md`.
+
+  O teste acha este § pelo título e pela frase que abre o bloco, nunca pelo número, que pode mudar num merge com a main. Os controles rodam a mesma função sobre entradas mudadas em memória e esperam a falha: uma linha apagada de `docs/claude/`, uma linha com texto a mais no fim, o `CLAUDE.md` com 25.601 bytes, um arquivo fora do índice, um item do índice sem arquivo, uma linha do bloco de volta em `docs/claude/` e uma regra nova fora do `CLAUDE.md`.
+- **Se a main andar** antes do merge da F9 com linhas novas no `CLAUDE.md`, elas vão, com o texto igual, para o arquivo do tema, e a constante `BEFORE_F9` do teste passa ao commit novo da main (o comentário dela diz isso). A frase que abre o bloco continua com `bbd30c8`: ela é o nome do bloco, não a constante.
+- **A revisão da F9** (achados E-1 a E-6 e D-5):
+  - **O núcleo preso ao `CLAUDE.md` (E-3).** O teste só perguntava se cada linha de antes estava em algum arquivo, então uma regra do núcleo podia ir para `docs/claude/` sem reprovar. A função `coreLines()` (`tests/unit/lib/claude-md.ts`) dá as linhas do `CLAUDE.md` de `bbd30c8` que este § deu ao núcleo: todas as linhas acima do primeiro cabeçalho de fase ("## F1a: "), menos as do bloco das que saíram, e, nas seções de fase, as linhas das tabelas de comandos e as que as abrem ("Comandos novos:", "Scripts do `package.json`…" e "Rodar um teste só:"). São 79 linhas (35 e 44), e nenhuma está também num arquivo de tema. O `claudeMdProblems` reprova uma delas fora do `CLAUDE.md`, e um controle move uma linha do núcleo (e uma linha de tabela) para o `ci.md` e espera a falha. As linhas novas da F9 no núcleo ficam fora dessa lista: a F9 pode ajustá-las, e as seis regras já têm o teste delas.
+  - **O índice com os assuntos que faltavam (E-1 e E-2).** As linhas do índice, que são da F9, passaram a dizer como texto, sem um segundo caminho entre crases (o teste proíbe dois numa linha): o Astro e o `build.format`, o TypeScript e o `exactOptionalPropertyTypes` e o `pnpm tipos` nos specs (na linha do `ci.md`); o Preact (na do `design-e-oli.md`); a ilha e o `mount.ts` (na do `imagem.md`); e que o `pnpm screenshots` tem pegadinhas também nos arquivos do service worker e de PDF, o `lint:texto` também no das calculadoras, e o `uv` no do Git Bash.
+  - **Regras novas do núcleo (E-5), só acrescentando:** em "Regras que nenhuma run quebra", a do repositório público (nenhum dado pessoal, token ou achado da auditoria em arquivo do Git, commit, PR, log ou artefato); em "Fora de toda run", criar ou mudar rótulos do GitHub e importar ou mudar rulesets; e, depois das seis regras, as notas à regra 1 (o rótulo `ci` depende de o Victor criá-lo, e o fim de run da § 327).
+  - **Os números de partes antigos (E-4).** O começo do `ci.md` e do `playwright.md` ganhou uma linha que diz que os números de partes das seções de antes da F9 são os de cada época, e o fim da seção da F9 do `ci.md` ganhou "O que a revisão da F9 acrescentou": o fim de run, o estado de rascunho na hora, a linha verde, o `--failed` em 24 h, a divisão de hoje (Chromium em 5, WebKit em 13), a proteção contra fork, o `fetch-depth`, o preparo em segundo plano e como reproduzir uma parte (`pnpm verificar --build` e depois o comando do passo).
+  - **Os tamanhos depois da revisão (E-6, `wc -c`):** o `CLAUDE.md` tem 16.966 bytes (era 15.119 no commit da revisão, `859f7b4`); os dez arquivos somam 83.131 bytes: `ci.md` 22.395 (17.608 em `859f7b4`), `idiomas.md` 11.125, `calculadoras.md` 9.999, `pdf.md` 7.256, `imagem.md` 7.167, `windows-git-bash.md` 6.660, `design-e-oli.md` 6.438, `service-worker.md` 4.856, `playwright.md` 4.484 e `anuncios.md` 2.751.
+  - **O comentário do `scripts/guides/lib/browser.ts` (D-5)** ainda aponta para o `CLAUDE.md` (F3) sobre os domínios do Google, que foram para o `anuncios.md`. Ele não mudou: o `tests/unit/guides-measured.test.ts` confere o SHA-256 dos arquivos de `scripts/guides/`, e mudar um byte pediria medir os guias de novo (`pnpm guias:medir`), fora do escopo da F9. Fica para a próxima run que medir os guias (pendência "F9 comentário guias").
+- **Alternativas.** Deixar a linha da PR antiga e só somar a regra nova 1 (as duas se contradiriam, e a antiga manda abrir a PR no fim). Tirar do núcleo as tabelas de comandos (a ficha manda que fiquem). Tirar também as linhas 205, 298, 438, 501 e 542, que falam das partes (são regras que continuam valendo, mesmo com números de partes velhos: a mecânica do `--shard`, as proteções da § 154, o `design.spec.ts` longe do `image-matrix.spec.ts`, o `verificar.test.ts` que lê as matrizes e o `--list` antes de somar specs). Pôr uma pegadinha em dois arquivos (dobraria a manutenção e o risco de as cópias divergirem). A mensagem do commit `docs: slim CLAUDE.md…` diz "four lines rewritten"; são cinco (3, 16, 17, 18 e 29), e nada foi reescrito no histórico.
+
+### As linhas que saíram
+
+Linhas que saíram do CLAUDE.md de bbd30c8, texto igual:
+
+```text
+Regras para toda run do Claude Code neste repositório. Valem junto com a ficha da run e o PLANO-FILEORCA.md. As runs só acrescentam a este arquivo (seção nova no fim); nunca apagam nem afrouxam uma regra.
+2. PLANO-FILEORCA.md (as "Decisões fechadas" são contrato: nenhuma run muda).
+3. DECISOES.md (§ numerados), docs/adr/, docs/design/ (design system), docs/F0-SAIDA.md e data/keywords.csv.
+4. O código existente.
+- No fim, abra a PR com `gh pr create`. O merge é do CI: **nunca** rode `gh pr merge`.
+- O CI roda o `pnpm verificar` em partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`, todos os portões menos o Playwright) e `playwright (chromium)`, `playwright (webkit 1 de 2)` e `playwright (webkit 2 de 2)` (`pnpm verificar --playwright=webkit --shard=1/2`). O `merge` espera todos. Na sua máquina, `pnpm verificar` sem argumento continua rodando tudo.
+- O CI passa a ter cinco partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`), `playwright (chromium)` e `playwright (webkit 1 de 3)`, `playwright (webkit 2 de 3)` e `playwright (webkit 3 de 3)` (`pnpm verificar --playwright=webkit --shard=i/3`). Isto substitui a descrição das partes na seção "Ajuste: CI em partes (ADR-003)", que fica como está; o resto daquela seção continua valendo (DECISOES § 108).
+- O `tests/unit/verificar.test.ts` não lê o `ci.yml`: a lista de partes dele é escrita à mão e segue com `1/2` e `2/2`. A asserção tira o `--shard` antes de comparar, então prova a cobertura para qualquer número de partes.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)" e "Ajuste: WebKit em três partes", que ficam como estão.
+- **As partes:** são onze, cada uma num job com o limite de 900 s e o alvo de 700 s.
+  - o `verificar` (`--sem-playwright`);
+  - o `playwright (chromium 1 de 3)` ao `3 de 3` (`--playwright=chromium --shard=i/3`);
+  - o `playwright (webkit 1 de 7)` ao `7 de 7` (`--playwright=webkit --shard=i/7`).
+- **Antes de somar specs:** rode o `--list` de cada parte (Chromium em 3, WebKit em 7) e veja onde caem o `design.spec.ts` e a matriz de imagens.
+  - Hoje o `design.spec.ts` fica inteiro na parte 4 do WebKit, e a matriz de imagens na parte 5.
+  - Com 6 partes, os dois cairiam juntos (§ 142).
+- **O `tests/unit/verificar.test.ts`** traz as partes da F5a escritas à mão. Mudou o `ci.yml`, mude o teste.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes" e "F5a", que ficam como estão.
+- **As partes:** são treze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` (`--playwright=chromium --shard=i/4`) e o `playwright (webkit 1 de 8)` ao `8 de 8` (`--playwright=webkit --shard=i/8`).
+- **O `tests/unit/verificar.test.ts`** traz as 13 partes escritas à mão. Mudou o `ci.yml`, mude o teste.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes", "F5a" e "F7", que ficam como estão.
+- **As partes:** são quinze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` e o `playwright (webkit 1 de 10)` ao `10 de 10` (§ 302). O job `alerta-dependabot` vem depois de todas.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes", "F5a", "F7" e "F8", que ficam como estão.
+- **As partes:** são vinte, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` em duas (`--sem-playwright --sem-lighthouse` e `--lighthouse`, uma matriz no mesmo job, então o `merge` e o `alerta-dependabot` esperam as duas), o `playwright (chromium 1 de 5)` ao `5 de 5` e o `playwright (webkit 1 de 13)` ao `13 de 13` (§ 320).
+```
+
+Por que cada uma saiu (o número é a linha no `CLAUDE.md` de `bbd30c8`):
+
+- **3** (a abertura, "As runs só acrescentam a este arquivo"): reescrita pela mudança 4 do contrato; a abertura nova diz a regra de acrescentar em `docs/claude/`.
+- **16, 17 e 18** (os itens 2 a 4 da fonte de verdade): reescritos pela decisão 12, na ordem nova. O `PLANO-MELHORIAS.md` entra em 2 e o `CLAUDE.md` com `docs/claude/` em 4; o texto do `PLANO-FILEORCA.md`, do `DECISOES.md` e do código continua, com outro número. O item 1 (linha 15) ficou igual.
+- **29** ("No fim, abra a PR com `gh pr create`"): conflitava com a regra nova 1, a PR em rascunho desde o começo. A linha nova manda abrir com `gh pr create --draft` logo depois do primeiro push e marcar com `gh pr ready` no fim, e guarda o "**nunca** rode `gh pr merge`".
+- **153** (as partes da ADR-003: `verificar`, `chromium`, `webkit 1 de 2` e `2 de 2`): descrição de partes substituída pela linha 204. O que ainda vale dela, "`pnpm verificar` sem argumento roda tudo", está na tabela da F1a, no núcleo.
+- **204** (as cinco partes do "WebKit em três partes", com o "Isto substitui"): descrição substituída pela da F5a.
+- **206** (o `verificar.test.ts` "não lê o `ci.yml`", com a lista à mão em `1/2` e `2/2`): falsa desde a F8; as linhas 501 e 542, que ficam, dizem que o teste lê as matrizes do `ci.yml`.
+- **292** ("Partes do CI. Isto substitui…", da F5a): a frase "Isto substitui"; a descrição que ela abria saiu.
+- **294 a 297** (as onze partes da F5a, com as três sublinhas): descrição substituída pela da F7.
+- **299, 300 e 301** ("Antes de somar specs" com o Chromium em 3 e o WebKit em 7, o `design.spec.ts` na parte 4 e "Com 6 partes"): a posição das onze partes. A regra continua nas linhas 438, 501 e 542 do `ci.md` e na 262 do `playwright.md`.
+- **302** (o `verificar.test.ts` com as partes da F5a escritas à mão): falsa desde a F8 (linhas 501 e 542).
+- **435** ("Partes do CI. Isto substitui…", da F7): a frase "Isto substitui".
+- **437** (as treze partes da F7): descrição substituída pela da F8.
+- **439** (o `verificar.test.ts` com as 13 partes escritas à mão): falsa desde a F8.
+- **498** ("Partes do CI. Isto substitui…", da F8): a frase "Isto substitui".
+- **500** (as quinze partes da F8): descrição substituída pela do ajuste idiomas.
+- **539** ("Partes do CI. Isto substitui…", do ajuste idiomas): a frase "Isto substitui".
+- **541** (as vinte partes do ajuste idiomas, § 320): descrição substituída pela do CI da F9, que fica na seção da F9 do `docs/claude/ci.md` e no adendo da ADR-003.
+
+## § 332 · A auditoria para o repositório público (F9, decisão 8)
+
+- **O comando:** `pnpm publico:auditar` (`scripts/publico/auditar.ts`), no padrão `grupo:verbo` dos scripts de apoio (`motor:exportar`, `guias:medir`). A lógica pura fica em `scripts/publico/lib/`: `pii.ts`, `exif.ts`, `classify.ts`, `git-parse.ts` e `report.ts`. Os 43 testes de `tests/unit/publico-{pii,exif,classify,report}.test.ts` usam só dados sintéticos: CPFs feitos pelo próprio dígito, domínios de exemplo ou fictícios, a faixa 555-01xx e um Exif com GPS montado em memória. Também confirmam que uma amostra pública com GPS (`fixtures/images/jpg-02-iphone6-paisagem-gps.jpg`) é lida, sem gravar a coordenada no teste. Fica fora do `verificar`, porque usa a rede.
+- **O espelho:** `git clone --mirror` em `.cache/auditoria/fileorca.git` e, nas vezes seguintes, `git remote update --prune`. A URL usada é a pública, fixa no script, e nunca a do remoto local, que pode levar token. O espelho traz as `refs/pull/*/head`, onde estão os commits das branches de run apagadas depois do squash.
+- **O gitleaks 8.30.1 (MIT):** fixado no `scripts/lib/tools.ts` (`GITLEAKS`) para `win32-x64` e `linux-x64`. Os dois SHA-256 conferem com o `gitleaks_8.30.1_checksums.txt` da release.
+  - **No histórico:** `gitleaks git <espelho> --log-opts="--all --full-history -m --no-textconv --no-ext-diff"`. O `-m` existe porque o padrão (`--all --full-history`) deixa de fora o diff dos commits de merge. O `--no-textconv --no-ext-diff` existe porque o Git for Windows liga os PDFs a um textconv no gitattributes do sistema, e um repositório bare não lê o `*.pdf binary` do projeto. Na primeira execução, o textconv falhou numa fixture, o `git log` parou e o gitleaks disse 225 de 566 commits com o código 7, como se tivesse lido tudo.
+  - **A conferência da completude:** o script compara os commits que o gitleaks diz ter lido com os commits cujo diff tem texto. Um commit que só mexe em binários não entra no `git log -p`. Quando os números não batem, ou quando o gitleaks imprime uma linha `ERR`, o script mostra "INCOMPLETO".
+  - **Na árvore:** o HEAD do espelho e o HEAD local (quando diferem) saem por `git archive` para `.cache/auditoria/tree*`, e o gitleaks roda com `gitleaks dir` sobre eles. Essas pastas são apagadas no fim, porque o `tsconfig.json` não exclui `.cache/` e elas têm `.ts`.
+  - **Alternativas recusadas:**
+    - o `gitleaks dir .` na raiz, que lê `node_modules`, `dist` e `.cache`;
+    - o gitleaks no clone de trabalho, que não vê as `refs/pull/*`;
+    - as opções padrão de log, que pulam os merges e, no Windows, pararam no meio.
+- **Os dados pessoais:** a busca roda em todo blob do espelho (`cat-file --batch-all-objects`, lido em fluxo pelo `cat-file --batch`) e em cada blob da branch local que o espelho não tem. Cada blob fica num try/catch.
+  - **Imagens (JPEG, PNG, WebP, HEIC e AVIF):** os leitores de `tests/e2e/lib/` (`metadataReport`, `exifBlock`, `pngExif`, `webpExif` e `exifItems`), mais um leitor de TIFF que dá a coordenada e as tags Artist, Copyright, XPAuthor, CameraOwnerName e BodySerialNumber, e o GPS e o `dc:creator` do XMP.
+  - **Texto** (sem NUL nos primeiros 8 KB, até 20 MB):
+    - e-mail;
+    - telefone do Brasil e dos EUA, só com separador;
+    - CPF com o dígito verificador certo (11 dígitos soltos só logo depois da palavra "CPF");
+    - endereço: CEP depois da palavra, ou rua com número no formato do Brasil ou dos EUA;
+    - perfil pessoal em rede social, só em `docs/lancamento/`.
+  - **Também entram** as mensagens de commit e as identidades de autor e de quem commitou.
+  - **Ficam de fora** os PDFs, as fontes e o GIF, contados por formato.
+- **A classificação:** cada achado é deduplicado por valor, com o número de ocorrências, os arquivos, os commits e as refs.
+  - **O contexto vem do repositório, nunca escrito à mão:**
+    - as strings de `src/platform/site.ts` e `pix.ts`;
+    - os domínios da marca;
+    - o `git config user.name` e o `user.email`, o `AUTHOR.name` e o login do dono, mais os e-mails dos commits com esses nomes;
+    - as amostras listadas no `fixtures/ORIGEM.md`, com as coordenadas delas.
+  - **Segredo real:** é o que sobra das regras abaixo.
+  - **Público por natureza:**
+    - valor que o site publica;
+    - endereço na marca;
+    - no-reply e robôs;
+    - texto de licença em `src/`;
+    - metadado de pacote npm no lockfile.
+  - **Dado do Victor:** os e-mails e nomes dele, e as contas com o nome da marca fora do domínio dela.
+  - **Dado de terceiro:**
+    - os demais e-mails, com uma nota que separa o endereço pessoal do endereço de função;
+    - o GPS das amostras públicas, nota "já publicada na origem";
+    - telefone, CPF ou endereço fora dos testes.
+  - **Falso positivo:**
+    - domínio de exemplo;
+    - valor só em `tests/` ou `fixtures/`;
+    - hash;
+    - palavra só de letras: o gitleaks leu "Especificaciones" como segredo do LinkedIn;
+    - a faixa 555-01xx.
+  - **Um GPS de fora do `fixtures/ORIGEM.md`** vai para "dado do Victor" para ele conferir.
+- **Onde fica o resultado:** só em `.cache/auditoria-publico.md`, e os JSON do gitleaks em `.cache/auditoria/`. O `.gitignore:10:.cache/` cobre os dois, e o `git check-ignore -v` confirma. O terminal mostra só contagens: um teste prova que nenhum valor chega às linhas do terminal. O script recusa gravar fora de `.cache/` antes de qualquer trabalho, e um teste o roda com `--saida docs/...`.
+- **A execução desta run** (3/nov/2026, na worktree do agente):
+  - **Varridos:**
+    - 20 refs, das quais 18 em `refs/pull/*`, já com a PR desta run;
+    - 575 commits;
+    - 3.970 blobs: 3.186 de texto, 788 imagens e 14 pulados (11 PDF, 1 GIF e 2 WOFF2);
+    - mais 18 blobs que só a branch local tem.
+  - **O gitleaks** leu 573 de 573 commits com mudança de texto.
+  - **Os 65 achados únicos:**
+    - segredo real: 0;
+    - público por natureza: 16;
+    - dado do Victor: 4;
+    - dado de terceiro: 17;
+    - falso positivo: 28.
+- **Nenhum achado foi corrigido.** A decisão é do Victor, pela seção F do `PLANO-MELHORIAS.md`.
+- **A revisão da F9 (B-3 e B-6).**
+  - A classificação põe em "falso positivo" todo achado que só aparece em `tests/`, `fixtures/`, `scripts/oracle/` ou `scripts/fixtures/`, sem olhar o valor. Hoje esses achados são sentinelas de teste, mas um segredo de verdade colado num teste cairia ali. A correção (só os padrões sintéticos conhecidos viram falso positivo; o resto vai a "a conferir") muda a contagem da auditoria e pede rodá-la de novo, então ficou para uma run de ajuste (pendência "F9 auditoria testes"). O `docs/OPERACAO.md` pede ao Victor que passe o olho também nos falsos positivos dessas pastas.
+  - O `docs/OPERACAO.md` dava como exemplo de dado de terceiro um arquivo pelo nome. O exemplo virou genérico ("o e-mail de uma pessoa num arquivo do repositório"), e a busca por frases que liguem um achado a um arquivo, a um valor ou a uma pessoa (`git grep`) não achou outra nos textos da F9 que a revisão pode mudar. O `PLANO-MELHORIAS.md` (do Victor) cita a pasta `docs/lancamento/` num exemplo genérico, escrito antes da auditoria, e ficou como está.
+  - O exemplo antigo continua no histórico: ele entrou no commit `6002159`, que já estava na `origin/fase-09`, e reescrever o histórico está fora da run. O arquivo que ele citava já era público, e o achado continua contado só no `.cache/auditoria-publico.md` (a segunda passada da revisão).
+
+## § 333 · A proteção contra PR de fork (F9, decisão 9)
+
+- **O `pode-mesclar.ts`** só mescla PR cujo head é deste repositório e cujo autor é o dono do repositório (o login de `github.repository_owner`) ou o Dependabot. Uma PR de branch `fase-*` de outro autor, ou de um fork, nunca é mesclada. Quando os dados faltam (um `pr.json` de antes da F9, ou o fork apagado, sem `head.repo`), recusa, com comentário. A regra (`origin()`) vem logo depois do rascunho, antes da de workflow.
+- **Os dados** entram no `pr.json` pelo `jq` do passo Decide (`headRepo`, `repo` e `repoOwner`), a partir de três variáveis novas do passo (`HEAD_REPO`, `REPO` e `REPO_OWNER`). A chamada do CLI não muda (§ 297): o script velho da base ignora os campos, e o novo recusa sem eles. O `JQ_ON_MAIN` do `tests/unit/merge-events.test.ts` mudou junto, e o `CLI_ON_MAIN` ficou.
+- **Os jobs que escrevem** não rodam em PR de fork, por `if` no job: o `merge`, o `alerta-dependabot`, a chamada do `pos-deploy` e o job `conferir` do `pos-deploy.yml`. A condição é `github.event.pull_request.head.repo.full_name == github.repository`; com o fork apagado o lado esquerdo é vazio e o job não roda. Nenhum workflow usa `pull_request_target`.
+- **O `ci-ok` de uma PR de fork** roda o `ci.yml` da própria PR, então verde ali não prova nada: o merge de PR de fork é sempre do Victor, depois de ler o diff (`docs/OPERACAO.md`).
+- **A prova:**
+  - o `tests/unit/pode-mesclar.test.ts` (fork com nome de branch de run e com o login do Dependabot, outro autor, dados ausentes);
+  - os eventos novos de `fixtures/merge-events/` (`fork-run-branch`, `other-author-run-branch` e `missing-head-repo`; o Dependabot e o dono são os casos de antes, que ganharam o `head.repo` do payload real);
+  - o `tests/unit/ci-workflows.test.ts` (os jobs com permissão de escrita são exatamente esses três e todos têm a guarda; nenhum `pull_request_target`).
+
+  Com `MERGE_SCRIPT=<o pode-mesclar.ts do bbd30c8>`, os três eventos novos reprovam: a proteção é o que os faz passar.
+
+## § 334 · README, SECURITY e a licença (F9, decisão 10)
+
+- **O `README.md`, em português:**
+  - o que é o FileOrca;
+  - como rodar: Node 24 pelo `.node-version`, pnpm 10 pelo `packageManager` com o Corepack, `pnpm install`, o Playwright na primeira vez, `pnpm dev`, `pnpm verificar` e `pnpm verificar --partes`;
+  - a licença, e que o motor de imagem é distribuído à parte sob MIT, no repositório `fileorca-image-engine`, gerado pelo `pnpm motor:exportar` (passo a passo em `docs/lancamento/codigo-aberto.md`).
+- **O `SECURITY.md`:**
+  - o relato em particular: pela aba Security → Report a vulnerability, que o Victor liga na seção F, ou, enquanto o botão não aparece, pelo `contato@fileorca.com`, o `CONTACT_EMAIL` de `src/platform/site.ts`;
+  - nunca em issue, PR ou discussão pública;
+  - o que mandar, o escopo (o site, as prévias e os workflows; os serviços de terceiros ficam fora) e o que esperar, sem prazo prometido.
+- **O `LICENSE`:**
+  - em inglês: "Copyright (c) 2026 Victor Yuki Matusita. All rights reserved.", nenhuma licença concedida, e só o que os Termos de Serviço do GitHub exigem (ver e fazer fork no GitHub);
+  - as exceções: a cópia MIT do motor no repositório separado, e os arquivos de terceiros com as próprias licenças (dependências, fontes OFL, `src/platform/license-texts/` e fixtures do `fixtures/ORIGEM.md`);
+  - um parágrafo curto em português.
+- **O `package.json`:** ganha `"license": "UNLICENSED"`, a convenção do npm para "nenhum direito concedido", e mantém o `"private": true`.
+  - **Alternativas recusadas:**
+    - sem o campo: o npm avisa "No license field", e o arquivo não diz nada;
+    - `"SEE LICENSE IN LICENSE"`: é válido, mas sugere uma licença a ler;
+    - MIT ou uma licença de código-fonte disponível: a ficha manda "todos os direitos reservados".
+  - **O `gate:licencas` passa,** rodado com o `dist/` desta branch: "licenças: ok". O license-checker roda com `--excludePrivatePackages`, então o pacote raiz não entra na árvore.
+- **O motor aberto:** o repositório `fileorca-image-engine` ainda não consta como criado (pendência "Motor aberto"). Por isso o LICENSE fala da "cópia publicada no repositório separado".
+- **A revisão da F9 (F-5):** o README e o LICENSE falavam no presente de um repositório que não existe (`gh repo view vmatusita/fileorca-image-engine` não o acha). Os dois passaram ao futuro: a cópia MIT do motor vale quando o repositório for publicado, e o README diz que ele ainda não existe.
+
+## § 335 · Workers Builds e PR de fork (F9, decisão 11)
+
+- **O que a documentação do Cloudflare diz** (lida em 3/nov/2026):
+  - Workers Builds, página "Build branches": com Enable Preview Builds (Settings → Build → Branch control), cada push numa branch que não é a de produção gera um build de prévia.
+  - Workers Builds, página "GitHub integration": o Cloudflare publica a cada push e comenta na PR o status e a URL da prévia. O app do GitHub é "Cloudflare Workers and Pages", o mesmo do Pages, e a página recomenda limitar o acesso aos repositórios usados.
+  - As páginas do Workers Builds (build branches, GitHub integration e configuration) não falam de fork. Só a do Pages diz que URL de prévia não é criada para PR de fork.
+  - Os exemplos de automação de prévias, com GitHub Actions, lembram que os segredos não chegam a PR de fork e mandam conferir `head.repo.full_name` antes de expor credenciais. O CI do FileOrca não usa credencial do Cloudflare.
+- **A conclusão:** o build nasce de push numa branch do repositório conectado, e o push de quem fez fork vai para o repositório dele. O esperado é nenhum build, mas o Workers Builds não documenta isso.
+- **O registro:** o `docs/OPERACAO.md` ("Workers Builds e PR de fork") lista o que o Victor confere:
+  - o Branch control;
+  - as variáveis e os segredos do build e das prévias, que devem ser só valores públicos;
+  - o acesso do app só ao `fileorca`;
+  - uma PR de fork de verdade, de uma segunda conta.
+  - Se ela gerar build, ele desliga o Enable Preview Builds e registra numa run curta.
+- **Alternativas:**
+  - desligar as prévias antes de publicar: perde a prévia das runs, que a regra nova 1 do `PLANO-MELHORIAS.md` usa;
+  - aceitar sem testar: a documentação não cobre o caso.
+
+## § 336 · O ruleset da main e a seção "Repositório público" do OPERACAO (F9, decisão 11)
+
+- **O formato:** `docs/ops/ruleset-main.json` é o corpo do `POST /repos/{owner}/{repo}/rulesets`, o mesmo JSON que o Settings → Rules → Rulesets → New ruleset → Import a ruleset lê. A fonte é a documentação do GitHub, "Managing rulesets for a repository" (Importing) e REST "Create a repository ruleset", e os exemplos do `github/ruleset-recipes` usam a mesma forma. O arquivo não tem `id`, `source` nem `source_type`, que são da exportação de um ruleset que já existe.
+- **O conteúdo:**
+  - nome `main`, `target: branch`, `enforcement: active`;
+  - `ref_name.include` só com `~DEFAULT_BRANCH`, `exclude` vazio, `bypass_actors` vazio;
+  - as regras `deletion` e `non_fast_forward`;
+  - `pull_request` com 0 aprovação, os quatro booleanos em false e `allowed_merge_methods: ["squash"]`, porque o job de merge usa `gh pr merge --squash`;
+  - `required_status_checks` só com `{context: "ci-ok", integration_id: 15368}`, o app do GitHub Actions confirmado pelo `gh api apps/github-actions`, e `strict_required_status_checks_policy: false` e `do_not_enforce_on_create: false`.
+- **Alternativas recusadas:**
+  - exigir cada parte do CI como check: cada mudança de partes mexeria no ruleset, e a ficha recusa;
+  - exigir uma aprovação: o Victor trabalha sozinho, e o autor não aprova a própria PR;
+  - bypass para o admin: contornaria a trava. Numa emergência, o OPERACAO manda desativar o ruleset, mesclar e reativar;
+  - branch atualizada obrigatória: cada merge pediria outro CI completo;
+  - merge ou rebase liberados: a `main` é só squash.
+- **O teste:** `tests/unit/ruleset.test.ts`, com 14 testes, dos quais 10 são controles que reprovam: bypass, todas as branches, sem exclusão, sem force push, aprovação, branch atualizada, check de qualquer app, segundo check, regra `update` e modo `evaluate`.
+- **A seção "Repositório público" do `docs/OPERACAO.md`** entra antes de "Pendências", e os 18 cabeçalhos exigidos não mudam. Ela tem quatro partes:
+  - **O passo a passo:** a seção F adaptada.
+    - O repositório já é público desde 28/out/2026, então o "Change visibility" já está feito e o resto ficou urgente.
+    - A auditoria vem primeiro.
+    - Voltar a privado é a única saída sem reescrever o histórico.
+    - O ruleset só entra depois de o `ci-ok` estar na `main`.
+    - Depois vêm a aprovação de fork para todos os externos, o Code security, as Features (Wiki e Projects desligados, Issues fica), o Workers Builds e a primeira PR.
+  - **O merge de PR de fork:** o `ci-ok` dela roda o `.github/workflows/ci.yml` da própria PR, então o merge é sempre do Victor, depois de ler o diff.
+  - **O que fica público no Actions:**
+    - os logs e os artefatos: o build com 1 dia e os relatórios do Playwright com 7;
+    - nenhum passo imprime token ou ambiente;
+    - o `disco.ts` mostra só o nome dos processos;
+    - os runners de repositório público não gastam a cota de minutos.
+  - **O Workers Builds e a PR de fork:** o que a § 335 registra.
+- **Os caminhos do texto:** toda citação entre crases é um caminho completo (`.github/workflows/ci.yml`, `docs/ops/ruleset-main.json`), e o `operacao.test.ts` passa.
+- **A revisão da F9** (achados B-2, B-4, B-6, C-4, F-2, F-3, F-4, F-7 e F-8, e o B-1 e o F-1 do `ci-ok` duplicado):
+  - **A ordem nova do passo a passo:** 1 a auditoria; 2 o Advanced Security, 3 a aprovação de PR de fork e 4 as Features, que são só configuração e não dependem do merge (o relato privado fica ligado antes de o `SECURITY.md` chegar à `main`); 5 o merge da F9; 6 o ruleset, que espera o `ci-ok` na `main`; 7 o Workers Builds; 8 a primeira PR. A ficha da F9 listava a ordem da seção F (escrita com o repositório privado); com ele público desde a criação, só o ruleset depende do merge, e a ordem da ficha continua sendo a das dependências.
+  - **A auditoria (passo 1):** o `pnpm publico:auditar` só existe na branch `fase-09` até o merge; a primeira execução numa máquina baixa o gitleaks fixado por SHA-256; e há commits depois da auditoria da run, então o Victor roda de novo antes de decidir.
+  - **Voltar a privado:** a página "About rulesets" do GitHub, lida na revisão, fala dos planos Team e Enterprise e não confirma o ruleset num repositório privado do plano Free: o texto diz que ele pode deixar de valer e manda conferir, e lembra que os minutos do Actions voltam a contar.
+  - **Os nomes dos menus** (lidos na documentação do GitHub em 3/nov/2026): Settings → "Advanced Security", na seção "Security and quality" do menu lateral, com "Secret Protection" (o secret scanning), "Push protection" dentro dela e "Private vulnerability reporting". O texto põe o nome antigo ("Code security") entre parênteses, também no item do Dependabot security updates.
+  - **O `ci-ok` vermelho de execução cancelada (passo 6 e passo 8):** o que fazer se o merge for recusado por ele (rodar de novo a execução cancelada com `gh run rerun <id>`, ou um push; não testado) e conferir isso na primeira PR (§ 327, pendência "F9 ci-ok duplicado").
+  - **O `--failed` em 24 h** nas duas receitas de rerun (§ 324).
+  - **O `GH_TOKEN`:** no job `merge` ele é variável do job inteiro, e o texto agora diz isso (e onde ele entra no `alerta-dependabot` e no `ci-ok`). O `env` do job não mudou nesta revisão.
+  - **O que fica público:** o exemplo de dado de terceiro ficou genérico, sem caminho (§ 332), e a lista ganhou os comentários do Workers Builds nas PRs (a URL da prévia e o link do painel com o ID da conta).
+  - **A abertura** diz "depois da F9", e o `tests/unit/operacao.test.ts` confere a seção "Repositório público" com os quatro `###` dela, e que o passo do ruleset cita o `docs/ops/ruleset-main.json` e vem depois do merge.
+
+## § 337 · A fonte de verdade da F9 (F9, decisão 12)
+
+- **O `PLANO-MELHORIAS.md`** entrou no primeiro commit (`892b10f`). O `Claude outputs/PLANO-MELHORIAS.md` era diferente do da raiz (a ficha da F9 sem "com o build só se o Vitest precisar" e o passo 4 da seção F com outro texto): pela ficha, ele é a versão final e foi copiado por cima antes do commit. A pasta `Claude outputs/` não entra em commit.
+- **O `PLANO-FILEORCA.md` não tinha diff:** a linha do Victor no topo, apontando para o `PLANO-MELHORIAS.md`, não estava lá. A run não tocou no arquivo (o `.claude/settings.json` nega a edição) e registrou a pendência.
+- **O prompt** entrou sem edição, nos dois arquivos que estavam em `docs/prompts/`. O `.txt` é o que a run recebeu. O `.md` está atrás dele em dois pontos: o caso do rótulo `ci` inexistente e o `--undo` do `gh pr ready`. O `Claude outputs/prompt-fase-09.md` tem a versão atual do `.md`; a ficha manda os dois arquivos sem edição, e a run seguiu o `.txt`.
+- **A ordem nova** está no `CLAUDE.md`: a ficha da run, o `PLANO-MELHORIAS.md` (nos itens de "Mudanças no contrato"), o `PLANO-FILEORCA.md`, o `CLAUDE.md` e `docs/claude/`, o `DECISOES.md` e o código.
+
+## § 338 · O repositório já era público, e o rótulo ci não existe (F9, exploração)
+
+- **O fato.** A ficha e o `PLANO-FILEORCA.md` partem de um repositório privado, no GitHub Free, com 2.000 minutos por mês. A API diz outra coisa:
+  - `visibility: public`;
+  - um `PublicEvent` em 28/out/2026 15:03 UTC, a mesma hora do `created_at`. O repositório é público desde a criação.
+
+  O código, os relatórios, as `refs/pull/*` (16 hoje, com 548 commits que só existem ali), os logs e os artefatos do Actions já estão públicos.
+- **O que a run mudou por isso:** nada no escopo.
+  - A auditoria segue só em `.cache/` e nunca entra no Git, na PR ou na resposta.
+  - A proteção contra fork entra como a ficha manda.
+  - O `docs/OPERACAO.md` diz que o passo da visibilidade já está feito e que os outros da seção F ficam urgentes: o ruleset, a aprovação de workflow de fork, o secret scanning, a push protection, o relato privado e as Features.
+
+  Nenhuma configuração do GitHub mudou; elas são do Victor.
+- **O custo.** Os minutos de um repositório público não são cobrados. O `ci:custo` calcula "como num repositório privado" (o minuto arredondado por job), como a ficha pede. A linha de base também rodou como repositório público, mas o tipo de máquina mudou entre ela e as execuções desta PR (o disco do `/` foi de 72 para 145 GB, e os testes ficaram uns 30 % mais rápidos): por isso o relatório traz também uma conta controlada (§ 339). A revisão da F9 (C-1) mostrou que foi um degrau, não uma variação: a máquina mudou uma vez entre a linha de base e a F9, e a causa é desconhecida (§ 339).
+- **O rótulo `ci` não existe** (`gh label list` mostra só os padrões). A run não o cria (`gh label create` é proibido). As execuções completas saem do `gh pr ready`, e o `gh pr ready --undo` volta ao rascunho entre elas. Criar o rótulo é do Victor.
+
+## § 339 · A meta de 35 % numa execução completa (F9, decisão 1 e critério 1)
+
+- **A conta da linha de base** (§ 323): 157 minutos cobrados.
+  - 120,5 min no passo `pnpm verificar` das 20 partes, dos quais 6,5 min de build e o resto testes e portões;
+  - 24,5 min de preparo;
+  - 10,3 min de arredondamento ao minuto, por job;
+  - o resto em caudas e no `merge`.
+- **O teto do que a ficha deixa mexer:**
+  - mesmo com o preparo e o build zerados, a execução completa iria a uns 127 minutos (−19 %);
+  - com o preparo em 45 s, o build único e os três jobs novos (`classificar`, `build` e `ci-ok`), a estimativa é de 142 a 151 minutos (−4 % a −10 %).
+
+  Os 35 % pediriam cortar tempo de teste, mudar o número de partes ou os workers, e a ficha proíbe os três (a F9b redivide).
+- **O que as duas execuções completas da PR mostraram** (41658317282 e 41660597548): 111 minutos cobrados cada uma, contra 157 da linha de base (−29,3 %). Esse número mistura duas coisas.
+  - **A máquina mudou.** A imagem base é a mesma (`ubuntu-24.04`, versão 20261025.353.1, com alguns jobs numa versão mais nova; abaixo), mas o `/` das partes tem 145 GB, contra 72 GB na linha de base, e o tempo de teste somado das 20 partes caiu de 113,9 para 78,7 e 75,7 minutos (−31 % e −34 %), com os mesmos testes sobre o mesmo `dist/`. O runner tem 4 vCPU nas execuções da F9 (o log do preparo passou a imprimir o `nproc`); a linha de base não tem essa medida.
+  - **A conta controlada:** cada parte da execução nova com o tempo de teste da linha de base (a duração do job menos o `total` dele, mais o `total` da linha de base sem o build), e os jobs novos como foram medidos. Ela dá 148 minutos nas duas execuções: −5,7 %, dentro da estimativa de antes. É o que a F9 economiza sozinha numa execução completa.
+- **O critério 1 não fechou.** Pela conta bruta, −29,3 % não chegam aos 35 %; pela controlada, a F9 sozinha dá −5,7 %. A run implementou o build único, o preparo em segundo plano, o cache menor e as classes, e o relatório traz as duas saídas do `ci:custo` lado a lado e a conta controlada. A economia que a run entrega está nas execuções que deixam de ser completas:
+  - um push em rascunho custava uma execução completa (157 a 166 minutos na PR #19) e passa a custar 5 (`41652974779`: 3 jobs, 3,5 min de parede);
+  - uma PR só de documentação pula o Playwright e o Lighthouse.
+- **Para a F9b:** redividir as partes e os workers para as máquinas de repositório público (4 vCPU) é a alavanca que falta, medida com o `pnpm ci:custo` antes e depois e com a conta controlada, porque a máquina mudou entre a linha de base e a F9 e pode mudar de novo. Linha "F9 35 %" no `PENDENCIAS.md`.
+- **O que a revisão da F9 corrigiu neste registro** (C-1 e C-6):
+  - **A máquina mudou entre a linha de base e a F9,** uma vez; o "varia" do primeiro registro (aqui, na § 325 e no `docs/claude/ci.md`) dizia mais do que os dados mostram. Todas as execuções de antes que a revisão leu (a linha de base e mais quatro) têm 72 GB no `/`, e todas as da PR da F9, 145 GB, sem alternância. A causa é desconhecida: entre a linha de base (06:46 UTC de 3/nov) e a primeira execução nova (14:22 UTC) não houve execução do CI. A imagem também não é exatamente a mesma: a base é a 20261025.353.1, mas cinco jobs da 41660597548 e um da 41658317282 rodaram na 20261101.360.1, com o mesmo disco. O "4 vCPU" é medida só das execuções da F9 (o `nproc` passou a ser impresso no preparo nesta run); a linha de base não tem essa medida.
+  - **A conta controlada é conservadora, e dá uma faixa.** O tempo de teste da linha de base leva os 48,6 s do `lint:texto` do job dos portões, porque a PR #19 mudou texto do site; a PR da F9 não muda, e o mesmo passo levou 0,7 s nas duas execuções novas. Com o `lint:texto` de cada execução nova no lugar do da linha de base (o resto igual), a conta dá 147 minutos nas duas execuções, contra 148. A F9 sozinha economiza de 9 a 10 minutos numa execução completa: −5,7 % a −6,4 %. O tempo do Vitest também varia dentro da mesma máquina (121,6 s na linha de base, 82,1 s e 51,7 s nas duas execuções novas), um ruído maior que esse viés, e a faixa é o que a conta sustenta.
+
+## § 340 · O adendo da ADR-003 e as pendências (F9, decisão 14)
+
+- **O adendo** "Adendo (F9, 03/nov/2026): o build uma vez, as classes de execução e o ci-ok" entra na ADR-003, como a § 302 e a § 320 fizeram, e a ADR continua Aceita. Ele diz o que mudou (o build, as classes, o `ci-ok` e o preparo), o que não mudou (as 20 partes, os limites, os workers e os testes) e onde está a prova.
+- **O `docs/PENDENCIAS.md`:**
+  - a § 242 sai das linhas abertas para a tabela "Já corrigidos" (`pnpm verificar --partes`, § 329);
+  - a "F8 ensaio-3" sai do mesmo jeito (§ 330);
+  - a § 283 fica, atualizada: a F9 manteve as partes, e a F9b a absorve;
+  - entra o grupo 18, "O que a F9 deixou".
+
+## § 341 · Os testes que mudaram junto com o CI (F9)
+
+A ficha manda mudar um teste que fixa o CI de antes junto com o que ele protege, e mostrar que a proteção continua.
+
+- **`tests/unit/ci-workflows.test.ts`.** Fixava o gatilho de antes (sem `labeled`), o `needs` do `alerta-dependabot` (`verificar`, `playwright` e `merge`) e o `if` dele sem a guarda de fork. Agora fixa:
+  - o gatilho com `labeled` e o `alerta-dependabot` depois do `ci-ok` e do `merge`, com a guarda;
+  - o `if` de cada job por classe, sem `paths`;
+  - o `ci-ok` (nome, sem matriz, `always()`, o `needs` igual ao `REQUIRED`);
+  - o `merge` depois do `ci-ok` e sem rascunho nem fork;
+  - o build só no job `build`, com o artefato baixado depois do cache;
+  - o `fetch-depth: 0` só nos quatro jobs que leem o histórico;
+  - nenhum `pull_request_target`, e os jobs com permissão de escrita, todos com a guarda;
+  - as proteções da § 154 e a espera pelo navegador.
+
+  Os testes do alerta e das issues continuam iguais.
+- **`tests/unit/merge-events.test.ts`.**
+  - O `JQ_ON_MAIN` e o `env` do Decide ganharam os três campos do fork; o `CLI_ON_MAIN` e o `DIFF_ON_MAIN` não mudaram.
+  - As 16 fixtures de antes ganharam o `head.repo.full_name` do payload real, e o resultado esperado de cada uma não mudou.
+  - O `MERGE_SCRIPT` deixa rodar os eventos com outro script: com o do `bbd30c8`, os três eventos novos reprovam.
+- **`tests/unit/pode-mesclar.test.ts`.** A base dos casos ganhou o repositório e o dono. Todos os casos de antes dão o mesmo resultado; os novos são os do fork.
+- **`tests/unit/verificar.test.ts`.** O teste do ajuste idiomas lia as duas matrizes do job `verificar`, que deixou de existir. As asserções dele sobre o `plan()` ficaram. A leitura do `ci.yml` foi para o teste novo, que lê todas as partes do arquivo e confere o todo com o build uma vez. A lista do que o `plan()` recusa ganhou os casos novos.
+- **`tests/unit/pendencias.test.ts`.** A lista de ids obrigatórios perdeu a `§ 242`, que a F9 fechou. O teste passa a exigir que ela não esteja nas linhas abertas e esteja na tabela "Já corrigidos" com a § 329, então ela não some sem rastro.
+- **`tests/unit/pdf-engine-ops.test.ts`.** O teste do split lê do oráculo os links da fonte (§ 330). As asserções sobre a saída são as mesmas, mais uma.
+- **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 93 arquivos e 1.597 testes para 102 arquivos e 1.735 testes, e o `--list` do Playwright continua em 1.428 por navegador.
+- **Depois da revisão da F9.** O 1.735 acima é o da execução 41658317282; o teste do `merge` pulado (§ 327) levou o commit revisado (`859f7b4`) a 1.736 (revisão, D-2). As correções da revisão só acrescentaram testes: 13, nos arquivos `ci-ok` (o estado de rascunho na hora e o CLI sem `PR_DRAFT_NOW`), `ci-workflows` (as permissões e o `env` do `ci-ok`, a linha verde, o passo rodado em `bash -e` e o controle do `success()`), `claude-md` (o núcleo e o controle dele) e `operacao` (a seção "Repositório público" e o passo do ruleset). O Vitest inteiro dá 102 arquivos e 1.749 testes, verdes nesta máquina. Mudaram, sem perder asserção: o `alerta-dependabot` fixado com `!cancelled()`, a regex da função de status sem `success()` e o título de um teste do `verificar.test.ts` que prometia ler as matrizes do `ci.yml` (D-3).

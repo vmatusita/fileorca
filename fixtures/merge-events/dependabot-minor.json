@@ -11,7 +11,10 @@
       },
       "head": {
         "ref": "dependabot/npm_and_yarn/vitest-5.1.0",
-        "sha": "00caf8cccccccccccccccccccccccccccccccccc"
+        "sha": "00caf8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
       },
       "base": {
         "ref": "main",

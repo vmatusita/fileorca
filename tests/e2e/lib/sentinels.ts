@@ -103,7 +103,7 @@ export interface SeenRequest {
 export const requestText = (request: SeenRequest): string => `${request.method} ${request.url}\n${Object.entries(request.headers).map(([key, value]) => `${key}: ${value}`).join('\n')}\n${request.body}`;
 
 /**
- * Requests that break the rule of the site (CLAUDE.md, F3; tests/e2e/launch-claims.spec.ts): anything that is not a GET, has
+ * Requests that break the rule of the site (docs/claude/playwright.md, F3; tests/e2e/launch-claims.spec.ts): anything that is not a GET, has
  * a body, carries a query string, or goes to another origin. blob:, data: and about: stay in the browser and are not
  * requests to anywhere; they are still searched for the sentinels.
  */

@@ -40,6 +40,27 @@ export const ACTIONLINT: Tool = {
   },
 };
 
+/**
+ * gitleaks (MIT) for the public-repository audit (`pnpm publico:auditar`): scans the whole
+ * history of a mirror clone and the exported tree. Hashes from gitleaks_8.30.1_checksums.txt.
+ */
+export const GITLEAKS: Tool = {
+  name: 'gitleaks',
+  version: '8.30.1',
+  assets: {
+    'linux-x64': {
+      url: 'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz',
+      sha256: '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb',
+      entry: 'gitleaks',
+    },
+    'win32-x64': {
+      url: 'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip',
+      sha256: 'd29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e',
+      entry: 'gitleaks.exe',
+    },
+  },
+};
+
 /** shellcheck for actionlint, pinned so the local gate checks run: blocks like the CI does. */
 export const SHELLCHECK: Tool = {
   name: 'shellcheck',

@@ -1,0 +1,33 @@
+{
+  "description": "docs/design/ não é documentação: o build lê os tokens",
+  "event": {
+    "action": "synchronize",
+    "number": 254,
+    "pull_request": {
+      "number": 254,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00fef8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "docs/design/tokens.json"
+  ],
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, com código: tudo."
+  }
+}

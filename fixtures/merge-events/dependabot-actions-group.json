@@ -11,7 +11,10 @@
       },
       "head": {
         "ref": "dependabot/github_actions/actions-minor-patch-a1b2c3d4e5",
-        "sha": "00cff8cccccccccccccccccccccccccccccccccc"
+        "sha": "00cff8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
       },
       "base": {
         "ref": "main",

@@ -1,0 +1,32 @@
+{
+  "description": "Evento sem o repositório da branch (o fork foi apagado): sem os dados, nunca mescla",
+  "event": {
+    "action": "reopened",
+    "number": 232,
+    "pull_request": {
+      "number": 232,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "fase-10",
+        "sha": "00e8f8cccccccccccccccccccccccccccccccccc",
+        "repo": null
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/platform/site.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "O evento não trouxe o repositório da branch, o deste repositório ou o dono: o merge fica para o Victor."
+  }
+}

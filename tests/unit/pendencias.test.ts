@@ -14,7 +14,11 @@ const rows = DOC.split('\n')
 describe('docs/PENDENCIAS.md', () => {
   it('has the items the decision 3 of the F8 names', () => {
     const ids = rows.map((cells) => cells[0]);
-    for (const id of ['F2 2b', '§ 242', '§ 283', 'F7 e-1', 'Worktrees', 'Fontes', 'F3 d-02', 'F3 c-04', 'F3 c-08', 'F3 b-07', 'F3 e-05']) expect(ids, id).toContain(id);
+    for (const id of ['F2 2b', '§ 283', 'F7 e-1', 'Worktrees', 'Fontes', 'F3 d-02', 'F3 c-04', 'F3 c-08', 'F3 b-07', 'F3 e-05']) expect(ids, id).toContain(id);
+    // The F9 closed the § 242 (pnpm verificar --partes, DECISOES § 329): it left the open rows for the table of what was
+    // fixed, and never disappears from the list (DECISOES § 341).
+    expect(ids).not.toContain('§ 242');
+    expect(DOC).toMatch(/^\| § 242: .+ \| F9, § 329: .+ \|$/m);
     expect(DOC).toContain('§ 85');
     expect(DOC).toContain('§ 103');
     expect(DOC).toMatch(/ACOG CO 700/);

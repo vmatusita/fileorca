@@ -1,0 +1,31 @@
+{
+  "description": "Diff vazio conta como completo",
+  "event": {
+    "action": "synchronize",
+    "number": 259,
+    "pull_request": {
+      "number": 259,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00103f8ccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [],
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, sem diff legível: tudo."
+  }
+}

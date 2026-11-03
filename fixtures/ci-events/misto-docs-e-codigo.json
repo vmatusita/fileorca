@@ -1,0 +1,35 @@
+{
+  "description": "Diff que mistura documentação e código: completo",
+  "event": {
+    "action": "synchronize",
+    "number": 253,
+    "pull_request": {
+      "number": 253,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00fdf8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "docs/relatorios/fase-09.md",
+    "README.md",
+    "tests/unit/ci-ok.test.ts"
+  ],
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, com código: tudo."
+  }
+}
