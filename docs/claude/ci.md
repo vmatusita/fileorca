@@ -113,3 +113,41 @@ Partes do CI (o que continua valendo depois da F9, que tirou a lista das partes 
 Pegadinhas que o ajuste achou:
 
 - **A estimativa das partes do CI** é o tempo médio por teste de cada spec na última execução, vezes os testes de cada spec no `--list` da parte, dividido pelos 2 workers, mais 33 s. Ela reproduziu a F8 com erro de 1 a 3 %, mas os testes de pt e es custaram mais no runner do que os do inglês (§ 320).
+
+## F9: o CI por classes, o build único e o ci-ok
+
+O CI desde a F9 (DECISOES § 323 a § 340 e o adendo da F9 na ADR-003). O comentário do topo do `.github/workflows/ci.yml` diz o mesmo, em inglês.
+
+- **As classes** saem do `scripts/ci/classificar.ts`, lido da base:
+  - rascunho sem o rótulo `ci`: `leve`, que roda tipos, lint, build e Vitest num job só;
+  - rascunho com o rótulo, ou PR pronta: `completo`, ou `portões` quando todo arquivo do diff é documentação.
+
+  "Documentação" é todo arquivo em `docs/` fora de `docs/design/` e de `docs/oli/`, ou um `.md` da raiz. Diff vazio ou ilegível conta como `completo`. Um rótulo qualquer recalcula a classe (`labeled`); tirar um rótulo não roda nada.
+- **Os jobs:**
+  - `classificar`;
+  - `leve`;
+  - `build`: o build único e o artefato `site`, com o `dist/` e o `.cache/bundle-modules.json`, guardado por 1 dia;
+  - `portoes`: `--sem-playwright --sem-lighthouse --dist-pronto`;
+  - `lighthouse`: `--lighthouse --dist-pronto`;
+  - `playwright`: as 18 partes do ajuste idiomas, com `--dist-pronto`;
+  - `ci-ok`, `merge`, `alerta-dependabot` e `pos-deploy`.
+
+  O pulo é por `if` de job, nunca por `paths`.
+- **O `ci-ok`** roda sempre e é o único check que o ruleset (`docs/ops/ruleset-main.json`) exige. Verde só com a classe saída e cada job que ela pede verde (`REQUIRED` do `scripts/ci/ci-ok.ts`, lido da base).
+  - Job novo de verificação entra no `needs` do `ci-ok` e no `REQUIRED`; o `tests/unit/ci-workflows.test.ts` reprova a falta.
+  - O `merge` espera o `ci-ok` e não roda em rascunho nem em PR de fork.
+- **A prova de que as partes são o todo:** o `tests/unit/verificar.test.ts` lê as partes do `ci.yml` pelo `ciParts()` (`scripts/lib/ci-parts.ts`) e confere que juntas cobrem o `pnpm verificar` inteiro, com o build uma vez e cada portão uma vez. Cada comando é comparado sem as opções (`--project`, `--shard`), então a prova vale para qualquer número de partes.
+- **Na máquina:** `pnpm verificar` sem argumento continua rodando tudo, num processo só. `pnpm verificar --partes` roda as partes do `ci.yml` em sequência, o build uma vez, cada parte com o próprio limite de 900 s, e soma.
+- **O custo:** `pnpm ci:custo <run-id>` (com `--attempt <n>` depois de um rerun). O relatório traz o da última execução do CI (regra 5).
+- **Os scripts lidos da base** (`pode-mesclar.ts`, `classificar.ts` e `ci-ok.ts`): a chamada de cada um no `ci.yml` não muda depois de ir para a main, porque o job roda o script da base. Dado novo entra no JSON que o `jq` monta, e o script novo aceita a falta dele ou recusa.
+
+Pegadinhas que a F9 achou:
+
+- **O repositório é público desde a criação** (28/out/2026, o `PublicEvent` da API). Os planos supunham privado. Logs, artefatos e `refs/pull/*` são públicos: nada de dado pessoal, token ou achado de auditoria em log, artefato, commit ou PR.
+- **O rótulo `ci` não existia** na F9, e criar rótulo é do Victor. Sem ele, a execução completa no meio da run sai do `gh pr ready`, e o `gh pr ready --undo` volta ao rascunho.
+- **O `upload-artifact` ignora caminho oculto** desde a v4.4: o `.cache/bundle-modules.json` só entra no artefato com `include-hidden-files: true`.
+- **O cache das ferramentas guardava a pasta `.cache/` inteira** (uns 555 MB por PR, com os builds do `gate:prontidao` e um `bundle-modules.json` velho). Desde a F9 ele guarda só as pastas das ferramentas fixadas e, no `portoes`, volta antes do download do artefato. O cache do Actions de uma PR só serve à própria PR, e a `main` não gera cache: a primeira execução de cada PR é fria.
+- **Um job de matriz pulado** aparece no `gh run view` e no `ci:custo` com o nome sem expandir: `playwright (${{ matrix.part }})`.
+- **O Node roda os `.ts` de `scripts/` por remoção de tipos**, que recusa "parameter property" (`constructor(private x)`) com `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`. O Vitest aceita, então o erro só aparece quando o Node roda o arquivo direto. Nada de parameter property, `enum` ou `namespace` em arquivo que um script importa.
+- **A meta de minutos de uma execução completa:** o passo `pnpm verificar` das partes é uns três quartos do custo, e o preparo e o build somam um quinto. A economia grande vem das execuções que deixam de ser completas: o rascunho e a PR só de documentação (§ 339).
+- **Medir na máquina com outros agentes rodando** deixa o Vitest e o Playwright lentos. Os tempos do relatório saem com a máquina livre, ou dizem que não.
