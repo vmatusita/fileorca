@@ -4,8 +4,9 @@
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
-import { QR_ID, type Lang } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { QR_ID, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { TEXTS } from '../../src/i18n/texts.ts';
 
 /** Route id of the hub of the image tools. */
 export const HUB_ID = 'image-tools';
@@ -67,6 +68,14 @@ export const MONEY_PAGE_IDS: readonly string[] = [MONEY_HUB_ID, ...Object.keys(C
 
 /** Route ids of the ten file guides of the F5b (src/tools/guides/registry.ts). */
 export const FILE_GUIDE_PAGE_IDS: readonly string[] = [...FILE_GUIDE_IDS];
+
+/**
+ * The pages gate:seo finds in the sitemap of each language their route has, and in no other, by registry rather than by
+ * the route map alone: the image pages and hub, the money pages, the PDF pages, the file guides, the home and health pages,
+ * and since the languages adjustment the QR code generator (in en, pt and es). The Brazilian pages are added by the gate
+ * once their rows are in the map.
+ */
+export const SITEMAP_REGISTRY_IDS: readonly string[] = [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...LIFE_PAGE_IDS, QR_ID];
 
 /** A tool page or a preset page of the image tools. */
 export function isImagePage(routeId: string): boolean {
@@ -148,6 +157,16 @@ export function fileGuideTitleProblems(name: string, title: string, h1: string, 
   if (tool && plain.toLowerCase().startsWith(tool)) problems.push(`título começa pelo H1 da ferramenta (${toolH1})`);
   if (tool && h1.toLowerCase().startsWith(tool)) problems.push(`H1 começa pelo H1 da ferramenta (${toolH1})`);
   return problems;
+}
+
+/**
+ * What gate:seo compares the title of a file guide with, in the language of the page (the languages adjustment): the name
+ * of the guide's card in that language (TEXTS[lang].common.fileGuides, empty where the language has none) and the path, in
+ * that language, of the tool the guide embeds, whose H1 the guide's title and H1 must not start with. An English name or an
+ * English tool H1 against a Portuguese or Spanish title would fail every translated guide, or let a copied one pass.
+ */
+export function fileGuideWant(id: FileGuideId, lang: Lang): { name: string; toolPath: string } {
+  return { name: TEXTS[lang].common.fileGuides?.[id]?.name ?? '', toolPath: routeById(FILE_GUIDES[id].tool).paths[lang] ?? '' };
 }
 
 /** The URLs that a sitemap does not list. */
