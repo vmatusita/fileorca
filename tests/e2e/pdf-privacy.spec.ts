@@ -61,7 +61,7 @@ interface Seen {
   navigations: string[];
 }
 
-/** Listens before the first request: the context sees the requests of the workers, in both browsers (CLAUDE.md, F3). */
+/** Listens before the first request: the context sees the requests of the workers, in both browsers (docs/claude/playwright.md, F3). */
 function watch(context: BrowserContext, page: Page): Seen {
   const seen: Seen = { requests: [], console: [], dialogs: [], popups: [], navigations: [] };
   context.on('request', (request) => {
@@ -632,7 +632,7 @@ async function expectNotIsolated(page: Page, where: string): Promise<number> {
 }
 
 test('qpdf and PDF.js work on a page that is not cross-origin isolated, with the unmodified .wasm files of their packages', async ({ page, context, browserName }) => {
-  // The context sees the requests of the workers in both browsers (CLAUDE.md, F3).
+  // The context sees the requests of the workers in both browsers (docs/claude/playwright.md, F3).
   const qpdfFetches: string[] = [];
   context.on('request', (request) => {
     if (/\/qpdf-[\w-]+\.wasm$/.test(request.url())) qpdfFetches.push(request.url());

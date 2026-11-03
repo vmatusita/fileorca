@@ -71,7 +71,7 @@ function succeeded(result: PdfResult): PdfSuccess {
 
 const sameBytes = (a: Uint8Array, b: Uint8Array): boolean => Buffer.compare(Buffer.from(a), Buffer.from(b)) === 0;
 
-/** The time of the biggest case here is seconds; the limits leave room for a runner about 5 times slower (CLAUDE.md). */
+/** The time of the biggest case here is seconds; the limits leave room for a runner about 5 times slower (docs/claude/ci.md, F1b). */
 const limitFor = (name: string, mode: CompressMode): number => 60_000 + (mode === 'strong' ? (oracle(name).pages ?? 1) * 1_000 : 0);
 
 /** The pages of a Strong output: one picture each, no text, the size of the page as shown, no turn left. */

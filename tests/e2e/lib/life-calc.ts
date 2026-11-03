@@ -145,7 +145,7 @@ export async function expectPdf(page: Page, id: LifeCalcId): Promise<Buffer> {
   return bytes;
 }
 
-/** Picks an option of a segmented OptionGroup: its radio is hidden, so the label is clicked (CLAUDE.md, F5a). */
+/** Picks an option of a segmented OptionGroup: its radio is hidden, so the label is clicked (docs/claude/pdf.md, F5a). */
 export async function chooseOption(page: Page, key: string, value: string): Promise<void> {
   const radio = page.locator(`input[name="fo-calc-${key}"][value="${value}"]`);
   await page.locator('.fo-seg__opt').filter({ has: radio }).click();
