@@ -69,7 +69,7 @@ const texts: FileGuideTexts = {
   ],
   sourcesHeading: 'Fuentes',
   sources: [
-    { id: 'adobe', label: 'Adobe: Why is my PDF so big? (en inglés)', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
+    { id: 'adobe', label: 'Adobe Acrobat: por qué un PDF pesa tanto y cómo trabajar con un PDF grande (en inglés)', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
   ],
   facts: {},
   names: [],

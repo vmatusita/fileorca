@@ -8,7 +8,7 @@ const texts: FileGuideTexts = {
   changed: 'Primera versión, con las mediciones del {date}.',
   intro: [
     'Un PDF pesa lo que pesa su contenido. En los {spaceFiles_word} PDF de prueba cuyo contenido pesamos, los más pesados deben la mayor parte de su peso a las imágenes, y un escaneo también está hecho de imágenes, una por página. Después vienen las fuentes. La guía de Adobe, en inglés, nombra las mismas causas: dice que la resolución y la profundidad de bits de una imagen pueden afectar directamente el tamaño del archivo, y que agregar una sola fuente a veces puede aumentarlo de forma considerable.',
-    'El correo electrónico es un límite con el que te puedes topar. Una cuenta personal de Gmail envía archivos adjuntos de hasta {gmailLimit}, y Outlook.com acepta adjuntos de hasta {outlookLimit}. Por encima de eso, el archivo tiene que quedar más pequeño, dividirse o viajar como enlace.',
+    'El correo electrónico pone un límite con el que te puedes topar. Una cuenta personal de Gmail envía archivos adjuntos de hasta {gmailLimit}, y Outlook.com acepta adjuntos de hasta {outlookLimit}. Por encima de eso, el archivo tiene que quedar más pequeño, dividirse o viajar como enlace.',
   ],
   toolHeading: 'Comprime tu PDF aquí',
   toolIntro: 'Suelta un PDF y se comprime en esta pestaña del navegador, con la compresión Recomendada para empezar. Cambia la compresión para ver cada resultado. No se sube nada.',
@@ -78,7 +78,7 @@ const texts: FileGuideTexts = {
   sources: [
     { id: 'gmail', label: 'Ayuda de Gmail: Cómo enviar archivos adjuntos en un mensaje de Gmail', href: 'https://support.google.com/mail/answer/6584?hl=es-419', read: '2026-11-03' },
     { id: 'outlook', label: 'Soporte de Microsoft: Límites de envío en Outlook.com', href: 'https://support.microsoft.com/es-es/outlook/sending-limits-in-outlook-com', read: '2026-11-03' },
-    { id: 'adobe', label: 'Adobe: Why is my PDF so big? (en inglés)', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
+    { id: 'adobe', label: 'Adobe Acrobat: por qué un PDF pesa tanto y cómo trabajar con un PDF grande (en inglés)', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
   ],
   facts: {
     gmailLimit: { text: '25 MB', source: 'gmail' },

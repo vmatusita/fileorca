@@ -30,7 +30,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'En cualquier celular, en el navegador',
       paragraphs: [
-        'Unir PDF, en esta página, corre en el navegador del celular, así que trabaja igual en un iPhone y en un teléfono Android. Toca para elegir los archivos, desde la app Archivos en el iPhone o desde tus descargas en Android, ponlos en orden y toca el botón. El PDF unido se descarga como cualquier otro archivo.',
+        'Unir PDF, en esta página, funciona en el navegador del celular, así que hace lo mismo en un iPhone y en un teléfono Android. Toca para elegir los archivos, desde la app Archivos en el iPhone o desde tus descargas en Android, ponlos en orden y toca el botón. El PDF unido se descarga como cualquier otro archivo.',
         'Los archivos no se suben a ningún servidor: el celular hace el trabajo, así que los documentos privados se quedan en él.',
       ],
     },
