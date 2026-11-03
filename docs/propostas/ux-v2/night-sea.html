@@ -226,24 +226,24 @@ html[data-state="calc"] [data-when]:not([data-when~="calc"]) { display: none !im
 /* máscara: o caminho do rodapé, "M0 10 C20 2 40 2 60 10 S100 18 120 10", 120 × 16 px, repeat-x */</code></pre>
     <h3>Tokens e contraste</h3>
     <ul>
-      <li>A: <code>--surface</code> (o ar), <code>--stroke</code> (a crista), <code>--deep</code> (o mar). Os pares novos são a crista contra o ar (W-1) e contra o chão, no rodapé (W-2).</li>
-      <li>B: <code>--proposta-mar-noite</code> (no claro, o valor do <code>deep</code>; no escuro, o azul-marinho abaixo do chão) e <code>--proposta-crista</code> (no claro, o valor do <code>stroke</code>; no escuro, o azul de luar), declarados no fim do <code>proto.css</code>, nos três blocos. Pares N-1 a N-7: tudo o que o <code>deep</code> carrega hoje (o texto <code>on-deep</code> e <code>on-deep-muted</code>, a série <code>brand-on-deep</code>, a série <code>coral</code>, o Baixar <code>sun</code>) mais a crista contra o ar e contra o chão.</li>
+      <li>A: <code>--surface</code> (o ar), <code>--stroke</code> (a crista), <code>--deep</code> (o mar). Os pares novos são a crista contra o ar (UX15-W1) e contra o chão, no rodapé (UX15-W2).</li>
+      <li>B: <code>--proposta-mar-noite</code> (no claro, o valor do <code>deep</code>; no escuro, o azul-marinho abaixo do chão) e <code>--proposta-crista</code> (no claro, o valor do <code>stroke</code>; no escuro, o azul de luar), declarados no fim do <code>proto.css</code>, nos três blocos. Pares UX15-N1 a UX15-N7: tudo o que o <code>deep</code> carrega hoje (o texto <code>on-deep</code> e <code>on-deep-muted</code>, a série <code>brand-on-deep</code>, a série <code>coral</code>, o Baixar <code>sun</code>) mais a crista contra o ar e contra o chão.</li>
     </ul>
     <table>
       <thead><tr><th scope="col">Par</th><th scope="col">Tipo</th><th scope="col">Claro</th><th scope="col">Escuro</th></tr></thead>
       <tbody>
-        <tr><td>W-1 <code>stroke</code> sobre <code>surface</code></td><td>componente</td><td>17,28:1</td><td>4,07:1</td></tr>
-        <tr><td>W-2 <code>stroke</code> sobre <code>bg</code></td><td>componente</td><td>16,50:1</td><td>4,67:1</td></tr>
-        <tr><td>N-1 <code>on-deep</code> sobre <code>proposta-mar-noite</code></td><td>texto</td><td>13,16:1</td><td>17,65:1</td></tr>
-        <tr><td>N-2 <code>on-deep-muted</code> sobre <code>proposta-mar-noite</code></td><td>texto</td><td>7,71:1</td><td>10,34:1</td></tr>
-        <tr><td>N-3 <code>brand-on-deep</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>5,28:1</td><td>7,09:1</td></tr>
-        <tr><td>N-4 <code>coral</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>4,92:1</td><td>6,60:1</td></tr>
-        <tr><td>N-5 <code>sun</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>8,98:1</td><td>12,04:1</td></tr>
-        <tr><td>N-6 <code>proposta-crista</code> sobre <code>surface</code></td><td>componente</td><td>17,28:1</td><td>7,76:1</td></tr>
-        <tr><td>N-7 <code>proposta-crista</code> sobre <code>bg</code></td><td>componente</td><td>16,50:1</td><td>8,91:1</td></tr>
+        <tr><td>UX15-W1 <code>stroke</code> sobre <code>surface</code></td><td>componente</td><td>17,28:1</td><td>4,07:1</td></tr>
+        <tr><td>UX15-W2 <code>stroke</code> sobre <code>bg</code></td><td>componente</td><td>16,50:1</td><td>4,67:1</td></tr>
+        <tr><td>UX15-N1 <code>on-deep</code> sobre <code>proposta-mar-noite</code></td><td>texto</td><td>13,16:1</td><td>17,65:1</td></tr>
+        <tr><td>UX15-N2 <code>on-deep-muted</code> sobre <code>proposta-mar-noite</code></td><td>texto</td><td>7,71:1</td><td>10,34:1</td></tr>
+        <tr><td>UX15-N3 <code>brand-on-deep</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>5,28:1</td><td>7,09:1</td></tr>
+        <tr><td>UX15-N4 <code>coral</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>4,92:1</td><td>6,60:1</td></tr>
+        <tr><td>UX15-N5 <code>sun</code> sobre <code>proposta-mar-noite</code></td><td>componente</td><td>8,98:1</td><td>12,04:1</td></tr>
+        <tr><td>UX15-N6 <code>proposta-crista</code> sobre <code>surface</code></td><td>componente</td><td>17,28:1</td><td>7,76:1</td></tr>
+        <tr><td>UX15-N7 <code>proposta-crista</code> sobre <code>bg</code></td><td>componente</td><td>16,50:1</td><td>8,91:1</td></tr>
       </tbody>
     </table>
-    <p>Os números saem do <code>contraste.mjs</code> (a tabela do README é a referência). O que não muda: a borda <code>stroke</code> do cartão contra o chão (4,67:1 no escuro), o anel de foco <code>on-deep</code> dentro de <code>.fo-deep</code> (N-1) e a Placa, que hoje tem 1,16:1 de borda contra o <code>deep</code> no escuro e segue com 1,16:1 contra o mar à noite: o número dela está em <code>ink</code> sobre <code>surface</code>, e a frase da Oli diz o mesmo número.</p>
+    <p>Os números saem do <code>contraste.mjs</code> (a tabela do README é a referência). O que não muda: a borda <code>stroke</code> do cartão contra o chão (4,67:1 no escuro), o anel de foco <code>on-deep</code> dentro de <code>.fo-deep</code> (UX15-N1) e a Placa, que hoje tem 1,16:1 de borda contra o <code>deep</code> no escuro e segue com 1,16:1 contra o mar à noite: o número dela está em <code>ink</code> sobre <code>surface</code>, e a frase da Oli diz o mesmo número.</p>
     <h3>Estados</h3>
     <table>
       <thead><tr><th scope="col">Parâmetro</th><th scope="col">Valores</th><th scope="col">O que muda</th></tr></thead>
