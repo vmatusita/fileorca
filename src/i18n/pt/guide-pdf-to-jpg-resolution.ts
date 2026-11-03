@@ -1,81 +1,80 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'Which Resolution to Choose for PDF to JPG, With the Pixels and Sizes',
-  description: 'What the resolution of a PDF to JPG conversion changes, measured on our test PDFs: the pixels of each page, the size of the file, and when JPG or PNG is the better pick.',
-  h1: 'Which resolution to choose for PDF to JPG',
-  lead: 'A PDF page has no pixels until something draws it. The resolution you pick decides how many it gets, and how heavy the images will be.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Qual resolução escolher ao converter PDF para JPG, com os pixels e os tamanhos',
+  description: 'O que a resolução muda ao converter PDF para JPG, medido nos nossos PDFs de teste: os pixels da página, o peso do arquivo e quando escolher JPG ou PNG.',
+  h1: 'Qual resolução escolher ao converter PDF para JPG',
+  lead: 'Uma página de PDF não tem pixels até que algo a desenhe. A resolução que você escolhe decide quantos ela ganha, e quanto as imagens vão pesar.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'Text and drawings in a PDF are stored as shapes, not as dots. To turn a page into a JPG, a program draws the page onto a grid of pixels, and the resolution, in pixels per inch, sets how fine that grid is. Ask for more and every letter gets more pixels, and the file gets bigger.',
-    'PDF to JPG offers {lowPpi} for the screen, {mediumPpi} for general use and {highPpi} for printing. Here is what each one gave on {files_word} of our test PDFs, so you can pick the smallest that does the job.',
+    'Texto e desenhos num PDF são guardados como formas, não como pontos. Para transformar uma página em JPG, um programa desenha a página numa grade de pixels, e a resolução, em pixels por polegada, define o quão fina é essa grade. Peça mais e cada letra ganha mais pixels, e o arquivo cresce junto.',
+    'A ferramenta PDF para JPG oferece {lowPpi} para a tela, {mediumPpi} para uso geral e {highPpi} para imprimir. Veja o que cada opção deu em {files_word} dos nossos PDFs de teste, para você escolher a menor que resolve o seu caso.',
   ],
-  toolHeading: 'Turn your PDF pages into images here',
-  toolIntro: 'Drop a PDF and each page becomes a JPG at {mediumPpi}, in this browser tab, with nothing uploaded. Change the resolution or the format and the images are made again; several pages come back as one ZIP.',
+  toolHeading: 'Transforme as páginas do seu PDF em imagens aqui',
+  toolIntro: 'Solte um PDF e cada página vira um JPG a {mediumPpi}, nesta aba do navegador, sem nada ser enviado. Mude a resolução ou o formato e as imagens são feitas de novo; várias páginas vêm juntas num ZIP só.',
   sections: [
     {
-      heading: 'Pixels grow with the square of the resolution',
+      heading: 'Os pixels crescem com o quadrado da resolução',
       paragraphs: [
-        'Resolution counts pixels along one inch, and a page has two sides. So doubling the resolution doubles the width and the height, and multiplies the pixels by four. The first page of the IRS Form 1040 came out at {formWidth72} × {formHeight72} pixels at {lowPpi}, {formWidth150} × {formHeight150} at {mediumPpi} and {formWidth300} × {formHeight300} at {highPpi}.',
-        'Going from {mediumPpi} to {highPpi} gave {formPixels300vs150_times} the pixels on that page, and the same on every PDF we tried. The file did not grow quite as fast: the JPG of that page went from {formJpg150Chromium} to {formJpg300Chromium}, {formJpg300vs150Chromium_times} as heavy.',
+        'A resolução conta os pixels ao longo de uma polegada, e uma página tem largura e altura. Por isso, dobrar a resolução dobra a largura e a altura, e multiplica os pixels por quatro. A primeira página do Formulário 1040 do IRS saiu com {formWidth72} × {formHeight72} pixels a {lowPpi}, {formWidth150} × {formHeight150} a {mediumPpi} e {formWidth300} × {formHeight300} a {highPpi}.',
+        'Passar de {mediumPpi} para {highPpi} deu {formPixels300vs150_times} o número de pixels nessa página, e o mesmo em todos os PDFs que testamos. O arquivo não cresceu no mesmo ritmo: o JPG dessa página foi de {formJpg150Chromium} para {formJpg300Chromium}, {formJpg300vs150Chromium_times} o peso.',
       ],
     },
     {
-      heading: 'For the screen',
+      heading: 'Para a tela',
       paragraphs: [
-        '{lowPpi} gives the smallest images. That is enough for a preview, a thumbnail or a picture in a chat, and the files are small: the first page of the form weighed {formJpg72Chromium}, and the first page of the lecture notes {bookJpg72Chromium}.',
-        'Small print gets hard to read at this setting once you zoom in. If someone needs to read the text in the image, go up one step.',
+        'A resolução de {lowPpi} dá as menores imagens. Isso basta para uma prévia, uma miniatura ou uma imagem numa conversa, e os arquivos ficam pequenos: a primeira página do formulário pesou {formJpg72Chromium}, e a primeira página das notas de aula, {bookJpg72Chromium}.',
+        'Letra miúda fica difícil de ler nessa opção quando você amplia a imagem. Se alguém precisa ler o texto da imagem, suba um degrau.',
       ],
     },
     {
-      heading: 'For most uses',
+      heading: 'Para uso geral',
       paragraphs: [
-        '{mediumPpi} is the default, and the right choice when you are not sure. Text stays readable when you zoom in on a phone, and the files stay easy to send. Going from {lowPpi} to {mediumPpi} made the JPG of the form’s first page {formJpg150vs72Chromium_times} as heavy, for a page that reads well on any screen.',
+        'A resolução de {mediumPpi} é o padrão, e a escolha certa quando você está em dúvida. O texto continua legível quando você amplia no celular, e os arquivos continuam fáceis de mandar. Passar de {lowPpi} para {mediumPpi} deixou o JPG da primeira página do formulário com {formJpg150vs72Chromium_times} o peso, em troca de uma página que se lê bem em qualquer tela.',
       ],
     },
     {
-      heading: 'For printing',
+      heading: 'Para imprimir',
       paragraphs: [
-        '{highPpi} is for paper. Printed text and fine lines need the extra pixels to look sharp, and the extra weight is the cost: the first page of the lecture notes went from {bookJpg150Chromium} at {mediumPpi} to {bookJpg300Chromium} at {highPpi}.',
-        'More resolution only helps when the PDF has the detail to give. Our scanned book page holds one picture {scanImageWidth} pixels wide, which is {scanImagePpi} over the width of the page. At {highPpi} that picture is simply stretched over twice as many pixels in each direction: the image grew from {scanJpg150Chromium} to {scanJpg300Chromium} and showed nothing new. For a scanned PDF, match the resolution of the scan, or stay below it.',
+        'A resolução de {highPpi} é para o papel. Texto impresso e linhas finas precisam dos pixels a mais para sair nítidos, e o peso a mais é o preço: a primeira página das notas de aula foi de {bookJpg150Chromium} a {mediumPpi} para {bookJpg300Chromium} a {highPpi}.',
+        'Mais resolução só ajuda quando o PDF tem detalhe para dar. Nossa página de livro escaneada guarda uma única imagem de {scanImageWidth} pixels de largura, o que dá {scanImagePpi} na largura da página. A {highPpi}, essa imagem só é esticada sobre o dobro de pixels em cada direção: a imagem cresceu de {scanJpg150Chromium} para {scanJpg300Chromium} e não mostrou nada novo. Num PDF escaneado, use a resolução do escaneamento, ou fique abaixo dela.',
       ],
     },
     {
-      heading: 'JPG or PNG for a page',
+      heading: 'JPG ou PNG para uma página',
       paragraphs: [
-        'The tool can also save each page as PNG, which loses nothing. For a page of photos that is costly: the first page of our PDF of photos weighed {photosPng150Chromium} as PNG against {photosJpg150Chromium} as JPG at {mediumPpi}, {photosPngVsJpg150Chromium_times} as much.',
-        'For pages of text the gap is smaller, and it depends on the browser that writes the PNG. On the form’s first page at {mediumPpi}, the PNG was {formPngVsJpg150Chromium_times} the JPG in Chromium and {formPngVsJpg150Webkit_times} in WebKit. PNG keeps text perfectly crisp, so for a page of text or a diagram it is worth trying both.',
-        'Black and white scans can tip the other way. On the first page of the scanned NASA report at {highPpi}, the PNG weighed {reportPng300Chromium} against {reportJpg300Chromium} for the JPG in Chromium: a page of black text on white paper packs well without loss, and JPG spends bytes on smudges around every letter.',
+        'A ferramenta também salva cada página em PNG, que não perde nada. Numa página de fotos, isso sai caro: a primeira página do nosso PDF de fotos pesou {photosPng150Chromium} em PNG contra {photosJpg150Chromium} em JPG a {mediumPpi}, {photosPngVsJpg150Chromium_times} o peso.',
+        'Em páginas de texto a diferença é menor, e depende do navegador que escreve o PNG. Na primeira página do formulário a {mediumPpi}, o PNG teve {formPngVsJpg150Chromium_times} o tamanho do JPG no Chromium e {formPngVsJpg150Webkit_times} no WebKit. O PNG mantém o texto perfeitamente nítido, então, numa página de texto ou num diagrama, vale testar os dois formatos.',
+        'Escaneamentos em preto e branco podem virar o jogo. Na primeira página do relatório da NASA escaneado a {highPpi}, o PNG pesou {reportPng300Chromium} contra {reportJpg300Chromium} do JPG no Chromium: uma página de letras pretas em papel branco se compacta bem sem perda, e o JPG gasta bytes com borrões em volta de cada letra.',
       ],
     },
     {
-      heading: 'A quick way to choose',
+      heading: 'Um jeito rápido de escolher',
       paragraphs: [
-        'Pick {lowPpi} for previews and chats, {mediumPpi} for reading on a screen and for most uploads, and {highPpi} only for printing or for a page with fine detail that someone will zoom into. Choose JPG for photos and scans in color, and try PNG for text, charts and forms.',
-        'If you only need some pages, turn just those into images with the page range, rather than every page at the highest setting.',
+        'Escolha {lowPpi} para prévias e conversas, {mediumPpi} para ler na tela e para enviar a sites e formulários, e {highPpi} só para imprimir ou para uma página com detalhe fino que alguém vai ampliar. Escolha JPG para fotos e escaneamentos coloridos, e teste o PNG para texto, gráficos e formulários.',
+        'Se você só precisa de algumas páginas, transforme só essas em imagens com a opção Intervalo de páginas, em vez de converter todas na resolução mais alta.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'The first page of each PDF at the three resolutions of the tool, in JPG and PNG. Pixels are width by height.',
-  measuredNote: 'Measured on {date} through the PDF to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, on the first and the second page of {files_word} PDFs of our tests, the real documents and a PDF of photos (the scanned book has a single page). The pixels were the same in both browsers; the table shows the Chromium files.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'A primeira página de cada PDF em cada resolução da ferramenta, em JPG e em PNG. Os pixels são largura por altura.',
+  measuredNote: 'Medido em {date} pela página PDF para JPG deste site, no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, na primeira e na segunda página de {files_word} PDFs dos nossos testes: os documentos reais e um PDF feito de fotos (o livro escaneado tem uma página só). Os pixels foram os mesmos em ambos os navegadores; a tabela mostra os arquivos do Chromium.',
   tables: [
     {
-      heading: 'The first page at each resolution',
-      caption: 'The first page of each PDF at each resolution: its size in pixels, and the size of the JPG and of the PNG',
-      head: ['File', 'Resolution', 'Pixels', 'JPG', 'PNG'],
+      heading: 'A primeira página em cada resolução',
+      caption: 'A primeira página de cada PDF em cada resolução: o tamanho em pixels e o peso do JPG e do PNG',
+      head: ['Arquivo', 'Resolução', 'Pixels', 'JPG', 'PNG'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-01' },
-    { id: 'jpeg-org', label: 'JPEG committee: JPEG 1', href: 'https://jpeg.org/jpeg/', read: '2026-11-01' },
+    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
+    { id: 'jpeg-org', label: 'Comitê JPEG: JPEG 1 (em inglês)', href: 'https://jpeg.org/jpeg/', read: '2026-11-03' },
   ],
   facts: {},
-  names: ['Form 1040', 'W3C', 'JPEG 1'],
-  relatedHeading: 'Related tools and guides',
+  names: ['Formulário 1040', 'W3C', 'JPEG 1'],
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;

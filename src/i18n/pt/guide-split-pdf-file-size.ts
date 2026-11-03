@@ -1,80 +1,79 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Split a PDF, and Why the Parts Can Weigh More Than the Whole',
-  description: 'Why the parts of a split PDF can add up to far more than the original, measured on our test PDFs, and how to split so they do not.',
-  h1: 'How to split a PDF, and why the parts can weigh more than the whole',
-  lead: 'You split a big PDF to send it in pieces, and the pieces add up to more than the file you started with. Here is why that happens, and when it does not.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Como dividir um PDF e por que as partes podem pesar mais que o todo',
+  description: 'Por que as partes de um PDF dividido podem somar bem mais que o original, medido nos nossos PDFs de teste, e como dividir para isso não acontecer.',
+  h1: 'Como dividir um PDF e por que as partes podem pesar mais que o todo',
+  lead: 'Você divide um PDF grande para enviar em pedaços, e os pedaços somam mais que o arquivo do começo. Veja por que isso acontece, e quando não acontece.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'Splitting a PDF sounds like cutting paper: the pages go into separate piles and nothing is added. A PDF does not work like that. Each part has to be a complete PDF on its own, able to open anywhere, so it carries everything its pages need to show correctly, and Split PDF also gives every part a copy of the description of the original document.',
-    'How much that adds depends on the file. We split {files_word} PDFs of our tests, one part per page, and added the parts up. The parts of {bigger_word} of them weighed more than the whole: those of the lecture notes {bookRatio_times} as much, those of the scanned NASA report {reportRatio_more} more, and those of the PDF of photos {photosGrowth_exact} more.',
+    'Dividir um PDF parece cortar papel: as páginas vão para pilhas separadas e nada é acrescentado. Um PDF não funciona assim. Cada parte precisa ser um PDF completo, que abre em qualquer lugar, então leva tudo de que as páginas dela precisam para aparecer certo, e a Dividir PDF ainda dá a cada parte uma cópia da descrição do documento original.',
+    'O quanto isso acrescenta depende do arquivo. Dividimos {files_word} PDFs dos nossos testes, uma parte por página, e somamos as partes. As partes de {bigger_word} deles pesaram mais que o todo: as das notas de aula somaram {bookRatio_times} o original, as do relatório da NASA escaneado ficaram {reportRatio_more} acima dele, e as do PDF de fotos, {photosGrowth_exact} acima.',
   ],
-  toolHeading: 'Split your PDF here',
-  toolIntro: 'Drop a PDF, choose to split every page or type the ranges you want, and press the button. The parts are made in this browser tab and come back as one ZIP; nothing is uploaded.',
+  toolHeading: 'Divida seu PDF aqui',
+  toolIntro: 'Solte um PDF, escolha dividir cada página ou digite os intervalos que você quer, e toque no botão. As partes são feitas nesta aba do navegador e vêm juntas num ZIP só; nada é enviado.',
   sections: [
     {
-      heading: 'Each part is a whole PDF',
+      heading: 'Cada parte é um PDF inteiro',
       paragraphs: [
-        'When Split PDF makes a part, it starts a new PDF and copies into it the pages of that part, with everything those pages use: the fonts, the pictures, the links and the form fields that sit on them. A picture that sits on a single page goes into a single part. A font used on every page goes into every part.',
-        'That last point is the whole story. A PDF stores each font once and lets every page share it. Split it into one file per page, and each file needs its own copy.',
+        'Quando a Dividir PDF faz uma parte, ela começa um PDF novo e copia para ele as páginas dessa parte, com tudo o que essas páginas usam: as fontes, as imagens, os links e os campos de formulário que estão nelas. Uma imagem que aparece numa página só vai para uma parte só. Uma fonte usada em todas as páginas vai para todas as partes.',
+        'Esse último ponto explica tudo. Um PDF guarda cada fonte uma vez e deixa todas as páginas usarem a mesma. Divida o arquivo em um PDF por página, e cada arquivo precisa da própria cópia.',
       ],
     },
     {
-      heading: 'Where the parts grew: fonts',
+      heading: 'Onde as partes cresceram: as fontes',
       paragraphs: [
-        'Our lecture notes have {bookParts} pages set in many embedded fonts. Split into {bookParts} parts, they added up to {bookSum}, {bookRatio_times} the original {bookTotal}. Almost all of the growth was fonts: the whole file holds {bookFonts} of font data, and the parts together held {bookPartFonts}, {bookFontsRatio_times} as much.',
-        'The pictures did not grow at all. Each one sits on a single page, so it went into a single part, and the parts held {bookPartImages} of pictures, exactly what the whole file holds. Adobe notes that adding a single font to a PDF can sometimes increase its size substantially; splitting can repeat that cost in every part that uses the font.',
+        'Nossas notas de aula têm {bookParts} páginas compostas em muitas fontes incorporadas. Divididas em {bookParts} partes, elas somaram {bookSum}, {bookRatio_times} os {bookTotal} do original. Quase todo o crescimento veio das fontes: o arquivo inteiro guarda {bookFonts} de dados de fonte, e as partes juntas guardaram {bookPartFonts}, {bookFontsRatio_times} esse peso.',
+        'As imagens não cresceram nada. Cada uma está numa página só, então foi para uma parte só, e as partes guardaram {bookPartImages} de imagens, exatamente o que o arquivo inteiro guarda. A Adobe observa que adicionar uma fonte pode aumentar significativamente o tamanho de um PDF; dividir pode repetir esse custo em cada parte que usa a fonte.',
       ],
     },
     {
-      heading: 'Scans: what every part repeats',
+      heading: 'Escaneamentos: o que cada parte repete',
       paragraphs: [
-        'A scanned document is one picture per page, and each picture goes into one part. Our scanned NASA report has {reportParts} pages; split into {reportParts} parts, it added up to {reportSum}, {reportRatio_more} more than the whole, with the pictures the same bytes as before. Most of the growth, {reportMetadataShare}, was the metadata of the document: a description of the file in a format called XMP, {reportMetadata} in the original. Split PDF copies it into every part, so the parts held {reportPartMetadata} of it. The rest is the small structure each part needs around its page.',
-        'Our PDF of photos carries no such description. Split into its {photosParts} pages, it grew by only {photosGrowth_exact}.',
+        'Um documento escaneado é uma imagem por página, e cada imagem vai para uma parte. Nosso relatório da NASA escaneado tem {reportParts} páginas; dividido em {reportParts} partes, ele somou {reportSum}, {reportRatio_more} acima do todo, com as imagens nos mesmos bytes de antes. A maior parte do crescimento, {reportMetadataShare}, foram os metadados do documento: uma descrição do arquivo num formato chamado XMP, com {reportMetadata} no original. A Dividir PDF copia essa descrição para cada parte, então as partes guardaram {reportPartMetadata} dela. O resto é a pequena estrutura de que cada parte precisa em volta da página.',
+        'Nosso PDF de fotos não leva essa descrição. Separado nas suas {photosParts} páginas, ele cresceu só {photosGrowth_exact}.',
       ],
     },
     {
-      heading: 'When the parts weigh less',
+      heading: 'Quando as partes pesam menos',
       paragraphs: [
-        'The IRS form went the other way. Split into its {formParts} pages, the parts added up to {formSum}, {formRatio_off} less than the original. The form carries a second description of itself, in a format called XFA, that only some programs read. Split PDF does not copy it into the parts, and it says so next to the file; the form fields themselves are kept.',
-        'The parts are also written with their structure packed tightly, in compressed object streams, which is part of why a part can come out smaller than its share of the whole.',
+        'O formulário do IRS foi pelo caminho contrário. Com as {formParts} páginas separadas, as partes somaram {formSum}, {formRatio_off} abaixo do original. O formulário leva uma segunda descrição de si mesmo, num formato chamado XFA, que só alguns programas leem. A Dividir PDF não copia essa descrição para as partes, e avisa isso ao lado do arquivo; os campos do formulário em si continuam lá.',
+        'As partes também são escritas com a estrutura bem compactada, em fluxos de objetos comprimidos, e isso explica em parte por que uma parte pode sair menor que a fatia dela no todo.',
       ],
     },
     {
-      heading: 'How to split without the extra weight',
+      heading: 'Como dividir sem o peso extra',
       paragraphs: [
-        'Split into ranges, not single pages, when the pages share their fonts. A chapter in one part carries its fonts once, where its pages split apart carry them once each. Type the ranges you need in the tool, for example by chapter or by section, instead of splitting every page.',
-        'If you split to get under an email limit, check the total, not only each part: a part that fits can still be the first of many heavy ones. Each part of our scanned report added about {reportGrowthPerPart} to the total, and {reportMetadata} of that is its own copy of the metadata; the rest is its structure. Fewer, larger parts repeat both fewer times. Compress PDF can make the pictures lighter before you split.',
-        'And if what you need is a shorter PDF rather than several, delete the pages you do not need instead. One file keeps its fonts once, however many pages go.',
+        'Divida por intervalos, e não página por página, quando as páginas compartilham as fontes. Um capítulo numa parte leva as fontes uma vez, enquanto as páginas dele separadas levam as fontes uma vez cada. Digite na ferramenta os intervalos de que você precisa, por capítulo ou por seção, por exemplo, em vez de dividir cada página.',
+        'Se você divide para caber num limite de e-mail, confira o total, e não só cada parte: uma parte que cabe ainda pode ser a primeira de muitas partes pesadas. Cada parte do nosso relatório escaneado somou cerca de {reportGrowthPerPart} ao total, e {reportMetadata} disso é a própria cópia dos metadados; o resto é a estrutura dela. Com menos partes, e maiores, os metadados e a estrutura se repetem menos vezes. A Comprimir PDF pode deixar as imagens mais leves antes de você dividir.',
+        'E se o que você precisa é de um PDF mais curto, e não de vários, exclua as páginas de que não precisa. Um arquivo só guarda as fontes uma vez, por mais páginas que saiam dele.',
       ],
     },
     {
-      heading: 'What we measured on each file',
+      heading: 'O que medimos em cada arquivo',
       paragraphs: [
-        'We split {files} PDFs into one part per page, the default of Split PDF, and added up the parts. The parts weighed more than the whole in {bigger} of them. The table shows each file, with its fonts before and after, since fonts made most of the extra weight in our sample.',
+        'Dividimos {files} PDFs em uma parte por página, o padrão da Dividir PDF, e somamos as partes. As partes pesaram mais que o todo em {bigger} deles. A tabela mostra cada arquivo, com as fontes antes e depois, já que as fontes fizeram a maior parte do peso extra na nossa amostra.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Each PDF split into one part per page, the default of Split PDF. Change is all the parts against the whole file; fonts shows the font data of the whole file, then of all the parts together.',
-  measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on {files_word} PDFs of our tests, the real documents and a PDF of photos. Fonts, pictures and metadata were counted with pdf-lib, the library the engine opens files with.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Cada PDF dividido em uma parte por página, o padrão da Dividir PDF. A variação compara todas as partes com o arquivo inteiro; a coluna das fontes mostra os dados de fonte do arquivo inteiro e, depois, os de todas as partes juntas.',
+  measuredNote: 'Medido em {date} no Node com o motor deste site, que dá os mesmos bytes que o navegador, em {files_word} PDFs dos nossos testes: os documentos reais e um PDF feito de fotos. As fontes, as imagens e os metadados foram contados com a pdf-lib, a biblioteca com que o motor abre os arquivos.',
   tables: [
     {
-      heading: 'One part per page',
-      caption: 'Each PDF: the number of parts, the size of the whole file, the size of all the parts together, the change, and the font data before and after',
-      head: ['File', 'Parts', 'Whole file', 'All parts', 'Change', 'Fonts'],
+      heading: 'Uma parte por página',
+      caption: 'Cada PDF: o número de partes, o tamanho do arquivo inteiro, o tamanho de todas as partes juntas, a variação e os dados de fonte antes e depois',
+      head: ['Arquivo', 'Partes', 'Arquivo inteiro', 'Todas as partes', 'Variação', 'Fontes'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'adobe', label: 'Adobe: Why is my PDF so big?', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-01' },
+    { id: 'adobe', label: 'Adobe: Por que meu PDF está tão grande?', href: 'https://www.adobe.com/br/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
   ],
   facts: {},
   names: [],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;
