@@ -81,3 +81,10 @@ Pegadinhas que o ajuste achou:
 - **A ferramenta de escrita interpreta `\u00A0` como o caractere**, e o heredoc do Git Bash engole a barra invertida. Para gravar o escape num arquivo, monte-o num script com `String.fromCharCode(0x5c)`; para procurar o caractere, `grep -n $'\xc2\xa0'`.
 - **Commit de merge não leva o `Co-Authored-By` sozinho.** Nesta run, os 21 merges saíram sem ele: 10 do agente principal, ao trazer a branch de cada agente, e 11 dos agentes em worktree, ao trazer a branch da run. Nada foi reescrito. Escreva a mensagem do merge com o trailer (`git merge --no-ff -F <arquivo>`), e no briefing de um agente peça o `--ff-only` ou a mesma mensagem.
 - **O `git worktree remove` no Windows deixa uma pasta com `node_modules`** (uns 1,5 MB) de cada worktree removida: é o resto da pendência "Worktrees".
+
+## F9: CI e repositório público
+
+Pegadinhas que a F9 achou:
+
+- **O `git log -p` de um espelho (`git clone --mirror`, um repositório bare) no Windows usa o textconv de PDF do Git for Windows** (o `diff.astextplain` do gitattributes do sistema), porque um repositório bare não lê o `.gitattributes` do projeto. Na F9, o textconv falhou numa fixture, o `git log` parou no meio e o gitleaks disse 225 de 566 commits com o código 7, como se tivesse lido tudo (DECISOES § 332). Passe `--no-textconv --no-ext-diff` e confira quantos commits a ferramenta leu.
+- **Dois agentes que acrescentam um script no fim do `package.json`** dão conflito na mesma linha no merge: junte as duas linhas, com a vírgula, e confira com `JSON.parse` antes do commit.

@@ -83,9 +83,10 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 
 ## Minutos do Actions acabando
 
+- **Hoje não acontece:** o repositório é público, e os runners padrão do GitHub não gastam a cota de um repositório público (seção "Repositório público", abaixo). Esta seção vale se ele voltar a ser privado.
 - **Onde ver:** Settings → Billing → Actions (2.000 minutos por mês no plano Free, com o repositório privado).
-- Cada execução do CI custa uns 170 minutos (20 partes desde o ajuste "idiomas", DECISOES § 320; eram 135 minutos em 15 partes). Cada PR do Dependabot roda o CI inteiro, e cada rebase dela também.
-- **O que fazer:** baixe o `open-pull-requests-limit` do `.github/dependabot.yml` numa run curta, feche PRs de major que você não vai mesclar agora com `@dependabot ignore this major version`, e evite reruns sem motivo.
+- **Quanto custa cada execução** (os minutos como num repositório privado, que o `pnpm ci:custo <id>` mostra; DECISOES § 323): desde a F9, um push numa PR em rascunho roda só o job leve (uns 5 minutos), uma PR só de documentação roda o build e os portões, e uma PR pronta roda o CI completo (157 minutos na linha de base da F9; DECISOES § 339). Cada PR do Dependabot nasce pronta e roda o CI completo, e cada rebase dela também.
+- **O que fazer:** baixe o `open-pull-requests-limit` do `.github/dependabot.yml` numa run curta, feche PRs de major que você não vai mesclar agora com `@dependabot ignore this major version`, e evite reruns sem motivo. O `pnpm ci:custo <id>` mostra o que mais pesa em cada execução.
 
 ## Defeito no service worker (desativação de emergência)
 
@@ -173,7 +174,7 @@ Escrito na F9 (3/nov/2026; DECISOES § 332 a § 336), a partir da seção F do `
 5. **Code security:** Settings → Code security, ligue Secret scanning, Push protection e Private vulnerability reporting. O `SECURITY.md` manda relatar pelo relato privado: até você ligá-lo, o botão "Report a vulnerability" não aparece, e o relato vai pelo e-mail do site.
 6. **Features:** Settings → General → Features, desligue Wiki e Projects (hoje ligados) e confira que Discussions está desligado. Issues fica, porque os alertas dos workflows usam.
 7. **Workers Builds:** confira o painel do Cloudflare e o app do GitHub (subseção "Workers Builds e PR de fork", abaixo).
-8. **Na primeira PR depois disso,** confira que o check `ci-ok` aparece e que o merge automático acontece. Gere o prompt da F9b com o custo dessa execução (o script `ci:custo` da F9).
+8. **Na primeira PR depois disso,** confira que o check `ci-ok` aparece e que o merge automático acontece. Gere o prompt da F9b com o custo dessa execução: `pnpm ci:custo <id da execução>`.
 
 ### Merge de PR de fork
 

@@ -6,6 +6,7 @@
 // force push, no deletion and nobody who bypasses it.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { workflowJobs } from './lib/merge-job.ts';
 
 /** The id of the GitHub Actions app (gh api apps/github-actions): a check named ci-ok from anything else does not count. */
 const GITHUB_ACTIONS_APP = 15368;
@@ -100,4 +101,15 @@ describe('docs/ops/ruleset-main.json', () => {
       expect(rulesetProblems(ruleset)).not.toEqual([]);
     });
   }
+});
+
+// The check the ruleset requires is the one the CI reports: the job ci-ok of ci.yml, named ci-ok, with no matrix (a
+// matrix would report one check per entry, none of them named ci-ok), always run (DECISOES § 327).
+describe('the ci-ok check of the ruleset in ci.yml', () => {
+  it('is reported by a job named ci-ok, with no matrix, that always runs', () => {
+    const job = workflowJobs(readFileSync('.github/workflows/ci.yml', 'utf8'))['ci-ok'];
+    expect(job?.['name']).toBe('ci-ok');
+    expect(job?.['strategy']).toBeUndefined();
+    expect(job?.['if']).toBe('always()');
+  });
 });
