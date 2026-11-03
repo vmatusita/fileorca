@@ -2954,3 +2954,90 @@ A revisão das cinco lentes (`docs/relatorios/REVISAO-ajuste-idiomas.md`) confir
 - **A correção.** O teste espera o foco no botão da ação, que é o que o painel garante, e só então foca a página. O painel não mudou: o foco na ação é o comportamento da § 240.
 - **Alternativas.** Mudar o painel para não mover o foco quando a pessoa já está numa página da grade (mudança de produto que a ficha não pede, e a § 240 já trata o caso dos campos de texto); um `waitForTimeout` (proibido: esperar tempo em vez de estado).
 - **A prova.** O teste passou três vezes seguidas em cada navegador nesta máquina, e o CI da PR roda a parte de novo.
+
+## § 331 · O CLAUDE.md enxuto e a pasta docs/claude/ (F9, decisão 7)
+
+- **O tamanho.** O `CLAUDE.md` de `bbd30c8` (a main de antes da F9) tinha 78.256 bytes e 557 linhas, e entrava inteiro no contexto de cada agente e subagente. O novo tem 15.119 bytes, abaixo dos 25.600 da ficha. Os dez arquivos de `docs/claude/` somam 70.602 bytes: `ci.md` 11.253, `idiomas.md` 10.713, `calculadoras.md` 9.999, `pdf.md` 7.256, `imagem.md` 7.167, `design-e-oli.md` 6.438, `windows-git-bash.md` 5.908, `service-worker.md` 4.856, `playwright.md` 4.261 e `anuncios.md` 2.751.
+- **O núcleo, no `CLAUDE.md`:** a abertura; o projeto; a fonte de verdade, com a ordem nova da decisão 12; a arquitetura fixa; o Git; o que fica fora de toda run; os testes; as regras que nenhuma run quebra; como a run termina; o idioma; as "Regras novas de toda run" do `PLANO-MELHORIAS.md`, com o texto literal das linhas 62 a 69 dele, sob "Regras de toda run (PLANO-MELHORIAS.md)"; o índice "mexeu em X, leia `docs/claude/X.md`", uma linha por arquivo; e as tabelas de comandos de todas as fases (F1a, F2, F4, F5a, F5b, F6 e F7, cada uma com a linha que a abre), mais a tabela nova da F9.
+- **Como as linhas foram.** Por script, do `git show bbd30c8:CLAUDE.md`: cada linha não vazia tem um destino (o núcleo, um arquivo de tema, ou a lista abaixo), e o script grava o texto lido, sem redigitar. A linha com U+00A0 (o `sed` da F8) foi junto. Dentro de cada arquivo, as linhas seguem a ordem do arquivo antigo, sob o cabeçalho `##` de origem.
+- **O destino de cada seção:**
+  - "O projeto em cinco linhas" até "Idioma": no núcleo, com as linhas reescritas abaixo.
+  - "F1a: comandos e pegadinhas": a tabela e o "Rodar um teste só" no núcleo. As pegadinhas: Node e pnpm, `CI=true`, Astro e Vite, `exactOptionalPropertyTypes` e Worker Previews no `ci.md`; Preact no `design-e-oli.md`; `mount.ts` no `imagem.md`; o WebKit sem `OffscreenCanvas` no `playwright.md`; o heredoc e o push com a PR na mesma linha no `windows-git-bash.md`; o LanguageTool no `idiomas.md`.
+  - "Ajuste da prévia": inteiro no `ci.md`.
+  - "F1b": o CSS, o tema, a Oli, os ícones, o `pnpm screenshots` e as pegadinhas de CSS e SVG no `design-e-oli.md`; o `cat >>` no `windows-git-bash.md`; o runner 5 vezes mais lento no `ci.md`.
+  - "F2": a tabela no núcleo; o passo a passo e as pegadinhas do motor no `imagem.md`; o colar, o `serve-dist` e a porta 4173 no `playwright.md`; o `pos-deploy.test.ts` no `ci.md`.
+  - "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes" e "Ajuste: diagnóstico de disco": no `ci.md`, menos as linhas que saíram.
+  - "F3": o `gate:prontidao` e o navegador na produção sem o Google no `anuncios.md`; o método da revisão adversarial e o `node -e` no `windows-git-bash.md`; o fundo do `body` e os screenshots com o aviso no `design-e-oli.md`; o `loading()` e o worker sem `OffscreenCanvas` no `imagem.md`; o WebKit travado e o `context.on('request')` no `playwright.md`.
+  - "Ajuste: espaço do aviso de cookies": a regra no `design-e-oli.md`; o `dismissCookies` no `playwright.md`.
+  - "F4": a tabela no núcleo; a convenção do dinheiro, o passo a passo e as pegadinhas de calculadora no `calculadoras.md`; o uv, o heredoc, o `node -e` e o `git checkout` no `windows-git-bash.md`; o `networkidle` e os `money-*.spec.ts` no `playwright.md`; o `ENOSPC` no `ci.md`.
+  - "F5a": a tabela no núcleo; o passo a passo, as regras do PDF.js, do qpdf e do pdf-lib e as pegadinhas de PDF no `pdf.md`; o worker avaliado duas vezes e o WebKit do Windows sem imagem no worker no `imagem.md`; o que cada parte do Playwright faz (§ 154) e o `pnpm tipos` no `ci.md`; os agentes em worktree no `windows-git-bash.md`.
+  - "F5b": a tabela no núcleo; o guia de arquivo, a regra dos números, o kit e as pegadinhas de texto no `idiomas.md`; o `--color-*` no `design-e-oli.md`; a porta do `guias:medir` no `playwright.md`; o heredoc e o `node -e` no `windows-git-bash.md`.
+  - "F6": a tabela no núcleo; o passo a passo de pt e es, o formato de cada idioma e as pegadinhas de texto no `idiomas.md`; o Pix no `anuncios.md`; o cache do Vitest e o "`.github/` não mudou" no `ci.md`; o número do resultado e o rótulo com "exemplo" no `calculadoras.md`; o `i18n-budgets.spec.ts` no `playwright.md`; o `fill` depois de soltar o PDF no `pdf.md`; o `String.replace` e o "/" no `windows-git-bash.md`.
+  - "F7: casa, saúde e QR code": a tabela no núcleo; a calculadora de casa ou saúde, os hubs, o `lead`, as datas e o WebFetch no `calculadoras.md`; o QR code, o CommonJS e o `jsqr` no `imagem.md`; o `design.spec.ts` e o `image-matrix.spec.ts` nunca na mesma parte no `ci.md`; o `String.replace` no `windows-git-bash.md`.
+  - "F7: o que a revisão mudou nos formulários das calculadoras": no `calculadoras.md`, menos o alto contraste, no `playwright.md`.
+  - "F8": o service worker, o compartilhar e as pegadinhas deles no `service-worker.md`; o Dependabot, a regra de merge, o `verificar.test.ts` e o `--assignee` no `ci.md`; as fontes e o CLS no `design-e-oli.md`; o relógio falso, o teste do site inteiro e o `axe-pdf-states.spec.ts` no `playwright.md`; o `SETTLE_MS` no `calculadoras.md`; o `sed` no `windows-git-bash.md`.
+  - "Ajuste: idiomas": a introdução e "Como uma página ganha versão num idioma" no `idiomas.md`; o `verificar.test.ts` e a estimativa das partes no `ci.md`; os 740 px e o rótulo de duas palavras no `calculadoras.md`; o foco da ação no `pdf.md`; o ` `, o trailer dos merges e o `git worktree remove` no `windows-git-bash.md`.
+- **O critério de tema.** Cada linha de conteúdo vai para um arquivo só, o do assunto dela: o comportamento de uma ferramenta, para o arquivo dela; um macete do Playwright, do navegador ou do runner, para o `playwright.md`; o CI, o `verificar`, o Dependabot, a regra de merge, o Workers Builds e as ferramentas do projeto (Node, pnpm, Astro, Vite e Vitest), para o `ci.md`; o shell, o Git, as worktrees e os agentes, para o `windows-git-bash.md`. Os julgamentos: o método da revisão adversarial foi para o `windows-git-bash.md` (é trabalho de worktree e de agente); os guias de arquivo e o kit do Product Hunt, para o `idiomas.md` (são regras de texto); o QR code, para o `imagem.md`; o Pix, para o `anuncios.md` (a receita); os passos de uma calculadora em pt e es (antigas 390, 391, 532 e 533) ficaram só no `idiomas.md`, e a abertura do `calculadoras.md` aponta para lá. Só se repetem os cabeçalhos `##` de origem e as linhas que abrem uma lista ("Pegadinhas que a F4 achou:"): cada arquivo leva os das linhas dele.
+- **O que é texto novo.** No núcleo: a abertura, os itens 2 a 6 da fonte de verdade, a linha da PR em rascunho, a linha do ruleset (`docs/ops/ruleset-main.json`, a quarta camada, que o Victor importa no GitHub), a seção das regras de toda run, o índice, o "Comandos" com os subtítulos de cada fase e a tabela da F9. Em `docs/claude/`: o título e a frase de abertura de cada arquivo e, no `ci.md`, a linha "Partes do CI (o que continua valendo depois da F9, que tirou a lista das partes de então):" antes das quatro regras das partes cuja linha de abertura saiu (as antigas 298, 438, 501 e 542).
+- **A regra de nunca apagar muda uma vez** (mudança 4 do contrato do `PLANO-MELHORIAS.md`). A abertura do `CLAUDE.md` diz que a F9 compactou o arquivo uma vez e que, daqui em diante, as runs acrescentam no arquivo do tema em `docs/claude/` (seção nova no fim), e o `CLAUDE.md` só muda no núcleo e no índice, também só acrescentando; nunca apagam nem afrouxam uma regra. Um arquivo novo de `docs/claude/` entra com uma linha no índice.
+- **A prova.** O `tests/unit/claude-md.test.ts` (a lógica é a função pura `claudeMdProblems`, em `tests/unit/lib/claude-md.ts`) lê o `CLAUDE.md` de `bbd30c8` pelo `git show` e reprova:
+  - uma linha não vazia dele que não esteja, igual, no `CLAUDE.md` ou num arquivo de `docs/claude/` (a linha inteira, sem os espaços do fim, nunca um pedaço), a não ser que esteja no bloco abaixo;
+  - uma linha do bloco que ainda esteja no `CLAUDE.md` ou em `docs/claude/`, ou que não seja do arquivo antigo;
+  - o `CLAUDE.md` acima de 25.600 bytes;
+  - um arquivo de `docs/claude/` fora do índice, um item do índice sem arquivo ou um arquivo citado em duas linhas do índice;
+  - uma linha da seção "Regras novas de toda run" do `PLANO-MELHORIAS.md` que não esteja, igual, no `CLAUDE.md`.
+
+  O teste acha este § pelo título e pela frase que abre o bloco, nunca pelo número, que pode mudar num merge com a main. Os controles rodam a mesma função sobre entradas mudadas em memória e esperam a falha: uma linha apagada de `docs/claude/`, uma linha com texto a mais no fim, o `CLAUDE.md` com 25.601 bytes, um arquivo fora do índice, um item do índice sem arquivo, uma linha do bloco de volta em `docs/claude/` e uma regra nova fora do `CLAUDE.md`.
+- **Se a main andar** antes do merge da F9 com linhas novas no `CLAUDE.md`, elas vão, com o texto igual, para o arquivo do tema, e a constante `BEFORE_F9` do teste passa ao commit novo da main (o comentário dela diz isso). A frase que abre o bloco continua com `bbd30c8`: ela é o nome do bloco, não a constante.
+- **Alternativas.** Deixar a linha da PR antiga e só somar a regra nova 1 (as duas se contradiriam, e a antiga manda abrir a PR no fim). Tirar do núcleo as tabelas de comandos (a ficha manda que fiquem). Tirar também as linhas 205, 298, 438, 501 e 542, que falam das partes (são regras que continuam valendo, mesmo com números de partes velhos: a mecânica do `--shard`, as proteções da § 154, o `design.spec.ts` longe do `image-matrix.spec.ts`, o `verificar.test.ts` que lê as matrizes e o `--list` antes de somar specs). Pôr uma pegadinha em dois arquivos (dobraria a manutenção e o risco de as cópias divergirem). A mensagem do commit `docs: slim CLAUDE.md…` diz "four lines rewritten"; são cinco (3, 16, 17, 18 e 29), e nada foi reescrito no histórico.
+
+### As linhas que saíram
+
+Linhas que saíram do CLAUDE.md de bbd30c8, texto igual:
+
+```text
+Regras para toda run do Claude Code neste repositório. Valem junto com a ficha da run e o PLANO-FILEORCA.md. As runs só acrescentam a este arquivo (seção nova no fim); nunca apagam nem afrouxam uma regra.
+2. PLANO-FILEORCA.md (as "Decisões fechadas" são contrato: nenhuma run muda).
+3. DECISOES.md (§ numerados), docs/adr/, docs/design/ (design system), docs/F0-SAIDA.md e data/keywords.csv.
+4. O código existente.
+- No fim, abra a PR com `gh pr create`. O merge é do CI: **nunca** rode `gh pr merge`.
+- O CI roda o `pnpm verificar` em partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`, todos os portões menos o Playwright) e `playwright (chromium)`, `playwright (webkit 1 de 2)` e `playwright (webkit 2 de 2)` (`pnpm verificar --playwright=webkit --shard=1/2`). O `merge` espera todos. Na sua máquina, `pnpm verificar` sem argumento continua rodando tudo.
+- O CI passa a ter cinco partes, cada uma num job com o limite de 900 s: `verificar` (`pnpm verificar --sem-playwright`), `playwright (chromium)` e `playwright (webkit 1 de 3)`, `playwright (webkit 2 de 3)` e `playwright (webkit 3 de 3)` (`pnpm verificar --playwright=webkit --shard=i/3`). Isto substitui a descrição das partes na seção "Ajuste: CI em partes (ADR-003)", que fica como está; o resto daquela seção continua valendo (DECISOES § 108).
+- O `tests/unit/verificar.test.ts` não lê o `ci.yml`: a lista de partes dele é escrita à mão e segue com `1/2` e `2/2`. A asserção tira o `--shard` antes de comparar, então prova a cobertura para qualquer número de partes.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)" e "Ajuste: WebKit em três partes", que ficam como estão.
+- **As partes:** são onze, cada uma num job com o limite de 900 s e o alvo de 700 s.
+  - o `verificar` (`--sem-playwright`);
+  - o `playwright (chromium 1 de 3)` ao `3 de 3` (`--playwright=chromium --shard=i/3`);
+  - o `playwright (webkit 1 de 7)` ao `7 de 7` (`--playwright=webkit --shard=i/7`).
+- **Antes de somar specs:** rode o `--list` de cada parte (Chromium em 3, WebKit em 7) e veja onde caem o `design.spec.ts` e a matriz de imagens.
+  - Hoje o `design.spec.ts` fica inteiro na parte 4 do WebKit, e a matriz de imagens na parte 5.
+  - Com 6 partes, os dois cairiam juntos (§ 142).
+- **O `tests/unit/verificar.test.ts`** traz as partes da F5a escritas à mão. Mudou o `ci.yml`, mude o teste.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes" e "F5a", que ficam como estão.
+- **As partes:** são treze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` (`--playwright=chromium --shard=i/4`) e o `playwright (webkit 1 de 8)` ao `8 de 8` (`--playwright=webkit --shard=i/8`).
+- **O `tests/unit/verificar.test.ts`** traz as 13 partes escritas à mão. Mudou o `ci.yml`, mude o teste.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes", "F5a" e "F7", que ficam como estão.
+- **As partes:** são quinze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` e o `playwright (webkit 1 de 10)` ao `10 de 10` (§ 302). O job `alerta-dependabot` vem depois de todas.
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes", "F5a", "F7" e "F8", que ficam como estão.
+- **As partes:** são vinte, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` em duas (`--sem-playwright --sem-lighthouse` e `--lighthouse`, uma matriz no mesmo job, então o `merge` e o `alerta-dependabot` esperam as duas), o `playwright (chromium 1 de 5)` ao `5 de 5` e o `playwright (webkit 1 de 13)` ao `13 de 13` (§ 320).
+```
+
+Por que cada uma saiu (o número é a linha no `CLAUDE.md` de `bbd30c8`):
+
+- **3** (a abertura, "As runs só acrescentam a este arquivo"): reescrita pela mudança 4 do contrato; a abertura nova diz a regra de acrescentar em `docs/claude/`.
+- **16, 17 e 18** (os itens 2 a 4 da fonte de verdade): reescritos pela decisão 12, na ordem nova. O `PLANO-MELHORIAS.md` entra em 2 e o `CLAUDE.md` com `docs/claude/` em 4; o texto do `PLANO-FILEORCA.md`, do `DECISOES.md` e do código continua, com outro número. O item 1 (linha 15) ficou igual.
+- **29** ("No fim, abra a PR com `gh pr create`"): conflitava com a regra nova 1, a PR em rascunho desde o começo. A linha nova manda abrir com `gh pr create --draft` logo depois do primeiro push e marcar com `gh pr ready` no fim, e guarda o "**nunca** rode `gh pr merge`".
+- **153** (as partes da ADR-003: `verificar`, `chromium`, `webkit 1 de 2` e `2 de 2`): descrição de partes substituída pela linha 204. O que ainda vale dela, "`pnpm verificar` sem argumento roda tudo", está na tabela da F1a, no núcleo.
+- **204** (as cinco partes do "WebKit em três partes", com o "Isto substitui"): descrição substituída pela da F5a.
+- **206** (o `verificar.test.ts` "não lê o `ci.yml`", com a lista à mão em `1/2` e `2/2`): falsa desde a F8; as linhas 501 e 542, que ficam, dizem que o teste lê as matrizes do `ci.yml`.
+- **292** ("Partes do CI. Isto substitui…", da F5a): a frase "Isto substitui"; a descrição que ela abria saiu.
+- **294 a 297** (as onze partes da F5a, com as três sublinhas): descrição substituída pela da F7.
+- **299, 300 e 301** ("Antes de somar specs" com o Chromium em 3 e o WebKit em 7, o `design.spec.ts` na parte 4 e "Com 6 partes"): a posição das onze partes. A regra continua nas linhas 438, 501 e 542 do `ci.md` e na 262 do `playwright.md`.
+- **302** (o `verificar.test.ts` com as partes da F5a escritas à mão): falsa desde a F8 (linhas 501 e 542).
+- **435** ("Partes do CI. Isto substitui…", da F7): a frase "Isto substitui".
+- **437** (as treze partes da F7): descrição substituída pela da F8.
+- **439** (o `verificar.test.ts` com as 13 partes escritas à mão): falsa desde a F8.
+- **498** ("Partes do CI. Isto substitui…", da F8): a frase "Isto substitui".
+- **500** (as quinze partes da F8): descrição substituída pela do ajuste idiomas.
+- **539** ("Partes do CI. Isto substitui…", do ajuste idiomas): a frase "Isto substitui".
+- **541** (as vinte partes do ajuste idiomas, § 320): descrição substituída pela do CI da F9, que fica na seção da F9 do `docs/claude/ci.md` e no adendo da ADR-003.

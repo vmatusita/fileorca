@@ -1,0 +1,56 @@
+# Ferramentas de PDF
+
+O que as runs aprenderam sobre o motor e as ferramentas de PDF (PDF.js, qpdf e pdf-lib), com o texto igual ao do CLAUDE.md até a F9 e sob o cabeçalho de origem; as runs acrescentam no fim, numa seção nova.
+
+## F5a: ferramentas de PDF
+
+Como acrescentar uma ferramenta de PDF:
+
+1. O id em `PDF_TOOL_IDS` e a entrada em `PDF_PAGES` (`src/tools/pdf/registry.ts`): ícone, `files` (`batch`, `merge` ou `single`), `run` (`auto` ou `action`), sufixo do nome, chips (`next`) e até 6 relacionadas. A rota sai de `pdfRoutes()` (`src/i18n/routes.ts`), só em inglês; o id entra em `RouteId` e em `PDF_EVENT_TOOLS` (`src/analytics/tool-ids.ts`).
+2. A operação no motor: o tipo em `PdfOperation` (`src/engine/pdf/types.ts`) e o caso em `processPdf` (`src/engine/pdf/process.ts`), com o Vitest no Node sobre as fixtures antes da ilha. Falha volta como `{ ok: false, reason }` da lista fechada `PDF_REASONS`; razão nova entra também em `ERROR_REASONS` (`src/analytics/events.ts`).
+3. A definição na ilha: uma entrada em `PDF_TOOLS` (`src/tools/pdf/tools.tsx`), com `operation`, `success`, `warm` e, se houver, `Options`, `grid` e `actionLabel`. Nada de entrada nova: as 12 cabem no `PdfIsland.astro`, e a página carrega 2 arquivos JS.
+4. Os textos em `src/tools/<slug>/i18n/en.ts` (`PdfToolTexts`, com os blocos do `gate:conteudo`), a entrada em `PDF_TOOL_TEXTS` (`src/tools/pdf/texts.ts`) e o cartão em `src/i18n/en/common.ts` (`pdf`). A página é `src/pages/<slug>/index.astro` com `<PdfToolPage id="<slug>" />`.
+5. Testes: a ferramenta na matriz (`tests/e2e/pdf-matrix.spec.ts`), com cada fixture que ela aceita, as recusas no meio do lote e a conta conferida no Node contra o `expected.json`. O `budgets`, o `ads`, o `a11y`, o `pdf-privacy`, o `gate:seo`, o `gate:conteudo` e o `gate:prontidao` leem o registro.
+
+Regras do PDF.js e do qpdf:
+
+- O motor é `src/engine/pdf/`, autossuficiente. O PDF.js, o qpdf, o MozJPEG e o resize só carregam sob demanda, e cada `import()` passa pelo `loading()` de `errors.ts` (falha de carga é `load`, nunca "arquivo danificado"). Nada carrega antes do primeiro arquivo; o aquecimento só busca o que o primeiro arquivo buscaria.
+- PDF.js (§ 144): o build legacy, com `useWorkerFetch: false`, `useSystemFonts: false`, `enableXfa: false`, `AnnotationMode.DISABLE` e sem camada de texto nem scripting. A versão 6 não tem `isEvalSupported`; o teste de endurecimento prova no JS publicado que não há `eval` nem `new Function` no caminho de fontes e funções. Os dados vêm de `/_astro/pdfjs/<versão>/`, copiados sem mudança pelo `src/platform/pdfjs-data.ts`: os CMaps, as fontes da Foxit e dois `.wasm`. Liberation (GPL), `.icc`, qcms e quickjs não entram.
+- No worker, o PDF.js roda com o "worker falso" (`globalThis.pdfjsWorker`) e `OffscreenCanvas`. Sem `OffscreenCanvas` no worker (WebKit do Windows), o desenho vai para a página com a porta do `pdfjs-core.ts`. Teste os dois caminhos.
+- qpdf: `runQpdf(args, input)` com `IN` e `OUT` no lugar dos arquivos. A saída (`print` e `printErr`) fica capturada e nunca vai ao `console`, porque pode levar a senha. O MEMFS é limpo depois de cada execução, e a instância é refeita acima de 512 MB ou depois de um `abort`. No Node, o qpdf mexe no `process.exitCode`: o `scripts/lib/qpdf.ts` devolve o valor de antes.
+- Cifra: `--show-encryption` diz se o arquivo pede senha ("invalid password") ou não está cifrado ("File is not encrypted"). A Protect é `--encrypt --user-password=P --owner-password=P --bits=256 --`; a Unlock é `--decrypt`, com `--password=P` quando pede. Nunca força bruta.
+- pdf-lib: abra com `updateMetadata: false`, `ignoreEncryption: true`, `parseSpeed: Fastest` e `throwOnInvalidObject: false`. Documento novo copia páginas pelo `assemble.ts` (§ 145), nunca pelo `copyPages` direto, que puxa páginas de fora por links e campos.
+- Geometria: tudo o que se desenha na página passa por `toUser(box, rotate, vx, vy)` (`src/engine/pdf/geometry.ts`), sobre a CropBox e o /Rotate. O texto fica em pé na tela em toda rotação.
+
+Pegadinhas que a F5a achou:
+
+- Um arquivo que pede senha ou é restrito tem de contar como sem saída no painel (`HOPELESS` do `PdfPanel.tsx`). Senão ele entra no pedido da Merge, e a Merge inteira falha com "pede senha" em toda linha.
+- O campo de arquivo das ferramentas de um arquivo por vez é `multiple` mesmo assim: o segundo arquivo vira a recusa na linha, e o `setInputFiles` com dois arquivos funciona no teste.
+- As opções em segmento escondem o rádio: no teste, clique no rótulo `.fo-seg__opt` (o `.check()` do rádio trava).
+- A lista de linhas mostra 6 e esconde o resto atrás de "Show N more": um teste que lê a razão de uma linha escondida clica antes em `.fo-queue__more`.
+- O `readWithPdfjs` dos testes precisa de `new Uint8Array(bytes)`, não de um `Buffer` do Node.
+- O `removePage` com `addPage` do pdf-lib estraga a árvore de páginas (`CorruptPageTreeError`): o Reorder refaz a lista `Kids` da raiz e copia os atributos herdados.
+- O PDF.js no Node desenha com o `@napi-rs/canvas`, que vem como dependência opcional do `pdfjs-dist`: não é dependência nova e não entra no bundle.
+- A AES-256 R6 do qpdf sorteia o IV e a chave mesmo com `--static-aes-iv`: a fixture só fica determinista com o `crypto.getRandomValues` trocado durante a cifra.
+- O `--allow-weak-crypto` do qpdf vem antes do `--encrypt` na linha de comando.
+- `setCropBox` e `setMediaBox` do pdf-lib recebem x, y, largura e altura, não dois cantos.
+- **A matriz de PDF roda toda ferramenta contra toda fixture que ela aceita** (§ 175).
+  - Ferramenta ou fixture nova entra nela, e o `pdf-matrix-table.test.ts` reprova lacuna.
+  - Regere a tabela com uma execução só, nos dois navegadores, e o `node scripts/fixtures/pdf-matrix-table.ts > docs/relatorios/fase-05a-matriz.md`.
+- **Arquivo reparado** (índice refeito pelo pdf-lib) nunca volta estragado: sem ganho, a Compress devolve a reescrita reparada, não os bytes de entrada (§ 182).
+- **Estado próprio de um componente de opções** (a área de assinatura) precisa recomeçar quando o "Start over" limpa o estado da ferramenta.
+  - Uma `key` pelo arquivo não serve, porque o arquivo só aparece depois de lido.
+- **O `pnpm screenshots` reusa o passeio de estados de `tests/e2e/lib/pdf-states.ts`.** O `expect` do Playwright funciona fora do runner.
+  - As miniaturas da grade são desenhadas só na tela, então o script espera as imagens das células visíveis.
+
+## F6: português e espanhol
+
+Pegadinhas que a F6 achou:
+
+- **Um `fill` logo depois de soltar um PDF** corria com o painel, que leva o foco ao botão da ação um quadro depois de mostrar as opções (§ 240). O painel agora deixa o foco num campo de texto onde ele já está. Um teste que precisa do foco num campo assim que ele aparece pode focá-lo por um `MutationObserver` na página, antes dos efeitos da ilha.
+
+## Ajuste: idiomas
+
+Pegadinhas que o ajuste achou:
+
+- **O painel de PDF leva o foco à ação um quadro depois de mostrar a grade** (§ 240). Teste que dá foco a uma página da grade ou a um campo logo depois de abrir um arquivo espera antes o foco na ação; senão o movimento chega depois e tira o foco, só no runner lento (§ 322).
