@@ -3495,7 +3495,7 @@ A ficha manda mudar um teste que fixa o CI de antes junto com o que ele protege,
 - **A Oli** entra inline, com as peças do sprite e o `oli-clip` declarado uma vez, sempre `aria-hidden`. O estado é dito em texto.
 - **Cor nova** só como `--proposta-*`, nos dois temas, com o contraste calculado (§ 353).
 - **O anúncio** é a caixa neutra do AdSlot, com o rótulo do idioma e sem script. Em produção, pela Mudança 10, o espaço só existe quando a unidade tem ID: a caixa do protótipo é o desenho do espaço com a unidade.
-- **O protótipo recomendado é a especificação** que a F11, a F12 e a F13 seguem quando o Victor não escolher. Cada um traz, numa área fora da moldura (`.proto-spec`): a marcação, os tokens, os estados, os textos nos três idiomas, o teclado, o nome acessível, as medidas e uma nota do que muda no JS e nas requisições.
+- **O protótipo recomendado é a especificação** que a F11 e a F12 seguem quando o Victor não escolher (a decisão 4 da ficha). Na F13, só entra o item que o Victor marcar (§ 381, d-01). Cada um traz, numa área fora da moldura (`.proto-spec`): a marcação, os tokens, os estados, os textos nos três idiomas, o teclado, o nome acessível, as medidas e uma nota do que muda no JS e nas requisições.
 
 ## § 346 · Os obrigatórios viram UX-01 a UX-08 (F10, decisão 5)
 
@@ -3515,7 +3515,7 @@ O 9 (as pendências) é a tabela do README. Cada pendência que muda o que se v�
 ## § 347 · As pendências: 37 linhas, não 36 (F10, decisão 6)
 
 - **A conta.** A ficha diz 36 (os 12 itens do grupo 5, os 16 do grupo 6 e 8 avulsas), mas o grupo 5 tem 13 linhas. A 13ª é a "Idiomas R2-03", que o ajuste idiomas acrescentou sem atualizar o Resumo do `PENDENCIAS.md` (que diz 12 e soma 183 no total). A ficha herdou o número do Resumo.
-- **A escolha:** a tabela do README tem as 37, e o `readme.mjs` confere os 37 ids contra o `PENDENCIAS.md`. Deixar uma pendência de acessibilidade de fora para bater o número seria a opção pior: ela ficaria sem destino. A correção do Resumo vai para "Para o PENDENCIAS" do relatório, porque o `PENDENCIAS.md` não muda nesta run.
+- **A escolha:** a tabela do README tem as 37, e o `readme.mjs` confere os 37 ids contra o `PENDENCIAS.md` (desde a revisão, ele lê as linhas dos grupos 5 e 6 e as 8 avulsas do próprio `PENDENCIAS.md` e as cruza com o `.cache/f10/pendencias-ids.json`; § 381, d-07). Deixar uma pendência de acessibilidade de fora para bater o número seria a opção pior: ela ficaria sem destino. A correção do Resumo vai para "Para o PENDENCIAS" do relatório, porque o `PENDENCIAS.md` não muda nesta run.
 - **A reconferência:** cada uma foi reconferida no código de hoje (`87ef4c8`) antes do destino, como manda o "Como ler". A F7 e-1 já está resolvida (a face `Figtree Steady` da § 305); a F4 ACE-9, a F5a D-8, a F4-F7 e-2 e a F4-F7 f-1 mudaram de forma; as outras seguem abertas com o mesmo código.
 - **Cada linha** traz o id, o estado (aberta, já resolvida ou mudou), o destino (corrigir, aceitar e registrar, ou descartar), a proposta ou a escolha entre as saídas que a pendência já traz, o UX-NN (quando muda o que se vê) ou o teste que a F13 escreveria (quando muda só o comportamento), e a run. O destino recomendado de cada uma está na § 365.
 
@@ -3531,8 +3531,8 @@ Os sete itens entram no README como "proposto" (com UX-NN, evidência, protótip
 - **Os rótulos de cada UX-NN:** Origem, Problema, Evidência, Proposta (com as alternativas), Oli, Custo (P, M ou G), Riscos (orçamento, anúncio e acessibilidade), Protótipo, Recomendação e Run.
 - **Cada D-NN** tem uma linha "Onde" (tarefa, idioma, tamanho, tema e estado), "O que acontece", "Evidência", "Gravidade" (bloqueia, atrasa ou incomoda) e "Responde" (o UX-NN).
 - **O `index.html`** abre cada protótipo nos dois temas e liga cada um ao item do README.
-- **O `ESCOLHAS.md`** começa com "Copie este arquivo para `.cache/ESCOLHAS-marcado.md` e marque lá. O arquivo do Git fica limpo". Os itens ficam agrupados pela run que os constrói (F11, F12 e F13). Cada um traz o id, o título, as alternativas como caixas de marcar, a recomendada com "(recomendado)", uma linha do porquê e o custo; as pendências vêm com o destino recomendado. O grupo da F13 segue a ordem de prioridade recomendada, porque a F13 constrói na ordem da lista.
-- O `readme.mjs` confere tudo isso.
+- **O `ESCOLHAS.md`** começa com "Copie este arquivo para `.cache/ESCOLHAS-marcado.md` e marque lá. O arquivo do Git fica limpo". Os itens ficam agrupados pela run que os constrói (F11, F12 e F13). Cada um traz o id, o título, as alternativas como caixas de marcar, a recomendada com "(recomendado)", uma linha do porquê e o custo; as pendências vêm com o destino recomendado. O grupo da F13 segue a ordem de prioridade recomendada, porque a F13 constrói os itens marcados na ordem da lista. As decisões que não são um item inteiro ficam no grupo "Decisões avulsas", com caixas (§ 381, d-08).
+- O `readme.mjs` confere tudo isso: desde a revisão, também o link escuro de cada protótipo no `index.html` (`?theme=dark`), uma caixa por alternativa e as colunas da proposta e do que responde em cada pendência (§ 381, d-07).
 
 ## § 350 · "Mais único": o critério (F10, decisão 9)
 
@@ -3575,7 +3575,7 @@ Uma alternativa é "do FileOrca e de mais ninguém" quando a forma dela sai de u
 
 - **O formato:** escala 1, JPEG de qualidade 80 para página inteira e PNG para recorte.
 - **O tamanho:** cada imagem com até 500 KB (lidos como 500.000 bytes) e o total novo de `docs/relatorios/fase-10/` com até 25 MB (25.000.000 bytes). As duas leituras são as mais estritas.
-- **O nome:** em inglês, com a tarefa, o idioma, o tamanho, o tema e o estado (por exemplo, `compress-image-pt-360-dark-result.jpg`).
+- **O nome:** em inglês, com a tarefa, o idioma, o tamanho, o tema e o estado (por exemplo, `compress-image-pt-360-dark-result.jpg`). As screenshots dos protótipos seguem `<protótipo>-<idioma>-<estado>-<largura>-<tema>.jpg` (por exemplo, `tool-a-en-rest-360-light.jpg`), e o `imagens.mjs` exige esse padrão em `prototipos/` (§ 381, d-11).
 - **O `imagens.mjs`** mede cada imagem e o total, confere o tipo verdadeiro do arquivo e a pasta, e reprova imagem sem referência no README, no `index.html`, na folha ou no relatório.
 
 ## § 355 · O que iria para outros arquivos (F10, decisão 14)
@@ -3602,7 +3602,7 @@ Cada um sai com código diferente de zero quando reprova, e as saídas reais vã
 Nos três pontos em que a ficha deixa a leitura em aberto, os scripts usam a mais estrita:
 - o `diff.mjs` confere também a classe que o CI vai dar (`portões`);
 - o `prototipos.mjs` reprova controle da página abaixo de 48 px, e não só abaixo dos 24 px que o axe cobra pela WCAG 2.5.8;
-- o `readme.mjs` lê os ids das pendências de um arquivo conferido contra o `PENDENCIAS.md`, e não de um número fixo.
+- o `readme.mjs` lê os ids das pendências do `PENDENCIAS.md` (as linhas dos grupos 5 e 6 e as 8 avulsas) e os cruza com o arquivo da ordem, e não usa um número fixo; ele roda de qualquer pasta, com os caminhos da raiz do repositório (§ 381, d-07).
 
 ## § 357 · A PR e o CI (F10, decisão 16)
 
@@ -3661,27 +3661,31 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
 
 ## § 361 · O mapa de anúncios: o que muda da seção B, e a alternativa B (F10, obrigatório 7)
 
-- **O multiplex só a partir de 768 px.** Com 1.700 px a 360 px (§ 351), 10 dos 12 moldes passam de 30 % na conservadora (até 41,6 %); só a home (26,0 %) e o guia de dinheiro (26,1 %) caberiam. O multiplex cresce com a tela (1.830 px a 412 px), então a regra é por largura, igual para todos. A F12 o esconde abaixo de 768 px por CSS. A ajuda do AdSense permite esconder a unidade responsiva com `display: none` por largura, e a F12 confere o texto da ajuda antes.
+- **O multiplex só a partir de 768 px.** Com 1.700 px a 360 px (§ 351), 10 dos 12 moldes passam de 30 % na conservadora (até 41,6 %); só a home (26,0 %) e o guia de dinheiro (26,1 %) caberiam. O multiplex cresce com a tela (1.830 px a 412 px), então a regra é por largura, igual para todos. A F12 o esconde abaixo de 768 px por CSS. É uma suposição: a ajuda do AdSense proíbe esconder unidade "a não ser ao implementar uma unidade responsiva" (`support.google.com/adsense/answer/1354736`) e mostra a media query com `display: none` no código responsivo (`answer/9183363`, num exemplo de tamanho fixo por largura). A F12 confere as duas páginas antes. Plano B, se não puder: o script de `push` cria o `<ins>` só nas caixas cuja largura bate no carregamento e empurra uma vez, sem refresh; sem permissão e sem o plano B, o multiplex sai (§ 381, c-02).
+  - **A 768 px,** onde o multiplex começa, o conteúdo 1 e o multiplex do carregador dão no máximo 26,1 % na conservadora a 768×1024 e 26,5 % a 812×375, em 19 páginas (`.cache/f10/densidade768.mjs`; § 381, c-04).
   - **A alternativa recusada:** o multiplex só na home e nos guias de dinheiro, uma regra por molde, frágil.
 - **O conteúdo 2 em diante só abaixo de 768 px.** A 1280×800, as fronteiras escolhidas no celular ficam a 726 px umas das outras, menos de 1,5 tela (1.200 px). No computador, esse papel é das duas laterais e do multiplex.
 - **As laterais:**
-  - **A lateral 1 começa 150 px abaixo do cabeçalho.** Hoje ela fica a 29 px do botão de idioma e da busca, que são menus (D-07), e o menu de idioma aberto cai em cima dela.
+  - **A lateral 1 começa 150 px abaixo do cabeçalho.** Hoje ela fica a 29 px do botão de idioma e da busca, que são menus (UX-01 e UX-07; `.cache/f10/agentes/header/medir-rail.mjs`), e o menu de idioma aberto cai em cima dela. Os protótipos a desenham assim desde a revisão (§ 381, c-01).
+  - **Ao lado da água:** a lateral fica a 150 px ou mais da coluna enquanto o WaterLevel está na tela; "ao lado" é lido como a menos de 150 px, a leitura da § 20. A leitura literal do README do WaterLevel (a lateral some no processamento) é uma decisão avulsa do Victor (§ 381, a-02).
   - **A lateral 2 fica 1.200 px abaixo da 1ª, de borda a borda,** em `position: absolute` numa coluna esticada, e só aparece quando cabe. Isso vale para as 181 páginas com anúncio, sem CLS.
 - **Os primeiros anúncios:**
+  - **o 1º da ferramenta,** com o UX-04 A marcado, vai depois do "Como usar" (§ 371): a F12 lê a marca e o põe ali; sem a marca, depois dos chips, como a seção B (§ 381, d-04);
   - **o 1º do hub de dinheiro** vai depois da grade de crédito, pela letra da seção B; hoje vem depois das duas grades;
   - **o 1º do guia** vai no texto, logo depois da ferramenta embutida, com um parágrafo entre os dois; hoje vem depois da metade do texto.
 - **Nunca colado em tabela, em todo molde.** A seção B pede isso só no guia. Uma regra só é mais simples de escrever e testar.
-- **Uma unidade por posição:** `conteudo`, `conteudo-2` a `conteudo-5`, `lateral`, `lateral-2` e `multiplex`. São 37 unidades com a alternativa A, contra as 15 da seção B. A ajuda do AdSense não tem regra sobre repetir unidade, e uma por posição separa o relatório. Sem ID, a posição não aparece (Mudança 10), então o Victor limita as caixas criando menos unidades.
+- **Uma unidade por posição:** `conteudo`, `conteudo-2` a `conteudo-5`, `lateral`, `lateral-2` e `multiplex`. São 37 unidades com a alternativa A, contra as 15 da seção B, que o Victor cria à mão no AdSense (uma decisão avulsa do `ESCOLHAS.md`). A ajuda do AdSense não tem regra sobre repetir unidade, e uma por posição separa o relatório. Sem ID, a posição não aparece (Mudança 10), então o Victor limita as caixas criando menos unidades.
 - **A alternativa B** lê os 1.110 px de topo a topo, como uma frequência. Ela dá 807 anúncios de conteúdo no celular contra 618 (4,5 por página contra 3,4), 43 unidades e o pior molde em 24,0 %. A recomendação é a A, a leitura da § 351.
 - **O `gate:prontidao` conta toda caixa do HTML** (150 palavras do `<main>` por caixa), mesmo a escondida naquela largura. Com o mapa, 111 das 181 páginas reprovariam; contando o que cada largura mostra, 0 no celular e 14 no computador.
   - **A recomendação:** a F12 conta por largura e mantém as 150 palavras por caixa. Isso muda a conta de um teste, então pede o ok do Victor e um §.
-  - **Sem o ok:** o teto é palavras ÷ 150 caixas por página, e o mapa encolhe.
+  - **Sem o ok:** o teto é palavras ÷ 150 caixas por página, e o mapa encolhe. O ok é uma caixa das "Decisões avulsas" do `ESCOLHAS.md`.
+  - **A conta é da home de hoje** (560 a 758 palavras). A home B do UX-03 tem 345 a 376: com 3 caixas por largura, o portão pede 450, então ou a F13 escreve de 75 a 105 palavras a mais, ou a B fica com 2 anúncios por largura (§ 370, § 381, c-03).
 
 ## § 362 · "Nenhum texto liga doação a anúncio": a leitura (F10)
 
 - **A tensão:** o texto da página de apoio da seção C diz "Ads cover the costs; every coffee becomes the next tool", e a parede da seção A diz "With your ad blocker on, Oli gets nothing". As duas falam de anúncio e de dinheiro, e a regra do PLANO diz que "nenhum texto liga doação a anúncio".
 - **A leitura:** a regra proíbe dizer ou sugerir que a doação compra, troca ou tira anúncio, ou que doar compensa o bloqueador. Ela vem junto de "sem anúncio para quem doa continua fora". Dizer que os anúncios pagam os custos e que o café vira a próxima ferramenta não troca uma coisa pela outra. Por isso os protótipos usam os textos das seções A e C exatamente.
-- **As redações sem a primeira metade:** o protótipo da página de apoio traz uma (`support.html?texto=ajuste`), e o README da parede, outra, como proposta. O Victor marca no `ESCOLHAS.md`. A parede nunca menciona o café como forma de sair dela (F12, "Fora").
+- **As redações sem a primeira metade:** o protótipo da página de apoio traz uma (`support.html?texto=ajuste`), e o README da parede, outra, como proposta. O Victor marca no `ESCOLHAS.md`: a da parede no ajuste 3 do UX-06, a da página de apoio nas "Decisões avulsas" (desde a revisão, § 381, c-06). A parede nunca menciona o café como forma de sair dela (F12, "Fora").
 - **Para a revisão:** a lente (c) testa esta leitura.
 
 ## § 363 · O cabeçalho: o espaço no celular, a grade a 1280 e os menus (F10, UX-01)
@@ -3742,7 +3746,7 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
 
   As três vão para "Para o PENDENCIAS" do relatório.
 
-## § 366 · A lista "para avaliar": quatro propostas e dois descartes (F10, decisão 7)
+## § 366 · A lista "para avaliar": cinco propostas e dois descartes (F10, decisão 7)
 
 | Item | Situação | Por quê |
 |---|---|---|
@@ -3776,7 +3780,7 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
 ## § 368 · O card do café e a página de apoio (F10, UX-05)
 
 - **O link do Ko-fi** é o `https://ko-fi.com/victormatusita` da § 3 (o `KOFI_URL` do site). O `ko-fi.com/fileorca` do PLANO e da ficha não existe. O protótipo segue a § 3 e diz a diferença.
-- **Em pt, o card leva um botão só,** "Pagar um café no Pix" (para `/pt/apoie/#pix`, como hoje). O rótulo do Ko-fi vai no botão da página de apoio, onde os dois caminhos ficam lado a lado. Dois botões no card seriam três alvos de 52 px no celular.
+- **Em pt, o card leva um botão só,** "Pagar um café no Pix" (para `/pt/apoie/#pix`, como hoje). O rótulo do Ko-fi vai no botão da página de apoio, onde os dois caminhos ficam lado a lado. Dois botões no card seriam três alvos de 52 px no celular. É desvio da seção C, que lista os dois rótulos em pt; o README e o `ESCOLHAS.md` o dizem como desvio, e os dois botões ficam como alternativa nas "Decisões avulsas" (§ 381, d-12).
 - **Sem "Agora não".** A linha já aparece no máximo uma vez a cada 7 dias. O "Não mostrar de novo" grava `{"never": true}` e põe no lugar uma frase de confirmação (`role="status"`), texto novo nos três idiomas que a F12 passa pelo LanguageTool.
 - **A linha do rodapé vai para o topo do rodapé.** Hoje a base dela fica a 24 a 46 px da âncora do AdSense, e "O pedido de café nunca encosta num anúncio".
 - **O gatilho do 1º uso para quem bloqueia anúncio sai** (Mudança 11), junto com a F3 c-08. Fica o 3º uso para todos.
@@ -3809,13 +3813,14 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
   - **A alternativa A** (a zona "solte qualquer arquivo", que reusa o `formatOfBytes` e a caixa de entrada do "Abrir com" da F8) dá mais papel à Oli. Em troca, ela quebra a regra "nenhum arquivo JS novo por página": mais 4,9 KB em gzip (o script e o chunk `sniff`), e as requisições vão de 4 para 6. Ela também repete a zona de soltar da página de ferramenta.
 - **As contagens do H1** seguem a conta da página Sobre de cada idioma: 50 em en (8 + 12 + 18 + 11 + 1), 29 em pt e 39 em es. O registro `HUB_MONEY_IDS` tem 14 calculadoras de dinheiro em en e es; as 4 variantes de hipoteca e de saldo final são presets. A F13 decide se elas entram na conta, com um §.
 - **Todo número das faixas e das descrições tem fonte no repositório:** o medido (o `data/guides-measured.json`), o exato (o preset de 1280×720, o AES-256 do proteger PDF) ou o exemplo (`fixtures/calc/`). A exceção é o "2,6 MB → 717 KB" do comprimir, que vem do diagnóstico da F10, fora do Git: a F13 grava esse número numa fixture antes de usá-lo.
-- **Os anúncios da home:** caixas só no celular ou só a partir de 768 px (`fo-mobile-only` e `fo-desktop-only`), porque com uma posição fixa os 1.110 px não valem em todas as larguras. As duas laterais ficam 800 px uma da outra na home (uma tela a 1280×800, nunca as duas à vista); a seção B não fixa esse número, e o mapa geral (§ 361) usa 1.200 px. A F12 escolhe um número só.
+- **Os anúncios da home:** caixas só no celular ou só a partir de 768 px (`fo-mobile-only` e `fo-desktop-only`), porque com uma posição fixa os 1.110 px não valem em todas as larguras. Desde a revisão, os protótipos da home e do guia seguem o mapa a partir de 768 px: só o conteúdo 1 e o multiplex, com a altura do carregador (§ 381, c-05). O `gate:prontidao` limita a home B: 345 a 376 palavras pedem 75 a 105 a mais para os 3 anúncios por largura (§ 361; § 381, c-03). As duas laterais ficam 800 px uma da outra na home (uma tela a 1280×800, nunca as duas à vista); a seção B não fixa esse número, e o mapa geral (§ 361) usa 1.200 px. A F12 escolhe um número só.
 
 ## § 371 · A página de ferramenta: a alternativa A e o 1º anúncio depois do "Como usar" (F10, UX-04)
 
 - **A recomendação é a A** ("um lugar só, mais firme", a água). O retângulo tem a mesma altura em todos os estados: 356 px no celular e 340 a partir de 768. O resultado é o mar que subiu, com a placa também a 360. Uma faixa de altura fixa abaixo do retângulo mostra as opções e, no resultado, os chips e o "Ajustar". O antes e depois abre só quando a pessoa pede.
   - **O que a medida do protótipo dá:** o Baixar termina em 440 px (en) e em 486 (pt, es), acima do topo do aviso de hoje (532 e 510); os chips ficam a 158 a 182 px do Baixar; a preset em pt vai até 696 px; o CLS da interação esperado é 0,00.
-  - **O custo:** M, dentro das duas ilhas que já existem, sem arquivo novo.
+  - **O custo:** G, porque refaz o molde da página de ferramenta (a ficha: "um molde inteiro"), embora fique dentro das duas ilhas que já existem, sem arquivo novo; conta também o retrabalho do `island.spec.ts`, do `a11y.spec.ts` e do `ads.spec.ts`. Pode ir em duas partes: a imagem entre os três primeiros da F13, e o juntar depois ou na 13b (§ 381, d-06).
+  - **Os atritos do juntar e do erro** (§ 381, a-01): a lixeira com desfazer em cada linha (D-21), a leitura que já é a lista, com o WaterLevel só depois de 400 ms (D-27), a ajuda da ordem à vista (D-26), o Juntar no ponto onde estava o Escolher (D-22), o erro que diz o caso (D-06) e aponta o PNG para JPG na página do HEIC (D-17), e o puxador com as duas setas (D-09).
   - **A alternativa B** (o papel com a dobra, com a bandeja ao lado no computador e as abas no celular) é G e deixa o Baixar a 8 px do aviso no celular.
 - **O que muda no design system:**
   - a água da DropZone em repouso sobe de 12 % para 30 %, e com o arquivo em cima, de 38 % para 60 %;
@@ -3823,8 +3828,8 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
   - a placa fica `aria-hidden`, porque repete o número da fala.
 
   Os README da DropZone e do WaterLevel mudam com §, se o Victor escolher.
-- **O 1º anúncio de conteúdo vai para depois do "Como usar".** A seção B diz "depois dos chips", e o mapa (§ 361) mediu assim. Na A, os chips ficam dentro da faixa colada no resultado, e o anúncio logo depois dela cairia na primeira tela a 1280 (D-55). Depois do "Como usar", ele fica em y 1.085 no comprimir e em y 949 no juntar, a 1280. Se o Victor escolher a A, a F12 põe o 1º anúncio da ferramenta depois do primeiro bloco de conteúdo; a densidade do mapa não piora, porque a contagem e a altura do `<main>` são as mesmas.
-- **No juntar,** a alça (pegar com espaço) sai, e as setas da linha cobrem o teclado e a WCAG 2.5.7. Se a revisão achar regressão, a alça fica só a partir de 768 px.
+- **O 1º anúncio de conteúdo vai para depois do "Como usar".** A seção B diz "depois dos chips", e o mapa (§ 361) mediu assim. Na A, os chips ficam dentro da faixa colada no resultado, e o anúncio logo depois dela cairia na primeira tela a 1280 (D-55). Depois do "Como usar", ele fica em y 1.085 no comprimir e em y 949 no juntar, a 1280. Se o Victor escolher a A, a F12 põe o 1º anúncio da ferramenta depois do primeiro bloco de conteúdo (é ela quem move, lendo a marca do UX-04; a tabela "O que muda da seção B" do README tem a linha); a densidade do mapa não piora, porque a contagem e a altura do `<main>` são as mesmas.
+- **No juntar,** a alça (pegar com espaço) sai, e as setas da linha cobrem o teclado e a WCAG 2.5.7. O UX-11 A desenha a linha do Juntar do mesmo jeito; sem o UX-04 A marcado, a alça fica ghost (§ 374; § 381, d-05).
 
 ## § 372 · O aviso de cookies compacto (F10, UX-09)
 
@@ -3859,7 +3864,7 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
 - **O `fo-btn--sm` sai das quatro peças de PDF** (F5a D-12), que ficam com 52 px. A sugestão da pendência, 48 px só no celular, reprova no verificador da F10, que exige 48 px também a 1280. O único `--sm` que sobra é o "Copiar código" do Pix, que o UX-05 também tira.
 - **A caixa "Pular a primeira página" vira um OptionGroup** ("Primeira página: Numerar / Pular", F5a F-11). Ela é a única caixa de seleção nativa do site, e o design system já tem a peça para escolhas de 2 a 4. Aceitar a caixa nativa estilizada fica como a alternativa.
 - **O aviso da Sign e o do Compress "forte" viram a nota do design system** (`brand-soft` e o ícone `info`, F5a F-10). Na alternativa A, a frase do README do OptionGroup "avisa antes, em OliMessage info" passa a "numa nota", o que muda uma regra; a alternativa B segue o README, com a Oli `wave`.
-- **As setas do Juntar e do Organizar viram `fo-btn--icon`** com traço e lábio (D-23), e as desativadas seguem o estado desabilitado do README. O UX-04 usa as mesmas.
+- **As setas do Juntar e do Organizar viram `fo-btn--icon`** com traço e lábio (D-23), e as desativadas seguem o estado desabilitado do README no Organizar. No Juntar, a linha segue o UX-04 A: sem alça, e onde a seta não anda fica um lugar vazio de 48 px (§ 381, d-05).
 - **A página escolhida ganha um ícone `check`** além da cor (D-7, WCAG 1.4.1), e a borda dela não passa da dobra (F-8).
 - **A dobra do FileCard no painel ganha a cor do painel** (F-7). O FileCard de PDF ganha o ícone `pdf` no lugar do quadrado vazio (F-6).
 - **Uma pegadinha:** o `.fo-page` do `bundle.css` (a prévia do ToolPage, com 360 px de largura) colide com a célula da grade de páginas do site.
@@ -3927,7 +3932,48 @@ O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto:
 ## § 380 · As screenshots e o verificador dos protótipos (F10, decisões 13 e 15)
 
 - **A screenshot fotografa a página do site, sem o controle e sem a especificação.** O `prototipos.mjs --shots` mira o `.proto-page` de cada protótipo, a 360×740 e a 1280×800, nos dois temas, no Chromium, em JPEG de qualidade 80 e escala 1. A folha da Oli e o `index.html`, que não têm `.proto-page`, saem inteiros.
-- **Só a primeira variante do `<meta name="proto-shots">` de cada protótipo** (`--shots-max 1`). Com todas as variantes que os agentes pediram, as screenshots passariam dos 25 MB, somadas às capturas do diagnóstico.
+- **Só a primeira variante do `<meta name="proto-shots">` de cada protótipo** (`--shots-max 1`), com o nome `<protótipo>-<idioma>-<estado>-<largura>-<tema>.jpg` (desde a revisão, § 381, d-11). Com todas as variantes que os agentes pediram, as screenshots passariam dos 25 MB, somadas às capturas do diagnóstico.
 - **Quando uma screenshot passa de 500 KB,** ela continua em qualidade 80 e é cortada nas primeiras telas.
 - **O `index.html` é gerado do README** pelo `.cache/f10/gen-index.mjs`: cada item com o link do README, os protótipos nos dois temas, os estados que o item cita e as screenshots. Assim toda imagem de `prototipos/` tem referência.
 - **O filtro de cor do `contraste.mjs`** passou a tirar o sprite inteiro da Oli (`<svg class="fo-sprite">`), com as peças `oli-p…` de cores fixas. Antes, toda página com a Oli reprovava pela cor literal das peças, que é permitida pelo design system ("exceto dentro da Oli").
+
+## § 381 · O que a revisão da F10 mudou (F10, revisão adversarial)
+
+A revisão (quatro lentes Sonnet e os céticos, sobre `4d8e946`) deu 34 achados: 1 médio e 32 baixos que ficaram e 1 refutado. As correções ficaram num agente só, nas fontes do README (`.cache/f10/readme-parts/`, `.cache/f10/results/` e `.cache/f10/diag/`), nos protótipos e nos scripts de `.cache/f10/`. O que mudou, achado a achado:
+
+- **a-01 (médio):** o UX-04 A responde aos sete atritos na proposta, na especificação e nos estados dos protótipos. No `tool-a-merge.html`: a lixeira de 48 px em cada linha, com "scan.pdf saiu da lista." e Desfazer no lugar da linha até a próxima ação (D-21, `?state=removed`); a leitura que já é a lista, com "Lendo…", a barra e o × de cada arquivo, e o WaterLevel só depois de 400 ms (D-27, `?state=reading`); a ajuda da ordem à vista entre o Juntar e as linhas (D-26); e o registro de que o ponto do Escolher cai no Juntar e o Começar de novo vai para o pé (D-22). No `tool-a.html`: os casos de erro (`?error=content`, a extensão que não bate, D-06; `?error=heic`, o PNG na página do HEIC com o chip para o PNG para JPG, D-17) e o puxador com as duas setas (D-09, também no `tool-b.html` e no `guide-page.html`). A Evidência do UX-04 nomeia os D-NN. A lista do juntar ficou mais alta, e o retângulo guarda 480, 564 e 540 px a 360 (en, pt, es): os chips do juntar ficam a 290 a 374 px do Baixar (0,39 a 0,51 tela), contra 0,44 a 0,78 tela hoje e os 194 a 298 px que o protótipo dava antes da revisão.
+- **a-02:** a tabela "O que muda da seção B" cita o UX-01, o UX-07 e o `medir-rail.mjs` para os 29 px, e não o D-07; o UX-07, a § 361 e uma decisão avulsa dizem o que acontece com a lateral ao lado da água. A gravidade do D-07 fica (o cético: "derruba conta" não é nível da escala da ficha).
+- **a-03:** G-15 com 42 links; G-16 com 7 perguntas e a tabela de 10 linhas mais o cabeçalho; o UX-07 com "10 dos 12 moldes (9 dos 11 do `dist/` e o hub de guias)" e as 178 páginas do `dist/` mais os 3 hubs de guias (181).
+- **a-04:** o G-12 cita as capturas em pt (`support-pt-360-light.jpg`, de volta ao Git, e `support-pt-1280-dark.jpg`); o G-21 cita o hub de dinheiro escuro (`hub-money-en-1280-dark.jpg`); o D-43 traz os y medidos (o título em 1922 e o botão em 1980 a 2032, abaixo do anúncio) e o D-08 o y do "How it works" (1458), sem a captura de página inteira que saiu do Git. A `support-en-360-light.jpg` deixou de ser citada e saiu.
+- **a-05:** o "até 2 px" do escuro ressalva o artefato da trilha, e o D-32 e o D-33 trazem os valores sem ele (≈ 958 e 1.460).
+- **a-06:** o D-55 atribui a frase ao `PLANO-FILEORCA.md` (molde da página de ferramenta, item 6), e do `docs/design/README.md` fica só a regra dos 150 px.
+- **a-07:** o 2.4.11 é "Foco não encoberto (mínimo)" no D-01 e no D-10.
+- **a-08 (refutado, fica):** o nome dos concorrentes numa frase descritiva fora da seção 4 não copia captura, logo, texto nem layout, que é o que a decisão 3 proíbe. Só a remissão do G-16 a "notas" virou "seção 4", e a do U-12 também.
+- **a-09:** os scripts dos agentes saíram das worktrees para `.cache/f10/agentes/<nome>/` (um por agente, com um `LEIA.txt`), e o README e o `header-a.html` citam esse caminho; o intervalo do idioma (62,4 a 63,1) diz que é da Figtree e da fonte de reserva.
+- **b-01:** o `proto.css` aplica a regra do UX-10 em todo protótipo: a `wave` flutua uma vez (2 × 1,5 s) e para; só a `swim` do processamento é laço, com a duração pelo nome. O laço infinito de hoje fica só no "antes" do `oli-motion.html`.
+- **b-02:** todo protótipo que não é o do cabeçalho diz no controle qual cabeçalho mostra ("um marcador de lugar" ou "o de hoje") e aponta para o `header-a.html`; a frase do `home-b.html` e a ordem do Tab do `support.html` dizem o cabeçalho do UX-01 A.
+- **b-03:** a 320×568, o `tool-a.html` e o `tool-b.html` (as opções e o botão do erro podem quebrar linha), o `handoff.html` (o Baixar do card com a regra do site, `components.css:177-181`) e o `icons.html` (as tabelas do mapa) cabem. O `.cache/f10/revisao-reflow.mjs` confere toda variante de todo protótipo a 320 px e passa.
+- **b-04:** no rodapé do UX-17 (`pages.css`), o link do hub de cada categoria, a linha institucional e a do café passam a 48 px; os links das ferramentas dentro de uma lista aberta ficam com os 32 px de hoje, como exceção dita na especificação. As alturas e as porcentagens do rodapé foram medidas de novo (A corta de 54 a 61 %).
+- **b-05:** o UX-06, o Resumo e o `ESCOLHAS.md` dizem que o `fo-btn--brand` no "recarregar" muda a regra do Button/README, e o botão padrão com lábio é uma decisão avulsa.
+- **b-06:** a especificação do `header-a.html` diz o que foi conferido (a árvore de acessibilidade do Chromium) e o que fica para a F11 (NVDA, VoiceOver e o WebKit, com a região `role="status"` como saída); a do `wall.html` diz para onde vai o foco quando não havia foco antes (o `<main>` com `tabindex="-1"`).
+- **c-01:** o `.proto-rail` começa 150 px abaixo do cabeçalho (`padding-top: var(--ad-clearance)`), como a § 361: a lateral fica a 159 px dos controles em todos os protótipos. O comentário do `proto.css` e as Medidas do `tool-a.html` dizem isso.
+- **c-02:** a § 361, a suposição 6, a seção 8 e o `ad-map.html` tratam o `display: none` como suposição, citam as duas páginas da ajuda (`answer/1354736` e `answer/9183363`) e dão o plano B (o `<ins>` criado por script só onde a largura bate, sem refresh); o `ESCOLHAS.md` diz a consequência.
+- **c-03:** o UX-03, a seção 8, a § 361, a § 370, o `ad-map.html` e uma decisão avulsa dizem que a home B tem 345 a 376 palavras e que, sem 75 a 105 a mais, o `gate:prontidao` a deixa com 2 anúncios por largura.
+- **c-04:** o `.cache/f10/densidade768.mjs` (feito do script da lente c) mediu 19 páginas a 768×1024 (máximo de 26,1 %, `/home-calculators/`) e a 812×375 (26,5 %, `/health-calculators/`); a seção 8, o `ad-map.html` e o teste da F12 trazem as duas larguras.
+- **c-05:** a partir de 768 px, os protótipos da home e do guia seguem o mapa: só o conteúdo 1 e o multiplex (o 2º da home A e o 3º do guia ficam só no celular; a caixa só do computador da home B e do guia saiu). O multiplex tem uma altura só, a do carregador mais o rótulo (485 a 500 px na coluna, 498 ao lado da lateral; na home sem lateral, pela largura).
+- **c-06:** o texto da página de apoio tem as duas caixas nas "Decisões avulsas"; a § 362 diz onde.
+- **c-07:** o `ad-map.html` traz o hub de guias medido, "10 dos 12", a home de hoje separada da home B, a densidade a 768 px, a linha do 1º da ferramenta com o UX-04 A, a lateral ao lado da água e o plano B do `display: none`.
+- **d-01:** a regra do item sem marca é por run, no `ESCOLHAS.md`, no README (seções 1 e 5, suposição 15) e na § 345: na F11 e na F12 vale a recomendada (decisão 4 da ficha), menos a pose, que sem marca usa a `oops` (ficha da F12); na F13 só entra o marcado (ficha da F13: "Fora: item não escolhido"), e isso vale para as pendências.
+- **d-02:** a linha do cabeçalho da seção 4 e o U-12 dizem que o idioma fica à vista a partir de 768 px e entra no Menu no celular; o UX-01 ganhou a linha de risco, e o Resumo e o `ESCOLHAS.md` a mudança de regra.
+- **d-03:** a lista do Resumo "O que muda regra do design system" tem as onze mudanças (UX-01, UX-04 A, UX-06, UX-09, UX-10, UX-11 A, UX-12 A, UX-15 B, UX-16, UX-17 e UX-18 B), e o porquê de cada item do `ESCOLHAS.md` diz "muda regra".
+- **d-04:** a tabela "O que muda da seção B" (README e `ad-map.html`) tem a linha do 1º da ferramenta; o UX-04, o UX-07, a § 361, a § 371 e o `ESCOLHAS.md` dizem que a F12 move o anúncio se o UX-04 A for marcado.
+- **d-05:** a linha do Juntar do UX-11 A (`pdf-pieces.html`) segue o UX-04 A: sem a alça e com o lugar vazio onde a seta não anda; o teste do F5a D-11 cobre o Juntar só sem o UX-04 A, e a pendência, o README e a § 374 dizem o mesmo.
+- **d-06:** o custo do UX-04 A é G (refaz o molde), com o retrabalho dos testes que existem, e o `ESCOLHAS.md` diz que ele pode ir em duas partes: a imagem entre os três primeiros da F13 e o juntar depois.
+- **d-07:** o `readme.mjs` lê os ids das pendências do `PENDENCIAS.md` (grupos 5 e 6 e as 8 avulsas) e os cruza com o `pendencias-ids.json`, roda de qualquer pasta, exige o link `?theme=dark` de cada protótipo, uma caixa por alternativa (pelo menos 2) e as colunas da proposta e do que responde; a § 347, a § 349 e a § 356 dizem o que ele faz.
+- **d-08:** o `ESCOLHAS.md` tem o grupo "Decisões avulsas", com caixas para a conta do `gate:prontidao`, as 37 unidades, a lateral ao lado da água, a vinheta, o texto da página de apoio, o card do café em pt, o botão da parede e o texto da home B.
+- **d-09:** saíram as linhas-fantasma ("Pendências do UX-09:" e as outras, e a "nenhuma desta tarefa") e a conta é "29 dos grupos 5 e 6 (13 e 16) e 8 avulsas".
+- **d-10:** o título da § 366 diz "cinco propostas e dois descartes".
+- **d-11:** as screenshots dos protótipos se chamam `<protótipo>-<idioma>-<estado>-<largura>-<tema>.jpg`; o `prototipos.mjs` grava assim, o `gen-index.mjs` as acha e o `imagens.mjs` exige o padrão em `prototipos/`. As 100 foram gravadas de novo.
+- **d-12:** o UX-05 diz que o card em pt com um botão só é desvio da seção C, e os dois botões ficam como alternativa nas "Decisões avulsas".
+
+Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-proto-ads.mjs`, `revisao-reflow.mjs`, `revisao-ux04.mjs` e os `revisao-patch-*.mjs` de cada correção.
