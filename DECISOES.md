@@ -3614,3 +3614,320 @@ Nos três pontos em que a ficha deixa a leitura em aberto, os scripts usam a mai
 
   Assim nenhum `ci-ok` vermelho de uma execução leve cancelada fica no commit (pendência "F9 ci-ok duplicado"). O `gh pr ready` dispara a classe `portões`, e o `merge` mescla sozinho.
 - **Depois do `gh pr ready`,** nada de push. O `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit 22 --body-file`), mesmo depois do merge.
+
+## § 358 · As URLs das tarefas e o guia do diagnóstico (F10)
+
+- **As URLs** vêm do mapa de rotas (`src/i18n/routes.ts`) e foram conferidas no `dist/`:
+
+  | Tarefa | en | pt | es |
+  |---|---|---|---|
+  | Comprimir imagem | `/compress-image/` | `/pt/comprimir-imagem/` | `/es/comprimir-imagen/` |
+  | HEIC para JPG | `/heic-to-jpg/` | `/pt/heic-para-jpg/` | `/es/heic-a-jpg/` |
+  | Juntar PDF | `/merge-pdf/` | `/pt/juntar-pdf/` | `/es/unir-pdf/` |
+  | Hipoteca | `/mortgage-calculator/` | — | `/es/calculadora-de-hipoteca/` |
+  | SAC × PRICE | — | `/pt/simulador-sac-price/` | — |
+- **A hipoteca não existe em pt.** O `br-sac-price` nasce da hipoteca, mas os registros dizem que as páginas não são equivalentes (sem par no hreflang). A tarefa entra em en e es, e o SAC × PRICE fica como a tarefa de pt.
+- **O guia:** `guides-heic-to-jpg-on-windows` (`/guides/heic-to-jpg-on-windows/`, `/pt/guias/heic-para-jpg-no-windows/`, `/es/guias/heic-a-jpg-en-windows/`).
+  - **Por quê:** sem dados do GA4 (§ 359), a ficha manda um guia de arquivo com a ferramenta embutida que exista nos três idiomas. Os 10 guias de arquivo cumprem isso, e este liga a tarefa do HEIC ao guia: o mesmo motor, numa página de leitura.
+  - **A alternativa:** o `guides-combine-pdfs-on-phone`, que embute o juntar PDF.
+
+## § 359 · Sem dados do GA4 e do Search Console (F10)
+
+`.cache/dados-f10/` não existe: o Victor não exportou os eventos do GA4 nem as páginas e consultas do Search Console antes da run.
+
+O diagnóstico seguiu só com medida e heurística, como a ficha prevê. Ficaram para quando houver dados:
+- a conclusão por página (`tool_complete` sobre `tool_start`);
+- as saídas;
+- as páginas com muita impressão e pouco clique;
+- a escolha do guia mais visto.
+
+O relatório lista isso no que é do Victor. No Git, nunca vai número absoluto: só proporção e ordem.
+
+## § 360 · Como a densidade foi medida na prática (F10, decisão 10)
+
+- **O script:** o `.cache/f10/densidade.mjs`, fora do Git. Ele abre a 360×740 as 208 páginas do `dist/` e o protótipo do hub de guias, com o `fo-consent` gravado e a ferramenta hidratada em repouso, e insere caixas de 300 px onde o mapa manda.
+- **Onde a caixa entra:** só em fronteira de bloco. Vale:
+  - entre seções do `<main>`;
+  - entre parágrafos de uma seção de texto, nunca logo depois de um título;
+  - entre perguntas.
+
+  Nunca dentro de grade, tabela, painel, cronograma, ferramenta embutida, lista, formulário, trilha, topo ou faixa da categoria. Nunca colada em tabela.
+- **A margem não colapsa.** A margem de 150 px do `.fo-ad` não colapsa na grade do `.fo-main` (gap de 16 px): cada caixa soma 616 px ao `<main>`, e o vizinho fica a 166 px. A densidade conta a caixa de 300 px; a margem entra no denominador, como no site.
+- **A 1280×800:**
+  - o multiplex tem 498 px de caixa: o `ins` de `floor(758 × 0,6)` = 454 px, pela fórmula do carregador para a coluna de 758 px, mais o rótulo;
+  - as laterais têm 300×644 cada.
+- **O tempo e a saída:** 11 s para as 211 páginas. O resultado vai para `.cache/f10/densidade.json` e `densidade.md`, e a tabela, para a seção 8 do README.
+- **O resultado:** nenhum molde passa de 30 % na leitura conservadora. O pior é a ferramenta de imagem, com 22,3 % em `/png-to-jpg/`.
+
+## § 361 · O mapa de anúncios: o que muda da seção B, e a alternativa B (F10, obrigatório 7)
+
+- **O multiplex só a partir de 768 px.** Com 1.700 px a 360 px (§ 351), 10 dos 12 moldes passam de 30 % na conservadora (até 41,6 %); só a home (26,0 %) e o guia de dinheiro (26,1 %) caberiam. O multiplex cresce com a tela (1.830 px a 412 px), então a regra é por largura, igual para todos. A F12 o esconde abaixo de 768 px por CSS. A ajuda do AdSense permite esconder a unidade responsiva com `display: none` por largura, e a F12 confere o texto da ajuda antes.
+  - **A alternativa recusada:** o multiplex só na home e nos guias de dinheiro, uma regra por molde, frágil.
+- **O conteúdo 2 em diante só abaixo de 768 px.** A 1280×800, as fronteiras escolhidas no celular ficam a 726 px umas das outras, menos de 1,5 tela (1.200 px). No computador, esse papel é das duas laterais e do multiplex.
+- **As laterais:**
+  - **A lateral 1 começa 150 px abaixo do cabeçalho.** Hoje ela fica a 29 px do botão de idioma e da busca, que são menus (D-07), e o menu de idioma aberto cai em cima dela.
+  - **A lateral 2 fica 1.200 px abaixo da 1ª, de borda a borda,** em `position: absolute` numa coluna esticada, e só aparece quando cabe. Isso vale para as 181 páginas com anúncio, sem CLS.
+- **Os primeiros anúncios:**
+  - **o 1º do hub de dinheiro** vai depois da grade de crédito, pela letra da seção B; hoje vem depois das duas grades;
+  - **o 1º do guia** vai no texto, logo depois da ferramenta embutida, com um parágrafo entre os dois; hoje vem depois da metade do texto.
+- **Nunca colado em tabela, em todo molde.** A seção B pede isso só no guia. Uma regra só é mais simples de escrever e testar.
+- **Uma unidade por posição:** `conteudo`, `conteudo-2` a `conteudo-5`, `lateral`, `lateral-2` e `multiplex`. São 37 unidades com a alternativa A, contra as 15 da seção B. A ajuda do AdSense não tem regra sobre repetir unidade, e uma por posição separa o relatório. Sem ID, a posição não aparece (Mudança 10), então o Victor limita as caixas criando menos unidades.
+- **A alternativa B** lê os 1.110 px de topo a topo, como uma frequência. Ela dá 807 anúncios de conteúdo no celular contra 618 (4,5 por página contra 3,4), 43 unidades e o pior molde em 24,0 %. A recomendação é a A, a leitura da § 351.
+- **O `gate:prontidao` conta toda caixa do HTML** (150 palavras do `<main>` por caixa), mesmo a escondida naquela largura. Com o mapa, 111 das 181 páginas reprovariam; contando o que cada largura mostra, 0 no celular e 14 no computador.
+  - **A recomendação:** a F12 conta por largura e mantém as 150 palavras por caixa. Isso muda a conta de um teste, então pede o ok do Victor e um §.
+  - **Sem o ok:** o teto é palavras ÷ 150 caixas por página, e o mapa encolhe.
+
+## § 362 · "Nenhum texto liga doação a anúncio": a leitura (F10)
+
+- **A tensão:** o texto da página de apoio da seção C diz "Ads cover the costs; every coffee becomes the next tool", e a parede da seção A diz "With your ad blocker on, Oli gets nothing". As duas falam de anúncio e de dinheiro, e a regra do PLANO diz que "nenhum texto liga doação a anúncio".
+- **A leitura:** a regra proíbe dizer ou sugerir que a doação compra, troca ou tira anúncio, ou que doar compensa o bloqueador. Ela vem junto de "sem anúncio para quem doa continua fora". Dizer que os anúncios pagam os custos e que o café vira a próxima ferramenta não troca uma coisa pela outra. Por isso os protótipos usam os textos das seções A e C exatamente.
+- **As redações sem a primeira metade:** o protótipo da página de apoio traz uma (`support.html?texto=ajuste`), e o README da parede, outra, como proposta. O Victor marca no `ESCOLHAS.md`. A parede nunca menciona o café como forma de sair dela (F12, "Fora").
+- **Para a revisão:** a lente (c) testa esta leitura.
+
+## § 363 · O cabeçalho: o espaço no celular, a grade a 1280 e os menus (F10, UX-01)
+
+- **O idioma entra no Menu abaixo de 768 px,** nas duas alternativas.
+  - **As medidas:** o logo tem 126,5 px, e a busca, o tema e o Menu têm 48 px cada. Com 8 px de espaço, dá 294,4 px, e sobram 33,6 px a 360. Com 4 px de espaço, dá 282,4 de 288 px a 320. As cinco peças juntas só caberiam a partir de 398 px.
+  - **As alternativas recusadas:** o logo só com a Oli (tiraria "FileOrca" do celular), o tema dentro do Menu (a seção D pede o botão no cabeçalho) e o idioma sem o globo (ainda não cabe).
+- **A partir de 1280 px, o cabeçalho segue a grade da moldura.** O logo fica em x 36, alinhado com a coluna (hoje ele fica em x 16), e o último controle, em x 794, a 150 px da lateral (x 944).
+  - **A alternativa recusada:** descer a lateral para y 388 ou mais, o que tiraria metade dela da primeira tela.
+- **Os menus em `position: absolute`,** com o anchor positioning e uma reserva `top: 68px`. O menu de idioma de hoje passa de `fixed` para `absolute`, para nunca ficar parado sobre a página, e sobre um anúncio, enquanto ela rola.
+- **O botão de tema:** o nome e o ícone vêm do CSS, a partir do `data-theme` do `<html>`, então ficam certos já na primeira pintura, sem script.
+  - **Os scripts inline:** 185 bytes no `<head>` e 422 no botão, 320 em gzip juntos.
+  - **As metas:** entra a `<meta name="color-scheme" content="light dark">`; o `theme-color` fica igual.
+- **Os ícones novos** ficam em `docs/propostas/ux-v2/icons/`: menu, sol, lua, sistema e livro (Guias), no formato dos 39. Eles usam `currentColor` porque a proposta não aceita cor literal; na F11 vão para `docs/design/assets/Icons/` com o traço dos outros.
+- **A recomendação é a A** (o Menu de papel, em toda largura): um padrão só, 64 px e uma linha em toda largura, e metade do teste da B.
+
+## § 364 · O hub de guias e o cartão de guia (F10, UX-02)
+
+- **Nenhuma Oli no hub.** Ela diz estado, e o hub não tem estado. A 360 px, uma Oli de 96 px deixaria só 168 px para o H1, e o hub tem até 5 caixas de anúncio.
+- **A introdução em duas partes:**
+  - **no topo:** a frase da faixa (en 32 palavras, pt 28, es 31);
+  - **no fim:** "Como os guias são feitos" (en 59, es 66, pt 44 mais a nota de que pt não tem guias de dinheiro, 36).
+
+  O texto próprio soma en 91, pt 108 e es 97 palavras. Um parágrafo de 60 a 75 palavras no topo foi medido e empurrava o primeiro cartão para baixo da dobra.
+- **O cartão de guia (`.fo-guidecard`)** diz "Measured on N test files", com o N lido de `data/guides-measured.json` no build. Os guias de dinheiro dizem "Numbers worked out". Ele também diz qual ferramenta o guia traz. É diferente do ToolCard (fecha a F5b F-12).
+- **A faixa do hub** usa `brand-soft`. O hub não tem cor de categoria, e o `surface-sunken` é o chão do AdSlot.
+- **As entradas:**
+  - **o rodapé:** o bloco "Guides" fica embaixo de Utilities; uma 8ª coluna não cabe a 1280 px;
+  - **a home:** 4 guias, um por grupo e um quarto para o celular, escolhidos pelo volume do `data/keywords.csv`;
+  - **a ferramenta que tem guia:** o cartão vai no fim da seção "How it works";
+  - **a busca:** ela ganha `kind: 'tool' | 'guide'` e agrupa em Tools e Guides.
+- **Para a F12:** o hub entra no mapa como os hubs de categoria. A densidade conservadora é de 14,1 %.
+
+## § 365 · O destino das 37 pendências (F10, decisão 6)
+
+- **A conta:** 35 vão para "corrigir", 1 para "aceitar e registrar" e 1 para "descartar". Por run: 35 na F13, 1 na F11 (a F5b F-12, com o cartão de guia do UX-02, como o `PLANO-MELHORIAS.md` já manda) e 1 na F12 (a F3 f-06, junto com a c-04, que mexe no mesmo script do consentimento).
+- **O estado:**
+  - 30 estão abertas com o mesmo código;
+  - 6 mudaram de forma: a F4 ACE-9, a F5a D-8, a F5a F-11, a F4-F7 e-2, a F4-F7 f-1 e a F4-F7 f-2;
+  - 1 já está resolvida: a F7 e-1, pela face `Figtree Steady` da § 305.
+- **As duas que não vão para "corrigir":**
+  - **a F7 e-1, descartar:** já resolvida. Sai do `PENDENCIAS.md` citando a § 305, e o `layout-shift.spec.ts` já prova;
+  - **a F4 ACE-7, aceitar e registrar:** a ordem de tabulação "campos principais, resultado, campos opcionais" segue o molde da calculadora (§ 124: o resultado logo depois dos campos principais), e mudar o DOM poria o resultado depois dos opcionais no leitor de tela. A linha diz o teste que confere a ordem.
+- **O que responde a cada uma:**
+  - **mudança visual:** o UX-NN com o protótipo. São 25 linhas:
+    - UX-11 (as 12 do PDF);
+    - UX-12 (as 9 das calculadoras e do QR);
+    - UX-13 (2);
+    - UX-09 (2);
+    - UX-04 (2);
+    - UX-10 (1);
+    - UX-02 (1).
+  - **só comportamento:** o teste que a F13 escreveria (a F7 obs 1, a F3 f-06, a Idiomas R2-03, a F5a D-10 e a F5a D-11), com o que ele afirma e que reprova sem a correção.
+- **Onde as pendências apontam além do texto:**
+  - a F4 ACE-9 junta dois defeitos opostos: falta cabeçalho de linha nas calculadoras, e ele se repete nos guias;
+  - a F7 obs 3 diz "Mulch", mas os rótulos que quebram são os da Paint;
+  - a F5a D-12 cresceu com o "Copiar código" do Pix, de 40 px.
+
+  As três vão para "Para o PENDENCIAS" do relatório.
+
+## § 366 · A lista "para avaliar": quatro propostas e dois descartes (F10, decisão 7)
+
+| Item | Situação | Por quê |
+|---|---|---|
+| A-1 · o resultado direto para a próxima ferramenta | proposto (UX-14) | O README do NextStepChips promete chips que "levam o arquivo, ou a pessoa", e hoje o destino abre vazio (D-05, D-11, D-49). A caixa da F8 já existe (Cache Storage `fileorca-inbox` e o `takeInbox` nas ilhas, § 290). O custo é cerca de 1 KB em gzip no chunk que já existe, sem arquivo nem requisição nova. |
+| A-2 · as ferramentas recentes e "a Oli já economizou X MB" | descartado | Não há evidência de atrito (nenhum D-NN ou G-NN), as seis tarefas começam na URL da ferramenta e não há GA4 para medir a volta (§ 359). No aparelho compartilhado, a lista mostra o que foi usado (as calculadoras de saúde e de dinheiro dizem muito). Pela § 49, só daria para gravar depois do Aceitar. E custaria JS e risco de CLS em toda página. Volta à mesa se o GA4 mostrar muita volta à mesma ferramenta. |
+| A-3 · soltar o arquivo em qualquer lugar | proposto (UX-18) | Hoje o `dragover` do documento promete "copiar" na página inteira, e o `drop` fora da ilha some em silêncio (contra o README da DropZone). A alternativa recomendada aceita o soltar em todo o conteúdo do site e não toca no anúncio: o iframe de outra origem recebe o próprio arrasto, e a zona volta ao repouso. O véu na tela inteira cobre os anúncios durante o arrasto e fica como mudança de regra. |
+| A-4 · a cena de fundo do mar nos hubs | proposto como alternativa B do UX-15 (mudança de regra) | Cinco SVG inline de 0,55 a 0,72 KB resolvem o G-05, mas mudam "Mar: nenhuma imagem de fundo" e "Nunca: imagem de fundo". A alternativa A do UX-15 (o aquário, dentro das regras) é a recomendada. |
+| A-5 · o "mar à noite" | proposto como alternativa B do escuro do UX-15 (mudança de regra) | No escuro, o `deep` fica 1,33:1 mais claro que o chão (G-07). A B propõe `--proposta-mar-noite` e `--proposta-crista`, com os pares acima do mínimo, e muda "`deep` igual nos dois temas". A A (a onda no topo do ResultCard e do ResultHero) resolve pela forma, sem cor nova, e é a recomendada. |
+| A-6 · a microanimação da Oli por estado | proposto (UX-10) | Fecha a F3 d-02 (WCAG 2.2.2): o maior movimento que começa sozinho acaba em 3.120 ms, nada roda aos 5,5 s, e o movimento reduzido não tem animação. É só CSS. Muda a frase "loops com `ease-in-out`" da regra "Movimento". |
+| A-7 · o cenário salvo nas calculadoras | descartado | Contradiz o princípio 6 ("o cenário vive no link") e a § 114 ("a página nunca escreve na URL"), e quebraria o `money-privacy.spec.ts`, que procura cada número digitado no `localStorage` e no `sessionStorage`. No aparelho compartilhado, a próxima pessoa veria os números de quem veio antes. O link do `#` já guarda o cenário quando a pessoa pede. |
+
+## § 367 · O que torna cada alternativa do FileOrca, e nenhuma pose nova além da `sad` (F10, decisão 9)
+
+| Item | Alternativa A | Alternativa B | Recomendada |
+|---|---|---|---|
+| UX-01 · cabeçalho | o Menu de papel: um botão em toda largura, a folha com a **dobra** e o **traço** marcando a seção | o **mar**: a navegação exposta no computador, com a seção "debaixo d'água"; uma gaveta de mar fundo no celular, com a Oli na borda | A (um padrão só, 64 px e uma linha) |
+| UX-03 · home | a **Oli** na borda da **água** de uma zona "solte qualquer arquivo", com as categorias em papéis com a **dobra** | o **mar** por categoria: faixas com a onda e um número medido, as ferramentas como chips, a Oli nadando na faixa de água | B (sem JS) |
+| UX-04 · página de ferramenta | a **água**: um lugar só, o resultado como o mar que subiu, a placa presa pela Oli | a **dobra**: o arquivo como papel que afunda e volta; a bandeja ao lado no computador e as abas no celular | A (M, sem arquivo novo) |
+| UX-07 · mapa de anúncios | 1.110 px de borda a borda | 1.110 px de topo a topo | A (a leitura da § 351) |
+| UX-15 · hubs | o aquário: a água, a crista na cor da categoria e a Oli `swim`, dentro das regras | a cena por categoria em SVG (mudança de regra) | A |
+| UX-15 · escuro | a onda no topo do ResultCard e do ResultHero (a profundidade pela forma) | as cores do "mar à noite" (mudança de regra) | A |
+| UX-18 · soltar em qualquer lugar | o soltar em todo o conteúdo, sem tocar no anúncio | o véu na tela inteira, que cobre os anúncios (mudança de regra) | A |
+
+- **Em cada par, a B muda a estrutura** (onde as coisas ficam e como se chega a elas), não só a cor. No UX-07 e no UX-15, ela muda a regra.
+- **Os itens de uma alternativa só:** o UX-02, o UX-05, o UX-06, o UX-08 a o UX-14, o UX-16 e o UX-17. A ficha não pede duas para eles, e onde há uma escolha de desenho real ela aparece como estado do protótipo e linha do `ESCOLHAS.md` (por exemplo, a F7 f-10 e a F5a F-10).
+- **Nenhuma pose nova além da `sad`.** O diagnóstico não pediu nenhuma:
+  - o UX-10 anima as nove de sempre;
+  - o UX-14 usa a `lost` fora da 404, para a caixa vazia da ferramenta, o que é uso novo de uma pose que já existe;
+  - o G-08 (a calculadora sem a Oli) se resolve com a `wave` na borda do ResultHero (UX-12).
+
+## § 368 · O card do café e a página de apoio (F10, UX-05)
+
+- **O link do Ko-fi** é o `https://ko-fi.com/victormatusita` da § 3 (o `KOFI_URL` do site). O `ko-fi.com/fileorca` do PLANO e da ficha não existe. O protótipo segue a § 3 e diz a diferença.
+- **Em pt, o card leva um botão só,** "Pagar um café no Pix" (para `/pt/apoie/#pix`, como hoje). O rótulo do Ko-fi vai no botão da página de apoio, onde os dois caminhos ficam lado a lado. Dois botões no card seriam três alvos de 52 px no celular.
+- **Sem "Agora não".** A linha já aparece no máximo uma vez a cada 7 dias. O "Não mostrar de novo" grava `{"never": true}` e põe no lugar uma frase de confirmação (`role="status"`), texto novo nos três idiomas que a F12 passa pelo LanguageTool.
+- **A linha do rodapé vai para o topo do rodapé.** Hoje a base dela fica a 24 a 46 px da âncora do AdSense, e "O pedido de café nunca encosta num anúncio".
+- **O gatilho do 1º uso para quem bloqueia anúncio sai** (Mudança 11), junto com a F3 c-08. Fica o 3º uso para todos.
+- **A Oli `coffee` fica à direita do título,** olhando para ele (G-10). O vapor passa a parar sozinho em 4,8 s (a saída A da F3 d-02).
+- **O "Copiar código" do Pix vira um botão de 52 px** (F5a D-12) e, no celular, vem antes do QR.
+- **O Pix do protótipo é de mentira:** um QR que não lê e um código "exemplo".
+
+## § 369 · A parede do bloqueador (F10, UX-06)
+
+- **O fundo do diálogo:** no claro, a `water` a 92 %; no escuro, o `deep` a 92 %, sem token novo.
+  - O `deep` no claro viraria o véu escuro da mensagem do Google.
+  - A `water` no escuro daria 2,59:1 na borda do card.
+- **O botão principal é o `fo-btn--brand`**, nunca amarelo. A ordem fica marca, neutro e ghost, com um primário só.
+- **A ajuda:**
+  - um botão com `aria-expanded` abre o painel;
+  - as 9 entradas são `<details name>` (uma aberta por vez);
+  - o recarregar e o escape ficam num rodapé fixo do card, sempre à vista.
+- **O Esc no bloqueio** tem três camadas: o `closedby="none"`, o `cancel` com `preventDefault` e o `close` que reabre. O `CloseWatcher` do Chromium deixa um segundo Esc fechar sem gesto no meio. No aviso, vale o `closedby="closerequest"`.
+- **A partir de 1280 px, o card centra na coluna da ferramenta,** com a Oli a 256 px da lateral. Centrado na janela, ela ficaria a 28 px dela.
+- **Com a parede aberta,** a rolagem trava (CLS 0) e a Oli da página some: uma Oli por tela.
+- **O escape:** a data vai para o `fo-wall-escape`, sem depender do aviso de cookies, pelo precedente da § 49.
+- **Na UE,** a parede espera o `__tcfapi` dar `tcloaded` ou `useractioncomplete`, para não deixar a mensagem de consentimento inerte.
+- **A detecção:** um anúncio preenchido encerra a detecção (o caso do Acceptable Ads), e a isca nunca é um `ins.adsbygoogle`.
+- **Os textos novos,** fora da seção A, nos três idiomas: a linha do depois do escape, o título e a dica do painel, e o "Fechar".
+- **O texto da Privacidade da seção A** ("nada sai do aparelho") não bate com a realidade: a tag do Google conta a detecção ao Google, e o `adblock_wall` vai para o GA4. A especificação propõe outro texto, e a decisão é do Victor ("Para o PENDENCIAS").
+
+## § 370 · A home: a alternativa B, os números e os anúncios por largura (F10, UX-03)
+
+- **A recomendação é a B** (o mar por categoria). Ela resolve os G-01, G-02, G-03, G-06, G-18 e G-21 sem nenhum JS: a home continua sem ilha, com 4 requisições e 3,1 KB de JS inline. O `<main>` cai de 8.872 px para 4.696 px a 360 (en, sem anúncio).
+  - **A alternativa A** (a zona "solte qualquer arquivo", que reusa o `formatOfBytes` e a caixa de entrada do "Abrir com" da F8) dá mais papel à Oli. Em troca, ela quebra a regra "nenhum arquivo JS novo por página": mais 4,9 KB em gzip (o script e o chunk `sniff`), e as requisições vão de 4 para 6. Ela também repete a zona de soltar da página de ferramenta.
+- **As contagens do H1** seguem a conta da página Sobre de cada idioma: 50 em en (8 + 12 + 18 + 11 + 1), 29 em pt e 39 em es. O registro `HUB_MONEY_IDS` tem 14 calculadoras de dinheiro em en e es; as 4 variantes de hipoteca e de saldo final são presets. A F13 decide se elas entram na conta, com um §.
+- **Todo número das faixas e das descrições tem fonte no repositório:** o medido (o `data/guides-measured.json`), o exato (o preset de 1280×720, o AES-256 do proteger PDF) ou o exemplo (`fixtures/calc/`). A exceção é o "2,6 MB → 717 KB" do comprimir, que vem do diagnóstico da F10, fora do Git: a F13 grava esse número numa fixture antes de usá-lo.
+- **Os anúncios da home:** caixas só no celular ou só a partir de 768 px (`fo-mobile-only` e `fo-desktop-only`), porque com uma posição fixa os 1.110 px não valem em todas as larguras. As duas laterais ficam 800 px uma da outra na home (uma tela a 1280×800, nunca as duas à vista); a seção B não fixa esse número, e o mapa geral (§ 361) usa 1.200 px. A F12 escolhe um número só.
+
+## § 371 · A página de ferramenta: a alternativa A e o 1º anúncio depois do "Como usar" (F10, UX-04)
+
+- **A recomendação é a A** ("um lugar só, mais firme", a água). O retângulo tem a mesma altura em todos os estados: 356 px no celular e 340 a partir de 768. O resultado é o mar que subiu, com a placa também a 360. Uma faixa de altura fixa abaixo do retângulo mostra as opções e, no resultado, os chips e o "Ajustar". O antes e depois abre só quando a pessoa pede.
+  - **O que a medida do protótipo dá:** o Baixar termina em 440 px (en) e em 486 (pt, es), acima do topo do aviso de hoje (532 e 510); os chips ficam a 158 a 182 px do Baixar; a preset em pt vai até 696 px; o CLS da interação esperado é 0,00.
+  - **O custo:** M, dentro das duas ilhas que já existem, sem arquivo novo.
+  - **A alternativa B** (o papel com a dobra, com a bandeja ao lado no computador e as abas no celular) é G e deixa o Baixar a 8 px do aviso no celular.
+- **O que muda no design system:**
+  - a água da DropZone em repouso sobe de 12 % para 30 %, e com o arquivo em cima, de 38 % para 60 %;
+  - no WaterLevel, a Oli fica no canto, e não na superfície;
+  - a placa fica `aria-hidden`, porque repete o número da fala.
+
+  Os README da DropZone e do WaterLevel mudam com §, se o Victor escolher.
+- **O 1º anúncio de conteúdo vai para depois do "Como usar".** A seção B diz "depois dos chips", e o mapa (§ 361) mediu assim. Na A, os chips ficam dentro da faixa colada no resultado, e o anúncio logo depois dela cairia na primeira tela a 1280 (D-55). Depois do "Como usar", ele fica em y 1.085 no comprimir e em y 949 no juntar, a 1280. Se o Victor escolher a A, a F12 põe o 1º anúncio da ferramenta depois do primeiro bloco de conteúdo; a densidade do mapa não piora, porque a contagem e a altura do `<main>` são as mesmas.
+- **No juntar,** a alça (pegar com espaço) sai, e as setas da linha cobrem o teclado e a WCAG 2.5.7. Se a revisão achar regressão, a alça fica só a partir de 768 px.
+
+## § 372 · O aviso de cookies compacto (F10, UX-09)
+
+- **O card fica no mesmo lugar, mais baixo:**
+  - o texto em `small` (14/20 px) e em duas linhas a 360 px nos três idiomas, com a Figtree e com a Figtree Fallback;
+  - 128 px de altura a 360×740 (hoje são 200 e 222), ou 16,5 % da tela;
+  - 360 px de largura a partir de 768 px (hoje são 440);
+  - os dois botões iguais, lado a lado.
+- **O texto repete o selo da própria página:** arquivo, números ou o texto do QR. Hoje as calculadoras dizem "seu arquivo não sai do aparelho" logo abaixo do selo "seus números" (D-29, D-45). Isso muda uma linha do README do CookieNotice: "lembra que o arquivo não sai do aparelho" passa a "repete o selo da página". O "aceitando ou não" sai do card porque não cabe em duas linhas em pt e es; as razões ficam na Privacidade.
+- **O `keep()` no script inline:** com o aviso aberto, um ResizeObserver no `#main` tira de baixo dele o elemento focado que se mexeu sem o foco mudar.
+  - **A causa achada para o D-01 e o D-10:** no erro, o Preact reaproveita o mesmo `<button>` (`ImagePanel.tsx:843` e `:851`), o foco não muda de elemento e o `focusin` do aviso nunca dispara.
+  - **O F3 f-06:** o `resize` e o ResizeObserver passam a valer também no aviso reaberto.
+- **O que continua igual:** o aviso não bloqueia, não reserva espaço no fim da página (§ 91 e § 106), usa a `Figtree Steady` e fica acima da âncora.
+- **A saída recusada:** o aviso no fluxo, depois da ferramenta (a (b) da F4-F7 f-1). Ela empurraria a página na primeira visita e reabriria o espaço reservado que o Victor recusou duas vezes.
+- **O que ainda depende de outros itens:**
+  - o número das calculadoras a 360 só sai de baixo do aviso quando o UX-12 o sobe para acima de 596 px;
+  - a 320×640, o "Escolher" do pt e do es espera o UX-04;
+  - na rolagem 0, a 1ª caixa de conteúdo precisa ficar a 150 px do aviso aberto (y ≥ 882 a 360×740 e y ≥ 934 a 1280×800), e é a F12 que confere.
+
+## § 373 · A Oli por estado, com laço curto (F10, UX-10, F3 d-02)
+
+- **A saída A da F3 d-02:** cada movimento que começa sozinho para antes de 5 s. O maior acaba em 3.120 ms, e nenhum roda aos 5,5 s. A `wave` faz um aceno e para, e um aceno curto volta no `:hover` e no `:focus-within`. O vapor da `coffee` faz dois ciclos e para visível. A `swim` só aparece com o WaterLevel (depois de 400 ms), e a `cheer` dura 0,6 s, uma vez.
+- **As nove poses ganham uma reação por estado:** `wave` na espera, `gulp` com o arquivo em cima, `swim` na água, `cheer` no resultado, `oops` no erro, `coffee` no apoio, `buoy` offline, `lost` na 404 e `peek` na busca vazia. A `oops`, a `buoy`, a `lost` e a `peek` hoje não reagem a nada.
+- **O custo:** só CSS, só `transform` e `opacity`, nenhum JS, nenhuma requisição e CLS 0. Com o movimento reduzido, não há nenhuma animação, e o quadro parado é o mesmo do movimento.
+- **A mudança de regra:** a regra "Movimento" do design system ("loops com `ease-in-out`") passa a dizer que nenhum laço que começa sozinho passa de 5 s.
+- **Duas pegadinhas:**
+  - a animação do vapor mira o `<path>` do `<symbol>` dentro do sprite, então o seletor precisa pendurar num ancestral do sprite;
+  - trocar a lista `animation` de [a] para [a, b] preserva a animação `a` e só começa a `b`.
+
+## § 374 · As peças do PDF (F10, UX-11)
+
+- **O `fo-btn--sm` sai das quatro peças de PDF** (F5a D-12), que ficam com 52 px. A sugestão da pendência, 48 px só no celular, reprova no verificador da F10, que exige 48 px também a 1280. O único `--sm` que sobra é o "Copiar código" do Pix, que o UX-05 também tira.
+- **A caixa "Pular a primeira página" vira um OptionGroup** ("Primeira página: Numerar / Pular", F5a F-11). Ela é a única caixa de seleção nativa do site, e o design system já tem a peça para escolhas de 2 a 4. Aceitar a caixa nativa estilizada fica como a alternativa.
+- **O aviso da Sign e o do Compress "forte" viram a nota do design system** (`brand-soft` e o ícone `info`, F5a F-10). Na alternativa A, a frase do README do OptionGroup "avisa antes, em OliMessage info" passa a "numa nota", o que muda uma regra; a alternativa B segue o README, com a Oli `wave`.
+- **As setas do Juntar e do Organizar viram `fo-btn--icon`** com traço e lábio (D-23), e as desativadas seguem o estado desabilitado do README. O UX-04 usa as mesmas.
+- **A página escolhida ganha um ícone `check`** além da cor (D-7, WCAG 1.4.1), e a borda dela não passa da dobra (F-8).
+- **A dobra do FileCard no painel ganha a cor do painel** (F-7). O FileCard de PDF ganha o ícone `pdf` no lugar do quadrado vazio (F-6).
+- **Uma pegadinha:** o `.fo-page` do `bundle.css` (a prévia do ToolPage, com 360 px de largura) colide com a célula da grade de páginas do site.
+
+## § 375 · As calculadoras e o QR (F10, UX-12)
+
+- **O resultado e o Baixar PDF acima da dobra a 360,** com o Baixar em bloco (D-30, D-31, D-39, D-44). O número do ResultHero termina acima de 596 px, para o aviso compacto (UX-09) não o cobrir.
+- **O erro de faixa avisa que o número está velho e não empurra o card** (D-34, D-35, D-41). A borda de erro tem 2 px mais 1 px de `box-shadow`, para o campo não crescer.
+- **A F4 ACE-11:** o campo culpado ganha `aria-invalid` e um `aria-describedby` para a frase do herói, sem repetir a frase.
+- **A F4 ACE-8:** o botão do CSV ganha um verbo ("Baixar CSV"), e o do cronograma fica com um texto fixo e o chevron que gira com o `aria-expanded`.
+- **A F4 ACE-9:** a tabela aberta ganha o cabeçalho de linha, sem o `sticky` herdado do `.fo-amort th`.
+- **A Oli `wave` senta na borda do ResultHero** (G-08), a 150 px de qualquer anúncio. O H2 em Figtree vira Fredoka (G-19, D-46).
+- **O token novo:** `--proposta-danger-on-deep` (`#FF8A80`), para o ícone de alerta sobre o `deep`. O `danger` tem só 2,45:1 ali no tema claro.
+- **A F7 f-10 tem duas saídas:**
+  - **A:** esconder o Baixar até haver código, como diz o README do Button;
+  - **B:** aceitar o Baixar desabilitado e registrar.
+
+  A recomendada é a A. A mesma regra vale para o Baixar PDF das calculadoras, ligado pelas § 139 e § 276.
+- **A ordem na F13:** o bloco dos rótulos (a BTU, a Paint, a Ovulation e o es E-2) e o do QR, que são P, podem ir antes, sozinhos.
+
+## § 376 · A página de guia (F10, UX-13)
+
+- **Uma ficha "o que medimos" logo abaixo do H1,** com dois ou três números em `number-md` (G-17). A ferramenta vem antes da prosa longa: o "Escolher" vai de y 1.338 para y 898 a 360. A assinatura cabe numa linha só (F5b F-13, G-23).
+- **O resultado não empurra o texto:** a caixa reservada é a mesma da ilha da página de ferramenta (UX-04), e o CLS da interação fica em até 0,05.
+- **A tabela ganha uma pista de rolagem** (F5b F-2): a sombra de borda feita com token, no traço tracejado da DropZone.
+- **A repetição da primeira coluna sai** (a metade dos guias da F4 ACE-9): um `tbody` por valor repetido, com `th scope="rowgroup"` e o `th scope="row"` na célula que separa as linhas.
+- **O que muda no `gate:conteudo`** (§ 184, decisão 4 da F5b): o `checkFileGuide` passa a pedir a ordem trilha, H1, assinatura, ficha, ferramenta, introdução, anúncio, medidas, fontes e relacionadas, e procura o link da ferramenta no texto do guia. O `dinheiro-saude` só confere o bloco `[data-ymyl="reviewed"]` e não olha a posição, então a assinatura numa linha não fere o portão.
+- **Os anúncios pelo mapa:** a densidade fica em 11,2 % e em 13,5 % na conservadora a 360.
+- **Uma dependência:** com a ferramenta mais alta a 1280, o aviso de cookies de hoje cobriria dois terços do "Escolher" na primeira visita, então o UX-09 vem junto ou antes.
+
+## § 377 · O resultado para a próxima ferramenta e o soltar em qualquer lugar (F10, UX-14 e UX-18)
+
+- **O UX-14:** o chip de próximo passo leva o resultado pela caixa da F8.
+  - **O que muda no código:** o `takeInbox` passa a devolver `{files, from, lost}`, e o `sessionStorage` ganha o `from`.
+  - **A caixa vazia** (a Oli `lost`, "Escolher imagens" e "Voltar para o Comprimir imagem") é um estado novo da DropZone, que ganha uma linha no README dela.
+  - **A privacidade:** nada sai do aparelho, e a caixa é apagada na entrega ou depois de 1 h, pelo service worker. A Privacidade ganha um parágrafo nos três idiomas, e o GA4 não muda.
+  - **A ordem:** ele vem junto com o UX-04 ou logo depois.
+- **O UX-18:** a alternativa A aceita o soltar em todo o conteúdo do site e acende a zona onde ela estiver; em cima de um anúncio, a zona volta ao repouso. A alternativa B, o véu na tela inteira, cobre os anúncios durante o arrasto, e nenhuma política lida o autoriza. Ela põe a Oli em cima de um anúncio coberto, então fica como mudança de regra.
+- **Para o PENDENCIAS, qualquer que seja a escolha:** hoje o `dragover` do documento promete "copiar" na página inteira, e o `drop` fora da ilha some em silêncio (`ImagePanel.tsx:587-596`, `PdfPanel.tsx:658-666`). A correção mínima é o `dropEffect = 'none'` fora da ilha, com um teste.
+
+## § 378 · O mar nos hubs e no escuro (F10, UX-15)
+
+- **A alternativa A dos hubs, o aquário, fica dentro das regras:** a borda de baixo da faixa em onda (a forma do rodapé, como elemento, nunca imagem de fundo), a água no fundo da faixa e a Oli `swim`, que para depois de três balanços (4,8 s). No escuro, a faixa é `surface`, com a cor cheia só na crista (G-21).
+- **A alternativa B dos hubs, a cena, muda a regra:** cinco SVG inline de 0,55 a 0,72 KB, `aria-hidden`, só com tokens, nunca o LCP e nunca atrás de texto. Ela muda "Mar: nenhuma imagem de fundo" e "Nunca: imagem de fundo".
+- **O escuro na alternativa A:** a onda vai para o topo do ResultCard e do ResultHero, para a profundidade se ler pela forma e não pela luminância (G-07). A crista fica em `stroke`, com 4,07:1 contra o chão.
+- **O escuro na alternativa B, o mar à noite, muda a regra "`deep` igual nos dois temas":**
+  - `--proposta-mar-noite`: `#051230` no escuro, 1,01:1 abaixo do chão;
+  - `--proposta-crista`: `#9DB7DA` no escuro;
+  - os sete pares (UX15-N1 a UX15-N7) passam nos dois temas.
+- **A sobreposição:** a borda de cima do ResultCard em onda é a mesma do UX-04 A. Se os dois forem escolhidos, a F13 constrói uma vez.
+
+## § 379 · Os ícones próprios e as páginas institucionais (F10, UX-16 e UX-17)
+
+- **Os ícones:**
+  - **27 ícones novos** em `docs/propostas/ux-v2/icons/`, no formato dos 39 do design system (grade de 24 px, traço de 2 px, `stroke="#0F1B2D"` no `<svg>` raiz, como o `tests/unit/icons.test.ts` confere): carro, cartão, porcentagem, área, tinta, saco, pá, balança, termômetro, calendário, carrinho de bebê, entre outros, e o `file-drop` da DropZone (G-11).
+  - **O mapa ferramenta → ícone** está no `icons.html`: as 50 ferramentas de en, as 29 de pt e as 39 de es, com 33 trocas.
+  - **Os ícones do UX-01** (menu, sol, lua, sistema e livro) usam `currentColor` no `<svg>` raiz. Na F11, eles vão para `docs/design/assets/Icons/` no formato do design system, com o traço `#0F1B2D`, ou o teste reprova.
+- **As páginas institucionais:**
+  - **a 404:** a Oli `lost` de 128 px ou mais numa faixa de água, a busca sem a sombra de pop e três links de ferramentas reais (G-13);
+  - **a Sobre:** quatro números em `number-md`, por idioma, tirados dos registros no build. O 11 de casa e saúde só existe em en; em pt e es, o quarto número é "3 idiomas" (G-14);
+  - **o rodapé no celular:** cada categoria num `<details>`, com o hub como link principal (G-15);
+  - **a 1280, sem a lateral:** a coluna da direita das páginas livres recebe o cartão dos números, ou a coluna se centra (G-06).
+- **As duas Olis** param depois de 4,8 s (F3 d-02).
+
+## § 380 · As screenshots e o verificador dos protótipos (F10, decisões 13 e 15)
+
+- **A screenshot fotografa a página do site, sem o controle e sem a especificação.** O `prototipos.mjs --shots` mira o `.proto-page` de cada protótipo, a 360×740 e a 1280×800, nos dois temas, no Chromium, em JPEG de qualidade 80 e escala 1. A folha da Oli e o `index.html`, que não têm `.proto-page`, saem inteiros.
+- **Só a primeira variante do `<meta name="proto-shots">` de cada protótipo** (`--shots-max 1`). Com todas as variantes que os agentes pediram, as screenshots passariam dos 25 MB, somadas às capturas do diagnóstico.
+- **Quando uma screenshot passa de 500 KB,** ela continua em qualidade 80 e é cortada nas primeiras telas.
+- **O `index.html` é gerado do README** pelo `.cache/f10/gen-index.mjs`: cada item com o link do README, os protótipos nos dois temas, os estados que o item cita e as screenshots. Assim toda imagem de `prototipos/` tem referência.
+- **O filtro de cor do `contraste.mjs`** passou a tirar o sprite inteiro da Oli (`<svg class="fo-sprite">`), com as peças `oli-p…` de cores fixas. Antes, toda página com a Oli reprovava pela cor literal das peças, que é permitida pelo design system ("exceto dentro da Oli").

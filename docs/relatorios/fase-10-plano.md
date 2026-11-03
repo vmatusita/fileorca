@@ -186,8 +186,16 @@ Cada decisão da ficha ganha um §, em ordem; as novas vêm depois.
 | 342 a 357 | As decisões 1 a 16 da ficha, uma por §, com o desvio das screenshots (decisão 1) e as escolhas feitas dentro de cada uma |
 | 358 | As URLs das tarefas e o guia do diagnóstico |
 | 359 | Sem dados do GA4 e do Search Console |
-| 360 | As alturas da densidade: o AdSlot de 300 px, o multiplex de 1.700 px e a âncora de 100 px |
-| 361 em diante | O mapa no celular, a leitura de "doação × anúncio", o critério de "mais único" de cada par, o destino das pendências e o que mais a run decidir |
+| 360 | Como a densidade foi medida na prática (as alturas e as leituras estão na § 351) |
+| 361 | O mapa de anúncios: o que muda da seção B, e a alternativa B |
+| 362 | "Nenhum texto liga doação a anúncio": a leitura |
+| 363 e 364 | O cabeçalho (UX-01) e o hub de guias (UX-02) |
+| 365 a 367 | O destino das 37 pendências, a lista "para avaliar" e o que torna cada alternativa do FileOrca |
+| 368 a 371 | O café (UX-05), a parede (UX-06), a home (UX-03) e a página de ferramenta (UX-04) |
+| 372 a 379 | Os itens UX-09 a UX-18 |
+| 380 | As screenshots e o verificador dos protótipos |
+
+(Esta tabela foi atualizada no fim da fatia 7, com a numeração final.)
 
 ## 11. Riscos e a válvula
 
