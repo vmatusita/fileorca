@@ -146,8 +146,10 @@ html[data-state="edit"] .calc-editing .fo-input { outline: var(--stroke-3) solid
 @media (max-width: 479px) { .fo-amort--flat th, .fo-amort--flat td { padding-inline: var(--space-2); } .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
 /* Ovulation (F7 obs 2): below 480 px a date is short and breaks only after its comma, never inside "Nov 1". */
 .calc-date { white-space: nowrap; }
-/* Three columns of the same width: the long range no longer takes the width of the two single dates. */
+/* Fixed columns: the range (which wraps anyway, between "Oct 26" and "to 31, 2026") takes 30 %, and each single date
+   gets the 35 % that keeps "Nov 15, 2026" on one line at 360 px (at 320 px it breaks after the comma). */
 .calc-amort--even { table-layout: fixed; }
+.calc-amort--even thead th:first-child { width: 30%; }
 
 /* ---------- 7. Labels with the example tag (Idiomas E-2, F7 obs 3) and the board of parts ---------- */
 /* Below 400 px the tag is compact: 6 px from the label, 4 px of side padding and less letter-spacing (about 12 px less). */
