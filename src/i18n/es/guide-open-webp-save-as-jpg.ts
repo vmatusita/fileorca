@@ -1,85 +1,84 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Open WebP Images and Save Them as JPG',
-  description: 'What a WebP file is, where it opens without extra software, and what changes in size, animation and location when you save it as a JPG.',
-  h1: 'How to open WebP images and save them as JPG',
-  lead: 'You saved an image from a website and got a .webp file that your other apps will not take. Here is what it is, where it opens, and how to turn it into a JPG.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Cómo abrir imágenes WebP y guardarlas como JPG',
+  description: 'Qué es un archivo WebP, dónde se abre sin programas adicionales y qué cambia en el tamaño, la animación y la ubicación cuando lo guardas como JPG.',
+  h1: 'Cómo abrir imágenes WebP y guardarlas como JPG',
+  lead: 'Guardaste una imagen de un sitio web y te quedó un archivo .webp que tus otras apps no aceptan. Aquí ves qué es, dónde se abre y cómo convertirlo en un JPG.',
+  changed: 'Primera versión, con las mediciones del {date}.',
   intro: [
-    'WebP is an image format made by Google for the web. Websites use it because it is small, so pages load faster, and that is why a picture you save from a browser can arrive as a .webp file instead of a JPG or a PNG.',
-    'The browser you saved it from shows it without trouble. The trouble starts when the file leaves the browser: an older photo editor, an upload form that asks for a JPG, or a print shop may refuse it. Saving it as a JPG makes it open almost anywhere, but it does not make it better, and it does not make it smaller.',
+    'WebP es un formato de imagen que Google creó para la web. Los sitios web lo usan porque pesa poco y las páginas cargan más rápido, y por eso una imagen que guardas desde el navegador puede llegar como archivo .webp en lugar de JPG o PNG.',
+    'El navegador desde el que la guardaste la muestra sin problema. El problema empieza cuando el archivo sale del navegador: un editor de fotos antiguo, un formulario que pide un JPG o una tienda de impresión pueden rechazarlo. Guardarlo como JPG hace que se abra casi en cualquier lugar, pero no lo mejora ni lo hace más pequeño.',
   ],
-  toolHeading: 'Save your WebP images as JPG here',
-  toolIntro: 'Drop one WebP or a whole batch. Each one becomes a JPG in this browser tab, so nothing is uploaded, and a batch comes back as one ZIP. You can choose PNG instead if you need the transparency kept.',
+  toolHeading: 'Guarda tus imágenes WebP como JPG aquí',
+  toolIntro: 'Suelta un WebP o todo un lote. Cada uno se vuelve JPG en esta pestaña del navegador, así que nada se sube, y un lote llega en un solo ZIP. Si necesitas conservar la transparencia, puedes elegir PNG.',
   sections: [
     {
-      heading: 'What a WebP file is',
+      heading: 'Qué es un archivo WebP',
       paragraphs: [
-        'Google describes WebP as a format with both lossy and lossless compression. Lossy WebP plays the part of a JPG, for photos; lossless WebP plays the part of a PNG, for graphics. It can also keep transparency, and it can hold an animation, the way a GIF does.',
-        'Google reports that lossy WebP images are {googleSmaller} smaller than comparable JPG images at the same visual quality. That is the reason websites prefer it: the same picture costs less to download.',
+        'Google describe WebP como un formato con compresión con pérdida y sin pérdida. El WebP con pérdida cumple el papel de un JPG, para fotos; el WebP sin pérdida cumple el papel de un PNG, para gráficos. También puede conservar la transparencia y guardar una animación, como un GIF.',
+        'Google informa que las imágenes WebP con pérdida son {googleSmaller} más pequeñas que imágenes JPEG comparables con la misma calidad visual. Por eso los sitios web lo prefieren: la misma imagen cuesta menos de descargar.',
       ],
     },
     {
-      heading: 'Where WebP opens without a converter',
+      heading: 'Dónde se abre un WebP sin conversor',
       paragraphs: [
-        'On Apple devices, WebP support came with Safari 14, which shipped with iOS 14 and macOS Big Sur 11, according to Apple’s release notes. On Windows, Microsoft’s WebP Image Extension lets File Explorer, Photos and other Windows apps show WebP images.',
-        'So if you only need to look at the picture, you may not need to convert anything. Drag the file into the browser you saved it from and it opens. You need a JPG when the file has to go somewhere that does not take WebP.',
+        'En los dispositivos Apple, la compatibilidad con WebP llegó con Safari 14, que venía incluido en iOS 14 y macOS Big Sur 11, según las notas de la versión de Apple. En Windows, la Extensión de imagen WebP de Microsoft permite ver imágenes WebP en el Explorador de archivos, en Fotos y en otras aplicaciones de Windows.',
+        'Así que, si solo necesitas ver la imagen, quizá no tengas que convertir nada. Arrastra el archivo al navegador desde el que lo guardaste y se abre. Necesitas un JPG cuando el archivo tiene que ir a un lugar que no acepta WebP.',
       ],
     },
     {
-      heading: 'What we did to test it',
+      heading: 'Cómo lo probamos',
       paragraphs: [
-        'We took our {photos_word} real phone photos, saved them as WebP with the engine of this site at its standard WebP quality, and then saved those WebP files as JPG with the tool above. We also ran a WebP that carries GPS data and an animated WebP through the same tool.',
-        'Our WebP copies weighed {webpTotal}, against {jpgTotal} for the original JPGs from the cameras. Do not read too much into that gap: the cameras saved their JPGs at a higher quality than our WebP copies, so this is not a fair race between the formats. What it does show is what our WebP copies kept at the quality of this site’s encoder: {webpRatio} of the weight of the originals.',
+        'Tomamos nuestras {photos_wordf} fotos reales de celular, las guardamos como WebP con el motor de este sitio en su calidad WebP estándar y luego guardamos esos archivos WebP como JPG con la herramienta de arriba. También pasamos por la misma herramienta un WebP que lleva datos GPS y un WebP animado.',
+        'Nuestras copias WebP pesaron {webpTotal}, frente a {jpgTotal} de los JPG originales de las cámaras. No le des demasiada importancia a esa diferencia: las cámaras guardaron sus JPG con más calidad que nuestras copias WebP, así que esta no es una carrera justa entre formatos. Lo que sí muestra es cuánto conservaron nuestras copias WebP con la calidad del codificador de este sitio: el {webpRatio} del peso de los originales.',
       ],
     },
     {
-      heading: 'The JPG is bigger than the WebP',
+      heading: 'El JPG pesa más que el WebP',
       paragraphs: [
-        'When we saved the WebP copies as JPG, the JPGs weighed {backTotalChromium}, which is {backRatioChromium_times} the WebP files. A JPG packs a picture less tightly than WebP, and the tool saves it at a high quality, so the detail that is left is kept rather than squeezed again.',
-        'The JPGs also weighed {backVsOriginalChromium} of the original camera JPGs, and they look like the WebP, not like the original. Converting cannot bring back detail the WebP had already dropped. If you have the original photo, use it instead of the WebP.',
+        'Cuando guardamos las copias WebP como JPG, los JPG pesaron {backTotalChromium}, es decir, {backRatioChromium_times} lo que pesaban los archivos WebP. Un JPG guarda la imagen con menos compresión que WebP, y la herramienta lo guarda con alta calidad, así que el detalle que queda se conserva en lugar de comprimirse otra vez.',
+        'Los JPG también pesaron el {backVsOriginalChromium} de los JPG originales de las cámaras, y se ven como el WebP, no como el original. Convertir no puede recuperar el detalle que el WebP ya había descartado. Si tienes la foto original, úsala en lugar del WebP.',
       ],
     },
     {
-      heading: 'Animation and transparency',
+      heading: 'Animación y transparencia',
       paragraphs: [
-        'A JPG holds one still picture. Our animated WebP has {animatedFrames} frames, and the JPG kept only the first one; the result says so next to the file. If you need the animation, keep the WebP, or turn it into a video or a GIF with another tool.',
-        'A JPG has no transparency either. Transparent parts of a WebP turn white in the JPG. If the image is a logo or a cut-out that needs its transparent background, choose PNG in the tool instead.',
+        'Un JPG guarda una sola imagen fija. Nuestro WebP animado tiene {animatedFrames} cuadros, y el JPG conservó solo el primero; el resultado lo indica junto al archivo. Si necesitas la animación, conserva el WebP o conviértelo en video o en GIF con otra herramienta.',
+        'Un JPG tampoco tiene transparencia. Las partes transparentes de un WebP quedan blancas en el JPG. Si la imagen es un logotipo o un recorte que necesita su fondo transparente, elige PNG en la herramienta.',
       ],
     },
     {
-      heading: 'The location stays behind',
+      heading: 'La ubicación se queda atrás',
       paragraphs: [
-        'The WebP format can carry Exif and XMP metadata, according to Google’s container specification, so a WebP can hold the GPS position and the camera details of a photo. Our test WebP with GPS data came out of the tool as a JPG with {exifGpsAfterChromium_word} GPS data.',
-        'That happens because each JPG is written from the pixels of the image, not copied from the file. That is what you want when you share a picture and not its details, but it also means the JPG is a new file: keep the WebP if you need the original as it was.',
+        'El formato WebP puede llevar metadatos Exif y XMP, según la especificación del contenedor de Google, así que un WebP puede guardar la posición GPS y los datos de la cámara de una foto. Nuestro WebP de prueba con datos GPS salió de la herramienta como un JPG con {exifGpsAfterChromium_word} datos GPS.',
+        'Eso pasa porque cada JPG se escribe a partir de los píxeles de la imagen, y no se copia del archivo. Es lo que quieres cuando compartes una imagen y no sus datos, pero también significa que el JPG es un archivo nuevo: conserva el WebP si necesitas el original tal como era.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Our {photos_word} real phone photos, saved as WebP by the engine of this site, then saved as JPG with the tool above. The share in brackets is against the original camera JPG.',
-  measuredNote: 'Measured on {date}. The WebP copies were written in Node with the WebP encoder of this site’s engine; the JPGs were made through the WebP to JPG page in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes. The table shows Chromium.',
+  measuredHeading: 'Lo que medimos',
+  measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, guardadas como WebP por el motor de este sitio y luego como JPG con la herramienta de arriba. El porcentaje entre paréntesis es frente al JPG original de la cámara.',
+  measuredNote: 'Medido el {date}. Las copias WebP se escribieron en Node con el codificador WebP del motor de este sitio; los JPG se hicieron con la herramienta WebP a JPG de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}, que dieron los mismos tamaños. La tabla muestra Chromium.',
   tables: [
     {
-      heading: 'Our photos as WebP and back to JPG',
-      caption: 'Each photo: the original JPG, its WebP copy and the JPG made from the WebP, with the share of the original size',
-      head: ['Photo', 'Original JPG', 'As WebP', 'Back to JPG'],
+      heading: 'Nuestras fotos en WebP y de vuelta a JPG',
+      caption: 'Cada foto: el JPG original, su copia WebP y el JPG hecho a partir del WebP, con el porcentaje del tamaño original',
+      head: ['Foto', 'JPG original', 'En WebP', 'De vuelta a JPG'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fuentes',
   sources: [
-    { id: 'google-webp', label: 'Google for Developers: An image format for the Web', href: 'https://developers.google.com/speed/webp?hl=en', read: '2026-11-01' },
-    { id: 'google-webp-container', label: 'Google for Developers: WebP Container Specification', href: 'https://developers.google.com/speed/webp/docs/riff_container?hl=en', read: '2026-11-01' },
-    { id: 'ms-webp', label: 'Microsoft Store: WebP Image Extension', href: 'https://apps.microsoft.com/detail/9pg2dk419drg?hl=en-US&gl=US', read: '2026-11-01' },
-    { id: 'apple-safari', label: 'Apple Developer: Safari 14 Release Notes', href: 'https://developer.apple.com/documentation/safari-release-notes/safari-14-release-notes', read: '2026-11-01' },
+    { id: 'google-webp', label: 'Google for Developers: Un formato de imagen para la Web', href: 'https://developers.google.com/speed/webp?hl=es-419', read: '2026-11-03' },
+    { id: 'google-webp-container', label: 'Google for Developers: Especificación del contenedor WebP', href: 'https://developers.google.com/speed/webp/docs/riff_container?hl=es-419', read: '2026-11-03' },
+    { id: 'ms-webp', label: 'Microsoft Store: Extensión de imagen WebP', href: 'https://apps.microsoft.com/detail/9pg2dk419drg?hl=es-US&gl=US', read: '2026-11-03' },
+    { id: 'apple-safari', label: 'Apple Developer: Safari 14 Release Notes (versión en español)', href: 'https://developer.apple.com/la/documentation/safari-release-notes/safari-14-release-notes', read: '2026-11-03' },
   ],
   facts: {
-    googleSmaller: { text: '25 to 34%', source: 'google-webp' },
+    googleSmaller: { text: 'entre un 25 y un 34 %', source: 'google-webp' },
   },
   names: ['Safari 14', 'iOS 14', 'macOS Big Sur 11'],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Herramientas y guías relacionadas',
 };
 
 export default texts;
