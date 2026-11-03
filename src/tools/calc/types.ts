@@ -161,6 +161,8 @@ export interface CalcSharedTexts {
   copyThis: string;
   /** The PDF maker did not load (offline, or an update replaced it): reload the page. */
   exportFailed: string;
+  /** The same, offline, when the PDF maker was never kept (F8; DECISOES § 292): it needs the internet once. */
+  exportOffline: string;
   /** Shown while a field is wrong: the result stays the last one that worked. */
   stale: string;
   /** Added to a field's error when what is typed is not a number of the page's language: how it writes decimals. */

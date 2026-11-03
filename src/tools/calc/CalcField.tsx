@@ -12,7 +12,7 @@ import type { ComponentChildren } from 'preact';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import { parseScaled, type NumberLang } from '../../calc/parse.ts';
-import { decimalsOf, display, inRange } from './form.ts';
+import { SETTLE_MS, decimalsOf, display, inRange } from './form.ts';
 import type { NumberSpec } from './types.ts';
 
 export interface CalcFieldProps {
@@ -52,6 +52,8 @@ export default function CalcField(props: CalcFieldProps) {
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const settle = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(settle.current), []);
 
   // A value that changes from outside (the scenario link, the unit of the down payment) shows in the
   // field, unless the person is typing in it right now.
@@ -115,11 +117,16 @@ export default function CalcField(props: CalcFieldProps) {
               const text = event.currentTarget.value;
               setDraft(text);
               const parsed = read(text);
-              setWrong(parsed === null);
+              // A value out of the range is said after a pause, not on the way to a valid one (DECISOES § 305).
+              window.clearTimeout(settle.current);
+              if (parsed === null) settle.current = window.setTimeout(() => setWrong(true), SETTLE_MS);
+              else setWrong(false);
               if (parsed !== null && parsed !== value) onValue(parsed);
             }}
             onBlur={(event) => {
               const parsed = read(event.currentTarget.value);
+              window.clearTimeout(settle.current);
+              setWrong(parsed === null);
               if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />

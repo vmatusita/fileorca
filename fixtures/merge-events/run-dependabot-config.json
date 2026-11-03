@@ -1,0 +1,31 @@
+{
+  "description": "PR que mexe só em .github/dependabot.yml, que não é workflow",
+  "event": {
+    "action": "synchronize",
+    "number": 216,
+    "pull_request": {
+      "number": 216,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "ajuste-dependabot",
+        "sha": "00d8f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    ".github/dependabot.yml"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Branch de run (ajuste-dependabot) com o verificar verde: merge automático."
+  }
+}

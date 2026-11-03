@@ -1,0 +1,581 @@
+ultracode
+
+# Missão
+
+Rode a F8 do FileOrca, o piloto automático: o site passa a rodar sem o Victor. Ao terminar:
+
+- **a revisão das F4 a F7** rodou no método da F3, sobre a main de hoje, olhando o site como um todo. Nenhum achado crítico ou alto fica aberto, os médios de correção local estão corrigidos, e cada correção tem um teste;
+- **os baixos** estão numa lista única, `docs/PENDENCIAS.md`, com a fonte e a correção proposta de cada um, sem correção nesta run. Entram os novos e os que já estavam pendentes desde a F3;
+- **o Dependabot** está configurado em `.github/dependabot.yml`: npm e GitHub Actions, mensal, um grupo de minor e patch por ecossistema e major em PR própria. Ele foi ensaiado: a leva de minor e patch de hoje passa no `pnpm verificar --sem-playwright`, ou o que a travava está resolvido com §;
+- **a regra de merge** (`scripts/ci/pode-mesclar.ts`) está provada com eventos de exemplo do GitHub: Dependabot patch, minor, minor em grupo e major; branches `fase-*` e `ajuste-*`; e PR que mexe em `.github/workflows/`;
+- **o site é instalável e funciona offline.** Um service worker guarda só arquivos do próprio domínio, das páginas visitadas. Com a rede desligada, no E2E, funcionam:
+  - uma ferramenta de imagem e uma de PDF visitadas e usadas uma vez;
+  - uma calculadora visitada, com o CSV e o PDF;
+  - o QR code.
+
+  Uma página não guardada mostra a página offline do idioma, com a Oli `buoy`. Nada do que a pessoa digitou ou abriu vai para o cache, e uma desativação de emergência está provada;
+- **o compartilhar para a ferramenta funciona no Android.** Com o FileOrca instalado, imagens e PDFs compartilhados abrem a página "Abrir com" do idioma, e o arquivo entra na fila da ferramenta escolhida, sem sair do aparelho;
+- **os avisos chegam ao Victor:**
+  - um `gh workflow run pos-deploy.yml` com um commit que nunca chega e 2 minutos de espera abriu a issue;
+  - uma PR do Dependabot com o CI vermelho abre uma issue;
+- **o `docs/OPERACAO.md`** diz o que fazer em cada alerta e na revisão mensal. Um teste confere que os comandos e os caminhos citados existem;
+- **o CI** cabe no alvo de 700 s por parte, com todas as partes verdes.
+
+Nada é publicado, enviado nem configurado fora do repositório, além do disparo de teste do pós-deploy e da issue que ele abre. O `pnpm verificar` fica verde na sua máquina e em todas as partes do CI. Tudo vai numa PR da branch `fase-08`, com o relatório.
+
+Se a PR mexer em `.github/workflows/`, o job de merge não a mescla e comenta isso na PR: é o esperado. A run termina com a PR pronta e o CI verde, e o merge é do Victor.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, e o shell é o Git Bash. O CI roda em Ubuntu.
+
+A main está em `29afbce`, o merge da F7 (PR #15), ou num commit mais novo. Confira com `git log --oneline -8`.
+
+O que está no ar em fileorca.com:
+
+- em inglês:
+  - imagem: 8 ferramentas, 3 presets e o hub;
+  - PDF: 12 ferramentas e o hub;
+  - dinheiro: 14 calculadoras, 4 presets, o hub e 5 guias;
+  - casa: 6 calculadoras e o hub; saúde: 5 calculadoras e o hub;
+  - 10 guias de arquivo e o gerador de QR code;
+- em pt e es: imagem, PDF, o dinheiro (8 calculadoras adaptadas em pt e 5 traduzidas em es), o Pix (só em pt) e as institucionais;
+- 1.168 testes do Playwright por navegador, num CI de 13 partes.
+
+O que a F8 usa (leia o código antes de planejar):
+
+- **A regra de merge:**
+  - `scripts/ci/pode-mesclar.ts`: o `decide()`, o `fromGhJson()` e o CLI, que grava `merge`, `comment` e `reason` no `GITHUB_OUTPUT`;
+  - `tests/unit/pode-mesclar.test.ts`: 7 testes do `decide()`, com objetos montados à mão;
+  - no `ci.yml`, o job `merge`: ele monta o `pr.json` com `jq` a partir do evento (`HEAD_REF`, `AUTHOR`, `DRAFT` e os arquivos do `git diff --no-renames`) e roda **o `pode-mesclar.ts` da base** (`BASE_SHA`), para uma PR não mudar a própria regra.
+- **O pós-deploy:**
+  - `.github/workflows/pos-deploy.yml`: os gatilhos `push` na main, `workflow_call` e `workflow_dispatch` (entradas `commit` e `wait_minutes`), o checkout da `main` com `fetch-depth: 0` e o passo "Abrir issue" com `if: failure()`;
+  - `scripts/ci/pos-deploy.ts`: o `rev-parse` do commit, o `waitForDeploy` (lê o `build.txt` de produção e usa o `hasCommit`) e o IndexNow, só no sucesso.
+- **O manifest:** `src/pages/manifest-[lang].webmanifest.ts`, um por idioma (`scope: '/'`, `start_url` da home do idioma, sem `id` e sem `share_target`), ligado no `BaseLayout.astro`.
+- **Os cabeçalhos:** `src/platform/headers.ts` (`/_astro/*` com `immutable`, `/build.txt` com `no-store`) e o `gate:cabecalhos`.
+- **O Worker sem código:** o `scripts/gates/worker.ts` reprova `_worker.js`, `functions/`, `_routes.json` e qualquer mudança no `wrangler.jsonc`.
+- **O orçamento** (`tests/e2e/lib/budgets.ts`):
+  - até 8 requisições do próprio domínio na primeira página e 3 novas na seguinte;
+  - 2 arquivos JS por página de ferramenta;
+  - nenhuma requisição cujo endereço case com `/worker|\.wasm$/` antes do primeiro arquivo.
+- **A entrada de arquivos:**
+  - `src/tools/image/ImagePanel.tsx`, `src/tools/image/paste.ts` e `src/tools/pdf/PdfPanel.tsx`: soltar, escolher e colar;
+  - o formato pelos bytes e o que cada ferramenta aceita estão nos registros (`src/tools/image/registry.ts` e `src/tools/pdf/registry.ts`).
+- **A falha de carga:** todo `import()` do motor passa pelo `loading()` (`src/engine/image/errors.ts` e o equivalente do PDF). A falha vira `EngineError('load')`, com a fala "recarregue a página".
+- **O design:**
+  - a pose `buoy` (offline);
+  - o estado offline do `OliMessage` (`docs/design/components/OliMessage/README.md`: `role="status"`, tom `surface`);
+  - a linha "Offline" da tabela de falas do `docs/design/README.md`.
+- **Os idiomas:** as rotas e os slugs em `src/i18n/routes.ts` (`TRANSLATED_PATHS`), os glossários em `docs/i18n/` e a 404 de cada idioma.
+
+O que as fases anteriores deixaram para a F8 (leia as notas nos relatórios da F5b, da F6 e da F7):
+
+- os guias usam os 2 arquivos JS da ferramenta: um guia visitado funciona offline como a ferramenta;
+- o cache nunca guarda a URL com o `#` do link do cenário. Nas de saúde, o `#` leva sexo, idade, medidas e a forma de contar a data do parto;
+- o CSV e o PDF das calculadoras, feitos no aparelho, seguem sem rede;
+- a página offline não mostra calculadora sem o motor;
+- o "hoje" do Due date continua vindo do relógio do aparelho com a página do cache;
+- o QR offline é provado pela leitura do PNG baixado com o `jsqr`.
+
+A nota da F6 falava em guardar todas as páginas de antemão. A ficha manda guardar "as ferramentas visitadas", e a ficha vence (decisão 4).
+
+As pendências que não são desta run vão para a lista única (decisão 3):
+
+- a 2b (§ 85);
+- as decisões do Victor da § 103;
+- as propostas da § 242 e da § 283, se a § 283 não entrar pela decisão 2;
+- o CLS do breadcrumb (e-1 da revisão da F7, § 274);
+- as fontes que não abriram (ACOG CO 700 e DTIC);
+- as worktrees antigas em `.claude/worktrees/`.
+
+# Escopo
+
+Dentro:
+
+1. A revisão das F4 a F7, com as correções (decisão 17).
+2. O `docs/PENDENCIAS.md` (decisão 3).
+3. O `.github/dependabot.yml`, com o ensaio e os testes que travariam a PR mensal (decisões 11 e 12).
+4. A regra de merge provada com eventos de exemplo (decisão 13).
+5. O service worker, a página offline nos três idiomas, o registro, os cabeçalhos, a desativação de emergência e o texto da Privacidade nos três idiomas (decisões 4 a 8 e 18).
+6. O compartilhar: os três manifests, a página "Abrir com" nos três idiomas e a entrada do arquivo nas ilhas de imagem e de PDF (decisões 1, 9 e 10).
+7. O alerta de CI vermelho nas PRs do Dependabot (decisão 14).
+8. A prova do aviso de deploy pelo `workflow_dispatch` (decisão 15).
+9. O `docs/OPERACAO.md` e o teste dele (decisão 16).
+10. A divisão do CI, se a projeção pedir (decisão 2).
+11. A revisão adversarial final do que a F8 mudou.
+12. A seção da F8 no `CLAUDE.md`.
+
+Fora (não toque):
+
+- ferramenta, calculadora, guia ou página de conteúdo nova; pt e es de casa e saúde; a 2b; alemão e francês;
+- a correção dos baixos, que vão para a lista, e as decisões da § 103, que são do Victor;
+- atualizar ou acrescentar dependência nesta PR. O Dependabot atualiza depois do merge, e o ensaio roda numa worktree descartável;
+- botão de instalar próprio, notificação push, sincronização em segundo plano, guardar o site inteiro de antemão e baixar o motor de uma ferramenta que a pessoa não usou;
+- código de Worker, `_worker.js`, `run_worker_first` e COOP/COEP;
+- configuração do repositório no GitHub (alertas e atualizações de segurança do Dependabot, proteção de branch, rótulos): vira tarefa do Victor no `OPERACAO.md`;
+- workflow agendado novo, serviço externo de alerta e o UptimeRobot (que o Victor cria depois da F8);
+- a mudança da chamada do `pode-mesclar.ts` no `ci.yml` (armadilhas);
+- o kit do Product Hunt e o do Show HN. O `launch-kit.test.ts` tem de seguir verde sem mudar o kit;
+- texto de página existente além da Privacidade e do que uma correção da revisão pedir.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 284)
+
+1. **O compartilhar abre a página "Abrir com" (decisão do Victor).**
+   - **Rotas:** uma rota por idioma, com o slug em inglês e os de pt e es pelo glossário (`TRANSLATED_PATHS`).
+   - **A página:** é `noindex`, fica fora do sitemap e do hreflang e não tem anúncio. Só o manifest leva até ela, então o portão de páginas órfãs ganha uma exceção explícita e testada.
+   - **O POST:** o service worker recebe o POST do compartilhar, guarda os arquivos numa caixa de entrada local (decisão 10) e responde 303 para a mesma página, em GET.
+   - **O que ela mostra:**
+     - os arquivos: o nome, o tamanho e o formato lido dos bytes;
+     - as ferramentas que aceitam pelo menos um deles, em dois grupos (imagem e PDF), com o `ToolCard` do design system e quantos arquivos cada uma aceita. Só ferramentas: presets e guias ficam de fora. Tudo sai dos registros, com a mesma regra de formato das ferramentas.
+   - **Escolher:** abre a ferramenta no mesmo idioma. A ilha dela pega os arquivos da caixa pelo mesmo caminho do soltar e do colar, e o que ela não aceita vira a recusa na linha, como hoje. Depois, a caixa é apagada.
+   - **Sem service worker ou com a caixa vazia** (a pessoa abriu o endereço direto): a página explica numa frase e leva aos hubs de imagem e de PDF do idioma.
+   - **Arquivos JS:** a página "Abrir com" carrega no máximo 2. O código que lê a caixa entra na ilha que já existe, sem arquivo novo na página de ferramenta.
+2. **O CI e os workflows (decisão do Victor).**
+   - A run pode mexer em `.github/workflows/`, e o merge da PR fica com o Victor.
+   - Antes de somar specs, projete as partes. Use o `--list` de cada parte e os tempos da [run 41465872919](https://github.com/vmatusita/fileorca/actions/runs/41465872919), a última da F7.
+   - Se alguma parte passar de 700 s na projeção, aplique a proposta da § 283:
+     - o passeio de estados do `a11y.spec.ts` num arquivo próprio, que caia depois do `ads.spec.ts`;
+     - e, se precisar, mais uma parte do WebKit (ou do Chromium).
+   - O `design.spec.ts` e o `image-matrix.spec.ts` nunca ficam na mesma parte do WebKit (§ 142). O `tests/unit/verificar.test.ts` acompanha a nova divisão.
+   - O alerta do Dependabot entra no `ci.yml` (decisão 14).
+3. **Os baixos vão para uma lista única (decisão do Victor).**
+   - O `docs/PENDENCIAS.md` junta:
+     - os baixos e os médios ainda abertos do `REVISAO-F3.md` ao `REVISAO-F7.md`;
+     - os da revisão das F4 a F7 e os da revisão final da F8;
+     - a § 85, a § 103, a § 242, a § 283 (se não entrar), o e-1, as fontes que não abriram e as worktrees antigas.
+   - Cada item tem: o id e a fonte (arquivo e §), a severidade, o defeito numa frase, a correção proposta e quem resolve (uma run curta de ajuste ou uma decisão do Victor).
+   - Agrupe por tipo de run, para uma run de ajuste pegar vários de uma vez.
+   - Nenhum baixo é corrigido nesta run.
+4. **O que fica offline.**
+   - **A página visitada:** ao visitar uma página com rede, o service worker guarda o HTML dela e o que ela pediu ao próprio domínio: os 2 arquivos JS, o CSS, as fontes, o sprite, os ícones e o manifest.
+   - **O motor:** os codecs, os `.wasm`, os dados do PDF.js e o qpdf entram no cache quando a ferramenta os carrega com rede, no primeiro arquivo. Nada se baixa só para o offline.
+   - **Calculadoras, QR e guias:** o motor das calculadoras está no arquivo comum (§ 236) e o do QR na ilha dele, então uma calculadora visitada ou o QR funcionam offline inteiros. Os guias seguem a ferramenta deles.
+   - **Ferramenta guardada sem o motor:** offline, a falha de carga mostra a fala offline da Oli (`buoy`), nunca "recarregue a página" nem "arquivo danificado". Com rede, o comportamento de hoje não muda.
+5. **A estratégia do cache.**
+   - **Navegação (HTML):** rede primeiro. Sem rede, a cópia guardada; sem cópia, a página offline do idioma do caminho (`/pt/…` em português, `/es/…` em espanhol, o resto em inglês).
+   - **`/_astro/*`:** cache primeiro, porque o nome leva o hash.
+   - **O que entra:** só GET, só a mesma origem e só resposta 200 do tipo `basic`. Nunca entra resposta redirecionada, opaca, 404 ou parcial (206). Pedido de outra origem passa direto, sem `respondWith`.
+   - **O que nunca entra:** `/build.txt`, `/cdn-cgi/*`, `ads.txt`, `robots.txt`, os sitemaps, o arquivo da chave do IndexNow e o próprio `/sw.js`.
+   - **A chave:** a URL sem `#` e sem `?`.
+   - **A versão:** o nome do cache leva o commit do build. No `activate`, os caches de outras versões são apagados. Se a run preferir guardar os `/_astro/*` entre versões, registre o porquê.
+6. **O arquivo e o registro.**
+   - **O arquivo:** `/sw.js` na raiz, com escopo `/`, gerado no build com a versão. O nome nunca tem "worker" (o orçamento reprova).
+   - **A lógica:** fica num módulo TypeScript puro, testado no Vitest: a chave, o que entra, o idioma do caminho e a caixa de entrada.
+   - **O registro:** um script inline pequeno no `BaseLayout`, depois do `load`, só se `'serviceWorker' in navigator`. Nenhum arquivo JS novo, e nada no caminho crítico.
+   - **O cabeçalho:** `/sw.js` com `Cache-Control: no-cache`, conferido pelo `gate:cabecalhos`.
+   - **O Worker:** o `gate:worker` segue verde e passa a afirmar que o `sw.js` é um arquivo estático dos assets, não código de Worker.
+7. **A desativação de emergência.**
+   - Uma constante no código (por exemplo, `SW_ENABLED`). Com ela em `false`:
+     - o build gera um `sw.js` que apaga os caches do FileOrca e se desregistra;
+     - o `BaseLayout` deixa de registrar.
+   - Ligar ou desligar é uma run curta de ajuste.
+   - Um teste prova a ida e a volta, pelo menos no Chromium: com o service worker ativo e páginas guardadas, o de desativação limpa tudo, e a página volta a vir só da rede.
+8. **A página offline.**
+   - Uma por idioma, `noindex`, fora do sitemap e do hreflang e sem anúncio.
+   - Na instalação, o service worker guarda só a do idioma da página. Se a do idioma pedido não estiver guardada, vale a de outro idioma que estiver.
+   - **O que ela mostra:**
+     - a Oli `buoy` e a fala offline, na voz do design system, dizendo a verdade: esta página não foi guardada;
+     - a lista das páginas guardadas no aparelho, lida do cache, com o título de cada uma;
+     - o link para a home do idioma.
+   - A linha "Offline" da tabela de falas promete mais do que vale para uma página não guardada. Ajuste o texto e registre o desvio num §.
+9. **O manifest.**
+   - **O `id`:** explícito e igual ao `start_url` de hoje, para não mudar a identidade de quem já instalou.
+   - **O `share_target`:**
+     - o `action` é a página "Abrir com" do idioma, com `method: POST` e `enctype: multipart/form-data`;
+     - um campo de arquivos, com o `accept` gerado dos registros: os tipos e as extensões que alguma ferramenta de imagem ou de PDF aceita, HEIC incluído;
+     - sem `text` nem `url`: link e texto compartilhados não servem a nenhuma ferramenta.
+   - **O teste** confere os três manifests: o que a instalação pede (`name`, `icons` de 192 e 512, `start_url`, `display` e `id`), o `action` existindo no `dist/` e o `accept` igual ao que sai dos registros.
+10. **A caixa de entrada do compartilhar.**
+    - Os arquivos ficam no Cache Storage ou no IndexedDB, num lugar só da caixa, e nunca na URL.
+    - Qual ferramenta vai buscar a caixa é dito sem `?` e sem `#` (por exemplo, no `sessionStorage` da aba).
+    - A caixa se apaga em três momentos: depois da entrega à ferramenta, na ativação de um service worker novo e depois de um prazo curto (por exemplo, uma hora).
+11. **O Dependabot.**
+    - **O arquivo:** `.github/dependabot.yml`, `version: 2`, com dois ecossistemas:
+      - `npm` no diretório `/` (o pnpm é reconhecido pelo `pnpm-lock.yaml`; confira na doc);
+      - `github-actions` no diretório `/`.
+    - **A agenda:** mensal, com hora e o fuso de São Paulo.
+    - **Os grupos:** em cada ecossistema, um grupo só com `update-types: [minor, patch]`. Major sai em PR própria.
+    - **O `cooldown`:** de alguns dias, se a doc confirmar o campo. É a proteção contra pacote publicado no mesmo dia (`CLAUDE.md`, F1a).
+    - **O `open-pull-requests-limit`:** saído do ensaio e dos minutos do Actions. Cada PR roda o CI inteiro, umas 2 h de runner.
+    - **O `commit-message`:** no padrão da main (Conventional Commits).
+    - **O `ignore`:** só com a razão escrita, saída do ensaio ou do `DECISOES.md`. Por exemplo, o Node e o pnpm das § 17 e § 37: o `packageManager` e o `@types/node` acima do major do `.node-version`.
+    - **O que não entra:** rótulos, revisores, `pull_request_target` e segredos.
+    - **As PRs de GitHub Actions** mexem em `.github/workflows/`, então ficam sempre para o Victor (regra do plano). O `OPERACAO.md` diz isso.
+    - **O teste:** confere a estrutura sem dependência nova: os dois ecossistemas, o mensal e os grupos sem major. O GitHub só valida o arquivo depois do merge na main, e conferir isso é tarefa do Victor.
+12. **O ensaio do Dependabot.**
+    - Numa worktree descartável a partir da sua branch, simule a PR de minor e patch de hoje:
+      - leve cada dependência à última minor ou patch, como o grupo faria, inclusive as fixadas na versão exata e as com `~`;
+      - rode `pnpm verificar --sem-playwright` e um subconjunto do Playwright (o `budgets`, o `image-smoke` e o `pdf-tool`), com `FO_PORT=4182`, longe das portas das lentes.
+    - Cada falha recebe um destino:
+      - (a) **teste que fixa uma versão sem razão de produto:** passa a ler a versão do `package.json` ou do lockfile, com §;
+      - (b) **incompatibilidade real:** vira `ignore`, com a razão;
+      - (c) **precisa de gente** (por exemplo, medir de novo os guias depois de um Playwright novo): vira um passo do `OPERACAO.md`.
+    - Rode também o `pnpm outdated`, para prever a primeira leva (quantas PRs de major) e calibrar o limite.
+    - O relatório traz a lista do que o grupo atualizaria e a saída do ensaio. Nenhuma dependência muda na PR.
+    - Apague a worktree no fim.
+13. **Os eventos de exemplo da regra de merge.**
+    - **As fixtures:** payloads do evento `pull_request` na forma real do GitHub, só com os campos que o job lê, mais a lista de arquivos e a saída do `fetch-metadata` (`update-type` e `dependency-group`). Os casos:
+      - Dependabot patch, minor, minor em grupo (com `dependency-group` e o `update-type` maior do grupo), major e tipo vazio;
+      - Dependabot numa branch fora de `dependabot/`;
+      - `fase-08`, `fase-05a` e `ajuste-ci-disco`, e uma branch qualquer;
+      - rascunho;
+      - PR que mexe em `.github/workflows/`, também num rename para fora da pasta;
+      - PR que mexe só em `.github/dependabot.yml`, que não é workflow e mescla.
+    - **O teste:** leva cada evento pelo mesmo caminho do job, do payload ao `pr.json` (a transformação que o `jq` faz) e ao `merge`, `comment` e `reason` que o CLI grava no `GITHUB_OUTPUT`.
+    - **A chamada do CLI no `ci.yml` não muda nesta PR** (armadilhas). Se a transformação ganhar uma versão em TypeScript para o teste, prove que ela e o `jq` dão o mesmo `pr.json`. No Linux do CI, rode o próprio `jq`; o teste ramifica por dentro, sem `skip`.
+14. **O alerta de CI vermelho nas PRs do Dependabot.**
+    - Um job novo no `ci.yml`:
+      - com `needs` no `verificar` e no `playwright`;
+      - com `if: failure() && github.event.pull_request.user.login == 'dependabot[bot]'`;
+      - com `issues: write` e `pull-requests: write` só nele.
+    - Ele abre uma issue com o número da PR e o link da execução. Se já houver uma aberta para a mesma PR, comenta nela, para não duplicar a cada rebase. Também comenta na PR.
+    - **As provas:** o `gate:actionlint` verde e um teste de unidade que lê o `ci.yml` e confere o gatilho, a condição, as permissões e o `needs`.
+    - A prova ao vivo só vem com uma PR real do Dependabot vermelha. O `OPERACAO.md` diz ao Victor o que olhar no primeiro ciclo.
+    - Uma falha do próprio Dependabot (a execução "Dependabot Updates" vermelha) também não avisa ninguém. Ela entra na revisão mensal do `OPERACAO.md`, com o lugar onde olhar, sem workflow novo.
+15. **A prova do aviso de deploy.**
+    - Antes de disparar, leia o `pos-deploy.ts` e confirme que o caminho da falha não chega ao IndexNow.
+    - Depois do primeiro push da branch, dispare com o SHA completo do primeiro commit da `fase-08`. O merge é squash, então esse commit nunca chega à main; e o checkout com `fetch-depth: 0` o encontra, então a run prova a espera, não um erro de `rev-parse`:
+
+      `gh workflow run pos-deploy.yml --ref main -f commit=<sha> -f wait_minutes=2`
+    - **Acompanhe** com `gh run watch <id>` e leia o log (`gh run view <id> --log`). Ele tem de mostrar:
+      - a linha "Esperando … (até 2 min)";
+      - as linhas "build.txt traz …, ainda sem …";
+      - a linha "não chegou em 2 min";
+      - o passo "Abrir issue" verde.
+    - **Confira a issue** com `gh issue list`. Comente nela: "Disparo de teste da F8, a prova do aviso de deploy. Victor: confira se o e-mail chegou e feche esta issue." Não feche a issue.
+    - **Se a PR mudar o `pos-deploy.yml`,** repita depois da mudança com `--ref fase-08`.
+    - Este é o único `gh workflow run` da run (dois, no caso acima).
+16. **O `docs/OPERACAO.md`.**
+    - Em português e curto, para o Victor. Cada alerta tem uma seção:
+      - como ele chega: o e-mail da issue, a PR aberta, o e-mail do UptimeRobot ou o Search Console;
+      - o que ele quer dizer;
+      - o que fazer, em passos, com os comandos exatos;
+      - quando vira uma run curta de ajuste (a ficha "Run curta de ajuste" do plano).
+    - **Os alertas, no mínimo:**
+      - a issue do pós-deploy;
+      - as issues do job de merge (merge que falhou e commit de merge sem leitura);
+      - a PR de major do Dependabot;
+      - a issue de CI vermelho numa PR do Dependabot;
+      - a PR de GitHub Actions do Dependabot, sempre manual;
+      - a execução "Dependabot Updates" vermelha;
+      - o build do Workers Builds vermelho: pedir o log e achar a linha `Executing user build command`;
+      - a queda no UptimeRobot;
+      - o Googlebot barrado: 403 nas estatísticas de rastreamento leva à zona do Cloudflare (F0, bloco 3);
+      - os minutos do Actions acabando;
+      - o defeito no service worker, que leva à desativação de emergência;
+      - o pico de `tool_error` no GA4;
+      - o e-mail de política do AdSense;
+      - uma parte do CI com `ENOSPC`: rodar de novo só a parte.
+    - **A revisão mensal de 30 minutos** do plano entra como lista de conferência. Junto, a revisão anual (as fontes das calculadoras e as medidas das redes sociais) e o ponteiro para o `PENDENCIAS.md`.
+    - **As tarefas de configuração do Victor** também entram: o UptimeRobot e, se ele quiser, as atualizações de segurança do Dependabot.
+    - **O teste** (`tests/unit/operacao.test.ts`) confere que todo `pnpm <script>`, caminho de arquivo e workflow citado existe, e que os títulos de issue citados batem com os dos workflows.
+17. **A revisão das F4 a F7**, no método da F3 (`CLAUDE.md`, F3, § 92 a § 94).
+    - **Onde:** sobre o commit da main no começo da run, numa worktree só de leitura (`.claude/worktrees/revisao-f4-f7`), com o próprio `pnpm install --frozen-lockfile` e o próprio `pnpm build`. Comece cedo e deixe rodando enquanto você implementa.
+    - **O que olhar:** o que as F4 a F7 puseram no ar, como está hoje, como um site só:
+      - o que a F6 e a F7 mudaram no que a F4 e a F5 construíram;
+      - o arquivo comum das calculadoras;
+      - os três idiomas;
+      - as regras do plano: "Decisões fechadas", "Regra das calculadoras", "O que derruba conta", "Confiança em dinheiro e saúde" e "Regra da página programática".
+
+      Os `REVISAO-F4.md` a `REVISAO-F7.md` são entrada: a lente não reporta de novo o que já está pendente, a menos que ache mais grave, e diz isso.
+    - **As lentes:** oito lentes Sonnet em contexto limpo, contra este prompt e o plano. Cada uma tem um `FO_PORT` (de 4174 a 4181) e uma pasta só dela, `.cache/lente-<x>/`.
+      - (a) corretude: os motores contra uma amostra refeita por um oráculo próprio, o PDF contra as fixtures, os guias contra o JSON medido, e o CSV e o PDF exportados;
+      - (b) privacidade e segurança: nada sai do aparelho; a URL e o `#`; o GA4; os storages; os nomes de arquivo; as senhas do PDF; o Pix;
+      - (c) anúncio e política: as distâncias, os rótulos e as páginas de dinheiro e de saúde, nos três idiomas;
+      - (d) acessibilidade (WCAG 2.2 AA): os formulários das calculadoras, a grade de páginas do PDF, a assinatura, as tabelas e pt e es;
+      - (e) desempenho e SEO: o orçamento, o Lighthouse, o hreflang, os sitemaps, os links internos, as órfãs, e títulos e descrições nos três idiomas;
+      - (f) design system e voz, nos três idiomas;
+      - (g) dinheiro e saúde (YMYL): as fontes, a taxa digitada, nada de "taxa de hoje", o aviso de ferramenta educativa, só adultos, e IOF, CET e TR como campos no Brasil;
+      - (h) idiomas e formatos: o glossário, os números, as datas, o CSV, o A4 e o Letter, o inglês vazando e os nomes de arquivo.
+    - **Os céticos:** cada achado crítico, alto ou médio tem um cético próprio, e os baixos de cada lente vão a um cético só. Sem reprodução, o achado é refutado.
+    - **As correções:**
+      - crítico e alto confirmados são sempre corrigidos;
+      - médio é corrigido se a correção é local;
+      - baixo vai para o `PENDENCIAS.md`.
+
+      Cada correção tem um teste que reprova no commit da revisão e passa no novo, e um §.
+    - **A segunda passada:** um revisor Sonnet em contexto limpo lê só o diff das correções.
+    - Tudo fica em `docs/relatorios/REVISAO-F4-F7.md`. Remova a worktree no fim.
+18. **A Privacidade**, nos três idiomas. Ela diz:
+    - que o site guarda no aparelho uma cópia das páginas e dos arquivos do site que a pessoa abriu, para funcionarem offline;
+    - que os arquivos e os números da pessoa nunca entram nessa cópia;
+    - como apagar a cópia: nas configurações do navegador ou desinstalando o app;
+    - que um arquivo compartilhado com o FileOrca fica no aparelho e é apagado depois de entregue à ferramenta.
+
+    O `gate:prontidao` segue verde.
+19. **O GA4.** Nenhum evento novo é obrigatório. Se a run acrescentar um (por exemplo, para contar o uso do "Abrir com"), ele segue as listas fechadas, não leva dado de arquivo e entra num §. Offline, o `gtag` falha calado, e nada fica numa fila.
+
+# Armadilhas conhecidas
+
+- **O orçamento reprova "worker" no endereço antes do primeiro arquivo.** O service worker se chama `/sw.js`, e o orçamento não muda para caber.
+- **O service worker nos testes antigos.** Com um service worker ativo, o `page.route` e o `context.route` deixam de ver pedidos que ele responde do cache, e os testes que servem um worker modificado (`engine-paths.spec.ts`, o `slowEngine`) podem passar a testar outra coisa.
+  - Ponha `serviceWorkers: 'block'` como padrão no `playwright.config.ts`.
+  - Os specs do service worker usam `test.use({ serviceWorkers: 'allow' })`.
+  - Um teste de orçamento com o service worker liberado prova o que ele acrescenta.
+- **O WebKit do Playwright e o service worker.** O Playwright avisa que eventos de rede de service worker só existem no Chromium, e o WebKit do Windows difere do Linux.
+  - Os specs ramificam por dentro: afirmam no Chromium e registram o que o WebKit faz, sem `skip`.
+  - O Linux do CI é a referência.
+- **Resposta redirecionada numa navegação.** O `html_handling: auto-trailing-slash` redireciona "/x" para "/x/". Devolver ao navegador uma resposta com `redirected: true` numa navegação dá erro de rede.
+  - Nunca guarde resposta redirecionada.
+  - Se servir uma, refaça a `Response` com o corpo.
+- **O `#` no pedido.** O `FetchEvent.request.url` pode trazer o `#` da navegação. A chave tira o `#` e o `?` antes de qualquer `cache.put` ou `match`. O teste lê as chaves de todos os caches e procura `#`, `?` e as sentinelas.
+- **O 404 dos `/_astro/*` depois de um deploy** (§ 103, e-05). Resposta que não é 200 nunca entra no cache.
+- **O merge usa o script da base.** O job `merge` roda o `pode-mesclar.ts` do `BASE_SHA`. Se esta PR mudar o `ci.yml` para chamar o CLI de outro jeito, o script velho recebe a chamada nova, o passo falha, e a PR fica vermelha. Mantenha a chamada de hoje.
+- **O `rev-parse` do pós-deploy.** Um SHA inventado faz o `pos-deploy.ts` falhar no `rev-parse`, antes de esperar: a issue abre, mas a espera não é provada. Use um commit da branch, que o `fetch-depth: 0` traz, e confira as linhas do log da decisão 15.
+- **A primeira leva do Dependabot.** Um `dependabot.yml` novo na main dispara a verificação na hora, e cada PR roda o CI inteiro. O limite de PRs abertas e o aviso no relatório protegem os 2.000 minutos do mês.
+- **Testes que fixam versão** (`licenses.test.ts`: `qrcode` 1.5.4 e `pdfjs-dist` 6.4.299). Eles deixariam a PR mensal vermelha. O ensaio acha todos (decisão 12).
+- **O Playwright novo muda o canvas,** e os guias medidos ficam velhos (`CLAUDE.md`, F5b). O `pnpm guias:medir --check` está fora do `verificar`. Decida no ensaio: um passo do `OPERACAO.md` depois de uma PR que mexe no `@playwright/test`, ou o pacote num grupo próprio.
+- **`~` e versão exata no `package.json`** (`eslint`, `typescript`, `qrcode`, `gifenc`, `jsqr`, `@types/qrcode`). Leia no `DECISOES.md` por que cada um está assim antes de decidir o `ignore`.
+- **Os tipos do service worker.** O `lib: ["webworker"]` briga com o DOM no mesmo `tsconfig`. Isole o arquivo do service worker, e confira o `pnpm tipos` e o `pnpm lint`.
+- **Páginas `noindex` fora do sitemap** (a offline e a "Abrir com"). O `gate:seo`, o `gate:links` (órfãs) e o `gate:prontidao` precisam de exceção explícita, com teste. Elas entram no `a11y.spec.ts`.
+- **Texto novo em pt e es** passa pelo glossário (`docs/i18n/`, `glossary.test.ts`) e pelo `lint:texto`, com as regras da F6.
+- **A máquina carregada.** Com as lentes da revisão rodando o Playwright ao mesmo tempo que você, o WebKit do Windows já travou no `page.goto` até em teste antigo (`CLAUDE.md`, F3). Antes de achar que um teste do WebKit está errado, rode-o de novo com a máquina livre.
+- **Agentes em worktree nascem da `main`.** O primeiro passo de cada um é `git merge --ff-only fase-08`. Agente que escreve código usa `model: 'opus'`.
+- As pegadinhas do Git Bash, do `uv`, do `String.replace` com `$'` e das portas do Playwright estão no `CLAUDE.md`. Leia antes de escrever scripts.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. O `REVISAO-F4-F7.md` não tem achado crítico nem alto aberto. Cada médio local está corrigido, com um teste que reprova no commit da revisão e passa no novo.
+2. O `docs/PENDENCIAS.md` traz todos os itens da decisão 3, cada um com a fonte e a correção proposta.
+3. O teste do `dependabot.yml` está verde. O relatório traz a lista do que o grupo de minor e patch atualizaria hoje e a saída verde do ensaio, depois dos ajustes.
+4. Os eventos de exemplo passam pelo mesmo caminho do job e dão a decisão esperada, numa tabela evento → `merge`/`comment`/`reason`. A chamada do CLI no `ci.yml` é a mesma da main.
+5. A prova do aviso de deploy: o link da execução, as linhas do log da decisão 15 e o link da issue, comentada.
+6. O alerta do Dependabot: o `gate:actionlint` verde e o teste do `ci.yml`.
+7. O offline no E2E, verde no Chromium e com o comportamento do WebKit afirmado ou registrado. Primeiro, com rede:
+   - uma ferramenta de imagem (Compress image) e uma de PDF, cada uma visitada e usada uma vez;
+   - uma calculadora de dinheiro em inglês e uma em pt;
+   - o Due date, com o relógio fixado;
+   - o QR code.
+
+   Depois, offline, cada uma recarrega e funciona: processa outro arquivo, recalcula, baixa o CSV e o PDF, e o PNG do QR lido pelo `jsqr` devolve o texto. Uma página não visitada mostra a página offline do idioma, com a `buoy` e a lista das guardadas. Uma ferramenta guardada sem o motor mostra a fala offline.
+8. A privacidade do cache. Depois de links do cenário com números, arquivos processados e um compartilhar, as chaves de todos os caches e o IndexedDB não têm `#`, `?`, sentinela digitada, nome de arquivo nem bytes de arquivo. Nada sai para outra origem pelo service worker, e a caixa de entrada termina vazia.
+9. A desativação de emergência e a troca de versão estão provadas por teste: um build novo apaga os caches velhos.
+10. O compartilhar no E2E (Chromium):
+    - um POST `multipart` de navegação para a "Abrir com", com uma imagem e um PDF, mostra os arquivos e as ferramentas certas;
+    - escolher uma ferramenta põe os arquivos na fila, e o resultado baixa;
+    - a caixa fica vazia;
+    - o servidor nunca recebe o POST (`response.fromServiceWorker()` ou o log do `serve-dist`).
+11. O teste dos três manifests está verde, com o que a instalação pede e o `share_target`.
+12. O orçamento:
+    - as páginas de ferramenta seguem com 2 arquivos JS e sem `worker` nem `.wasm` antes do primeiro arquivo;
+    - o JS inicial muda só pelo script inline do registro, com o número de bytes no relatório;
+    - o teste com o service worker liberado mostra o que ele acrescenta.
+13. O Lighthouse das URLs do `lighthouserc.json` está nos limiares de hoje.
+14. O `docs/OPERACAO.md` existe e o teste dele está verde.
+15. Todas as partes do CI estão verdes, abaixo de 900 s, com o total de cada uma no relatório.
+16. O `REVISAO-F8.md` não tem achado crítico nem alto aberto.
+17. O `pnpm verificar` está verde numa execução limpa na sua máquina.
+
+# Verificação: rode de verdade
+
+- Siga a ordem das fatias de "Como trabalhar", e cada fatia termina verde antes da próxima.
+- Leia cada falha, corrija a causa e repita até passar.
+  - É proibido desligar, pular, marcar como `skip`, afrouxar limiar, mudar orçamento, ligar `retries` ou aumentar timeout para passar.
+  - Se um portão estiver de fato errado, corrija o portão com um teste que prove o erro e registre no `DECISOES.md`.
+- No fim, rode os `--check` dos três oráculos de calculadora e o do Pix, e cole a saída. Todos dão zero, porque nada aqui muda as contas. Se uma correção da revisão mexer num motor de imagem ou de PDF, rode também o `pnpm guias:medir --check`.
+- No fim, rode o verificar inteiro numa execução limpa (`CI=true pnpm install --frozen-lockfile` e `pnpm verificar`, que builda do zero) e guarde a saída completa.
+  - Se o todo passar de 900 s na sua máquina só pelo tamanho da suíte, rode as partes do CI em sequência e cole o resumo de cada uma.
+  - O limite não muda; registre a medida num §.
+- Rode o `pnpm screenshots` depois do último ajuste visual. A pasta é `docs/relatorios/fase-08/componentes/`, e as antigas ficam como estão. Ela traz, nos dois temas, a 360 e a 1280 px:
+  - a página offline nos três idiomas;
+  - a "Abrir com" com arquivos (uma imagem e um PDF) e vazia;
+  - a fala offline numa ferramenta guardada sem o motor.
+- Depois de abrir a PR, acompanhe com `gh pr checks <n> --watch` e conserte o que só falha no Ubuntu. Leia o total de cada parte no log (`gh run view <id> --log`, com o `--attempt` do `CLAUDE.md` depois de um rerun).
+
+# Autonomia e decisões
+
+Você está rodando sozinho e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O `CLAUDE.md`, a ficha F8 e o resto do plano.
+3. O `docs/design/` e o `DECISOES.md`.
+4. Na dúvida, a opção mais simples e reversível.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos:
+
+- os slugs da "Abrir com" e da página offline;
+- o lugar da caixa de entrada e o prazo dela;
+- o que acontece com os `/_astro/*` na troca de versão;
+- a hora do Dependabot, o `cooldown`, o limite de PRs e cada `ignore`;
+- o destino de cada falha do ensaio;
+- a nova divisão do CI.
+
+Uma mudança de arquitetura (host, framework, estrutura do repositório) vira uma ADR "Proposta" em `docs/adr/` e uma pendência. O service worker é arquivo estático dos assets e está no plano: não é mudança de arquitetura. A divisão do CI segue a ADR-003.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- o `gh workflow run` recusado (escopo do `gh` ou modo de permissão). O relatório traz o comando exato para o Victor rodar;
+- o push do `ci.yml` recusado por falta do escopo `workflow`;
+- uma página de documentação que não abre;
+- o WebKit sem service worker no Playwright (registre e siga com o Chromium).
+
+Válvula de estouro, nesta ordem, se o tempo ou o limite apertar:
+
+1. O compartilhar, para o backlog, como a ficha permite. Saem a "Abrir com", o `share_target` dos manifests e a entrada pela caixa. Entram um § e uma linha no `PENDENCIAS.md`, e nada fica "em breve".
+2. A lista das páginas guardadas na página offline. Ela fica só com a fala e o link para a home.
+
+Nunca corte:
+
+- a revisão das F4 a F7 e as correções de crítico e alto;
+- o Dependabot e o ensaio;
+- os eventos de exemplo da regra de merge;
+- a prova do aviso de deploy e o alerta do Dependabot;
+- o offline no E2E, a privacidade do cache e a desativação de emergência;
+- o `OPERACAO.md` e o `PENDENCIAS.md`;
+- a divisão do CI, se a projeção pedir;
+- a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo.**
+  - Rode `git switch main` e `git pull --ff-only`.
+  - Antes de criar a branch, o `git status` só pode mostrar como não rastreados `docs/prompts/prompt-fase-08.md` e `docs/prompts/prompt-fase-08.txt`, o prompt desta run.
+  - Crie a branch com `git switch -c fase-08`. Os dois arquivos entram sem edição no primeiro commit dela.
+  - Se eles não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-08.txt`.
+- **O primeiro push** vem logo depois do primeiro commit, porque a prova do aviso de deploy precisa de um commit da branch no GitHub (decisão 15).
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits).
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push, e o CI não roda sem PR.
+- **A PR em rascunho, só com o verificar local verde** e tudo commitado. Use `gh pr create --draft --base main --head fase-08`, num comando separado do push.
+  - O título e a descrição vão em português, com o resumo e o link do relatório.
+  - Se a PR mexer em `.github/workflows/`, a descrição diz em destaque que o merge é do Victor e lista o diff do `.github/`.
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **As worktrees** dos agentes, da revisão e do ensaio são removidas no fim com `git worktree remove`.
+- **Fim:**
+  1. Com o CI verde no rascunho, commite o relatório (citando essa execução), as duas revisões, as listas e os screenshots.
+  2. Faça o push e rode logo em seguida `gh pr ready`. A concorrência do CI cancela a execução do push e fica a do `ready_for_review`.
+  3. Acompanhe essa execução até o fim.
+  4. A run termina com a PR pronta e o CI verde, ou com a pendência que impediu isso. A resposta final diz qual.
+- **No GitHub, a run só faz isto:**
+  - push da branch;
+  - a PR (`gh pr create`, `gh pr ready`);
+  - o disparo da decisão 15;
+  - um comentário na issue que ele abriu;
+  - leitura (`gh run`, `gh pr checks`, `gh issue list`).
+
+  Nada de fechar, editar ou criar issue à mão.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo create`/`edit`;
+  - postar, enviar formulário, criar conta ou subir arquivo para qualquer serviço;
+  - `npm publish` ou `wrangler deploy` em qualquer forma, inclusive `--dry-run`.
+
+  O `.claude/settings.json` nega esses comandos. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar**, com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) a ficha F8, as seções do plano e as regras do `CLAUDE.md`, num checklist "requisito → onde vai ficar → que teste prova";
+   - (b) o service worker neste build:
+     - como o Astro gera o `/sw.js` e as páginas `noindex`;
+     - o `BaseLayout`, o `headers.ts` e o orçamento;
+     - a entrada de arquivos das ilhas de imagem e de PDF;
+     - as rotas novas em `routes.ts`;
+     - o que o `gate:seo`, o `gate:links` e o `gate:prontidao` pedem de uma página nova;
+   - (c) a documentação da web, lida com link e data:
+     - o ciclo de vida do service worker, a navegação e o redirecionamento;
+     - o Web Share Target com arquivos no Chrome do Android;
+     - o service worker no WebKit e o `serviceWorkers` do Playwright;
+   - (d) a documentação do GitHub, lida com link e data:
+     - as opções do `dependabot.yml` (`groups`, `cooldown`, `ignore`, `open-pull-requests-limit`, `commit-message` e o pnpm);
+     - as saídas do `fetch-metadata` v3.1.0 nas PRs em grupo;
+     - o token e as permissões nos workflows do Dependabot;
+     - os avisos de workflow;
+     - o `workflow_dispatch` com `--ref`;
+   - (e) o CI: o tempo por spec da run 41465872919 e a projeção do `--list` com os specs novos;
+   - (f) as pendências: tudo o que está aberto do `REVISAO-F3.md` ao `REVISAO-F7.md` e nas § 85, § 103, § 242 e § 283, num rascunho do `PENDENCIAS.md`.
+2. **Planejar.** Escreva `docs/relatorios/fase-08-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz:
+   - o desenho do service worker: a tabela "pedido → estratégia → entra no cache?", a chave, a versão, a desativação e a página offline;
+   - o desenho do compartilhar: as rotas, o manifest, a caixa de entrada e a entrega à ilha;
+   - o `dependabot.yml` comentado e o plano do ensaio;
+   - os casos dos eventos de exemplo;
+   - o job de alerta;
+   - o índice do `OPERACAO.md`;
+   - cada critério ligado a um teste ou comando;
+   - a projeção das partes do CI;
+   - a ordem de construção.
+3. **Começar a revisão das F4 a F7** (decisão 17) logo depois do plano, num workflow em segundo plano, sobre o commit da main. Ela roda enquanto você implementa.
+4. **Implementar** em fatias que terminam verdes, nesta ordem:
+   1. o primeiro push e a prova do aviso de deploy;
+   2. o ensaio do Dependabot, o `dependabot.yml`, os testes que travariam a PR mensal e os eventos de exemplo da regra de merge;
+   3. o service worker: o arquivo, o registro, o cabeçalho, as regras do cache, a desativação, a página offline nos três idiomas e os specs de offline, de privacidade do cache e de orçamento;
+   4. o compartilhar: os manifests, a "Abrir com" nos três idiomas, a entrega à ilha e o spec dele;
+   5. a Privacidade nos três idiomas;
+   6. o alerta do Dependabot, a projeção e a divisão do CI, e o `verificar.test.ts`;
+   7. as correções da revisão das F4 a F7, quando ela terminar;
+   8. o `OPERACAO.md`, o `PENDENCIAS.md` e os testes deles;
+   9. o Lighthouse, os screenshots e o `--list` das partes.
+5. **A revisão adversarial final**, no mesmo método, sobre um commit fixo e registrado da branch, contra este prompt e o `fase-08-plano.md`:
+   - **As lentes:** cinco lentes Sonnet em contexto limpo:
+     - (a) privacidade e segurança do service worker e do compartilhar: as chaves, nada de arquivo nem número, a caixa apagada, só a mesma origem e nenhum POST que saia;
+     - (b) corretude do offline e da atualização: o deploy novo, o 404 fora do cache, o redirecionamento, a desativação e o WebKit;
+     - (c) operação: o `dependabot.yml` contra a doc, os eventos da regra de merge, o alerta, o `OPERACAO.md` verdadeiro e o pós-deploy;
+     - (d) acessibilidade, design e voz das páginas novas nos três idiomas;
+     - (e) desempenho: o orçamento com o service worker, o Lighthouse e nada baixado à toa.
+   - **Os céticos, as correções e a segunda passada:** como na decisão 17.
+   - Tudo fica em `docs/relatorios/REVISAO-F8.md`. Remova a worktree no fim.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-08.md` em português, commitado na branch antes do `gh pr ready`. Ele cita a última execução verde do CI com código ou teste, com o link e o total de cada parte.
+
+O relatório traz:
+
+- o resumo;
+- a revisão das F4 a F7, por lente e severidade, apontando para o `REVISAO-F4-F7.md`, e o que foi corrigido, com os §;
+- o Dependabot: o arquivo, a lista do ensaio, a saída dele e o destino de cada falha;
+- a tabela dos eventos de exemplo da regra de merge;
+- a prova do aviso de deploy: o link da execução, as linhas do log e o link da issue;
+- o service worker: a tabela das regras do cache, a saída dos specs de offline nos dois navegadores, o dump das chaves do cache e a prova da desativação;
+- o compartilhar: a saída do spec e os screenshots;
+- o orçamento, antes e depois;
+- o Lighthouse das URLs do `lighthouserc.json`;
+- o CI: a tabela das partes contra a F7, onde o `--list` pôs os specs novos e o total de cada execução;
+- o resumo da revisão final, apontando para o `REVISAO-F8.md`;
+- a saída real e completa do `pnpm verificar` local, com o tempo de cada portão;
+- o link da prévia e o que você conferiu nela;
+- as decisões novas, apontando os §;
+- o que a válvula cortou, se cortou;
+- **a lista do que é do Victor, em passos:**
+  1. **O merge.** Conferir o diff do `.github/` (`git diff origin/main...fase-08 -- .github/`) e dar o merge pela página da PR (squash, apagando a branch). Depois, conferir o pós-deploy e o `build.txt` de produção.
+  2. **A issue de teste.** Conferir que o e-mail dela chegou e fechar a issue. Se não chegou, ajustar as notificações do GitHub (o repositório em "Watching", o e-mail ligado).
+  3. **O UptimeRobot.** Criar o monitor HTTPS de fileorca.com a cada 5 minutos, com alerta para o Gmail da marca (tarefa da F8 no plano).
+  4. **O Dependabot, logo depois do merge.**
+     - Conferir em Insights → Dependency graph → Dependabot que o arquivo foi aceito sem erro.
+     - Acompanhar a primeira leva de PRs e os minutos do Actions.
+     - A PR de minor e patch tem de se mesclar sozinha. As de major e as de GitHub Actions esperam por ele.
+  5. **No celular Android,** na produção:
+     - instalar o site e visitar uma ferramenta;
+     - usar a ferramenta com rede e depois sem rede;
+     - compartilhar uma foto da galeria com o FileOrca e escolher uma ferramenta na "Abrir com".
+  6. **No iPhone:** o offline no Safari. O iOS não tem o compartilhar.
+  7. **O `docs/OPERACAO.md`.** Ler uma vez e marcar a revisão mensal na agenda.
+  8. **As pendências:** o `docs/PENDENCIAS.md`.
+  9. **Opcional:** ligar as atualizações de segurança do Dependabot nas configurações do repositório.
+
+Acrescente no fim do `CLAUDE.md` uma seção curta, "F8: piloto automático", com:
+
+- as regras do service worker: o que entra no cache, a chave, a versão, a desativação, o `serviceWorkers: 'block'` dos testes e como um spec libera;
+- o compartilhar: onde estão a caixa e a entrega;
+- o Dependabot: o arquivo, os grupos, o que fica para o Victor e o que fazer quando um teste fixa versão;
+- os eventos de exemplo da regra de merge e por que a chamada do CLI não muda junto com o `ci.yml`;
+- as partes do CI, se mudaram, substituindo a descrição das seções anteriores, que ficam como estão;
+- as armadilhas que você achou.
+
+Não apague nada do que já existe.
+
+Termine a resposta final com:
+
+- um resumo de cinco linhas em português;
+- o link da PR, o estado do CI e o link da issue de teste;
+- o lembrete de que o merge é do Victor, se a PR mexeu em `.github/workflows/`.
+
+# Idioma
+
+Em português: a narrativa, o plano, as revisões, o relatório, o `DECISOES.md`, o `OPERACAO.md`, o `PENDENCIAS.md` e a descrição da PR.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, os commits e os textos do site, nos arquivos de tradução de cada idioma, com a voz de `docs/design/README.md`.

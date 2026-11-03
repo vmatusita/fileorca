@@ -4,7 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, requireDist } from '../lib/dist.ts';
 import { headerBlocks } from '../lib/headers-file.ts';
-import { WORKERS_DEV_PATTERN, headerRules, redirectRules, toHeadersFile, toRedirectsFile } from '../../src/platform/headers.ts';
+import { SW_SCRIPT_HEADERS, WORKERS_DEV_PATTERN, headerRules, noindexPagePaths, redirectRules, toHeadersFile, toRedirectsFile } from '../../src/platform/headers.ts';
 import { LAUNCHED } from '../../src/platform/site.ts';
 
 requireDist();
@@ -28,6 +28,12 @@ for (const expected of [
 if (!LAUNCHED && !site.includes('X-Robots-Tag: noindex')) problems.add('LAUNCHED = false e /* sem X-Robots-Tag: noindex');
 if (LAUNCHED && site.some((line) => line.startsWith('X-Robots-Tag'))) problems.add('LAUNCHED = true e /* ainda com X-Robots-Tag');
 if (!(blocks.get(WORKERS_DEV_PATTERN) ?? []).includes('X-Robots-Tag: noindex')) problems.add(`${WORKERS_DEV_PATTERN} sem noindex`);
+// F8: /sw.js revalidates on every update check, and the offline and share pages stay out of the index (DECISOES § 287).
+if (!(blocks.get('/sw.js') ?? []).includes(`Cache-Control: ${SW_SCRIPT_HEADERS['Cache-Control']}`)) problems.add('/sw.js sem Cache-Control: no-cache');
+if (!existsSync(`${DIST}/sw.js`)) problems.add('dist/sw.js não existe');
+for (const path of noindexPagePaths()) {
+  if (!(blocks.get(path) ?? []).includes('X-Robots-Tag: noindex')) problems.add(`${path} sem X-Robots-Tag: noindex`);
+}
 if (blocks.size > 100) problems.add(`_headers com ${blocks.size} regras (limite do Cloudflare: 100)`);
 if (readFileSync(`${DIST}/_redirects`, 'utf8') !== toRedirectsFile(redirectRules())) problems.add('dist/_redirects difere do gerado');
 const build = existsSync(`${DIST}/build.txt`) ? readFileSync(`${DIST}/build.txt`, 'utf8') : '';

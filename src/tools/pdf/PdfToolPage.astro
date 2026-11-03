@@ -13,7 +13,7 @@ import AdSlot from '../../ads/AdSlot.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, webApplicationLd } from '../../seo/meta.ts';
-import { PANEL_POSES } from '../image/Oli.tsx';
+import { FILE_PANEL_POSES } from '../image/Oli.tsx';
 import PdfIsland from './PdfIsland.astro';
 import { crumbsFor, panelData, relatedFor } from './page.ts';
 import { PDF_TOOL_TEXTS } from './texts.ts';
@@ -47,7 +47,7 @@ const guides = lang === 'en' ? guidesOfTool(id).map((guide) => ({ href: FILE_GUI
   title={title}
   description={t.description}
   withAds
-  oli={PANEL_POSES}
+  oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />

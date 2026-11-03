@@ -10,9 +10,9 @@ import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS, type ImagePageId } from 
 import { CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
-import { describedViolations } from './lib/axe.ts';
+import { violationsEverywhere } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
-import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
+import { walkPdfTool } from './lib/pdf-states.ts';
 
 // axe-core (WCAG 2.2 AA and best practices, tests/e2e/lib/axe.ts) on every page, at 360 and 1280px, in both
 // themes. It runs with reduced motion (DECISOES § 57): the site animates only transform and opacity, so the
@@ -20,25 +20,8 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 // CI runner. The motion itself is tested in design.spec.ts.
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
 
-// F2 (DECISOES § 76 and § 83): each page and each state is reached once per browser, and axe runs at both widths
-// and in both themes on it. The site has no layout or theme decided by script at load, so resizing and switching
-// prefers-color-scheme in place gives what a fresh load gives, with the same rules and reach.
-const COMBOS = [
-  { width: 360, height: 740, colorScheme: 'dark' },
-  { width: 360, height: 740, colorScheme: 'light' },
-  { width: 1280, height: 800, colorScheme: 'dark' },
-  { width: 1280, height: 800, colorScheme: 'light' },
-] as const;
-
-async function violationsEverywhere(page: Page): Promise<string[]> {
-  const found: string[] = [];
-  for (const combo of COMBOS) {
-    await page.setViewportSize({ width: combo.width, height: combo.height });
-    await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
-    found.push(...(await describedViolations(page, `${combo.width}px ${combo.colorScheme}`)));
-  }
-  return found;
-}
+// Each page and each state is reached once per browser, and axe runs at both widths and in both themes on it
+// (violationsEverywhere, tests/e2e/lib/axe.ts; DECISOES § 76 and § 83).
 
 test.describe('axe em toda página, a 360 e 1280px, nos temas escuro e claro', () => {
   test.use({ reducedMotion: 'reduce', viewport: { width: 360, height: 740 }, colorScheme: 'dark' });
@@ -342,33 +325,7 @@ test.describe('axe nos estados das calculadoras de casa e saúde, a 360 e 1280px
   });
 });
 
-// F5a (prompt decision 12; DECISOES § 170): the states of the PDF pages the page-by-page pass does not reach
-// (it reads each page as loaded, with the cookie notice open and before anything is chosen). Each PDF page is reached once
-// per browser (§ 76) and walked through its states by tests/e2e/lib/pdf-states.ts: at rest with the island hydrated, the
-// Merge list, the page grid with a selection (a page turned, moved or picked), the password field with its error (Protect:
-// the two passwords do not match; Unlock: the password is wrong), the signature area in its three ways to sign (draw, upload,
-// type, with the box on the preview of the page) and the result. axe runs at both widths and in both themes on each of them.
-const PDF_AXE_STATES: ReadonlySet<PdfState> = new Set<PdfState>(['rest', 'list', 'grid', 'password', 'signature', 'result']);
-
-test.describe('axe nos estados das ferramentas de PDF, a 360 e 1280px, nos temas escuro e claro', () => {
-  test.use({ reducedMotion: 'reduce' });
-
-  for (const { id, path } of PDF_WALKS) {
-    test(`${path}: at rest, with its options and with the result`, async ({ page }) => {
-      const found: string[] = [];
-      await walkPdfTool(
-        page,
-        id,
-        async (state, note) => {
-          if (!PDF_AXE_STATES.has(state)) return;
-          for (const violation of await violationsEverywhere(page)) found.push(`${state} (${note}): ${violation}`);
-        },
-        { hold: false },
-      );
-      expect(found).toEqual([]);
-    });
-  }
-});
+// The states of the PDF pages (F5a and F6) are walked in axe-pdf-states.spec.ts (DECISOES § 307).
 
 // F5b (prompt decision 7): every file guide with its embedded tool showing a result. The guide at rest is already read by
 // the page-by-page pass above (the route map lists it). An image guide gets one small file the tool takes; a PDF guide walks
@@ -439,28 +396,6 @@ test.describe('axe nas ferramentas de imagem em pt e es com o resultado, a 360 e
         await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
         await animationsDone(page);
         expect(await violationsEverywhere(page)).toEqual([]);
-      });
-    }
-  }
-});
-
-test.describe('axe nos estados das ferramentas de PDF em pt e es, a 360 e 1280px, nos temas escuro e claro', () => {
-  test.use({ reducedMotion: 'reduce' });
-
-  for (const lang of TRANSLATED) {
-    for (const id of PDF_TOOL_IDS) {
-      test(`${routeById(id).paths[lang] ?? ''}: at rest, with its options and with the result`, async ({ page }) => {
-        const found: string[] = [];
-        await walkPdfTool(
-          page,
-          id,
-          async (state, note) => {
-            if (!PDF_AXE_STATES.has(state)) return;
-            for (const violation of await violationsEverywhere(page)) found.push(`${state} (${note}): ${violation}`);
-          },
-          { hold: false, lang },
-        );
-        expect(found).toEqual([]);
       });
     }
   }

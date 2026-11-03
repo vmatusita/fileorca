@@ -1,6 +1,7 @@
 # Post-deploy check of production (PLANO "Da run ao ar", item 7): waits until build.txt carries the
 # commit (or a later one), checks injected scripts, robots.txt and X-Robots-Tag against the
-# LAUNCHED of that commit, pings IndexNow with the changed URLs, and opens an issue on failure.
+# LAUNCHED of that commit, pings IndexNow with the changed URLs, and opens an issue on failure, assigned to the owner
+# of the repository so GitHub e-mails him (F8; DECISOES § 301).
 name: Pós-deploy
 
 on:
@@ -60,7 +61,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue create --title "Pós-deploy falhou para ${COMMIT:0:7}" \
+          gh issue create --title "Pós-deploy falhou para ${COMMIT:0:7}" --assignee "$OWNER" \
             --body "A conferência de produção do commit $COMMIT falhou ou o deploy não chegou em $WAIT_MINUTES minutos. Execução: $RUN_URL"

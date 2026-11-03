@@ -27,3 +27,24 @@ export async function violationIds(page: Page): Promise<string[]> {
 export async function describedViolations(page: Page, where: string): Promise<string[]> {
   return (await axe(page)).map((violation) => `${where} · ${violation.id}: ${violation.targets.join(', ')}`);
 }
+
+// F2 (DECISOES § 76 and § 83): each page and each state is reached once per browser, and axe runs at both widths
+// and in both themes on it. The site has no layout or theme decided by script at load, so resizing and switching
+// prefers-color-scheme in place gives what a fresh load gives, with the same rules and reach.
+const COMBOS = [
+  { width: 360, height: 740, colorScheme: 'dark' },
+  { width: 360, height: 740, colorScheme: 'light' },
+  { width: 1280, height: 800, colorScheme: 'dark' },
+  { width: 1280, height: 800, colorScheme: 'light' },
+] as const;
+
+/** axe at 360 and 1280 px, in the dark and the light theme, on the page as it is now (a11y and axe-pdf-states). */
+export async function violationsEverywhere(page: Page): Promise<string[]> {
+  const found: string[] = [];
+  for (const combo of COMBOS) {
+    await page.setViewportSize({ width: combo.width, height: combo.height });
+    await page.emulateMedia({ colorScheme: combo.colorScheme, reducedMotion: 'reduce' });
+    found.push(...(await describedViolations(page, `${combo.width}px ${combo.colorScheme}`)));
+  }
+  return found;
+}

@@ -12,6 +12,7 @@ export default {
     decimalHint: 'Usa punto en los decimales, como 6.5.',
     copyThis: 'Copia este enlace',
     exportFailed: 'Oli no pudo cargar el generador de PDF. Recarga la página e inténtalo de nuevo.',
+    exportOffline: 'Sin conexión, y el generador de PDF aún no está guardado. Descarga un PDF una vez con internet y también funcionará sin conexión.',
     stale: 'Corrige el campo marcado para actualizar el resultado.',
     nextLabel: 'Siguiente paso',
     scheduleHeading: 'Tabla de amortización',

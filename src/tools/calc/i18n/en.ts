@@ -26,6 +26,7 @@ export default {
     decimalHint: 'Use a dot for the decimals, like 6.5.',
     copyThis: 'Copy this link',
     exportFailed: "Oli couldn't load the PDF maker. Reload the page and try again.",
+    exportOffline: "No internet, and the PDF maker isn't saved yet. Download a PDF once with internet and it works offline too.",
     stale: 'Fix the highlighted field to update the result.',
     nextLabel: 'Next step',
     scheduleHeading: 'Payment schedule',

@@ -15,6 +15,7 @@ export const creditPanel: { fields: CalcPanelTexts['fields']; options: Record<st
     sentence: 'Em {months} você paga {total} no total, com {interest} de juros. O CET é de {cetYear} ao ano ({cetMonth} ao mês).',
     noLoan: 'Com a entrada igual ao preço não há o que financiar. Diminua a entrada para ver a parcela.',
     costsTooHigh: 'O IOF e as tarifas pagos à vista não podem passar do valor do crédito. Diminua os custos ou escolha financiar junto.',
+    cetTooHigh: 'Com esses custos o CET passa de 10.000.000% ao ano, mais do que a calculadora consegue mostrar. Diminua o IOF e as tarifas.',
     cetShort: '{x}',
     cetYear: 'CET ao ano',
     cetMonth: 'CET ao mês',

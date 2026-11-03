@@ -15,6 +15,7 @@ import { reportInput } from '../../src/tools/calc/exports.ts';
 import { cellText, inputRows } from '../../src/tools/calc/view.ts';
 import { parsePdf, strictPdf } from '../e2e/lib/pdf.ts';
 import { pdfTextLines } from '../e2e/lib/pdf-text.ts';
+import { readWithPdfjs } from '../e2e/lib/pdfjs-read.ts';
 
 async function mortgagePdf() {
   const def = DEFS['mortgage-calculator'];
@@ -217,6 +218,42 @@ describe('the PDF of the home and health calculators (F7)', () => {
 // Second pass of the review F6 (DECISOES § 255): the column of insurance and fees took the SAC × PRICE table to 8 columns in
 // A4, and its texts ran into each other. The layout gives a table whose texts overflow their share columns as wide as their
 // text (and a smaller type); every table whose texts fit keeps the even layout, so the English and Spanish PDFs keep their bytes.
+// The review F4-F7 (h-3; DECISOES § 305): with ten debts the payoff order of the debt calculators in Portuguese and
+// Spanish is longer than its line, and it was drawn over its label. Read back by PDF.js, every label of the summary is
+// clear of the value on its line (a value that does not fit goes under it).
+describe('the summary of the calculator PDF', () => {
+  it('keeps every label clear of its value with ten debts, in Portuguese and in Spanish', async () => {
+    const doc = await PDFDocument.create();
+    const regular = await doc.embedFont(StandardFonts.Helvetica);
+    for (const [id, lang] of [['br-debt-payoff', 'pt'], ['debt-payoff-calculator', 'es'], ['debt-payoff-calculator', 'en']] as const) {
+      const def = DEFS[id];
+      const list = def.fields.find((field) => field.kind === 'list' && field.key === 'd') as { blank: Record<string, number> } | undefined;
+      expect(list, id).toBeDefined();
+      // Ten debts and an extra that covers their interest, so the plan (and its payoff order) is made.
+      const values = { ...def.initial, x: 500_000, d: Array.from({ length: 10 }, (_, index) => ({ ...list?.blank, b: 100_000 * (index + 1) })) } as Values;
+      const data = panelData(id, lang);
+      const view = viewOf(def, data, values);
+      const input = reportInput(
+        { title: data.name, inputs: inputRows(def.fields, values, data), results: view.summary, premises: view.premises, table: view.table(), notice: data.notice, cell: cellText(lang) },
+        data.t,
+      );
+      const read = await readWithPdfjs(await buildReport(input));
+      const texts = read.pages.flatMap((page, n) => page.texts.map((text) => ({ ...text, n })));
+      const labels = new Set(view.summary.map(([label]) => winAnsi(label)));
+      let checked = 0;
+      for (const text of texts.filter((item) => labels.has(item.str))) {
+        const end = text.x + regular.widthOfTextAtSize(text.str, 10);
+        for (const other of texts) {
+          if (other === text || other.str.trim() === '' || other.n !== text.n || Math.abs(other.y - text.y) > 1 || other.x < text.x) continue;
+          expect(other.x, `${id} ${lang}: "${other.str}" after "${text.str}"`).toBeGreaterThan(end + 6);
+        }
+        checked += 1;
+      }
+      expect(checked, `${id} ${lang}`).toBeGreaterThan(5);
+    }
+  });
+});
+
 describe('the columns of the calculator PDF', () => {
   const tableOf = (id: AnyCalcId, lang: 'en' | 'es' | 'pt') => {
     const def = DEFS[id];

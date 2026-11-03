@@ -121,7 +121,7 @@ export default function ExportBar({ page, lang, t, icons, off, pdf, csv, link }:
       {failed && (
         <p class="fo-field__error" role="alert">
           <Icon inner={icons.alert} />
-          {t.exportFailed}
+          {typeof navigator !== 'undefined' && navigator.onLine === false ? t.exportOffline : t.exportFailed}
         </p>
       )}
     </div>

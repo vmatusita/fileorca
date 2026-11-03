@@ -756,3 +756,23 @@ test('Delete PDF pages: a field focused as the file is read keeps the focus and 
   await page.keyboard.type('2-3');
   await expect(field).toHaveValue('2-3');
 });
+
+// The review F4-F7 (d-1; DECISOES § 305): in a tool with an action button the focus goes to the button once the files
+// are read, so the status says what the reading found, the files ready or the ones refused.
+test('a PDF tool with an action says, once the files are read, how many are ready and how many were refused', async ({ page }) => {
+  const status = page.locator('#fo-tool-root p.fo-sr[role="status"]');
+  await openTool(page, '/split-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  await expect(page.getByRole('button', { name: 'Split PDF' })).toBeFocused({ timeout: 30_000 });
+  await expect(status).toHaveText(panel.queue.readyOne);
+
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-ja-otimizado.pdf'), { name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf') }]);
+  await expect(page.getByRole('button', { name: 'Merge PDFs' })).toBeFocused({ timeout: 30_000 });
+  await expect(status).toHaveText(fmt(panel.errors.some, { count: 1 }));
+
+  // One PDF left after the refusals: Merge says the refusal and what it still needs (second pass, s-3).
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), { name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf') }]);
+  await expect(status).toHaveText(`${fmt(panel.errors.some, { count: 1 })} ${mergeTexts.panel.options.needMore}`, { timeout: 30_000 });
+});

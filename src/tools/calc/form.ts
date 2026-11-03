@@ -8,6 +8,14 @@ import type { DateSpec, FieldSpec, ListSpec, NumberSpec, Values } from './types.
 
 export const LINK_VERSION = '1';
 
+/**
+ * How long a field waits, after the last key, before a value out of its range shows the error, its alert and the stale
+ * result: typing 425,000 in a field that starts at 10,000 passed through 4, 42, 425 and 4,250, and each one was announced
+ * as an error (review F4-F7 d-4; DECISOES § 305). A valid value reaches the account at once; leaving the field shows the
+ * error at once.
+ */
+export const SETTLE_MS = 800;
+
 /** Decimals a number field keeps: cents for money, four for a rate (1/10,000 of a point), none for a count. */
 export const DECIMALS: Record<'money' | 'rate' | 'int', number> = { money: 2, rate: 4, int: 0 };
 

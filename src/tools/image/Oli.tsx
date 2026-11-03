@@ -5,6 +5,8 @@ import type { Pose } from '../../oli/poses.ts';
 
 /** All the poses this island can show: the page puts them in its sprite (BaseLayout `oli`). */
 export const PANEL_POSES: Pose[] = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
+/** The image and PDF panels also say, in buoy, that the tool was kept without its engine (F8; DECISOES § 292). */
+export const FILE_PANEL_POSES: Pose[] = [...PANEL_POSES, 'buoy'];
 
 export default function Oli({ pose, class: className }: { pose: Pose; class: string }) {
   return (

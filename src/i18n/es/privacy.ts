@@ -30,6 +30,15 @@ export default {
       ],
     },
     {
+      heading: 'La copia guardada para usar sin conexión',
+      paragraphs: [
+        'Cuando abres una página de FileOrca con internet, tu navegador guarda una copia de esa página y de los archivos del sitio que necesita, como los scripts, los estilos, las fuentes y el motor de una herramienta que usaste, para que la página también funcione sin conexión. Esa copia se queda en tu dispositivo, en el almacenamiento del navegador, y FileOrca nunca la recibe.',
+        'Tus archivos y tus números nunca entran en esa copia. Solo guarda archivos de fileorca.com, en direcciones sin la parte después del ? o del #, así que lo que escribes, abres o guardas queda fuera.',
+        'Para borrar la copia, borra los datos del sitio fileorca.com en la configuración del navegador, o desinstala la app de FileOrca si la instalaste.',
+        'En Android, cuando compartes imágenes o PDF con la app de FileOrca instalada, esperan en tu dispositivo hasta que eliges una herramienta, en un lugar propio del almacenamiento del navegador, aparte de la copia de las páginas. Se borran cuando la herramienta los recibe; si no eliges ninguna, se borran la próxima vez que abras FileOrca después de una hora. Esto funciona porque el navegador guarda la parte del sitio para usarlo sin conexión, que recibe en tu primera visita con internet. Si borras los datos del sitio, abre fileorca.com una vez antes de volver a compartir. Sin esa parte, Android envía los archivos compartidos a fileorca.com, que los rechaza y no los guarda. Cuando eliges una herramienta, la página anota en esta pestaña cuál elegiste, y nada más.',
+      ],
+    },
+    {
       heading: 'Entrega del sitio (Cloudflare)',
       paragraphs: [
         'FileOrca es un sitio estático que entrega Cloudflare. Cuando tu navegador pide una página, Cloudflare procesa datos técnicos de la solicitud, como tu dirección IP y tu navegador, para entregar y proteger el sitio.',
@@ -120,6 +129,7 @@ export default {
         'Datos de anuncios: Google los conserva según sus propias políticas.',
         'Elección de cookies: se queda en tu navegador, y puedes borrarla cuando quieras eliminando los datos del sitio.',
         'Correos electrónicos: se conservan solo el tiempo necesario para responderte.',
+        'Copia sin conexión: se queda en el navegador hasta que borres los datos del sitio o desinstales la app. Los archivos compartidos con la app se borran cuando una herramienta los recibe, o la próxima vez que abras FileOrca después de una hora.',
       ],
     },
     {

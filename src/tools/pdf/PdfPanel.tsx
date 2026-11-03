@@ -21,6 +21,7 @@ import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from '../image/coffee.ts';
 import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
+import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
@@ -33,6 +34,7 @@ import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
+import offlineIcon from '../../../docs/design/assets/Icons/offline.svg?raw';
 
 const SHOW_PROGRESS_AFTER_MS = 400;
 /** Page pictures of the grid drawn at the same time: the worker draws one at a time, so two keep it busy (§ 180). */
@@ -115,6 +117,11 @@ const usable = (item: Item): boolean => item.info !== null && !item.removed && !
 const NOTE_KEY: Record<PdfNote, keyof PdfPanelData['t']['result']['notes'] | null> = {
   repaired: 'repaired', 'xfa-removed': 'xfaRemoved', 'form-lost': 'formLost', 'text-flattened': 'textFlattened', downscaled: 'downscaled', 'bookmarks-kept': null, 'form-kept': null,
 };
+
+/** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
+function offlineNow(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
 
 function adBlocked(adsOn: boolean): boolean {
   const ads = (window as { adsbygoogle?: { loaded?: boolean } }).adsbygoogle;
@@ -232,6 +239,12 @@ export default function PdfPanel(props: PdfPanelData) {
     afterReading();
   }
 
+  /** "2 PDFs ready" under the action, or what Merge still needs; the same words on screen and in the status. */
+  function readyCount(count: number): string {
+    if (mode === 'merge' && count < 2) return (texts.options as { needMore?: string }).needMore ?? '';
+    return count === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count });
+  }
+
   function afterReading(): void {
     const ready = m.items.filter(usable);
     if (ready.length === 0) {
@@ -247,7 +260,13 @@ export default function PdfPanel(props: PdfPanelData) {
     if (runMode === 'auto') void run(false);
     else {
       m.focusAction = true;
-      m.announce = '';
+      // The focus goes to the action, so the status says what the reading found: the files ready, and the ones refused
+      // (review F4-F7 d-1; DECISOES § 305).
+      const refused = m.items.length - ready.length;
+      // Merge with one PDF left after the refusals also says what it still needs, as the screen does (second pass, s-3).
+      const needs = mode === 'merge' && ready.length < 2;
+      const some = fmt(t.errors.some, { count: refused });
+      m.announce = refused === 0 ? readyCount(ready.length) : needs ? `${some} ${readyCount(ready.length)}` : some;
       render();
     }
   }
@@ -656,6 +675,10 @@ export default function PdfPanel(props: PdfPanelData) {
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
+    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
+    void takeInbox(page).then((files) => {
+      if (files.length > 0) addFiles(files);
+    });
     return () => {
       document.removeEventListener('dragover', onDragOver);
       document.removeEventListener('drop', onDrop);
@@ -796,7 +819,7 @@ export default function PdfPanel(props: PdfPanelData) {
       case 'not-encrypted': return fmt(e.notEncrypted, { name });
       case 'too-large': return fmt(e.tooLarge, { name });
       case 'encode': return fmt(e.encode, { name });
-      case 'load': return fmt(e.load, { name });
+      case 'load': return fmt(offlineNow() ? e.offlineRow : e.load, { name });
       case 'one-at-a-time': return fmt(e.oneAtATime, { name });
       case 'no-pages': return fmt(e.noPages, { name });
     }
@@ -805,7 +828,9 @@ export default function PdfPanel(props: PdfPanelData) {
   const pagesLabel = (info: PdfInspect | null) => (info ? (info.pages === 1 ? t.queue.page : fmt(t.queue.pages, { count: info.pages })) : '');
   const done = m.items.filter((item) => item.status === 'done' && item.outputs);
   const delivered = m.single ?? m.bundle;
-  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : m.phase === 'error' ? 'error' : undefined;
+  // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
+  const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
+  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
   const showLevel = (m.phase === 'processing' && m.showLevel) || (m.phase === 'reading' && m.items.length > 0);
   const progress = m.zipping ? 100 : m.phase === 'reading' ? 0 : batchPercent(m.finished, m.total, 0);
   const actionText = texts.action ? (tool.actionLabel?.(state, texts.options as never, subject ? viewOf(subject) : null, texts.action) ?? texts.action) : '';
@@ -940,7 +965,7 @@ export default function PdfPanel(props: PdfPanelData) {
         {one && only ? (
           <FileCard name={nameOf(only)} category="pdf" labels={{ to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove }} state="done" before={fileSize(only.file.size, lang)} note={pagesLabel(only.info)} />
         ) : (
-          <p class="fo-ready__count">{mode === 'merge' && ready.length < 2 ? (texts.options as { needMore?: string }).needMore : ready.length === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count: ready.length })}</p>
+          <p class="fo-ready__count">{readyCount(ready.length)}</p>
         )}
         <div class="fo-result__actions">
           {texts.action && (
@@ -967,14 +992,24 @@ export default function PdfPanel(props: PdfPanelData) {
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
-        <Oli pose={dropState === 'over' ? 'gulp' : dropState === 'error' ? 'oops' : 'wave'} class="fo-drop__oli" />
+        <Oli pose={dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave'} class="fo-drop__oli" />
         <div class="fo-drop__badge" aria-hidden="true">
-          <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'error' ? alertIcon : uploadIcon} />
+          <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : dropState === 'error' ? alertIcon : uploadIcon} />
         </div>
         {dropState === 'over' ? (
           <>
             <p class="fo-drop__title">{t.drop.over}</p>
             <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
+          </>
+        ) : dropState === 'offline' ? (
+          <>
+            <div role="status" class="fo-drop__message">
+              <p class="fo-drop__title">{t.errors.offline}</p>
+              <p class="fo-drop__help">{t.errors.offlineHelp}</p>
+            </div>
+            <button ref={chooseRef} type="button" class="fo-btn" onClick={() => openPicker()}>
+              {t.errors.chooseAnother}
+            </button>
           </>
         ) : dropState === 'error' ? (
           <>

@@ -465,3 +465,60 @@ Pegadinhas que a F7 achou:
   Antes de criar um campo de meia largura com unidade longa, ou um menu com opção longa, rode esse spec.
 - **Alto contraste** (§ 280). O WebKit do Playwright não emula `forcedColors`. O teste ramifica por dentro, pelo `matchMedia('(forced-colors: active)')`: no Chromium afirma o sublinhado, no WebKit o fundo.
 - **Foco das áreas** (§ 278). Só o clique no "Add an area" move o foco para a linha nova (`addedBelow`, estado do módulo `Fields.tsx`). As linhas que o link do cenário traz não mexem no foco.
+
+## F8: piloto automático
+
+O service worker (DECISOES § 285 a § 294):
+
+- **Arquivos:** `src/sw/shared.ts` (o que a página e o worker combinam), `src/sw/logic.ts` (as regras puras, no Vitest) e `src/sw/main.ts` (os eventos). O `src/sw/build.ts` costura os três num script clássico, `dist/sw.js`, no `astro:build:done` do `src/platform/build-files.ts`. Arquivo novo do worker só importa os de antes dele na lista `SW_FILES`, sem `export { }` nem `import` de pacote: o build recusa.
+- **O que entra no cache:** só GET da mesma origem, resposta 200 `basic` sem redirecionamento. Navegação e o resto vão à rede primeiro; `/_astro/*` vem do cache primeiro. Nunca entram `/build.txt`, `/cdn-cgi/*`, `ads.txt`, `robots.txt`, os sitemaps, a chave do IndexNow, o `/sw.js` e a caixa de entrada.
+- **A chave** é `origin + pathname`, sem `?` e sem `#`, em todo `put` e `match`. **A versão** é o commit do `build.txt` no nome do cache (`fileorca-pages-<commit>`); no `activate`, o resto sai.
+- **A desativação:** `SW_ENABLED = false` em `src/platform/site.ts` (run curta). O `/sw.js` passa a apagar os caches e se desregistrar, o `BaseLayout` não registra e o manifest perde o `share_target`.
+- **Nos testes:** `serviceWorkers: 'block'` é o padrão do `playwright.config.ts`. Um spec do worker liga com `test.use({ serviceWorkers: 'allow' })` e sobe o próprio servidor do `dist/` (`tests/e2e/lib/sw-server.ts`): origem limpa, `/sw.js` trocável, e a rede desligada de verdade com `close()`. Os ajudantes estão em `tests/e2e/lib/sw.ts` (`controlled`, `kept`, `allKept`, `offline`, `reloadOffline`, `share`).
+- **O registro** (`src/platform/sw-register.ts`) é inline, depois do `load`, e nunca espera o `ready`.
+
+O compartilhar (§ 290 e § 291):
+
+- **A caixa** é o Cache Storage `fileorca-inbox` (entradas `/__fileorca-inbox/<n>`, o nome em cabeçalho). O worker a enche no POST da ação do manifest e responde 303.
+- **A página "Abrir com"** é `src/views/OpenWithView.astro` com o script `src/share/client.ts`, que não importa nada do chunk `island` (2 arquivos JS: a entrada e o chunk `sniff`). As ferramentas e o `accept` dos manifests saem de `src/share/tools.ts`, que lê os registros.
+- **A entrega** é o `takeInbox(page)` de `src/tools/image/inbox.ts`, na montagem do `ImagePanel` e do `PdfPanel`, pelo caminho do soltar. A escolha vai no `sessionStorage` da aba (`{tool, order}`), nunca na URL.
+
+O Dependabot (§ 298 e § 299):
+
+- **O arquivo** é `.github/dependabot.yml`: npm e GitHub Actions, mensal (dia 1, 06:00 de São Paulo), um grupo de minor e patch por ecossistema, major em PR própria, `cooldown` de 7 dias, `labels: []` e `ignore` sempre com a razão no comentário de cima (o `tests/unit/dependabot.test.ts` reprova `ignore` sem razão).
+- **Fica para o Victor:** toda major, toda PR de GitHub Actions (mexe em `.github/workflows/`) e o que o `docs/OPERACAO.md` lista depois de certas PRs.
+- **Teste que fixa versão:** se uma PR do grupo ficar vermelha porque um teste fixa uma versão sem razão de produto, o teste passa a ler a versão do `package.json` ou do lockfile (run curta). Se a versão nova quebra de fato, a dependência ganha um `ignore` com a razão.
+
+A regra de merge (§ 297):
+
+- Os eventos de exemplo estão em `fixtures/merge-events/`, e o `tests/unit/merge-events.test.ts` os leva pelo mesmo caminho do job (o `env` do Decide, o `git diff`, o `jq` do próprio `ci.yml` e o CLI com o `GITHUB_OUTPUT`). Caso novo é um JSON a mais.
+- A chamada do CLI no `ci.yml` não muda junto com o script: o job roda o `pode-mesclar.ts` da base, e uma chamada nova chegaria ao script velho. Mudar a chamada pede duas PRs (primeiro o script aceita as duas formas, depois o `ci.yml` muda), e o teste fixa a chamada de hoje.
+- Toda issue dos workflows leva `--assignee "$OWNER"` (§ 301): o `tests/unit/ci-workflows.test.ts` reprova uma sem isso, e o `tests/unit/operacao.test.ts` reprova título de issue que o `docs/OPERACAO.md` não cite.
+
+Partes do CI. Isto substitui a descrição das seções "Ajuste: CI em partes (ADR-003)", "Ajuste: WebKit em três partes", "F5a" e "F7", que ficam como estão.
+
+- **As partes:** são quinze, cada uma num job com o limite de 900 s e o alvo de 700 s: o `verificar` (`--sem-playwright`), o `playwright (chromium 1 de 4)` ao `4 de 4` e o `playwright (webkit 1 de 10)` ao `10 de 10` (§ 302). O job `alerta-dependabot` vem depois de todas.
+- **O `tests/unit/verificar.test.ts`** lê a matriz do próprio `ci.yml`. Antes de somar specs, rode o `--list` das partes e veja onde caem o `design.spec.ts` e o `image-matrix.spec.ts` (§ 142).
+
+Pegadinhas que a F8 achou:
+
+- **O gancho `astro:build:done` roda com o carregador do Vite fechado:** um `import()` ali falha com "Vite module runner has been closed". Use `createRequire` (pacote CommonJS) ou import estático.
+- **O relógio falso do Playwright esvazia o `performance.getEntriesByType('resource')` no WebKit.** Um teste que fixa o relógio antes de a página carregar não vê os recursos dela.
+- **No WebKit do Playwright, o `setOffline(false)` não chega ao service worker,** que segue sem rede; e os pedidos feitos pelo worker não aparecem no `context.on('request')`. O teste ramifica por dentro.
+- **Com `serviceWorkers: 'block'`, o `navigator.serviceWorker.register()` resolve `undefined` e o `ready` nunca resolve.** Script de página não espera o `ready`.
+- **O pedido do `/sw.js` para registrar não aparece no `context.on('request')`:** confira no servidor do teste.
+- **`caches.open()` cria o cache que falta:** um teste que lista os caches enquanto o worker apaga um deles o recria. Leia os nomes com `caches.keys()` e confira com `caches.has()` antes de abrir.
+- **No Git Bash, ` ` e crases num `sed` ou num `node -e` somem.** Texto com barra invertida, crase ou apóstrofo vai num arquivo escrito pela ferramenta de escrita (como nas fases anteriores).
+- **O Victor não assistia o repositório:** issue sem responsável podia não dar e-mail. Por isso o `--assignee`.
+- **A trilha de navegação e o aviso de cookies usam a face `Figtree Steady`** (`--fo-font-steady`, o mesmo arquivo da Figtree com `font-display: optional`, § 305; o `.fo-cookie` redefine `--fo-font-text` para ela). Os dois ficam com a fonte da primeira pintura, então não mudam de linha quando a Figtree chega. Com `swap`, a trilha volta a empurrar a ferramenta na primeira visita no celular (CLS até 0,27), e o card de cookies cresce (0,095 no Lighthouse). Texto novo que aparece na primeira visita e empurra a página ou muda de altura fixo na tela vai para essa face. Não reserve altura na trilha: duas linhas reservadas põem o resultado de cinco calculadoras abaixo da dobra (§ 124).
+- **Medida de fonte atrasada sem o consentimento gravado:** o aviso de cookies só aparece na primeira visita de verdade. Uma varredura ou um teste que grava o `fo-consent` antes de abrir a página não vê o card (foi assim que o 0,095 do Lighthouse escapou das varreduras da § 305).
+- **A `Figtree Fallback` tem `size-adjust: 101.2%`** (§ 305), escolhido pela varredura de todas as páginas de 320 a 412 px, cada uma num contexto novo, com a Figtree segura até a primeira pintura (o `firstVisit()` do `layout-shift.spec.ts` faz o mesmo numa página; o spec guarda as páginas da borda de cada largura). No Chromium a fonte de reserva não engorda no negrito; no WebKit, sim. Mudou a fonte, a calibração ou um texto perto da borda: rode o `layout-shift.spec.ts`.
+- **No WebKit, uma página de hub não pinta enquanto a Figtree está segura:** o `requestAnimationFrame` não roda. Teste que segura a fonte espera a pintura com um teto (`setTimeout`), como o `painted()` do `layout-shift.spec.ts`. E o WebKit ainda usa uma face `optional` que chega nos 100 ms depois do pedido: para provar a fonte "atrasada", solte-a depois disso.
+- **O CLS de texto com a fonte atrasada depende do sistema:** a mesma página deu 0,046 aqui e 0,257 no Linux do CI, porque a fonte de reserva se desenha diferente (§ 305). Um teste de fonte afirma o que a página garante (a trilha e o H1 parados) e imprime o CLS; o limite de CLS do projeto é o do Lighthouse.
+- **Teste que percorre o site inteiro num teste só estoura os 60 s no WebKit do CI** quando o site cresce (o reflow a 320 px, com 169 páginas, § 306). Divida em blocos de páginas, um teste cada, e confira no `--list` onde caem o `design.spec.ts` e o `image-matrix.spec.ts`.
+- **Uma versão nova do worker assume a página depois do `load`:** o que a página manda ao worker no `load` vai para o velho, cujo cache o novo apaga. O registro manda a lista de novo no `controllerchange` (§ 307). Teste de troca de versão nunca recarrega antes de conferir o cache novo.
+- **Teste do worker começa com `if (await workerOff(page, server)) return;`** antes do primeiro `controlled()` (§ 307): com `SW_ENABLED` em `false`, ele confere o estado desligado e termina. Teste novo do worker segue o mesmo molde, e um teste que lê o manifest ou o `/sw.js` compara com o `SW_ENABLED`.
+- **Os passeios de estados das ferramentas de PDF ficam no `axe-pdf-states.spec.ts`** (§ 307): no `a11y.spec.ts` eles caíam todos na primeira parte de cada navegador, acima de 700 s. Teste pesado de axe novo vai num spec que caia numa parte leve; confira no `--list`.
+- **Página que mostra um estado depois de ler algo no navegador nasce sem ele** (a "Abrir com", § 307): o estado vazio visível no HTML afirmava "nada para abrir" sobre arquivos compartilhados. Ele começa com `hidden`, o script o mostra quando a leitura termina vazia, e um `<noscript>` cobre quem não roda script.
+- **O `pnpm screenshots` abre as páginas com `serviceWorkers: 'block'`,** como os testes: fora do runner, o Playwright libera o worker, e o `page.route` deixa de ver o que ele responde (o nível d'água, que segura o `engine-client`, nunca aparecia). O bloco da F8, que fotografa o offline e a "Abrir com", cria o próprio contexto com `allow`.
+- **O erro de faixa das calculadoras espera 800 ms sem tecla ou a saída do campo** (`SETTLE_MS`, § 305). Teste que digita um valor fora da faixa espera o alerta com `expect` (que já espera), nunca na hora.

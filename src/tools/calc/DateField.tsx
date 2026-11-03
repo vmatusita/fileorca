@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
-import { dayInRange } from './form.ts';
+import { SETTLE_MS, dayInRange } from './form.ts';
 
 export interface DateFieldProps {
   id: string;
@@ -27,6 +27,8 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
   const [draft, setDraft] = useState(value);
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const settle = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(settle.current), []);
 
   // A day that changes from outside (the scenario link) shows in the field, unless the person is typing in it.
   useEffect(() => {
@@ -41,10 +43,13 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
     return () => report?.(id, false);
   }, [report, id, wrong]);
 
-  const read = (text: string) => {
+  // As in the CalcField: a day out of the range (or half typed) is said after a pause or on leaving (DECISOES § 305).
+  const read = (text: string, now = false) => {
     setDraft(text);
     const ok = dayInRange({ min, max }, text);
-    setWrong(!ok);
+    window.clearTimeout(settle.current);
+    if (ok || now) setWrong(!ok);
+    else settle.current = window.setTimeout(() => setWrong(true), SETTLE_MS);
     if (ok && text !== value) onValue(text);
   };
   const errorId = `${id}-error`;
@@ -67,6 +72,7 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
             aria-describedby={wrong ? errorId : undefined}
             onInput={(event) => read(event.currentTarget.value)}
             onChange={(event) => read(event.currentTarget.value)}
+            onBlur={(event) => read(event.currentTarget.value, true)}
           />
         </div>
         {wrong && (

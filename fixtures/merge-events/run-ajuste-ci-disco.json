@@ -1,0 +1,31 @@
+{
+  "description": "Branch de ajuste ajuste-ci-disco",
+  "event": {
+    "action": "synchronize",
+    "number": 211,
+    "pull_request": {
+      "number": 211,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "ajuste-ci-disco",
+        "sha": "00d3f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "scripts/lib/disco.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Branch de run (ajuste-ci-disco) com o verificar verde: merge automático."
+  }
+}

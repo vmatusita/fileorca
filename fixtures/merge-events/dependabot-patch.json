@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot patch de uma dependência npm",
+  "event": {
+    "action": "synchronize",
+    "number": 201,
+    "pull_request": {
+      "number": 201,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/npm_and_yarn/astro-7.4.5",
+        "sha": "00c9f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-patch",
+    "dependency-group": ""
+  },
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Dependabot patch: merge automático."
+  }
+}

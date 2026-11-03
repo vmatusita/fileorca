@@ -16,7 +16,7 @@ import AdSlot from '../../ads/AdSlot.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
-import { PANEL_POSES } from './Oli.tsx';
+import { FILE_PANEL_POSES } from './Oli.tsx';
 import { fmt } from '../../i18n/format.ts';
 import enCommon from '../../i18n/en/common.ts';
 import guideTexts from '../../i18n/en/file-guides.ts';
@@ -55,7 +55,7 @@ const guides = lang === 'en' && tool ? guidesOfTool(tool).map((guide) => ({ href
   title={title}
   description={t.description}
   withAds
-  oli={PANEL_POSES}
+  oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(name, t.description, path, lang)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />

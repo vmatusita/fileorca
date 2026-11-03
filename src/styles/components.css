@@ -98,7 +98,9 @@
 .fo-langmenu a[aria-current] { background: var(--brand-soft); }
 
 /* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
-.fo-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+/* The trail wraps on a phone, as the Breadcrumb README allows, in the font of its first paint: Figtree Steady never swaps,
+   so the number of rows never changes when Figtree arrives late (review F4-F7 e-1 and its second pass, DECISOES § 305). */
+.fo-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; font: 500 14px/20px var(--fo-font-steady); color: var(--ink-muted); }
 .fo-crumbs li { display: inline-flex; align-items: center; gap: 2px; }
 .fo-crumbs__link { color: var(--ink-muted); text-decoration: none; padding: 6px 2px; }
 .fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
@@ -252,7 +254,8 @@
 
 /* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
 .fo-says { display: flex; align-items: flex-end; gap: var(--space-2); }
-.fo-says__oli { width: 64px; height: 64px; }
+.fo-says__oli { width: 64px; height: 64px; flex: none; }
+.fo-says__oli svg { width: 100%; height: 100%; display: block; }
 .fo-says__bubble { position: relative; margin-bottom: 10px; padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); border-bottom-left-radius: 4px; background: var(--surface); color: var(--ink); font: 500 20px/26px var(--fo-font-display); }
 .fo-says__bubble p { margin: 0; }
 .fo-says__bubble small { display: block; margin-top: 2px; font: 400 15px/22px var(--fo-font-text); color: var(--ink-muted); }
@@ -471,7 +474,9 @@
 .fo-footer__coffee .fo-icon { width: 20px; height: 20px; }
 
 /* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
-.fo-cookie { position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
+/* The notice of the first visit keeps the font of its first paint, and so its height (DECISOES § 305): every text inside
+   it that asks for --fo-font-text gets the Figtree that never swaps. */
+.fo-cookie { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-text); position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
 .fo-cookie[hidden] { display: none; }
 @media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 440px; } }
 .fo-cookie p { margin: 0; font-size: 15px; line-height: 22px; }
@@ -556,9 +561,11 @@
 /* The number never breaks inside: ResultHero measures it (--fo-num-em, its numbers in em; --fo-num-px, its words, unit and
    gaps), and its size is what fits the card (cqi), never past 48px (60px from 768px; DECISOES § 246 and § 253). */
 .fo-rhero__num { margin: 0; font: 600 48px/52px var(--fo-font-display); font-size: min(48px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); letter-spacing: -0.015em; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); overflow-wrap: anywhere; }
-.fo-rhero__num > span { white-space: nowrap; }
+/* The number keeps whole lines but breaks rather than run out of the card, as with the text spacing of WCAG 1.4.12
+   (review F4-F7 d-3; DECISOES § 305). */
+.fo-rhero__num > span { min-width: 0; overflow-wrap: anywhere; }
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
-.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; }
+.fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
 .fo-rhero__sentence b { font-weight: 700; }
 /* A long placard (a 7-digit result) wraps and shrinks instead of widening the card past the column (review F4,
    ANU-1 and ACE-10). */
@@ -723,3 +730,26 @@
   .fo-pdf-island .fo-seg:has(small) { flex-direction: column; border-radius: var(--radius-lg); }
   .fo-pdf-island .fo-seg:has(small) .fo-seg__opt { border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
 }
+
+/* F8: the offline page (DECISOES § 289). */
+.fo-offline { max-width: var(--fo-measure); }
+.fo-offline .fo-says { margin-top: var(--space-6); }
+.fo-saved { margin: 0; padding-left: var(--space-6); list-style: disc; }
+.fo-saved li + li { margin-top: var(--space-2); }
+.fo-offline__home { margin-top: var(--space-8); }
+
+/* F8: the "Open with" page of the share target (DECISOES § 290). */
+/* The page waits for the inbox with the room of a screen, so the footer starts below the fold and nothing it shows
+   pushes what was on screen (the list and the cards moved the footer: CLS 0.25; review F8 d-2, DECISOES § 307). */
+.fo-openwith { max-width: 1040px; min-height: 100svh; }
+.fo-openwith .fo-says { margin-top: var(--space-6); max-width: var(--fo-measure); }
+.fo-openwith__hubs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+.fo-openwith__hubs a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+.fo-openwith__lead { max-width: var(--fo-measure); margin: var(--space-3) 0 0; }
+.fo-shared { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-shared li { display: flex; flex-wrap: wrap; gap: 0 var(--space-3); padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
+.fo-shared__name { font-weight: 600; overflow-wrap: anywhere; }
+.fo-shared__meta { color: var(--ink-muted); }
+.fo-grid > li[hidden], .fo-openwith [data-group][hidden] { display: none; }
+.fo-tool__takes { font: 600 14px/20px var(--fo-font-text); color: var(--ink); }
+.fo-tool__takes:empty { display: none; }

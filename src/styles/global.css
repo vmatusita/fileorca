@@ -15,6 +15,8 @@
 :root {
   --fo-font-display: "Fredoka", "Fredoka Fallback", var(--font-display);
   --fo-font-text: "Figtree", "Figtree Fallback", var(--font-text);
+  /* The Figtree that never swaps after the first paint: the breadcrumb and the cookie notice (fonts.css, § 305). */
+  --fo-font-steady: "Figtree Steady", "Figtree Fallback", var(--font-text);
   /* The measure token (68ch) in Figtree, fixed in rem: ch follows the font in use, so 68ch would
      widen the prose by 90px when Figtree replaces the fallback (CLS). The 0 of Figtree is 0.641em. */
   --fo-measure: calc(68 * 0.641rem);

@@ -192,7 +192,7 @@ Da tabela de voz do docs/design/README.
 | Erro | Ops, a Oli não conseguiu ler esse arquivo. Tente um JPG ou PNG. |
 | Arquivo em cima | Pode soltar, a Oli está pronta |
 | 404 | Essa página nadou para longe. |
-| Offline | Sem internet? Sem problema, a Oli funciona offline. |
+| Offline | Sem internet? A Oli segue funcionando nas páginas que você já abriu. (F8, DECISOES § 289: só as páginas abertas com internet ficam guardadas.) |
 | Apoio | A Oli funciona à base de café. |
 
 ## Pedido de café e Pix

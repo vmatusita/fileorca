@@ -2,10 +2,12 @@
 # scripts/ci/pode-mesclar.ts, then the post-deploy check runs when the merge happened.
 # A merge made with the GITHUB_TOKEN does not fire `push`, so the post-deploy is called here.
 # ADR-003: pnpm verificar runs in parts, one job each, in parallel on 2-vCPU runners: every gate but the
-# Playwright suite (`verificar`), and the suite split by browser, Chromium in four shards and WebKit in eight
-# (`playwright`; F5a and F7, the adendos of ADR-003). Each part keeps the 900 s limit; together they are the whole of pnpm
+# Playwright suite (`verificar`), and the suite split by browser, Chromium in four shards and WebKit in ten
+# (`playwright`; F5a, F7 and F8, the adendos of ADR-003). Each part keeps the 900 s limit; together they are the whole of pnpm
 # verificar (tests/unit/verificar.test.ts). The Playwright parts run with core dumps off and end with the state of the
-# disk and of the core dumps, whatever happened (the ENOSPC of DECISOES § 141; § 154).
+# disk and of the core dumps, whatever happened (the ENOSPC of DECISOES § 141; § 154). F8: a Dependabot PR whose CI went
+# red tells Victor in an issue assigned to him and in the PR (alerta-dependabot; DECISOES § 300), and every issue the
+# workflows open is assigned to the owner of the repository, so GitHub e-mails him (DECISOES § 301).
 name: CI
 
 on:
@@ -65,30 +67,36 @@ jobs:
           - part: chromium 4 de 4
             browser: chromium
             args: --playwright=chromium --shard=4/4
-          - part: webkit 1 de 8
+          - part: webkit 1 de 10
             browser: webkit
-            args: --playwright=webkit --shard=1/8
-          - part: webkit 2 de 8
+            args: --playwright=webkit --shard=1/10
+          - part: webkit 2 de 10
             browser: webkit
-            args: --playwright=webkit --shard=2/8
-          - part: webkit 3 de 8
+            args: --playwright=webkit --shard=2/10
+          - part: webkit 3 de 10
             browser: webkit
-            args: --playwright=webkit --shard=3/8
-          - part: webkit 4 de 8
+            args: --playwright=webkit --shard=3/10
+          - part: webkit 4 de 10
             browser: webkit
-            args: --playwright=webkit --shard=4/8
-          - part: webkit 5 de 8
+            args: --playwright=webkit --shard=4/10
+          - part: webkit 5 de 10
             browser: webkit
-            args: --playwright=webkit --shard=5/8
-          - part: webkit 6 de 8
+            args: --playwright=webkit --shard=5/10
+          - part: webkit 6 de 10
             browser: webkit
-            args: --playwright=webkit --shard=6/8
-          - part: webkit 7 de 8
+            args: --playwright=webkit --shard=6/10
+          - part: webkit 7 de 10
             browser: webkit
-            args: --playwright=webkit --shard=7/8
-          - part: webkit 8 de 8
+            args: --playwright=webkit --shard=7/10
+          - part: webkit 8 de 10
             browser: webkit
-            args: --playwright=webkit --shard=8/8
+            args: --playwright=webkit --shard=8/10
+          - part: webkit 9 de 10
+            browser: webkit
+            args: --playwright=webkit --shard=9/10
+          - part: webkit 10 de 10
+            browser: webkit
+            args: --playwright=webkit --shard=10/10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -141,6 +149,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR: ${{ github.event.pull_request.number }}
+      OWNER: ${{ github.repository_owner }}
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
@@ -200,17 +209,47 @@ jobs:
               sleep 5
             done
             if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
-              gh issue create --title "Merge da PR #$PR sem commit de merge legível" --body "O merge aconteceu, mas o commit não apareceu no gh pr view; rode o pós-deploy à mão. Execução: $RUN_URL"
+              gh issue create --title "Merge da PR #$PR sem commit de merge legível" --assignee "$OWNER" --body "O merge aconteceu, mas o commit não apareceu no gh pr view; rode o pós-deploy à mão. Execução: $RUN_URL"
               exit 1
             fi
             echo "merged=true" >> "$GITHUB_OUTPUT"
             echo "sha=$sha" >> "$GITHUB_OUTPUT"
           else
             gh pr comment "$PR" --body "Merge automático: o GitHub recusou o merge (conflito ou PR desatualizada). Execução: $RUN_URL"
-            gh issue create --title "Merge automático falhou na PR #$PR" --body "O job de merge decidiu mesclar ($REASON), mas o gh pr merge falhou. Execução: $RUN_URL"
+            gh issue create --title "Merge automático falhou na PR #$PR" --assignee "$OWNER" --body "O job de merge decidiu mesclar ($REASON), mas o gh pr merge falhou. Execução: $RUN_URL"
             echo "merged=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
+
+  # F8 (decision 14; DECISOES § 300): GitHub sends no failure e-mail for a run Dependabot started, so a red CI in a
+  # Dependabot PR (any part, or the merge job) opens an issue assigned to the owner, one per PR: a new red run comments
+  # on the open one instead of opening another. It also comments on the PR. No checkout: only the gh CLI runs here.
+  alerta-dependabot:
+    needs: [verificar, playwright, merge]
+    if: failure() && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      OWNER: ${{ github.repository_owner }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Abrir ou comentar a issue
+        run: |
+          title="CI vermelho na PR #$PR do Dependabot"
+          body="O CI da PR #$PR do Dependabot ficou vermelho e o merge automático não aconteceu. Execução: $RUN_URL. O que fazer: docs/OPERACAO.md, seção \"CI vermelho numa PR do Dependabot\"."
+          issue=$(gh issue list --state open --limit 100 --json number,title --jq "map(select(.title == \"$title\")) | first | .number // empty")
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body "$body"
+          else
+            gh issue create --title "$title" --assignee "$OWNER" --body "$body"
+          fi
+          gh pr comment "$PR" --body "CI vermelho: o merge automático não acontece. A issue \"$title\" avisa o dono do repositório. Execução: $RUN_URL"
 
   pos-deploy:
     needs: merge

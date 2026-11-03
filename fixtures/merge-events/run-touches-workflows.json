@@ -1,0 +1,32 @@
+{
+  "description": "Branch de run que mexe em .github/workflows/",
+  "event": {
+    "action": "ready_for_review",
+    "number": 214,
+    "pull_request": {
+      "number": 214,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "head": {
+        "ref": "fase-08",
+        "sha": "00d6f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    ".github/workflows/ci.yml",
+    "tests/unit/ci-alert.test.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "A PR mexe em .github/workflows/, então o merge fica para o Victor."
+  }
+}

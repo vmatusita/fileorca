@@ -21,6 +21,7 @@ import Oli from './Oli.tsx';
 import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from './coffee.ts';
 import { EXTENSION, uniqueNames } from './names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
+import { takeInbox } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
 import type { FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -29,6 +30,7 @@ import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import imageIcon from '../../../docs/design/assets/Icons/image.svg?raw';
 import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
+import offlineIcon from '../../../docs/design/assets/Icons/offline.svg?raw';
 
 export interface ImagePanelProps<S extends object, O> extends ImagePanelData<O> {
   tool: ImageTool<S, O>;
@@ -129,6 +131,11 @@ function newModel(): Model {
     selected: null, expanded: false, announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
     rowFocus: null, slotFocus: false, successors: [], focusRowId: null,
   };
+}
+
+/** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
+function offlineNow(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false;
 }
 
 function adBlocked(adsOn: boolean): boolean {
@@ -514,7 +521,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       case 'decode': return fmt(errors.decode, { name });
       case 'encode': return fmt(errors.encode, { name });
       case 'too-large': return fmt(errors.tooLarge, { name });
-      case 'load': return fmt(errors.load, { name });
+      case 'load': return fmt(offlineNow() ? errors.offlineRow : errors.load, { name });
       case 'wrong-tool': {
         const link = failure.source === 'heic' ? converters.heic : failure.source === 'avif' ? converters.avif : undefined;
         const format = formatName(failure.source);
@@ -597,6 +604,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
+    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
+    void takeInbox(page).then((files) => {
+      if (files.length > 0) startBatch(files);
+    });
     return () => {
       document.removeEventListener('dragover', onDragOver);
       document.removeEventListener('drop', onDrop);
@@ -632,7 +643,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const progress = m.zipping ? 100 : batchPercent(m.finished, total, current?.progress ?? 0);
   const showProgress = m.phase === 'processing' && m.showLevel;
   const showCard = rows.length > 0 && m.hadCard && (m.phase === 'done' || (m.phase === 'processing' && !m.showLevel));
-  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : m.phase === 'error' ? 'error' : undefined;
+  // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
+  const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
+  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
   const names = outputNames(ready());
   const nameFor = new Map(ready().map((item, index) => [item.id, names[index] ?? '']));
 
@@ -668,8 +681,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return only?.item.outUrl ? { url: only.item.outUrl, name: nameFor.get(only.item.id) ?? '', size: only.output.blob.size } : null;
   })();
 
-  const oliPose = dropState === 'over' ? 'gulp' : dropState === 'error' ? 'oops' : 'wave';
-  const badge = dropState === 'over' ? downloadIcon : dropState === 'error' ? alertIcon : uploadIcon;
+  const oliPose = dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
+  const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : dropState === 'error' ? alertIcon : uploadIcon;
   const [helpBefore = '', helpAfter = ''] = fmt(t.drop.helpDesktop, { formats: texts.formats }).split('{kbd}');
   const single = m.items.length === 1 ? m.items[0] : undefined;
 
@@ -810,6 +823,16 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           <>
             <p class="fo-drop__title">{t.drop.over}</p>
             <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
+          </>
+        ) : dropState === 'offline' ? (
+          <>
+            <div role="status" class="fo-drop__message">
+              <p class="fo-drop__title">{t.errors.offline}</p>
+              <p class="fo-drop__help">{t.errors.offlineHelp}</p>
+            </div>
+            <button ref={chooseRef} type="button" class="fo-btn" onClick={openPicker}>
+              {t.errors.chooseAnother}
+            </button>
           </>
         ) : dropState === 'error' ? (
           <>

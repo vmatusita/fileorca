@@ -100,14 +100,30 @@ function heading(pen: Pen, text: string): void {
   pen.y -= LINE * 1.4;
 }
 
+/** Least room between a label and its value on one line, in points; a value that would come closer goes under it. */
+const PAIR_GAP = 12;
+
 function pairs(pen: Pen, rows: [string, string][]): void {
+  const available = pen.size.width - 2 * MARGIN;
   for (const [label, value] of rows) {
     room(pen, LINE);
-    pen.page.drawText(winAnsi(label), { x: MARGIN, y: pen.y, size: BODY, font: pen.regular });
+    const name = winAnsi(label);
+    pen.page.drawText(name, { x: MARGIN, y: pen.y, size: BODY, font: pen.regular });
     const text = winAnsi(value);
     const width = pen.bold.widthOfTextAtSize(text, BODY);
-    pen.page.drawText(text, { x: pen.size.width - MARGIN - width, y: pen.y, size: BODY, font: pen.bold });
+    if (pen.regular.widthOfTextAtSize(name, BODY) + PAIR_GAP + width <= available) {
+      pen.page.drawText(text, { x: pen.size.width - MARGIN - width, y: pen.y, size: BODY, font: pen.bold });
+      pen.y -= LINE;
+      continue;
+    }
+    // A value too long for the line of its label (the payoff order of ten debts in pt and es) goes under the label, in
+    // lines that keep to the right like the other values (review F4-F7 h-3; DECISOES § 305).
     pen.y -= LINE;
+    for (const line of wrap(text, pen.bold, BODY, available)) {
+      room(pen, LINE);
+      pen.page.drawText(line, { x: pen.size.width - MARGIN - pen.bold.widthOfTextAtSize(line, BODY), y: pen.y, size: BODY, font: pen.bold });
+      pen.y -= LINE;
+    }
   }
 }
 

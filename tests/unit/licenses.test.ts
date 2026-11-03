@@ -557,7 +557,11 @@ describe('os pacotes compilados dentro de um arquivo pronto de outro (DECISOES �
     ]);
   });
 
-  it('holds on the real files: the legacy build of PDF.js carries core-js 3.50.0 and only that, and /licenses has its MIT text', () => {
+  it('holds on the real files: the legacy build of PDF.js carries the core-js of the /licenses text and only that, with its MIT text', () => {
+    // The version is the one src/platform/licenses.ts declares (the text copied by hand, DECISOES § 179), never a literal
+    // of this test: a pdfjs-dist with another core-js fails here and in gate:licencas until the text is copied again.
+    const real = (UPSTREAM_TEXTS['pdfjs-dist'] ?? []).find((entry) => entry.embeds === 'core-js');
+    expect(real?.source).toMatch(/^https:\/\/github\.com\/zloirock\/core-js\/blob\/v\d+\.\d+\.\d+\/LICENSE$/);
     const dir = pdfjsPackageDir();
     const record = { '_astro/pdf.js': [`${dir}/legacy/build/pdf.mjs`], '_astro/pdf.worker.js': [`${dir}/legacy/build/pdf.worker.mjs`, `${dir}/package.json`] };
     const files = readPrebuiltFiles(record, dirname(dirname(dir)));
@@ -565,7 +569,7 @@ describe('os pacotes compilados dentro de um arquivo pronto de outro (DECISOES �
       ['pdfjs-dist/legacy/build/pdf.mjs', ['core-js']],
       ['pdfjs-dist/legacy/build/pdf.worker.mjs', ['core-js']],
     ]);
-    for (const file of files) expect(file.licenseUrls.filter((url) => url.includes('/core-js/'))).toEqual([CORE_JS]);
+    for (const file of files) expect(file.licenseUrls.filter((url) => url.includes('/core-js/'))).toEqual([real?.source]);
     expect(checkEmbeddedTexts(files, UPSTREAM_TEXTS)).toEqual([]);
     // Negative control: the same files against the list without the core-js text fail, which is the gate before the § 179.
     const without = { ...UPSTREAM_TEXTS, 'pdfjs-dist': (UPSTREAM_TEXTS['pdfjs-dist'] ?? []).filter((entry) => entry.embeds !== 'core-js') };
@@ -575,9 +579,9 @@ describe('os pacotes compilados dentro de um arquivo pronto de outro (DECISOES �
     ]);
     // The modern build carries nothing: the check reads only files with the markers.
     expect(readPrebuiltFiles({ '_astro/pdf.js': [`${dir}/build/pdf.mjs`] }, dirname(dirname(dir)))).toEqual([]);
-    const text = listedPackages().find((pkg) => pkg.name === 'pdfjs-dist')?.texts.find((entry) => entry.label === coreJsText.label);
+    const text = listedPackages().find((pkg) => pkg.name === 'pdfjs-dist')?.texts.find((entry) => entry.label === real?.label);
     expect(text?.text).toMatch(/^Copyright \(c\) 2013–2025 Denis Pushkarev \(zloirock\.ru\)\nCopyright \(c\) 2025–2026 CoreJS Company \(core-js\.io\)\n\nPermission is hereby granted, free of charge/);
-    expect(text?.source).toBe(CORE_JS);
+    expect(text?.source).toBe(real?.source);
   });
 });
 
@@ -668,8 +672,9 @@ describe('os pacotes e os textos de licença', () => {
       'PDF.js glue of qcms_bg.wasm',
       'Adobe CMaps',
       'Foxit standard fonts (PDFium)',
-      // DECISOES § 179: core-js is compiled into the legacy build, which ships no text of it.
-      'core-js 3.50.0, inside the PDF.js legacy build',
+      // DECISOES § 179: core-js is compiled into the legacy build, which ships no text of it. The version is the one of
+      // the copied text (src/platform/licenses.ts), which the test of the real files ties to the code of pdfjs-dist.
+      expect.stringMatching(/^core-js \d+\.\d+\.\d+, inside the PDF\.js legacy build$/),
     ]);
     expect(pdfjs?.texts.some((entry) => /Marti Maria/.test(entry.text))).toBe(false);
     // Nothing GPL among the texts: the Liberation fonts stay out of the dist (DECISOES § 144).

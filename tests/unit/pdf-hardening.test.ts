@@ -179,6 +179,26 @@ describe('getDocument in src/engine/pdf/pdfjs.ts', () => {
     expect(calls).toBe(1);
   });
 
+  it('hands PDF.js factories with every public method of its base factories, so a new one does not break the drawing in the worker', () => {
+    // PDF.js 6.5 asks the canvas factory for getNoAlphaContext; the engine's OffscreenFactory had no such method, and the
+    // worker drew nothing in Chromium (the Dependabot rehearsal, F8). The Node tests never draw through these factories.
+    const methods = (file: ts.SourceFile, name: string): string[] => {
+      const found: string[] = [];
+      visit(file, (node) => {
+        if (!ts.isClassDeclaration(node) || node.name?.text !== name) return;
+        for (const member of node.members) if (ts.isMethodDeclaration(member) && ts.isIdentifier(member.name) && !member.name.text.startsWith('_')) found.push(member.name.text);
+      });
+      return found.sort();
+    };
+    const pdfjs = publishedFile('legacy/build/pdf.mjs');
+    for (const [base, own] of [['BaseCanvasFactory', 'OffscreenFactory'], ['BaseFilterFactory', 'NoFilterFactory'], ['BaseBinaryDataFactory', 'SiteDataFactory']] as const) {
+      const wanted = methods(pdfjs, base);
+      expect(wanted.length, base).toBeGreaterThan(0);
+      const have = methods(source, own);
+      expect(wanted.filter((name) => !have.includes(name)), `${own} lacks a method of ${base}`).toEqual([]);
+    }
+  });
+
   it('turns off XFA, system fonts and the worker\'s own fetching, and keeps the WebAssembly decoders on', () => {
     expect(options.get('enableXfa')).toBe('false');
     expect(options.get('useWorkerFetch')).toBe('false');

@@ -1,0 +1,102 @@
+---
+// The page of the share target (F8, decision 1; DECISOES § 290). The service worker takes the POST of the share,
+// keeps the files in the inbox and answers with a 303 to this page, in GET. Its script (src/share/client.ts) shows the
+// files (name, size and the format read from the bytes) and the tools that take at least one of them, in two groups,
+// with the ToolCard of the design system and how many files each one takes. The cards are built here from the
+// registries and stay hidden until the script knows the files. With no files (opened directly, or a browser without
+// the worker), the page says so and leads to the image and PDF hubs. Noindex, out of the sitemap, no ads.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Oli from '../components/Oli.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { IMAGE_PAGES } from '../tools/image/registry.ts';
+import { PDF_PAGES } from '../tools/pdf/registry.ts';
+import { SHARE_TOOLS } from '../share/tools.ts';
+import { INBOX_CACHE, INBOX_ENTRY_PREFIX, INBOX_NAME_HEADER, INBOX_TIME_HEADER, INBOX_TOOL_KEY, INBOX_TTL_MS } from '../sw/shared.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('open-with');
+const t = TEXTS[lang]['open-with'];
+const common = TEXTS[lang].common;
+const cards = SHARE_TOOLS.map((tool) => {
+  const text = tool.kind === 'image' ? common.tools[tool.id] : common.pdf[tool.id];
+  return {
+    ...tool,
+    href: pathFor(tool.id, lang),
+    name: text.name,
+    description: text.description,
+    icon: tool.kind === 'image' ? IMAGE_PAGES[tool.id].icon : PDF_PAGES[tool.id].icon,
+    category: tool.kind === 'pdf' || IMAGE_PAGES[tool.id].pdf ? ('pdf' as const) : ('image' as const),
+  };
+});
+const groups = [
+  { kind: 'image', heading: common.imageTools, cards: cards.filter((card) => card.kind === 'image') },
+  { kind: 'pdf', heading: common.pdfTools, cards: cards.filter((card) => card.kind === 'pdf') },
+];
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} oli={['wave']}>
+  <div
+    class="fo-openwith"
+    data-open-with
+    data-lang={lang}
+    data-inbox={INBOX_CACHE}
+    data-entry-prefix={INBOX_ENTRY_PREFIX}
+    data-name-header={INBOX_NAME_HEADER}
+    data-time-header={INBOX_TIME_HEADER}
+    data-ttl={INBOX_TTL_MS}
+    data-tool-key={INBOX_TOOL_KEY}
+    data-takes-this={t.takesThis}
+    data-takes-all={t.takesAll}
+    data-takes-some={t.takesSome}
+    data-unknown={t.unknown}
+    data-unnamed={t.unnamed}
+  >
+    <h1 class="fo-h1">{t.h1}</h1>
+    {/* The empty state waits for the script to read the inbox: shown first, it said "nothing to open" over shared files
+        (review F8 d-2; DECISOES § 307). Without scripts, the noscript copy says it. */}
+    {[true, false].map((scripted) => {
+      const empty = (
+        <Fragment>
+          <div class="fo-says fo-says--info" role="note" data-empty hidden={scripted}>
+            <Oli pose="wave" class="fo-says__oli" />
+            <div class="fo-says__bubble"><p>{t.emptySays}</p><small>{t.emptyDetail}</small></div>
+          </div>
+          <ul class="fo-openwith__hubs" data-empty hidden={scripted}>
+            <li><a href={pathFor('image-tools', lang)}>{common.imageTools}</a></li>
+            <li><a href={pathFor('pdf-tools', lang)}>{common.pdfTools}</a></li>
+          </ul>
+        </Fragment>
+      );
+      return scripted ? empty : <noscript>{empty}</noscript>;
+    })}
+    <div data-shared hidden>
+      <p class="fo-openwith__lead">{t.lead}</p>
+      <section class="fo-section" aria-labelledby="fo-shared-title">
+        <h2 id="fo-shared-title">{t.filesHeading}</h2>
+        <ul class="fo-shared" data-files></ul>
+      </section>
+      {groups.map((group) => (
+        <section class="fo-section" aria-labelledby={`fo-open-${group.kind}`} data-group={group.kind} hidden>
+          <h2 id={`fo-open-${group.kind}`}>{group.heading}</h2>
+          <ul class="fo-grid">
+            {group.cards.map((card) => (
+              <li data-tool={card.id} data-accepts={card.accepts.join(' ')} data-single={String(card.single)} hidden>
+                <ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon}>
+                  <span class="fo-tool__takes" data-takes></span>
+                </ToolCard>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <p class="fo-section" data-no-tool hidden>{t.noTool}</p>
+    </div>
+  </div>
+</BaseLayout>
+<script>
+  import '../share/client.ts';
+</script>

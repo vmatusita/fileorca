@@ -1,0 +1,35 @@
+{
+  "description": "Autor dependabot[bot] numa branch fora de dependabot/",
+  "event": {
+    "action": "synchronize",
+    "number": 208,
+    "pull_request": {
+      "number": 208,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "fase-08",
+        "sha": "00d0f8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-patch",
+    "dependency-group": ""
+  },
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "PR do Dependabot fora de uma branch dependabot/: fica para o Victor."
+  }
+}

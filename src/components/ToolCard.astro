@@ -1,6 +1,7 @@
 ---
 // ToolCard (docs/design/components/ToolCard): the whole card is a link, with the folded corner in the
-// category colour; name in an H3; it lifts on hover (a card leads, a button acts: no lip).
+// category colour; name in an H3; it lifts on hover (a card leads, a button acts: no lip). The slot adds a line
+// under the description (the "Open with" page says how many shared files the tool takes; F8).
 import type { IconName } from '../icons/svg.ts';
 import Icon from './Icon.astro';
 
@@ -17,4 +18,5 @@ const { href, name, description, category, icon } = Astro.props;
   <span class="fo-tool__icon" aria-hidden="true"><Icon name={icon} /></span>
   <h3 class="fo-tool__name">{name}</h3>
   <p class="fo-tool__desc">{description}</p>
+  <slot />
 </a>

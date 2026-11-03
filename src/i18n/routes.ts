@@ -64,6 +64,8 @@ export type RouteId =
   | 'contact'
   | 'licenses'
   | 'support'
+  | 'offline'
+  | 'open-with'
   | 'not-found';
 
 export type AdArea = 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilidades';
@@ -114,6 +116,9 @@ const TRANSLATED_PATHS: Partial<Record<RouteId, { pt: string; es: string }>> = {
   'compress-pdf': { pt: '/pt/comprimir-pdf/', es: '/es/comprimir-pdf/' },
   'protect-pdf': { pt: '/pt/proteger-pdf/', es: '/es/proteger-pdf/' },
   'unlock-pdf': { pt: '/pt/desbloquear-pdf/', es: '/es/desbloquear-pdf/' },
+  // F8: the offline page and the page of the share target, by the glossaries (docs/i18n/; DECISOES § 289 and § 290).
+  offline: { pt: '/pt/offline/', es: '/es/sin-conexion/' },
+  'open-with': { pt: '/pt/abrir-com/', es: '/es/abrir-con/' },
 };
 
 export const ROUTES: readonly RouteDef[] = [
@@ -200,6 +205,23 @@ export const ROUTES: readonly RouteDef[] = [
     indexable: true,
     view: 'src/views/SupportView.astro',
     texts: ['src/i18n/{lang}/support.ts'],
+  },
+  // F8: the page the service worker shows offline for a page it did not keep, and the page the share target of the
+  // manifests opens (Android). Out of the sitemaps and of hreflang, noindex in _headers, with no ads and reached
+  // by no link (DECISOES § 289 and § 290).
+  {
+    id: 'offline',
+    paths: { en: '/offline/', ...TRANSLATED_PATHS['offline'] },
+    indexable: false,
+    view: 'src/views/OfflineView.astro',
+    texts: ['src/i18n/{lang}/offline.ts'],
+  },
+  {
+    id: 'open-with',
+    paths: { en: '/open-with/', ...TRANSLATED_PATHS['open-with'] },
+    indexable: false,
+    view: 'src/views/OpenWithView.astro',
+    texts: ['src/i18n/{lang}/open-with.ts'],
   },
   {
     id: 'not-found',

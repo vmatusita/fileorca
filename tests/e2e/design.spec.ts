@@ -386,14 +386,26 @@ test.describe('largest contentful paint', () => {
 // ---- regressions of the adversarial review (DECISOES § 40, § 42 and § 44) ------------------------
 
 test.describe('review regressions', () => {
-  test('reflow at 320px: no page and no tool state scrolls sideways', async ({ page }) => {
+  // Every page of the site in one test passed the 60 s limit in the WebKit of the CI when the F8 added six pages: the
+  // loads took 34 s and the batch below had no room left. The pages go in blocks, each a test (DECISOES § 306).
+  const REFLOW_BLOCK = 60;
+  for (let start = 0; start < PAGES.length; start += REFLOW_BLOCK) {
+    const block = PAGES.slice(start, start + REFLOW_BLOCK);
+    test(`reflow at 320px: no page scrolls sideways (pages ${start + 1} to ${start + block.length})`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      const wide: string[] = [];
+      for (const path of block) {
+        await page.goto(path);
+        const width = await page.evaluate(() => document.documentElement.scrollWidth);
+        if (width > 320) wide.push(`${path} ${width}px`);
+      }
+      expect(wide).toEqual([]);
+    });
+  }
+
+  test('reflow at 320px: no tool state scrolls sideways', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     const wide: string[] = [];
-    for (const path of PAGES) {
-      await page.goto(path);
-      const width = await page.evaluate(() => document.documentElement.scrollWidth);
-      if (width > 320) wide.push(`${path} ${width}px`);
-    }
     await page.goto('/compress-image/');
     await hydrated(page);
     await dismissCookies(page);

@@ -254,6 +254,37 @@ export interface NotFoundTexts extends PageMeta {
   homeLink: string;
 }
 
+/** The offline page (F8, decision 8; DECISOES § 289): what the service worker shows for a page it did not keep. */
+export interface OfflineTexts extends PageMeta {
+  h1: string;
+  /** The offline line of the Oli (buoy), true for a page that was not kept, and its second line. */
+  says: string;
+  saysDetail: string;
+  savedHeading: string;
+  /** Shown when the device keeps no page yet (or the list cannot be read). */
+  savedEmpty: string;
+  homeLink: string;
+}
+
+/** The page of the share target (F8, decision 1; DECISOES § 290). {count} and {total} are numbers of files. */
+export interface OpenWithTexts extends PageMeta {
+  h1: string;
+  lead: string;
+  filesHeading: string;
+  /** Under a tool card: how many of the shared files the tool takes. */
+  takesThis: string;
+  takesAll: string;
+  takesSome: string;
+  /** The files arrived but no tool takes any of them. */
+  noTool: string;
+  /** No files: the page was opened directly, or the browser has no service worker. */
+  emptySays: string;
+  emptyDetail: string;
+  /** Next to a file whose format the page cannot read from its bytes, and for a file with no name. */
+  unknown: string;
+  unnamed: string;
+}
+
 /** One question of a tool page: researched, answered in our own words. */
 export interface FaqItem {
   q: string;
@@ -548,6 +579,10 @@ export interface ImagePanelTexts {
     encode: string;
     /** The engine could not be loaded (offline, or the site changed since the page opened). */
     load: string;
+    /** Offline, with the engine never kept (F8; DECISOES § 292): the Oli line (buoy), what to do, and the row of a file. */
+    offline: string;
+    offlineHelp: string;
+    offlineRow: string;
     tooLarge: string;
     /** "Choose other files" (DropZone error button). */
     chooseAnother: string;
@@ -830,6 +865,10 @@ export interface PdfPanelTexts {
     tooLarge: string;
     encode: string;
     load: string;
+    /** Offline, with the engine never kept (F8; DECISOES § 292): the Oli line (buoy), what to do, and the row of a file. */
+    offline: string;
+    offlineHelp: string;
+    offlineRow: string;
     /** A second file in a tool that works on one: "Oli works on one PDF at a time here. Start over to use {name}." */
     oneAtATime: string;
     /** PDF to JPG, a file with no page in the typed range: "{name} has no page in that range, so Oli left it out." (DECISOES § 178) */

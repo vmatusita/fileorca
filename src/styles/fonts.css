@@ -20,6 +20,20 @@
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+/* A second face of the same Figtree file, with font-display: optional, for the text a first visit shows before Figtree
+   arrives and that moves the page when it wraps again: the breadcrumb and the cookie notice keep the font of their first
+   paint. A trail that fit in one row with the fallback and needed two with Figtree (or two and three) pushed the tool
+   down when the font arrived late (CLS up to 0.27 at 320 to 412 px), and the notice grew by a line (0.095 in
+   Lighthouse; review F4-F7 e-1 and its second pass, DECISOES § 305). The browser fetches the file once for both faces,
+   and from the second page on this text is in Figtree. */
+@font-face {
+  font-family: "Figtree Steady";
+  src: url("@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 @font-face {
   font-family: "Fredoka Fallback";
   src: local("Arial"), local("Helvetica"), local("Liberation Sans"), local("Roboto");
@@ -31,7 +45,10 @@
 @font-face {
   font-family: "Figtree Fallback";
   src: local("Arial"), local("Helvetica"), local("Liberation Sans"), local("Roboto");
-  size-adjust: 99.9%;
+  /* 99.9% was the width of Figtree at weight 300, the default of the variable file. 101.2% is a little past its width at
+     weight 500 (1.010 times Arial; 1.0025 at weight 400), and gave the smallest layout shift over every page at 320 to
+     412 px when Figtree arrives late, against 99.9% and 100.5% (review F4-F7 e-1 and its second pass; DECISOES § 305). */
+  size-adjust: 101.2%;
   ascent-override: 95.1%;
   descent-override: 25%;
   line-gap-override: 0%;

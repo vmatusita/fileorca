@@ -18,7 +18,7 @@ import { fmt } from '../i18n/format.ts';
 import enCommon from '../i18n/en/common.ts';
 import shared from '../i18n/en/file-guides.ts';
 import { articleLd, breadcrumbLd, personLd } from '../seo/meta.ts';
-import { PANEL_POSES } from '../tools/image/Oli.tsx';
+import { FILE_PANEL_POSES } from '../tools/image/Oli.tsx';
 import { panelData as pdfPanelData } from '../tools/pdf/page.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, type FileGuideId } from '../tools/guides/registry.ts';
@@ -50,7 +50,7 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
   title={t.title}
   description={t.description}
   withAds
-  oli={PANEL_POSES}
+  oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, def.path, lang, GUIDE_PUBLISHED, GUIDE_REVIEWED), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />

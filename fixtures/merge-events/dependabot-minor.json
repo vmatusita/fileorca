@@ -1,0 +1,35 @@
+{
+  "description": "Dependabot minor de uma dependência npm",
+  "event": {
+    "action": "synchronize",
+    "number": 202,
+    "pull_request": {
+      "number": 202,
+      "draft": false,
+      "user": {
+        "login": "dependabot[bot]"
+      },
+      "head": {
+        "ref": "dependabot/npm_and_yarn/vitest-5.1.0",
+        "sha": "00caf8cccccccccccccccccccccccccccccccccc"
+      },
+      "base": {
+        "ref": "main",
+        "sha": "29afbce0000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "fetchMetadata": {
+    "update-type": "version-update:semver-minor",
+    "dependency-group": ""
+  },
+  "expected": {
+    "merge": "true",
+    "comment": "false",
+    "reason": "Dependabot minor: merge automático."
+  }
+}

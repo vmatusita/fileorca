@@ -189,7 +189,7 @@ Da tabela de voz do docs/design/README.
 | Error | Uy, Oli no pudo leer este archivo. Prueba con un JPG o PNG. |
 | Archivo encima | Suéltalo, Oli está lista |
 | 404 | Esta página se fue nadando. |
-| Sin conexión | ¿Sin internet? No pasa nada: Oli funciona sin conexión. |
+| Sin conexión | ¿Sin internet? Oli sigue funcionando en las páginas que ya abriste. (F8, DECISOES § 289: só as páginas abertas com internet ficam guardadas.) |
 | Apoyo | Oli funciona a base de café. |
 
 ## Pedido de café
