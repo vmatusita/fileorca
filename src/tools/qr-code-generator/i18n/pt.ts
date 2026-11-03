@@ -44,7 +44,7 @@ export default {
     },
     {
       q: 'Por que um texto longo deixa o código mais denso?',
-      a: 'Um QR code cresce conforme o que ele guarda. Um link curto como https://fileorca.com/ cabe numa grade de 29 quadradinhos de lado, e o texto mais longo ocupa 177. Menos quadradinhos significam quadradinhos maiores, que a câmera lê de mais longe.',
+      a: 'Um QR code cresce conforme o que ele guarda. Um link curto como https://fileorca.com/pt/ cabe numa grade de 29 quadradinhos de lado, e o texto mais longo ocupa 177. Menos quadradinhos significam quadradinhos maiores, que a câmera lê de mais longe.',
     },
     {
       q: 'Devo baixar o PNG ou o SVG?',

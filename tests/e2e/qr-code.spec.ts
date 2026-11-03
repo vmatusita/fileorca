@@ -261,6 +261,31 @@ test.describe('QR code generator', () => {
     });
   }
 
+  // Review of the languages adjustment (E-1; DECISOES § 321): at 320 px the Spanish rail of the PNG size ("Pequeño",
+  // "Mediano", "Grande", each over its pixels) was 17 px wider than its column and touched the border of the card, while the
+  // page itself did not scroll (the reflow test only reads the page). Each part of each choice group stays in its column.
+  test('every choice group keeps its rail and its note inside the column at 320 px, in the three languages', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 740 });
+    for (const lang of LANGS) {
+      await open(page, lang);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const groups = await page.locator('#fo-tool-root fieldset.fo-field').evaluateAll((sets) =>
+        sets.map((set) => {
+          const style = getComputedStyle(set);
+          const box = set.getBoundingClientRect();
+          const right = box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth);
+          const widest = Math.max(...[...set.children].map((child) => child.getBoundingClientRect().right));
+          return { legend: set.querySelector('legend')?.textContent ?? '', over: widest - right };
+        }),
+      );
+      expect(groups.length, `${lang}: os dois grupos de opções`).toBe(2);
+      // Under a pixel: the rounding of the layout (the Portuguese rail is 0.3 px over, inside the padding of the card).
+      for (const group of groups) expect(group.over, `${lang} "${group.legend}" a 320 px`).toBeLessThan(1);
+    }
+  });
+
   test('an empty box and a text over the limit show the error, with no code and no download', async ({ page }) => {
     await open(page);
     const alert = page.locator('#fo-qr-error');

@@ -44,7 +44,7 @@ export default {
     },
     {
       q: '¿Por qué un texto largo crea un código más denso?',
-      a: 'Un código QR crece según lo que guarda. Un enlace corto como https://fileorca.com/ cabe en una cuadrícula de 29 cuadritos por lado, y el texto más largo ocupa 177. Menos cuadritos significan cuadritos más grandes, que una cámara lee desde más lejos.',
+      a: 'Un código QR crece según lo que guarda. Un enlace corto como https://fileorca.com/es/ cabe en una cuadrícula de 29 cuadritos por lado, y el texto más largo ocupa 177. Menos cuadritos significan cuadritos más grandes, que una cámara lee desde más lejos.',
     },
     {
       q: '¿Descargo el PNG o el SVG?',
@@ -74,7 +74,7 @@ export default {
     oli: { legend: 'Oli en el centro', on: 'Activada', off: 'Desactivada' },
     size: {
       legend: 'Tamaño del PNG',
-      small: 'Pequeño',
+      small: 'Chico',
       medium: 'Mediano',
       large: 'Grande',
       px: '{side} px',
