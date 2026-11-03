@@ -8,7 +8,7 @@
 // The name puts this file before the design spec, in a light part of the WebKit (DECISOES § 142 and § 274).
 import { expect, test, type Page } from '@playwright/test';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import { csvButton, openCalc, pdfButton, scaled } from './lib/life-calc.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
 
@@ -157,26 +157,32 @@ test('a field out of its range marks the result stale and turns the PDF and the 
   }
 });
 
-test('below 360 px the money pages keep their half rows, the down payment beside the price among them (s-1)', async ({ page }) => {
-  test.setTimeout(120_000);
-  await page.setViewportSize({ width: 320, height: 740 });
-  const pages = [
-    ...CALC_PAGE_IDS.map((id) => [id, 'en'] as const),
-    ...ES_CALC_IDS.map((id) => [id, 'es'] as const),
-    ...BR_CALC_IDS.map((id) => [id, 'pt'] as const),
-  ];
-  for (const [id, lang] of pages) {
-    const path = await openMoney(page, id, lang);
-    const wide = await page.locator('.fo-calc__main > .fo-field--half').evaluateAll((fields) =>
-      fields.flatMap((field) => {
-        const own = Math.round(field.getBoundingClientRect().width);
-        const grid = Math.round(field.parentElement?.getBoundingClientRect().width ?? 0);
-        return own >= grid ? [field.querySelector('input, select')?.id ?? '?'] : [];
-      }),
-    );
-    expect.soft(wide, path).toEqual([]);
-  }
-});
+// Every money page in the three languages: the 18 in English, the same 18 in Spanish (every row of the registry has its
+// Spanish page since the languages adjustment) and the 8 of Brazil, in blocks of pages, a test each (DECISOES § 306).
+const MONEY_PAGES: [AnyCalcId, 'en' | 'pt' | 'es'][] = [
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, 'en'] => [id, 'en']),
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, 'es'] => [id, 'es']),
+  ...BR_CALC_IDS.map((id): [AnyCalcId, 'pt'] => [id, 'pt']),
+];
+const MONEY_BLOCK = 15;
+for (let start = 0; start < MONEY_PAGES.length; start += MONEY_BLOCK) {
+  const block = MONEY_PAGES.slice(start, start + MONEY_BLOCK);
+  test(`below 360 px the money pages keep their half rows, the down payment beside the price among them (s-1; pages ${start + 1} to ${start + block.length})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 320, height: 740 });
+    for (const [id, lang] of block) {
+      const path = await openMoney(page, id, lang);
+      const wide = await page.locator('.fo-calc__main > .fo-field--half').evaluateAll((fields) =>
+        fields.flatMap((field) => {
+          const own = Math.round(field.getBoundingClientRect().width);
+          const grid = Math.round(field.parentElement?.getBoundingClientRect().width ?? 0);
+          return own >= grid ? [field.querySelector('input, select')?.id ?? '?'] : [];
+        }),
+      );
+      expect.soft(wide, path).toEqual([]);
+    }
+  });
+}
 
 test('a scenario link with three areas leaves the focus and the scroll alone; Add an area takes the focus (a-1)', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });

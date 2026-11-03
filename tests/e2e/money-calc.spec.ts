@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDES, moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
 import enShared from '../../src/tools/calc/i18n/en.ts';
 import esShared from '../../src/tools/calc/i18n/es.ts';
 import ptShared from '../../src/tools/calc/i18n/pt.ts';
@@ -568,88 +568,101 @@ test.describe('F6: the CSV and the PDF in Spanish and Portuguese', () => {
   });
 });
 
+// Every money calculator page in the three languages: the 18 in English, the same 18 in Spanish (every row of the registry
+// has its Spanish page since the languages adjustment) and the 8 of Brazil. The two tests that walk them all go in blocks of
+// pages, a test each, so a block keeps the room of its 120 s on the WebKit of the CI as the site grows (DECISOES § 306).
+const MONEY_PATHS = [
+  ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
+  ...CALC_PAGE_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''),
+  ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
+];
+const MONEY_BLOCK = 15;
+/** The pages in blocks of MONEY_BLOCK, each with the words of its test title ("pages 16 to 30"). */
+function moneyBlocks(paths: readonly string[]): { name: string; paths: string[] }[] {
+  const out: { name: string; paths: string[] }[] = [];
+  for (let start = 0; start < paths.length; start += MONEY_BLOCK) {
+    const block = paths.slice(start, start + MONEY_BLOCK);
+    out.push({ name: `pages ${start + 1} to ${start + block.length}`, paths: block });
+  }
+  return out;
+}
+
 // Review F6 (f-3; DECISOES § 246): the number of the ResultHero, with its unit, stays on one line from 320 to 1280px on every
 // calculator in the three languages, with the example it opens with. Before, "R$ 166.010,85" broke in the middle from 768px
 // ("R$ 166.010,8" and "5"), and the Portuguese "/mês" went to a line of its own.
-test('the ResultHero number and its unit stay on one line at 320, 360, 768 and 1280px, in the three languages', async ({ page }) => {
-  test.setTimeout(120_000);
-  const paths = [
-    ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
-    ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''),
-    ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
-  ];
-  const broken: string[] = [];
-  const english = new Set(CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path));
-  // Second pass (DECISOES § 253): a long whole amount typed in, "$22,222,828", which used to break at 320, 768 and 1280px.
-  const typed = `${CALC_PAGES['compound-interest-calculator'].path}#v=1&i=58900000&m=0&r=120000&y=30`;
-  for (const path of [...paths, typed]) {
-    await page.setViewportSize({ width: 320, height: 900 });
-    expect((await page.goto(path))?.status(), path).toBe(200);
-    await page.evaluate(() => document.fonts.ready);
-    for (const width of [320, 360, 768, 1280]) {
-      await page.setViewportSize({ width, height: 900 });
-      const { lines, size } = await page.locator('.fo-rhero__num').first().evaluate((num) => ({
-        lines: Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight)),
-        size: parseFloat(getComputedStyle(num).fontSize),
-      }));
-      if (lines !== 1) broken.push(`${path} a ${width}px: ${lines} linhas`);
-      // The English numbers fit at their full size with their example: they stay at 48px, and 60px from 768px, as before.
-      if (english.has(path) && size < (width >= 768 ? 60 : 48)) broken.push(`${path} a ${width}px: ${size}px`);
+// Second pass (DECISOES § 253): and a long whole amount typed in, "$22,222,828", which used to break at 320, 768 and 1280px.
+const HERO_PATHS = [...MONEY_PATHS, `${CALC_PAGES['compound-interest-calculator'].path}#v=1&i=58900000&m=0&r=120000&y=30`];
+for (const block of moneyBlocks(HERO_PATHS)) {
+  test(`the ResultHero number and its unit stay on one line at 320, 360, 768 and 1280px, in the three languages (${block.name})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const broken: string[] = [];
+    const english = new Set(CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path));
+    for (const path of block.paths) {
+      await page.setViewportSize({ width: 320, height: 900 });
+      expect((await page.goto(path))?.status(), path).toBe(200);
+      await page.evaluate(() => document.fonts.ready);
+      for (const width of [320, 360, 768, 1280]) {
+        await page.setViewportSize({ width, height: 900 });
+        const { lines, size } = await page.locator('.fo-rhero__num').first().evaluate((num) => ({
+          lines: Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight)),
+          size: parseFloat(getComputedStyle(num).fontSize),
+        }));
+        if (lines !== 1) broken.push(`${path} a ${width}px: ${lines} linhas`);
+        // The English numbers fit at their full size with their example: they stay at 48px, and 60px from 768px, as before.
+        if (english.has(path) && size < (width >= 768 ? 60 : 48)) broken.push(`${path} a ${width}px: ${size}px`);
+      }
     }
-  }
-  expect(broken).toEqual([]);
-});
+    expect(broken).toEqual([]);
+  });
+}
 
 // Review F6 (f-4; DECISOES § 247): no value of the worked example breaks inside a word or a number, at 320, 360 and 1280px, on
 // every calculator in the three languages ("R$ 1.084.638,2" and "0" before, and "$375,000.0" and "0" in Spanish); a value
 // may wrap at a space, and the page never scrolls sideways.
-test('the values of the worked example never break inside a number at 320, 360 and 1280px, in the three languages', async ({ page }) => {
-  test.setTimeout(120_000);
-  const paths = [
-    ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
-    ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''),
-    ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? ''),
-  ];
-  const broken: string[] = [];
-  for (const path of paths) {
-    await page.setViewportSize({ width: 320, height: 900 });
-    expect((await page.goto(path))?.status(), path).toBe(200);
-    await page.evaluate(() => document.fonts.ready);
-    for (const width of [320, 360, 1280]) {
-      await page.setViewportSize({ width, height: 900 });
-      const cells = await page.locator('.fo-example td').evaluateAll((tds) =>
-        tds.flatMap((td) => {
-          // Every run of characters with no ordinary space between them (a number, with its no-break space) is on one line.
-          const tops: { char: string; top: number }[] = [];
-          const walker = document.createTreeWalker(td, NodeFilter.SHOW_TEXT);
-          for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-            const text = node.textContent ?? '';
-            for (let i = 0; i < text.length; i += 1) {
-              const range = document.createRange();
-              range.setStart(node, i);
-              range.setEnd(node, i + 1);
-              const rect = range.getClientRects()[0];
-              if (rect) tops.push({ char: text[i] ?? '', top: Math.round(rect.top) });
+for (const block of moneyBlocks(MONEY_PATHS)) {
+  test(`the values of the worked example never break inside a number at 320, 360 and 1280px, in the three languages (${block.name})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const broken: string[] = [];
+    for (const path of block.paths) {
+      await page.setViewportSize({ width: 320, height: 900 });
+      expect((await page.goto(path))?.status(), path).toBe(200);
+      await page.evaluate(() => document.fonts.ready);
+      for (const width of [320, 360, 1280]) {
+        await page.setViewportSize({ width, height: 900 });
+        const cells = await page.locator('.fo-example td').evaluateAll((tds) =>
+          tds.flatMap((td) => {
+            // Every run of characters with no ordinary space between them (a number, with its no-break space) is on one line.
+            const tops: { char: string; top: number }[] = [];
+            const walker = document.createTreeWalker(td, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+              const text = node.textContent ?? '';
+              for (let i = 0; i < text.length; i += 1) {
+                const range = document.createRange();
+                range.setStart(node, i);
+                range.setEnd(node, i + 1);
+                const rect = range.getClientRects()[0];
+                if (rect) tops.push({ char: text[i] ?? '', top: Math.round(rect.top) });
+              }
             }
-          }
-          let token: number[] = [];
-          const split: string[] = [];
-          for (const { char, top } of [...tops, { char: ' ', top: 0 }]) {
-            if (char === ' ') {
-              if (new Set(token).size > 1) split.push(td.textContent ?? '');
-              token = [];
-            } else token.push(top);
-          }
-          return split.slice(0, 1);
-        }),
-      );
-      expect(await page.locator('.fo-example td').count(), path).toBeGreaterThan(0);
-      for (const cell of cells) broken.push(`${path} a ${width}px: "${cell}"`);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${path} a ${width}px`).toBeLessThanOrEqual(width);
+            let token: number[] = [];
+            const split: string[] = [];
+            for (const { char, top } of [...tops, { char: ' ', top: 0 }]) {
+              if (char === ' ') {
+                if (new Set(token).size > 1) split.push(td.textContent ?? '');
+                token = [];
+              } else token.push(top);
+            }
+            return split.slice(0, 1);
+          }),
+        );
+        expect(await page.locator('.fo-example td').count(), path).toBeGreaterThan(0);
+        for (const cell of cells) broken.push(`${path} a ${width}px: "${cell}"`);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth), `${path} a ${width}px`).toBeLessThanOrEqual(width);
+      }
     }
-  }
-  expect(broken).toEqual([]);
-});
+    expect(broken).toEqual([]);
+  });
+}
 
 // Review F6 (d-1; DECISOES § 251): text that is not a number of the page's language gets the range and how the page writes
 // decimals (WCAG 3.3.3); a number out of the range gets the range alone, in the three languages.
