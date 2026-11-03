@@ -1,0 +1,137 @@
+/* FileOrca UX v2 (F10) · UX-17: the institutional pages (404, About, the legal pages) and the footer on the phone.
+   Loaded after proto.css by pages.html. Colours: tokens only (no proposal token). The site would take these rules
+   into src/styles/components.css with the fo- prefix (the spec of pages.html says which name each one gets).
+   Sections:
+     1. the page views and the right column from 1280 px (Alternative A: the column of the page itself)
+     2. 404: the sea band with the Oli lost, the search without the pop shadow, the three tools
+     3. About: the numbers card (the dog-ear paper) and the Oli wave in the orca section
+     4. legal pages: the "On this page" index from 1280 px, and Alternative B (the centred column)
+     5. the footer: A (a disclosure per category below 768 px) and B (two plain columns) */
+
+/* ---------- 1. Views ---------- */
+.pg-main { display: block; min-width: 0; padding-top: var(--space-5); }
+.pg-view { display: grid; gap: var(--space-4); align-content: start; min-width: 0; max-width: var(--tool-max); }
+.pg-view > * { min-width: 0; }
+/* From 1280 px a page without the ad rail keeps the same two columns as a page with it (760 + 150 + 300): the right
+   column holds a piece of the page (the sea, the numbers, the index), never an empty band. */
+@media (min-width: 1280px) {
+  .pg-view--side { max-width: none; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; }
+  .pg-view--side > * { grid-column: 1; }
+  .pg-view--side > .pg-side { grid-column: 2; grid-row: 1 / -1; align-self: start; }
+}
+
+/* ---------- 2. 404 ---------- */
+.pg-404__text { display: grid; gap: var(--space-3); }
+.pg-404__body { max-width: 62ch; }
+/* The sea band: the water of the DropZone (fo-water) in a band of surface-sunken; the Oli floats on the water line,
+   on the right, looking left at the title. Decorative: aria-hidden, no text inside. */
+.pg-sea { position: relative; height: 176px; border-radius: var(--radius-xl); background: var(--surface-sunken); overflow: hidden; }
+.pg-sea > .fo-water { --level: 44%; z-index: 1; }
+.pg-sea__oli { position: absolute; z-index: 0; right: 14%; bottom: 20%; width: 128px; height: 128px; }
+/* It bobs twice and stops (4.8 s, under the 5 s of WCAG 2.2.2); with reduced motion, proto.css stops it. */
+.pg-sea__oli > svg { animation: fo-float calc(var(--dur-float) * 0.8) var(--ease-in-out) 2 alternate; }
+@media (min-width: 768px) {
+  .pg-sea { height: 208px; }
+  .pg-sea__oli { width: 160px; height: 160px; right: 16%; bottom: 18%; }
+}
+/* The inline search does not float: only the stroke, no shadow-pop (G-13; Forma: "O que flutua usa shadow-pop"). */
+.pg-search { max-width: 560px; box-shadow: none; }
+/* Site parity of the search box (components.css: the hidden list, the 20 px icon, the 18 px field, the focus ring). */
+.pg-search [hidden] { display: none; }
+.pg-search .fo-search__field { border-bottom: 0; }
+.pg-search .fo-search__field > .fo-icon { width: 20px; height: 20px; }
+.pg-search .fo-search__field input { flex: 1; align-self: stretch; width: 0; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 18px/24px var(--font-text); }
+.pg-search .fo-search__field input::placeholder { color: var(--ink-muted); opacity: 1; }
+.pg-search .fo-search__field input:focus-visible { outline: none; }
+.pg-search .fo-search__field:focus-within { outline: var(--stroke-3) solid var(--focus); outline-offset: -3px; border-radius: var(--radius-lg); }
+.pg-404__tools { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.pg-404__tools > h2 { font: 700 18px/26px var(--font-text); }
+.pg-chips { margin: 0; padding: 0; list-style: none; }
+@media (min-width: 1280px) {
+  .pg-404 { grid-template-rows: auto auto auto 1fr; }
+  .pg-404 > .pg-sea { height: auto; min-height: 400px; align-self: stretch; }
+  .pg-404 .pg-sea > .fo-water { --level: 38%; }
+  .pg-404 .pg-sea__oli { right: 50%; bottom: 30%; margin-right: -80px; }
+}
+
+/* ---------- 3. About ---------- */
+.pg-about__intro { display: grid; gap: var(--space-3); }
+.pg-about__intro > p { max-width: 68ch; }
+/* The numbers card: a paper with the brand dog-ear (the fin tip), the four counts in number-md and the zero with the
+   PrivacySeal. The counts come from the registries at build time, never typed by hand. */
+.pg-stats { --fo-ground: var(--bg); position: relative; display: grid; gap: var(--space-4); padding: var(--space-5) var(--space-4) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.pg-stats__title { padding-right: var(--dogear); font: 700 18px/26px var(--font-text); }
+.pg-stats__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); margin: 0; padding: 0; list-style: none; }
+.pg-stat { display: grid; align-content: start; gap: 2px; }
+.pg-stat__num { font: 600 24px/28px var(--font-display); color: var(--ink); }
+.pg-stat__label { font: 500 15px/20px var(--font-text); color: var(--ink-muted); }
+.pg-stat--zero { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--space-3); row-gap: var(--space-2); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--hairline); }
+.pg-stat--zero > .fo-seal { grid-column: 1 / -1; justify-self: start; }
+@media (min-width: 768px) and (max-width: 1279px) {
+  .pg-stats__list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  .pg-about { grid-template-rows: auto 1fr; }
+  .pg-about > .pg-stats { position: sticky; top: var(--space-5); }
+}
+.pg-orca { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
+.pg-orca__oli { width: 96px; height: 96px; }
+/* The wave floats twice and stops (4.8 s): the infinite loop of today is the pending item F3 d-02 (UX-10). */
+.pg-orca__oli > svg { animation: fo-float calc(var(--dur-float) * 0.8) var(--ease-in-out) 2 alternate; }
+@media (min-width: 768px) { .pg-orca__oli { width: 128px; height: 128px; } }
+
+/* ---------- 4. Legal pages ---------- */
+.pg-legal__head { display: grid; gap: var(--space-3); }
+.pg-updated { color: var(--ink-muted); font: 500 14px/20px var(--font-text); }
+.pg-elide { color: var(--ink-muted); font-style: italic; }
+.pg-toc { display: none; }
+@media (min-width: 1280px) {
+  .pg-legal { grid-template-rows: auto 1fr; }
+  .pg-toc { display: block; position: sticky; top: var(--space-5); padding-top: var(--space-2); }
+  .pg-toc > h2 { margin: 0 0 var(--space-2); font: 700 18px/26px var(--font-text); }
+  .pg-toc ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; counter-reset: pg-toc; }
+  .pg-toc li { counter-increment: pg-toc; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: baseline; }
+  .pg-toc li::before { content: counter(pg-toc); color: var(--ink-muted); font: 600 13px/20px var(--font-text); font-variant-numeric: tabular-nums; }
+  .pg-toc__link { display: block; padding: 4px 0; color: var(--ink); font: 500 15px/20px var(--font-text); text-decoration: none; }
+  .pg-toc__link:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+  /* Alternative B (state "centro"): no rail and no column of its own, the column is centred in page-max. */
+  html[data-state="centro"] .pg-legal { display: block; margin-inline: auto; max-width: var(--tool-max); }
+  html[data-state="centro"] .pg-legal > .pg-legal__body { margin-top: var(--space-4); }
+}
+html[data-state="centro"] .pg-toc { display: none; }
+
+/* ---------- 5. Footer ---------- */
+/* Site parity (components.css): 64 px above, the columns and the base centred in page-max. */
+.pg-footer { margin-top: var(--space-16); }
+.pg-footer .fo-footer__cols, .pg-footer .fo-footer__base { max-width: var(--page-max); margin-inline: auto; }
+.pg-footer .fo-footer__cols { gap: var(--space-6) var(--space-4); }
+.pg-fcol { display: grid; align-content: start; min-width: 0; }
+.pg-fcol > h2 { margin: 0 0 var(--space-1); }
+.pg-fcol a { display: block; overflow-wrap: anywhere; }
+/* Alternative A: below 768 px, two columns; each category keeps its hub link in sight and the tools behind a
+   disclosure. From 768 px, where the browser can style ::details-content, the summary goes away and the list shows as
+   today; where it cannot, the disclosure stays (it still works, it only takes one tap more). */
+.pg-fmore > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  min-height: var(--tap-min); margin-top: var(--space-1); padding: 0 var(--space-2) 0 var(--space-3);
+  border: var(--stroke-hair) solid var(--on-deep-muted); border-radius: var(--radius-pill);
+  color: var(--on-deep); font: 600 15px/20px var(--font-text); list-style: none; cursor: pointer;
+}
+.pg-fmore > summary::-webkit-details-marker { display: none; }
+.pg-fmore > summary .fo-icon { flex: none; color: var(--on-deep-muted); transition: transform var(--dur-quick) var(--ease-out); }
+.pg-fmore[open] > summary .fo-icon { transform: rotate(180deg); }
+.pg-fmore > summary:hover { background: var(--brand-soft); color: var(--ink); }
+.pg-fmore > summary:hover .fo-icon { color: var(--ink); }
+.pg-fmore ul { margin-top: var(--space-1); }
+@media (max-width: 767px) {
+  .pg-footer--a .fo-footer__cols, .pg-footer--b .fo-footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-footer--a .pg-fcol--site { grid-column: 1 / -1; }
+  .pg-footer--a .pg-fcol--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-5); }
+}
+@supports selector(::details-content) {
+  @media (min-width: 768px) {
+    .pg-fmore > summary { display: none; }
+    .pg-fmore::details-content { content-visibility: visible; }
+    .pg-fmore ul { margin-top: 0; }
+  }
+}
