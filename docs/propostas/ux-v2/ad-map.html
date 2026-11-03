@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en" data-state="home" data-proto-state="home hub guides-hub tool calc guide free" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de anúncios · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?state=hub;?state=guides-hub;?state=tool;?state=calc;?state=guide;?state=free;?lang=pt&state=tool;?lang=es&state=guide">
+<meta name="proto-shots" content=";?state=tool;?state=calc;?state=guide;?state=free">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-state="home"] [data-when]:not([data-when~="home"]),
+html[data-state="hub"] [data-when]:not([data-when~="hub"]),
+html[data-state="guides-hub"] [data-when]:not([data-when~="guides-hub"]),
+html[data-state="tool"] [data-when]:not([data-when~="tool"]),
+html[data-state="calc"] [data-when]:not([data-when~="calc"]),
+html[data-state="guide"] [data-when]:not([data-when~="guide"]),
+html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="ad-map.css">
+</head>
+<body>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-state">
+      <span class="proto-control__label" id="proto-control-state">State</span>
+      <a href="?state=home" aria-current="true">Home</a>
+      <a href="?state=hub">Category hub</a>
+      <a href="?state=guides-hub">Guides hub</a>
+      <a href="?state=tool">Tool</a>
+      <a href="?state=calc">Calculator</a>
+      <a href="?state=guide">Guide</a>
+      <a href="?state=free">Free pages</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+  </div>
+</nav>
+<div class="proto-page">
+  <main id="main" class="admap" lang="pt-BR">
+    <header class="admap__head">
+      <p class="admap__eyebrow">UX-07 · mapa de anúncios · F12</p>
+      <h1 class="fo-h1">Onde cada anúncio entra, molde a molde</h1>
+      <p class="fo-lead">Cada esquema é o <code>&lt;main&gt;</code> de uma página real do <code>dist/</code>, com as caixas onde o mapa manda. A altura está na escala 1:8; a largura, não. Primeiro o celular, a 360 × 740; depois, ao lado ou embaixo, o computador, a 1280 × 800.</p>
+      <ul class="admap__legend" aria-label="Legenda dos esquemas">
+        <li><span class="admap__sw admap__sw--texto" aria-hidden="true"></span>Conteúdo do site</li>
+        <li><span class="admap__sw admap__sw--grade" aria-hidden="true"></span>Grade de cards</li>
+        <li><span class="admap__sw admap__sw--painel" aria-hidden="true"></span>Painel da ferramenta (o traço)</li>
+        <li><span class="admap__sw admap__sw--ad" aria-hidden="true"></span>Caixa de anúncio, com o rótulo e a unidade</li>
+        <li><span class="admap__sw admap__sw--zone" aria-hidden="true"></span>Os 150 px de folga em volta</li>
+        <li><span class="admap__sw admap__sw--fold" aria-hidden="true"></span>Fim da primeira tela</li>
+      </ul>
+    </header>
+
+    <section class="admap__state" data-when="home" aria-labelledby="st-home">
+      <h2 id="st-home">Home</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd><code>geral</code> (nova)</dd>
+        <dt>1º anúncio</dt><dd>Depois da primeira seção de cards, nunca com o topo na primeira tela (o mais alto ficou a 2.110 px no celular e a 1.150 px no computador).</dd>
+        <dt>Os seguintes</dt><dd>Um a cada 1,5 tela, só entre seções: 1.110 px de borda a borda no celular. Em inglês cabem 5; em português e espanhol, 3.</dd>
+        <dt>Fim e lateral</dt><dd>Multiplex no fim, antes do rodapé, a partir de 768 px. A home ganha a coluna lateral a partir de 1280 px, com 2 unidades.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 5 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="5 anúncios de conteúdo a 360 px; o 1º com o topo a 2.110 px da página; nenhum multiplex e nenhuma lateral." style="height:1514px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:28.3px"><span>Herói com a Oli</span></div><div class="admap__b admap__b--grade" style="top:38.8px;height:196.3px"><span>Imagem · grade de cards</span></div><div class="admap__b admap__b--grade" style="top:320.0px;height:312.8px"><span>PDF · grade de cards</span></div><div class="admap__b admap__b--grade" style="top:717.8px;height:144.0px"><span>Dinheiro · grade</span></div><div class="admap__b admap__b--grade" style="top:946.8px;height:165.3px"><span>Casa · grade</span></div><div class="admap__b admap__b--grade" style="top:1197.0px;height:143.5px"><span>Saúde · grade</span></div><div class="admap__b admap__b--grade" style="top:1425.5px;height:37.5px"><span>QR · grade</span></div><div class="admap__b admap__b--texto" style="top:1471.0px;height:23.0px"><span>Privacidade</span></div><div class="admap__zone" style="top:237.0px;height:75.0px"></div><div class="admap__ad" style="top:255.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:634.8px;height:75.0px"></div><div class="admap__ad" style="top:653.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div><div class="admap__zone" style="top:863.8px;height:75.0px"></div><div class="admap__ad" style="top:882.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-3</code></div><div class="admap__zone" style="top:1114.0px;height:75.0px"></div><div class="admap__ad" style="top:1132.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-4</code></div><div class="admap__zone" style="top:1342.5px;height:75.0px"></div><div class="admap__ad" style="top:1361.3px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-5</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:751px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:22.5px"><span>Herói com a Oli</span></div><div class="admap__b admap__b--grade admap__col" style="top:33.0px;height:82.0px"><span>Imagem · grade de cards</span></div><div class="admap__b admap__b--grade admap__col" style="top:200.0px;height:121.3px"><span>PDF · grade de cards</span></div><div class="admap__b admap__b--grade admap__col" style="top:329.3px;height:72.5px"><span>Dinheiro · grade</span></div><div class="admap__b admap__b--grade admap__col" style="top:409.8px;height:72.5px"><span>Casa · grade</span></div><div class="admap__b admap__b--grade admap__col" style="top:490.3px;height:69.5px"><span>Saúde · grade</span></div><div class="admap__b admap__b--grade admap__col" style="top:567.8px;height:37.0px"><span>QR · grade</span></div><div class="admap__b admap__b--texto admap__col" style="top:612.8px;height:16.5px"><span>Privacidade</span></div><div class="admap__zone" style="top:117.0px;height:75.0px"></div><div class="admap__ad admap__col" style="top:135.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:631.3px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:650.0px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (/)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Herói com a Oli</th><td>20–246</td><td>20–200</td></tr>
+          <tr><th scope="row">Imagem · grade de cards</th><td>310–1.880</td><td>264–920</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>2.046–2.346</td><td>1.086–1.386</td></tr>
+          <tr><th scope="row">PDF · grade de cards</th><td>2.560–5.062</td><td>1.600–2.570</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>5.228–5.528</td><td>só no celular</td></tr>
+          <tr><th scope="row">Dinheiro · grade</th><td>5.742–6.894</td><td>2.634–3.214</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-3</code></th><td>7.060–7.360</td><td>só no celular</td></tr>
+          <tr><th scope="row">Casa · grade</th><td>7.574–8.896</td><td>3.278–3.858</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-4</code></th><td>9.062–9.362</td><td>só no celular</td></tr>
+          <tr><th scope="row">Saúde · grade</th><td>9.576–10.724</td><td>3.922–4.478</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-5</code></th><td>10.890–11.190</td><td>só no celular</td></tr>
+          <tr><th scope="row">QR · grade</th><td>11.404–11.704</td><td>4.542–4.838</td></tr>
+          <tr><th scope="row">Privacidade</th><td>11.768–11.952</td><td>4.902–5.034</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>5.200–5.698</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="hub" aria-labelledby="st-hub">
+      <h2 id="st-hub">Hub de categoria</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd>A da categoria: <code>arquivos</code> (imagem e PDF), <code>dinheiro</code>, <code>casa-saude</code> (casa e saúde).</dd>
+        <dt>1º anúncio</dt><dd>Depois da primeira grade de cards, como hoje. No hub de dinheiro, depois da grade de crédito (hoje ele vem depois das duas grades).</dd>
+        <dt>Os seguintes</dt><dd>Um a cada 1,5 tela, entre seções e entre os parágrafos do texto, nunca dentro de uma grade ou de uma tabela.</dd>
+        <dt>Fim e lateral</dt><dd>Multiplex no fim a partir de 768 px; 2 laterais a partir de 1280 px.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 2 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="2 anúncios de conteúdo a 360 px; o 1º com o topo a 2.142 px da página; nenhum multiplex e nenhuma lateral." style="height:658px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:37.5px"><span>Trilha e faixa da categoria</span></div><div class="admap__b admap__b--grade" style="top:48.0px;height:191.0px"><span>Ferramentas · grade de cards</span></div><div class="admap__b admap__b--texto" style="top:324.0px;height:35.8px"><span>Tamanhos prontos · tabela</span></div><div class="admap__b admap__b--texto" style="top:367.8px;height:184.0px"><span>Qual ferramenta usar</span></div><div class="admap__b admap__b--texto" style="top:559.8px;height:78.3px"><span>Guias · links</span></div><div class="admap__zone" style="top:241.0px;height:75.0px"></div><div class="admap__ad" style="top:259.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:465.5px;height:75.0px"></div><div class="admap__ad" style="top:484.3px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:486px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:36.5px"><span>Trilha e faixa da categoria</span></div><div class="admap__b admap__b--grade admap__col" style="top:47.0px;height:76.8px"><span>Ferramentas · grade de cards</span></div><div class="admap__b admap__b--texto admap__col" style="top:208.8px;height:24.8px"><span>Tamanhos prontos · tabela</span></div><div class="admap__b admap__b--texto admap__col" style="top:241.5px;height:68.3px"><span>Qual ferramenta usar</span></div><div class="admap__b admap__b--texto admap__col" style="top:317.8px;height:45.8px"><span>Guias · links</span></div><div class="admap__zone" style="top:125.8px;height:75.0px"></div><div class="admap__ad admap__col" style="top:144.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:365.5px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:384.3px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (/image-tools/)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trilha e faixa da categoria</th><td>20–320</td><td>20–312</td></tr>
+          <tr><th scope="row">Ferramentas · grade de cards</th><td>384–1.912</td><td>376–990</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>2.078–2.378</td><td>1.156–1.456</td></tr>
+          <tr><th scope="row">Tamanhos prontos · tabela</th><td>2.592–2.878</td><td>1.670–1.868</td></tr>
+          <tr><th scope="row">Qual ferramenta usar</th><td>2.942–4.414</td><td>1.932–2.478</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>3.874–4.174</td><td>só no celular</td></tr>
+          <tr><th scope="row">Guias · links</th><td>4.478–5.104</td><td>2.542–2.908</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>3.074–3.572</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="guides-hub" aria-labelledby="st-guides-hub">
+      <h2 id="st-guides-hub">Hub de guias</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd><code>geral</code></dd>
+        <dt>Regra</dt><dd>A dos hubs de categoria: o 1º depois da primeira grade de guias; depois, um a cada 1,5 tela; multiplex no fim; 2 laterais.</dd>
+        <dt>Medida</dt><dd>O hub ainda não existe no <code>dist/</code>. O esquema é uma estimativa a partir do hub de imagem (cards de uns 135 px no celular); o <code>densidade.mjs</code> mede o protótipo <code>guides-hub.html</code> quando ele entra no checkout principal. Em português não há guias de dinheiro, e a página é mais curta.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 2 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="2 anúncios de conteúdo a 360 px; o 1º com o topo a 1.594 px da página; nenhum multiplex e nenhuma lateral." style="height:590px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:65.0px"><span>Trilha, título e introdução</span></div><div class="admap__b admap__b--grade" style="top:75.5px;height:95.0px"><span>Guias de imagem · cards</span></div><div class="admap__b admap__b--grade" style="top:249.5px;height:95.0px"><span>Guias de PDF · cards</span></div><div class="admap__b admap__b--grade" style="top:352.5px;height:95.0px"><span>Guias de dinheiro · cards (en e es)</span></div><div class="admap__b admap__b--texto" style="top:526.5px;height:41.3px"><span>Como os guias são feitos</span></div><div class="admap__zone" style="top:172.5px;height:75.0px"></div><div class="admap__ad" style="top:191.3px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:449.5px;height:75.0px"></div><div class="admap__ad" style="top:468.3px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:432px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:47.5px"><span>Trilha, título e introdução</span></div><div class="admap__b admap__b--grade admap__col" style="top:58.0px;height:50.0px"><span>Guias de imagem · cards</span></div><div class="admap__b admap__b--grade admap__col" style="top:187.0px;height:50.0px"><span>Guias de PDF · cards</span></div><div class="admap__b admap__b--grade admap__col" style="top:245.0px;height:50.0px"><span>Guias de dinheiro · cards (en e es)</span></div><div class="admap__b admap__b--texto admap__col" style="top:303.0px;height:25.0px"><span>Como os guias são feitos</span></div><div class="admap__zone" style="top:110.0px;height:75.0px"></div><div class="admap__ad admap__col" style="top:128.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:330.0px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:348.8px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (estimativa a partir do hub de imagem)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trilha, título e introdução</th><td>20–540</td><td>20–400</td></tr>
+          <tr><th scope="row">Guias de imagem · cards</th><td>604–1.364</td><td>464–864</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>1.530–1.830</td><td>1.030–1.330</td></tr>
+          <tr><th scope="row">Guias de PDF · cards</th><td>1.996–2.756</td><td>1.496–1.896</td></tr>
+          <tr><th scope="row">Guias de dinheiro · cards (en e es)</th><td>2.820–3.580</td><td>1.960–2.360</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>3.746–4.046</td><td>só no celular</td></tr>
+          <tr><th scope="row">Como os guias são feitos</th><td>4.212–4.542</td><td>2.424–2.624</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>2.790–3.288</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="tool" aria-labelledby="st-tool">
+      <h2 id="st-tool">Ferramenta (imagem, PDF e QR)</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd><code>arquivos</code> (imagem e PDF) e <code>utilidades</code> (QR).</dd>
+        <dt>1º anúncio</dt><dd>Logo depois do painel, como hoje: os chips de próximo passo ficam dentro dele. Nada acima da ferramenta.</dd>
+        <dt>Os seguintes</dt><dd>Um a cada 1,5 tela no conteúdo: entre seções, entre parágrafos e entre as perguntas. De 2 a 3 por página no celular.</dd>
+        <dt>Fim e lateral</dt><dd>Multiplex depois das relacionadas, a 166 px da grade, a partir de 768 px; 2 laterais a partir de 1280 px.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 2 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="2 anúncios de conteúdo a 360 px; o 1º com o topo a 944 px da página; nenhum multiplex e nenhuma lateral." style="height:760px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:17.8px"><span>Trilha, título e selo</span></div><div class="admap__b admap__b--painel" style="top:22.3px;height:67.0px"><span>Painel: soltar, opções e chips</span></div><div class="admap__b admap__b--texto" style="top:174.3px;height:40.1px"><span>Como funciona</span></div><div class="admap__b admap__b--texto" style="top:222.4px;height:149.3px"><span>Especificações · tabelas</span></div><div class="admap__b admap__b--texto" style="top:379.6px;height:179.9px"><span>Perguntas</span></div><div class="admap__b admap__b--texto" style="top:567.5px;height:19.8px"><span>Privacidade</span></div><div class="admap__b admap__b--grade" style="top:595.3px;height:144.8px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:91.3px;height:75.0px"></div><div class="admap__ad" style="top:110.0px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:429.8px;height:75.0px"></div><div class="admap__ad" style="top:448.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:571px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:16.3px"><span>Trilha, título e selo</span></div><div class="admap__b admap__b--painel admap__col" style="top:20.8px;height:59.5px"><span>Painel: soltar, opções e chips</span></div><div class="admap__b admap__b--texto admap__col" style="top:165.3px;height:23.9px"><span>Como funciona</span></div><div class="admap__b admap__b--texto admap__col" style="top:197.1px;height:90.5px"><span>Especificações · tabelas</span></div><div class="admap__b admap__b--texto admap__col" style="top:295.6px;height:71.4px"><span>Perguntas</span></div><div class="admap__b admap__b--texto admap__col" style="top:375.0px;height:13.3px"><span>Privacidade</span></div><div class="admap__b admap__b--grade admap__col" style="top:396.3px;height:52.3px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:82.3px;height:75.0px"></div><div class="admap__ad admap__col" style="top:101.0px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:450.5px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:469.3px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (/compress-image/)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trilha, título e selo</th><td>20–162</td><td>20–150</td></tr>
+          <tr><th scope="row">Painel: soltar, opções e chips</th><td>178–714</td><td>166–642</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>880–1.180</td><td>808–1.108</td></tr>
+          <tr><th scope="row">Como funciona</th><td>1.394–1.715</td><td>1.322–1.513</td></tr>
+          <tr><th scope="row">Especificações · tabelas</th><td>1.779–2.973</td><td>1.577–2.301</td></tr>
+          <tr><th scope="row">Perguntas</th><td>3.037–4.476</td><td>2.365–2.936</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>3.588–3.888</td><td>só no celular</td></tr>
+          <tr><th scope="row">Privacidade</th><td>4.540–4.698</td><td>3.000–3.106</td></tr>
+          <tr><th scope="row">Relacionadas · grade</th><td>4.762–5.920</td><td>3.170–3.588</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>3.754–4.252</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="calc" aria-labelledby="st-calc">
+      <h2 id="st-calc">Calculadora</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd><code>dinheiro</code> ou <code>casa-saude</code>.</dd>
+        <dt>1º anúncio</dt><dd>Depois do painel (campos, resultado e chips) e antes do cronograma, como hoje. Nunca entre os campos nem dentro do cronograma.</dd>
+        <dt>Os seguintes</dt><dd>Um a cada 1,5 tela em "Como a conta funciona" e nas perguntas. De 3 a 5 por página no celular.</dd>
+        <dt>Fim e lateral</dt><dd>Multiplex no fim a partir de 768 px; 2 laterais a partir de 1280 px.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 4 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="4 anúncios de conteúdo a 360 px; o 1º com o topo a 1.718 px da página; nenhum multiplex e nenhuma lateral." style="height:1205px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:29.3px"><span>Trilha e título</span></div><div class="admap__b admap__b--painel" style="top:33.8px;height:152.3px"><span>Calculadora: campos, resultado e chips</span></div><div class="admap__b admap__b--painel" style="top:265.0px;height:22.3px"><span>Cronograma</span></div><div class="admap__b admap__b--texto" style="top:295.3px;height:45.0px"><span>Como usar</span></div><div class="admap__b admap__b--texto" style="top:348.3px;height:441.6px"><span>Como a conta funciona</span></div><div class="admap__b admap__b--texto" style="top:797.9px;height:41.3px"><span>Cenários prontos · tabela</span></div><div class="admap__b admap__b--texto" style="top:847.1px;height:148.4px"><span>Perguntas</span></div><div class="admap__b admap__b--texto" style="top:1003.5px;height:23.0px"><span>Privacidade</span></div><div class="admap__b admap__b--grade" style="top:1034.5px;height:150.3px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:188.0px;height:75.0px"></div><div class="admap__ad" style="top:206.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:376.8px;height:75.0px"></div><div class="admap__ad" style="top:395.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div><div class="admap__zone" style="top:651.9px;height:75.0px"></div><div class="admap__ad" style="top:670.6px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-3</code></div><div class="admap__zone" style="top:888.0px;height:75.0px"></div><div class="admap__ad" style="top:906.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-4</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:734px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:24.3px"><span>Trilha e título</span></div><div class="admap__b admap__b--painel admap__col" style="top:28.8px;height:78.0px"><span>Calculadora: campos, resultado e chips</span></div><div class="admap__b admap__b--painel admap__col" style="top:185.8px;height:22.3px"><span>Cronograma</span></div><div class="admap__b admap__b--texto admap__col" style="top:216.0px;height:25.0px"><span>Como usar</span></div><div class="admap__b admap__b--texto admap__col" style="top:249.0px;height:171.6px"><span>Como a conta funciona</span></div><div class="admap__b admap__b--texto admap__col" style="top:428.6px;height:24.8px"><span>Cenários prontos · tabela</span></div><div class="admap__b admap__b--texto admap__col" style="top:461.4px;height:53.9px"><span>Perguntas</span></div><div class="admap__b admap__b--texto admap__col" style="top:523.3px;height:16.5px"><span>Privacidade</span></div><div class="admap__b admap__b--grade admap__col" style="top:547.8px;height:63.8px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:108.8px;height:75.0px"></div><div class="admap__ad admap__col" style="top:127.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:613.5px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:632.3px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (/mortgage-calculator/)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trilha e título</th><td>20–254</td><td>20–214</td></tr>
+          <tr><th scope="row">Calculadora: campos, resultado e chips</th><td>270–1.488</td><td>230–854</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>1.654–1.954</td><td>1.020–1.320</td></tr>
+          <tr><th scope="row">Cronograma</th><td>2.120–2.298</td><td>1.486–1.664</td></tr>
+          <tr><th scope="row">Como usar</th><td>2.362–2.722</td><td>1.728–1.928</td></tr>
+          <tr><th scope="row">Como a conta funciona</th><td>2.786–6.319</td><td>1.992–3.365</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>3.164–3.464</td><td>só no celular</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-3</code></th><td>5.365–5.665</td><td>só no celular</td></tr>
+          <tr><th scope="row">Cenários prontos · tabela</th><td>6.383–6.713</td><td>3.429–3.627</td></tr>
+          <tr><th scope="row">Perguntas</th><td>6.777–7.964</td><td>3.691–4.122</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-4</code></th><td>7.254–7.554</td><td>só no celular</td></tr>
+          <tr><th scope="row">Privacidade</th><td>8.028–8.212</td><td>4.186–4.318</td></tr>
+          <tr><th scope="row">Relacionadas · grade</th><td>8.276–9.478</td><td>4.382–4.892</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>5.058–5.556</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="guide" aria-labelledby="st-guide">
+      <h2 id="st-guide">Guia (de arquivo e de dinheiro)</h2>
+      <dl class="admap__facts">
+        <dt>Área</dt><dd>A do guia: <code>arquivos</code> (guia de arquivo) ou <code>dinheiro</code> (guia de dinheiro).</dd>
+        <dt>1º anúncio</dt><dd>No texto, depois da ferramenta embutida e nunca colado nela: pelo menos um parágrafo entre os dois. Hoje ele vem depois da metade do texto.</dd>
+        <dt>Os seguintes</dt><dd>Um a cada 1,5 tela no texto. Nunca dentro da ferramenta embutida nem colado na tabela de medidas. De 3 a 5 por página no celular.</dd>
+        <dt>Fim e lateral</dt><dd>Multiplex no fim a partir de 768 px; 2 laterais a partir de 1280 px.</dd>
+      </dl>
+      
+      <div class="admap__pair">
+        <figure class="admap__fig">
+          <figcaption class="admap__cap"><strong>Celular</strong> · 360 × 740 · 5 anúncios de conteúdo</figcaption>
+          <div class="admap__wf admap__wf--phone" role="img" aria-label="5 anúncios de conteúdo a 360 px; o 1º com o topo a 2.304 px da página; nenhum multiplex e nenhuma lateral." style="height:1348px">
+            <div class="admap__fold" style="top:84.5px"><span>Dobra · 740</span></div>
+            <div class="admap__b admap__b--texto" style="top:2.5px;height:97.0px"><span>Trilha, título e introdução</span></div><div class="admap__b admap__b--painel" style="top:107.5px;height:101.0px"><span>Ferramenta embutida</span></div><div class="admap__b admap__b--texto" style="top:216.5px;height:140.8px"><span>Texto · parte 1</span></div><div class="admap__b admap__b--texto" style="top:365.3px;height:64.0px"><span>Texto · parte 2</span></div><div class="admap__b admap__b--texto" style="top:437.3px;height:137.0px"><span>Texto · parte 3</span></div><div class="admap__b admap__b--texto" style="top:582.3px;height:57.5px"><span>Texto · parte 4</span></div><div class="admap__b admap__b--texto" style="top:647.8px;height:142.3px"><span>Texto · parte 5</span></div><div class="admap__b admap__b--texto" style="top:798.0px;height:51.0px"><span>Texto · parte 6</span></div><div class="admap__b admap__b--texto" style="top:857.0px;height:114.3px"><span>Texto · parte 7</span></div><div class="admap__b admap__b--texto" style="top:979.3px;height:84.1px"><span>O que medimos · tabela</span></div><div class="admap__b admap__b--texto" style="top:1071.4px;height:42.5px"><span>Fontes</span></div><div class="admap__b admap__b--grade" style="top:1198.9px;height:128.8px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:261.3px;height:75.0px"></div><div class="admap__ad" style="top:280.0px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:471.8px;height:75.0px"></div><div class="admap__ad" style="top:490.5px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-2</code></div><div class="admap__zone" style="top:676.3px;height:75.0px"></div><div class="admap__ad" style="top:695.0px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-3</code></div><div class="admap__zone" style="top:885.0px;height:75.0px"></div><div class="admap__ad" style="top:903.8px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-4</code></div><div class="admap__zone" style="top:1115.9px;height:75.0px"></div><div class="admap__ad" style="top:1134.6px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo-5</code></div>
+          </div>
+        </figure>
+        <figure class="admap__fig admap__fig--desk">
+          <figcaption class="admap__cap"><strong>Computador</strong> · 1280 × 800 · conteúdo 1, multiplex e 2 laterais</figcaption>
+          <div class="admap__wf admap__wf--desk" role="img" aria-label="A 1280 px: o anúncio de conteúdo 1, o multiplex de 498 px no fim do main e 2 laterais de 300 × 644 px, a 2ª 1.200 px abaixo da 1ª." style="height:798px">
+            <div class="admap__fold" style="top:92.0px"><span>Dobra · 800</span></div>
+            <div class="admap__b admap__b--texto admap__col" style="top:2.5px;height:53.0px"><span>Trilha, título e introdução</span></div><div class="admap__b admap__b--painel admap__col" style="top:63.5px;height:83.3px"><span>Ferramenta embutida</span></div><div class="admap__b admap__b--texto admap__col" style="top:154.8px;height:107.8px"><span>Texto · parte 1</span></div><div class="admap__b admap__b--texto admap__col" style="top:270.5px;height:31.0px"><span>Texto · parte 2</span></div><div class="admap__b admap__b--texto admap__col" style="top:309.5px;height:34.3px"><span>Texto · parte 3</span></div><div class="admap__b admap__b--texto admap__col" style="top:351.8px;height:27.8px"><span>Texto · parte 4</span></div><div class="admap__b admap__b--texto admap__col" style="top:387.5px;height:35.8px"><span>Texto · parte 5</span></div><div class="admap__b admap__b--texto admap__col" style="top:431.3px;height:27.8px"><span>Texto · parte 6</span></div><div class="admap__b admap__b--texto admap__col" style="top:467.0px;height:24.5px"><span>Texto · parte 7</span></div><div class="admap__b admap__b--texto admap__col" style="top:499.5px;height:75.9px"><span>O que medimos · tabela</span></div><div class="admap__b admap__b--texto admap__col" style="top:583.4px;height:23.0px"><span>Fontes</span></div><div class="admap__b admap__b--grade admap__col" style="top:614.4px;height:61.0px"><span>Relacionadas · grade</span></div><div class="admap__zone" style="top:176.3px;height:75.0px"></div><div class="admap__ad admap__col" style="top:195.0px;height:37.5px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>conteudo</code></div><div class="admap__zone" style="top:677.4px;height:99.8px"></div><div class="admap__ad admap__col admap__ad--mplex" style="top:696.1px;height:62.3px"><span class="fo-ad__label" lang="en" data-t-lang="ad.lang" data-t="proto.ad">Advertisements</span> <code>multiplex</code></div><div class="admap__ad admap__rail" style="top:18.8px;height:80.5px"><code>lateral</code></div><div class="admap__ad admap__rail" style="top:249.3px;height:80.5px"><code>lateral-2</code></div>
+          </div>
+        </figure>
+      </div>
+      
+      <table class="admap__table">
+        <caption>Os blocos do <code>&lt;main&gt;</code>, de cima para baixo, em px a partir do topo do <code>&lt;main&gt;</code> (/guides/heic-to-jpg-on-windows/)</caption>
+        <thead><tr><th scope="col">Bloco</th><th scope="col">360 px</th><th scope="col">1280 px</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trilha, título e introdução</th><td>20–796</td><td>20–444</td></tr>
+          <tr><th scope="row">Ferramenta embutida</th><td>860–1.668</td><td>508–1.174</td></tr>
+          <tr><th scope="row">Texto · parte 1</th><td>1.732–2.858</td><td>1.238–2.100</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo</code></th><td>2.240–2.540</td><td>1.560–1.860</td></tr>
+          <tr><th scope="row">Texto · parte 2</th><td>2.922–3.434</td><td>2.164–2.412</td></tr>
+          <tr><th scope="row">Texto · parte 3</th><td>3.498–4.594</td><td>2.476–2.750</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-2</code></th><td>3.924–4.224</td><td>só no celular</td></tr>
+          <tr><th scope="row">Texto · parte 4</th><td>4.658–5.118</td><td>2.814–3.036</td></tr>
+          <tr><th scope="row">Texto · parte 5</th><td>5.182–6.320</td><td>3.100–3.386</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-3</code></th><td>5.560–5.860</td><td>só no celular</td></tr>
+          <tr><th scope="row">Texto · parte 6</th><td>6.384–6.792</td><td>3.450–3.672</td></tr>
+          <tr><th scope="row">Texto · parte 7</th><td>6.856–7.770</td><td>3.736–3.932</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-4</code></th><td>7.230–7.530</td><td>só no celular</td></tr>
+          <tr><th scope="row">O que medimos · tabela</th><td>7.834–8.507</td><td>3.996–4.603</td></tr>
+          <tr><th scope="row">Fontes</th><td>8.571–8.911</td><td>4.667–4.851</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>conteudo-5</code></th><td>9.077–9.377</td><td>só no celular</td></tr>
+          <tr><th scope="row">Relacionadas · grade</th><td>9.591–10.621</td><td>4.915–5.403</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>multiplex</code></th><td>a partir de 768 px</td><td>5.569–6.067</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral</code></th><td>a partir de 1280 px</td><td>150–794 (coluna lateral)</td></tr>
+          <tr class="admap__row-ad"><th scope="row">Anúncio <code>lateral-2</code></th><td>a partir de 1280 px</td><td>1.994–2.638 (coluna lateral)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admap__state" data-when="free" aria-labelledby="st-free">
+      <h2 id="st-free">Páginas livres</h2>
+      <p class="admap__note">Nenhum anúncio: nem caixa, nem âncora, nem vinheta, porque a página nem carrega o script do AdSense (<code>withAds</code> desligado). São 9 tipos nos 3 idiomas, 27 páginas, conferidas no <code>dist/</code>.</p>
+      <div class="admap__scroll" role="region" aria-label="Páginas livres por idioma" tabindex="0">
+        <table class="admap__table">
+          <thead><tr><th scope="col">Página</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+          <tbody>
+        <tr><th scope="row">Privacidade</th><td><code>/privacy/</code></td><td><code>/pt/privacidade/</code></td><td><code>/es/privacidad/</code></td></tr>
+        <tr><th scope="row">Termos</th><td><code>/terms/</code></td><td><code>/pt/termos/</code></td><td><code>/es/terminos/</code></td></tr>
+        <tr><th scope="row">Sobre</th><td><code>/about/</code></td><td><code>/pt/sobre/</code></td><td><code>/es/acerca-de/</code></td></tr>
+        <tr><th scope="row">Contato</th><td><code>/contact/</code></td><td><code>/pt/contato/</code></td><td><code>/es/contacto/</code></td></tr>
+        <tr><th scope="row">Licenças</th><td><code>/licenses/</code></td><td><code>/pt/licencas/</code></td><td><code>/es/licencias/</code></td></tr>
+        <tr><th scope="row">Apoie</th><td><code>/support/</code></td><td><code>/pt/apoie/</code></td><td><code>/es/apoyo/</code></td></tr>
+        <tr><th scope="row">404</th><td><code>/404.html</code></td><td><code>/pt/404.html</code></td><td><code>/es/404.html</code></td></tr>
+        <tr><th scope="row">Offline</th><td><code>/offline/</code></td><td><code>/pt/offline/</code></td><td><code>/es/sin-conexion/</code></td></tr>
+        <tr><th scope="row">Abrir com</th><td><code>/open-with/</code></td><td><code>/pt/abrir-com/</code></td><td><code>/es/abrir-con/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-07 · a F12 constrói</p>
+    <h2 id="spec-title">O mapa de anúncios que a F12 segue</h2>
+    <p>O mapa põe o máximo de anúncios que as regras deixam, molde a molde, sem mudar nenhuma regra de "O que não muda". Os números vêm do <code>.cache/f10/densidade.mjs</code>, que abriu as 208 páginas do <code>dist/</code> de <code>87ef4c8</code> em 2026-11-03, pôs as caixas onde o mapa manda e mediu. Nenhum molde passa de 30&#160;% na leitura conservadora: o pior fica em 22,3&#160;%.</p>
+
+    <h3>O mapa, molde a molde</h3>
+    <div class="admap__scroll" role="region" aria-label="O mapa, molde a molde" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">Área</th><th scope="col">1º anúncio</th><th scope="col">Os seguintes (só abaixo de 768 px)</th><th scope="col">Multiplex (a partir de 768 px)</th><th scope="col">Laterais (a partir de 1280 px)</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Home</th><td><code>geral</code></td><td>Depois da 1ª seção de cards, nunca com o topo na 1ª tela</td><td>Um a cada 1,5 tela, entre seções</td><td>No fim, antes do rodapé</td><td>2 (a home ganha a coluna)</td></tr>
+          <tr><th scope="row">Hub de categoria</th><td>A da categoria</td><td>Depois da 1ª grade</td><td>Um a cada 1,5 tela</td><td>No fim</td><td>2</td></tr>
+          <tr><th scope="row">Hub de guias</th><td><code>geral</code></td><td>Depois da 1ª grade de guias</td><td>Um a cada 1,5 tela</td><td>No fim</td><td>2</td></tr>
+          <tr><th scope="row">Ferramenta</th><td><code>arquivos</code> ou <code>utilidades</code></td><td>Logo depois do painel</td><td>Um a cada 1,5 tela no conteúdo</td><td>Depois das relacionadas</td><td>2</td></tr>
+          <tr><th scope="row">Calculadora</th><td><code>dinheiro</code> ou <code>casa-saude</code></td><td>Depois do painel, antes do cronograma</td><td>Um a cada 1,5 tela em "Como a conta funciona" e nas perguntas</td><td>No fim</td><td>2</td></tr>
+          <tr><th scope="row">Guia</th><td><code>arquivos</code> ou <code>dinheiro</code></td><td>No texto, depois da ferramenta embutida, com um parágrafo entre os dois</td><td>Um a cada 1,5 tela no texto</td><td>No fim</td><td>2</td></tr>
+          <tr><th scope="row">Livres</th><td>—</td><td colspan="4">Nenhum: Privacidade, Termos, Sobre, Contato, Licenças, Apoie, 404, offline e "Abrir com"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O 1º anúncio de conteúdo aparece em toda largura. Do 2º em diante, só abaixo de 768 px: no computador, as mesmas fronteiras ficam a 726&#160;px umas das outras, menos que 1,5 tela de 800 px (1.200 px), e quem faz esse papel são as 2 laterais e o multiplex.</p>
+
+    <h3>Onde um anúncio pode entrar: a fronteira de bloco</h3>
+    <ul>
+      <li>Entre duas seções do <code>&lt;main&gt;</code>.</li>
+      <li>Dentro de uma seção de texto: entre dois parágrafos, entre um parágrafo e uma lista, entre os blocos de "Como a conta funciona" e entre duas perguntas. Nunca logo depois de um título.</li>
+      <li>Nunca dentro de: grade de cards, tabela, painel (<code>#fo-tool-root</code>), cronograma, ferramenta embutida, lista (<code>ul</code>, <code>ol</code>), pergunta aberta (<code>details</code>), formulário, trilha, título da página, herói e faixa da categoria.</li>
+      <li>Nunca colado em tabela: o bloco de antes não termina numa tabela, o de depois não começa com uma, e a seção "O que medimos" dos guias nunca tem anúncio ao lado. A seção B pede isso só nos guias; o mapa vale para todos, para a F12 ter uma regra só.</li>
+      <li>A distância entre dois anúncios do conteúdo é lida de borda a borda: pelo menos 1.110 px entre a base de um e o topo do outro (§ 351). Os 150 px de margem da caixa contam dentro desses 1.110.</li>
+    </ul>
+    <p><strong>Como a F12 escolhe as fronteiras.</strong> O HTML é estático, então a posição sai no build. A view marca as fronteiras permitidas, na ordem; um ajudante de build escolhe, de cima para baixo, a primeira que fica a 1.110 px ou mais da anterior por uma estimativa da altura a 360 px (as linhas de texto vezes 26 px, e as alturas fixas de tabela, grade e painel), com 15&#160;% de folga para errar sempre para menos anúncio. O teste da F12 mede a altura de verdade, com as mesmas regras do <code>densidade.mjs</code>, e reprova se dois ficarem a menos de 1.110 px. O <code>densidade.md</code> lista onde os anúncios caem em cada molde (por exemplo, na ferramenta: depois do painel, entre duas perguntas e depois da privacidade).</p>
+
+    <h3>As unidades e o <code>PUBLIC_ADSENSE_SLOTS</code></h3>
+    <p>A ajuda do AdSense não tem regra escrita sobre repetir o mesmo <code>data-ad-slot</code> na página, nem a favor nem contra (pesquisa de 3/nov/2026). A recomendação é <strong>uma unidade por posição</strong>: custa pouco, e o relatório "Ad units" separa o que cada posição rende. Assim, cada área tem as unidades de conteúdo numeradas pela ordem na página, as duas laterais e o multiplex.</p>
+    <div class="admap__scroll" role="region" aria-label="As unidades por área" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Área</th><th scope="col">Moldes</th><th scope="col">Conteúdo (máximo medido por página)</th><th scope="col">Lateral</th><th scope="col">Multiplex</th><th scope="col">Unidades</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>geral</code></th><td>Home e hub de guias</td><td><code>conteudo</code> a <code>conteudo-5</code> (5)</td><td><code>lateral</code>, <code>lateral-2</code></td><td><code>multiplex</code></td><td>8</td></tr>
+          <tr><th scope="row"><code>arquivos</code></th><td>Ferramentas de imagem e PDF, os dois hubs e os guias de arquivo</td><td><code>conteudo</code> a <code>conteudo-5</code> (5)</td><td><code>lateral</code>, <code>lateral-2</code></td><td><code>multiplex</code></td><td>8</td></tr>
+          <tr><th scope="row"><code>dinheiro</code></th><td>Calculadoras de dinheiro, o hub e os guias de dinheiro</td><td><code>conteudo</code> a <code>conteudo-5</code> (5)</td><td><code>lateral</code>, <code>lateral-2</code></td><td><code>multiplex</code></td><td>8</td></tr>
+          <tr><th scope="row"><code>casa-saude</code></th><td>Calculadoras e hubs de casa e saúde</td><td><code>conteudo</code> a <code>conteudo-5</code> (5)</td><td><code>lateral</code>, <code>lateral-2</code></td><td><code>multiplex</code></td><td>8</td></tr>
+          <tr><th scope="row"><code>utilidades</code></th><td>QR code</td><td><code>conteudo</code>, <code>conteudo-2</code> (2)</td><td><code>lateral</code>, <code>lateral-2</code></td><td><code>multiplex</code></td><td>5</td></tr>
+          <tr><th scope="row">Total</th><td colspan="4">A seção B previa 15 (5 áreas × 3). Com uma unidade por posição, são 37.</td><td>37</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O modelo do JSON cresce assim (o <code>config.ts</code> da F12 aceita <code>conteudo</code>, <code>conteudo-2</code> a <code>conteudo-9</code>, <code>lateral</code>, <code>lateral-2</code> e <code>multiplex</code>, com o id em <code>^\d{6,}$</code>, e a área <code>geral</code>):</p>
+    <pre><code>{"geral":{"conteudo":"…","conteudo-2":"…","conteudo-3":"…","conteudo-4":"…","conteudo-5":"…","lateral":"…","lateral-2":"…","multiplex":"…"},
+ "arquivos":{…},"dinheiro":{…},"casa-saude":{…},
+ "utilidades":{"conteudo":"…","conteudo-2":"…","lateral":"…","lateral-2":"…","multiplex":"…"}}</code></pre>
+    <p>A posição <em>n</em> usa a unidade <code>conteudo-n</code> da área da página. O Victor pode criar menos unidades: a posição sem id não aparece (próxima seção), e a densidade só cai. Criar só <code>conteudo</code> a <code>conteudo-3</code>, por exemplo, põe no máximo 3 por página.</p>
+
+    <h3>Sem id, o espaço não aparece (Mudança 10)</h3>
+    <ul>
+      <li>A caixa só existe no HTML quando a unidade daquela posição tem id: nada de caixa, rótulo ou espaço reservado sem ela. O build padrão, sem as variáveis, sai sem nenhuma caixa.</li>
+      <li>A distância e a densidade são testadas no build de teste com ids de teste em todas as 37 unidades, que é o pior caso: o máximo de caixas que o mapa põe.</li>
+      <li>Não há "reserva": se o AdSense não preencher a unidade, a caixa de 300 px fica com o rótulo (o CSS do AdSense pode escondê-la com <code>data-ad-status="unfilled"</code>, o que só diminui a densidade).</li>
+    </ul>
+
+    <h3>Os rótulos</h3>
+    <table>
+      <thead><tr><th scope="col">Onde</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td>Rótulo de toda caixa (conteúdo, lateral e multiplex)</td><td lang="en">Advertisements</td><td>Publicidade</td><td lang="es">Anuncios</td></tr>
+        <tr><td><code>aria-label</code> da coluna lateral (<code>&lt;aside&gt;</code>)</td><td lang="en">Advertisements</td><td>Publicidade</td><td lang="es">Anuncios</td></tr>
+      </tbody>
+    </table>
+    <p>São os rótulos que a política de posicionamento aceita em cada língua (nada de "Recursos", "Links úteis" ou "Patrocinadores"). Use o controle do protótipo (EN, PT, ES) para ver os três nos esquemas.</p>
+
+    <h3>A densidade, a 360 × 740</h3>
+    <p>A da ficha: a soma das caixas de anúncio da coluna principal dividida pela altura do <code>&lt;main&gt;</code>. A conservadora, que é a trava (§ 351): mais 100 px de âncora, contada uma vez, e o denominador sem a seção de relacionadas. A ferramenta em repouso, o estado de menor altura. A última coluna é a seção B como está escrita, com o multiplex de 1.700 px no fim também no celular.</p>
+    <div class="admap__scroll" role="region" aria-label="Densidade por molde a 360 por 740" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">Área</th><th scope="col">Páginas</th><th scope="col">Anúncios por página</th><th scope="col">Ficha: máx · mediana</th><th scope="col">Conservadora: máx · mediana</th><th scope="col">Página da máxima</th><th scope="col">Com o multiplex no celular</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Home</th><td><code>geral</code></td><td>3</td><td>3–5</td><td>12,6&#160;% · 10,7&#160;%</td><td><strong>13,4&#160;%</strong> · 11,9&#160;%</td><td><code>/</code></td><td>26,0&#160;%</td></tr>
+        <tr><th scope="row">Hub de categoria · arquivos</th><td><code>arquivos</code></td><td>6</td><td>2–2</td><td>11,8&#160;% · 10,1&#160;%</td><td><strong>13,7&#160;%</strong> · 11,8&#160;%</td><td><code>/image-tools/</code></td><td>33,7&#160;%</td></tr>
+        <tr><th scope="row">Hub de categoria · dinheiro</th><td><code>dinheiro</code></td><td>3</td><td>3–5</td><td>16,1&#160;% · 16,0&#160;%</td><td><strong>17,8&#160;%</strong> · 17,2&#160;%</td><td><code>/pt/calculadoras-financeiras/</code></td><td>35,3&#160;%</td></tr>
+        <tr><th scope="row">Hub de categoria · casa-saude</th><td><code>casa-saude</code></td><td>2</td><td>2–2</td><td>13,3&#160;% · 13,2&#160;%</td><td><strong>15,5&#160;%</strong> · 15,4&#160;%</td><td><code>/health-calculators/</code></td><td>36,8&#160;%</td></tr>
+        <tr><th scope="row">Ferramenta · imagem</th><td><code>arquivos</code></td><td>33</td><td>2–3</td><td>15,7&#160;% · 11,5&#160;%</td><td><strong>22,3&#160;%</strong> · 17,5&#160;%</td><td><code>/png-to-jpg/</code></td><td>41,6&#160;%</td></tr>
+        <tr><th scope="row">Ferramenta · pdf</th><td><code>arquivos</code></td><td>36</td><td>2–3</td><td>14,5&#160;% · 10,6&#160;%</td><td><strong>20,1&#160;%</strong> · 15,9&#160;%</td><td><code>/merge-pdf/</code></td><td>39,0&#160;%</td></tr>
+        <tr><th scope="row">Ferramenta · qr</th><td><code>utilidades</code></td><td>3</td><td>2–2</td><td>10,7&#160;% · 10,2&#160;%</td><td><strong>14,8&#160;%</strong> · 13,9&#160;%</td><td><code>/qr-code-generator/</code></td><td>35,5&#160;%</td></tr>
+        <tr><th scope="row">Calculadora · dinheiro</th><td><code>dinheiro</code></td><td>44</td><td>3–5</td><td>16,1&#160;% · 13,8&#160;%</td><td><strong>21,0&#160;%</strong> · 17,2&#160;%</td><td><code>/apr-to-apy-calculator/</code></td><td>36,6&#160;%</td></tr>
+        <tr><th scope="row">Calculadora · casa-saude</th><td><code>casa-saude</code></td><td>11</td><td>4–5</td><td>17,6&#160;% · 15,2&#160;%</td><td><strong>21,0&#160;%</strong> · 18,5&#160;%</td><td><code>/btu-calculator/</code></td><td>35,5&#160;%</td></tr>
+        <tr><th scope="row">Guia · arquivo</th><td><code>arquivos</code></td><td>30</td><td>4–5</td><td>15,6&#160;% · 13,5&#160;%</td><td><strong>18,7&#160;%</strong> · 16,2&#160;%</td><td><code>/guides/combine-pdfs-on-phone/</code></td><td>31,2&#160;%</td></tr>
+        <tr><th scope="row">Guia · dinheiro</th><td><code>dinheiro</code></td><td>10</td><td>3–5</td><td>13,6&#160;% · 11,5&#160;%</td><td><strong>14,5&#160;%</strong> · 12,5&#160;%</td><td><code>/guides/extra-mortgage-payments/</code></td><td>26,1&#160;%</td></tr>
+        <tr><th scope="row">Livres</th><td>—</td><td>27</td><td>0</td><td>0</td><td>0</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O hub de guias entra na tabela quando o protótipo existir (pela estimativa do esquema, uns 15&#160;%). No total, o mapa põe 618 anúncios de conteúdo nas 181 páginas com anúncio, 3,4 por página no celular; hoje é 1.</p>
+
+    <h3>As distâncias, a 360 × 740 (o menor valor de cada molde)</h3>
+    <div class="admap__scroll" role="region" aria-label="Distâncias por molde a 360 por 740" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">Entre anúncios</th><th scope="col">Topo do 1º</th><th scope="col">Baixar</th><th scope="col">Campos</th><th scope="col">Menus</th><th scope="col">Painel</th><th scope="col">Cronograma</th><th scope="col">Oli</th><th scope="col">Café</th><th scope="col">Grade de cards</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Home</th><td>1.528&#160;px</td><td>2.110&#160;px</td><td>—</td><td>—</td><td>2.055&#160;px</td><td>—</td><td>—</td><td>1.865&#160;px</td><td>2.173&#160;px</td><td>208&#160;px</td></tr>
+        <tr><th scope="row">Hub de categoria · arquivos</th><td>1.496&#160;px</td><td>2.142&#160;px</td><td>—</td><td>—</td><td>2.087&#160;px</td><td>—</td><td>—</td><td>—</td><td>2.315&#160;px</td><td>166&#160;px</td></tr>
+        <tr><th scope="row">Hub de categoria · dinheiro</th><td>1.115&#160;px</td><td>1.952&#160;px</td><td>—</td><td>—</td><td>1.897&#160;px</td><td>—</td><td>—</td><td>—</td><td>1.975&#160;px</td><td>166&#160;px</td></tr>
+        <tr><th scope="row">Hub de categoria · casa-saude</th><td>1.170&#160;px</td><td>1.710&#160;px</td><td>—</td><td>—</td><td>1.655&#160;px</td><td>—</td><td>—</td><td>—</td><td>2.732&#160;px</td><td>166&#160;px</td></tr>
+        <tr><th scope="row">Ferramenta · imagem</th><td>1.165&#160;px</td><td>852&#160;px</td><td>—</td><td>166&#160;px</td><td>797&#160;px</td><td>166&#160;px</td><td>—</td><td>598&#160;px</td><td>2.757&#160;px</td><td>256&#160;px</td></tr>
+        <tr><th scope="row">Ferramenta · pdf</th><td>1.123&#160;px</td><td>796&#160;px</td><td>—</td><td>166&#160;px</td><td>741&#160;px</td><td>166&#160;px</td><td>—</td><td>542&#160;px</td><td>2.779&#160;px</td><td>256&#160;px</td></tr>
+        <tr><th scope="row">Ferramenta · qr</th><td>1.942&#160;px</td><td>1.419&#160;px</td><td>256&#160;px</td><td>672&#160;px</td><td>1.364&#160;px</td><td>166&#160;px</td><td>—</td><td>1.131&#160;px</td><td>3.093&#160;px</td><td>952&#160;px</td></tr>
+        <tr><th scope="row">Calculadora · dinheiro</th><td>1.111&#160;px</td><td>1.202&#160;px</td><td>358&#160;px</td><td>318&#160;px</td><td>1.147&#160;px</td><td>166&#160;px</td><td>166&#160;px</td><td>—</td><td>2.801&#160;px</td><td>256&#160;px</td></tr>
+        <tr><th scope="row">Calculadora · casa-saude</th><td>1.110&#160;px</td><td>1.076&#160;px</td><td>302&#160;px</td><td>290&#160;px</td><td>1.021&#160;px</td><td>166&#160;px</td><td>166&#160;px</td><td>—</td><td>2.969&#160;px</td><td>256&#160;px</td></tr>
+        <tr><th scope="row">Guia · arquivo</th><td>1.112&#160;px</td><td>1.944&#160;px</td><td>—</td><td>454&#160;px</td><td>1.889&#160;px</td><td>412&#160;px</td><td>—</td><td>856&#160;px</td><td>2.635&#160;px</td><td>256&#160;px</td></tr>
+        <tr><th scope="row">Guia · dinheiro</th><td>1.116&#160;px</td><td>3.006&#160;px</td><td>1.430&#160;px</td><td>1.338&#160;px</td><td>2.951&#160;px</td><td>554&#160;px</td><td>360&#160;px</td><td>—</td><td>2.383&#160;px</td><td>256&#160;px</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>"—": a peça não existe no molde em repouso. O Baixar e o card do café só aparecem no resultado, dentro do painel; o painel cresce para baixo e empurra o anúncio, que fica sempre a 166 px dele (150 da margem e 16 do vão da grade).</p>
+
+    <h3>A 1280 × 800</h3>
+    <div class="admap__scroll" role="region" aria-label="Medidas a 1280 por 800" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">Conteúdo 2+ se ficassem</th><th scope="col">Multiplex</th><th scope="col">Do conteúdo 1 ao multiplex</th><th scope="col">Lateral 2 cabe</th><th scope="col">Lateral ao cabeçalho: hoje → mapa</th><th scope="col">Densidade da coluna</th><th scope="col">Menor folga das unidades</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Home</th><td>936&#160;px</td><td>498&#160;px</td><td>2.646&#160;px</td><td>3/3</td><td>29&#160;px → 159&#160;px</td><td>17,0&#160;%</td><td>150&#160;px (oli)</td></tr>
+        <tr><th scope="row">Hub de categoria · arquivos</th><td>1.094&#160;px</td><td>498&#160;px</td><td>1.618&#160;px</td><td>6/6</td><td>29&#160;px → 159&#160;px</td><td>21,4&#160;%</td><td>150&#160;px (cards)</td></tr>
+        <tr><th scope="row">Hub de categoria · dinheiro</th><td>742&#160;px</td><td>498&#160;px</td><td>1.733&#160;px</td><td>3/3</td><td>29&#160;px → 159&#160;px</td><td>21,3&#160;%</td><td>150&#160;px (cards)</td></tr>
+        <tr><th scope="row">Hub de categoria · casa-saude</th><td>806&#160;px</td><td>498&#160;px</td><td>1.414&#160;px</td><td>2/2</td><td>29&#160;px → 159&#160;px</td><td>23,5&#160;%</td><td>150&#160;px (cards)</td></tr>
+        <tr><th scope="row">Ferramenta · imagem</th><td>955&#160;px</td><td>498&#160;px</td><td>2.207&#160;px</td><td>33/33</td><td>29&#160;px → 159&#160;px</td><td>20,6&#160;%</td><td>150&#160;px (campos)</td></tr>
+        <tr><th scope="row">Ferramenta · pdf</th><td>955&#160;px</td><td>498&#160;px</td><td>2.334&#160;px</td><td>36/36</td><td>29&#160;px → 159&#160;px</td><td>20,0&#160;%</td><td>150&#160;px (campos)</td></tr>
+        <tr><th scope="row">Ferramenta · qr</th><td>1.412&#160;px</td><td>498&#160;px</td><td>2.448&#160;px</td><td>3/3</td><td>29&#160;px → 159&#160;px</td><td>18,6&#160;%</td><td>150&#160;px (painel)</td></tr>
+        <tr><th scope="row">Calculadora · dinheiro</th><td>728&#160;px</td><td>498&#160;px</td><td>2.749&#160;px</td><td>44/44</td><td>29&#160;px → 159&#160;px</td><td>17,3&#160;%</td><td>150&#160;px (painel)</td></tr>
+        <tr><th scope="row">Calculadora · casa-saude</th><td>794&#160;px</td><td>498&#160;px</td><td>2.836&#160;px</td><td>11/11</td><td>29&#160;px → 159&#160;px</td><td>17,3&#160;%</td><td>150&#160;px (painel)</td></tr>
+        <tr><th scope="row">Guia · arquivo</th><td>744&#160;px</td><td>498&#160;px</td><td>3.006&#160;px</td><td>30/30</td><td>29&#160;px → 159&#160;px</td><td>14,6&#160;%</td><td>150&#160;px (painel)</td></tr>
+        <tr><th scope="row">Guia · dinheiro</th><td>726&#160;px</td><td>498&#160;px</td><td>2.777&#160;px</td><td>10/10</td><td>29&#160;px → 159&#160;px</td><td>13,3&#160;%</td><td>150&#160;px (painel)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O multiplex a 1280 px: o carregador público do AdSense (lido em 3/nov/2026) dá ao <code>ins</code> <code>floor(L × 0,6)</code> para L de 550 a 849 px, <code>floor(L × 0,5)</code> de 850 a 1.199 e 600 px a partir de 1.200. Com a coluna de 758 px, o <code>ins</code> tem 454&#160;px e a caixa, com o rótulo, 498&#160;px. As laterais ficam a 150 px da coluna pelo vão da grade, e a 2ª cabe em 181 das 181 páginas.</p>
+
+    <h3>O que muda da seção B</h3>
+    <div class="admap__scroll" role="region" aria-label="O que muda da seção B" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Peça</th><th scope="col">A seção B diz</th><th scope="col">O mapa faz</th><th scope="col">Por quê, com o número</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Multiplex</th><td>No fim de todo molde</td><td>Só a partir de 768 px</td><td>Com 1.700 px a 360 px (§ 351), 9 dos 11 moldes medidos passam de 30&#160;% na conservadora; o pior chega a 41,6&#160;%. Só a home e o guia de dinheiro caberiam, e o multiplex cresce com a tela (1.830 px a 412 px).</td></tr>
+          <tr><th scope="row">Conteúdo 2 em diante</th><td>"Um a cada 1,5 tela", sem largura</td><td>Só abaixo de 768 px</td><td>As fronteiras escolhidas no celular ficam a 726&#160;px umas das outras a 1280 × 800, menos de 1,5 tela (1.200 px). No computador, as 2 laterais e o multiplex fazem esse papel.</td></tr>
+          <tr><th scope="row">Lateral 1</th><td>300 × 600, não gruda</td><td>Começa 150 px abaixo do cabeçalho (<code>padding-top</code> de 150 px, hoje 20)</td><td>Hoje ela fica a 29&#160;px do botão de idioma e da busca do cabeçalho, que são menus; com o mapa, 159&#160;px. Vale também para o botão Menu e o de tema da F11.</td></tr>
+          <tr><th scope="row">Lateral 2</th><td>"2ª unidade lateral", sem lugar</td><td>1.200 px abaixo da 1ª, de borda a borda (1,5 tela de 800 px), em <code>position: absolute</code> na coluna esticada até a altura do <code>&lt;main&gt;</code>; só quando cabe</td><td>Ela cabe em 181 das 181 páginas. Como é absoluta, aparecer ou não aparecer não mexe na página (sem CLS).</td></tr>
+          <tr><th scope="row">1º do hub de dinheiro</th><td>"Como hoje (depois da primeira grade)"</td><td>Depois da grade de crédito</td><td>Hoje o hub de dinheiro põe o anúncio depois das duas grades; o mapa segue a letra da seção B, como nos outros hubs.</td></tr>
+          <tr><th scope="row">1º do guia</th><td>"Um a cada 1,5 tela no texto"</td><td>No texto logo depois da ferramenta embutida, com um parágrafo entre os dois</td><td>Hoje ele vem depois da metade do texto. O topo do 1º fica a 1.944 px ou mais (guia de arquivo) e a 3.006 px ou mais (guia de dinheiro), sempre abaixo da ferramenta.</td></tr>
+          <tr><th scope="row">Tabela</th><td>"Nunca colado na tabela de medidas", só no guia</td><td>Nunca colado em tabela, em todo molde</td><td>Uma regra só para a F12 escrever e testar. Ninguém perde o 1º anúncio por isso.</td></tr>
+          <tr><th scope="row">Unidades</th><td>15 (5 áreas × conteúdo, lateral e multiplex); a F12 confere se pode repetir</td><td>Uma por posição: 37</td><td>A ajuda não tem regra sobre repetir; uma por posição separa o relatório. Sem id, a posição some.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A alternativa B: 1.110 px de topo a topo</h3>
+    <p>A § 351 lê "um a cada 1,5 tela" de borda a borda (alternativa A, a recomendada). A alternativa B lê de topo a topo, como uma frequência: um anúncio a cada 1.110 px de página, com 810 px de conteúdo entre as caixas. Ela muda onde os anúncios caem e quantos são, não a cor: 807 anúncios de conteúdo em vez de 618 (4,5 por página no celular, contra 3,4), e o pior molde vai a 24,0&#160;%, ainda abaixo de 30&#160;%. O <code>densidade.mjs --leitura topo</code> mede B.</p>
+    <div class="admap__scroll" role="region" aria-label="Alternativa A contra a B" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">A: anúncios por página</th><th scope="col">A: conservadora máx</th><th scope="col">B: anúncios por página</th><th scope="col">B: conservadora máx</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Home</th><td>3–5 (média 3,7)</td><td><strong>13,4&#160;%</strong></td><td>3–5 (média 3,7)</td><td><strong>13,4&#160;%</strong></td></tr>
+        <tr><th scope="row">Hub de categoria · arquivos</th><td>2–2 (média 2,0)</td><td><strong>13,7&#160;%</strong></td><td>3–3 (média 3,0)</td><td><strong>17,6&#160;%</strong></td></tr>
+        <tr><th scope="row">Hub de categoria · dinheiro</th><td>3–5 (média 4,3)</td><td><strong>17,8&#160;%</strong></td><td>4–6 (média 5,3)</td><td><strong>20,9&#160;%</strong></td></tr>
+        <tr><th scope="row">Hub de categoria · casa-saude</th><td>2–2 (média 2,0)</td><td><strong>15,5&#160;%</strong></td><td>3–3 (média 3,0)</td><td><strong>19,6&#160;%</strong></td></tr>
+        <tr><th scope="row">Ferramenta · imagem</th><td>2–3 (média 2,5)</td><td><strong>22,3&#160;%</strong></td><td>2–3 (média 3,0)</td><td><strong>22,4&#160;%</strong></td></tr>
+        <tr><th scope="row">Ferramenta · pdf</th><td>2–3 (média 2,3)</td><td><strong>20,1&#160;%</strong></td><td>2–3 (média 2,6)</td><td><strong>20,6&#160;%</strong></td></tr>
+        <tr><th scope="row">Ferramenta · qr</th><td>2–2 (média 2,0)</td><td><strong>14,8&#160;%</strong></td><td>3–3 (média 3,0)</td><td><strong>18,7&#160;%</strong></td></tr>
+        <tr><th scope="row">Calculadora · dinheiro</th><td>3–5 (média 4,2)</td><td><strong>21,0&#160;%</strong></td><td>4–7 (média 5,8)</td><td><strong>24,0&#160;%</strong></td></tr>
+        <tr><th scope="row">Calculadora · casa-saude</th><td>4–5 (média 4,2)</td><td><strong>21,0&#160;%</strong></td><td>5–6 (média 5,9)</td><td><strong>23,6&#160;%</strong></td></tr>
+        <tr><th scope="row">Guia · arquivo</th><td>4–5 (média 4,5)</td><td><strong>18,7&#160;%</strong></td><td>5–7 (média 6,1)</td><td><strong>21,5&#160;%</strong></td></tr>
+        <tr><th scope="row">Guia · dinheiro</th><td>3–5 (média 4,1)</td><td><strong>14,5&#160;%</strong></td><td>5–6 (média 5,4)</td><td><strong>16,5&#160;%</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Com B, as unidades sobem para 43 (até <code>conteudo-7</code> em <code>arquivos</code> e <code>dinheiro</code>). A recomendação é A: é a leitura que a § 351 fixou, a mesma dos 150 px de folga, e deixa o celular com um anúncio a cada tela e meia de leitura de verdade.</p>
+
+    <h3>Para a F12: o <code>gate:prontidao</code></h3>
+    <p>O portão pede 150 palavras do <code>&lt;main&gt;</code> para cada caixa de anúncio do HTML (<code>scripts/lib/prontidao.ts:47</code>). Com o mapa, o HTML de uma página tem até 8 caixas (5 de conteúdo, 2 laterais e o multiplex), mas nenhuma largura mostra mais que 5. Contando todas as caixas do HTML, 111 das 181 páginas reprovariam; contando as que cada largura mostra, 0 no celular e 14 no computador (as que têm menos de 600 palavras para conteúdo 1, 2 laterais e multiplex). A menor página tem 515 palavras.</p>
+    <div class="admap__scroll" role="region" aria-label="O gate de prontidão por molde" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Molde</th><th scope="col">Caixas no HTML (máx)</th><th scope="col">Menor número de palavras</th><th scope="col">Reprovam contando todas</th><th scope="col">Reprovam contando só as de conteúdo</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Home</th><td>8</td><td>560</td><td>3/3</td><td>0/3</td></tr>
+        <tr><th scope="row">Hub de categoria · arquivos</th><td>5</td><td>575</td><td>3/6</td><td>0/6</td></tr>
+        <tr><th scope="row">Hub de categoria · dinheiro</th><td>8</td><td>515</td><td>3/3</td><td>0/3</td></tr>
+        <tr><th scope="row">Hub de categoria · casa-saude</th><td>5</td><td>538</td><td>2/2</td><td>0/2</td></tr>
+        <tr><th scope="row">Ferramenta · imagem</th><td>6</td><td>559</td><td>29/33</td><td>0/33</td></tr>
+        <tr><th scope="row">Ferramenta · pdf</th><td>6</td><td>671</td><td>27/36</td><td>0/36</td></tr>
+        <tr><th scope="row">Ferramenta · qr</th><td>5</td><td>752</td><td>0/3</td><td>0/3</td></tr>
+        <tr><th scope="row">Calculadora · dinheiro</th><td>8</td><td>593</td><td>33/44</td><td>0/44</td></tr>
+        <tr><th scope="row">Calculadora · casa-saude</th><td>8</td><td>773</td><td>11/11</td><td>0/11</td></tr>
+        <tr><th scope="row">Guia · arquivo</th><td>8</td><td>1.160</td><td>0/30</td><td>0/30</td></tr>
+        <tr><th scope="row">Guia · dinheiro</th><td>8</td><td>1.139</td><td>0/10</td><td>0/10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A recomendação: a F12 muda a conta do portão para <strong>cada largura</strong> (celular: as caixas de conteúdo; computador: o conteúdo 1, as laterais e o multiplex), mantendo as 150 palavras por caixa, e registra num § que isso não afrouxa a regra ("uma tela de celular de texto por anúncio" que aparece). Nas 14 páginas com menos de 600 palavras, a lateral 2 não entra (com 3 caixas no computador, nenhuma reprova). Mudar a conta de um teste pede o ok do Victor; sem ele, a F12 põe um teto de caixas por página igual a palavras ÷ 150, e o mapa encolhe.</p>
+
+    <h3>Âncora e vinheta</h3>
+    <ul>
+      <li>Os únicos formatos automáticos continuam a âncora e a vinheta, ligadas no painel do AdSense, nunca no código. Posicionamento automático e side rail ficam desligados; nenhum anúncio se atualiza sozinho.</li>
+      <li>A âncora entra na densidade conservadora com 100 px, uma vez (a âncora alta da pesquisa, 320 × 100; o AdSense não publica a altura da dinâmica). Ela tem 13,5&#160;% da tela de 740 px, abaixo dos 30&#160;% do "anúncio fixo grande". O aviso de cookies continua subindo por cima dela (§ 35 e § 101).</li>
+      <li>A vinheta: desde 9/mar/2026 o AdSense liga, por padrão, os "gatilhos adicionais" (voltar à aba, o botão Voltar, 30 s parado e depois um toque, e o fim do <code>article</code>). Com eles, uma vinheta pode aparecer enquanto a ferramenta processa, o que tensiona "nada no processamento". Desligar é do Victor, no painel: Anúncios automáticos → Vinheta → desmarcar "Allow additional triggers for vignette ads". Vai para "Para o PENDENCIAS" do relatório.</li>
+    </ul>
+
+    <h3>Marcação</h3>
+    <p>Uma caixa por posição, com a unidade da área. O <code>class</code> diz em que largura ela existe; o CSS esconde e o script inline só chama o <code>push</code> onde ela aparece.</p>
+    <pre><code>&lt;!-- conteúdo 1: toda largura --&gt;
+&lt;div class="fo-ad fo-ad--content" data-ad-area="arquivos" data-ad-unit="conteudo"&gt;
+  &lt;span class="fo-ad__label"&gt;Advertisements&lt;/span&gt;
+  &lt;ins class="adsbygoogle" data-ad-client="ca-pub-…" data-ad-slot="…" data-ad-format="auto" data-full-width-responsive="true" style="display:block"&gt;&lt;/ins&gt;
+&lt;/div&gt;
+&lt;!-- conteúdo 2 em diante: só abaixo de 768 px --&gt;
+&lt;div class="fo-ad fo-ad--content fo-ad--celular" data-ad-area="arquivos" data-ad-unit="conteudo-2"&gt;…&lt;/div&gt;
+&lt;!-- multiplex: último bloco do main, a partir de 768 px --&gt;
+&lt;div class="fo-ad fo-ad--multiplex" data-ad-area="arquivos" data-ad-unit="multiplex"&gt;
+  &lt;span class="fo-ad__label"&gt;Advertisements&lt;/span&gt;
+  &lt;ins class="adsbygoogle" data-ad-client="ca-pub-…" data-ad-slot="…" data-ad-format="autorelaxed" style="display:block"&gt;&lt;/ins&gt;
+&lt;/div&gt;
+&lt;!-- laterais: a partir de 1280 px; a 2ª é absoluta e começa escondida --&gt;
+&lt;aside class="fo-rail" aria-label="Advertisements"&gt;
+  &lt;div class="fo-ad fo-ad--rail" data-ad-unit="lateral"&gt;…&lt;/div&gt;
+  &lt;div class="fo-ad fo-ad--rail fo-ad--rail2" data-ad-unit="lateral-2" hidden&gt;…&lt;/div&gt;
+&lt;/aside&gt;</code></pre>
+    <pre><code>@media (min-width: 768px) { .fo-ad--celular { display: none; } }
+@media (max-width: 767px) { .fo-ad--multiplex { display: none; } }
+.fo-ad--multiplex { width: 100%; }
+@media (min-width: 1280px) {
+  .fo-rail { padding-top: var(--ad-clearance); align-self: stretch; position: relative; }
+  .fo-ad--rail2 { position: absolute; right: 0; top: calc(var(--ad-clearance) + 644px + 1200px); }
+}</code></pre>
+
+    <h3>Tokens</h3>
+    <ul>
+      <li>A caixa: <code>--ad-ground</code>, <code>--radius-xs</code>, a margem <code>--ad-clearance</code> (150 px); o rótulo em 12/16 px com <code>--ink-muted</code>. Nada novo.</li>
+      <li>A coluna lateral: <code>--rail</code> (300 px) e o vão <code>--ad-clearance</code>.</li>
+      <li>Este protótipo usa só tokens do design system; os pares de cor dele estão na tabela do contraste do README.</li>
+    </ul>
+
+    <h3>Estados deste protótipo</h3>
+    <table>
+      <thead><tr><th scope="col"><code>?state=</code></th><th scope="col">O que mostra</th><th scope="col">Página medida</th></tr></thead>
+      <tbody>
+        <tr><td><code>home</code> (padrão)</td><td>A home</td><td><code>/</code></td></tr>
+        <tr><td><code>hub</code></td><td>Hub de categoria</td><td><code>/image-tools/</code></td></tr>
+        <tr><td><code>guides-hub</code></td><td>Hub de guias</td><td>Estimativa (o hub ainda não existe)</td></tr>
+        <tr><td><code>tool</code></td><td>Ferramenta</td><td><code>/compress-image/</code></td></tr>
+        <tr><td><code>calc</code></td><td>Calculadora</td><td><code>/mortgage-calculator/</code></td></tr>
+        <tr><td><code>guide</code></td><td>Guia</td><td><code>/guides/heic-to-jpg-on-windows/</code></td></tr>
+        <tr><td><code>free</code></td><td>As 27 páginas livres</td><td>Todas</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Teclado e nome acessível</h3>
+    <ul>
+      <li>A caixa de anúncio não recebe foco e não tem papel próprio. O <code>&lt;aside&gt;</code> da lateral tem o nome do rótulo ("Advertisements", "Publicidade", "Anuncios"), como hoje.</li>
+      <li>O <code>iframe</code> que o AdSense põe dentro do <code>ins</code> é dele; o site não muda a ordem do Tab. Nenhum anúncio fica entre o painel e o Baixar na ordem do teclado, porque nenhum fica dentro do painel.</li>
+    </ul>
+
+    <h3>Medidas</h3>
+    <ul>
+      <li>Conteúdo: caixa de 300 px de altura (o <code>ins</code> estica a 256), margem de 150 px em cima e embaixo.</li>
+      <li>Entre dois anúncios do conteúdo: 1.110 px de borda a borda a 360 × 740. A 1280 × 800, só o conteúdo 1, o multiplex (a 1.414&#160;px ou mais do conteúdo 1) e as laterais.</li>
+      <li>150 px de cada caixa até o Baixar, os campos, os menus (os controles do cabeçalho e os popovers), o painel inteiro, o cronograma, a Oli, o card do café e, no multiplex, a grade de cards. O menor valor medido em todo molde é 166 px no celular e 150 px no computador (as laterais pelo vão da grade).</li>
+      <li>Laterais: 300 × 644 px, a 1ª com o topo 150 px abaixo do cabeçalho, a 2ª 1.200 px abaixo da 1ª e só se a coluna tiver 2.638 px (150 + 644 + 1.200 + 644).</li>
+      <li>Nenhuma caixa é alvo de toque; os alvos de 48 px da página não mudam.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <ul>
+      <li>Nenhum arquivo JS novo e nenhuma requisição nova: o carregador continua o <code>adsbygoogle.js</code> de hoje, um por página.</li>
+      <li>Os scripts inline de <code>push</code> de cada caixa viram um só, no fim do <code>&lt;body&gt;</code>, com a trava do domínio de hoje: ele percorre os <code>ins</code>, chama o <code>push</code> só nos que estão visíveis (<code>offsetParent</code> não nulo) e mostra a lateral 2 quando a coluna tem a altura. São 352 bytes sem compressão e 264 em gzip, no lugar dos 110 bytes por caixa de hoje (com 8 caixas, 880). Ele entra na conta dos 80 KB do <code>budgets.ts</code>, que soma os scripts inline.</li>
+      <li>CLS: as caixas de conteúdo e o multiplex reservam a altura no HTML; o que muda por largura é CSS, que vale antes da primeira pintura; a lateral 2 é absoluta. O Lighthouse do CI roda sem anúncio e não vê nada disso.</li>
+    </ul>
+    <pre><code>&lt;script&gt;if(location.hostname==="fileorca.com"){var q=window.adsbygoogle=window.adsbygoogle||[],r=document.querySelector(".fo-ad--rail2"),a=r&amp;&amp;r.parentElement;
+if(r&amp;&amp;matchMedia("(min-width: 1280px)").matches&amp;&amp;a.offsetHeight&gt;=2638)r.hidden=false;
+document.querySelectorAll("ins.adsbygoogle").forEach(function(i){if(i.offsetParent)q.push({});});}&lt;/script&gt;</code></pre>
+
+    <h3>O que o teste da F12 confere</h3>
+    <p>No build de teste, com ids de teste nas 37 unidades e a parede em <code>bloqueio</code>, nos três idiomas, com a ferramenta em repouso:</p>
+    <ol>
+      <li>A 360 × 740, em toda página: a densidade conservadora em até 30&#160;% (caixas mais 100 px de âncora, sobre o <code>&lt;main&gt;</code> sem as relacionadas).</li>
+      <li>Pelo menos 1.110 px de borda a borda entre dois anúncios do conteúdo.</li>
+      <li>150 px de cada caixa até o Baixar, os campos, os menus, o painel, o cronograma, a Oli, o card do café e, no multiplex, a grade de cards (a lista do <code>ads.spec.ts</code> com os controles do cabeçalho).</li>
+      <li>O 1º anúncio depois da peça certa de cada molde, nada acima da ferramenta e nada na primeira tela da home (topo a 740 px ou mais no celular, a 800 px ou mais no computador).</li>
+      <li>Nenhuma caixa dentro de grade, tabela, painel, cronograma, ferramenta embutida, lista, pergunta ou formulário, e nenhuma colada numa tabela.</li>
+      <li>Abaixo de 768 px: nenhum multiplex visível. A partir de 768 px: só o conteúdo 1, e o multiplex como último bloco do <code>&lt;main&gt;</code>; a 1280 × 800, a 1.200 px ou mais do conteúdo 1.</li>
+      <li>A partir de 1280 px: a lateral 1 a 150 px ou mais dos controles do cabeçalho; a lateral 2 só onde a coluna tem a altura, 1.200 px abaixo da 1ª; nenhuma gruda ao rolar.</li>
+      <li>As 27 páginas livres sem caixa e sem código de anúncio; o build padrão sem caixa, sem rótulo e sem espaço reservado.</li>
+      <li>O mesmo número de caixas em todo estado da ferramenta, e um <code>push</code> por caixa visível, uma vez só (nenhum refresh).</li>
+      <li>O <code>gate:prontidao</code> com as 150 palavras por caixa, na conta que o Victor escolher.</li>
+    </ol>
+
+    <h3>Como medir de novo</h3>
+    <pre><code>FO_PORT=4187 node .cache/f10/densidade.mjs                 # o mapa (A): grava densidade.json e densidade.md
+FO_PORT=4187 node .cache/f10/densidade.mjs --leitura topo  # a alternativa B: densidade-topo.*
+FO_PORT=4187 node .cache/f10/densidade.mjs --prototipo docs/propostas/ux-v2/guides-hub.html</code></pre>
+    <p>Sai com código 1 se um molde passar de 30&#160;% na conservadora a 360 × 740 ou se uma regra reprovar.</p>
+  </div>
+</section>
+<script>
+var PROTO_T = {
+  pt: { 'page.title': 'Mapa de anúncios · FileOrca UX v2', 'ad.lang': 'pt-BR' },
+  es: { 'page.title': 'Mapa de anúncios · FileOrca UX v2', 'ad.lang': 'es' }
+};
+</script>
+</body>
+</html>
