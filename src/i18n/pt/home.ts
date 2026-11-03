@@ -21,6 +21,8 @@ export default {
   privacyHeading: 'Seus arquivos ficam com você',
   privacyBody:
     'Seus arquivos nunca saem do seu aparelho. O FileOrca faz o trabalho no navegador, e você mesmo pode conferir: abra a aba Rede do navegador enquanto usa uma ferramenta e veja que nenhuma requisição leva o seu arquivo.',
-  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
-  qr: { heading: 'Make a QR code', intro: 'STUB' },
+  qr: {
+    heading: 'Crie um QR code',
+    intro: 'Transforme um link ou um texto curto num QR code com a Oli no centro e baixe em PNG ou SVG. O texto fica no seu aparelho.',
+  },
 } satisfies HomeTexts;
