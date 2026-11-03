@@ -44,11 +44,14 @@
    of .proto-main, so the real distance to the block above and below is 150 + 16 = 166 px. Some boxes exist only on
    the phone (fo-mobile-only) or only from 768 px (fo-desktop-only): display: none by media query, which AdSense allows
    for responsive units, and the 1,110 px between two content ads holds at each width. */
-/* The multiplex, from 768 px only (§ 351: at 360 px its 1,700 px do not fit in 30 %). Planned height: the loader
-   gives floor(L x 0.6) for a 550 to 849 px box, floor(L x 0.5) from 850 and 600 from 1200; 600 px is the largest
-   (main column of 1,208 px), 456 px next to the rail (760 px column). */
-@media (min-width: 768px) { .hx-main .fo-ad--multiplex { --proto-multiplex-h: 600px; } }
-@media (min-width: 1280px) { html[data-ads="on"] .hx-main .fo-ad--multiplex { --proto-multiplex-h: 456px; } }
+/* The multiplex, from 768 px only (§ 351: at 360 px its 1,700 px do not fit in 30 %). Its box is the loader's <ins>
+   plus the 44 px label, the one height of every prototype (proto.css, review of the F10, c-05): floor(L x 0.6) for a
+   550 to 849 px column, floor(L x 0.5) from 850 and 600 from 1200. The home column takes the page width below
+   1280 px (L = 100vw - 32 px), so the box goes from 485 to 644 px; next to the rail (758 px column) it is 498 px. */
+@media (min-width: 768px) { .hx-main .fo-ad--multiplex { --proto-multiplex-h: calc((100vw - 2 * var(--space-4)) * 0.6 + 44px); } }
+@media (min-width: 882px) { .hx-main .fo-ad--multiplex { --proto-multiplex-h: calc((100vw - 2 * var(--space-4)) * 0.5 + 44px); } }
+@media (min-width: 1232px) { .hx-main .fo-ad--multiplex { --proto-multiplex-h: 644px; } }
+@media (min-width: 1280px) { html[data-ads="on"] .hx-main .fo-ad--multiplex { --proto-multiplex-h: 498px; } }
 /* The rail: two 300 x 644 units, never sticky, one desktop screen (800 px) apart, so only one is in view. */
 @media (min-width: 1280px) { .hx-rail { display: grid; align-content: start; } }
 .hx-rail .fo-ad--rail + .fo-ad--rail { margin-top: 800px; }

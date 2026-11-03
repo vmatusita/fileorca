@@ -231,7 +231,7 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       <dl class="admap__facts">
         <dt>Área</dt><dd><code>geral</code></dd>
         <dt>Regra</dt><dd>A dos hubs de categoria: o 1º depois da primeira grade de guias; depois, um a cada 1,5 tela; multiplex no fim; 2 laterais.</dd>
-        <dt>Medida</dt><dd>O hub ainda não existe no <code>dist/</code>. O esquema é uma estimativa a partir do hub de imagem (cards de uns 135 px no celular); o <code>densidade.mjs</code> mede o protótipo <code>guides-hub.html</code> quando ele entra no checkout principal. Em português não há guias de dinheiro, e a página é mais curta.</dd>
+        <dt>Medida</dt><dd>O hub ainda não existe no <code>dist/</code>; o <code>densidade.mjs</code> mede o protótipo <code>guides-hub.html</code>: 14,1&#160;% na conservadora (en), 13,3&#160;% (pt), 12,7&#160;% pela ficha e 33,0&#160;% com o multiplex de 1.700 px no celular. Em inglês e espanhol cabem 3 anúncios no celular; em português, sem os guias de dinheiro, a página é mais curta e cabem 2, que é o que o esquema desenha.</dd>
       </dl>
       
       <div class="admap__pair">
@@ -519,10 +519,12 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       <table>
         <thead><tr><th scope="col">Molde</th><th scope="col">Área</th><th scope="col">Páginas</th><th scope="col">Anúncios por página</th><th scope="col">Ficha: máx · mediana</th><th scope="col">Conservadora: máx · mediana</th><th scope="col">Página da máxima</th><th scope="col">Com o multiplex no celular</th></tr></thead>
         <tbody>
-        <tr><th scope="row">Home</th><td><code>geral</code></td><td>3</td><td>3–5</td><td>12,6&#160;% · 10,7&#160;%</td><td><strong>13,4&#160;%</strong> · 11,9&#160;%</td><td><code>/</code></td><td>26,0&#160;%</td></tr>
+        <tr><th scope="row">Home (a de hoje)</th><td><code>geral</code></td><td>3</td><td>3–5</td><td>12,6&#160;% · 10,7&#160;%</td><td><strong>13,4&#160;%</strong> · 11,9&#160;%</td><td><code>/</code></td><td>26,0&#160;%</td></tr>
+        <tr><th scope="row">Home B do UX-03 (protótipo)</th><td><code>geral</code></td><td>3</td><td>3</td><td>—</td><td><strong>17,7&#160;%</strong> · 17,1&#160;%</td><td><code>home-b.html?lang=es</code></td><td>—</td></tr>
         <tr><th scope="row">Hub de categoria · arquivos</th><td><code>arquivos</code></td><td>6</td><td>2–2</td><td>11,8&#160;% · 10,1&#160;%</td><td><strong>13,7&#160;%</strong> · 11,8&#160;%</td><td><code>/image-tools/</code></td><td>33,7&#160;%</td></tr>
         <tr><th scope="row">Hub de categoria · dinheiro</th><td><code>dinheiro</code></td><td>3</td><td>3–5</td><td>16,1&#160;% · 16,0&#160;%</td><td><strong>17,8&#160;%</strong> · 17,2&#160;%</td><td><code>/pt/calculadoras-financeiras/</code></td><td>35,3&#160;%</td></tr>
         <tr><th scope="row">Hub de categoria · casa-saude</th><td><code>casa-saude</code></td><td>2</td><td>2–2</td><td>13,3&#160;% · 13,2&#160;%</td><td><strong>15,5&#160;%</strong> · 15,4&#160;%</td><td><code>/health-calculators/</code></td><td>36,8&#160;%</td></tr>
+        <tr><th scope="row">Hub de guias (protótipo)</th><td><code>geral</code></td><td>3</td><td>2–3</td><td>12,7&#160;% · 12,5&#160;%</td><td><strong>14,1&#160;%</strong> · 13,9&#160;%</td><td><code>guides-hub.html</code></td><td>33,0&#160;%</td></tr>
         <tr><th scope="row">Ferramenta · imagem</th><td><code>arquivos</code></td><td>33</td><td>2–3</td><td>15,7&#160;% · 11,5&#160;%</td><td><strong>22,3&#160;%</strong> · 17,5&#160;%</td><td><code>/png-to-jpg/</code></td><td>41,6&#160;%</td></tr>
         <tr><th scope="row">Ferramenta · pdf</th><td><code>arquivos</code></td><td>36</td><td>2–3</td><td>14,5&#160;% · 10,6&#160;%</td><td><strong>20,1&#160;%</strong> · 15,9&#160;%</td><td><code>/merge-pdf/</code></td><td>39,0&#160;%</td></tr>
         <tr><th scope="row">Ferramenta · qr</th><td><code>utilidades</code></td><td>3</td><td>2–2</td><td>10,7&#160;% · 10,2&#160;%</td><td><strong>14,8&#160;%</strong> · 13,9&#160;%</td><td><code>/qr-code-generator/</code></td><td>35,5&#160;%</td></tr>
@@ -534,7 +536,9 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
         </tbody>
       </table>
     </div>
-    <p>O hub de guias entra na tabela quando o protótipo existir (pela estimativa do esquema, uns 15&#160;%). No total, o mapa põe 618 anúncios de conteúdo nas 181 páginas com anúncio, 3,4 por página no celular; hoje é 1.</p>
+    <p>O hub de guias está medido no protótipo pelo <code>densidade.mjs</code>, e a home B do UX-03, pelo <code>.cache/f10/revisao-proto-ads.mjs</code> (15,2 a 17,7&#160;% na conservadora, 3 anúncios no celular). A linha "Home (a de hoje)" mede a home do <code>dist/</code>, com a grade de 37 cartões. No total, o mapa põe 618 anúncios de conteúdo nas 181 páginas com anúncio (as 178 do <code>dist/</code> e os 3 hubs de guias), 3,4 por página no celular; hoje é 1, nas 178.</p>
+    <h3>A 768 px, onde o multiplex começa</h3>
+    <p>A trava da ficha é a 360 × 740, mas o Google aplica a regra da densidade também ao tablet (pesquisa, 3.2), e a partir de 768 px o mapa troca os anúncios de conteúdo 2+ pelo multiplex. O <code>.cache/f10/densidade768.mjs</code> mediu 19 páginas (as de maior densidade de cada molde, nos três idiomas) com o conteúdo 1 e o multiplex do carregador (485 px de caixa a 768, 500 a 812): a conservadora chega a 26,1&#160;% a 768 × 1024 (<code>/home-calculators/</code>) e a 26,5&#160;% a 812 × 375, o celular deitado (<code>/health-calculators/</code>). Nenhuma passa de 30&#160;%, mas a folga cai de uns 8 pontos (360) para uns 4. Se as margens de 150 px das caixas saíssem do denominador, essas páginas passariam de 30&#160;% (até 32,2&#160;%); o mapa as conta, como a § 360 e como o site faz. O teste da F12 mede também nessas duas larguras (item 1).</p>
 
     <h3>As distâncias, a 360 × 740 (o menor valor de cada molde)</h3>
     <div class="admap__scroll" role="region" aria-label="Distâncias por molde a 360 por 740" tabindex="0">
@@ -583,10 +587,12 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       <table>
         <thead><tr><th scope="col">Peça</th><th scope="col">A seção B diz</th><th scope="col">O mapa faz</th><th scope="col">Por quê, com o número</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Multiplex</th><td>No fim de todo molde</td><td>Só a partir de 768 px</td><td>Com 1.700 px a 360 px (§ 351), 9 dos 11 moldes medidos passam de 30&#160;% na conservadora; o pior chega a 41,6&#160;%. Só a home e o guia de dinheiro caberiam, e o multiplex cresce com a tela (1.830 px a 412 px).</td></tr>
+          <tr><th scope="row">Multiplex</th><td>No fim de todo molde</td><td>Só a partir de 768 px</td><td>Com 1.700 px a 360 px (§ 351), 10 dos 12 moldes medidos passam de 30&#160;% na conservadora (9 dos 11 do <code>dist/</code>, mais o hub de guias do protótipo); o pior chega a 41,6&#160;%. Só a home e o guia de dinheiro caberiam, e o multiplex cresce com a tela (1.830 px a 412 px).</td></tr>
           <tr><th scope="row">Conteúdo 2 em diante</th><td>"Um a cada 1,5 tela", sem largura</td><td>Só abaixo de 768 px</td><td>As fronteiras escolhidas no celular ficam a 726&#160;px umas das outras a 1280 × 800, menos de 1,5 tela (1.200 px). No computador, as 2 laterais e o multiplex fazem esse papel.</td></tr>
           <tr><th scope="row">Lateral 1</th><td>300 × 600, não gruda</td><td>Começa 150 px abaixo do cabeçalho (<code>padding-top</code> de 150 px, hoje 20)</td><td>Hoje ela fica a 29&#160;px do botão de idioma e da busca do cabeçalho, que são menus; com o mapa, 159&#160;px. Vale também para o botão Menu e o de tema da F11.</td></tr>
           <tr><th scope="row">Lateral 2</th><td>"2ª unidade lateral", sem lugar</td><td>1.200 px abaixo da 1ª, de borda a borda (1,5 tela de 800 px), em <code>position: absolute</code> na coluna esticada até a altura do <code>&lt;main&gt;</code>; só quando cabe</td><td>Ela cabe em 181 das 181 páginas. Como é absoluta, aparecer ou não aparecer não mexe na página (sem CLS).</td></tr>
+          <tr><th scope="row">Lateral durante o processamento</th><td>"Nunca anúncio no processamento"; o README do WaterLevel diz "nunca sobre ou ao lado"</td><td>A lateral fica, a 150 px ou mais da coluna, enquanto a água sobe</td><td>"Ao lado" é lido como a menos de 150 px, a leitura das fases anteriores (§ 20; o <code>ads.spec.ts</code> testa a lateral com o WaterLevel na tela desde a F1b). Se o Victor ler a frase ao pé da letra, a F12 esconde a lateral enquanto o WaterLevel estiver na tela (<code>visibility: hidden</code>, a caixa fica, sem CLS): é uma caixa das "Decisões avulsas" do <code>ESCOLHAS.md</code>.</td></tr>
+          <tr><th scope="row">1º da ferramenta</th><td>"Como hoje (o 1º depois dos chips)"</td><td>Com o UX-04 A marcado: depois do "Como usar"; sem ele, depois dos chips, como hoje</td><td>O UX-04 A põe os chips numa faixa fixa logo abaixo do retângulo e o 1º anúncio de conteúdo depois do "Como usar": a 1280 ele sai da primeira tela (y 1.085 no comprimir, 949 no juntar), e a 360 fica a 415 px da faixa. A F12 lê a marca do UX-04 no <code>ESCOLHAS.md</code> e põe o anúncio ali (§ 371); a densidade, os 1.110 px e os 150 px continuam e o teste confere. Medido no protótipo, não no <code>dist/</code>: a F13 mede de novo.</td></tr>
           <tr><th scope="row">1º do hub de dinheiro</th><td>"Como hoje (depois da primeira grade)"</td><td>Depois da grade de crédito</td><td>Hoje o hub de dinheiro põe o anúncio depois das duas grades; o mapa segue a letra da seção B, como nos outros hubs.</td></tr>
           <tr><th scope="row">1º do guia</th><td>"Um a cada 1,5 tela no texto"</td><td>No texto logo depois da ferramenta embutida, com um parágrafo entre os dois</td><td>Hoje ele vem depois da metade do texto. O topo do 1º fica a 1.944 px ou mais (guia de arquivo) e a 3.006 px ou mais (guia de dinheiro), sempre abaixo da ferramenta.</td></tr>
           <tr><th scope="row">Tabela</th><td>"Nunca colado na tabela de medidas", só no guia</td><td>Nunca colado em tabela, em todo molde</td><td>Uma regra só para a F12 escrever e testar. Ninguém perde o 1º anúncio por isso.</td></tr>
@@ -623,7 +629,8 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       <table>
         <thead><tr><th scope="col">Molde</th><th scope="col">Caixas no HTML (máx)</th><th scope="col">Menor número de palavras</th><th scope="col">Reprovam contando todas</th><th scope="col">Reprovam contando só as de conteúdo</th></tr></thead>
         <tbody>
-        <tr><th scope="row">Home</th><td>8</td><td>560</td><td>3/3</td><td>0/3</td></tr>
+        <tr><th scope="row">Home (a de hoje)</th><td>8</td><td>560</td><td>3/3</td><td>0/3</td></tr>
+        <tr><th scope="row">Home B do UX-03 (protótipo)</th><td>6</td><td>345</td><td>3/3</td><td>3/3 (3 caixas no celular e 3 a partir de 1280 pedem 450)</td></tr>
         <tr><th scope="row">Hub de categoria · arquivos</th><td>5</td><td>575</td><td>3/6</td><td>0/6</td></tr>
         <tr><th scope="row">Hub de categoria · dinheiro</th><td>8</td><td>515</td><td>3/3</td><td>0/3</td></tr>
         <tr><th scope="row">Hub de categoria · casa-saude</th><td>5</td><td>538</td><td>2/2</td><td>0/2</td></tr>
@@ -638,6 +645,8 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       </table>
     </div>
     <p>A recomendação: a F12 muda a conta do portão para <strong>cada largura</strong> (celular: as caixas de conteúdo; computador: o conteúdo 1, as laterais e o multiplex), mantendo as 150 palavras por caixa, e registra num § que isso não afrouxa a regra ("uma tela de celular de texto por anúncio" que aparece). Nas 14 páginas com menos de 600 palavras, a lateral 2 não entra (com 3 caixas no computador, nenhuma reprova). Mudar a conta de um teste pede o ok do Victor; sem ele, a F12 põe um teto de caixas por página igual a palavras ÷ 150, e o mapa encolhe.</p>
+
+    <p><strong>A home B do UX-03.</strong> Ela tira as descrições da grade de cartões, e o <code>&lt;main&gt;</code> cai de 560 a 758 palavras (a home de hoje) para 345 a 376 (contadas na revisão com a função do portão; 331 a 360 sem o texto só para leitor de tela). O protótipo mostra 3 caixas no celular (450 palavras) e, a partir de 1280, o conteúdo 1, o multiplex e a lateral 1 (450 também; a lateral 2 não entra abaixo de 600). Com 345 a 376 palavras, o portão deixa 2 caixas por largura. Para manter as 3, a F13 escreve de 75 a 105 palavras a mais no <code>&lt;main&gt;</code> da home (uma frase por faixa de categoria); sem isso, a home B fica com 2 anúncios por largura. O UX-03 e o <code>ESCOLHAS.md</code> dizem o mesmo.</p>
 
     <h3>Âncora e vinheta</h3>
     <ul>
@@ -672,6 +681,7 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
   .fo-rail { padding-top: var(--ad-clearance); align-self: stretch; position: relative; }
   .fo-ad--rail2 { position: absolute; right: 0; top: calc(var(--ad-clearance) + 644px + 1200px); }
 }</code></pre>
+    <p><strong>O <code>display: none</code> é uma suposição, com plano B</strong> (suposição 6 do README, § 361). A ajuda do AdSense lista como proibido "esconder a unidade a qualquer momento (por exemplo, <code>display:none</code>), a não ser ao implementar uma unidade responsiva" (<code>support.google.com/adsense/answer/1354736</code>), e mostra a media query com <code>display:none</code> no código de uma unidade responsiva (<code>support.google.com/adsense/answer/9183363</code>), onde nenhuma requisição de anúncio é feita para a unidade escondida. O exemplo da 9183363 é de uma unidade de tamanho fixo por largura, com as linhas <code>data-ad-format="auto"</code> e <code>data-full-width-responsive</code> apagadas; o mapa usa as unidades <code>auto</code> e <code>autorelaxed</code> sem dimensionar o <code>ins</code>, e supõe que a exceção da 1354736 as cobre. A F12 confere as duas páginas antes de construir. <strong>Plano B</strong>, se a F12 concluir que não pode: nenhuma caixa escondida por CSS. O script de <code>push</code> único cria o <code>&lt;ins&gt;</code> só nas caixas cuja largura bate no carregamento (<code>matchMedia</code>) e empurra uma vez; as outras caixas não entram no HTML de anúncio (ficam fora do DOM, sem rótulo nem espaço). Girar o aparelho ou redimensionar a janela depois do carregamento não cria nem tira anúncio (nenhum refresh): o que estava continua, como a lateral de hoje (<code>AdSlot.astro</code>). Sem permissão e sem o plano B, o multiplex sai do mapa e o conteúdo 2+ passa a valer também no computador, com os 1.200 px de lá.</p>
 
     <h3>Tokens</h3>
     <ul>
@@ -686,7 +696,7 @@ html[data-state="free"] [data-when]:not([data-when~="free"]) { display: none !im
       <tbody>
         <tr><td><code>home</code> (padrão)</td><td>A home</td><td><code>/</code></td></tr>
         <tr><td><code>hub</code></td><td>Hub de categoria</td><td><code>/image-tools/</code></td></tr>
-        <tr><td><code>guides-hub</code></td><td>Hub de guias</td><td>Estimativa (o hub ainda não existe)</td></tr>
+        <tr><td><code>guides-hub</code></td><td>Hub de guias</td><td>O protótipo <code>guides-hub.html</code> (o hub ainda não existe no <code>dist/</code>)</td></tr>
         <tr><td><code>tool</code></td><td>Ferramenta</td><td><code>/compress-image/</code></td></tr>
         <tr><td><code>calc</code></td><td>Calculadora</td><td><code>/mortgage-calculator/</code></td></tr>
         <tr><td><code>guide</code></td><td>Guia</td><td><code>/guides/heic-to-jpg-on-windows/</code></td></tr>
@@ -722,7 +732,7 @@ document.querySelectorAll("ins.adsbygoogle").forEach(function(i){if(i.offsetPare
     <h3>O que o teste da F12 confere</h3>
     <p>No build de teste, com ids de teste nas 37 unidades e a parede em <code>bloqueio</code>, nos três idiomas, com a ferramenta em repouso:</p>
     <ol>
-      <li>A 360 × 740, em toda página: a densidade conservadora em até 30&#160;% (caixas mais 100 px de âncora, sobre o <code>&lt;main&gt;</code> sem as relacionadas).</li>
+      <li>A 360 × 740, em toda página: a densidade conservadora em até 30&#160;% (caixas mais 100 px de âncora, sobre o <code>&lt;main&gt;</code> sem as relacionadas). O mesmo a 768 × 1024 e a 812 × 375, com o conteúdo 1 e o multiplex.</li>
       <li>Pelo menos 1.110 px de borda a borda entre dois anúncios do conteúdo.</li>
       <li>150 px de cada caixa até o Baixar, os campos, os menus, o painel, o cronograma, a Oli, o card do café e, no multiplex, a grade de cards (a lista do <code>ads.spec.ts</code> com os controles do cabeçalho).</li>
       <li>O 1º anúncio depois da peça certa de cada molde, nada acima da ferramenta e nada na primeira tela da home (topo a 740 px ou mais no celular, a 800 px ou mais no computador).</li>
@@ -737,7 +747,9 @@ document.querySelectorAll("ins.adsbygoogle").forEach(function(i){if(i.offsetPare
     <h3>Como medir de novo</h3>
     <pre><code>FO_PORT=4187 node .cache/f10/densidade.mjs                 # o mapa (A): grava densidade.json e densidade.md
 FO_PORT=4187 node .cache/f10/densidade.mjs --leitura topo  # a alternativa B: densidade-topo.*
-FO_PORT=4187 node .cache/f10/densidade.mjs --prototipo docs/propostas/ux-v2/guides-hub.html</code></pre>
+FO_PORT=4187 node .cache/f10/densidade.mjs --prototipo docs/propostas/ux-v2/guides-hub.html
+FO_PORT=4187 node .cache/f10/densidade768.mjs                          # 768 × 1024: densidade768.json e .md
+FO_PORT=4187 node .cache/f10/densidade768.mjs --w 812 --h 375 --out .cache/f10/densidade812.json</code></pre>
     <p>Sai com código 1 se um molde passar de 30&#160;% na conservadora a 360 × 740 ou se uma regra reprovar.</p>
   </div>
 </section>

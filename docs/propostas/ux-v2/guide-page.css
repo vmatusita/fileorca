@@ -136,5 +136,5 @@
 /* The second rail unit: 1.600 px (two screens) below the first, edge to edge. More than the 1.110 px of the content
    units, so it does not stand beside the first content unit of the text at 1280 px. Not sticky. */
 .g-rail2 { margin-top: 1600px; }
-/* The multiplex only from 768 px (the map), as tall as the loader makes it at the column width (760 x 0.6). */
-.g-multiplex { --proto-multiplex-h: 456px; }
+/* The multiplex only from 768 px (the map), as tall as the loader makes it at the column width (760 x 0.6) plus the
+   44 px label: the height comes from proto.css, the one height of every prototype (review of the F10, c-05). */

@@ -107,6 +107,7 @@ html[data-state="table"] [data-when]:not([data-when~="table"]) { display: none !
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page g-page">
@@ -186,7 +187,7 @@ html[data-state="table"] [data-when]:not([data-when~="table"]) { display: none !
                     <span class="fo-ba__tag fo-ba__tag--l" data-t="tagBefore">Before · 721 KB</span><span class="fo-ba__tag fo-ba__tag--r" data-t="tagAfter">After · 1.2 MB</span>
                     <input class="fo-ba__range" type="range" min="0" max="100" value="50" aria-label="Compare before and after" data-t-aria-label="compareLabel">
                     <span class="fo-ba__line"></span>
-                    <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+                    <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-4 5 4 5"/><path d="m15 7 4 5-4 5"/></svg></span>
                   </div>
                 </details>
               </div>
@@ -237,7 +238,6 @@ html[data-state="table"] [data-when]:not([data-when~="table"]) { display: none !
         <p data-t="sec.3.p.1">Nothing is sent anywhere. The conversion runs in your browser tab, which is also why it works for private photos: the network tab of your browser shows no request carrying the file.</p>
         <p data-t-html="toolLink">The panel at the top of this guide is the same tool as our <a href="#">HEIC to JPG page</a>, which also answers the common questions.</p>
       </section>
-      <div class="fo-desktop-only g-adbox"><div class="fo-ad fo-ad--content" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></div>
       <section class="fo-section fo-prose" aria-labelledby="part-4" data-flow="sec4">
         <h2 id="part-4" data-t="sec.4.h">What converting did to our photos</h2>
         <p data-t="sec.4.p.0">We ran the converter on our 10 HEIC test photos, taken with 7 different camera models, from iPhones to a Samsung phone and an Apple Vision Pro. Together the HEIC files weighed 18.8 MB. The JPGs weighed 23.6 MB, which is 25% more.</p>
@@ -255,7 +255,7 @@ html[data-state="table"] [data-when]:not([data-when~="table"]) { display: none !
         <p data-t="sec.6.p.0">Converting re-encodes the picture, so the JPG is a new file, not a copy of the HEIC with a new name. Some HEIC files also hold more than one picture. Only the main picture becomes the JPG: the depth map of a portrait shot and the second picture of a spatial photo are left out.</p>
         <p data-t="sec.6.p.1">Your HEIC files are never changed. Keep them as the originals and send the JPGs, and you lose nothing.</p>
       </section>
-      <div class="fo-ad fo-ad--content" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <div class="fo-ad fo-ad--content fo-mobile-only" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
       <section class="fo-section fo-prose g-measured" aria-labelledby="measured" data-content="measured" data-flow="measured">
         <h2 id="measured" data-t="tableH2">Photo by photo</h2>
         <p data-t="measuredIntro">Every HEIC test photo of this site, converted with the defaults of the tool above. Change is the JPG against the HEIC.</p>
@@ -456,7 +456,7 @@ multiplex (a partir de 768 px) · aside: 2 unidades laterais (a partir de 1280 p
     <ul>
       <li>Só nas fronteiras entre seções da prosa, nunca entre a ferramenta e a introdução, nunca no painel, sempre com os 150 px de margem do próprio AdSlot.</li>
       <li>360 × 740: 4 unidades de conteúdo (depois das seções 1, 3, 5 e 7), com 1.520, 1.600 e 1.234 px de borda a borda (en; pt e es de 1.256 a 1.704). A mais perto da tabela fica a 406 px dela (432 em pt e es). Sem multiplex. Densidade: 11,2 % pela fórmula da ficha e 13,5 % pela conservadora (com 100 px de âncora e sem as relacionadas).</li>
-      <li>1280 × 800: 3 unidades de conteúdo (depois das seções 1, 4 e 7), com 1.400 e 1.296 px de borda a borda; a mais perto da tabela, a 348 px. O multiplex (456 px, 760 × 0,6) depois das relacionadas, a 166 px da grade. Duas unidades laterais de 300 × 644: a 2ª começa 1.600 px abaixo da 1ª, para não ficar ao lado do 1º anúncio do texto.</li>
+      <li>A partir de 768 px, pelo mapa do UX-07 (revisão da F10, c-05): só o conteúdo 1 (depois da seção 1) e o multiplex depois das relacionadas, a 166 px da grade, com a altura do carregador (486 px de caixa a 768, 500 a partir de 792: o <code>ins</code> de 760 × 0,6 mais o rótulo); do conteúdo 1 ao multiplex, 3.895 a 4.165 px. Duas unidades laterais de 300 × 644: a 2ª começa 1.600 px abaixo da 1ª, para não ficar ao lado do 1º anúncio do texto.</li>
       <li>O DOM é um só: as unidades que só valem num tamanho ficam numa caixa <code>fo-mobile-only</code> ou <code>fo-desktop-only</code> (a unidade escondida pelo CSS não é pedida). A F12 escolhe as posições de cada guia no build e o teste de distância confere a 360 e a 1280.</li>
     </ul>
 

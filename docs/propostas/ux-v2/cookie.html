@@ -120,6 +120,7 @@ html[data-notice="old"] [data-when-notice]:not([data-when-notice~="old"]) { disp
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">
@@ -305,7 +306,7 @@ html[data-notice="old"] [data-when-notice]:not([data-when-notice~="old"]) { disp
     <p>No protótipo, o aviso fica no pé de uma caixa da altura da tela de verdade (740 px, ou 800 a partir de 768), medida do topo da página: o que ele cobre aqui é o que ele cobre no site na rolagem 0. Compare com o de hoje em <a href="?state=today">?state=today</a> e, em qualquer estado, com <a href="?notice=old">?notice=old</a>.</p>
 
     <h3>Hoje e a proposta, no <code>dist/</code></h3>
-    <p>Medido no <code>dist/</code> de <code>87ef4c8</code>, na primeira visita (sem <code>fo-consent</code>), com o CSS e o texto da proposta injetados na página real (<code>.cache/f10/aviso-dist.mjs</code>, fora do Git). "Coberto" é a altura do alvo que fica embaixo do aviso.</p>
+    <p>Medido no <code>dist/</code> de <code>87ef4c8</code>, na primeira visita (sem <code>fo-consent</code>), com o CSS e o texto da proposta injetados na página real (<code>.cache/f10/agentes/cookie/aviso-dist.mjs</code>, fora do Git). "Coberto" é a altura do alvo que fica embaixo do aviso.</p>
     <table>
       <caption class="fo-sr">A 360 × 740: hoje e a proposta, em en, pt e es</caption>
       <thead><tr><th scope="col">360 × 740</th><th scope="col">Hoje (en · pt · es)</th><th scope="col">Proposta (en · pt · es)</th></tr></thead>
@@ -396,7 +397,7 @@ html[data-notice="old"] [data-when-notice]:not([data-when-notice~="old"]) { disp
         <tr><td>Botões (sem mudança)</td><td lang="en">Decline · Accept</td><td>Recusar · Aceitar</td><td lang="es">Rechazar · Aceptar</td></tr>
       </tbody>
     </table>
-    <p>Os nove textos (três idiomas × três selos) ficam em duas linhas a 360 px e no card de 360 px do computador, tanto na Figtree quanto na <code>Figtree Fallback</code> (a Arial a 101,2 % que a primeira visita lenta mantém, porque o aviso usa a face <code>Figtree Steady</code>, com <code>optional</code>). A 320 px o en fica em duas linhas e o pt e o es em três, também nas duas fontes: o aviso não muda de altura quando a Figtree chega, então o CLS da § 305 continua zero. Medido por <code>.cache/f10/linhas.mjs</code>; a F13 mede de novo no Linux do CI, onde a reserva é a Liberation Sans.</p>
+    <p>Os nove textos (três idiomas × três selos) ficam em duas linhas a 360 px e no card de 360 px do computador, tanto na Figtree quanto na <code>Figtree Fallback</code> (a Arial a 101,2 % que a primeira visita lenta mantém, porque o aviso usa a face <code>Figtree Steady</code>, com <code>optional</code>). A 320 px o en fica em duas linhas e o pt e o es em três, também nas duas fontes: o aviso não muda de altura quando a Figtree chega, então o CLS da § 305 continua zero. Medido por <code>.cache/f10/agentes/cookie/linhas.mjs</code>; a F13 mede de novo no Linux do CI, onde a reserva é a Liberation Sans.</p>
     <p>O que o consentimento precisa dizer continua lá: para que servem os cookies (medir o uso e os anúncios), de quem (o Google), a escolha em dois botões do mesmo tamanho e peso, e o link para a Privacidade, que explica o resto. O "para ver quais ferramentas ajudam" e o "para manter o site grátis" de hoje ficam na Privacidade, que já os diz. O "aceitando ou não" sai porque não cabe em duas linhas no pt e no es; a frase do selo, sozinha, diz o mesmo sem prometer nada a mais.</p>
 
     <h3>Teclado</h3>

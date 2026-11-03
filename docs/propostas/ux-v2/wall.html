@@ -118,6 +118,7 @@ html[data-pose="oops"] [data-when-pose]:not([data-when-pose~="oops"]) { display:
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">
@@ -578,7 +579,7 @@ html[data-pose="oops"] [data-when-pose]:not([data-when-pose~="oops"]) { display:
       <li>Enter ou espaço em “How to turn it off” abre e fecha o painel; em cada entrada, Enter ou espaço no <code>summary</code>.</li>
       <li>Esc fecha no aviso e na UE; no bloqueio, não faz nada.</li>
       <li>Não é armadilha de teclado (WCAG 2.1.2): o recarregar está sempre ao alcance, e a interface do navegador (F6, Ctrl+L) continua fora do modal.</li>
-      <li>Ao fechar (aviso ou escape), o foco volta para onde estava antes da parede.</li>
+      <li>Ao fechar (aviso ou escape), o foco volta para onde estava antes da parede, que é o comportamento do <code>&lt;dialog&gt;</code>. Como a parede abre sozinha, no carregamento, quase sempre não havia foco antes, e ele cairia no <code>body</code> (conferido na revisão, no Chromium e no WebKit): nesse caso, a F12 põe <code>tabindex="-1"</code> no <code>&lt;main&gt;</code> e manda o foco para ele, para o Tab seguinte começar no conteúdo.</li>
     </ul>
 
     <h3>Nome acessível e leitor de tela</h3>

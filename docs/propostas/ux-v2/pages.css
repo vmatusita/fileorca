@@ -108,6 +108,10 @@ html[data-state="centro"] .pg-toc { display: none; }
 .pg-fcol { display: grid; align-content: start; min-width: 0; }
 .pg-fcol > h2 { margin: 0 0 var(--space-1); }
 .pg-fcol a { display: block; overflow-wrap: anywhere; }
+/* The links always in view (the hub of each category, the institutional line and the coffee line) are 48 px tall
+   (Principle 7, tap-min; review of the F10, b-04). The tool links inside an opened list keep the 32 px line of
+   today's footer (bundle.css:314), which passes WCAG 2.5.8 (24 px): an exception the F13 writes in the Footer README. */
+.pg-fcol a.pg-fhub, .pg-fcol--site a, .pg-footer .fo-footer__coffee { display: flex; align-items: center; min-height: var(--tap-min); line-height: 20px; }
 /* Alternative A: below 768 px, two columns; each category keeps its hub link in sight and the tools behind a
    disclosure. From 768 px, where the browser can style ::details-content, the summary goes away and the list shows as
    today; where it cannot, the disclosure stays (it still works, it only takes one tap more). */

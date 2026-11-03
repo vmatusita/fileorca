@@ -92,11 +92,16 @@
 .fo-merge__moves { display: flex; flex-direction: column; }
 .fo-merge__move .fo-icon { rotate: 90deg; }
 .fo-merge__move--up .fo-icon { rotate: -90deg; }
+/* The Merge row of the "after A" figure follows UX-04 A (review of the F10, d-05): no handle, and where an arrow
+   cannot go an empty 48 px place (the disabled button keeps its box, hidden, so the script that moves rows works). */
+.fo-merge .fo-filelist__row:not(:has(> .fo-merge__grab)) { grid-template-columns: minmax(0, 1fr) auto; }
+.pp-new .fo-merge .fo-merge__move:disabled { visibility: hidden; }
 @media (max-width: 479px) {
   .fo-merge .fo-filelist__row { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "card card" "grab moves"; row-gap: var(--space-1); }
   .fo-merge .fo-filelist__row > .fo-file { grid-area: card; }
   .fo-merge__grab { grid-area: grab; }
   .fo-merge__moves { grid-area: moves; flex-direction: row; justify-self: end; }
+  .fo-merge .fo-filelist__row:not(:has(> .fo-merge__grab)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "card card" ". moves"; }
 }
 
 .fo-sign__place { position: relative; display: grid; gap: var(--space-3); }

@@ -105,6 +105,7 @@ html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: a placeholder that only holds the place of the Menu and the theme button. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">
@@ -257,8 +258,6 @@ html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none
         </section>
       </div>
 
-      <div class="fo-ad fo-ad--content fo-desktop-only" data-ad-area="geral" data-when-ads="on"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
-
       <section class="fo-section hx-guides" aria-labelledby="hx-guides-title">
         <h2 id="hx-guides-title" data-t="g.h2">Guides with what we measured</h2>
         <ul class="hx-guides__list">
@@ -393,7 +392,7 @@ html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none
     <p>Os guias em destaque são os mesmos 4 nos três idiomas (todos existem em en, pt e es), cada um com o número que ele mediu: o HEIC no Windows (10 fotos, 18,8 MB → 23,6 MB), o "PDF tão grande" (79 % de imagem num relatório de 150 páginas), o JPG ou PNG (de 4 a 5 vezes) e as fotos num PDF (7,4 MB, ou 3,6 MB comprimindo antes). O cartão de guia de verdade é o do UX-02; aqui a seção é uma lista simples.</p>
 
     <h3>Teclado</h3>
-    <p>Tab passa pelo pular para o conteúdo, o cabeçalho (o do UX-01), os chips de cada faixa na ordem dos registros, o link "Todas" de cada faixa, os 4 guias, o link de todos os guias e o rodapé. Nenhum controle novo: só links. O menu do cabeçalho é o <code>popover</code> do UX-01 (Enter abre, Esc fecha) e leva às faixas por âncora.</p>
+    <p>Tab passa pelo pular para o conteúdo, o cabeçalho (aqui um marcador de lugar, com o idioma na barra e o tema no menu; o que vale é o do UX-01 A, com o tema na barra e o idioma no Menu abaixo de 768 px, § 363), os chips de cada faixa na ordem dos registros, o link "Todas" de cada faixa, os 4 guias, o link de todos os guias e o rodapé. Nenhum controle novo: só links. O menu do cabeçalho é o <code>popover</code> do UX-01 (Enter abre, Esc fecha) e leva às faixas por âncora.</p>
 
     <h3>Nome acessível</h3>
     <ul>
@@ -415,8 +414,8 @@ html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none
       <thead><tr><th scope="col">Largura</th><th scope="col">Onde</th><th scope="col">Topo do 1º (en · pt · es)</th><th scope="col">Entre anúncios (de borda a borda)</th></tr></thead>
       <tbody>
         <tr><td>360 a 767</td><td>Conteúdo depois da faixa de imagem (a primeira seção de cards); depois da faixa de dinheiro; depois dos guias. Sem multiplex (§ 351) e sem lateral.</td><td>1.336 · 1.374 · 1.396 px (abaixo dos 740 da primeira tela)</td><td>en 1.804 e 2.184; pt 1.938 e 1.284; es 1.770 e 1.206 px</td></tr>
-        <tr><td>768 a 1279</td><td>Conteúdo depois da faixa de imagem e depois da última faixa; multiplex no fim, antes do rodapé.</td><td>964 · 1.020 · 1.020 px (a 768)</td><td>a 768: en 1.960, pt 1.478, es 1.500; a 1024: en 1.792, pt e es 1.422 px</td></tr>
-        <tr><td>1280 ou mais</td><td>Os dois de conteúdo acima, o multiplex e a lateral com 2 unidades.</td><td>964 · 1.020 · 1.020 px</td><td>en 1.960; pt e es 1.478 px</td></tr>
+        <tr><td>768 a 1279</td><td>O conteúdo 1 depois da faixa de imagem e o multiplex no fim, antes do rodapé (o mapa do UX-07: a partir de 768, só o conteúdo 1 e o multiplex; revisão da F10, c-05).</td><td>964 · 1.020 · 1.020 px (a 768)</td><td>do conteúdo 1 ao multiplex: a 768, en 2.546, pt 2.064, es 2.086; a 1024, en 2.334, pt e es 1.986 px (multiplex de 486 e 540 px)</td></tr>
+        <tr><td>1280 ou mais</td><td>O conteúdo 1, o multiplex (498 px) e a lateral com 2 unidades, a 1ª 150 px abaixo do cabeçalho.</td><td>964 · 1.020 · 1.020 px</td><td>do conteúdo 1 ao multiplex: en 2.546; pt e es 2.064 px</td></tr>
       </tbody>
     </table>
     <p>As caixas que só existem numa largura usam <code>display: none</code> por media query (<code>fo-mobile-only</code> e <code>fo-desktop-only</code>), o que o AdSense permite para unidades responsivas. Nenhuma caixa fica entre chips, dentro de uma faixa, acima do H1 ou na água da Oli.</p>

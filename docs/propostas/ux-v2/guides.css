@@ -87,8 +87,8 @@
 /* ---------- 5. Ads of the hub (section B: like the category hubs, area "geral") ----------
    The content units carry fo-mobile-only or fo-desktop-only where the 1,110 px rule holds only at one width; the
    multiplex is fo-desktop-only (1,700 px does not fit the 30 % on the phone, DECISOES § 351). At 760 px the loader
-   gives the multiplex 4 columns x 2 rows and floor(760 x 0.6) = 456 px (pesquisa-ads.md, section 1.2). */
-@media (min-width: 768px) { .fo-ad--multiplex { --proto-multiplex-h: 456px; } }
+   gives the multiplex 4 columns x 2 rows and floor(760 x 0.6) = 456 px (pesquisa-ads.md, section 1.2); the box adds
+   the 44 px label, and its height comes from proto.css, the one height of every prototype (review of the F10, c-05). */
 .fo-ad--rail + .fo-ad--rail { margin-top: 1110px; }
 /* ?ads=off is the F11 state: the hub is born without AdSlot, so the frame has no rail column. The same goes for the
    by-tool list in Portuguese (285 words in the main: not even two boxes reach 150 words each, the gate:prontidao rule). */
