@@ -28,22 +28,24 @@ const FIRST = [
 ];
 // Languages adjustment: the sweep of the 45 pages of pt and es that the adjustment adds or changes (the QR code generator,
 // the 18 Spanish money pages, the 5 Spanish money guides and the 20 file guides) at the five widths, in both browsers, put
-// these on the edge of a row: the trail had another number of rows with the fallback font than with Figtree, or less than
-// 6 px left on its last row. Measured on the texts of the time; the sweep is redone when the texts of a page change. The
-// paths are read from the registries.
+// these on the edge of a row: the trail had another number of rows with the fallback font than with Figtree (either
+// browser), or 6 px or less left on its last row in Chromium. Measured on the texts of the time (the trail of a file guide
+// ends in its own title; the Spanish calculators still had the English names); the sweep is redone when the texts of a
+// page change. The paths are read from the registries.
 const guideIn = (id: FileGuideId, lang: 'pt' | 'es'): string => FILE_GUIDES[id].paths[lang];
 const spanish = (id: CalcPageId): string => moneyPage(id, 'es')?.path ?? `(${id} sem página em es)`;
 const CASES: Record<number, string[]> = {
-  320: [
-    '/home-affordability-calculator/', '/pt/assinar-pdf/', '/bmi-calculator/', '/btu-calculator/', '/compress-image/to-100kb/', '/compress-image/to-1mb/', '/ovulation-calculator/',
-    guideIn('guides-pdf-to-jpg-resolution', 'pt'), guideIn('guides-pdf-to-jpg-resolution', 'es'),
+  320: ['/home-affordability-calculator/', '/pt/assinar-pdf/', '/bmi-calculator/', '/btu-calculator/', '/compress-image/to-100kb/', '/compress-image/to-1mb/', '/ovulation-calculator/', guideIn('guides-heic-to-jpg-on-windows', 'pt')],
+  360: [...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/', guideIn('guides-open-webp-save-as-jpg', 'es'), guideIn('guides-pdf-to-jpg-resolution', 'pt')],
+  375: [
+    '/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/',
+    guideIn('guides-pdf-to-jpg-resolution', 'pt'), guideIn('guides-open-webp-save-as-jpg', 'es'),
   ],
-  360: [...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/', guideIn('guides-open-webp-save-as-jpg', 'pt'), guideIn('guides-open-webp-save-as-jpg', 'es')],
-  375: ['/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/'],
-  393: [...FIRST, '/es/numerar-paginas-pdf/', spanish('mortgage-calculator-biweekly'), spanish('auto-loan-calculator'), guideIn('guides-why-is-my-pdf-so-large', 'es')],
+  393: [...FIRST, '/es/numerar-paginas-pdf/', spanish('auto-loan-calculator'), spanish('mortgage-calculator-biweekly')],
   412: [
     '/credit-card-payoff-calculator/', '/pt/organizar-paginas-pdf/', '/es/calculadora-de-deudas/', '/es/redimensionar-imagen/', '/debt-consolidation-calculator/', '/compound-interest-calculator/',
-    spanish('rent-vs-buy-calculator'), spanish('apr-to-apy-calculator'), guideIn('guides-why-is-my-pdf-so-large', 'pt'),
+    spanish('rent-vs-buy-calculator'), spanish('apr-to-apy-calculator'), guideIn('guides-jpg-vs-png', 'pt'), guideIn('guides-jpg-vs-png', 'es'),
+    guideIn('guides-why-is-my-pdf-so-large', 'es'), guideIn('guides-remove-location-from-photos', 'es'), guideIn('guides-combine-pdfs-on-phone', 'es'),
   ],
 };
 const CHUNK = 8;
