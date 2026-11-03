@@ -5,10 +5,11 @@
 // URL and body of any origin, the dataLayer, document.title, location.search, localStorage, sessionStorage, the
 // cookies and the names of the downloaded files. None is found. The copied link is the one place with the numbers.
 // F6 (decision 9): the five Spanish calculators and the eight Brazilian ones too, with each sentinel typed as a person
-// types it in the page's language (a decimal comma in Portuguese) and searched in the forms of every language.
+// types it in the page's language (a decimal comma in Portuguese) and searched in the forms of every language. The languages
+// adjustment: the 18 Spanish pages, the five of the F6 and the 13 new ones (9 calculators and the 4 presets).
 import { expect, test, type Page } from '@playwright/test';
 import type { Lang } from '../../src/i18n/routes.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, moneyPage, type MoneyPageId } from '../../src/tools/calc/registry.ts';
 import enShared from '../../src/tools/calc/i18n/en.ts';
 import ptShared from '../../src/tools/calc/i18n/pt.ts';
 import esShared from '../../src/tools/calc/i18n/es.ts';
@@ -103,9 +104,10 @@ test('the sentinel search finds every form and ignores a number inside another o
   expect(found('287', 'id 12873 and 2870')).toBe(false);
 });
 
+// The languages adjustment: every calculator and preset of the registry has its Spanish page, so the 18 are searched in Spanish.
 const PAGES: { id: MoneyPageId; lang: Lang }[] = [
   ...CALC_PAGE_IDS.map((id) => ({ id, lang: 'en' as const })),
-  ...ES_CALC_IDS.map((id) => ({ id, lang: 'es' as const })),
+  ...CALC_PAGE_IDS.map((id) => ({ id, lang: 'es' as const })),
   ...BR_CALC_IDS.map((id) => ({ id, lang: 'pt' as const })),
 ];
 
