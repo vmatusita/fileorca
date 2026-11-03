@@ -28,7 +28,7 @@ import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registr
 import {
   BR_CALC_IDS,
   BR_HUB_ID,
-  ES_CALC_IDS,
+  CALC_TOOL_IDS,
   HEALTH_HUB_ID,
   HOME_MONEY_IDS,
   HOUSE_HUB_ID,
@@ -320,15 +320,17 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     // F6 (decision 7): the home of each language lists its money calculators (HOME_MONEY_IDS, when the language has its money
     // hub) and its 12 PDF tools, all with the paths of the language; the Spanish money hub lists the five Spanish
     // calculators; the Brazilian hub its own once its row is in the map. Before the F6 only English had cards to check.
+    // The languages adjustment (decision 6): and the QR code generator of the language, last, as in English.
     for (const lang of ['pt', 'es'] as const) {
       const hub = moneyHubId(lang);
       const money = pagePath(hub, lang) ? HOME_MONEY_IDS[lang].map((id) => pagePath(id, lang)) : [];
-      expect(site.cards?.['home']?.[lang], lang).toEqual([...money, ...PDF_TOOL_IDS.map((id) => pagePath(id, lang))]);
+      expect(site.cards?.['home']?.[lang], lang).toEqual([...money, ...PDF_TOOL_IDS.map((id) => pagePath(id, lang)), pagePath(QR_ID, lang)]);
       for (const path of site.cards?.['home']?.[lang] ?? []) expect(path.startsWith(`/${lang}/`), path).toBe(true);
       if (pagePath(hub, lang)) expect(site.cards?.[hub]?.[lang], lang).toEqual(HUB_MONEY_IDS[lang].map((id) => pagePath(id, lang)));
       else expect(site.cards?.[hub]?.[lang], lang).toBeUndefined();
     }
-    expect(site.cards?.['money-calculators']?.es).toEqual(ES_CALC_IDS.map((id) => pagePath(id, 'es')));
+    // The Spanish money hub lists the 14 calculators, as the English one (the five of the F6 before the languages adjustment).
+    expect(site.cards?.['money-calculators']?.es).toEqual(CALC_TOOL_IDS.map((id) => pagePath(id, 'es')));
     expect(site.cards?.['money-calculators']?.pt).toBeUndefined();
     // F5a: the search offers the 12 PDF tools as well; F5b: and the 10 file guides (DECISOES § 190); F6: and the Brazilian
     // calculators once their rows are in the map.
@@ -338,7 +340,7 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(site.searchIds).toHaveLength(11 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
   });
 
-  it('builds the F7 part of the real site from the calculator registry: the home cards, the two hubs and the search, in English only (F7, decision 9)', () => {
+  it('builds the F7 part of the real site from the calculator registry: the home cards, the two hubs and the search, home and health in English only (F7, decision 9)', () => {
     const site = realSite('dist');
     // Each hub lists its calculators in the order of the registry, and nothing else; neither hub exists in pt or es.
     for (const hub of ['house', 'health'] as const) {
@@ -348,17 +350,19 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
       expect(site.cards?.[id]?.es, hub).toBeUndefined();
     }
     expect(Object.keys(site.cards ?? {}).sort()).toEqual(['home', 'money-calculators', PDF_HUB_ID, HOUSE_HUB_ID, HEALTH_HUB_ID, ...(pagePath(BR_HUB_ID, 'pt') ? [BR_HUB_ID] : [])].sort());
-    // The home of pt and es does not change: none of the 14 F7 pages is a card there.
+    // The home of pt and es has none of the 13 home and health pages (the QR code generator of the language is a card
+    // there since the languages adjustment, at its own path).
     const f7 = new Set(([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID] as RouteId[]).map((id) => routeById(id).paths.en));
     for (const lang of ['pt', 'es'] as const) expect((site.cards?.['home']?.[lang] ?? []).filter((path) => f7.has(path)), lang).toEqual([]);
     // The search ends with the 11 calculators in hub order and the QR code generator; the hubs are not search entries.
     expect(site.searchIds.slice(-12)).toEqual([...LIFE_CALC_IDS, QR_ID]);
     expect(site.searchIds).not.toContain(HOUSE_HUB_ID);
     expect(site.searchIds).not.toContain(HEALTH_HUB_ID);
-    // The 14 pages are pages of the route map, English only, with an ad area: they get the loader and the content rows.
+    // The 14 pages are pages of the route map with an ad area: they get the loader and the content rows. The 13 of home and
+    // health are English only; the QR code generator is in the three languages since the languages adjustment.
     for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID]) {
       const pages = site.pages.filter((page) => page.id === id);
-      expect(pages.map((page) => page.lang), id).toEqual(['en']);
+      expect(pages.map((page) => page.lang), id).toEqual(id === QR_ID ? ['en', 'pt', 'es'] : ['en']);
       expect(pages[0]?.ads, id).toBe(true);
       expect(pages[0]?.indexable, id).toBe(true);
     }
