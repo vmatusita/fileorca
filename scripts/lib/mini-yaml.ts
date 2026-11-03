@@ -1,5 +1,7 @@
 // A small YAML reader for the repository's own config files (.github/dependabot.yml and the workflows), so the
-// tests can check their structure without a new dependency (DECISOES § 296). It reads the subset those files use:
+// tests can check their structure without a new dependency (DECISOES § 296). Since the F9 it lives in scripts/lib/,
+// because pnpm verificar --partes reads the parts of the CI from ci.yml with it (DECISOES § 329); tests/unit/lib/
+// mini-yaml.ts re-exports it for the tests. It reads the subset those files use:
 // block mappings and sequences, flow sequences and maps of scalars, quoted and plain scalars, `|` and `>` block
 // scalars, and comments. Anchors, tags, multi-document streams and multi-line flow collections are refused.
 
@@ -103,7 +105,12 @@ function keySplit(text: string): { key: string; rest: string } | null {
 }
 
 class Reader {
-  constructor(private readonly lines: Line[]) {}
+  // A plain field, not a parameter property: Node runs this file by type stripping (pnpm verificar --partes).
+  private readonly lines: Line[];
+
+  constructor(lines: Line[]) {
+    this.lines = lines;
+  }
 
   private next(index: number): number {
     let i = index;
