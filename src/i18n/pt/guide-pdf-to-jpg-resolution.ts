@@ -69,7 +69,7 @@ const texts: FileGuideTexts = {
   ],
   sourcesHeading: 'Fontes',
   sources: [
-    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
+    { id: 'w3c-png', label: 'W3C: Especificação do formato PNG (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
     { id: 'jpeg-org', label: 'Comitê JPEG: JPEG 1 (em inglês)', href: 'https://jpeg.org/jpeg/', read: '2026-11-03' },
   ],
   facts: {},

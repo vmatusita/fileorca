@@ -17,7 +17,7 @@ const texts: FileGuideTexts = {
       heading: 'Como cada formato guarda uma imagem',
       paragraphs: [
         'O PNG é sem perda. A especificação dele, publicada pelo W3C, diz que a compressão deve preservar toda a informação, e o formato aceita um canal alfa opcional, que é onde fica a transparência. Um PNG aberto e salvo de novo é a mesma imagem, pixel por pixel.',
-        'O JPG é com perda. O comitê JPEG descreve esse formato como uma compressão com perda baseada em DCT: ele divide a imagem em blocos pequenos e guarda as formas e as cores gerais de cada um, jogando fora os detalhes finos que o olho menos percebe. É por isso que uma foto fica tão menor em JPG, e é por isso que bordas nítidas e cores chapadas podem mostrar pequenas manchas em volta.',
+        'O JPG é com perda. O comitê JPEG descreve esse formato como uma compressão com perda baseada em DCT: ele divide a imagem em blocos pequenos e guarda as formas e as cores gerais de cada um, jogando fora os detalhes finos que o olho menos percebe. É por isso que uma foto fica bem menor em JPG, e é por isso que bordas nítidas e cores chapadas podem mostrar pequenas manchas em volta.',
       ],
     },
     {
@@ -74,7 +74,7 @@ const texts: FileGuideTexts = {
   ],
   sourcesHeading: 'Fontes',
   sources: [
-    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
+    { id: 'w3c-png', label: 'W3C: Especificação do formato PNG (em inglês)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
     { id: 'google-webp', label: 'Google for Developers: Um formato de imagem para a Web', href: 'https://developers.google.com/speed/webp?hl=pt-br', read: '2026-11-03' },
     { id: 'jpeg-org', label: 'Comitê JPEG: JPEG 1 (em inglês)', href: 'https://jpeg.org/jpeg/', read: '2026-11-03' },
   ],

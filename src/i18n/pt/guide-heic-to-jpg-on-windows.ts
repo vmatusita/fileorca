@@ -37,7 +37,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'Converta os arquivos que você já tem',
       paragraphs: [
-        'Para fotos que já estão em HEIC no seu computador ou na pasta de downloads, um conversor é o caminho direto. A ferramenta desta página lê cada HEIC com o libheif, o mesmo decodificador aberto em todos os navegadores, deixa a imagem principal na posição certa e grava um JPG novo a partir dos pixels. Você pode soltar um arquivo ou uma pasta inteira, e o ZIP mantém os nomes originais, com a terminação .jpg.',
+        'Para fotos que já estão em HEIC no seu computador ou na pasta de downloads, um conversor é o caminho direto. A ferramenta desta página lê cada HEIC com o libheif, um decodificador de código aberto, o mesmo em todos os navegadores, deixa a imagem principal na posição certa e grava um JPG novo a partir dos pixels. Você pode soltar um arquivo ou uma pasta inteira, e o ZIP mantém os nomes originais, com a terminação .jpg.',
         'Nada é enviado a lugar nenhum. A conversão roda na aba do navegador, e é por isso que ela serve para fotos privadas: a aba Rede do navegador não mostra nenhuma requisição levando o arquivo.',
       ],
     },
@@ -66,13 +66,13 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
-  measuredIntro: 'Todas as fotos HEIC de teste deste site, convertidas com o padrão da ferramenta acima. A mudança compara o JPG com o HEIC.',
+  measuredIntro: 'Todas as fotos HEIC de teste deste site, convertidas com o padrão da ferramenta acima. A variação compara o JPG com o HEIC.',
   measuredNote: 'Medido em {date} no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, pela página HEIC para JPG deste site, nas nossas {files} fotos HEIC de teste. A tabela mostra o Chromium; o WebKit deu os mesmos bytes em {identicalBrowsers_wordf} das {files} fotos.',
   tables: [
     {
       heading: 'Nossas fotos HEIC em JPG',
-      caption: 'Cada foto HEIC de teste: a câmera, o tamanho em HEIC e em JPG, a mudança, o tamanho em pixels e o GPS antes e depois',
-      head: ['Câmera', 'HEIC', 'JPG', 'Mudança', 'Pixels', 'GPS antes', 'GPS depois'],
+      caption: 'Cada foto HEIC de teste: a câmera, o tamanho em HEIC e em JPG, a variação, o tamanho em pixels e o GPS antes e depois',
+      head: ['Câmera', 'HEIC', 'JPG', 'Variação', 'Pixels', 'GPS antes', 'GPS depois'],
     },
   ],
   sourcesHeading: 'Fontes',

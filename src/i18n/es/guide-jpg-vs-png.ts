@@ -74,7 +74,7 @@ const texts: FileGuideTexts = {
   ],
   sourcesHeading: 'Fuentes',
   sources: [
-    { id: 'w3c-png', label: 'W3C: Portable Network Graphics (PNG) Specification (en inglés)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
+    { id: 'w3c-png', label: 'W3C: Especificación del formato PNG (en inglés)', href: 'https://www.w3.org/TR/png-3/', read: '2026-11-03' },
     { id: 'google-webp', label: 'Google for Developers: Un formato de imagen para la Web', href: 'https://developers.google.com/speed/webp?hl=es-419', read: '2026-11-03' },
     { id: 'jpeg-org', label: 'Comité JPEG: JPEG 1 (en inglés)', href: 'https://jpeg.org/jpeg/', read: '2026-11-03' },
   ],

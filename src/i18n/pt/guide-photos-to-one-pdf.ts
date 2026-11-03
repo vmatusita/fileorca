@@ -63,7 +63,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'Uma rotina curta',
       paragraphs: [
-        'Ponha as fotos em ordem, comprima as fotos se o PDF for por e-mail e depois transforme tudo num PDF só. Se ainda ficar pesado demais, passe o PDF pela Comprimir PDF: o nosso guia de PDFs grandes mostra o que cada modo faz com um PDF de fotos.',
+        'Ponha as fotos em ordem, comprima as fotos se o PDF for por e-mail e depois transforme tudo num PDF só. Se ainda ficar pesado demais, passe o PDF pela Comprimir PDF: o nosso guia de PDFs grandes mostra o que cada nível faz com um PDF de fotos.',
         'Guarde as fotos originais. O PDF é para mandar e imprimir; as fotos são a cópia a que você sempre pode voltar.',
       ],
     },

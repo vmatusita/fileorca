@@ -38,7 +38,7 @@ const texts: FileGuideTexts = {
       heading: 'Quita la ubicación del archivo sin cambiar la foto',
       paragraphs: [
         'Todas las herramientas de este sitio que escriben una imagen la escriben a partir de los píxeles, y eso deja atrás los metadatos. Pero casi todas cambian también la imagen: la comprimen, la recortan, la giran o cambian su formato. Así que medimos cuál cambia menos la foto, con una regla fijada antes de la medición: el mismo encuadre, el mismo formato y los píxeles más parecidos al original.',
-        'Ganó Redimensionar imagen, con la opción {winnerOption}.Una foto que ya tiene el tamaño que pides no se decodifica ni se codifica de nuevo: la herramienta copia los datos de la imagen tal como están y deja fuera los metadatos. Nuestras fotos volvieron con píxeles idénticos, las {resizeImageIdenticalChromium_wordf}, y solo un {resizeImageRatioChromium_off} más ligeras, que es lo que pesaban los metadatos.',
+        'Ganó Redimensionar imagen, con la opción {winnerOption}. Una foto que ya tiene el tamaño que pides no se decodifica ni se codifica de nuevo: la herramienta copia los datos de la imagen tal como están y deja fuera los metadatos. Nuestras fotos volvieron con píxeles idénticos, las {resizeImageIdenticalChromium_wordf}, y solo un {resizeImageRatioChromium_off} más ligeras, que es lo que pesaban los metadatos.',
       ],
     },
     {

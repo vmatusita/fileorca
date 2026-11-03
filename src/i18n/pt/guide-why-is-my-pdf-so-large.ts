@@ -78,7 +78,7 @@ const texts: FileGuideTexts = {
   sources: [
     { id: 'gmail', label: 'Ajuda do Gmail: Enviar anexos na mensagem do Gmail', href: 'https://support.google.com/mail/answer/6584?hl=pt-BR', read: '2026-11-03' },
     { id: 'outlook', label: 'Suporte da Microsoft: Limites de envio no Outlook.com', href: 'https://support.microsoft.com/pt-br/outlook/sending-limits-in-outlook-com', read: '2026-11-03' },
-    { id: 'adobe', label: 'Adobe: Por que meu PDF está tão grande?', href: 'https://www.adobe.com/br/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
+    { id: 'adobe', label: 'Adobe: Por que meu PDF está tão grande', href: 'https://www.adobe.com/br/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
   ],
   facts: {
     gmailLimit: { text: '25 MB', source: 'gmail' },
