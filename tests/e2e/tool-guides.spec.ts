@@ -1,5 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
+import { LANGS, type Lang } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
+import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
+import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { imageSize, metadataReport, sniff } from './lib/images.ts';
 import { expectNoMetadata, filesOf, fixtureFile, takeDownload, type Delivered } from './lib/matrix.ts';
 import { dismissCookies, hydrated, type TestFile } from './lib/page.ts';
@@ -13,12 +17,15 @@ import { displaySize } from './lib/jpeg.ts';
 // request of the page and of its workers is a GET to the site's own origin, with no body and no query string, and the
 // file's name appears only in the name of the download, never in a request.
 // The file is named so it sorts at the end of the spec list, after the PDF specs (the CI shards by test count; § 142).
+// Languages adjustment (decision 5): the 30 guides, each at its path in its language (FILE_GUIDES[id].paths), with the
+// tool of the language embedded. The case of a guide holds in the three languages; what the language changes (the name of
+// the PDF of photos, the words of the panel) is read from the panel texts of that language.
 
 interface Case {
   files: () => TestFile[];
   /** A PDF tool that waits for its button (Split, Merge). */
   action?: true;
-  check: (delivered: Delivered) => Promise<void> | void;
+  check: (delivered: Delivered, lang: Lang) => Promise<void> | void;
 }
 
 const photo = (name: string): TestFile => fixtureFile(name);
@@ -115,8 +122,9 @@ const CASES: Record<FileGuideId, Case> = {
   },
   'guides-photos-to-one-pdf': {
     files: () => [photo('jpg-02-iphone6-paisagem-gps.jpg'), photo('gen-png-transparente.png')],
-    check: async (delivered) => {
-      expect(delivered.name).toBe('fileorca-images.pdf');
+    check: async (delivered, lang) => {
+      // The name of the PDF comes from the panel texts of the language ('fileorca-images.pdf' in English; DECISOES § 219).
+      expect(delivered.name).toBe(`${IMAGE_PANEL_TEXTS[lang].files.pdf}.pdf`);
       await expectPdf(delivered.bytes, 2);
       expect(parsePdf(delivered.bytes).hasXmp, 'no XMP').toBe(false);
     },
@@ -138,37 +146,45 @@ function watch(page: Page): Seen[] {
   return seen;
 }
 
-for (const id of FILE_GUIDE_IDS) {
-  const guide = FILE_GUIDES[id];
-  const kase = CASES[id];
-  test(`${guide.path}: the embedded tool works, gives a sound file and keeps it in the browser`, async ({ page }) => {
-    test.setTimeout(90_000);
-    const seen = watch(page);
-    expect((await page.goto(guide.path))?.status(), `${guide.path} answers 200`).toBe(200);
-    await hydrated(page);
-    await dismissCookies(page);
-    const files = kase.files();
-    await page.setInputFiles('#fo-tool-root input[type="file"]', files);
-    if (kase.action) {
-      const ready = page.locator('#fo-tool-root .fo-ready');
-      await expect(ready).toBeVisible({ timeout: 30_000 });
-      await ready.locator('.fo-btn--brand').click();
-    }
-    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 60_000 });
-    const delivered = await takeDownload(page);
-    await kase.check(delivered);
+/** The words of the Download of the embedded panel, in the language of the page (an image panel or the PDF one). */
+function downloadWords(id: FileGuideId, lang: Lang): string {
+  const tool = FILE_GUIDES[id].tool;
+  return (Object.hasOwn(PDF_PAGES, tool) ? PDF_PANEL_TEXTS : IMAGE_PANEL_TEXTS)[lang].result.download;
+}
 
-    const origin = new URL(page.url()).origin;
-    const own = seen.filter((request) => !/^(blob|data|about):/.test(request.url));
-    expect(own.filter((request) => request.method !== 'GET'), 'only GET').toEqual([]);
-    expect(own.filter((request) => request.body), 'no request carries a body').toEqual([]);
-    expect(own.filter((request) => new URL(request.url).origin !== origin).map((request) => request.url), 'no request leaves the site').toEqual([]);
-    expect(own.filter((request) => new URL(request.url).search !== '').map((request) => request.url), 'no query string').toEqual([]);
-    for (const file of files) {
-      const stem = file.name.replace(/\.[^.]+$/, '');
-      expect(own.filter((request) => decodeURIComponent(request.url).includes(stem)).map((request) => request.url), `${file.name} only in the download name`).toEqual([]);
-    }
-  });
+/** The guide's own fixture goes into the embedded tool of the language, the file comes out sound, and nothing leaves. */
+async function expectToolWorks(page: Page, id: FileGuideId, lang: Lang): Promise<void> {
+  const path = FILE_GUIDES[id].paths[lang];
+  const kase = CASES[id];
+  const seen = watch(page);
+  expect((await page.goto(path))?.status(), `${path} answers 200`).toBe(200);
+  await expect(page.locator('html'), 'the page is in its language').toHaveAttribute('lang', lang === 'pt' ? 'pt-BR' : lang);
+  await hydrated(page);
+  await dismissCookies(page);
+  const files = kase.files();
+  await page.setInputFiles('#fo-tool-root input[type="file"]', files);
+  if (kase.action) {
+    const ready = page.locator('#fo-tool-root .fo-ready');
+    await expect(ready).toBeVisible({ timeout: 30_000 });
+    await ready.locator('.fo-btn--brand').click();
+  }
+  const download = page.locator('#fo-tool-root .fo-btn--download');
+  await expect(download).toBeVisible({ timeout: 60_000 });
+  // The panel speaks the language of the page (its texts are the tool's own, read from the module of the language).
+  await expect(download, 'the Download of the panel, in the language of the page').toContainText(downloadWords(id, lang));
+  const delivered = await takeDownload(page);
+  await kase.check(delivered, lang);
+
+  const origin = new URL(page.url()).origin;
+  const own = seen.filter((request) => !/^(blob|data|about):/.test(request.url));
+  expect(own.filter((request) => request.method !== 'GET'), 'only GET').toEqual([]);
+  expect(own.filter((request) => request.body), 'no request carries a body').toEqual([]);
+  expect(own.filter((request) => new URL(request.url).origin !== origin).map((request) => request.url), 'no request leaves the site').toEqual([]);
+  expect(own.filter((request) => new URL(request.url).search !== '').map((request) => request.url), 'no query string').toEqual([]);
+  for (const file of files) {
+    const stem = file.name.replace(/\.[^.]+$/, '');
+    expect(own.filter((request) => decodeURIComponent(request.url).includes(stem)).map((request) => request.url), `${file.name} only in the download name`).toEqual([]);
+  }
 }
 
 // The Oli of the panel sits on the top edge of the drop zone and rises 86 px above it (components.css). On a tool page
@@ -176,42 +192,77 @@ for (const id of FILE_GUIDE_IDS) {
 // of the page is measured against her box, at the widths where she covered the end of that paragraph.
 const OLI_WIDTHS = [320, 360, 390, 600, 768, 1280];
 
-for (const id of FILE_GUIDE_IDS) {
-  const guide = FILE_GUIDES[id];
-  test(`${guide.path}: the Oli of the panel covers no line of text, at ${OLI_WIDTHS.join(', ')} px`, async ({ page }) => {
-    const hits: string[] = [];
-    for (const width of OLI_WIDTHS) {
-      await page.setViewportSize({ width, height: 800 });
-      expect((await page.goto(guide.path))?.status(), `${guide.path} answers 200`).toBe(200);
-      await hydrated(page);
-      await dismissCookies(page);
-      await expect(page.locator('#fo-tool-root [data-oli]').first()).toBeVisible();
-      const found = await page.evaluate(() => {
-        const olis = [...document.querySelectorAll('main [data-oli]')].map((oli) => oli.getBoundingClientRect()).filter((box) => box.width > 0 && box.height > 0);
-        const out: string[] = [];
-        const walker = document.createTreeWalker(document.querySelector('main') as Node, NodeFilter.SHOW_TEXT);
-        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-          const text = node.textContent ?? '';
-          if (!text.trim() || node.parentElement?.closest('.fo-sr, [aria-hidden="true"], [data-oli]')) continue;
-          const range = document.createRange();
-          range.selectNodeContents(node);
-          for (const line of range.getClientRects()) {
-            for (const oli of olis) {
-              const x = Math.min(line.right, oli.right) - Math.max(line.left, oli.left);
-              const y = Math.min(line.bottom, oli.bottom) - Math.max(line.top, oli.top);
-              if (x > 0.5 && y > 0.5) out.push(`"${text.trim().slice(0, 40)}" (${Math.round(x)} × ${Math.round(y)} px)`);
-            }
+async function expectOliCoversNoText(page: Page, path: string): Promise<void> {
+  const hits: string[] = [];
+  for (const width of OLI_WIDTHS) {
+    await page.setViewportSize({ width, height: 800 });
+    expect((await page.goto(path))?.status(), `${path} answers 200`).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    await expect(page.locator('#fo-tool-root [data-oli]').first()).toBeVisible();
+    const found = await page.evaluate(() => {
+      const olis = [...document.querySelectorAll('main [data-oli]')].map((oli) => oli.getBoundingClientRect()).filter((box) => box.width > 0 && box.height > 0);
+      const out: string[] = [];
+      const walker = document.createTreeWalker(document.querySelector('main') as Node, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const text = node.textContent ?? '';
+        if (!text.trim() || node.parentElement?.closest('.fo-sr, [aria-hidden="true"], [data-oli]')) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const line of range.getClientRects()) {
+          for (const oli of olis) {
+            const x = Math.min(line.right, oli.right) - Math.max(line.left, oli.left);
+            const y = Math.min(line.bottom, oli.bottom) - Math.max(line.top, oli.top);
+            if (x > 0.5 && y > 0.5) out.push(`"${text.trim().slice(0, 40)}" (${Math.round(x)} × ${Math.round(y)} px)`);
           }
         }
-        return out;
-      });
-      hits.push(...found.map((hit) => `${width} px: ${hit}`));
-    }
-    expect(hits, 'text under the Oli').toEqual([]);
+      }
+      return out;
+    });
+    hits.push(...found.map((hit) => `${width} px: ${hit}`));
+  }
+  expect(hits, 'text under the Oli').toEqual([]);
+}
+
+// English: the two tests of the F5b, one each.
+for (const id of FILE_GUIDE_IDS) {
+  const path = FILE_GUIDES[id].paths.en;
+  test(`${path}: the embedded tool works, gives a sound file and keeps it in the browser`, async ({ page }) => {
+    test.setTimeout(90_000);
+    await expectToolWorks(page, id, 'en');
   });
 }
 
-test('every file guide has its case here, read from the registry', () => {
+for (const id of FILE_GUIDE_IDS) {
+  const path = FILE_GUIDES[id].paths.en;
+  test(`${path}: the Oli of the panel covers no line of text, at ${OLI_WIDTHS.join(', ')} px`, async ({ page }) => {
+    await expectOliCoversNoText(page, path);
+  });
+}
+
+// Portuguese and Spanish (languages adjustment, decision 8): the same two proofs in one test per guide, so the 20 guides
+// add 20 tests and not 40 to the part of the CI where the file falls. The tool comes first, the Oli after, each with the
+// same assertions as in English; the time limit is the one of the English tool test.
+const TRANSLATED = LANGS.filter((lang) => lang !== 'en');
+
+for (const lang of TRANSLATED) {
+  for (const id of FILE_GUIDE_IDS) {
+    const path = FILE_GUIDES[id].paths[lang];
+    test(`${path}: the embedded tool of the language works and keeps the file in the browser, and the Oli of the panel covers no line of text`, async ({ page }) => {
+      test.setTimeout(90_000);
+      await expectToolWorks(page, id, lang);
+      await expectOliCoversNoText(page, path);
+    });
+  }
+}
+
+test('every file guide has its case here, read from the registry, and a page in each language', () => {
   expect(Object.keys(CASES).sort()).toEqual([...FILE_GUIDE_IDS].sort());
   for (const id of FILE_GUIDE_IDS) expect(CASES[id].files().length, id).toBeGreaterThan(0);
+  const paths = FILE_GUIDE_IDS.flatMap((id) => LANGS.map((lang) => FILE_GUIDES[id].paths[lang]));
+  expect(new Set(paths).size, 'one path per guide and language').toBe(FILE_GUIDE_IDS.length * LANGS.length);
+  for (const id of FILE_GUIDE_IDS) {
+    expect(FILE_GUIDES[id].paths.en, id).toBe(FILE_GUIDES[id].path);
+    for (const lang of TRANSLATED) expect(FILE_GUIDES[id].paths[lang], `${id} ${lang}`).toMatch(new RegExp(`^/${lang}/guias/[a-z0-9-]+/$`));
+  }
 });

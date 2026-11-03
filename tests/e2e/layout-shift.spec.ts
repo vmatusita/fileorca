@@ -7,6 +7,8 @@
 // but does not judge it here, because the fallback renders differently on each system (the CLS of a paragraph that
 // loses a line was 0.046 on Windows and 0.257 on the Linux of the CI, on the same page; DECISOES § 305).
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import { moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
+import { FILE_GUIDES, type FileGuideId } from '../../src/tools/guides/registry.ts';
 
 // Each width with the pages whose trail sat on the edge of a row there, in the sweeps of every page (before the
 // correction and with each candidate of it), and the twelve pages of the first measure at 360 and 393 px.
@@ -24,12 +26,27 @@ const FIRST = [
   '/es/calculadora-de-hipoteca/',
   '/compress-image/',
 ];
+// Languages adjustment: the sweep of the 45 pages of pt and es that the adjustment adds or changes (the QR code generator,
+// the 18 Spanish money pages, the 5 Spanish money guides and the 20 file guides) at the five widths, in both browsers, put
+// these on the edge of a row: the trail had another number of rows with the fallback font than with Figtree (either
+// browser), or 6 px or less left on its last row in Chromium. Measured on the texts of the time (the trail of a file guide
+// ends in its own title; the Spanish calculators still had the English names); the sweep is redone when the texts of a
+// page change. The paths are read from the registries.
+const guideIn = (id: FileGuideId, lang: 'pt' | 'es'): string => FILE_GUIDES[id].paths[lang];
+const spanish = (id: CalcPageId): string => moneyPage(id, 'es')?.path ?? `(${id} sem página em es)`;
 const CASES: Record<number, string[]> = {
-  320: ['/home-affordability-calculator/', '/pt/assinar-pdf/', '/bmi-calculator/', '/btu-calculator/', '/compress-image/to-100kb/', '/compress-image/to-1mb/', '/ovulation-calculator/'],
-  360: [...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/'],
-  375: ['/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/'],
-  393: [...FIRST, '/es/numerar-paginas-pdf/'],
-  412: ['/credit-card-payoff-calculator/', '/pt/organizar-paginas-pdf/', '/es/calculadora-de-deudas/', '/es/redimensionar-imagen/', '/debt-consolidation-calculator/', '/compound-interest-calculator/'],
+  320: ['/home-affordability-calculator/', '/pt/assinar-pdf/', '/bmi-calculator/', '/btu-calculator/', '/compress-image/to-100kb/', '/compress-image/to-1mb/', '/ovulation-calculator/', guideIn('guides-heic-to-jpg-on-windows', 'pt')],
+  360: [...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/', guideIn('guides-open-webp-save-as-jpg', 'es'), guideIn('guides-pdf-to-jpg-resolution', 'pt')],
+  375: [
+    '/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/',
+    guideIn('guides-pdf-to-jpg-resolution', 'pt'), guideIn('guides-open-webp-save-as-jpg', 'es'),
+  ],
+  393: [...FIRST, '/es/numerar-paginas-pdf/', spanish('auto-loan-calculator'), spanish('mortgage-calculator-biweekly')],
+  412: [
+    '/credit-card-payoff-calculator/', '/pt/organizar-paginas-pdf/', '/es/calculadora-de-deudas/', '/es/redimensionar-imagen/', '/debt-consolidation-calculator/', '/compound-interest-calculator/',
+    spanish('rent-vs-buy-calculator'), spanish('apr-to-apy-calculator'), guideIn('guides-jpg-vs-png', 'pt'), guideIn('guides-jpg-vs-png', 'es'),
+    guideIn('guides-why-is-my-pdf-so-large', 'es'), guideIn('guides-remove-location-from-photos', 'es'), guideIn('guides-combine-pdfs-on-phone', 'es'),
+  ],
 };
 const CHUNK = 8;
 const FIGTREE = /figtree[^/]*\.woff2$/;

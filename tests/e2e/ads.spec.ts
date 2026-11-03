@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, ES_CALC_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES, guidePathIn, moneyPage } from '../../src/tools/calc/registry.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { visible } from '../../src/tools/calc/form.ts';
 import type { ChoiceSpec, FieldSpec } from '../../src/tools/calc/types.ts';
 import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
@@ -336,8 +336,19 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
 // between the fields or inside the schedule; on a phone the result sits above the fold, right under the main fields.
 const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-export .fo-btn, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
 // F6: the Spanish calculators and the Brazilian ones too, read from the registry, with the result above the fold.
-const CALCULATOR_PATHS = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''), ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? '')];
-const MONEY_PAGES = [...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path), ...GUIDE_IDS.map((id) => GUIDES[id].path), ...CALCULATOR_PATHS.slice(CALC_PAGE_IDS.length)];
+// Languages adjustment (decision 4): every calculator and preset in Spanish (moneyPage(id, 'es'), the 18 of the English
+// list) and the five money guides in Spanish; the result of each Spanish calculator is held above the fold at 360×740 too.
+const EN_CALC_PATHS = CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path);
+const ES_CALC_PATHS = CALC_PAGE_IDS.map((id) => moneyPage(id, 'es')?.path ?? '');
+const BR_CALC_PATHS = BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? '');
+const CALCULATOR_PATHS = [...EN_CALC_PATHS, ...ES_CALC_PATHS, ...BR_CALC_PATHS];
+const MONEY_PAGES = [
+  ...EN_CALC_PATHS,
+  ...GUIDE_IDS.map((id) => GUIDES[id].path),
+  ...ES_CALC_PATHS,
+  ...GUIDE_IDS.map((id) => guidePathIn(id, 'es') ?? ''),
+  ...BR_CALC_PATHS,
+];
 
 test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×800', () => {
   for (const path of MONEY_PAGES) {
@@ -489,42 +500,46 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
 // buttons, at rest, with a code made and with the error of a text over the limit.
 const QR_TARGETS = `${TARGETS}, .fo-qr, .fo-qr__form, .fo-qr__preview, .fo-qr__code, .fo-qr__oli, .fo-qr__actions, .fo-qr__out, .fo-btn, .fo-field__error`;
 
-test('the QR code generator keeps every AdSlot 150px from the tool, at rest, with a code and with an error', async ({ page }) => {
-  const path = routeById('qr-code-generator').paths.en ?? '';
-  expect(routeById('qr-code-generator').adArea).toBe('utilidades');
-  await page.setViewportSize(VIEWPORTS[0]);
-  expect((await page.goto(path))?.status()).toBe(200);
-  await hydrated(page);
-  await dismissCookies(page);
-  const adCount = await page.locator('.fo-ad').count();
-  expect(adCount).toBeGreaterThan(0);
-  await expect(page.locator('.fo-ad[data-ad-area="utilidades"]')).toHaveCount(adCount);
-  const gaps: string[] = [];
-  const measure = async (state: string) => {
-    let min = Infinity;
-    for (const viewport of VIEWPORTS) {
-      await page.setViewportSize(viewport);
-      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
-      const label = `${state} a ${viewport.width}px`;
-      const tool = (await boxes(page, '#fo-tool-root'))[0];
-      expect(tool, label).toBeDefined();
-      for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-      if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
-      await expectAdsOutsideThePanel(page, label, adCount);
-      min = Math.min(min, await expectClearance(page, label, QR_TARGETS));
-    }
-    gaps.push(`${state}: ${min.toFixed(0)}`);
-  };
-  await measure('repouso');
-  const box = page.locator('#fo-tool-root textarea');
-  await box.fill('https://fileorca.com/qr-code-generator/');
-  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
-  await measure('com o QR');
-  await box.fill('x'.repeat(1_274));
-  await expect(page.locator('#fo-tool-root .fo-field__error')).toBeVisible();
-  await measure('acima do limite');
-  console.log(`${path} menor vão: ${gaps.join(' | ')}`);
-});
+// Languages adjustment (decision 3): the same page in Portuguese and Spanish, with the same states and targets.
+for (const lang of LANGS) {
+  const path = routeById(QR_ID).paths[lang] ?? '';
+  test(`${path}: the QR code generator keeps every AdSlot 150px from the tool, at rest, with a code and with an error`, async ({ page }) => {
+    expect(path, `o QR existe em ${lang}`).not.toBe('');
+    expect(routeById(QR_ID).adArea).toBe('utilidades');
+    await page.setViewportSize(VIEWPORTS[0]);
+    expect((await page.goto(path))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const adCount = await page.locator('.fo-ad').count();
+    expect(adCount).toBeGreaterThan(0);
+    await expect(page.locator('.fo-ad[data-ad-area="utilidades"]')).toHaveCount(adCount);
+    const gaps: string[] = [];
+    const measure = async (state: string) => {
+      let min = Infinity;
+      for (const viewport of VIEWPORTS) {
+        await page.setViewportSize(viewport);
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+        const label = `${state} a ${viewport.width}px`;
+        const tool = (await boxes(page, '#fo-tool-root'))[0];
+        expect(tool, label).toBeDefined();
+        for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+        if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+        await expectAdsOutsideThePanel(page, label, adCount);
+        min = Math.min(min, await expectClearance(page, label, QR_TARGETS));
+      }
+      gaps.push(`${state}: ${min.toFixed(0)}`);
+    };
+    await measure('repouso');
+    const box = page.locator('#fo-tool-root textarea');
+    await box.fill('https://fileorca.com/qr-code-generator/');
+    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
+    await measure('com o QR');
+    await box.fill('x'.repeat(1_274));
+    await expect(page.locator('#fo-tool-root .fo-field__error')).toBeVisible();
+    await measure('acima do limite');
+    console.log(`${path} menor vão: ${gaps.join(' | ')}`);
+  });
+}
 
 // The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
 // phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
@@ -666,53 +681,64 @@ async function guideSpots(page: Page, label: string, adCount: number, selector: 
   return min;
 }
 
+// Languages adjustment (decision 5): the 30 guides, each at its path in its language (FILE_GUIDES[id].paths), with the tool
+// of the language: the PDF walk reads the labels of the language, and the small file of an image tool is the one of its
+// English page (SMALL_OF is keyed by the English path).
 test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 1280×800', () => {
-  for (const id of FILE_GUIDE_IDS) {
-    const guide = FILE_GUIDES[id];
-    test(`${guide.path}: with the tool at rest and with a result`, async ({ page }) => {
-      await page.setViewportSize(VIEWPORTS[0]);
-      const gaps: string[] = [];
-      if (isPdfTool(guide.tool)) {
-        let adCount = 0;
-        await walkPdfTool(
-          page,
-          guide.tool,
-          async (state, note) => {
-            if (state === 'rest') adCount = await page.locator('.fo-ad').count();
-            gaps.push(`${state}: ${(await guideSpots(page, `${state} (${note})`, adCount, PDF_TARGETS)).toFixed(0)}`);
-          },
-          { hold: false, path: guide.path },
-        );
-        expect(gaps.some((gap) => gap.startsWith('result')), 'o passeio chegou ao resultado').toBe(true);
-      } else {
-        expect((await page.goto(guide.path))?.status()).toBe(200);
-        await hydrated(page);
-        await dismissCookies(page);
-        const adCount = await page.locator('.fo-ad').count();
-        expect(adCount).toBeGreaterThan(0);
-        gaps.push(`repouso: ${(await guideSpots(page, 'repouso', adCount, TARGETS)).toFixed(0)}`);
-        const toolPath = routeById(guide.tool).paths.en ?? '/';
-        await chooseImages(page, await smallFiles(page, toolPath, 1));
-        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-        for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
-        gaps.push(`resultado: ${(await guideSpots(page, 'resultado', adCount, TARGETS)).toFixed(0)}`);
-      }
-      console.log(`${guide.path} menor vão: ${gaps.join(' | ')}`);
-    });
-  }
-});
-
-// The line that links a tool to its guide sits outside the panel and 150px from both AdSlots (prompt decision 6).
-test('the guide line of each embedded tool stays 150px from every AdSlot, at 360 and 1280px', async ({ page }) => {
-  const tools = [...new Set(FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].tool))];
-  for (const tool of tools) {
-    const path = routeById(tool).paths.en ?? '/';
-    expect((await page.goto(path))?.status(), path).toBe(200);
-    for (const viewport of VIEWPORTS) {
-      await page.setViewportSize(viewport);
-      await expect(page.locator('.fo-guide-links a').first(), `${path}: a linha do guia`).toBeVisible();
-      expect(await page.locator('#fo-tool-root .fo-guide-links').count(), `${path}: a linha dentro do painel`).toBe(0);
-      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-guide-links');
+  for (const lang of LANGS) {
+    for (const id of FILE_GUIDE_IDS) {
+      const guide = FILE_GUIDES[id];
+      const path = guide.paths[lang];
+      test(`${path}: with the tool at rest and with a result`, async ({ page }) => {
+        await page.setViewportSize(VIEWPORTS[0]);
+        const gaps: string[] = [];
+        if (isPdfTool(guide.tool)) {
+          let adCount = 0;
+          await walkPdfTool(
+            page,
+            guide.tool,
+            async (state, note) => {
+              if (state === 'rest') adCount = await page.locator('.fo-ad').count();
+              gaps.push(`${state}: ${(await guideSpots(page, `${state} (${note})`, adCount, PDF_TARGETS)).toFixed(0)}`);
+            },
+            { hold: false, path, lang },
+          );
+          expect(gaps.some((gap) => gap.startsWith('result')), 'o passeio chegou ao resultado').toBe(true);
+        } else {
+          expect((await page.goto(path))?.status()).toBe(200);
+          await hydrated(page);
+          await dismissCookies(page);
+          const adCount = await page.locator('.fo-ad').count();
+          expect(adCount).toBeGreaterThan(0);
+          gaps.push(`repouso: ${(await guideSpots(page, 'repouso', adCount, TARGETS)).toFixed(0)}`);
+          const toolPath = routeById(guide.tool).paths.en ?? '/';
+          await chooseImages(page, await smallFiles(page, toolPath, 1));
+          await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+          for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
+          gaps.push(`resultado: ${(await guideSpots(page, 'resultado', adCount, TARGETS)).toFixed(0)}`);
+        }
+        console.log(`${path} menor vão: ${gaps.join(' | ')}`);
+      });
     }
   }
 });
+
+// The line that links a tool to its guide sits outside the panel and 150px from both AdSlots (prompt decision 6). Languages
+// adjustment: the tool pages of pt and es link to the guides of their language too, so the line is measured there, one test
+// per language.
+for (const lang of LANGS) {
+  const title = 'the guide line of each embedded tool stays 150px from every AdSlot, at 360 and 1280px';
+  test(lang === 'en' ? title : `${title} (${lang})`, async ({ page }) => {
+    const tools = [...new Set(FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].tool))];
+    for (const tool of tools) {
+      const path = routeById(tool).paths[lang] ?? '/';
+      expect((await page.goto(path))?.status(), path).toBe(200);
+      for (const viewport of VIEWPORTS) {
+        await page.setViewportSize(viewport);
+        await expect(page.locator('.fo-guide-links a').first(), `${path}: a linha do guia`).toBeVisible();
+        expect(await page.locator('#fo-tool-root .fo-guide-links').count(), `${path}: a linha dentro do painel`).toBe(0);
+        await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-guide-links');
+      }
+    }
+  });
+}
