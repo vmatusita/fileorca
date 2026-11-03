@@ -10,7 +10,7 @@ import { stringsOf } from '../../scripts/publico/lib/git-parse.ts';
 const context = (): AuditContext => ({
   publicValues: stringsOf(site, pix),
   brandDomains: new Set(['fileorca.com']),
-  ownerEmails: new Set(['dono.exemplo@caixa-postal.net']),
+  ownerEmails: new Set(['dono.exemplo@caixa-ficticia-auditoria.net']),
   ownerNames: new Set(['dono exemplo', 'donoexemplo']),
   samplePaths: new Set(['fixtures/images/sample-gps.jpg']),
   sampleCoordinates: new Set(['10.000000, -20.000000']),
@@ -50,31 +50,37 @@ describe('e-mail', () => {
     expect(email(site.CONTACT_EMAIL)).toBe('publico');
     expect(email('noreply@anthropic.com')).toBe('publico');
     expect(email('12345+someone@users.noreply.github.com')).toBe('publico');
-    expect(email('author@example-lib.org', ['src/platform/license-texts/x.txt'])).toBe('publico');
-    expect(email('author@example-lib.org', ['pnpm-lock.yaml'])).toBe('publico');
+    expect(email('author@biblioteca-ficticia-auditoria.org', ['src/platform/license-texts/x.txt'])).toBe('publico');
+    expect(email('author@biblioteca-ficticia-auditoria.org', ['pnpm-lock.yaml'])).toBe('publico');
   });
 
   it("the owner's addresses and accounts named after the brand are the owner's", () => {
-    expect(email('dono.exemplo@caixa-postal.net')).toBe('victor');
-    expect(email('fileorca.extra@mailbox.org')).toBe('victor');
+    expect(email('dono.exemplo@caixa-ficticia-auditoria.net')).toBe('victor');
+    expect(email('fileorca.conta.teste@caixa-ficticia-auditoria.net')).toBe('victor');
   });
 
   it('other addresses are third-party data, with a note that tells personal from role addresses', () => {
-    const personal = classify({ type: 'email', value: 'someone.blog@gmail.com', paths: ['docs/lancamento/x.md'] }, context());
-    const role = classify({ type: 'email', value: 'editor@someblog.org', paths: ['docs/lancamento/x.md'] }, context());
+    const personal = classify({ type: 'email', value: 'nao.existe.auditoria.publico.teste@gmail.com', paths: ['docs/lancamento/x.md'] }, context());
+    const role = classify({ type: 'email', value: 'editor@blog-ficticio-auditoria.org', paths: ['docs/lancamento/x.md'] }, context());
     expect([personal.category, role.category]).toEqual(['terceiro', 'terceiro']);
     expect(personal.note).toContain('pessoal');
     expect(role.note).toContain('função');
+  });
+
+  it('an address that only the tests and fixtures carry is synthetic, unless it is the owner\'s', () => {
+    expect(email('editor@blog-ficticio-auditoria.org', ['tests/unit/x.test.ts', 'fixtures/y.json'])).toBe('falso-positivo');
+    expect(email('editor@blog-ficticio-auditoria.org', ['tests/unit/x.test.ts', 'docs/y.md'])).toBe('terceiro');
+    expect(email('dono.exemplo@caixa-ficticia-auditoria.net', ['tests/unit/x.test.ts'])).toBe('victor');
   });
 });
 
 describe('commit identities', () => {
   it("the owner's identity, a service identity and someone else's", () => {
     expect(verdict({ type: 'autor-commit', value: 'Dono Exemplo <other@example.org>', paths: [] })).toBe('victor');
-    expect(verdict({ type: 'autor-commit', value: 'x <dono.exemplo@caixa-postal.net>', paths: [] })).toBe('victor');
+    expect(verdict({ type: 'autor-commit', value: 'x <dono.exemplo@caixa-ficticia-auditoria.net>', paths: [] })).toBe('victor');
     expect(verdict({ type: 'autor-commit', value: 'GitHub <noreply@github.com>', paths: [] })).toBe('publico');
     expect(verdict({ type: 'autor-commit', value: 'dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>', paths: [] })).toBe('publico');
-    expect(verdict({ type: 'autor-commit', value: 'Fulana Contribuidora <fulana@example-mail.org>', paths: [] })).toBe('terceiro');
+    expect(verdict({ type: 'autor-commit', value: 'Fulana Contribuidora <fulana@outra-caixa-ficticia.org>', paths: [] })).toBe('terceiro');
   });
 });
 

@@ -89,6 +89,7 @@ function emailVerdict(finding: Finding, context: AuditContext): Verdict {
   if (isPublicValue(key, context) || context.brandDomains.has(domain)) return { category: 'publico', note: 'endereço da marca, já no site' };
   if (SERVICE_EMAIL.test(key)) return { category: 'publico', note: 'endereço de serviço (no-reply ou robô)' };
   if (context.ownerEmails.has(key)) return { category: 'victor', note: 'e-mail do Victor' };
+  if (finding.paths.length > 0 && finding.paths.every((path) => TEST_PATH.test(path))) return { category: 'falso-positivo', note: 'valor sintético de teste ou fixture' };
   const brand = [...context.brandDomains].map((brandDomain) => brandDomain.split('.')[0] ?? '').filter((name) => name.length >= 4);
   if (brand.some((name) => local.includes(name))) return { category: 'victor', note: 'conta com o nome da marca fora do domínio dela: provavelmente do Victor' };
   if (finding.paths.length > 0 && finding.paths.some((path) => SITE_PATH.test(path))) return { category: 'publico', note: 'está no código do site (src/ ou public/), como um texto de licença' };

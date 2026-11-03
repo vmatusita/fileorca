@@ -25,8 +25,8 @@ import { REPORT_PATH, aggregate, renderReport, safeOutput, summaryLines, type Oc
 const SHA = (seed: string): string => seed.repeat(40).slice(0, 40);
 
 const context: AuditContext = {
-  publicValues: new Set(['contato@marca-exemplo.net']),
-  brandDomains: new Set(['marca-exemplo.net']),
+  publicValues: new Set(['contato@marca-ficticia-auditoria.net']),
+  brandDomains: new Set(['marca-ficticia-auditoria.net']),
   ownerEmails: new Set(),
   ownerNames: new Set(),
   samplePaths: new Set(),
@@ -36,10 +36,10 @@ const context: AuditContext = {
 const stats: ScanStats = { refs: 3, pullRefs: 2, commits: 10, blobs: 40, textBlobs: 30, imageBlobs: 8, skippedBlobs: 2, skippedKinds: { pdf: 2 }, localBlobs: 1, gitleaksHistory: 'com achados', gitleaksTree: 'sem achados' };
 
 const occurrences: Occurrence[] = [
-  { type: 'email', value: 'Pessoa.Distinta@caixa-terceiro.net', paths: ['docs/a.md'], commits: [SHA('a')], source: 'historico' },
-  { type: 'email', value: 'pessoa.distinta@caixa-terceiro.net', paths: ['docs/b.md'], commits: [SHA('b')], source: 'arvore' },
+  { type: 'email', value: 'Pessoa.Distinta@caixa-terceiro-ficticia.net', paths: ['docs/a.md'], commits: [SHA('a')], source: 'historico' },
+  { type: 'email', value: 'pessoa.distinta@caixa-terceiro-ficticia.net', paths: ['docs/b.md'], commits: [SHA('b')], source: 'arvore' },
   { type: 'gps', value: '-12.345678, 98.765432', paths: ['docs/foto.jpg'], commits: [SHA('c')], source: 'historico' },
-  { type: 'email', value: 'contato@marca-exemplo.net', paths: ['src/x.ts'], commits: [SHA('a')], source: 'arvore' },
+  { type: 'email', value: 'contato@marca-ficticia-auditoria.net', paths: ['src/x.ts'], commits: [SHA('a')], source: 'arvore' },
 ];
 
 describe('aggregate', () => {
@@ -67,7 +67,7 @@ describe('aggregate', () => {
 
   it('the .cache/ report carries the values, with the warning not to copy them', () => {
     const report = renderReport(items, stats, { date: '2026-11-03', origin: 'https://example.invalid/repo.git', mirrorHead: SHA('d'), localHead: SHA('e'), gitleaksVersion: '0.0.0', gitleaksHistoryArgs: 'x', limits: ['nada'] });
-    expect(report.toLowerCase()).toContain('pessoa.distinta@caixa-terceiro.net');
+    expect(report.toLowerCase()).toContain('pessoa.distinta@caixa-terceiro-ficticia.net');
     expect(report).toContain('-12.345678, 98.765432');
     expect(report).toContain('não copie nada daqui');
   });
@@ -104,7 +104,7 @@ describe('parsers', () => {
       { sha: SHA('b'), type: 'tree', size: 40 },
     ]);
     expect(parseLsTree(`100644 blob ${SHA('a')}\tdocs/a b.md\n100644 blob ${SHA('a')}\tdocs/c.md\n040000 tree ${SHA('b')}\tdocs\n`)).toEqual(new Map([[SHA('a'), ['docs/a b.md', 'docs/c.md']]]));
-    expect(parseIdentities(`${SHA('a')}\tAna\tana@x.net\tGitHub\tnoreply@github.com\n`)).toEqual([{ commit: SHA('a'), authorName: 'Ana', authorEmail: 'ana@x.net', committerName: 'GitHub', committerEmail: 'noreply@github.com' }]);
+    expect(parseIdentities(`${SHA('a')}\tAna\tana@caixa-ficticia-auditoria.net\tGitHub\tnoreply@github.com\n`)).toEqual([{ commit: SHA('a'), authorName: 'Ana', authorEmail: 'ana@caixa-ficticia-auditoria.net', committerName: 'GitHub', committerEmail: 'noreply@github.com' }]);
     expect(parseMessages(`${SHA('a')}\u0000feat: x\n\nCo-Authored-By: y\n\u0000\n${SHA('b')}\u0000fix\n\u0000`)).toEqual([
       { commit: SHA('a'), body: 'feat: x\n\nCo-Authored-By: y\n' },
       { commit: SHA('b'), body: 'fix\n' },
