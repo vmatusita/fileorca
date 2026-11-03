@@ -307,22 +307,26 @@ test.describe('axe nos estados das calculadoras de casa e saúde, a 360 e 1280px
   });
 
   // F7 (decision 11): the QR code generator with a code made (the preview, the options and both Download buttons), then with
-  // a text over the limit (the error with the alert, and no code).
-  test('QR code generator: with a code, then with a text over the limit', async ({ page }) => {
-    expect((await page.goto('/qr-code-generator/'))?.status()).toBe(200);
-    await hydrated(page);
-    await dismissCookies(page);
-    const box = page.locator('#fo-tool-root textarea');
-    await box.fill('https://fileorca.com/qr-code-generator/');
-    await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
-    await animationsDone(page);
-    expect(await violationsEverywhere(page), 'a code').toEqual([]);
-    await box.fill('x'.repeat(1_274));
-    await expect(box).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('#fo-tool-root .fo-field__error[role="alert"]')).toBeVisible();
-    await animationsDone(page);
-    expect(await violationsEverywhere(page), 'over the limit').toEqual([]);
-  });
+  // a text over the limit (the error with the alert, and no code). The languages adjustment: the same in Portuguese and
+  // Spanish, at the path of the route map, a test per language.
+  for (const lang of languagesOf(routeById(QR_ID))) {
+    const path = routeById(QR_ID).paths[lang] ?? '';
+    test(lang === 'en' ? 'QR code generator: with a code, then with a text over the limit' : `QR code generator in ${lang} (${path}): with a code, then with a text over the limit`, async ({ page }) => {
+      expect((await page.goto(path))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      const box = page.locator('#fo-tool-root textarea');
+      await box.fill(`https://fileorca.com${path}`);
+      await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeEnabled();
+      await animationsDone(page);
+      expect(await violationsEverywhere(page), 'a code').toEqual([]);
+      await box.fill('x'.repeat(1_274));
+      await expect(box).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.locator('#fo-tool-root .fo-field__error[role="alert"]')).toBeVisible();
+      await animationsDone(page);
+      expect(await violationsEverywhere(page), 'over the limit').toEqual([]);
+    });
+  }
 });
 
 // The states of the PDF pages (F5a and F6) are walked in axe-pdf-states.spec.ts (DECISOES § 307).
