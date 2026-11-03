@@ -5,7 +5,6 @@ import {
   BR_CALC_IDS,
   BR_HUB_ID,
   CALC_PAGE_IDS,
-  ES_CALC_IDS,
   GUIDE_IDS,
   HEALTH_CALC_IDS,
   HEALTH_HUB_ID,
@@ -159,7 +158,8 @@ describe('contagem do portão de dinheiro e saúde (F4)', () => {
     // F7 (decision 1): the two hubs and the 11 home and health calculators, in English only (DECISOES § 259).
     const life = 2 + HOUSE_CALC_IDS.length + HEALTH_CALC_IDS.length;
     expect(life).toBe(13);
-    expect(expectedYmylPages(routes)).toBe(english + 1 + ES_CALC_IDS.length + brazilian + life);
+    // The languages adjustment (decision 4): Spanish has the hub, the 18 calculator pages and the 5 money guides.
+    expect(expectedYmylPages(routes)).toBe(english + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + brazilian + life);
   });
 
   it('accepts a count equal to the routes, and refuses zero pages and any other count', () => {

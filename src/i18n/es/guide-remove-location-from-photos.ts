@@ -1,94 +1,93 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Remove Location Data From Photos Before You Share Them',
-  description: 'Where a photo keeps the place it was taken, how to stop or hide it on iPhone and Android, and the way to strip it from the file without changing a pixel.',
-  h1: 'How to remove location data from photos before you share them',
-  lead: 'A photo from a phone can carry the exact place it was taken. Here is where that data lives, how to keep it out, and how to remove it from a file you already have.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
+  description: 'Dónde guarda una foto el lugar en que se tomó, cómo evitarlo u ocultarlo en iPhone y Android, y cómo quitarlo del archivo sin cambiar un solo píxel.',
+  h1: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
+  lead: 'Una foto tomada con el celular puede llevar el lugar exacto donde se tomó. Aquí ves dónde están esos datos, cómo evitar que se guarden y cómo quitarlos de un archivo que ya tienes.',
+  changed: 'Primera versión, con las mediciones del {date}.',
   intro: [
-    'Phones write facts about each photo into the file itself: the camera, the date and time, and, when location is on, the GPS coordinates of where you stood. Apple puts it plainly: the coordinates are embedded into each photo and video. Anyone who gets the original file can read them, and a few clicks put them on a map.',
-    'Some apps strip this data when you post, and some do not. Email, file transfers, cloud folders and many chat apps send the file as it is. If a photo shows your home, your child’s school or anywhere you would rather not pin, remove the location before the file leaves your hands.',
+    'Los teléfonos escriben datos de cada foto dentro del propio archivo: la cámara, la fecha y la hora y, si la ubicación está activada, las coordenadas GPS del lugar donde estabas. Apple lo dice con claridad: las coordenadas se incrustan en cada foto y video. Cualquiera que reciba el archivo original puede leerlas, y con unos pocos clics las pone en un mapa.',
+    'Algunas apps quitan estos datos cuando publicas, y otras no. El correo, las transferencias de archivos, las carpetas en la nube y muchas apps de chat envían el archivo tal como está. Si una foto muestra tu casa, la escuela de tus hijos o cualquier lugar que prefieras no marcar en un mapa, quita la ubicación antes de que el archivo salga de tus manos.',
   ],
-  toolHeading: 'Strip the metadata from your photos here',
-  toolIntro: 'This is Resize image, set to {winnerOption}: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
+  toolHeading: 'Quita los metadatos de tus fotos aquí',
+  toolIntro: 'Es Redimensionar imagen con la opción {winnerOption}: cada foto conserva todos sus píxeles y vuelve sin su ubicación, su cámara ni su fecha. Funciona en esta pestaña del navegador, así que las fotos nunca se suben.',
   sections: [
     {
-      heading: 'What our photos carried',
+      heading: 'Lo que llevaban nuestras fotos',
       paragraphs: [
-        'All {withGps_word} of our real phone photos in JPG had GPS coordinates, {withCamera_word} named the camera model and {withDate_word} had the date and time they were taken. They are old test photos from a Google Pixel and from iPhones, and the data was all still there.',
-        'Of our {heicFiles} HEIC test photos, {heicWithGps} had real GPS coordinates and all {heicWithCamera} named the camera. HEIC is the format an iPhone uses by default, and it carries the same kind of data as a JPG.',
+        'Las {withGps_wordf} fotos reales de celular en JPG de nuestras pruebas tenían coordenadas GPS, {withCamera_wordf} indicaban el modelo de la cámara y {withDate_wordf} tenían la fecha y la hora en que se tomaron. Son fotos de prueba antiguas de un Google Pixel y de iPhones, y los datos seguían todos ahí.',
+        'De nuestras {heicFiles} fotos HEIC de prueba, {heicWithGps} tenían coordenadas GPS reales y las {heicWithCamera} indicaban la cámara. HEIC es el formato que usa el iPhone de forma predeterminada, y lleva el mismo tipo de datos que un JPG.',
       ],
     },
     {
-      heading: 'Stop the camera from saving it',
+      heading: 'Haz que la cámara no guarde la ubicación',
       paragraphs: [
-        'The surest way is to never record it. On an iPhone, Apple’s steps are: go to Settings, then Privacy & Security, then Location Services, then Camera, and tap Never. Apple notes that location data can be collected only if the Camera app has access to Location Services.',
-        'On Android it depends on the phone. Google’s help says you can control whether your camera adds location to your photos, and that the setting varies by manufacturer. In the Pixel Camera app, Google’s steps are to open the camera settings and turn off Save location.',
+        'Lo más seguro es no registrarla nunca. En un iPhone, los pasos de Apple son estos: ve a Configuración, luego a Privacidad y seguridad, luego a Localización, luego a Cámara, y toca Nunca. Apple aclara que los metadatos de ubicación de las fotos y los videos solo se recopilan si la app Cámara tiene acceso a Localización.',
+        'En Android depende del teléfono. La ayuda de Google dice que puedes controlar si la cámara agrega datos de ubicación a las fotos, y da los pasos por separado para cada marca. En la app Cámara Pixel, los pasos de Google son abrir la configuración de la cámara, entrar en Más parámetros de configuración y desactivar Guardar ubicación.',
       ],
     },
     {
-      heading: 'Share without it from your phone',
+      heading: 'Comparte sin la ubicación desde el teléfono',
       paragraphs: [
-        'On an iPhone you can leave the location out each time you share. Apple’s steps: select the photos, tap the share button, tap Options, and turn off Location. The share sheet then shows Location Not Included above the Options button. For a photo already in your library, tap Adjust Info, then Adjust Location, then No Location.',
-        'Google Photos keeps locations private by default, according to its help center. It can remove a location it estimated, but if the camera added the location, Google says you cannot update or remove it in Google Photos. For those files, strip the data from the file itself.',
+        'En un iPhone puedes dejar fuera la ubicación cada vez que compartes. Los pasos de Apple: selecciona las fotos, toca el botón de compartir, elige Opciones y desactiva Ubicación. Arriba del botón Opciones aparece entonces Ubicación no incluida. Para una foto que ya está en la app Fotos, ábrela y toca Ajustar información, luego Ajustar ubicación y luego Sin ubicación.',
+        'Google Fotos mantiene privadas las ubicaciones de forma predeterminada, según su centro de ayuda. Deja cambiar o quitar una ubicación aproximada, pero si la cámara agregó la ubicación de forma automática, Google dice que no puedes actualizarla ni quitarla en Google Fotos. Para esos archivos, quita los datos del propio archivo.',
       ],
     },
     {
-      heading: 'Strip it from the file without changing the photo',
+      heading: 'Quita la ubicación del archivo sin cambiar la foto',
       paragraphs: [
-        'Any tool on this site that writes an image writes it from the pixels, which leaves the metadata behind. Most of them also change the picture: they compress it, crop it, turn it or change its format. So we measured which one changes the photo least, by a rule fixed before the measurement: the same frame, the same format, and the pixels closest to the original.',
-        'Resize image at {winnerOption} won. A photo that already has the size you ask for is not decoded or encoded again: the tool copies the picture data as it is and leaves the metadata out. Our photos came back with identical pixels, {resizeImageIdenticalChromium_word} of them, and only {resizeImageRatioChromium_off} lighter, the weight of the metadata.',
+        'Todas las herramientas de este sitio que escriben una imagen la escriben a partir de los píxeles, y eso deja atrás los metadatos. Pero casi todas cambian también la imagen: la comprimen, la recortan, la giran o cambian su formato. Así que medimos cuál cambia menos la foto, con una regla fijada antes de la medición: el mismo encuadre, el mismo formato y los píxeles más parecidos al original.',
+        'Ganó Redimensionar imagen, con la opción {winnerOption}.Una foto que ya tiene el tamaño que pides no se decodifica ni se codifica de nuevo: la herramienta copia los datos de la imagen tal como están y deja fuera los metadatos. Nuestras fotos volvieron con píxeles idénticos, las {resizeImageIdenticalChromium_wordf}, y solo un {resizeImageRatioChromium_off} más ligeras, que es lo que pesaban los metadatos.',
       ],
     },
     {
-      heading: 'What the other tools did',
+      heading: 'Lo que hicieron las otras herramientas',
       paragraphs: [
-        'Compress image also removed the location and made the photos {compressImageRatioChromium_off} lighter, but by recompressing them: its lowest score on our photos was {compressImagePsnrMinChromium} of PSNR, a measure of how close two images are, where higher is closer. Good for sending, not for keeping. Crop image and Rotate image change the frame by design, and PNG to JPG turned the photos into PNG files {pngToJpgRatioChromium_times} the size in Chromium and {pngToJpgRatioWebkit_times} in WebKit.',
-        'None of them left GPS coordinates, camera names or dates in the photos, and the PDF from Image to PDF carried no GPS either. The table under "What we measured" has each tool.',
+        'Comprimir imagen también quitó la ubicación y dejó las fotos un {compressImageRatioChromium_off} más ligeras, pero porque las volvió a comprimir: su puntuación más baja en nuestras fotos fue de {compressImagePsnrMinChromium} de PSNR. El PSNR mide cuánto se parecen dos imágenes, y cuanto más sube, más se parecen. Sirve para enviar, no para guardar. Recortar imagen y Rotar imagen cambian el encuadre por diseño, y PNG a JPG convirtió las fotos en archivos PNG con {pngToJpgRatioChromium_times} el tamaño en Chromium y {pngToJpgRatioWebkit_times} en WebKit.',
+        'Ninguna dejó coordenadas GPS, nombres de cámara ni fechas en las fotos, y el PDF de Imagen a PDF tampoco llevaba GPS. La tabla de "Lo que medimos" muestra cada herramienta.',
       ],
     },
     {
-      heading: 'What stays, and what a photo still shows',
+      heading: 'Lo que queda, y lo que la foto todavía muestra',
       paragraphs: [
-        'Two things stay on purpose. A photo stored upside down keeps a tiny tag that says which way is up, so it does not show turned: {resizeImageOrientationChromium_word} of our photos kept one. The color profile stays too, so the colors do not shift.',
-        'Removing the data does not hide what is in the picture. Google’s help warns that people may still work out where a photo was taken from what it shows, such as a landmark. Look at the photo itself before you share it.',
+        'Dos cosas se quedan a propósito. Una foto guardada al revés conserva una pequeña etiqueta que indica dónde está arriba, para que no se vea girada, y {resizeImageOrientationChromium_wordf} de nuestras fotos la conservó. El perfil de color también se queda, para que los colores no cambien.',
+        'Quitar los datos no oculta lo que hay en la imagen. La ayuda de Google advierte que otras personas pueden adivinar dónde se tomó una foto a partir de lo que muestra, como un punto de referencia. Mira la foto antes de compartirla.',
       ],
     },
     {
-      heading: 'For HEIC photos',
+      heading: 'Para fotos HEIC',
       paragraphs: [
-        'Resize image takes JPG, PNG and WebP. For HEIC photos from an iPhone, use HEIC to JPG instead: it writes each JPG from the pixels too, and none of our HEIC test photos kept any GPS data after the conversion. Our HEIC to JPG guide has those measurements.',
+        'Redimensionar imagen acepta JPG, PNG y WebP. Para las fotos HEIC de un iPhone, usa HEIC a JPG: también escribe cada JPG a partir de los píxeles, y ninguna de nuestras fotos HEIC de prueba conservó datos GPS después de la conversión. Nuestra guía para convertir HEIC a JPG tiene esas mediciones.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Our {photos_word} real phone photos through each image tool that takes a JPG, each with the option that changes the photo least. The share is the size after against the originals, and pixels compares each copy with the original on the worst of the photos.',
-  measuredNote: 'Measured on {date} through the tool pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The two browsers wrote files of the same size with {browsersSameSize_word} of the {candidates_word} tools; with {browsersDiffer}, the sizes differed. The metadata and the pixels were read in Node, with the same decoder for the original and the copy. The table shows Chromium.',
+  measuredHeading: 'Lo que medimos',
+  measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, pasadas por cada herramienta de imagen que acepta JPG, cada una con la opción que menos cambia la foto. El porcentaje es el tamaño después frente a los originales, y la columna de píxeles compara cada copia con el original en la peor de las fotos.',
+  measuredNote: 'Medido el {date} con las herramientas de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}. Los dos navegadores escribieron archivos del mismo tamaño con {browsersSameSize_wordf} de las {candidates_wordf} herramientas; con {browsersDiffer}, los tamaños fueron distintos. Los metadatos y los píxeles se leyeron en Node, con el mismo decodificador para el original y la copia. La tabla muestra Chromium.',
   tables: [
     {
-      heading: 'Each tool on our photos',
-      caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, how close the pixels are on the worst photo, and how many photos kept GPS data',
-      head: ['Tool', 'Size after', 'Format', 'Same frame', 'Pixels, worst photo', 'Photos with GPS left'],
+      heading: 'Cada herramienta con nuestras fotos',
+      caption: 'Cada herramienta de imagen que acepta JPG: el tamaño después, el formato, si el encuadre queda igual, cuánto se parecen los píxeles en la peor foto y cuántas fotos conservaron datos GPS',
+      head: ['Herramienta', 'Tamaño después', 'Formato', 'Mismo encuadre', 'Píxeles, peor foto', 'Fotos que conservaron GPS'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fuentes',
   sources: [
-    { id: 'apple-location', label: 'Apple Support: Manage location metadata in Photos', href: 'https://support.apple.com/guide/personal-safety/manage-location-metadata-in-photos-ips0d7a5df82/web', read: '2026-11-01' },
-    { id: 'google-photos-location', label: 'Google Photos Help: Understand, find and edit your photos’ locations', href: 'https://support.google.com/photos/answer/6153599?hl=en&co=GENIE.Platform%3DAndroid', read: '2026-11-01' },
-    { id: 'google-photos-privacy', label: 'Google Photos Help: How Google Photos protects your location data', href: 'https://support.google.com/photos/answer/11190100?hl=en', read: '2026-11-01' },
-    { id: 'google-camera-location', label: 'Google Photos Help: Change your camera location settings', href: 'https://support.google.com/photos/answer/9921876?hl=en', read: '2026-11-01' },
-    { id: 'pixel-camera', label: 'Pixel Camera Help: Change your Camera app settings', href: 'https://support.google.com/pixelcamera/answer/2838995?hl=en', read: '2026-11-01' },
+    { id: 'apple-location', label: 'Soporte técnico de Apple: Administrar los metadatos de la ubicación en Fotos', href: 'https://support.apple.com/es-us/guide/personal-safety/ips0d7a5df82/web', read: '2026-11-03' },
+    { id: 'google-photos-location', label: 'Ayuda de Google Fotos: Cómo entender, encontrar y editar las ubicaciones de tus fotos', href: 'https://support.google.com/photos/answer/6153599?hl=es-419&co=GENIE.Platform%3DAndroid', read: '2026-11-03' },
+    { id: 'google-photos-privacy', label: 'Ayuda de Google Fotos: Cómo protege Google Fotos tus datos de ubicación', href: 'https://support.google.com/photos/answer/11190100?hl=es-419', read: '2026-11-03' },
+    { id: 'google-camera-location', label: 'Ayuda de Google Fotos: Cómo cambiar la configuración de la ubicación de la cámara', href: 'https://support.google.com/photos/answer/9921876?hl=es-419', read: '2026-11-03' },
+    { id: 'pixel-camera', label: 'Ayuda de Cámara Pixel: Cómo cambiar la configuración de la app de Cámara', href: 'https://support.google.com/pixelcamera/answer/2838995?hl=es-419', read: '2026-11-03' },
   ],
   facts: {},
   names: [],
+  relatedHeading: 'Herramientas y guías relacionadas',
   measuredTerms: {
-    "PNG to JPG": "PNG to JPG",
-    "By percentage, 100": "By percentage, 100",
+    'PNG to JPG': 'PNG a JPG',
+    'By percentage, 100': 'Por porcentaje, 100 %',
   },
-  relatedHeading: 'Related tools and guides',
 };
 
 export default texts;

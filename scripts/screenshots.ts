@@ -11,6 +11,9 @@
 // four new icons beside their neighbours (§ 149), drawn in currentColor as the site draws them (src/icons/svg.ts).
 // F5b: two file guides whole (an image one and a PDF one), at rest and with the embedded tool's result, and the guides list
 // of the image hub.
+// The languages adjustment: the QR code in pt and es with a code made from a text with accents, a Spanish calculator with
+// long labels (Home affordability and Rent vs buy), a Spanish preset, a Spanish money guide, a Portuguese image file guide
+// and a Spanish PDF file guide, whole, at both widths.
 // F6: the Portuguese and Spanish pages whole, at both widths: an image tool and a PDF tool with their result, a calculator
 // of each language, the Brazilian money hub, and the support page with its Pix (and the Pix block alone at 360px).
 // F8: the offline page in the three languages, the "Open with" page with files and empty, and the offline line of a
@@ -27,7 +30,7 @@ const ORIGIN = 'http://127.0.0.1:4173';
 // F3 had a folder of its own under fase-03/, which keeps the before and after shots of the cookie notice; F4 wrote
 // under fase-04/, F5a under fase-05a/, F5b under fase-05b/, F6 under fase-06/, F7 under fase-07/ and F8 writes under fase-08/,
 // leaving the older shots as they were.
-const OUT = 'docs/relatorios/fase-08/componentes';
+const OUT = 'docs/relatorios/ajuste-idiomas/componentes';
 const PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 // The 12 MP portrait photo: the last file of a batch, so the queue is caught with rows ready, one working and one error.
 const BIG_PHOTO = 'fixtures/images/jpg-01-pixel2-retrato-gps.jpg';
@@ -559,6 +562,34 @@ async function main(): Promise<void> {
           await tab.screenshot({ path: join(OUT, `f8-tool-offline-page-${theme}-${width}.png`), fullPage: true });
           console.log(`  f8-tool-offline-page-${theme}-${width}.png`);
           await context.close();
+        }
+      }
+
+      // The languages adjustment: the new pages of pt and es, whole, at both widths.
+      for (const width of [360, 1280]) {
+        for (const [lang, path, text] of [['pt', '/pt/gerador-de-qr-code/', 'Ação de graças na praça'], ['es', '/es/generador-de-codigo-qr/', 'Año nuevo con el ñandú']] as const) {
+          page = await open(browser, theme, width, path);
+          const box = page.locator('textarea').first();
+          await box.fill(text);
+          await page.locator('.fo-qr svg, [data-qr-preview] svg').first().waitFor({ timeout: 10_000 }).catch(() => undefined);
+          await page.screenshot({ path: join(OUT, `idiomas-qr-code-${lang}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  idiomas-qr-code-${lang}-${theme}-${width}.png`);
+          await page.close();
+        }
+        const pages = [
+          ['home-affordability-es', '/es/calculadora-de-cuanta-casa-puedo-pagar/'],
+          ['rent-vs-buy-es', '/es/calculadora-de-alquilar-o-comprar/'],
+          ['preset-15-vs-30-es', '/es/calculadora-de-hipoteca/15-o-30-anos/'],
+          ['money-guide-es', '/es/guias/bola-de-nieve-o-avalancha/'],
+          ['file-guide-image-pt', '/pt/guias/jpg-ou-png/'],
+          ['file-guide-pdf-es', '/es/guias/por-que-mi-pdf-pesa-tanto/'],
+          ['money-hub-es', '/es/calculadoras-financieras/'],
+        ] as const;
+        for (const [name, path] of pages) {
+          page = await open(browser, theme, width, path);
+          await page.screenshot({ path: join(OUT, `idiomas-${name}-${theme}-${width}.png`), fullPage: true });
+          console.log(`  idiomas-${name}-${theme}-${width}.png`);
+          await page.close();
         }
       }
     }
