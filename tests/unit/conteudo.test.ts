@@ -17,7 +17,9 @@ import {
   PDF_SECRETS,
   PLACEHOLDERS,
   QR_BLOCKS,
+  QR_NEVER_OPENS,
   QR_PRIVACY_PHRASE,
+  QR_PRIVACY_PHRASES,
   calcComparisonPaths,
   checkCalcPage,
   checkPdfHub,
@@ -42,11 +44,15 @@ import { LANGS, QR_ID, ROUTES, languagesOf, routeById, type Lang } from '../../s
 import enCommon from '../../src/i18n/en/common.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import qrTexts from '../../src/tools/qr-code-generator/i18n/en.ts';
+import ptQrTexts from '../../src/tools/qr-code-generator/i18n/pt.ts';
+import esQrTexts from '../../src/tools/qr-code-generator/i18n/es.ts';
+import type { QrPageTexts } from '../../src/tools/qr-code-generator/types.ts';
+import { longDate } from '../../src/i18n/dates.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
-import { FILLER, MAX_GUIDE_WORDS, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { FILLER, FILLER_BY_LANG, MAX_GUIDE_WORDS, MEASURED_DATE, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
 const faq = (count: number, tag = 'Q'): string =>
@@ -69,8 +75,15 @@ function page(blocks: Partial<Record<ContentBlock, string>> = {}, head = '<title
 const without = (name: ContentBlock): string => page().replace(`data-content="${name}"`, 'data-x="y"');
 
 // A file guide (F5b), built the way FileGuideView renders one: the blocks in order and `words` words of its own text.
+// The languages adjustment: `lang` writes the note of the measurement as the page of that language does ("Medido em 1 de
+// novembro de 2026.", with the date of src/i18n/dates.ts).
 const GUIDE_SENTENCE = 'The photo goes into the tool and comes back lighter than it was.';
-function guidePage(options: { words?: number; tool?: string; toolPath?: string; extra?: string; edit?: (html: string) => string } = {}): string {
+const MEASURED_NOTE: Record<Lang, string> = {
+  en: 'Measured on November 1, 2026.',
+  pt: `Medido em ${longDate('2026-11-01', 'pt')}.`,
+  es: `Medido el ${longDate('2026-11-01', 'es')}.`,
+};
+function guidePage(options: { words?: number; tool?: string; toolPath?: string; extra?: string; lang?: Lang; edit?: (html: string) => string } = {}): string {
   const sentences = Math.ceil((options.words ?? 900) / 13);
   const text = Array.from({ length: sentences }, () => GUIDE_SENTENCE).join(' ');
   const html = `<!doctype html><html><head><title>A guide | FileOrca</title><meta name="description" content="A guide to a tool."></head><body><main>
@@ -83,7 +96,7 @@ function guidePage(options: { words?: number; tool?: string; toolPath?: string; 
     <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p></section>
     <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
     <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
-    <p class="fo-reviewed">Measured on November 1, 2026.</p></section>
+    <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p></section>
     <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
   </main></body></html>`;
@@ -313,9 +326,13 @@ describe('portão de conteúdo: blocos das calculadoras (F4)', () => {
     expect(calcComparisonPaths('loan-amortization-calculator-balloon-payment')).toEqual(['/loan-amortization-calculator/']);
     expect(calcComparisonPaths('mortgage-calculator')).toEqual([]);
     for (const id of CALC_PRESET_IDS) expect(calcComparisonPaths(id), id).not.toContain(CALC_PAGES[id].path);
-    // F6: in Spanish a preset would be compared with the Spanish pages only; the presets are English only, and of the
-    // mortgage family only the parent has a Spanish page.
-    expect(calcComparisonPaths('mortgage-calculator-biweekly', 'es')).toEqual(['/es/calculadora-de-hipoteca/']);
+    // F6: in Spanish a preset is compared with the Spanish pages only. Since the languages adjustment the four presets have
+    // a Spanish page, so a Spanish preset is compared with its Spanish parent and its Spanish siblings, in the English order.
+    const es = (id: keyof typeof CALC_PAGES): string => CALC_PAGES[id].es.path;
+    expect(calcComparisonPaths('mortgage-calculator-biweekly', 'es')).toEqual([es('mortgage-calculator'), es('mortgage-calculator-extra-payments'), es('mortgage-calculator-15-vs-30-year')]);
+    expect(calcComparisonPaths('loan-amortization-calculator-balloon-payment', 'es')).toEqual([es('loan-amortization-calculator')]);
+    for (const id of CALC_PRESET_IDS) expect(calcComparisonPaths(id, 'es'), id).toEqual(calcComparisonPaths(id).map((path) => Object.values(CALC_PAGES).find((page) => page.path === path)?.es.path));
+    // No US money page exists in Portuguese.
     expect(calcComparisonPaths('mortgage-calculator-biweekly', 'pt')).toEqual([]);
   });
 
@@ -339,9 +356,21 @@ describe('portão de conteúdo: blocos das calculadoras (F4)', () => {
 
 // ---- F7, decision 8: the QR code generator page ---------------------------------------------------------------------
 
-/** A QR page with its four blocks, made from the real texts of src/tools/qr-code-generator/i18n/en.ts. */
-function qrPage(change: (html: string) => string = (html) => html): string {
-  const t = qrTexts;
+/** The real texts of the QR page in each language (Portuguese and Spanish since the languages adjustment). */
+const QR_TEXTS: Record<Lang, QrPageTexts> = { en: qrTexts, pt: ptQrTexts, es: esQrTexts };
+
+/**
+ * A privacy note of the QR page in each language, written here: the fake site of the script test has its pages in the words
+ * of their language whatever the real texts say, as its calculators do (calcPage).
+ */
+const QR_NOTE: Record<Lang, string> = {
+  en: 'Your text stays on your device. FileOrca never opens the link you type and never sends a request to it.',
+  pt: 'Seu texto fica no seu aparelho. O FileOrca nunca abre o link que você digita e nunca manda um pedido para ele.',
+  es: 'Tu texto se queda en tu dispositivo. FileOrca nunca abre el enlace que escribes ni le envía una solicitud.',
+};
+
+/** A QR page with its four blocks, made from the real texts of src/tools/qr-code-generator/i18n/<lang>.ts (English by default). */
+function qrPage(change: (html: string) => string = (html) => html, t: QrPageTexts = qrTexts): string {
   const questions = t.faq.map((item) => `<details><summary>${item.q}</summary><div><p>${item.a}</p></div></details>`).join('');
   const blocks = [
     `<section data-content="how"><ol>${t.howSteps.map((step) => `<li>${step}</li>`).join('')}</ol></section>`,
@@ -384,6 +413,64 @@ describe('portão de conteúdo: o gerador de QR code (F7)', () => {
 
   it('flags an unmeasured claim', () => {
     expect(checkQrPage(qrPage((html) => html.replace('</main>', '<p>The best QR code maker.</p></main>'))).join()).toMatch(/afirmação sem medida na página: best/);
+  });
+});
+
+// ---- The languages adjustment, decision 3: the QR code generator in Portuguese and Spanish -----------------------------
+
+/** The English page with the privacy note of a language in place of the English one. */
+const qrPageWithNote = (lang: Lang): string => qrPage((html) => html.replace(qrTexts.privacyNote, QR_NOTE[lang]));
+
+describe('portão de conteúdo: o gerador de QR code em português e espanhol', () => {
+  it('asks each language for its own phrases: the text stays on the device and the page never opens the link', () => {
+    expect(QR_PRIVACY_PHRASES.en).toBe(QR_PRIVACY_PHRASE);
+    expect(QR_PRIVACY_PHRASES).toEqual({ en: 'your text stays on your device', pt: 'seu texto fica no seu aparelho', es: 'tu texto se queda en tu dispositivo' });
+    expect(Object.fromEntries(LANGS.map((lang) => [lang, QR_NEVER_OPENS[lang].words]))).toEqual({ en: 'never opens', pt: 'nunca abre', es: 'nunca abre' });
+    // Positive controls: a page with the note of its language passes in that language.
+    for (const lang of LANGS) expect(checkQrPage(qrPageWithNote(lang), lang), lang).toEqual([]);
+    // The default stays English, as in the F7.
+    expect(checkQrPage(qrPageWithNote('en'))).toEqual([]);
+  });
+
+  it('fails a page left in English in Portuguese and Spanish, and a translated note in English (negative controls)', () => {
+    expect(checkQrPage(qrPage(), 'pt')).toEqual([
+      'o bloco privacy não diz "seu texto fica no seu aparelho"',
+      'o bloco privacy não diz que a página nunca abre o endereço digitado ("nunca abre")',
+    ]);
+    expect(checkQrPage(qrPage(), 'es')).toEqual([
+      'o bloco privacy não diz "tu texto se queda en tu dispositivo"',
+      'o bloco privacy não diz que a página nunca abre o endereço digitado ("nunca abre")',
+    ]);
+    expect(checkQrPage(qrPageWithNote('pt')).join()).toContain('o bloco privacy não diz "your text stays on your device"');
+    expect(checkQrPage(qrPageWithNote('pt'), 'es').join()).toContain('não diz "tu texto se queda en tu dispositivo"');
+    // Each phrase on its own: the device phrase without "nunca abre", and "nunca abre" without the device phrase.
+    const noNever = qrPage((html) => html.replace(qrTexts.privacyNote, 'Seu texto fica no seu aparelho. O FileOrca não guarda o link.'));
+    expect(checkQrPage(noNever, 'pt')).toEqual(['o bloco privacy não diz que a página nunca abre o endereço digitado ("nunca abre")']);
+    const noDevice = qrPage((html) => html.replace(qrTexts.privacyNote, 'Tu texto nunca sale del navegador. FileOrca nunca abre el enlace.'));
+    expect(checkQrPage(noDevice, 'es')).toEqual(['o bloco privacy não diz "tu texto se queda en tu dispositivo"']);
+    // "Nunca abre" is two whole words: "nunca abrem" and "nunca abrió" are not it.
+    expect(QR_NEVER_OPENS.pt.pattern.test('o fileorca nunca abrem o link')).toBe(false);
+    expect(QR_NEVER_OPENS.es.pattern.test('fileorca nunca abrió el enlace')).toBe(false);
+    expect(QR_NEVER_OPENS.es.pattern.test('fileorca nunca abre el enlace')).toBe(true);
+  });
+
+  it('looks for the claims of the language of the page', () => {
+    expect(checkQrPage(qrPageWithNote('pt').replace('</main>', '<p>O melhor gerador de QR code.</p></main>'), 'pt').join()).toMatch(/afirmação sem medida na página: best/);
+    expect(checkQrPage(qrPageWithNote('es').replace('</main>', '<p>El mejor generador de códigos QR.</p></main>'), 'es').join()).toMatch(/afirmação sem medida na página: best/);
+    // The Portuguese words are not a claim in English, and the English rule is not run on a Spanish page.
+    expect(checkQrPage(qrPageWithNote('en').replace('</main>', '<p>O melhor gerador.</p></main>'))).toEqual([]);
+  });
+
+  // Fails while src/tools/qr-code-generator/i18n/pt.ts and es.ts are the English stubs of the languages adjustment, and
+  // passes once the writers' texts say the two phrases of their language (as the English one does above).
+  it('accepts the Portuguese and Spanish pages built from their real texts', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      const t = QR_TEXTS[lang];
+      expect(checkQrPage(qrPage((html) => html, t), lang), lang).toEqual([]);
+      expect(normalizeText(t.privacyNote), lang).toContain(QR_PRIVACY_PHRASES[lang]);
+      expect(t.howSteps.length, lang).toBeGreaterThanOrEqual(3);
+      expect(t.faq.length, lang).toBeGreaterThanOrEqual(4);
+    }
   });
 });
 
@@ -966,6 +1053,96 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
   });
 });
 
+// ---- The languages adjustment, decision 5: the file guides in Portuguese and Spanish ----------------------------------
+
+describe('portão de conteúdo: os guias de arquivo em português e espanhol', () => {
+  const toolPath = { pt: '/pt/heic-para-jpg/', es: '/es/heic-a-jpg/' } as const;
+
+  it('passes a guide of each language with the date of the measurement written the way its page writes it', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      expect(checkFileGuide(guidePage({ lang, toolPath: toolPath[lang] }), { toolPath: toolPath[lang], lang }), lang).toEqual([]);
+    }
+    expect(MEASURED_NOTE.pt).toBe('Medido em 1 de novembro de 2026.');
+    expect(MEASURED_NOTE.es).toBe('Medido el 1 de noviembre de 2026.');
+  });
+
+  it('reads every month of src/i18n/dates.ts in its language, with a plain or a no-break space, and only there', () => {
+    for (const lang of LANGS) {
+      for (let month = 1; month <= 12; month += 1) {
+        const written = longDate(`2026-${String(month).padStart(2, '0')}-02`, lang);
+        expect(MEASURED_DATE[lang].test(`Measured: ${written}.`), `${lang} ${written}`).toBe(true);
+        expect(MEASURED_DATE[lang].test(written.replace(/ /g, '\u00a0')), `${lang} ${written} with no-break spaces`).toBe(true);
+      }
+    }
+    expect(MEASURED_DATE.en.test('November 2, 2026')).toBe(true);
+    expect(MEASURED_DATE.pt.test('2 de novembro de 2026')).toBe(true);
+    expect(MEASURED_DATE.es.test('2 de noviembre de 2026')).toBe(true);
+    // A date of another language is not one: the English date in pt and es, the Portuguese one in es and en.
+    expect(MEASURED_DATE.pt.test('November 2, 2026')).toBe(false);
+    expect(MEASURED_DATE.es.test('November 2, 2026')).toBe(false);
+    expect(MEASURED_DATE.es.test('2 de novembro de 2026')).toBe(false);
+    expect(MEASURED_DATE.en.test('2 de novembro de 2026')).toBe(false);
+    // Nor a month without its day or year.
+    expect(MEASURED_DATE.pt.test('em novembro de 2026')).toBe(false);
+    expect(MEASURED_DATE.es.test('2 de noviembre')).toBe(false);
+  });
+
+  it('fails a Portuguese or Spanish guide whose measured note keeps the English date, and an English guide with a translated one', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      expect(checkFileGuide(guidePage({ toolPath: toolPath[lang] }), { toolPath: toolPath[lang], lang }), lang).toContain('a seção medida sem a data da medida');
+    }
+    expect(checkFileGuide(guidePage({ lang: 'pt' }), { toolPath: '/heic-to-jpg/' })).toContain('a seção medida sem a data da medida');
+    expect(checkFileGuide(guidePage({ lang: 'es' }), { toolPath: '/heic-to-jpg/', lang: 'pt' })).toContain('a seção medida sem a data da medida');
+  });
+
+  it('fails a guide of a language that links to the tool page of another language', () => {
+    expect(checkFileGuide(guidePage({ lang: 'pt' }), { toolPath: toolPath.pt, lang: 'pt' }).join()).toMatch(/o link da ferramenta leva a \/heic-to-jpg\/ em vez de \/pt\/heic-para-jpg\//);
+  });
+
+  it('keeps the limit of 800 to 1,500 words in every language', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      expect(checkFileGuide(guidePage({ lang, toolPath: toolPath[lang], words: 700 }), { toolPath: toolPath[lang], lang }).join(), lang).toMatch(/palavras de texto \(pede de 800 a 1500\)/);
+      expect(checkFileGuide(guidePage({ lang, toolPath: toolPath[lang], words: MAX_GUIDE_WORDS + 200 }), { toolPath: toolPath[lang], lang }).join(), lang).toMatch(/palavras de texto/);
+    }
+  });
+
+  it('fails the filler phrases of Portuguese and Spanish, and an English one left in a translation', () => {
+    const fillers: Record<'pt' | 'es', string[]> = {
+      pt: [
+        'No mundo de hoje, as fotos são grandes.',
+        'Vale ressaltar que o JPG perde detalhes.',
+        'É importante notar que o PNG não perde nada.',
+        'Em conclusão, use JPG para fotos.',
+        'Vamos mergulhar fundo nos formatos.',
+        'Nem é preciso dizer que o arquivo fica menor.',
+      ],
+      es: [
+        'En el mundo actual, las fotos pesan mucho.',
+        'Cabe destacar que el JPG pierde detalles.',
+        'Es importante señalar que el PNG no pierde nada.',
+        'En conclusión, usa JPG para las fotos.',
+        'Vamos a sumergirnos en los formatos.',
+        'Huelga decir que el archivo queda más chico.',
+      ],
+    };
+    for (const lang of ['pt', 'es'] as const) {
+      expect(FILLER_BY_LANG[lang].length, lang).toBeGreaterThanOrEqual(5);
+      for (const text of fillers[lang]) {
+        expect(findFiller(text, lang), `${lang} ${text}`).not.toEqual([]);
+        expect(checkFileGuide(guidePage({ lang, toolPath: toolPath[lang], extra: text }), { toolPath: toolPath[lang], lang }).join(), `${lang} ${text}`).toMatch(/frase de enchimento/);
+        // The same phrase read as English is not English filler: each list is of its own language.
+        expect(findFiller(text), `en ${text}`).toEqual([]);
+      }
+      // An English filler left in a translation fails too.
+      expect(findFiller('In conclusion, use JPG.', lang), lang).toEqual(['in conclusion']);
+    }
+    expect(FILLER_BY_LANG.en).toBe(FILLER);
+    // Negative controls: the words alone, in plain sentences, are not filler.
+    for (const text of ['A conclusão da medida está na tabela.', 'O mundo das fotos de celular mudou com o HEIC.', 'É importante para quem envia fotos por e-mail.', 'O resumo da medida vem depois.']) expect(findFiller(text, 'pt'), text).toEqual([]);
+    for (const text of ['La conclusión de la medida está en la tabla.', 'El mundo de las fotos del celular cambió con el HEIC.', 'Es importante para quien envía fotos por correo.', 'El resumen de la medida viene después.']) expect(findFiller(text, 'es'), text).toEqual([]);
+  });
+});
+
 describe('portão de conteúdo: o script sobre um dist de teste', () => {
   const root = mkdtempSync(join(tmpdir(), 'fileorca-conteudo-'));
   afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -1004,14 +1181,18 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
         write(dir, entry.path, pdfHub({ lang: entry.lang }));
         continue;
       }
-      // F7: the QR code generator, with its real texts.
+      // F7: the QR code generator, with its real English texts. The languages adjustment: in Portuguese and Spanish too, with
+      // the privacy note of the language and a title and description of its own.
       if (id === QR_ID) {
-        write(dir, entry.path, qrPage());
+        const qr = entry.lang === 'en' ? qrPage() : qrPageWithNote(entry.lang).replace(`<title>${qrTexts.title} | FileOrca</title>`, `<title>${qrTexts.title} ${entry.lang} | FileOrca</title>`).replace(`content="${qrTexts.description}"`, `content="${qrTexts.description} ${entry.lang}"`);
+        write(dir, entry.path, qr);
         continue;
       }
+      // The file guides, in each of their languages: the date of the measurement as that language writes it, and the link to
+      // the tool page of that language.
       if (isFileGuide(id)) {
-        const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[id].tool)?.paths.en ?? '/';
-        write(dir, entry.path, guidePage({ toolPath, edit: (html) => html.replace('<title>A guide | FileOrca</title>', `<title>${id} | FileOrca</title>`).replace('content="A guide to a tool."', `content="Guide ${id}."`) }));
+        const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[id].tool)?.paths[entry.lang] ?? '/';
+        write(dir, entry.path, guidePage({ toolPath, lang: entry.lang, edit: (html) => html.replace('<title>A guide | FileOrca</title>', `<title>${id} ${entry.lang} | FileOrca</title>`).replace('content="A guide to a tool."', `content="Guide ${id} ${entry.lang}."`) }));
         continue;
       }
       if (!isImagePage(id)) {
@@ -1037,6 +1218,9 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   // F7: and the 11 home and health calculators, in English (DECISOES § 259).
   const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id) || isLifeCalc(entry.route.id)).length;
   const pdfCount = allPages().filter((entry) => isPdfPage(entry.route.id) || entry.route.id === PDF_HUB_ID).length;
+  // The languages adjustment: the ten file guides and the QR code generator in each of their languages (30 and 3; 10 and 1 before).
+  const guideCount = allPages().filter((entry) => isFileGuide(entry.route.id)).length;
+  const qrCount = allPages().filter((entry) => entry.route.id === QR_ID).length;
 
   it('passes on a complete site, whose 404 pages repeat a title and hold placeholder wording', () => {
     expect(imageCount).toBe(11 * 3);
@@ -1119,23 +1303,49 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   });
 
   it('checks the ten file guides of the registry, and fails when one loses its tool or is missing (F5b)', () => {
+    expect(guideCount).toBe(FILE_GUIDE_IDS.length * LANGS.length);
     const dir = join(root, 'guides');
     build(dir);
-    expect(run(dir).output).toMatch(new RegExp(`${pdfCount} de PDF \\(as ferramentas e o hub\\), 10 guia\\(s\\) de arquivo`));
+    expect(run(dir).output).toMatch(new RegExp(`${pdfCount} de PDF \\(as ferramentas e o hub\\), ${guideCount} guia\\(s\\) de arquivo`));
     write(dir, '/guides/jpg-vs-png/', guidePage({ toolPath: '/png-to-jpg/', tool: '' }));
     rmSync(join(dir, fileForPath('/guides/split-pdf-file-size/')));
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
+    expect(result.output).toContain(`${guideCount - 1} guia(s) de arquivo conferido(s), o registro tem ${guideCount}`);
+  });
+
+  it('checks each file guide in Portuguese and Spanish, in the words and links of its language (the languages adjustment)', () => {
+    const dir = join(root, 'guides-languages');
+    build(dir);
+    const jpgPng = FILE_GUIDES['guides-jpg-vs-png'];
+    const pngToJpg = routeById('png-to-jpg');
+    // The Portuguese guide with the English note of the measurement, and the Spanish one linking to the English tool page.
+    write(dir, jpgPng.paths.pt, guidePage({ toolPath: pngToJpg.paths.pt ?? '', edit: (html) => html.replace('<title>A guide | FileOrca</title>', '<title>jpg pt | FileOrca</title>') }));
+    write(dir, jpgPng.paths.es, guidePage({ lang: 'es', toolPath: pngToJpg.paths.en ?? '', edit: (html) => html.replace('<title>A guide | FileOrca</title>', '<title>jpg es | FileOrca</title>') }));
+    // A Spanish guide with a filler phrase of Spanish, and a Portuguese guide that is missing.
+    const heic = FILE_GUIDES['guides-heic-to-jpg-on-windows'];
+    write(dir, heic.paths.es, guidePage({ lang: 'es', toolPath: routeById('heic-to-jpg').paths.es ?? '', extra: 'Cabe destacar que el HEIC pesa menos.', edit: (html) => html.replace('<title>A guide | FileOrca</title>', '<title>heic es | FileOrca</title>') }));
+    rmSync(join(dir, fileForPath(heic.paths.pt)));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain(`${jpgPng.paths.pt}: a seção medida sem a data da medida`);
+    expect(result.output).toContain(`${jpgPng.paths.es}: o link da ferramenta leva a ${pngToJpg.paths.en} em vez de ${pngToJpg.paths.es}`);
+    expect(result.output).toContain(`${heic.paths.es}: frase de enchimento: "cabe destacar"`);
+    expect(result.output).toContain(`${heic.paths.pt}: a página não existe no dist`);
+    // The English guides of the same site still pass: no English guide is named.
+    expect(result.output).not.toContain(`${jpgPng.paths.en}:`);
+    expect(result.output).not.toContain(`${heic.paths.en}:`);
   });
 
   it('checks the QR code generator from the route map, and fails when it loses a block or is missing (F7)', () => {
+    expect(qrCount).toBe(3);
     const dir = join(root, 'qr');
     build(dir);
     const ok = run(dir);
     expect(ok.status).toBe(0);
-    expect(ok.output).toMatch(/10 guia\(s\) de arquivo, 1 do gerador de QR code e \d+ página\(s\) do site/);
+    expect(ok.output).toMatch(new RegExp(`${guideCount} guia\\(s\\) de arquivo, ${qrCount} do gerador de QR code e \\d+ página\\(s\\) do site`));
     const path = routeById(QR_ID).paths.en ?? '';
     write(dir, path, qrPage((html) => html.replace(/<section data-content="privacy">.*?<\/section>/, '')));
     const lost = run(dir);
@@ -1143,6 +1353,24 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(lost.output).toContain(`${path}: sem o bloco privacy`);
     rmSync(join(dir, fileForPath(path)));
     expect(run(dir).output).toContain(`${path}: a página não existe no dist`);
+  });
+
+  it('checks the QR code generator in Portuguese and Spanish with the phrases of each language (the languages adjustment)', () => {
+    const dir = join(root, 'qr-languages');
+    build(dir);
+    const pt = routeById(QR_ID).paths.pt ?? '';
+    const es = routeById(QR_ID).paths.es ?? '';
+    // The Portuguese page left in English, and the Spanish one with the Portuguese note.
+    write(dir, pt, qrPage().replace(`<title>${qrTexts.title} | FileOrca</title>`, '<title>qr pt | FileOrca</title>').replace(`content="${qrTexts.description}"`, 'content="qr pt"'));
+    write(dir, es, qrPageWithNote('pt').replace(`<title>${qrTexts.title} | FileOrca</title>`, '<title>qr es | FileOrca</title>').replace(`content="${qrTexts.description}"`, 'content="qr es"'));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain(`${pt}: o bloco privacy não diz "seu texto fica no seu aparelho"`);
+    expect(result.output).toContain(`${pt}: o bloco privacy não diz que a página nunca abre o endereço digitado ("nunca abre")`);
+    expect(result.output).toContain(`${es}: o bloco privacy não diz "tu texto se queda en tu dispositivo"`);
+    // The Portuguese "nunca abre" is the Spanish one too, so the Spanish page fails on the device phrase only.
+    expect(result.output).not.toContain(`${es}: o bloco privacy não diz que a página nunca abre`);
+    expect(result.output).not.toContain(`${routeById(QR_ID).paths.en}:`);
   });
 
   it('fails with the page and the block when a tool page loses one', () => {

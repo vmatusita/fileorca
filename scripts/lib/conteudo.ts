@@ -613,15 +613,32 @@ export function checkPdfHub(html: string, want: PdfHubWant): string[] {
 export const QR_BLOCKS = ['how', 'faq', 'privacy', 'related'] as const;
 /** What the privacy note of the QR page says, in so many words: the text is the person's, and it stays with them. */
 export const QR_PRIVACY_PHRASE = 'your text stays on your device';
-/** And that the page never opens, or sends a request to, the address typed in the box. */
-const QR_NEVER_OPENS = /\bnever opens\b/;
+/**
+ * The same phrase in each language (the languages adjustment, decision 3), lower case, in the words of docs/i18n/pt.md and
+ * es.md ("aparelho", "dispositivo"), the way CALC_PRIVACY_PHRASES says it of the numbers.
+ */
+export const QR_PRIVACY_PHRASES: Record<Lang, string> = {
+  en: QR_PRIVACY_PHRASE,
+  pt: 'seu texto fica no seu aparelho',
+  es: 'tu texto se queda en tu dispositivo',
+};
+/**
+ * And that the page never opens, or sends a request to, the address typed in the box: "never opens", "nunca abre". The
+ * boundaries know accents (\b does not).
+ */
+export const QR_NEVER_OPENS: Record<Lang, { words: string; pattern: RegExp }> = {
+  en: { words: 'never opens', pattern: /\bnever opens\b/ },
+  pt: { words: 'nunca abre', pattern: /(?<![\p{L}\p{N}])nunca abre(?![\p{L}\p{N}])/u },
+  es: { words: 'nunca abre', pattern: /(?<![\p{L}\p{N}])nunca abre(?![\p{L}\p{N}])/u },
+};
 
 /**
  * Rule 6 (F7): the QR code generator page. Its four blocks (three steps or more, four real questions or more, the privacy
  * note, at least one related link); the privacy note says the text stays on the device and the page never opens the link
- * typed; and no best, #1 or unmeasured number (CLAIMS).
+ * typed; and no best, #1 or unmeasured number (CLAIMS). Since the languages adjustment, in the language of the page (English
+ * by default, as in the F7): the phrases of QR_PRIVACY_PHRASES and QR_NEVER_OPENS, and the claims of CLAIMS_BY_LANG.
  */
-export function checkQrPage(html: string): string[] {
+export function checkQrPage(html: string, lang: Lang = DEFAULT_LANG): string[] {
   const root = parsePage(html);
   const problems: string[] = [];
   for (const name of QR_BLOCKS) {
@@ -631,9 +648,11 @@ export function checkQrPage(html: string): string[] {
     else problems.push(...(name === 'faq' ? pdfFaqProblems(root) : BLOCK_CHECKS[name](blocks)));
   }
   const privacy = blocksOf(root, 'privacy').map(plainText).join(' ');
-  if (privacy && !privacy.includes(QR_PRIVACY_PHRASE)) problems.push(`o bloco privacy não diz "${QR_PRIVACY_PHRASE}"`);
-  if (privacy && !QR_NEVER_OPENS.test(privacy)) problems.push('o bloco privacy não diz que a página nunca abre o endereço digitado ("never opens")');
-  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`)) {
+  const phrase = QR_PRIVACY_PHRASES[lang];
+  const never = QR_NEVER_OPENS[lang];
+  if (privacy && !privacy.includes(phrase)) problems.push(`o bloco privacy não diz "${phrase}"`);
+  if (privacy && !never.pattern.test(privacy)) problems.push(`o bloco privacy não diz que a página nunca abre o endereço digitado ("${never.words}")`);
+  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`, lang)) {
     problems.push(`afirmação sem medida na página: ${claim}`);
   }
   return problems;
