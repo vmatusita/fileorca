@@ -85,7 +85,7 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 
 - **Hoje não acontece:** o repositório é público, e os runners padrão do GitHub não gastam a cota de um repositório público (seção "Repositório público", abaixo). Esta seção vale se ele voltar a ser privado.
 - **Onde ver:** Settings → Billing → Actions (2.000 minutos por mês no plano Free, com o repositório privado).
-- **Quanto custa cada execução** (os minutos como num repositório privado, que o `pnpm ci:custo <id>` mostra; DECISOES § 323): desde a F9, um push numa PR em rascunho roda só o job leve (uns 5 minutos), uma PR só de documentação roda o build e os portões, e uma PR pronta roda o CI completo (157 minutos na linha de base da F9; DECISOES § 339). Cada PR do Dependabot nasce pronta e roda o CI completo, e cada rebase dela também.
+- **Quanto custa cada execução** (os minutos como num repositório privado, que o `pnpm ci:custo <id>` mostra; DECISOES § 323): desde a F9, um push numa PR em rascunho roda só o job leve (uns 5 minutos), uma PR só de documentação roda o build e os portões, e uma PR pronta roda o CI completo (111 minutos nas execuções da F9, contra 157 na linha de base, numa máquina mais rápida; DECISOES § 339). Cada PR do Dependabot nasce pronta e roda o CI completo, e cada rebase dela também.
 - **O que fazer:** baixe o `open-pull-requests-limit` do `.github/dependabot.yml` numa run curta, feche PRs de major que você não vai mesclar agora com `@dependabot ignore this major version`, e evite reruns sem motivo. O `pnpm ci:custo <id>` mostra o que mais pesa em cada execução.
 
 ## Defeito no service worker (desativação de emergência)

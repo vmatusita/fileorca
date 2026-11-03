@@ -208,7 +208,8 @@ jobs:
             test -s "$RUNNER_TEMP/navegador/status" && break
             sleep 1
           done
-          grep '^\[navegador\]' "$RUNNER_TEMP/navegador/log" || true
+          # The time of each phase and what apt downloaded, to tell a slow mirror from a slow dpkg (DECISOES § 325).
+          grep -E '^(\[navegador\]|Fetched )' "$RUNNER_TEMP/navegador/log" || true
           if [ "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" != 0 ]; then
             tail -n 40 "$RUNNER_TEMP/navegador/log"
             exit 1
@@ -318,7 +319,8 @@ jobs:
             test -s "$RUNNER_TEMP/navegador/status" && break
             sleep 1
           done
-          grep '^\[navegador\]' "$RUNNER_TEMP/navegador/log" || true
+          # The time of each phase and what apt downloaded, to tell a slow mirror from a slow dpkg (DECISOES § 325).
+          grep -E '^(\[navegador\]|Fetched )' "$RUNNER_TEMP/navegador/log" || true
           if [ "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" != 0 ]; then
             tail -n 40 "$RUNNER_TEMP/navegador/log"
             exit 1

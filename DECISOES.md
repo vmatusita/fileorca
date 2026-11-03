@@ -3004,6 +3004,36 @@ A revisão das cinco lentes (`docs/relatorios/REVISAO-ajuste-idiomas.md`) confir
 
   O teste do ajuste idiomas que lia as duas matrizes do `ci.yml` (`matrixOf('verificar')`) perdeu essa leitura, porque o job `verificar` deixou de existir. As asserções dele sobre o `plan()` ficaram, e a do `ci.yml` passou ao teste novo, mais forte: as partes vêm do arquivo e o build conta uma vez.
 
+## § 325 · O preparo dos jobs do Playwright (F9, decisão 3)
+
+- **O que é o preparo:** do início do job ao início do passo que roda o `pnpm verificar`. Inclui o checkout, o Node e o pnpm, o `pnpm install`, o navegador, os pacotes do sistema e o download do artefato. O `pnpm ci:custo` mede cada job, não a média.
+- **Onde estava o tempo** (linha de base, execução 41590377930): o preparo foi de 55 a 128 s, com mediana de uns 75 s e 1 dos 18 jobs acima de 90 s.
+  - O `playwright install --with-deps` levava de 19 a 27 s no Chromium e de 33 a 45 s no WebKit, com 86 s no pior caso.
+  - A parte lenta é o `apt` do WebKit: uns 180 pacotes e 114 MB. O download do navegador leva de 3 a 8 s.
+  - O `setup-node` levava de 11 a 17 s (o Node 24.22.2 não vem na imagem do runner, mais o cache do pnpm), e o `pnpm install`, de 7 a 12 s.
+- **Abordagem 1, medida na execução 41658317282:** checkout raso, e logo depois o `npx playwright@<versão do lockfile> install --with-deps <navegador>` em segundo plano (`setsid nohup`, com a saída num arquivo), enquanto o job baixa o artefato e prepara o Node e o pnpm.
+  - A versão sai do `pnpm-lock.yaml` (a linha `'@playwright/test@x.y.z':`), então o navegador é a mesma revisão que o `@playwright/test` instalado procura.
+  - Um passo "Wait for the browser" espera o status do processo (até 300 s) e falha se a instalação falhou, mostrando o fim do log dela.
+  - O job do Lighthouse faz o mesmo, com o Chromium.
+  - **Resultado:** o preparo dos 18 jobs foi de 41 a 116 s, com mediana de 53 s. Só o WebKit 13 de 13 passou de 90 s: 116 s, com 79 s de espera pelo navegador.
+- **Abordagem 2, medida na execução 41660597548:** a 1, mais o `dpkg` sem `fsync` (`force-unsafe-io`) e sem o gatilho do `man-db`. A instalação passou a ser feita em duas etapas, os pacotes do sistema e depois o navegador, cada uma com o próprio tempo no log (linhas `[navegador]`).
+  - **Resultado:** o preparo foi de 40 a 122 s, com mediana de 56 s. Só o WebKit 7 de 13 passou de 90 s: 122 s.
+  - **Os pacotes do sistema** levaram de 13 a 33 s no Chromium e de 32 a 62 s no WebKit, com 99 s no WebKit 7. O navegador levou de 4 a 13 s.
+- **A conclusão:** o critério "até 90 s em cada job" não fechou. Nas duas execuções, 17 dos 18 jobs ficaram em até 90 s (antes, 17 de 18 também, com mediana de uns 75 s). Em cada execução, um job do WebKit passou, pela variação do `apt` dos pacotes do sistema, e não pelo trabalho do job. A mediana caiu uns 20 s. O passo de espera passa a mostrar a linha "Fetched" do `apt`, para separar um espelho lento de um `dpkg` lento. A pendência "F9 preparo" fica para a F9b.
+- **A opção B,** a imagem oficial `mcr.microsoft.com/playwright:v1.64.1-noble` rodada por um passo `docker run`, não foi medida: as duas medidas permitidas foram para a opção A. Contra a B pesavam:
+  - 990 MB de camadas, com os três navegadores;
+  - o Node 26 da imagem, quando o projeto pede o 24;
+  - o diagnóstico de disco pela metade dentro do contêiner;
+  - o disco: a § 141 registra `ENOSPC` com 72 GB. As máquinas desta run têm 145 GB, mas a linha de base rodou numa de 72 GB, e o tipo de máquina varia.
+- **Alternativa recusada: o navegador em cache pelo `actions/cache`.** A documentação do Playwright desaconselha, porque restaurar leva o mesmo que baixar. O cache de uma PR só serve à própria PR, então a primeira execução seria fria. E o `apt`, que é a parte lenta, não se guarda assim.
+- **As proteções da § 154 não mudaram.** Nos logs das 18 partes da execução 41658317282 aparecem:
+  - o passo "Core dumps off" (`kernel.core_pattern = |/bin/false`) antes do `verificar`;
+  - o `ulimit -c 0` no passo;
+  - o passo "Disk and core dumps", com o `df` e o `core_pattern: |/bin/false`;
+  - as linhas `[disco]`.
+
+  O `tests/unit/ci-workflows.test.ts` fixa os passos. O disco livre mínimo das partes foi de 81 a 85 GB, contra 7 a 10 GB na linha de base: outra máquina (abaixo, § 339).
+
 ## § 326 · Quando o CI roda: as classes (F9, decisão 4)
 
 - **O script** é o `scripts/ci/classificar.ts`, com a função pura `classify()` e um CLI que lê o JSON do job e escreve `classe` e `motivo` no `GITHUB_OUTPUT`, e a linha `classificar: classe <x> - <motivo>` no log (o `ci:custo` a lê). O job `classificar` lê o script da base, como o `pode-mesclar.ts`; nesta PR a base não o tem e o job usa a cópia da própria PR.
@@ -3329,7 +3359,7 @@ Por que cada uma saiu (o número é a linha no `CLAUDE.md` de `bbd30c8`):
   - O `docs/OPERACAO.md` diz que o passo da visibilidade já está feito e que os outros da seção F ficam urgentes: o ruleset, a aprovação de workflow de fork, o secret scanning, a push protection, o relato privado e as Features.
 
   Nenhuma configuração do GitHub mudou; elas são do Victor.
-- **O custo.** Os minutos de um repositório público não são cobrados. O `ci:custo` calcula "como num repositório privado" (o minuto arredondado por job), como a ficha pede, e a linha de base já rodou nas máquinas de repositório público. A comparação é entre as mesmas máquinas.
+- **O custo.** Os minutos de um repositório público não são cobrados. O `ci:custo` calcula "como num repositório privado" (o minuto arredondado por job), como a ficha pede. A linha de base também rodou como repositório público, mas o tipo de máquina mudou entre ela e as execuções desta PR (o disco do `/` foi de 72 para 145 GB, e os testes ficaram uns 30 % mais rápidos): por isso o relatório traz também uma conta controlada (§ 339).
 - **O rótulo `ci` não existe** (`gh label list` mostra só os padrões). A run não o cria (`gh label create` é proibido). As execuções completas saem do `gh pr ready`, e o `gh pr ready --undo` volta ao rascunho entre elas. Criar o rótulo é do Victor.
 
 ## § 339 · A meta de 35 % numa execução completa (F9, decisão 1 e critério 1)
@@ -3344,10 +3374,13 @@ Por que cada uma saiu (o número é a linha no `CLAUDE.md` de `bbd30c8`):
   - com o preparo em 45 s, o build único e os três jobs novos (`classificar`, `build` e `ci-ok`), a estimativa é de 142 a 151 minutos (−4 % a −10 %).
 
   Os 35 % pediriam cortar tempo de teste, mudar o número de partes ou os workers, e a ficha proíbe os três (a F9b redivide).
-- **O que a run fez:** implementou o build único, o preparo em segundo plano e as classes, mediu a execução completa e põe as duas saídas do `ci:custo` lado a lado no relatório. O critério 1 fica registrado como não atingido na parte dos 35 %. A economia que a run entrega está nas execuções que deixam de ser completas:
-  - um push em rascunho custava uma execução completa (157 a 166 minutos na PR #19) e passa a custar uns 6;
+- **O que as duas execuções completas da PR mostraram** (41658317282 e 41660597548): 111 minutos cobrados cada uma, contra 157 da linha de base (−29,3 %). Esse número mistura duas coisas.
+  - **A máquina mudou.** A imagem é a mesma (`ubuntu-24.04`, versão 20261025.353.1), mas o `/` das partes tem 145 GB, contra 72 GB na linha de base, e o tempo de teste somado das 20 partes caiu de 113,9 para 78,7 e 75,7 minutos (−31 % e −34 %), com os mesmos testes sobre o mesmo `dist/`. O runner tem 4 vCPU (o log do preparo imprime o `nproc`).
+  - **A conta controlada:** cada parte da execução nova com o tempo de teste da linha de base (a duração do job menos o `total` dele, mais o `total` da linha de base sem o build), e os jobs novos como foram medidos. Ela dá 148 minutos nas duas execuções: −5,7 %, dentro da estimativa de antes. É o que a F9 economiza sozinha numa execução completa.
+- **O critério 1 não fechou.** Pela conta bruta, −29,3 % não chegam aos 35 %; pela controlada, a F9 sozinha dá −5,7 %. A run implementou o build único, o preparo em segundo plano, o cache menor e as classes, e o relatório traz as duas saídas do `ci:custo` lado a lado e a conta controlada. A economia que a run entrega está nas execuções que deixam de ser completas:
+  - um push em rascunho custava uma execução completa (157 a 166 minutos na PR #19) e passa a custar 5 (`41652974779`: 3 jobs, 3,5 min de parede);
   - uma PR só de documentação pula o Playwright e o Lighthouse.
-- **Para a F9b:** com o repositório público, os runners padrão do Linux têm 4 vCPU (o log do preparo imprime o `nproc`). Redividir as partes e os workers para essas máquinas é a alavanca que falta. Linha no `PENDENCIAS.md`.
+- **Para a F9b:** redividir as partes e os workers para as máquinas de repositório público (4 vCPU) é a alavanca que falta, medida com o `pnpm ci:custo` antes e depois e com a conta controlada, porque o tipo de máquina varia. Linha "F9 35 %" no `PENDENCIAS.md`.
 
 ## § 340 · O adendo da ADR-003 e as pendências (F9, decisão 14)
 
