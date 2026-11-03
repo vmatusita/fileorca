@@ -52,6 +52,9 @@
 .tl-options { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: var(--space-2); }
 .tl-options > legend { padding: 0; margin-bottom: var(--space-2); font: 600 15px/20px var(--font-text); color: var(--ink); }
 .tl-options .fo-seg__opt span { display: grid; justify-items: center; }
+/* At 320 px the two options share 288 px: they may shrink and their lines wrap (WCAG 1.4.10; review of the F10, b-03). */
+.tl-options .fo-seg__opt, .tb-tray .fo-seg__opt { min-width: 0; padding-inline: var(--space-2); }
+.tl-options .fo-seg__opt :is(span, small), .tb-tray .fo-seg__opt :is(span, small) { min-width: 0; overflow-wrap: anywhere; text-align: center; }
 
 /* The Adjust disclosure: the options folded under one 48 px line after the result. */
 .tl-adjust { border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
@@ -80,7 +83,7 @@
 @media (min-width: 768px) { .ta-oli { top: -76px; right: var(--space-4); width: 112px; height: 112px; } }
 .ta-oli > [data-oli] { width: 100%; height: 100%; }
 .ta-oli > [data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
-.ta-oli > [data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
+.ta-oli > [data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }
 
 /* The zone: the water rests at 30 % (not 12 %), so the sea is visible above the cookie notice; the button sits in
    the dry part, high enough to stay above today's notice in pt and es. */
@@ -90,6 +93,9 @@
 @media (min-width: 768px) { .ta-zone[data-state="error"] { padding-inline: var(--space-8); } .ta-zone[data-state="error"] .fo-btn { align-self: flex-start; } }
 .ta-zone .fo-drop__help { max-width: 32ch; }
 .ta-error { display: grid; gap: var(--space-2); }
+/* The way out may wrap: at 320 px "Escolher outros arquivos" does not fit one line inside the zone (WCAG 1.4.10;
+   review of the F10, b-03). */
+:is(.ta-zone, .tb-sheet)[data-state="error"] .fo-btn { min-width: 0; max-width: 100%; white-space: normal; }
 .ta-error__title { display: flex; gap: var(--space-2); align-items: flex-start; margin: 0; font: 600 20px/26px var(--font-display); color: var(--ink); }
 .ta-error__title .fo-icon { flex: none; margin-top: 1px; color: var(--danger); }
 .ta-error__why { margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
@@ -235,12 +241,38 @@
 .tm-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .tm-foot .tm-add { flex: 1 1 180px; width: auto; }
 
+/* Review of the F10 (a-01). D-26: the order help is in view, right above the rows, not under the last one. */
+.tm-help--order { margin-top: calc(-1 * var(--space-1)); }
+/* D-27: while the files are read, the panel is already the list (no WaterLevel blinking for 30 to 150 ms); the place
+   of Merge PDFs holds a line of the same height, so nothing moves when the button arrives. The WaterLevel of the
+   reading only shows after 400 ms, as the processing does (Principle 8). D-21: with one PDF left, the same place says
+   what is missing. */
+.tm-hold { display: flex; align-items: center; min-height: 60px; margin: 0; font: 600 16px/22px var(--font-text); color: var(--ink); }
+.tm-hold--need { color: var(--ink-muted); font-weight: 500; }
+.tm-row--reading .fo-bar { margin-top: var(--space-2); }
+/* D-21: every row has a remove button (the trash icon, 48 px), after the arrows; the arrows stack on the phone so the
+   name keeps its width (the row is 100 px tall there). */
+.tm-row:has(> .tm-remove) { grid-template-columns: minmax(0, 1fr) auto auto; }
+.tm-row.tm-row--reading { grid-template-columns: minmax(0, 1fr) auto; }
+.tm-remove .fo-icon { width: 20px; height: 20px; }
+@media (max-width: 767px) {
+  .tm-moves { flex-direction: column; }
+  /* The card takes the height of the stacked arrows, so each pair of arrows reads as its own row's. */
+  .tm-row:has(> .tm-remove) { align-items: stretch; }
+  .tm-row:has(> .tm-remove) > .fo-file { align-content: center; }
+  .tm-row > .tm-remove { align-self: center; }
+}
+/* The undo line takes the place of the row that left: a dashed paper of the row height, the sentence and Undo. It
+   stays until the next action (Merge, Add or another remove): no timer (WCAG 2.2.1). */
+.tm-undo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); min-height: 72px; margin: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.tm-undo__btn { flex: none; }
+
 /* With the list on screen the rectangle keeps the list's height (--tm-lock, measured by the island in the site; here,
    the height of two files in the longest language) through the WaterLevel and the result: nothing below moves. */
-.tm-island { --tm-lock: 388px; }
-html[data-lang="es"] .tm-island { --tm-lock: 468px; }
-html[data-lang="pt"] .tm-island { --tm-lock: 492px; }
-@media (min-width: 768px) { .tm-island, html:is([data-lang="pt"], [data-lang="es"]) .tm-island { --tm-lock: 400px; } }
+.tm-island { --tm-lock: 480px; }
+html[data-lang="es"] .tm-island { --tm-lock: 540px; }
+html[data-lang="pt"] .tm-island { --tm-lock: 564px; }
+@media (min-width: 768px) { .tm-island, html:is([data-lang="pt"], [data-lang="es"]) .tm-island { --tm-lock: 412px; } }
 .tm-island .tl-slot > :is(.tm-panel, .fo-level, .fo-result) { min-height: var(--tm-lock); }
 .tm-band { --tl-band-h: 252px; }
 .tm-b-band { --tl-band-h: 0px; }

@@ -76,9 +76,13 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
 /* Oli boxes: the site writes <div class="..." data-oli="pose" aria-hidden="true"><svg><use href="#oli-pose"/></svg></div>. */
 [data-oli] { flex: none; }
 [data-oli] > svg { display: block; width: 100%; height: 100%; overflow: visible; }
-[data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
+/* The motion follows the rule of UX-10 in every prototype (review of the F10, b-01): what starts on its own ends
+   before 5 s and leaves the Oli still (WCAG 2.2.2). The wave floats up and back once, 2 x 1.5 s = 3 s; the swim is
+   the only loop, because it is the progress of the work (the essential exception), with the duration by name.
+   Today's infinite wave (components.css:14) is shown only in oli-motion.html?state=antes. */
+[data-oli="wave"] > svg { animation: fo-float calc(var(--dur-float) / 2) var(--ease-in-out) 2 alternate; }
 [data-oli="gulp"] > svg { scale: 1.05; }
-[data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
+[data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }
 .fo-drop__oli { top: -86px; right: 0; }
 .fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring); }
 @media (min-width: 768px) { .fo-drop__oli { top: -76px; right: var(--space-4); } }
@@ -119,9 +123,11 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
 .proto-main { display: grid; gap: var(--space-4); padding-top: var(--space-5); min-width: 0; max-width: var(--tool-max); }
 .proto-rail { display: none; }
 @media (min-width: 1280px) {
-  /* The column gap is the ad clearance itself, so the rail never comes closer than 150 px. */
+  /* The column gap is the ad clearance itself, so the rail never comes closer than 150 px to the column. The rail
+     starts 150 px below the header, as the map of UX-07 asks (DECISOES § 361; review of the F10, c-01): today's site
+     has 20 px there (global.css:62-70), 29 px from the search and the language button, which are menus. */
   .proto-frame--rail { display: grid; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; align-items: start; }
-  .proto-rail { display: block; padding-top: var(--space-5); }
+  .proto-rail { display: block; padding-top: var(--ad-clearance); }
 }
 /* The hero of the home and the 404 (the site calls it .fo-hero, which in bundle.css is the calculators' ResultHero). */
 .proto-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
@@ -135,8 +141,12 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
 .fo-ad--content { min-height: 300px; }
 .fo-ad--rail { min-height: 644px; }
 .fo-ad ins { display: block; width: 100%; }
-/* Proposal (F12): the multiplex, planned at 1700 px tall at 360 px wide (§ 360). Override --proto-multiplex-h per breakpoint. */
+/* Proposal (F12): the multiplex, planned at 1700 px tall at 360 px wide (§ 360). From 768 px (the map shows it only
+   there) the box is the loader's <ins> plus the 44 px label (pesquisa-ads 1.2): floor(L x 0.6) for a column of 550 to
+   849 px; the tool column stops at 760 px, so the box is 485 to 500 px. One height for every prototype (review of the
+   F10, c-05); the home, whose column is wider, overrides it with the same formula in home.css. */
 .fo-ad--multiplex { width: 100%; min-height: var(--proto-multiplex-h, 1700px); }
+@media (min-width: 768px) { .fo-ad--multiplex { --proto-multiplex-h: calc(min(100vw - 2 * var(--space-4), var(--tool-max)) * 0.6 + 44px); } }
 
 /* ---------- 5. Prototype control: outside the page frame, in the flow, never fixed over the content ---------- */
 .proto-control {
@@ -156,6 +166,9 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
 .proto-control a:hover { background: var(--surface); }
 .proto-control a[aria-current] { background: var(--surface); border-color: var(--stroke); font-weight: 700; text-decoration: none; }
 .proto-control__index { margin-left: auto; }
+/* Which header the prototype shows (review of the F10, b-02): its own line, under the groups. */
+.proto-control__note { flex-basis: 100%; margin: 0; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
+.proto-control__note a { display: inline; min-height: 0; min-width: 0; padding: 0; border: 0; }
 
 /* ---------- 6. States and languages ---------- */
 /* <html data-state="repouso"> is the default in the markup (it holds without JS); the inline runtime of the kit

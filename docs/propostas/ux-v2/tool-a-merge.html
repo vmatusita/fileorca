@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-state="rest" data-proto-state="rest drag list processing result error next" data-visit="return" data-proto-visit="return first" data-lang="en" data-proto-lang="en pt es">
+<html lang="en" data-state="rest" data-proto-state="rest drag reading list removed processing result error next" data-visit="return" data-proto-visit="return first" data-lang="en" data-proto-lang="en pt es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Merge PDF, alternative A · FileOrca UX v2</title>
-<meta name="proto-variants" content=";?state=drag;?state=list;?state=processing;?state=result;?state=error;?state=next;?visit=first;?lang=pt&state=list&visit=first;?lang=pt&state=result&visit=first;?lang=es&state=error&visit=first;?lang=es&state=list;?lang=pt&state=next">
-<meta name="proto-shots" content=";?state=list;?state=result;?state=next;?lang=pt&state=list&visit=first">
+<meta name="proto-variants" content=";?state=drag;?state=reading;?state=list;?state=removed;?lang=pt&state=removed;?lang=es&state=reading;?state=processing;?state=result;?state=error;?state=next;?visit=first;?lang=pt&state=list&visit=first;?lang=pt&state=result&visit=first;?lang=es&state=error&visit=first;?lang=es&state=list;?lang=pt&state=next">
+<meta name="proto-shots" content=";?state=removed;?state=reading;?state=list;?state=result;?state=next;?lang=pt&state=list&visit=first">
 <script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
 <link rel="stylesheet" href="../../design/fonts/fonts.css">
 <link rel="stylesheet" href="../../design/tokens.css">
@@ -15,7 +15,9 @@
 /* States of the prototype control (kit): a [data-when] part shows only in its states. */
 html[data-state="rest"] [data-when]:not([data-when~="rest"]),
 html[data-state="drag"] [data-when]:not([data-when~="drag"]),
+html[data-state="reading"] [data-when]:not([data-when~="reading"]),
 html[data-state="list"] [data-when]:not([data-when~="list"]),
+html[data-state="removed"] [data-when]:not([data-when~="removed"]),
 html[data-state="processing"] [data-when]:not([data-when~="processing"]),
 html[data-state="result"] [data-when]:not([data-when~="result"]),
 html[data-state="error"] [data-when]:not([data-when~="error"]),
@@ -99,7 +101,9 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <span class="proto-control__label" id="proto-control-state">State</span>
       <a href="?state=rest" aria-current="true">Rest</a>
       <a href="?state=drag">File over</a>
+      <a href="?state=reading">Reading</a>
       <a href="?state=list">List</a>
+      <a href="?state=removed">Removed, with undo</a>
       <a href="?state=processing">Processing</a>
       <a href="?state=result">Result</a>
       <a href="?state=error">Error</a>
@@ -122,6 +126,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: a placeholder that only holds the place of the Menu and the theme button. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">
@@ -157,7 +162,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
 
       <div class="tl-island ta-island tm-island">
         <div class="tl-slot">
-          <div class="ta-oli" data-when="rest list"><div class="ta-oli__pose" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div></div>
+          <div class="ta-oli" data-when="rest reading list removed"><div class="ta-oli__pose" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div></div>
           <div class="ta-oli" data-when="drag"><div class="ta-oli__pose" data-oli="gulp" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-gulp"/></svg></div></div>
           <div class="ta-oli" data-when="processing"><div class="ta-oli__pose" data-oli="swim" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-swim"/></svg></div></div>
           <div class="ta-oli" data-when="result next"><div class="ta-oli__pose" data-oli="cheer" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-cheer"/></svg></div></div>
@@ -176,25 +181,47 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
             <p class="fo-drop__help" data-t="drop.overHelp">Oli reads them right here</p>
           </div>
 
-          <section class="tm-panel" aria-labelledby="tm-count" data-when="list">
+          <section class="tm-panel" aria-labelledby="tm-count" data-when="reading list removed">
             <div class="tm-panel__head">
-              <p class="tm-count" id="tm-count"><span data-t="l.count">2 PDFs ready</span> <span class="tm-count__pages" data-t="l.pages">· 3 pages</span></p>
+              <p class="tm-count" id="tm-count"><span data-when="list"><span data-t="l.count">2 PDFs ready</span> <span class="tm-count__pages" data-t="l.pages">· 3 pages</span></span><span data-when="reading" data-t="l.reading">Reading 2 PDFs…</span><span data-when="removed"><span data-t="l.countOne">1 PDF ready</span> <span class="tm-count__pages" data-t="l.pagesOne">· 2 pages</span></span></p>
             </div>
             <div class="tm-actions">
-              <button type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" data-t="l.merge">Merge PDFs</button>
+              <button type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" data-when="list" data-t="l.merge">Merge PDFs</button>
+              <p class="tm-hold" data-when="reading" data-t="l.wait">Oli is reading the pages…</p>
+              <p class="tm-hold tm-hold--need" data-when="removed" data-t="l.need">Add at least one more PDF to merge.</p>
             </div>
-            <p class="fo-sr" id="tm-help" data-t="l.help">Oli joins them from top to bottom.</p>
-            <ol class="tm-rows" aria-label="Files, in the order they join" data-t-aria-label="l.list" aria-describedby="tm-help">
+            <p class="tm-help tm-help--order" id="tm-help" data-when="list removed" data-t="l.help">Oli joins them from top to bottom. The arrows change the order.</p>
+            <ol class="tm-rows" aria-label="Files, in the order they join" data-t-aria-label="l.list" data-when="reading">
+              <li class="tm-row tm-row--reading">
+                <div class="fo-file fo-dogear fo-cat--pdf"><span class="tm-n" aria-hidden="true">1</span><div><p class="fo-file__name">form.pdf</p><p class="fo-file__meta"><span>146 KB</span><span data-t="l.readingRow">Reading…</span></p><div class="fo-bar" aria-hidden="true"><i style="--value:60%"></i></div></div></div>
+                <button type="button" class="fo-btn fo-btn--icon tm-remove" aria-label="Cancel form.pdf" data-t-aria-label="l.cancelForm"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+              </li>
+              <li class="tm-row tm-row--reading">
+                <div class="fo-file fo-dogear fo-cat--pdf"><span class="tm-n" aria-hidden="true">2</span><div><p class="fo-file__name">scan.pdf</p><p class="fo-file__meta"><span>168 KB</span><span data-t="l.readingRow">Reading…</span></p><div class="fo-bar" aria-hidden="true"><i style="--value:25%"></i></div></div></div>
+                <button type="button" class="fo-btn fo-btn--icon tm-remove" aria-label="Cancel scan.pdf" data-t-aria-label="l.cancelScan"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+              </li>
+            </ol>
+            <ol class="tm-rows" aria-label="Files, in the order they join" data-t-aria-label="l.list" aria-describedby="tm-help" data-when="list">
               <li class="tm-row">
                 <div class="fo-file fo-dogear fo-cat--pdf"><span class="tm-n" aria-hidden="true">1</span><div><p class="fo-file__name">form.pdf</p><p class="fo-file__meta"><span>146 KB</span><span data-t="l.p2">2 pages</span></p></div></div>
                 <span class="tm-moves"><span class="tm-move--none" aria-hidden="true"></span><button type="button" class="fo-btn fo-btn--icon tm-move tm-move--down" aria-label="Move form.pdf down" data-t-aria-label="l.downForm"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span>
+                <button type="button" class="fo-btn fo-btn--icon tm-remove" aria-label="Remove form.pdf" data-t-aria-label="l.removeForm"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M10 3.5h4"/><path d="m6.5 7 1 12.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5l1-12.5"/></svg></button>
               </li>
               <li class="tm-row">
                 <div class="fo-file fo-dogear fo-cat--pdf"><span class="tm-n" aria-hidden="true">2</span><div><p class="fo-file__name">scan.pdf</p><p class="fo-file__meta"><span>168 KB</span><span data-t="l.p1">1 page</span></p></div></div>
                 <span class="tm-moves"><button type="button" class="fo-btn fo-btn--icon tm-move tm-move--up" aria-label="Move scan.pdf up" data-t-aria-label="l.upScan"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><span class="tm-move--none" aria-hidden="true"></span></span>
+                <button type="button" class="fo-btn fo-btn--icon tm-remove" aria-label="Remove scan.pdf" data-t-aria-label="l.removeScan"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M10 3.5h4"/><path d="m6.5 7 1 12.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5l1-12.5"/></svg></button>
               </li>
             </ol>
-            <div class="tm-foot">
+            <ol class="tm-rows" aria-label="Files, in the order they join" data-t-aria-label="l.list" aria-describedby="tm-help" data-when="removed">
+              <li class="tm-row">
+                <div class="fo-file fo-dogear fo-cat--pdf"><span class="tm-n" aria-hidden="true">1</span><div><p class="fo-file__name">form.pdf</p><p class="fo-file__meta"><span>146 KB</span><span data-t="l.p2">2 pages</span></p></div></div>
+                <span class="tm-moves"><span class="tm-move--none" aria-hidden="true"></span><span class="tm-move--none" aria-hidden="true"></span></span>
+                <button type="button" class="fo-btn fo-btn--icon tm-remove" aria-label="Remove form.pdf" data-t-aria-label="l.removeForm"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M10 3.5h4"/><path d="m6.5 7 1 12.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5l1-12.5"/></svg></button>
+              </li>
+            </ol>
+            <p class="tm-undo" data-when="removed"><span role="status" data-t="l.removed">scan.pdf is out of the list.</span><button type="button" class="fo-btn fo-btn--ghost tm-undo__btn" data-t="l.undo">Undo</button></p>
+            <div class="tm-foot" data-when="list removed">
               <button type="button" class="tm-add"><span class="fo-water"></span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg><span data-t="l.add">Add more PDFs</span></button>
               <button type="button" class="fo-btn fo-btn--ghost" data-t="r.again">Start over</button>
             </div>
@@ -307,23 +334,29 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
         <tr><td>Anúncio na 1ª tela a 1280 (obs. 9; <code>merge-pdf-en-1280-light-return-rest.jpg</code>)</td><td>caixa de conteúdo em y 744</td><td>depois do "Como juntar": y 949 em repouso e 1145 com a lista</td></tr>
         <tr><td>Juntar sob o aviso (1ª visita, 360)</td><td>o cartão e a lista começam a 304 e a lista desce sob o aviso</td><td>o Juntar PDFs fica em 328 a 388 (pt), acima do aviso (510); a lista pode descer, o botão não</td></tr>
         <tr><td>Erro sob o aviso (obs. 2)</td><td>"Choose other files" sob o aviso</td><td>base em 453 (pt): logo depois da frase</td></tr>
-        <tr><td>CLS da interação</td><td>0 no juntar (o diagnóstico mediu), mas o resultado troca o cartão de altura</td><td>o retângulo guarda a altura da lista (<code>--tm-lock</code>) até o "Começar de novo": o resultado nunca encolhe nem cresce sozinho</td></tr>
-        <tr><td>Chips (obs. 7)</td><td>0,44 a 0,78 tela abaixo do Baixar</td><td>logo abaixo do retângulo: 194 px (en) a 298 px (pt, com a lista mais alta) a 360; 200 px a 1280</td></tr>
+        <tr><td>CLS da interação</td><td>0 no juntar (o diagnóstico mediu), mas o resultado troca o cartão de altura</td><td>o retângulo guarda a altura da lista (<code>--tm-lock</code>: 480, 564 e 540 px a 360 em en, pt e es; 412 a partir de 768) da leitura até o "Começar de novo": a leitura, a lista, a remoção, o WaterLevel e o resultado têm a mesma altura</td></tr>
+        <tr><td>Chips (obs. 7)</td><td>0,44 a 0,78 tela abaixo do Baixar</td><td>logo abaixo do retângulo: 290 px (en), 350 (es) e 374 (pt) a 360, ou 0,39 a 0,51 tela, porque o retângulo guarda a altura da lista; 212 px a 1280</td></tr>
+        <tr><td>D-21: tirar um arquivo da lista (atrasa)</td><td>as linhas prontas não têm remover; a única saída é "Começar de novo", que apaga tudo na hora</td><td>cada linha tem a lixeira (ícone <code>trash</code>, 48 px) depois das setas. Ao tirar, a linha vira "scan.pdf saiu da lista." com <strong>Desfazer</strong> (48 px), no mesmo lugar e na mesma altura, até a próxima ação (Juntar, Adicionar ou outra remoção), sem tempo marcado (WCAG 2.2.1). Com um PDF só, o lugar do Juntar diz "Adicione pelo menos mais um PDF para juntar." (<code>?state=removed</code>)</td></tr>
+        <tr><td>D-22: o toque do Escolher cai no Começar de novo (1ª visita, 360)</td><td>o Começar de novo contém o ponto (180, 456) onde a pessoa tocou o Escolher</td><td>no protótipo, o Escolher PDFs fica em y 331 a 391 (centro em 361) a 360; na lista, esse ponto cai no Juntar PDFs (304 a 364 em en e es, 328 a 388 em pt), nas duas visitas, e o Começar de novo vai para o pé do retângulo (658 a 710 em en, 744 a 796 em pt, 720 a 772 em es), depois do "Adicionar mais PDFs". A 1280, o ponto cai na faixa do Juntar, fora de qualquer botão. A ação destrutiva nunca fica no lugar do toque anterior</td></tr>
+        <tr><td>D-26: a ajuda da ordem fora da tela</td><td>a frase que diz que a ordem da lista é a do arquivo fica depois da última linha, abaixo da dobra</td><td>"A Oli junta de cima para baixo. As setas mudam a ordem." fica visível entre o Juntar e as linhas (y 376 a 416 em en a 360; 374 a 394 a 1280), e o número de cada linha (o círculo <code>deep</code>) diz a posição</td></tr>
+        <tr><td>D-27: o WaterLevel da leitura pisca (30 a 150 ms)</td><td>a água entra e sai antes de a lista aparecer: a leitura não segue a regra dos 400 ms</td><td>a leitura já é a lista: as linhas com "Lendo…", a barra de cada arquivo e o × de cancelar, e o lugar do Juntar com "A Oli está lendo as páginas…" na mesma altura (60 px). O WaterLevel da leitura só entra se ela passar de 400 ms, a regra do processamento (Princípio 8). Nada pisca e nada se move quando o Juntar chega (<code>?state=reading</code>)</td></tr>
       </tbody>
     </table>
 
     <h3>Marcação</h3>
-    <pre><code>&lt;section class="fo-merge-panel" aria-labelledby="fo-count"&gt;     &lt;!-- no .fo-slot, no lugar do .fo-ready --&gt;
-  &lt;p class="fo-count" id="fo-count"&gt;2 PDFs ready &lt;span&gt;· 3 pages&lt;/span&gt;&lt;/p&gt;
-  &lt;button class="fo-btn fo-btn--brand fo-btn--lg"&gt;Merge PDFs&lt;/button&gt;
-  &lt;p class="fo-sr" id="fo-merge-help"&gt;Oli joins them from top to bottom.&lt;/p&gt;
+    <pre><code>&lt;section class="fo-merge-panel" aria-labelledby="fo-count"&gt;     &lt;!-- no .fo-slot, no lugar do .fo-ready, já na leitura --&gt;
+  &lt;p class="fo-count" id="fo-count"&gt;2 PDFs ready &lt;span&gt;· 3 pages&lt;/span&gt;&lt;/p&gt;   &lt;!-- na leitura: "Reading 2 PDFs…" --&gt;
+  &lt;button class="fo-btn fo-btn--brand fo-btn--lg"&gt;Merge PDFs&lt;/button&gt;   &lt;!-- na leitura, no lugar dele: &lt;p class="fo-merge__hold"&gt;Oli is reading the pages…&lt;/p&gt;; com 1 PDF: "Add at least one more PDF to merge." --&gt;
+  &lt;p class="fo-merge__help" id="fo-merge-help"&gt;Oli joins them from top to bottom. The arrows change the order.&lt;/p&gt;
   &lt;ol class="fo-merge" aria-label="Files, in the order they join" aria-describedby="fo-merge-help"&gt;
     &lt;li class="fo-merge__row"&gt;
       &lt;div class="fo-file fo-dogear fo-cat--pdf"&gt;&lt;span class="fo-merge__n" aria-hidden="true"&gt;1&lt;/span&gt;…&lt;/div&gt;
       &lt;span class="fo-merge__moves"&gt;&lt;span class="fo-merge__none" aria-hidden="true"&gt;&lt;/span&gt;
         &lt;button class="fo-btn fo-btn--icon" aria-label="Move form.pdf down"&gt;…&lt;/button&gt;&lt;/span&gt;
+      &lt;button class="fo-btn fo-btn--icon" aria-label="Remove form.pdf"&gt;…trash…&lt;/button&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
+  &lt;p class="fo-merge__undo"&gt;&lt;span role="status"&gt;scan.pdf is out of the list.&lt;/span&gt;&lt;button class="fo-btn fo-btn--ghost"&gt;Undo&lt;/button&gt;&lt;/p&gt;   &lt;!-- só depois de uma remoção --&gt;
   &lt;button class="fo-merge__add"&gt;&lt;span class="fo-water"&gt;&lt;/span&gt;Add more PDFs&lt;/button&gt;
   &lt;button class="fo-btn fo-btn--ghost"&gt;Start over&lt;/button&gt;
 &lt;/section&gt;</code></pre>
@@ -335,7 +368,9 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <tbody>
         <tr><td><code>rest</code></td><td>DropZone, "Choose PDFs"</td><td><code>wave</code></td><td>(não existe)</td></tr>
         <tr><td><code>drag</code></td><td>água a 60 %, "Let go, Oli's ready", "Oli reads them right here"</td><td><code>gulp</code></td><td>(não existe)</td></tr>
-        <tr><td><code>list</code></td><td>contagem, Juntar PDFs, as linhas, Adicionar mais PDFs e Começar de novo; o retângulo cresce com os arquivos (gesto)</td><td><code>wave</code></td><td>reservada, vazia</td></tr>
+        <tr><td><code>reading</code> (D-27)</td><td>"Lendo 2 PDFs…", no lugar do Juntar "A Oli está lendo as páginas…" (60 px), a ajuda some e as linhas com "Lendo…", a barra e o × de cancelar; o WaterLevel só depois de 400 ms</td><td><code>wave</code></td><td>reservada, vazia</td></tr>
+        <tr><td><code>list</code></td><td>contagem, Juntar PDFs, a ajuda da ordem à vista (D-26), as linhas com as setas e a lixeira (D-21), Adicionar mais PDFs e Começar de novo; o retângulo cresce com os arquivos (gesto) e guarda essa altura</td><td><code>wave</code></td><td>reservada, vazia</td></tr>
+        <tr><td><code>removed</code> (D-21)</td><td>"1 PDF pronto · 2 páginas", no lugar do Juntar "Adicione pelo menos mais um PDF para juntar.", a linha que ficou e, no lugar da que saiu, "scan.pdf saiu da lista." com Desfazer</td><td><code>wave</code></td><td>reservada, vazia</td></tr>
         <tr><td><code>processing</code></td><td>WaterLevel com a altura da lista</td><td><code>swim</code></td><td>reservada</td></tr>
         <tr><td><code>result</code></td><td>fala, Páginas 3 e Tamanho 246 KB, Baixar, a ordem e a nota do título</td><td><code>cheer</code></td><td>chips e "Order" fechado</td></tr>
         <tr><td><code>next</code></td><td>o mesmo</td><td><code>cheer</code></td><td>"Order" aberto, com as linhas</td></tr>
@@ -348,7 +383,11 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
       <tbody>
         <tr><td>Contagem</td><td lang="en">2 PDFs ready · 3 pages</td><td>2 PDFs prontos · 3 páginas</td><td lang="es">2 PDF listos · 3 páginas</td></tr>
-        <tr><td>Ajuda da ordem (leitor de tela)</td><td lang="en">Oli joins them from top to bottom.</td><td>A Oli junta de cima para baixo.</td><td lang="es">Oli los une de arriba abajo.</td></tr>
+        <tr><td>Ajuda da ordem (à vista, D-26)</td><td lang="en">Oli joins them from top to bottom. The arrows change the order.</td><td>A Oli junta de cima para baixo. As setas mudam a ordem.</td><td lang="es">Oli los une de arriba abajo. Las flechas cambian el orden.</td></tr>
+        <tr><td>Leitura (D-27; textos de hoje do PDF)</td><td lang="en">Reading 2 PDFs… · Oli is reading the pages… · Reading… · Cancel form.pdf</td><td>Lendo 2 PDFs… · A Oli está lendo as páginas… · Lendo… · Cancelar form.pdf</td><td lang="es">Leyendo 2 PDF… · Oli está leyendo las páginas… · Leyendo… · Cancelar form.pdf</td></tr>
+        <tr><td>Remover (D-21; o nome de hoje do PDF)</td><td lang="en">Remove form.pdf</td><td>Remover form.pdf</td><td lang="es">Quitar form.pdf</td></tr>
+        <tr><td>Depois de remover (novo)</td><td lang="en">scan.pdf is out of the list. · Undo</td><td>scan.pdf saiu da lista. · Desfazer</td><td lang="es">scan.pdf salió de la lista. · Deshacer</td></tr>
+        <tr><td>Com 1 PDF (o <code>needMore</code> de hoje)</td><td lang="en">Add at least one more PDF to merge.</td><td>Adicione pelo menos mais um PDF para juntar.</td><td lang="es">Agrega al menos un PDF más para unir.</td></tr>
         <tr><td>Ordem, depois do resultado (novo)</td><td lang="en">Order · 2 files</td><td>Ordem · 2 arquivos</td><td lang="es">Orden · 2 archivos</td></tr>
         <tr><td>Ajuda da ordem depois (nova)</td><td lang="en">Changing the order merges again right away.</td><td>Mudar a ordem junta de novo na hora.</td><td lang="es">Cambiar el orden los une de nuevo al momento.</td></tr>
         <tr><td>Erro</td><td lang="en">Oops, Oli couldn't use this file. notes.txt isn't a PDF. Try a file that ends in .pdf.</td><td>Ops, a Oli não conseguiu usar esse arquivo. notes.txt não é um PDF. Tente um arquivo que termine em .pdf.</td><td lang="es">Uy, Oli no pudo usar este archivo. notes.txt no es un PDF. Prueba con un archivo que termine en .pdf.</td></tr>
@@ -360,20 +399,31 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
     <ul>
       <li>Cada linha tem só as setas que funcionam: "Move form.pdf down", "Move scan.pdf up". Depois de mover, o foco fica na seta que a pessoa apertou, na nova posição (como o <code>moveItem</code> de hoje); se ela sumiu (a linha chegou ao topo ou ao fim), o foco vai para a outra seta da mesma linha.</li>
       <li>O botão de alça (pegar com espaço e mover com as setas) sai: as setas da linha fazem o mesmo pelo teclado e pelo toque, e o arrastar com o mouse continua na linha inteira (WCAG 2.5.7 coberto pelas setas).</li>
-      <li>A lista é um <code>&lt;ol&gt;</code>: o leitor diz "1 de 2"; o número visível é <code>aria-hidden</code>.</li>
+      <li>A lista é um <code>&lt;ol&gt;</code>: o leitor diz "1 de 2"; o número visível é <code>aria-hidden</code>. A ajuda da ordem, agora à vista, continua no <code>aria-describedby</code> da lista.</li>
+      <li>Lixeira (D-21): "Remove form.pdf", depois das setas na ordem do Tab. Ao remover, o foco vai para o Desfazer, e a frase "scan.pdf is out of the list." sai numa região <code>role="status"</code>. Desfazer devolve a linha ao mesmo lugar e o foco à lixeira dela. A próxima ação (Juntar, Adicionar, outra remoção) apaga o desfazer; não há tempo marcado.</li>
+      <li>Leitura (D-27): o × de cada linha é "Cancel form.pdf", como hoje. Nenhum foco se move quando a leitura acaba: o Juntar entra no lugar da linha "A Oli está lendo as páginas…", que tem a mesma altura.</li>
+      <li>D-22: o Começar de novo fica no pé do retângulo, longe do ponto onde estava o Escolher, que passa a ser o Juntar PDFs.</li>
       <li>"Adicionar mais PDFs" é um <code>&lt;button&gt;</code> que abre o seletor e também recebe arquivo solto.</li>
     </ul>
 
     <h3>Medidas</h3>
     <ul>
-      <li>Setas de 48 × 48 com 4 px entre elas; o lugar vazio também tem 48 px, para as colunas não pularem. "Adicionar mais PDFs" com 56 px de altura.</li>
-      <li>O retângulo cresce com a lista (gesto) e guarda essa altura no processamento e no resultado; volta a 356/340 no "Começar de novo".</li>
+      <li>Setas de 48 × 48 com 4 px entre elas; o lugar vazio também tem 48 px, para as colunas não pularem. A lixeira também tem 48 × 48. Abaixo de 768 px as duas setas ficam uma sobre a outra (a linha tem 100 px), para o nome manter a largura de hoje com a lixeira ao lado. "Adicionar mais PDFs" com 56 px de altura; o Desfazer, ghost de 48 px, numa linha tracejada de 72 px.</li>
+      <li>O retângulo cresce com a lista (gesto) e guarda essa altura da leitura ao resultado (480, 564 e 540 px a 360 em en, pt e es; 412 a partir de 768); volta a 356/340 no "Começar de novo". Medido por <code>.cache/f10/revisao-ux04.mjs</code>.</li>
       <li>Anúncio: depois do "Como juntar", a mais de 150 px da faixa dos chips e da ordem.</li>
+    </ul>
+
+    <h3>Testes que a F13 escreve</h3>
+    <ul>
+      <li>D-21: com dois PDFs, "Remove scan.pdf" deixa uma linha, o "1 PDF ready", o Desfazer com foco e a frase na região; Desfazer volta às duas linhas na mesma ordem. Chromium e WebKit.</li>
+      <li>D-27: com a CPU normal, nenhum <code>.fo-level</code> aparece entre a escolha e a lista quando a leitura leva menos de 400 ms; com a CPU a 6x, ele aparece depois de 400 ms.</li>
+      <li>D-22: a 360×740, 1ª visita, o centro do Escolher em repouso cai no Juntar PDFs da lista (<code>elementFromPoint</code>), nunca no Começar de novo.</li>
+      <li>D-26: na lista, a ajuda da ordem fica acima da primeira linha e acima da dobra nos três idiomas.</li>
     </ul>
 
     <h3>JS e requisições</h3>
     <ul>
-      <li>Nenhum arquivo novo: no <code>PdfPanel.tsx</code>, o <code>.fo-ready</code> do modo <code>merge</code> vira o painel da lista (a lista já existe em <code>queue</code>, só muda de lugar), o botão desabilitado vira um lugar vazio, e a ilha guarda a altura do retângulo (<code>slot.style.minHeight</code>) enquanto há arquivos. Estimativa: +0,2 KB gzip (hoje 38,2 KB).</li>
+      <li>Nenhum arquivo novo: no <code>PdfPanel.tsx</code>, o <code>.fo-ready</code> do modo <code>merge</code> vira o painel da lista (a lista já existe em <code>queue</code>, só muda de lugar), o botão desabilitado vira um lugar vazio, e a ilha guarda a altura do retângulo (<code>slot.style.minHeight</code>) enquanto há arquivos. A lixeira usa o <code>onRemove</code> que o FileCard já tem (hoje só no erro, <code>FileCard.tsx:151</code>); o desfazer guarda o último item removido e a posição dele; a leitura mostra o painel em vez do WaterLevel até 400 ms (<code>showLevel</code>, <code>PdfPanel.tsx:834</code>, ganha o mesmo atraso do processamento). Estimativa: +0,5 KB gzip (hoje 38,2 KB).</li>
       <li>Nenhuma requisição nova: a miniatura em branco sai sem o PDF.js desenhar nada.</li>
     </ul>
   </div>
@@ -450,7 +500,19 @@ var TM_COMMON = {
     'l.count': '2 PDFs prontos',
     'l.pages': '· 3 páginas',
     'l.merge': 'Juntar PDFs',
-    'l.help': 'A Oli junta de cima para baixo.',
+    'l.help': 'A Oli junta de cima para baixo. As setas mudam a ordem.',
+    'l.reading': 'Lendo 2 PDFs…',
+    'l.wait': 'A Oli está lendo as páginas…',
+    'l.readingRow': 'Lendo…',
+    'l.cancelForm': 'Cancelar form.pdf',
+    'l.cancelScan': 'Cancelar scan.pdf',
+    'l.countOne': '1 PDF pronto',
+    'l.pagesOne': '· 2 páginas',
+    'l.need': 'Adicione pelo menos mais um PDF para juntar.',
+    'l.removeForm': 'Remover form.pdf',
+    'l.removeScan': 'Remover scan.pdf',
+    'l.removed': 'scan.pdf saiu da lista.',
+    'l.undo': 'Desfazer',
     'l.list': 'Arquivos, na ordem em que serão juntados',
     'l.upForm': 'Subir form.pdf',
     'l.downForm': 'Descer form.pdf',
@@ -498,7 +560,19 @@ var TM_COMMON = {
     'l.count': '2 PDF listos',
     'l.pages': '· 3 páginas',
     'l.merge': 'Unir PDF',
-    'l.help': 'Oli los une de arriba abajo.',
+    'l.help': 'Oli los une de arriba abajo. Las flechas cambian el orden.',
+    'l.reading': 'Leyendo 2 PDF…',
+    'l.wait': 'Oli está leyendo las páginas…',
+    'l.readingRow': 'Leyendo…',
+    'l.cancelForm': 'Cancelar form.pdf',
+    'l.cancelScan': 'Cancelar scan.pdf',
+    'l.countOne': '1 PDF listo',
+    'l.pagesOne': '· 2 páginas',
+    'l.need': 'Agrega al menos un PDF más para unir.',
+    'l.removeForm': 'Quitar form.pdf',
+    'l.removeScan': 'Quitar scan.pdf',
+    'l.removed': 'scan.pdf salió de la lista.',
+    'l.undo': 'Deshacer',
     'l.list': 'Archivos, en el orden en que se unen',
     'l.upForm': 'Mover form.pdf hacia arriba',
     'l.downForm': 'Mover form.pdf hacia abajo',

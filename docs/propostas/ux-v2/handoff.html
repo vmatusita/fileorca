@@ -89,6 +89,9 @@ html[data-state="vazia"] [data-when]:not([data-when~="vazia"]) { display: none !
 .fo-drop__message { display: grid; gap: var(--space-2); max-width: 100%; overflow-wrap: anywhere; }
 .fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
 .fo-result__head .fo-placard { margin-left: auto; }
+/* The Download of the card as the site draws it (components.css:177-181): full width and wrapping on a phone, so the
+   card never forces the page wider than 320 px (WCAG 1.4.10; review of the F10, b-03). */
+.fo-result__actions .fo-btn--download { display: flex; width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
 @media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
 /* The line that says where the file came from: the first note of the card, with the same muted ink on deep. */
 .ux14-from { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--on-deep); font-weight: 600; }
@@ -99,7 +102,7 @@ html[data-state="vazia"] [data-when]:not([data-when~="vazia"]) { display: none !
 .ux14-carry .fo-icon--inline { margin-top: 2px; flex: none; color: var(--brand); }
 /* The empty box: the DropZone in a status state (like the offline state of § 292), two ways out. */
 .ux14-lost__actions { display: grid; gap: var(--space-2); justify-items: center; width: 100%; }
-@media (max-width: 767px) { .ux14-lost__actions .fo-btn { width: 100%; } }
+@media (max-width: 767px) { .ux14-lost__actions .fo-btn { width: 100%; min-width: 0; white-space: normal; } }
 @media (min-width: 768px) { .ux14-lost__actions { display: flex; flex-wrap: wrap; justify-content: center; } }
 .fo-drop[data-state="lost"] .fo-drop__message { max-width: 34em; }
 </style>
@@ -127,6 +130,7 @@ html[data-state="vazia"] [data-when]:not([data-when~="vazia"]) { display: none !
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">

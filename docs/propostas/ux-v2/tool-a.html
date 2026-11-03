@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-state="rest" data-proto-state="rest drag processing result error next" data-page="tool" data-proto-page="tool preset" data-visit="return" data-proto-visit="return first" data-lang="en" data-proto-lang="en pt es">
+<html lang="en" data-state="rest" data-proto-state="rest drag processing result error next" data-page="tool" data-proto-page="tool preset" data-visit="return" data-proto-visit="return first" data-error="other" data-proto-error="other content heic" data-lang="en" data-proto-lang="en pt es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Compress image, alternative A · FileOrca UX v2</title>
-<meta name="proto-variants" content=";?state=drag;?state=processing;?state=result;?state=error;?state=next;?visit=first;?lang=pt&visit=first;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=es&state=result&visit=first;?lang=pt&page=preset;?lang=pt&page=preset&state=result;?lang=es&state=next">
-<meta name="proto-shots" content=";?state=result;?state=next;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=pt&page=preset">
+<meta name="proto-variants" content=";?state=drag;?state=processing;?state=result;?state=error;?state=error&error=content;?state=error&error=heic;?lang=pt&state=error&error=heic&visit=first;?lang=es&state=error&error=content;?state=next;?visit=first;?lang=pt&visit=first;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=es&state=result&visit=first;?lang=pt&page=preset;?lang=pt&page=preset&state=result;?lang=es&state=next">
+<meta name="proto-shots" content=";?state=error&error=heic;?state=result;?state=next;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=pt&page=preset">
 <script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
 <link rel="stylesheet" href="../../design/fonts/fonts.css">
 <link rel="stylesheet" href="../../design/tokens.css">
@@ -22,7 +22,13 @@ html[data-state="next"] [data-when]:not([data-when~="next"]),
 html[data-page="tool"] [data-when-page]:not([data-when-page~="tool"]),
 html[data-page="preset"] [data-when-page]:not([data-when-page~="preset"]),
 html[data-visit="return"] [data-when-visit]:not([data-when-visit~="return"]),
-html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { display: none !important; }
+html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]),
+html[data-error="other"] [data-when-error]:not([data-when-error~="other"]),
+html[data-error="content"] [data-when-error]:not([data-when-error~="content"]),
+html[data-error="heic"] [data-when-error]:not([data-when-error~="heic"]) { display: none !important; }
+/* The HEIC case (D-17) is the HEIC page in the Error state: its H1, its crumb, and the chip to PNG to JPG in place of the options. */
+html:not([data-state="error"]) .ta-heic, html:not([data-error="heic"]) .ta-heic,
+html[data-state="error"][data-error="heic"] .ta-noheic { display: none !important; }
 </style>
 <script>
 /* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
@@ -105,6 +111,12 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <a href="?state=error">Error</a>
       <a href="?state=next">Next step</a>
     </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-error">
+      <span class="proto-control__label" id="proto-control-error">Error case</span>
+      <a href="?state=error&amp;error=other" data-proto-current>Not an image</a>
+      <a href="?state=error&amp;error=content" data-proto-current>.png, not an image inside</a>
+      <a href="?state=error&amp;error=heic" data-proto-current>PNG on the HEIC page</a>
+    </div>
     <div class="proto-control__group" role="group" aria-labelledby="proto-control-page">
       <span class="proto-control__label" id="proto-control-page">Page</span>
       <a href="?page=tool" aria-current="true">Tool</a>
@@ -127,6 +139,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <a href="?theme=dark">Dark</a>
     </div>
     <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: a placeholder that only holds the place of the Menu and the theme button. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
   </div>
 </nav>
 <div class="proto-page">
@@ -152,13 +165,14 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
         <ol class="fo-crumbs">
           <li><a class="fo-crumbs__link" href="#" data-t="crumb.home">Home</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
           <li><a class="fo-crumbs__link" href="#" data-t="crumb.cat">Image tools</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
-          <li data-when-page="tool"><span aria-current="page" data-t="h1">Compress image</span></li>
+          <li data-when-page="tool" class="ta-noheic"><span aria-current="page" data-t="h1">Compress image</span></li>
+          <li class="ta-heic"><span aria-current="page" data-t="h1H">HEIC to JPG</span></li>
           <li data-when-page="preset"><a class="fo-crumbs__link" href="#" data-t="h1">Compress image</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
           <li data-when-page="preset"><span aria-current="page" data-t="h1P">Compress image to 100 KB</span></li>
         </ol>
       </nav>
       <div class="tl-top">
-        <h1 class="fo-h1"><span data-when-page="tool" data-t="h1">Compress image</span><span data-when-page="preset" data-t="h1P">Compress image to 100 KB</span></h1>
+        <h1 class="fo-h1"><span data-when-page="tool" class="ta-noheic" data-t="h1">Compress image</span><span class="ta-heic" data-t="h1H">HEIC to JPG</span><span data-when-page="preset" data-t="h1P">Compress image to 100 KB</span></h1>
         <div class="tl-top__seal"><p class="fo-seal"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-t="seal">Your files never leave your device</span></p></div>
       </div>
 
@@ -213,7 +227,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
               <span class="fo-ba__tag fo-ba__tag--r"><span data-t="r.after">After</span> · <span data-when-page="tool">717 KB</span><span data-when-page="preset">98 KB</span></span>
               <input class="fo-ba__range" type="range" min="0" max="100" value="50" aria-label="Compare before and after" data-t-aria-label="r.compareLabel">
               <span class="fo-ba__line"></span>
-              <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+              <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-4 5 4 5"/><path d="m15 7 4 5-4 5"/></svg></span>
             </div>
             <ul class="tl-notes">
               <li data-t="r.meta">Oli removed the photo metadata, including the GPS location.</li>
@@ -225,14 +239,14 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
             <div class="fo-drop__sea"><div class="fo-water"></div></div>
             <div class="ta-error" role="alert">
               <p class="ta-error__title"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01" stroke-width="2.6"/></svg><span data-t="e.title">Oops, Oli couldn't read this file.</span></p>
-              <p class="ta-error__why" data-t="e.why">notes.txt isn't an image. Try a JPG or PNG.</p>
+              <p class="ta-error__why"><span data-when-error="other" data-t="e.why">notes.txt isn't an image. Try a JPG or PNG.</span><span data-when-error="content" data-t="e.whyContent">notes.png ends in .png, but it isn't an image inside. Save it again as JPG or PNG.</span><span data-when-error="heic" data-t="e.whyHeic">notes.png is a PNG, not a HEIC photo. To get a JPG from it, use PNG to JPG.</span></p>
             </div>
             <button type="button" class="fo-btn fo-btn--brand"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg><span data-t="e.choose">Choose other files</span></button>
           </div>
         </div>
 
         <div class="tl-band ta-band">
-          <fieldset class="tl-options" data-when="rest drag processing error">
+          <fieldset class="tl-options ta-noheic" data-when="rest drag processing error">
             <legend data-t="o.legend">Compression</legend>
             <div class="fo-seg">
               <label class="fo-seg__opt"><input type="radio" name="ta-level" value="recommended" checked><span><span data-t="o.rec">Recommended</span><small data-t="o.recHelp">best balance</small></span></label>
@@ -240,6 +254,10 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
             </div>
             <p class="fo-field__help" data-t="o.png">PNG is saved without loss, so the level only changes JPG and WebP.</p>
           </fieldset>
+          <nav class="fo-next tl-next ta-heic" aria-labelledby="ta-heic-label">
+            <span class="fo-next__label" id="ta-heic-label" data-t="n.heicLabel">For a PNG:</span>
+            <a class="fo-chip fo-cat--image" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span data-t="n.png">PNG to JPG</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </nav>
           <nav class="fo-next tl-next" aria-labelledby="ta-next-label" data-when="result next">
             <span class="fo-next__label" id="ta-next-label" data-t="n.label">Next:</span>
             <a class="fo-chip fo-cat--image" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="n.resize">Resize image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
@@ -325,6 +343,9 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
         <tr><td>Erro sob o aviso (obs. 2; <code>compress-image-pt-360-light-first-error.jpg</code>)</td><td>"Escolher outros arquivos" coberto 26 a 52 de 52 px</td><td>o botão sobe para logo depois da frase, sem o selo de 64 px: base em 453 (en) e 475 (pt, es)</td></tr>
         <tr><td>Placa e água no celular (G-09)</td><td>a placa some abaixo de 768 e a água não volta</td><td>a placa aparece nos dois tamanhos, na superfície; o cartão é a água que subiu</td></tr>
         <tr><td>Oli de costas (G-10)</td><td>à esquerda da fala, olhando para fora do cartão</td><td>no canto de cima à direita, olhando para a fala e segurando a placa</td></tr>
+        <tr><td>D-06: um .png que não é imagem recebe "tente PNG"</td><td>"notes.png isn't an image Oli can read. Try JPG, PNG or WebP."</td><td>a razão diz o que houve e como sair: "notes.png ends in .png, but it isn't an image inside. Save it again as JPG or PNG." (<code>?state=error&amp;error=content</code>; 3 linhas, o retângulo fica com 356 px e a saída termina em 471 em en e 493 em pt e es, acima do aviso)</td></tr>
+        <tr><td>D-17: um PNG na página do HEIC não diz para onde ir</td><td>"notes.png isn't an image Oli can read. Try HEIC or HEIF." e só o Escolher outros arquivos</td><td>"notes.png is a PNG, not a HEIC photo. To get a JPG from it, use PNG to JPG." e, na faixa de baixo, no lugar das opções, o chip "For a PNG: PNG to JPG" (48 px, a 16 px do retângulo) que leva o arquivo à ferramenta certa (<code>?state=error&amp;error=heic</code>)</td></tr>
+        <tr><td>D-09: o puxador do antes e depois parece um botão de avançar</td><td>um chevron só (›), o do preview do BeforeAfter</td><td>o puxador tem as duas setas (‹ ›): arrasta para os dois lados (<code>?state=next</code>); o mesmo desenho no tool-b.html e no guide-page.html</td></tr>
         <tr><td>Anúncio na 1ª tela a 1280 (obs. 9; <code>merge-pdf-en-1280-light-return-rest.jpg</code>)</td><td>caixa de conteúdo em y 744, com a dobra em 800</td><td>o 1º anúncio de conteúdo vem depois do "Como comprimir": y 1085 a 1280 e 1233 a 360</td></tr>
       </tbody>
     </table>
@@ -374,7 +395,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
         <tr><td><code>processing</code></td><td>WaterLevel (<code>progressbar</code>) no mesmo lugar, só depois de 400 ms</td><td><code>swim</code>, no canto</td><td>as opções (desabilitadas, como hoje)</td></tr>
         <tr><td><code>result</code></td><td>o mar que subiu: fala, placa, "2.6 MB → 717 KB", Baixar, Começar de novo, Antes e depois, a nota dos metadados</td><td><code>cheer</code>, uma vez, segurando a placa</td><td>os chips e o "Ajustar" fechado</td></tr>
         <tr><td><code>next</code></td><td>o mesmo, com o antes e depois aberto (gesto)</td><td><code>cheer</code></td><td>os chips e o "Ajustar" aberto: mudar o nível refaz na hora</td></tr>
-        <tr><td><code>error</code></td><td>traço <code>danger</code>, a frase com o ícone, a razão, o Escolher outros arquivos logo abaixo (sem o selo redondo)</td><td><code>oops</code></td><td>as opções</td></tr>
+        <tr><td><code>error</code></td><td>traço <code>danger</code>, a frase com o ícone, a razão, o Escolher outros arquivos logo abaixo (sem o selo redondo). A razão depende do caso (<code>?error=</code>): <code>other</code> (não é imagem), <code>content</code> (a extensão é de imagem e o conteúdo não, D-06) e <code>heic</code> (um PNG na página do HEIC, D-17, que mostra o H1 e a trilha do HEIC; o resto da página continua a do comprimir, porque o caso só vale no estado de erro)</td><td><code>oops</code></td><td>as opções; no caso <code>heic</code>, o chip para o PNG para JPG</td></tr>
         <tr><td><code>?visit=first</code></td><td colspan="3">o aviso de cookies de hoje, onde ele fica no site (a 8 px da base da tela de 740; a 16 px do canto a partir de 768). Nada de importante fica embaixo dele a 360×740 nos três idiomas: o Escolher, o Baixar e o Escolher outros arquivos terminam acima do topo dele.</td></tr>
         <tr><td><code>?page=preset</code></td><td colspan="3">a preset "para 100 KB": trilha de 4 itens e H1 de duas linhas na largura toda (F4-F7 f-2).</td></tr>
       </tbody>
@@ -387,6 +408,8 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <tbody>
         <tr><td>Erro (fala do README)</td><td lang="en">Oops, Oli couldn't read this file.</td><td>Ops, a Oli não conseguiu ler esse arquivo.</td><td lang="es">Uy, Oli no pudo leer este archivo.</td></tr>
         <tr><td>Erro, a razão (nova forma)</td><td lang="en">notes.txt isn't an image. Try a JPG or PNG.</td><td>notes.txt não é uma imagem. Tente um JPG ou PNG.</td><td lang="es">notes.txt no es una imagen. Prueba con un JPG o PNG.</td></tr>
+        <tr><td>Erro, a extensão não bate com o conteúdo (D-06, novo)</td><td lang="en">notes.png ends in .png, but it isn't an image inside. Save it again as JPG or PNG.</td><td>notes.png termina em .png, mas por dentro não é uma imagem. Salve de novo como JPG ou PNG.</td><td lang="es">notes.png termina en .png, pero por dentro no es una imagen. Guárdalo de nuevo como JPG o PNG.</td></tr>
+        <tr><td>Erro, um PNG na página do HEIC (D-17, novo)</td><td lang="en">notes.png is a PNG, not a HEIC photo. To get a JPG from it, use PNG to JPG. · For a PNG: PNG to JPG</td><td>notes.png é um PNG, não uma foto HEIC. Para ter um JPG, use o PNG para JPG. · Para um PNG: PNG para JPG</td><td lang="es">notes.png es un PNG, no una foto HEIC. Para tener un JPG, usa PNG a JPG. · Para un PNG: PNG a JPG</td></tr>
         <tr><td>Pronto</td><td lang="en">Done! Your image is 72% lighter.</td><td>Prontinho! Sua imagem ficou 72% mais leve.</td><td lang="es">¡Listo! Tu imagen quedó un 72 % más ligera.</td></tr>
         <tr><td>Antes e depois (novo botão)</td><td lang="en">Before and after</td><td>Antes e depois</td><td lang="es">Antes y después</td></tr>
         <tr><td>Ajustar (novo)</td><td lang="en">Adjust · Recommended</td><td>Ajustar · Recomendada</td><td lang="es">Ajustar · Recomendada</td></tr>
@@ -404,7 +427,8 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <li>Escolher: o texto do botão, com <code>aria-describedby</code> na ajuda dos formatos.</li>
       <li>WaterLevel: <code>role="progressbar"</code>, nome "Compressing images", <code>aria-valuetext</code> "55%" (e a contagem no lote).</li>
       <li>Resultado: <code>aria-live="polite"</code> e <code>aria-labelledby</code> na fala. A placa é <code>aria-hidden</code>: repete o número da fala, que já é lido.</li>
-      <li>Baixar: "Download · 717 KB". Antes e depois: <code>aria-expanded</code> e <code>aria-controls</code>. O comparador: "Compare before and after".</li>
+      <li>Baixar: "Download · 717 KB". Antes e depois: <code>aria-expanded</code> e <code>aria-controls</code>. O comparador: "Compare before and after"; o puxador com as duas setas é decorativo (o controle é o <code>range</code>, que anda com as setas do teclado).</li>
+      <li>Erro do HEIC: o chip é um link da <code>nav</code> "For a PNG:" e leva o arquivo, pela caixa do compartilhar (UX-14), quando ele existir; sem o UX-14, leva só à página.</li>
       <li>Chips: <code>nav</code> com o nome "Next:". "Ajustar": o <code>summary</code> diz o nível atual.</li>
       <li>Erro: a frase e a razão num <code>role="alert"</code>; a Oli é sempre <code>aria-hidden</code>.</li>
     </ul>
@@ -413,7 +437,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
     <ul>
       <li>Todo controle com 48 px (<code>--tap-min</code>): Escolher e Baixar com 60, Começar de novo e Antes e depois com 48 (ghost, 15 px de texto e 6 px de lado no celular, para caberem numa linha nos três idiomas), chips e o "Ajustar" com 48.</li>
       <li>Retângulo: 356 px (celular) e 340 (a partir de 768). Faixa: 196 e 120. A Oli: 88 px a <code>top: -78px</code> (celular) e 112 px a <code>top: -76px</code>.</li>
-      <li>Anúncio de conteúdo: 300 px, depois do "Como comprimir": a 415 px da faixa a 360 (a regra pede 150) e longe da Oli. A lateral (300×644) a 150 px da coluna, a partir de 1280. Densidade a 360 (en, repouso): 300 / 1829 px do <code>&lt;main&gt;</code> do protótipo = 16 %, 22 % com a âncora de 100 px; a página de verdade é mais longa e a densidade, menor.</li>
+      <li>Anúncio de conteúdo: 300 px, depois do "Como comprimir": a 415 px da faixa a 360 (a regra pede 150) e longe da Oli. A lateral (300×644) a 150 px da coluna, a partir de 1280, e 150 px abaixo do cabeçalho (a 159 px da busca e dos botões, a regra dos menus; hoje, 29 px), como o mapa do UX-07 manda. Densidade a 360 (en, repouso): 300 / 1829 px do <code>&lt;main&gt;</code> do protótipo = 16 %, 22 % com a âncora de 100 px; a página de verdade é mais longa e a densidade, menor.</li>
     </ul>
 
     <h3>JS e requisições</h3>
@@ -430,6 +454,9 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <li>A dobra: toda página de ferramenta e de preset a 360×740, com e sem a fonte: base do retângulo ≤ 740 (F4-F7 f-2).</li>
       <li>O aviso: sem <code>fo-consent</code>, a interseção do <code>#fo-cookie</code> com o Escolher e com o Escolher outros arquivos é zero a 360×740 nos três idiomas (F4-F7 f-1).</li>
       <li>O foco: no resultado da 1ª visita a 360, o <code>scrollY</code> não muda quando o Baixar recebe o foco (obs. 8).</li>
+      <li>D-06: com <code>gen-texto-extensao-png.png</code> enviada como <code>notes.png</code>, a razão do erro nos três idiomas não traz "PNG" como saída e diz que o conteúdo não é imagem.</li>
+      <li>D-17: um PNG na página do HEIC mostra o link para <code>/png-to-jpg/</code> (e <code>/pt/png-para-jpg/</code>, <code>/es/png-a-jpg/</code>) na faixa de baixo, com 48 px.</li>
+      <li>D-09: o puxador do <code>.fo-ba</code> tem dois caminhos de seta.</li>
     </ul>
 
     <h3>O que muda no design system</h3>
@@ -438,6 +465,8 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
       <li>ResultCard: a Oli no canto de cima à direita, fora do cartão (G-10); a faixa de água e a onda no topo (G-09); a placa em todas as larguras, boiando; "Before / After" vira a linha "2.6 MB → 717 KB"; as dimensões ficam na nota, a partir de 768.</li>
       <li>ToolPage: o H1 sem o recuo da Oli; as opções sob "Ajustar" depois do resultado; o 1º anúncio depois do "Como usar".</li>
       <li>WaterLevel: a Oli nada no canto, não na superfície (a água sobe até ela).</li>
+      <li>BeforeAfter: o puxador com as duas setas (D-09); muda o <code>preview.html</code> do componente.</li>
+      <li>A mensagem de erro: a razão diz o caso (não é imagem, a extensão não bate, a ferramenta certa é outra) e, quando há ferramenta certa no site, o chip para ela fica na faixa de baixo (D-06, D-17).</li>
     </ul>
   </div>
 </section>
@@ -531,6 +560,11 @@ var TL_PAGE = {
     'r.size': 'Tamanho',
     'e.title': 'Ops, a Oli não conseguiu ler esse arquivo.',
     'e.why': 'notes.txt não é uma imagem. Tente um JPG ou PNG.',
+    'e.whyContent': 'notes.png termina em .png, mas por dentro não é uma imagem. Salve de novo como JPG ou PNG.',
+    'e.whyHeic': 'notes.png é um PNG, não uma foto HEIC. Para ter um JPG, use o PNG para JPG.',
+    'h1H': 'HEIC para JPG',
+    'n.heicLabel': 'Para um PNG:',
+    'n.png': 'PNG para JPG',
     'e.choose': 'Escolher outros arquivos',
     'o.legend': 'Compressão',
     'o.rec': 'Recomendada',
@@ -581,6 +615,11 @@ var TL_PAGE = {
     'r.size': 'Tamaño',
     'e.title': 'Uy, Oli no pudo leer este archivo.',
     'e.why': 'notes.txt no es una imagen. Prueba con un JPG o PNG.',
+    'e.whyContent': 'notes.png termina en .png, pero por dentro no es una imagen. Guárdalo de nuevo como JPG o PNG.',
+    'e.whyHeic': 'notes.png es un PNG, no una foto HEIC. Para tener un JPG, usa PNG a JPG.',
+    'h1H': 'HEIC a JPG',
+    'n.heicLabel': 'Para un PNG:',
+    'n.png': 'PNG a JPG',
     'e.choose': 'Elegir otros archivos',
     'o.legend': 'Compresión',
     'o.rec': 'Recomendada',
