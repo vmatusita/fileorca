@@ -21,7 +21,7 @@ Relatório da run F9, a primeira fase do `PLANO-MELHORIAS.md`. A ficha é o `doc
   - o passo a passo no `docs/OPERACAO.md`.
 - **Dois critérios da ficha não fecharam, e está dito:**
   - os 35 % de minutos a menos numa execução completa: −29,3 % brutos, numa máquina mais rápida, e de −5,7 % a −6,4 % pela conta controlada (§ 339);
-  - o preparo de até 90 s em cada job do Playwright: 17 de 18 nas duas execuções (§ 325).
+  - o preparo de até 90 s em cada job do Playwright: 17 de 18 nas duas primeiras execuções completas, 10 de 18 na terceira, que parou no preparo de uma parte (§ 325). A correção (a espera maior e o checkout esparso) é medida na execução final.
 
 ## Três achados que mudam a leitura deste relatório
 
@@ -234,7 +234,7 @@ A primeira completa (41658317282) teve o mesmo total, 111 minutos, com o `merge`
 
 | Arquivo | Bytes |
 | --- | ---: |
-| `ci.md` (com a seção da F9) | 22.756 |
+| `ci.md` (com a seção da F9) | 23.576 |
 | `idiomas.md` | 11.125 |
 | `calculadoras.md` | 9.999 |
 | `pdf.md` | 7.256 |
@@ -345,8 +345,15 @@ Resumo das partes do CI (pnpm verificar --partes, 21 partes lidas de .github/wor
 | 41658317282 | `8727853` | `ready_for_review` | completo | verde (o `merge` pulado, § 327) | 111 |
 | 41660597548 | `9e2d7d4` | `synchronize` (pronta) | completo | verde | 111 |
 | 41662993159 | `a85630b` | `synchronize` (rascunho) | leve | verde | 5 |
+| 41676530537 | `99812d8` | `synchronize` (rascunho) | leve | verde | 6 |
+| 41677467607 | `99812d8` | `ready_for_review` | completo | vermelha: o preparo do WebKit 1 de 13 parou (abaixo) | 122 |
 
-A execução leve do push deste relatório e a completa do `gh pr ready` final vêm depois dele; o `ci:custo` delas vai na descrição da PR. Até aqui, a run gastou 234 minutos cobrados em 5 execuções, contra 509 da PR #19 (o ajuste idiomas), que teve 4 execuções completas.
+**A execução 41677467607 falhou no preparo, não num teste.** No WebKit 1 de 13, o `apt` travou baixando os pacotes do sistema do espelho do runner, e a espera de 300 s pelo navegador se esgotou. As outras 17 partes do Playwright, o Lighthouse e os portões passaram, e o `ci-ok` ficou vermelho, como deve. Nessa execução, 8 dos 18 preparos passaram de 90 s: o checkout raso da árvore inteira levou até 132 s (a árvore tem 448 MB, 392 MB deles capturas de tela de `docs/relatorios/`), e o `apt` baixou a 1,4 MB/s numa parte. Pela ficha, a PR voltou a rascunho (`gh pr ready --undo`), a correção entrou, e a PR ficou pronta de novo:
+
+- a espera passou a 1.200 s, abaixo dos 30 min do job (no fluxo de antes da F9, a instalação só parava no limite do job);
+- os jobs `build`, `lighthouse` e `playwright` passaram a checkout esparso, sem `docs/relatorios/` (59 MB no teste local), a terceira abordagem do preparo (§ 325).
+
+A execução leve do push da correção e a completa do `gh pr ready` seguinte vêm depois deste relatório; o `ci:custo` delas vai na descrição da PR. Até aqui, a run gastou 362 minutos cobrados em 7 execuções, contra 509 da PR #19 (o ajuste idiomas), que teve 4 execuções completas.
 
 ## A revisão
 

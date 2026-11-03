@@ -5,7 +5,7 @@
 // that the merge waits for, the guards against a PR from a fork, the history only where it is read, and the protections
 // of § 154 in every Playwright part.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { delimiter, dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -268,6 +268,23 @@ describe('the history of each checkout', () => {
   it('fetches the whole history only for lint:texto, the Vitest, the classification and the merge', () => {
     const deep = Object.keys(jobs).filter((job) => stepsOf(job).some((step) => step.uses?.startsWith('actions/checkout@') && step.with?.['fetch-depth'] === 0));
     expect(deep.sort()).toEqual(['classificar', 'leve', 'merge', 'portoes']);
+  });
+
+  // The final run of the F9 spent up to 132 s in the shallow checkout of the whole tree, 392 MB of it the screenshots of
+  // docs/relatorios/ (DECISOES § 325). The jobs that only build, serve and test the site check out without them.
+  it('checks out the build, Lighthouse and Playwright jobs without docs/relatorios/, which nothing they run reads', () => {
+    const sparse = Object.keys(jobs).filter((job) => stepsOf(job).some((step) => step.uses?.startsWith('actions/checkout@') && step.with?.['sparse-checkout'] !== undefined));
+    expect(sparse).toEqual(['build', 'lighthouse', 'playwright']);
+    for (const job of sparse) {
+      const checkout = stepsOf(job).find((step) => step.uses?.startsWith('actions/checkout@'));
+      expect(String(checkout?.with?.['sparse-checkout']).trim().split('\n'), job).toEqual(['/*', '!/docs/relatorios/']);
+      expect(checkout?.with?.['sparse-checkout-cone-mode'], job).toBe(false);
+    }
+    // Outside comments, nothing the build, the Playwright suite or Lighthouse runs names docs/relatorios/.
+    const roots = ['src', 'tests/e2e', 'scripts/lib', 'scripts/gates/lighthouse.ts', 'scripts/serve-dist.ts', 'scripts/verificar.ts', 'astro.config.ts', 'playwright.config.ts', 'lighthouserc.json'];
+    const files = roots.flatMap((root) => (statSync(root).isDirectory() ? readdirSync(root, { recursive: true, encoding: 'utf8' }).map((name) => join(root, name)) : [root])).filter((path) => statSync(path).isFile());
+    const code = files.flatMap((path) => readFileSync(path, 'utf8').split('\n').filter((line) => line.includes('docs/relatorios') && !/^\s*(?:\/\/|\*|\/\*)/.test(line)).map((line) => `${path}: ${line.trim()}`));
+    expect(code).toEqual([]);
   });
 
   it('keeps the credentials of the checkout only where a job fetches with them (ci-ok fetches the base commit)', () => {
