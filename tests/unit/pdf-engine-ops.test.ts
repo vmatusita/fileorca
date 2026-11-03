@@ -91,11 +91,17 @@ describe('split, delete and reorder', () => {
   });
 
   it('keeps the links that stay inside a part and drops the ones that lead out of it', async () => {
-    const source = await readWithPdfjs(fixture('pdf-grande-fontes-embutidas-117p.pdf'));
-    const busy = source.pages.findIndex((page) => page.links >= 30);
+    // The links of each source page come from the oracle (fixtures/pdf/expected.json, PDF.js's reading when the fixture
+    // was made), not from reading the 117 pages again: that reading was most of the test, which overran the 5 s of the
+    // Vitest on a loaded machine (F8 ensaio-3; DECISOES § 330). The output is still read by PDF.js and qpdf.
+    const links = oracle('pdf-grande-fontes-embutidas-117p.pdf').links ?? [];
+    expect(links).toHaveLength(117);
+    const busy = links.findIndex((count) => count >= 30);
+    expect(busy).toBeGreaterThanOrEqual(0);
     const result = ok(await run({ kind: 'split', parts: [[busy]] }, 'pdf-grande-fontes-embutidas-117p.pdf'));
     const read = await sound(result.outputs[0]?.bytes as Uint8Array);
-    expect(read.pages[0]?.links ?? 0).toBeLessThan(source.pages[busy]?.links ?? 0);
+    expect(read.pages).toHaveLength(1);
+    expect(read.pages[0]?.links ?? 0).toBeLessThan(links[busy] ?? 0);
     expect(result.outputs[0]?.bytes.length ?? 0).toBeLessThan(fixture('pdf-grande-fontes-embutidas-117p.pdf').length / 5);
   });
 
