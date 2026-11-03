@@ -110,7 +110,7 @@ Da exploração (e), com o tempo por spec da execução 41548317129 e o modelo d
 
 - Com as partes de hoje (Chromium 4, WebKit 10) e os testes que a decisão 8 pede, a parte 9 do WebKit iria a uns 732 s e a 1 do Chromium a 653 s. A variância entre execuções do mesmo código chega a ±35 %.
 - A parte `verificar` iria de 674,8 s a uns 715 s (o `lint:texto` com a diff desta PR, o build e o Vitest crescem; o Lighthouse sozinho são 382,6 s).
-- **Decisão (§ 320): Chromium em 5, WebKit em 12 e a parte `verificar` em duas** (`--sem-playwright --sem-lighthouse` e `--lighthouse`), com o job `verificar` virando matriz (os `needs` do `merge` e do `alerta-dependabot` não mudam). Projeção: máximo de uns 593 s no Chromium, 629 s no WebKit, 340 s e 405 s nas duas do `verificar`. O `design.spec.ts` e o `image-matrix.spec.ts` ficam em partes diferentes do WebKit. Com o `ci.yml` no diff, o merge é do Victor.
+- **Decisão (§ 320): Chromium em 5, WebKit em 13 (primeiro 12; a estimativa com os testes prontos deu 694 s a uma parte) e a parte `verificar` em duas** (`--sem-playwright --sem-lighthouse` e `--lighthouse`), com o job `verificar` virando matriz (os `needs` do `merge` e do `alerta-dependabot` não mudam). Projeção com os testes prontos: máximo de uns 574 s no Chromium, 560 s no WebKit, 340 s e 405 s nas duas do `verificar`. O `design.spec.ts` e o `image-matrix.spec.ts` ficam em partes diferentes do WebKit. Com o `ci.yml` no diff, o merge é do Victor.
 - A medida local das partes que crescem e o `--list` final entram no relatório.
 
 ## 7. A ordem de construção

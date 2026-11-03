@@ -84,7 +84,7 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 ## Minutos do Actions acabando
 
 - **Onde ver:** Settings → Billing → Actions (2.000 minutos por mês no plano Free, com o repositório privado).
-- Cada execução do CI custa uns 165 minutos (19 partes desde o ajuste "idiomas", DECISOES § 320; eram 135 minutos em 15 partes). Cada PR do Dependabot roda o CI inteiro, e cada rebase dela também.
+- Cada execução do CI custa uns 170 minutos (20 partes desde o ajuste "idiomas", DECISOES § 320; eram 135 minutos em 15 partes). Cada PR do Dependabot roda o CI inteiro, e cada rebase dela também.
 - **O que fazer:** baixe o `open-pull-requests-limit` do `.github/dependabot.yml` numa run curta, feche PRs de major que você não vai mesclar agora com `@dependabot ignore this major version`, e evite reruns sem motivo.
 
 ## Defeito no service worker (desativação de emergência)

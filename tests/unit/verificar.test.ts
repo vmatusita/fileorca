@@ -61,13 +61,13 @@ describe('verificar em partes', () => {
   });
 
   // The languages adjustment (fourth adendo of ADR-003; DECISOES § 320): the gates in two parts (all but Lighthouse, and
-  // Lighthouse), Chromium in five shards and WebKit in twelve: the 19 parts of the ci.yml, read from the matrices of the
+  // Lighthouse), Chromium in five shards and WebKit in thirteen: the 20 parts of the ci.yml, read from the matrices of the
   // workflow itself so the test follows it.
-  it('covers the whole suite between the 19 parts of the languages adjustment, the same as the matrices of ci.yml', () => {
+  it('covers the whole suite between the 20 parts of the languages adjustment, the same as the matrices of ci.yml', () => {
     const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
     const gates = [['--sem-playwright', '--sem-lighthouse'], ['--lighthouse']];
-    const parts = [...gates, ...shards('chromium', 5), ...shards('webkit', 12)];
-    expect(parts).toHaveLength(19);
+    const parts = [...gates, ...shards('chromium', 5), ...shards('webkit', 13)];
+    expect(parts).toHaveLength(20);
     const commands = parts.flatMap((part) => plan(part).steps.map((step) => step.command.replace(/ --.*$/, '')));
     expect([...new Set(commands)].sort()).toEqual(STEPS.map((step) => step.command).sort());
     // Every gate runs in one part only: the build runs in each part, which needs it, and the suite once per shard.
