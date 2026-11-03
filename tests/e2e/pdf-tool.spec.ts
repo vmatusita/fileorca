@@ -619,6 +619,9 @@ test('Reorder PDF pages: the same new order by drag, by the buttons and by the k
     await page.getByRole('button', { name: panel.result.startOver }).click();
     await choosePdfs(page, [pdfFile(fixture)]);
     await expect(page.locator('.fo-pages__grid > li')).toHaveCount(all.length, { timeout: 30_000 });
+    // When the file is ready the panel moves the focus to the action, a frame after the grid shows (DECISOES § 240). A
+    // step that focuses a page waits for that move first, or the move takes the focus away from the page (§ 321).
+    await focused(page.getByRole('button', { name: must(reorderTexts.panel.action) }));
     await page.evaluate(() => ((window as unknown as { __status: string[] }).__status.length = 0));
   }
 
