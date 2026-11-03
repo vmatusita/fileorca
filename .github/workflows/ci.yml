@@ -12,7 +12,8 @@
 #                ends with the state of the disk and of the core dumps, whatever happened (the ENOSPC of § 141; § 154).
 #   ci-ok        always (a skipped job counts as passed in a required check): green only when the class came out and
 #                every job it asks for passed, from scripts/ci/ci-ok.ts of the base branch. The one check the ruleset of
-#                docs/ops/ruleset-main.json requires.
+#                docs/ops/ruleset-main.json requires. It reads the draft state of the PR as it is now: a leve run of a
+#                PR that is already ready is red.
 #   merge        after a green ci-ok, never for a draft or a fork: scripts/ci/pode-mesclar.ts of the base decides, and
 #                the post-deploy check runs when the merge happened (a merge made with the GITHUB_TOKEN does not fire
 #                `push`, so it is called here).
@@ -353,12 +354,19 @@ jobs:
 
   # The one check that sums up the CI (DECISOES § 327). It always runs, because a skipped job counts as passed in a
   # required check, and it reads its rule from the base branch, so a PR cannot turn its own check green.
+  # The class comes from the payload of the event; the draft state of the PR is read again here (PR_DRAFT_NOW), so a
+  # leve run of a PR that is already ready is red (the review of the F9, A-2). The step is green only when the output of
+  # the script has the line "ci-ok: verde": a script that never reaches its verdict (an older Node without
+  # import.meta.main, from the .node-version of the PR) fails the step too (A-4).
   ci-ok:
     name: ci-ok
     needs: [classificar, leve, build, portoes, lighthouse, playwright]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -368,7 +376,11 @@ jobs:
         env:
           NEEDS: ${{ toJSON(needs) }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
+          set -o pipefail
           mkdir -p "$RUNNER_TEMP/ci"
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           if git cat-file -e "$BASE_SHA:scripts/ci/ci-ok.ts" 2>/dev/null; then
@@ -377,7 +389,10 @@ jobs:
             cp scripts/ci/ci-ok.ts "$RUNNER_TEMP/ci/ci-ok.ts"
           fi
           printf '%s' "$NEEDS" > "$RUNNER_TEMP/needs.json"
-          node "$RUNNER_TEMP/ci/ci-ok.ts" "$RUNNER_TEMP/needs.json"
+          PR_DRAFT_NOW=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .draft)
+          export PR_DRAFT_NOW
+          node "$RUNNER_TEMP/ci/ci-ok.ts" "$RUNNER_TEMP/needs.json" | tee "$RUNNER_TEMP/ci-ok.log"
+          grep -qx 'ci-ok: verde' "$RUNNER_TEMP/ci-ok.log"
 
   # The status function and the result of ci-ok are explicit: with the implicit success(), GitHub also looks at the jobs
   # before ci-ok, and the leve job is always skipped in a complete run, so the merge was skipped too (DECISOES § 327).
@@ -478,9 +493,10 @@ jobs:
   # F8 (decision 14; DECISOES § 300): GitHub sends no failure e-mail for a run Dependabot started, so a red CI in a
   # Dependabot PR (ci-ok, or the merge job) opens an issue assigned to the owner, one per PR: a new red run comments
   # on the open one instead of opening another. It also comments on the PR. No checkout: only the gh CLI runs here.
+  # !cancelled(): the ci-ok of a cancelled run ends red (it always runs), and that is not a red CI (the review of the F9).
   alerta-dependabot:
     needs: [ci-ok, merge]
-    if: failure() && github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    if: failure() && !cancelled() && github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:

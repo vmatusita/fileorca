@@ -4,7 +4,10 @@
 // F9 (DECISOES § 323 to § 333): the jobs of the classes and the condition of each one, the ci-ok that sums them up and
 // that the merge waits for, the guards against a PR from a fork, the history only where it is read, and the protections
 // of § 154 in every Playwright part.
-import { readFileSync, readdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { delimiter, dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { REQUIRED, WATCHED } from '../../scripts/ci/ci-ok.ts';
 import { parseYaml, type YamlValue } from './lib/mini-yaml.ts';
@@ -18,6 +21,34 @@ const steps = (alert['steps'] ?? []) as { name?: string; uses?: string; run?: st
 const stepsOf = (job: string): Step[] => (jobs[job]?.['steps'] ?? []) as unknown as Step[];
 const FROM_HERE = 'github.event.pull_request.head.repo.full_name == github.repository';
 const CLASS_IS = (klass: string): string => `needs.classificar.outputs.classe == '${klass}'`;
+const hasBash = spawnSync('bash', ['--version'], { encoding: 'utf8' }).status === 0;
+type Jobs = ReturnType<typeof workflowJobs>;
+
+/** The lines of the run of the Verdict step of ci-ok. */
+function verdictLines(): string[] {
+  return (stepsOf('ci-ok').find((step) => step.name === 'Verdict')?.run ?? '').trim().split('\n');
+}
+
+/** The jobs whose needs reach both the leve and the build jobs, whose classes exclude each other. */
+function afterExclusiveClasses(all: Jobs): string[] {
+  const ancestors = (job: string, seen = new Set<string>()): Set<string> => {
+    const needs = all[job]?.['needs'];
+    for (const parent of Array.isArray(needs) ? needs : needs ? [needs] : []) {
+      if (seen.has(String(parent))) continue;
+      seen.add(String(parent));
+      ancestors(String(parent), seen);
+    }
+    return seen;
+  };
+  return Object.keys(all)
+    .filter((job) => ancestors(job).has('leve') && ancestors(job).has('build'))
+    .sort();
+}
+
+/** Those jobs whose if has no explicit status function: always(), cancelled() (as in !cancelled()) or failure(). */
+function withoutStatusFunction(all: Jobs): string[] {
+  return afterExclusiveClasses(all).filter((job) => !/\b(?:always|cancelled|failure)\(\)/.test(String(all[job]?.['if'])));
+}
 
 /** Every `gh issue create` of a workflow text, with its title and whether it is assigned to the owner. */
 function issueCreates(source: string): { title: string; assigned: boolean }[] {
@@ -30,7 +61,9 @@ describe('the alert of a red CI in a Dependabot PR', () => {
     // F9 (decision 4; DECISOES § 326): `labeled` recomputes the class; unlabeled and converted_to_draft run nothing.
     expect(on['pull_request']?.types).toEqual(['opened', 'synchronize', 'reopened', 'ready_for_review', 'labeled']);
     expect(alert['needs']).toEqual(['ci-ok', 'merge']);
-    expect(alert['if']).toBe(`failure() && github.event.pull_request.user.login == 'dependabot[bot]' && ${FROM_HERE}`);
+    // The review of the F9 (A-1): the ci-ok of a cancelled run ends red, because it always runs; a cancelled run is not
+    // a red CI, so the alert never fires for one.
+    expect(alert['if']).toBe(`failure() && !cancelled() && github.event.pull_request.user.login == 'dependabot[bot]' && ${FROM_HERE}`);
   });
 
   it('may write issues and comments, and nothing else; the workflow stays read-only', () => {
@@ -104,6 +137,66 @@ describe('the classes of the CI and the ci-ok', () => {
     expect(run).toMatch(/^git fetch --no-tags --depth=1 origin "\$BASE_SHA"$/m);
   });
 
+  // The review of the F9 (A-2): the class comes from the payload of the event, so ci-ok reads the draft state of the PR
+  // as it is now and hands it to the script, which makes a leve run of a ready PR red. Reading a PR asks for
+  // pull-requests: read; the job writes nothing.
+  it('reads the draft state of the PR as it is now, with a token that only reads', () => {
+    expect(jobs['ci-ok']?.['permissions']).toEqual({ contents: 'read', 'pull-requests': 'read' });
+    const verdictStep = stepsOf('ci-ok').find((step) => step.name === 'Verdict');
+    expect(verdictStep?.env).toEqual({
+      NEEDS: '${{ toJSON(needs) }}',
+      BASE_SHA: '${{ github.event.pull_request.base.sha }}',
+      GH_TOKEN: '${{ github.token }}',
+      GH_REPO: '${{ github.repository }}',
+      PR: '${{ github.event.pull_request.number }}',
+    });
+    const lines = (verdictStep?.run ?? '').trim().split('\n');
+    // The assignment alone, so a failing gh api fails the step (export VAR=$(…) would hide its status).
+    const read = lines.indexOf('PR_DRAFT_NOW=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .draft)');
+    expect(read).toBeGreaterThan(-1);
+    expect(lines[read + 1]).toBe('export PR_DRAFT_NOW');
+    expect(lines.findIndex((line) => line.startsWith('node "$RUNNER_TEMP/ci/ci-ok.ts"'))).toBe(read + 2);
+  });
+
+  // The review of the F9 (A-4): the default shell of a run step is `bash -e {0}`, without pipefail. The step turns
+  // pipefail on and is green only when the output has the line of the green verdict, so a script that never reaches
+  // its verdict (an older Node from the .node-version of the PR, without import.meta.main) fails the step.
+  it('is green only when the output of the script says ci-ok: verde', () => {
+    expect(jobs['ci-ok']?.['defaults']).toBeUndefined();
+    expect((parseYaml(CI) as Record<string, YamlValue>)['defaults']).toBeUndefined();
+    const lines = verdictLines();
+    expect(lines[0]).toBe('set -o pipefail');
+    expect(lines.slice(-2)).toEqual([
+      'node "$RUNNER_TEMP/ci/ci-ok.ts" "$RUNNER_TEMP/needs.json" | tee "$RUNNER_TEMP/ci-ok.log"',
+      "grep -qx 'ci-ok: verde' \"$RUNNER_TEMP/ci-ok.log\"",
+    ]);
+  });
+
+  it('fails the step, run in bash -e as GitHub runs it, when the script says nothing, says red or fails', () => {
+    if (process.platform === 'linux') expect(hasBash, 'bash tem de existir no runner do CI').toBe(true);
+    if (!hasBash) return;
+    const tail = ['set -o pipefail', ...verdictLines().slice(-2)].join('\n');
+    const dir = mkdtempSync(join(tmpdir(), 'fo-ci-ok-step-'));
+    try {
+      mkdirSync(join(dir, 'ci'));
+      const green = Object.fromEntries(WATCHED.map((job) => [job, { result: REQUIRED.completo.includes(job) ? 'success' : 'skipped', outputs: job === 'classificar' ? { classe: 'completo' } : {} }]));
+      writeFileSync(join(dir, 'needs.json'), JSON.stringify(green));
+      const step = (script: string, draftNow: string): number => {
+        writeFileSync(join(dir, 'ci', 'ci-ok.ts'), script);
+        const env = { ...process.env, RUNNER_TEMP: dir, PR_DRAFT_NOW: draftNow, PATH: `${dirname(process.execPath)}${delimiter}${process.env['PATH'] ?? ''}` };
+        return spawnSync('bash', ['-e', '-c', tail], { env, encoding: 'utf8' }).status ?? 1;
+      };
+      const real = readFileSync('scripts/ci/ci-ok.ts', 'utf8');
+      expect(step(real, 'false'), 'the real script, a green complete run').toBe(0);
+      expect(step(real, 'maybe'), 'the real script without a valid PR_DRAFT_NOW').not.toBe(0);
+      expect(step('export {};\n', 'false'), 'a script that never reaches its verdict and exits 0').not.toBe(0);
+      expect(step("console.log('ci-ok: vermelho');\n", 'false'), 'a script that says red and exits 0').not.toBe(0);
+      expect(step("console.log('ci-ok: verde');\nprocess.exit(1);\n", 'false'), 'a script that says green and exits 1').not.toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('merges only after a green ci-ok, never a draft and never a fork, and the alert waits for both', () => {
     expect(jobs['merge']?.['needs']).toBe('ci-ok');
     expect(jobs['merge']?.['if']).toBe(`needs.ci-ok.result == 'success' && !cancelled() && github.event.pull_request.draft == false && ${FROM_HERE}`);
@@ -113,20 +206,20 @@ describe('the classes of the CI and the ci-ok', () => {
 
   // The first complete run of the F9 skipped the merge: the implicit success() of an if also looks at the jobs before the
   // ones in needs, and the leve job is skipped in every complete run (DECISOES § 327). A job after jobs of classes that
-  // exclude each other needs an explicit status function.
+  // exclude each other needs an explicit status function, and success() written out is the same as the implicit one,
+  // so it does not count (the review of the F9, D-1).
   it('gives an explicit status function to every job after jobs of classes that exclude each other', () => {
-    const ancestors = (job: string, seen = new Set<string>()): Set<string> => {
-      const needs = jobs[job]?.['needs'];
-      for (const parent of Array.isArray(needs) ? needs : needs ? [needs] : []) {
-        if (seen.has(String(parent))) continue;
-        seen.add(String(parent));
-        ancestors(String(parent), seen);
-      }
-      return seen;
-    };
-    const after = Object.keys(jobs).filter((job) => ancestors(job).has('leve') && ancestors(job).has('build'));
-    expect(after.sort()).toEqual(['alerta-dependabot', 'ci-ok', 'merge', 'pos-deploy']);
-    for (const job of after) expect(String(jobs[job]?.['if']), job).toMatch(/\b(?:always|cancelled|failure|success)\(\)/);
+    expect(afterExclusiveClasses(jobs)).toEqual(['alerta-dependabot', 'ci-ok', 'merge', 'pos-deploy']);
+    expect(withoutStatusFunction(jobs)).toEqual([]);
+  });
+
+  it('flags an if with success() in place of the status function (a control that fails)', () => {
+    const merge = "needs.ci-ok.result == 'success' && !cancelled() && github.event.pull_request.draft == false";
+    expect(CI).toContain(merge);
+    const mutated = workflowJobs(CI.replace(merge, "success() && needs.ci-ok.result == 'success' && github.event.pull_request.draft == false"));
+    expect(withoutStatusFunction(mutated)).toEqual(['merge']);
+    const removed = workflowJobs(CI.replace(merge, "needs.ci-ok.result == 'success' && github.event.pull_request.draft == false"));
+    expect(withoutStatusFunction(removed)).toEqual(['merge']);
   });
 
   it('reads the classification from the base branch, with the copy of the PR only while the base has none', () => {
