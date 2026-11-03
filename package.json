@@ -33,7 +33,8 @@
     "fixtures": "node scripts/fixtures/generate.ts",
     "motor:exportar": "node scripts/oss/image-engine.ts",
     "guias:medir": "node scripts/guides/measure.ts",
-    "lancamento:imagens": "node scripts/lancamento/imagens.ts"
+    "lancamento:imagens": "node scripts/lancamento/imagens.ts",
+    "publico:auditar": "node scripts/publico/auditar.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
