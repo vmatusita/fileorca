@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { LANGS, QR_ID, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, languagesOf, pageFileFor, routeById, textFilesFor, type RouteId } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
@@ -76,14 +76,14 @@ describe('mapa de rotas', () => {
     // too (English only in the F5b, DECISOES § 190), and the QR code generator.
     const everyLanguage = ROUTES.filter((route) => route.adArea === 'arquivos').map((route) => route.id);
     expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + 1 + FILE_GUIDE_IDS.length);
-    for (const id of [...everyLanguage, QR_ID]) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
+    for (const id of [...everyLanguage, QR_ID] as RouteId[]) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
     // What stays English only: the 13 pages of home and health (F7, decision 1; their trigger is DECISOES § 273).
     const englishOnly = ROUTES.filter((route) => languagesFor(route.id).length === 1 && languagesFor(route.id)[0] === 'en').map((route) => route.id);
     expect(englishOnly).toEqual([...LIFE_IDS]);
     expect(LIFE_IDS).toHaveLength(13);
     // The languages adjustment (decision 4): every calculator and preset and every money guide has its Spanish page, and
     // none of them a Portuguese one.
-    for (const id of [MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS]) expect(languagesOf(routeById(id)), id).toEqual(['en', 'es']);
+    for (const id of [MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS] as RouteId[]) expect(languagesOf(routeById(id)), id).toEqual(['en', 'es']);
     for (const route of ROUTES) expect(languagesOf(route), route.id).toEqual(languagesFor(route.id));
   });
 

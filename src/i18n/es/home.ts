@@ -15,7 +15,7 @@ export default {
   },
   money: {
     heading: 'Calcula un préstamo',
-    intro: 'Hipotecas, préstamos personales, tarjetas de crédito y deudas: el pago mensual, los intereses y la tabla completa. Tus números se quedan en tu dispositivo.',
+    intro: 'Hipoteca, refinanciamiento, préstamos para auto y personales, y cuánta casa puedes pagar: el pago, los intereses y la tabla completa. Tus números se quedan en tu dispositivo.',
     hubLink: 'Ver todas las calculadoras financieras',
   },
   privacyHeading: 'Tus archivos se quedan contigo',

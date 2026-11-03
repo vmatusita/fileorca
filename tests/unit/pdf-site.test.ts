@@ -148,7 +148,7 @@ describe('footer', () => {
       // QR code generator of the language (since the languages adjustment), FileOrca.
       const titles = page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text);
       expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.utilityColumn, common.footer.siteColumn]);
-      const utility = column(page, common.footer.utilityColumn)?.querySelectorAll('li a') ?? [];
+      const utility = column(page, common.footer.utilityColumn ?? '')?.querySelectorAll('li a') ?? [];
       expect(utility.map((link) => link.getAttribute('href')), lang).toEqual([routeById(QR_ID).paths[lang]]);
       expect(utility.map((link) => link.text), lang).toEqual([common.qr?.name]);
       // No footer link to an English PDF page.
