@@ -218,10 +218,14 @@ html[data-lang="es"] [data-when-lang]:not([data-when-lang~="es"]) { display: non
 
 /* ---------- 9. Proposal colour tokens (none yet). Each one: light, dark, and the system-dark mirror, equal. ---------- */
 :root, [data-theme="light"] {
+  /* UX-12: the alert icon on the deep ground of the ResultHero (danger is 2.45:1 there in the light theme). */
+  --proposta-danger-on-deep: #FF8A80;
 }
 [data-theme="dark"] {
+  --proposta-danger-on-deep: #FF8A80;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --proposta-danger-on-deep: #FF8A80;
   }
 }
