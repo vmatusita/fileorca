@@ -148,6 +148,66 @@ Saído do ensaio do Dependabot da F8 (DECISOES § 299):
 - [ ] **Depois do merge da F8:** Insights → Dependency graph → Dependabot, conferir que o `.github/dependabot.yml` foi aceito sem erro.
 - [ ] **Opcional:** Settings → Code security → Dependabot security updates, para PRs de segurança fora do mês (elas também rodam o CI inteiro).
 
+## Repositório público
+
+Escrito na F9 (3/nov/2026; DECISOES § 332 a § 336), a partir da seção F do `PLANO-MELHORIAS.md`.
+
+**O repositório já é público.** O GitHub registra a visibilidade pública desde a criação, em 28/out/2026: o histórico inteiro, com as `refs/pull/*` das PRs, já pode ser lido por qualquer pessoa. O passo "Change visibility" da seção F já está feito. Os outros passos ficaram urgentes, porque hoje a `main` não tem ruleset, uma PR de fork de quem já contribuiu roda o CI sem a sua aprovação, e o secret scanning, o push protection e o relato privado de falhas estão desligados.
+
+### Passo a passo, nesta ordem
+
+1. **Leia a auditoria antes de tudo.** Rode `pnpm publico:auditar` na pasta do projeto (uns 20 s; ele atualiza o espelho em `.cache/auditoria/`) e abra o `.cache/auditoria-publico.md`. O arquivo fica fora do Git e traz cada achado com o valor, onde ele aparece (arquivo, commit e ref) e a categoria. No terminal saem só as contagens. Decida por categoria:
+   - **Segredo real:** gire o segredo no serviço dele agora, porque o histórico já está público.
+   - **Dado de terceiro** (por exemplo, o e-mail de um blogueiro em `docs/lancamento/blogs-financas.md`): tirar do arquivo atual numa run curta resolve o arquivo, mas não o histórico. Veja se o dado já era público no site da pessoa.
+   - **GPS:** cada foto com a coordenada. Confira se alguma aponta para um lugar que você não quer mostrar.
+   - **Dado do Victor** (o e-mail dos commits e as contas com o nome da marca): já está público com o histórico.
+   - **Público por natureza e falso positivo:** só conferência, sem ação.
+
+   Reescrever o histórico não está no plano: quebra os testes que leem commits antigos e os links dos relatórios. Se algo não puder continuar público, a saída sem reescrever é voltar o repositório para privado (Settings → General → Danger Zone → Change visibility). Quem já clonou ou fez fork continua com a cópia.
+2. **Dê o merge da PR da F9** (squash, apagando a branch), depois de ler o diff do `.github/`. Ela traz o check `ci-ok`, a proteção contra PR de fork no `scripts/ci/pode-mesclar.ts` e as guardas dos jobs que escrevem.
+3. **Importe o ruleset da `main`,** só depois do passo 2: antes de o `.github/workflows/ci.yml` com o job `ci-ok` estar na `main`, nenhuma PR recebe esse check, e todas ficariam esperando. Settings → Rules → Rulesets → New ruleset → Import a ruleset → escolha o `docs/ops/ruleset-main.json` → revise → Create.
+   - O que ele exige: só na branch padrão, PR obrigatória sem aprovação e só com squash; o `ci-ok` vindo do GitHub Actions como o único check, sem exigir a branch atualizada; nenhum force push e nenhuma exclusão; ninguém contorna. O `tests/unit/ruleset.test.ts` confere o arquivo.
+   - Como o `ci-ok` resume o CI inteiro, mudar as partes do CI nunca mexe no ruleset.
+   - Se um dia precisar mesclar com o `ci-ok` vermelho, mude o ruleset para Disabled (Settings → Rules → Rulesets → main → Enforcement status), mescle e volte para Active.
+4. **Aprovação de PR de fork:** Settings → Actions → General, na parte de aprovação de workflows de PR de fork, escolha "Require approval for all external contributors". Hoje está em "first-time contributors".
+5. **Code security:** Settings → Code security, ligue Secret scanning, Push protection e Private vulnerability reporting. O `SECURITY.md` manda relatar pelo relato privado: até você ligá-lo, o botão "Report a vulnerability" não aparece, e o relato vai pelo e-mail do site.
+6. **Features:** Settings → General → Features, desligue Wiki e Projects (hoje ligados) e confira que Discussions está desligado. Issues fica, porque os alertas dos workflows usam.
+7. **Workers Builds:** confira o painel do Cloudflare e o app do GitHub (subseção "Workers Builds e PR de fork", abaixo).
+8. **Na primeira PR depois disso,** confira que o check `ci-ok` aparece e que o merge automático acontece. Gere o prompt da F9b com o custo dessa execução (o script `ci:custo` da F9).
+
+### Merge de PR de fork
+
+- Uma PR de fork roda o `.github/workflows/ci.yml` **da própria PR**, não o da `main`. Quem abre a PR pode mudar o workflow para o `ci-ok` sair verde sem testar nada. Verde ali não prova nada.
+- Por isso o merge de PR de fork é sempre seu, depois de ler o diff inteiro, com atenção a `.github/`, `scripts/`, `package.json`, `pnpm-lock.yaml` e `.githooks/`.
+  - O job `merge` não roda em PR de fork, e o `scripts/ci/pode-mesclar.ts` recusa a PR cujo head não é deste repositório e a de autor que não seja o dono ou o Dependabot. Uma PR de branch `fase-*` de outra pessoa também não se mescla sozinha.
+  - Os jobs que escrevem (o `merge`, o `alerta-dependabot` e o `.github/workflows/pos-deploy.yml`) não rodam em PR de fork, e nenhum workflow usa `pull_request_target`.
+  - O token de uma PR de fork só lê, e os workflows não usam nenhum segredo do repositório.
+- Com o passo 4, cada execução de PR de fork espera você clicar em "Approve and run". Leia o diff antes de aprovar: aprovar roda o código da PR num runner do GitHub.
+
+### O que fica público no Actions
+
+- Qualquer pessoa lê os logs de toda execução, e qualquer conta do GitHub baixa os artefatos.
+- **Os artefatos:** o do build (o `dist/` e o `.cache/bundle-modules.json`), com retenção de 1 dia, e os relatórios do Playwright (`playwright-report-<n>`), com 7 dias. O `dist/` é o site que já está no ar; os relatórios trazem screenshots das páginas e as fixtures de teste, que são amostras públicas (`fixtures/ORIGEM.md`).
+- **Os logs:** nenhum passo imprime token ou variável de ambiente. O `GH_TOKEN` entra só como variável dos passos que chamam o `gh`, e o GitHub mascara o token no log. O diagnóstico de disco (`scripts/lib/disco.ts`) mostra caminhos e tamanhos do runner e o nome dos processos, nunca a linha de comando nem o ambiente.
+- A auditoria não roda no CI: o `.cache/auditoria-publico.md` só existe na sua máquina.
+- Título de PR, de issue e mensagem de commit também ficam públicos: nunca ponha dado pessoal neles.
+- Num repositório público, os runners padrão do GitHub não gastam a cota de minutos. A seção "Minutos do Actions acabando" vale enquanto o repositório for privado.
+
+### Workers Builds e PR de fork
+
+- **O que a documentação do Cloudflare diz** (lida em 3/nov/2026):
+  - Workers Builds, página "Build branches": com **Enable Preview Builds** ligado (Settings → Build → Branch control), "every push to a branch that is not your production branch triggers a preview build".
+  - Workers Builds, página "GitHub integration": o Cloudflare publica a cada push numa branch do repositório conectado e comenta na PR o status do build e a URL da prévia. O app do GitHub se chama "Cloudflare Workers and Pages", é o mesmo do Pages, e a página recomenda limitar o acesso aos repositórios que você publica.
+  - Nenhuma página do Workers Builds (build branches, GitHub integration, configuration) fala de fork. Só a do Pages fala: "preview URLs will not be created for pull requests created from forks of your repository".
+  - Os exemplos de automação de prévias do Cloudflare, com GitHub Actions, lembram que os segredos do repositório não chegam a PR de fork. O CI do FileOrca não usa credencial do Cloudflare: quem publica é só o Workers Builds.
+- **O que isso quer dizer:** a prévia nasce de um push numa branch deste repositório. O push de quem fez fork vai para o repositório dele, então o esperado é nenhum build. Como a documentação do Workers Builds não diz isso, confira de verdade.
+- **O que você confere:**
+  1. No Cloudflare, Workers → fileorca → Settings → Build → Branch control: a branch de produção é a `main`, e Enable Preview Builds está como você quer.
+  2. Nas variáveis e nos segredos do build e nas configurações das prévias: só valores que o site já publica, nenhum token.
+  3. No GitHub, na sua conta, Settings → Applications → Installed GitHub Apps → Cloudflare Workers and Pages → Configure: Repository access em "Only select repositories", só com o `fileorca` (e o repositório do motor, quando existir).
+  4. Um teste de verdade: de uma segunda conta (sua ou de alguém de confiança), faça um fork, abra uma PR que muda uma linha de um `.md` e veja se aparece check, comentário ou build do Workers Builds. Depois feche a PR.
+- **Se uma PR de fork gerar build:** desligue Enable Preview Builds até decidir, porque o build roda o código da PR com as variáveis do build, e registre numa run curta.
+
 ## Pendências
 
 O que ficou para depois está em `docs/PENDENCIAS.md`, agrupado por tipo de run.
