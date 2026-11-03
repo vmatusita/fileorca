@@ -5,12 +5,12 @@
 import type { Lang } from '../../i18n/routes.ts';
 import { AUTHOR } from '../../platform/site.ts';
 import { SHARED_BY_LANG, datesOf, longDate } from './page.ts';
-import type { AnyCalcId, CalcArea } from './registry.ts';
+import type { AnyCalcId, CalcArea, GuideId } from './registry.ts';
 
 interface Props {
   lang?: Lang;
   /** The page (or the hub's area): the home and health pages carry the days of the F7. */
-  of?: AnyCalcId | CalcArea;
+  of?: AnyCalcId | CalcArea | GuideId;
 }
 const { lang = 'en', of = 'money' } = Astro.props;
 const shared = SHARED_BY_LANG[lang].page;

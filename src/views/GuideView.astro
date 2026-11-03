@@ -4,7 +4,9 @@
 // with the guide's example by property of the page (never by the URL), and its schedule; the text, whose
 // every result is filled in by the engines at build (src/tools/calc/guides.ts); one content AdSlot only after
 // the calculator; the table the engines measured, with its date; how it works (the data-ymyl blocks of
-// gate:dinheiro-saude); the related calculators; the rail AdSlot. Schema: Article, BreadcrumbList, Person.
+// gate:dinheiro-saude); the related calculators; the rail AdSlot. Schema: Article, BreadcrumbList, Person. Since the
+// languages adjustment it also serves the Spanish guides: the same engines, the numbers and words in Spanish, the Spanish
+// calculator embedded, and every link to a Spanish page.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
@@ -12,42 +14,42 @@ import AdSlot from '../ads/AdSlot.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import CalcIsland from '../tools/calc/CalcIsland.astro';
 import CalcScheduleRoot from '../tools/calc/CalcScheduleRoot.astro';
-import { routeById } from '../i18n/routes.ts';
+import { pathFor, routeById } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
-import enCommon from '../i18n/en/common.ts';
-import type { GuideTexts } from '../i18n/types.ts';
+import { TEXTS } from '../i18n/texts.ts';
 import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
 import { PANEL_POSES } from '../tools/image/Oli.tsx';
-import { CALC_PAGES, GUIDES, MONEY_HUB_ID, type GuideId } from '../tools/calc/registry.ts';
-import { FIRST_PUBLISHED, REVIEWED, SHARED, calcTexts, cardOf, longDate, panelData } from '../tools/calc/page.ts';
-import { GUIDE_FACTS } from '../tools/calc/guides.ts';
+import { GUIDES, MONEY_HUB_ID, guidePathIn, moneyPage, type GuideId } from '../tools/calc/registry.ts';
+import { SHARED_BY_LANG, calcTexts, cardOf, datesOf, longDate, panelData } from '../tools/calc/page.ts';
+import { GUIDE_FACTS, GUIDE_TEXTS, type GuideLang } from '../tools/calc/guides.ts';
 
 interface Props {
   id: GuideId;
-  lang: 'en';
+  lang: GuideLang;
 }
 const { id, lang } = Astro.props;
-const texts = import.meta.glob<GuideTexts>('/src/i18n/en/guide-*.ts', { import: 'default', eager: true });
-const t = texts[`/src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`];
-if (!t) throw new Error(`no texts for ${id}`);
+const t = GUIDE_TEXTS[id][lang];
 const route = routeById(id);
-const path = GUIDES[id].path;
-const guide = GUIDE_FACTS[id]();
-const fill = (text: string): string => fmt(text, { ...guide.facts, date: longDate(REVIEWED) });
+const path = guidePathIn(id, lang) ?? GUIDES[id].path;
+const guide = GUIDE_FACTS[id](lang);
+// The days of the guide: the English ones of the F4, the Spanish ones of the languages adjustment.
+const { reviewed: REVIEWED, first: FIRST_PUBLISHED } = datesOf(id, lang);
+const fill = (text: string): string => fmt(text, { ...guide.facts, date: longDate(REVIEWED, lang) });
 const data = panelData(guide.calc, lang, { initial: guide.example, readLink: false });
-const common = enCommon;
+const common = TEXTS[lang].common;
+const shared = SHARED_BY_LANG[lang].page;
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
-  { name: common.moneyCalculators, path: `/${MONEY_HUB_ID}/` },
+  { name: common.moneyCalculators, path: pathFor(MONEY_HUB_ID, lang) },
   { name: t.h1, path },
 ];
-const related = GUIDES[id].related.map((target) => cardOf(target, 'en'));
+const related = GUIDES[id].related.map((target) => cardOf(target, lang));
 // The calculator the guide embeds, by its own H1, linked under it (review F4, SEO-1): the first letter goes small
 // unless the name starts with an acronym ("APR to APY").
-const calcH1 = calcTexts(guide.calc).h1;
+const calcH1 = calcTexts(guide.calc, lang).h1;
 const calcLabel = /^[A-Z][a-z]/.test(calcH1) ? calcH1[0]!.toLowerCase() + calcH1.slice(1) : calcH1;
-const calcPath = CALC_PAGES[guide.calc].path;
-const [readBefore, readAfter] = SHARED.page.readOn.split('{date}');
+const calcPath = moneyPage(guide.calc, lang)?.path ?? '';
+const [readBefore, readAfter] = shared.readOn.split('{date}');
 const [noteBefore, noteAfter] = t.tableNote.split('{date}');
 const before = t.sections.slice(0, 2);
 const after = t.sections.slice(2);
@@ -59,13 +61,13 @@ const after = t.sections.slice(2);
   description={t.description}
   withAds
   oli={PANEL_POSES}
-  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED), personLd()]}
+  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED, id), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <div class="fo-top fo-top--calc">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
-    <Reviewed />
+    <Reviewed lang={lang} of={id} />
   </div>
   <div class="fo-prose fo-guide">{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
   <section class="fo-section fo-prose" aria-labelledby="guide-calc">
@@ -73,7 +75,7 @@ const after = t.sections.slice(2);
     <p>{fill(t.calcIntro)}</p>
   </section>
   <CalcIsland data={data} />
-  <p class="fo-guide__open"><a href={calcPath}>{fmt(SHARED.page.openCalc, { name: calcLabel })}</a></p>
+  <p class="fo-guide__open"><a href={calcPath}>{fmt(shared.openCalc, { name: calcLabel })}</a></p>
   <CalcScheduleRoot data={data} />
   {before.map((section, index) => (
     <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>
@@ -98,7 +100,7 @@ const after = t.sections.slice(2);
         <tbody>{guide.table.rows.map((row) => <tr>{row.map((cell, index) => (index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}</tr>)}</tbody>
       </table>
     </div>
-    <p class="fo-reviewed">{noteBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{noteAfter}</p>
+    <p class="fo-reviewed">{noteBefore}<time datetime={REVIEWED}>{longDate(REVIEWED, lang)}</time>{noteAfter}</p>
   </section>
   <section class="fo-section fo-prose" aria-labelledby="works">
     <h2 id="works">{t.formulaHeading}</h2>
@@ -113,7 +115,7 @@ const after = t.sections.slice(2);
     </div>
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
-      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED)}</time>{readAfter}</li>)}</ul>
+      <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED, lang)}</time>{readAfter}</li>)}</ul>
     </div>
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{t.disclaimerHeading}</h3>

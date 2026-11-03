@@ -2,7 +2,7 @@
 
 Glossário fixo do FileOrca em português (F6, decisão 3 do prompt; PLANO "Idiomas"). Todo texto do site em português segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em português e no HTML das páginas `/pt/` do `dist/`.
 
-Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md.
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code e os guias de arquivo.
 
 ## Registro
 
@@ -94,6 +94,7 @@ As datas de "Revisado em" e "Última atualização" são o dia em Brasília.
 | Compress PDF | Comprimir PDF | /pt/comprimir-pdf/ |
 | Protect PDF | Proteger PDF | /pt/proteger-pdf/ |
 | Unlock PDF | Desbloquear PDF | /pt/desbloquear-pdf/ |
+| QR code generator | Gerador de QR code | /pt/gerador-de-qr-code/ |
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O artigo do formato é masculino ("um JPG", "o PDF").
 
@@ -138,6 +139,7 @@ Sem acento, em minúsculas, com hífen (o mesmo nome em todo sistema de arquivos
 | `fileorca-images.zip`, `fileorca-images.pdf` | `fileorca-imagens.zip`, `fileorca-imagens.pdf` |
 | `fileorca-pdfs.zip`, `fileorca-pdf-images.zip` | `fileorca-pdfs.zip`, `fileorca-pdf-imagens.zip` |
 | `document.pdf` | `documento.pdf` |
+| `qr-code.png`, `qr-code.svg` | `qr-code.png`, `qr-code.svg` (o mesmo: "QR code" é o nome do código no Brasil) |
 
 ## Dinheiro (calculadoras adaptadas ao Brasil)
 
@@ -180,6 +182,59 @@ Sem acento, em minúsculas, com hífen (o mesmo nome em todo sistema de arquivos
 Nomes das páginas: Calculadoras financeiras (hub), Simulador SAC × PRICE, Simulador de financiamento de veículo, Simulador de empréstimo, Amortização antecipada, Calculadora do cartão de crédito, Calculadora de dívidas, Calculadora de juros compostos, Alugar ou comprar. No PDF o "×" sai como "x" (WinAnsi).
 
 Nome do arquivo do PDF e do CSV: `simulacao-sac-price`, `financiamento-veiculo`, `simulacao-emprestimo`, `amortizacao-antecipada`, `cartao-de-credito`, `plano-de-dividas`, `juros-compostos`, `alugar-ou-comprar`.
+
+## QR code (ajuste idiomas)
+
+| Inglês | Português | Observação |
+| --- | --- | --- |
+| QR code | QR code | masculino ("o QR code"); "o código" na forma curta |
+| square (módulo do código) | quadradinho | |
+| Link or text | Link ou texto | rótulo da caixa |
+| Oli in the middle · On · Off | A Oli no centro · Ligada · Desligada | no feminino, pela Oli |
+| PNG size · Small · Medium · Large | Tamanho do PNG · Pequeno · Médio · Grande | |
+| Download PNG · Download SVG | Baixar PNG · Baixar SVG | |
+| Preview | Prévia | |
+| Error correction | Correção de erros | "nível H" |
+| static code · short link | código estático · link encurtado | |
+| scan | escanear | "escaneie o código com a câmera do celular" |
+| Utilities | Utilidades | coluna do rodapé e categoria da busca |
+
+## Guias de arquivo (ajuste idiomas)
+
+Os 10 guias em `/pt/guias/<slug>/`. O número de cada guia sai do código no formato do português: "2,4 MB", "68%", "5,2 vezes" ("0,5 vez" e "1,3 vez" no singular, abaixo de 2), "42,2 dB" e "150 ppi", com espaço sem quebra antes da unidade. Contagem por extenso: `{x_word}` masculino ("dois arquivos") e `{x_wordf}` feminino ("duas fotos"), pelo substantivo que a contagem acompanha; nunca no começo de uma frase (DECISOES § 314).
+
+| Guia (inglês) | Nome em português | Caminho |
+| --- | --- | --- |
+| How to convert HEIC to JPG on Windows | Como converter HEIC para JPG no Windows | /pt/guias/heic-para-jpg-no-windows/ |
+| Why is my PDF so large? | Por que meu PDF está tão grande? | /pt/guias/por-que-meu-pdf-esta-tao-grande/ |
+| Social media image sizes | Tamanhos de imagem para redes sociais | /pt/guias/tamanhos-de-imagem-para-redes-sociais/ |
+| How to open WebP images and save them as JPG | Como abrir imagens WebP e salvar como JPG | /pt/guias/abrir-webp-e-salvar-como-jpg/ |
+| JPG or PNG: which one to use | JPG ou PNG: qual usar | /pt/guias/jpg-ou-png/ |
+| How to remove location data from photos | Como remover a localização das fotos | /pt/guias/remover-localizacao-das-fotos/ |
+| Which resolution to choose for PDF to JPG | Qual resolução escolher ao converter PDF para JPG | /pt/guias/resolucao-de-pdf-para-jpg/ |
+| How to split a PDF, and why the parts can weigh more | Como dividir um PDF e por que as partes podem pesar mais | /pt/guias/dividir-pdf-e-tamanho-do-arquivo/ |
+| How to combine PDFs on a phone | Como juntar PDFs no celular | /pt/guias/juntar-pdfs-no-celular/ |
+| How to turn photos into one PDF | Como transformar fotos em um único PDF | /pt/guias/fotos-em-um-pdf/ |
+
+| Inglês | Português | Observação |
+| --- | --- | --- |
+| guide · Read the guide | guia · Leia o guia | |
+| What we measured · Sources · Related tools and guides | O que medimos · Fontes · Ferramentas e guias relacionados | |
+| real phone photos | fotos de celular de verdade | vale; "PDFs reais" e "arquivos reais" não (DECISOES § 208) |
+| graphics | imagens gráficas | logos, capturas de tela, gráficos |
+| round trip | ida e volta | |
+| frame | quadro | do corte, das redes e de uma animação |
+| portrait · landscape | retrato · paisagem | |
+| embedded fonts | fontes incorporadas | como o Acrobat em português |
+| scan · scanned | escaneamento · escaneado | "digitalizar" só ao citar a ajuda do Google Drive, que usa o verbo |
+| mode (da Comprimir PDF) | nível | "a compressão Sem perda", "a Recomendada", "a Forte" |
+| merged file | arquivo juntado | |
+| Change (coluna) | Variação | |
+| object streams | fluxos de objetos | |
+| post · header photo · channel banner · thumbnail | publicação · foto de capa · banner do canal · miniatura | |
+| preset | ajuste pronto | |
+
+Rótulos de sistema, como as páginas de suporte em português escrevem (lidas em 3/nov/2026): Ajustes, Mais Compatível, Alta Eficiência, Manter Originais, Privacidade e Segurança, Serviços de Localização, Ajustar Localização, Sem Localização, app Pré-Visualização, Inserir de Arquivo, app Arquivos, Manual de Uso do iPhone (Apple); Configurações, Mais configurações, Salvar local, Google Fotos, Câmera Pixel, Adicionar (Google); aplicativo Fotos, Extensões de Imagem HEIF, Extensões de Vídeo HEVC, Extensão de Imagem WebP, Explorador de Arquivos (Microsoft). Fonte sem versão em português leva "(em inglês)" no rótulo.
 
 ## Falas da Oli
 

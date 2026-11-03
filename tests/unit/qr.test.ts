@@ -29,6 +29,10 @@ import {
   utf8,
   type QrMatrix,
 } from '../../src/tools/qr-code-generator/qr.ts';
+import { pathFor } from '../../src/i18n/routes.ts';
+import enTexts from '../../src/tools/qr-code-generator/i18n/en.ts';
+import ptTexts from '../../src/tools/qr-code-generator/i18n/pt.ts';
+import esTexts from '../../src/tools/qr-code-generator/i18n/es.ts';
 
 /** A text of exactly `bytes` bytes of UTF-8, with accents and emoji in it (the longest text the page takes). */
 function textOfBytes(bytes: number): string {
@@ -98,6 +102,20 @@ describe('the matrix', () => {
     expect(encode('🐋'.repeat(318))).toMatchObject({ ok: true, bytes: 1272 });
     // Spaces around a text are kept: the code carries what was typed.
     expect(encode(' a ').ok).toBe(true);
+  });
+
+  // Review of the languages adjustment (D1; DECISOES § 321): the short link of the answer becomes a link on the page (the
+  // RichText of the FAQ), and in Portuguese and Spanish it took the reader to the English home. Each language shows the
+  // home of its own language, and the grid the answer says is still the grid of that link.
+  it('makes the grid the FAQ says of its short link, and the link is the home of the page language', () => {
+    for (const [lang, texts] of [['en', enTexts], ['pt', ptTexts], ['es', esTexts]] as const) {
+      const answer = texts.faq.map((item) => item.a).find((a) => a.includes('https://')) ?? '';
+      const link = /https:\/\/\S+\//.exec(answer)?.[0] ?? '';
+      expect(link, lang).toBe(`https://fileorca.com${pathFor('home', lang)}`);
+      const side = Number(/\b(\d+)\b(?= (?:squares|quadradinhos|cuadritos))/.exec(answer)?.[1] ?? 0);
+      expect(side, `${lang}: o lado da grade na resposta`).toBe(29);
+      expect(matrixOf(link).size, `${lang}: ${link}`).toBe(side);
+    }
   });
 });
 

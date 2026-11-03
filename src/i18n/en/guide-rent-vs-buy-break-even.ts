@@ -73,4 +73,5 @@ export default {
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice. It rests on rates chosen for the example, and the future ones are unknown.',
   relatedHeading: 'Calculators for the next step',
-} satisfies GuideTexts;
+  words: { head: 'Home value change per year', savings: 'Savings earn {rate}', year: 'year {n}', notWithin: 'not within 30 years' },
+} satisfies GuideTexts<'guides-rent-vs-buy-break-even'>;

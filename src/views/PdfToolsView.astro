@@ -2,17 +2,16 @@
 // The PDF hub /pdf-tools/ (F5a, decision 7; the model of the image hub, DECISOES § 77 and § 96): eyebrow, H1 and one
 // line in the PDF band (coral), the grid of the 12 PDF tools in order of search volume with the Image to PDF card at the
 // end of its band (its page stays in the image hub, DECISOES § 148), one content AdSlot, the guide of which tool does
-// which job, how the files stay on the device, and the rail AdSlot, in the language of the page. The file guides exist
-// only in English, so only the English hub lists them (F5b note; F6, decision 4).
+// which job, how the files stay on the device, and the rail AdSlot, in the language of the page. Each hub lists the file
+// guides of its language (F5b note; in pt and es since the languages adjustment).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
-import enCommon from '../i18n/en/common.ts';
-import shared from '../i18n/en/file-guides.ts';
-import { FILE_GUIDES, guidesOfHub } from '../tools/guides/registry.ts';
+import { guidesOfHub } from '../tools/guides/registry.ts';
+import { GUIDE_SHARED, guideLinks } from '../tools/guides/page.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { IMAGE_PAGES } from '../tools/image/registry.ts';
@@ -39,7 +38,8 @@ const nameOf = (id: (typeof t.guide)[number]['tool']) => (id === 'image-to-pdf' 
 const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lang];
 // The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
 // links, never cards (gate:prontidao counts the cards of a hub against the tool registry).
-const guides = lang === 'en' ? guidesOfHub('pdf-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description })) : [];
+const guides = guideLinks(guidesOfHub('pdf-tools'), lang);
+const shared = GUIDE_SHARED[lang];
 ---
 <BaseLayout
   lang={lang}

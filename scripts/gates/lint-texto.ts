@@ -9,11 +9,12 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { LANGUAGETOOL, JRE, ensureTool } from '../lib/tools.ts';
-import type { GUIDE_FACTS as GUIDE_FACTS_TYPE } from '../../src/tools/calc/guides.ts';
+import type { GUIDE_FACTS as GUIDE_FACTS_TYPE, GuideLang } from '../../src/tools/calc/guides.ts';
 import type * as MEASURED_MODULE from '../../src/tools/guides/measured.ts';
-import type { FileGuideTexts } from '../../src/i18n/types.ts';
+import type { FileGuidesSharedTexts, FileGuideTexts } from '../../src/i18n/types.ts';
+import type { Lang } from '../../src/i18n/routes.ts';
 import { FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
-import { LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
+import { GUIDE_IDS, LIFE_CALC_IDS, type GuideId } from '../../src/tools/calc/registry.ts';
 
 const LANGUAGE: Record<string, string> = { en: 'en-US', pt: 'pt-BR', es: 'es' };
 // Every text file the route map lists (src/i18n/routes.ts): page texts, a tool's texts, the texts
@@ -134,10 +135,57 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       unit: 'años',
       date: '1 de noviembre de 2026',
       name: 'Victor Yuki Matusita',
+      // The languages adjustment: the placeholders of the nine calculators and four presets new in Spanish that are not an
+      // amount of money, written as the Spanish page writes them (docs/i18n/es.md: "28 %" with a no-break space). Home
+      // affordability: the two limits and the rule they make.
+      front: '28\u00a0%',
+      back: '36\u00a0%',
+      rule: 'el límite de vivienda del 28\u00a0%',
+      // Refinance, debt consolidation and 15 vs 30-year: what B costs against A, said with its direction.
+      paymentDiff: '$308 menos',
+      totalDiff: '$3,490 más',
+      interestEffect: 'ahorra $212,238 de intereses',
+      interestPart: 'paga $484 menos de intereses',
+      timePart: 'termina 1 mes antes',
+      // Biweekly and extra payments: the term of the loan without the change.
+      base: '30 años',
     },
     fallback: '$1,234.56',
   },
 };
+
+/**
+ * Money samples that depend on the page (the languages adjustment): the same name is a plain number on one calculator and
+ * a duration or an amount on another. "{years}" is a duration on the mortgage ("En {years} al {rate}") and a count before
+ * the word on Rent vs buy ("Después de {years} años"); "{saved}" is the time saved on the two mortgage presets and an
+ * amount on Savings goal. Keyed by the folder of the texts under src/tools/, per language; English keeps the F4 samples.
+ */
+export const MONEY_SAMPLES_BY_PAGE: Record<string, Record<string, Record<string, string>>> = {
+  es: {
+    'rent-vs-buy-calculator': { years: '10' },
+    'mortgage-calculator/presets/biweekly': { saved: '3 años 4 meses' },
+    'mortgage-calculator/presets/extra-payments': { saved: '3 años 4 meses' },
+  },
+};
+
+/** The folder of a tool's or preset's texts under src/tools/ ("mortgage-calculator/presets/biweekly"), or undefined. */
+const toolFolderOf = (file: string): string | undefined => /^src\/tools\/([\w-]+(?:\/presets\/[\w-]+)?)\/i18n\/(?:en|pt|es)\.ts$/.exec(file)?.[1];
+
+/**
+ * The samples of the QR code generator's texts, in each language (the languages adjustment): the limit in bytes ("{max}"),
+ * the count next to the label ("{count} of {max}") and the side of the PNG ("{side} px"), with the digit groups of the
+ * language. Apart from SAMPLES because "{count}" and "{max}" mean other things in the image and PDF texts.
+ */
+export const QR_SAMPLES_BY_LANG: Record<string, Record<string, string>> = {
+  en: { max: '1,273', count: '42', side: '512' },
+  pt: { max: '1.273', count: '42', side: '512' },
+  es: { max: '1,273', count: '42', side: '512' },
+};
+
+/** A text file of the QR code generator: src/tools/qr-code-generator/i18n/<lang>.ts. */
+export function isQrText(file: string): boolean {
+  return /^src\/tools\/qr-code-generator\/i18n\/(?:en|pt|es)\.ts$/.test(file);
+}
 
 /**
  * The samples of the home and health calculators and their hubs (F7, decision 11): measures, counts and dates as their
@@ -205,21 +253,35 @@ export function isLifeText(file: string): boolean {
   return /^src\/i18n\/(?:en|pt|es)\/(?:home|health)-calculators\.ts$/.test(file);
 }
 
-/** The id of a file guide (F5b) whose texts this is, or undefined: src/i18n/en/guide-<slug>.ts of a guide in FILE_GUIDE_IDS. */
+/**
+ * The id of a file guide (F5b) whose texts this is, or undefined: src/i18n/<lang>/guide-<slug>.ts of a guide in
+ * FILE_GUIDE_IDS, in English, Portuguese or Spanish since the languages adjustment (the file keeps the English slug).
+ */
 export function fileGuideOf(file: string): FileGuideId | undefined {
-  const slug = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
+  const slug = /^src\/i18n\/(?:en|pt|es)\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
   const id = slug ? `guides-${slug}` : '';
   return (FILE_GUIDE_IDS as readonly string[]).includes(id) ? (id as FileGuideId) : undefined;
 }
 
 /**
+ * The money guide (F4) whose texts this is, with the language, or undefined: src/i18n/<lang>/guide-<slug>.ts of a guide in
+ * GUIDE_IDS, in English or, since the languages adjustment, Spanish (no US money page exists in Portuguese).
+ */
+export function moneyGuideOf(file: string): { id: GuideId; lang: GuideLang } | undefined {
+  const match = /^src\/i18n\/(en|es)\/guide-([\w-]+)\.ts$/.exec(file);
+  const id = match ? `guides-${match[2]}` : '';
+  return match && (GUIDE_IDS as readonly string[]).includes(id) ? { id: id as GuideId, lang: match[1] as GuideLang } : undefined;
+}
+
+/**
  * A money text file: a calculator's or preset's texts (also the Brazilian calculators, src/tools/br-*), the texts the
- * calculators share, a money hub of any language or a money guide. F7: the texts of the home and health calculators are
- * calculator texts but not money (isLifeText), filled with their own samples.
+ * calculators share, a money hub of any language or a money guide (English or Spanish). F7: the texts of the home and health
+ * calculators are calculator texts but not money (isLifeText), filled with their own samples.
  */
 export function isMoneyText(file: string): boolean {
   if (fileGuideOf(file) || isLifeText(file)) return false;
-  return /^src\/(?:tools\/(?:[\w-]+-calculator|br-[\w-]+)\/|tools\/calc\/i18n\/|i18n\/(?:en|pt|es)\/money-calculators\.ts|i18n\/en\/guide-[\w-]+\.ts)/.test(file);
+  if (moneyGuideOf(file)) return true;
+  return /^src\/(?:tools\/(?:[\w-]+-calculator|br-[\w-]+)\/|tools\/calc\/i18n\/|i18n\/(?:en|pt|es)\/money-calculators\.ts)/.test(file);
 }
 
 /** How a placeholder is filled: by its name and, for the few samples that depend on it, the key of the string (F7). */
@@ -238,25 +300,41 @@ export function collectStrings(value: unknown, key = '', out: string[] = [], fil
  * (F5b) is filled from data/guides-measured.json and its own official facts, the values its page shows (DECISOES § 189).
  */
 export async function fillFor(file: string): Promise<Fill> {
+  const lang = textFileLang(file) ?? 'en';
   const fileGuide = fileGuideOf(file);
   if (fileGuide) {
-    const { fillValues, placeholdersIn } = (await import(pathToFileURL(resolve('src/tools/guides/measured.ts')).href)) as typeof MEASURED_MODULE;
+    // The languages adjustment: a guide of Portuguese or Spanish is filled the way its page writes the numbers (separators,
+    // "%", no-break spaces, counts in words with their gender, the date written out), from the shared texts of its language.
+    // Those are imported directly: src/tools/guides/page.ts holds them too, but reads the guide texts with import.meta.glob,
+    // which only runs under Vite.
+    const { MEASURED, fillValues, placeholdersIn } = (await import(pathToFileURL(resolve('src/tools/guides/measured.ts')).href)) as typeof MEASURED_MODULE;
+    const shared = ((await import(pathToFileURL(resolve(`src/i18n/${lang}/file-guides.ts`)).href)) as { default: FileGuidesSharedTexts }).default;
     const texts = ((await import(pathToFileURL(resolve(file)).href)) as { default: FileGuideTexts }).default;
-    const values = fillValues(fileGuide, texts, [...placeholdersIn(texts)]);
-    return (name) => values[name] ?? SAMPLES[name] ?? name;
+    const values = fillValues(fileGuide, texts, [...placeholdersIn(texts)], MEASURED, { lang: lang as Lang, shared });
+    const samples = samplesOf(file);
+    return (name) => values[name] ?? samples[name] ?? name;
   }
   // F7: the home and health calculators and their hubs, with measures, counts and dates, never money.
   if (isLifeText(file)) return (name, key) => LIFE_SAMPLES_BY_KEY[key]?.[name] ?? LIFE_SAMPLES[name] ?? LIFE_DEFAULT;
   const samples = samplesOf(file);
-  if (!isMoneyText(file)) return (name) => samples[name] ?? name;
-  const guide = /^src\/i18n\/en\/guide-([\w-]+)\.ts$/.exec(file)?.[1];
-  if (guide) {
-    const { GUIDE_FACTS } = (await import(pathToFileURL(resolve('src/tools/calc/guides.ts')).href)) as { GUIDE_FACTS: typeof GUIDE_FACTS_TYPE };
-    const facts = GUIDE_FACTS[`guides-${guide}` as keyof typeof GUIDE_FACTS]().facts;
-    return (name) => facts[name] ?? MONEY_SAMPLES[name] ?? MONEY_DEFAULT;
+  // The languages adjustment: the QR code generator, with its limit and sizes in the digits of its language.
+  if (isQrText(file)) {
+    const qr = QR_SAMPLES_BY_LANG[lang] ?? {};
+    return (name) => qr[name] ?? samples[name] ?? name;
   }
-  const money = MONEY_SAMPLES_BY_LANG[textFileLang(file) ?? 'en'] ?? { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT };
-  return (name) => money.samples[name] ?? money.fallback;
+  if (!isMoneyText(file)) return (name) => samples[name] ?? name;
+  const money = MONEY_SAMPLES_BY_LANG[lang] ?? { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT };
+  const guide = moneyGuideOf(file);
+  if (guide) {
+    // A money guide, in English or Spanish: the facts the engines give its page in its language, and the samples of the
+    // language for the words of its table ("month {n}", "Savings earn {rate}").
+    const { GUIDE_FACTS } = (await import(pathToFileURL(resolve('src/tools/calc/guides.ts')).href)) as { GUIDE_FACTS: typeof GUIDE_FACTS_TYPE };
+    const facts = GUIDE_FACTS[guide.id](guide.lang).facts;
+    return (name) => facts[name] ?? money.samples[name] ?? money.fallback;
+  }
+  const page = MONEY_SAMPLES_BY_PAGE[lang]?.[toolFolderOf(file) ?? ''] ?? {};
+  // A singular form ("monthsOne: '{n} mes'", review of the languages adjustment, C-3) is shown only for 1, so it reads with 1.
+  return (name, key) => (name === 'n' && key.endsWith('One') ? '1' : (page[name] ?? money.samples[name] ?? money.fallback));
 }
 
 function chunks(texts: string[]): string[] {

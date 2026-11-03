@@ -49,21 +49,41 @@ describe('verificar em partes', () => {
     expect(plan(['--playwright=webkit', '--shard=8/8']).label).toBe('Playwright no webkit, parte 8 de 8');
   });
 
-  // F8 (third adendo of ADR-003; DECISOES § 302): Chromium in four shards and WebKit in ten, the 15 parts of the ci.yml,
-  // read from the matrix of the workflow itself so the test follows it.
-  it('covers the whole suite between the 15 parts of the F8, the same as the matrix of ci.yml', () => {
+  // F8 (third adendo of ADR-003; DECISOES § 302): Chromium in four shards and WebKit in ten, the 15 parts of the ci.yml
+  // until the languages adjustment.
+  it('covers the whole suite between the 15 parts of the F8', () => {
     const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
     const parts = [['--sem-playwright'], ...shards('chromium', 4), ...shards('webkit', 10)];
     expect(parts).toHaveLength(15);
     const commands = new Set(parts.flatMap((part) => plan(part).steps.map((step) => step.command.replace(/ --.*$/, ''))));
     expect([...commands].sort()).toEqual(STEPS.map((step) => step.command).sort());
     expect(plan(['--playwright=webkit', '--shard=10/10']).label).toBe('Playwright no webkit, parte 10 de 10');
-    const matrix = (workflowJobs(readFileSync('.github/workflows/ci.yml', 'utf8'))['playwright']?.['strategy'] as { matrix: { include: { args: string }[] } }).matrix.include;
-    expect(matrix.map((entry) => entry.args.split(' '))).toEqual(parts.slice(1));
+  });
+
+  // The languages adjustment (fourth adendo of ADR-003; DECISOES § 320): the gates in two parts (all but Lighthouse, and
+  // Lighthouse), Chromium in five shards and WebKit in thirteen: the 20 parts of the ci.yml, read from the matrices of the
+  // workflow itself so the test follows it.
+  it('covers the whole suite between the 20 parts of the languages adjustment, the same as the matrices of ci.yml', () => {
+    const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`]);
+    const gates = [['--sem-playwright', '--sem-lighthouse'], ['--lighthouse']];
+    const parts = [...gates, ...shards('chromium', 5), ...shards('webkit', 13)];
+    expect(parts).toHaveLength(20);
+    const commands = parts.flatMap((part) => plan(part).steps.map((step) => step.command.replace(/ --.*$/, '')));
+    expect([...new Set(commands)].sort()).toEqual(STEPS.map((step) => step.command).sort());
+    // Every gate runs in one part only: the build runs in each part, which needs it, and the suite once per shard.
+    const once = commands.filter((command) => command !== 'pnpm run build' && command !== 'pnpm run e2e');
+    expect(once).toHaveLength(new Set(once).size);
+    expect(plan(['--sem-playwright', '--sem-lighthouse']).steps.map((step) => step.command)).not.toContain('pnpm run lhci');
+    expect(plan(['--sem-lighthouse', '--sem-playwright']).steps).toEqual(plan(['--sem-playwright', '--sem-lighthouse']).steps);
+    expect(plan(['--lighthouse']).steps.map((step) => step.command)).toEqual(['pnpm run build', 'pnpm run lhci']);
+    const jobs = workflowJobs(readFileSync('.github/workflows/ci.yml', 'utf8'));
+    const matrixOf = (job: string) => (jobs[job]?.['strategy'] as { matrix: { include: { args: string }[] } }).matrix.include.map((entry) => entry.args.split(' '));
+    expect(matrixOf('verificar')).toEqual(gates);
+    expect(matrixOf('playwright')).toEqual(parts.slice(gates.length));
   });
 
   it('refuses what it does not know', () => {
-    for (const args of [['--playwright=firefox'], ['--playwright'], ['--shard=1/2'], ['--playwright=webkit', '--shard=3/2'], ['--playwright=webkit', '--shard=0/2'], ['--sem-playwright', '--playwright=webkit'], ['--tudo']]) {
+    for (const args of [['--playwright=firefox'], ['--playwright'], ['--shard=1/2'], ['--playwright=webkit', '--shard=3/2'], ['--playwright=webkit', '--shard=0/2'], ['--sem-playwright', '--playwright=webkit'], ['--tudo'], ['--sem-lighthouse'], ['--lighthouse', '--sem-playwright'], ['--lighthouse', '--shard=1/2'], ['--sem-playwright', '--sem-lighthouse', '--lighthouse']]) {
       expect(() => plan(args), args.join(' ')).toThrow();
     }
   });

@@ -1,15 +1,19 @@
-import type { MoneyHubTexts } from '../types.ts';
+import type { EsMoneyHubTexts } from '../types.ts';
 
-// The Spanish money hub /es/calculadoras-financieras/: the five calculators translated from English (prompt F6, decision 6),
-// with no presets and no guides, which exist only in English.
+// The Spanish money hub /es/calculadoras-financieras/: the 14 calculators of the English hub (credit first), its four presets
+// and its five guides, translated from English (prompt F6, decision 6; languages adjustment, decision 4).
 export default {
   title: 'Calculadoras financieras: hipoteca, préstamos, deudas y ahorro',
-  description: 'Calculadoras gratis de hipoteca, préstamo personal, tarjeta de crédito, deudas e interés compuesto. Tus números se quedan en tu dispositivo.',
+  description: 'Calculadoras gratis de hipoteca, refinanciamiento, préstamos para auto y personales, tarjetas de crédito, deudas y ahorro. Tus números se quedan en tu dispositivo.',
   eyebrow: 'Calculadoras financieras',
   h1: 'Calculadoras de préstamos, deudas y ahorro',
   intro: 'Cada una responde una pregunta con una tabla que puedes guardar. Nada de lo que escribes sale de tu dispositivo.',
   creditHeading: 'Préstamos, vivienda y deudas',
   educationalHeading: 'Ahorro e intereses',
+  presetsHeading: 'Calculadoras para una sola pregunta',
+  presetsCaption: 'Calculadoras que parten de una calculadora principal y responden una sola pregunta',
+  presetsHead: ['Calculadora', 'Qué responde'],
+  guidesHeading: 'Guías con los números calculados',
   worksHeading: 'Cómo funcionan estas calculadoras',
   worksIntro: [
     'Cada calculadora de esta página funciona en tu navegador. Tú escribes los números, también la tasa de interés: el valor con el que empieza un campo es un ejemplo, no una tasa que alguien te ofrezca. El resultado cambia mientras escribes, y puedes abrir la tabla completa, guardarla en PDF o CSV, o copiar un enlace que guarda tus números después del #.',
@@ -18,7 +22,7 @@ export default {
   formulaHeading: 'La fórmula de las calculadoras de préstamos',
   formula: [
     'Un préstamo de tasa fija tiene el mismo pago todos los meses: M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), donde P es el monto prestado, r es la tasa anual dividida entre 12 y n es el número de pagos. Cada pago cubre primero los intereses del mes (el saldo por r) y el resto reduce el saldo.',
-    'La calculadora de interés compuesto hace el mismo cálculo mes a mes, pero al revés: cada mes suma los intereses del saldo y tu depósito.',
+    'Las calculadoras de ahorro hacen el mismo cálculo mes a mes, pero al revés: cada mes suman los intereses del saldo y tu depósito.',
   ],
   premisesHeading: 'Lo que supone cada calculadora',
   premises: [
@@ -39,4 +43,4 @@ export default {
   ],
   disclaimerHeading: 'Herramientas educativas',
   disclaimer: 'Estas calculadoras son herramientas educativas, no asesoría financiera ni ofertas de crédito. Un prestamista decide cuánto presta y a qué tasa; revisa cada número con el tuyo antes de firmar.',
-} satisfies MoneyHubTexts;
+} satisfies EsMoneyHubTexts;

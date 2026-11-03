@@ -79,4 +79,5 @@ export default {
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice. Your loan contract says how extra payments are applied.',
   relatedHeading: 'Calculators for the next step',
-} satisfies GuideTexts;
+  words: { head: ['Extra per month', 'Paid off in', 'Sooner by', 'Interest saved'] },
+} satisfies GuideTexts<'guides-extra-mortgage-payments'>;

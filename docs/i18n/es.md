@@ -2,7 +2,7 @@
 
 Glossário fixo do FileOrca em espanhol (F6, decisão 3 do prompt; PLANO "Idiomas"). As explicações estão em português, como todo o `docs/`; os termos estão em espanhol. Todo texto do site em espanhol segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em espanhol e no HTML das páginas `/es/` do `dist/`.
 
-Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md.
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code, os guias de arquivo e o resto do dinheiro dos EUA. Corrigido na revisão do ajuste (DECISOES § 321): "ppp", "Chico", a nota do "pago global" e a tabela das páginas de dinheiro.
 
 ## Registro
 
@@ -92,6 +92,7 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 | Compress PDF | Comprimir PDF | /es/comprimir-pdf/ |
 | Protect PDF | Proteger PDF | /es/proteger-pdf/ |
 | Unlock PDF | Desbloquear PDF | /es/desbloquear-pdf/ |
+| QR code generator | Generador de códigos QR | /es/generador-de-codigo-qr/ |
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plural de PDF não leva "s" no texto corrido ("tus PDF"); no nome do ZIP fica `pdfs`.
 
@@ -136,10 +137,11 @@ Sem acento, em minúsculas, com hífen.
 | `fileorca-images.zip`, `fileorca-images.pdf` | `fileorca-imagenes.zip`, `fileorca-imagenes.pdf` |
 | `fileorca-pdfs.zip`, `fileorca-pdf-images.zip` | `fileorca-pdfs.zip`, `fileorca-pdf-imagenes.zip` |
 | `document.pdf` | `documento.pdf` |
+| `qr-code.png`, `qr-code.svg` | `codigo-qr.png`, `codigo-qr.svg` |
 
 ## Dinero (las 5 calculadoras, para el público hispano de EE. UU.)
 
-As contas, os campos e os exemplos são os da página em inglês, em US$. Os termos seguem o que o CFPB usa nos documentos em espanhol lidos em 1º/nov/2026 (o Toolkit hipotecário, os formulários H-28, o "Plan de acción contra la deuda" e o glossário inglês-espanhol do CFPB de abril de 2021). O site `consumerfinance.gov/es/` foi tirado do ar pelo CFPB em 2026 (redireciona para o inglês); nenhum link aponta para lá.
+As contas, os campos e os exemplos são os da página em inglês, em US$. Os termos seguem o que o CFPB usa nos documentos em espanhol lidos em 1º/nov/2026 (o Toolkit hipotecário, os formulários H-28, o "Plan de acción contra la deuda" e o glossário inglês-espanhol do CFPB). O glossário do CFPB citado na F6 como "de abril de 2021" é o "Spanish-English glossary of financial terms" de março de 2024 (files.consumerfinance.gov); a edição anterior é de abril de 2022, e não há uma de 2021 (ajuste idiomas, DECISOES § 317). O site `consumerfinance.gov/es/` foi tirado do ar pelo CFPB em 2026 (redireciona para o inglês); nenhum link aponta para lá.
 
 | Inglês | Español | Observação |
 | --- | --- | --- |
@@ -177,6 +179,112 @@ As contas, os campos e os exemplos são os da página em inglês, em US$. Os ter
 Nomes das páginas: Calculadoras financieras (hub), Calculadora de hipoteca, Calculadora de préstamo personal, Calculadora de tarjeta de crédito, Calculadora de deudas, Calculadora de interés compuesto.
 
 Nome do arquivo do PDF e do CSV: `tabla-hipoteca`, `tabla-prestamo-personal`, `plan-tarjeta-de-credito`, `plan-de-deudas`, `interes-compuesto`.
+
+Os caminhos das 5 (acrescentados na revisão do ajuste "idiomas", DECISOES § 321, para a tabela das páginas de dinheiro em espanhol ficar inteira):
+
+| Página (inglês) | Nombre en español | Caminho | Arquivo |
+| --- | --- | --- | --- |
+| Mortgage calculator | Calculadora de hipoteca | /es/calculadora-de-hipoteca/ | `tabla-hipoteca` |
+| Personal loan calculator | Calculadora de préstamo personal | /es/calculadora-de-prestamo-personal/ | `tabla-prestamo-personal` |
+| Credit card payoff calculator | Calculadora de tarjeta de crédito | /es/calculadora-de-tarjeta-de-credito/ | `plan-tarjeta-de-credito` |
+| Debt payoff calculator | Calculadora de deudas | /es/calculadora-de-deudas/ | `plan-de-deudas` |
+| Compound interest calculator | Calculadora de interés compuesto | /es/calculadora-de-interes-compuesto/ | `interes-compuesto` |
+
+### O resto do dinheiro dos EUA (ajuste idiomas)
+
+As 9 calculadoras, os 4 presets e os 5 guias que faltavam entraram em espanhol, com os termos do Toolkit hipotecario (ago/2026), dos formulários H-28 e do glossário do CFPB (mar/2024), conferidos em 3/nov/2026; onde o CFPB não tem o termo, o do FDIC ou da FTC.
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| refinance | refinanciar · refinanciamiento | CFPB, H-28(C) |
+| closing costs | costos de cierre | |
+| balloon payment | pago global | o termo do glossário e do Toolkit hipotecario do CFPB; o formulário H-28(D) diz "cuota extraordinaria", e o site fica com a forma do glossário. "Cuota" não é proibida: só "cuota mensual" está no "Nunca", e "cuota de la asociación de propietarios (HOA)" é o termo do site (DECISOES § 321) |
+| debt consolidation | consolidación de deudas | FDIC, FTC |
+| debt-to-income ratio | relación deudas-ingresos (DTI) | |
+| simple interest | interés simple | |
+| savings goal | meta de ahorro | "objetivo de ahorro" como sinônimo na busca |
+| auto loan | préstamo para auto | o CFPB escreve "automóvil"; nunca "coche" (DECISOES § 309) |
+| biweekly payment | pago cada dos semanas | nunca "quincenal", que é duas vezes por mês |
+| rent (v.) | alquilar | |
+| net worth | valor neto | |
+| Loan Estimate · Closing Disclosure | Estimación de Préstamo · Declaración de Cierre | como o formulário e o Toolkit |
+| points | puntos | |
+| home affordability | cuánta casa puedo pagar | |
+
+Nomes das páginas, caminhos e nome do arquivo do PDF e do CSV (o bloco `es` do `src/tools/calc/registry.ts`; DECISOES § 309 e § 321). O `tests/unit/glossary.test.ts` confere cada caminho e cada arquivo com o registro.
+
+| Página (inglês) | Nombre en español | Caminho | Arquivo |
+| --- | --- | --- | --- |
+| Auto loan calculator | Calculadora de préstamo para auto | /es/calculadora-de-prestamo-para-auto/ | `tabla-prestamo-para-auto` |
+| Refinance calculator | Calculadora de refinanciamiento | /es/calculadora-de-refinanciamiento/ | `comparacion-refinanciamiento` |
+| Home affordability calculator | Calculadora de cuánta casa puedo pagar | /es/calculadora-de-cuanta-casa-puedo-pagar/ | `cuanta-casa-puedo-pagar` |
+| Loan amortization calculator | Calculadora de amortización | /es/calculadora-de-amortizacion-de-prestamos/ | `tabla-amortizacion-prestamo` |
+| Debt consolidation calculator | Calculadora de consolidación de deudas | /es/calculadora-de-consolidacion-de-deudas/ | `comparacion-consolidacion-de-deudas` |
+| Rent vs buy calculator | Calculadora de alquilar o comprar | /es/calculadora-de-alquilar-o-comprar/ | `alquilar-o-comprar` |
+| Savings goal calculator | Calculadora de meta de ahorro | /es/calculadora-de-meta-de-ahorro/ | `plan-meta-de-ahorro` |
+| Simple interest calculator | Calculadora de interés simple | /es/calculadora-de-interes-simple/ | `interes-simple` |
+| APR to APY calculator | Calculadora de APR a APY | /es/calculadora-de-apr-a-apy/ | `tabla-apr-a-apy` |
+| Mortgage calculator with extra payments | Calculadora de pagos adicionales a la hipoteca | /es/calculadora-de-hipoteca/pagos-adicionales/ | `tabla-pagos-adicionales` |
+| Biweekly mortgage calculator | Calculadora de pagos cada dos semanas | /es/calculadora-de-hipoteca/pagos-cada-dos-semanas/ | `tabla-hipoteca-cada-dos-semanas` |
+| 15-year vs 30-year mortgage calculator | Calculadora de hipoteca a 15 o 30 años | /es/calculadora-de-hipoteca/15-o-30-anos/ | `hipoteca-15-o-30-anos` |
+| Balloon loan calculator | Calculadora de préstamo con pago global | /es/calculadora-de-amortizacion-de-prestamos/pago-global/ | `tabla-prestamo-con-pago-global` |
+
+Os 5 guias de dinheiro:
+
+| Guia (inglês) | Nombre en español | Caminho |
+| --- | --- | --- |
+| 15-year vs 30-year mortgage: the real cost | Hipoteca a 15 o 30 años: el costo real | /es/guias/hipoteca-a-15-o-30-anos/ |
+| Snowball vs avalanche, with numbers | Bola de nieve o avalancha, con números | /es/guias/bola-de-nieve-o-avalancha/ |
+| How extra payments shorten a mortgage | Cómo los pagos adicionales acortan una hipoteca | /es/guias/pagos-adicionales-a-la-hipoteca/ |
+| Refinancing: find your break-even month | Refinanciamiento: halla tu mes de equilibrio | /es/guias/punto-de-equilibrio-del-refinanciamiento/ |
+| Rent vs buy: when buying starts to pay off | Alquilar o comprar: cuándo empieza a convenir comprar | /es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/ |
+
+## Generador de códigos QR (ajuste idiomas)
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| QR code | código QR | "Generador de códigos QR", no plural, como a página e os Términos |
+| square (módulo) | cuadrito | |
+| Link or text · the text box | Enlace o texto · el cuadro | |
+| Oli in the middle · On · Off | Oli en el centro · Activada · Desactivada | no feminino, pela Oli |
+| PNG size · Small · Medium · Large | Tamaño del PNG · Chico · Mediano · Grande | "Chico", a palavra de tamanho do espanhol dos EUA: com "Pequeño", as três opções não cabiam a 320 px (DECISOES § 321). Só no QR: a Marca de agua PDF da F6 segue com "Pequeño · Mediano · Grande", e a diferença é a pendência "Idiomas R2-04" |
+| Download PNG · Download SVG | Descargar PNG · Descargar SVG | |
+| Preview · Error correction | Vista previa · Corrección de errores | |
+| short link · expire · tracking | enlace acortado · vencer · rastreo | |
+| icon | ícono | forma das Américas |
+| Utilities | Utilidades | |
+
+## Guías de archivo (ajuste idiomas)
+
+Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espanhol dos EUA: "2.4 MB", "68 %" (com espaço sem quebra), "5.2 veces" ("1.0 vez" só no 1 exato), "42.2 dB", "150 ppp" (como a PDF a JPG escreve na mesma página; DECISOES § 321). Contagem por extenso: `{x_word}` masculino ("dos archivos", "un PDF", sempre com o substantivo depois do "un") e `{x_wordf}` feminino ("dos fotos", "una imagen", "cuatro esquinas"); nunca no começo de uma frase (DECISOES § 314).
+
+| Guia (inglês) | Nombre en español | Caminho |
+| --- | --- | --- |
+| How to convert HEIC to JPG on Windows | Cómo convertir HEIC a JPG en Windows | /es/guias/heic-a-jpg-en-windows/ |
+| Why is my PDF so large? | ¿Por qué mi PDF pesa tanto? | /es/guias/por-que-mi-pdf-pesa-tanto/ |
+| Social media image sizes | Tamaños de imagen para redes sociales | /es/guias/tamanos-de-imagen-para-redes-sociales/ |
+| How to open WebP images and save them as JPG | Cómo abrir imágenes WebP y guardarlas como JPG | /es/guias/abrir-webp-y-guardar-como-jpg/ |
+| JPG or PNG: which one to use | JPG o PNG: cuál usar | /es/guias/jpg-o-png/ |
+| How to remove location data from photos | Cómo quitar la ubicación de las fotos | /es/guias/quitar-la-ubicacion-de-las-fotos/ |
+| Which resolution to choose for PDF to JPG | Qué resolución elegir para pasar un PDF a JPG | /es/guias/resolucion-de-pdf-a-jpg/ |
+| How to split a PDF, and why the parts can weigh more | Cómo dividir un PDF y por qué las partes pueden pesar más | /es/guias/dividir-pdf-y-tamano-del-archivo/ |
+| How to combine PDFs on a phone | Cómo unir PDF en el celular | /es/guias/unir-pdf-en-el-celular/ |
+| How to turn photos into one PDF | Cómo convertir fotos en un solo PDF | /es/guias/fotos-en-un-solo-pdf/ |
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| What we measured · Sources · Related tools and guides | Lo que medimos · Fuentes · Herramientas y guías relacionadas | |
+| real phone photos | fotos reales de celular | vale; "PDF reales" e "archivos reales" não |
+| lossy · lossless | con pérdida · sin pérdida | |
+| frame · thumbnail · cover photo · header photo | cuadro · miniatura · foto de portada · foto de encabezado | |
+| embedded fonts | fuentes incrustadas | "fuentes" também são as fontes citadas: nenhuma frase com {date} fala delas |
+| scan · scanned | escaneo · escaneado | |
+| mode (Comprimir PDF) | nivel | "la compresión Recomendada" |
+| N times as heavy | N veces el peso | nunca "N veces más", que é ambíguo |
+| merged file · attachment | archivo unido · archivo adjunto | |
+| preset | ajuste predefinido | |
+
+Rótulos de sistema, como as páginas de suporte em espanhol escrevem (lidas em 3/nov/2026): Alta eficiencia, Más compatible, Mantener originales, Localización (manual da Apple es-us), app Vista Previa, Insertar desde archivo, app Archivos, mantén presionada, Manual de uso del iPhone (Apple); Guardar ubicación, Más parámetros de configuración, Agregar (Google); Extensiones de imagen HEIF, Extensiones de vídeo HEVC (nome do produto), Explorador de archivos, Microsoft Print To PDF (Microsoft). Fonte sem versão em espanhol leva "(en inglés)" no rótulo.
 
 ## Frases de Oli
 
@@ -219,8 +327,9 @@ Cada linha da tabela é um termo proibido nos textos em espanhol e nas páginas 
 | ficheros | archivos | espanhol da Espanha |
 | pinchar | hacer clic, tocar | espanhol da Espanha |
 | enganche | pago inicial | regional (México); o CFPB diz "pago inicial" |
-| tasa de porcentaje anual | tasa porcentual anual (APR) | o CFPB não usa essa forma |
+| tasa de porcentaje anual | tasa porcentual anual (APR) | o Toolkit e os formulários do CFPB e a FTC escrevem "tasa porcentual anual"; o glossário do CFPB (mar/2024) e o do FDIC trazem a outra forma, que o site não usa nem cita (DECISOES § 317) |
 | cuota mensual | pago mensual | o CFPB diz "pago mensual" |
 | mensualidad | pago mensual | idem |
 | tasa de hoy | un ejemplo rotulado como ejemplo | nada de taxa do dia |
 | tasas de hoy | un ejemplo rotulado como ejemplo | idem |
+| ppi | ppp (píxeles por pulgada) | a PDF a JPG e a Comprimir PDF escrevem "ppp" desde a F6, e o guia de resolução mostra a ferramenta e a medida na mesma página (DECISOES § 321) |

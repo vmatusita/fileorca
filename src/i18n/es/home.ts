@@ -15,10 +15,14 @@ export default {
   },
   money: {
     heading: 'Calcula un préstamo',
-    intro: 'Hipotecas, préstamos personales, tarjetas de crédito y deudas: el pago mensual, los intereses y la tabla completa. Tus números se quedan en tu dispositivo.',
+    intro: 'Hipoteca, refinanciamiento, préstamos para auto y personales, y cuánta casa puedes pagar: el pago, los intereses y la tabla completa. Tus números se quedan en tu dispositivo.',
     hubLink: 'Ver todas las calculadoras financieras',
   },
   privacyHeading: 'Tus archivos se quedan contigo',
   privacyBody:
     'Tus archivos nunca salen de tu dispositivo. FileOrca hace el trabajo en tu navegador, y puedes comprobarlo tú mismo: abre la pestaña Red del navegador mientras usas una herramienta y verás que ninguna solicitud lleva tu archivo.',
+  qr: {
+    heading: 'Crea un código QR',
+    intro: 'Convierte un enlace o un texto corto en un código QR con Oli en el centro y descárgalo en PNG o SVG. El texto se queda en tu dispositivo.',
+  },
 } satisfies HomeTexts;

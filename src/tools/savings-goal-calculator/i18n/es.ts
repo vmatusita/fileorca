@@ -1,0 +1,100 @@
+import type { CalcPageTexts } from '../../calc/types.ts';
+
+export default {
+  title: 'Calculadora de meta de ahorro: depósito mensual o tiempo para la meta',
+  description: 'Calcula el depósito mensual que alcanza una meta de ahorro en una fecha, o cuántos meses tarda un depósito, con intereses, lo que pones tú y un plan por mes.',
+  h1: 'Calculadora de meta de ahorro',
+  lead: 'El depósito mensual para una meta, o cuánto tarda un depósito.',
+  panel: {
+    fields: {
+      g: { label: 'Meta de ahorro', prefix: '$', error: 'Escribe una meta de $1 a $100,000,000.' },
+      s: { label: 'Ya ahorrado', prefix: '$', error: 'Escribe de $0 a $100,000,000.' },
+      r: { label: 'Tasa anual', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
+      md: { label: 'Quiero saber', error: '' },
+      m: { label: 'Meses para ahorrar', suffix: 'meses', error: 'Escribe de 1 a 1,200 meses.' },
+      dep: { label: 'Depósito al mes', prefix: '$', error: 'Escribe un depósito de $0 a $1,000,000.' },
+    },
+    options: { md: { months: 'Depósito', deposit: 'Tiempo' } },
+    moreHeading: 'Intereses de tus ahorros',
+    view: {
+      labelDeposit: 'Depósito mensual',
+      labelTime: 'Tiempo para tu meta',
+      unit: '/mes',
+      placardDeposit: 'al mes',
+      placardTime: 'meses',
+      sentenceMonths: 'Si ahorras {deposit} al mes durante {time} al {rate}, pasas de {saved} a {final}: {deposited} tuyos y {interest} de intereses.',
+      sentenceDeposit: 'Si ahorras {deposit} al mes al {rate}, llegas a {goal} en {time}, con {interest} de intereses.',
+      alreadyThere: 'Ya tienes lo suficiente para llegar a {goal} en ese tiempo, sin depósitos nuevos.',
+      tooLong: 'Con {deposit} al mes, la meta tardaría más de 100 años. Prueba con un depósito mayor.',
+      tooLarge: 'Ese saldo es demasiado grande para mostrarlo. Prueba con un monto, una tasa o un número de meses menor.',
+      yours: 'Tu dinero',
+      interest: 'Intereses',
+      final: 'Saldo al final',
+      deposited: 'Tus depósitos',
+      month: 'Mes',
+      deposit: 'Depósito',
+      balance: 'Saldo',
+      caption: 'Plan de ahorro por mes, agrupado por año',
+      scheduleHeading: 'Plan de ahorro',
+    },
+    premises: [
+      'Los depósitos son iguales todos los meses y se hacen al final del mes.',
+      'Los intereses se suman una vez al mes, a la tasa anual dividida entre 12, sobre el saldo, redondeados al centavo.',
+      'El depósito para una fecha es el depósito más pequeño, en centavos enteros, que alcanza la meta en ese plazo.',
+      'No se incluyen impuestos, cargos ni retiros.',
+    ],
+  },
+  howHeading: 'Cómo usar la calculadora de meta de ahorro',
+  howSteps: [
+    'Escribe tu meta, lo que ya ahorraste y la tasa anual de la cuenta.',
+    'Elige si quieres saber el depósito para un número de meses, o el tiempo con un depósito que tú eliges.',
+    'Escribe los meses o el depósito, y mira el resultado.',
+    'Abre el plan por mes, o guárdalo en PDF o CSV.',
+  ],
+  worksHeading: 'Cómo se calculan el depósito y el tiempo',
+  formulaHeading: 'La fórmula',
+  formula: [
+    'Cada mes: saldo = saldo + saldo × r + depósito, con r la tasa anual dividida entre 12 y los intereses redondeados al centavo.',
+    'El depósito para una fecha parte de D = (meta − ahorrado × (1 + r)^n) × r ÷ ((1 + r)^n − 1) y pasa al depósito más pequeño, en centavos enteros, que alcanza la meta en n meses. El tiempo con un depósito es el primer mes en que el saldo llega a la meta.',
+  ],
+  premisesHeading: 'Supuestos',
+  exampleHeading: 'Ejemplo resuelto',
+  exampleIntro: 'Este es el ejemplo con el que empieza la calculadora, calculado por el mismo motor que usas arriba.',
+  sourcesHeading: 'Fuentes',
+  sources: [
+    {
+      label: 'Oficina para la Protección Financiera del Consumidor (CFPB), "Mi nueva meta financiera", hoja de trabajo con lo que hay que ahorrar al mes para llegar a una meta (PDF, en español)',
+      href: 'https://files.consumerfinance.gov/f/documents/cfpb_my-new-money-goal_spanish.pdf',
+    },
+    {
+      label: 'Comisión de Bolsa y Valores (SEC), Investor.gov, "Calculadora de objetivo de ahorro" (en español)',
+      href: 'https://www.investor.gov/financial-tools-calculators/calculators/calculadora-de-objetivo-de-ahorro',
+    },
+    { label: 'CFPB, cómo funciona el interés compuesto (en inglés)', href: 'https://www.consumerfinance.gov/ask-cfpb/how-does-compound-interest-work-en-1683/' },
+    { label: 'CFPB, Reglamento DD (Regulation DD), Apéndice A, cálculo del rendimiento porcentual anual (APY) (en inglés)', href: 'https://www.consumerfinance.gov/rules-policy/regulations/1030/a/' },
+  ],
+  disclaimer: 'Esta calculadora es una herramienta educativa, no asesoría financiera. La tasa que paga una cuenta puede cambiar.',
+  faqHeading: 'Preguntas sobre metas de ahorro',
+  faq: [
+    {
+      q: '¿Por qué el depósito es menor que la meta dividida entre los meses?',
+      a: 'Los intereses hacen parte del trabajo, y lo que ya ahorraste también crece. Al 0 % el depósito es justo lo que falta dividido entre los meses, redondeado hacia arriba al centavo: la misma cuenta, sin intereses, de la hoja de trabajo de la CFPB.',
+    },
+    {
+      q: '¿Qué tasa debo usar?',
+      a: 'La tasa que paga tu cuenta de ahorros. Si la cuenta muestra un rendimiento porcentual anual (APY), la calculadora de APR a APY lo convierte en la tasa anual que usa esta calculadora.',
+    },
+    {
+      q: '¿Y si me salto un mes?',
+      a: 'El plan supone un depósito cada mes. Para ponerte al día, vuelve a hacer la cuenta con lo que tengas ahorrado en ese momento y los meses que falten.',
+    },
+    {
+      q: '¿Puede planear una meta para dentro de muchos años?',
+      a: 'Hasta 1,200 meses. En plazos largos los precios también suben, así que la meta misma puede tener que crecer.',
+    },
+  ],
+  privacyHeading: 'Privacidad',
+  privacyNote:
+    'Tus números se quedan en tu dispositivo. La calculadora funciona en tu navegador, así que nada de lo que escribes se envía a ninguna parte, y el enlace que copias guarda los números después del #, una parte de la dirección que tu navegador nunca envía.',
+  relatedHeading: 'Calculadoras relacionadas',
+} satisfies CalcPageTexts;

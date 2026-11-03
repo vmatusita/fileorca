@@ -5,9 +5,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { BR_PAGE_IDS, FILE_GUIDE_PAGE_IDS, HUB_ID, IMAGE_PAGE_IDS, LIFE_PAGE_IDS, MONEY_PAGE_IDS, PDF_PAGE_IDS, descriptionProblem, fileGuideTitleProblems, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
-import enCommon from '../../src/i18n/en/common.ts';
-import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { BR_PAGE_IDS, SITEMAP_REGISTRY_IDS, descriptionProblem, fileGuideTitleProblems, fileGuideWant, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES, type Lang } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
@@ -34,11 +33,13 @@ for (const page of allPages()) {
   const titleIssue = titleProblem(page.route.id, title, h1);
   if (titleIssue) problems.add(`${page.path}: ${titleIssue}`);
   // A file guide (F5b): its own name first, no year, and not the H1 of the tool it embeds (read from that tool's page).
+  // Since the languages adjustment, in the language of the page: the name of the guide's card and the tool page of that language.
   if (isFileGuide(page.route.id)) {
-    const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[page.route.id as keyof typeof FILE_GUIDES].tool)?.paths['en'] ?? '';
-    const toolH1 = toolPath ? (readHtml(toolPath).querySelector('h1')?.text.trim() ?? '') : '';
+    const want = fileGuideWant(page.route.id, page.lang);
+    const toolH1 = want.toolPath ? (readHtml(want.toolPath).querySelector('h1')?.text.trim() ?? '') : '';
+    if (!want.name) problems.add(`${page.path}: o guia não tem nome no cartão do idioma (common.fileGuides de ${page.lang})`);
     if (!toolH1) problems.add(`${page.path}: a página da ferramenta embutida não tem H1`);
-    for (const issue of fileGuideTitleProblems(enCommon.fileGuides[page.route.id].name, title, h1, toolH1)) problems.add(`${page.path}: ${issue}`);
+    for (const issue of fileGuideTitleProblems(want.name, title, h1, toolH1)) problems.add(`${page.path}: ${issue}`);
   }
   // 50 to 170 characters; the image and PDF pages in Portuguese and Spanish 120 to 160 (prompt F6, decision 4).
   const descriptionIssue = descriptionProblem(page.route.id, page.lang, description);
@@ -113,10 +114,11 @@ for (const lang of LANGS) {
 // F4 too, the PDF hub and tools of the F5a and the file guides of the F5b. F6: each one is also in the sitemap of every
 // other language its route has (the image and PDF pages in pt and es, the Spanish money pages), and in no sitemap of a
 // language it does not have. The Brazilian pages (Portuguese only, no English route) are read once their rows are in the map.
+// The languages adjustment: the QR code generator too, in its three languages (SITEMAP_REGISTRY_IDS).
 const sitemapOf = Object.fromEntries(LANGS.map((lang) => [lang, readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8')])) as Record<Lang, string>;
 const registryUrls: Record<Lang, string[]> = { en: [], pt: [], es: [] };
 const brazilian = BR_PAGE_IDS.filter((id) => ROUTES.some((candidate) => candidate.id === id));
-for (const id of [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...LIFE_PAGE_IDS, ...brazilian]) {
+for (const id of [...SITEMAP_REGISTRY_IDS, ...brazilian]) {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route?.paths['en'] && !brazilian.includes(id)) problems.add(`página ${id} do registro de imagem sem rota em inglês`);
   for (const lang of LANGS) {

@@ -14,13 +14,15 @@ export const CSV_SEPARATOR: Record<Lang, string> = { en: ',', pt: ';', es: ',' }
 
 /**
  * A cell as the CSV writes it: cents as 1896.20 (1896,20 in Portuguese; no thousands separator, ASCII minus), a measure with
- * its decimals (1234.50, F7), text as it is.
+ * its decimals (1234.50, F7), text as it is, except that a percent is glued to its number: the no-break space Spanish puts
+ * before the "%" on the screen and in the PDF (DECISOES § 213) stays out of the file, which is written like the English one
+ * ("5.00%", so a spreadsheet reads a number; review of the languages adjustment, C-5).
  */
 export function csvCell(cell: Cell, lang: Lang = 'en'): string {
   const numbers = lang === 'pt' ? 'pt' : 'en';
   if ('cents' in cell) return formatScaled(cell.cents, 2, numbers, { min: 2, group: false, minus: '-' });
   if ('scaled' in cell) return formatScaled(cell.scaled, cell.decimals, numbers, { min: cell.decimals, group: false, minus: '-' });
-  return cell.text;
+  return cell.text.replace(/(\d)\u00A0%/g, '$1%');
 }
 
 function quote(text: string, separator: string): string {

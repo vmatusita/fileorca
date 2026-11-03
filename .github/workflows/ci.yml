@@ -22,9 +22,20 @@ permissions:
   contents: read
 
 jobs:
+  # The gates in two parts since the languages adjustment (DECISOES § 320): every gate but Lighthouse, and Lighthouse alone.
+  # A matrix keeps the job id, so the needs of merge and alerta-dependabot wait for both.
   verificar:
+    name: verificar (${{ matrix.part }})
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - part: portões
+            args: --sem-playwright --sem-lighthouse
+          - part: lighthouse
+            args: --lighthouse
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -41,9 +52,10 @@ jobs:
           path: .cache
           key: tools-${{ runner.os }}-${{ hashFiles('scripts/lib/tools.ts') }}
       # Lighthouse runs on the Chromium of Playwright.
-      - run: pnpm exec playwright install --with-deps chromium
-      - name: pnpm verificar --sem-playwright
-        run: pnpm verificar --sem-playwright
+      - if: matrix.part == 'lighthouse'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: pnpm verificar ${{ matrix.args }}
+        run: pnpm verificar ${{ matrix.args }}
         env:
           LINT_TEXTO_BASE: origin/${{ github.event.pull_request.base.ref }}
 
@@ -55,48 +67,60 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - part: chromium 1 de 4
+          - part: chromium 1 de 5
             browser: chromium
-            args: --playwright=chromium --shard=1/4
-          - part: chromium 2 de 4
+            args: --playwright=chromium --shard=1/5
+          - part: chromium 2 de 5
             browser: chromium
-            args: --playwright=chromium --shard=2/4
-          - part: chromium 3 de 4
+            args: --playwright=chromium --shard=2/5
+          - part: chromium 3 de 5
             browser: chromium
-            args: --playwright=chromium --shard=3/4
-          - part: chromium 4 de 4
+            args: --playwright=chromium --shard=3/5
+          - part: chromium 4 de 5
             browser: chromium
-            args: --playwright=chromium --shard=4/4
-          - part: webkit 1 de 10
+            args: --playwright=chromium --shard=4/5
+          - part: chromium 5 de 5
+            browser: chromium
+            args: --playwright=chromium --shard=5/5
+          - part: webkit 1 de 13
             browser: webkit
-            args: --playwright=webkit --shard=1/10
-          - part: webkit 2 de 10
+            args: --playwright=webkit --shard=1/13
+          - part: webkit 2 de 13
             browser: webkit
-            args: --playwright=webkit --shard=2/10
-          - part: webkit 3 de 10
+            args: --playwright=webkit --shard=2/13
+          - part: webkit 3 de 13
             browser: webkit
-            args: --playwright=webkit --shard=3/10
-          - part: webkit 4 de 10
+            args: --playwright=webkit --shard=3/13
+          - part: webkit 4 de 13
             browser: webkit
-            args: --playwright=webkit --shard=4/10
-          - part: webkit 5 de 10
+            args: --playwright=webkit --shard=4/13
+          - part: webkit 5 de 13
             browser: webkit
-            args: --playwright=webkit --shard=5/10
-          - part: webkit 6 de 10
+            args: --playwright=webkit --shard=5/13
+          - part: webkit 6 de 13
             browser: webkit
-            args: --playwright=webkit --shard=6/10
-          - part: webkit 7 de 10
+            args: --playwright=webkit --shard=6/13
+          - part: webkit 7 de 13
             browser: webkit
-            args: --playwright=webkit --shard=7/10
-          - part: webkit 8 de 10
+            args: --playwright=webkit --shard=7/13
+          - part: webkit 8 de 13
             browser: webkit
-            args: --playwright=webkit --shard=8/10
-          - part: webkit 9 de 10
+            args: --playwright=webkit --shard=8/13
+          - part: webkit 9 de 13
             browser: webkit
-            args: --playwright=webkit --shard=9/10
-          - part: webkit 10 de 10
+            args: --playwright=webkit --shard=9/13
+          - part: webkit 10 de 13
             browser: webkit
-            args: --playwright=webkit --shard=10/10
+            args: --playwright=webkit --shard=10/13
+          - part: webkit 11 de 13
+            browser: webkit
+            args: --playwright=webkit --shard=11/13
+          - part: webkit 12 de 13
+            browser: webkit
+            args: --playwright=webkit --shard=12/13
+          - part: webkit 13 de 13
+            browser: webkit
+            args: --playwright=webkit --shard=13/13
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

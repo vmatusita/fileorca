@@ -323,4 +323,23 @@ describe('no English phrase on the pages of Portuguese and Spanish in dist/ (pro
     }
     expect(pages.filter((candidate) => candidate.id === 'licenses').map((page) => page.lang).sort()).toEqual(['es', 'pt']);
   });
+
+  // Review of the languages adjustment (D1; DECISOES § 321): the example link of a FAQ answer of the QR code generator became
+  // a link to the English home on the pt and es pages. A link of a page in pt or es stays in its language: a path of the
+  // site (relative, or on fileorca.com) starts with /pt/ or /es/; only the language switcher (hreflang) goes to another.
+  it('links every page of pt and es only to pages of its own language, but the language switcher', () => {
+    const away = (html: string, lang: 'pt' | 'es'): string[] =>
+      parse(html)
+        .querySelectorAll('body a[href]')
+        .filter((link) => !link.getAttribute('hreflang'))
+        .map((link) => link.getAttribute('href') ?? '')
+        .map((href) => (href.startsWith('https://fileorca.com') ? href.slice('https://fileorca.com'.length) || '/' : href))
+        .filter((href) => href.startsWith('/') && !href.startsWith('//') && !href.startsWith(`/${lang}/`));
+    // Controls: the link of the old answer is caught, a switcher and a page of the language are not.
+    expect(away('<body><a href="https://fileorca.com/" rel="noopener">fileorca.com/</a><a href="/money-calculators/">x</a></body>', 'pt')).toEqual(['/', '/money-calculators/']);
+    expect(away('<body><a href="/qr-code-generator/" hreflang="en">English</a><a href="https://fileorca.com/pt/">x</a><a href="/pt/sobre/">y</a><a href="#main">z</a></body>', 'pt')).toEqual([]);
+    const found: string[] = [];
+    for (const page of pages) for (const href of away(readFileSync(fileForPath(page.path), 'utf8'), page.lang)) found.push(`${page.path}: ${href}`);
+    expect(found).toEqual([]);
+  }, 60_000);
 });

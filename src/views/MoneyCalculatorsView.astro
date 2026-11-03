@@ -3,9 +3,9 @@
 // eyebrow, H1 and one line in the money band; the calculators, the credit ones first; one content AdSlot;
 // the presets with their links; the guides; "how these calculators work" with the data-ymyl blocks of
 // gate:dinheiro-saude (formula, assumptions, a worked example from the engine, official sources, "Reviewed
-// by" and the notice); the rail AdSlot. The same view serves the English hub, its Spanish version (the five translated
-// calculators) and the Brazilian hub in Portuguese (the eight adapted ones), each with the pages of its language; the
-// presets and the guides exist only in English (prompt F6, decisions 5 and 6).
+// by" and the notice); the rail AdSlot. The same view serves the English hub, its Spanish version (the same 14
+// calculators, 4 presets and 5 guides since the languages adjustment) and the Brazilian hub in Portuguese (the eight adapted
+// ones, with no preset and no guide), each with the pages of its language (prompt F6, decisions 5 and 6).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
@@ -14,8 +14,8 @@ import Reviewed from '../tools/calc/Reviewed.astro';
 import { moneyHubId, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { breadcrumbLd, collectionPageLd, homePath, personLd } from '../seo/meta.ts';
-import { CALC_PRESET_IDS, GUIDES, GUIDE_IDS, HUB_MONEY_IDS, moneyPage, type MoneyPageId } from '../tools/calc/registry.ts';
-import { SHARED_BY_LANG, SOURCES_READ_ON, cardOf, longDate, workedExample } from '../tools/calc/page.ts';
+import { CALC_PRESET_IDS, GUIDE_IDS, HUB_MONEY_IDS, guidePathIn, moneyPage, type MoneyPageId } from '../tools/calc/registry.ts';
+import { SHARED_BY_LANG, cardOf, datesOf, longDate, workedExample } from '../tools/calc/page.ts';
 
 interface Props {
   lang?: Lang;
@@ -37,12 +37,17 @@ const groups = [
   { id: 'credit', heading: t.creditHeading, cards: inGroup('credit') },
   { id: 'savings', heading: t.educationalHeading, cards: inGroup('educational') },
 ].filter((group) => group.cards.length > 0);
-const presets = lang === 'en' ? CALC_PRESET_IDS.map((id) => cardOf(id, lang)) : [];
-const guides = lang === 'en' ? GUIDE_IDS.flatMap((id) => { const blurb = common.guides?.[id]; return blurb ? [{ href: GUIDES[id].path, blurb }] : []; }) : [];
+// The presets and the guides of the language: English and Spanish have them, the Brazilian hub has none.
+const presets = CALC_PRESET_IDS.filter((id) => moneyPage(id, lang)).map((id) => cardOf(id, lang));
+const guides = GUIDE_IDS.flatMap((id) => {
+  const blurb = common.guides?.[id];
+  const href = guidePathIn(id, lang);
+  return blurb && href ? [{ href, blurb }] : [];
+});
 const list = [...groups.flatMap((group) => group.cards), ...presets].map((card) => ({ name: card.name, path: card.href }));
 const example = workedExample(exampleOf, lang);
 const [readBefore, readAfter] = shared.readOn.split('{date}');
-const read = SOURCES_READ_ON[lang];
+const read = datesOf('money', lang).read;
 ---
 <BaseLayout
   lang={lang}

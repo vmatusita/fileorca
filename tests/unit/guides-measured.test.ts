@@ -12,7 +12,12 @@ import type { MeasuredFile, MeasuredNumber, MeasuredTable, Method, OfficialSize,
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
 import { compareNumbers, compareTables } from '../../scripts/guides/lib/compare.ts';
-import { globals, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import { VARIANTS, globals, guideTables, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import enShared from '../../src/i18n/en/file-guides.ts';
+import ptShared from '../../src/i18n/pt/file-guides.ts';
+import esShared from '../../src/i18n/es/file-guides.ts';
+import esResolution from '../../src/i18n/es/guide-pdf-to-jpg-resolution.ts';
+import pdfToJpgEs from '../../src/tools/pdf-to-jpg/i18n/es.ts';
 import { GUIDE_PUBLISHED, GUIDE_REVIEWED } from '../../src/tools/guides/page.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import removeLocation from '../../src/i18n/en/guide-remove-location-from-photos.ts';
@@ -224,17 +229,19 @@ describe('the measurements of the file guides', () => {
     expect(differProblems('', JSON.stringify(removeLocation)).join()).toMatch(/sem nenhuma ferramenta/);
   });
 
-  it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
-    const texts = import.meta.glob<{ facts?: Record<string, unknown> }>('/src/i18n/en/guide-*.ts', { import: 'default' });
+  // Since the languages adjustment, the guides of pt and es too. The pattern lacked its backslash before (/{(w+)}/ matched
+  // nothing), so the test proved nothing in any language until then (DECISOES § 314).
+  it('hold every placeholder of every guide text, in the three languages, or the guide names it as an official fact', async () => {
+    const texts = import.meta.glob<{ facts?: Record<string, unknown> }>(['/src/i18n/en/guide-*.ts', '/src/i18n/pt/guide-*.ts', '/src/i18n/es/guide-*.ts'], { import: 'default' });
     const always = Object.keys(globals(measured));
-    for (const id of FILE_GUIDE_IDS) {
-      const file = `/src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`;
+    for (const [lang, id] of FILE_GUIDE_IDS.flatMap((guide) => (['en', 'pt', 'es'] as const).map((lang) => [lang, guide] as const))) {
+      const file = `/src/i18n/${lang}/guide-${id.replace(/^guides-/, '')}.ts`;
       const load = texts[file];
       expect(load, `${file} exists`).toBeDefined();
       if (!load) continue;
       const source = readFileSync(`.${file}`, 'utf8');
       const official = Object.keys((await load()).facts ?? {});
-      const missing = [...source.matchAll(/{(w+)}/g)]
+      const missing = [...source.matchAll(/\{(\w+)\}/g)]
         .map((match) => match[1] as string)
         .filter((name) => !always.includes(name) && !official.includes(name) && !(name in measured.guides[id].facts) && resolvePlaceholder(id, name, measured) === null);
       expect(missing, `${file}: placeholders with no measurement`).toEqual([]);
@@ -325,5 +332,24 @@ describe('a deterministic part, measured again in Node with the same code', () =
     expect(form.fontCount).toBe(value('guides-why-is-my-pdf-so-large', 'formFontCount'));
     const pair = await merge(['pdf-escaneado-01-pagina-livro-cor.pdf', 'pdf-formulario-irs-1040-2019.pdf']);
     expect(pair.merged).toBe(value('guides-combine-pdfs-on-phone', 'scanFormMerged'));
+  });
+});
+
+// Review of the languages adjustment (C-1 and B2; DECISOES § 321): the guide to the resolution of PDF to JPG shows the tool
+// and the measure on one page, and in Spanish the tool says "ppp" since the F6. The unit of a resolution comes from the
+// shared texts of the language, so the guide says it the same way; the English and Portuguese pages stay "ppi".
+describe('the unit of a resolution', () => {
+  it('is ppp in Spanish and ppi in English and Portuguese, in the placeholders and in the table of the guide', () => {
+    const base = Object.values(measured.guides['guides-pdf-to-jpg-resolution'].numbers)[0];
+    if (!base) throw new Error('the resolution guide has numbers');
+    const number = (value: number): MeasuredNumber => ({ ...base, value, unit: 'ppi' });
+    expect(VARIANTS[''](number(150), { lang: 'en', shared: enShared })).toBe('150 ppi');
+    expect(VARIANTS[''](number(150), { lang: 'pt', shared: ptShared })).toBe('150 ppi');
+    expect(VARIANTS[''](number(1200), { lang: 'es', shared: esShared })).toBe('1,200 ppp');
+    const cells = guideTables('guides-pdf-to-jpg-resolution', esShared, esResolution, measured, 'es').flat(2).join(' | ');
+    expect(cells).toMatch(/\b(?:72|150|300) ppp\b/);
+    expect(cells).not.toMatch(/\bppi\b/);
+    // The tool embedded in the same page writes ppp (src/tools/pdf-to-jpg/i18n/es.ts).
+    expect(JSON.stringify(pdfToJpgEs)).toMatch(/150 ppp/);
   });
 });

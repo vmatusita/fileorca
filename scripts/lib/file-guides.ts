@@ -1,7 +1,12 @@
 // The content rules of the file guides (prompt F5b, decisions 4 and 5): the blocks of the page in their order, 800 to
 // 1,500 words of text, no filler phrase. Pure functions over the HTML of a guide, returning problems in Portuguese;
 // scripts/gates/conteudo.ts runs them on every guide of the registry, and tests/unit/conteudo.test.ts proves each one.
+// Since the languages adjustment the guides exist in Portuguese and Spanish too: the date of the measurement is looked for
+// as the page of each language writes it (src/i18n/dates.ts) and the filler phrases of each language are refused. The
+// limit of 800 to 1,500 words is the same in the three languages.
 import { parse, type HTMLElement } from 'node-html-parser';
+import { longDate } from '../../src/i18n/dates.ts';
+import { DEFAULT_LANG, LANGS, type Lang } from '../../src/i18n/routes.ts';
 
 export const MIN_GUIDE_WORDS = 800;
 export const MAX_GUIDE_WORDS = 1500;
@@ -17,6 +22,54 @@ export const FILLER: { label: string; pattern: RegExp }[] = [
   { label: 'in summary', pattern: /\bin summary\b/i },
   { label: 'needless to say', pattern: /\bneedless to say\b/i },
 ];
+
+/** A phrase of Portuguese or Spanish, whole words only: the boundaries know accents (\b does not), any case. */
+const phrase = (source: string): RegExp => new RegExp(`(?<![\\p{L}\\p{N}])(?:${source})(?![\\p{L}\\p{N}])`, 'iu');
+
+/**
+ * The same kind of phrase in Portuguese and Spanish (the languages adjustment): the openings and links that generated text
+ * leans on and a person writing a guide does not need. A guide of those languages is held to its own list and to the
+ * English one, so an English filler left in a translation fails too.
+ */
+export const FILLER_BY_LANG: Record<Lang, { label: string; pattern: RegExp }[]> = {
+  en: FILLER,
+  pt: [
+    { label: 'no mundo de hoje', pattern: phrase('no mundo (?:de hoje|atual|digital de hoje)') },
+    { label: 'vale ressaltar', pattern: phrase('vale (?:ressaltar|destacar|mencionar|notar)') },
+    { label: 'é importante notar', pattern: phrase('é (?:importante|crucial|válido) (?:notar|ressaltar|destacar|mencionar|lembrar|observar)') },
+    { label: 'em conclusão', pattern: phrase('em conclusão|em suma|em resumo') },
+    { label: 'mergulhar fundo', pattern: phrase('mergulh(?:ar|e|emos|amos) fundo|mergulho profundo|vamos mergulhar') },
+    { label: 'nem é preciso dizer', pattern: phrase('nem é preciso dizer|escusado será dizer') },
+  ],
+  es: [
+    { label: 'en el mundo actual', pattern: phrase('en el mundo (?:actual|de hoy|digital de hoy)') },
+    { label: 'cabe destacar', pattern: phrase('cabe (?:destacar|señalar|mencionar|resaltar)|vale la pena (?:destacar|señalar|mencionar)') },
+    { label: 'es importante señalar', pattern: phrase('es (?:importante|crucial) (?:señalar|destacar|mencionar|notar|resaltar|recordar)') },
+    { label: 'en conclusión', pattern: phrase('en conclusión|en resumen|en suma') },
+    { label: 'sumergirse', pattern: phrase('sumerg(?:irse|irnos|ámonos|amonos|imos)|inmersión profunda') },
+    { label: 'huelga decir', pattern: phrase('huelga decir|ni que decir tiene|no hace falta decir') },
+  ],
+};
+
+/** The names of the months as longDate writes them in a language ("November", "novembro", "noviembre"). */
+function monthNames(lang: Lang): string[] {
+  return Array.from({ length: 12 }, (_, index) => {
+    const written = longDate(`2000-${String(index + 1).padStart(2, '0')}-01`, lang);
+    return (lang === 'en' ? written.split(' ')[0] : written.split(' de ')[1]) ?? '';
+  });
+}
+
+/**
+ * A date written out the way the page of each language writes the day of the measurement (src/i18n/dates.ts): "November 2,
+ * 2026", "2 de novembro de 2026", "2 de noviembre de 2026". A space may be a no-break one.
+ */
+export const MEASURED_DATE: Record<Lang, RegExp> = Object.fromEntries(
+  LANGS.map((lang) => {
+    const months = monthNames(lang).join('|');
+    const source = lang === 'en' ? `(?:${months})\\s\\d{1,2},\\s\\d{4}` : `\\d{1,2}\\sde\\s(?:${months})\\sde\\s\\d{4}`;
+    return [lang, new RegExp(`(?<![\\p{L}\\p{N}])${source}(?![\\p{L}\\p{N}])`, 'u')];
+  }),
+) as Record<Lang, RegExp>;
 
 function parsed(html: string): HTMLElement {
   const root = parse(html);
@@ -36,14 +89,18 @@ export function guideWords(html: string): number {
     .reduce((sum, block) => sum + words(textOf(block)), 0);
 }
 
-export function findFiller(text: string): string[] {
+/** The filler phrases of a text: its language's list and, for Portuguese and Spanish, the English one too. */
+export function findFiller(text: string, lang: Lang = DEFAULT_LANG): string[] {
   const flat = text.replace(/\s+/g, ' ');
-  return FILLER.filter(({ pattern }) => pattern.test(flat)).map(({ label }) => label);
+  const lists = lang === 'en' ? [FILLER] : [FILLER_BY_LANG[lang], FILLER];
+  return lists.flat().filter(({ pattern }) => pattern.test(flat)).map(({ label }) => label);
 }
 
 export interface GuideWant {
-  /** The path of the tool page the guide embeds and links to. */
+  /** The path of the tool page the guide embeds and links to, in the language of the guide. */
   toolPath: string;
+  /** The language of the guide (English by default, as in the F5b). */
+  lang?: Lang;
 }
 
 /** Where a selector first appears in the HTML of main, or -1. */
@@ -54,6 +111,7 @@ function at(main: HTMLElement, selector: string): number {
 }
 
 export function checkFileGuide(html: string, want: GuideWant): string[] {
+  const lang = want.lang ?? DEFAULT_LANG;
   const root = parsed(html);
   const main = root.querySelector('main');
   if (!main) return ['sem <main>'];
@@ -97,7 +155,7 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
     const tables = measured.querySelectorAll('.fo-table-wrap table');
     if (tables.length === 0) problems.push('a seção medida sem tabela em .fo-table-wrap');
     if (tables.some((table) => table.querySelectorAll('tbody tr').length === 0)) problems.push('uma tabela medida sem linha');
-    if (!/\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/.test(measured.text)) problems.push('a seção medida sem a data da medida');
+    if (!MEASURED_DATE[lang].test(measured.text)) problems.push('a seção medida sem a data da medida');
   }
   const sources = main.querySelector('[data-content="sources"]');
   if (sources) {
@@ -119,6 +177,6 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   if (main.querySelectorAll('.fo-ad').length > 2) problems.push(`${main.querySelectorAll('.fo-ad').length} AdSlots (no máximo 2)`);
   const count = guideWords(html);
   if (count < MIN_GUIDE_WORDS || count > MAX_GUIDE_WORDS) problems.push(`${count} palavras de texto (pede de ${MIN_GUIDE_WORDS} a ${MAX_GUIDE_WORDS})`);
-  for (const label of findFiller(main.querySelectorAll('[data-guide-text]').map(textOf).join(' '))) problems.push(`frase de enchimento: "${label}"`);
+  for (const label of findFiller(main.querySelectorAll('[data-guide-text]').map(textOf).join(' '), lang)) problems.push(`frase de enchimento: "${label}"`);
   return problems;
 }

@@ -7,16 +7,34 @@
 // title, location.search, the storages, the cookies, the attributes of the page and the names of the files, and no request
 // goes to another host; the export_click events carry only the page, the language and the format. Last, the empty box and
 // the text over the limit show the error (role="alert"), no code and no download.
+// The languages adjustment (decisions 3 and 8): the page in Portuguese and Spanish, at its own path, with its own texts and
+// file names (QR_TEXTS, `panel.file`, no accents). Each language gets one round trip, a text with "ação", "año", "ñandú" and
+// an emoji read back from the PNG and the SVG with and without the Oli, and the privacy test with a sentinel with an accent;
+// the box keeps autocomplete, spellcheck and autocapitalize off in the three languages.
 import { readFileSync } from 'node:fs';
 import { Buffer } from 'node:buffer';
 import { Resvg } from '@resvg/resvg-js';
 import jsQR from 'jsqr';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import texts from '../../src/tools/qr-code-generator/i18n/en.ts';
+import { fmt, groupDigits } from '../../src/i18n/format.ts';
+import { LANGS, QR_ID, routeById, type Lang } from '../../src/i18n/routes.ts';
+import { QR_TEXTS } from '../../src/tools/qr-code-generator/page.ts';
+import type { PngSize } from '../../src/tools/qr-code-generator/qr.ts';
+import type { QrPanelTexts } from '../../src/tools/qr-code-generator/types.ts';
 import { dataLayer, dismissCookies, hydrated } from './lib/page.ts';
 import { pngInfo, pngPixels } from './lib/png.ts';
 
-const PATH = '/qr-code-generator/';
+/** The page in a language, from the route map. */
+function pathOf(lang: Lang): string {
+  const path = routeById(QR_ID).paths[lang];
+  if (!path) throw new Error(`no ${lang} page for the QR code generator`);
+  return path;
+}
+/** The texts of the island in a language. */
+const panelOf = (lang: Lang): QrPanelTexts => QR_TEXTS[lang].panel;
+/** The names of the two downloads in a language: the base name of the texts, never the text typed. */
+const filesOf = (t: QrPanelTexts): { png: string; svg: string } => ({ png: `${t.file}.png`, svg: `${t.file}.svg` });
+
 /** The longest text, in bytes of UTF-8: the capacity of version 40 at error correction H (MAX_BYTES of qr.ts). */
 const MAX_BYTES = 1273;
 const utf8 = (text: string): Uint8Array => new TextEncoder().encode(text);
@@ -37,13 +55,19 @@ const CONTENTS: { name: string; text: string; large?: true }[] = [
   { name: 'o maior permitido', text: textOfBytes(MAX_BYTES) },
 ];
 
+/** The text of the round trip in Portuguese and in Spanish: "ação", "año", "ñandú" and an emoji in each. */
+const ACCENTS: Record<Exclude<Lang, 'en'>, string> = {
+  pt: 'https://fileorca.com/pt/ — Ação de graças: o ñandú no año novo 🐋 até já ☕',
+  es: '¡Feliz año! El ñandú y la ação 🐋 — https://fileorca.com/es/ ☕',
+};
+
 const box = (page: Page): Locator => page.locator('#fo-qr-text');
-const pngButton = (page: Page): Locator => page.getByRole('button', { name: new RegExp(`^${texts.panel.download.png}`) });
-const svgButton = (page: Page): Locator => page.getByRole('button', { name: texts.panel.download.svg, exact: true });
+const pngButton = (page: Page, t: QrPanelTexts): Locator => page.getByRole('button', { name: new RegExp(`^${t.download.png}`) });
+const svgButton = (page: Page, t: QrPanelTexts): Locator => page.getByRole('button', { name: t.download.svg, exact: true });
 const preview = (page: Page): Locator => page.locator('.fo-qr__code > svg');
 
-async function open(page: Page): Promise<void> {
-  expect((await page.goto(PATH))?.status()).toBe(200);
+async function open(page: Page, lang: Lang = 'en'): Promise<void> {
+  expect((await page.goto(pathOf(lang)))?.status()).toBe(200);
   await hydrated(page);
   await dismissCookies(page);
 }
@@ -53,9 +77,18 @@ async function type(page: Page, text: string): Promise<void> {
   await expect(preview(page)).toBeVisible();
 }
 
-/** Clicks a choice of an OptionGroup by its label (the radio is hidden inside the rail). */
-async function choose(page: Page, legend: string, label: string): Promise<void> {
-  await page.locator('fieldset', { has: page.locator('legend', { hasText: legend }) }).locator('.fo-seg__opt', { hasText: label }).click();
+/**
+ * Clicks a choice of an OptionGroup (the radio is hidden inside the rail): the group under its legend, the option by its
+ * value, after checking that it shows the label of the language (a label may be part of another one, "Ligada" of "Desligada").
+ */
+async function choose(page: Page, t: QrPanelTexts, group: 'oli', value: 'on' | 'off'): Promise<void>;
+async function choose(page: Page, t: QrPanelTexts, group: 'size', value: PngSize): Promise<void>;
+async function choose(page: Page, t: QrPanelTexts, group: 'oli' | 'size', value: string): Promise<void> {
+  const set = page.locator('fieldset', { has: page.locator(`input[name="fo-qr-${group}"]`) });
+  await expect(set.locator('legend')).toHaveText(t[group].legend);
+  const option = set.locator('.fo-seg__opt', { has: page.locator(`input[value="${value}"]`) });
+  await expect(option).toContainText(group === 'oli' ? t.oli[value as 'on' | 'off'] : t.size[value as PngSize]);
+  await option.click();
 }
 
 async function download(page: Page, button: Locator): Promise<{ name: string; bytes: Buffer }> {
@@ -88,13 +121,17 @@ function readSvg(bytes: Buffer): number[] | undefined {
   return jsQR(new Uint8ClampedArray(pixels.buffer, pixels.byteOffset, pixels.length), image.width, image.height)?.binaryData;
 }
 
-/** The side the page says for the PNG of the chosen size ("· 481 × 481 px" after "Download PNG"). */
-async function shownSide(page: Page): Promise<number> {
-  const meta = (await pngButton(page).locator('.fo-btn__meta').textContent()) ?? '';
-  return Number(/([\d,]+) ×/.exec(meta)?.[1]?.replaceAll(',', '') ?? 0);
+/**
+ * The side the page says for the PNG of the chosen size ("· 481 × 481 px" after "Download PNG"): the first number of the
+ * line, with the thousands separator of any language taken out ("2,048" in English and Spanish, "2.048" in Portuguese).
+ */
+async function shownSide(page: Page, t: QrPanelTexts): Promise<number> {
+  const meta = (await pngButton(page, t).locator('.fo-btn__meta').textContent()) ?? '';
+  return Number(/\d[\d.,]*/.exec(meta)?.[0]?.replace(/[.,]/g, '') ?? 0);
 }
 
 test.describe('QR code generator', () => {
+  const en = panelOf('en');
   for (const content of CONTENTS) {
     test(`${content.name}: the PNG and the SVG read back to the exact UTF-8, with and without the Oli`, async ({ page, browserName }) => {
       test.setTimeout(90_000);
@@ -102,13 +139,13 @@ test.describe('QR code generator', () => {
       await type(page, content.text);
       const rows: string[] = [];
       for (const oli of [true, false]) {
-        await choose(page, texts.panel.oli.legend, oli ? texts.panel.oli.on : texts.panel.oli.off);
+        await choose(page, en, 'oli', oli ? 'on' : 'off');
         await expect(page.locator('.fo-qr__code > svg > svg')).toHaveCount(oli ? 1 : 0);
-        const sizes: ('Small' | 'Large')[] = content.large && oli ? ['Small', 'Large'] : ['Small'];
+        const sizes: PngSize[] = content.large && oli ? ['small', 'large'] : ['small'];
         for (const size of sizes) {
-          await choose(page, texts.panel.size.legend, size);
-          const side = await shownSide(page);
-          const png = await download(page, pngButton(page));
+          await choose(page, en, 'size', size);
+          const side = await shownSide(page, en);
+          const png = await download(page, pngButton(page, en));
           expect(png.name).toBe('qr-code.png');
           expect(pngInfo(new Uint8Array(png.bytes)).width).toBe(side);
           const read = readPng(png.bytes);
@@ -117,8 +154,8 @@ test.describe('QR code generator', () => {
           expect(read.blue > 0, `${content.name}: PNG ${size}, a Oli desenhada`).toBe(oli);
           rows.push(`PNG ${size} (${side} px) ${oli ? 'com' : 'sem'} a Oli: ok`);
         }
-        await choose(page, texts.panel.size.legend, 'Small');
-        const svg = await download(page, svgButton(page));
+        await choose(page, en, 'size', 'small');
+        const svg = await download(page, svgButton(page, en));
         expect(svg.name).toBe('qr-code.svg');
         expect(same(readSvg(svg.bytes), content.text), `${content.name}: SVG, Oli ${oli}`).toBe(true);
         rows.push(`SVG ${oli ? 'com' : 'sem'} a Oli: ok`);
@@ -127,57 +164,126 @@ test.describe('QR code generator', () => {
     });
   }
 
-  test('the text never leaves the device: no request, event, store, title, attribute or file name carries it', async ({ page, context, baseURL }) => {
-    test.setTimeout(90_000);
-    const outgoing: { url: string; text: string }[] = [];
-    context.on('request', (request) => outgoing.push({ url: request.url(), text: `${request.method()} ${request.url()}\n${request.postData() ?? ''}` }));
-    await open(page);
-    const sentinel = 'https://qr-sentinel-7f3k9q.example/olá/zq4815?code=Qs-9d2m';
-    await type(page, sentinel);
-    const names: string[] = [];
-    names.push((await download(page, pngButton(page))).name);
-    await choose(page, texts.panel.oli.legend, texts.panel.oli.off);
-    names.push((await download(page, svgButton(page))).name);
-    await choose(page, texts.panel.size.legend, 'Large');
-    names.push((await download(page, pngButton(page))).name);
-    expect(names).toEqual(['qr-code.png', 'qr-code.svg', 'qr-code.png']);
-
-    const seen = await page.evaluate(() => {
-      const store = (storage: Storage) => Object.keys(storage).map((key) => `${key}=${storage.getItem(key)}`).join(';');
-      const attributes = [...document.querySelectorAll('*')].flatMap((element) => [...element.attributes].map((attribute) => `${attribute.name}=${attribute.value}`)).join('\n');
-      return { title: document.title, search: location.search, hash: location.hash, local: store(localStorage), session: store(sessionStorage), cookie: document.cookie, attributes };
+  // The languages adjustment (decision 8): one round trip per language, the four files of a text with accents and an emoji.
+  for (const lang of ['pt', 'es'] as const) {
+    test(`${pathOf(lang)}: "ação", "año", "ñandú" and an emoji read back from the PNG and the SVG, with and without the Oli`, async ({ page, browserName }) => {
+      test.setTimeout(90_000);
+      const t = panelOf(lang);
+      const text = ACCENTS[lang];
+      const names = filesOf(t);
+      // The names come from the texts of the language, with no accent and no space (docs/i18n, § 219).
+      expect(t.file).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+      await open(page, lang);
+      await type(page, text);
+      // The count next to the label is the language's: the bytes of the text and the limit with its own thousands separator.
+      await expect(page.locator('#fo-qr-count')).toHaveText(fmt(t.field.count, { count: groupDigits(utf8(text).length, lang), max: groupDigits(MAX_BYTES, lang) }));
+      const rows: string[] = [];
+      for (const oli of [true, false]) {
+        await choose(page, t, 'oli', oli ? 'on' : 'off');
+        await expect(page.locator('.fo-qr__code > svg > svg')).toHaveCount(oli ? 1 : 0);
+        const side = await shownSide(page, t);
+        const png = await download(page, pngButton(page, t));
+        expect(png.name).toBe(names.png);
+        expect(pngInfo(new Uint8Array(png.bytes)).width).toBe(side);
+        const read = readPng(png.bytes);
+        expect(same(read.binary, text), `${lang}: PNG, Oli ${oli}`).toBe(true);
+        expect(read.blue > 0, `${lang}: PNG, a Oli desenhada`).toBe(oli);
+        const svg = await download(page, svgButton(page, t));
+        expect(svg.name).toBe(names.svg);
+        expect(same(readSvg(svg.bytes), text), `${lang}: SVG, Oli ${oli}`).toBe(true);
+        rows.push(`PNG (${side} px) e SVG ${oli ? 'com' : 'sem'} a Oli: ok`);
+      }
+      for (const row of rows) console.log(`[qr] ${lang} (${utf8(text).length} bytes), ${browserName}: ${row}`);
     });
-    const events = await dataLayer(page);
-    const forms = ['7f3k9q', 'zq4815', 'Qs-9d2m', encodeURIComponent(sentinel), Buffer.from(sentinel).toString('base64').slice(0, 24)];
-    const surfaces: [string, string][] = [
-      ...outgoing.map((request): [string, string] => [`requisição ${request.url}`, request.text]),
-      ['dataLayer', JSON.stringify(events)],
-      ['título', seen.title],
-      ['location.search', seen.search],
-      ['location.hash', seen.hash],
-      ['localStorage', seen.local],
-      ['sessionStorage', seen.session],
-      ['cookies', seen.cookie],
-      ['atributos da página', seen.attributes],
-      ['nomes de arquivo', names.join('\n')],
-    ];
-    const found = surfaces.flatMap(([where, text]) => forms.filter((form) => text.includes(form)).map((form) => `${where}: ${form}`));
-    expect(found, 'o texto fora do aparelho').toEqual([]);
-    expect(seen.search).toBe('');
-    expect(seen.hash).toBe('');
-    // Every request stays on the site's own origin (a data: or blob: URL is the page's own memory).
-    const origin = new URL(baseURL ?? '').origin;
-    const away = outgoing.map((request) => request.url).filter((url) => !/^(?:data|blob):/.test(url) && new URL(url).origin !== origin);
-    expect(away, 'requisições a outro host').toEqual([]);
-    // The events of the downloads name the page, the language and the format, and nothing else.
-    const exports = events.filter((entry) => entry[0] === 'event' && entry[1] === 'export_click');
-    expect(exports).toEqual([
-      ['event', 'export_click', { tool: 'qr-code-generator', lang: 'en', format: 'png' }],
-      ['event', 'export_click', { tool: 'qr-code-generator', lang: 'en', format: 'svg' }],
-      ['event', 'export_click', { tool: 'qr-code-generator', lang: 'en', format: 'png' }],
-    ]);
-    // The search is real: the same forms are found where the text is (control).
-    expect(forms.every((form) => form.length > 0 && `${sentinel} ${encodeURIComponent(sentinel)} ${Buffer.from(sentinel).toString('base64')}`.includes(form))).toBe(true);
+  }
+
+  for (const lang of LANGS) {
+    const title = 'the text never leaves the device: no request, event, store, title, attribute or file name carries it';
+    test(lang === 'en' ? title : `${pathOf(lang)}: ${title}`, async ({ page, context, baseURL }) => {
+      test.setTimeout(90_000);
+      const t = panelOf(lang);
+      const outgoing: { url: string; text: string }[] = [];
+      context.on('request', (request) => outgoing.push({ url: request.url(), text: `${request.method()} ${request.url()}\n${request.postData() ?? ''}` }));
+      await open(page, lang);
+      // The box asks the browser to keep nothing: no autofill store, no spelling service, no capital letter added.
+      await expect(box(page)).toHaveAttribute('autocomplete', 'off');
+      await expect(box(page)).toHaveAttribute('spellcheck', 'false');
+      await expect(box(page)).toHaveAttribute('autocapitalize', 'off');
+      const accent = { en: 'olá', pt: 'ação', es: 'año' }[lang];
+      const sentinel = `https://qr-sentinel-7f3k9q.example/${accent}/zq4815?code=Qs-9d2m`;
+      await type(page, sentinel);
+      const names: string[] = [];
+      names.push((await download(page, pngButton(page, t))).name);
+      await choose(page, t, 'oli', 'off');
+      names.push((await download(page, svgButton(page, t))).name);
+      await choose(page, t, 'size', 'large');
+      names.push((await download(page, pngButton(page, t))).name);
+      const files = filesOf(t);
+      expect(names).toEqual([files.png, files.svg, files.png]);
+      if (lang === 'en') expect(files).toEqual({ png: 'qr-code.png', svg: 'qr-code.svg' });
+
+      const seen = await page.evaluate(() => {
+        const store = (storage: Storage) => Object.keys(storage).map((key) => `${key}=${storage.getItem(key)}`).join(';');
+        const attributes = [...document.querySelectorAll('*')].flatMap((element) => [...element.attributes].map((attribute) => `${attribute.name}=${attribute.value}`)).join('\n');
+        return { title: document.title, search: location.search, hash: location.hash, local: store(localStorage), session: store(sessionStorage), cookie: document.cookie, attributes };
+      });
+      const events = await dataLayer(page);
+      const forms = ['7f3k9q', 'zq4815', 'Qs-9d2m', encodeURIComponent(sentinel), Buffer.from(sentinel).toString('base64').slice(0, 24)];
+      const surfaces: [string, string][] = [
+        ...outgoing.map((request): [string, string] => [`requisição ${request.url}`, request.text]),
+        ['dataLayer', JSON.stringify(events)],
+        ['título', seen.title],
+        ['location.search', seen.search],
+        ['location.hash', seen.hash],
+        ['localStorage', seen.local],
+        ['sessionStorage', seen.session],
+        ['cookies', seen.cookie],
+        ['atributos da página', seen.attributes],
+        ['nomes de arquivo', names.join('\n')],
+      ];
+      const found = surfaces.flatMap(([where, text]) => forms.filter((form) => text.includes(form)).map((form) => `${where}: ${form}`));
+      expect(found, 'o texto fora do aparelho').toEqual([]);
+      expect(seen.search).toBe('');
+      expect(seen.hash).toBe('');
+      // Every request stays on the site's own origin (a data: or blob: URL is the page's own memory).
+      const origin = new URL(baseURL ?? '').origin;
+      const away = outgoing.map((request) => request.url).filter((url) => !/^(?:data|blob):/.test(url) && new URL(url).origin !== origin);
+      expect(away, 'requisições a outro host').toEqual([]);
+      // The events of the downloads name the page, the language and the format, and nothing else.
+      const exports = events.filter((entry) => entry[0] === 'event' && entry[1] === 'export_click');
+      expect(exports).toEqual([
+        ['event', 'export_click', { tool: 'qr-code-generator', lang, format: 'png' }],
+        ['event', 'export_click', { tool: 'qr-code-generator', lang, format: 'svg' }],
+        ['event', 'export_click', { tool: 'qr-code-generator', lang, format: 'png' }],
+      ]);
+      // The search is real: the same forms are found where the text is (control).
+      expect(forms.every((form) => form.length > 0 && `${sentinel} ${encodeURIComponent(sentinel)} ${Buffer.from(sentinel).toString('base64')}`.includes(form))).toBe(true);
+    });
+  }
+
+  // Review of the languages adjustment (E-1; DECISOES § 321): at 320 px the Spanish rail of the PNG size ("Pequeño",
+  // "Mediano", "Grande", each over its pixels) was 17 px wider than its column and touched the border of the card, while the
+  // page itself did not scroll (the reflow test only reads the page). Each part of each choice group stays in its column.
+  test('every choice group keeps its rail and its note inside the column at 320 px, in the three languages', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 740 });
+    for (const lang of LANGS) {
+      await open(page, lang);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const groups = await page.locator('#fo-tool-root fieldset.fo-field').evaluateAll((sets) =>
+        sets.map((set) => {
+          const style = getComputedStyle(set);
+          const box = set.getBoundingClientRect();
+          const right = box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth);
+          const widest = Math.max(...[...set.children].map((child) => child.getBoundingClientRect().right));
+          return { legend: set.querySelector('legend')?.textContent ?? '', over: widest - right };
+        }),
+      );
+      expect(groups.length, `${lang}: os dois grupos de opções`).toBe(2);
+      // Under a pixel: the rounding of the layout (the Portuguese rail is 0.3 px over, inside the padding of the card).
+      for (const group of groups) expect(group.over, `${lang} "${group.legend}" a 320 px`).toBeLessThan(1);
+    }
   });
 
   test('an empty box and a text over the limit show the error, with no code and no download', async ({ page }) => {
@@ -186,8 +292,8 @@ test.describe('QR code generator', () => {
     // Nothing typed yet: no error, no code, both downloads off.
     await expect(alert).toHaveCount(0);
     await expect(preview(page)).toHaveCount(0);
-    await expect(pngButton(page)).toBeDisabled();
-    await expect(svgButton(page)).toBeDisabled();
+    await expect(pngButton(page, en)).toBeDisabled();
+    await expect(svgButton(page, en)).toBeDisabled();
     await expect(page.locator('#fo-qr-count')).toHaveText('0 of 1,273');
 
     const noCode = async (message: RegExp): Promise<void> => {
@@ -195,8 +301,8 @@ test.describe('QR code generator', () => {
       await expect(alert).toHaveText(message);
       await expect(box(page)).toHaveAttribute('aria-invalid', 'true');
       await expect(preview(page)).toHaveCount(0);
-      await expect(pngButton(page)).toBeDisabled();
-      await expect(svgButton(page)).toBeDisabled();
+      await expect(pngButton(page, en)).toBeDisabled();
+      await expect(svgButton(page, en)).toBeDisabled();
     };
     await type(page, 'abc');
     await box(page).fill('');
@@ -211,7 +317,7 @@ test.describe('QR code generator', () => {
     await type(page, textOfBytes(MAX_BYTES));
     await expect(alert).toHaveCount(0);
     await expect(box(page)).not.toHaveAttribute('aria-invalid', 'true');
-    await expect(pngButton(page)).toBeEnabled();
+    await expect(pngButton(page, en)).toBeEnabled();
     await expect(page.locator('#fo-qr-count')).toHaveText('1,273 of 1,273');
   });
 });

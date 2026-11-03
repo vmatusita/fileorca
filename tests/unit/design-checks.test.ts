@@ -2,6 +2,11 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { FORBIDDEN_WORDS, FORBIDDEN_WORDS_BY_LANG, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
 import { tokenNames } from '../../scripts/lib/theme.ts';
+import { F6_ES_CALC_IDS, fileGuideVoicePages, newVoicePages, pageVoiceProblems, pdfVoicePages } from '../../scripts/lib/voice-pages.ts';
+import { LANGS, QR_ID, routeById } from '../../src/i18n/routes.ts';
+import { CALC_PAGE_IDS, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 const tokens: unknown = JSON.parse(readFileSync('docs/design/tokens.json', 'utf8'));
 const names = new Set(tokenNames(tokens));
@@ -393,6 +398,60 @@ describe('voz dos textos (F5a)', () => {
     // Negative controls: the words that only look like them pass.
     for (const text of ['A Oli comprime a foto.', 'Ela não faz esforço nenhum para o navegador.', 'Comprima com a opção Forte.', 'Revolução de 1930']) expect(checkVoice({ a: text }, 'texto', 'pt'), text).toEqual([]);
     for (const text of ['Oli comprime la foto.', 'Comprime con la opción Fuerte.', 'Con ayuda de Oli, sin subir nada.']) expect(checkVoice({ a: text }, 'texto', 'es'), text).toEqual([]);
+  });
+});
+
+// ---- The languages adjustment: the pages whose voice gate:design reads, and the check of one page ----------------------
+
+describe('voz das páginas do gate:design (ajuste de idiomas)', () => {
+  it('reads the PDF pages and the file guides in every language, from the registries', () => {
+    const pdf = pdfVoicePages();
+    expect(pdf).toHaveLength((PDF_TOOL_IDS.length + 1) * LANGS.length);
+    for (const page of pdf) expect(page.path, `${page.id} ${page.lang}`).toBe(routeById(page.id).paths[page.lang]);
+    const guides = fileGuideVoicePages();
+    expect(guides).toHaveLength(FILE_GUIDE_IDS.length * LANGS.length);
+    for (const id of FILE_GUIDE_IDS) {
+      for (const lang of LANGS) expect(guides, `${id} ${lang}`).toContainEqual({ id, lang, path: FILE_GUIDES[id].paths[lang] });
+    }
+    // The paths are the route map's.
+    for (const page of guides) expect(page.path, `${page.id} ${page.lang}`).toBe(routeById(page.id).paths[page.lang]);
+  });
+
+  it('reads the other new pages of pt and es: the QR code generator, and in es the new calculators and presets, the hub and the money guides', () => {
+    const pages = newVoicePages();
+    const ids = (lang: 'en' | 'pt' | 'es'): string[] => pages.filter((page) => page.lang === lang).map((page) => page.id);
+    expect(ids('en')).toEqual([]);
+    expect(ids('pt')).toEqual([QR_ID]);
+    const newCalcs = CALC_PAGE_IDS.filter((id) => !F6_ES_CALC_IDS.includes(id));
+    expect(newCalcs).toHaveLength(13);
+    expect(ids('es')).toEqual([QR_ID, ...newCalcs, MONEY_HUB_ID, ...GUIDE_IDS]);
+    expect(pages).toHaveLength(1 + 1 + 13 + 1 + GUIDE_IDS.length);
+    for (const page of pages) expect(page.path, `${page.id} ${page.lang}`).toBe(routeById(page.id).paths[page.lang]);
+    // The Spanish pages of the F6 stay out, like every page that existed before (PENDENCIAS F7 f-11).
+    expect(F6_ES_CALC_IDS).toEqual(['mortgage-calculator', 'personal-loan-calculator', 'credit-card-payoff-calculator', 'debt-payoff-calculator', 'compound-interest-calculator']);
+    for (const id of F6_ES_CALC_IDS) expect(ids('es'), id).not.toContain(id);
+  });
+
+  /** A page with a visible text and an island whose data-props hold `props`, escaped as Astro writes the attribute. */
+  const voicePage = (text: string, props: unknown = { t: { field: { label: 'Texto' } }, texts: { done: '¡Listo! Oli terminó.' } }): string =>
+    `<!doctype html><html><body><main><h1>Página</h1><p>${text}</p><div id="fo-tool-root" data-props="${JSON.stringify(props).replaceAll('"', '&quot;')}"></div><script>const a = "¡Hola!";</script></main></body></html>`;
+
+  it('passes a clean page in its language, with one exclamation in the success line of the island (positive control)', () => {
+    for (const lang of LANGS) expect(pageVoiceProblems(voicePage('Oli faz o QR code no seu aparelho.'), lang), lang).toEqual([]);
+  });
+
+  it('fails the visible text and the island texts of a page by the rules of its language (negative controls)', () => {
+    // A marketing word of Portuguese, refused in Portuguese and not in English.
+    expect(pageVoiceProblems(voicePage('Um gerador revolucionário.'), 'pt')).toEqual(['texto visível: "revolucionário" é uma palavra que o README do design proíbe']);
+    expect(pageVoiceProblems(voicePage('Um gerador revolucionário.'), 'en')).toEqual([]);
+    // In the island's texts: a Spanish marketing word in `texts`, an exclamation outside the success line in `t`.
+    expect(pageVoiceProblems(voicePage('Texto.', { t: { field: { label: 'Escribe' } }, texts: { lead: 'Crea códigos QR sin esfuerzo.' } }), 'es')).toEqual(['data-props.texts.lead: "sin esfuerzo" é uma palavra que o README do design proíbe']);
+    expect(pageVoiceProblems(voicePage('Texto.', { t: { errors: { long: '¡Ay! Es demasiado largo.' } } }), 'es')).toEqual(['data-props.t.errors.long: exclamação fora da fala de sucesso']);
+    // An emoji or an arrow in the visible text.
+    expect(pageVoiceProblems(voicePage('Listo 🎉'), 'es').join()).toMatch(/texto visível: emoji no texto/);
+    expect(pageVoiceProblems(voicePage('PNG → SVG'), 'pt').join()).toMatch(/texto visível: seta/);
+    // The guides read the visible text only (props false), as in the F5b.
+    expect(pageVoiceProblems(voicePage('Texto.', { t: { errors: { long: '¡Ay!' } } }), 'es', false)).toEqual([]);
   });
 });
 

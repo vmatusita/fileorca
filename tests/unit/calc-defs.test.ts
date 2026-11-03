@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { formatScaled, type NumberLang } from '../../src/calc/parse.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
@@ -44,7 +44,7 @@ function bound(spec: NumberSpec, value: number, lang: Lang = 'en'): string {
 const PAGES: [AnyCalcId, Lang][] = [
   ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
   ...BR_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'pt']),
-  ...ES_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
   ...LIFE_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
 ];
 /** Each definition once, with the language of its first page. */
@@ -346,6 +346,80 @@ describe('the CSV', () => {
     const csv = csvText({ caption: 'c', head: ['Debt', 'Order'], rows: [[{ text: 'Debt 1, then "Debt 2"' }, { cents: 123_456_789 }]] }, 'Year');
     expect(csv).toBe('﻿Debt,Order\r\n"Debt 1, then ""Debt 2""",1234567.89\r\n');
   });
+
+  // Review of the languages adjustment (C-5; DECISOES § 321): the Spanish CSV is written like the English one (decision 4).
+  // The APR to APY table has its percents as text, and the no-break space of the Spanish screen went into the file
+  // ("5.00 %"), which a spreadsheet does not read as a number.
+  it('writes no no-break space on any Spanish money page, and the percents of the APR to APY glued as in English', () => {
+    for (const id of CALC_PAGE_IDS) {
+      const def = DEFS[id];
+      const view = viewOf(def, panelData(id, 'es'), def.initial);
+      const csv = csvText(view.table(), 'Año', 'es');
+      expect(csv.includes('\u00A0'), `${id}: espaço sem quebra no CSV`).toBe(false);
+    }
+    const def = DEFS['apr-to-apy-calculator'];
+    const rows = (lang: Lang) => csvText(viewOf(def, panelData('apr-to-apy-calculator', lang), def.initial).table(), 'Year', lang).slice(1).trimEnd().split('\r\n').slice(1);
+    const es = rows('es');
+    expect(es.length).toBeGreaterThan(3);
+    for (const line of es) expect(line, line).toMatch(/,\d+\.\d{2}%$/);
+    // The numbers are the English ones, cell for cell (the words of the compounding are in each language).
+    expect(es.map((line) => line.split(',').at(-1))).toEqual(rows('en').map((line) => line.split(',').at(-1)));
+    // The screen keeps the Spanish percent (§ 213): only the file glues it.
+    expect(viewOf(def, panelData('apr-to-apy-calculator', 'es'), def.initial).table().rows[0]?.[1]).toEqual({ text: expect.stringMatching(/\d %$/) });
+  });
+});
+
+// Review of the languages adjustment (C-3; DECISOES § 321): a new Spanish page says a count of one in the singular. The
+// English texts are as they were (PENDENCIAS F4 COR-6 keeps "for 1 years" and "After 1 payments" for a run of their own).
+describe('the singular of the new Spanish pages', () => {
+  const sentence = (id: AnyCalcId, values: Values, lang: Lang = 'es'): string =>
+    viewOf(DEFS[id], panelData(id, lang), { ...DEFS[id].initial, ...values }).hero.sentence.map((part) => (typeof part === 'string' ? part : part.b)).join('');
+
+  it('the simple interest says "1 año", "1 mes" and "1 día", and the plural from 2 on (and for 0)', () => {
+    expect(sentence('simple-interest-calculator', { u: 'years', ty: 1 })).toContain('durante 1 año gana');
+    expect(sentence('simple-interest-calculator', { u: 'months', tmo: 1 })).toContain('durante 1 mes gana');
+    expect(sentence('simple-interest-calculator', { u: 'days', td: 1 })).toContain('durante 1 día gana');
+    expect(sentence('simple-interest-calculator', { u: 'years', ty: 2 })).toContain('durante 2 años gana');
+    expect(sentence('simple-interest-calculator', { u: 'months', tmo: 0 })).toContain('durante 0 meses gana');
+    expect(sentence('simple-interest-calculator', { u: 'days', td: 365 })).toContain('durante 365 días gana');
+    // The heading of the table keeps the plural of the unit ("Tiempo, en años").
+    const view = viewOf(DEFS['simple-interest-calculator'], panelData('simple-interest-calculator', 'es'), { ...DEFS['simple-interest-calculator'].initial, ty: 1 });
+    expect(view.table().head[0]).toBe('Tiempo, en años');
+    // The English page writes as before.
+    expect(sentence('simple-interest-calculator', { u: 'years', ty: 3 }, 'en')).toContain('for 3 years earns');
+  });
+
+  // B5: the two rates of the 15 vs 30-year page were labelled "A 15 años" and "A 30 años", so the field, its accessible name
+  // and the "Lo que escribes" list never said it was a rate. A field whose error asks for a rate says "tasa" in its label.
+  it('labels every rate field of the Spanish pages with "tasa"', () => {
+    const unnamed: string[] = [];
+    for (const id of CALC_PAGE_IDS) {
+      for (const [key, field] of Object.entries(calcTexts(id, 'es').panel.fields)) {
+        if (/\btasa\b/i.test(field.error) && !/\btasa\b/i.test(field.label)) unnamed.push(`${id} ${key}: ${field.label}`);
+      }
+    }
+    expect(unnamed).toEqual([]);
+  });
+
+  it('the extra payments and the biweekly payments say "1 mes" saved in their summary, and the plural otherwise', () => {
+    const saved = (id: AnyCalcId, values: Values): string =>
+      viewOf(DEFS[id], panelData(id, 'es'), { ...DEFS[id].initial, ...values }).summary.find(([label]) => label === 'Meses ahorrados')?.[1] ?? '';
+    // The smallest extra a month that ends the loan of the example one month sooner: found by walking up from $1.
+    let extra = 100;
+    while (extra < 100_000 && saved('mortgage-calculator-extra-payments', { em: extra }) === '0 meses') extra += 100;
+    expect(saved('mortgage-calculator-extra-payments', { em: extra })).toBe('1 mes');
+    expect(saved('mortgage-calculator-extra-payments', { em: extra + 10_000 })).toMatch(/^(?:[2-9]|\d{2,}) meses$/);
+    expect(saved('mortgage-calculator-extra-payments', {})).toMatch(/^\d+ meses$/);
+    expect(saved('mortgage-calculator-biweekly', {})).toMatch(/^\d+ meses$/);
+  });
+
+  it('the balloon payment never puts a count before "pagos": 0, 1 and 83 regular payments read the same way', () => {
+    for (const bm of [1, 2, 84]) {
+      const said = sentence('loan-amortization-calculator-balloon-payment', { bm });
+      expect(said, `bm ${bm}`).not.toMatch(/\d+ pagos/);
+      expect(said, `bm ${bm}`).toContain(`vence con el pago ${bm},`);
+    }
+  });
 });
 
 // Review F4: what the texts and the views say in the cases the lenses found.
@@ -391,7 +465,8 @@ describe('after the review', () => {
       // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
       // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
       // F7 (decision 9): the English page changed for the home and health calculators and the QR code (DECISOES § 259).
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
+      // The languages adjustment: the pages of pt and es changed for the QR code, which exists in them now (DECISOES § 310).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 3 de novembro de 2026', es: 'Última actualización: 3 de noviembre de 2026' }[lang]);
     }
   });
 });

@@ -187,6 +187,9 @@ export const simpleInterestDef: CalcDef<SimpleInterestInput, SimpleInterestResul
     const v = t.view;
     const input = simpleInterestDef.toInput(values);
     const unitWord = t.options?.['u']?.[input.unit] ?? input.unit;
+    // A time of exactly 1 takes the singular where the texts give one ("durante 1 año"; review of the languages
+    // adjustment, C-3). The English texts have none, so the English page writes as before (PENDENCIAS F4 COR-6).
+    const timeWord = (input.time === 1 ? v[`${input.unit}One`] : undefined) ?? unitWord;
     // The table: interest at the end of each whole year of the period (the same formula, for the time so far).
     const table = (): Table => {
       const perYear = { years: 1, months: 12, days: 365 }[input.unit];
@@ -209,7 +212,7 @@ export const simpleInterestDef: CalcDef<SimpleInterestInput, SimpleInterestResul
         sentence: say(text(v, 'sentence'), {
           principal: cash(input.principal, l),
           rate: ratePercent(input.rate, l),
-          time: `${input.time} ${unitWord}`,
+          time: `${input.time} ${timeWord}`,
           interest: cash(r.interest, l),
           total: cash(r.total, l),
         }),

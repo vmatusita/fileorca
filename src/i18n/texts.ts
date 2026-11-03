@@ -8,6 +8,7 @@ import type {
   ContactTexts,
   EnCommonTexts,
   EsCommonTexts,
+  EsMoneyHubTexts,
   HomeTexts,
   ImageToolsTexts,
   LegalTexts,
@@ -19,6 +20,7 @@ import type {
   PdfToolsTexts,
   PtCommonTexts,
   SupportTexts,
+  TranslatedHomeTexts,
 } from './types.ts';
 import enCommon from './en/common.ts';
 import ptCommon from './pt/common.ts';
@@ -87,11 +89,11 @@ export const TEXTS: Record<Lang, LangTexts> = {
     licenses: enLicenses, support: enSupport, 'not-found': enNotFound, offline: enOffline, 'open-with': enOpenWith,
   },
   pt: {
-    common: ptCommon satisfies PtCommonTexts, 'image-tools': ptImageTools, 'pdf-tools': ptPdfTools, 'money-calculators': ptMoney, home: ptHome, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
+    common: ptCommon satisfies PtCommonTexts, 'image-tools': ptImageTools, 'pdf-tools': ptPdfTools, 'money-calculators': ptMoney, home: ptHome satisfies TranslatedHomeTexts, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
     licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound, offline: ptOffline, 'open-with': ptOpenWith,
   },
   es: {
-    common: esCommon satisfies EsCommonTexts, 'image-tools': esImageTools, 'pdf-tools': esPdfTools, 'money-calculators': esMoney, home: esHome, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
+    common: esCommon satisfies EsCommonTexts, 'image-tools': esImageTools, 'pdf-tools': esPdfTools, 'money-calculators': esMoney satisfies EsMoneyHubTexts, home: esHome satisfies TranslatedHomeTexts, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
     licenses: esLicenses, support: esSupport, 'not-found': esNotFound, offline: esOffline, 'open-with': esOpenWith,
   },
 };

@@ -16,6 +16,8 @@
 // and the hub in the three languages, with the names, seal and words of the language (DECISOES § 162 extended).
 // F7 (decision 8): the QR code generator, from the route map (QR_ID): its four blocks, real questions, a privacy note that says
 // the text stays on the device and the link typed is never opened, and no unmeasured claim.
+// The languages adjustment: the QR code generator and the ten file guides in Portuguese and Spanish too, each held to the
+// words of its language (the privacy phrases, the date of the measurement, the filler phrases, the claims).
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
@@ -135,7 +137,8 @@ if (pdfPages !== pdfWanted || pdfWanted < PDF_TOOL_IDS.length + 1) {
   problems.add(`${pdfPages} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfWanted} (as ${PDF_TOOL_IDS.length} ferramentas e o hub, em cada idioma)`);
 }
 
-// The QR code generator (F7), in every language of its route (English only).
+// The QR code generator (F7), in every language of its route (English, and Portuguese and Spanish since the languages
+// adjustment), each with the privacy phrases and the claims of its language.
 let qrPages = 0;
 const qrRoute = pages.find((page) => page.route.id === QR_ID)?.route;
 if (!qrRoute) problems.add(`${QR_ID}: a página não está no mapa de rotas`);
@@ -146,26 +149,35 @@ for (const lang of qrRoute ? languagesOf(qrRoute) : []) {
     continue;
   }
   qrPages += 1;
-  for (const problem of checkQrPage(read(path))) problems.add(`${path}: ${problem}`);
+  for (const problem of checkQrPage(read(path), lang)) problems.add(`${path}: ${problem}`);
 }
 
-// The file guides, read from their registry: the route map must have each one, and the page must pass the guide rules.
+// The file guides, read from their registry, in each of their languages (the three since the languages adjustment): the
+// route map must have each one at the path of the registry, and the page must pass the guide rules of its language, with
+// the link to the tool page of that language.
 let guidePages = 0;
+let guideWanted = 0;
 const guideWordCounts: string[] = [];
 for (const id of FILE_GUIDE_IDS) {
-  const path = FILE_GUIDES[id].path;
-  if (!pages.some((page) => page.route.id === id)) problems.add(`${id}: o guia do registro não está no mapa de rotas`);
-  if (!existsSync(fileForPath(path))) {
-    problems.add(`${path}: a página não existe no dist`);
-    continue;
+  const route = pages.find((page) => page.route.id === id)?.route;
+  if (!route) problems.add(`${id}: o guia do registro não está no mapa de rotas`);
+  for (const lang of LANGS) {
+    const path = FILE_GUIDES[id].paths[lang];
+    guideWanted += 1;
+    if (route && route.paths[lang] !== path) problems.add(`${path}: o mapa de rotas não tem o guia ${id} em ${lang} neste caminho`);
+    if (!existsSync(fileForPath(path))) {
+      problems.add(`${path}: a página não existe no dist`);
+      continue;
+    }
+    guidePages += 1;
+    const toolPath = routeById(FILE_GUIDES[id].tool).paths[lang] ?? '';
+    if (!toolPath) problems.add(`${path}: a ferramenta ${FILE_GUIDES[id].tool} não tem página em ${lang}`);
+    const html = read(path);
+    for (const problem of checkFileGuide(html, { toolPath, lang })) problems.add(`${path}: ${problem}`);
+    guideWordCounts.push(`${lang}/${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
   }
-  guidePages += 1;
-  const toolPath = routeById(FILE_GUIDES[id].tool).paths.en ?? '';
-  const html = read(path);
-  for (const problem of checkFileGuide(html, { toolPath })) problems.add(`${path}: ${problem}`);
-  guideWordCounts.push(`${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
 }
-if (guidePages !== FILE_GUIDE_IDS.length) problems.add(`${guidePages} guia(s) de arquivo conferido(s), o registro tem ${FILE_GUIDE_IDS.length}`);
+if (guidePages !== guideWanted) problems.add(`${guidePages} guia(s) de arquivo conferido(s), o registro tem ${guideWanted} (${FILE_GUIDE_IDS.length} guias em ${LANGS.length} idiomas)`);
 console.log(`palavras dos guias de arquivo: ${guideWordCounts.join(', ')}`);
 
 const sitePages = listFiles(DIST)

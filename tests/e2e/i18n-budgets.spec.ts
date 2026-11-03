@@ -1,13 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
-import { moneyHubId, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
-import { BR_CALC_IDS, CALC_PAGES, ES_CALC_IDS, moneyPage } from '../../src/tools/calc/registry.ts';
+import { QR_ID, moneyHubId, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, guidePathIn, moneyPage } from '../../src/tools/calc/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES as PDF_PAGES_OF, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { expectInitialBudget, expectNextPage, settler } from './lib/budgets.ts';
 
 // The performance budgets of the Portuguese and Spanish pages (F6, decision 4 and criterion 9), with the measures of
 // budgets.spec.ts (tests/e2e/lib/budgets.ts): every image tool and preset, PDF tool, calculator, hub and support page in
-// pt and es, read from the registries and the route map, held to the budgets and to the number of files of its English
+// pt and es (since the languages adjustment, also the QR code generator, the file guides and, in Spanish, the money
+// guides), read from the registries and the route map, held to the budgets and to the number of files of its English
 // pair (budgets.spec.ts keeps the two Compress image pages it already had). Then each one loads the very same JS files,
 // name and hash, as its English page: a translation adds HTML and data-props, never code. The file is named to sort
 // between design.spec.ts and image-matrix.spec.ts, so those two stay in different parts of the WebKit split (DECISOES
@@ -19,20 +21,33 @@ const IMAGE_IDS = Object.keys(IMAGE_PAGES) as ImagePageId[];
 const ALREADY = ['/pt/comprimir-imagem/', '/es/comprimir-imagen/'];
 const TOOL_PAGES = TRANSLATED.flatMap((lang) => IMAGE_IDS.map((id) => pathOf(id, lang))).filter((path) => !ALREADY.includes(path));
 const PDF_PAGES = TRANSLATED.flatMap((lang) => PDF_TOOL_IDS.map((id) => pathOf(id, lang)));
-const CALC_PAGES_LIST = [...ES_CALC_IDS.map((id) => moneyPage(id, 'es')?.path ?? ''), ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? '')];
+// Languages adjustment (decision 8): every calculator and preset in Spanish (the 18 of the English list) and the five money
+// guides in Spanish, each with the one calculator entry and the island chunk, as in English (budgets.spec.ts CALC_PAGES);
+// the QR code generator in pt and es (its entry and the island chunk, as QR_PAGE); and the ten file guides in pt and es,
+// each with the entry of the tool it embeds and the island chunk (FILE_GUIDE_PAGES), the PDF ones with nothing of the engine
+// before the first file. The Brazilian calculators stay as they were.
+const ES_CALC_PAGES = CALC_PAGE_IDS.map((id) => moneyPage(id, 'es')?.path ?? '');
+const ES_GUIDE_PAGES = GUIDE_IDS.map((id) => guidePathIn(id, 'es') ?? '');
+const CALC_PAGES_LIST = [...ES_CALC_PAGES, ...ES_GUIDE_PAGES, ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? '')];
+const QR_PAGES = TRANSLATED.map((lang) => pathOf(QR_ID, lang));
+const FILE_GUIDE_PAGES = TRANSLATED.flatMap((lang) => FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].paths[lang]));
+const PDF_GUIDE_PAGES = TRANSLATED.flatMap((lang) =>
+  FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'pdf-tools' && Object.hasOwn(PDF_PAGES_OF, FILE_GUIDES[id].tool)).map((id) => FILE_GUIDES[id].paths[lang]),
+);
 const PDF_HUBS = TRANSLATED.map((lang) => pathOf(PDF_HUB_ID, lang));
 const HUBS = TRANSLATED.flatMap((lang) => [pathOf('image-tools', lang), pathOf(PDF_HUB_ID, lang), pathOf(moneyHubId(lang), lang)]);
 const SUPPORT_PAGES = TRANSLATED.map((lang) => pathOf('support', lang));
 
-for (const path of [...TOOL_PAGES, ...PDF_PAGES, ...CALC_PAGES_LIST, ...HUBS, ...SUPPORT_PAGES]) {
+for (const path of [...TOOL_PAGES, ...QR_PAGES, ...PDF_PAGES, ...CALC_PAGES_LIST, ...FILE_GUIDE_PAGES, ...HUBS, ...SUPPORT_PAGES]) {
   test(`initial JS and requests of ${path} fit the budgets, with no worker and no wasm`, async ({ page, baseURL }) => {
-    const isTool = TOOL_PAGES.includes(path);
+    const isTool = TOOL_PAGES.includes(path) || QR_PAGES.includes(path);
     const isPdf = PDF_PAGES.includes(path);
     const isCalc = CALC_PAGES_LIST.includes(path);
+    const isFileGuide = FILE_GUIDE_PAGES.includes(path);
     await expectInitialBudget(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, path, {
-      files: isTool || isPdf || isCalc ? 2 : 'at most 2',
+      files: isTool || isPdf || isCalc || isFileGuide ? 2 : 'at most 2',
       noPdfMaker: isCalc,
-      noPdfEngine: isPdf || PDF_HUBS.includes(path),
+      noPdfEngine: isPdf || PDF_HUBS.includes(path) || PDF_GUIDE_PAGES.includes(path),
     });
   });
 }
@@ -63,12 +78,17 @@ function scriptsOf(page: Page, origin: string): Set<string> {
 }
 
 // A Brazilian calculator has no English pair: it loads the files of the English calculators. The support pages are held to
-// the files of /support/ (the Portuguese one carries the Pix's inline script, counted in the budget above).
+// the files of /support/ (the Portuguese one carries the Pix's inline script, counted in the budget above). Languages
+// adjustment: each Spanish calculator, preset and money guide, the QR code generator in pt and es and each file guide in
+// pt and es load the files of their English page.
 const SAME_FILES: [string, string][] = [
   ...TRANSLATED.flatMap((lang) => IMAGE_IDS.map((id): [string, string] => [pathOf(id, 'en'), pathOf(id, lang)])),
   ...TRANSLATED.flatMap((lang) => PDF_TOOL_IDS.map((id): [string, string] => [pathOf(id, 'en'), pathOf(id, lang)])),
-  ...ES_CALC_IDS.map((id): [string, string] => [CALC_PAGES[id].path, moneyPage(id, 'es')?.path ?? '']),
+  ...CALC_PAGE_IDS.map((id): [string, string] => [CALC_PAGES[id].path, moneyPage(id, 'es')?.path ?? '']),
+  ...GUIDE_IDS.map((id): [string, string] => [GUIDES[id].path, guidePathIn(id, 'es') ?? '']),
   ...BR_CALC_IDS.map((id): [string, string] => [CALC_PAGES['mortgage-calculator'].path, moneyPage(id, 'pt')?.path ?? '']),
+  ...TRANSLATED.map((lang): [string, string] => [pathOf(QR_ID, 'en'), pathOf(QR_ID, lang)]),
+  ...TRANSLATED.flatMap((lang) => FILE_GUIDE_IDS.map((id): [string, string] => [FILE_GUIDES[id].paths.en, FILE_GUIDES[id].paths[lang]])),
   ...TRANSLATED.flatMap((lang): [string, string][] => [
     [pathOf('image-tools', 'en'), pathOf('image-tools', lang)],
     [pathOf(PDF_HUB_ID, 'en'), pathOf(PDF_HUB_ID, lang)],

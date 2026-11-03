@@ -24,6 +24,7 @@ export default {
     terms: 'Términos',
     licenses: 'Licencias',
     contact: 'Contacto',
+    utilityColumn: 'Utilidades',
     coffee: '¿Te gustan estas herramientas? Invítame un café',
     signature: 'Hecho por {name} en {city}',
   },
@@ -47,6 +48,7 @@ export default {
     imageCategory: 'Imagen',
     moneyCategory: 'Calculadoras financieras',
     pdfCategory: 'PDF',
+    utilityCategory: 'Utilidades',
     shortcut: 'Ctrl K',
   },
   imageTools: 'Herramientas de imagen',
@@ -193,10 +195,159 @@ export default {
       description: 'Bola de nieve o avalancha: cuándo quedas libre de deudas y cuánto pagas de intereses.',
       synonyms: ['deudas', 'salir de deudas', 'bola de nieve', 'avalancha', 'pagar deudas', 'intereses'],
     },
+    'auto-loan-calculator': {
+      name: 'Calculadora de préstamo para auto',
+      description: 'Lo que cuesta al mes un préstamo para auto, con impuestos, cargos y el auto que entregas.',
+      synonyms: ['préstamo para auto', 'préstamo de auto', 'préstamo para carro', 'financiar un auto', 'pago del auto', 'auto usado', 'concesionario', 'intereses'],
+    },
+    'refinance-calculator': {
+      name: 'Calculadora de refinanciamiento',
+      description: 'Si refinanciar tu hipoteca compensa, y en qué mes llega al punto de equilibrio.',
+      synonyms: ['refinanciar', 'refinanciamiento', 'refinanciación', 'refinanciar hipoteca', 'costos de cierre', 'punto de equilibrio', 'tasa nueva', 'hipoteca'],
+    },
+    'home-affordability-calculator': {
+      name: 'Calculadora de cuánta casa puedo pagar',
+      description: 'Cuánta casa cabe en tu ingreso, con las reglas generales del 28 % y el 36 %.',
+      synonyms: ['cuánta casa puedo pagar', 'cuánta casa puedo comprar', 'comprar casa', 'relación deudas-ingresos', 'dti', 'ingreso', 'pago inicial', 'hipoteca'],
+    },
+    'loan-amortization-calculator': {
+      name: 'Calculadora de amortización',
+      description: 'La tabla completa de un préstamo: capital, intereses y saldo de cada pago.',
+      synonyms: ['amortización', 'tabla de amortización', 'amortización de préstamos', 'calendario de pagos', 'capital', 'intereses', 'saldo'],
+    },
+    'debt-consolidation-calculator': {
+      name: 'Calculadora de consolidación de deudas',
+      description: 'Tus deudas como están o un solo préstamo nuevo: pago, intereses y tiempo.',
+      synonyms: ['consolidación de deudas', 'consolidar deudas', 'préstamo de consolidación', 'juntar deudas', 'unir deudas', 'pagar deudas', 'intereses'],
+    },
+    'rent-vs-buy-calculator': {
+      name: 'Calculadora de alquilar o comprar',
+      description: 'Tu valor neto alquilando y comprando, y cuándo comprar alcanza a alquilar.',
+      synonyms: ['alquilar o comprar', 'rentar o comprar', 'alquilar vs comprar', 'comprar casa', 'alquiler', 'renta', 'valor neto', 'hipoteca'],
+    },
+    'savings-goal-calculator': {
+      name: 'Calculadora de meta de ahorro',
+      description: 'El depósito mensual para llegar a una meta, o cuánto tarda un depósito.',
+      synonyms: ['meta de ahorro', 'objetivo de ahorro', 'ahorrar dinero', 'ahorro mensual', 'plan de ahorro', 'depósito', 'intereses'],
+    },
+    'simple-interest-calculator': {
+      name: 'Calculadora de interés simple',
+      description: 'Los intereses de un capital por años, meses o días, sin capitalizar.',
+      synonyms: ['interés simple', 'capital', 'tasa', 'días', 'intereses'],
+    },
+    'apr-to-apy-calculator': {
+      name: 'Calculadora de APR a APY',
+      description: 'Lo que rinde una tasa con la capitalización: de APR a APY y al revés.',
+      synonyms: ['apr a apy', 'apy a apr', 'apy', 'apr', 'rendimiento porcentual anual', 'tasa porcentual anual', 'capitalización'],
+    },
+    'mortgage-calculator-extra-payments': {
+      name: 'Calculadora de pagos adicionales a la hipoteca',
+      description: 'Los meses y los intereses que te ahorra pagar de más en la hipoteca.',
+      synonyms: ['pagos adicionales', 'pago adicional', 'pagos extra', 'pagar la hipoteca antes', 'pago anticipado', 'abonar a capital', 'hipoteca'],
+    },
+    'mortgage-calculator-biweekly': {
+      name: 'Calculadora de pagos cada dos semanas',
+      description: 'La mitad del pago cada dos semanas frente al pago mensual.',
+      synonyms: ['cada dos semanas', 'pagos cada dos semanas', 'medio pago', 'hipoteca cada dos semanas', 'pagar la hipoteca antes', 'hipoteca'],
+    },
+    'mortgage-calculator-15-vs-30-year': {
+      name: 'Calculadora de hipoteca a 15 o 30 años',
+      description: 'Los dos plazos lado a lado: el pago, los intereses y la diferencia.',
+      synonyms: ['15 años', '30 años', '15 o 30', 'hipoteca a 15 años', 'hipoteca a 30 años', 'plazo de la hipoteca', 'hipoteca'],
+    },
+    'loan-amortization-calculator-balloon-payment': {
+      name: 'Calculadora de préstamo con pago global',
+      description: 'El pago de un préstamo con pago global y lo que vence al final.',
+      synonyms: ['pago global', 'préstamo con pago global', 'pago final', 'pago globo', 'amortización', 'intereses'],
+    },
     'compound-interest-calculator': {
       name: 'Calculadora de interés compuesto',
       description: 'Cuánto crece tu dinero con interés compuesto y depósitos mensuales.',
       synonyms: ['interés compuesto', 'ahorros', 'inversión', 'depósito mensual', 'capitalización', 'apy'],
+    },
+  },
+  qr: {
+    name: 'Generador de códigos QR',
+    description: 'Un código QR de tu enlace o texto, con Oli en el centro, en PNG o SVG.',
+    synonyms: ['qr', 'código qr', 'codigo qr', 'generar qr', 'crear código qr', 'generador de qr', 'qr code', 'enlace a qr', 'código de barras'],
+  },
+  fileGuides: {
+    'guides-heic-to-jpg-on-windows': {
+      name: 'Cómo convertir HEIC a JPG en Windows',
+      description: 'Por qué Windows pide una extensión y qué pasa con el tamaño y la ubicación cuando una foto se vuelve JPG.',
+      synonyms: ['guía', 'convertir heic a jpeg en windows', 'heic en windows'],
+    },
+    'guides-why-is-my-pdf-so-large': {
+      name: '¿Por qué mi PDF pesa tanto?',
+      description: 'Qué ocupa el espacio en un PDF y qué hace con él cada nivel de Comprimir PDF.',
+      synonyms: ['guía', 'pdf pesado', 'pdf muy grande'],
+    },
+    'guides-social-media-image-sizes': {
+      name: 'Tamaños de imagen para redes sociales',
+      description: 'Los tamaños que publica cada red y cómo queda una foto cuando la redimensionas a ellos.',
+      synonyms: ['guía', 'tamaño para instagram', 'dimensiones de imagen'],
+    },
+    'guides-open-webp-save-as-jpg': {
+      name: 'Cómo abrir imágenes WebP y guardarlas como JPG',
+      description: 'Qué es un WebP, dónde se abre y qué cambia cuando se vuelve JPG.',
+      synonyms: ['guía', 'guardar webp como jpeg', 'abrir webp'],
+    },
+    'guides-jpg-vs-png': {
+      name: 'JPG o PNG: cuál usar',
+      description: 'Cuándo gana cada formato, medido con las mismas fotos en los dos.',
+      synonyms: ['guía', 'jpeg o png', 'png o jpg'],
+    },
+    'guides-remove-location-from-photos': {
+      name: 'Cómo quitar la ubicación de las fotos',
+      description: 'Dónde guarda una foto su ubicación y cómo quitarla sin cambiar ningún píxel.',
+      synonyms: ['guía', 'quitar gps', 'ubicación exif'],
+    },
+    'guides-pdf-to-jpg-resolution': {
+      name: 'Qué resolución elegir para pasar un PDF a JPG',
+      description: 'Lo que una resolución más alta suma a los píxeles y al archivo, página por página.',
+      synonyms: ['guía', 'resolución jpeg', 'píxeles por pulgada', 'ppp'],
+    },
+    'guides-split-pdf-file-size': {
+      name: 'Cómo dividir un PDF y por qué las partes pueden pesar más',
+      description: 'Por qué las partes de un PDF pueden sumar más que el original, y cuándo no.',
+      synonyms: ['guía', 'tamaño al dividir un pdf', 'partes de un pdf'],
+    },
+    'guides-combine-pdfs-on-phone': {
+      name: 'Cómo unir PDF en el celular',
+      description: 'Las formas de juntar PDF en un iPhone o en un celular Android, y el tamaño que obtienes.',
+      synonyms: ['guía', 'juntar pdf en iphone', 'pdf en android'],
+    },
+    'guides-photos-to-one-pdf': {
+      name: 'Cómo convertir fotos en un solo PDF',
+      description: 'Un solo PDF con unas cuantas fotos, y lo que cambia su tamaño si comprimes antes las fotos.',
+      synonyms: ['guía', 'fotos a pdf', 'juntar fotos en pdf'],
+    },
+  },
+  guides: {
+    'guides-15-vs-30-year-mortgage': {
+      name: 'Hipoteca a 15 o 30 años: el costo real',
+      description: 'Lo que cuesta al mes el plazo corto y lo que ahorra en intereses, tasa por tasa.',
+      synonyms: ['guía', '15 o 30 años', 'plazo de la hipoteca'],
+    },
+    'guides-debt-snowball-vs-avalanche': {
+      name: 'Bola de nieve o avalancha, con números',
+      description: 'Las dos formas de pagar deudas, aplicadas a las mismas cuatro deudas.',
+      synonyms: ['guía', 'bola de nieve', 'avalancha'],
+    },
+    'guides-extra-mortgage-payments': {
+      name: 'Cómo los pagos adicionales acortan una hipoteca',
+      description: 'Lo que hace pagar un poco más cada mes con el plazo y los intereses.',
+      synonyms: ['guía', 'pagos adicionales', 'pagar la hipoteca antes'],
+    },
+    'guides-refinance-break-even': {
+      name: 'Refinanciamiento: halla tu mes de equilibrio',
+      description: 'Dos formas de contar el punto de equilibrio, y por qué pueden no coincidir.',
+      synonyms: ['guía', 'refinanciar', 'punto de equilibrio'],
+    },
+    'guides-rent-vs-buy-break-even': {
+      name: 'Alquilar o comprar: cuándo empieza a convenir comprar',
+      description: 'El año en que comprar alcanza a alquilar, y lo que lo mueve.',
+      synonyms: ['guía', 'alquilar o comprar', 'punto de equilibrio'],
     },
   },
 } satisfies EsCommonTexts;

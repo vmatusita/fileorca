@@ -1,6 +1,6 @@
 import type { CalcPageTexts, CalcPanelTexts } from '../../calc/types.ts';
 
-/** The fields and result texts of a home loan (the presets exist only in English). */
+/** The fields and result texts of a home loan, shared with the Spanish mortgage presets. */
 export const homePanel: Omit<CalcPanelTexts, 'view' | 'premises'> = {
   fields: {
     p: { label: 'Precio de la vivienda', prefix: '$', error: 'Escribe un precio de la vivienda de $10,000 a $20,000,000.' },
@@ -114,4 +114,5 @@ export default {
   privacyNote:
     'Tus números se quedan en tu dispositivo. La calculadora funciona en tu navegador, así que nada de lo que escribes se envía a ninguna parte, y el enlace que copias guarda los números después del #, una parte de la dirección que tu navegador nunca envía.',
   relatedHeading: 'Calculadoras relacionadas',
+  presets: { heading: 'Más calculadoras de hipoteca', caption: 'Calculadoras de hipoteca que responden, cada una, a una sola pregunta', head: ['Calculadora', 'Qué responde'] },
 } satisfies CalcPageTexts;

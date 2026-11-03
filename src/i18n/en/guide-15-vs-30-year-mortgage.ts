@@ -69,4 +69,5 @@ export default {
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice and not a loan offer. Your lender sets your rate and payment.',
   relatedHeading: 'Calculators for the next step',
-} satisfies GuideTexts;
+  words: { head: ['Rate', '15-year payment', '30-year payment', '15-year interest', '30-year interest', 'Interest saved'] },
+} satisfies GuideTexts<'guides-15-vs-30-year-mortgage'>;

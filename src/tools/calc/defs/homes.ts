@@ -30,6 +30,14 @@ function lessOrMore(v: Record<string, string>, cents: number, lang: NumberLang):
   return fmt(text(v, cents >= 0 ? 'less' : 'more'), { x: dollars(Math.abs(cents), lang) });
 }
 
+/**
+ * A count with its noun ("{n} months"), from the view text `key`; a count of exactly 1 takes `<key>One` where the texts give
+ * it ("1 mes"; review of the languages adjustment, C-3). The English texts have none and write as before (PENDENCIAS F4 COR-6).
+ */
+function counted(v: Record<string, string>, key: string, n: number): string {
+  return fmt((n === 1 ? v[`${key}One`] : undefined) ?? text(v, key), { n });
+}
+
 export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
   id: 'refinance-calculator',
   fields: [
@@ -214,9 +222,9 @@ export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> 
         [text(v, 'pi'), cash(r.payment, l)],
         [text(v, 'monthly'), cash(r.monthlyTotal, l)],
         [text(v, 'label'), cash(r.interestSaved, l)],
-        [text(v, 'monthsSaved'), fmt(text(v, 'months'), { n: r.monthsSaved })],
-        [text(v, 'paidOffWith'), fmt(text(v, 'payments'), { n: r.extra.count })],
-        [text(v, 'paidOffWithout'), fmt(text(v, 'payments'), { n: r.base.count })],
+        [text(v, 'monthsSaved'), counted(v, 'months', r.monthsSaved)],
+        [text(v, 'paidOffWith'), counted(v, 'payments', r.extra.count)],
+        [text(v, 'paidOffWithout'), counted(v, 'payments', r.base.count)],
       ],
       premises: t.premises,
     };
@@ -261,7 +269,7 @@ export const biweeklyDef: CalcDef<MortgageInput, BiweeklyResult> = {
         [text(v, 'payment'), cash(r.payment, l)],
         [text(v, 'half'), cash(r.halfPayment, l)],
         [text(v, 'label'), cash(r.interestSaved, l)],
-        [text(v, 'monthsSaved'), fmt(text(v, 'months'), { n: r.monthsSaved })],
+        [text(v, 'monthsSaved'), counted(v, 'months', r.monthsSaved)],
         [text(v, 'halfCount'), fmt(text(v, 'halves'), { n: r.biweekly.count })],
       ],
       premises: t.premises,

@@ -24,6 +24,7 @@ export default {
     terms: 'Termos',
     licenses: 'Licenças',
     contact: 'Contato',
+    utilityColumn: 'Utilidades',
     coffee: 'Curtiu? Me paga um café',
     signature: 'Feito por {name} em {city}',
   },
@@ -47,6 +48,7 @@ export default {
     imageCategory: 'Imagem',
     moneyCategory: 'Calculadoras financeiras',
     pdfCategory: 'PDF',
+    utilityCategory: 'Utilidades',
     shortcut: 'Ctrl K',
   },
   imageTools: 'Ferramentas de imagem',
@@ -212,6 +214,63 @@ export default {
       name: 'Alugar ou comprar',
       description: 'Compare alugar e investir a diferença com financiar o imóvel, ano a ano.',
       synonyms: ['alugar ou comprar', 'aluguel', 'comprar imóvel', 'financiamento', 'itbi', 'casa própria'],
+    },
+  },
+  qr: {
+    name: 'Gerador de QR code',
+    description: 'Um QR code do seu link ou texto, com a Oli no centro, em PNG ou SVG.',
+    synonyms: ['qr', 'qr code', 'código qr', 'gerar qr code', 'gerador de qr code', 'criar qr code', 'qrcode', 'link para qr code', 'código de barras'],
+  },
+  fileGuides: {
+    'guides-heic-to-jpg-on-windows': {
+      name: 'Como converter HEIC para JPG no Windows',
+      description: 'Por que o Windows pede uma extensão, e o que acontece com o tamanho e a localização quando uma foto vira JPG.',
+      synonyms: ['guia', 'converter heic para jpeg no windows', 'heic no windows'],
+    },
+    'guides-why-is-my-pdf-so-large': {
+      name: 'Por que meu PDF está tão grande?',
+      description: 'O que ocupa espaço num PDF, e o que cada nível da Comprimir PDF faz com ele.',
+      synonyms: ['guia', 'pdf grande', 'pdf pesado', 'tamanho do pdf'],
+    },
+    'guides-social-media-image-sizes': {
+      name: 'Tamanhos de imagem para redes sociais',
+      description: 'Os tamanhos que cada rede publica, e como fica uma foto redimensionada para eles.',
+      synonyms: ['guia', 'tamanho para instagram', 'dimensões de imagem'],
+    },
+    'guides-open-webp-save-as-jpg': {
+      name: 'Como abrir imagens WebP e salvar como JPG',
+      description: 'O que é um WebP, onde ele abre e o que muda quando ele vira JPG.',
+      synonyms: ['guia', 'salvar webp como jpeg', 'abrir webp'],
+    },
+    'guides-jpg-vs-png': {
+      name: 'JPG ou PNG: qual usar',
+      description: 'Quando cada formato ganha, medido nas mesmas fotos nos dois formatos.',
+      synonyms: ['guia', 'jpeg ou png', 'png ou jpg'],
+    },
+    'guides-remove-location-from-photos': {
+      name: 'Como remover a localização das fotos',
+      description: 'Onde a foto guarda a localização, e o jeito de tirar esse dado sem mudar nenhum pixel.',
+      synonyms: ['guia', 'remover gps', 'localização no exif'],
+    },
+    'guides-pdf-to-jpg-resolution': {
+      name: 'Qual resolução escolher ao converter PDF para JPG',
+      description: 'O que uma resolução maior acrescenta aos pixels e ao arquivo, página por página.',
+      synonyms: ['guia', 'resolução do jpg', 'ppi', 'dpi'],
+    },
+    'guides-split-pdf-file-size': {
+      name: 'Como dividir um PDF e por que as partes podem pesar mais',
+      description: 'Por que as partes de um PDF podem somar mais que o arquivo inteiro, e quando isso não acontece.',
+      synonyms: ['guia', 'tamanho das partes do pdf', 'pdf dividido maior'],
+    },
+    'guides-combine-pdfs-on-phone': {
+      name: 'Como juntar PDFs no celular',
+      description: 'Os jeitos de juntar PDFs no iPhone ou num celular Android, e o tamanho do arquivo que você recebe.',
+      synonyms: ['guia', 'unir pdf no iphone', 'pdf no android', 'combinar pdf no celular'],
+    },
+    'guides-photos-to-one-pdf': {
+      name: 'Como transformar fotos em um único PDF',
+      description: 'Um PDF só com algumas fotos, e o que comprimir as fotos antes faz com o tamanho dele.',
+      synonyms: ['guia', 'fotos para pdf', 'imagens num pdf'],
     },
   },
 } satisfies PtCommonTexts;

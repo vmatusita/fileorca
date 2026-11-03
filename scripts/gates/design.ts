@@ -7,13 +7,12 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse } from 'node-html-parser';
 import { DIST, Problems, listFiles, requireDist } from '../lib/dist.ts';
-import { checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkThemeVars, checkVoice } from '../lib/design-checks.ts';
+import { checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkThemeVars } from '../lib/design-checks.ts';
 import { tokenNames } from '../lib/theme.ts';
-import { visibleText } from '../lib/conteudo.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { languagesOf, routeById, type RouteId } from '../../src/i18n/routes.ts';
+import { fileGuideVoicePages, newVoicePages, pageVoiceProblems, pdfVoicePages, type VoicePage } from '../lib/voice-pages.ts';
+import { languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { HEALTH_CALC_IDS } from '../../src/tools/calc/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 requireDist();
 
@@ -73,45 +72,38 @@ report(
 );
 report('setas', perPage((page) => checkArrows(page.html)), `${pages.length} páginas sem → nem ↔ no texto`);
 
+/** The voice problems of a list of pages, each read in its language; a page of the list missing from the dist is one too. */
+function voiceOf(list: readonly VoicePage[], missing: string, props: boolean): Problems {
+  const problems = new Problems();
+  for (const { lang, path } of list) {
+    const page = pages.find((candidate) => candidate.path === path);
+    if (!page) {
+      problems.add(`${path}: ${missing}`);
+      continue;
+    }
+    for (const problem of pageVoiceProblems(page.html, lang, props)) problems.add(`${path}: ${problem}`);
+  }
+  return problems;
+}
+
 // The voice of the PDF pages as built (F5a, DECISOES § 164): the visible text of each tool page and of the hub, and
 // the texts the island gets in data-props (`t`, the panel bits every PDF tool shares, and `texts`, the tool's own), against the
 // rules of the README: no forbidden marketing word, no emoji, no arrow, and an exclamation only in a success line (`done`,
 // `doneMany`), so a visible text has none. The pages come from the PDF registry. F6: in every language of the route (the
 // three since the F6), with the marketing words of that language too (FORBIDDEN_WORDS_BY_LANG).
-const voiceIds: RouteId[] = [...PDF_TOOL_IDS, PDF_HUB_ID];
-const voicePages = voiceIds.flatMap((id) => {
-  const route = routeById(id);
-  return languagesOf(route).map((lang) => ({ lang, path: route.paths[lang] ?? '' }));
-});
-const voiceProblems = new Problems();
-for (const { lang, path } of voicePages) {
-  const page = pages.find((candidate) => candidate.path === path);
-  if (!page) {
-    voiceProblems.add(`${path}: a página do registro de PDF não existe no dist`);
-    continue;
-  }
-  const root = parse(page.html);
-  const props = root.querySelectorAll('[data-props]').flatMap((element) => {
-    const parsed = JSON.parse(element.getAttribute('data-props') ?? '{}') as { t?: unknown; texts?: unknown };
-    return [checkVoice(parsed.t, 'data-props.t', lang), checkVoice(parsed.texts, 'data-props.texts', lang)].flat();
-  });
-  // visibleText puts a space at every element boundary, so "…AES-256.<a>Unlock PDF</a><p>Remove…" reads "Unlock PDF Remove".
-  for (const problem of [...checkVoice(visibleText(page.html), 'texto visível', lang), ...props]) voiceProblems.add(`${path}: ${problem}`);
-}
-report('voz das páginas de PDF', voiceProblems, `${voicePages.length} páginas do registro de PDF (as ferramentas e o hub, em cada idioma): texto visível e textos do painel sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
+const pdfPages = pdfVoicePages();
+report('voz das páginas de PDF', voiceOf(pdfPages, 'a página do registro de PDF não existe no dist', true), `${pdfPages.length} páginas do registro de PDF (as ferramentas e o hub, em cada idioma): texto visível e textos do painel sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
 
 // The file guides of the F5b, read from their registry: the same voice rules on the text a person reads (DECISOES § 188).
-const guideVoice = new Problems();
-for (const id of FILE_GUIDE_IDS) {
-  const path = FILE_GUIDES[id].path;
-  const page = pages.find((candidate) => candidate.path === path);
-  if (!page) {
-    guideVoice.add(`${path}: o guia do registro não existe no dist`);
-    continue;
-  }
-  for (const problem of checkVoice(visibleText(page.html), 'texto visível')) guideVoice.add(`${path}: ${problem}`);
-}
-report('voz dos guias de arquivo', guideVoice, `${FILE_GUIDE_IDS.length} guias do registro: texto visível sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
+// Since the languages adjustment, in the three languages, each with the marketing words of its language.
+const guidePages = fileGuideVoicePages();
+report('voz dos guias de arquivo', voiceOf(guidePages, 'o guia do registro não existe no dist', false), `${guidePages.length} guias do registro (${FILE_GUIDE_IDS.length} em cada idioma): texto visível sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
+
+// The other pages of the languages adjustment, in the same mold as the PDF pages (the visible text and the island's texts):
+// the QR code generator in pt and es, and in es the nine calculators and four presets new there, the money hub and the five
+// money guides. The pages that existed before stay out until PENDENCIAS F7 f-11.
+const newPages = newVoicePages();
+report('voz das páginas novas em pt e es', voiceOf(newPages, 'a página do mapa de rotas não existe no dist', true), `${newPages.length} páginas (o QR em pt e es; em es as calculadoras e os presets novos, o hub e os guias de dinheiro): texto visível e textos da ilha sem palavra proibida, emoji, seta nem exclamação fora do sucesso`);
 
 // The CSS files the pages link, each with the pages that use it.
 const sheets = new Map<string, string[]>();

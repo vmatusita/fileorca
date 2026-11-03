@@ -49,17 +49,12 @@ export type GuideId = (typeof GUIDE_IDS)[number];
 export const MONEY_HUB_ID = 'money-calculators';
 
 /**
- * The five calculators that also exist in Spanish (prompt F6, decision 6): the same definition, engine, fixtures
- * and example as the English page, for the Hispanic audience of the US, with a pair in hreflang.
+ * Every calculator and preset of this registry also exists in Spanish, for the Hispanic audience of the US: the five of
+ * the F6 (prompt F6, decision 6) and the other 13 since the languages adjustment. The same definition, engine, fixtures
+ * and example as the English page, with a pair in hreflang. The list of the five (ES_CALC_IDS) is gone: the Spanish page
+ * of a calculator is its `es` block, which every row has (DECISOES § 311).
  */
-export const ES_CALC_IDS = [
-  'mortgage-calculator',
-  'personal-loan-calculator',
-  'credit-card-payoff-calculator',
-  'debt-payoff-calculator',
-  'compound-interest-calculator',
-] as const satisfies readonly CalcToolId[];
-export type EsCalcId = (typeof ES_CALC_IDS)[number];
+export type EsCalcId = CalcPageId;
 
 /**
  * The eight calculators adapted to Brazil (prompt F6, decision 5): pages of their own, only in Portuguese, with no
@@ -112,13 +107,14 @@ export type LifeHub = 'house' | 'health';
 /** Any calculator page the one island serves: money (English, Spanish, Brazilian), home and health. */
 export type AnyCalcId = MoneyPageId | LifeCalcId;
 
-/** A money page in a language other than English: its own path, export file name and links, all within that language. */
+/**
+ * The Spanish page of a calculator or preset: its own path and export file name. Its chips, its related grid, its parent
+ * and its guide are the English ones, since every one of them exists in Spanish too (languages adjustment, decision 4).
+ */
 export interface CalcLangPage {
   path: string;
-  /** Base name of the PDF and the CSV, in the language (docs/i18n). */
+  /** Base name of the PDF and the CSV, in the language (docs/i18n), without accents. */
   file: string;
-  next: readonly MoneyPageId[];
-  related: readonly MoneyPageId[];
 }
 
 export interface CalcPageDef {
@@ -138,8 +134,8 @@ export interface CalcPageDef {
   guide?: GuideId;
   /** Base name of the PDF and the CSV: fixed, never a number the person typed. */
   file: string;
-  /** The Spanish page, for the five of ES_CALC_IDS. */
-  es?: CalcLangPage;
+  /** The Spanish page (every calculator and preset has one since the languages adjustment). */
+  es: CalcLangPage;
 }
 
 const preset = (parent: CalcToolId, name: string): string => `/${parent}/${name}/`;
@@ -154,12 +150,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['mortgage-calculator-15-vs-30-year', 'mortgage-calculator-extra-payments', 'mortgage-calculator-biweekly', 'home-affordability-calculator', 'refinance-calculator', 'rent-vs-buy-calculator'],
     guide: 'guides-15-vs-30-year-mortgage',
     file: 'mortgage-schedule',
-    es: {
-      path: '/es/calculadora-de-hipoteca/',
-      file: 'tabla-hipoteca',
-      next: ['personal-loan-calculator', 'compound-interest-calculator'],
-      related: ['personal-loan-calculator', 'credit-card-payoff-calculator', 'debt-payoff-calculator', 'compound-interest-calculator'],
-    },
+    es: { path: '/es/calculadora-de-hipoteca/', file: 'tabla-hipoteca' },
   },
   'personal-loan-calculator': {
     id: 'personal-loan-calculator',
@@ -169,12 +160,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['debt-consolidation-calculator', 'loan-amortization-calculator'],
     related: ['debt-consolidation-calculator', 'auto-loan-calculator', 'loan-amortization-calculator', 'credit-card-payoff-calculator', 'debt-payoff-calculator', 'apr-to-apy-calculator'],
     file: 'personal-loan-schedule',
-    es: {
-      path: '/es/calculadora-de-prestamo-personal/',
-      file: 'tabla-prestamo-personal',
-      next: ['debt-payoff-calculator', 'credit-card-payoff-calculator'],
-      related: ['debt-payoff-calculator', 'credit-card-payoff-calculator', 'mortgage-calculator', 'compound-interest-calculator'],
-    },
+    es: { path: '/es/calculadora-de-prestamo-personal/', file: 'tabla-prestamo-personal' },
   },
   'auto-loan-calculator': {
     id: 'auto-loan-calculator',
@@ -184,6 +170,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['loan-amortization-calculator', 'personal-loan-calculator'],
     related: ['personal-loan-calculator', 'loan-amortization-calculator', 'loan-amortization-calculator-balloon-payment', 'debt-payoff-calculator', 'savings-goal-calculator', 'mortgage-calculator'],
     file: 'auto-loan-schedule',
+    es: { path: '/es/calculadora-de-prestamo-para-auto/', file: 'tabla-prestamo-para-auto' },
   },
   'refinance-calculator': {
     id: 'refinance-calculator',
@@ -194,6 +181,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['mortgage-calculator', 'mortgage-calculator-15-vs-30-year', 'mortgage-calculator-extra-payments', 'mortgage-calculator-biweekly', 'loan-amortization-calculator', 'home-affordability-calculator'],
     guide: 'guides-refinance-break-even',
     file: 'refinance-comparison',
+    es: { path: '/es/calculadora-de-refinanciamiento/', file: 'comparacion-refinanciamiento' },
   },
   'home-affordability-calculator': {
     id: 'home-affordability-calculator',
@@ -203,6 +191,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['mortgage-calculator', 'rent-vs-buy-calculator'],
     related: ['mortgage-calculator', 'rent-vs-buy-calculator', 'mortgage-calculator-15-vs-30-year', 'savings-goal-calculator', 'refinance-calculator', 'mortgage-calculator-biweekly'],
     file: 'home-affordability',
+    es: { path: '/es/calculadora-de-cuanta-casa-puedo-pagar/', file: 'cuanta-casa-puedo-pagar' },
   },
   'loan-amortization-calculator': {
     id: 'loan-amortization-calculator',
@@ -212,6 +201,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['loan-amortization-calculator-balloon-payment', 'mortgage-calculator-extra-payments'],
     related: ['loan-amortization-calculator-balloon-payment', 'mortgage-calculator', 'personal-loan-calculator', 'auto-loan-calculator', 'mortgage-calculator-extra-payments', 'simple-interest-calculator'],
     file: 'loan-amortization-schedule',
+    es: { path: '/es/calculadora-de-amortizacion-de-prestamos/', file: 'tabla-amortizacion-prestamo' },
   },
   'credit-card-payoff-calculator': {
     id: 'credit-card-payoff-calculator',
@@ -221,12 +211,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['debt-payoff-calculator', 'debt-consolidation-calculator'],
     related: ['debt-payoff-calculator', 'debt-consolidation-calculator', 'personal-loan-calculator', 'apr-to-apy-calculator', 'savings-goal-calculator', 'simple-interest-calculator'],
     file: 'credit-card-payoff-schedule',
-    es: {
-      path: '/es/calculadora-de-tarjeta-de-credito/',
-      file: 'plan-tarjeta-de-credito',
-      next: ['debt-payoff-calculator', 'personal-loan-calculator'],
-      related: ['debt-payoff-calculator', 'personal-loan-calculator', 'compound-interest-calculator', 'mortgage-calculator'],
-    },
+    es: { path: '/es/calculadora-de-tarjeta-de-credito/', file: 'plan-tarjeta-de-credito' },
   },
   'debt-payoff-calculator': {
     id: 'debt-payoff-calculator',
@@ -237,12 +222,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['credit-card-payoff-calculator', 'debt-consolidation-calculator', 'personal-loan-calculator', 'savings-goal-calculator', 'compound-interest-calculator', 'mortgage-calculator-extra-payments'],
     guide: 'guides-debt-snowball-vs-avalanche',
     file: 'debt-payoff-plan',
-    es: {
-      path: '/es/calculadora-de-deudas/',
-      file: 'plan-de-deudas',
-      next: ['credit-card-payoff-calculator', 'personal-loan-calculator'],
-      related: ['credit-card-payoff-calculator', 'personal-loan-calculator', 'compound-interest-calculator', 'mortgage-calculator'],
-    },
+    es: { path: '/es/calculadora-de-deudas/', file: 'plan-de-deudas' },
   },
   'debt-consolidation-calculator': {
     id: 'debt-consolidation-calculator',
@@ -252,6 +232,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['debt-payoff-calculator', 'personal-loan-calculator'],
     related: ['debt-payoff-calculator', 'credit-card-payoff-calculator', 'personal-loan-calculator', 'loan-amortization-calculator', 'apr-to-apy-calculator', 'savings-goal-calculator'],
     file: 'debt-consolidation-comparison',
+    es: { path: '/es/calculadora-de-consolidacion-de-deudas/', file: 'comparacion-consolidacion-de-deudas' },
   },
   'rent-vs-buy-calculator': {
     id: 'rent-vs-buy-calculator',
@@ -262,6 +243,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['home-affordability-calculator', 'mortgage-calculator', 'mortgage-calculator-15-vs-30-year', 'compound-interest-calculator', 'savings-goal-calculator', 'refinance-calculator'],
     guide: 'guides-rent-vs-buy-break-even',
     file: 'rent-vs-buy-comparison',
+    es: { path: '/es/calculadora-de-alquilar-o-comprar/', file: 'alquilar-o-comprar' },
   },
   'compound-interest-calculator': {
     id: 'compound-interest-calculator',
@@ -271,12 +253,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['savings-goal-calculator', 'apr-to-apy-calculator'],
     related: ['savings-goal-calculator', 'apr-to-apy-calculator', 'simple-interest-calculator', 'rent-vs-buy-calculator', 'debt-payoff-calculator', 'credit-card-payoff-calculator'],
     file: 'compound-interest-table',
-    es: {
-      path: '/es/calculadora-de-interes-compuesto/',
-      file: 'interes-compuesto',
-      next: ['debt-payoff-calculator', 'mortgage-calculator'],
-      related: ['debt-payoff-calculator', 'credit-card-payoff-calculator', 'personal-loan-calculator', 'mortgage-calculator'],
-    },
+    es: { path: '/es/calculadora-de-interes-compuesto/', file: 'interes-compuesto' },
   },
   'savings-goal-calculator': {
     id: 'savings-goal-calculator',
@@ -286,6 +263,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['compound-interest-calculator', 'apr-to-apy-calculator'],
     related: ['compound-interest-calculator', 'apr-to-apy-calculator', 'simple-interest-calculator', 'home-affordability-calculator', 'debt-payoff-calculator', 'rent-vs-buy-calculator'],
     file: 'savings-goal-plan',
+    es: { path: '/es/calculadora-de-meta-de-ahorro/', file: 'plan-meta-de-ahorro' },
   },
   'simple-interest-calculator': {
     id: 'simple-interest-calculator',
@@ -295,6 +273,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['compound-interest-calculator', 'apr-to-apy-calculator'],
     related: ['compound-interest-calculator', 'apr-to-apy-calculator', 'savings-goal-calculator', 'loan-amortization-calculator', 'personal-loan-calculator', 'credit-card-payoff-calculator'],
     file: 'simple-interest',
+    es: { path: '/es/calculadora-de-interes-simple/', file: 'interes-simple' },
   },
   'apr-to-apy-calculator': {
     id: 'apr-to-apy-calculator',
@@ -304,6 +283,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['compound-interest-calculator', 'savings-goal-calculator'],
     related: ['compound-interest-calculator', 'savings-goal-calculator', 'simple-interest-calculator', 'personal-loan-calculator', 'credit-card-payoff-calculator', 'loan-amortization-calculator'],
     file: 'apr-to-apy-table',
+    es: { path: '/es/calculadora-de-apr-a-apy/', file: 'tabla-apr-a-apy' },
   },
   'mortgage-calculator-extra-payments': {
     id: 'mortgage-calculator-extra-payments',
@@ -315,6 +295,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['mortgage-calculator', 'mortgage-calculator-biweekly', 'mortgage-calculator-15-vs-30-year', 'refinance-calculator', 'loan-amortization-calculator', 'home-affordability-calculator'],
     guide: 'guides-extra-mortgage-payments',
     file: 'extra-payments-schedule',
+    es: { path: '/es/calculadora-de-hipoteca/pagos-adicionales/', file: 'tabla-pagos-adicionales' },
   },
   'mortgage-calculator-biweekly': {
     id: 'mortgage-calculator-biweekly',
@@ -325,6 +306,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['mortgage-calculator-extra-payments', 'mortgage-calculator-15-vs-30-year'],
     related: ['mortgage-calculator', 'mortgage-calculator-extra-payments', 'mortgage-calculator-15-vs-30-year', 'refinance-calculator', 'loan-amortization-calculator', 'home-affordability-calculator'],
     file: 'biweekly-mortgage-schedule',
+    es: { path: '/es/calculadora-de-hipoteca/pagos-cada-dos-semanas/', file: 'tabla-hipoteca-cada-dos-semanas' },
   },
   'mortgage-calculator-15-vs-30-year': {
     id: 'mortgage-calculator-15-vs-30-year',
@@ -336,6 +318,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     related: ['mortgage-calculator', 'mortgage-calculator-extra-payments', 'mortgage-calculator-biweekly', 'refinance-calculator', 'home-affordability-calculator', 'rent-vs-buy-calculator'],
     guide: 'guides-15-vs-30-year-mortgage',
     file: '15-vs-30-year-mortgage',
+    es: { path: '/es/calculadora-de-hipoteca/15-o-30-anos/', file: 'hipoteca-15-o-30-anos' },
   },
   'loan-amortization-calculator-balloon-payment': {
     id: 'loan-amortization-calculator-balloon-payment',
@@ -346,12 +329,15 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['loan-amortization-calculator', 'refinance-calculator'],
     related: ['loan-amortization-calculator', 'mortgage-calculator', 'refinance-calculator', 'auto-loan-calculator', 'personal-loan-calculator', 'simple-interest-calculator'],
     file: 'balloon-loan-schedule',
+    es: { path: '/es/calculadora-de-amortizacion-de-prestamos/pago-global/', file: 'tabla-prestamo-con-pago-global' },
   },
 };
 
 export interface GuideDef {
   id: GuideId;
   path: string;
+  /** The Spanish guide (languages adjustment, decision 4): its path; the calculator and the related pages are the English ones. */
+  es: { path: string };
   /** The calculator embedded in the guide, filled with the guide's example. */
   calc: CalcPageId;
   /** The calculators the guide links to at the end. */
@@ -362,30 +348,35 @@ export const GUIDES: Record<GuideId, GuideDef> = {
   'guides-15-vs-30-year-mortgage': {
     id: 'guides-15-vs-30-year-mortgage',
     path: '/guides/15-vs-30-year-mortgage/',
+    es: { path: '/es/guias/hipoteca-a-15-o-30-anos/' },
     calc: 'mortgage-calculator-15-vs-30-year',
     related: ['mortgage-calculator', 'mortgage-calculator-extra-payments', 'refinance-calculator', 'home-affordability-calculator'],
   },
   'guides-debt-snowball-vs-avalanche': {
     id: 'guides-debt-snowball-vs-avalanche',
     path: '/guides/debt-snowball-vs-avalanche/',
+    es: { path: '/es/guias/bola-de-nieve-o-avalancha/' },
     calc: 'debt-payoff-calculator',
     related: ['credit-card-payoff-calculator', 'debt-consolidation-calculator', 'personal-loan-calculator'],
   },
   'guides-extra-mortgage-payments': {
     id: 'guides-extra-mortgage-payments',
     path: '/guides/extra-mortgage-payments/',
+    es: { path: '/es/guias/pagos-adicionales-a-la-hipoteca/' },
     calc: 'mortgage-calculator-extra-payments',
     related: ['mortgage-calculator', 'mortgage-calculator-biweekly', 'mortgage-calculator-15-vs-30-year', 'refinance-calculator'],
   },
   'guides-refinance-break-even': {
     id: 'guides-refinance-break-even',
     path: '/guides/refinance-break-even/',
+    es: { path: '/es/guias/punto-de-equilibrio-del-refinanciamiento/' },
     calc: 'refinance-calculator',
     related: ['mortgage-calculator', 'mortgage-calculator-extra-payments', 'loan-amortization-calculator'],
   },
   'guides-rent-vs-buy-break-even': {
     id: 'guides-rent-vs-buy-break-even',
     path: '/guides/rent-vs-buy-break-even/',
+    es: { path: '/es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/' },
     calc: 'rent-vs-buy-calculator',
     related: ['home-affordability-calculator', 'mortgage-calculator', 'compound-interest-calculator'],
   },
@@ -632,18 +623,18 @@ export function calcAreaOf(id: AnyCalcId): CalcArea {
   return isLifeCalc(id) ? LIFE_CALC_PAGES[id].hub : 'money';
 }
 
-/** The calculators the home's money section and the footer's money column list, per language. */
+/** The calculators the home's money section and the footer's money column list, per language (Spanish: the English five). */
 export const HOME_MONEY_IDS: Record<Lang, readonly MoneyPageId[]> = {
   en: HOME_CALC_IDS,
   pt: ['br-sac-price', 'br-vehicle-loan', 'br-personal-loan', 'br-early-payoff', 'br-credit-card'],
-  es: ES_CALC_IDS,
+  es: HOME_CALC_IDS,
 };
 
 /** The calculators of each language's money hub, in hub order (credit first, then educational). */
 export const HUB_MONEY_IDS: Record<Lang, readonly MoneyPageId[]> = {
   en: CALC_TOOL_IDS,
   pt: BR_CALC_IDS,
-  es: ES_CALC_IDS,
+  es: CALC_TOOL_IDS,
 };
 
 /** The page of a money calculator in one language, or null where it does not exist (prompt F6, decision 2). */
@@ -672,7 +663,9 @@ export function moneyPage(id: AnyCalcId, lang: Lang): MoneyPage | null {
   }
   const def = CALC_PAGES[id];
   if (lang === 'en') return def;
-  if (lang === 'es' && def.es) return { id, icon: def.icon, group: def.group, ...def.es };
+  if (lang === 'es') {
+    return { id, path: def.es.path, file: def.es.file, icon: def.icon, group: def.group, next: def.next, related: def.related, ...(def.parent ? { parent: def.parent } : {}), ...(def.guide ? { guide: def.guide } : {}) };
+  }
   return null;
 }
 
@@ -696,4 +689,9 @@ export function isCalcPage(id: string): id is CalcPageId {
 
 export function isGuide(id: string): id is GuideId {
   return Object.hasOwn(GUIDES, id);
+}
+
+/** The path of a money guide in a language: English and Spanish (the guides of the US calculators are not in Portuguese). */
+export function guidePathIn(id: GuideId, lang: Lang): string | null {
+  return lang === 'en' ? GUIDES[id].path : lang === 'es' ? GUIDES[id].es.path : null;
 }
