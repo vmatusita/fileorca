@@ -113,3 +113,26 @@ A F6 terminou com duas partes do Chromium acima do alvo de 700 s (727,3 s e 663,
 - **O que não mudou:** o `scripts/verificar.ts`, os passos de cada job, o `merge`, o `pos-deploy.yml`, e nenhum teste, portão, limiar, timeout, `retries` ou número de workers.
 - **A prova:** o `tests/unit/verificar.test.ts` ganha as 13 partes escritas à mão e confere que juntas são os mesmos passos do todo.
 - **Tempos:** no relatório da F7 (`docs/relatorios/fase-07.md`), com o total do `verificar` de cada parte contra a F6.
+
+## Adendo (F9, 03/nov/2026): o build uma vez, as classes de execução e o ci-ok
+
+A F8 levou o CI a 15 partes (DECISOES § 302) e o ajuste idiomas a 20 (§ 320), as duas na linha desta ADR. A F9 (ficha da run, decisões 2 a 5 e 14) não muda as partes. Ela muda o que roda em volta delas e quando o CI inteiro roda. A ADR continua Aceita: a ficha manda.
+
+- **O que mudou** (`.github/workflows/ci.yml`):
+  - **O build.** Um job `build` faz o único build da execução (`pnpm verificar --build`) e sobe o `dist/` como artefato. As partes rodam com `--dist-pronto`, que falha se o `dist/build.txt` não for o commit do checkout (§ 324).
+  - **As classes.** Uma classificação lida da base decide a classe (§ 326):
+    - `leve` (rascunho sem o rótulo `ci`): um job com tipos, lint, build e Vitest;
+    - `portões` (só documentação): o build e os portões;
+    - `completo`: tudo.
+  - **O `ci-ok`.** Um job com esse nome, que roda sempre, resume o CI. O merge espera por ele, e ele é o único check que o ruleset de `docs/ops/ruleset-main.json` exige (§ 327). Mudar as partes nunca mexe no ruleset.
+  - **O preparo das partes do Playwright e do Lighthouse.** Checkout raso, e o navegador e os pacotes do sistema instalam em segundo plano enquanto o job prepara o Node e o pnpm (§ 325).
+- **O que não mudou:**
+  - as 20 partes (`portões`, `lighthouse`, Chromium em 5 e WebKit em 13);
+  - o limite de 900 s e o alvo de 700 s;
+  - os 2 workers, os testes, os portões, os limiares, os timeouts e o `retries`;
+  - as proteções da § 154 em cada parte do Playwright.
+- **A prova:**
+  - o `tests/unit/verificar.test.ts` lê as partes do `ci.yml` pelo `scripts/lib/ci-parts.ts` e confere que juntas são o todo, com o build uma vez;
+  - o `tests/unit/ci-workflows.test.ts` confere os jobs, as condições, o `ci-ok` e a § 154;
+  - o `tests/unit/ci-events.test.ts` passa 20 eventos de exemplo pela classificação.
+- **Custo e tempos:** no relatório da F9 (`docs/relatorios/fase-09.md`), com o `pnpm ci:custo` da linha de base (execução 41590377930) e o das execuções desta PR.
