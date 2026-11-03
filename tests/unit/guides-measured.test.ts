@@ -224,17 +224,19 @@ describe('the measurements of the file guides', () => {
     expect(differProblems('', JSON.stringify(removeLocation)).join()).toMatch(/sem nenhuma ferramenta/);
   });
 
-  it('hold every placeholder of every guide text, or the guide names it as an official fact', async () => {
-    const texts = import.meta.glob<{ facts?: Record<string, unknown> }>('/src/i18n/en/guide-*.ts', { import: 'default' });
+  // Since the languages adjustment, the guides of pt and es too. The pattern lacked its backslash before (/{(w+)}/ matched
+  // nothing), so the test proved nothing in any language until then (DECISOES § 314).
+  it('hold every placeholder of every guide text, in the three languages, or the guide names it as an official fact', async () => {
+    const texts = import.meta.glob<{ facts?: Record<string, unknown> }>(['/src/i18n/en/guide-*.ts', '/src/i18n/pt/guide-*.ts', '/src/i18n/es/guide-*.ts'], { import: 'default' });
     const always = Object.keys(globals(measured));
-    for (const id of FILE_GUIDE_IDS) {
-      const file = `/src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`;
+    for (const [lang, id] of FILE_GUIDE_IDS.flatMap((guide) => (['en', 'pt', 'es'] as const).map((lang) => [lang, guide] as const))) {
+      const file = `/src/i18n/${lang}/guide-${id.replace(/^guides-/, '')}.ts`;
       const load = texts[file];
       expect(load, `${file} exists`).toBeDefined();
       if (!load) continue;
       const source = readFileSync(`.${file}`, 'utf8');
       const official = Object.keys((await load()).facts ?? {});
-      const missing = [...source.matchAll(/{(w+)}/g)]
+      const missing = [...source.matchAll(/\{(\w+)\}/g)]
         .map((match) => match[1] as string)
         .filter((name) => !always.includes(name) && !official.includes(name) && !(name in measured.guides[id].facts) && resolvePlaceholder(id, name, measured) === null);
       expect(missing, `${file}: placeholders with no measurement`).toEqual([]);
