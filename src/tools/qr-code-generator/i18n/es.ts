@@ -48,7 +48,7 @@ export default {
     },
     {
       q: '¿Descargo el PNG o el SVG?',
-      a: 'El PNG sirve para una pantalla, una presentación o un documento. El SVG sirve para imprimir y para apps de diseño, porque se ve nítido en cualquier tamaño.',
+      a: 'El PNG sirve para una pantalla, una presentación o un documento. El SVG sirve para imprimir y para programas de diseño, porque se ve nítido en cualquier tamaño.',
     },
     {
       q: '¿Puedo usar el código en productos o en mi negocio?',
