@@ -20,7 +20,7 @@ Relatório da run F9, a primeira fase do `PLANO-MELHORIAS.md`. A ficha é o `doc
   - o ruleset em `docs/ops/ruleset-main.json`;
   - o passo a passo no `docs/OPERACAO.md`.
 - **Dois critérios da ficha não fecharam, e está dito:**
-  - os 35 % de minutos a menos numa execução completa: −29,3 % brutos, numa máquina mais rápida, e −5,7 % pela conta controlada (§ 339);
+  - os 35 % de minutos a menos numa execução completa: −29,3 % brutos, numa máquina mais rápida, e de −5,7 % a −6,4 % pela conta controlada (§ 339);
   - o preparo de até 90 s em cada job do Playwright: 17 de 18 nas duas execuções (§ 325).
 
 ## Três achados que mudam a leitura deste relatório
@@ -30,7 +30,7 @@ Relatório da run F9, a primeira fase do `PLANO-MELHORIAS.md`. A ficha é o `doc
    - O código, os relatórios, as 18 `refs/pull/*`, os logs e os artefatos já estão públicos.
    - O passo "Change visibility" da seção F já está feito. Os outros (ruleset, aprovação de fork, Code security e Features) ficaram urgentes e são do Victor.
 2. **O rótulo `ci` não existe.** A run não o cria. As execuções completas saíram do `gh pr ready`, com o `gh pr ready --undo` entre elas.
-3. **A máquina do runner mudou entre a linha de base e esta PR.** A imagem é a mesma, mas o disco do `/` foi de 72 para 145 GB. Os mesmos testes, sobre o mesmo `dist/`, ficaram uns 30 % mais rápidos. A comparação de custo vai com duas contas: a bruta, do `ci:custo`, e a controlada, com o tempo de teste da linha de base (§ 339).
+3. **A máquina do runner mudou entre a linha de base e esta PR,** por causa desconhecida. A imagem é a mesma, mas o disco do `/` foi de 72 para 145 GB. Os mesmos testes, sobre o mesmo `dist/`, ficaram uns 30 % mais rápidos. A comparação de custo vai com duas contas: a bruta, do `ci:custo`, e a controlada, com o tempo de teste da linha de base (§ 339).
 
 ## O custo
 
@@ -42,16 +42,17 @@ Relatório da run F9, a primeira fase do `PLANO-MELHORIAS.md`. A ficha é o `doc
 | Commit | `8513580` (PR #19) | `77ea4e8` | `8727853` | `9e2d7d4` |
 | Classe | completo (antes da F9) | leve | completo | completo |
 | Minutos cobrados | 157 | 5 | 111 | 111 |
-| Com o tempo de teste da linha de base | 157 | — | 148 (−5,7 %) | 148 (−5,7 %) |
+| Com o tempo de teste da linha de base | 157 | — | 147 a 148 (−5,7 % a −6,4 %) | 147 a 148 (−5,7 % a −6,4 %) |
 | Tempo de parede | 11,1 min | 3,5 min | 8,8 min | 9,3 min |
 | Jobs que rodaram / pulados | 21 / 2 | 3 / 7 | 23 / 4 | 24 / 3 |
 | Preparo dos jobs do Playwright | 55 a 128 s; 1 de 18 > 90 s | — | 41 a 116 s; 1 de 18 > 90 s | 40 a 122 s; 1 de 18 > 90 s |
 | Maior `total` de parte | 574,7 s | 126,4 s | 358,6 s | 361,7 s |
 | Builds do site | 20 | 1 (o do `leve`) | 1 (o job `build`) | 1 (o job `build`) |
+| Artefato do build | — | — | `site`, 23,0 MB, 1 dia | `site`, 23,0 MB, 1 dia |
 | Tempo de teste somado das 20 partes | 113,9 min | — | 78,7 min | 75,7 min |
 
-- **A conta controlada** (`§ 339`) pega cada parte da execução nova e troca o tempo de teste dela pelo da linha de base: a duração do job, menos o `total` do `verificar`, mais o `total` da linha de base sem o build. Os jobs novos (`classificar`, `build` e `ci-ok`) entram como medidos. É o que a F9 economiza sozinha numa execução completa: o build de 20 partes, uns 20 s de preparo por parte e um pouco de arredondamento, menos os três jobs novos.
-- **O critério 1 não fechou.** A conta bruta dá −29,3 %, abaixo dos 35 %; a controlada dá −5,7 %. Os 35 % pediriam cortar tempo de teste, mudar as partes ou os workers, que a ficha proíbe. A F9b redivide para as máquinas de 4 vCPU (pendência "F9 35 %").
+- **A conta controlada** (`§ 339`) pega cada parte da execução nova e troca o tempo de teste dela pelo da linha de base: a duração do job, menos o `total` do `verificar`, mais o `total` da linha de base sem o build. Os jobs novos (`classificar`, `build` e `ci-ok`) entram como medidos. A conta é conservadora: o `lint:texto` da linha de base tinha texto para conferir (48,6 s) e o desta PR não; descontado, ela dá 147. É o que a F9 economiza sozinha numa execução completa: o build de 20 partes, uns 20 s de preparo por parte e um pouco de arredondamento, menos os três jobs novos.
+- **O critério 1 não fechou.** A conta bruta dá −29,3 %, abaixo dos 35 %; a controlada dá de −5,7 % a −6,4 %. Os 35 % pediriam cortar tempo de teste, mudar as partes ou os workers, que a ficha proíbe. A F9b redivide para as máquinas de 4 vCPU (pendência "F9 35 %").
 - **A economia grande da F9** está nas execuções que deixam de ser completas.
   - Na PR #19, cada push em rascunho rodou o CI inteiro, de 157 a 166 minutos. Agora um push em rascunho custa 5.
   - Uma PR só de documentação roda só o build e os portões.
@@ -208,7 +209,7 @@ A primeira completa (41658317282) teve o mesmo total, 111 minutos, com o `merge`
 - **Critério 6, nenhum teste a menos:**
   - o `pnpm exec playwright test --list` dá 1.428 testes em 44 arquivos em cada navegador, o mesmo do `bbd30c8`;
   - na execução 41658317282, as partes aprovaram 286 + 286 + 286 + 285 + 285 = 1.428 no Chromium e 11 × 110 + 2 × 109 = 1.428 no WebKit;
-  - o Vitest foi de 93 arquivos e 1.597 testes para 102 arquivos e 1.735 testes;
+  - o Vitest foi de 93 arquivos e 1.597 testes para 102 arquivos e 1.749 testes (no commit final);
   - nenhum `skip`, `only`, `retries`, timeout maior ou limiar menor (§ 341).
 - **Critério 7, o site igual:** `git diff --stat bbd30c8 -- src public astro.config.ts docs/design docs/oli` sai vazio.
 - **Critério 8, a § 154:** nos logs das 18 partes do Playwright da execução 41658317282 aparecem:
@@ -216,7 +217,7 @@ A primeira completa (41658317282) teve o mesmo total, 111 minutos, com o `merge`
   - o passo "Disk and core dumps", com o `df` e o `core_pattern: |/bin/false` (18 de 18);
   - as linhas `[disco]` (as 18 partes, os portões, o Lighthouse e o `build`).
 
-  O disco livre mínimo foi de 81 a 85 GB, contra 7 a 10 GB na linha de base, porque a máquina tem 145 GB.
+  O disco livre mínimo foi de 81 a 85 GB, contra 7 a 10 GB na linha de base, porque a máquina tem 145 GB. Desde a revisão, o passo de espera mostra também a linha "Fetched" do `apt`, para a F9b separar um espelho lento de um `dpkg` lento (pendência "F9 preparo").
 - **Critério 11, o fork:**
   - o `tests/unit/pode-mesclar.test.ts`, os eventos `fork-run-branch`, `other-author-run-branch` e `missing-head-repo` de `fixtures/merge-events/`, e o `tests/unit/ci-workflows.test.ts` (nenhum `pull_request_target`, e os três jobs que escrevem, todos com a guarda);
   - com `MERGE_SCRIPT=<o pode-mesclar.ts do bbd30c8>`, os três eventos novos reprovam (3 falhas, 20 aprovados): a proteção é o que os faz passar.
@@ -233,7 +234,7 @@ A primeira completa (41658317282) teve o mesmo total, 111 minutos, com o `merge`
 
 | Arquivo | Bytes |
 | --- | ---: |
-| `ci.md` (com a seção da F9) | 17.608 |
+| `ci.md` (com a seção da F9) | 22.756 |
 | `idiomas.md` | 11.125 |
 | `calculadoras.md` | 9.999 |
 | `pdf.md` | 7.256 |
@@ -303,9 +304,37 @@ Resumo das partes do CI (pnpm verificar --partes, 21 partes lidas de .github/wor
   soma 1603.1 s (parede 1603.1 s; cada parte com o limite de 900 s)
 ```
 
-Nenhuma parte passou de 900 s. As partes do Playwright aprovaram 1.428 testes em cada navegador. O `--partes` final, depois de `CI=true pnpm install --frozen-lockfile`, está na seção seguinte.
+Nenhuma parte passou de 900 s. As partes do Playwright aprovaram 1.428 testes em cada navegador.
 
-A execução final do `--partes`, depois de `CI=true pnpm install --frozen-lockfile`, entra depois da revisão.
+### A execução final
+
+Depois de `CI=true pnpm install --frozen-lockfile`, sobre o commit `d8054e4` (o último commit de código antes do relatório):
+
+```text
+Resumo das partes do CI (pnpm verificar --partes, 21 partes lidas de .github/workflows/ci.yml)
+  ok      33.3 s  build: pnpm verificar --build
+  ok     125.1 s  portoes: pnpm verificar --sem-playwright --sem-lighthouse --dist-pronto
+  ok     350.6 s  lighthouse: pnpm verificar --lighthouse --dist-pronto
+  ok      79.5 s  playwright: pnpm verificar --playwright=chromium --shard=1/5 --dist-pronto
+  ok      86.0 s  playwright: pnpm verificar --playwright=chromium --shard=2/5 --dist-pronto
+  ok      69.5 s  playwright: pnpm verificar --playwright=chromium --shard=3/5 --dist-pronto
+  ok      87.5 s  playwright: pnpm verificar --playwright=chromium --shard=4/5 --dist-pronto
+  ok      79.6 s  playwright: pnpm verificar --playwright=chromium --shard=5/5 --dist-pronto
+  ok      42.1 s  playwright: pnpm verificar --playwright=webkit --shard=1/13 --dist-pronto
+  ok      43.5 s  playwright: pnpm verificar --playwright=webkit --shard=2/13 --dist-pronto
+  ok      49.9 s  playwright: pnpm verificar --playwright=webkit --shard=3/13 --dist-pronto
+  ok      52.5 s  playwright: pnpm verificar --playwright=webkit --shard=4/13 --dist-pronto
+  ok      58.3 s  playwright: pnpm verificar --playwright=webkit --shard=5/13 --dist-pronto
+  ok      48.2 s  playwright: pnpm verificar --playwright=webkit --shard=6/13 --dist-pronto
+  ok      29.8 s  playwright: pnpm verificar --playwright=webkit --shard=7/13 --dist-pronto
+  ok      39.4 s  playwright: pnpm verificar --playwright=webkit --shard=8/13 --dist-pronto
+  ok      59.9 s  playwright: pnpm verificar --playwright=webkit --shard=9/13 --dist-pronto
+  ok      47.4 s  playwright: pnpm verificar --playwright=webkit --shard=10/13 --dist-pronto
+  ok      52.8 s  playwright: pnpm verificar --playwright=webkit --shard=11/13 --dist-pronto
+  ok      70.1 s  playwright: pnpm verificar --playwright=webkit --shard=12/13 --dist-pronto
+  ok      48.1 s  playwright: pnpm verificar --playwright=webkit --shard=13/13 --dist-pronto
+  soma 1553.2 s (parede 1553.2 s; cada parte com o limite de 900 s)
+```
 
 ## As execuções do CI desta run
 
@@ -315,11 +344,22 @@ A execução final do `--partes`, depois de `CI=true pnpm install --frozen-lockf
 | 41658314769 | `8727853` | `synchronize` (rascunho) | leve, cancelada pelo `ready_for_review` | cancelada | 2 |
 | 41658317282 | `8727853` | `ready_for_review` | completo | verde (o `merge` pulado, § 327) | 111 |
 | 41660597548 | `9e2d7d4` | `synchronize` (pronta) | completo | verde | 111 |
-| 41662993159 | `a85630b` | `synchronize` (rascunho) | leve | verde | (no relatório final) |
+| 41662993159 | `a85630b` | `synchronize` (rascunho) | leve | verde | 5 |
+
+A execução leve do push deste relatório e a completa do `gh pr ready` final vêm depois dele; o `ci:custo` delas vai na descrição da PR. Até aqui, a run gastou 234 minutos cobrados em 5 execuções, contra 509 da PR #19 (o ajuste idiomas), que teve 4 execuções completas.
 
 ## A revisão
 
-A revisão adversarial roda sobre o commit deste relatório; o resumo entra depois dela, e o detalhe fica no `docs/relatorios/REVISAO-F9.md`.
+A revisão adversarial está no `docs/relatorios/REVISAO-F9.md`. Ela rodou no commit `859f7b4`, com seis lentes Sonnet, um cético por achado médio ou acima e um por lente para os baixos (21 agentes).
+
+- **O resultado:** 37 achados. Depois dos céticos, nenhum crítico e nenhum alto ficaram; sobraram 3 médios e 32 baixos, e 2 foram refutados.
+- **Os médios:**
+  - A-2: a classe sai do payload do evento. Corrigido: o `ci-ok` lê o estado atual da PR.
+  - B-1 e F-1: dois `ci-ok` no mesmo commit depois de uma execução cancelada. Corrigido em parte (o texto, o fim de run, o `alerta-dependabot` e o OPERACAO); o resto ficou na pendência "F9 ci-ok duplicado", porque ninguém testou se o ruleset bloqueia.
+- **Os baixos:** corrigidos num agente Opus só, ou registrados no grupo 18 do `docs/PENDENCIAS.md`.
+- **A segunda passada** (um revisor Sonnet sobre o diff das correções) achou 8 baixos, todos corrigidos no commit `f868c62`.
+
+Depois das correções, o `--partes` inteiro rodou de novo (acima). O build e os portões rodaram mais uma vez sobre `f868c62`: 125,6 s, com 102 arquivos e 1.749 testes no Vitest.
 
 ## A prévia
 
@@ -357,15 +397,16 @@ Nada. A compactação do `CLAUDE.md` e o `--partes` entraram nesta run.
 
 ## O que é do Victor
 
-1. **Ler o `.cache/auditoria-publico.md` antes de tudo** e decidir por categoria, pela seção F do `PLANO-MELHORIAS.md` e pela seção "Repositório público" do `docs/OPERACAO.md`. O repositório já é público, então isto é urgente. Se quiser refazer a auditoria, rode `pnpm publico:auditar`.
-2. **Conferir o diff do `.github/`** (`ci.yml` e `pos-deploy.yml`) e dar o merge da PR #20 (squash, apagando a branch).
-3. **Os passos da seção F, na ordem do `docs/OPERACAO.md`.** A visibilidade já é pública. Falta:
-   - importar o ruleset de `docs/ops/ruleset-main.json`, só depois do merge;
-   - a aprovação de PR de fork para todos os externos;
-   - o Code security: secret scanning, push protection e o relato privado;
-   - as Features: desligar o Wiki e o Projects;
-   - conferir o Workers Builds no painel, e testar com uma PR de fork de verdade.
+1. **Ler o `.cache/auditoria-publico.md` antes de tudo** e decidir por categoria, pela seção F do `PLANO-MELHORIAS.md` e pela seção "Repositório público" do `docs/OPERACAO.md`. O repositório já é público, então isto é urgente. Antes de decidir, rode a auditoria de novo com a branch `fase-09` em uso (`pnpm publico:auditar`; o script só chega à `main` com o merge), porque houve commits depois dela.
+2. **Os passos que não dependem do merge, já** (na ordem do `docs/OPERACAO.md`):
+   - em Advanced Security (antes, Code security), ligar o Secret Protection, o push protection e o relato privado de falhas;
+   - pedir aprovação para os workflows de PR de fork de todos os colaboradores externos;
+   - nas Features, desligar o Wiki e o Projects.
+3. **Conferir o diff do `.github/`** (`ci.yml` e `pos-deploy.yml`) e **dar o merge da PR #20** (squash, apagando a branch). Depois:
+   - importar o ruleset de `docs/ops/ruleset-main.json`;
+   - conferir o Workers Builds no painel e testar com uma PR de fork de verdade;
+   - testar, numa PR descartável com o ruleset ativo, se um `ci-ok` vermelho de execução cancelada no mesmo commit bloqueia o merge (pendência "F9 ci-ok duplicado").
 4. **Criar o rótulo `ci`** (Issues → Labels), de que a regra 1 do `CLAUDE.md` depende, e **acrescentar a linha no topo do `PLANO-FILEORCA.md`** apontando para o `PLANO-MELHORIAS.md` (decisão 12; o arquivo não tinha a linha).
 5. **Na primeira PR depois disso,** conferir que o check `ci-ok` aparece e que o merge automático acontece.
-6. **Gerar o prompt da F9b** com o `pnpm ci:custo` da primeira execução depois do merge, e com a conta controlada, porque a máquina do runner varia. A F9b redivide as partes e os workers para as máquinas de 4 vCPU (pendências "F9 35 %", "F9 preparo" e § 283).
-7. As outras pendências da F9 estão no grupo 18 do `docs/PENDENCIAS.md`: a cópia `.md` do prompt, o motor MIT e o que a auditoria não lê.
+6. **Gerar o prompt da F9b** com o `pnpm ci:custo` da primeira execução depois do merge, e com a conta controlada, porque a máquina do runner já mudou uma vez. A F9b redivide as partes e os workers para as máquinas de 4 vCPU (pendências "F9 35 %", "F9 preparo" e § 283).
+7. As outras pendências da F9 estão no grupo 18 do `docs/PENDENCIAS.md` (14 linhas): o preparo, o `npx`, a classificação dos testes na auditoria, o comentário dos guias, a cópia `.md` do prompt, o motor MIT e o que a auditoria não lê.
