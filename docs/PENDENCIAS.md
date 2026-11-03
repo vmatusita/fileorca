@@ -27,15 +27,16 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 8. SEO, títulos e imagens sociais | 7 | Run de ajuste de SEO |
 | 9. Testes e portões | 7 | Run de ajuste de testes |
 | 10. Desempenho | 4 | Run de ajuste de desempenho |
-| 11. CI e ferramentas | 2 | Run de ajuste de CI |
+| 11. CI e ferramentas | 1 | Run F9b |
 | 12. Kit de lançamento | 5 | Run de ajuste do kit |
 | 13. Conteúdo: a run 2b | 1 | Run 2b |
 | 14. Decisões do Victor | 13 | Victor decide |
 | 15. Tarefas do Victor | 12 | Victor faz |
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
-| 17. O que a F8 deixou | 23 | Runs de ajuste e Victor |
+| 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
+| 18. O que a F9 deixou | 9 | Victor e a run F9b |
 
-Total: 171 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 178 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -328,6 +329,22 @@ O que a run da F8 achou fora da revisão das F4 a F7: no ensaio do Dependabot, n
 | F8 e-6 | REVISAO-F8.md e-6 | baixo (médio na lente) | No WebKit o 'warm' do service worker baixa de novo todos os arquivos da primeira página (+10 requisições, +273 KB em /compress-image/), e nenhum spec enxerga isso (src/sw/main.ts:53) | Medir no Safari/iOS real. Se confirmar, em vez de o worker rebuscar, a própria página (que usa o cache HTTP dela) grava os arquivos já carregados no Cache Storage pelo nome que o worker publica, ou o worker só guarda o que a ferramenta pedir depois de controlar a página. Acrescentar ao sw-offline.spec.ts uma afirmação sobre server.requests (contagem de pedidos depois do load) nos dois navegadores, com cache:'force-cache' no fetchAndStore para tirar o HTML repetido no Chromium. | Run de ajuste de desempenho |
 | F8 e-7 | REVISAO-F8.md e-7 | baixo (médio na lente) | O critério 12 ('o JS inicial muda só pelo script inline do registro') não vale ao pé da letra, e os bytes não estão registrados em lugar nenhum (docs/prompts/prompt-fase-08.txt (critério 12); astro.config.ts; src/tools/image/inbox.ts) | Registrar no relatório e num § os números acima (inline +392 B gzip; ilha +0,7 a +0,9 KB por causa do inbox, da fala offline e das correções F4-F7) e corrigir a frase do critério; o orçamento (budgets.ts) segue intacto. | Run de ajuste de desempenho |
 | F8 s-2 | REVISAO-F8.md, segunda passada, s-2; DECISOES § 305 | médio | Com a Figtree chegando depois da primeira pintura, o texto que muda de linha ainda move a página fora do Windows: no Chromium do Linux do CI, CLS de 0,257 no `/es/calculadora-de-deudas/` a 412 px e 0,125 no `/guides/debt-snowball-vs-avalanche/` a 375 px (no Windows, 0,046 e 0,008). A `Figtree Fallback` é calibrada sobre a Arial; no Android a fonte local é a Roboto, e no Linux a Liberation Sans se desenha diferente. O `layout-shift.spec.ts` afirma só a trilha, o H1 e o aviso, e imprime o CLS (`[cls]`). | Medir o CLS do texto com a fonte atrasada num Android real ou no Chromium do Linux com a Roboto e decidir entre uma face de reserva por plataforma (`local("Roboto")` com o `size-adjust` dela) ou a face que não troca também no texto da primeira dobra; depois, um limite de CLS no spec que valha no CI. | Run de ajuste de desempenho |
+
+## 18. O que a F9 deixou
+
+O que a run da F9 achou e não é dela resolver: a decisão sobre a auditoria, as configurações do repositório público e o que a ficha deixou para a F9b. A revisão final da F9 (`docs/relatorios/REVISAO-F9.md`) acrescenta aqui os baixos dela.
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F9 auditoria | `fase-09.md`; § 332 | médio | A auditoria para o público (`pnpm publico:auditar`, 3/nov/2026) achou 65 valores únicos: 0 segredos reais, 16 públicos por natureza, 4 dados do Victor, 17 dados de terceiro (11 e-mails e 6 coordenadas de GPS de fotos de amostra) e 28 falsos positivos. O repositório já é público desde 28/out/2026. O detalhe fica só em `.cache/auditoria-publico.md`, fora do Git. | O Victor roda `pnpm publico:auditar` na pasta do projeto, lê o `.cache/auditoria-publico.md` e decide por categoria (seção F do `PLANO-MELHORIAS.md` e `docs/OPERACAO.md`, "Repositório público"). O que sair de um arquivo vira run curta, sem reescrever o histórico. | Victor decide |
+| F9 público | § 336 e § 338; `docs/OPERACAO.md`, "Repositório público" | médio | O repositório já é público, e a `main` segue sem ruleset. PR de fork de quem já contribuiu roda o CI sem aprovação, o secret scanning, o push protection e o relato privado de falhas estão desligados, e o Wiki e o Projects estão ligados. | Os passos 2 a 8 da seção "Repositório público" do `docs/OPERACAO.md`: o merge da F9, o `docs/ops/ruleset-main.json` importado depois de o `ci-ok` estar na `main`, a aprovação de fork para todos os externos, o Code security e as Features. | Victor faz |
+| F9 Workers Builds | § 335; `docs/OPERACAO.md`, "Workers Builds e PR de fork" | médio | A documentação do Workers Builds não diz se uma PR de fork gera build ou prévia; só a do Pages diz que não cria URL de prévia para fork. Um build de PR de fork rodaria o código da PR com as variáveis do build. | Conferir o Branch control, as variáveis e os segredos do build e das prévias, o acesso do app "Cloudflare Workers and Pages" só ao `fileorca` e uma PR de fork de verdade, de uma segunda conta. Se gerar build, desligar o Enable Preview Builds e registrar numa run curta. | Victor faz |
+| F9 35 % | § 339; ficha da F9, critério 1 | médio | A ficha pedia ao menos 35 % menos minutos numa execução completa do CI. O passo `pnpm verificar` das partes é uns três quartos do custo, e a ficha proibiu cortar teste, mudar as partes e mudar os workers: o build único, o preparo em segundo plano e o cache menor não chegam lá (os números estão no `docs/relatorios/fase-09.md`). | A F9b redivide as partes e os workers para as máquinas de repositório público (o `nproc` que o log do preparo imprime) e mede com o `pnpm ci:custo` antes e depois. A § 283 entra junto. | Run F9b |
+| F9 rótulo ci | § 338 | baixo | O rótulo `ci`, de que a regra 1 do `CLAUDE.md` depende para conferir no Linux do CI no meio da run, não existe. Sem ele, uma run só confere com o `gh pr ready` e o `gh pr ready --undo`. | Criar o rótulo `ci` em Issues → Labels. | Victor faz |
+| F9 PLANO-FILEORCA | § 337 | baixo | A linha no topo do `PLANO-FILEORCA.md` que aponta para o `PLANO-MELHORIAS.md` (decisão 12 da ficha da F9) não estava no arquivo, e o `.claude/settings.json` nega a edição às runs. | O Victor acrescenta a linha no topo do `PLANO-FILEORCA.md`. | Victor faz |
+| F9 prompt | § 337 | baixo | O `docs/prompts/prompt-fase-09.md` está atrás do `.txt` em dois pontos (o caso do rótulo `ci` inexistente e o `--undo` do `gh pr ready`); a ficha mandou commitar os dois sem edição, e o `.txt` é o que a run seguiu. | Trocar o `.md` pela versão atual (a de `Claude outputs/`) numa run curta, ou deixar como está. | Victor decide |
+| F9 motor MIT | § 334 | baixo | O README e o LICENSE dizem que o motor de imagem é distribuído à parte sob MIT, no repositório `fileorca-image-engine`, que ainda não consta como criado (linha "Motor aberto"). | Criar o repositório (`docs/lancamento/codigo-aberto.md`) ou, se o Victor desistir, uma run curta tira a exceção do LICENSE e a frase do README. | Victor decide |
+| F9 fora do Git | § 332 | baixo | A auditoria não lê o que está no GitHub fora do Git: títulos, descrições e comentários das PRs e das issues, e os logs do Actions, que também ficam públicos. | O Victor passa os olhos nas PRs e issues, que são poucas, ou uma run curta acrescenta ao `pnpm publico:auditar` a leitura pelo `gh`, só leitura. | Victor decide |
 
 ## Registrados (escolhas, não defeitos)
 
