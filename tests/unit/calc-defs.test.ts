@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { formatScaled, type NumberLang } from '../../src/calc/parse.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
@@ -44,7 +44,7 @@ function bound(spec: NumberSpec, value: number, lang: Lang = 'en'): string {
 const PAGES: [AnyCalcId, Lang][] = [
   ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
   ...BR_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'pt']),
-  ...ES_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
   ...LIFE_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
 ];
 /** Each definition once, with the language of its first page. */
