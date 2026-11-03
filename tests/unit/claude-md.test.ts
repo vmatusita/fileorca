@@ -39,8 +39,9 @@ describe('the slim CLAUDE.md', () => {
   });
 
   it('has the ten topic files of decision 7, each in one line of the index', () => {
-    expect(Object.keys(REAL.topics)).toEqual(TOPIC_FILES);
-    expect(indexEntries(REAL.core).flat().sort()).toEqual(TOPIC_FILES);
+    // A later run may add a topic file, with its line in the index (the first test checks that); none of the ten leaves.
+    expect(Object.keys(REAL.topics)).toEqual(expect.arrayContaining(TOPIC_FILES));
+    expect(indexEntries(REAL.core).flat()).toEqual(expect.arrayContaining(TOPIC_FILES));
   });
 
   it('lists the lines that left in the §: the replaced CI parts and the lines rewritten on purpose', () => {
