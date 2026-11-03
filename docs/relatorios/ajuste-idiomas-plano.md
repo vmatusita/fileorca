@@ -16,7 +16,7 @@ Todas indexáveis, com canonical, o sitemap do idioma e o hreflang recíproco (x
 
 | id | en | es | arquivo do PDF e do CSV (es) |
 | --- | --- | --- | --- |
-| `auto-loan-calculator` | `/auto-loan-calculator/` | `/es/calculadora-de-prestamo-de-auto/` | `tabla-prestamo-de-auto` |
+| `auto-loan-calculator` | `/auto-loan-calculator/` | `/es/calculadora-de-prestamo-para-auto/` | `tabla-prestamo-para-auto` |
 | `refinance-calculator` | `/refinance-calculator/` | `/es/calculadora-de-refinanciamiento/` | `comparacion-refinanciamiento` |
 | `home-affordability-calculator` | `/home-affordability-calculator/` | `/es/calculadora-de-cuanta-casa-puedo-pagar/` | `cuanta-casa-puedo-pagar` |
 | `loan-amortization-calculator` | `/loan-amortization-calculator/` | `/es/calculadora-de-amortizacion-de-prestamos/` | `tabla-amortizacion-prestamo` |
