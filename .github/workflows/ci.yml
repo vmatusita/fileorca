@@ -1,18 +1,31 @@
-# CI of every PR (ADR-001, item 5): pnpm verificar, then the merge job decides with
-# scripts/ci/pode-mesclar.ts, then the post-deploy check runs when the merge happened.
-# A merge made with the GITHUB_TOKEN does not fire `push`, so the post-deploy is called here.
-# ADR-003: pnpm verificar runs in parts, one job each, in parallel on 2-vCPU runners: every gate but the
-# Playwright suite (`verificar`), and the suite split by browser, Chromium in four shards and WebKit in ten
-# (`playwright`; F5a, F7 and F8, the adendos of ADR-003). Each part keeps the 900 s limit; together they are the whole of pnpm
-# verificar (tests/unit/verificar.test.ts). The Playwright parts run with core dumps off and end with the state of the
-# disk and of the core dumps, whatever happened (the ENOSPC of DECISOES § 141; § 154). F8: a Dependabot PR whose CI went
-# red tells Victor in an issue assigned to him and in the PR (alerta-dependabot; DECISOES § 300), and every issue the
-# workflows open is assigned to the owner of the repository, so GitHub e-mails him (DECISOES § 301).
+# CI of every PR (ADR-001, item 5; ADR-003 and its adendos). Since the F9 (DECISOES § 323 to § 340) one execution is:
+#   classificar  the class of the execution, from scripts/ci/classificar.ts of the base branch: leve (a draft without the
+#                `ci` label), portões (a ready PR, or a draft with the label, that changes only documentation) or completo.
+#   leve         leve only: tipos, lint, the build and Vitest in one job (pnpm verificar --leve).
+#   build        portões and completo: the one build of the execution (pnpm verificar --build), uploaded as the artifact
+#                `site` (dist/ and .cache/bundle-modules.json, kept 1 day) that every part below downloads.
+#   portoes      portões and completo: every gate but Playwright and Lighthouse, on that dist/ (--dist-pronto).
+#   lighthouse   completo: Lighthouse alone, on that dist/.
+#   playwright   completo: the suite in parts (Chromium in five, WebKit in thirteen; F5a, F7, F8 and the languages
+#                adjustment), on that dist/. The browser and its system packages install in the background while the job
+#                sets up Node and pnpm, so the setup fits in 90 s (DECISOES § 325). Core dumps stay off and every part
+#                ends with the state of the disk and of the core dumps, whatever happened (the ENOSPC of § 141; § 154).
+#   ci-ok        always (a skipped job counts as passed in a required check): green only when the class came out and
+#                every job it asks for passed, from scripts/ci/ci-ok.ts of the base branch. The one check the ruleset of
+#                docs/ops/ruleset-main.json requires.
+#   merge        after a green ci-ok, never for a draft or a fork: scripts/ci/pode-mesclar.ts of the base decides, and
+#                the post-deploy check runs when the merge happened (a merge made with the GITHUB_TOKEN does not fire
+#                `push`, so it is called here).
+# Jobs skip by `if`, never by `paths` in `on:`, which would leave a required check pending forever. Each part keeps the
+# 900 s limit; together the parts are the whole of pnpm verificar, with the build once (tests/unit/verificar.test.ts).
+# F8: a Dependabot PR whose CI went red tells Victor in an issue assigned to him and in the PR (alerta-dependabot;
+# DECISOES § 300), and every issue the workflows open is assigned to the owner of the repository (DECISOES § 301).
+# F9: the jobs that write (merge, alerta-dependabot and pos-deploy) never run for a PR from a fork (DECISOES § 333).
 name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
 
 concurrency:
   group: ci-pr-${{ github.event.pull_request.number }}
@@ -22,45 +35,179 @@ permissions:
   contents: read
 
 jobs:
-  # The gates in two parts since the languages adjustment (DECISOES § 320): every gate but Lighthouse, and Lighthouse alone.
-  # A matrix keeps the job id, so the needs of merge and alerta-dependabot wait for both.
-  verificar:
-    name: verificar (${{ matrix.part }})
+  # The class of the execution (DECISOES § 326). Any label recomputes it, like a push; removing one runs nothing.
+  classificar:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - part: portões
-            args: --sem-playwright --sem-lighthouse
-          - part: lighthouse
-            args: --lighthouse
+    timeout-minutes: 5
+    outputs:
+      classe: ${{ steps.classify.outputs.classe }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Classify
+        id: classify
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          # The script comes from the base branch, so a PR cannot change the class of its own run. Only the PR that
+          # creates it (no script on the base yet) uses its own copy.
+          mkdir -p "$RUNNER_TEMP/ci"
+          if git cat-file -e "$BASE_SHA:scripts/ci/classificar.ts" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/ci/classificar.ts" > "$RUNNER_TEMP/ci/classificar.ts"
+          else
+            cp scripts/ci/classificar.ts "$RUNNER_TEMP/ci/classificar.ts"
+          fi
+          # A diff that cannot be read counts as code: the class is completo.
+          if ! git -c core.quotePath=false diff --no-renames --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"; then
+            echo "::warning::git diff failed: the execution counts as complete"
+            : > "$RUNNER_TEMP/files.txt"
+          fi
+          jq -n --argjson draft "$DRAFT" --argjson labels "$LABELS" --rawfile files "$RUNNER_TEMP/files.txt" \
+            '{isDraft: $draft, labels: $labels, files: ($files | split("\n") | map(select(length > 0)) | map({path: .}))}' \
+            > "$RUNNER_TEMP/pr.json"
+          node "$RUNNER_TEMP/ci/classificar.ts" "$RUNNER_TEMP/pr.json"
+
+  # A draft without the `ci` label: one job builds for the Vitest and checks the code (DECISOES § 326).
+  leve:
+    name: verificar (leve)
+    needs: classificar
+    if: needs.classificar.outputs.classe == 'leve'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      # The Vitest reads the history (HEAD~1 and older commits).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: pnpm verificar --leve
+        run: pnpm verificar --leve
+
+  # The one build of the execution (DECISOES § 324).
+  build:
+    needs: classificar
+    if: needs.classificar.outputs.classe == 'portões' || needs.classificar.outputs.classe == 'completo'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: pnpm verificar --build
+        run: pnpm verificar --build
+      # .cache/ is hidden, so it needs include-hidden-files; the Playwright budgets and the license gate read the record.
+      - name: Upload the build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: |
+            dist/
+            .cache/bundle-modules.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  portoes:
+    name: verificar (portões)
+    needs: [classificar, build]
+    if: needs.classificar.outputs.classe == 'portões' || needs.classificar.outputs.classe == 'completo'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      # lint:texto diffs against the base and the Vitest reads the history.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The cache of .cache/ comes back before the build, so the bundle record of the artifact wins over an old one.
       - name: Cache pinned tools (actionlint, LanguageTool, JRE)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache
           key: tools-${{ runner.os }}-${{ hashFiles('scripts/lib/tools.ts') }}
-      # Lighthouse runs on the Chromium of Playwright.
-      - if: matrix.part == 'lighthouse'
-        run: pnpm exec playwright install --with-deps chromium
-      - name: pnpm verificar ${{ matrix.args }}
-        run: pnpm verificar ${{ matrix.args }}
+      - name: Download the build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: .
+      - name: pnpm verificar --sem-playwright --sem-lighthouse --dist-pronto
+        run: pnpm verificar --sem-playwright --sem-lighthouse --dist-pronto
         env:
           LINT_TEXTO_BASE: origin/${{ github.event.pull_request.base.ref }}
 
+  lighthouse:
+    name: verificar (lighthouse)
+    needs: [classificar, build]
+    if: needs.classificar.outputs.classe == 'completo'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Lighthouse runs on the Chromium of Playwright: it installs in the background while the job sets up (§ 325).
+      - name: Browser in the background
+        env:
+          BROWSER: chromium
+        run: |
+          version=$(sed -n "s/^  '@playwright\/test@\([0-9][0-9.]*\)':$/\1/p" pnpm-lock.yaml | head -n 1)
+          test -n "$version" || { echo "no @playwright/test version in pnpm-lock.yaml"; exit 1; }
+          echo "Playwright $version, $BROWSER, $(nproc) vCPU"
+          mkdir -p "$RUNNER_TEMP/navegador"
+          # shellcheck disable=SC2016 # the inner script reads its own positional arguments
+          setsid nohup bash -c 'npx --yes "playwright@$1" install --with-deps "$2"; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
+      - name: Download the build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: .
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Wait for the browser
+        run: |
+          for _ in $(seq 1 300); do
+            test -s "$RUNNER_TEMP/navegador/status" && break
+            sleep 1
+          done
+          tail -n 20 "$RUNNER_TEMP/navegador/log"
+          test "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" = 0
+      - name: pnpm verificar --lighthouse --dist-pronto
+        run: pnpm verificar --lighthouse --dist-pronto
+
   playwright:
     name: playwright (${{ matrix.part }})
+    needs: [classificar, build]
+    if: needs.classificar.outputs.classe == 'completo'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -124,24 +271,49 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          persist-credentials: false
+      # The browser of the Playwright version in the lockfile and its system packages (the apt of WebKit is the slow part)
+      # install in the background while the job downloads the build and sets up Node and pnpm (DECISOES § 325). setsid and
+      # the redirections let the step end while the install goes on; the wait step reads its status.
+      - name: Browser in the background
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          version=$(sed -n "s/^  '@playwright\/test@\([0-9][0-9.]*\)':$/\1/p" pnpm-lock.yaml | head -n 1)
+          test -n "$version" || { echo "no @playwright/test version in pnpm-lock.yaml"; exit 1; }
+          echo "Playwright $version, $BROWSER, $(nproc) vCPU"
+          mkdir -p "$RUNNER_TEMP/navegador"
+          # shellcheck disable=SC2016 # the inner script reads its own positional arguments
+          setsid nohup bash -c 'npx --yes "playwright@$1" install --with-deps "$2"; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
+      - name: Download the build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: .
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: Wait for the browser
+        run: |
+          for _ in $(seq 1 300); do
+            test -s "$RUNNER_TEMP/navegador/status" && break
+            sleep 1
+          done
+          tail -n 20 "$RUNNER_TEMP/navegador/log"
+          test "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" = 0
       # The runner pipes core dumps to systemd-coredump with a fixed size limit in its core_pattern, so ulimit -c 0 alone
       # does not stop them: the pattern goes to /bin/false for the job, and ulimit -c 0 stays in the step (DECISOES § 154).
       - name: Core dumps off
         run: |
           echo "core_pattern: $(cat /proc/sys/kernel/core_pattern)"
           sudo -n sysctl -w kernel.core_pattern='|/bin/false'
-      - name: pnpm verificar ${{ matrix.args }}
+      - name: pnpm verificar ${{ matrix.args }} --dist-pronto
         run: |
           ulimit -c 0
-          pnpm verificar ${{ matrix.args }}
+          pnpm verificar ${{ matrix.args }} --dist-pronto
       - name: Disk and core dumps
         if: always()
         run: |
@@ -158,8 +330,37 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  # The one check that sums up the CI (DECISOES § 327). It always runs, because a skipped job counts as passed in a
+  # required check, and it reads its rule from the base branch, so a PR cannot turn its own check green.
+  ci-ok:
+    name: ci-ok
+    needs: [classificar, leve, build, portoes, lighthouse, playwright]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Verdict
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/ci"
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if git cat-file -e "$BASE_SHA:scripts/ci/ci-ok.ts" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/ci/ci-ok.ts" > "$RUNNER_TEMP/ci/ci-ok.ts"
+          else
+            cp scripts/ci/ci-ok.ts "$RUNNER_TEMP/ci/ci-ok.ts"
+          fi
+          printf '%s' "$NEEDS" > "$RUNNER_TEMP/needs.json"
+          node "$RUNNER_TEMP/ci/ci-ok.ts" "$RUNNER_TEMP/needs.json"
+
   merge:
-    needs: [verificar, playwright]
+    needs: ci-ok
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -196,6 +397,9 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
           DRAFT: ${{ github.event.pull_request.draft }}
           UPDATE_TYPE: ${{ steps.dependabot.outputs.update-type }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
           # The decision script comes from the base branch, so a PR cannot change its own rule.
           # Only the PR that creates the pipeline (no script on the base yet) uses its own copy.
@@ -207,9 +411,12 @@ jobs:
           fi
           # --no-renames lists both sides of a rename, so moving a workflow out of the folder counts.
           git -c core.quotePath=false diff --no-renames --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"
+          # F9: the repository of the head branch, this repository and its owner (DECISOES § 333). The script of the base
+          # before the F9 ignores them; the new one refuses the merge when they are missing.
           jq -n --arg head "$HEAD_REF" --arg author "$AUTHOR" --argjson draft "$DRAFT" \
+            --arg headRepo "$HEAD_REPO" --arg repo "$REPO" --arg repoOwner "$REPO_OWNER" \
             --rawfile files "$RUNNER_TEMP/files.txt" \
-            '{headRefName: $head, isDraft: $draft, author: {login: $author}, files: ($files | split("\n") | map(select(length > 0)) | map({path: .}))}' \
+            '{headRefName: $head, isDraft: $draft, author: {login: $author}, headRepo: $headRepo, repo: $repo, repoOwner: $repoOwner, files: ($files | split("\n") | map(select(length > 0)) | map({path: .}))}' \
             > "$RUNNER_TEMP/pr.json"
           node "$RUNNER_TEMP/ci/pode-mesclar.ts" "$RUNNER_TEMP/pr.json" "$UPDATE_TYPE"
       - name: Comment why it was not merged
@@ -246,11 +453,11 @@ jobs:
           fi
 
   # F8 (decision 14; DECISOES § 300): GitHub sends no failure e-mail for a run Dependabot started, so a red CI in a
-  # Dependabot PR (any part, or the merge job) opens an issue assigned to the owner, one per PR: a new red run comments
+  # Dependabot PR (ci-ok, or the merge job) opens an issue assigned to the owner, one per PR: a new red run comments
   # on the open one instead of opening another. It also comments on the PR. No checkout: only the gh CLI runs here.
   alerta-dependabot:
-    needs: [verificar, playwright, merge]
-    if: failure() && github.event.pull_request.user.login == 'dependabot[bot]'
+    needs: [ci-ok, merge]
+    if: failure() && github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -277,7 +484,7 @@ jobs:
 
   pos-deploy:
     needs: merge
-    if: needs.merge.outputs.merged == 'true'
+    if: needs.merge.outputs.merged == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       issues: write

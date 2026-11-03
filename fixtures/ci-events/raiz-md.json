@@ -1,0 +1,35 @@
+{
+  "description": ".md da raiz (CLAUDE.md, PLANO, DECISOES) é documentação",
+  "event": {
+    "action": "synchronize",
+    "number": 257,
+    "pull_request": {
+      "number": 257,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00101f8ccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "CLAUDE.md",
+    "PLANO-MELHORIAS.md",
+    "docs/claude/ci.md"
+  ],
+  "expected": {
+    "classe": "portões",
+    "motivo": "PR pronta, só documentação: o build e os portões, sem o Playwright e sem o Lighthouse."
+  }
+}

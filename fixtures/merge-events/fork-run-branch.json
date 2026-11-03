@@ -1,0 +1,34 @@
+{
+  "description": "PR de um fork com nome de branch de run (fase-10): nunca mescla",
+  "event": {
+    "action": "synchronize",
+    "number": 230,
+    "pull_request": {
+      "number": 230,
+      "draft": false,
+      "user": {
+        "login": "alguem-de-fora"
+      },
+      "head": {
+        "ref": "fase-10",
+        "sha": "00e6f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "alguem-de-fora/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "src/platform/site.ts"
+  ],
+  "fetchMetadata": null,
+  "expected": {
+    "merge": "false",
+    "comment": "true",
+    "reason": "A PR vem de um fork (alguem-de-fora/fileorca): o merge fica para o Victor, depois de ler o diff."
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "description": "LICENSE não é .md: conta como código",
+  "event": {
+    "action": "synchronize",
+    "number": 258,
+    "pull_request": {
+      "number": 258,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00102f8ccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "LICENSE"
+  ],
+  "expected": {
+    "classe": "completo",
+    "motivo": "PR pronta, com código: tudo."
+  }
+}

@@ -11,7 +11,10 @@
       },
       "head": {
         "ref": "feature/offline-cache",
-        "sha": "00d4f8cccccccccccccccccccccccccccccccccc"
+        "sha": "00d4f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
       },
       "base": {
         "ref": "main",

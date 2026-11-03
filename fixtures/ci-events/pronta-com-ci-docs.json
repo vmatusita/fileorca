@@ -1,0 +1,37 @@
+{
+  "description": "Linha 5: PR pronta com o rótulo ci, só documentação (o rótulo não muda nada)",
+  "event": {
+    "action": "synchronize",
+    "number": 247,
+    "pull_request": {
+      "number": 247,
+      "draft": false,
+      "user": {
+        "login": "vmatusita"
+      },
+      "labels": [
+        {
+          "name": "ci"
+        }
+      ],
+      "head": {
+        "ref": "fase-09",
+        "sha": "00f7f8cccccccccccccccccccccccccccccccccc",
+        "repo": {
+          "full_name": "vmatusita/fileorca"
+        }
+      },
+      "base": {
+        "ref": "main",
+        "sha": "bbd30c80000000000000000000000000000000aa"
+      }
+    }
+  },
+  "files": [
+    "docs/claude/ci.md"
+  ],
+  "expected": {
+    "classe": "portões",
+    "motivo": "PR pronta, só documentação: o build e os portões, sem o Playwright e sem o Lighthouse."
+  }
+}
