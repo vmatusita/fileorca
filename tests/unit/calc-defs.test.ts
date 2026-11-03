@@ -391,7 +391,8 @@ describe('after the review', () => {
       // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
       // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
       // F7 (decision 9): the English page changed for the home and health calculators and the QR code (DECISOES § 259).
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
+      // The languages adjustment: the pages of pt and es changed for the QR code, which exists in them now (DECISOES § 310).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 3 de novembro de 2026', es: 'Última actualización: 3 de noviembre de 2026' }[lang]);
     }
   });
 });
