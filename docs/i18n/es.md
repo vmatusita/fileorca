@@ -2,7 +2,7 @@
 
 Glossário fixo do FileOrca em espanhol (F6, decisão 3 do prompt; PLANO "Idiomas"). As explicações estão em português, como todo o `docs/`; os termos estão em espanhol. Todo texto do site em espanhol segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em espanhol e no HTML das páginas `/es/` do `dist/`.
 
-Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md.
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code, os guias de arquivo e o resto do dinheiro dos EUA.
 
 ## Registro
 
@@ -92,6 +92,7 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 | Compress PDF | Comprimir PDF | /es/comprimir-pdf/ |
 | Protect PDF | Proteger PDF | /es/proteger-pdf/ |
 | Unlock PDF | Desbloquear PDF | /es/desbloquear-pdf/ |
+| QR code generator | Generador de códigos QR | /es/generador-de-codigo-qr/ |
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plural de PDF não leva "s" no texto corrido ("tus PDF"); no nome do ZIP fica `pdfs`.
 
@@ -136,10 +137,11 @@ Sem acento, em minúsculas, com hífen.
 | `fileorca-images.zip`, `fileorca-images.pdf` | `fileorca-imagenes.zip`, `fileorca-imagenes.pdf` |
 | `fileorca-pdfs.zip`, `fileorca-pdf-images.zip` | `fileorca-pdfs.zip`, `fileorca-pdf-imagenes.zip` |
 | `document.pdf` | `documento.pdf` |
+| `qr-code.png`, `qr-code.svg` | `codigo-qr.png`, `codigo-qr.svg` |
 
 ## Dinero (las 5 calculadoras, para el público hispano de EE. UU.)
 
-As contas, os campos e os exemplos são os da página em inglês, em US$. Os termos seguem o que o CFPB usa nos documentos em espanhol lidos em 1º/nov/2026 (o Toolkit hipotecário, os formulários H-28, o "Plan de acción contra la deuda" e o glossário inglês-espanhol do CFPB de abril de 2021). O site `consumerfinance.gov/es/` foi tirado do ar pelo CFPB em 2026 (redireciona para o inglês); nenhum link aponta para lá.
+As contas, os campos e os exemplos são os da página em inglês, em US$. Os termos seguem o que o CFPB usa nos documentos em espanhol lidos em 1º/nov/2026 (o Toolkit hipotecário, os formulários H-28, o "Plan de acción contra la deuda" e o glossário inglês-espanhol do CFPB). O glossário do CFPB citado na F6 como "de abril de 2021" é o "Spanish-English glossary of financial terms" de março de 2024 (files.consumerfinance.gov); a edição anterior é de abril de 2022, e não há uma de 2021 (ajuste idiomas, DECISOES § 317). O site `consumerfinance.gov/es/` foi tirado do ar pelo CFPB em 2026 (redireciona para o inglês); nenhum link aponta para lá.
 
 | Inglês | Español | Observação |
 | --- | --- | --- |
@@ -177,6 +179,76 @@ As contas, os campos e os exemplos são os da página em inglês, em US$. Os ter
 Nomes das páginas: Calculadoras financieras (hub), Calculadora de hipoteca, Calculadora de préstamo personal, Calculadora de tarjeta de crédito, Calculadora de deudas, Calculadora de interés compuesto.
 
 Nome do arquivo do PDF e do CSV: `tabla-hipoteca`, `tabla-prestamo-personal`, `plan-tarjeta-de-credito`, `plan-de-deudas`, `interes-compuesto`.
+
+### O resto do dinheiro dos EUA (ajuste idiomas)
+
+As 9 calculadoras, os 4 presets e os 5 guias que faltavam entraram em espanhol, com os termos do Toolkit hipotecario (ago/2026), dos formulários H-28 e do glossário do CFPB (mar/2024), conferidos em 3/nov/2026; onde o CFPB não tem o termo, o do FDIC ou da FTC.
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| refinance | refinanciar · refinanciamiento | CFPB, H-28(C) |
+| closing costs | costos de cierre | |
+| balloon payment | pago global | o H-28(D) diz "cuota extraordinaria", e "cuota" está proibida aqui |
+| debt consolidation | consolidación de deudas | FDIC, FTC |
+| debt-to-income ratio | relación deudas-ingresos (DTI) | |
+| simple interest | interés simple | |
+| savings goal | meta de ahorro | "objetivo de ahorro" como sinônimo na busca |
+| auto loan | préstamo para auto | o CFPB escreve "automóvil"; nunca "coche" (DECISOES § 309) |
+| biweekly payment | pago cada dos semanas | nunca "quincenal", que é duas vezes por mês |
+| rent (v.) | alquilar | |
+| net worth | valor neto | |
+| Loan Estimate · Closing Disclosure | Estimación de Préstamo · Declaración de Cierre | como o formulário e o Toolkit |
+| points | puntos | |
+| home affordability | cuánta casa puedo pagar | |
+
+Nomes das páginas e arquivos: a tabela do `docs/relatorios/ajuste-idiomas-plano.md` e o bloco `es` do `src/tools/calc/registry.ts` (DECISOES § 309).
+
+## Generador de códigos QR (ajuste idiomas)
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| QR code | código QR | "Generador de códigos QR", no plural, como a página e os Términos |
+| square (módulo) | cuadrito | |
+| Link or text · the text box | Enlace o texto · el cuadro | |
+| Oli in the middle · On · Off | Oli en el centro · Activada · Desactivada | no feminino, pela Oli |
+| PNG size · Small · Medium · Large | Tamaño del PNG · Pequeño · Mediano · Grande | |
+| Download PNG · Download SVG | Descargar PNG · Descargar SVG | |
+| Preview · Error correction | Vista previa · Corrección de errores | |
+| short link · expire · tracking | enlace acortado · vencer · rastreo | |
+| icon | ícono | forma das Américas |
+| Utilities | Utilidades | |
+
+## Guías de archivo (ajuste idiomas)
+
+Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espanhol dos EUA: "2.4 MB", "68 %" (com espaço sem quebra), "5.2 veces" ("1.0 vez" só no 1 exato), "42.2 dB", "150 ppi". Contagem por extenso: `{x_word}` masculino ("dos archivos", "un PDF", sempre com o substantivo depois do "un") e `{x_wordf}` feminino ("dos fotos", "una imagen", "cuatro esquinas"); nunca no começo de uma frase (DECISOES § 314).
+
+| Guia (inglês) | Nombre en español | Caminho |
+| --- | --- | --- |
+| How to convert HEIC to JPG on Windows | Cómo convertir HEIC a JPG en Windows | /es/guias/heic-a-jpg-en-windows/ |
+| Why is my PDF so large? | ¿Por qué mi PDF pesa tanto? | /es/guias/por-que-mi-pdf-pesa-tanto/ |
+| Social media image sizes | Tamaños de imagen para redes sociales | /es/guias/tamanos-de-imagen-para-redes-sociales/ |
+| How to open WebP images and save them as JPG | Cómo abrir imágenes WebP y guardarlas como JPG | /es/guias/abrir-webp-y-guardar-como-jpg/ |
+| JPG or PNG: which one to use | JPG o PNG: cuál usar | /es/guias/jpg-o-png/ |
+| How to remove location data from photos | Cómo quitar la ubicación de las fotos | /es/guias/quitar-la-ubicacion-de-las-fotos/ |
+| Which resolution to choose for PDF to JPG | Qué resolución elegir para pasar un PDF a JPG | /es/guias/resolucion-de-pdf-a-jpg/ |
+| How to split a PDF, and why the parts can weigh more | Cómo dividir un PDF y por qué las partes pueden pesar más | /es/guias/dividir-pdf-y-tamano-del-archivo/ |
+| How to combine PDFs on a phone | Cómo unir PDF en el celular | /es/guias/unir-pdf-en-el-celular/ |
+| How to turn photos into one PDF | Cómo convertir fotos en un solo PDF | /es/guias/fotos-en-un-solo-pdf/ |
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| What we measured · Sources · Related tools and guides | Lo que medimos · Fuentes · Herramientas y guías relacionadas | |
+| real phone photos | fotos reales de celular | vale; "PDF reales" e "archivos reales" não |
+| lossy · lossless | con pérdida · sin pérdida | |
+| frame · thumbnail · cover photo · header photo | cuadro · miniatura · foto de portada · foto de encabezado | |
+| embedded fonts | fuentes incrustadas | "fuentes" também são as fontes citadas: nenhuma frase com {date} fala delas |
+| scan · scanned | escaneo · escaneado | |
+| mode (Comprimir PDF) | nivel | "la compresión Recomendada" |
+| N times as heavy | N veces el peso | nunca "N veces más", que é ambíguo |
+| merged file · attachment | archivo unido · archivo adjunto | |
+| preset | ajuste predefinido | |
+
+Rótulos de sistema, como as páginas de suporte em espanhol escrevem (lidas em 3/nov/2026): Alta eficiencia, Más compatible, Mantener originales, Localización (manual da Apple es-us), app Vista Previa, Insertar desde archivo, app Archivos, mantén presionada, Manual de uso del iPhone (Apple); Guardar ubicación, Más parámetros de configuración, Agregar (Google); Extensiones de imagen HEIF, Extensiones de vídeo HEVC (nome do produto), Explorador de archivos, Microsoft Print To PDF (Microsoft). Fonte sem versão em espanhol leva "(en inglés)" no rótulo.
 
 ## Frases de Oli
 
@@ -219,7 +291,7 @@ Cada linha da tabela é um termo proibido nos textos em espanhol e nas páginas 
 | ficheros | archivos | espanhol da Espanha |
 | pinchar | hacer clic, tocar | espanhol da Espanha |
 | enganche | pago inicial | regional (México); o CFPB diz "pago inicial" |
-| tasa de porcentaje anual | tasa porcentual anual (APR) | o CFPB não usa essa forma |
+| tasa de porcentaje anual | tasa porcentual anual (APR) | o Toolkit e os formulários do CFPB e a FTC escrevem "tasa porcentual anual"; o glossário do CFPB (mar/2024) e o do FDIC trazem a outra forma, que o site não usa nem cita (DECISOES § 317) |
 | cuota mensual | pago mensual | o CFPB diz "pago mensual" |
 | mensualidad | pago mensual | idem |
 | tasa de hoy | un ejemplo rotulado como ejemplo | nada de taxa do dia |

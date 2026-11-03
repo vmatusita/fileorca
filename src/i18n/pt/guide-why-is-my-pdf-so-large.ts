@@ -1,92 +1,91 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'Why Is My PDF So Large? What Fills It and What Shrinks It',
-  description: 'What takes the space inside a PDF, measured on our test PDFs, and what each mode of Compress PDF did to them, including when the file came back the same.',
-  h1: 'Why is my PDF so large?',
-  lead: 'A PDF is a container, and the size depends on what went into it. Find out which part is heavy before you try to shrink it.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Por que meu PDF está tão grande? O que ocupa espaço e o que deixa o arquivo menor',
+  description: 'O que ocupa espaço dentro de um PDF, medido nos nossos PDFs de teste, e o que cada nível da Comprimir PDF fez com eles, até quando o arquivo voltou igual.',
+  h1: 'Por que meu PDF está tão grande?',
+  lead: 'Um PDF é um recipiente, e o tamanho depende do que foi colocado nele. Descubra qual parte pesa antes de tentar diminuir o arquivo.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'A PDF is as heavy as what went into it. In the {spaceFiles_word} test PDFs whose contents we weighed, the heaviest owe most of their weight to pictures, and a scan is pictures too, one per page. Fonts come next. Adobe’s guide names the same two causes: it says the resolution and the bit depth of an image can directly affect the size of the file, and that adding a single font can sometimes increase it substantially.',
-    'Email is one limit you can run into. A personal Gmail account sends attachments up to {gmailLimit}, and Outlook.com takes attachments up to {outlookLimit}. Above that, the file needs to get smaller, be split, or travel as a link.',
+    'Um PDF pesa o que foi colocado nele. Nos {spaceFiles_word} PDFs de teste cujo conteúdo pesamos, os mais pesados devem a maior parte do peso às imagens, e um documento escaneado também é imagem, uma por página. Depois vêm as fontes. O guia da Adobe aponta as mesmas duas causas: diz que a resolução e a profundidade de bits de uma imagem podem afetar diretamente o tamanho do arquivo, e que adicionar uma fonte pode aumentar esse tamanho de forma significativa.',
+    'O e-mail é um dos limites em que você pode esbarrar. Uma conta pessoal do Gmail envia anexos de até {gmailLimit}, e o Outlook.com aceita anexos de até {outlookLimit}. Acima disso, o arquivo precisa ficar menor, ser dividido ou ir como link.',
   ],
-  toolHeading: 'Compress your PDF here',
-  toolIntro: 'Drop a PDF and it is compressed in this browser tab, with the Recommended mode to start. Change the mode to see each result. Nothing is uploaded.',
+  toolHeading: 'Comprima seu PDF aqui',
+  toolIntro: 'Solte um PDF e ele é comprimido nesta aba do navegador, começando pela compressão Recomendada. Troque o nível para ver cada resultado. Nada é enviado.',
   sections: [
     {
-      heading: 'Where the bytes are',
+      heading: 'Onde estão os bytes',
       paragraphs: [
-        'We opened the PDFs of our tests and added up the bytes of each kind of content. In the scanned book page, the one picture is {scanImagesShare} of the file. In a PDF made of photos it is {photosImagesShare}. These files are big because their pictures are big, and nothing else matters much.',
-        'The scanned NASA report has {reportPages} pages, each one a black and white picture. The pictures are {reportImagesShare} of it, and the rest is the structure that holds that many pages together. The IRS form has no pictures at all: its {formFontCount} embedded fonts are {formFontsShare} of the file, and the form fields and page text make up the other {formOtherShare}.',
-        'The lecture notes mix everything: {bookImageCount} pictures are {bookImagesShare} of the file, {bookFontCount} embedded font programs are another {bookFontsShare}, and the {bookPages} pages of text and drawings are the rest. The table under "What we measured" has every file.',
+        'Abrimos os PDFs dos nossos testes e somamos os bytes de cada tipo de conteúdo. Na página de livro escaneada, a única imagem é {scanImagesShare} do arquivo. Num PDF feito de fotos, é {photosImagesShare}. Esses arquivos são grandes porque as imagens deles são grandes, e o resto pesa pouco.',
+        'O relatório da NASA escaneado tem {reportPages} páginas, e cada página é uma imagem em preto e branco. As imagens são {reportImagesShare} dele, e o resto é a estrutura que mantém tantas páginas juntas. O formulário do IRS não tem imagem nenhuma: as {formFontCount} fontes incorporadas são {formFontsShare} do arquivo, e os campos do formulário e o texto das páginas formam os outros {formOtherShare}.',
+        'As notas de aula misturam tudo: {bookImageCount} imagens são {bookImagesShare} do arquivo, {bookFontCount} fontes incorporadas são outros {bookFontsShare}, e as {bookPages} páginas de texto e desenhos são o resto. A tabela em "O que medimos" traz cada arquivo.',
       ],
     },
     {
-      heading: 'Pictures: the weight of our heaviest PDFs',
+      heading: 'Imagens: o peso dos nossos PDFs mais pesados',
       paragraphs: [
-        'A photo straight from a phone has millions of pixels, far more than a page needs on a screen or even in print. When such a photo goes into a PDF at full size, the PDF carries every pixel. A scan does the same: scanning at a high resolution, in color, makes each page a large picture.',
-        'This is where the Recommended and Strong modes of Compress PDF can help, because pictures can lose detail nobody sees. A PDF with no pictures can only get lighter by a rewrite of its structure, and how much that gave on our files is in the next section.',
+        'Uma foto tirada no celular tem milhões de pixels, muito mais do que uma página precisa na tela ou mesmo no papel. Quando uma foto dessas entra num PDF no tamanho original, o PDF carrega cada pixel. Um escaneamento faz o mesmo: escanear em alta resolução, em cores, transforma cada página numa imagem grande.',
+        'É aqui que a compressão Recomendada e a Forte da Comprimir PDF podem ajudar, porque as imagens podem perder detalhes que ninguém vê. Um PDF sem imagens só fica mais leve com uma reescrita da estrutura, e o quanto isso rendeu nos nossos arquivos está na próxima seção.',
       ],
     },
     {
-      heading: 'Fonts, forms and structure',
+      heading: 'Fontes, formulários e estrutura',
       paragraphs: [
-        'A PDF carries the fonts it needs, so it looks the same on any computer. A document set in many typefaces, or one that embeds whole fonts instead of only the letters it uses, gets heavier for it. Forms add their own weight: every field is an object, and some forms carry a second description of themselves for older software.',
-        'None of this can be squeezed the way a photo can. A lossless rewrite packs the structure more tightly and drops what is repeated, and what that gives depends on how the file was written. Our long text-only PDF, which our test script wrote without packing anything, lost {textOnlyLosslessRatio_off} of its size to it. The lecture notes, a real document, lost only {bookLosslessSaved} of {bookTotal}.',
+        'Um PDF leva junto as fontes de que precisa, para aparecer igual em qualquer computador. Um documento composto em muitas fontes, ou que incorpora fontes inteiras em vez de só as letras que usa, fica mais pesado por isso. Formulários somam o próprio peso: cada campo é um objeto, e alguns formulários levam uma segunda descrição de si mesmos para programas antigos.',
+        'Nada disso pode ser espremido como uma foto. Uma reescrita sem perda arruma a estrutura de forma mais compacta e tira o que está repetido, e o ganho depende de como o arquivo foi escrito. Nosso PDF longo só com texto, que o nosso script de teste escreveu sem compactar nada, perdeu {textOnlyLosslessRatio_off} do tamanho com ela. As notas de aula, um documento real, perderam só {bookLosslessSaved} de {bookTotal}.',
       ],
     },
     {
-      heading: 'What each mode of Compress PDF did',
+      heading: 'O que cada nível da Comprimir PDF fez',
       paragraphs: [
-        'Lossless rewrites the file without touching any picture. It took {reportLosslessRatio_off} off the scanned report and {formLosslessRatio_off} off the tax form. On the PDF of photos, whose weight is in its pictures, it saved only {photosLosslessSaved_exact} of {photosTotal}.',
-        'Recommended also recompresses the color and gray photos inside, at no more than the resolution a page needs. On the PDF of photos it took {photosRecommendedRatio_off} off, and on the scanned book page {scanRecommendedRatio_off}. On the scanned report it gave the same result as Lossless, because black and white scans are stored in a way this mode does not recompress.',
-        'Strong turns every page into a picture. On the PDF of photos it took {photosStrongChromiumRatio_off} off, and on the scanned book page {scanStrongChromiumRatio_off}. It has a cost: the text can no longer be selected or searched, and form fields, links and bookmarks are lost.',
+        'A compressão Sem perda reescreve o arquivo sem mexer em nenhuma imagem. Ela tirou {reportLosslessRatio_off} do relatório escaneado e {formLosslessRatio_off} do formulário de imposto. No PDF de fotos, cujo peso está nas imagens, ela economizou só {photosLosslessSaved_exact} de {photosTotal}.',
+        'A Recomendada também comprime de novo as fotos coloridas e em tons de cinza que estão lá dentro, sem passar da resolução de que uma página precisa. No PDF de fotos ela tirou {photosRecommendedRatio_off}, e na página de livro escaneada, {scanRecommendedRatio_off}. No relatório escaneado, deu o mesmo resultado da Sem perda, porque os escaneamentos em preto e branco são guardados de um jeito que esse nível não comprime de novo.',
+        'A Forte transforma cada página numa imagem. No PDF de fotos ela tirou {photosStrongChromiumRatio_off}, e na página de livro escaneada, {scanStrongChromiumRatio_off}. Isso tem um custo: o texto não pode mais ser selecionado nem buscado, e os campos de formulário, os links e os marcadores se perdem.',
       ],
     },
     {
-      heading: 'When the file comes back the same',
+      heading: 'Quando o arquivo volta igual',
       paragraphs: [
-        'Compress PDF never hands back a file bigger than the one you gave it. When a mode cannot make the file smaller, you get the original back, byte for byte. Of the {accepted} files we compressed, Lossless gave {losslessUnchanged_word} back unchanged and Recommended {recommendedUnchanged_word}: a PDF that was already as small as the rewrite makes it.',
-        'Strong gave {strongUnchangedChromium_word} of the {accepted_word} back unchanged. Text pages drawn as pictures are heavier than the text itself, and a black and white scan stored as a picture of a page is already smaller than a photo of the same page. In our tests, Strong did better than Recommended only on the PDF of photos and the scanned book page.',
+        'A Comprimir PDF nunca devolve um arquivo maior do que o que você deu a ela. Quando um nível não consegue deixar o arquivo menor, você recebe o original de volta, byte por byte. Dos {accepted} arquivos que comprimimos, a Sem perda devolveu {losslessUnchanged_word} deles sem mudança, e a Recomendada, {recommendedUnchanged_word}: um PDF que já estava tão pequeno quanto a reescrita consegue deixar.',
+        'A Forte devolveu {strongUnchangedChromium_word} dos {accepted_word} sem mudança. Páginas de texto desenhadas como imagem pesam mais que o próprio texto, e um escaneamento em preto e branco guardado como imagem da página já é menor que uma foto da mesma página. Nos nossos testes, a Forte superou a Recomendada só no PDF de fotos e na página de livro escaneada.',
       ],
     },
     {
-      heading: 'If it is still too big',
+      heading: 'Se ainda estiver grande demais',
       paragraphs: [
-        'If the PDF is mostly text and still over the limit after Lossless, split it into parts and send them separately, or remove the pages that are not needed. If it is mostly photos, compress the photos before they go into the PDF, at a size that fits the page.',
-        'For a scan you are about to make, a lower resolution and gray instead of color make each page a smaller picture from the start. And when the file has to stay whole, a link to a shared copy can go where an attachment cannot.',
+        'Se o PDF for quase todo texto e ainda passar do limite depois da Sem perda, divida o arquivo em partes e envie cada uma separada, ou tire as páginas que não precisam ir. Se for quase todo foto, comprima as fotos antes de colocá-las no PDF, num tamanho que caiba na página.',
+        'Num documento que você ainda vai escanear, uma resolução menor e tons de cinza em vez de cores fazem de cada página uma imagem menor desde o começo. E quando o arquivo precisa ficar inteiro, um link para uma cópia compartilhada chega aonde um anexo não chega.',
       ],
     },
   ],
   half: 3,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'First, what each kind of content weighs in {spaceFiles_word} of our test PDFs. Then each mode of Compress PDF on the {accepted} PDFs of our tests the tool takes, with the share of the original size that is left.',
-  measuredNote: 'Measured on {date}. The scanned pages, the NASA report, the IRS form and the lecture notes are real documents; the other test PDFs were written by our own test script. What takes the space was read with pdf-lib, the library the engine opens files with. Lossless and Recommended ran in Node with the engine of this site, which gives the same bytes as the browser; Strong draws the pages on the canvas, so it was measured through the Compress PDF page in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The table shows Chromium.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Primeiro, quanto pesa cada tipo de conteúdo em {spaceFiles_word} dos nossos PDFs de teste. Depois, cada nível da Comprimir PDF nos {accepted} PDFs dos nossos testes que a ferramenta aceita, com a parte do tamanho original que sobra.',
+  measuredNote: 'Medido em {date}. As páginas escaneadas, o relatório da NASA, o formulário do IRS e as notas de aula são documentos reais; os outros PDFs de teste foram escritos pelo nosso próprio script de teste. O que ocupa espaço foi lido com a pdf-lib, a biblioteca com que o motor abre os arquivos. A Sem perda e a Recomendada rodaram no Node com o motor deste site, que dá os mesmos bytes que o navegador; a Forte desenha as páginas no canvas, então foi medida pela página da Comprimir PDF no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}. A tabela mostra o Chromium.',
   tables: [
     {
-      heading: 'What takes the space',
-      caption: 'Our test PDFs: pages, size, and how much of it is pictures, fonts and everything else',
-      head: ['File', 'Pages', 'Size', 'Pictures', 'Fonts', 'Everything else'],
+      heading: 'O que ocupa espaço',
+      caption: 'Nossos PDFs de teste: páginas, tamanho e quanto dele é imagem, fonte e todo o resto',
+      head: ['Arquivo', 'Páginas', 'Tamanho', 'Imagens', 'Fontes', 'Todo o resto'],
     },
     {
-      heading: 'Compress PDF, mode by mode',
-      caption: 'Every PDF of our tests that Compress PDF takes: its size before, and after each mode, with the share of the original that is left',
-      head: ['File', 'Before', 'Lossless', 'Recommended', 'Strong'],
+      heading: 'A Comprimir PDF, nível por nível',
+      caption: 'Cada PDF dos nossos testes que a Comprimir PDF aceita: o tamanho antes e depois de cada nível, com a parte do original que sobra',
+      head: ['Arquivo', 'Antes', 'Sem perda', 'Recomendada', 'Forte'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'gmail', label: 'Gmail Help: Send attachments with your Gmail message', href: 'https://support.google.com/mail/answer/6584?hl=en', read: '2026-11-01' },
-    { id: 'outlook', label: 'Microsoft Support: Sending limits in Outlook.com', href: 'https://support.microsoft.com/en-us/outlook/sending-limits-in-outlook-com', read: '2026-11-01' },
-    { id: 'adobe', label: 'Adobe: Why is my PDF so big?', href: 'https://www.adobe.com/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-01' },
+    { id: 'gmail', label: 'Ajuda do Gmail: Enviar anexos na mensagem do Gmail', href: 'https://support.google.com/mail/answer/6584?hl=pt-BR', read: '2026-11-03' },
+    { id: 'outlook', label: 'Suporte da Microsoft: Limites de envio no Outlook.com', href: 'https://support.microsoft.com/pt-br/outlook/sending-limits-in-outlook-com', read: '2026-11-03' },
+    { id: 'adobe', label: 'Adobe: Por que meu PDF está tão grande?', href: 'https://www.adobe.com/br/acrobat/hub/why-is-pdf-so-big.html', read: '2026-11-03' },
   ],
   facts: {
-    gmailLimit: { text: '25 MB', source: 'gmail' },
-    outlookLimit: { text: '25 MB', source: 'outlook' },
+    gmailLimit: { text: '25 MB', source: 'gmail' },
+    outlookLimit: { text: '25 MB', source: 'outlook' },
   },
   names: [],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;

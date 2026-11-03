@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { formatScaled, type NumberLang } from '../../src/calc/parse.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 import { calcTexts, panelData } from '../../src/tools/calc/page.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
@@ -44,7 +44,7 @@ function bound(spec: NumberSpec, value: number, lang: Lang = 'en'): string {
 const PAGES: [AnyCalcId, Lang][] = [
   ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
   ...BR_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'pt']),
-  ...ES_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
+  ...CALC_PAGE_IDS.map((id): [AnyCalcId, Lang] => [id, 'es']),
   ...LIFE_CALC_IDS.map((id): [AnyCalcId, Lang] => [id, 'en']),
 ];
 /** Each definition once, with the language of its first page. */
@@ -391,7 +391,8 @@ describe('after the review', () => {
       // The Portuguese and Spanish pages changed in the F6 (the PDF, the money calculators and, in Portuguese, the Pix): their
       // date moved to the day of that change, written as decision 1 asks, without the ordinal (DECISOES § 230).
       // F7 (decision 9): the English page changed for the home and health calculators and the QR code (DECISOES § 259).
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 2 de novembro de 2026', es: 'Última actualización: 2 de noviembre de 2026' }[lang]);
+      // The languages adjustment: the pages of pt and es changed for the QR code, which exists in them now (DECISOES § 310).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 2, 2026', pt: 'Última atualização: 3 de novembro de 2026', es: 'Última actualización: 3 de noviembre de 2026' }[lang]);
     }
   });
 });

@@ -1,91 +1,91 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Combine PDFs on a Phone, iPhone or Android',
-  description: 'The ways to put several PDFs into one on an iPhone or an Android phone, what the merged file weighs, and what it keeps from each PDF.',
-  h1: 'How to combine PDFs on a phone',
-  lead: 'You have a few PDFs on your phone and need to send them as one. Here are the ways to do it there, without a computer, and what to expect from the result.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Como juntar PDFs no celular, no iPhone ou no Android',
+  description: 'Os jeitos de juntar vários PDFs num só no iPhone ou num celular Android, quanto pesa o arquivo juntado e o que ele mantém de cada PDF.',
+  h1: 'Como juntar PDFs no celular',
+  lead: 'Você tem alguns PDFs no celular e precisa enviar tudo como um arquivo só. Veja os jeitos de fazer isso no próprio celular, sem computador, e o que esperar do resultado.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
-    'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged {pairs_word} pairs of our test PDFs.',
+    'Formulários, recibos, uma página assinada e o escaneamento de um documento de identidade podem chegar como PDFs separados, e o lugar para onde você precisa mandar aceita um arquivo só. No computador, há muitos jeitos de juntar tudo. No celular há menos, e eles dependem do aparelho.',
+    'Este guia mostra o jeito que a Apple documenta para o iPhone, o jeito que funciona no navegador de qualquer celular e o que medimos ao juntar {pairs_word} pares dos nossos PDFs de teste.',
   ],
-  toolHeading: 'Combine your PDFs here',
-  toolIntro: 'Choose two or more PDFs from your phone, drag them into the order you want and tap the button. They are joined in this browser tab, on the phone itself, and nothing is uploaded.',
+  toolHeading: 'Junte seus PDFs aqui',
+  toolIntro: 'Escolha os PDFs no seu celular, arraste cada um para a ordem que você quer e toque em Juntar PDFs. Eles são juntados nesta aba do navegador, no próprio celular, e nada é enviado.',
   sections: [
     {
-      heading: 'On an iPhone, with Preview',
+      heading: 'No iPhone, com o app Pré-Visualização',
       paragraphs: [
-        'Apple’s iPhone User Guide describes how to add pages to a PDF in the Preview app: open the PDF, touch and hold a page thumbnail, then tap Insert from File to bring in another PDF or an image. To change the order, touch and hold a thumbnail and drag it above or below another one.',
-        'This works well for adding one file to another. For several files, you repeat the insert for each one, and the result is the PDF you started from with the new pages added.',
+        'O Manual de Uso do iPhone, da Apple, explica como adicionar páginas a um PDF no app Pré-Visualização: abra o PDF, mantenha o toque sobre a miniatura de uma página e toque em Inserir de Arquivo para trazer outro PDF ou uma imagem. Para mudar a ordem, mantenha o toque numa miniatura e arraste para cima ou para baixo de outra.',
+        'Isso funciona bem para acrescentar um arquivo a outro. Com vários arquivos, você repete a inserção para cada um, e o resultado é o PDF do começo com as páginas novas acrescentadas.',
       ],
     },
     {
-      heading: 'On an Android phone',
+      heading: 'Num celular Android',
       paragraphs: [
-        'Google’s help for the Drive app describes scanning paper into a PDF: you scan a page, tap Add to scan another, and save the result as a PDF. That is a good way to turn several sheets of paper into one file, but it makes a new PDF from the camera. It does not join PDFs you already have on the phone.',
-        'For files that are already PDFs, the browser is the simplest place to do it on Android, with the tool on this page.',
+        'A ajuda do app Google Drive explica como digitalizar papel para um PDF: você digitaliza uma página, toca em Adicionar para digitalizar outra e salva o resultado em PDF. É um bom jeito de transformar várias folhas de papel num arquivo só, mas ele cria um PDF novo a partir da câmera. Ele não junta os PDFs que você já tem no celular.',
+        'Para arquivos que já são PDF, o navegador é o lugar mais simples para fazer isso no Android, com a ferramenta desta página.',
       ],
     },
     {
-      heading: 'On any phone, in the browser',
+      heading: 'Em qualquer celular, no navegador',
       paragraphs: [
-        'Merge PDF on this page runs in the browser of the phone, so it works the same on an iPhone and on an Android phone. Tap to choose the files, from the Files app on an iPhone or from your downloads on Android, put them in order and tap the button. The merged PDF downloads like any other file.',
-        'The files are not uploaded to a server: the phone does the work, so private documents stay on it.',
+        'A Juntar PDF desta página roda no navegador do celular, então funciona igual no iPhone e no Android. Toque para escolher os arquivos, no app Arquivos do iPhone ou entre os arquivos que você baixou no Android, coloque-os em ordem e toque em Juntar PDFs. O PDF juntado é baixado como qualquer outro arquivo.',
+        'Os arquivos não são enviados a nenhum servidor: o celular faz o trabalho, então documentos particulares ficam nele.',
       ],
     },
     {
-      heading: 'What the merged file weighs',
+      heading: 'Quanto pesa o arquivo juntado',
       paragraphs: [
-        'We merged {pairs} pairs of our test PDFs and compared the merged file with the two files it came from. The merged file was never bigger than the two together, and it came out smaller in {smaller} of the {pairs} pairs, by very different amounts.',
-        'Our PDF of photos with the scanned book page, and the scanned NASA report with that same page, came out just under their combined size: {photosScanMerged_exact} against {photosScanInputs_exact}, and {reportScanMerged_exact} against {reportScanInputs_exact}. A PDF has some structure around its pages, and the merged file needs that structure once instead of twice; the pictures stay as they were. The lecture notes with the IRS form came out {bookFormRatio_off} smaller.',
+        'Juntamos {pairs} pares dos nossos PDFs de teste e comparamos o arquivo juntado com os dois arquivos de origem. O arquivo juntado nunca ficou maior que os dois somados, e saiu menor em {smaller} dos {pairs} pares, com diferenças bem desiguais.',
+        'Nosso PDF de fotos com a página de livro escaneada, e o relatório da NASA escaneado com essa mesma página, saíram logo abaixo da soma dos dois: {photosScanMerged_exact} contra {photosScanInputs_exact}, e {reportScanMerged_exact} contra {reportScanInputs_exact}. Um PDF tem alguma estrutura em volta das páginas, e o arquivo juntado precisa dessa estrutura uma vez em vez de duas; as imagens ficam como estavam. As notas de aula com o formulário do IRS saíram {bookFormRatio_off} menores.',
       ],
     },
     {
-      heading: 'When the merged file is clearly smaller',
+      heading: 'Quando o arquivo juntado fica bem menor',
       paragraphs: [
-        'The scanned book page with the IRS form came out {scanFormRatio_off} smaller than the two files together. The form carries a second description of itself, in a format called XFA, that only some programs read, and Merge PDF leaves it out; the result tells you so next to the file. The form fields themselves are kept, so the form can still be filled in. Our PDF with pages of mixed sizes and our PDF with links and actions came out {mixedActionsRatio_off} smaller together: our test script wrote both without packing their structure, and the merged file is written packed.',
-        'Nothing else is dropped on purpose. Bookmarks and links come along, and a field whose name already exists in another file gets a number added so both keep working.',
+        'A página de livro escaneada com o formulário do IRS saiu {scanFormRatio_off} menor que os dois arquivos somados. O formulário leva uma segunda descrição de si mesmo, num formato chamado XFA, que só alguns programas leem, e a Juntar PDF deixa essa descrição de fora; o resultado avisa isso ao lado do arquivo. Os campos do formulário em si continuam lá, então o formulário ainda pode ser preenchido. Nosso PDF com páginas de tamanhos diferentes e nosso PDF com links e ações saíram {mixedActionsRatio_off} menores juntos: o nosso script de teste escreveu os dois sem compactar a estrutura, e o arquivo juntado é escrito compactado.',
+        'Nada mais fica de fora de propósito. Os marcadores e os links vêm junto, e um campo cujo nome já existe em outro arquivo ganha um número no nome, para os dois continuarem funcionando.',
       ],
     },
     {
-      heading: 'Before you merge',
+      heading: 'Antes de juntar',
       paragraphs: [
-        'Put the files in the order the reader should see them, and remove the pages that are not needed first: a merged PDF is easier to check than to fix. A PDF that asks for a password has to be saved without it before it can be merged, which Unlock PDF does; Merge PDF tells you which file is locked.',
-        'If the merged file is too big to send, compress it afterwards. Merging does not make files lighter by itself, apart from the savings above.',
+        'Coloque os arquivos na ordem em que a pessoa deve ler, e tire antes as páginas que não precisam ir: um PDF juntado é mais fácil de conferir do que de consertar. Um PDF que pede senha precisa ser salvo sem ela antes de entrar na junção, e a Desbloquear PDF faz isso; a Juntar PDF avisa qual arquivo está bloqueado.',
+        'Se o arquivo juntado ficar grande demais para enviar, comprima depois. Juntar não deixa os arquivos mais leves por si só, fora a economia que vimos acima.',
       ],
     },
     {
-      heading: 'Sending the merged PDF',
+      heading: 'Como mandar o PDF juntado',
       paragraphs: [
-        'A personal Gmail account sends attachments up to {gmailLimit}; above that, Google turns the attachment into a Drive link. If your merged PDF is near the limit, Compress PDF may bring it under. In the measurements of our guide to large PDFs, it made a PDF of photos and a scanned color page much lighter, and a black and white scan only a little; that guide has each mode on each file.',
-        'Check the merged file before you send it: open it, scroll through every page and make sure the order is right. It takes a minute, and it is much easier than explaining a missing page later.',
+        'Uma conta pessoal do Gmail envia anexos de até {gmailLimit}; acima disso, o Gmail troca o anexo por um link do Google Drive. Se o seu PDF juntado estiver perto do limite, a Comprimir PDF pode deixá-lo abaixo. Nas medidas do nosso guia sobre PDFs grandes, ela deixou bem mais leves um PDF de fotos e uma página colorida escaneada, e um escaneamento em preto e branco só um pouco; aquele guia traz cada nível em cada arquivo.',
+        'Confira o arquivo juntado antes de mandar: abra, passe por todas as páginas e veja se a ordem está certa. Leva um minuto, e é muito mais fácil do que explicar depois uma página que ficou faltando.',
       ],
     },
   ],
   half: 4,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'We merged {pairs_word} pairs made from {pdfs_word} of our test PDFs, in the order shown. Change is the merged file against the two files together.',
-  measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on pairs of the PDFs of our tests.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Juntamos {pairs_word} pares feitos com {pdfs_word} dos nossos PDFs de teste, na ordem mostrada. A variação compara o arquivo juntado com os dois arquivos somados.',
+  measuredNote: 'Medido em {date} no Node com o motor deste site, que dá os mesmos bytes que o navegador, em pares dos PDFs dos nossos testes.',
   tables: [
     {
-      heading: 'Merged pairs',
-      caption: 'Each pair of PDFs: the two files together, the merged file, and the change',
-      head: ['Files', 'Together', 'Merged', 'Change'],
+      heading: 'Pares juntados',
+      caption: 'Cada par de PDFs: os dois arquivos somados, o arquivo juntado e a variação',
+      head: ['Arquivos', 'Somados', 'Juntado', 'Variação'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'google-drive-scan', label: 'Google Drive Help: Scan documents with Google Drive', href: 'https://support.google.com/drive/answer/3145835?hl=en&co=GENIE.Platform%3DAndroid', read: '2026-11-01' },
-    { id: 'gmail', label: 'Gmail Help: Send attachments with your Gmail message', href: 'https://support.google.com/mail/answer/6584?hl=en', read: '2026-11-01' },
-    { id: 'apple-preview', label: 'Apple iPhone User Guide: Add, delete, rotate, move, or crop PDF pages in Preview on iPhone', href: 'https://support.apple.com/guide/iphone/iphbf4977cff/ios', read: '2026-11-01' },
+    { id: 'google-drive-scan', label: 'Ajuda do Google Drive: Digitalizar documentos com o Google Drive', href: 'https://support.google.com/drive/answer/3145835?hl=pt-BR&co=GENIE.Platform%3DAndroid', read: '2026-11-03' },
+    { id: 'gmail', label: 'Ajuda do Gmail: Enviar anexos na mensagem do Gmail', href: 'https://support.google.com/mail/answer/6584?hl=pt-BR', read: '2026-11-03' },
+    { id: 'apple-preview', label: 'Manual de Uso do iPhone: Adicione, apague, gire, mova ou recorte páginas em PDFs no app Pré-Visualização do iPhone', href: 'https://support.apple.com/pt-br/guide/iphone/iphbf4977cff/ios', read: '2026-11-03' },
+    { id: 'apple-files', label: 'Manual de Uso do iPhone: Organize arquivos e pastas no app Arquivos do iPhone', href: 'https://support.apple.com/pt-br/guide/iphone/iphab82e0798/ios', read: '2026-11-03' },
   ],
   facts: {
-    gmailLimit: { text: '25 MB', source: 'gmail' },
+    gmailLimit: { text: '25 MB', source: 'gmail' },
   },
   names: [],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;

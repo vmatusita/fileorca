@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { PDFDocument, StandardFonts } from '@cantoo/pdf-lib';
 import { buildReport, columnLayout, winAnsi } from '../../src/engine/pdf/report.ts';
-import { CALC_PAGE_IDS, ES_CALC_IDS, LIFE_CALC_IDS, type AnyCalcId, type LifeCalcId } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGE_IDS, LIFE_CALC_IDS, type AnyCalcId, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import type { Values } from '../../src/tools/calc/types.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { panelData } from '../../src/tools/calc/page.ts';
@@ -275,7 +275,7 @@ describe('the columns of the calculator PDF', () => {
   it('keeps the even layout for every English and Spanish calculator', async () => {
     const fonts = await fontsOf();
     const width = 612 - 96;
-    for (const [id, lang] of [...CALC_PAGE_IDS.map((id) => [id, 'en'] as const), ...ES_CALC_IDS.map((id) => [id, 'es'] as const)]) {
+    for (const [id, lang] of [...CALC_PAGE_IDS.map((id) => [id, 'en'] as const), ...CALC_PAGE_IDS.map((id) => [id, 'es'] as const)]) {
       const { head, rows } = tableOf(id, lang);
       if (rows.length === 0) continue;
       const layout = columnLayout(48, width, head, rows, fonts);

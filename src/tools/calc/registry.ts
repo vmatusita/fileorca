@@ -170,7 +170,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     next: ['loan-amortization-calculator', 'personal-loan-calculator'],
     related: ['personal-loan-calculator', 'loan-amortization-calculator', 'loan-amortization-calculator-balloon-payment', 'debt-payoff-calculator', 'savings-goal-calculator', 'mortgage-calculator'],
     file: 'auto-loan-schedule',
-    es: { path: '/es/calculadora-de-prestamo-de-auto/', file: 'tabla-prestamo-de-auto' },
+    es: { path: '/es/calculadora-de-prestamo-para-auto/', file: 'tabla-prestamo-para-auto' },
   },
   'refinance-calculator': {
     id: 'refinance-calculator',

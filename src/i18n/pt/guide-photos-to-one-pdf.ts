@@ -1,95 +1,94 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Turn Photos Into One PDF, and Keep It Small Enough to Send',
-  description: 'How to put several photos into one PDF on a phone or a computer, what the PDF weighs, and what compressing the photos first does to it.',
-  h1: 'How to turn photos into one PDF',
-  lead: 'Receipts, pages of a contract, a few photos for a form: one PDF is easier to send and to print than a pile of images. Here is how to make it, and how heavy it gets.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Como transformar fotos em um único PDF leve o bastante para mandar',
+  description: 'Como pôr várias fotos num único PDF, no celular ou no computador, quanto o PDF pesa e o que muda quando você comprime as fotos antes.',
+  h1: 'Como transformar fotos em um único PDF',
+  lead: 'Recibos, páginas de um contrato, algumas fotos para um formulário: um PDF só é mais fácil de mandar e de imprimir que um monte de imagens. Veja como fazer e quanto ele pesa.',
+  changed: 'Primeira versão, com as medidas de {date}.',
   intro: [
-    'A PDF of photos keeps them in order, prints each one on its own page and opens on any computer or phone. Many forms and offices also ask for exactly that: one PDF, not a set of images.',
-    'The catch is size. Put into one PDF, our {photos_word} phone photos made a file {pdfRatioChromium} as heavy as the photos themselves. We measured what happens to the size, with and without compressing the photos first.',
+    'Um PDF de fotos mantém a ordem, imprime cada foto na própria página e abre em qualquer computador ou celular. Muitos formulários e escritórios também pedem exatamente isso: um PDF, e não um conjunto de imagens.',
+    'O problema é o tamanho. Postas num PDF só, as nossas {photos_wordf} fotos de celular viraram um arquivo com {pdfRatioChromium} do peso das próprias fotos. Medimos o que acontece com o tamanho, com e sem comprimir as fotos antes.',
   ],
-  toolHeading: 'Turn your photos into one PDF here',
-  toolIntro: 'Drop your photos in the order you want them, or drag them into order. Each one becomes a page, the PDF is made in this browser tab, and nothing is uploaded.',
+  toolHeading: 'Transforme suas fotos em um único PDF aqui',
+  toolIntro: 'Solte as fotos na ordem que você quer, ou arraste para pôr em ordem. Cada uma vira uma página, o PDF é feito nesta aba do navegador e nada é enviado.',
   sections: [
     {
-      heading: 'On an iPhone',
+      heading: 'No iPhone',
       paragraphs: [
-        'Apple’s Preview app on the iPhone can export an image as a PDF, and Apple notes it can also compress the file on the way. To add more photos, Apple’s guide describes inserting an image into a PDF: touch and hold a page thumbnail, then tap Insert from File. That makes a PDF of photos one insert at a time.',
+        'O app Pré-Visualização do iPhone exporta uma imagem como PDF, e a Apple lembra que ele também pode comprimir o arquivo nesse caminho. Para acrescentar mais fotos, o manual da Apple descreve como inserir uma imagem num PDF: mantenha o toque sobre uma miniatura de página e toque em Inserir de Arquivo. Assim você monta um PDF de fotos, uma inserção de cada vez.',
       ],
     },
     {
-      heading: 'On a computer',
+      heading: 'No computador',
       paragraphs: [
-        'Windows includes a printer called Microsoft Print to PDF, which Microsoft describes as part of Windows 10 and Windows 11. From an app that prints your photos, choose it in the list of printers and the pages are saved as a PDF instead of printed. The page size and margins come from the print settings, so check them before you save.',
-        'The tool on this page works the same way on a computer and on a phone, in the browser: drop the photos, set the page size if you need Letter or A4, and download one PDF.',
+        'O Windows tem uma impressora chamada Microsoft Print to PDF, que a Microsoft descreve como parte do Windows 10 e do Windows 11. Num app que imprime as suas fotos, escolha essa impressora na lista Impressora, e as páginas são salvas como PDF em vez de impressas. O tamanho da página e as margens vêm das configurações de impressão, então confira antes de salvar.',
+        'A ferramenta desta página funciona do mesmo jeito no computador e no celular, no navegador: solte as fotos, escolha o tamanho da página se precisar de Carta ou A4 e baixe um PDF só.',
       ],
     },
     {
-      heading: 'What the tool does with each photo',
+      heading: 'O que a ferramenta faz com cada foto',
       paragraphs: [
-        'By default each page is the size of its photo, so nothing is cropped and no white border is added. You can also choose Letter or A4, and each photo then sits on the page with a margin. Photos are written into the PDF as JPGs at a high quality; an image with transparency goes in as PNG, so the transparent parts stay clear.',
-        'Every photo is written again from its pixels. That is what keeps the location and the camera details out of the PDF: our PDF carried {pdfGpsChromium_word} GPS data, though every photo we put in had it.',
+        'Por padrão, cada página tem o tamanho da própria foto, então nada é cortado e nenhuma borda branca é acrescentada. Você também pode escolher Carta ou A4, e cada foto fica na página com uma margem. As fotos entram no PDF como JPG em qualidade alta; uma imagem com transparência entra como PNG, para as partes transparentes continuarem transparentes.',
+        'Cada foto é gravada de novo a partir dos pixels. É isso que deixa a localização e os dados da câmera fora do PDF: nosso PDF levou {pdfGpsChromium_word} dados de GPS, embora todas as fotos que pusemos nele tivessem esse dado.',
       ],
     },
     {
-      heading: 'How heavy the PDF gets',
+      heading: 'Quanto o PDF pesa',
       paragraphs: [
-        'Our {photos_word} real phone photos weighed {photosTotal} together. Put straight into one PDF, they made a file of {pdfChromium}, which is {pdfRatioChromium} of the photos. Almost all of that is the photos themselves: the pictures inside the PDF weighed {pdfImagesChromium}.',
-        'The PDF came out a little lighter than the photos only because the tool saves the pictures at its own quality, a bit lower than the phone cameras used. It is not compression in any real sense.',
+        'Nossas {photos_wordf} fotos de celular de verdade pesavam {photosTotal} juntas. Postas direto num PDF, viraram um arquivo de {pdfChromium}, ou seja, {pdfRatioChromium} do peso das fotos. Quase tudo isso são as próprias fotos: as imagens dentro do PDF pesavam {pdfImagesChromium}.',
+        'O PDF saiu um pouco mais leve que as fotos só porque a ferramenta salva as imagens na qualidade dela, um pouco abaixo da que as câmeras dos celulares usaram. Isso não é compressão de verdade.',
       ],
     },
     {
-      heading: 'Compress the photos first',
+      heading: 'Comprima as fotos antes',
       paragraphs: [
-        'We then ran the same photos through Compress image first, at its Recommended level. They came out at {compressedChromium}, {compressedRatioChromium_off} lighter than the originals. Turned into one PDF, they made a file of {pdfAfterChromium}, which is {pdfAfterRatioChromium} of the original photos.',
-        'That PDF is still {pdfAfterVsCompressedChromium_more} heavier than the compressed photos it was made from. The reason is the step above: Image to PDF writes each photo again at its own high quality, and that takes back part of the saving. The order still pays off, but if the PDF has to be as small as possible, compress the finished PDF too.',
+        'Depois passamos as mesmas fotos pela Comprimir imagem, no nível Recomendada. Elas saíram com {compressedChromium}, {compressedRatioChromium_off} mais leves que as originais. Transformadas num PDF, viraram um arquivo de {pdfAfterChromium}, ou seja, {pdfAfterRatioChromium} das fotos originais.',
+        'Esse PDF ainda ficou {pdfAfterVsCompressedChromium_more} mais pesado que as fotos comprimidas de onde veio. O motivo é o passo de cima: a Imagem para PDF grava cada foto de novo, na própria qualidade alta, e isso devolve parte da economia. A ordem ainda compensa, mas, se o PDF precisa ficar o menor possível, comprima também o PDF pronto.',
       ],
     },
     {
-      heading: 'Photos of documents',
+      heading: 'Fotos de documentos',
       paragraphs: [
-        'When the photos are of paper, a little care before the PDF makes a better file. Crop each photo to the sheet, so the table, the floor and your fingers stay out of it, and turn any photo that came out sideways. Crop image and Rotate image do both in the browser, before the photos go into the PDF.',
-        'Take the photos in good light and straight from above. A sharp photo of a page reads well at a much smaller size than a blurry one, so it also compresses better.',
+        'Quando as fotos são de papel, um pouco de cuidado antes do PDF dá um arquivo melhor. Corte cada foto na folha, para a mesa, o chão e os seus dedos ficarem de fora, e gire qualquer foto que saiu de lado. A Cortar imagem e a Girar imagem fazem as duas coisas no navegador, antes de as fotos irem para o PDF.',
+        'Tire as fotos com boa luz e bem de cima. Uma foto nítida de uma página fica legível num tamanho bem menor que uma foto tremida, então ela também comprime melhor.',
       ],
     },
     {
-      heading: 'Photos from an iPhone',
+      heading: 'Fotos do iPhone',
       paragraphs: [
-        'Image to PDF takes JPG, PNG and WebP. An iPhone saves photos as HEIC by default, so turn them into JPGs first with HEIC to JPG, then put the JPGs into one PDF. Our guide on converting HEIC to JPG explains the formats and the settings that avoid HEIC altogether.',
+        'A Imagem para PDF aceita JPG, PNG e WebP. O iPhone salva as fotos em HEIC por padrão, então transforme as fotos em JPG antes, com a HEIC para JPG, e depois ponha os JPGs num PDF só. O nosso guia de HEIC para JPG explica os formatos e os ajustes que evitam o HEIC de vez.',
       ],
     },
     {
-      heading: 'A short routine',
+      heading: 'Uma rotina curta',
       paragraphs: [
-        'Put the photos in order, compress them if the PDF has to be emailed, then turn them into one PDF. If it is still too heavy, run Compress PDF on it: our guide to large PDFs shows what each mode does to a PDF of photos.',
-        'Keep the original photos. The PDF is for sending and printing; the photos are the copy you can always go back to.',
+        'Ponha as fotos em ordem, comprima as fotos se o PDF for por e-mail e depois transforme tudo num PDF só. Se ainda ficar pesado demais, passe o PDF pela Comprimir PDF: o nosso guia de PDFs grandes mostra o que cada modo faz com um PDF de fotos.',
+        'Guarde as fotos originais. O PDF é para mandar e imprimir; as fotos são a cópia a que você sempre pode voltar.',
       ],
     },
   ],
   half: 4,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'Our {photos_word} real phone photos, straight into one PDF, and again after Compress image. The share is against the original photos.',
-  measuredNote: 'Measured on {date} through the Image to PDF and Compress image pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes, on our real phone photos at the default settings. The pictures inside the PDF were counted with pdf-lib.',
+  measuredHeading: 'O que medimos',
+  measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, direto num PDF só, e de novo depois da Comprimir imagem. A porcentagem compara com as fotos originais.',
+  measuredNote: 'Medido em {date} pelas páginas Imagem para PDF e Comprimir imagem deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, que deram os mesmos tamanhos, nas nossas fotos de celular de verdade, com os ajustes padrão. As imagens dentro do PDF foram contadas com o pdf-lib.',
   tables: [
     {
-      heading: 'Photos and the PDF',
-      caption: 'Each step: the original photos, the PDF made from them, the photos after Compress image and the PDF made from those, with the share of the original size',
-      head: ['Step', 'Size', 'Of the original photos'],
-      labels: ['The original photos', 'One PDF of the photos', 'The photos after Compress image', 'One PDF of the compressed photos'],
+      heading: 'As fotos e o PDF',
+      caption: 'Cada passo: as fotos originais, o PDF feito com elas, as fotos depois da Comprimir imagem e o PDF feito com essas fotos, com a porcentagem do tamanho original',
+      head: ['Passo', 'Tamanho', 'Das fotos originais'],
+      labels: ['As fotos originais', 'Um PDF com as fotos', 'As fotos depois da Comprimir imagem', 'Um PDF com as fotos comprimidas'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fontes',
   sources: [
-    { id: 'apple-preview-export', label: 'Apple iPhone User Guide: Export or compress PDFs and images in Preview on iPhone', href: 'https://support.apple.com/guide/iphone/iph61c20afe1/ios', read: '2026-11-01' },
-    { id: 'apple-preview-pages', label: 'Apple iPhone User Guide: Add, delete, rotate, move, or crop PDF pages in Preview on iPhone', href: 'https://support.apple.com/guide/iphone/iphbf4977cff/ios', read: '2026-11-01' },
-    { id: 'ms-print-to-pdf', label: 'Microsoft Support: Save an Outlook message as a .eml file, a PDF file, or as a draft', href: 'https://support.microsoft.com/en-us/outlook/mail/save-an-outlook-message-as-a-eml-file-a-pdf-file-or-as-a-draft', read: '2026-11-01' },
+    { id: 'apple-preview-export', label: 'Manual de Uso do iPhone: Exporte ou comprima PDFs e imagens no app Pré-Visualização no iPhone', href: 'https://support.apple.com/pt-br/guide/iphone/iph61c20afe1/ios', read: '2026-11-03' },
+    { id: 'apple-preview-pages', label: 'Manual de Uso do iPhone: Adicione, apague, gire, mova ou recorte páginas em PDFs no app Pré-Visualização do iPhone', href: 'https://support.apple.com/pt-br/guide/iphone/iphbf4977cff/ios', read: '2026-11-03' },
+    { id: 'ms-print-to-pdf', label: 'Suporte da Microsoft: Salvar uma mensagem do Outlook como um arquivo .eml, um arquivo PDF ou como um rascunho', href: 'https://support.microsoft.com/pt-br/outlook/mail/save-an-outlook-message-as-a-eml-file-a-pdf-file-or-as-a-draft', read: '2026-11-03' },
   ],
   facts: {},
   names: ['Windows 10', 'Windows 11', 'A4'],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Ferramentas e guias relacionados',
 };
 
 export default texts;
