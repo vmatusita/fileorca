@@ -2797,3 +2797,80 @@ Um revisor Sonnet em contexto limpo leu só o diff das correções (`69fb7f3..08
   - **s-2:** o teste da fonte atrasada passa a se chamar pelo que afirma (a trilha, o H1 e o aviso ficam no lugar). O CLS do texto que muda de linha fora do Windows (0,257 e 0,125 no Linux do CI) vai para o `PENDENCIAS.md` (F8 s-2): a fonte de reserva é calibrada sobre a Arial, e o Android usa a Roboto.
   - **s-3:** o parágrafo da Privacidade sobre o compartilhar dizia que os arquivos ficam na parte do site guardada para o offline, e o de cima, que nenhum arquivo entra nessa cópia. Os arquivos ficam num lugar próprio do armazenamento, separado da cópia das páginas, e a frase de 47 palavras virou três, nos três idiomas.
   - **s-4:** o teste de ida e volta da desativação falhava em 20 a 30 % das vezes com um worker só, porque o registro do recarregamento se juntava ao da desativação ainda em curso. Ele espera o `/sw.js` da desativação chegar e o registro sumir antes de religar.
+
+## § 308 · O escopo do ajuste "idiomas" (ajuste idiomas, decisão 1)
+
+- **A decisão é do Victor, de 2/nov/2026** (`docs/prompts/prompt-ajuste-idiomas.md`). Ela revoga o "só em inglês" em quatro pontos: a § 58 (as páginas que existiam só em inglês), os guias da F5b (§ 184), as 5 calculadoras em espanhol da F6 (decisão 6) e o QR da F7 (decisão 8).
+- **O que entra (40 páginas):** o gerador de QR code em pt e es; em espanhol, as 9 calculadoras dos EUA que faltavam, os 4 presets e os 5 guias de dinheiro, no hub `/es/calculadoras-financieras/`; os 10 guias de arquivo em pt e em es. Cada página nova é a mesma página do inglês, traduzida, com par no hreflang e o x-default no inglês.
+- **O que fica de fora, e por quê:**
+  - **Casa e saúde** (11 calculadoras e 2 hubs) seguem só em inglês até o gatilho da § 273 (fim do teste de 90 dias, 31/jan/2027): o teste está correndo, e mexer nelas agora o estragaria. A escolha para o gatilho está na § 319.
+  - **O dinheiro dos EUA em português:** o público de pt é o Brasil, com as 8 calculadoras adaptadas (F6, decisão 5). Uma hipoteca americana em português não serve a ninguém, e "hipoteca" é termo proibido no glossário de pt.
+- **O PLANO:** as linhas 63, 70, 477 e 860 do `PLANO-FILEORCA.md` ("os 15 guias ficam só em inglês", "em espanhol: hipoteca, préstamo…") ficam superadas por esta decisão. Nenhuma delas está nas "Decisões fechadas", e a ficha da run vence o plano (CLAUDE.md, "Fonte de verdade"). O `PLANO-FILEORCA.md` não é editado nesta run.
+
+## § 309 · Os caminhos das 40 páginas (ajuste idiomas, decisão 2)
+
+- **A regra:** slug sem acento, com as palavras do glossário, no padrão das páginas do idioma. Nenhum caminho que existia mudou. A tabela das 40 está no `docs/relatorios/ajuste-idiomas-plano.md` e nos glossários.
+- **O QR:** `/pt/gerador-de-qr-code/` e `/es/generador-de-codigo-qr/`, como a ficha fixou.
+- **O dinheiro em es:** `/es/calculadora-de-<nome>/`, como as 5 da F6, e cada preset embaixo da calculadora-mãe. As escolhas:
+  - **`prestamo-para-auto`:** o glossário do CFPB (mar/2024) escreve "préstamo para automóvil (o vehículo)", a FTC "carro". "Auto" é a palavra dos hispanos dos EUA e cabe no padrão "préstamo para…" do CFPB. "Coche" é de outros países.
+  - **`pagos-cada-dos-semanas`:** o biweekly é a cada duas semanas (26 pagamentos no ano). "Quincenal" é duas vezes por mês (24), e o próprio glossário do CFPB põe as duas formas lado a lado; a página não pode sugerir a outra conta.
+  - **`pago-global`:** o termo do glossário e do Toolkit hipotecario do CFPB para balloon payment. O formulário H-28(D) diz "cuota extraordinaria", mas "cuota" está proibida no glossário de es.
+  - **`cuanta-casa-puedo-pagar`:** a pergunta que a página responde, como a pessoa a faz ("¿cuánta casa puedo pagar?"). "Asequibilidad" é tradução literal de affordability e pouco usada.
+  - **`amortizacion-de-prestamos`**, **`refinanciamiento`** (CFPB, H-28(C)), **`consolidacion-de-deudas`** (FDIC, FTC), **`alquilar-o-comprar`**, **`meta-de-ahorro`**, **`interes-simple`**, **`apr-a-apy`** (o site escreve APR e APY, as siglas do mercado dos EUA).
+  - **Os guias** em `/es/guias/<slug>/`: `hipoteca-a-15-o-30-anos`, `bola-de-nieve-o-avalancha`, `pagos-adicionales-a-la-hipoteca`, `punto-de-equilibrio-del-refinanciamiento`, `punto-de-equilibrio-entre-alquilar-y-comprar`.
+- **Os guias de arquivo** em `/pt/guias/<slug>/` e `/es/guias/<slug>/`, com o slug traduzido (lista no plano). Os slugs dos guias de dinheiro e dos de arquivo em `/es/guias/` são distintos entre si.
+- **Os arquivos de texto** guardam o slug em inglês (`src/i18n/es/guide-jpg-vs-png.ts`): o mapa de rotas e os testes acham o texto pelo id, e a URL traduzida mora só no registro.
+- **O nome do PDF e do CSV** de cada página de dinheiro em es está no bloco `es` do registro, sem acento (lista no plano).
+
+## § 310 · O QR em português e em espanhol (ajuste idiomas, decisão 3)
+
+- **O mesmo QR da § 272:** a ilha, a conta, o limite de 1.273 bytes, a Oli, as cores, o PNG e o SVG não mudam. O `QrTool.astro` recebe o `lang`; os textos ficam em `src/tools/qr-code-generator/i18n/{pt,es}.ts` (`QR_TEXTS` no `page.ts`).
+- **O nome dos arquivos** sai dos textos (`panel.file`), sem acento (§ 219): `qr-code.png` e `qr-code.svg` em inglês e em português ("QR code" é o nome do código no Brasil), `codigo-qr.png` e `codigo-qr.svg` em espanhol. Antes era a constante `FILE_NAMES` do painel.
+- **O selo** no idioma ("Seu texto nem sai do aparelho", "Tu texto nunca sale de tu dispositivo"), e a frase de privacidade que o `gate:conteudo` pede, por idioma.
+- **O cartão Open Graph** do QR em pt e es leva o selo da própria página, não o "seus arquivos" do site (a página não tem arquivo). O cartão em inglês continua como está: é a pendência F7 e-2, que vale para a página antiga.
+- **As relacionadas** são as mesmas 4 ferramentas, no idioma (`qrRelated(lang)`).
+
+## § 311 · O dinheiro em espanhol: o bloco `es` obrigatório e o fim do `ES_CALC_IDS` (ajuste idiomas, decisão 4)
+
+- **O bloco `es`** de cada linha do `CALC_PAGES` passa a ser obrigatório e só tem o caminho e o nome do arquivo (`{ path, file }`). Os chips (`next`), as relacionadas, a calculadora-mãe e o guia são os do inglês, porque toda página que o inglês liga existe em espanhol. O compilador reprova uma calculadora nova sem página em es.
+- **O `ES_CALC_IDS` sumiu.** Alternativas: (a) apagar; (b) derivar do registro (`CALC_PAGE_IDS.filter(…)`); (c) manter como alias de `CALC_TOOL_IDS`. Fica a (a): com o bloco obrigatório, "as páginas em es" são todas as do registro (`CALC_PAGE_IDS` por `moneyPage(id, 'es')`), e um nome que diz "as cinco" mentiria (a (c) ainda deixaria os presets de fora). O tipo `EsCalcId` vira `CalcPageId`. Os 13 testes que importavam o nome passaram a ler o registro.
+- **A home e o rodapé em es** listam as 5 calculadoras de crédito da home em inglês (`HOME_MONEY_IDS.es = HOME_CALC_IDS`), e o hub em es as 14 na ordem do inglês (`HUB_MONEY_IDS.es = CALC_TOOL_IDS`), com os presets e os guias.
+- **O `moneyPage()`** em es leva a mãe e o guia (antes os descartava, e o preset em es perderia a calculadora-mãe na trilha). O `presetRows()` e o `guideOf()` servem o inglês e o espanhol.
+- **As 5 calculadoras da F6** ganham os vizinhos novos (chips e relacionadas iguais aos do inglês), e a hipoteca em es ganha a tabela dos presets. O texto delas não muda.
+
+## § 312 · As datas das páginas novas (ajuste idiomas; § 207 e § 223)
+
+- **O dia da run em Brasília é 3/nov/2026** (`IDIOMAS_DAY` em `src/tools/calc/page.ts`; `GUIDE_REVIEWED_ON` e `GUIDE_PUBLISHED_ON` em `src/tools/guides/page.ts`): os textos foram escritos e as fontes lidas nesse dia. A run começou às 22h30 de 2/nov em Brasília, e o texto de nenhuma página existia antes da meia-noite.
+- **Dinheiro em es:** as 13 calculadoras e presets novos e os 5 guias levam o dia da run no "Revisado", no "Publicado por primera vez" e na leitura das fontes. As 5 calculadoras da F6 guardam os dias delas (o texto não mudou). O hub em es, cujo texto foi reescrito, leva o dia da run no "Revisado" e guarda a primeira publicação e a leitura das fontes da F6. O `datesOf()` decide pela página (antes era uma data por idioma).
+- **Guias de arquivo em pt e es:** revisados e publicados no dia da run, nunca antes do `measuredOn` (2/nov/2026 em UTC, § 207).
+
+## § 313 · Os guias de dinheiro em espanhol: as palavras dos motores nos textos (ajuste idiomas, decisão 4)
+
+- **O problema:** o `src/tools/calc/guides.ts` escrevia em inglês, no código, as palavras dos fatos e das tabelas ("the big card, then the small card", "month 41", "never", "year 8", "not within 30 years" e os cabeçalhos das tabelas).
+- **A decisão:** essas palavras passam para o texto de cada guia, num campo `words` com o tipo de cada guia (`GuideWordsById`), e o `GUIDE_FACTS[id](lang)` escreve os números no idioma (dólares, taxas com U+00A0 antes do "%" em es, durações do `duration` do idioma). As palavras do inglês foram copiadas para os `en.ts` sem mudar uma letra: a página em inglês sai igual.
+- **Alternativa recusada:** uma tabela `Record<Lang, …>` dentro do `guides.ts`. Texto do site mora nos arquivos de tradução (CLAUDE.md, "Idioma"), e o `glossary.test.ts` e o `lint:texto` só leem esses arquivos.
+- **Prova:** o `calc-guides.test.ts` confere, em inglês e em espanhol, que todo placeholder do texto tem fato, que os placeholders do es são os do en, e que cada fato e cada célula da tabela em es tem os mesmos algarismos do inglês.
+
+## § 314 · Os guias de arquivo em português e espanhol: o formato e o gênero das contagens (ajuste idiomas, decisão 5)
+
+- **O formato** (`src/tools/guides/measured.ts`, `GuideFormat`): tamanho, separadores e "%" do idioma (§ 213); um espaço sem quebra entre número e unidade em pt e es ("2,4 MB", "42,2 dB", "150 ppi", "1.304 bytes"), como o glossário pede e a pendência F6 f-8 cobra das páginas antigas; o inglês sai como antes. "Vezes/veces" saem dos textos compartilhados (`times`, `timesOne`): em pt o singular abaixo de 2 ("0,5 vez", norma do singular com parte inteira menor que 2), em es só no 1 exato.
+- **O gênero das contagens por extenso:** `{x_word}` é masculino e `{x_wordf}` feminino, pelo substantivo que a contagem acompanha no idioma ("duas fotos", "dos fotos", "um PDF", "una imagen"). Alternativas: (a) o sufixo no placeholder; (b) um mapa de gêneros por guia nos textos; (c) uma variante por número. Fica a (a): o texto diz o gênero onde usa a contagem, e o código não precisa conhecer o substantivo. As palavras (de zero a doze, nos dois gêneros) ficam em `src/i18n/{lang}/file-guides.ts`. Em es o 1 masculino é "un", então o substantivo vem logo depois.
+- **As provas:** o `guides-numbers.test.ts` tem uma tabela com o gênero de cada contagem em pt e es (a partir dos substantivos dos textos), reprova `{x_wordf}` em inglês, uma contagem que abre frase (sairia em minúscula) e um "un" sem substantivo; os controles reprovam cada caso.
+- **As palavras inglesas do `data/guides-measured.json`** (o "use" dos tamanhos oficiais do guia 3, a opção e as ferramentas do guia 6) são traduzidas no campo `measuredTerms` de cada guia, com a chave igual ao texto em inglês. Falta de tradução para o build, e o teste confere que os algarismos da tradução são os da chave.
+- **As células sem gênero:** "Nada" e "Sem GPS"/"Sin GPS" nas tabelas, porque a mesma palavra serve a colunas de gêneros diferentes.
+- **O guia 3 em pt e es** cita a página de ajuda do idioma quando ela dá o mesmo número; o teste compara pelo id da fonte, não pelo endereço.
+- **O defeito achado:** o teste dos placeholders do `guides-measured.test.ts` usava `/{(w+)}/`, sem a barra, e não conferia nada. A regex foi corrigida (os 10 guias em inglês passam) e o teste lê os três idiomas.
+
+## § 315 · A regra dos números em português e espanhol (ajuste idiomas, decisão 5)
+
+- **A regra não muda:** nenhum algarismo à mão (§ 189), a frase diz a amostra, um mínimo ou um máximo diz a direção (§ 199), nada generaliza além da amostra (§ 197 e § 208) e a data da medida não vai para as fontes (§ 208).
+- **As listas por idioma:** `GENERAL` com as palavras da ficha ("geralmente", "normalmente", "em geral", "quase sempre", "a maioria dos PDFs"; "generalmente", "normalmente", "por lo general", "casi siempre", "la mayoría de los PDF") e as equivalentes da lista inglesa; `SOURCES`, `LOW`, `HIGH` e `CLAIMS_BEST` por idioma. Todas com borda Unicode (o `\b` do JavaScript é ASCII e não casa "até" nem "típicamente").
+- **O "free" dos fatos oficiais** vira "grátis"/"gratuito" em pt e "gratis"/"gratuito" em es.
+- **Os controles** em pt e es reprovam cada lista e aceitam "fotos reais de celular" e "fotos reales de celular".
+
+## § 316 · Os lotes de texto e quem escreve (ajuste idiomas, decisão 7)
+
+- **Os redatores são agentes Opus em worktree**, um por lote, nunca Sonnet. Os quatro lotes da ficha (QR, dinheiro em es, guias de arquivo em pt, guias de arquivo em es) foram divididos pelo tamanho: o dinheiro em calculadoras / presets, guias e hub; cada lote de guias em imagem / PDF. São 7 agentes, cada um com um conjunto de arquivos só seu. O glossário e as convenções (gênero, `measuredTerms`, palavras dos motores) vieram antes, no brief comum, para os dois agentes de um idioma escreverem igual.
+- **Os arquivos compartilhados** (`src/i18n/{pt,es}/common.ts`, as homes, o glossário) ficaram com o agente principal: os redatores devolveram os cartões e os termos novos na resposta, e o agente principal os integrou. Assim nenhum par de agentes mexeu no mesmo arquivo.
+- **Os stubs:** enquanto os lotes eram escritos, cada arquivo de texto novo existia como cópia do inglês marcada `// STUB-IDIOMAS`, para o build e os testes rodarem. Nenhum stub chega à PR (o `english-leak.test.ts` reprova texto inglês numa página de pt e es, e a busca pelo marcador fica no relatório).
+- **A leitura de cada lote:** o agente principal leu cada lote contra o glossário e rodou o `lint:texto` antes de o lote entrar na branch.

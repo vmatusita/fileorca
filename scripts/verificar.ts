@@ -3,7 +3,9 @@
 // Stops at the first failure; nothing here is optional or skipped.
 //
 // The CI runs it in parts, one job each (ADR-003): `--sem-playwright` runs every gate except the Playwright suite;
-// `--playwright=<project>` (with `--shard=i/n` when the project is split) builds and runs that part of the suite.
+// `--playwright=<project>` (with `--shard=i/n` when the project is split) builds and runs that part of the suite. Since the
+// languages adjustment (DECISOES § 320) the gates are two parts: `--sem-playwright --sem-lighthouse` runs every gate but the
+// Playwright suite and Lighthouse, and `--lighthouse` builds and runs Lighthouse alone.
 // Together the parts are the same steps as the whole, and every part keeps the 900 s limit. Without arguments it
 // runs everything, as on a laptop.
 import { spawn } from 'node:child_process';
@@ -16,6 +18,7 @@ export interface Step {
 }
 
 const E2E = 'playwright (chromium e webkit, axe, anúncios, orçamentos)';
+const LIGHTHOUSE = 'lighthouse ci';
 
 export const STEPS: Step[] = [
   { name: 'tipos (astro check)', command: 'pnpm run tipos' },
@@ -33,7 +36,7 @@ export const STEPS: Step[] = [
   { name: 'conteúdo de dinheiro e saúde', command: 'pnpm run gate:dinheiro-saude' },
   { name: 'actionlint', command: 'pnpm run gate:actionlint' },
   { name: E2E, command: 'pnpm run e2e' },
-  { name: 'lighthouse ci', command: 'pnpm run lhci' },
+  { name: LIGHTHOUSE, command: 'pnpm run lhci' },
   { name: 'lint:texto (LanguageTool)', command: 'pnpm run lint:texto' },
 ];
 
@@ -45,10 +48,17 @@ export function plan(args: readonly string[]): { label: string; steps: Step[] } 
   if (args.length === 1 && args[0] === '--sem-playwright') {
     return { label: 'sem o Playwright', steps: STEPS.filter((step) => step.name !== E2E) };
   }
+  if (args.length === 2 && args.includes('--sem-playwright') && args.includes('--sem-lighthouse')) {
+    return { label: 'sem o Playwright e sem o Lighthouse', steps: STEPS.filter((step) => step.name !== E2E && step.name !== LIGHTHOUSE) };
+  }
+  if (args.length === 1 && args[0] === '--lighthouse') {
+    const build = STEPS.find((step) => step.name.startsWith('build')) as Step;
+    return { label: 'Lighthouse', steps: [build, STEPS.find((step) => step.name === LIGHTHOUSE) as Step] };
+  }
   const project = /^--playwright=(.+)$/.exec(args[0] ?? '')?.[1];
   const shard = args.length === 2 ? /^--shard=(\d+)\/(\d+)$/.exec(args[1] ?? '') : null;
   if (!project || !(PROJECTS as readonly string[]).includes(project) || args.length > 2 || (args.length === 2 && !shard)) {
-    throw new Error(`uso: pnpm verificar [--sem-playwright | --playwright=chromium|webkit [--shard=i/n]] (recebido: ${args.join(' ')})`);
+    throw new Error(`uso: pnpm verificar [--sem-playwright [--sem-lighthouse] | --lighthouse | --playwright=chromium|webkit [--shard=i/n]] (recebido: ${args.join(' ')})`);
   }
   const [index, total] = shard ? [Number(shard[1]), Number(shard[2])] : [1, 1];
   if (index < 1 || index > total) throw new Error(`--shard=${index}/${total} fora do intervalo`);
