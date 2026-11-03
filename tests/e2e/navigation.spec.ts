@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { LAUNCHED } from '../../src/platform/site.ts';
-import { QR_ID, ROUTES, type Lang } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
 import ptCommon from '../../src/i18n/pt/common.ts';
+import esCommon from '../../src/i18n/es/common.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, guidePathIn, moneyPage, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { filterEntries, type SearchEntry } from '../../src/search/search.ts';
 
 test('a missing page gets the nearest 404 of its language, with status 404', async ({ page }) => {
@@ -41,8 +42,13 @@ test('pages are served with the generated headers (no X-Robots-Tag since the lau
 
 // F2 (DECISOES § 84): a page that exists only in English offers the other languages' homes, never a missing page. F6: HEIC to
 // JPG has its Portuguese and Spanish pages now, so the example is a file guide, which stays in English (DECISOES § 233).
+// Languages adjustment: the file guides have their pt and es pages too, so the example is a home or health calculator,
+// which stays in English until the trigger of § 273.
+const ENGLISH_ONLY = LIFE_CALC_PAGES['bmi-calculator'].path;
+
 test('on a page that exists only in English, the language menu leads to the home of each language', async ({ page }) => {
-  await page.goto('/guides/heic-to-jpg-on-windows/');
+  expect(languagesOf(routeById('bmi-calculator')), `${ENGLISH_ONLY} só em inglês`).toEqual(['en']);
+  await page.goto(ENGLISH_ONLY);
   await page.getByRole('button', { name: /^EN/ }).click();
   await expect(page.getByRole('link', { name: 'Português' })).toHaveAttribute('href', '/pt/');
   await expect(page.getByRole('link', { name: 'Español' })).toHaveAttribute('href', '/es/');
@@ -56,6 +62,12 @@ test('the language button goes to the equivalent page', async ({ page }) => {
   await page.getByRole('button', { name: /^PT/ }).click();
   await page.getByRole('link', { name: 'Español' }).click();
   await expect(page).toHaveURL(/\/es\/comprimir-imagen\/$/);
+  // Languages adjustment: a file guide (once the example of an English-only page) leads to the same guide in each language.
+  const guide = FILE_GUIDES['guides-heic-to-jpg-on-windows'].paths;
+  await page.goto(guide.en);
+  await page.getByRole('button', { name: /^EN/ }).click();
+  await expect(page.getByRole('link', { name: 'Português' })).toHaveAttribute('href', guide.pt);
+  await expect(page.getByRole('link', { name: 'Español' })).toHaveAttribute('href', guide.es);
 });
 
 test('tool search loads on first use, finds synonyms in any language and opens the page in the current one', async ({ page }) => {
@@ -90,36 +102,95 @@ test('tool search loads on first use, finds synonyms in any language and opens t
 // from the registry and the route map (the English count grows by construction, DECISOES § 259).
 const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
 const searchedIn = (lang: Lang): number => ROUTES.filter((route) => SEARCHED.has(route.id) && route.paths[lang]).length;
-const PT_NAMES = [...Object.values(ptCommon.tools), ...Object.values(ptCommon.pdf), ...Object.values(ptCommon.calcs)].map((blurb) => blurb.name);
+// The names a row of each language may start with, read from its common texts. Languages adjustment: the file guides and the
+// QR code generator in both languages, and the money guides in Spanish (its calculators are the 18 of the English list).
+const namesOf = (blurbs: Record<string, { name: string }>): string[] => Object.values(blurbs).map((blurb) => blurb.name);
+const PT_NAMES = [...namesOf(ptCommon.tools), ...namesOf(ptCommon.pdf), ...namesOf(ptCommon.calcs), ...namesOf(ptCommon.fileGuides), ptCommon.qr.name];
+const ES_NAMES = [...namesOf(esCommon.tools), ...namesOf(esCommon.pdf), ...namesOf(esCommon.calcs), ...namesOf(esCommon.guides), ...namesOf(esCommon.fileGuides), esCommon.qr.name];
+const TRANSLATED = [
+  { lang: 'pt', common: ptCommon, names: PT_NAMES },
+  { lang: 'es', common: esCommon, names: ES_NAMES },
+] as const;
 
-test('the search shows only the pages that exist in the language and never falls back to English', async ({ page }) => {
-  await page.goto('/pt/');
-  await page.keyboard.press('Control+K');
-  const dialog = page.locator('#fo-search-dialog');
-  const input = dialog.getByRole('combobox');
-  await expect(input).toBeFocused();
-  // Nothing typed: every page Portuguese has (31 in the F6, fewer than the English list).
-  expect(searchedIn('pt')).toBeLessThan(searchedIn('en'));
-  await expect(dialog.getByRole('option')).toHaveCount(searchedIn('pt'));
-  // 'compress' and 'jpg' match pages that exist in Portuguese: every row is the Portuguese name of one of them.
-  for (const query of ['compress', 'jpg', 'jpeg']) {
-    await input.fill(query);
-    const rows = await dialog.getByRole('option').allInnerTexts();
-    expect(rows.length, query).toBeGreaterThan(0);
-    for (const row of rows) expect(PT_NAMES.some((name) => row.replace(/\s+/g, ' ').startsWith(name)), `${query}: ${row}`).toBe(true);
+test('the search shows only the pages that exist in the language and never falls back to English', async ({ page, request }) => {
+  const index = (await (await request.get('/search-index.json')).json()) as SearchEntry[];
+  for (const { lang, common, names } of TRANSLATED) {
+    await page.goto(`/${lang}/`);
+    await page.keyboard.press('Control+K');
+    const dialog = page.locator('#fo-search-dialog');
+    const input = dialog.getByRole('combobox');
+    await expect(input).toBeFocused();
+    // Nothing typed: every page the language has (fewer than the English list: no home and health calculators, and in
+    // Portuguese no US money page).
+    expect(searchedIn(lang), lang).toBeLessThan(searchedIn('en'));
+    await expect(dialog.getByRole('option')).toHaveCount(searchedIn(lang));
+    // 'compress' and 'jpg' match pages that exist in the language: every row is the name of one of them in the language.
+    for (const query of ['compress', 'jpg', 'jpeg']) {
+      await input.fill(query);
+      // The list repaints after the index answers: the count of this query is waited for before the rows are read.
+      const shown = filterEntries(index, query, lang);
+      expect(shown.length, `${lang} ${query}`).toBeGreaterThan(0);
+      await expect(dialog.getByRole('option'), `${lang} ${query}`).toHaveCount(shown.length);
+      const rows = await dialog.getByRole('option').allInnerTexts();
+      for (const row of rows) expect(names.some((name) => row.replace(/\s+/g, ' ').startsWith(name)), `${lang} ${query}: ${row}`).toBe(true);
+    }
+    await input.fill('compress');
+    await expect(dialog.getByRole('option').first()).toHaveText(new RegExp(common.tools['compress-image'].name));
+    if (lang !== 'pt') continue;
+    // The mortgage calculator exists in English and Spanish only: Portuguese finds nothing, and does not offer the English page.
+    await input.fill('mortgage');
+    await expect(dialog.locator('[data-search-empty]')).toBeVisible();
+    await expect(dialog.getByRole('option')).toHaveCount(0);
+    await expect(dialog.locator('[data-search-empty-title]')).toContainText('mortgage');
+    // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101).
+    await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "mortgage"');
+    await input.fill('jpg');
+    await expect(dialog.getByRole('status')).toHaveText('');
   }
-  await input.fill('compress');
-  await expect(dialog.getByRole('option').first()).toHaveText(/Comprimir imagem/);
-  // The mortgage calculator exists in English and Spanish only: Portuguese finds nothing, and does not offer the English page.
-  await input.fill('mortgage');
-  await expect(dialog.locator('[data-search-empty]')).toBeVisible();
-  await expect(dialog.getByRole('option')).toHaveCount(0);
-  await expect(dialog.locator('[data-search-empty-title]')).toContainText('mortgage');
-  // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101).
-  await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "mortgage"');
-  await input.fill('jpg');
-  await expect(dialog.getByRole('status')).toHaveText('');
 });
+
+// Languages adjustment (decision 6): the search of pt and es finds the QR code generator by the words people use in the
+// language, and each file guide of the language by its name, each in its category; Enter opens the page of the language.
+const QR_QUERIES = {
+  pt: ['qr', 'código qr', 'gerar qr code'],
+  es: ['código qr', 'generar qr', 'crear código qr'],
+} as const;
+type Translated = (typeof TRANSLATED)[number];
+const qrRow = ({ common }: Translated): string => `${common.qr.name}${common.search.utilityCategory}`;
+const guideRow = ({ common }: Translated, id: FileGuideId): string =>
+  `${common.fileGuides[id].name}${FILE_GUIDES[id].hub === 'pdf-tools' ? common.search.pdfCategory : common.search.imageCategory}`;
+
+for (const translated of TRANSLATED) {
+  const { lang, common } = translated;
+  test(`the ${lang} search finds the QR code generator by its synonyms and the file guides by their names, and opens them in the language`, async ({ page }) => {
+    const dialog = page.locator('#fo-search-dialog');
+    const input = dialog.getByRole('combobox');
+    const first = dialog.getByRole('option').first();
+    await page.goto(`/${lang}/`);
+    await page.keyboard.press('Control+K');
+    await expect(input).toBeFocused();
+    for (const query of QR_QUERIES[lang]) {
+      await input.fill(query);
+      await expect(first, `${lang} ${query}`).toHaveText(qrRow(translated));
+    }
+    for (const id of FILE_GUIDE_IDS) {
+      await input.fill(common.fileGuides[id].name);
+      await expect(first, `${lang} ${id}`).toHaveText(guideRow(translated, id));
+    }
+    await input.fill(QR_QUERIES[lang][QR_QUERIES[lang].length - 1] ?? '');
+    await expect(first).toHaveText(qrRow(translated));
+    await input.press('Enter');
+    await expect(page).toHaveURL(new RegExp(`${routeById(QR_ID).paths[lang] ?? '-'}$`));
+    const guide = 'guides-photos-to-one-pdf';
+    await page.goto(`/${lang}/`);
+    await page.keyboard.press('Control+K');
+    await expect(input).toBeFocused();
+    await input.fill(common.fileGuides[guide].name);
+    await expect(first).toHaveText(guideRow(translated, guide));
+    await input.press('Enter');
+    await expect(page).toHaveURL(new RegExp(`${FILE_GUIDES[guide].paths[lang]}$`));
+  });
+}
 
 test('the English search finds the new tools and presets and opens the one chosen', async ({ page }) => {
   await page.goto('/');
@@ -204,6 +275,40 @@ test('the 404 page has a working tool search', async ({ page }) => {
   // F6: Compress PDF exists in Spanish and says "achicar pdf" too; Compress image comes first.
   await expect(page.locator('[data-search-inline]').getByRole('option').first()).toHaveText(/Comprimir imagen/);
 });
+
+// Languages adjustment (decision 6): the 404 of pt and es searches the pages new to the language. Each name typed finds its
+// page first: the QR code generator (by its name and by the first word people use for it) and the file guides, and in Spanish
+// every money calculator, preset and guide, each in its category.
+for (const translated of TRANSLATED) {
+  const { lang, common } = translated;
+  const missing = lang === 'pt' ? '/pt/nao-existe/' : '/es/no-existe/';
+  test(`the ${lang} 404 page finds the pages new to the language by their names`, async ({ page }) => {
+    const queries: [string, string][] = [
+      [common.qr.name, qrRow(translated)],
+      [QR_QUERIES[lang][0], qrRow(translated)],
+      ...FILE_GUIDE_IDS.map((id): [string, string] => [common.fileGuides[id].name, guideRow(translated, id)]),
+    ];
+    if (lang === 'es') {
+      const money = esCommon.search.moneyCategory;
+      for (const id of CALC_PAGE_IDS) {
+        expect(moneyPage(id, 'es'), `${id} em espanhol`).not.toBeNull();
+        queries.push([esCommon.calcs[id].name, `${esCommon.calcs[id].name}${money}`]);
+      }
+      for (const id of GUIDE_IDS) {
+        expect(guidePathIn(id, 'es'), `${id} em espanhol`).not.toBeNull();
+        queries.push([esCommon.guides[id].name, `${esCommon.guides[id].name}${money}`]);
+      }
+    }
+    expect((await page.goto(missing))?.status(), missing).toBe(404);
+    const search = page.locator('[data-search-inline]');
+    const box = search.getByRole('combobox');
+    await box.click();
+    for (const [query, row] of queries) {
+      await box.fill(query);
+      await expect(search.getByRole('option').first(), `${lang} ${query}`).toHaveText(row);
+    }
+  });
+}
 
 // F7 (decision 9): the English search finds the home and health calculators by the words people use ("pregnancy", "AC size",
 // "cubic yards"), each in its category, and Enter opens the first one. Portuguese and Spanish do not have these pages: the
