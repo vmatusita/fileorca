@@ -1,10 +1,13 @@
 // The five guides (prompt F4, decision 10): the main example of each guide is a case of the oracle, the
 // embedded calculator starts from it, and every sentence of the text that describes a result in words (less
 // interest, sooner, later than the shortcut) still holds for the numbers the engines give. If a text and its
-// numbers drift apart, this test fails before the page does.
+// numbers drift apart, this test fails before the page does. Since the languages adjustment the guides also exist in
+// Spanish: the same facts in the Spanish format, every placeholder of the Spanish texts filled, and the words of the
+// engines (the table headings, the debt names) taken from each guide's texts.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { GUIDE_FACTS } from '../../src/tools/calc/guides.ts';
+import { GUIDE_FACTS, GUIDE_TEXTS, type GuideLang } from '../../src/tools/calc/guides.ts';
+import { placeholdersIn } from '../../src/tools/guides/measured.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { GUIDES, GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 import { mortgage15vs30, mortgageExtraPayments, refinance, type ExtraPaymentsInput, type FifteenVsThirtyInput, type RefinanceInput } from '../../src/calc/loans.ts';
@@ -35,21 +38,48 @@ describe('the guides', () => {
     }
   });
 
-  it('fill every placeholder of their texts with a number from the engines', () => {
+  // The prose of a guide (every key but its `words`, whose {n} and {rate} the engines fill) in English and in Spanish.
+  const LANGS: readonly GuideLang[] = ['en', 'es'];
+  const prose = (id: (typeof GUIDE_IDS)[number], lang: GuideLang): unknown => ({ ...GUIDE_TEXTS[id][lang], words: undefined });
+
+  it('fill every placeholder of their texts with a number from the engines, in English and in Spanish', () => {
+    for (const lang of LANGS) {
+      for (const id of GUIDE_IDS) {
+        const facts = GUIDE_FACTS[id](lang).facts;
+        const used = [...placeholdersIn(prose(id, lang))].filter((name) => name !== 'date');
+        expect(used.length, `${id} (${lang})`).toBeGreaterThan(0);
+        for (const name of used) expect(facts[name], `${id} (${lang}): {${name}}`).toBeDefined();
+        for (const value of Object.values(facts)) expect(value, `${id} (${lang})`).not.toMatch(/NaN|undefined|Infinity|\{/);
+      }
+    }
+  });
+
+  it('use in Spanish the same placeholders as in English, and the words of the engines only through {n} and {rate}', () => {
     for (const id of GUIDE_IDS) {
-      const source = readFileSync(`src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`, 'utf8');
-      const facts = GUIDE_FACTS[id]().facts;
-      const used = [...source.matchAll(/\{(\w+)\}/g)].map((match) => match[1] ?? '').filter((name) => name !== 'date');
-      for (const name of used) expect(facts[name], `${id}: {${name}}`).toBeDefined();
-      for (const value of Object.values(facts)) expect(value, id).not.toMatch(/NaN|undefined|Infinity/);
+      expect([...placeholdersIn(prose(id, 'es'))].sort(), id).toEqual([...placeholdersIn(prose(id, 'en'))].sort());
+      for (const lang of LANGS) expect([...placeholdersIn(GUIDE_TEXTS[id][lang].words)].filter((name) => name !== 'n' && name !== 'rate'), `${id} (${lang})`).toEqual([]);
+    }
+  });
+
+  it('write the same numbers in Spanish as in English, in the Spanish format', () => {
+    // The digits of each fact, once the separators are gone: $1,234.56 and 6.5 % keep their digits in both languages.
+    const digits = (value: string): string => value.replace(/[^\d]/g, '');
+    for (const id of GUIDE_IDS) {
+      const en = GUIDE_FACTS[id]('en');
+      const es = GUIDE_FACTS[id]('es');
+      for (const [name, value] of Object.entries(en.facts)) expect(digits(es.facts[name] ?? ''), `${id}: {${name}}`).toBe(digits(value));
+      expect(es.table.rows.map((row) => row.map(digits)), id).toEqual(en.table.rows.map((row) => row.map(digits)));
+      for (const value of [...Object.values(es.facts), ...es.table.rows.flat()]) expect(value, id).not.toMatch(/\d%/);
     }
   });
 
   it('measure a table of their own, with the same number of cells in every row', () => {
-    for (const id of GUIDE_IDS) {
-      const { table } = GUIDE_FACTS[id]();
-      expect(table.rows.length, id).toBeGreaterThanOrEqual(5);
-      for (const row of table.rows) expect(row, id).toHaveLength(table.head.length);
+    for (const lang of LANGS) {
+      for (const id of GUIDE_IDS) {
+        const { table } = GUIDE_FACTS[id](lang);
+        expect(table.rows.length, `${id} (${lang})`).toBeGreaterThanOrEqual(5);
+        for (const row of table.rows) expect(row, `${id} (${lang})`).toHaveLength(table.head.length);
+      }
     }
   });
 });

@@ -10,7 +10,7 @@ import { buildReport } from '../../src/engine/pdf/report.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { csvText, reportInput } from '../../src/tools/calc/exports.ts';
 import { panelData } from '../../src/tools/calc/page.ts';
-import { BR_CALC_IDS, ES_CALC_IDS, type MoneyPageId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, type MoneyPageId } from '../../src/tools/calc/registry.ts';
 import { viewOf } from '../../src/tools/calc/store.ts';
 import type { Cell } from '../../src/tools/calc/types.ts';
 import { cellText, inputRows } from '../../src/tools/calc/view.ts';
@@ -34,8 +34,8 @@ function pdfOf(id: MoneyPageId, lang: Lang) {
   );
 }
 
-describe('the five Spanish calculators', () => {
-  for (const id of ES_CALC_IDS) {
+describe('the Spanish calculators and presets (the five of the F6, every one since the languages adjustment)', () => {
+  for (const id of CALC_PAGE_IDS) {
     it(`${id} works out the English page example to the same cent, written the same way`, () => {
       const en = pageExample(id, 'en');
       const es = pageExample(id, 'es');
