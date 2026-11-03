@@ -16,8 +16,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'Lo que llevaban nuestras fotos',
       paragraphs: [
-        'Las {withGps_wordf} fotos reales de celular en JPG de nuestras pruebas tenían coordenadas GPS, {withCamera_wordf} indicaban el modelo de la cámara y {withDate_wordf} tenían la fecha y la hora en que se tomaron. Son fotos de prueba antiguas de un Google Pixel y de iPhones, y los datos seguían todos ahí.',
-        'De nuestras {heicFiles} fotos HEIC de prueba, {heicWithGps} tenían coordenadas GPS reales y las {heicWithCamera} indicaban la cámara. HEIC es el formato que usa el iPhone de forma predeterminada, y lleva el mismo tipo de datos que un JPG.',
+        'Las {withGps_wordf} fotos reales de celular en JPG de nuestras pruebas tenían coordenadas de GPS, {withCamera_wordf} indicaban el modelo de la cámara y {withDate_wordf} tenían la fecha y la hora en que se tomaron. Son fotos de prueba antiguas de un Google Pixel y de iPhones, y los datos seguían todos ahí.',
+        'De nuestras {heicFiles} fotos HEIC de prueba, {heicWithGps} tenían coordenadas reales de GPS y las {heicWithCamera} indicaban la cámara. HEIC es el formato que usa el iPhone de forma predeterminada, y lleva el mismo tipo de datos que un JPG.',
       ],
     },
     {
@@ -45,7 +45,7 @@ const texts: FileGuideTexts = {
       heading: 'Lo que hicieron las otras herramientas',
       paragraphs: [
         'Comprimir imagen también quitó la ubicación y dejó las fotos un {compressImageRatioChromium_off} más ligeras, pero porque las volvió a comprimir: su puntuación más baja en nuestras fotos fue de {compressImagePsnrMinChromium} de PSNR. El PSNR mide cuánto se parecen dos imágenes, y cuanto más sube, más se parecen. Sirve para enviar, no para guardar. Recortar imagen y Rotar imagen cambian el encuadre por diseño, y PNG a JPG convirtió las fotos en archivos PNG con {pngToJpgRatioChromium_times} el tamaño en Chromium y {pngToJpgRatioWebkit_times} en WebKit.',
-        'Ninguna dejó coordenadas GPS, nombres de cámara ni fechas en las fotos, y el PDF de Imagen a PDF tampoco llevaba GPS. La tabla de "Lo que medimos" muestra cada herramienta.',
+        'Ninguna dejó coordenadas de GPS, nombres de cámara ni fechas en las fotos, y el PDF de Imagen a PDF tampoco llevaba GPS. La tabla de "Lo que medimos" muestra cada herramienta.',
       ],
     },
     {

@@ -58,7 +58,7 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'Lo que medimos',
-  measuredIntro: 'La primera página de cada PDF en cada resolución de la herramienta, en JPG y en PNG. Los píxeles son ancho por alto.',
+  measuredIntro: 'La primera página de cada PDF en cada resolución de la herramienta, en JPG y en PNG. Las medidas en píxeles van en ancho por alto.',
   measuredNote: 'Medido el {date} en la página PDF a JPG de este sitio, en Chromium {chromiumVersion} y en WebKit {webkitVersion}, con {system}, sobre la primera y la segunda página de {files_word} PDF de nuestras pruebas: los documentos reales y un PDF de fotos (el libro escaneado tiene una sola página). Los píxeles fueron los mismos en ambos navegadores; la tabla muestra los archivos de Chromium.',
   tables: [
     {

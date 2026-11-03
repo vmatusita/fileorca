@@ -67,7 +67,7 @@ const texts: FileGuideTexts = {
     { id: 'instagram-feed', label: 'Central de Ajuda do Instagram: Resolução de imagem das fotos que você compartilha no Instagram', href: 'https://help.instagram.com/1631821640426723/?locale=pt_BR', read: '2026-11-03' },
     { id: 'instagram-reel-cover', label: 'Central de Ajuda do Instagram: Tamanho e taxas de proporção de reels no Instagram', href: 'https://help.instagram.com/1038071743007909/?locale=pt_BR', read: '2026-11-03' },
     { id: 'facebook-page', label: 'Central de Ajuda do Facebook: Dimensões da foto do perfil e da capa da Página do Facebook', href: 'https://www.facebook.com/help/125379114252045?locale=pt_BR', read: '2026-11-03' },
-    { id: 'facebook-link', label: 'Meta for Developers: Imagens em compartilhamento de links', href: 'https://developers.facebook.com/documentation/sharing/webmasters/images', read: '2026-11-03' },
+    { id: 'facebook-link', label: 'Documentação da Meta para desenvolvedores: as imagens dos links compartilhados', href: 'https://developers.facebook.com/documentation/sharing/webmasters/images', read: '2026-11-03' },
     { id: 'x-profile', label: 'Central de Ajuda do X: Help with uploading a profile photo (em inglês)', href: 'https://help.x.com/en/managing-your-account/common-issues-when-uploading-profile-photo', read: '2026-11-03' },
     { id: 'linkedin-post', label: 'Ajuda do LinkedIn: Compartilhar fotos no LinkedIn', href: 'https://www.linkedin.com/help/lms/answer/a527229?lang=pt', read: '2026-11-03' },
     { id: 'linkedin-profile-cover', label: 'Ajuda do LinkedIn: Adicionar ou alterar a imagem da capa no seu perfil', href: 'https://www.linkedin.com/help/linkedin/answer/a568217/add-or-change-the-background-photo-on-your-profile?lang=pt', read: '2026-11-03' },

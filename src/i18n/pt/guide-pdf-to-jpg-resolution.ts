@@ -58,7 +58,7 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
-  measuredIntro: 'A primeira página de cada PDF em cada resolução da ferramenta, em JPG e em PNG. Os pixels são largura por altura.',
+  measuredIntro: 'A primeira página de cada PDF em cada resolução da ferramenta, em JPG e em PNG. As medidas em pixels vêm em largura por altura.',
   measuredNote: 'Medido em {date} pela página PDF para JPG deste site, no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, na primeira e na segunda página de {files_word} PDFs dos nossos testes: os documentos reais e um PDF feito de fotos (o livro escaneado tem uma página só). Os pixels foram os mesmos em ambos os navegadores; a tabela mostra os arquivos do Chromium.',
   tables: [
     {

@@ -71,7 +71,7 @@ const texts: FileGuideTexts = {
   half: 4,
   measuredHeading: 'O que medimos',
   measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, direto num PDF só, e de novo depois da Comprimir imagem. A porcentagem compara com as fotos originais.',
-  measuredNote: 'Medido em {date} pelas páginas Imagem para PDF e Comprimir imagem deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, que deram os mesmos tamanhos, nas nossas fotos de celular de verdade, com os ajustes padrão. As imagens dentro do PDF foram contadas com o pdf-lib.',
+  measuredNote: 'Medido em {date} pela página Imagem para PDF e pela página Comprimir imagem deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, que deram os mesmos tamanhos, nas nossas fotos de celular de verdade, com os ajustes padrão. As imagens dentro do PDF foram contadas com o pdf-lib.',
   tables: [
     {
       heading: 'As fotos e o PDF',

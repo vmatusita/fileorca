@@ -22,7 +22,7 @@ export default {
     view: {
       label: 'Precio de vivienda que puedes pagar',
       placard: 'precio de la vivienda',
-      sentence: 'Con {rule}, tus costos de vivienda pueden ser {housing} al mes: {pi} de capital e intereses, y el resto impuestos, seguro y HOA. Eso paga un préstamo de {loan}.',
+      sentence: 'Con {rule}, tus costos de vivienda pueden ser {housing} al mes: {pi} de capital e intereses, y el resto, de impuestos, seguro y HOA. Eso paga un préstamo de {loan}.',
       ruleFront: 'el límite de vivienda del {front}',
       ruleBack: 'el límite de deuda total del {back}',
       ruleBoth: 'los dos límites',

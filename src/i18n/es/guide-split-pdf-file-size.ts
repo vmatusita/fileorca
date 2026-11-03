@@ -45,7 +45,7 @@ const texts: FileGuideTexts = {
       heading: 'Cómo dividir sin el peso extra',
       paragraphs: [
         'Divide en rangos, no en páginas sueltas, cuando las páginas comparten sus fuentes. Un capítulo en una parte lleva sus fuentes una vez, mientras que sus páginas separadas las llevan una vez cada una. Escribe en la herramienta los rangos que necesitas, por ejemplo por capítulo o por sección, en lugar de dividir cada página.',
-        'Si divides para no pasarte del límite de un correo, mira el total y no solo cada parte: una parte que cabe puede ser la primera de muchas partes pesadas. Cada parte de nuestro informe escaneado sumó unos {reportGrowthPerPart} al total, y {reportMetadata} de eso es su propia copia de los metadatos; el resto es su estructura. Menos partes, y más grandes, repiten ambas cosas menos veces. Comprimir PDF puede aligerar las imágenes antes de que dividas.',
+        'Si divides para no pasarte del límite de un correo, mira el total y no solo cada parte: una parte dentro del límite puede ser la primera de muchas partes pesadas. Cada parte de nuestro informe escaneado sumó unos {reportGrowthPerPart} al total, y {reportMetadata} de eso es su propia copia de los metadatos; el resto es su estructura. Menos partes, y más grandes, repiten ambas cosas menos veces. Comprimir PDF puede aligerar las imágenes antes de que dividas.',
         'Y si lo que necesitas es un PDF más corto y no varios, mejor elimina las páginas que no te hacen falta. Un archivo entero guarda sus fuentes una vez, sin importar cuántas páginas quites.',
       ],
     },

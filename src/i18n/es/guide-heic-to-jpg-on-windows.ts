@@ -52,7 +52,7 @@ const texts: FileGuideTexts = {
     {
       heading: 'La ubicación se queda atrás',
       paragraphs: [
-        'Una foto puede llevar el lugar donde se tomó. De nuestras {files} fotos, {gpsBefore} tenían coordenadas GPS reales, y {gpsTagBefore} tenían una etiqueta GPS de algún tipo, llena o vacía. Después de la conversión, la cantidad de JPG con algún dato GPS fue {gpsAfterChromium}.',
+        'Una foto puede llevar el lugar donde se tomó. De nuestras {files} fotos, {gpsBefore} tenían coordenadas reales de GPS, y {gpsTagBefore} tenían una etiqueta GPS de algún tipo, llena o vacía. Después de la conversión, la cantidad de JPG con algún dato GPS fue {gpsAfterChromium}.',
         'Es a propósito: la herramienta escribe cada JPG a partir de los píxeles, así que la ubicación, los datos de la cámara y los demás metadatos del HEIC se quedan atrás. Si quieres conservar la ubicación, para un mapa de fotos o un álbum, guarda el HEIC original o usa la exportación de tu app de fotos.',
       ],
     },

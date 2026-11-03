@@ -69,7 +69,7 @@ export default {
     },
     {
       q: '¿Por qué las cuentas de ahorros muestran el APY?',
-      a: 'La Ley de Veracidad en la Información de Ahorros pide a los bancos una forma común de mostrar los intereses, el rendimiento porcentual anual, para que las cuentas que se capitalizan de forma distinta se puedan comparar.',
+      a: 'La Ley de Veracidad en la Información de Ahorros pide a los bancos una forma común de mostrar los intereses, el rendimiento porcentual anual, que permite comparar cuentas que se capitalizan de forma distinta.',
     },
     {
       q: '¿La APR de un préstamo es lo mismo?',
