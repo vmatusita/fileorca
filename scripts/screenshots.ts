@@ -66,7 +66,9 @@ async function serve(): Promise<ChildProcess | null> {
 }
 
 async function open(browser: Browser, theme: Theme, width: number, path: string, consent: 'granted' | 'denied' | null = 'denied', coffeeUses = 0): Promise<Page> {
-  const page = await browser.newPage({ viewport: { width, height: width < 768 ? 740 : 800 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce' });
+  // No service worker, as in the tests (DECISOES § 294): once it controls the page, page.route no longer sees what it
+  // answers, and the shots that hold a file back (the water level) would never catch the state.
+  const page = await browser.newPage({ viewport: { width, height: width < 768 ? 740 : 800 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce', serviceWorkers: 'block' });
   await page.addInitScript(
     ([choice, uses]) => {
       if (choice) localStorage.setItem('fo-consent', choice);
