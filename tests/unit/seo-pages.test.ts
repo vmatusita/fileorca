@@ -7,9 +7,11 @@ import {
   LIFE_PAGE_IDS,
   MONEY_PAGE_IDS,
   PDF_PAGE_IDS,
+  SITEMAP_REGISTRY_IDS,
   TRANSLATED_DESCRIPTION_RANGE,
   descriptionProblem,
   fileGuideTitleProblems,
+  fileGuideWant,
   isImagePage,
   isQrPage,
   missingFromSitemap,
@@ -20,8 +22,11 @@ import {
 } from '../../scripts/lib/seo-pages.ts';
 import { BR_CALC_IDS, BR_HUB_ID, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { QR_ID, ROUTES, routeById } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, routeById } from '../../src/i18n/routes.ts';
 import qrTexts from '../../src/tools/qr-code-generator/i18n/en.ts';
+import enCommon from '../../src/i18n/en/common.ts';
+import { TEXTS } from '../../src/i18n/texts.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 
 // The SEO checks that depend on what a page is (scripts/lib/seo-pages.ts, used by gate:seo): they read the
@@ -262,5 +267,70 @@ describe('the QR code generator of the F7 (decision 8)', () => {
     expect(descriptionProblem(QR_ID, 'en', qrTexts.description)).toBeNull();
     expect(titleProblem(QR_ID, `${qrTexts.title} | FileOrca`, qrTexts.h1)).toBeNull();
     expect(routeById(QR_ID).paths.en).toBe('/qr-code-generator/');
+  });
+});
+
+// ---- The languages adjustment: the QR code generator and the file guides in Portuguese and Spanish -----------------------
+
+describe('the pages of the languages adjustment', () => {
+  const text = (length: number): string => 'a'.repeat(length);
+
+  it('asks 120 to 160 characters of the QR code generator in Portuguese and Spanish too, and 50 to 170 of the guides and the Spanish money pages', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      expect(descriptionProblem(QR_ID, lang, text(120)), lang).toBeNull();
+      expect(descriptionProblem(QR_ID, lang, text(160)), lang).toBeNull();
+      expect(descriptionProblem(QR_ID, lang, text(119)), lang).toMatch(/pede de 120 a 160 no gerador de QR code/);
+      expect(descriptionProblem(QR_ID, lang, text(161)), lang).toMatch(/pede de 120 a 160 no gerador de QR code/);
+      for (const id of FILE_GUIDE_PAGE_IDS) {
+        expect(descriptionProblem(id, lang, text(50)), `${lang} ${id}`).toBeNull();
+        expect(descriptionProblem(id, lang, text(170)), `${lang} ${id}`).toBeNull();
+        expect(descriptionProblem(id, lang, text(49)), `${lang} ${id}`).toBe('descrição com 49 caracteres');
+        expect(descriptionProblem(id, lang, text(171)), `${lang} ${id}`).toBe('descrição com 171 caracteres');
+      }
+    }
+    for (const id of ['money-calculators', 'auto-loan-calculator', 'mortgage-calculator-biweekly', 'guides-refinance-break-even']) {
+      expect(descriptionProblem(id, 'es', text(60)), id).toBeNull();
+      expect(descriptionProblem(id, 'es', text(171)), id).toBe('descrição com 171 caracteres');
+    }
+  });
+
+  it('compares the title of a file guide with the name of its card and the tool page in the language of the page', () => {
+    for (const id of FILE_GUIDE_IDS) {
+      const tool = routeById(FILE_GUIDES[id].tool);
+      for (const lang of LANGS) {
+        const want = fileGuideWant(id, lang);
+        expect(want.name, `${lang} ${id}`).toBe(TEXTS[lang].common.fileGuides?.[id]?.name);
+        expect(want.name.length, `${lang} ${id}`).toBeGreaterThan(0);
+        expect(want.toolPath, `${lang} ${id}`).toBe(tool.paths[lang]);
+      }
+    }
+    expect(fileGuideWant('guides-jpg-vs-png', 'pt').toolPath).toBe('/pt/png-para-jpg/');
+    expect(fileGuideWant('guides-why-is-my-pdf-so-large', 'es').toolPath).toBe('/es/comprimir-pdf/');
+    expect(fileGuideWant('guides-jpg-vs-png', 'en').name).toBe(enCommon.fileGuides['guides-jpg-vs-png'].name);
+  });
+
+  it('fails a translated guide held to the English name or to the H1 of the tool in its language (negative controls)', () => {
+    // A Portuguese guide whose title is in Portuguese: it starts with the Portuguese name, not with the English one.
+    const name = 'Como converter HEIC para JPG no Windows';
+    const title = 'Como Converter HEIC para JPG no Windows, Foto por Foto | FileOrca';
+    expect(fileGuideTitleProblems(name, title, name, 'HEIC para JPG')).toEqual([]);
+    expect(fileGuideTitleProblems('How to convert HEIC to JPG on Windows', title, name, 'HEIC para JPG').join()).toMatch(/não começa pelo nome do guia/);
+    // A Spanish guide that starts with the H1 of the Spanish tool it embeds competes with that page.
+    expect(fileGuideTitleProblems('HEIC a JPG en Windows', 'HEIC a JPG en Windows | FileOrca', 'HEIC a JPG en Windows', 'HEIC a JPG').join()).toMatch(/começa pelo H1 da ferramenta \(HEIC a JPG\)/);
+    // A year in a translated title still fails.
+    expect(fileGuideTitleProblems(name, 'Como Converter HEIC para JPG no Windows em 2026 | FileOrca', name, 'HEIC para JPG').join()).toMatch(/título com ano/);
+  });
+
+  it('finds the QR code generator in the sitemap of each of its languages, by registry (SITEMAP_REGISTRY_IDS)', () => {
+    expect(SITEMAP_REGISTRY_IDS).toContain(QR_ID);
+    for (const id of [...FILE_GUIDE_PAGE_IDS, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...IMAGE_PAGE_IDS, HUB_ID, ...LIFE_PAGE_IDS]) expect(SITEMAP_REGISTRY_IDS, id).toContain(id);
+    expect(new Set(SITEMAP_REGISTRY_IDS).size).toBe(SITEMAP_REGISTRY_IDS.length);
+    for (const lang of LANGS) {
+      const path = routeById(QR_ID).paths[lang] ?? '';
+      expect(path, lang).not.toBe('');
+      expect(missingFromSitemap(sitemapXml(lang), [`${O}${path}`]), lang).toEqual([]);
+      // And in no sitemap of another language.
+      for (const other of LANGS.filter((candidate) => candidate !== lang)) expect(missingFromSitemap(sitemapXml(other), [`${O}${path}`]), `${other} lists ${path}`).toEqual([`${O}${path}`]);
+    }
   });
 });
