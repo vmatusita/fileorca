@@ -15,6 +15,12 @@ export interface PullRequestInfo {
   files: string[];
   /** `update-type` from dependabot/fetch-metadata, when the PR is from Dependabot. */
   dependabotUpdateType?: string | null;
+  /** `owner/name` of the repository of the head branch; null when the event did not carry it (a deleted fork). */
+  headRepo?: string | null;
+  /** `owner/name` of this repository. */
+  repo?: string | null;
+  /** Login of the owner of this repository. */
+  repoOwner?: string | null;
 }
 
 export type Decision =
@@ -28,10 +34,29 @@ export function touchesWorkflows(files: readonly string[]): boolean {
   return files.some((file) => file.replaceAll('\\', '/').startsWith('.github/workflows/'));
 }
 
+/**
+ * F9 (decision 9; DECISOES § 333): only a PR whose head branch lives in this repository, opened by the owner of the
+ * repository or by Dependabot, is merged. A fork, another author, or an event without these data never is.
+ */
+export function origin(pr: PullRequestInfo): string | null {
+  if (!pr.headRepo || !pr.repo || !pr.repoOwner) {
+    return `O evento não trouxe o repositório da branch, o deste repositório ou o dono: o merge fica para o ${OWNER}.`;
+  }
+  if (pr.headRepo !== pr.repo) {
+    return `A PR vem de um fork (${pr.headRepo}): o merge fica para o ${OWNER}, depois de ler o diff.`;
+  }
+  if (pr.author !== pr.repoOwner && pr.author !== DEPENDABOT_LOGIN) {
+    return `A PR é de ${pr.author}, que não é o dono do repositório nem o Dependabot: o merge fica para o ${OWNER}.`;
+  }
+  return null;
+}
+
 export function decide(pr: PullRequestInfo): Decision {
   if (pr.isDraft) {
     return { merge: false, comment: false, reason: 'PR em rascunho: o merge espera ela ficar pronta.' };
   }
+  const refused = origin(pr);
+  if (refused) return { merge: false, comment: true, reason: refused };
   if (touchesWorkflows(pr.files)) {
     return {
       merge: false,
@@ -65,9 +90,13 @@ interface GhPrJson {
   isDraft: boolean;
   author: { login: string };
   files: { path: string }[];
+  /** F9: written by the jq of the merge job; missing in a pr.json from before, so the merge is refused. */
+  headRepo?: string;
+  repo?: string;
+  repoOwner?: string;
 }
 
-/** Builds the decision input from `gh pr view --json headRefName,isDraft,author,files`. */
+/** Builds the decision input from the pr.json of the merge job (the shape of `gh pr view --json`, plus the F9 fields). */
 export function fromGhJson(json: GhPrJson, dependabotUpdateType?: string | null): PullRequestInfo {
   return {
     headRef: json.headRefName,
@@ -75,6 +104,9 @@ export function fromGhJson(json: GhPrJson, dependabotUpdateType?: string | null)
     isDraft: json.isDraft,
     files: json.files.map((file) => file.path),
     dependabotUpdateType: dependabotUpdateType ?? null,
+    headRepo: json.headRepo || null,
+    repo: json.repo || null,
+    repoOwner: json.repoOwner || null,
   };
 }
 

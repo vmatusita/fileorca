@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { decide, fromGhJson, touchesWorkflows, type PullRequestInfo } from '../../scripts/ci/pode-mesclar.ts';
+import { decide, fromGhJson, origin, touchesWorkflows, type PullRequestInfo } from '../../scripts/ci/pode-mesclar.ts';
 
-const base: PullRequestInfo = { headRef: 'fase-02', author: 'vmatusita', isDraft: false, files: ['src/a.ts'] };
+const here = { headRepo: 'vmatusita/fileorca', repo: 'vmatusita/fileorca', repoOwner: 'vmatusita' };
+const base: PullRequestInfo = { headRef: 'fase-02', author: 'vmatusita', isDraft: false, files: ['src/a.ts'], ...here };
 const bot = (updateType: string | null, files = ['package.json', 'pnpm-lock.yaml']): PullRequestInfo => ({
   headRef: 'dependabot/npm_and_yarn/astro-7.4.5',
   author: 'dependabot[bot]',
   isDraft: false,
   files,
   dependabotUpdateType: updateType,
+  ...here,
 });
 
 describe('pode-mesclar: decide', () => {
@@ -63,12 +65,51 @@ describe('pode-mesclar: decide', () => {
   });
 });
 
+// F9 (decision 9; DECISOES § 333): a fork, another author or an event without the data is never merged, whatever the
+// branch is called. Each case is a run branch and a Dependabot patch that would merge otherwise.
+describe('pode-mesclar: the origin of the PR', () => {
+  it('merges the owner and Dependabot from this repository', () => {
+    expect(origin(base)).toBeNull();
+    expect(origin(bot('version-update:semver-patch'))).toBeNull();
+  });
+
+  it('refuses a fork, even with the name of a run branch or the Dependabot login', () => {
+    const fork = { ...base, headRef: 'fase-10', author: 'alguem', headRepo: 'alguem/fileorca' };
+    expect(decide(fork)).toMatchObject({ merge: false, comment: true });
+    expect(decide(fork).reason).toContain('fork');
+    expect(decide({ ...base, headRepo: 'vmatusita-other/fileorca' })).toMatchObject({ merge: false });
+    expect(decide({ ...bot('version-update:semver-patch'), headRepo: 'alguem/fileorca' })).toMatchObject({ merge: false });
+  });
+
+  it('refuses another author of this repository, on a run branch too', () => {
+    const decision = decide({ ...base, headRef: 'fase-10', author: 'colaborador' });
+    expect(decision).toMatchObject({ merge: false, comment: true });
+    expect(decision.reason).toContain('colaborador');
+    expect(decide({ ...base, author: 'VMATUSITA' })).toMatchObject({ merge: false });
+  });
+
+  it('refuses when the event did not carry the repositories or the owner', () => {
+    for (const missing of [{ headRepo: null }, { repo: null }, { repoOwner: null }, { headRepo: '' }]) {
+      expect(decide({ ...base, ...missing }), JSON.stringify(missing)).toMatchObject({ merge: false, comment: true });
+    }
+    // A pr.json from before the F9, without the three fields.
+    const old: PullRequestInfo = { headRef: base.headRef, author: base.author, isDraft: base.isDraft, files: base.files };
+    expect(decide(old)).toMatchObject({ merge: false, comment: true });
+  });
+});
+
 describe('pode-mesclar: fromGhJson', () => {
   it('maps gh pr view JSON', () => {
     const info = fromGhJson(
       { headRefName: 'fase-01a', isDraft: true, author: { login: 'vmatusita' }, files: [{ path: 'a' }, { path: 'b' }] },
       undefined,
     );
-    expect(info).toEqual({ headRef: 'fase-01a', author: 'vmatusita', isDraft: true, files: ['a', 'b'], dependabotUpdateType: null });
+    expect(info).toEqual({ headRef: 'fase-01a', author: 'vmatusita', isDraft: true, files: ['a', 'b'], dependabotUpdateType: null, headRepo: null, repo: null, repoOwner: null });
+  });
+
+  it('maps the fields the jq of the merge job adds since the F9', () => {
+    const info = fromGhJson({ headRefName: 'fase-09', isDraft: false, author: { login: 'vmatusita' }, files: [], headRepo: 'vmatusita/fileorca', repo: 'vmatusita/fileorca', repoOwner: 'vmatusita' });
+    expect(info).toMatchObject(here);
+    expect(decide(info)).toMatchObject({ merge: true });
   });
 });
