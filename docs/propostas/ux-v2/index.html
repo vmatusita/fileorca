@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR" data-lang="pt" data-proto-lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FileOrca UX v2 · protótipos da F10</title>
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+</head>
+<body>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+  </div>
+</nav>
+<main class="proto-doc proto-index" id="main">
+  <p class="proto-doc__eyebrow">Proposta da F10 · docs/propostas/ux-v2/</p>
+  <h1>FileOrca UX v2 · protótipos da F10</h1>
+  <p>Cada protótipo é uma página HTML estática sobre o design system (<code>docs/design/</code>) e o <code>proto.css</code> desta pasta. Para abrir, dê um duplo clique no arquivo (ele abre por <code>file://</code>) ou sirva a raiz do repositório com qualquer servidor estático e abra <code>/docs/propostas/ux-v2/index.html</code>. Dentro de cada protótipo, o bloco "Prototype control", acima da página, troca o estado, o idioma e o tema; na URL, o mesmo vale por <code>?state=</code>, <code>?lang=pt</code> ou <code>?lang=es</code> e <code>?theme=dark</code> (na parede, <code>?modo=</code>). A especificação de cada peça fica abaixo da página, e os itens estão no <a href="README.md">README</a>.</p>
+  <h2>Os oito obrigatórios</h2>
+  <!-- Quando um protótipo existir, troque o "em construção" pelos links, um par por arquivo:
+       <a data-tap href="header-a.html?theme=light">claro<span class="fo-sr"> · header-a</span></a>
+       <a data-tap href="header-a.html?theme=dark">escuro<span class="fo-sr"> · header-a</span></a> -->
+  <ol class="proto-index__list">
+    <li class="proto-index__item" id="ux-01">
+      <span class="proto-index__id">UX-01</span>
+      <p class="proto-index__title">Cabeçalho com menu e botão de tema (A e B), no celular e no computador</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-01">README<span class="fo-sr"> do UX-01</span></a> <span class="proto-index__wip">header-a.html e header-b.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-02">
+      <span class="proto-index__id">UX-02</span>
+      <p class="proto-index__title">Hub de guias (en, pt e es) e as entradas: trilha, rodapé, seção na home, link na ferramenta e categoria na busca</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-02">README<span class="fo-sr"> do UX-02</span></a> <span class="proto-index__wip">guides-hub.html e guides-entries.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-03">
+      <span class="proto-index__id">UX-03</span>
+      <p class="proto-index__title">Home (A e B), com os anúncios da área <code>geral</code> pelo mapa</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-03">README<span class="fo-sr"> do UX-03</span></a> <span class="proto-index__wip">home-a.html e home-b.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-04">
+      <span class="proto-index__id">UX-04</span>
+      <p class="proto-index__title">Página de ferramenta, do soltar ao resultado (A e B), no comprimir imagem, e a variação do juntar PDF</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-04">README<span class="fo-sr"> do UX-04</span></a> <span class="proto-index__wip">tool-a.html, tool-b.html, tool-a-merge.html e tool-b-merge.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-05">
+      <span class="proto-index__id">UX-05</span>
+      <p class="proto-index__title">Card do café no resultado, linha do rodapé, item do menu e a página de apoio (pt com Ko-fi e Pix)</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-05">README<span class="fo-sr"> do UX-05</span></a> <span class="proto-index__wip">coffee.html e support.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-06">
+      <span class="proto-index__id">UX-06</span>
+      <p class="proto-index__title">Parede do bloqueador com a Oli triste: bloqueio e aviso, o "Como desativar", o depois do escape e a variante da UE</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-06">README<span class="fo-sr"> do UX-06</span></a> <span class="proto-index__wip">wall.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-07">
+      <span class="proto-index__id">UX-07</span>
+      <p class="proto-index__title">Mapa de anúncios de cada molde a 360×740 e a 1280×800, com a densidade</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-07">README<span class="fo-sr"> do UX-07</span></a> <span class="proto-index__wip">ad-map.html: em construção</span></p>
+    </li>
+    <li class="proto-index__item" id="ux-08">
+      <span class="proto-index__id">UX-08</span>
+      <p class="proto-index__title">A pose <code>sad</code> da Oli</p>
+      <p class="proto-index__links"><a data-tap href="README.md#ux-08">README<span class="fo-sr"> do UX-08</span></a> <span class="proto-index__wip">oli/oli-sad.svg e oli/folha.html: em construção</span></p>
+    </li>
+  </ol>
+</main>
+</body>
+</html>
