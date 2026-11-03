@@ -13,7 +13,9 @@ import { parse } from 'node-html-parser';
 import { describe, expect, it } from 'vitest';
 import { visibleText } from '../../scripts/lib/conteudo.ts';
 import { fileForPath } from '../../scripts/lib/dist.ts';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
+import { QR_ID, ROUTES, languagesOf, pathFor } from '../../src/i18n/routes.ts';
+import { CALC_PAGE_IDS, GUIDES, GUIDE_IDS, moneyPage } from '../../src/tools/calc/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 type Lang = 'pt' | 'es';
 
@@ -124,6 +126,35 @@ describe('the matcher (controls)', () => {
     expect(findTerms('automóvil', ['móvil'])).toEqual([]);
     expect(findTerms('a palavra passa', ['palavra-passe'])).toEqual([]);
     expect(findTerms('sem upload', ['fazer upload'])).toEqual([]);
+  });
+});
+
+// Review of the languages adjustment (D5; DECISOES § 321): decision 2 puts every new path in the glossary's table. The
+// Spanish money pages were only pointed at (the plan and the registry); the table now lists each path and the name of
+// its PDF and CSV, and it stays the registry's.
+describe('the paths of the glossaries are the paths of the registries', () => {
+  it('lists the path and the file name of every Spanish money page, and the path of every Spanish money guide', () => {
+    const markdown = readFileSync(GLOSSARY.es, 'utf8');
+    const missing: string[] = [];
+    for (const id of CALC_PAGE_IDS) {
+      const page = moneyPage(id, 'es');
+      if (!page) {
+        missing.push(`${id}: sem página em es`);
+        continue;
+      }
+      if (!markdown.includes(`| ${page.path} |`)) missing.push(`${id}: ${page.path}`);
+      if (!markdown.includes(`\`${page.file}\``)) missing.push(`${id}: ${page.file}`);
+    }
+    for (const id of GUIDE_IDS) if (!markdown.includes(`| ${GUIDES[id].es.path} |`)) missing.push(`${id}: ${GUIDES[id].es.path}`);
+    expect(missing).toEqual([]);
+  });
+
+  it('lists the path of every file guide and of the QR code generator in pt and es', () => {
+    for (const lang of ['pt', 'es'] as const) {
+      const markdown = readFileSync(GLOSSARY[lang], 'utf8');
+      const paths = [...FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].paths[lang]), pathFor(QR_ID, lang)];
+      expect(paths.filter((path) => !markdown.includes(path)), lang).toEqual([]);
+    }
   });
 });
 
