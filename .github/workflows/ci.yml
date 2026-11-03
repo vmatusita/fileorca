@@ -184,9 +184,13 @@ jobs:
           version=$(sed -n "s/^  '@playwright\/test@\([0-9][0-9.]*\)':$/\1/p" pnpm-lock.yaml | head -n 1)
           test -n "$version" || { echo "no @playwright/test version in pnpm-lock.yaml"; exit 1; }
           echo "Playwright $version, $BROWSER, $(nproc) vCPU"
+          # dpkg without fsync and without the man-db trigger: the apt of WebKit unpacks about 180 packages (DECISOES § 325).
+          sudo rm -f /var/lib/man-db/auto-update
+          echo force-unsafe-io | sudo tee /etc/dpkg/dpkg.cfg.d/90-fileorca-unsafe-io > /dev/null
           mkdir -p "$RUNNER_TEMP/navegador"
+          # The system packages, then the browser, each with its time in the log ([navegador] lines).
           # shellcheck disable=SC2016 # the inner script reads its own positional arguments
-          setsid nohup bash -c 'npx --yes "playwright@$1" install --with-deps "$2"; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
+          setsid nohup bash -c 'start=$(date +%s); npx --yes "playwright@$1" install-deps "$2"; deps=$?; mid=$(date +%s); echo "[navegador] pacotes do sistema: $((mid - start)) s, saída $deps"; npx --yes "playwright@$1" install "$2"; got=$?; echo "[navegador] navegador: $(($(date +%s) - mid)) s, saída $got"; [ "$deps" = 0 ] && [ "$got" = 0 ]; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
       - name: Download the build
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -204,8 +208,11 @@ jobs:
             test -s "$RUNNER_TEMP/navegador/status" && break
             sleep 1
           done
-          tail -n 20 "$RUNNER_TEMP/navegador/log"
-          test "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" = 0
+          grep '^\[navegador\]' "$RUNNER_TEMP/navegador/log" || true
+          if [ "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" != 0 ]; then
+            tail -n 40 "$RUNNER_TEMP/navegador/log"
+            exit 1
+          fi
       - name: pnpm verificar --lighthouse --dist-pronto
         run: pnpm verificar --lighthouse --dist-pronto
 
@@ -287,9 +294,13 @@ jobs:
           version=$(sed -n "s/^  '@playwright\/test@\([0-9][0-9.]*\)':$/\1/p" pnpm-lock.yaml | head -n 1)
           test -n "$version" || { echo "no @playwright/test version in pnpm-lock.yaml"; exit 1; }
           echo "Playwright $version, $BROWSER, $(nproc) vCPU"
+          # dpkg without fsync and without the man-db trigger: the apt of WebKit unpacks about 180 packages (DECISOES § 325).
+          sudo rm -f /var/lib/man-db/auto-update
+          echo force-unsafe-io | sudo tee /etc/dpkg/dpkg.cfg.d/90-fileorca-unsafe-io > /dev/null
           mkdir -p "$RUNNER_TEMP/navegador"
+          # The system packages, then the browser, each with its time in the log ([navegador] lines).
           # shellcheck disable=SC2016 # the inner script reads its own positional arguments
-          setsid nohup bash -c 'npx --yes "playwright@$1" install --with-deps "$2"; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
+          setsid nohup bash -c 'start=$(date +%s); npx --yes "playwright@$1" install-deps "$2"; deps=$?; mid=$(date +%s); echo "[navegador] pacotes do sistema: $((mid - start)) s, saída $deps"; npx --yes "playwright@$1" install "$2"; got=$?; echo "[navegador] navegador: $(($(date +%s) - mid)) s, saída $got"; [ "$deps" = 0 ] && [ "$got" = 0 ]; echo "$?" > "$3/status"' _ "$version" "$BROWSER" "$RUNNER_TEMP/navegador" > "$RUNNER_TEMP/navegador/log" 2>&1 < /dev/null &
       - name: Download the build
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -307,8 +318,11 @@ jobs:
             test -s "$RUNNER_TEMP/navegador/status" && break
             sleep 1
           done
-          tail -n 20 "$RUNNER_TEMP/navegador/log"
-          test "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" = 0
+          grep '^\[navegador\]' "$RUNNER_TEMP/navegador/log" || true
+          if [ "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" != 0 ]; then
+            tail -n 40 "$RUNNER_TEMP/navegador/log"
+            exit 1
+          fi
       # The runner pipes core dumps to systemd-coredump with a fixed size limit in its core_pattern, so ulimit -c 0 alone
       # does not stop them: the pattern goes to /bin/false for the job, and ulimit -c 0 stays in the step (DECISOES § 154).
       - name: Core dumps off
@@ -363,9 +377,11 @@ jobs:
           printf '%s' "$NEEDS" > "$RUNNER_TEMP/needs.json"
           node "$RUNNER_TEMP/ci/ci-ok.ts" "$RUNNER_TEMP/needs.json"
 
+  # The status function and the result of ci-ok are explicit: with the implicit success(), GitHub also looks at the jobs
+  # before ci-ok, and the leve job is always skipped in a complete run, so the merge was skipped too (DECISOES § 327).
   merge:
     needs: ci-ok
-    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    if: needs.ci-ok.result == 'success' && !cancelled() && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -489,7 +505,7 @@ jobs:
 
   pos-deploy:
     needs: merge
-    if: needs.merge.outputs.merged == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    if: needs.merge.result == 'success' && !cancelled() && needs.merge.outputs.merged == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       issues: write

@@ -106,9 +106,27 @@ describe('the classes of the CI and the ci-ok', () => {
 
   it('merges only after a green ci-ok, never a draft and never a fork, and the alert waits for both', () => {
     expect(jobs['merge']?.['needs']).toBe('ci-ok');
-    expect(jobs['merge']?.['if']).toBe(`github.event.pull_request.draft == false && ${FROM_HERE}`);
+    expect(jobs['merge']?.['if']).toBe(`needs.ci-ok.result == 'success' && !cancelled() && github.event.pull_request.draft == false && ${FROM_HERE}`);
     expect(jobs['pos-deploy']?.['needs']).toBe('merge');
-    expect(jobs['pos-deploy']?.['if']).toBe(`needs.merge.outputs.merged == 'true' && ${FROM_HERE}`);
+    expect(jobs['pos-deploy']?.['if']).toBe(`needs.merge.result == 'success' && !cancelled() && needs.merge.outputs.merged == 'true' && ${FROM_HERE}`);
+  });
+
+  // The first complete run of the F9 skipped the merge: the implicit success() of an if also looks at the jobs before the
+  // ones in needs, and the leve job is skipped in every complete run (DECISOES § 327). A job after jobs of classes that
+  // exclude each other needs an explicit status function.
+  it('gives an explicit status function to every job after jobs of classes that exclude each other', () => {
+    const ancestors = (job: string, seen = new Set<string>()): Set<string> => {
+      const needs = jobs[job]?.['needs'];
+      for (const parent of Array.isArray(needs) ? needs : needs ? [needs] : []) {
+        if (seen.has(String(parent))) continue;
+        seen.add(String(parent));
+        ancestors(String(parent), seen);
+      }
+      return seen;
+    };
+    const after = Object.keys(jobs).filter((job) => ancestors(job).has('leve') && ancestors(job).has('build'));
+    expect(after.sort()).toEqual(['alerta-dependabot', 'ci-ok', 'merge', 'pos-deploy']);
+    for (const job of after) expect(String(jobs[job]?.['if']), job).toMatch(/\b(?:always|cancelled|failure|success)\(\)/);
   });
 
   it('reads the classification from the base branch, with the copy of the PR only while the base has none', () => {
@@ -204,8 +222,9 @@ describe('the protections of § 154 in every Playwright part', () => {
       expect(start, job).toBeLessThan(wait);
       expect(wait, job).toBeLessThan(verificar);
       expect(list[start]?.run, job).toContain('pnpm-lock.yaml');
-      expect(list[start]?.run, job).toContain('install --with-deps');
-      expect(list[wait]?.run, job).toContain('test "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" = 0');
+      expect(list[start]?.run, job).toContain('install-deps "$2"');
+      expect(list[start]?.run, job).toContain('install "$2"');
+      expect(list[wait]?.run, job).toContain('if [ "$(cat "$RUNNER_TEMP/navegador/status" 2>/dev/null)" != 0 ]; then');
     }
   });
 });
