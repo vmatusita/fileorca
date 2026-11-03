@@ -33,6 +33,13 @@ import { SHARED_BY_LANG, calcTexts } from '../../../tools/calc/page.ts';
 import { PDF_HUB_ID, PDF_PAGES, type PdfToolId } from '../../../tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
 import { FILE_GUIDES, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
+import { QR_TEXTS } from '../../../tools/qr-code-generator/page.ts';
+
+/** A card title that must exist in the language of the page: an empty title would be an empty card. */
+function named(name: string | undefined, id: RouteId, lang: Lang): string {
+  if (!name) throw new Error(`no ${lang} name for the card of ${id}`);
+  return name;
+}
 
 export const getStaticPaths: GetStaticPaths = () =>
   ROUTES.filter((route) => route.indexable).flatMap((route) =>
@@ -70,12 +77,13 @@ function heading(lang: Lang, id: RouteId): [string, string] {
   if (isMoneyCalc(id) || isLifeCalc(id)) return [calcTexts(id, lang).h1, moneySeal];
   if (id === HOUSE_HUB_ID) return [LIFE_HUB_TEXTS.house.h1, moneySeal];
   if (id === HEALTH_HUB_ID) return [LIFE_HUB_TEXTS.health.h1, moneySeal];
-  if (id === QR_ID) return [enCommon.qr.name, seal];
-  if (isGuide(id)) return [enCommon.guides[id].name, moneySeal];
+  // The QR code page keeps no file, so its card carries the seal of the page (in pt and es since the languages adjustment).
+  if (id === QR_ID) return lang === 'en' ? [enCommon.qr.name, seal] : [named(texts.common.qr?.name, id, lang), QR_TEXTS[lang].seal];
+  if (isGuide(id)) return [named(texts.common.guides?.[id]?.name, id, lang), moneySeal];
   if (id === MONEY_HUB_ID || id === BR_HUB_ID) return [texts['money-calculators'].h1, moneySeal];
   if (isPdfPage(id)) return [PDF_TOOL_TEXTS[lang][id].h1, seal];
   if (id === PDF_HUB_ID) return [texts['pdf-tools'].h1, seal];
-  if (isFileGuide(id)) return [enCommon.fileGuides[id].name, seal];
+  if (isFileGuide(id)) return [named(texts.common.fileGuides?.[id]?.name, id, lang), seal];
   return [texts[id as PlainId].h1, seal];
 }
 

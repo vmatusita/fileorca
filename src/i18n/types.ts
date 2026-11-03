@@ -34,7 +34,7 @@ export interface CommonTexts {
     imageColumn: string;
     moneyColumn: string;
     pdfColumn: string;
-    /** The home and health columns and the QR code (English only, F7). */
+    /** The home and health columns (English only, F7) and the QR code (en, pt and es since the languages adjustment). */
     homeColumn?: string;
     healthColumn?: string;
     utilityColumn?: string;
@@ -72,7 +72,7 @@ export interface CommonTexts {
     imageCategory: string;
     moneyCategory: string;
     pdfCategory: string;
-    /** "Home calculators", "Health calculators" and "Utilities" (English only, F7). */
+    /** "Home calculators" and "Health calculators" (English only, F7) and "Utilities" (every language since the languages adjustment). */
     homeCategory?: string;
     healthCategory?: string;
     utilityCategory?: string;
@@ -87,17 +87,25 @@ export interface CommonTexts {
   calcSeal: string;
   /** The cards of the calculators that exist in this language (exact per language, below). */
   calcs: Partial<Record<AnyCalcId, ToolBlurb>>;
-  /** The names of the home and health hubs and the QR code card (English only, F7). */
+  /** The names of the home and health hubs (English only, F7) and the QR code card (every language since the languages adjustment). */
   homeCalculators?: string;
   healthCalculators?: string;
   qr?: ToolBlurb;
-  /** The cards of the money guides (English only, F4). */
+  /** The cards of the money guides (English and Spanish). */
   guides?: Record<GuideId, ToolBlurb>;
   /** Name of the PDF hub and the cards of the PDF tools. */
   pdfTools: string;
   pdf: Record<PdfToolId, ToolBlurb>;
-  /** The cards of the file guides (English only, F5b). */
+  /** The cards of the file guides (the three languages since the languages adjustment). */
   fileGuides?: Record<FileGuideId, ToolBlurb>;
+}
+
+/** What every language has since the languages adjustment: the QR code card, its footer column and search category, and the file guides. */
+interface TranslatedCommonTexts extends CommonTexts {
+  qr: ToolBlurb;
+  footer: CommonTexts['footer'] & { utilityColumn: string };
+  search: CommonTexts['search'] & { utilityCategory: string };
+  fileGuides: Record<FileGuideId, ToolBlurb>;
 }
 
 /** English has every calculator, preset and guide, and the home and health calculators and the QR code of the F7. */
@@ -112,14 +120,18 @@ export interface EnCommonTexts extends CommonTexts {
   fileGuides: Record<FileGuideId, ToolBlurb>;
 }
 
-/** Portuguese has the eight calculators adapted to Brazil (prompt F6, decision 5). */
-export interface PtCommonTexts extends CommonTexts {
+/** Portuguese has the eight calculators adapted to Brazil (prompt F6, decision 5), the QR code and the file guides. */
+export interface PtCommonTexts extends TranslatedCommonTexts {
   calcs: Record<BrCalcId, ToolBlurb>;
 }
 
-/** Spanish has five of the English calculators, translated (prompt F6, decision 6). */
-export interface EsCommonTexts extends CommonTexts {
+/**
+ * Spanish has every English calculator and preset and the money guides, translated (prompt F6, decision 6; languages
+ * adjustment, decision 4), the QR code and the file guides.
+ */
+export interface EsCommonTexts extends TranslatedCommonTexts {
   calcs: Record<EsCalcId, ToolBlurb>;
+  guides: Record<GuideId, ToolBlurb>;
 }
 
 export interface Section {
@@ -142,10 +154,15 @@ export interface HomeTexts extends PageMeta {
   money: { heading: string; intro: string; hubLink: string };
   /** The PDF section: heading, line and the hub link. */
   pdf: { heading: string; intro: string; hubLink: string };
-  /** The home, health and QR code sections (English only, F7, decision 9). */
+  /** The home and health sections (English only, F7, decision 9) and the QR code section (every language). */
   house?: { heading: string; intro: string; hubLink: string };
   health?: { heading: string; intro: string; hubLink: string };
   qr?: { heading: string; intro: string };
+}
+
+/** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
+export interface TranslatedHomeTexts extends HomeTexts {
+  qr: { heading: string; intro: string };
 }
 
 export interface LegalTexts extends PageMeta {
@@ -353,7 +370,7 @@ export interface MoneyHubTexts extends PageMeta {
   intro: string;
   creditHeading: string;
   educationalHeading: string;
-  /** The presets and the guides exist only in English (prompt F6, decisions 5 and 6). */
+  /** The presets and the guides: English and Spanish (the Brazilian hub has none; prompt F6, decision 5). */
   presetsHeading?: string;
   presetsCaption?: string;
   presetsHead?: [string, string];
@@ -370,6 +387,14 @@ export interface MoneyHubTexts extends PageMeta {
   sources: MoneySource[];
   disclaimerHeading: string;
   disclaimer: string;
+}
+
+/** The Spanish money hub (languages adjustment, decision 4): with the presets and the guides, like the English one. */
+export interface EsMoneyHubTexts extends MoneyHubTexts {
+  presetsHeading: string;
+  presetsCaption: string;
+  presetsHead: [string, string];
+  guidesHeading: string;
 }
 
 /**
@@ -395,8 +420,25 @@ export interface LifeHubTexts extends PageMeta {
   disclaimer: string;
 }
 
+/**
+ * The words the engines write into the facts and the table of a money guide (src/tools/calc/guides.ts), in the language of
+ * the guide (languages adjustment): the headings of the table, and the few words a fact or a cell is made of.
+ */
+export interface GuideWordsById {
+  'guides-15-vs-30-year-mortgage': { head: [string, string, string, string, string, string] };
+  /** The name of each of the four debts of the example, and what goes between two of them in a payoff order. */
+  'guides-debt-snowball-vs-avalanche': { head: [string, string, string, string, string, string]; debts: [string, string, string, string]; then: string };
+  'guides-extra-mortgage-payments': { head: [string, string, string, string] };
+  /** The month of a break-even ("month {n}") and a break-even that never comes. */
+  'guides-refinance-break-even': { head: [string, string, string, string, string]; month: string; never: string };
+  /** The first heading, the heading of a column of returns ("Savings earn {rate}"), the year of a break-even and none in 30 years. */
+  'guides-rent-vs-buy-break-even': { head: string; savings: string; year: string; notWithin: string };
+}
+
 /** A guide /guides/<slug>/ (F4, decision 10): {placeholders} are numbers the engines work out at build. */
-export interface GuideTexts extends PageMeta {
+export interface GuideTexts<Id extends GuideId = GuideId> extends PageMeta {
+  /** The words of the engines' facts and table (GuideWordsById). */
+  words: GuideWordsById[Id];
   h1: string;
   lead: string;
   intro: string[];
@@ -471,6 +513,11 @@ export interface FileGuideTexts extends PageMeta {
   facts: Record<string, FileGuideFact>;
   names: string[];
   relatedHeading: string;
+  /**
+   * Portuguese and Spanish: the English words data/guides-measured.json holds (a fact the measurement settled, the use
+   * of an official size), keyed by the English words, in this language (src/tools/guides/measured.ts).
+   */
+  measuredTerms?: Record<string, string>;
 }
 
 /** Texts every file guide shares (src/i18n/en/file-guides.ts). */
@@ -507,6 +554,16 @@ export interface FileGuidesSharedTexts {
   guideLink: string;
   /** Heading of the guides list of a hub. */
   hubGuidesHeading: string;
+  /**
+   * The counts in words, from zero to twelve, for {name_word} (masculine, and the only form in English) and {name_wordf}
+   * (before a feminine noun: "duas fotos", "una imagen").
+   */
+  numbers: { masculine: readonly string[]; feminine: readonly string[] };
+  /** A ratio as a multiple, {name_times}: "{n} times"; and the singular, where the language uses it (pt below 2, es at exactly 1). */
+  times: string;
+  timesOne: string;
+  /** Bytes to the byte, {name_exact}: "{n} bytes". */
+  bytes: string;
 }
 
 /**

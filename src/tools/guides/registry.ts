@@ -1,6 +1,8 @@
-// The ten file guides (prompt F5b, decisions 1 and 2): /guides/<slug>/, English only, each embedding a tool that is
-// already live. The pages, the hubs, the search, the gates and the tests read this registry, the way the money guides
-// read GUIDES (src/tools/calc/registry.ts). Plain data: never import it from an island.
+// The ten file guides (prompt F5b, decisions 1 and 2): /guides/<slug>/, each embedding a tool that is already live. Since
+// the languages adjustment they exist in Portuguese and Spanish too (/pt/guias/<slug>/, /es/guias/<slug>/), each the same
+// guide translated, with a pair in hreflang. The pages, the hubs, the search, the gates and the tests read this registry,
+// the way the money guides read GUIDES (src/tools/calc/registry.ts). Plain data: never import it from an island.
+import type { Lang } from '../../i18n/routes.ts';
 import type { ImagePresetId, ImageToolId } from '../image/registry.ts';
 import type { PdfToolId } from '../pdf/registry.ts';
 
@@ -24,8 +26,10 @@ export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | FileGui
 
 export interface FileGuideDef {
   id: FileGuideId;
-  /** URL path, with the trailing slash. */
+  /** The English URL path, with the trailing slash. */
   path: string;
+  /** The URL path in each language (the slugs of pt and es by the glossaries of docs/i18n/). */
+  paths: Record<Lang, string>;
   /** The tool the guide embeds: the same island and entry as the tool's own page. */
   tool: FileGuideTool;
   /** The hub of the breadcrumb, which also lists the guide. */
@@ -35,7 +39,29 @@ export interface FileGuideDef {
 }
 
 const path = (id: FileGuideId): string => `/guides/${id.replace(/^guides-/, '')}/`;
-const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({ id, path: path(id), tool, hub, related });
+
+/** The slug of each guide in Portuguese and Spanish, without accents (prompt of the languages adjustment, decision 2). */
+const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
+  'guides-heic-to-jpg-on-windows': { pt: 'heic-para-jpg-no-windows', es: 'heic-a-jpg-en-windows' },
+  'guides-why-is-my-pdf-so-large': { pt: 'por-que-meu-pdf-esta-tao-grande', es: 'por-que-mi-pdf-pesa-tanto' },
+  'guides-social-media-image-sizes': { pt: 'tamanhos-de-imagem-para-redes-sociais', es: 'tamanos-de-imagen-para-redes-sociales' },
+  'guides-open-webp-save-as-jpg': { pt: 'abrir-webp-e-salvar-como-jpg', es: 'abrir-webp-y-guardar-como-jpg' },
+  'guides-jpg-vs-png': { pt: 'jpg-ou-png', es: 'jpg-o-png' },
+  'guides-remove-location-from-photos': { pt: 'remover-localizacao-das-fotos', es: 'quitar-la-ubicacion-de-las-fotos' },
+  'guides-pdf-to-jpg-resolution': { pt: 'resolucao-de-pdf-para-jpg', es: 'resolucion-de-pdf-a-jpg' },
+  'guides-split-pdf-file-size': { pt: 'dividir-pdf-e-tamanho-do-arquivo', es: 'dividir-pdf-y-tamano-del-archivo' },
+  'guides-combine-pdfs-on-phone': { pt: 'juntar-pdfs-no-celular', es: 'unir-pdf-en-el-celular' },
+  'guides-photos-to-one-pdf': { pt: 'fotos-em-um-pdf', es: 'fotos-en-un-solo-pdf' },
+};
+
+const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({
+  id,
+  path: path(id),
+  paths: { en: path(id), pt: `/pt/guias/${SLUGS[id].pt}/`, es: `/es/guias/${SLUGS[id].es}/` },
+  tool,
+  hub,
+  related,
+});
 
 export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {
   'guides-heic-to-jpg-on-windows': def('guides-heic-to-jpg-on-windows', 'heic-to-jpg', 'image-tools', [

@@ -64,6 +64,7 @@ export default {
     'Your text stays on your device. The code is made in your browser, and the text never goes into the page address, an analytics event, a cookie, your browser storage or the file name. FileOrca never opens the link you type and never sends a request to it.',
   relatedHeading: 'More tools',
   panel: {
+    file: 'qr-code',
     field: {
       label: 'Link or text',
       placeholder: 'https://fileorca.com',

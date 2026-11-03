@@ -2,16 +2,15 @@
 // The image hub /image-tools/ (docs/design/components/ToolCard, fo-hubband): eyebrow, H1 and one line in
 // the category band, the grid of the eight tools, one content AdSlot, the presets with their links, the
 // guide of which tool does which job (DECISOES § 96) and the rail AdSlot like the tool pages, in the language of the
-// page. The file guides exist only in English, so only the English hub lists them (F5b note; F6, decision 4).
+// page. Each hub lists the file guides of its language (F5b note; in pt and es since the languages adjustment).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
-import enCommon from '../i18n/en/common.ts';
-import shared from '../i18n/en/file-guides.ts';
-import { FILE_GUIDES, guidesOfHub } from '../tools/guides/registry.ts';
+import { guidesOfHub } from '../tools/guides/registry.ts';
+import { GUIDE_SHARED, guideLinks } from '../tools/guides/page.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 
@@ -38,7 +37,8 @@ const presets = IMAGE_PRESET_IDS.map((id) => ({ href: routeById(id).paths[lang] 
 const list = tools.map((tool) => ({ name: tool.blurb.name, path: tool.href }));
 // The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
 // links, never cards (gate:prontidao counts the cards of a hub against the tool registry).
-const guides = lang === 'en' ? guidesOfHub('image-tools').map((id) => ({ href: FILE_GUIDES[id].path, name: enCommon.fileGuides[id].name, description: enCommon.fileGuides[id].description })) : [];
+const guides = guideLinks(guidesOfHub('image-tools'), lang);
+const shared = GUIDE_SHARED[lang];
 ---
 <BaseLayout
   lang={lang}

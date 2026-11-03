@@ -1,22 +1,55 @@
 // The numbers of the five guides (prompt F4, decision 10), worked out by the engines at build: no result in
 // a guide is written by hand. Each guide has its main example (the calculator it embeds starts from it, and
 // it is a case of the oracle: tests/unit/calc-guides.test.ts) and a table measured by the same engines, the
-// guide's own data. The texts (src/i18n/en/guide-<slug>.ts) hold {placeholders} that these facts fill.
+// guide's own data. The texts (src/i18n/<lang>/guide-<slug>.ts) hold {placeholders} that these facts fill. Since the
+// languages adjustment the guides also exist in Spanish: the same engines and examples, the numbers written in the language
+// of the guide, and the few words of the facts and the table from that guide's `words` (never typed here).
 import { dollars, money, ratePercent } from '../../calc/parse.ts';
 import { mortgage15vs30, mortgageExtraPayments, refinance, type ExtraPaymentsInput } from '../../calc/loans.ts';
 import { debtPayoff, type DebtPayoffInput } from '../../calc/debts.ts';
 import { rentVsBuy, type RentVsBuyInput } from '../../calc/rent-vs-buy.ts';
+import { fmt } from '../../i18n/format.ts';
+import type { GuideTexts } from '../../i18n/types.ts';
 import enShared from './i18n/en.ts';
+import esShared from './i18n/es.ts';
+import en15 from '../../i18n/en/guide-15-vs-30-year-mortgage.ts';
+import enSnowball from '../../i18n/en/guide-debt-snowball-vs-avalanche.ts';
+import enExtra from '../../i18n/en/guide-extra-mortgage-payments.ts';
+import enRefinance from '../../i18n/en/guide-refinance-break-even.ts';
+import enRent from '../../i18n/en/guide-rent-vs-buy-break-even.ts';
+import es15 from '../../i18n/es/guide-15-vs-30-year-mortgage.ts';
+import esSnowball from '../../i18n/es/guide-debt-snowball-vs-avalanche.ts';
+import esExtra from '../../i18n/es/guide-extra-mortgage-payments.ts';
+import esRefinance from '../../i18n/es/guide-refinance-break-even.ts';
+import esRent from '../../i18n/es/guide-rent-vs-buy-break-even.ts';
 import { DEFS } from './defs/index.ts';
 import { duration } from './view.ts';
 import type { CalcPageId, GuideId } from './registry.ts';
 import type { Values } from './types.ts';
 
-const S = enShared.island;
-const usd = (cents: number): string => dollars(cents, 'en');
-const cents = (value: number): string => money(value, 'en');
-const pct = (units: number): string => ratePercent(units, 'en');
-const time = (months: number): string => duration(months, S);
+/** The languages of the money guides: English and Spanish (no US money page exists in Portuguese). */
+export type GuideLang = 'en' | 'es';
+
+/** The texts of each guide in each of its languages, typed by guide so each one carries its own words. */
+export const GUIDE_TEXTS: { [Id in GuideId]: Record<GuideLang, GuideTexts<Id>> } = {
+  'guides-15-vs-30-year-mortgage': { en: en15, es: es15 },
+  'guides-debt-snowball-vs-avalanche': { en: enSnowball, es: esSnowball },
+  'guides-extra-mortgage-payments': { en: enExtra, es: esExtra },
+  'guides-refinance-break-even': { en: enRefinance, es: esRefinance },
+  'guides-rent-vs-buy-break-even': { en: enRent, es: esRent },
+};
+
+/** How a guide writes its numbers and durations, in its language. */
+function writer(lang: GuideLang) {
+  const island = (lang === 'es' ? esShared : enShared).island;
+  return {
+    island,
+    usd: (cents: number): string => dollars(cents, lang),
+    cents: (value: number): string => money(value, lang),
+    pct: (units: number): string => ratePercent(units, lang),
+    time: (months: number): string => duration(months, island),
+  };
+}
 const PCT = 10_000;
 
 export interface GuideTable {
@@ -32,7 +65,9 @@ export interface GuideFacts {
   table: GuideTable;
 }
 
-function fifteenVsThirty(): GuideFacts {
+function fifteenVsThirty(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct } = writer(lang);
+  const words = GUIDE_TEXTS['guides-15-vs-30-year-mortgage'][lang].words;
   const example = DEFS['mortgage-calculator-15-vs-30-year'].initial;
   const input = DEFS['mortgage-calculator-15-vs-30-year'].toInput(example) as Parameters<typeof mortgage15vs30>[0];
   const r = mortgage15vs30(input);
@@ -67,17 +102,19 @@ function fifteenVsThirty(): GuideFacts {
       lowerMore: usd(lower.paymentDiff),
       lowerSaved: usd(lower.interestDiff),
     },
-    table: { head: ['Rate', '15-year payment', '30-year payment', '15-year interest', '30-year interest', 'Interest saved'], rows },
+    table: { head: [...words.head], rows },
   };
 }
 
-function snowballAvalanche(): GuideFacts {
+function snowballAvalanche(lang: GuideLang = 'en'): GuideFacts {
+  const { island, usd, pct, time } = writer(lang);
+  const words = GUIDE_TEXTS['guides-debt-snowball-vs-avalanche'][lang].words;
   const example = DEFS['debt-payoff-calculator'].initial;
   const input = DEFS['debt-payoff-calculator'].toInput(example) as DebtPayoffInput;
   const r = debtPayoff(input);
   if ('error' in r) throw new Error('the snowball guide example must make an account');
-  const name = (index: number) => ['the big card', 'the small card', 'the car loan', 'the personal loan'][index] ?? `debt ${index + 1}`;
-  const order = (plan: typeof r.snowball) => plan.payoffOrder.map(name).join(', then ');
+  const name = (index: number) => words.debts[index] ?? fmt(island.row, { n: index + 1 });
+  const order = (plan: typeof r.snowball) => plan.payoffOrder.map(name).join(words.then);
   const rows = [0, 10_000, 20_000, 40_000, 80_000].map((extra) => {
     const at = debtPayoff({ ...input, extra });
     if ('error' in at) return [usd(extra), '-', '-', '-', '-', '-'];
@@ -108,11 +145,13 @@ function snowballAvalanche(): GuideFacts {
     calc: 'debt-payoff-calculator',
     example,
     facts,
-    table: { head: ['Extra per month', 'Snowball: debt-free in', 'Snowball: interest', 'Avalanche: debt-free in', 'Avalanche: interest', 'Interest difference'], rows },
+    table: { head: [...words.head], rows },
   };
 }
 
-function extraPayments(): GuideFacts {
+function extraPayments(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct, time } = writer(lang);
+  const words = GUIDE_TEXTS['guides-extra-mortgage-payments'][lang].words;
   const example = DEFS['mortgage-calculator-extra-payments'].initial;
   const input = DEFS['mortgage-calculator-extra-payments'].toInput(example) as ExtraPaymentsInput;
   const r = mortgageExtraPayments(input);
@@ -146,17 +185,19 @@ function extraPayments(): GuideFacts {
       lateInterest: usd(late.interestSaved),
       lateSaved: time(late.monthsSaved),
     },
-    table: { head: ['Extra per month', 'Paid off in', 'Sooner by', 'Interest saved'], rows },
+    table: { head: [...words.head], rows },
   };
 }
 
-function refinanceBreakEven(): GuideFacts {
+function refinanceBreakEven(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct, time } = writer(lang);
+  const words = GUIDE_TEXTS['guides-refinance-break-even'][lang].words;
   const example = DEFS['refinance-calculator'].initial;
   const input = DEFS['refinance-calculator'].toInput(example) as Parameters<typeof refinance>[0];
   const r = refinance(input);
   const rolled = refinance({ ...input, costsMode: 'loan' });
   const sameTerm = refinance({ ...input, newYears: 25 });
-  const month = (value: number | null): string => (value === null ? 'never' : `month ${value}`);
+  const month = (value: number | null): string => (value === null ? words.never : fmt(words.month, { n: value }));
   const rows = [300_000, 600_000, 900_000].flatMap((costs) =>
     [55_000, 60_000, 65_000].map((newRate) => {
       const at = refinance({ ...input, costs, newRate });
@@ -190,15 +231,17 @@ function refinanceBreakEven(): GuideFacts {
       sameTermBreakEven: String(sameTerm.breakEven ?? 0),
       sameTermInterest: usd(sameTerm.interestDiff),
     },
-    table: { head: ['Closing costs', 'New rate', 'Monthly savings', 'Shortcut: costs ÷ savings', 'Interest break-even'], rows },
+    table: { head: [...words.head], rows },
   };
 }
 
-function rentVsBuyBreakEven(): GuideFacts {
+function rentVsBuyBreakEven(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct } = writer(lang);
+  const words = GUIDE_TEXTS['guides-rent-vs-buy-break-even'][lang].words;
   const example = DEFS['rent-vs-buy-calculator'].initial;
   const input = DEFS['rent-vs-buy-calculator'].toInput(example) as RentVsBuyInput;
   const r = rentVsBuy(input);
-  const year = (value: number | null): string => (value === null ? 'not within 30 years' : `year ${value}`);
+  const year = (value: number | null): string => (value === null ? words.notWithin : fmt(words.year, { n: value }));
   const returns = [40_000, 60_000, 80_000];
   const rows = [0, 10_000, 20_000, 30_000, 40_000, 50_000].map((appreciation) => [
     pct(appreciation),
@@ -231,11 +274,12 @@ function rentVsBuyBreakEven(): GuideFacts {
       firstYearBuyer: usd(r.buyer[0] ?? 0),
       firstYearRenter: usd(r.renter[0] ?? 0),
     },
-    table: { head: ['Home value change per year', ...returns.map((value) => `Savings earn ${pct(value)}`)], rows },
+    table: { head: [words.head, ...returns.map((value) => fmt(words.savings, { rate: pct(value) }))], rows },
   };
 }
 
-export const GUIDE_FACTS: Record<GuideId, () => GuideFacts> = {
+/** The facts of each guide, in its language (English by default). */
+export const GUIDE_FACTS: Record<GuideId, (lang?: GuideLang) => GuideFacts> = {
   'guides-15-vs-30-year-mortgage': fifteenVsThirty,
   'guides-debt-snowball-vs-avalanche': snowballAvalanche,
   'guides-extra-mortgage-payments': extraPayments,

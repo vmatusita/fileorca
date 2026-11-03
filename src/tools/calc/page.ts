@@ -18,11 +18,12 @@ import ptShared from './i18n/pt.ts';
 import esShared from './i18n/es.ts';
 import {
   CALC_PAGES,
-  GUIDES,
   LIFE_HUB_ROUTE,
   calcAreaOf,
   calcPresetsOf,
+  guidePathIn,
   isCalcPage,
+  isGuide,
   moneyPage,
   type AnyCalcId,
   type CalcArea,
@@ -45,6 +46,16 @@ export const REVIEWED_ON: Record<Lang, string> = { en: REVIEWED, pt: '2026-11-02
 export const FIRST_PUBLISHED_ON: Record<Lang, string> = { en: FIRST_PUBLISHED, pt: '2026-11-02', es: '2026-11-02' };
 export const SOURCES_READ_ON: Record<Lang, string> = { en: REVIEWED, pt: '2026-11-01', es: '2026-11-01' };
 
+/** The five Spanish calculators of the F6, which keep their days; every other Spanish money page was born in the languages adjustment. */
+const ES_OF_F6: readonly AnyCalcId[] = ['mortgage-calculator', 'personal-loan-calculator', 'credit-card-payoff-calculator', 'debt-payoff-calculator', 'compound-interest-calculator'];
+
+/**
+ * The day in Brasília of the languages adjustment (DECISOES § 207 and § 223): the Spanish calculators, presets and guides it
+ * wrote were reviewed, first published and had their sources read on it, and the Spanish hub, whose text it rewrote, was
+ * reviewed on it.
+ */
+export const IDIOMAS_DAY = '2026-11-03';
+
 /**
  * The home and health pages (English only) were reviewed, first published and had their sources read in the F7, on the
  * day in Brasília the run wrote them (DECISOES § 207 and § 264).
@@ -54,9 +65,13 @@ export const LIFE_FIRST_PUBLISHED = '2026-11-02';
 export const LIFE_SOURCES_READ_ON = '2026-11-02';
 
 /** The days a calculator page shows: reviewed, first published and the day its sources were read. */
-export function datesOf(id: AnyCalcId | CalcArea, lang: Lang): { reviewed: string; first: string; read: string } {
+export function datesOf(id: AnyCalcId | CalcArea | GuideId, lang: Lang): { reviewed: string; first: string; read: string } {
+  // A money guide: the English ones of the F4, the Spanish ones of the languages adjustment.
+  if (isGuide(id)) return lang === 'en' ? { reviewed: REVIEWED, first: FIRST_PUBLISHED, read: REVIEWED } : { reviewed: IDIOMAS_DAY, first: IDIOMAS_DAY, read: IDIOMAS_DAY };
   const area = id === 'money' || id === 'house' || id === 'health' ? id : calcAreaOf(id);
   if (area !== 'money') return { reviewed: LIFE_REVIEWED, first: LIFE_FIRST_PUBLISHED, read: LIFE_SOURCES_READ_ON };
+  if (lang === 'es' && id !== 'money' && !(ES_OF_F6 as readonly string[]).includes(id)) return { reviewed: IDIOMAS_DAY, first: IDIOMAS_DAY, read: IDIOMAS_DAY };
+  if (lang === 'es' && id === 'money') return { reviewed: IDIOMAS_DAY, first: FIRST_PUBLISHED_ON.es, read: SOURCES_READ_ON.es };
   return { reviewed: REVIEWED_ON[lang], first: FIRST_PUBLISHED_ON[lang], read: SOURCES_READ_ON[lang] };
 }
 
@@ -81,7 +96,7 @@ export interface SharedTexts {
 }
 
 export const SHARED_BY_LANG: Record<Lang, SharedTexts> = { en: enShared, pt: ptShared, es: esShared };
-/** The English shared texts (the guides, which exist only in English). */
+/** The English shared texts. */
 export const SHARED = enShared;
 
 /** The page of a calculator in a language; throws where it does not exist (it must not be linked there). */
@@ -188,19 +203,20 @@ export function relatedFor(id: AnyCalcId, lang: Lang = 'en'): MoneyCard[] {
     .map((target) => cardOf(target, lang));
 }
 
-/** The presets of a calculator, for the table on its page (English only: the presets exist only there). */
+/** The presets of a calculator, for the table on its page, where they exist in the language (English and Spanish). */
 export function presetRows(id: AnyCalcId, lang: Lang = 'en'): { href: string; name: string; description: string }[] {
-  if (lang !== 'en' || !isCalcPage(id) || CALC_PAGES[id].parent) return [];
-  const common = TEXTS.en.common;
-  return calcPresetsOf(id as CalcToolId).map((preset) => ({ href: CALC_PAGES[preset].path, name: calcName(preset), description: common.calcs[preset]?.description ?? '' }));
+  if (!isCalcPage(id) || CALC_PAGES[id].parent) return [];
+  const common = TEXTS[lang].common;
+  return existing(calcPresetsOf(id as CalcToolId), lang).map((preset) => ({ href: pageIn(preset, lang).path, name: calcName(preset, lang), description: common.calcs[preset]?.description ?? '' }));
 }
 
-/** The guide of a calculator (English only: the guides exist only there). */
+/** The guide of a calculator, where it exists in the language (English and Spanish). */
 export function guideOf(id: AnyCalcId, lang: Lang = 'en'): { href: string; title: string } | null {
-  if (lang !== 'en' || !isCalcPage(id)) return null;
+  if (!isCalcPage(id)) return null;
   const guide = CALC_PAGES[id].guide;
-  const name = guide ? TEXTS.en.common.guides?.[guide]?.name : undefined;
-  return guide && name ? { href: GUIDES[guide].path, title: name } : null;
+  const name = guide ? TEXTS[lang].common.guides?.[guide]?.name : undefined;
+  const href = guide ? guidePathIn(guide, lang) : null;
+  return guide && name && href ? { href, title: name } : null;
 }
 
 /** The worked example: what the example values put in and what the engine gives back, as the page shows them. */

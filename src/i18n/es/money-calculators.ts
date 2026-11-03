@@ -39,4 +39,6 @@ export default {
   ],
   disclaimerHeading: 'Herramientas educativas',
   disclaimer: 'Estas calculadoras son herramientas educativas, no asesoría financiera ni ofertas de crédito. Un prestamista decide cuánto presta y a qué tasa; revisa cada número con el tuyo antes de firmar.',
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+  presetsHeading: 'STUB', presetsCaption: 'STUB', presetsHead: ['STUB', 'STUB'], guidesHeading: 'STUB',
 } satisfies MoneyHubTexts;

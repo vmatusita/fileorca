@@ -15,8 +15,8 @@ import { DARK, LIGHT, MAX_BYTES, PNG_SIZES, PNG_TARGETS, encode, iconSvg, pngIco
 import type { QrPanelData } from './types.ts';
 
 const TOOL = 'qr-code-generator';
-/** Fixed names, never the text (decision 8). */
-export const FILE_NAMES = { png: 'qr-code.png', svg: 'qr-code.svg' } as const;
+/** Fixed names in the language of the page, never the text (decision 8): qr-code.png in English. */
+export const fileNames = (t: QrPanelData['t']): { png: string; svg: string } => ({ png: `${t.file}.png`, svg: `${t.file}.svg` });
 
 /** Hands a file to the browser's download from the page itself (the model is save() of src/tools/calc/exports.ts). */
 function save(blob: Blob, name: string): void {
@@ -86,7 +86,7 @@ export default function QrPanel({ lang, t }: QrPanelData) {
     setBusy(true);
     setPngFailed(false);
     try {
-      save(await drawPng(matrix, oli, size), FILE_NAMES.png);
+      save(await drawPng(matrix, oli, size), fileNames(t).png);
     } catch {
       setPngFailed(true);
     } finally {
@@ -97,7 +97,7 @@ export default function QrPanel({ lang, t }: QrPanelData) {
   function downloadSvg(): void {
     if (!svg) return;
     track('export_click', { tool: TOOL, lang, format: 'svg' });
-    save(new Blob([svg], { type: 'image/svg+xml' }), FILE_NAMES.svg);
+    save(new Blob([svg], { type: 'image/svg+xml' }), fileNames(t).svg);
   }
 
   const describedBy = ['fo-qr-help', 'fo-qr-count', ...(problem ? ['fo-qr-error'] : [])].join(' ');

@@ -71,4 +71,9 @@ export default {
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice. Your lenders set the rates and minimums on your debts.',
   relatedHeading: 'Calculators for the next step',
-} satisfies GuideTexts;
+  words: {
+    head: ['Extra per month', 'Snowball: debt-free in', 'Snowball: interest', 'Avalanche: debt-free in', 'Avalanche: interest', 'Interest difference'],
+    debts: ['the big card', 'the small card', 'the car loan', 'the personal loan'],
+    then: ', then ',
+  },
+} satisfies GuideTexts<'guides-debt-snowball-vs-avalanche'>;

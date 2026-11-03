@@ -21,4 +21,6 @@ export default {
   privacyHeading: 'Tus archivos se quedan contigo',
   privacyBody:
     'Tus archivos nunca salen de tu dispositivo. FileOrca hace el trabajo en tu navegador, y puedes comprobarlo tú mismo: abre la pestaña Red del navegador mientras usas una herramienta y verás que ninguna solicitud lleva tu archivo.',
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+  qr: { heading: 'Make a QR code', intro: 'STUB' },
 } satisfies HomeTexts;

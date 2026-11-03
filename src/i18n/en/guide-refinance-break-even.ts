@@ -71,4 +71,9 @@ export default {
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice and not a loan offer. A lender decides whether you qualify and at what rate and cost.',
   relatedHeading: 'Calculators for the next step',
-} satisfies GuideTexts;
+  words: {
+    head: ['Closing costs', 'New rate', 'Monthly savings', 'Shortcut: costs ÷ savings', 'Interest break-even'],
+    month: 'month {n}',
+    never: 'never',
+  },
+} satisfies GuideTexts<'guides-refinance-break-even'>;

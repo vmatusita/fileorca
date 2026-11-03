@@ -33,6 +33,13 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
   },
   guideLink: 'Read the guide: {title}',
   hubGuidesHeading: 'Guides',
+  numbers: {
+    masculine: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'],
+    feminine: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'],
+  },
+  times: '{n} times',
+  timesOne: '{n} times',
+  bytes: '{n} bytes',
   // The technical names above that carry digits (tests/unit/guides-numbers.test.ts).
   names: ['Pixel 2', 'iPhone 6', 'iPhone 5', 'Form 1040'],
 };

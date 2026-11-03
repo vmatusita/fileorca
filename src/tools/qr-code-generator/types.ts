@@ -1,9 +1,11 @@
-// The texts and the island data of the QR code generator (prompt F7, decision 8). English only, so the type lives with the
-// tool instead of src/i18n/types.ts; the shape follows the image tools (ImageToolTexts) where the page is the same.
+// The texts and the island data of the QR code generator (prompt F7, decision 8; in pt and es since the languages
+// adjustment). The type lives with the tool; the shape follows the image tools (ImageToolTexts) where the page is the same.
 import type { Lang } from '../../i18n/routes.ts';
 
 /** What the island shows: it goes to the browser in data-props, so nothing here is page-only text. */
 export interface QrPanelTexts {
+  /** The base name of the two downloads, without accents (docs/i18n): "qr-code" gives qr-code.png and qr-code.svg. */
+  file: string;
   field: {
     label: string;
     placeholder: string;

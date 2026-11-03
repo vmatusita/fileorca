@@ -24,6 +24,8 @@ export default {
     terms: 'Términos',
     licenses: 'Licencias',
     contact: 'Contacto',
+    // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    utilityColumn: 'Utilities',
     coffee: '¿Te gustan estas herramientas? Invítame un café',
     signature: 'Hecho por {name} en {city}',
   },
@@ -47,6 +49,8 @@ export default {
     imageCategory: 'Imagen',
     moneyCategory: 'Calculadoras financieras',
     pdfCategory: 'PDF',
+    // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    utilityCategory: 'Utilities',
     shortcut: 'Ctrl K',
   },
   imageTools: 'Herramientas de imagen',
@@ -193,10 +197,163 @@ export default {
       description: 'Bola de nieve o avalancha: cuándo quedas libre de deudas y cuánto pagas de intereses.',
       synonyms: ['deudas', 'salir de deudas', 'bola de nieve', 'avalancha', 'pagar deudas', 'intereses'],
     },
+    // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    'auto-loan-calculator': {
+      name: 'Auto loan calculator',
+      description: 'What a car loan costs a month, with trade-in, taxes and fees.',
+      synonyms: ['auto loan', 'car loan', 'car payment', 'vehicle loan', 'trade-in', 'interest'],
+    },
+    'refinance-calculator': {
+      name: 'Refinance calculator',
+      description: 'Whether refinancing pays off, and in which month it breaks even.',
+      synonyms: ['refinance', 'refi', 'break-even', 'closing costs', 'new rate', 'mortgage'],
+    },
+    'home-affordability-calculator': {
+      name: 'Home affordability calculator',
+      description: 'How much house fits your income, with the 28% and 36% rules of thumb.',
+      synonyms: ['affordability', 'how much house', 'debt-to-income', 'dti', 'income', 'mortgage'],
+    },
+    'loan-amortization-calculator': {
+      name: 'Loan amortization calculator',
+      description: 'The whole schedule of a loan: principal, interest and balance by payment.',
+      synonyms: ['amortization', 'amortization schedule', 'loan schedule', 'principal', 'interest', 'balance'],
+    },
+    'debt-consolidation-calculator': {
+      name: 'Debt consolidation calculator',
+      description: 'Your debts now against one new loan: payment, interest and time.',
+      synonyms: ['debt consolidation', 'consolidate', 'consolidation loan', 'combine debts', 'payoff', 'interest'],
+    },
+    'rent-vs-buy-calculator': {
+      name: 'Rent vs buy calculator',
+      description: 'Your net worth renting and buying, and the year buying catches up.',
+      synonyms: ['rent vs buy', 'rent or buy', 'renting', 'buying a home', 'break-even', 'mortgage'],
+    },
+    'savings-goal-calculator': {
+      name: 'Savings goal calculator',
+      description: 'The monthly deposit for a goal, or how long a deposit takes.',
+      synonyms: ['savings goal', 'save money', 'monthly savings', 'goal', 'deposit', 'interest'],
+    },
+    'simple-interest-calculator': {
+      name: 'Simple interest calculator',
+      description: 'Interest on a principal for years, months or days.',
+      synonyms: ['simple interest', 'principal', 'rate', 'days', 'interest'],
+    },
+    'apr-to-apy-calculator': {
+      name: 'APR to APY calculator',
+      description: 'A yearly rate turned into APY, or back, for any compounding.',
+      synonyms: ['apr', 'apy', 'apy to apr', 'annual percentage yield', 'effective rate', 'compounding'],
+    },
+    'mortgage-calculator-extra-payments': {
+      name: 'Mortgage with extra payments',
+      description: 'The months and interest an extra payment saves on a mortgage.',
+      synonyms: ['extra payments', 'extra payment', 'pay off mortgage early', 'prepayment', 'mortgage'],
+    },
+    'mortgage-calculator-biweekly': {
+      name: 'Biweekly mortgage calculator',
+      description: 'Half the payment every two weeks against the monthly payment.',
+      synonyms: ['biweekly', 'bi-weekly', 'every two weeks', 'half payment', 'mortgage'],
+    },
+    'mortgage-calculator-15-vs-30-year': {
+      name: '15-year vs 30-year mortgage',
+      description: 'The two terms side by side: payment, interest and the difference.',
+      synonyms: ['15 year', '30 year', '15 vs 30', 'mortgage term', 'mortgage'],
+    },
+    'loan-amortization-calculator-balloon-payment': {
+      name: 'Balloon loan calculator',
+      description: 'The payment of a balloon loan and what is left due at the end.',
+      synonyms: ['balloon', 'balloon payment', 'balloon loan', 'amortization', 'interest'],
+    },
     'compound-interest-calculator': {
       name: 'Calculadora de interés compuesto',
       description: 'Cuánto crece tu dinero con interés compuesto y depósitos mensuales.',
       synonyms: ['interés compuesto', 'ahorros', 'inversión', 'depósito mensual', 'capitalización', 'apy'],
+    },
+  },
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    qr: {
+    name: 'QR code generator',
+    description: 'A QR code of your link or text, with Oli in the middle, as PNG or SVG.',
+    synonyms: ['qr', 'qr code', 'qr generator', 'qr maker', 'link to qr', 'url to qr', 'barcode'],
+  },
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    fileGuides: {
+    'guides-heic-to-jpg-on-windows': {
+      name: 'How to convert HEIC to JPG on Windows',
+      description: 'Why Windows asks for an extension, and what happens to size and location when a photo becomes a JPG.',
+      synonyms: ['guide', 'convert heic to jpeg on windows', 'windows heic'],
+    },
+    'guides-why-is-my-pdf-so-large': {
+      name: 'Why is my PDF so large?',
+      description: 'What takes the space in a PDF, and what each mode of Compress PDF does to it.',
+      synonyms: ['guide', 'large pdf', 'pdf file size'],
+    },
+    'guides-social-media-image-sizes': {
+      name: 'Social media image sizes',
+      description: 'The sizes each network publishes, and what a photo looks like when it is resized to them.',
+      synonyms: ['guide', 'instagram size', 'image dimensions'],
+    },
+    'guides-open-webp-save-as-jpg': {
+      name: 'How to open WebP images and save them as JPG',
+      description: 'What a WebP is, where it opens, and what changes when it becomes a JPG.',
+      synonyms: ['guide', 'save webp as jpeg', 'open webp'],
+    },
+    'guides-jpg-vs-png': {
+      name: 'JPG or PNG: which one to use',
+      description: 'When each format wins, measured on the same photos in both.',
+      synonyms: ['guide', 'jpeg or png', 'png or jpg'],
+    },
+    'guides-remove-location-from-photos': {
+      name: 'How to remove location data from photos',
+      description: 'Where a photo keeps its location, and the way to strip it that changes no pixel.',
+      synonyms: ['guide', 'remove gps', 'exif location'],
+    },
+    'guides-pdf-to-jpg-resolution': {
+      name: 'Which resolution to choose for PDF to JPG',
+      description: 'What a higher resolution adds to the pixels and to the file, page by page.',
+      synonyms: ['guide', 'jpeg resolution', 'ppi'],
+    },
+    'guides-split-pdf-file-size': {
+      name: 'How to split a PDF, and why the parts can weigh more',
+      description: 'Why the parts of a PDF can add up to more than the whole, and when they do not.',
+      synonyms: ['guide', 'split pdf size', 'pdf parts'],
+    },
+    'guides-combine-pdfs-on-phone': {
+      name: 'How to combine PDFs on a phone',
+      description: 'The ways to put PDFs together on an iPhone or an Android phone, and the size you get.',
+      synonyms: ['guide', 'combine pdf on iphone', 'pdf on android'],
+    },
+    'guides-photos-to-one-pdf': {
+      name: 'How to turn photos into one PDF',
+      description: 'One PDF from a few photos, and what compressing the photos first does to its size.',
+      synonyms: ['guide', 'photos to pdf', 'pictures to pdf'],
+    },
+  },
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    guides: {
+    'guides-15-vs-30-year-mortgage': {
+      name: '15-year vs 30-year mortgage: the real cost',
+      description: 'What the shorter term costs a month and saves in interest, rate by rate.',
+      synonyms: ['guide', '15 vs 30', 'mortgage term'],
+    },
+    'guides-debt-snowball-vs-avalanche': {
+      name: 'Snowball vs avalanche, with numbers',
+      description: 'The two ways to pay off debts, run on the same four debts.',
+      synonyms: ['guide', 'snowball', 'avalanche'],
+    },
+    'guides-extra-mortgage-payments': {
+      name: 'How extra payments shorten a mortgage',
+      description: 'What a little more each month does to the term and the interest.',
+      synonyms: ['guide', 'extra payments', 'pay off mortgage early'],
+    },
+    'guides-refinance-break-even': {
+      name: 'Refinancing: find your break-even month',
+      description: 'Two ways to count the break-even, and why they can disagree.',
+      synonyms: ['guide', 'refinance', 'break-even'],
+    },
+    'guides-rent-vs-buy-break-even': {
+      name: 'Rent vs buy: when buying starts to pay off',
+      description: 'The year buying catches up with renting, and what moves it.',
+      synonyms: ['guide', 'rent vs buy', 'break-even'],
     },
   },
 } satisfies EsCommonTexts;

@@ -2,18 +2,22 @@
 // The "Reviewed" line of a file guide (prompt F5b, decision 4; PLANO "Conteúdo de apoio"): the author, the date of the
 // review and of first publication as <time datetime>, and what the review changed. No data-ymyl: the file guides are in
 // the ad area "arquivos", outside gate:dinheiro-saude.
+import type { Lang } from '../../i18n/routes.ts';
 import { AUTHOR } from '../../platform/site.ts';
-import shared from '../../i18n/en/file-guides.ts';
 import { longDate } from './measured.ts';
-import { GUIDE_PUBLISHED, GUIDE_REVIEWED } from './page.ts';
+import { GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, GUIDE_SHARED } from './page.ts';
 
 interface Props {
   changed: string;
+  lang?: Lang;
 }
-const { changed } = Astro.props;
+const { changed, lang = 'en' } = Astro.props;
+const shared = GUIDE_SHARED[lang];
+const reviewed = GUIDE_REVIEWED_ON[lang];
+const published = GUIDE_PUBLISHED_ON[lang];
 const [byBefore, byAfter = ''] = shared.reviewed.split('{date}');
 const [firstBefore, firstAfter = ''] = shared.firstPublished.split('{date}');
 ---
 <p class="fo-reviewed">
-  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={GUIDE_REVIEWED}>{longDate(GUIDE_REVIEWED)}</time>{`${byAfter} `}{firstBefore}<time datetime={GUIDE_PUBLISHED}>{longDate(GUIDE_PUBLISHED)}</time>{`${firstAfter} ${changed}`}
+  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={reviewed}>{longDate(reviewed, lang)}</time>{`${byAfter} `}{firstBefore}<time datetime={published}>{longDate(published, lang)}</time>{`${firstAfter} ${changed}`}
 </p>

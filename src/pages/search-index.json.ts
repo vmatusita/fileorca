@@ -4,12 +4,12 @@
 // in one language still finds a synonym typed in another. The search shows an entry only in a language
 // that has its link (src/search/search.ts), so a page that exists only in English is not offered in
 // Portuguese or Spanish. The 12 PDF tools come after the image pages, in the PDF category, then the money calculators
-// in the money category: the English ones (five of them also in Spanish), the eight Brazilian ones (only in Portuguese,
-// F6) and the money guides (English only, F4). The hubs are not listed, as the image hub is not (DECISOES § 160). The
-// ten file guides (English only, F5b) come next, each in the category of its hub, image or PDF, with its name as its
-// only term (DECISOES § 190). Last, in English only, the home and health calculators, in the categories "Home
-// calculators" and "Health calculators" with the violet of their category, and the QR code generator in "Utilities"
-// (F7, decision 9).
+// in the money category: the English ones (all of them also in Spanish since the languages adjustment), the eight
+// Brazilian ones (only in Portuguese, F6) and the money guides (English and Spanish). The hubs are not listed, as the image
+// hub is not (DECISOES § 160). The ten file guides (in the three languages since the languages adjustment) come next, each
+// in the category of its hub, image or PDF, with its name as its only term (DECISOES § 190). Last, in English only, the
+// home and health calculators, in the categories "Home calculators" and "Health calculators" with the violet of their
+// category, and the QR code generator in "Utilities" (F7, decision 9; in pt and es since the languages adjustment).
 import type { APIRoute } from 'astro';
 import { LANGS, QR_ID, ROUTES, type Lang, type RouteId } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -17,7 +17,6 @@ import type { ToolBlurb } from '../i18n/types.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
-import enCommon from '../i18n/en/common.ts';
 import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES } from '../tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../tools/guides/registry.ts';
@@ -78,7 +77,7 @@ function moneyEntries(): SearchEntry[] {
   return [
     ...CALC_PAGE_IDS.flatMap((id) => entry(id, 'money', ICONS[CALC_PAGES[id].icon], (lang) => calc(lang, id))),
     ...BR_CALC_IDS.flatMap((id) => entry(id, 'money', ICONS[BR_CALC_PAGES[id].icon], (lang) => calc(lang, id))),
-    ...GUIDE_IDS.flatMap((id) => entry(id, 'money', ICONS[CALC_PAGES[GUIDES[id].calc].icon], (lang) => (lang === 'en' ? enCommon.guides[id] : undefined))),
+    ...GUIDE_IDS.flatMap((id) => entry(id, 'money', ICONS[CALC_PAGES[GUIDES[id].calc].icon], (lang) => TEXTS[lang].common.guides?.[id])),
   ];
 }
 
@@ -87,16 +86,15 @@ function fileGuideEntries(): SearchEntry[] {
   return FILE_GUIDE_IDS.flatMap((id) => {
     const def = FILE_GUIDES[id];
     const icon = def.tool in PDF_PAGES ? PDF_PAGES[def.tool as keyof typeof PDF_PAGES].icon : IMAGE_PAGES[def.tool as ImagePageId].icon;
-    const blurb = enCommon.fileGuides[id];
-    return entry(id, def.hub === 'pdf-tools' ? 'pdf' : 'image', ICONS[icon], (lang) => (lang === 'en' ? blurb : undefined));
+    return entry(id, def.hub === 'pdf-tools' ? 'pdf' : 'image', ICONS[icon], (lang) => TEXTS[lang].common.fileGuides?.[id]);
   });
 }
 
-/** The home and health calculators in hub order, then the QR code generator (English only, F7). */
+/** The home and health calculators in hub order (English only, F7), then the QR code generator (en, pt and es). */
 function lifeEntries(): SearchEntry[] {
   return [
-    ...LIFE_CALC_IDS.flatMap((id) => entry(id, 'home', ICONS[LIFE_CALC_PAGES[id].icon], (lang) => (lang === 'en' ? enCommon.calcs[id] : undefined), LIFE_CALC_PAGES[id].hub)),
-    ...entry(QR_ID, 'util', ICONS.qr, (lang) => (lang === 'en' ? enCommon.qr : undefined)),
+    ...LIFE_CALC_IDS.flatMap((id) => entry(id, 'home', ICONS[LIFE_CALC_PAGES[id].icon], (lang) => (lang === 'en' ? TEXTS.en.common.calcs[id] : undefined), LIFE_CALC_PAGES[id].hub)),
+    ...entry(QR_ID, 'util', ICONS.qr, (lang) => TEXTS[lang].common.qr),
   ];
 }
 

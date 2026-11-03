@@ -18,9 +18,8 @@ import PdfIsland from './PdfIsland.astro';
 import { crumbsFor, panelData, relatedFor } from './page.ts';
 import { PDF_TOOL_TEXTS } from './texts.ts';
 import { fmt } from '../../i18n/format.ts';
-import enCommon from '../../i18n/en/common.ts';
-import guideTexts from '../../i18n/en/file-guides.ts';
-import { FILE_GUIDES, guidesOfTool } from '../guides/registry.ts';
+import { guidesOfTool } from '../guides/registry.ts';
+import { GUIDE_SHARED, guideLinks } from '../guides/page.ts';
 import type { PdfToolId } from './registry.ts';
 
 interface Props {
@@ -38,8 +37,9 @@ const related = relatedFor(id, lang);
 const data = panelData(id, lang);
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
 // The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots;
-// only in English, where the guides exist (DECISOES § 6; F6, decision 4).
-const guides = lang === 'en' ? guidesOfTool(id).map((guide) => ({ href: FILE_GUIDES[guide].path, title: enCommon.fileGuides[guide].name })) : [];
+// in the language of the page, where the guides exist since the languages adjustment (DECISOES § 6).
+const guides = guideLinks(guidesOfTool(id), lang).map((guide) => ({ href: guide.href, title: guide.name }));
+const guideTexts = GUIDE_SHARED[lang];
 ---
 <BaseLayout
   lang={lang}

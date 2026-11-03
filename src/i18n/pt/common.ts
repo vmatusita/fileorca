@@ -24,6 +24,8 @@ export default {
     terms: 'Termos',
     licenses: 'Licenças',
     contact: 'Contato',
+    // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    utilityColumn: 'Utilities',
     coffee: 'Curtiu? Me paga um café',
     signature: 'Feito por {name} em {city}',
   },
@@ -47,6 +49,8 @@ export default {
     imageCategory: 'Imagem',
     moneyCategory: 'Calculadoras financeiras',
     pdfCategory: 'PDF',
+    // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    utilityCategory: 'Utilities',
     shortcut: 'Ctrl K',
   },
   imageTools: 'Ferramentas de imagem',
@@ -212,6 +216,65 @@ export default {
       name: 'Alugar ou comprar',
       description: 'Compare alugar e investir a diferença com financiar o imóvel, ano a ano.',
       synonyms: ['alugar ou comprar', 'aluguel', 'comprar imóvel', 'financiamento', 'itbi', 'casa própria'],
+    },
+  },
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    qr: {
+    name: 'QR code generator',
+    description: 'A QR code of your link or text, with Oli in the middle, as PNG or SVG.',
+    synonyms: ['qr', 'qr code', 'qr generator', 'qr maker', 'link to qr', 'url to qr', 'barcode'],
+  },
+  // STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
+    fileGuides: {
+    'guides-heic-to-jpg-on-windows': {
+      name: 'How to convert HEIC to JPG on Windows',
+      description: 'Why Windows asks for an extension, and what happens to size and location when a photo becomes a JPG.',
+      synonyms: ['guide', 'convert heic to jpeg on windows', 'windows heic'],
+    },
+    'guides-why-is-my-pdf-so-large': {
+      name: 'Why is my PDF so large?',
+      description: 'What takes the space in a PDF, and what each mode of Compress PDF does to it.',
+      synonyms: ['guide', 'large pdf', 'pdf file size'],
+    },
+    'guides-social-media-image-sizes': {
+      name: 'Social media image sizes',
+      description: 'The sizes each network publishes, and what a photo looks like when it is resized to them.',
+      synonyms: ['guide', 'instagram size', 'image dimensions'],
+    },
+    'guides-open-webp-save-as-jpg': {
+      name: 'How to open WebP images and save them as JPG',
+      description: 'What a WebP is, where it opens, and what changes when it becomes a JPG.',
+      synonyms: ['guide', 'save webp as jpeg', 'open webp'],
+    },
+    'guides-jpg-vs-png': {
+      name: 'JPG or PNG: which one to use',
+      description: 'When each format wins, measured on the same photos in both.',
+      synonyms: ['guide', 'jpeg or png', 'png or jpg'],
+    },
+    'guides-remove-location-from-photos': {
+      name: 'How to remove location data from photos',
+      description: 'Where a photo keeps its location, and the way to strip it that changes no pixel.',
+      synonyms: ['guide', 'remove gps', 'exif location'],
+    },
+    'guides-pdf-to-jpg-resolution': {
+      name: 'Which resolution to choose for PDF to JPG',
+      description: 'What a higher resolution adds to the pixels and to the file, page by page.',
+      synonyms: ['guide', 'jpeg resolution', 'ppi'],
+    },
+    'guides-split-pdf-file-size': {
+      name: 'How to split a PDF, and why the parts can weigh more',
+      description: 'Why the parts of a PDF can add up to more than the whole, and when they do not.',
+      synonyms: ['guide', 'split pdf size', 'pdf parts'],
+    },
+    'guides-combine-pdfs-on-phone': {
+      name: 'How to combine PDFs on a phone',
+      description: 'The ways to put PDFs together on an iPhone or an Android phone, and the size you get.',
+      synonyms: ['guide', 'combine pdf on iphone', 'pdf on android'],
+    },
+    'guides-photos-to-one-pdf': {
+      name: 'How to turn photos into one PDF',
+      description: 'One PDF from a few photos, and what compressing the photos first does to its size.',
+      synonyms: ['guide', 'photos to pdf', 'pictures to pdf'],
     },
   },
 } satisfies PtCommonTexts;

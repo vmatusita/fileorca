@@ -70,7 +70,7 @@ export type RouteId =
 
 export type AdArea = 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilidades';
 
-/** The QR code generator (prompt F7, decision 8): English only, in the ad area "utilidades", with no hub. */
+/** The QR code generator (prompt F7, decision 8): in the ad area "utilidades", with no hub; in pt and es since the languages adjustment. */
 export const QR_ID = 'qr-code-generator';
 
 export interface RouteDef {
@@ -146,19 +146,19 @@ export const ROUTES: readonly RouteDef[] = [
     adArea: 'arquivos',
   },
   ...imageToolRoutes(),
-  // The money hub and five calculators also exist in Spanish; the presets and guides only in English (F6).
+  // The money hub, the 14 calculators, the 4 presets and the 5 guides, in English and Spanish (F6 and the languages adjustment).
   ...moneyRoutes(),
   // The Brazilian money hub and the eight calculators adapted to Brazil, only in Portuguese (F6, decision 5).
   ...brMoneyRoutes(),
   // The PDF hub and the 12 PDF tools exist in the three languages (F6).
   ...pdfRoutes(),
-  // The ten file guides exist only in English (F5b; DECISOES § 58 and § 184).
+  // The ten file guides, in the three languages since the languages adjustment (F5b; DECISOES § 58 and § 184).
   ...fileGuideRoutes(),
   // The home and health hubs and their 11 calculators, only in English (F7, decision 1).
   ...lifeRoutes(),
   {
     id: QR_ID,
-    paths: { en: '/qr-code-generator/' },
+    paths: { en: '/qr-code-generator/', pt: '/pt/gerador-de-qr-code/', es: '/es/generador-de-codigo-qr/' },
     indexable: true,
     view: 'src/tools/qr-code-generator/',
     texts: ['src/tools/qr-code-generator/i18n/{lang}.ts'],
@@ -272,8 +272,9 @@ function imageToolRoutes(): RouteDef[] {
  * The money pages of the F4: the hub, each calculator (folder src/tools/<slug>/), each preset
  * (src/tools/<parent>/presets/<name>/) and each guide (src/views/GuideView.astro with src/i18n/<lang>/guide-<slug>.ts).
  * The ids and paths come from the calculator registry. Every one of them is in the ad area "dinheiro", which
- * is what gate:dinheiro-saude checks (DECISOES § 52). The hub and the five calculators of ES_CALC_IDS also have a
- * Spanish page, their equivalent (prompt F6, decision 6); the presets and guides exist only in English.
+ * is what gate:dinheiro-saude checks (DECISOES § 52). The hub and the five first calculators have a Spanish page since the
+ * F6 (decision 6), and every other calculator, preset and guide since the languages adjustment (decision 4): the equivalent
+ * page, with a pair in hreflang. No US money page exists in Portuguese, whose money hub is the Brazilian one.
  */
 function moneyRoutes(): RouteDef[] {
   const shared = 'src/tools/calc/i18n/{lang}.ts';
@@ -298,7 +299,7 @@ function moneyRoutes(): RouteDef[] {
     },
     ...[...CALC_TOOL_IDS, ...CALC_PRESET_IDS].map((id): RouteDef => ({
       id,
-      paths: { en: CALC_PAGES[id].path, ...(CALC_PAGES[id].es ? { es: CALC_PAGES[id].es.path } : {}) },
+      paths: { en: CALC_PAGES[id].path, es: CALC_PAGES[id].es.path },
       indexable: true,
       view: calcView(id),
       texts: calcTexts(id),
@@ -306,7 +307,7 @@ function moneyRoutes(): RouteDef[] {
     })),
     ...GUIDE_IDS.map((id): RouteDef => ({
       id,
-      paths: { en: GUIDES[id].path },
+      paths: { en: GUIDES[id].path, es: GUIDES[id].es.path },
       indexable: true,
       view: 'src/views/GuideView.astro',
       texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, ...calcTexts(GUIDES[id].calc)],
@@ -367,9 +368,9 @@ function pdfRoutes(): RouteDef[] {
 }
 
 /**
- * English-only file guides (F5b): src/views/FileGuideView.astro with src/i18n/<lang>/guide-<slug>.ts, the shared guide
- * texts and the texts of the tool the guide embeds. The ids and paths come from the guide registry; every one is in the
- * ad area "arquivos", like the tool it embeds.
+ * The file guides (F5b), in English, Portuguese and Spanish since the languages adjustment: src/views/FileGuideView.astro
+ * with src/i18n/<lang>/guide-<slug>.ts, the shared guide texts and the texts of the tool the guide embeds. The ids and
+ * paths come from the guide registry; every one is in the ad area "arquivos", like the tool it embeds.
  */
 function fileGuideRoutes(): RouteDef[] {
   return FILE_GUIDE_IDS.map((id): RouteDef => {
@@ -379,7 +380,7 @@ function fileGuideRoutes(): RouteDef[] {
       : [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'];
     return {
       id,
-      paths: { en: FILE_GUIDES[id].path },
+      paths: { ...FILE_GUIDES[id].paths },
       indexable: true,
       view: 'src/views/FileGuideView.astro',
       texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, 'src/i18n/{lang}/file-guides.ts', ...toolTexts],

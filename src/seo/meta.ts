@@ -113,8 +113,11 @@ export function collectionPageLd(name: string, description: string, path: string
   };
 }
 
-/** A guide (F4): an Article by the author, with the date it was published and the date it was last reviewed. */
-export function articleLd(headline: string, description: string, path: string, lang: Lang, published: string, modified: string): JsonLd {
+/**
+ * A guide (F4): an Article by the author, with the date it was published and the date it was last reviewed. Its image is
+ * the Open Graph card of the guide's route (`id`): a Portuguese or Spanish path is not the card's name.
+ */
+export function articleLd(headline: string, description: string, path: string, lang: Lang, published: string, modified: string, id?: RouteId): JsonLd {
   return {
     '@type': 'Article',
     headline,
@@ -126,7 +129,7 @@ export function articleLd(headline: string, description: string, path: string, l
     dateModified: modified,
     author: { '@id': `${SITE_ORIGIN}/#victor` },
     publisher: { '@id': `${SITE_ORIGIN}/#organization` },
-    image: absolute(`/og/${lang}/${path.split('/').filter(Boolean).join('-')}.png`),
+    image: absolute(id ? ogImagePath(id, lang) : `/og/${lang}/${path.split('/').filter(Boolean).join('-')}.png`),
   };
 }
 
