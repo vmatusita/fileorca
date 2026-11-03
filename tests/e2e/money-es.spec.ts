@@ -157,9 +157,12 @@ function csvCells(line: string): string[] {
   return cells;
 }
 
-/** A number cell of the CSV in whole units: money as cents (1896.20), a percent as hundredths ("5.13 %"), a count as it is. */
+/**
+ * A number cell of the CSV in whole units: money as cents (1896.20), a percent as hundredths ("5.13%", glued to its number
+ * as in the English CSV, so a spreadsheet reads it; the no-break space of the screen stays out, review C-5), a count as it is.
+ */
 function csvNumber(cell: string): number | null {
-  const plain = cell.replace(/\s*%$/, '');
+  const plain = cell.replace(/(?<=\d)%$/, '');
   if (!/^-?\d+(?:\.\d{2})?$/.test(plain)) return null;
   return plain.includes('.') ? Math.round(Number(plain) * 100) : Number(plain);
 }
