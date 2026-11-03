@@ -132,7 +132,13 @@ describe('the classes of the CI and the ci-ok', () => {
       expect(list.find((step) => (step.run ?? '').includes('pnpm verificar'))?.run, job).toContain('--dist-pronto');
       // The cache of .cache/ (tools) comes back before the artifact, so the bundle record of the build wins.
       const cache = list.findIndex((step) => step.uses?.startsWith('actions/cache@'));
-      if (cache >= 0) expect(cache, job).toBeLessThan(download);
+      if (cache >= 0) {
+        expect(cache, job).toBeLessThan(download);
+        // Only the folders of the pinned tools: never the whole .cache/, with the record and the builds of a past run.
+        const paths = String(list[cache]?.with?.['path']).trim().split('\n');
+        expect(paths.length, job).toBeGreaterThan(0);
+        for (const path of paths) expect(path, job).toMatch(/^\.cache\/[a-z]+-\*$/);
+      }
     }
   });
 });
