@@ -5,7 +5,7 @@ export default {
   title: 'Calculadora de pagos adicionales a la hipoteca: intereses y meses que ahorras',
   description: 'Mira cuántos meses e intereses te ahorran los pagos adicionales a la hipoteca: cada mes, una vez al año o un solo pago, junto al préstamo sin ellos.',
   h1: 'Calculadora de pagos adicionales a la hipoteca',
-  lead: 'Los intereses y el tiempo que ahorras si pagas un poco más.',
+  lead: 'Lo que ahorras si pagas un poco más.',
   panel: {
     ...homePanel,
     fields: {
@@ -106,7 +106,7 @@ export default {
     },
     {
       q: '¿El pago único tiene que ser en el primer año?',
-      a: 'No. Elige el número del pago con el que lo harás; un pago único más adelante ahorra menos intereses que el mismo monto al principio.',
+      a: 'No. Elige el número del pago con el que lo harás; un pago único hecho más tarde en el préstamo ahorra menos intereses que el mismo monto al principio.',
     },
   ],
   privacyHeading: 'Privacidad',

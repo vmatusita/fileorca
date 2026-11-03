@@ -4,7 +4,7 @@ export default {
   title: 'Calculadora de préstamo con pago global: el pago mensual y lo que vence al final',
   description: 'Calcula el pago mensual de un préstamo con pago global y el monto que aún vence en la fecha del pago global, con los intereses hasta entonces y la tabla.',
   h1: 'Calculadora de préstamo con pago global',
-  lead: 'El pago mensual y lo que queda por pagar al final del préstamo.',
+  lead: 'El pago al mes y lo que vence al final.',
   panel: {
     fields: {
       a: { label: 'Monto del préstamo', prefix: '$', error: 'Escribe un monto de $100 a $100,000,000.' },

@@ -2,10 +2,10 @@ import type { CalcPageTexts } from '../../../../calc/types.ts';
 import { homePanel, homePremises } from '../../../i18n/es.ts';
 
 export default {
-  title: 'Calculadora de hipoteca con pagos cada dos semanas: medio pago en lugar de uno al mes',
+  title: 'Calculadora de pagos cada dos semanas de la hipoteca: medio pago en lugar de uno al mes',
   description: 'Compara pagar la mitad del pago de tu hipoteca cada dos semanas con pagar una vez al mes: los meses y los intereses que ahorras, y la tabla completa.',
-  h1: 'Calculadora de hipoteca con pagos cada dos semanas',
-  lead: 'Lo que ahorras al pagar la mitad del pago cada dos semanas.',
+  h1: 'Calculadora de pagos cada dos semanas',
+  lead: 'El ahorro de pagar cada dos semanas.',
   panel: {
     ...homePanel,
     view: {

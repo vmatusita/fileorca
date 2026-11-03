@@ -5,14 +5,14 @@ export default {
   title: 'Calculadora de hipoteca a 15 o 30 años: pago e intereses de cada plazo',
   description: 'Pon una hipoteca a 15 años al lado de una a 30 años: el pago mensual, el total de intereses y cómo baja el saldo cada año, con las tasas que elijas.',
   h1: 'Calculadora de hipoteca a 15 o 30 años',
-  lead: 'Lo que cuesta al mes el plazo corto y lo que ahorra en intereses.',
+  lead: 'Lo que cuesta y ahorra el plazo corto.',
   panel: {
     fields: {
       p: homePanel.fields['p']!,
       d: homePanel.fields['d']!,
       dp: homePanel.fields['dp']!,
-      r15: { label: 'Tasa 15 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
-      r30: { label: 'Tasa 30 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
+      r15: { label: 'A 15 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
+      r30: { label: 'A 30 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
     },
     view: {
       label: 'Pago a 15 años',
