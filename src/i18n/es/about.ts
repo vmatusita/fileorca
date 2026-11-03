@@ -7,7 +7,7 @@ export default {
   h1: 'Acerca de FileOrca',
   intro: [
     'FileOrca lo hace y lo mantiene una sola persona: Victor Yuki Matusita, desarrollador en Curitiba, Paraná, Brasil.',
-    'Es un conjunto de herramientas gratis que funcionan en tu navegador. En español tienes todas las herramientas de imagen, que son ocho, todas las de PDF, que son 12, las 14 calculadoras de dinero con sus guías, el generador de códigos QR y guías sobre archivos de imagen y PDF. El sitio también está en inglés y en portugués.',
+    'Es un conjunto de herramientas gratis que funcionan en tu navegador. En español tienes todas las herramientas de imagen, que son ocho, todas las de PDF, que son 12, las 18 calculadoras de dinero con sus guías, el generador de códigos QR y guías sobre archivos de imagen y PDF. El sitio también está en inglés y en portugués.',
   ],
   whyHeading: 'Por qué existe este sitio',
   why: [

@@ -1,10 +1,10 @@
 import type { CalcPageTexts } from '../../calc/types.ts';
 
 export default {
-  title: 'Calculadora de alquilar o comprar: el año en que comprar alcanza',
+  title: 'Calculadora de alquilar o comprar: cuándo comprar alcanza a alquilar',
   description: 'Compara alquilar y comprar una vivienda año por año: el valor neto de cada camino, el año en que comprar alcanza a alquilar y lo que cuestan la vivienda y el alquiler.',
   h1: 'Calculadora de alquilar o comprar',
-  lead: 'Tu valor neto alquilando y comprando, y el año en que comprar alcanza.',
+  lead: 'Tu valor neto alquilando y comprando, y el año en que comprar alcanza a alquilar.',
   panel: {
     fields: {
       p: { label: 'Precio de la vivienda', prefix: '$', error: 'Escribe un precio de la vivienda de $10,000 a $20,000,000.' },
@@ -25,7 +25,7 @@ export default {
     moreHeading: 'El préstamo, la vivienda y el mercado',
     view: {
       label: 'Comprar alcanza a alquilar en',
-      placard: 'comprar alcanza',
+      placard: 'punto de equilibrio',
       yearN: 'Año {n}',
       notWithin: 'Aún no en el año {n}',
       sentence: 'Al final del año {years}, comprar te deja {buyer} y alquilar {renter}.',
