@@ -22,7 +22,7 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 3. CSV e PDF das calculadoras | 4 | Run de ajuste de exportação |
 | 4. Texto e voz em en, pt e es | 23 | Run de ajuste de texto e voz |
 | 5. Acessibilidade | 12 | Run de ajuste de acessibilidade |
-| 6. Layout e design system | 15 | Run de ajuste de layout |
+| 6. Layout e design system | 16 | Run de ajuste de layout |
 | 7. PDF: comportamento | 4 | Run de ajuste de PDF |
 | 8. SEO, títulos e imagens sociais | 7 | Run de ajuste de SEO |
 | 9. Testes e portões | 7 | Run de ajuste de testes |
@@ -35,7 +35,7 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 23 | Runs de ajuste e Victor |
 
-Total: 170 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 171 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -150,6 +150,7 @@ Run de ajuste de layout. Só tokens (nenhuma cor fora deles); o `gate:design` e 
 | F7 f-13 | REVISAO-F7.md f-13 | baixo | No BTU, "Heavy shade" e "Very sunny" quebram em duas linhas no trilho segmentado a 360 e 320 px. | Rótulos de uma palavra ("Normal", "Shade", "Sun") com a explicação na ajuda, ou o grupo em linha inteira com `white-space: nowrap`. | Run de ajuste de layout |
 | F7 obs 2 | REVISAO-F7.md, segunda passada | baixo | A tabela da Ovulation quebra datas no meio a 320 px ("November / 1, 2026"). | `white-space: nowrap` na célula da data sem voltar à coluna fixa (§ 275). | Run de ajuste de layout |
 | F7 obs 3 | REVISAO-F7.md, segunda passada | baixo | A etiqueta "example" desce de linha em "Coverage per gallon" (e o vizinho "Doors" fica mais baixo); o teste dos menus (`calc-form.spec.ts`, § 277) supõe uma seta de 26 px, com folga de 3 px no pior caso ("Rectangle" a 360 px). | Rótulo mais curto na Mulch; no teste, medir a seta do navegador em vez de supor 26 px. | Run de ajuste de layout |
+| Idiomas E-2 | REVISAO-ajuste-idiomas.md E-2; DECISOES § 321 | baixo | Na primeira visita, com a fonte de reserva, os rótulos de meia largura "Tasa nueva" e "Plazo nuevo" (refinanciamiento, consolidación de deudas) e "Tasa anual" (interés compuesto e simple, no WebKit) quebram a etiqueta "ejemplo" para a linha de baixo, e a ferramenta sobe 30 px quando a Figtree chega: CLS 0,041 e 0,051 a 360 px no Chromium, 0,030 na meta de ahorro no Lighthouse a 412 px, todos abaixo do limite de 0,05. A regra "palavra mais longa + 12 + 72 ≤ 158 px" não vê o rótulo de duas palavras, que quebra inteiro. As páginas estão nos `CASES` do `layout-shift.spec.ts`, que imprime o CLS. | Rótulo que caiba com folga na fonte de reserva (o espanhol curto do glossário), ou o teste medir o rótulo inteiro com a etiqueta; conferir o resultado a 740 px. | Run de ajuste de layout |
 
 ## 7. PDF: comportamento
 

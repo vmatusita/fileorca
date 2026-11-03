@@ -36,7 +36,13 @@ const guideIn = (id: FileGuideId, lang: 'pt' | 'es'): string => FILE_GUIDES[id].
 const spanish = (id: CalcPageId): string => moneyPage(id, 'es')?.path ?? `(${id} sem página em es)`;
 const CASES: Record<number, string[]> = {
   320: ['/home-affordability-calculator/', '/pt/assinar-pdf/', '/bmi-calculator/', '/btu-calculator/', '/compress-image/to-100kb/', '/compress-image/to-1mb/', '/ovulation-calculator/', guideIn('guides-heic-to-jpg-on-windows', 'pt')],
-  360: [...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/', guideIn('guides-open-webp-save-as-jpg', 'es'), guideIn('guides-pdf-to-jpg-resolution', 'pt')],
+  360: [
+    ...FIRST, '/es/imagen-a-pdf/', '/due-date-calculator/', '/pt/desbloquear-pdf/', guideIn('guides-open-webp-save-as-jpg', 'es'), guideIn('guides-pdf-to-jpg-resolution', 'pt'),
+    // Review of the languages adjustment (E-2): a half-width label next to its "ejemplo" tag ("Tasa nueva", "Tasa anual")
+    // that fits with Figtree and not with the fallback font moves the tool 30 px when Figtree arrives (CLS 0.041 and 0.051
+    // in Chromium). The trail and the H1 stay; the CLS of these pages is printed, so it is seen again when it changes.
+    spanish('refinance-calculator'), spanish('debt-consolidation-calculator'), spanish('compound-interest-calculator'), spanish('simple-interest-calculator'),
+  ],
   375: [
     '/mortgage-calculator/biweekly/', '/debt-payoff-calculator/', '/es/marca-de-agua-pdf/', '/refinance-calculator/', '/home-calculators/', '/health-calculators/', '/guides/debt-snowball-vs-avalanche/', '/debt-consolidation-calculator/', '/savings-goal-calculator/', '/mortgage-calculator/extra-payments/',
     guideIn('guides-pdf-to-jpg-resolution', 'pt'), guideIn('guides-open-webp-save-as-jpg', 'es'),
@@ -46,6 +52,8 @@ const CASES: Record<number, string[]> = {
     '/credit-card-payoff-calculator/', '/pt/organizar-paginas-pdf/', '/es/calculadora-de-deudas/', '/es/redimensionar-imagen/', '/debt-consolidation-calculator/', '/compound-interest-calculator/',
     spanish('rent-vs-buy-calculator'), spanish('apr-to-apy-calculator'), guideIn('guides-jpg-vs-png', 'pt'), guideIn('guides-jpg-vs-png', 'es'),
     guideIn('guides-why-is-my-pdf-so-large', 'es'), guideIn('guides-remove-location-from-photos', 'es'), guideIn('guides-combine-pdfs-on-phone', 'es'),
+    // E-2: 0.030 in the three Lighthouse runs of the review, from the same label wrap.
+    spanish('savings-goal-calculator'),
   ],
 };
 const CHUNK = 8;
