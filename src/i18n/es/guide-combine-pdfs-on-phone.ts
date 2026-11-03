@@ -1,91 +1,91 @@
-// STUB-IDIOMAS: copy of the English text, replaced by the writer of the lot.
 import type { FileGuideTexts } from '../types.ts';
 
 const texts: FileGuideTexts = {
-  title: 'How to Combine PDFs on a Phone, iPhone or Android',
-  description: 'The ways to put several PDFs into one on an iPhone or an Android phone, what the merged file weighs, and what it keeps from each PDF.',
-  h1: 'How to combine PDFs on a phone',
-  lead: 'You have a few PDFs on your phone and need to send them as one. Here are the ways to do it there, without a computer, and what to expect from the result.',
-  changed: 'First version, with the measurements of {date}.',
+  title: 'Cómo unir PDF en el celular, en un iPhone o en Android',
+  description: 'Las formas de juntar varios PDF en uno solo en un iPhone o en un celular Android, cuánto pesa el archivo unido y qué conserva de cada PDF.',
+  h1: 'Cómo unir PDF en el celular',
+  lead: 'Tienes algunos PDF en el celular y necesitas enviarlos como uno solo. Estas son las formas de hacerlo ahí mismo, sin computadora, y lo que puedes esperar del resultado.',
+  changed: 'Primera versión, con las mediciones del {date}.',
   intro: [
-    'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
-    'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged {pairs_word} pairs of our test PDFs.',
+    'Formularios, recibos, una página firmada y el escaneo de una identificación pueden llegar como PDF separados, y el lugar al que tienes que enviarlos acepta un solo archivo. En una computadora hay muchas formas de juntarlos. En un celular hay menos, y dependen del teléfono.',
+    'Esta guía cubre la forma que Apple documenta para el iPhone, la forma que funciona en el navegador de cualquier celular y lo que medimos al unir {pairs_word} pares de nuestros PDF de prueba.',
   ],
-  toolHeading: 'Combine your PDFs here',
-  toolIntro: 'Choose two or more PDFs from your phone, drag them into the order you want and tap the button. They are joined in this browser tab, on the phone itself, and nothing is uploaded.',
+  toolHeading: 'Une tus PDF aquí',
+  toolIntro: 'Elige dos o más PDF de tu celular, arrástralos al orden que quieras y toca el botón. Se unen en esta pestaña del navegador, en el propio celular, y no se sube nada.',
   sections: [
     {
-      heading: 'On an iPhone, with Preview',
+      heading: 'En un iPhone, con Vista Previa',
       paragraphs: [
-        'Apple’s iPhone User Guide describes how to add pages to a PDF in the Preview app: open the PDF, touch and hold a page thumbnail, then tap Insert from File to bring in another PDF or an image. To change the order, touch and hold a thumbnail and drag it above or below another one.',
-        'This works well for adding one file to another. For several files, you repeat the insert for each one, and the result is the PDF you started from with the new pages added.',
+        'El Manual de uso del iPhone de Apple explica cómo agregar páginas a un PDF en la app Vista Previa: abre el PDF, mantén presionada una miniatura de página y toca Insertar desde archivo para traer otro PDF o una imagen. Para cambiar el orden, mantén presionada una miniatura y arrástrala por encima o por debajo de otra.',
+        'Esto funciona bien para agregar un archivo a otro. Para varios archivos, repites la inserción con cada uno, y el resultado es el PDF del que partiste con las páginas nuevas agregadas.',
       ],
     },
     {
-      heading: 'On an Android phone',
+      heading: 'En un celular Android',
       paragraphs: [
-        'Google’s help for the Drive app describes scanning paper into a PDF: you scan a page, tap Add to scan another, and save the result as a PDF. That is a good way to turn several sheets of paper into one file, but it makes a new PDF from the camera. It does not join PDFs you already have on the phone.',
-        'For files that are already PDFs, the browser is the simplest place to do it on Android, with the tool on this page.',
+        'La ayuda de Google para la app de Google Drive explica cómo escanear papel a un PDF: escaneas una página, presionas Agregar para escanear otra y guardas el resultado como PDF. Es una buena forma de convertir varias hojas de papel en un solo archivo, pero crea un PDF nuevo con la cámara. No une los PDF que ya tienes en el teléfono.',
+        'Para los archivos que ya son PDF, el navegador es el lugar más simple para hacerlo en Android, con la herramienta de esta página.',
       ],
     },
     {
-      heading: 'On any phone, in the browser',
+      heading: 'En cualquier celular, en el navegador',
       paragraphs: [
-        'Merge PDF on this page runs in the browser of the phone, so it works the same on an iPhone and on an Android phone. Tap to choose the files, from the Files app on an iPhone or from your downloads on Android, put them in order and tap the button. The merged PDF downloads like any other file.',
-        'The files are not uploaded to a server: the phone does the work, so private documents stay on it.',
+        'Unir PDF, en esta página, corre en el navegador del celular, así que trabaja igual en un iPhone y en un teléfono Android. Toca para elegir los archivos, desde la app Archivos en el iPhone o desde tus descargas en Android, ponlos en orden y toca el botón. El PDF unido se descarga como cualquier otro archivo.',
+        'Los archivos no se suben a ningún servidor: el celular hace el trabajo, así que los documentos privados se quedan en él.',
       ],
     },
     {
-      heading: 'What the merged file weighs',
+      heading: 'Cuánto pesa el archivo unido',
       paragraphs: [
-        'We merged {pairs} pairs of our test PDFs and compared the merged file with the two files it came from. The merged file was never bigger than the two together, and it came out smaller in {smaller} of the {pairs} pairs, by very different amounts.',
-        'Our PDF of photos with the scanned book page, and the scanned NASA report with that same page, came out just under their combined size: {photosScanMerged_exact} against {photosScanInputs_exact}, and {reportScanMerged_exact} against {reportScanInputs_exact}. A PDF has some structure around its pages, and the merged file needs that structure once instead of twice; the pictures stay as they were. The lecture notes with the IRS form came out {bookFormRatio_off} smaller.',
+        'Unimos {pairs} pares de nuestros PDF de prueba y comparamos cada archivo unido con los dos archivos de los que salió. El archivo unido nunca pesó más que los dos juntos, y salió más pequeño en {smaller} de los {pairs} pares, aunque por márgenes muy distintos.',
+        'Nuestro PDF de fotos con la página de libro escaneada, y el informe de la NASA escaneado con esa misma página, quedaron justo por debajo de la suma de sus tamaños: {photosScanMerged_exact} contra {photosScanInputs_exact}, y {reportScanMerged_exact} contra {reportScanInputs_exact}. Un PDF tiene algo de estructura alrededor de sus páginas, y el archivo unido necesita esa estructura una vez en lugar de dos; las imágenes quedan como estaban. Los apuntes de clase con el formulario del IRS salieron un {bookFormRatio_off} más pequeños.',
       ],
     },
     {
-      heading: 'When the merged file is clearly smaller',
+      heading: 'Cuando el archivo unido es claramente más pequeño',
       paragraphs: [
-        'The scanned book page with the IRS form came out {scanFormRatio_off} smaller than the two files together. The form carries a second description of itself, in a format called XFA, that only some programs read, and Merge PDF leaves it out; the result tells you so next to the file. The form fields themselves are kept, so the form can still be filled in. Our PDF with pages of mixed sizes and our PDF with links and actions came out {mixedActionsRatio_off} smaller together: our test script wrote both without packing their structure, and the merged file is written packed.',
-        'Nothing else is dropped on purpose. Bookmarks and links come along, and a field whose name already exists in another file gets a number added so both keep working.',
+        'La unión de la página de libro escaneada con el formulario del IRS salió un {scanFormRatio_off} más pequeña que los dos archivos juntos. El formulario lleva una segunda descripción de sí mismo, en un formato llamado XFA, que solo leen algunos programas, y Unir PDF la deja fuera; el resultado te lo avisa junto al archivo. Los campos del formulario se conservan, así que el formulario se puede seguir llenando. Nuestro PDF con páginas de tamaños distintos y nuestro PDF con enlaces y acciones salieron un {mixedActionsRatio_off} más pequeños juntos: nuestro script de prueba los escribió sin empaquetar su estructura, y el archivo unido se escribe empaquetado.',
+        'No se descarta nada más a propósito. Los marcadores y los enlaces se mantienen, y a un campo cuyo nombre ya existe en otro archivo se le agrega un número para que ambos sigan funcionando.',
       ],
     },
     {
-      heading: 'Before you merge',
+      heading: 'Antes de unir',
       paragraphs: [
-        'Put the files in the order the reader should see them, and remove the pages that are not needed first: a merged PDF is easier to check than to fix. A PDF that asks for a password has to be saved without it before it can be merged, which Unlock PDF does; Merge PDF tells you which file is locked.',
-        'If the merged file is too big to send, compress it afterwards. Merging does not make files lighter by itself, apart from the savings above.',
+        'Pon los archivos en el orden en que quien los reciba debe verlos, y quita antes las páginas que no hacen falta: un PDF unido es más fácil de revisar que de arreglar. Un PDF que pide contraseña tiene que guardarse sin ella antes de unirlo, y eso lo hace Desbloquear PDF; Unir PDF te dice qué archivo está bloqueado.',
+        'Si el archivo unido pesa demasiado para enviarlo, comprímelo después. Unir no hace más ligeros los archivos por sí mismo, aparte del ahorro que viste arriba.',
       ],
     },
     {
-      heading: 'Sending the merged PDF',
+      heading: 'Cómo enviar el PDF unido',
       paragraphs: [
-        'A personal Gmail account sends attachments up to {gmailLimit}; above that, Google turns the attachment into a Drive link. If your merged PDF is near the limit, Compress PDF may bring it under. In the measurements of our guide to large PDFs, it made a PDF of photos and a scanned color page much lighter, and a black and white scan only a little; that guide has each mode on each file.',
-        'Check the merged file before you send it: open it, scroll through every page and make sure the order is right. It takes a minute, and it is much easier than explaining a missing page later.',
+        'Una cuenta personal de Gmail envía archivos adjuntos de hasta {gmailLimit}; por encima de eso, Gmail convierte el adjunto en un vínculo de Google Drive. Si tu PDF unido está cerca del límite, Comprimir PDF puede dejarlo por debajo. En las mediciones de nuestra guía sobre los PDF pesados, dejó mucho más ligeros un PDF de fotos y una página escaneada a color, y apenas un poco más ligero un escaneo en blanco y negro; esa guía muestra cada nivel en cada archivo.',
+        'Revisa el archivo unido antes de enviarlo: ábrelo, recorre todas las páginas y confirma que el orden es el correcto. Es rápido, y es mucho más fácil que explicar después una página que falta.',
       ],
     },
   ],
   half: 4,
-  measuredHeading: 'What we measured',
-  measuredIntro: 'We merged {pairs_word} pairs made from {pdfs_word} of our test PDFs, in the order shown. Change is the merged file against the two files together.',
-  measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on pairs of the PDFs of our tests.',
+  measuredHeading: 'Lo que medimos',
+  measuredIntro: 'Unimos {pairs_word} pares formados con {pdfs_word} PDF de nuestras pruebas, en el orden que se muestra. El cambio compara el archivo unido con los dos archivos juntos.',
+  measuredNote: 'Medido el {date} en Node con el motor de este sitio, que da los mismos bytes que el navegador, sobre pares de los PDF de nuestras pruebas.',
   tables: [
     {
-      heading: 'Merged pairs',
-      caption: 'Each pair of PDFs: the two files together, the merged file, and the change',
-      head: ['Files', 'Together', 'Merged', 'Change'],
+      heading: 'Pares unidos',
+      caption: 'Cada par de PDF: los dos archivos juntos, el archivo unido y el cambio',
+      head: ['Archivos', 'Juntos', 'Unido', 'Cambio'],
     },
   ],
-  sourcesHeading: 'Sources',
+  sourcesHeading: 'Fuentes',
   sources: [
-    { id: 'google-drive-scan', label: 'Google Drive Help: Scan documents with Google Drive', href: 'https://support.google.com/drive/answer/3145835?hl=en&co=GENIE.Platform%3DAndroid', read: '2026-11-01' },
-    { id: 'gmail', label: 'Gmail Help: Send attachments with your Gmail message', href: 'https://support.google.com/mail/answer/6584?hl=en', read: '2026-11-01' },
-    { id: 'apple-preview', label: 'Apple iPhone User Guide: Add, delete, rotate, move, or crop PDF pages in Preview on iPhone', href: 'https://support.apple.com/guide/iphone/iphbf4977cff/ios', read: '2026-11-01' },
+    { id: 'google-drive-scan', label: 'Ayuda de Drive: Cómo escanear documentos con Google Drive (Android)', href: 'https://support.google.com/drive/answer/3145835?hl=es-419&co=GENIE.Platform%3DAndroid', read: '2026-11-03' },
+    { id: 'gmail', label: 'Ayuda de Gmail: Cómo enviar archivos adjuntos en un mensaje de Gmail', href: 'https://support.google.com/mail/answer/6584?hl=es-419', read: '2026-11-03' },
+    { id: 'apple-preview', label: 'Manual de uso del iPhone: Agregar, eliminar, girar, transferir o recortar páginas de archivos PDF en Vista Previa en el iPhone', href: 'https://support.apple.com/es-us/guide/iphone/iphbf4977cff/ios', read: '2026-11-03' },
+    { id: 'apple-files', label: 'Soporte técnico de Apple: Buscar archivos en el iPhone o iPad', href: 'https://support.apple.com/es-lamr/102570', read: '2026-11-03' },
   ],
   facts: {
-    gmailLimit: { text: '25 MB', source: 'gmail' },
+    gmailLimit: { text: '25 MB', source: 'gmail' },
   },
   names: [],
-  relatedHeading: 'Related tools and guides',
+  relatedHeading: 'Herramientas y guías relacionadas',
 };
 
 export default texts;
