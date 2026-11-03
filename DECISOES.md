@@ -3973,7 +3973,7 @@ A revisão (quatro lentes Sonnet e os céticos, sobre `4d8e946`) deu 34 achados:
 - **d-08:** o `ESCOLHAS.md` tem o grupo "Decisões avulsas", com caixas para a conta do `gate:prontidao`, as 37 unidades, a lateral ao lado da água, a vinheta, o texto da página de apoio, o card do café em pt, o botão da parede e o texto da home B.
 - **d-09:** saíram as linhas-fantasma ("Pendências do UX-09:" e as outras, e a "nenhuma desta tarefa") e a conta é "29 dos grupos 5 e 6 (13 e 16) e 8 avulsas".
 - **d-10:** o título da § 366 diz "cinco propostas e dois descartes".
-- **d-11:** as screenshots dos protótipos se chamam `<protótipo>-<idioma>-<estado>-<largura>-<tema>.jpg`; o `prototipos.mjs` grava assim, o `gen-index.mjs` as acha e o `imagens.mjs` exige o padrão em `prototipos/`. As 100 foram gravadas de novo.
+- **d-11:** as screenshots dos protótipos se chamam `<protótipo>-<idioma>-<estado>-<largura>-<tema>.jpg`; o `prototipos.mjs` grava assim, o `gen-index.mjs` as acha e o `imagens.mjs` exige o padrão em `prototipos/`. As 100 foram gravadas de novo, e três estados novos do UX-04 A (a remoção com desfazer e a leitura do juntar, e o erro do HEIC) entraram a 360 no claro, pelo `.cache/f10/revisao-shots-estados.mjs` (23,75 MB de 25 no total).
 - **d-12:** o UX-05 diz que o card em pt com um botão só é desvio da seção C, e os dois botões ficam como alternativa nas "Decisões avulsas".
 
 Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-proto-ads.mjs`, `revisao-reflow.mjs`, `revisao-ux04.mjs` e os `revisao-patch-*.mjs` de cada correção.
