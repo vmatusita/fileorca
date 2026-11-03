@@ -3460,3 +3460,157 @@ A ficha manda mudar um teste que fixa o CI de antes junto com o que ele protege,
 - **`tests/unit/pdf-engine-ops.test.ts`.** O teste do split lê do oráculo os links da fonte (§ 330). As asserções sobre a saída são as mesmas, mais uma.
 - **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 93 arquivos e 1.597 testes para 102 arquivos e 1.735 testes, e o `--list` do Playwright continua em 1.428 por navegador.
 - **Depois da revisão da F9.** O 1.735 acima é o da execução 41658317282; o teste do `merge` pulado (§ 327) levou o commit revisado (`859f7b4`) a 1.736 (revisão, D-2). As correções da revisão só acrescentaram testes: 13, nos arquivos `ci-ok` (o estado de rascunho na hora e o CLI sem `PR_DRAFT_NOW`), `ci-workflows` (as permissões e o `env` do `ci-ok`, a linha verde, o passo rodado em `bash -e` e o controle do `success()`), `claude-md` (o núcleo e o controle dele) e `operacao` (a seção "Repositório público" e o passo do ruleset). O Vitest inteiro dá 102 arquivos e 1.749 testes, verdes nesta máquina. Mudaram, sem perder asserção: o `alerta-dependabot` fixado com `!cancelled()`, a regex da função de status sem `success()` e o título de um teste do `verificar.test.ts` que prometia ler as matrizes do `ci.yml` (D-3).
+
+## § 342 · Onde fica cada coisa, e as screenshots fora da proposta (F10, decisão 1)
+
+- **`docs/propostas/ux-v2/`** guarda só texto: o `index.html`, o `README.md`, o `ESCOLHAS.md`, os protótipos (um `.html` por peça e por alternativa), o `proto.css` comum, os CSS de grupo quando precisam, os SVG novos (`icons/` e `oli/oli-sad.svg`) e a folha da Oli (`oli/folha.html`). Nenhum PNG ou JPEG, e nenhum `.js`, `.ts` ou `.mjs`: o script dos protótipos é inline. O `diff.mjs` confere.
+- **`docs/relatorios/fase-10/`** guarda todas as imagens, em três pastas: `diagnostico/` (só as capturas que um D-NN ou um UX-NN cita), `prototipos/` (as screenshots dos protótipos) e `oli/` (os dois PNG de 512 px da pose `sad`, para a busca reversa).
+- **`.cache/f10/`**, fora do Git, guarda os scripts de apoio, todas as capturas brutas, as capturas e as notas dos concorrentes e a saída das verificações. Não há dados do GA4 nem do Search Console (§ 359).
+- **O desvio.** A ficha da F10 no `PLANO-MELHORIAS.md` põe as screenshots dos protótipos dentro de `docs/propostas/ux-v2/`, e a ficha da run (decisão 1) as põe em `docs/relatorios/fase-10/`. Vale a da run: o checkout dos jobs `build`, `lighthouse` e `playwright` é esparso e pula só `docs/relatorios/` (§ 325). Uma imagem em `docs/propostas/` entraria em todo checkout desses jobs, em toda execução do CI, para sempre. O README e o `index.html` apontam para `../../relatorios/fase-10/`.
+
+## § 343 · O diagnóstico: tarefas, matriz, estados e onde medir (F10, decisão 2)
+
+- **As seis tarefas:** comprimir imagem, HEIC para JPG, juntar PDF, hipoteca, SAC × PRICE (pt) e um guia (§ 358 diz qual). Cada uma entra em cada idioma em que existe: 15 pares de tarefa e idioma. A hipoteca não existe em pt, e o SAC × PRICE só existe em pt.
+- **A matriz:** 360×740 e 1280×800, claro e escuro, a primeira visita (sem `fo-consent`, com o aviso aberto) e a volta (com o consentimento gravado). São 120 sessões, no Chromium. Uma amostra no WebKit (cada tarefa num idioma, 360, claro, volta) diz o que muda de navegador; a ficha não pede a matriz inteira nos dois.
+- **Os estados:** repouso, arquivo em cima (ou campos preenchidos), processando (a CPU desacelerada pelo CDP, para o WaterLevel aparecer), resultado, erro e o próximo passo. O juntar PDF ganha o estado "lista".
+- **Onde medir:** o `dist/` de `87ef4c8` (o mesmo `src/` da `33be71e`), servido como o `pnpm serve`; os anúncios de hoje no build `all` de `.cache/prontidao/all/`; e o fileorca.com, com o Google abortado, numa tarefa por categoria (imagem, PDF e dinheiro).
+- **O CLS da interação** (que nenhum teste mede hoje, F4-F7 e-2) sai de um `PerformanceObserver` de `layout-shift` instalado antes da página. Ele separa o carregamento do que vem depois do primeiro gesto, e soma as entradas com e sem `hadRecentInput`.
+- **O que entra no Git:** só a captura citada por um D-NN ou um UX-NN. A matriz inteira e o JSON das medidas ficam em `.cache/f10/diag/`.
+
+## § 344 · Os concorrentes, só em repouso e fora do Git (F10, decisão 3)
+
+- **Os cinco:** iLovePDF (a home e o juntar PDF), Smallpdf (o juntar PDF; ele não tem página de comprimir imagem, e sete endereços prováveis deram 404), TinyPNG, Squoosh e a calculadora de hipoteca da NerdWallet. Todos abertos em 3/nov/2026, a 360×740 e a 1280×800, nos dois temas.
+- **Só repouso:** abrir, rolar e abrir o menu. Nenhum arquivo, nenhum campo digitado e nenhum clique no banner de cookies (nem para recusar). Para medir sem o banner, ele foi escondido por um CSS local, que não manda nada ao site. Nenhum site bloqueou o robô.
+- **Nada deles entra no Git.** As capturas, as notas e as medidas ficam em `.cache/f10/concorrentes/`. O README diz o padrão e a lacuna em palavras, com o endereço e a data.
+
+## § 345 · Os protótipos: base, `file://`, tema, idioma e estado (F10, decisão 4)
+
+- **A base:** HTML estático sobre `../../design/tokens.css`, `../../design/components/bundle.css` e `../../design/fonts/fonts.css`, mais o `proto.css` da pasta. Nada de `src/`. Onde o `bundle.css` difere do site (o AdSlot de 300 px e não 280; o painel de 380 e 340 px; a Oli em `top: -86px`), o protótipo segue o site e diz isso.
+- **Abre pelo duplo clique e por http.** O script é só inline e clássico, porque o Chromium bloqueia `type="module"` em `file://`. Nada de `fetch`, e nada de fora do repositório. O `prototipos.mjs` abre cada página pelos dois caminhos.
+- **O tema** segue a convenção dos previews (`?theme=dark`). O protótipo do cabeçalho tem também o botão de tema de verdade, com o script inline como a F11 vai escrever.
+- **O idioma** é `?lang=pt|es`. O inglês é o padrão e a página continua legível sem JS. O menu, a parede, o café, o hub de guias e a página de apoio saem sempre nos três.
+- **O estado** é `?state=…`, e na parede é `?modo=…`, porque o `showModal()` deixa o resto da página inerte e um controle na página ficaria fora de alcance com o diálogo aberto.
+- **O controle de protótipo** fica fora da moldura da página, no fluxo e nunca por cima do conteúdo. É um `<nav data-proto-control aria-label="Prototype control">` de links, acessível por teclado.
+- **As variantes** que o verificador testa e fotografa ficam nos `<meta name="proto-variants">` e `<meta name="proto-shots">` de cada página.
+- **A Oli** entra inline, com as peças do sprite e o `oli-clip` declarado uma vez, sempre `aria-hidden`. O estado é dito em texto.
+- **Cor nova** só como `--proposta-*`, nos dois temas, com o contraste calculado (§ 353).
+- **O anúncio** é a caixa neutra do AdSlot, com o rótulo do idioma e sem script. Em produção, pela Mudança 10, o espaço só existe quando a unidade tem ID: a caixa do protótipo é o desenho do espaço com a unidade.
+- **O protótipo recomendado é a especificação** que a F11, a F12 e a F13 seguem quando o Victor não escolher. Cada um traz, numa área fora da moldura (`.proto-spec`): a marcação, os tokens, os estados, os textos nos três idiomas, o teclado, o nome acessível, as medidas e uma nota do que muda no JS e nas requisições.
+
+## § 346 · Os obrigatórios viram UX-01 a UX-08 (F10, decisão 5)
+
+| Obrigatório | Item | Protótipos | Run |
+|---|---|---|---|
+| 1. Cabeçalho com menu e botão de tema, em 2 alternativas | UX-01 | `header-a.html`, `header-b.html` | F11 |
+| 2. Hub de guias e as entradas | UX-02 | `guides-hub.html`, `guides-entries.html` | F11 |
+| 3. Home, em 2 alternativas | UX-03 | `home-a.html`, `home-b.html` | F13 (guias na F11, anúncios na F12) |
+| 4. Página de ferramenta, em 2 alternativas, e a variação do PDF | UX-04 | `tool-a.html`, `tool-b.html`, `tool-a-merge.html`, `tool-b-merge.html` | F13 |
+| 5. Card do café e página de apoio | UX-05 | `coffee.html`, `support.html` | F12 |
+| 6. Parede do bloqueador | UX-06 | `wall.html` | F12 |
+| 7. Mapa de anúncios | UX-07 | `ad-map.html` | F12 |
+| 8. A pose `sad` | UX-08 | `oli/oli-sad.svg`, `oli/folha.html` | F12 |
+
+O 9 (as pendências) é a tabela do README. Cada pendência que muda o que se vê aponta para um UX-NN com protótipo (do UX-09 em diante).
+
+## § 347 · As pendências: 37 linhas, não 36 (F10, decisão 6)
+
+- **A conta.** A ficha diz 36 (os 12 itens do grupo 5, os 16 do grupo 6 e 8 avulsas), mas o grupo 5 tem 13 linhas. A 13ª é a "Idiomas R2-03", que o ajuste idiomas acrescentou sem atualizar o Resumo do `PENDENCIAS.md` (que diz 12 e soma 183 no total). A ficha herdou o número do Resumo.
+- **A escolha:** a tabela do README tem as 37, e o `readme.mjs` confere os 37 ids contra o `PENDENCIAS.md`. Deixar uma pendência de acessibilidade de fora para bater o número seria a opção pior: ela ficaria sem destino. A correção do Resumo vai para "Para o PENDENCIAS" do relatório, porque o `PENDENCIAS.md` não muda nesta run.
+- **A reconferência:** cada uma foi reconferida no código de hoje (`87ef4c8`) antes do destino, como manda o "Como ler". A F7 e-1 já está resolvida (a face `Figtree Steady` da § 305); a F4 ACE-9, a F5a D-8, a F4-F7 e-2 e a F4-F7 f-1 mudaram de forma; as outras seguem abertas com o mesmo código.
+- **Cada linha** traz o id, o estado (aberta, já resolvida ou mudou), o destino (corrigir, aceitar e registrar, ou descartar), a proposta ou a escolha entre as saídas que a pendência já traz, o UX-NN (quando muda o que se vê) ou o teste que a F13 escreveria (quando muda só o comportamento), e a run. O destino recomendado de cada uma está na § 365.
+
+## § 348 · A lista "para avaliar" (F10, decisão 7)
+
+Os sete itens entram no README como "proposto" (com UX-NN, evidência, protótipo e custo) ou "descartado" (com o porquê). As escolhas e as razões estão na § 366. Duas delas mudam regra do design system e são apresentadas como tal:
+- a cena de fundo do mar nos hubs ("Mar": "Nenhuma imagem de fundo no site"; "Nunca": "imagem de fundo");
+- o "mar à noite", porque pede cor nova no tema escuro.
+
+## § 349 · O README, o index e o ESCOLHAS (F10, decisão 8)
+
+- **O `README.md`,** nesta ordem: como abrir; o resumo; o diagnóstico (os D-NN por tarefa e a tabela das medidas); "O que os outros fazem"; os itens UX-NN; a tabela das pendências; a lista "para avaliar"; o mapa de anúncios com a densidade; a tabela do contraste; as suposições.
+- **Os rótulos de cada UX-NN:** Origem, Problema, Evidência, Proposta (com as alternativas), Oli, Custo (P, M ou G), Riscos (orçamento, anúncio e acessibilidade), Protótipo, Recomendação e Run.
+- **Cada D-NN** tem uma linha "Onde" (tarefa, idioma, tamanho, tema e estado), "O que acontece", "Evidência", "Gravidade" (bloqueia, atrasa ou incomoda) e "Responde" (o UX-NN).
+- **O `index.html`** abre cada protótipo nos dois temas e liga cada um ao item do README.
+- **O `ESCOLHAS.md`** começa com "Copie este arquivo para `.cache/ESCOLHAS-marcado.md` e marque lá. O arquivo do Git fica limpo". Os itens ficam agrupados pela run que os constrói (F11, F12 e F13). Cada um traz o id, o título, as alternativas como caixas de marcar, a recomendada com "(recomendado)", uma linha do porquê e o custo; as pendências vêm com o destino recomendado. O grupo da F13 segue a ordem de prioridade recomendada, porque a F13 constrói na ordem da lista.
+- O `readme.mjs` confere tudo isso.
+
+## § 350 · "Mais único": o critério (F10, decisão 9)
+
+Uma alternativa é "do FileOrca e de mais ninguém" quando a forma dela sai de uma das seis imagens do design system e não de um padrão de site de ferramentas: a **Oli** (ela reage, olha para o conteúdo e diz o estado), o **mar** (o fundo `deep` onde o resultado chega), a **água** (que sobe enquanto a ferramenta trabalha, com a borda de onda), o **traço** (a borda de 2 px preto-orca do que se toca), a **dobra** (o canto dobrado do papel, que é a ponta da barbatana) e o **lábio** (a sombra sólida do que se aperta). Cada alternativa diz no README qual dessas imagens a define. A segunda de cada par muda a estrutura (onde as coisas ficam e como se chega a elas), não só a cor. Os pares e o que os separa estão na § 367.
+
+## § 351 · A densidade: fórmula, alturas e a âncora (F10, decisão 10)
+
+- **A fórmula da seção B:** a soma da altura das caixas de anúncio na coluna principal, dividida pela altura do `<main>`, a 360×740.
+- **A metodologia da Coalition for Better Ads** ("Ad Density Higher Than 30%", lida em 3/nov/2026) mede contra o conteúdo principal, "not the viewport". Ela conta o anúncio fixo uma vez ("The height of each sticky ad is counted once"). A leitura do Google tira do conteúdo principal o cabeçalho, o rodapé, a navegação e as recomendações de conteúdo ("relacionados").
+- **A leitura mais conservadora, que a run usa como trava:**
+  - o numerador soma as caixas e mais 100 px de âncora, uma vez. A âncora padrão tem 50 px; os 100 px são a âncora alta da pesquisa (320×100). A dinâmica pode passar disso, e o AdSense não publica a altura;
+  - o denominador é o `<main>` sem a grade de ferramentas relacionadas;
+  - a página é medida no estado de menor altura (a ferramenta em repouso).
+
+  O `densidade.mjs` mede as duas (a da ficha e a conservadora), e a trava é a conservadora.
+- **As alturas:**
+  - **o conteúdo tem 300 px:** é o que o AdSlot do site reserva (`src/styles/components.css:387`). A ficha e o README do AdSlot dizem 280; os 300 px são a medida real e a mais conservadora;
+  - **a lateral tem 644 px.** Ela fica fora da coluna principal e não entra na conta do celular;
+  - **o multiplex tem 1.700 px a 360 px.** A ajuda do AdSense não publica número. Pelo código público do carregador (`adsbygoogle.js`, lido em 3/nov/2026), o padrão do celular é 1 coluna × 6 linhas, com a altura `floor((L/1,91 + 80) × 6 + 56)`: 1.666 px com o `ins` de 360 px e 1.566 px com 328. A run usa 1.700 px, a maior medida razoável. Os atributos `data-matched-content-*` estão "deprecated" na ajuda, e o carregador os sobrescreve, então não dá para contar com um multiplex menor.
+- **A distância entre dois anúncios do conteúdo** é lida de borda a borda: pelo menos 1.110 px de conteúdo entre a base de um e o topo do outro. É a leitura que dá menos anúncio, e a mesma dos 150 px de `ad-clearance`. A outra leitura (1.110 px de topo a topo) está na § 361, como a alternativa.
+
+## § 352 · A pose `sad` (F10, decisão 11)
+
+- **Feita com as peças do sprite,** como as nove: o corpo, a cauda, a dorsal, a dobra azul da barbatana, as manchas, o aro branco e o contorno vêm das outras poses. O que é dela é o rosto e o gesto.
+- **Triste, sem culpa e sem pedir clique** (seção A e Mudança 12): sem lágrima escorrendo, sem gesto de pedir e sem apontar para botão. Ela olha para a esquerda, para o conteúdo, e lê a partir de 32 px.
+- **O `<symbol>`** é medido como o `src/oli/sprite.ts` o montaria, pelo `.cache/f10/oli-sad.mjs`, que importa a função sem mudá-la. O limite é de 4.096 bytes, e as dez poses são medidas juntas, porque uma pose nova pode mudar as peças compartilhadas.
+- **Os arquivos:** o `docs/propostas/ux-v2/oli/oli-sad.svg` (128×128, as cores fixas do README das poses); a `docs/propostas/ux-v2/oli/folha.html` (a pose sozinha e ao lado das nove, nos dois fundos, em 32, 64 e 128 px, e dentro da parede); e os dois PNG de 512 px em `docs/relatorios/fase-10/oli/`, para a busca reversa do Victor.
+- **O que não muda:** o sprite, a lista fechada de poses e o `docs/oli/folha.html` não mudam nesta run. A F12 põe a `sad` no sprite e na lista, se o Victor a escolher; sem escolha, a parede usa a `oops`.
+- Nenhuma outra pose nova foi proposta (§ 367 diz se o diagnóstico pediu alguma).
+
+## § 353 · O contraste (F10, decisão 12)
+
+- **Todo par de cor novo** é calculado nos dois temas pelo `.cache/f10/contraste.mjs`, com a fórmula da luminância relativa da WCAG 2.2: texto sobre fundo, ícone sobre fundo e borda de controle sobre fundo. Isso vale para os tokens `--proposta-*` e também para combinações novas de tokens que já existem.
+- **Os mínimos:** 4,5:1 para texto, 3:1 para texto grande e 3:1 para componente e ícone que carrega sentido. Par reprovado não entra.
+- **O escuro de cada token proposto** é declarado duas vezes: no `[data-theme="dark"]` e no `prefers-color-scheme`. O script confere que os dois são iguais.
+- **Fora dos tokens, só a Oli.** O script reprova cor literal em qualquer HTML ou CSS da proposta, salvo as declarações `--proposta-` e a Oli, que tem cores fixas pelo design system.
+- A tabela vai no README, e o `--readme` confere os números.
+
+## § 354 · As imagens (F10, decisão 13)
+
+- **O formato:** escala 1, JPEG de qualidade 80 para página inteira e PNG para recorte.
+- **O tamanho:** cada imagem com até 500 KB (lidos como 500.000 bytes) e o total novo de `docs/relatorios/fase-10/` com até 25 MB (25.000.000 bytes). As duas leituras são as mais estritas.
+- **O nome:** em inglês, com a tarefa, o idioma, o tamanho, o tema e o estado (por exemplo, `compress-image-pt-360-dark-result.jpg`).
+- **O `imagens.mjs`** mede cada imagem e o total, confere o tipo verdadeiro do arquivo e a pasta, e reprova imagem sem referência no README, no `index.html`, na folha ou no relatório.
+
+## § 355 · O que iria para outros arquivos (F10, decisão 14)
+
+O critério 1 limita o diff a `docs/propostas/ux-v2/`, aos arquivos novos da run em `docs/relatorios/`, ao prompt e ao fim do `DECISOES.md`. Por isso, o que outra run copiaria fica no relatório:
+- as pegadinhas novas vão para a seção "Para o docs/claude/", com o arquivo do tema e o texto pronto;
+- as pendências novas vão para a seção "Para o PENDENCIAS", com a linha pronta no formato das seis colunas.
+
+Uma proposta que mudaria a arquitetura vira uma ADR "Proposta" no README, não em `docs/adr/`, e uma linha em "Para o PENDENCIAS".
+
+## § 356 · As verificações (F10, decisão 15)
+
+Os sete scripts ficam em `.cache/f10/`, em `.mjs`, fora do Git:
+- `diff.mjs`: o escopo, com `origin/main...HEAD`;
+- `readme.mjs`: o README, o `index.html` e o `ESCOLHAS.md`;
+- `prototipos.mjs`: os protótipos;
+- `contraste.mjs`: o contraste;
+- `densidade.mjs`: a densidade;
+- `oli-sad.mjs`: a pose `sad`;
+- `imagens.mjs`: as imagens.
+
+Cada um sai com código diferente de zero quando reprova, e as saídas reais vão para o relatório.
+
+Nos três pontos em que a ficha deixa a leitura em aberto, os scripts usam a mais estrita:
+- o `diff.mjs` confere também a classe que o CI vai dar (`portões`);
+- o `prototipos.mjs` reprova controle da página abaixo de 48 px, e não só abaixo dos 24 px que o axe cobra pela WCAG 2.5.8;
+- o `readme.mjs` lê os ids das pendências de um arquivo conferido contra o `PENDENCIAS.md`, e não de um número fixo.
+
+## § 357 · A PR e o CI (F10, decisão 16)
+
+- **A PR:** [vmatusita/fileorca#22](https://github.com/vmatusita/fileorca/pull/22) abriu em rascunho logo depois do primeiro push. Cada push roda o job `leve`, e a run não usa o rótulo `ci`.
+- **No fim,** com tudo commitado (o relatório, a revisão e as imagens):
+  1. o push;
+  2. a espera da execução leve verde;
+  3. o `gh pr ready`.
+
+  Assim nenhum `ci-ok` vermelho de uma execução leve cancelada fica no commit (pendência "F9 ci-ok duplicado"). O `gh pr ready` dispara a classe `portões`, e o `merge` mescla sozinho.
+- **Depois do `gh pr ready`,** nada de push. O `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit 22 --body-file`), mesmo depois do merge.
