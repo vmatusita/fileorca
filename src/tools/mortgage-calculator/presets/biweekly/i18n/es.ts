@@ -25,6 +25,7 @@ export default {
       half: 'Medio pago',
       monthsSaved: 'Meses ahorrados',
       months: '{n} meses',
+      monthsOne: '{n} mes',
       halfCount: 'Número de medios pagos',
       halves: '{n} medios pagos',
       compareLabel: 'Pagos mensuales y pagos cada dos semanas, uno al lado del otro',

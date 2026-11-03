@@ -15,7 +15,7 @@ export default {
     view: {
       label: 'Pago global',
       placard: 'pago global',
-      sentence: 'Después de {count} pagos de {payment}, el pago global vence con el pago {month}, además del pago regular de ese mes. Hasta entonces pagas {interest} de intereses.',
+      sentence: 'Con pagos mensuales de {payment}, el pago global vence con el pago {month}, además del pago regular de ese mes. Hasta entonces pagas {interest} de intereses.',
       principal: 'Préstamo',
       interest: 'Intereses',
       caption: 'Tabla de pagos hasta el pago global, por año del préstamo',

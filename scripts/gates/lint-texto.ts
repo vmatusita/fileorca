@@ -333,7 +333,8 @@ export async function fillFor(file: string): Promise<Fill> {
     return (name) => facts[name] ?? money.samples[name] ?? money.fallback;
   }
   const page = MONEY_SAMPLES_BY_PAGE[lang]?.[toolFolderOf(file) ?? ''] ?? {};
-  return (name) => page[name] ?? money.samples[name] ?? money.fallback;
+  // A singular form ("monthsOne: '{n} mes'", review of the languages adjustment, C-3) is shown only for 1, so it reads with 1.
+  return (name, key) => (name === 'n' && key.endsWith('One') ? '1' : (page[name] ?? money.samples[name] ?? money.fallback));
 }
 
 function chunks(texts: string[]): string[] {

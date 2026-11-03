@@ -19,6 +19,10 @@ export default {
       label: 'Intereses',
       placard: 'intereses',
       sentence: '{principal} al {rate} durante {time} gana {interest} de interés simple, para un total de {total}.',
+      // The unit of {time} when the time is exactly 1 ("durante 1 año"); the plural comes from options.u.
+      yearsOne: 'año',
+      monthsOne: 'mes',
+      daysOne: 'día',
       principal: 'Capital',
       interest: 'Intereses',
       total: 'Total',

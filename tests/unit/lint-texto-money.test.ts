@@ -251,6 +251,13 @@ describe('lint:texto and the texts of the languages adjustment', () => {
     expect(collectStrings({ a: 'After {years} years' }, '', [], rentEn)).toEqual([`After ${MONEY_SAMPLES['years']} years`]);
   });
 
+  // Review of the languages adjustment (C-3): the singular of a count ("monthsOne: '{n} mes'") is shown only for 1, and
+  // LanguageTool reads it so; the plural of the same page keeps its sample.
+  it('fills the singular forms of the money texts with 1', async () => {
+    const extra = await fillFor('src/tools/mortgage-calculator/presets/extra-payments/i18n/es.ts');
+    expect(collectStrings({ months: '{n} meses', monthsOne: '{n} mes', paymentsOne: '{n} pago' }, '', [], extra)).toEqual(['12 meses', '1 mes', '1 pago']);
+  });
+
   it('knows the five money guides in Spanish and fills them with the facts the engines give the Spanish page', async () => {
     for (const id of GUIDE_IDS) {
       const slug = id.replace(/^guides-/, '');
