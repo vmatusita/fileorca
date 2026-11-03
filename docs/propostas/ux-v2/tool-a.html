@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en" data-state="rest" data-proto-state="rest drag processing result error next" data-page="tool" data-proto-page="tool preset" data-visit="return" data-proto-visit="return first" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compress image, alternative A · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?state=drag;?state=processing;?state=result;?state=error;?state=next;?visit=first;?lang=pt&visit=first;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=es&state=result&visit=first;?lang=pt&page=preset;?lang=pt&page=preset&state=result;?lang=es&state=next">
+<meta name="proto-shots" content=";?state=result;?state=next;?lang=pt&state=error&visit=first;?lang=pt&state=result&visit=first;?lang=pt&page=preset">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-state="rest"] [data-when]:not([data-when~="rest"]),
+html[data-state="drag"] [data-when]:not([data-when~="drag"]),
+html[data-state="processing"] [data-when]:not([data-when~="processing"]),
+html[data-state="result"] [data-when]:not([data-when~="result"]),
+html[data-state="error"] [data-when]:not([data-when~="error"]),
+html[data-state="next"] [data-when]:not([data-when~="next"]),
+html[data-page="tool"] [data-when-page]:not([data-when-page~="tool"]),
+html[data-page="preset"] [data-when-page]:not([data-when-page~="preset"]),
+html[data-visit="return"] [data-when-visit]:not([data-when-visit~="return"]),
+html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="tool.css">
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path id="oli-p12" d="M36 58.5 Q 41 52 46 58.5" fill="none" stroke="#0F1B2D" stroke-width="3" stroke-linecap="round"/><path id="oli-p13" d="M19 82 q 3 -3 6 0 t 6 0 t 6 0" fill="none" stroke="#0F1B2D" stroke-width="2.6" stroke-linecap="round"/><symbol id="oli-wave" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M84 52 q5 -3 8 1 M86 44 q7 -5 12 1" fill="none" stroke="#0B63F6" stroke-width="2.6" stroke-linecap="round"/></g></symbol><symbol id="oli-gulp" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><ellipse cx="41" cy="57" rx="5" ry="6" fill="#0F1B2D"/><circle cx="42.8" cy="54.6" r="2.1" fill="#F7FAFD"/><circle cx="39.2" cy="59.2" r="1" fill="#F7FAFD"/><use href="#oli-p8"/><path d="M12 70 Q 28 68 42 79 Q 38 99 22 98 Q 11 95 12 70 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="25" cy="92" rx="8" ry="3.6" fill="#FF9CA8"/><use href="#oli-p10"/><use href="#oli-p11"/><g transform="rotate(-18 10 82)"><path d="M1 72 L12 72 L18 78 L18 93 L1 93 Z" fill="#F7FAFD" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 72 L12 78 L18 78 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.2" stroke-linejoin="round"/></g></g></symbol><symbol id="oli-swim" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(-8 64 64)"><g fill="none" stroke="#0B63F6" stroke-width="2.4"><circle cx="8" cy="54" r="3"/><circle cx="6" cy="40" r="2"/></g><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M50 88 C55 97 62 103 70 105 C75 106 75 100 71 96 C67 92 62 89 58 86 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M50 88 C55 97 62 103 70 105 C75 106 75 100 71 96 C67 92 62 89 58 86 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></g></g></symbol><symbol id="oli-cheer" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(-10 64 64) translate(0 -6)"><g fill="#0B63F6"><path d="M30 118 q3 -8 6 0 q-3 4 -6 0z"/><path d="M50 122 q3 -9 6 0 q-3 4 -6 0z"/><path d="M76 118 q3 -8 6 0 q-3 4 -6 0z"/></g><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p12"/><use href="#oli-p8"/><path d="M15 78 Q 27 77 39 81 Q 34 95 22 93 Q 15 90 15 78 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="26" cy="89" rx="6" ry="3.2" fill="#FF9CA8"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></g></g></symbol><symbol id="oli-oops" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(8 64 64)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><ellipse cx="41" cy="58" rx="4" ry="4.6" fill="#0F1B2D"/><circle cx="42.5" cy="56.4" r="1.5" fill="#F7FAFD"/><path d="M35 50 L46 48" stroke="#0F1B2D" stroke-width="2.6" stroke-linecap="round"/><use href="#oli-p8"/><use href="#oli-p13"/><use href="#oli-p10"/><use href="#oli-p11"/><path d="M13 34 C10 40 7 43 7 47 C7 50.5 9.6 53 13 53 C16.4 53 19 50.5 19 47 C19 43 16 40 13 34 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.2" stroke-linejoin="round"/></g></g></symbol></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-state">
+      <span class="proto-control__label" id="proto-control-state">State</span>
+      <a href="?state=rest" aria-current="true">Rest</a>
+      <a href="?state=drag">File over</a>
+      <a href="?state=processing">Processing</a>
+      <a href="?state=result">Result</a>
+      <a href="?state=error">Error</a>
+      <a href="?state=next">Next step</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-page">
+      <span class="proto-control__label" id="proto-control-page">Page</span>
+      <a href="?page=tool" aria-current="true">Tool</a>
+      <a href="?page=preset">Preset 100 KB</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-visit">
+      <span class="proto-control__label" id="proto-control-visit">Visit</span>
+      <a href="?visit=return" aria-current="true">Return visit</a>
+      <a href="?visit=first">First visit</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+  </div>
+</nav>
+<div class="proto-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#" aria-label="FileOrca home" data-t-aria-label="home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="fo-header__lang" popovertarget="tl-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="lang.code">EN</span><span class="fo-sr" data-t="lang.sr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="tl-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="lang.menu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+    <button type="button" class="fo-header__lang tl-header__theme fo-desktop-only"><span data-t="theme">Theme</span><span class="fo-sr" data-t="theme.sr"> · system</span></button>
+    <button type="button" class="fo-header__lang tl-header__menu"><span data-t="menu">Menu</span></button>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame proto-frame--rail">
+    <main id="main" class="proto-main">
+      <nav aria-label="Breadcrumb" data-t-aria-label="crumbs">
+        <ol class="fo-crumbs">
+          <li><a class="fo-crumbs__link" href="#" data-t="crumb.home">Home</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li><a class="fo-crumbs__link" href="#" data-t="crumb.cat">Image tools</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li data-when-page="tool"><span aria-current="page" data-t="h1">Compress image</span></li>
+          <li data-when-page="preset"><a class="fo-crumbs__link" href="#" data-t="h1">Compress image</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li data-when-page="preset"><span aria-current="page" data-t="h1P">Compress image to 100 KB</span></li>
+        </ol>
+      </nav>
+      <div class="tl-top">
+        <h1 class="fo-h1"><span data-when-page="tool" data-t="h1">Compress image</span><span data-when-page="preset" data-t="h1P">Compress image to 100 KB</span></h1>
+        <div class="tl-top__seal"><p class="fo-seal"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-t="seal">Your files never leave your device</span></p></div>
+      </div>
+
+      <div class="tl-island ta-island">
+        <div class="tl-slot">
+          <div class="ta-oli" data-when="rest"><div class="ta-oli__pose" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div></div>
+          <div class="ta-oli" data-when="drag"><div class="ta-oli__pose" data-oli="gulp" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-gulp"/></svg></div></div>
+          <div class="ta-oli" data-when="processing"><div class="ta-oli__pose" data-oli="swim" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-swim"/></svg></div></div>
+          <div class="ta-oli" data-when="result next"><div class="ta-oli__pose" data-oli="cheer" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-cheer"/></svg></div></div>
+          <div class="ta-oli" data-when="error"><div class="ta-oli__pose" data-oli="oops" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-oops"/></svg></div></div>
+
+          <div class="fo-drop ta-zone" data-when="rest">
+            <div class="fo-drop__sea"><div class="fo-water"></div></div>
+            <p class="fo-drop__title fo-desktop-only" data-t="drop.title">Drop images here</p>
+            <button type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" aria-describedby="ta-drop-help"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg><span data-t="drop.choose">Choose images</span></button>
+            <p class="fo-drop__help" id="ta-drop-help"><span class="fo-desktop-only" data-t-html="drop.helpDesk">or paste with <span class="fo-kbd">Ctrl V</span> · JPG, PNG or WebP</span><span class="fo-mobile-only" data-t="drop.help">JPG, PNG or WebP, as many as you like</span></p>
+          </div>
+
+          <div class="fo-drop ta-zone" data-state="over" data-when="drag">
+            <div class="fo-drop__sea"><div class="fo-water fo-water--moving"></div></div>
+            <p class="fo-drop__title" data-t="drop.over">Let go, Oli's ready</p>
+            <p class="fo-drop__help" data-t="drop.overHelp">As many as you like</p>
+          </div>
+
+          <div class="fo-level ta-level" role="progressbar" aria-label="Compressing images" data-t-aria-label="level.label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55" aria-valuetext="55%" data-t-aria-valuetext="level.pct" style="--level:55%" data-when="processing">
+            <div class="fo-water fo-water--moving"></div>
+            <div class="fo-level__text"><span class="fo-level__pct" data-t="level.pct">55%</span><span class="fo-level__msg" data-t="level.msg">Oli is on it…</span></div>
+          </div>
+
+          <section class="fo-result fo-deep ta-result" aria-live="polite" aria-labelledby="ta-says" data-when="result next">
+            <div class="fo-water ta-result__sea"></div>
+            <div class="ta-result__head">
+              <div class="fo-placard fo-pop" aria-hidden="true"><span class="fo-placard__n"><span data-when-page="tool" data-t="r.pct">−72%</span><span data-when-page="preset" data-t="r.pctP">−96%</span></span><span class="fo-placard__l" data-t="r.lighter">lighter</span></div>
+              <p class="fo-result__says" id="ta-says"><span data-when-page="tool" data-t="r.says">Done! Your image is 72% lighter.</span><span data-when-page="preset" data-t="r.saysP">Done! Your image is 96% lighter and fits in 100 KB.</span></p>
+            </div>
+            <dl class="tl-numbers">
+              <div class="tl-numbers__before"><dt class="fo-sr" data-t="r.before">Before</dt><dd data-t="r.beforeV">2.6 MB</dd></div>
+              <div><dt class="fo-sr" data-t="r.after">After</dt><dd><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg> <span data-when-page="tool">717 KB</span><span data-when-page="preset">98 KB</span></dd></div>
+            </dl>
+            <div class="ta-result__actions">
+              <a class="fo-btn fo-btn--download fo-btn--lg" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-t="r.download">Download</span><span class="fo-btn__meta">&#160;· <span data-when-page="tool">717 KB</span><span data-when-page="preset">98 KB</span></span></a>
+              <div class="ta-result__more">
+                <button type="button" class="fo-btn fo-btn--ghost" data-t="r.again">Start over</button>
+                <button type="button" class="fo-btn fo-btn--ghost" aria-expanded="false" aria-controls="ta-compare" data-when="result" data-t="r.compare">Before and after</button>
+                <button type="button" class="fo-btn fo-btn--ghost" aria-expanded="true" aria-controls="ta-compare" data-when="next" data-t="r.compare">Before and after</button>
+              </div>
+            </div>
+            <div class="fo-ba tl-ba" id="ta-compare" data-when="next">
+              <img src="../../design/assets/photo.jpg" alt="" width="800" height="600">
+              <img class="fo-ba__after" src="../../design/assets/photo-after.jpg" alt="" width="800" height="600">
+              <span class="fo-ba__tag fo-ba__tag--l"><span data-t="r.before">Before</span> · <span data-t="r.beforeV">2.6 MB</span></span>
+              <span class="fo-ba__tag fo-ba__tag--r"><span data-t="r.after">After</span> · <span data-when-page="tool">717 KB</span><span data-when-page="preset">98 KB</span></span>
+              <input class="fo-ba__range" type="range" min="0" max="100" value="50" aria-label="Compare before and after" data-t-aria-label="r.compareLabel">
+              <span class="fo-ba__line"></span>
+              <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+            </div>
+            <ul class="tl-notes">
+              <li data-t="r.meta">Oli removed the photo metadata, including the GPS location.</li>
+              <li class="fo-desktop-only"><span data-t="r.size">Size</span> 3264 × 2448 px</li>
+            </ul>
+          </section>
+
+          <div class="fo-drop ta-zone" data-state="error" data-when="error">
+            <div class="fo-drop__sea"><div class="fo-water"></div></div>
+            <div class="ta-error" role="alert">
+              <p class="ta-error__title"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01" stroke-width="2.6"/></svg><span data-t="e.title">Oops, Oli couldn't read this file.</span></p>
+              <p class="ta-error__why" data-t="e.why">notes.txt isn't an image. Try a JPG or PNG.</p>
+            </div>
+            <button type="button" class="fo-btn fo-btn--brand"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg><span data-t="e.choose">Choose other files</span></button>
+          </div>
+        </div>
+
+        <div class="tl-band ta-band">
+          <fieldset class="tl-options" data-when="rest drag processing error">
+            <legend data-t="o.legend">Compression</legend>
+            <div class="fo-seg">
+              <label class="fo-seg__opt"><input type="radio" name="ta-level" value="recommended" checked><span><span data-t="o.rec">Recommended</span><small data-t="o.recHelp">best balance</small></span></label>
+              <label class="fo-seg__opt"><input type="radio" name="ta-level" value="strong"><span><span data-t="o.strong">Strong</span><small data-t="o.strongHelp">smallest</small></span></label>
+            </div>
+            <p class="fo-field__help" data-t="o.png">PNG is saved without loss, so the level only changes JPG and WebP.</p>
+          </fieldset>
+          <nav class="fo-next tl-next" aria-labelledby="ta-next-label" data-when="result next">
+            <span class="fo-next__label" id="ta-next-label" data-t="n.label">Next:</span>
+            <a class="fo-chip fo-cat--image" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="n.resize">Resize image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+            <a class="fo-chip fo-cat--pdf" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="n.topdf">Image to PDF</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </nav>
+          <details class="tl-adjust" data-when="result">
+            <summary><span><span data-t="a.sum">Adjust</span> <span class="tl-adjust__now" data-t="a.now">· Recommended</span></span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="tl-adjust__body">
+              <fieldset class="tl-options">
+                <legend data-t="o.legend">Compression</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="ta-level-r" value="recommended" checked><span><span data-t="o.rec">Recommended</span><small data-t="o.recHelp">best balance</small></span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="ta-level-r" value="strong"><span><span data-t="o.strong">Strong</span><small data-t="o.strongHelp">smallest</small></span></label>
+                </div>
+                <p class="fo-field__help" data-t="o.redo">Changing the level redoes the image right away.</p>
+              </fieldset>
+            </div>
+          </details>
+          <details class="tl-adjust" open data-when="next">
+            <summary><span><span data-t="a.sum">Adjust</span> <span class="tl-adjust__now" data-t="a.now">· Recommended</span></span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="tl-adjust__body">
+              <fieldset class="tl-options">
+                <legend data-t="o.legend">Compression</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="ta-level-n" value="recommended" checked><span><span data-t="o.rec">Recommended</span><small data-t="o.recHelp">best balance</small></span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="ta-level-n" value="strong"><span><span data-t="o.strong">Strong</span><small data-t="o.strongHelp">smallest</small></span></label>
+                </div>
+                <p class="fo-field__help" data-t="o.redo">Changing the level redoes the image right away.</p>
+              </fieldset>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <section class="fo-section" aria-labelledby="ta-how">
+        <h2 id="ta-how" data-t="how.title">How to compress an image</h2>
+        <ol class="fo-steps">
+          <li data-t="how.1">Choose or drop your images. They stay on your device.</li>
+          <li data-t="how.2">Oli compresses each one in your browser at the Recommended level.</li>
+          <li data-t="how.3">Download the lighter file. Changing the level redoes it right away.</li>
+        </ol>
+      </section>
+      <div class="fo-ad fo-ad--content"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <section class="fo-section tl-privacy" aria-labelledby="ta-priv">
+        <h2 id="ta-priv" data-t="priv.title">Privacy</h2>
+        <p data-t="priv.p">Images are processed on your device and are never sent to a server. Each saved copy also leaves out the photo metadata, including the GPS location.</p>
+      </section>
+    </main>
+    <aside class="proto-rail" aria-label="Advertisements" data-t-aria-label="proto.ad"><div class="fo-ad fo-ad--rail"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></aside>
+  </div>
+  <footer class="fo-footer fo-deep">
+    <div class="fo-footer__cols">
+      <div><h2 data-t="f.image">Image</h2><ul><li><a href="#" data-t="f.compress">Compress image</a></li><li><a href="#" data-t="f.heic">HEIC to JPG</a></li></ul></div>
+      <div><h2>PDF</h2><ul><li><a href="#" data-t="f.merge">Merge PDF</a></li><li><a href="#" data-t="f.split">Split PDF</a></li></ul></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#" data-t="f.about">About</a></li><li><a href="#" data-t="f.privacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="f.coffee">Like these tools? Support them with a coffee</span></a><span data-t="f.sign">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+  <div class="tl-cookie-zone" data-when-visit="first">
+    <div class="fo-cookie" role="dialog" aria-labelledby="tl-cookie-text">
+      <p id="tl-cookie-text"><b data-t="c.title">Cookies, quickly.</b> <span data-t="c.body">We use Google Analytics to see which tools help, and ads to keep FileOrca free. Your files never leave your device either way.</span> <a href="#" data-t="c.privacy">Privacy</a></p>
+      <div class="fo-cookie__actions"><button type="button" class="fo-btn" data-t="c.decline">Decline</button><button type="button" class="fo-btn" data-t="c.accept">Accept</button></div>
+    </div>
+  </div>
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-04 · alternativa A (recomendada)</p>
+    <h2 id="spec-title">A página de ferramenta, do soltar ao resultado: um lugar só, mais firme</h2>
+    <p>O retângulo da ferramenta tem a mesma altura do começo ao fim (356 px no celular, 340 a partir de 768), e a Oli não sai do canto de cima à direita dele: <code>wave</code> em repouso, <code>gulp</code> com o arquivo em cima, <code>swim</code> enquanto a água sobe, <code>cheer</code> no resultado e <code>oops</code> no erro. <strong>A imagem do design system que a define é a água</strong>: ela fica a 30 % em repouso, sobe a 60 % com o arquivo em cima, marca o progresso no WaterLevel e, no resultado, chegou ao topo: o ResultCard é o mar que subiu, com uma faixa de água e a onda na borda de cima, e a placa boia na superfície, presa pela Oli. Abaixo do retângulo, uma faixa de altura fixa mostra as opções antes do resultado e, depois dele, os chips e as mesmas opções recolhidas num "Ajustar". O antes e depois abre só quando a pessoa pede.</p>
+    <p>É a especificação que a F13 segue se o Victor não escolher. O comprimir imagem é o exemplo; o molde vale para as oito ferramentas de imagem e as presets. O juntar PDF está em <a href="tool-a-merge.html">tool-a-merge.html</a>.</p>
+
+    <h3>O que resolve (antes e depois, medido)</h3>
+    <p>"Hoje" é o diagnóstico da F10 (<code>.cache/f10/diag/destaques.md</code>, capturas em <code>shots/</code>). "Com a A" foi medido neste protótipo no Chromium, com as fontes do site, contra o topo da página (o aviso de cookies é o de hoje, na posição de hoje).</p>
+    <table>
+      <thead><tr><th scope="col">Achado</th><th scope="col">Hoje</th><th scope="col">Com a A</th></tr></thead>
+      <tbody>
+        <tr><td>CLS da interação (F4-F7 e-2, obs. 5; <code>compress-image-en-360-light-return-next.jpg</code>)</td><td>0,067 no comprimir e 0,059 no HEIC a 360: o BeforeAfter monta entre o status e as opções (<code>ImagePanel.tsx:954</code>) e o fieldset desce 376 a 428 px</td><td>0,00 esperado: o retângulo e a faixa de baixo (196 px no celular, 120 a partir de 768) têm altura fixa em todos os estados; o antes e depois e o "Ajustar" só crescem depois de um toque (entrada recente, fora do CLS)</td></tr>
+        <tr><td>Baixar a 360 na 1ª visita (obs. 8; <code>compress-image-pt-360-light-first-result.jpg</code>)</td><td>o foco no Baixar rola a página 106 a 184 px</td><td>base do Baixar em 440 (en) e 486 (pt, es), acima do topo do aviso (532 e 510): rolagem 0</td></tr>
+        <tr><td>Chips longe do Baixar (obs. 7; <code>compress-image-en-360-light-return-next.jpg</code>)</td><td>568 a 705 px abaixo (0,74 a 0,95 tela)</td><td>182 px (en) e 158 px (pt, es) a 360; 160 px a 1280</td></tr>
+        <tr><td>Painel acima da dobra (F4-F7 f-2)</td><td><code>/pt/comprimir-imagem/para-100kb/</code>: zona até 754 px, H1 em 3 linhas</td><td>zona até 696 px: o H1 usa a largura toda (2 linhas) e só a linha do selo abre espaço para a Oli (<code>?lang=pt&amp;page=preset</code>)</td></tr>
+        <tr><td>Escolher sob o aviso (F4-F7 f-1, obs. 3; <code>compress-image-pt-360-light-first-rest.jpg</code>)</td><td>pt: 32 de 60 px cobertos</td><td>base do Escolher em 395 (en) e 417 (pt, es): 137 e 93 px acima do aviso</td></tr>
+        <tr><td>Erro sob o aviso (obs. 2; <code>compress-image-pt-360-light-first-error.jpg</code>)</td><td>"Escolher outros arquivos" coberto 26 a 52 de 52 px</td><td>o botão sobe para logo depois da frase, sem o selo de 64 px: base em 453 (en) e 475 (pt, es)</td></tr>
+        <tr><td>Placa e água no celular (G-09)</td><td>a placa some abaixo de 768 e a água não volta</td><td>a placa aparece nos dois tamanhos, na superfície; o cartão é a água que subiu</td></tr>
+        <tr><td>Oli de costas (G-10)</td><td>à esquerda da fala, olhando para fora do cartão</td><td>no canto de cima à direita, olhando para a fala e segurando a placa</td></tr>
+        <tr><td>Anúncio na 1ª tela a 1280 (obs. 9; <code>merge-pdf-en-1280-light-return-rest.jpg</code>)</td><td>caixa de conteúdo em y 744, com a dobra em 800</td><td>o 1º anúncio de conteúdo vem depois do "Como comprimir": y 1085 a 1280 e 1233 a 360</td></tr>
+      </tbody>
+    </table>
+    <p>Fica de fora: na preset em pt, na 1ª visita a 360, o Baixar fica em 490 a 550 e o aviso de hoje (510) o cobre. A trilha de três linhas da preset (88 px) é a causa; o aviso compacto do UX-09 resolve sem mexer na trilha.</p>
+
+    <h3>Marcação</h3>
+    <pre><code>&lt;div class="fo-tool-island" data-state="rest|over|working|done|error"&gt;
+  &lt;div class="fo-slot"&gt;                       &lt;!-- min-height 356 / 340, nunca muda sozinho --&gt;
+    &lt;div class="fo-slot__oli" data-oli="wave|gulp|swim|cheer|oops" aria-hidden="true"&gt;…&lt;/div&gt;
+    &lt;div class="fo-drop" data-state="…"&gt;&lt;div class="fo-drop__sea"&gt;&lt;div class="fo-water"&gt;&lt;/div&gt;&lt;/div&gt;…&lt;/div&gt;
+    &lt;!-- ou --&gt; &lt;div class="fo-level" role="progressbar" aria-label="Compressing images" …&gt;
+    &lt;!-- ou --&gt; &lt;section class="fo-result fo-deep" aria-live="polite" aria-labelledby="fo-says"&gt;
+      &lt;div class="fo-water fo-result__sea"&gt;&lt;/div&gt;
+      &lt;div class="fo-result__head"&gt;&lt;div class="fo-placard fo-pop" aria-hidden="true"&gt;…&lt;/div&gt;&lt;p class="fo-result__says" id="fo-says"&gt;…&lt;/p&gt;&lt;/div&gt;
+      &lt;dl class="fo-numbers"&gt;&lt;div&gt;&lt;dt class="fo-sr"&gt;Before&lt;/dt&gt;&lt;dd&gt;2.6 MB&lt;/dd&gt;&lt;/div&gt;&lt;div&gt;&lt;dt class="fo-sr"&gt;After&lt;/dt&gt;&lt;dd&gt;→ 717 KB&lt;/dd&gt;&lt;/div&gt;&lt;/dl&gt;
+      &lt;a class="fo-btn fo-btn--download fo-btn--lg" download&gt;Download · 717 KB&lt;/a&gt;
+      &lt;button class="fo-btn fo-btn--ghost"&gt;Start over&lt;/button&gt;
+      &lt;button class="fo-btn fo-btn--ghost" aria-expanded="false" aria-controls="fo-compare"&gt;Before and after&lt;/button&gt;
+      &lt;div class="fo-ba" id="fo-compare" hidden&gt;…&lt;/div&gt;
+      &lt;ul class="fo-result__notes"&gt;…&lt;/ul&gt;
+    &lt;/section&gt;
+  &lt;/div&gt;
+  &lt;div class="fo-band"&gt;                       &lt;!-- min-height 196 / 120 --&gt;
+    &lt;fieldset class="fo-options"&gt;…&lt;/fieldset&gt;   &lt;!-- antes do resultado --&gt;
+    &lt;nav class="fo-next" aria-labelledby="fo-next-label"&gt;…&lt;/nav&gt;   &lt;!-- depois --&gt;
+    &lt;details class="fo-adjust"&gt;&lt;summary&gt;Adjust · Recommended&lt;/summary&gt;&lt;fieldset&gt;…&lt;/fieldset&gt;&lt;/details&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    <p>No molde (<code>ImageToolPage.astro</code> e <code>PdfToolPage.astro</code>): o H1 sai de dentro do recuo de 96/136 px, que passa a valer só para a linha do selo; o primeiro AdSlot de conteúdo passa para depois da seção "Como usar" (antes, logo depois da ilha).</p>
+
+    <h3>Tokens</h3>
+    <ul>
+      <li>Retângulo: <code>--surface</code>, traço <code>--stroke-2</code> tracejado em <code>--stroke</code> (sólido <code>--brand</code> com o arquivo em cima, <code>--stroke-3</code> <code>--danger</code> no erro), <code>--radius-xl</code>.</li>
+      <li>Água: <code>--water</code>, a onda da <code>.fo-water::before</code>; <code>--level</code> 30 % (repouso), 60 % (em cima), o progresso (processando).</li>
+      <li>Resultado: fundo <code>--water</code> na faixa de 20/24 px e <code>--deep</code> abaixo dela; texto <code>--on-deep</code> e <code>--on-deep-muted</code>; a placa em <code>--surface</code> com borda <code>--surface</code> (a regra de hoje sobre <code>deep</code>); o Baixar é o único <code>--sun</code>.</li>
+      <li>Erro: o ícone <code>alert</code> em <code>--danger</code> sobre <code>--surface</code>, a frase em <code>--ink</code> e a razão em <code>--ink-muted</code>.</li>
+      <li>"Ajustar": <code>--surface</code>, traço <code>--stroke</code>, <code>--radius-lg</code>; o valor atual em <code>--ink-muted</code>.</li>
+      <li>Nenhuma cor nova. Combinações novas de tokens que já existem estão na tabela de contraste do README (UX-04).</li>
+    </ul>
+
+    <h3>Estados</h3>
+    <table>
+      <thead><tr><th scope="col">Estado (<code>?state=</code>)</th><th scope="col">No retângulo</th><th scope="col">A Oli</th><th scope="col">Na faixa de baixo</th></tr></thead>
+      <tbody>
+        <tr><td><code>rest</code> (padrão)</td><td>DropZone, água a 30 %, Escolher (Fredoka no título só a partir de 768)</td><td><code>wave</code></td><td>as opções</td></tr>
+        <tr><td><code>drag</code></td><td>traço sólido, água a 60 % com a onda andando, "Let go, Oli's ready"; o botão some enquanto o arquivo está em cima</td><td><code>gulp</code></td><td>as opções</td></tr>
+        <tr><td><code>processing</code></td><td>WaterLevel (<code>progressbar</code>) no mesmo lugar, só depois de 400 ms</td><td><code>swim</code>, no canto</td><td>as opções (desabilitadas, como hoje)</td></tr>
+        <tr><td><code>result</code></td><td>o mar que subiu: fala, placa, "2.6 MB → 717 KB", Baixar, Começar de novo, Antes e depois, a nota dos metadados</td><td><code>cheer</code>, uma vez, segurando a placa</td><td>os chips e o "Ajustar" fechado</td></tr>
+        <tr><td><code>next</code></td><td>o mesmo, com o antes e depois aberto (gesto)</td><td><code>cheer</code></td><td>os chips e o "Ajustar" aberto: mudar o nível refaz na hora</td></tr>
+        <tr><td><code>error</code></td><td>traço <code>danger</code>, a frase com o ícone, a razão, o Escolher outros arquivos logo abaixo (sem o selo redondo)</td><td><code>oops</code></td><td>as opções</td></tr>
+        <tr><td><code>?visit=first</code></td><td colspan="3">o aviso de cookies de hoje, onde ele fica no site (a 8 px da base da tela de 740; a 16 px do canto a partir de 768). Nada de importante fica embaixo dele a 360×740 nos três idiomas: o Escolher, o Baixar e o Escolher outros arquivos terminam acima do topo dele.</td></tr>
+        <tr><td><code>?page=preset</code></td><td colspan="3">a preset "para 100 KB": trilha de 4 itens e H1 de duas linhas na largura toda (F4-F7 f-2).</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Textos</h3>
+    <p>Os textos de hoje ficam; o que é novo está marcado.</p>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td>Erro (fala do README)</td><td lang="en">Oops, Oli couldn't read this file.</td><td>Ops, a Oli não conseguiu ler esse arquivo.</td><td lang="es">Uy, Oli no pudo leer este archivo.</td></tr>
+        <tr><td>Erro, a razão (nova forma)</td><td lang="en">notes.txt isn't an image. Try a JPG or PNG.</td><td>notes.txt não é uma imagem. Tente um JPG ou PNG.</td><td lang="es">notes.txt no es una imagen. Prueba con un JPG o PNG.</td></tr>
+        <tr><td>Pronto</td><td lang="en">Done! Your image is 72% lighter.</td><td>Prontinho! Sua imagem ficou 72% mais leve.</td><td lang="es">¡Listo! Tu imagen quedó un 72 % más ligera.</td></tr>
+        <tr><td>Antes e depois (novo botão)</td><td lang="en">Before and after</td><td>Antes e depois</td><td lang="es">Antes y después</td></tr>
+        <tr><td>Ajustar (novo)</td><td lang="en">Adjust · Recommended</td><td>Ajustar · Recomendada</td><td lang="es">Ajustar · Recomendada</td></tr>
+        <tr><td>Ajuda do Ajustar (nova)</td><td lang="en">Changing the level redoes the image right away.</td><td>Mudar o nível refaz a imagem na hora.</td><td lang="es">Cambiar el nivel rehace la imagen al momento.</td></tr>
+        <tr><td>Chips</td><td lang="en">Next: Resize image · Image to PDF</td><td>A seguir: Redimensionar imagem · Imagem para PDF</td><td lang="es">Siguiente: Redimensionar imagen · Imagen a PDF</td></tr>
+        <tr><td>Placa</td><td lang="en">−72% LIGHTER</td><td>−72% MAIS LEVE</td><td lang="es">−72 % MÁS LIGERA</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Teclado</h3>
+    <p>Tab: pular para o conteúdo, logo, busca, idioma, tema (a partir de 768), Menu, trilha, Escolher imagens, as opções (setas trocam o nível). No resultado, o foco vai para o Baixar (como hoje) e o Tab segue: Começar de novo, Antes e depois (Enter ou espaço abre e fecha; com ele aberto, o controle do comparador anda com as setas), os chips, o "Ajustar" (Enter ou espaço abre o <code>details</code>) e as opções dentro dele. No erro, o foco vai para o Escolher outros arquivos.</p>
+
+    <h3>Nome acessível</h3>
+    <ul>
+      <li>Escolher: o texto do botão, com <code>aria-describedby</code> na ajuda dos formatos.</li>
+      <li>WaterLevel: <code>role="progressbar"</code>, nome "Compressing images", <code>aria-valuetext</code> "55%" (e a contagem no lote).</li>
+      <li>Resultado: <code>aria-live="polite"</code> e <code>aria-labelledby</code> na fala. A placa é <code>aria-hidden</code>: repete o número da fala, que já é lido.</li>
+      <li>Baixar: "Download · 717 KB". Antes e depois: <code>aria-expanded</code> e <code>aria-controls</code>. O comparador: "Compare before and after".</li>
+      <li>Chips: <code>nav</code> com o nome "Next:". "Ajustar": o <code>summary</code> diz o nível atual.</li>
+      <li>Erro: a frase e a razão num <code>role="alert"</code>; a Oli é sempre <code>aria-hidden</code>.</li>
+    </ul>
+
+    <h3>Medidas</h3>
+    <ul>
+      <li>Todo controle com 48 px (<code>--tap-min</code>): Escolher e Baixar com 60, Começar de novo e Antes e depois com 48 (ghost, 15 px de texto e 6 px de lado no celular, para caberem numa linha nos três idiomas), chips e o "Ajustar" com 48.</li>
+      <li>Retângulo: 356 px (celular) e 340 (a partir de 768). Faixa: 196 e 120. A Oli: 88 px a <code>top: -78px</code> (celular) e 112 px a <code>top: -76px</code>.</li>
+      <li>Anúncio de conteúdo: 300 px, depois do "Como comprimir": a 415 px da faixa a 360 (a regra pede 150) e longe da Oli. A lateral (300×644) a 150 px da coluna, a partir de 1280. Densidade a 360 (en, repouso): 300 / 1829 px do <code>&lt;main&gt;</code> do protótipo = 16 %, 22 % com a âncora de 100 px; a página de verdade é mais longa e a densidade, menor.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <ul>
+      <li>Nenhum arquivo JS novo e nenhuma dependência: tudo muda dentro da ilha que já existe (<code>ImagePanel.tsx</code>) e do CSS do molde.</li>
+      <li>No <code>ImagePanel.tsx</code>: o <code>comparison</code> deixa de montar entre o status e as opções (<code>:954</code>) e passa para dentro do cartão, atrás do botão (um booleano); as <code>Options</code> passam para dentro de um <code>&lt;details&gt;</code> depois do resultado; a placa sai também abaixo de 768 (cai a regra de <code>components.css:194</code>); o erro perde o selo redondo. Estimativa: +0,3 KB gzip no JS da página (hoje 22,0 a 22,2 KB; teto 80).</li>
+      <li>Requisições: as mesmas 6 (teto 8, nenhuma nova). As imagens do comparador são <code>blob:</code> e só decodificam quando ele abre.</li>
+      <li>CLS: 0,00 esperado na interação (teto 0,05). Lighthouse: o LCP continua o H1 ou a zona; nada novo acima da dobra.</li>
+    </ul>
+
+    <h3>Testes que a F13 escreve</h3>
+    <ul>
+      <li>CLS depois da interação: Chromium, 360×740, <code>fo-consent</code> gravado, <code>PerformanceObserver</code> de <code>layout-shift</code> antes do <code>setInputFiles</code>, até o Baixar + 1,5 s: ≤ 0,05 no comprimir, HEIC para JPG, WebP para JPG e redimensionar (a pendência F4-F7 e-2).</li>
+      <li>A dobra: toda página de ferramenta e de preset a 360×740, com e sem a fonte: base do retângulo ≤ 740 (F4-F7 f-2).</li>
+      <li>O aviso: sem <code>fo-consent</code>, a interseção do <code>#fo-cookie</code> com o Escolher e com o Escolher outros arquivos é zero a 360×740 nos três idiomas (F4-F7 f-1).</li>
+      <li>O foco: no resultado da 1ª visita a 360, o <code>scrollY</code> não muda quando o Baixar recebe o foco (obs. 8).</li>
+    </ul>
+
+    <h3>O que muda no design system</h3>
+    <ul>
+      <li>DropZone: água a 30 % em repouso e 60 % com o arquivo em cima (hoje 12 e 38 %); o selo redondo com o ícone <code>upload</code> sai (G-11 resolvido pela ausência).</li>
+      <li>ResultCard: a Oli no canto de cima à direita, fora do cartão (G-10); a faixa de água e a onda no topo (G-09); a placa em todas as larguras, boiando; "Before / After" vira a linha "2.6 MB → 717 KB"; as dimensões ficam na nota, a partir de 768.</li>
+      <li>ToolPage: o H1 sem o recuo da Oli; as opções sob "Ajustar" depois do resultado; o 1º anúncio depois do "Como usar".</li>
+      <li>WaterLevel: a Oli nada no canto, não na superfície (a água sobe até ela).</li>
+    </ul>
+  </div>
+</section>
+<script>
+var TL_COMMON = {
+  pt: {
+    'skip': 'Ir para o conteúdo',
+    'home': 'FileOrca, página inicial',
+    'search': 'Buscar ferramentas',
+    'lang.code': 'PT',
+    'lang.sr': ' · Idioma: Português',
+    'lang.menu': 'Escolha um idioma',
+    'theme': 'Tema',
+    'theme.sr': ' · sistema',
+    'menu': 'Menu',
+    'crumbs': 'Trilha de navegação',
+    'crumb.home': 'Início',
+    'seal': 'Seu arquivo nem sai do aparelho',
+    'c.title': 'Cookies, rapidinho.',
+    'c.body': 'Usamos o Google Analytics para ver quais ferramentas ajudam e anúncios para manter o site grátis. Aceitando ou não, seu arquivo nem sai do aparelho.',
+    'c.privacy': 'Privacidade',
+    'c.decline': 'Recusar',
+    'c.accept': 'Aceitar',
+    'f.image': 'Imagem',
+    'f.compress': 'Comprimir imagem',
+    'f.heic': 'HEIC para JPG',
+    'f.merge': 'Juntar PDF',
+    'f.split': 'Dividir PDF',
+    'f.about': 'Sobre',
+    'f.privacy': 'Privacidade',
+    'f.coffee': 'Curtiu? Me paga um café',
+    'f.sign': 'Feito por Victor Yuki Matusita em Curitiba · © 2026'
+  },
+  es: {
+    'skip': 'Saltar al contenido',
+    'home': 'FileOrca, página de inicio',
+    'search': 'Buscar herramientas',
+    'lang.code': 'ES',
+    'lang.sr': ' · Idioma: Español',
+    'lang.menu': 'Elige un idioma',
+    'theme': 'Tema',
+    'theme.sr': ' · sistema',
+    'menu': 'Menú',
+    'crumbs': 'Ruta de navegación',
+    'crumb.home': 'Inicio',
+    'seal': 'Tus archivos nunca salen de tu dispositivo',
+    'c.title': 'Cookies, en pocas palabras.',
+    'c.body': 'Usamos Google Analytics para ver qué herramientas ayudan y anuncios para mantener el sitio gratis. Aceptes o no, tus archivos nunca salen de tu dispositivo.',
+    'c.privacy': 'Privacidad',
+    'c.decline': 'Rechazar',
+    'c.accept': 'Aceptar',
+    'f.image': 'Imagen',
+    'f.compress': 'Comprimir imagen',
+    'f.heic': 'HEIC a JPG',
+    'f.merge': 'Unir PDF',
+    'f.split': 'Dividir PDF',
+    'f.about': 'Acerca de',
+    'f.privacy': 'Privacidad',
+    'f.coffee': '¿Te gustan estas herramientas? Invítame un café',
+    'f.sign': 'Hecho por Victor Yuki Matusita en Curitiba · © 2026'
+  }
+};
+var TL_PAGE = {
+  pt: {
+    'page.title': 'Comprimir imagem, alternativa A · FileOrca UX v2',
+    'crumb.cat': 'Ferramentas de imagem',
+    'h1': 'Comprimir imagem',
+    'h1P': 'Comprimir imagem para 100 KB',
+    'drop.title': 'Solte as imagens aqui',
+    'drop.choose': 'Escolher imagens',
+    'drop.helpDesk': 'ou cole com <span class="fo-kbd">Ctrl V</span> · JPG, PNG ou WebP',
+    'drop.help': 'JPG, PNG ou WebP, quantas quiser',
+    'drop.over': 'Pode soltar, a Oli está pronta',
+    'drop.overHelp': 'Quantas quiser',
+    'level.label': 'Comprimindo as imagens',
+    'level.pct': '55%',
+    'level.msg': 'A Oli está cuidando disso…',
+    'r.says': 'Prontinho! Sua imagem ficou 72% mais leve.',
+    'r.saysP': 'Prontinho! Sua imagem ficou 96% mais leve e cabe em 100 KB.',
+    'r.pct': '−72%',
+    'r.pctP': '−96%',
+    'r.lighter': 'mais leve',
+    'r.before': 'Antes',
+    'r.after': 'Depois',
+    'r.beforeV': '2,6 MB',
+    'r.download': 'Baixar',
+    'r.again': 'Começar de novo',
+    'r.compare': 'Antes e depois',
+    'r.compareLabel': 'Comparar antes e depois',
+    'r.meta': 'A Oli removeu os metadados da foto, inclusive a localização GPS.',
+    'r.size': 'Tamanho',
+    'e.title': 'Ops, a Oli não conseguiu ler esse arquivo.',
+    'e.why': 'notes.txt não é uma imagem. Tente um JPG ou PNG.',
+    'e.choose': 'Escolher outros arquivos',
+    'o.legend': 'Compressão',
+    'o.rec': 'Recomendada',
+    'o.recHelp': 'melhor equilíbrio',
+    'o.strong': 'Forte',
+    'o.strongHelp': 'menor tamanho',
+    'o.png': 'O PNG é salvo sem perda, então o nível só muda JPG e WebP.',
+    'o.redo': 'Mudar o nível refaz a imagem na hora.',
+    'n.label': 'A seguir:',
+    'n.resize': 'Redimensionar imagem',
+    'n.topdf': 'Imagem para PDF',
+    'a.sum': 'Ajustar',
+    'a.now': '· Recomendada',
+    'how.title': 'Como comprimir uma imagem',
+    'how.1': 'Escolha ou solte suas imagens. Elas ficam no seu aparelho.',
+    'how.2': 'A Oli comprime cada uma no seu navegador, no nível Recomendada.',
+    'how.3': 'Baixe o arquivo mais leve. Mudar o nível refaz na hora.',
+    'priv.title': 'Privacidade',
+    'priv.p': 'As imagens são processadas no seu aparelho e nunca são enviadas a um servidor. Cada cópia salva também deixa de fora os metadados da foto, inclusive a localização GPS.'
+  },
+  es: {
+    'page.title': 'Comprimir imagen, alternativa A · FileOrca UX v2',
+    'crumb.cat': 'Herramientas de imagen',
+    'h1': 'Comprimir imagen',
+    'h1P': 'Comprimir imagen a 100 KB',
+    'drop.title': 'Suelta las imágenes aquí',
+    'drop.choose': 'Elegir imágenes',
+    'drop.helpDesk': 'o pégalas con <span class="fo-kbd">Ctrl V</span> · JPG, PNG o WebP',
+    'drop.help': 'JPG, PNG o WebP, todas las que quieras',
+    'drop.over': 'Suéltalo, Oli está lista',
+    'drop.overHelp': 'Todas las que quieras',
+    'level.label': 'Comprimiendo las imágenes',
+    'level.pct': '55 %',
+    'level.msg': 'Oli se está encargando…',
+    'r.says': '¡Listo! Tu imagen quedó un 72 % más ligera.',
+    'r.saysP': '¡Listo! Tu imagen quedó un 96 % más ligera y cabe en 100 KB.',
+    'r.pct': '−72 %',
+    'r.pctP': '−96 %',
+    'r.lighter': 'más ligera',
+    'r.before': 'Antes',
+    'r.after': 'Después',
+    'r.beforeV': '2,6 MB',
+    'r.download': 'Descargar',
+    'r.again': 'Empezar de nuevo',
+    'r.compare': 'Antes y después',
+    'r.compareLabel': 'Comparar antes y después',
+    'r.meta': 'Oli eliminó los metadatos de la foto, incluida la ubicación GPS.',
+    'r.size': 'Tamaño',
+    'e.title': 'Uy, Oli no pudo leer este archivo.',
+    'e.why': 'notes.txt no es una imagen. Prueba con un JPG o PNG.',
+    'e.choose': 'Elegir otros archivos',
+    'o.legend': 'Compresión',
+    'o.rec': 'Recomendada',
+    'o.recHelp': 'mejor equilibrio',
+    'o.strong': 'Fuerte',
+    'o.strongHelp': 'archivo más pequeño',
+    'o.png': 'El PNG se guarda sin pérdida, así que el nivel solo cambia JPG y WebP.',
+    'o.redo': 'Cambiar el nivel rehace la imagen al momento.',
+    'n.label': 'Siguiente:',
+    'n.resize': 'Redimensionar imagen',
+    'n.topdf': 'Imagen a PDF',
+    'a.sum': 'Ajustar',
+    'a.now': '· Recomendada',
+    'how.title': 'Cómo comprimir una imagen',
+    'how.1': 'Elige o suelta tus imágenes. Se quedan en tu dispositivo.',
+    'how.2': 'Oli comprime cada una en tu navegador, en el nivel Recomendada.',
+    'how.3': 'Descarga el archivo más ligero. Cambiar el nivel lo rehace al momento.',
+    'priv.title': 'Privacidad',
+    'priv.p': 'Las imágenes se procesan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Cada copia guardada también omite los metadatos de la foto, incluida la ubicación GPS.'
+  }
+};
+var PROTO_T = { pt: Object.assign({}, TL_COMMON.pt, TL_PAGE.pt), es: Object.assign({}, TL_COMMON.es, TL_PAGE.es) };
+/* Prototype behaviour (inline, classic, no fetch): the BeforeAfter line follows its range; the tabs switch by
+   click, arrow keys, Home and End (WAI-ARIA tabs, automatic activation); a tablist may name its first tab per state. */
+document.addEventListener('DOMContentLoaded', function () {
+  var i, bas = document.querySelectorAll('.fo-ba');
+  for (i = 0; i < bas.length; i++) (function (ba) {
+    var r = ba.querySelector('input');
+    if (r) r.addEventListener('input', function () { ba.style.setProperty('--pos', r.value + '%'); });
+  })(bas[i]);
+  var lists = document.querySelectorAll('[role="tablist"]');
+  for (i = 0; i < lists.length; i++) (function (tl) {
+    var tabs = Array.prototype.slice.call(tl.querySelectorAll('[role="tab"]'));
+    var pick = function (t, focus) {
+      tabs.forEach(function (x) {
+        var on = x === t, p = document.getElementById(x.getAttribute('aria-controls'));
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+        x.tabIndex = on ? 0 : -1;
+        if (p) p.hidden = !on;
+      });
+      if (focus) t.focus();
+    };
+    tabs.forEach(function (t, k) {
+      t.addEventListener('click', function () { pick(t, false); });
+      t.addEventListener('keydown', function (e) {
+        var n = e.key === 'ArrowRight' ? k + 1 : e.key === 'ArrowLeft' ? k - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : null;
+        if (n === null) return;
+        e.preventDefault();
+        pick(tabs[(n + tabs.length) % tabs.length], true);
+      });
+    });
+    var first = tl.getAttribute('data-first-' + document.documentElement.getAttribute('data-state'));
+    var s = first && document.getElementById(first);
+    if (s) pick(s, false);
+  })(lists[i]);
+});
+</script>
+</body>
+</html>
