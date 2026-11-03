@@ -1,6 +1,6 @@
 # Operação do FileOrca
 
-O manual do site depois da F8: o que fazer em cada alerta, a revisão mensal e a anual, e as tarefas de configuração que são suas. Escrito na F8 (2/nov/2026; DECISOES § 303). O `tests/unit/operacao.test.ts` confere que todo comando `pnpm`, caminho, workflow e título de issue citado aqui existe.
+O manual do site depois da F9: o que fazer em cada alerta, a revisão mensal e a anual, as tarefas de configuração que são suas e o passo a passo do repositório público. Escrito na F8 (2/nov/2026; DECISOES § 303) e ampliado na F9 (3/nov/2026; a seção "Repositório público", DECISOES § 336). O `tests/unit/operacao.test.ts` confere que todo comando `pnpm`, caminho, workflow e título de issue citado aqui existe.
 
 Quando um alerta pedir mudança no código, ela vira uma **run curta de ajuste** (a ficha "Run curta de ajuste" do `PLANO-FILEORCA.md`): branch `ajuste-{assunto}`, só a mudança pedida e um teste que falha sem ela. Se não couber numa run curta, vira ficha de fase.
 
@@ -49,7 +49,7 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 - **O que quer dizer:** uma PR do Dependabot (a do grupo de minor e patch, ou uma major) ficou vermelha. O GitHub não manda e-mail de falha para execução que o Dependabot começou: este job (`alerta-dependabot`, no `.github/workflows/ci.yml`) abre a issue e comenta na PR. Uma issue por PR: o próximo vermelho da mesma PR vira comentário.
 - **O que fazer:**
   1. Leia a parte vermelha: `gh run view <id> --log`, com o `--attempt` se for um rerun.
-  2. Se a falha for `ENOSPC` ou um travamento do WebKit, rode só a parte de novo: `gh run rerun <id> --failed`.
+  2. Se a falha for `ENOSPC` ou um travamento do WebKit, rode só a parte de novo: `gh run rerun <id> --failed`. Isso só vale em até 24 h da execução: desde a F9, as partes baixam o artefato do build, guardado por 1 dia. Depois disso, use "Re-run all jobs" na página da execução (refaz o build) ou peça `@dependabot rebase` num comentário da PR.
   3. Se a falha vier da atualização, veja a seção "Depois de certas PRs" abaixo.
   4. Feche a issue quando a PR ficar verde (ela se mescla sozinha).
 - **No primeiro ciclo (1/dez/2026):** confira que a issue abriu de fato numa PR vermelha, se houver uma. A prova ao vivo só vem com uma PR real.
@@ -110,6 +110,7 @@ Títulos das issues que os workflows abrem (`.github/workflows/ci.yml` e `.githu
 ## Uma parte do CI com `ENOSPC`
 
 - O WebKit do runner às vezes enche o disco (DECISOES § 108, § 109 e § 141). Leia as linhas `[disco]` do log e rode só a parte de novo: `gh run rerun <id> --failed`. Não mexa em teste por causa disso.
+- O `--failed` só vale em até 24 h da execução: desde a F9, as partes baixam o artefato `site` do job `build`, guardado por 1 dia, e depois disso a parte rodada de novo falha no download, por uma razão que nada tem a ver com o `ENOSPC`. Passadas as 24 h, use "Re-run all jobs" na página da execução (refaz o build; não testado na F9) ou faça um push na branch. A retenção de 1 dia fica (DECISOES § 324).
 
 ## Depois de certas PRs
 
@@ -147,7 +148,7 @@ Saído do ensaio do Dependabot da F8 (DECISOES § 299):
 - [ ] **Watch do repositório:** Watch → Custom → Issues (e Pull requests, se quiser), para receber todo e-mail de issue.
 - [ ] **UptimeRobot:** monitor HTTPS de https://fileorca.com a cada 5 minutos, com alerta para o Gmail da marca.
 - [ ] **Depois do merge da F8:** Insights → Dependency graph → Dependabot, conferir que o `.github/dependabot.yml` foi aceito sem erro.
-- [ ] **Opcional:** Settings → Code security → Dependabot security updates, para PRs de segurança fora do mês (elas também rodam o CI inteiro).
+- [ ] **Opcional:** Settings → Advanced Security (antes "Code security") → Dependabot security updates, para PRs de segurança fora do mês (elas também rodam o CI inteiro).
 
 ## Repositório público
 
@@ -157,24 +158,29 @@ Escrito na F9 (3/nov/2026; DECISOES § 332 a § 336), a partir da seção F do `
 
 ### Passo a passo, nesta ordem
 
-1. **Leia a auditoria antes de tudo.** Rode `pnpm publico:auditar` na pasta do projeto (uns 20 s; ele atualiza o espelho em `.cache/auditoria/`) e abra o `.cache/auditoria-publico.md`. O arquivo fica fora do Git e traz cada achado com o valor, onde ele aparece (arquivo, commit e ref) e a categoria. No terminal saem só as contagens. Decida por categoria:
+Os passos 2, 3 e 4 são só configuração e não dependem do merge da F9: faça-os logo depois da auditoria. Só o ruleset (passo 6) espera o merge (passo 5).
+
+1. **Leia a auditoria antes de tudo.** Rode `pnpm publico:auditar` na pasta do projeto, com a branch `fase-09` em uso: o script (e o README, o SECURITY e o LICENSE) só chega à `main` com o merge do passo 5. Ele leva uns 20 s, atualiza o espelho em `.cache/auditoria/` e, na primeira vez numa máquina, baixa o gitleaks fixado por SHA-256 no `scripts/lib/tools.ts`. Rode de novo mesmo que o `.cache/auditoria-publico.md` já exista: a auditoria da run foi feita antes dos últimos commits da F9, e a decisão vale sobre o histórico de agora. Abra o `.cache/auditoria-publico.md`. O arquivo fica fora do Git e traz cada achado com o valor, onde ele aparece (arquivo, commit e ref) e a categoria. No terminal saem só as contagens. Decida por categoria:
    - **Segredo real:** gire o segredo no serviço dele agora, porque o histórico já está público.
-   - **Dado de terceiro** (por exemplo, o e-mail de um blogueiro em `docs/lancamento/blogs-financas.md`): tirar do arquivo atual numa run curta resolve o arquivo, mas não o histórico. Veja se o dado já era público no site da pessoa.
+   - **Dado de terceiro** (por exemplo, o e-mail de uma pessoa num arquivo do repositório): tirar do arquivo atual numa run curta resolve o arquivo, mas não o histórico. Veja se o dado já era público no site da pessoa.
    - **GPS:** cada foto com a coordenada. Confira se alguma aponta para um lugar que você não quer mostrar.
    - **Dado do Victor** (o e-mail dos commits e as contas com o nome da marca): já está público com o histórico.
-   - **Público por natureza e falso positivo:** só conferência, sem ação.
+   - **Público por natureza e falso positivo:** só conferência, sem ação. Um achado só cai em falso positivo por estar só em `tests/` ou `fixtures/` (pendência "F9 auditoria testes"): passe o olho nos valores dessas linhas também.
 
-   Reescrever o histórico não está no plano: quebra os testes que leem commits antigos e os links dos relatórios. Se algo não puder continuar público, a saída sem reescrever é voltar o repositório para privado (Settings → General → Danger Zone → Change visibility). Quem já clonou ou fez fork continua com a cópia.
-2. **Dê o merge da PR da F9** (squash, apagando a branch), depois de ler o diff do `.github/`. Ela traz o check `ci-ok`, a proteção contra PR de fork no `scripts/ci/pode-mesclar.ts` e as guardas dos jobs que escrevem.
-3. **Importe o ruleset da `main`,** só depois do passo 2: antes de o `.github/workflows/ci.yml` com o job `ci-ok` estar na `main`, nenhuma PR recebe esse check, e todas ficariam esperando. Settings → Rules → Rulesets → New ruleset → Import a ruleset → escolha o `docs/ops/ruleset-main.json` → revise → Create.
+   Reescrever o histórico não está no plano: quebra os testes que leem commits antigos e os links dos relatórios. Se algo não puder continuar público, a saída sem reescrever é voltar o repositório para privado (Settings → General → Danger Zone → Change visibility). Quem já clonou ou fez fork continua com a cópia. Antes de voltar, saiba o que muda:
+   - **O ruleset pode deixar de valer:** no plano Free, um repositório privado pode ficar sem ele. A página "About rulesets" do GitHub, lida na F9, fala dos planos Team e Enterprise e não confirma o Free privado: confira lá, e na página do seu plano, antes de mudar. Sem o ruleset, a proteção da `main` volta a ser só o hook, o `.claude/settings.json` e o `CLAUDE.md`.
+   - **Os minutos do Actions voltam a contar** (seção "Minutos do Actions acabando"), e uma execução completa custa mais de 100 minutos.
+2. **Advanced Security** (antes "Code security" ou "Code security and analysis"): Settings → Advanced Security (na seção "Security and quality" do menu lateral). Ligue Secret Protection (o secret scanning de antes) e, dentro dela, Push protection, e ligue Private vulnerability reporting. O `SECURITY.md` manda relatar pelo relato privado: até você ligá-lo, o botão "Report a vulnerability" não aparece, e o relato vai pelo e-mail do site. Ligue antes do merge da F9, que leva o `SECURITY.md` à `main`.
+3. **Aprovação de PR de fork:** Settings → Actions → General, na parte de aprovação de workflows de PR de fork, escolha "Require approval for all external contributors". Hoje está em "first-time contributors".
+4. **Features:** Settings → General → Features, desligue Wiki e Projects (hoje ligados) e confira que Discussions está desligado. Issues fica, porque os alertas dos workflows usam.
+5. **Dê o merge da PR da F9** (squash, apagando a branch), depois de ler o diff do `.github/`. Ela traz o check `ci-ok`, a proteção contra PR de fork no `scripts/ci/pode-mesclar.ts` e as guardas dos jobs que escrevem.
+6. **Importe o ruleset da `main`,** só depois do passo 5: antes de o `.github/workflows/ci.yml` com o job `ci-ok` estar na `main`, nenhuma PR recebe esse check, e todas ficariam esperando. Settings → Rules → Rulesets → New ruleset → Import a ruleset → escolha o `docs/ops/ruleset-main.json` → revise → Create.
    - O que ele exige: só na branch padrão, PR obrigatória sem aprovação e só com squash; o `ci-ok` vindo do GitHub Actions como o único check, sem exigir a branch atualizada; nenhum force push e nenhuma exclusão; ninguém contorna. O `tests/unit/ruleset.test.ts` confere o arquivo.
    - Como o `ci-ok` resume o CI inteiro, mudar as partes do CI nunca mexe no ruleset.
    - Se um dia precisar mesclar com o `ci-ok` vermelho, mude o ruleset para Disabled (Settings → Rules → Rulesets → main → Enforcement status), mescle e volte para Active.
-4. **Aprovação de PR de fork:** Settings → Actions → General, na parte de aprovação de workflows de PR de fork, escolha "Require approval for all external contributors". Hoje está em "first-time contributors".
-5. **Code security:** Settings → Code security, ligue Secret scanning, Push protection e Private vulnerability reporting. O `SECURITY.md` manda relatar pelo relato privado: até você ligá-lo, o botão "Report a vulnerability" não aparece, e o relato vai pelo e-mail do site.
-6. **Features:** Settings → General → Features, desligue Wiki e Projects (hoje ligados) e confira que Discussions está desligado. Issues fica, porque os alertas dos workflows usam.
+   - **Um `ci-ok` vermelho de execução cancelada no mesmo commit.** Quando um push e o `gh pr ready` (ou um rótulo) chegam juntos, a primeira execução é cancelada, e o `ci-ok` dela (que sempre roda) sai vermelho e fica no commit ao lado do verde da execução nova (DECISOES § 327). Não se sabe se o ruleset recusa o merge por causa dele: não foi testado (pendência "F9 ci-ok duplicado"). Se o merge for recusado assim (issue "Merge automático falhou na PR #<n>" com o `ci-ok` verde na execução nova), rode de novo a execução cancelada (`gh run rerun <id da cancelada>`) ou faça um push na branch; nenhum dos dois foi testado. Se nada resolver, a saída é a de cima (Disabled, merge, Active).
 7. **Workers Builds:** confira o painel do Cloudflare e o app do GitHub (subseção "Workers Builds e PR de fork", abaixo).
-8. **Na primeira PR depois disso,** confira que o check `ci-ok` aparece e que o merge automático acontece. Gere o prompt da F9b com o custo dessa execução: `pnpm ci:custo <id da execução>`.
+8. **Na primeira PR depois disso,** confira que o check `ci-ok` aparece e que o merge automático acontece. Se ela tiver uma execução cancelada no mesmo commit, veja se o merge passou mesmo assim e registre a resposta numa run curta (pendência "F9 ci-ok duplicado"). Gere o prompt da F9b com o custo dessa execução: `pnpm ci:custo <id da execução>`.
 
 ### Merge de PR de fork
 
@@ -183,15 +189,16 @@ Escrito na F9 (3/nov/2026; DECISOES § 332 a § 336), a partir da seção F do `
   - O job `merge` não roda em PR de fork, e o `scripts/ci/pode-mesclar.ts` recusa a PR cujo head não é deste repositório e a de autor que não seja o dono ou o Dependabot. Uma PR de branch `fase-*` de outra pessoa também não se mescla sozinha.
   - Os jobs que escrevem (o `merge`, o `alerta-dependabot` e o `.github/workflows/pos-deploy.yml`) não rodam em PR de fork, e nenhum workflow usa `pull_request_target`.
   - O token de uma PR de fork só lê, e os workflows não usam nenhum segredo do repositório.
-- Com o passo 4, cada execução de PR de fork espera você clicar em "Approve and run". Leia o diff antes de aprovar: aprovar roda o código da PR num runner do GitHub.
+- Com o passo 3, cada execução de PR de fork espera você clicar em "Approve and run". Leia o diff antes de aprovar: aprovar roda o código da PR num runner do GitHub.
 
 ### O que fica público no Actions
 
 - Qualquer pessoa lê os logs de toda execução, e qualquer conta do GitHub baixa os artefatos.
 - **Os artefatos:** o do build (o `dist/` e o `.cache/bundle-modules.json`), com retenção de 1 dia, e os relatórios do Playwright (`playwright-report-<n>`), com 7 dias. O `dist/` é o site que já está no ar; os relatórios trazem screenshots das páginas e as fixtures de teste, que são amostras públicas (`fixtures/ORIGEM.md`).
-- **Os logs:** nenhum passo imprime token ou variável de ambiente. O `GH_TOKEN` entra só como variável dos passos que chamam o `gh`, e o GitHub mascara o token no log. O diagnóstico de disco (`scripts/lib/disco.ts`) mostra caminhos e tamanhos do runner e o nome dos processos, nunca a linha de comando nem o ambiente.
+- **Os logs:** nenhum passo imprime token ou variável de ambiente. No job `merge`, o `GH_TOKEN` é variável do job inteiro: chega também ao checkout, ao `setup-node`, ao `dependabot/fetch-metadata` e ao passo que roda o `scripts/ci/pode-mesclar.ts`, embora só dois passos chamem o `gh`. No `alerta-dependabot`, o único passo chama o `gh`; no `ci-ok`, o token entra só no passo Verdict, com permissão só de leitura. O GitHub mascara o token no log. O diagnóstico de disco (`scripts/lib/disco.ts`) mostra caminhos e tamanhos do runner e o nome dos processos, nunca a linha de comando nem o ambiente.
 - A auditoria não roda no CI: o `.cache/auditoria-publico.md` só existe na sua máquina.
 - Título de PR, de issue e mensagem de commit também ficam públicos: nunca ponha dado pessoal neles.
+- Os comentários do Workers Builds nas PRs também são públicos: trazem o status do build, a URL da prévia no `workers.dev` e o link do painel do Cloudflare, com o ID da conta (que não é segredo).
 - Num repositório público, os runners padrão do GitHub não gastam a cota de minutos. A seção "Minutos do Actions acabando" vale enquanto o repositório for privado.
 
 ### Workers Builds e PR de fork

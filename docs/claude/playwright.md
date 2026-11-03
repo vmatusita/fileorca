@@ -2,6 +2,8 @@
 
 O que as runs aprenderam sobre os specs do Playwright, o Chromium e o WebKit, as portas e a divisão dos testes nas partes do CI, com o texto igual ao do CLAUDE.md até a F9 e sob o cabeçalho de origem; as runs acrescentam no fim, numa seção nova.
 
+Os números de partes das seções de antes da F9 (como "a parte 3" do WebKit dos `money-*.spec.ts`) são os de cada época. A divisão de hoje (Chromium em 5, WebKit em 13) está no fim da seção da F9 do arquivo do CI.
+
 ## F1a: comandos e pegadinhas
 
 Pegadinhas que a F1a achou:

@@ -71,4 +71,31 @@ describe('docs/OPERACAO.md', () => {
       expect(DOC, heading).toContain(`## ${heading}`);
     }
   });
+
+  // The F9 (decision 11; DECISOES § 336) and its review (F-8): the section of the public repository, with its parts,
+  // and the step of the ruleset that points to the file Victor imports.
+  it('has the section of the public repository, with its parts', () => {
+    const headings = DOC.split('\n').filter((line) => /^#{2,3} /.test(line));
+    expect(headings).toContain('## Repositório público');
+    const start = headings.indexOf('## Repositório público');
+    const next = headings.findIndex((line, at) => at > start && line.startsWith('## '));
+    expect(headings.slice(start + 1, next)).toEqual([
+      '### Passo a passo, nesta ordem',
+      '### Merge de PR de fork',
+      '### O que fica público no Actions',
+      '### Workers Builds e PR de fork',
+    ]);
+  });
+
+  it('imports the ruleset from docs/ops/ruleset-main.json, after the merge that brings ci-ok to main', () => {
+    const step = DOC.split('\n').find((line) => /^\d+\. \*\*Importe o ruleset/.test(line));
+    expect(step).toBeDefined();
+    expect(step).toContain('`docs/ops/ruleset-main.json`');
+    expect(step).toContain('Import a ruleset');
+    const steps = DOC.split('\n').filter((line) => /^\d+\. \*\*/.test(line));
+    const merge = steps.findIndex((line) => line.includes('Dê o merge da PR da F9'));
+    const ruleset = steps.findIndex((line) => line.includes('Importe o ruleset'));
+    expect(merge).toBeGreaterThan(-1);
+    expect(ruleset).toBeGreaterThan(merge);
+  });
 });
