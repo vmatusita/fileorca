@@ -200,9 +200,9 @@ test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new
   await expect(page.getByRole('listitem', { name: 'photo-7.jpg' })).toBeFocused();
 
   const sentence = 'Done! Your PDF with 7 pages is ready.';
-  await expect(page.getByRole('status')).toHaveText(sentence);
+  await expect(page.locator('#fo-tool-root').getByRole('status')).toHaveText(sentence);
   await page.evaluate(() => {
-    const region = document.querySelector('[role="status"]');
+    const region = document.querySelector('#fo-tool-root [role="status"]');
     const said: string[] = [];
     (window as unknown as { __said: string[] }).__said = said;
     if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });

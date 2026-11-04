@@ -40,11 +40,11 @@ test.describe('a batch', () => {
     // The drop zone went away with the button that had the focus: the focus follows to the WaterLevel instead of
     // falling to the page, and the status region says what is going on from the start of the batch.
     await expect(level).toBeFocused();
-    await expect(page.getByRole('status')).toHaveText('Compressing images');
+    await expect(page.locator('#fo-tool-root').getByRole('status')).toHaveText('Compressing images');
     gate.release();
     await done(page);
     await expect(page.locator('.fo-filelist .fo-file__gain')).toHaveCount(3);
-    await expect(page.getByRole('status')).toHaveText(/^Done! Your 3 images are \d+% lighter\.$/);
+    await expect(page.locator('#fo-tool-root').getByRole('status')).toHaveText(/^Done! Your 3 images are \d+% lighter\.$/);
     // The status region is the one live region of the tool: the card does not say the result a second time
     // (F2 low 6 and review d-03, DECISOES § 102).
     await expect(page.locator('#fo-tool-root [aria-live], #fo-tool-root [role="alert"]:not(:empty)')).toHaveCount(0);
@@ -97,7 +97,7 @@ test.describe('a batch', () => {
     // What the status region held over time, to see that it is emptied before the new sentence comes: a live
     // region that gets the same text again says nothing.
     await page.evaluate(() => {
-      const region = document.querySelector('[role="status"]');
+      const region = document.querySelector('#fo-tool-root [role="status"]');
       const said: string[] = [];
       (window as unknown as { __said: string[] }).__said = said;
       if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
@@ -114,7 +114,7 @@ test.describe('a batch', () => {
       }, { timeout: 30_000 })
       .toBeLessThan(before);
     await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeFocused();
-    await expect(page.getByRole('status')).toContainText('Done!');
+    await expect(page.locator('#fo-tool-root').getByRole('status')).toContainText('Done!');
     const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
     expect(said[0], 'the sentence of the first run is cleared when the re-run starts').toBe('');
     expect(said.at(-1)).toMatch(/^Done! Your 3 images are \d+% lighter\.$/);
