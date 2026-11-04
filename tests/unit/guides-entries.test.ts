@@ -289,3 +289,15 @@ describe('the guides on the home', () => {
     });
   }
 });
+
+// F11 (decision 5; DECISOES § 399): the English guides hub is one of the pages Lighthouse measures (performance 90 or more
+// and CLS 0.05 at most, the median of three runs), next to the image and PDF hubs.
+describe('the guides hub in the Lighthouse list', () => {
+  it('has /guides/ among the URLs of lighthouserc.json, once', () => {
+    const config = JSON.parse(readFileSync('lighthouserc.json', 'utf8')) as { ci: { collect: { url: string[] } } };
+    const urls = config.ci.collect.url;
+    expect(urls.filter((url) => url === HUB.en)).toHaveLength(1);
+    expect(urls).toContain('/image-tools/');
+    expect(existsSync(fileForPath(HUB.en))).toBe(true);
+  });
+});

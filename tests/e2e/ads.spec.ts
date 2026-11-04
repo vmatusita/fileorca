@@ -8,7 +8,7 @@ import type { ChoiceSpec, FieldSpec } from '../../src/tools/calc/types.ts';
 import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { LANGS, QR_ID, ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
@@ -279,14 +279,18 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-test('legal, institutional, home and 404 pages have no AdSlot and no ad code', async ({ page }) => {
+// F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language is born with no AdSlot and no ad area.
+test('legal, institutional, home, guides hub and 404 pages have no AdSlot and no ad code', async ({ page }) => {
   const paths = [
     '/', '/pt/', '/es/', '/privacy/', '/pt/privacidade/', '/es/privacidad/', '/terms/', '/pt/termos/', '/es/terminos/',
     '/about/', '/pt/sobre/', '/es/acerca-de/', '/contact/', '/pt/contato/', '/es/contacto/',
     '/licenses/', '/pt/licencas/', '/es/licencias/', '/support/', '/pt/apoie/', '/es/apoyo/', '/404.html', '/pt/404.html', '/es/404.html',
+    ...LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/'),
   ];
+  expect(paths.slice(-3)).toEqual(['/guides/', '/pt/guias/', '/es/guias/']);
   for (const path of paths) {
-    await page.goto(path);
+    const response = await page.goto(path);
+    if (!path.endsWith('404.html')) expect(response?.status(), path).toBe(200);
     expect(await page.locator('.fo-ad').count(), path).toBe(0);
     expect(await page.locator('script[src*="adsbygoogle"], ins.adsbygoogle').count(), path).toBe(0);
   }
