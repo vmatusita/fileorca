@@ -4981,3 +4981,14 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
 - **O achado:** o único teste do mar conferia só os 92 % (`toContain('0.92')`), no tema claro. Com a `water` no escuro, o defeito que a decisão 5 evita (a borda do card a 2,59:1), ele continuava verde.
 - **O teste novo:** `tests/e2e/fo-wall.spec.ts`, "the sea is the water in the light theme and the deep in the dark one, by the system and by the theme button against it". Ele percorre as seis combinações do esquema do sistema (claro e escuro, pelo `emulateMedia`) com o `data-theme` (nenhum, `light` e `dark`, inclusive contra o sistema). Em cada uma, o `::backdrop` tem de ser o `color-mix` de 92 % do token do tema na tela (a `water` no claro e o `deep` no escuro, lidos numa sonda na mesma página), e a borda do card fica a 3:1 ou mais contra a cor do mar, opaca, como a especificação mede.
 - **Reprova sem a correção.** Com a mutação do defeito (o `--fo-wall-sea` na `water` nas duas regras escuras do `components.css`), ele reprova nos dois navegadores: nas três combinações escuras, o mar sai `color(srgb 0.0784 0.251 0.494 / 0.92)` (a `water` escura) e a borda fica a 2,59:1. O código da F12 está certo, e o teste é a trava. O teste antigo dos 92 % não mudou.
+
+## § 452 · "Ícono", "Presiona" e "gray" na parede, o glossário, e a parede sob o `english-leak` (F12, revisão F-1, F-2 e F-3)
+
+- **O espanhol (F-1).** Os passos e as notas da parede diziam "icono" (8 vezes) e "Pulsa" (2), as formas da especificação. O resto do site escreve "ícono" (o QR e os guias) e "Presiona" (20 vezes em 11 arquivos), e o `docs/i18n/es.md` manda o espanhol neutro das Américas. Agora é "ícono" e "Presiona". O glossário ganhou duas linhas na seção da parede ("icon · ícono" e "Press · Presiona") e duas na tabela Nunca ("icono" e "pulsa"), que o `glossary.test.ts` lê. Com os textos de antes, ele acha os 10 casos no `src/i18n/es/wall.ts`. Só as formas que a parede usava entram na tabela.
+- **O inglês (F-2):** "It turns grey." virou "It turns gray.", como o resto do site em inglês. O `lint:texto` dava o aviso de ortografia britânica, que não reprova.
+- **A guarda contra o inglês (F-3).** O `english-leak.test.ts` só lia o `dist/` padrão, onde a parede nunca entra (§ 413). Ele ganhou um bloco que renderiza o AdblockWall em pt e es, nos dois modos, pelo Container, e passa o HTML no mesmo `findLeaks(pageTexts(...))`, com as mesmas frases inglesas (o `src/i18n/en/wall.ts` entre elas). Hoje não há vazamento. Os controles:
+  - a parede em inglês dá vazamentos nos passos e nas notas, o que prova que o detector lê o diálogo fechado e a ajuda;
+  - a parede em português com um passo deixado em inglês é pega.
+
+  Alternativa recusada: o teste no `wall.test.ts`, que teria de importar o `english-leak.test.ts` e rodaria os testes dele de novo.
+- **Nenhum teste antigo mudou:** o `wall.test.ts` não fixa as frases trocadas.

@@ -2,7 +2,8 @@ import type { WallTexts } from '../types.ts';
 
 // F12 · a parede do bloqueador (decisión 10, con el ajuste 3; § 431). Los textos de la especificación (wall.html), con la
 // 2.ª frase y los botones del ajuste 3. Los pasos de la ayuda vienen de la ayuda pública de cada producto; ninguno tiene enlace.
-// La nota de Brave dice "celular": el glosario (docs/i18n/es.md, "Nunca") no deja "móvil".
+// La nota de Brave dice "celular": el glosario (docs/i18n/es.md, "Nunca") no deja "móvil". Los pasos dicen "ícono" y
+// "Presiona", como el resto del sitio, no "icono" ni "Pulsa" de la especificación (revisión F12, § 452).
 export default {
   title: 'Oli vive de los anuncios',
   body: 'FileOrca es gratis, sin registros ni límites, porque los anuncios pagan las cuentas. Con un bloqueador activado, los anuncios no se ven y no entra nada. Desactívalo para fileorca.com y vuelve a cargar la página.',
@@ -16,28 +17,28 @@ export default {
   entries: {
     ubo: {
       name: 'uBlock Origin',
-      steps: ['Abre uBlock Origin desde su icono en la barra del navegador.', 'Pulsa el botón grande de encendido, azul. Se vuelve gris.', 'Recarga la página.'],
+      steps: ['Abre uBlock Origin desde su ícono en la barra del navegador.', 'Presiona el botón grande de encendido, azul. Se vuelve gris.', 'Recarga la página.'],
       note: '¿Usas uBO Lite? Mueve el “modo de filtrado” hasta “sin filtrado”.',
     },
     adblock: {
       name: 'AdBlock',
-      steps: ['Abre AdBlock desde su icono en la barra del navegador.', 'Elige “Pausar en este sitio web”.', 'La página se recarga sola.'],
+      steps: ['Abre AdBlock desde su ícono en la barra del navegador.', 'Elige “Pausar en este sitio web”.', 'La página se recarga sola.'],
       note: 'La pausa dura 7 días y se renueva en cada visita.',
     },
     abp: {
       name: 'Adblock Plus',
-      steps: ['Abre Adblock Plus desde su icono en la barra del navegador.', 'Desactiva el interruptor “Este sitio web”.', 'Pulsa “Actualizar”.'],
+      steps: ['Abre Adblock Plus desde su ícono en la barra del navegador.', 'Desactiva el interruptor “Este sitio web”.', 'Presiona “Actualizar”.'],
       note: 'La pausa dura 7 días y se renueva en cada visita.',
     },
     adguard: {
       name: 'AdGuard',
-      steps: ['Abre AdGuard desde su icono en la barra del navegador.', 'Desactiva “Protección para el sitio web actual”.', 'Recarga la página.'],
-      note: 'El icono de pausa, arriba, detiene AdGuard en todos los sitios. El interruptor basta.',
+      steps: ['Abre AdGuard desde su ícono en la barra del navegador.', 'Desactiva “Protección para el sitio web actual”.', 'Recarga la página.'],
+      note: 'El ícono de pausa, arriba, detiene AdGuard en todos los sitios. El interruptor basta.',
     },
     brave: {
       name: 'Brave',
       steps: [
-        'Abre Brave Shields desde el icono del león, a la derecha de la barra de direcciones.',
+        'Abre Brave Shields desde el ícono del león, a la derecha de la barra de direcciones.',
         'Desactiva los Shields con el interruptor de arriba del panel.',
         'Recarga la página si no se recarga sola.',
       ],
@@ -59,7 +60,7 @@ export default {
         'En la lista de la izquierda, elige “Bloqueadores de contenido”.',
         'En el menú junto a fileorca.com, elige “No” y recarga la página.',
       ],
-      note: 'AdBlock, Adblock Plus y AdGuard también tienen su propio icono en Safari: mira arriba.',
+      note: 'AdBlock, Adblock Plus y AdGuard también tienen su propio ícono en Safari: mira arriba.',
     },
     'safari-ios': {
       name: 'Safari en iPhone y iPad',
@@ -73,7 +74,7 @@ export default {
     other: {
       name: 'Otro bloqueador, o la red',
       steps: [
-        'Busca su icono en la barra del navegador o dentro de la barra de direcciones.',
+        'Busca su ícono en la barra del navegador o dentro de la barra de direcciones.',
         'Permite fileorca.com, o páusalo en este sitio.',
         'Recarga la página.',
       ],

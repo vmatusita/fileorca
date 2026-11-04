@@ -333,6 +333,8 @@ Os textos de `src/i18n/es/wall.ts`, da especificação do `wall.html` com o ajus
 | Content Blockers · Settings · Websites | Bloqueadores de contenido · Configuración · Sitios web | os nomes do Safari no Mac em espanhol, da ajuda da Apple (es-mx) |
 | Pause on this site | Pausar en este sitio web | o menu do AdBlock em espanhol (`_locales/es` da extensão) |
 | on the phone | en el celular | "móvil" está na tabela Nunca |
+| icon | ícono | a forma das Américas, como no QR e nos guias; a especificação dizia "icono" (DECISOES § 452) |
+| Press (a button) | Presiona | como os passos do resto do site; a especificação dizia "Pulsa" (DECISOES § 452) |
 
 ## Pedido de café
 
@@ -361,6 +363,8 @@ Cada linha da tabela é um termo proibido nos textos em espanhol e nas páginas 
 | vuestra | tu | idem |
 | usted | tú | o site usa "tú" (design system) |
 | fichero | archivo | espanhol da Espanha |
+| icono | ícono | a forma da Espanha; o site escreve "ícono" (DECISOES § 452) |
+| pulsa | presiona | o site diz "presiona" nos passos (DECISOES § 452) |
 | ficheros | archivos | espanhol da Espanha |
 | pinchar | hacer clic, tocar | espanhol da Espanha |
 | enganche | pago inicial | regional (México); o CFPB diz "pago inicial" |
