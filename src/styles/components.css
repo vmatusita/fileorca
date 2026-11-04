@@ -869,6 +869,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    guide in the language (the money group in pt) keeps the measure of a paragraph. */
 .fo-cat--guide { --fo-cat-soft: var(--brand-soft); }
 .fo-jump ul { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+/* The first group sits 32 px under its shortcuts, not the 64 px between sections: at 360 × 740 the first card's name then
+   stays above the fold with a title one line longer, which the Spanish title becomes where Fredoka sets a little wider
+   (it fills 278.5 of 280 px in the Chromium of Windows and took a third line in the CI's Linux; DECISOES § 408). */
+.fo-jump + .fo-section { margin-top: var(--space-4); }
 .fo-section__note { margin: 0; max-width: var(--fo-measure); }
 
 /* F11: guides. The GuideCard (UX-02 A; DECISOES § 395): the paper of the ToolCard (2 px stroke, the fold in the colour of
