@@ -72,19 +72,17 @@
 /* Skip link, logo, search, language (from 768 px), theme and Menu, in this order in the DOM and on screen, each popover
    right after the button that opens it. 64 px and one line at every width: every text of the header is in the face that
    never swaps after the first paint (Figtree Steady, § 305), so nothing changes width when Figtree arrives late. */
-.fo-header { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
+/* The header and the footer share their edges, on every page and at every width (DECISOES § 409): 24 px from the
+   window, and from 1288 px the 1240 px of the page, centred. Under 340 px both keep 16 px: the header needs 282.5 px
+   there (282.5 of 292 at 340 with 24 px edges, and of 288 at 320 with 16), and the footer keeps one column on both
+   sides of the switch (two need 324 px; with the switch at 360 px it had two at 356 to 359 px and one at 360). The two
+   menus inherit the edge too, for the right of their reserve without anchor. */
+.fo-header, .fo-footer { --fo-edge: max(var(--space-6), (100% - var(--page-max)) / 2); }
+@media (max-width: 339px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
+.fo-header { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--fo-edge); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
 @media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
 /* Under 360 px the gap closes to 4 px: logo (126.5 px), search, theme and Menu (48 px each) take 282.5 of 288 px at 320. */
 @media (max-width: 359px) { .fo-header { gap: var(--space-1); } }
-/* From 1280 px the header follows the grid of the frame (global.css .fo-frame): the logo starts where the tool column
-   starts and the last control ends where it ends, on every page, so nothing of the header and no open menu comes within
-   150 px of the rail (at 1280 px: logo at x 36, last control ending at x 794, rail from x 944). */
-@media (min-width: 1280px) {
-  .fo-header {
-    padding-left: calc((100% - var(--page-max)) / 2 + var(--space-4));
-    padding-right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance));
-  }
-}
 .fo-header__logo { display: inline-flex; align-items: center; min-height: var(--tap-min); margin-right: auto; border-radius: var(--radius-sm); }
 .fo-header__logo svg { display: block; width: auto; height: 38px; }
 @media (min-width: 768px) { .fo-header__logo svg { height: 44px; } }
@@ -132,8 +130,7 @@ html[data-theme="dark"] .fo-theme__state--dark { display: inline-flex; }
    header and never stays over the page (or an ad) while it scrolls. In the top layer the containing block of an absolute
    box is the initial one: anchor positioning puts it under its button; without it, the reserve top of 68 px (64 + 4)
    and the right edge of the header. Opening one closes the other (two auto popovers). */
-.fo-langmenu { position: absolute; inset: auto; top: 68px; right: var(--space-4); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
-@media (min-width: 1280px) { .fo-langmenu { right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance)); } }
+.fo-langmenu { position: absolute; inset: auto; top: 68px; right: var(--fo-edge); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
 @supports (position-anchor: --fo-lang) {
   .fo-header__lang { anchor-name: --fo-lang; }
   .fo-langmenu { position-anchor: --fo-lang; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); }
@@ -162,15 +159,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    and the sheet starts below the corner (26 px), as a card's padding does, so the corner never covers a row. */
 .fo-menu {
   position: absolute; inset: auto; margin: 0; width: auto; height: auto; overflow: visible;
-  position-anchor: --fo-menu; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); left: var(--space-4);
+  position-anchor: --fo-menu; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); left: var(--fo-edge);
   padding: calc(var(--dogear) - var(--stroke-2)) var(--space-2) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg);
   background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop);
   font: 400 16px/26px var(--fo-font-text);
 }
 @media (min-width: 768px) { .fo-menu { left: auto; width: 360px; } }
 @supports not (top: anchor(bottom)) {
-  .fo-menu { top: 68px; right: var(--space-4); }
-  @media (min-width: 1280px) { .fo-menu { right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance)); } }
+  .fo-menu { top: 68px; right: var(--fo-edge); }
 }
 .fo-menu__list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .fo-menu__list + .fo-menu__list, .fo-menu__lang { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--stroke-hair) solid var(--hairline); }
@@ -565,7 +561,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* While the cookie notice is open or the AdSense anchor is on screen, the script of the notice puts the room they
    need in --fo-bottom-room on <html>, and the footer takes it at its end: the page still ends on the deep sea
    (DECISOES § 36, § 91 and § 101). */
-.fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--space-6) calc(var(--space-6) + var(--fo-bottom-room, 0px)); }
+.fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--fo-edge) calc(var(--space-6) + var(--fo-bottom-room, 0px)); }
 .fo-footer::before {
   content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: var(--deep);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;

@@ -261,13 +261,12 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px 
 /* ---------- Header / Breadcrumb / Search ---------- */
 /* Header (F11, UX-01 alternative A): logo, search, language (from 768 px), theme and Menu, 64 px and one line at every width.
    In the site every text of the header is in the Figtree face that never swaps after the first paint (Figtree Steady). */
-.fo-header { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
+/* The header and the footer share their edges: 24 px from the window, from 1288 px the 1240 px of the page, centred; 16 px under 340 px. */
+.fo-header, .fo-footer { --fo-edge: max(var(--space-6), (100% - var(--page-max)) / 2); }
+@media (max-width: 339px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
+.fo-header { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--fo-edge); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
 @media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
 @media (max-width: 359px) { .fo-header { gap: var(--space-1); } }
-/* From 1280 px the header follows the grid of the frame: the logo where the tool column starts, the last control where it ends, 150 px before the rail. */
-@media (min-width: 1280px) {
-  .fo-header { padding-left: calc((100% - var(--page-max)) / 2 + var(--space-4)); padding-right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance)); }
-}
 .fo-header__logo { display: inline-flex; align-items: center; min-height: var(--tap-min); margin-right: auto; }
 .fo-header__logo svg { display: block; width: auto; }
 .fo-header__search { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink-muted); font: 500 15px/20px var(--font-text); white-space: nowrap; cursor: pointer; }
@@ -299,7 +298,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 @media (min-width: 768px) { .fo-menu__lang { display: none; } }
 /* The language menu and the Menu: popovers in position absolute, under their buttons by anchor positioning; without it,
    the reserve top of 68 px. They scroll away with the page. */
-.fo-langmenu { box-sizing: border-box; position: absolute; inset: auto; top: 68px; right: var(--space-4); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
+.fo-langmenu { box-sizing: border-box; position: absolute; inset: auto; top: 68px; right: var(--fo-edge); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
 @supports (position-anchor: --fo-lang) {
   .fo-header__lang { anchor-name: --fo-lang; }
   .fo-langmenu { position-anchor: --fo-lang; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); }
@@ -307,9 +306,9 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-langmenu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-langmenu a { box-sizing: border-box; display: flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; font-weight: 600; }
 .fo-langmenu a[aria-current] { background: var(--brand-soft); }
-.fo-menu { box-sizing: border-box; position: absolute; inset: auto; margin: 0; width: auto; height: auto; overflow: visible; position-anchor: --fo-menu; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); left: var(--space-4); padding: calc(var(--dogear) - var(--stroke-2)) var(--space-2) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); font: 400 16px/26px var(--font-text); }
+.fo-menu { box-sizing: border-box; position: absolute; inset: auto; margin: 0; width: auto; height: auto; overflow: visible; position-anchor: --fo-menu; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); left: var(--fo-edge); padding: calc(var(--dogear) - var(--stroke-2)) var(--space-2) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); font: 400 16px/26px var(--font-text); }
 @media (min-width: 768px) { .fo-menu { left: auto; width: 360px; } }
-@supports not (top: anchor(bottom)) { .fo-menu { top: 68px; right: var(--space-4); } }
+@supports not (top: anchor(bottom)) { .fo-menu { top: 68px; right: var(--fo-edge); } }
 .fo-menu__list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .fo-menu__list + .fo-menu__list, .fo-menu__lang { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--stroke-hair) solid var(--hairline); }
 .fo-menu__item { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap-min); padding: 0 var(--space-3) 0 var(--space-2); border: var(--stroke-2) solid transparent; border-radius: var(--radius-md); color: var(--ink); text-decoration: none; }
@@ -370,7 +369,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-faq details > div p { margin: 0 0 var(--space-2); }
 
 /* ---------- Footer ---------- */
-.fo-footer { position: relative; margin-top: 24px; padding: var(--space-10) var(--space-6) var(--space-6); }
+.fo-footer { position: relative; margin-top: 24px; padding: var(--space-10) var(--fo-edge) var(--space-6); }
 .fo-footer::before { content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: var(--deep);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px; }

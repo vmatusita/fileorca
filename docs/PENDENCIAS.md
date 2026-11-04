@@ -35,10 +35,10 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
-| 19. O que a F10 deixou | 18 | As runs F11, F12 e F13 e o Victor |
+| 19. O que a F10 deixou | 17 | As runs F11, F12 e F13 e o Victor |
 | 20. O que a F11 deixou | 12 | O Victor, a run F12 e runs de ajuste |
 
-Total: 216 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 215 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -361,7 +361,6 @@ O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela reso
 | F10 p-2 | DECISOES § 365; README da proposta, seção 6 | baixo | A F4 ACE-9 junta dois defeitos opostos: falta o cabeçalho de linha nas tabelas das calculadoras, e ele se repete na primeira coluna de 4 tabelas dos guias | Dividir em duas linhas: as calculadoras com o UX-12, os guias com o UX-13 | Run F13 |
 | F10 p-3 | DECISOES § 365 | baixo | A F7 obs 3 fala da Mulch, mas os rótulos que empurram a etiqueta "example" são os da Paint ("Coverage per gallon", "Area of a door", "Area of a window"); a Mulch só quebra o "Bag size" a 320 px | Corrigir o texto da linha | Run F13 |
 | F10 p-4 | DECISOES § 368 | baixo | A F5a D-12 cresceu: o "Copiar código" do Pix (`src/components/SupportCard.astro:57`) também usa o `fo-btn--sm` de 40 px no celular | Acrescentar à D-12; o UX-05 passa o botão a 52 px | Run F12 |
-| F10 p-5 | DECISOES § 361 e § 363; D-07; DECISOES § 388 | baixo (médio na F10) | A 1280 px, a lateral de anúncio começa em y 84, a 29 px dos botões de idioma e de busca, e o menu de idioma aberto (`position: fixed`) cai em cima dela; o `ads.spec.ts` não mede o cabeçalho. Aparece quando os anúncios ligarem. A F11 pôs o menu de idioma e o Menu em `absolute`, o cabeçalho na grade da moldura (a 1280 px, o último botão termina em x 794 e a lateral começa em x 944) e o cabeçalho e os dois menus abertos nos alvos do `ads.spec.ts`, nas 178 páginas com área de anúncio | Decidir, no mapa novo (UX-07), se a lateral ainda desce para 150 px abaixo do cabeçalho; a regra dos 150 px já não depende disso | Run F12 |
 | F10 p-6 | DECISOES § 368 | médio | A linha do café no rodapé fica a 24 a 46 px da âncora do AdSense no fim da página (`components.css:458-466`), contra "o pedido de café nunca encosta num anúncio"; nenhum teste mede | A linha no topo do rodapé (UX-05) e um teste de distância com a âncora | Run F12 |
 | F10 p-7 | DECISOES § 361; `docs/propostas/ux-v2/ad-map.html` | médio | Os "gatilhos adicionais" da vinheta do AdSense (botão Voltar, 30 s parado, volta à aba, fim do artigo) vêm ligados por padrão desde 9/mar/2026 e podem pôr uma vinheta durante o processamento | Desligar em Anúncios automáticos → Vinheta, antes de ligar os anúncios | Victor |
 | F10 p-8 | DECISOES § 369; UX-06 | médio | O texto da Privacidade da seção A ("nada sai do aparelho" pela parede) não bate com a tag de recuperação do Google, que conta a detecção ao Google, nem com o evento `adblock_wall` no GA4 | Escolher o texto proposto na especificação do UX-06, nos três idiomas | Victor |
@@ -420,4 +419,5 @@ O que a F11 (navegação, guias e tema) achou e não era dela resolver, ou deixo
 | F8 ensaio-3: o teste "keeps the links that stay inside a part…" estourava os 5 s sob carga | F9, § 330: `tests/unit/pdf-engine-ops.test.ts` lê do oráculo os links de cada página, em vez de ler as 117 páginas com o PDF.js (de 1,7 s para 0,3 s sozinho; três rodadas do Vitest inteiro com o Playwright ao lado, de 0,15 a 0,22 s) |
 | F5b F-12: o cartão de guia igual ao de ferramenta nas relacionadas | F11, § 395 e § 396: o `GuideCard` (`src/components/GuideCard.astro`) nas relacionadas, e o `tests/unit/guides-entries.test.ts` reprova um guia com `fo-tool` em qualquer página do `dist/` |
 | F10 p-1: o Resumo sem as linhas novas dos grupos 4 e 5 | F11, § 383: o Resumo e o Total corrigidos, e o `tests/unit/pendencias.test.ts` conta as linhas de cada grupo e a soma |
+| F10 p-5: a lateral a 29 px do cabeçalho a 1280 px | Ajuste `ajuste-header-width`, § 409: o cabeçalho tem as bordas do rodapé, e a lateral começa 150 px abaixo dele (`src/styles/global.css`). O bloco do cabeçalho do `ads.spec.ts` mede os controles contra a lateral e confere que ela não recebe o ponteiro com um menu aberto |
 | F10 p-20: os ícones do UX-01 com `currentColor` no `<svg>` raiz | F11, § 384: os cinco em `docs/design/assets/Icons/` com o traço em Orca, e o `tests/unit/icons.test.ts` conta 44 |
