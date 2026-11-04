@@ -14,7 +14,7 @@ import { IMAGE_PAGES, type ImagePageId } from '../image/registry.ts';
 import { imageToolTexts } from '../image/texts.ts';
 import { PDF_PAGES, type PdfToolId } from '../pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../pdf/texts.ts';
-import { FILE_GUIDES, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
+import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
 
 /**
  * The day the ten English guides were reviewed, and when they were first published (prompt F5b). In UTC, like the date
@@ -68,13 +68,15 @@ export function toolInfo(tool: FileGuideTool, lang: Lang = 'en'): ToolInfo {
   return { name: common.tools[tool].name, h1: imageToolTexts(tool, lang).h1, path: pathFor(tool, lang), icon: def.icon, category: def.pdf ? 'pdf' : 'image', pdf: false };
 }
 
-/** Home › Image tools (or PDF tools) › the guide's H1, in the language. */
+/**
+ * Home › Guides › the guide's H1, in the language (F11, decision 7: the guides hub, which lists every guide; before, the
+ * second step was the image or PDF hub of the guide).
+ */
 export function crumbsFor(id: FileGuideId, lang: Lang = 'en'): Crumb[] {
-  const def = FILE_GUIDES[id];
   const common = TEXTS[lang].common;
   return [
     { name: common.breadcrumb.home, path: homePath(lang) },
-    def.hub === 'pdf-tools' ? { name: common.pdfTools, path: pathFor('pdf-tools', lang) } : { name: common.imageTools, path: pathFor('image-tools', lang) },
+    { name: common.guidesHub, path: pathFor(GUIDES_HUB_ID, lang) },
     { name: guideTexts(id, lang).h1, path: guidePath(id, lang) },
   ];
 }

@@ -1,5 +1,6 @@
 ---
-// A guide /guides/<slug>/ (F4, decision 10; DECISOES § 119): breadcrumb Home › Money calculators › title; H1,
+// A guide /guides/<slug>/ (F4, decision 10; DECISOES § 119): breadcrumb Home › Guides › title (F11; before, Home › Money
+// calculators › title); H1,
 // the line it answers and "Reviewed by" with the dates; the introduction; the embedded calculator, filled
 // with the guide's example by property of the page (never by the URL), and its schedule; the text, whose
 // every result is filled in by the engines at build (src/tools/calc/guides.ts); one content AdSlot only after
@@ -19,7 +20,8 @@ import { fmt } from '../i18n/format.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
 import { PANEL_POSES } from '../tools/image/Oli.tsx';
-import { GUIDES, MONEY_HUB_ID, guidePathIn, moneyPage, type GuideId } from '../tools/calc/registry.ts';
+import { GUIDES, guidePathIn, moneyPage, type GuideId } from '../tools/calc/registry.ts';
+import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
 import { SHARED_BY_LANG, calcTexts, cardOf, datesOf, longDate, panelData } from '../tools/calc/page.ts';
 import { GUIDE_FACTS, GUIDE_TEXTS, type GuideLang } from '../tools/calc/guides.ts';
 
@@ -38,9 +40,10 @@ const fill = (text: string): string => fmt(text, { ...guide.facts, date: longDat
 const data = panelData(guide.calc, lang, { initial: guide.example, readLink: false });
 const common = TEXTS[lang].common;
 const shared = SHARED_BY_LANG[lang].page;
+// F11 (decision 7): Home › Guides › the guide, the guides hub that lists every guide (before, the money hub).
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
-  { name: common.moneyCalculators, path: pathFor(MONEY_HUB_ID, lang) },
+  { name: common.guidesHub, path: pathFor(GUIDES_HUB_ID, lang) },
   { name: t.h1, path },
 ];
 const related = GUIDES[id].related.map((target) => cardOf(target, lang));

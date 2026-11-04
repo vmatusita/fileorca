@@ -1,0 +1,82 @@
+---
+// The guides hub /guides/, /pt/guias/ and /es/guias/ (F11, decision 5; DECISOES § 364): the specification of
+// docs/propostas/ux-v2/guides-hub.html, alternative A, as the F11 delivers it (?ads=off). The breadcrumb Home › Guides, the
+// band in brand-soft (eyebrow, H1 and the line with the number of guides), the shortcuts to the three groups, one section
+// per group (Image, PDF, Money, with the anchors #image, #pdf and #money) and "How these guides are made" at the end. Every
+// guide comes from the registries (src/tools/guides/hub.ts), once, only where it exists in the language: in pt the money
+// group is only the note that leads to the Brazilian money calculators. No Oli, no AdSlot, no rail, no island, no script.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Icon from '../components/Icon.astro';
+import { moneyHubId, pathFor, routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { fmt, groupDigits } from '../i18n/format.ts';
+import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
+import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
+import { HUB_GROUPS, hubGuides, type HubGroup } from '../tools/guides/hub.ts';
+import type { IconName } from '../icons/svg.ts';
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = 'en' } = Astro.props;
+const route = routeById(GUIDES_HUB_ID);
+const path = pathFor(GUIDES_HUB_ID, lang);
+const common = TEXTS[lang].common;
+const t = TEXTS[lang].guides;
+const guides = hubGuides(lang);
+// The number of guides of the language, read from the registries (15 in en and es, 10 in pt), in the digits of the language.
+const count = { n: groupDigits(guides.length, lang) };
+const description = fmt(t.description, count);
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: common.guidesHub, path },
+];
+// The icon of each shortcut, in the circle of the group's category (image, PDF, money).
+const JUMP_ICON: Record<HubGroup, IconName> = { image: 'image', pdf: 'pdf', money: 'calculator' };
+const groups = HUB_GROUPS.map((group) => ({ group, guides: guides.filter((guide) => guide.group === group) }));
+// A group with no guide in the language says why and where to go instead; only the money group of pt has one today.
+for (const { group, guides: inGroup } of groups) {
+  if (inGroup.length === 0 && !t.moneyNote) throw new Error(`guides hub ${lang}: the ${group} group has no guide and no note`);
+}
+const note = t.moneyNote;
+const moneyHub = pathFor(moneyHubId(lang), lang);
+const list = guides.map((guide) => ({ name: guide.name, path: guide.path }));
+---
+<BaseLayout
+  lang={lang}
+  route={route}
+  title={t.title}
+  description={description}
+  schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, description, path, lang, list)]}
+>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-hubband fo-cat--guide">
+    <span class="fo-eyebrow">{t.eyebrow}</span>
+    <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
+    <p class="fo-muted">{fmt(t.intro, count)}</p>
+  </div>
+  <nav class="fo-jump" aria-label={t.jumpLabel}>
+    <ul>
+      {HUB_GROUPS.map((group) => (
+        <li><a class={`fo-chip fo-cat--${group}`} href={`#${group}`}><span class="fo-chip__dot" aria-hidden="true"><Icon name={JUMP_ICON[group]} /></span><span>{t.groups[group].jump}</span></a></li>
+      ))}
+    </ul>
+  </nav>
+  {groups.map(({ group, guides: inGroup }) => (
+    <section class="fo-section" id={group} aria-labelledby={`${group}-title`}>
+      <h2 id={`${group}-title`}>{t.groups[group].heading}</h2>
+      {inGroup.length > 0 ? (
+        <ul class="fo-guidecards">
+          {inGroup.map((guide) => <li><a href={guide.path}>{guide.name}</a>: {guide.description}</li>)}
+        </ul>
+      ) : note && (
+        <p class="fo-section__note">{note.before} <a href={moneyHub}>{note.link}</a>{note.after}</p>
+      )}
+    </section>
+  ))}
+  <section class="fo-section fo-prose" id="how" aria-labelledby="how-title">
+    <h2 id="how-title">{t.howHeading}</h2>
+    <p>{t.how}</p>
+  </section>
+</BaseLayout>

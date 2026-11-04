@@ -6,7 +6,7 @@ import { QR_ID, ROUTES, routeById, type RouteDef, type RouteId } from '../../src
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 
 const O = 'https://fileorca.com';
 const tags = { xDefaultLang: 'en', langTags: ['en', 'pt-BR', 'es'] };
@@ -82,7 +82,8 @@ describe('sitemaps', () => {
   // (the two hubs, the 11 home and health calculators and the QR code generator). The languages adjustment: Portuguese and
   // Spanish get the QR code generator and the 10 file guides, and Spanish the 18 calculator pages and the 5 money guides.
   const f7Rows = ROUTES.filter((route) => route.adArea === 'casa-saude' || route.adArea === 'utilidades').map((route) => route.id);
-  const SIZES = { en: 19 + 24 + 13 + 10 + f7Rows.length, pt: 8 + 11 + 13 + brRows + 1 + 10, es: 8 + 11 + 13 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 } as const;
+  // F11 (decision 5): the guides hub, one page in each language (the last 1 of each sum).
+  const SIZES = { en: 19 + 24 + 13 + 10 + f7Rows.length + 1, pt: 8 + 11 + 13 + brRows + 1 + 10 + 1, es: 8 + 11 + 13 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
@@ -116,8 +117,9 @@ describe('sitemaps', () => {
 
   it('gives a page that exists only in English no hreflang (no equivalent to point to), and every image and PDF page the cluster of the three languages', () => {
     // F6: the image and PDF pages are translations now, so each one has the reciprocal cluster with the x-default in English
-    // (only Compress image had it before). The languages adjustment: the file guides and the QR code generator too.
-    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS, ...FILE_GUIDE_IDS, QR_ID] as RouteId[]) {
+    // (only Compress image had it before). The languages adjustment: the file guides and the QR code generator too. F11: the
+    // guides hub.
+    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS, ...FILE_GUIDE_IDS, QR_ID, GUIDES_HUB_ID] as RouteId[]) {
       const route = routeById(id);
       expect(alternatesFor(route).map((alt) => alt.hreflang), id).toEqual(['en', 'pt-BR', 'es', 'x-default']);
       expect(alternatesFor(route).map((alt) => alt.href), id).toEqual([`${O}${route.paths.en}`, `${O}${route.paths.pt}`, `${O}${route.paths.es}`, `${O}${route.paths.en}`]);
