@@ -11,6 +11,11 @@ type Entry = unknown[];
 const isConsent = (entry: Entry, kind: string) => entry[0] === 'consent' && entry[1] === kind;
 
 test.describe('Consent Mode v2 e aviso de cookies', () => {
+  // F12 (c-04; § F12-P3 and § F12-P9): the Accept of the site's own notice depends on the time zone of the device, which
+  // stands for the region (src/platform/region.ts). These tests expect the four keys of an Accept, so they run in a time
+  // zone outside the regions denied by default; the tests of the regions are below.
+  test.use({ timezoneId: 'America/Sao_Paulo' });
+
   test('consent defaults come before config, denied by region and granted elsewhere', async ({ page }) => {
     await page.goto('/compress-image/');
     const entries = await dataLayer(page);
@@ -86,6 +91,38 @@ test.describe('Consent Mode v2 e aviso de cookies', () => {
     const updates = (await dataLayer(page)).filter((entry) => isConsent(entry, 'update'));
     expect((updates.at(-1)?.[2] as Record<string, string>)['analytics_storage']).toBe('denied');
   });
+
+  // F12 · o consentimento (F3 c-04, saída A; § F12-P3). In a time zone of the regions denied by default (the EU, the EEA,
+  // the United Kingdom and Switzerland), the Accept of the site's own notice goes only to analytics_storage, made on the
+  // page and replayed on the next ones (the home, a free page and a page with ads alike): the ad_* stay with Google's
+  // consent message. A Decline is the four keys there too. Outside those regions (the test above), nothing changes.
+  for (const timezoneId of ['Europe/Berlin', 'Europe/London', 'Atlantic/Madeira']) {
+    test.describe(`no fuso ${timezoneId}`, () => {
+      test.use({ timezoneId });
+      test('the Accept of the own notice reaches only analytics_storage, made and replayed (c-04)', async ({ page }) => {
+        await page.goto('/');
+        await page.locator('#fo-cookie').getByRole('button', { name: 'Accept' }).click();
+        const made = (await dataLayer(page)).filter((entry) => isConsent(entry, 'update'));
+        expect(made.map((entry) => entry[2])).toEqual([{ analytics_storage: 'granted' }]);
+        for (const path of ['/privacy/', '/pt/sobre/', '/compress-image/', '/es/unir-pdf/']) {
+          await page.goto(path);
+          const entries = await dataLayer(page);
+          const replays = entries.filter((entry) => isConsent(entry, 'update'));
+          expect(replays.map((entry) => entry[2]), path).toEqual([{ analytics_storage: 'granted' }]);
+          expect(entries.indexOf(replays[0] as Entry), path).toBeLessThan(entries.findIndex((entry) => entry[0] === 'config'));
+        }
+      });
+
+      test('the Decline of the own notice is the four keys, made and replayed (c-04)', async ({ page }) => {
+        await page.goto('/compress-image/');
+        await page.locator('#fo-cookie').getByRole('button', { name: 'Decline' }).click();
+        const denied = Object.fromEntries(KEYS.map((key) => [key, 'denied']));
+        expect((await dataLayer(page)).filter((entry) => isConsent(entry, 'update')).map((entry) => entry[2])).toEqual([denied]);
+        await page.goto('/');
+        expect((await dataLayer(page)).filter((entry) => isConsent(entry, 'update')).map((entry) => entry[2])).toEqual([denied]);
+      });
+    });
+  }
 
   test('no gtag.js and no request to Google outside fileorca.com', async ({ page }) => {
     const google: string[] = [];

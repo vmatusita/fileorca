@@ -5,7 +5,7 @@ export default {
   description:
     'Como o FileOrca trata seus dados: os arquivos ficam no aparelho, o que Google Analytics, AdSense e Cloudflare processam e seus direitos na LGPD e no GDPR.',
   h1: 'Política de privacidade',
-  updated: 'Última atualização: 3 de novembro de 2026',
+  updated: 'Última atualização: 4 de novembro de 2026',
   intro:
     'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho, e o tema que você escolhe no cabeçalho fica no seu navegador. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
@@ -61,6 +61,7 @@ export default {
         'Primeiro resultado de uma calculadora, só com o nome da calculadora',
         'PDF ou CSV baixado de uma calculadora, ou QR code baixado em PNG ou SVG, só com o formato',
         'Clique em Copiar link numa calculadora, sem o link',
+        'Aviso da Oli sobre o bloqueador de anúncios: quando ele aparece e qual dos seus botões foi usado',
       ],
     },
     {
@@ -69,6 +70,8 @@ export default {
         'Para continuar grátis, o FileOrca mostra, ou vai mostrar, anúncios do Google AdSense. O Google é o parceiro de publicidade do site.',
         'Fornecedores terceiros, incluindo o Google, usam cookies para exibir anúncios com base nas suas visitas anteriores a este e a outros sites. O uso de cookies de publicidade pelo Google permite que ele e seus parceiros exibam anúncios para você com base nessas visitas.',
         'No Espaço Econômico Europeu (EEE), no Reino Unido e na Suíça, uma mensagem de consentimento do Google vai pedir a sua escolha antes de os anúncios usarem cookies, quando os anúncios estiverem no ar.',
+        // F12 · a parede do bloqueador (ajuste 1; § F12-P6): o que a verificação do bloqueador conta, e a quem.
+        'Para mostrar o aviso da Oli, o site verifica se há um bloqueador de anúncios ligado. A verificação usa a ferramenta de recuperação de anúncios do Google, que conta ao Google se achou um bloqueador, como os próprios anúncios fazem. Como faz com o uso das ferramentas, o site conta no Google Analytics quando o aviso aparece e qual botão foi usado. No seu navegador, ele guarda só a hora do “Usar só desta vez”.',
         'Use estes links para desativar a publicidade personalizada e para ler como o Google usa dados de sites parceiros:',
       ],
       list: [
@@ -130,6 +133,7 @@ export default {
         'Dados de anúncios: o Google os guarda de acordo com as próprias políticas.',
         'Escolha de cookies: fica no seu navegador, e você pode apagá-la quando quiser limpando os dados do site.',
         'Escolha do tema: a chave fo-theme fica no seu navegador até você voltar o tema para Sistema ou limpar os dados do site.',
+        'O “Usar só desta vez” do aviso da Oli: a hora em que você o usou fica no seu navegador até você limpar os dados do site.',
         'E-mails: guardados só pelo tempo necessário para responder a você.',
         'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora.',
       ],

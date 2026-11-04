@@ -450,3 +450,57 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-guidecard--here { grid-template-rows: auto auto auto auto; }
 .fo-guidehere { display: grid; gap: var(--space-4); }
 @media (prefers-reduced-motion: reduce) { .fo-guidecard:hover { transform: none; } }
+
+/* ---------- AdblockWall (F12) ---------- */
+/* The Oli wall for whoever blocks the ads: a card of the system over the sea, opened with showModal() on the site. The same
+   rules as src/styles/components.css (DECISOES § F12-P1), with the font tokens of the system. The sea is the water at 92 %
+   in the light theme and the deep at 92 % in the dark one, a private variable of the component (no new token), dark on
+   screen only. Closed, the dialog keeps display: none; only [open] is a flex column, so the footer stays in sight. */
+:root { --fo-wall-sea: var(--water); }
+@media screen { html[data-theme="dark"] { --fo-wall-sea: var(--deep); } }
+@media screen and (prefers-color-scheme: dark) { html:not([data-theme="light"]) { --fo-wall-sea: var(--deep); } }
+.fo-wall { box-sizing: border-box; width: calc(100vw - 2 * var(--space-4)); max-width: none; max-height: calc(100dvh - 2 * var(--space-4)); padding: 0; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); overflow: hidden; }
+.fo-wall[open] { display: flex; flex-direction: column; animation: fo-wall-rise calc(2 * var(--dur-base)) var(--ease-out) both; }
+@keyframes fo-wall-rise { from { opacity: 0; transform: translateY(24px); } }
+.fo-wall::backdrop { background: color-mix(in srgb, var(--fo-wall-sea) 92%, transparent); animation: fo-wall-tide calc(2 * var(--dur-base)) var(--ease-out) both; }
+@keyframes fo-wall-tide { from { opacity: 0; } }
+.fo-wall-sea { background: color-mix(in srgb, var(--fo-wall-sea) 92%, transparent); }
+html:has(.fo-wall[open]:modal) { overflow: hidden; scrollbar-gutter: stable; }
+.fo-wall__body { box-sizing: border-box; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-5) var(--space-5) var(--space-4); }
+.fo-wall__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title oli"; align-items: center; column-gap: var(--space-3); }
+.fo-wall--aviso .fo-wall__head { grid-template-areas: ". close" "title oli"; }
+.fo-wall__close { grid-area: close; justify-self: end; align-self: start; margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0 0; }
+.fo-wall__title { grid-area: title; margin: 0; padding-bottom: var(--space-2); font: 600 28px/34px var(--font-display); }
+.fo-wall__oli { grid-area: oli; width: 96px; height: 96px; }
+.fo-wall__oli > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fo-wall__desc { display: grid; gap: var(--space-2); margin-top: var(--space-3); font: 400 16px/26px var(--font-text); }
+.fo-wall__desc p { margin: 0; }
+.fo-wall__later { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-wall__toggle { display: flex; width: 100%; margin-top: var(--space-4); }
+.fo-wall__toggle .fo-icon { transition: transform var(--dur-base) var(--ease-out); }
+.fo-wall__toggle[aria-expanded="true"] .fo-icon { transform: rotate(180deg); }
+.fo-wall__help:not([hidden]) { display: grid; gap: var(--space-3); margin-top: var(--space-5); }
+.fo-wall__hint { margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.fo-wall__help .fo-faq details > div { display: grid; gap: var(--space-2); padding: 0 0 var(--space-4); }
+.fo-wall .fo-steps { margin: 0; padding-left: var(--space-6); list-style: decimal; display: grid; gap: var(--space-2); }
+.fo-wall .fo-steps li::marker { font: 600 16px/26px var(--font-display); color: var(--brand); }
+.fo-wall__note { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-wall__foot { box-sizing: border-box; flex: none; display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-top: var(--stroke-hair) solid var(--hairline); }
+.fo-wall__foot .fo-btn--ghost { justify-self: center; }
+.fo-wall:not(.fo-wall--aviso) .fo-wall__close, .fo-wall--escaped .fo-wall__once, .fo-wall:not(.fo-wall--escaped) .fo-wall__later { display: none; }
+@media (min-width: 768px) {
+  .fo-wall { width: min(600px, 100vw - 2 * var(--space-4)); }
+  .fo-wall__body { padding: var(--space-6) var(--space-8) var(--space-4); }
+  .fo-wall__head { column-gap: var(--space-4); }
+  .fo-wall--aviso .fo-wall__head { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "title oli close"; }
+  .fo-wall__close { margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-5)) 0 0; }
+  .fo-wall__title { font-size: 36px; line-height: 42px; letter-spacing: -0.01em; }
+  .fo-wall__oli { width: 128px; height: 128px; }
+  .fo-wall__desc { font-size: 18px; line-height: 28px; }
+  .fo-wall__toggle { display: inline-flex; width: auto; }
+  .fo-wall__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-4); padding: var(--space-4) var(--space-8) var(--space-5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fo-wall[open], .fo-wall::backdrop { animation: none; }
+  .fo-wall__toggle .fo-icon { transition: none; }
+}

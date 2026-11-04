@@ -1061,3 +1061,38 @@ export interface GuideCardTexts {
   workedOut?: string;
   tool: string;
 }
+
+/* F12 · a parede do bloqueador (decision 10, with adjustment 3; § F12-P6) */
+
+/** The nine entries of the help of the ad-block wall (AdblockWall.astro shows them in the order of the proposal). */
+export type WallHelpId = 'ubo' | 'adblock' | 'abp' | 'adguard' | 'brave' | 'firefox' | 'safari-mac' | 'safari-ios' | 'other';
+
+/** One entry of the help: the name of the blocker or browser, its three steps and a note. No link, no "click". */
+export interface WallHelpEntry {
+  name: string;
+  steps: [string, string, string];
+  note: string;
+}
+
+/**
+ * The texts of the ad-block wall, one file per language (src/i18n/<lang>/wall.ts), read by src/components/AdblockWall.astro.
+ * Sad without blame: no "Warning" in the title, no request to see or touch an ad, nothing about the coffee.
+ */
+export interface WallTexts {
+  /** The h2: "Oli lives on ads". */
+  title: string;
+  /** The three sentences under it. */
+  body: string;
+  /** The line shown once the escape was used today: it names the escape with its own label. */
+  later: string;
+  /** The three buttons, each starting with a verb: reload (brand), help (neutral), escape (ghost). */
+  reload: string;
+  help: string;
+  escape: string;
+  /** The accessible name of the close button of the notice (an icon only). */
+  close: string;
+  /** The h3 of the help panel and the line under it. */
+  helpTitle: string;
+  helpHint: string;
+  entries: Record<WallHelpId, WallHelpEntry>;
+}

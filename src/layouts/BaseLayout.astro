@@ -19,12 +19,15 @@ import { absolute, alternatesFor, graph, ogImagePath, organizationLd, pageTitle 
 import { SITE_NAME, SW_ENABLED } from '../platform/site.ts';
 import { swRegistration } from '../platform/sw-register.ts';
 import { APP_ICON_SVG } from '../seo/images.ts';
-import { buildAdsConfig } from '../ads/config.ts';
+import { buildAdsConfig, wallModeOf } from '../ads/config.ts';
 // F12 · o mapa de anúncios (DECISOES § F12-M1 and § F12-M2).
 import { layOutAds, markProblems, withoutMarks } from '../ads/map.ts';
 import type { AdArea } from '../i18n/routes.ts';
 import OliSprite from '../components/OliSprite.astro';
 import type { Pose } from '../oli/poses.ts';
+/* F12 · a parede do bloqueador (§ F12-P1) */
+import AdblockWall from '../components/AdblockWall.astro';
+import { WALL_POSE } from '../oli/poses.ts';
 // The same hashed URL as the url() of the @font-face in src/styles/fonts.css (DECISOES § 42).
 import fredokaUrl from '@fontsource-variable/fredoka/files/fredoka-latin-wght-normal.woff2?url';
 
@@ -43,8 +46,10 @@ interface Props {
   oli?: readonly Pose[];
 }
 const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [] } = Astro.props;
-const poses: Pose[] = [...new Set<Pose>([...oli, 'peek'])];
 const adsConfig = buildAdsConfig();
+/* F12 · a parede do bloqueador (§ F12-P1): only on a page with ads and with the wall on; its pose joins the sprite there. */
+const wall = withAds ? wallModeOf(adsConfig) : 'desligado';
+const poses: Pose[] = [...new Set<Pose>([...oli, 'peek', ...(wall === 'desligado' ? [] : [WALL_POSE])])];
 const anchor = withAds && adsConfig.scriptEnabled;
 const common = TEXTS[lang].common;
 const path = route.paths[lang] ?? '/';
@@ -109,6 +114,7 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
     <Footer lang={lang} t={common} anchor={anchor} current={route.id} />
     <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />
     <SearchDialog t={common} />
+    {wall !== 'desligado' && <AdblockWall lang={lang} mode={wall} />}
     <script is:inline set:html={trackScript} />
     {SW_ENABLED && <script is:inline set:html={swRegistration()} />}
   </body>

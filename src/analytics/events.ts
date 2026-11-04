@@ -16,6 +16,8 @@ export const EVENT_PARAMS = {
   calc_complete: ['tool', 'lang'],
   export_click: ['tool', 'lang', 'format'],
   share_click: ['tool', 'lang'],
+  // F12 · a parede do bloqueador (decision 5; § F12-P7): what the wall did and in which mode, both closed lists.
+  adblock_wall: ['action', 'mode', 'lang'],
 } as const;
 
 export type EventName = keyof typeof EVENT_PARAMS;
@@ -51,6 +53,15 @@ export type DonatePlace = (typeof DONATE_PLACES)[number];
 /** What a calculator exported, and since the F7 what the QR code generator saved: a closed list (DECISOES § 113 and § 263). */
 export const EXPORT_FORMATS = ['pdf', 'csv', 'png', 'svg'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
+/*
+ * F12 · a parede do bloqueador (decision 5; § F12-P7). What the ad-block wall did: it showed, or the person used one of its
+ * buttons (reload, the help, only when it opens the panel, or the escape "Continue just this once"). There is no "close":
+ * adjustment 4 of the proposal did not go in. And the mode it opened in: the closable notice or the wall.
+ */
+export const WALL_ACTIONS = ['shown', 'reload', 'help', 'escape'] as const;
+export type WallAction = (typeof WALL_ACTIONS)[number];
+export const WALL_EVENT_MODES = ['aviso', 'bloqueio'] as const;
+export type WallEventMode = (typeof WALL_EVENT_MODES)[number];
 
 export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
@@ -63,6 +74,8 @@ export interface EventMap {
   calc_complete: { tool: AnyCalcId; lang: Lang };
   export_click: { tool: AnyCalcId | 'qr-code-generator'; lang: Lang; format: ExportFormat };
   share_click: { tool: AnyCalcId; lang: Lang };
+  /** F12 (§ F12-P7): sent by the inline script of the wall through window.foTrack, never with the time zone or a time. */
+  adblock_wall: { action: WallAction; mode: WallEventMode; lang: Lang };
 }
 
 /** Parameters whose value comes from a closed list: anything else (a file type, a free string) is dropped. */
@@ -74,6 +87,9 @@ const CLOSED_VALUES: Record<string, readonly string[]> = {
   place: DONATE_PLACES,
   tool: EVENT_TOOLS,
   target: [...EVENT_TOOLS, 'home'],
+  // F12 (§ F12-P7): the two parameters of adblock_wall.
+  action: WALL_ACTIONS,
+  mode: WALL_EVENT_MODES,
 };
 
 /** Drops any parameter outside the list, and any value outside a closed list (defence in depth: the types already forbid them). */

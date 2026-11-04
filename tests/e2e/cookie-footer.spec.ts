@@ -126,6 +126,46 @@ test('the last footer link stays above the open notice when it takes the focus',
   }
 });
 
+// F12 · o consentimento (F3 f-06; § F12-P4). The notice opened again by "Change my cookie choice" keeps its room in step with
+// the width, like the notice of a first visit: from 1280 to 320 px on /es/privacidad/ (the longest notice), the
+// scroll-padding follows the new height of the card, and the last link of the footer, focused, stays above it.
+test('the notice opened again by "Change my cookie choice" follows the width, from 1280 to 320 px (f-06)', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const response = await page.goto('/es/privacidad/');
+  expect(response?.status()).toBe(200);
+  const notice = page.locator('#fo-cookie');
+  await notice.locator('[data-consent="denied"]').click();
+  await expect(notice).toBeHidden();
+  // A visit with the choice already kept: the notice starts hidden, and only the button opens it again.
+  await page.reload();
+  await expect(notice).toBeHidden();
+  await page.locator('[data-consent-change]').click();
+  await expect(notice).toBeVisible();
+  /** The room the notice needs (the rule of reserve() in CookieNotice.astro) and the room the page keeps. */
+  const room = () =>
+    page.evaluate(() => {
+      const box = document.getElementById('fo-cookie')!;
+      return {
+        kept: getComputedStyle(document.documentElement).scrollPaddingBottom,
+        needed: `${box.offsetHeight + (parseFloat(getComputedStyle(box).bottom) || 0) + 8}px`,
+      };
+    });
+  await expect.poll(async () => { const at = await room(); return at.kept === at.needed; }, { message: '1280 px' }).toBe(true);
+  const wide = await room();
+  await page.setViewportSize({ width: 320, height: 640 });
+  await expect.poll(async () => { const at = await room(); return at.kept === at.needed; }, { message: '320 px: a reserva segue a largura' }).toBe(true);
+  // The card is taller at 320 px, so the check above means something.
+  expect((await room()).needed).not.toBe(wide.needed);
+  const link = page.locator('footer a').last();
+  await link.focus();
+  const at = await link.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return { visible: Boolean(hit && (hit === element || element.contains(hit))), above: document.getElementById('fo-cookie')!.getBoundingClientRect().top - rect.bottom >= 0 };
+  });
+  expect(at).toEqual({ visible: true, above: true });
+});
+
 test('with the AdSense anchor and the notice at once, the anchor is not counted twice', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await page.addInitScript(() => {

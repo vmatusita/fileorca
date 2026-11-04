@@ -5,6 +5,12 @@
 // With the AdSense anchor on screen it sits above it (--fo-anchor), never under it, and neither the
 // notice nor the anchor covers the keyboard focus (the room they need goes to the end of the footer; the
 // notice's only once a focus at the end of the page needs it, DECISOES § 106).
+// F12 (the notes stay here, out of the script every page carries):
+// - F3 c-04 (§ F12-P3): apply() sends the update the <head> replays, window.foConsent (consent.ts): in the regions denied by
+//   default an Accept goes only to analytics_storage, and the ad_* stay with Google's consent message;
+// - F3 f-06 (§ F12-P4): the resize listener and the ResizeObserver are on before the early return of a stored choice, so
+//   the room follows the width also for the notice opened again by "Change my cookie choice" (with the notice hidden and
+//   no anchor, reserve() clears it all).
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
 import { COFFEE_KEY } from '../tools/image/coffee.ts';
@@ -18,7 +24,7 @@ const script = `(function(){
 var K=${JSON.stringify(CONSENT_STORAGE_KEY)},C=${JSON.stringify(COFFEE_KEY)},box=document.getElementById('fo-cookie'),anchor=0,keys=false;if(!box)return;
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
 function save(v){try{localStorage.setItem(K,v);}catch(e){}}
-function apply(v){if(window.gtag)gtag('consent','update',{ad_storage:v,analytics_storage:v,ad_user_data:v,ad_personalization:v});}
+function apply(v){if(window.foConsent)foConsent(v);}
 // Decline erases at once the coffee count kept from an earlier Accept; only "don't show again" stays (DECISOES § 101).
 function forget(){try{var c=localStorage.getItem(C);if(c===null)return;var n=false;try{n=JSON.parse(c).never===true;}catch(x){}if(n)localStorage.setItem(C,'{"uses":0,"never":true}');else localStorage.removeItem(C);}catch(e){}}
 // The keyboard focus is never hidden under the notice or the AdSense anchor (WCAG 2.4.11). The scroll-padding counts
@@ -41,8 +47,9 @@ box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]'
 document.addEventListener('click',function(e){var c=e.target.closest('[data-consent-change]');if(c){opener=c;show();var f=box.querySelector('button');if(f)f.focus();}});
 function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}anchor=h;box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
+addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
 if(stored()==='granted'||stored()==='denied')return;
-show();addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+show();
 // Google's CMP comes with the AdSense loader, often after the load event: look for it at once, at the load event
 // (where it usually is by then), and every 500 ms for up to 30 s, until it answers or the notice is gone (§ 101, § 104).
 var tries=0,found=false;function look(){if(found||box.hidden)return;if(tcf()){found=true;return;}if(++tries<=60)setTimeout(look,500);}
