@@ -71,9 +71,14 @@ export interface CommonTexts {
     listLabel: string;
     placeholder: string;
     close: string;
-    /** No result: 'No tool called "{query}"' */
+    /** No result: 'No tool or guide called "{query}"' */
     emptyTitle: string;
     emptyHint: string;
+    /** The titles of the two groups of results (F11, decision 7): "Tools", then "Guides". An empty group has no title. */
+    toolsGroup: string;
+    guidesGroup: string;
+    /** The category written beside every guide in the results ("Guide"), whatever its group. */
+    guideCategory: string;
     imageCategory: string;
     moneyCategory: string;
     pdfCategory: string;

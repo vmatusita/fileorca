@@ -1,5 +1,7 @@
 ---
-// ToolSearch markup (combobox + named listbox). Used inside the modal dialog and inline on the 404.
+// ToolSearch markup (combobox + named listbox). Used inside the modal dialog and inline on the 404. F11 (decision 7): the
+// listbox holds the two groups of results, the tools and then the guides, whose titles the list carries in data-tools and
+// data-guides (src/search/search.ts writes the groups on first use).
 // Without a result the Oli peeks from the bottom edge of the box (pose peek, in every page's sprite).
 import type { CommonTexts } from '../i18n/types.ts';
 import Icon from './Icon.astro';
@@ -28,7 +30,7 @@ const { t, id, dialog = false } = Astro.props;
     />
     {dialog && <span class="fo-kbd fo-desktop-only" aria-hidden="true">Esc</span>}
   </div>
-  <ul class="fo-search__list" id={`${id}-list`} role="listbox" aria-label={t.search.listLabel} hidden></ul>
+  <div class="fo-search__list" id={`${id}-list`} role="listbox" aria-label={t.search.listLabel} data-tools={t.search.toolsGroup} data-guides={t.search.guidesGroup} hidden></div>
   <div class="fo-search__empty" data-search-empty data-title={t.search.emptyTitle} hidden>
     <p class="fo-h3" data-search-empty-title></p>
     <p class="fo-muted">{t.search.emptyHint}</p>

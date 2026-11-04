@@ -1,10 +1,14 @@
 // ToolSearch (docs/design/components/ToolSearch): combobox inside a modal <dialog>. This module and
 // the index (/search-index.json) load on first use only (DECISOES § 15). Each entry brings the icon of
-// its tool, so the results need no request of their own.
+// its tool, so the results need no request of their own. F11 (decision 7; DECISOES § 397): the results come in two
+// groups, the tools first and then the guides, each a role="group" named by its title; an empty group has no title. The
+// order inside each group is the one of filterEntries, and the arrows run through both groups as one list.
 import { iconMarkup } from '../icons/svg.ts';
 
 export interface SearchEntry {
   id: string;
+  /** A tool (or calculator) or a guide (F11): the group of the results it goes in. */
+  kind: 'tool' | 'guide';
   /** href per language */
   href: Record<string, string>;
   /** display name per language */
@@ -57,6 +61,11 @@ function loadIndex(): Promise<SearchEntry[]> {
   return index;
 }
 
+/** The results in the order of the screen: every tool, then every guide, each group in the order of filterEntries. */
+export function groupEntries(entries: readonly SearchEntry[]): SearchEntry[] {
+  return [...entries.filter((entry) => entry.kind !== 'guide'), ...entries.filter((entry) => entry.kind === 'guide')];
+}
+
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string>, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
@@ -68,7 +77,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string,
 export function attach(root: HTMLElement): () => void {
   const lang = document.documentElement.dataset['lang'] ?? 'en';
   const input = root.querySelector<HTMLInputElement>('input[role="combobox"]');
-  const list = root.querySelector<HTMLUListElement>('[role="listbox"]');
+  const list = root.querySelector<HTMLElement>('[role="listbox"]');
   const empty = root.querySelector<HTMLElement>('[data-search-empty]');
   const status = root.querySelector<HTMLElement>('[data-search-status]');
   if (!input || !list || !empty) return () => {};
@@ -85,26 +94,37 @@ export function attach(root: HTMLElement): () => void {
 
   const select = (position: number) => {
     active = position;
-    list.querySelectorAll('[role="option"]').forEach((option, i) => option.setAttribute('aria-selected', String(i === position)));
+    const options = list.querySelectorAll('[role="option"]');
+    options.forEach((option, i) => option.setAttribute('aria-selected', String(i === position)));
     if (position >= 0) {
       input.setAttribute('aria-activedescendant', `${list.id}-${position}`);
-      // The list scrolls past eight rows: the active row stays in view as the arrows move it.
-      list.children[position]?.scrollIntoView({ block: 'nearest' });
+      // The list scrolls past eight rows: the active row stays in view as the arrows move it (the group titles are not
+      // rows: the option itself is scrolled to).
+      options[position]?.scrollIntoView({ block: 'nearest' });
     } else input.removeAttribute('aria-activedescendant');
   };
 
   const render = async () => {
-    results = filterEntries(await loadIndex(), input.value, lang);
-    list.replaceChildren(
-      ...results.map((entry, i) => {
-        const option = el('li', { id: `${list.id}-${i}`, role: 'option', 'aria-selected': 'false', class: `fo-search__item fo-cat--${entry.cat}` });
-        const dot = el('span', { class: 'fo-chip__dot', 'aria-hidden': 'true' });
-        dot.innerHTML = iconMarkup(entry.icon);
-        option.append(dot, entry.name[lang] ?? '', el('small', {}, entry.category[lang] ?? ''));
-        option.addEventListener('click', () => go(entry));
-        return option;
-      }),
-    );
+    results = groupEntries(filterEntries(await loadIndex(), input.value, lang));
+    const groups: HTMLElement[] = [];
+    let group: HTMLElement | null = null;
+    results.forEach((entry, i) => {
+      const kind = entry.kind === 'guide' ? 'guides' : 'tools';
+      if (group?.dataset['kind'] !== kind) {
+        // A title per group that has a result, named in the language of the page; the group is named by it.
+        const title = el('div', { class: 'fo-search__group', id: `${list.id}-${kind}` }, list.dataset[kind] ?? '');
+        group = el('div', { role: 'group', 'aria-labelledby': title.id, 'data-kind': kind });
+        group.append(title);
+        groups.push(group);
+      }
+      const option = el('div', { id: `${list.id}-${i}`, role: 'option', 'aria-selected': 'false', class: `fo-search__item fo-cat--${entry.cat}` });
+      const dot = el('span', { class: 'fo-chip__dot', 'aria-hidden': 'true' });
+      dot.innerHTML = iconMarkup(entry.icon);
+      option.append(dot, el('span', {}, entry.name[lang] ?? ''), el('small', {}, entry.category[lang] ?? ''));
+      option.addEventListener('click', () => go(entry));
+      group.append(option);
+    });
+    list.replaceChildren(...groups);
     const none = results.length === 0;
     list.hidden = none;
     empty.hidden = !none;

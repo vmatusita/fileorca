@@ -11,6 +11,9 @@ import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { HUB_GROUPS, hubGroup } from '../../src/tools/guides/hub.ts';
 import { routeById } from '../../src/i18n/routes.ts';
 import { DIST, allPages, fileForPath, listFiles } from '../../scripts/lib/dist.ts';
+import { searchIndex } from '../../src/pages/search-index.json.ts';
+import { filterEntries, groupEntries, type SearchEntry } from '../../src/search/search.ts';
+import { ICONS } from '../../src/icons/icons.ts';
 
 // The entries of the guides (F11, decision 7; DECISOES § 396), read from the built pages in dist/ (run `pnpm build` first,
 // as for guides-hub-route.test.ts): what every page of a language carries, and where the guides hub leads from.
@@ -189,5 +192,47 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
     }
     // 18 guides in the related grids of each language (§ 189), now drawn as guides.
     expect(total).toBe(18 * LANGS.length);
+  });
+});
+
+// F11 (decision 7; DECISOES § 397): the entries of the search index carry their kind; the guides show in their own group,
+// after the tools, with the file icon and the category "Guide" of the language, in the colour of their group.
+describe('the search index with the kind of each entry', () => {
+  const GUIDE_IDS_ALL = new Set<string>([...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+
+  it('marks the 15 guides as guides and every other entry as a tool, in the order of before', () => {
+    const index = searchIndex();
+    expect(index.filter((entry) => entry.kind === 'guide').map((entry) => entry.id)).toEqual([...GUIDE_IDS, ...FILE_GUIDE_IDS]);
+    for (const entry of index) expect(entry.kind, entry.id).toBe(GUIDE_IDS_ALL.has(entry.id) ? 'guide' : 'tool');
+    // The site serves the same index.
+    const served = JSON.parse(read('/search-index.json')) as SearchEntry[];
+    expect(served.map((entry) => [entry.id, entry.kind])).toEqual(index.map((entry) => [entry.id, entry.kind]));
+  });
+
+  it('gives every guide the file icon, the category "Guide" of each of its languages and the colour of its group', () => {
+    for (const entry of searchIndex().filter((candidate) => candidate.kind === 'guide')) {
+      expect(entry.icon, entry.id).toBe(ICONS.file);
+      for (const lang of Object.keys(entry.href) as Lang[]) expect(entry.category[lang], `${entry.id} ${lang}`).toBe(TEXTS[lang].common.search.guideCategory);
+      const group = isFileGuide(entry.id) ? (FILE_GUIDES[entry.id].hub === 'pdf-tools' ? 'pdf' : 'image') : 'money';
+      expect(entry.cat, entry.id).toBe(group);
+    }
+    expect(LANGS.map((lang) => TEXTS[lang].common.search.guideCategory)).toEqual(['Guide', 'Guia', 'Guía']);
+  });
+
+  it('puts the tools before the guides, each group in the order filterEntries gives it', () => {
+    const index = searchIndex();
+    for (const lang of LANGS) {
+      for (const query of ['jpg', 'pdf', 'pdf to jpg', 'jpg or png', 'windows', 'compress', '']) {
+        const ranked = filterEntries(index, query, lang);
+        const grouped = groupEntries(ranked);
+        expect([...grouped].sort((a, b) => a.id.localeCompare(b.id)), `${lang} ${query}`).toEqual([...ranked].sort((a, b) => a.id.localeCompare(b.id)));
+        const firstGuide = grouped.findIndex((entry) => entry.kind === 'guide');
+        if (firstGuide >= 0) expect(grouped.slice(firstGuide).every((entry) => entry.kind === 'guide'), `${lang} ${query}`).toBe(true);
+        expect(grouped.filter((entry) => entry.kind === 'tool'), `${lang} ${query}`).toEqual(ranked.filter((entry) => entry.kind === 'tool'));
+        expect(grouped.filter((entry) => entry.kind === 'guide'), `${lang} ${query}`).toEqual(ranked.filter((entry) => entry.kind === 'guide'));
+      }
+    }
+    // "pdf to jpg": the tool and the neighbour tool first, the guide after them (its rank is between the two tools).
+    expect(groupEntries(filterEntries(index, 'pdf to jpg', 'en')).map((entry) => entry.id)).toEqual(['pdf-to-jpg', 'image-to-pdf', 'guides-pdf-to-jpg-resolution']);
   });
 });
