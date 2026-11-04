@@ -7,8 +7,9 @@
 // but does not judge it here, because the fallback renders differently on each system (the CLS of a paragraph that
 // loses a line was 0.046 on Windows and 0.257 on the Linux of the CI, on the same page; DECISOES § 305).
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import { moneyPage, type CalcPageId } from '../../src/tools/calc/registry.ts';
-import { FILE_GUIDES, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { guidePathIn, moneyPage, type CalcPageId, type GuideId } from '../../src/tools/calc/registry.ts';
+import { FILE_GUIDES, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { LANGS, routeById } from '../../src/i18n/routes.ts';
 
 // Each width with the pages whose trail sat on the edge of a row there, in the sweeps of every page (before the
 // correction and with each candidate of it), and the twelve pages of the first measure at 360 and 393 px.
@@ -58,6 +59,29 @@ const CASES: Record<number, string[]> = {
     spanish('savings-goal-calculator'),
   ],
 };
+// F11 (decision 5; DECISOES § 399): the guides hub of each language at every width, read from the route map. It has no tool,
+// but its trail, its band and the cookie notice of the first visit are measured as on any page.
+const GUIDES_HUBS = LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/');
+for (const width of Object.keys(CASES)) CASES[Number(width)]?.push(...GUIDES_HUBS);
+// F11 (decision 7): the trail of the 40 guides became Home › Guides › the guide, so the sweep was redone on them and on the 3
+// hubs, at the five widths, in both browsers (.cache, not in Git). These were on the edge of a row: another number of rows
+// with the fallback font than with Figtree (either browser), or 6 px or less left on the last row in Chromium. The ones
+// already listed above for the same width are not repeated; no hub was on the edge.
+const spanishGuide = (id: GuideId): string => guidePathIn(id, 'es') ?? `(${id} sem página em es)`;
+const F11_EDGE: Record<number, string[]> = {
+  320: [FILE_GUIDES['guides-why-is-my-pdf-so-large'].paths.en, FILE_GUIDES['guides-pdf-to-jpg-resolution'].paths.en, spanishGuide('guides-refinance-break-even')],
+  360: [FILE_GUIDES['guides-jpg-vs-png'].paths.en, FILE_GUIDES['guides-open-webp-save-as-jpg'].paths.en, spanishGuide('guides-extra-mortgage-payments')],
+  375: [guideIn('guides-why-is-my-pdf-so-large', 'pt'), FILE_GUIDES['guides-photos-to-one-pdf'].paths.en],
+  393: [spanishGuide('guides-15-vs-30-year-mortgage'), spanishGuide('guides-rent-vs-buy-break-even'), guideIn('guides-photos-to-one-pdf', 'es')],
+  412: [
+    guideIn('guides-heic-to-jpg-on-windows', 'es'), guideIn('guides-social-media-image-sizes', 'pt'), guideIn('guides-social-media-image-sizes', 'es'),
+    spanishGuide('guides-debt-snowball-vs-avalanche'), '/guides/debt-snowball-vs-avalanche/', spanishGuide('guides-rent-vs-buy-break-even'),
+  ],
+};
+for (const [width, paths] of Object.entries(F11_EDGE)) {
+  const pages = CASES[Number(width)] ?? [];
+  for (const path of paths) if (!pages.includes(path)) pages.push(path);
+}
 const CHUNK = 8;
 const FIGTREE = /figtree[^/]*\.woff2$/;
 
@@ -119,7 +143,9 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
     await held;
     await route.continue();
   });
-  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  // F11 (DECISOES § 400): the page must exist (the serve-dist answers a missing route with the nearest 404, which also has a trail).
+  const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
+  expect(response?.status(), `${path} existe`).toBe(200);
   await painted(page);
   const before = await top(page);
   // Chromium settles an optional face at the first paint. WebKit still takes the file in the 100 ms block period after

@@ -793,3 +793,8 @@
 .fo-search__item { padding-block: var(--space-1); }
 .fo-search__item > span:not(.fo-chip__dot) { flex: 1; min-width: 0; line-height: 20px; }
 .fo-search__item .fo-chip__dot { flex: none; }
+/* The first visit of the guides hub: the band and the shortcuts keep the Figtree of the first paint (the Steady face, as the
+   breadcrumb; DECISOES § 305 and § 393). With the fallback font the line of the band took one more row at 412 px (en) and
+   the chips two rows at 393 px (pt), so the cards moved 26 to 56 px when Figtree arrived (CLS up to 0.108 in Chromium). */
+.fo-hubband.fo-cat--guide { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-jump { --fo-font-text: var(--fo-font-steady); }
