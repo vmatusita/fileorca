@@ -607,6 +607,75 @@ export function checkPdfHub(html: string, want: PdfHubWant): string[] {
   return problems;
 }
 
+// ---- The guides hub (prompt F11, decision 5; DECISOES § 394) -------------------------------------------------------------
+
+/** How a title of the guides hub starts in each language: the name of the hub ("Guides: image, PDF and money questions…"). */
+export const GUIDES_HUB_TITLE: Record<Lang, string> = { en: 'Guides', pt: 'Guias', es: 'Guías' };
+/**
+ * The words of the hub's own text, the blocks marked data-hub-text (the line of the band, the note of a group with no guide
+ * in the language and "How these guides are made"): 60 at least, the minimum of a page with no ad (gate:prontidao, § 95),
+ * and 120 at most, so the top stays short and the first card above the fold at 360 × 740 (§ 364: en 91, pt 108, es 97).
+ */
+export const GUIDES_HUB_WORDS = { min: 60, max: 120 } as const;
+/** The sections of the groups, whose ids are the anchors of the footer and of the shortcuts (#image, #pdf, #money). */
+export const GUIDES_HUB_GROUPS = ['image', 'pdf', 'money'] as const;
+
+/** What the guides hub must carry: the path of every guide of its language (the registries), and the language. */
+export interface GuidesHubWant {
+  paths: readonly string[];
+  lang?: Lang;
+}
+
+/** The words of the hub's own text: the blocks marked data-hub-text, each element boundary a break. */
+export function guidesHubWords(html: string): number {
+  return parsePage(html)
+    .querySelectorAll('main [data-hub-text]')
+    .reduce((sum, block) => sum + plainText(block).split(' ').filter((word) => /[\p{L}\p{N}]/u.test(word)).length, 0);
+}
+
+/**
+ * Rule 7 (F11): the guides hub, in the mould of the PDF hub's rule (§ 162). One H1; a title that starts with "Guides"
+ * ("Guias", "Guías"); the introduction of its own in the band; its own text between 60 and 120 words; one GuideCard for
+ * every guide of the language in the registries, each once and no other; no ToolCard (a guide is never shown as a tool);
+ * the three groups with their anchors, each with its cards or the note that says why it has none; and no best, #1 or
+ * unmeasured number.
+ */
+export function checkGuidesHub(html: string, want: GuidesHubWant): string[] {
+  const lang = want.lang ?? DEFAULT_LANG;
+  const root = parsePage(html);
+  const problems: string[] = [];
+  const h1s = root.querySelectorAll('h1');
+  if (h1s.length !== 1) problems.push(`${h1s.length} H1, pede 1`);
+  const title = normalizeText(root.querySelector('title')?.text ?? '');
+  if (!title.startsWith(normalizeText(GUIDES_HUB_TITLE[lang]))) problems.push(`o título "${title}" não começa por "${GUIDES_HUB_TITLE[lang]}"`);
+  if (normalizeText(root.querySelector('meta[name="description"]')?.getAttribute('content') ?? '') === '') problems.push('sem meta description');
+
+  const intro = root.querySelector('main .fo-hubband [data-hub-text]');
+  if (!intro || plainText(intro) === '') problems.push('sem a introdução própria na faixa (data-hub-text)');
+  const words = guidesHubWords(html);
+  if (words < GUIDES_HUB_WORDS.min || words > GUIDES_HUB_WORDS.max) problems.push(`o texto próprio tem ${words} palavra(s), pede de ${GUIDES_HUB_WORDS.min} a ${GUIDES_HUB_WORDS.max}`);
+
+  const cards = root.querySelectorAll('main a.fo-guidecard').map((card) => card.getAttribute('href') ?? '');
+  const absent = want.paths.filter((path) => !cards.includes(path));
+  const extra = cards.filter((path) => !want.paths.includes(path));
+  if (absent.length) problems.push(`faltam os cartões de ${absent.join(', ')}`);
+  if (extra.length) problems.push(`cartões fora do registro: ${extra.join(', ')}`);
+  if (new Set(cards).size !== cards.length) problems.push('um cartão aparece duas vezes');
+  const tools = root.querySelectorAll('main a.fo-tool');
+  if (tools.length > 0) problems.push(`${tools.length} cartão(ões) de ferramenta (a.fo-tool) no hub de guias`);
+
+  for (const group of GUIDES_HUB_GROUPS) {
+    const section = root.querySelector(`main section#${group}`);
+    if (!section) problems.push(`sem a seção do grupo #${group}`);
+    else if (section.querySelectorAll('a.fo-guidecard').length === 0 && !section.querySelectorAll('[data-hub-text]').some((note) => plainText(note) !== '')) problems.push(`o grupo #${group} não tem cartão nem a nota que diz por quê`);
+  }
+
+  for (const claim of findClaims(`${root.querySelector('title')?.text ?? ''} ${root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''} ${visibleText(html, 'main', ['.fo-ad'])}`, lang)) {
+    problems.push(`afirmação sem medida na página: ${claim}`);
+  }
+  return problems;
+}
+
 // ---- The QR code generator (prompt F7, decision 8) ----------------------------------------------------------------------
 
 /** The blocks of the QR code generator page: how to use it, the questions, the privacy note and the related tools. */

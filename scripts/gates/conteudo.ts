@@ -18,12 +18,16 @@
 // the text stays on the device and the link typed is never opened, and no unmeasured claim.
 // The languages adjustment: the QR code generator and the ten file guides in Portuguese and Spanish too, each held to the
 // words of its language (the privacy phrases, the date of the measurement, the filler phrases, the claims).
+// F11 (decision 5; DECISOES § 394): the guides hub in each of its languages, with a GuideCard for every guide of the language in
+// the registries (src/tools/guides/hub.ts), the introduction of its own and 60 to 120 words of its own text.
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
 import {
   calcComparisonPaths,
   checkCalcPage,
+  checkGuidesHub,
+  guidesHubWords,
   checkPdfHub,
   checkPdfPage,
   checkPresetPage,
@@ -41,7 +45,8 @@ import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
+import { hubGuides } from '../../src/tools/guides/hub.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
 
 requireDist();
@@ -180,10 +185,30 @@ for (const id of FILE_GUIDE_IDS) {
 if (guidePages !== guideWanted) problems.add(`${guidePages} guia(s) de arquivo conferido(s), o registro tem ${guideWanted} (${FILE_GUIDE_IDS.length} guias em ${LANGS.length} idiomas)`);
 console.log(`palavras dos guias de arquivo: ${guideWordCounts.join(', ')}`);
 
+// The guides hub (F11), in every language of its route: a card for each guide the registries give the language.
+let guidesHubPages = 0;
+const guidesHubWordCounts: string[] = [];
+const guidesHub = pages.find((page) => page.route.id === GUIDES_HUB_ID)?.route;
+if (!guidesHub) problems.add(`${GUIDES_HUB_ID}: o hub de guias não está no mapa de rotas`);
+for (const lang of guidesHub ? languagesOf(guidesHub) : []) {
+  const path = guidesHub?.paths[lang] ?? '';
+  if (!existsSync(fileForPath(path))) {
+    problems.add(`${path}: a página não existe no dist`);
+    continue;
+  }
+  guidesHubPages += 1;
+  const html = read(path);
+  const paths = hubGuides(lang).map((guide) => guide.path);
+  for (const problem of checkGuidesHub(html, { paths, lang })) problems.add(`${path}: ${problem}`);
+  guidesHubWordCounts.push(`${lang} ${guidesHubWords(html)}`);
+}
+if (guidesHub && guidesHubPages !== languagesOf(guidesHub).length) problems.add(`${guidesHubPages} hub(s) de guias conferido(s), o mapa de rotas tem ${languagesOf(guidesHub).length}`);
+console.log(`palavras próprias do hub de guias: ${guidesHubWordCounts.join(', ')}`);
+
 const sitePages = listFiles(DIST)
   .filter((file) => file.endsWith('.html'))
   .map((file) => ({ path: pathOfFile(file, DIST), html: readFileSync(file, 'utf8') }))
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s)`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias`);
