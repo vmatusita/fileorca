@@ -9,6 +9,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test';
 import { LANGS, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { MOLD_PAGES, expectedLanguages, expectedSheet } from './lib/header.ts';
+import { dismissCookies, hydrated } from './lib/page.ts';
 
 const WIDTHS = [320, 360, 1280] as const;
 const ALL_WIDTHS = [320, 360, 390, 412, 768, 1024, 1280] as const;
@@ -186,6 +187,54 @@ test('with forced colours the section and the language in use are underlined too
   await page.mouse.move(0, 0);
   const menu = await page.locator('#fo-langmenu a[hreflang]').evaluateAll((links) => links.map((link) => [link.getAttribute('aria-current') ?? '', getComputedStyle(link).textDecorationLine]));
   expect(menu).toEqual([['', 'none'], ['true', mark], ['', 'none']]);
+});
+
+// Review F11 B-2 and its second pass (DECISOES § 405): the click that closes a menu (the light dismiss of an auto popover)
+// went on to what was under it, so the DropZone opened the file picker and a radio of the tool changed. While a menu is
+// open the page under the header takes no pointer, and the click only closes the menu. page.mouse clicks by coordinate:
+// locator.click would wait for the element to take the pointer.
+test('the click that closes a menu does not reach the page under it: no file picker, no control changed', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/compress-image/');
+  await hydrated(page);
+  await dismissCookies(page);
+  let pickers = 0;
+  page.on('filechooser', () => (pickers += 1));
+  const drop = await page.locator('.fo-drop').first().boundingBox();
+  if (!drop) throw new Error('no DropZone');
+  const centre = { x: drop.x + drop.width / 2, y: drop.y + drop.height / 2 };
+  for (const [button, menu] of [['.fo-header__menu', '#fo-menu'], ['.fo-header__lang', '#fo-langmenu']] as const) {
+    await page.locator(button).click();
+    await expect(page.locator(menu)).toBeVisible();
+    await page.mouse.click(centre.x, centre.y);
+    await expect(page.locator(menu), `${menu}: the click closes it`).toBeHidden();
+  }
+  await page.waitForTimeout(300);
+  expect(pickers, 'no file picker from the click that closed a menu').toBe(0);
+  // With no menu open, the same click opens the picker: the page takes the pointer again.
+  const picker = page.waitForEvent('filechooser');
+  await page.mouse.click(centre.x, centre.y);
+  await picker;
+
+  // Under 768 px the sheet covers the DropZone: a tap on a radio of Rotate image just under the sheet.
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/rotate-image/');
+  await hydrated(page);
+  await menuButton(page).click();
+  await expect(sheet(page)).toBeVisible();
+  const bottom = await sheet(page).evaluate((element) => element.getBoundingClientRect().bottom);
+  const radio = await page.evaluate((below) => {
+    const label = [...document.querySelectorAll<HTMLElement>('main label.fo-seg__opt')]
+      .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+      .find(({ element, rect }) => element.querySelector('input:not(:checked)') && rect.top > below + 4 && rect.bottom < innerHeight - 4);
+    if (!label) return null;
+    label.element.setAttribute('data-probe', '');
+    return { x: label.rect.left + label.rect.width / 2, y: label.rect.top + label.rect.height / 2 };
+  }, bottom);
+  if (!radio) throw new Error('no unchecked radio under the sheet at 390 px');
+  await page.mouse.click(radio.x, radio.y);
+  await expect(sheet(page)).toBeHidden();
+  await expect(page.locator('[data-probe] input')).not.toBeChecked();
 });
 
 /** A first visit at one width, in a context of its own, with Figtree held until released (layout-shift.spec.ts). */
