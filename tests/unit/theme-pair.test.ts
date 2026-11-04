@@ -200,4 +200,12 @@ describe('o tema escuro só na tela: a impressão sai no tema claro (revisão F1
     expect(darkOnPaperProblems('@media not print { html[data-theme="dark"] { color-scheme: dark; } }')).toEqual([]);
     expect(darkOnPaperProblems('html[data-theme="dark"] { color-scheme: dark; }')).toHaveLength(1);
   });
+
+  // The second pass of the review (S2-2, DECISOES § 405): the bundle.css of docs/design mirrors the color-scheme rules of
+  // global.css for the previews, and the README of the system says the dark theme is on screen only.
+  it('keeps the dark color-scheme of the reference bundle.css of docs/design in @media screen too', () => {
+    const bundle = readFileSync('docs/design/components/bundle.css', 'utf8');
+    expect(darkOnPaperProblems(bundle, 'bundle.css')).toEqual([]);
+    expect(styleRules(bundle).filter((rule) => rule.selectors.some((selector) => selector.includes('[data-theme="dark"]'))).length).toBeGreaterThanOrEqual(1);
+  });
 });
