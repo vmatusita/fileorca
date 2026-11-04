@@ -15,6 +15,7 @@ import { imageToolTexts } from '../image/texts.ts';
 import { PDF_PAGES, type PdfToolId } from '../pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../pdf/texts.ts';
 import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
+import { guideCardData, type GuideCardData } from './card.ts';
 
 /**
  * The day the ten English guides were reviewed, and when they were first published (prompt F5b). In UTC, like the date
@@ -81,13 +82,27 @@ export function crumbsFor(id: FileGuideId, lang: Lang = 'en'): Crumb[] {
   ];
 }
 
-export interface GuideCard {
+/** A tool or preset in the related grid of a guide: the data of its ToolCard. */
+export interface RelatedToolCard {
+  kind: 'tool';
   href: string;
   name: string;
   description: string;
   icon: IconName;
   category: 'image' | 'pdf';
 }
+
+/** A guide in the related grid of a guide: the data of its GuideCard (F11, decision 7; the F5b F-12). */
+export interface RelatedGuideCard {
+  kind: 'guide';
+  card: GuideCardData;
+}
+
+/**
+ * A card of the related grid of a guide. Before the F11 a guide there was drawn with the ToolCard and looked like a tool
+ * (F5b F-12, DECISOES § 396): the kind says which component draws it.
+ */
+export type RelatedCard = RelatedToolCard | RelatedGuideCard;
 
 /** The card of a guide's blurb in the language (common.fileGuides). */
 function blurbOf(id: FileGuideId, lang: Lang): { name: string; description: string } {
@@ -96,23 +111,17 @@ function blurbOf(id: FileGuideId, lang: Lang): { name: string; description: stri
   return blurb;
 }
 
-/** The card of a guide: its tool's icon, in the colour of its hub. */
-export function guideCard(id: FileGuideId, lang: Lang = 'en'): GuideCard {
-  const def = FILE_GUIDES[id];
-  const blurb = blurbOf(id, lang);
-  return { href: guidePath(id, lang), name: blurb.name, description: blurb.description, icon: toolInfo(def.tool, lang).icon, category: def.hub === 'pdf-tools' ? 'pdf' : 'image' };
-}
-
-function cardOf(target: FileGuideRelated, lang: Lang): GuideCard {
+function cardOf(target: FileGuideRelated, lang: Lang): RelatedCard {
   const common = TEXTS[lang].common;
-  if (isFileGuide(target)) return guideCard(target, lang);
-  if (isPdfTool(target)) return { href: pathFor(target, lang), name: common.pdf[target].name, description: common.pdf[target].description, icon: PDF_PAGES[target].icon, category: 'pdf' };
+  if (isFileGuide(target)) return { kind: 'guide', card: guideCardData(target, lang) };
+  if (isPdfTool(target)) return { kind: 'tool', href: pathFor(target, lang), name: common.pdf[target].name, description: common.pdf[target].description, icon: PDF_PAGES[target].icon, category: 'pdf' };
   if (!isImagePage(target)) throw new Error(`unknown page ${String(target)}`);
   const def = IMAGE_PAGES[target];
-  return { href: pathFor(target, lang), name: common.tools[target].name, description: common.tools[target].description, icon: def.icon, category: def.pdf ? 'pdf' : 'image' };
+  return { kind: 'tool', href: pathFor(target, lang), name: common.tools[target].name, description: common.tools[target].description, icon: def.icon, category: def.pdf ? 'pdf' : 'image' };
 }
 
-export function relatedFor(id: FileGuideId, lang: Lang = 'en'): GuideCard[] {
+/** The related grid of a guide: at most six cards, the tools with the ToolCard and the guides with the GuideCard. */
+export function relatedFor(id: FileGuideId, lang: Lang = 'en'): RelatedCard[] {
   return FILE_GUIDES[id].related.slice(0, 6).map((target) => cardOf(target, lang));
 }
 

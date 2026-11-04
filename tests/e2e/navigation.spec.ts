@@ -89,8 +89,9 @@ test('tool search loads on first use, finds synonyms in any language and opens t
   await expect(dialog.getByRole('option').first()).toHaveText(/Comprimir imagem/);
   await expect(input).toHaveAttribute('aria-expanded', 'true');
   await input.fill('youtube downloader');
-  // The empty title (the status region says the same words since the F3, so the text alone matches two elements).
-  await expect(dialog.locator('[data-search-empty-title]')).toContainText('Nenhuma ferramenta chamada "youtube downloader"');
+  // The empty title (the status region says the same words since the F3, so the text alone matches two elements). F11
+  // (decision 7; DECISOES § 400): the search finds guides too, and its empty title says so.
+  await expect(dialog.locator('[data-search-empty-title]')).toContainText('Nenhuma ferramenta ou guia chamado "youtube downloader"');
   await input.fill('reduzir');
   await input.press('Enter');
   await expect(page).toHaveURL(/\/pt\/comprimir-imagem\/$/);
@@ -142,8 +143,9 @@ test('the search shows only the pages that exist in the language and never falls
     await expect(dialog.locator('[data-search-empty]')).toBeVisible();
     await expect(dialog.getByRole('option')).toHaveCount(0);
     await expect(dialog.locator('[data-search-empty-title]')).toContainText('mortgage');
-    // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101).
-    await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta chamada "mortgage"');
+    // F3: a screen reader hears the empty state through the status region (WCAG 4.1.3, DECISOES § 101). F11: in the words
+    // that name the guides too.
+    await expect(dialog.getByRole('status')).toHaveText('Nenhuma ferramenta ou guia chamado "mortgage"');
     await input.fill('jpg');
     await expect(dialog.getByRole('status')).toHaveText('');
   }
@@ -157,8 +159,9 @@ const QR_QUERIES = {
 } as const;
 type Translated = (typeof TRANSLATED)[number];
 const qrRow = ({ common }: Translated): string => `${common.qr.name}${common.search.utilityCategory}`;
-const guideRow = ({ common }: Translated, id: FileGuideId): string =>
-  `${common.fileGuides[id].name}${FILE_GUIDES[id].hub === 'pdf-tools' ? common.search.pdfCategory : common.search.imageCategory}`;
+// F11 (decision 7; DECISOES § 397 and § 400): a guide says "Guia" ("Guía") beside its name, whatever its group (it said the
+// category of its hub, "Imagem" or "PDF", before).
+const guideRow = ({ common }: Translated, id: FileGuideId): string => `${common.fileGuides[id].name}${common.search.guideCategory}`;
 
 for (const translated of TRANSLATED) {
   const { lang, common } = translated;
@@ -208,8 +211,9 @@ test('the English search finds the new tools and presets and opens the one chose
   await expect(dialog.getByRole('option')).toHaveCount(5);
   // F5a: PDF to JPG also has the words "jpg", "to" and "pdf" in its names, so it follows Image to PDF.
   await input.fill('jpg to pdf');
-  // F5b: and the guide on PDF to JPG resolution, whose name has the three words too, last (DECISOES § 190).
-  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF', 'Which resolution to choose for PDF to JPGPDF']);
+  // F5b: and the guide on PDF to JPG resolution, whose name has the three words too, last (DECISOES § 190). F11: in the
+  // group of the guides, after the tools, with "Guide" beside it.
+  await expect(dialog.getByRole('option')).toHaveText([...rows('Image to PDF'), 'PDF to JPGPDF', 'Which resolution to choose for PDF to JPGGuide']);
   await input.fill('heif');
   await expect(dialog.getByRole('option')).toHaveText(rows('HEIC to JPG'));
   await input.press('Enter');
@@ -294,9 +298,10 @@ for (const translated of TRANSLATED) {
         expect(moneyPage(id, 'es'), `${id} em espanhol`).not.toBeNull();
         queries.push([esCommon.calcs[id].name, `${esCommon.calcs[id].name}${money}`]);
       }
+      // F11: a money guide says "Guía" beside its name (it said the money category before).
       for (const id of GUIDE_IDS) {
         expect(guidePathIn(id, 'es'), `${id} em espanhol`).not.toBeNull();
-        queries.push([esCommon.guides[id].name, `${esCommon.guides[id].name}${money}`]);
+        queries.push([esCommon.guides[id].name, `${esCommon.guides[id].name}${esCommon.search.guideCategory}`]);
       }
     }
     expect((await page.goto(missing))?.status(), missing).toBe(404);

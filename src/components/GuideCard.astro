@@ -1,0 +1,52 @@
+---
+// GuideCard (docs/design/components/GuideCard; F11, decision 6; DECISOES § 364 and § 395): the card of a guide, a paper
+// like the ToolCard (the 2 px stroke and the fold in the colour of the guide's group) that opens with words instead of the
+// tool's 48 px icon square: "Guide" with the file icon, the name, the description, how its numbers were made ("Measured on
+// 10 test files", "Numbers worked out") and, after a dashed hairline, the tool the guide embeds in the circle of its own
+// category. The whole card is one link, whose accessible name starts with "Guide" ("Guia", "Guía"); the name is a heading
+// of the level the page asks for (H3 under the H2 of a section), and the icons are decorative. A space between its parts
+// keeps the words of the name apart in the text of the link (the parts are grid items; a space between them is not drawn).
+// The --here variant, on the page of the tool or calculator the guide embeds, has no heading level: no heading (its name
+// and description are spans, so the .fo-prose of the "How to" block never gives them its margins) and no foot (the tool in
+// the guide is the page's own tool). Never the class fo-tool: gate:prontidao and gate:conteudo count main a.fo-tool as the
+// tool cards of a hub or of the home.
+import Icon from './Icon.astro';
+import type { Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import type { GuideCardTool, GuideGroup } from '../tools/guides/card.ts';
+
+interface Props {
+  href: string;
+  name: string;
+  description: string;
+  /** The group of the guide: the colour of the fold. */
+  category: GuideGroup;
+  /** How the numbers were made, in the language of the page. */
+  proof: string;
+  /** The tool the guide embeds, at the foot of the card (left out on the tool's own page). */
+  tool?: GuideCardTool;
+  /** The level of the name's heading; without it, the card is the --here variant of a tool page (no heading, no foot). */
+  headingLevel?: 2 | 3 | 4;
+  lang?: Lang;
+}
+const { href, name, description, category, proof, tool, headingLevel, lang = 'en' } = Astro.props;
+const t = TEXTS[lang].guides.card;
+const here = headingLevel === undefined;
+const Heading = here ? 'span' : (`h${headingLevel}` as const);
+const Text = here ? 'span' : 'p';
+---
+<a class:list={['fo-guidecard', { 'fo-guidecard--here': here }, 'fo-dogear', `fo-cat--${category}`]} href={href}>
+  <span class="fo-guidecard__kind"><Icon name="file" class="fo-icon--sm" /><strong>{t.kind}</strong></span>{' '}
+  <Heading class="fo-guidecard__name">{name}</Heading>{' '}
+  <Text class="fo-guidecard__desc">{description}</Text>{' '}
+  <span class="fo-guidecard__proof"><Icon name="table" class="fo-icon--sm" /><span>{proof}</span></span>
+  {!here && tool && (
+    <>
+      {' '}
+      <span class="fo-guidecard__tool">
+        <span class={`fo-chip__dot fo-cat--${tool.category}`} aria-hidden="true"><Icon name={tool.icon} /></span>
+        <span><span class="fo-guidecard__label">{t.tool}</span>{' '}<span>{tool.name}</span></span>
+      </span>
+    </>
+  )}
+</a>

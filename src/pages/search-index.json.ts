@@ -7,7 +7,10 @@
 // in the money category: the English ones (all of them also in Spanish since the languages adjustment), the eight
 // Brazilian ones (only in Portuguese, F6) and the money guides (English and Spanish). The hubs are not listed, as the image
 // hub is not (DECISOES § 160). The ten file guides (in the three languages since the languages adjustment) come next, each
-// in the category of its hub, image or PDF, with its name as its only term (DECISOES § 190). Last, in English only, the
+// in the category of its hub, image or PDF, with its name as its only term (DECISOES § 190). F11 (decision 7; DECISOES § 397): every
+// guide, of money or of a file, is of the kind 'guide', with the file icon and the category "Guide" of the language, in the
+// colour of its group (cat); the rest are of the kind 'tool'. The search shows the guides in their own group, after the
+// tools; the order of the index does not change. Last, in English only, the
 // home and health calculators, in the categories "Home calculators" and "Health calculators" with the violet of their
 // category, and the QR code generator in "Utilities" (F7, decision 9; in pt and es since the languages adjustment).
 import type { APIRoute } from 'astro';
@@ -17,9 +20,9 @@ import type { ToolBlurb } from '../i18n/types.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
-import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES } from '../tools/calc/registry.ts';
+import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, isGuide } from '../tools/calc/registry.ts';
 import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide } from '../tools/guides/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
   return [...imageEntries(), ...pdfEntries(), ...moneyEntries(), ...fileGuideEntries(), ...lifeEntries()];
@@ -27,8 +30,9 @@ export function searchIndex(): SearchEntry[] {
 
 /** The colour of an entry (the design system's category class) and the category written beside its name. */
 type Cat = 'money' | 'pdf' | 'image' | 'home' | 'util';
-type Area = 'money' | 'pdf' | 'image' | 'house' | 'health' | 'util';
+type Area = 'money' | 'pdf' | 'image' | 'house' | 'health' | 'util' | 'guide';
 const CATEGORY: Record<Area, (lang: Lang) => string> = {
+  guide: (lang) => TEXTS[lang].common.search.guideCategory,
   image: (lang) => TEXTS[lang].common.search.imageCategory,
   pdf: (lang) => TEXTS[lang].common.search.pdfCategory,
   money: (lang) => TEXTS[lang].common.search.moneyCategory,
@@ -46,7 +50,8 @@ const CATEGORY: Record<Area, (lang: Lang) => string> = {
 function entry(id: RouteId, cat: Cat, icon: string, blurbOf: (lang: Lang) => ToolBlurb | undefined, area: Area = cat as Area): SearchEntry[] {
   const route = ROUTES.find((candidate) => candidate.id === id);
   if (!route) return [];
-  const found: SearchEntry = { id, href: {}, name: {}, category: {}, cat, icon, terms: [] };
+  const kind = isGuide(id) || isFileGuide(id) ? 'guide' : 'tool';
+  const found: SearchEntry = { id, kind, href: {}, name: {}, category: {}, cat, icon, terms: [] };
   const terms = new Set<string>();
   for (const lang of LANGS) {
     const path = route.paths[lang];
@@ -77,17 +82,13 @@ function moneyEntries(): SearchEntry[] {
   return [
     ...CALC_PAGE_IDS.flatMap((id) => entry(id, 'money', ICONS[CALC_PAGES[id].icon], (lang) => calc(lang, id))),
     ...BR_CALC_IDS.flatMap((id) => entry(id, 'money', ICONS[BR_CALC_PAGES[id].icon], (lang) => calc(lang, id))),
-    ...GUIDE_IDS.flatMap((id) => entry(id, 'money', ICONS[CALC_PAGES[GUIDES[id].calc].icon], (lang) => TEXTS[lang].common.guides?.[id])),
+    ...GUIDE_IDS.flatMap((id) => entry(id, 'money', ICONS.file, (lang) => TEXTS[lang].common.guides?.[id], 'guide')),
   ];
 }
 
-/** The file guides, in registry order: the icon of the tool each one embeds, the category of its hub. */
+/** The file guides, in registry order: the file icon, in the colour of its hub, in the category "Guide" (F11). */
 function fileGuideEntries(): SearchEntry[] {
-  return FILE_GUIDE_IDS.flatMap((id) => {
-    const def = FILE_GUIDES[id];
-    const icon = def.tool in PDF_PAGES ? PDF_PAGES[def.tool as keyof typeof PDF_PAGES].icon : IMAGE_PAGES[def.tool as ImagePageId].icon;
-    return entry(id, def.hub === 'pdf-tools' ? 'pdf' : 'image', ICONS[icon], (lang) => TEXTS[lang].common.fileGuides?.[id]);
-  });
+  return FILE_GUIDE_IDS.flatMap((id) => entry(id, FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image', ICONS.file, (lang) => TEXTS[lang].common.fileGuides?.[id], 'guide'));
 }
 
 /** The home and health calculators in hub order (English only, F7), then the QR code generator (en, pt and es). */

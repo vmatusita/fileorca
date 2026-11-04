@@ -7,7 +7,7 @@ import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registr
 import { chooseImage, dismissCookies, hydrated } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 import imagesTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { PDF_ENGINE_FILE, expectInitialBudget, expectNextPage, settler } from './lib/budgets.ts';
 
 // Performance budgets (PLANO "Orçamento de desempenho"): initial JS of the tool page at most
@@ -34,8 +34,9 @@ const TOOL_PAGES = [
   '/image-to-pdf/',
 ];
 // The hubs have no island: they are held to the same JS and request budgets, with at most the two files of a tool page.
-// F7: the home and health hubs too, read from the registry.
-const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`, ...([HOUSE_HUB_ID, HEALTH_HUB_ID] as const).map((id) => routeById(id).paths.en ?? '')];
+// F7: the home and health hubs too, read from the registry. F11 (decision 5; DECISOES § 399): and the guides hub, with no
+// island and no script of its own.
+const HUB_PAGES = ['/image-tools/', '/money-calculators/', `/${PDF_HUB_ID}/`, ...([HOUSE_HUB_ID, HEALTH_HUB_ID, GUIDES_HUB_ID] as const).map((id) => routeById(id).paths.en ?? '')];
 // The money calculators, their presets and the guides (F4; DECISOES § 110): one entry shared by all of them and
 // the shared island chunk, exactly two files, read from the calculator registry. F7 (decision 6; DECISOES § 257): the 11
 // home and health calculators come into the same island and are held to the same two files and the same 80 KB, with
@@ -120,6 +121,11 @@ for (const [first, second] of [
   ['/square-footage-calculator/', '/due-date-calculator/'],
   ['/home-calculators/', '/square-footage-calculator/'],
   ['/', '/health-calculators/'],
+  // F11: the guides hub brings no island: from the home it is the HTML only; from it to a guide, the HTML and the two files of
+  // the guide's tool; from a guide back to it, the HTML only.
+  ['/', '/guides/'],
+  ['/guides/', '/guides/jpg-vs-png/'],
+  ['/guides/refinance-break-even/', '/guides/'],
 ] as const) {
   test(`requests: ${first} then ${second}`, async ({ page, baseURL }) => {
     await expectNextPage(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, first, second);

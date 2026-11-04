@@ -286,6 +286,24 @@ Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espan
 
 Rótulos de sistema, como as páginas de suporte em espanhol escrevem (lidas em 3/nov/2026): Alta eficiencia, Más compatible, Mantener originales, Localización (manual da Apple es-us), app Vista Previa, Insertar desde archivo, app Archivos, mantén presionada, Manual de uso del iPhone (Apple); Guardar ubicación, Más parámetros de configuración, Agregar (Google); Extensiones de imagen HEIF, Extensiones de vídeo HEVC (nome do produto), Explorador de archivos, Microsoft Print To PDF (Microsoft). Fonte sem versão em espanhol leva "(en inglés)" no rótulo.
 
+## El hub de guías, la tarjeta y la búsqueda (F11)
+
+O hub `/es/guias/` lista os 10 guias de arquivo e os 5 de dinheiro (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Lee la guía" das ferramentas e calculadoras: o cartão de guia ficou no lugar dela (DECISOES § 396).
+
+| Inglês | Español | Observação |
+| --- | --- | --- |
+| Guides (o hub, a trilha, o rodapé) | Guías | caminho `/es/guias/` |
+| Answers that show the numbers | Respuestas que muestran los números | H1 do hub |
+| Image guides · PDF guides · Money guides | Guías de imagen · Guías de PDF · Guías de dinero | |
+| All guides | Todas las guías | rodapé |
+| Guide (na tarjeta e na busca) | Guía | primeira palavra do nome do cartão |
+| Measured on N test files · Numbers worked out | Medida con N archivos de prueba · Números calculados | |
+| Tool in the guide | Herramienta en la guía | |
+| Read a guide · See all N guides | Lee una guía · Ver las N guías | a seção da home |
+| Search tools and guides · Find a tool or a guide | Buscar herramientas y guías · Busca una herramienta o una guía | o botão do cabeçalho segue "Buscar herramientas" |
+| Results · Tools · Guides | Resultados · Herramientas · Guías | |
+| No tool or guide called "…" | Ninguna herramienta o guía llamada "…" | o feminino concorda com "guía", a palavra mais próxima |
+
 ## Frases de Oli
 
 Da tabela de voz do docs/design/README.

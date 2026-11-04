@@ -59,6 +59,11 @@ export interface CommonTexts {
     terms: string;
     licenses: string;
     contact: string;
+    /**
+     * The Guides block under the Utilities column (F11, decision 7): "All guides", the link to the guides hub. Its title is
+     * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
+     */
+    guidesAll: string;
     /** Support line at the base of the footer (PLANO, Doações). */
     coffee: string;
     /** "Made by {name} in {city}" */
@@ -81,9 +86,14 @@ export interface CommonTexts {
     listLabel: string;
     placeholder: string;
     close: string;
-    /** No result: 'No tool called "{query}"' */
+    /** No result: 'No tool or guide called "{query}"' */
     emptyTitle: string;
     emptyHint: string;
+    /** The titles of the two groups of results (F11, decision 7): "Tools", then "Guides". An empty group has no title. */
+    toolsGroup: string;
+    guidesGroup: string;
+    /** The category written beside every guide in the results ("Guide"), whatever its group. */
+    guideCategory: string;
     imageCategory: string;
     moneyCategory: string;
     pdfCategory: string;
@@ -175,6 +185,11 @@ export interface HomeTexts extends PageMeta {
   house?: { heading: string; intro: string; hubLink: string };
   health?: { heading: string; intro: string; hubLink: string };
   qr?: { heading: string; intro: string };
+  /**
+   * The "Read a guide" section (F11, decision 7): the heading, the line and the link to the guides hub, whose {n} is the
+   * number of guides of the language, read from the registries. The four cards are those of HOME_GUIDES.
+   */
+  guides: { heading: string; intro: string; hubLink: string };
 }
 
 /** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
@@ -567,8 +582,6 @@ export interface FileGuidesSharedTexts {
   gps: { real: string; none: string; empty: string; zeroed: string; kept: string };
   /** Readable names of the fixtures, by file name. */
   fixtures: Record<string, string>;
-  /** "Read the guide: {title}" under a tool. */
-  guideLink: string;
   /** Heading of the guides list of a hub. */
   hubGuidesHeading: string;
   /**
@@ -1033,4 +1046,18 @@ export interface GuidesHubTexts extends PageMeta {
   /** "How these guides are made", at the end. */
   howHeading: string;
   how: string;
+  /** The words of the guide card (F11, decision 6; src/components/GuideCard.astro), wherever the card appears. */
+  card: GuideCardTexts;
+}
+
+/**
+ * The words of a guide card: the kind that opens it ("Guide", the first word of its accessible name), the measure of a file
+ * guide with {n}, the number of its test files, and that of a money guide (only in a language with money guides: pt has
+ * none), and the label of the tool at its foot.
+ */
+export interface GuideCardTexts {
+  kind: string;
+  measured: string;
+  workedOut?: string;
+  tool: string;
 }

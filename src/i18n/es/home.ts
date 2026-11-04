@@ -25,4 +25,10 @@ export default {
     heading: 'Crea un código QR',
     intro: 'Convierte un enlace o un texto corto en un código QR con Oli en el centro y descárgalo en PNG o SVG. El texto se queda en tu dispositivo.',
   },
+  // F11 (decisión 7): la sección "Lee una guía"; {n} es el número de guías del idioma, leído de los registros.
+  guides: {
+    heading: 'Lee una guía',
+    intro: 'Cada guía responde una pregunta con números y trae la herramienta dentro.',
+    hubLink: 'Ver las {n} guías',
+  },
 } satisfies HomeTexts;

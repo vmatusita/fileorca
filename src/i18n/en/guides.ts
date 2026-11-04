@@ -18,6 +18,14 @@ const texts: GuidesHubTexts = {
   },
   howHeading: 'How these guides are made',
   how: 'The image and PDF guides are measured on real test files, with the same engine that runs the tools on this site. Each guide lists the files it used, the day it was measured and who reviewed it. The money guides work out each example with the calculator inside them. Nothing you put into a tool leaves your device.',
+  // The guide card (F11, decision 6): the kind that opens its name, the measure of a file guide ({n} test files, read from
+  // data/guides-measured.json) or of a money guide, and the label of the tool at its foot.
+  card: {
+    kind: 'Guide',
+    measured: 'Measured on {n} test files',
+    workedOut: 'Numbers worked out',
+    tool: 'Tool in the guide',
+  },
 };
 
 export default texts;

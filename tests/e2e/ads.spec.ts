@@ -8,7 +8,7 @@ import type { ChoiceSpec, FieldSpec } from '../../src/tools/calc/types.ts';
 import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { LANGS, QR_ID, ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
@@ -279,14 +279,18 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-test('legal, institutional, home and 404 pages have no AdSlot and no ad code', async ({ page }) => {
+// F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language is born with no AdSlot and no ad area.
+test('legal, institutional, home, guides hub and 404 pages have no AdSlot and no ad code', async ({ page }) => {
   const paths = [
     '/', '/pt/', '/es/', '/privacy/', '/pt/privacidade/', '/es/privacidad/', '/terms/', '/pt/termos/', '/es/terminos/',
     '/about/', '/pt/sobre/', '/es/acerca-de/', '/contact/', '/pt/contato/', '/es/contacto/',
     '/licenses/', '/pt/licencas/', '/es/licencias/', '/support/', '/pt/apoie/', '/es/apoyo/', '/404.html', '/pt/404.html', '/es/404.html',
+    ...LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/'),
   ];
+  expect(paths.slice(-3)).toEqual(['/guides/', '/pt/guias/', '/es/guias/']);
   for (const path of paths) {
-    await page.goto(path);
+    const response = await page.goto(path);
+    if (!path.endsWith('404.html')) expect(response?.status(), path).toBe(200);
     expect(await page.locator('.fo-ad').count(), path).toBe(0);
     expect(await page.locator('script[src*="adsbygoogle"], ins.adsbygoogle').count(), path).toBe(0);
   }
@@ -762,21 +766,27 @@ test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 128
   }
 });
 
-// The line that links a tool to its guide sits outside the panel and 150px from both AdSlots (prompt decision 6). Languages
-// adjustment: the tool pages of pt and es link to the guides of their language too, so the line is measured there, one test
-// per language.
+// The link from a tool to its guide sits outside the panel and 150px from both AdSlots (prompt decision 6). Languages
+// adjustment: the tool pages of pt and es link to the guides of their language too, one test per language. F11 (decision 7;
+// DECISOES § 396 and § 400): the link is the GuideCard (--here) at the end of the "How to" block, and the calculators that a
+// guide embeds have it too (en and es), so the card is the target, on the tools and on those calculators.
 for (const lang of LANGS) {
-  const title = 'the guide line of each embedded tool stays 150px from every AdSlot, at 360 and 1280px';
+  const title = 'the guide card of each tool and calculator a guide embeds stays 150px from every AdSlot, at 360 and 1280px';
   test(lang === 'en' ? title : `${title} (${lang})`, async ({ page }) => {
-    const tools = [...new Set(FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].tool))];
-    for (const tool of tools) {
-      const path = routeById(tool).paths[lang] ?? '/';
+    const tools = [...new Set(FILE_GUIDE_IDS.map((id) => FILE_GUIDES[id].tool))].map((tool) => routeById(tool).paths[lang] ?? '/');
+    const calcs = CALC_PAGE_IDS.flatMap((id) => {
+      const guide = CALC_PAGES[id].guide;
+      const page = moneyPage(id, lang);
+      return guide && page && guidePathIn(guide, lang) !== null ? [page.path] : [];
+    });
+    expect(calcs.length, `${lang}: as calculadoras com guia`).toBe(lang === 'pt' ? 0 : 6);
+    for (const path of [...tools, ...calcs]) {
       expect((await page.goto(path))?.status(), path).toBe(200);
       for (const viewport of VIEWPORTS) {
         await page.setViewportSize(viewport);
-        await expect(page.locator('.fo-guide-links a').first(), `${path}: a linha do guia`).toBeVisible();
-        expect(await page.locator('#fo-tool-root .fo-guide-links').count(), `${path}: a linha dentro do painel`).toBe(0);
-        await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-guide-links');
+        await expect(page.locator('section[data-content="how"] .fo-guidecard').first(), `${path}: o cartão do guia`).toBeVisible();
+        expect(await page.locator('#fo-tool-root .fo-guidecard').count(), `${path}: o cartão dentro do painel`).toBe(0);
+        await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-guidecard');
       }
     }
   });

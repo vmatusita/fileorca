@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { QR_ID, moneyHubId, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, guidePathIn, moneyPage } from '../../src/tools/calc/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES as PDF_PAGES_OF, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { expectInitialBudget, expectNextPage, settler } from './lib/budgets.ts';
@@ -35,7 +35,8 @@ const PDF_GUIDE_PAGES = TRANSLATED.flatMap((lang) =>
   FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'pdf-tools' && Object.hasOwn(PDF_PAGES_OF, FILE_GUIDES[id].tool)).map((id) => FILE_GUIDES[id].paths[lang]),
 );
 const PDF_HUBS = TRANSLATED.map((lang) => pathOf(PDF_HUB_ID, lang));
-const HUBS = TRANSLATED.flatMap((lang) => [pathOf('image-tools', lang), pathOf(PDF_HUB_ID, lang), pathOf(moneyHubId(lang), lang)]);
+// F11 (decision 5; DECISOES § 399): and the guides hub of each language, held to the rules of the category hubs.
+const HUBS = TRANSLATED.flatMap((lang) => [pathOf('image-tools', lang), pathOf(PDF_HUB_ID, lang), pathOf(moneyHubId(lang), lang), pathOf(GUIDES_HUB_ID, lang)]);
 const SUPPORT_PAGES = TRANSLATED.map((lang) => pathOf('support', lang));
 
 for (const path of [...TOOL_PAGES, ...QR_PAGES, ...PDF_PAGES, ...CALC_PAGES_LIST, ...FILE_GUIDE_PAGES, ...HUBS, ...SUPPORT_PAGES]) {
@@ -94,6 +95,8 @@ const SAME_FILES: [string, string][] = [
     [pathOf(PDF_HUB_ID, 'en'), pathOf(PDF_HUB_ID, lang)],
     [pathOf('money-calculators', 'en'), pathOf(moneyHubId(lang), lang)],
     [pathOf('support', 'en'), pathOf('support', lang)],
+    // F11: the guides hub of the language loads the files of /guides/.
+    [pathOf(GUIDES_HUB_ID, 'en'), pathOf(GUIDES_HUB_ID, lang)],
   ]),
 ];
 

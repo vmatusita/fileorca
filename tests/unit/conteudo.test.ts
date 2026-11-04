@@ -22,6 +22,7 @@ import {
   QR_PRIVACY_PHRASES,
   calcComparisonPaths,
   checkCalcPage,
+  checkGuidesHub,
   checkPdfHub,
   checkPdfPage,
   checkPresetPage,
@@ -31,6 +32,8 @@ import {
   comparisonPaths,
   findClaims,
   findPlaceholders,
+  GUIDES_HUB_WORDS,
+  guidesHubWords,
   isCalcPage,
   isImagePage,
   isNotFoundPath,
@@ -51,7 +54,9 @@ import { longDate } from '../../src/i18n/dates.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { FILLER, FILLER_BY_LANG, MAX_GUIDE_WORDS, MEASURED_DATE, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
@@ -810,6 +815,104 @@ describe('portão de conteúdo: o hub de PDF (F5a)', () => {
   });
 });
 
+// ---- F11: the guides hub (prompt F11, decision 5; DECISOES § 394) ----------------------------------------------------------
+
+/** A card of the guides hub as the GuideCard writes it: one link, the kind first, the name in an H3. */
+const guideCardHtml = (path: string): string =>
+  `<li><a class="fo-guidecard fo-dogear fo-cat--image" href="${path}"><span class="fo-guidecard__kind"><strong>Guide</strong></span><h3 class="fo-guidecard__name">${path}</h3><span class="fo-guidecard__proof"><span>Measured</span></span></a></li>`;
+interface FakeGuidesHub {
+  lang?: Lang;
+  head?: string;
+  /** The line of the band (null: none). */
+  intro?: string | null;
+  how?: string;
+  /** Paths of the registry left out of their group. */
+  drop?: readonly string[];
+  extra?: string;
+}
+/**
+ * A guides hub that passes every rule, in the language asked (English by default), with the real texts of the hub and the
+ * paths of the registries: each group with its cards, the money group of pt with the note. Each test changes one thing.
+ */
+function guidesHubPage(fake: FakeGuidesHub = {}): string {
+  const lang = fake.lang ?? 'en';
+  const t = TEXTS[lang].guides;
+  const n = groupDigits(hubGuides(lang).length, lang);
+  const head = fake.head ?? `<title>${t.title} | FileOrca</title><meta name="description" content="${fmt(t.description, { n })}">`;
+  const intro = fake.intro === null ? '' : `<p class="fo-muted" data-hub-text>${fake.intro ?? fmt(t.intro, { n })}</p>`;
+  const sections = HUB_GROUPS.map((group) => {
+    const paths = hubGroup(group, lang).map((guide) => guide.path).filter((path) => !(fake.drop ?? []).includes(path));
+    const note = t.moneyNote && hubGroup(group, lang).length === 0 ? `<p class="fo-section__note" data-hub-text>${t.moneyNote.before} <a href="/pt/calculadoras-financeiras/">${t.moneyNote.link}</a>${t.moneyNote.after}</p>` : '';
+    const cards = paths.length > 0 ? `<ul class="fo-guidecards">${paths.map(guideCardHtml).join('')}</ul>` : '';
+    return `<section class="fo-section" id="${group}" aria-labelledby="${group}-title"><h2 id="${group}-title">${t.groups[group].heading}</h2>${cards}${note}</section>`;
+  }).join('');
+  const how = `<section class="fo-section fo-prose" id="how" aria-labelledby="how-title"><h2 id="how-title">${t.howHeading}</h2><p data-hub-text>${fake.how ?? t.how}</p></section>`;
+  return `<!doctype html><html><head>${head}</head><body><main><div class="fo-hubband fo-cat--guide"><span class="fo-eyebrow">${t.eyebrow}</span><h1 class="fo-h1">${t.h1}</h1>${intro}</div>${sections}${how}${fake.extra ?? ''}</main></body></html>`;
+}
+const guidesHubWant = (lang: Lang) => ({ paths: hubGuides(lang).map((guide) => guide.path), lang });
+
+describe('portão de conteúdo: o hub de guias (F11)', () => {
+  const problemsOf = (html: string, lang: Lang = 'en'): string => checkGuidesHub(html, guidesHubWant(lang)).join('\n');
+  const someWords = (count: number): string => Array.from({ length: count }, (_, i) => `word${i}`).join(' ');
+
+  it('accepts the complete hub in the three languages, with its own words in the range (en 91, pt 108, es 97)', () => {
+    expect(GUIDES_HUB_WORDS).toEqual({ min: 60, max: 120 });
+    for (const lang of LANGS) {
+      expect(checkGuidesHub(guidesHubPage({ lang }), guidesHubWant(lang)), lang).toEqual([]);
+      expect(guidesHubWant(lang).paths, lang).toHaveLength([15, 10, 15][LANGS.indexOf(lang)] ?? 0);
+    }
+    expect(LANGS.map((lang) => guidesHubWords(guidesHubPage({ lang })))).toEqual([91, 108, 97]);
+  });
+
+  it('H1, title and description: one H1, a title that starts with the name of the hub in the language', () => {
+    expect(problemsOf(guidesHubPage().replace(/<h1 class="fo-h1">.*?<\/h1>/, ''))).toMatch(/0 H1, pede 1/);
+    expect(problemsOf(guidesHubPage({ extra: '<h1>Again</h1>' }))).toMatch(/2 H1, pede 1/);
+    expect(problemsOf(guidesHubPage({ head: '<title>Answers that show the numbers | FileOrca</title><meta name="description" content="x">' }))).toMatch(/não começa por "Guides"/);
+    expect(problemsOf(guidesHubPage({ head: `<title>${TEXTS.en.guides.title} | FileOrca</title>` }))).toMatch(/sem meta description/);
+    // The English title left on the Portuguese hub fails: it does not start with "Guias".
+    expect(problemsOf(guidesHubPage({ lang: 'pt', head: `<title>${TEXTS.en.guides.title} | FileOrca</title><meta name="description" content="x">` }), 'pt')).toMatch(/não começa por "Guias"/);
+  });
+
+  it('its own text: the introduction in the band, and from 60 to 120 words of its own', () => {
+    expect(problemsOf(guidesHubPage({ intro: null }))).toMatch(/sem a introdução própria na faixa/);
+    expect(problemsOf(guidesHubPage({ intro: '' }))).toMatch(/sem a introdução própria na faixa/);
+    // 32 words in the band and 20 at the end: 52, under the minimum.
+    expect(problemsOf(guidesHubPage({ how: someWords(20) }))).toContain('o texto próprio tem 52 palavra(s), pede de 60 a 120');
+    // 32 and 89: 121, one over the maximum; 120 passes.
+    expect(problemsOf(guidesHubPage({ how: someWords(89) }))).toContain('o texto próprio tem 121 palavra(s), pede de 60 a 120');
+    expect(problemsOf(guidesHubPage({ how: someWords(88) }))).toBe('');
+    // A card's words are not the hub's own: a hub of only cards has no text of its own.
+    expect(problemsOf(guidesHubPage({ intro: null, how: '' }))).toContain('o texto próprio tem 0 palavra(s), pede de 60 a 120');
+  });
+
+  it('cards: a GuideCard for every guide of the language in the registries, no other, none twice, and never a ToolCard', () => {
+    const [first] = guidesHubWant('en').paths;
+    expect(problemsOf(guidesHubPage({ drop: [first ?? ''] }))).toContain(`faltam os cartões de ${first}`);
+    expect(problemsOf(guidesHubPage({ extra: guideCardHtml('/guides/not-a-guide/') }))).toContain('cartões fora do registro: /guides/not-a-guide/');
+    expect(problemsOf(guidesHubPage({ extra: guideCardHtml(first ?? '') }))).toContain('um cartão aparece duas vezes');
+    // A guide drawn with the ToolCard (the F5b F-12): the hub has no tool card at all.
+    expect(problemsOf(guidesHubPage({ extra: `<a class="fo-tool fo-dogear fo-cat--image" href="${first}">x</a>` }))).toContain('1 cartão(ões) de ferramenta (a.fo-tool) no hub de guias');
+    // A money guide on the Portuguese hub: the registries have none in pt.
+    expect(problemsOf(guidesHubPage({ lang: 'pt', extra: guideCardHtml('/guides/extra-mortgage-payments/') }), 'pt')).toContain('cartões fora do registro: /guides/extra-mortgage-payments/');
+  });
+
+  it('groups: the three sections with their anchors, each with its cards or the note that says why it has none', () => {
+    expect(problemsOf(guidesHubPage().replace(/<section class="fo-section" id="pdf".*?<\/section>/, ''))).toMatch(/sem a seção do grupo #pdf/);
+    // Every money guide of en left out: the money group has no card and no note.
+    const money = hubGroup('money', 'en').map((guide) => guide.path);
+    expect(problemsOf(guidesHubPage({ drop: money }))).toContain('o grupo #money não tem cartão nem a nota que diz por quê');
+    // In pt the money group is the note; without it, the group says nothing.
+    const pt = guidesHubPage({ lang: 'pt' });
+    expect(problemsOf(pt, 'pt')).toBe('');
+    expect(problemsOf(pt.replace(/<p class="fo-section__note" data-hub-text>.*?<\/p>/, ''), 'pt')).toContain('o grupo #money não tem cartão nem a nota que diz por quê');
+  });
+
+  it('claims: the hub makes none, in its language', () => {
+    expect(problemsOf(guidesHubPage({ extra: '<p>The best guides, the #1 choice.</p>' }))).toContain('afirmação sem medida na página: best');
+    expect(problemsOf(guidesHubPage({ lang: 'es', extra: '<p>Las mejores guías.</p>' }), 'es')).toContain('afirmação sem medida na página: best');
+  });
+});
+
 // ---- F6: the same PDF rules in Portuguese and Spanish (prompt F6, decision 9) -----------------------------------------
 
 describe('portão de conteúdo: as páginas de PDF em português e espanhol (F6)', () => {
@@ -1181,6 +1284,11 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
         write(dir, entry.path, pdfHub({ lang: entry.lang }));
         continue;
       }
+      // F11: the guides hub, with a card for every guide of the language and the hub's own texts (DECISOES § 394).
+      if (id === GUIDES_HUB_ID) {
+        write(dir, entry.path, guidesHubPage({ lang: entry.lang }));
+        continue;
+      }
       // F7: the QR code generator, with its real English texts. The languages adjustment: in Portuguese and Spanish too, with
       // the privacy note of the language and a title and description of its own.
       if (id === QR_ID) {
@@ -1338,6 +1446,31 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).not.toContain(`${jpgPng.paths.en}:`);
     expect(result.output).not.toContain(`${heic.paths.en}:`);
   });
+
+  // F11 (decision 5; DECISOES § 394): the guides hub, in each language of its route, from the route map and the registries.
+  it('checks the guides hub in each of its languages, and fails when it loses a card or its own words (F11)', () => {
+    const hubCount = allPages().filter((entry) => entry.route.id === GUIDES_HUB_ID).length;
+    expect(hubCount).toBe(3);
+    const dir = join(root, 'guides-hub');
+    build(dir);
+    const ok = run(dir);
+    expect(ok.status, ok.output).toBe(0);
+    expect(ok.output).toContain(`; ${hubCount} do hub de guias`);
+    expect(ok.output).toContain('palavras próprias do hub de guias: en 91, pt 108, es 97');
+    const pt = routeById(GUIDES_HUB_ID).paths.pt ?? '';
+    const es = routeById(GUIDES_HUB_ID).paths.es ?? '';
+    const [lost] = hubGuides('pt').map((guide) => guide.path);
+    write(dir, pt, guidesHubPage({ lang: 'pt', drop: [lost ?? ''] }));
+    write(dir, es, guidesHubPage({ lang: 'es', how: 'Nada sale de tu dispositivo.' }));
+    const broken = run(dir);
+    expect(broken.status).toBe(1);
+    expect(broken.output).toContain(`${pt}: faltam os cartões de ${lost}`);
+    expect(broken.output).toMatch(new RegExp(`${es}: o texto próprio tem \\d+ palavra\\(s\\), pede de 60 a 120`));
+    // The English hub of the same site still passes.
+    expect(broken.output).not.toContain('/guides/:');
+    rmSync(join(dir, fileForPath(pt)));
+    expect(run(dir).output).toContain(`${pt}: a página não existe no dist`);
+  }, 60_000);
 
   it('checks the QR code generator from the route map, and fails when it loses a block or is missing (F7)', () => {
     expect(qrCount).toBe(3);

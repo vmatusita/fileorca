@@ -18,6 +18,14 @@ const texts: GuidesHubTexts = {
   },
   howHeading: 'Cómo se hacen estas guías',
   how: 'Las guías de imagen y PDF se miden sobre archivos de prueba reales, con el mismo motor que hace funcionar las herramientas de este sitio. Cada guía indica los archivos que usó, el día de la medición y quién la revisó. Las guías de dinero calculan cada ejemplo con la calculadora que llevan dentro. Nada de lo que pones en una herramienta sale de tu dispositivo.',
+  // La tarjeta de guía (F11, decisión 6): el tipo que abre su nombre, la medida de una guía de archivo ({n} archivos de prueba,
+  // leídos de data/guides-measured.json) o de una de dinero, y la etiqueta de la herramienta al pie.
+  card: {
+    kind: 'Guía',
+    measured: 'Medida con {n} archivos de prueba',
+    workedOut: 'Números calculados',
+    tool: 'Herramienta en la guía',
+  },
 };
 
 export default texts;

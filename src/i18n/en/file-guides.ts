@@ -31,7 +31,6 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
     'gen-paginas-mistas.pdf': 'PDF with pages of mixed sizes',
     'gen-xref-estragada.pdf': 'PDF with a damaged index',
   },
-  guideLink: 'Read the guide: {title}',
   hubGuidesHeading: 'Guides',
   numbers: {
     masculine: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'],

@@ -2,13 +2,15 @@
 // The tool page mold for the 12 PDF tools (docs/design/components/ToolPage; F5a, decision 9): breadcrumb, H1 +
 // PrivacySeal, the island, the first AdSlot (150 px clearance built in), then the blocks the content gate checks
 // (data-content: how, specs, faq, privacy, related) and the rail AdSlot (from 1280 px, not sticky). The same blocks as
-// ImageToolPage.astro, with "how it works" in three steps or more. The same mold serves the three languages (F6).
+// ImageToolPage.astro, with "how it works" in three steps or more. The same mold serves the three languages (F6). The card
+// of each guide that embeds the tool closes the "How to" block (F11, decision 7; DECISOES § 396).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
+import GuideCard from '../../components/GuideCard.astro';
 import AdSlot from '../../ads/AdSlot.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
@@ -17,9 +19,8 @@ import { FILE_PANEL_POSES } from '../image/Oli.tsx';
 import PdfIsland from './PdfIsland.astro';
 import { crumbsFor, panelData, relatedFor } from './page.ts';
 import { PDF_TOOL_TEXTS } from './texts.ts';
-import { fmt } from '../../i18n/format.ts';
 import { guidesOfTool } from '../guides/registry.ts';
-import { GUIDE_SHARED, guideLinks } from '../guides/page.ts';
+import { guideCardData } from '../guides/card.ts';
 import type { PdfToolId } from './registry.ts';
 
 interface Props {
@@ -36,10 +37,10 @@ const crumbs = crumbsFor(id, lang);
 const related = relatedFor(id, lang);
 const data = panelData(id, lang);
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
-// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots;
-// in the language of the page, where the guides exist since the languages adjustment (DECISOES § 6).
-const guides = guideLinks(guidesOfTool(id), lang).map((guide) => ({ href: guide.href, title: guide.name }));
-const guideTexts = GUIDE_SHARED[lang];
+// The guides that embed this tool (F5b, decision 6), in the language of the page (DECISOES § 6). F11 (decision 7): each one
+// is a GuideCard (--here) at the end of the "How to" block, the first block after the panel; the line "Read the guide"
+// between the specs and the questions is gone.
+const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
 ---
 <BaseLayout
   lang={lang}
@@ -60,6 +61,11 @@ const guideTexts = GUIDE_SHARED[lang];
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+    {guides.length > 0 && (
+      <div class="fo-guidehere">
+        {guides.map((card) => <GuideCard href={card.href} name={card.name} description={card.description} category={card.category} proof={card.proof} lang={lang} />)}
+      </div>
+    )}
   </section>
   <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
     <h2 id="specs">{t.specsHeading}</h2>
@@ -71,11 +77,6 @@ const guideTexts = GUIDE_SHARED[lang];
       </tbody>
     </table>
   </section>
-  {guides.length > 0 && (
-    <div class="fo-section fo-prose fo-guide-links">
-      {guides.map((guide) => <p><a href={guide.href}>{fmt(guideTexts.guideLink, { title: guide.title })}</a></p>)}
-    </div>
-  )}
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
     <Faq items={t.faq} />
