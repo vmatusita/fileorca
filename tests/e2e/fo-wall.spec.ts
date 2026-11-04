@@ -5,6 +5,7 @@ import { TEST_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
 import { STATUS, WALL_TOOL, expectWallOpen, googlefcStub, openAsProduction, wallEvents } from './lib/wall.ts';
 import enWall from '../../src/i18n/en/wall.ts';
 import ptWall from '../../src/i18n/pt/wall.ts';
+import { contrastRatio } from '../../scripts/lib/contrast.ts';
 
 // F12 · a parede do bloqueador (decision 5 and 11; § 427 and § 434). The wall in the test build (the fake unit ids and
 // PUBLIC_ADBLOCK_WALL=bloqueio), seen as fileorca.com (tests/e2e/lib/production.ts): every request to fileorca.com is
@@ -41,6 +42,15 @@ async function expectNeverOpens(page: Page): Promise<void> {
 }
 
 const actions = async (page: Page) => (await wallEvents(page)).map((event) => event['action']);
+
+/** A computed colour (rgb(), rgba() or color(srgb …)) as #rrggbb, the alpha left out. */
+function hexOf(color: string): string {
+  const srgb = /^color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)/.exec(color);
+  const rgb = /^rgba?\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)/.exec(color);
+  const channels = srgb ? srgb.slice(1, 4).map((value) => Number(value) * 255) : rgb ? rgb.slice(1, 4).map(Number) : null;
+  if (!channels) throw new Error(`cor que o teste não lê: ${color}`);
+  return `#${channels.map((value) => Math.round(value).toString(16).padStart(2, '0')).join('')}`;
+}
 
 test.describe('o sinal do Google', () => {
   test('the extension blocker opens the wall in bloqueio, with the focus on the reload', async ({ page, context }) => {
@@ -472,6 +482,49 @@ test.describe('a cara', () => {
     // The sea: a colour at 92 %, never opaque, over the page.
     const backdrop = await page.evaluate(() => getComputedStyle(document.getElementById('fo-wall') as HTMLElement, '::backdrop').backgroundColor);
     expect(backdrop).toContain('0.92');
+  });
+
+  // Review d-1 (§ 451): which sea. Decision 5: the water at 92 % in the light theme and the deep at 92 % in the dark one,
+  // where the water would leave the edge of the card at 2.59:1. The theme on screen comes from the system or from the
+  // theme button, which can say the opposite of the system (data-theme): the six ways, each against the tokens of the
+  // theme on screen, and the edge of the card at 3:1 or more against the sea.
+  test('the sea is the water in the light theme and the deep in the dark one, by the system and by the theme button against it', async ({ page, context }) => {
+    await openAsProduction(page, context, { recovery: googlefcStub(STATUS.EXTENSION) });
+    await expectWallOpen(page, 'bloqueio');
+    const found: string[] = [];
+    for (const colorScheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme });
+      for (const theme of [null, 'light', 'dark'] as const) {
+        const look = await page.evaluate((value) => {
+          const root = document.documentElement;
+          if (value) root.setAttribute('data-theme', value);
+          else root.removeAttribute('data-theme');
+          const probe = (property: string, css: string): string => {
+            const element = document.createElement('i');
+            element.style.setProperty(property, css);
+            document.body.append(element);
+            const result = getComputedStyle(element).getPropertyValue(property);
+            element.remove();
+            return result;
+          };
+          const dialog = document.getElementById('fo-wall') as HTMLElement;
+          return {
+            sea: getComputedStyle(dialog, '::backdrop').backgroundColor,
+            water: probe('background-color', 'color-mix(in srgb, var(--water) 92%, transparent)'),
+            deep: probe('background-color', 'color-mix(in srgb, var(--deep) 92%, transparent)'),
+            edge: getComputedStyle(dialog).borderTopColor,
+          };
+        }, theme);
+        const dark = theme === 'dark' || (theme === null && colorScheme === 'dark');
+        const where = `sistema ${colorScheme}, data-theme ${theme ?? 'nenhum'}`;
+        expect(look.water, where).not.toBe(look.deep);
+        if (look.sea !== (dark ? look.deep : look.water)) found.push(`${where}: o mar é ${look.sea}, devia ser ${dark ? 'o deep' : 'a water'}`);
+        // The edge against the colour of the sea, opaque (the 2.59:1 and 3.52:1 of the specification are measured so).
+        const ratio = contrastRatio(hexOf(look.edge), hexOf(look.sea));
+        if (ratio < 3) found.push(`${where}: a borda do card a ${ratio.toFixed(2)}:1 contra o mar`);
+      }
+    }
+    expect(found).toEqual([]);
   });
 
   test('one entrance of up to 480 ms, and nothing moves with reduced motion', async ({ page, context }) => {
