@@ -138,6 +138,18 @@ html[data-theme="dark"] .fo-theme__state--dark { display: inline-flex; }
   .fo-header__lang { anchor-name: --fo-lang; }
   .fo-langmenu { position-anchor: --fo-lang; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); }
 }
+/* The click that closes one of them (the light dismiss of an auto popover) goes on to what is under it: the DropZone
+   opened the file picker, a radio of the tool changed, and an ad could take it. While one is open the page under the
+   header (the main and the rail) takes no pointer, so the click lands on the body and only closes the menu. The pointer
+   comes back 400 ms after the close, not at once: in WebKit the click of a tap comes after the menu has closed. The delay
+   moves nothing on screen, so it stays with reduced motion too. With no :has() the rules fall and the page is as before
+   (review F11 B-2 and its second pass, DECISOES § 405). */
+.fo-frame { transition: pointer-events 0s linear 400ms allow-discrete; }
+body:has(#fo-menu:popover-open, #fo-langmenu:popover-open) .fo-frame { pointer-events: none; transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) {
+  .fo-frame { transition: pointer-events 0s linear 400ms allow-discrete !important; }
+  body:has(#fo-menu:popover-open, #fo-langmenu:popover-open) .fo-frame { transition-delay: 0s !important; }
+}
 .fo-langmenu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-langmenu a { display: flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; font-weight: 600; }
 .fo-langmenu a:hover { text-decoration: underline; text-underline-offset: 3px; }
