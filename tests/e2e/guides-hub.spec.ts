@@ -81,7 +81,7 @@ for (const lang of LANGS) {
     const extra = await page.addStyleTag({ content: '.fo-hubband .fo-h1::after { content: ""; display: block; height: 34px; }' });
     const taller = await first.boundingBox();
     expect((taller?.y ?? 9999) + (taller?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra, com uma linha a mais no H1`).toBeLessThanOrEqual(740);
-    await extra.evaluate((style) => style.remove());
+    await extra.evaluate((style) => (style as Element).remove());
     for (const width of [360, 1280]) {
       await page.setViewportSize({ width, height: 800 });
       for (const card of await page.locator('main a.fo-guidecard').all()) {
