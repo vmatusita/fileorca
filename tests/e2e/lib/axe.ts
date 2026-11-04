@@ -29,8 +29,10 @@ export async function describedViolations(page: Page, where: string): Promise<st
 }
 
 // F2 (DECISOES § 76 and § 83): each page and each state is reached once per browser, and axe runs at both widths
-// and in both themes on it. The site has no layout or theme decided by script at load, so resizing and switching
-// prefers-color-scheme in place gives what a fresh load gives, with the same rules and reach.
+// and in both themes on it. The site has no layout decided by script at load, and since the F11 the only theme a script
+// decides at load is a stored fo-theme choice (DECISOES § 385 and § 392): every test context starts with an empty storage,
+// so the page is in System, with no data-theme, and switching prefers-color-scheme in place still gives what a fresh
+// load gives, with the same rules and reach. The theme button and a stored choice are checked by header-axe.spec.ts.
 const COMBOS = [
   { width: 360, height: 740, colorScheme: 'dark' },
   { width: 360, height: 740, colorScheme: 'light' },
