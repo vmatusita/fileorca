@@ -2,18 +2,32 @@
 // AdSense in <head>: the verification meta only with PUBLIC_ADSENSE_CLIENT; the loader only with
 // the three variables, on a page that has AdSlots (never on legal or institutional pages) and,
 // like gtag.js, only on fileorca.com: previews on *.workers.dev never request ads.
+// F12 · a parede do bloqueador (decision 5; § 416 and § F12-P5): with the wall on (wallModeOf), the loader marks its own
+// failure (window.foAdsFailed, one line of onerror, half of the fallback signal of the wall), and the ad blocking recovery
+// tag of Google's Privacy & messaging comes after it, made by a script, only on fileorca.com: the async script of
+// fundingchoicesmessages.google.com/i/pub-…?ers=1 (the publisher id without "ca-", as in ads.txt) and the hidden
+// googlefcPresent frame (signalGooglefcPresent). Not the optional "error protection code", which would show a banner of
+// Google's own in English under the page, even with the recovery message in draft (§ 416).
 import { PRODUCTION_HOSTNAME } from '../platform/site.ts';
-import { adsenseScriptSrc, buildAdsConfig, type AdsConfig } from './config.ts';
+import { adsenseScriptSrc, buildAdsConfig, wallModeOf, type AdsConfig } from './config.ts';
+import { recoveryTagSrc } from './wall.ts';
 
 interface Props {
   withAds: boolean;
   config?: AdsConfig;
 }
 const { withAds, config = buildAdsConfig() } = Astro.props;
+const lock = `if(location.hostname===${JSON.stringify(PRODUCTION_HOSTNAME)})`;
+const wall = withAds && config.client ? wallModeOf(config) !== 'desligado' : false;
 const loader =
   withAds && config.scriptEnabled && config.client
-    ? `if(location.hostname===${JSON.stringify(PRODUCTION_HOSTNAME)}){var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src=${JSON.stringify(adsenseScriptSrc(config.client))};document.head.appendChild(s);}`
+    ? `${lock}{var s=document.createElement('script');s.async=true;s.crossOrigin='anonymous';s.src=${JSON.stringify(adsenseScriptSrc(config.client))};${wall ? 's.onerror=function(){window.foAdsFailed=true;};' : ''}document.head.appendChild(s);}`
+    : null;
+const recovery =
+  loader && wall && config.client
+    ? `${lock}{(function(){var f=document.createElement('script');f.async=true;f.src=${JSON.stringify(recoveryTagSrc(config.client))};document.head.appendChild(f);(function g(){if(!window.frames['googlefcPresent']){if(document.body){var i=document.createElement('iframe');i.style='width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;';i.style.display='none';i.name='googlefcPresent';document.body.appendChild(i);}else{setTimeout(g,0);}}})();})();}`
     : null;
 ---
 {config.client && <meta name="google-adsense-account" content={config.client} />}
 {loader && <script is:inline set:html={loader} />}
+{recovery && <script is:inline set:html={recovery} />}

@@ -8,6 +8,11 @@ import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import { dataLayer, dismissCookies, hydrated, useImage } from './lib/page.ts';
 import { BROKEN_PDFS, PDF_ORACLE, choosePdfs, openTool, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
+/* F12 · a parede do bloqueador (§ F12-P7) */
+import { WALL_ACTIONS, WALL_EVENT_MODES } from '../../src/analytics/events.ts';
+import { PRODUCTION_ORIGIN } from './lib/production.ts';
+import { useTestBuild } from './lib/test-build.ts';
+import { STATUS, expectWallOpen, googlefcStub, openAsProduction, wallEvents } from './lib/wall.ts';
 
 // donate_click, next_step_click and the cookie notice, end to end.
 
@@ -443,5 +448,73 @@ test.describe('the PDF tool events', () => {
     const others = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => !(PDF_EVENT_TOOLS as readonly string[]).includes(id));
     expect(others).toEqual(['image-to-pdf']);
     expect(EVENT_TOOLS).toContain('image-to-pdf');
+  });
+});
+
+/* F12 · a parede do bloqueador (decision 5; § F12-P7). The adblock_wall event, in the test build seen as fileorca.com
+   (tests/e2e/lib/wall.ts): each action of the closed list (shown, help only when the panel opens, reload and escape, never
+   a "close") with the mode of the closed list and the language, and nothing else. The reload empties the dataLayer, so
+   the events go through the sessionStorage of the tab too, kept by an init script. */
+test.describe('adblock_wall', () => {
+  useTestBuild(test);
+  test.use({ timezoneId: 'America/Sao_Paulo' });
+
+  test('carries only an action and a mode of its closed lists, and the language', async ({ page, context }) => {
+    await page.addInitScript(() => {
+      const KEY = 'fo-test-wall-events';
+      const kept: unknown[] = JSON.parse(sessionStorage.getItem(KEY) ?? '[]');
+      const layer: unknown[] = [];
+      const push = layer.push.bind(layer);
+      layer.push = (...items: unknown[]) => {
+        for (const item of items) {
+          const entry = Array.from(item as ArrayLike<unknown>);
+          if (entry[0] === 'event' && entry[1] === 'adblock_wall') kept.push(entry[2]);
+        }
+        sessionStorage.setItem(KEY, JSON.stringify(kept));
+        return push(...items);
+      };
+      (window as unknown as { dataLayer: unknown[] }).dataLayer = layer;
+    });
+    const kept = async () => JSON.parse((await page.evaluate(() => sessionStorage.getItem('fo-test-wall-events'))) ?? '[]') as Record<string, unknown>[];
+
+    // The wall (bloqueio): shown, the help opened and closed (one help), the reload (the page comes back with the wall),
+    // then the escape.
+    await openAsProduction(page, context, { recovery: googlefcStub(STATUS.EXTENSION) });
+    await expectWallOpen(page, 'bloqueio');
+    await page.locator('[data-wall="help"]').click();
+    await page.locator('[data-wall="help"]').click();
+    await Promise.all([page.waitForEvent('load'), page.locator('[data-wall="reload"]').click()]);
+    await expectWallOpen(page, 'bloqueio');
+    await page.locator('[data-wall="escape"]').click();
+    // A page in Portuguese: free for 30 minutes after the escape (no event); without the escape, the wall again.
+    await page.goto(`${PRODUCTION_ORIGIN}/pt/comprimir-imagem/`);
+    await page.evaluate(() => localStorage.removeItem('fo-wall-escape'));
+    await page.reload();
+    await expectWallOpen(page, 'bloqueio');
+    const events = await kept();
+    expect(events.map((event) => [event['action'], event['mode'], event['lang']])).toEqual([
+      ['shown', 'bloqueio', 'en'],
+      ['help', 'bloqueio', 'en'],
+      ['reload', 'bloqueio', 'en'],
+      ['shown', 'bloqueio', 'en'],
+      ['escape', 'bloqueio', 'en'],
+      ['shown', 'bloqueio', 'pt'],
+    ]);
+    for (const event of events) {
+      expect(Object.keys(event).sort()).toEqual(['action', 'lang', 'mode']);
+      expect(WALL_ACTIONS).toContain(event['action']);
+      expect(WALL_EVENT_MODES).toContain(event['mode']);
+    }
+    // Esc does not close the wall, and sends nothing.
+    await page.keyboard.press('Escape');
+    expect((await wallEvents(page)).map((event) => event['action'])).toEqual(['shown']);
+  });
+
+  test('the notice of the network-level blocker sends its mode, and Esc sends nothing', async ({ page, context }) => {
+    await openAsProduction(page, context, { recovery: googlefcStub(STATUS.NETWORK) }, `${PRODUCTION_ORIGIN}/es/comprimir-imagen/`);
+    await expectWallOpen(page, 'aviso');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#fo-wall')).not.toHaveAttribute('open', '');
+    expect(await wallEvents(page)).toEqual([{ action: 'shown', mode: 'aviso', lang: 'es' }]);
   });
 });
