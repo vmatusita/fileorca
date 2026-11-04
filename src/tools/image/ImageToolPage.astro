@@ -1,9 +1,12 @@
 ---
 // The tool page mold (docs/design/components/ToolPage; prompt F2 decision 9), shared by the eight image
-// tools and their presets: breadcrumb, H1 + PrivacySeal, the island, the first AdSlot (150px clearance
-// built in), then the blocks the content gate checks (data-content: how, specs, faq, privacy, related)
-// and the rail AdSlot (from 1280px, not sticky). The card of each guide that embeds the tool closes the "How to" block
-// (F11, decision 7; DECISOES § 396). The tool's page component fills two slots:
+// tools and their presets: breadcrumb, H1 + PrivacySeal, the island, then the blocks the content gate checks
+// (data-content: how, specs, faq, privacy, related), with the ads of the map. The card of each guide that embeds the tool
+// closes the "How to" block
+// (F11, decision 7; DECISOES § 396). F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad goes
+// after the "How to" block (UX-04 A, § 371), 166 px from the GuideCard that closes it; the next ones only at the marks
+// between the questions and between the last blocks, never against the tables of the specs; the layout puts each box and
+// the rails (src/ads/map.ts). The tool's page component fills two slots:
 //   panel   the tool's own Panel (server-rendered; its mount.ts hydrates it from data-props)
 //   default the <script> that imports that mount.ts. It must live in the tool's own component so
 //           Astro bundles one entry per tool (DECISOES § 23); here it would be one entry for all.
@@ -14,7 +17,7 @@ import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import GuideCard from '../../components/GuideCard.astro';
-import AdSlot from '../../ads/AdSlot.astro';
+import AdBreak from '../../ads/AdBreak.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
@@ -57,6 +60,7 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
   title={title}
   description={t.description}
   withAds
+  adArea={area}
   oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(name, t.description, path, lang)]}
 >
@@ -67,7 +71,6 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
   </div>
   <div id="fo-tool-root" data-props={JSON.stringify(panel)}><slot name="panel" /></div>
   <slot />
-  <AdSlot area={area} variant="content" label={common.adLabel} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
@@ -77,6 +80,7 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
       </div>
     )}
   </section>
+  <AdBreak first />
   <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
     <h2 id="specs">{t.specsHeading}</h2>
     <table class="fo-table">
@@ -101,12 +105,14 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
   </section>
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
-    <Faq items={t.faq} />
+    <Faq items={t.faq} breaks />
   </section>
+  <AdBreak />
   <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
     <h2 id="privacy-note">{t.privacyHeading}</h2>
     <p>{t.privacyNote}</p>
   </section>
+  <AdBreak />
   <section class="fo-section" data-content="related" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     {related.length > 0 ? (
@@ -119,5 +125,4 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
       <p class="fo-prose"><a href={homePath(lang)}>{TEXTS[lang].home.toolsHeading}</a></p>
     )}
   </section>
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

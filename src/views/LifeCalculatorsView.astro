@@ -4,10 +4,13 @@
 // order of the registry; one content AdSlot; "how these calculators work" with the data-ymyl blocks of
 // gate:dinheiro-saude (formula, assumptions, a worked example from the engine, official sources, the notice); the rail
 // AdSlot. English only.
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad after the grid of calculators, the next
+// ones only at the marks of "How these calculators work", never against the table of the example; the layout puts each box
+// and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import { routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -44,6 +47,7 @@ const read = datesOf(hub, lang).read;
   title={t.title}
   description={t.description}
   withAds
+  adArea="casa-saude"
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -61,18 +65,21 @@ const read = datesOf(hub, lang).read;
       ))}
     </ul>
   </section>
-  <AdSlot area="casa-saude" variant="content" label={common.adLabel} />
+  <AdBreak first />
   <section class="fo-section fo-prose" aria-labelledby="works">
     <h2 id="works">{t.worksHeading}</h2>
-    {t.worksIntro.map((paragraph) => <p>{paragraph}</p>)}
+    {t.worksIntro.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
+    <AdBreak />
     <div data-ymyl="formula">
       <h3 class="fo-h3">{t.formulaHeading}</h3>
-      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+      {t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
     </div>
+    <AdBreak />
     <div data-ymyl="premises">
       <h3 class="fo-h3">{t.premisesHeading}</h3>
       <ul>{t.premises.map((premise) => <li>{premise}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="example">
       <h3 class="fo-h3">{t.exampleHeading}</h3>
       <p>{t.exampleIntro}</p>
@@ -82,14 +89,15 @@ const read = datesOf(hub, lang).read;
       </table>
       <p>{example.sentence}</p>
     </div>
+    <AdBreak />
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{t.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>
   </section>
-  <AdSlot slot="rail" area="casa-saude" variant="rail" label={common.adLabel} />
 </BaseLayout>

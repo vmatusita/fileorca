@@ -4,10 +4,13 @@
 // end of its band (its page stays in the image hub, DECISOES § 148), one content AdSlot, the guide of which tool does
 // which job, how the files stay on the device, and the rail AdSlot, in the language of the page. Each hub lists the file
 // guides of its language (F5b note; in pt and es since the languages adjustment).
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad after the grid of tools, the next ones only
+// at the marks of the text (between its paragraphs and lists) and between its sections; the layout puts each box and the
+// rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { guidesOfHub } from '../tools/guides/registry.ts';
@@ -47,6 +50,7 @@ const shared = GUIDE_SHARED[lang];
   title={t.title}
   description={t.description}
   withAds
+  adArea={area}
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -63,26 +67,31 @@ const shared = GUIDE_SHARED[lang];
       ))}
     </ul>
   </section>
-  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <AdBreak first />
   <section class="fo-section fo-prose" aria-labelledby="guide">
     <h2 id="guide">{t.guideHeading}</h2>
     <p>{t.guideIntro}</p>
+    <AdBreak />
     <ul>
       {t.guide.map((line) => <li>{line.before} <a href={hrefOf(line.tool)}>{nameOf(line.tool)}</a> {line.after}</li>)}
     </ul>
+    <AdBreak />
     <p>{t.guideOutro}</p>
   </section>
+  <AdBreak />
   <section class="fo-section fo-prose" aria-labelledby="privacy">
     <h2 id="privacy">{t.privacyHeading}</h2>
-    {t.privacy.map((paragraph) => <p>{paragraph}</p>)}
+    {t.privacy.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
   </section>
   {guides.length > 0 && (
-    <section class="fo-section fo-prose" aria-labelledby="guides">
-      <h2 id="guides">{shared.hubGuidesHeading}</h2>
-      <ul>
-        {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
-      </ul>
-    </section>
+    <>
+      <AdBreak />
+      <section class="fo-section fo-prose" aria-labelledby="guides">
+        <h2 id="guides">{shared.hubGuidesHeading}</h2>
+        <ul>
+          {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
+        </ul>
+      </section>
+    </>
   )}
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

@@ -5,6 +5,7 @@ import AdsenseHead from '../../src/ads/AdsenseHead.astro';
 import { AD_UNITS, CONTENT_UNITS, adsConfigFrom, adsTxt, contentUnit, unitFor, wallModeOf, type AdsConfig } from '../../src/ads/config.ts';
 import { TEST_SLOTS, TEST_UNIT_COUNT } from '../../scripts/lib/test-build.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
+import { pushScript } from '../../src/ads/map.ts';
 
 const CLIENT = 'ca-pub-1234567890123456';
 const SLOTS = JSON.stringify({
@@ -105,10 +106,12 @@ describe('AdSlot and the AdSense head in the three states', () => {
   for (const [state, config] of Object.entries(STATES)) {
     // F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id for the position, nothing at all (no box, no label, no
     // reserved space, no push); with the id, the reserved box with the label.
+    // F12, the ad map (plan B, DECISOES § 415, § F12-M2 and § F12-M5): the box carries the area, the unit, its id and its
+    // format, and no <ins> and no push of its own: the one push script of the page makes the unit on fileorca.com.
     it(`renders the reserved box with the label in each language only with the unit id (${state})`, async () => {
       for (const [lang, label] of [['en', 'Advertisements'], ['pt', 'Publicidade'], ['es', 'Anuncios']] as const) {
         expect(TEXTS[lang].common.adLabel).toBe(label);
-        const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', variant: 'content', label, config } });
+        const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', unit: 'conteudo', label, config } });
         if (state !== 'all') {
           expect(html.trim()).toBe('');
           continue;
@@ -116,13 +119,16 @@ describe('AdSlot and the AdSense head in the three states', () => {
         expect(html).toContain('class="fo-ad fo-ad--content"');
         expect(html).toContain(`<span class="fo-ad__label">${label}</span>`);
         expect(html).not.toContain('aria-label');
-        const hasUnit = html.includes('class="adsbygoogle"');
-        expect(hasUnit).toBe(state === 'all');
-        if (state === 'all') {
-          expect(html).toContain(`data-ad-client="${CLIENT}"`);
-          expect(html).toContain('data-ad-slot="1111111111"');
-          expect(html).toContain('if(location.hostname==="fileorca.com"){(window.adsbygoogle=window.adsbygoogle||[]).push({});}');
-        }
+        expect(html).not.toContain('tabindex');
+        expect(html).not.toContain('role=');
+        expect(html).toContain('data-ad-area="arquivos"');
+        expect(html).toContain('data-ad-unit="conteudo"');
+        expect(html).toContain('data-ad-id="1111111111"');
+        expect(html).toContain('data-ad-format="auto"');
+        // The first content ad shows at every width: no media query.
+        expect(html).not.toContain('data-ad-media');
+        expect(html).not.toContain('class="adsbygoogle"');
+        expect(html).not.toContain('<script');
       }
     });
 
@@ -150,11 +156,15 @@ describe('AdSlot and the AdSense head in the three states', () => {
     vi.unstubAllEnvs();
   });
 
+  // F12 (DECISOES § F12-M2 and § F12-M5): the rail box says it is for 1280 px and more; its 300 × 600 unit is made by the push
+  // script, only where that width matches on load.
   it('reserves the rail unit size', async () => {
-    const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', variant: 'rail', label: 'Anuncios', config: STATES['all'] } });
+    const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', unit: 'lateral', label: 'Anuncios', config: STATES['all'] } });
     expect(html).toContain('class="fo-ad fo-ad--rail"');
-    expect(html).toContain('data-ad-slot="2222222222"');
-    expect(html).toContain('width:300px;height:600px');
-    expect(html).toContain("matchMedia('(min-width: 1280px)').matches");
+    expect(html).toContain('data-ad-id="2222222222"');
+    expect(html).toContain('data-ad-media="(min-width: 1280px)"');
+    expect(html).not.toContain('data-ad-format');
+    expect(pushScript(CLIENT)).toContain('width:300px;height:600px');
+    expect(pushScript(CLIENT)).toContain('matchMedia(m)');
   });
 });

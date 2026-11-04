@@ -8,10 +8,14 @@
 // gate:dinheiro-saude); the related calculators; the rail AdSlot. Schema: Article, BreadcrumbList, Person. Since the
 // languages adjustment it also serves the Spanish guides: the same engines, the numbers and words in Spanish, the Spanish
 // calculator embedded, and every link to a Spanish page.
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad goes into the text after the calculator,
+// with a paragraph between them (after the first paragraph of the first part), and the next ones only at the marks
+// between the paragraphs and the parts and in "How it works", never beside the table the engines measured; the layout
+// puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import CalcIsland from '../tools/calc/CalcIsland.astro';
 import CalcScheduleRoot from '../tools/calc/CalcScheduleRoot.astro';
@@ -54,8 +58,8 @@ const calcLabel = /^[A-Z][a-z]/.test(calcH1) ? calcH1[0]!.toLowerCase() + calcH1
 const calcPath = moneyPage(guide.calc, lang)?.path ?? '';
 const [readBefore, readAfter] = shared.readOn.split('{date}');
 const [noteBefore, noteAfter] = t.tableNote.split('{date}');
-const before = t.sections.slice(0, 2);
-const after = t.sections.slice(2);
+// The first ad after the first paragraph of the first part, or after that part when it has a single paragraph.
+const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
 ---
 <BaseLayout
   lang={lang}
@@ -63,6 +67,7 @@ const after = t.sections.slice(2);
   title={t.title}
   description={t.description}
   withAds
+  adArea="dinheiro"
   oli={PANEL_POSES}
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED, id), personLd()]}
 >
@@ -80,18 +85,14 @@ const after = t.sections.slice(2);
   <CalcIsland data={data} />
   <p class="fo-guide__open"><a href={calcPath}>{fmt(shared.openCalc, { name: calcLabel })}</a></p>
   <CalcScheduleRoot data={data} />
-  {before.map((section, index) => (
-    <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>
-      <h2 id={`part-${index}`}>{section.heading}</h2>
-      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
-    </section>
-  ))}
-  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
-  {after.map((section, index) => (
-    <section class="fo-section fo-prose" aria-labelledby={`part-${index + before.length}`}>
-      <h2 id={`part-${index + before.length}`}>{section.heading}</h2>
-      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
-    </section>
+  {t.sections.map((section, index) => (
+    <>
+      {index > 0 && <AdBreak first={index === 1 && !firstInside} />}
+      <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>
+        <h2 id={`part-${index}`}>{section.heading}</h2>
+        {section.paragraphs.map((paragraph, at) => <>{at > 0 && <AdBreak first={index === 0 && at === 1} />}<p>{fill(paragraph)}</p></>)}
+      </section>
+    </>
   ))}
   <section class="fo-section fo-prose" aria-labelledby="measured">
     <h2 id="measured">{t.tableHeading}</h2>
@@ -107,24 +108,29 @@ const after = t.sections.slice(2);
   </section>
   <section class="fo-section fo-prose" aria-labelledby="works">
     <h2 id="works">{t.formulaHeading}</h2>
-    <div data-ymyl="formula">{t.formula.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+    <div data-ymyl="formula">{t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{fill(paragraph)}</p></>)}</div>
+    <AdBreak />
     <div data-ymyl="premises">
       <h3 class="fo-h3">{t.premisesHeading}</h3>
       <ul>{t.premises.map((premise) => <li>{fill(premise)}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="example">
       <h3 class="fo-h3">{t.exampleHeading}</h3>
-      {t.example.map((paragraph) => <p>{fill(paragraph)}</p>)}
+      {t.example.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{fill(paragraph)}</p></>)}
     </div>
+    <AdBreak />
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED, lang)}</time>{readAfter}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{t.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>
   </section>
+  <AdBreak />
   <section class="fo-section" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
@@ -133,5 +139,4 @@ const after = t.sections.slice(2);
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
 </BaseLayout>
