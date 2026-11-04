@@ -102,7 +102,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 
 ## Acessibilidade
 
-- Anel de foco `focus` de 3px, afastado 2px, em tudo que recebe foco; dentro de `.fo-deep` ele vira `on-deep`.
+- Anel de foco `focus` de 3px, afastado 2px, em tudo que recebe foco; dentro de `.fo-deep` ele vira `on-deep`. A exceção é o `<main>` com `tabindex="-1"`, que recebe o foco por script quando a parede do bloqueador fecha, só para o próximo Tab começar no conteúdo: ele não é controle e fica sem o anel.
 - A DropZone não é botão: clicar nela abre o seletor, e o alvo de teclado é o Escolher arquivos dentro dela (controle dentro de controle reprova no axe). WaterLevel é `progressbar` com nome e `aria-valuetext`, ResultCard e ResultHero têm `aria-live="polite"`, OliMessage de erro é `alert`.
 - Todo controle tem nome acessível que contém o texto visível: o logo inline é `role="img"` com `aria-label="FileOrca"`, o botão de idioma diz "EN" e completa em texto escondido, a busca é um combobox com a lista nomeada.
 - Títulos sem pular nível: as colunas do rodapé são H2, e o título do SupportCard segue a página.

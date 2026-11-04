@@ -298,6 +298,9 @@ test.describe('o teclado e o Esc', () => {
     await expect(wall(page)).not.toHaveAttribute('open', '');
     await expect(page.locator('main')).toBeFocused();
     await expect(page.locator('main')).toHaveAttribute('tabindex', '-1');
+    // Review d-3 (§ 450): <main> takes the focus so the next Tab starts in the content, but it is no control: the focus
+    // closed by the keyboard is :focus-visible, and still no 3 px ring goes round the whole page.
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector('main') as HTMLElement).outlineStyle)).toBe('none');
   });
 
   test('the close button closes the notice for good', async ({ page, context }) => {

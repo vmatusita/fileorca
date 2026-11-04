@@ -24,7 +24,7 @@ Card: `surface`, `ink`, traço `stroke-2` em `stroke`, `radius-xl`, `shadow-pop`
 
 ## Teclado e leitor de tela
 
-- O foco abre no "recarregar". O modal nativo prende o foco no diálogo; ao fechar (o aviso ou o escape), o foco volta para onde estava e, quando não havia foco antes, vai para o `<main>` (`tabindex="-1"`).
+- O foco abre no "recarregar". O modal nativo prende o foco no diálogo; ao fechar (o aviso ou o escape), o foco volta para onde estava e, quando não havia foco antes, vai para o `<main>` (`tabindex="-1"`), sem o anel de foco: o `<main>` não é controle, e o foco ali só faz o próximo Tab começar no conteúdo (DECISOES § 450).
 - O diálogo tem nome (`aria-labelledby` no título) e descrição (`aria-describedby` no texto). O painel tem nome pelo `h3`.
 - O `Ctrl+K` não abre a busca por cima da parede.
 - Todo alvo tem 48 px ou mais: o recarregar 60, o "Ver como desativar" e o escape 52, o fechar 48 × 48, cada entrada do painel 56.
