@@ -43,7 +43,6 @@ export default {
     readOn: 'Lido em {date}.',
     exampleInputs: 'Você digita',
     exampleResults: 'Você recebe',
-    guide: 'Leia o guia: {title}',
     openCalc: 'Abrir a {name} na página dela',
     disclaimerHeading: 'Ferramenta educativa',
     exampleCaption: 'O exemplo resolvido: o que entra e o que sai',

@@ -21,7 +21,6 @@ import {
   LIFE_HUB_ROUTE,
   calcAreaOf,
   calcPresetsOf,
-  guidePathIn,
   isCalcPage,
   isGuide,
   moneyPage,
@@ -208,15 +207,6 @@ export function presetRows(id: AnyCalcId, lang: Lang = 'en'): { href: string; na
   if (!isCalcPage(id) || CALC_PAGES[id].parent) return [];
   const common = TEXTS[lang].common;
   return existing(calcPresetsOf(id as CalcToolId), lang).map((preset) => ({ href: pageIn(preset, lang).path, name: calcName(preset, lang), description: common.calcs[preset]?.description ?? '' }));
-}
-
-/** The guide of a calculator, where it exists in the language (English and Spanish). */
-export function guideOf(id: AnyCalcId, lang: Lang = 'en'): { href: string; title: string } | null {
-  if (!isCalcPage(id)) return null;
-  const guide = CALC_PAGES[id].guide;
-  const name = guide ? TEXTS[lang].common.guides?.[guide]?.name : undefined;
-  const href = guide ? guidePathIn(guide, lang) : null;
-  return guide && name && href ? { href, title: name } : null;
 }
 
 /** The worked example: what the example values put in and what the engine gives back, as the page shows them. */

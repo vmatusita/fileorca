@@ -4,24 +4,27 @@
 // "reviewed"); the island (fields, result, ExportBar, scenarios, chips); the first AdSlot, 150 px from the
 // chips; the schedule island; how to use; how it works (formula, assumptions, worked example from the
 // engine, official sources, educational notice: the data-ymyl blocks of gate:dinheiro-saude); the presets
-// table; the questions; the privacy note; the related grid; the rail AdSlot. It serves the English pages, their
+// table; the questions; the privacy note; the related grid; the rail AdSlot. The calculator that a guide embeds shows the
+// GuideCard of that guide (--here) at the end of "How to", right after the schedule, which takes nothing inside (F11,
+// decision 7; DECISOES § 396): before, a line "Read the guide" sat in the "how it works" block. It serves the English pages, their
 // Spanish versions and the Brazilian calculators, each in its language; the presets and guides only in English (F6).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import ToolCard from '../../components/ToolCard.astro';
+import GuideCard from '../../components/GuideCard.astro';
 import AdSlot from '../../ads/AdSlot.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
-import { fmt } from '../../i18n/format.ts';
 import { breadcrumbLd, personLd, webApplicationLd } from '../../seo/meta.ts';
 import { PANEL_POSES } from '../image/Oli.tsx';
 import CalcIsland from './CalcIsland.astro';
 import CalcScheduleRoot from './CalcScheduleRoot.astro';
 import Reviewed from './Reviewed.astro';
-import { SHARED_BY_LANG, calcTexts, crumbsFor, datesOf, guideOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
-import { calcAreaOf, type AnyCalcId } from './registry.ts';
+import { SHARED_BY_LANG, calcTexts, crumbsFor, datesOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
+import { CALC_PAGES, calcAreaOf, guidePathIn, isCalcPage, type AnyCalcId } from './registry.ts';
+import { guideCardData } from '../guides/card.ts';
 
 interface Props {
   id: AnyCalcId;
@@ -44,7 +47,9 @@ const data = panelData(id, lang);
 const crumbs = crumbsFor(id, lang);
 const related = relatedFor(id, lang);
 const presets = presetRows(id, lang);
-const guide = guideOf(id, lang);
+// The guide of the calculator, where it exists in the language (English and Spanish; never in pt).
+const guideId = isCalcPage(id) ? CALC_PAGES[id].guide : undefined;
+const guide = guideId && guidePathIn(guideId, lang) !== null ? guideCardData(guideId, lang) : null;
 const example = workedExample(id, lang);
 const [readBefore, readAfter] = shared.readOn.split('{date}');
 ---
@@ -70,6 +75,11 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+    {guide && (
+      <div class="fo-guidehere">
+        <GuideCard href={guide.href} name={guide.name} description={guide.description} category={guide.category} proof={guide.proof} lang={lang} />
+      </div>
+    )}
   </section>
   {t.own?.map((block, index) => (
     <section class="fo-section fo-prose" data-content="own" aria-labelledby={`own-${index}`}>
@@ -104,7 +114,6 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
     </div>
-    {guide && <p><a href={guide.href}>{fmt(shared.guide, { title: guide.title })}</a></p>}
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{shared.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>

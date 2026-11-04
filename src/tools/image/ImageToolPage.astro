@@ -2,7 +2,8 @@
 // The tool page mold (docs/design/components/ToolPage; prompt F2 decision 9), shared by the eight image
 // tools and their presets: breadcrumb, H1 + PrivacySeal, the island, the first AdSlot (150px clearance
 // built in), then the blocks the content gate checks (data-content: how, specs, faq, privacy, related)
-// and the rail AdSlot (from 1280px, not sticky). The tool's page component fills two slots:
+// and the rail AdSlot (from 1280px, not sticky). The card of each guide that embeds the tool closes the "How to" block
+// (F11, decision 7; DECISOES § 396). The tool's page component fills two slots:
 //   panel   the tool's own Panel (server-rendered; its mount.ts hydrates it from data-props)
 //   default the <script> that imports that mount.ts. It must live in the tool's own component so
 //           Astro bundles one entry per tool (DECISOES § 23); here it would be one entry for all.
@@ -12,14 +13,14 @@ import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
+import GuideCard from '../../components/GuideCard.astro';
 import AdSlot from '../../ads/AdSlot.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
 import { FILE_PANEL_POSES } from './Oli.tsx';
-import { fmt } from '../../i18n/format.ts';
 import { guidesOfTool } from '../guides/registry.ts';
-import { GUIDE_SHARED, guideLinks } from '../guides/page.ts';
+import { guideCardData } from '../guides/card.ts';
 import { IMAGE_TOOL_IDS } from './registry.ts';
 import { imageToolTexts } from './texts.ts';
 import { blurbOf, crumbsFor, presetRows, relatedFor } from './page.ts';
@@ -43,11 +44,12 @@ const related = relatedFor(id, lang);
 const presets = presetRows(id, lang);
 const name = blurbOf(id, lang)?.name ?? t.h1;
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
-// The guides that embed this tool (F5b, decision 6), linked between the specs and the questions, away from both AdSlots;
-// in the language of the page, where the guides exist since the languages adjustment (DECISOES § 6).
+// The guides that embed this tool (F5b, decision 6), in the language of the page, where the guides exist since the
+// languages adjustment (DECISOES § 6). F11 (decision 7): each one is a GuideCard (--here: no heading, no foot) at the end of
+// the "How to" block, the first block after the panel, one under the other; the line "Read the guide" between the specs and
+// the questions is gone.
 const tool = (IMAGE_TOOL_IDS as readonly string[]).includes(id) ? (id as (typeof IMAGE_TOOL_IDS)[number]) : null;
-const guides = tool ? guideLinks(guidesOfTool(tool), lang).map((guide) => ({ href: guide.href, title: guide.name })) : [];
-const guideTexts = GUIDE_SHARED[lang];
+const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lang)) : [];
 ---
 <BaseLayout
   lang={lang}
@@ -69,6 +71,11 @@ const guideTexts = GUIDE_SHARED[lang];
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
+    {guides.length > 0 && (
+      <div class="fo-guidehere">
+        {guides.map((card) => <GuideCard href={card.href} name={card.name} description={card.description} category={card.category} proof={card.proof} lang={lang} />)}
+      </div>
+    )}
   </section>
   <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
     <h2 id="specs">{t.specsHeading}</h2>
@@ -92,11 +99,6 @@ const guideTexts = GUIDE_SHARED[lang];
       </>
     )}
   </section>
-  {guides.length > 0 && (
-    <div class="fo-section fo-prose fo-guide-links">
-      {guides.map((guide) => <p><a href={guide.href}>{fmt(guideTexts.guideLink, { title: guide.title })}</a></p>)}
-    </div>
-  )}
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
     <Faq items={t.faq} />

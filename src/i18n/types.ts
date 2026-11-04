@@ -557,8 +557,6 @@ export interface FileGuidesSharedTexts {
   gps: { real: string; none: string; empty: string; zeroed: string; kept: string };
   /** Readable names of the fixtures, by file name. */
   fixtures: Record<string, string>;
-  /** "Read the guide: {title}" under a tool. */
-  guideLink: string;
   /** Heading of the guides list of a hub. */
   hubGuidesHeading: string;
   /**
