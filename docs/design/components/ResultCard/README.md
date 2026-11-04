@@ -17,5 +17,5 @@ O momento em que a Oli devolve o arquivo: um card no fundo do mar (`deep`), com 
 - `aria-live="polite"` no card: o leitor de tela ouve a fala da Oli.
 - O foco vai para o Baixar quando o card aparece.
 - `deep` é o mesmo nos dois temas; no escuro, o traço `stroke` (#6A82A6) é o que separa o card do chão.
-- O primeiro AdSlot fica abaixo dos NextStepChips, a `ad-clearance` do Baixar.
+- O primeiro AdSlot da ferramenta fica depois do "Como usar", longe do Baixar e da linha do café (F12, DECISOES § 419); nada de anúncio dentro do card nem a menos de `ad-clearance` dele.
 - Sem ganho real: a Oli diz "This file was already optimized" e o Baixar entrega o original, nunca um arquivo maior.

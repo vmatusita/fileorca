@@ -106,3 +106,12 @@ Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no
 - **Numa worktree isolada, o harness recusa o comando que não consegue ler:** um `for` com variável passada ao `node`, um `sed` com programa grande, um `powershell`. Rode um comando simples por vez, ponha a lógica num script do `.cache/` escrito com a ferramenta de escrita e passe `MSYS_NO_PATHCONV=1` quando um argumento começar por `/`.
 - O `-g` do Playwright com um padrão que começa por "/" (por exemplo `-g "/guides/$|/pt/guias/$"`) vira caminho do Windows no Git Bash e casa menos testes, sem erro: rodaram 2 dos 3 hubs. Use `MSYS_NO_PATHCONV=1` antes do comando e confira o número de testes que rodaram (F11).
 - Um agente em worktree isolada não roda um `for` com variável em volta do `pnpm` (`for g in seo links; do pnpm gate:$g; done`): o harness recusa, porque não consegue provar que o comando não é git. Rode cada portão num comando separado (F11).
+
+## F12: monetização
+
+Pegadinhas que a F12 achou no Git Bash, nas worktrees e na junção das três frentes (DECISOES § 410).
+
+- **Os § de frentes paralelas:** cada agente escreveu os seus com um marcador (o prefixo da fase, a letra da frente e a ordem), e um script trocou todos por números na junção, a partir do primeiro livre, na ordem das frentes. O script troca também os exemplos do marcador escritos em texto: descreva o marcador sem escrevê-lo, ou confira o diff do texto depois.
+- **Heredoc com crase, barra invertida ou apóstrofo continua estragando o texto,** também no `node - <<'EOF'`: um `\s` virou `s` e um `\/` virou `/` dentro de expressões regulares. Para trocar trechos com barra invertida, use a ferramenta de edição.
+- **A prova de "reprova sem a mudança" sem worktree nova:** `git archive <commit>` extraído em `.cache/`, com `pnpm install --frozen-lockfile --prefer-offline` (uns 11 s). Sem o `.git` ali, o build de teste sempre refaz.
+- **O verificador da worktree recusa comandos com `|`, colchetes ou variáveis dentro de argumentos** (`-g "a|b"`, `apo[iy]`, um `for`). Rode um `--grep` simples por comando.
