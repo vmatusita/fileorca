@@ -158,6 +158,36 @@ test('the section of the page is marked by its weight too, so it still shows wit
   expect(languages).toEqual([['', '600'], ['true', '700'], ['', '600']]);
 });
 
+// Review F11 B-1 (DECISOES § 404): with forced colours the background and every border look alike, and 700 against 600 is a
+// faint mark. The current row, the language in use in the Menu and the one in the language menu are underlined there too,
+// as the OptionGroup is (§ 280); with no forced colours nothing is underlined (WebKit, which does not emulate them).
+test('with forced colours the section and the language in use are underlined too, in the Menu and in the language menu', async ({ page, browserName }) => {
+  if (browserName === 'chromium') await page.emulateMedia({ forcedColors: 'active' });
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto(routeById('compress-image').paths.pt ?? '');
+  const forced = await page.evaluate(() => matchMedia('(forced-colors: active)').matches);
+  expect(forced).toBe(browserName === 'chromium');
+  const mark = forced ? 'underline' : 'none';
+  await menuButton(page).click();
+  await page.mouse.move(0, 0);
+  const rows = await sheet(page).locator('ul.fo-menu__list:not([aria-labelledby]) .fo-menu__name').evaluateAll((names) =>
+    names.map((name) => [name.closest('a')?.getAttribute('aria-current') ?? '', getComputedStyle(name).textDecorationLine]),
+  );
+  expect(rows.filter(([current]) => current).map(([, line]) => line)).toEqual([mark]);
+  expect(new Set(rows.filter(([current]) => !current).map(([, line]) => line))).toEqual(new Set(['none']));
+  const languages = await sheet(page).locator('.fo-menu__lang a[hreflang]').evaluateAll((links) => links.map((link) => [link.getAttribute('aria-current') ?? '', getComputedStyle(link).textDecorationLine]));
+  expect(languages).toEqual([['', 'none'], ['true', mark], ['', 'none']]);
+  await page.keyboard.press('Escape');
+
+  // The language menu of the computer: before, with forced colours, nothing marked the language in use.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.locator('.fo-header__lang').click();
+  await expect(page.locator('#fo-langmenu')).toBeVisible();
+  await page.mouse.move(0, 0);
+  const menu = await page.locator('#fo-langmenu a[hreflang]').evaluateAll((links) => links.map((link) => [link.getAttribute('aria-current') ?? '', getComputedStyle(link).textDecorationLine]));
+  expect(menu).toEqual([['', 'none'], ['true', mark], ['', 'none']]);
+});
+
 /** A first visit at one width, in a context of its own, with Figtree held until released (layout-shift.spec.ts). */
 async function heldPage(browser: Browser, path: string, width: number): Promise<{ page: Page; release: () => Promise<void>; close: () => Promise<void> }> {
   const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
