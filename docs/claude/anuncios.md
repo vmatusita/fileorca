@@ -39,3 +39,9 @@ Pegadinhas que a F10 achou ao medir o mapa (`docs/propostas/ux-v2/ad-map.html`, 
 - **O multiplex a 1280 px:** a coluna tem 758 px, então o `ins` tem `floor(758 × 0,6)` = 454 px, e a caixa, 498 px com o rótulo. A 360 px, o carregador dá 1 coluna × 6 linhas: 1.666 px, que nenhum molde cabe em 30 %.
 - **Para medir a densidade,** grave o `fo-consent`, espere `#fo-tool-root[data-hydrated="true"]` e meça com a ferramenta em repouso. A seção "O que medimos" dos guias de dinheiro não tem `data-content`, só o `h2#measured`.
 - **A vinheta do AdSense tem "gatilhos adicionais" ligados por padrão desde 9/mar/2026:** o botão Voltar, 30 s parado, a volta à aba e o fim do artigo. Eles podem pôr uma vinheta durante o processamento, e desligar é do Victor, no painel.
+
+## F11: navegação, guias e tema
+
+Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no hub de guias e nas entradas dele, e no merge das três fatias).
+
+- **A folha do Menu abre no topo da página e precisa terminar 150 px acima do 1º AdSlot:** a 360 px, o do Merge PDF e do Unlock PDF fica em y 796, e a folha em inglês termina em y 629,5 (§ 388). Linha nova na folha, ou anúncio mais alto num molde: rode o bloco do cabeçalho do `ads.spec.ts`, que mede as 178 páginas com área de anúncio.

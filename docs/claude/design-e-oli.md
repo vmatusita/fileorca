@@ -69,3 +69,13 @@ Pegadinhas que a F10 achou (nos protótipos sobre o `docs/design/`; valem para q
 - **`aria-labelledby` num `<code>` reprova no axe** (`aria-prohibited-attr`): use um rótulo visível antes do código.
 - **O `.fo-prose p` vence uma classe simples dentro de um cartão posto em texto corrido.** Use `span` ou um seletor `.fo-prose .x`.
 - **Os ícones de `docs/design/assets/Icons/` têm `stroke="#0F1B2D"` no `<svg>` raiz,** como o `tests/unit/icons.test.ts` confere. Um ícone com `currentColor` no raiz, como os do UX-01 na proposta, reprova o teste: converta ao mover.
+
+## F11: navegação, guias e tema
+
+Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no hub de guias e nas entradas dele, e no merge das três fatias).
+
+- **No Chromium, um texto `font-display: optional` que estava em `display: none` na primeira pintura usa a fonte se ela já tiver chegado quando o texto aparecer** (o código do idioma a 320 px, alargado a 768 px depois de a Figtree chegar, mudou 2 px). Numa largura fixa, a Steady fica parada. Meça "a fonte segura e solta" com um contexto novo por largura, nunca redimensionando a página que já pintou (`header-menu.spec.ts`, § 388).
+- **O `bundle.css` do `docs/design/` não tem o preflight do site,** então tudo nele é `box-sizing: content-box`. Uma linha de `min-height: 52px` com padding e borda dá 64 px no preview. Regra nova de componente no bundle leva `box-sizing: border-box` (a região do Header, § 388).
+- **Um link-cartão com as partes em `span` cola as palavras no nome dele:** sem espaço no HTML entre os itens de grade, o `textContent` (e o `structuredText` do node-html-parser) fica "GuideHow to…". Ponha `{' '}` entre as partes: entre itens de grade o espaço não aparece na tela (o GuideCard, § 395).
+- **A faixa e os chips do topo de um hub também mudam de linha quando a Figtree chega:** no hub de guias, a frase da faixa a 412 px (en) e os atalhos a 393 px (pt) empurravam os cartões de 26 a 56 px (CLS 0,108 no Chromium). Texto do topo de página nova vai na face `Figtree Steady`, como a trilha. Leia o `[cls]` que o `layout-shift.spec.ts` imprime para a página nova: o teste só reprova a trilha, o H1 e o aviso, não o CLS (§ 393).
+- **Um listbox com `role="group"` dentro:** o `n`-ésimo filho da lista deixa de ser a `n`-ésima opção. Numere os ids na ordem da tela, role a própria opção (`querySelectorAll('[role="option"]')[n]`) e monte o array dos resultados já na ordem dos grupos, para o Enter abrir o que está marcado (a busca, § 397).

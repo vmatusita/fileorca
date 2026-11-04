@@ -22,7 +22,7 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 3. CSV e PDF das calculadoras | 4 | Run de ajuste de exportação |
 | 4. Texto e voz em en, pt e es | 26 | Run de ajuste de texto e voz |
 | 5. Acessibilidade | 13 | Run de ajuste de acessibilidade |
-| 6. Layout e design system | 16 | Run de ajuste de layout |
+| 6. Layout e design system | 15 | Run de ajuste de layout |
 | 7. PDF: comportamento | 4 | Run de ajuste de PDF |
 | 8. SEO, títulos e imagens sociais | 7 | Run de ajuste de SEO |
 | 9. Testes e portões | 7 | Run de ajuste de testes |
@@ -35,9 +35,10 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
-| 19. O que a F10 deixou | 20 | As runs F11, F12 e F13 e o Victor |
+| 19. O que a F10 deixou | 18 | As runs F11, F12 e F13 e o Victor |
+| 20. O que a F11 deixou | 8 | O Victor, a run F12 e runs de ajuste |
 
-Total: 207 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 212 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -149,7 +150,6 @@ Run de ajuste de layout. Só tokens (nenhuma cor fora deles); o `gate:design` e 
 | F5a F-13 | REVISAO-F5a.md F-13 | baixo | A Unlock mostra o mesmo arquivo duas vezes depois de uma senha errada. | Uma linha só, com o erro dentro dela. | Run de ajuste de layout |
 | F5a F-14 | REVISAO-F5a.md F-14 | baixo | Acabamento a 360 px: "Pick none" quebra desalinhado, o trilho da Split vira uma pílula de duas linhas, e há linhas de ajuda repetidas. | Ajustar a grade dos três; tirar a ajuda repetida. | Run de ajuste de layout |
 | F5b F-2 | REVISAO-F5b.md F-2 e D-5 | baixo (médio na lente) | As tabelas "What we measured" dos guias são cortadas no computador e rolam duas a três telas a 360 px sem nenhuma pista visual. | Sombra de borda ou seta de rolagem na moldura (`.fo-table-wrap`), sem coluna fixa. | Run de ajuste de layout |
-| F5b F-12 | REVISAO-F5b.md F-12 | baixo | O cartão de guia é igual ao de ferramenta na seção de relacionadas. | Etiqueta "Guide" ou ícone próprio no cartão do guia. | Run de ajuste de layout |
 | F5b F-13 | REVISAO-F5b.md F-13 | baixo | Ruído nas tabelas e na linha "Reviewed" dos guias. | Reler a tabela renderizada e tirar o repetido. | Run de ajuste de layout |
 | F7 f-9 | REVISAO-F7.md f-9 | baixo | O Baixar PNG do QR quebra o tamanho em outra linha e deixa um "·" no começo da linha (`.fo-qr__actions .fo-btn`, `src/styles/components.css`). | O ponto dentro de um `<span>` que só aparece quando cabe, ou o tamanho sempre na segunda linha sem o "·", com `white-space: nowrap` no `.fo-btn__meta`. | Run de ajuste de layout |
 | F7 f-13 | REVISAO-F7.md f-13 | baixo | No BTU, "Heavy shade" e "Very sunny" quebram em duas linhas no trilho segmentado a 360 e 320 px. | Rótulos de uma palavra ("Normal", "Shade", "Sun") com a explicação na ajuda, ou o grupo em linha inteira com `white-space: nowrap`. | Run de ajuste de layout |
@@ -358,11 +358,10 @@ O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela reso
 
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
-| F10 p-1 | `fase-10.md`; DECISOES § 347 | baixo | O Resumo do `PENDENCIAS.md` diz 12 no grupo 5 e soma 183, mas a tabela do grupo 5 tem 13 linhas: a "Idiomas R2-03" entrou sem atualizar o Resumo e o Total | Corrigir o Resumo (13) e o Total | Run F13 |
 | F10 p-2 | DECISOES § 365; README da proposta, seção 6 | baixo | A F4 ACE-9 junta dois defeitos opostos: falta o cabeçalho de linha nas tabelas das calculadoras, e ele se repete na primeira coluna de 4 tabelas dos guias | Dividir em duas linhas: as calculadoras com o UX-12, os guias com o UX-13 | Run F13 |
 | F10 p-3 | DECISOES § 365 | baixo | A F7 obs 3 fala da Mulch, mas os rótulos que empurram a etiqueta "example" são os da Paint ("Coverage per gallon", "Area of a door", "Area of a window"); a Mulch só quebra o "Bag size" a 320 px | Corrigir o texto da linha | Run F13 |
 | F10 p-4 | DECISOES § 368 | baixo | A F5a D-12 cresceu: o "Copiar código" do Pix (`src/components/SupportCard.astro:57`) também usa o `fo-btn--sm` de 40 px no celular | Acrescentar à D-12; o UX-05 passa o botão a 52 px | Run F12 |
-| F10 p-5 | DECISOES § 361 e § 363; D-07 | médio | A 1280 px, a lateral de anúncio começa em y 84, a 29 px dos botões de idioma e de busca, e o menu de idioma aberto (`position: fixed`) cai em cima dela; o `ads.spec.ts` não mede o cabeçalho. Aparece quando os anúncios ligarem | A lateral com `padding-top` de 150 px, o menu de idioma em `absolute` e o cabeçalho nos alvos do `ads.spec.ts` | Run F11 e F12 |
+| F10 p-5 | DECISOES § 361 e § 363; D-07; DECISOES § 388 | baixo (médio na F10) | A 1280 px, a lateral de anúncio começa em y 84, a 29 px dos botões de idioma e de busca, e o menu de idioma aberto (`position: fixed`) cai em cima dela; o `ads.spec.ts` não mede o cabeçalho. Aparece quando os anúncios ligarem. A F11 pôs o menu de idioma e o Menu em `absolute`, o cabeçalho na grade da moldura (a 1280 px, o último botão termina em x 794 e a lateral começa em x 944) e o cabeçalho e os dois menus abertos nos alvos do `ads.spec.ts`, nas 178 páginas com área de anúncio | Decidir, no mapa novo (UX-07), se a lateral ainda desce para 150 px abaixo do cabeçalho; a regra dos 150 px já não depende disso | Run F12 |
 | F10 p-6 | DECISOES § 368 | médio | A linha do café no rodapé fica a 24 a 46 px da âncora do AdSense no fim da página (`components.css:458-466`), contra "o pedido de café nunca encosta num anúncio"; nenhum teste mede | A linha no topo do rodapé (UX-05) e um teste de distância com a âncora | Run F12 |
 | F10 p-7 | DECISOES § 361; `docs/propostas/ux-v2/ad-map.html` | médio | Os "gatilhos adicionais" da vinheta do AdSense (botão Voltar, 30 s parado, volta à aba, fim do artigo) vêm ligados por padrão desde 9/mar/2026 e podem pôr uma vinheta durante o processamento | Desligar em Anúncios automáticos → Vinheta, antes de ligar os anúncios | Victor |
 | F10 p-8 | DECISOES § 369; UX-06 | médio | O texto da Privacidade da seção A ("nada sai do aparelho" pela parede) não bate com a tag de recuperação do Google, que conta a detecção ao Google, nem com o evento `adblock_wall` no GA4 | Escolher o texto proposto na especificação do UX-06, nos três idiomas | Victor |
@@ -377,7 +376,21 @@ O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela reso
 | F10 p-17 | DECISOES § 370 | baixo | A contagem do H1 da home (50, 29 e 39) e as 4 variantes de hipoteca e de saldo final do `HUB_MONEY_IDS`, que são presets, não estão decididas | Decidir a conta num §, lida dos registros no build | Run F13 |
 | F10 p-18 | DECISOES § 361 e § 370 | baixo | A distância entre as duas laterais é de 800 px na home (UX-03) e de 1.200 px no mapa (UX-07) | Um número só para todos os moldes | Run F12 |
 | F10 p-19 | DECISOES § 372 | baixo | Com o aviso compacto, o número das calculadoras a 360 continua coberto (32, 52 e 52 de 52 px) até o UX-12 subir o ResultHero para acima de 596 px | Fazer o UX-12 junto ou logo depois do UX-09 | Run F13 |
-| F10 p-20 | DECISOES § 363 e § 379 | baixo | Os ícones do UX-01 (menu, sol, lua, sistema e livro) usam `currentColor` no `<svg>` raiz; o `tests/unit/icons.test.ts` exige `stroke="#0F1B2D"`, como os 39 do design system e os 27 do UX-16 | Converter ao mover para `docs/design/assets/Icons/` | Run F11 |
+
+## 20. O que a F11 deixou
+
+O que a F11 (navegação, guias e tema) achou e não era dela resolver, ou deixou para depois: as linhas vêm do merge e do CI (`p-`), das notas do agente do tema e do cabeçalho (`t-`) e das do agente do hub e das entradas (`g-`), e a revisão acrescenta as dela (`docs/relatorios/REVISAO-F11.md`).
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F11 p-1 | DECISOES § 401; `docs/claude/ci.md` (F11) | médio | Sem o rótulo `ci`, a run não confere no Linux no meio dela, e o `gh pr ready` seguido do `--undo` não é seguro: o job `merge` lê o rascunho do evento, e a execução do `ready_for_review` chega ao `gh pr merge` mesmo com a PR de volta ao rascunho | Criar o rótulo `ci` (Issues → Labels), ou fazer o `merge` e o `pode-mesclar` lerem o rascunho de agora, como o `ci-ok` lê na classe leve | Victor |
+| F11 t-1 | DECISOES § 385 e § 388 | baixo | Nenhum leitor de tela (NVDA, VoiceOver) conferiu se o nome novo do botão de tema e a região role=status são lidos uma vez só, nem o estado expandido do botão Menu no WebKit e no VoiceOver | Conferir com NVDA e VoiceOver; se a região repetir o nome, esvaziá-la depois de anunciar ou tirá-la | Victor |
+| F11 t-2 | DECISOES § 388 | baixo | A 360 px, a folha do Menu em inglês termina 166,5 px acima do 1º AdSlot do Merge PDF e do Unlock PDF (y 796). Uma linha nova na folha ou um anúncio mais alto nesses moldes quebra os 150 px, e a especificação contava com o 1º anúncio em y 880 ou mais | No mapa novo (UX-07), pôr o 1º anúncio dos moldes de PDF abaixo de y 880 a 360 px; o bloco do cabeçalho do ads.spec.ts mede toda página | Run F12 |
+| F11 t-3 | DECISOES § 388 | baixo | Abaixo de 768 px, o idioma em uso no fim do Menu perdeu o ícone check da especificação, que não cabe numa linha de três alvos; ele fica marcado só pelo fundo, pelo traço, pelo peso 700 e pelo aria-current | Aceitar, ou voltar ao check se a F12 mudar a folha ou o 1º anúncio | Run F12 |
+| F11 g-1 | F11, § 397 | baixo | Na busca em dois grupos, um guia digitado pelo nome inteiro fica depois das ferramentas que têm todas as palavras dele: em "jpg or png", Crop image e Rotate image vêm antes do guia, e o Enter abre a ferramenta | Decidir se o grupo do primeiro resultado do filterEntries vem antes, ou dar ao guia termos que não casem com as ferramentas; até lá, fica a ordem da especificação | Victor |
+| F11 g-2 | F11, § 395 e § 397 | baixo | São de antes do GuideCard e da busca em grupos: o docs/design/index.html, a "Conferência" do axe de 29/out, o preview.html do ToolSearch e o .fo-search__group no bundle.css | Na run que regenerar o design system, pôr o GuideCard no índice, passar o axe no preview dele e acrescentar o grupo da busca ao bundle e ao preview do ToolSearch | Run |
+| F11 g-3 | F11, § 396 | baixo | O lint:texto lê o {n} dos textos novos como "n" e avisa "abreviação de internet" em "Medido em n arquivos de teste" e "Ver os n guias" (aviso, não erro) | Dar ao {n} uma amostra numérica no SAMPLES do scripts/gates/lint-texto.ts | Run |
+| F11 g-4 | F11, § 400 | baixo | Com a máquina carregada, os testes do conteudo.test.ts que rodam o portão em subprocesso e o pdf-hardening.test.ts passam de 5 s (3 de 1.800 numa rodada do Vitest inteiro). Sozinhos levam de 1,1 a 2,9 s, e o portão não ficou mais lento (1,6 a 2,4 s antes e depois) | Dar a esses testes um limite explícito, como o 60_000 do pdf-site.test.ts, ou rodar o Vitest do verificar com menos workers | Run |
 
 ## Registrados (escolhas, não defeitos)
 
@@ -401,3 +414,6 @@ O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela reso
 | F6 s-6: a rolagem do cronograma a 1280 px | Fica como é: a da § 129 (rolagem dentro da moldura) |
 | § 242: o `pnpm verificar` local acima de 900 s, sem as partes do CI em sequência | F9, § 329: `pnpm verificar --partes` (`scripts/verificar.ts` e `scripts/lib/ci-parts.ts`) roda as partes do `.github/workflows/ci.yml` em sequência, o build uma vez e cada parte com o limite de 900 s, e soma |
 | F8 ensaio-3: o teste "keeps the links that stay inside a part…" estourava os 5 s sob carga | F9, § 330: `tests/unit/pdf-engine-ops.test.ts` lê do oráculo os links de cada página, em vez de ler as 117 páginas com o PDF.js (de 1,7 s para 0,3 s sozinho; três rodadas do Vitest inteiro com o Playwright ao lado, de 0,15 a 0,22 s) |
+| F5b F-12: o cartão de guia igual ao de ferramenta nas relacionadas | F11, § 395 e § 396: o `GuideCard` (`src/components/GuideCard.astro`) nas relacionadas, e o `tests/unit/guides-entries.test.ts` reprova um guia com `fo-tool` em qualquer página do `dist/` |
+| F10 p-1: o Resumo sem as linhas novas dos grupos 4 e 5 | F11, § 383: o Resumo e o Total corrigidos, e o `tests/unit/pendencias.test.ts` conta as linhas de cada grupo e a soma |
+| F10 p-20: os ícones do UX-01 com `currentColor` no `<svg>` raiz | F11, § 384: os cinco em `docs/design/assets/Icons/` com o traço em Orca, e o `tests/unit/icons.test.ts` conta 44 |

@@ -71,3 +71,13 @@ Pegadinhas que a F10 achou ao medir o site e os protótipos:
 - **A captura de página inteira faz um relayout com a fonte já carregada.** Na hipoteca en a 360, a trilha passa a duas linhas (`layout-shift` de 0,207, na janela da captura), e os estados seguintes ficam 22 px mais baixos. Meça as posições antes de qualquer `fullPage`.
 - **Com a máquina carregada, o Chromium no Windows pode falhar uma abertura com `net::ERR_NO_BUFFER_SPACE`.** Rodar de novo resolve.
 - **O CLS da interação** vem de um `PerformanceObserver` de `layout-shift` instalado com `addInitScript`. Separe o carregamento do que vem depois do primeiro gesto e some as entradas sem `hadRecentInput`. A escolha no seletor de arquivo cai fora da janela de 500 ms do input.
+
+## F11: navegação, guias e tema
+
+Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no hub de guias e nas entradas dele, e no merge das três fatias).
+
+- **Um `document.addEventListener('click', e => e.preventDefault())` impede também o `popovertarget`:** o Menu não abre. No molde do `events.spec.ts`, abra o popover antes de pôr o listener e use `{ once: true }` (§ 390).
+- **No WebKit, um clique num botão não lhe dá foco,** como no Safari do Mac. Um teste de Enter e espaço num botão (o do tema) faz `focus()` antes de apertar a tecla.
+- **A porta de uma prova pode estar ocupada por outro agente:** o `serve-dist` em segundo plano sai com `EADDRINUSE`, e o Playwright reaproveita o servidor alheio com `reuseExistingServer`. Antes de rodar a prova, confira com `curl <porta>/build.txt` que o servidor é o do `dist/` que você quer.
+- **Um spec do Playwright não importa o `ICONS` (`src/icons/icons.ts`) nem um módulo que o importe:** ele lê os SVG com `import.meta.glob`, que o carregador do Playwright não tem. O spec nem lista ("glob is not a function", "No tests found"). Importe o `common.ts` e os textos de cada idioma direto, como o `navigation.spec.ts`, e confira um ícone pelo desenho do SVG (`M6 3h8l5 5v11` é o `file`).
+- **Um teste que só mede uma lista de caminhos passa com a página ausente:** o `serve-dist` devolve a 404 mais próxima, que também tem trilha, rodapé e nenhum anúncio. O `layout-shift.spec.ts` e a lista sem anúncio do `ads.spec.ts` passaram a exigir status 200 na F11 (§ 400); faça o mesmo em teste novo.
