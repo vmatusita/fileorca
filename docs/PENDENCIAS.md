@@ -37,9 +37,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
 | 19. O que a F10 deixou | 11 | A run F13 e o Victor |
 | 20. O que a F11 deixou | 10 | O Victor e runs de ajuste |
-| 21. O que a F12 deixou | 6 | O Victor e runs de ajuste |
+| 21. O que a F12 deixou | 7 | O Victor, a run F13 e runs de ajuste |
 
-Total: 210 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 211 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -397,6 +397,7 @@ O que a F12 (monetização: o mapa de anúncios, a parede do bloqueador e o caf�
 | F12 p-4 | DECISOES § 417 | baixo | O núcleo do `CLAUDE.md` ainda diz que a Oli tem nove poses fechadas; desde a F12 são dez (a `sad`, só na parede; Mudança 12), e a F12 não podia mexer no núcleo | Na próxima run que puder mexer no núcleo, trocar por "dez poses fechadas (a `sad` só na parede)" | Run (a que puder mexer no núcleo do CLAUDE.md) |
 | F12 p-5 | DECISOES § 416 e § 430 | baixo | A forma da tag de recuperação veio de cópias públicas do código da aba Tagging do AdSense, e a API do Google não promete que o `AD_BLOCK_DATA_READY` dispare com a mensagem em Rascunho | Conferir a tag na aba Tagging e o sinal do Google em produção, nos passos da seção "Anúncios e parede do bloqueador" do `docs/OPERACAO.md` | Victor |
 | F12 p-6 | DECISOES § 428 | baixo | A c-04 pela saída A lê a região pelo fuso do aparelho: quem mora na UE com o aparelho em outro fuso tem os `ad_*` reaplicados pelo aviso próprio antes de a mensagem do Google perguntar | Conferir na UE com a mensagem de consentimento publicada, como a c-04 pedia; se for preciso, somar o `gdprApplies` do `__tcfapi` quando ele existir | Victor confere ao ligar os anúncios na UE |
+| F12 R-A-2 | REVISAO-F12.md A-2; DECISOES § 454 | baixo | O aviso de cookies aberto, na rolagem 0 da primeira visita, fica a 150 px ou mais do 1º anúncio a 360 × 740 e a 1280 × 800, as duas larguras que a ficha mede, mas não em outras janelas comuns: no build de teste, 19 páginas abaixo de 150 px a 1440 × 900, 33 a 1920 × 950, 75 a 1920 × 1080, 60 a 768 × 1024 e 120 a 1024 × 1366, com as três homes a 0 px (o aviso em cima do anúncio) | Medir o aviso em mais janelas no `fo-ad-map.spec.ts` (1440 × 900, 1920 × 950, 768 × 1024 e 1024 × 1366) e descer o 1º anúncio onde faltar, como a calculadora já faz a partir de 768 px; ou o aviso compacto do UX-09, que a F13 constrói | Run F13 (com o UX-09) |
 
 ## Registrados (escolhas, não defeitos)
 

@@ -7,7 +7,7 @@
 // (the commit and the variables) is the same and the tree is clean; with a dirty tree it is built again, so a test never
 // reads a build of another commit or of other files. A lock directory keeps two processes from building one at once.
 import { execFileSync, spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUNDLE_RECORD } from '../../src/platform/bundle-record.ts';
@@ -59,6 +59,8 @@ export const LOCK_STALE_MS = 60_000;
 const LOCK_BEAT_MS = 10_000;
 /** The file of the lock with the PID of the holder; its time is the last renewal. */
 const LOCK_OWNER = 'pid';
+/** A takeover directory older than this was left by a process that died inside it (it lives for a few milliseconds). */
+const TAKEOVER_STALE_MS = 10_000;
 
 export interface BuildResult {
   name: Variant;
@@ -118,18 +120,35 @@ function mtimeOf(path: string): number | null {
   }
 }
 
+/** The owner written in a lock (the PID, a colon and a token of that holder), or null when there is none. */
+function ownerOf(path: string): string | null {
+  try {
+    return readFileSync(join(path, LOCK_OWNER), 'utf8');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return null;
+    throw error;
+  }
+}
+
+/** Removes a directory; false when Windows holds it for a moment (EPERM, EBUSY, ENOTEMPTY), to try again later. */
+function removed(path: string): boolean {
+  try {
+    rmSync(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
+    return true;
+  } catch (error) {
+    if (['EPERM', 'EBUSY', 'ENOTEMPTY'].includes((error as NodeJS.ErrnoException).code ?? '')) return false;
+    throw error;
+  }
+}
+
 /**
  * The state of a lock another process made: "free" when it is gone (released between our mkdir and this look), "stale"
  * when its process is gone or it was not renewed for staleMs, "held" otherwise.
  */
 export function lockState(path: string, staleMs = LOCK_STALE_MS, now = Date.now()): 'free' | 'stale' | 'held' {
   const owner = join(path, LOCK_OWNER);
-  let pid = Number.NaN;
-  try {
-    pid = Number.parseInt(readFileSync(owner, 'utf8'), 10);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-  }
+  const pid = Number.parseInt(ownerOf(path) ?? '', 10);
   if (Number.isInteger(pid) && pid > 0 && !running(pid)) return 'stale';
   // The time of the last renewal; with no PID yet (the holder is between its mkdir and its write), that of the lock.
   const renewed = mtimeOf(owner) ?? mtimeOf(path);
@@ -145,6 +164,29 @@ export interface LockOptions {
   log?: (line: string) => void;
 }
 
+/**
+ * Takes the stale lock at path away, one waiter at a time (second pass of the review; § 455): the waiter that makes the
+ * takeover directory reads the state again inside it and removes the lock only if it is still stale, so a lock another
+ * waiter has just taken is never removed. A takeover directory left by a process that died inside it goes after a while.
+ */
+async function takeOver(path: string, staleMs: number, pollMs: number): Promise<void> {
+  const takeover = `${path}.takeover`;
+  try {
+    mkdirSync(takeover);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+    const since = mtimeOf(takeover);
+    if (since !== null && Date.now() - since > TAKEOVER_STALE_MS) removed(takeover);
+    else await sleep(pollMs);
+    return;
+  }
+  try {
+    if (lockState(path, staleMs) === 'stale' && !removed(path)) await sleep(pollMs);
+  } finally {
+    removed(takeover);
+  }
+}
+
 /** Takes the lock directory at path, waiting for a live holder and taking over a stale one; returns its release. */
 export async function lock(path: string, options: LockOptions = {}): Promise<() => void> {
   const { staleMs = LOCK_STALE_MS, beatMs = LOCK_BEAT_MS, pollMs = 500, log = (line: string) => console.warn(line) } = options;
@@ -155,7 +197,7 @@ export async function lock(path: string, options: LockOptions = {}): Promise<() 
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
       const state = lockState(path, staleMs);
-      if (state === 'stale') rmSync(path, { recursive: true, force: true });
+      if (state === 'stale') await takeOver(path, staleMs, pollMs);
       else if (state === 'held') {
         if (!told) {
           log(`[test-build] esperando a trava ${path}, de outro processo (fica velha se o processo some ou passa ${staleMs / 1000} s sem renová-la)`);
@@ -165,20 +207,24 @@ export async function lock(path: string, options: LockOptions = {}): Promise<() 
       }
       continue;
     }
+    // The owner is this process and this call: two holders of one process (the tests) are told apart by the token.
+    const me = `${process.pid}:${randomUUID()}`;
     const owner = join(path, LOCK_OWNER);
-    const renew = () => {
+    const mine = () => ownerOf(path) === me;
+    writeFileSync(owner, me);
+    // A holder that froze past staleMs and lost the lock to another one stops renewing it, and never removes it.
+    const beat = setInterval(() => {
       try {
-        writeFileSync(owner, String(process.pid));
+        if (mine()) writeFileSync(owner, me);
+        else clearInterval(beat);
       } catch {
-        // Released meanwhile: nothing to renew.
+        clearInterval(beat);
       }
-    };
-    renew();
-    const beat = setInterval(renew, beatMs);
+    }, beatMs);
     beat.unref();
     return () => {
       clearInterval(beat);
-      rmSync(path, { recursive: true, force: true });
+      if (mine()) removed(path);
     };
   }
 }

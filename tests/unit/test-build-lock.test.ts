@@ -2,10 +2,11 @@
 // build: a lock left by a process that is gone is taken at once, one that was not renewed is taken after its time (far
 // below the 600 s the specs wait), a live holder is waited for (with the path of the lock in the line that says so) and is
 // never taken over while it renews its lock, and a lock released between the mkdir and the look is free, not an error.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import { LOCK_STALE_MS, lock, lockState } from '../../scripts/lib/test-build.ts';
 
@@ -82,4 +83,46 @@ describe('a trava do build de teste (§ 453)', () => {
   it('reads a lock released between the mkdir and the look as free, not as an error (ENOENT)', () => {
     expect(lockState(join(ROOT, 'never-made.lock'))).toBe('free');
   });
+
+  // Second pass of the review (DECISOES § 455): two processes that find one stale lock at the same moment. Before, each
+  // read "stale" and removed the lock, and the slower one could remove the lock the faster had just taken, so both held it
+  // (7 to 9 times in 30 rounds). Now one waiter at a time takes the stale lock over, and a holder releases only its own.
+  it('lets one process at a time take over a stale lock, when two find it together', async () => {
+    const module = process.env['FO_LOCK_MODULE'] ?? join(process.cwd(), 'scripts/lib/test-build.ts');
+    const worker = join(ROOT, 'worker.mjs');
+    writeFileSync(
+      worker,
+      [
+        'const [, , path, startAt, holdMs] = process.argv;',
+        `const { lock } = await import(${JSON.stringify(pathToFileURL(module).href)});`,
+        'const wait = Number(startAt) - Date.now();',
+        'if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));',
+        'const release = await lock(path, { pollMs: 5, log: () => {} });',
+        'const acquired = Date.now();',
+        'await new Promise((resolve) => setTimeout(resolve, Number(holdMs)));',
+        'const released = Date.now();',
+        'release();',
+        'console.log(JSON.stringify({ acquired, released }));',
+      ].join('\n'),
+    );
+    const ROUNDS = 20;
+    const startAt = Date.now() + 6_000;
+    const run = (path: string) =>
+      new Promise<{ acquired: number; released: number }>((resolve, reject) => {
+        const child = spawn(process.execPath, [worker, path, String(startAt), '150'], { stdio: ['ignore', 'pipe', 'pipe'] });
+        let out = '';
+        let err = '';
+        child.stdout.on('data', (chunk: Buffer) => (out += chunk.toString()));
+        child.stderr.on('data', (chunk: Buffer) => (err += chunk.toString()));
+        child.on('close', (status) => (status === 0 ? resolve(JSON.parse(out.trim().split('\n').pop() ?? '{}') as { acquired: number; released: number }) : reject(new Error(err))));
+      });
+    const rounds = Array.from({ length: ROUNDS }, () => {
+      const path = fresh();
+      mkdirSync(path);
+      writeFileSync(join(path, 'pid'), String(goneProcess()));
+      return Promise.all([run(path), run(path)]);
+    });
+    const overlaps = (await Promise.all(rounds)).filter(([a, b]) => a.acquired < b.released && b.acquired < a.released);
+    expect(overlaps, 'rounds where both processes held the lock').toEqual([]);
+  }, 120_000);
 });
