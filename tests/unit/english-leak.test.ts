@@ -22,8 +22,14 @@
 //   JSON of each [data-props]. On the Licenses page only, the license texts (<pre>) are left out: the licenses ask for
 //   them word for word, and they are in English.
 import { existsSync, readFileSync } from 'node:fs';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { getContainerRenderer } from '@astrojs/preact/container-renderer';
+import { loadRenderers } from 'astro:container';
 import { parse, type HTMLElement } from 'node-html-parser';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import AdblockWall from '../../src/components/AdblockWall.astro';
+import enWall from '../../src/i18n/en/wall.ts';
+import ptWall from '../../src/i18n/pt/wall.ts';
 import { visibleText } from '../../scripts/lib/conteudo.ts';
 import { fileForPath } from '../../scripts/lib/dist.ts';
 import { ROUTES, languagesOf, type Lang } from '../../src/i18n/routes.ts';
@@ -343,4 +349,40 @@ describe('no English phrase on the pages of Portuguese and Spanish in dist/ (pro
     for (const page of pages) for (const href of away(readFileSync(fileForPath(page.path), 'utf8'), page.lang)) found.push(`${page.path}: ${href}`);
     expect(found).toEqual([]);
   }, 60_000);
+});
+
+// Review F12 (F-3; DECISOES § 452): the ad-block wall is never in the default build (default-build.test.ts reproves any
+// `fo-wall` in dist/), so the pages above never carry it. It is rendered here in pt and es, in both modes, closed as the
+// HTML has it (the help, the nine entries with their steps and notes, and the line of after the escape), and goes through
+// the same detector, with the same English phrases (src/i18n/en/wall.ts among them).
+describe('no English phrase in the ad-block wall in Portuguese and Spanish (F12)', () => {
+  type Component = Parameters<AstroContainer['renderToString']>[0];
+  let container: AstroContainer;
+  beforeAll(async () => {
+    container = await AstroContainer.create({ renderers: await loadRenderers([getContainerRenderer()]) });
+  });
+  const wallPage = async (lang: Lang, mode: 'aviso' | 'bloqueio'): Promise<string> =>
+    `<!doctype html><html lang="${lang}"><head><title>FileOrca</title></head><body>${await container.renderToString(AdblockWall as Component, { props: { lang, mode } })}</body></html>`;
+
+  for (const lang of ['pt', 'es'] as const) {
+    it(`has no English phrase in the wall in ${lang}, in both modes`, async () => {
+      const found: string[] = [];
+      for (const mode of ['aviso', 'bloqueio'] as const) {
+        for (const leak of longest(findLeaks(pageTexts(await wallPage(lang, mode)), PHRASES))) found.push(`${mode} [${leak.where}] "${leak.phrase}" (de ${leak.from.replace(/^\/src\//, 'src/')})`);
+      }
+      expect(found, `${found.length} frase(s) em inglês na parede em ${lang}`).toEqual([]);
+    });
+  }
+
+  it('reads the steps and the notes of the help (positive controls)', async () => {
+    // The English wall is all leaks, its steps and notes included: the detector reads the closed dialog and the help.
+    const from = findLeaks(pageTexts(await wallPage('en', 'bloqueio')), PHRASES).map((leak) => leak.from);
+    expect(from.some((path) => /wall\.ts\.default\.entries\.[\w-]+\.steps\.\d+$/.test(path))).toBe(true);
+    expect(from.some((path) => /wall\.ts\.default\.entries\.[\w-]+\.note$/.test(path))).toBe(true);
+    // A Portuguese wall with one step left in English is caught.
+    const step = enWall.entries.ubo.steps[1];
+    const html = (await wallPage('pt', 'bloqueio')).replace(ptWall.entries.ubo.steps[1], step);
+    expect(html).toContain(step);
+    expect(findLeaks(pageTexts(html), PHRASES).map((leak) => leak.from)).toContain('/src/i18n/en/wall.ts.default.entries.ubo.steps.1');
+  });
 });

@@ -4750,6 +4750,7 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
   - **a escolhida:** onde o fuso diz região negada, o Aceitar vai só ao `analytics_storage`; o Recusar vai às quatro chaves em todo lugar (um `denied` não concede nada, e nas regiões negadas os `ad_*` já são negados por padrão, então a mensagem do Google, que chega depois, continua decidindo); fora das regiões, o Aceitar segue com as quatro chaves, como antes.
 - **Os riscos da escolhida.** O falso negativo (quem mora numa região negada com o fuso do aparelho fora da lista, como quem viaja) fica como antes, com a c-04 aberta só para essa pessoa: nada afrouxa em relação a hoje. O falso positivo (um fuso `Europe/*` fora das 32 regiões) manda só o `analytics_storage` no Aceitar, e os `ad_*` ficam com o padrão concedido daquelas regiões: o mesmo estado de antes. O único desvio é estrito: um Recusar seguido de um Aceitar na mesma página, num falso positivo, deixa os `ad_*` negados até a próxima página.
 - **Um lugar só para a atualização:** o bootstrap do `<head>` (`consent.ts`) define `window.foConsent(v)`, que a reaplicação da escolha guardada usa antes do `config`, e o `apply()` do `CookieNotice.astro` chama o mesmo. Os dois mudaram juntos, como a decisão 8 pede.
+- **Revisto na § 449 (a revisão adversarial):** a lista ganhou o Chipre (`Asia/Nicosia` e `Asia/Famagusta`, os nomes que o navegador dá), o `Atlantic/Faeroe` (o nome das Faroé no Chromium) e as regiões ultraperiféricas da França; a linha acima que deixava essas regiões de fora não vale mais.
 
 ## § 429 · A f-06: o aviso reaberto acompanha a largura (F12, decisão 8)
 
@@ -4939,3 +4940,89 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
 - **O que a ficha pede:** depois que o mapa, a parede e o build de teste estão na branch, um push, a execução leve e o rótulo `ci` na PR, para a execução completa rodar no Linux do CI (o WebKit e as fontes de lá diferem do Windows, § 305, e o build de teste no CI é novo).
 - **O que a leitura achou:** `gh api repos/vmatusita/fileorca/labels/ci` respondeu 404 em 4/nov/2026, depois do push do `1d63498`. O rótulo não existe (F11 p-1), e criá-lo é do Victor.
 - **A escolha:** a conferência do meio sai, e a execução final, depois do `gh pr ready`, faz o papel dela. O atalho do `gh pr ready` seguido do `--undo` não entra: o job `merge` decide pelo rascunho do payload do evento e, com o `ci-ok` verde, tentaria mesclar a PR pela metade (§ 401). Se a execução final falhar só no Linux, a sequência da decisão 14 vale: `gh pr ready --undo`, a correção, o push, a execução leve e o `gh pr ready` de novo.
+
+## § 449 · O Chipre, as regiões ultraperiféricas e o Faeroe no fuso da região (F12, revisão C-1)
+
+- **O achado:** o navegador e o Node devolvem o nome canônico do fuso. O do Chipre é `Asia/Nicosia` (ou `Asia/Famagusta`), e o `Europe/Nicosia` vira `Asia/Nicosia` no Chromium e no Node. A lista do § 428 não casava esses nomes. Num aparelho no Chipre, que está no `EU` do `src/analytics/consent.ts` (§ 9), o Aceitar do aviso próprio reaplicava as quatro chaves, e a parede sem `__tcfapi` abria em `bloqueio`. Os testes só usavam fusos `Europe/*` e do Atlântico.
+- **O que a conferência achou além do Chipre.** Cada fuso do `zone.tab` das 32 regiões, mais os das regiões ultraperiféricas, passou pelo `Intl` do Node, do Chromium e do WebKit:
+  - o Chromium e o Node devolvem `Atlantic/Faeroe` para `Atlantic/Faroe` (o WebKit devolve `Atlantic/Faroe`): o ramo `Faroe` da lista da seção A nunca casava num Chromium nas Ilhas Faroé;
+  - as regiões ultraperiféricas da França ficavam de fora, como o § 428 decidiu: Reunião (`Indian/Reunion`), Mayotte (`Indian/Mayotte`), Guadalupe (`America/Guadeloupe`), Martinica (`America/Martinique`), Guiana Francesa (`America/Cayenne`) e São Martinho (`America/Marigot`). Os Açores, a Madeira, as Canárias e Ceuta já estavam;
+  - fica fora o apelido antigo `Iceland`, que o WebKit não canoniza (os sistemas informam `Atlantic/Reykjavik`), e o `Arctic/Longyearbyen` (Svalbard, código SJ, fora do EEE e da § 9).
+- **A escolha:** a lista ganha `Asia/Nicosia`, `Asia/Famagusta`, `Atlantic/Faeroe` e os seis fusos das regiões ultraperiféricas. Isso revê a linha do § 428 que deixava essas regiões de fora. Elas são território da UE (artigo 349 do TFUE), e a decisão 5 da ficha diz "na UE, sempre aviso". Os dois lados são os seguros, qualquer que seja o código com que o Google as localize:
+  - se for o da França (`FR`, na § 9), o Aceitar tem de ir só ao `analytics_storage`, e agora vai;
+  - se for o código próprio (`RE`, `GP` e os outros, fora da § 9), os `ad_*` já nascem concedidos ali, e mandar só o `analytics_storage` deixa o mesmo estado de antes;
+  - a parede vira aviso, o lado mais brando.
+
+  Nenhum fuso novo é de outro lugar. No `Intl`, `America/Guadeloupe` e `America/Marigot` não viram `America/Puerto_Rico`, e `Indian/Mayotte` não vira `Africa/Nairobi`, embora o tzdata os ligue; o teste confere esses vizinhos do lado de fora.
+  - Alternativas recusadas: só o Chipre (a correção da revisão), que deixa o Faeroe do Chromium fora da seção A e as regiões ultraperiféricas fora da decisão 5; casar `Asia/*` ou `America/*` inteiros (falso positivo em continentes inteiros); acrescentar o `Iceland` (um apelido que nenhum aparelho informa).
+- **O oráculo, escrito fora do código:** `tests/e2e/lib/region-zones.ts` traz os fusos do `zone.tab` de cada uma das 32 regiões e das regiões ultraperiféricas, e vizinhos de fora (Beirute, Jerusalém, Porto Rico, Nairóbi, Comores, Maurício, São Bartolomeu, Sint Maarten, Saint-Pierre e Svalbard, entre outros). O `tests/unit/region.test.ts` confere que as chaves são as 32 da § 9 e passa cada fuso pelo `Intl` do Node, pelo `inGdprTimeZone` e pelo JavaScript do `gdprZoneJs()` num `vm`. O `consent.spec.ts` abre um contexto por fuso (`timezoneId`), nos dois navegadores, e roda o `gdprZoneJs()` na página.
+- **Reprovam sem a correção** (com o `region.ts` do `0379389`):
+  - o `region.test.ts` acha 10 fusos fora: o Chipre três vezes, as seis regiões ultraperiféricas e o Faeroe;
+  - o teste novo do `consent.spec.ts` acha 10 fusos fora no Chromium e 9 no WebKit;
+  - a c-04 em `Asia/Nicosia` manda as quatro chaves nos dois navegadores;
+  - a parede em `Asia/Nicosia` abre com `closedby="none"` nos dois.
+- **Os testes antigos que mudaram** (formato da § 341):
+  - `tests/unit/consent.test.ts`: a lista `INSIDE` ganhou `Asia/Nicosia` e `Indian/Reunion`. As asserções não mudaram: o Aceitar dentro vai só ao `analytics_storage`, e o Recusar vai às quatro chaves em todo lugar;
+  - `tests/unit/wall.test.ts`: o teste da lista ganhou, do lado de dentro, `Atlantic/Faeroe`, `Asia/Nicosia`, `Asia/Famagusta`, `Indian/Reunion` e `America/Cayenne`, e o nome mudou. A lista de fora não mudou;
+  - `tests/e2e/consent.spec.ts` e `tests/e2e/fo-wall.spec.ts`: o laço dos fusos ganhou `Asia/Nicosia` (2 testes por navegador no consentimento e 1 na parede). O teste da parede passou a procurar também `Asia` e `Nicosia` no `dataLayer` e no `localStorage`: a proteção de antes (o fuso não sai do aparelho) continua, mais larga.
+- **O resto:** o § 428 ganhou uma linha que aponta para cá, e o `docs/claude/anuncios.md` ganhou as pegadinhas do fuso. O `consent.spec.ts` ganhou 3 testes por navegador (o oráculo e os dois do Chipre), e o `fo-wall.spec.ts`, 1 (o Chipre). Com os testes novos da revisão, o `consent.spec.ts` fica nas partes 2 e 3 do Chromium e na 6 do WebKit, e o `fo-wall.spec.ts` na 3 e na 7, as da § 434; o `design.spec.ts` e o `image-matrix.spec.ts` seguem em partes diferentes (3 e 4 no Chromium, 6 e 10 no WebKit).
+
+## § 450 · O `<main>` que a parede foca ao fechar fica sem o anel (F12, revisão d-3)
+
+- **O achado:** quando a parede fecha pelo teclado sem foco anterior (o Esc, ou o Enter no X), o script põe o foco no `<main>` com `tabindex="-1"` (decisão 5). Esse foco é `:focus-visible`, e a regra global do anel (`:where(..., [tabindex]):focus-visible`) desenhava 3 px em volta do `<main>` inteiro (758 × 4.404 px a 1280 × 800), nos dois navegadores. O teste do foco só conferia o `toBeFocused` e o `tabindex`.
+- **A escolha:** `main[tabindex="-1"]:focus { outline: none; }` no `src/styles/global.css`, logo depois da regra do anel. O `<main>` não é controle: o foco ali só faz o próximo Tab começar no conteúdo, e o anel aparece no controle que o Tab alcança. A regra do design muda (decisão 9, com o texto de antes e o de depois):
+  - antes: "Anel de foco `focus` de 3px, afastado 2px, em tudo que recebe foco; dentro de `.fo-deep` ele vira `on-deep`.";
+  - depois: o mesmo texto, mais "A exceção é o `<main>` com `tabindex="-1"`, que recebe o foco por script quando a parede do bloqueador fecha, só para o próximo Tab começar no conteúdo: ele não é controle e fica sem o anel." (`docs/design/README.md`, "Acessibilidade"). O README do AdblockWall diz o mesmo na seção do teclado.
+  - Alternativas recusadas: tirar o foco do `<main>` (a decisão 5 manda o foco para lá); focar o primeiro controle do conteúdo (a ficha diz o `<main>`, e um anel num botão que a pessoa não escolheu confunde); a regra só no `:focus-visible` (com o `:focus`, o clique também fica coberto, e o clique já não desenha o anel hoje).
+- **O teste antigo que mudou** (formato da § 341): `tests/e2e/fo-wall.spec.ts`, "the focus stays in the dialog, and lands on <main> when the notice closes with Esc". Ele mantém o que conferia (o foco preso no diálogo, o `<main>` focado e o `tabindex`) e soma a asserção do anel (`outline-style: none`). Reprova sem a correção nos dois navegadores (`solid`).
+
+## § 451 · O mar da parede nos dois temas, provado (F12, revisão d-1)
+
+- **O achado:** o único teste do mar conferia só os 92 % (`toContain('0.92')`), no tema claro. Com a `water` no escuro, o defeito que a decisão 5 evita (a borda do card a 2,59:1), ele continuava verde.
+- **O teste novo:** `tests/e2e/fo-wall.spec.ts`, "the sea is the water in the light theme and the deep in the dark one, by the system and by the theme button against it". Ele percorre as seis combinações do esquema do sistema (claro e escuro, pelo `emulateMedia`) com o `data-theme` (nenhum, `light` e `dark`, inclusive contra o sistema). Em cada uma, o `::backdrop` tem de ser o `color-mix` de 92 % do token do tema na tela (a `water` no claro e o `deep` no escuro, lidos numa sonda na mesma página), e a borda do card fica a 3:1 ou mais contra a cor do mar, opaca, como a especificação mede.
+- **Reprova sem a correção.** Com a mutação do defeito (o `--fo-wall-sea` na `water` nas duas regras escuras do `components.css`), ele reprova nos dois navegadores: nas três combinações escuras, o mar sai `color(srgb 0.0784 0.251 0.494 / 0.92)` (a `water` escura) e a borda fica a 2,59:1. O código da F12 está certo, e o teste é a trava. O teste antigo dos 92 % não mudou.
+
+## § 452 · "Ícono", "Presiona" e "gray" na parede, o glossário, e a parede sob o `english-leak` (F12, revisão F-1, F-2 e F-3)
+
+- **O espanhol (F-1).** Os passos e as notas da parede diziam "icono" (8 vezes) e "Pulsa" (2), as formas da especificação. O resto do site escreve "ícono" (o QR e os guias) e "Presiona" (20 vezes em 11 arquivos), e o `docs/i18n/es.md` manda o espanhol neutro das Américas. Agora é "ícono" e "Presiona". O glossário ganhou duas linhas na seção da parede ("icon · ícono" e "Press · Presiona") e duas na tabela Nunca ("icono" e "pulsa"), que o `glossary.test.ts` lê. Com os textos de antes, ele acha os 10 casos no `src/i18n/es/wall.ts`. Só as formas que a parede usava entram na tabela.
+- **O inglês (F-2):** "It turns grey." virou "It turns gray.", como o resto do site em inglês. O `lint:texto` dava o aviso de ortografia britânica, que não reprova.
+- **A guarda contra o inglês (F-3).** O `english-leak.test.ts` só lia o `dist/` padrão, onde a parede nunca entra (§ 413). Ele ganhou um bloco que renderiza o AdblockWall em pt e es, nos dois modos, pelo Container, e passa o HTML no mesmo `findLeaks(pageTexts(...))`, com as mesmas frases inglesas (o `src/i18n/en/wall.ts` entre elas). Hoje não há vazamento. Os controles:
+  - a parede em inglês dá vazamentos nos passos e nas notas, o que prova que o detector lê o diálogo fechado e a ajuda;
+  - a parede em português com um passo deixado em inglês é pega.
+
+  Alternativa recusada: o teste no `wall.test.ts`, que teria de importar o `english-leak.test.ts` e rodaria os testes dele de novo.
+- **Nenhum teste antigo mudou:** o `wall.test.ts` não fixa as frases trocadas.
+
+## § 453 · A trava do build de teste: o PID, a renovação e o ENOENT (F12, revisão E-3)
+
+- **O achado:** a trava de `scripts/lib/test-build.ts` (§ 414) era um diretório tratado como velho só depois de 15 min, mais que os 600 s que o `beforeAll` dos specs espera o build. Um processo morto no meio do build (um Ctrl-C, ou o Playwright derrubando o `webServer`) deixava a trava, e o próximo processo esperava em silêncio até o spec estourar o tempo. Além disso, o `statSync` da trava, dentro do `catch` do `EEXIST`, lançava `ENOENT` se ela fosse liberada entre o `mkdir` e a olhada.
+- **A escolha:** quem pega a trava grava o PID num arquivo dela (`pid`) e o renova a cada 10 s enquanto constrói. O build é um processo filho, e o laço de eventos fica livre. A trava fica velha em dois casos: na hora, quando o processo do PID não existe mais; ou quando passa 60 s sem renovação (um processo travado, um PID reaproveitado, ou uma trava de antes deste §, sem PID). Um processo vivo que renova nunca perde a trava, por mais que o build demore. A trava que some entre o `mkdir` e a olhada conta como livre. Enquanto espera, o processo diz uma vez, no stderr, o caminho da trava e quando ela fica velha. O `lockState` e o `lock` são exportados para o teste.
+  - Alternativas recusadas: só baixar o prazo para uns 5 min, como a revisão sugeria (numa máquina lenta, um build de mais de 5 min perderia a trava viva, e dois processos construiriam na mesma pasta); só o PID, sem renovação (um PID reaproveitado pelo sistema prenderia a trava para sempre).
+- **O teste:** `tests/unit/test-build-lock.test.ts` (6 testes), numa pasta temporária, sem build:
+  - a trava de um processo que acabou é tomada na hora;
+  - a trava sem PID e sem renovação há mais de 60 s também;
+  - um dono vivo é esperado, com uma linha só, que traz o caminho, e a trava passa quando ele a solta;
+  - um dono que renova não perde a trava, nem com três vezes o prazo;
+  - uma trava que não existe é livre, sem erro;
+  - o prazo fica abaixo da metade dos 600 s.
+- **Reprova sem a correção.** A trava de antes (as linhas 51 e 91 a 102 do `0379389`, copiadas para um script no `.cache/`) ainda esperava depois de 3 s, sem dizer nada, com a trava de um processo que acabou e com a de 10 minutos atrás, e o `statSync` da trava liberada lançava `ENOENT`. Sem o `lock` e o `lockState` exportados, o teste novo nem importa.
+
+## § 454 · A documentação da revisão: o roteiro na UE, o design system e o 2º anúncio (F12, revisão A-2, A-3, C-2, C-3 e d-2)
+
+- **O roteiro de teste na UE (C-2; `docs/OPERACAO.md`, passo 7 de "Depois da F12").** A VPN muda o IP, não o fuso que a parede lê.
+  - Antes: "com uma VPN da UE: a tela vira aviso e fecha (no X ou com Esc)".
+  - Depois: a parede lê o `__tcfapi`, que só existe com a mensagem de consentimento do Google publicada e a tag chegando, ou o fuso do aparelho; para ver o aviso com o uBlock ligado, mude o fuso do sistema para um da Europa.
+  - E um passo novo: na UE, com a mensagem publicada e sem bloqueador, conferir no `dataLayer` que o Aceitar do aviso do site leva só o `analytics_storage` (a F12 p-6).
+- **As pegadinhas (C-3):**
+  - o `docs/claude/anuncios.md` ganhou, no fim da seção F12, o Aceitar que depende do fuso (todo spec que lê o payload fixa o `timezoneId`, e a CI em UTC conta como fora), o nome canônico do fuso e a VPN;
+  - o `design-e-oli.md` ganhou o foco posto por script e a prova da cor de um tema;
+  - o `playwright.md` ganhou a trava do build de teste.
+- **O design system (d-2 e A-2),** com o texto de antes e o de depois:
+  - `docs/design/README.md`, "Oli". Antes: "Nove poses, lista fechada: … `peek`." Depois: "Dez poses, lista fechada: … `peek` e `sad` (só na parede do bloqueador, o AdblockWall; F12).", como o `src/oli/poses.ts`, o README da Oli e a decisão 9 (§ 417);
+  - `docs/design/README.md`, "Layout e anúncios". Antes: "o aviso de cookies aberto fica a 150px ou mais do 1º anúncio de conteúdo." Depois: "o aviso de cookies aberto, na primeira visita e na rolagem 0, fica a 150px ou mais do 1º anúncio de conteúdo a 360×740 e a 1280×800 (as duas larguras que o teste do mapa mede; as outras estão no grupo 21 do `docs/PENDENCIAS.md`)." A regra afirmava mais do que o teste mede: a revisão achou o aviso a menos de 150 px do 1º anúncio em outras janelas (1440 × 900, 1920 × 1080 e os tablets em pé). A ficha só pede as duas larguras, e o resto vai para o grupo 21 (A-2);
+  - a galeria do `docs/design/components/Oli/preview.html` ganhou a `sad` ("só na parede"), com o desenho do preview do AdblockWall. O `docs/design/index.html` ganhou o AdblockWall em Monetização, e o `components/README.md` diz isso;
+  - o comentário do `scripts/lib/folha.ts` dizia "the nine poses" e agora diz "every pose of the closed list (ten since the F12…)". A saída da folha não muda.
+- **O 2º anúncio do celular (A-3).** O comentário do `scripts/lib/prontidao.ts` dizia "the 2nd on show only under 768 px"; agora diz "only up to 459 px, § 445". O teste antigo que mudou (formato da § 341) é `tests/unit/prontidao.test.ts`, "reads the width of each box":
+  - antes, ele lia o analisador de largura com `'(max-width: 767px)'`, a consulta de antes da § 445;
+  - agora, ele lê as três consultas do `AD_MEDIA` do `src/ads/map.ts` (o 2º anúncio em `(max-width: 459px)`, o multiplex e as laterais), com o mesmo resultado nas três larguras do portão, e fixa o `AD_MEDIA.phone`;
+  - a proteção continua: o analisador lê cada consulta, e o `boxesAtWidths` com o `adBoxHtml` trava a regra real (`{360: 4, 768: 2, 1280: 4}`), que não mudou.

@@ -77,7 +77,8 @@ describe('Consent Mode v2 defaults', () => {
   // for them), the Accept made in the site's own notice is replayed only as analytics_storage: the ad_* stay with Google's
   // consent message. A Decline stays on the four keys (it grants nothing). Outside those regions nothing changes.
   const FOUR = (value: string) => ({ ad_storage: value, analytics_storage: value, ad_user_data: value, ad_personalization: value });
-  const INSIDE = ['Europe/Berlin', 'Europe/London', 'Europe/Zurich', 'Europe/Lisbon', 'Atlantic/Azores', 'Atlantic/Madeira', 'Atlantic/Canary', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Africa/Ceuta'];
+  // Review C-1 (§ 449): Cyprus (Asia/Nicosia, the name the browsers report) and Réunion, an outermost region, too.
+  const INSIDE = ['Europe/Berlin', 'Europe/London', 'Europe/Zurich', 'Europe/Lisbon', 'Atlantic/Azores', 'Atlantic/Madeira', 'Atlantic/Canary', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Africa/Ceuta', 'Asia/Nicosia', 'Indian/Reunion'];
   const OUTSIDE = ['America/Sao_Paulo', 'America/New_York', 'America/Mexico_City', 'Asia/Tokyo', 'UTC', 'Etc/UTC', 'Africa/Lagos', 'Atlantic/Bermuda', 'Australia/Sydney'];
 
   it('replays a stored Accept only as analytics_storage where the region is denied by default (c-04)', () => {

@@ -16,7 +16,7 @@ export default {
   entries: {
     ubo: {
       name: 'uBlock Origin',
-      steps: ['Open uBlock Origin from its icon in the browser toolbar.', 'Press the big blue power button. It turns grey.', 'Reload the page.'],
+      steps: ['Open uBlock Origin from its icon in the browser toolbar.', 'Press the big blue power button. It turns gray.', 'Reload the page.'],
       note: 'Using uBO Lite? Move the “filtering mode” slider to “no filtering”.',
     },
     adblock: {
