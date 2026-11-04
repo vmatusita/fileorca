@@ -6,10 +6,10 @@ import { ICON_FILE_ROOT, ICON_NAMES, iconInner, iconMarkup } from '../../src/ico
 const DIR = 'docs/design/assets/Icons';
 
 describe('ícones inline (DECISOES § 46)', () => {
-  it('lists exactly the 39 icons of docs/design/assets/Icons (35 of the design system, 4 drawn in the F5a, DECISOES § 149)', () => {
+  it('lists exactly the 44 icons of docs/design/assets/Icons (35 of the design system, 4 drawn in the F5a, DECISOES § 149, 5 of the header drawn in the F10 and moved in the F11, DECISOES § 384)', () => {
     const files = readdirSync(DIR).filter((file) => file.endsWith('.svg')).map((file) => file.replace(/\.svg$/, '')).sort();
     expect([...ICON_NAMES].sort()).toEqual(files);
-    expect(files).toHaveLength(39);
+    expect(files).toHaveLength(44);
   });
 
   it('every file has the root the inline markup replaces, and no id or colour of its own inside', () => {

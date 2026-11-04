@@ -3986,3 +3986,41 @@ Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-
 - **N7 e N8:** o `ESCOLHAS.md` diz onde está cada mudança de regra e que, na F11 e na F12, um item sem marca aceita a mudança da recomendada.
 - **N9:** o "(notas)" saiu dos G-NN e U-NN.
 - **N10:** a contagem do juntar ("Lendo 2 PDFs…" e depois "2 PDFs prontos") ganhou `role="status"`.
+
+## § 382 · A F11: o ponto de partida, a especificação e a reserva dos § (F11, decisão 1)
+
+- **O ponto de partida** é a `origin/main` em `609a868e22f418de060bd66e110018048e03eebc` (a F10 mesclada), na branch `fase-11`. A linha de base (build, orçamentos, número de testes e a lista dos JS de `dist/_astro/`) foi medida nele e fica em `.cache/f11/antes/`, fora do Git; a cópia do `dist/` dele fica em `.cache/f11/dist-antes/`, para provar que cada teste novo reprova sem a mudança.
+- **A especificação.** A área "Especificação" do `header-a.html`, do `guides-hub.html` (alternativa A, com `?ads=off`) e do `guides-entries.html` é o contrato, junto com a § 363 e a § 364. Onde ela diverge da ficha da run, vale a ficha. O site constrói sobre o `components.css` e as medidas dele, nunca sobre o `bundle.css` do `docs/design/` (as diferenças estão no bloco da F10 do `docs/claude/design-e-oli.md`), e não importa nada de `docs/propostas/`: nem o script dos previews (`?theme=`, `?lang=`, `?state=`) nem o controle do protótipo.
+- **As fatias:**
+  1. a documentação da F10 e os ícones, no agente principal (§ 383 e § 384);
+  2. o tema, o cabeçalho e a Privacidade, num agente em worktree (§ 385 a § 392);
+  3. ao mesmo tempo, o hub de guias, o GuideCard e as entradas, noutro agente em worktree (§ 393 a § 400);
+  4. o merge das duas no agente principal e a conferência no Linux;
+  5. o `docs/design/`, o `docs/PENDENCIAS.md` e as pegadinhas;
+  6. as verificações completas, as medidas e as imagens, e depois a revisão adversarial.
+- **A reserva dos §** (pegadinha da F10: um § citado antes de ser escrito prende a numeração):
+  - **§ 383 e § 384:** a documentação da F10 e os ícones;
+  - **§ 385 a § 392, do agente do tema e do cabeçalho:** 385 o tema (os três estados, a chave e os scripts), 386 o tema no CSS e as metas, 387 a Privacidade, 388 o cabeçalho com o Menu, 389 o mapa de cada rota para a seção do Menu, 390 o "Apoie a Oli" e o lugar `menu`, 391 onde mora cada teste novo da fatia, 392 os testes antigos que a fatia mudou;
+  - **§ 393 a § 400, do agente dos guias:** 393 o hub (a rota, os grupos e o SEO), 394 a regra do `gate:conteudo` para o hub, 395 o GuideCard, 396 as entradas (a trilha, o rodapé, o cartão e as relacionadas), 397 a busca, 398 a seção da home, 399 onde mora cada teste novo da fatia, 400 os testes antigos que a fatia mudou;
+  - **a partir da § 401:** os do agente principal, na ordem em que forem escritos (o merge e o CI, o `docs/design/`, as medidas e a revisão).
+
+  Cada agente escreve só os seus números, um a um e na ordem. Uma decisão a mais entra como item de um dos seus §, nunca como § novo.
+
+## § 383 · Os blocos da F10 no docs/claude/ e o grupo 19 do PENDENCIAS (F11, decisão 12)
+
+- **Os cinco blocos** da seção "Para o docs/claude/" do `docs/relatorios/fase-10.md` entraram com o texto igual, cada um como seção nova no fim do arquivo de tema: "F10: proposta de UX/UI" no `design-e-oli.md`, "F10: o mapa de anúncios" no `anuncios.md`, "F10: medidas de UX" no `playwright.md`, "F10: agentes em worktree" no `windows-git-bash.md` e "F10: textos dos protótipos" no `idiomas.md`. Um script copiou cada bloco entre as cercas do relatório, para o texto não mudar nem num caractere. O `CLAUDE.md` não mudou.
+- **O grupo 19 do `docs/PENDENCIAS.md`** ("O que a F10 deixou") recebeu as 20 linhas F10 p-1 a p-20, com o texto igual, no formato das seis colunas.
+- **O Resumo estava atrás das tabelas em dois grupos** (a F10 p-1 achou um):
+  - **o grupo 4** tem 26 linhas, e o Resumo dizia 23: as três linhas "Idiomas" (R2-05, R2-04 e g-1) entraram sem ele;
+  - **o grupo 5** tem 13, e o Resumo dizia 12: a "Idiomas R2-03" entrou sem ele.
+
+  O Resumo passou a 26 e 13, ganhou a linha do grupo 19, e o Total foi de 183 para 207 (os 187 de antes, que o Resumo dizia 183, mais os 20 da F10).
+- **Um teste novo** no `tests/unit/pendencias.test.ts` conta as linhas de seis colunas de cada grupo numerado e confere a linha do Resumo e o Total. Com o `PENDENCIAS.md` de antes, ele reprova (grupos 4 e 5 e o Total).
+- **No fim da run,** a F5b F-12, a F10 p-20 e a F10 p-1 vão para "Já corrigidos depois da revisão", com o § da F11 que fechou cada uma; a F10 p-5 fica só com o que sobrar para a F12; e o grupo 20 recebe o que a F11 deixar.
+
+## § 384 · Os ícones do cabeçalho no design system (F11, decisão 4)
+
+- **Os cinco ícones do UX-01** (`menu`, `sun`, `moon`, `theme-system` e `book`) foram de `docs/propostas/ux-v2/icons/` para `docs/design/assets/Icons/`. O desenho é o mesmo; só o `stroke` do `<svg>` raiz mudou, de `currentColor` para o `#0F1B2D` da `ICON_FILE_ROOT` de `src/icons/svg.ts`. Os arquivos da proposta ficam como estão: `docs/propostas/` é o registro da F10.
+- **Os nomes entraram no `ICON_NAMES`** em ordem alfabética, e o `src/icons/icons.ts` os lê do mesmo jeito que os outros (no build, nunca numa ilha). Isso fecha a F10 p-20.
+- **O `assets/Icons/README.md`** passou de 39 para 44 ícones, com uma linha "Cabeçalho" na lista.
+- **O teste antigo que mudou** (no formato da § 341): o `tests/unit/icons.test.ts` fixava a contagem em 39 (`toHaveLength(39)` e o título). A ficha esperava que ele passasse sem mudar, mas a contagem é a da pasta, e a pasta ganhou os cinco: o número foi a 44, e o título diz de onde vêm os cinco. A proteção continua: a lista de `ICON_NAMES` é igual à dos arquivos da pasta, e cada arquivo começa pela `ICON_FILE_ROOT` sem cor nem `id` dentro, como antes. Os outros dois testes do arquivo não mudaram.
