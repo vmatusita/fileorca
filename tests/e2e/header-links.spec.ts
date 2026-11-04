@@ -75,16 +75,16 @@ function checkHeader(source: string, page: Page): void {
 }
 
 test.describe('the header and the head of every page, in the HTML of the server', () => {
-  test('the list of pages is the route map, with every language of every route', () => {
-    expect(PAGES.length).toBe(ROUTES.reduce((sum, route) => sum + languagesOf(route).length, 0));
-    expect(PAGES.some((page) => page.id === GUIDES_HUB_ID)).toBe(true);
-    // The sheet of every language has the guides hub and at least the image, PDF and money hubs.
-    for (const lang of ['en', 'pt', 'es'] as const) expect(expectedSheet(lang).length, lang).toBeGreaterThanOrEqual(6);
-  });
-
   for (let start = 0; start < PAGES.length; start += BLOCK) {
     const block = PAGES.slice(start, start + BLOCK);
     test(`pages ${start + 1} to ${start + block.length} of ${PAGES.length} (${block[0]?.path} and on)`, async ({ request }) => {
+      if (start === 0) {
+        // The list is the route map, every language of every route, the guides hub included; and the sheet of every
+        // language has at least the image, PDF and money hubs, the QR code, the guides hub and the support page.
+        expect(PAGES.length).toBe(ROUTES.reduce((sum, route) => sum + languagesOf(route).length, 0));
+        expect(PAGES.some((page) => page.id === GUIDES_HUB_ID)).toBe(true);
+        for (const lang of ['en', 'pt', 'es'] as const) expect(expectedSheet(lang).length, lang).toBeGreaterThanOrEqual(6);
+      }
       for (const page of block) {
         const source = await html(request, page);
         checkHead(source, page.path);
