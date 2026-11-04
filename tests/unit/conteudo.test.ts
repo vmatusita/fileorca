@@ -1133,7 +1133,7 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want).join()).toMatch(/o link da ferramenta leva a \/png-to-jpg\//);
   });
 
-  // F12 (decision 3; DECISOES § F12-M6): the ads of the map in a guide. Before, "two AdSlots at most"; now the first one
+  // F12 (decision 3; DECISOES § 424): the ads of the map in a guide. Before, "two AdSlots at most"; now the first one
   // after the tool with a paragraph between them, five content ads at most, one multiplex as the last block, none in the
   // tool and none beside "What we measured".
   it('fails a guide whose first AdSlot comes before the tool or with no paragraph after it, and one with more ads than the map', () => {

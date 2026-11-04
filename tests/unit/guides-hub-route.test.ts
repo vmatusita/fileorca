@@ -33,7 +33,7 @@ type ItemList = { numberOfItems?: number; itemListElement?: { position?: number;
 type Crumbs = { itemListElement?: { position?: number; name?: string; item?: string }[] };
 
 describe('the route of the guides hub', () => {
-  // F12 (decision 3; DECISOES § F12-M5): the hub has the ads of the map now, in the area "geral" of the home.
+  // F12 (decision 3; DECISOES § 423): the hub has the ads of the map now, in the area "geral" of the home.
   it('has the three paths, is indexable, has the ad area "geral" and links the three languages in hreflang with the x-default in English', () => {
     const route = routeById(GUIDES_HUB_ID);
     expect(route.paths).toEqual(PATHS);
@@ -177,7 +177,7 @@ describe('the three pages of the guides hub in dist/', () => {
       // In pt the money group is only the note, with the link to the Brazilian money calculators.
       if (lang === 'pt') expect(main?.querySelector('section#money .fo-section__note a')?.getAttribute('href')).toBe('/pt/calculadoras-financeiras/');
       // No AdSlot, no rail, no ad code in the default build (Mudança 10: no unit id, nothing), no Oli in the page and no
-      // ToolCard (gate:prontidao counts main a.fo-tool on a hub). F12 (DECISOES § F12-M5): a page with ads keeps the column
+      // ToolCard (gate:prontidao counts main a.fo-tool on a hub). F12 (DECISOES § 423): a page with ads keeps the column
       // of the rail, empty here, like the tool pages (§ 413); the boxes of the map are checked on the test build
       // (tests/e2e/fo-ad-map.spec.ts).
       expect(root.querySelectorAll('.fo-ad, ins.adsbygoogle, aside.fo-rail, script[src*="adsbygoogle"]')).toHaveLength(0);

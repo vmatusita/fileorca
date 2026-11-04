@@ -11,7 +11,7 @@ type Entry = unknown[];
 const isConsent = (entry: Entry, kind: string) => entry[0] === 'consent' && entry[1] === kind;
 
 test.describe('Consent Mode v2 e aviso de cookies', () => {
-  // F12 (c-04; § F12-P3 and § F12-P9): the Accept of the site's own notice depends on the time zone of the device, which
+  // F12 (c-04; § 428 and § 434): the Accept of the site's own notice depends on the time zone of the device, which
   // stands for the region (src/platform/region.ts). These tests expect the four keys of an Accept, so they run in a time
   // zone outside the regions denied by default; the tests of the regions are below.
   test.use({ timezoneId: 'America/Sao_Paulo' });
@@ -92,7 +92,7 @@ test.describe('Consent Mode v2 e aviso de cookies', () => {
     expect((updates.at(-1)?.[2] as Record<string, string>)['analytics_storage']).toBe('denied');
   });
 
-  // F12 · o consentimento (F3 c-04, saída A; § F12-P3). In a time zone of the regions denied by default (the EU, the EEA,
+  // F12 · o consentimento (F3 c-04, saída A; § 428). In a time zone of the regions denied by default (the EU, the EEA,
   // the United Kingdom and Switzerland), the Accept of the site's own notice goes only to analytics_storage, made on the
   // page and replayed on the next ones (the home, a free page and a page with ads alike): the ad_* stay with Google's
   // consent message. A Decline is the four keys there too. Outside those regions (the test above), nothing changes.

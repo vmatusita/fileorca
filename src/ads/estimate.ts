@@ -1,4 +1,4 @@
-// The height of the blocks of <main> at 360 px, estimated at build time (F12, decision 3; DECISOES § F12-M1). The build
+// The height of the blocks of <main> at 360 px, estimated at build time (F12, decision 3; DECISOES § 419). The build
 // places the content ads after the first by this estimate, so it errs on the short side: the text counts with more
 // characters per line than the site shows on average, a card with the height of the shortest one, a margin only where
 // the CSS surely puts it. The Playwright test of the map (tests/e2e/fo-ad-map.spec.ts) measures the real heights, and a

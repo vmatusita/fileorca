@@ -1,6 +1,6 @@
 import type { WallTexts } from '../types.ts';
 
-// F12 · a parede do bloqueador (decision 10, with adjustment 3; § F12-P6). The texts of the proposal (wall.html,
+// F12 · a parede do bloqueador (decision 10, with adjustment 3; § 431). The texts of the proposal (wall.html,
 // "Especificação"), with the second sentence and the buttons of adjustment 3. The steps of the help come from the public
 // help of each product (the sources and what was checked are in the § and in the report of the run); none has a link.
 export default {

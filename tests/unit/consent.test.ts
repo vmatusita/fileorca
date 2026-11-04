@@ -11,7 +11,7 @@ import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
 import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
 import { CALC_IDS } from '../../src/calc/index.ts';
 
-// F12 (c-04; § F12-P3): the time zone of the device stands for the region, so the bootstrap runs with a fixed one; the
+// F12 (c-04; § 428): the time zone of the device stands for the region, so the bootstrap runs with a fixed one; the
 // default is outside Europe, where nothing changes. `null` makes Intl throw (a time zone that cannot be read).
 function runBootstrap(hostname: string, stored: string | null, timeZone: string | null = 'America/Sao_Paulo') {
   const appended: string[] = [];
@@ -73,7 +73,7 @@ describe('Consent Mode v2 defaults', () => {
     expect(dataLayer[4]?.[0]).toBe('config');
   });
 
-  // F12 · o consentimento (F3 c-04, saída A; § F12-P3). In the regions denied by default (the time zone of the device stands
+  // F12 · o consentimento (F3 c-04, saída A; § 428). In the regions denied by default (the time zone of the device stands
   // for them), the Accept made in the site's own notice is replayed only as analytics_storage: the ad_* stay with Google's
   // consent message. A Decline stays on the four keys (it grants nothing). Outside those regions nothing changes.
   const FOUR = (value: string) => ({ ad_storage: value, analytics_storage: value, ad_user_data: value, ad_personalization: value });
@@ -134,7 +134,7 @@ describe('Consent Mode v2 defaults', () => {
 
 describe('typed events', () => {
   it('has the closed list of the plan', () => {
-    // The F4 adds calc_complete, export_click and share_click (DECISOES § 113), and the F12 adblock_wall (§ F12-P7).
+    // The F4 adds calc_complete, export_click and share_click (DECISOES § 113), and the F12 adblock_wall (§ 432).
     expect(Object.keys(EVENT_PARAMS).sort()).toEqual([
       'adblock_wall', 'calc_complete', 'donate_click', 'download', 'export_click', 'next_step_click', 'share_click', 'tool_complete', 'tool_error', 'tool_start',
     ]);
@@ -310,12 +310,12 @@ describe('the events of the PDF tools (F5a)', () => {
   it('names no parameter that could carry a number, a range, a text, a password, a count of pages or a file name', () => {
     const names = new Set<string>();
     for (const params of Object.values(EVENT_PARAMS)) for (const name of params) names.add(name);
-    // F12 (§ F12-P7): action and mode, the two parameters of adblock_wall, take only the values of their closed lists.
+    // F12 (§ 432): action and mode, the two parameters of adblock_wall, take only the values of their closed lists.
     expect([...names].sort()).toEqual(['action', 'browser', 'codec', 'format', 'lang', 'mode', 'outcome', 'place', 'reason', 'target', 'tool']);
     expect(cleanParams('adblock_wall', { action: 'shown', mode: 'aviso', lang: 'en', place: 'x' })).toEqual({ action: 'shown', mode: 'aviso', lang: 'en' });
   });
 
-  // F12 · a parede do bloqueador (decision 5; § F12-P7): the actions and the modes of the wall are closed lists, without
+  // F12 · a parede do bloqueador (decision 5; § 432): the actions and the modes of the wall are closed lists, without
   // "close" (adjustment 4 did not go in); a time, a time zone or anything else is dropped.
   it('keeps adblock_wall to its closed lists', () => {
     expect(WALL_ACTIONS).toEqual(['shown', 'reload', 'help', 'escape']);

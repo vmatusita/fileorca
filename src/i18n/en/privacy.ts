@@ -70,7 +70,7 @@ export default {
         'To stay free, FileOrca shows, or will show, ads from Google AdSense. Google is the advertising partner of the site.',
         "Third-party vendors, including Google, use cookies to serve ads based on your prior visits to this and other websites. Google's use of advertising cookies lets Google and its partners serve ads to you based on those visits.",
         'In the European Economic Area (EEA), the United Kingdom and Switzerland, a Google consent message will ask for your choice before ads use cookies, once ads are on.',
-        // F12 · a parede do bloqueador (adjustment 1; § F12-P6): what the check for an ad blocker tells, and to whom.
+        // F12 · a parede do bloqueador (adjustment 1; § 431): what the check for an ad blocker tells, and to whom.
         "To show Oli's notice, the site checks whether an ad blocker is on. The check uses Google's ad blocking recovery tag, which tells Google whether it found a blocker, as the ads themselves do. Like the use of the tools, the site counts in Google Analytics when the notice shows and which button was used. In your browser, it keeps only the time of “Continue just this once”.",
         'Use these links to opt out of personalized advertising and to read how Google uses data from partner sites:',
       ],

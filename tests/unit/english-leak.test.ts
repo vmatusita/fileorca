@@ -217,7 +217,7 @@ describe('the English phrases the pages are compared with', () => {
   it('reads the English text files: thousands of phrases, the known ones among them, and none made of names and formats', () => {
     expect(Object.keys(ENGLISH_MODULES).length).toBeGreaterThan(60);
     expect(PHRASES.size).toBeGreaterThan(2000);
-    // A sentence of the support page, a panel line and a whole short title are phrases. F12 (DECISOES § F12-C9): the title of
+    // A sentence of the support page, a panel line and a whole short title are phrases. F12 (DECISOES § 443): the title of
     // the support page is the one of PLANO-MELHORIAS section C, which took the place of "Free tools, made by one person".
     expect(PHRASES.has('help oli keep swimming')).toBe(true);
     expect([...PHRASES.keys()].some((phrase) => phrase.includes('files never leave your device'))).toBe(true);

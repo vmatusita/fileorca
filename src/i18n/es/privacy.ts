@@ -70,7 +70,7 @@ export default {
         'Para seguir siendo gratis, FileOrca muestra, o mostrará, anuncios de Google AdSense. Google es el socio de publicidad del sitio.',
         'Proveedores externos, incluido Google, usan cookies para mostrar anuncios según tus visitas anteriores a este y a otros sitios web. El uso de cookies de publicidad por parte de Google permite que Google y sus socios te muestren anuncios según esas visitas.',
         'En el Espacio Económico Europeo (EEE), el Reino Unido y Suiza, un mensaje de consentimiento de Google te pedirá tu elección antes de que los anuncios usen cookies, cuando los anuncios estén activos.',
-        // F12 · a parede do bloqueador (ajuste 1; § F12-P6): lo que cuenta la comprobación del bloqueador, y a quién.
+        // F12 · a parede do bloqueador (ajuste 1; § 431): lo que cuenta la comprobación del bloqueador, y a quién.
         'Para mostrar el aviso de Oli, el sitio comprueba si hay un bloqueador de anuncios activado. La comprobación usa la herramienta de recuperación de anuncios de Google, que le dice a Google si encontró un bloqueador, como hacen los propios anuncios. Como con el uso de las herramientas, el sitio cuenta en Google Analytics cuándo aparece el aviso y qué botón se usó. En tu navegador, solo guarda la hora de “Seguir solo esta vez”.',
         'Usa estos enlaces para desactivar la publicidad personalizada y para leer cómo usa Google los datos de sitios de socios:',
       ],

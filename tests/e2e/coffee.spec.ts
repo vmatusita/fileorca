@@ -22,7 +22,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const KOFI = 'https://ko-fi.com/victormatusita';
 const LINE = '.fo-result .fo-result__support';
 
-// F12 (decision 7; DECISOES § F12-C7): the buttons of PLANO-MELHORIAS section C and the confirmation of the specification.
+// F12 (decision 7; DECISOES § 441): the buttons of PLANO-MELHORIAS section C and the confirmation of the specification.
 const LANGS = [
   { lang: 'en', tool: '/compress-image/', link: 'Buy me a coffee', hide: "Don't show this again", href: KOFI, done: "Got it, I won't ask here again. The coffee link stays in the footer." },
   // Portuguese: the Pix block of the support page since the F6 (PLANO "Doações"; DECISOES § 216), one button only (§ 368).
@@ -280,7 +280,7 @@ async function afterTheActions(page: Page, selector: string): Promise<boolean> {
   });
 }
 
-// F12 (decision 7; DECISOES § F12-C2): the card carries one coffee button (in Portuguese, the Pix one: § 368), and "Don't
+// F12 (decision 7; DECISOES § 436): the card carries one coffee button (in Portuguese, the Pix one: § 368), and "Don't
 // show this again" leaves one quiet sentence in the place of the line, a status that a screen reader reads once, with the
 // focus back on Download. Before, the line just went away. axe on the card with the sentence, at 360 and 1280 px, in both
 // themes (the line itself is in a11y.spec.ts).
@@ -331,7 +331,7 @@ test('pt, a PDF tool: the line on the 3rd use with the Pix button alone, and the
   expect(await coffee(page)).toMatchObject({ uses: 3, never: true });
 });
 
-// F12 (decision 7; DECISOES § F12-C3, which closes the F10 p-6): the coffee line opens the footer, the first thing in it and
+// F12 (decision 7; DECISOES § 437, which closes the F10 p-6): the coffee line opens the footer, the first thing in it and
 // its first link, with a 48 px target. At the base it sat 24 to 46 px from the AdSense anchor with the page scrolled to the
 // end. Here the anchor is drawn as the page gets it with the ads on (the footer's --anchor room and a 100 px band at the
 // bottom, as cookie-footer.spec.ts does), and the line stays 150 px or more from it, at 360 and 1280 px.
@@ -395,7 +395,7 @@ const SUPPORT = [
   { path: '/es/apoyo/', texts: esSupport, crumb: esCommon.header.support },
 ];
 
-// F12 (decision 7; DECISOES § F12-C4): the title and the text of section C, the Oli to the right of the title in the same
+// F12 (decision 7; DECISOES § 438): the title and the text of section C, the Oli to the right of the title in the same
 // row, looking at the text (she sat above it on the phone and in a column of her own from 768 px), and the last crumb is
 // the name of the Menu row.
 for (const { path, texts, crumb } of SUPPORT) {

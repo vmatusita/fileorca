@@ -1,6 +1,6 @@
 # AdblockWall
 
-Monetização · FileOrca design system v1.1 (F12). Estilo em `../bundle.css`; marcação de referência em [`preview.html`](preview.html) (abra com `?theme=dark` para o tema escuro). No site: `src/components/AdblockWall.astro`, o script em `src/ads/wall.ts` e o CSS no `src/styles/components.css` (DECISOES § F12-P1).
+Monetização · FileOrca design system v1.1 (F12). Estilo em `../bundle.css`; marcação de referência em [`preview.html`](preview.html) (abra com `?theme=dark` para o tema escuro). No site: `src/components/AdblockWall.astro`, o script em `src/ads/wall.ts` e o CSS no `src/styles/components.css` (DECISOES § 426).
 
 A parede da Oli triste para quem bloqueia anúncio: um card do design system sobre o mar, que diz por que o site precisa dos anúncios e mostra como desligar o bloqueador só para o fileorca.com. Triste sem culpa.
 

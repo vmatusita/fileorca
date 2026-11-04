@@ -1,6 +1,6 @@
 import type { WallTexts } from '../types.ts';
 
-// F12 · a parede do bloqueador (decisão 10, com o ajuste 3; § F12-P6). Os textos da especificação (wall.html), com a 2ª
+// F12 · a parede do bloqueador (decisão 10, com o ajuste 3; § 431). Os textos da especificação (wall.html), com a 2ª
 // frase e os botões do ajuste 3. Os passos da ajuda vêm da ajuda pública de cada produto; nenhum tem link.
 export default {
   title: 'A Oli vive dos anúncios',

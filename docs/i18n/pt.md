@@ -270,7 +270,7 @@ Da tabela de voz do docs/design/README.
 
 ## A parede do bloqueador (F12)
 
-Os textos de `src/i18n/pt/wall.ts`, da especificação do `wall.html` com o ajuste 3 (DECISOES § F12-P6). Os botões começam com verbo; nada de "clique", e a parede não fala do café.
+Os textos de `src/i18n/pt/wall.ts`, da especificação do `wall.html` com o ajuste 3 (DECISOES § 431). Os botões começam com verbo; nada de "clique", e a parede não fala do café.
 
 | Inglês | Português | Nota |
 | --- | --- | --- |
@@ -285,7 +285,7 @@ Os textos de `src/i18n/pt/wall.ts`, da especificação do `wall.html` com o ajus
 
 ## Pedido de café e Pix
 
-Da seção C do PLANO-MELHORIAS (F12, DECISOES § F12-C7), que trocou a tabela "Doações" do PLANO.
+Da seção C do PLANO-MELHORIAS (F12, DECISOES § 441), que trocou a tabela "Doações" do PLANO.
 
 | Lugar | Texto |
 | --- | --- |

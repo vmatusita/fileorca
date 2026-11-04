@@ -126,7 +126,7 @@ test('the last footer link stays above the open notice when it takes the focus',
   }
 });
 
-// F12 · o consentimento (F3 f-06; § F12-P4). The notice opened again by "Change my cookie choice" keeps its room in step with
+// F12 · o consentimento (F3 f-06; § 429). The notice opened again by "Change my cookie choice" keeps its room in step with
 // the width, like the notice of a first visit: from 1280 to 320 px on /es/privacidad/ (the longest notice), the
 // scroll-padding follows the new height of the card, and the last link of the footer, focused, stays above it.
 test('the notice opened again by "Change my cookie choice" follows the width, from 1280 to 320 px (f-06)', async ({ page }) => {

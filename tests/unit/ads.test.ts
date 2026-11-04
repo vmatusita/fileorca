@@ -106,7 +106,7 @@ describe('AdSlot and the AdSense head in the three states', () => {
   for (const [state, config] of Object.entries(STATES)) {
     // F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id for the position, nothing at all (no box, no label, no
     // reserved space, no push); with the id, the reserved box with the label.
-    // F12, the ad map (plan B, DECISOES § 415, § F12-M2 and § F12-M5): the box carries the area, the unit, its id and its
+    // F12, the ad map (plan B, DECISOES § 415, § 420 and § 423): the box carries the area, the unit, its id and its
     // format, and no <ins> and no push of its own: the one push script of the page makes the unit on fileorca.com.
     it(`renders the reserved box with the label in each language only with the unit id (${state})`, async () => {
       for (const [lang, label] of [['en', 'Advertisements'], ['pt', 'Publicidade'], ['es', 'Anuncios']] as const) {
@@ -156,7 +156,7 @@ describe('AdSlot and the AdSense head in the three states', () => {
     vi.unstubAllEnvs();
   });
 
-  // F12 (DECISOES § F12-M2 and § F12-M5): the rail box says it is for 1280 px and more; its 300 × 600 unit is made by the push
+  // F12 (DECISOES § 420 and § 423): the rail box says it is for 1280 px and more; its 300 × 600 unit is made by the push
   // script, only where that width matches on load.
   it('reserves the rail unit size', async () => {
     const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', unit: 'lateral', label: 'Anuncios', config: STATES['all'] } });

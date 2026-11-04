@@ -46,7 +46,7 @@ export const MIN_MAIN_WORDS = 60;
 /** Words of <main> each AdSlot needs: about one phone screen of text per ad (DECISOES § 95). */
 export const MIN_WORDS_PER_AD = 150;
 /**
- * F12 (decision 4; DECISOES § F12-M3): the boxes are counted at the widths a person sees them, not all at once. A box of the
+ * F12 (decision 4; DECISOES § 421): the boxes are counted at the widths a person sees them, not all at once. A box of the
  * ad map says the width it shows at (data-ad-media); the gate counts, at each of these widths, the boxes that show there,
  * and asks 150 words of <main> for each: on a phone the content ads (the 2nd on show only under 768 px), on a computer the
  * first content ad, the rails (the 2nd only on a page of 600 words or more) and the multiplex. A box with no width shows at
@@ -271,7 +271,7 @@ export function checkAllBuild(site: Site): Row[] {
     }
     if (!page.ads && (UNIT.test(html) || (html.match(BOX) ?? []).length > 0)) problems.push(`${page.path}: unidade de anúncio numa página sem área`);
   }
-  // F12 (decision 4; DECISOES § F12-M3): the wall is off in this build, so nothing of it is in any page.
+  // F12 (decision 4; DECISOES § 421): the wall is off in this build, so nothing of it is in any page.
   const files = htmlFiles(site.dir);
   const wall = files.flatMap(({ path, html }) => WALL.filter(({ pattern }) => pattern.test(html)).map(({ label }) => `${path}: ${label}`));
   return [
@@ -478,7 +478,7 @@ const thinProblems = (path: string, facts: PageFacts): string[] =>
   facts.words < MIN_MAIN_WORDS ? [`${path}: ${facts.words} palavras no <main>, pede ${MIN_MAIN_WORDS}`] : [];
 
 /**
- * 150 words of <main> for each AdSlot that shows at a width (F12, decision 4; DECISOES § F12-M3): the widths where the
+ * 150 words of <main> for each AdSlot that shows at a width (F12, decision 4; DECISOES § 421): the widths where the
  * boxes need more words than the page has, with the most boxes first.
  */
 function adProblems(path: string, facts: PageFacts): string[] {

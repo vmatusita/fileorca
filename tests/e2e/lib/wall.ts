@@ -1,4 +1,4 @@
-// F12 · a parede do bloqueador (decision 11; § F12-P9): what the specs of the wall share (fo-wall.spec.ts and the
+// F12 · a parede do bloqueador (decision 11; § 434): what the specs of the wall share (fo-wall.spec.ts and the
 // adblock_wall test of events.spec.ts). The pages are the test build seen as fileorca.com (production.ts).
 import { expect, type BrowserContext, type Page } from '@playwright/test';
 import { PRODUCTION_ORIGIN, serveAsProduction, type ProductionOptions } from './production.ts';

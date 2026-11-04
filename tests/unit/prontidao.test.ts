@@ -225,7 +225,7 @@ describe('gate:prontidao, (a) AdSense', () => {
     expect(failing(checkAllBuild(openPush))).toEqual([expect.stringMatching(/\/compress-image\/: push de unidade sem a trava do hostname/)]);
   });
 
-  // F12 (decision 4; DECISOES § F12-M3): the build with the ads and the wall off carries nothing of the wall, and a box of the
+  // F12 (decision 4; DECISOES § 421): the build with the ads and the wall off carries nothing of the wall, and a box of the
   // map (no <ins> since the plan B) is a unit too, never on a page without an ad area.
   it('refuses anything of the wall in the build with the wall off, and a box of the map on a page without an ad area', () => {
     for (const [piece, what] of [
@@ -470,7 +470,7 @@ describe('gate:prontidao, (d) conteúdo de verdade', () => {
     expect(failing(checkContent(site)).join('\n')).toMatch(/\/es\/contacto\/: \d+ palavras no <main>/);
   });
 
-  // F12 (decision 4; DECISOES § F12-M3 and § F12-M5): the two boxes of the fake page say no width, so they show at every
+  // F12 (decision 4; DECISOES § 421 and § 423): the two boxes of the fake page say no width, so they show at every
   // width and the page needs 300 words at each one, as when the gate counted every box of the HTML.
   it(`refuses a page with less than ${MIN_WORDS_PER_AD} words for each AdSlot`, () => {
     const tool = PAGES.find((page) => page.ads) as SitePage;
@@ -479,7 +479,7 @@ describe('gate:prontidao, (d) conteúdo de verdade', () => {
   });
 });
 
-// F12 (decision 4; DECISOES § F12-M3): the boxes of the ad map, counted at the widths they show at. A page of the map with
+// F12 (decision 4; DECISOES § 421): the boxes of the ad map, counted at the widths they show at. A page of the map with
 // the 1st content ad, three more on the phone, the multiplex and both rails has 7 boxes in its HTML but shows 4 at most
 // at any width: 600 words pass, and one box more than the words allow fails at that width only.
 describe('gate:prontidao, as caixas por largura (F12)', () => {

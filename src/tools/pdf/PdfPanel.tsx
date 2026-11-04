@@ -924,7 +924,7 @@ export default function PdfPanel(props: PdfPanelData) {
           </ul>
         )}
         {m.coffee && (m.coffee === 'done' ? (
-          // "Don't show this again" leaves one quiet sentence in the same place, read once (DECISOES § F12-C2).
+          // "Don't show this again" leaves one quiet sentence in the same place, read once (DECISOES § 436).
           <p class="fo-result__support--done" role="status">{t.result.coffee.done}</p>
         ) : (
           <div class="fo-result__support">

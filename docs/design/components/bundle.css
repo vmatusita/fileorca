@@ -150,7 +150,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px 
 .fo-result__stat dd { margin: 0; font: 600 24px/28px var(--font-display); }
 .fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
 .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
-/* F12 · o café (DECISOES § F12-C2): the coffee line after Download, Start over and the notes: a short paragraph, one neutral
+/* F12 · o café (DECISOES § 436): the coffee line after Download, Start over and the notes: a short paragraph, one neutral
    button (never sun) and the ghost "Don't show this again", which leaves one quiet sentence in its place (role="status"). */
 .fo-result__support { display: grid; gap: var(--space-3); margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 .fo-result__support p { margin: 0; }
@@ -385,7 +385,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .fo-footer__base { margin-top: var(--space-8); padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
-/* F12 · o café (DECISOES § F12-C3): the coffee line opens the footer, far from the AdSense anchor at the bottom. */
+/* F12 · o café (DECISOES § 437): the coffee line opens the footer, far from the AdSense anchor at the bottom. */
 .fo-footer__coffee-row { box-sizing: border-box; margin: 0 0 var(--space-6); padding-bottom: var(--space-4); border-bottom: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); }
 .fo-footer .fo-footer__coffee { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); color: var(--on-deep); font-size: 16px; line-height: 22px; font-weight: 700; }
 .fo-footer .fo-footer__coffee:hover { text-decoration-thickness: 2px; }
@@ -399,7 +399,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-ad--flush { margin-block: 0; }
 
 /* ---------- SupportCard ---------- */
-/* F12 · o café (DECISOES § F12-C4 and § F12-C6): one column; the head row puts the Oli to the right of the title, looking
+/* F12 · o café (DECISOES § 438 and § 440): one column; the head row puts the Oli to the right of the title, looking
    left at the text. In the Pix, on the phone, the code, its visible label and Copy code (a plain 52 px .fo-btn) come
    first and the QR after; from 768 px the QR comes first, at 160 px. */
 .fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
@@ -445,7 +445,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-oli--cheer svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
 @keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
 .fo-oli--gulp svg { transform: scale(1.05); transition: transform var(--dur-quick) var(--ease-spring); }
-/* F12 · o café (DECISOES § F12-C5): two rises, then the steam rests, visible and still, by 4.8 s (WCAG 2.2.2). */
+/* F12 · o café (DECISOES § 439): two rises, then the steam rests, visible and still, by 4.8 s (WCAG 2.2.2). */
 .oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
 .oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
 @keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
@@ -486,7 +486,7 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 
 /* ---------- AdblockWall (F12) ---------- */
 /* The Oli wall for whoever blocks the ads: a card of the system over the sea, opened with showModal() on the site. The same
-   rules as src/styles/components.css (DECISOES § F12-P1), with the font tokens of the system. The sea is the water at 92 %
+   rules as src/styles/components.css (DECISOES § 426), with the font tokens of the system. The sea is the water at 92 %
    in the light theme and the deep at 92 % in the dark one, a private variable of the component (no new token), dark on
    screen only. Closed, the dialog keeps display: none; only [open] is a flex column, so the footer stays in sight. */
 :root { --fo-wall-sea: var(--water); }

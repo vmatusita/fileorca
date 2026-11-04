@@ -321,7 +321,7 @@ test.describe('motion without the preference', () => {
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
   });
 
-  // F12 (decision 7; DECISOES § F12-C5): the steam of the coffee pose rises, then rests by itself, still and visible, by
+  // F12 (decision 7; DECISOES § 439): the steam of the coffee pose rises, then rests by itself, still and visible, by
   // 4.8 s (WCAG 2.2.2; it looped every 1.8 s, F3 d-02). It still moves at first, so this check is not vacuous. A finished
   // animation with "forwards" stays in getAnimations(): what is counted is the playState "running".
   test('support page: the coffee steam rises, then rests, still and visible, by 4.8 s', async ({ page }) => {

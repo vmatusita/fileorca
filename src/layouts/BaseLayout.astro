@@ -20,12 +20,12 @@ import { SITE_NAME, SW_ENABLED } from '../platform/site.ts';
 import { swRegistration } from '../platform/sw-register.ts';
 import { APP_ICON_SVG } from '../seo/images.ts';
 import { buildAdsConfig, wallModeOf } from '../ads/config.ts';
-// F12 · o mapa de anúncios (DECISOES § F12-M1 and § F12-M2).
+// F12 · o mapa de anúncios (DECISOES § 419 and § 420).
 import { layOutAds, markProblems, withoutMarks } from '../ads/map.ts';
 import type { AdArea } from '../i18n/routes.ts';
 import OliSprite from '../components/OliSprite.astro';
 import type { Pose } from '../oli/poses.ts';
-/* F12 · a parede do bloqueador (§ F12-P1) */
+/* F12 · a parede do bloqueador (§ 426) */
 import AdblockWall from '../components/AdblockWall.astro';
 import { WALL_POSE } from '../oli/poses.ts';
 // The same hashed URL as the url() of the @font-face in src/styles/fonts.css (DECISOES § 42).
@@ -47,7 +47,7 @@ interface Props {
 }
 const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [] } = Astro.props;
 const adsConfig = buildAdsConfig();
-/* F12 · a parede do bloqueador (§ F12-P1): only on a page with ads and with the wall on; its pose joins the sprite there. */
+/* F12 · a parede do bloqueador (§ 426): only on a page with ads and with the wall on; its pose joins the sprite there. */
 const wall = withAds ? wallModeOf(adsConfig) : 'desligado';
 const poses: Pose[] = [...new Set<Pose>([...oli, 'peek', ...(wall === 'desligado' ? [] : [WALL_POSE])])];
 const anchor = withAds && adsConfig.scriptEnabled;
@@ -57,7 +57,7 @@ const canonical = absolute(path);
 const alternates = alternatesFor(route);
 const fullTitle = pageTitle(title);
 const ogImage = absolute(ogImagePath(route.indexable ? route.id : 'home', lang));
-// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1 and § F12-M2): <main> is rendered to text, the build puts each ad
+// F12 · o mapa de anúncios (decision 3; DECISOES § 419 and § 420): <main> is rendered to text, the build puts each ad
 // box at the marks of the view (src/ads/map.ts) and drops the marks, and the rail gets its boxes; a box exists only with
 // the id of its unit. A mark in a wrong place fails the build, on a page with ads or without.
 // F12, Mudança 10 (DECISOES § 413): a page with ads keeps the rail column of the grid from 1280px, empty when the build has

@@ -52,7 +52,7 @@ test('each amount shows its QR and its code, and Copy code copies exactly that c
   expect(requests.map((request) => `${request.method()} ${request.url()}`)).toEqual([]);
 });
 
-// F12 (decision 7; DECISOES § F12-C6): the name of the code is the visible label "Pix copia e cola" above it (it was text for
+// F12 (decision 7; DECISOES § 440): the name of the code is the visible label "Pix copia e cola" above it (it was text for
 // screen readers only, .fo-sr, with a colon); no aria-labelledby on the <code>, which axe refuses (aria-prohibited-attr).
 test('the amounts are a radio group with a name, and the code has a visible label', async ({ page }) => {
   await page.goto('/pt/apoie/');
@@ -131,7 +131,7 @@ test('another amount clears the status, and a refused copy says how to copy by h
   }
 });
 
-// F12 (decision 7; DECISOES § F12-C6, which closes the F10 p-4 and the Pix part of the F5a D-12): Copy code is a plain 52 px
+// F12 (decision 7; DECISOES § 440, which closes the F10 p-4 and the Pix part of the F5a D-12): Copy code is a plain 52 px
 // button (it was the 40 px --sm), and on the phone the "copia e cola" and its button come before the QR (the phone that reads
 // the page cannot scan its own screen); from 768 px the QR comes first, at 160 px (it was 112 px), for the phone of the
 // person at the computer. Every amount, at 360, 390, 768 and 1280 px.

@@ -1,4 +1,4 @@
-// F12 · a parede do bloqueador (decision 5, 10 and 11; § F12-P1, § F12-P5, § F12-P6 and § F12-P9). What only depends on
+// F12 · a parede do bloqueador (decision 5, 10 and 11; § 426, § 430, § 431 and § 434). What only depends on
 // the build, read from the rendered components (the default build itself is read by default-build.test.ts):
 // - the wall (the dialog, the bait, its script and the sad pose in the sprite), the recovery tag and the onerror of the
 //   loader are on a page with ads only with the three AdSense variables and PUBLIC_ADBLOCK_WALL in aviso or bloqueio, and

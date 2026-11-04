@@ -1,4 +1,4 @@
-// A small reader of the HTML the site renders itself (F12, the ad map; DECISOES § F12-M1). The build reads the <main> of a
+// A small reader of the HTML the site renders itself (F12, the ad map; DECISOES § 419). The build reads the <main> of a
 // page to place the ad boxes at the block boundaries the view marks, to estimate the height of the blocks between them at
 // 360 px and to count the words of <main>. The HTML is the site's own (Astro output: closed tags, quoted attributes), so a
 // tag reader is enough; nothing here runs in the browser.

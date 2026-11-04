@@ -11,7 +11,7 @@ O botão da FileOrca é uma pílula com o traço de 2px e um "lábio" sólido em
 | Classe | Uso |
 |---|---|
 | `fo-btn--download` | O Baixar. Fundo `sun`, texto `on-sun`. Um por tela, sempre com o ícone `download` e, quando houver, o tamanho do arquivo em `fo-btn__meta`. Nunca perto de anúncio (`ad-clearance`). |
-| `fo-btn--brand` | Escolher arquivos, dentro da DropZone, e o "recarregar" da parede do bloqueador ([AdblockWall](../AdblockWall/README.md); F12, DECISOES § F12-P8). Um por tela. |
+| `fo-btn--brand` | Escolher arquivos, dentro da DropZone, e o "recarregar" da parede do bloqueador ([AdblockWall](../AdblockWall/README.md); F12, DECISOES § 433). Um por tela. |
 | (padrão) | Ações secundárias: CSV, Copiar link, Aceitar/Recusar cookies. |
 | `fo-btn--ghost` | Ações de saída e de baixo risco: Começar de novo, Cancelar. Sem traço, sem lábio. |
 | `fo-btn--icon` | Ações de linha (remover, baixar um arquivo do lote). Sempre com `aria-label`. |

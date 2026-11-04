@@ -183,7 +183,7 @@ function firstVisits(build: string): void {
 
 firstVisits('padrão');
 
-// F12 (decision 11 and criterion 11; DECISOES § F12-M4): the same first visits on the test build, with the boxes of the ad
+// F12 (decision 11 and criterion 11; DECISOES § 422): the same first visits on the test build, with the boxes of the ad
 // map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves
 // either, and the shift of each page is printed next to the one of the default build.
 test.describe('on the test build, with the boxes of the ad map', () => {

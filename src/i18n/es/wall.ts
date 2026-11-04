@@ -1,6 +1,6 @@
 import type { WallTexts } from '../types.ts';
 
-// F12 · a parede do bloqueador (decisión 10, con el ajuste 3; § F12-P6). Los textos de la especificación (wall.html), con la
+// F12 · a parede do bloqueador (decisión 10, con el ajuste 3; § 431). Los textos de la especificación (wall.html), con la
 // 2.ª frase y los botones del ajuste 3. Los pasos de la ayuda vienen de la ayuda pública de cada producto; ninguno tiene enlace.
 // La nota de Brave dice "celular": el glosario (docs/i18n/es.md, "Nunca") no deja "móvil".
 export default {

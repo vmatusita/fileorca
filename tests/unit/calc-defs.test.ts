@@ -469,7 +469,7 @@ describe('after the review', () => {
       // F11 (decision 2): the three pages changed for the theme key fo-theme; the English date moved to that day, and the
       // Portuguese and Spanish dates were already on it (DECISOES § 387 and § 392).
       // F12 (decision 5, adjustment 1): the three pages changed for the ad-block wall (the recovery tag, the adblock_wall
-      // event and the fo-wall-escape key); the three dates moved to that day (§ F12-P6 and § F12-P9).
+      // event and the fo-wall-escape key); the three dates moved to that day (§ 431 and § 434).
       expect(privacy.updated, lang).toBe({ en: 'Last updated: November 4, 2026', pt: 'Última atualização: 4 de novembro de 2026', es: 'Última actualización: 4 de noviembre de 2026' }[lang]);
     }
   });

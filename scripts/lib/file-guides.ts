@@ -12,7 +12,7 @@ export const MIN_GUIDE_WORDS = 800;
 export const MAX_GUIDE_WORDS = 1500;
 /** At most this many related cards, as on a tool page. */
 export const MAX_GUIDE_RELATED = 6;
-/** F12 (DECISOES § F12-M6): the content ads of a guide, conteudo to conteudo-5 of the ad map (ad-map.html, the 37 units). */
+/** F12 (DECISOES § 424): the content ads of a guide, conteudo to conteudo-5 of the ad map (ad-map.html, the 37 units). */
 export const MAX_GUIDE_CONTENT_ADS = 5;
 
 /** Phrases that fill space without saying anything (prompt F5b, decision 5.7; the F4 list). */
@@ -175,7 +175,7 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
     if (cards.length === 0) problems.push('as relacionadas sem link');
     if (cards.length > MAX_GUIDE_RELATED) problems.push(`${cards.length} relacionadas (no máximo ${MAX_GUIDE_RELATED})`);
   }
-  // F12 (decision 3; DECISOES § F12-M6): the ads of the map in the guide. Before, two AdSlots at most (the content one after
+  // F12 (decision 3; DECISOES § 424): the ads of the map in the guide. Before, two AdSlots at most (the content one after
   // the tool and the rail one). Now the first content ad comes in the text after the tool, with a paragraph between them;
   // five content ads at most (conteudo to conteudo-5) and one multiplex, the last block of <main>; none in the tool and none
   // beside "What we measured". The density and the 1,110 px between them are measured in tests/e2e/fo-ad-map.spec.ts.

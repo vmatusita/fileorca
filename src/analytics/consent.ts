@@ -34,7 +34,7 @@ export function defaultConsentFor(region: string): ConsentState {
 export const GTAG_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`;
 
 /*
- * F12 · o consentimento (F3 c-04, saída A; § F12-P3). The choice made in the site's own notice, as the consent update it
+ * F12 · o consentimento (F3 c-04, saída A; § 428). The choice made in the site's own notice, as the consent update it
  * sends, when it is replayed in <head> and when it is made in the notice (CookieNotice.astro calls window.foConsent):
  * - a Decline sends the four keys denied, everywhere: a denial grants nothing, and where the region is denied by default
  *   the ad_* are denied already, so Google's message still decides them (its update comes after this one);
@@ -60,7 +60,7 @@ export function consentBootstrap(): string {
     'window.gtag=gtag;',
     `gtag('consent','default',${denied});`,
     `gtag('consent','default',${granted});`,
-    // F12 (c-04; § F12-P3): the stored choice goes through window.foConsent, the same update the notice sends.
+    // F12 (c-04; § 428): the stored choice goes through window.foConsent, the same update the notice sends.
     `window.foConsent=${consentUpdateJs()};`,
     `try{var c=localStorage.getItem('${CONSENT_STORAGE_KEY}');if(c==='granted'||c==='denied'){foConsent(c);}}catch(e){}`,
     "gtag('js',new Date());",

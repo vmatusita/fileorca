@@ -130,7 +130,7 @@ export const ROUTES: readonly RouteDef[] = [
     indexable: true,
     view: 'src/views/HomeView.astro',
     texts: ['src/i18n/{lang}/home.ts'],
-    // F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the home has ads, in the area "geral".
+    // F12 · o mapa de anúncios (decision 3; DECISOES § 419): the home has ads, in the area "geral".
     adArea: 'geral',
   },
   {
@@ -157,7 +157,7 @@ export const ROUTES: readonly RouteDef[] = [
   // The PDF hub and the 12 PDF tools exist in the three languages (F6).
   ...pdfRoutes(),
   // F11 (decision 5): the guides hub, in the three languages, right before the file guides, the way each hub comes before
-  // its pages; it lists them and the money guides. F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): with ads, in
+  // its pages; it lists them and the money guides. F12 · o mapa de anúncios (decision 3; DECISOES § 419): with ads, in
   // the area "geral", like the home.
   {
     id: GUIDES_HUB_ID,

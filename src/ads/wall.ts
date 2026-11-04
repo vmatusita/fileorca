@@ -1,4 +1,4 @@
-// F12 · a parede do bloqueador (decision 5; § F12-P1 and § F12-P2). The inline script of the ad-block wall, built at
+// F12 · a parede do bloqueador (decision 5; § 426 and § 427). The inline script of the ad-block wall, built at
 // build time for the language and the mode of the page; AdblockWall.astro puts it at the end of the <body>, only on the
 // pages with ads and only with the wall on (wallModeOf). It runs only on fileorca.com, like the AdSense loader, and it
 // writes nothing but the time of the escape (fo-wall-escape, § 49 precedent: asked by the person, with or without the
@@ -12,7 +12,7 @@
 // 3. the fallback, when Google said nothing 4 s after the load event: the AdSense loader failed (window.foAdsFailed, its
 //    onerror) and the bait #fo-bait is hidden, both together (the Googlebot only ever has the first);
 // 4. an ins.adsbygoogle[data-ad-status="filled"] on the page ends the detection (Acceptable Ads).
-// The window closes 4 s after the load event: Google's answer after it, or nothing, leaves the page alone (§ F12-P2).
+// The window closes 4 s after the load event: Google's answer after it, or nothing, leaves the page alone (§ 427).
 // The mode: the network-level blocker always gets the closable notice (adjustment 2); so do the EU, the United Kingdom and
 // Switzerland, by the __tcfapi (gdprApplies, after tcloaded or useractioncomplete, so the wall never covers Google's
 // consent message) or, without it, by the time zone of the device (src/platform/region.ts).

@@ -1,4 +1,4 @@
-// F12 · a parede do bloqueador e o consentimento (§ F12-P3): the one helper of the region on the device, for the ad-block
+// F12 · a parede do bloqueador e o consentimento (§ 428): the one helper of the region on the device, for the ad-block
 // wall (always the closable notice in the EU, the United Kingdom and Switzerland when the __tcfapi is not there) and for
 // the cookie choice of the site's own notice (F3 c-04: in the regions denied by default, an Accept replays only the
 // analytics_storage). The browser does not know the country: the time zone of the device stands for it, with the list of

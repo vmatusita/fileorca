@@ -44,7 +44,7 @@ describe('linha do café (DECISOES § 49)', () => {
     expect(decideCoffee({ uses: 2, never: true }, { ...accepted, now: NOW + 10 * WEEK_MS })).toEqual({ show: false, next: null });
   });
 
-  // F12 (Mudança 11; DECISOES § F12-C1, which closes the F3 c-08): someone who blocks ads gets the ad-block wall, and the
+  // F12 (Mudança 11; DECISOES § 435, which closes the F3 c-08): someone who blocks ads gets the ad-block wall, and the
   // coffee line no longer asks them on the 1st use. Before, the context carried adsBlocked and the 1st use showed the line
   // ({ adsBlocked: true } gave show: true on { uses: 0 }); a context that still says so is ignored.
   it('asks someone who blocks ads on the 3rd use too, still only with the Accept: the 1st-use ask is gone', () => {

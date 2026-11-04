@@ -1,4 +1,4 @@
-// The ad map in the page (F12, decisions 3 and 4; UX-07 A; DECISOES § F12-M1 to § F12-M3). The build places every ad box:
+// The ad map in the page (F12, decisions 3 and 4; UX-07 A; DECISOES § 419 to § 421). The build places every ad box:
 // the view renders <main> with marks between its blocks (AdBreak.astro): one "first" mark where the first content ad of
 // the mold goes, and "break" marks at the other block boundaries where a content ad may go. The layout renders <main> to
 // text, and this module

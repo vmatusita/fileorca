@@ -24,7 +24,7 @@ const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
 const CLEARANCE = 150;
-// F12 · o mapa de anúncios (DECISOES § F12-M5): the rail has a 2nd unit, absolute 1,200 px under the 1st, on the pages of 600
+// F12 · o mapa de anúncios (DECISOES § 423): the rail has a 2nd unit, absolute 1,200 px under the 1st, on the pages of 600
 // words or more; it starts hidden and only the push script of fileorca.com shows it, so the rail of these tests is the 1st.
 const RAIL = '.fo-ad--rail:not(.fo-ad--rail2)';
 // F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
@@ -173,7 +173,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await dismissCookies(page);
       const adCount = await page.locator('.fo-ad').count();
       expect(adCount).toBeGreaterThan(0);
-      // F12 (decision 3; UX-04 A, § 371; DECISOES § F12-M5): the first content AdSlot comes right after the "How to" block,
+      // F12 (decision 3; UX-04 A, § 371; DECISOES § 423): the first content AdSlot comes right after the "How to" block,
       // which the GuideCard closes, and no longer right after the panel.
       expect(await page.locator('main > section[data-content="how"] + .fo-ad--content[data-ad-unit="conteudo"]').count(), 'o 1º anúncio depois do "Como usar"').toBe(1);
 
@@ -292,7 +292,7 @@ for (const viewport of VIEWPORTS) {
 }
 
 // F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language was born with no AdSlot and no ad area.
-// F12 (decision 3; DECISOES § F12-M5): the home and the guides hub have ads now, in the area "geral" (the map checks them,
+// F12 (decision 3; DECISOES § 423): the home and the guides hub have ads now, in the area "geral" (the map checks them,
 // fo-ad-map.spec.ts); the free pages are the 27 of the map, with the offline page and "Open with" too, read from the route
 // map (every route with no ad area), and none has a box, a unit, the loader or the push script.
 test('the 27 free pages (legal, institutional, support, 404, offline and "Open with") have no AdSlot and no ad code', async ({ page }) => {
@@ -314,7 +314,7 @@ test('the 27 free pages (legal, institutional, support, 404, offline and "Open w
 // F2: the hub /image-tools/ has no panel, field, Download or Oli on screen; what holds there is the order. Its one
 // content AdSlot sits under the grid of tools (never above them on the phone), the rail is the tool pages' one, and
 // none is within 150px of a visible Oli.
-// F12 (decision 3; DECISOES § F12-M5): the hub has more content AdSlots on the phone (the map's); the first one is right
+// F12 (decision 3; DECISOES § 423): the hub has more content AdSlots on the phone (the map's); the first one is right
 // after the grid of tools, and every content AdSlot on screen at each width is under the grid.
 test('the hub keeps its first content AdSlot right after the grid of tools and every one under it, at 360 and 1280px', async ({ page }) => {
   // F6: in the three languages.
@@ -339,7 +339,7 @@ test('the AdSlot shows the accepted label per language and reserves its height, 
   for (const [path, label] of [['/compress-image/', 'Advertisements'], ['/pt/comprimir-imagem/', 'Publicidade'], ['/es/comprimir-imagen/', 'Anuncios']] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(path);
-    // F12 (DECISOES § F12-M5): every box carries the label (the content ones, the multiplex and the rails).
+    // F12 (DECISOES § 423): every box carries the label (the content ones, the multiplex and the rails).
     for (const box of await page.locator('.fo-ad').all()) await expect(box.locator('.fo-ad__label')).toHaveText(label);
     const content = page.locator('.fo-ad--content').first();
     expect((await content.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(300);
@@ -482,7 +482,7 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
   }
 });
 
-// F12 (decision 3; DECISOES § F12-M5): the first content AdSlot of the money hub goes right after the grid of the credit
+// F12 (decision 3; DECISOES § 423): the first content AdSlot of the money hub goes right after the grid of the credit
 // calculators (before, after both grids), and every content AdSlot on screen is under that grid and 150px from every grid.
 test('the money hub keeps its first content AdSlot right after the grid of credit calculators, at 360 and 1280px', async ({ page }) => {
   // F6: the Spanish hub and the Brazilian one too.
@@ -638,7 +638,7 @@ for (const lang of LANGS) {
 
 // The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
 // phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
-// F12 (decision 3; DECISOES § F12-M5): the first content AdSlot right after the grid, every one under it, and every box of
+// F12 (decision 3; DECISOES § 423): the first content AdSlot right after the grid, every one under it, and every box of
 // the page (the content ones, the multiplex and the rails) in the ad area casa-saude.
 test('the home and health hubs keep their first content AdSlot right after the grid of calculators, at 360 and 1280px', async ({ page }) => {
   for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID] as const) {
@@ -734,7 +734,7 @@ test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1
 
 // The PDF hub, like the image and the money hubs: one content AdSlot under the grid of tools (never above them on a
 // phone), the rail from 1280px, and 150px from the grid and from every Oli on screen.
-// F12 (decision 3; DECISOES § F12-M5): the first content AdSlot right after the grid, every one on screen under it.
+// F12 (decision 3; DECISOES § 423): the first content AdSlot right after the grid, every one on screen under it.
 test('the PDF hub keeps its first content AdSlot right after the grid of tools and every one under it, at 360 and 1280px', async ({ page }) => {
   // F6: in the three languages.
   for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById(PDF_HUB_ID).paths[lang] ?? '')) {

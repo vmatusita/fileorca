@@ -3,7 +3,7 @@ import { dismissCookies, hydrated, nextUse, settle, useImage } from './lib/page.
 import { PRODUCTION_ORIGIN, serveAsProduction } from './lib/production.ts';
 import { useTestBuild } from './lib/test-build.ts';
 
-// F12 (Mudança 11, decision 7; DECISOES § F12-C1, which closes the F3 c-08): with the ads on, someone who blocks them no
+// F12 (Mudança 11, decision 7; DECISOES § 435, which closes the F3 c-08): with the ads on, someone who blocks them no
 // longer gets the coffee line on the 1st use. Before, the panel read the AdSense loader (window.adsbygoogle.loaded) on
 // fileorca.com with the ads on at build, and a loader that never ran made the 1st use show the line, also for a loader
 // that only failed (the false positive of the c-08). Now the rule is the 3rd use for everyone, and someone who blocks ads

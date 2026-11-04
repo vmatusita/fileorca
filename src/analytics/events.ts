@@ -16,7 +16,7 @@ export const EVENT_PARAMS = {
   calc_complete: ['tool', 'lang'],
   export_click: ['tool', 'lang', 'format'],
   share_click: ['tool', 'lang'],
-  // F12 · a parede do bloqueador (decision 5; § F12-P7): what the wall did and in which mode, both closed lists.
+  // F12 · a parede do bloqueador (decision 5; § 432): what the wall did and in which mode, both closed lists.
   adblock_wall: ['action', 'mode', 'lang'],
 } as const;
 
@@ -54,7 +54,7 @@ export type DonatePlace = (typeof DONATE_PLACES)[number];
 export const EXPORT_FORMATS = ['pdf', 'csv', 'png', 'svg'] as const;
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 /*
- * F12 · a parede do bloqueador (decision 5; § F12-P7). What the ad-block wall did: it showed, or the person used one of its
+ * F12 · a parede do bloqueador (decision 5; § 432). What the ad-block wall did: it showed, or the person used one of its
  * buttons (reload, the help, only when it opens the panel, or the escape "Continue just this once"). There is no "close":
  * adjustment 4 of the proposal did not go in. And the mode it opened in: the closable notice or the wall.
  */
@@ -74,7 +74,7 @@ export interface EventMap {
   calc_complete: { tool: AnyCalcId; lang: Lang };
   export_click: { tool: AnyCalcId | 'qr-code-generator'; lang: Lang; format: ExportFormat };
   share_click: { tool: AnyCalcId; lang: Lang };
-  /** F12 (§ F12-P7): sent by the inline script of the wall through window.foTrack, never with the time zone or a time. */
+  /** F12 (§ 432): sent by the inline script of the wall through window.foTrack, never with the time zone or a time. */
   adblock_wall: { action: WallAction; mode: WallEventMode; lang: Lang };
 }
 
@@ -87,7 +87,7 @@ const CLOSED_VALUES: Record<string, readonly string[]> = {
   place: DONATE_PLACES,
   tool: EVENT_TOOLS,
   target: [...EVENT_TOOLS, 'home'],
-  // F12 (§ F12-P7): the two parameters of adblock_wall.
+  // F12 (§ 432): the two parameters of adblock_wall.
   action: WALL_ACTIONS,
   mode: WALL_EVENT_MODES,
 };

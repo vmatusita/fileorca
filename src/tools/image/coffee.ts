@@ -6,7 +6,7 @@
 // Accept is erased (consent withdrawn). "Don't show again" is the person's own request and is always
 // kept. A use is a batch with at least one real output (smaller, converted, turned, cropped, resized or
 // put into a PDF), and the count is one for all the image tools in this browser. Someone who blocks ads follows the same
-// rule: the 1st-use ask for them is gone (F12, Mudança 11; DECISOES § F12-C1). They get the ad-block wall, and the coffee
+// rule: the 1st-use ask for them is gone (F12, Mudança 11; DECISOES § 435). They get the ad-block wall, and the coffee
 // is never a way out of it.
 import { CONSENT_STORAGE_KEY } from '../../analytics/consent.ts';
 
@@ -14,7 +14,7 @@ export const COFFEE_KEY = 'fo-coffee';
 export const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 export const USES_BEFORE_ASKING = 3;
 
-/** The coffee line of a result card: none, the ask, or the sentence that confirms "don't show again" (§ F12-C2). */
+/** The coffee line of a result card: none, the ask, or the sentence that confirms "don't show again" (§ 436). */
 export type CoffeeLine = '' | 'ask' | 'done';
 
 export interface CoffeeState {

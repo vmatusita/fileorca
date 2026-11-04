@@ -163,7 +163,7 @@ describe('mapa de rotas', () => {
     expect(TEXTS.en.common.seal).toBe('Your files never leave your device');
     expect(TEXTS.pt.common.seal).toBe('Seu arquivo nem sai do aparelho');
     expect(TEXTS.es.common.seal).toBe('Tus archivos nunca salen de tu dispositivo');
-    // F12 (decision 7; DECISOES § F12-C7): the coffee texts of PLANO-MELHORIAS section C, where "Curtiu? Me paga um café"
+    // F12 (decision 7; DECISOES § 441): the coffee texts of PLANO-MELHORIAS section C, where "Curtiu? Me paga um café"
     // and "Free tools, made by one person" were the PLANO's "Doações" ones.
     expect(TEXTS.pt.common.footer.coffee).toBe('Me ajude a manter o FileOrca grátis: paga um café?');
     expect(TEXTS.en.support.h1).toBe('Help Oli keep swimming');

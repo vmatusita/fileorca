@@ -8,7 +8,7 @@ import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import { dataLayer, dismissCookies, hydrated, useImage } from './lib/page.ts';
 import { BROKEN_PDFS, PDF_ORACLE, choosePdfs, openTool, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
-/* F12 · a parede do bloqueador (§ F12-P7) */
+/* F12 · a parede do bloqueador (§ 432) */
 import { WALL_ACTIONS, WALL_EVENT_MODES } from '../../src/analytics/events.ts';
 import { PRODUCTION_ORIGIN } from './lib/production.ts';
 import { useTestBuild } from './lib/test-build.ts';
@@ -25,14 +25,14 @@ test('the footer coffee link sends donate_click with place footer and the langua
   // The open notice floats over the end of the page (DECISOES § 106): the choice comes first, as a person's would.
   await dismissCookies(page);
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
-  // F12 (DECISOES § F12-C9): the footer line of PLANO-MELHORIAS section C, at the top of the footer.
+  // F12 (DECISOES § 443): the footer line of PLANO-MELHORIAS section C, at the top of the footer.
   await page.locator('footer').getByRole('link', { name: 'Me ajude a manter o FileOrca grátis: paga um café?', exact: true }).click();
   expect(await lastEvent(page, 'donate_click')).toEqual(['event', 'donate_click', { lang: 'pt', place: 'footer' }]);
 });
 
 test('the support page button links to Ko-fi without any Ko-fi script and sends donate_click', async ({ page }) => {
   await page.goto('/support/');
-  // F12 (DECISOES § F12-C9): the Ko-fi button of section C. Exact: the footer line of the same page ends in "buy me a coffee".
+  // F12 (DECISOES § 443): the Ko-fi button of section C. Exact: the footer line of the same page ends in "buy me a coffee".
   const button = page.getByRole('link', { name: 'Buy me a coffee', exact: true });
   await expect(button).toHaveAttribute('href', 'https://ko-fi.com/victormatusita');
   expect(await page.locator('script[src*="ko-fi"], iframe[src*="ko-fi"]').count()).toBe(0);
@@ -453,7 +453,7 @@ test.describe('the PDF tool events', () => {
   });
 });
 
-/* F12 · a parede do bloqueador (decision 5; § F12-P7). The adblock_wall event, in the test build seen as fileorca.com
+/* F12 · a parede do bloqueador (decision 5; § 432). The adblock_wall event, in the test build seen as fileorca.com
    (tests/e2e/lib/wall.ts): each action of the closed list (shown, help only when the panel opens, reload and escape, never
    a "close") with the mode of the closed list and the language, and nothing else. The reload empties the dataLayer, so
    the events go through the sessionStorage of the tab too, kept by an init script. */

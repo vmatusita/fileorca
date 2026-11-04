@@ -28,7 +28,7 @@ O próximo § livre é o **410**. As fatias 2a, 2b e 2c correm em paralelo, ent�
   - § 416 · A tag de recuperação e a API `googlefc` (decisão 5);
   - § 417 · A pose `sad` (decisão 6);
   - § 418 · Os testes antigos que a Mudança 10 e o build de teste mudaram (formato da § 341).
-- **Fatias 2a, 2b e 2c (agentes M, P e C):** cada agente escreve os seus § no fim do `DECISOES.md` com um marcador no lugar do número (`§ F12-M1`, `§ F12-M2`…, `§ F12-P1`…, `§ F12-C1`…), também nos comentários do código que os citam. Na junção, um script troca os marcadores por números a partir do **419**, na ordem M, P, C, e confere que nenhum marcador sobrou. Assim nenhum número é citado antes de escrito, e não há buraco.
+- **Fatias 2a, 2b e 2c (agentes M, P e C):** cada agente escreve os seus § no fim do `DECISOES.md` com um marcador no lugar do número (o prefixo da fase, a letra da frente e a ordem: M1, M2…, P1…, C1…), também nos comentários do código que os citam. Na junção, um script troca os marcadores por números a partir do **419**, na ordem M, P, C, e confere que nenhum marcador sobrou. Assim nenhum número é citado antes de escrito, e não há buraco. Resultado da junção: o mapa do 419 ao 425, a parede e o consentimento do 426 ao 434, e o café do 435 ao 444.
 - **Fatias 4 e 5 e a revisão:** números seguintes, na ordem em que forem escritos.
 
 ## 3. O `display: none` por largura: o plano B

@@ -1,6 +1,6 @@
-// The ad map in every page with ads (F12, decisions 3 and 11; UX-07 A; DECISOES § F12-M1 to § F12-M4), on the test build
+// The ad map in every page with ads (F12, decisions 3 and 11; UX-07 A; DECISOES § 419 to § 422), on the test build
 // (fake ids in the 37 units, the worst case). The name puts this spec next to the other specs of the test build in the
-// parts of the CI (after events.spec.ts, with header-menu.spec.ts; DECISOES § F12-M4).
+// parts of the CI (after events.spec.ts, with header-menu.spec.ts; DECISOES § 422).
 //   - The 184 pages, in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
 //     content ads edge to edge, 150 px from every target, nothing above the tool, the first ad after the piece of its mold,
 //     no box in a grid, a table, a list, a question, a form, the panel, the schedule or a band, none against a table or a
@@ -156,7 +156,7 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
       await page.setViewportSize(PHONE);
       // A first visit: the cookie notice is open. In Chromium the initial JS (with the inline push) is held to the 80 KB of
       // budgets.ts: its bytes are the same in WebKit, which budgets.spec.ts and i18n-budgets.spec.ts measure on the default
-      // build with the same files and requests (DECISOES § F12-M4).
+      // build with the same files and requests (DECISOES § 422).
       if (browserName === 'chromium') await expectInitialBudget(page, TEST_BUILD_ORIGIN, adPage.path, { files: 'at most 2' });
       else expect((await page.goto(adPage.path))?.status(), adPage.path).toBe(200);
       if (await page.locator('#fo-tool-root').count()) await hydrated(page);

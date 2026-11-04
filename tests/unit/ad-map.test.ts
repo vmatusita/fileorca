@@ -1,4 +1,4 @@
-// The ad map at build time (F12, decisions 3 and 4; DECISOES § F12-M1 and § F12-M2): the rules of the marks a view puts in
+// The ad map at build time (F12, decisions 3 and 4; DECISOES § 419 and § 420): the rules of the marks a view puts in
 // <main>, the choice of the marks by the estimate at 360 px, the boxes with the unit of each position (none without its id),
 // the multiplex, the rails, the one push script, and the words of <main> counted as gate:prontidao counts them.
 import { existsSync, readFileSync } from 'node:fs';
@@ -152,7 +152,7 @@ describe('the boxes of a page', () => {
 
 // The build places the lateral-2 by the words of <main> (600 or more); the gate asks 150 words for each box that shows on a
 // computer, counted with its own reader. They have to agree on every page, or a page could have the lateral-2 the gate
-// refuses (DECISOES § F12-M2 and § F12-M3).
+// refuses (DECISOES § 420 and § 421).
 const DIST = 'dist';
 describe.runIf(existsSync(join(DIST, 'index.html')))('the words of <main> as the gate counts them', () => {
   it('counts the words of every page of dist/ like gate:prontidao', () => {

@@ -19,7 +19,7 @@ import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 // Whole pages in the three states of the build variables: the meta tag goes on every page once
 // the client exists; the loader and the units only on tool pages, and only with all three.
 const CLIENT = 'ca-pub-1234567890123456';
-// F12 (DECISOES § F12-M5): the area "geral" of the home and of the guides hub, with the same two units.
+// F12 (DECISOES § 423): the area "geral" of the home and of the guides hub, with the same two units.
 const SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' }, geral: { conteudo: '3333333333', lateral: '4444444444' } });
 /** The one push script of a page with a box (src/ads/map.ts). */
 const PUSH_SCRIPT = 'if(location.hostname==="fileorca.com"){document.querySelectorAll(".fo-ad[data-ad-id]")';
@@ -61,7 +61,7 @@ const NO_ADS = [
   ['support', SupportView, {}],
   ['404', NotFoundView, {}],
 ] as const;
-// F12 (decision 3; DECISOES § F12-M5): the home and the guides hub (born with no AdSlot in the F11) have the ads of the map
+// F12 (decision 3; DECISOES § 423): the home and the guides hub (born with no AdSlot in the F11) have the ads of the map
 // now, in the area "geral".
 const GERAL = [
   ['home', HomeView, {}],
@@ -88,7 +88,7 @@ describe('anúncio por página nos três estados', () => {
         const tool = await container.renderToString(Page, { props });
         expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`), page).toBe(state !== 'none');
         expect(tool.includes('adsbygoogle.js?client='), page).toBe(state === 'all');
-        // F12, the ad map (plan B, DECISOES § 415 and § F12-M5): no <ins> in the HTML in any state; the units come from the
+        // F12, the ad map (plan B, DECISOES § 415 and § 423): no <ins> in the HTML in any state; the units come from the
         // one push script of the page, there only with a box.
         expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(0);
         expect(tool.split(PUSH_SCRIPT).length - 1, page).toBe(state === 'all' ? 1 : 0);

@@ -6,7 +6,7 @@ import { STATUS, WALL_TOOL, expectWallOpen, googlefcStub, openAsProduction, wall
 import enWall from '../../src/i18n/en/wall.ts';
 import ptWall from '../../src/i18n/pt/wall.ts';
 
-// F12 · a parede do bloqueador (decision 5 and 11; § F12-P2 and § F12-P9). The wall in the test build (the fake unit ids and
+// F12 · a parede do bloqueador (decision 5 and 11; § 427 and § 434). The wall in the test build (the fake unit ids and
 // PUBLIC_ADBLOCK_WALL=bloqueio), seen as fileorca.com (tests/e2e/lib/production.ts): every request to fileorca.com is
 // answered by the test server, the AdSense loader fails (what a blocker does) or gets an empty stub, and the ad blocking
 // recovery tag gets a stub that defines googlefc with the status of each case, or fails. No test reaches Google.

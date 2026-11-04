@@ -379,7 +379,7 @@ for (const path of ['/compress-image/', '/pt/guias/', '/es/']) {
       const box = await expectOneLine(page, label);
       const first = Math.min(...box.controls.map((control) => control.left));
       const last = Math.max(...box.controls.map((control) => control.right));
-      // F12 (DECISOES § F12-C3 and § F12-C9): the coffee line opens the footer, on the same edges as the columns and the base.
+      // F12 (DECISOES § 437 and § 443): the coffee line opens the footer, on the same edges as the columns and the base.
       const footer = await page.evaluate(() => [...document.querySelectorAll('.fo-footer__coffee-row, .fo-footer__cols, .fo-footer__base')].map((element) => {
         const rect = element.getBoundingClientRect();
         return { left: rect.left, right: rect.right };

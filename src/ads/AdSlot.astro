@@ -1,8 +1,8 @@
 ---
 // AdSlot (docs/design/components/AdSlot): one ad box, the reserved room with the label AdSense accepts in each language.
 // F12, Mudança 10 (DECISOES § 413): with no unit id for the position, nothing renders (no box, no label, no reserved
-// space), so the default build, with no variables, has no ad box at all. F12, the ad map (decision 3; DECISOES § F12-M1
-// and § F12-M2): the box carries the area, the unit, its id, the format and the width it is for, and no <ins>; the one
+// space), so the default build, with no variables, has no ad box at all. F12, the ad map (decision 3; DECISOES § 419
+// and § 420): the box carries the area, the unit, its id, the format and the width it is for, and no <ins>; the one
 // push script of the page (src/ads/map.ts) makes the unit on fileorca.com, only where the width matches. The pages place
 // their boxes through the layout (BaseLayout and map.ts); this component draws one box, for the tests and the docs.
 import type { AdArea } from '../i18n/routes.ts';

@@ -14,7 +14,7 @@
 [data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
 [data-oli="gulp"] > svg { scale: 1.05; }
 [data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
-/* F12 · o café (DECISOES § F12-C5): the steam of the coffee pose rises twice and rests, visible and still, by 4.8 s
+/* F12 · o café (DECISOES § 439): the steam of the coffee pose rises twice and rests, visible and still, by 4.8 s
    (WCAG 2.2.2; it looped every 1.8 s). The first wisp rises from 0 to 3.6 s and settles by 4.2 s; the second, 0.6 s
    behind, settles by 4.8 s. "backwards" keeps the second one clear through its delay. The selector hangs on no section:
    inside a <use> the animation targets the element of the <symbol> (docs/claude/design-e-oli.md). */
@@ -302,7 +302,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .fo-result__support .fo-btn { margin-bottom: var(--lip); }
 .fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
-/* F12 · o café (DECISOES § F12-C2): after "Don't show this again", one quiet sentence in the same place (role="status"). */
+/* F12 · o café (DECISOES § 436): after "Don't show this again", one quiet sentence in the same place (role="status"). */
 .fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 @media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
@@ -500,7 +500,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-ad--content { min-height: 300px; width: 100%; }
 .fo-ad--rail { width: var(--rail); min-height: 644px; margin-block: 0; }
 .fo-ad ins { display: block; width: 100%; }
-/* F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1 and § F12-M2). Plan B of the help of Google (§ 415): no unit is
+/* F12 · o mapa de anúncios (decision 3; DECISOES § 419 and § 420). Plan B of the help of Google (§ 415): no unit is
    hidden by CSS, since no box has an <ins> in the HTML. Each box says the width it is for (data-ad-media) and shows only
    there, reserving its room from the first paint (no CLS); on fileorca.com the push script gives the <ins> only to the box
    whose width matches on load and takes the attribute away, so that box stays visible at any width after (and the one that
@@ -512,7 +512,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (min-width: 768px) { .fo-ad[data-ad-media="(max-width: 767px)"] { display: none; } }
 @media (max-width: 767px) { .fo-ad[data-ad-media="(min-width: 768px)"] { display: none; } }
 .fo-ad--multiplex { width: 100%; min-height: calc(min(100vw - 2 * var(--space-4), var(--tool-max)) * 0.6 + 44px); }
-/* The cookie notice of the first visit, open at scroll 0, keeps 150 px from the first content ad (F10 p-12; § F12-M2): from
+/* The cookie notice of the first visit, open at scroll 0, keeps 150 px from the first content ad (F10 p-12; § 420): from
    768 px the panel of a short calculator ends in the first screen, so its first ad goes down, never the notice. */
 @media (min-width: 768px) { .fo-calc-island ~ .fo-ad[data-ad-unit="conteudo"] { margin-top: calc(var(--ad-clearance) + var(--space-24)); } }
 @media (min-width: 1280px) {
@@ -549,7 +549,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
 
 /* ---------- SupportCard ---------- */
-/* F12 · o café (DECISOES § F12-C4): one column. The head row puts the Oli to the right of the title, looking left at the
+/* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the
    text, 96 px and 128 px from 768 px; before, she sat above the title on the phone and in a column of her own, looking
    out of the card, from 768 px. */
 .fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
@@ -564,7 +564,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The Pix of the Portuguese support page (SupportCard, .fo-pix; F6, decision 8). Only the block of the checked amount
    shows: the choice is CSS, no island. The QR is a white square in both themes (the one hex the design system allows
    for it), its modules in deep, the same in both themes.
-   F12 · o café (DECISOES § F12-C6): on the phone the "copia e cola", its visible label and the Copy code button come
+   F12 · o café (DECISOES § 440): on the phone the "copia e cola", its visible label and the Copy code button come
    first, the QR after (the phone that reads the page cannot scan its own screen); from 768 px the QR comes first, at
    160 px (it was 112 px), for the phone of the person at the computer. Copy code is a plain 52 px .fo-btn (it was the
    40 px --sm, which the Button README keeps for the computer). */
@@ -617,7 +617,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
-/* F12 · o café (DECISOES § F12-C3): the coffee line opens the footer, on the edges of the columns, with a hairline under
+/* F12 · o café (DECISOES § 437): the coffee line opens the footer, on the edges of the columns, with a hairline under
    it and a 48 px target (it was the 32 px line of the links, at the base, 24 to 46 px from the AdSense anchor). */
 .fo-footer__coffee-row { max-width: var(--page-max); margin: 0 auto var(--space-6); padding-bottom: var(--space-4); border-bottom: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); }
 .fo-footer .fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); font-size: 16px; line-height: 22px; font-weight: 700; }
@@ -954,7 +954,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hubband.fo-cat--guide { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 .fo-jump { --fo-font-text: var(--fo-font-steady); }
 
-/* F12 · a parede do bloqueador (AdblockWall; decision 5, § 369 and § F12-P1). The CSS of the proposal (wall.css, parts 1
+/* F12 · a parede do bloqueador (AdblockWall; decision 5, § 369 and § 426). The CSS of the proposal (wall.css, parts 1
    to 4) with the fonts of the site. Closed, the dialog keeps the display: none of the browser; only [open] is a flex
    column, so the footer with the reload stays in sight and only the body scrolls. The sea over the page is the water at
    92 % in the light theme and the deep at 92 % in the dark one (with the water the card border would be 2.59:1), no new

@@ -1,4 +1,4 @@
-// The measures of the ad map (F12, decisions 3 and 11; DECISOES § F12-M1 to § F12-M4), read in the page of the test build:
+// The measures of the ad map (F12, decisions 3 and 11; DECISOES § 419 to § 422), read in the page of the test build:
 // every ad box that shows at the width of the window, the blocks of <main>, the targets that must stay 150 px from an ad,
 // and the cookie notice. The rules of the map are asserted by tests/e2e/fo-ad-map.spec.ts, on top of these numbers.
 import type { Page } from '@playwright/test';

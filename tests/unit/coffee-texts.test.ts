@@ -1,4 +1,4 @@
-// The texts of the coffee ask (F12, decisions 7 and 10; DECISOES § F12-C7). They are read from the table of
+// The texts of the coffee ask (F12, decisions 7 and 10; DECISOES § 441). They are read from the table of
 // PLANO-MELHORIAS.md, section C, so a comma changed on either side reprovaria here: the result card, its button, the footer
 // line, the Menu row, the title and the text of the support page, in en, pt and es. The one new text, the sentence after
 // "Don't show this again", is the one of the specification (docs/propostas/ux-v2/coffee.html). Then the rules of every
