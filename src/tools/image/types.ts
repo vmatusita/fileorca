@@ -41,10 +41,8 @@ export interface ImagePanelData<O = object> {
   chips: ChipData[];
   /** Where a HEIC or an AVIF can go instead, for the "open it in …" link of a refused file (CONVERTER_FOR: a format with no converter has no entry). */
   converters: { heic?: ConverterLink; avif?: ConverterLink };
-  /** Where the coffee line leads: Ko-fi, or the support page in Portuguese until the Pix (F6). */
+  /** Where the coffee line leads: Ko-fi, or the Pix of the support page in Portuguese (F6). */
   coffeeHref: string;
-  /** The AdSense variables are filled in at build (the ad-blocker case of the coffee line). */
-  adsOn: boolean;
   /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
   initial?: Record<string, unknown>;
 }

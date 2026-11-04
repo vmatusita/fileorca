@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { decideCoffee, isAdBlocked, parseCoffee, USES_BEFORE_ASKING, WEEK_MS, type CoffeeState } from '../../src/tools/image/coffee.ts';
+import * as coffee from '../../src/tools/image/coffee.ts';
+import { decideCoffee, parseCoffee, USES_BEFORE_ASKING, WEEK_MS, type CoffeeState } from '../../src/tools/image/coffee.ts';
 
 const NOW = Date.UTC(2026, 10, 1, 12);
-const accepted = { now: NOW, consent: true, adsBlocked: false };
+const accepted = { now: NOW, consent: true };
 
 function uses(count: number, context = accepted): { shown: boolean[]; state: CoffeeState } {
   let state: CoffeeState = { uses: 0 };
@@ -43,17 +44,22 @@ describe('linha do café (DECISOES § 49)', () => {
     expect(decideCoffee({ uses: 2, never: true }, { ...accepted, now: NOW + 10 * WEEK_MS })).toEqual({ show: false, next: null });
   });
 
-  it('shows on the 1st use for someone who blocks ads, still only with the Accept', () => {
-    expect(decideCoffee({ uses: 0 }, { ...accepted, adsBlocked: true }).show).toBe(true);
-    expect(decideCoffee({ uses: 0 }, { now: NOW, consent: false, adsBlocked: true }).show).toBe(false);
+  // F12 (Mudança 11; DECISOES § F12-C1, which closes the F3 c-08): someone who blocks ads gets the ad-block wall, and the
+  // coffee line no longer asks them on the 1st use. Before, the context carried adsBlocked and the 1st use showed the line
+  // ({ adsBlocked: true } gave show: true on { uses: 0 }); a context that still says so is ignored.
+  it('asks someone who blocks ads on the 3rd use too, still only with the Accept: the 1st-use ask is gone', () => {
+    const blocked = { ...accepted, adsBlocked: true } as typeof accepted;
+    expect(decideCoffee({ uses: 0 }, blocked)).toEqual({ show: false, next: { uses: 1 } });
+    expect(uses(3, blocked).shown).toEqual([false, false, true]);
+    expect(decideCoffee({ uses: 0 }, { ...blocked, consent: false }).show).toBe(false);
   });
 
-  it('detects blocked ads only with ads on, on the production host', () => {
-    expect(isAdBlocked({ adsOn: true, production: true, loaded: false, unitHeight: null })).toBe(true);
-    expect(isAdBlocked({ adsOn: true, production: true, loaded: true, unitHeight: 0 })).toBe(true);
-    expect(isAdBlocked({ adsOn: true, production: true, loaded: true, unitHeight: 280 })).toBe(false);
-    expect(isAdBlocked({ adsOn: false, production: true, loaded: false, unitHeight: null })).toBe(false);
-    expect(isAdBlocked({ adsOn: true, production: false, loaded: false, unitHeight: null })).toBe(false);
+  // It took the place of "detects blocked ads only with ads on, on the production host" (isAdBlocked): the guess that read
+  // a loader that never ran, or an empty unit, as an ad blocker (the false positive of the c-08) is gone from the module,
+  // and countUse takes no flag for it. The wall has a detection of its own (DECISOES § 416).
+  it('has no ad-block guess any more: no isAdBlocked, and countUse takes no ad-block flag', () => {
+    expect(Object.keys(coffee)).not.toContain('isAdBlocked');
+    expect(coffee.countUse.length, 'countUse(now?)').toBe(0);
   });
 
   it('reads a damaged or foreign value as a fresh start', () => {

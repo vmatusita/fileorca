@@ -379,11 +379,12 @@ for (const path of ['/compress-image/', '/pt/guias/', '/es/']) {
       const box = await expectOneLine(page, label);
       const first = Math.min(...box.controls.map((control) => control.left));
       const last = Math.max(...box.controls.map((control) => control.right));
-      const footer = await page.evaluate(() => [...document.querySelectorAll('.fo-footer__cols, .fo-footer__base')].map((element) => {
+      // F12 (DECISOES § F12-C3 and § F12-C9): the coffee line opens the footer, on the same edges as the columns and the base.
+      const footer = await page.evaluate(() => [...document.querySelectorAll('.fo-footer__coffee-row, .fo-footer__cols, .fo-footer__base')].map((element) => {
         const rect = element.getBoundingClientRect();
         return { left: rect.left, right: rect.right };
       }));
-      expect(footer, label).toHaveLength(2);
+      expect(footer, label).toHaveLength(3);
       for (const edges of footer) {
         expect(Math.abs(first - edges.left), `${label}: o cabeçalho começa em x ${first.toFixed(1)}, o rodapé em x ${edges.left.toFixed(1)}`).toBeLessThanOrEqual(0.5);
         expect(Math.abs(last - edges.right), `${label}: o cabeçalho termina em x ${last.toFixed(1)}, o rodapé em x ${edges.right.toFixed(1)}`).toBeLessThanOrEqual(0.5);

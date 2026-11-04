@@ -52,7 +52,9 @@ test('each amount shows its QR and its code, and Copy code copies exactly that c
   expect(requests.map((request) => `${request.method()} ${request.url()}`)).toEqual([]);
 });
 
-test('the amounts are a radio group with a name, and the code has a name for screen readers', async ({ page }) => {
+// F12 (decision 7; DECISOES § F12-C6): the name of the code is the visible label "Pix copia e cola" above it (it was text for
+// screen readers only, .fo-sr, with a colon); no aria-labelledby on the <code>, which axe refuses (aria-prohibited-attr).
+test('the amounts are a radio group with a name, and the code has a visible label', async ({ page }) => {
   await page.goto('/pt/apoie/');
   await page.waitForLoadState('load');
   await expect(page.getByRole('radiogroup', { name: pix.legend })).toBeVisible();
@@ -62,7 +64,11 @@ test('the amounts are a radio group with a name, and the code has a name for scr
   await page.keyboard.press('ArrowRight');
   await expect(page.getByRole('radio', { name: labelOf('5.00') })).toBeChecked();
   await expect(page.locator('.fo-pix:visible code')).toHaveText(fixture.codes[1]!.code);
-  await expect(page.locator('.fo-pix:visible .fo-sr')).toHaveText(`${pix.codeLabel}: `);
+  const label = page.locator('.fo-pix:visible .fo-pix__label');
+  await expect(label).toHaveText(pix.codeLabel);
+  await expect(label).toBeVisible();
+  expect(await label.evaluate((node) => node.nextElementSibling?.querySelector('code') !== null), 'the label stands right above the code').toBe(true);
+  await expect(page.locator('.fo-pix .fo-sr')).toHaveCount(0);
 });
 
 // Review F6 (c-1, f-1 and f-6; DECISOES § 245): the four amounts stay inside the rail of the OptionGroup, and the copy
@@ -123,4 +129,38 @@ test('another amount clears the status, and a refused copy says how to copy by h
     expect(errors, clipboard).toEqual([]);
     await other.close();
   }
+});
+
+// F12 (decision 7; DECISOES § F12-C6, which closes the F10 p-4 and the Pix part of the F5a D-12): Copy code is a plain 52 px
+// button (it was the 40 px --sm), and on the phone the "copia e cola" and its button come before the QR (the phone that reads
+// the page cannot scan its own screen); from 768 px the QR comes first, at 160 px (it was 112 px), for the phone of the
+// person at the computer. Every amount, at 360, 390, 768 and 1280 px.
+test('Copy code is 52 px and comes before the QR on the phone, and the QR is 160 px on the computer', async ({ page }) => {
+  for (const width of [360, 390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    expect((await page.goto('/pt/apoie/'))?.status()).toBe(200);
+    await page.waitForLoadState('load');
+    await dismissCookies(page);
+    for (const { amount } of fixture.codes) {
+      const label = `${width} px, ${labelOf(amount)}`;
+      await page.locator('.fo-pix-card .fo-seg__opt', { hasText: labelOf(amount) }).click();
+      const shown = page.locator('.fo-pix:visible');
+      await expect(shown, label).toHaveCount(1);
+      const button = await shown.getByRole('button', { name: pix.copy }).boundingBox();
+      const qr = await shown.locator('svg.fo-pix__qr').boundingBox();
+      const code = await shown.locator('code').boundingBox();
+      if (!button || !qr || !code) throw new Error(`${label}: no box`);
+      expect(button.height, `${label}: Copy code`).toBeGreaterThanOrEqual(52);
+      if (width < 768) {
+        expect(button.y + button.height, `${label}: Copy code above the QR`).toBeLessThanOrEqual(qr.y);
+        expect(code.y, `${label}: the code above the QR`).toBeLessThan(qr.y);
+        expect(qr.width, `${label}: the QR`).toBe(112);
+      } else {
+        expect(qr.x + qr.width, `${label}: the QR on the left`).toBeLessThanOrEqual(button.x);
+        expect([qr.width, qr.height], `${label}: the QR`).toEqual([160, 160]);
+      }
+      if (amount === null) console.log(`[café] Pix a ${width} px: Copiar código de ${button.y.toFixed(0)} a ${(button.y + button.height).toFixed(0)} px (${button.height.toFixed(0)} px), QR de ${qr.width.toFixed(0)} px em y ${qr.y.toFixed(0)}`);
+    }
+  }
+  await expect(page.locator('[data-pix-copy].fo-btn--sm')).toHaveCount(0);
 });

@@ -74,9 +74,10 @@ export default {
     },
     metadata: 'Oli removed the photo metadata, including the GPS location.',
     coffee: {
-      text: 'This tool is free, has no limits and never uploads your files. If it saved you time, a coffee helps keep it that way.',
-      button: 'Support with a coffee',
+      text: 'FileOrca is made by one person, with no sign-ups and no limits. If Oli saved you some time, would you help me with a coffee?',
+      button: 'Buy me a coffee',
       hide: "Don't show this again",
+      done: "Got it, I won't ask here again. The coffee link stays in the footer.",
     },
   },
   compare: {

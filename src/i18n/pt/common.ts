@@ -35,7 +35,7 @@ export default {
     contact: 'Contato',
     utilityColumn: 'Utilidades',
     guidesAll: 'Todos os guias',
-    coffee: 'Curtiu? Me paga um café',
+    coffee: 'Me ajude a manter o FileOrca grátis: paga um café?',
     signature: 'Feito por {name} em {city}',
   },
   cookie: {

@@ -64,7 +64,7 @@ export interface CommonTexts {
      * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
      */
     guidesAll: string;
-    /** Support line at the base of the footer (PLANO, Doações). */
+    /** The coffee line at the top of the footer (PLANO-MELHORIAS, section C; DECISOES § F12-C3). */
     coffee: string;
     /** "Made by {name} in {city}" */
     signature: string;
@@ -256,9 +256,9 @@ export interface LicensesTexts extends PageMeta {
 }
 
 export interface SupportTexts extends PageMeta {
-  /** "Free tools, made by one person" (PLANO, Doações). */
+  /** "Help Oli keep swimming" (PLANO-MELHORIAS, section C; DECISOES § F12-C4). */
   h1: string;
-  /** "No accounts, no paywalls, no upload limits. Ads cover the costs; coffees pay for new tools." */
+  /** "FileOrca is free, with no sign-ups and no limits, and it's made by one person in Curitiba, Brazil. Ads cover the costs; every coffee becomes the next tool." */
   body: string;
   whoHeading: string;
   who: string;
@@ -282,7 +282,7 @@ export interface SupportPixTexts {
   /** Name of the QR: "QR code do Pix, {amount}" ({amount}: "qualquer valor" or "R$ 5"). */
   qrLabel: string;
   anyLower: string;
-  /** Name of the code field (the "copia e cola"). */
+  /** The visible label above the code, its name: "Pix copia e cola" (F12; DECISOES § F12-C6). */
   codeLabel: string;
   copy: string;
   /** What the status region says after the copy. */
@@ -712,7 +712,8 @@ export interface ImagePanelTexts {
     };
     /** The metadata line every result shows: the photo data, GPS included, is gone. */
     metadata: string;
-    coffee: { text: string; button: string; hide: string };
+    /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ F12-C2). */
+    coffee: { text: string; button: string; hide: string; done: string };
   };
   compare: {
     /** Name of the range control: "Compare before and after". */
@@ -979,7 +980,8 @@ export interface PdfPanelTexts {
     unchangedMany: string;
     /** One line per engine note (src/engine/pdf/types.ts PdfNote). */
     notes: { repaired: string; xfaRemoved: string; formLost: string; textFlattened: string; downscaled: string };
-    coffee: { text: string; button: string; hide: string };
+    /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ F12-C2). */
+    coffee: { text: string; button: string; hide: string; done: string };
   };
   next: { label: string; moreTools: string };
 }

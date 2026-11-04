@@ -35,7 +35,7 @@ export default {
     contact: 'Contacto',
     utilityColumn: 'Utilidades',
     guidesAll: 'Todas las guías',
-    coffee: '¿Te gustan estas herramientas? Invítame un café',
+    coffee: 'Ayúdame a mantener FileOrca gratis: invítame un café',
     signature: 'Hecho por {name} en {city}',
   },
   cookie: {

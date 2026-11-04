@@ -35,7 +35,7 @@ export default {
     licenses: 'Licenses',
     contact: 'Contact',
     guidesAll: 'All guides',
-    coffee: 'Like these tools? Support them with a coffee',
+    coffee: 'Help keep FileOrca free: buy me a coffee',
     signature: 'Made by {name} in {city}',
   },
   cookie: {

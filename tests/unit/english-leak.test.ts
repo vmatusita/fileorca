@@ -217,8 +217,9 @@ describe('the English phrases the pages are compared with', () => {
   it('reads the English text files: thousands of phrases, the known ones among them, and none made of names and formats', () => {
     expect(Object.keys(ENGLISH_MODULES).length).toBeGreaterThan(60);
     expect(PHRASES.size).toBeGreaterThan(2000);
-    // A sentence of the support page, a panel line and a whole short title are phrases.
-    expect(PHRASES.has('free tools made by one person')).toBe(true);
+    // A sentence of the support page, a panel line and a whole short title are phrases. F12 (DECISOES § F12-C9): the title of
+    // the support page is the one of PLANO-MELHORIAS section C, which took the place of "Free tools, made by one person".
+    expect(PHRASES.has('help oli keep swimming')).toBe(true);
     expect([...PHRASES.keys()].some((phrase) => phrase.includes('files never leave your device'))).toBe(true);
     // Names, formats and technical tokens alone never are.
     for (const phrase of ['victor yuki matusita', 'jpg png or webp', 'ctrl v', 'consumer financial protection bureau']) expect(PHRASES.has(phrase), phrase).toBe(false);
@@ -261,7 +262,7 @@ describe('the detector, on pages made here (controls)', () => {
   });
 
   it('catches an English title, an English aria-label and a glued neighbour (positive controls)', () => {
-    const page = ptPage(`<h1>Comprimir imagem</h1><button aria-label="${sentence}">x</button><ul><li>Free tools,</li><li>made by one person</li></ul>`).replace('<title>Comprimir imagem | FileOrca</title>', `<title>${sentence} | FileOrca</title>`);
+    const page = ptPage(`<h1>Comprimir imagem</h1><button aria-label="${sentence}">x</button><ul><li>Help Oli</li><li>keep swimming</li></ul>`).replace('<title>Comprimir imagem | FileOrca</title>', `<title>${sentence} | FileOrca</title>`);
     const where = findLeaks(pageTexts(page), PHRASES).map((leak) => leak.where);
     expect(where).toEqual(expect.arrayContaining(['title', '[aria-label]', 'texto visível']));
   });

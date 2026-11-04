@@ -73,9 +73,10 @@ export default {
     },
     metadata: 'Oli eliminó los metadatos de la foto, incluida la ubicación GPS.',
     coffee: {
-      text: 'Esta herramienta es gratis, sin límites y nunca sube tus archivos. Si te ahorró tiempo, un café ayuda a mantenerla así.',
-      button: 'Invítame un café',
+      text: 'FileOrca lo hace una sola persona, sin registros ni límites. Si Oli te ahorró tiempo, ¿me ayudas con un café?',
+      button: 'Ayúdame con un café',
       hide: 'No mostrar de nuevo',
+      done: 'Entendido, no vuelvo a pedirlo aquí. El enlace del café queda en el pie de página.',
     },
   },
   compare: {

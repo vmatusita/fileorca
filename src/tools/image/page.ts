@@ -8,7 +8,6 @@ import { TEXTS } from '../../i18n/texts.ts';
 import type { ImageToolPanelTexts, ToolBlurb } from '../../i18n/types.ts';
 import enCommon from '../../i18n/en/common.ts';
 import { ICONS } from '../../icons/icons.ts';
-import { buildAdsConfig } from '../../ads/config.ts';
 import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
 import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId } from './registry.ts';
@@ -81,7 +80,6 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Rec
     converters: convertersFor(lang),
     // In Portuguese the coffee line leads to the Pix of the support page (PLANO "Doações"; F6, decision 8).
     coffeeHref: lang === 'pt' ? `${pathFor('support', lang)}#pix` : KOFI_URL,
-    adsOn: buildAdsConfig().scriptEnabled,
     ...(initial ? { initial } : {}),
   };
 }
