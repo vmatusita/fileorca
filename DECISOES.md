@@ -4530,3 +4530,119 @@ A execução completa do `gh pr ready` (a 41791116378, no `3a743ab`, a primeira 
   - **a segunda passada** (um revisor Sonnet em contexto limpo, sobre o diff das correções) não achou defeito; corrigiu-se a faixa dos 8 px de diferença, que começava em 320 px e não em 360.
 - **A F10 p-5** saiu do grupo 19 do `docs/PENDENCIAS.md` para "Já corrigidos": a lateral desceu para 150 px abaixo do cabeçalho, que era o que ela deixava para a F12 decidir.
 - **Um efeito que fica:** a 360 px, o cabeçalho e o rodapé ficam a 24 px da janela, e o conteúdo da página continua a 16 px (a `.fo-frame`). A partir de 1288 px, o cabeçalho e o rodapé ocupam 1240 px, e o conteúdo, 1208. O pedido era alinhar o cabeçalho com o rodapé, não com o conteúdo.
+
+## § 410 · O ponto de partida, a linha de base e a numeração dos § da F12
+
+- **O ponto de partida** é a `origin/main` em `e0467c8` (a F11 e o `ajuste-header-width`). A branch `fase-12` nasce dele, e o primeiro commit (`283541d`) só traz os dois arquivos do prompt.
+- **A linha de base**, guardada em `.cache/f12/antes/` (fora do Git) no `283541d`, que tem o mesmo código:
+  - `pnpm install --frozen-lockfile` e `pnpm build` verdes;
+  - o Vitest com 109 arquivos e 1.833 testes, verdes;
+  - o `playwright test --list` com 1.563 testes por navegador em 51 arquivos;
+  - o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com 342 testes verdes;
+  - a lista dos 66 JS de `dist/_astro/`, com e sem o hash;
+  - uma cópia do `dist/` de partida em `.cache/f12/dist-antes/`, para provar que cada teste novo reprova sem a mudança.
+- **A numeração.** O próximo § livre era o 410. A fatia 1 escreve do 410 ao 418, nesta ordem. As fatias 2a, 2b e 2c correm ao mesmo tempo, em três worktrees, então cada agente escreve os seus § com um marcador no lugar do número (`§ F12-M1`, `§ F12-P1`, `§ F12-C1`…), no `DECISOES.md` e nos comentários do código. Na junção, um script troca os marcadores por números a partir do 419, na ordem M, P, C, e confere que nenhum sobrou. Assim nenhum número é citado antes de existir, e não há buraco na sequência. O plano da run está em `docs/relatorios/fase-12-plano.md`.
+
+## § 411 · A especificação dos protótipos e o prompt (F12, decisão 1)
+
+- **O contrato** é a área "Especificação" do `ad-map.html`, do `wall.html`, do `coffee.html` e do `support.html` (`docs/propostas/ux-v2/`), junto com as § 351, § 360, § 361, § 368, § 369 e § 371. Onde ela diverge do prompt da F12, vale o prompt. As divergências que a leitura achou, e o que vale:
+  - **os textos da parede:** o `wall.html` tem os textos da seção A. Valem os do ajuste 3, que o Victor marcou: "With an ad blocker on, the ads don't show, and nothing comes in" no lugar de "Oli gets nothing", e os botões com verbo ("Reload, it's off now", "See how to turn it off", "Continue just this once"). A linha de depois do escape cita o escape com o nome novo;
+  - **a pose da parede:** a `sad`, e não a `oops` da seção A (UX-08, marcada);
+  - **a Privacidade:** o texto do ajuste 1, e não o "nada sai do aparelho" da seção A, porque a tag do Google e o evento saem;
+  - **as unidades:** 37, uma por posição, e não as 15 da seção B;
+  - **o 1º anúncio da ferramenta:** depois do "Como usar", e não depois dos chips (UX-04 A e § 371);
+  - **a densidade:** a leitura conservadora da § 351, e não a fórmula simples da seção B;
+  - **o card do café em português:** um botão só, o Pix.
+- **O que é só do protótipo e não vai para o site:** o `bundle.css` do `docs/design/` (o site constrói sobre o `components.css` e o `global.css`, e cada medida é conferida no `dist/`), o script dos previews (`?modo=`, `?state=`, `?lang=`, `?theme=`), o controle do protótipo e os esquemas do `ad-map.css`. O site não importa nada de `docs/propostas/`.
+- **As fontes da proposta** (`--font-display`, `--font-text`) viram as do site (`--fo-font-display`, `--fo-font-text`), que trazem a fonte de reserva do CLS.
+
+## § 412 · A configuração: a área `geral`, as 37 unidades e o `PUBLIC_ADBLOCK_WALL` (F12, decisão 2)
+
+- **O que entrou em `src/ads/config.ts`:**
+  - a área `geral` (`AD_AREAS`), a da home e do hub de guias; o tipo `AdArea` de `src/i18n/routes.ts` também a tem;
+  - as unidades `conteudo`, `conteudo-2` a `conteudo-9` (`CONTENT_UNITS`), `lateral`, `lateral-2` e `multiplex` (`AD_UNITS`), cada uma com o ID em `^\d{6,}$`;
+  - a posição n do conteúdo usa a unidade `conteudo-n` da área da página (`contentUnit(n)`; a 1ª é o `conteudo`, e depois da 9ª não há unidade);
+  - o `PUBLIC_ADBLOCK_WALL`: `desligado` (o padrão, também vazio), `aviso` ou `bloqueio`, sem diferença de maiúscula;
+  - o modo que vale (`wallModeOf`): `desligado` sem o `scriptEnabled` (as três variáveis de hoje), seja o que for a variável.
+- **O que para o build,** como antes: área desconhecida, unidade desconhecida (`conteudo-1`, `conteudo-10`, `lateral-3`), ID fora do formato ou que não é texto, área que não é objeto e o `PUBLIC_ADBLOCK_WALL` fora dos três valores.
+- **O modelo do JSON** é o do `ad-map.html`: oito unidades em `geral`, `arquivos`, `dinheiro` e `casa-saude` (`conteudo` a `conteudo-5`, `lateral`, `lateral-2` e `multiplex`) e cinco em `utilidades` (`conteudo`, `conteudo-2`, `lateral`, `lateral-2` e `multiplex`). O Victor pode criar menos: a posição sem ID não aparece. O `config.ts` aceita até `conteudo-9`, para o mapa crescer sem mudar o código.
+- **Os testes** (`tests/unit/ads.test.ts`): as 37 unidades do build de teste passam e caem nas cinco áreas, na ordem do modelo; cada valor errado reprova com a mensagem certa; o `PUBLIC_ADBLOCK_WALL` em cada valor, e o modo que vale com e sem as três variáveis.
+
+## § 413 · Sem ID, nada (Mudança 10), e a grade igual nos dois builds (F12, decisão 2)
+
+- **O `AdSlot`** (`src/ads/AdSlot.astro`) não desenha nada quando a posição não tem o ID da unidade: nem caixa, nem rótulo, nem espaço reservado, nem script. Antes, a caixa neutra com o rótulo entrava em toda página com área de anúncio, mesmo sem a variável. O build padrão sai sem nenhuma `.fo-ad`.
+- **A grade não muda com ou sem anúncio.** A página com anúncio mantém a classe `fo-frame--rail` (a grade de duas colunas a partir de 1280 px), e o `<aside class="fo-rail">` só entra quando a lateral tem o que mostrar (`BaseLayout.astro` renderiza o slot `rail` e confere se ficou vazio). Sem unidade, a coluna da lateral fica no lugar, vazia, e o conteúdo, o cabeçalho e o rodapé ficam nas mesmas bordas nos dois builds (§ 409). Uma coluna vazia não leva nome acessível: um `<aside>` sem nada dentro seria uma região "Advertisements" vazia para o leitor de tela.
+- **Quem confere:**
+  - `tests/unit/default-build.test.ts` (novo) lê toda página do `dist/` sem renderizar e reprova caixa, rótulo, unidade, push, carregador, parede, isca, tag de recuperação e a pose `sad`. Contra o `dist/` do ponto de partida (`FO_DEFAULT_DIST=.cache/f12/dist-antes`), ele reprova nas 178 páginas com área de anúncio, cada uma com a caixa e o rótulo;
+  - o `gate:prontidao`, no item "Build de hoje, sem o ID: nenhum anúncio", passa a reprovar a caixa sem ID, página a página (antes contava as caixas neutras como esperadas);
+  - o `ads.spec.ts` abre as mesmas páginas no `dist/` padrão e confere que não há caixa, rótulo nem `<aside>`.
+
+## § 414 · O build de teste: o ajudante, a chave, o segundo servidor e o custo (F12, decisão 2)
+
+- **O ajudante único** é `scripts/lib/test-build.ts` (`buildVariant(nome)`). Ele faz os três builds extras do mesmo código:
+  - `client`, só com o `ca-pub-0000000000000000` (o que a revisão do AdSense vê), e `all`, com as três variáveis, os IDs falsos das 37 unidades e a parede desligada. São os builds do `gate:prontidao`, que antes ficavam no próprio portão;
+  - `teste`, o build de teste: o mesmo ID de editor, os IDs falsos nas 37 unidades (o pior caso, com o máximo de caixas) e a parede em `bloqueio`.
+
+  Os IDs falsos têm dez dígitos e dizem a posição: `9`, a área (1 a 5), a unidade (01 a 12) e seis zeros.
+- **Onde e como.** Cada build vai para `.cache/builds/<nome>/`, nunca para o `dist/`, e o registro do bundle que o `gate:licencas` lê volta como estava. Cada build começa com as quatro variáveis vazias, para nada do terminal vazar para dentro. Uma trava em diretório (`<nome>.lock`) impede dois processos de construir a mesma variante ao mesmo tempo.
+- **A chave.** O build é reaproveitado só quando o commit e as variáveis são os mesmos e a árvore está limpa (`.cache/builds/<nome>.key.json`). Com a árvore suja, ele refaz: um arquivo rastreado mudado, em qualquer lugar, ou um arquivo novo onde o build lê (`src/`, `public/`, `docs/design/`, `scripts/` e os arquivos de configuração da raiz). Um teste nunca lê um build de outro commit ou de outros arquivos.
+- **O segundo servidor** é `scripts/serve-test-build.ts`, na porta `FO_PORT` + 100 (4273 a 4289, nenhuma das portas que o WebKit recusa), declarado como segundo `webServer` do `playwright.config.ts`. Ele sobe na hora, com as regras do `serve-dist.ts` (que ganhou a raiz como opção, `dist/` por padrão), e só constrói quando um spec pede: o `beforeAll` dos specs que leem o build de teste (`useTestBuild()` em `tests/e2e/lib/test-build.ts`) chama `/__test-build` com o id da execução do Playwright (`FO_RUN_ID`, posto no `playwright.config.ts` e herdado pelos workers). A primeira chamada de uma execução faz ou reaproveita o build, uma vez; as outras esperam por ela. Antes do build, qualquer outro caminho responde 503.
+- **As partes do CI sem esses specs** pagam só a subida do processo. A regra "o build uma vez por execução" (Mudança 3) fala do `dist/`, o site que os portões, o Playwright e o Lighthouse medem. O build de teste é uma fixture, como os builds do `gate:prontidao`, e não toca em `.github/`. O `verificar.test.ts` não fixa nada sobre builds extras, então não muda.
+- **O `gate:conteudo`** confere os blocos dos guias de arquivo, o AdSlot incluído, no build `all` (§ 418). No CI, ele roda antes do `gate:prontidao` no mesmo job, e o portão de prontidão reaproveita o `all` que ele fez: o job `portoes` não paga um build a mais.
+- **Visto como fileorca.com.** O site só pede anúncio e só abre a parede quando o `location.hostname` é fileorca.com. Um spec abre `https://fileorca.com/...` e `tests/e2e/lib/production.ts` responde pelo `context.route`: cada pedido a fileorca.com vai ao servidor de teste (os redirecionamentos também), o carregador do AdSense falha ou recebe um stub vazio, a tag de recuperação recebe o script do caso (o stub do `googlefc`) ou falha, e todo o resto do Google é abortado. Nenhum teste chega ao Google.
+- **O custo,** na primeira medida local: o build de teste leva 33 s nesta máquina, uma vez por execução do Playwright. O custo no CI, lido do `ci:custo`, entra no fim da run.
+
+## § 415 · A ajuda do Google sobre o `display: none`, e o plano B (F12, decisão 3)
+
+- **O que as duas páginas dizem** (lidas com o WebFetch em 4/nov/2026):
+  - a `support.google.com/adsense/answer/1354736` ("Modifications of AdSense ad code") lista entre as técnicas a evitar "Hiding ad units at anytime (e.g., `display:none`)", com a exceção "unless you're implementing a responsive ad unit". O link da exceção leva à seção "Hiding an ad unit" da outra página;
+  - a `support.google.com/adsense/answer/9183363` ("How to modify your responsive ad code") mostra uma media query que esconde a unidade em telas pequenas, onde "no ad request is made and no ad is shown". O exemplo é de uma unidade de tamanho fixo por largura, e a página manda apagar as linhas `data-ad-format="auto"` e `data-full-width-responsive="true"` antes de mexer.
+- **A leitura:** a exceção cobre a unidade do exemplo, de tamanho por largura e sem o `auto`. Nenhuma das páginas cita o `autorelaxed` (o multiplex; as páginas do multiplex, `answer/9189566` e `answer/7533385`, não falam de esconder), e nenhuma diz se uma unidade `auto` escondida faz pedido de anúncio. A exceção não cobre, sem dúvida, as unidades `auto` e `autorelaxed` do mapa.
+- **Vale o plano B,** que é seguro nas duas leituras:
+  - nenhuma unidade escondida por CSS: o HTML não tem `<ins>`;
+  - cada caixa (a `div.fo-ad` com o rótulo) diz a largura em que vale, e o CSS mostra a caixa só nessa largura. A caixa da largura certa reserva o espaço no HTML, sem CLS. Uma caixa sem `<ins>` não é uma unidade de anúncio;
+  - o script de push único, só em fileorca.com, percorre as caixas no carregamento: a que bate com a largura (`matchMedia`) ganha o `<ins>` e um `push()`, e fica visível em qualquer largura dali em diante; a que não bate sai do DOM. A lateral 2 entra só quando a coluna tem 2.638 px;
+  - girar o aparelho ou mudar a janela depois não cria nem tira anúncio, e nada é empurrado de novo (nenhum refresh). O que estava continua, como a lateral de hoje.
+- **A implementação** é do mapa (fatia 2a), que registra o detalhe no § dela.
+
+## § 416 · A tag de recuperação e a API `googlefc` (F12, decisão 5)
+
+- **As páginas lidas** com o WebFetch em 4/nov/2026: a `support.google.com/adsense/answer/11575177` ("Tag your sites for ad blocking recovery messages"), a `answer/11576085` ("Create an ad blocking recovery message"), a `answer/11575480` (os erros), a `answer/11576589` e a `developers.google.com/funding-choices/fc-api-docs` ("Privacy & Messaging JavaScript API").
+- **O que a ajuda diz da tag:**
+  - ela fica na aba "Tagging" do Privacy & messaging e vai no `<head>` ("in between the `<head>` and `</head>` tags");
+  - a página não traz o código. A forma vem de cópias públicas do código da aba: um script `async` de `https://fundingchoicesmessages.google.com/i/pub-<16 dígitos>?ers=1` (o ID do editor sem o `ca-`, o mesmo corte do `adsTxt()`) e um script inline que cria uma vez, no `body`, uma `iframe` escondida de nome `googlefcPresent` (`signalGooglefcPresent`). O Victor confere a forma contra a aba dele, num passo do `docs/OPERACAO.md`;
+  - com a mensagem em Rascunho, o AdSense já detecta e mede (a premissa do "Depois da F12");
+  - o "error protection code", opcional, mostraria uma faixa do Google em inglês embaixo da página, mesmo com a mensagem em Rascunho. Ele não entra.
+- **O que a API diz:**
+  - a única forma de chamar é pela fila: `googlefc.callbackQueue.push({ AD_BLOCK_DATA_READY: function () {…} })`, com o objeto criado antes (`window.googlefc = window.googlefc || {}`), porque o script do Google é `async`. Uma função solta na fila recebe o status `UNKNOWN`;
+  - `googlefc.getAdBlockerStatus()` só vale dentro desse callback e devolve o `googlefc.AdBlockerStatusEnum`: `UNKNOWN` 0, `EXTENSION_AD_BLOCKER` 1, `NETWORK_LEVEL_AD_BLOCKER` 2 e `NO_AD_BLOCKER` 3;
+  - o exemplo da própria página usa o nome `EXTENSION_LEVEL_AD_BLOCKER`, que não é o do enum. O código compara pelos números, e o `UNKNOWN` não decide nada: cai no sinal reserva;
+  - o `AD_BLOCK_DATA_READY` é o dado mais tardio da fila. A API não promete que ele dispara com a mensagem em Rascunho: o sinal reserva de 4 s cobre o silêncio, e o Victor confere em produção;
+  - o `__tcfapi` do TCF v2.2 entra com `__tcfapi('addEventListener', 2.2, …)`.
+- **Onde:** só com o `scriptEnabled`, a parede ligada e o `location.hostname` igual a fileorca.com, como o carregador do AdSense. A implementação é da parede (fatia 2b).
+
+## § 417 · A pose `sad` (F12, decisão 6)
+
+- **O SVG** de `docs/propostas/ux-v2/oli/oli-sad.svg` foi para `docs/design/assets/Oli/oli-sad.svg` sem mudar um byte: ele já tem o formato dos outros (128 × 128, o `oli-clip`, o mesmo grupo de transformação). No sprite, o `<symbol>` sai das peças que já existem, sem peça nova e sem cor nova, e as treze peças não mudam de número. As nove poses não mudam de tamanho.
+- **A lista fechada** passou a dez em todo lugar onde ela mora: `src/oli/poses.ts`, `scripts/lib/design-checks.ts`, `tests/unit/design-checks.test.ts` e `tests/e2e/design.spec.ts`. O `sprite.test.ts` e o `folha.test.ts` leem a lista e mudaram só o título e a conta (30 `<use>` por fundo, eram 27).
+- **Só na parede.** A `sad` só entra no sprite das páginas com a parede (fatia 2b). No `dist/` padrão ela não existe: o `gate:design` passou a proibi-la em toda página (`forbiddenPoses`), e o `default-build.test.ts` também.
+- **A pose da parede é uma constante só,** `WALL_POSE` em `src/oli/poses.ts`. Se a busca reversa do Victor no Google Lens achar algo parecido demais, a troca pela `oops` é essa linha.
+- **A documentação:** o `docs/design/assets/Oli/README.md` e o README da Oli passaram a dez poses, com a regra "a `sad` só na parede". A folha (`docs/oli/folha.html`) saiu do `pnpm design:gerar`, e o diff dela só traz a pose nova e a frase "dez poses". O `src/styles/theme.css`, que o mesmo comando gera, não mudou.
+- **O `CLAUDE.md`** ainda diz "nove poses fechadas" no núcleo. A run não pode mexer nele (o prompt o põe fora), e a Mudança 12 do `PLANO-MELHORIAS.md`, que vem antes do `CLAUDE.md` na ordem de autoridade, dá a décima pose. O `docs/claude/design-e-oli.md` registra isso na seção da F12, e a próxima run que puder mexer no núcleo acerta a frase.
+
+## § 418 · Os testes antigos que a Mudança 10 e o build de teste mudaram (F12, no formato da § 341)
+
+A ficha manda mudar o teste que fixa o que a run muda junto com o código que ele protege, e mostrar que a proteção continua.
+
+- **`tests/unit/ads.test.ts`.** Fixava a caixa neutra com o rótulo nos três estados das variáveis. Agora, sem o ID, o `AdSlot` não desenha nada (a saída é vazia), e com o ID a caixa tem o rótulo de cada idioma, a unidade e o push, como antes. Ganhou três testes da configuração nova (§ 412).
+- **`tests/unit/ads-pages.test.ts`.** Fixava duas caixas em toda página de ferramenta nos três estados. Agora são duas com as variáveis e nenhuma sem elas; o resto (a meta, o carregador, as páginas livres) não mudou.
+- **`tests/unit/image-hub.test.ts`.** Fixava a caixa de conteúdo e a lateral do hub no build padrão. Agora o hub não tem caixa sem as variáveis, e com elas tem a de conteúdo no `<main>` e a lateral fora dele, como antes.
+- **`tests/unit/prontidao.test.ts`.** O site de mentira servia de build padrão e de build com os anúncios ao mesmo tempo. Agora o build padrão é o mesmo site sem as caixas (`withoutBoxes()`), como o `dist/` real; as 150 palavras por caixa e as caixas das páginas de PDF são conferidas no site com as caixas, como o portão faz no build `all`. Ganhou o controle negativo da caixa sem ID no build padrão.
+- **`scripts/gates/prontidao.ts` e `scripts/lib/prontidao.ts`.** O "Mais conteúdo que anúncio" e as linhas das páginas de PDF liam as caixas do `dist/`, que não tem mais nenhuma; agora leem o build `all`, com as 37 unidades. O texto das páginas é o mesmo nos dois builds, então as palavras não mudam. Sem a mudança, as 39 páginas de PDF reprovavam por "nenhum AdSlot na página", e a regra das 150 palavras passaria sem conferir nada.
+- **`scripts/gates/conteudo.ts`.** Os blocos dos guias de arquivo (a ferramenta, o link, o AdSlot, o que medimos, as fontes e as relacionadas, nessa ordem, e no máximo dois AdSlots) eram lidos do `dist/`. Agora a página do build padrão não pode ter caixa, e a ordem, com o AdSlot, é lida do build `all` (ou da pasta que o `FO_ADS_BUILD` der). Sem a mudança, os 30 guias reprovavam por "sem o AdSlot de conteúdo".
+- **`tests/unit/conteudo.test.ts`.** Roda o portão sobre um site de mentira, que era o `dist/` com as caixas. Agora o site escrito é o build com os anúncios (`FO_ADS_BUILD`), e o build padrão é o mesmo site sem as caixas, posto de volta depois de cada execução; todas as asserções de antes continuam. Ganhou um teste: a caixa que sobra no build padrão e o guia sem o AdSlot no build com os anúncios reprovam, cada um com a sua mensagem.
+- **`tests/unit/ci-workflows.test.ts`.** Não mudou. O ajudante do build de teste mora em `scripts/lib/`, que o teste varre, e não cita a pasta dos relatórios: a lista do que deixa a árvore suja diz onde o build lê, e não o que fica de fora.
+- **`tests/e2e/ads.spec.ts`.** Mede no build de teste (`useTestBuild()`), porque o build padrão não tem caixa. O teste do rótulo passou a conferir também o build padrão, pela origem dele: nenhuma caixa, rótulo, `<aside>`, meta, unidade ou carregador, e o `ads.txt` com 404.
+- **`tests/e2e/header-menu.spec.ts`.** A medida da lateral a 1280 px (150 px abaixo do cabeçalho, os controles a 150 px dela, o ponteiro bloqueado com a folha aberta) usa a página do build de teste, onde a lateral existe. As outras larguras continuam no build padrão.
+- **`tests/unit/design-checks.test.ts`, `sprite.test.ts`, `folha.test.ts` e `tests/e2e/design.spec.ts`.** A lista fechada passou a dez poses (§ 417); as asserções sobre as nove continuam valendo para elas.
+- **Nenhum teste saiu, nenhum foi pulado e nenhum limite mudou.** As contagens antes e depois vão no relatório da run.
