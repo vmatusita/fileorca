@@ -20,8 +20,8 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 1. Saúde e fontes (YMYL) | 8 | Run de ajuste de saúde e fontes |
 | 2. Motor, contas e formulário | 9 | Run de ajuste de contas (oráculo antes do motor) |
 | 3. CSV e PDF das calculadoras | 4 | Run de ajuste de exportação |
-| 4. Texto e voz em en, pt e es | 23 | Run de ajuste de texto e voz |
-| 5. Acessibilidade | 12 | Run de ajuste de acessibilidade |
+| 4. Texto e voz em en, pt e es | 26 | Run de ajuste de texto e voz |
+| 5. Acessibilidade | 13 | Run de ajuste de acessibilidade |
 | 6. Layout e design system | 16 | Run de ajuste de layout |
 | 7. PDF: comportamento | 4 | Run de ajuste de PDF |
 | 8. SEO, títulos e imagens sociais | 7 | Run de ajuste de SEO |
@@ -35,8 +35,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 16. Revisão das F4 a F7 (F8) | 21 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
+| 19. O que a F10 deixou | 20 | As runs F11, F12 e F13 e o Victor |
 
-Total: 183 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 207 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -350,6 +351,33 @@ O que a run da F9 achou e não é dela resolver: a decisão sobre a auditoria, a
 | F9 auditoria testes | REVISAO-F9.md B-3; § 332 | baixo | O `pnpm publico:auditar` põe em "falso positivo" todo achado que só aparece em `tests/`, `fixtures/`, `scripts/oracle/` ou `scripts/fixtures/`, sem olhar o valor (`scripts/publico/lib/classify.ts`). Um token, um CPF válido ou o e-mail de uma pessoa colado num teste cairia ali, e o terminal diria "segredo real: 0". Hoje os achados dessas pastas são sentinelas de teste. A correção muda a contagem da auditoria, por isso não entrou na revisão da F9. | Nessas pastas, só chamar de falso positivo o valor que casa um padrão sintético conhecido (o prefixo das sentinelas, os domínios de exemplo, os CPFs fabricados pelo dígito, a faixa 555-01xx); o resto vai a uma categoria "a conferir", com a nota do caminho. Rodar a auditoria de novo e dizer a contagem nova. | Run de ajuste |
 | F9 npx integridade | REVISAO-F9.md B-5; § 325 | baixo | O preparo das partes do Playwright e do Lighthouse roda `npx --yes playwright@<versão do lockfile>` antes do `pnpm install`, e o pacote vem do registro sem a conferência de integridade do `pnpm-lock.yaml` (antes da F9, o navegador vinha do pacote que o `pnpm install --frozen-lockfile` conferia). O npm confere o hash que o registro publica, e uma versão publicada não muda. | Conferir o `dist.integrity` de `npm view playwright@<versão>` contra a linha do `pnpm-lock.yaml` antes do `npx`, ou instalar o navegador só depois do `pnpm install`, medindo o que isso custa no preparo. | Run F9b |
 | F9 comentário guias | REVISAO-F9.md D-5 | baixo | O comentário de `scripts/guides/lib/browser.ts` sobre os domínios do Google aponta para o `CLAUDE.md` (F3), e a regra foi para o arquivo de anúncios de `docs/claude/` na F9. O arquivo não mudou porque o `tests/unit/guides-measured.test.ts` confere o SHA-256 dos scripts de medida, e mudar um byte pede medir os guias de novo. | Na próxima run que medir os guias de novo (`pnpm guias:medir`), trocar o ponteiro por `docs/claude/anuncios.md` e procurar outros "CLAUDE.md, F" em `scripts/` e `src/`. | Run de ajuste |
+
+## 19. O que a F10 deixou
+
+O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela resolver: as linhas vêm do diagnóstico, das notas dos agentes e da exploração, e a revisão da F10 não deixou baixo aberto (`docs/relatorios/fase-10.md`, "Para o PENDENCIAS"). A F11 colou as linhas aqui com o texto igual (DECISOES § 383).
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F10 p-1 | `fase-10.md`; DECISOES § 347 | baixo | O Resumo do `PENDENCIAS.md` diz 12 no grupo 5 e soma 183, mas a tabela do grupo 5 tem 13 linhas: a "Idiomas R2-03" entrou sem atualizar o Resumo e o Total | Corrigir o Resumo (13) e o Total | Run F13 |
+| F10 p-2 | DECISOES § 365; README da proposta, seção 6 | baixo | A F4 ACE-9 junta dois defeitos opostos: falta o cabeçalho de linha nas tabelas das calculadoras, e ele se repete na primeira coluna de 4 tabelas dos guias | Dividir em duas linhas: as calculadoras com o UX-12, os guias com o UX-13 | Run F13 |
+| F10 p-3 | DECISOES § 365 | baixo | A F7 obs 3 fala da Mulch, mas os rótulos que empurram a etiqueta "example" são os da Paint ("Coverage per gallon", "Area of a door", "Area of a window"); a Mulch só quebra o "Bag size" a 320 px | Corrigir o texto da linha | Run F13 |
+| F10 p-4 | DECISOES § 368 | baixo | A F5a D-12 cresceu: o "Copiar código" do Pix (`src/components/SupportCard.astro:57`) também usa o `fo-btn--sm` de 40 px no celular | Acrescentar à D-12; o UX-05 passa o botão a 52 px | Run F12 |
+| F10 p-5 | DECISOES § 361 e § 363; D-07 | médio | A 1280 px, a lateral de anúncio começa em y 84, a 29 px dos botões de idioma e de busca, e o menu de idioma aberto (`position: fixed`) cai em cima dela; o `ads.spec.ts` não mede o cabeçalho. Aparece quando os anúncios ligarem | A lateral com `padding-top` de 150 px, o menu de idioma em `absolute` e o cabeçalho nos alvos do `ads.spec.ts` | Run F11 e F12 |
+| F10 p-6 | DECISOES § 368 | médio | A linha do café no rodapé fica a 24 a 46 px da âncora do AdSense no fim da página (`components.css:458-466`), contra "o pedido de café nunca encosta num anúncio"; nenhum teste mede | A linha no topo do rodapé (UX-05) e um teste de distância com a âncora | Run F12 |
+| F10 p-7 | DECISOES § 361; `docs/propostas/ux-v2/ad-map.html` | médio | Os "gatilhos adicionais" da vinheta do AdSense (botão Voltar, 30 s parado, volta à aba, fim do artigo) vêm ligados por padrão desde 9/mar/2026 e podem pôr uma vinheta durante o processamento | Desligar em Anúncios automáticos → Vinheta, antes de ligar os anúncios | Victor |
+| F10 p-8 | DECISOES § 369; UX-06 | médio | O texto da Privacidade da seção A ("nada sai do aparelho" pela parede) não bate com a tag de recuperação do Google, que conta a detecção ao Google, nem com o evento `adblock_wall` no GA4 | Escolher o texto proposto na especificação do UX-06, nos três idiomas | Victor |
+| F10 p-9 | DECISOES § 369 | baixo | O "Usar só desta vez" guarda a data no `localStorage` sem o Aceitar, pelo precedente da § 49; a leitura do art. 5(3) da ePrivacy é jurídica | Conferir a leitura antes de ligar a parede na UE (lá ela é só aviso) | Victor |
+| F10 p-10 | DECISOES § 361; UX-07 | médio | O `gate:prontidao` conta toda caixa `fo-ad fo-ad--` do HTML (150 palavras por caixa), mesmo a escondida naquela largura; com o mapa, 111 das 181 páginas reprovariam (por largura, 0 no celular e 14 no computador) | Contar por largura, com as mesmas 150 palavras (pede o ok do Victor e um §), ou encolher o mapa | Run F12, com o ok do Victor |
+| F10 p-11 | DECISOES § 377; UX-18 | baixo | O `dragover` do documento promete "copiar" na página inteira, e o `drop` fora da ilha some em silêncio (`ImagePanel.tsx:587-596`, `PdfPanel.tsx:658-666`), contra o README da DropZone | `dropEffect = 'none'` fora da ilha, com um teste, qualquer que seja a escolha do UX-18 | Run F13 |
+| F10 p-12 | D-55 e D-56 | baixo | Quando os anúncios ligarem, a caixa de conteúdo do juntar PDF entra na primeira tela a 1280 (y 744), e o aviso de cookies aberto encosta nela (distância 0) | O mapa da F12 (com o UX-04 A, o 1º anúncio depois do "Como usar") e o aviso compacto (UX-09) | Run F12 |
+| F10 p-13 | D-14 e D-51 | médio | No HEIC para JPG, o JPG sai maior que o HEIC (até +66 % no guia), e o card e a dica dizem que ele fica mais leve | O card do UX-04 que diz quando o arquivo cresce, e a dica do "Save as" corrigida | Run F13 |
+| F10 p-14 | D-06 e D-17 | baixo | O erro manda tentar PNG para um `.png` que não é imagem, e no HEIC o erro de um PNG não aponta para o PNG para JPG | O erro "o conteúdo não bate com a extensão" e o chip da ferramenta certa (UX-04) | Run F13 |
+| F10 p-15 | UX-12 (notas) | baixo | Com a fonte de reserva no WebKit, o rótulo "Window area" ainda quebra (163 de 158 px), o mesmo caso do F8 s-2 | Calibrar a `Figtree Fallback` também para o peso 600 | Run F13 |
+| F10 p-16 | DECISOES § 370 | baixo | O número "2,6 MB → 717 KB" da faixa de imagem da home B vem do diagnóstico da F10, que está fora do Git | Gravar o número numa fixture ou no texto da ferramenta antes de usá-lo na home | Run F13 |
+| F10 p-17 | DECISOES § 370 | baixo | A contagem do H1 da home (50, 29 e 39) e as 4 variantes de hipoteca e de saldo final do `HUB_MONEY_IDS`, que são presets, não estão decididas | Decidir a conta num §, lida dos registros no build | Run F13 |
+| F10 p-18 | DECISOES § 361 e § 370 | baixo | A distância entre as duas laterais é de 800 px na home (UX-03) e de 1.200 px no mapa (UX-07) | Um número só para todos os moldes | Run F12 |
+| F10 p-19 | DECISOES § 372 | baixo | Com o aviso compacto, o número das calculadoras a 360 continua coberto (32, 52 e 52 de 52 px) até o UX-12 subir o ResultHero para acima de 596 px | Fazer o UX-12 junto ou logo depois do UX-09 | Run F13 |
+| F10 p-20 | DECISOES § 363 e § 379 | baixo | Os ícones do UX-01 (menu, sol, lua, sistema e livro) usam `currentColor` no `<svg>` raiz; o `tests/unit/icons.test.ts` exige `stroke="#0F1B2D"`, como os 39 do design system e os 27 do UX-16 | Converter ao mover para `docs/design/assets/Icons/` | Run F11 |
 
 ## Registrados (escolhas, não defeitos)
 

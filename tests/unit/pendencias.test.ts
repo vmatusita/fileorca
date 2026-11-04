@@ -59,6 +59,24 @@ describe('docs/PENDENCIAS.md', () => {
     expect(open.filter((id) => !covered.has(id))).toEqual([]);
   });
 
+  // F10 p-1 (DECISOES § 383): rows entered groups 4 and 5 without the Resumo; it now counts each numbered group's
+  // six-column rows, and the Total is their sum.
+  it('counts, in the Resumo, the rows of each group, and sums them in the Total', () => {
+    const groups = new Map<string, number>();
+    let group: string | undefined;
+    for (const line of DOC.split('\n')) {
+      const heading = /^## (\d+\. .+)$/.exec(line);
+      if (heading?.[1]) groups.set((group = heading[1]), 0);
+      else if (line.startsWith('## ')) group = undefined;
+      else if (group && line.startsWith('| ') && !line.startsWith('| ---') && !line.startsWith('| Id ') && line.slice(2, -2).split(' | ').length === 6) groups.set(group, (groups.get(group) ?? 0) + 1);
+    }
+    expect(groups.size).toBeGreaterThan(18);
+    const summary = DOC.slice(DOC.indexOf('## Resumo'), DOC.indexOf('## 1. '));
+    for (const [name, count] of groups) expect(summary, name).toContain(`| ${name} | ${count} |`);
+    const total = [...groups.values()].reduce((sum, count) => sum + count, 0);
+    expect(summary).toContain(`Total: ${total} linhas`);
+  });
+
   it('has a row for every low finding of the reviews of the F8', () => {
     for (const review of ['docs/relatorios/REVISAO-F4-F7.md', 'docs/relatorios/REVISAO-F8.md']) {
       // The fourth column of the tables is the final severity, after the skeptic.
