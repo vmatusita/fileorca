@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { dataLayer } from './lib/page.ts';
+import { INSIDE_ZONES, OUTSIDE_ZONES } from './lib/region-zones.ts';
+import { gdprZoneJs } from '../../src/platform/region.ts';
 
 const REGIONS = [
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU',
@@ -11,6 +13,11 @@ type Entry = unknown[];
 const isConsent = (entry: Entry, kind: string) => entry[0] === 'consent' && entry[1] === kind;
 
 test.describe('Consent Mode v2 e aviso de cookies', () => {
+  // F12 (c-04; § 428 and § 434): the Accept of the site's own notice depends on the time zone of the device, which
+  // stands for the region (src/platform/region.ts). These tests expect the four keys of an Accept, so they run in a time
+  // zone outside the regions denied by default; the tests of the regions are below.
+  test.use({ timezoneId: 'America/Sao_Paulo' });
+
   test('consent defaults come before config, denied by region and granted elsewhere', async ({ page }) => {
     await page.goto('/compress-image/');
     const entries = await dataLayer(page);
@@ -85,6 +92,64 @@ test.describe('Consent Mode v2 e aviso de cookies', () => {
     await page.locator('#fo-cookie').getByRole('button', { name: 'Decline' }).click();
     const updates = (await dataLayer(page)).filter((entry) => isConsent(entry, 'update'));
     expect((updates.at(-1)?.[2] as Record<string, string>)['analytics_storage']).toBe('denied');
+  });
+
+  // F12 · o consentimento (F3 c-04, saída A; § 428). In a time zone of the regions denied by default (the EU, the EEA,
+  // the United Kingdom and Switzerland), the Accept of the site's own notice goes only to analytics_storage, made on the
+  // page and replayed on the next ones (the home, a free page and a page with ads alike): the ad_* stay with Google's
+  // consent message. A Decline is the four keys there too. Outside those regions (the test above), nothing changes.
+  // Review C-1 (§ 449): Cyprus, whose zone the browsers report as Asia/Nicosia.
+  for (const timezoneId of ['Europe/Berlin', 'Europe/London', 'Atlantic/Madeira', 'Asia/Nicosia']) {
+    test.describe(`no fuso ${timezoneId}`, () => {
+      test.use({ timezoneId });
+      test('the Accept of the own notice reaches only analytics_storage, made and replayed (c-04)', async ({ page }) => {
+        await page.goto('/');
+        await page.locator('#fo-cookie').getByRole('button', { name: 'Accept' }).click();
+        const made = (await dataLayer(page)).filter((entry) => isConsent(entry, 'update'));
+        expect(made.map((entry) => entry[2])).toEqual([{ analytics_storage: 'granted' }]);
+        for (const path of ['/privacy/', '/pt/sobre/', '/compress-image/', '/es/unir-pdf/']) {
+          await page.goto(path);
+          const entries = await dataLayer(page);
+          const replays = entries.filter((entry) => isConsent(entry, 'update'));
+          expect(replays.map((entry) => entry[2]), path).toEqual([{ analytics_storage: 'granted' }]);
+          expect(entries.indexOf(replays[0] as Entry), path).toBeLessThan(entries.findIndex((entry) => entry[0] === 'config'));
+        }
+      });
+
+      test('the Decline of the own notice is the four keys, made and replayed (c-04)', async ({ page }) => {
+        await page.goto('/compress-image/');
+        await page.locator('#fo-cookie').getByRole('button', { name: 'Decline' }).click();
+        const denied = Object.fromEntries(KEYS.map((key) => [key, 'denied']));
+        expect((await dataLayer(page)).filter((entry) => isConsent(entry, 'update')).map((entry) => entry[2])).toEqual([denied]);
+        await page.goto('/');
+        expect((await dataLayer(page)).filter((entry) => isConsent(entry, 'update')).map((entry) => entry[2])).toEqual([denied]);
+      });
+    });
+  }
+
+  // Review C-1 (§ 449): the region the inline scripts read, on a device in each time zone of the oracle (zone.tab: every
+  // zone of the 32 regions denied by default and of the outermost regions of the EU), as this browser reports it. A zone
+  // the list misses (Asia/Nicosia before § 449; Atlantic/Faeroe, the name Chromium gives the Faroes) fails here.
+  test('the region list covers every time zone of the regions denied by default, as the browser reports it', async ({ browser }) => {
+    const says = async (timezoneId: string) => {
+      const context = await browser.newContext({ timezoneId, serviceWorkers: 'block' });
+      const page = await context.newPage();
+      // A string is evaluated as an expression on the page: the very JavaScript the inline scripts carry.
+      const inside: unknown = await page.evaluate(gdprZoneJs());
+      const zone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+      await context.close();
+      return { zone, inside };
+    };
+    const wrong: string[] = [];
+    for (const { where, zone } of INSIDE_ZONES) {
+      const { zone: reported, inside } = await says(zone);
+      if (inside !== true) wrong.push(`${where} ${zone} -> ${reported}: fora`);
+    }
+    for (const zone of OUTSIDE_ZONES) {
+      const { zone: reported, inside } = await says(zone);
+      if (inside !== false) wrong.push(`${zone} -> ${reported}: dentro`);
+    }
+    expect(wrong).toEqual([]);
   });
 
   test('no gtag.js and no request to Google outside fileorca.com', async ({ page }) => {

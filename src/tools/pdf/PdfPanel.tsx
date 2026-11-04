@@ -15,11 +15,10 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren, JSX, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track, type Codec, type ErrorReason, type Outcome } from '../../analytics/events.ts';
-import { PRODUCTION_HOSTNAME } from '../../platform/site.ts';
 import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
-import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from '../image/coffee.ts';
+import { countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from '../image/coffee.ts';
 import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
 import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
@@ -92,7 +91,7 @@ interface Model {
   single: Bundle | null;
   notes: PdfNote[];
   announce: string;
-  coffee: boolean;
+  coffee: CoffeeLine;
   completeSent: boolean;
   newUse: boolean;
   focusDownload: boolean;
@@ -106,7 +105,7 @@ interface Model {
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, bundle: null, single: null, notes: [],
-  announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false, grabbed: null,
+  announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false, grabbed: null,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -121,12 +120,6 @@ const NOTE_KEY: Record<PdfNote, keyof PdfPanelData['t']['result']['notes'] | nul
 /** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
 function offlineNow(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
-}
-
-function adBlocked(adsOn: boolean): boolean {
-  const ads = (window as { adsbygoogle?: { loaded?: boolean } }).adsbygoogle;
-  const unit = document.querySelector<HTMLElement>('.fo-ad--content ins.adsbygoogle');
-  return isAdBlocked({ adsOn, production: location.hostname === PRODUCTION_HOSTNAME, loaded: ads?.loaded === true, unitHeight: unit ? unit.offsetHeight : null });
 }
 
 /** The tag of a part of a split, in the words of the page: the page of "each page", the part of the ranges, "selected". */
@@ -150,7 +143,7 @@ const codecOf = (failure: Failure | null): Codec => {
 type Client = typeof ClientModule;
 
 export default function PdfPanel(props: PdfPanelData) {
-  const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref, adsOn } = props;
+  const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref } = props;
   const tool = PDF_TOOLS[page];
   const { Options } = tool;
   const model = useRef<Model>(newModel());
@@ -444,7 +437,7 @@ export default function PdfPanel(props: PdfPanelData) {
     }
     if (delivered && m.newUse && done.some((item) => item.outcome === 'new')) {
       m.newUse = false;
-      m.coffee = countUse(adBlocked(adsOn));
+      m.coffee = countUse() ? 'ask' : '';
     }
     m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : ''].filter(Boolean).join(' ') : '';
     render();
@@ -496,7 +489,7 @@ export default function PdfPanel(props: PdfPanelData) {
       teardown();
       m.completeSent = false;
       m.newUse = true;
-      m.coffee = false;
+      m.coffee = '';
       m.expanded = false;
       m.focusDownload = true;
       if (one) {
@@ -549,7 +542,7 @@ export default function PdfPanel(props: PdfPanelData) {
     teardown();
     m.phase = 'idle';
     m.announce = '';
-    m.coffee = false;
+    m.coffee = '';
     m.showErrors = false;
     setOver(0);
     const fresh = { ...tool.initial, ...(tool.start?.(texts.options as never) ?? {}) };
@@ -930,7 +923,10 @@ export default function PdfPanel(props: PdfPanelData) {
             ))}
           </ul>
         )}
-        {m.coffee && (
+        {m.coffee && (m.coffee === 'done' ? (
+          // "Don't show this again" leaves one quiet sentence in the same place, read once (DECISOES § 436).
+          <p class="fo-result__support--done" role="status">{t.result.coffee.done}</p>
+        ) : (
           <div class="fo-result__support">
             <p>{t.result.coffee.text}</p>
             <div class="fo-result__support-actions">
@@ -943,7 +939,7 @@ export default function PdfPanel(props: PdfPanelData) {
                 class="fo-btn fo-btn--ghost"
                 onClick={() => {
                   dontShowAgain();
-                  m.coffee = false;
+                  m.coffee = 'done';
                   render();
                   downloadRef.current?.focus();
                 }}
@@ -952,7 +948,7 @@ export default function PdfPanel(props: PdfPanelData) {
               </button>
             </div>
           </div>
-        )}
+        ))}
       </section>
     );
   } else if (m.phase === 'ready' || m.phase === 'processing' || (m.phase === 'done' && !delivered)) {

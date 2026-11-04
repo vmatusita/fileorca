@@ -4,8 +4,12 @@
 // money hub (F4, DECISOES § 118; F6: the Brazilian ones in Portuguese, the five translated ones in Spanish); in English, the
 // home and health calculators with links to their hubs and the QR code generator (F7, decision 9); then the four guides of
 // HOME_GUIDES as GuideCards, with the link to the guides hub (F11, decision 7; DECISOES § 398). The cards come from the
-// route map and the registries: a page gets a card only with a path in this language. No AdSlot.
+// route map and the registries: a page gets a card only with a path in this language.
+// F12 · o mapa de anúncios (decision 3; DECISOES § 419): the home has ads now, in the area "geral" and with the rail
+// column: the first content ad after the first section of cards (its top never on the first screen of a phone), the next
+// ones only at the marks between the sections; the layout puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
 import GuideCard from '../components/GuideCard.astro';
@@ -77,7 +81,7 @@ const website = {
   publisher: { '@id': `${SITE_ORIGIN}/#organization` },
 };
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]} oli={['wave']}>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]} oli={['wave']} withAds adArea="geral">
   <div class="fo-hero">
     <div class="fo-hero__text">
       <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
@@ -94,6 +98,7 @@ const website = {
     </ul>
     {hub && t.hubLink && <p class="fo-more"><a href={hub}>{t.hubLink}</a></p>}
   </section>
+  <AdBreak first />
   {pdfHub && t.pdf && pdfCards.length > 0 && (
     <section class="fo-section" aria-labelledby="pdf-home">
       <h2 id="pdf-home">{t.pdf.heading}</h2>
@@ -107,6 +112,8 @@ const website = {
     </section>
   )}
   {moneyHub && t.money && moneyCards.length > 0 && (
+    <>
+    <AdBreak />
     <section class="fo-section" aria-labelledby="money-home">
       <h2 id="money-home">{t.money.heading}</h2>
       <p class="fo-prose">{t.money.intro}</p>
@@ -117,8 +124,11 @@ const website = {
       </ul>
       <p class="fo-more"><a href={moneyHub}>{t.money.hubLink}</a></p>
     </section>
+    </>
   )}
   {lifeSections.map((section) => (
+    <>
+    <AdBreak />
     <section class="fo-section" aria-labelledby={`${section.id}-home`}>
       <h2 id={`${section.id}-home`}>{section.texts.heading}</h2>
       <p class="fo-prose">{section.texts.intro}</p>
@@ -129,8 +139,11 @@ const website = {
       </ul>
       <p class="fo-more"><a href={section.href}>{section.texts.hubLink}</a></p>
     </section>
+    </>
   ))}
   {qr && (
+    <>
+    <AdBreak />
     <section class="fo-section" aria-labelledby="qr-home">
       <h2 id="qr-home">{qr.texts.heading}</h2>
       <p class="fo-prose">{qr.texts.intro}</p>
@@ -138,8 +151,11 @@ const website = {
         <li><ToolCard href={qr.href} name={qr.blurb.name} description={qr.blurb.description} category="util" icon="qr" /></li>
       </ul>
     </section>
+    </>
   )}
   {guidesHub && guideCards.length > 0 && (
+    <>
+    <AdBreak />
     <section class="fo-section" aria-labelledby="guides-home">
       <h2 id="guides-home">{t.guides.heading}</h2>
       <p class="fo-prose">{t.guides.intro}</p>
@@ -150,7 +166,9 @@ const website = {
       </ul>
       <p class="fo-more"><a href={guidesHub}>{fmt(t.guides.hubLink, guideCount)}</a></p>
     </section>
+    </>
   )}
+  <AdBreak />
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">
     <h2 id="privacy-home">{t.privacyHeading}</h2>
     <p>{t.privacyBody}</p>

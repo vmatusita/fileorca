@@ -3,8 +3,10 @@
 // not_found_handling "404-page" (nearest 404.html, status 404) and the path rules of _headers. A method other than GET
 // and HEAD gets 405 with an empty body, like the assets-only Worker (F8: the POST of the share target must never reach
 // the server; DECISOES § 294). The tests of the service worker build their own servers with createDistServer().
+// F12 (DECISOES § 414): the folder served is an option (dist/ by default), so scripts/serve-test-build.ts serves the test
+// build under .cache/builds/ with the same rules.
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
-import { createServer, type Server } from 'node:http';
+import { createServer, type RequestListener, type Server } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
 const ROOT = 'dist';
@@ -29,8 +31,8 @@ interface Rule {
   headers: [string, string][];
 }
 
-function loadRules(): Rule[] {
-  const path = join(ROOT, '_headers');
+function loadRules(root: string): Rule[] {
+  const path = join(root, '_headers');
   if (!existsSync(path)) return [];
   const rules: Rule[] = [];
   for (const raw of readFileSync(path, 'utf8').split('\n')) {
@@ -51,46 +53,50 @@ function loadRules(): Rule[] {
   return rules;
 }
 
-const rules = loadRules();
 
 function isFile(path: string): boolean {
   return existsSync(path) && statSync(path).isFile();
 }
 
 /** Resolves a request path like the Cloudflare handler: [status, file, location?]. */
-export function resolve(pathname: string): { status: number; file?: string; location?: string } {
+export function resolve(pathname: string, root: string = ROOT): { status: number; file?: string; location?: string } {
   const path = normalize(decodeURIComponent(pathname)).split('\\').join('/');
   if (path.includes('..')) return { status: 400 };
   if (path.endsWith('/index.html')) return { status: 307, location: path.slice(0, -'index.html'.length) };
-  if (path.endsWith('.html') && isFile(join(ROOT, path))) return { status: 307, location: path.slice(0, -'.html'.length) };
+  if (path.endsWith('.html') && isFile(join(root, path))) return { status: 307, location: path.slice(0, -'.html'.length) };
   if (path.endsWith('/')) {
-    if (isFile(join(ROOT, path, 'index.html'))) return { status: 200, file: join(ROOT, path, 'index.html') };
-    if (path !== '/' && isFile(join(ROOT, `${path.slice(0, -1)}.html`))) return { status: 307, location: path.slice(0, -1) };
+    if (isFile(join(root, path, 'index.html'))) return { status: 200, file: join(root, path, 'index.html') };
+    if (path !== '/' && isFile(join(root, `${path.slice(0, -1)}.html`))) return { status: 307, location: path.slice(0, -1) };
   } else {
-    if (isFile(join(ROOT, path)) && !path.startsWith('/_headers') && !path.startsWith('/_redirects')) {
-      return { status: 200, file: join(ROOT, path) };
+    if (isFile(join(root, path)) && !path.startsWith('/_headers') && !path.startsWith('/_redirects')) {
+      return { status: 200, file: join(root, path) };
     }
-    if (isFile(join(ROOT, `${path}.html`))) return { status: 200, file: join(ROOT, `${path}.html`) };
-    if (isFile(join(ROOT, path, 'index.html'))) return { status: 307, location: `${path}/` };
+    if (isFile(join(root, `${path}.html`))) return { status: 200, file: join(root, `${path}.html`) };
+    if (isFile(join(root, path, 'index.html'))) return { status: 307, location: `${path}/` };
   }
   let dir = path;
   for (;;) {
     dir = dir.slice(0, dir.lastIndexOf('/'));
-    const candidate = join(ROOT, dir, '404.html');
+    const candidate = join(root, dir, '404.html');
     if (isFile(candidate)) return { status: 404, file: candidate };
     if (!dir) return { status: 404 };
   }
 }
 
 export interface DistServerOptions {
+  /** The folder served, dist/ by default. */
+  root?: string;
   /** Answers for some paths instead of the file in dist/ (the tests swap /sw.js). */
   overrides?: Map<string, string>;
   /** Called for every request, before the answer. */
   onRequest?: (method: string, pathname: string) => void;
 }
 
-export function createDistServer(options: DistServerOptions = {}): Server {
-  return createServer((request, response) => {
+/** The request handler of the static server (createDistServer wraps it in an HTTP server). */
+export function distHandler(options: DistServerOptions = {}): RequestListener {
+  const root = options.root ?? ROOT;
+  const rules = loadRules(root);
+  return (request, response) => {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
     options.onRequest?.(request.method ?? 'GET', url.pathname);
     if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -98,7 +104,7 @@ export function createDistServer(options: DistServerOptions = {}): Server {
       response.end();
       return;
     }
-    const result = resolve(url.pathname);
+    const result = resolve(url.pathname, root);
     for (const rule of rules) {
       if (rule.pattern.test(url.pathname)) for (const [name, value] of rule.headers) response.appendHeader(name, value);
     }
@@ -120,7 +126,11 @@ export function createDistServer(options: DistServerOptions = {}): Server {
     }
     response.writeHead(result.status, { 'Content-Type': TYPES[extname(result.file)] ?? 'application/octet-stream' });
     createReadStream(result.file).pipe(response);
-  });
+  };
+}
+
+export function createDistServer(options: DistServerOptions = {}): Server {
+  return createServer(distHandler(options));
 }
 
 if (import.meta.main) {

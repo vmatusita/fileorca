@@ -1,9 +1,11 @@
 ---
 // The tool page mold for the 12 PDF tools (docs/design/components/ToolPage; F5a, decision 9): breadcrumb, H1 +
-// PrivacySeal, the island, the first AdSlot (150 px clearance built in), then the blocks the content gate checks
-// (data-content: how, specs, faq, privacy, related) and the rail AdSlot (from 1280 px, not sticky). The same blocks as
-// ImageToolPage.astro, with "how it works" in three steps or more. The same mold serves the three languages (F6). The card
-// of each guide that embeds the tool closes the "How to" block (F11, decision 7; DECISOES § 396).
+// PrivacySeal, the island, then the blocks the content gate checks (data-content: how, specs, faq, privacy, related), with
+// the ads of the map. The same blocks as ImageToolPage.astro, with "how it works" in three steps or more. The same mold
+// serves the three languages (F6). The card of each guide that embeds the tool closes the "How to" block (F11, decision 7;
+// DECISOES § 396). F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad after the "How to"
+// block (UX-04 A, § 371), the next ones at the marks between the questions and between the last blocks; the layout puts
+// each box and the rails (src/ads/map.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
@@ -11,7 +13,7 @@ import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import GuideCard from '../../components/GuideCard.astro';
-import AdSlot from '../../ads/AdSlot.astro';
+import AdBreak from '../../ads/AdBreak.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, webApplicationLd } from '../../seo/meta.ts';
@@ -48,6 +50,7 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
   title={title}
   description={t.description}
   withAds
+  adArea={area}
   oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang)]}
 >
@@ -57,7 +60,6 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
     <PrivacySeal text={common.seal} />
   </div>
   <PdfIsland data={data} />
-  <AdSlot area={area} variant="content" label={common.adLabel} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
@@ -67,6 +69,7 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
       </div>
     )}
   </section>
+  <AdBreak first />
   <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
     <h2 id="specs">{t.specsHeading}</h2>
     <table class="fo-table">
@@ -79,12 +82,14 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
   </section>
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
-    <Faq items={t.faq} />
+    <Faq items={t.faq} breaks />
   </section>
+  <AdBreak />
   <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
     <h2 id="privacy-note">{t.privacyHeading}</h2>
     <p>{t.privacyNote}</p>
   </section>
+  <AdBreak />
   <section class="fo-section" data-content="related" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
@@ -93,5 +98,4 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

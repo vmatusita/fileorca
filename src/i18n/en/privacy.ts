@@ -5,7 +5,7 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: November 3, 2026',
+  updated: 'Last updated: November 4, 2026',
   intro:
     'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device, and the theme you pick in the header stays in your browser. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
@@ -61,6 +61,7 @@ export default {
         'First result of a calculator, with the name of the calculator only',
         'Download of a calculator PDF or CSV, or of a QR code as PNG or SVG, with the format only',
         'Click on Copy link in a calculator, without the link',
+        "Oli's notice about ad blockers: when it shows and which of its buttons was used",
       ],
     },
     {
@@ -69,6 +70,8 @@ export default {
         'To stay free, FileOrca shows, or will show, ads from Google AdSense. Google is the advertising partner of the site.',
         "Third-party vendors, including Google, use cookies to serve ads based on your prior visits to this and other websites. Google's use of advertising cookies lets Google and its partners serve ads to you based on those visits.",
         'In the European Economic Area (EEA), the United Kingdom and Switzerland, a Google consent message will ask for your choice before ads use cookies, once ads are on.',
+        // F12 · a parede do bloqueador (adjustment 1; § 431): what the check for an ad blocker tells, and to whom.
+        "To show Oli's notice, the site checks whether an ad blocker is on. The check uses Google's ad blocking recovery tag, which tells Google whether it found a blocker, as the ads themselves do. Like the use of the tools, the site counts in Google Analytics when the notice shows and which button was used. In your browser, it keeps only the time of “Continue just this once”.",
         'Use these links to opt out of personalized advertising and to read how Google uses data from partner sites:',
       ],
       list: [
@@ -130,6 +133,7 @@ export default {
         'Ad data: Google keeps it under its own policies.',
         'Cookie choice: stays in your browser, and you can delete it at any time by clearing the site data.',
         'Theme choice: the fo-theme key stays in your browser until you set the theme back to System or clear the site data.',
+        "“Continue just this once” on Oli's notice: the time you used it stays in your browser until you clear the site data.",
         'E-mails: kept only as long as needed to answer you.',
         'Offline copy: stays in your browser until you clear the site data or uninstall the app. Files shared with the app are deleted when a tool takes them, or the next time you open FileOrca after an hour.',
       ],

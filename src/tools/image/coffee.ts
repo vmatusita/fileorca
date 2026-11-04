@@ -5,12 +5,17 @@
 // person is. Without Accept nothing is written and the line never shows; a count left from an earlier
 // Accept is erased (consent withdrawn). "Don't show again" is the person's own request and is always
 // kept. A use is a batch with at least one real output (smaller, converted, turned, cropped, resized or
-// put into a PDF), and the count is one for all the image tools in this browser. With ads on, someone who blocks them sees it on the 1st.
+// put into a PDF), and the count is one for all the image tools in this browser. Someone who blocks ads follows the same
+// rule: the 1st-use ask for them is gone (F12, Mudança 11; DECISOES § 435). They get the ad-block wall, and the coffee
+// is never a way out of it.
 import { CONSENT_STORAGE_KEY } from '../../analytics/consent.ts';
 
 export const COFFEE_KEY = 'fo-coffee';
 export const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 export const USES_BEFORE_ASKING = 3;
+
+/** The coffee line of a result card: none, the ask, or the sentence that confirms "don't show again" (§ 436). */
+export type CoffeeLine = '' | 'ask' | 'done';
 
 export interface CoffeeState {
   uses: number;
@@ -21,7 +26,6 @@ export interface CoffeeState {
 export interface CoffeeContext {
   now: number;
   consent: boolean;
-  adsBlocked: boolean;
 }
 
 export function parseCoffee(raw: string | null): CoffeeState {
@@ -40,13 +44,8 @@ export function parseCoffee(raw: string | null): CoffeeState {
 export function decideCoffee(state: CoffeeState, context: CoffeeContext): { show: boolean; next: CoffeeState | null } {
   if (state.never || !context.consent) return { show: false, next: null };
   const uses = state.uses + 1;
-  const due = uses >= (context.adsBlocked ? 1 : USES_BEFORE_ASKING) && (state.shownAt === undefined || context.now - state.shownAt >= WEEK_MS);
+  const due = uses >= USES_BEFORE_ASKING && (state.shownAt === undefined || context.now - state.shownAt >= WEEK_MS);
   return { show: due, next: due ? { ...state, uses, shownAt: context.now } : { ...state, uses } };
-}
-
-/** Ads on at build, on the production host, and the AdSense loader never ran or the unit stayed empty. */
-export function isAdBlocked(input: { adsOn: boolean; production: boolean; loaded: boolean; unitHeight: number | null }): boolean {
-  return input.adsOn && input.production && (!input.loaded || input.unitHeight === 0);
 }
 
 function storage(): Storage | null {
@@ -77,7 +76,7 @@ export function forgetWithoutConsent(): void {
 }
 
 /** Counts a successful use in this browser; returns whether the coffee line shows. */
-export function countUse(adsBlocked: boolean, now = Date.now()): boolean {
+export function countUse(now = Date.now()): boolean {
   const store = storage();
   if (!store) return false;
   try {
@@ -86,7 +85,7 @@ export function countUse(adsBlocked: boolean, now = Date.now()): boolean {
       forget(store);
       return false;
     }
-    const { show, next } = decideCoffee(parseCoffee(store.getItem(COFFEE_KEY)), { now, consent, adsBlocked });
+    const { show, next } = decideCoffee(parseCoffee(store.getItem(COFFEE_KEY)), { now, consent });
     if (next) store.setItem(COFFEE_KEY, JSON.stringify(next));
     return show;
   } catch {

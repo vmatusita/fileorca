@@ -11,11 +11,11 @@ O botão da FileOrca é uma pílula com o traço de 2px e um "lábio" sólido em
 | Classe | Uso |
 |---|---|
 | `fo-btn--download` | O Baixar. Fundo `sun`, texto `on-sun`. Um por tela, sempre com o ícone `download` e, quando houver, o tamanho do arquivo em `fo-btn__meta`. Nunca perto de anúncio (`ad-clearance`). |
-| `fo-btn--brand` | Escolher arquivos, dentro da DropZone. Um por tela. |
+| `fo-btn--brand` | Escolher arquivos, dentro da DropZone, e o "recarregar" da parede do bloqueador ([AdblockWall](../AdblockWall/README.md); F12, DECISOES § 433). Um por tela. |
 | (padrão) | Ações secundárias: CSV, Copiar link, Aceitar/Recusar cookies. |
 | `fo-btn--ghost` | Ações de saída e de baixo risco: Começar de novo, Cancelar. Sem traço, sem lábio. |
 | `fo-btn--icon` | Ações de linha (remover, baixar um arquivo do lote). Sempre com `aria-label`. |
-| `fo-btn--lg` / `fo-btn--sm` / `fo-btn--block` | Tamanho: `button-lg` (60px) para Baixar e Escolher; `--sm` (40px) só no computador; `--block` no celular. |
+| `fo-btn--lg` / `fo-btn--sm` / `fo-btn--block` | Tamanho: `button-lg` (60px) para Baixar, Escolher e o recarregar da parede; `--sm` (40px) só no computador; `--block` no celular. |
 
 Sobre `deep` (ResultCard), envolva em `.fo-deep`: o Baixar troca o lábio para `shadow-lip-on-deep` e o ghost passa a `on-deep`.
 

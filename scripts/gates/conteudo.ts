@@ -10,6 +10,9 @@
 // claim; the hub has a card and a guide link for each tool (DECISOES § 162).
 // The ten file guides of the F5b come from their registry (src/tools/guides/registry.ts): each one has the blocks of the
 // page in order, 800 to 1,500 words of its own text and no filler phrase (scripts/lib/file-guides.ts; DECISOES § 188).
+// F12, Mudança 10 (DECISOES § 418): the default build has no ad box, so the blocks of each guide, its AdSlots included,
+// are checked on the build with the ads ("all", the one of gate:prontidao, made or reused by scripts/lib/test-build.ts),
+// and the page of the default build must have no ad box at all.
 // Across the whole dist/ (404s aside): no repeated title or description and no placeholder wording.
 // F6 (decision 9): every page in every language of the route map. The calculators of the registries in each language they
 // have (the Spanish ones of ES_CALC_IDS and the Brazilian ones too), with the privacy phrase of the language; the PDF tools
@@ -48,6 +51,8 @@ import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { hubGuides } from '../../src/tools/guides/hub.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
+import { fileIn } from '../lib/prontidao.ts';
+import { buildVariant } from '../lib/test-build.ts';
 
 requireDist();
 const problems = new Problems();
@@ -163,6 +168,8 @@ for (const lang of qrRoute ? languagesOf(qrRoute) : []) {
 let guidePages = 0;
 let guideWanted = 0;
 const guideWordCounts: string[] = [];
+// FO_ADS_BUILD names another folder for it (tests/unit/conteudo.test.ts runs the gate on a fake site).
+const withAds = process.env['FO_ADS_BUILD'] ?? (await buildVariant('all')).dir;
 for (const id of FILE_GUIDE_IDS) {
   const route = pages.find((page) => page.route.id === id)?.route;
   if (!route) problems.add(`${id}: o guia do registro não está no mapa de rotas`);
@@ -178,7 +185,13 @@ for (const id of FILE_GUIDE_IDS) {
     const toolPath = routeById(FILE_GUIDES[id].tool).paths[lang] ?? '';
     if (!toolPath) problems.add(`${path}: a ferramenta ${FILE_GUIDES[id].tool} não tem página em ${lang}`);
     const html = read(path);
-    for (const problem of checkFileGuide(html, { toolPath, lang })) problems.add(`${path}: ${problem}`);
+    if (html.includes('class="fo-ad')) problems.add(`${path}: caixa de anúncio no build padrão, que não tem ID de unidade`);
+    const adsFile = fileIn(withAds, path);
+    if (!existsSync(adsFile)) {
+      problems.add(`${path}: a página não existe no build com os anúncios`);
+      continue;
+    }
+    for (const problem of checkFileGuide(readFileSync(adsFile, 'utf8'), { toolPath, lang })) problems.add(`${path}: ${problem}`);
     guideWordCounts.push(`${lang}/${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
   }
 }

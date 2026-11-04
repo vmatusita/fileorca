@@ -5,7 +5,6 @@
 import { pathFor, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { ICONS } from '../../icons/icons.ts';
-import { buildAdsConfig } from '../../ads/config.ts';
 import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
 import { IMAGE_PAGES } from '../image/registry.ts';
@@ -91,7 +90,6 @@ export function panelData(id: PdfToolId, lang: Lang = 'en'): PdfPanelData {
     icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload, reorder: ICONS.reorder },
     ink: lightInk(),
     coffeeHref: coffeeHrefFor(lang),
-    adsOn: buildAdsConfig().scriptEnabled,
   };
 }
 

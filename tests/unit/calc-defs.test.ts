@@ -468,7 +468,9 @@ describe('after the review', () => {
       // The languages adjustment: the pages of pt and es changed for the QR code, which exists in them now (DECISOES § 310).
       // F11 (decision 2): the three pages changed for the theme key fo-theme; the English date moved to that day, and the
       // Portuguese and Spanish dates were already on it (DECISOES § 387 and § 392).
-      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 3, 2026', pt: 'Última atualização: 3 de novembro de 2026', es: 'Última actualización: 3 de noviembre de 2026' }[lang]);
+      // F12 (decision 5, adjustment 1): the three pages changed for the ad-block wall (the recovery tag, the adblock_wall
+      // event and the fo-wall-escape key); the three dates moved to that day (§ 431 and § 434).
+      expect(privacy.updated, lang).toBe({ en: 'Last updated: November 4, 2026', pt: 'Última atualização: 4 de novembro de 2026', es: 'Última actualización: 4 de noviembre de 2026' }[lang]);
     }
   });
 });

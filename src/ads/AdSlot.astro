@@ -1,35 +1,22 @@
 ---
-// AdSlot (docs/design/components/AdSlot): neutral box with reserved height and the label AdSense
-// accepts in each language. The unit and its push only render with the three build variables
-// filled in (PLANO "Como o anúncio liga"), and the push only runs on fileorca.com; the rail unit
-// only asks for an ad from 1280px, where the rail is visible. The loader lives in AdsenseHead.
+// AdSlot (docs/design/components/AdSlot): one ad box, the reserved room with the label AdSense accepts in each language.
+// F12, Mudança 10 (DECISOES § 413): with no unit id for the position, nothing renders (no box, no label, no reserved
+// space), so the default build, with no variables, has no ad box at all. F12, the ad map (decision 3; DECISOES § 419
+// and § 420): the box carries the area, the unit, its id, the format and the width it is for, and no <ins>; the one
+// push script of the page (src/ads/map.ts) makes the unit on fileorca.com, only where the width matches. The pages place
+// their boxes through the layout (BaseLayout and map.ts); this component draws one box, for the tests and the docs.
 import type { AdArea } from '../i18n/routes.ts';
-import { PRODUCTION_HOSTNAME } from '../platform/site.ts';
-import { buildAdsConfig, unitFor, type AdsConfig } from './config.ts';
+import { buildAdsConfig, unitFor, type AdUnit, type AdsConfig } from './config.ts';
+import { adBoxHtml } from './map.ts';
 
 interface Props {
   area: AdArea;
-  variant: 'content' | 'rail';
+  unit: AdUnit;
   label: string;
   /** Tests pass a config; the site uses the build variables. */
   config?: AdsConfig;
 }
-const { area, variant, label, config = buildAdsConfig() } = Astro.props;
-const unit = unitFor(config, area, variant === 'rail' ? 'lateral' : 'conteudo');
-const condition = `location.hostname===${JSON.stringify(PRODUCTION_HOSTNAME)}${variant === 'rail' ? "&&matchMedia('(min-width: 1280px)').matches" : ''}`;
-const push = `if(${condition}){(window.adsbygoogle=window.adsbygoogle||[]).push({});}`;
+const { area, unit, label, config = buildAdsConfig() } = Astro.props;
+const id = unitFor(config, area, unit);
 ---
-<div class={`fo-ad fo-ad--${variant}`} data-ad-area={area}>
-  <span class="fo-ad__label">{label}</span>
-  {unit && config.client && (
-    <ins
-      class="adsbygoogle"
-      data-ad-client={config.client}
-      data-ad-slot={unit}
-      data-ad-format={variant === 'rail' ? undefined : 'auto'}
-      data-full-width-responsive={variant === 'rail' ? undefined : 'true'}
-      style={variant === 'rail' ? 'display:inline-block;width:300px;height:600px' : 'display:block'}
-    ></ins>
-  )}
-  {unit && <script is:inline set:html={push} />}
-</div>
+{id && config.client && <Fragment set:html={adBoxHtml({ area, unit, id, label })} />}

@@ -41,7 +41,7 @@ describe('folha da Oli', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('shows the nine poses at 32, 64 and 512 px on a light and a dark background', () => {
+  it('shows the ten poses at 32, 64 and 512 px on a light and a dark background', () => {
     expect(sections).toHaveLength(2);
     expect(sections[0]).toContain('class="fundo fundo--claro"');
     expect(sections[1]).toContain('class="fundo fundo--escuro"');
@@ -53,7 +53,7 @@ describe('folha da Oli', () => {
           expect(count(section, cell), `${pose} ${size}`).toBe(1);
         }
       }
-      expect(count(section, '<use ')).toBe(27);
+      expect(count(section, '<use ')).toBe(30);
     }
   });
 

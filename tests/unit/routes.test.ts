@@ -163,8 +163,10 @@ describe('mapa de rotas', () => {
     expect(TEXTS.en.common.seal).toBe('Your files never leave your device');
     expect(TEXTS.pt.common.seal).toBe('Seu arquivo nem sai do aparelho');
     expect(TEXTS.es.common.seal).toBe('Tus archivos nunca salen de tu dispositivo');
-    expect(TEXTS.pt.common.footer.coffee).toBe('Curtiu? Me paga um café');
-    expect(TEXTS.en.support.h1).toBe('Free tools, made by one person');
+    // F12 (decision 7; DECISOES § 441): the coffee texts of PLANO-MELHORIAS section C, where "Curtiu? Me paga um café"
+    // and "Free tools, made by one person" were the PLANO's "Doações" ones.
+    expect(TEXTS.pt.common.footer.coffee).toBe('Me ajude a manter o FileOrca grátis: paga um café?');
+    expect(TEXTS.en.support.h1).toBe('Help Oli keep swimming');
     expect(TEXTS.es['not-found'].h1).toBe('Esta página se fue nadando.');
     for (const lang of LANGS) {
       // The texts of the image tools and presets live apart from TEXTS (src/tools/image/texts.ts): they get the same scan.

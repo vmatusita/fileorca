@@ -43,6 +43,9 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
   outline-offset: 2px;
 }
 .fo-deep :focus-visible { outline-color: var(--on-deep); }
+/* F12 · a parede do bloqueador (review d-3; DECISOES § 450): the <main> the wall's script focuses when it closes with no
+   focus before it (tabindex="-1", so the next Tab starts in the content) is no control: no ring around the whole page. */
+main[tabindex="-1"]:focus { outline: none; }
 .fo-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .fo-skip { position: absolute; left: var(--space-4); top: -100px; padding: var(--space-2) var(--space-4); background: var(--surface); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); z-index: 30; }
 .fo-skip:focus { top: var(--space-2); }

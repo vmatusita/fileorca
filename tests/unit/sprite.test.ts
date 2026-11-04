@@ -18,7 +18,7 @@ const idsOf = (markup: string) => [...markup.matchAll(/\sid="([^"]*)"/g)].map((m
 const count = (text: string, part: string) => text.split(part).length - 1;
 
 describe('sprite da Oli: montagem', () => {
-  it('has nine symbols named after the closed list of poses', () => {
+  it('has ten symbols named after the closed list of poses', () => {
     expect([...sprite.symbols.keys()]).toEqual([...POSES]);
     expect(idsOf(spriteMarkup(sprite, POSES)).filter((id) => /^oli-(?!p\d|clip)/.test(id))).toEqual(POSES.map((pose) => `oli-${pose}`));
     expect(isPose('wave')).toBe(true);

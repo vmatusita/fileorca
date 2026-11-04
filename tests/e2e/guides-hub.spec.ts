@@ -51,7 +51,8 @@ for (const lang of LANGS) {
       const name = (await card.locator('.fo-guidecard__name').textContent()) ?? '';
       await expect(card).toHaveAccessibleName(new RegExp(`^${KIND[lang]} ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `));
     }
-    // No AdSlot, no rail, no ad code (the hub has no ad area in the F11).
+    // No AdSlot, no rail, no ad code in the default build. F12 (DECISOES § 423): the hub has the ad area "geral" now, but
+    // with no unit id there is nothing (Mudança 10); its boxes are checked on the test build (fo-ad-map.spec.ts).
     await expect(page.locator('.fo-ad, ins.adsbygoogle, aside.fo-rail, script[src*="adsbygoogle"]')).toHaveCount(0);
     // The headings go H1, H2, H3 with no level skipped.
     const levels = await main.locator('h1, h2, h3, h4, h5, h6').evaluateAll((headings) => headings.map((heading) => Number(heading.tagName.slice(1))));

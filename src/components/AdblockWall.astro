@@ -1,0 +1,71 @@
+---
+// AdblockWall (docs/design/components/AdblockWall; F12, decision 5; § 426): the Oli wall for whoever blocks the ads,
+// closed in the HTML until the inline script opens it with showModal(). BaseLayout puts it at the end of the <body> only on
+// the pages with ads (withAds) and only with wallModeOf(buildAdsConfig()) other than "desligado": with the variable off,
+// or without the three AdSense variables, nothing of it is in the HTML (no dialog, no bait, no script, no sad pose).
+// Markup of the proposal (wall.html, "Especificação"): the sad Oli to the right of the title, looking at it; the brand
+// "reload", the neutral "see how" with its lip and the ghost escape; the help with nine <details name> entries; the
+// footer of the card with the reload and the escape always in sight. Nothing sun, nothing that looks like an AdSlot, no
+// ad and no link inside. The bait #fo-bait is never an ins.adsbygoogle: an empty, off-screen box with the class names the
+// cosmetic lists of the blockers hide.
+import Icon from './Icon.astro';
+import Oli from './Oli.astro';
+import { WALL_POSE } from '../oli/poses.ts';
+import { wallScript } from '../ads/wall.ts';
+import type { Lang } from '../i18n/routes.ts';
+import type { WallHelpId, WallTexts } from '../i18n/types.ts';
+import enWall from '../i18n/en/wall.ts';
+import ptWall from '../i18n/pt/wall.ts';
+import esWall from '../i18n/es/wall.ts';
+
+interface Props {
+  lang: Lang;
+  /** The mode of the build; the script softens bloqueio into aviso for the EU and the network-level blocker. */
+  mode: 'aviso' | 'bloqueio';
+}
+const { lang, mode } = Astro.props;
+const TEXTS: Record<Lang, WallTexts> = { en: enWall, pt: ptWall, es: esWall };
+/** The order of the help entries in the proposal. */
+const ORDER: readonly WallHelpId[] = ['ubo', 'adblock', 'abp', 'adguard', 'brave', 'firefox', 'safari-mac', 'safari-ios', 'other'];
+const t = TEXTS[lang];
+---
+<dialog id="fo-wall" class="fo-wall" aria-labelledby="fo-wall-title" aria-describedby="fo-wall-desc">
+  <div class="fo-wall__body">
+    <div class="fo-wall__head">
+      <button type="button" class="fo-btn fo-btn--ghost fo-btn--icon fo-wall__close" data-wall="close" aria-label={t.close}><Icon name="close" /></button>
+      <h2 id="fo-wall-title" class="fo-wall__title">{t.title}</h2>
+      <Oli pose={WALL_POSE} class="fo-wall__oli" />
+    </div>
+    <div id="fo-wall-desc" class="fo-wall__desc">
+      <p>{t.body}</p>
+      <p class="fo-wall__later">{t.later}</p>
+    </div>
+    <button type="button" class="fo-btn fo-wall__toggle" data-wall="help" aria-expanded="false" aria-controls="fo-wall-help">{t.help}<Icon name="chevron-down" /></button>
+    <section id="fo-wall-help" class="fo-wall__help" aria-labelledby="fo-wall-help-title" hidden>
+      <h3 id="fo-wall-help-title" class="fo-h3">{t.helpTitle}</h3>
+      <p class="fo-wall__hint">{t.helpHint}</p>
+      <div class="fo-faq">
+        {
+          ORDER.map((id) => {
+            const entry = t.entries[id];
+            return (
+              <details name="fo-wall-help">
+                <summary><span>{entry.name}</span><Icon name="chevron-down" /></summary>
+                <div>
+                  <ol class="fo-steps">{entry.steps.map((step) => <li>{step}</li>)}</ol>
+                  <p class="fo-wall__note">{entry.note}</p>
+                </div>
+              </details>
+            );
+          })
+        }
+      </div>
+    </section>
+  </div>
+  <div class="fo-wall__foot">
+    <button type="button" class="fo-btn fo-btn--brand fo-btn--lg" data-wall="reload" autofocus>{t.reload}</button>
+    <button type="button" class="fo-btn fo-btn--ghost fo-wall__once" data-wall="escape">{t.escape}</button>
+  </div>
+</dialog>
+<div id="fo-bait" class="adsbox ad-banner textads" aria-hidden="true" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></div>
+<script is:inline set:html={wallScript({ lang, mode })} />

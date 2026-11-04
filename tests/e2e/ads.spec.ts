@@ -12,12 +12,21 @@ import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '..
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
+import { DEFAULT_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
+
+// F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id there is no ad box, so the default build has none and
+// every distance below is measured on the test build (fake ids in the 37 units of the map, the worst case). What the
+// default build must not have is checked on it, by its own origin.
+useTestBuild(test);
 
 const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).
 const CLEARANCE = 150;
+// F12 · o mapa de anúncios (DECISOES § 423): the rail has a 2nd unit, absolute 1,200 px under the 1st, on the pages of 600
+// words or more; it starts hidden and only the push script of fileorca.com shows it, so the rail of these tests is the 1st.
+const RAIL = '.fo-ad--rail:not(.fo-ad--rail2)';
 // F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
 // frames, labels and help lines), the comparison, the crop editor with its box and corner handles and the
 // next-step chips are measured too.
@@ -164,13 +173,16 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await dismissCookies(page);
       const adCount = await page.locator('.fo-ad').count();
       expect(adCount).toBeGreaterThan(0);
+      // F12 (decision 3; UX-04 A, § 371; DECISOES § 423): the first content AdSlot comes right after the "How to" block,
+      // which the GuideCard closes, and no longer right after the panel.
+      expect(await page.locator('main > section[data-content="how"] + .fo-ad--content[data-ad-unit="conteudo"]').count(), 'o 1º anúncio depois do "Como usar"').toBe(1);
 
       // At rest: no content AdSlot above the tool panel, the rail from 1280px, and the clearance from every target.
       await atBothWidths('repouso', async (viewport) => {
         const panel = (await boxes(page, '.fo-drop'))[0];
         expect(panel).toBeDefined();
         for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, 'AdSlot acima do painel').toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
-        if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+        if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
         await expectAdsOutsideThePanel(page, 'antes do arquivo', adCount);
         return expectClearance(page, 'antes do arquivo');
       });
@@ -279,38 +291,43 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-// F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language is born with no AdSlot and no ad area.
-test('legal, institutional, home, guides hub and 404 pages have no AdSlot and no ad code', async ({ page }) => {
-  const paths = [
-    '/', '/pt/', '/es/', '/privacy/', '/pt/privacidade/', '/es/privacidad/', '/terms/', '/pt/termos/', '/es/terminos/',
-    '/about/', '/pt/sobre/', '/es/acerca-de/', '/contact/', '/pt/contato/', '/es/contacto/',
-    '/licenses/', '/pt/licencas/', '/es/licencias/', '/support/', '/pt/apoie/', '/es/apoyo/', '/404.html', '/pt/404.html', '/es/404.html',
-    ...LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/'),
-  ];
-  expect(paths.slice(-3)).toEqual(['/guides/', '/pt/guias/', '/es/guias/']);
+// F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language was born with no AdSlot and no ad area.
+// F12 (decision 3; DECISOES § 423): the home and the guides hub have ads now, in the area "geral" (the map checks them,
+// fo-ad-map.spec.ts); the free pages are the 27 of the map, with the offline page and "Open with" too, read from the route
+// map (every route with no ad area), and none has a box, a unit, the loader or the push script.
+test('the 27 free pages (legal, institutional, support, 404, offline and "Open with") have no AdSlot and no ad code', async ({ page }) => {
+  const paths = ROUTES.filter((route) => !route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
+  expect(paths).toHaveLength(27);
+  for (const free of ['/privacy/', '/pt/termos/', '/es/acerca-de/', '/contact/', '/pt/licencas/', '/es/apoyo/', '/404.html', '/pt/offline/', '/es/abrir-con/']) expect(paths).toContain(free);
+  for (const withAds of ['/', '/pt/', '/es/', ...LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/')]) expect(paths).not.toContain(withAds);
   for (const path of paths) {
     const response = await page.goto(path);
     if (!path.endsWith('404.html')) expect(response?.status(), path).toBe(200);
-    expect(await page.locator('.fo-ad').count(), path).toBe(0);
+    expect(await page.locator('.fo-ad, aside.fo-rail').count(), path).toBe(0);
     expect(await page.locator('script[src*="adsbygoogle"], ins.adsbygoogle').count(), path).toBe(0);
+    const html = await page.content();
+    expect(html, `${path}: o carregador do AdSense`).not.toContain('pagead2.googlesyndication.com');
+    expect(html, `${path}: o script de push`).not.toMatch(/adsbygoogle[^;]*\.push\s*\(/);
   }
 });
 
 // F2: the hub /image-tools/ has no panel, field, Download or Oli on screen; what holds there is the order. Its one
 // content AdSlot sits under the grid of tools (never above them on the phone), the rail is the tool pages' one, and
 // none is within 150px of a visible Oli.
-test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
+// F12 (decision 3; DECISOES § 423): the hub has more content AdSlots on the phone (the map's); the first one is right
+// after the grid of tools, and every content AdSlot on screen at each width is under the grid.
+test('the hub keeps its first content AdSlot right after the grid of tools and every one under it, at 360 and 1280px', async ({ page }) => {
   // F6: in the three languages.
   for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById('image-tools').paths[lang] ?? '')) {
     expect((await page.goto(path))?.status(), path).toBe(200);
+    await expect(page.locator('main > section:has(.fo-grid) + .fo-ad--content[data-ad-unit="conteudo"]')).toHaveCount(1);
+    await expect(page.locator(RAIL)).toHaveCount(1);
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize(viewport);
-      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
       const grid = await page.locator('.fo-grid').boundingBox();
-      const ad = await page.locator('.fo-ad--content').boundingBox();
-      expect(grid && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
-      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+      const ads = await boxes(page, '.fo-ad--content');
+      expect(grid && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
       for (const oli of await boxes(page, '[data-oli]')) {
         for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${path} ${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
       }
@@ -318,18 +335,23 @@ test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1
   }
 });
 
-test('the AdSlot shows the accepted label per language, reserves its height and loads nothing without the variables', async ({ page }) => {
+test('the AdSlot shows the accepted label per language and reserves its height, and nothing exists without the variables', async ({ page }) => {
   for (const [path, label] of [['/compress-image/', 'Advertisements'], ['/pt/comprimir-imagem/', 'Publicidade'], ['/es/comprimir-imagen/', 'Anuncios']] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(path);
-    const content = page.locator('.fo-ad--content');
-    await expect(content.locator('.fo-ad__label')).toHaveText(label);
+    // F12 (DECISOES § 423): every box carries the label (the content ones, the multiplex and the rails).
+    for (const box of await page.locator('.fo-ad').all()) await expect(box.locator('.fo-ad__label')).toHaveText(label);
+    const content = page.locator('.fo-ad--content').first();
     expect((await content.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(300);
-    expect((await page.locator('.fo-ad--rail').boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(644);
+    expect((await page.locator(RAIL).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(644);
+    await expect(page.locator('aside.fo-rail')).toHaveAttribute('aria-label', label);
+    // The default build: no box, no label, no reserved space, no meta, no unit, no loader (Mudança 10).
+    expect((await page.goto(`${DEFAULT_BUILD_ORIGIN}${path}`))?.status(), path).toBe(200);
+    expect(await page.locator('.fo-ad, .fo-ad__label, aside.fo-rail').count()).toBe(0);
     expect(await page.locator('meta[name="google-adsense-account"]').count()).toBe(0);
     expect(await page.locator('ins.adsbygoogle, script[src*="adsbygoogle"]').count()).toBe(0);
   }
-  const adsTxt = await page.request.get('/ads.txt');
+  const adsTxt = await page.request.get(`${DEFAULT_BUILD_ORIGIN}/ads.txt`);
   expect(adsTxt.status()).toBe(404);
   expect(readFileSync('dist/_headers', 'utf8')).not.toContain('ads.txt');
 });
@@ -440,7 +462,7 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
           expect(tool, label).toBeDefined();
           // No content AdSlot above the tool, on a phone or a computer.
           for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-          if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+          if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
           expect(await page.locator('#fo-calc-schedule .fo-ad, .fo-amort .fo-ad').count(), `${label}: AdSlot dentro do cronograma`).toBe(0);
           await expectAdsOutsideThePanel(page, label, adCount);
           await expectClearance(page, label, CALC_TARGETS);
@@ -460,19 +482,20 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
   }
 });
 
-test('the money hub keeps its one content AdSlot under the grids of calculators, at 360 and 1280px', async ({ page }) => {
+// F12 (decision 3; DECISOES § 423): the first content AdSlot of the money hub goes right after the grid of the credit
+// calculators (before, after both grids), and every content AdSlot on screen is under that grid and 150px from every grid.
+test('the money hub keeps its first content AdSlot right after the grid of credit calculators, at 360 and 1280px', async ({ page }) => {
   // F6: the Spanish hub and the Brazilian one too.
   for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById(moneyHubId(lang)).paths[lang] ?? '')) {
     expect((await page.goto(path))?.status(), path).toBe(200);
+    await expect(page.locator('main > section[aria-labelledby="calcs-credit"] + .fo-ad--content[data-ad-unit="conteudo"]')).toHaveCount(1);
+    await expect(page.locator(RAIL)).toHaveCount(1);
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize(viewport);
-      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
-      const grids = await boxes(page, 'main .fo-grid');
-      const ad = await page.locator('.fo-ad--content').boundingBox();
-      const last = grids.at(-1);
-      expect(last && ad, `${path} ${viewport.width}px: as grades e o AdSlot na tela`).toBeTruthy();
-      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima das grades`).toBeGreaterThanOrEqual(last!.y + last!.h);
+      const credit = (await boxes(page, 'main section[aria-labelledby="calcs-credit"] .fo-grid'))[0];
+      const ads = await boxes(page, '.fo-ad--content');
+      expect(credit && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade de crédito`).toBeGreaterThanOrEqual(credit!.y + credit!.h);
       await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
     }
   }
@@ -527,7 +550,7 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
           const tool = (await boxes(page, '#fo-tool-root'))[0];
           expect(tool, label).toBeDefined();
           for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-          if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+          if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
           expect(await page.locator('#fo-calc-schedule .fo-ad, .fo-amort .fo-ad').count(), `${label}: AdSlot dentro da tabela`).toBe(0);
           await expectAdsOutsideThePanel(page, label, adCount);
           min = Math.min(min, await expectClearance(page, label, LIFE_TARGETS));
@@ -595,7 +618,7 @@ for (const lang of LANGS) {
         const tool = (await boxes(page, '#fo-tool-root'))[0];
         expect(tool, label).toBeDefined();
         for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-        if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+        if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
         await expectAdsOutsideThePanel(page, label, adCount);
         min = Math.min(min, await expectClearance(page, label, QR_TARGETS));
       }
@@ -615,22 +638,25 @@ for (const lang of LANGS) {
 
 // The home and health hubs, like the money hub: one content AdSlot under the grid of calculators (never above it on a
 // phone), the rail from 1280px, 150px from the grid and from every Oli on screen, and both in the ad area casa-saude.
-test('the home and health hubs keep their one content AdSlot under the grid of calculators, at 360 and 1280px', async ({ page }) => {
+// F12 (decision 3; DECISOES § 423): the first content AdSlot right after the grid, every one under it, and every box of
+// the page (the content ones, the multiplex and the rails) in the ad area casa-saude.
+test('the home and health hubs keep their first content AdSlot right after the grid of calculators, at 360 and 1280px', async ({ page }) => {
   for (const id of [HOUSE_HUB_ID, HEALTH_HUB_ID] as const) {
     const route = routeById(id);
     const path = route.paths.en ?? '';
     expect(route.adArea, `${path}: área de anúncio`).toBe('casa-saude');
     expect((await page.goto(path))?.status(), path).toBe(200);
+    await expect(page.locator('main > section:has(.fo-grid) + .fo-ad--content[data-ad-unit="conteudo"]')).toHaveCount(1);
+    await expect(page.locator(RAIL)).toHaveCount(1);
+    const all = await page.locator('.fo-ad').count();
+    expect(all).toBeGreaterThan(2);
+    await expect(page.locator('.fo-ad[data-ad-area="casa-saude"]')).toHaveCount(all);
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize(viewport);
-      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
-      await expect(page.locator('.fo-ad[data-ad-area="casa-saude"]')).toHaveCount(2);
-      const grids = await boxes(page, 'main .fo-grid');
-      const ad = await page.locator('.fo-ad--content').boundingBox();
-      const last = grids.at(-1);
-      expect(last && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
-      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(last!.y + last!.h);
+      const grid = (await boxes(page, 'main .fo-grid'))[0];
+      const ads = await boxes(page, '.fo-ad--content');
+      expect(grid && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.h);
       await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
     }
   }
@@ -691,7 +717,7 @@ test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1
             expect(tool, `${label}: a ferramenta na tela`).toBeDefined();
             // No content AdSlot above the tool, on a phone or a computer, in any state.
             for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-            if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+            if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
             for (const selector of PDF_ON_SCREEN[state]) expect((await boxes(page, selector)).length, `${label}: ${selector} na tela`).toBeGreaterThan(0);
             await expectAdsOutsideThePanel(page, label, adCount);
             smallest.push(`${viewport.width}px ${(await expectClearance(page, label, PDF_TARGETS)).toFixed(0)}`);
@@ -708,18 +734,19 @@ test.describe('distância dos anúncios nas ferramentas de PDF, a 360×740 e a 1
 
 // The PDF hub, like the image and the money hubs: one content AdSlot under the grid of tools (never above them on a
 // phone), the rail from 1280px, and 150px from the grid and from every Oli on screen.
-test('the PDF hub keeps its one content AdSlot under the grid of tools, at 360 and 1280px', async ({ page }) => {
+// F12 (decision 3; DECISOES § 423): the first content AdSlot right after the grid, every one on screen under it.
+test('the PDF hub keeps its first content AdSlot right after the grid of tools and every one under it, at 360 and 1280px', async ({ page }) => {
   // F6: in the three languages.
   for (const path of (['en', ...TRANSLATED] as const).map((lang) => routeById(PDF_HUB_ID).paths[lang] ?? '')) {
     expect((await page.goto(path))?.status(), path).toBe(200);
+    await expect(page.locator('main > section:has(.fo-grid) + .fo-ad--content[data-ad-unit="conteudo"]')).toHaveCount(1);
+    await expect(page.locator(RAIL)).toHaveCount(1);
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize(viewport);
-      await expect(page.locator('.fo-ad--content')).toHaveCount(1);
-      await expect(page.locator('.fo-ad--rail')).toHaveCount(1);
       const grid = await page.locator('main .fo-grid').boundingBox();
-      const ad = await page.locator('.fo-ad--content').boundingBox();
-      expect(grid && ad, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
-      expect(ad!.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+      const ads = await boxes(page, '.fo-ad--content');
+      expect(grid && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
+      for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
       await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
     }
   }
@@ -746,7 +773,7 @@ async function guideSpots(page: Page, label: string, adCount: number, selector: 
     const tool = (await boxes(page, '#fo-tool-root'))[0];
     expect(tool, `${at}: a ferramenta na tela`).toBeDefined();
     for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${at}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
-    if (viewport.width >= 1280) await expect(page.locator('.fo-ad--rail')).toBeVisible();
+    if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
     await expectAdsOutsideThePanel(page, at, adCount);
     min = Math.min(min, await expectClearance(page, at, selector));
   }

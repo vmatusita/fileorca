@@ -6,8 +6,12 @@
 // guide comes from the registries (src/tools/guides/hub.ts), once, only where it exists in the language, as a GuideCard in
 // the grid of its group (DECISOES § 395): in pt the money group is only the note that leads to the Brazilian money
 // calculators. The text of the hub's own (the line of the band, the note and "How these guides are made") carries
-// data-hub-text, which gate:conteudo counts (DECISOES § 394). No Oli, no AdSlot, no rail, no island, no script.
+// data-hub-text, which gate:conteudo counts (DECISOES § 394). No Oli, no island, no script.
+// F12 · o mapa de anúncios (decision 3; DECISOES § 419): the hub has ads now, in the area "geral" and with the rail
+// column: the first content ad after the first grid of guides, the next ones only at the marks between the sections; the
+// layout puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import GuideCard from '../components/GuideCard.astro';
 import Icon from '../components/Icon.astro';
@@ -52,6 +56,8 @@ const list = guides.map((guide) => ({ name: guide.name, path: guide.path }));
   route={route}
   title={t.title}
   description={description}
+  withAds
+  adArea="geral"
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, description, path, lang, list)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -67,7 +73,9 @@ const list = guides.map((guide) => ({ name: guide.name, path: guide.path }));
       ))}
     </ul>
   </nav>
-  {groups.map(({ group, guides: inGroup }) => (
+  {groups.map(({ group, guides: inGroup }, index) => (
+    <>
+    {index > 0 && <AdBreak first={index === 1} />}
     <section class="fo-section" id={group} aria-labelledby={`${group}-title`}>
       <h2 id={`${group}-title`}>{t.groups[group].heading}</h2>
       {inGroup.length > 0 ? (
@@ -80,7 +88,9 @@ const list = guides.map((guide) => ({ name: guide.name, path: guide.path }));
         <p class="fo-section__note" data-hub-text>{note.before} <a href={moneyHub}>{note.link}</a>{note.after}</p>
       )}
     </section>
+    </>
   ))}
+  <AdBreak />
   <section class="fo-section fo-prose" id="how" aria-labelledby="how-title">
     <h2 id="how-title">{t.howHeading}</h2>
     <p data-hub-text>{t.how}</p>

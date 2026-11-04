@@ -6,6 +6,11 @@
 // amounts in an OptionGroup, the static QR of each one (built here, in SVG), its "copia e cola" with a Copy button and
 // the receiver's name. The choice of amount is CSS only (:has(:checked) shows the block of the checked amount); the
 // copy is the one inline script below. Nothing leaves the page for the Pix: the codes are in the HTML.
+// F12 · o café (decision 7): the title and the text of PLANO-MELHORIAS section C; the Oli to the right of the title,
+// looking left at the text (DECISOES § 438); in the Pix, the "Pix copia e cola" label is visible (it was for screen
+// readers only), Copy code is a plain 52 px button, and on the phone it comes before the QR (DECISOES § 440). The
+// Ko-fi button stays after the Pix: in Portuguese the two ways sit side by side on this page, and the result card
+// carries only the Pix.
 import type { SupportTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { KOFI_URL } from '../platform/site.ts';
@@ -33,39 +38,42 @@ const amounts = pix
       return { value, label: amount === null ? pix.any : amountText(amount), code, qr: qrSvg(code, fmt(pix.qrLabel, { amount: spoken })).svg };
     })
   : [];
+// The last word of the Ko-fi button stays whole when the label wraps on the phone: "(Ko-fi)" never breaks at its hyphen.
+const [, buttonHead = t.button, buttonTail = ''] = /^(.*\s)(\S+)$/.exec(t.button) ?? [];
 // The receiver as the person knows him, not the upper case of the BR Code.
 const receiver = pix ? fmt(pix.receiver, { name: PIX_NAME === AUTHOR.name.toUpperCase() ? AUTHOR.name : PIX_NAME }) : '';
 ---
 <section class="fo-support" aria-labelledby="fo-support-title">
-  <Oli pose="coffee" class="fo-support__oli" />
-  <div>
+  <div class="fo-support__head">
     <Heading id="fo-support-title">{t.h1}</Heading>
-    <p>{t.body}</p>
-    {pix && (
-      <div class="fo-pix-card" id="pix">
-        <PixHeading class="fo-h3" id="fo-pix-title">{pix.heading}</PixHeading>
-        <div class="fo-seg" role="radiogroup" aria-label={pix.legend}>
-          {amounts.map((entry, index) => (
-            <label class="fo-seg__opt"><input type="radio" name="fo-pix-amount" value={entry.value} checked={index === 0} />{entry.label}</label>
-          ))}
-        </div>
-        {amounts.map((entry) => (
-          <div class="fo-pix" data-pix={entry.value}>
-            <Fragment set:html={entry.qr} />
-            <div class="fo-pix__side">
-              <div class="fo-pix__code"><span class="fo-sr">{pix.codeLabel}: </span><code>{entry.code}</code></div>
-              <button class="fo-btn fo-btn--sm" type="button" data-pix-copy={entry.code} data-track="donate_click" data-track-place="pix">{pix.copy}</button>
-              <span class="fo-pix__receiver">{receiver}</span>
-            </div>
-          </div>
-        ))}
-        <p class="fo-pix__status" role="status" data-pix-copied={pix.copied} data-pix-failed={pix.copyFailed}></p>
-        <p class="fo-support__amounts">{pix.note}</p>
-      </div>
-    )}
-    <a class="fo-btn" href={KOFI_URL} rel="noopener" data-track="donate_click" data-track-place="support_page"><Icon name="coffee" class="fo-icon--sm" />{t.button}</a>
-    <p class="fo-support__amounts">{t.amountsNote}</p>
+    <Oli pose="coffee" class="fo-support__oli" />
   </div>
+  <p>{t.body}</p>
+  {pix && (
+    <div class="fo-pix-card" id="pix">
+      <PixHeading class="fo-h3" id="fo-pix-title">{pix.heading}</PixHeading>
+      <div class="fo-seg" role="radiogroup" aria-label={pix.legend}>
+        {amounts.map((entry, index) => (
+          <label class="fo-seg__opt"><input type="radio" name="fo-pix-amount" value={entry.value} checked={index === 0} />{entry.label}</label>
+        ))}
+      </div>
+      {amounts.map((entry) => (
+        <div class="fo-pix" data-pix={entry.value}>
+          <Fragment set:html={entry.qr} />
+          <div class="fo-pix__side">
+            <p class="fo-pix__label">{pix.codeLabel}</p>
+            <div class="fo-pix__code"><code>{entry.code}</code></div>
+            <button class="fo-btn" type="button" data-pix-copy={entry.code} data-track="donate_click" data-track-place="pix">{pix.copy}</button>
+            <span class="fo-pix__receiver">{receiver}</span>
+          </div>
+        </div>
+      ))}
+      <p class="fo-pix__status" role="status" data-pix-copied={pix.copied} data-pix-failed={pix.copyFailed}></p>
+      <p class="fo-support__amounts">{pix.note}</p>
+    </div>
+  )}
+  <a class="fo-btn" href={KOFI_URL} rel="noopener" data-track="donate_click" data-track-place="support_page"><Icon name="coffee" class="fo-icon--sm" /><span>{buttonHead}<span class="fo-support__last">{buttonTail}</span></span></a>
+  <p class="fo-support__amounts">{t.amountsNote}</p>
 </section>
 {pix && (
   <script is:inline>

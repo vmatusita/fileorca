@@ -3,10 +3,13 @@
 // the category band, the grid of the eight tools, one content AdSlot, the presets with their links, the
 // guide of which tool does which job (DECISOES § 96) and the rail AdSlot like the tool pages, in the language of the
 // page. Each hub lists the file guides of its language (F5b note; in pt and es since the languages adjustment).
+// F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad after the grid of tools, the next ones only
+// at the marks of the guide text and between its last sections, never against the table of the presets; the layout puts
+// each box and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { guidesOfHub } from '../tools/guides/registry.ts';
@@ -46,6 +49,7 @@ const shared = GUIDE_SHARED[lang];
   title={t.title}
   description={t.description}
   withAds
+  adArea={area}
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -62,7 +66,7 @@ const shared = GUIDE_SHARED[lang];
       ))}
     </ul>
   </section>
-  <AdSlot area={area} variant="content" label={common.adLabel} />
+  <AdBreak first />
   <section class="fo-section fo-prose" aria-labelledby="presets">
     <h2 id="presets">{t.presetsHeading}</h2>
     <table class="fo-table">
@@ -76,18 +80,22 @@ const shared = GUIDE_SHARED[lang];
   <section class="fo-section fo-prose" aria-labelledby="guide">
     <h2 id="guide">{t.guideHeading}</h2>
     <p>{t.guideIntro}</p>
+    <AdBreak />
     <ul>
       {t.guide.map((line) => <li>{line.before} <a href={routeById(line.tool).paths[lang]}>{common.tools[line.tool].name}</a> {line.after}</li>)}
     </ul>
+    <AdBreak />
     <p>{t.guideOutro}</p>
   </section>
   {guides.length > 0 && (
-    <section class="fo-section fo-prose" aria-labelledby="guides">
-      <h2 id="guides">{shared.hubGuidesHeading}</h2>
-      <ul>
-        {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
-      </ul>
-    </section>
+    <>
+      <AdBreak />
+      <section class="fo-section fo-prose" aria-labelledby="guides">
+        <h2 id="guides">{shared.hubGuidesHeading}</h2>
+        <ul>
+          {guides.map((guide) => <li><a href={guide.href}>{guide.name}</a>: {guide.description}</li>)}
+        </ul>
+      </section>
+    </>
   )}
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
 </BaseLayout>

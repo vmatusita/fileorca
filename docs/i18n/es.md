@@ -318,16 +318,37 @@ Da tabela de voz do docs/design/README.
 | Sin conexión | ¿Sin internet? Oli sigue funcionando en las páginas que ya abriste. (F8, DECISOES § 289: só as páginas abertas com internet ficam guardadas.) |
 | Apoyo | Oli funciona a base de café. |
 
+## La pared del bloqueador (F12)
+
+Os textos de `src/i18n/es/wall.ts`, da especificação do `wall.html` com o ajuste 3 (DECISOES § 431). Os botões começam com verbo; nada de "clic", e a parede não fala do café.
+
+| Inglês | Espanhol | Nota |
+| --- | --- | --- |
+| ad blocker | bloqueador de anuncios; bloqueador | o nome do produto AdBlock fica como está |
+| Oli lives on ads | Oli vive de los anuncios | o título da parede |
+| Reload, it's off now | Recargar, ya lo desactivé | o botão principal |
+| See how to turn it off | Ver cómo desactivarlo | abre a ajuda |
+| Continue just this once | Seguir solo esta vez | o escape; a linha de depois dele o cita entre aspas |
+| Turn it off just for fileorca.com | Desactívalo solo para fileorca.com | o título da ajuda |
+| Content Blockers · Settings · Websites | Bloqueadores de contenido · Configuración · Sitios web | os nomes do Safari no Mac em espanhol, da ajuda da Apple (es-mx) |
+| Pause on this site | Pausar en este sitio web | o menu do AdBlock em espanhol (`_locales/es` da extensão) |
+| on the phone | en el celular | "móvil" está na tabela Nunca |
+| icon | ícono | a forma das Américas, como no QR e nos guias; a especificação dizia "icono" (DECISOES § 452) |
+| Press (a button) | Presiona | como os passos do resto do site; a especificação dizia "Pulsa" (DECISOES § 452) |
+
 ## Pedido de café
 
-Da tabela "Doações" do PLANO. Em espanhol não há Pix: o botão leva ao Ko-fi.
+Da seção C do PLANO-MELHORIAS (F12, DECISOES § 441), que trocou a tabela "Doações" do PLANO. Em espanhol não há Pix: o botão leva ao Ko-fi.
 
 | Lugar | Texto |
 | --- | --- |
-| Línea de la tarjeta de resultado | Esta herramienta es gratis, sin límites y nunca sube tus archivos. Si te ahorró tiempo, un café ayuda a mantenerla así. |
-| Botón | Invítame un café |
-| Pie de página | ¿Te gustan estas herramientas? Invítame un café |
-| Título de la página de apoyo | Herramientas gratis, hechas por una sola persona |
+| Línea de la tarjeta de resultado | FileOrca lo hace una sola persona, sin registros ni límites. Si Oli te ahorró tiempo, ¿me ayudas con un café? |
+| Botón (tarjeta y página de apoyo) | Ayúdame con un café |
+| Después de "No mostrar de nuevo" | Entendido, no vuelvo a pedirlo aquí. El enlace del café queda en el pie de página. |
+| Pie de página (arriba) | Ayúdame a mantener FileOrca gratis: invítame un café |
+| Título de la página de apoyo | Ayúdame a que Oli siga nadando |
+| Texto de la página de apoyo | FileOrca es gratis, sin registros ni límites, y lo hace una sola persona en Curitiba, Brasil. Los anuncios cubren los costos; cada café se convierte en la próxima herramienta. |
+| Ruta de navegación de la página de apoyo | Apoya a Oli |
 
 ## Nunca
 
@@ -342,6 +363,8 @@ Cada linha da tabela é um termo proibido nos textos em espanhol e nas páginas 
 | vuestra | tu | idem |
 | usted | tú | o site usa "tú" (design system) |
 | fichero | archivo | espanhol da Espanha |
+| icono | ícono | a forma da Espanha; o site escreve "ícono" (DECISOES § 452) |
+| pulsa | presiona | o site diz "presiona" nos passos (DECISOES § 452) |
 | ficheros | archivos | espanhol da Espanha |
 | pinchar | hacer clic, tocar | espanhol da Espanha |
 | enganche | pago inicial | regional (México); o CFPB diz "pago inicial" |

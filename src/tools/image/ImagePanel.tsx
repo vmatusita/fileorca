@@ -12,13 +12,12 @@ import type { ComponentChildren, JSX, TargetedMouseEvent } from 'preact';
 import type { ImagePanelTexts } from '../../i18n/types.ts';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track } from '../../analytics/events.ts';
-import { PRODUCTION_HOSTNAME } from '../../platform/site.ts';
 import type { EngineFailure, EngineOutput, EngineResult, Note, Operation, Sniffed } from '../../engine/image/types.ts';
 import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import BeforeAfter from './BeforeAfter.tsx';
 import Oli from './Oli.tsx';
-import { countUse, dontShowAgain, forgetWithoutConsent, isAdBlocked } from './coffee.ts';
+import { countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from './coffee.ts';
 import { EXTENSION, uniqueNames } from './names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
 import { takeInbox } from './inbox.ts';
@@ -109,7 +108,7 @@ interface Model {
   selected: number | null;
   expanded: boolean;
   announce: string;
-  coffee: boolean;
+  coffee: CoffeeLine;
   completeSent: boolean;
   /** A batch counts once for the coffee line, however many times an option re-runs it. */
   newUse: boolean;
@@ -128,7 +127,7 @@ interface Model {
 function newModel(): Model {
   return {
     items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, hadCard: false, bundle: null,
-    selected: null, expanded: false, announce: '', coffee: false, completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
+    selected: null, expanded: false, announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
     rowFocus: null, slotFocus: false, successors: [], focusRowId: null,
   };
 }
@@ -136,12 +135,6 @@ function newModel(): Model {
 /** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
 function offlineNow(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
-}
-
-function adBlocked(adsOn: boolean): boolean {
-  const ads = (window as { adsbygoogle?: { loaded?: boolean } }).adsbygoogle;
-  const unit = document.querySelector<HTMLElement>('.fo-ad--content ins.adsbygoogle');
-  return isAdBlocked({ adsOn, production: location.hostname === PRODUCTION_HOSTNAME, loaded: ads?.loaded === true, unitHeight: unit ? unit.offsetHeight : null });
 }
 
 function useWide(): boolean {
@@ -176,7 +169,7 @@ function release(item: Item): void {
 const infoOf = (item: Item): FileInfo => ({ id: item.id, name: item.file.name, size: item.file.size, width: item.width, height: item.height });
 
 export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S, O>) {
-  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, coffeeHref, adsOn, tool, initial } = props;
+  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, coffeeHref, tool, initial } = props;
   const { Options } = tool;
   const model = useRef<Model>(newModel());
   const m = model.current;
@@ -400,7 +393,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
     if (rows.length > 0 && m.newUse && rows.some((row) => row.output.outcome === 'new')) {
       m.newUse = false;
-      m.coffee = countUse(adBlocked(adsOn));
+      m.coffee = countUse() ? 'ask' : '';
     }
     // The error box announces itself (role="alert"); the status region speaks when something came out.
     m.announce = rows.length > 0 ? [saysFor(rows), failed > 0 ? fmt(t.errors.some, { count: failed }) : ''].filter(Boolean).join(' ') : '';
@@ -420,7 +413,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.hadCard = false;
     m.completeSent = false;
     m.newUse = true;
-    m.coffee = false;
+    m.coffee = '';
     m.announce = texts.progressLabel; // the status region speaks while the batch runs, then says how it ended
     m.focusDownload = true;
     m.broken = new Set();
@@ -446,7 +439,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.phase = 'idle';
     m.hadCard = false;
     m.announce = '';
-    m.coffee = false;
+    m.coffee = '';
     m.selected = null;
     m.zipping = false;
     setOver(0);
@@ -783,7 +776,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           <li>{t.result.metadata}</li>
         </ul>
         {wide && comparison}
-        {m.coffee && m.phase === 'done' && (
+        {m.coffee && m.phase === 'done' && (m.coffee === 'done' ? (
+          // "Don't show this again" leaves one quiet sentence in the same place, read once (DECISOES § 436).
+          <p class="fo-result__support--done" role="status">{t.result.coffee.done}</p>
+        ) : (
           <div class="fo-result__support">
             <p>{t.result.coffee.text}</p>
             <div class="fo-result__support-actions">
@@ -796,7 +792,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
                 class="fo-btn fo-btn--ghost"
                 onClick={() => {
                   dontShowAgain();
-                  m.coffee = false;
+                  m.coffee = 'done';
                   render();
                   downloadRef.current?.focus();
                 }}
@@ -805,7 +801,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
               </button>
             </div>
           </div>
-        )}
+        ))}
       </section>
     );
   } else {

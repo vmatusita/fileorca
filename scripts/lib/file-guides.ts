@@ -12,6 +12,8 @@ export const MIN_GUIDE_WORDS = 800;
 export const MAX_GUIDE_WORDS = 1500;
 /** At most this many related cards, as on a tool page. */
 export const MAX_GUIDE_RELATED = 6;
+/** F12 (DECISOES § 424): the content ads of a guide, conteudo to conteudo-5 of the ad map (ad-map.html, the 37 units). */
+export const MAX_GUIDE_CONTENT_ADS = 5;
 
 /** Phrases that fill space without saying anything (prompt F5b, decision 5.7; the F4 list). */
 export const FILLER: { label: string; pattern: RegExp }[] = [
@@ -173,8 +175,28 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
     if (cards.length === 0) problems.push('as relacionadas sem link');
     if (cards.length > MAX_GUIDE_RELATED) problems.push(`${cards.length} relacionadas (no máximo ${MAX_GUIDE_RELATED})`);
   }
-  // Two AdSlots at most: the content one after the tool and the rail one.
-  if (main.querySelectorAll('.fo-ad').length > 2) problems.push(`${main.querySelectorAll('.fo-ad').length} AdSlots (no máximo 2)`);
+  // F12 (decision 3; DECISOES § 424): the ads of the map in the guide. Before, two AdSlots at most (the content one after
+  // the tool and the rail one). Now the first content ad comes in the text after the tool, with a paragraph between them;
+  // five content ads at most (conteudo to conteudo-5) and one multiplex, the last block of <main>; none in the tool and none
+  // beside "What we measured". The density and the 1,110 px between them are measured in tests/e2e/fo-ad-map.spec.ts.
+  const content = main.querySelectorAll('.fo-ad--content');
+  if (content.length > MAX_GUIDE_CONTENT_ADS) problems.push(`${content.length} AdSlots de conteúdo (no máximo ${MAX_GUIDE_CONTENT_ADS})`);
+  const multiplex = main.querySelectorAll('.fo-ad--multiplex');
+  if (multiplex.length > 1) problems.push(`${multiplex.length} multiplex (no máximo 1)`);
+  if (multiplex.length === 1 && main.childNodes.filter((node) => node.nodeType === 1).at(-1) !== multiplex[0]) problems.push('o multiplex não é o último bloco do <main>');
+  if (main.querySelectorAll('.fo-ad--rail').length > 0) problems.push('a lateral dentro do <main>');
+  if (main.querySelectorAll('#fo-tool-root .fo-ad').length > 0) problems.push('um AdSlot dentro da ferramenta');
+  const first = content[0];
+  const tool = main.querySelector('#fo-tool-root');
+  if (first && tool) {
+    const html = main.toString();
+    const from = html.indexOf(main.querySelector('.fo-guide__open')?.toString() ?? tool.toString());
+    const between = html.slice(from, html.indexOf(first.toString())).replace(/<p class="fo-guide__open">[\s\S]*?<\/p>/, '');
+    if (!/<p[\s>]/.test(between)) problems.push('o 1º AdSlot sem um parágrafo entre a ferramenta e ele');
+  }
+  const measuredBlock = main.querySelector('[data-content="measured"]');
+  const beside = [measuredBlock?.previousElementSibling, measuredBlock?.nextElementSibling].some((element) => element?.classList.contains('fo-ad'));
+  if (beside || (measuredBlock?.querySelectorAll('.fo-ad').length ?? 0) > 0) problems.push('um AdSlot ao lado de "What we measured"');
   const count = guideWords(html);
   if (count < MIN_GUIDE_WORDS || count > MAX_GUIDE_WORDS) problems.push(`${count} palavras de texto (pede de ${MIN_GUIDE_WORDS} a ${MAX_GUIDE_WORDS})`);
   for (const label of findFiller(main.querySelectorAll('[data-guide-text]').map(textOf).join(' '), lang)) problems.push(`frase de enchimento: "${label}"`);

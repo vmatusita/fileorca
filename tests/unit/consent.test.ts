@@ -1,7 +1,7 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { DENIED_BY_DEFAULT_REGIONS, EEA_EXTRA, EU, consentBootstrap, defaultConsentFor } from '../../src/analytics/consent.ts';
-import { CODECS, ERROR_REASONS, EVENT_PARAMS, EXPORT_FORMATS, OUTCOMES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
+import { CODECS, ERROR_REASONS, EVENT_PARAMS, EXPORT_FORMATS, OUTCOMES, WALL_ACTIONS, WALL_EVENT_MODES, browserLabel, cleanParams, type EventMap } from '../../src/analytics/events.ts';
 import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS, UTILITY_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
@@ -11,19 +11,36 @@ import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
 import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
 import { CALC_IDS } from '../../src/calc/index.ts';
 
-function runBootstrap(hostname: string, stored: string | null) {
+// F12 (c-04; § 428): the time zone of the device stands for the region, so the bootstrap runs with a fixed one; the
+// default is outside Europe, where nothing changes. `null` makes Intl throw (a time zone that cannot be read).
+function runBootstrap(hostname: string, stored: string | null, timeZone: string | null = 'America/Sao_Paulo') {
   const appended: string[] = [];
+  const intl = {
+    DateTimeFormat: () => ({
+      resolvedOptions: () => {
+        if (timeZone === null) throw new Error('no Intl');
+        return { timeZone };
+      },
+    }),
+  };
   // In a browser the global object is `window`; make the vm context play that role.
   const window: Record<string, unknown> = {
     location: { hostname, origin: `https://${hostname}`, pathname: '/compress-image/' },
     localStorage: { getItem: () => stored },
     document: { head: { appendChild: (node: { src: string }) => appended.push(node.src) }, createElement: () => ({ src: '' }) },
     Date,
+    Intl: intl,
   };
   window['window'] = window;
   runInNewContext(consentBootstrap(), window);
   const read = () => (window['dataLayer'] as ArrayLike<unknown>[]).map((entry) => Array.from(entry));
-  return { dataLayer: read(), read, appended, foTrack: window['foTrack'] as (name: string, params: Record<string, unknown>) => void };
+  return {
+    dataLayer: read(),
+    read,
+    appended,
+    foTrack: window['foTrack'] as (name: string, params: Record<string, unknown>) => void,
+    foConsent: window['foConsent'] as (value: string) => void,
+  };
 }
 
 describe('Consent Mode v2 defaults', () => {
@@ -56,6 +73,49 @@ describe('Consent Mode v2 defaults', () => {
     expect(dataLayer[4]?.[0]).toBe('config');
   });
 
+  // F12 · o consentimento (F3 c-04, saída A; § 428). In the regions denied by default (the time zone of the device stands
+  // for them), the Accept made in the site's own notice is replayed only as analytics_storage: the ad_* stay with Google's
+  // consent message. A Decline stays on the four keys (it grants nothing). Outside those regions nothing changes.
+  const FOUR = (value: string) => ({ ad_storage: value, analytics_storage: value, ad_user_data: value, ad_personalization: value });
+  // Review C-1 (§ 449): Cyprus (Asia/Nicosia, the name the browsers report) and Réunion, an outermost region, too.
+  const INSIDE = ['Europe/Berlin', 'Europe/London', 'Europe/Zurich', 'Europe/Lisbon', 'Atlantic/Azores', 'Atlantic/Madeira', 'Atlantic/Canary', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Africa/Ceuta', 'Asia/Nicosia', 'Indian/Reunion'];
+  const OUTSIDE = ['America/Sao_Paulo', 'America/New_York', 'America/Mexico_City', 'Asia/Tokyo', 'UTC', 'Etc/UTC', 'Africa/Lagos', 'Atlantic/Bermuda', 'Australia/Sydney'];
+
+  it('replays a stored Accept only as analytics_storage where the region is denied by default (c-04)', () => {
+    for (const zone of INSIDE) {
+      const { dataLayer } = runBootstrap('fileorca.com', 'granted', zone);
+      expect(dataLayer[2], zone).toEqual(['consent', 'update', { analytics_storage: 'granted' }]);
+      expect(dataLayer[4]?.[0], zone).toBe('config');
+    }
+    // A time zone that cannot be read counts as inside: the safe side.
+    expect(runBootstrap('fileorca.com', 'granted', null).dataLayer[2]).toEqual(['consent', 'update', { analytics_storage: 'granted' }]);
+    expect(runBootstrap('fileorca.com', 'granted', '').dataLayer[2]).toEqual(['consent', 'update', { analytics_storage: 'granted' }]);
+  });
+
+  it('replays a stored Accept as the four keys outside those regions, and a Decline as the four keys everywhere (c-04)', () => {
+    for (const zone of OUTSIDE) expect(runBootstrap('fileorca.com', 'granted', zone).dataLayer[2], zone).toEqual(['consent', 'update', FOUR('granted')]);
+    for (const zone of [...INSIDE, ...OUTSIDE]) expect(runBootstrap('fileorca.com', 'denied', zone).dataLayer[2], zone).toEqual(['consent', 'update', FOUR('denied')]);
+    // No stored choice, no update.
+    expect(runBootstrap('fileorca.com', null, 'Europe/Paris').dataLayer.filter((entry) => entry[1] === 'update')).toEqual([]);
+  });
+
+  it('gives the cookie notice the same update for a choice made on the page (window.foConsent, c-04)', () => {
+    const inside = runBootstrap('localhost', null, 'Europe/Madrid');
+    inside.foConsent('granted');
+    inside.foConsent('denied');
+    expect(inside.read().slice(-2)).toEqual([['consent', 'update', { analytics_storage: 'granted' }], ['consent', 'update', FOUR('denied')]]);
+    const outside = runBootstrap('localhost', null, 'America/Bogota');
+    outside.foConsent('granted');
+    expect(outside.read().at(-1)).toEqual(['consent', 'update', FOUR('granted')]);
+  });
+
+  it('reads the time zone only on the device: it is in no event and in no request (c-04)', () => {
+    const { read, foTrack, appended } = runBootstrap('fileorca.com', 'granted', 'Europe/Berlin');
+    foTrack('adblock_wall', { action: 'shown', mode: 'aviso', lang: 'en', timeZone: 'Europe/Berlin' });
+    expect(JSON.stringify(read())).not.toContain('Europe');
+    expect(appended.join(' ')).not.toContain('Europe');
+  });
+
   it('injects gtag.js only on fileorca.com', () => {
     expect(runBootstrap('fileorca.com', null).appended).toEqual(['https://www.googletagmanager.com/gtag/js?id=G-T4BBJN7S11']);
     for (const host of ['localhost', '127.0.0.1', 'fase-01a-fileorca.vmatusita.workers.dev', 'www.fileorca.com', 'fileorca.com.evil.test']) {
@@ -75,10 +135,11 @@ describe('Consent Mode v2 defaults', () => {
 
 describe('typed events', () => {
   it('has the closed list of the plan', () => {
-    // The F4 adds calc_complete, export_click and share_click (DECISOES § 113).
+    // The F4 adds calc_complete, export_click and share_click (DECISOES § 113), and the F12 adblock_wall (§ 432).
     expect(Object.keys(EVENT_PARAMS).sort()).toEqual([
-      'calc_complete', 'donate_click', 'download', 'export_click', 'next_step_click', 'share_click', 'tool_complete', 'tool_error', 'tool_start',
+      'adblock_wall', 'calc_complete', 'donate_click', 'download', 'export_click', 'next_step_click', 'share_click', 'tool_complete', 'tool_error', 'tool_start',
     ]);
+    expect(EVENT_PARAMS.adblock_wall).toEqual(['action', 'mode', 'lang']);
     expect(EVENT_PARAMS.calc_complete).toEqual(['tool', 'lang']);
     expect(EVENT_PARAMS.export_click).toEqual(['tool', 'lang', 'format']);
     expect(EVENT_PARAMS.share_click).toEqual(['tool', 'lang']);
@@ -250,7 +311,24 @@ describe('the events of the PDF tools (F5a)', () => {
   it('names no parameter that could carry a number, a range, a text, a password, a count of pages or a file name', () => {
     const names = new Set<string>();
     for (const params of Object.values(EVENT_PARAMS)) for (const name of params) names.add(name);
-    expect([...names].sort()).toEqual(['browser', 'codec', 'format', 'lang', 'outcome', 'place', 'reason', 'target', 'tool']);
+    // F12 (§ 432): action and mode, the two parameters of adblock_wall, take only the values of their closed lists.
+    expect([...names].sort()).toEqual(['action', 'browser', 'codec', 'format', 'lang', 'mode', 'outcome', 'place', 'reason', 'target', 'tool']);
+    expect(cleanParams('adblock_wall', { action: 'shown', mode: 'aviso', lang: 'en', place: 'x' })).toEqual({ action: 'shown', mode: 'aviso', lang: 'en' });
+  });
+
+  // F12 · a parede do bloqueador (decision 5; § 432): the actions and the modes of the wall are closed lists, without
+  // "close" (adjustment 4 did not go in); a time, a time zone or anything else is dropped.
+  it('keeps adblock_wall to its closed lists', () => {
+    expect(WALL_ACTIONS).toEqual(['shown', 'reload', 'help', 'escape']);
+    expect(WALL_EVENT_MODES).toEqual(['aviso', 'bloqueio']);
+    for (const action of WALL_ACTIONS) {
+      for (const mode of WALL_EVENT_MODES) {
+        expect(cleanParams('adblock_wall', { action, mode, lang: 'pt' }), `${action} ${mode}`).toEqual({ action, mode, lang: 'pt' });
+      }
+    }
+    for (const action of ['close', 'dismiss', 'Shown', '1730000000000']) expect(cleanParams('adblock_wall', { action, mode: 'aviso', lang: 'en' }), action).toEqual({ mode: 'aviso', lang: 'en' });
+    for (const mode of ['desligado', 'Europe/Berlin', 'eu']) expect(cleanParams('adblock_wall', { action: 'shown', mode, lang: 'en' }), mode).toEqual({ action: 'shown', lang: 'en' });
+    expect(cleanParams('adblock_wall', { action: 'escape', mode: 'bloqueio', lang: 'es', timeZone: 'Europe/Madrid', at: 1730000000000 })).toEqual({ action: 'escape', mode: 'bloqueio', lang: 'es' });
   });
 
   it('drops anything smuggled beside the parameters of a PDF event, whichever the event', () => {

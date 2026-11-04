@@ -45,6 +45,14 @@ export const REQUIRED_PAGES = ['about', 'contact', 'privacy', 'terms', 'licenses
 export const MIN_MAIN_WORDS = 60;
 /** Words of <main> each AdSlot needs: about one phone screen of text per ad (DECISOES § 95). */
 export const MIN_WORDS_PER_AD = 150;
+/**
+ * F12 (decision 4; DECISOES § 421): the boxes are counted at the widths a person sees them, not all at once. A box of the
+ * ad map says the width it shows at (data-ad-media); the gate counts, at each of these widths, the boxes that show there,
+ * and asks 150 words of <main> for each: on a phone the content ads (the 2nd on only up to 459 px, § 445), on a computer the
+ * first content ad, the rails (the 2nd only on a page of 600 words or more) and the multiplex. A box with no width shows at
+ * every width (the first content ad, and the boxes of before the map).
+ */
+export const AD_WIDTHS = [360, 768, 1280] as const;
 
 /** Wording of a page that is not finished, on top of the placeholders gate:conteudo already refuses. */
 const UNFINISHED: { label: string; pattern: RegExp }[] = [
@@ -77,6 +85,16 @@ const LOADER = /adsbygoogle\.js|pagead2\.googlesyndication\.com/;
 const PUSH = /adsbygoogle[^;]*\.push\s*\(/;
 const HOSTNAME_LOCK = 'location.hostname==="fileorca.com"';
 const UNIT = /class="adsbygoogle"/;
+/** An ad box of the map (no <ins> in the HTML since the plan B of the F12; DECISOES § 415), with the id of its unit. */
+const BOX = /<div class="fo-ad[ "][^>]*>/g;
+/** What the ad-block wall puts in a page (F12, decision 5): nothing of it may be in a build with the wall off. */
+const WALL: { label: string; pattern: RegExp }[] = [
+  { label: 'o diálogo da parede (fo-wall)', pattern: /fo-wall/ },
+  { label: 'a isca (fo-bait)', pattern: /fo-bait/ },
+  { label: 'a tag de recuperação (fundingchoicesmessages)', pattern: /fundingchoicesmessages/ },
+  { label: 'a API do Google (googlefc)', pattern: /googlefc/ },
+  { label: 'a pose sad (oli-sad)', pattern: /oli-sad/ },
+];
 const META = /<meta name="google-adsense-account"[^>]*>/g;
 
 export interface SitePage {
@@ -251,18 +269,29 @@ export function checkAllBuild(site: Site): Row[] {
       if (!LOADER.test(body) && !PUSH.test(body)) continue;
       if (!body.includes(HOSTNAME_LOCK)) problems.push(`${page.path}: ${LOADER.test(body) ? 'carregador' : 'push de unidade'} sem a trava do hostname`);
     }
-    if (!page.ads && UNIT.test(html)) problems.push(`${page.path}: unidade de anúncio numa página sem área`);
+    if (!page.ads && (UNIT.test(html) || (html.match(BOX) ?? []).length > 0)) problems.push(`${page.path}: unidade de anúncio numa página sem área`);
   }
+  // F12 (decision 4; DECISOES § 421): the wall is off in this build, so nothing of it is in any page.
+  const files = htmlFiles(site.dir);
+  const wall = files.flatMap(({ path, html }) => WALL.filter(({ pattern }) => pattern.test(html)).map(({ label }) => `${path}: ${label}`));
   return [
     row(
       'Carregador só nas ferramentas, nunca em página jurídica ou institucional',
       'build com as três variáveis (ID, unidades de teste e PUBLIC_ADS_ENABLED=true): o carregador está nas páginas com área de anúncio, com a trava do hostname, e em nenhuma outra',
       problems,
     ),
+    row(
+      'Nada da parede com a parede desligada',
+      `o mesmo build, com PUBLIC_ADBLOCK_WALL desligado: nenhum ${WALL.map(({ label }) => label).join(', ')} em ${files.length} HTML`,
+      wall,
+    ),
   ];
 }
 
-/** The real build of today (no id): no meta, no ads.txt, no loader, and the AdSlots are the neutral space. */
+/**
+ * The real build of today (no id): no meta, no ads.txt, no loader and, from the F12 (Mudança 10; DECISOES § 413), no ad
+ * box at all: with no unit id the position does not exist (no box, no label, no reserved space).
+ */
 export function checkTodayBuild(site: Site): Row[] {
   const files = htmlFiles(site.dir);
   const problems = files.flatMap(({ path, html }) => [
@@ -270,8 +299,11 @@ export function checkTodayBuild(site: Site): Row[] {
     ...(LOADER.test(html) || UNIT.test(html) ? [`${path}: carregador ou unidade do AdSense`] : []),
   ]);
   if (existsSync(join(site.dir, 'ads.txt'))) problems.push('ads.txt existe sem o ID');
-  const slots = files.reduce((sum, { html }) => sum + (html.match(/class="fo-ad fo-ad--/g) ?? []).length, 0);
-  return [row('Build de hoje, sem o ID: nenhum anúncio', `dist/ real: nenhuma meta, ads.txt ou script de anúncio; ${slots} AdSlot(s) só com o espaço neutro`, problems)];
+  for (const { path, html } of files) {
+    const slots = (html.match(/class="fo-ad[ "]/g) ?? []).length;
+    if (slots) problems.push(`${path}: ${slots} caixa(s) de anúncio sem ID de unidade`);
+  }
+  return [row('Build de hoje, sem o ID: nenhum anúncio', `dist/ real: nenhuma meta, ads.txt, script ou caixa de anúncio em ${files.length} HTML`, problems)];
 }
 
 // ---- (b) Required pages ------------------------------------------------------------------------------
@@ -385,7 +417,22 @@ interface PageFacts {
   h1Count: number;
   values: { h1: string; title: string; description: string };
   words: number;
+  /** Every ad box of the page, at any width. */
   slots: number;
+  /** The boxes that show at each width of AD_WIDTHS (F12, decision 4). */
+  atWidth: Record<number, number>;
+}
+
+/** Whether a box with this media query (data-ad-media) shows at a width; a box with none shows at every width. */
+export function showsAt(media: string | null, width: number): boolean {
+  if (!media) return true;
+  return [...media.matchAll(/\((min|max)-width:\s*(\d+)px\)/g)].every(([, kind, value]) => (kind === 'min' ? width >= Number(value) : width <= Number(value)));
+}
+
+/** The ad boxes of a page and how many show at each width of AD_WIDTHS. */
+export function boxesAtWidths(html: string): { slots: number; atWidth: Record<number, number> } {
+  const medias = (html.match(BOX) ?? []).map((tag) => /data-ad-media="([^"]*)"/.exec(tag)?.[1] ?? null);
+  return { slots: medias.length, atWidth: Object.fromEntries(AD_WIDTHS.map((width) => [width, medias.filter((media) => showsAt(media, width)).length])) };
 }
 
 type Seen = Record<keyof PageFacts['values'], Map<string, string>>;
@@ -403,7 +450,7 @@ function factsOf(html: string): PageFacts {
       description: normalizeText(root.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''),
     },
     words: words(visibleText(html, 'main', ['.fo-ad'])),
-    slots: (html.match(/class="fo-ad fo-ad--/g) ?? []).length,
+    ...boxesAtWidths(html),
   };
 }
 
@@ -430,8 +477,16 @@ function ownProblems(path: string, facts: PageFacts, seen: Seen): string[] {
 const thinProblems = (path: string, facts: PageFacts): string[] =>
   facts.words < MIN_MAIN_WORDS ? [`${path}: ${facts.words} palavras no <main>, pede ${MIN_MAIN_WORDS}`] : [];
 
-const adProblems = (path: string, facts: PageFacts): string[] =>
-  facts.slots && facts.words < facts.slots * MIN_WORDS_PER_AD ? [`${path}: ${facts.slots} AdSlot(s) para ${facts.words} palavras, pede ${MIN_WORDS_PER_AD} por AdSlot`] : [];
+/**
+ * 150 words of <main> for each AdSlot that shows at a width (F12, decision 4; DECISOES § 421): the widths where the
+ * boxes need more words than the page has, with the most boxes first.
+ */
+function adProblems(path: string, facts: PageFacts): string[] {
+  const short = AD_WIDTHS.filter((width) => facts.words < (facts.atWidth[width] ?? 0) * MIN_WORDS_PER_AD).sort((a, b) => (facts.atWidth[b] ?? 0) - (facts.atWidth[a] ?? 0));
+  if (short.length === 0) return [];
+  const most = facts.atWidth[short[0] ?? 0] ?? 0;
+  return [`${path}: ${most} AdSlot(s) a ${short.filter((width) => facts.atWidth[width] === most).join(' e ')} px para ${facts.words} palavras, pede ${MIN_WORDS_PER_AD} por AdSlot que aparece numa largura`];
+}
 
 export function checkContent(site: Site): Row[] {
   const own: string[] = [];
@@ -454,7 +509,7 @@ export function checkContent(site: Site): Row[] {
   return [
     row('H1, título e descrição próprios', `${indexable} páginas indexáveis: um H1 e nenhum H1, título ou descrição repetido`, own),
     row('Texto mínimo no <main>', `${MIN_MAIN_WORDS} palavras visíveis, sem o rótulo dos AdSlots (o Contato tem 74 hoje)`, thin),
-    row('Mais conteúdo que anúncio', `${MIN_WORDS_PER_AD} palavras do <main> para cada AdSlot (uma tela de celular de texto por anúncio)`, ads),
+    row('Mais conteúdo que anúncio', `${MIN_WORDS_PER_AD} palavras do <main> para cada AdSlot que aparece a ${AD_WIDTHS.join(', ')} px (uma tela de celular de texto por anúncio que aparece)`, ads),
   ];
 }
 
@@ -510,7 +565,7 @@ export function checkPdfPages(site: Site): Row[] {
   return [
     row('As páginas de PDF estão no mapa de rotas e no build', `${what}: em ${languages.map((lang) => LANG_NAMES[lang]).join(', ')}, indexáveis, com área de anúncio e o arquivo no build`, present),
     row('PDF: H1, título e descrição próprios', `${what}: um H1 e nenhum H1, título ou descrição igual ao de outra página do site`, own),
-    row('PDF: texto mínimo e mais conteúdo que anúncio', `${what}: ${MIN_MAIN_WORDS} palavras no <main> e ${MIN_WORDS_PER_AD} para cada AdSlot, e pelo menos um AdSlot`, [...thin, ...ads]),
+    row('PDF: texto mínimo e mais conteúdo que anúncio', `${what}: ${MIN_MAIN_WORDS} palavras no <main> e ${MIN_WORDS_PER_AD} para cada AdSlot que aparece numa largura, e pelo menos um AdSlot`, [...thin, ...ads]),
   ];
 }
 

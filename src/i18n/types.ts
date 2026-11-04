@@ -64,7 +64,7 @@ export interface CommonTexts {
      * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
      */
     guidesAll: string;
-    /** Support line at the base of the footer (PLANO, Doações). */
+    /** The coffee line at the top of the footer (PLANO-MELHORIAS, section C; DECISOES § 437). */
     coffee: string;
     /** "Made by {name} in {city}" */
     signature: string;
@@ -256,9 +256,9 @@ export interface LicensesTexts extends PageMeta {
 }
 
 export interface SupportTexts extends PageMeta {
-  /** "Free tools, made by one person" (PLANO, Doações). */
+  /** "Help Oli keep swimming" (PLANO-MELHORIAS, section C; DECISOES § 438). */
   h1: string;
-  /** "No accounts, no paywalls, no upload limits. Ads cover the costs; coffees pay for new tools." */
+  /** "FileOrca is free, with no sign-ups and no limits, and it's made by one person in Curitiba, Brazil. Ads cover the costs; every coffee becomes the next tool." */
   body: string;
   whoHeading: string;
   who: string;
@@ -282,7 +282,7 @@ export interface SupportPixTexts {
   /** Name of the QR: "QR code do Pix, {amount}" ({amount}: "qualquer valor" or "R$ 5"). */
   qrLabel: string;
   anyLower: string;
-  /** Name of the code field (the "copia e cola"). */
+  /** The visible label above the code, its name: "Pix copia e cola" (F12; DECISOES § 440). */
   codeLabel: string;
   copy: string;
   /** What the status region says after the copy. */
@@ -532,7 +532,7 @@ export interface FileGuideTexts extends PageMeta {
   intro: string[];
   toolHeading: string;
   toolIntro: string;
-  /** The sections; the content AdSlot goes after the first `half` of them. */
+  /** The sections. The content AdSlot went after the first `half` of them until the F12; the ad map places the ads now. */
   sections: Section[];
   half: number;
   measuredHeading: string;
@@ -712,7 +712,8 @@ export interface ImagePanelTexts {
     };
     /** The metadata line every result shows: the photo data, GPS included, is gone. */
     metadata: string;
-    coffee: { text: string; button: string; hide: string };
+    /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */
+    coffee: { text: string; button: string; hide: string; done: string };
   };
   compare: {
     /** Name of the range control: "Compare before and after". */
@@ -979,7 +980,8 @@ export interface PdfPanelTexts {
     unchangedMany: string;
     /** One line per engine note (src/engine/pdf/types.ts PdfNote). */
     notes: { repaired: string; xfaRemoved: string; formLost: string; textFlattened: string; downscaled: string };
-    coffee: { text: string; button: string; hide: string };
+    /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */
+    coffee: { text: string; button: string; hide: string; done: string };
   };
   next: { label: string; moreTools: string };
 }
@@ -1060,4 +1062,39 @@ export interface GuideCardTexts {
   measured: string;
   workedOut?: string;
   tool: string;
+}
+
+/* F12 · a parede do bloqueador (decision 10, with adjustment 3; § 431) */
+
+/** The nine entries of the help of the ad-block wall (AdblockWall.astro shows them in the order of the proposal). */
+export type WallHelpId = 'ubo' | 'adblock' | 'abp' | 'adguard' | 'brave' | 'firefox' | 'safari-mac' | 'safari-ios' | 'other';
+
+/** One entry of the help: the name of the blocker or browser, its three steps and a note. No link, no "click". */
+export interface WallHelpEntry {
+  name: string;
+  steps: [string, string, string];
+  note: string;
+}
+
+/**
+ * The texts of the ad-block wall, one file per language (src/i18n/<lang>/wall.ts), read by src/components/AdblockWall.astro.
+ * Sad without blame: no "Warning" in the title, no request to see or touch an ad, nothing about the coffee.
+ */
+export interface WallTexts {
+  /** The h2: "Oli lives on ads". */
+  title: string;
+  /** The three sentences under it. */
+  body: string;
+  /** The line shown once the escape was used today: it names the escape with its own label. */
+  later: string;
+  /** The three buttons, each starting with a verb: reload (brand), help (neutral), escape (ghost). */
+  reload: string;
+  help: string;
+  escape: string;
+  /** The accessible name of the close button of the notice (an icon only). */
+  close: string;
+  /** The h3 of the help panel and the line under it. */
+  helpTitle: string;
+  helpHint: string;
+  entries: Record<WallHelpId, WallHelpEntry>;
 }

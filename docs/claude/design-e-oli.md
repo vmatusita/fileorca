@@ -88,3 +88,15 @@ Pegadinhas do ajuste que deu ao cabeçalho as bordas do rodapé (DECISOES § 409
 
 - **O cabeçalho e o rodapé leem a mesma borda,** `--fo-edge` (`components.css`). Mude a borda num, e o outro muda junto. O teste de bordas do `header-menu.spec.ts` confere as duas em 14 larguras, de 320 a 1920 px. Abaixo de 340 px, a borda é 16 px, porque a 320 px o cabeçalho usa 282,5 dos 288 px: controle novo no cabeçalho do celular não cabe. A troca não fica em 360 px por causa do rodapé: com 16 px de 356 a 359 px, ele ganhava a segunda coluna e a perdia a 360 (o mesmo teste confere que o rodapé nunca perde coluna ao alargar).
 - **Um `100%` dentro de uma variável é resolvido onde ela é usada.** No `padding` do cabeçalho e do rodapé, ele é a largura do `body`. No `right` de um popover, que está na camada superior, é a largura da janela. As duas coincidem, então a reserva sem anchor dos menus fica na borda do cabeçalho.
+
+## F12: monetização
+
+Pegadinhas que a F12 achou na pose `sad`, na parede e no café (DECISOES § 417, § 426, § 439 e § 440).
+
+- **A Oli tem dez poses desde a F12:** a `sad` entrou na lista fechada, só para a parede do bloqueador (Mudança 12 do `PLANO-MELHORIAS.md`). O núcleo do `CLAUDE.md` ainda diz "nove poses fechadas", porque a F12 não podia mexer nele (§ 417): vale a Mudança 12. A pose da parede é a constante `WALL_POSE` (`src/oli/poses.ts`); o `gate:design` e o `default-build.test.ts` reprovam a `sad` no `dist/` padrão.
+- **O tema escuro no `::backdrop`:** o `theme-pair.test.ts` exige o par no mesmo elemento e dentro de `@media screen`. O mar da parede é uma variável privada do componente (`--fo-wall-sea`), com a `water` em `:root` e o `deep` no `html` escuro; não é token.
+- **O movimento reduzido não chega ao `::backdrop`:** ele não está no `*, *::before, *::after` do `global.css`, e precisa de linha própria.
+- **Um rótulo com hífen quebra no hífen:** "Me ajude com um café (Ko-fi)" partia em "(Ko-" e "fi)" num `fo-btn` com `white-space: normal`. Nenhum CSS impede a quebra no hífen; um `span` com `nowrap` na última palavra resolve sem mudar o nome acessível.
+- **O vapor da caneca para em 4,8 s:** `fo-steam` roda duas vezes e o `fo-steam-rest` termina com `forwards`, e a segunda nuvem só atrasa. O seletor continua pendurado num ancestral do sprite, nunca numa seção (F1b).
+- **O foco posto por script depois de um fechar pelo teclado é `:focus-visible`:** o `<main>` que recebe o foco quando a parede fecha com Esc ganhava o anel de 3 px em volta da página inteira. O `<main>` com `tabindex="-1"` não é controle e fica sem o anel (`global.css`, § 450); um controle que recebe foco assim continua com ele.
+- **Prove a cor de um tema pelos tokens do tema na tela:** um teste que só confere a opacidade (o "0,92" do mar) passa com qualquer cor. O teste do mar (§ 451) compara o `::backdrop` com o `color-mix` da `water` e do `deep` lidos na página, nas seis combinações do esquema do sistema com o `data-theme`.

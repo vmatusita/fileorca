@@ -203,7 +203,7 @@ export function buildSprite(sources: { poses: Record<Pose, string>; logo: string
     if (pose !== 'peek') bodies.set(pose, parseBody(sources.poses[pose], poseFile(pose)));
   }
 
-  // oli-clip is one drawing, in the 8 poses and in the logo.
+  // oli-clip is one drawing, in the 9 full-body poses and in the logo.
   let clip = '';
   let clipFile = '';
   const sameClip = (node: XmlNode, file: string) => {

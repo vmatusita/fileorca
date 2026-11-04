@@ -268,16 +268,35 @@ Da tabela de voz do docs/design/README.
 | Offline | Sem internet? A Oli segue funcionando nas páginas que você já abriu. (F8, DECISOES § 289: só as páginas abertas com internet ficam guardadas.) |
 | Apoio | A Oli funciona à base de café. |
 
+## A parede do bloqueador (F12)
+
+Os textos de `src/i18n/pt/wall.ts`, da especificação do `wall.html` com o ajuste 3 (DECISOES § 431). Os botões começam com verbo; nada de "clique", e a parede não fala do café.
+
+| Inglês | Português | Nota |
+| --- | --- | --- |
+| ad blocker | bloqueador de anúncios; bloqueador | nunca "adblock" solto; o nome do produto AdBlock fica como está |
+| Oli lives on ads | A Oli vive dos anúncios | o título da parede |
+| Reload, it's off now | Recarregar, já desativei | o botão principal |
+| See how to turn it off | Ver como desativar | abre a ajuda |
+| Continue just this once | Usar só desta vez | o escape; a linha de depois dele o cita entre aspas |
+| Turn it off just for fileorca.com | Desative só para o fileorca.com | o título da ajuda |
+| Content Blockers · Settings · Websites | Bloqueadores de Conteúdo · Ajustes · Sites | os nomes do Safari no Mac em português, da ajuda da Apple |
+| Pause on this site | Pausar nesse site | o menu do AdBlock em português (`_locales/pt_BR` da extensão) |
+
 ## Pedido de café e Pix
 
-Da tabela "Doações" do PLANO.
+Da seção C do PLANO-MELHORIAS (F12, DECISOES § 441), que trocou a tabela "Doações" do PLANO.
 
 | Lugar | Texto |
 | --- | --- |
-| Linha do card de resultado | Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café? |
+| Linha do card de resultado | O FileOrca é feito por uma pessoa só, sem cadastro e sem limite. Se a Oli te ajudou, me ajuda com um café? |
 | Botão da linha | Pagar um café no Pix |
-| Rodapé | Curtiu? Me paga um café |
-| Título da página de apoio | Ferramentas grátis, feitas por uma pessoa só |
+| Depois de "Não mostrar de novo" | Combinado, não peço mais aqui. O link do café fica no rodapé. |
+| Rodapé (no topo) | Me ajude a manter o FileOrca grátis: paga um café? |
+| Título da página de apoio | Me ajude a manter a Oli nadando |
+| Texto da página de apoio | O FileOrca é grátis, sem cadastro e sem limite, e é feito por uma pessoa só, em Curitiba. Os anúncios pagam os custos; cada café vira a próxima ferramenta. |
+| Botão do Ko-fi (página de apoio) | Me ajude com um café (Ko-fi) |
+| Trilha da página de apoio | Apoie a Oli |
 | Valores | Qualquer valor · R$ 5 · R$ 10 · R$ 20 |
 | Botão do código | Copiar código |
 | Recebedor | Em nome de Victor Yuki Matusita |

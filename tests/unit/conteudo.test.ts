@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -98,12 +98,14 @@ function guidePage(options: { words?: number; tool?: string; toolPath?: string; 
     <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
     ${options.tool ?? '<div id="fo-tool-root" data-props="{}"><div class="fo-tool-island"></div></div>'}
     <p class="fo-guide__open"><a href="${options.toolPath ?? '/heic-to-jpg/'}">Open the HEIC to JPG tool</a></p>
-    <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p></section>
+    <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p>
     <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
+    <p>Even more text.</p></section>
     <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
     <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p></section>
     <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
+    <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
   </main></body></html>`;
   return options.edit ? options.edit(html) : html;
 }
@@ -1131,11 +1133,25 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want).join()).toMatch(/o link da ferramenta leva a \/png-to-jpg\//);
   });
 
-  it('fails a guide whose AdSlot comes before the tool, or that has a third AdSlot', () => {
-    const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(/<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements<\/span><\/div>/, '') });
+  // F12 (decision 3; DECISOES § 424): the ads of the map in a guide. Before, "two AdSlots at most"; now the first one
+  // after the tool with a paragraph between them, five content ads at most, one multiplex as the last block, none in the
+  // tool and none beside "What we measured".
+  it('fails a guide whose first AdSlot comes before the tool or with no paragraph after it, and one with more ads than the map', () => {
+    const box = '<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>';
+    const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(box, '') });
     expect(checkFileGuide(early, want).join()).toMatch(/a ferramenta embutida vem antes de o AdSlot de conteúdo|o AdSlot de conteúdo vem antes|vem antes de/);
-    const three = guidePage({ edit: (html) => html.replace('<section data-content="sources">', '<div class="fo-ad"></div><div class="fo-ad"></div><section data-content="sources">') });
-    expect(checkFileGuide(three, want)).toContain('3 AdSlots (no máximo 2)');
+    const glued = guidePage({ edit: (html) => html.replace(box, '').replace('<section data-guide-text><h2>More</h2>', `${box}<section data-guide-text><h2>More</h2>`) });
+    expect(checkFileGuide(glued, want)).toEqual(['o 1º AdSlot sem um parágrafo entre a ferramenta e ele']);
+    const six = guidePage({ edit: (html) => html.replace('<p>Even more text.</p>', `${`<p>Text.</p>${box}`.repeat(5)}<p>Even more text.</p>`) });
+    expect(checkFileGuide(six, want)).toEqual(['6 AdSlots de conteúdo (no máximo 5)']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('<p>Even more text.</p>', `${`<p>Text.</p>${box}`.repeat(4)}<p>Even more text.</p>`) }), want)).toEqual([]);
+    const multiplex = '<div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>';
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(multiplex, '').replace('<section data-content="related">', `${multiplex}<section data-content="related">`) }), want)).toEqual(['o multiplex não é o último bloco do <main>']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('</main>', `${multiplex}</main>`) }), want)).toEqual(['2 multiplex (no máximo 1)']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('<div class="fo-tool-island"></div>', `<div class="fo-tool-island"></div>${box}`) }), want)).toContain('um AdSlot dentro da ferramenta');
+    for (const at of ['<section data-content="measured">', '<section data-content="sources">']) {
+      expect(checkFileGuide(guidePage({ edit: (html) => html.replace(at, `${box}${at}`) }), want), at).toContain('um AdSlot ao lado de "What we measured"');
+    }
   });
 
   it('fails a guide whose measured table, date or sources are missing, and one with more than six related cards', () => {
@@ -1314,8 +1330,23 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     write(dir, '/pt/404.html', '<html><head><title>Not found</title></head><body><p>Em breve</p></body></html>');
   }
 
+  /**
+   * F12, Mudança 10 (DECISOES § 418): the gate reads the blocks of the file guides, their AdSlots included, on the build with
+   * the ads (FO_ADS_BUILD) and wants no ad box in the default build. The fake site as written is the build with the ads;
+   * the default build is the same site with its boxes taken out, put back after the run.
+   */
   function run(dir: string): { status: number | null; output: string } {
-    const result = spawnSync(process.execPath, [gate], { cwd: dir, encoding: 'utf8' });
+    const dist = join(dir, 'dist');
+    const ads = join(dir, 'ads-build');
+    rmSync(ads, { recursive: true, force: true });
+    cpSync(dist, ads, { recursive: true });
+    for (const name of readdirSync(dist, { recursive: true, encoding: 'utf8' }).filter((entry) => entry.endsWith('.html'))) {
+      const file = join(dist, name);
+      writeFileSync(file, readFileSync(file, 'utf8').replace(/<div class="fo-ad[^"]*">(?:<span[^>]*>[^<]*<\/span>)?<\/div>/g, ''));
+    }
+    const result = spawnSync(process.execPath, [gate], { cwd: dir, encoding: 'utf8', env: { ...process.env, FO_ADS_BUILD: 'ads-build' } });
+    rmSync(dist, { recursive: true, force: true });
+    cpSync(ads, dist, { recursive: true });
     return { status: result.status, output: `${result.stdout}${result.stderr}` };
   }
 
@@ -1422,6 +1453,19 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
     expect(result.output).toContain(`${guideCount - 1} guia(s) de arquivo conferido(s), o registro tem ${guideCount}`);
+  });
+
+  // F12, Mudança 10 (DECISOES § 418): the default build has no ad box, and the blocks are read on the build with the ads.
+  it('fails a file guide with an ad box in the default build, or with no AdSlot in the build with the ads', () => {
+    const dir = join(root, 'guides-boxes');
+    build(dir);
+    // A box run() does not take out of the default build (it has an attribute), and a guide whose AdSlot is gone.
+    write(dir, '/guides/jpg-vs-png/', guidePage({ toolPath: '/png-to-jpg/', edit: (html) => html.replace('<div class="fo-ad fo-ad--content">', '<div class="fo-ad fo-ad--content" data-left>') }));
+    write(dir, '/guides/split-pdf-file-size/', guidePage({ toolPath: routeById('split-pdf').paths.en ?? '', edit: (html) => html.replace(/<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements<\/span><\/div>/, '') }));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/guides/jpg-vs-png/: caixa de anúncio no build padrão, que não tem ID de unidade');
+    expect(result.output).toContain('/guides/split-pdf-file-size/: sem o AdSlot de conteúdo (.fo-ad--content)');
   });
 
   it('checks each file guide in Portuguese and Spanish, in the words and links of its language (the languages adjustment)', () => {

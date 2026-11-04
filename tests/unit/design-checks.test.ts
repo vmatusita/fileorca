@@ -211,8 +211,8 @@ describe('sprite da Oli', () => {
   const required = { requiredPoses: ['peek'] };
   const problems = (html: string, options: { requiredPoses: readonly string[]; forbiddenPoses?: readonly string[] } = required) => checkSprite(html, options).join('\n');
 
-  it('lists the nine poses of the closed list', () => {
-    expect(OLI_POSES).toEqual(['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek']);
+  it('lists the ten poses of the closed list (F12: sad, only on the ad-block wall)', () => {
+    expect(OLI_POSES).toEqual(['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek', 'sad']);
   });
 
   it('accepts a sprite with parts, one oli-clip and boxes that use their own pose', () => {

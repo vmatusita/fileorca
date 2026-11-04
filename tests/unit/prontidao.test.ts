@@ -1,13 +1,16 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
+  AD_WIDTHS,
   MIN_MAIN_WORDS,
   MIN_WORDS_PER_AD,
   REQUIRED_PAGES,
   TEST_ADS_TXT,
   TEST_CLIENT,
+  boxesAtWidths,
+  showsAt,
   checkAllBuild,
   checkClientBuild,
   checkContent,
@@ -40,6 +43,8 @@ import {
   type LifeCalcId,
 } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { AD_MEDIA, adBoxHtml } from '../../src/ads/map.ts';
+import type { AdUnit } from '../../src/ads/config.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
 // one break at a time (positive and negative controls, prompt F3, decision 5). From the F5a the fake site can carry the
@@ -150,12 +155,27 @@ function makeAdsBuild(options: { meta?: (path: string) => string; adsTxt?: strin
   });
 }
 
+/**
+ * The same fake site as the default build makes it (F12, Mudança 10; DECISOES § 413 and § 418): no ad box, since no
+ * position has a unit id. The gate reads the words for each AdSlot on the build with the ids, and the boxes there.
+ */
+function withoutBoxes(site: Site): Site {
+  const dir = mkdtempSync(join(tmpdir(), 'fo-prontidao-'));
+  roots.push(dir);
+  cpSync(site.dir, dir, { recursive: true });
+  for (const name of readdirSync(dir, { recursive: true, encoding: 'utf8' }).filter((entry) => entry.endsWith('.html'))) {
+    const path = join(dir, name);
+    writeFileSync(path, readFileSync(path, 'utf8').replace(/<div class="fo-ad[^"]*"><span[^>]*>[^<]*<\/span><\/div>/g, ''));
+  }
+  return { ...site, dir };
+}
+
 const failing = (rows: Row[]): string[] => rows.filter((row) => !row.ok).flatMap((row) => row.problems.map((problem) => `${row.item}: ${problem}`));
 
 describe('gate:prontidao, controle positivo', () => {
   it('passes a complete site on every item', () => {
     const site = makeSite();
-    const rows = [...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkCrawlable(site)];
+    const rows = [...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkCrawlable(site)];
     expect(failing(rows)).toEqual([]);
     expect(rows).toHaveLength(14);
     expect(formatTable(rows)).toMatch(/^ok {4}/);
@@ -205,10 +225,34 @@ describe('gate:prontidao, (a) AdSense', () => {
     expect(failing(checkAllBuild(openPush))).toEqual([expect.stringMatching(/\/compress-image\/: push de unidade sem a trava do hostname/)]);
   });
 
+  // F12 (decision 4; DECISOES § 421): the build with the ads and the wall off carries nothing of the wall, and a box of the
+  // map (no <ins> since the plan B) is a unit too, never on a page without an ad area.
+  it('refuses anything of the wall in the build with the wall off, and a box of the map on a page without an ad area', () => {
+    for (const [piece, what] of [
+      ['<dialog id="fo-wall"></dialog>', 'fo-wall'],
+      ['<div id="fo-bait"></div>', 'fo-bait'],
+      ['<script async src="https://fundingchoicesmessages.google.com/i/pub-0000000000000000?ers=1"></script>', 'fundingchoicesmessages'],
+      ['<script>window.googlefc=window.googlefc||{};</script>', 'googlefc'],
+      ['<svg><symbol id="oli-sad"></symbol></svg>', 'oli-sad'],
+    ] as const) {
+      const wall = makeAdsBuild({ loader: (page) => page.ads });
+      write(wall.dir, '/terms/', readFileSync(fileIn(wall.dir, '/terms/'), 'utf8').replace('</main>', `${piece}</main>`));
+      expect(failing(checkAllBuild(wall)), what).toEqual([expect.stringMatching(new RegExp(`^Nada da parede com a parede desligada: /terms/: .*${what}`))]);
+    }
+    const box = makeAdsBuild({ loader: (page) => page.ads });
+    write(box.dir, '/about/', readFileSync(fileIn(box.dir, '/about/'), 'utf8').replace('</main>', `${adBoxHtml({ area: 'geral', unit: 'conteudo', id: '9100000000', label: 'Advertisements' })}</main>`));
+    expect(failing(checkAllBuild(box))).toEqual([expect.stringMatching(/\/about\/: unidade de anúncio numa página sem área/)]);
+  });
+
   it('refuses the build of today with a meta tag, an ads.txt or an ad unit', () => {
     expect(failing(checkTodayBuild(makeAdsBuild())).join('\n')).toMatch(/meta do AdSense[\s\S]*ads\.txt existe sem o ID/);
     const unit = makeSite((dir) => write(dir, TOOL, pageHtml(PAGES.find((page) => page.ads) as SitePage, (main) => `${main}<ins class="adsbygoogle"></ins>`)));
     expect(failing(checkTodayBuild(unit)).join('\n')).toMatch(/carregador ou unidade/);
+    // F12, Mudança 10 (DECISOES § 413): with no unit id, not even the neutral box with its label.
+    expect(failing(checkTodayBuild(withoutBoxes(makeSite())))).toEqual([]);
+    // The box left behind has a space withoutBoxes() does not take, so the today build keeps one box on the tool page.
+    const box = withoutBoxes(makeSite((dir) => write(dir, TOOL, pageHtml(PAGES.find((page) => page.ads) as SitePage, (main) => `${main}<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Ad</span> </div>`))));
+    expect(failing(checkTodayBuild(box)).join('\n')).toMatch(/\/compress-image\/: 1 caixa\(s\) de anúncio sem ID de unidade/);
   });
 });
 
@@ -426,10 +470,54 @@ describe('gate:prontidao, (d) conteúdo de verdade', () => {
     expect(failing(checkContent(site)).join('\n')).toMatch(/\/es\/contacto\/: \d+ palavras no <main>/);
   });
 
+  // F12 (decision 4; DECISOES § 421 and § 423): the two boxes of the fake page say no width, so they show at every
+  // width and the page needs 300 words at each one, as when the gate counted every box of the HTML.
   it(`refuses a page with less than ${MIN_WORDS_PER_AD} words for each AdSlot`, () => {
     const tool = PAGES.find((page) => page.ads) as SitePage;
     const site = makeSite((dir) => write(dir, tool.path, pageHtml(tool, (main) => main.replace(prose(400, 'compress-imageen'), prose(2 * MIN_WORDS_PER_AD - 20, 'x')))));
-    expect(failing(checkContent(site))).toEqual([expect.stringMatching(/^Mais conteúdo que anúncio: \/compress-image\/: 2 AdSlot\(s\) para 2\d\d palavras/)]);
+    expect(failing(checkContent(site))).toEqual([expect.stringMatching(/^Mais conteúdo que anúncio: \/compress-image\/: 2 AdSlot\(s\) a 360 e 768 e 1280 px para 2\d\d palavras/)]);
+  });
+});
+
+// F12 (decision 4; DECISOES § 421): the boxes of the ad map, counted at the widths they show at. A page of the map with
+// the 1st content ad, three more on the phone, the multiplex and both rails has 7 boxes in its HTML but shows 4 at most
+// at any width: 600 words pass, and one box more than the words allow fails at that width only.
+describe('gate:prontidao, as caixas por largura (F12)', () => {
+  const box = (unit: AdUnit): string => adBoxHtml({ area: 'arquivos', unit, id: '9200000000', label: 'Advertisements' });
+  const tool = PAGES.find((page) => page.ads) as SitePage;
+  const withMap = (words: number, units: AdUnit[], rail: AdUnit[] = []): Site =>
+    makeSite((dir) =>
+      write(
+        dir,
+        tool.path,
+        pageHtml(tool, (main) => main.replace(prose(400, 'compress-imageen'), prose(words, 'x')).replace(/<div class="fo-ad[\s\S]*$/, '') + units.map(box).join('')).replace('</main>', `</main><aside class="fo-rail">${rail.map(box).join('')}</aside>`),
+      ),
+    );
+  const PHONE_MAP: AdUnit[] = ['conteudo', 'conteudo-2', 'conteudo-3', 'conteudo-4', 'multiplex'];
+
+  it('reads the width of each box', () => {
+    expect([showsAt(null, 360), showsAt(null, 1280)]).toEqual([true, true]);
+    // Review A-3 (§ 454): the queries the map writes (src/ads/map.ts), the 2nd content ad up to 459 px since § 445.
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.phone, width))).toEqual([true, false, false]);
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.wide, width))).toEqual([false, true, true]);
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.rail, width))).toEqual([false, false, true]);
+    expect(AD_MEDIA.phone).toBe('(max-width: 459px)');
+    const html = [...PHONE_MAP, 'lateral', 'lateral-2'].map((unit) => box(unit as AdUnit)).join('');
+    expect(boxesAtWidths(html)).toEqual({ slots: 7, atWidth: { 360: 4, 768: 2, 1280: 4 } });
+  });
+
+  it(`passes ${4 * MIN_WORDS_PER_AD} words for the 7 boxes of the map, 4 at most at any width (control)`, () => {
+    expect(failing(checkContent(withMap(4 * MIN_WORDS_PER_AD, PHONE_MAP, ['lateral', 'lateral-2'])))).toEqual([]);
+  });
+
+  it('refuses one content box more than the words allow on the phone, and only there', () => {
+    const site = withMap(3 * MIN_WORDS_PER_AD, PHONE_MAP, ['lateral']);
+    expect(failing(checkContent(site))).toEqual([expect.stringMatching(/^Mais conteúdo que anúncio: \/compress-image\/: 4 AdSlot\(s\) a 360 px para 4\d\d palavras/)]);
+  });
+
+  it('refuses one box more than the words allow on a computer (the lateral-2 without 600 words), and only there', () => {
+    const site = withMap(3 * MIN_WORDS_PER_AD, ['conteudo', 'conteudo-2', 'multiplex'], ['lateral', 'lateral-2']);
+    expect(failing(checkContent(site))).toEqual([expect.stringMatching(/^Mais conteúdo que anúncio: \/compress-image\/: 4 AdSlot\(s\) a 1280 px para 4\d\d palavras/)]);
   });
 });
 
@@ -439,7 +527,7 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
   const MERGE = fakeOf('merge-pdf');
   const HUB = fakeOf(PDF_HUB_ID);
   const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
-  const allRows = (site: Site): Row[] => [...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
+  const allRows = (site: Site): Row[] => [...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
 
   it('passes a site with the 12 PDF tools, their hub, cards and search on every item', () => {
     const rows = allRows(pdfSite());
@@ -545,7 +633,7 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
 
   it(`refuses a PDF page with less than ${MIN_WORDS_PER_AD} words for each AdSlot, and one without any AdSlot`, () => {
     const dense = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE, (main) => main.replace(prose(400, 'merge-pdfen'), prose(2 * MIN_WORDS_PER_AD - 20, 'x')))));
-    expect(failing(checkPdfPages(dense))).toEqual([expect.stringMatching(/^PDF: texto mínimo e mais conteúdo que anúncio: \/merge-pdf\/: 2 AdSlot\(s\) para 2\d\d palavras/)]);
+    expect(failing(checkPdfPages(dense))).toEqual([expect.stringMatching(/^PDF: texto mínimo e mais conteúdo que anúncio: \/merge-pdf\/: 2 AdSlot\(s\) a 360 e 768 e 1280 px para 2\d\d palavras/)]);
     const bare = pdfSite((dir) => write(dir, MERGE.path, pageHtml(MERGE, (main) => main.replace(/<div class="fo-ad[\s\S]*$/, ''))));
     expect(failing(checkPdfPages(bare))).toEqual(['PDF: texto mínimo e mais conteúdo que anúncio: /merge-pdf/: nenhum AdSlot na página']);
   });
@@ -621,7 +709,7 @@ describe('gate:prontidao, as páginas de casa, saúde e QR (F7, decision 11)', (
 
   it('passes a site with the home and health calculators, their hubs, the QR code, cards and search (positive control)', () => {
     const site = lifeSite();
-    expect(failing([...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site)])).toEqual([]);
+    expect(failing([...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site)])).toEqual([]);
     expect(LIFE_FAKE).toHaveLength(14);
   });
 

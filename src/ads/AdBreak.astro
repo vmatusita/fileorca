@@ -1,0 +1,12 @@
+---
+// A block boundary of <main> where a content ad may go (F12, decision 3; DECISOES § 419): the view puts one `first` where
+// the first content ad of the mold goes and a plain one at every other allowed boundary, in order. It renders an HTML
+// comment that the layout reads (src/ads/map.ts) and never lets through: the build turns each into a box or into nothing.
+import { AD_MARK } from './html.ts';
+
+interface Props {
+  first?: boolean;
+}
+const { first = false } = Astro.props;
+---
+<Fragment set:html={first ? AD_MARK.first : AD_MARK.break} />

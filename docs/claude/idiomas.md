@@ -95,3 +95,12 @@ Pegadinhas que a F9 achou:
 Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no hub de guias e nas entradas dele, e no merge das três fatias).
 
 - O texto de uma especificação da F10 não passou pelo glossário: a nota do hub de guias em pt dizia "hipoteca", que a tabela Nunca de `docs/i18n/pt.md` proíbe, e o `glossary.test.ts` reprovou o arquivo de texto e a página do `dist/`. Antes de copiar um texto da proposta, confira a tabela Nunca do idioma (F11: virou "financiamento imobiliário").
+
+## F12: monetização
+
+Pegadinhas que a F12 achou nos textos da parede e do café (DECISOES § 431 e § 441).
+
+- **A especificação da F10 não passou pelo glossário:** a nota do Brave em espanhol dizia "móvil", que a tabela Nunca de `docs/i18n/es.md` proíbe; ficou "celular". Texto copiado de um protótipo passa pelo `glossary.test.ts` e pelo `lint:texto` como qualquer outro.
+- **Nenhum texto da parede ou do café diz "click", "clique" ou "clic"**, sem diferença de maiúscula, os passos da ajuda dos bloqueadores inclusive (os testes da parede e do café têm a lista). Os passos dizem "Toque", "Abra", "Escolha".
+- **O nome de um menu de outro produto, em pt e es,** vem da tradução do próprio produto: as do AdBlock estão em `github.com/betafish-inc/adblock-releases` (`_locales/<idioma>/messages.json`). As páginas da Apple não devolvem o texto do artigo ao WebFetch; o que não deu para conferir foi para o grupo 21 do `docs/PENDENCIAS.md`.
+- **O `lint:texto` numa worktree sem baixar nada:** suba o LanguageTool do `.cache` do checkout principal numa porta própria e aponte o `LANGUAGETOOL_URL` para ela; a 8081, a padrão, pode colidir com outro agente.

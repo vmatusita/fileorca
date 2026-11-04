@@ -5,7 +5,7 @@ import { parse, type HTMLElement } from 'node-html-parser';
 import type { Lang } from '../../src/i18n/routes.ts';
 
 /** The closed list of Oli poses (DECISOES § 19 and the F1b prompt, decision 4). */
-export const OLI_POSES: readonly string[] = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek'];
+export const OLI_POSES: readonly string[] = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek', 'sad'];
 
 /** Colour tokens a `color:` declaration may use. `on-*` only on the fill they name (contrast.test.ts). */
 export const TEXT_COLOR_TOKENS: readonly string[] = ['ink', 'ink-muted', 'brand', 'danger', 'success', 'on-brand', 'on-sun', 'on-deep', 'on-deep-muted', 'on-cat', 'on-violeta'];

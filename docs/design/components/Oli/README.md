@@ -6,7 +6,9 @@ A mascote: uma orca de feijão com o olho dentro da mancha branca, bochecha rosa
 
 ## Poses (lista fechada)
 
-`wave` (topo, repouso), `gulp` (arquivo sobre a DropZone), `swim` (processando), `cheer` (pronto), `oops` (erro), `buoy` (offline), `lost` (404), `coffee` (apoio), `peek` (busca sem resultado). Pose nova só com decisão registrada no DECISOES.md.
+`wave` (topo, repouso), `gulp` (arquivo sobre a DropZone), `swim` (processando), `cheer` (pronto), `oops` (erro), `buoy` (offline), `lost` (404), `coffee` (apoio), `peek` (busca sem resultado), `sad` (só na parede do bloqueador de anúncios, à direita do título, olhando para ele; F12, DECISOES § 417). Pose nova só com decisão registrada no DECISOES.md.
+
+A `sad` só na parede: ela fala triste, sem culpa e sem pedir clique, e nunca aparece no build sem a parede ligada. A pose da parede é uma constante só (`WALL_POSE`, em `src/oli/poses.ts`), para a troca pela `oops` ser uma linha.
 
 ## Como usar
 
@@ -15,7 +17,7 @@ A mascote: uma orca de feijão com o olho dentro da mancha branca, bochecha rosa
 - Contorno Orca (#0F1B2D) de 3px a 128px, fixo nos dois temas (não é o token `stroke`, que clareia no escuro), e um aro branco-espuma por trás de tudo: some no fundo claro e vira adesivo no escuro. Não remova o aro.
 - Tamanhos: 32px (inline em texto), 64px (OliMessage), 72px (WaterLevel), 88–112px (DropZone, ResultCard), 128px ou mais (home, 404, apoio). Abaixo de 32px use o ícone do app (o rosto de frente), que lê bem a partir de 16px.
 - No sprite, o `clipPath` `oli-clip` é declarado uma vez e serve a todas as poses e ao logo inline (o logo traz uma cópia com o mesmo id). A `oli-peek.svg` traz um `clipPath id="ic"` sem uso, sobra do ícone do app: ele não entra no sprite.
-- Movimento só em `transform` e `opacity`: flutuar (`dur-float`), salto do `cheer` (`dur-cheer`, uma vez), vapor do `coffee`. Com movimento reduzido, tudo para.
+- Movimento só em `transform` e `opacity`: flutuar (`dur-float`), salto do `cheer` (`dur-cheer`, uma vez), vapor do `coffee`, que sobe duas vezes e assenta, parado e visível, em 4,8s (F12, DECISOES § 439). Com movimento reduzido, tudo para.
 
 ## Nunca
 

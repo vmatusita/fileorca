@@ -2,7 +2,13 @@ import { expect, test, type Page } from '@playwright/test';
 import enSupport from '../../src/i18n/en/support.ts';
 import esSupport from '../../src/i18n/es/support.ts';
 import ptSupport from '../../src/i18n/pt/support.ts';
+import enCommon from '../../src/i18n/en/common.ts';
+import esCommon from '../../src/i18n/es/common.ts';
+import ptCommon from '../../src/i18n/pt/common.ts';
+import ptPdfPanel from '../../src/tools/pdf/i18n/pt.ts';
+import { violationsEverywhere } from './lib/axe.ts';
 import { chooseImages, dataLayer, dismissCookies, hydrated, jpegBatch, nextUse, reachCoffeeLine, settle, useBadFile, useImage } from './lib/page.ts';
+import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 
 // F1b criterion 12: the coffee line of the ResultCard and the support page.
 // Rule (PLANO "Doações", F1b decision 10; F2 decision 4): a "use" is a batch that reached the result card with at
@@ -16,12 +22,14 @@ const DAY = 24 * 60 * 60 * 1000;
 const KOFI = 'https://ko-fi.com/victormatusita';
 const LINE = '.fo-result .fo-result__support';
 
+// F12 (decision 7; DECISOES § 441): the buttons of PLANO-MELHORIAS section C and the confirmation of the specification.
 const LANGS = [
-  { lang: 'en', tool: '/compress-image/', link: 'Support with a coffee', hide: "Don't show this again", href: KOFI },
-  // Portuguese: the Pix block of the support page since the F6 (PLANO "Doações"; DECISOES § 216).
-  { lang: 'pt', tool: '/pt/comprimir-imagem/', link: 'Pagar um café no Pix', hide: 'Não mostrar de novo', href: '/pt/apoie/#pix' },
-  { lang: 'es', tool: '/es/comprimir-imagen/', link: 'Invítame un café', hide: 'No mostrar de nuevo', href: KOFI },
+  { lang: 'en', tool: '/compress-image/', link: 'Buy me a coffee', hide: "Don't show this again", href: KOFI, done: "Got it, I won't ask here again. The coffee link stays in the footer." },
+  // Portuguese: the Pix block of the support page since the F6 (PLANO "Doações"; DECISOES § 216), one button only (§ 368).
+  { lang: 'pt', tool: '/pt/comprimir-imagem/', link: 'Pagar um café no Pix', hide: 'Não mostrar de novo', href: '/pt/apoie/#pix', done: 'Combinado, não peço mais aqui. O link do café fica no rodapé.' },
+  { lang: 'es', tool: '/es/comprimir-imagen/', link: 'Ayúdame con un café', hide: 'No mostrar de nuevo', href: KOFI, done: 'Entendido, no vuelvo a pedirlo aquí. El enlace del café queda en el pie de página.' },
 ] as const;
+const DONE = '.fo-result .fo-result__support--done';
 
 interface CoffeeState {
   uses: number;
@@ -264,11 +272,150 @@ for (const { lang, tool, link, hide, href } of LANGS) {
   });
 }
 
+/** The confirmation stands where the line stood: inside the card, after Download and Start over. */
+async function afterTheActions(page: Page, selector: string): Promise<boolean> {
+  return page.locator(selector).evaluate((node) => {
+    const actions = node.closest('.fo-result')?.querySelector('.fo-result__actions');
+    return !!actions && !!(actions.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+}
+
+// F12 (decision 7; DECISOES § 436): the card carries one coffee button (in Portuguese, the Pix one: § 368), and "Don't
+// show this again" leaves one quiet sentence in the place of the line, a status that a screen reader reads once, with the
+// focus back on Download. Before, the line just went away. axe on the card with the sentence, at 360 and 1280 px, in both
+// themes (the line itself is in a11y.spec.ts).
+for (const { lang, tool, link, hide, href, done } of LANGS) {
+  test(`${lang}: one coffee button, and "${hide}" leaves the confirmation as a status in its place, with the focus on Download`, async ({ page }) => {
+    await open(page, tool);
+    await reachCoffeeLine(page);
+    const line = page.locator(LINE);
+    await expect(line.getByRole('link')).toHaveCount(1);
+    await expect(line.getByRole('link')).toHaveText(link);
+    await expect(line.getByRole('link')).toHaveAttribute('href', href);
+    await expect(line.getByRole('button')).toHaveCount(1);
+    // Enter on the ghost (WebKit gives no focus to a button on click: the keyboard path is the one of the specification).
+    await line.getByRole('button', { name: hide }).focus();
+    await page.keyboard.press('Enter');
+    await expect(line).toHaveCount(0);
+    const confirmation = page.locator(DONE);
+    await expect(confirmation).toHaveText(done);
+    await expect(confirmation).toHaveAttribute('role', 'status');
+    await expect(page.getByRole('status').filter({ hasText: done })).toHaveCount(1);
+    await expect(page.locator('.fo-btn--download')).toBeFocused();
+    expect(await afterTheActions(page, DONE), 'the sentence stands after Download and Start over').toBe(true);
+    await expect(page.locator(`.fo-result a[href="${href}"]`)).toHaveCount(0);
+    expect(await coffee(page)).toMatchObject({ uses: 3, never: true });
+    expect(await violationsEverywhere(page)).toEqual([]);
+  });
+}
+
+test('pt, a PDF tool: the line on the 3rd use with the Pix button alone, and the confirmation with the focus on Download', async ({ page }) => {
+  const coffeeTexts = ptPdfPanel.result.coffee;
+  expect((await page.goto('/pt/girar-pdf/'))?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page, 'granted');
+  await page.evaluate(() => localStorage.setItem('fo-coffee', JSON.stringify({ uses: 2 })));
+  await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  const line = page.locator(LINE);
+  await expect(line).toBeVisible({ timeout: 30_000 });
+  await expect(line.locator('p').first()).toHaveText(coffeeTexts.text);
+  await expect(line.getByRole('link')).toHaveCount(1);
+  await expect(line.getByRole('link', { name: coffeeTexts.button })).toHaveAttribute('href', '/pt/apoie/#pix');
+  await line.getByRole('button', { name: coffeeTexts.hide }).focus();
+  await page.keyboard.press('Enter');
+  await expect(line).toHaveCount(0);
+  await expect(page.locator(DONE)).toHaveText(coffeeTexts.done);
+  await expect(page.locator(DONE)).toHaveAttribute('role', 'status');
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeFocused();
+  expect(await afterTheActions(page, DONE)).toBe(true);
+  expect(await coffee(page)).toMatchObject({ uses: 3, never: true });
+});
+
+// F12 (decision 7; DECISOES § 437, which closes the F10 p-6): the coffee line opens the footer, the first thing in it and
+// its first link, with a 48 px target. At the base it sat 24 to 46 px from the AdSense anchor with the page scrolled to the
+// end. Here the anchor is drawn as the page gets it with the ads on (the footer's --anchor room and a 100 px band at the
+// bottom, as cookie-footer.spec.ts does), and the line stays 150 px or more from it, at 360 and 1280 px.
+const FOOTERS = [
+  { path: '/about/', text: enCommon.footer.coffee, href: '/support/' },
+  { path: '/pt/sobre/', text: ptCommon.footer.coffee, href: '/pt/apoie/' },
+  { path: '/es/acerca-de/', text: esCommon.footer.coffee, href: '/es/apoyo/' },
+  { path: '/compress-image/', text: enCommon.footer.coffee, href: '/support/' },
+] as const;
+
+for (const { path, text, href } of FOOTERS) {
+  test(`footer ${path}: the coffee line opens the footer with a 48 px target, 150 px or more from the anchor`, async ({ page }) => {
+    for (const size of [{ width: 360, height: 740 }, { width: 1280, height: 800 }]) {
+      await page.setViewportSize(size);
+      expect((await page.goto(path))?.status(), path).toBe(200);
+      await dismissCookies(page);
+      const label = `${path} a ${size.width} px`;
+      const link = page.locator('footer.fo-footer a').first();
+      await expect(link, label).toHaveText(text);
+      await expect(link, label).toHaveAttribute('href', href);
+      await expect(link, label).toHaveClass(/(^|\s)fo-footer__coffee(\s|$)/);
+      await expect(link, label).toHaveAttribute('data-track-place', 'footer');
+      const at = await page.evaluate(() => {
+        const footer = document.querySelector<HTMLElement>('footer.fo-footer')!;
+        footer.classList.add('fo-footer--anchor');
+        const band = document.createElement('ins');
+        band.className = 'adsbygoogle';
+        band.setAttribute('data-anchor-status', 'displayed');
+        band.style.cssText = 'position:fixed;left:0;right:0;bottom:0;height:100px;display:block';
+        document.body.append(band);
+        return new Promise<{ first: boolean; above: boolean; height: number; gap: number }>((done) => {
+          // A frame for the room of the anchor (the script of the cookie notice watches it), then the end of the page.
+          setTimeout(() => {
+            window.scrollTo(0, document.documentElement.scrollHeight);
+            requestAnimationFrame(() => {
+              const row = footer.querySelector('.fo-footer__coffee-row')!;
+              const anchor = row.querySelector('a')!.getBoundingClientRect();
+              const columns = footer.querySelector('.fo-footer__cols')!.getBoundingClientRect();
+              done({
+                first: footer.firstElementChild === row,
+                above: row.getBoundingClientRect().bottom <= columns.top,
+                height: anchor.height,
+                gap: band.getBoundingClientRect().top - anchor.bottom,
+              });
+            });
+          }, 300);
+        });
+      });
+      expect(at.first, `${label}: the first thing of the footer`).toBe(true);
+      expect(at.above, `${label}: above the columns`).toBe(true);
+      expect(at.height, `${label}: the target`).toBeGreaterThanOrEqual(48);
+      expect(at.gap, `${label}: from the anchor`).toBeGreaterThanOrEqual(150);
+      console.log(`[café] rodapé ${label}: alvo de ${at.height.toFixed(1)} px, ${Math.round(at.gap)} px até a âncora de 100 px`);
+    }
+  });
+}
+
 const SUPPORT = [
-  { path: '/support/', texts: enSupport },
-  { path: '/pt/apoie/', texts: ptSupport },
-  { path: '/es/apoyo/', texts: esSupport },
+  { path: '/support/', texts: enSupport, crumb: enCommon.header.support },
+  { path: '/pt/apoie/', texts: ptSupport, crumb: ptCommon.header.support },
+  { path: '/es/apoyo/', texts: esSupport, crumb: esCommon.header.support },
 ];
+
+// F12 (decision 7; DECISOES § 438): the title and the text of section C, the Oli to the right of the title in the same
+// row, looking at the text (she sat above it on the phone and in a column of her own from 768 px), and the last crumb is
+// the name of the Menu row.
+for (const { path, texts, crumb } of SUPPORT) {
+  test(`support page ${path}: the Oli to the right of the title, at 360 and 1280 px, and the crumb of the Menu row`, async ({ page }) => {
+    for (const size of [{ width: 360, height: 740 }, { width: 1280, height: 800 }]) {
+      await page.setViewportSize(size);
+      expect((await page.goto(path))?.status()).toBe(200);
+      await expect(page.locator('.fo-support > p').first()).toHaveText(texts.body);
+      await expect(page.locator('.fo-crumbs [aria-current="page"]')).toHaveText(crumb);
+      const title = await page.locator('.fo-support h1').boundingBox();
+      const oli = await page.locator('.fo-support [data-oli="coffee"]').boundingBox();
+      expect(title && oli, path).toBeTruthy();
+      if (!title || !oli) continue;
+      const label = `${path} a ${size.width} px`;
+      expect(oli.x, `${label}: the Oli starts where the title ends`).toBeGreaterThanOrEqual(title.x + title.width);
+      expect(oli.y < title.y + title.height && title.y < oli.y + oli.height, `${label}: in the row of the title`).toBe(true);
+      expect(oli.width, `${label}: the size of the Oli`).toBe(size.width < 768 ? 96 : 128);
+    }
+  });
+}
 
 for (const { path, texts } of SUPPORT) {
   test(`support page ${path}: card title as H1, the coffee Oli, the Ko-fi link and no other origin`, async ({ page, baseURL }) => {

@@ -6,10 +6,13 @@
 // by" and the notice); the rail AdSlot. The same view serves the English hub, its Spanish version (the same 14
 // calculators, 4 presets and 5 guides since the languages adjustment) and the Brazilian hub in Portuguese (the eight adapted
 // ones, with no preset and no guide), each with the pages of its language (prompt F6, decisions 5 and 6).
+// F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad after the grid of the credit calculators
+// (before, after both grids), the next ones only at the marks between the sections and in "How these calculators work",
+// never against the table of the presets nor the one of the example; the layout puts each box and the rails.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import { moneyHubId, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -55,6 +58,7 @@ const read = datesOf('money', lang).read;
   title={t.title}
   description={t.description}
   withAds
+  adArea="dinheiro"
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -64,17 +68,20 @@ const read = datesOf('money', lang).read;
     <p class="fo-muted">{t.intro}</p>
     <Reviewed lang={lang} />
   </div>
-  {groups.map((group) => (
-    <section class="fo-section" aria-labelledby={`calcs-${group.id}`}>
-      <h2 id={`calcs-${group.id}`}>{group.heading}</h2>
-      <ul class="fo-grid">
-        {group.cards.map((card) => (
-          <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
-        ))}
-      </ul>
-    </section>
+  {groups.map((group, index) => (
+    <>
+      {index > 0 && <AdBreak first={index === 1} />}
+      <section class="fo-section" aria-labelledby={`calcs-${group.id}`}>
+        <h2 id={`calcs-${group.id}`}>{group.heading}</h2>
+        <ul class="fo-grid">
+          {group.cards.map((card) => (
+            <li><ToolCard href={card.href} name={card.name} description={card.description} category="money" icon={card.icon} /></li>
+          ))}
+        </ul>
+      </section>
+    </>
   ))}
-  <AdSlot area="dinheiro" variant="content" label={common.adLabel} />
+  <AdBreak first={groups.length === 1} />
   {presets.length > 0 && t.presetsHead && (
     <section class="fo-section fo-prose" aria-labelledby="presets">
       <h2 id="presets">{t.presetsHeading}</h2>
@@ -95,17 +102,21 @@ const read = datesOf('money', lang).read;
       </ul>
     </section>
   )}
+  {guides.length > 0 && <AdBreak />}
   <section class="fo-section fo-prose" aria-labelledby="works">
     <h2 id="works">{t.worksHeading}</h2>
-    {t.worksIntro.map((paragraph) => <p>{paragraph}</p>)}
+    {t.worksIntro.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
+    <AdBreak />
     <div data-ymyl="formula">
       <h3 class="fo-h3">{t.formulaHeading}</h3>
-      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+      {t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
     </div>
+    <AdBreak />
     <div data-ymyl="premises">
       <h3 class="fo-h3">{t.premisesHeading}</h3>
       <ul>{t.premises.map((premise) => <li>{premise}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="example">
       <h3 class="fo-h3">{t.exampleHeading}</h3>
       <p>{t.exampleIntro}</p>
@@ -115,14 +126,15 @@ const read = datesOf('money', lang).read;
       </table>
       <p>{example.sentence}</p>
     </div>
+    <AdBreak />
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{t.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>
   </section>
-  <AdSlot slot="rail" area="dinheiro" variant="rail" label={common.adLabel} />
 </BaseLayout>

@@ -22,8 +22,14 @@
 //   JSON of each [data-props]. On the Licenses page only, the license texts (<pre>) are left out: the licenses ask for
 //   them word for word, and they are in English.
 import { existsSync, readFileSync } from 'node:fs';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { getContainerRenderer } from '@astrojs/preact/container-renderer';
+import { loadRenderers } from 'astro:container';
 import { parse, type HTMLElement } from 'node-html-parser';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import AdblockWall from '../../src/components/AdblockWall.astro';
+import enWall from '../../src/i18n/en/wall.ts';
+import ptWall from '../../src/i18n/pt/wall.ts';
 import { visibleText } from '../../scripts/lib/conteudo.ts';
 import { fileForPath } from '../../scripts/lib/dist.ts';
 import { ROUTES, languagesOf, type Lang } from '../../src/i18n/routes.ts';
@@ -217,8 +223,9 @@ describe('the English phrases the pages are compared with', () => {
   it('reads the English text files: thousands of phrases, the known ones among them, and none made of names and formats', () => {
     expect(Object.keys(ENGLISH_MODULES).length).toBeGreaterThan(60);
     expect(PHRASES.size).toBeGreaterThan(2000);
-    // A sentence of the support page, a panel line and a whole short title are phrases.
-    expect(PHRASES.has('free tools made by one person')).toBe(true);
+    // A sentence of the support page, a panel line and a whole short title are phrases. F12 (DECISOES § 443): the title of
+    // the support page is the one of PLANO-MELHORIAS section C, which took the place of "Free tools, made by one person".
+    expect(PHRASES.has('help oli keep swimming')).toBe(true);
     expect([...PHRASES.keys()].some((phrase) => phrase.includes('files never leave your device'))).toBe(true);
     // Names, formats and technical tokens alone never are.
     for (const phrase of ['victor yuki matusita', 'jpg png or webp', 'ctrl v', 'consumer financial protection bureau']) expect(PHRASES.has(phrase), phrase).toBe(false);
@@ -261,7 +268,7 @@ describe('the detector, on pages made here (controls)', () => {
   });
 
   it('catches an English title, an English aria-label and a glued neighbour (positive controls)', () => {
-    const page = ptPage(`<h1>Comprimir imagem</h1><button aria-label="${sentence}">x</button><ul><li>Free tools,</li><li>made by one person</li></ul>`).replace('<title>Comprimir imagem | FileOrca</title>', `<title>${sentence} | FileOrca</title>`);
+    const page = ptPage(`<h1>Comprimir imagem</h1><button aria-label="${sentence}">x</button><ul><li>Help Oli</li><li>keep swimming</li></ul>`).replace('<title>Comprimir imagem | FileOrca</title>', `<title>${sentence} | FileOrca</title>`);
     const where = findLeaks(pageTexts(page), PHRASES).map((leak) => leak.where);
     expect(where).toEqual(expect.arrayContaining(['title', '[aria-label]', 'texto visível']));
   });
@@ -342,4 +349,40 @@ describe('no English phrase on the pages of Portuguese and Spanish in dist/ (pro
     for (const page of pages) for (const href of away(readFileSync(fileForPath(page.path), 'utf8'), page.lang)) found.push(`${page.path}: ${href}`);
     expect(found).toEqual([]);
   }, 60_000);
+});
+
+// Review F12 (F-3; DECISOES § 452): the ad-block wall is never in the default build (default-build.test.ts reproves any
+// `fo-wall` in dist/), so the pages above never carry it. It is rendered here in pt and es, in both modes, closed as the
+// HTML has it (the help, the nine entries with their steps and notes, and the line of after the escape), and goes through
+// the same detector, with the same English phrases (src/i18n/en/wall.ts among them).
+describe('no English phrase in the ad-block wall in Portuguese and Spanish (F12)', () => {
+  type Component = Parameters<AstroContainer['renderToString']>[0];
+  let container: AstroContainer;
+  beforeAll(async () => {
+    container = await AstroContainer.create({ renderers: await loadRenderers([getContainerRenderer()]) });
+  });
+  const wallPage = async (lang: Lang, mode: 'aviso' | 'bloqueio'): Promise<string> =>
+    `<!doctype html><html lang="${lang}"><head><title>FileOrca</title></head><body>${await container.renderToString(AdblockWall as Component, { props: { lang, mode } })}</body></html>`;
+
+  for (const lang of ['pt', 'es'] as const) {
+    it(`has no English phrase in the wall in ${lang}, in both modes`, async () => {
+      const found: string[] = [];
+      for (const mode of ['aviso', 'bloqueio'] as const) {
+        for (const leak of longest(findLeaks(pageTexts(await wallPage(lang, mode)), PHRASES))) found.push(`${mode} [${leak.where}] "${leak.phrase}" (de ${leak.from.replace(/^\/src\//, 'src/')})`);
+      }
+      expect(found, `${found.length} frase(s) em inglês na parede em ${lang}`).toEqual([]);
+    });
+  }
+
+  it('reads the steps and the notes of the help (positive controls)', async () => {
+    // The English wall is all leaks, its steps and notes included: the detector reads the closed dialog and the help.
+    const from = findLeaks(pageTexts(await wallPage('en', 'bloqueio')), PHRASES).map((leak) => leak.from);
+    expect(from.some((path) => /wall\.ts\.default\.entries\.[\w-]+\.steps\.\d+$/.test(path))).toBe(true);
+    expect(from.some((path) => /wall\.ts\.default\.entries\.[\w-]+\.note$/.test(path))).toBe(true);
+    // A Portuguese wall with one step left in English is caught.
+    const step = enWall.entries.ubo.steps[1];
+    const html = (await wallPage('pt', 'bloqueio')).replace(ptWall.entries.ubo.steps[1], step);
+    expect(html).toContain(step);
+    expect(findLeaks(pageTexts(html), PHRASES).map((leak) => leak.from)).toContain('/src/i18n/en/wall.ts.default.entries.ubo.steps.1');
+  });
 });
