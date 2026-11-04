@@ -72,8 +72,8 @@ test.describe('the Menu on one page per mold and per language, at 320, 360 and 1
         const button = await menuButton(page).boundingBox();
         expect(box && button && box.y >= button.y + button.height, `${label}: the sheet opens under the button`).toBe(true);
         expect(box && box.x >= 0 && box.x + box.width <= width, `${label}: the sheet stays in the window`).toBe(true);
-        // Rows of 52 px, languages of 48 px.
-        for (const height of await rows.evaluateAll((links) => links.map((link) => link.getBoundingClientRect().height))) expect(height, label).toBeGreaterThanOrEqual(52);
+        // Rows of 48 px, the tap-min, as the languages (52 px before the review F11 D-1; DECISOES § 404).
+        for (const height of await rows.evaluateAll((links) => links.map((link) => link.getBoundingClientRect().height))) expect(height, label).toBeGreaterThanOrEqual(48);
         const languages = sheet(page).locator('.fo-menu__lang a[hreflang]');
         if (width < 768) {
           await expect(sheet(page).locator('.fo-menu__lang')).toBeVisible();

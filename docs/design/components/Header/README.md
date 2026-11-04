@@ -13,4 +13,4 @@ O cabeçalho: logo, busca de ferramentas, idioma (a partir de 768px), tema e Men
 - Os dois menus (o de idioma e o Menu) são `position: absolute`, embaixo do botão pelo anchor positioning, com a reserva `top: 68px` onde ele não existe: rolam com a página e nunca ficam parados sobre ela, nem sobre um anúncio.
 - A partir de 1280px, o cabeçalho segue a grade da moldura, em toda página: o logo começa onde começa a coluna da ferramenta e o último botão termina onde ela termina, 150px antes da lateral.
 - Nenhum controle do cabeçalho e nenhum menu aberto fica a menos de 150px de um anúncio.
-- Logo, busca, idioma, tema e Menu têm alvo de `tap-min` (48px); as linhas da folha têm 52px, e os idiomas, 48px.
+- Logo, busca, idioma, tema e Menu têm alvo de `tap-min` (48px); as linhas da folha e os idiomas também têm 48px. A especificação pedia linhas de 52px, mas com elas a folha em inglês terminava a 146,5px do primeiro anúncio do Merge PDF e do Unlock PDF de 390 a 767px; com 48px, a folha fica a 178,5px ou mais de todo anúncio abaixo de 768px.
