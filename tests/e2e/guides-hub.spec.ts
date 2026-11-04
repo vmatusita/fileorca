@@ -76,6 +76,12 @@ for (const lang of LANGS) {
     const first = page.locator('main a.fo-guidecard .fo-guidecard__name').first();
     const box = await first.boundingBox();
     expect((box?.y ?? 9999) + (box?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra`).toBeLessThanOrEqual(740);
+    // And with one more line in the H1: the Spanish title fills 278.5 of its 280 px in the Chromium of Windows and took a
+    // third line in the Chromium of the CI's Linux (DECISOES § 408), so the fold holds for a title one line longer too.
+    const extra = await page.addStyleTag({ content: '.fo-hubband .fo-h1::after { content: ""; display: block; height: 34px; }' });
+    const taller = await first.boundingBox();
+    expect((taller?.y ?? 9999) + (taller?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra, com uma linha a mais no H1`).toBeLessThanOrEqual(740);
+    await extra.evaluate((style) => style.remove());
     for (const width of [360, 1280]) {
       await page.setViewportSize({ width, height: 800 });
       for (const card of await page.locator('main a.fo-guidecard').all()) {
