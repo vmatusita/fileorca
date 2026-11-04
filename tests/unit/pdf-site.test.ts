@@ -203,8 +203,13 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
       const cluster = [['en', `${O}${paths.en}`], ['pt-BR', `${O}${paths.pt}`], ['es', `${O}${paths.es}`], ['x-default', `${O}${paths.en}`]];
       const root = parse(await renderPage());
       expect(root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), id).toEqual(cluster);
-      const menu = root.querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
-      expect(menu, id).toEqual([['en', paths.en], ['pt-BR', paths.pt], ['es', paths.es]]);
+      // F11 (DECISOES § 392): the language links are in two places, the language menu and the end of the Menu (under
+      // 768 px), each with the same three pairs; no other link of the page carries hreflang.
+      const pairs = [['en', paths.en], ['pt-BR', paths.pt], ['es', paths.es]];
+      const menu = root.querySelectorAll('.fo-langmenu a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+      expect(menu, id).toEqual(pairs);
+      expect(root.querySelectorAll('.fo-menu__lang a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), id).toEqual(pairs);
+      expect(root.querySelectorAll('a[hreflang]'), id).toHaveLength(2 * pairs.length);
     }
     // The pages in Portuguese and Spanish carry the same cluster and their own canonical.
     for (const lang of ['pt', 'es'] as const) {
@@ -224,7 +229,13 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
     // (translated in the languages adjustment) to a page of home and health, which stays English only (F7, decision 1).
     const english = routeById(LIFE_CALC_IDS[0] ?? 'bmi-calculator');
     const header = async (route: typeof english) => parse(await container.renderToString(Header as Parameters<AstroContainer['renderToString']>[0], { props: { lang: 'en', route, t: TEXTS.en.common } }));
-    const menuOf = async (route: typeof english) => (await header(route)).querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+    // F11 (DECISOES § 392): the language menu and the language list at the end of the Menu follow the same rule.
+    const linksOf = async (route: typeof english, where: string) => (await header(route)).querySelectorAll(`${where} a[hreflang]`).map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+    const menuOf = async (route: typeof english) => {
+      const languages = await linksOf(route, '.fo-langmenu');
+      expect(await linksOf(route, '.fo-menu__lang'), route.id).toEqual(languages);
+      return languages;
+    };
     expect(await menuOf(english)).toEqual([['en', english.paths.en], ['pt-BR', '/pt/'], ['es', '/es/']]);
     // A PDF file guide now leads to the same guide in each language.
     const guide = routeById(FILE_GUIDE_IDS.find((id) => FILE_GUIDES[id].hub === 'pdf-tools') ?? 'guides-split-pdf-file-size');

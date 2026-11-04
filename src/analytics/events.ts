@@ -42,8 +42,11 @@ export type ErrorReason = (typeof ERROR_REASONS)[number];
 /** The real format of the file as the engine read it from the bytes: a closed list, never a file type string. */
 export const CODECS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/avif', 'image/gif', 'application/pdf', 'unknown', 'empty'] as const;
 export type Codec = (typeof CODECS)[number];
-/** Where a donation link was clicked: a closed list (DECISOES § 10); `pix` is the Copy code of the Pix (F6, § 216). */
-export const DONATE_PLACES = ['result', 'footer', 'support_page', 'pix'] as const;
+/**
+ * Where a donation link was clicked: a closed list (DECISOES § 10); `pix` is the Copy code of the Pix (F6, § 216), and
+ * `menu` the Support Oli row of the header Menu (F11, decision 3; § 390).
+ */
+export const DONATE_PLACES = ['result', 'footer', 'support_page', 'pix', 'menu'] as const;
 export type DonatePlace = (typeof DONATE_PLACES)[number];
 /** What a calculator exported, and since the F7 what the QR code generator saved: a closed list (DECISOES § 113 and § 263). */
 export const EXPORT_FORMATS = ['pdf', 'csv', 'png', 'svg'] as const;

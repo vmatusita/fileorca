@@ -1,11 +1,19 @@
 ---
-// Header (docs/design/components/Header, v1.1): logo, tool search and language. No menu.
-// The logo is inline (role="img", "FileOrca"); on the phone the search is the icon alone, still named
-// "Search tools" (DECISOES § 46, closes § 30). Logo, search and language are 48px targets.
+// Header (docs/design/components/Header, F11: UX-01 alternative A, DECISOES § 388): logo, tool search, language (from
+// 768 px), theme and Menu, in this order in the DOM and on screen, each popover right after the button that opens it.
+// The logo is inline (role="img", "FileOrca"); on the phone the search is the icon alone, still named "Search tools"
+// (DECISOES § 46), and the language moves to the end of the Menu. Every control is a 48px target.
+// - The theme button goes System → Light → Dark (§ 385): its icon and its name come from CSS, by the data-theme of <html>,
+//   so they are right at the first paint; its script comes right after the </header>, and the status region next to it
+//   says the new name. Nothing sent anywhere: the choice is the fo-theme key of this browser.
+// - The Menu is a popover with no script, like the language menu: the sheet with the folded corner lists the sections of
+//   the language with their counts read from the registries, the QR code, the Guides and Support Oli, and under 768 px the
+//   language; the section of the page carries aria-current (§ 389). It must stay the next sibling of the Menu button.
 import type { Lang, RouteDef } from '../i18n/routes.ts';
-import { LANGS, languagesOf } from '../i18n/routes.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { homePath } from '../seo/meta.ts';
+import { themeToggle } from '../platform/theme.ts';
+import { languageLinks, menuGroups } from './header-menu.ts';
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 
@@ -15,13 +23,9 @@ interface Props {
   t: CommonTexts;
 }
 const { lang, route, t } = Astro.props;
-const available = new Set(languagesOf(route));
 // Language links go to the equivalent page; without one, to that language's home.
-const links = LANGS.map((code) => ({
-  code,
-  href: available.has(code) && route.indexable ? route.paths[code] : homePath(code),
-  name: t.header.langNames[code],
-}));
+const links = languageLinks(route, lang, t);
+const groups = menuGroups(lang, route.id, t);
 ---
 <header class="fo-header">
   <a class="fo-header__logo" href={homePath(lang)} aria-label={t.header.homeLabel}><Logo class="fo-logo" /></a>
@@ -35,11 +39,54 @@ const links = LANGS.map((code) => ({
     <ul>
       {links.map((link) => (
         <li>
-          <a href={link.href} hreflang={link.code === 'pt' ? 'pt-BR' : link.code} lang={link.code === 'pt' ? 'pt-BR' : link.code} aria-current={link.code === lang ? 'true' : undefined}>
+          <a href={link.href} hreflang={link.tag} lang={link.tag} aria-current={link.current ? 'true' : undefined}>
             {link.name}
           </a>
         </li>
       ))}
     </ul>
   </nav>
+  <button type="button" class="fo-header__theme" data-theme-toggle>
+    <span class="fo-theme__state fo-theme__state--system"><Icon name="theme-system" /><span class="fo-sr">{t.header.theme.system}</span></span>
+    <span class="fo-theme__state fo-theme__state--light"><Icon name="sun" /><span class="fo-sr">{t.header.theme.light}</span></span>
+    <span class="fo-theme__state fo-theme__state--dark"><Icon name="moon" /><span class="fo-sr">{t.header.theme.dark}</span></span>
+  </button>
+  <span class="fo-sr" role="status" data-theme-status></span>
+  <button type="button" class="fo-header__menu" popovertarget="fo-menu">
+    <span class="fo-header__menu-icon fo-header__menu-icon--open"><Icon name="menu" /></span>
+    <span class="fo-header__menu-icon fo-header__menu-icon--close"><Icon name="close" /></span>
+    <span class="fo-header__menu-text">{t.header.menu}</span>
+  </button>
+  <nav id="fo-menu" class="fo-menu fo-dogear" popover aria-label={t.header.menu}>
+    {groups.map((group) => (
+      <ul class="fo-menu__list">
+        {group.map((row) => (
+          <li>
+            <a
+              class:list={['fo-menu__item', row.cat && `fo-cat--${row.cat}`]}
+              href={row.href}
+              aria-current={row.current}
+              {...(row.section === 'support' ? { 'data-track': 'donate_click', 'data-track-place': 'menu' } : {})}
+            >
+              <span class="fo-menu__dot"><Icon name={row.icon} /></span>
+              <span class="fo-menu__text"><span class="fo-menu__name">{row.name}</span><span class="fo-menu__meta"><span class="fo-sr">{', '}</span>{row.meta}</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ))}
+    <div class="fo-menu__lang fo-mobile-only">
+      <p class="fo-menu__label" id="fo-menu-lang">{t.header.menuLanguage}</p>
+      <ul class="fo-menu__list" aria-labelledby="fo-menu-lang">
+        {links.map((link) => (
+          <li>
+            <a class="fo-menu__item" href={link.href} hreflang={link.tag} lang={link.tag} aria-current={link.current ? 'true' : undefined}>
+              <span>{link.name}</span><span class="fo-menu__check"><Icon name="check" /></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
 </header>
+<script is:inline set:html={themeToggle()} />
