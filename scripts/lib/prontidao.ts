@@ -262,7 +262,10 @@ export function checkAllBuild(site: Site): Row[] {
   ];
 }
 
-/** The real build of today (no id): no meta, no ads.txt, no loader, and the AdSlots are the neutral space. */
+/**
+ * The real build of today (no id): no meta, no ads.txt, no loader and, from the F12 (Mudança 10; DECISOES § 413), no ad
+ * box at all: with no unit id the position does not exist (no box, no label, no reserved space).
+ */
 export function checkTodayBuild(site: Site): Row[] {
   const files = htmlFiles(site.dir);
   const problems = files.flatMap(({ path, html }) => [
@@ -270,8 +273,11 @@ export function checkTodayBuild(site: Site): Row[] {
     ...(LOADER.test(html) || UNIT.test(html) ? [`${path}: carregador ou unidade do AdSense`] : []),
   ]);
   if (existsSync(join(site.dir, 'ads.txt'))) problems.push('ads.txt existe sem o ID');
-  const slots = files.reduce((sum, { html }) => sum + (html.match(/class="fo-ad fo-ad--/g) ?? []).length, 0);
-  return [row('Build de hoje, sem o ID: nenhum anúncio', `dist/ real: nenhuma meta, ads.txt ou script de anúncio; ${slots} AdSlot(s) só com o espaço neutro`, problems)];
+  for (const { path, html } of files) {
+    const slots = (html.match(/class="fo-ad[ "]/g) ?? []).length;
+    if (slots) problems.push(`${path}: ${slots} caixa(s) de anúncio sem ID de unidade`);
+  }
+  return [row('Build de hoje, sem o ID: nenhum anúncio', `dist/ real: nenhuma meta, ads.txt, script ou caixa de anúncio em ${files.length} HTML`, problems)];
 }
 
 // ---- (b) Required pages ------------------------------------------------------------------------------

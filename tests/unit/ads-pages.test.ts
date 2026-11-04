@@ -83,7 +83,8 @@ describe('anúncio por página nos três estados', () => {
         expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`), page).toBe(state !== 'none');
         expect(tool.includes('adsbygoogle.js?client='), page).toBe(state === 'all');
         expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
-        expect((tool.match(/class="fo-ad fo-ad--/g) ?? []).length, page).toBe(2);
+        // F12, Mudança 10 (DECISOES § 413 and § 418): the box exists only with the unit id of its position.
+        expect((tool.match(/class="fo-ad fo-ad--/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
       }
       for (const lang of ['en', 'pt', 'es'] as const) {
         for (const [name, View, props] of NO_ADS) {

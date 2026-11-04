@@ -4,6 +4,11 @@ import { defineConfig, devices } from '@playwright/test';
 // Chromium and WebKit, as the plan requires. Build first: pnpm build (pnpm verificar does).
 // FO_PORT lets two checkouts run the suite at once (agent worktrees); CI and verificar use 4173.
 const PORT = Number(process.env['FO_PORT'] ?? 4173);
+// F12 (DECISOES § 414): the test build (the ads with fake ids and the wall) has a server of its own, 100 ports above, that
+// builds only when a spec asks for it (tests/e2e/lib/test-build.ts), once per run of Playwright: the run id is set here, in
+// the runner, and the workers inherit it.
+const TEST_BUILD_PORT = PORT + 100;
+process.env['FO_RUN_ID'] ??= `${process.pid}-${Date.now()}`;
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -27,10 +32,18 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
-  webServer: {
-    command: 'node scripts/serve-dist.ts',
-    url: `http://127.0.0.1:${PORT}/`,
-    reuseExistingServer: !process.env['CI'],
-    env: { PORT: String(PORT) },
-  },
+  webServer: [
+    {
+      command: 'node scripts/serve-dist.ts',
+      url: `http://127.0.0.1:${PORT}/`,
+      reuseExistingServer: !process.env['CI'],
+      env: { PORT: String(PORT) },
+    },
+    {
+      command: 'node scripts/serve-test-build.ts',
+      url: `http://127.0.0.1:${TEST_BUILD_PORT}/__health`,
+      reuseExistingServer: !process.env['CI'],
+      env: { PORT: String(TEST_BUILD_PORT) },
+    },
+  ],
 });

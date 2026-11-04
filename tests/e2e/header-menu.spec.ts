@@ -11,6 +11,7 @@ import { LANGS, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { MOLD_PAGES, expectedLanguages, expectedSheet } from './lib/header.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
+import { TEST_BUILD_ORIGIN, testBuildReady } from './lib/test-build.ts';
 
 const WIDTHS = [320, 360, 1280] as const;
 const ALL_WIDTHS = [320, 360, 390, 412, 768, 1024, 1280] as const;
@@ -274,9 +275,13 @@ test('the tap that closes the Menu on a touch screen does not reach the page eit
   }
 });
 
-/** A first visit at one width, in a context of its own, with Figtree held until released (layout-shift.spec.ts). */
+/**
+ * A first visit at one width, in a context of its own, with Figtree held until released (layout-shift.spec.ts). At 1280 px
+ * the page comes from the test build (F12, Mudança 10; DECISOES § 418): the default build has no ad box, so the rail the
+ * header must keep 150 px from exists only there.
+ */
 async function heldPage(browser: Browser, path: string, width: number): Promise<{ page: Page; release: () => Promise<void>; close: () => Promise<void> }> {
-  const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+  const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: 'reduce', serviceWorkers: 'block', ...(width === 1280 ? { baseURL: TEST_BUILD_ORIGIN } : {}) });
   const page = await context.newPage();
   let open: () => void = () => {};
   const held = new Promise<void>((resolve) => {
@@ -304,6 +309,10 @@ async function heldPage(browser: Browser, path: string, width: number): Promise<
 }
 
 test.describe('the header measured in the three languages, with Figtree held and released', () => {
+  test.beforeAll(async () => {
+    test.setTimeout(600_000);
+    await testBuildReady();
+  });
   for (const lang of LANGS) {
     for (const width of ALL_WIDTHS) {
       test(`${lang} at ${width} px: 64 px and one line before and after Figtree, nothing changes width, 48 px targets${width === 1280 ? ', the rail 150 px under the header' : ''}`, async ({ browser, browserName }) => {

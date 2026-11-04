@@ -12,6 +12,12 @@ import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '..
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
+import { DEFAULT_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
+
+// F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id there is no ad box, so the default build has none and
+// every distance below is measured on the test build (fake ids in the 37 units of the map, the worst case). What the
+// default build must not have is checked on it, by its own origin.
+useTestBuild(test);
 
 const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
 
@@ -318,7 +324,7 @@ test('the hub keeps its one content AdSlot under the grid of tools, at 360 and 1
   }
 });
 
-test('the AdSlot shows the accepted label per language, reserves its height and loads nothing without the variables', async ({ page }) => {
+test('the AdSlot shows the accepted label per language and reserves its height, and nothing exists without the variables', async ({ page }) => {
   for (const [path, label] of [['/compress-image/', 'Advertisements'], ['/pt/comprimir-imagem/', 'Publicidade'], ['/es/comprimir-imagen/', 'Anuncios']] as const) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(path);
@@ -326,10 +332,13 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
     await expect(content.locator('.fo-ad__label')).toHaveText(label);
     expect((await content.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(300);
     expect((await page.locator('.fo-ad--rail').boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(644);
+    // The default build: no box, no label, no reserved space, no meta, no unit, no loader (Mudança 10).
+    expect((await page.goto(`${DEFAULT_BUILD_ORIGIN}${path}`))?.status(), path).toBe(200);
+    expect(await page.locator('.fo-ad, .fo-ad__label, aside.fo-rail').count()).toBe(0);
     expect(await page.locator('meta[name="google-adsense-account"]').count()).toBe(0);
     expect(await page.locator('ins.adsbygoogle, script[src*="adsbygoogle"]').count()).toBe(0);
   }
-  const adsTxt = await page.request.get('/ads.txt');
+  const adsTxt = await page.request.get(`${DEFAULT_BUILD_ORIGIN}/ads.txt`);
   expect(adsTxt.status()).toBe(404);
   expect(readFileSync('dist/_headers', 'utf8')).not.toContain('ads.txt');
 });

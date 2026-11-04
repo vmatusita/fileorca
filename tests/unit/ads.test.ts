@@ -2,7 +2,8 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import AdSlot from '../../src/ads/AdSlot.astro';
 import AdsenseHead from '../../src/ads/AdsenseHead.astro';
-import { adsConfigFrom, adsTxt, unitFor, type AdsConfig } from '../../src/ads/config.ts';
+import { AD_UNITS, CONTENT_UNITS, adsConfigFrom, adsTxt, contentUnit, unitFor, wallModeOf, type AdsConfig } from '../../src/ads/config.ts';
+import { TEST_SLOTS, TEST_UNIT_COUNT } from '../../scripts/lib/test-build.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 
 const CLIENT = 'ca-pub-1234567890123456';
@@ -41,6 +42,54 @@ describe('ads config from the build variables', () => {
     expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '[1]' })).toThrow(/JSON object/);
   });
 
+  // F12 (decision 2; DECISOES § 412): the area "geral", one unit per position (37 in the model of the map) and the
+  // ad-block wall variable, each wrong value failing the build.
+  it('takes the 37 units of the map, the area "geral" and the position of each content ad', () => {
+    const config = adsConfigFrom({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: JSON.stringify(TEST_SLOTS), PUBLIC_ADS_ENABLED: 'true' });
+    expect(TEST_UNIT_COUNT).toBe(37);
+    expect(Object.values(config.slots).reduce((sum, units) => sum + Object.keys(units).length, 0)).toBe(37);
+    expect(Object.keys(config.slots)).toEqual(['geral', 'arquivos', 'dinheiro', 'casa-saude', 'utilidades']);
+    for (const area of ['geral', 'arquivos', 'dinheiro', 'casa-saude'] as const) {
+      expect(Object.keys(config.slots[area] ?? {})).toEqual(['conteudo', 'conteudo-2', 'conteudo-3', 'conteudo-4', 'conteudo-5', 'lateral', 'lateral-2', 'multiplex']);
+    }
+    expect(Object.keys(config.slots.utilidades ?? {})).toEqual(['conteudo', 'conteudo-2', 'lateral', 'lateral-2', 'multiplex']);
+    expect(unitFor(config, 'geral', 'multiplex')).toBe(TEST_SLOTS['geral']?.['multiplex']);
+    expect(unitFor(config, 'utilidades', 'conteudo-3')).toBeNull();
+    expect(CONTENT_UNITS).toEqual(['conteudo', ...[2, 3, 4, 5, 6, 7, 8, 9].map((n) => `conteudo-${n}`)]);
+    expect([1, 2, 5, 9, 10].map(contentUnit)).toEqual(['conteudo', 'conteudo-2', 'conteudo-5', 'conteudo-9', null]);
+    expect(AD_UNITS).toHaveLength(12);
+    const nine = adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: JSON.stringify({ geral: { 'conteudo-9': '123456', 'lateral-2': '1234567' } }) });
+    expect(nine.slots.geral).toEqual({ 'conteudo-9': '123456', 'lateral-2': '1234567' });
+  });
+
+  it('fails the build on a wrong area, unit or id of the new model', () => {
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"home":{"conteudo":"1234567"}}' })).toThrow(/unknown area "home"/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"conteudo-10":"1234567"}}' })).toThrow(/unknown unit "conteudo-10"/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"conteudo-1":"1234567"}}' })).toThrow(/unknown unit "conteudo-1"/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"lateral-3":"1234567"}}' })).toThrow(/unknown unit "lateral-3"/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"multiplex":"12345"}}' })).toThrow(/geral\.multiplex must be a numeric id/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"multiplex":1234567}}' })).toThrow(/numeric id/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":{"multiplex":"ca-1234567"}}' })).toThrow(/numeric id/);
+    expect(() => adsConfigFrom({ PUBLIC_ADSENSE_SLOTS: '{"geral":["1234567"]}' })).toThrow(/geral must be an object/);
+  });
+
+  it('reads PUBLIC_ADBLOCK_WALL: off by default, aviso or bloqueio, and only with the ads on', () => {
+    expect(adsConfigFrom({}).wall).toBe('desligado');
+    expect(adsConfigFrom({ PUBLIC_ADBLOCK_WALL: '' }).wall).toBe('desligado');
+    expect(adsConfigFrom({ PUBLIC_ADBLOCK_WALL: 'desligado' }).wall).toBe('desligado');
+    expect(adsConfigFrom({ PUBLIC_ADBLOCK_WALL: 'aviso' }).wall).toBe('aviso');
+    expect(adsConfigFrom({ PUBLIC_ADBLOCK_WALL: ' Bloqueio ' }).wall).toBe('bloqueio');
+    for (const wrong of ['on', 'true', 'block', 'avisos', '1']) {
+      expect(() => adsConfigFrom({ PUBLIC_ADBLOCK_WALL: wrong }), wrong).toThrow(/PUBLIC_ADBLOCK_WALL must be desligado, aviso or bloqueio/);
+    }
+    // The wall exists only with the three variables of the ads (scriptEnabled).
+    expect(wallModeOf(adsConfigFrom({ PUBLIC_ADBLOCK_WALL: 'bloqueio' }))).toBe('desligado');
+    expect(wallModeOf(adsConfigFrom({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADBLOCK_WALL: 'bloqueio' }))).toBe('desligado');
+    expect(wallModeOf(adsConfigFrom({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: SLOTS, PUBLIC_ADS_ENABLED: 'true', PUBLIC_ADBLOCK_WALL: 'aviso' }))).toBe('aviso');
+    expect(wallModeOf(adsConfigFrom({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: SLOTS, PUBLIC_ADS_ENABLED: 'true', PUBLIC_ADBLOCK_WALL: 'bloqueio' }))).toBe('bloqueio');
+    expect(wallModeOf(adsConfigFrom({ PUBLIC_ADSENSE_CLIENT: CLIENT, PUBLIC_ADSENSE_SLOTS: SLOTS, PUBLIC_ADS_ENABLED: 'true' }))).toBe('desligado');
+  });
+
   it('writes ads.txt with pub- and without ca-', () => {
     expect(adsTxt(CLIENT)).toBe('google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n');
   });
@@ -54,10 +103,16 @@ describe('ads config from the build variables', () => {
 
 describe('AdSlot and the AdSense head in the three states', () => {
   for (const [state, config] of Object.entries(STATES)) {
-    it(`renders the reserved box with the label in each language (${state})`, async () => {
+    // F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id for the position, nothing at all (no box, no label, no
+    // reserved space, no push); with the id, the reserved box with the label.
+    it(`renders the reserved box with the label in each language only with the unit id (${state})`, async () => {
       for (const [lang, label] of [['en', 'Advertisements'], ['pt', 'Publicidade'], ['es', 'Anuncios']] as const) {
         expect(TEXTS[lang].common.adLabel).toBe(label);
         const html = await container.renderToString(AdSlot, { props: { area: 'arquivos', variant: 'content', label, config } });
+        if (state !== 'all') {
+          expect(html.trim()).toBe('');
+          continue;
+        }
         expect(html).toContain('class="fo-ad fo-ad--content"');
         expect(html).toContain(`<span class="fo-ad__label">${label}</span>`);
         expect(html).not.toContain('aria-label');

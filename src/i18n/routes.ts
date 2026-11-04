@@ -69,7 +69,8 @@ export type RouteId =
   | 'open-with'
   | 'not-found';
 
-export type AdArea = 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilidades';
+/** F12 (DECISOES § 412): 'geral' is the area of the home and of the guides hub. */
+export type AdArea = 'geral' | 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilidades';
 
 /** The QR code generator (prompt F7, decision 8): in the ad area "utilidades", with no hub; in pt and es since the languages adjustment. */
 export const QR_ID = 'qr-code-generator';

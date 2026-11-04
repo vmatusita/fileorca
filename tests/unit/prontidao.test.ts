@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -150,12 +150,27 @@ function makeAdsBuild(options: { meta?: (path: string) => string; adsTxt?: strin
   });
 }
 
+/**
+ * The same fake site as the default build makes it (F12, Mudança 10; DECISOES § 413 and § 418): no ad box, since no
+ * position has a unit id. The gate reads the words for each AdSlot on the build with the ids, and the boxes there.
+ */
+function withoutBoxes(site: Site): Site {
+  const dir = mkdtempSync(join(tmpdir(), 'fo-prontidao-'));
+  roots.push(dir);
+  cpSync(site.dir, dir, { recursive: true });
+  for (const name of readdirSync(dir, { recursive: true, encoding: 'utf8' }).filter((entry) => entry.endsWith('.html'))) {
+    const path = join(dir, name);
+    writeFileSync(path, readFileSync(path, 'utf8').replace(/<div class="fo-ad[^"]*"><span[^>]*>[^<]*<\/span><\/div>/g, ''));
+  }
+  return { ...site, dir };
+}
+
 const failing = (rows: Row[]): string[] => rows.filter((row) => !row.ok).flatMap((row) => row.problems.map((problem) => `${row.item}: ${problem}`));
 
 describe('gate:prontidao, controle positivo', () => {
   it('passes a complete site on every item', () => {
     const site = makeSite();
-    const rows = [...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkCrawlable(site)];
+    const rows = [...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkCrawlable(site)];
     expect(failing(rows)).toEqual([]);
     expect(rows).toHaveLength(14);
     expect(formatTable(rows)).toMatch(/^ok {4}/);
@@ -209,6 +224,11 @@ describe('gate:prontidao, (a) AdSense', () => {
     expect(failing(checkTodayBuild(makeAdsBuild())).join('\n')).toMatch(/meta do AdSense[\s\S]*ads\.txt existe sem o ID/);
     const unit = makeSite((dir) => write(dir, TOOL, pageHtml(PAGES.find((page) => page.ads) as SitePage, (main) => `${main}<ins class="adsbygoogle"></ins>`)));
     expect(failing(checkTodayBuild(unit)).join('\n')).toMatch(/carregador ou unidade/);
+    // F12, Mudança 10 (DECISOES § 413): with no unit id, not even the neutral box with its label.
+    expect(failing(checkTodayBuild(withoutBoxes(makeSite())))).toEqual([]);
+    // The box left behind has a space withoutBoxes() does not take, so the today build keeps one box on the tool page.
+    const box = withoutBoxes(makeSite((dir) => write(dir, TOOL, pageHtml(PAGES.find((page) => page.ads) as SitePage, (main) => `${main}<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Ad</span> </div>`))));
+    expect(failing(checkTodayBuild(box)).join('\n')).toMatch(/\/compress-image\/: 1 caixa\(s\) de anúncio sem ID de unidade/);
   });
 });
 
@@ -439,7 +459,7 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
   const MERGE = fakeOf('merge-pdf');
   const HUB = fakeOf(PDF_HUB_ID);
   const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
-  const allRows = (site: Site): Row[] => [...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
+  const allRows = (site: Site): Row[] => [...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
 
   it('passes a site with the 12 PDF tools, their hub, cards and search on every item', () => {
     const rows = allRows(pdfSite());
@@ -621,7 +641,7 @@ describe('gate:prontidao, as páginas de casa, saúde e QR (F7, decision 11)', (
 
   it('passes a site with the home and health calculators, their hubs, the QR code, cards and search (positive control)', () => {
     const site = lifeSite();
-    expect(failing([...checkTodayBuild(site), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site)])).toEqual([]);
+    expect(failing([...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site)])).toEqual([]);
     expect(LIFE_FAKE).toHaveLength(14);
   });
 

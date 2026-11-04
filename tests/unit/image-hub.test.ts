@@ -2,7 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { getContainerRenderer } from '@astrojs/preact/container-renderer';
 import { loadRenderers } from 'astro:container';
 import { parse } from 'node-html-parser';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import HomeView from '../../src/views/HomeView.astro';
 import ImageToolsView from '../../src/views/ImageToolsView.astro';
 import { ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
@@ -17,6 +17,8 @@ let container: AstroContainer;
 beforeAll(async () => {
   container = await AstroContainer.create({ renderers: await loadRenderers([getContainerRenderer()]) });
 });
+
+afterEach(() => vi.unstubAllEnvs());
 
 const render = async (View: typeof HomeView | typeof ImageToolsView, lang: Lang) =>
   parse(await container.renderToString(View, { props: { lang } }));
@@ -95,9 +97,16 @@ describe('hub /image-tools/', () => {
     expect(page.querySelectorAll('main .fo-grid a.fo-tool.fo-cat--pdf').map((card) => card.getAttribute('href'))).toEqual(['/image-to-pdf/']);
     const presets = page.querySelectorAll('main table.fo-table tbody a');
     expect(presets.map((link) => link.getAttribute('href'))).toEqual(IMAGE_PRESET_IDS.map((id) => routeById(id).paths.en));
-    expect(page.querySelectorAll('.fo-ad--content')).toHaveLength(1);
-    expect(page.querySelectorAll('.fo-ad--rail')).toHaveLength(1);
-    expect(page.querySelector('main .fo-ad--rail')).toBeNull();
+    // F12, Mudança 10 (DECISOES § 413 and § 418): with no unit id, no box; with the three variables, the content box in
+    // the main and the rail one outside it.
+    expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
+    vi.stubEnv('PUBLIC_ADSENSE_CLIENT', 'ca-pub-1234567890123456');
+    vi.stubEnv('PUBLIC_ADSENSE_SLOTS', JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' } }));
+    vi.stubEnv('PUBLIC_ADS_ENABLED', 'true');
+    const withAds = await render(ImageToolsView, 'en');
+    expect(withAds.querySelectorAll('main .fo-ad--content')).toHaveLength(1);
+    expect(withAds.querySelectorAll('.fo-ad--rail')).toHaveLength(1);
+    expect(withAds.querySelector('main .fo-ad--rail')).toBeNull();
   });
 
   it('has the breadcrumb Home > Image tools, the hreflang cluster of the three languages and the CollectionPage with the eight tools', async () => {

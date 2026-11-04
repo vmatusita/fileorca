@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -1314,8 +1314,23 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     write(dir, '/pt/404.html', '<html><head><title>Not found</title></head><body><p>Em breve</p></body></html>');
   }
 
+  /**
+   * F12, Mudança 10 (DECISOES § 418): the gate reads the blocks of the file guides, their AdSlots included, on the build with
+   * the ads (FO_ADS_BUILD) and wants no ad box in the default build. The fake site as written is the build with the ads;
+   * the default build is the same site with its boxes taken out, put back after the run.
+   */
   function run(dir: string): { status: number | null; output: string } {
-    const result = spawnSync(process.execPath, [gate], { cwd: dir, encoding: 'utf8' });
+    const dist = join(dir, 'dist');
+    const ads = join(dir, 'ads-build');
+    rmSync(ads, { recursive: true, force: true });
+    cpSync(dist, ads, { recursive: true });
+    for (const name of readdirSync(dist, { recursive: true, encoding: 'utf8' }).filter((entry) => entry.endsWith('.html'))) {
+      const file = join(dist, name);
+      writeFileSync(file, readFileSync(file, 'utf8').replace(/<div class="fo-ad[^"]*">(?:<span[^>]*>[^<]*<\/span>)?<\/div>/g, ''));
+    }
+    const result = spawnSync(process.execPath, [gate], { cwd: dir, encoding: 'utf8', env: { ...process.env, FO_ADS_BUILD: 'ads-build' } });
+    rmSync(dist, { recursive: true, force: true });
+    cpSync(ads, dist, { recursive: true });
     return { status: result.status, output: `${result.stdout}${result.stderr}` };
   }
 
@@ -1422,6 +1437,19 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
     expect(result.output).toContain(`${guideCount - 1} guia(s) de arquivo conferido(s), o registro tem ${guideCount}`);
+  });
+
+  // F12, Mudança 10 (DECISOES § 418): the default build has no ad box, and the blocks are read on the build with the ads.
+  it('fails a file guide with an ad box in the default build, or with no AdSlot in the build with the ads', () => {
+    const dir = join(root, 'guides-boxes');
+    build(dir);
+    // A box run() does not take out of the default build (it has an attribute), and a guide whose AdSlot is gone.
+    write(dir, '/guides/jpg-vs-png/', guidePage({ toolPath: '/png-to-jpg/', edit: (html) => html.replace('<div class="fo-ad fo-ad--content">', '<div class="fo-ad fo-ad--content" data-left>') }));
+    write(dir, '/guides/split-pdf-file-size/', guidePage({ toolPath: routeById('split-pdf').paths.en ?? '', edit: (html) => html.replace(/<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements<\/span><\/div>/, '') }));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('/guides/jpg-vs-png/: caixa de anúncio no build padrão, que não tem ID de unidade');
+    expect(result.output).toContain('/guides/split-pdf-file-size/: sem o AdSlot de conteúdo (.fo-ad--content)');
   });
 
   it('checks each file guide in Portuguese and Spanish, in the words and links of its language (the languages adjustment)', () => {
