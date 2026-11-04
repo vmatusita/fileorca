@@ -365,3 +365,23 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px 
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
   .fo-btn:hover, .fo-tool:hover { transform: none; }
 }
+
+/* ---------- GuideCard (F11) ---------- */
+/* The guide card: the paper of the ToolCard (the stroke and the fold in the colour of the guide's group) that opens with
+   words, not with the tool's icon square. Grid of 300 px columns at least (the names are long). The --here variant, on
+   the tool's own page, has no foot and no heading. */
+.fo-guidecards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.fo-guidecards > li { display: grid; }
+.fo-guidecard { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; grid-template-rows: auto auto 1fr auto auto; align-content: start; gap: var(--space-2); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
+.fo-guidecard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.fo-guidecard__kind { display: flex; align-items: center; gap: var(--space-2); padding-right: var(--dogear); font: 700 14px/20px var(--font-text); color: var(--ink); }
+.fo-guidecard__kind > .fo-icon, .fo-guidecard__proof > .fo-icon { flex: none; width: 20px; height: 20px; color: var(--brand); }
+.fo-guidecard__name { margin: 0; font: 700 18px/24px var(--font-text); }
+.fo-guidecard__desc { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.fo-guidecard__proof { display: flex; align-items: flex-start; gap: var(--space-2); font: 500 14px/20px var(--font-text); color: var(--ink-muted); }
+.fo-guidecard__tool { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-1); padding-top: var(--space-3); border-top: var(--stroke-hair) dashed var(--hairline); }
+.fo-guidecard__tool > span:last-child { display: grid; font: 600 15px/20px var(--font-text); }
+.fo-guidecard__label { font: 500 13px/18px var(--font-text); color: var(--ink-muted); }
+.fo-guidecard--here { grid-template-rows: auto auto auto auto; }
+.fo-guidehere { display: grid; gap: var(--space-4); }
+@media (prefers-reduced-motion: reduce) { .fo-guidecard:hover { transform: none; } }

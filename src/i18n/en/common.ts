@@ -25,6 +25,7 @@ export default {
     terms: 'Terms',
     licenses: 'Licenses',
     contact: 'Contact',
+    guidesAll: 'All guides',
     coffee: 'Like these tools? Support them with a coffee',
     signature: 'Made by {name} in {city}',
   },

@@ -24,6 +24,13 @@ const texts: GuidesHubTexts = {
   },
   howHeading: 'Como os guias são feitos',
   how: 'Os guias são medidos em arquivos de teste reais, com o mesmo motor que roda as ferramentas deste site. Cada guia lista os arquivos que usou, o dia da medição e quem revisou. Nada do que você coloca numa ferramenta sai do seu aparelho.',
+  // O cartão de guia (F11, decisão 6): o tipo que abre o nome dele, a medida de um guia de arquivo ({n} arquivos de teste,
+  // lidos de data/guides-measured.json) e o rótulo da ferramenta no pé. Sem a medida de dinheiro: pt não tem guia de dinheiro.
+  card: {
+    kind: 'Guia',
+    measured: 'Medido em {n} arquivos de teste',
+    tool: 'Ferramenta no guia',
+  },
 };
 
 export default texts;

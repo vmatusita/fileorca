@@ -25,6 +25,7 @@ export default {
     licenses: 'Licencias',
     contact: 'Contacto',
     utilityColumn: 'Utilidades',
+    guidesAll: 'Todas las guías',
     coffee: '¿Te gustan estas herramientas? Invítame un café',
     signature: 'Hecho por {name} en {city}',
   },

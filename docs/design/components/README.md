@@ -1,6 +1,6 @@
 # FileOrca · componentes
 
-v1.1 · 29/out/2026 · 27 componentes e o molde da página de ferramenta (ToolPage). Cada pasta tem o guia de uso (README.md) e a marcação de referência (preview.html). Estilos em `bundle.css`, valores em `../tokens.css`. Para ver todos os previews juntos, abra `../index.html`.
+v1.1 · 29/out/2026 · 27 componentes e o molde da página de ferramenta (ToolPage). Cada pasta tem o guia de uso (README.md) e a marcação de referência (preview.html). Estilos em `bundle.css`, valores em `../tokens.css`. Para ver todos os previews juntos, abra `../index.html`. A F11 acrescentou o GuideCard, o 28º componente (DECISOES § 395); o `../index.html` e a conferência abaixo são de antes dele.
 
 **Como ler a marcação:** nos previews, os ícones já estão inline (SVG com `class="fo-icon"`, `aria-hidden="true"` e `stroke="currentColor"`, os desenhos de `../assets/Icons/`), a Oli também (as poses de `../assets/Oli/`, sempre `aria-hidden`), e o logo do Header é inline, com "File" em `var(--ink)` e "Orca" em `var(--brand)`, `role="img"` e `aria-label="FileOrca"`. O `clipPath` `oli-clip` é declarado uma vez por página, como no sprite do site. Os textos estão em inglês, o idioma de lançamento; português e espanhol seguem as falas do README do sistema.
 
@@ -31,6 +31,7 @@ v1.1 · 29/out/2026 · 27 componentes e o molde da página de ferramenta (ToolPa
 | Navegação | Breadcrumb | [README](Breadcrumb/README.md) | [preview](Breadcrumb/preview.html) |
 | Navegação | ToolSearch | [README](ToolSearch/README.md) | [preview](ToolSearch/preview.html) |
 | Navegação | ToolCard | [README](ToolCard/README.md) | [preview](ToolCard/preview.html) |
+| Navegação | GuideCard | [README](GuideCard/README.md) | [preview](GuideCard/preview.html) |
 | Navegação | Footer | [README](Footer/README.md) | [preview](Footer/preview.html) |
 | Conteúdo | Faq | [README](Faq/README.md) | [preview](Faq/preview.html) |
 | Monetização | AdSlot | [README](AdSlot/README.md) | [preview](AdSlot/preview.html) |

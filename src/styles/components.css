@@ -760,3 +760,26 @@
 .fo-cat--guide { --fo-cat-soft: var(--brand-soft); }
 .fo-jump ul { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .fo-section__note { margin: 0; max-width: var(--fo-measure); }
+
+/* F11: guides. The GuideCard (UX-02 A; DECISOES § 395): the paper of the ToolCard (2 px stroke, the fold in the colour of
+   the guide's group) that opens with words, "Guide" and the file icon, then the name, the description, the measure with the
+   table icon and, after a dashed hairline, the tool of the guide in the circle of its own category. The grid of the hub and
+   of the home has columns of 300 px at least (the guides' names are long: 220 px would give four lines). The --here
+   variant, at the end of the "How to" block of a tool page, has no foot; its wrapper keeps one or two cards one under the
+   other. Nothing moves but by transform, and the hover lift goes with reduced motion, as the ToolCard's does. */
+.fo-guidecards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.fo-guidecards > li { display: grid; }
+.fo-guidecard { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; grid-template-rows: auto auto 1fr auto auto; align-content: start; gap: var(--space-2); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
+.fo-guidecard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.fo-guidecard__kind { display: flex; align-items: center; gap: var(--space-2); padding-right: var(--dogear); font: 700 14px/20px var(--fo-font-text); color: var(--ink); }
+.fo-guidecard__kind > .fo-icon, .fo-guidecard__proof > .fo-icon { flex: none; width: 20px; height: 20px; color: var(--brand); }
+.fo-guidecard__name { margin: 0; font: 700 18px/24px var(--fo-font-text); }
+.fo-guidecard__desc { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.fo-guidecard__proof { display: flex; align-items: flex-start; gap: var(--space-2); font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-guidecard__tool { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-1); padding-top: var(--space-3); border-top: var(--stroke-hair) dashed var(--hairline); }
+.fo-guidecard__tool > span:last-child { display: grid; font: 600 15px/20px var(--fo-font-text); }
+.fo-guidecard__label { font: 500 13px/18px var(--fo-font-text); color: var(--ink-muted); }
+.fo-guidecard--here { grid-template-rows: auto auto auto auto; }
+.fo-prose .fo-guidecard :is(p, span) { margin: 0; }
+.fo-guidehere { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
+@media (prefers-reduced-motion: reduce) { .fo-guidecard:hover { transform: none; } }

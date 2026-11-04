@@ -44,6 +44,11 @@ export interface CommonTexts {
     terms: string;
     licenses: string;
     contact: string;
+    /**
+     * The Guides block under the Utilities column (F11, decision 7): "All guides", the link to the guides hub. Its title is
+     * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
+     */
+    guidesAll: string;
     /** Support line at the base of the footer (PLANO, Doações). */
     coffee: string;
     /** "Made by {name} in {city}" */
@@ -1018,4 +1023,18 @@ export interface GuidesHubTexts extends PageMeta {
   /** "How these guides are made", at the end. */
   howHeading: string;
   how: string;
+  /** The words of the guide card (F11, decision 6; src/components/GuideCard.astro), wherever the card appears. */
+  card: GuideCardTexts;
+}
+
+/**
+ * The words of a guide card: the kind that opens it ("Guide", the first word of its accessible name), the measure of a file
+ * guide with {n}, the number of its test files, and that of a money guide (only in a language with money guides: pt has
+ * none), and the label of the tool at its foot.
+ */
+export interface GuideCardTexts {
+  kind: string;
+  measured: string;
+  workedOut?: string;
+  tool: string;
 }
