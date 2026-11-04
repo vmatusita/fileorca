@@ -5,9 +5,9 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: November 2, 2026',
+  updated: 'Last updated: November 3, 2026',
   intro:
-    'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
+    'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device, and the theme you pick in the header stays in your browser. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
     {
       heading: 'Who is responsible',
@@ -77,9 +77,10 @@ export default {
       ],
     },
     {
-      heading: 'Your cookie choice in the browser',
+      heading: 'Your cookie choice and your theme in the browser',
       paragraphs: [
         "FileOrca saves your cookie choice in your browser's local storage, so the notice does not come back every time. This record stays on your device. To remove it, clear the site data in your browser; the notice then appears again.",
+        'The theme you pick with the button in the header is kept there too, under the key fo-theme, with the value light or dark, and only when you choose Light or Dark: System, the default, keeps nothing. It stays on your device and is never sent anywhere, and it does not depend on the cookie notice, because you ask for it yourself. To delete it, set the button back to System, or clear the site data in your browser.',
         "If you accept in the cookie notice, FileOrca also counts there how many image or PDF batches ended with at least one real result in this browser, such as a smaller, converted, rotated, cropped or resized image or a new PDF, so the coffee request shows only from the third one and at most once a week; if you ask not to see it again, that is kept there too. This count stays only in your browser and never leaves it, and it is erased if you decline cookies later.",
         "On the calculators, the page keeps one yes-or-no mark in this tab's session storage, so the Oli cheers only on the first result of the visit. It holds no number, never leaves the browser and is gone when you close the tab.",
       ],
@@ -128,6 +129,7 @@ export default {
         'Delivery data: Cloudflare keeps it under its own policies.',
         'Ad data: Google keeps it under its own policies.',
         'Cookie choice: stays in your browser, and you can delete it at any time by clearing the site data.',
+        'Theme choice: the fo-theme key stays in your browser until you set the theme back to System or clear the site data.',
         'E-mails: kept only as long as needed to answer you.',
         'Offline copy: stays in your browser until you clear the site data or uninstall the app. Files shared with the app are deleted when a tool takes them, or the next time you open FileOrca after an hour.',
       ],

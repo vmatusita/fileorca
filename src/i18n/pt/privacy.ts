@@ -7,7 +7,7 @@ export default {
   h1: 'Política de privacidade',
   updated: 'Última atualização: 3 de novembro de 2026',
   intro:
-    'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
+    'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho, e o tema que você escolhe no cabeçalho fica no seu navegador. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
     {
       heading: 'Quem é o responsável',
@@ -77,9 +77,10 @@ export default {
       ],
     },
     {
-      heading: 'Sua escolha de cookies no navegador',
+      heading: 'Sua escolha de cookies e o seu tema no navegador',
       paragraphs: [
         'O FileOrca guarda a sua escolha sobre cookies no armazenamento local (local storage) do navegador, para o aviso não voltar toda vez. Esse registro fica no seu aparelho. Para apagá-lo, limpe os dados do site no navegador; o aviso volta a aparecer.',
+        'O tema que você escolhe no botão do cabeçalho também fica guardado ali, na chave fo-theme, com o valor light ou dark, e só quando você escolhe Claro ou Escuro: o Sistema, que é o padrão, não guarda nada. Ele fica no seu aparelho e nunca é enviado a lugar nenhum, e não depende do aviso de cookies, porque é você quem pede. Para apagá-lo, volte o botão para Sistema ou limpe os dados do site no navegador.',
         'Se você aceitar no aviso de cookies, o FileOrca também conta ali quantos lotes de imagens ou de PDFs terminaram com pelo menos um resultado de verdade neste navegador, como uma imagem menor, convertida, girada, cortada ou redimensionada, ou um PDF novo, para o pedido de café aparecer só a partir do terceiro e no máximo uma vez por semana; se você pedir para não ver mais, isso também fica guardado ali. Essa contagem fica só no navegador e nunca sai dele, e é apagada se você recusar os cookies depois.',
         'Nas calculadoras, a página guarda uma marca de sim ou não no armazenamento da sessão desta aba, para a Oli comemorar só no primeiro resultado da visita. Ela não tem nenhum número, nunca sai do navegador e some quando você fecha a aba.',
       ],
@@ -128,6 +129,7 @@ export default {
         'Dados de entrega: a Cloudflare os guarda de acordo com as próprias políticas.',
         'Dados de anúncios: o Google os guarda de acordo com as próprias políticas.',
         'Escolha de cookies: fica no seu navegador, e você pode apagá-la quando quiser limpando os dados do site.',
+        'Escolha do tema: a chave fo-theme fica no seu navegador até você voltar o tema para Sistema ou limpar os dados do site.',
         'E-mails: guardados só pelo tempo necessário para responder a você.',
         'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora.',
       ],
