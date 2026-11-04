@@ -41,6 +41,10 @@ const PAIRS: readonly Pair[] = [
   { fg: 'stroke', bg: 'bg', use: 'ui' },
   { fg: 'stroke', bg: 'surface', use: 'ui' },
   { fg: 'stroke', bg: 'surface-sunken', use: 'ui' },
+  // F11 (UX01-5; DECISOES § 388): the 2 px trace of the Menu row of the page's section, and of the language in use, on
+  // its brand-soft (3.20:1 in the dark theme, the lowest of the header). The trace on the sheet (surface), the name
+  // (ink) and the count (ink-muted) on brand-soft are pairs above.
+  { fg: 'stroke', bg: 'brand-soft', use: 'ui' },
   { fg: 'sun', bg: 'deep', use: 'ui' },
 ];
 

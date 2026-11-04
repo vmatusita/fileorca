@@ -34,6 +34,23 @@ test('the support page button links to Ko-fi without any Ko-fi script and sends 
   expect(await lastEvent(page, 'donate_click')).toEqual(['event', 'donate_click', { lang: 'en', place: 'support_page' }]);
 });
 
+// F11 (decision 3; DECISOES § 390): the Support Oli row of the header Menu leads to the support page of the language and
+// sends donate_click with the place menu, a value of the closed list DONATE_PLACES, on the phone and on the computer.
+test('the Support Oli row of the Menu sends donate_click with place menu and the language', async ({ page }) => {
+  for (const [width, path, lang, name, href] of [[360, '/es/unir-pdf/', 'es', 'Apoya a Oli', '/es/apoyo/'], [1280, '/guides/', 'en', 'Support Oli', '/support/']] as const) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(path);
+    await dismissCookies(page);
+    // The Menu opens first: a click whose default is prevented would not open the popover either.
+    await page.locator('.fo-header__menu').click();
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false, once: true }));
+    const link = page.locator('#fo-menu').getByRole('link', { name: new RegExp(`^${name}`) });
+    await expect(link).toHaveAttribute('href', href);
+    await link.click();
+    expect(await lastEvent(page, 'donate_click'), path).toEqual(['event', 'donate_click', { lang, place: 'menu' }]);
+  }
+});
+
 test('the next-step chip sends next_step_click', async ({ page }) => {
   await page.goto('/es/comprimir-imagen/');
   await hydrated(page);

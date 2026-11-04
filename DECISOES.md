@@ -4024,3 +4024,202 @@ Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-
 - **Os nomes entraram no `ICON_NAMES`** em ordem alfabética, e o `src/icons/icons.ts` os lê do mesmo jeito que os outros (no build, nunca numa ilha). Isso fecha a F10 p-20.
 - **O `assets/Icons/README.md`** passou de 39 para 44 ícones, com uma linha "Cabeçalho" na lista.
 - **O teste antigo que mudou** (no formato da § 341): o `tests/unit/icons.test.ts` fixava a contagem em 39 (`toHaveLength(39)` e o título). A ficha esperava que ele passasse sem mudar, mas a contagem é a da pasta, e a pasta ganhou os cinco: o número foi a 44, e o título diz de onde vêm os cinco. A proteção continua: a lista de `ICON_NAMES` é igual à dos arquivos da pasta, e cada arquivo começa pela `ICON_FILE_ROOT` sem cor nem `id` dentro, como antes. Os outros dois testes do arquivo não mudaram.
+
+## § 385 · O tema: os três estados, a chave `fo-theme` e os dois scripts inline (F11, decisão 2)
+
+- **Os três estados:** Sistema (o padrão), Claro e Escuro. O botão de tema do cabeçalho passa por eles nessa ordem, e Escuro volta a Sistema. O nome acessível diz o estado: "Theme: system", "Theme: light" e "Theme: dark" em inglês; "Tema: sistema", "Tema: claro" e "Tema: escuro" em português; "Tema: sistema", "Tema: claro" e "Tema: oscuro" em espanhol (`common.header.theme`).
+- **A escolha** fica no `localStorage`, na chave `fo-theme`, com `light` ou `dark`. Sem a chave, vale Sistema, e voltar a Sistema apaga a chave. Ela não depende do aviso de cookies: é uma preferência que a pessoa pede no botão. Sistema não põe `data-theme`, então o `prefers-color-scheme` decide, como antes.
+- **Os dois scripts** moram em `src/platform/theme.ts`, como funções que devolvem a string, no molde do `consentBootstrap()`: o `themeBootstrap()` e o `themeToggle()`, com a chave na constante `THEME_STORAGE_KEY`. Entram com `<script is:inline set:html>`, sem arquivo novo e sem requisição:
+  - **o do `<head>`** só lê. É o da especificação, palavra por palavra, e vem depois do `charset`, do `viewport` e da `<meta name="color-scheme" content="light dark">`. O Astro põe a folha de estilo no fim do `<head>`, então ele roda antes de todo CSS, e a primeira pintura já sai no tema guardado;
+  - **o do botão** vem no `Header.astro`, logo depois do `</header>`. A cada clique (Enter e espaço clicam um botão), ele põe o próximo estado no `<html>`, na meta e na chave, e escreve o nome novo na região de status.
+- **Os tamanhos:** o do `<head>` tem 185 bytes (157 com gzip nível 9); o do botão, 572 (331); os dois juntos, como o orçamento os soma, 376 bytes com gzip. A especificação media 422 bytes no botão: a região de status custou 150 bytes, porque o script acha a região pelo `[data-theme-status]` e o nome pela classe do estado (`.fo-theme__state--light .fo-sr`), e não pela posição.
+  - **As alternativas:** o `nextElementSibling` e o índice do rascunho da `.cache/f11/explore-d1-spec-header.md` (522 bytes), ou o `innerText` do botão. Ficaram de fora porque quebram em silêncio se a marcação mudar de ordem.
+- **A região de status:** um `<span class="fo-sr" role="status" data-theme-status>`, vazio na carga (não anuncia nada ao abrir a página), logo depois do botão de tema e antes do botão Menu. Ela não pode ficar entre o botão Menu e a folha: o `:has(+ :popover-open)` exige a folha como irmã imediata do botão. O `.fo-sr` é `absolute`, então não entra no espaço do cabeçalho.
+- **A ordem no `<head>`:** a meta e o script do tema vêm antes do script do consentimento.
+  - **Por quê:** os dois são independentes, o do tema é o menor, e assim a meta e o script que a muda ficam juntos. O consentimento continua declarado antes de todo `config` e de todo evento (§ 9), que é o que a regra dele pede.
+  - **A alternativa:** depois do consentimento, o que a especificação também aceitava.
+- **O armazenamento bloqueado** (janela privada, dados do site bloqueados): a leitura e a escrita ficam em `try/catch`. A página abre em Sistema, sem erro, e o botão troca o tema só daquela página.
+- **Outra aba** só muda ao recarregar, sem `storage` listener, como na especificação.
+- **Nada sai do aparelho:** trocar o tema não faz requisição, não manda evento do GA4 nem mexe na URL ou no histórico. O script não toca em `fetch`, `location`, `history`, `gtag` nem no `dataLayer`, e o teste unitário confere o texto dele.
+- **O service worker não muda:** ele guarda a página inteira, com os dois scripts, então a página guardada e a página offline seguem a escolha. O `header-theme-offline.spec.ts` prova, com o worker ligado e a rede desligada de verdade.
+
+## § 386 · O tema no CSS e as metas (F11, decisão 2)
+
+- **O par de toda regra.** O CSS do site tem só duas regras de `prefers-color-scheme`, no `global.css` (o `color-scheme` do `<html>`) e no `docs/design/tokens.css` (as variáveis de cor), e as duas já tinham o par com `data-theme`. O cabeçalho novo não acrescenta nenhuma: o botão de tema mostra um dos três estados pelo `data-theme` do `<html>` (`html:not([data-theme])`, `[data-theme="light"]` e `[data-theme="dark"]`), e as cores do Menu são todas por token.
+- **O teste do par** é o `tests/unit/theme-pair.test.ts`; o `tests/unit/theme.test.ts` já existia e é do tema do Tailwind. Ele lê todo `.css` de `src/styles/` (o `theme.css`, o `fonts.css`, o `global.css` e o `components.css`) e o `docs/design/tokens.css`, e confere em cada regra dentro de `@media (prefers-color-scheme: dark)`, em qualquer `@layer` ou `@supports`:
+  - a guarda `:not([data-theme="light"])` em cada seletor, para a página forçada clara num sistema escuro não pegar o valor escuro;
+  - o par `[data-theme="dark"]` fora da media query, com as mesmas declarações, para a página forçada escura num sistema claro;
+  - um valor claro de cada propriedade, no mesmo elemento ou em `[data-theme="light"]`.
+
+  A regra de `prefers-color-scheme: light` segue o espelho. O controle negativo tem cinco casos: sem a guarda, sem o par, o par com outro valor, sem o valor claro, e o espelho claro. O `bundle.css` do `docs/design/` fica de fora, porque é referência e nunca import (ele também tem o par).
+- **A prova no navegador:** a página forçada clara num sistema escuro fica com o fundo e o texto da página clara, e a forçada escura num sistema claro, com o fundo escuro (`header-theme.spec.ts`). O primeiro quadro de cada molde já sai no tema guardado.
+- **As metas:** a `<meta name="color-scheme" content="light dark">` entra logo depois do `viewport`. O script do `<head>` troca o `content` para `light` ou `dark` quando há escolha, e o botão o troca para `light`, `dark` ou de volta para `light dark`. Antes de o CSS chegar, o fundo da aba segue a escolha; depois, quem manda é o `html { color-scheme }` do `global.css`. O `theme-color` não muda: uma meta só, `#0C2B5E`, sem `media`.
+- **A linha do tema do `docs/design/README.md`** (decisão 8):
+  - **antes:** "O tema escuro segue o sistema (`prefers-color-scheme`) só com CSS, sem script; `data-theme="light"` ou `"dark"` no `<html>` força um dos dois (para testes e previews)."
+  - **depois:** "O tema tem três estados: Sistema (o padrão, que segue o `prefers-color-scheme` só com CSS), Claro e Escuro, escolhidos no botão de tema do cabeçalho (Header). A escolha fica no navegador, na chave `fo-theme` do `localStorage` (`light` ou `dark`; voltar a Sistema apaga a chave), e um script inline mínimo no `<head>`, depois da `<meta name="color-scheme" content="light dark">` e antes do CSS, põe `data-theme="light"` ou `"dark"` no `<html>` antes da primeira pintura; em Sistema, nenhum `data-theme`. Toda regra de `prefers-color-scheme` tem o par com `data-theme` (`tokens.css` e o CSS do site), e os testes e previews também forçam um dos dois pelo `data-theme`."
+
+  O comentário do `tokens.css` ("data-theme ... forces either one") continua certo e não mudou, e o `MUDANCAS-v1.1.md` é histórico.
+- **A § 76 continua valendo.** O axe troca o `prefers-color-scheme` no lugar, e o único tema que um script decide na carga é uma escolha guardada. Todo contexto de teste começa com o armazenamento vazio, ou seja, em Sistema, sem `data-theme`. O comentário do `tests/e2e/lib/axe.ts` diz isso agora (§ 392), e o axe com o botão nos três estados fica no `header-axe.spec.ts`.
+
+## § 387 · A Privacidade e o tema (F11, decisão 2)
+
+- **Onde:** nos três idiomas e com a mesma forma (o `routes.test.ts` confere que as seções da Privacidade têm o mesmo número de parágrafos e de itens em en, pt e es), em três lugares:
+  - **no resumo da introdução:** "your files never leave your device, and the theme you pick in the header stays in your browser" (pt: "e o tema que você escolhe no cabeçalho fica no seu navegador"; es: "y el tema que eliges en el encabezado se queda en tu navegador");
+  - **junto da escolha de cookies:** um parágrafo novo, logo depois do registro do aviso, na seção que passou a se chamar "Your cookie choice and your theme in the browser" ("Sua escolha de cookies e o seu tema no navegador", "Tu elección de cookies y tu tema en el navegador");
+  - **na lista de "How long data is kept":** um item novo, "Theme choice", depois do da escolha de cookies.
+- **O que o parágrafo diz:**
+  - o que fica guardado: a chave `fo-theme`, com `light` ou `dark`, só quando a pessoa escolhe Claro ou Escuro; Sistema, o padrão, não guarda nada;
+  - que fica no aparelho e nunca é enviado a lugar nenhum;
+  - que não depende do aviso de cookies, porque é a pessoa quem pede;
+  - como apagar: voltar o botão a Sistema ou limpar os dados do site no navegador.
+- **A data** "Last updated" em inglês foi a 3 de novembro de 2026, o dia da mudança; em português e em espanhol ela já estava nesse dia. O `calc-defs.test.ts` fixa as três (§ 392).
+- **O que não mudou:** a lista dos eventos do GA4. O "Click on a donation link" já cobre o lugar `menu` (§ 390), e o tema não manda evento. Os itens que o `gate:prontidao` pede na Privacidade continuam lá.
+- **O teste:** o `tests/unit/privacy-theme.test.ts` acha, em cada idioma, a chave no resumo, o parágrafo na seção do aviso, com `light`, `dark`, os nomes dos três estados e as quatro afirmações, e um item só na lista do tempo de guarda. Com os textos de antes, os três casos reprovam.
+
+## § 388 · O cabeçalho com o Menu (F11, decisão 3)
+
+- **A marcação** é a da especificação (`header-a.html`), no `src/components/Header.astro`, na ordem do DOM e da tela: pular para o conteúdo (no layout), logo, busca, botão de idioma e menu de idioma, botão de tema, a região de status, botão Menu e a folha. Cada popover vem logo depois do botão que o abre, e nada fica entre o botão Menu e a folha.
+  - **O Menu** é um `popover` com `popovertarget`, sem script, como o menu de idioma. A folha é `nav#fo-menu.fo-menu.fo-dogear`, com o nome "Menu" ("Menú").
+  - **As linhas** são as do § 389.
+  - **As props do Header não mudaram** (`lang`, `route`, `t`): o que a folha precisa sai do módulo `src/components/header-menu.ts`, e o teste que renderiza o `Header` sozinho (`pdf-site.test.ts`) continua chamando-o do mesmo jeito.
+- **O CSS** foi reescrito no lugar do bloco do cabeçalho do `components.css`, sem arquivo nem token novo. Ele vem do `header.css` da proposta, com o que muda no site:
+  - o `--font-text` virou `--fo-font-text`;
+  - o círculo das linhas usa `--on-cat` e `--on-violeta` por um seletor `:where(.fo-cat--image, …) > .fo-menu__dot`, como o `.fo-chip__dot`, porque o `--fo-on-cat` do `bundle.css` não existe no site;
+  - não entraram as regras que são só do protótipo nem as da alternativa B.
+- **A face Figtree Steady** (`--fo-font-steady`) está em todo texto do cabeçalho: a busca, o "Ctrl K", o código do idioma e o "Menu".
+  - **A folha** fica na `--fo-font-text`: ela abre depois da primeira pintura, e numa primeira visita com a Figtree atrasada a Steady ficaria na fonte de reserva a visita inteira.
+  - **A alternativa** era redefinir `--fo-font-text` no `.fo-header`, como o `.fo-cookie` faz, o que levaria a folha para a Steady também.
+  - **A medida:** a 320, 360, 390, 412, 768, 1024 e 1280 px, cada largura num contexto com a Figtree segura até a primeira pintura e depois solta, nenhum controle do cabeçalho muda de posição nem de largura, nos dois navegadores.
+  - **Uma pegadinha nova:** no Chromium, um texto `optional` que estava em `display: none` na primeira pintura (o idioma a 320 px) e aparece depois de a fonte chegar já sai na Figtree. Uma página aberta a 320 px e alargada até 768 px antes de a fonte chegar ainda vê o idioma mudar 2 px; numa largura fixa, nada muda.
+- **A partir de 1280 px, uma regra só para toda página.**
+  - **A regra:** o `padding` do cabeçalho põe o logo onde começa a coluna da ferramenta (x 36) e o último botão onde ela termina (x 794), a 150 px da lateral (x 944).
+  - **Nas páginas sem lateral** (a home, os hubs de guias, as institucionais e as jurídicas), o último botão termina também em x 794, 2 px antes do fim da coluna de 760 px delas: o cabeçalho é o mesmo em toda página e não pula quando se passa de uma para outra.
+  - **A alternativa,** proposta na nota d1 (seção 0, item 6), era uma classe por página com lateral (uma prop do `Header` ou um `body:has(.fo-frame--rail)`) e o cabeçalho na largura da moldura inteira nas outras. Ela pede uma prop ou um `:has` no `body`, e o cabeçalho mudaria de lugar entre as páginas.
+- **Os dois popovers** são `position: absolute`, com o anchor positioning (o `position-anchor` no botão) e a reserva `top: 68px` (64 + `--space-1`) onde ele não existe.
+  - **O menu de idioma** passou de `fixed` para `absolute`, e a reserva dele foi de 64 para 68 px, como a do Menu (§ 363).
+  - **Na reserva a partir de 1280 px,** os dois terminam na borda direita do cabeçalho (x 794), e não a 16 px da janela. A especificação não tratava o menu de idioma sem anchor.
+  - **Abrir um fecha o outro:** são dois `popover` automáticos.
+- **Os idiomas no Menu numa linha de três, abaixo de 768 px.** É um desvio da especificação, que punha um idioma por linha, com o ícone `check`.
+  - **Por quê:** a 360 px, a folha em inglês (a mais alta, com casa e saúde) terminava em y 729,5. O primeiro AdSlot do Merge PDF e do Unlock PDF fica em y 796 nos três idiomas (67 px da folha), e o do PNG to JPG e do Delete PDF pages, em y 852 (123 px). A especificação contava com o primeiro anúncio de cada molde em y 880 ou mais, mas mediu só os moldes de imagem.
+  - **O resultado:** com os três idiomas lado a lado, em alvos de 48 px, a folha termina em y 629,5 em inglês e 521,5 em português e espanhol. Todo AdSlot das 178 páginas com anúncio fica a 166,5 px ou mais, e o `ads.spec.ts` confere toda página, a 360 e a 1280 px.
+  - **O idioma em uso** guarda o fundo `brand-soft`, o traço de 2 px e o peso 700, que marca também com cores forçadas, além do `aria-current`. O `check` saiu, porque não cabe na linha: "Português" tem 74,6 px, e cada alvo, 88 px a 320 px.
+  - **As alternativas:**
+    - linhas de 48 px, sem espaço entre elas e com o rótulo "Language" escondido: a folha em inglês ainda terminava em y 641,5, a 154,5 px, e no limite;
+    - uma altura máxima com rolagem dentro da folha: a dobra sai da caixa, e o idioma ficaria escondido;
+    - descer o AdSlot da ferramenta de PDF: mexe no mapa de anúncios, fora da F11;
+    - as categorias em duas colunas: os nomes quebram de linha.
+- **As medidas** (Chromium e WebKit, `header-menu.spec.ts`, linhas `[header]`):
+  - 64 px e uma linha em toda largura de 320 a 1280 px, nos três idiomas, com a Figtree segura e solta;
+  - a 320 px, logo, busca, tema e Menu ocupam 282,5 de 288 px (sobram 5,5), e a 360 px, 294,5 de 328;
+  - a 768 px, com o idioma e o texto "Menu", ocupam 608,2 px em en, 654,5 em pt e 663,0 em es, de 736, no Chromium (612,6, 659,0 e 667,5 no WebKit);
+  - a 1280 px, o logo fica em x 36 e o último botão termina em x 794, na coluna. A lateral começa em x 944, e a folha aberta vai de x 434 a 794, com 481 px de altura em en e 373 em pt e es.
+  - Todo controle tem 48 × 48 px; as linhas da folha, 52 px; os idiomas, 48.
+- **A F10 p-5.**
+  - **O que a grade resolve:** a 1280 px, a lateral começa em y 84 e em x 944, e o último botão termina em x 794. Um controle do cabeçalho fica a 150 px dela na horizontal (o `ads.spec.ts` mede 150 e mais). O menu de idioma e o Menu, `absolute`, terminam em x 794 ou antes.
+  - **O que sobra:** o `padding-top` de 150 px na lateral deixa de ser preciso para a regra dos 150 px. Da F10 p-5 não sobra nada obrigatório para a F12, que decide se ainda quer a lateral mais baixa no mapa novo (UX-07).
+- **O README do Header** (decisão 8), cada regra com o antes e o depois:
+  - **a descrição:** antes, "O cabeçalho fino: logo, busca de ferramentas e idioma. Nada mais."; depois, "O cabeçalho: logo, busca de ferramentas, idioma (a partir de 768px), tema e Menu, nessa ordem no DOM e na tela. Cada menu vem logo depois do botão que o abre.";
+  - **a altura:** antes, "64px de altura, fundo `bg`, divisor `hairline` embaixo. Não gruda ao rolar…"; depois, a mesma regra com "64px de altura e uma linha só em toda largura, de 320 a 1280px, nos três idiomas, antes e depois da fonte", mais a face Figtree Steady em todo texto do cabeçalho;
+  - **o idioma:** antes, ele levava para a página equivalente ou "para o hub do idioma"; depois, "para a home do idioma", que é a regra do código, e, abaixo de 768px, ele fica no fim do Menu, em três alvos lado a lado;
+  - **o tema e o Menu:** não existiam; agora há uma regra para o botão de tema (os três estados, o nome pelo CSS, a região de status e a chave), uma para o Menu (o `popover`, a folha com a dobra, as linhas, o `aria-current` e o peso, o Esc e o foco), uma para os dois menus `absolute` com o anchor e a reserva de 68px, uma para a grade a partir de 1280px e uma para os 150px de todo controle e menu aberto;
+  - **os alvos:** antes, "Logo, busca e idioma têm alvo de `tap-min` (48px)."; depois, "Logo, busca, idioma, tema e Menu têm alvo de `tap-min` (48px); as linhas da folha têm 52px, e os idiomas, 48px.";
+  - **o menu:** antes, "Sem menu hambúrguer: as categorias ficam na home e nos hubs."; depois, a regra saiu, e o Menu tomou o lugar dela.
+
+  O `preview.html` mostra o cabeçalho do computador e o do celular, o botão de tema que passa pelos três estados e a folha aberta nas duas larguras. A região do Header no `bundle.css` traz as regras novas, com `box-sizing: border-box`, porque o `bundle.css` não tem o preflight do site.
+
+## § 389 · O mapa de cada rota para a seção do Menu e o `aria-current` (F11, decisão 3)
+
+- **Onde mora:** em `src/components/header-menu.ts`, que roda no Node, sem `import.meta.glob`. Ele tem as seções (`MENU_SECTIONS`, na ordem da folha), a página de cada seção por idioma (`sectionPage`), as páginas de cada seção, as páginas sem seção (`NO_SECTION`), a contagem (`sectionCount`), as linhas de um idioma (`menuGroups`) e os links de idioma (`languageLinks`, a regra do menu de idioma de antes, só mudada de lugar).
+- **O mapa:**
+  - **Imagem:** o hub `image-tools` é a página da seção ("page"), e as 8 ferramentas e os 3 presets marcam "true";
+  - **PDF:** o hub `pdf-tools` ("page") e as 12 ferramentas ("true");
+  - **Dinheiro:** os dois hubs ("page"), o `money-calculators` (en e es) e o `br-money-calculators` (pt), e as 14 calculadoras, os 4 presets e as 8 calculadoras do Brasil ("true");
+  - **Casa e Saúde:** o `home-calculators` e o `health-calculators` ("page"), e as 6 e as 5 calculadoras de cada um ("true");
+  - **QR code:** o `qr-code-generator` ("page");
+  - **Guias:** o hub `guides` ("page"), e os 10 guias de arquivo e os 5 de dinheiro ("true"). Um guia marca Guias, e não a categoria da ferramenta que ele embute ou da calculadora que ele explica, como a especificação pede;
+  - **Apoie a Oli:** a página `support` ("page");
+  - **Sem seção:** a home, a Privacidade, os Termos, o Sobre, o Contato, as Licenças, a página offline, a "Abrir com" e a 404.
+
+  O `header-menu.test.ts` confere que toda rota do `ROUTES` está numa seção só ou na lista sem seção, com os hubs em "page".
+- **O `aria-current`:** "page" na própria página da seção e "true" numa página dela. A linha que não é a da página fica sem o atributo: o Astro escreveria `aria-current="false"` para um `false`, e o seletor `[aria-current]` o pegaria. O mesmo vale para o idioma em uso no fim da folha ("true").
+- **As linhas de cada idioma:** só as seções cuja página existe nele (`pagePath`). Em inglês são oito; em português e espanhol, seis, sem Casa e Saúde, e a linha de Dinheiro leva ao hub do Brasil em português.
+- **A contagem de cada linha**, sempre dos registros:
+  - **Imagem:** `IMAGE_TOOL_IDS` com página no idioma, 8, as ferramentas da grade do hub (os presets ficam na tabela dele);
+  - **PDF:** `PDF_TOOL_IDS`, 12;
+  - **Dinheiro:** `HUB_MONEY_IDS[lang].length`, 14 em en e es e 8 em pt, os cartões do hub. A tabela da especificação dizia 18 em en e es, porque contou também os 4 presets, o que nenhum hub mostra como cartão;
+  - **Casa:** `HOUSE_CALC_IDS`, 6; **Saúde:** `HEALTH_CALC_IDS`, 5;
+  - **Guias:** `hubGuides(lang).length`, 15, 10 e 15 (o `src/tools/guides/hub.ts` do hub de guias).
+
+  O número sai com o `groupDigits` do idioma, nos textos `common.header.menuTools`, `menuCalculators` e `menuGuides` ("{n} tools", "{n} ferramentas", "{n} herramientas"…). O QR code diz os formatos ("PNG or SVG"), e o Apoie a Oli diz como apoiar ("Ko-fi"; "Ko-fi ou Pix" em português).
+- **Os nomes** são os que o site já tem (`imageTools`, `pdfTools`, `moneyCalculators`, `homeCalculators`, `healthCalculators`, `qr.name` e o `guidesHub` do hub de guias). Os textos novos do cabeçalho ficam no bloco `header` dos três `common.ts`: `menu`, `theme`, `menuLanguage`, `menuTools`, `menuCalculators`, `menuGuides`, `menuQr`, `support` e `supportMeta`.
+- **Os ícones** são os do design system: `image`, `pdf`, `calculator`, `home`, `heart`, `qr`, `book` e `coffee`, com o círculo na cor da categoria (`fo-cat--image`, `--pdf`, `--money`, `--home` e `--util`) e o `brand-soft` em Guias e no Apoie a Oli.
+
+## § 390 · O "Apoie a Oli" no Menu e o lugar `menu` (F11, decisão 3)
+
+- **A linha:** "Support Oli", "Apoie a Oli" e "Apoya a Oli", com o ícone `coffee` no círculo `brand-soft` e a linha de baixo "Ko-fi" ("Ko-fi ou Pix" em português). Ela leva à página de apoio do idioma (`/support/`, `/pt/apoie/`, `/es/apoyo/`) e leva `data-track="donate_click"` e `data-track-place="menu"`.
+- **O evento:** o script que o `BaseLayout` já tinha (o `[data-track]` delegado) manda `donate_click` com `{ lang, place: 'menu' }`. Nada de script novo.
+- **A lista fechada:** o `menu` entrou no fim de `DONATE_PLACES` (`src/analytics/events.ts`), e com ele o tipo `DonatePlace` e o `CLOSED_VALUES.place` do `cleanParams`, que lê a mesma lista. O `foTrack` do navegador filtra só os nomes dos parâmetros, e o `EVENT_PARAMS` não mudou.
+- **A Privacidade** não mudou por isso: o "Click on a donation link" já cobre o lugar novo.
+- **Os testes:**
+  - o `events.spec.ts` clica a linha a 360 px em espanhol (`/es/unir-pdf/`) e a 1280 px em inglês (`/guides/`) e espera `['event', 'donate_click', { lang, place: 'menu' }]`;
+  - o `pix.test.ts` fixa a lista nova e o `cleanParams` com `menu` e com um lugar fora da lista (§ 392).
+- **O café** fica como está: o card, os textos novos, a linha do rodapé e a página de apoio são da F12.
+
+## § 391 · Onde mora cada teste novo do cabeçalho e do tema (F11, decisão 10)
+
+- **No Vitest** (roda em todo push, no job `leve`):
+  - `tests/unit/theme-script.test.ts`: os dois scripts num contexto próprio (`runInNewContext`), como o `consent.test.ts`. Confere a leitura, a escrita, a remoção da chave, o armazenamento bloqueado, a página sem meta, sem botão ou sem região, nada mandado e nenhum `storage` listener, e os tamanhos (376 bytes com gzip, abaixo de 512);
+  - `tests/unit/theme-pair.test.ts`: o par de toda regra de `prefers-color-scheme` (§ 386), com o controle negativo;
+  - `tests/unit/header-menu.test.ts`: o mapa de cada rota (§ 389), as contagens pelos registros, as linhas de cada idioma, os links de idioma e o `Header` renderizado (a ordem dos filhos, os nomes, o evento do Apoie a Oli e o script logo depois do `</header>`);
+  - `tests/unit/privacy-theme.test.ts`: a Privacidade nos três idiomas (§ 387).
+- **No Playwright,** com nomes `header-*`, que ordenam entre o `events.spec.ts` e o `i18n-budgets.spec.ts` e caem nas partes leves:
+  - `header-axe.spec.ts`: o axe com o Menu aberto e o botão nos três estados, nos dois temas;
+  - `header-links.spec.ts`: o HTML de toda página pelo `request`, em blocos de 24, com o Menu e a ordem do `<head>`;
+  - `header-menu.spec.ts`: o Menu numa página por molde e idioma a 320, 360 e 1280 px; a altura e as medidas a sete larguras com a Figtree segura e solta; os dois menus que se fecham; e o peso com cores forçadas;
+  - `header-theme-offline.spec.ts`: o tema offline, com o worker;
+  - `header-theme.spec.ts`: o primeiro quadro em cada molde, a escolha entre páginas e idiomas, Sistema, os nomes, o armazenamento bloqueado e nada mandado.
+
+  As partes de cada um estão na tabela de baixo.
+- **Nos specs que já existiam:**
+  - `tests/e2e/ads.spec.ts`: um bloco próprio, no meio do arquivo e longe do bloco do `.fo-guide-links` que o G2 troca. Ele mede o cabeçalho e os dois menus abertos contra todo AdSlot das 178 páginas com área de anúncio, a 360 e a 1280 px, em 12 blocos de 15 páginas, com o `expectClearance` do arquivo;
+  - `tests/e2e/events.spec.ts`: o `donate_click` com o lugar `menu` (§ 390);
+  - `tests/unit/contrast.test.ts`: o par novo `stroke` sobre `brand-soft` (uso `ui`, 3,20:1 no escuro). O resto dos pares do Menu já estava na lista.
+- **O apoio comum:** o `tests/e2e/lib/header.ts` tem as páginas de cada molde, o que a folha deve listar e para onde leva cada idioma, tirados do mapa de rotas e não do módulo que monta a folha, e a cor do fundo de cada tema, tirada do `tokens.json`.
+- **Cada teste novo reprova sem a mudança.** As provas são contra o `dist/` do ponto de partida (`.cache/f11/dist-antes`, servido na porta 4184) e estão no relatório do agente. O `theme-pair.test.ts` passa com o CSS de antes, que já tinha o par: a prova dele é o controle negativo e uma cópia do `global.css` sem a guarda, com que ele reprova.
+- **As partes do CI.** O `--list` de cada parte (`--project=chromium --shard=i/5` e `--project=webkit --shard=i/13`), com os specs novos, no commit do agente T, antes do merge com o G2:
+
+  | Spec | Testes por navegador | Chromium | WebKit |
+  | --- | --- | --- | --- |
+  | `header-axe.spec.ts` | 13 | 3 | 7 |
+  | `header-links.spec.ts` | 9 | 3 | 7 |
+  | `header-menu.spec.ts` | 49 | 3 | 7 |
+  | `header-theme-offline.spec.ts` | 1 | 3 | 7 |
+  | `header-theme.spec.ts` | 14 | 3 | 7 |
+  | `ads.spec.ts`, o bloco do cabeçalho | 12 | 1 e 2 | 3 e 4 |
+  | `events.spec.ts`, o Apoie a Oli | 1 | 3 | 7 |
+
+  O `design.spec.ts` e o `image-matrix.spec.ts` continuam em partes diferentes: Chromium 3 e 4, WebKit 6 e 7 contra 9 e 10. O `--list` foi de 1.428 testes por navegador no ponto de partida a 1.431 com o hub do G1 (o `a11y.spec.ts` lê o `ROUTES`) e a 1.530 com os 99 desta fatia. A parte 7 do WebKit, a mais leve na F9 (128 s), recebe quase todos os specs novos; a do Chromium é a 3 (217 s na F9). Os specs `guides-*` do G2 ordenam antes dos `header-*` e empurram as fronteiras, então o `--list` se refaz depois do merge.
+
+## § 392 · Os testes antigos que o cabeçalho e o tema mudaram (F11, no formato da § 341)
+
+A ficha manda mudar um teste que fixa o cabeçalho, o tema ou a Privacidade de antes junto com o que ele protege, e mostrar que a proteção continua.
+
+- **`tests/unit/pdf-site.test.ts`,** dois testes.
+  - **O primeiro** ("has the reciprocal hreflang cluster…") fixava `a[hreflang]` da página inteira igual aos três pares do menu de idioma. Com os idiomas no fim do Menu, a página tem seis. Agora fixa:
+    - os três pares no `.fo-langmenu`;
+    - os mesmos três pares no `.fo-menu__lang`;
+    - seis `a[hreflang]` na página, nenhum fora dos dois menus.
+  - **O segundo** ("keeps § 84…") lia `a[hreflang]` do `Header` sozinho. Agora lê o menu de idioma e confere que a lista do Menu é igual a ela.
+
+  Os dois pares da § 84 continuam: a página só em inglês leva às homes dos outros idiomas, e o guia de PDF leva ao mesmo guia. O `Header` é chamado com as mesmas props.
+- **`tests/unit/pix.test.ts`.** Fixava `DONATE_PLACES` igual a `['result', 'footer', 'support_page', 'pix']`. Agora fixa a lista com `menu` no fim e confere que o `cleanParams` guarda `menu` e descarta um lugar fora da lista (`header`). As asserções do `pix` e do `pix-copia-e-cola` continuam iguais.
+- **`tests/unit/calc-defs.test.ts`** ("the privacy policy names the Oli's session mark…"). Fixava a data "Last updated: November 2, 2026" da Privacidade em inglês. Agora fixa "November 3, 2026", o dia em que a página ganhou a chave do tema (§ 387). As datas de pt e es e a asserção do armazenamento da sessão continuam iguais.
+- **`tests/e2e/lib/axe.ts`.** Só o comentário mudou. Ele dizia que o site não decide tema por script na carga; agora diz que o único tema decidido na carga é uma escolha guardada, que todo contexto de teste começa sem ela e que o botão de tema fica no `header-axe.spec.ts`. As combinações, as regras e o código não mudaram.
+- **Só acrescentados,** sem nenhuma asserção mudada: o bloco do cabeçalho no `ads.spec.ts`, o teste do Apoie a Oli no `events.spec.ts` e o par `stroke` sobre `brand-soft` no `contrast.test.ts`.
+- **Os que passaram sem mudar,** rodados nos dois navegadores:
+  - `navigation.spec.ts`: o botão de idioma continua a partir de 768 px, com o nome começando pelo código, e o idioma do Menu fica escondido a 1280 px;
+  - `cookie-footer.spec.ts` e `a11y.spec.ts`: o tema trocado no lugar, em Sistema;
+  - `layout-shift.spec.ts`: a trilha e o H1 parados com a Figtree atrasada, e o cabeçalho com a mesma altura;
+  - `design.spec.ts`;
+  - `english-leak.test.ts` e `image-hub.test.ts`: os links do Menu são todos do idioma, e os de idioma levam `hreflang`.
+- **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 103 arquivos e 1.766 testes (o commit do hub, `0e8f8ea`) para 107 arquivos e 1.796 testes. O `--list` do Playwright foi de 1.431 para 1.530 testes por navegador; no ponto de partida eram 1.428.

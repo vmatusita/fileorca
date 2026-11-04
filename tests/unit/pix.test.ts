@@ -66,9 +66,12 @@ describe('the Pix generator', () => {
 });
 
 describe('the donate_click of the Pix', () => {
-  // The Copy code button sends donate_click with the place pix, a value of the closed list (DECISOES § 10 and § 216).
+  // The Copy code button sends donate_click with the place pix, a value of the closed list (DECISOES § 10 and § 216). The
+  // list gained `menu` in the F11 (the Support Oli row of the header Menu, § 390 and § 392): it stays closed and ordered.
   it('keeps the place pix and drops a place outside the list', () => {
-    expect(DONATE_PLACES).toEqual(['result', 'footer', 'support_page', 'pix']);
+    expect(DONATE_PLACES).toEqual(['result', 'footer', 'support_page', 'pix', 'menu']);
+    expect(cleanParams('donate_click', { place: 'menu', lang: 'es' })).toEqual({ place: 'menu', lang: 'es' });
+    expect(cleanParams('donate_click', { place: 'header', lang: 'es' })).toEqual({ lang: 'es' });
     expect(cleanParams('donate_click', { place: 'pix', lang: 'pt' })).toEqual({ place: 'pix', lang: 'pt' });
     expect(cleanParams('donate_click', { place: 'pix-copia-e-cola', lang: 'pt' })).toEqual({ lang: 'pt' });
   });

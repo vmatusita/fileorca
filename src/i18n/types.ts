@@ -27,6 +27,21 @@ export interface CommonTexts {
     langSr: string;
     langMenuLabel: string;
     langNames: LangNames;
+    /** The Menu button and the name of its sheet (F11, decision 3): "Menu", "Menú". */
+    menu: string;
+    /** The name of the theme button in each state (F11, decision 2): "Theme: system", "Theme: light", "Theme: dark". */
+    theme: { system: string; light: string; dark: string };
+    /** The label of the language list at the end of the Menu, under 768 px: "Language". */
+    menuLanguage: string;
+    /** The line under a Menu row, {n} from the registries: "{n} tools", "{n} calculators", "{n} guides". */
+    menuTools: string;
+    menuCalculators: string;
+    menuGuides: string;
+    /** The line under the QR code row: the formats it saves ("PNG or SVG"). */
+    menuQr: string;
+    /** The support row of the Menu ("Support Oli") and the line under it (how to support: "Ko-fi"). */
+    support: string;
+    supportMeta: string;
   };
   breadcrumb: { label: string; home: string };
   seal: string;

@@ -330,6 +330,45 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
   expect(readFileSync('dist/_headers', 'utf8')).not.toContain('ads.txt');
 });
 
+// F11 (decision 10 and criterion 8; DECISOES § 388 and § 391): the header. Every control of it (logo, search, language,
+// theme, Menu) and every open menu (the Menu sheet and the language menu) is 150 px or more from every AdSlot, at 360 and
+// 1280 px, on every page that has AdSlots (the route map: each route with an ad area, in each of its languages), in blocks
+// of pages. On the phone the sheet opens at the top of the page and the first AdSlot of each mold sits under it (the
+// nearest, Merge PDF and Unlock PDF in English, at y 796); at 1280 px the header follows the grid of the frame, so its
+// last control and the open sheet end where the tool column ends, 150 px from the rail.
+const HEADER_CONTROLS = '.fo-header > a, .fo-header > button';
+const HEADER_AD_PAGES = ROUTES.filter((route) => route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
+const HEADER_AD_BLOCK = 15;
+test.describe('the header and its open menus stay 150px from every AdSlot, at 360 and 1280px', () => {
+  for (let start = 0; start < HEADER_AD_PAGES.length; start += HEADER_AD_BLOCK) {
+    const block = HEADER_AD_PAGES.slice(start, start + HEADER_AD_BLOCK);
+    test(`pages ${start + 1} to ${start + block.length} of ${HEADER_AD_PAGES.length} (${block[0]} and on)`, async ({ page }) => {
+      for (const path of block) {
+        expect((await page.goto(path))?.status(), path).toBe(200);
+        for (const viewport of VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          await page.evaluate(() => scrollTo(0, 0));
+          const label = `${path} ${viewport.width}px`;
+          await expectClearance(page, `${label}, o cabeçalho`, HEADER_CONTROLS);
+          await page.locator('.fo-header__menu').click();
+          await expect(page.locator('#fo-menu')).toBeVisible();
+          await expectClearance(page, `${label}, o Menu aberto`, `#fo-menu, ${HEADER_CONTROLS}`);
+          await page.keyboard.press('Escape');
+          await expect(page.locator('#fo-menu')).toBeHidden();
+          // The language menu has its button from 768 px; under it, the languages are in the Menu, measured above.
+          if (viewport.width >= 768) {
+            await page.locator('.fo-header__lang').click();
+            await expect(page.locator('#fo-langmenu')).toBeVisible();
+            await expectClearance(page, `${label}, o menu de idioma aberto`, `#fo-langmenu, ${HEADER_CONTROLS}`);
+            await page.keyboard.press('Escape');
+            await expect(page.locator('#fo-langmenu')).toBeHidden();
+          }
+        }
+      }
+    });
+  }
+});
+
 // F4 (prompt decision 13): every calculator, preset and guide, at 360x740 and 1280x800 on one load, with the
 // schedule closed and with one year open. Measured on top of TARGETS: the ResultHero, the three ExportBar buttons,
 // the ScenarioCompare, the schedule section and its table. No AdSlot above the tool on a phone, inside the island,

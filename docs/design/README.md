@@ -9,7 +9,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - Carregue `tokens.css` e `components/bundle.css`. As classes são `fo-*`; cada componente tem a marcação no seu `preview.html` e as regras no seu README.
 - No site (Astro + Tailwind v4), os tokens viram o `@theme` e as variáveis do tema escuro; `bundle.css` é a referência de estilo de cada componente. Nenhum hex fora de `tokens.json`, exceto dentro da Oli, o fundo branco do QR do Pix e a hachura dos juros.
 - Ícones: SVG inline com `stroke="currentColor"` (grupo Icons). Oli: SVG inline num sprite (grupo Oli), sempre `aria-hidden`.
-- O tema escuro segue o sistema (`prefers-color-scheme`) só com CSS, sem script; `data-theme="light"` ou `"dark"` no `<html>` força um dos dois (para testes e previews).
+- O tema tem três estados: Sistema (o padrão, que segue o `prefers-color-scheme` só com CSS), Claro e Escuro, escolhidos no botão de tema do cabeçalho (Header). A escolha fica no navegador, na chave `fo-theme` do `localStorage` (`light` ou `dark`; voltar a Sistema apaga a chave), e um script inline mínimo no `<head>`, depois da `<meta name="color-scheme" content="light dark">` e antes do CSS, põe `data-theme="light"` ou `"dark"` no `<html>` antes da primeira pintura; em Sistema, nenhum `data-theme`. Toda regra de `prefers-color-scheme` tem o par com `data-theme` (`tokens.css` e o CSS do site), e os testes e previews também forçam um dos dois pelo `data-theme`.
 
 ## Princípios de UX
 
