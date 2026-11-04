@@ -23,8 +23,9 @@
 }
 
 html { color-scheme: light; -webkit-text-size-adjust: 100%; }
-html[data-theme="dark"] { color-scheme: dark; }
-@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) { color-scheme: dark; } }
+/* The dark theme on screen only, as in tokens.css: the print is always light (review F11 C-1, DECISOES § 404). */
+@media screen { html[data-theme="dark"] { color-scheme: dark; } }
+@media screen and (prefers-color-scheme: dark) { html:not([data-theme="light"]) { color-scheme: dark; } }
 
 body {
   background: var(--bg);
