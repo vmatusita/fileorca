@@ -194,7 +194,9 @@ test('with forced colours the section and the language in use are underlined too
 // open, and for 400 ms after it closes (a tap's click comes after the close in WebKit), the page under the header takes no
 // pointer, and the click only closes the menu. page.mouse and page.touchscreen act by coordinate: locator.click would wait
 // for the element to take the pointer.
-const framePointer = (page: Page) => page.evaluate(() => getComputedStyle(document.querySelector('.fo-frame') as Element).pointerEvents);
+/** Whether the page under the header takes the pointer again: the frame is not none and the unpainted sheet has left. */
+const takesPointer = (page: Page) =>
+  page.evaluate(() => getComputedStyle(document.querySelector('.fo-frame') as Element).pointerEvents === 'auto' && getComputedStyle(document.body, '::after').scale === '0');
 
 /** The centre of an unchecked radio of the tool just under the open sheet, marked data-probe. */
 async function radioUnderSheet(page: Page): Promise<{ x: number; y: number }> {
@@ -230,7 +232,7 @@ test('the click that closes a menu does not reach the page under it: no file pic
   await page.waitForTimeout(300);
   expect(pickers, 'no file picker from the click that closed a menu').toBe(0);
   // With no menu open, once the hold is over, the same click opens the picker: the page takes the pointer again.
-  await expect.poll(() => framePointer(page)).toBe('auto');
+  await expect.poll(() => takesPointer(page)).toBe(true);
   const picker = page.waitForEvent('filechooser');
   await page.mouse.click(centre.x, centre.y);
   await picker;
@@ -261,7 +263,7 @@ test('the tap that closes the Menu on a touch screen does not reach the page eit
     await page.waitForTimeout(500);
     await expect(page.locator('[data-probe] input'), `${reducedMotion}: the closing tap changed nothing`).not.toBeChecked();
     // Once the hold is over, the same tap reaches the radio.
-    await expect.poll(() => framePointer(page)).toBe('auto');
+    await expect.poll(() => takesPointer(page)).toBe(true);
     await page.touchscreen.tap(radio.x, radio.y);
     await expect(page.locator('[data-probe] input'), reducedMotion).toBeChecked();
     await context.close();
