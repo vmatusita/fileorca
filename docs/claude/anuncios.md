@@ -28,3 +28,14 @@ Pegadinhas que a F3 achou:
 ## F6: português e espanhol
 
 O Pix: a chave aleatória está em `src/platform/pix.ts` (uma linha, copiada do `docs/F0-SAIDA.md`). O gerador reproduz o exemplo do manual e os quatro códigos do `fixtures/pix.json` (`tests/unit/pix.test.ts`); o QR é desenhado no build com o `qrcode` e lido de volta com o `jsqr` em cada SVG do `dist/pt/apoie/` (`tests/unit/pix-qr.test.ts`). A troca de valor é CSS (`:has(:checked)`) e o copiar é um script inline; o "Copiar código" manda o `donate_click` com o lugar `pix`.
+
+## F10: o mapa de anúncios
+
+Pegadinhas que a F10 achou ao medir o mapa (`docs/propostas/ux-v2/ad-map.html`, DECISOES § 351, § 360 e § 361):
+
+- **A margem de 150 px do `.fo-ad` não colapsa na grade do `.fo-main`** (gap de 16 px). Cada caixa de conteúdo soma 616 px ao `<main>`, e o vizinho fica a 166 px.
+- **A lateral, a 1280 px, fica a 29 px dos botões de idioma e de busca do cabeçalho** (y 84), e o menu de idioma aberto (`position: fixed`) cai em cima dela. O `ads.spec.ts` não põe o cabeçalho nos alvos. Ponha `.fo-header a`, `.fo-header button` e os popovers, e dê à lateral um `padding-top` de 150 px.
+- **O `gate:prontidao` conta toda caixa `fo-ad fo-ad--` do HTML,** mesmo a escondida por CSS naquela largura (150 palavras por caixa).
+- **O multiplex a 1280 px:** a coluna tem 758 px, então o `ins` tem `floor(758 × 0,6)` = 454 px, e a caixa, 498 px com o rótulo. A 360 px, o carregador dá 1 coluna × 6 linhas: 1.666 px, que nenhum molde cabe em 30 %.
+- **Para medir a densidade,** grave o `fo-consent`, espere `#fo-tool-root[data-hydrated="true"]` e meça com a ferramenta em repouso. A seção "O que medimos" dos guias de dinheiro não tem `data-content`, só o `h2#measured`.
+- **A vinheta do AdSense tem "gatilhos adicionais" ligados por padrão desde 9/mar/2026:** o botão Voltar, 30 s parado, a volta à aba e o fim do artigo. Eles podem pôr uma vinheta durante o processamento, e desligar é do Victor, no painel.

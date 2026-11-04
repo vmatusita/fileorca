@@ -59,3 +59,15 @@ Pegadinhas que a F8 achou:
 - **O relógio falso do Playwright esvazia o `performance.getEntriesByType('resource')` no WebKit.** Um teste que fixa o relógio antes de a página carregar não vê os recursos dela.
 - **Teste que percorre o site inteiro num teste só estoura os 60 s no WebKit do CI** quando o site cresce (o reflow a 320 px, com 169 páginas, § 306). Divida em blocos de páginas, um teste cada, e confira no `--list` onde caem o `design.spec.ts` e o `image-matrix.spec.ts`.
 - **Os passeios de estados das ferramentas de PDF ficam no `axe-pdf-states.spec.ts`** (§ 307): no `a11y.spec.ts` eles caíam todos na primeira parte de cada navegador, acima de 700 s. Teste pesado de axe novo vai num spec que caia numa parte leve; confira no `--list`.
+
+## F10: medidas de UX
+
+Pegadinhas que a F10 achou ao medir o site e os protótipos:
+
+- **No WebKit (o Safari e o do Playwright), o Tab pula os links por padrão.** Um teste de teclado usa `focus()` ou Option+Tab. Um popover aberto pelo clique não dá foco ao botão; pelo teclado, o foco volta ao botão no Esc.
+- **O Chromium headless no Windows tem a barra de rolagem clássica:** um diálogo de 328 px fica em x 9 a 360 px, e no WebKit, em x 16.
+- **O `boundingBox()` dá coordenadas da janela, não do documento.** Num `clip` de `fullPage`, some o `scrollY`.
+- **Num contexto novo, o `document.fonts.ready` pode resolver antes de a fonte ser pedida.** Para medir quebra de linha, chame antes `document.fonts.load('600 24px Fredoka')` e o mesmo para a Figtree.
+- **A captura de página inteira faz um relayout com a fonte já carregada.** Na hipoteca en a 360, a trilha passa a duas linhas (`layout-shift` de 0,207, na janela da captura), e os estados seguintes ficam 22 px mais baixos. Meça as posições antes de qualquer `fullPage`.
+- **Com a máquina carregada, o Chromium no Windows pode falhar uma abertura com `net::ERR_NO_BUFFER_SPACE`.** Rodar de novo resolve.
+- **O CLS da interação** vem de um `PerformanceObserver` de `layout-shift` instalado com `addInitScript`. Separe o carregamento do que vem depois do primeiro gesto e some as entradas sem `hadRecentInput`. A escolha no seletor de arquivo cai fora da janela de 500 ms do input.

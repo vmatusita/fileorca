@@ -85,3 +85,7 @@ Pegadinhas que o ajuste achou:
 Pegadinhas que a F9 achou:
 
 - **Até um comentário em `scripts/guides/` muda o SHA-256** que o `tests/unit/guides-measured.test.ts` confere contra o `data/guides-measured.json`: a F9 trocou um comentário do `scripts/guides/lib/browser.ts` e o teste reprovou. Mexer ali pede o `pnpm guias:medir` de novo; para só atualizar uma referência num comentário, deixe como está.
+
+## F10: textos dos protótipos
+
+- **Os textos em pt e es dos protótipos de `docs/propostas/ux-v2/` não passam pelo `lint:texto`,** que só lê os arquivos de tradução do site. A run que construir um item copia os textos da especificação para os arquivos de tradução e passa o glossário (`docs/i18n/`) e o LanguageTool lá.

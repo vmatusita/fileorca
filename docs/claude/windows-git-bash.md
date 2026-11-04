@@ -88,3 +88,11 @@ Pegadinhas que a F9 achou:
 
 - **O `git log -p` de um espelho (`git clone --mirror`, um repositório bare) no Windows usa o textconv de PDF do Git for Windows** (o `diff.astextplain` do gitattributes do sistema), porque um repositório bare não lê o `.gitattributes` do projeto. Na F9, o textconv falhou numa fixture, o `git log` parou no meio e o gitleaks disse 225 de 566 commits com o código 7, como se tivesse lido tudo (DECISOES § 332). Passe `--no-textconv --no-ext-diff` e confira quantos commits a ferramenta leu.
 - **Dois agentes que acrescentam um script no fim do `package.json`** dão conflito na mesma linha no merge: junte as duas linhas, com a vírgula, e confira com `JSON.parse` antes do commit.
+
+## F10: agentes em worktree
+
+Pegadinhas que a F10 achou:
+
+- **Um agente de workflow em worktree (`isolation: 'worktree'`) não consegue escrever no checkout principal:** o harness bloqueia. Ele lê o `.cache/` do principal pelo caminho absoluto, mas grava os scripts e as notas no `.cache/` da própria worktree, e o agente principal copia o que precisa antes do `git worktree remove`.
+- **Dois agentes que acrescentam tokens no fim do mesmo CSS** (a seção 9 do `proto.css`) dão um merge automático se um mexe dentro dos blocos vazios e o outro acrescenta um trio novo depois. Confira com o script de contraste depois do merge.
+- **Uma § citada antes de ser escrita** (por exemplo, "o destino está na § 365") prende a numeração. Reserve os números no plano e escreva as §§ na ordem, ou cite a decisão pelo assunto.

@@ -51,3 +51,21 @@ Pegadinhas que a F8 achou:
 - **A `Figtree Fallback` tem `size-adjust: 101.2%`** (§ 305), escolhido pela varredura de todas as páginas de 320 a 412 px, cada uma num contexto novo, com a Figtree segura até a primeira pintura (o `firstVisit()` do `layout-shift.spec.ts` faz o mesmo numa página; o spec guarda as páginas da borda de cada largura). No Chromium a fonte de reserva não engorda no negrito; no WebKit, sim. Mudou a fonte, a calibração ou um texto perto da borda: rode o `layout-shift.spec.ts`.
 - **No WebKit, uma página de hub não pinta enquanto a Figtree está segura:** o `requestAnimationFrame` não roda. Teste que segura a fonte espera a pintura com um teto (`setTimeout`), como o `painted()` do `layout-shift.spec.ts`. E o WebKit ainda usa uma face `optional` que chega nos 100 ms depois do pedido: para provar a fonte "atrasada", solte-a depois disso.
 - **O CLS de texto com a fonte atrasada depende do sistema:** a mesma página deu 0,046 aqui e 0,257 no Linux do CI, porque a fonte de reserva se desenha diferente (§ 305). Um teste de fonte afirma o que a página garante (a trilha e o H1 parados) e imprime o CLS; o limite de CLS do projeto é o do Lighthouse.
+
+## F10: proposta de UX/UI
+
+Pegadinhas que a F10 achou (nos protótipos sobre o `docs/design/`; valem para quem construir a partir deles):
+
+- **O `bundle.css` do `docs/design/` não é o CSS do site.**
+  - **Medidas que diferem:** o site reserva 300 px no AdSlot de conteúdo e 644 px na lateral (o bundle diz 280 e 624); o `fo-seg__opt` tem 48 px (o bundle, 44); a Oli da DropZone fica em `top: -86px` no celular.
+  - **Nomes que colidem:** o `.fo-hero` do bundle é o ResultHero das calculadoras, e o site usa o mesmo nome para o herói da home e da 404 (o ResultHero do site é `.fo-rhero`). O `.fo-page` do bundle é a prévia do ToolPage, com 360 px de largura, e colide com a célula da grade de páginas do PDF.
+  - **Uma regra que o site não tem:** a `.fo-result__support a` pinta de branco também o botão da linha do café.
+- **A animação de uma peça da Oli dentro de um `<use>` (o vapor da `coffee`) mira o elemento do `<symbol>` no sprite.** O seletor precisa pendurar num ancestral do sprite (`html`, `body`), nunca numa seção da página: o símbolo não descende dela.
+- **Trocar a lista `animation` de [a] para [a, b] preserva a animação `a`** (o mesmo nome na mesma posição) e só começa a `b`. É assim que um aceno curto no `:hover` não recomeça o aceno de 3 s.
+- **Uma regra `.x { display: grid }` vence o atributo `hidden`.** Use `.x:not([hidden])`. No `<dialog>`, o `display: flex` vai só em `[open]`, senão o diálogo fechado aparece.
+- **O `::backdrop` herda as variáveis do `<html>`** a partir do Chrome 122 e do Safari 17.4.
+- **Um `[popover]` no top layer com `position: absolute` usa o bloco inicial como referência.** Só o anchor positioning acerta a posição: o Chromium e o WebKit do Playwright suportam, com uma reserva `top`. Zere o estilo do navegador (`position: fixed`, `inset: 0`, `margin: auto`, `overflow: auto`).
+- **Com cores forçadas, uma borda transparente aparece, e uma marca de estado feita só de borda ou de fundo some.** Marque o estado com peso ou com ícone também.
+- **`aria-labelledby` num `<code>` reprova no axe** (`aria-prohibited-attr`): use um rótulo visível antes do código.
+- **O `.fo-prose p` vence uma classe simples dentro de um cartão posto em texto corrido.** Use `span` ou um seletor `.fo-prose .x`.
+- **Os ícones de `docs/design/assets/Icons/` têm `stroke="#0F1B2D"` no `<svg>` raiz,** como o `tests/unit/icons.test.ts` confere. Um ícone com `currentColor` no raiz, como os do UX-01 na proposta, reprova o teste: converta ao mover.
