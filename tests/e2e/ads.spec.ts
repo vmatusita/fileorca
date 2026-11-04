@@ -335,21 +335,25 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
 });
 
 // F11 (decision 10 and criterion 8; DECISOES § 388 and § 391): the header. Every control of it (logo, search, language,
-// theme, Menu) and every open menu (the Menu sheet and the language menu) is 150 px or more from every AdSlot, at 360 and
-// 1280 px, on every page that has AdSlots (the route map: each route with an ad area, in each of its languages), in blocks
+// theme, Menu) and every open menu (the Menu sheet and the language menu) is 150 px or more from every AdSlot, at 360,
+// 767 and 1280 px, on every page that has AdSlots (the route map: each route with an ad area, in each of its languages), in blocks
 // of pages. On the phone the sheet opens at the top of the page and the first AdSlot of each mold sits under it (the
 // nearest, Merge PDF and Unlock PDF in English, at y 796); at 1280 px the header follows the grid of the frame, so its
 // last control and the open sheet end where the tool column ends, 150 px from the rail.
+// Review F11 D-1 (DECISOES § 404): 767 px too. Under 768 px the sheet keeps its height at every width, while the first
+// AdSlot rises as the text of the page wraps less (Merge PDF and Unlock PDF in English: y 796 up to 384 px, y 776 from
+// 390 px), so 767 px is where the open sheet and the first AdSlot of the phone layout come closest.
 const HEADER_CONTROLS = '.fo-header > a, .fo-header > button';
 const HEADER_AD_PAGES = ROUTES.filter((route) => route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
 const HEADER_AD_BLOCK = 15;
-test.describe('the header and its open menus stay 150px from every AdSlot, at 360 and 1280px', () => {
+const HEADER_VIEWPORTS = [VIEWPORTS[0], { width: 767, height: 800 }, VIEWPORTS[1]] as const;
+test.describe('the header and its open menus stay 150px from every AdSlot, at 360, 767 and 1280px', () => {
   for (let start = 0; start < HEADER_AD_PAGES.length; start += HEADER_AD_BLOCK) {
     const block = HEADER_AD_PAGES.slice(start, start + HEADER_AD_BLOCK);
     test(`pages ${start + 1} to ${start + block.length} of ${HEADER_AD_PAGES.length} (${block[0]} and on)`, async ({ page }) => {
       for (const path of block) {
         expect((await page.goto(path))?.status(), path).toBe(200);
-        for (const viewport of VIEWPORTS) {
+        for (const viewport of HEADER_VIEWPORTS) {
           await page.setViewportSize(viewport);
           await page.evaluate(() => scrollTo(0, 0));
           const label = `${path} ${viewport.width}px`;
