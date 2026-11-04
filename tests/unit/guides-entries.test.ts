@@ -8,7 +8,8 @@ import { guideCardData } from '../../src/tools/guides/card.ts';
 import { CALC_PAGES, GUIDE_IDS, guidePathIn, isBrCalc, isCalcPage, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { HUB_GROUPS, hubGroup } from '../../src/tools/guides/hub.ts';
+import { HOME_GUIDES, HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { routeById } from '../../src/i18n/routes.ts';
 import { DIST, allPages, fileForPath, listFiles } from '../../scripts/lib/dist.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
@@ -235,4 +236,56 @@ describe('the search index with the kind of each entry', () => {
     // "pdf to jpg": the tool and the neighbour tool first, the guide after them (its rank is between the two tools).
     expect(groupEntries(filterEntries(index, 'pdf to jpg', 'en')).map((entry) => entry.id)).toEqual(['pdf-to-jpg', 'image-to-pdf', 'guides-pdf-to-jpg-resolution']);
   });
+});
+
+// F11 (decision 7; DECISOES § 398): the "Read a guide" section of the home, with the four guides of HOME_GUIDES.
+describe('the guides on the home', () => {
+  const groupOf = (id: string): string => (isFileGuide(id) ? (FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image') : 'money');
+
+  it('lists four guides per language: one per group of the hub that has guides in it and a fourth, all with a page there', () => {
+    const want = ['guides-heic-to-jpg-on-windows', 'guides-why-is-my-pdf-so-large', 'guides-combine-pdfs-on-phone'];
+    expect(HOME_GUIDES.en).toEqual([...want, 'guides-extra-mortgage-payments']);
+    expect(HOME_GUIDES.es).toEqual([...want, 'guides-extra-mortgage-payments']);
+    // Portuguese has no money guide: JPG or PNG takes the place of the money one.
+    expect(HOME_GUIDES.pt).toEqual([...want, 'guides-jpg-vs-png']);
+    for (const lang of LANGS) {
+      const ids = HOME_GUIDES[lang];
+      expect(ids, lang).toHaveLength(4);
+      expect(new Set(ids).size, lang).toBe(4);
+      const paths = hubGuides(lang).map((guide) => guide.id);
+      for (const id of ids) expect(paths, `${lang} ${id}`).toContain(id);
+      // Every group of the hub that has a guide in the language has one on the home.
+      for (const group of HUB_GROUPS.filter((candidate) => hubGroup(candidate, lang).length > 0)) expect(ids.map(groupOf), `${lang} ${group}`).toContain(group);
+    }
+  });
+
+  for (const lang of LANGS) {
+    it(`${lang}: the section between the QR code and the privacy line, with the four GuideCards and the link to the guides hub`, () => {
+      const t = TEXTS[lang].home.guides;
+      const main = parse(read(routeById('home').paths[lang] ?? '/')).querySelector('main');
+      const order = main?.querySelectorAll(':scope > section').map((section) => section.getAttribute('aria-labelledby')) ?? [];
+      expect(order.indexOf('guides-home'), lang).toBe(order.indexOf('privacy-home') - 1);
+      expect(order[order.indexOf('guides-home') - 1], lang).toBe('qr-home');
+      const section = main?.querySelector('section[aria-labelledby="guides-home"]');
+      expect(section?.querySelector('h2#guides-home')?.text, lang).toBe(t.heading);
+      expect(section?.querySelector('p.fo-prose')?.text, lang).toBe(t.intro);
+      const cards = section?.querySelectorAll('ul.fo-guidecards > li > a.fo-guidecard') ?? [];
+      expect(cards.map((card) => card.getAttribute('href')), lang).toEqual(HOME_GUIDES[lang].map((id) => guideCardData(id, lang).href));
+      for (const [index, card] of cards.entries()) {
+        const data = guideCardData(HOME_GUIDES[lang][index] ?? 'guides-jpg-vs-png', lang);
+        expect(card.classList.value, `${lang} ${data.id}`).toEqual(['fo-guidecard', 'fo-dogear', `fo-cat--${data.category}`]);
+        expect(card.querySelector('h3.fo-guidecard__name')?.text, `${lang} ${data.id}`).toBe(data.name);
+        expect(card.querySelector('.fo-guidecard__proof')?.text.trim(), `${lang} ${data.id}`).toBe(data.proof);
+        expect(card.querySelector('.fo-guidecard__tool > span:last-child > span:last-child')?.text, `${lang} ${data.id}`).toBe(data.tool.name);
+      }
+      // "See all 15 guides": the hub of the language, with the number of its guides read from the registries.
+      const more = section?.querySelector('p.fo-more a');
+      expect(more?.getAttribute('href'), lang).toBe(HUB[lang]);
+      expect(more?.text, lang).toBe(fmt(t.hubLink, { n: groupDigits(hubGuides(lang).length, lang) }));
+      expect(more?.text, lang).toMatch(lang === 'pt' ? /\b10\b/ : /\b15\b/);
+      // Still no AdSlot and no card of a guide as a tool on the home (gate:prontidao counts main a.fo-tool).
+      expect(main?.querySelectorAll('.fo-ad'), lang).toHaveLength(0);
+      expect(section?.querySelectorAll('a.fo-tool'), lang).toHaveLength(0);
+    });
+  }
 });

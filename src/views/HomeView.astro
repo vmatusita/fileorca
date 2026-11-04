@@ -2,11 +2,13 @@
 // Home: the image tools that exist in the language, with the Oli waving next to the H1, and a link to the image hub;
 // the 12 PDF tools and a link to the PDF hub (F5a, DECISOES § 160); the language's credit calculators and a link to its
 // money hub (F4, DECISOES § 118; F6: the Brazilian ones in Portuguese, the five translated ones in Spanish); in English, the
-// home and health calculators with links to their hubs and the QR code generator (F7, decision 9). The cards come from the
+// home and health calculators with links to their hubs and the QR code generator (F7, decision 9); then the four guides of
+// HOME_GUIDES as GuideCards, with the link to the guides hub (F11, decision 7; DECISOES § 398). The cards come from the
 // route map and the registries: a page gets a card only with a path in this language. No AdSlot.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
+import GuideCard from '../components/GuideCard.astro';
 import { QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
@@ -14,6 +16,10 @@ import { absolute } from '../seo/meta.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, moneyPage, type LifeHub } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
+import { HOME_GUIDES, hubGuides } from '../tools/guides/hub.ts';
+import { guideCardData } from '../tools/guides/card.ts';
+import { fmt, groupDigits } from '../i18n/format.ts';
 
 interface Props {
   lang: Lang;
@@ -60,6 +66,10 @@ const lifeSections = (['house', 'health'] as LifeHub[]).flatMap((hubId) => {
 });
 const qrPath = pagePath(QR_ID, lang);
 const qr = qrPath && t.qr && common.qr ? { href: qrPath, texts: t.qr, blurb: common.qr } : null;
+// The "Read a guide" section: the four guides of the language, and the guides hub with the number of its guides.
+const guidesHub = pagePath(GUIDES_HUB_ID, lang);
+const guideCards = HOME_GUIDES[lang].map((id) => guideCardData(id, lang));
+const guideCount = { n: groupDigits(hubGuides(lang).length, lang) };
 const website = {
   '@type': 'WebSite',
   name: SITE_NAME,
@@ -127,6 +137,18 @@ const website = {
       <ul class="fo-grid">
         <li><ToolCard href={qr.href} name={qr.blurb.name} description={qr.blurb.description} category="util" icon="qr" /></li>
       </ul>
+    </section>
+  )}
+  {guidesHub && guideCards.length > 0 && (
+    <section class="fo-section" aria-labelledby="guides-home">
+      <h2 id="guides-home">{t.guides.heading}</h2>
+      <p class="fo-prose">{t.guides.intro}</p>
+      <ul class="fo-guidecards">
+        {guideCards.map((card) => (
+          <li><GuideCard href={card.href} name={card.name} description={card.description} category={card.category} proof={card.proof} tool={card.tool} headingLevel={3} lang={lang} /></li>
+        ))}
+      </ul>
+      <p class="fo-more"><a href={guidesHub}>{fmt(t.guides.hubLink, guideCount)}</a></p>
     </section>
   )}
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">

@@ -51,8 +51,9 @@ describe('home', () => {
     expect(more?.text).toBe('See all PDF tools');
     // The order of the sections: the image tools, the PDF tools, the money calculators, then the privacy line.
     // F7 (decision 9; DECISOES § 259): in English, after the money section, the home and health sections and the QR code.
+    // F11 (decision 7; DECISOES § 398 and § 400): the "Read a guide" section between the QR code and the privacy line.
     const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
-    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'house-home', 'health-home', 'qr-home', 'privacy-home']);
+    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'house-home', 'health-home', 'qr-home', 'guides-home', 'privacy-home']);
     // The home still has no AdSlot, and the Oli is still next to the H1 (above the fold rule of the home).
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
     expect(page.querySelectorAll('main .fo-hero [data-oli="wave"]')).toHaveLength(1);
@@ -93,9 +94,9 @@ describe('home', () => {
       expect(section?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(hubPathIn(lang));
       expect(section?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.pdf?.hubLink);
       // The image tools, the PDF tools, the money section where the language has a money hub, the QR code generator (since
-      // the languages adjustment, as in English), then the privacy line.
+      // the languages adjustment, as in English), then the privacy line. F11: the guides between the QR code and the privacy.
       const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
-      expect(order, lang).toEqual(['tools', 'pdf-home', ...(pagePath(moneyHubId(lang), lang) ? ['money-home'] : []), 'qr-home', 'privacy-home']);
+      expect(order, lang).toEqual(['tools', 'pdf-home', ...(pagePath(moneyHubId(lang), lang) ? ['money-home'] : []), 'qr-home', 'guides-home', 'privacy-home']);
       // § 6: the English PDF pages are never linked from a page in another language.
       const hrefs = page.querySelectorAll('a:not([hreflang])').map((link) => link.getAttribute('href') ?? '');
       for (const id of PDF_TOOL_IDS) expect(hrefs, `${lang} ${id}`).not.toContain(toolPath(id));

@@ -35,4 +35,10 @@ export default {
   privacyHeading: 'Your files stay with you',
   privacyBody:
     "Your files never leave your device. FileOrca does the work in your browser, and you can check it yourself: open your browser's Network tab while you use a tool and see that no request carries your file.",
+  // F11 (decision 7): the "Read a guide" section; {n} is the number of guides of the language, read from the registries.
+  guides: {
+    heading: 'Read a guide',
+    intro: 'Each guide answers one question with numbers and has the tool inside.',
+    hubLink: 'See all {n} guides',
+  },
 } satisfies HomeTexts;

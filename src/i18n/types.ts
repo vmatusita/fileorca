@@ -170,6 +170,11 @@ export interface HomeTexts extends PageMeta {
   house?: { heading: string; intro: string; hubLink: string };
   health?: { heading: string; intro: string; hubLink: string };
   qr?: { heading: string; intro: string };
+  /**
+   * The "Read a guide" section (F11, decision 7): the heading, the line and the link to the guides hub, whose {n} is the
+   * number of guides of the language, read from the registries. The four cards are those of HOME_GUIDES.
+   */
+  guides: { heading: string; intro: string; hubLink: string };
 }
 
 /** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
