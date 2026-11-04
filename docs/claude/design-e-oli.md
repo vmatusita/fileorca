@@ -86,5 +86,5 @@ Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no
 
 Pegadinhas do ajuste que deu ao cabeçalho as bordas do rodapé (DECISOES § 409).
 
-- **O cabeçalho e o rodapé leem a mesma borda,** `--fo-edge` (`components.css`). Mude a borda num, e o outro muda junto. O teste de bordas do `header-menu.spec.ts` confere as duas em 12 larguras, de 320 a 1920 px. Abaixo de 360 px, a borda é 16 px, porque a 320 px o cabeçalho usa 282,5 dos 288 px: controle novo no cabeçalho do celular não cabe.
+- **O cabeçalho e o rodapé leem a mesma borda,** `--fo-edge` (`components.css`). Mude a borda num, e o outro muda junto. O teste de bordas do `header-menu.spec.ts` confere as duas em 14 larguras, de 320 a 1920 px. Abaixo de 340 px, a borda é 16 px, porque a 320 px o cabeçalho usa 282,5 dos 288 px: controle novo no cabeçalho do celular não cabe. A troca não fica em 360 px por causa do rodapé: com 16 px de 356 a 359 px, ele ganhava a segunda coluna e a perdia a 360 (o mesmo teste confere que o rodapé nunca perde coluna ao alargar).
 - **Um `100%` dentro de uma variável é resolvido onde ela é usada.** No `padding` do cabeçalho e do rodapé, ele é a largura do `body`. No `right` de um popover, que está na camada superior, é a largura da janela. As duas coincidem, então a reserva sem anchor dos menus fica na borda do cabeçalho.

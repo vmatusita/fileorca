@@ -261,9 +261,9 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px 
 /* ---------- Header / Breadcrumb / Search ---------- */
 /* Header (F11, UX-01 alternative A): logo, search, language (from 768 px), theme and Menu, 64 px and one line at every width.
    In the site every text of the header is in the Figtree face that never swaps after the first paint (Figtree Steady). */
-/* The header and the footer share their edges: 24 px from the window, from 1288 px the 1240 px of the page, centred; 16 px under 360 px. */
+/* The header and the footer share their edges: 24 px from the window, from 1288 px the 1240 px of the page, centred; 16 px under 340 px. */
 .fo-header, .fo-footer { --fo-edge: max(var(--space-6), (100% - var(--page-max)) / 2); }
-@media (max-width: 359px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
+@media (max-width: 339px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
 .fo-header { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--fo-edge); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
 @media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
 @media (max-width: 359px) { .fo-header { gap: var(--space-1); } }
