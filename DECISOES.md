@@ -4933,3 +4933,9 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
 - **O que ganhou uma nota e ficou aberto:** a F5a D-12 (o "Copiar código" do Pix saiu na F12, § 440; as peças de PDF ficam para a F13) e a F3 d-02 (o vapor para em 4,8 s desde a F12, § 439; fica a `wave`).
 - **O grupo 21, "O que a F12 deixou",** com as notas das três frentes (`p-`) e os baixos da revisão adversarial (`R-`). O Resumo e o Total estão em dia.
 - **O teste que mudou: `tests/unit/pendencias.test.ts`.** Fixava a F3 c-04 e a c-08 entre os itens abertos que a decisão 3 da F8 nomeia. Agora elas não podem estar nas linhas abertas e têm de estar na tabela "Já corrigidos" com o § que as fechou, como a § 242 na F9 (§ 341): nada some sem rastro. Os outros ids da lista continuam obrigatórios, e o teste de cada revisão (as linhas abertas das F3 a F7 cobertas pelo id) continua valendo, porque o id fica no arquivo.
+
+## § 448 · Sem o rótulo `ci`, a conferência no Linux do meio da run sai (F12, decisão 14)
+
+- **O que a ficha pede:** depois que o mapa, a parede e o build de teste estão na branch, um push, a execução leve e o rótulo `ci` na PR, para a execução completa rodar no Linux do CI (o WebKit e as fontes de lá diferem do Windows, § 305, e o build de teste no CI é novo).
+- **O que a leitura achou:** `gh api repos/vmatusita/fileorca/labels/ci` respondeu 404 em 4/nov/2026, depois do push do `1d63498`. O rótulo não existe (F11 p-1), e criá-lo é do Victor.
+- **A escolha:** a conferência do meio sai, e a execução final, depois do `gh pr ready`, faz o papel dela. O atalho do `gh pr ready` seguido do `--undo` não entra: o job `merge` decide pelo rascunho do payload do evento e, com o `ci-ok` verde, tentaria mesclar a PR pela metade (§ 401). Se a execução final falhar só no Linux, a sequência da decisão 14 vale: `gh pr ready --undo`, a correção, o push, a execução leve e o `gh pr ready` de novo.
