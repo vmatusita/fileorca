@@ -255,6 +255,9 @@ test('the tap that closes the Menu on a touch screen does not reach the page eit
     const page = await context.newPage();
     await page.goto('/rotate-image/');
     await hydrated(page);
+    // The cookie notice would cover the radio: at 390 × 900 it starts 10 px under the radio's centre in the Chromium of
+    // Windows and higher in the CI's Linux, where its text takes more room (DECISOES § 408).
+    await dismissCookies(page);
     await menuButton(page).tap();
     await expect(sheet(page)).toBeVisible();
     const radio = await radioUnderSheet(page);
