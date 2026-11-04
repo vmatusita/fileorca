@@ -266,14 +266,15 @@ test.describe('a região', () => {
     await expectWallOpen(page, 'bloqueio');
   });
 
-  for (const timezoneId of ['Europe/Berlin', 'Europe/London', 'Atlantic/Canary']) {
+  // Review C-1 (§ 449): Cyprus too, whose zone the browsers report as Asia/Nicosia.
+  for (const timezoneId of ['Europe/Berlin', 'Europe/London', 'Atlantic/Canary', 'Asia/Nicosia']) {
     test.describe(`sem __tcfapi, no fuso ${timezoneId}`, () => {
       test.use({ timezoneId });
       test('the time zone of the device gives the closable notice, and stays on the device', async ({ page, context }) => {
         await openAsProduction(page, context, { recovery: googlefcStub(STATUS.EXTENSION) });
         await expectWallOpen(page, 'aviso');
-        expect(JSON.stringify(await page.evaluate(() => window.dataLayer))).not.toMatch(/Europe|Atlantic/);
-        expect(await page.evaluate(() => JSON.stringify({ ...localStorage }))).not.toMatch(/Europe|Atlantic/);
+        expect(JSON.stringify(await page.evaluate(() => window.dataLayer))).not.toMatch(/Europe|Atlantic|Asia|Nicosia/);
+        expect(await page.evaluate(() => JSON.stringify({ ...localStorage }))).not.toMatch(/Europe|Atlantic|Asia|Nicosia/);
       });
     });
   }

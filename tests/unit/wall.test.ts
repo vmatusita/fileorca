@@ -315,8 +315,9 @@ describe('o script da parede', () => {
     expect([WALL_ESCAPE_MS, WALL_FALLBACK_MS]).toEqual([1_800_000, 4_000]);
   });
 
-  it('reads the region from the time zone list of section A, with Ceuta, and counts an unreadable one as inside', () => {
-    for (const zone of ['Europe/Berlin', 'Europe/London', 'Europe/Zurich', 'Europe/Kyiv', 'Atlantic/Azores', 'Atlantic/Madeira', 'Atlantic/Canary', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Africa/Ceuta', '']) {
+  // Review C-1 (§ 449): with Cyprus, the outermost regions and the Faeroe of Chromium; the whole oracle is region.test.ts.
+  it('reads the region from the time zone list of section A, with Ceuta, Cyprus and the outermost regions, and counts an unreadable one as inside', () => {
+    for (const zone of ['Europe/Berlin', 'Europe/London', 'Europe/Zurich', 'Europe/Kyiv', 'Atlantic/Azores', 'Atlantic/Madeira', 'Atlantic/Canary', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Atlantic/Faeroe', 'Africa/Ceuta', 'Asia/Nicosia', 'Asia/Famagusta', 'Indian/Reunion', 'America/Cayenne', '']) {
       expect(inGdprTimeZone(zone), zone).toBe(true);
     }
     for (const zone of ['America/Sao_Paulo', 'UTC', 'Etc/UTC', 'Atlantic/Bermuda', 'Atlantic/Stanley', 'Africa/Casablanca', 'Asia/Istanbul', 'Europe', 'Europe/']) {
