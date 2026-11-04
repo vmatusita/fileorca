@@ -3,8 +3,9 @@
 
 /* ---------- base ---------- */
 html { color-scheme: light; }
-html[data-theme="dark"] { color-scheme: dark; }
-@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) { color-scheme: dark; } }
+/* The dark theme on screen only, as in tokens.css and global.css: the print is always light (F11, DECISOES § 404 and § 405). */
+@media screen { html[data-theme="dark"] { color-scheme: dark; } }
+@media screen and (prefers-color-scheme: dark) { html:not([data-theme="light"]) { color-scheme: dark; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px var(--font-text); -webkit-font-smoothing: antialiased; }
 .fo-stage { padding: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; }
 .fo-stack { display: flex; flex-direction: column; gap: var(--space-4); }
