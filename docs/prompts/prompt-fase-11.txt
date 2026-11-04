@@ -1,0 +1,509 @@
+ultracode
+
+# Missão
+
+Rode a F11 do FileOrca, a fase "Navegação, guias e tema claro e escuro" do `PLANO-MELHORIAS.md`. Deixe todo guia e toda categoria a um toque de qualquer página e dê à pessoa a escolha do tema, sem piorar nenhum orçamento. O desenho já está escolhido: o cabeçalho A da F10 (o Menu de papel, UX-01) e o hub de guias A, com o cartão de guia (UX-02).
+
+Ao terminar:
+
+- toda página, nos três idiomas, tem no cabeçalho o botão de tema (Sistema → Claro → Escuro) e o botão Menu, que abre sem JS a folha com as categorias do idioma, os Guias e o "Apoie a Oli"; abaixo de 768 px, o idioma fica no fim da folha;
+- a escolha do tema fica no navegador (`fo-theme`), sai na primeira pintura sem piscar e vale em todas as páginas, no offline e no app instalado; a Privacidade diz isso nos três idiomas;
+- `/guides/`, `/pt/guias/` e `/es/guias/` existem, indexáveis, com o GuideCard e sem anúncio;
+- os guias têm as cinco entradas: a trilha Início › Guias › o guia, a coluna Guias no rodapé, a seção na home (ou a válvula), o cartão na ferramenta e na calculadora que têm guia, e o grupo Guias na busca; nas relacionadas, o guia usa o GuideCard (fecha a F5b F-12);
+- os ícones novos estão no design system, e o `docs/design/` traz as regras novas do cabeçalho e do tema;
+- os blocos que a F10 deixou para o `docs/claude/` e para o `docs/PENDENCIAS.md` estão lá;
+- o relatório está em `docs/relatorios/fase-11.md` e a revisão em `docs/relatorios/REVISAO-F11.md`;
+- a PR da branch `fase-11` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `609a868` (a F10 mesclada) ou num commit mais novo. Confira com `git log --oneline -5`. Guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+O que mudou desde que o plano foi escrito:
+
+- **A F10 está na main.** A proposta está em `docs/propostas/ux-v2/`. No fim de cada protótipo há uma área "Especificação" com a marcação, os tokens, os estados, os textos nos três idiomas, o teclado, o nome acessível, as medidas e o que a F11 testa. Para esta run, ela é a especificação (decisão 1).
+- **As escolhas do Victor.** A lista `ESCOLHAS.md` marcada está em `.cache/ESCOLHAS-marcado.md`, fora do Git, e ele ficou com a recomendada em tudo. Para a F11 valem três marcas:
+  - UX-01, alternativa A (o Menu de papel);
+  - UX-02, alternativa A (o cartão de guia com a dobra, em grade por grupo);
+  - a pendência F5b F-12: corrigir com o cartão de guia, também nas relacionadas.
+
+  Marcar a A aceita as mudanças de regra que ela traz: o README do Header e a linha do tema do `docs/design/README.md`. O resto da lista é da F12 e da F13: não toque.
+- **O CI roda por classe** (F9, `scripts/ci/classificar.ts`):
+  - PR em rascunho sem o rótulo `ci` roda o job `leve` (tipos, lint, build e Vitest);
+  - PR pronta roda tudo: o build uma vez, os portões, o Playwright em partes e o Lighthouse;
+  - depois, o `merge` mescla sozinho a PR do dono que não mexe em `.github/`. Esta PR cai na classe completa.
+- **O rótulo `ci` pode não existir** (DECISOES § 338). A decisão 13 diz o que fazer, e por que o `gh pr ready` seguido do `--undo` não serve nesta PR.
+- **O repositório é público** (§ 338). Tudo o que você commita, a PR, os logs e os artefatos do Actions ficam públicos.
+- **A F9b** (a redivisão do CI) pode rodar antes, depois ou ao lado desta. Ela mexe no `ci.yml` e talvez no `playwright.config.ts` e no número de partes. Se a main andar, traga com `git merge origin/main` e confira de novo o `--list` das partes (decisão 10).
+- **O relatório da F10 deixou duas seções para esta run** (`docs/relatorios/fase-10.md`): "Para o docs/claude/", com cinco blocos, e "Para o PENDENCIAS", com as linhas F10 p-1 a p-20. Duas linhas são da F11: a p-5 (a metade do cabeçalho) e a p-20 (os ícones).
+- **O próximo § livre do `DECISOES.md` é o 382,** se nada entrou depois da F10. Reserve os números no plano e escreva os § na ordem: um § citado antes de ser escrito prende a numeração (pegadinha da F10).
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **Este prompt.** Ele faz o papel da ficha da F11 e vence o resto.
+2. **O `PLANO-MELHORIAS.md`:**
+   - "Mudanças no contrato" (sobretudo a 6, a 7 e a 14), "O que não é viável ou tem limite" e "Regras novas de toda run";
+   - as fichas da F11 e da F12 (a da F12 diz o que fica para depois);
+   - as seções D e E, e da C só a linha do menu.
+3. **O `PLANO-FILEORCA.md`:** "Decisões fechadas", "Design: amigável, chamativo e rápido" (com "Orçamento de desempenho"), a parte de SEO e "Execução por IA".
+4. **O `CLAUDE.md` e, de `docs/claude/`:**
+   - `design-e-oli.md`, `idiomas.md`, `service-worker.md`, `playwright.md`, `windows-git-bash.md` e `anuncios.md`;
+   - do `ci.md`, as pegadinhas gerais da F1a e a seção da F9.
+
+   Leia esses arquivos depois de copiar os blocos da F10 (decisão 12), que acrescentam pegadinhas a cinco deles.
+5. **A proposta:**
+   - no `docs/propostas/ux-v2/README.md`, os itens UX-01 e UX-02 e a tabela do contraste (seção 9);
+   - os protótipos `header-a.html`, `guides-hub.html` (a alternativa A, com `?ads=off`) e `guides-entries.html`, com a área "Especificação" de cada um;
+   - os ícones de `docs/propostas/ux-v2/icons/`;
+   - do `DECISOES.md`, os § 363 e § 364 e o que eles citam.
+6. **O `docs/design/`:** o `README.md`, o `tokens.css`, o `components/README.md`, o `assets/Icons/README.md` e os README do Header, do ToolCard, da Breadcrumb, do Footer, do ToolSearch e do NextStepChips.
+7. **Do `docs/PENDENCIAS.md`:** "Como ler", o Resumo, a linha F5b F-12 (grupo 6), o grupo 18 (pelo formato) e "Já corrigidos depois da revisão".
+8. **O `DECISOES.md`, só buscando o §** (são 600 KB, nunca inteiro). Comece pelos § 41, § 46, § 76, § 106, § 124, § 160, § 184, § 190, § 305, § 307, § 327, § 338, § 341, § 363 e § 364, e siga pelos que você precisar.
+9. **O código que a run toca:**
+   - o cabeçalho e a página: `src/components/Header.astro`, `src/layouts/BaseLayout.astro` e `src/analytics/consent.ts` (o modelo de script inline no `<head>`);
+   - o CSS: `src/styles/global.css` e `components.css` (o tema e o cabeçalho);
+   - os guias: `src/i18n/routes.ts`, `src/tools/guides/registry.ts` e `page.ts`, e os `GUIDES` de `src/tools/calc/registry.ts`;
+   - as views: as dos hubs, `GuideView.astro`, `FileGuideView.astro` e `HomeView.astro`;
+   - os moldes: `ImageToolPage.astro`, `PdfToolPage.astro` e `CalcTool.astro`;
+   - os componentes: `Footer.astro`, `Breadcrumb.astro` e `ToolCard.astro`;
+   - a busca: `src/search/search.ts`, `src/pages/search-index.json.ts` e `SearchDialog.astro`;
+   - o resto: `src/seo/`, `src/pages/og/`, `src/icons/svg.ts`, `src/analytics/events.ts` e os textos de `src/i18n/<lang>/` (o `common.ts` e o `privacy.ts`);
+   - os testes que leem o cabeçalho, a trilha, a linha do guia e a busca.
+
+# Escopo
+
+Dentro:
+
+1. O tema (a seção D inteira; decisão 2).
+2. O cabeçalho com o Menu (UX-01 A; decisões 3 e 4).
+3. O hub de guias nos três idiomas e o GuideCard (UX-02 A; decisões 5 e 6).
+4. As entradas dos guias (seção E; decisão 7), com a F5b F-12.
+5. Os ícones novos (decisão 4), o `docs/design/` (decisão 8) e a Privacidade (decisão 2).
+6. O que a F10 deixou para o `docs/claude/` e o `docs/PENDENCIAS.md` (decisão 12).
+7. Os testes (decisão 10), os §, a revisão adversarial e o relatório.
+
+Fora (não toque):
+
+- **Anúncio.** Nada de AdSlot novo, de área nova (a `geral` é da F12) ou de mudança em `src/ads/` e no mapa. O hub de guias nasce sem AdSlot, sem `adArea` e sem coluna lateral. Do anúncio, só entra isto:
+  - o cabeçalho novo respeita os 150 px dos anúncios de hoje;
+  - o `ads.spec.ts` ganha os alvos do cabeçalho e o `.fo-guidecard` (decisão 10).
+- **O café e a parede:** o card do café, os textos novos do café, a linha do café no rodapé, a página de apoio, a parede e a pose `sad` são da F12. Do café, a F11 só põe o link "Apoie a Oli" no Menu, com o texto da seção C e o evento da decisão 3.
+- **O resto da proposta:**
+  - a home nova (UX-03), a página de ferramenta (UX-04), as calculadoras (UX-12) e o molde do guia (UX-13);
+  - o mar (UX-15), os ícones por ferramenta (UX-16), o rodapé novo (UX-17) e o soltar em qualquer lugar (UX-18);
+  - o aviso de cookies (UX-09) e a Oli (UX-10).
+
+  Nenhum componente muda além do que as seções D e E pedem: o cabeçalho, o hub, o GuideCard, as cinco entradas e a Privacidade.
+- **Dependência nova,** inclusive um `pnpm dlx` ou `npx` de pacote fora do lockfile. Arquivo JS novo por página. Cor nova: nenhum token novo.
+- **Arquivos fora da run:** `.github/`, o `CLAUDE.md`, os dois PLANOs, `docs/adr/` e `docs/propostas/` (é o registro da F10).
+- **Código fora da run:** o motor, as calculadoras, as ilhas das ferramentas, o service worker (`src/sw/`), o aviso de cookies e o sprite da Oli.
+- **Dois comandos:** o `pnpm screenshots`, que apaga e regrava `docs/relatorios/fase-03/componentes/`, e o `pnpm design:gerar`, porque nenhum token muda.
+- Qualquer coisa no Cloudflare, no GitHub fora da PR desta run, no GA4, no Search Console ou no AdSense.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 382)
+
+1. **A especificação.**
+   - A área "Especificação" de `header-a.html`, de `guides-hub.html` (alternativa A, `?ads=off`) e de `guides-entries.html` é o contrato, junto com os § 363 e § 364. Ela traz a marcação, as classes, os tokens, os textos nos três idiomas, o teclado, o nome acessível, as medidas e os testes.
+   - Onde ela e este prompt divergem, vale este prompt.
+   - Os protótipos estão sobre o `bundle.css` do `docs/design/`, que não é o CSS do site (o bloco da F10 no `design-e-oli.md`). Construa sobre o `components.css`, com as medidas do site, e confira cada medida no `dist/`.
+   - O site não importa nada de `docs/propostas/`, e nem o script dos previews (`?theme=`, `?lang=`, `?state=`) nem o controle de protótipo vão para o site.
+
+2. **O tema** (seção D).
+   - **Os três estados:** Sistema (padrão), Claro e Escuro. Um botão no cabeçalho passa por eles nessa ordem. O nome acessível diz o estado:
+     - en: "Theme: system", "Theme: light", "Theme: dark";
+     - pt: "Tema: sistema", "Tema: claro", "Tema: escuro";
+     - es: "Tema: sistema", "Tema: claro", "Tema: oscuro".
+   - **A escolha** fica no `localStorage`, na chave `fo-theme`, com `light` ou `dark`. Sem a chave, vale Sistema, e voltar a Sistema apaga a chave. É uma preferência funcional, pedida pela pessoa: não depende do aviso de cookies.
+   - **Os dois scripts inline da especificação,** sem arquivo novo:
+     - o do `<head>`, que só lê. Ele vai depois do `charset`, do `viewport` e da `<meta name="color-scheme" content="light dark">`, e antes de qualquer CSS;
+     - o do botão, logo depois do `</header>`.
+
+     Leitura e escrita vão em `try/catch`. Com o armazenamento bloqueado, a página abre em Sistema, sem erro, e o botão troca o tema só naquela página.
+   - **Sistema não põe `data-theme`.** O `prefers-color-scheme` decide, e os testes que trocam o tema no lugar (o `a11y.spec.ts` e o `cookie-footer.spec.ts`, § 76) continuam valendo.
+   - **O ícone e o nome do botão vêm do CSS,** pelo `data-theme` do `<html>` (sem ele, Sistema), então ficam certos na primeira pintura. A run não tem leitor de tela para conferir se o nome novo é lido com o foco parado no botão. Por isso, ponha a região `role="status"` (`fo-sr`) que a especificação descreve, preenchida pelo script do botão.
+   - **O CSS.** Toda regra de `prefers-color-scheme` no CSS do site tem o par com `data-theme`, como o `tokens.css` e o `global.css` já fazem. Um teste confere nos arquivos de `src/styles/` e no `tokens.css`. A página forçada clara num sistema escuro fica com as cores da página clara, e o contrário.
+   - **As metas:** o `theme-color` não muda, e a `<meta name="color-scheme">` acompanha a escolha, como na especificação.
+   - **Nada sai do aparelho:** trocar o tema não faz requisição, não manda evento do GA4 e não mexe na URL.
+   - **O service worker não muda.** A página guardada e a offline trazem o script do `<head>`, então seguem a escolha. Um teste prova (decisão 10).
+   - **A Privacidade** (`src/i18n/<lang>/privacy.ts`), nos três idiomas, junto da escolha de cookies e no resumo, diz:
+     - o que fica guardado: a chave `fo-theme`, com `light` ou `dark`, só quando a pessoa escolhe Claro ou Escuro;
+     - que fica no aparelho e não vai a lugar nenhum;
+     - que não depende do aviso;
+     - como apagar: voltar a Sistema ou limpar os dados do site.
+   - **Outra aba** só muda ao recarregar, sem `storage` listener, como na especificação.
+
+3. **O cabeçalho** (UX-01 A).
+   - **A ordem do DOM e da tela:** pular para o conteúdo, logo, busca, idioma (a partir de 768 px), tema e Menu. Cada popover vem logo depois do botão que o abre.
+   - **64 px e uma linha** em toda largura, de 320 a 1280 px, nos três idiomas, antes e depois da fonte.
+   - **A face `Figtree Steady`** (`--fo-font-steady`) em todo texto do cabeçalho: o "Menu", o código do idioma e também o "Search tools". A especificação deixa o último como opção; a F11 o passa, para nada mudar de largura quando a Figtree chega.
+   - **O Menu** é um popover sem JS, pelo mesmo mecanismo do menu de idioma (`popover` e `popovertarget`). A folha tem a dobra (`fo-dogear`) e traz:
+     - as categorias que existem no idioma, cada uma com o círculo da cor e a contagem lida dos registros, nunca escrita à mão;
+     - o QR code, os Guias e o "Apoie a Oli";
+     - e, abaixo de 768 px, o idioma no fim.
+
+     Valem a tabela de textos e a de caminhos da especificação.
+   - **A seção da página leva `aria-current`:** "page" no próprio hub, "true" numa página da categoria, e em Guias nos guias. Ela ganha o fundo, o traço de 2 px e o nome em 700; com cores forçadas, o peso continua marcando. O mapa de cada rota para a seção vira um §.
+   - **Os popovers em `position: absolute`,** com o anchor positioning e a reserva `top` da especificação. O menu de idioma passa de `fixed` para `absolute`. Abrir um fecha o outro.
+   - **A partir de 1280 px,** o cabeçalho segue a grade da moldura: o logo começa onde começa a coluna, e o último botão termina onde ela termina, a 150 px ou mais da lateral.
+   - **O "Apoie a Oli"** leva `data-track="donate_click"` e `data-track-place="menu"`. O `menu` entra na lista fechada `DONATE_PLACES` (`src/analytics/events.ts`), como a seção C pede, com teste no `events.spec.ts`.
+   - **O idioma no Menu** segue a regra de hoje: a página equivalente ou, sem ela, a home do idioma.
+
+4. **Os ícones.**
+   - `menu`, `sun`, `moon`, `theme-system` e `book` vão de `docs/propostas/ux-v2/icons/` para `docs/design/assets/Icons/`. O desenho é o mesmo; muda só a raiz, que passa a ser a `ICON_FILE_ROOT` de `src/icons/svg.ts`, com o traço `#0F1B2D` escrito no arquivo no lugar do `currentColor`.
+   - Os nomes entram em `ICON_NAMES`, e o `assets/Icons/README.md` ganha a contagem nova, com um §.
+   - Isso fecha a F10 p-20. O `tests/unit/icons.test.ts` passa sem mudar.
+
+5. **O hub de guias** (UX-02 A).
+   - **A rota:** um id novo no `src/i18n/routes.ts`, com `/guides/`, `/pt/guias/` e `/es/guias/`, indexável e sem `adArea`. Cada idioma tem a sua página `.../index.astro` (`build.format: 'preserve'`).
+   - **Os guias,** sempre lidos dos registros, em três grupos (Imagem, PDF e Dinheiro):
+     - os de arquivo, do `FILE_GUIDES`, na ordem de `FILE_GUIDE_IDS`;
+     - os de dinheiro, dos `GUIDES`, na ordem de `GUIDE_IDS`, só onde existem no idioma.
+
+     São 15 guias em en, 10 em pt e 15 em es. Em pt, o grupo Dinheiro é só a nota que leva às calculadoras financeiras do Brasil.
+   - **Os textos da especificação,** nos três idiomas: título, descrição, trilha, sobretítulo, H1, frase da faixa, atalhos dos grupos, H2 e "Como os guias são feitos" (§ 364).
+   - **A cara:** sem Oli no hub, a faixa em `brand-soft` e nenhum token novo.
+   - **O SEO:**
+     - o schema `CollectionPage` e o `BreadcrumbList` (Início › Guias);
+     - o canonical e o `hreflang` entre os três, com o `x-default`;
+     - o sitemap de cada idioma e a imagem OG de cada idioma;
+     - título e descrição que passem no `gate:seo`.
+   - **O `gate:conteudo`** passa a conferir o hub: a introdução própria e o mínimo de palavras da regra que você escrever, num §. O `tests/unit/conteudo.test.ts` ganha um controle negativo.
+   - **Os orçamentos.** O hub não tem ilha nem script próprio. Ele entra:
+     - no `budgets.spec.ts` (en) e no `i18n-budgets.spec.ts` (pt e es), com as regras dos hubs de categoria;
+     - no `layout-shift.spec.ts` e no `a11y.spec.ts`;
+     - e, o `/guides/`, na lista do `lighthouserc.json`.
+
+6. **O GuideCard.**
+   - **O componente:** `src/components/GuideCard.astro`, com as props da especificação (`href`, `name`, `description`, `category`, `proof`, `tool` opcional e `headingLevel`). A variante `fo-guidecard--here`, para a página da ferramenta, não tem o pé "Tool in the guide" nem H3.
+   - **A medida:** "Measured on N test files", com o N lido no build de `data/guides-measured.json`: são os arquivos distintos de todas as `sample.files` do guia. Nos guias de dinheiro, "Numbers worked out". Os textos nos três idiomas, com o número formatado pelo idioma.
+   - **O link:** um só, com o nome começando por "Guide", "Guia" ou "Guía". Os títulos vão de H1 a H3 sem pular.
+   - **No `docs/design/components/GuideCard/`:** um `README.md` e um `preview.html` no formato dos outros componentes, e o estilo no `bundle.css`, com um §.
+
+7. **As entradas dos guias** (seção E e `guides-entries.html`).
+   - **A trilha** das 40 páginas de guia passa a Início › Guias › o guia, no HTML e no `BreadcrumbList`.
+   - **O rodapé:** a coluna Guias, embaixo de Utilidades, com "Todos os guias" e os grupos que existem no idioma (as âncoras `#image`, `#pdf` e `#money` do hub).
+   - **A ferramenta e a calculadora que têm guia:**
+     - o GuideCard (`--here`) fecha o primeiro bloco de conteúdo depois do painel;
+     - a linha "Read the guide" de hoje sai;
+     - nas calculadoras, o cartão vai para o fim da seção "How", como na especificação;
+     - com dois guias, dois cartões.
+   - **As relacionadas:** todo guia numa grade de relacionadas usa o GuideCard, nunca o ToolCard (fecha a F5b F-12). Um teste reprova um guia com o ToolCard em qualquer página.
+   - **A busca:**
+     - as entradas ganham `kind: 'tool' | 'guide'`;
+     - os resultados vêm em dois grupos, Ferramentas e Guias, com o ARIA, os textos e a ordem da especificação;
+     - a busca continua carregando só no primeiro uso.
+   - **A home:** a seção "Read a guide", com os quatro guias da especificação, lidos de uma lista `HOME_GUIDES` por idioma. São um por grupo e um quarto; em pt, o "JPG ou PNG" fica no lugar do de dinheiro. É a única entrada que a válvula pode mandar para a F13.
+
+8. **O `docs/design/`.** Cada regra nova tem um §, com o texto de antes e o de depois:
+   - **o README do Header:** o Menu, o tema, o idioma dentro do Menu abaixo de 768 px, a grade a 1280 px e os popovers `absolute`, com o `preview.html` dele e o `bundle.css` em dia;
+   - **o `docs/design/README.md`:** a linha do tema deixa de dizer "segue o sistema só com CSS, sem script" e passa a dizer o padrão Sistema, a escolha no cabeçalho, a chave e o script inline mínimo;
+   - **o GuideCard** (decisão 6) e **os ícones** (decisão 4).
+
+9. **Os textos.**
+   - **Onde:** em inglês, português e espanhol, nos arquivos de tradução de cada idioma (o `common.ts` e os novos), com as mesmas chaves e os mesmos `{placeholders}`.
+   - **Quais:** os da especificação. O que faltar, você escreve na voz do site.
+   - **As conferências:**
+     - o glossário (`docs/i18n/pt.md` e `es.md`) ganha os termos novos que o `glossary.test.ts` pedir;
+     - o `lint:texto` passa nos textos alterados, e o `english-leak.test.ts` também.
+   - **Os números:** só no formato do idioma (`docs/claude/idiomas.md`), e toda contagem é lida dos registros. Nenhum algarismo à mão num texto de guia (`guides-numbers.test.ts`).
+
+10. **Os testes.** Cada critério tem o seu, e cada teste novo reprova sem a mudança. Prove com o `dist/` do ponto de partida, nunca com `git checkout -- arquivo` sobre mudança não commitada.
+    - **A navegação.**
+      - (a) **Toda página, nos HTML:** em cada idioma, o cabeçalho de toda página tem o link para o hub de guias do idioma e para cada hub de categoria que existe nele. O teste lê o HTML pelo `request` do Playwright, sem renderizar, com a lista de páginas tirada das rotas, em blocos de páginas. Nunca um teste só para o site inteiro: ele estoura os 60 s no WebKit do CI (§ 306).
+      - (b) **Renderizado,** uma página por molde e por idioma, a 320, 360 e 1280 px, nos dois navegadores:
+        - o Menu abre pelo clique e pelo teclado;
+        - a folha leva ao hub de guias e a cada hub de categoria;
+        - abaixo de 768 px, o idioma no Menu leva à página equivalente;
+        - o Esc fecha e devolve o foco;
+        - o cabeçalho fica com 64 px e uma linha.
+    - **O tema:**
+      - a ordem no `<head>` em toda página, lida pelo `request` como na navegação: a `meta`, o script e só depois o CSS;
+      - a primeira pintura com o tema guardado, numa página por molde: a cor do fundo no primeiro quadro, com o `fo-theme` gravado antes da carga e o sistema no esquema oposto;
+      - a escolha passando de página para página e de idioma para idioma, e ficando no recarregar;
+      - Sistema seguindo o `prefers-color-scheme` emulado e apagando a chave;
+      - o nome do botão em cada estado;
+      - o armazenamento bloqueado sem `pageerror`;
+      - nenhuma requisição e nenhum evento na troca;
+      - a página guardada pelo service worker, offline, com o tema escolhido. Esse vai num spec do worker, com `serviceWorkers: 'allow'` e o `workerOff` da § 307.
+    - **O anúncio,** no `ads.spec.ts`, no build com os IDs de teste:
+      - cada controle do cabeçalho e cada menu aberto (o Menu e o idioma) a 150 px ou mais de todo anúncio, a 360 e a 1280 px;
+      - o `.fo-guidecard` no lugar do `.fo-guide-links` como alvo.
+    - **A acessibilidade:**
+      - o axe nos dois temas e nos dois navegadores no hub, no cabeçalho com o Menu aberto e no botão de tema nos três estados;
+      - o contraste de todo par novo no teste de contraste.
+    - **O orçamento e o CLS:** a decisão 5 e os critérios 6 e 7.
+    - **Os unitários:** as rotas, o SEO das páginas novas, o `gate:conteudo` do hub, o índice da busca com o `kind`, o par `prefers-color-scheme`/`data-theme` no CSS e o `DONATE_PLACES`.
+    - **O teste antigo que fixa o que esta run muda.** Exemplos: o cabeçalho sem menu, a linha "Read the guide", a trilha que aponta para o hub da categoria, um guia com o ToolCard e uma contagem de páginas.
+      - Ele muda no mesmo commit que o código que ele protege.
+      - Cada um entra num §, no formato da § 341: o que ele protegia e como a proteção continua.
+      - Nenhum teste sai, nenhum é pulado e nenhum limite afrouxa. O número de testes do Vitest e o do `--list` do Playwright só crescem; o antes e o depois vão no relatório.
+    - **A divisão nas partes:**
+      - um spec novo pesado vai num arquivo cujo nome caia numa parte leve;
+      - rode o `--list` de cada parte (`docs/claude/playwright.md` e a seção da F9 do `ci.md`);
+      - confira que o `design.spec.ts` e o `image-matrix.spec.ts` continuam em partes diferentes.
+
+11. **As imagens do relatório.**
+    - **Quais:** até 24 capturas em `docs/relatorios/fase-11/` do cabeçalho fechado, do cabeçalho com o Menu aberto e do hub de guias, em en e pt, a 360 e a 1280 px, no claro e no escuro.
+    - **Como:** JPEG de qualidade 80 ou PNG, escala 1, até 300 KB cada uma e 6 MB no total, com nome em inglês.
+    - **Onde:** nada de imagem fora de `docs/relatorios/`, porque o checkout esparso do CI só pula essa pasta.
+
+12. **O que vem da F10.**
+    - **Os cinco blocos de "Para o docs/claude/"** do `docs/relatorios/fase-10.md` entram com o texto igual, cada um como seção nova no fim do arquivo de tema, num commit só de documentação, logo no começo.
+    - **O `docs/PENDENCIAS.md`, no começo:**
+      - o grupo novo "19. O que a F10 deixou", com as 20 linhas F10 p-1 a p-20 no formato das seis colunas;
+      - o Resumo e o Total em dia. Aproveite e corrija a contagem do grupo 5, que é a F10 p-1.
+    - **O `docs/PENDENCIAS.md`, no fim:**
+      - a F5b F-12, a F10 p-20 e a F10 p-1 vão para "Já corrigidos depois da revisão", com o § da F11;
+      - a F10 p-5 fica só com o que sobrar para a F12 (a lateral, se ainda precisar);
+      - um grupo "20. O que a F11 deixou" recebe o que a revisão desta run deixar.
+
+      Nada some sem rastro: o `tests/unit/pendencias.test.ts` procura os ids no arquivo inteiro.
+    - **As pegadinhas novas desta run** vão no fim do arquivo de tema de `docs/claude/`, numa seção "## F11: navegação, guias e tema". O `CLAUDE.md` não muda.
+
+13. **A PR e o CI.**
+    - **A PR abre em rascunho** logo depois do primeiro push, e cada push roda o job leve.
+    - **Uma conferência no Linux, no meio da run,** depois que o cabeçalho e o tema estiverem na branch. O WebKit e as fontes de lá diferem do Windows (§ 305). Faça o push, espere a execução leve terminar e rode `gh pr edit <n> --add-label ci`:
+      - **se o rótulo existir,** acompanhe a execução completa, leia os logs, corrija o que só falhou lá e tire o rótulo depois (`gh pr edit <n> --remove-label ci`). Com a PR em rascunho, o `merge` não roda;
+      - **se não existir,** pule esta conferência e registre num §: a execução final é a conferência no Linux. Não use o `gh pr ready` seguido do `--undo` que a nota da regra 1 do `CLAUDE.md` descreve. Nesta PR, que o CI mescla sozinho, ele não é seguro: o job `merge` decide pelo rascunho do payload do evento (`github.event.pull_request.draft`, no `if` e no JSON do `pode-mesclar`), não pelo estado de agora. Com o `ci-ok` verde, ele tentaria mesclar a PR pela metade. Registre isso como pegadinha no `docs/claude/ci.md` (seção da F11) e como uma linha no grupo 20 do `docs/PENDENCIAS.md`, para o Victor.
+    - **No fim,** com tudo commitado (o relatório, a revisão e as imagens):
+      1. faça o push e espere a execução leve terminar verde;
+      2. só então rode o `gh pr ready` (pendência "F9 ci-ok duplicado");
+      3. acompanhe a execução completa até o fim.
+
+      Se ela falhar: `gh pr ready --undo`, corrija, commite, faça o push, espere a leve e rode o `gh pr ready` de novo. A falha e a correção vão no relatório.
+    - **O custo:** o `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit <n> --body-file <arquivo>`), mesmo depois do merge.
+
+# Armadilhas conhecidas
+
+- **O protótipo não é o site.** O `bundle.css` difere do CSS do site:
+  - nas medidas: o AdSlot de 300 px e a lateral de 644 px; o `fo-seg__opt` com 48 px;
+  - nos nomes: o `.fo-hero` e o `.fo-page` colidem com classes do site.
+
+  Os ícones da proposta usam `currentColor` e reprovam o `icons.test.ts` (decisão 4).
+- **O popover no top layer com `position: absolute` usa o bloco inicial como referência.** Só o anchor positioning acerta a posição, com a reserva `top`. Zere o estilo do navegador (`position: fixed`, `inset: 0`, `margin: auto`, `overflow: auto`).
+- **Uma regra `.x { display: grid }` vence o atributo `hidden`:** use `.x:not([hidden])`.
+- **Cores forçadas:** uma marca de estado feita só de borda ou de fundo some. Marque também com peso ou com ícone.
+- **O CLS e as fontes:**
+  - a face `Figtree Steady` não troca depois da primeira pintura; texto novo no cabeçalho vai nela;
+  - o CLS de texto com a fonte atrasada muda entre Windows e Linux (0,046 aqui contra 0,257 no CI, § 305): por isso a conferência no meio da run;
+  - no WebKit, um hub não pinta enquanto a Figtree está segura, e o `requestAnimationFrame` não roda. Um teste do primeiro quadro espera com um teto (`setTimeout`), como o `painted()` do `layout-shift.spec.ts`;
+  - antes de medir quebra de linha, chame `document.fonts.load`, porque o `document.fonts.ready` pode resolver antes de a fonte ser pedida;
+  - a captura de página inteira faz um relayout com a fonte já carregada: meça as posições antes de qualquer `fullPage`.
+- **O WebKit:** o Tab pula os links por padrão (use `focus()` ou Option+Tab), e um popover aberto pelo clique não dá foco ao botão.
+- **O Chromium headless no Windows** tem a barra de rolagem clássica, que muda as larguras.
+- **O `boundingBox()`** dá coordenadas da janela, não do documento.
+- **O `serve-dist` devolve o 404 mais próximo** para rota que falta: confira o status 200 antes de afirmar uma página.
+- **As portas:** cada worktree usa o próprio `FO_PORT`, de 4174 a 4189.
+- **O Astro e o TypeScript:**
+  - o `build.format` é `preserve`, então toda página é um `.../index.astro`;
+  - o tsconfig usa `exactOptionalPropertyTypes`: espalhe um objeto condicional, nunca passe `undefined`;
+  - o `pnpm tipos` confere também os specs. Rode-o antes do push.
+- **Os moldes e os hubs recebem `lang` com o padrão `'en'`.** Escreva `.map((id) => cardOf(id, lang))`, nunca `.map(cardOf)`.
+- **O `gate:seo`** pede de 120 a 160 caracteres na descrição das páginas de imagem e de PDF em pt e es, e de 50 a 170 nas outras.
+- **O `lint:texto` do português** reprova nome de opção depois de vírgula e lê "for" como verbo num nome inglês (`docs/claude/idiomas.md`).
+- **A busca:** uma consulta que traz um guia muda por construção (§ 190). Confira as consultas dos testes da busca.
+- **Não mexa em `scripts/guides/`,** nem num comentário: o `guides-measured.test.ts` confere o SHA-256 dos scripts de medida.
+- **O `GUIDE_TEXTS` usa import estático.** O `lint:texto` importa o módulo pelo Node, então nada de `import.meta.glob` ali.
+- **O `.text` do `node-html-parser` cola o texto de elementos vizinhos:** para contar palavras, use `structuredText`.
+- **O service worker nos testes:**
+  - o padrão é `serviceWorkers: 'block'`;
+  - um spec do worker liga com `allow` e sobe o próprio servidor (`tests/e2e/lib/sw-server.ts`);
+  - no WebKit, o `setOffline(false)` não chega ao worker.
+- **O Git Bash:**
+  - heredoc e `node -e` com crase, barra invertida ou apóstrofo estragam o texto: escreva arquivo pela ferramenta de escrita;
+  - argumento que começa com "/" vira caminho do Windows (`MSYS_NO_PATHCONV=1`);
+  - o `git push` e o `gh pr create --base main` vão em comandos separados;
+  - no Node, `String.replace(a, b)` interpreta `$` em `b`: use `s.replace(a, () => b)`.
+- **Nunca `git add -A` nem `git add .`:** a pasta `Claude outputs/` está na raiz, sem rastreio, e nunca entra. Adicione por caminho.
+- **Os agentes em worktree:**
+  - eles nascem da `main`: o primeiro passo de cada um é `git merge --ff-only fase-11`;
+  - todo commit de merge leva o trailer `Co-Authored-By`, com a mensagem num arquivo (`git merge --no-ff -F <arquivo>`);
+  - um agente que escreve código usa `model: 'opus'`;
+  - um agente em worktree não escreve no checkout principal. Ele lê o `.cache/` do principal pelo caminho absoluto, mas grava no `.cache/` da própria worktree, e o agente principal copia o que precisa antes do `git worktree remove`;
+  - dois agentes que acrescentam no mesmo arquivo (os `common.ts`, o `types.ts`, o `package.json`) dão conflito no merge: junte as duas partes e rode o `pnpm tipos`.
+- **O repositório é público:** nenhum dado pessoal no que você commita, nem no prompt, no relatório, na revisão ou nas imagens.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. **A navegação.** Os dois testes da decisão 10 passam nos dois navegadores. Em toda página de cada idioma, o cabeçalho leva ao hub de guias do idioma e a cada hub de categoria que existe nele.
+2. **O hub de guias.**
+   - As três páginas respondem 200, são indexáveis e estão no sitemap do idioma, com o `hreflang` entre os três e o `x-default`.
+   - O `CollectionPage` e o `BreadcrumbList` são válidos, e a imagem OG de cada idioma existe.
+   - Cada guia do idioma aparece uma vez, lido do registro, e não há AdSlot.
+   - As 40 páginas de guia têm a trilha Início › Guias › o guia, no HTML e no schema.
+   - O `gate:seo`, o `gate:links` e o `gate:conteudo` ficam verdes.
+3. **As entradas.**
+   - O rodapé tem a coluna Guias nos três idiomas.
+   - Toda ferramenta e toda calculadora que tem guia mostra o GuideCard no primeiro bloco de conteúdo, e a linha antiga sumiu: a contagem bate com os registros.
+   - Nenhum guia aparece com o ToolCard.
+   - A busca agrupa Ferramentas e Guias.
+   - A home tem a seção de guias, ou a válvula está registrada.
+4. **O tema.** Todas as provas da decisão 10 passam nos dois navegadores, e o teste do CSS acha o par `data-theme` de toda regra de `prefers-color-scheme`.
+5. **A acessibilidade.**
+   - O axe dá zero violação nos dois temas e nos dois navegadores no hub, no cabeçalho com o Menu aberto e no botão de tema nos três estados.
+   - O teclado segue a especificação, e os alvos têm 48 px.
+   - Todo par novo de cor passa no teste de contraste.
+6. **O orçamento.**
+   - Em toda página que o `budgets.spec.ts` e o `i18n-budgets.spec.ts` medem, o número de arquivos JS e o de requisições são os mesmos do ponto de partida.
+   - O JS inicial (gzip, com o inline) cresce no máximo 1 KB e fica em até 80 KB. A tabela do antes e do depois vai no relatório, montada das linhas "JS inicial" dos dois specs.
+   - A lista dos nomes dos JS de `dist/_astro/`, sem o hash, é a mesma.
+   - O chunk da busca cresce no máximo 1 KB com gzip e continua carregando só no primeiro uso.
+7. **O cabeçalho e o CLS.**
+   - O `layout-shift.spec.ts` fica verde de 320 a 412 px, com o hub de guias.
+   - O cabeçalho tem 64 px e uma linha a 320, 360, 390, 412, 768, 1024 e 1280 px, nos três idiomas, com a Figtree segura e solta (tabela no relatório).
+   - A 1280 px, o último botão e a folha aberta ficam a 150 px ou mais da lateral, e o logo fica alinhado com a coluna.
+8. **O anúncio.**
+   - No `ads.spec.ts`, cada controle do cabeçalho e cada menu aberto ficam a 150 px ou mais de todo anúncio, a 360 e a 1280 px.
+   - O hub não tem AdSlot, e `src/ads/` não mudou: `git diff --stat origin/main...HEAD -- src/ads` sai vazio.
+9. **O Lighthouse.** O desempenho fica em 90 ou mais (mediana) e o CLS em até 0,05 em toda URL do `lighthouserc.json`, com o `/guides/`.
+10. **Os textos.** O `lint:texto`, o `english-leak.test.ts` e o `glossary.test.ts` passam.
+11. **A documentação.**
+    - Os cinco blocos da F10 estão no `docs/claude/`, com o texto igual.
+    - O `docs/PENDENCIAS.md` está em dia (decisão 12), e o `pendencias.test.ts` passa.
+    - O `docs/design/` tem o Header, a linha do tema, o GuideCard e os ícones.
+    - Os § começam no 382.
+12. **Os testes.** O número de testes do Vitest e o do `--list` do Playwright só cresceram, e todo teste antigo que mudou tem o seu §.
+13. **O `pnpm verificar`.** O `pnpm verificar --partes` passa na máquina local, com o total de cada parte e a soma no relatório. Nenhuma parte passa de 700 s.
+14. **A revisão.** O `docs/relatorios/REVISAO-F11.md` não tem achado crítico, alto nem médio aberto.
+15. **O CI.** A execução depois do `gh pr ready` termina verde, com o `ci-ok` verde, e o `merge` mescla a PR, ou o relatório diz por que não.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código.** No ponto de partida:
+  - rode `pnpm install --frozen-lockfile` e `pnpm build`;
+  - rode o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com a saída em `.cache/f11/antes/`;
+  - guarde o número de testes do Vitest e o do `pnpm exec playwright test --list` de cada navegador, e a lista dos JS de `dist/_astro/`.
+- **Em cada fatia:** rode o `pnpm tipos`, o `pnpm lint`, o Vitest, os specs que a fatia toca nos dois navegadores e os portões que ela toca. Leia a saída, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o deste prompt e o do projeto.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit, com a máquina livre. Se uma parte falhar:
+  - rode a mesma parte no ponto de partida, numa worktree;
+  - se falhar igual, a falha não é desta run: registre num §, ponha no relatório e siga;
+  - se não falhar igual, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`.
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. A especificação dos protótipos e os § 363 e § 364.
+3. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, `docs/claude/` e `docs/design/`.
+4. O `DECISOES.md` e o código.
+5. Na dúvida, a opção mais simples e reversível.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos: o id da rota do hub, o mapa de cada rota para a seção do Menu, a regra do `gate:conteudo` para o hub, onde cada teste novo mora e cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run. Siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- o rótulo `ci` não existe: a conferência do meio sai, e a execução final faz o papel dela (decisão 13);
+- a F9b muda as partes no meio da run: traga a main e confira o `--list`;
+- o Lighthouse oscila numa URL: rode a parte de novo uma vez, registre, e se cair de novo, ache a causa.
+
+Válvula de estouro, se o tempo ou o limite apertar: a seção de guias na home pode ir para a F13, com um § e uma linha no grupo 20 do `docs/PENDENCIAS.md`. O resto não tem válvula.
+
+Nunca corte: o Menu, o hub de guias nos três idiomas, o tema, as outras entradas, o GuideCard nas relacionadas, os testes da decisão 10 e a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo:**
+  - rode `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, `docs/prompts/prompt-fase-11.md`, `docs/prompts/prompt-fase-11.txt` e a pasta `Claude outputs/`. Se o `PLANO-FILEORCA.md` aparecer modificado (a linha que o Victor acrescenta no topo), deixe-o como está e fora dos commits. Qualquer outra coisa: não mexa, não commite e registre;
+  - crie a branch com `git switch -c fase-11`. O primeiro commit leva os dois arquivos do prompt, sem edição;
+  - se os arquivos do prompt não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-11.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits).
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-11`. O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-11-fileorca.vmatusita.workers.dev/`).
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **As worktrees** dos agentes e da revisão são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:**
+  - o push da branch;
+  - na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` só depois de uma execução final vermelha (decisão 13);
+  - leitura (`gh run`, `gh pr checks`, `gh pr view` e `gh api` sem método);
+  - um `gh run rerun` por falha que pareça instável, registrado.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh label`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`;
+  - postar, enviar formulário, criar conta ou subir arquivo para qualquer serviço;
+  - `wrangler deploy` em qualquer forma.
+
+  O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) as regras desta run, num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) o cabeçalho e o tema no código: o `<head>` do `BaseLayout`, onde o Astro injeta o CSS, toda regra de `prefers-color-scheme` do CSS do site e o menu de idioma;
+   - (c) os guias: os registros, as rotas, as trilhas, as relacionadas, a linha "Read the guide", a busca, o rodapé, a home, a imagem OG, o sitemap, o schema e os portões;
+   - (d) a especificação dos três protótipos e os § 363 e § 364, separando o que é contrato do que é só do `bundle.css`;
+   - (e) os testes que fixam o que muda, e a divisão das partes (`--list`).
+2. **A linha de base** (seção "Verificação").
+3. **Planejar.** Escreva `docs/relatorios/fase-11-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz:
+   - o ponto de partida e a linha de base;
+   - os § reservados;
+   - quem faz o quê e a ordem das fatias;
+   - cada critério ligado a um teste ou comando.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. a documentação da F10 (decisão 12) e os ícones (decisão 4), pelo agente principal;
+   2. o tema, o cabeçalho e a Privacidade (decisões 2 e 3), por um agente `opus` em worktree;
+   3. ao mesmo tempo, o hub, o GuideCard e as entradas (decisões 5 a 7), por outro agente `opus` em worktree;
+   4. o merge das duas no agente principal, com os conflitos dos textos resolvidos e o `pnpm tipos` verde, e depois a conferência no Linux (decisão 13);
+   5. o `docs/design/` (decisão 8), os § e o `docs/PENDENCIAS.md`;
+   6. as verificações completas, a tabela do orçamento e as imagens.
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`):
+   - sobre um commit fixo e registrado da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile` e o próprio `pnpm build`;
+   - contra este prompt e o plano;
+   - cada lente com o próprio `FO_PORT` e escrevendo só no `.cache/lente-<x>/` da worktree.
+
+   A F11 é uma fase de interface (três lentes, pela regra 3), mas mexe também na privacidade (a chave e a Privacidade) e na regra dos 150 px do cabeçalho. Por isso são cinco lentes Sonnet em contexto limpo:
+   - (a) **navegação, rotas e SEO:** o caminho pelo cabeçalho de toda página, o hub nos três idiomas, as trilhas, o sitemap, o `hreflang`, o canonical, o schema, a imagem OG, a busca, o rodapé, os links e as órfãs;
+   - (b) **design system e acessibilidade:** tokens, lista "Nunca", o cabeçalho e o GuideCard contra a especificação, contraste e axe nos dois temas, teclado (Tab, Esc, popover e Safari), alvos de 48 px, leitor de tela (o nome do tema, o `aria-current` e a região de status), movimento reduzido e cores forçadas;
+   - (c) **tema e desempenho:** a primeira pintura sem piscar, os três estados, a escolha entre páginas, o offline, o armazenamento bloqueado, o JS e as requisições antes e depois, o CLS de 320 a 412 px, os 64 px e o Lighthouse;
+   - (d) **privacidade e anúncio:**
+     - o `fo-theme` só no aparelho e só com Claro ou Escuro;
+     - nada na URL nem no GA4;
+     - a Privacidade certa nos três idiomas;
+     - os 150 px do cabeçalho e dos menus abertos no build com os IDs, a 360 e a 1280 px;
+     - o hub sem AdSlot, e nada que imite anúncio;
+   - (e) **textos e idiomas:** os textos novos em en, pt e es contra a especificação, o glossário, o `lint:texto`, o `english-leak`, o formato de número de cada idioma e a voz do site.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo; os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada revisa o diff delas. Os baixos que sobrarem vão para o grupo 20 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F11.md`. Remova a worktree no fim.
+6. **Fechar:** o relatório, o `pnpm verificar --partes` e a sequência de fim da decisão 13.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-11.md` em português, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que mudou para a pessoa no site, em cinco linhas;
+- o que entrou, por decisão, apontando os arquivos;
+- a evidência de cada critério, com a saída real dos comandos e dos specs;
+- a tabela do orçamento (antes e depois, por página) e a da altura do cabeçalho;
+- o número de testes do Vitest e do `--list`, antes e depois, e a lista dos testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o total de cada parte e a soma;
+- o custo (regra 5 de toda run): o `pnpm ci:custo` da última execução antes do relatório. O da execução final vai na descrição da PR;
+- o que a conferência no Linux achou;
+- o resumo da revisão, apontando para o `REVISAO-F11.md`;
+- as imagens de `docs/relatorios/fase-11/`;
+- o link da prévia (`https://fase-11-fileorca.vmatusita.workers.dev/`);
+- as decisões novas, apontando os §;
+- o que a válvula cortou, se cortou;
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e conferir no celular o Menu, o tema (Sistema, Claro e Escuro, e se a escolha fica) e os guias, na prévia ou no fileorca.com depois do deploy.
+  2. No Search Console, pedir a indexação de `/guides/`, `/pt/guias/` e `/es/guias/` (Inspeção de URL → Solicitar indexação).
+  3. Gerar o prompt da F12 com a lista marcada e o que a F11 deixou (o grupo 20 do `docs/PENDENCIAS.md` e a F10 p-5).
+
+Termine a resposta final com:
+
+- um resumo de cinco linhas em português;
+- o link da PR e o estado do CI (mesclada ou esperando, e por quê);
+- os três passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, os README do `docs/design/` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.
