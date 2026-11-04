@@ -46,3 +46,10 @@ Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no
 
 - **A folha do Menu abre no topo da página e precisa terminar 150 px acima do 1º AdSlot:** a 360 px, o do Merge PDF e do Unlock PDF fica em y 796, e a folha em inglês termina em y 597,5 (629,5 com as linhas de 52 px da § 388; § 404). Linha nova na folha, ou anúncio mais alto num molde: rode o bloco do cabeçalho do `ads.spec.ts`, que mede as 178 páginas com área de anúncio.
 - **Abaixo de 768 px, a folha tem a mesma altura em toda largura, mas o 1º AdSlot sobe quando o texto da página quebra menos:** o do Merge PDF e do Unlock PDF fica em y 796 até 384 px e em y 776 a partir de 390 px. Com as linhas de 52 px, a folha ficava a 146,5 px dele de 390 a 767 px, e o teste, que media só 360 e 1280 px, não via. Por isso o bloco do cabeçalho mede também 767 px, a largura em que os dois mais se aproximam, e as linhas passaram a 48 px (revisão F11 D-1, § 404).
+
+## Ajuste da largura do cabeçalho
+
+Pegadinhas do ajuste que deu ao cabeçalho as bordas do rodapé (DECISOES § 409).
+
+- **A partir de 1280 px, o cabeçalho passa por cima da lateral,** e só os 150 px de `padding-top` da `.fo-rail` (`global.css`) seguram os controles longe do anúncio dela (158 px). Mudar a altura do cabeçalho ou o `padding-top` da lateral pede o bloco do cabeçalho do `ads.spec.ts`: com a lateral a 20 px, ele reprova a 29 px da busca.
+- **Um menu aberto cobre o alto da lateral.** Por isso o `ads.spec.ts` mede o menu aberto contra todo anúncio menos o da lateral (`.fo-ad:not(.fo-ad--rail)`) e confere, no lugar, que o clique não chega a ela (`railTakesPointer`). A conferência com os menus fechados espera (`expect.poll`), porque a folha que segura o clique de fechar fica 400 ms.
