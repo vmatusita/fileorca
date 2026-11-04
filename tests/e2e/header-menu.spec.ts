@@ -191,8 +191,26 @@ test('with forced colours the section and the language in use are underlined too
 
 // Review F11 B-2 and its second pass (DECISOES § 405): the click that closes a menu (the light dismiss of an auto popover)
 // went on to what was under it, so the DropZone opened the file picker and a radio of the tool changed. While a menu is
-// open the page under the header takes no pointer, and the click only closes the menu. page.mouse clicks by coordinate:
-// locator.click would wait for the element to take the pointer.
+// open, and for 400 ms after it closes (a tap's click comes after the close in WebKit), the page under the header takes no
+// pointer, and the click only closes the menu. page.mouse and page.touchscreen act by coordinate: locator.click would wait
+// for the element to take the pointer.
+const framePointer = (page: Page) => page.evaluate(() => getComputedStyle(document.querySelector('.fo-frame') as Element).pointerEvents);
+
+/** The centre of an unchecked radio of the tool just under the open sheet, marked data-probe. */
+async function radioUnderSheet(page: Page): Promise<{ x: number; y: number }> {
+  const bottom = await sheet(page).evaluate((element) => element.getBoundingClientRect().bottom);
+  const radio = await page.evaluate((below) => {
+    const label = [...document.querySelectorAll<HTMLElement>('main label.fo-seg__opt')]
+      .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+      .find(({ element, rect }) => element.querySelector('input:not(:checked)') && rect.top > below + 4 && rect.bottom < innerHeight - 4);
+    if (!label) return null;
+    label.element.setAttribute('data-probe', '');
+    return { x: label.rect.left + label.rect.width / 2, y: label.rect.top + label.rect.height / 2 };
+  }, bottom);
+  if (!radio) throw new Error('no unchecked radio under the sheet');
+  return radio;
+}
+
 test('the click that closes a menu does not reach the page under it: no file picker, no control changed', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/compress-image/');
@@ -211,30 +229,43 @@ test('the click that closes a menu does not reach the page under it: no file pic
   }
   await page.waitForTimeout(300);
   expect(pickers, 'no file picker from the click that closed a menu').toBe(0);
-  // With no menu open, the same click opens the picker: the page takes the pointer again.
+  // With no menu open, once the hold is over, the same click opens the picker: the page takes the pointer again.
+  await expect.poll(() => framePointer(page)).toBe('auto');
   const picker = page.waitForEvent('filechooser');
   await page.mouse.click(centre.x, centre.y);
   await picker;
 
-  // Under 768 px the sheet covers the DropZone: a tap on a radio of Rotate image just under the sheet.
+  // Under 768 px the sheet covers the DropZone: a click on a radio of Rotate image just under the sheet.
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('/rotate-image/');
   await hydrated(page);
   await menuButton(page).click();
   await expect(sheet(page)).toBeVisible();
-  const bottom = await sheet(page).evaluate((element) => element.getBoundingClientRect().bottom);
-  const radio = await page.evaluate((below) => {
-    const label = [...document.querySelectorAll<HTMLElement>('main label.fo-seg__opt')]
-      .map((element) => ({ element, rect: element.getBoundingClientRect() }))
-      .find(({ element, rect }) => element.querySelector('input:not(:checked)') && rect.top > below + 4 && rect.bottom < innerHeight - 4);
-    if (!label) return null;
-    label.element.setAttribute('data-probe', '');
-    return { x: label.rect.left + label.rect.width / 2, y: label.rect.top + label.rect.height / 2 };
-  }, bottom);
-  if (!radio) throw new Error('no unchecked radio under the sheet at 390 px');
+  const radio = await radioUnderSheet(page);
   await page.mouse.click(radio.x, radio.y);
   await expect(sheet(page)).toBeHidden();
   await expect(page.locator('[data-probe] input')).not.toBeChecked();
+});
+
+test('the tap that closes the Menu on a touch screen does not reach the page either, with reduced motion too', async ({ browser }) => {
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 900 }, hasTouch: true, reducedMotion, serviceWorkers: 'block' });
+    const page = await context.newPage();
+    await page.goto('/rotate-image/');
+    await hydrated(page);
+    await menuButton(page).tap();
+    await expect(sheet(page)).toBeVisible();
+    const radio = await radioUnderSheet(page);
+    await page.touchscreen.tap(radio.x, radio.y);
+    await expect(sheet(page), reducedMotion).toBeHidden();
+    await page.waitForTimeout(500);
+    await expect(page.locator('[data-probe] input'), `${reducedMotion}: the closing tap changed nothing`).not.toBeChecked();
+    // Once the hold is over, the same tap reaches the radio.
+    await expect.poll(() => framePointer(page)).toBe('auto');
+    await page.touchscreen.tap(radio.x, radio.y);
+    await expect(page.locator('[data-probe] input'), reducedMotion).toBeChecked();
+    await context.close();
+  }
 });
 
 /** A first visit at one width, in a context of its own, with Figtree held until released (layout-shift.spec.ts). */
