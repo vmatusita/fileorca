@@ -356,7 +356,7 @@ test.describe('the header measured in the three languages, with Figtree held and
 // footer's columns and its base line start, and the last one ends where they end, at every width from 320 to 1920 px, on
 // a page with the rail and on two without. The open sheet keeps to the same edges under 768 px, and to the right one from
 // there. Before, from 1280 px the header ended where the tool column ends (x 794 at 1280, the footer at x 1256), and from
-// 360 to 1279 px it was 8 px wider than the footer on each side. The edge narrows to 16 px under 340 px, and the footer
+// 320 to 1279 px it was 8 px wider than the footer on each side. The edge narrows to 16 px under 340 px, and the footer
 // never loses a column as the window widens (with the switch at 360 px it had two at 356 to 359 px and one at 360;
 // review of § 409, b-2).
 const EDGE_WIDTHS = [320, 339, 340, 359, 360, 390, 767, 768, 1024, 1279, 1280, 1288, 1440, 1920] as const;

@@ -38,4 +38,11 @@ Os 9 achados confirmados são 4 defeitos. Cinco lentes acharam o mesmo (b-1, c-1
 
 ## A segunda passada
 
-(a preencher)
+Um revisor Sonnet em contexto limpo leu o diff das correções (`ee091cd..3ff2549`), só com leitura, em 299 s e 24 chamadas de ferramenta. Não achou defeito:
+
+- **o ponto novo da lateral:** a 1280 px, fica em y 529 em inglês e ~429 em português e espanhol com o Menu aberto, e ~250 com o menu de idioma. Os três ficam fora da folha e dentro do anúncio (y 214 a 858). Sem a lateral na tela (360 e 767 px), a função devolve `false` antes de procurar o ponto; nada mais cobre o ponto (o aviso de cookies fica de x 16 a 456);
+- **a borda de 16 px abaixo de 340 px:** o cabeçalho cabe com 24 px a partir de 331 px, e o rodapé só ganha a segunda coluna a 372 px, então não perde coluna de 320 a 1920 px;
+- **o teste de colunas:** o `gridTemplateColumns` calculado vem em pixels, e o teste reprova com a troca em 360 px;
+- **os documentos:** o limiar de 340 px e os números conferem com o código.
+
+Ele apontou um texto antigo impreciso, de antes das correções: "de 360 a 1279 px, o cabeçalho era 8 px mais largo". Na `main`, a diferença ia de 320 a 1279 px. O texto foi corrigido no relatório, na § 409 e no comentário do teste de bordas.
