@@ -27,6 +27,11 @@ const CLEARANCE = 150;
 const AD_DISTANCE = 1110;
 const DENSITY = 0.3;
 const PHONE = { width: 360, height: 740 };
+// The widest width with the 2nd content ad on (DECISOES § 445): the 1,110 px between two content ads hold there too.
+const WIDEST_PHONE = { width: 459, height: 900 };
+const PHONE_MAX = 459;
+// A small tablet held upright: from 460 to 767 px the page keeps only the 1st content ad (§ 445).
+const SMALL_TABLET = { width: 600, height: 960 };
 const TABLET = { width: 768, height: 1024 };
 const LANDSCAPE = { width: 812, height: 375 };
 const DESKTOP = { width: 1280, height: 800 };
@@ -42,9 +47,10 @@ test('the map reads the 184 pages with ads of the route map', () => {
 function check(problems: string[], page: AdPage, measure: MapMeasure, label: string): void {
   const fail = (what: string): void => void problems.push(`${page.path} ${label}: ${what}`);
   const width = measure.width;
-  // The boxes that show at this width: the 2nd content ad on only under 768 px, the multiplex from 768 px, the rails from 1280 px.
+  // The boxes that show at this width: the 2nd content ad on only up to 459 px (§ 445), the multiplex from 768 px, the rails
+  // from 1280 px.
   for (const box of measure.boxes) {
-    if (box.kind === 'content' && box.unit !== 'conteudo' && width >= 768) fail(`${box.unit} aparece a ${width} px`);
+    if (box.kind === 'content' && box.unit !== 'conteudo' && width > PHONE_MAX) fail(`${box.unit} aparece a ${width} px`);
     if (box.kind === 'multiplex' && width < 768) fail(`o multiplex aparece a ${width} px`);
     if (box.kind === 'rail' && width < 1280) fail(`${box.unit} aparece a ${width} px`);
     if (box.kind !== 'rail' && !box.inMain) fail(`${box.unit} fora do <main>`);
@@ -147,7 +153,7 @@ function shortestTo(measure: MapMeasure, group: string): number | null {
 
 for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
   const block = AD_PAGES.slice(start, start + BLOCK);
-  test(`the map at 360, 768, 812 and 1280 px, the notice and the budget: pages ${start + 1} to ${start + block.length} of ${AD_PAGES.length} (${block[0]?.path} and on)`, async ({ context, browserName }) => {
+  test(`the map at 360, 459, 600, 768, 812 and 1280 px, the notice and the budget: pages ${start + 1} to ${start + block.length} of ${AD_PAGES.length} (${block[0]?.path} and on)`, async ({ context, browserName }) => {
     test.setTimeout(180_000);
     const problems: string[] = [];
     const rows: Row[] = [];
@@ -171,7 +177,7 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
       }
       await dismissCookies(page);
       const at: Record<string, MapMeasure> = {};
-      for (const viewport of [PHONE, TABLET, LANDSCAPE, DESKTOP]) {
+      for (const viewport of [PHONE, WIDEST_PHONE, SMALL_TABLET, TABLET, LANDSCAPE, DESKTOP]) {
         await page.setViewportSize(viewport);
         await frames(page);
         const measure = await measureMap(page);
@@ -265,7 +271,7 @@ test.describe('on fileorca.com, the one push script', () => {
           if (unit === 'multiplex') return viewport.width >= 768;
           if (unit === 'lateral') return viewport.width >= 1280;
           if (unit === 'lateral-2') return viewport.width >= 1280 && state.rail >= 2638;
-          return viewport.width < 768;
+          return viewport.width <= PHONE_MAX;
         });
         const label = `${adPage.path} a ${viewport.width} px`;
         expect(state.ins.map((ins) => ins.unit), `${label}: as unidades com <ins>`).toEqual(want);

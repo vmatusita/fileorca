@@ -122,7 +122,7 @@ describe('the boxes of a page', () => {
     expect(box('conteudo')?.getAttribute('class')).toBe('fo-ad fo-ad--content');
     expect(box('conteudo')?.getAttribute('data-ad-media')).toBeUndefined();
     expect(box('conteudo-2')?.getAttribute('class')).toBe('fo-ad fo-ad--content fo-ad--phone');
-    expect(box('conteudo-2')?.getAttribute('data-ad-media')).toBe('(max-width: 767px)');
+    expect(box('conteudo-2')?.getAttribute('data-ad-media')).toBe('(max-width: 459px)');
     expect(box('multiplex')?.getAttribute('data-ad-format')).toBe('autorelaxed');
     expect(box('multiplex')?.getAttribute('data-ad-media')).toBe('(min-width: 768px)');
     expect(box('lateral')?.getAttribute('data-ad-media')).toBe('(min-width: 1280px)');

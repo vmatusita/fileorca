@@ -36,9 +36,14 @@ export const RAIL_GAP = 1200;
 export const RAIL_BOX = 644;
 export const RAIL2_COLUMN = AD_CLEARANCE + RAIL_BOX + RAIL_GAP + RAIL_BOX;
 
-/** The widths a box is for: the 2nd content ad on only under 768 px, the multiplex from 768 px, the rails from 1280 px. */
+/**
+ * The widths a box is for: the 2nd content ad on only on a phone held upright (up to 459 px; the widest phone of today is
+ * 440), the multiplex from 768 px, the rails from 1280 px. From 460 px the text wraps less and two content ads of the 360 px
+ * layout come closer than 1,110 px (1,104 at 480 px, 882 at 767), so from there up to 767 px the page keeps only the 1st
+ * (DECISOES § 445).
+ */
 export const AD_MEDIA = {
-  phone: '(max-width: 767px)',
+  phone: '(max-width: 459px)',
   wide: '(min-width: 768px)',
   rail: '(min-width: 1280px)',
 } as const;

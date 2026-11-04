@@ -252,7 +252,7 @@ O JSON, numa linha só no Workers Builds, com o ID de cada unidade (só dígitos
 
 No AdSense, dê a cada unidade o nome "área · unidade" (por exemplo "arquivos · conteudo-2"), para achar o ID depois. Os tipos:
 
-- **`conteudo` a `conteudo-5`:** unidade de display, responsiva (o formato padrão). O 1º aparece em toda largura; do 2º em diante, só abaixo de 768 px.
+- **`conteudo` a `conteudo-5`:** unidade de display, responsiva (o formato padrão). O 1º aparece em toda largura; do 2º em diante, só até 459 px (o celular em pé).
 - **`lateral` e `lateral-2`:** unidade de display de tamanho fixo, 300 × 600. Só a partir de 1280 px; a 2ª fica 1.200 px abaixo da 1ª, só em página com 600 palavras ou mais.
 - **`multiplex`:** unidade Multiplex. Só a partir de 768 px, no fim do conteúdo.
 
