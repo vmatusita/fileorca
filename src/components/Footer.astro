@@ -9,6 +9,9 @@
 // language, and its groups that have guides in the language (#image, #pdf and #money on the hub; no money in pt). On the hub
 // itself, "All guides" is the current page. An eighth column would not fit at 1280 px. Never an ad inside the footer. With
 // the AdSense anchor on the page, 96px of room at the bottom on the phone.
+// F12 · o café (decision 7; DECISOES § F12-C3): the coffee line opens the footer, the first link of it, with a 48 px target.
+// At the base it sat 24 to 46 px from the AdSense anchor with the page scrolled to the end; at the top, the columns lie
+// between them. The base keeps only the signature.
 import type { Lang, RouteId } from '../i18n/routes.ts';
 import { QR_ID, moneyHubId, pagePath, pathFor, routeById } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -104,6 +107,7 @@ const site = [
 ];
 ---
 <footer class:list={['fo-footer fo-deep', { 'fo-footer--anchor': anchor }]}>
+  <p class="fo-footer__coffee-row"><a class="fo-footer__coffee" href={pathFor('support', lang)} data-track="donate_click" data-track-place="footer"><Icon name="coffee" />{t.footer.coffee}</a></p>
   <div class="fo-footer__cols">
     <div>
       <h2>{t.footer.imageColumn}</h2>
@@ -149,7 +153,6 @@ const site = [
     </div>
   </div>
   <div class="fo-footer__base">
-    <a class="fo-footer__coffee" href={pathFor('support', lang)} data-track="donate_click" data-track-place="footer"><Icon name="coffee" />{t.footer.coffee}</a>
     <span>{fmt(t.footer.signature, { name: AUTHOR.name, city: AUTHOR.city })} · © {year}</span>
   </div>
 </footer>

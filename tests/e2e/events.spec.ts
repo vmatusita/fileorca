@@ -25,13 +25,15 @@ test('the footer coffee link sends donate_click with place footer and the langua
   // The open notice floats over the end of the page (DECISOES § 106): the choice comes first, as a person's would.
   await dismissCookies(page);
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
-  await page.locator('footer').getByRole('link', { name: 'Curtiu? Me paga um café' }).click();
+  // F12 (DECISOES § F12-C9): the footer line of PLANO-MELHORIAS section C, at the top of the footer.
+  await page.locator('footer').getByRole('link', { name: 'Me ajude a manter o FileOrca grátis: paga um café?', exact: true }).click();
   expect(await lastEvent(page, 'donate_click')).toEqual(['event', 'donate_click', { lang: 'pt', place: 'footer' }]);
 });
 
 test('the support page button links to Ko-fi without any Ko-fi script and sends donate_click', async ({ page }) => {
   await page.goto('/support/');
-  const button = page.getByRole('link', { name: 'Support with a coffee' });
+  // F12 (DECISOES § F12-C9): the Ko-fi button of section C. Exact: the footer line of the same page ends in "buy me a coffee".
+  const button = page.getByRole('link', { name: 'Buy me a coffee', exact: true });
   await expect(button).toHaveAttribute('href', 'https://ko-fi.com/victormatusita');
   expect(await page.locator('script[src*="ko-fi"], iframe[src*="ko-fi"]').count()).toBe(0);
   await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));

@@ -150,8 +150,14 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/26px 
 .fo-result__stat dd { margin: 0; font: 600 24px/28px var(--font-display); }
 .fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
 .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
-.fo-result__support { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
-.fo-result__support a { color: var(--on-deep); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+/* F12 · o café (DECISOES § F12-C2): the coffee line after Download, Start over and the notes: a short paragraph, one neutral
+   button (never sun) and the ghost "Don't show this again", which leaves one quiet sentence in its place (role="status"). */
+.fo-result__support { display: grid; gap: var(--space-3); margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
+.fo-result__support p { margin: 0; }
+.fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.fo-result__support .fo-btn { margin-bottom: var(--lip); }
+.fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
+.fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 .fo-placard { display: inline-grid; justify-items: center; padding: var(--space-2) var(--space-4) var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); rotate: -4deg; box-shadow: 0 4px 0 var(--stroke); }
 .fo-deep .fo-placard { border-color: var(--surface); box-shadow: none; }
 .fo-placard__n { font: 600 40px/44px var(--font-display); letter-spacing: -0.01em; }
@@ -379,7 +385,11 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .fo-footer__base { margin-top: var(--space-8); padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
-.fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--on-deep) !important; font-weight: 700; }
+/* F12 · o café (DECISOES § F12-C3): the coffee line opens the footer, far from the AdSense anchor at the bottom. */
+.fo-footer__coffee-row { box-sizing: border-box; margin: 0 0 var(--space-6); padding-bottom: var(--space-4); border-bottom: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); }
+.fo-footer .fo-footer__coffee { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); color: var(--on-deep); font-size: 16px; line-height: 22px; font-weight: 700; }
+.fo-footer .fo-footer__coffee:hover { text-decoration-thickness: 2px; }
+.fo-footer__coffee .fo-icon { width: 24px; height: 24px; }
 
 /* ---------- AdSlot ---------- */
 .fo-ad { box-sizing: border-box; display: grid; grid-template-rows: auto 1fr; justify-items: center; gap: var(--space-2); padding: var(--space-2) 0 var(--space-3); border-radius: var(--radius-xs); background: var(--ad-ground); margin-block: var(--ad-clearance); }
@@ -389,15 +399,36 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-ad--flush { margin-block: 0; }
 
 /* ---------- SupportCard ---------- */
-.fo-support { box-sizing: border-box; display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); align-items: center; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
+/* F12 · o café (DECISOES § F12-C4 and § F12-C6): one column; the head row puts the Oli to the right of the title, looking
+   left at the text. In the Pix, on the phone, the code, its visible label and Copy code (a plain 52 px .fo-btn) come
+   first and the QR after; from 768 px the QR comes first, at 160 px. */
+.fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.fo-support__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
 .fo-support__oli { width: 96px; height: 96px; }
 .fo-support__oli svg { width: 100%; height: 100%; display: block; }
-.fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-1); font: 600 22px/28px var(--font-display); }
-.fo-support p { margin: 0 0 var(--space-3); color: var(--ink-muted); }
-.fo-support__amounts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.fo-pix { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: var(--space-4); align-items: center; margin-top: var(--space-3); }
+.fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-2); font: 600 28px/34px var(--font-display); }
+.fo-support__head > :is(h1, h2, h3) { flex: 1 1 0; min-width: 0; margin: 0; }
+.fo-support p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
+.fo-support > .fo-btn { margin: 0 0 var(--space-3); max-width: 100%; white-space: normal; text-align: center; }
+.fo-support .fo-support__amounts { margin: 0; font-size: 15px; line-height: 22px; }
+.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-6); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--hairline); min-width: 0; }
+.fo-support .fo-pix-card :is(h2, h3, h4) { margin: 0; font: 700 18px/24px var(--font-text); letter-spacing: 0; }
+.fo-pix { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; min-width: 0; }
 .fo-pix__qr { width: 112px; height: 112px; padding: 6px; box-sizing: border-box; background: #FFFFFF; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); }
-.fo-pix__code { display: flex; gap: var(--space-2); align-items: center; }
+.fo-pix__side { order: -1; display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
+.fo-support .fo-pix__label { margin: 0; font: 600 14px/20px var(--font-text); color: var(--ink-muted); }
+.fo-pix__side .fo-btn { margin: 0 0 var(--lip); max-width: 100%; white-space: normal; }
+.fo-pix__receiver { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+@media (min-width: 768px) {
+  .fo-support { padding: var(--space-6); }
+  .fo-support__head { gap: var(--space-6); }
+  .fo-support__oli { width: 128px; height: 128px; }
+  .fo-support :is(h1, h2, h3) { font-size: 36px; line-height: 42px; letter-spacing: -0.01em; }
+  .fo-pix { grid-template-columns: 160px minmax(0, 1fr); align-items: center; }
+  .fo-pix__qr { width: 160px; height: 160px; }
+  .fo-pix__side { order: 0; }
+}
+.fo-pix__code { display: flex; gap: var(--space-2); align-items: center; width: 100%; }
 .fo-pix__code code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 13px/20px ui-monospace, monospace; color: var(--ink-muted); }
 
 /* ---------- CookieNotice ---------- */
@@ -414,9 +445,11 @@ html:not([data-theme]) .fo-theme__state--system, html[data-theme="light"] .fo-th
 .fo-oli--cheer svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
 @keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
 .fo-oli--gulp svg { transform: scale(1.05); transition: transform var(--dur-quick) var(--ease-spring); }
-.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) infinite; }
-.oli-steam path:last-child { animation-delay: 600ms; }
+/* F12 · o café (DECISOES § F12-C5): two rises, then the steam rests, visible and still, by 4.8 s (WCAG 2.2.2). */
+.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
+.oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
 @keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
+@keyframes fo-steam-rest { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
 /* ---------- page template helper (preview only) ---------- */
 .fo-page { box-sizing: border-box; width: 360px; background: var(--bg); border: var(--stroke-hair) solid var(--hairline); }

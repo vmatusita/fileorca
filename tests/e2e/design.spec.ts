@@ -321,9 +321,34 @@ test.describe('motion without the preference', () => {
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
   });
 
-  test('support page: the coffee steam rises in a loop', async ({ page }) => {
+  // F12 (decision 7; DECISOES § F12-C5): the steam of the coffee pose rises, then rests by itself, still and visible, by
+  // 4.8 s (WCAG 2.2.2; it looped every 1.8 s, F3 d-02). It still moves at first, so this check is not vacuous. A finished
+  // animation with "forwards" stays in getAnimations(): what is counted is the playState "running".
+  test('support page: the coffee steam rises, then rests, still and visible, by 4.8 s', async ({ page }) => {
     await page.goto('/support/');
     await expect.poll(() => running(page)).toBeGreaterThan(0);
+    const steam = () =>
+      page.evaluate(() =>
+        document
+          .getAnimations()
+          .filter((animation): animation is CSSAnimation => animation instanceof CSSAnimation && animation.animationName.startsWith('fo-steam'))
+          .map((animation) => ({ name: animation.animationName, end: Number(animation.effect?.getComputedTiming().endTime), state: animation.playState })),
+      );
+    const timings = await steam();
+    expect(timings.length, 'the steam animates').toBeGreaterThan(0);
+    for (const timing of timings) expect(timing.end, `${timing.name} ends`).toBeLessThanOrEqual(4800);
+    console.log(`[café] vapor: ${timings.length} animações, a última termina em ${Math.max(...timings.map((timing) => timing.end))} ms`);
+    // On the clock too: after the 4.8 s nothing on the page runs, and the two wisps rest in place, fully visible.
+    await expect.poll(() => running(page), { timeout: 10_000 }).toBe(0);
+    expect((await steam()).every((timing) => timing.state === 'finished')).toBe(true);
+    const wisps = await page.evaluate(() =>
+      [...document.querySelectorAll('#oli-coffee .oli-steam path')].map((path) => {
+        const style = getComputedStyle(path);
+        // "forwards" keeps the last keyframe (transform: none), which the engine may write as the identity matrix.
+        return { opacity: style.opacity, transform: ['none', 'matrix(1, 0, 0, 1, 0, 0)'].includes(style.transform) ? 'in place' : style.transform };
+      }),
+    );
+    expect(wisps).toEqual([{ opacity: '1', transform: 'in place' }, { opacity: '1', transform: 'in place' }]);
   });
 });
 

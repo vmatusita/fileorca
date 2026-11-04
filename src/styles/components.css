@@ -14,12 +14,17 @@
 [data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
 [data-oli="gulp"] > svg { scale: 1.05; }
 [data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
-.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) infinite; }
-.oli-steam path:last-child { animation-delay: 600ms; }
+/* F12 · o café (DECISOES § F12-C5): the steam of the coffee pose rises twice and rests, visible and still, by 4.8 s
+   (WCAG 2.2.2; it looped every 1.8 s). The first wisp rises from 0 to 3.6 s and settles by 4.2 s; the second, 0.6 s
+   behind, settles by 4.8 s. "backwards" keeps the second one clear through its delay. The selector hangs on no section:
+   inside a <use> the animation targets the element of the <symbol> (docs/claude/design-e-oli.md). */
+.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
+.oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
 @keyframes fo-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
 @keyframes fo-bob { to { transform: translateY(-4px) rotate(-3deg); } }
 @keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
 @keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
+@keyframes fo-steam-rest { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
 /* ---------- Dog-ear: the folded file corner (Oli's fin tip) and the category colours ---------- */
 .fo-dogear { position: relative; border-top-right-radius: 0 !important; }
@@ -297,6 +302,8 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .fo-result__support .fo-btn { margin-bottom: var(--lip); }
 .fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
+/* F12 · o café (DECISOES § F12-C2): after "Don't show this again", one quiet sentence in the same place (role="status"). */
+.fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 @media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
 .fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
@@ -542,38 +549,53 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
 
 /* ---------- SupportCard ---------- */
-.fo-support { box-sizing: border-box; display: grid; grid-template-columns: 1fr; gap: var(--space-4); align-items: center; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
+/* F12 · o café (DECISOES § F12-C4): one column. The head row puts the Oli to the right of the title, looking left at the
+   text, 96 px and 128 px from 768 px; before, she sat above the title on the phone and in a column of her own, looking
+   out of the card, from 768 px. */
+.fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
+.fo-support__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
 .fo-support__oli { width: 96px; height: 96px; }
 .fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-2); font: 600 28px/34px var(--fo-font-display); }
-.fo-support p { margin: 0 0 var(--space-3); color: var(--ink-muted); }
-.fo-support .fo-btn { margin-bottom: var(--space-3); }
-.fo-support__amounts { font-size: 15px; line-height: 22px; }
+.fo-support__head > :is(h1, h2, h3) { flex: 1 1 0; min-width: 0; margin: 0; }
+.fo-support p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
+.fo-support > .fo-btn { margin: 0 0 var(--space-3); max-width: 100%; white-space: normal; text-align: center; }
+.fo-support__last { white-space: nowrap; }
+.fo-support .fo-support__amounts { margin: 0; font-size: 15px; line-height: 22px; }
 /* The Pix of the Portuguese support page (SupportCard, .fo-pix; F6, decision 8). Only the block of the checked amount
    shows: the choice is CSS, no island. The QR is a white square in both themes (the one hex the design system allows
-   for it), its modules in deep, the same in both themes. */
-.fo-support > div { min-width: 0; }
-.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-5); min-width: 0; }
+   for it), its modules in deep, the same in both themes.
+   F12 · o café (DECISOES § F12-C6): on the phone the "copia e cola", its visible label and the Copy code button come
+   first, the QR after (the phone that reads the page cannot scan its own screen); from 768 px the QR comes first, at
+   160 px (it was 112 px), for the phone of the person at the computer. Copy code is a plain 52 px .fo-btn (it was the
+   40 px --sm, which the Button README keeps for the computer). */
+.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-6); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--hairline); min-width: 0; }
 .fo-pix-card .fo-seg__opt { padding: 0 var(--space-2); white-space: nowrap; }
 /* Below 390px the four amounts fit only with less room around each one, and "Qualquer valor" may break into two lines (F6; DECISOES § 245). */
 @media (max-width: 389px) { .fo-pix-card .fo-seg__opt { padding: 0 var(--space-1); } .fo-pix-card .fo-seg__opt:first-child { white-space: normal; } }
 .fo-support .fo-pix-card :is(h2, h3, h4) { margin: 0; font: 700 18px/24px var(--fo-font-text); letter-spacing: 0; }
-.fo-pix { display: none; grid-template-columns: 112px minmax(0, 1fr); gap: var(--space-4); align-items: center; min-width: 0; }
+.fo-pix { display: none; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; min-width: 0; }
 .fo-pix-card:has(input[value="any"]:checked) .fo-pix[data-pix="any"],
 .fo-pix-card:has(input[value="5"]:checked) .fo-pix[data-pix="5"],
 .fo-pix-card:has(input[value="10"]:checked) .fo-pix[data-pix="10"],
 .fo-pix-card:has(input[value="20"]:checked) .fo-pix[data-pix="20"] { display: grid; }
 .fo-pix__qr { width: 112px; height: 112px; padding: 6px; box-sizing: border-box; background: #FFFFFF; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); }
 .fo-pix__qr path { fill: var(--deep); }
-.fo-pix__side { display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
-.fo-pix__side .fo-btn { margin-bottom: 0; max-width: 100%; white-space: normal; }
+.fo-pix__side { order: -1; display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
+.fo-support .fo-pix__label { margin: 0; font: 600 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-pix__side .fo-btn { margin: 0 0 var(--lip); max-width: 100%; white-space: normal; }
 .fo-pix__code { display: flex; gap: var(--space-2); align-items: center; width: 100%; }
 .fo-pix__code code { flex: 1; width: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 13px/20px ui-monospace, monospace; color: var(--ink-muted); }
 .fo-pix__receiver { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.fo-support .fo-pix__status { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink); }
 .fo-pix__status:empty { display: none; }
 @media (min-width: 768px) {
-  .fo-support { grid-template-columns: auto minmax(0, 1fr); gap: var(--space-6); padding: var(--space-6); }
+  .fo-support { padding: var(--space-6); }
+  .fo-support__head { gap: var(--space-6); }
   .fo-support__oli { width: 128px; height: 128px; }
   .fo-support :is(h1, h2, h3) { font-size: 36px; line-height: 42px; letter-spacing: -0.01em; }
+  .fo-pix { grid-template-columns: 160px minmax(0, 1fr); align-items: center; }
+  .fo-pix__qr { width: 160px; height: 160px; }
+  .fo-pix__side { order: 0; }
 }
 
 /* ---------- Footer on the deep sea, with the wave on its top edge ---------- */
@@ -595,8 +617,12 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
-.fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; }
-.fo-footer__coffee .fo-icon { width: 20px; height: 20px; }
+/* F12 · o café (DECISOES § F12-C3): the coffee line opens the footer, on the edges of the columns, with a hairline under
+   it and a 48 px target (it was the 32 px line of the links, at the base, 24 to 46 px from the AdSense anchor). */
+.fo-footer__coffee-row { max-width: var(--page-max); margin: 0 auto var(--space-6); padding-bottom: var(--space-4); border-bottom: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); }
+.fo-footer .fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); font-size: 16px; line-height: 22px; font-weight: 700; }
+.fo-footer .fo-footer__coffee:hover { text-decoration-thickness: 2px; }
+.fo-footer__coffee .fo-icon { width: 24px; height: 24px; }
 
 /* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
 /* The notice of the first visit keeps the font of its first paint, and so its height (DECISOES § 305): every text inside

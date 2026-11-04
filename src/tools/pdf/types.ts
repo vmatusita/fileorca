@@ -47,7 +47,6 @@ export interface PdfPanelData<O = object> {
   /** The ink of the light theme (the "ink" token), for the signature: it lands on a white page in any theme. */
   ink: string;
   coffeeHref: string;
-  adsOn: boolean;
 }
 
 /** A file of the panel as a tool sees it. */

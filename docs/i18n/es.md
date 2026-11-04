@@ -336,14 +336,17 @@ Os textos de `src/i18n/es/wall.ts`, da especificação do `wall.html` com o ajus
 
 ## Pedido de café
 
-Da tabela "Doações" do PLANO. Em espanhol não há Pix: o botão leva ao Ko-fi.
+Da seção C do PLANO-MELHORIAS (F12, DECISOES § F12-C7), que trocou a tabela "Doações" do PLANO. Em espanhol não há Pix: o botão leva ao Ko-fi.
 
 | Lugar | Texto |
 | --- | --- |
-| Línea de la tarjeta de resultado | Esta herramienta es gratis, sin límites y nunca sube tus archivos. Si te ahorró tiempo, un café ayuda a mantenerla así. |
-| Botón | Invítame un café |
-| Pie de página | ¿Te gustan estas herramientas? Invítame un café |
-| Título de la página de apoyo | Herramientas gratis, hechas por una sola persona |
+| Línea de la tarjeta de resultado | FileOrca lo hace una sola persona, sin registros ni límites. Si Oli te ahorró tiempo, ¿me ayudas con un café? |
+| Botón (tarjeta y página de apoyo) | Ayúdame con un café |
+| Después de "No mostrar de nuevo" | Entendido, no vuelvo a pedirlo aquí. El enlace del café queda en el pie de página. |
+| Pie de página (arriba) | Ayúdame a mantener FileOrca gratis: invítame un café |
+| Título de la página de apoyo | Ayúdame a que Oli siga nadando |
+| Texto de la página de apoyo | FileOrca es gratis, sin registros ni límites, y lo hace una sola persona en Curitiba, Brasil. Los anuncios cubren los costos; cada café se convierte en la próxima herramienta. |
+| Ruta de navegación de la página de apoyo | Apoya a Oli |
 
 ## Nunca
 

@@ -285,14 +285,18 @@ Os textos de `src/i18n/pt/wall.ts`, da especificação do `wall.html` com o ajus
 
 ## Pedido de café e Pix
 
-Da tabela "Doações" do PLANO.
+Da seção C do PLANO-MELHORIAS (F12, DECISOES § F12-C7), que trocou a tabela "Doações" do PLANO.
 
 | Lugar | Texto |
 | --- | --- |
-| Linha do card de resultado | Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café? |
+| Linha do card de resultado | O FileOrca é feito por uma pessoa só, sem cadastro e sem limite. Se a Oli te ajudou, me ajuda com um café? |
 | Botão da linha | Pagar um café no Pix |
-| Rodapé | Curtiu? Me paga um café |
-| Título da página de apoio | Ferramentas grátis, feitas por uma pessoa só |
+| Depois de "Não mostrar de novo" | Combinado, não peço mais aqui. O link do café fica no rodapé. |
+| Rodapé (no topo) | Me ajude a manter o FileOrca grátis: paga um café? |
+| Título da página de apoio | Me ajude a manter a Oli nadando |
+| Texto da página de apoio | O FileOrca é grátis, sem cadastro e sem limite, e é feito por uma pessoa só, em Curitiba. Os anúncios pagam os custos; cada café vira a próxima ferramenta. |
+| Botão do Ko-fi (página de apoio) | Me ajude com um café (Ko-fi) |
+| Trilha da página de apoio | Apoie a Oli |
 | Valores | Qualquer valor · R$ 5 · R$ 10 · R$ 20 |
 | Botão do código | Copiar código |
 | Recebedor | Em nome de Victor Yuki Matusita |

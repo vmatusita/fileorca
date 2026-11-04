@@ -110,9 +110,10 @@ const texts: PdfPanelTexts = {
       downscaled: 'Algumas páginas eram grandes demais para desenhar nessa resolução, então a Oli desenhou essas páginas um pouco menores.',
     },
     coffee: {
-      text: 'Esta ferramenta é grátis, sem limite, e seu arquivo nem saiu do aparelho. Se ela te ajudou, me paga um café?',
+      text: 'O FileOrca é feito por uma pessoa só, sem cadastro e sem limite. Se a Oli te ajudou, me ajuda com um café?',
       button: 'Pagar um café no Pix',
       hide: 'Não mostrar de novo',
+      done: 'Combinado, não peço mais aqui. O link do café fica no rodapé.',
     },
   },
   next: { label: 'A seguir', moreTools: 'Mais ferramentas' },
