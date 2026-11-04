@@ -75,6 +75,7 @@ As saídas abaixo são do build do merge (`cc008df`), dos commits seguintes e do
      - `links: ok, 14992 links internos em 211 páginas, nenhuma órfã`;
      - `conteúdo: ok, … 3 do hub de guias`, com `palavras próprias do hub de guias: en 91, pt 108, es 97`.
    - Os testes: o `tests/unit/guides-hub-route.test.ts` (rota, sitemap, canonical, `hreflang` com `x-default`, OG de 1200 × 630, `CollectionPage`, `BreadcrumbList` e zero anúncio) e o `tests/e2e/guides-hub.spec.ts`, nos dois navegadores.
+   - A dobra: a 360 × 740, o nome do primeiro cartão fica acima de 740 px nos três idiomas, também com uma linha a mais no título (§ 408).
    - O controle negativo da regra nova do `gate:conteudo` está no `tests/unit/conteudo.test.ts`: o site falso fica verde e depois vermelho em pt e es.
 3. **As entradas.**
    - O `tests/unit/guides-entries.test.ts` confere:
@@ -120,7 +121,7 @@ As saídas abaixo são do build do merge (`cc008df`), dos commits seguintes e do
     - no `docs/PENDENCIAS.md`, a F5b F-12, a F10 p-1 e a F10 p-20 foram para "Já corrigidos", a F10 p-5 ficou com o que sobra para a F12, e o grupo 20 entrou;
     - o `pendencias.test.ts` passa;
     - o `docs/design/` tem o Header, a linha do tema, o GuideCard e os 44 ícones;
-    - os § vão do 382 ao 407.
+    - os § vão do 382 ao 408.
 12. **Os testes:** as contagens e os testes antigos que mudaram estão na seção seguinte.
 
 ## O orçamento
@@ -368,6 +369,8 @@ Os testes antigos que mudaram, cada um com o que protegia, por que mudou e a pro
 
 ## O `pnpm verificar --partes`
 
+Rodou antes do primeiro `gh pr ready`. As correções da § 408, depois dele, mudaram uma regra de CSS do hub de guias e dois testes desta run; os specs que elas tocam (o `guides-hub`, o `header-menu`, o `layout-shift`, o `a11y` dos guias, o `design`, o `navigation` e o `guides-search`, 336 testes nos dois navegadores) passaram, e a execução completa do CI roda tudo de novo no Linux.
+
 A primeira execução, no `3275ede`, com a máquina livre, parou na parte 4 do Chromium: 3 testes antigos liam a primeira região de status da página, e o cabeçalho agora tem a do tema (§ 406). Depois da mudança nos testes, o `verificar --partes` rodou de novo, inteiro, no `75e98d9` (o último commit de código), com a máquina livre (nenhum outro processo do repositório, nenhum servidor de pé). A saída real da segunda execução:
 
 ```text
@@ -445,37 +448,62 @@ A primeira execução, no `3275ede`, parou assim (a parte 4 do Chromium, com o `
 
 ## O custo
 
-O `pnpm ci:custo` da última execução do CI antes deste relatório, a leve do push do `75e98d9` (PR em rascunho):
+O `pnpm ci:custo` da última execução do CI antes desta versão do relatório, a completa do primeiro `gh pr ready` (no `3a743ab`, vermelha; § 408):
 
-### Execução 41787121377 (tentativa 1)
+### Execução 41791116378 (tentativa 1)
 
-- Branch `fase-11`, commit `75e98d9`, evento `pull_request`, criada em 2026-11-04T06:40:43Z, resultado `success`.
-- Classe: **leve**.
-- Minutos cobrados: **5** (soma dos jobs, cada um arredondado para cima).
-- Tempo de parede: **3.1 min** (do início do primeiro job ao fim do último).
-- Jobs: 3 rodaram, 7 pulados.
+- Branch `fase-11`, commit `3a743ab`, evento `pull_request`, criada em 2026-11-04T07:16:27Z, resultado `failure`.
+- Classe: **completo**.
+- Minutos cobrados: **121** (soma dos jobs, cada um arredondado para cima).
+- Tempo de parede: **10.1 min** (do início do primeiro job ao fim do último).
+- Jobs: 23 rodaram, 4 pulados.
 
 | Job | Resultado | Duração | Cobrado | Preparo | Total do verificar | Passos que mais pesam |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | alerta-dependabot | pulado | | 0 | | | |
-| build | pulado | | 0 | | | |
-| ci-ok | success | 27 s | 1 |  |  | Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (15 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (5 s); Set up job (1 s) |
-| classificar | success | 17 s | 1 |  |  | Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (8 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (4 s); Set up job (1 s) |
+| build | success | 54 s | 1 | 23 s | 22.3 s | pnpm verificar --build (23 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (7 s); Run pnpm install --frozen-lockfile (7 s) |
+| ci-ok | failure | 33 s | 1 |  |  | Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (16 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (7 s); Verdict (6 s) |
+| classificar | success | 14 s | 1 |  |  | Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (7 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (4 s); Set up job (1 s) |
 | merge | pulado | | 0 | | | |
-| playwright (${{ matrix.part }}) | pulado | | 0 | | | |
+| playwright (chromium 1 de 5) | success | 450 s | 8 | 36 s | 409.7 s | pnpm verificar --playwright=chromium --shard=1/5 --dist-pronto (410 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s); Run pnpm install --frozen-lockfile (9 s) |
+| playwright (chromium 2 de 5) | success | 417 s | 7 | 32 s | 381.8 s | pnpm verificar --playwright=chromium --shard=2/5 --dist-pronto (382 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s); Run pnpm install --frozen-lockfile (7 s) |
+| playwright (chromium 3 de 5) | failure | 212 s | 4 | 30 s | 177.5 s | pnpm verificar --playwright=chromium --shard=3/5 --dist-pronto (178 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s); Run pnpm install --frozen-lockfile (6 s) |
+| playwright (chromium 4 de 5) | success | 400 s | 7 | 36 s | 359.6 s | pnpm verificar --playwright=chromium --shard=4/5 --dist-pronto (360 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (12 s); Run pnpm install --frozen-lockfile (9 s) |
+| playwright (chromium 5 de 5) | success | 389 s | 7 | 41 s | 344.3 s | pnpm verificar --playwright=chromium --shard=5/5 --dist-pronto (345 s); Wait for the browser (12 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 1 de 13) | success | 310 s | 6 | 53 s | 252.9 s | pnpm verificar --playwright=webkit --shard=1/13 --dist-pronto (253 s); Wait for the browser (25 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 2 de 13) | success | 320 s | 6 | 47 s | 269.8 s | pnpm verificar --playwright=webkit --shard=2/13 --dist-pronto (270 s); Wait for the browser (18 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 3 de 13) | success | 369 s | 7 | 49 s | 317.0 s | pnpm verificar --playwright=webkit --shard=3/13 --dist-pronto (317 s); Wait for the browser (22 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s) |
+| playwright (webkit 4 de 13) | success | 390 s | 7 | 48 s | 338.7 s | pnpm verificar --playwright=webkit --shard=4/13 --dist-pronto (339 s); Wait for the browser (20 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 5 de 13) | success | 255 s | 5 | 49 s | 202.9 s | pnpm verificar --playwright=webkit --shard=5/13 --dist-pronto (204 s); Wait for the browser (23 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (8 s) |
+| playwright (webkit 6 de 13) | success | 237 s | 4 | 48 s | 184.6 s | pnpm verificar --playwright=webkit --shard=6/13 --dist-pronto (185 s); Wait for the browser (20 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 7 de 13) | success | 262 s | 5 | 53 s | 205.0 s | pnpm verificar --playwright=webkit --shard=7/13 --dist-pronto (206 s); Wait for the browser (23 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 8 de 13) | success | 252 s | 5 | 122 s | 125.3 s | pnpm verificar --playwright=webkit --shard=8/13 --dist-pronto (126 s); Wait for the browser (88 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (11 s) |
+| playwright (webkit 9 de 13) | success | 240 s | 4 | 47 s | 189.8 s | pnpm verificar --playwright=webkit --shard=9/13 --dist-pronto (190 s); Wait for the browser (21 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s) |
+| playwright (webkit 10 de 13) | success | 497 s | 9 | 132 s | 360.5 s | pnpm verificar --playwright=webkit --shard=10/13 --dist-pronto (361 s); Wait for the browser (98 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (12 s) |
+| playwright (webkit 11 de 13) | success | 208 s | 4 | 49 s | 155.9 s | pnpm verificar --playwright=webkit --shard=11/13 --dist-pronto (157 s); Wait for the browser (21 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s) |
+| playwright (webkit 12 de 13) | success | 399 s | 7 | 46 s | 349.1 s | pnpm verificar --playwright=webkit --shard=12/13 --dist-pronto (350 s); Wait for the browser (19 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| playwright (webkit 13 de 13) | success | 213 s | 4 | 46 s | 163.9 s | pnpm verificar --playwright=webkit --shard=13/13 --dist-pronto (164 s); Wait for the browser (23 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (8 s) |
 | pos-deploy | pulado | | 0 | | | |
-| verificar (leve) | success | 141 s | 3 | 33 s | 104.7 s | pnpm verificar --leve (105 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s); Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (8 s) |
-| verificar (lighthouse) | pulado | | 0 | | | |
-| verificar (portões) | pulado | | 0 | | | |
+| verificar (leve) | pulado | | 0 | | | |
+| verificar (lighthouse) | success | 445 s | 8 | 42 s | 400.0 s | pnpm verificar --lighthouse --dist-pronto (400 s); Wait for the browser (14 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (10 s) |
+| verificar (portões) | success | 198 s | 4 | 33 s | 158.9 s | pnpm verificar --sem-playwright --sem-lighthouse --dist-pronto (159 s); Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 (9 s); Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 (7 s) |
 
-Jobs que rodaram o build do site no verificar: verificar (leve) (14 s).
-Total do verificar: o maior foi 104.7 s (verificar (leve)); 0 de 1 partes acima do alvo de 700 s.
+Jobs que rodaram o build do site no verificar: build (19 s).
+Preparo dos jobs do Playwright: o maior foi 132 s (playwright (webkit 10 de 13)); 2 de 18 acima de 90 s.
+Total do verificar: o maior foi 409.7 s (playwright (chromium 1 de 5)); 0 de 21 partes acima do alvo de 700 s.
 
-O custo da execução completa, a do `gh pr ready`, vai na descrição da PR, porque só existe depois do relatório.
+A leve do push do `75e98d9`, a anterior, custou 5 minutos cobrados e 3,1 min de parede (3 jobs). O custo da execução completa final vai na descrição da PR, porque só existe depois do relatório.
 
 ## A conferência no Linux
 
-No meio da run, não houve: o rótulo `ci` não existe no repositório (o `gh api` do rótulo, só leitura, respondeu 404), e a run não cria rótulos. O atalho de pôr a PR pronta e voltá-la ao rascunho foi recusado, porque o job `merge` lê o rascunho do evento, e uma execução verde do `ready_for_review` chegaria ao `gh pr merge` com a PR de volta ao rascunho (§ 401, `docs/claude/ci.md`, F11 p-1). As execuções leves do CI (tipos, lint, build e Vitest, no Ubuntu) passaram em todo push da run. A conferência completa no Linux, com o Playwright nos dois navegadores, é a execução do `gh pr ready`, com tudo commitado; o resultado dela está na descrição da PR.
+No meio da run, não houve: o rótulo `ci` não existe no repositório (o `gh api` do rótulo, só leitura, respondeu 404), e a run não cria rótulos. O atalho de pôr a PR pronta e voltá-la ao rascunho foi recusado, porque o job `merge` lê o rascunho do evento, e uma execução verde do `ready_for_review` chegaria ao `gh pr merge` com a PR de volta ao rascunho (§ 401, `docs/claude/ci.md`, F11 p-1). As execuções leves do CI (tipos, lint, build e Vitest, no Ubuntu) passaram em todo push da run.
+
+A conferência no Linux foi, então, a execução completa do `gh pr ready`. A primeira, no `3a743ab`, reprovou na parte 3 do Chromium, com 2 testes desta run que tinham passado no Windows (§ 408):
+
+- **o hub de guias em espanhol a 360 × 740:** no Linux, o título vai a três linhas (a 2ª linha, "muestran los números", ocupa 278,5 dos 280 px no Windows), e o nome do primeiro cartão desce para y 765,14, abaixo da dobra de 740 px que a especificação pede. A correção: o primeiro grupo fica 32 px abaixo dos atalhos, não 64, e o nome fica em y 733 mesmo com o título em três linhas. O teste agora põe uma linha a mais no título e exige a dobra do mesmo jeito; reprovou antes da correção com 765,0, o número do CI;
+- **o toque que fecha o Menu:** o teste não fechava o aviso de cookies, que no Linux fica mais alto e cobriu o rádio; o controle positivo do próprio teste acusou. A correção é o `dismissCookies` no teste.
+
+As outras 22 partes passaram. A PR voltou ao rascunho, as correções entraram, e a sequência do fim recomeçou: o push, a execução leve verde e o `gh pr ready`. O resultado da execução completa final está na descrição da PR.
 
 ## A revisão
 
@@ -490,7 +518,7 @@ Tudo está em `docs/relatorios/REVISAO-F11.md`.
 
 ## As imagens
 
-22 imagens em `docs/relatorios/fase-11/`, 1,3 MB no total, a maior com 103 KB. Foram tiradas do `dist/`, com o Chromium do Playwright, a 1x e com movimento reduzido. As do Menu foram refeitas depois das linhas de 48 px.
+22 imagens em `docs/relatorios/fase-11/`, 1,3 MB no total, a maior com 103 KB. Foram tiradas do `dist/`, com o Chromium do Playwright, a 1x e com movimento reduzido. As do Menu foram refeitas depois das linhas de 48 px, e as do hub depois do espaço novo acima do primeiro grupo (§ 408).
 
 | Arquivo | O que mostra |
 | --- | --- |
@@ -533,6 +561,7 @@ https://fase-11-fileorca.vmatusita.workers.dev/ (o Workers Builds gera a prévia
 - § 404 e § 405: as correções da revisão e da segunda passada, e a causa da F11 p-2.
 - § 406: os testes antigos que a região de status do tema mudou.
 - § 407: o fim da run.
+- § 408: a primeira execução completa vermelha e as duas correções.
 
 ## O que a válvula cortou
 

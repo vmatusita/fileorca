@@ -4480,8 +4480,24 @@ O primeiro `pnpm verificar --partes` do fim (no `3275ede`) parou na parte 4 do C
 
 ## § 407 · O fim da F11: o verificar, o custo e a sequência do fim (F11, decisão 13)
 
-- **O `pnpm verificar --partes`** rodou duas vezes, com a máquina livre. A primeira, no `3275ede`, parou na parte 4 do Chromium com 3 testes antigos que liam a primeira região de status da página (§ 406). A segunda, no `75e98d9`, o último commit de código: as 21 partes verdes, a soma de 1.784,6 s, e a maior parte, a do Lighthouse, com 390,7 s, abaixo dos 700 s. A saída real está no relatório.
+- **O `pnpm verificar --partes`** rodou duas vezes, com a máquina livre. A primeira, no `3275ede`, parou na parte 4 do Chromium com 3 testes antigos que liam a primeira região de status da página (§ 406). A segunda, no `75e98d9`, o último commit de código antes do primeiro `gh pr ready` (as correções da § 408 vieram depois): as 21 partes verdes, a soma de 1.784,6 s, e a maior parte, a do Lighthouse, com 390,7 s, abaixo dos 700 s. A saída real está no relatório.
 - **As contagens do fim:** o Vitest com 109 arquivos e 1.833 testes (1.750 em 102 no ponto de partida), e o `--list` do Playwright com 1.560 testes por navegador em 51 arquivos (1.428 em 44).
 - **O custo** da última execução do CI antes do relatório, a leve do push do `75e98d9`, está no relatório; o da execução completa vai na descrição da PR.
 - **A sequência do fim,** a da ficha: tudo commitado (o relatório, a revisão e as imagens), o push, a execução leve do último push terminada verde, e só então o `gh pr ready`, para o último commit não ficar com um `ci-ok` vermelho de uma execução cancelada ao lado do verde da completa (CLAUDE.md, notas à regra 1). A execução completa é a conferência no Linux que a run não teve no meio (§ 401). Se ela ficar vermelha: `gh pr ready --undo`, a correção, o push, a execução leve e o `gh pr ready` de novo.
 - **As worktrees** da run foram removidas com `git worktree remove`: a do ponto de partida (`f11-base`), a da revisão (`revisao-f11`) e a das correções (`wf_a6978b59-cc0-13`, com a branch dela já mesclada). As das três fatias já não existiam. As de outras runs ficaram.
+
+## § 408 · A primeira execução completa vermelha e as duas correções (F11, decisão 13)
+
+A execução completa do `gh pr ready` (a 41791116378, no `3a743ab`, a primeira conferência no Linux da run) reprovou na parte 3 do Chromium: 2 testes desta run, verdes no Windows nas duas execuções do `verificar --partes`. As outras 22 partes passaram, e o `merge` não rodou. A PR voltou ao rascunho (`gh pr ready --undo`) antes da correção, como a ficha manda. O custo dessa execução: 121 minutos cobrados, 10,1 min de parede, 23 jobs.
+
+- **O hub de guias em espanhol, a 360 × 740** (`guides-hub.spec.ts`, "the shortcuts lead to the three groups…"):
+  - o nome do primeiro cartão terminou em y 765,14, e a especificação pede que ele fique acima de 740 nos três idiomas (§ 364);
+  - a causa: a 2ª linha do H1, "muestran los números", ocupa 278,5 dos 280 px no Chromium do Windows (278,4 com a fonte de reserva). No Linux do CI, o Fredoka sai um pouco mais largo, e o título vai a três linhas: 731,14 + 34 = 765,14. No Windows, nenhuma fonte bloqueada reproduz isso;
+  - a correção, sem mexer no tipo do título nem no padding da faixa (`components.css`): o primeiro grupo fica 32 px abaixo dos atalhos (`.fo-jump + .fo-section { margin-top: var(--space-4) }`), não os 64 px de uma seção a outra. O nome do primeiro cartão fica em y 699 com o título em duas linhas, e em y 733 com três;
+  - o teste: o mesmo teste agora também acrescenta ao H1 uma linha de 34 px e exige o nome acima de 740 do mesmo jeito. Antes da correção (commit `9d01a85`), reprovou nos três idiomas e nos dois navegadores com 765,0, o mesmo número do CI. Depois, passou. As imagens 13 a 17 do relatório foram refeitas.
+- **O toque que fecha o Menu** (`header-menu.spec.ts`, o teste com `hasTouch` da § 405):
+  - o controle positivo do teste (depois da espera, o mesmo toque marca o rádio) reprovou: o toque não marcou;
+  - a causa: o teste abre um contexto novo e não fechava o aviso de cookies. A 390 × 900, o aviso começa 10 px abaixo do centro do rádio no Windows. O texto dele ocupa mais espaço no Linux, e o aviso cobriu o rádio. O snapshot do trace do CI mostra o aviso aberto. No Linux, o toque de fechar caía no aviso, e o teste não provava nada: o controle positivo é o que mostrou isso;
+  - a correção, só no teste (`3acc508`): o `dismissCookies` antes de abrir o Menu, como no teste do clique.
+- **As pegadinhas** foram para o `docs/claude/playwright.md`.
+- **A sequência continua a da § 407:** o push, a execução leve verde e o `gh pr ready` de novo.
