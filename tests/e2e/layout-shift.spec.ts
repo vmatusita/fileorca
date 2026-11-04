@@ -10,6 +10,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test';
 import { guidePathIn, moneyPage, type CalcPageId, type GuideId } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { LANGS, routeById } from '../../src/i18n/routes.ts';
+import { useTestBuild } from './lib/test-build.ts';
 
 // Each width with the pages whose trail sat on the edge of a row there, in the sweeps of every page (before the
 // correction and with each candidate of it), and the twelve pages of the first measure at 360 and 393 px.
@@ -161,18 +162,31 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
   return { before, after, cls, moved };
 }
 
-for (const [width, pages] of Object.entries(CASES)) {
-  for (let start = 0; start < pages.length; start += CHUNK) {
-    const chunk = pages.slice(start, start + CHUNK);
-    test(`the breadcrumb, the H1 and the cookie notice keep their place when Figtree arrives late, at ${width} px (${chunk[0]} and on)`, async ({ browser, browserName }) => {
-      const visits = [];
-      for (const path of chunk) visits.push({ path, ...(await firstVisit(browser, browserName, path, Number(width))) });
-      // Printed before any assertion, so a red run still shows the shift of every page of the chunk.
-      if (browserName === 'chromium') console.log(`[cls] ${browserName} ${width}: ${visits.map(({ path, cls, moved }) => `${path} ${cls.toFixed(3)}${cls > 0.01 ? ` (${moved.join('; ')})` : ''}`).join(', ')}`);
-      for (const { path, before, after, moved } of visits) {
-        expect(after.over, `${path}: the trail cuts nothing at ${width} px`).toBeLessThanOrEqual(0);
-        expect(after, `${path} at ${width} px: the breadcrumb, the H1 and the notice stay where the first paint put them (moved: ${moved.join('; ') || 'nothing'})`).toEqual(before);
-      }
-    });
+/** The tests of every width, in chunks of pages; `build` names the build in the title and in the printed line. */
+function firstVisits(build: string): void {
+  for (const [width, pages] of Object.entries(CASES)) {
+    for (let start = 0; start < pages.length; start += CHUNK) {
+      const chunk = pages.slice(start, start + CHUNK);
+      test(`the breadcrumb, the H1 and the cookie notice keep their place when Figtree arrives late, at ${width} px (${chunk[0]} and on)`, async ({ browser, browserName }) => {
+        const visits = [];
+        for (const path of chunk) visits.push({ path, ...(await firstVisit(browser, browserName, path, Number(width))) });
+        // Printed before any assertion, so a red run still shows the shift of every page of the chunk.
+        if (browserName === 'chromium') console.log(`[cls] ${browserName} ${build} ${width}: ${visits.map(({ path, cls, moved }) => `${path} ${cls.toFixed(3)}${cls > 0.01 ? ` (${moved.join('; ')})` : ''}`).join(', ')}`);
+        for (const { path, before, after, moved } of visits) {
+          expect(after.over, `${path}: the trail cuts nothing at ${width} px`).toBeLessThanOrEqual(0);
+          expect(after, `${path} at ${width} px: the breadcrumb, the H1 and the notice stay where the first paint put them (moved: ${moved.join('; ') || 'nothing'})`).toEqual(before);
+        }
+      });
+    }
   }
 }
+
+firstVisits('padrão');
+
+// F12 (decision 11 and criterion 11; DECISOES § F12-M4): the same first visits on the test build, with the boxes of the ad
+// map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves
+// either, and the shift of each page is printed next to the one of the default build.
+test.describe('on the test build, with the boxes of the ad map', () => {
+  useTestBuild(test);
+  firstVisits('teste');
+});
