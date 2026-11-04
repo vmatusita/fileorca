@@ -131,6 +131,7 @@ Saído do ensaio do Dependabot da F8 (DECISOES § 299):
 - [ ] Search Console: categoria sem impressão em 90 dias para de crescer até você entender o motivo.
 - [ ] Search Console: estatísticas de rastreamento sem 403 (seção "Googlebot barrado") e zero erro de hreflang.
 - [ ] AdSense: status do Confirmed Click.
+- [ ] AdSense e GA4, com a parede ligada: o relatório de recuperação de bloqueio e o evento `adblock_wall` (seção "Anúncios e parede do bloqueador").
 - [ ] GA4: os `tool_error` do mês (seção acima).
 - [ ] GitHub: a PR de minor e patch do Dependabot se mesclou? Há PR de major ou de Actions esperando? A execução "Dependabot Updates" está verde?
 - [ ] GitHub: minutos do Actions do mês.
@@ -215,6 +216,69 @@ Os passos 2, 3 e 4 são só configuração e não dependem do merge da F9: faça
   3. No GitHub, na sua conta, Settings → Applications → Installed GitHub Apps → Cloudflare Workers and Pages → Configure: Repository access em "Only select repositories", só com o `fileorca` (e o repositório do motor, quando existir).
   4. Um teste de verdade: de uma segunda conta (sua ou de alguém de confiança), faça um fork, abra uma PR que muda uma linha de um `.md` e veja se aparece check, comentário ou build do Workers Builds. Depois feche a PR.
 - **Se uma PR de fork gerar build:** desligue Enable Preview Builds até decidir, porque o build roda o código da PR com as variáveis do build, e registre numa run curta.
+
+## Anúncios e parede do bloqueador
+
+Escrito na F12 (4/nov/2026; DECISOES § 412 a § 416). Nada de anúncio nem de parede aparece até você ligar as variáveis: o build sem elas (o de hoje e o da prévia) não tem caixa de anúncio, parede nem a pose `sad`.
+
+### As variáveis do Workers Builds
+
+| Variável | Valores | O que faz |
+| --- | --- | --- |
+| `PUBLIC_ADSENSE_CLIENT` | `ca-pub-` e 16 dígitos | A meta de verificação, o `ads.txt` e o ID de editor das unidades |
+| `PUBLIC_ADS_ENABLED` | `true` (exatamente) | Liga o carregador e as unidades, com as outras duas |
+| `PUBLIC_ADSENSE_SLOTS` | O JSON do modelo abaixo | O ID de cada posição; posição sem ID não aparece |
+| `PUBLIC_ADBLOCK_WALL` | `desligado` (padrão), `aviso` ou `bloqueio` | A parede da Oli triste para quem bloqueia anúncio; só vale com as três de cima |
+
+Valor errado em qualquer uma (área, unidade ou ID fora do formato, ou a parede fora dos três valores) para o build: o Workers Builds fica vermelho e o site continua no ar com o build anterior. Depois de mudar uma variável, use Retry no último build da `main`.
+
+### O modelo do `PUBLIC_ADSENSE_SLOTS` (37 unidades)
+
+Uma unidade por posição. A posição n do conteúdo usa a unidade `conteudo-n` da área da página; a 1ª é o `conteudo`.
+
+| Área | Páginas | Unidades |
+| --- | --- | --- |
+| `geral` | A home e o hub de guias | `conteudo`, `conteudo-2`, `conteudo-3`, `conteudo-4`, `conteudo-5`, `lateral`, `lateral-2`, `multiplex` |
+| `arquivos` | As ferramentas de imagem e de PDF, os dois hubs e os guias de arquivo | as mesmas oito |
+| `dinheiro` | As calculadoras de dinheiro, o hub e os guias de dinheiro | as mesmas oito |
+| `casa-saude` | As calculadoras e os hubs de casa e saúde | as mesmas oito |
+| `utilidades` | O gerador de QR code | `conteudo`, `conteudo-2`, `lateral`, `lateral-2`, `multiplex` |
+
+O JSON, numa linha só no Workers Builds, com o ID de cada unidade (só dígitos) no lugar de cada `…`:
+
+```
+{"geral":{"conteudo":"…","conteudo-2":"…","conteudo-3":"…","conteudo-4":"…","conteudo-5":"…","lateral":"…","lateral-2":"…","multiplex":"…"},"arquivos":{"conteudo":"…","conteudo-2":"…","conteudo-3":"…","conteudo-4":"…","conteudo-5":"…","lateral":"…","lateral-2":"…","multiplex":"…"},"dinheiro":{"conteudo":"…","conteudo-2":"…","conteudo-3":"…","conteudo-4":"…","conteudo-5":"…","lateral":"…","lateral-2":"…","multiplex":"…"},"casa-saude":{"conteudo":"…","conteudo-2":"…","conteudo-3":"…","conteudo-4":"…","conteudo-5":"…","lateral":"…","lateral-2":"…","multiplex":"…"},"utilidades":{"conteudo":"…","conteudo-2":"…","lateral":"…","lateral-2":"…","multiplex":"…"}}
+```
+
+No AdSense, dê a cada unidade o nome "área · unidade" (por exemplo "arquivos · conteudo-2"), para achar o ID depois. Os tipos:
+
+- **`conteudo` a `conteudo-5`:** unidade de display, responsiva (o formato padrão). O 1º aparece em toda largura; do 2º em diante, só abaixo de 768 px.
+- **`lateral` e `lateral-2`:** unidade de display de tamanho fixo, 300 × 600. Só a partir de 1280 px; a 2ª fica 1.200 px abaixo da 1ª, só em página com 600 palavras ou mais.
+- **`multiplex`:** unidade Multiplex. Só a partir de 768 px, no fim do conteúdo.
+
+Você pode criar menos: a posição sem ID não aparece, e a densidade só cai. Criar só `conteudo` a `conteudo-3`, por exemplo, põe no máximo 3 por página no celular.
+
+### Depois da F12, com o AdSense aprovado
+
+1. **Antes de ligar a parede, a busca reversa da `sad`** (15 minutos): no Google Lens, os PNG de `docs/relatorios/fase-10/oli/` (`oli-sad-512-light.png` e `oli-sad-512-dark.png`). Se aparecer um personagem parecido demais, peça uma run curta que troca a pose da parede pela `oops` (a constante `WALL_POSE` de `src/oli/poses.ts`).
+2. **Crie as unidades** do modelo acima e atualize o `PUBLIC_ADSENSE_SLOTS`. Use Retry no último build da `main` e confira no site, com o bloqueador desligado, que as caixas aparecem com anúncio.
+3. **Anúncios automáticos** (Ads → By site → fileorca.com): só a âncora e a vinheta ligadas; o posicionamento automático dentro da página e o side rail desligados. Na vinheta, desmarque "Allow additional triggers for vignette ads" (os gatilhos adicionais, ligados por padrão desde 9/mar/2026, podem pôr uma vinheta enquanto a ferramenta processa).
+4. **A mensagem de recuperação** (Privacy & messaging → Ad blocking recovery): crie a mensagem e deixe-a em **Rascunho**. A detecção e o relatório funcionam sem publicar, e publicada a tela do Google apareceria por cima da da Oli. Em "For Acceptable Ads users", escolha não mostrar a mensagem.
+5. **Confira a tag** (1 minuto): na aba Tagging da mesma página, o "ad blocking recovery tag" tem de ser um script de `fundingchoicesmessages.google.com/i/pub-<seu número>?ers=1` e um script que cria a `iframe` `googlefcPresent`, a forma que o site gera (DECISOES § 416). Se for diferente, peça uma run curta com o código da aba. Não cole o "error protection code": ele põe uma faixa do Google em inglês embaixo da página.
+6. **Ligue a parede:** crie a variável `PUBLIC_ADBLOCK_WALL` = `bloqueio` e use Retry no último build da `main`.
+7. **Teste de verdade:**
+   - com o uBlock Origin no computador e com o Brave no Android: a parede aparece; o "Usar só desta vez" funciona uma vez, e no mesmo dia não volta a aparecer o botão; depois de liberar o site no bloqueador, ela some ao recarregar;
+   - com uma VPN da UE: a tela vira aviso e fecha (no X ou com Esc).
+8. **Se a parede só aparecer pelo sinal reserva** (o do Google não chega com a mensagem em Rascunho): publique a mensagem do Google com a inclusão apontando para um caminho que não existe (`/__sem-mensagem/`). Assim a tela do Google nunca aparece e o sinal passa a chegar.
+9. **Antes de ligar na UE** (lá a parede é só aviso), confira a leitura da ePrivacy sobre a chave do "Usar só desta vez" (`fo-wall-escape`, só a hora, no navegador; F10 p-9 no `docs/PENDENCIAS.md`).
+10. **Leia os textos em português** da parede e do café, e acompanhe por 2 semanas (seção abaixo).
+
+### Onde olhar o resultado
+
+- **AdSense, Privacy & messaging → Ad blocking recovery → relatório:** quantas visitas têm bloqueador e quantas liberaram.
+- **GA4, o evento `adblock_wall`:** o `action` (`shown`, `reload`, `help` ou `escape`) e o `mode` (`aviso` ou `bloqueio`). É um piso: quem bloqueia anúncio costuma bloquear o GA4 também.
+- **GA4, páginas por sessão, e Search Console, Core Web Vitals:** por 2 semanas depois de ligar. O Lighthouse do CI mede sem anúncio, então o efeito real só aparece aqui.
+- **Para desligar a parede:** `PUBLIC_ADBLOCK_WALL` = `desligado` e Retry. Para desligar os anúncios: `PUBLIC_ADS_ENABLED` diferente de `true` e Retry.
 
 ## Pendências
 
