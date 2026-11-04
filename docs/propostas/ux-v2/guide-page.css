@@ -1,0 +1,140 @@
+/* UX-13 · the guide page (F10 proposal; the F13 builds it). Loads after proto.css.
+   Colours: only var(--token). No new colour token: every pair below is an existing token on an existing ground.
+   The "g-" prefix marks what is new on this page; the "fo-" classes are the site's.
+   Sections:
+     0. site parity (classes of src/styles/components.css that bundle.css lacks)
+     1. the top: H1, lead and the signature in one line
+     2. the "what we measured" sheet (the paper with the fold)
+     3. the tool, before the long text, and the result in the same rectangle
+     4. the box under the panel that the rest and the result share (no layout shift)
+     5. the table of measurements: the dashed edge where it continues, the hint, the grouped rows
+     6. the ads by the map (content in the text, two rail units, multiplex from 768 px) */
+
+/* ---------- 0. Site parity ---------- */
+.fo-reviewed { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
+.fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
+/* The site's ResultCard (components.css:161-200): 20 px padding and 16 px gap on the phone, 24/20 from 768 px. */
+.fo-result { padding: var(--space-5); gap: var(--space-4); }
+.fo-result__head { min-height: 72px; }
+.fo-result__says { flex: 1 1 0; min-width: 0; font: 500 18px/24px var(--font-display); }
+.fo-result__notes { margin: 0; font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+@media (min-width: 768px) {
+  .fo-result { padding: var(--space-6); gap: var(--space-5); }
+  .fo-result__head { min-height: 96px; }
+  .fo-result__says { font-size: 20px; line-height: 26px; }
+}
+/* A guide's top takes the whole width, like a calculator's (components.css:546): the Oli is on the panel, lower down. */
+.fo-top.fo-top--calc { padding-right: 0; }
+/* The preflight of the site resets fieldset and legend; bundle.css does not. */
+.g-options { min-width: 0; margin: 0; padding: 0; border: 0; }
+.g-options > legend { padding: 0; }
+
+/* No block of the column may widen it (at 320 px a wide panel would push the whole column into the gutter and reflow
+   the text above it when the result replaces the panel). */
+.g-main > * { min-width: 0; }
+
+/* ---------- 1. The top ---------- */
+.g-top { gap: var(--space-2); }
+/* One line at 360 px in the three languages: the name and the short date (Intl, dateStyle "medium"). */
+.g-sig time { white-space: nowrap; }
+
+/* ---------- 2. The sheet: a paper with the fold in the colour of the hub (turquesa: image) ---------- */
+.g-facts {
+  --fo-ground: var(--bg);
+  position: relative; display: grid; gap: var(--space-3); margin: var(--space-2) 0 0; padding: var(--space-4);
+  border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink);
+}
+/* The title is an H2 in the caption style, like the column titles of the footer. */
+.g-facts__title { padding-right: calc(var(--dogear) + var(--space-2)); font: 600 12px/16px var(--font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.g-facts__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin: 0; }
+.g-facts__stat { display: grid; align-content: start; gap: var(--space-1); }
+.g-facts__stat dt { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+/* On the phone the two labels take two lines, so the two numbers sit on the same line. */
+@media (max-width: 767px) { .g-facts__stat dt { min-height: 40px; } }
+.g-facts__stat dd { margin: 0; }
+/* number-md (Tipografia: "number-md nas estatísticas"). */
+.g-facts__n { font: 600 24px/28px var(--font-display); color: var(--ink); }
+.g-facts__sub { font: 600 14px/20px var(--font-text); font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.g-facts__sub .fo-icon--inline { margin: 0 var(--space-1); vertical-align: -0.15em; color: var(--ink-muted); }
+.g-facts__sample { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.g-facts__sample a { font-weight: 600; }
+@media (min-width: 768px) {
+  .g-facts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr); column-gap: var(--space-6); padding: var(--space-5) var(--space-6); }
+  .g-facts__title { grid-column: 1 / -1; }
+  .g-facts__list { grid-column: 1 / 3; column-gap: var(--space-6); }
+  .g-facts__sample { align-self: end; }
+}
+
+/* ---------- 3. The tool ---------- */
+.g-tool { display: grid; gap: var(--space-2); margin-top: var(--space-6); }
+@media (min-width: 768px) { .g-tool { margin-top: var(--space-10); } }
+/* The same room on the right as .fo-top and .fo-guide__tool: the DropZone's Oli sits there (DECISOES § 206). */
+.g-tool__h2 { padding-right: 96px; font: 600 24px/30px var(--font-display); }
+@media (min-width: 768px) { .g-tool__h2 { padding-right: 136px; } }
+/* In a block on the phone; the smaller side padding keeps the panel inside the column down to 320 px (reflow). */
+@media (max-width: 767px) { .g-choose { display: flex; width: 100%; padding-inline: var(--space-4); } }
+/* The result card fills the same rectangle as the DropZone: .fo-slot reserves 380 px (340 from 768) and the card
+   stretches to it. Everything the card does not need at once (the before and after) opens on a tap. */
+.g-result { align-content: start; }
+/* Three short numbers in one line down to 320 px. */
+@media (max-width: 767px) { .g-result .fo-result__stats { column-gap: var(--space-4); } }
+/* Phone: the Download in a block, then "Start over" and "Compare" side by side, half each (a label may take two
+   lines at 320 px inside the 52 px of the button, so the card keeps its height). From 768 px, one row. */
+.g-result__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: var(--space-2); }
+/* The site's reflow of the Download (components.css:174-177): the size goes under the label when the card is narrow. */
+.g-result__actions .g-download { grid-column: 1 / -1; flex-wrap: wrap; row-gap: 0; padding: var(--space-2) var(--space-4); white-space: normal; text-align: center; }
+@media (min-width: 768px) { .g-result__actions .g-download { padding-inline: var(--space-8); } }
+.g-result__actions .fo-btn--ghost { width: 100%; padding-inline: var(--space-2); white-space: normal; text-align: center; }
+.g-compare[open] { grid-column: 1 / -1; }
+@media (min-width: 768px) {
+  .g-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+  .g-result__actions .fo-btn--ghost { width: auto; padding-inline: var(--space-3); }
+  .g-compare[open] { flex: 1 1 100%; }
+}
+.g-compare > summary { list-style: none; }
+.g-compare > summary::-webkit-details-marker { display: none; }
+.g-ba { margin-top: var(--space-3); }
+
+/* ---------- 4. Under the panel: one reserved box (the intro of the tool at rest, the next-step chips in the result) ---------- */
+/* Reserved for the largest of the two: on the phone, the "Next:" line and two chips, one per line (20 + 8 + 48 + 8 + 48);
+   from 768 px, one line of chips. The intro of the tool at rest is shorter than both. */
+.g-after { display: grid; align-content: start; min-height: 132px; }
+@media (min-width: 768px) { .g-after { min-height: var(--tap-min); } }
+@media (max-width: 767px) { .g-next .fo-next__label { flex: 1 1 100%; } }
+.g-after__intro { font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+/* The prose starts after the tool. */
+.g-intro { margin-top: var(--space-8); }
+
+/* ---------- 5. The table ---------- */
+.g-hint { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-2); font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.g-hint .fo-icon--inline { flex: none; width: 18px; height: 18px; color: var(--ink); }
+/* The edge cue, CSS only: on each side where the table continues, a dashed line (the DropZone's stroke, "there is
+   more here") on a 12 px band of surface-sunken, like the torn edge of a long paper. The two local layers are covers in
+   the ground colour that travel with the table and hide the cue when that side is fully shown; the scroll layers are
+   the cue, fixed to the frame. Hard stops only: no blur, no fade, no shadow. Nothing changes when the table fits. */
+.g-table-wrap {
+  --g-cover: var(--bg);
+  --g-edge: var(--stroke);
+  --g-band: var(--surface-sunken);
+  background:
+    linear-gradient(var(--g-cover), var(--g-cover)) left / 20px 100% no-repeat local,
+    linear-gradient(var(--g-cover), var(--g-cover)) right / 20px 100% no-repeat local,
+    repeating-linear-gradient(to bottom, var(--g-edge) 0 8px, transparent 8px 14px) left / var(--stroke-2) 100% no-repeat scroll,
+    repeating-linear-gradient(to bottom, var(--g-edge) 0 8px, transparent 8px 14px) right / var(--stroke-2) 100% no-repeat scroll,
+    linear-gradient(var(--g-band), var(--g-band)) left / 12px 100% no-repeat scroll,
+    linear-gradient(var(--g-band), var(--g-band)) right / 12px 100% no-repeat scroll;
+}
+/* The rows of one camera share one row-group header; the cell that tells the rows apart (the HEIC size) is the row
+   header and reads like the other cells (F4 ACE-9, F5b F-13). */
+.g-table .g-table__cam { padding-right: var(--space-4); vertical-align: top; }
+.g-table .g-table__key { font-weight: 500; }
+.g-history { margin-top: var(--space-2); }
+
+/* ---------- 6. Ads ---------- */
+/* The second rail unit: 1.600 px (two screens) below the first, edge to edge. More than the 1.110 px of the content
+   units, so it does not stand beside the first content unit of the text at 1280 px. Not sticky. */
+.g-rail2 { margin-top: 1600px; }
+/* The multiplex only from 768 px (the map), as tall as the loader makes it at the column width (760 x 0.6) plus the
+   44 px label: the height comes from proto.css, the one height of every prototype (review of the F10, c-05). */

@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF tool pieces · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?lang=pt;?lang=es">
+<meta name="proto-shots" content=";?lang=pt">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="pdf.css">
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><symbol id="oli-wave" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M84 52 q5 -3 8 1 M86 44 q7 -5 12 1" fill="none" stroke="#0B63F6" stroke-width="2.6" stroke-linecap="round"/></g></symbol></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
+  </div>
+</nav>
+<div class="proto-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#" aria-label="FileOrca home" data-t-aria-label="home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="fo-header__lang" popovertarget="pp-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="lang.code">EN</span><span class="fo-sr" data-t="lang.sr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="pp-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="lang.menu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame">
+    <main id="main" class="proto-main">
+      <div class="pp-intro">
+        <h1 class="fo-h1" data-t="h1">The pieces of the PDF tools</h1>
+        <p class="fo-lead" data-t="lead">Seven pieces that the 13 PDF tools share. Each block shows today's site and the proposal at the width of the tool column: 328 px on a phone, 760 px on a computer.</p>
+        <ul class="pp-howto">
+          <li data-t="howto1">Before · today: drawn with the CSS of today's site, as a still picture.</li>
+          <li data-t="howto2">After · proposal: what the F13 builds. The page grid, the signature box and the Merge arrows answer to the keyboard and the mouse here.</li>
+        </ul>
+      </div>
+
+      <!-- 1 · The page grid -->
+      <section class="pp-block" aria-labelledby="pp1-title">
+        <h2 class="pp-block__title" id="pp1-title" data-t="b1.title">1 · The page grid</h2>
+        <p class="pp-block__lead" data-t="b1.lead">Split (Pick pages), Delete PDF pages and Sign PDF (Pick pages) show it. The picked page gets a check in a circle, not only a thicker blue border. The fold stays on the corner, and the bar fits 360 px with buttons of the normal size, 52 px tall.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a D-7 · F5a F-8 · F5a F-14 · F5a D-12</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage fo-pdf-island" inert>
+              <div class="fo-options-stack">
+                <p class="fo-field__help" data-t="del.help">Pick the pages to delete in the grid, or type their numbers in the field below.</p>
+                <div class="fo-pages" data-mode="select" data-pp-pages>
+                  <div class="fo-pages__bar">
+                    <p class="fo-pages__count">2 of 6 pages picked</p>
+                    <button type="button" class="fo-btn fo-btn--sm fo-btn--ghost" data-t="g.all">Pick all</button>
+                    <button type="button" class="fo-btn fo-btn--sm fo-btn--ghost" data-t="g.none">Pick none</button>
+                  </div>
+                  <ul class="fo-pages__grid" aria-label="Pages of minutes-2026-10.pdf" data-t-aria-label="g.label" aria-describedby="b1-help">
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="0" aria-pressed="false" data-n="1" aria-label="Page 1 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">1</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" data-selected="true" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="true" data-n="2" aria-label="Page 2 of 6, picked"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">2</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="3" aria-label="Page 3 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">3</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="4" aria-label="Page 4 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">4</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" data-selected="true" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="true" data-n="5" aria-label="Page 5 of 6, picked"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">5</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="6" aria-label="Page 6 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">6</span></button></li>
+                  </ul>
+                  <p class="fo-field__help" id="b1-help" data-t="g.help">Arrow keys move between pages; Space picks a page.</p>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b1.beforeNote">Pages 2 and 5 are picked: only the border says so, and a sliver of it shows past the fold. At 360 px, Pick none drops alone to a second line, and both buttons are 40 px tall.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.after">After · proposal</figcaption>
+            <div class="pp-stage fo-pdf-island">
+              <div class="fo-options-stack">
+                <p class="fo-field__help" data-t="del.help">Pick the pages to delete in the grid, or type their numbers in the field below.</p>
+                <div class="fo-pages" data-mode="select" data-pp-pages data-pp-live>
+                  <div class="fo-pages__bar">
+                    <p class="fo-pages__count">2 of 6 pages picked</p>
+                    <button type="button" class="fo-btn fo-btn--ghost" data-pp-all data-t="g.all">Pick all</button>
+                    <button type="button" class="fo-btn fo-btn--ghost" data-pp-none data-t="g.none">Pick none</button>
+                  </div>
+                  <ul class="fo-pages__grid" aria-label="Pages of minutes-2026-10.pdf" data-t-aria-label="g.label" aria-describedby="a1-help">
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="0" aria-pressed="false" data-n="1" aria-label="Page 1 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>1</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" data-selected="true" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="true" data-n="2" aria-label="Page 2 of 6, picked"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>2</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="3" aria-label="Page 3 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>3</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="4" aria-label="Page 4 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>4</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" data-selected="true" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="true" data-n="5" aria-label="Page 5 of 6, picked"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>5</span></button></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="6" aria-label="Page 6 of 6"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true"><span class="fo-page__check"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>6</span></button></li>
+                  </ul>
+                  <p class="fo-field__help" id="a1-help" data-t="g.help">Arrow keys move between pages; Space picks a page.</p>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b1.afterNote">Click a page, or move with the arrow keys and press Space: the check, the border and the count change together.</p>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 2 · The signature box -->
+      <section class="pp-block" aria-labelledby="pp2-title">
+        <h2 class="pp-block__title" id="pp2-title" data-t="b2.title">2 · The signature box</h2>
+        <p class="pp-block__lead" data-t="b2.lead">Sign PDF. The focus ring is whole at every edge of the page, the preview is drawn at the size of the box, and the keyboard help names keys that work without Shift.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a D-9 · F5a F-5 · F5a D-6</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage" inert>
+              <fieldset class="fo-field fo-sign__place">
+                <legend class="fo-field__label" data-t="sign.place">Position</legend>
+                <div class="fo-sign__page" style="--page-ratio:0.7727">
+                  <span class="pp-paper" data-theme="light" role="img" aria-label="Page preview" data-t-aria-label="sign.preview"><i class="pp-paper__h"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="pp-paper__s"></i><i></i><i></i><i class="pp-paper__s"></i></span>
+                  <div class="fo-sign__box pp-ring" style="--x:70%;--y:92.27%;--w:30%"><svg class="pp-sig" data-theme="light" viewBox="0 0 300 100" aria-hidden="true"><path d="M18 70c18-34 30-50 38-46s-6 40 4 44 22-38 34-36-2 30 10 32 20-24 30-24 4 22 16 22 34-18 52-20 30 6 52 2" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+                <p class="fo-field__help" data-t="sign.helpOld">Drag the box on the preview. With the keyboard, the arrow keys move it, + makes it bigger and − makes it smaller.</p>
+              </fieldset>
+              <div class="pp-zoom">
+                <div class="pp-zoom__box"><div class="pp-zoom__paper" data-theme="light">
+                  <svg viewBox="0 0 50 70" aria-hidden="true"><rect class="pp-px-a" x="0" y="0" width="10" height="70"/><rect class="pp-px-a" x="10" y="0" width="30" height="10"/><rect class="pp-px-b" x="40" y="0" width="10" height="10"/><rect class="pp-px-a" x="40" y="10" width="10" height="20"/><rect class="pp-px-a" x="10" y="30" width="30" height="10"/><rect class="pp-px-b" x="40" y="30" width="10" height="10"/><rect class="pp-px-c" x="10" y="10" width="10" height="20"/><rect class="pp-px-c" x="10" y="40" width="10" height="10"/><rect class="pp-px-c" x="30" y="10" width="10" height="20"/></svg>
+                </div></div>
+                <p class="pp-case__note" data-t="z.before">The letter P at 4×: the 240 px thumbnail, stretched to the box (1.48× on a computer, 4.05× on a phone with 3× pixels).</p>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b2.beforeNote">The box sits on the bottom right corner and has the focus: the frame clips the ring on two sides, and in the dark theme the blue of the ring is 2.6:1 on the white page.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.after">After · proposal</figcaption>
+            <div class="pp-stage" data-pp-sign>
+              <fieldset class="fo-field fo-sign__place">
+                <legend class="fo-field__label" data-t="sign.place">Position</legend>
+                <div class="fo-sign__page" style="--page-ratio:0.7727">
+                  <div class="fo-sign__sheet" data-theme="light">
+                    <span class="pp-paper" role="img" aria-label="Page preview" data-t-aria-label="sign.preview"><i class="pp-paper__h"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="pp-paper__s"></i><i></i><i></i><i class="pp-paper__s"></i></span>
+                    <div class="fo-sign__box pp-ring" role="group" tabindex="0" aria-label="Signature position, 70% from the left, 92% from the top, 30% wide" aria-describedby="a2-help" style="--x:70%;--y:92.27%;--w:30%"><svg class="pp-sig" viewBox="0 0 300 100" aria-hidden="true"><path d="M18 70c18-34 30-50 38-46s-6 40 4 44 22-38 34-36-2 30 10 32 20-24 30-24 4 22 16 22 34-18 52-20 30 6 52 2" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  </div>
+                </div>
+                <p class="fo-field__help" id="a2-help" data-t="sign.helpNew">Drag the box on the preview. With the keyboard, the arrow keys move it (with Shift, 10 times further), + or = makes it bigger and − makes it smaller.</p>
+                <p class="fo-sr" role="status" id="a2-status" data-pp-status></p>
+              </fieldset>
+              <div class="pp-zoom">
+                <div class="pp-zoom__box"><div class="pp-zoom__paper" data-theme="light">
+                  <svg viewBox="0 0 50 70" aria-hidden="true"><path class="pp-px-path" d="M8 66V5h17a14 14 0 0 1 0 28H8"/></svg>
+                </div></div>
+                <p class="pp-case__note" data-t="z.after">The same letter with the page drawn at the box's width times the pixel density, up to 1,080 px.</p>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b2.afterNote">Tab to the box: the arrow keys move it, + or = makes it bigger and − smaller. The position is said once, after a short pause. The ring stays whole at the edges.</p>
+          </figure>
+        </div>
+
+        <h3 class="pp-sub" id="pp2n-title" data-t="b2.noteTitle">The notices as the system's note</h3>
+        <p class="pp-block__lead" data-t="b2.noteLead">The notice of Sign PDF has no icon, and the warning of Compress PDF's Strong level is a grey help line. Both become the note: brand-soft with the info icon.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a F-10</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage fo-pdf-island" inert>
+              <p class="fo-sign__notice" data-t="sign.notice">This puts an image of your signature on the page. It is not a digital signature with a certificate, and FileOrca gives no legal advice. Where a signature with a certificate is required, use a service built for that.</p>
+              <fieldset class="fo-field fo-options" aria-describedby="b2n-note">
+                <legend class="fo-field__label" data-t="c.legend">Compression</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="b2n-level" value="lossless"><span data-t="c.lossless">Lossless</span><small data-t="c.losslessHelp">no visible change</small></label>
+                  <label class="fo-seg__opt"><input type="radio" name="b2n-level" value="recommended"><span data-t="c.recommended">Recommended</span><small data-t="c.recommendedHelp">smaller photos</small></label>
+                  <label class="fo-seg__opt"><input type="radio" name="b2n-level" value="strong" checked><span data-t="c.strong">Strong</span><small data-t="c.strongHelp">smallest file</small></label>
+                </div>
+                <p class="fo-field__help" id="b2n-note" data-t="c.warn">Strong turns every page into a picture. The text can no longer be selected or searched, and form fields, links and bookmarks are lost.</p>
+              </fieldset>
+            </div>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.afterA">After · proposal (alternative A, recommended)</figcaption>
+            <div class="pp-stage fo-pdf-island">
+              <p class="fo-note"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.5h.01" stroke-width="2.6"/></svg><span data-t="sign.notice">This puts an image of your signature on the page. It is not a digital signature with a certificate, and FileOrca gives no legal advice. Where a signature with a certificate is required, use a service built for that.</span></p>
+              <fieldset class="fo-field fo-options" aria-describedby="a2n-note">
+                <legend class="fo-field__label" data-t="c.legend">Compression</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="a2n-level" value="lossless"><span data-t="c.lossless">Lossless</span><small data-t="c.losslessHelp">no visible change</small></label>
+                  <label class="fo-seg__opt"><input type="radio" name="a2n-level" value="recommended"><span data-t="c.recommended">Recommended</span><small data-t="c.recommendedHelp">smaller photos</small></label>
+                  <label class="fo-seg__opt"><input type="radio" name="a2n-level" value="strong" checked><span data-t="c.strong">Strong</span><small data-t="c.strongHelp">smallest file</small></label>
+                </div>
+                <p class="fo-note" id="a2n-note"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.5h.01" stroke-width="2.6"/></svg><span data-t="c.warn">Strong turns every page into a picture. The text can no longer be selected or searched, and form fields, links and bookmarks are lost.</span></p>
+              </fieldset>
+            </div>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.altB">Alternative B · the Strong warning as an OliMessage, as the OptionGroup README writes it</figcaption>
+            <div class="pp-stage">
+              <div class="fo-says fo-says--info" role="note">
+                <div class="fo-says__oli" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div>
+                <div class="fo-says__bubble"><p data-t="c.warn1">Strong turns every page into a picture.</p><small data-t="c.warn2">The text can no longer be selected or searched, and form fields, links and bookmarks are lost.</small></div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b2.altBNote">A second Oli on the same screen as the one on the panel, looking away from the bubble.</p>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 3 · The PDF file card -->
+      <section class="pp-block" aria-labelledby="pp3-title">
+        <h2 class="pp-block__title" id="pp3-title" data-t="b3.title">3 · The PDF file card</h2>
+        <p class="pp-block__lead" data-t="b3.lead">On the ready card of Split, Delete pages, Sign and Reorder. The card of a PDF shows the pdf icon on the category's soft coral instead of an empty square, and the fold cuts with the card's own ground, so the dark theme loses the notch.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a F-6 · F5a F-7</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage" inert>
+              <div class="fo-ready">
+                <div class="fo-file fo-dogear fo-cat--pdf">
+                  <div class="fo-file__thumb"></div>
+                  <div><p class="fo-file__name" title="minutes-2026-10.pdf" data-t="r1.name" data-t-title="r1.name">minutes-2026-10.pdf</p><p class="fo-file__meta"><span data-t="r1.size">1.2 MB</span><span data-t="r1.pages">12 pages</span></p></div>
+                  <div class="fo-file__actions"></div>
+                </div>
+                <div class="fo-result__actions">
+                  <button type="button" class="fo-btn fo-btn--brand fo-btn--lg" data-t="r1.action">Split PDF</button>
+                  <button type="button" class="fo-btn fo-btn--ghost" data-t="startOver">Start over</button>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b3.beforeNote">The square is an empty box of 52 px. In the dark theme, the corner of the fold is painted with the color of the page, darker than the card.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.after">After · proposal</figcaption>
+            <div class="pp-stage">
+              <div class="fo-ready">
+                <div class="fo-file fo-dogear fo-cat--pdf">
+                  <div class="fo-file__thumb"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></div>
+                  <div><p class="fo-file__name" title="minutes-2026-10.pdf" data-t="r1.name" data-t-title="r1.name">minutes-2026-10.pdf</p><p class="fo-file__meta"><span data-t="r1.size">1.2 MB</span><span data-t="r1.pages">12 pages</span></p></div>
+                  <div class="fo-file__actions"></div>
+                </div>
+                <div class="fo-result__actions">
+                  <button type="button" class="fo-btn fo-btn--brand fo-btn--lg" data-t="r1.action">Split PDF</button>
+                  <button type="button" class="fo-btn fo-btn--ghost" data-t="startOver">Start over</button>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 4 · The Merge row and the move arrows -->
+      <section class="pp-block" aria-labelledby="pp4-title">
+        <h2 class="pp-block__title" id="pp4-title" data-t="b4.title">4 · The Merge row and the move arrows</h2>
+        <p class="pp-block__lead" data-t="b4.lead">Today the arrows that do nothing (up on the first row, down on the last) are the only ones with a circle, so they look like the buttons. An arrow that moves becomes a button with the stroke and the lip; one that can't keep the flat disabled look. In the Merge list the name takes up to two lines.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> D-23 · F5a D-8 · F5a F-6 · F5a D-12 · F5a F-14</p>
+        <h3 class="pp-sub" data-t="b4.mergeTitle">Merge PDF</h3>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage" inert>
+              <div class="fo-queue">
+                <div class="fo-filelist fo-merge" role="list" aria-label="Files" data-t-aria-label="q.label" data-pp-merge>
+                  <div role="listitem" class="fo-filelist__row">
+                    <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__grab" aria-pressed="false" data-pp-act="grab" aria-label="Pick up lease agreement 2026-10-27 signed copy.pdf" aria-describedby="b4-help"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V4"/><path d="m4 7 3-3 3 3"/><path d="M17 4v16"/><path d="m14 17 3 3 3-3"/></svg></button>
+                    <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"></div><div><p class="fo-file__name" data-t="m.n1">lease agreement 2026-10-27 signed copy.pdf</p><p class="fo-file__meta"><span>146 KB</span><span data-t="m.p1">2 pages</span></p></div><div class="fo-file__actions"></div></div>
+                    <span class="fo-merge__moves"><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--up" data-pp-act="up" disabled aria-label="Move lease agreement 2026-10-27 signed copy.pdf up"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--down" data-pp-act="down" aria-label="Move lease agreement 2026-10-27 signed copy.pdf down"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span>
+                  </div>
+                  <div role="listitem" class="fo-filelist__row">
+                    <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__grab" aria-pressed="false" data-pp-act="grab" aria-label="Pick up lease agreement 2026-10-27 signed page 2.pdf" aria-describedby="b4-help"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V4"/><path d="m4 7 3-3 3 3"/><path d="M17 4v16"/><path d="m14 17 3 3 3-3"/></svg></button>
+                    <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"></div><div><p class="fo-file__name" data-t="m.n2">lease agreement 2026-10-27 signed page 2.pdf</p><p class="fo-file__meta"><span>168 KB</span><span data-t="m.p2">1 page</span></p></div><div class="fo-file__actions"></div></div>
+                    <span class="fo-merge__moves"><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--up" data-pp-act="up" aria-label="Move lease agreement 2026-10-27 signed page 2.pdf up"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--down" data-pp-act="down" disabled aria-label="Move lease agreement 2026-10-27 signed page 2.pdf down"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span>
+                  </div>
+                </div>
+                <p class="fo-field__help" id="b4-help" data-t="m.help">Drag a row to move it, or use the arrow buttons on the row. With the keyboard, Space picks a row up, the arrow keys move it, and Space drops it. The files join in the order of this list.</p>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b4.beforeNote">At 360 px both names are cut at the same place and look alike. The two disabled arrows have the circle; the two that work are a loose chevron.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.afterA">After · proposal (alternative A, recommended)</figcaption>
+            <div class="pp-stage">
+              <div class="fo-queue">
+                <div class="fo-filelist fo-merge" role="list" aria-label="Files" data-t-aria-label="q.label" data-pp-merge data-pp-live>
+                  <div role="listitem" class="fo-filelist__row">
+                    <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></div><div><p class="fo-file__name" data-t="m.n1">lease agreement 2026-10-27 signed copy.pdf</p><p class="fo-file__meta"><span>146 KB</span><span data-t="m.p1">2 pages</span></p></div><div class="fo-file__actions"></div></div>
+                    <span class="fo-merge__moves"><button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--up" data-pp-act="up" disabled aria-label="Move lease agreement 2026-10-27 signed copy.pdf up"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--down" data-pp-act="down" aria-label="Move lease agreement 2026-10-27 signed copy.pdf down"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span>
+                  </div>
+                  <div role="listitem" class="fo-filelist__row">
+                    <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></div><div><p class="fo-file__name" data-t="m.n2">lease agreement 2026-10-27 signed page 2.pdf</p><p class="fo-file__meta"><span>168 KB</span><span data-t="m.p2">1 page</span></p></div><div class="fo-file__actions"></div></div>
+                    <span class="fo-merge__moves"><button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--up" data-pp-act="up" aria-label="Move lease agreement 2026-10-27 signed page 2.pdf up"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--down" data-pp-act="down" disabled aria-label="Move lease agreement 2026-10-27 signed page 2.pdf down"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span>
+                  </div>
+                </div>
+                <p class="fo-field__help" id="a4-help" data-t="m.helpA">Drag a row to move it, or use its arrows. The files join in the order of this list, from top to bottom.</p>
+                <p class="fo-sr" role="status" data-pp-status></p>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b4.afterNote">Press an arrow: the row moves and the focus follows it. Where an arrow cannot go there is an empty place, and there is no handle: the Merge row of UX-04 A.</p>
+          </figure>
+        </div>
+
+        <h3 class="pp-sub" data-t="b4.reorderTitle">Reorder PDF pages</h3>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage fo-pdf-island" inert>
+              <div class="fo-options-stack">
+                <div class="fo-pages__bar">
+                  <p class="fo-field__help" data-t="r.help">Drag a page to its new place, or use the arrows on each page.</p>
+                  <button type="button" class="fo-btn fo-btn--sm" data-t="r.rev">Reverse order</button>
+                </div>
+                <div class="fo-pages" data-mode="order" data-pp-pages>
+                  <ul class="fo-pages__grid" aria-label="Pages of report.pdf" data-t-aria-label="r.label" aria-describedby="b4r-help">
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="0" aria-pressed="false" data-n="1" aria-label="Page 1 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">1</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move fo-page__move--back" disabled data-pp-move="earlier" data-n="1" aria-label="Move page 1 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move" data-pp-move="later" data-n="1" aria-label="Move page 1 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="2" aria-label="Page 2 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">2</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move fo-page__move--back" tabindex="-1" data-pp-move="earlier" data-n="2" aria-label="Move page 2 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move" tabindex="-1" data-pp-move="later" data-n="2" aria-label="Move page 2 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="3" aria-label="Page 3 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">3</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move fo-page__move--back" tabindex="-1" data-pp-move="earlier" data-n="3" aria-label="Move page 3 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move" disabled data-pp-move="later" data-n="3" aria-label="Move page 3 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                  </ul>
+                  <p class="fo-field__help" id="b4r-help" data-t="g.helpOrder">Drag a page, or use its arrows. With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.</p>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b4.reorderBeforeNote">Reverse order is 40 px tall on the phone, and the help above and under the grid says twice to drag or to use the arrows.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.afterA">After · proposal (alternative A, recommended)</figcaption>
+            <div class="pp-stage fo-pdf-island">
+              <div class="fo-options-stack">
+                <div class="fo-pages__bar">
+                  <p class="fo-field__help" data-t="r.help">Drag a page to its new place, or use the arrows on each page.</p>
+                  <button type="button" class="fo-btn" data-t="r.rev">Reverse order</button>
+                </div>
+                <div class="fo-pages" data-mode="order" data-pp-pages>
+                  <ul class="fo-pages__grid" aria-label="Pages of report.pdf" data-t-aria-label="r.label" aria-describedby="a4r-help">
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="0" aria-pressed="false" data-n="1" aria-label="Page 1 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">1</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-page__move fo-page__move--back" disabled data-pp-move="earlier" data-n="1" aria-label="Move page 1 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-page__move" data-pp-move="later" data-n="1" aria-label="Move page 1 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="2" aria-label="Page 2 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">2</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-page__move fo-page__move--back" tabindex="-1" data-pp-move="earlier" data-n="2" aria-label="Move page 2 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-page__move" tabindex="-1" data-pp-move="later" data-n="2" aria-label="Move page 2 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                    <li class="fo-page fo-dogear fo-cat--pdf" style="--page-ratio:0.7727"><button type="button" class="fo-page__main" tabindex="-1" aria-pressed="false" data-n="3" aria-label="Page 3 of 3"><span class="fo-page__sheet"><span class="pp-paper" data-theme="light" aria-hidden="true"><i class="pp-paper__h"></i><i></i><i class="pp-paper__s"></i></span></span><span class="fo-page__n" aria-hidden="true">3</span></button><span class="fo-page__moves"><button type="button" class="fo-btn fo-btn--icon fo-page__move fo-page__move--back" tabindex="-1" data-pp-move="earlier" data-n="3" aria-label="Move page 3 earlier"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button type="button" class="fo-btn fo-btn--icon fo-page__move" disabled data-pp-move="later" data-n="3" aria-label="Move page 3 later"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button></span></li>
+                  </ul>
+                  <p class="fo-field__help" id="a4r-help" data-t="g.helpKeys">With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.</p>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b4.reorderAfterNote">Reverse order is a button of the normal size, 52 px tall, and the help under the grid keeps only the keyboard. A still picture: the order does not change here.</p>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 5 · A yes-or-no choice -->
+      <section class="pp-block" aria-labelledby="pp5-title">
+        <h2 class="pp-block__title" id="pp5-title" data-t="b5.title">5 · A yes-or-no choice</h2>
+        <p class="pp-block__lead" data-t="b5.lead">Add page numbers to PDF has the only checkbox of the site, a native one. The system's piece for two to four choices is the OptionGroup rail: the first page becomes a choice between Number it and Skip it.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a F-11</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.beforeB">Before · today (alternative B: accept it and record it)</figcaption>
+            <div class="pp-stage" inert>
+              <div class="fo-fields">
+                <div class="fo-field"><label class="fo-field__label" for="b5-start" data-t="n.start">First number</label><div class="fo-input"><input id="b5-start" type="text" inputmode="numeric" value="1"></div></div>
+                <label class="fo-check"><input type="checkbox"><span data-t="n.skip">Skip the first page</span></label>
+              </div>
+            </div>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.afterA">After · proposal (alternative A, recommended)</figcaption>
+            <div class="pp-stage">
+              <div class="fo-fields">
+                <div class="fo-field"><label class="fo-field__label" for="a5-start" data-t="n.start">First number</label><div class="fo-input"><input id="a5-start" type="text" inputmode="numeric" value="1"></div></div>
+                <fieldset class="fo-field fo-options">
+                  <legend class="fo-field__label" data-t="n.first">First page</legend>
+                  <div class="fo-seg">
+                    <label class="fo-seg__opt"><input type="radio" name="a5-first" value="number" checked><span data-t="n.numberIt">Number it</span></label>
+                    <label class="fo-seg__opt"><input type="radio" name="a5-first" value="skip"><span data-t="n.skipIt">Skip it</span></label>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 6 · The password step -->
+      <section class="pp-block" aria-labelledby="pp6-title">
+        <h2 class="pp-block__title" id="pp6-title" data-t="b6.title">6 · The password step, with one card</h2>
+        <p class="pp-block__lead" data-t="b6.lead">Unlock PDF after a wrong password. Today the file shows twice: on the ready card and again in a list below. One card stays, the error stays on the field, and the focus goes back to the field with the password selected.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a F-13 · F5a D-11</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage" inert>
+              <div class="fo-ready">
+                <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"></div><div><p class="fo-file__name" data-t="u.name">contract-2026.pdf</p><p class="fo-file__meta"><span>312 KB</span><span data-t="u.pages">4 pages</span></p></div><div class="fo-file__actions"></div></div>
+                <div class="fo-result__actions"><button type="button" class="fo-btn fo-btn--ghost" data-t="startOver">Start over</button></div>
+              </div>
+              <div class="fo-fields fo-fields--stack">
+                <p class="fo-field__help" data-t="u.ask">This PDF needs a password to open. Type it, then press Remove password.</p>
+                <div class="fo-field fo-pass" data-state="error">
+                  <label class="fo-field__label" for="b6-pass" data-t="u.label">Password to open the PDF</label>
+                  <div class="fo-input"><input id="b6-pass" type="password" autocomplete="current-password" value="oli-wrong" aria-invalid="true" aria-describedby="b6-err b6-rule"><button type="button" class="fo-pass__toggle" aria-pressed="false" aria-label="Show password" data-t-aria-label="u.showName" data-t="u.show">Show</button></div>
+                  <p class="fo-field__error" id="b6-err"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01" stroke-width="2.6"/></svg><span data-t="u.err">That password didn't open contract-2026.pdf. Check it and try again.</span></p>
+                  <p class="fo-field__help" id="b6-rule" data-t="u.rule">Type the password of this PDF to continue.</p>
+                </div>
+                <button type="button" class="fo-btn fo-btn--brand" data-t="u.submit">Remove password</button>
+              </div>
+              <div class="fo-queue">
+                <div class="fo-filelist" role="list" aria-label="Files" data-t-aria-label="q.label">
+                  <div role="listitem" class="fo-filelist__row"><div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"></div><div><p class="fo-file__name" data-t="u.name">contract-2026.pdf</p><p class="fo-file__meta"><span>312 KB</span><span data-t="u.pages">4 pages</span></p></div><div class="fo-file__actions"></div></div></div>
+                </div>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b6.beforeNote">The same file twice, and the focus lands on Start over, away from the field.</p>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.after">After · proposal</figcaption>
+            <div class="pp-stage">
+              <div class="fo-ready">
+                <div class="fo-file fo-dogear fo-cat--pdf"><div class="fo-file__thumb"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></div><div><p class="fo-file__name" data-t="u.name">contract-2026.pdf</p><p class="fo-file__meta"><span>312 KB</span><span data-t="u.pages">4 pages</span></p></div><div class="fo-file__actions"></div></div>
+                <div class="fo-result__actions"><button type="button" class="fo-btn fo-btn--ghost" data-t="startOver">Start over</button></div>
+              </div>
+              <div class="fo-fields fo-fields--stack">
+                <p class="fo-field__help" data-t="u.ask">This PDF needs a password to open. Type it, then press Remove password.</p>
+                <div class="fo-field fo-pass" data-state="error">
+                  <label class="fo-field__label" for="a6-pass" data-t="u.label">Password to open the PDF</label>
+                  <div class="fo-input pp-ring"><input id="a6-pass" type="password" autocomplete="current-password" value="oli-wrong" aria-invalid="true" aria-describedby="a6-err a6-rule"><button type="button" class="fo-pass__toggle" aria-pressed="false" aria-label="Show password" data-t-aria-label="u.showName" data-t="u.show">Show</button></div>
+                  <p class="fo-field__error" id="a6-err"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01" stroke-width="2.6"/></svg><span data-t="u.err">That password didn't open contract-2026.pdf. Check it and try again.</span></p>
+                  <p class="fo-field__help" id="a6-rule" data-t="u.rule">Type the password of this PDF to continue.</p>
+                </div>
+                <button type="button" class="fo-btn fo-btn--brand" data-t="u.submit">Remove password</button>
+              </div>
+            </div>
+            <p class="pp-case__note" data-t="b6.afterNote">The ring on the field marks where the focus lands after the wrong password, with the text selected to type again.</p>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 7 · The rail of three choices -->
+      <section class="pp-block" aria-labelledby="pp7-title">
+        <h2 class="pp-block__title" id="pp7-title" data-t="b7.title">7 · The rail of three choices at 360 px</h2>
+        <p class="pp-block__lead" data-t="b7.lead">Split PDF. Today, at 360 px, the rail wraps into a pill of two lines, 108 px tall, with the third choice alone. Below 480 px the three share one row of equal columns, 56 px tall, and a long label breaks inside its own 48 px. At 1280 px both are the same row.</p>
+        <p class="pp-fixes"><span data-t="fixes">Fixes</span> F5a F-14</p>
+        <div class="pp-pair">
+          <figure class="pp-case pp-case--before" data-proto-exempt>
+            <figcaption class="pp-case__cap" data-t="cap.before">Before · today</figcaption>
+            <div class="pp-stage fo-pdf-island" inert>
+              <fieldset class="fo-field fo-options">
+                <legend class="fo-field__label" data-t="s.legend">Split by</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="b7-mode" value="each"><span data-t="s.each">Every page</span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="b7-mode" value="ranges"><span data-t="s.ranges">Page ranges</span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="b7-mode" value="pick" checked><span data-t="s.pick">Pick pages</span></label>
+                </div>
+              </fieldset>
+            </div>
+          </figure>
+          <figure class="pp-case pp-case--after pp-new">
+            <figcaption class="pp-case__cap" data-t="cap.after">After · proposal</figcaption>
+            <div class="pp-stage fo-pdf-island">
+              <fieldset class="fo-field fo-options">
+                <legend class="fo-field__label" data-t="s.legend">Split by</legend>
+                <div class="fo-seg">
+                  <label class="fo-seg__opt"><input type="radio" name="a7-mode" value="each"><span data-t="s.each">Every page</span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="a7-mode" value="ranges"><span data-t="s.ranges">Page ranges</span></label>
+                  <label class="fo-seg__opt"><input type="radio" name="a7-mode" value="pick" checked><span data-t="s.pick">Pick pages</span></label>
+                </div>
+              </fieldset>
+            </div>
+          </figure>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer class="fo-footer fo-deep">
+    <div class="fo-footer__cols">
+      <div><h2 data-t="f.pdf">PDF</h2><ul><li><a href="#" data-t="f.merge">Merge PDF</a></li><li><a href="#" data-t="f.split">Split PDF</a></li><li><a href="#" data-t="f.sign">Sign PDF</a></li></ul></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#" data-t="f.about">About</a></li><li><a href="#" data-t="f.privacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="f.coffee">Like these tools? Support them with a coffee</span></a><span data-t="f.signline">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-11 · F13</p>
+    <h2 id="spec-title">As peças das ferramentas de PDF</h2>
+    <p>Esta página é a especificação que a F13 segue quando o Victor não escolher. Ela não redesenha o Juntar (o UX-04 faz isso): muda as peças que as 13 ferramentas de PDF dividem, quase tudo em CSS de <code>src/styles/components.css</code> e em poucas linhas de <code>PageGrid.tsx</code>, <code>SignatureArea.tsx</code>, <code>PdfPanel.tsx</code>, <code>tools.tsx</code>, <code>OptionGroup.tsx</code> e <code>FileCard.tsx</code>. Nenhum arquivo novo, nenhuma dependência, nenhuma cor nova.</p>
+    <p><strong>Mudança de regra (só na nota do Forte, alternativa A):</strong> o README do OptionGroup diz que a opção irreversível "avisa antes, em OliMessage <code>info</code>". A proposta usa a nota (<code>brand-soft</code> com o ícone <code>info</code>, a regra de "Cor" do README do sistema) também no Forte, e a linha do OptionGroup passa a dizer "avisa antes, numa nota". A alternativa B segue o README como está. Nenhuma outra peça muda regra: o <code>--sm</code> só no computador já está no README do Button, as setas com traço e lábio seguem "só o que se aperta tem lábio", e a seta desativada segue o "Desabilitado" do Button.</p>
+
+    <h3>Marcação</h3>
+    <ul>
+      <li><strong>Grade (D-7, F-8):</strong> só no modo <code>select</code> do <code>PageGrid.tsx</code>, o número da célula leva o selo antes do algarismo. O <code>aria-pressed</code> e o sufixo ", picked" do nome seguem como hoje.</li>
+    </ul>
+    <pre><code>&lt;span class="fo-page__n" aria-hidden="true"&gt;&lt;span class="fo-page__check"&gt;&lt;svg class="fo-icon" …check…/&gt;&lt;/span&gt;2&lt;/span&gt;</code></pre>
+    <ul>
+      <li><strong>Caixa da assinatura (D-9, F-5, D-6):</strong> a imagem e a caixa entram num invólucro de papel, que fica claro nos dois temas; a região viva é nova.</li>
+    </ul>
+    <pre><code>&lt;div class="fo-sign__page" style="--page-ratio:0.7727"&gt;
+  &lt;div class="fo-sign__sheet" data-theme="light"&gt;
+    &lt;img src="…" alt="Page preview"&gt;
+    &lt;div class="fo-sign__box" role="group" tabindex="0" aria-label="Signature position, 70% from the left, 92% from the top, 30% wide" aria-describedby="fo-sign-box-help"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p class="fo-field__help" id="fo-sign-box-help"&gt;…&lt;/p&gt;
+&lt;p class="fo-sr" role="status" id="fo-sign-box-status"&gt;&lt;/p&gt;</code></pre>
+    <p>No <code>onBoxKey</code>: <code>const arrow = event.shiftKey ? 0.1 : 0.01</code> só nas setas; <code>+ = - _</code> mudam a largura em 0.01 sempre. A região recebe <code>""</code> e, 400 ms depois da última tecla, "Signature position: …" (o molde do <code>SPEAK_AFTER_MS</code> do ResultHero). Na prévia (F-5), o <code>SignOptions</code> pede ao cache uma imagem só da página mostrada, na largura <code>Math.min(1080, Math.ceil(frame.clientWidth * devicePixelRatio))</code>, e a solta (<code>drop</code>) ao trocar de página; a grade segue com 240 px.</p>
+    <ul>
+      <li><strong>Nota (F-10):</strong> no Assinar, o <code>&lt;p class="fo-sign__notice"&gt;</code> vira a nota. No Comprimir, o <code>OptionGroup</code> ganha a prop <code>noteIcon</code> (a marcação do <code>info</code>, que entra em <code>PdfIcons</code>, lido no build como os outros): com ela, a <code>note</code> sai como nota e não como ajuda cinza, com o mesmo <code>id</code> do <code>aria-describedby</code> do <code>fieldset</code>.</li>
+    </ul>
+    <pre><code>&lt;p class="fo-note" id="fo-compress-note"&gt;&lt;svg class="fo-icon" aria-hidden="true"&gt;…info…&lt;/svg&gt;&lt;span&gt;Strong turns every page into a picture. …&lt;/span&gt;&lt;/p&gt;</code></pre>
+    <ul>
+      <li><strong>FileCard de PDF (F-6):</strong> o <code>FileCard</code> ganha a prop <code>icon</code> (marcação interna), usada quando não há <code>thumb</code> e o estado não é erro; o <code>PdfPanel</code> passa <code>icons.pdf</code>, que a página já lê. O chunk das ferramentas de imagem não cresce.</li>
+      <li><strong>Setas (D-23):</strong> <code>.fo-merge__move</code> (<code>PdfPanel.tsx:1101</code> e <code>1104</code>) e <code>.fo-page__move</code> (<code>PageGrid.tsx:268</code> e <code>278</code>) perdem o <code>fo-btn--ghost</code>. No Juntar, a linha segue o UX-04 A (revisão da F10, d-05): a alça sai, as setas da linha fazem o mesmo, e onde a seta não anda fica um lugar vazio de 48 px, não a seta desativada. Sem o UX-04 A marcado, a alça fica ghost e a seta que não anda fica com o desativado liso, como no Organizar.</li>
+      <li><strong>Ajuda da Reorder (F-14):</strong> no modo <code>order</code>, o <code>PageGrid</code> mostra a chave nova <code>helpKeys</code> no lugar de <code>helpOrder</code>, que sai dos três idiomas. Na Delete, as três ajudas dizem coisas diferentes (o que fazer, o formato do campo, o teclado) e ficam.</li>
+      <li><strong>Escolha de sim ou não (F-11):</strong> em <code>tools.tsx:392-395</code>, a <code>label.fo-check</code> sai e entra no lugar dela, dentro do <code>.fo-fields</code> e ao lado do "First number", um <code>OptionGroup</code> <code>name="fo-numbers-first"</code> com <code>value={state.skipFirst ? 'skip' : 'number'}</code> e <code>onChange={(v) =&gt; update({ skipFirst: v === 'skip' })}</code>. O estado e o motor não mudam.</li>
+      <li><strong>Unlock (F-13, D-11):</strong> a fila (<code>PdfPanel.tsx:1065</code>) só acende com falha se alguma falha não for <code>wrong-password</code> com <code>info</code>, ou se houver mais de um arquivo. Depois da senha errada, um efeito põe o foco em <code>#fo-unlock-password</code> e chama <code>select()</code>.</li>
+      <li><strong>Pegada (D-11):</strong> <code>onFocusOut</code> no <code>&lt;li&gt;</code> da grade (e na linha do Juntar, só se o UX-04 A não for marcado, porque com ele a alça sai) solta a pegada quando o <code>relatedTarget</code> sai do item, menos enquanto o <code>focusAfter</code> espera a célula movida (o foco passa pelo <code>body</code> nesse instante).</li>
+      <li><strong>Frases (D-10):</strong> o Inverter anuncia a chave nova <code>reversed</code>, não o rótulo do botão; a Rotate diz quantas páginas e que giro.</li>
+      <li><strong>Alvo (D-12):</strong> os quatro usos do <code>fo-btn--sm</code> no PDF (<code>PageGrid.tsx:203</code> e <code>206</code>, <code>SignatureArea.tsx:318</code>, <code>tools.tsx:601</code>) perdem a classe e ficam no tamanho normal (52 px, o <code>control-h</code>), no celular e no computador. O README do Button não muda: o <code>--sm</code> segue "só no computador", e o único uso que sobra é o Copiar do Pix (<code>SupportCard.astro:57</code>), que hoje aparece também no celular e que o UX-05 da F12 desenha de novo.</li>
+    </ul>
+
+    <h3>CSS para o <code>components.css</code></h3>
+    <pre><code>/* D-12: nenhuma peça de PDF usa mais o .fo-btn--sm (40 px): os quatro botões viram o .fo-btn normal (52 px) */
+
+/* D-7 e F-8: a página marcada tem o check, e a dobra acompanha a borda de 3 px */
+.fo-page__n { display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-page__check { box-sizing: border-box; display: inline-grid; place-items: center; width: 24px; height: 24px;
+  border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--on-brand); }
+.fo-page__check .fo-icon { width: 16px; height: 16px; stroke-width: 3; visibility: hidden; }
+.fo-page[data-selected="true"] .fo-page__check { background: var(--brand); border-color: var(--brand-edge); }
+.fo-page[data-selected="true"] .fo-page__check .fo-icon { visibility: visible; }
+.fo-page[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
+
+/* F-14: a barra da grade e o trilho de três escolhas abaixo de 480 px */
+@media (max-width: 479px) {
+  .fo-pages__count { flex-basis: 100%; }
+  .fo-pages__count ~ .fo-btn { flex: 1 1 0; }
+  .fo-pdf-island .fo-seg:not(:has(small)) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:not(:has(small)) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
+}
+
+/* D-9: a moldura não corta mais o anel; o papel é claro nos dois temas */
+.fo-sign__page { overflow: visible; } /* sai o overflow: hidden de hoje */
+.fo-sign__sheet { position: absolute; inset: 0; border-radius: calc(var(--radius-xs) - var(--stroke-2)); background: var(--surface); }
+.fo-sign__sheet &gt; img { border-radius: inherit; }
+
+/* F-10: a nota do sistema (sai .fo-sign__notice) */
+.fo-note { margin: 0; display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
+.fo-note &gt; .fo-icon { flex: none; margin-top: -1px; color: var(--brand); }
+
+/* F-6, F-7 e D-8: o FileCard de PDF */
+.fo-cat--pdf:not([data-state="error"]) &gt; .fo-file__thumb { background: var(--fo-cat-soft); color: var(--ink); }
+.fo-ready .fo-file { --fo-ground: var(--surface); }
+.fo-merge .fo-file__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; overflow-wrap: anywhere; }
+
+/* D-23: as setas com lábio precisam de folga */
+.fo-merge__moves, .fo-page__moves { gap: var(--space-1); }
+@media (max-width: 479px) { .fo-merge__moves { gap: var(--space-2); } }
+
+/* F-11: saem .fo-check e .fo-check input (o único uso vira OptionGroup); abaixo de 480 px o grupo ocupa a linha */
+@media (max-width: 479px) { .fo-fields &gt; .fo-options { grid-column: 1 / -1; } }</code></pre>
+
+    <h3>Tokens</h3>
+    <ul>
+      <li>Selo da página: <code>brand</code>, <code>brand-edge</code> e <code>on-brand</code> (marcada); <code>stroke</code> e <code>surface</code> (vazio).</li>
+      <li>Setas: as do Button (<code>surface</code>, <code>stroke</code>, <code>shadow-lip</code>); desativada com <code>surface-sunken</code>, <code>hairline</code> e <code>ink-muted</code>.</li>
+      <li>Caixa da assinatura: <code>brand</code> e <code>focus</code> do tema claro, dentro do papel (<code>data-theme="light"</code>).</li>
+      <li>Nota: <code>brand-soft</code>, <code>brand</code> (ícone) e <code>ink</code> (texto).</li>
+      <li>FileCard de PDF: <code>--fo-cat-soft</code> (<code>coral-soft</code>) e <code>ink</code>; <code>--fo-ground: surface</code> no cartão de pronto.</li>
+      <li>Medidas: <code>tap-min</code>, <code>stroke-2</code>, <code>stroke-3</code>, <code>radius-pill</code>, <code>radius-lg</code>, <code>radius-md</code>, <code>radius-xs</code>. Nenhuma cor nova: os pares novos estão na tabela do contraste do README (UX11-1 a UX11-7).</li>
+    </ul>
+
+    <h3>Estados</h3>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">Estado</th><th scope="col">O que se vê</th></tr></thead>
+      <tbody>
+        <tr><td>Célula da grade</td><td>não marcada</td><td>Círculo vazio (traço <code>stroke</code>) antes do número, borda de 2 px.</td></tr>
+        <tr><td>Célula da grade</td><td>marcada</td><td>Círculo <code>brand</code> com o <code>check</code> em <code>on-brand</code>, borda <code>brand</code> de 3 px, a dobra a −3 px.</td></tr>
+        <tr><td>Seta de mover</td><td>ativa</td><td>Botão de ícone padrão: traço de 2 px, <code>surface</code>, lábio de 4 px; afunda no clique.</td></tr>
+        <tr><td>Seta de mover</td><td>desativada</td><td><code>surface-sunken</code>, traço <code>hairline</code>, ícone <code>ink-muted</code>, sem lábio.</td></tr>
+        <tr><td>Caixa da assinatura</td><td>foco</td><td>Anel <code>focus</code> do claro, 3 px a 2 px, inteiro em qualquer borda da página.</td></tr>
+        <tr><td>Caixa da assinatura</td><td>depois de mover</td><td>A região viva diz a posição uma vez, 400 ms depois da última tecla.</td></tr>
+        <tr><td>FileCard de PDF</td><td>pronto</td><td>Ícone <code>pdf</code> em <code>ink</code> sobre <code>coral-soft</code>; no cartão de pronto, a dobra recorta com <code>surface</code>.</td></tr>
+        <tr><td>FileCard de PDF</td><td>erro</td><td>Como hoje: ícone <code>file</code> em <code>danger</code> sobre <code>danger-soft</code>.</td></tr>
+        <tr><td>Unlock</td><td>senha errada</td><td>Um cartão só, o erro no campo (<code>role="alert"</code>, § 177), o foco no campo com o texto selecionado.</td></tr>
+        <tr><td>Trilho de 3 escolhas</td><td>abaixo de 480 px</td><td>Três colunas iguais numa linha de 56 px; rótulo longo em duas linhas.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Textos novos</h3>
+    <table>
+      <thead><tr><th scope="col">Chave</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td><code>sign-pdf</code> <code>keyboardHelp</code> (D-6)</td><td lang="en">Drag the box on the preview. With the keyboard, the arrow keys move it (with Shift, 10 times further), + or = makes it bigger and − makes it smaller.</td><td>Arraste a caixa na prévia. No teclado, as setas movem a caixa (com Shift, 10 vezes mais longe), + ou = aumenta e − diminui.</td><td lang="es">Arrastra el recuadro sobre la vista previa. Con el teclado, las flechas lo mueven (con Mayús, 10 veces más lejos), + o = lo agranda y − lo achica.</td></tr>
+        <tr><td><code>grid.helpKeys</code> (F-14)</td><td lang="en">With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.</td><td>No teclado: Espaço pega a página, as setas a movem e Espaço a solta.</td><td lang="es">Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.</td></tr>
+        <tr><td><code>reorder-pdf-pages</code> <code>reversed</code> (D-10)</td><td lang="en">Pages reversed.</td><td>Páginas invertidas.</td><td lang="es">Páginas invertidas.</td></tr>
+        <tr><td><code>rotate-pdf</code> <code>done</code> (D-10)</td><td lang="en">Done! Oli turned the {pages} pages of your PDF {turn}.</td><td>Prontinho! A Oli girou as {pages} páginas do seu PDF {turn}.</td><td lang="es">¡Listo! Oli giró las {pages} páginas de tu PDF {turn}.</td></tr>
+        <tr><td><code>rotate-pdf</code> <code>doneOne</code> (D-10)</td><td lang="en">Done! Oli turned the page of your PDF {turn}.</td><td>Prontinho! A Oli girou a página do seu PDF {turn}.</td><td lang="es">¡Listo! Oli giró la página de tu PDF {turn}.</td></tr>
+        <tr><td><code>rotate-pdf</code> <code>donePicked</code> (D-10)</td><td lang="en">Done! Oli turned {count} of the {pages} pages.</td><td>Prontinho! A Oli girou {count} das {pages} páginas.</td><td lang="es">¡Listo! Oli giró {count} de las {pages} páginas.</td></tr>
+        <tr><td><code>rotate-pdf</code> <code>doneMany</code> (D-10)</td><td lang="en">Done! Oli turned your {count} PDFs {turn}.</td><td>Prontinho! A Oli girou seus {count} PDFs {turn}.</td><td lang="es">¡Listo! Oli giró tus {count} PDF {turn}.</td></tr>
+        <tr><td><code>rotate-pdf</code> <code>{turn}</code></td><td lang="en">90° to the right · 180° · 90° to the left</td><td>90° para a direita · 180° · 90° para a esquerda</td><td lang="es">90° a la derecha · 180° · 90° a la izquierda</td></tr>
+        <tr><td><code>add-page-numbers</code> <code>firstLegend</code>, <code>numberIt</code>, <code>skipIt</code> (F-11)</td><td lang="en">First page · Number it · Skip it</td><td>Primeira página · Numerar · Pular</td><td lang="es">Primera página · Numerar · Omitir</td></tr>
+      </tbody>
+    </table>
+    <p>Saem: <code>skipFirst</code> (F-11) e <code>grid.helpOrder</code> (F-14). A nota e o aviso do Forte guardam o texto de hoje. As frases novas passam pelo glossário de <code>docs/i18n/</code> e pelo <code>lint:texto</code> na F13.</p>
+
+    <h3>Teclado</h3>
+    <ul>
+      <li><strong>Grade (marcar):</strong> um Tab para a grade inteira (foco itinerante); setas andam (para cima e para baixo, uma coluna), Home e End vão às pontas; Espaço ou Enter marca e desmarca. "Pick all" e "Pick none" vêm no Tab seguinte.</li>
+      <li><strong>Grade (ordem):</strong> Espaço pega, as setas movem, Espaço solta, Esc solta. Novo: sair do item (Tab, Shift+Tab ou clique fora) solta a pegada. <strong>Juntar:</strong> com o UX-04 A, só as setas da linha (a alça sai); sem ele, o mesmo da grade.</li>
+      <li><strong>Setas de mover:</strong> a desativada sai do Tab (<code>disabled</code>); depois de mover, o foco segue a linha para a seta que ainda vale.</li>
+      <li><strong>Caixa da assinatura:</strong> setas andam 1 % (Shift: 10 %); <code>+</code> e <code>=</code> crescem 1 %, <code>-</code> e <code>_</code> encolhem 1 %, com ou sem Shift. Os campos X, Y e largura seguem como a saída sem teclas especiais.</li>
+      <li><strong>Unlock:</strong> depois da senha errada, o foco vai ao campo com o texto selecionado; Enter envia de novo.</li>
+      <li><strong>Trilho e "Primeira página":</strong> rádios nativos, as setas trocam a opção.</li>
+    </ul>
+
+    <h3>Nome acessível</h3>
+    <ul>
+      <li>Célula: "Page 2 of 6, picked" / "Página 2 de 6, marcada" / "Página 2 de 6, elegida", como hoje. O selo fica dentro do <code>.fo-page__n</code>, que é <code>aria-hidden</code>.</li>
+      <li>Setas: "Move {name} up" / "Subir {name}" / "Mover {name} hacia arriba", como hoje; a desativada é lida como indisponível.</li>
+      <li>Caixa: "Signature position, 70% from the left, 92% from the top, 30% wide"; a região viva diz "Signature position: …" depois da pausa.</li>
+      <li>Ícones <code>pdf</code>, <code>info</code> e <code>check</code>: <code>aria-hidden</code>. O nome do arquivo, o texto da nota e o <code>aria-pressed</code> dizem tudo.</li>
+      <li>"Primeira página": a <code>legend</code> e o rótulo de cada rádio.</li>
+    </ul>
+
+    <h3>Medidas</h3>
+    <ul>
+      <li>Todo controle das peças tem 48 px ou mais, no celular e no computador: Pick all, Pick none, Clear e Reverse order passam de 40 para 52 px (<code>control-h</code>).</li>
+      <li>Barra da grade a 360: contador numa linha e os dois botões lado a lado, 80 px de altura contra 88 hoje, sem o botão sozinho na segunda linha.</li>
+      <li>Trilho de três escolhas a 360: 56 px (48 + 8) contra 108 hoje.</li>
+      <li>Selo da página: 24 px, ícone de 16 px; a célula cresce 6 px.</li>
+      <li>Linha do Juntar: a 360, mais 22 px quando o nome vai a duas linhas; a 1280, a coluna das setas com lábio tem 104 px (2 × 48 + 2 × 4).</li>
+      <li>Prévia da Sign: imagem de <code>min(1080, ceil(largura da caixa × devicePixelRatio))</code> px, ou seja 356 px a 1280 com DPR 1 e 972 px a 360 com DPR 3; a grade continua com 240.</li>
+      <li>Anúncio: o mapa não muda. Todas as peças ficam no painel e nas opções, que já guardam 150 px (<code>ad-clearance</code>) do AdSlot; quando uma peça cresce, o anúncio desce junto.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <ul>
+      <li>Nenhum arquivo JS novo, nenhuma dependência e nenhuma requisição nova. Tudo cai no chunk da ilha de PDF que já existe: estimativa de +0,5 a +1 KB gzip (o <code>focusout</code>, a região viva com o temporizador, o passo das teclas, o foco da senha, a condição da fila e a largura da prévia). O orçamento (80 KB gzip, 8 requisições) não muda de forma mensurável.</li>
+      <li>O <code>FileCard</code> recebe o ícone por prop, e o <code>info</code> entra em <code>PdfIcons</code> (lido no build, uns 200 bytes no HTML das páginas de PDF): o chunk das ferramentas de imagem não cresce.</li>
+      <li>A prévia da Sign desenha uma página maior no worker: um pico de uns 6 MB de canvas (1.080 × 1.398 × 4 bytes) durante o desenho, e um JPEG guardado só para a página mostrada, solto ao trocar. Nada sai do aparelho.</li>
+      <li>CLS: nada muda no carregamento; o que cresce cresce depois de um gesto. Lighthouse: nada muda no caminho do LCP.</li>
+    </ul>
+
+    <h3>Testes da F13</h3>
+    <table>
+      <thead><tr><th scope="col">Pendência</th><th scope="col">Teste</th><th scope="col">O que afirma</th><th scope="col">Por que reprova hoje</th></tr></thead>
+      <tbody>
+        <tr><td>F5a D-6</td><td>Playwright, <code>sign-pdf</code></td><td>Na caixa focada, <code>Shift+Equal</code> (o "+") e <code>Equal</code> aumentam o campo de largura em 1 cada um.</td><td>O "+" com Shift aumenta 10.</td></tr>
+        <tr><td>F5a D-9</td><td>Playwright, <code>sign-pdf</code></td><td>Três <code>ArrowRight</code> na caixa e 600 ms depois: <code>#fo-sign-box-status</code> diz a posição nova; com a caixa na borda direita, <code>.fo-sign__page</code> tem <code>overflow</code> <code>visible</code>.</td><td>Não há região viva, e a moldura tem <code>overflow: hidden</code>.</td></tr>
+        <tr><td>F5a D-10</td><td>Vitest e Playwright</td><td>Vitest: nos três idiomas, as frases da Rotate têm <code>{pages}</code> ou <code>{count}</code> e <code>{turn}</code>. Playwright, Reorder: depois do Reverse order, o <code>role="status"</code> diz "Pages reversed.".</td><td>O status diz "Reverse order", e a Rotate diz só "Done! Oli turned your PDF.".</td></tr>
+        <tr><td>F5a D-11</td><td>Playwright, Chromium e WebKit</td><td>Reorder (e o Juntar, só se o UX-04 A não for marcado; com ele, a linha do Juntar não tem alça): pegar com Espaço e dar Tab deixa <code>aria-pressed="false"</code> e nenhum <code>[data-grabbed]</code>. Unlock com <code>gen-cifrado-aes256.pdf</code> e senha errada: <code>#fo-unlock-password</code> com foco e o texto selecionado.</td><td>A pegada fica, e o foco vai ao Start over.</td></tr>
+        <tr><td>F5a F-13</td><td>Playwright, <code>unlock-pdf</code></td><td>Depois da senha errada, <code>#fo-tool-root .fo-file__name</code> tem contagem 1 e o <code>role="alert"</code> segue.</td><td>A contagem é 2.</td></tr>
+        <tr><td>F5a F-5</td><td>Playwright, DPR 2</td><td>Na Sign, a <code>img</code> da prévia tem <code>naturalWidth</code> de pelo menos <code>clientWidth × devicePixelRatio</code>.</td><td>A imagem tem 240 px.</td></tr>
+        <tr><td>F5a F-14</td><td>Playwright a 360</td><td>Pick all e Pick none com o mesmo <code>top</code>; o trilho da Split com no máximo 56 px.</td><td>Tops diferentes, e o trilho tem 108 px.</td></tr>
+        <tr><td>F5a D-12</td><td>Playwright a 360 e a 1280</td><td>Nas ferramentas de PDF, nenhum <code>.fo-btn--sm</code> no <code>#fo-tool-root</code>, e todo botão visível dele com 48 px ou mais.</td><td>Pick all, Pick none, Clear e Reverse order têm 40 px.</td></tr>
+        <tr><td>F5a D-7 e F-8</td><td>Playwright</td><td>Célula marcada com o <code>.fo-page__check .fo-icon</code> visível, e o <code>::after</code> com <code>top</code> de −3px.</td><td>Sem selo, e a dobra a −2px.</td></tr>
+        <tr><td>F5a F-6 e F-7</td><td>Playwright, claro e escuro</td><td>O <code>.fo-file__thumb</code> de PDF tem um <code>svg</code>; no <code>.fo-ready</code>, o fundo do <code>::after</code> do cartão começa com a cor de <code>surface</code>.</td><td>Um <code>div</code> vazio, e a cor de <code>bg</code>.</td></tr>
+        <tr><td>F5a F-10</td><td>Playwright</td><td>No Assinar e no Comprimir (com Forte), a nota é <code>.fo-note</code> com um <code>svg</code>; o <code>fieldset</code> do Comprimir aponta para ela no <code>aria-describedby</code>.</td><td>Sem ícone, e o aviso do Forte é um <code>.fo-field__help</code>.</td></tr>
+        <tr><td>F5a F-11</td><td>Playwright</td><td>No Numerar páginas, nenhum <code>input[type=checkbox]</code>, e o grupo "First page" com dois rádios; "Skip it" pula a primeira página no PDF (o teste de motor de hoje, pela opção nova).</td><td>A caixa nativa existe.</td></tr>
+        <tr><td>D-23</td><td>Playwright, <code>merge-pdf</code></td><td>Com dois arquivos, <code>.fo-merge__move:not([disabled])</code> tem <code>box-shadow</code> diferente de <code>none</code>; com o UX-04 A, onde a seta não anda não há botão (o lugar vazio de 48 px), e, sem ele, o <code>[disabled]</code> tem <code>none</code>.</td><td>A seta ativa é ghost, sem traço nem lábio.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>O que resolve</h3>
+    <ul>
+      <li><strong>Diagnóstico:</strong> D-23 (as setas desativadas parecem mais clicáveis); D-24 em parte (o quadrado vazio vira o ícone <code>pdf</code>; a posição de cada arquivo fica com o UX-04).</li>
+      <li><strong>Pendências:</strong> F5a D-6, D-7, D-8, D-9, D-10, D-11, D-12, F-5, F-6, F-7, F-8, F-10, F-11, F-13 e F-14.</li>
+      <li><strong>"Parece genérico":</strong> nenhum G-NN é desta peça. Ela protege o U-05 (a dobra: F-7 e F-8 tiram os dois defeitos dela) e põe o traço e o lábio nas setas, duas das seis imagens do critério da § 350.</li>
+      <li><strong>Ficam com outros itens:</strong> D-19 (o aviso de cookies sobre a lista, UX-09) e D-20, D-21, D-22, D-24 (a posição), D-25, D-26 e D-27 (o desenho do Juntar, UX-04).</li>
+    </ul>
+
+    <h3>Alternativas</h3>
+    <ul>
+      <li><strong>Setas (D-23), B:</strong> manter as setas ghost e tirar o fundo e a borda da desativada (ícone em <code>ink-muted</code>). Mudança de regra: o "Desabilitado" do README do Button ganha uma exceção para o ghost. Mais leve, mas a seta ativa e a desativada passam a diferir só no tom do ícone.</li>
+      <li><strong>Aviso do Forte (F-10), B:</strong> OliMessage <code>info</code> com a <code>wave</code>, como o README do OptionGroup escreve; a nota fica só no Assinar. Põe uma segunda Oli na tela, de costas para o balão (G-10).</li>
+      <li><strong>Caixa (F-11), B:</strong> aceitar a nativa (linha de 48 px, <code>accent-color: brand</code>) e registrar num §.</li>
+      <li><strong>Anel (D-9), B:</strong> anel por dentro (<code>outline-offset: calc(-1 * var(--stroke-3))</code>), como o Mostrar da senha. Não precisa tirar o <code>overflow: hidden</code>, mas foge do "afastado 2px" do README.</li>
+      <li><strong>Nome no Juntar (D-8), B:</strong> aceitar e registrar a medida nova (28 a 31 caracteres a 360 px).</li>
+      <li><strong>Ícone do FileCard (F-6), B:</strong> a miniatura da página 1 de cada arquivo, com um desenho no worker por arquivo (uns 0,85 MB cada).</li>
+    </ul>
+  </div>
+</section>
+<script>
+var PROTO_T = {
+  pt: {
+    'page.title': 'Peças das ferramentas de PDF · FileOrca UX v2',
+    'skip': 'Ir para o conteúdo',
+    'home': 'FileOrca, página inicial',
+    'search': 'Buscar ferramentas',
+    'lang.code': 'PT',
+    'lang.sr': ' · Idioma: Português',
+    'lang.menu': 'Escolha um idioma',
+    'h1': 'As peças das ferramentas de PDF',
+    'lead': 'Sete peças que as 13 ferramentas de PDF dividem. Cada bloco mostra o site de hoje e a proposta na largura da coluna da ferramenta: 328 px no celular, 760 px no computador.',
+    'howto1': 'Antes · hoje: desenhado com o CSS do site de hoje, como uma foto parada.',
+    'howto2': 'Depois · proposta: o que a F13 constrói. A grade de páginas, a caixa da assinatura e as setas do Juntar respondem ao teclado e ao mouse aqui.',
+    'cap.before': 'Antes · hoje',
+    'cap.after': 'Depois · proposta',
+    'cap.afterA': 'Depois · proposta (alternativa A, recomendada)',
+    'cap.beforeB': 'Antes · hoje (alternativa B: aceitar e registrar)',
+    'cap.altB': 'Alternativa B · o aviso do Forte como OliMessage, como o README do OptionGroup escreve',
+    'fixes': 'Resolve',
+    'b1.title': '1 · A grade de páginas',
+    'b1.lead': 'Aparece no Dividir PDF (Escolher páginas), no Excluir páginas do PDF e no Assinar PDF (Escolher páginas). A página marcada ganha um check num círculo, não só uma borda azul mais grossa. A dobra fica no canto, e a barra cabe em 360 px com botões do tamanho normal, de 52 px.',
+    'b1.beforeNote': 'As páginas 2 e 5 estão marcadas: só a borda diz isso, e um fio dela aparece além da dobra. A 360 px, o Desmarcar todas cai sozinho para uma segunda linha, e os dois botões têm 40 px de altura.',
+    'b1.afterNote': 'Clique numa página, ou ande com as setas e aperte Espaço: o check, a borda e a contagem mudam juntos.',
+    'del.help': 'Marque na grade as páginas que vão sair, ou digite os números delas no campo abaixo.',
+    'g.all': 'Marcar todas',
+    'g.none': 'Desmarcar todas',
+    'g.label': 'Páginas de ata-2026-10.pdf',
+    'g.help': 'As setas andam entre as páginas, e a tecla Espaço marca uma página.',
+    'g.page': 'Página {n} de {total}',
+    'g.sel': ', marcada',
+    'g.count': '{count} de {total} páginas marcadas',
+    'g.earlier': 'Mover a página {n} para antes',
+    'g.later': 'Mover a página {n} para depois',
+    'g.helpOrder': 'Arraste uma página ou use as setas dela. No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
+    'g.helpKeys': 'No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
+    'b2.title': '2 · A caixa da assinatura',
+    'b2.lead': 'Assinar PDF. O anel de foco fica inteiro em qualquer borda da página, a prévia é desenhada no tamanho da caixa, e a ajuda do teclado fala de teclas que funcionam sem Shift.',
+    'b2.beforeNote': 'A caixa está no canto de baixo à direita e tem o foco: a moldura corta o anel em dois lados, e no tema escuro o azul do anel fica em 2,6:1 sobre a página branca.',
+    'b2.afterNote': 'Chegue à caixa com Tab: as setas movem a caixa, + ou = aumenta e − diminui. A posição é dita uma vez, depois de uma pausa curta. O anel fica inteiro nas bordas.',
+    'b2.noteTitle': 'Os avisos como a nota do sistema',
+    'b2.noteLead': 'O aviso do Assinar PDF não tem ícone, e o aviso do nível Forte do Comprimir PDF é uma linha de ajuda cinza. Os dois viram a nota: brand-soft com o ícone info.',
+    'b2.altBNote': 'Uma segunda Oli na mesma tela da que está no painel, de costas para o balão.',
+    'sign.place': 'Posição',
+    'sign.preview': 'Prévia da página',
+    'sign.helpOld': 'Arraste a caixa na prévia. No teclado, as setas movem a caixa, + aumenta e − diminui.',
+    'sign.helpNew': 'Arraste a caixa na prévia. No teclado, as setas movem a caixa (com Shift, 10 vezes mais longe), + ou = aumenta e − diminui.',
+    'sign.boxLabel': 'Posição da assinatura',
+    'sign.boxValue': '{x}% da esquerda, {y}% do topo, {width}% de largura',
+    'sign.notice': 'Isto coloca uma imagem da sua assinatura na página. Não é uma assinatura digital com certificado, e o FileOrca não dá orientação jurídica. Onde uma assinatura com certificado for exigida, use um serviço feito para isso.',
+    'z.before': 'A letra P a 4×: a miniatura de 240 px, esticada até a caixa (1,48× no computador, 4,05× num celular de 3× pixels).',
+    'z.after': 'A mesma letra com a página desenhada na largura da caixa vezes a densidade de pixels, até 1.080 px.',
+    'c.legend': 'Compressão',
+    'c.lossless': 'Sem perda',
+    'c.losslessHelp': 'nada muda à vista',
+    'c.recommended': 'Recomendada',
+    'c.recommendedHelp': 'fotos mais leves',
+    'c.strong': 'Forte',
+    'c.strongHelp': 'menor arquivo',
+    'c.warn': 'A Forte transforma cada página numa imagem. O texto não pode mais ser selecionado nem buscado, e os campos de formulário, os links e os marcadores se perdem.',
+    'c.warn1': 'A Forte transforma cada página numa imagem.',
+    'c.warn2': 'O texto não pode mais ser selecionado nem buscado, e os campos de formulário, os links e os marcadores se perdem.',
+    'b3.title': '3 · O FileCard de PDF',
+    'b3.lead': 'No cartão de pronto do Dividir, do Excluir páginas, do Assinar e do Organizar páginas. O cartão de um PDF mostra o ícone pdf no coral suave da categoria, no lugar de um quadrado vazio, e a dobra recorta com o fundo do próprio cartão: o tema escuro perde o entalhe.',
+    'b3.beforeNote': 'O quadrado é uma caixa vazia de 52 px. No tema escuro, o canto da dobra é pintado com a cor da página, mais escura que o cartão.',
+    'r1.name': 'ata-2026-10.pdf',
+    'r1.size': '1,2 MB',
+    'r1.pages': '12 páginas',
+    'r1.action': 'Dividir PDF',
+    'startOver': 'Começar de novo',
+    'b4.title': '4 · A linha do Juntar e as setas de mover',
+    'b4.lead': 'Hoje as setas que não fazem nada (subir na primeira linha, descer na última) são as únicas com círculo, e parecem os botões. A seta que move vira um botão com o traço e o lábio; a que não pode mover fica com o desativado liso. Na lista do Juntar, o nome usa até duas linhas.',
+    'b4.mergeTitle': 'Juntar PDF',
+    'b4.reorderTitle': 'Organizar páginas do PDF',
+    'b4.beforeNote': 'A 360 px, os dois nomes são cortados no mesmo ponto e parecem iguais. As duas setas desativadas têm o círculo; as duas que funcionam são um chevron solto.',
+    'b4.afterNote': 'Aperte uma seta: a linha muda de lugar e o foco vai junto. Onde a seta não anda fica um lugar vazio, e não há alça: é a linha do Juntar do UX-04 A.',
+    'm.helpA': 'Arraste uma linha para mover, ou use as setas dela. Os arquivos são juntados na ordem desta lista, de cima para baixo.',
+    'b4.reorderBeforeNote': 'O Inverter a ordem tem 40 px de altura no celular, e a ajuda de cima e a de baixo da grade dizem duas vezes para arrastar ou usar as setas.',
+    'b4.reorderAfterNote': 'O Inverter a ordem vira um botão do tamanho normal, de 52 px, e a ajuda embaixo da grade fica só com o teclado. Uma foto parada: a ordem não muda aqui.',
+    'q.label': 'Arquivos',
+    'q.grab': 'Pegar {name}',
+    'q.up': 'Subir {name}',
+    'q.down': 'Descer {name}',
+    'q.moved': '{name} agora é o número {position} de {total}.',
+    'm.n1': 'contrato de aluguel 2026-10-27 cópia assinada.pdf',
+    'm.n2': 'contrato de aluguel 2026-10-27 página 2 assinada.pdf',
+    'm.p1': '2 páginas',
+    'm.p2': '1 página',
+    'm.help': 'Arraste uma linha para mover, ou use as setas dela. No teclado, a tecla Espaço pega a linha, as setas a movem e a tecla Espaço a solta. Os arquivos são juntados na ordem desta lista.',
+    'r.help': 'Arraste uma página para o novo lugar, ou use as setas de cada página.',
+    'r.rev': 'Inverter a ordem',
+    'r.label': 'Páginas de relatorio.pdf',
+    'b5.title': '5 · Uma escolha de sim ou não',
+    'b5.lead': 'O Numerar páginas do PDF tem a única caixa de seleção do site, uma nativa. A peça do sistema para duas a quatro escolhas é o trilho do OptionGroup: a primeira página vira uma escolha entre Numerar e Pular.',
+    'n.start': 'Primeiro número',
+    'n.skip': 'Pular a primeira página',
+    'n.first': 'Primeira página',
+    'n.numberIt': 'Numerar',
+    'n.skipIt': 'Pular',
+    'b6.title': '6 · O passo da senha, com um cartão só',
+    'b6.lead': 'Desbloquear PDF depois de uma senha errada. Hoje o arquivo aparece duas vezes: no cartão de pronto e de novo numa lista embaixo. Fica um cartão só, o erro fica no campo, e o foco volta ao campo com a senha selecionada.',
+    'b6.beforeNote': 'O mesmo arquivo duas vezes, e o foco cai no Começar de novo, longe do campo.',
+    'b6.afterNote': 'O anel no campo marca onde o foco cai depois da senha errada, com o texto selecionado para digitar de novo.',
+    'u.name': 'contrato-2026.pdf',
+    'u.pages': '4 páginas',
+    'u.ask': 'Este PDF pede senha para abrir. Digite a senha e aperte Tirar a senha.',
+    'u.label': 'Senha para abrir o PDF',
+    'u.show': 'Mostrar',
+    'u.showName': 'Mostrar a senha',
+    'u.err': 'Essa senha não abriu contrato-2026.pdf. Confira e tente de novo.',
+    'u.rule': 'Digite a senha deste PDF para continuar.',
+    'u.submit': 'Tirar a senha',
+    'b7.title': '7 · O trilho de três escolhas a 360 px',
+    'b7.lead': 'Dividir PDF. Hoje, a 360 px, o trilho quebra numa pílula de duas linhas, com 108 px de altura e a terceira escolha sozinha. Abaixo de 480 px, as três dividem uma linha de colunas iguais, com 56 px, e um rótulo longo quebra dentro dos próprios 48 px. A 1280 px, as duas são a mesma linha.',
+    's.legend': 'Dividir por',
+    's.each': 'Cada página',
+    's.ranges': 'Intervalos de páginas',
+    's.pick': 'Escolher páginas',
+    'f.pdf': 'PDF',
+    'f.merge': 'Juntar PDF',
+    'f.split': 'Dividir PDF',
+    'f.sign': 'Assinar PDF',
+    'f.about': 'Sobre',
+    'f.privacy': 'Privacidade',
+    'f.coffee': 'Curtiu? Me paga um café',
+    'f.signline': 'Feito por Victor Yuki Matusita em Curitiba · © 2026'
+  },
+  es: {
+    'page.title': 'Piezas de las herramientas de PDF · FileOrca UX v2',
+    'skip': 'Saltar al contenido',
+    'home': 'FileOrca, página de inicio',
+    'search': 'Buscar herramientas',
+    'lang.code': 'ES',
+    'lang.sr': ' · Idioma: Español',
+    'lang.menu': 'Elige un idioma',
+    'h1': 'Las piezas de las herramientas de PDF',
+    'lead': 'Siete piezas que comparten las 13 herramientas de PDF. Cada bloque muestra el sitio de hoy y la propuesta al ancho de la columna de la herramienta: 328 px en el celular, 760 px en la computadora.',
+    'howto1': 'Antes · hoy: dibujado con el CSS del sitio de hoy, como una foto fija.',
+    'howto2': 'Después · propuesta: lo que construye la F13. La cuadrícula de páginas, el recuadro de la firma y las flechas de Unir responden al teclado y al mouse aquí.',
+    'cap.before': 'Antes · hoy',
+    'cap.after': 'Después · propuesta',
+    'cap.afterA': 'Después · propuesta (alternativa A, recomendada)',
+    'cap.beforeB': 'Antes · hoy (alternativa B: aceptarla y registrarla)',
+    'cap.altB': 'Alternativa B · el aviso de Fuerte como OliMessage, como lo escribe el README del OptionGroup',
+    'fixes': 'Resuelve',
+    'b1.title': '1 · La cuadrícula de páginas',
+    'b1.lead': 'Aparece en Dividir PDF (Elegir páginas), en Eliminar páginas de PDF y en Firmar PDF (Elegir páginas). La página elegida lleva un check en un círculo, no solo un borde azul más grueso. El doblez queda en la esquina, y la barra cabe en 360 px con botones del tamaño normal, de 52 px.',
+    'b1.beforeNote': 'Las páginas 2 y 5 están elegidas: solo el borde lo dice, y una franja de él se ve más allá del doblez. A 360 px, Desmarcar todas baja sola a una segunda línea, y los dos botones miden 40 px de alto.',
+    'b1.afterNote': 'Haz clic en una página, o muévete con las flechas y presiona Espacio: el check, el borde y el conteo cambian juntos.',
+    'del.help': 'Elige en la cuadrícula las páginas que quieres eliminar o escribe sus números en el campo de abajo.',
+    'g.all': 'Elegir todas',
+    'g.none': 'Desmarcar todas',
+    'g.label': 'Páginas de acta-2026-10.pdf',
+    'g.help': 'Las flechas del teclado pasan de una página a otra; Espacio elige una página.',
+    'g.page': 'Página {n} de {total}',
+    'g.sel': ', elegida',
+    'g.count': '{count} de {total} páginas elegidas',
+    'g.earlier': 'Mover la página {n} antes',
+    'g.later': 'Mover la página {n} después',
+    'g.helpOrder': 'Arrastra una página o usa sus flechas. Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
+    'g.helpKeys': 'Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
+    'b2.title': '2 · El recuadro de la firma',
+    'b2.lead': 'Firmar PDF. El anillo de foco queda entero en cualquier borde de la página, la vista previa se dibuja al tamaño del recuadro y la ayuda del teclado habla de teclas que funcionan sin Mayús.',
+    'b2.beforeNote': 'El recuadro está en la esquina inferior derecha y tiene el foco: el marco corta el anillo en dos lados, y en el tema oscuro el azul del anillo queda en 2,6:1 sobre la página blanca.',
+    'b2.afterNote': 'Llega al recuadro con Tab: las flechas lo mueven, + o = lo agranda y − lo achica. La posición se dice una vez, después de una pausa corta. El anillo queda entero en los bordes.',
+    'b2.noteTitle': 'Los avisos como la nota del sistema',
+    'b2.noteLead': 'El aviso de Firmar PDF no tiene icono, y el aviso del nivel Fuerte de Comprimir PDF es una línea de ayuda gris. Los dos pasan a ser la nota: brand-soft con el icono info.',
+    'b2.altBNote': 'Una segunda Oli en la misma pantalla que la del panel, de espaldas al globo.',
+    'sign.place': 'Posición',
+    'sign.preview': 'Vista previa de la página',
+    'sign.helpOld': 'Arrastra el recuadro sobre la vista previa. Con el teclado, las flechas lo mueven, + lo agranda y − lo achica.',
+    'sign.helpNew': 'Arrastra el recuadro sobre la vista previa. Con el teclado, las flechas lo mueven (con Mayús, 10 veces más lejos), + o = lo agranda y − lo achica.',
+    'sign.boxLabel': 'Posición de la firma',
+    'sign.boxValue': '{x} % desde la izquierda, {y} % desde arriba, {width} % de ancho',
+    'sign.notice': 'Esto pone una imagen de tu firma en la página. No es una firma digital con certificado, y FileOrca no da asesoría legal. Cuando se exige una firma con certificado, usa un servicio hecho para eso.',
+    'z.before': 'La letra P a 4×: la miniatura de 240 px, estirada hasta el recuadro (1,48× en la computadora, 4,05× en un celular de 3× píxeles).',
+    'z.after': 'La misma letra con la página dibujada al ancho del recuadro por la densidad de píxeles, hasta 1080 px.',
+    'c.legend': 'Compresión',
+    'c.lossless': 'Sin pérdida',
+    'c.losslessHelp': 'sin cambios visibles',
+    'c.recommended': 'Recomendada',
+    'c.recommendedHelp': 'fotos más ligeras',
+    'c.strong': 'Fuerte',
+    'c.strongHelp': 'archivo más pequeño',
+    'c.warn': 'Fuerte convierte cada página en una imagen. El texto ya no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores.',
+    'c.warn1': 'Fuerte convierte cada página en una imagen.',
+    'c.warn2': 'El texto ya no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores.',
+    'b3.title': '3 · La FileCard de PDF',
+    'b3.lead': 'En la tarjeta de listo de Dividir, Eliminar páginas, Firmar y Ordenar páginas. La tarjeta de un PDF muestra el icono pdf sobre el coral suave de la categoría, en lugar de un cuadrado vacío, y el doblez recorta con el fondo de la propia tarjeta: el tema oscuro pierde la muesca.',
+    'b3.beforeNote': 'El cuadrado es una caja vacía de 52 px. En el tema oscuro, la esquina del doblez se pinta con el color de la página, más oscuro que la tarjeta.',
+    'r1.name': 'acta-2026-10.pdf',
+    'r1.size': '1,2 MB',
+    'r1.pages': '12 páginas',
+    'r1.action': 'Dividir PDF',
+    'startOver': 'Empezar de nuevo',
+    'b4.title': '4 · La fila de Unir y las flechas para mover',
+    'b4.lead': 'Hoy las flechas que no hacen nada (subir en la primera fila, bajar en la última) son las únicas con círculo, y parecen los botones. La flecha que mueve pasa a ser un botón con el trazo y el labio; la que no puede mover queda con el desactivado liso. En la lista de Unir, el nombre usa hasta dos líneas.',
+    'b4.mergeTitle': 'Unir PDF',
+    'b4.reorderTitle': 'Ordenar páginas de PDF',
+    'b4.beforeNote': 'A 360 px, los dos nombres se cortan en el mismo punto y parecen iguales. Las dos flechas desactivadas tienen el círculo; las dos que funcionan son un chevron suelto.',
+    'b4.afterNote': 'Presiona una flecha: la fila cambia de lugar y el foco la sigue. Donde la flecha no puede ir queda un lugar vacío, y no hay asa: es la fila de Unir del UX-04 A.',
+    'm.helpA': 'Arrastra una fila para moverla o usa sus flechas. Los archivos se unen en el orden de esta lista, de arriba abajo.',
+    'b4.reorderBeforeNote': 'Invertir el orden mide 40 px de alto en el celular, y la ayuda de arriba y la de abajo de la cuadrícula dicen dos veces que arrastres o uses las flechas.',
+    'b4.reorderAfterNote': 'Invertir el orden pasa a ser un botón del tamaño normal, de 52 px, y la ayuda bajo la cuadrícula queda solo con el teclado. Una foto fija: el orden no cambia aquí.',
+    'q.label': 'Archivos',
+    'q.grab': 'Tomar {name}',
+    'q.up': 'Mover {name} hacia arriba',
+    'q.down': 'Mover {name} hacia abajo',
+    'q.moved': '{name} ahora es el número {position} de {total}.',
+    'm.n1': 'contrato de alquiler 2026-10-27 copia firmada.pdf',
+    'm.n2': 'contrato de alquiler 2026-10-27 página 2 firmada.pdf',
+    'm.p1': '2 páginas',
+    'm.p2': '1 página',
+    'm.help': 'Arrastra una fila para moverla o usa sus botones de flecha. Con el teclado, Espacio toma una fila, las flechas la mueven y Espacio la suelta. Los archivos se juntan en el orden de esta lista.',
+    'r.help': 'Arrastra una página a su nuevo lugar o usa las flechas de cada página.',
+    'r.rev': 'Invertir el orden',
+    'r.label': 'Páginas de informe.pdf',
+    'b5.title': '5 · Una elección de sí o no',
+    'b5.lead': 'Numerar páginas de PDF tiene la única casilla del sitio, una nativa. La pieza del sistema para dos a cuatro opciones es el riel del OptionGroup: la primera página pasa a ser una elección entre Numerar y Omitir.',
+    'n.start': 'Primer número',
+    'n.skip': 'Omitir la primera página',
+    'n.first': 'Primera página',
+    'n.numberIt': 'Numerar',
+    'n.skipIt': 'Omitir',
+    'b6.title': '6 · El paso de la contraseña, con una sola tarjeta',
+    'b6.lead': 'Desbloquear PDF después de una contraseña equivocada. Hoy el archivo aparece dos veces: en la tarjeta de listo y otra vez en una lista abajo. Queda una sola tarjeta, el error queda en el campo y el foco vuelve al campo con la contraseña seleccionada.',
+    'b6.beforeNote': 'El mismo archivo dos veces, y el foco cae en Empezar de nuevo, lejos del campo.',
+    'b6.afterNote': 'El anillo en el campo marca dónde cae el foco después de la contraseña equivocada, con el texto seleccionado para escribir de nuevo.',
+    'u.name': 'contrato-2026.pdf',
+    'u.pages': '4 páginas',
+    'u.ask': 'Este PDF necesita una contraseña para abrirse. Escríbela y presiona Quitar la contraseña.',
+    'u.label': 'Contraseña para abrir el PDF',
+    'u.show': 'Mostrar',
+    'u.showName': 'Mostrar la contraseña',
+    'u.err': 'Esa contraseña no abrió contrato-2026.pdf. Revísala e inténtalo de nuevo.',
+    'u.rule': 'Escribe la contraseña de este PDF para continuar.',
+    'u.submit': 'Quitar la contraseña',
+    'b7.title': '7 · El riel de tres opciones a 360 px',
+    'b7.lead': 'Dividir PDF. Hoy, a 360 px, el riel se parte en una píldora de dos líneas, de 108 px de alto, con la tercera opción sola. Debajo de 480 px, las tres comparten una fila de columnas iguales, de 56 px, y una etiqueta larga se parte dentro de sus propios 48 px. A 1280 px, las dos son la misma fila.',
+    's.legend': 'Dividir por',
+    's.each': 'Cada página',
+    's.ranges': 'Rangos de páginas',
+    's.pick': 'Elegir páginas',
+    'f.pdf': 'PDF',
+    'f.merge': 'Unir PDF',
+    'f.split': 'Dividir PDF',
+    'f.sign': 'Firmar PDF',
+    'f.about': 'Acerca de',
+    'f.privacy': 'Privacidad',
+    'f.coffee': '¿Te gustan estas herramientas? Invítame un café',
+    'f.signline': 'Hecho por Victor Yuki Matusita en Curitiba · © 2026'
+  }
+};
+</script>
+<script>
+/* UX-11: the "after" pieces answer to the keyboard and the mouse, as the F13 builds them (PageGrid, SignatureArea,
+   the Merge list). Texts come from PROTO_T, English as the fallback. Runs after the kit's runtime has translated. */
+(function () {
+  var EN = {
+    'g.page': 'Page {n} of {total}', 'g.sel': ', picked', 'g.count': '{count} of {total} pages picked',
+    'g.earlier': 'Move page {n} earlier', 'g.later': 'Move page {n} later',
+    'q.grab': 'Pick up {name}', 'q.up': 'Move {name} up', 'q.down': 'Move {name} down', 'q.moved': '{name} is now number {position} of {total}.',
+    'sign.boxLabel': 'Signature position', 'sign.boxValue': '{x}% from the left, {y}% from the top, {width}% wide'
+  };
+  function T(key) {
+    var lang = document.documentElement.getAttribute('data-lang') || 'en';
+    var page = window.PROTO_T && window.PROTO_T[lang];
+    return (page && page[key]) || EN[key];
+  }
+  function fmt(text, values) {
+    return text.replace(/\{(\w+)\}/g, function (all, key) { return values[key] !== undefined ? String(values[key]) : all; });
+  }
+  function each(list, fn) { Array.prototype.forEach.call(list, fn); }
+
+  function pages(box) {
+    var cells = Array.prototype.slice.call(box.querySelectorAll('.fo-page__main'));
+    var total = cells.length;
+    var count = box.querySelector('.fo-pages__count');
+    var cellOf = function (button) { return button.closest('.fo-page'); };
+    function refresh() {
+      var picked = 0;
+      each(cells, function (button) {
+        var on = cellOf(button).getAttribute('data-selected') === 'true';
+        if (on) picked += 1;
+        if (box.getAttribute('data-mode') === 'select') button.setAttribute('aria-pressed', on ? 'true' : 'false');
+        button.setAttribute('aria-label', fmt(T('g.page'), { n: button.getAttribute('data-n'), total: total }) + (on ? T('g.sel') : ''));
+      });
+      if (count) count.textContent = fmt(T('g.count'), { count: picked, total: total });
+      each(box.querySelectorAll('[data-pp-move]'), function (move) {
+        move.setAttribute('aria-label', fmt(T(move.getAttribute('data-pp-move') === 'earlier' ? 'g.earlier' : 'g.later'), { n: move.getAttribute('data-n') }));
+      });
+    }
+    refresh();
+    if (!box.hasAttribute('data-pp-live')) return;
+    function columns() {
+      var top = cellOf(cells[0]).offsetTop, n = 0;
+      for (var i = 0; i < cells.length; i += 1) {
+        if (cellOf(cells[i]).offsetTop !== top) break;
+        n += 1;
+      }
+      return Math.max(1, n);
+    }
+    function focusAt(index) {
+      each(cells, function (button, i) { button.tabIndex = i === index ? 0 : -1; });
+      cells[index].focus();
+    }
+    function pick(cell, on) {
+      if (on) cell.setAttribute('data-selected', 'true');
+      else cell.removeAttribute('data-selected');
+    }
+    each(cells, function (button, index) {
+      button.addEventListener('click', function () {
+        var cell = cellOf(button);
+        pick(cell, cell.getAttribute('data-selected') !== 'true');
+        each(cells, function (other, i) { other.tabIndex = i === index ? 0 : -1; });
+        refresh();
+      });
+      button.addEventListener('keydown', function (event) {
+        var steps = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns(), ArrowDown: columns() };
+        if (Object.prototype.hasOwnProperty.call(steps, event.key)) {
+          event.preventDefault();
+          focusAt(Math.min(total - 1, Math.max(0, index + steps[event.key])));
+        } else if (event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          focusAt(event.key === 'Home' ? 0 : total - 1);
+        }
+      });
+    });
+    var all = box.querySelector('[data-pp-all]');
+    var none = box.querySelector('[data-pp-none]');
+    if (all) all.addEventListener('click', function () { each(cells, function (b) { pick(cellOf(b), true); }); refresh(); });
+    if (none) none.addEventListener('click', function () { each(cells, function (b) { pick(cellOf(b), false); }); refresh(); });
+  }
+
+  function merge(list) {
+    var rows = function () { return Array.prototype.slice.call(list.querySelectorAll('.fo-filelist__row')); };
+    function refresh() {
+      var all = rows();
+      each(all, function (row, i) {
+        var nameEl = row.querySelector('.fo-file__name');
+        var name = nameEl.textContent;
+        nameEl.setAttribute('title', name);
+        var grab = row.querySelector('[data-pp-act="grab"]');
+        if (grab) grab.setAttribute('aria-label', fmt(T('q.grab'), { name: name }));
+        var up = row.querySelector('[data-pp-act="up"]');
+        var down = row.querySelector('[data-pp-act="down"]');
+        up.setAttribute('aria-label', fmt(T('q.up'), { name: name }));
+        down.setAttribute('aria-label', fmt(T('q.down'), { name: name }));
+        up.disabled = i === 0;
+        down.disabled = i === all.length - 1;
+      });
+    }
+    refresh();
+    if (!list.hasAttribute('data-pp-live')) return;
+    var status = list.parentNode.querySelector('[data-pp-status]');
+    list.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-pp-act]');
+      if (!button || button.disabled) return;
+      var act = button.getAttribute('data-pp-act');
+      if (act === 'grab') return;
+      var all = rows(), row = button.closest('.fo-filelist__row'), from = all.indexOf(row), to = act === 'up' ? from - 1 : from + 1;
+      if (to < 0 || to >= all.length) return;
+      if (act === 'up') list.insertBefore(row, all[to]);
+      else list.insertBefore(all[to], row);
+      refresh();
+      var next = row.querySelector('[data-pp-act="' + act + '"]');
+      if (next.disabled) next = row.querySelector('[data-pp-act="' + (act === 'up' ? 'down' : 'up') + '"]');
+      next.focus();
+      if (status) {
+        status.textContent = '';
+        var said = fmt(T('q.moved'), { name: row.querySelector('.fo-file__name').textContent, position: to + 1, total: all.length });
+        setTimeout(function () { status.textContent = said; }, 50);
+      }
+    });
+  }
+
+  function sign(stage) {
+    var box = stage.querySelector('.fo-sign__box');
+    var status = stage.querySelector('[data-pp-status]');
+    if (!box) return;
+    var RATIO = 1 / 3, PAGE = 0.7727, MIN = 0.05;
+    var s = { x: 0.7, y: 1, w: 0.3 };
+    var timer = 0;
+    function fit() {
+      s.w = Math.min(1, Math.max(MIN, s.w));
+      var h = s.w * RATIO * PAGE;
+      s.x = Math.min(Math.max(0, 1 - s.w), Math.max(0, s.x));
+      s.y = Math.min(Math.max(0, 1 - h), Math.max(0, s.y));
+    }
+    function value() {
+      return fmt(T('sign.boxValue'), { x: Math.round(s.x * 100), y: Math.round(s.y * 100), width: Math.round(s.w * 100) });
+    }
+    function show() {
+      box.style.setProperty('--x', (s.x * 100).toFixed(2) + '%');
+      box.style.setProperty('--y', (s.y * 100).toFixed(2) + '%');
+      box.style.setProperty('--w', (s.w * 100).toFixed(2) + '%');
+      box.setAttribute('aria-label', T('sign.boxLabel') + ', ' + value());
+    }
+    box.addEventListener('keydown', function (event) {
+      // D-6: the arrows take Shift (10 times further); + = - _ always change the width by 1 %.
+      var arrow = event.shiftKey ? 0.1 : 0.01;
+      var keys = { ArrowLeft: [-arrow, 0, 0], ArrowRight: [arrow, 0, 0], ArrowUp: [0, -arrow, 0], ArrowDown: [0, arrow, 0], '+': [0, 0, 0.01], '=': [0, 0, 0.01], '-': [0, 0, -0.01], '_': [0, 0, -0.01] };
+      if (!Object.prototype.hasOwnProperty.call(keys, event.key)) return;
+      event.preventDefault();
+      var change = keys[event.key];
+      s.x += change[0];
+      s.y += change[1];
+      s.w += change[2];
+      fit();
+      show();
+      // D-9: the position is said once, 400 ms after the last key.
+      clearTimeout(timer);
+      if (status) status.textContent = '';
+      timer = setTimeout(function () { if (status) status.textContent = T('sign.boxLabel') + ': ' + value(); }, 400);
+    });
+    fit();
+    show();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    each(document.querySelectorAll('[data-pp-pages]'), pages);
+    each(document.querySelectorAll('[data-pp-merge]'), merge);
+    each(document.querySelectorAll('[data-pp-sign]'), sign);
+  });
+})();
+</script>
+</body>
+</html>

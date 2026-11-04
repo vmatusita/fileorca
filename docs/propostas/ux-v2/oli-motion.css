@@ -1,0 +1,162 @@
+/* UX-10 · The Oli by state, with a short loop (F10: "para avaliar" A-6, which closes the pending F3 d-02).
+   Loaded by oli-motion.html after proto.css. Colours: tokens only (no new token). Motion: transform and opacity
+   only (here also the individual scale and translate, which the site's design gate accepts), durations and curves
+   by token name (docs/design/README.md, "Movimento").
+   Sections:
+     1. the proposal (?state=depois, the default): what F13 writes in src/styles/components.css, scoped here to
+        html[data-state="depois"] and to the live stage (.om-live), so the prototype's "Play again" can restart it.
+        The keyframes are om-*; on the site they are fo-* (the specification area of the page has the site CSS);
+     2. today (?state=antes): the rules of src/styles/components.css:14-22, :149 and :171, copied as they are;
+     3. restart and reduced motion: the prototype's reset, and ?motion=reduce, the same rule as
+        src/styles/global.css:97-100 (the checker does not emulate prefers-reduced-motion);
+     4. the showcase page: stages, scenes, facts, the 5-second bar and the prototype-only "Play again" button. */
+
+/* ---------- 1. The proposal (depois) ---------- */
+/* Waiting (wave): floats up, sways twice and settles, once, 3 s. The short nod is the person's gesture (pointer
+   over the zone, or the focus on its button): it is added as a second animation, so the greeting keeps its own
+   time and does not start again. */
+html[data-state="depois"] .om-live [data-oli="wave"] > svg { animation: om-hello var(--dur-float) var(--ease-in-out) 1; }
+html[data-state="depois"] .om-live .fo-drop:is(:hover, :focus-within) [data-oli="wave"] > svg {
+  animation: om-hello var(--dur-float) var(--ease-in-out) 1, om-nod var(--dur-cheer) var(--ease-spring) 1;
+}
+/* File over the zone (gulp): a little bigger and leaning to the water. On the site this is the transition of
+   .fo-drop__oli > svg (it goes back the same way when the file leaves); the prototype plays the way in. */
+html[data-state="depois"] .om-live [data-oli="gulp"] > svg { scale: 1.06; translate: 0 4px; transition: none; animation: om-gulp var(--dur-quick) var(--ease-spring) 1; }
+/* Working (swim): the only loop, and it lasts the work (progress, the essential exception of 2.2.2).
+   In the prototype the job lasts 3 s: two half strokes. On the site: infinite, gone with the WaterLevel. */
+html[data-state="depois"] .om-live [data-oli="swim"] > svg { animation: om-swim calc(var(--dur-float) / 2) var(--ease-in-out) 2 alternate; }
+/* Result (cheer): the jump of today, once. */
+html[data-state="depois"] .om-live .fo-result__oli > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+/* Error (oops): pulls back and returns, once. No shake: a shake says "wrong", and the error is never the person's. */
+html[data-state="depois"] .om-live [data-oli="oops"] > svg { animation: om-oops var(--dur-cheer) var(--ease-spring) 1; }
+/* Offline (buoy): two bobs on the buoy, 4 half bobs of 750 ms = 3 s, and still (an even count ends at rest). */
+html[data-state="depois"] .om-live [data-oli="buoy"] > svg { animation: om-buoy calc(var(--dur-float) / 4) var(--ease-in-out) 4 alternate; }
+/* 404 (lost): tilts left, then right, as if searching, once, 3 s. */
+html[data-state="depois"] .om-live [data-oli="lost"] > svg { animation: om-lost var(--dur-float) var(--ease-in-out) 1; }
+/* Search with no result (peek): rises from behind the edge, once (an entrance, so ease-out). */
+html[data-state="depois"] .om-live [data-oli="peek"] > svg { animation: om-peek var(--dur-base) var(--ease-out) 1 backwards; }
+/* Support (coffee): Oli stays still; the steam rises once and the second puff settles in sight.
+   1.4 cycles of 1.8 s end on the 40% keyframe (opacity 1, no transform), which is the drawn steam:
+   2.52 s for the first stroke, 0.6 s + 2.52 s = 3.12 s for the second. The steam paths live in the <symbol> of
+   the sprite, so these rules hang on <html>, an ancestor of the symbol (the <use> instance follows them). */
+html[data-state="depois"] [data-oli="coffee"] > svg { animation: none; }
+html[data-state="depois"] .oli-steam path { animation: om-steam calc(var(--dur-cheer) * 3) var(--ease-in-out) 1.4; }
+html[data-state="depois"] .oli-steam path:last-child { animation-delay: var(--dur-cheer); }
+
+@keyframes om-hello {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(-6px) rotate(-4deg); }
+  40% { transform: translateY(-6px) rotate(1deg); }
+  60% { transform: translateY(-5px) rotate(-3deg); }
+  80% { transform: translateY(-2px) rotate(0deg); }
+}
+@keyframes om-nod { 50% { transform: translateY(-4px) rotate(-5deg); } }
+@keyframes om-gulp { from { scale: 1; translate: 0 0; } }
+@keyframes om-swim { to { transform: translate(-3px, -4px) rotate(-3deg); } }
+@keyframes om-oops { 30% { transform: translateX(4px) rotate(4deg); } }
+@keyframes om-buoy { to { transform: translateY(-3px) rotate(2deg); } }
+@keyframes om-lost {
+  0%, 100% { transform: none; }
+  30% { transform: translateX(-4px) rotate(-6deg); }
+  65% { transform: translateX(2px) rotate(3deg); }
+}
+@keyframes om-peek { from { opacity: 0; transform: translateY(8px); } }
+@keyframes om-steam {
+  0% { opacity: 0; transform: translateY(3px); }
+  40% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-5px); }
+}
+
+/* ---------- 2. Today (antes): src/styles/components.css, as it is ---------- */
+/* :14 the wave floats with no end; :15 + :149 the gulp grows 5% in a transition; :16 the swim bobs with no end;
+   :171 the cheer jumps once; :17-18 the steam rises with no end. The other poses are still. The keyframes fo-float,
+   fo-bob, fo-cheer and fo-steam come from bundle.css (the same as the site's). */
+html[data-state="antes"] .om-live [data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
+html[data-state="antes"] .om-live [data-oli="gulp"] > svg { scale: 1.05; transition: none; animation: om-gulp-today var(--dur-quick) var(--ease-spring) 1; }
+html[data-state="antes"] .om-live [data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
+html[data-state="antes"] .om-live .fo-result__oli > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+html[data-state="antes"] .om-live :is([data-oli="oops"], [data-oli="buoy"], [data-oli="lost"], [data-oli="peek"], [data-oli="coffee"]) > svg { animation: none; }
+html[data-state="antes"] .oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) infinite; }
+html[data-state="antes"] .oli-steam path:last-child { animation-delay: 600ms; }
+@keyframes om-gulp-today { from { scale: 1; } }
+
+/* ---------- 3. Restart and reduced motion ---------- */
+/* "Play again" takes .om-live off the stage (and .om-steam-reset onto <html> for the steam), forces a style pass and
+   puts it back: every animation of the stage starts from its first frame. */
+.om-stage:not(.om-live) [data-oli] > svg { animation: none !important; transition: none !important; }
+html.om-steam-reset .oli-steam path { animation: none !important; }
+/* ?motion=reduce: what prefers-reduced-motion does on the site (global.css:97-100). Oli stays in the pose as drawn,
+   which is also the last frame of every move above. */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after { animation: none !important; transition: none !important; }
+html[data-motion="reduce"] .fo-btn:hover:not(:active) { transform: none; }
+
+/* ---------- 4. The showcase page ---------- */
+.om-intro { display: grid; gap: var(--space-3); }
+.om-note { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font-size: 15px; line-height: 22px; }
+.om-note .fo-icon { color: var(--brand); flex: none; }
+.om-playall { justify-self: start; }
+
+.om-stages { display: grid; margin-top: var(--space-4); }
+.om-stage { display: grid; gap: var(--space-4); padding-block: var(--space-8); border-top: var(--stroke-hair) solid var(--hairline); }
+.om-stage__title { font: 600 24px/30px var(--font-display); }
+@media (min-width: 768px) {
+  .om-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); align-items: start; }
+  .om-stage__title { grid-column: 1 / -1; }
+}
+
+/* Scenes: each Oli in her own box, at her size on the site (§ 19), looking left, to the text. Nothing in a scene is
+   a control: the prototype shows the state, not the tool. */
+.om-scene { position: relative; min-width: 0; }
+.om-scene--edge { padding-top: 88px; }
+@media (min-width: 768px) { .om-scene--edge { padding-top: 80px; } }
+.om-scene .fo-drop { min-height: 176px; padding: var(--space-6) var(--space-4) var(--space-10); cursor: default; }
+.om-scene .fo-drop[data-state="over"] .fo-water::before { animation: none; }
+.om-scene .fo-drop__title { font-size: 20px; line-height: 26px; }
+
+/* Working: the text on top and the water low, so Oli never covers the "…" of the line (D-16). */
+.om-scene .fo-level { min-height: 232px; align-items: start; padding-top: var(--space-6); }
+
+.om-scene .fo-result__says { font-size: 18px; line-height: 24px; }
+
+.om-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.om-card__text { display: grid; gap: var(--space-2); }
+.om-card__says { font: 500 20px/26px var(--font-display); }
+.om-card__sub { color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.om-card__oli { width: 96px; height: 96px; }
+@media (min-width: 768px) { .om-card__oli { width: 112px; height: 112px; } }
+
+.om-hero__says { font: 600 28px/34px var(--font-display); }
+
+/* The list ends at the bottom edge and clips: the peek rises from behind it. */
+.om-search { display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-4) 0; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); overflow: hidden; }
+.om-search__field { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); font-size: 16px; }
+.om-search__empty { display: grid; justify-items: center; gap: var(--space-2); padding-top: var(--space-4); text-align: center; }
+.om-search__title { font-weight: 700; }
+.om-search__hint { color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+
+/* Facts: what moves, for how long, how many times, with which curve and what starts it. */
+.om-facts { display: grid; gap: var(--space-3); min-width: 0; }
+.om-move { font-size: 16px; line-height: 24px; }
+.om-dl { display: grid; gap: var(--space-1); margin: 0; font-size: 15px; line-height: 22px; }
+.om-dl > div { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: var(--space-2); }
+.om-dl dt { color: var(--ink-muted); font-weight: 600; }
+.om-dl dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.om-dl code { font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; font-size: 14px; }
+
+/* The bar is 5 s long (the 2.2.2 limit): the fill is the total of the move. No end fills it in danger. */
+.om-track { position: relative; height: 10px; border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
+.om-track > i { position: absolute; inset: 0; border-radius: inherit; background: var(--brand); transform-origin: left center; transform: scaleX(var(--om-t, 0)); }
+.om-track--over > i { background: var(--danger); transform: none; }
+
+/* Specification tables: from 768 px the first column keeps whole words (on a phone it may break, so the page never
+   scrolls sideways). */
+@media (min-width: 768px) { .proto-doc .om-table td:first-child { overflow-wrap: normal; } }
+
+/* Prototype only: the site has no "Play again". Drawn like the prototype control (dashed, sunken), never like a
+   button of the site. */
+.om-replay {
+  justify-self: start; display: inline-flex; align-items: center; justify-content: center; min-width: var(--tap-min); min-height: var(--tap-min);
+  padding: 0 var(--space-4); border: var(--stroke-2) dashed var(--hairline); border-radius: var(--radius-sm);
+  background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--font-text); cursor: pointer;
+}
+.om-replay:hover { background: var(--surface); border-color: var(--stroke); }

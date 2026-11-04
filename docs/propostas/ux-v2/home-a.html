@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en" data-state="repouso" data-proto-state="repouso over lido" data-ads="on" data-proto-ads="on off" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home, alternative A · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?state=over;?state=lido;?ads=off;?lang=pt;?lang=es&state=lido;?lang=pt&ads=off;?lang=es&state=over&ads=off">
+<meta name="proto-shots" content=";?state=lido;?ads=off">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-state="repouso"] [data-when]:not([data-when~="repouso"]),
+html[data-state="over"] [data-when]:not([data-when~="over"]),
+html[data-state="lido"] [data-when]:not([data-when~="lido"]),
+html[data-ads="on"] [data-when-ads]:not([data-when-ads~="on"]),
+html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="home.css">
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><symbol id="oli-wave" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M84 52 q5 -3 8 1 M86 44 q7 -5 12 1" fill="none" stroke="#0B63F6" stroke-width="2.6" stroke-linecap="round"/></g></symbol><symbol id="oli-gulp" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><ellipse cx="41" cy="57" rx="5" ry="6" fill="#0F1B2D"/><circle cx="42.8" cy="54.6" r="2.1" fill="#F7FAFD"/><circle cx="39.2" cy="59.2" r="1" fill="#F7FAFD"/><use href="#oli-p8"/><path d="M12 70 Q 28 68 42 79 Q 38 99 22 98 Q 11 95 12 70 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="25" cy="92" rx="8" ry="3.6" fill="#FF9CA8"/><use href="#oli-p10"/><use href="#oli-p11"/><g transform="rotate(-18 10 82)"><path d="M1 72 L12 72 L18 78 L18 93 L1 93 Z" fill="#F7FAFD" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 72 L12 78 L18 78 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.2" stroke-linejoin="round"/></g></g></symbol><symbol id="oli-swim" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(-8 64 64)"><g fill="none" stroke="#0B63F6" stroke-width="2.4"><circle cx="8" cy="54" r="3"/><circle cx="6" cy="40" r="2"/></g><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M50 88 C55 97 62 103 70 105 C75 106 75 100 71 96 C67 92 62 89 58 86 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M50 88 C55 97 62 103 70 105 C75 106 75 100 71 96 C67 92 62 89 58 86 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></g></g></symbol></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-state">
+      <span class="proto-control__label" id="proto-control-state">State</span>
+      <a href="?state=repouso" aria-current="true">Rest</a>
+      <a href="?state=over">File over</a>
+      <a href="?state=lido">File read</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-ads">
+      <span class="proto-control__label" id="proto-control-ads">Ads</span>
+      <a href="?ads=on" aria-current="true">Ads on (F12)</a>
+      <a href="?ads=off">Ads off</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: a placeholder that only holds the place of the Menu and the theme button. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
+  </div>
+</nav>
+<div class="proto-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#" aria-label="FileOrca home" data-t-aria-label="home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="hx-btn hx-btn--theme fo-desktop-only" aria-label="Theme: system" data-t-aria-label="theme"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+    <button type="button" class="fo-header__lang" popovertarget="hx-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="lang.code">EN</span><span class="fo-sr" data-t="lang.sr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="hx-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="lang.menu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+    <button type="button" class="hx-btn hx-btn--menu" popovertarget="hx-menu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="hx-btn__text" data-t="menu">Menu</span></button>
+    <nav id="hx-menu" class="fo-langmenu hx-menu" popover aria-label="Site menu" data-t-aria-label="menu.label">
+      <ul>
+        <li><a href="#ha-p-image" data-t="m.image">Image tools</a></li>
+        <li><a href="#ha-p-pdf" data-t="m.pdf">PDF tools</a></li>
+        <li><a href="#ha-p-money" data-t="m.money">Money calculators</a></li>
+        <li data-when-lang="en"><a href="#ha-p-life">Home calculators</a></li>
+        <li data-when-lang="en"><a href="#ha-p-life">Health calculators</a></li>
+        <li><a href="#ha-p-qr" data-t="m.qr">QR code generator</a></li>
+        <li><a href="#hx-guides-title" data-t="m.guides">Guides</a></li>
+        <li><a href="#" data-t="m.support">Support Oli</a></li>
+        <li class="fo-mobile-only"><button type="button" class="hx-btn hx-menu__theme" data-t="theme">Theme: system</button></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame proto-frame--rail">
+    <main id="main" class="proto-main hx-main">
+      <div class="ha-hero">
+        <div class="ha-hero__text">
+          <h1 class="fo-h1 fo-h1--display" data-t-html="h1">50 tools. <span class="hx-nw">0 uploads.</span></h1>
+          <p class="fo-lead" data-t="a.lead">Drop a file and Oli takes it to the tool that opens it. Nothing is uploaded.</p>
+        </div>
+        <div class="ha-zone fo-drop">
+          <div class="fo-drop__sea" aria-hidden="true"><div class="fo-water"></div></div>
+          <div class="ha-oli" data-when="repouso"><div class="ha-zone__oli" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div></div>
+          <div class="ha-oli" data-when="over"><div class="ha-zone__oli" data-oli="gulp" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-gulp"/></svg></div></div>
+          <div class="ha-oli" data-when="lido"><div class="ha-zone__oli" data-oli="swim" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-swim"/></svg></div></div>
+          <div class="ha-zone__body" data-when="repouso over">
+            <span class="fo-drop__badge" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg></span>
+            <p class="fo-drop__title"><span data-when="repouso" data-t="a.zone.title">Drop any file here</span><span data-when="over" data-t="a.zone.over">Let go, Oli's ready</span></p>
+            <p class="fo-drop__or" data-t="a.zone.or">or</p>
+            <button type="button" class="fo-btn fo-btn--brand"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span data-t="a.zone.choose">Choose a file</span></button>
+            <input type="file" hidden aria-label="Choose a file" data-t-aria-label="a.zone.choose" accept="image/jpeg,image/png,image/webp,image/heic,.heic,application/pdf,.pdf">
+            <p class="fo-drop__help" data-t="a.zone.help">JPG, PNG, WebP, HEIC or PDF. It never leaves your device.</p>
+          </div>
+          <div class="ha-read" data-when="lido" role="status">
+            <div class="fo-file ha-read__file">
+              <span class="fo-file__thumb ha-read__thumb" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span>
+              <div><p class="fo-file__name">IMG_2041.jpg</p><p class="fo-file__meta"><span data-t="a.read.size">2.6 MB</span><span>JPG</span></p></div>
+            </div>
+            <p class="ha-read__say" data-t="a.read.say">Oli has your JPG. Where should she take it?</p>
+            <a class="fo-btn fo-btn--brand fo-btn--block" href="#"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg><span data-t="t.compress-image">Compress image</span></a>
+            <nav class="fo-next fo-cat--image" aria-label="Other tools for this file" data-t-aria-label="a.read.others">
+              <span class="fo-next__label" data-t="a.read.also">Also:</span>
+              <a class="fo-chip" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="t.resize-image">Resize image</span></a>
+              <a class="fo-chip" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></span><span data-t="t.crop-image">Crop image</span></a>
+              <a class="fo-chip" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13A8 8 0 1 1 17 6.3"/><path d="M19 3v5h-5"/></svg></span><span data-t="t.rotate-image">Rotate image</span></a>
+              <a class="fo-chip fo-cat--pdf" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="t.image-to-pdf">Image to PDF</span></a>
+            </nav>
+            <button type="button" class="fo-btn fo-btn--ghost" data-t="a.read.again">Choose another file</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="fo-section" aria-labelledby="ha-files">
+        <h2 id="ha-files" data-t="a.files">Work on a file</h2>
+        <div class="ha-papers">
+          <div class="ha-paper fo-dogear fo-cat--image">
+            <div class="ha-paper__head">
+              <span class="ha-paper__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span>
+              <h3 class="ha-paper__title" id="ha-p-image" data-t="cat.image">Image</h3>
+              <span class="ha-paper__count" data-t="count.image">8 tools</span>
+            </div>
+            <ul class="ha-tools">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.compress-image">Compress image</span><span class="ha-tool__desc" data-t="d.compress-image">A 2.6 MB phone photo comes out at 717 KB, 72% lighter.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.heic-to-jpg">HEIC to JPG</span><span class="ha-tool__desc" data-t="d.heic-to-jpg">iPhone photos to JPG; in our 10-photo test the JPGs weighed 25% more.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.resize-image">Resize image</span><span class="ha-tool__desc" data-t="d.resize-image">By pixels or %, with ready sizes like 1280 × 720 for YouTube.</span></a></li>
+            </ul>
+            <a class="ha-paper__all" href="#"><span data-t="a.all.image">All 8 image tools</span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+          <div class="ha-paper fo-dogear fo-cat--pdf">
+            <div class="ha-paper__head">
+              <span class="ha-paper__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span>
+              <h3 class="ha-paper__title" id="ha-p-pdf">PDF</h3>
+              <span class="ha-paper__count" data-t="count.pdf">12 tools</span>
+            </div>
+            <ul class="ha-tools">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.merge-pdf">Merge PDF</span><span class="ha-tool__desc" data-t="d.merge-pdf">Many PDFs into 1, in your order; lighter than the parts in 5 of 5 tests.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.compress-pdf">Compress PDF</span><span class="ha-tool__desc" data-t="d.compress-pdf">A PDF of photos went from 2.9 MB to 950 KB, 67% lighter.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.protect-pdf">Protect PDF</span><span class="ha-tool__desc" data-t="d.protect-pdf">A password with AES-256, set without the PDF leaving your device.</span></a></li>
+            </ul>
+            <a class="ha-paper__all" href="#"><span data-t="a.all.pdf">All 12 PDF tools</span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <div class="fo-ad fo-ad--content" data-ad-area="geral" data-when-ads="on"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+
+      <section class="fo-section" aria-labelledby="ha-numbers">
+        <h2 id="ha-numbers" data-t="a.numbers">Work out a number</h2>
+        <div class="ha-papers">
+          <div class="ha-paper fo-dogear fo-cat--money">
+            <div class="ha-paper__head">
+              <span class="ha-paper__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8.5 7.5h7"/><path d="M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" stroke-width="2.6"/></svg></span>
+              <h3 class="ha-paper__title" id="ha-p-money" data-t="cat.money">Money</h3>
+              <span class="ha-paper__count" data-t="count.money">18 calculators</span>
+            </div>
+            <ul class="ha-tools" data-when-lang="en es">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.mortgage-calculator">Mortgage calculator</span><span class="ha-tool__desc" data-t="d.mortgage-calculator">A $375,000 home, 20% down, 6.5%, 30 years: $2,396.20 a month, all in.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.refinance-calculator">Refinance calculator</span><span class="ha-tool__desc" data-t="d.refinance-calculator">In the example, $308 less a month pays the costs back in month 24.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.auto-loan-calculator">Auto loan calculator</span><span class="ha-tool__desc" data-t="d.auto-loan-calculator">$24,400 over 60 months at 7.5%: $488.93 a month.</span></a></li>
+            </ul>
+            <ul class="ha-tools" data-when-lang="pt">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">Simulador SAC × PRICE</span><span class="ha-tool__desc">R$ 400 mil em 360 meses: R$ 284.596 a menos de juros no SAC.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">Financiamento de veículo</span><span class="ha-tool__desc">R$ 60 mil em 48 parcelas: R$ 1.949,32 por mês e CET de 26,57% ao ano.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">Simulador de empréstimo</span><span class="ha-tool__desc">R$ 10 mil em 24 parcelas: R$ 575,90 por mês e CET de 38,79% ao ano.</span></a></li>
+            </ul>
+            <a class="ha-paper__all" href="#"><span data-t="a.all.money">All 18 money calculators</span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+          <div class="ha-paper fo-dogear fo-cat--home" data-when-lang="en">
+            <div class="ha-paper__head">
+              <span class="ha-paper__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8a2 2 0 0 1-2 2h-3.5v-6h-5v6H6a2 2 0 0 1-2-2z"/></svg></span>
+              <h3 class="ha-paper__title" id="ha-p-life">Home and health</h3>
+              <span class="ha-paper__count">11 calculators</span>
+            </div>
+            <ul class="ha-tools">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">Paint calculator</span><span class="ha-tool__desc">2 coats on a 12 × 12 ft room: 1.9 gallons of paint.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">Concrete calculator</span><span class="ha-tool__desc">A 10 × 10 ft slab, 4 in thick: 1.36 cubic yards with 10% extra.</span></a></li>
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name">BMI calculator</span><span class="ha-tool__desc">5 ft 9 in and 160 lb: a BMI of 23.6, in the healthy range.</span></a></li>
+            </ul>
+            <a class="ha-paper__all" href="#"><span>All 6 home calculators</span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+            <a class="ha-paper__all" href="#"><span>All 5 health calculators</span><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+          <div class="ha-paper fo-dogear fo-cat--util">
+            <div class="ha-paper__head">
+              <span class="ha-paper__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><path d="M14 14h2.5v2.5H14zM20 14v.01M17.5 20H20v-3M14 20h.01"/></svg></span>
+              <h3 class="ha-paper__title" id="ha-p-qr" data-t="cat.qr">QR code</h3>
+              <span class="ha-paper__count" data-t="count.qr">1 tool</span>
+            </div>
+            <ul class="ha-tools">
+              <li><a class="ha-tool" href="#"><span class="ha-tool__name" data-t="t.qr">QR code generator</span><span class="ha-tool__desc" data-t="d.qr">Up to 1,273 characters, with Oli in the middle (error correction H).</span></a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="fo-section hx-guides" aria-labelledby="hx-guides-title">
+        <h2 id="hx-guides-title" data-t="g.h2">Guides with what we measured</h2>
+        <ul class="hx-guides__list">
+          <li><a class="hx-guide fo-cat--image" href="#"><span class="hx-guide__kind" data-t="g.kind.image">Image guide</span><span class="hx-guide__title" data-t="g.1.title">How to convert HEIC to JPG on Windows</span><span class="hx-guide__fact" data-t="g.1.fact">10 iPhone photos: 18.8 MB of HEIC became 23.6 MB of JPG.</span></a></li>
+          <li><a class="hx-guide fo-cat--pdf" href="#"><span class="hx-guide__kind" data-t="g.kind.pdf">PDF guide</span><span class="hx-guide__title" data-t="g.2.title">Why is my PDF so large?</span><span class="hx-guide__fact" data-t="g.2.fact">In a 150-page scanned report, the pictures are 79% of the file.</span></a></li>
+          <li><a class="hx-guide fo-cat--image" href="#"><span class="hx-guide__kind" data-t="g.kind.image">Image guide</span><span class="hx-guide__title" data-t="g.3.title">JPG or PNG: which one to use</span><span class="hx-guide__fact" data-t="g.3.fact">The same 3 photos weighed 4 to 5 times more as PNG.</span></a></li>
+          <li><a class="hx-guide fo-cat--pdf" href="#"><span class="hx-guide__kind" data-t="g.kind.pdf">PDF guide</span><span class="hx-guide__title" data-t="g.4.title">How to turn photos into one PDF</span><span class="hx-guide__fact" data-t="g.4.fact">3 photos in 1 PDF: 7.4 MB, or 3.6 MB if you compress them first.</span></a></li>
+        </ul>
+        <p class="fo-more"><a href="#" data-t="g.all">All 15 guides</a></p>
+      </section>
+
+      <div class="fo-ad fo-ad--content fo-mobile-only" data-ad-area="geral" data-when-ads="on"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+
+      <section class="fo-section fo-prose" aria-labelledby="hx-privacy">
+        <h2 id="hx-privacy" data-t="p.h2">Your files stay with you</h2>
+        <p data-t="p.body">FileOrca does the work in your browser. Check it yourself: open your browser's Network tab while you use a tool, and 0 requests carry your file.</p>
+      </section>
+
+      <div class="fo-ad fo-ad--multiplex fo-desktop-only" data-ad-area="geral" data-when-ads="on"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+    </main>
+    <aside class="proto-rail hx-rail" aria-label="Advertisements" data-t-aria-label="proto.ad" data-when-ads="on">
+      <div class="fo-ad fo-ad--rail" data-ad-area="geral"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <div class="fo-ad fo-ad--rail" data-ad-area="geral"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+    </aside>
+  </div>
+  <footer class="fo-footer fo-deep hx-footer">
+    <div class="fo-footer__cols">
+      <div><h2 data-t="cat.image">Image</h2><ul><li><a href="#" data-t="t.compress-image">Compress image</a></li><li><a href="#" data-t="t.heic-to-jpg">HEIC to JPG</a></li></ul></div>
+      <div><h2>PDF</h2><ul><li><a href="#" data-t="t.merge-pdf">Merge PDF</a></li><li><a href="#" data-t="t.compress-pdf">Compress PDF</a></li></ul></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#" data-t="f.about">About</a></li><li><a href="#" data-t="m.guides">Guides</a></li><li><a href="#" data-t="f.privacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="f.coffee">Like these tools? Support them with a coffee</span></a><span data-t="f.sign">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-03 · Alternativa A</p>
+    <h2 id="spec-title">A home que começa pelo arquivo</h2>
+    <p>A primeira tela é o H1 com número e uma zona de soltar qualquer arquivo, com a Oli grande sentada na borda. A pessoa solta (ou escolhe) um JPG, um HEIC ou um PDF, a Oli lê o formato e mostra as ferramentas que abrem aquele arquivo; um toque e a ferramenta já abre com o arquivo dentro. Embaixo, as categorias como papéis com a dobra, cada um com as 3 ferramentas mais usadas e uma descrição com número. Não é a recomendada (a B é): a A põe JS numa página que hoje não tem ilha e quebra a regra "nenhum arquivo JS novo por página". O protótipo mostra os estados <code>repouso</code>, <code>over</code> e <code>lido</code>.</p>
+
+    <h3>O que a torna do FileOrca (decisão 9, § 350)</h3>
+    <p>A imagem que define a alternativa é <strong>a Oli</strong>, na borda da água: a assinatura da DropZone (o achado U-01, "a Oli sentada no canto da zona", e o U-02, "a melhor cena do site", o arquivo em cima) passa da página de ferramenta para a porta de entrada. A segunda imagem é <strong>a dobra</strong>: cada categoria é um papel com o canto dobrado na cor dela. Nenhum concorrente da decisão 3 aceita "qualquer arquivo" na home e diz qual ferramenta o abre; o TinyPNG põe o panda atrás da ferramenta, sem reagir.</p>
+
+    <h3>A Oli</h3>
+    <ul>
+      <li><code>wave</code> em repouso, <code>gulp</code> com o arquivo em cima, <code>swim</code> quando ela leu o arquivo e vai levá-lo (as poses e os papéis do Oli/README; nenhuma pose nova).</li>
+      <li>112 px no celular e 144 px a partir de 768 px, no canto de cima à direita da zona, 104 px (128 px) para fora da borda, olhando para a esquerda, para o H1 e a linha. O H1 fica com a largura inteira; só a linha abaixo dele deixa 116 px para ela.</li>
+      <li>Movimento: a <code>wave</code> sobe uma vez (3 s) e fica; a <code>swim</code> faz 3 ciclos de 1,6 s; a onda do estado <code>over</code> corre 2 vezes. Tudo para antes dos 5 s (WCAG 2.2.2) e nada se mexe com o movimento reduzido.</li>
+      <li><code>aria-hidden</code>; o estado é dito em texto ("Let go, Oli's ready"; "Oli has your JPG. Where should she take it?", num <code>role="status"</code>).</li>
+      <li>Distância até o anúncio: 1.490 px ou mais a 360; 160 px até a lateral a 1280.</li>
+    </ul>
+
+    <h3>O que resolve (o diagnóstico)</h3>
+    <ul>
+      <li>G-01 (<code>home-en-360-claro.jpg</code>, <code>home-pt-360-escuro-primeira.jpg</code>): a Oli deixa de ser um adesivo ao lado do H1 e reage na zona.</li>
+      <li>G-02 (<code>home-en-1280-claro-full.jpg</code>): os 37 cartões viram 5 papéis (4 em pt e es) com 3 ferramentas cada; o <code>&lt;main&gt;</code> a 360 sem anúncio cai de 8.872 para 3.694 px em en (pt 6.530 → 3.296; es 6.562 → 3.270).</li>
+      <li>G-03 (<code>home-en-1280-claro.jpg</code>): toda descrição na home diz um número com fonte (a tabela abaixo).</li>
+      <li>G-06 (<code>home-en-1280-claro.jpg</code>): com anúncio, a lateral com 2 unidades; sem anúncio, o H1 à esquerda e a zona à direita ocupam a largura.</li>
+      <li>G-11 (<code>tool-compress-en-360-claro.jpg</code>): a zona da home usa o ícone <code>file</code> com a dobra, não o <code>upload</code>.</li>
+      <li>G-18: "50 tools. 0 uploads." (29 em pt, 39 em es).</li>
+    </ul>
+
+    <h3>Como o arquivo chega à ferramenta (reusa o "Abrir com" da F8)</h3>
+    <ol>
+      <li>Soltar na zona, ou "Choose a file": o script da home lê os primeiros 64 KB e chama o <code>formatOfBytes</code> de <code>src/share/logic.ts</code> (o sniff dos motores, a mesma regra das ferramentas).</li>
+      <li>As ferramentas que aceitam o formato saem do <code>takes()</code> sobre a lista <code>SHARE_TOOLS</code> (<code>src/share/tools.ts</code>), escrita no HTML como no <code>OpenWithView.astro</code>. A mais usada vira o botão azul; as outras, chips. HEIC: só o "HEIC to JPG" aceita, então só o botão. PDF: as 12 de PDF (com 2 ou mais PDFs, o "Merge PDF" primeiro). Formato que nenhuma abre: a fala de erro da Oli (<code>oops</code>), "Oops, Oli can't open this file. Try a JPG, PNG, WebP, HEIC or PDF.", num <code>role="alert"</code>.</li>
+      <li>No toque, o script grava o arquivo na caixa de entrada que o service worker já usa no compartilhar (o cache <code>INBOX_CACHE</code>, com os cabeçalhos de nome e hora de <code>src/sw/shared.ts</code>) e a escolha no <code>sessionStorage</code> (<code>INBOX_TOOL_KEY</code>, com o <code>deliveryOrder</code>). O link abre a ferramenta, e a ilha dela já pega a caixa (<code>takeInbox</code> de <code>src/tools/image/inbox.ts</code>) e processa no padrão (princípio 1). A caixa é apagada quando lida e expira sozinha.</li>
+      <li>Sem a Cache Storage (navegador antigo, modo privado que a recuse), o link abre a ferramenta vazia e a pessoa solta o arquivo lá: nada quebra.</li>
+    </ol>
+    <p>Toques: no celular, "Choose a file", o arquivo e a ferramenta (3, como hoje, mas a pessoa não precisa saber o nome do formato); no computador, soltar e um clique (2). O arquivo não sai do aparelho: a caixa de entrada é do navegador. A Privacidade passa a citar a caixa também para a home.</p>
+
+    <h3>Marcação</h3>
+    <pre><code>&lt;div class="ha-hero"&gt;
+  &lt;div class="ha-hero__text"&gt;&lt;h1 class="fo-h1 fo-h1--display"&gt;50 tools. &lt;span class="hx-nw"&gt;0 uploads.&lt;/span&gt;&lt;/h1&gt;&lt;p class="fo-lead"&gt;…&lt;/p&gt;&lt;/div&gt;
+  &lt;div class="ha-zone fo-drop" data-state="idle|over|read"&gt;
+    &lt;div class="fo-drop__sea" aria-hidden="true"&gt;&lt;div class="fo-water"&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class="ha-zone__oli" data-oli="wave|gulp|swim" aria-hidden="true"&gt;&lt;svg&gt;&lt;use href="#oli-wave"/&gt;&lt;/svg&gt;&lt;/div&gt;
+    &lt;div class="ha-zone__body"&gt; badge (file) · título · "or" · &lt;button class="fo-btn fo-btn--brand"&gt;Choose a file&lt;/button&gt; · &lt;input type="file" hidden&gt; · ajuda &lt;/div&gt;
+    &lt;div class="ha-read" role="status" hidden&gt; FileCard · fala · &lt;a class="fo-btn fo-btn--brand fo-btn--block"&gt; · &lt;nav class="fo-next"&gt; chips &lt;/nav&gt; · ghost "Choose another file" &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;section class="fo-section"&gt;&lt;h2&gt;Work on a file&lt;/h2&gt;
+  &lt;div class="ha-papers"&gt;&lt;div class="ha-paper fo-dogear fo-cat--image"&gt; círculo · &lt;h3&gt;Image&lt;/h3&gt; · 8 tools · &lt;ul class="ha-tools"&gt; 3 × (nome + descrição) &lt;/ul&gt; · "All 8 image tools" &lt;/div&gt; …&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+
+    <h3>Estados</h3>
+    <table>
+      <thead><tr><th scope="col">Estado (<code>?state=</code>)</th><th scope="col">O que aparece</th></tr></thead>
+      <tbody>
+        <tr><td><code>repouso</code> (padrão)</td><td>A zona tracejada, a água a 12 %, a Oli <code>wave</code>, o "Choose a file".</td></tr>
+        <tr><td><code>over</code></td><td>Borda sólida <code>--brand</code>, água a 38 % com a onda, a Oli <code>gulp</code>, "Let go, Oli's ready".</td></tr>
+        <tr><td><code>lido</code></td><td>O FileCard do arquivo, a fala, o destino mais provável como botão azul e os outros como chips; a Oli <code>swim</code>. O foco vai para o botão azul.</td></tr>
+        <tr><td>erro (não prototipado)</td><td>A OliMessage de erro com a <code>oops</code>, como nas ferramentas.</td></tr>
+        <tr><td><code>?ads=on</code> / <code>?ads=off</code></td><td>Com e sem os anúncios da área <code>geral</code>; sem eles, a 1024 px ou mais, o H1 à esquerda e a zona à direita.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>As descrições com número (o padrão de G-03)</h3>
+    <p>Uma linha, o ganho com algarismo, e o número com fonte: <strong>medido</strong> (fixture, oráculo ou <code>data/guides-measured.json</code>), <strong>exato</strong> (o que a ferramenta faz por especificação) ou <strong>exemplo</strong> (o que a calculadora mostra ao abrir). O mesmo padrão vale nos hubs e nas relacionadas.</p>
+    <table>
+      <thead><tr><th scope="col">Ferramenta</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th><th scope="col">Fonte</th></tr></thead>
+      <tbody>
+        <tr><td>Compress image</td><td lang="en">A 2.6 MB phone photo comes out at 717 KB, 72% lighter.</td><td>Uma foto de celular de 2,6 MB sai com 717 KB, 72% mais leve.</td><td lang="es">Una foto de celular de 2.6 MB queda en 717 KB, un 72 % más ligera.</td><td>medido (diagnóstico F10, destaque 11)</td></tr>
+        <tr><td>HEIC to JPG</td><td lang="en">iPhone photos to JPG; in our 10-photo test the JPGs weighed 25% more.</td><td>Fotos do iPhone para JPG; no nosso teste com 10 fotos, os JPGs pesaram 25% a mais.</td><td lang="es">Fotos del iPhone a JPG; en nuestra prueba con 10 fotos, los JPG pesaron un 25 % más.</td><td>medido (<code>ratioTotal</code> 1,252 do guia HEIC no Windows)</td></tr>
+        <tr><td>Resize image</td><td lang="en">By pixels or %, with ready sizes like 1280 × 720 for YouTube.</td><td>Em pixels ou %, com tamanhos prontos como 1280 × 720 para o YouTube.</td><td lang="es">En píxeles o %, con tamaños listos como 1280 × 720 para YouTube.</td><td>exato (o preset da miniatura do YouTube)</td></tr>
+        <tr><td>Merge PDF</td><td lang="en">Many PDFs into 1, in your order; lighter than the parts in 5 of 5 tests.</td><td>Vários PDFs num só, na sua ordem; mais leve que as partes em 5 de 5 testes.</td><td lang="es">Varios PDF en uno, en tu orden; más ligero que las partes en 5 de 5 pruebas.</td><td>medido (<code>pairs</code> e <code>smaller</code> do guia de juntar no celular)</td></tr>
+        <tr><td>Compress PDF</td><td lang="en">A PDF of photos went from 2.9 MB to 950 KB, 67% lighter.</td><td>Um PDF de fotos foi de 2,9 MB para 950 KB, 67% mais leve.</td><td lang="es">Un PDF de fotos pasó de 2.9 MB a 950 KB, un 67 % más ligero.</td><td>medido (<code>photosRecommended</code> do guia do PDF grande)</td></tr>
+        <tr><td>Protect PDF</td><td lang="en">A password with AES-256, set without the PDF leaving your device.</td><td>Senha com AES-256, posta sem o PDF sair do seu aparelho.</td><td lang="es">Contraseña con AES-256, puesta sin que el PDF salga de tu dispositivo.</td><td>exato</td></tr>
+        <tr><td>Mortgage calculator (en, es)</td><td lang="en">A $375,000 home, 20% down, 6.5%, 30 years: $2,396.20 a month, all in.</td><td>—</td><td lang="es">Casa de $375,000, 20 % de pago inicial, 6.5 %, 30 años: $2,396.20 al mes, todo incluido.</td><td>exemplo (<code>monthlyTotal</code> 239620)</td></tr>
+        <tr><td>Refinance calculator (en, es)</td><td lang="en">In the example, $308 less a month pays the costs back in month 24.</td><td>—</td><td lang="es">En el ejemplo, $308 menos al mes recuperan los costos en el mes 24.</td><td>exemplo (<code>monthlySavings</code> 30814, <code>breakEven</code> 24)</td></tr>
+        <tr><td>Auto loan calculator (en, es)</td><td lang="en">$24,400 over 60 months at 7.5%: $488.93 a month.</td><td>—</td><td lang="es">$24,400 a 60 meses al 7.5 %: $488.93 al mes.</td><td>exemplo (<code>financed</code> 2440000, <code>payment</code> 48893)</td></tr>
+        <tr><td>SAC × PRICE (pt)</td><td>—</td><td>R$ 400 mil em 360 meses: R$ 284.596 a menos de juros no SAC.</td><td>—</td><td>exemplo (<code>br-sac-price.json</code>)</td></tr>
+        <tr><td>Financiamento de veículo (pt)</td><td>—</td><td>R$ 60 mil em 48 parcelas: R$ 1.949,32 por mês e CET de 26,57% ao ano.</td><td>—</td><td>exemplo (<code>payment</code> 194932, <code>cetYear</code> 2657)</td></tr>
+        <tr><td>Empréstimo (pt)</td><td>—</td><td>R$ 10 mil em 24 parcelas: R$ 575,90 por mês e CET de 38,79% ao ano.</td><td>—</td><td>exemplo (<code>payment</code> 57590, <code>cetYear</code> 3879)</td></tr>
+        <tr><td>Paint (en)</td><td lang="en">2 coats on a 12 × 12 ft room: 1.9 gallons of paint.</td><td>—</td><td>—</td><td>exemplo (<code>gallons</code> 190)</td></tr>
+        <tr><td>Concrete (en)</td><td lang="en">A 10 × 10 ft slab, 4 in thick: 1.36 cubic yards with 10% extra.</td><td>—</td><td>—</td><td>exemplo (<code>total.cuyd</code> 136)</td></tr>
+        <tr><td>BMI (en)</td><td lang="en">5 ft 9 in and 160 lb: a BMI of 23.6, in the healthy range.</td><td>—</td><td>—</td><td>exemplo (<code>bmi</code> 236)</td></tr>
+        <tr><td>QR code generator</td><td lang="en">Up to 1,273 characters, with Oli in the middle (error correction H).</td><td>Até 1.273 caracteres, com a Oli no meio (correção de erro H).</td><td lang="es">Hasta 1,273 caracteres, con Oli en el centro (corrección de errores H).</td><td>exato (<code>MAX_BYTES</code> de <code>qr.ts</code>)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Textos da zona</h3>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td>Linha</td><td lang="en">Drop a file and Oli takes it to the tool that opens it. Nothing is uploaded.</td><td>Solte um arquivo e a Oli leva ele até a ferramenta que abre. Nada é enviado.</td><td lang="es">Suelta un archivo y Oli lo lleva a la herramienta que lo abre. No se sube nada.</td></tr>
+        <tr><td>Título</td><td lang="en">Drop any file here</td><td>Solte qualquer arquivo aqui</td><td lang="es">Suelta cualquier archivo aquí</td></tr>
+        <tr><td>Arquivo em cima</td><td lang="en">Let go, Oli's ready</td><td>Pode soltar, a Oli está pronta</td><td lang="es">Suéltalo, Oli está lista</td></tr>
+        <tr><td>Botão</td><td lang="en">Choose a file</td><td>Escolher arquivo</td><td lang="es">Elegir archivo</td></tr>
+        <tr><td>Ajuda</td><td lang="en">JPG, PNG, WebP, HEIC or PDF. It never leaves your device.</td><td>JPG, PNG, WebP, HEIC ou PDF. Ele nunca sai do seu aparelho.</td><td lang="es">JPG, PNG, WebP, HEIC o PDF. Nunca sale de tu dispositivo.</td></tr>
+        <tr><td>Fala (lido)</td><td lang="en">Oli has your JPG. Where should she take it?</td><td>A Oli pegou seu JPG. Para onde ela leva?</td><td lang="es">Oli tiene tu JPG. ¿A dónde lo lleva?</td></tr>
+        <tr><td>Rótulo dos chips · outro arquivo</td><td lang="en">Also: · Choose another file</td><td>Também: · Escolher outro arquivo</td><td lang="es">También: · Elegir otro archivo</td></tr>
+        <tr><td>Seções</td><td lang="en">Work on a file · Work out a number</td><td>Mexa num arquivo · Faça as contas</td><td lang="es">Trabaja con un archivo · Haz las cuentas</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Teclado e nome acessível</h3>
+    <ul>
+      <li>A zona não é botão (controle dentro de controle reprova no axe): o alvo de teclado é o "Choose a file", e soltar é só para o mouse e o toque. No <code>lido</code>, o foco vai para o botão azul; o "Choose another file" volta ao repouso e devolve o foco ao "Choose a file".</li>
+      <li>Os nomes são os textos visíveis; os chips ficam num <code>&lt;nav aria-label="Other tools for this file"&gt;</code>; a Oli, a água e o ícone do arquivo são <code>aria-hidden</code>.</li>
+      <li>Os papéis têm H3 debaixo dos H2 "Work on a file" e "Work out a number": sem pular nível.</li>
+    </ul>
+
+    <h3>Medidas e o mapa de anúncios (área <code>geral</code>)</h3>
+    <ul>
+      <li>Todo controle com 48 px ou mais; a zona com 300 px de altura mínima a 360 e 340 a partir de 768 (a do bundle).</li>
+      <li>Conteúdo: o 1º depois de "Work on a file" (a primeira seção de cards), o 2º depois dos guias, só abaixo de 768 px (o mapa do UX-07: a partir de 768, só o conteúdo 1 e o multiplex; revisão da F10, c-05); multiplex a partir de 768 px, com a altura do carregador; lateral com 2 unidades a partir de 1280 px, 800 px uma da outra.</li>
+      <li>Topo do 1º a 360: 1.734 px (en), 1.820 (pt), 1.820 (es), longe da primeira tela. Entre os dois, a 360: 2.256, 1.772 e 1.716 px (en, pt, es). A partir de 768, do conteúdo 1 ao multiplex: 1.730, 1.444 e 1.422 px a 768; 1.480, 1.400 e 1.400 a 1024; 1.708, 1.444 e 1.422 a 1280. O multiplex tem 486 px de caixa a 768, 540 a 1024 e 498 ao lado da lateral (o <code>ins</code> do carregador mais o rótulo). A lateral começa 150 px abaixo do cabeçalho (159 px dos controles). Medido por <code>.cache/f10/revisao-proto-ads.mjs</code>.</li>
+      <li>Distâncias medidas: anúncio até um papel, 166 px; até um controle, 188 px; até a Oli, 1.490 px ou mais a 360; a lateral fica a 150 px da coluna e a 160 px da Oli a 1280.</li>
+    </ul>
+
+    <h3>Densidade a 360 × 740, altura, JS e requisições</h3>
+    <table>
+      <thead><tr><th scope="col">Idioma</th><th scope="col"><code>&lt;main&gt;</code> com anúncio</th><th scope="col">Caixas</th><th scope="col">Da ficha</th><th scope="col">Conservadora (+100 px)</th><th scope="col"><code>&lt;main&gt;</code> sem anúncio (hoje)</th></tr></thead>
+      <tbody>
+        <tr><td>en</td><td>4.926 px</td><td>2 × 300</td><td>12,2 %</td><td>14,2 %</td><td>3.694 px (8.872)</td></tr>
+        <tr><td>pt</td><td>4.528 px</td><td>2 × 300</td><td>13,3 %</td><td>15,5 %</td><td>3.296 px (6.530)</td></tr>
+        <tr><td>es</td><td>4.502 px</td><td>2 × 300</td><td>13,3 %</td><td>15,5 %</td><td>3.270 px (6.562)</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>Medida em repouso, o estado mais curto (no <code>lido</code> a zona cresce e a densidade cai para 13,5 a 14,7 %). A home não tem grade de relacionadas.</li>
+      <li>Altura total a 360 com anúncio e o rodapé de hoje: uns 6.990 px em en (hoje 10.981); sem anúncio, uns 5.760.</li>
+      <li><strong>JS: um arquivo novo.</strong> Hoje a home tem 0 arquivo JS, 3,1 KB gzip de JS inline e 4 requisições. O script da zona é um módulo do Astro que importa <code>src/share/logic.ts</code>; pelo "Abrir com", que faz o mesmo (1,7 KB gzip, mais o chunk <code>sniff</code> de 3,2 KB), a home passa a uns 8 KB gzip de JS e 6 requisições (2 novas): dentro dos 80 KB e das 8 e 3, mas fora da regra "nenhum arquivo JS novo por página", que pede decisão do Victor. A saída sem arquivo novo é um script inline de uns 2 KB com o sniff copiado, que duplica código testado.</li>
+      <li>CLS: o <code>lido</code> é mais alto que o repouso (uns 240 px a 360) e empurra a página logo depois do gesto; a leitura de 64 KB acaba bem antes dos 500 ms do <code>hadRecentInput</code>, mas a F13 mede, como manda a F4-F7 e-2. LCP: o H1.</li>
+    </ul>
+
+    <h3>Custo e riscos</h3>
+    <ul>
+      <li>Custo G: comportamento novo na home (o script, a caixa de entrada, o foco), teste de Vitest para a escolha da ferramenta e de Playwright para soltar na home e ver a ferramenta abrir com o arquivo, nos dois navegadores, mais a Privacidade nos três idiomas.</li>
+      <li>Duas zonas de soltar no site (a home e a ferramenta) com o mesmo desenho: a pessoa que solta na home ainda escolhe a ferramenta, então a página de ferramenta segue sendo o lugar do resultado.</li>
+      <li>SEO: a home liga a 13 ferramentas (en) e aos hubs, não às 37 de hoje; os hubs seguem ligando a todas.</li>
+      <li>O soltar "em qualquer lugar da página" (lista "para avaliar") não entra: aqui só a zona aceita, e ela fica a 1.490 px ou mais do primeiro anúncio.</li>
+    </ul>
+  </div>
+</section>
+<script>
+var PROTO_T = {
+  pt: {
+    'page.title': 'Home, alternativa A · FileOrca UX v2',
+    'skip': 'Ir para o conteúdo',
+    'home': 'FileOrca, página inicial',
+    'search': 'Buscar ferramentas',
+    'theme': 'Tema: sistema',
+    'lang.code': 'PT',
+    'lang.sr': ' · Idioma: Português',
+    'lang.menu': 'Escolha um idioma',
+    'menu': 'Menu',
+    'menu.label': 'Menu do site',
+    'm.image': 'Ferramentas de imagem',
+    'm.pdf': 'Ferramentas de PDF',
+    'm.money': 'Calculadoras financeiras',
+    'm.qr': 'Gerador de QR code',
+    'm.guides': 'Guias',
+    'm.support': 'Apoie a Oli',
+    'h1': '29 ferramentas. <span class="hx-nw">0 uploads.</span>',
+    'a.lead': 'Solte um arquivo e a Oli leva ele até a ferramenta que abre. Nada é enviado.',
+    'a.zone.title': 'Solte qualquer arquivo aqui',
+    'a.zone.over': 'Pode soltar, a Oli está pronta',
+    'a.zone.or': 'ou',
+    'a.zone.choose': 'Escolher arquivo',
+    'a.zone.help': 'JPG, PNG, WebP, HEIC ou PDF. Ele nunca sai do seu aparelho.',
+    'a.read.size': '2,6 MB',
+    'a.read.say': 'A Oli pegou seu JPG. Para onde ela leva?',
+    'a.read.others': 'Outras ferramentas para este arquivo',
+    'a.read.also': 'Também:',
+    'a.read.again': 'Escolher outro arquivo',
+    'a.files': 'Mexa num arquivo',
+    'a.numbers': 'Faça as contas',
+    'cat.image': 'Imagem',
+    'count.image': '8 ferramentas',
+    't.compress-image': 'Comprimir imagem',
+    'd.compress-image': 'Uma foto de celular de 2,6 MB sai com 717 KB, 72% mais leve.',
+    't.heic-to-jpg': 'HEIC para JPG',
+    'd.heic-to-jpg': 'Fotos do iPhone para JPG; no nosso teste com 10 fotos, os JPGs pesaram 25% a mais.',
+    't.resize-image': 'Redimensionar imagem',
+    'd.resize-image': 'Em pixels ou %, com tamanhos prontos como 1280 × 720 para o YouTube.',
+    't.crop-image': 'Cortar imagem',
+    't.rotate-image': 'Girar imagem',
+    't.image-to-pdf': 'Imagem para PDF',
+    'a.all.image': 'As 8 ferramentas de imagem',
+    'count.pdf': '12 ferramentas',
+    't.merge-pdf': 'Juntar PDF',
+    'd.merge-pdf': 'Vários PDFs num só, na sua ordem; mais leve que as partes em 5 de 5 testes.',
+    't.compress-pdf': 'Comprimir PDF',
+    'd.compress-pdf': 'Um PDF de fotos foi de 2,9 MB para 950 KB, 67% mais leve.',
+    't.protect-pdf': 'Proteger PDF',
+    'd.protect-pdf': 'Senha com AES-256, posta sem o PDF sair do seu aparelho.',
+    'a.all.pdf': 'As 12 ferramentas de PDF',
+    'cat.money': 'Dinheiro',
+    'count.money': '8 calculadoras',
+    'a.all.money': 'As 8 calculadoras financeiras',
+    'cat.qr': 'QR code',
+    'count.qr': '1 ferramenta',
+    't.qr': 'Gerador de QR code',
+    'd.qr': 'Até 1.273 caracteres, com a Oli no meio (correção de erro H).',
+    'g.h2': 'Guias com o que a gente mediu',
+    'g.kind.image': 'Guia de imagem',
+    'g.kind.pdf': 'Guia de PDF',
+    'g.1.title': 'Como converter HEIC para JPG no Windows',
+    'g.1.fact': '10 fotos do iPhone: 18,8 MB de HEIC viraram 23,6 MB de JPG.',
+    'g.2.title': 'Por que meu PDF está tão grande?',
+    'g.2.fact': 'Num relatório escaneado de 150 páginas, as imagens são 79% do arquivo.',
+    'g.3.title': 'JPG ou PNG: qual usar',
+    'g.3.fact': 'As mesmas 3 fotos pesaram de 4 a 5 vezes mais em PNG.',
+    'g.4.title': 'Como transformar fotos em um único PDF',
+    'g.4.fact': '3 fotos num PDF: 7,4 MB, ou 3,6 MB se você comprimir antes.',
+    'g.all': 'Os 10 guias',
+    'p.h2': 'Seus arquivos ficam com você',
+    'p.body': 'O FileOrca faz o trabalho no navegador. Confira você mesmo: abra a aba Rede do navegador enquanto usa uma ferramenta, e 0 requisições levam o seu arquivo.',
+    'f.about': 'Sobre',
+    'f.privacy': 'Privacidade',
+    'f.coffee': 'Curtiu? Me paga um café',
+    'f.sign': 'Feito por Victor Yuki Matusita em Curitiba · © 2026'
+  },
+  es: {
+    'page.title': 'Inicio, alternativa A · FileOrca UX v2',
+    'skip': 'Saltar al contenido',
+    'home': 'FileOrca, página de inicio',
+    'search': 'Buscar herramientas',
+    'theme': 'Tema: sistema',
+    'lang.code': 'ES',
+    'lang.sr': ' · Idioma: Español',
+    'lang.menu': 'Elige un idioma',
+    'menu': 'Menú',
+    'menu.label': 'Menú del sitio',
+    'm.image': 'Herramientas de imagen',
+    'm.pdf': 'Herramientas PDF',
+    'm.money': 'Calculadoras financieras',
+    'm.qr': 'Generador de códigos QR',
+    'm.guides': 'Guías',
+    'm.support': 'Apoya a Oli',
+    'h1': '39 herramientas. <span class="hx-nw">0 subidas.</span>',
+    'a.lead': 'Suelta un archivo y Oli lo lleva a la herramienta que lo abre. No se sube nada.',
+    'a.zone.title': 'Suelta cualquier archivo aquí',
+    'a.zone.over': 'Suéltalo, Oli está lista',
+    'a.zone.or': 'o',
+    'a.zone.choose': 'Elegir archivo',
+    'a.zone.help': 'JPG, PNG, WebP, HEIC o PDF. Nunca sale de tu dispositivo.',
+    'a.read.size': '2.6 MB',
+    'a.read.say': 'Oli tiene tu JPG. ¿A dónde lo lleva?',
+    'a.read.others': 'Otras herramientas para este archivo',
+    'a.read.also': 'También:',
+    'a.read.again': 'Elegir otro archivo',
+    'a.files': 'Trabaja con un archivo',
+    'a.numbers': 'Haz las cuentas',
+    'cat.image': 'Imagen',
+    'count.image': '8 herramientas',
+    't.compress-image': 'Comprimir imagen',
+    'd.compress-image': 'Una foto de celular de 2.6 MB queda en 717 KB, un 72 % más ligera.',
+    't.heic-to-jpg': 'HEIC a JPG',
+    'd.heic-to-jpg': 'Fotos del iPhone a JPG; en nuestra prueba con 10 fotos, los JPG pesaron un 25 % más.',
+    't.resize-image': 'Redimensionar imagen',
+    'd.resize-image': 'En píxeles o %, con tamaños listos como 1280 × 720 para YouTube.',
+    't.crop-image': 'Recortar imagen',
+    't.rotate-image': 'Rotar imagen',
+    't.image-to-pdf': 'Imagen a PDF',
+    'a.all.image': 'Las 8 herramientas de imagen',
+    'count.pdf': '12 herramientas',
+    't.merge-pdf': 'Unir PDF',
+    'd.merge-pdf': 'Varios PDF en uno, en tu orden; más ligero que las partes en 5 de 5 pruebas.',
+    't.compress-pdf': 'Comprimir PDF',
+    'd.compress-pdf': 'Un PDF de fotos pasó de 2.9 MB a 950 KB, un 67 % más ligero.',
+    't.protect-pdf': 'Proteger PDF',
+    'd.protect-pdf': 'Contraseña con AES-256, puesta sin que el PDF salga de tu dispositivo.',
+    'a.all.pdf': 'Las 12 herramientas PDF',
+    'cat.money': 'Dinero',
+    'count.money': '18 calculadoras',
+    't.mortgage-calculator': 'Calculadora de hipoteca',
+    'd.mortgage-calculator': 'Casa de $375,000, 20 % de pago inicial, 6.5 %, 30 años: $2,396.20 al mes, todo incluido.',
+    't.refinance-calculator': 'Calculadora de refinanciamiento',
+    'd.refinance-calculator': 'En el ejemplo, $308 menos al mes recuperan los costos en el mes 24.',
+    't.auto-loan-calculator': 'Calculadora de préstamo para auto',
+    'd.auto-loan-calculator': '$24,400 a 60 meses al 7.5 %: $488.93 al mes.',
+    'a.all.money': 'Las 18 calculadoras financieras',
+    'cat.qr': 'Código QR',
+    'count.qr': '1 herramienta',
+    't.qr': 'Generador de códigos QR',
+    'd.qr': 'Hasta 1,273 caracteres, con Oli en el centro (corrección de errores H).',
+    'g.h2': 'Guías con lo que medimos',
+    'g.kind.image': 'Guía de imagen',
+    'g.kind.pdf': 'Guía de PDF',
+    'g.1.title': 'Cómo convertir HEIC a JPG en Windows',
+    'g.1.fact': '10 fotos del iPhone: 18.8 MB de HEIC pasaron a 23.6 MB de JPG.',
+    'g.2.title': '¿Por qué mi PDF pesa tanto?',
+    'g.2.fact': 'En un informe escaneado de 150 páginas, las imágenes son el 79 % del archivo.',
+    'g.3.title': 'JPG o PNG: cuál usar',
+    'g.3.fact': 'Las mismas 3 fotos pesaron de 4 a 5 veces más en PNG.',
+    'g.4.title': 'Cómo convertir fotos en un solo PDF',
+    'g.4.fact': '3 fotos en un PDF: 7.4 MB, o 3.6 MB si las comprimes antes.',
+    'g.all': 'Las 15 guías',
+    'p.h2': 'Tus archivos se quedan contigo',
+    'p.body': 'FileOrca hace el trabajo en tu navegador. Compruébalo tú mismo: abre la pestaña Red del navegador mientras usas una herramienta, y 0 solicitudes llevan tu archivo.',
+    'f.about': 'Acerca de',
+    'f.privacy': 'Privacidad',
+    'f.coffee': '¿Te gustan estas herramientas? Invítame un café',
+    'f.sign': 'Hecho por Victor Yuki Matusita en Curitiba · © 2026'
+  }
+};
+</script>
+</body>
+</html>

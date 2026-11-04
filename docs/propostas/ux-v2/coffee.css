@@ -1,0 +1,166 @@
+/* FileOrca UX v2 (F10), UX-05: the coffee ask (the line in the ResultCard, the footer row, the menu item) and the
+   support page. Loaded after proto.css by coffee.html and support.html. Colours: only var(--token); no new token.
+   Sections:
+     1. site parity the two pages need (ResultCard, footer, options, chips) where bundle.css differs from the site
+     2. alternative A: the coffee line inside the ResultCard, on the deep sea (recommended)
+     3. the state after "Don't show this again"
+     4. alternative B: the folded note right below the ResultCard
+     5. the footer row (proposal: the coffee moves from the base to the top of the footer)
+     6. the header menu (a sketch: UX-01 draws the real one) and its "Support Oli" item
+     7. prototype annotations: the distance rulers and the drawing of the AdSense anchor (not part of the site)
+     8. the support page: the head row with the Oli on the right, the steam that stops, the Pix */
+
+/* ---------- 1. Site parity (src/styles/components.css) ---------- */
+.fo-result { padding: var(--space-5); gap: var(--space-4); align-content: center; }
+.fo-result__head { min-height: 72px; }
+.fo-result__says { flex: 1 1 0; min-width: 0; font-size: 18px; line-height: 24px; }
+.fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
+.fo-result__actions .fo-btn--download { display: flex; width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
+.fo-placard { margin-left: auto; }
+@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
+.fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+@media (min-width: 768px) {
+  .fo-result { padding: var(--space-6); gap: var(--space-5); }
+  .fo-result__head { min-height: 96px; }
+  .fo-result__says { font-size: 20px; line-height: 26px; }
+  .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-items: start; }
+  .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+.fo-seal { justify-self: start; }
+.fo-field { display: grid; gap: var(--space-2); border: 0; padding: 0; margin: 0; min-width: 0; }
+.fo-field__label { font: 600 15px/20px var(--font-text); padding: 0; margin-bottom: var(--space-2); }
+.fo-field__help { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-footer { margin-top: var(--space-16); }
+.fo-footer__cols, .fo-footer__base { max-width: var(--page-max); margin-inline: auto; }
+.fo-footer__base { margin-top: var(--space-8); }
+.fo-footer__coffee .fo-icon { width: 20px; height: 20px; }
+
+/* ---------- 2. Alternative A: the line inside the ResultCard (§ 49; the site's .fo-result__support) ---------- */
+/* After the Download, the Start over and the notes: never before the Download, never in its place. Neutral button,
+   never sun. The hairline is the same one the site draws today. */
+.fo-result__support { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
+.fo-result__support p { margin: 0; }
+.fo-result__support-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+/* bundle.css styles every link of the line as an underlined on-deep text link; the button keeps its own ink. */
+.fo-result__support a.fo-btn { margin-bottom: var(--lip); color: var(--_ink); font-weight: 700; text-decoration: none; }
+.fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; min-height: var(--tap-min); }
+
+/* ---------- 3. After "Don't show this again": one quiet sentence in the same place (role="status") ---------- */
+.fo-result__support--done { padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
+
+/* ---------- 4. Alternative B: a folded note right below the ResultCard (the dog-ear, on paper) ---------- */
+/* Outside the sea, so the ResultCard keeps the size of the DropZone. The flap is brand (the fin tip of the Oli). */
+.coffee-note { --fo-ground: var(--bg); box-sizing: border-box; display: grid; gap: var(--space-3); padding: var(--space-5); padding-right: calc(var(--dogear) + var(--space-5)); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); font-size: 15px; line-height: 22px; }
+.coffee-note p { margin: 0; }
+.coffee-note__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.coffee-note .fo-btn { margin-bottom: var(--lip); }
+.coffee-note .fo-btn--ghost { margin-bottom: 0; font-weight: 600; min-height: var(--tap-min); }
+@media (min-width: 768px) { .coffee-note { padding: var(--space-6); padding-right: calc(var(--dogear) + var(--space-6)); } }
+
+/* ---------- 5. The footer row: the coffee opens the footer, far from the anchor at the bottom ---------- */
+.coffee-foot { max-width: var(--page-max); margin: 0 auto var(--space-6); padding-bottom: var(--space-4); border-bottom: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); }
+.fo-footer .coffee-foot a { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); color: var(--on-deep); font-size: 16px; line-height: 22px; font-weight: 700; }
+.fo-footer .coffee-foot a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.coffee-foot .fo-icon { width: 24px; height: 24px; flex: none; }
+
+/* ---------- 6. Header menu (sketch; UX-01 owns the real one) ---------- */
+/* The button sits left of the logo, so the popover opens over the column and keeps away from the rail ad (150 px). */
+.coffee-menu-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1); min-width: var(--tap-min); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font: 700 15px/20px var(--font-text); cursor: pointer; }
+.coffee-menu-btn .fo-icon { width: 16px; height: 16px; }
+.coffee-menu { position: fixed; inset: auto; top: 64px; left: var(--space-4); width: min(296px, calc(100vw - 2 * var(--space-4))); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
+@supports (position-anchor: --coffee-menu) {
+  .coffee-menu-btn { anchor-name: --coffee-menu; }
+  .coffee-menu { position-anchor: --coffee-menu; top: calc(anchor(bottom) + var(--space-1)); left: anchor(left); }
+}
+.coffee-menu ul { display: grid; gap: 2px; }
+.coffee-menu a { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-sm); color: var(--ink); font-weight: 600; }
+.coffee-menu a:hover { background: var(--brand-soft); }
+.coffee-menu a[aria-current] { background: var(--brand-soft); }
+.coffee-menu__support { margin-top: var(--space-1); padding-top: var(--space-1); border-top: var(--stroke-hair) solid var(--hairline); }
+.coffee-menu__support .fo-icon { width: 20px; height: 20px; flex: none; }
+.coffee-menu-btn, .fo-header__search, .fo-header__lang { flex: none; }
+.coffee-menu-btn .fo-desktop-only { display: inline-flex; }
+@media (max-width: 767px) {
+  .fo-header { padding-inline: var(--space-3); }
+  .coffee-menu-btn { padding: 0 var(--space-3); }
+  .coffee-menu-btn .fo-desktop-only { display: none !important; }
+  .fo-header__logo { min-width: 0; }
+}
+
+/* ---------- 7. Prototype annotations (aria-hidden; nothing here goes to the site) ---------- */
+.proto-ruler { position: absolute; z-index: 4; width: 0; border-left: var(--stroke-2) dashed var(--success); pointer-events: none; }
+.proto-ruler::before, .proto-ruler::after { content: ""; position: absolute; left: -9px; width: 16px; border-top: var(--stroke-2) solid var(--success); }
+.proto-ruler::before { top: 0; }
+.proto-ruler::after { bottom: 0; }
+.proto-ruler > span { position: absolute; bottom: var(--space-12); right: var(--space-2); padding: 2px var(--space-2); border: var(--stroke-2) solid var(--success); border-radius: var(--radius-xs); background: var(--surface); color: var(--ink); font: 600 12px/16px var(--font-text); letter-spacing: 0.04em; white-space: nowrap; }
+.proto-ruler:not([style]) { display: none; }
+/* From 1280 px the rail ad sits beside the column: a horizontal ruler measures the coffee ask to it. */
+.proto-ruler--h { height: 0; border-left: 0; border-top: var(--stroke-2) dashed var(--success); }
+.proto-ruler--h::before, .proto-ruler--h::after { top: -9px; bottom: auto; left: auto; width: 0; height: 16px; border-top: 0; border-left: var(--stroke-2) solid var(--success); }
+.proto-ruler--h::before { left: 0; }
+.proto-ruler--h::after { right: 0; }
+.proto-ruler--h > span { bottom: var(--space-2); right: auto; left: 50%; translate: -50% 0; }
+/* The AdSense anchor, drawn where it rests when the page is scrolled to the end (state footer only). On the site it is
+   position: fixed and belongs to Google; the footer keeps the room under it (components.css:458-466). */
+.proto-anchor { position: absolute; left: 0; right: 0; bottom: 0; height: 100px; margin: 0; border-radius: 0; }
+.proto-anchor__note { color: var(--ink-muted); font: 500 12px/16px var(--font-text); }
+html[data-state="footer"] .fo-footer { padding-bottom: calc(var(--space-6) + 100px); }
+
+/* ---------- 8. The support page ---------- */
+/* The Oli goes to the right of the title, in both sizes, so she looks left at the text (today, from 768 px, she sits
+   in the left column and looks out of the card). */
+.fo-support { display: block; max-width: var(--tool-max); padding: var(--space-5); color: var(--ink); }
+.coffee-support__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.coffee-support__head h1 { flex: 1 1 0; min-width: 0; margin: 0; font: 600 28px/34px var(--font-display); }
+.fo-support__oli { width: 96px; height: 96px; }
+.fo-support p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
+.fo-support { min-width: 0; }
+.fo-support > .fo-btn { margin: 0 0 var(--space-3); max-width: 100%; white-space: normal; text-align: center; }
+.fo-support .fo-support__amounts { margin: 0; font-size: 15px; line-height: 22px; }
+@media (min-width: 768px) {
+  .fo-support { padding: var(--space-6); }
+  .coffee-support__head { gap: var(--space-6); }
+  .coffee-support__head h1 { font-size: 36px; line-height: 42px; letter-spacing: -0.01em; }
+  .fo-support__oli { width: 128px; height: 128px; }
+}
+/* The steam of the mug stops by itself: two rises, then it settles, visible, at 4.8 s (WCAG 2.2.2, under 5 s; F3 d-02).
+   Today: fo-steam 1800 ms, infinite. With reduced motion, proto.css (and global.css on the site) stops everything. */
+.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
+.oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
+@keyframes fo-steam-rest { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+html.proto-replay .oli-steam path { animation: none; }
+
+/* The Pix (pt only). The amount is CSS only: the block of the checked radio shows (:has). */
+.fo-pix-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0 0 var(--space-6); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--hairline); min-width: 0; }
+.fo-pix-card h2 { margin: 0; font: 700 18px/24px var(--font-text); color: var(--ink); }
+.fo-pix-card .fo-seg__opt { padding: 0 var(--space-2); white-space: nowrap; min-height: var(--tap-min); }
+@media (max-width: 389px) { .fo-pix-card .fo-seg__opt { padding: 0 var(--space-1); } .fo-pix-card .fo-seg__opt:first-child { white-space: normal; } }
+.fo-pix { display: none; gap: var(--space-4); align-items: start; min-width: 0; }
+.fo-pix-card:has(input[value="any"]:checked) .fo-pix[data-pix="any"],
+.fo-pix-card:has(input[value="5"]:checked) .fo-pix[data-pix="5"],
+.fo-pix-card:has(input[value="10"]:checked) .fo-pix[data-pix="10"],
+.fo-pix-card:has(input[value="20"]:checked) .fo-pix[data-pix="20"] { display: grid; }
+/* Phone: the code and the Copy button first (the phone that reads the page cannot scan its own screen), the QR after.
+   From 768 px: the QR first, larger (160 px), for the phone of the person in front of the computer. */
+.fo-pix { grid-template-columns: minmax(0, 1fr); }
+.fo-pix__side { order: -1; display: grid; gap: var(--space-2); min-width: 0; justify-items: start; }
+@media (min-width: 768px) {
+  .fo-pix { grid-template-columns: 160px minmax(0, 1fr); align-items: center; }
+  .fo-pix__side { order: 0; }
+}
+.fo-pix__label { margin: 0; font: 600 14px/20px var(--font-text); color: var(--ink-muted); }
+.fo-pix__code { display: flex; width: 100%; min-width: 0; }
+.fo-pix__code code { flex: 1; width: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 13px/20px ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; color: var(--ink-muted); }
+/* "Copiar código": a plain .fo-btn (52 px), no longer .fo-btn--sm (40 px, "only on the computer"; F5a D-12). */
+.fo-pix__side .fo-btn { margin: 0 0 var(--lip); max-width: 100%; white-space: normal; }
+.fo-pix__receiver { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.fo-pix__status { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink); }
+.fo-pix__status:empty { display: none; }
+/* The QR of the prototype is an EXAMPLE that does not scan: the light square in on-deep and the modules in deep, the
+   same in both themes (the site draws the real one on pure white, the one literal colour the design system allows
+   for it, which the prototypes cannot use). */
+.coffee-qr { position: relative; width: 112px; height: 112px; }
+@media (min-width: 768px) { .coffee-qr { width: 160px; height: 160px; } }
+.coffee-qr svg { display: block; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-sm); background: var(--on-deep); color: var(--deep); }
+.coffee-qr__tag { position: absolute; left: 50%; top: 50%; translate: -50% -50%; padding: 2px var(--space-2); border-radius: var(--radius-xs); background: var(--deep); color: var(--on-deep); font: 700 11px/14px var(--font-text); letter-spacing: 0.06em; text-transform: uppercase; text-align: center; white-space: nowrap; }
+.coffee-tag { display: inline-block; margin-left: var(--space-1); padding: 0 6px; border-radius: var(--radius-xs); background: var(--brand-soft); color: var(--ink); font: 700 11px/18px var(--font-text); letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; }

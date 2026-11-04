@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en" data-card="a" data-proto-card="a b" data-ads="on" data-proto-ads="on off" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UX-02 · Guides hub · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?ads=off;?card=b;?lang=pt;?lang=es;?lang=pt&ads=off;?lang=pt&card=b;?lang=es&card=b&ads=off">
+<meta name="proto-shots" content=";?ads=off;?card=b;?lang=pt">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-card="a"] [data-when-card]:not([data-when-card~="a"]),
+html[data-card="b"] [data-when-card]:not([data-when-card~="b"]),
+html[data-ads="on"] [data-when-ads]:not([data-when-ads~="on"]),
+html[data-ads="off"] [data-when-ads]:not([data-when-ads~="off"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="guides.css">
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-card">
+      <span class="proto-control__label" id="proto-control-card">Card</span>
+      <a href="?card=a" aria-current="true">Card A (recommended)</a>
+      <a href="?card=b">By tool (B)</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-ads">
+      <span class="proto-control__label" id="proto-control-ads">Ads</span>
+      <a href="?ads=on" aria-current="true">With ads (F12)</a>
+      <a href="?ads=off">No ads (F11)</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
+  </div>
+</nav>
+<div class="proto-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#/" aria-label="FileOrca home" data-t-aria-label="home" data-t-href="href.home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="fo-header__lang" popovertarget="gh-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="lang.code">EN</span><span class="fo-sr" data-t="lang.sr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="gh-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="lang.menu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame proto-frame--rail">
+    <main id="main" class="proto-main">
+      <nav aria-label="Breadcrumb" data-t-aria-label="crumbs">
+        <ol class="fo-crumbs">
+          <li><a class="fo-crumbs__link" href="#/" data-t="crumb.home" data-t-href="href.home">Home</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li><span aria-current="page" data-t="crumb.here">Guides</span></li>
+        </ol>
+      </nav>
+      <div class="fo-hubband fo-cat--guide">
+        <span class="fo-eyebrow" data-t="eyebrow">Guides</span>
+        <h1 class="fo-h1 fo-h1--display" data-t="h1">Answers that show the numbers</h1>
+        <p class="fo-muted" data-t="lead">15 guides to common questions about images, PDFs and loans. Each one says where its numbers come from and has the tool inside, so you can try it on the same page.</p>
+      </div>
+      <nav class="fo-jump" aria-label="Guide groups" data-t-aria-label="jump">
+        <ul>
+          <li><a class="fo-chip fo-cat--image" href="#image" data-tap><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span><span data-t="chip.image">Image</span></a></li>
+          <li><a class="fo-chip fo-cat--pdf" href="#pdf" data-tap><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="chip.pdf">PDF</span></a></li>
+          <li><a class="fo-chip fo-cat--money" href="#money" data-tap><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8.5 7.5h7"/><path d="M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01" stroke-width="2.6"/></svg></span><span data-t="chip.money">Money</span></a></li>
+        </ul>
+      </nav>
+
+      <section class="fo-section" id="image" aria-labelledby="image-title">
+        <h2 id="image-title" data-t="g.image">Image guides</h2>
+        <ul class="fo-guidecards" data-when-card="a">
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/heic-to-jpg-on-windows/" data-t-href="h.heic">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.heic">How to convert HEIC to JPG on Windows</h3>
+            <p class="fo-guidecard__desc" data-t="d.heic">Why Windows asks for an extension, and what happens to size and location when a photo becomes a JPG.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 10 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--image" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.heic">HEIC to JPG</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/social-media-image-sizes/" data-t-href="h.social">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.social">Social media image sizes</h3>
+            <p class="fo-guidecard__desc" data-t="d.social">The sizes each network publishes, and what a photo looks like when it is resized to them.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 3 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--image" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.resize">Resize image</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/open-webp-save-as-jpg/" data-t-href="h.webp">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.webp">How to open WebP images and save them as JPG</h3>
+            <p class="fo-guidecard__desc" data-t="d.webp">What a WebP is, where it opens, and what changes when it becomes a JPG.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--image" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.webp">WebP to JPG</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/jpg-vs-png/" data-t-href="h.jvp">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.jvp">JPG or PNG: which one to use</h3>
+            <p class="fo-guidecard__desc" data-t="d.jvp">When each format wins, measured on the same photos in both.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 4 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--image" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.png">PNG to JPG</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/remove-location-from-photos/" data-t-href="h.loc">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.loc">How to remove location data from photos</h3>
+            <p class="fo-guidecard__desc" data-t="d.loc">Where a photo keeps its location, and the way to strip it that changes no pixel.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 13 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--image" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.resize">Resize image</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--image" href="#/guides/photos-to-one-pdf/" data-t-href="h.photos">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.photos">How to turn photos into one PDF</h3>
+            <p class="fo-guidecard__desc" data-t="d.photos">One PDF from a few photos, and what compressing the photos first does to its size.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 3 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--pdf" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.i2p">Image to PDF</span></span></span>
+          </a></li>
+        </ul>
+        <ul class="fo-bytool" data-when-card="b">
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--image" href="#/heic-to-jpg/" data-t-href="ht.heic"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span data-t="t.heic">HEIC to JPG</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/heic-to-jpg-on-windows/" data-t-href="h.heic"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.heic">How to convert HEIC to JPG on Windows</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 10 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--image" href="#/resize-image/" data-t-href="ht.resize"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="t.resize">Resize image</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/social-media-image-sizes/" data-t-href="h.social"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.social">Social media image sizes</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 3 <span data-t="files">test files</span></span></a></li>
+              <li><a class="fo-bytool__guide" href="#/guides/remove-location-from-photos/" data-t-href="h.loc"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.loc">How to remove location data from photos</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 13 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--image" href="#/webp-to-jpg/" data-t-href="ht.webp"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span data-t="t.webp">WebP to JPG</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/open-webp-save-as-jpg/" data-t-href="h.webp"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.webp">How to open WebP images and save them as JPG</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--image" href="#/png-to-jpg/" data-t-href="ht.png"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span data-t="t.png">PNG to JPG</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/jpg-vs-png/" data-t-href="h.jvp"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.jvp">JPG or PNG: which one to use</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 4 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--pdf" href="#/image-to-pdf/" data-t-href="ht.i2p"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="t.i2p">Image to PDF</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/photos-to-one-pdf/" data-t-href="h.photos"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.photos">How to turn photos into one PDF</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 3 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+      <div class="fo-ad fo-ad--content" data-ad-area="geral" data-when-ads="on" data-ad-slot-proto="1"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+
+      <section class="fo-section" id="pdf" aria-labelledby="pdf-title">
+        <h2 id="pdf-title" data-t="g.pdf">PDF guides</h2>
+        <ul class="fo-guidecards" data-when-card="a">
+          <li><a class="fo-guidecard fo-dogear fo-cat--pdf" href="#/guides/why-is-my-pdf-so-large/" data-t-href="h.why">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.why">Why is my PDF so large?</h3>
+            <p class="fo-guidecard__desc" data-t="d.why">What takes the space in a PDF, and what each mode of Compress PDF does to it.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 10 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--pdf" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.cpdf">Compress PDF</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--pdf" href="#/guides/pdf-to-jpg-resolution/" data-t-href="h.res">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.res">Which resolution to choose for PDF to JPG</h3>
+            <p class="fo-guidecard__desc" data-t="d.res">What a higher resolution adds to the pixels and to the file, page by page.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--pdf" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.p2j">PDF to JPG</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--pdf" href="#/guides/split-pdf-file-size/" data-t-href="h.split">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.split">How to split a PDF, and why the parts can weigh more</h3>
+            <p class="fo-guidecard__desc" data-t="d.split">Why the parts of a PDF can add up to more than the whole, and when they do not.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--pdf" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7c0-3.5-6-3.5-6-7V3"/><path d="M12 14c0-3.5 6-3.5 6-7V3"/><path d="m3.5 5.5 2.5-2.5 2.5 2.5"/><path d="m15.5 5.5 2.5-2.5 2.5 2.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.spdf">Split PDF</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--pdf" href="#/guides/combine-pdfs-on-phone/" data-t-href="h.combine">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.combine">How to combine PDFs on a phone</h3>
+            <p class="fo-guidecard__desc" data-t="d.combine">The ways to put PDFs together on an iPhone or an Android phone, and the size you get.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span><span data-t="measured.cap">Measured on</span> 7 <span data-t="files">test files</span></span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--pdf" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v4c0 3.5 6 3.5 6 7v7"/><path d="M18 3v4c0 3.5-6 3.5-6 7"/><path d="m8.5 17.5 3.5 3.5 3.5-3.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.mpdf">Merge PDF</span></span></span>
+          </a></li>
+        </ul>
+        <ul class="fo-bytool" data-when-card="b">
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--pdf" href="#/compress-pdf/" data-t-href="ht.cpdf"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></span><span data-t="t.cpdf">Compress PDF</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/why-is-my-pdf-so-large/" data-t-href="h.why"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.why">Why is my PDF so large?</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 10 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--pdf" href="#/pdf-to-jpg/" data-t-href="ht.p2j"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span><span data-t="t.p2j">PDF to JPG</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/pdf-to-jpg-resolution/" data-t-href="h.res"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.res">Which resolution to choose for PDF to JPG</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--pdf" href="#/split-pdf/" data-t-href="ht.spdf"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7c0-3.5-6-3.5-6-7V3"/><path d="M12 14c0-3.5 6-3.5 6-7V3"/><path d="m3.5 5.5 2.5-2.5 2.5 2.5"/><path d="m15.5 5.5 2.5-2.5 2.5 2.5"/></svg></span><span data-t="t.spdf">Split PDF</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/split-pdf-file-size/" data-t-href="h.split"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.split">How to split a PDF, and why the parts can weigh more</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 5 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--pdf" href="#/merge-pdf/" data-t-href="ht.mpdf"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v4c0 3.5 6 3.5 6 7v7"/><path d="M18 3v4c0 3.5-6 3.5-6 7"/><path d="m8.5 17.5 3.5 3.5 3.5-3.5"/></svg></span><span data-t="t.mpdf">Merge PDF</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/combine-pdfs-on-phone/" data-t-href="h.combine"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.combine">How to combine PDFs on a phone</span><span class="fo-bytool__meta"><span data-t="measured.cap">Measured on</span> 7 <span data-t="files">test files</span></span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+      <div class="fo-ad fo-ad--content fo-mobile-only" data-ad-area="geral" data-when-ads="on" data-when-card="a" data-ad-slot-proto="2"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+
+      <section class="fo-section" id="money" aria-labelledby="money-title">
+        <h2 id="money-title" data-t="g.money">Money guides</h2>
+        <p class="fo-section__note" data-when-lang="pt">Os guias de dinheiro falam de hipoteca e de crédito nos Estados Unidos, por isso existem só em inglês e em espanhol. Para as contas do Brasil, como SAC ou PRICE, use as <a href="#/pt/calculadoras-financeiras/">calculadoras financeiras</a>.</p>
+        <ul class="fo-guidecards" data-when-card="a" data-when-lang="en es">
+          <li><a class="fo-guidecard fo-dogear fo-cat--money" href="#/guides/15-vs-30-year-mortgage/" data-t-href="h.m15">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.m15">15-year vs 30-year mortgage: the real cost</h3>
+            <p class="fo-guidecard__desc" data-t="d.m15">What the shorter term costs a month and saves in interest, rate by rate.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span data-t="worked.cap">Numbers worked out</span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--money" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7c0-3.5-6-3.5-6-7V3"/><path d="M12 14c0-3.5 6-3.5 6-7V3"/><path d="m3.5 5.5 2.5-2.5 2.5 2.5"/><path d="m15.5 5.5 2.5-2.5 2.5 2.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.m15">15-year vs 30-year mortgage</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--money" href="#/guides/debt-snowball-vs-avalanche/" data-t-href="h.snow">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.snow">Snowball vs avalanche, with numbers</h3>
+            <p class="fo-guidecard__desc" data-t="d.snow">The two ways to pay off debts, run on the same four debts.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span data-t="worked.cap">Numbers worked out</span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--money" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.debt">Debt payoff calculator</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--money" href="#/guides/extra-mortgage-payments/" data-t-href="h.extra">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.extra">How extra payments shorten a mortgage</h3>
+            <p class="fo-guidecard__desc" data-t="d.extra">What a little more each month does to the term and the interest.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span data-t="worked.cap">Numbers worked out</span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--money" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8a2 2 0 0 1-2 2h-3.5v-6h-5v6H6a2 2 0 0 1-2-2z"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.extra">Mortgage with extra payments</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--money" href="#/guides/refinance-break-even/" data-t-href="h.refi">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.refi">Refinancing: find your break-even month</h3>
+            <p class="fo-guidecard__desc" data-t="d.refi">Two ways to count the break-even, and why they can disagree.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span data-t="worked.cap">Numbers worked out</span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--money" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.refi">Refinance calculator</span></span></span>
+          </a></li>
+          <li><a class="fo-guidecard fo-dogear fo-cat--money" href="#/guides/rent-vs-buy-break-even/" data-t-href="h.rent">
+            <span class="fo-guidecard__kind"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><strong data-t="kind">Guide</strong></span>
+            <h3 class="fo-guidecard__name" data-t="n.rent">Rent vs buy: when buying starts to pay off</h3>
+            <p class="fo-guidecard__desc" data-t="d.rent">The year buying catches up with renting, and what moves it.</p>
+              <span class="fo-guidecard__proof"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M4 10h16M10 4v16"/></svg><span data-t="worked.cap">Numbers worked out</span></span>
+            <span class="fo-guidecard__tool"><span class="fo-chip__dot fo-cat--money" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8a2 2 0 0 1-2 2h-3.5v-6h-5v6H6a2 2 0 0 1-2-2z"/></svg></span><span><span class="fo-guidecard__label" data-t="toolin">Tool in the guide</span><span data-t="t.rent">Rent vs buy calculator</span></span></span>
+          </a></li>
+        </ul>
+        <ul class="fo-bytool" data-when-card="b" data-when-lang="en es">
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--money" href="#/mortgage-calculator/15-vs-30-year/" data-t-href="ht.m15"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-7c0-3.5-6-3.5-6-7V3"/><path d="M12 14c0-3.5 6-3.5 6-7V3"/><path d="m3.5 5.5 2.5-2.5 2.5 2.5"/><path d="m15.5 5.5 2.5-2.5 2.5 2.5"/></svg></span><span data-t="t.m15">15-year vs 30-year mortgage</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/15-vs-30-year-mortgage/" data-t-href="h.m15"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.m15">15-year vs 30-year mortgage: the real cost</span><span class="fo-bytool__meta" data-t="worked.cap">Numbers worked out</span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--money" href="#/debt-payoff-calculator/" data-t-href="ht.debt"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/></svg></span><span data-t="t.debt">Debt payoff calculator</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/debt-snowball-vs-avalanche/" data-t-href="h.snow"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.snow">Snowball vs avalanche, with numbers</span><span class="fo-bytool__meta" data-t="worked.cap">Numbers worked out</span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--money" href="#/mortgage-calculator/extra-payments/" data-t-href="ht.extra"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8a2 2 0 0 1-2 2h-3.5v-6h-5v6H6a2 2 0 0 1-2-2z"/></svg></span><span data-t="t.extra">Mortgage with extra payments</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/extra-mortgage-payments/" data-t-href="h.extra"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.extra">How extra payments shorten a mortgage</span><span class="fo-bytool__meta" data-t="worked.cap">Numbers worked out</span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--money" href="#/refinance-calculator/" data-t-href="ht.refi"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14"/><path d="m14.5 4.5 3.5 3.5-3.5 3.5"/><path d="M20 16H6"/><path d="m9.5 12.5-3.5 3.5 3.5 3.5"/></svg></span><span data-t="t.refi">Refinance calculator</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/refinance-break-even/" data-t-href="h.refi"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.refi">Refinancing: find your break-even month</span><span class="fo-bytool__meta" data-t="worked.cap">Numbers worked out</span></a></li>
+            </ul>
+          </li>
+          <li class="fo-bytool__item">
+            <h3><a class="fo-chip fo-cat--money" href="#/rent-vs-buy-calculator/" data-t-href="ht.rent"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7v8a2 2 0 0 1-2 2h-3.5v-6h-5v6H6a2 2 0 0 1-2-2z"/></svg></span><span data-t="t.rent">Rent vs buy calculator</span></a></h3>
+            <ul class="fo-bytool__guides">
+              <li><a class="fo-bytool__guide" href="#/guides/rent-vs-buy-break-even/" data-t-href="h.rent"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/></svg><span class="fo-bytool__name" data-t="n.rent">Rent vs buy: when buying starts to pay off</span><span class="fo-bytool__meta" data-t="worked.cap">Numbers worked out</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+      <section class="fo-section fo-prose" id="how" aria-labelledby="how-title">
+        <h2 id="how-title" data-t="how.title">How these guides are made</h2>
+        <p data-t="how.p">The image and PDF guides are measured on real test files, with the same engine that runs the tools on this site. Each guide lists the files it used, the day it was measured and who reviewed it. The money guides work out each example with the calculator inside them. Nothing you put into a tool leaves your device.</p>
+      </section>
+      <div class="fo-ad fo-ad--content fo-mobile-only" data-ad-area="geral" data-when-ads="on" data-when-lang="en es" data-ad-slot-proto="3"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <div class="fo-ad fo-ad--multiplex fo-desktop-only" data-ad-area="geral" data-when-ads="on" data-when-lang="en es" data-when-card="a" data-ad-slot-proto="mx"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+    </main>
+    <aside class="proto-rail gh-rail" aria-label="Advertisements" data-t-aria-label="proto.ad" data-when-ads="on">
+      <div class="fo-ad fo-ad--rail" data-ad-area="geral"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <div class="fo-ad fo-ad--rail" data-ad-area="geral" data-when-card="a"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+    </aside>
+  </div>
+    <footer class="fo-footer fo-deep">
+    <div class="fo-footer__cols" data-when-lang="en">
+      <div><h2>Image</h2><ul><li><a href="#/image-tools/">Image tools</a></li><li><a href="#/compress-image/">Compress image</a></li><li><a href="#/resize-image/">Resize image</a></li><li><a href="#/crop-image/">Crop image</a></li><li><a href="#/rotate-image/">Rotate image</a></li><li><a href="#/heic-to-jpg/">HEIC to JPG</a></li><li><a href="#/webp-to-jpg/">WebP to JPG</a></li><li><a href="#/png-to-jpg/">PNG to JPG</a></li><li><a href="#/image-to-pdf/">Image to PDF</a></li></ul></div>
+      <div><h2>PDF</h2><ul><li><a href="#/pdf-tools/">PDF tools</a></li><li><a href="#/merge-pdf/">Merge PDF</a></li><li><a href="#/split-pdf/">Split PDF</a></li><li><a href="#/pdf-to-jpg/">PDF to JPG</a></li><li><a href="#/compress-pdf/">Compress PDF</a></li><li><a href="#/rotate-pdf/">Rotate PDF</a></li><li><a href="#/delete-pdf-pages/">Delete PDF pages</a></li></ul></div>
+      <div><h2>Money</h2><ul><li><a href="#/money-calculators/">Money calculators</a></li><li><a href="#/mortgage-calculator/">Mortgage calculator</a></li><li><a href="#/refinance-calculator/">Refinance calculator</a></li><li><a href="#/auto-loan-calculator/">Auto loan calculator</a></li><li><a href="#/personal-loan-calculator/">Personal loan calculator</a></li><li><a href="#/home-affordability-calculator/">Home affordability calculator</a></li></ul></div>
+      <div><h2>Home</h2><ul><li><a href="#/home-calculators/">Home calculators</a></li><li><a href="#/square-footage-calculator/">Square footage calculator</a></li><li><a href="#/concrete-calculator/">Concrete calculator</a></li><li><a href="#/mulch-calculator/">Mulch and gravel calculator</a></li><li><a href="#/paint-calculator/">Paint calculator</a></li><li><a href="#/tile-calculator/">Tile calculator</a></li><li><a href="#/btu-calculator/">BTU calculator</a></li></ul></div>
+      <div><h2>Health</h2><ul><li><a href="#/health-calculators/">Health calculators</a></li><li><a href="#/bmi-calculator/">BMI calculator</a></li><li><a href="#/calorie-calculator/">Calorie calculator</a></li><li><a href="#/ovulation-calculator/">Ovulation calculator</a></li><li><a href="#/body-fat-calculator/">Body fat calculator</a></li><li><a href="#/due-date-calculator/">Due date calculator</a></li></ul></div>
+      <div><h2>Utilities</h2><ul><li><a href="#/qr-code-generator/">QR code generator</a></li></ul><div class="fo-footer__more gh-new"><h2>Guides</h2><ul><li><a href="#/guides/" aria-current="page">All guides</a></li><li><a href="#/guides/#image">Image guides</a></li><li><a href="#/guides/#pdf">PDF guides</a></li><li><a href="#/guides/#money">Money guides</a></li></ul></div></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#/about/">About</a></li><li><a href="#/privacy/">Privacy</a></li><li><a href="#/terms/">Terms</a></li><li><a href="#/licenses/">Licenses</a></li><li><a href="#/contact/">Contact</a></li></ul></div>
+    </div>
+    <div class="fo-footer__cols" data-when-lang="pt" lang="pt-BR">
+      <div><h2>Imagem</h2><ul><li><a href="#/pt/ferramentas-de-imagem/">Ferramentas de imagem</a></li><li><a href="#/pt/comprimir-imagem/">Comprimir imagem</a></li><li><a href="#/pt/redimensionar-imagem/">Redimensionar imagem</a></li><li><a href="#/pt/cortar-imagem/">Cortar imagem</a></li><li><a href="#/pt/girar-imagem/">Girar imagem</a></li><li><a href="#/pt/heic-para-jpg/">HEIC para JPG</a></li><li><a href="#/pt/webp-para-jpg/">WebP para JPG</a></li><li><a href="#/pt/png-para-jpg/">PNG para JPG</a></li><li><a href="#/pt/imagem-para-pdf/">Imagem para PDF</a></li></ul></div>
+      <div><h2>PDF</h2><ul><li><a href="#/pt/ferramentas-pdf/">Ferramentas de PDF</a></li><li><a href="#/pt/juntar-pdf/">Juntar PDF</a></li><li><a href="#/pt/dividir-pdf/">Dividir PDF</a></li><li><a href="#/pt/pdf-para-jpg/">PDF para JPG</a></li><li><a href="#/pt/comprimir-pdf/">Comprimir PDF</a></li><li><a href="#/pt/girar-pdf/">Girar PDF</a></li><li><a href="#/pt/excluir-paginas-pdf/">Excluir páginas do PDF</a></li></ul></div>
+      <div><h2>Dinheiro</h2><ul><li><a href="#/pt/calculadoras-financeiras/">Calculadoras financeiras</a></li><li><a href="#/pt/simulador-sac-price/">Simulador SAC × PRICE</a></li><li><a href="#/pt/simulador-financiamento-veiculo/">Simulador de financiamento de veículo</a></li><li><a href="#/pt/simulador-emprestimo/">Simulador de empréstimo</a></li><li><a href="#/pt/amortizacao-antecipada/">Amortização antecipada</a></li><li><a href="#/pt/calculadora-cartao-de-credito/">Calculadora do cartão de crédito</a></li></ul></div>
+      <div><h2>Utilidades</h2><ul><li><a href="#/pt/gerador-de-qr-code/">Gerador de QR code</a></li></ul><div class="fo-footer__more gh-new"><h2>Guias</h2><ul><li><a href="#/pt/guias/" aria-current="page">Todos os guias</a></li><li><a href="#/pt/guias/#image">Guias de imagem</a></li><li><a href="#/pt/guias/#pdf">Guias de PDF</a></li></ul></div></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#/pt/sobre/">Sobre</a></li><li><a href="#/pt/privacidade/">Privacidade</a></li><li><a href="#/pt/termos/">Termos</a></li><li><a href="#/pt/licencas/">Licenças</a></li><li><a href="#/pt/contato/">Contato</a></li></ul></div>
+    </div>
+    <div class="fo-footer__cols" data-when-lang="es" lang="es">
+      <div><h2>Imagen</h2><ul><li><a href="#/es/herramientas-de-imagen/">Herramientas de imagen</a></li><li><a href="#/es/comprimir-imagen/">Comprimir imagen</a></li><li><a href="#/es/redimensionar-imagen/">Redimensionar imagen</a></li><li><a href="#/es/recortar-imagen/">Recortar imagen</a></li><li><a href="#/es/rotar-imagen/">Rotar imagen</a></li><li><a href="#/es/heic-a-jpg/">HEIC a JPG</a></li><li><a href="#/es/webp-a-jpg/">WebP a JPG</a></li><li><a href="#/es/png-a-jpg/">PNG a JPG</a></li><li><a href="#/es/imagen-a-pdf/">Imagen a PDF</a></li></ul></div>
+      <div><h2>PDF</h2><ul><li><a href="#/es/herramientas-pdf/">Herramientas PDF</a></li><li><a href="#/es/unir-pdf/">Unir PDF</a></li><li><a href="#/es/dividir-pdf/">Dividir PDF</a></li><li><a href="#/es/pdf-a-jpg/">PDF a JPG</a></li><li><a href="#/es/comprimir-pdf/">Comprimir PDF</a></li><li><a href="#/es/rotar-pdf/">Rotar PDF</a></li><li><a href="#/es/eliminar-paginas-pdf/">Eliminar páginas de PDF</a></li></ul></div>
+      <div><h2>Dinero</h2><ul><li><a href="#/es/calculadoras-financieras/">Calculadoras financieras</a></li><li><a href="#/es/calculadora-de-hipoteca/">Calculadora de hipoteca</a></li><li><a href="#/es/calculadora-de-refinanciamiento/">Calculadora de refinanciamiento</a></li><li><a href="#/es/calculadora-de-prestamo-para-auto/">Calculadora de préstamo para auto</a></li><li><a href="#/es/calculadora-de-prestamo-personal/">Calculadora de préstamo personal</a></li><li><a href="#/es/calculadora-de-cuanta-casa-puedo-pagar/">Calculadora de cuánta casa puedo pagar</a></li></ul></div>
+      <div><h2>Utilidades</h2><ul><li><a href="#/es/generador-de-codigo-qr/">Generador de códigos QR</a></li></ul><div class="fo-footer__more gh-new"><h2>Guías</h2><ul><li><a href="#/es/guias/" aria-current="page">Todas las guías</a></li><li><a href="#/es/guias/#image">Guías de imagen</a></li><li><a href="#/es/guias/#pdf">Guías de PDF</a></li><li><a href="#/es/guias/#money">Guías de dinero</a></li></ul></div></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#/es/acerca-de/">Acerca de</a></li><li><a href="#/es/privacidad/">Privacidad</a></li><li><a href="#/es/terminos/">Términos</a></li><li><a href="#/es/licencias/">Licencias</a></li><li><a href="#/es/contacto/">Contacto</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#/support/" data-t-href="href.support"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="f.coffee">Like these tools? Support them with a coffee</span></a><span data-t="f.sign">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-02 · hub de guias (F11; os anúncios na F12)</p>
+    <h2 id="spec-title">O que esta página especifica</h2>
+    <p>Os três hubs de guias, <code>/guides/</code>, <code>/pt/guias/</code> e <code>/es/guias/</code>, que a F11 cria (seção E do PLANO-MELHORIAS), e o cartão de guia que fecha a pendência F5b F-12. Com <code>?ads=off</code> a página está como a F11 a entrega: sem AdSlot e sem a coluna lateral. O padrão, com anúncios, é o estado da F12, pelo mapa da seção B ("Hub de guias: como os hubs de categoria", área <code>geral</code>). As entradas dos guias (trilha, rodapé, home, página da ferramenta e busca) estão em <a href="guides-entries.html">guides-entries.html</a>.</p>
+
+    <h3>As duas alternativas e o que as torna do FileOrca</h3>
+    <dl>
+      <dt>A · O papel com a ferramenta dentro (recomendada; <code>?card=a</code>)</dt>
+      <dd>Define-se pela <strong>dobra</strong> e pelo <strong>traço</strong>. O guia é um papel como todo arquivo do FileOrca: borda de 2 px no preto-orca e o canto de cima dobrado na cor do grupo, que é a ponta da barbatana da Oli. O que muda em relação ao ToolCard é a face: sem o quadrado de 48 px com o ícone (a cara da ferramenta), o cartão começa por palavras. Primeiro "Guide" com o ícone do papel dobrado; depois o título, a descrição e a linha da tabela, que diz de onde vêm os números ("Measured on 10 test files"). No pé, depois de um fio tracejado, vem a ferramenta que o guia traz, no círculo da categoria: o mesmo círculo dos chips do próximo passo e da busca, que no site quer dizer "uma ferramenta".</dd>
+      <dt>B · Por ferramenta (<code>?card=b</code>)</dt>
+      <dd>Define-se pelo <strong>traço</strong> do chip e muda a estrutura. O hub lista as ferramentas que têm guia, cada uma num chip do próximo passo (pílula de 2 px com o círculo da categoria, que leva à ferramenta), e embaixo de cada chip os guias dela: links com o ícone do papel e a linha da medida, sem a descrição. É o guia como manual da ferramenta. No celular a página fica com quase metade da altura: o <code>&lt;main&gt;</code> em inglês mede 4.536 px em B e 7.113 px em A.</dd>
+    </dl>
+    <p><strong>Por que A.</strong> Um componente só serve os quatro lugares: o hub, a seção da home, as grades de relacionadas (onde está a F5b F-12, com o guia ao lado das ferramentas) e a página da ferramenta. B precisaria do cartão A de qualquer jeito nas relacionadas. B também perde a descrição, que é o "o que você aprende", e fica com menos texto: são 328 palavras no <code>&lt;main&gt;</code> em inglês, contra 631 em A. Pela regra de 150 palavras por caixa do <code>gate:prontidao</code>, isso tira de B o multiplex e a segunda lateral. O que B tem de melhor é a rolagem curta no celular.</p>
+
+    <h3>Os guias de cada idioma (dos registros)</h3>
+    <p>Ordem e grupos: <code>guidesOfHub('image-tools')</code> e <code>guidesOfHub('pdf-tools')</code> na ordem de <code>FILE_GUIDE_IDS</code> (<code>src/tools/guides/registry.ts</code>); Dinheiro na ordem de <code>GUIDE_IDS</code> (<code>src/tools/calc/registry.ts</code>), só onde <code>guidePathIn(id, lang)</code> não é <code>null</code>, isto é, em en e es. Título e descrição: <code>common.fileGuides[id]</code> e <code>common.guides[id]</code> de cada idioma. Ferramenta: <code>FILE_GUIDES[id].tool</code> e <code>GUIDES[id].calc</code>, com o nome, o ícone e a categoria de <code>toolInfo()</code>. N: os arquivos distintos de todas as <code>sample.files</code> do guia em <code>data/guides-measured.json</code> (o JSON que o <code>guias:medir --check</code> confere), lido no build.</p>
+    <table>
+      <thead><tr><th scope="col">Grupo</th><th scope="col">Guia (id sem <code>guides-</code>)</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th><th scope="col">Ferramenta no guia</th><th scope="col">N</th></tr></thead>
+      <tbody>
+        <tr><td>Imagem</td><td>heic-to-jpg-on-windows</td><td><code>/guides/heic-to-jpg-on-windows/</code></td><td><code>/pt/guias/heic-para-jpg-no-windows/</code></td><td><code>/es/guias/heic-a-jpg-en-windows/</code></td><td>HEIC to JPG</td><td>10</td></tr>
+        <tr><td>Imagem</td><td>social-media-image-sizes</td><td><code>/guides/social-media-image-sizes/</code></td><td><code>/pt/guias/tamanhos-de-imagem-para-redes-sociais/</code></td><td><code>/es/guias/tamanos-de-imagen-para-redes-sociales/</code></td><td>Resize image</td><td>3</td></tr>
+        <tr><td>Imagem</td><td>open-webp-save-as-jpg</td><td><code>/guides/open-webp-save-as-jpg/</code></td><td><code>/pt/guias/abrir-webp-e-salvar-como-jpg/</code></td><td><code>/es/guias/abrir-webp-y-guardar-como-jpg/</code></td><td>WebP to JPG</td><td>5</td></tr>
+        <tr><td>Imagem</td><td>jpg-vs-png</td><td><code>/guides/jpg-vs-png/</code></td><td><code>/pt/guias/jpg-ou-png/</code></td><td><code>/es/guias/jpg-o-png/</code></td><td>PNG to JPG</td><td>4</td></tr>
+        <tr><td>Imagem</td><td>remove-location-from-photos</td><td><code>/guides/remove-location-from-photos/</code></td><td><code>/pt/guias/remover-localizacao-das-fotos/</code></td><td><code>/es/guias/quitar-la-ubicacion-de-las-fotos/</code></td><td>Resize image</td><td>13</td></tr>
+        <tr><td>Imagem</td><td>photos-to-one-pdf</td><td><code>/guides/photos-to-one-pdf/</code></td><td><code>/pt/guias/fotos-em-um-pdf/</code></td><td><code>/es/guias/fotos-en-un-solo-pdf/</code></td><td>Image to PDF (círculo coral: a ferramenta é de PDF)</td><td>3</td></tr>
+        <tr><td>PDF</td><td>why-is-my-pdf-so-large</td><td><code>/guides/why-is-my-pdf-so-large/</code></td><td><code>/pt/guias/por-que-meu-pdf-esta-tao-grande/</code></td><td><code>/es/guias/por-que-mi-pdf-pesa-tanto/</code></td><td>Compress PDF</td><td>10</td></tr>
+        <tr><td>PDF</td><td>pdf-to-jpg-resolution</td><td><code>/guides/pdf-to-jpg-resolution/</code></td><td><code>/pt/guias/resolucao-de-pdf-para-jpg/</code></td><td><code>/es/guias/resolucion-de-pdf-a-jpg/</code></td><td>PDF to JPG</td><td>5</td></tr>
+        <tr><td>PDF</td><td>split-pdf-file-size</td><td><code>/guides/split-pdf-file-size/</code></td><td><code>/pt/guias/dividir-pdf-e-tamanho-do-arquivo/</code></td><td><code>/es/guias/dividir-pdf-y-tamano-del-archivo/</code></td><td>Split PDF</td><td>5</td></tr>
+        <tr><td>PDF</td><td>combine-pdfs-on-phone</td><td><code>/guides/combine-pdfs-on-phone/</code></td><td><code>/pt/guias/juntar-pdfs-no-celular/</code></td><td><code>/es/guias/unir-pdf-en-el-celular/</code></td><td>Merge PDF</td><td>7</td></tr>
+        <tr><td>Dinheiro</td><td>15-vs-30-year-mortgage</td><td><code>/guides/15-vs-30-year-mortgage/</code></td><td>não existe</td><td><code>/es/guias/hipoteca-a-15-o-30-anos/</code></td><td>15-year vs 30-year mortgage</td><td>calculado</td></tr>
+        <tr><td>Dinheiro</td><td>debt-snowball-vs-avalanche</td><td><code>/guides/debt-snowball-vs-avalanche/</code></td><td>não existe</td><td><code>/es/guias/bola-de-nieve-o-avalancha/</code></td><td>Debt payoff calculator</td><td>calculado</td></tr>
+        <tr><td>Dinheiro</td><td>extra-mortgage-payments</td><td><code>/guides/extra-mortgage-payments/</code></td><td>não existe</td><td><code>/es/guias/pagos-adicionales-a-la-hipoteca/</code></td><td>Mortgage with extra payments</td><td>calculado</td></tr>
+        <tr><td>Dinheiro</td><td>refinance-break-even</td><td><code>/guides/refinance-break-even/</code></td><td>não existe</td><td><code>/es/guias/punto-de-equilibrio-del-refinanciamiento/</code></td><td>Refinance calculator</td><td>calculado</td></tr>
+        <tr><td>Dinheiro</td><td>rent-vs-buy-break-even</td><td><code>/guides/rent-vs-buy-break-even/</code></td><td>não existe</td><td><code>/es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/</code></td><td>Rent vs buy calculator</td><td>calculado</td></tr>
+      </tbody>
+    </table>
+    <p>São 15 guias em en, 10 em pt e 15 em es. Em pt, o grupo Dinheiro fica no hub só com a nota que diz por que não há guia e leva às calculadoras financeiras do Brasil. No protótipo, os links são <code>#/caminho/</code> para não sair da página; na F11 são o caminho de verdade.</p>
+
+    <h3>Marcação</h3>
+    <pre><code>&lt;nav aria-label="Breadcrumb"&gt;&lt;ol class="fo-crumbs"&gt;… Home › &lt;span aria-current="page"&gt;Guides&lt;/span&gt;&lt;/ol&gt;&lt;/nav&gt;
+&lt;div class="fo-hubband fo-cat--guide"&gt;
+  &lt;span class="fo-eyebrow"&gt;Guides&lt;/span&gt;
+  &lt;h1 class="fo-h1 fo-h1--display"&gt;Answers that show the numbers&lt;/h1&gt;
+  &lt;p class="fo-muted"&gt;15 guides to common questions…&lt;/p&gt;
+&lt;/div&gt;
+&lt;nav class="fo-jump" aria-label="Guide groups"&gt;&lt;ul&gt;
+  &lt;li&gt;&lt;a class="fo-chip fo-cat--image" href="#image"&gt;&lt;span class="fo-chip__dot" aria-hidden="true"&gt;(ícone image)&lt;/span&gt;Image&lt;/a&gt;&lt;/li&gt; … PDF, Money
+&lt;/ul&gt;&lt;/nav&gt;
+&lt;section class="fo-section" id="image" aria-labelledby="image-title"&gt;
+  &lt;h2 id="image-title"&gt;Image guides&lt;/h2&gt;
+  &lt;ul class="fo-guidecards"&gt;&lt;li&gt;(GuideCard)&lt;/li&gt; …&lt;/ul&gt;
+&lt;/section&gt;
+(AdSlot content, F12) · &lt;section id="pdf"&gt; · (AdSlot só no celular) · &lt;section id="money"&gt; (em pt, a nota)
+&lt;section class="fo-section fo-prose" id="how"&gt;&lt;h2&gt;How these guides are made&lt;/h2&gt;&lt;p&gt;…&lt;/p&gt;&lt;/section&gt;
+(AdSlot content só no celular · multiplex a partir de 768 px)</code></pre>
+    <p>O GuideCard (componente novo, <code>src/components/GuideCard.astro</code>, com as props <code>href</code>, <code>name</code>, <code>description</code>, <code>category</code>, <code>proof</code>, <code>tool</code> opcional e <code>headingLevel</code>):</p>
+    <pre><code>&lt;a class="fo-guidecard fo-dogear fo-cat--image" href="/guides/heic-to-jpg-on-windows/"&gt;
+  &lt;span class="fo-guidecard__kind"&gt;(ícone file)&lt;strong&gt;Guide&lt;/strong&gt;&lt;/span&gt;
+  &lt;h3 class="fo-guidecard__name"&gt;How to convert HEIC to JPG on Windows&lt;/h3&gt;
+  &lt;p class="fo-guidecard__desc"&gt;Why Windows asks for an extension…&lt;/p&gt;
+  &lt;span class="fo-guidecard__proof"&gt;(ícone table)&lt;span&gt;Measured on 10 test files&lt;/span&gt;&lt;/span&gt;
+  &lt;span class="fo-guidecard__tool"&gt;&lt;span class="fo-chip__dot fo-cat--image" aria-hidden="true"&gt;(ícone convert)&lt;/span&gt;
+    &lt;span&gt;&lt;span class="fo-guidecard__label"&gt;Tool in the guide&lt;/span&gt;&lt;span&gt;HEIC to JPG&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;/a&gt;</code></pre>
+    <p>A alternativa B, se escolhida: <code>&lt;ul class="fo-bytool"&gt;&lt;li class="fo-bytool__item"&gt;&lt;h3&gt;&lt;a class="fo-chip fo-cat--image" href="/heic-to-jpg/"&gt;(círculo)HEIC to JPG&lt;/a&gt;&lt;/h3&gt;&lt;ul class="fo-bytool__guides"&gt;&lt;li&gt;&lt;a class="fo-bytool__guide" href="…"&gt;(ícone file)&lt;span class="fo-bytool__name"&gt;…&lt;/span&gt;&lt;span class="fo-bytool__meta"&gt;Measured on 10 test files&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;</code>. O CSS das duas está em <code>guides.css</code>, seções 3 e 4, com os nomes que a F11 escreve no <code>components.css</code>.</p>
+
+    <h3>Tokens</h3>
+    <ul>
+      <li>Nenhum token novo. Faixa: <code>.fo-cat--guide { --fo-cat-soft: var(--brand-soft) }</code>, com todo o texto em <code>--ink</code>, como nas faixas dos hubs de categoria. O hub de guias não tem cor de categoria própria; o tom é o mesmo do selo de privacidade.</li>
+      <li>Cartão: <code>--surface</code>, borda <code>--stroke-2</code> em <code>--stroke</code>, <code>--radius-lg</code>, dobra de <code>--dogear</code> na cor do grupo (<code>--turquesa</code>, <code>--coral</code> ou <code>--alga</code>, sobre o chão <code>--bg</code>), <code>--shadow-lift</code> e −3 px no hover. "Guide" em <code>--ink</code> 700 14/20; título em Figtree 700 18/24; descrição em <code>--ink-muted</code> 15/22; linha da medida em <code>--ink-muted</code> 14/20; ícones file e table em <code>--brand</code> (20 px); fio do pé em <code>--stroke-hair</code> tracejado <code>--hairline</code>; círculo de 32 px em <code>--fo-cat</code> com o ícone em <code>--on-cat</code>.</li>
+      <li>Grade: <code>repeat(auto-fill, minmax(min(100%, 300px), 1fr))</code> e <code>--space-4</code>: uma coluna no celular e duas a partir de uns 664 px. Os títulos dos guias são longos, então 220 px, o mínimo do ToolCard, dariam quatro linhas.</li>
+      <li>Combinações novas de tokens que já existem: <code>--ink</code> sobre <code>--brand-soft</code> (a faixa), <code>--ink-muted</code> sobre <code>--brand-soft</code> (a categoria da opção marcada na busca, nas entradas) e <code>--brand</code> sobre <code>--surface</code> (os ícones do cartão). Os números estão na tabela do contraste do README; as três passam nos dois temas.</li>
+    </ul>
+
+    <h3>Estados</h3>
+    <table>
+      <thead><tr><th scope="col">Parâmetro</th><th scope="col">Valores</th><th scope="col">O que muda</th></tr></thead>
+      <tbody>
+        <tr><td><code>?card=</code></td><td><code>a</code> (padrão, vale sem JS) · <code>b</code></td><td>O cartão de guia (A) ou a lista por ferramenta (B). Em B somem o anúncio depois do PDF, o multiplex e a 2ª lateral (palavras de menos; veja "Anúncios").</td></tr>
+        <tr><td><code>?ads=</code></td><td><code>on</code> (padrão: a F12) · <code>off</code> (a F11)</td><td>Com <code>off</code>, nenhum AdSlot e nenhuma coluna lateral, como o hub nasce na F11.</td></tr>
+        <tr><td><code>?lang=</code></td><td><code>en</code> · <code>pt</code> · <code>es</code></td><td>Textos, caminhos e grupos. Em pt, o grupo Dinheiro é só a nota.</td></tr>
+      </tbody>
+    </table>
+    <p>O hub não tem estado de interface: é uma página estática, sem ilha e sem script próprio.</p>
+
+    <h3>Textos</h3>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td><code>&lt;title&gt;</code></td><td lang="en">Guides: image, PDF and money questions, with the numbers | FileOrca</td><td>Guias: dúvidas de imagem e PDF, com os números | FileOrca</td><td lang="es">Guías: dudas de imagen, PDF y dinero, con los números | FileOrca</td></tr>
+        <tr><td>Descrição (meta e OG)</td><td lang="en">15 guides to common questions about images, PDFs and loans, with the numbers measured or worked out and the tool inside each one.</td><td>10 guias para dúvidas comuns sobre imagens e PDFs, com os números medidos e a ferramenta dentro de cada um.</td><td lang="es">15 guías sobre dudas comunes de imágenes, PDF y préstamos, con los números medidos o calculados y la herramienta dentro de cada una.</td></tr>
+        <tr><td>Trilha</td><td lang="en">Home › Guides</td><td>Início › Guias</td><td lang="es">Inicio › Guías</td></tr>
+        <tr><td>Sobretítulo</td><td lang="en">Guides</td><td>Guias</td><td lang="es">Guías</td></tr>
+        <tr><td>H1</td><td lang="en">Answers that show the numbers</td><td>Respostas que mostram os números</td><td lang="es">Respuestas que muestran los números</td></tr>
+        <tr><td>Frase da faixa</td><td lang="en">15 guides to common questions about images, PDFs and loans. Each one says where its numbers come from and has the tool inside, so you can try it on the same page.</td><td>10 guias para dúvidas comuns sobre imagens e PDFs. Cada um diz de onde vieram os números e traz a ferramenta dentro, para você testar na mesma página.</td><td lang="es">15 guías sobre dudas comunes de imágenes, PDF y préstamos. Cada una dice de dónde salen sus números y trae la herramienta dentro, para que la pruebes en la misma página.</td></tr>
+        <tr><td>Nome dos atalhos (<code>aria-label</code>)</td><td lang="en">Guide groups</td><td>Grupos de guias</td><td lang="es">Grupos de guías</td></tr>
+        <tr><td>Atalhos</td><td lang="en">Image · PDF · Money</td><td>Imagem · PDF · Dinheiro</td><td lang="es">Imagen · PDF · Dinero</td></tr>
+        <tr><td>H2 dos grupos</td><td lang="en">Image guides · PDF guides · Money guides</td><td>Guias de imagem · Guias de PDF · Dinheiro</td><td lang="es">Guías de imagen · Guías de PDF · Guías de dinero</td></tr>
+        <tr><td>Tipo do cartão</td><td lang="en">Guide</td><td>Guia</td><td lang="es">Guía</td></tr>
+        <tr><td>Medida (arquivo)</td><td lang="en">Measured on {n} test files</td><td>Medido em {n} arquivos de teste</td><td lang="es">Medida con {n} archivos de prueba</td></tr>
+        <tr><td>Medida (dinheiro)</td><td lang="en">Numbers worked out</td><td>(não há)</td><td lang="es">Números calculados</td></tr>
+        <tr><td>Pé do cartão</td><td lang="en">Tool in the guide</td><td>Ferramenta no guia</td><td lang="es">Herramienta en la guía</td></tr>
+        <tr><td>Nota de Dinheiro (só pt)</td><td>(não há)</td><td>Os guias de dinheiro falam de hipoteca e de crédito nos Estados Unidos, por isso existem só em inglês e em espanhol. Para as contas do Brasil, como SAC ou PRICE, use as calculadoras financeiras.</td><td>(não há)</td></tr>
+        <tr><td>H2 do fim</td><td lang="en">How these guides are made</td><td>Como os guias são feitos</td><td lang="es">Cómo se hacen estas guías</td></tr>
+        <tr><td>Texto do fim</td><td lang="en">The image and PDF guides are measured on real test files, with the same engine that runs the tools on this site. Each guide lists the files it used, the day it was measured and who reviewed it. The money guides work out each example with the calculator inside them. Nothing you put into a tool leaves your device.</td><td>Os guias são medidos em arquivos de teste reais, com o mesmo motor que roda as ferramentas deste site. Cada guia lista os arquivos que usou, o dia da medição e quem revisou. Nada do que você coloca numa ferramenta sai do seu aparelho.</td><td lang="es">Las guías de imagen y PDF se miden sobre archivos de prueba reales, con el mismo motor que hace funcionar las herramientas de este sitio. Cada guía indica los archivos que usó, el día de la medición y quién la revisó. Las guías de dinero calculan cada ejemplo con la calculadora que llevan dentro. Nada de lo que pones en una herramienta sale de tu dispositivo.</td></tr>
+      </tbody>
+    </table>
+    <p>O número de guias ("15", "10") sai da contagem do registro no idioma, nunca escrito à mão. Os títulos e as descrições dos cartões são os de <code>common.fileGuides</code> e <code>common.guides</code>, sem texto novo. O texto novo passa pelo <code>lint:texto</code> e pelos glossários de <code>docs/i18n/</code>.</p>
+
+    <h3>A introdução e as palavras</h3>
+    <p>O texto próprio do hub tem duas partes. No topo fica a frase da faixa: o que há aqui e que a ferramenta vem junto. No fim fica "Como os guias são feitos": o método, a revisão e a privacidade. Em pt entra também a nota de Dinheiro. O topo fica curto de propósito: assim o primeiro cartão aparece acima da dobra a 360×740, como nos hubs de categoria. O texto longo foi para o fim, como o "How these calculators work" do hub de dinheiro.</p>
+    <table>
+      <thead><tr><th scope="col">Idioma</th><th scope="col">Faixa</th><th scope="col">Nota de Dinheiro</th><th scope="col">Fim</th><th scope="col">Texto próprio</th><th scope="col">Todo o <code>&lt;main&gt;</code> (A · B)</th></tr></thead>
+      <tbody>
+        <tr><td>en</td><td>32</td><td>—</td><td>59</td><td><strong>91</strong></td><td>631 · 328</td></tr>
+        <tr><td>pt</td><td>28</td><td>36</td><td>44</td><td><strong>108</strong></td><td>495 · 285</td></tr>
+        <tr><td>es</td><td>31</td><td>—</td><td>66</td><td><strong>97</strong></td><td>663 · 353</td></tr>
+      </tbody>
+    </table>
+    <p>Contagem por palavras separadas por espaço; o <code>&lt;main&gt;</code> é o <code>innerText</code> medido no Chromium, sem o rótulo dos anúncios. A regra que a F11 põe no <code>gate:conteudo</code>, no molde da do hub de PDF (§ 162): um H1; um título que começa por "Guides", "Guias" ou "Guías"; um cartão por guia do registro no idioma; o texto próprio entre 60 e 120 palavras; e nenhum número sem medida.</p>
+
+    <h3>Anúncios: o mapa da seção B, área <code>geral</code></h3>
+    <table>
+      <thead><tr><th scope="col">Unidade</th><th scope="col">Onde</th><th scope="col">Quando</th></tr></thead>
+      <tbody>
+        <tr><td>Conteúdo 1</td><td>Depois da primeira grade (Imagem)</td><td>Sempre</td></tr>
+        <tr><td>Conteúdo 2</td><td>Depois da grade de PDF</td><td>Só abaixo de 768 px e só em A. A 768 px ou mais, a grade de PDF tem 2 linhas e o espaço entre as caixas cairia para uns 900 px, abaixo dos 1.110 px.</td></tr>
+        <tr><td>Conteúdo 3</td><td>No fim, depois de "How these guides are made"</td><td>Só abaixo de 768 px, em en e es, em A e em B. No celular, é ele que ocupa o lugar do multiplex.</td></tr>
+        <tr><td>Multiplex</td><td>No fim, no mesmo lugar</td><td>Só a 768 px ou mais, em en e es e em A, com 456 px (4 × 2 a 760 px de largura). No celular não entra: são 1.700 px, que não cabem nos 30 % (§ 351).</td></tr>
+        <tr><td>Laterais</td><td>Coluna de 300 px, a 150 px da coluna principal</td><td>A partir de 1280 px. A 2ª começa 1.110 px abaixo da base da 1ª, então as duas nunca aparecem juntas numa tela de 800 px. Em B fica só a 1ª; em pt com B, nenhuma.</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th scope="col">Variante</th><th scope="col">360×740: caixas, menor distância entre elas, densidade (ficha · com a âncora de 100 px)</th><th scope="col">1280×800: caixas na coluna e laterais</th><th scope="col">Palavras por caixa (celular · computador)</th></tr></thead>
+      <tbody>
+        <tr><td>en, A</td><td>3 · 1.518 px · 12,7 % · 14,1 %</td><td>conteúdo 1 e multiplex, 2.141 px entre eles · 2 laterais</td><td>210 · 158</td></tr>
+        <tr><td>pt, A</td><td>2 · 1.518 px · 11,4 % · 13,3 %</td><td>conteúdo 1 · 2 laterais</td><td>248 · 165</td></tr>
+        <tr><td>es, A</td><td>3 · 1.496 px · 12,5 % · 13,9 %</td><td>conteúdo 1 e multiplex, 2.137 px entre eles · 2 laterais</td><td>221 · 166</td></tr>
+        <tr><td>en, B</td><td>2 · 2.244 px · 13,2 % · 15,4 %</td><td>conteúdo 1 · 1 lateral</td><td>164 · 164</td></tr>
+        <tr><td>pt, B</td><td>1 · — · 9,2 % · 12,3 %</td><td>conteúdo 1 · nenhuma lateral</td><td>285 · 285</td></tr>
+        <tr><td>es, B</td><td>2 · 2.270 px · 13,0 % · 15,2 %</td><td>conteúdo 1 · 1 lateral</td><td>177 · 176</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><strong>150 px:</strong> cada caixa fica a 166 px da grade de cartões mais próxima (os 150 px da margem do AdSlot mais os 16 px do <code>gap</code>), e a lateral fica a 150 px da coluna, contando os atalhos. Não há Oli, Baixar, campo nem painel nesta página.</li>
+      <li><strong>Nada acima do conteúdo:</strong> no celular, o primeiro anúncio começa a 2.454 px do topo (en), depois de seis cartões.</li>
+      <li><strong>A regra de 150 palavras por caixa</strong> do <code>gate:prontidao</code> (§ 95) passa em todas as variantes, contando só as caixas que aparecem em cada tamanho. É a leitura que a F12 tem de adotar. A conta de hoje soma todo <code>fo-ad fo-ad--</code> do HTML; o hub en em A teria 6 caixas no HTML e pediria 900 palavras, e não passaria. O multiplex sai de pt pela mesma regra: com ele, seriam 4 caixas no computador para 494 palavras.</li>
+      <li><strong>Esconder por largura:</strong> as caixas que só existem num tamanho levam <code>fo-mobile-only</code> ou <code>fo-desktop-only</code> (<code>display: none</code>). A ajuda do AdSense sobre o código responsivo permite esconder uma unidade assim, e com ela escondida nenhum anúncio é pedido. A F12 confere isso na ajuda e no AdSlot: o <code>push</code> só sai para a caixa visível.</li>
+      <li><strong>Sem ID de unidade</strong> (Mudança 10), o espaço não aparece, e a página fica igual ao <code>?ads=off</code>.</li>
+    </ul>
+
+    <h3>SEO: o que a F11 faz</h3>
+    <ul>
+      <li><strong>Rota:</strong> um <code>RouteId</code> <code>'guides'</code> em <code>src/i18n/routes.ts</code>, com <code>paths: { en: '/guides/', pt: '/pt/guias/', es: '/es/guias/' }</code> e <code>indexable: true</code>. As páginas dos guias já moram embaixo desses caminhos, e o hub preenche o 404 que existe hoje (<code>dist/guides/index.html</code> não existe). O <code>adArea</code> <code>'geral'</code> entra na F12.</li>
+      <li><strong>Schema</strong> (o mesmo <code>@graph</code> dos hubs): <code>Organization</code>; <code>BreadcrumbList</code> com Home e Guides; e <code>CollectionPage</code> com <code>name</code> (o H1), <code>description</code>, <code>url</code>, <code>inLanguage</code>, <code>publisher</code> e <code>mainEntity</code>. O <code>mainEntity</code> é um <code>ItemList</code> com <code>numberOfItems</code> 15, 10 ou 15 e um <code>ListItem</code> por guia (<code>position</code>, <code>name</code>, <code>url</code>), na ordem da página.</li>
+      <li><strong>OG:</strong> <code>og:type</code> <code>website</code>; título e descrição como na tabela; <code>og:url</code>; <code>og:locale</code> <code>en_US</code>, <code>pt_BR</code> ou <code>es_US</code> (<code>OG_LOCALE</code>); <code>og:image</code> <code>/og/&lt;lang&gt;/guides.png</code>, de 1200×630, gerada pelo mesmo caminho das outras rotas.</li>
+      <li><strong>hreflang e canonical:</strong> os três hubs se apontam (<code>en</code>, <code>pt-BR</code> e <code>es</code>), com <code>x-default</code> para <code>/guides/</code>, e cada um tem o próprio canonical.</li>
+      <li><strong>Sitemap:</strong> cada hub entra no <code>sitemap-en.xml</code>, no <code>sitemap-pt.xml</code> ou no <code>sitemap-es.xml</code>. A busca do site continua sem hubs.</li>
+      <li><strong>As trilhas das 40 páginas de guia</strong> (15 en, 10 pt e 15 es) mudam para Home › Guides › o guia, no HTML e no <code>BreadcrumbList</code> (veja as entradas).</li>
+      <li><strong>Portões:</strong> <code>gate:seo</code> (título e descrição únicos, hreflang de ida e volta), <code>gate:links</code> (o hub tira os guias do estado de "só ligados pelos hubs de categoria") e <code>gate:conteudo</code> (a regra acima).</li>
+    </ul>
+
+    <h3>Teclado</h3>
+    <p>Tab passa por: pular para o conteúdo, o logo, a busca, o idioma, a trilha, os três atalhos (Image, PDF e Money, que levam às seções com <code>id</code> <code>image</code>, <code>pdf</code> e <code>money</code>), cada cartão em ordem de leitura e os links do rodapé. Em B, o chip da ferramenta vem antes dos guias dela. Nenhum controle prende o foco, e nada abre ou fecha.</p>
+
+    <h3>Nome acessível</h3>
+    <ul>
+      <li>O cartão é um link só. O nome é o texto dele, na ordem: "Guide, How to convert HEIC to JPG on Windows, Why Windows asks…, Measured on 10 test files, Tool in the guide, HEIC to JPG". O leitor de tela ouve "Guide" primeiro, que é o que a F5b F-12 pede ("ler junto"), e o H3 dentro dele serve à navegação por títulos.</li>
+      <li>O círculo da ferramenta e os ícones file e table são <code>aria-hidden</code>, porque as palavras ao lado dizem o mesmo.</li>
+      <li>A faixa usa um H1. Os grupos e "Como os guias são feitos" usam H2, e os cartões, H3, sem pular nível. Os atalhos ficam num <code>nav</code> chamado "Guide groups", "Grupos de guias" ou "Grupos de guías".</li>
+    </ul>
+
+    <h3>Medidas</h3>
+    <ul>
+      <li>Os atalhos são chips de 48 px (<code>--tap-min</code>). Os cartões têm pelo menos 300 px de largura e 200 px de altura. Em B, os links dos guias têm 48 px de altura mínima.</li>
+      <li>Os anúncios ficam a 150 px de margem (<code>--ad-clearance</code>), a 166 px da grade mais próxima. A lateral mede 300 × 644 px, a 150 px da coluna de 760 px.</li>
+      <li>A dobra: no celular, o título do primeiro cartão aparece acima dos 740 px nos três idiomas.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <p><strong>Zero JS.</strong> O hub é estático: nenhuma ilha, nenhum arquivo JS novo, nenhum script inline novo. Ficam só os scripts inline que toda página já tem (a busca sob demanda, o consentimento e o service worker). As requisições são as mesmas do hub de imagem de hoje: o HTML, o CSS único, a Fredoka (com preload), a Figtree e o manifesto. O HTML fica perto dos 39 KB do hub de imagem. Os 15 cartões mais o rodapé novo devem somar uns 45 KB sem compressão; é uma estimativa, que a F11 mede. O CSS novo (<code>.fo-guidecard</code>, <code>.fo-jump</code> e <code>.fo-cat--guide</code>) tem uns 2 KB e vai no CSS de sempre. Na F12, os anúncios trazem as requisições do AdSense, como em qualquer página com AdSlot.</p>
+  </div>
+</section>
+
+<script>
+var PROTO_T = {
+  pt: {
+    'page.title': 'UX-02 · Hub de guias · FileOrca UX v2',
+    'skip': 'Ir para o conteúdo',
+    'home': 'FileOrca, página inicial',
+    'href.home': '#/pt/',
+    'href.support': '#/pt/apoie/',
+    'search': 'Buscar ferramentas',
+    'lang.code': 'PT',
+    'lang.sr': ' · Idioma: Português',
+    'lang.menu': 'Escolha um idioma',
+    'crumbs': 'Trilha de navegação',
+    'crumb.home': 'Início',
+    'crumb.here': 'Guias',
+    'eyebrow': 'Guias',
+    'h1': 'Respostas que mostram os números',
+    'lead': '10 guias para dúvidas comuns sobre imagens e PDFs. Cada um diz de onde vieram os números e traz a ferramenta dentro, para você testar na mesma página.',
+    'jump': 'Grupos de guias',
+    'chip.image': 'Imagem',
+    'chip.pdf': 'PDF',
+    'chip.money': 'Dinheiro',
+    'g.image': 'Guias de imagem',
+    'g.pdf': 'Guias de PDF',
+    'g.money': 'Dinheiro',
+    'kind': 'Guia',
+    'measured.cap': 'Medido em',
+    'files': 'arquivos de teste',
+    'toolin': 'Ferramenta no guia',
+    'n.heic': 'Como converter HEIC para JPG no Windows',
+    'd.heic': 'Por que o Windows pede uma extensão, e o que acontece com o tamanho e a localização quando uma foto vira JPG.',
+    'h.heic': '#/pt/guias/heic-para-jpg-no-windows/',
+    'n.social': 'Tamanhos de imagem para redes sociais',
+    'd.social': 'Os tamanhos que cada rede publica, e como fica uma foto redimensionada para eles.',
+    'h.social': '#/pt/guias/tamanhos-de-imagem-para-redes-sociais/',
+    'n.webp': 'Como abrir imagens WebP e salvar como JPG',
+    'd.webp': 'O que é um WebP, onde ele abre e o que muda quando ele vira JPG.',
+    'h.webp': '#/pt/guias/abrir-webp-e-salvar-como-jpg/',
+    'n.jvp': 'JPG ou PNG: qual usar',
+    'd.jvp': 'Quando cada formato ganha, medido nas mesmas fotos nos dois formatos.',
+    'h.jvp': '#/pt/guias/jpg-ou-png/',
+    'n.loc': 'Como remover a localização das fotos',
+    'd.loc': 'Onde a foto guarda a localização, e o jeito de tirar esse dado sem mudar nenhum pixel.',
+    'h.loc': '#/pt/guias/remover-localizacao-das-fotos/',
+    'n.photos': 'Como transformar fotos em um único PDF',
+    'd.photos': 'Um PDF só com algumas fotos, e o que comprimir as fotos antes faz com o tamanho dele.',
+    'h.photos': '#/pt/guias/fotos-em-um-pdf/',
+    'n.why': 'Por que meu PDF está tão grande?',
+    'd.why': 'O que ocupa espaço num PDF, e o que cada nível da Comprimir PDF faz com ele.',
+    'h.why': '#/pt/guias/por-que-meu-pdf-esta-tao-grande/',
+    'n.res': 'Qual resolução escolher ao converter PDF para JPG',
+    'd.res': 'O que uma resolução maior acrescenta aos pixels e ao arquivo, página por página.',
+    'h.res': '#/pt/guias/resolucao-de-pdf-para-jpg/',
+    'n.split': 'Como dividir um PDF e por que as partes podem pesar mais',
+    'd.split': 'Por que as partes de um PDF podem somar mais que o arquivo inteiro, e quando isso não acontece.',
+    'h.split': '#/pt/guias/dividir-pdf-e-tamanho-do-arquivo/',
+    'n.combine': 'Como juntar PDFs no celular',
+    'd.combine': 'Os jeitos de juntar PDFs no iPhone ou num celular Android, e o tamanho do arquivo que você recebe.',
+    'h.combine': '#/pt/guias/juntar-pdfs-no-celular/',
+    't.heic': 'HEIC para JPG',
+    'ht.heic': '#/pt/heic-para-jpg/',
+    't.resize': 'Redimensionar imagem',
+    'ht.resize': '#/pt/redimensionar-imagem/',
+    't.webp': 'WebP para JPG',
+    'ht.webp': '#/pt/webp-para-jpg/',
+    't.png': 'PNG para JPG',
+    'ht.png': '#/pt/png-para-jpg/',
+    't.i2p': 'Imagem para PDF',
+    'ht.i2p': '#/pt/imagem-para-pdf/',
+    't.cpdf': 'Comprimir PDF',
+    'ht.cpdf': '#/pt/comprimir-pdf/',
+    't.p2j': 'PDF para JPG',
+    'ht.p2j': '#/pt/pdf-para-jpg/',
+    't.spdf': 'Dividir PDF',
+    'ht.spdf': '#/pt/dividir-pdf/',
+    't.mpdf': 'Juntar PDF',
+    'ht.mpdf': '#/pt/juntar-pdf/',
+    'how.title': 'Como os guias são feitos',
+    'how.p': 'Os guias são medidos em arquivos de teste reais, com o mesmo motor que roda as ferramentas deste site. Cada guia lista os arquivos que usou, o dia da medição e quem revisou. Nada do que você coloca numa ferramenta sai do seu aparelho.',
+    'f.coffee': 'Curtiu? Me paga um café',
+    'f.sign': 'Feito por Victor Yuki Matusita em Curitiba · © 2026'
+  },
+  es: {
+    'page.title': 'UX-02 · Hub de guías · FileOrca UX v2',
+    'skip': 'Saltar al contenido',
+    'home': 'FileOrca, página de inicio',
+    'href.home': '#/es/',
+    'href.support': '#/es/apoyo/',
+    'search': 'Buscar herramientas',
+    'lang.code': 'ES',
+    'lang.sr': ' · Idioma: Español',
+    'lang.menu': 'Elige un idioma',
+    'crumbs': 'Ruta de navegación',
+    'crumb.home': 'Inicio',
+    'crumb.here': 'Guías',
+    'eyebrow': 'Guías',
+    'h1': 'Respuestas que muestran los números',
+    'lead': '15 guías sobre dudas comunes de imágenes, PDF y préstamos. Cada una dice de dónde salen sus números y trae la herramienta dentro, para que la pruebes en la misma página.',
+    'jump': 'Grupos de guías',
+    'chip.image': 'Imagen',
+    'chip.pdf': 'PDF',
+    'chip.money': 'Dinero',
+    'g.image': 'Guías de imagen',
+    'g.pdf': 'Guías de PDF',
+    'g.money': 'Guías de dinero',
+    'kind': 'Guía',
+    'measured.cap': 'Medida con',
+    'files': 'archivos de prueba',
+    'worked.cap': 'Números calculados',
+    'toolin': 'Herramienta en la guía',
+    'n.heic': 'Cómo convertir HEIC a JPG en Windows',
+    'd.heic': 'Por qué Windows pide una extensión y qué pasa con el tamaño y la ubicación cuando una foto se vuelve JPG.',
+    'h.heic': '#/es/guias/heic-a-jpg-en-windows/',
+    'n.social': 'Tamaños de imagen para redes sociales',
+    'd.social': 'Los tamaños que publica cada red y cómo queda una foto cuando la redimensionas a ellos.',
+    'h.social': '#/es/guias/tamanos-de-imagen-para-redes-sociales/',
+    'n.webp': 'Cómo abrir imágenes WebP y guardarlas como JPG',
+    'd.webp': 'Qué es un WebP, dónde se abre y qué cambia cuando se vuelve JPG.',
+    'h.webp': '#/es/guias/abrir-webp-y-guardar-como-jpg/',
+    'n.jvp': 'JPG o PNG: cuál usar',
+    'd.jvp': 'Cuándo gana cada formato, medido con las mismas fotos en los dos.',
+    'h.jvp': '#/es/guias/jpg-o-png/',
+    'n.loc': 'Cómo quitar la ubicación de las fotos',
+    'd.loc': 'Dónde guarda una foto su ubicación y cómo quitarla sin cambiar ningún píxel.',
+    'h.loc': '#/es/guias/quitar-la-ubicacion-de-las-fotos/',
+    'n.photos': 'Cómo convertir fotos en un solo PDF',
+    'd.photos': 'Un solo PDF con unas cuantas fotos, y lo que cambia su tamaño si comprimes antes las fotos.',
+    'h.photos': '#/es/guias/fotos-en-un-solo-pdf/',
+    'n.why': '¿Por qué mi PDF pesa tanto?',
+    'd.why': 'Qué ocupa el espacio en un PDF y qué hace con él cada nivel de Comprimir PDF.',
+    'h.why': '#/es/guias/por-que-mi-pdf-pesa-tanto/',
+    'n.res': 'Qué resolución elegir para pasar un PDF a JPG',
+    'd.res': 'Lo que una resolución más alta suma a los píxeles y al archivo, página por página.',
+    'h.res': '#/es/guias/resolucion-de-pdf-a-jpg/',
+    'n.split': 'Cómo dividir un PDF y por qué las partes pueden pesar más',
+    'd.split': 'Por qué las partes de un PDF pueden sumar más que el original, y cuándo no.',
+    'h.split': '#/es/guias/dividir-pdf-y-tamano-del-archivo/',
+    'n.combine': 'Cómo unir PDF en el celular',
+    'd.combine': 'Las formas de juntar PDF en un iPhone o en un celular Android, y el tamaño que obtienes.',
+    'h.combine': '#/es/guias/unir-pdf-en-el-celular/',
+    'n.m15': 'Hipoteca a 15 o 30 años: el costo real',
+    'd.m15': 'Lo que cuesta al mes el plazo corto y lo que ahorra en intereses, tasa por tasa.',
+    'h.m15': '#/es/guias/hipoteca-a-15-o-30-anos/',
+    'n.snow': 'Bola de nieve o avalancha, con números',
+    'd.snow': 'Las dos formas de pagar deudas, aplicadas a las mismas cuatro deudas.',
+    'h.snow': '#/es/guias/bola-de-nieve-o-avalancha/',
+    'n.extra': 'Cómo los pagos adicionales acortan una hipoteca',
+    'd.extra': 'Lo que hace pagar un poco más cada mes con el plazo y los intereses.',
+    'h.extra': '#/es/guias/pagos-adicionales-a-la-hipoteca/',
+    'n.refi': 'Refinanciamiento: halla tu mes de equilibrio',
+    'd.refi': 'Dos formas de contar el punto de equilibrio, y por qué pueden no coincidir.',
+    'h.refi': '#/es/guias/punto-de-equilibrio-del-refinanciamiento/',
+    'n.rent': 'Alquilar o comprar: cuándo empieza a convenir comprar',
+    'd.rent': 'El año en que comprar alcanza a alquilar, y lo que lo mueve.',
+    'h.rent': '#/es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/',
+    't.heic': 'HEIC a JPG',
+    'ht.heic': '#/es/heic-a-jpg/',
+    't.resize': 'Redimensionar imagen',
+    'ht.resize': '#/es/redimensionar-imagen/',
+    't.webp': 'WebP a JPG',
+    'ht.webp': '#/es/webp-a-jpg/',
+    't.png': 'PNG a JPG',
+    'ht.png': '#/es/png-a-jpg/',
+    't.i2p': 'Imagen a PDF',
+    'ht.i2p': '#/es/imagen-a-pdf/',
+    't.cpdf': 'Comprimir PDF',
+    'ht.cpdf': '#/es/comprimir-pdf/',
+    't.p2j': 'PDF a JPG',
+    'ht.p2j': '#/es/pdf-a-jpg/',
+    't.spdf': 'Dividir PDF',
+    'ht.spdf': '#/es/dividir-pdf/',
+    't.mpdf': 'Unir PDF',
+    'ht.mpdf': '#/es/unir-pdf/',
+    't.m15': 'Calculadora de hipoteca a 15 o 30 años',
+    'ht.m15': '#/es/calculadora-de-hipoteca/15-o-30-anos/',
+    't.debt': 'Calculadora de deudas',
+    'ht.debt': '#/es/calculadora-de-deudas/',
+    't.extra': 'Calculadora de pagos adicionales a la hipoteca',
+    'ht.extra': '#/es/calculadora-de-hipoteca/pagos-adicionales/',
+    't.refi': 'Calculadora de refinanciamiento',
+    'ht.refi': '#/es/calculadora-de-refinanciamiento/',
+    't.rent': 'Calculadora de alquilar o comprar',
+    'ht.rent': '#/es/calculadora-de-alquilar-o-comprar/',
+    'how.title': 'Cómo se hacen estas guías',
+    'how.p': 'Las guías de imagen y PDF se miden sobre archivos de prueba reales, con el mismo motor que hace funcionar las herramientas de este sitio. Cada guía indica los archivos que usó, el día de la medición y quién la revisó. Las guías de dinero calculan cada ejemplo con la calculadora que llevan dentro. Nada de lo que pones en una herramienta sale de tu dispositivo.',
+    'f.coffee': '¿Te gustan estas herramientas? Invítame un café',
+    'f.sign': 'Hecho por Victor Yuki Matusita en Curitiba · © 2026'
+  }
+};
+</script>
+
+</body>
+</html>

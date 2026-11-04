@@ -1,0 +1,318 @@
+/* FileOrca UX v2 (F10) · UX-04, the tool page from the drop to the result: the CSS of tool-a.html, tool-b.html,
+   tool-a-merge.html and tool-b-merge.html. Loaded after proto.css. Colours: only var(--token); no new token.
+   Sections:
+     1. shared: the header placeholder, the top block (F4-F7 f-2), the fixed rectangle, the band below it, the
+        first-visit cookie notice where today's one sits, buttons on deep, the numbers line, options, the Adjust
+        disclosure, the BeforeAfter as the site draws it
+     2. Alternative A (.ta-*): one place; the Oli in one corner; the result is the water that rose
+     3. Alternative B (.tb-*): the paper with the fold; the tray beside the sheet (from 768 px), tabs below it (phone)
+     4. Merge (.tm-*): the list inside the rectangle (A) and the pages of the merged paper beside the order (B) */
+
+/* ---------- 1. Shared ---------- */
+/* Header placeholder: today's header plus a Menu button and, from 768 px, a theme button (UX-01 draws the real one). */
+.tl-header__menu, .tl-header__theme { padding: 0 var(--space-3); }
+
+/* The top block (F4-F7 f-2): the H1 takes the whole measure; only the seal row leaves room for the Oli on the border. */
+.tl-top { display: grid; gap: var(--space-2); }
+.tl-top__seal { padding-right: 96px; }
+@media (min-width: 768px) { .tl-top__seal { padding-right: 136px; } }
+.tl-top .fo-seal { margin: 0; }
+
+/* The rectangle: one height for every state (356 px on the phone, 340 from 768). A state that is taller only grows
+   after a gesture of the person (opening the comparison, adding files), never by itself. */
+.tl-island { --tl-slot-h: 356px; --tl-band-h: 196px; display: grid; gap: var(--space-4); }
+@media (min-width: 768px) { .tl-island { --tl-slot-h: 340px; --tl-band-h: 120px; } }
+.tl-slot { position: relative; display: grid; min-height: var(--tl-slot-h); margin-top: var(--space-2); }
+.tl-slot > :is(.fo-drop, .fo-level, .fo-result, .tm-panel, .tm-sheet) { min-height: var(--tl-slot-h); }
+/* The band below the rectangle keeps its height in every state: the options before the result, the chips after. */
+.tl-band { display: grid; align-content: start; gap: var(--space-3); min-height: var(--tl-band-h); }
+
+/* Today's first-visit cookie notice, drawn where the site pins it (fixed, 8 px from the bottom of a 740 px screen;
+   from 768 px, 16 px from the bottom-left corner of an 800 px screen). The compact one is UX-09's. */
+.tl-cookie-zone { position: absolute; z-index: 20; top: 0; left: var(--space-2); right: var(--space-2); height: calc(740px - var(--space-2)); display: flex; align-items: flex-end; pointer-events: none; }
+@media (min-width: 768px) { .tl-cookie-zone { left: var(--space-4); right: auto; width: 440px; height: calc(800px - var(--space-4)); } }
+.tl-cookie-zone .fo-cookie { width: 100%; max-width: none; pointer-events: auto; background: var(--surface); color: var(--ink); }
+.tl-cookie-zone .fo-cookie__actions .fo-btn { padding: 0 var(--space-3); }
+
+/* Buttons and text on deep (the site's .fo-deep rules). */
+.fo-deep .fo-btn--ghost { --_ink: var(--on-deep); }
+.tl-notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+@media (max-width: 767px) { .fo-btn--block-mobile { display: flex; width: 100%; } }
+
+/* "2.6 MB → 717 KB" (Principle 4): Before struck through, the arrow icon with "to" for screen readers. */
+.tl-numbers { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); margin: 0; font: 600 24px/28px var(--font-display); }
+.tl-numbers > div { display: flex; align-items: baseline; gap: var(--space-2); }
+.tl-numbers dd { margin: 0; }
+.tl-numbers .fo-icon--inline { align-self: center; width: 20px; height: 20px; }
+.tl-numbers__before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
+.tl-numbers--paper { font-size: 20px; line-height: 26px; }
+.tl-numbers--paper .tl-numbers__before dd { color: var(--ink-muted); }
+
+/* Options (OptionGroup): a fieldset with no box of its own. */
+.tl-options { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: var(--space-2); }
+.tl-options > legend { padding: 0; margin-bottom: var(--space-2); font: 600 15px/20px var(--font-text); color: var(--ink); }
+.tl-options .fo-seg__opt span { display: grid; justify-items: center; }
+/* At 320 px the two options share 288 px: they may shrink and their lines wrap (WCAG 1.4.10; review of the F10, b-03). */
+.tl-options .fo-seg__opt, .tb-tray .fo-seg__opt { min-width: 0; padding-inline: var(--space-2); }
+.tl-options .fo-seg__opt :is(span, small), .tb-tray .fo-seg__opt :is(span, small) { min-width: 0; overflow-wrap: anywhere; text-align: center; }
+
+/* The Adjust disclosure: the options folded under one 48 px line after the result. */
+.tl-adjust { border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.tl-adjust > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-lg); font: 600 15px/20px var(--font-text); cursor: pointer; list-style: none; }
+.tl-adjust > summary::-webkit-details-marker { display: none; }
+.tl-adjust > summary .fo-icon { transition: transform var(--dur-quick) var(--ease-out); }
+.tl-adjust[open] > summary .fo-icon { transform: rotate(180deg); }
+.tl-adjust__now { color: var(--ink-muted); font-weight: 500; }
+.tl-adjust__body { padding: 0 var(--space-4) var(--space-4); }
+
+/* BeforeAfter as the site sizes it (components.css:324-325): 4:3, never taller than 360 px. */
+.tl-ba { --ba-ratio: 1.3333; --ba-max: 360px; justify-self: center; width: min(100%, calc(var(--ba-max) * var(--ba-ratio))); aspect-ratio: var(--ba-ratio); }
+.fo-deep .fo-ba { border-color: var(--surface); }
+.fo-ba__knob .fo-icon { width: 20px; height: 20px; }
+
+/* Chips: the site's NextStepChips; the arrow is the last icon. */
+.tl-next .fo-chip > .fo-icon:last-child { margin-left: auto; }
+
+/* The page below the tool. */
+.tl-how { counter-reset: none; }
+.tl-privacy p { max-width: calc(68 * 0.641rem); }
+
+/* ---------- 2. Alternative A: one place, one corner ---------- */
+/* The Oli never leaves the top-right corner of the rectangle: wave, gulp, swim, cheer and oops in the same spot. */
+.ta-oli { position: absolute; z-index: 3; top: -78px; right: 0; width: 88px; height: 88px; pointer-events: none; }
+@media (min-width: 768px) { .ta-oli { top: -76px; right: var(--space-4); width: 112px; height: 112px; } }
+.ta-oli > [data-oli] { width: 100%; height: 100%; }
+.ta-oli > [data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+.ta-oli > [data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }
+
+/* The zone: the water rests at 30 % (not 12 %), so the sea is visible above the cookie notice; the button sits in
+   the dry part, high enough to stay above today's notice in pt and es. */
+.ta-zone { --level: 30%; justify-content: center; padding: var(--space-6) var(--space-6) calc(var(--tl-slot-h) * 0.3 + var(--space-4)); }
+.ta-zone[data-state="over"] { --level: 60%; padding-bottom: calc(var(--tl-slot-h) * 0.6 + var(--space-4)); justify-content: flex-end; }
+.ta-zone[data-state="error"] { --level: 30%; justify-content: flex-start; padding-top: var(--space-6); gap: var(--space-4); text-align: left; align-items: stretch; }
+@media (min-width: 768px) { .ta-zone[data-state="error"] { padding-inline: var(--space-8); } .ta-zone[data-state="error"] .fo-btn { align-self: flex-start; } }
+.ta-zone .fo-drop__help { max-width: 32ch; }
+.ta-error { display: grid; gap: var(--space-2); }
+/* The way out may wrap: at 320 px "Escolher outros arquivos" does not fit one line inside the zone (WCAG 1.4.10;
+   review of the F10, b-03). */
+:is(.ta-zone, .tb-sheet)[data-state="error"] .fo-btn { min-width: 0; max-width: 100%; white-space: normal; }
+.ta-error__title { display: flex; gap: var(--space-2); align-items: flex-start; margin: 0; font: 600 20px/26px var(--font-display); color: var(--ink); }
+.ta-error__title .fo-icon { flex: none; margin-top: 1px; color: var(--danger); }
+.ta-error__why { margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+
+/* The WaterLevel stays the rectangle; the Oli swims in her corner, the water rises to her. */
+.ta-level .fo-water { z-index: 0; }
+
+/* The result is the water that rose: a band of water at the top with the wave, deep below it. */
+.ta-result { --ta-band: 20px; position: relative; align-content: start; gap: var(--space-2); padding: calc(var(--ta-band) + var(--space-3)) var(--space-4) var(--space-3); background: var(--water); }
+@media (min-width: 768px) { .ta-result { --ta-band: 24px; gap: var(--space-4); padding: calc(var(--ta-band) + var(--space-4)) var(--space-6) var(--space-6); } }
+.ta-result > .ta-result__sea { --level: calc(100% - var(--ta-band)); background: var(--deep); transition: none; border-radius: 0 0 calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)); }
+.ta-result > :not(.ta-result__sea) { position: relative; }
+/* The placard floats at the surface: it hangs over the edge of the card, in front of the Oli that holds it, and the
+   Oli's sentence wraps around it (two short lines beside it, then the whole width). */
+.ta-result__head { display: flow-root; }
+.ta-result__head .fo-result__says { margin: 0; font: 500 18px/24px var(--font-display); }
+@media (min-width: 768px) { .ta-result__head .fo-result__says { font-size: 20px; line-height: 26px; padding-top: var(--space-2); } }
+.ta-result__head .fo-placard { float: right; margin: -54px var(--space-1) var(--space-1) var(--space-3); }
+@media (min-width: 768px) { .ta-result__head .fo-placard { margin: -60px var(--space-16) 0 var(--space-4); } }
+.ta-result__actions { display: grid; gap: var(--space-1); }
+.ta-result__actions .fo-btn--download { display: flex; width: 100%; }
+.ta-result__more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-2); }
+@media (max-width: 767px) { .ta-result__more .fo-btn--ghost, .tb-result__more .fo-btn--ghost { padding: 0 6px; font-size: 15px; } }
+@media (min-width: 768px) {
+  .ta-result__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+  .ta-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+
+/* The band of A: the options before the result; the chips and the folded options after it. */
+.ta-band .fo-next { min-height: var(--tap-min); }
+
+/* ---------- 3. Alternative B: the paper with the fold ---------- */
+/* From 768 px the island is the sheet and a tray side by side; on the phone the tray becomes tabs under the sheet. */
+.tb-island { display: grid; gap: var(--space-4); }
+@media (min-width: 768px) { .tb-island { grid-template-columns: minmax(0, 1fr) 248px; column-gap: var(--space-6); align-items: start; } }
+.tb-island > .tl-slot { min-width: 0; }
+
+/* The Oli of B sits on the border too, left of the fold. */
+.tb-oli { position: absolute; z-index: 3; top: -78px; right: 34px; width: 88px; height: 88px; pointer-events: none; }
+@media (min-width: 768px) { .tb-oli { top: -76px; right: 40px; width: 112px; height: 112px; } }
+.tb-oli > [data-oli] { width: 100%; height: 100%; }
+.tb-oli > [data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+
+/* The empty sheet: the DropZone with the folded corner of a paper in the colour of the category. */
+.tb-sheet { --fo-ground: var(--bg); justify-content: center; }
+.tb-sheet[data-state="error"] { justify-content: flex-start; text-align: left; align-items: stretch; gap: var(--space-4); }
+.tb-sheet[data-state="error"] .fo-btn { justify-self: start; }
+@media (max-width: 767px) { .tb-sheet[data-state="error"] .fo-btn { width: 100%; } }
+
+/* The place where the file lands: an empty paper above the water (decorative); with a file over it, it dips. */
+.tb-ghost { --fo-ground: var(--surface); flex: none; width: 112px; height: 64px; margin-top: var(--space-2); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
+.tb-ghost--in { transform: translateY(20px) rotate(-4deg); }
+@media (max-width: 767px) { .tb-sheet[data-state]:not([data-state="over"]) { justify-content: flex-start; } .tb-sheet:not([data-state]) { justify-content: flex-start; padding-top: var(--space-12); } }
+
+/* Processing: the file's paper sinks; the water climbs over it and the Oli swims at the surface, right of it. */
+.tb-sink { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: var(--space-12) var(--space-4) var(--space-6); }
+.tb-sink__paper { --fo-ground: var(--surface); position: relative; z-index: 0; text-align: left; width: min(100%, 280px); margin-top: calc(var(--tl-slot-h) * (1 - var(--sink, 0.62)) - var(--space-12) - 40px); }
+.tb-sink > .fo-water { z-index: 1; }
+.tb-sink .fo-level__oli { left: auto; right: var(--space-4); translate: 0 0; }
+.tb-sink .fo-level__text { z-index: 2; }
+
+/* The paper the Oli brings back: white on the sea, the fold in the category colour, the placard pinned to it. */
+.tb-result { align-content: start; gap: var(--space-3); padding: var(--space-4); }
+@media (min-width: 768px) { .tb-result { gap: var(--space-3); padding: var(--space-4) var(--space-6); } }
+.tb-result .fo-result__says { margin: 0; font: 500 18px/24px var(--font-display); }
+@media (min-width: 768px) { .tb-result .fo-result__says { font-size: 20px; line-height: 26px; padding-right: 0; } }
+.tb-paper { --fo-ground: var(--deep); position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: center; max-width: calc(100% - 72px); padding: var(--space-3) var(--space-8) var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--surface); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+@media (min-width: 768px) { .tb-paper { grid-template-columns: 52px minmax(0, 1fr); max-width: calc(100% - 96px); } }
+.tb-paper__thumb { display: none; width: 52px; height: 52px; border-radius: var(--radius-xs); object-fit: cover; }
+@media (min-width: 768px) { .tb-paper__thumb { display: block; } }
+.tb-paper__name { margin: 0; font: 600 16px/22px var(--font-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tb-paper__meta { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.tb-paper .fo-placard { position: absolute; z-index: 1; top: -12px; right: -88px; }
+@media (min-width: 768px) { .tb-paper .fo-placard { right: -104px; } }
+.tb-result__actions { display: grid; gap: var(--space-1); }
+.tb-result__actions .fo-btn--download { display: flex; width: 100%; }
+.tb-result__more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-2); }
+@media (min-width: 768px) {
+  .tb-result__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+  .tb-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+.tb-result .tl-ba { --ba-max: 232px; --ba-ratio: 1.7778; }
+/* From 768 px, "Before and after" turns the paper over: the comparison takes its place in the card. */
+@media (min-width: 768px) { html[data-state="next"] .tb-result > .tb-paper { display: none; } }
+.tb-ba-tab { --ba-max: 200px; }
+
+/* The tray (from 768 px): beside the sheet, never below it; its height never passes the sheet's. */
+.tb-tray { display: grid; align-content: start; gap: var(--space-5); padding-top: var(--space-2); }
+.tb-tray .fo-next { flex-direction: column; align-items: stretch; }
+.tb-tray .fo-next__label { margin: 0; }
+.tb-tray .fo-chip { width: 100%; }
+.tb-tray .fo-seg { flex-direction: column; border-radius: var(--radius-lg); }
+.tb-tray .fo-seg__opt { border-radius: var(--radius-md); }
+
+/* The tabs (phone): Next, Compare and Adjust, under the sheet, in the reach of the thumb. */
+.tb-band { min-height: 176px; }
+.tb-tablist { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-pill); background: var(--surface-sunken); }
+.tb-tab { flex: 1 1 auto; min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid transparent; border-radius: var(--radius-pill); background: transparent; color: var(--ink-muted); font: 600 15px/20px var(--font-text); cursor: pointer; }
+.tb-tab:hover { color: var(--ink); }
+.tb-tab[aria-selected="true"] { background: var(--surface); color: var(--ink); border-color: var(--stroke); }
+.tb-tab:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.tb-tabpanel { padding-top: var(--space-3); }
+.tb-tabpanel[hidden] { display: none; }
+
+/* How it works, as the three moments of the file (G-16): the Oli at the right of each step, looking at it. */
+.tb-steps { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.tb-step { display: grid; grid-template-columns: minmax(0, 1fr) 64px; align-items: center; gap: var(--space-4); padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
+.tb-step__oli { width: 64px; height: 64px; }
+.tb-step__oli > svg { animation: none; }
+.tb-step__n { display: block; font: 600 24px/28px var(--font-display); }
+.tb-step__t { margin: var(--space-1) 0 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+
+/* ---------- 4. Merge ---------- */
+/* A: the list lives inside the rectangle; the Merge button comes first, the order after it. */
+.tm-panel { position: relative; box-sizing: border-box; display: grid; align-content: start; gap: var(--space-3); padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
+@media (min-width: 768px) { .tm-panel { padding: var(--space-6); } }
+.tm-panel__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); padding-right: 72px; }
+@media (min-width: 768px) { .tm-panel__head { padding-right: 112px; } }
+.tm-count { margin: 0; font: 600 20px/24px var(--font-display); }
+.tm-count__pages { color: var(--ink-muted); font-weight: 500; }
+.tm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.tm-help { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+
+.tm-rows { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.tm-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.tm-row .fo-file { --fo-ground: var(--surface); grid-template-columns: 32px minmax(0, 1fr); padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3); }
+.tm-row .fo-file__meta { gap: 0 var(--space-2); }
+/* The position in the order: a numbered circle in deep, the ScenarioCompare pattern. */
+.tm-n { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--deep); color: var(--on-deep); font: 600 16px/1 var(--font-display); }
+.tm-moves { display: flex; gap: var(--space-1); }
+.tm-move .fo-icon { width: 20px; height: 20px; }
+.tm-move--up .fo-icon { rotate: -90deg; }
+.tm-move--down .fo-icon { rotate: 90deg; }
+/* Where an arrow cannot go (up on the first row, down on the last), an empty 48 px place: no disabled button
+   drawn heavier than the live ones (merge-pdf-en-1280-light-return-list.jpg). */
+.tm-move--none { display: block; width: var(--tap-min); height: var(--tap-min); }
+/* "Add more PDFs": a small DropZone at the end of the list (dashed, a little water), a real button. */
+.tm-add { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; min-height: 56px; padding: 0 var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 700 16px/20px var(--font-text); cursor: pointer; }
+.tm-add:hover { border-color: var(--brand); }
+.tm-add > .fo-water { --level: 20%; }
+.tm-add > :not(.fo-water) { position: relative; }
+
+.tm-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.tm-foot .tm-add { flex: 1 1 180px; width: auto; }
+
+/* Review of the F10 (a-01). D-26: the order help is in view, right above the rows, not under the last one. */
+.tm-help--order { margin-top: calc(-1 * var(--space-1)); }
+/* D-27: while the files are read, the panel is already the list (no WaterLevel blinking for 30 to 150 ms); the place
+   of Merge PDFs holds a line of the same height, so nothing moves when the button arrives. The WaterLevel of the
+   reading only shows after 400 ms, as the processing does (Principle 8). D-21: with one PDF left, the same place says
+   what is missing. */
+.tm-hold { display: flex; align-items: center; min-height: 60px; margin: 0; font: 600 16px/22px var(--font-text); color: var(--ink); }
+.tm-hold--need { color: var(--ink-muted); font-weight: 500; }
+.tm-row--reading .fo-bar { margin-top: var(--space-2); }
+/* D-21: every row has a remove button (the trash icon, 48 px), after the arrows; the arrows stack on the phone so the
+   name keeps its width (the row is 100 px tall there). */
+.tm-row:has(> .tm-remove) { grid-template-columns: minmax(0, 1fr) auto auto; }
+.tm-row.tm-row--reading { grid-template-columns: minmax(0, 1fr) auto; }
+.tm-remove .fo-icon { width: 20px; height: 20px; }
+@media (max-width: 767px) {
+  .tm-moves { flex-direction: column; }
+  /* The card takes the height of the stacked arrows, so each pair of arrows reads as its own row's. */
+  .tm-row:has(> .tm-remove) { align-items: stretch; }
+  .tm-row:has(> .tm-remove) > .fo-file { align-content: center; }
+  .tm-row > .tm-remove { align-self: center; }
+}
+/* The undo line takes the place of the row that left: a dashed paper of the row height, the sentence and Undo. It
+   stays until the next action (Merge, Add or another remove): no timer (WCAG 2.2.1). */
+.tm-undo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); min-height: 72px; margin: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.tm-undo__btn { flex: none; }
+
+/* With the list on screen the rectangle keeps the list's height (--tm-lock, measured by the island in the site; here,
+   the height of two files in the longest language) through the WaterLevel and the result: nothing below moves. */
+.tm-island { --tm-lock: 480px; }
+html[data-lang="es"] .tm-island { --tm-lock: 540px; }
+html[data-lang="pt"] .tm-island { --tm-lock: 564px; }
+@media (min-width: 768px) { .tm-island, html:is([data-lang="pt"], [data-lang="es"]) .tm-island { --tm-lock: 412px; } }
+.tm-island .tl-slot > :is(.tm-panel, .fo-level, .fo-result) { min-height: var(--tm-lock); }
+.tm-band { --tl-band-h: 252px; }
+.tm-b-band { --tl-band-h: 0px; }
+@media (min-width: 768px) { .tm-band, .tm-b-band { --tl-band-h: 120px; } }
+
+/* The result of the merge: the same deep card, kept at the height of the list it replaced. */
+.tm-result { align-content: start; }
+
+/* B: the merged paper shows its pages in order (the fold on each, coral for PDF); the order sits beside it. */
+.tm-sheet { display: grid; align-content: start; gap: var(--space-4); padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
+@media (min-width: 768px) { .tm-sheet { padding: var(--space-6); } }
+.tm-merged { --fo-ground: var(--surface); position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pages name" "pages meta" "legend legend"; gap: var(--space-1) var(--space-3); align-items: center; padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+.tm-merged--deep { --fo-ground: var(--deep); border-color: var(--surface); }
+.tm-merged > .tm-pages { grid-area: pages; }
+.tm-merged > .tm-legend { grid-area: legend; margin-top: var(--space-2); }
+/* In the result the legend gives way to the Download (the order list beside or below keeps the same marks). */
+.tm-merged--deep > .tm-legend { display: none; }
+.tm-merged__name { grid-area: name; align-self: end; margin: 0; font: 600 16px/22px var(--font-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-merged__meta { grid-area: meta; align-self: start; margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.tm-pages { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.tm-page { position: relative; display: grid; align-content: end; justify-items: center; width: 36px; height: 46px; padding-bottom: 2px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); font: 600 13px/16px var(--font-text); color: var(--ink); }
+/* The lines of a page (a stand-in for the PDF.js miniature of the real page). */
+.tm-page::before { content: ""; position: absolute; top: 7px; left: 6px; right: 6px; height: 12px; border-block: var(--stroke-2) solid var(--hairline); }
+.tm-page--b { border-style: dashed; }
+.tm-legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin: 0; padding: 0; list-style: none; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.tm-legend__key { display: inline-block; width: 14px; height: 14px; margin-right: var(--space-1); vertical-align: -2px; border: var(--stroke-2) solid var(--stroke); border-radius: 3px; }
+.tm-legend__key--b { border-style: dashed; }
+.tm-order { display: grid; align-content: start; gap: var(--space-3); }
+.tm-order__label { margin: 0; font: 600 15px/20px var(--font-text); color: var(--ink-muted); }
+.tm-sheet .fo-btn--brand { justify-self: start; }
+@media (max-width: 767px) { .tm-sheet .fo-btn--brand { justify-self: stretch; } }
+/* From 768 px the order is a column of its own beside the sheet (the tray of B); the chips stay under the sheet,
+   next to the Download. On the phone: the sheet, the chips (or the help line), then the order. */
+@media (min-width: 768px) {
+  .tm-b-island { grid-template-columns: minmax(0, 1fr) 272px; grid-template-areas: "slot order" "band order"; column-gap: var(--space-6); align-items: start; }
+  .tm-b-island > .tl-slot { grid-area: slot; }
+  .tm-b-island > .tm-b-band { grid-area: band; }
+  .tm-b-island > .tm-order { grid-area: order; padding-top: var(--space-2); }
+  html:is([data-state="rest"], [data-state="drag"], [data-state="error"]) .tm-b-island > .tl-slot { grid-column: 1 / -1; }
+}
+.tm-b-island .tm-row .fo-file { grid-template-columns: 36px minmax(0, 1fr); padding-right: var(--space-6); }
+.tm-b-island .tm-row .tm-page { width: 36px; height: 44px; }
+.tm-order__again { justify-self: start; }

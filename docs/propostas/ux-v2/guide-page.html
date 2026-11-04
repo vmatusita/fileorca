@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en" data-state="rest" data-proto-state="rest result table" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide page · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?state=result;?state=table;?lang=pt;?lang=es&state=result;?lang=pt&state=table;?lang=es">
+<meta name="proto-shots" content=";?state=result;?state=table;?lang=pt">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-state="rest"] [data-when]:not([data-when~="rest"]),
+html[data-state="result"] [data-when]:not([data-when~="result"]),
+html[data-state="table"] [data-when]:not([data-when~="table"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<link rel="stylesheet" href="guide-page.css">
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path id="oli-p12" d="M36 58.5 Q 41 52 46 58.5" fill="none" stroke="#0F1B2D" stroke-width="3" stroke-linecap="round"/><symbol id="oli-wave" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M55 86 C57 76 63 67 71 63 C77 61 79 67 76 72 C72 80 67 86 63 91 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path d="M84 52 q5 -3 8 1 M86 44 q7 -5 12 1" fill="none" stroke="#0B63F6" stroke-width="2.6" stroke-linecap="round"/></g></symbol><symbol id="oli-cheer" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(-10 64 64) translate(0 -6)"><g fill="#0B63F6"><path d="M30 118 q3 -8 6 0 q-3 4 -6 0z"/><path d="M50 122 q3 -9 6 0 q-3 4 -6 0z"/><path d="M76 118 q3 -8 6 0 q-3 4 -6 0z"/></g><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p12"/><use href="#oli-p8"/><path d="M15 78 Q 27 77 39 81 Q 34 95 22 93 Q 15 90 15 78 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="26" cy="89" rx="6" ry="3.2" fill="#FF9CA8"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></g></g></symbol></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-state">
+      <span class="proto-control__label" id="proto-control-state">State</span>
+      <a href="?state=rest" aria-current="true">rest</a>
+      <a href="?state=result">result</a>
+      <a href="?state=table">table</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
+  </div>
+</nav>
+<div class="proto-page g-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#" aria-label="FileOrca home" data-t-aria-label="home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="fo-header__lang" popovertarget="g-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="langCode">EN</span><span class="fo-sr" data-t="langSr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="g-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="langMenu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame proto-frame--rail">
+    <main id="main" class="proto-main g-main">
+      <nav aria-label="Breadcrumb" data-t-aria-label="crumbs">
+        <ol class="fo-crumbs">
+          <li><a class="fo-crumbs__link" href="#" data-t="crumbHome">Home</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li><a class="fo-crumbs__link" href="#" data-t="crumbGuides">Guides</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li><span aria-current="page" data-t="h1">How to convert HEIC to JPG on Windows</span></li>
+        </ol>
+      </nav>
+      <div class="fo-top fo-top--calc g-top">
+        <h1 class="fo-h1" data-t="h1">How to convert HEIC to JPG on Windows</h1>
+        <p class="fo-lead" data-t="lead">Your iPhone saved the photo as HEIC, and Windows will not open it, or a website will not take it. Here is why, and how to end up with a JPG.</p>
+        <p class="fo-reviewed g-sig" data-t-html="sig">Reviewed by Victor Yuki Matusita · <time datetime="2026-11-02">Nov 2, 2026</time></p>
+      </div>
+      <section class="g-facts fo-dogear fo-cat--image" aria-labelledby="g-facts-title" data-content="facts">
+        <h2 class="g-facts__title" id="g-facts-title" data-t="factsTitle">What we measured</h2>
+        <dl class="g-facts__list">
+          <div class="g-facts__stat">
+            <dt data-t="s1dt">Size as JPG, all together</dt>
+            <dd class="g-facts__n" data-t="s1dd">+25%</dd>
+            <dd class="g-facts__sub"><span data-t="s1from">18.8 MB</span><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg><span class="fo-sr" data-t="to"> to </span><span data-t="s1to">23.6 MB</span></dd>
+          </div>
+          <div class="g-facts__stat">
+            <dt data-t="s2dt">JPGs that kept the GPS location</dt>
+            <dd class="g-facts__n" data-t="s2dd">0 of 10</dd>
+          </div>
+        </dl>
+        <p class="g-facts__sample" data-t-html="sample">10 HEIC test photos from 7 cameras. <a href="#measured">See each one in the table</a>.</p>
+      </section>
+      <section class="g-tool" aria-labelledby="guide-tool">
+        <h2 class="g-tool__h2" id="guide-tool" data-t="toolH2">Convert your HEIC photos here</h2>
+        <div class="fo-tool-island g-island">
+          <div class="fo-slot g-slot">
+            <div class="fo-drop" data-when="rest table">
+              <div class="fo-drop__sea"><div class="fo-water"></div></div>
+              <div class="fo-drop__oli" data-oli="wave" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-wave"/></svg></div>
+              <div class="fo-drop__badge" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
+              <p class="fo-drop__title fo-desktop-only" data-t="dropTitle">Drop images here</p>
+              <button type="button" class="fo-btn fo-btn--brand fo-btn--lg g-choose" aria-describedby="g-drop-help"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg><span data-t="choose">Choose images</span></button>
+              <p class="fo-drop__help" id="g-drop-help"><span class="fo-desktop-only"><span data-t="helpDesk">or paste with</span> <span class="fo-kbd">Ctrl V</span> · <span data-t="formats">HEIC or HEIF</span></span><span class="fo-mobile-only" data-t="helpMobile">HEIC or HEIF, as many as you like</span></p>
+            </div>
+            <section class="fo-result fo-deep g-result" aria-live="polite" aria-labelledby="g-says" data-when="result">
+              <div class="fo-result__head">
+                <div class="fo-result__oli" data-oli="cheer" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-cheer"/></svg></div>
+                <p class="fo-result__says" id="g-says" data-t="says">Done! Your photo is converted.</p>
+              </div>
+              <dl class="fo-result__stats">
+                <div class="fo-result__stat"><dt>HEIC</dt><dd>721 KB</dd></div>
+                <div class="fo-result__stat"><dt>JPG</dt><dd data-t="jpgSize">1.2 MB</dd></div>
+                <div class="fo-result__stat"><dt data-t="change">Change</dt><dd data-t="changeVal">+66%</dd></div>
+              </dl>
+              <div class="g-result__actions">
+                <a class="fo-btn fo-btn--download fo-btn--lg g-download" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-t="download">Download</span> <span class="fo-btn__meta">· <span data-t="jpgSize">1.2 MB</span></span></a>
+                <button type="button" class="fo-btn fo-btn--ghost" data-t="startOver">Start over</button>
+                <details class="g-compare">
+                  <summary class="fo-btn fo-btn--ghost"><span data-t="compare">Compare</span><span class="fo-sr" data-t="compareSr"> before and after</span></summary>
+                  <div class="fo-ba g-ba">
+                    <img src="../../design/assets/photo.jpg" alt="The photo as HEIC" data-t-alt="altBefore" width="1200" height="900">
+                    <img class="fo-ba__after" src="../../design/assets/photo-after.jpg" alt="The same photo as JPG" data-t-alt="altAfter" width="1200" height="900">
+                    <span class="fo-ba__tag fo-ba__tag--l" data-t="tagBefore">Before · 721 KB</span><span class="fo-ba__tag fo-ba__tag--r" data-t="tagAfter">After · 1.2 MB</span>
+                    <input class="fo-ba__range" type="range" min="0" max="100" value="50" aria-label="Compare before and after" data-t-aria-label="compareLabel">
+                    <span class="fo-ba__line"></span>
+                    <span class="fo-ba__knob"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-4 5 4 5"/><path d="m15 7 4 5-4 5"/></svg></span>
+                  </div>
+                </details>
+              </div>
+              <p class="fo-result__notes g-result__notes" data-t="metadata">Oli removed the photo metadata, including the GPS location.</p>
+            </section>
+          </div>
+          <div class="g-after">
+            <p class="g-after__intro" data-when="rest table" data-t="toolIntro">Drop one HEIC photo or a whole batch. Each one becomes a JPG inside this browser tab, so the photos are never uploaded, and a batch comes back as one ZIP.</p>
+            <nav class="fo-next g-next" aria-label="Next step" data-t-aria-label="nextLabel" data-when="result">
+              <span class="fo-next__label" data-t="next">Next:</span>
+              <a class="fo-chip fo-cat--image" href="#"><span class="fo-chip__dot"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></span><span data-t="chipCompress">Compress image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+              <a class="fo-chip fo-cat--image" href="#"><span class="fo-chip__dot"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="chipResize">Resize image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>            </nav>
+          </div>
+          <fieldset class="fo-field fo-options g-options" aria-describedby="g-save-help">
+            <legend class="fo-field__label" data-t="saveAs">Save as</legend>
+            <div class="fo-seg">
+              <label class="fo-seg__opt"><input type="radio" name="g-to" value="jpeg" checked>JPG</label>
+              <label class="fo-seg__opt"><input type="radio" name="g-to" value="png">PNG</label>
+            </div>
+            <p class="fo-field__help" id="g-save-help" data-t="saveHelp">JPG opens everywhere and is lighter than PNG. PNG adds no further loss, but the file is much bigger.</p>
+          </fieldset>
+        </div>
+      </section>
+      <div class="fo-prose fo-guide g-intro" data-guide-text data-flow="intro">
+        <p data-t="intro.0">HEIC is the file Apple writes when an iPhone or iPad saves photos in its High Efficiency format, which is built on HEIF. The picture is the same as in a JPG, but it is packed more tightly, so the phone keeps more photos in the same space. The catch is everywhere else: Windows needs extra software to show it, and many upload forms still ask for a JPG.</p>
+        <p data-t="intro.1">You can fix this in different places. You can teach Windows to read HEIC, you can tell the iPhone to stop writing it, or you can convert the files you already have. Each one solves a different part of the problem, and the last one is the only one that gives you JPG files to send anywhere.</p>
+      </div>
+      <section class="fo-section fo-prose" aria-labelledby="part-0" data-flow="sec0">
+        <h2 id="part-0" data-t="sec.0.h">Why Windows asks for an extension</h2>
+        <p data-t="sec.0.p.0">Windows does not read HEIC on its own. When you open one in the Photos app, Microsoft says you may see the message "You need an extension to use this file." The fix Microsoft gives is a pair of extensions from the Microsoft Store: HEIF Image Extensions, which is free, and HEVC Video Extensions, which costs $0.99. Microsoft says you need both, even if you only plan to look at photos, and that the Photos app has to be restarted after they are installed.</p>
+        <p data-t="sec.0.p.1">That is a good fix if all you want is to look at the photos on your own PC. It does not change the files, though. They are still HEIC, so the website, the shared folder or the person you send them to may still be unable to open them.</p>
+      </section>
+      <div class="fo-ad fo-ad--content" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <section class="fo-section fo-prose" aria-labelledby="part-1" data-flow="sec1">
+        <h2 id="part-1" data-t="sec.1.h">Stop the iPhone from writing HEIC</h2>
+        <p data-t="sec.1.p.0">If most of your photos end up on Windows, you can switch the camera to JPG for everything you take from now on. Apple describes the setting: open Settings, tap Camera, tap Formats, then tap Most Compatible. From then on the camera saves photos as JPEG and videos as H.264. Choosing High Efficiency goes back to HEIF and HEVC, which take less space on the phone.</p>
+        <p data-t="sec.1.p.1">Apple also recommends Most Compatible when you transfer photos to a Windows PC, together with its Apple Devices app from the Microsoft Store. This only changes the photos you take after the switch. The ones already on the phone stay HEIC.</p>
+      </section>
+      <section class="fo-section fo-prose" aria-labelledby="part-2" data-flow="sec2">
+        <h2 id="part-2" data-t="sec.2.h">Let the transfer convert them</h2>
+        <p data-t="sec.2.p.0">When photos travel from an iPhone to a computer over a cable, Apple says the media may be converted to JPEG or H.264 on the way. The phone does this unless it is told to keep the originals: open Settings, tap Apps, tap Photos, then scroll down and tap Keep Originals. If you leave that setting off, the copies that reach the PC can already be JPGs.</p>
+        <p data-t="sec.2.p.1">Microsoft points to a similar route without a cable: many devices convert HEIC photos to a more common format when the files are transferred or emailed, and OneDrive can convert photo files on its own. Both depend on how the photos travel, so they are worth knowing but hard to count on for a folder of files you already have.</p>
+      </section>
+      <div class="fo-mobile-only g-adbox"><div class="fo-ad fo-ad--content" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></div>
+      <section class="fo-section fo-prose" aria-labelledby="part-3" data-flow="sec3">
+        <h2 id="part-3" data-t="sec.3.h">Convert the files you already have</h2>
+        <p data-t="sec.3.p.0">For photos that are already HEIC on your PC or in a download folder, a converter is the direct way. The tool on this page reads each HEIC file with libheif, the same open decoder for every browser, turns the main picture upright and writes a new JPG from its pixels. You can drop one file or a whole folder of them, and the ZIP keeps the original names with a .jpg ending.</p>
+        <p data-t="sec.3.p.1">Nothing is sent anywhere. The conversion runs in your browser tab, which is also why it works for private photos: the network tab of your browser shows no request carrying the file.</p>
+        <p data-t-html="toolLink">The panel at the top of this guide is the same tool as our <a href="#">HEIC to JPG page</a>, which also answers the common questions.</p>
+      </section>
+      <section class="fo-section fo-prose" aria-labelledby="part-4" data-flow="sec4">
+        <h2 id="part-4" data-t="sec.4.h">What converting did to our photos</h2>
+        <p data-t="sec.4.p.0">We ran the converter on our 10 HEIC test photos, taken with 7 different camera models, from iPhones to a Samsung phone and an Apple Vision Pro. Together the HEIC files weighed 18.8 MB. The JPGs weighed 23.6 MB, which is 25% more.</p>
+        <p data-t="sec.4.p.1">That is the price of compatibility. Photo by photo the change went from −7% to +73%, and half of them grew by 34% or less. A JPG packs the same picture less tightly than HEIC, which is why our photos came out bigger together, not smaller. If you need it smaller, compress or resize the JPG afterwards.</p>
+        <p data-t="sec.4.p.2">All ten JPGs kept the size in pixels of the photo as the phone shows it, turned the right way up.</p>
+      </section>
+      <div class="fo-mobile-only g-adbox"><div class="fo-ad fo-ad--content" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></div>
+      <section class="fo-section fo-prose" aria-labelledby="part-5" data-flow="sec5">
+        <h2 id="part-5" data-t="sec.5.h">The location does not come along</h2>
+        <p data-t="sec.5.p.0">A photo can carry where it was taken. Of our 10 photos, 3 had real GPS coordinates, and 5 had a GPS tag of some kind, filled or empty. After the conversion, the number of JPGs with any GPS data in them was 0.</p>
+        <p data-t="sec.5.p.1">This is on purpose: the tool writes each JPG from the pixels, so the location, the camera details and the other metadata of the HEIC stay behind. If you want the location kept, for a photo map or an album, keep the HEIC original, or use the export of your photo app instead.</p>
+      </section>
+      <section class="fo-section fo-prose" aria-labelledby="part-6" data-flow="sec6">
+        <h2 id="part-6" data-t="sec.6.h">What else stays in the HEIC</h2>
+        <p data-t="sec.6.p.0">Converting re-encodes the picture, so the JPG is a new file, not a copy of the HEIC with a new name. Some HEIC files also hold more than one picture. Only the main picture becomes the JPG: the depth map of a portrait shot and the second picture of a spatial photo are left out.</p>
+        <p data-t="sec.6.p.1">Your HEIC files are never changed. Keep them as the originals and send the JPGs, and you lose nothing.</p>
+      </section>
+      <div class="fo-ad fo-ad--content fo-mobile-only" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <section class="fo-section fo-prose g-measured" aria-labelledby="measured" data-content="measured" data-flow="measured">
+        <h2 id="measured" data-t="tableH2">Photo by photo</h2>
+        <p data-t="measuredIntro">Every HEIC test photo of this site, converted with the defaults of the tool above. Change is the JPG against the HEIC.</p>
+        <p class="g-hint fo-mobile-only" id="g-hint"><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg><span data-t="hint">Scroll sideways to see all 6 columns</span></p>
+        <div class="fo-table-wrap g-table-wrap" tabindex="0" role="region" aria-labelledby="measured">
+          <table class="fo-table g-table">
+          <caption class="fo-sr" data-t="caption">Each HEIC test photo: its camera, its size as HEIC and as JPG, the change, its size in pixels and its GPS before the conversion</caption>
+          <thead><tr><th scope="col" data-t="th.0">Camera</th><th scope="col" data-t="th.1">HEIC</th><th scope="col" data-t="th.2">JPG</th><th scope="col" data-t="th.3">Change</th><th scope="col" data-t="th.4">Pixels</th><th scope="col" data-t="th.5">GPS before</th></tr></thead>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="3" class="g-table__cam">Apple iPhone 11 Pro</th><th scope="row" class="g-table__key" data-t="td.0.1">721 KB</th><td data-t="td.0.2">1.2 MB</td><td data-t="td.0.3">+66%</td><td data-t="td.0.4">3,024 × 4,032</td><td data-t="td.0.5">None</td></tr>
+            <tr><th scope="row" class="g-table__key" data-t="td.1.1">6.2 MB</th><td data-t="td.1.2">6.3 MB</td><td data-t="td.1.3">+2%</td><td data-t="td.1.4">3,024 × 4,032</td><td data-t="td.1.5">None</td></tr>
+            <tr><th scope="row" class="g-table__key" data-t="td.2.1">2.7 MB</th><td data-t="td.2.2">3.7 MB</td><td data-t="td.2.3">+38%</td><td data-t="td.2.4">3,024 × 4,032</td><td data-t="td.2.5">None</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="1" class="g-table__cam">Apple iPhone 11 Pro Max</th><th scope="row" class="g-table__key" data-t="td.3.1">833 KB</th><td data-t="td.3.2">1.4 MB</td><td data-t="td.3.3">+73%</td><td data-t="td.3.4">2,566 × 3,313</td><td data-t="td.3.5">Yes</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="1" class="g-table__cam">Apple iPhone 13 Pro Max</th><th scope="row" class="g-table__key" data-t="td.4.1">2.2 MB</th><td data-t="td.4.2">3.2 MB</td><td data-t="td.4.3">+46%</td><td data-t="td.4.4">3,024 × 4,032</td><td data-t="td.4.5">None</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="1" class="g-table__cam">Apple iPhone 7</th><th scope="row" class="g-table__key" data-t="td.5.1">1.8 MB</th><td data-t="td.5.2">2.7 MB</td><td data-t="td.5.3">+56%</td><td data-t="td.5.4">4,032 × 3,024</td><td data-t="td.5.5">Yes</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="2" class="g-table__cam">Apple iPhone 13 Pro</th><th scope="row" class="g-table__key" data-t="td.6.1">1.3 MB</th><td data-t="td.6.2">1.5 MB</td><td data-t="td.6.3">+14%</td><td data-t="td.6.4">4,032 × 3,024</td><td data-t="td.6.5">Yes</td></tr>
+            <tr><th scope="row" class="g-table__key" data-t="td.7.1">239 KB</th><td data-t="td.7.2">309 KB</td><td data-t="td.7.3">+29%</td><td data-t="td.7.4">1,512 × 850</td><td data-t="td.7.5">None</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="1" class="g-table__cam">samsung SM-G975F</th><th scope="row" class="g-table__key" data-t="td.8.1">1.6 MB</th><td data-t="td.8.2">2.0 MB</td><td data-t="td.8.3">+21%</td><td data-t="td.8.4">3,024 × 4,032</td><td data-t="td.8.5">Empty tag</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" rowspan="1" class="g-table__cam">Apple Vision Pro</th><th scope="row" class="g-table__key" data-t="td.9.1">1.3 MB</th><td data-t="td.9.2">1.2 MB</td><td data-t="td.9.3">−7%</td><td data-t="td.9.4">2,560 × 2,560</td><td data-t="td.9.5">Zeroed</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <p class="fo-reviewed" data-t="note">Measured on November 2, 2026 in Chromium 156 and WebKit 27.2 on Windows, with the tool above. The table shows Chromium; WebKit gave the same bytes for all 10 photos. No JPG kept any GPS data.</p>
+        <p class="fo-reviewed g-history" data-t-html="history">First version of this guide, published on <time datetime="2026-11-02">Nov 2, 2026</time> with these measurements.</p>
+      </section>
+      <section class="fo-section fo-prose" aria-labelledby="sources" data-content="sources" data-flow="sources">
+        <h2 id="sources" data-t="sourcesH2">Sources</h2>
+        <ul>
+          <li data-t-html="src.0"><a href="https://support.microsoft.com/en-us/windows/apps/photos/photos-app-video-editor-error-can-t-view-this-file-type">Microsoft Support: Photos app Video Editor error, can’t view this file type</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li>
+          <li data-t-html="src.1"><a href="https://apps.microsoft.com/detail/9pmmsr1cgpwg?hl=en-US&amp;gl=US">Microsoft Store: HEIF Image Extension</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li>
+          <li data-t-html="src.2"><a href="https://support.apple.com/en-us/116944">Apple Support: Using HEIF or HEVC media on Apple devices</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li>
+          <li data-t-html="src.3"><a href="https://support.apple.com/en-us/120267">Apple Support: Transfer photos from your iPhone or iPad</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li>
+        </ul>
+      </section>
+      <section class="fo-section" aria-labelledby="related" data-content="related" data-flow="related">
+        <h2 id="related" data-t="relatedH2">Related tools and guides</h2>
+        <ul class="fo-grid">
+          <li><a class="fo-tool fo-dogear fo-cat--image" href="#"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></span><h3 class="fo-tool__name" data-t="rel.0.n">Compress image</h3><p class="fo-tool__desc" data-t="rel.0.d">Make a JPG, PNG or WebP lighter, right in your browser.</p></a></li>
+          <li><a class="fo-tool fo-dogear fo-cat--image" href="#"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><h3 class="fo-tool__name" data-t="rel.1.n">Resize image</h3><p class="fo-tool__desc" data-t="rel.1.d">Change the size of an image by pixels or by percentage.</p></a></li>
+          <li><a class="fo-tool fo-dogear fo-cat--pdf" href="#"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><h3 class="fo-tool__name" data-t="rel.2.n">Image to PDF</h3><p class="fo-tool__desc" data-t="rel.2.d">Put your images in one PDF, one image per page.</p></a></li>
+          <li><a class="fo-tool fo-dogear fo-cat--image" href="#"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span><h3 class="fo-tool__name" data-t="rel.3.n">How to remove location data from photos</h3><p class="fo-tool__desc" data-t="rel.3.d">Where a photo keeps its location, and the way to strip it that changes no pixel.</p></a></li>
+          <li><a class="fo-tool fo-dogear fo-cat--image" href="#"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg></span><h3 class="fo-tool__name" data-t="rel.4.n">JPG or PNG: which one to use</h3><p class="fo-tool__desc" data-t="rel.4.d">When each format wins, measured on the same photos in both.</p></a></li>
+        </ul>
+      </section>
+      <div class="fo-desktop-only g-multiplex"><div class="fo-ad fo-ad--multiplex" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></div>
+    </main>
+    <aside class="proto-rail g-rail" aria-label="Advertisements" data-t-aria-label="proto.ad"><div class="fo-ad fo-ad--rail" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div><div class="g-rail2"><div class="fo-ad fo-ad--rail" data-ad-area="arquivos"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></div></aside>
+  </div>
+  <footer class="fo-footer fo-deep">
+    <div class="fo-footer__cols">
+      <div><h2 data-t="fImage">Image</h2><ul><li><a href="#" data-t="fCompress">Compress image</a></li><li><a href="#" data-t="fHeic">HEIC to JPG</a></li><li><a href="#" data-t="fGuides">Guides</a></li></ul></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#" data-t="fAbout">About</a></li><li><a href="#" data-t="fPrivacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="fCoffee">Like these tools? Support them with a coffee</span></a><span data-t="fSign">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-13 · página de guia · F13</p>
+    <h2 id="spec-title">O que esta página especifica</h2>
+    <p>O molde dos 10 guias de arquivo (<code>src/views/FileGuideView.astro</code>), mostrado no guia "HEIC para JPG no Windows" nos três idiomas. Ele muda a ordem do molde (o que medimos, a ferramenta, depois a prosa), a assinatura, a tabela das medidas e o lugar dos anúncios. A ilha da ferramenta é a mesma da página da ferramenta (§ 184): o que o UX-04 mudar no painel, o guia herda.</p>
+    <p><strong>Mais único:</strong> a ficha do que medimos é um papel com a <em>dobra</em> na cor do hub (turquesa, imagem) e números em <code>number-md</code>; a ferramenta mantém a <em>água</em> e a Oli na borda; o resultado chega no <em>mar</em> (<code>deep</code>) no mesmo retângulo; e a tabela que continua para o lado ganha o <em>traço</em> tracejado da DropZone na borda, como a beira de um papel comprido. Nenhum concorrente mostra o que mediu acima da ferramenta.</p>
+
+    <h3>O que resolve</h3>
+    <ul>
+      <li><strong>D-47:</strong> o Escolher sai de y 1.338–1.442 (1,81–1,95 telas) para y 898 (1,21 tela) a 360 nos três idiomas, com o H2 da ferramenta, a Oli e a borda do painel já na primeira tela; a 1280, de 904–964 para 716–776, inteiro acima da dobra de 800, e o painel começa em 540 (a faixa para soltar o arquivo vai de 46–72 px para 260 px visíveis).</li>
+      <li><strong>D-49:</strong> os chips ficam 162 px abaixo do fim do Baixar a 360 (hoje 685–705) e 86 px a 1280 (hoje 594), na mesma tela do Baixar.</li>
+      <li><strong>D-50:</strong> o card do resultado ocupa o retângulo do painel (380 px no celular, 340 a partir de 768) e o que vem embaixo do painel é uma caixa reservada (132 px no celular, 48 a partir de 768) que mostra o texto da ferramenta em repouso e os chips no resultado. As opções e a prosa ficam no mesmo y nos dois estados (medido no protótipo: opções em 1.266 a 360 e 960 a 1280, em repouso e no resultado, nos três idiomas e a 320). O antes e depois abre só com um toque ("Comparar"), então o crescimento vem com input.</li>
+      <li><strong>D-54:</strong> o link "Open the HEIC to JPG tool" logo abaixo do painel sai. A página da ferramenta continua ligada, numa frase da seção "Convert the files you already have", que diz o que ela tem a mais (as perguntas).</li>
+      <li><strong>D-51, a metade do guia:</strong> o card diz HEIC 721 KB, JPG 1.2 MB e Change +66% (a mesma palavra da coluna da tabela), e a ajuda do "Save as" passa a comparar o JPG com o PNG ("lighter than PNG"), sem dizer que o JPG é mais leve que o HEIC. O resto do D-51 e os D-52 e D-53 (a água de "10%" e a água que pisca) são do UX-04: o guia herda o WaterLevel.</li>
+      <li><strong>G-17:</strong> o bloco "What we measured" logo abaixo do H1, com dois números em <code>number-md</code> (+25% e 0 de 10) e o 18,8 MB → 23,6 MB, na primeira tela nos dois tamanhos.</li>
+      <li><strong>G-23:</strong> a assinatura numa linha (<code>small</code>, 20 px a 360 nos três idiomas): o nome e uma data curta. A primeira publicação e o que mudou vão para o fim da seção das medidas.</li>
+      <li><strong>F5b F-2:</strong> a tabela que rola ganha a pista: a linha "Scroll sideways to see all 6 columns" abaixo de 768 px e, em todo tamanho, o traço tracejado na borda onde ainda há coluna (só CSS; some quando a tabela cabe, como a 1280 neste guia).</li>
+      <li><strong>F5b F-13:</strong> uma data só na assinatura; a região da tabela com o nome do título da seção ("Photo by photo") e a tabela com o <code>caption</code>, sem o mesmo texto duas vezes; a coluna "GPS after", igual nas 10 linhas, sai e vira uma frase na nota; a câmera aparece uma vez por grupo; "ten of the 10" vira "all 10".</li>
+      <li><strong>F4 ACE-9, a metade dos guias:</strong> a câmera vira cabeçalho do grupo (<code>th scope="rowgroup"</code>, um <code>tbody</code> por câmera) e a célula que separa as linhas (o tamanho em HEIC) vira o cabeçalho da linha (<code>th scope="row"</code>), com o peso das outras células. Vale para as 4 tabelas que repetem a 1ª coluna (heic-to-jpg-on-windows, pdf-to-jpg-resolution, social-media-image-sizes e refinance-break-even).</li>
+    </ul>
+
+    <h3>A ordem do molde</h3>
+    <pre><code>nav.fo-crumbs                       (a trilha do UX-02: Início › Guias › o guia)
+div.fo-top.fo-top--calc
+  h1.fo-h1
+  p.fo-lead
+  p.fo-reviewed                     (a assinatura, uma linha)
+section.g-facts[data-content=facts] (o que medimos: 2 ou 3 números)
+section.g-tool
+  h2#guide-tool                     (com o recuo de 96/136 px da Oli)
+  #fo-tool-root                     (a ilha de sempre: .fo-slot, a caixa de baixo, as opções)
+div.fo-prose.fo-guide               (a introdução, agora depois da ferramenta)
+section.fo-section × 7              (com os anúncios de conteúdo nas fronteiras)
+section[data-content=measured]      ("Photo by photo": a tabela, a nota e o histórico)
+section[data-content=sources]
+section[data-content=related]
+multiplex (a partir de 768 px) · aside: 2 unidades laterais (a partir de 1280 px)</code></pre>
+
+    <h3>Marcação</h3>
+    <pre><code>&lt;p class="fo-reviewed"&gt;Reviewed by Victor Yuki Matusita · &lt;time datetime="2026-11-02"&gt;Nov 2, 2026&lt;/time&gt;&lt;/p&gt;
+
+&lt;section class="g-facts fo-dogear fo-cat--image" aria-labelledby="g-facts-title" data-content="facts"&gt;
+  &lt;h2 class="g-facts__title" id="g-facts-title"&gt;What we measured&lt;/h2&gt;
+  &lt;dl class="g-facts__list"&gt;
+    &lt;div class="g-facts__stat"&gt;&lt;dt&gt;Size as JPG, all together&lt;/dt&gt;&lt;dd class="g-facts__n"&gt;+25%&lt;/dd&gt;
+      &lt;dd class="g-facts__sub"&gt;18.8 MB &lt;svg class="fo-icon fo-icon--inline" aria-hidden="true"&gt;…arrow-right…&lt;/svg&gt;&lt;span class="fo-sr"&gt; to &lt;/span&gt;23.6 MB&lt;/dd&gt;&lt;/div&gt;
+    &lt;div class="g-facts__stat"&gt;&lt;dt&gt;JPGs that kept the GPS location&lt;/dt&gt;&lt;dd class="g-facts__n"&gt;0 of 10&lt;/dd&gt;&lt;/div&gt;
+  &lt;/dl&gt;
+  &lt;p class="g-facts__sample"&gt;10 HEIC test photos from 7 cameras. &lt;a href="#measured"&gt;See each one in the table&lt;/a&gt;.&lt;/p&gt;
+&lt;/section&gt;
+
+&lt;div class="g-after"&gt;                         (min-height: 132 px; 48 px a partir de 768)
+  &lt;p class="g-after__intro"&gt;Drop one HEIC photo or a whole batch…&lt;/p&gt;      (repouso)
+  &lt;nav class="fo-next" aria-label="Next step"&gt;…2 chips…&lt;/nav&gt;              (resultado)
+&lt;/div&gt;
+
+&lt;div class="fo-table-wrap g-table-wrap" tabindex="0" role="region" aria-labelledby="measured"&gt;
+  &lt;table class="fo-table g-table"&gt;
+    &lt;caption class="fo-sr"&gt;Each HEIC test photo: its camera, …&lt;/caption&gt;
+    &lt;thead&gt;&lt;tr&gt;&lt;th scope="col"&gt;Camera&lt;/th&gt;…&lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;&lt;th scope="rowgroup" rowspan="3"&gt;Apple iPhone 11 Pro&lt;/th&gt;&lt;th scope="row"&gt;721 KB&lt;/th&gt;&lt;td&gt;1.2 MB&lt;/td&gt;…&lt;/tr&gt;
+      &lt;tr&gt;&lt;th scope="row"&gt;6.2 MB&lt;/th&gt;…&lt;/tr&gt;
+    &lt;/tbody&gt;
+    &lt;tbody&gt;…uma por câmera…&lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</code></pre>
+
+    <h3>Tokens</h3>
+    <ul>
+      <li>Ficha: fundo <code>--surface</code>, traço <code>--stroke-2</code> em <code>--stroke</code>, <code>--radius-lg</code>, a dobra <code>fo-dogear fo-cat--image</code> com <code>--fo-ground: var(--bg)</code>; título em <code>caption</code> (12/16, 600, 0,08em, caixa alta) em <code>--ink-muted</code>; números em <code>number-md</code> (Fredoka 24/28, 600) em <code>--ink</code>; rótulos em <code>small</code> em <code>--ink-muted</code>; link em <code>--brand</code>, sublinhado. Padding <code>--space-4</code> no celular, <code>--space-5</code>/<code>--space-6</code> no computador.</li>
+      <li>Assinatura e notas: <code>small</code> (14/20) em <code>--ink-muted</code> (a <code>.fo-reviewed</code> de hoje).</li>
+      <li>Resultado: <code>.fo-result.fo-deep</code> de sempre (<code>--deep</code>, <code>--on-deep</code>, <code>--on-deep-muted</code>); o Baixar é o único <code>--sun</code> da tela.</li>
+      <li>Borda da tabela: a linha tracejada de <code>--stroke-2</code> em <code>--stroke</code> (8 px traço, 6 px vão) sobre uma faixa de 12 px de <code>--surface-sunken</code>, cobertas por <code>--bg</code> quando o lado está inteiro. Só paradas duras: sem degradê, sem desfoque, sem sombra.</li>
+      <li>Nenhuma cor nova: os pares estão no README (contraste).</li>
+    </ul>
+
+    <h3>Estados (<code>?state=</code>)</h3>
+    <table>
+      <thead><tr><th scope="col">Estado</th><th scope="col">O que aparece</th></tr></thead>
+      <tbody>
+        <tr><td><code>rest</code> (padrão)</td><td>A DropZone com a Oli <code>wave</code>; embaixo, o texto da ferramenta; as opções; a tabela no começo, com a pista só à direita.</td></tr>
+        <tr><td><code>result</code></td><td>O card no mesmo retângulo, com a Oli <code>cheer</code>, HEIC, JPG e Change, o Baixar, Começar de novo e Comparar; embaixo, "Next:" e dois chips no lugar do texto. Nada abaixo muda de lugar.</td></tr>
+        <tr><td><code>table</code></td><td>A página aberta na tabela, rolada até o meio: a pista aparece dos dois lados. (No site não há script: a pista é CSS; o script aqui só rola o protótipo.)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Textos</h3>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td>Assinatura</td><td lang="en">Reviewed by Victor Yuki Matusita · Nov 2, 2026</td><td>Revisado por Victor Yuki Matusita · 03/11/2026</td><td lang="es">Revisado por Victor Yuki Matusita · 3/11/2026</td></tr>
+        <tr><td>Título da ficha</td><td lang="en">What we measured</td><td>O que medimos</td><td lang="es">Lo que medimos</td></tr>
+        <tr><td>Número 1</td><td lang="en">Size as JPG, all together · +25% · 18.8 MB → 23.6 MB</td><td>Tamanho em JPG, no total · +25% · 18,8 MB → 23,6 MB</td><td lang="es">Tamaño en JPG, en total · +25 % · 18.8 MB → 23.6 MB</td></tr>
+        <tr><td>Número 2</td><td lang="en">JPGs that kept the GPS location · 0 of 10</td><td>JPGs que mantiveram a localização GPS · 0 de 10</td><td lang="es">JPG que conservaron la ubicación GPS · 0 de 10</td></tr>
+        <tr><td>Amostra</td><td lang="en">10 HEIC test photos from 7 cameras. See each one in the table.</td><td>10 fotos HEIC de teste, de 7 câmeras. Veja cada uma na tabela.</td><td lang="es">10 fotos HEIC de prueba, de 7 cámaras. Mira cada una en la tabla.</td></tr>
+        <tr><td>Card: a variação</td><td lang="en">Change · +66%</td><td>Variação · +66%</td><td lang="es">Cambio · +66 %</td></tr>
+        <tr><td>Comparar</td><td lang="en">Compare (nome: Compare before and after)</td><td>Comparar (nome: Comparar antes e depois)</td><td lang="es">Comparar (nombre: Comparar antes y después)</td></tr>
+        <tr><td>Ajuda do "Save as"</td><td lang="en">JPG opens everywhere and is lighter than PNG. PNG adds no further loss, but the file is much bigger.</td><td>O JPG abre em todo lugar e é mais leve que o PNG. O PNG não acrescenta perda, mas o arquivo fica bem maior.</td><td lang="es">El JPG se abre en todas partes y pesa menos que el PNG. El PNG no suma más pérdida, pero el archivo es mucho más grande.</td></tr>
+        <tr><td>Link da ferramenta, no texto</td><td lang="en">The panel at the top of this guide is the same tool as our HEIC to JPG page, which also answers the common questions.</td><td>O painel no alto deste guia é a mesma ferramenta da nossa página HEIC para JPG, que também responde às perguntas mais comuns.</td><td lang="es">El panel de arriba de esta guía es la misma herramienta que nuestra página HEIC a JPG, que también responde las preguntas más comunes.</td></tr>
+        <tr><td>Título da tabela</td><td lang="en">Photo by photo</td><td>Foto a foto</td><td lang="es">Foto por foto</td></tr>
+        <tr><td>Pista (abaixo de 768 px)</td><td lang="en">Scroll sideways to see all 6 columns</td><td>Role para o lado para ver as 6 colunas</td><td lang="es">Desplázate hacia el lado para ver las 6 columnas</td></tr>
+        <tr><td>Nota (fim)</td><td lang="en">… WebKit gave the same bytes for all 10 photos. No JPG kept any GPS data.</td><td>… o WebKit deu os mesmos bytes nas 10 fotos. Nenhum JPG manteve dado de GPS.</td><td lang="es">… WebKit dio los mismos bytes en las 10 fotos. Ningún JPG conservó datos GPS.</td></tr>
+        <tr><td>Histórico</td><td lang="en">First version of this guide, published on Nov 2, 2026 with these measurements.</td><td>Primeira versão deste guia, publicada em 3 de nov. de 2026 com as medidas de 2 de nov. de 2026.</td><td lang="es">Primera versión de esta guía, publicada el 3 nov 2026 con las mediciones del 2 nov 2026.</td></tr>
+      </tbody>
+    </table>
+    <p>Os números da ficha saem do mesmo <code>fillValues</code> de hoje (<code>{ratioTotalChromium_more}</code>, <code>{heicTotal}</code>, <code>{jpgTotalChromium}</code>, <code>{gpsAfterChromium}</code>, <code>{files}</code>, <code>{cameras}</code>), então o <code>lint:texto</code> e o <code>guias:medir --check</code> continuam valendo. Cada um dos 10 guias ganha a sua ficha (2 ou 3 números) nos três idiomas: uma chave nova <code>facts</code> em <code>FileGuideTexts</code>.</p>
+
+    <h3>Teclado</h3>
+    <p>Tab passa por: pular para o conteúdo, o logo, a busca, o idioma, a trilha, o link "See each one in the table" (leva a <code>#measured</code>), o Escolher imagens, JPG e PNG (setas), os links do texto, a moldura da tabela (com foco, as setas rolam para o lado), as fontes e os cartões. No resultado: o foco vai para o Baixar (como hoje), depois Começar de novo, Comparar (Enter ou espaço abre o antes e depois; as setas movem o cursor) e os dois chips.</p>
+
+    <h3>Nome acessível</h3>
+    <ul>
+      <li>A ficha é uma <code>section</code> nomeada pelo H2 "What we measured"; os números são um <code>dl</code>, lidos como "Size as JPG, all together, +25%, 18.8 MB to 23.6 MB" (a seta é o ícone <code>arrow-right</code> com "to" escondido).</li>
+      <li>A moldura da tabela: região "Photo by photo" (o H2); a tabela: o <code>caption</code>. Os dois nomes não se repetem. Cada célula é anunciada com a câmera (grupo) e o tamanho em HEIC (linha).</li>
+      <li>Comparar: "Compare before and after" (o texto visível "Compare" vem primeiro, WCAG 2.5.3).</li>
+      <li>A Oli é <code>aria-hidden</code>; o estado é a fala do card (<code>aria-live="polite"</code>).</li>
+    </ul>
+
+    <h3>Medidas (no protótipo, Chromium)</h3>
+    <ul>
+      <li>360 × 740: a assinatura em 1 linha (20 px) nos três idiomas; a ficha de 394 a 606; o painel de 722 a 1.102; o Escolher de 898 a 958 (1,21 tela). A 320, de 918 a 1.006 px (a assinatura quebra em 2 linhas em en e pt).</li>
+      <li>1280 × 800: a ficha de 290 a 438; o painel de 540 a 880; o Escolher de 716 a 776, acima da dobra.</li>
+      <li>O card tem 380 px a 320 e a 360 (340 a 1280) nos três idiomas, sem transbordar; a caixa de baixo, 132 px (48 a 1280); as opções e o texto no mesmo y em repouso e no resultado.</li>
+      <li>Alvos: o Escolher com 60 px, o Baixar com 60, Começar de novo e Comparar com 52, os chips com 48, as opções com 48; o link da ficha e o da prosa são links de texto (exceção da WCAG 2.5.8).</li>
+      <li>A Oli fica a 150 px ou mais de qualquer anúncio: a ilha (as opções) termina 1.258 px (360) e 786 px (1280) antes do 1º anúncio de conteúdo, e a coluna lateral fica a 166 px da Oli a 1280, olhando para o outro lado.</li>
+    </ul>
+
+    <h3>Anúncios (o mapa da seção B: "um a cada 1,5 tela no texto, nunca dentro da ferramenta embutida nem colado na tabela")</h3>
+    <ul>
+      <li>Só nas fronteiras entre seções da prosa, nunca entre a ferramenta e a introdução, nunca no painel, sempre com os 150 px de margem do próprio AdSlot.</li>
+      <li>360 × 740: 4 unidades de conteúdo (depois das seções 1, 3, 5 e 7), com 1.520, 1.600 e 1.234 px de borda a borda (en; pt e es de 1.256 a 1.704). A mais perto da tabela fica a 406 px dela (432 em pt e es). Sem multiplex. Densidade: 11,2 % pela fórmula da ficha e 13,5 % pela conservadora (com 100 px de âncora e sem as relacionadas).</li>
+      <li>A partir de 768 px, pelo mapa do UX-07 (revisão da F10, c-05): só o conteúdo 1 (depois da seção 1) e o multiplex depois das relacionadas, a 166 px da grade, com a altura do carregador (486 px de caixa a 768, 500 a partir de 792: o <code>ins</code> de 760 × 0,6 mais o rótulo); do conteúdo 1 ao multiplex, 3.895 a 4.165 px. Duas unidades laterais de 300 × 644: a 2ª começa 1.600 px abaixo da 1ª, para não ficar ao lado do 1º anúncio do texto.</li>
+      <li>O DOM é um só: as unidades que só valem num tamanho ficam numa caixa <code>fo-mobile-only</code> ou <code>fo-desktop-only</code> (a unidade escondida pelo CSS não é pedida). A F12 escolhe as posições de cada guia no build e o teste de distância confere a 360 e a 1280.</li>
+    </ul>
+
+    <h3>O que muda no código (F13)</h3>
+    <ul>
+      <li><code>FileGuideView.astro</code>: a nova ordem; a ficha (<code>t.facts</code>); a seção da ferramenta sem o <code>p.fo-guide__open</code>; a introdução depois da ilha; o título da seção medida vira <code>t.tableHeading</code>; a região com <code>aria-labelledby</code>; a pista; o histórico no fim da seção. <code>Reviewed.astro</code>: uma linha (o nome e a data curta, <code>Intl.DateTimeFormat</code> com <code>dateStyle: 'medium'</code> em en e dia/mês/ano em pt e es); a primeira publicação e o <code>changed</code> vão para o histórico.</li>
+      <li><code>src/tools/guides/measured.ts</code>: as tabelas saem sem coluna constante e agrupadas pela 1ª coluna quando ela repete (<code>rowgroup</code>). As células continuam vindo do <code>data/guides-measured.json</code>; o <code>guias:medir</code> não muda.</li>
+      <li><code>src/styles/components.css</code>: a ficha, a caixa de baixo da ilha, a pista e o agrupamento (cerca de 1 KB). A ilha (<code>mount.ts</code> e o painel da imagem) põe os chips na caixa reservada; é a mesma mudança do UX-04, e o guia herda.</li>
+      <li><code>scripts/lib/file-guides.ts</code> (<code>checkFileGuide</code>, gate:conteudo): a ordem passa a ser trilha, H1, assinatura, ficha, ferramenta, introdução, anúncio, medidas, fontes e relacionadas; a assinatura pede uma <code>time[datetime]</code> (duas quando a revisão é diferente da primeira publicação, e então a segunda vai no histórico); o link da página da ferramenta é procurado no texto do guia, não logo abaixo do painel. É mudança da decisão 4 da F5b (§ 184), com § novo.</li>
+      <li>O <code>gate:dinheiro-saude</code> não muda (ver abaixo).</li>
+    </ul>
+
+    <h3>O portão de dinheiro e saúde (G-23)</h3>
+    <p>O <code>scripts/gates/dinheiro-saude.ts</code> (com <code>scripts/lib/ymyl.ts</code>) só confere que existe um bloco <code>[data-ymyl="reviewed"]</code> com <code>&lt;time datetime&gt;</code>, sem olhar a posição, e só nas páginas das áreas dinheiro, casa e saúde. Os guias de arquivo ficam na área <code>arquivos</code> e não passam por ele (o <code>Reviewed.astro</code> não tem <code>data-ymyl</code>). Quem prende a linha no topo do guia de arquivo é o <code>gate:conteudo</code> (<code>checkFileGuide</code>: <code>.fo-top .fo-reviewed</code> logo depois do H1, com duas <code>time</code>) e a regra do PLANO "com Revisado em". Nos guias de dinheiro (<code>GuideView.astro</code>) o PLANO pede "Revisado em, com o que mudou": ali muda só o estilo (uma linha <code>small</code>, a data curta), e o que mudou fica no mesmo bloco <code>data-ymyl</code>.</p>
+
+    <h3>Testes que a F13 escreve</h3>
+    <ul>
+      <li>Playwright, <code>tool-guides.spec.ts</code>, nos 10 guias × 3 idiomas, no Chromium e no WebKit: a 1280 × 800, o Escolher termina acima de 800 px; a 360 × 740, o topo do painel fica acima de 740 px; a assinatura tem uma linha a 360 (altura ≤ 20 px).</li>
+      <li>Playwright, CLS do uso (o <code>PerformanceObserver</code> de <code>layout-shift</code> do diagnóstico, § 343): escolher a fixture HEIC e somar os deslocamentos sem input até o resultado: ≤ 0,05 a 360 e a 1280 (hoje 0,145–0,202 e 0,043–0,078). Reprova sem a caixa reservada.</li>
+      <li>Playwright: no resultado, com o Baixar no topo da tela, o 1º chip está inteiro na tela a 360 × 740 (hoje fica abaixo da dobra).</li>
+      <li>Vitest sobre o <code>dist/</code> (<code>file-guides.test.ts</code>): nenhuma região de tabela com o mesmo nome da tabela; em cada <code>tbody</code>, os <code>th[scope=row]</code> são diferentes entre si; nenhuma coluna com o mesmo valor em todas as linhas; nenhum <code>.fo-guide__open</code>; o link da página da ferramenta está no texto.</li>
+      <li>Playwright a 360: com a tabela mais larga que a moldura, a moldura tem <code>background-image</code> e a pista está visível; a 1280, no guia em que a tabela cabe, a pista não aparece.</li>
+      <li>O teste de distância e densidade dos anúncios (F12), no build de teste, a 360 e a 1280.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <p>Nenhum arquivo JS novo e nenhuma requisição nova: a pista é CSS, a ficha e a tabela são HTML do build, e o Comparar é um <code>&lt;details&gt;</code> nativo. A ilha é a mesma (22,1 KB de JS e 6 requisições no diagnóstico). O CSS cresce cerca de 1 KB. O H1 continua sendo o LCP. O CLS do carregamento não muda (a ficha é texto do build, com as fontes de sempre), e o do uso cai para perto de zero pela caixa reservada.</p>
+
+    <h3>O que não é desta peça</h3>
+    <ul>
+      <li>A trilha "Início › Guias › o guia" e o cartão de guia nas relacionadas: UX-02 (F11). Aqui a trilha só ocupa a altura que vai ter.</li>
+      <li>O aviso de cookies em cima da ferramenta a 1280 (D-48): UX-09.</li>
+      <li>A água de "10%" e a água que pisca (D-52, D-53), o puxador do antes e depois e o card que diz quando o arquivo cresce: UX-04. O guia herda.</li>
+      <li>O mapa de anúncios dos outros moldes e a densidade de todos: UX-07 (F12).</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+var PROTO_T = {
+ "pt": {
+  "page.title": "Página de guia · FileOrca UX v2",
+  "home": "FileOrca, página inicial",
+  "langMenu": "Escolha um idioma",
+  "th.0": "Câmera",
+  "th.1": "HEIC",
+  "th.2": "JPG",
+  "th.3": "Variação",
+  "th.4": "Pixels",
+  "th.5": "GPS antes",
+  "td.0.1": "721 KB",
+  "td.0.2": "1,2 MB",
+  "td.0.3": "+66%",
+  "td.0.4": "3.024 × 4.032",
+  "td.0.5": "Sem GPS",
+  "td.1.1": "6,2 MB",
+  "td.1.2": "6,3 MB",
+  "td.1.3": "+2%",
+  "td.1.4": "3.024 × 4.032",
+  "td.1.5": "Sem GPS",
+  "td.2.1": "2,7 MB",
+  "td.2.2": "3,7 MB",
+  "td.2.3": "+38%",
+  "td.2.4": "3.024 × 4.032",
+  "td.2.5": "Sem GPS",
+  "td.3.1": "833 KB",
+  "td.3.2": "1,4 MB",
+  "td.3.3": "+73%",
+  "td.3.4": "2.566 × 3.313",
+  "td.3.5": "Sim",
+  "td.4.1": "2,2 MB",
+  "td.4.2": "3,2 MB",
+  "td.4.3": "+46%",
+  "td.4.4": "3.024 × 4.032",
+  "td.4.5": "Sem GPS",
+  "td.5.1": "1,8 MB",
+  "td.5.2": "2,7 MB",
+  "td.5.3": "+56%",
+  "td.5.4": "4.032 × 3.024",
+  "td.5.5": "Sim",
+  "td.6.1": "1,3 MB",
+  "td.6.2": "1,5 MB",
+  "td.6.3": "+14%",
+  "td.6.4": "4.032 × 3.024",
+  "td.6.5": "Sim",
+  "td.7.1": "239 KB",
+  "td.7.2": "309 KB",
+  "td.7.3": "+29%",
+  "td.7.4": "1.512 × 850",
+  "td.7.5": "Sem GPS",
+  "td.8.1": "1,6 MB",
+  "td.8.2": "2,0 MB",
+  "td.8.3": "+21%",
+  "td.8.4": "3.024 × 4.032",
+  "td.8.5": "Campo vazio",
+  "td.9.1": "1,3 MB",
+  "td.9.2": "1,2 MB",
+  "td.9.3": "−7%",
+  "td.9.4": "2.560 × 2.560",
+  "td.9.5": "Zerado",
+  "intro.0": "HEIC é o arquivo que a Apple grava quando um iPhone ou iPad salva as fotos no formato Alta Eficiência, que se baseia no HEIF. A imagem é a mesma de um JPG, mas fica guardada de um jeito mais compacto, e por isso cabem mais fotos no mesmo espaço do celular. O problema aparece em todo o resto: o Windows precisa de um programa a mais para mostrar o arquivo, e muitos formulários de envio ainda pedem JPG.",
+  "intro.1": "Dá para resolver isso em lugares diferentes. Você pode ensinar o Windows a ler HEIC, pode pedir ao iPhone que pare de gravar nesse formato ou pode converter os arquivos que já tem. Cada caminho resolve uma parte do problema, e só o último entrega arquivos JPG que você pode mandar para qualquer lugar.",
+  "src.0": "<a href=\"https://support.microsoft.com/pt-br/windows/apps/photos/photos-app-video-editor-error-can-t-view-this-file-type\">Suporte da Microsoft: Erro do Editor de Vídeo do aplicativo Fotos, não é possível exibir esse tipo de arquivo<\/a>. Lido em <time datetime=\"2026-11-03\">3 de novembro de 2026<\/time>.",
+  "src.1": "<a href=\"https://apps.microsoft.com/detail/9pmmsr1cgpwg?hl=pt-BR&amp;gl=BR\">Microsoft Store: Extensão da Imagem HEIF<\/a>. Lido em <time datetime=\"2026-11-03\">3 de novembro de 2026<\/time>.",
+  "src.2": "<a href=\"https://support.apple.com/pt-br/116944\">Suporte da Apple: Como usar mídias HEIF ou HEVC em dispositivos Apple<\/a>. Lido em <time datetime=\"2026-11-03\">3 de novembro de 2026<\/time>.",
+  "src.3": "<a href=\"https://support.apple.com/pt-br/120267\">Suporte da Apple: Transferir fotos e vídeos do iPhone ou iPad para um Mac ou PC<\/a>. Lido em <time datetime=\"2026-11-03\">3 de novembro de 2026<\/time>.",
+  "rel.0.n": "Comprimir imagem",
+  "rel.0.d": "Deixe um JPG, PNG ou WebP mais leve, direto no navegador.",
+  "rel.1.n": "Redimensionar imagem",
+  "rel.1.d": "Mude o tamanho de uma imagem em pixels ou em porcentagem.",
+  "rel.2.n": "Imagem para PDF",
+  "rel.2.d": "Junte suas imagens num PDF só, uma imagem por página.",
+  "rel.3.n": "Como remover a localização das fotos",
+  "rel.3.d": "Onde a foto guarda a localização, e o jeito de tirar esse dado sem mudar nenhum pixel.",
+  "rel.4.n": "JPG ou PNG: qual usar",
+  "rel.4.d": "Quando cada formato ganha, medido nas mesmas fotos nos dois formatos.",
+  "skip": "Ir para o conteúdo",
+  "search": "Buscar ferramentas",
+  "langCode": "PT",
+  "langSr": " · Idioma: Português",
+  "crumbs": "Trilha de navegação",
+  "crumbHome": "Início",
+  "crumbGuides": "Guias",
+  "h1": "Como converter HEIC para JPG no Windows",
+  "lead": "Seu iPhone salvou a foto em HEIC, e o Windows não abre o arquivo, ou um site não aceita. Veja por que isso acontece e como chegar a um JPG.",
+  "sig": "Revisado por Victor Yuki Matusita · <time datetime=\"2026-11-03\">03/11/2026<\/time>",
+  "factsTitle": "O que medimos",
+  "s1dt": "Tamanho em JPG, no total",
+  "s1dd": "+25%",
+  "s1from": "18,8 MB",
+  "to": " para ",
+  "s1to": "23,6 MB",
+  "s2dt": "JPGs que mantiveram a localização GPS",
+  "s2dd": "0 de 10",
+  "sample": "10 fotos HEIC de teste, de 7 câmeras. <a href=\"#measured\">Veja cada uma na tabela<\/a>.",
+  "toolH2": "Converta suas fotos HEIC aqui",
+  "dropTitle": "Solte as imagens aqui",
+  "choose": "Escolher imagens",
+  "helpDesk": "ou cole com",
+  "formats": "HEIC ou HEIF",
+  "helpMobile": "HEIC ou HEIF, quantas quiser",
+  "says": "Prontinho! Sua foto foi convertida.",
+  "jpgSize": "1,2 MB",
+  "change": "Variação",
+  "changeVal": "+66%",
+  "download": "Baixar",
+  "startOver": "Começar de novo",
+  "compare": "Comparar",
+  "compareSr": " antes e depois",
+  "altBefore": "A foto em HEIC",
+  "altAfter": "A mesma foto em JPG",
+  "tagBefore": "Antes · 721 KB",
+  "tagAfter": "Depois · 1,2 MB",
+  "compareLabel": "Comparar antes e depois",
+  "metadata": "A Oli removeu os metadados da foto, inclusive a localização GPS.",
+  "toolIntro": "Solte uma foto HEIC ou um lote inteiro. Cada uma vira JPG dentro desta aba do navegador, então as fotos nunca são enviadas, e um lote volta num só ZIP.",
+  "nextLabel": "Próximo passo",
+  "next": "A seguir:",
+  "chipCompress": "Comprimir imagem",
+  "chipResize": "Redimensionar imagem",
+  "saveAs": "Salvar como",
+  "saveHelp": "O JPG abre em todo lugar e é mais leve que o PNG. O PNG não acrescenta perda, mas o arquivo fica bem maior.",
+  "sec.0.p.0": "O Windows não lê HEIC sozinho. Quando você abre um arquivo desses no aplicativo Fotos, a Microsoft avisa que pode aparecer a mensagem \"Você precisa de uma extensão para usar este arquivo\". A solução que a Microsoft dá são duas extensões da Microsoft Store: as Extensões de Imagem HEIF, que são grátis, e as Extensões de Vídeo HEVC, que custam US$ 0,99. Segundo a Microsoft, você precisa das duas, mesmo que só pretenda ver fotos, e o aplicativo Fotos tem de ser reiniciado depois da instalação.",
+  "sec.0.p.1": "É uma boa saída se você só quer ver as fotos no seu próprio computador. Só que ela não muda os arquivos. Eles continuam em HEIC, então o site, a pasta compartilhada ou a pessoa que recebe as fotos pode continuar sem conseguir abrir.",
+  "sec.0.h": "Por que o Windows pede uma extensão",
+  "sec.1.p.0": "Se as suas fotos vão parar no Windows, você pode passar a câmera para JPG em tudo o que fotografar daqui em diante. A Apple descreve o ajuste: abra Ajustes, toque em Câmera, toque em Formatos e, em seguida, toque em Mais Compatível. A partir daí, a câmera salva as fotos em JPEG e os vídeos em H.264. Escolher Alta Eficiência volta para HEIF e HEVC, que ocupam menos espaço no celular.",
+  "sec.1.p.1": "A Apple também recomenda o Mais Compatível para quem transfere fotos para um PC com Windows, junto com o app Dispositivos Apple, da Microsoft Store. Isso só muda as fotos que você tirar depois do ajuste. As que já estão no celular continuam em HEIC.",
+  "sec.1.h": "Faça o iPhone parar de gravar em HEIC",
+  "sec.2.p.0": "Quando as fotos vão do iPhone para o computador pelo cabo, a Apple diz que elas podem ser convertidas em JPEG ou H.264 no caminho. O celular faz isso a não ser que você peça para manter os originais: abra Ajustes, toque em Apps e em Fotos, role para baixo e toque em Manter Originais. Se você não escolher essa opção, as cópias que chegam ao PC já podem ser JPG.",
+  "sec.2.p.1": "A Microsoft aponta um caminho parecido, sem cabo: muitos aparelhos convertem fotos HEIC para um formato mais comum quando os arquivos são transferidos ou enviados por e-mail, e o OneDrive pode converter arquivos de foto sozinho. Os dois dependem de como as fotos viajam, então vale conhecer, mas é difícil contar com eles para uma pasta de arquivos que você já tem.",
+  "sec.2.h": "Deixe a transferência converter",
+  "sec.3.p.0": "Para fotos que já estão em HEIC no seu computador ou na pasta de downloads, um conversor é o caminho direto. A ferramenta desta página lê cada HEIC com o libheif, um decodificador de código aberto, o mesmo em todos os navegadores, deixa a imagem principal na posição certa e grava um JPG novo a partir dos pixels. Você pode soltar um arquivo ou uma pasta inteira, e o ZIP mantém os nomes originais, com a terminação .jpg.",
+  "sec.3.p.1": "Nada é enviado a lugar nenhum. A conversão roda na aba do navegador, e é por isso que ela serve para fotos privadas: a aba Rede do navegador não mostra nenhuma requisição levando o arquivo.",
+  "toolLink": "O painel no alto deste guia é a mesma ferramenta da nossa <a href=\"#\">página HEIC para JPG<\/a>, que também responde às perguntas mais comuns.",
+  "sec.3.h": "Converta os arquivos que você já tem",
+  "sec.4.p.0": "Rodamos o conversor nas nossas 10 fotos HEIC de teste, tiradas com 7 modelos de câmera diferentes, de iPhones a um celular Samsung e um Apple Vision Pro. Juntos, os arquivos HEIC pesavam 18,8 MB. Os JPGs pesaram 23,6 MB, ou seja, 25% a mais.",
+  "sec.4.p.1": "Esse é o preço da compatibilidade. Foto a foto, a mudança foi de −7% a +73%, e metade delas cresceu 34% ou menos. O JPG guarda a mesma imagem de um jeito menos compacto que o HEIC, e por isso as nossas fotos saíram maiores no total, e não menores. Se você precisa de um arquivo menor, comprima ou redimensione o JPG depois.",
+  "sec.4.p.2": "Todos os dez JPGs mantiveram o tamanho em pixels da foto como o celular a mostra, na posição certa.",
+  "sec.4.h": "O que a conversão fez com as nossas fotos",
+  "sec.5.p.0": "Uma foto pode guardar o lugar onde foi tirada. Das nossas 10 fotos, 3 tinham coordenadas de GPS de verdade, e 5 tinham algum tipo de marcação de GPS, preenchida ou vazia. Depois da conversão, o número de JPGs com algum dado de GPS foi 0.",
+  "sec.5.p.1": "Isso é de propósito: a ferramenta grava cada JPG a partir dos pixels, então a localização, os dados da câmera e os outros metadados do HEIC ficam para trás. Se você quer manter a localização, para um mapa de fotos ou um álbum, guarde o HEIC original ou use a exportação do seu app de fotos.",
+  "sec.5.h": "A localização não vem junto",
+  "sec.6.p.0": "Converter codifica a imagem de novo, então o JPG é um arquivo novo, e não uma cópia do HEIC com outro nome. Alguns arquivos HEIC também guardam mais de uma imagem. Só a imagem principal vira o JPG: o mapa de profundidade de uma foto de retrato e a segunda imagem de uma foto espacial ficam de fora.",
+  "sec.6.p.1": "Seus arquivos HEIC nunca são alterados. Guarde os originais e mande os JPGs, e você não perde nada.",
+  "sec.6.h": "O que mais fica no HEIC",
+  "tableH2": "Foto a foto",
+  "measuredIntro": "Todas as fotos HEIC de teste deste site, convertidas com o padrão da ferramenta acima. A variação compara o JPG com o HEIC.",
+  "hint": "Role para o lado para ver as 6 colunas",
+  "caption": "Cada foto HEIC de teste: a câmera, o tamanho em HEIC e em JPG, a variação, o tamanho em pixels e o GPS antes da conversão",
+  "note": "Medido em 2 de novembro de 2026 no Chromium 156 e no WebKit 27.2, no Windows, com a ferramenta acima. A tabela mostra o Chromium; o WebKit deu os mesmos bytes nas 10 fotos. Nenhum JPG manteve dado de GPS.",
+  "history": "Primeira versão deste guia, publicada em <time datetime=\"2026-11-03\">3 de nov. de 2026<\/time> com as medidas de 2 de nov. de 2026.",
+  "sourcesH2": "Fontes",
+  "relatedH2": "Ferramentas e guias relacionados",
+  "fImage": "Imagem",
+  "fCompress": "Comprimir imagem",
+  "fHeic": "HEIC para JPG",
+  "fGuides": "Guias",
+  "fAbout": "Sobre",
+  "fPrivacy": "Privacidade",
+  "fCoffee": "Curtiu? Me paga um café",
+  "fSign": "Feito por Victor Yuki Matusita em Curitiba · © 2026"
+ },
+ "es": {
+  "page.title": "Página de guía · FileOrca UX v2",
+  "home": "FileOrca, página de inicio",
+  "langMenu": "Elige un idioma",
+  "th.0": "Cámara",
+  "th.1": "HEIC",
+  "th.2": "JPG",
+  "th.3": "Cambio",
+  "th.4": "Píxeles",
+  "th.5": "GPS antes",
+  "td.0.1": "721 KB",
+  "td.0.2": "1.2 MB",
+  "td.0.3": "+66 %",
+  "td.0.4": "3,024 × 4,032",
+  "td.0.5": "Sin GPS",
+  "td.1.1": "6.2 MB",
+  "td.1.2": "6.3 MB",
+  "td.1.3": "+2 %",
+  "td.1.4": "3,024 × 4,032",
+  "td.1.5": "Sin GPS",
+  "td.2.1": "2.7 MB",
+  "td.2.2": "3.7 MB",
+  "td.2.3": "+38 %",
+  "td.2.4": "3,024 × 4,032",
+  "td.2.5": "Sin GPS",
+  "td.3.1": "833 KB",
+  "td.3.2": "1.4 MB",
+  "td.3.3": "+73 %",
+  "td.3.4": "2,566 × 3,313",
+  "td.3.5": "Sí",
+  "td.4.1": "2.2 MB",
+  "td.4.2": "3.2 MB",
+  "td.4.3": "+46 %",
+  "td.4.4": "3,024 × 4,032",
+  "td.4.5": "Sin GPS",
+  "td.5.1": "1.8 MB",
+  "td.5.2": "2.7 MB",
+  "td.5.3": "+56 %",
+  "td.5.4": "4,032 × 3,024",
+  "td.5.5": "Sí",
+  "td.6.1": "1.3 MB",
+  "td.6.2": "1.5 MB",
+  "td.6.3": "+14 %",
+  "td.6.4": "4,032 × 3,024",
+  "td.6.5": "Sí",
+  "td.7.1": "239 KB",
+  "td.7.2": "309 KB",
+  "td.7.3": "+29 %",
+  "td.7.4": "1,512 × 850",
+  "td.7.5": "Sin GPS",
+  "td.8.1": "1.6 MB",
+  "td.8.2": "2.0 MB",
+  "td.8.3": "+21 %",
+  "td.8.4": "3,024 × 4,032",
+  "td.8.5": "Etiqueta vacía",
+  "td.9.1": "1.3 MB",
+  "td.9.2": "1.2 MB",
+  "td.9.3": "−7 %",
+  "td.9.4": "2,560 × 2,560",
+  "td.9.5": "En cero",
+  "intro.0": "HEIC es el archivo que escribe Apple cuando un iPhone o un iPad guarda las fotos con la opción Alta eficiencia, que se basa en HEIF. La imagen es la misma que en un JPG, pero va más comprimida, así que el teléfono guarda más fotos en el mismo espacio. El problema está en todo lo demás: Windows necesita software adicional para mostrarla, y muchos formularios en línea todavía piden un JPG.",
+  "intro.1": "Puedes resolverlo en lugares distintos. Puedes enseñarle a Windows a leer HEIC, pedirle al iPhone que deje de escribirlo o convertir los archivos que ya tienes. Cada camino resuelve una parte distinta del problema, y solo el último te da archivos JPG que puedes enviar a cualquier parte.",
+  "src.0": "<a href=\"https://support.microsoft.com/es-es/windows/apps/photos/photos-app-video-editor-error-can-t-view-this-file-type\">Soporte de Microsoft: Error del Editor de vídeo de la aplicación Fotos, no se puede ver este tipo de archivo<\/a>. Leído el <time datetime=\"2026-11-03\">3 de noviembre de 2026<\/time>.",
+  "src.1": "<a href=\"https://apps.microsoft.com/detail/9pmmsr1cgpwg?hl=es-US&amp;gl=US\">Microsoft Store: Extensión de imágenes HEIF<\/a>. Leído el <time datetime=\"2026-11-03\">3 de noviembre de 2026<\/time>.",
+  "src.2": "<a href=\"https://support.apple.com/es-lamr/116944\">Soporte técnico de Apple: Usa contenido en formato HEIF o HEVC en dispositivos Apple<\/a>. Leído el <time datetime=\"2026-11-03\">3 de noviembre de 2026<\/time>.",
+  "src.3": "<a href=\"https://support.apple.com/es-lamr/120267\">Soporte técnico de Apple: Transfiere fotos y videos del iPhone o iPad a una Mac o PC<\/a>. Leído el <time datetime=\"2026-11-03\">3 de noviembre de 2026<\/time>.",
+  "rel.0.n": "Comprimir imagen",
+  "rel.0.d": "Haz que un JPG, PNG o WebP pese menos, directamente en tu navegador.",
+  "rel.1.n": "Redimensionar imagen",
+  "rel.1.d": "Cambia el tamaño de una imagen en píxeles o en porcentaje.",
+  "rel.2.n": "Imagen a PDF",
+  "rel.2.d": "Junta tus imágenes en un solo PDF, una imagen por página.",
+  "rel.3.n": "Cómo quitar la ubicación de las fotos",
+  "rel.3.d": "Dónde guarda una foto su ubicación y cómo quitarla sin cambiar ningún píxel.",
+  "rel.4.n": "JPG o PNG: cuál usar",
+  "rel.4.d": "Cuándo gana cada formato, medido con las mismas fotos en los dos.",
+  "skip": "Saltar al contenido",
+  "search": "Buscar herramientas",
+  "langCode": "ES",
+  "langSr": " · Idioma: Español",
+  "crumbs": "Ruta de navegación",
+  "crumbHome": "Inicio",
+  "crumbGuides": "Guías",
+  "h1": "Cómo convertir HEIC a JPG en Windows",
+  "lead": "Tu iPhone guardó la foto en HEIC, y Windows no la abre o un sitio web no la acepta. Aquí ves por qué pasa y cómo terminar con un JPG.",
+  "sig": "Revisado por Victor Yuki Matusita · <time datetime=\"2026-11-03\">3/11/2026<\/time>",
+  "factsTitle": "Lo que medimos",
+  "s1dt": "Tamaño en JPG, en total",
+  "s1dd": "+25 %",
+  "s1from": "18.8 MB",
+  "to": " a ",
+  "s1to": "23.6 MB",
+  "s2dt": "JPG que conservaron la ubicación GPS",
+  "s2dd": "0 de 10",
+  "sample": "10 fotos HEIC de prueba, de 7 cámaras. <a href=\"#measured\">Mira cada una en la tabla<\/a>.",
+  "toolH2": "Convierte tus fotos HEIC aquí",
+  "dropTitle": "Suelta las imágenes aquí",
+  "choose": "Elegir imágenes",
+  "helpDesk": "o pégalas con",
+  "formats": "HEIC o HEIF",
+  "helpMobile": "HEIC o HEIF, todas las que quieras",
+  "says": "¡Listo! Tu foto quedó convertida.",
+  "jpgSize": "1.2 MB",
+  "change": "Cambio",
+  "changeVal": "+66 %",
+  "download": "Descargar",
+  "startOver": "Empezar de nuevo",
+  "compare": "Comparar",
+  "compareSr": " antes y después",
+  "altBefore": "La foto en HEIC",
+  "altAfter": "La misma foto en JPG",
+  "tagBefore": "Antes · 721 KB",
+  "tagAfter": "Después · 1.2 MB",
+  "compareLabel": "Comparar antes y después",
+  "metadata": "Oli eliminó los metadatos de la foto, incluida la ubicación GPS.",
+  "toolIntro": "Suelta una foto HEIC o todo un lote. Cada una se vuelve JPG dentro de esta pestaña del navegador, así que las fotos nunca se suben, y un lote llega en un solo ZIP.",
+  "nextLabel": "Siguiente paso",
+  "next": "Siguiente:",
+  "chipCompress": "Comprimir imagen",
+  "chipResize": "Redimensionar imagen",
+  "saveAs": "Guardar como",
+  "saveHelp": "El JPG se abre en todas partes y pesa menos que el PNG. El PNG no suma más pérdida, pero el archivo es mucho más grande.",
+  "sec.0.p.0": "Windows no lee HEIC por su cuenta. Cuando abres un archivo HEIC en la aplicación Fotos, Microsoft dice que puedes ver el mensaje \"Necesitas una extensión para usar este archivo\". La solución que da Microsoft son dos extensiones de Microsoft Store: Extensiones de imagen HEIF, que es gratis, y Extensiones de vídeo HEVC, que cuesta $0.99. Según Microsoft, necesitas las dos aunque solo pienses ver fotos, y hay que reiniciar la aplicación Fotos después de instalarlas.",
+  "sec.0.p.1": "Es una buena solución si solo quieres ver las fotos en tu propia PC. Pero no cambia los archivos. Siguen siendo HEIC, así que el sitio web, la carpeta compartida o la persona a quien se los envías quizá todavía no pueda abrirlos.",
+  "sec.0.h": "Por qué Windows pide una extensión",
+  "sec.1.p.0": "Si tus fotos van a parar sobre todo a una PC con Windows, puedes pasar la cámara a JPG para todo lo que tomes de ahora en adelante. Apple describe el ajuste: abre Configuración, toca Cámara, toca Formatos y luego toca Más compatible. Desde ese momento, la cámara guarda las fotos en JPEG y los videos en H.264. Si eliges Alta eficiencia, vuelves a HEIF y HEVC, que ocupan menos espacio en el teléfono.",
+  "sec.1.p.1": "Apple también recomienda Más compatible cuando pasas fotos a una PC con Windows, junto con su app Dispositivos Apple de Microsoft Store. Esto solo cambia las fotos que tomes después del cambio. Las que ya están en el teléfono siguen en HEIC.",
+  "sec.1.h": "Haz que el iPhone deje de escribir HEIC",
+  "sec.2.p.0": "Cuando las fotos pasan de un iPhone a una computadora por cable, Apple dice que el contenido puede convertirse a JPEG o H.264 en el camino. El teléfono lo hace a menos que le pidas conservar los originales: abre Configuración, toca Apps, toca Fotos, desplázate hacia abajo y toca Mantener originales. Si dejas ese ajuste desactivado, las copias que llegan a la PC ya pueden ser JPG.",
+  "sec.2.p.1": "Microsoft señala un camino parecido sin cable: muchos dispositivos convierten las fotos HEIC a un formato más común cuando los archivos se transfieren o se envían por correo, y OneDrive puede convertir los archivos de fotos por su cuenta. Los dos dependen de cómo viajan las fotos, así que conviene conocerlos, pero es difícil contar con ellos para una carpeta de archivos que ya tienes.",
+  "sec.2.h": "Deja que la transferencia las convierta",
+  "sec.3.p.0": "Para las fotos que ya están en HEIC en tu PC o en una carpeta de descargas, un conversor es el camino directo. La herramienta de esta página lee cada archivo HEIC con libheif, el mismo decodificador abierto en todos los navegadores, pone derecha la imagen principal y escribe un JPG nuevo a partir de sus píxeles. Puedes soltar un archivo o una carpeta entera, y el ZIP conserva los nombres originales con la terminación .jpg.",
+  "sec.3.p.1": "Nada se envía a ningún lugar. La conversión se hace en la pestaña de tu navegador, y por eso sirve también para fotos privadas: la pestaña Red de tu navegador no muestra ninguna solicitud que lleve el archivo.",
+  "toolLink": "El panel de arriba de esta guía es la misma herramienta que nuestra <a href=\"#\">página HEIC a JPG<\/a>, que también responde las preguntas más comunes.",
+  "sec.3.h": "Convierte los archivos que ya tienes",
+  "sec.4.p.0": "Pasamos por el conversor nuestras 10 fotos HEIC de prueba, tomadas con 7 modelos de cámara distintos, desde iPhones hasta un teléfono Samsung y un Apple Vision Pro. Juntos, los archivos HEIC pesaban 18.8 MB. Los JPG pesaron 23.6 MB, es decir, un 25 % más.",
+  "sec.4.p.1": "Ese es el precio de la compatibilidad. Foto por foto, el cambio fue de −7 % a +73 %, y la mitad de las fotos creció un 34 % o menos. Un JPG guarda la misma imagen con menos compresión que el HEIC, y por eso nuestras fotos salieron más grandes en conjunto, no más pequeñas. Si necesitas un archivo más pequeño, comprime o redimensiona el JPG después.",
+  "sec.4.p.2": "Los diez JPG conservaron el tamaño en píxeles que muestra el teléfono, con la foto derecha.",
+  "sec.4.h": "Lo que la conversión hizo con nuestras fotos",
+  "sec.5.p.0": "Una foto puede llevar el lugar donde se tomó. De nuestras 10 fotos, 3 tenían coordenadas reales de GPS, y 5 tenían una etiqueta GPS de algún tipo, llena o vacía. Después de la conversión, la cantidad de JPG con algún dato GPS fue 0.",
+  "sec.5.p.1": "Es a propósito: la herramienta escribe cada JPG a partir de los píxeles, así que la ubicación, los datos de la cámara y los demás metadatos del HEIC se quedan atrás. Si quieres conservar la ubicación, para un mapa de fotos o un álbum, guarda el HEIC original o usa la exportación de tu app de fotos.",
+  "sec.5.h": "La ubicación se queda atrás",
+  "sec.6.p.0": "Convertir vuelve a codificar la imagen, así que el JPG es un archivo nuevo y no una copia del HEIC con otro nombre. Además, algunos archivos HEIC guardan más de una imagen. Solo la imagen principal se convierte en el JPG: el mapa de profundidad de una foto en modo Retrato y la segunda imagen de una foto espacial quedan fuera.",
+  "sec.6.p.1": "Tus archivos HEIC nunca cambian. Guárdalos como originales y envía los JPG, y no pierdes nada.",
+  "sec.6.h": "Qué más se queda en el HEIC",
+  "tableH2": "Foto por foto",
+  "measuredIntro": "Todas las fotos HEIC de prueba de este sitio, convertidas con los valores predeterminados de la herramienta de arriba. El cambio es el del JPG frente al HEIC.",
+  "hint": "Desplázate hacia el lado para ver las 6 columnas",
+  "caption": "Cada foto HEIC de prueba: su cámara, su tamaño en HEIC y en JPG, el cambio, su tamaño en píxeles y su GPS antes de la conversión",
+  "note": "Medido el 2 de noviembre de 2026 en Chromium 156 y WebKit 27.2 en Windows, con la herramienta de arriba. La tabla muestra Chromium; WebKit dio los mismos bytes en las 10 fotos. Ningún JPG conservó datos GPS.",
+  "history": "Primera versión de esta guía, publicada el <time datetime=\"2026-11-03\">3 nov 2026<\/time> con las mediciones del 2 nov 2026.",
+  "sourcesH2": "Fuentes",
+  "relatedH2": "Herramientas y guías relacionadas",
+  "fImage": "Imagen",
+  "fCompress": "Comprimir imagen",
+  "fHeic": "HEIC a JPG",
+  "fGuides": "Guías",
+  "fAbout": "Acerca de",
+  "fPrivacy": "Privacidad",
+  "fCoffee": "¿Te gustan estas herramientas? Invítame un café",
+  "fSign": "Hecho por Victor Yuki Matusita en Curitiba · © 2026"
+ }
+};
+</script>
+<script>
+/* Prototype only (state "table"): open the page at the table, scrolled to the middle, so both edge cues show.
+   The site needs no script for the cue: it is CSS (background-attachment local and scroll). */
+document.addEventListener('DOMContentLoaded', function () {
+  if (document.documentElement.getAttribute('data-state') !== 'table') return;
+  var wrap = document.querySelector('.g-table-wrap');
+  if (!wrap) return;
+  wrap.scrollLeft = Math.round((wrap.scrollWidth - wrap.clientWidth) / 2);
+  var h = document.getElementById('measured');
+  if (h && h.scrollIntoView) h.scrollIntoView();
+});
+</script>
+</body>
+</html>

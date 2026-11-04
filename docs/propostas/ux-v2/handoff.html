@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en" data-state="resultado" data-proto-state="resultado chegada vazia" data-lang="en" data-proto-lang="en pt es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Result to the next tool · FileOrca UX v2</title>
+<meta name="proto-variants" content=";?state=chegada;?state=vazia;?lang=pt;?lang=pt&state=chegada;?lang=es&state=vazia;?lang=es&state=chegada">
+<meta name="proto-shots" content=";?state=chegada;?state=vazia">
+<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="../../design/fonts/fonts.css">
+<link rel="stylesheet" href="../../design/tokens.css">
+<link rel="stylesheet" href="../../design/components/bundle.css">
+<link rel="stylesheet" href="proto.css">
+<style>
+/* States of the prototype control (kit): a [data-when] part shows only in its states. */
+html[data-state="resultado"] [data-when]:not([data-when~="resultado"]),
+html[data-state="chegada"] [data-when]:not([data-when~="chegada"]),
+html[data-state="vazia"] [data-when]:not([data-when~="vazia"]) { display: none !important; }
+</style>
+<script>
+/* Prototype runtime (F10 kit). <html data-proto-X="a b c"> lists the values of ?X= (lang, state, modo...);
+   a listed value becomes data-X on <html>. ?modo= also gives data-state when the page has no state of its own.
+   On DOMContentLoaded: the texts marked data-t="key" (textContent), data-t-html="key" (innerHTML) and
+   data-t-<attribute>="key" come from window.PROTO_T[lang] (falling back to the markup, which is English; the key
+   "page.title" is the document title, since <title> takes no attribute), and every
+   link href="?..." keeps the other parameters; the prototype control marks the current value with aria-current. */
+(function () {
+  var d = document.documentElement, q = new URLSearchParams(location.search), i, a, p, v;
+  var TAG = { en: 'en', pt: 'pt-BR', es: 'es' };
+  if (!d.hasAttribute('data-lang')) d.setAttribute('data-lang', (d.getAttribute('lang') || 'en').slice(0, 2));
+  if (!d.hasAttribute('data-proto-lang')) d.setAttribute('data-proto-lang', 'en pt es');
+  var attrs = Array.prototype.slice.call(d.attributes);
+  for (i = 0; i < attrs.length; i++) {
+    a = attrs[i];
+    if (a.name.indexOf('data-proto-') !== 0) continue;
+    p = a.name.slice(11);
+    v = q.get(p);
+    if (v !== null && (' ' + a.value + ' ').indexOf(' ' + v + ' ') >= 0) d.setAttribute('data-' + p, v);
+  }
+  if (d.hasAttribute('data-proto-modo') && !d.hasAttribute('data-proto-state') && d.hasAttribute('data-modo')) d.setAttribute('data-state', d.getAttribute('data-modo'));
+  var lang = d.getAttribute('data-lang');
+  if (TAG[lang]) d.setAttribute('lang', TAG[lang]);
+  document.addEventListener('DOMContentLoaded', function () {
+    var BASE = { en: { 'proto.ad': 'Advertisements' }, pt: { 'proto.ad': 'Publicidade' }, es: { 'proto.ad': 'Anuncios' } };
+    var page = (window.PROTO_T && window.PROTO_T[lang]) || {}, base = BASE[lang] || {};
+    var t = function (k) { return Object.prototype.hasOwnProperty.call(page, k) ? page[k] : base[k]; };
+    if (t('page.title') !== undefined) document.title = t('page.title');
+    var all = document.querySelectorAll('*'), el, j, n, s, list;
+    for (i = 0; i < all.length; i++) {
+      el = all[i];
+      list = Array.prototype.slice.call(el.attributes);
+      for (j = 0; j < list.length; j++) {
+        n = list[j].name;
+        if (n !== 'data-t' && n.indexOf('data-t-') !== 0) continue;
+        s = t(list[j].value);
+        if (s === undefined) continue;
+        if (n === 'data-t') el.textContent = s;
+        else if (n === 'data-t-html') el.innerHTML = s;
+        else el.setAttribute(n.slice(7), s);
+      }
+    }
+    var now = function (k) {
+      if (k !== 'theme') return d.getAttribute('data-' + k);
+      var th = q.get('theme');
+      return th === 'dark' || th === 'light' ? th : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+    var index = document.querySelector('.proto-control__index'), th0 = q.get('theme');
+    if (index && (th0 === 'dark' || th0 === 'light')) index.setAttribute('href', index.getAttribute('href') + '?theme=' + th0);
+    var links = document.querySelectorAll('a[href^="?"]'), own, next, on;
+    var visit = function (val, key) { next.set(key, val); if (now(key) !== val) on = false; };
+    for (i = 0; i < links.length; i++) {
+      a = links[i];
+      own = new URLSearchParams(a.getAttribute('href').slice(1));
+      next = new URLSearchParams(location.search);
+      on = true;
+      own.forEach(visit);
+      a.setAttribute('href', '?' + next.toString());
+      if (a.closest('[data-proto-control]') || a.hasAttribute('data-proto-current')) {
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      }
+    }
+  });
+})();
+</script>
+<style>
+/* UX-14 (handoff): rules of this page only. Colours: tokens only. Site classes that bundle.css lacks are copied
+   from src/styles/components.css with the same values (fo-result__notes, fo-drop__message). */
+.fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+.fo-drop__message { display: grid; gap: var(--space-2); max-width: 100%; overflow-wrap: anywhere; }
+.fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
+.fo-result__head .fo-placard { margin-left: auto; }
+/* The Download of the card as the site draws it (components.css:177-181): full width and wrapping on a phone, so the
+   card never forces the page wider than 320 px (WCAG 1.4.10; review of the F10, b-03). */
+.fo-result__actions .fo-btn--download { display: flex; width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
+@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
+/* The line that says where the file came from: the first note of the card, with the same muted ink on deep. */
+.ux14-from { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--on-deep); font-weight: 600; }
+.ux14-from .fo-icon--inline { margin-top: 2px; flex: none; }
+/* The chips that carry the file, and the one line under them. */
+.ux14-next { display: grid; gap: var(--space-2); }
+.ux14-carry { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.ux14-carry .fo-icon--inline { margin-top: 2px; flex: none; color: var(--brand); }
+/* The empty box: the DropZone in a status state (like the offline state of § 292), two ways out. */
+.ux14-lost__actions { display: grid; gap: var(--space-2); justify-items: center; width: 100%; }
+@media (max-width: 767px) { .ux14-lost__actions .fo-btn { width: 100%; min-width: 0; white-space: normal; } }
+@media (min-width: 768px) { .ux14-lost__actions { display: flex; flex-wrap: wrap; justify-content: center; } }
+.fo-drop[data-state="lost"] .fo-drop__message { max-width: 34em; }
+</style>
+</head>
+<body>
+<svg class="fo-sprite" style="position:absolute" aria-hidden="true" focusable="false" width="0" height="0"><defs><clipPath id="oli-clip"><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></clipPath><g id="oli-p1" fill="#F7FAFD" stroke="#F7FAFD" stroke-width="9" stroke-linejoin="round" class="oli-rim"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z"/></g><g id="oli-p2" stroke="#0F1B2D" stroke-width="3" stroke-linejoin="round"><path d="M95 66 C104 58 107 48 107 40 C100 37 94 33 91 26 C99 25 105 27 109 31 C112 26 118 23 125 23 C123 31 118 37 113 40 C113 50 109 60 101 70 Z" fill="#0F1B2D"/><path d="M56 37 C60 28 63 19 65 10 L80 11 C80 22 82 31 88 41 Z" fill="#0F1B2D"/><path d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="#0F1B2D"/></g><path id="oli-p3" d="M65 10 L80 11 L71 22 Z" fill="#0B63F6" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><g id="oli-p4" clip-path="url(#oli-clip)"><path d="M8 77 C22 79 32 81 44 83 C60 85 76 80 88 68 C95 76 95 85 90 94 L90 112 L8 112 Z" fill="#F7FAFD"/><ellipse cx="44" cy="56" rx="12.5" ry="8.5" transform="rotate(-12 44 56)" fill="#F7FAFD"/></g><path id="oli-p5" d="M14 74 C14 50 32 34 56 34 C80 34 96 46 104 60 C100 76 90 88 74 94 C58 100 34 99 24 92 C17 87 14 81 14 74 Z" fill="none" stroke="#0F1B2D" stroke-width="3"/><ellipse id="oli-p6" cx="41" cy="57" rx="4.4" ry="5.4" fill="#0F1B2D"/><circle id="oli-p7" cx="42.7" cy="54.9" r="1.8" fill="#F7FAFD"/><ellipse id="oli-p8" cx="32" cy="70" rx="5" ry="3" fill="#FF9CA8"/><path id="oli-p9" d="M17 79 Q 27 87 38 81" fill="none" stroke="#0F1B2D" stroke-width="2.8" stroke-linecap="round"/><path id="oli-p10" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path id="oli-p11" d="M47 87 C41 96 42 106 49 110 C55 112 58 104 58 88 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/><path id="oli-p12" d="M36 58.5 Q 41 52 46 58.5" fill="none" stroke="#0F1B2D" stroke-width="3" stroke-linecap="round"/><path id="oli-p13" d="M19 82 q 3 -3 6 0 t 6 0 t 6 0" fill="none" stroke="#0F1B2D" stroke-width="2.6" stroke-linecap="round"/><symbol id="oli-cheer" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><g transform="rotate(-10 64 64) translate(0 -6)"><g fill="#0B63F6"><path d="M30 118 q3 -8 6 0 q-3 4 -6 0z"/><path d="M50 122 q3 -9 6 0 q-3 4 -6 0z"/><path d="M76 118 q3 -8 6 0 q-3 4 -6 0z"/></g><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p12"/><use href="#oli-p8"/><path d="M15 78 Q 27 77 39 81 Q 34 95 22 93 Q 15 90 15 78 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="26" cy="89" rx="6" ry="3.2" fill="#FF9CA8"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#F7FAFD" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/><path d="M53 85 C54 74 58 64 65 58 C70 54 75 58 73 64 C71 72 66 82 62 90 Z" fill="#0F1B2D" stroke="#0F1B2D" stroke-width="2.4" stroke-linejoin="round"/></g></g></symbol><symbol id="oli-lost" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p13"/><use href="#oli-p10"/><use href="#oli-p11"/><rect x="28" y="47" width="28" height="19" rx="8" fill="#D6E6FF" stroke="#0F1B2D" stroke-width="2.6"/><ellipse cx="41" cy="57" rx="4.2" ry="5.2" fill="#0F1B2D"/><circle cx="42.7" cy="55" r="1.7" fill="#F7FAFD"/><path d="M30 52 l6 -3" stroke="#F7FAFD" stroke-width="2" stroke-linecap="round"/><path d="M20 84 C 10 84 8 76 8 66 L8 30" fill="none" stroke="#0F1B2D" stroke-width="7" stroke-linecap="round"/><path d="M20 84 C 10 84 8 76 8 66 L8 30" fill="none" stroke="#0B63F6" stroke-width="3.4" stroke-linecap="round"/></g></symbol></defs></svg>
+<nav class="proto-control" data-proto-control lang="en" aria-labelledby="proto-control-title">
+  <p class="proto-control__title" id="proto-control-title">Prototype control</p>
+  <div class="proto-control__groups">
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-state">
+      <span class="proto-control__label" id="proto-control-state">State</span>
+      <a href="?state=resultado" aria-current="true">Compress result</a>
+      <a href="?state=chegada">Arrival in Resize</a>
+      <a href="?state=vazia">Empty box</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-lang">
+      <span class="proto-control__label" id="proto-control-lang">Language</span>
+      <a href="?lang=en" aria-current="true">EN</a>
+      <a href="?lang=pt">PT</a>
+      <a href="?lang=es">ES</a>
+    </div>
+    <div class="proto-control__group" role="group" aria-labelledby="proto-control-theme">
+      <span class="proto-control__label" id="proto-control-theme">Theme</span>
+      <a href="?theme=light">Light</a>
+      <a href="?theme=dark">Dark</a>
+    </div>
+    <a class="proto-control__index" href="index.html">All prototypes</a>
+    <p class="proto-control__note">Header: today's site. The header to build is UX-01 A: <a href="header-a.html">header-a.html</a>.</p>
+  </div>
+</nav>
+<div class="proto-page">
+  <a class="fo-skip" href="#main" data-t="skip">Skip to content</a>
+  <header class="fo-header">
+    <a class="fo-header__logo" href="#" aria-label="FileOrca home" data-t-aria-label="home"><svg class="fo-logo" width="146.4" height="44" viewBox="0 0 426 128" role="img" aria-label="FileOrca"><g transform="translate(128 4) scale(-1 1)"><g transform="translate(64 64) scale(0.9) translate(-69.5 -60)"><use href="#oli-p1"/><use href="#oli-p2"/><use href="#oli-p3"/><use href="#oli-p4"/><use href="#oli-p5"/><use href="#oli-p6"/><use href="#oli-p7"/><use href="#oli-p8"/><use href="#oli-p9"/><use href="#oli-p10"/><use href="#oli-p11"/></g></g><path class="fo-logo__file" d="M147.1 92.7Q144.5 92.7 143.3 91.9Q142.2 91.1 141.9 89.8Q141.7 88.5 141.7 87.2V47.8Q141.7 44.7 142.9 43.5Q144.1 42.3 147.3 42.3H174.5Q176 42.3 177.2 42.6Q178.4 42.9 179.1 44Q179.9 45.1 179.9 47.8Q179.9 50.5 179.1 51.6Q178.3 52.8 177.1 53Q175.8 53.3 174.4 53.3H152.6V62.5H167.4Q168.8 62.5 169.9 62.8Q171.1 63 171.7 64Q172.3 65 172.3 67.4Q172.3 69.7 171.7 70.6Q171 71.6 169.9 71.8Q168.8 72 167.3 72H152.6V87.2Q152.6 88.6 152.3 89.9Q152.1 91.1 150.9 91.9Q149.8 92.7 147.1 92.7ZM190.5 92.7Q187.9 92.7 186.8 91.9Q185.6 91.1 185.4 89.9Q185.2 88.6 185.2 87.2V62.1Q185.2 60.7 185.4 59.5Q185.7 58.3 186.8 57.5Q188 56.7 190.6 56.7Q193.2 56.7 194.3 57.5Q195.4 58.3 195.7 59.5Q196 60.8 196 62.2V87.3Q196 88.7 195.7 89.9Q195.4 91.2 194.3 91.9Q193.2 92.7 190.5 92.7ZM190.5 51.5Q187.8 51.5 186.7 50.7Q185.5 49.9 185.2 48.6Q185 47.3 185 45.8Q185 44.4 185.3 43.1Q185.6 41.9 186.7 41.1Q187.9 40.3 190.6 40.3Q193.3 40.3 194.4 41.1Q195.6 41.9 195.8 43.2Q196.1 44.5 196.1 46Q196.1 47.4 195.8 48.7Q195.6 50 194.4 50.7Q193.3 51.5 190.5 51.5ZM215.3 92.7Q212.3 92.7 210.1 92.4Q207.8 92 206.2 91.2Q204.6 90.3 203.6 88.8Q202.6 87.2 202.1 84.8Q201.6 82.4 201.6 78.9V45.7Q201.6 44.2 201.9 43Q202.1 41.7 203.3 41Q204.4 40.2 207 40.2Q209.7 40.2 210.8 41Q211.9 41.7 212.2 43Q212.4 44.2 212.4 45.7V78.4Q212.4 79.6 212.5 80.3Q212.7 81.1 213 81.5Q213.3 81.9 213.9 82.1Q214.5 82.2 215.4 82.2Q216.3 82.2 217.2 82.4Q218.1 82.7 218.7 83.7Q219.3 84.8 219.3 87.3Q219.3 89.9 218.7 91.1Q218.1 92.2 217.2 92.4Q216.2 92.7 215.3 92.7ZM240.3 93.3Q235.3 93.3 231.6 91.7Q228 90 225.7 87.3Q223.4 84.6 222.3 81.3Q221.1 78 221.1 74.7Q221.1 69.2 223.6 65.1Q226 60.9 230.4 58.5Q234.7 56.1 240.3 56.1Q244.5 56.1 247.5 57.4Q250.6 58.8 252.6 60.9Q254.6 63 255.5 65.4Q256.5 67.9 256.5 70.1Q256.5 74.1 254.6 76Q252.7 77.9 249.7 77.9H232.6Q232.8 79.7 233.9 81Q235.1 82.4 236.9 83.1Q238.7 83.8 240.7 83.8Q242.4 83.8 243.7 83.6Q245 83.4 246.0 83.1Q247 82.8 247.7 82.5Q248.5 82.2 249.1 81.9Q249.7 81.7 250.3 81.6Q251.4 81.6 252.3 82.3Q253.2 82.9 253.9 84.3Q254.4 85.1 254.6 85.8Q254.8 86.6 254.8 87.2Q254.8 89 253 90.4Q251.3 91.7 248.1 92.5Q244.8 93.3 240.3 93.3ZM232.6 72H244Q245.1 72 245.6 71.6Q246.2 71.2 246.2 70.1Q246.2 68.8 245.4 67.8Q244.7 66.8 243.3 66.3Q242 65.7 240.2 65.7Q238 65.7 236.3 66.6Q234.5 67.5 233.6 68.9Q232.6 70.3 232.6 72Z"/><path class="fo-logo__orca" d="M283.9 93.4Q278.7 93.4 274.1 91.4Q269.6 89.4 266.1 85.9Q262.7 82.4 260.7 77.8Q258.7 73.2 258.7 67.9Q258.7 62.5 260.6 57.8Q262.5 53 265.9 49.4Q269.3 45.9 273.7 43.9Q278.2 41.8 283.3 41.8Q288.5 41.8 293 43.8Q297.6 45.8 301 49.3Q304.4 52.8 306.4 57.5Q308.3 62.2 308.3 67.6Q308.3 72.9 306.4 77.6Q304.5 82.2 301.1 85.8Q297.8 89.4 293.3 91.4Q288.9 93.4 283.9 93.4ZM283.5 82.4Q286.4 82.4 288.9 81.3Q291.4 80.1 293.3 78.1Q295.2 76.1 296.3 73.4Q297.4 70.7 297.4 67.6Q297.4 64.5 296.3 61.9Q295.2 59.2 293.3 57.1Q291.4 55.1 288.9 53.9Q286.4 52.8 283.5 52.8Q280.7 52.8 278.2 53.9Q275.7 55.1 273.8 57.1Q271.9 59.2 270.8 61.9Q269.7 64.6 269.7 67.6Q269.7 70.7 270.8 73.4Q271.9 76.1 273.8 78.1Q275.7 80.1 278.2 81.3Q280.7 82.4 283.5 82.4ZM317.2 92.7Q314.6 92.7 313.5 91.9Q312.4 91.1 312.1 89.8Q311.9 88.5 311.9 87.2V62Q311.9 60.6 312.2 59.4Q312.4 58.1 313.6 57.4Q314.7 56.7 317.3 56.7Q319.9 56.7 321 57.4Q322.1 58 322.4 58.9Q322.6 59.8 322.6 60.5L321.8 60.9Q322 60.6 322.6 59.9Q323.2 59.1 324.3 58.3Q325.4 57.5 326.9 56.9Q328.4 56.3 330.4 56.3Q331.2 56.3 332.2 56.4Q333.2 56.5 334.2 56.8Q335.2 57.2 336.1 57.7Q337 58.2 337.5 59Q338.1 59.9 338.1 61Q338.1 63.9 336.7 66Q335.3 68 333.3 68Q332.1 68 331.5 67.8Q331 67.6 330.7 67.4Q330.4 67.2 329.9 67Q329.5 66.8 328.4 66.8Q327.3 66.8 326.3 67.1Q325.3 67.4 324.5 68Q323.7 68.6 323.2 69.5Q322.8 70.4 322.8 71.5V87.3Q322.8 88.7 322.5 89.9Q322.2 91.2 321.1 91.9Q319.9 92.7 317.2 92.7ZM359.4 93Q356.2 93 352.9 91.8Q349.7 90.6 346.9 88.2Q344.2 85.9 342.5 82.5Q340.8 79.1 340.8 74.6Q340.8 70.1 342.5 66.7Q344.2 63.3 346.9 61Q349.6 58.7 352.9 57.5Q356.1 56.3 359.3 56.3Q361.9 56.3 364.1 57Q366.2 57.6 367.7 58.5Q369.1 59.3 369.8 60Q371 60.9 371.9 61.8Q372.9 62.8 372.8 64.3Q372.7 65.1 372.3 65.9Q371.9 66.7 371.2 67.6Q369 70.6 366.9 70.3Q365.8 70.1 364.9 69.6Q364 69.1 363.2 68.6Q362.4 68.1 361.4 67.7Q360.5 67.3 359.3 67.3Q357.2 67.3 355.5 68.3Q353.8 69.2 352.9 70.8Q351.9 72.5 351.9 74.6Q351.9 76.8 352.9 78.4Q353.8 80.1 355.5 81Q357.1 82 359.1 82Q360.3 82 361.2 81.7Q362.2 81.5 362.8 81.1Q363.5 80.7 363.8 80.4Q364.7 79.8 365.4 79.4Q366.2 78.9 367.1 78.9Q368.1 78.9 369.2 79.7Q370.2 80.4 371.5 82.1Q372.7 83.6 372.9 84.9Q373 86.2 372.3 87.3Q371.5 88.5 369.8 89.6Q369.3 90.1 367.8 90.9Q366.3 91.7 364.2 92.3Q362.1 93 359.4 93ZM406.6 92.6Q404 92.6 402.7 91.6Q401.4 90.7 401.4 89.3L402.2 88.1Q401.7 88.8 400.5 89.9Q399.3 90.9 397.3 91.7Q395.4 92.6 392.5 92.6Q389.2 92.6 386.2 91.1Q383.2 89.7 380.9 87.2Q378.6 84.6 377.3 81.4Q375.9 78.1 375.9 74.5Q375.9 71 377.3 67.8Q378.6 64.6 381 62.1Q383.3 59.6 386.3 58.2Q389.2 56.7 392.5 56.7Q395.2 56.7 397.1 57.5Q398.9 58.2 400.2 59.3Q401.4 60.3 402.1 61.2L401.5 60.2Q401.4 58.5 402.7 57.6Q404 56.7 406.7 56.7Q409.3 56.7 410.4 57.5Q411.5 58.2 411.8 59.5Q412 60.8 412 62.2V87.1Q412 88.5 411.8 89.8Q411.5 91 410.4 91.8Q409.3 92.6 406.6 92.6ZM394.1 81.9Q396 81.9 397.5 80.9Q399 79.9 400 78.3Q400.9 76.6 400.9 74.6Q400.9 72.5 399.9 70.9Q399.0 69.3 397.4 68.3Q395.9 67.3 393.9 67.3Q391.9 67.3 390.2 68.3Q388.6 69.3 387.6 71Q386.7 72.6 386.7 74.7Q386.7 76.7 387.7 78.3Q388.7 79.9 390.3 80.9Q392 81.9 394.1 81.9Z"/></svg></a>
+    <button type="button" class="fo-header__search" aria-keyshortcuts="Control+K"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span class="fo-header__search-text" data-t="search">Search tools</span><span class="fo-kbd fo-desktop-only" aria-hidden="true">Ctrl K</span></button>
+    <button type="button" class="fo-header__lang" popovertarget="ux14-langmenu"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3.2 3 14.8 0 18-3-3.2-3-14.8 0-18z"/></svg><span data-t="lang.code">EN</span><span class="fo-sr" data-t="lang.sr"> · Language: English</span><span class="fo-desktop-only"><svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <nav id="ux14-langmenu" class="fo-langmenu" popover aria-label="Choose a language" data-t-aria-label="lang.menu">
+      <ul>
+        <li><a href="?lang=en" hreflang="en" lang="en" data-proto-current aria-current="true">English</a></li>
+        <li><a href="?lang=pt" hreflang="pt-BR" lang="pt-BR" data-proto-current>Português</a></li>
+        <li><a href="?lang=es" hreflang="es" lang="es" data-proto-current>Español</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="proto-fold" aria-hidden="true"><span class="fo-mobile-only">Fold · 740 px</span><span class="fo-desktop-only">Fold · 800 px</span></div>
+  <div class="proto-frame proto-frame--rail">
+    <main id="main" class="proto-main">
+      <nav aria-label="Breadcrumb" data-t-aria-label="crumbs">
+        <ol class="fo-crumbs">
+          <li><a class="fo-crumbs__link" href="#" data-t="crumb.home">Home</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li><a class="fo-crumbs__link" href="#" data-t="crumb.image">Image tools</a><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></li>
+          <li data-when="resultado"><span aria-current="page" data-t="tool.compress">Compress image</span></li>
+          <li data-when="chegada vazia"><span aria-current="page" data-t="tool.resize">Resize image</span></li>
+        </ol>
+      </nav>
+      <div class="fo-top">
+        <h1 class="fo-h1" data-when="resultado" data-t="tool.compress">Compress image</h1>
+        <h1 class="fo-h1" data-when="chegada vazia" data-t="tool.resize">Resize image</h1>
+        <span class="fo-seal"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-t="seal">Your files never leave your device</span></span>
+      </div>
+      <div class="fo-tool-island">
+        <div class="fo-slot">
+          <!-- resultado: the result of Compress image, with the chips that carry the file -->
+          <section class="fo-result fo-deep" data-when="resultado" aria-labelledby="ux14-says-c">
+            <div class="fo-result__head">
+              <div class="fo-result__oli" data-oli="cheer" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-cheer"/></svg></div>
+              <p class="fo-result__says" id="ux14-says-c" data-t="c.says">Done! Your image is 72% lighter.</p>
+              <div class="fo-placard fo-pop"><span class="fo-placard__n" data-t="c.placard">−72%</span><span class="fo-placard__l" data-t="c.lighter">lighter</span></div>
+            </div>
+            <dl class="fo-result__stats">
+              <div class="fo-result__stat fo-result__stat--before"><dt data-t="r.before">Before</dt><dd data-t="c.before">2.6 MB</dd></div>
+              <div class="fo-result__stat"><dt data-t="r.after">After</dt><dd>717 KB</dd></div>
+              <div class="fo-result__stat"><dt data-t="r.size">Size</dt><dd>4032 × 3024</dd></div>
+            </dl>
+            <div class="fo-result__actions">
+              <a class="fo-btn fo-btn--download fo-btn--lg" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-t="r.download">Download</span> <span class="fo-btn__meta">· 717 KB</span></a>
+              <button type="button" class="fo-btn fo-btn--ghost" data-t="r.startOver">Start over</button>
+            </div>
+            <ul class="fo-result__notes">
+              <li data-t="r.metadata">Oli removed the photo metadata, including the GPS location.</li>
+            </ul>
+          </section>
+          <!-- chegada: Resize image opened with the file the chip carried, already resized with the default (half) -->
+          <section class="fo-result fo-deep" data-when="chegada" aria-labelledby="ux14-says-r">
+            <div class="fo-result__head">
+              <div class="fo-result__oli" data-oli="cheer" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-cheer"/></svg></div>
+              <p class="fo-result__says" id="ux14-says-r" data-t="r.says">Done! Your image is resized.</p>
+            </div>
+            <dl class="fo-result__stats">
+              <div class="fo-result__stat fo-result__stat--before"><dt data-t="r.before">Before</dt><dd>717 KB</dd></div>
+              <div class="fo-result__stat"><dt data-t="r.after">After</dt><dd>231 KB</dd></div>
+              <div class="fo-result__stat"><dt data-t="r.size">Size</dt><dd>2016 × 1512</dd></div>
+            </dl>
+            <div class="fo-result__actions">
+              <a class="fo-btn fo-btn--download fo-btn--lg" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-t="r.download">Download</span> <span class="fo-btn__meta">· 231 KB</span></a>
+              <button type="button" class="fo-btn fo-btn--ghost" data-t="r.startOver">Start over</button>
+            </div>
+            <ul class="fo-result__notes">
+              <li class="ux14-from"><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg><span data-t="r.from">Oli brought this image from Compress image.</span></li>
+              <li data-t="r.metadata">Oli removed the photo metadata, including the GPS location.</li>
+            </ul>
+          </section>
+          <!-- vazia: the chip was used, but the box came empty (a new worker cleared it, or the browser storage was wiped) -->
+          <div class="fo-drop" data-state="lost" data-when="vazia">
+            <div class="fo-drop__sea"><div class="fo-water"></div></div>
+            <div class="fo-drop__oli" data-oli="lost" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#oli-lost"/></svg></div>
+            <div class="fo-drop__badge" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.5h.01" stroke-width="2.6"/></svg></div>
+            <div role="status" class="fo-drop__message">
+              <p class="fo-drop__title" data-t="v.title">Oli couldn't bring the image here</p>
+              <p class="fo-drop__help" data-t="v.help">Nothing left your device. Choose the image again, or go back to Compress image and download it there.</p>
+            </div>
+            <div class="ux14-lost__actions">
+              <button type="button" class="fo-btn fo-btn--brand fo-btn--lg"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m3 16 5-5 4 4 2.5-2.5L21 19"/><circle cx="15.5" cy="8.5" r="1.5"/></svg><span data-t="v.choose">Choose images</span></button>
+              <button type="button" class="fo-btn" data-t="v.back">Back to Compress image</button>
+            </div>
+          </div>
+        </div>
+        <p class="fo-sr" role="status" data-when="resultado" data-t="c.says">Done! Your image is 72% lighter.</p>
+        <p class="fo-sr" role="status" data-when="chegada" data-t="r.status">Done! Your image is resized. Oli brought this image from Compress image.</p>
+        <div class="ux14-next" data-when="resultado">
+          <nav class="fo-next" aria-labelledby="ux14-next-c">
+            <span class="fo-next__label" id="ux14-next-c" data-t="next.label">Next:</span>
+            <a class="fo-chip fo-cat--image" href="?state=chegada" data-carry><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="m20 4-7 7"/><path d="M10 20H4v-6"/><path d="m4 20 7-7"/></svg></span><span data-t="chip.resize">Resize this image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+            <a class="fo-chip fo-cat--pdf" href="#" data-carry><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="chip.pdf">Turn this image into a PDF</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </nav>
+          <p class="ux14-carry"><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-t="carry.note">Oli takes the image to the next tool. It never leaves your device.</span></p>
+        </div>
+        <div class="ux14-next" data-when="chegada">
+          <nav class="fo-next" aria-labelledby="ux14-next-r">
+            <span class="fo-next__label" id="ux14-next-r" data-t="next.label">Next:</span>
+            <a class="fo-chip fo-cat--image" href="#" data-carry><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4"/><path d="M15 4v5h5"/><path d="M9 20v-5H4"/><path d="M15 20v-5h5"/></svg></span><span data-t="chip.compress">Compress this image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+            <a class="fo-chip fo-cat--image" href="#" data-carry><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></span><span data-t="chip.crop">Crop this image</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+            <a class="fo-chip fo-cat--pdf" href="#" data-carry><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M14 3v5h5"/><path d="M8.5 13h7"/><path d="M8.5 17h4.5"/></svg></span><span data-t="chip.pdf">Turn this image into a PDF</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </nav>
+          <p class="ux14-carry"><svg class="fo-icon fo-icon--inline" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span data-t="carry.note">Oli takes the image to the next tool. It never leaves your device.</span></p>
+        </div>
+      </div>
+      <div class="fo-ad fo-ad--content"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div>
+      <section class="fo-section">
+        <h2 data-when="resultado" data-t="how.c">How to compress an image</h2>
+        <h2 data-when="chegada vazia" data-t="how.r">How to resize an image</h2>
+        <ol class="fo-steps">
+          <li data-t="how.1">Drop your images on the box, choose them, or paste them with Ctrl V.</li>
+          <li data-t="how.2">Oli works on your device: nothing is uploaded.</li>
+          <li data-t="how.3">Download the result, or take it to the next tool with one of the chips.</li>
+        </ol>
+      </section>
+    </main>
+    <aside class="proto-rail" aria-label="Advertisements" data-t-aria-label="proto.ad"><div class="fo-ad fo-ad--rail"><span class="fo-ad__label" data-t="proto.ad">Advertisements</span></div></aside>
+  </div>
+  <footer class="fo-footer fo-deep">
+    <div class="fo-footer__cols">
+      <div><h2 data-t="f.image">Image</h2><ul><li><a href="#" data-t="tool.compress">Compress image</a></li><li><a href="#" data-t="tool.resize">Resize image</a></li></ul></div>
+      <div><h2>FileOrca</h2><ul><li><a href="#" data-t="f.about">About</a></li><li><a href="#" data-t="f.privacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="fo-footer__base"><a class="fo-footer__coffee" href="#"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5v2M12.5 3.5v2"/></svg><span data-t="f.coffee">Like these tools? Support them with a coffee</span></a><span data-t="f.sign">Made by Victor Yuki Matusita in Curitiba · © 2026</span></div>
+  </footer>
+</div>
+<section class="proto-spec" lang="pt-BR" aria-labelledby="spec-title">
+  <div class="proto-doc">
+    <p class="proto-doc__eyebrow">Especificação · UX-14 · run F13 · custo M</p>
+    <h2 id="spec-title">O resultado vai direto para a próxima ferramenta</h2>
+    <p>Hoje o chip de próximo passo leva só a pessoa: "Resize image" abre a ferramenta vazia, e quem acabou de comprimir precisa baixar, achar o arquivo nos downloads e escolher de novo. O <code>docs/design/components/NextStepChips/README.md</code> já promete o contrário ("levam o arquivo, ou a pessoa, para a ferramenta seguinte"). Esta peça faz o chip levar o arquivo, pela mesma caixa do compartilhar da F8 (§ 290): o Cache Storage <code>fileorca-inbox</code>, no aparelho, apagada na entrega.</p>
+
+    <h3>O que ela resolve</h3>
+    <ul>
+      <li><strong>A promessa do NextStepChips</strong>, que hoje leva só a pessoa.</li>
+      <li><strong>D-05, D-11 e D-49</strong> pela metade: os chips continuam longe do Baixar (a distância é da UX-04 e da UX-13), mas o toque neles passa a valer a viagem. Comprimir e depois redimensionar custa hoje 1 toque, mais o Baixar, o chip, o "Choose images" e a busca do arquivo no seletor do sistema (no iPhone, o seletor abre nas Fotos, e o arquivo baixado está em Arquivos › Downloads): 5 ações ou mais. Com o chip que leva, são 2: o resultado e o chip. Heurística: Nielsen 6 (reconhecer em vez de lembrar onde o arquivo foi parar) e 7 (atalho para quem encadeia ferramentas).</li>
+      <li>O caso do D-49: no guia do HEIC o JPG sai 66 % maior, e o chip "Compress this image" leva o JPG direto para a compressão.</li>
+    </ul>
+
+    <h3>Estados (<code>?state=</code>)</h3>
+    <table>
+      <thead><tr><th scope="col">Estado</th><th scope="col">O que aparece</th></tr></thead>
+      <tbody>
+        <tr><td><code>resultado</code> (padrão)</td><td>O resultado do Compress image. Os chips que levam o arquivo dizem "this image" (ou "these 3 images" no lote), e uma linha embaixo diz que o arquivo não sai do aparelho.</td></tr>
+        <tr><td><code>chegada</code></td><td>O Resize image aberto pelo chip. O arquivo chega pelo caminho do soltar (o <code>startBatch</code>, como no compartilhar), então a ferramenta já processa com o padrão (metade do tamanho) e mostra o resultado. A primeira nota do card diz de onde ele veio. Se o trabalho passar de 400 ms, o WaterLevel aparece antes, como sempre.</td></tr>
+        <tr><td><code>vazia</code></td><td>O chip foi usado, mas a caixa chegou vazia (um service worker novo a apagou, o prazo de 1 h passou ou a pessoa limpou os dados do site). A DropZone vira um estado de aviso, com a Oli <code>lost</code> e duas saídas.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Marcação</h3>
+    <pre><code>&lt;a class="fo-chip fo-cat--image" href="/resize-image/" data-carry&gt;
+  &lt;span class="fo-chip__dot" aria-hidden="true"&gt;…resize…&lt;/span&gt;Resize this image…arrow…
+&lt;/a&gt;
+&lt;p class="fo-carry"&gt;…shield…Oli takes the image to the next tool. It never leaves your device.&lt;/p&gt;
+
+&lt;!-- na chegada, a primeira nota do card --&gt;
+&lt;li class="fo-result__from"&gt;…arrow-right…Oli brought this image from Compress image.&lt;/li&gt;
+
+&lt;!-- caixa vazia: a DropZone em estado de aviso --&gt;
+&lt;div class="fo-drop" data-state="lost"&gt;
+  …fo-drop__sea… &lt;div class="fo-drop__oli" data-oli="lost" aria-hidden="true"&gt;…&lt;/div&gt;
+  &lt;div class="fo-drop__badge" aria-hidden="true"&gt;…info…&lt;/div&gt;
+  &lt;div role="status" class="fo-drop__message"&gt;&lt;p class="fo-drop__title"&gt;…&lt;/p&gt;&lt;p class="fo-drop__help"&gt;…&lt;/p&gt;&lt;/div&gt;
+  &lt;button type="button" class="fo-btn fo-btn--brand fo-btn--lg"&gt;Choose images&lt;/button&gt;
+  &lt;button type="button" class="fo-btn"&gt;Back to Compress image&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+    <h3>Quando o chip leva o arquivo</h3>
+    <ul>
+      <li>Só quando a ferramenta de destino aceita pelo menos um arquivo do resultado (a regra <code>takes()</code> de <code>src/share/logic.ts</code>, com os <code>accepts</code> dos registros). O chip que não leva fica como hoje, com o nome da ferramenta: depois do Image to PDF, o "Compress image" não leva o PDF.</li>
+      <li>Só no clique simples (botão principal, sem Ctrl, Shift, Alt ou Cmd). Ctrl-clique, botão do meio e "abrir em nova aba" seguem o link de hoje e abrem a ferramenta vazia.</li>
+      <li>Só com o service worker no controle (<code>navigator.serviceWorker.controller</code>), porque é ele que apaga a caixa vencida depois de 1 h (§ 290). Sem ele, o chip é o link de hoje.</li>
+      <li>Leva os arquivos que saíram (não o ZIP), na ordem da lista; os que falharam ficam. Um arquivo "já otimizado" vai como foi entregue (o original sem metadados).</li>
+    </ul>
+
+    <h3>O que o JS faz (no chunk <code>island</code>, sem arquivo novo)</h3>
+    <ol>
+      <li>No clique: <code>preventDefault</code>; apaga a caixa velha (<code>caches.delete('fileorca-inbox')</code>); grava cada arquivo em <code>/__fileorca-inbox/&lt;n&gt;</code> com o nome codificado e a hora nos cabeçalhos de hoje (<code>X-FileOrca-Name</code>, <code>X-FileOrca-Stored</code>).</li>
+      <li>Grava no <code>sessionStorage</code> da aba <code>fo-inbox-tool = {tool, order, from}</code>. O <code>from</code> é novo: o id da página de origem (<code>compress-image</code>), nunca um nome de arquivo.</li>
+      <li><code>location.assign(href)</code>. Se algo falhar, ou passar de 3 s, a navegação segue sem a chave: a ferramenta abre vazia, como hoje, e não mostra a caixa vazia.</li>
+      <li>Na chegada, o <code>takeInbox(page)</code> de hoje passa a devolver <code>{files, from, lost}</code>. Com arquivos, vai ao <code>startBatch</code> (imagem) ou ao <code>addFiles</code> (PDF), e o card ganha a nota de origem. Com a chave e sem entrada válida, é o estado <code>lost</code>. A caixa é apagada na leitura, como hoje.</li>
+    </ol>
+    <p>O PDF faz igual: depois do Merge PDF, "Compress this PDF" e "Number the pages of this PDF" levam o PDF juntado; depois do PDF to JPG, "Compress these 12 images" leva as páginas.</p>
+
+    <h3>Textos</h3>
+    <table>
+      <thead><tr><th scope="col">Peça</th><th scope="col">en</th><th scope="col">pt</th><th scope="col">es</th></tr></thead>
+      <tbody>
+        <tr><td>Chip (um)</td><td lang="en">Resize this image · Turn this image into a PDF · Compress this image · Crop this image</td><td>Redimensionar esta imagem · Pôr esta imagem num PDF · Comprimir esta imagem · Cortar esta imagem</td><td lang="es">Redimensionar esta imagen · Pasar esta imagen a PDF · Comprimir esta imagen · Recortar esta imagen</td></tr>
+        <tr><td>Chip (lote)</td><td lang="en">Resize these 3 images · Turn these 3 images into a PDF</td><td>Redimensionar estas 3 imagens · Pôr estas 3 imagens num PDF</td><td lang="es">Redimensionar estas 3 imágenes · Pasar estas 3 imágenes a PDF</td></tr>
+        <tr><td>Chip (PDF)</td><td lang="en">Compress this PDF · Number the pages of this PDF</td><td>Comprimir este PDF · Numerar as páginas deste PDF</td><td lang="es">Comprimir este PDF · Numerar las páginas de este PDF</td></tr>
+        <tr><td>Linha sob os chips</td><td lang="en">Oli takes the image to the next tool. It never leaves your device.</td><td>A Oli leva a imagem para a próxima ferramenta. Ela não sai do seu aparelho.</td><td lang="es">Oli lleva la imagen a la siguiente herramienta. Nunca sale de tu dispositivo.</td></tr>
+        <tr><td>Nota de origem</td><td lang="en">Oli brought this image from Compress image.</td><td>A Oli trouxe esta imagem de Comprimir imagem.</td><td lang="es">Oli trajo esta imagen desde Comprimir imagen.</td></tr>
+        <tr><td>Caixa vazia: título</td><td lang="en">Oli couldn't bring the image here</td><td>A Oli não conseguiu trazer a imagem</td><td lang="es">Oli no pudo traer la imagen</td></tr>
+        <tr><td>Caixa vazia: ajuda</td><td lang="en">Nothing left your device. Choose the image again, or go back to Compress image and download it there.</td><td>Nada saiu do seu aparelho. Escolha a imagem de novo, ou volte para Comprimir imagem e baixe de lá.</td><td lang="es">Nada salió de tu dispositivo. Elige la imagen de nuevo, o vuelve a Comprimir imagen y descárgala allí.</td></tr>
+        <tr><td>Caixa vazia: botões</td><td lang="en">Choose images · Back to Compress image</td><td>Escolher imagens · Voltar para Comprimir imagem</td><td lang="es">Elegir imágenes · Volver a Comprimir imagen</td></tr>
+      </tbody>
+    </table>
+
+    <h3>O que a Privacidade passa a dizer</h3>
+    <p>Na seção da cópia offline, depois do parágrafo do Android:</p>
+    <ul>
+      <li lang="en">"When you tap a next-step suggestion that takes your result along, such as Resize this image, the result goes to that tool through the same place of the browser storage as the shared files: it stays on your device, is deleted when the tool takes it, and, if it never arrives, the next time you open FileOrca after an hour. The page notes in this tab which tool you chose and which tool the file came from, and nothing else."</li>
+      <li>"Quando você toca numa sugestão de próximo passo que leva o resultado junto, como Redimensionar esta imagem, o resultado vai para essa ferramenta pelo mesmo lugar do armazenamento do navegador que os arquivos compartilhados: ele fica no seu aparelho, é apagado quando a ferramenta o recebe e, se não chegar, na próxima vez que você abrir o FileOrca depois de uma hora. A página anota nesta aba qual ferramenta você escolheu e de qual ferramenta o arquivo veio, e nada mais."</li>
+      <li lang="es">"Cuando tocas una sugerencia de siguiente paso que lleva tu resultado, como Redimensionar esta imagen, el resultado va a esa herramienta por el mismo lugar del almacenamiento del navegador que los archivos compartidos: se queda en tu dispositivo, se borra cuando la herramienta lo recibe y, si no llega, la próxima vez que abras FileOrca después de una hora. La página anota en esta pestaña qué herramienta elegiste y de qué herramienta vino el archivo, y nada más."</li>
+    </ul>
+    <p>E, em "Por quanto tempo", a linha da cópia offline ganha: "Os resultados levados para a próxima ferramenta são apagados quando ela os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora" (en e es no mesmo molde).</p>
+
+    <h3>GA4: nada novo</h3>
+    <p>O clique continua sendo o <code>next_step_click</code> de hoje, com <code>tool</code>, <code>lang</code> e <code>target</code> da lista fechada. Nenhum evento leva nome, tamanho, formato ou quantidade de arquivos, e nenhum parâmetro novo diz se o arquivo foi junto. Na chegada, o <code>tool_start</code> é o de um soltar.</p>
+
+    <h3>Teclado e leitor de tela</h3>
+    <ul>
+      <li>O chip é um link: Enter segue o link e leva o arquivo (o clique do teclado é o mesmo clique simples). O nome acessível é o texto visível ("Resize this image").</li>
+      <li>Na chegada, o foco vai para o Baixar quando o card aparece, como num soltar, e o <code>role="status"</code> do painel diz a fala da Oli e a origem ("Done! Your image is resized. Oli brought this image from Compress image.").</li>
+      <li>Na caixa vazia, o foco fica no começo da página (é uma carga nova), o <code>role="status"</code> é preenchido depois da leitura da caixa e é anunciado, e o primeiro Tab dentro do painel cai em "Choose images". "Back to Compress image" é um <code>&lt;button&gt;</code> com <code>history.back()</code>: o cache de voltar do navegador costuma devolver o resultado ainda na tela.</li>
+    </ul>
+
+    <h3>Medidas e anúncio</h3>
+    <ul>
+      <li>Os chips têm 48 px (<code>tap-min</code>). O texto mais longo ("Turn this image into a PDF", "Redimensionar estas 3 imagens") cabe numa linha a 360 px; se o lote passar disso, o chip quebra em duas linhas e cresce, sem cortar.</li>
+      <li>Os chips e a linha de baixo ficam onde a UX-04 os põe, entre o Baixar e o primeiro anúncio, com os 150 px de <code>ad-clearance</code> (a caixa do anúncio tem a margem). Nada novo encosta num anúncio.</li>
+      <li>A Oli <code>lost</code> fica no canto da DropZone, como a <code>wave</code>, a mais de 150 px de qualquer anúncio.</li>
+    </ul>
+
+    <h3>JS e requisições</h3>
+    <p>Nenhum arquivo JS novo: a gravação vive no chunk <code>island</code>, que a página já carrega, e a leitura (<code>takeInbox</code>) já existe. Estimativa: cerca de 1 KB gzip a mais no <code>island</code> (a F13 mede; o Compress está em 22,1 KB de 80). Nenhuma requisição nova na carga, e a gravação no Cache Storage é local. CLS: nenhum na carga; a chegada é um soltar no mesmo retângulo.</p>
+
+    <h3>Os testes que a F13 escreve</h3>
+    <ul>
+      <li><strong>Playwright, Chromium e WebKit:</strong> comprimir a fixture <code>jpg-01</code>, tocar "Resize this image" e esperar o card do Resize com 2016 × 1512 e a nota de origem; depois, <code>caches.has('fileorca-inbox')</code> falso e a chave <code>fo-inbox-tool</code> fora do <code>sessionStorage</code>. Reprova sem a mudança: o Resize abre vazio.</li>
+      <li><strong>Privacidade:</strong> o mesmo fluxo com o registro de rede do <code>money-privacy.spec.ts</code>: nenhuma requisição leva os bytes nem o nome do arquivo, e o <code>dataLayer</code> só tem o <code>next_step_click</code> de sempre.</li>
+      <li><strong>Caixa vazia:</strong> gravar a chave sem a caixa e abrir o Resize: a DropZone em <code>data-state="lost"</code>, com o <code>role="status"</code>. Ctrl-clique no chip: a ferramenta abre vazia e sem o aviso.</li>
+      <li><strong>Vitest:</strong> a decisão "leva ou só linka" pelos formatos do resultado e os <code>accepts</code> do destino (o Image to PDF para o Compress image não leva).</li>
+    </ul>
+  </div>
+</section>
+<script>
+var PROTO_T = {
+  pt: {
+    'page.title': 'Resultado para a próxima ferramenta · FileOrca UX v2',
+    'skip': 'Ir para o conteúdo',
+    'home': 'FileOrca, página inicial',
+    'search': 'Buscar ferramentas',
+    'lang.code': 'PT',
+    'lang.sr': ' · Idioma: Português',
+    'lang.menu': 'Escolha um idioma',
+    'crumbs': 'Trilha de navegação',
+    'crumb.home': 'Início',
+    'crumb.image': 'Ferramentas de imagem',
+    'tool.compress': 'Comprimir imagem',
+    'tool.resize': 'Redimensionar imagem',
+    'seal': 'Seu arquivo nem sai do aparelho',
+    'c.says': 'Prontinho! Sua imagem ficou 72% mais leve.',
+    'c.placard': '−72%',
+    'c.lighter': 'mais leve',
+    'c.before': '2,6 MB',
+    'r.before': 'Antes',
+    'r.after': 'Depois',
+    'r.size': 'Tamanho',
+    'r.download': 'Baixar',
+    'r.startOver': 'Começar de novo',
+    'r.metadata': 'A Oli removeu os metadados da foto, inclusive a localização GPS.',
+    'r.says': 'Prontinho! Sua imagem foi redimensionada.',
+    'r.from': 'A Oli trouxe esta imagem de Comprimir imagem.',
+    'r.status': 'Prontinho! Sua imagem foi redimensionada. A Oli trouxe esta imagem de Comprimir imagem.',
+    'v.title': 'A Oli não conseguiu trazer a imagem',
+    'v.help': 'Nada saiu do seu aparelho. Escolha a imagem de novo, ou volte para Comprimir imagem e baixe de lá.',
+    'v.choose': 'Escolher imagens',
+    'v.back': 'Voltar para Comprimir imagem',
+    'next.label': 'A seguir:',
+    'chip.resize': 'Redimensionar esta imagem',
+    'chip.pdf': 'Pôr esta imagem num PDF',
+    'chip.compress': 'Comprimir esta imagem',
+    'chip.crop': 'Cortar esta imagem',
+    'carry.note': 'A Oli leva a imagem para a próxima ferramenta. Ela não sai do seu aparelho.',
+    'how.c': 'Como comprimir uma imagem',
+    'how.r': 'Como redimensionar uma imagem',
+    'how.1': 'Solte as imagens na caixa, escolha ou cole com Ctrl V.',
+    'how.2': 'A Oli trabalha no seu aparelho: nada é enviado.',
+    'how.3': 'Baixe o resultado, ou leve para a próxima ferramenta com um dos chips.',
+    'f.image': 'Imagem',
+    'f.about': 'Sobre',
+    'f.privacy': 'Privacidade',
+    'f.coffee': 'Curtiu? Me paga um café',
+    'f.sign': 'Feito por Victor Yuki Matusita em Curitiba · © 2026'
+  },
+  es: {
+    'page.title': 'Resultado a la siguiente herramienta · FileOrca UX v2',
+    'skip': 'Saltar al contenido',
+    'home': 'FileOrca, página de inicio',
+    'search': 'Buscar herramientas',
+    'lang.code': 'ES',
+    'lang.sr': ' · Idioma: Español',
+    'lang.menu': 'Elige un idioma',
+    'crumbs': 'Ruta de navegación',
+    'crumb.home': 'Inicio',
+    'crumb.image': 'Herramientas de imagen',
+    'tool.compress': 'Comprimir imagen',
+    'tool.resize': 'Redimensionar imagen',
+    'seal': 'Tus archivos nunca salen de tu dispositivo',
+    'c.says': '¡Listo! Tu imagen quedó un 72 % más ligera.',
+    'c.placard': '−72 %',
+    'c.lighter': 'más ligera',
+    'c.before': '2,6 MB',
+    'r.before': 'Antes',
+    'r.after': 'Después',
+    'r.size': 'Tamaño',
+    'r.download': 'Descargar',
+    'r.startOver': 'Empezar de nuevo',
+    'r.metadata': 'Oli eliminó los metadatos de la foto, incluida la ubicación GPS.',
+    'r.says': '¡Listo! Tu imagen quedó redimensionada.',
+    'r.from': 'Oli trajo esta imagen desde Comprimir imagen.',
+    'r.status': '¡Listo! Tu imagen quedó redimensionada. Oli trajo esta imagen desde Comprimir imagen.',
+    'v.title': 'Oli no pudo traer la imagen',
+    'v.help': 'Nada salió de tu dispositivo. Elige la imagen de nuevo, o vuelve a Comprimir imagen y descárgala allí.',
+    'v.choose': 'Elegir imágenes',
+    'v.back': 'Volver a Comprimir imagen',
+    'next.label': 'Siguiente:',
+    'chip.resize': 'Redimensionar esta imagen',
+    'chip.pdf': 'Pasar esta imagen a PDF',
+    'chip.compress': 'Comprimir esta imagen',
+    'chip.crop': 'Recortar esta imagen',
+    'carry.note': 'Oli lleva la imagen a la siguiente herramienta. Nunca sale de tu dispositivo.',
+    'how.c': 'Cómo comprimir una imagen',
+    'how.r': 'Cómo redimensionar una imagen',
+    'how.1': 'Suelta tus imágenes en la caja, elígelas o pégalas con Ctrl V.',
+    'how.2': 'Oli trabaja en tu dispositivo: no se sube nada.',
+    'how.3': 'Descarga el resultado, o llévalo a la siguiente herramienta con uno de los chips.',
+    'f.image': 'Imagen',
+    'f.about': 'Acerca de',
+    'f.privacy': 'Privacidad',
+    'f.coffee': '¿Te gustan estas herramientas? Invítame un café',
+    'f.sign': 'Hecho por Victor Yuki Matusita en Curitiba · © 2026'
+  }
+};
+</script>
+</body>
+</html>
