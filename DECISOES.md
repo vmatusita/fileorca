@@ -4333,3 +4333,65 @@ A ficha manda mudar um teste que fixa o que a fatia muda junto com o que ele pro
 - **Por construção, sem editar:** o `tests/e2e/a11y.spec.ts` ganhou 3 testes por navegador (o hub nos três idiomas), e o reflow a 320 px do `tests/e2e/design.spec.ts` continua em 4 blocos, com o título do 4º de "(pages 181 to 208)" para "(pages 181 to 211)".
 - **Conferidos, sem mudar:** o `tests/unit/routes.test.ts` da busca (o `filterEntries` ordena como antes), as contagens de opções da busca no `a11y.spec.ts` e no `design.spec.ts`, o `tool-guides.spec.ts`, o `tool-i18n.spec.ts`, o `cookie-footer.spec.ts`, o `events.spec.ts`, o `image-hub.test.ts` e o `guides-hub-route.test.ts`.
 - **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 102 arquivos e 1.751 testes (o `41cdf4a`; 1.750 no ponto de partida `609a868`) para 105 arquivos e 1.800 testes, passando pelos 103 e 1.766 do G1, e o `--list` do Playwright foi de 1.428 para 1.457 por navegador (1.431 no G1).
+
+## § 401 · O merge das três fatias e a conferência no Linux (F11, decisão 13)
+
+- **As três fatias entraram na `fase-11` por `git merge --no-ff`, com o trailer (regra 6), na ordem do plano:** G1, a rota do hub (`ca87dbf`); T, o tema, o cabeçalho e a Privacidade (`8c1a815`); e G2, o GuideCard e as entradas (`cc008df`). O T e o G2 partiram do commit do G1 (`0e8f8ea`) e tocaram onze arquivos em comum. O Git juntou dez sozinho, porque o plano separou as regiões: as chaves do `header` e as do `footer` e da `search`, o bloco do cabeçalho reescrito no lugar e o resto no fim do `components.css`, e linhas diferentes dos testes. Só o `DECISOES.md` teve conflito: as § 385 a § 392 (T) ficaram antes das § 393 a § 400 (G2), como o plano mandava.
+- **Depois do merge:**
+  - `pnpm tipos` com 0 erros, `pnpm lint` verde e o build com 211 páginas;
+  - o Vitest com 109 arquivos e 1.830 testes (1.750 no ponto de partida);
+  - os portões do build verdes;
+  - o `--list` com 1.556 testes por navegador (1.428 no ponto de partida), em partes que ainda separam o `design.spec.ts` do `image-matrix.spec.ts` (Chromium 3 e 4; WebKit 6 e 9-10).
+
+  Os specs em que as duas fatias se encontram rodaram juntos, nos dois navegadores: o cabeçalho de toda página, o hub com os cartões, os anúncios, o `layout-shift`, o `a11y`, a navegação, os eventos, o design e os guias. Foram 15 specs numa execução só, de 8,4 min: 1.423 verdes e 1 vermelho, o primeiro quadro do `/merge-pdf/` no Chromium (`header-theme.spec.ts:79`). Um quadro teve o fundo do `body` transparente (`rgba(0, 0, 0, 0)`) em vez do claro guardado. O teste não reprovou de novo em 54 execuções sozinho, em 180 com 14 workers no Chromium nem em 90 com 8 workers no WebKit. Ficou como a F11 p-2 do grupo 20 e foi para a lente de tema e desempenho da revisão.
+- **A conferência no Linux no meio da run não rodou,** porque o rótulo `ci` não existe no repositório. O `gh api repos/<dono>/<repo>/labels/ci`, só leitura, respondeu 404. No começo da run, um `gh label list`, também só leitura, já tinha mostrado o mesmo; a ficha manda nunca usar `gh label`, e isso fica registrado no relatório. A run não cria o rótulo (CLAUDE.md, "Fora de toda run").
+- **O `gh pr ready` seguido do `gh pr ready --undo` foi recusado como atalho:**
+  - o job `merge` decide pelo `github.event.pull_request.draft` do evento, no `if` dele e no JSON que o `pode-mesclar` lê;
+  - o `ci-ok` só olha o rascunho de agora (`PR_DRAFT_NOW`) na classe leve;
+  - a execução do `ready_for_review` chegaria, verde, ao `gh pr merge` com a PR já de volta ao rascunho.
+
+  O resultado seria uma PR pela metade na `main` ou, se o GitHub recusasse o rascunho, um job vermelho, um comentário e uma issue para o Victor. A conferência no Linux é a execução final, com tudo commitado. A pegadinha está na seção F11 do `docs/claude/ci.md`; a escolha (criar o rótulo, ou fazer o `merge` ler o rascunho de agora) é do Victor, na linha F11 p-1 do grupo 20 do `docs/PENDENCIAS.md`.
+
+## § 402 · O `docs/design/` depois da F11 (F11, decisão 8)
+
+As regras novas entraram nos README pelas fatias, cada uma com o texto de antes e o de depois no § dela. Este § junta o que mudou e o que ficou de fora:
+
+- **Ícones:** 44, com os cinco do cabeçalho (§ 384).
+- **O README do sistema:** a linha do tema, com os três estados, a chave `fo-theme`, o script do `<head>` e o par de toda regra de `prefers-color-scheme` (§ 386).
+- **O Header:**
+  - o README, regra a regra, e o preview com o botão de tema, o Menu e a folha (§ 388);
+  - a região do Header no `bundle.css`, com `box-sizing: border-box`, porque o bundle não tem o preflight do site.
+- **O GuideCard:** o 28º componente, com README, preview, o bloco no fim do `bundle.css` e a linha na tabela de `components/README.md` (§ 395).
+- **Footer, Breadcrumb e ToolSearch:** os README dizem o bloco Guias, a trilha Início › Guias › guia e os dois grupos da busca (§ 396 e § 397).
+- **Nenhum token novo:** o `git diff` do ponto de partida até aqui não toca o `tokens.json` nem o `tokens.css`, e nenhum hex entrou no CSS do site. O `gate:design` passa com 211 páginas e 1 CSS.
+- **Ficou de fora, para a run que regenerar o design system** (F11 g-2, no grupo 20):
+  - o `docs/design/index.html` sem o GuideCard;
+  - a "Conferência" do axe de 29/out, de antes dele;
+  - o preview do ToolSearch e o `.fo-search__group` no `bundle.css`.
+
+  A ficha proíbe o `pnpm design:gerar` nesta run.
+
+## § 403 · As medidas do fim, depois do merge (F11, decisões 3, 9 e 11)
+
+Sobre o build do merge (`cc008df`), na máquina local:
+
+- **Orçamento de JS:** o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, 342 verdes. As 180 linhas "JS inicial" do ponto de partida (`.cache/f11/antes/budgets.log`), comparadas página a página:
+  - todas têm o mesmo número de arquivos JS e de requisições;
+  - o maior aumento é de +0,3 KB, dos dois scripts inline do tema (376 bytes com gzip, § 385);
+  - o maior JS inicial do site é 51,9 KB, para um limite de 80.
+
+  Os três hubs novos têm 0 arquivo JS e 4 requisições, como os hubs de categoria.
+- **Nenhum arquivo JS novo por página:** os nomes de `dist/_astro/*.js` sem o hash são os mesmos 66 do ponto de partida.
+- **A busca:**
+  - o chunk do `entry` foi de 1.321 para 1.455 bytes com `gzip -9` (+134 B, limite +1 KB) e continua só no primeiro uso;
+  - o `search-index.json` foi de 8.946 para 8.985 bytes com gzip.
+- **A altura do cabeçalho** (as 90 linhas `[header]` do `header-menu.spec.ts`, nos dois navegadores, com a Figtree segura e solta): 64 px e uma linha em toda largura de 320 a 1280 px, nos três idiomas, sem nada se mover quando a fonte chega.
+  - A 320 px, os quatro controles ocupam 282,5 de 288 px.
+  - A 1280 px, o logo começa na coluna (x 36), o último controle termina em x 794 e a lateral começa em x 944: 150 px.
+
+  A tabela por largura está no relatório.
+- **As partes do CI:** o `--list` dá 1.556 testes por navegador:
+  - Chromium em 5 partes, de 311 e 312;
+  - WebKit em 13 partes, de 119 e 120;
+  - os specs `guides-*` e `header-*` caem nas partes leves (Chromium 3, WebKit 7 e 8);
+  - o `design.spec.ts` e o `image-matrix.spec.ts` seguem em partes diferentes.

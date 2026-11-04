@@ -36,9 +36,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
 | 19. O que a F10 deixou | 18 | As runs F11, F12 e F13 e o Victor |
-| 20. O que a F11 deixou | 8 | O Victor, a run F12 e runs de ajuste |
+| 20. O que a F11 deixou | 9 | O Victor, a run F12 e runs de ajuste |
 
-Total: 212 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 213 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -384,6 +384,7 @@ O que a F11 (navegação, guias e tema) achou e não era dela resolver, ou deixo
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
 | F11 p-1 | DECISOES § 401; `docs/claude/ci.md` (F11) | médio | Sem o rótulo `ci`, a run não confere no Linux no meio dela, e o `gh pr ready` seguido do `--undo` não é seguro: o job `merge` lê o rascunho do evento, e a execução do `ready_for_review` chega ao `gh pr merge` mesmo com a PR de volta ao rascunho | Criar o rótulo `ci` (Issues → Labels), ou fazer o `merge` e o `pode-mesclar` lerem o rascunho de agora, como o `ci-ok` lê na classe leve | Victor |
+| F11 p-2 | DECISOES § 401 | baixo | O primeiro quadro do `/merge-pdf/` no Chromium (`tests/e2e/header-theme.spec.ts:79`) reprovou uma vez, numa execução de 15 specs juntos: um quadro com o fundo do `body` transparente em vez do claro guardado. Não se repetiu em 324 execuções do teste, com até 14 workers | Se reprovar de novo no CI, gravar o trace e achar de onde vem o quadro transparente antes de mexer no teste | Run de ajuste de testes |
 | F11 t-1 | DECISOES § 385 e § 388 | baixo | Nenhum leitor de tela (NVDA, VoiceOver) conferiu se o nome novo do botão de tema e a região role=status são lidos uma vez só, nem o estado expandido do botão Menu no WebKit e no VoiceOver | Conferir com NVDA e VoiceOver; se a região repetir o nome, esvaziá-la depois de anunciar ou tirá-la | Victor |
 | F11 t-2 | DECISOES § 388 | baixo | A 360 px, a folha do Menu em inglês termina 166,5 px acima do 1º AdSlot do Merge PDF e do Unlock PDF (y 796). Uma linha nova na folha ou um anúncio mais alto nesses moldes quebra os 150 px, e a especificação contava com o 1º anúncio em y 880 ou mais | No mapa novo (UX-07), pôr o 1º anúncio dos moldes de PDF abaixo de y 880 a 360 px; o bloco do cabeçalho do ads.spec.ts mede toda página | Run F12 |
 | F11 t-3 | DECISOES § 388 | baixo | Abaixo de 768 px, o idioma em uso no fim do Menu perdeu o ícone check da especificação, que não cabe numa linha de três alvos; ele fica marcado só pelo fundo, pelo traço, pelo peso 700 e pelo aria-current | Aceitar, ou voltar ao check se a F12 mudar a folha ou o 1º anúncio | Run F12 |
