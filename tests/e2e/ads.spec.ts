@@ -335,14 +335,15 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
 });
 
 // F11 (decision 10 and criterion 8; DECISOES § 388 and § 391): the header. Every control of it (logo, search, language,
-// theme, Menu) and every open menu (the Menu sheet and the language menu) is 150 px or more from every AdSlot, at 360,
-// 767 and 1280 px, on every page that has AdSlots (the route map: each route with an ad area, in each of its languages), in blocks
-// of pages. On the phone the sheet opens at the top of the page and the first AdSlot of each mold sits under it (the
-// nearest, Merge PDF and Unlock PDF in English, at y 796).
+// theme, Menu) is 150 px or more from every AdSlot, and every open menu (the Menu sheet and the language menu) from every
+// AdSlot but the rail's, at 360, 767 and 1280 px, on every page that has AdSlots (the route map: each route with an ad
+// area, in each of its languages), in blocks of pages. On the phone the sheet opens at the top of the page and the first
+// AdSlot of each mold sits under it (the nearest, Merge PDF and Unlock PDF in English, at y 796).
 // Header width adjustment (DECISOES § 409): from 1280 px the header runs over the rail, as the footer does, and the rail
 // starts 150 px under the header, so every control stays 150 px or more from its AdSlot. An open menu covers the top of
 // the rail: it keeps the 150 px from every other AdSlot, and while it is open the rail takes no pointer (the click that
-// closes it lands on the body; review F11 B-2), which the test checks against a control with the menus closed.
+// closes it lands on the body; review F11 B-2), which the test checks under the open menu, against a control with the
+// menus closed.
 // Review F11 D-1 (DECISOES § 404): 767 px too. Under 768 px the sheet keeps its height at every width, while the first
 // AdSlot rises as the text of the page wraps less (Merge PDF and Unlock PDF in English: y 796 up to 384 px, y 776 from
 // 390 px), so 767 px is where the open sheet and the first AdSlot of the phone layout come closest.
@@ -350,14 +351,19 @@ const HEADER_CONTROLS = '.fo-header > a, .fo-header > button';
 const HEADER_AD_PAGES = ROUTES.filter((route) => route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
 const HEADER_AD_BLOCK = 15;
 const HEADER_VIEWPORTS = [VIEWPORTS[0], { width: 767, height: 800 }, VIEWPORTS[1]] as const;
-/** Whether a click on the AdSlot of the rail, 20 px under its top, reaches it (no rail on screen: no). */
+/** Whether a click on the AdSlot of the rail reaches it (no rail on screen: no), in its middle, 20 px under its top or
+ * under the open menu, whichever is lower: a point under the open sheet would hit the sheet and prove nothing (review of
+ * § 409, b-1). With no such point on screen, the test fails rather than pass by default. */
 const railTakesPointer = (page: Page) => page.evaluate(() => {
   const ad = document.querySelector('.fo-ad--rail');
   const rect = ad?.getBoundingClientRect();
   if (!ad || !rect || rect.width === 0) return false;
-  return ad.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + 20));
+  const menus = [...document.querySelectorAll('#fo-menu, #fo-langmenu')].filter((menu) => menu.matches(':popover-open')).map((menu) => menu.getBoundingClientRect().bottom);
+  const y = Math.max(rect.top, ...menus) + 20;
+  if (y > Math.min(rect.bottom, innerHeight)) throw new Error(`no point of the rail under the open menu on screen (y ${y})`);
+  return ad.contains(document.elementFromPoint(rect.left + rect.width / 2, y));
 });
-test.describe('the header and its open menus stay 150px from every AdSlot, at 360, 767 and 1280px', () => {
+test.describe('the header stays 150px from every AdSlot and its open menus from every one but the rail, which takes no pointer, at 360, 767 and 1280px', () => {
   for (let start = 0; start < HEADER_AD_PAGES.length; start += HEADER_AD_BLOCK) {
     const block = HEADER_AD_PAGES.slice(start, start + HEADER_AD_BLOCK);
     test(`pages ${start + 1} to ${start + block.length} of ${HEADER_AD_PAGES.length} (${block[0]} and on)`, async ({ page }) => {

@@ -73,10 +73,12 @@
    right after the button that opens it. 64 px and one line at every width: every text of the header is in the face that
    never swaps after the first paint (Figtree Steady, § 305), so nothing changes width when Figtree arrives late. */
 /* The header and the footer share their edges, on every page and at every width (DECISOES § 409): 24 px from the
-   window, and from 1288 px the 1240 px of the page, centred. Under 360 px both keep 16 px, where the header needs 282.5
-   of the 288 px it has at 320. The two menus inherit the edge too, for the right of their reserve without anchor. */
+   window, and from 1288 px the 1240 px of the page, centred. Under 340 px both keep 16 px: the header needs 282.5 px
+   there (282.5 of 292 at 340 with 24 px edges, and of 288 at 320 with 16), and the footer keeps one column on both
+   sides of the switch (two need 324 px; with the switch at 360 px it had two at 356 to 359 px and one at 360). The two
+   menus inherit the edge too, for the right of their reserve without anchor. */
 .fo-header, .fo-footer { --fo-edge: max(var(--space-6), (100% - var(--page-max)) / 2); }
-@media (max-width: 359px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
+@media (max-width: 339px) { .fo-header, .fo-footer { --fo-edge: var(--space-4); } }
 .fo-header { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--fo-edge); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
 @media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
 /* Under 360 px the gap closes to 4 px: logo (126.5 px), search, theme and Menu (48 px each) take 282.5 of 288 px at 320. */

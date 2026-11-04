@@ -306,7 +306,7 @@ async function heldPage(browser: Browser, path: string, width: number): Promise<
 test.describe('the header measured in the three languages, with Figtree held and released', () => {
   for (const lang of LANGS) {
     for (const width of ALL_WIDTHS) {
-      test(`${lang} at ${width} px: 64 px and one line before and after Figtree, nothing changes width, 48 px targets${width === 1280 ? ', the grid of the frame' : ''}`, async ({ browser, browserName }) => {
+      test(`${lang} at ${width} px: 64 px and one line before and after Figtree, nothing changes width, 48 px targets${width === 1280 ? ', the rail 150 px under the header' : ''}`, async ({ browser, browserName }) => {
         const path = routeById('compress-image').paths[lang] ?? '';
         const { page, release, close } = await heldPage(browser, path, width);
         const lines: string[] = [];
@@ -356,11 +356,14 @@ test.describe('the header measured in the three languages, with Figtree held and
 // footer's columns and its base line start, and the last one ends where they end, at every width from 320 to 1920 px, on
 // a page with the rail and on two without. The open sheet keeps to the same edges under 768 px, and to the right one from
 // there. Before, from 1280 px the header ended where the tool column ends (x 794 at 1280, the footer at x 1256), and from
-// 360 to 1279 px it was 8 px wider than the footer on each side.
-const EDGE_WIDTHS = [320, 359, 360, 390, 767, 768, 1024, 1279, 1280, 1288, 1440, 1920] as const;
+// 360 to 1279 px it was 8 px wider than the footer on each side. The edge narrows to 16 px under 340 px, and the footer
+// never loses a column as the window widens (with the switch at 360 px it had two at 356 to 359 px and one at 360;
+// review of § 409, b-2).
+const EDGE_WIDTHS = [320, 339, 340, 359, 360, 390, 767, 768, 1024, 1279, 1280, 1288, 1440, 1920] as const;
 for (const path of ['/compress-image/', '/pt/guias/', '/es/']) {
   test(`${path}: the header and the footer share their edges at every width, and the open sheet keeps to them`, async ({ page }) => {
     expect((await page.goto(path))?.status(), path).toBe(200);
+    let columns = 0;
     for (const width of EDGE_WIDTHS) {
       await page.setViewportSize({ width, height: 800 });
       const label = `${path} a ${width} px`;
@@ -376,6 +379,9 @@ for (const path of ['/compress-image/', '/pt/guias/', '/es/']) {
         expect(Math.abs(first - edges.left), `${label}: o cabeçalho começa em x ${first.toFixed(1)}, o rodapé em x ${edges.left.toFixed(1)}`).toBeLessThanOrEqual(0.5);
         expect(Math.abs(last - edges.right), `${label}: o cabeçalho termina em x ${last.toFixed(1)}, o rodapé em x ${edges.right.toFixed(1)}`).toBeLessThanOrEqual(0.5);
       }
+      const now = await page.evaluate(() => getComputedStyle(document.querySelector('.fo-footer__cols') as Element).gridTemplateColumns.split(' ').length);
+      expect(now, `${label}: o rodapé perdeu coluna ao alargar (${columns} antes, ${now} agora)`).toBeGreaterThanOrEqual(columns);
+      columns = now;
       await menuButton(page).click();
       await expect(sheet(page)).toBeVisible();
       const open = await sheet(page).boundingBox();
