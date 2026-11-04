@@ -4500,4 +4500,5 @@ A execução completa do `gh pr ready` (a 41791116378, no `3a743ab`, a primeira 
   - a causa: o teste abre um contexto novo e não fechava o aviso de cookies. A 390 × 900, o aviso começa 10 px abaixo do centro do rádio no Windows. O texto dele ocupa mais espaço no Linux, e o aviso cobriu o rádio. O snapshot do trace do CI mostra o aviso aberto. No Linux, o toque de fechar caía no aviso, e o teste não provava nada: o controle positivo é o que mostrou isso;
   - a correção, só no teste (`3acc508`): o `dismissCookies` antes de abrir o Menu, como no teste do clique.
 - **As pegadinhas** foram para o `docs/claude/playwright.md`.
+- **Um tropeço no caminho:** o push do `ebb6379` levou um erro de tipo no teste novo do hub (`style.remove()` num `ElementHandle<Node>`). O `pnpm tipos` rodado logo depois do push o pegou, o `cb80298` corrigiu, e a execução leve do `ebb6379` foi cancelada pelo push seguinte, sem chegar ao resultado. A regra 2 (o spec alvo e os tipos antes do push) vale também para uma correção de teste.
 - **A sequência continua a da § 407:** o push, a execução leve verde e o `gh pr ready` de novo.

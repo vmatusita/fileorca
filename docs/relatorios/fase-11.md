@@ -503,7 +503,7 @@ A conferência no Linux foi, então, a execução completa do `gh pr ready`. A p
 - **o hub de guias em espanhol a 360 × 740:** no Linux, o título vai a três linhas (a 2ª linha, "muestran los números", ocupa 278,5 dos 280 px no Windows), e o nome do primeiro cartão desce para y 765,14, abaixo da dobra de 740 px que a especificação pede. A correção: o primeiro grupo fica 32 px abaixo dos atalhos, não 64, e o nome fica em y 733 mesmo com o título em três linhas. O teste agora põe uma linha a mais no título e exige a dobra do mesmo jeito; reprovou antes da correção com 765,0, o número do CI;
 - **o toque que fecha o Menu:** o teste não fechava o aviso de cookies, que no Linux fica mais alto e cobriu o rádio; o controle positivo do próprio teste acusou. A correção é o `dismissCookies` no teste.
 
-As outras 22 partes passaram. A PR voltou ao rascunho, as correções entraram, e a sequência do fim recomeçou: o push, a execução leve verde e o `gh pr ready`. O resultado da execução completa final está na descrição da PR.
+As outras 22 partes passaram. A PR voltou ao rascunho e as correções entraram. Um push no caminho (`ebb6379`) levou um erro de tipo no teste novo; o `pnpm tipos` local o pegou logo depois, o `cb80298` corrigiu, e a execução leve do `ebb6379` foi cancelada pelo push seguinte. Então a sequência do fim recomeçou: o push, a execução leve verde e o `gh pr ready`. O resultado da execução completa final está na descrição da PR.
 
 ## A revisão
 
