@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { parse, type HTMLElement } from 'node-html-parser';
 import { describe, expect, it } from 'vitest';
-import { LANGS, LANG_TAG, ROUTES, languagesOf, moneyHubId, pageFileFor, pathFor, routeById, textFilesFor, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, LANG_TAG, ROUTES, languagesOf, moneyHubId, pageFileFor, pathFor, routeById, textFilesFor, type Lang, type RouteId } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { absolute, alternatesFor, ogImagePath, pageTitle } from '../../src/seo/meta.ts';
@@ -181,4 +181,33 @@ describe('the three pages of the guides hub in dist/', () => {
       expect(main?.querySelectorAll('a.fo-tool')).toHaveLength(0);
     });
   }
+});
+
+// F11 (decision 7): the breadcrumb of every guide goes through the guides hub (before, the image, PDF or money hub). It is
+// also the first link to the hub from a page of another route, which keeps the hub out of the orphans of gate:links.
+describe('the breadcrumb of the 40 guides in dist/: Home › Guides › the guide', () => {
+  const pages = [...FILE_GUIDE_IDS, ...GUIDE_IDS].flatMap((id) => LANGS.flatMap((lang) => {
+    const path = routeById(id as RouteId).paths[lang];
+    return path ? [{ id, lang, path }] : [];
+  }));
+
+  it('has the 40 pages of guide, 15 in en and es and 10 in pt, read from the registries', () => {
+    expect(pages).toHaveLength(40);
+    expect(LANGS.map((lang) => pages.filter((page) => page.lang === lang).length)).toEqual([15, 10, 15]);
+  });
+
+  it('leads each guide to the guides hub of its language, in the HTML and in the BreadcrumbList (position 2)', () => {
+    for (const { id, lang, path } of pages) {
+      const root = html(path);
+      const items = root.querySelectorAll('main nav ol.fo-crumbs li');
+      expect(items, `${lang} ${id}`).toHaveLength(3);
+      expect(items[1]?.querySelector('a')?.getAttribute('href'), `${lang} ${id}`).toBe(PATHS[lang]);
+      expect(items[1]?.text.trim(), `${lang} ${id}`).toBe(TEXTS[lang].common.guidesHub);
+      expect(items[2]?.querySelector('[aria-current="page"]'), `${lang} ${id}`).not.toBeNull();
+      const crumbs = (nodesOf(root).find((node) => node['@type'] === 'BreadcrumbList') as Crumbs | undefined)?.itemListElement ?? [];
+      expect(crumbs.map((crumb) => crumb.item), `${lang} ${id}`).toEqual([`${O}${pathFor('home', lang)}`, `${O}${PATHS[lang]}`, `${O}${path}`]);
+      expect(crumbs[1]?.position, `${lang} ${id}`).toBe(2);
+      expect(crumbs[1]?.name, `${lang} ${id}`).toBe(TEXTS[lang].common.guidesHub);
+    }
+  }, 60_000);
 });
