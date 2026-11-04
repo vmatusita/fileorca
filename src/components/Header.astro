@@ -81,7 +81,7 @@ const groups = menuGroups(lang, route.id, t);
         {links.map((link) => (
           <li>
             <a class="fo-menu__item" href={link.href} hreflang={link.tag} lang={link.tag} aria-current={link.current ? 'true' : undefined}>
-              <span>{link.name}</span><span class="fo-menu__check"><Icon name="check" /></span>
+              {link.name}
             </a>
           </li>
         ))}

@@ -166,8 +166,8 @@ html[data-theme="dark"] .fo-theme__state--dark { display: inline-flex; }
 .fo-menu__item:hover { background: var(--brand-soft); }
 .fo-menu__item:hover .fo-menu__name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 /* The section of the page, and the language in use: brand-soft with the stroke around it (the trace). The name in 700
-   too: with forced colours the background goes and every transparent border shows, so the weight (and the check of the
-   language) is what still tells the current row apart. */
+   too: with forced colours the background goes and every transparent border shows, so the weight is what still tells
+   the current row apart. */
 .fo-menu__item[aria-current] { background: var(--brand-soft); border-color: var(--stroke); }
 .fo-menu__item[aria-current] .fo-menu__name, .fo-menu__lang .fo-menu__item[aria-current] { font-weight: 700; }
 .fo-menu__dot { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--fo-cat, var(--brand-soft)); color: var(--ink); }
@@ -178,10 +178,11 @@ html[data-theme="dark"] .fo-theme__state--dark { display: inline-flex; }
 .fo-menu__name { font: 600 16px/20px var(--fo-font-text); }
 .fo-menu__meta { font: 400 13px/18px var(--fo-font-text); color: var(--ink-muted); }
 .fo-menu__label { margin: 0; padding: var(--space-1) var(--space-3); font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
-.fo-menu__lang .fo-menu__item { min-height: var(--tap-min); padding-left: var(--space-3); font: 600 16px/20px var(--fo-font-text); }
-.fo-menu__check { display: inline-flex; margin-left: auto; visibility: hidden; }
-.fo-menu__item[aria-current] .fo-menu__check { visibility: visible; }
-.fo-menu__check .fo-icon { width: 20px; height: 20px; }
+/* The languages (under 768 px only) side by side, three 48 px targets in one row, not one row each: the English sheet
+   then ends at y 630 at 360 px instead of 730, 150 px or more above the first AdSlot of every page (the one of Merge PDF
+   and Unlock PDF sits at y 796; DECISOES § 388). The language in use: brand-soft, the stroke and 700, like the section. */
+.fo-menu__lang .fo-menu__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fo-menu__lang .fo-menu__item { justify-content: center; min-height: var(--tap-min); padding: 0 var(--space-1); font: 600 16px/20px var(--fo-font-text); white-space: nowrap; }
 
 /* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
 /* The trail wraps on a phone, as the Breadcrumb README allows, in the font of its first paint: Figtree Steady never swaps,
