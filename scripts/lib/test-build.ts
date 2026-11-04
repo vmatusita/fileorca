@@ -110,23 +110,32 @@ function running(pid: number): boolean {
   }
 }
 
-/** The time of a file in ms, or null when it is not there. */
-function mtimeOf(path: string): number | null {
+/** What Windows answers for a file another process is deleting or writing right now: look again in a moment. */
+const BUSY = ['EPERM', 'EBUSY', 'EACCES'];
+const busy = (error: unknown): boolean => BUSY.includes((error as NodeJS.ErrnoException).code ?? '');
+
+/** The time of a file in ms, null when it is not there, undefined when it cannot be read this moment. */
+function mtimeOf(path: string): number | null | undefined {
   try {
     return statSync(path).mtimeMs;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    if (busy(error)) return undefined;
     throw error;
   }
 }
 
-/** The owner written in a lock (the PID, a colon and a token of that holder), or null when there is none. */
-function ownerOf(path: string): string | null {
+/**
+ * The owner written in a lock (the PID, a colon and a token of that holder): null when there is none, undefined when the
+ * file cannot be read this moment (another process deletes or writes it; the verificar caught an EPERM there, § 455).
+ */
+function ownerOf(path: string): string | null | undefined {
   try {
     return readFileSync(join(path, LOCK_OWNER), 'utf8');
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT' || code === 'ENOTDIR') return null;
+    if (busy(error)) return undefined;
     throw error;
   }
 }
@@ -148,10 +157,15 @@ function removed(path: string): boolean {
  */
 export function lockState(path: string, staleMs = LOCK_STALE_MS, now = Date.now()): 'free' | 'stale' | 'held' {
   const owner = join(path, LOCK_OWNER);
-  const pid = Number.parseInt(ownerOf(path) ?? '', 10);
+  const written = ownerOf(path);
+  // A lock whose owner cannot be read this moment is in the hands of another process: wait and look again.
+  if (written === undefined) return 'held';
+  const pid = Number.parseInt(written ?? '', 10);
   if (Number.isInteger(pid) && pid > 0 && !running(pid)) return 'stale';
   // The time of the last renewal; with no PID yet (the holder is between its mkdir and its write), that of the lock.
-  const renewed = mtimeOf(owner) ?? mtimeOf(path);
+  const ownerTime = mtimeOf(owner);
+  const renewed = ownerTime === null ? mtimeOf(path) : ownerTime;
+  if (renewed === undefined) return 'held';
   if (renewed === null) return 'free';
   return now - renewed > staleMs ? 'stale' : 'held';
 }
@@ -176,7 +190,7 @@ async function takeOver(path: string, staleMs: number, pollMs: number): Promise<
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
     const since = mtimeOf(takeover);
-    if (since !== null && Date.now() - since > TAKEOVER_STALE_MS) removed(takeover);
+    if (typeof since === 'number' && Date.now() - since > TAKEOVER_STALE_MS) removed(takeover);
     else await sleep(pollMs);
     return;
   }
@@ -210,21 +224,34 @@ export async function lock(path: string, options: LockOptions = {}): Promise<() 
     // The owner is this process and this call: two holders of one process (the tests) are told apart by the token.
     const me = `${process.pid}:${randomUUID()}`;
     const owner = join(path, LOCK_OWNER);
-    const mine = () => ownerOf(path) === me;
     writeFileSync(owner, me);
-    // A holder that froze past staleMs and lost the lock to another one stops renewing it, and never removes it.
+    // A holder that froze past staleMs and lost the lock to another one stops renewing it, and never removes it. An owner
+    // file that cannot be read this moment (busy) is looked at again at the next beat.
     const beat = setInterval(() => {
-      try {
-        if (mine()) writeFileSync(owner, me);
-        else clearInterval(beat);
-      } catch {
+      const now = ownerOf(path);
+      if (now === undefined) return;
+      if (now !== me) {
         clearInterval(beat);
+        return;
+      }
+      try {
+        writeFileSync(owner, me);
+      } catch (error) {
+        if (!busy(error)) clearInterval(beat);
       }
     }, beatMs);
     beat.unref();
     return () => {
       clearInterval(beat);
-      if (mine()) removed(path);
+      for (let tries = 0; tries < 20; tries += 1) {
+        const now = ownerOf(path);
+        if (now === me) {
+          removed(path);
+          return;
+        }
+        // Gone, or another holder's: nothing of this one to remove.
+        if (now !== undefined) return;
+      }
     };
   }
 }
