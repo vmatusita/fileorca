@@ -236,6 +236,24 @@ Os 10 guias em `/pt/guias/<slug>/`. O número de cada guia sai do código no for
 
 Rótulos de sistema, como as páginas de suporte em português escrevem (lidas em 3/nov/2026): Ajustes, Mais Compatível, Alta Eficiência, Manter Originais, Privacidade e Segurança, Serviços de Localização, Ajustar Localização, Sem Localização, app Pré-Visualização, Inserir de Arquivo, app Arquivos, Manual de Uso do iPhone (Apple); Configurações, Mais configurações, Salvar local, Google Fotos, Câmera Pixel, Adicionar (Google); aplicativo Fotos, Extensões de Imagem HEIF, Extensões de Vídeo HEVC, Extensão de Imagem WebP, Explorador de Arquivos (Microsoft). Fonte sem versão em português leva "(em inglês)" no rótulo.
 
+## O hub de guias, o cartão e a busca (F11)
+
+O hub `/pt/guias/` lista os 10 guias de arquivo; os guias de dinheiro dos EUA não existem em português, e o grupo Dinheiro do hub é a nota que leva às calculadoras financeiras do Brasil (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Leia o guia" das ferramentas: o cartão de guia ficou no lugar dela (DECISOES § 396).
+
+| Inglês | Português | Observação |
+| --- | --- | --- |
+| Guides (o hub, a trilha, o rodapé) | Guias | caminho `/pt/guias/` |
+| Answers that show the numbers | Respostas que mostram os números | H1 do hub |
+| Image guides · PDF guides · Money guides | Guias de imagem · Guias de PDF · Dinheiro | o grupo de dinheiro do hub é só "Dinheiro" (a nota); o rodapé não o lista |
+| All guides | Todos os guias | rodapé |
+| Guide (no cartão e na busca) | Guia | primeira palavra do nome do cartão |
+| Measured on N test files | Medido em N arquivos de teste | |
+| Tool in the guide | Ferramenta no guia | |
+| Read a guide · See all N guides | Leia um guia · Ver os N guias | a seção da home |
+| Search tools and guides · Find a tool or a guide | Buscar ferramentas e guias · Encontre uma ferramenta ou um guia | o campo da busca; o botão do cabeçalho segue "Buscar ferramentas" |
+| Results · Tools · Guides | Resultados · Ferramentas · Guias | a lista e os títulos dos grupos da busca |
+| No tool or guide called "…" | Nenhuma ferramenta ou guia chamado "…" | o masculino concorda com "guia" |
+
 ## Falas da Oli
 
 Da tabela de voz do docs/design/README.
