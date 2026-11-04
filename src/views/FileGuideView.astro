@@ -1,16 +1,18 @@
 ---
-// A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184): breadcrumb Home › Image tools (or PDF tools) ›
-// H1; the H1, the question it answers and the "Reviewed" line; the introduction; the embedded tool, the same island and
+// A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184): breadcrumb Home › Guides › H1 (F11; before,
+// Home › Image tools or PDF tools › H1); the H1, the question it answers and the "Reviewed" line; the introduction; the embedded tool, the same island and
 // entry as the tool's own page (an image tool comes in through the "tool" slot from the page file; a PDF tool is the
 // PdfIsland of the 12 PDF pages), with the link to the tool's page; the first half of the text; one content AdSlot,
 // only after the tool; the second half; "What we measured", every cell from data/guides-measured.json, with the date,
-// the sample and the method; the sources, with the day they were read; the related pages; the rail AdSlot.
+// the sample and the method; the sources, with the day they were read; the related pages (F11, decision 7: a guide among
+// them is a GuideCard, never a ToolCard, which closes the F5b F-12); the rail AdSlot.
 // Schema: Article (author Person, datePublished, dateModified), BreadcrumbList and Person. The text blocks carry
 // data-guide-text, which gate:conteudo counts (800 to 1,500 words). Since the languages adjustment the same view serves the
 // guides in Portuguese and Spanish, each with the tool page of its language and the numbers written in that language.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
+import GuideCard from '../components/GuideCard.astro';
 import AdSlot from '../ads/AdSlot.astro';
 import PdfIsland from '../tools/pdf/PdfIsland.astro';
 import Reviewed from '../tools/guides/Reviewed.astro';
@@ -108,7 +110,13 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
       {related.map((card) => (
-        <li><ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon} /></li>
+        <li>
+          {card.kind === 'guide' ? (
+            <GuideCard href={card.card.href} name={card.card.name} description={card.card.description} category={card.card.category} proof={card.card.proof} tool={card.card.tool} headingLevel={3} lang={lang} />
+          ) : (
+            <ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon} />
+          )}
+        </li>
       ))}
     </ul>
   </section>

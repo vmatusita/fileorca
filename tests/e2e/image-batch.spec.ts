@@ -65,7 +65,7 @@ test.describe('files that cannot be read, in the middle of a batch', () => {
     await expect(errors.nth(2)).toContainText('gen-vazio.jpg is empty, so there is nothing to read.');
     await expect(errors.nth(3)).toContainText("gen-texto-extensao-png.png isn't an image Oli can read. Try JPG, PNG or WebP.");
     await expect(page.getByRole('alert')).toHaveCount(0);
-    await expect(page.getByRole('status')).toContainText("4 files couldn't be read; the rest are ready.");
+    await expect(page.locator('#fo-tool-root').getByRole('status')).toContainText("4 files couldn't be read; the rest are ready.");
     expect(readZip(await downloadBytes(page)).map((entry) => entry.name)).toEqual(['one.jpg', 'two.jpg']);
 
     // An option changed afterwards processes the good files again and does not try the lost ones, nor report them twice.

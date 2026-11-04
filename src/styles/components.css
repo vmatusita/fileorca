@@ -68,34 +68,144 @@
 .fo-spin { width: 18px; height: 18px; border-radius: 50%; border: var(--stroke-2) solid currentColor; border-right-color: transparent; animation: fo-spin 700ms linear infinite; }
 @keyframes fo-spin { to { transform: rotate(1turn); } }
 
-/* ---------- Header ---------- */
+/* ---------- Header (F11: the Menu of paper and the theme button; DECISOES § 388) ---------- */
+/* Skip link, logo, search, language (from 768 px), theme and Menu, in this order in the DOM and on screen, each popover
+   right after the button that opens it. 64 px and one line at every width: every text of the header is in the face that
+   never swaps after the first paint (Figtree Steady, § 305), so nothing changes width when Figtree arrives late. */
 .fo-header { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: 0 var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); background: var(--bg); }
 @media (min-width: 768px) { .fo-header { gap: var(--space-3); } }
+/* Under 360 px the gap closes to 4 px: logo (126.5 px), search, theme and Menu (48 px each) take 282.5 of 288 px at 320. */
+@media (max-width: 359px) { .fo-header { gap: var(--space-1); } }
+/* From 1280 px the header follows the grid of the frame (global.css .fo-frame): the logo starts where the tool column
+   starts and the last control ends where it ends, on every page, so nothing of the header and no open menu comes within
+   150 px of the rail (at 1280 px: logo at x 36, last control ending at x 794, rail from x 944). */
+@media (min-width: 1280px) {
+  .fo-header {
+    padding-left: calc((100% - var(--page-max)) / 2 + var(--space-4));
+    padding-right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance));
+  }
+}
 .fo-header__logo { display: inline-flex; align-items: center; min-height: var(--tap-min); margin-right: auto; border-radius: var(--radius-sm); }
 .fo-header__logo svg { display: block; width: auto; height: 38px; }
 @media (min-width: 768px) { .fo-header__logo svg { height: 44px; } }
 .fo-logo__file { fill: var(--ink); }
 .fo-logo__orca { fill: var(--brand); }
-.fo-header__search { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink-muted); font: 500 15px/20px var(--fo-font-text); cursor: pointer; }
+.fo-header__search { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink-muted); font: 500 15px/20px var(--fo-font-steady); white-space: nowrap; cursor: pointer; }
 .fo-header__search .fo-icon { width: 20px; height: 20px; color: var(--ink); }
-/* On the phone the search is the icon alone (48px), its name still "Search tools" (§ 46). */
-@media (max-width: 767px) {
-  .fo-header__search { width: var(--tap-min); padding: 0; border-color: transparent; background: transparent; }
-  .fo-header__search-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-}
-.fo-header__lang { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap-min); padding: 0 var(--space-2); border: 0; background: none; color: var(--ink); font: 700 15px/20px var(--fo-font-text); cursor: pointer; border-radius: var(--radius-pill); }
+.fo-header__search .fo-kbd { font-family: var(--fo-font-steady); }
+.fo-header__lang { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap-min); padding: 0 var(--space-2); border: 0; background: none; color: var(--ink); font: 700 15px/20px var(--fo-font-steady); white-space: nowrap; cursor: pointer; border-radius: var(--radius-pill); }
 .fo-header__lang .fo-icon { width: 20px; height: 20px; }
 .fo-header__lang .fo-icon--sm { width: 16px; height: 16px; }
-/* Language menu: a native popover, under the button where anchor positioning exists. */
-.fo-langmenu { position: fixed; inset: auto; top: 64px; right: var(--space-4); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
+/* The theme button and the Menu button: 48 px, borderless like the language one, ink on bg. */
+.fo-header__theme, .fo-header__menu {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+  min-width: var(--tap-min); min-height: var(--tap-min); padding: 0 var(--space-3); margin: 0;
+  border: 0; border-radius: var(--radius-pill); background: none; color: var(--ink);
+  font: 700 15px/20px var(--fo-font-steady); white-space: nowrap; cursor: pointer;
+}
+.fo-header__theme { width: var(--tap-min); padding: 0; }
+.fo-header__theme .fo-icon, .fo-header__menu .fo-icon { width: var(--icon-sm); height: var(--icon-sm); }
+.fo-header__lang:hover, .fo-header__theme:hover, .fo-header__menu:hover { background: var(--brand-soft); }
+/* The theme button shows its state at the first paint, with no script: the <head> script has already put data-theme on
+   <html> (or not, for System), and CSS shows one of the three icons, each with its own name (§ 385). */
+.fo-theme__state { display: none; }
+html:not([data-theme]) .fo-theme__state--system,
+html[data-theme="light"] .fo-theme__state--light,
+html[data-theme="dark"] .fo-theme__state--dark { display: inline-flex; }
+/* The Menu button: its text from 768 px; on the phone the icon alone, still named "Menu" (as the search). The sheet must
+   be the next sibling of the button, or the :has(+ :popover-open) below never matches. */
+.fo-header__menu { anchor-name: --fo-menu; }
+.fo-header__menu-icon { display: inline-flex; }
+.fo-header__menu-icon--close { display: none; }
+.fo-header__menu:has(+ :popover-open) { background: var(--brand-soft); }
+.fo-header__menu:has(+ :popover-open) .fo-header__menu-icon--open { display: none; }
+.fo-header__menu:has(+ :popover-open) .fo-header__menu-icon--close { display: inline-flex; }
+/* On the phone the search is the icon alone (48px), its name still "Search tools" (§ 46), and the language goes into the
+   Menu: logo, search, theme and Menu take 294.5 of 328 px at 360 (§ 363). */
+@media (max-width: 767px) {
+  .fo-header__search { width: var(--tap-min); padding: 0; border-color: transparent; background: transparent; }
+  .fo-header__search-text, .fo-header__menu-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fo-header__lang { display: none; }
+  .fo-header__menu { width: var(--tap-min); padding: 0; }
+}
+/* The language menu and the Menu: native popovers in position absolute, not fixed, so an open one scrolls away with the
+   header and never stays over the page (or an ad) while it scrolls. In the top layer the containing block of an absolute
+   box is the initial one: anchor positioning puts it under its button; without it, the reserve top of 68 px (64 + 4)
+   and the right edge of the header. Opening one closes the other (two auto popovers). */
+.fo-langmenu { position: absolute; inset: auto; top: 68px; right: var(--space-4); margin: 0; padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); }
+@media (min-width: 1280px) { .fo-langmenu { right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance)); } }
 @supports (position-anchor: --fo-lang) {
   .fo-header__lang { anchor-name: --fo-lang; }
   .fo-langmenu { position-anchor: --fo-lang; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); }
+}
+/* The click that closes one of them (the light dismiss of an auto popover) goes on to what is under it: the DropZone
+   opened the file picker, a radio of the tool changed, and an ad could take it. While one is open the page under the
+   header (the main and the rail) takes no pointer, so the click lands on the body and only closes the menu. In WebKit the
+   click of a tap comes after the menu has closed, so a sheet that is never painted (body::after, under the header) stays
+   over the page 400 ms more: it leaves by scale, the one way to delay it in CSS within the motion rule, and the delay
+   moves nothing on screen, so it stays with reduced motion too. With no :has() the rules fall and the page is as before
+   (review F11 B-2 and its second pass, DECISOES § 405). */
+.fo-header { position: relative; z-index: 11; }
+body::after { content: ''; position: fixed; inset: 0; z-index: 10; scale: 0; transition: scale 0s linear 400ms; }
+body:has(#fo-menu:popover-open, #fo-langmenu:popover-open) .fo-frame { pointer-events: none; }
+body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) {
+  body::after { transition: scale 0s linear 400ms !important; }
+  body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { transition-delay: 0s !important; }
 }
 .fo-langmenu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-langmenu a { display: flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; font-weight: 600; }
 .fo-langmenu a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .fo-langmenu a[aria-current] { background: var(--brand-soft); }
+/* The Menu: a sheet of paper with the folded corner (fo-dogear), under the Menu button. The browser's [popover] style is
+   undone (fixed, inset 0, margin auto, overflow auto); overflow stays visible for the corner, which sits outside the box,
+   and the sheet starts below the corner (26 px), as a card's padding does, so the corner never covers a row. */
+.fo-menu {
+  position: absolute; inset: auto; margin: 0; width: auto; height: auto; overflow: visible;
+  position-anchor: --fo-menu; top: calc(anchor(bottom) + var(--space-1)); right: anchor(right); left: var(--space-4);
+  padding: calc(var(--dogear) - var(--stroke-2)) var(--space-2) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg);
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop);
+  font: 400 16px/26px var(--fo-font-text);
+}
+@media (min-width: 768px) { .fo-menu { left: auto; width: 360px; } }
+@supports not (top: anchor(bottom)) {
+  .fo-menu { top: 68px; right: var(--space-4); }
+  @media (min-width: 1280px) { .fo-menu { right: calc((100% - var(--page-max)) / 2 + var(--space-4) + var(--rail) + var(--ad-clearance)); } }
+}
+.fo-menu__list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.fo-menu__list + .fo-menu__list, .fo-menu__lang { margin-top: var(--space-2); padding-top: var(--space-2); border-top: var(--stroke-hair) solid var(--hairline); }
+/* Rows of 48 px, the tap-min of every control (the name and the count, 38 px, centred), not the 52 px of the
+   specification: from 390 px the first AdSlot of Merge PDF and Unlock PDF rises to y 776, and with rows of 52 px the
+   English sheet ended 146.5 px above it (review F11 D-1, DECISOES § 404). */
+.fo-menu__item {
+  display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap-min); padding: 0 var(--space-3) 0 var(--space-2);
+  border: var(--stroke-2) solid transparent; border-radius: var(--radius-md); color: var(--ink); text-decoration: none;
+}
+.fo-menu__item:hover { background: var(--brand-soft); }
+.fo-menu__item:hover .fo-menu__name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+/* The section of the page, and the language in use: brand-soft with the stroke around it (the trace). The name in 700
+   too. With forced colours the background goes and every transparent border shows, and 700 against 600 is a faint mark:
+   there the current row and language (and the one of the language menu) are underlined, as the OptionGroup is (§ 280;
+   review F11 B-1, DECISOES § 404). */
+.fo-menu__item[aria-current] { background: var(--brand-soft); border-color: var(--stroke); }
+.fo-menu__item[aria-current] .fo-menu__name, .fo-menu__lang .fo-menu__item[aria-current] { font-weight: 700; }
+@media (forced-colors: active) {
+  .fo-menu__item[aria-current] .fo-menu__name, .fo-menu__lang .fo-menu__item[aria-current], .fo-langmenu a[aria-current] { text-decoration-line: underline; text-decoration-thickness: var(--stroke-3); text-underline-offset: 4px; }
+}
+.fo-menu__dot { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--fo-cat, var(--brand-soft)); color: var(--ink); }
+:where(.fo-cat--image, .fo-cat--pdf, .fo-cat--money, .fo-cat--util) > .fo-menu__dot { color: var(--on-cat); }
+.fo-cat--home > .fo-menu__dot { color: var(--on-violeta); }
+.fo-menu__dot .fo-icon { width: 18px; height: 18px; }
+.fo-menu__text { display: grid; min-width: 0; }
+.fo-menu__name { font: 600 16px/20px var(--fo-font-text); }
+.fo-menu__meta { font: 400 13px/18px var(--fo-font-text); color: var(--ink-muted); }
+.fo-menu__label { margin: 0; padding: var(--space-1) var(--space-3); font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+/* The languages (under 768 px only) side by side, three 48 px targets in one row, not one row each: the English sheet
+   then ends at y 630 at 360 px instead of 730 (DECISOES § 388), and at y 598 with the rows of 48 px, 178 px or more above
+   the first AdSlot of every page at every width under 768 px (the one of Merge PDF and Unlock PDF sits at y 796 up to
+   384 px and at y 776 from 390 px; § 404). The language in use: brand-soft, the stroke and 700, like the section. */
+.fo-menu__lang .fo-menu__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fo-menu__lang .fo-menu__item { justify-content: center; min-height: var(--tap-min); padding: 0 var(--space-1); font: 600 16px/20px var(--fo-font-text); white-space: nowrap; }
 
 /* ---------- Breadcrumb, H1 and PrivacySeal ---------- */
 /* The trail wraps on a phone, as the Breadcrumb README allows, in the font of its first paint: Figtree Steady never swaps,
@@ -753,3 +863,52 @@
 .fo-grid > li[hidden], .fo-openwith [data-group][hidden] { display: none; }
 .fo-tool__takes { font: 600 14px/20px var(--fo-font-text); color: var(--ink); }
 .fo-tool__takes:empty { display: none; }
+
+/* F11: the guides hub (UX-02 A; DECISOES § 364). It has no category colour of its own: its band uses brand-soft, with
+   the text in ink as in every hub band. The shortcuts to the three groups are chips (48 px); the note of a group with no
+   guide in the language (the money group in pt) keeps the measure of a paragraph. */
+.fo-cat--guide { --fo-cat-soft: var(--brand-soft); }
+.fo-jump ul { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+/* The first group sits 32 px under its shortcuts, not the 64 px between sections: at 360 × 740 the first card's name then
+   stays above the fold with a title one line longer, which the Spanish title becomes where Fredoka sets a little wider
+   (it fills 278.5 of 280 px in the Chromium of Windows and took a third line in the CI's Linux; DECISOES § 408). */
+.fo-jump + .fo-section { margin-top: var(--space-4); }
+.fo-section__note { margin: 0; max-width: var(--fo-measure); }
+
+/* F11: guides. The GuideCard (UX-02 A; DECISOES § 395): the paper of the ToolCard (2 px stroke, the fold in the colour of
+   the guide's group) that opens with words, "Guide" and the file icon, then the name, the description, the measure with the
+   table icon and, after a dashed hairline, the tool of the guide in the circle of its own category. The grid of the hub and
+   of the home has columns of 300 px at least (the guides' names are long: 220 px would give four lines). The --here
+   variant, at the end of the "How to" block of a tool page, has no foot; its wrapper keeps one or two cards one under the
+   other. Nothing moves but by transform, and the hover lift goes with reduced motion, as the ToolCard's does. */
+.fo-guidecards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.fo-guidecards > li { display: grid; }
+.fo-guidecard { --fo-ground: var(--bg); position: relative; box-sizing: border-box; display: grid; grid-template-rows: auto auto 1fr auto auto; align-content: start; gap: var(--space-2); padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); text-decoration: none; transition: transform var(--dur-quick) var(--ease-out); }
+.fo-guidecard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.fo-guidecard__kind { display: flex; align-items: center; gap: var(--space-2); padding-right: var(--dogear); font: 700 14px/20px var(--fo-font-text); color: var(--ink); }
+.fo-guidecard__kind > .fo-icon, .fo-guidecard__proof > .fo-icon { flex: none; width: 20px; height: 20px; color: var(--brand); }
+.fo-guidecard__name { margin: 0; font: 700 18px/24px var(--fo-font-text); }
+.fo-guidecard__desc { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.fo-guidecard__proof { display: flex; align-items: flex-start; gap: var(--space-2); font: 500 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-guidecard__tool { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-1); padding-top: var(--space-3); border-top: var(--stroke-hair) dashed var(--hairline); }
+.fo-guidecard__tool > span:last-child { display: grid; font: 600 15px/20px var(--fo-font-text); }
+.fo-guidecard__label { font: 500 13px/18px var(--fo-font-text); color: var(--ink-muted); }
+.fo-guidecard--here { grid-template-rows: auto auto auto auto; }
+.fo-prose .fo-guidecard :is(p, span) { margin: 0; }
+.fo-guidehere { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
+@media (prefers-reduced-motion: reduce) { .fo-guidecard:hover { transform: none; } }
+/* The Guides block of the footer sits under Utilities, in the same column: an eighth column does not fit at 1280 px. */
+.fo-footer__more { margin-top: var(--space-6); }
+/* The search in two groups (F11, decision 7; DECISOES § 397): a title above each group of results, in the caption style of
+   a footer column title (ink-muted on the surface of the box); the options keep their 48 px, and a long guide name breaks
+   inside its row, beside the circle and before the category. */
+.fo-search__list [role="group"] { display: grid; gap: 2px; }
+.fo-search__group { padding: var(--space-3) var(--space-3) var(--space-1); font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-search__item { padding-block: var(--space-1); }
+.fo-search__item > span:not(.fo-chip__dot) { flex: 1; min-width: 0; line-height: 20px; }
+.fo-search__item .fo-chip__dot { flex: none; }
+/* The first visit of the guides hub: the band and the shortcuts keep the Figtree of the first paint (the Steady face, as the
+   breadcrumb; DECISOES § 305 and § 393). With the fallback font the line of the band took one more row at 412 px (en) and
+   the chips two rows at 393 px (pt), so the cards moved 26 to 56 px when Figtree arrived (CLS up to 0.108 in Chromium). */
+.fo-hubband.fo-cat--guide { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-jump { --fo-font-text: var(--fo-font-steady); }

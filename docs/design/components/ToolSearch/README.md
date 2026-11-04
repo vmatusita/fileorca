@@ -6,6 +6,7 @@ A busca de ferramentas (Ctrl+K no computador, ícone no celular): um campo e uma
 
 - Caixa `surface` com traço e `shadow-pop`, campo de 60px em 18px. Resultados com o círculo da categoria, o nome e a categoria à direita.
 - Teclado: setas movem (`aria-selected`), Enter abre, Esc fecha. `role="dialog"` com o foco preso enquanto aberta.
-- É o padrão combobox: o campo leva `role="combobox"`, `aria-expanded`, `aria-controls` (a lista) e `aria-activedescendant` (a opção marcada); a lista é `role="listbox"` com nome ("Tools"). O foco fica no campo o tempo todo.
+- É o padrão combobox: o campo leva `role="combobox"`, `aria-expanded`, `aria-controls` (a lista) e `aria-activedescendant` (a opção marcada); a lista é `role="listbox"` com nome ("Results"). O foco fica no campo o tempo todo.
+- Dois grupos (F11, DECISOES § 397): primeiro as ferramentas, depois os guias, cada um um `role="group"` nomeado pelo título dele ("Tools", "Guides", na legenda `caption` em `ink-muted`). Grupo vazio não tem título. Um guia tem o ícone `file`, o círculo da cor do grupo dele e "Guide" à direita. As setas passam de um grupo para o outro, pulando os títulos.
 - Procura nos três idiomas e em sinônimos ("shrink", "reduzir", "achicar" → Compress).
 - Sem resultado: a Oli em `peek` espia da borda de baixo, diz o que procurou e sugere três termos reais. Nunca "No results".

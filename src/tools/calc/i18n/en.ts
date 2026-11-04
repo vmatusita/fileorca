@@ -8,7 +8,6 @@ export interface CalcPageShared {
   readOn: string;
   exampleInputs: string;
   exampleResults: string;
-  guide: string;
   /** Under the calculator of a guide: the link to that calculator's own page. */
   openCalc: string;
   disclaimerHeading: string;
@@ -57,7 +56,6 @@ export default {
     readOn: 'Read on {date}.',
     exampleInputs: 'You enter',
     exampleResults: 'You get',
-    guide: 'Read the guide: {title}',
     openCalc: 'Open the {name} on its own page',
     disclaimerHeading: 'Educational tool',
     exampleCaption: 'The worked example: what goes in and what comes out',

@@ -1,5 +1,6 @@
 /* FileOrca v1.1 — generated from tokens.json. Fonts come from @fontsource-variable/fredoka and /figtree (latin subset).
-   Dark theme: follows prefers-color-scheme, and data-theme="light" | "dark" on <html> forces either one. */
+   Dark theme: follows prefers-color-scheme, and data-theme="light" | "dark" on <html> forces either one. On screen only:
+   paper is white and the browser prints no background by default, so the print is always the light theme (F11 C-1). */
 :root, [data-theme="light"] {
   --bg: #F7FAFD;
   --surface: #FFFFFF;
@@ -45,6 +46,7 @@
   --shadow-lip-sun: 0 4px 0 #0F1B2D;
   --shadow-lip-on-deep: 0 4px 0 #B8870F;
 }
+@media screen {
 [data-theme="dark"] {
   --bg: #0B1524;
   --surface: #13223A;
@@ -75,7 +77,8 @@
   --shadow-lip-sun: 0 4px 0 #B8870F;
   --ad-ground: var(--surface-sunken);
 }
-@media (prefers-color-scheme: dark) {
+}
+@media screen and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0B1524;
     --surface: #13223A;

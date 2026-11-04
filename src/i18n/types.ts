@@ -27,6 +27,21 @@ export interface CommonTexts {
     langSr: string;
     langMenuLabel: string;
     langNames: LangNames;
+    /** The Menu button and the name of its sheet (F11, decision 3): "Menu", "Menú". */
+    menu: string;
+    /** The name of the theme button in each state (F11, decision 2): "Theme: system", "Theme: light", "Theme: dark". */
+    theme: { system: string; light: string; dark: string };
+    /** The label of the language list at the end of the Menu, under 768 px: "Language". */
+    menuLanguage: string;
+    /** The line under a Menu row, {n} from the registries: "{n} tools", "{n} calculators", "{n} guides". */
+    menuTools: string;
+    menuCalculators: string;
+    menuGuides: string;
+    /** The line under the QR code row: the formats it saves ("PNG or SVG"). */
+    menuQr: string;
+    /** The support row of the Menu ("Support Oli") and the line under it (how to support: "Ko-fi"). */
+    support: string;
+    supportMeta: string;
   };
   breadcrumb: { label: string; home: string };
   seal: string;
@@ -44,6 +59,11 @@ export interface CommonTexts {
     terms: string;
     licenses: string;
     contact: string;
+    /**
+     * The Guides block under the Utilities column (F11, decision 7): "All guides", the link to the guides hub. Its title is
+     * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
+     */
+    guidesAll: string;
     /** Support line at the base of the footer (PLANO, Doações). */
     coffee: string;
     /** "Made by {name} in {city}" */
@@ -66,9 +86,14 @@ export interface CommonTexts {
     listLabel: string;
     placeholder: string;
     close: string;
-    /** No result: 'No tool called "{query}"' */
+    /** No result: 'No tool or guide called "{query}"' */
     emptyTitle: string;
     emptyHint: string;
+    /** The titles of the two groups of results (F11, decision 7): "Tools", then "Guides". An empty group has no title. */
+    toolsGroup: string;
+    guidesGroup: string;
+    /** The category written beside every guide in the results ("Guide"), whatever its group. */
+    guideCategory: string;
     imageCategory: string;
     moneyCategory: string;
     pdfCategory: string;
@@ -98,6 +123,8 @@ export interface CommonTexts {
   pdf: Record<PdfToolId, ToolBlurb>;
   /** The cards of the file guides (the three languages since the languages adjustment). */
   fileGuides?: Record<FileGuideId, ToolBlurb>;
+  /** Name of the guides hub (F11): the second step of its breadcrumb and of the guides' breadcrumbs ("Guides"). */
+  guidesHub: string;
 }
 
 /** What every language has since the languages adjustment: the QR code card, its footer column and search category, and the file guides. */
@@ -158,6 +185,11 @@ export interface HomeTexts extends PageMeta {
   house?: { heading: string; intro: string; hubLink: string };
   health?: { heading: string; intro: string; hubLink: string };
   qr?: { heading: string; intro: string };
+  /**
+   * The "Read a guide" section (F11, decision 7): the heading, the line and the link to the guides hub, whose {n} is the
+   * number of guides of the language, read from the registries. The four cards are those of HOME_GUIDES.
+   */
+  guides: { heading: string; intro: string; hubLink: string };
 }
 
 /** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
@@ -550,8 +582,6 @@ export interface FileGuidesSharedTexts {
   gps: { real: string; none: string; empty: string; zeroed: string; kept: string };
   /** Readable names of the fixtures, by file name. */
   fixtures: Record<string, string>;
-  /** "Read the guide: {title}" under a tool. */
-  guideLink: string;
   /** Heading of the guides list of a hub. */
   hubGuidesHeading: string;
   /**
@@ -985,4 +1015,49 @@ export interface PdfToolsTexts extends PageMeta {
   guideOutro: string;
   privacyHeading: string;
   privacy: string[];
+}
+
+/** A group of the guides hub (F11): the text of its shortcut chip and the heading of its section. */
+export interface GuidesHubGroupTexts {
+  /** The shortcut chip at the top of the hub ("Image"), which leads to the section. */
+  jump: string;
+  /** The H2 of the section ("Image guides"; in pt the money group is only "Dinheiro", the section of the note). */
+  heading: string;
+}
+
+/**
+ * The guides hub /guides/ (F11, decision 5; DECISOES § 364), with the texts of the specification
+ * (docs/propostas/ux-v2/guides-hub.html, alternative A). In the description and the line of the band, {n} is the number of
+ * guides of the language, read from the registries, never written by hand.
+ */
+export interface GuidesHubTexts extends PageMeta {
+  eyebrow: string;
+  h1: string;
+  /** The line of the band, with {n}. */
+  intro: string;
+  /** The name of the nav of the shortcuts (aria-label). */
+  jumpLabel: string;
+  groups: Record<'image' | 'pdf' | 'money', GuidesHubGroupTexts>;
+  /**
+   * Only in a language with no money guide (pt): the note of the money group, which says why and leads to the money hub of
+   * the language (the text before the link, the link, the text after it).
+   */
+  moneyNote?: { before: string; link: string; after: string };
+  /** "How these guides are made", at the end. */
+  howHeading: string;
+  how: string;
+  /** The words of the guide card (F11, decision 6; src/components/GuideCard.astro), wherever the card appears. */
+  card: GuideCardTexts;
+}
+
+/**
+ * The words of a guide card: the kind that opens it ("Guide", the first word of its accessible name), the measure of a file
+ * guide with {n}, the number of its test files, and that of a money guide (only in a language with money guides: pt has
+ * none), and the label of the tool at its foot.
+ */
+export interface GuideCardTexts {
+  kind: string;
+  measured: string;
+  workedOut?: string;
+  tool: string;
 }

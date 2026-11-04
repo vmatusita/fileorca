@@ -12,7 +12,7 @@ import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, H
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
-import { FILE_GUIDE_IDS, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { FILE_SUFFIX } from '../../scripts/lib/design-checks.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 
@@ -58,7 +58,8 @@ describe('mapa de rotas', () => {
       'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
       PDF_HUB_ID, ...PDF_TOOL_IDS,
-      ...FILE_GUIDE_IDS,
+      // F11 (decision 5): the guides hub, right before the file guides, as each hub comes before its pages.
+      GUIDES_HUB_ID, ...FILE_GUIDE_IDS,
       // F7 (decision 1; DECISOES § 259): the two hubs, the 11 home and health calculators in hub order and the QR code
       // generator, after the file guides and before the institutional pages.
       HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID,

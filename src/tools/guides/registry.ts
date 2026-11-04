@@ -20,6 +20,13 @@ export const FILE_GUIDE_IDS = [
 ] as const;
 export type FileGuideId = (typeof FILE_GUIDE_IDS)[number];
 
+/**
+ * The route id of the guides hub (F11, decision 5): /guides/, /pt/guias/ and /es/guias/, the page that lists every guide
+ * of a language, the file guides of this registry and the money guides of src/tools/calc/registry.ts. "guides" alone, with
+ * no hyphen, so it never reads as a guide id (they all start with "guides-").
+ */
+export const GUIDES_HUB_ID = 'guides';
+
 export type FileGuideHub = 'image-tools' | 'pdf-tools';
 export type FileGuideTool = ImageToolId | PdfToolId;
 export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | FileGuideId;

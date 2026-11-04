@@ -3986,3 +3986,519 @@ Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-
 - **N7 e N8:** o `ESCOLHAS.md` diz onde está cada mudança de regra e que, na F11 e na F12, um item sem marca aceita a mudança da recomendada.
 - **N9:** o "(notas)" saiu dos G-NN e U-NN.
 - **N10:** a contagem do juntar ("Lendo 2 PDFs…" e depois "2 PDFs prontos") ganhou `role="status"`.
+
+## § 382 · A F11: o ponto de partida, a especificação e a reserva dos § (F11, decisão 1)
+
+- **O ponto de partida** é a `origin/main` em `609a868e22f418de060bd66e110018048e03eebc` (a F10 mesclada), na branch `fase-11`. A linha de base (build, orçamentos, número de testes e a lista dos JS de `dist/_astro/`) foi medida nele e fica em `.cache/f11/antes/`, fora do Git; a cópia do `dist/` dele fica em `.cache/f11/dist-antes/`, para provar que cada teste novo reprova sem a mudança.
+- **A especificação.** A área "Especificação" do `header-a.html`, do `guides-hub.html` (alternativa A, com `?ads=off`) e do `guides-entries.html` é o contrato, junto com a § 363 e a § 364. Onde ela diverge da ficha da run, vale a ficha. O site constrói sobre o `components.css` e as medidas dele, nunca sobre o `bundle.css` do `docs/design/` (as diferenças estão no bloco da F10 do `docs/claude/design-e-oli.md`), e não importa nada de `docs/propostas/`: nem o script dos previews (`?theme=`, `?lang=`, `?state=`) nem o controle do protótipo.
+- **As fatias:**
+  1. a documentação da F10 e os ícones, no agente principal (§ 383 e § 384);
+  2. o tema, o cabeçalho e a Privacidade, num agente em worktree (§ 385 a § 392);
+  3. ao mesmo tempo, o hub de guias, o GuideCard e as entradas, noutro agente em worktree (§ 393 a § 400);
+  4. o merge das duas no agente principal e a conferência no Linux;
+  5. o `docs/design/`, o `docs/PENDENCIAS.md` e as pegadinhas;
+  6. as verificações completas, as medidas e as imagens, e depois a revisão adversarial.
+- **A reserva dos §** (pegadinha da F10: um § citado antes de ser escrito prende a numeração):
+  - **§ 383 e § 384:** a documentação da F10 e os ícones;
+  - **§ 385 a § 392, do agente do tema e do cabeçalho:** 385 o tema (os três estados, a chave e os scripts), 386 o tema no CSS e as metas, 387 a Privacidade, 388 o cabeçalho com o Menu, 389 o mapa de cada rota para a seção do Menu, 390 o "Apoie a Oli" e o lugar `menu`, 391 onde mora cada teste novo da fatia, 392 os testes antigos que a fatia mudou;
+  - **§ 393 a § 400, do agente dos guias:** 393 o hub (a rota, os grupos e o SEO), 394 a regra do `gate:conteudo` para o hub, 395 o GuideCard, 396 as entradas (a trilha, o rodapé, o cartão e as relacionadas), 397 a busca, 398 a seção da home, 399 onde mora cada teste novo da fatia, 400 os testes antigos que a fatia mudou;
+  - **a partir da § 401:** os do agente principal, na ordem em que forem escritos (o merge e o CI, o `docs/design/`, as medidas e a revisão).
+
+  Cada agente escreve só os seus números, um a um e na ordem. Uma decisão a mais entra como item de um dos seus §, nunca como § novo.
+
+## § 383 · Os blocos da F10 no docs/claude/ e o grupo 19 do PENDENCIAS (F11, decisão 12)
+
+- **Os cinco blocos** da seção "Para o docs/claude/" do `docs/relatorios/fase-10.md` entraram com o texto igual, cada um como seção nova no fim do arquivo de tema: "F10: proposta de UX/UI" no `design-e-oli.md`, "F10: o mapa de anúncios" no `anuncios.md`, "F10: medidas de UX" no `playwright.md`, "F10: agentes em worktree" no `windows-git-bash.md` e "F10: textos dos protótipos" no `idiomas.md`. Um script copiou cada bloco entre as cercas do relatório, para o texto não mudar nem num caractere. O `CLAUDE.md` não mudou.
+- **O grupo 19 do `docs/PENDENCIAS.md`** ("O que a F10 deixou") recebeu as 20 linhas F10 p-1 a p-20, com o texto igual, no formato das seis colunas.
+- **O Resumo estava atrás das tabelas em dois grupos** (a F10 p-1 achou um):
+  - **o grupo 4** tem 26 linhas, e o Resumo dizia 23: as três linhas "Idiomas" (R2-05, R2-04 e g-1) entraram sem ele;
+  - **o grupo 5** tem 13, e o Resumo dizia 12: a "Idiomas R2-03" entrou sem ele.
+
+  O Resumo passou a 26 e 13, ganhou a linha do grupo 19, e o Total foi de 183 para 207 (os 187 de antes, que o Resumo dizia 183, mais os 20 da F10).
+- **Um teste novo** no `tests/unit/pendencias.test.ts` conta as linhas de seis colunas de cada grupo numerado e confere a linha do Resumo e o Total. Com o `PENDENCIAS.md` de antes, ele reprova (grupos 4 e 5 e o Total).
+- **No fim da run,** a F5b F-12, a F10 p-20 e a F10 p-1 vão para "Já corrigidos depois da revisão", com o § da F11 que fechou cada uma; a F10 p-5 fica só com o que sobrar para a F12; e o grupo 20 recebe o que a F11 deixar.
+
+## § 384 · Os ícones do cabeçalho no design system (F11, decisão 4)
+
+- **Os cinco ícones do UX-01** (`menu`, `sun`, `moon`, `theme-system` e `book`) foram de `docs/propostas/ux-v2/icons/` para `docs/design/assets/Icons/`. O desenho é o mesmo; só o `stroke` do `<svg>` raiz mudou, de `currentColor` para o `#0F1B2D` da `ICON_FILE_ROOT` de `src/icons/svg.ts`. Os arquivos da proposta ficam como estão: `docs/propostas/` é o registro da F10.
+- **Os nomes entraram no `ICON_NAMES`** em ordem alfabética, e o `src/icons/icons.ts` os lê do mesmo jeito que os outros (no build, nunca numa ilha). Isso fecha a F10 p-20.
+- **O `assets/Icons/README.md`** passou de 39 para 44 ícones, com uma linha "Cabeçalho" na lista.
+- **O teste antigo que mudou** (no formato da § 341): o `tests/unit/icons.test.ts` fixava a contagem em 39 (`toHaveLength(39)` e o título). A ficha esperava que ele passasse sem mudar, mas a contagem é a da pasta, e a pasta ganhou os cinco: o número foi a 44, e o título diz de onde vêm os cinco. A proteção continua: a lista de `ICON_NAMES` é igual à dos arquivos da pasta, e cada arquivo começa pela `ICON_FILE_ROOT` sem cor nem `id` dentro, como antes. Os outros dois testes do arquivo não mudaram.
+
+## § 385 · O tema: os três estados, a chave `fo-theme` e os dois scripts inline (F11, decisão 2)
+
+- **Os três estados:** Sistema (o padrão), Claro e Escuro. O botão de tema do cabeçalho passa por eles nessa ordem, e Escuro volta a Sistema. O nome acessível diz o estado: "Theme: system", "Theme: light" e "Theme: dark" em inglês; "Tema: sistema", "Tema: claro" e "Tema: escuro" em português; "Tema: sistema", "Tema: claro" e "Tema: oscuro" em espanhol (`common.header.theme`).
+- **A escolha** fica no `localStorage`, na chave `fo-theme`, com `light` ou `dark`. Sem a chave, vale Sistema, e voltar a Sistema apaga a chave. Ela não depende do aviso de cookies: é uma preferência que a pessoa pede no botão. Sistema não põe `data-theme`, então o `prefers-color-scheme` decide, como antes.
+- **Os dois scripts** moram em `src/platform/theme.ts`, como funções que devolvem a string, no molde do `consentBootstrap()`: o `themeBootstrap()` e o `themeToggle()`, com a chave na constante `THEME_STORAGE_KEY`. Entram com `<script is:inline set:html>`, sem arquivo novo e sem requisição:
+  - **o do `<head>`** só lê. É o da especificação, palavra por palavra, e vem depois do `charset`, do `viewport` e da `<meta name="color-scheme" content="light dark">`. O Astro põe a folha de estilo no fim do `<head>`, então ele roda antes de todo CSS, e a primeira pintura já sai no tema guardado;
+  - **o do botão** vem no `Header.astro`, logo depois do `</header>`. A cada clique (Enter e espaço clicam um botão), ele põe o próximo estado no `<html>`, na meta e na chave, e escreve o nome novo na região de status.
+- **Os tamanhos:** o do `<head>` tem 185 bytes (157 com gzip nível 9); o do botão, 572 (331); os dois juntos, como o orçamento os soma, 376 bytes com gzip. A especificação media 422 bytes no botão: a região de status custou 150 bytes, porque o script acha a região pelo `[data-theme-status]` e o nome pela classe do estado (`.fo-theme__state--light .fo-sr`), e não pela posição.
+  - **As alternativas:** o `nextElementSibling` e o índice do rascunho da `.cache/f11/explore-d1-spec-header.md` (522 bytes), ou o `innerText` do botão. Ficaram de fora porque quebram em silêncio se a marcação mudar de ordem.
+- **A região de status:** um `<span class="fo-sr" role="status" data-theme-status>`, vazio na carga (não anuncia nada ao abrir a página), logo depois do botão de tema e antes do botão Menu. Ela não pode ficar entre o botão Menu e a folha: o `:has(+ :popover-open)` exige a folha como irmã imediata do botão. O `.fo-sr` é `absolute`, então não entra no espaço do cabeçalho.
+- **A ordem no `<head>`:** a meta e o script do tema vêm antes do script do consentimento.
+  - **Por quê:** os dois são independentes, o do tema é o menor, e assim a meta e o script que a muda ficam juntos. O consentimento continua declarado antes de todo `config` e de todo evento (§ 9), que é o que a regra dele pede.
+  - **A alternativa:** depois do consentimento, o que a especificação também aceitava.
+- **O armazenamento bloqueado** (janela privada, dados do site bloqueados): a leitura e a escrita ficam em `try/catch`. A página abre em Sistema, sem erro, e o botão troca o tema só daquela página.
+- **Outra aba** só muda ao recarregar, sem `storage` listener, como na especificação.
+- **Nada sai do aparelho:** trocar o tema não faz requisição, não manda evento do GA4 nem mexe na URL ou no histórico. O script não toca em `fetch`, `location`, `history`, `gtag` nem no `dataLayer`, e o teste unitário confere o texto dele.
+- **O service worker não muda:** ele guarda a página inteira, com os dois scripts, então a página guardada e a página offline seguem a escolha. O `header-theme-offline.spec.ts` prova, com o worker ligado e a rede desligada de verdade.
+
+## § 386 · O tema no CSS e as metas (F11, decisão 2)
+
+- **O par de toda regra.** O CSS do site tem só duas regras de `prefers-color-scheme`, no `global.css` (o `color-scheme` do `<html>`) e no `docs/design/tokens.css` (as variáveis de cor), e as duas já tinham o par com `data-theme`. O cabeçalho novo não acrescenta nenhuma: o botão de tema mostra um dos três estados pelo `data-theme` do `<html>` (`html:not([data-theme])`, `[data-theme="light"]` e `[data-theme="dark"]`), e as cores do Menu são todas por token.
+- **O teste do par** é o `tests/unit/theme-pair.test.ts`; o `tests/unit/theme.test.ts` já existia e é do tema do Tailwind. Ele lê todo `.css` de `src/styles/` (o `theme.css`, o `fonts.css`, o `global.css` e o `components.css`) e o `docs/design/tokens.css`, e confere em cada regra dentro de `@media (prefers-color-scheme: dark)`, em qualquer `@layer` ou `@supports`:
+  - a guarda `:not([data-theme="light"])` em cada seletor, para a página forçada clara num sistema escuro não pegar o valor escuro;
+  - o par `[data-theme="dark"]` fora da media query, com as mesmas declarações, para a página forçada escura num sistema claro;
+  - um valor claro de cada propriedade, no mesmo elemento ou em `[data-theme="light"]`.
+
+  A regra de `prefers-color-scheme: light` segue o espelho. O controle negativo tem cinco casos: sem a guarda, sem o par, o par com outro valor, sem o valor claro, e o espelho claro. O `bundle.css` do `docs/design/` fica de fora, porque é referência e nunca import (ele também tem o par).
+- **A prova no navegador:** a página forçada clara num sistema escuro fica com o fundo e o texto da página clara, e a forçada escura num sistema claro, com o fundo escuro (`header-theme.spec.ts`). O primeiro quadro de cada molde já sai no tema guardado.
+- **As metas:** a `<meta name="color-scheme" content="light dark">` entra logo depois do `viewport`. O script do `<head>` troca o `content` para `light` ou `dark` quando há escolha, e o botão o troca para `light`, `dark` ou de volta para `light dark`. Antes de o CSS chegar, o fundo da aba segue a escolha; depois, quem manda é o `html { color-scheme }` do `global.css`. O `theme-color` não muda: uma meta só, `#0C2B5E`, sem `media`.
+- **A linha do tema do `docs/design/README.md`** (decisão 8):
+  - **antes:** "O tema escuro segue o sistema (`prefers-color-scheme`) só com CSS, sem script; `data-theme="light"` ou `"dark"` no `<html>` força um dos dois (para testes e previews)."
+  - **depois:** "O tema tem três estados: Sistema (o padrão, que segue o `prefers-color-scheme` só com CSS), Claro e Escuro, escolhidos no botão de tema do cabeçalho (Header). A escolha fica no navegador, na chave `fo-theme` do `localStorage` (`light` ou `dark`; voltar a Sistema apaga a chave), e um script inline mínimo no `<head>`, depois da `<meta name="color-scheme" content="light dark">` e antes do CSS, põe `data-theme="light"` ou `"dark"` no `<html>` antes da primeira pintura; em Sistema, nenhum `data-theme`. Toda regra de `prefers-color-scheme` tem o par com `data-theme` (`tokens.css` e o CSS do site), e os testes e previews também forçam um dos dois pelo `data-theme`."
+
+  O comentário do `tokens.css` ("data-theme ... forces either one") continua certo e não mudou, e o `MUDANCAS-v1.1.md` é histórico.
+- **A § 76 continua valendo.** O axe troca o `prefers-color-scheme` no lugar, e o único tema que um script decide na carga é uma escolha guardada. Todo contexto de teste começa com o armazenamento vazio, ou seja, em Sistema, sem `data-theme`. O comentário do `tests/e2e/lib/axe.ts` diz isso agora (§ 392), e o axe com o botão nos três estados fica no `header-axe.spec.ts`.
+
+## § 387 · A Privacidade e o tema (F11, decisão 2)
+
+- **Onde:** nos três idiomas e com a mesma forma (o `routes.test.ts` confere que as seções da Privacidade têm o mesmo número de parágrafos e de itens em en, pt e es), em três lugares:
+  - **no resumo da introdução:** "your files never leave your device, and the theme you pick in the header stays in your browser" (pt: "e o tema que você escolhe no cabeçalho fica no seu navegador"; es: "y el tema que eliges en el encabezado se queda en tu navegador");
+  - **junto da escolha de cookies:** um parágrafo novo, logo depois do registro do aviso, na seção que passou a se chamar "Your cookie choice and your theme in the browser" ("Sua escolha de cookies e o seu tema no navegador", "Tu elección de cookies y tu tema en el navegador");
+  - **na lista de "How long data is kept":** um item novo, "Theme choice", depois do da escolha de cookies.
+- **O que o parágrafo diz:**
+  - o que fica guardado: a chave `fo-theme`, com `light` ou `dark`, só quando a pessoa escolhe Claro ou Escuro; Sistema, o padrão, não guarda nada;
+  - que fica no aparelho e nunca é enviado a lugar nenhum;
+  - que não depende do aviso de cookies, porque é a pessoa quem pede;
+  - como apagar: voltar o botão a Sistema ou limpar os dados do site no navegador.
+- **A data** "Last updated" em inglês foi a 3 de novembro de 2026, o dia da mudança; em português e em espanhol ela já estava nesse dia. O `calc-defs.test.ts` fixa as três (§ 392).
+- **O que não mudou:** a lista dos eventos do GA4. O "Click on a donation link" já cobre o lugar `menu` (§ 390), e o tema não manda evento. Os itens que o `gate:prontidao` pede na Privacidade continuam lá.
+- **O teste:** o `tests/unit/privacy-theme.test.ts` acha, em cada idioma, a chave no resumo, o parágrafo na seção do aviso, com `light`, `dark`, os nomes dos três estados e as quatro afirmações, e um item só na lista do tempo de guarda. Com os textos de antes, os três casos reprovam.
+
+## § 388 · O cabeçalho com o Menu (F11, decisão 3)
+
+- **A marcação** é a da especificação (`header-a.html`), no `src/components/Header.astro`, na ordem do DOM e da tela: pular para o conteúdo (no layout), logo, busca, botão de idioma e menu de idioma, botão de tema, a região de status, botão Menu e a folha. Cada popover vem logo depois do botão que o abre, e nada fica entre o botão Menu e a folha.
+  - **O Menu** é um `popover` com `popovertarget`, sem script, como o menu de idioma. A folha é `nav#fo-menu.fo-menu.fo-dogear`, com o nome "Menu" ("Menú").
+  - **As linhas** são as do § 389.
+  - **As props do Header não mudaram** (`lang`, `route`, `t`): o que a folha precisa sai do módulo `src/components/header-menu.ts`, e o teste que renderiza o `Header` sozinho (`pdf-site.test.ts`) continua chamando-o do mesmo jeito.
+- **O CSS** foi reescrito no lugar do bloco do cabeçalho do `components.css`, sem arquivo nem token novo. Ele vem do `header.css` da proposta, com o que muda no site:
+  - o `--font-text` virou `--fo-font-text`;
+  - o círculo das linhas usa `--on-cat` e `--on-violeta` por um seletor `:where(.fo-cat--image, …) > .fo-menu__dot`, como o `.fo-chip__dot`, porque o `--fo-on-cat` do `bundle.css` não existe no site;
+  - não entraram as regras que são só do protótipo nem as da alternativa B.
+- **A face Figtree Steady** (`--fo-font-steady`) está em todo texto do cabeçalho: a busca, o "Ctrl K", o código do idioma e o "Menu".
+  - **A folha** fica na `--fo-font-text`: ela abre depois da primeira pintura, e numa primeira visita com a Figtree atrasada a Steady ficaria na fonte de reserva a visita inteira.
+  - **A alternativa** era redefinir `--fo-font-text` no `.fo-header`, como o `.fo-cookie` faz, o que levaria a folha para a Steady também.
+  - **A medida:** a 320, 360, 390, 412, 768, 1024 e 1280 px, cada largura num contexto com a Figtree segura até a primeira pintura e depois solta, nenhum controle do cabeçalho muda de posição nem de largura, nos dois navegadores.
+  - **Uma pegadinha nova:** no Chromium, um texto `optional` que estava em `display: none` na primeira pintura (o idioma a 320 px) e aparece depois de a fonte chegar já sai na Figtree. Uma página aberta a 320 px e alargada até 768 px antes de a fonte chegar ainda vê o idioma mudar 2 px; numa largura fixa, nada muda.
+- **A partir de 1280 px, uma regra só para toda página.**
+  - **A regra:** o `padding` do cabeçalho põe o logo onde começa a coluna da ferramenta (x 36) e o último botão onde ela termina (x 794), a 150 px da lateral (x 944).
+  - **Nas páginas sem lateral** (a home, os hubs de guias, as institucionais e as jurídicas), o último botão termina também em x 794, 2 px antes do fim da coluna de 760 px delas: o cabeçalho é o mesmo em toda página e não pula quando se passa de uma para outra.
+  - **A alternativa,** proposta na nota d1 (seção 0, item 6), era uma classe por página com lateral (uma prop do `Header` ou um `body:has(.fo-frame--rail)`) e o cabeçalho na largura da moldura inteira nas outras. Ela pede uma prop ou um `:has` no `body`, e o cabeçalho mudaria de lugar entre as páginas.
+- **Os dois popovers** são `position: absolute`, com o anchor positioning (o `position-anchor` no botão) e a reserva `top: 68px` (64 + `--space-1`) onde ele não existe.
+  - **O menu de idioma** passou de `fixed` para `absolute`, e a reserva dele foi de 64 para 68 px, como a do Menu (§ 363).
+  - **Na reserva a partir de 1280 px,** os dois terminam na borda direita do cabeçalho (x 794), e não a 16 px da janela. A especificação não tratava o menu de idioma sem anchor.
+  - **Abrir um fecha o outro:** são dois `popover` automáticos.
+- **Os idiomas no Menu numa linha de três, abaixo de 768 px.** É um desvio da especificação, que punha um idioma por linha, com o ícone `check`.
+  - **Por quê:** a 360 px, a folha em inglês (a mais alta, com casa e saúde) terminava em y 729,5. O primeiro AdSlot do Merge PDF e do Unlock PDF fica em y 796 nos três idiomas (67 px da folha), e o do PNG to JPG e do Delete PDF pages, em y 852 (123 px). A especificação contava com o primeiro anúncio de cada molde em y 880 ou mais, mas mediu só os moldes de imagem.
+  - **O resultado:** com os três idiomas lado a lado, em alvos de 48 px, a folha termina em y 629,5 em inglês e 521,5 em português e espanhol. Todo AdSlot das 178 páginas com anúncio fica a 166,5 px ou mais, e o `ads.spec.ts` confere toda página, a 360 e a 1280 px.
+  - **O idioma em uso** guarda o fundo `brand-soft`, o traço de 2 px e o peso 700, que marca também com cores forçadas, além do `aria-current`. O `check` saiu, porque não cabe na linha: "Português" tem 74,6 px, e cada alvo, 88 px a 320 px.
+  - **As alternativas:**
+    - linhas de 48 px, sem espaço entre elas e com o rótulo "Language" escondido: a folha em inglês ainda terminava em y 641,5, a 154,5 px, e no limite;
+    - uma altura máxima com rolagem dentro da folha: a dobra sai da caixa, e o idioma ficaria escondido;
+    - descer o AdSlot da ferramenta de PDF: mexe no mapa de anúncios, fora da F11;
+    - as categorias em duas colunas: os nomes quebram de linha.
+- **As medidas** (Chromium e WebKit, `header-menu.spec.ts`, linhas `[header]`):
+  - 64 px e uma linha em toda largura de 320 a 1280 px, nos três idiomas, com a Figtree segura e solta;
+  - a 320 px, logo, busca, tema e Menu ocupam 282,5 de 288 px (sobram 5,5), e a 360 px, 294,5 de 328;
+  - a 768 px, com o idioma e o texto "Menu", ocupam 608,2 px em en, 654,5 em pt e 663,0 em es, de 736, no Chromium (612,6, 659,0 e 667,5 no WebKit);
+  - a 1280 px, o logo fica em x 36 e o último botão termina em x 794, na coluna. A lateral começa em x 944, e a folha aberta vai de x 434 a 794, com 481 px de altura em en e 373 em pt e es.
+  - Todo controle tem 48 × 48 px; as linhas da folha, 52 px; os idiomas, 48.
+- **A F10 p-5.**
+  - **O que a grade resolve:** a 1280 px, a lateral começa em y 84 e em x 944, e o último botão termina em x 794. Um controle do cabeçalho fica a 150 px dela na horizontal (o `ads.spec.ts` mede 150 e mais). O menu de idioma e o Menu, `absolute`, terminam em x 794 ou antes.
+  - **O que sobra:** o `padding-top` de 150 px na lateral deixa de ser preciso para a regra dos 150 px. Da F10 p-5 não sobra nada obrigatório para a F12, que decide se ainda quer a lateral mais baixa no mapa novo (UX-07).
+- **O README do Header** (decisão 8), cada regra com o antes e o depois:
+  - **a descrição:** antes, "O cabeçalho fino: logo, busca de ferramentas e idioma. Nada mais."; depois, "O cabeçalho: logo, busca de ferramentas, idioma (a partir de 768px), tema e Menu, nessa ordem no DOM e na tela. Cada menu vem logo depois do botão que o abre.";
+  - **a altura:** antes, "64px de altura, fundo `bg`, divisor `hairline` embaixo. Não gruda ao rolar…"; depois, a mesma regra com "64px de altura e uma linha só em toda largura, de 320 a 1280px, nos três idiomas, antes e depois da fonte", mais a face Figtree Steady em todo texto do cabeçalho;
+  - **o idioma:** antes, ele levava para a página equivalente ou "para o hub do idioma"; depois, "para a home do idioma", que é a regra do código, e, abaixo de 768px, ele fica no fim do Menu, em três alvos lado a lado;
+  - **o tema e o Menu:** não existiam; agora há uma regra para o botão de tema (os três estados, o nome pelo CSS, a região de status e a chave), uma para o Menu (o `popover`, a folha com a dobra, as linhas, o `aria-current` e o peso, o Esc e o foco), uma para os dois menus `absolute` com o anchor e a reserva de 68px, uma para a grade a partir de 1280px e uma para os 150px de todo controle e menu aberto;
+  - **os alvos:** antes, "Logo, busca e idioma têm alvo de `tap-min` (48px)."; depois, "Logo, busca, idioma, tema e Menu têm alvo de `tap-min` (48px); as linhas da folha têm 52px, e os idiomas, 48px.";
+  - **o menu:** antes, "Sem menu hambúrguer: as categorias ficam na home e nos hubs."; depois, a regra saiu, e o Menu tomou o lugar dela.
+
+  O `preview.html` mostra o cabeçalho do computador e o do celular, o botão de tema que passa pelos três estados e a folha aberta nas duas larguras. A região do Header no `bundle.css` traz as regras novas, com `box-sizing: border-box`, porque o `bundle.css` não tem o preflight do site.
+
+## § 389 · O mapa de cada rota para a seção do Menu e o `aria-current` (F11, decisão 3)
+
+- **Onde mora:** em `src/components/header-menu.ts`, que roda no Node, sem `import.meta.glob`. Ele tem as seções (`MENU_SECTIONS`, na ordem da folha), a página de cada seção por idioma (`sectionPage`), as páginas de cada seção, as páginas sem seção (`NO_SECTION`), a contagem (`sectionCount`), as linhas de um idioma (`menuGroups`) e os links de idioma (`languageLinks`, a regra do menu de idioma de antes, só mudada de lugar).
+- **O mapa:**
+  - **Imagem:** o hub `image-tools` é a página da seção ("page"), e as 8 ferramentas e os 3 presets marcam "true";
+  - **PDF:** o hub `pdf-tools` ("page") e as 12 ferramentas ("true");
+  - **Dinheiro:** os dois hubs ("page"), o `money-calculators` (en e es) e o `br-money-calculators` (pt), e as 14 calculadoras, os 4 presets e as 8 calculadoras do Brasil ("true");
+  - **Casa e Saúde:** o `home-calculators` e o `health-calculators` ("page"), e as 6 e as 5 calculadoras de cada um ("true");
+  - **QR code:** o `qr-code-generator` ("page");
+  - **Guias:** o hub `guides` ("page"), e os 10 guias de arquivo e os 5 de dinheiro ("true"). Um guia marca Guias, e não a categoria da ferramenta que ele embute ou da calculadora que ele explica, como a especificação pede;
+  - **Apoie a Oli:** a página `support` ("page");
+  - **Sem seção:** a home, a Privacidade, os Termos, o Sobre, o Contato, as Licenças, a página offline, a "Abrir com" e a 404.
+
+  O `header-menu.test.ts` confere que toda rota do `ROUTES` está numa seção só ou na lista sem seção, com os hubs em "page".
+- **O `aria-current`:** "page" na própria página da seção e "true" numa página dela. A linha que não é a da página fica sem o atributo: o Astro escreveria `aria-current="false"` para um `false`, e o seletor `[aria-current]` o pegaria. O mesmo vale para o idioma em uso no fim da folha ("true").
+- **As linhas de cada idioma:** só as seções cuja página existe nele (`pagePath`). Em inglês são oito; em português e espanhol, seis, sem Casa e Saúde, e a linha de Dinheiro leva ao hub do Brasil em português.
+- **A contagem de cada linha**, sempre dos registros:
+  - **Imagem:** `IMAGE_TOOL_IDS` com página no idioma, 8, as ferramentas da grade do hub (os presets ficam na tabela dele);
+  - **PDF:** `PDF_TOOL_IDS`, 12;
+  - **Dinheiro:** `HUB_MONEY_IDS[lang].length`, 14 em en e es e 8 em pt, os cartões do hub. A tabela da especificação dizia 18 em en e es, porque contou também os 4 presets, o que nenhum hub mostra como cartão;
+  - **Casa:** `HOUSE_CALC_IDS`, 6; **Saúde:** `HEALTH_CALC_IDS`, 5;
+  - **Guias:** `hubGuides(lang).length`, 15, 10 e 15 (o `src/tools/guides/hub.ts` do hub de guias).
+
+  O número sai com o `groupDigits` do idioma, nos textos `common.header.menuTools`, `menuCalculators` e `menuGuides` ("{n} tools", "{n} ferramentas", "{n} herramientas"…). O QR code diz os formatos ("PNG or SVG"), e o Apoie a Oli diz como apoiar ("Ko-fi"; "Ko-fi ou Pix" em português).
+- **Os nomes** são os que o site já tem (`imageTools`, `pdfTools`, `moneyCalculators`, `homeCalculators`, `healthCalculators`, `qr.name` e o `guidesHub` do hub de guias). Os textos novos do cabeçalho ficam no bloco `header` dos três `common.ts`: `menu`, `theme`, `menuLanguage`, `menuTools`, `menuCalculators`, `menuGuides`, `menuQr`, `support` e `supportMeta`.
+- **Os ícones** são os do design system: `image`, `pdf`, `calculator`, `home`, `heart`, `qr`, `book` e `coffee`, com o círculo na cor da categoria (`fo-cat--image`, `--pdf`, `--money`, `--home` e `--util`) e o `brand-soft` em Guias e no Apoie a Oli.
+
+## § 390 · O "Apoie a Oli" no Menu e o lugar `menu` (F11, decisão 3)
+
+- **A linha:** "Support Oli", "Apoie a Oli" e "Apoya a Oli", com o ícone `coffee` no círculo `brand-soft` e a linha de baixo "Ko-fi" ("Ko-fi ou Pix" em português). Ela leva à página de apoio do idioma (`/support/`, `/pt/apoie/`, `/es/apoyo/`) e leva `data-track="donate_click"` e `data-track-place="menu"`.
+- **O evento:** o script que o `BaseLayout` já tinha (o `[data-track]` delegado) manda `donate_click` com `{ lang, place: 'menu' }`. Nada de script novo.
+- **A lista fechada:** o `menu` entrou no fim de `DONATE_PLACES` (`src/analytics/events.ts`), e com ele o tipo `DonatePlace` e o `CLOSED_VALUES.place` do `cleanParams`, que lê a mesma lista. O `foTrack` do navegador filtra só os nomes dos parâmetros, e o `EVENT_PARAMS` não mudou.
+- **A Privacidade** não mudou por isso: o "Click on a donation link" já cobre o lugar novo.
+- **Os testes:**
+  - o `events.spec.ts` clica a linha a 360 px em espanhol (`/es/unir-pdf/`) e a 1280 px em inglês (`/guides/`) e espera `['event', 'donate_click', { lang, place: 'menu' }]`;
+  - o `pix.test.ts` fixa a lista nova e o `cleanParams` com `menu` e com um lugar fora da lista (§ 392).
+- **O café** fica como está: o card, os textos novos, a linha do rodapé e a página de apoio são da F12.
+
+## § 391 · Onde mora cada teste novo do cabeçalho e do tema (F11, decisão 10)
+
+- **No Vitest** (roda em todo push, no job `leve`):
+  - `tests/unit/theme-script.test.ts`: os dois scripts num contexto próprio (`runInNewContext`), como o `consent.test.ts`. Confere a leitura, a escrita, a remoção da chave, o armazenamento bloqueado, a página sem meta, sem botão ou sem região, nada mandado e nenhum `storage` listener, e os tamanhos (376 bytes com gzip, abaixo de 512);
+  - `tests/unit/theme-pair.test.ts`: o par de toda regra de `prefers-color-scheme` (§ 386), com o controle negativo;
+  - `tests/unit/header-menu.test.ts`: o mapa de cada rota (§ 389), as contagens pelos registros, as linhas de cada idioma, os links de idioma e o `Header` renderizado (a ordem dos filhos, os nomes, o evento do Apoie a Oli e o script logo depois do `</header>`);
+  - `tests/unit/privacy-theme.test.ts`: a Privacidade nos três idiomas (§ 387).
+- **No Playwright,** com nomes `header-*`, que ordenam entre o `events.spec.ts` e o `i18n-budgets.spec.ts` e caem nas partes leves:
+  - `header-axe.spec.ts`: o axe com o Menu aberto e o botão nos três estados, nos dois temas;
+  - `header-links.spec.ts`: o HTML de toda página pelo `request`, em blocos de 24, com o Menu e a ordem do `<head>`;
+  - `header-menu.spec.ts`: o Menu numa página por molde e idioma a 320, 360 e 1280 px; a altura e as medidas a sete larguras com a Figtree segura e solta; os dois menus que se fecham; e o peso com cores forçadas;
+  - `header-theme-offline.spec.ts`: o tema offline, com o worker;
+  - `header-theme.spec.ts`: o primeiro quadro em cada molde, a escolha entre páginas e idiomas, Sistema, os nomes, o armazenamento bloqueado e nada mandado.
+
+  As partes de cada um estão na tabela de baixo.
+- **Nos specs que já existiam:**
+  - `tests/e2e/ads.spec.ts`: um bloco próprio, no meio do arquivo e longe do bloco do `.fo-guide-links` que o G2 troca. Ele mede o cabeçalho e os dois menus abertos contra todo AdSlot das 178 páginas com área de anúncio, a 360 e a 1280 px, em 12 blocos de 15 páginas, com o `expectClearance` do arquivo;
+  - `tests/e2e/events.spec.ts`: o `donate_click` com o lugar `menu` (§ 390);
+  - `tests/unit/contrast.test.ts`: o par novo `stroke` sobre `brand-soft` (uso `ui`, 3,20:1 no escuro). O resto dos pares do Menu já estava na lista.
+- **O apoio comum:** o `tests/e2e/lib/header.ts` tem as páginas de cada molde, o que a folha deve listar e para onde leva cada idioma, tirados do mapa de rotas e não do módulo que monta a folha, e a cor do fundo de cada tema, tirada do `tokens.json`.
+- **Cada teste novo reprova sem a mudança.** As provas são contra o `dist/` do ponto de partida (`.cache/f11/dist-antes`, servido na porta 4184) e estão no relatório do agente. O `theme-pair.test.ts` passa com o CSS de antes, que já tinha o par: a prova dele é o controle negativo e uma cópia do `global.css` sem a guarda, com que ele reprova.
+- **As partes do CI.** O `--list` de cada parte (`--project=chromium --shard=i/5` e `--project=webkit --shard=i/13`), com os specs novos, no commit do agente T, antes do merge com o G2:
+
+  | Spec | Testes por navegador | Chromium | WebKit |
+  | --- | --- | --- | --- |
+  | `header-axe.spec.ts` | 13 | 3 | 7 |
+  | `header-links.spec.ts` | 9 | 3 | 7 |
+  | `header-menu.spec.ts` | 49 | 3 | 7 |
+  | `header-theme-offline.spec.ts` | 1 | 3 | 7 |
+  | `header-theme.spec.ts` | 14 | 3 | 7 |
+  | `ads.spec.ts`, o bloco do cabeçalho | 12 | 1 e 2 | 3 e 4 |
+  | `events.spec.ts`, o Apoie a Oli | 1 | 3 | 7 |
+
+  O `design.spec.ts` e o `image-matrix.spec.ts` continuam em partes diferentes: Chromium 3 e 4, WebKit 6 e 7 contra 9 e 10. O `--list` foi de 1.428 testes por navegador no ponto de partida a 1.431 com o hub do G1 (o `a11y.spec.ts` lê o `ROUTES`) e a 1.530 com os 99 desta fatia. A parte 7 do WebKit, a mais leve na F9 (128 s), recebe quase todos os specs novos; a do Chromium é a 3 (217 s na F9). Os specs `guides-*` do G2 ordenam antes dos `header-*` e empurram as fronteiras, então o `--list` se refaz depois do merge.
+
+## § 392 · Os testes antigos que o cabeçalho e o tema mudaram (F11, no formato da § 341)
+
+A ficha manda mudar um teste que fixa o cabeçalho, o tema ou a Privacidade de antes junto com o que ele protege, e mostrar que a proteção continua.
+
+- **`tests/unit/pdf-site.test.ts`,** dois testes.
+  - **O primeiro** ("has the reciprocal hreflang cluster…") fixava `a[hreflang]` da página inteira igual aos três pares do menu de idioma. Com os idiomas no fim do Menu, a página tem seis. Agora fixa:
+    - os três pares no `.fo-langmenu`;
+    - os mesmos três pares no `.fo-menu__lang`;
+    - seis `a[hreflang]` na página, nenhum fora dos dois menus.
+  - **O segundo** ("keeps § 84…") lia `a[hreflang]` do `Header` sozinho. Agora lê o menu de idioma e confere que a lista do Menu é igual a ela.
+
+  Os dois pares da § 84 continuam: a página só em inglês leva às homes dos outros idiomas, e o guia de PDF leva ao mesmo guia. O `Header` é chamado com as mesmas props.
+- **`tests/unit/pix.test.ts`.** Fixava `DONATE_PLACES` igual a `['result', 'footer', 'support_page', 'pix']`. Agora fixa a lista com `menu` no fim e confere que o `cleanParams` guarda `menu` e descarta um lugar fora da lista (`header`). As asserções do `pix` e do `pix-copia-e-cola` continuam iguais.
+- **`tests/unit/calc-defs.test.ts`** ("the privacy policy names the Oli's session mark…"). Fixava a data "Last updated: November 2, 2026" da Privacidade em inglês. Agora fixa "November 3, 2026", o dia em que a página ganhou a chave do tema (§ 387). As datas de pt e es e a asserção do armazenamento da sessão continuam iguais.
+- **`tests/e2e/lib/axe.ts`.** Só o comentário mudou. Ele dizia que o site não decide tema por script na carga; agora diz que o único tema decidido na carga é uma escolha guardada, que todo contexto de teste começa sem ela e que o botão de tema fica no `header-axe.spec.ts`. As combinações, as regras e o código não mudaram.
+- **Só acrescentados,** sem nenhuma asserção mudada: o bloco do cabeçalho no `ads.spec.ts`, o teste do Apoie a Oli no `events.spec.ts` e o par `stroke` sobre `brand-soft` no `contrast.test.ts`.
+- **Os que passaram sem mudar,** rodados nos dois navegadores:
+  - `navigation.spec.ts`: o botão de idioma continua a partir de 768 px, com o nome começando pelo código, e o idioma do Menu fica escondido a 1280 px;
+  - `cookie-footer.spec.ts` e `a11y.spec.ts`: o tema trocado no lugar, em Sistema;
+  - `layout-shift.spec.ts`: a trilha e o H1 parados com a Figtree atrasada, e o cabeçalho com a mesma altura;
+  - `design.spec.ts`;
+  - `english-leak.test.ts` e `image-hub.test.ts`: os links do Menu são todos do idioma, e os de idioma levam `hreflang`.
+- **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 103 arquivos e 1.766 testes (o commit do hub, `0e8f8ea`) para 107 arquivos e 1.796 testes. O `--list` do Playwright foi de 1.431 para 1.530 testes por navegador; no ponto de partida eram 1.428.
+
+## § 393 · O hub de guias: a rota, os grupos, os textos e o SEO (F11, decisão 5)
+
+O hub nasceu no agente G1 (a rota, as três páginas, os textos e o SEO) e ganhou os cartões no agente G2. As decisões que a ficha não fixou:
+
+- **O id da rota é `'guides'`,** na constante `GUIDES_HUB_ID` de `src/tools/guides/registry.ts`, como o `PDF_HUB_ID` mora em `pdf/registry.ts`. As alternativas eram `'guides-hub'`, que colide com o prefixo `guides-` de todo id de guia (os `replace(/^guides-/)` e os `startsWith`), e um literal em `routes.ts`. O `'guides'`, sem hífen, nunca é lido como guia, e a especificação já usa `pathFor('guides', lang)`. Os caminhos: `/guides/`, `/pt/guias/` e `/es/guias/`; indexável, sem `adArea`.
+- **A posição em `ROUTES`:** logo antes de `...fileGuideRoutes()`, depois das ferramentas de PDF e antes dos guias de arquivo, pela convenção do arquivo de o hub vir antes das próprias páginas (o de dinheiro, o de PDF, os de casa e saúde). As alternativas eram depois dos guias ou dentro de `fileGuideRoutes()`, o que pediria renomear a função. No `PAGES`, o hub fica nas posições 136 a 138.
+- **Os textos do hub** ficam em `src/i18n/<lang>/guides.ts`, com a chave `TEXTS[lang].guides` e o tipo `GuidesHubTexts`, pela convenção arquivo = chave = id da rota (`image-tools.ts`, `pdf-tools.ts`, `money-calculators.ts`). O nome não casa com o glob `guide-*.ts` dos textos de cada guia. O `common.guidesHub` ("Guides", "Guias", "Guías") é o segundo passo da trilha do hub e dos 40 guias, o título do bloco Guias do rodapé e o nome que o Menu do cabeçalho pode usar.
+- **Os textos são os da especificação,** palavra por palavra, com uma exceção: na nota de pt, "hipoteca" virou "financiamento imobiliário", porque o `glossary.test.ts` reprova "hipoteca" (`docs/i18n/pt.md`, tabela "Nunca": no Brasil, hipoteca é a garantia, não o crédito).
+- **A contagem** da descrição e da frase da faixa é `{n}`, preenchido com `groupDigits(hubGuides(lang).length, lang)`: 15, 10 e 15, lidos do registro, nenhum algarismo à mão.
+- **Os dados:** `src/tools/guides/hub.ts` (`HUB_GROUPS`, `hubGuides(lang)` e `hubGroup(group, lang)`) roda no Node, sem `import.meta.glob`: os guias de arquivo na ordem de `FILE_GUIDE_IDS`, no grupo do hub de cada um; os de dinheiro na ordem de `GUIDE_IDS`, só onde o idioma tem a página. O `gate:conteudo` e o rodapé leem dali.
+- **A marcação:** a trilha Início › Guias; a faixa `.fo-hubband.fo-cat--guide` com o sobretítulo, o H1 e a frase; `nav.fo-jump[aria-label]` com três `a.fo-chip` (ícones `image`, `pdf` e `calculator`); uma `section.fo-section#<grupo>[aria-labelledby]` com H2 por grupo, cada guia um GuideCard com H3 numa `ul.fo-guidecards` (§ 395); em pt, o grupo Dinheiro é só a `p.fo-section__note` com o link para `/pt/calculadoras-financeiras/`; no fim, `section.fo-section.fo-prose#how`. A frase da faixa, a nota e o texto do fim levam `data-hub-text`, que o `gate:conteudo` conta (§ 394). A view lança erro no build se um grupo ficar vazio sem nota. Sem Oli, sem AdSlot, sem lateral, sem ilha e sem script próprio.
+- **O CSS** vai no fim do `components.css`: `.fo-cat--guide { --fo-cat-soft: var(--brand-soft) }`, `.fo-jump ul` e `.fo-section__note`, mais o bloco do GuideCard (§ 395). Nenhum token novo.
+- **A imagem OG** de cada idioma é `/og/<lang>/guides.png` (1200 × 630): o H1 do idioma com o `common.seal`, e o ícone `book` (o mesmo dos Guias no Menu) num ladrilho `brand-soft`, uma categoria nova `guide` no `TILE` de `src/seo/images.ts` com o valor do token claro (`#E3EEFE`, que já está no `tokens.css`). As alternativas eram sem ladrilho, como a home, ou a cor de uma categoria; o hub não tem cor própria, e o tom dele é o `brand-soft`.
+- **O schema:** `Organization`, `BreadcrumbList` (Início › Guias, posições 1 e 2) e `CollectionPage` com `name` = H1, a descrição, a URL, o idioma, o `publisher` e um `ItemList` com `numberOfItems` de 15, 10 ou 15 e um `ListItem` por guia, na ordem da página. Sem `Person`, como o hub de PDF. Em `scripts/lib/seo-pages.ts`, o `requiredSchemaTypes('guides')` é `['Organization', 'BreadcrumbList', 'CollectionPage']`, o `schemaProblems` confere o hub e o `SITEMAP_REGISTRY_IDS` ganhou `'guides'`.
+- **Os comprimentos,** com " | FileOrca" nos títulos: títulos de 67, 57 e 64 caracteres; descrições de 129, 107 e 132 (en, pt, es), na faixa de 50 a 170. O hub não entra na faixa de 120 a 160 das páginas traduzidas de imagem e PDF: a descrição em pt reprovaria. O texto próprio soma en 91, pt 108 e es 97 palavras (o `gate:conteudo` imprime). O HTML tem 56,0 KB em en, 48,2 KB em pt e 56,5 KB em es, sem compressão; a especificação estimava uns 45 KB, e a diferença são os ícones dos 15 cartões, inline como em toda página.
+- **A primeira visita sem pulo.** Com a fonte de reserva, a frase da faixa tomava uma linha a mais a 412 px (en) e os atalhos, duas linhas a 393 px (pt): quando a Figtree chegava, os cartões subiam de 26 a 56 px (CLS de até 0,108 no Chromium, no `layout-shift.spec.ts`). A faixa e os atalhos do hub passaram à face `Figtree Steady` (`--fo-font-steady`), como a trilha (§ 305), e ficam com a fonte da primeira pintura: o CLS do hub caiu para 0,004 no máximo. Só o hub de guias muda; as faixas dos hubs de categoria ficam como estão.
+- **O `gate:links`:** o hub nasceu órfão, porque nenhuma página de outra rota ligava a ele. A primeira entrada da decisão 7 resolveu: a trilha dos 40 guias passou a Início › Guias › o guia (§ 396). Depois, o rodapé de toda página e a home também levam a ele.
+
+## § 394 · A regra do gate:conteudo para o hub de guias (F11, decisão 5)
+
+- **A regra 7 do portão** (`checkGuidesHub` em `scripts/lib/conteudo.ts`), no molde da do hub de PDF (§ 162), confere o hub de cada idioma da rota:
+  - um H1;
+  - um título que começa por "Guides", "Guias" ou "Guías" (`GUIDES_HUB_TITLE`) e uma meta description;
+  - a introdução própria na faixa: um bloco `data-hub-text` dentro da `.fo-hubband`, com texto;
+  - o texto próprio, somado nos blocos `data-hub-text` (a frase da faixa, a nota de um grupo sem guia e "Como os guias são feitos"), entre 60 e 120 palavras (`GUIDES_HUB_WORDS`);
+  - um `main a.fo-guidecard` para cada guia que os registros dão ao idioma (`hubGuides`), nenhum outro e nenhum repetido;
+  - nenhum `a.fo-tool` no hub: um guia nunca aparece como ferramenta;
+  - as três seções dos grupos, com os ids das âncoras (`#image`, `#pdf`, `#money`), cada uma com cartões ou com a nota que diz por que não tem;
+  - nenhuma afirmação sem medida (`findClaims`, nas palavras do idioma).
+- **Por que 60 a 120 palavras.** É a proposta da especificação. O mínimo de 60 é o do `gate:prontidao` para uma página sem anúncio (§ 95). O máximo de 120 guarda o topo curto, que é o que deixa o primeiro cartão acima da dobra a 360 × 740 (§ 364: um parágrafo de 60 a 75 palavras no topo empurrava o cartão para baixo). O hub de hoje dá en 91, pt 108 e es 97. As palavras dos cartões não contam: são o texto dos guias, não o do hub.
+- **A linha do resumo** do portão ganhou "; N do hub de guias" no fim, depois de "página(s) do site conferida(s)". No meio da linha, as duas regex do `tests/unit/conteudo.test.ts` que a leem teriam de mudar. O portão também imprime as palavras próprias de cada hub, como já faz com as dos guias de arquivo.
+- **Os controles negativos** (`tests/unit/conteudo.test.ts`, "portão de conteúdo: o hub de guias (F11)"): uma fábrica `guidesHubPage()` monta o hub com os textos reais e os caminhos dos registros, e cada teste quebra uma regra (sem H1 e com dois, o título sem o nome do hub e o inglês no hub em pt, sem descrição, sem introdução, 52 e 121 palavras, 120 passando, faltando um cartão, um cartão fora do registro, um repetido, um ToolCard, um guia de dinheiro no hub em pt, sem a seção de um grupo, um grupo sem cartão nem nota, a nota de pt tirada, a afirmação em inglês e em espanhol). Um teste roda o portão sobre o site falso: verde com os três hubs, vermelho com um cartão a menos em pt e com o texto curto em es, e "a página não existe no dist" sem o hub em pt.
+
+## § 395 · O GuideCard (F11, decisão 6)
+
+- **O componente** é `src/components/GuideCard.astro`, com as props da especificação: `href`, `name`, `description`, `category` (o grupo do guia: `image`, `pdf` ou `money`, a cor da dobra), `proof` (a medida já escrita no idioma), `tool` opcional (`{ name, icon, category }`, a categoria da ferramenta, que pode não ser a do grupo: Image to PDF é coral num guia de imagem) e `headingLevel`. Mais uma, `lang` (padrão `'en'`, como os moldes): o componente lê no idioma o "Guide" e o "Tool in the guide".
+- **A variante `--here` é o cartão sem `headingLevel`:** sem título (o nome e a descrição são `span`, então o `.fo-prose p` do bloco "How to" não lhes dá margem) e sem pé. A alternativa era uma prop `variant`; ficou de fora porque a especificação define o `--here` justamente por "sem H3 e sem o pé", e a lista de props da ficha não tem outra.
+- **Um link só,** com a classe `fo-guidecard` e nunca `fo-tool` (o `gate:prontidao` e o `gate:conteudo` contam `main a.fo-tool` na home e nos hubs). O nome acessível é o texto do link, na ordem: "Guide", o nome, a descrição, a medida e, no cartão completo, "Tool in the guide" e a ferramenta. Entre as partes vai um espaço (`{' '}`): elas são itens de grade, o espaço não aparece na tela, e o texto do link fica "Guide How to convert…" e não "GuideHow to convert…" em qualquer leitor. Os ícones (`file`, `table` e o da ferramenta) são `aria-hidden`.
+- **A medida.** Num guia de arquivo, "Measured on N test files" ("Medido em N arquivos de teste", "Medida con N archivos de prueba"), com o N escrito por `groupDigits` no idioma. O N é o número de arquivos distintos de todas as `sample.files` do guia em `data/guides-measured.json`, numa varredura de qualquer profundidade (`measuredFiles` em `src/tools/guides/card.ts`): 10, 10, 3, 5, 4, 13, 5, 5, 7 e 3, na ordem de `FILE_GUIDE_IDS`, os mesmos que a especificação contou à mão. Num guia de dinheiro, "Numbers worked out" ("Números calculados"); pt não tem guia de dinheiro, e a chave é opcional lá.
+- **Os dados do cartão** saem de `guideCardData(id, lang)` (`src/tools/guides/card.ts`), que lê o cartão do guia (`common.fileGuides` e `common.guides`), o grupo, a medida e a ferramenta (o cartão da ferramenta de imagem ou de PDF, ou o da calculadora). O módulo roda no Node e no build, nunca numa ilha: o JSON tem 471 KB.
+- **Os textos do cartão** ficam em `TEXTS[lang].guides.card` (`kind`, `measured`, `workedOut` e `tool`, tipo `GuideCardTexts`), nos arquivos `guides.ts` do hub. As alternativas eram o `common.ts`, que o agente do cabeçalho edita ao mesmo tempo (conflito no merge), e um arquivo novo `guide-card.ts`, que o glob `guide-*.ts` dos textos de cada guia leria como um guia.
+- **O nome antigo.** A interface `GuideCard` de `src/tools/guides/page.ts` (os dados do ToolCard de um guia nas relacionadas) virou `RelatedCard`, a união de `RelatedToolCard` e `RelatedGuideCard` com o campo `kind`, e a função `guideCard()` saiu (§ 396).
+- **O CSS** é o da seção 3 do `guides.css` da proposta, no fim do `components.css` num bloco "F11: guides", com `var(--fo-font-text)` no lugar do `var(--font-text)` do `bundle.css`. Acrescenta o `.fo-guidehere` (o invólucro do `--here`: uma coluna, 16 px acima e entre dois cartões; a grade `.fo-guidecards` poria os dois lado a lado) e o hover sem movimento com `prefers-reduced-motion`, no mesmo bloco, para não tocar na linha do `global.css` que o agente do tema pode editar. Movimento só por `transform`; cor só de tokens de texto (`ink`, `ink-muted` e `brand`).
+- **O contraste.** Nenhum token novo. Os pares que o cartão e o hub põem na tela já estavam no `tests/unit/contrast.test.ts`; um teste novo lê as regras `.fo-guidecard` do `components.css` e confere que cada cor delas tem o seu par sobre `surface`, e que os três pares novos do UX-02 têm os valores do README da proposta: `ink` sobre `brand-soft` 14,76 e 11,99; `ink-muted` sobre `brand-soft` 5,98 e 6,17; `brand` sobre `surface` 5,09 e 6,11 (claro e escuro).
+- **O `docs/design/`.** O `components/GuideCard/README.md` e o `preview.html` (no formato do ToolCard, com o hub, um PDF, um de dinheiro e o `--here`) são novos. No `components/README.md`, a frase "Para ver todos os previews juntos, abra `../index.html`." passou a "Para ver todos os previews juntos, abra `../index.html`. A F11 acrescentou o GuideCard, o 28º componente (DECISOES § 395); o `../index.html` e a conferência abaixo são de antes dele.", e a tabela ganhou a linha do GuideCard depois do ToolCard. O `bundle.css` ganhou o bloco "GuideCard (F11)" no fim. O `../index.html` e a "Conferência" de 29/out (o axe dos 28 blocos) ficam como estavam: o `pnpm design:gerar` e as capturas ficam fora desta run.
+
+## § 396 · As entradas dos guias: a trilha, o rodapé, o cartão na ferramenta e as relacionadas (F11, decisão 7)
+
+- **A trilha** dos 40 guias (15 en, 10 pt, 15 es) é Início › Guias › o guia, no HTML e no `BreadcrumbList`, com o hub na posição 2: o `crumbsFor` de `src/tools/guides/page.ts` (guias de arquivo) e as `crumbs` de `src/views/GuideView.astro` (guias de dinheiro, que levavam ao hub de dinheiro). Feito pelo G1; o teste lê as 40 páginas no `dist/` (`tests/unit/guides-hub-route.test.ts`).
+- **O rodapé.** O bloco Guias fica embaixo de Utilidades, na mesma coluna (`div.fo-footer__more`, 24 px acima): uma 8ª coluna não cabe a 1280 px. O título é o `common.guidesHub`; os links são "All guides" ("Todos os guias", "Todas las guías", a chave nova `common.footer.guidesAll`) para o hub e os grupos que têm guia no idioma, com o H2 de cada grupo no hub ("Image guides" etc.) e as âncoras `#image`, `#pdf` e `#money`. Em pt são o hub, imagem e PDF. No hub, o "All guides" leva `aria-current="page"`: o `BaseLayout` passa a rota ao `Footer` por uma prop nova, `current` (a alternativa era o `Astro.url`, menos explícito).
+- **A ferramenta e a calculadora que têm guia.** O GuideCard `--here` fecha o bloco "How to" (`section[data-content="how"]`), o primeiro bloco depois do painel, depois dos passos, dentro do `.fo-guidehere`; com dois guias (Resize image), dois cartões, um embaixo do outro. Na calculadora, o primeiro bloco depois do painel é o cronograma, que não recebe nada; o cartão vai para o fim do "How to", logo depois dele, e o link saiu do bloco "how it works". Os guias vêm de `guidesOfTool` (ferramentas) e de `CALC_PAGES[id].guide` (calculadoras, onde o guia tem página no idioma): 27 páginas de ferramenta com 30 cartões e 12 de calculadora com 12 (a hipoteca e o preset 15 vs 30 levam o mesmo guia), em en e es; 39 páginas e 42 cartões.
+- **A linha "Read the guide" saiu,** e as chaves dela também: `FileGuidesSharedTexts.guideLink` (os três `file-guides.ts` e o tipo), `CalcPageShared.guide` (os três `calc/i18n/*.ts` e o tipo) e a função `guideOf` de `src/tools/calc/page.ts`. Nenhum `.fo-guide-links` sobra.
+- **As relacionadas (fecha a F5b F-12).** O `relatedFor` dos guias de arquivo devolve cada cartão com o `kind`: uma ferramenta segue com o ToolCard, um guia vira o GuideCard completo (H3 e o pé com a ferramenta), na mesma `ul.fo-grid` de 220 px. São 18 guias nas relacionadas de cada idioma, 54 no total. Um link por cartão, então o limite de seis links das relacionadas (`checkFileGuide`) continua. As relacionadas das ferramentas, das calculadoras e dos guias de dinheiro não têm guia.
+- **O `docs/design/`** diz as duas entradas que mudam regra de componente:
+  - no `components/Footer/README.md`, a linha "Colunas de links por categoria e a coluna FileOrca (About, Privacy, Terms, Licenses, Contact)." ganhou, depois dela, "Embaixo de Utilities, na mesma coluna, o bloco Guides (F11, DECISOES § 396): "All guides" e os grupos do hub que têm guia no idioma; no hub, "All guides" leva `aria-current="page"`.";
+  - no `components/Breadcrumb/README.md`, "Sempre Home → hub da categoria → ferramenta → preset." passou a "Sempre Home → hub da categoria → ferramenta → preset; num guia, Home → Guides → o guia (F11, DECISOES § 396).".
+- **O glossário** (`docs/i18n/pt.md` e `es.md`, que pede um § a cada mudança) ganhou a seção "O hub de guias, o cartão e a busca (F11)" com os termos novos: o hub, os grupos, "All guides", o tipo e a medida do cartão, a ferramenta no guia, a seção da home e a busca em dois grupos, com a concordância do título vazio.
+
+## § 397 · A busca com Ferramentas e Guias (F11, decisão 7)
+
+- **O índice.** Cada entrada de `/search-index.json` ganhou `kind: 'tool' | 'guide'`. Os 15 guias (os de dinheiro e os de arquivo) são `'guide'`, com o ícone `file` e a categoria "Guide" ("Guia", "Guía") de cada idioma; o `cat` segue o do grupo (`image`, `pdf` ou `money`), que pinta o círculo. Antes, um guia de arquivo vinha com o ícone da ferramenta e a categoria do hub ("Image", "PDF"), e um de dinheiro com a de dinheiro. Nenhuma entrada nova, e a ordem do índice não mudou.
+- **Os grupos.** O `filterEntries` ordena como antes; o `groupEntries` põe todas as ferramentas e depois todos os guias, sem mudar a ordem dentro de cada grupo, e o `render` monta, dentro do `role="listbox"`, um `div[role="group"]` por grupo que tem resultado, com o `aria-labelledby` no título (`div.fo-search__group`, "Tools" e "Guides" no idioma) e os `div[role="option"]` dentro. Grupo vazio não tem título. A lista passou de `ul` para `div`: um `ul` só pode ter `li`, e a marcação da especificação é de `div`. O nome de cada opção vai num `span` (o CSS da especificação o deixa quebrar ao lado do círculo).
+- **O teclado.** O foco fica no campo, e o `aria-activedescendant` aponta a opção marcada; os ids das opções seguem a ordem da tela (`<lista>-0`, `-1`…), então as setas passam de um grupo para o outro, pulam os títulos e dão a volta; o `select()` rola a própria opção, não o `n`-ésimo filho da lista (que agora é um grupo). Enter abre, Esc fecha.
+- **Os textos:** o nome do campo "Search tools and guides", o placeholder "Find a tool or a guide", o nome da lista "Results", os títulos dos grupos (`search.toolsGroup` e `search.guidesGroup`, nomes desta run), a categoria `search.guideCategory` e o vazio "No tool or guide called "{query}"", nos três idiomas, como na especificação. O título vazio em es passou de "No hay ninguna herramienta llamada" para "Ninguna herramienta o guía llamada". O `dialogLabel` e o `emptyHint` ficam como estavam (a especificação não os muda), e o botão do cabeçalho segue "Search tools". Os títulos dos grupos chegam ao módulo pelos atributos `data-tools` e `data-guides` da lista, para o chunk da busca não carregar textos.
+- **Uma consequência da ordem fixa.** A especificação manda Ferramentas antes de Guias, sempre. Um guia digitado pelo nome inteiro fica depois das ferramentas que têm todas as palavras dele: "jpg or png" mostra Crop image e Rotate image antes do guia "JPG or PNG: which one to use", e o Enter abre o Crop image. A regra da § 180 (o nome digitado vem primeiro) vale dentro de cada grupo. Nenhuma consulta dos testes da busca perdeu o primeiro resultado; a consequência vai como pendência para o Victor decidir se a ordem dos grupos segue o resultado mais próximo.
+- **O `docs/design/components/ToolSearch/README.md`:** "a lista é `role="listbox"` com nome ("Tools")" passou a "com nome ("Results")", e uma linha nova diz os dois grupos: "Dois grupos (F11, DECISOES § 397): primeiro as ferramentas, depois os guias, cada um um `role="group"` nomeado pelo título dele ("Tools", "Guides", na legenda `caption` em `ink-muted`). Grupo vazio não tem título. Um guia tem o ícone `file`, o círculo da cor do grupo dele e "Guide" à direita. As setas passam de um grupo para o outro, pulando os títulos." O `preview.html` dele e o `bundle.css` ficam para a run que regenerar o design system (`.fo-search__group` está só no `components.css` do site).
+- **O peso.** O chunk da busca (`dist/_astro/entry-*.js`) foi de 2.629 para 2.984 bytes, e de 1.298 para 1.432 com gzip nível 9 (+134 bytes; o limite é +1 KB). O `search-index.json` foi de 45.820 para 46.520 bytes (8.949 para 8.987 com gzip). A busca continua carregando só no primeiro uso (o teste do `guides-search.spec.ts` e o do `navigation.spec.ts`).
+
+## § 398 · A seção de guias na home e o HOME_GUIDES (F11, decisão 7)
+
+- **A seção "Read a guide"** ("Leia um guia", "Lee una guía") entra na home dos três idiomas entre a do QR code e "Your files stay with you", no molde das outras: `section.fo-section[aria-labelledby="guides-home"]`, H2, `p.fo-prose` ("Each guide answers one question with numbers and has the tool inside."), a grade `ul.fo-guidecards` com os quatro GuideCards (H3 e o pé) e `p.fo-more` com "See all 15 guides" ("Ver os 10 guias", "Ver las 15 guías"), o `{n}` lido do registro, para o hub do idioma. A válvula da ficha não foi usada.
+- **O `HOME_GUIDES`** mora em `src/tools/guides/hub.ts`, que já junta os guias de arquivo e os de dinheiro (a alternativa era o `registry.ts` dos guias de arquivo, que passaria a importar o registro das calculadoras). Em en e es: HEIC to JPG on Windows (imagem), Why is my PDF so large? (PDF), How to combine PDFs on a phone (o quarto, o único guia escrito para o celular) e How extra payments shorten a mortgage (dinheiro), a ordem do protótipo. Em pt, sem guia de dinheiro, "JPG ou PNG: qual usar" fica no lugar do de dinheiro. O módulo lança erro se um id não tiver página no idioma.
+- **Os textos** ficam no `home.ts` de cada idioma (`home.guides`, obrigatório no `HomeTexts`), e não num arquivo novo: a seção é da home. A home continua sem AdSlot, e o `gate:prontidao` continua contando só os `a.fo-tool` dela.
+
+## § 399 · Onde mora cada teste novo do hub e das entradas (F11, decisão 10)
+
+- **Os unitários (Vitest; rodam no job `leve` e no `verificar`):**
+  - `tests/unit/guides-card.test.ts`, novo, 8 testes: a medida de cada guia de arquivo contra a contagem da especificação e contra a forma do JSON, e a varredura de qualquer profundidade (2); os dados do cartão nos três idiomas, de arquivo e de dinheiro, e os textos do cartão sem algarismo (3); os cartões do hub no `dist/`, um teste por idioma: um link, o nome que começa por "Guide", o H3 embaixo do H2, a medida e a ferramenta (3).
+  - `tests/unit/guides-entries.test.ts`, novo, 17 testes, todos sobre o `dist/` (precisa do `pnpm build` antes, como o `guides-hub-route.test.ts`): o bloco Guias no rodapé de cada uma das 211 páginas, um teste por idioma, e as âncoras do hub (5); os cartões `--here` de toda ferramenta e calculadora, contados contra os registros (39 páginas e 42 cartões), e a linha antiga sumida (1); nenhum guia com o ToolCard em todo HTML do `dist/` e os guias das relacionadas com o GuideCard (3); o índice da busca com o `kind`, o ícone e a categoria, e a ordem dos grupos (3); a seção da home e o `HOME_GUIDES` (4); o `/guides/` no `lighthouserc.json` (1).
+  - `tests/unit/conteudo.test.ts`: mais 7, a regra do hub com os controles negativos (6) e o portão rodado sobre o site falso (1, com o limite de 60 s, como o do `pdf-site.test.ts`: roda o portão duas vezes num subprocesso).
+  - `tests/unit/contrast.test.ts`: mais 2, as cores do cartão lidas do `components.css` e os três pares do UX-02.
+- **"Nenhum guia com o ToolCard em qualquer página" mora no Vitest, sobre o `dist/`.** Ele lê todo HTML do build (as 211 páginas e as 404) em menos de um segundo, sem navegador. A alternativa era um spec do Playwright, que abriria as 211 páginas nos dois navegadores, num teste só (estoura os 60 s do WebKit no CI, § 306) ou em blocos, para conferir uma marcação estática. Da mesma forma, o rodapé de toda página e a contagem dos cartões `--here` são unitários sobre o `dist/`. A trilha das 40 páginas, no HTML e no `BreadcrumbList`, fica no `tests/unit/guides-hub-route.test.ts` do G1.
+- **Os specs do Playwright,** com nomes `guides-*`, que ordenam entre o `events.spec.ts` e o `i18n-budgets.spec.ts` e caem nas partes leves:
+  - `tests/e2e/guides-hub.spec.ts`, novo, 6 testes por navegador (dois por idioma): o hub renderizado, cada guia do idioma uma vez no grupo dele, o GuideCard com um link só e o nome que começa por "Guide", "Guia" ou "Guía", H1, H2 e H3 sem pular nível, nenhum AdSlot, os atalhos de 48 px e as âncoras, o primeiro cartão acima da dobra a 360 × 740, os cartões com 300 px ou mais de largura e 200 de altura, e o "All guides" como página atual no rodapé. O axe do hub nos dois temas fica no `a11y.spec.ts`, que lê o mapa de rotas.
+  - `tests/e2e/guides-search.spec.ts`, novo, 7 testes por navegador: o índice servido com o `kind` (1) e, por idioma, os dois grupos com o nome acessível, a ordem, os ids, as setas entre os grupos e o Enter num guia (3), e o grupo vazio sem título, o vazio e a busca carregando só no primeiro uso (3).
+  - mais 4 no `budgets.spec.ts` (o `/guides/` e três pares de requisições), 4 no `i18n-budgets.spec.ts` (os dois hubs e os mesmos arquivos de `/guides/`) e 5 no `layout-shift.spec.ts` (de 10 para 15 por navegador: os hubs em toda largura e as páginas da borda da varredura nova); os dois testes que mudaram no `ads.spec.ts` não somam.
+- **As partes do CI,** pelo `--list` desta worktree (`--shard=i/5` no Chromium e `--shard=i/13` no WebKit; o merge com o agente do cabeçalho muda as fronteiras, e o agente principal confere de novo): o `guides-hub.spec.ts` e o `guides-search.spec.ts` caem na parte 3 do Chromium e na 7 do WebKit; o `layout-shift.spec.ts` na 4 do Chromium e na 10 do WebKit. O `design.spec.ts` (Chromium 3, WebKit 6 e 7) e o `image-matrix.spec.ts` (Chromium 4, WebKit 9) seguem em partes diferentes.
+- **As contas:** o Vitest foi de 103 arquivos e 1.766 testes (o commit do G1) para 105 arquivos e 1.800 (+34: 8, 17, 7 e 2). O `--list` do Playwright foi de 1.431 para 1.457 por navegador (+26: 6, 7, 4, 4 e 5).
+- **A prova de que cada teste novo reprova sem a mudança,** contra o `dist/` do ponto de partida (`.cache/f11/dist-antes/`, servido numa porta própria para os specs e posto no lugar do `dist/` para os unitários): os 13 testes novos do `guides-hub.spec.ts` e do `guides-search.spec.ts` reprovam (o hub responde 404; o índice não tem `kind`; a lista não tem grupos); os 17 do `guides-entries.test.ts` e os 3 do `guides-card.test.ts` que leem o `dist/` reprovam (sem o bloco Guias no rodapé, sem cartões, 108 guias com o ToolCard nas páginas, sem a seção da home, sem o hub); os testes novos e mudados do `budgets`, do `i18n-budgets`, do `layout-shift` e do `ads.spec.ts` reprovam (20, pelo status do hub ou pela falta do cartão); os do `contrast.test.ts` reprovam com o `components.css` do ponto de partida (0 regras `.fo-guidecard`). Os unitários que leem só os registros (a medida, os dados do cartão, o `HOME_GUIDES`, o `groupEntries`, a regra do portão) importam módulos e funções que o ponto de partida não tem (`src/tools/guides/card.ts`, `HOME_GUIDES`, `groupEntries`, `checkGuidesHub`): o arquivo nem carrega.
+
+## § 400 · Os testes antigos que o hub e as entradas mudaram (F11, decisão 10)
+
+A ficha manda mudar um teste que fixa o que a fatia muda junto com o que ele protege, e mostrar que a proteção continua. São os do G1 (a rota e a trilha) e os do G2 (o cartão e as entradas), cada um no mesmo commit do código que ele protege.
+
+- **`tests/unit/routes.test.ts:56-68` (G1).** O teste "has the routes of the site…" fixava a ordem exata dos ids do mapa de rotas. Agora fixa a mesma ordem, com o `GUIDES_HUB_ID` logo antes de `...FILE_GUIDE_IDS`. As outras asserções do teste continuam iguais e passam sem mudar (a `adArea` 'arquivos', os idiomas por id, as páginas só em inglês, 'dinheiro' e 'utilidades'): o hub não tem `adArea`, e o `languagesFor` dele dá os três idiomas.
+- **`tests/unit/seo-checks.test.ts:85` (G1).** O `SIZES` dos sitemaps fixava en 80, pt 52 e es 67 URLs. Agora fixa 81, 53 e 68, com "+ 1" em cada soma e um comentário da F11. A asserção ao lado, que compara o comprimento com as rotas indexáveis que têm caminho no idioma (lidas do mapa), continua igual e protege a contagem.
+- **`tests/unit/seo-checks.test.ts:120` (G1).** Só acréscimo: a lista do cluster `['en', 'pt-BR', 'es', 'x-default']` ganhou o `GUIDES_HUB_ID`, o que prova o `hreflang` recíproco e o `x-default` do hub. Nenhuma asserção mudou.
+- **`tests/unit/ads-pages.test.ts:53` (G1).** Só acréscimo: o `NO_ADS` ganhou `['guides', GuidesHubView, {}]`. Nos três estados do build (`none`, `client`, `all`) e nos três idiomas, o hub fica sem `adsbygoogle.js`, sem `class="adsbygoogle"` e sem `class="fo-ad"`. Nenhuma asserção mudou, e o número de testes também não.
+- **`tests/unit/conteudo.test.ts`, o `build()` (G2).** O site falso escrevia um esboço (`<p>id</p>`) para toda rota que o teste não conhecia, o hub entre elas; o esboço reprova a regra nova (§ 394). Agora escreve o hub de `guidesHubPage()`, que passa todas as regras. As duas regex da linha do resumo não mudaram: a contagem nova vai no fim da linha.
+- **`tests/unit/pdf-site.test.ts`, a home (G2).** A ordem das seções da home fixava `[…, 'qr-home', 'privacy-home']` em en, pt e es. Agora fixa `[…, 'qr-home', 'guides-home', 'privacy-home']`. As asserções de nenhum AdSlot e da Oli ao lado do H1 continuam.
+- **`tests/unit/pdf-site.test.ts`, o rodapé (G2).** Fixava os títulos das colunas de en (`[…, 'Utilities', 'FileOrca']`) e de pt e es, e lia a coluna Utilidades por todos os `li a` dela. Agora os títulos ganharam "Guides" ("Guias", "Guías", o `common.guidesHub`) depois de Utilities, uma asserção nova fixa as 7 colunas de en (o bloco Guias fica na mesma coluna, não numa 8ª), e a lista da coluna Utilidades é a do primeiro `ul` dela (o QR code). As asserções da coluna de PDF, das de casa e saúde e de pt e es sem link para página em inglês continuam iguais.
+- **`tests/e2e/navigation.spec.ts` (G2).** Fixava o título vazio em pt "Nenhuma ferramenta chamada" (dois lugares), a linha de um guia de arquivo com a categoria do hub ("Imagem", "PDF"), a do guia de resolução em "jpg to pdf" com "PDF" e as dos guias de dinheiro do 404 em es com a categoria de dinheiro. Agora fixa "Nenhuma ferramenta ou guia chamado" e a categoria "Guide" ("Guia", "Guía") de todo guia. As consultas, as contagens e a primeira opção de cada consulta não mudaram: nelas, os guias já vinham depois das ferramentas.
+- **`tests/e2e/ads.spec.ts`, a linha do guia (G2).** Os três testes (um por idioma) mediam `.fo-guide-links`: visível, fora do painel e a 150 px de todo AdSlot. Agora medem o `.fo-guidecard` dentro de `section[data-content="how"]`, com as mesmas três afirmações, e também nas calculadoras que um guia traz (6 em en e es; nenhuma em pt). O título mudou para "the guide card of each tool and calculator a guide embeds stays 150px from every AdSlot, at 360 and 1280px".
+- **`tests/e2e/ads.spec.ts`, as páginas sem anúncio (G2).** A lista ganhou `/guides/`, `/pt/guias/` e `/es/guias/`, lidos do mapa, e cada página da lista, fora as 404, tem de responder 200 (o `serve-dist` responde uma rota que falta com a 404 mais próxima, que também não tem anúncio). O título ganhou "guides hub". As duas asserções de antes (nenhum `.fo-ad`, nenhum código do AdSense) continuam.
+- **`tests/e2e/budgets.spec.ts` e `tests/e2e/i18n-budgets.spec.ts` (G2).** Só acréscimo: o hub nas listas de hubs, com as regras deles (no máximo dois arquivos de JS), três pares de requisições e o par dos mesmos arquivos de pt e es com `/guides/`. Nenhuma asserção mudou.
+- **`tests/e2e/layout-shift.spec.ts` (G2).** O `CASES` ganhou os três hubs em toda largura e as 17 páginas que a varredura nova pôs na borda de uma linha (a trilha dos 40 guias mudou); a visita passou a exigir status 200. Os testes por navegador passaram de 10 para 15, e os nomes dos blocos mudaram com as listas. A asserção de cada página (a trilha, o H1 e o aviso parados quando a Figtree chega) não mudou.
+- **Por construção, sem editar:** o `tests/e2e/a11y.spec.ts` ganhou 3 testes por navegador (o hub nos três idiomas), e o reflow a 320 px do `tests/e2e/design.spec.ts` continua em 4 blocos, com o título do 4º de "(pages 181 to 208)" para "(pages 181 to 211)".
+- **Conferidos, sem mudar:** o `tests/unit/routes.test.ts` da busca (o `filterEntries` ordena como antes), as contagens de opções da busca no `a11y.spec.ts` e no `design.spec.ts`, o `tool-guides.spec.ts`, o `tool-i18n.spec.ts`, o `cookie-footer.spec.ts`, o `events.spec.ts`, o `image-hub.test.ts` e o `guides-hub-route.test.ts`.
+- **Nenhum teste saiu, nenhum foi pulado e nenhum limite ou tempo mudou.** O Vitest foi de 102 arquivos e 1.751 testes (o `41cdf4a`; 1.750 no ponto de partida `609a868`) para 105 arquivos e 1.800 testes, passando pelos 103 e 1.766 do G1, e o `--list` do Playwright foi de 1.428 para 1.457 por navegador (1.431 no G1).
+
+## § 401 · O merge das três fatias e a conferência no Linux (F11, decisão 13)
+
+- **As três fatias entraram na `fase-11` por `git merge --no-ff`, com o trailer (regra 6), na ordem do plano:** G1, a rota do hub (`ca87dbf`); T, o tema, o cabeçalho e a Privacidade (`8c1a815`); e G2, o GuideCard e as entradas (`cc008df`). O T e o G2 partiram do commit do G1 (`0e8f8ea`) e tocaram onze arquivos em comum. O Git juntou dez sozinho, porque o plano separou as regiões: as chaves do `header` e as do `footer` e da `search`, o bloco do cabeçalho reescrito no lugar e o resto no fim do `components.css`, e linhas diferentes dos testes. Só o `DECISOES.md` teve conflito: as § 385 a § 392 (T) ficaram antes das § 393 a § 400 (G2), como o plano mandava.
+- **Depois do merge:**
+  - `pnpm tipos` com 0 erros, `pnpm lint` verde e o build com 211 páginas;
+  - o Vitest com 109 arquivos e 1.830 testes (1.750 no ponto de partida);
+  - os portões do build verdes;
+  - o `--list` com 1.556 testes por navegador (1.428 no ponto de partida), em partes que ainda separam o `design.spec.ts` do `image-matrix.spec.ts` (Chromium 3 e 4; WebKit 6 e 9-10).
+
+  Os specs em que as duas fatias se encontram rodaram juntos, nos dois navegadores: o cabeçalho de toda página, o hub com os cartões, os anúncios, o `layout-shift`, o `a11y`, a navegação, os eventos, o design e os guias. Foram 15 specs numa execução só, de 8,4 min: 1.423 verdes e 1 vermelho, o primeiro quadro do `/merge-pdf/` no Chromium (`header-theme.spec.ts:79`). Um quadro teve o fundo do `body` transparente (`rgba(0, 0, 0, 0)`) em vez do claro guardado. O teste não reprovou de novo em 54 execuções sozinho, em 180 com 14 workers no Chromium nem em 90 com 8 workers no WebKit. Ficou como a F11 p-2 do grupo 20 e foi para a lente de tema e desempenho da revisão.
+- **A conferência no Linux no meio da run não rodou,** porque o rótulo `ci` não existe no repositório. O `gh api repos/<dono>/<repo>/labels/ci`, só leitura, respondeu 404. No começo da run, um `gh label list`, também só leitura, já tinha mostrado o mesmo; a ficha manda nunca usar `gh label`, e isso fica registrado no relatório. A run não cria o rótulo (CLAUDE.md, "Fora de toda run").
+- **O `gh pr ready` seguido do `gh pr ready --undo` foi recusado como atalho:**
+  - o job `merge` decide pelo `github.event.pull_request.draft` do evento, no `if` dele e no JSON que o `pode-mesclar` lê;
+  - o `ci-ok` só olha o rascunho de agora (`PR_DRAFT_NOW`) na classe leve;
+  - a execução do `ready_for_review` chegaria, verde, ao `gh pr merge` com a PR já de volta ao rascunho.
+
+  O resultado seria uma PR pela metade na `main` ou, se o GitHub recusasse o rascunho, um job vermelho, um comentário e uma issue para o Victor. A conferência no Linux é a execução final, com tudo commitado. A pegadinha está na seção F11 do `docs/claude/ci.md`; a escolha (criar o rótulo, ou fazer o `merge` ler o rascunho de agora) é do Victor, na linha F11 p-1 do grupo 20 do `docs/PENDENCIAS.md`.
+
+## § 402 · O `docs/design/` depois da F11 (F11, decisão 8)
+
+As regras novas entraram nos README pelas fatias, cada uma com o texto de antes e o de depois no § dela. Este § junta o que mudou e o que ficou de fora:
+
+- **Ícones:** 44, com os cinco do cabeçalho (§ 384).
+- **O README do sistema:** a linha do tema, com os três estados, a chave `fo-theme`, o script do `<head>` e o par de toda regra de `prefers-color-scheme` (§ 386).
+- **O Header:**
+  - o README, regra a regra, e o preview com o botão de tema, o Menu e a folha (§ 388);
+  - a região do Header no `bundle.css`, com `box-sizing: border-box`, porque o bundle não tem o preflight do site.
+- **O GuideCard:** o 28º componente, com README, preview, o bloco no fim do `bundle.css` e a linha na tabela de `components/README.md` (§ 395).
+- **Footer, Breadcrumb e ToolSearch:** os README dizem o bloco Guias, a trilha Início › Guias › guia e os dois grupos da busca (§ 396 e § 397).
+- **Nenhum token novo:** o `git diff` do ponto de partida até aqui não toca o `tokens.json` nem o `tokens.css`, e nenhum hex entrou no CSS do site. O `gate:design` passa com 211 páginas e 1 CSS.
+- **Ficou de fora, para a run que regenerar o design system** (F11 g-2, no grupo 20):
+  - o `docs/design/index.html` sem o GuideCard;
+  - a "Conferência" do axe de 29/out, de antes dele;
+  - o preview do ToolSearch e o `.fo-search__group` no `bundle.css`.
+
+  A ficha proíbe o `pnpm design:gerar` nesta run.
+
+## § 403 · As medidas do fim, depois do merge (F11, decisões 3, 9 e 11)
+
+Sobre o build do merge (`cc008df`), na máquina local:
+
+- **Orçamento de JS:** o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, 342 verdes. As 180 linhas "JS inicial" do ponto de partida (`.cache/f11/antes/budgets.log`), comparadas página a página:
+  - todas têm o mesmo número de arquivos JS e de requisições;
+  - o maior aumento é de +0,3 KB, dos dois scripts inline do tema (376 bytes com gzip, § 385);
+  - o maior JS inicial do site é 51,9 KB, para um limite de 80.
+
+  Os três hubs novos têm 0 arquivo JS e 4 requisições, como os hubs de categoria.
+- **Nenhum arquivo JS novo por página:** os nomes de `dist/_astro/*.js` sem o hash são os mesmos 66 do ponto de partida.
+- **A busca:**
+  - o chunk do `entry` foi de 1.321 para 1.455 bytes com `gzip -9` (+134 B, limite +1 KB) e continua só no primeiro uso;
+  - o `search-index.json` foi de 8.946 para 8.985 bytes com gzip.
+- **A altura do cabeçalho** (as 90 linhas `[header]` do `header-menu.spec.ts`, nos dois navegadores, com a Figtree segura e solta): 64 px e uma linha em toda largura de 320 a 1280 px, nos três idiomas, sem nada se mover quando a fonte chega.
+  - A 320 px, os quatro controles ocupam 282,5 de 288 px.
+  - A 1280 px, o logo começa na coluna (x 36), o último controle termina em x 794 e a lateral começa em x 944: 150 px.
+
+  A tabela por largura está no relatório.
+- **As partes do CI:** o `--list` dá 1.556 testes por navegador:
+  - Chromium em 5 partes, de 311 e 312;
+  - WebKit em 13 partes, de 119 e 120;
+  - os specs `guides-*` e `header-*` caem nas partes leves (Chromium 3, WebKit 7 e 8);
+  - o `design.spec.ts` e o `image-matrix.spec.ts` seguem em partes diferentes.
+
+## § 404 · As correções da revisão adversarial (F11)
+
+Depois dos céticos, a revisão adversarial da F11 deixou de pé oito achados, todos baixos: o B-1 e o D-1 chegaram como médios, e os céticos os rebaixaram. Quatro foram corrigidos aqui. Cada um tem um teste que reprova sem a correção, provado no commit do teste, sobre o build de antes (`ca91a85`). Os outros quatro foram para o PENDENCIAS.
+
+- **B-1, a marca da seção e do idioma com cores forçadas.**
+  - **O defeito:** com cores forçadas, o fundo e as bordas de toda linha do Menu ficam iguais. A seção atual e o idioma em uso só se distinguiam pelo peso, 700 contra 600. O item atual do menu de idioma do computador (uma regra da F1b) não tinha marca nenhuma.
+  - **A correção:** em `@media (forced-colors: active)`, um sublinhado de 3 px (`stroke-3`, a 4 px do texto) no nome da linha atual, no idioma em uso do Menu e no item atual do menu de idioma, como na opção escolhida do OptionGroup (§ 280). Nenhuma cor entra, porque o sublinhado segue a cor forçada, e o peso 700 continua. O README do Header e a região do Header no `bundle.css` dizem o mesmo.
+  - **O teste:** `header-menu.spec.ts`, "with forced colours the section and the language in use are underlined too…".
+    - No Chromium, com `forcedColors: 'active'`, ele exige `underline` na linha atual e no idioma em uso a 360 px e no item atual do menu de idioma a 1280 px, e `none` nos outros.
+    - No WebKit, que não emula cores forçadas, exige `none` em todos.
+    - No commit `922cf1d`, o Chromium reprovou: esperava `underline` e recebeu `none`.
+- **C-1, a impressão com o Escuro.**
+  - **O defeito:** o bloco `[data-theme="dark"]` do `tokens.css` e o `color-scheme` escuro do `<html>` valiam em toda mídia. Com o Escuro guardado, ou com Sistema num sistema escuro, a impressão saía com o texto claro sobre o papel branco, porque o navegador não imprime o fundo por padrão. O cético mediu, no PDF do Chromium, o texto clareado para rgb(165, 167, 169), 2,41:1 sobre o branco.
+  - **A correção:** as quatro regras do escuro ficam em `@media screen`: no `tokens.css`, as variáveis em `[data-theme="dark"]` e em `prefers-color-scheme: dark`; no `global.css`, as duas de `color-scheme`. A impressão sai sempre no tema claro. Nenhum token nem valor mudou, e o par da § 386 continua. A linha do tema do `docs/design/README.md` diz isso.
+  - **Os testes:**
+    - `theme-pair.test.ts`, um `describe` novo com dois testes. Toda regra do escuro que pinta (uma variável, o `color-scheme`, `color` ou `background`) tem de estar em `@media screen`, em todo CSS do `src/styles/` e no `tokens.css`, e os controles negativos mostram que a checagem acusa a regra fora da tela. O `styleRules` passou a guardar as `@media` em volta de cada regra (o campo `media`), sem mudar as asserções que já existiam. No commit `60e4840`, reprovou com as duas regras do `global.css`.
+    - `header-theme.spec.ts`, "the print is in the light theme…". Com o Escuro guardado, e depois com Sistema num sistema escuro, o `emulateMedia({ media: 'print' })` dá o texto, o fundo e o `color-scheme` da página clara, e na tela a página continua escura. No mesmo commit, reprovou nos dois navegadores, com o texto rgb(247, 250, 253), o fundo rgb(11, 21, 36) e o `color-scheme` dark.
+- **D-1, a folha do Menu a 146,5 px do anúncio, de 390 a 767 px.**
+  - **O defeito:** abaixo de 768 px, a folha tem a mesma altura em toda largura, mas o 1º AdSlot do Merge PDF e do Unlock PDF em inglês sobe de y 796 para y 776 a partir de 390 px. Com as linhas de 52 px, a folha terminava em y 629,5, a 146,5 px dele, nos dois navegadores. O `ads.spec.ts` media só 360 e 1280 px, e a frase da § 388 ("todo AdSlot das 178 páginas … a 166,5 px ou mais") só valia até 384 px.
+  - **A correção:** as linhas da folha passam a ter 48 px, o `tap-min` de todo controle e dos idiomas (`min-height: var(--tap-min)` e padding vertical 0; o nome e a contagem, 38 px, ficam centrados). É um desvio da especificação (`header-a.html`), que pedia 52 px.
+    - A folha em inglês termina em y 597,5 (antes, 629,5), e a de português e espanhol em y 497,5 (antes, 521,5).
+    - Abaixo de 768 px, todo AdSlot fica a 178,5 px ou mais da folha aberta; de 320 a 384 px, a 198,5 px ou mais.
+    - A 1280 px, a folha fica 32 px mais curta em inglês e 24 px em português e espanhol.
+    - O README do Header, a região do Header no `bundle.css`, o comentário do CSS e o `docs/claude/anuncios.md` dizem as medidas novas.
+  - **O teste:** o bloco do cabeçalho do `ads.spec.ts` mede também 767 px (360, 767 e 1280). Abaixo de 768 px, a folha não muda de altura e o anúncio só sobe com a largura, então 767 px é onde os dois mais se aproximam. No commit `333fec8`, os blocos do `/merge-pdf/` e do `/unlock-pdf/` reprovaram nos dois navegadores, com 146,5 px a 767 px. Depois da correção, os 24 blocos passam.
+  - **As alternativas:**
+    - 48 px de altura mínima com o padding de 4 px: as linhas ficavam com 50 px, e o vão com 162,5 px;
+    - medir 390 e 412 px em vez de 767: uma largura a mais, sem pegar o ponto mais perto;
+    - a solução da raiz, o 1º anúncio dos moldes de PDF abaixo de y 880, continua com a F12 (UX-07).
+- **D-2, o tempo dos blocos do cabeçalho.**
+  - **O defeito:** cada bloco abre 15 páginas e, em cada largura, abre e fecha os menus. No WebKit, com a máquina carregada, estourava os 60 s do padrão sem nenhuma asserção de vão falhar.
+  - **A correção:** `test.setTimeout(120_000)` no teste do bloco, como nos testes longos das calculadoras. Nenhuma asserção mudou.
+  - **A prova:** com o tempo global baixado para 5 s (`--timeout=5000`, um runner muito mais lento), os 12 blocos do Chromium reprovaram no commit `333fec8` com "Test timeout of 5000ms exceeded". No `7b39ad6`, os 12 passaram em 17,3 s, porque o bloco tem o tempo dele.
+- **O teste antigo que mudou (no formato da § 341).** No `tests/e2e/header-menu.spec.ts`, o teste de cada molde fixava as linhas da folha com 52 px ou mais, a altura da especificação. Agora fixa 48 px ou mais, porque o D-1 passou as linhas a 48 px. A proteção continua: toda linha é um alvo de 48 px, como os idiomas e os controles, e o vão da folha aos anúncios, que a altura servia, está no `ads.spec.ts`, agora também a 767 px.
+- **Só acrescentados,** sem nenhuma asserção mudada: o teste do sublinhado no `header-menu.spec.ts`, o da impressão no `header-theme.spec.ts`, o `describe` da impressão e o campo `media` no `theme-pair.test.ts`, e a largura de 767 px e o tempo de 120 s no bloco do cabeçalho do `ads.spec.ts`.
+- **As pegadinhas novas:**
+  - no `docs/claude/design-e-oli.md`, o clique que fecha um popover segue para o que está embaixo (B-2; a correção só com CSS, da § 405, está no mesmo bullet);
+  - no `docs/claude/anuncios.md`, o 1º AdSlot que sobe com a largura (D-1);
+  - no `docs/claude/playwright.md`, o WebKit recusa a porta 4190, que está na lista de portas restritas: todo `page.goto` fica parado até o tempo do teste acabar.
+- **Os que foram para o PENDENCIAS, sem correção:**
+  - B-2: é o comportamento padrão do popover, e engolir o clique pediria um script; a pegadinha ficou escrita. A segunda passada mostrou que basta CSS, e o B-2 foi corrigido na § 405;
+  - B-3: o README do sistema e o `bundle.css`, junto do F11 g-2, na run que regenerar o design system;
+  - C-2: o tema não é relido ao voltar do bfcache, e a correção é JS novo em toda página, fora desta revisão;
+  - E-1: o Menu diz 14 calculadoras de dinheiro, e a Sobre e os Termos em inglês e espanhol dizem 18. As duas páginas estão fora do diff da F11, e o 18 é decisão da § 321.
+- **As contagens:** o Vitest tem 109 arquivos e 1.832 testes (+2, os do `theme-pair.test.ts`), e o `--list` do Playwright, 1.558 testes por navegador (+2, o do sublinhado e o da impressão).
+
+## § 405 · A segunda passada da revisão adversarial e a causa da F11 p-2 (F11)
+
+A segunda passada revisou o diff das correções da § 404 (o merge `68aa102`) e confirmou as quatro: cada teste novo reprova sem a sua correção. Ela deixou três achados, e o agente principal corrigiu os três.
+
+- **S2-1 (médio), o B-2 se corrige só com CSS.** A § 404 deixava o B-2 no PENDENCIAS porque "engolir o clique pediria um script". A segunda passada mostrou que não: com `body:has(:popover-open) main { pointer-events: none; }`, o clique que fecha o menu cai no `body` e não chega à ferramenta.
+  - **A especificação** (`header-a.html`, "esse clique segue para o que está embaixo: se fosse um anúncio, seria um clique acidental") trata a passagem como risco, não como recurso: por isso pede os 150 px. A correção vai no mesmo sentido, e os 150 px continuam medidos no `ads.spec.ts`.
+  - **A correção**, no `src/styles/components.css`, ao lado do menu de idioma:
+    - com o Menu ou o menu de idioma aberto, o `.fo-frame` (o `main` e a lateral) fica com `pointer-events: none`. É o `.fo-frame` e não só o `main`, para o clique de fechar também não cair num anúncio da lateral;
+    - no WebKit, o clique de um toque chega depois de o menu fechar, e a regra sozinha não bastava: com o `hasTouch`, o toque de fechar marcava o rádio do Rotate image. Por isso, uma folha que nunca se pinta (`body::after`, fixa, `z-index: 10`) cobre a página enquanto um menu está aberto e 400 ms depois, e sai por `scale` com `transition-delay`. O cabeçalho ganhou `position: relative` e `z-index: 11`, para ficar acima dela e continuar clicável (abrir um menu fecha o outro). O aviso de cookies, com `z-index: 20`, também fica acima;
+    - o atraso não move nada na tela, então vale também com movimento reduzido: o `transition: none !important` do `global.css` ganhou, só para esta folha, a exceção com `!important`;
+    - sem `:has()`, as regras caem e a página fica como antes.
+  - **O que não serviu:** uma transição de `pointer-events` no `.fo-frame` (`allow-discrete` com atraso) segurava o toque nos dois navegadores, mas o `gate:design` só aceita transição de `transform`, `opacity`, `translate`, `scale` e `rotate`, e afrouxar o portão é proibido. No caminho, o minificador pôs o `transition-behavior` antes do atalho `transition`, que o zerou; a pegadinha foi para o `docs/claude/design-e-oli.md`.
+  - **Os testes**, no `header-menu.spec.ts`, cada um commitado antes da correção:
+    - "the click that closes a menu does not reach the page under it…": a 1280 px, no `/compress-image/`, o clique no meio da DropZone com o Menu e depois com o menu de idioma abertos fecha o menu e não abre o seletor; com a página livre, o mesmo clique abre. A 390 px, um rádio do Rotate image logo abaixo da folha continua sem marca. No commit `1c56c0b`, sobre o build de antes, reprovou nos dois navegadores, com 2 seletores abertos;
+    - "the tap that closes the Menu on a touch screen…", com `hasTouch`, com e sem movimento reduzido. No commit `304c4d5`, sobre o build só com o `pointer-events: none`, reprovou no WebKit: o toque de fechar marcou o rádio;
+    - os dois clicam por coordenada (`page.mouse`, `page.touchscreen`) e esperam a página voltar a receber o ponteiro (`takesPointer`) antes do clique de controle;
+    - depois da correção, os dois passaram 3 vezes em cada navegador.
+  - O README do Header diz que o clique fora da folha só fecha o menu. O bullet da pegadinha do B-2 no `docs/claude/design-e-oli.md`, desta run, foi corrigido.
+- **S2-2 (baixo), o `bundle.css`.** As duas regras de `color-scheme` escuro do `docs/design/components/bundle.css` foram para `@media screen`, como no `global.css`. O `theme-pair.test.ts` ganhou um teste que lê o `bundle.css` com o `darkOnPaperProblems`; no commit dele, reprovou com as duas regras.
+- **S2-3 (baixo), os números velhos.** No `docs/claude/anuncios.md`, a folha termina em y 597,5 (629,5 com as linhas de 52 px). Na § 404, a folha fica "mais curta", não "mais baixa". A linha F11 t-2 do PENDENCIAS diz 198,5 px a 360 px e 178,5 px de 390 a 767 px.
+- **A causa da F11 p-2.** Numa execução com 6 workers, o axe do cabeçalho do `/merge-pdf/` no Chromium reprovou no tema escuro (contraste em todo texto) e passou ao rodar de novo. O console do trace mostra `Failed to load resource: net::ERR_NO_BUFFER_SPACE` na folha `island.*.css`: o Windows recusou o socket, com a máquina carregada. Uma sonda com a requisição da folha abortada dá o mesmo quadro da p-2: `document.styleSheets` com uma folha vazia e o fundo do `body` em `rgba(0, 0, 0, 0)`. A p-2 é isso, não um piscar do tema. A linha F11 p-2 ficou com a causa, e a pegadinha foi para o `docs/claude/playwright.md`.
+- **O que mais a revisão somou ao grupo 20:** a A-1 (o exemplo em espanhol) à g-1, a E-5 (os outros textos com `{n}`) à g-3, a A-2 (o teste do QR code) à g-4, e as linhas novas F11 R-B-3, R-C-2 e R-E-1. O grupo 20 tem 12 linhas, e o PENDENCIAS, 216.
+- **As contagens:** o Vitest tem 109 arquivos e 1.833 testes (+1, o do `bundle.css`), e o `--list` do Playwright, 1.560 testes por navegador (+2, o do clique e o do toque).
+
+## § 406 · Os testes antigos que a região de status do tema mudou (F11, no formato da § 341)
+
+O primeiro `pnpm verificar --partes` do fim (no `3275ede`) parou na parte 4 do Chromium com 3 reprovações. A região de status do botão de tema (`<span class="fo-sr" role="status" data-theme-status>`, § 385), que fica no cabeçalho de toda página, fez o `page.getByRole('status')` de testes antigos achar dois elementos (o modo estrito do Playwright reprova), e o `document.querySelector('[role="status"]')` achar a do cabeçalho, que vem antes no DOM. Nenhum spec que a run rodou antes do fim (os 15 da execução conjunta, os da revisão e os tocados pelas correções) lê a região de status da página inteira, e a execução leve do CI não roda o Playwright: por isso só o `verificar` completo viu.
+
+- **O que mudou:** sete leituras passaram a olhar a região da ferramenta, `#fo-tool-root`, como já faziam o `pdf-tool.spec.ts`, o `sw-offline.spec.ts` e a linha 51 do próprio `island.spec.ts`:
+  - `tests/e2e/island.spec.ts`: as três asserções do texto da região (linhas 43, 47 e 117) e o observador que anota o que a região disse (linha 100);
+  - `tests/e2e/tool.spec.ts`: a asserção da frase do Image to PDF (linha 203) e o observador dela (linha 205);
+  - `tests/e2e/image-batch.spec.ts`: a frase do lote com arquivos ilegíveis (linha 68).
+- **O que protegiam, e continua:** a frase que a ferramenta diz na região de status (o começo, o fim e o lote com erros), e que a região é esvaziada antes de a mesma frase voltar. Os textos esperados, os tempos e a ordem não mudaram. O `island.spec.ts:51` continua exigindo uma região de status só dentro da ferramenta, e o `header-theme.spec.ts` confere a do cabeçalho.
+- **Por que não o produto:** a página pode ter mais de uma região de status, e a do tema só fala quando a pessoa troca o tema. Tirar o `role="status"` dela mudaria a § 385 para servir a um seletor de teste.
+- **A prova:** os 3 reprovaram no `verificar`; depois da mudança, o `island.spec.ts`, o `tool.spec.ts` e o `image-batch.spec.ts` passaram inteiros nos dois navegadores (52 testes). O `verificar --partes` rodou de novo, inteiro (§ 407).
+
+## § 407 · O fim da F11: o verificar, o custo e a sequência do fim (F11, decisão 13)
+
+- **O `pnpm verificar --partes`** rodou duas vezes, com a máquina livre. A primeira, no `3275ede`, parou na parte 4 do Chromium com 3 testes antigos que liam a primeira região de status da página (§ 406). A segunda, no `75e98d9`, o último commit de código antes do primeiro `gh pr ready` (as correções da § 408 vieram depois): as 21 partes verdes, a soma de 1.784,6 s, e a maior parte, a do Lighthouse, com 390,7 s, abaixo dos 700 s. A saída real está no relatório.
+- **As contagens do fim:** o Vitest com 109 arquivos e 1.833 testes (1.750 em 102 no ponto de partida), e o `--list` do Playwright com 1.560 testes por navegador em 51 arquivos (1.428 em 44).
+- **O custo** da última execução do CI antes do relatório, a leve do push do `75e98d9`, está no relatório; o da execução completa vai na descrição da PR.
+- **A sequência do fim,** a da ficha: tudo commitado (o relatório, a revisão e as imagens), o push, a execução leve do último push terminada verde, e só então o `gh pr ready`, para o último commit não ficar com um `ci-ok` vermelho de uma execução cancelada ao lado do verde da completa (CLAUDE.md, notas à regra 1). A execução completa é a conferência no Linux que a run não teve no meio (§ 401). Se ela ficar vermelha: `gh pr ready --undo`, a correção, o push, a execução leve e o `gh pr ready` de novo.
+- **As worktrees** da run foram removidas com `git worktree remove`: a do ponto de partida (`f11-base`), a da revisão (`revisao-f11`) e a das correções (`wf_a6978b59-cc0-13`, com a branch dela já mesclada). As das três fatias já não existiam. As de outras runs ficaram.
+
+## § 408 · A primeira execução completa vermelha e as duas correções (F11, decisão 13)
+
+A execução completa do `gh pr ready` (a 41791116378, no `3a743ab`, a primeira conferência no Linux da run) reprovou na parte 3 do Chromium: 2 testes desta run, verdes no Windows nas duas execuções do `verificar --partes`. As outras 22 partes passaram, e o `merge` não rodou. A PR voltou ao rascunho (`gh pr ready --undo`) antes da correção, como a ficha manda. O custo dessa execução: 121 minutos cobrados, 10,1 min de parede, 23 jobs.
+
+- **O hub de guias em espanhol, a 360 × 740** (`guides-hub.spec.ts`, "the shortcuts lead to the three groups…"):
+  - o nome do primeiro cartão terminou em y 765,14, e a especificação pede que ele fique acima de 740 nos três idiomas (§ 364);
+  - a causa: a 2ª linha do H1, "muestran los números", ocupa 278,5 dos 280 px no Chromium do Windows (278,4 com a fonte de reserva). No Linux do CI, o Fredoka sai um pouco mais largo, e o título vai a três linhas: 731,14 + 34 = 765,14. No Windows, nenhuma fonte bloqueada reproduz isso;
+  - a correção, sem mexer no tipo do título nem no padding da faixa (`components.css`): o primeiro grupo fica 32 px abaixo dos atalhos (`.fo-jump + .fo-section { margin-top: var(--space-4) }`), não os 64 px de uma seção a outra. O nome do primeiro cartão fica em y 699 com o título em duas linhas, e em y 733 com três;
+  - o teste: o mesmo teste agora também põe o H1 em três linhas (acrescenta embaixo dele as linhas de 34 px que faltam para três) e exige o nome acima de 740 do mesmo jeito. Na primeira versão (`9d01a85`), ele acrescentava uma linha ao que o navegador desenhou: reprovou antes da correção nos três idiomas e nos dois navegadores com 765,0, o número do CI, e passou depois no Windows. Mas no Linux o título em espanhol já tem três linhas, e a linha a mais fez quatro: a segunda execução completa (a 41794528865, no `04d9708`; 119 minutos cobrados, 9,9 min de parede) reprovou só nessa asserção, com 767, enquanto a da dobra de verdade passou. A versão de agora (`254a64e`) mede contra três linhas onde quer que o título seja desenhado. Com o espaço antigo de 64 px, ela dá 768 no Windows; com o novo, 736, e o Linux deu 733 com o título de verdade em três linhas. As imagens 13 a 17 do relatório foram refeitas.
+- **O toque que fecha o Menu** (`header-menu.spec.ts`, o teste com `hasTouch` da § 405):
+  - o controle positivo do teste (depois da espera, o mesmo toque marca o rádio) reprovou: o toque não marcou;
+  - a causa: o teste abre um contexto novo e não fechava o aviso de cookies. A 390 × 900, o aviso começa 10 px abaixo do centro do rádio no Windows. O texto dele ocupa mais espaço no Linux, e o aviso cobriu o rádio. O snapshot do trace do CI mostra o aviso aberto. No Linux, o toque de fechar caía no aviso, e o teste não provava nada: o controle positivo é o que mostrou isso;
+  - a correção, só no teste (`3acc508`): o `dismissCookies` antes de abrir o Menu, como no teste do clique.
+- **As pegadinhas** foram para o `docs/claude/playwright.md`.
+- **Um tropeço no caminho:** o push do `ebb6379` levou um erro de tipo no teste novo do hub (`style.remove()` num `ElementHandle<Node>`). O `pnpm tipos` rodado logo depois do push o pegou, o `cb80298` corrigiu, e a execução leve do `ebb6379` foi cancelada pelo push seguinte, sem chegar ao resultado. A regra 2 (o spec alvo e os tipos antes do push) vale também para uma correção de teste.
+- **A sequência continua a da § 407:** o push, a execução leve verde e o `gh pr ready` de novo, depois de cada execução completa vermelha (a PR voltou ao rascunho nas duas).

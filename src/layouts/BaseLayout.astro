@@ -1,7 +1,10 @@
 ---
-// Base layout of every page: technical SEO head, consent bootstrap first, the Fredoka preload, the Oli
+// Base layout of every page: technical SEO head, the theme and the consent bootstraps first, the Fredoka preload, the Oli
 // sprite of the page, header, footer, cookie notice, the lazy tool search and the registration of the service
 // worker (F8, after the load event). Noindex comes only from the _headers file (DECISOES § 12).
+// The theme (F11, DECISOES § 385 and § 386): the color-scheme meta says both schemes before the CSS arrives, and the
+// <head> script right after it puts the stored choice (fo-theme) on <html> and in that meta before any CSS (Astro puts the
+// stylesheet last in <head>), so the first paint is already in the chosen theme. The theme-color stays one, the deep sea.
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -9,6 +12,7 @@ import CookieNotice from '../components/CookieNotice.astro';
 import SearchDialog from '../components/SearchDialog.astro';
 import AdsenseHead from '../ads/AdsenseHead.astro';
 import { consentBootstrap } from '../analytics/consent.ts';
+import { themeBootstrap } from '../platform/theme.ts';
 import { LANG_TAG, OG_LOCALE, pathFor, type Lang, type RouteDef } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { absolute, alternatesFor, graph, ogImagePath, organizationLd, pageTitle } from '../seo/meta.ts';
@@ -50,6 +54,8 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline set:html={themeBootstrap()} />
     <script is:inline set:html={consentBootstrap()} />
     <title>{fullTitle}</title>
     <link rel="preload" href={fredokaUrl} as="font" type="font/woff2" crossorigin />
@@ -83,7 +89,7 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
       </main>
       {hasRail && <aside class="fo-rail" aria-label={common.adLabel}><slot name="rail" /></aside>}
     </div>
-    <Footer lang={lang} t={common} anchor={anchor} />
+    <Footer lang={lang} t={common} anchor={anchor} current={route.id} />
     <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />
     <SearchDialog t={common} />
     <script is:inline set:html={trackScript} />

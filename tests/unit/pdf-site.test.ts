@@ -51,8 +51,9 @@ describe('home', () => {
     expect(more?.text).toBe('See all PDF tools');
     // The order of the sections: the image tools, the PDF tools, the money calculators, then the privacy line.
     // F7 (decision 9; DECISOES § 259): in English, after the money section, the home and health sections and the QR code.
+    // F11 (decision 7; DECISOES § 398 and § 400): the "Read a guide" section between the QR code and the privacy line.
     const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
-    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'house-home', 'health-home', 'qr-home', 'privacy-home']);
+    expect(order).toEqual(['tools', 'pdf-home', 'money-home', 'house-home', 'health-home', 'qr-home', 'guides-home', 'privacy-home']);
     // The home still has no AdSlot, and the Oli is still next to the H1 (above the fold rule of the home).
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
     expect(page.querySelectorAll('main .fo-hero [data-oli="wave"]')).toHaveLength(1);
@@ -93,9 +94,9 @@ describe('home', () => {
       expect(section?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(hubPathIn(lang));
       expect(section?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.pdf?.hubLink);
       // The image tools, the PDF tools, the money section where the language has a money hub, the QR code generator (since
-      // the languages adjustment, as in English), then the privacy line.
+      // the languages adjustment, as in English), then the privacy line. F11: the guides between the QR code and the privacy.
       const order = page.querySelectorAll('main > section').map((node) => node.getAttribute('aria-labelledby'));
-      expect(order, lang).toEqual(['tools', 'pdf-home', ...(pagePath(moneyHubId(lang), lang) ? ['money-home'] : []), 'qr-home', 'privacy-home']);
+      expect(order, lang).toEqual(['tools', 'pdf-home', ...(pagePath(moneyHubId(lang), lang) ? ['money-home'] : []), 'qr-home', 'guides-home', 'privacy-home']);
       // § 6: the English PDF pages are never linked from a page in another language.
       const hrefs = page.querySelectorAll('a:not([hreflang])').map((link) => link.getAttribute('href') ?? '');
       for (const id of PDF_TOOL_IDS) expect(hrefs, `${lang} ${id}`).not.toContain(toolPath(id));
@@ -119,7 +120,9 @@ describe('footer', () => {
     expect(links.map((link) => link.text)).toEqual([enCommon.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => enCommon.pdf[id].name)]);
     // The columns, in the order of the site: image, PDF, money, FileOrca.
     // F7 (decision 9; DECISOES § 259): in English, the Home, Health and Utilities columns come before FileOrca.
-    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'Home', 'Health', 'Utilities', 'FileOrca']);
+    // F11 (decision 7; DECISOES § 396 and § 400): the Guides block sits under Utilities, in the same column.
+    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'Home', 'Health', 'Utilities', 'Guides', 'FileOrca']);
+    expect(page.querySelectorAll('footer .fo-footer__cols > div')).toHaveLength(7);
   });
 
   it('has, in English, a Home and a Health column with the hub and every calculator of it, and a Utilities column with the QR code, so no F7 page is an orphan', async () => {
@@ -129,7 +132,8 @@ describe('footer', () => {
       expect(links.map((link) => link.getAttribute('href')), hub).toEqual([routeById(LIFE_HUB_ROUTE[hub]).paths.en, ...LIFE_HUB_IDS[hub].map((id) => routeById(id).paths.en)]);
       expect(links.map((link) => link.text), hub).toEqual([name, ...LIFE_HUB_IDS[hub].map((id) => enCommon.calcs[id].name)]);
     }
-    const utility = column(page, enCommon.footer.utilityColumn)?.querySelectorAll('li a') ?? [];
+    // The first list of the column is the utilities one (F11: the Guides block follows it in the same column).
+    const utility = column(page, enCommon.footer.utilityColumn)?.querySelector('ul')?.querySelectorAll('li a') ?? [];
     expect(utility.map((link) => link.getAttribute('href'))).toEqual([routeById(QR_ID).paths.en]);
     expect(utility.map((link) => link.text)).toEqual([enCommon.qr.name]);
     // Every one of the 14 F7 pages is linked from the English footer.
@@ -147,8 +151,9 @@ describe('footer', () => {
       // The columns in the order of the site: image, PDF, money (where the language has a money hub), the utilities with the
       // QR code generator of the language (since the languages adjustment), FileOrca.
       const titles = page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text);
-      expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.utilityColumn, common.footer.siteColumn]);
-      const utility = column(page, common.footer.utilityColumn ?? '')?.querySelectorAll('li a') ?? [];
+      // F11: and the Guides block under the utilities, in the same column (DECISOES § 400).
+      expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.utilityColumn, common.guidesHub, common.footer.siteColumn]);
+      const utility = column(page, common.footer.utilityColumn ?? '')?.querySelector('ul')?.querySelectorAll('li a') ?? [];
       expect(utility.map((link) => link.getAttribute('href')), lang).toEqual([routeById(QR_ID).paths[lang]]);
       expect(utility.map((link) => link.text), lang).toEqual([common.qr?.name]);
       // No footer link to an English PDF page.
@@ -203,8 +208,13 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
       const cluster = [['en', `${O}${paths.en}`], ['pt-BR', `${O}${paths.pt}`], ['es', `${O}${paths.es}`], ['x-default', `${O}${paths.en}`]];
       const root = parse(await renderPage());
       expect(root.querySelectorAll('link[rel="alternate"][hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), id).toEqual(cluster);
-      const menu = root.querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
-      expect(menu, id).toEqual([['en', paths.en], ['pt-BR', paths.pt], ['es', paths.es]]);
+      // F11 (DECISOES § 392): the language links are in two places, the language menu and the end of the Menu (under
+      // 768 px), each with the same three pairs; no other link of the page carries hreflang.
+      const pairs = [['en', paths.en], ['pt-BR', paths.pt], ['es', paths.es]];
+      const menu = root.querySelectorAll('.fo-langmenu a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+      expect(menu, id).toEqual(pairs);
+      expect(root.querySelectorAll('.fo-menu__lang a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]), id).toEqual(pairs);
+      expect(root.querySelectorAll('a[hreflang]'), id).toHaveLength(2 * pairs.length);
     }
     // The pages in Portuguese and Spanish carry the same cluster and their own canonical.
     for (const lang of ['pt', 'es'] as const) {
@@ -224,7 +234,13 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
     // (translated in the languages adjustment) to a page of home and health, which stays English only (F7, decision 1).
     const english = routeById(LIFE_CALC_IDS[0] ?? 'bmi-calculator');
     const header = async (route: typeof english) => parse(await container.renderToString(Header as Parameters<AstroContainer['renderToString']>[0], { props: { lang: 'en', route, t: TEXTS.en.common } }));
-    const menuOf = async (route: typeof english) => (await header(route)).querySelectorAll('a[hreflang]').map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+    // F11 (DECISOES § 392): the language menu and the language list at the end of the Menu follow the same rule.
+    const linksOf = async (route: typeof english, where: string) => (await header(route)).querySelectorAll(`${where} a[hreflang]`).map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
+    const menuOf = async (route: typeof english) => {
+      const languages = await linksOf(route, '.fo-langmenu');
+      expect(await linksOf(route, '.fo-menu__lang'), route.id).toEqual(languages);
+      return languages;
+    };
     expect(await menuOf(english)).toEqual([['en', english.paths.en], ['pt-BR', '/pt/'], ['es', '/es/']]);
     // A PDF file guide now leads to the same guide in each language.
     const guide = routeById(FILE_GUIDE_IDS.find((id) => FILE_GUIDES[id].hub === 'pdf-tools') ?? 'guides-split-pdf-file-size');

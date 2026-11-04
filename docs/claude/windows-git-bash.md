@@ -88,3 +88,21 @@ Pegadinhas que a F9 achou:
 
 - **O `git log -p` de um espelho (`git clone --mirror`, um repositório bare) no Windows usa o textconv de PDF do Git for Windows** (o `diff.astextplain` do gitattributes do sistema), porque um repositório bare não lê o `.gitattributes` do projeto. Na F9, o textconv falhou numa fixture, o `git log` parou no meio e o gitleaks disse 225 de 566 commits com o código 7, como se tivesse lido tudo (DECISOES § 332). Passe `--no-textconv --no-ext-diff` e confira quantos commits a ferramenta leu.
 - **Dois agentes que acrescentam um script no fim do `package.json`** dão conflito na mesma linha no merge: junte as duas linhas, com a vírgula, e confira com `JSON.parse` antes do commit.
+
+## F10: agentes em worktree
+
+Pegadinhas que a F10 achou:
+
+- **Um agente de workflow em worktree (`isolation: 'worktree'`) não consegue escrever no checkout principal:** o harness bloqueia. Ele lê o `.cache/` do principal pelo caminho absoluto, mas grava os scripts e as notas no `.cache/` da própria worktree, e o agente principal copia o que precisa antes do `git worktree remove`.
+- **Dois agentes que acrescentam tokens no fim do mesmo CSS** (a seção 9 do `proto.css`) dão um merge automático se um mexe dentro dos blocos vazios e o outro acrescenta um trio novo depois. Confira com o script de contraste depois do merge.
+- **Uma § citada antes de ser escrita** (por exemplo, "o destino está na § 365") prende a numeração. Reserve os números no plano e escreva as §§ na ordem, ou cite a decisão pelo assunto.
+
+## F11: navegação, guias e tema
+
+Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no hub de guias e nas entradas dele, e no merge das três fatias).
+
+- **No Git Bash, um argumento que começa com `//` vira `/`** (a conversão do MSYS): o marcador `// F11` passado a um script de emenda perdeu uma barra, e o texto saiu deslocado um caractere (`/// F11` e `/ F4`). Use `MSYS_NO_PATHCONV=1` ou ponha o marcador num arquivo.
+- **O `lint:texto` numa worktree sem baixar nada:** copie `.cache/jre-21.0.13+9` e `.cache/languagetool-6.6` do checkout principal para o `.cache/` da worktree. O `ensureTool` acha o arquivo de entrada e não baixa.
+- **Numa worktree isolada, o harness recusa o comando que não consegue ler:** um `for` com variável passada ao `node`, um `sed` com programa grande, um `powershell`. Rode um comando simples por vez, ponha a lógica num script do `.cache/` escrito com a ferramenta de escrita e passe `MSYS_NO_PATHCONV=1` quando um argumento começar por `/`.
+- O `-g` do Playwright com um padrão que começa por "/" (por exemplo `-g "/guides/$|/pt/guias/$"`) vira caminho do Windows no Git Bash e casa menos testes, sem erro: rodaram 2 dos 3 hubs. Use `MSYS_NO_PATHCONV=1` antes do comando e confira o número de testes que rodaram (F11).
+- Um agente em worktree isolada não roda um `for` com variável em volta do `pnpm` (`for g in seo links; do pnpm gate:$g; done`): o harness recusa, porque não consegue provar que o comando não é git. Rode cada portão num comando separado (F11).

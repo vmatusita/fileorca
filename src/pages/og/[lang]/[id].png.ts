@@ -4,7 +4,8 @@
 // shows its icon in the PDF colour, and the PDF hub the PDF icon (F5a). A file guide shows the icon of the tool it embeds, in
 // the colour of its hub (F5b). Every heading is in the language of the page (F6): the Brazilian calculators and hub show
 // their own names in Portuguese. The home and health pages (F7) show their icon in the violet of their category, the QR code its
-// icon in the lime of the utilities; all of them only in English.
+// icon in the lime of the utilities; all of them only in English. The guides hub (F11) shows the book icon on the brand-soft
+// of its band, since it has no category colour.
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { QR_ID, ROUTES, languagesOf, type Lang, type RouteId } from '../../../i18n/routes.ts';
 import { TEXTS, type LangTexts } from '../../../i18n/texts.ts';
@@ -32,7 +33,7 @@ import { LIFE_HUB_TEXTS } from '../../../i18n/life-hubs.ts';
 import { SHARED_BY_LANG, calcTexts } from '../../../tools/calc/page.ts';
 import { PDF_HUB_ID, PDF_PAGES, type PdfToolId } from '../../../tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
-import { FILE_GUIDES, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
+import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
 import { QR_TEXTS } from '../../../tools/qr-code-generator/page.ts';
 
 /** A card title that must exist in the language of the page: an empty title would be an empty card. */
@@ -62,6 +63,7 @@ type PlainId = Exclude<
   | PdfToolId
   | typeof PDF_HUB_ID
   | FileGuideId
+  | typeof GUIDES_HUB_ID
   | LifeCalcId
   | typeof HOUSE_HUB_ID
   | typeof HEALTH_HUB_ID
@@ -84,6 +86,8 @@ function heading(lang: Lang, id: RouteId): [string, string] {
   if (isPdfPage(id)) return [PDF_TOOL_TEXTS[lang][id].h1, seal];
   if (id === PDF_HUB_ID) return [texts['pdf-tools'].h1, seal];
   if (isFileGuide(id)) return [named(texts.common.fileGuides?.[id]?.name, id, lang), seal];
+  // F11: the guides hub shows its H1 in the language, with the seal of the files (most guides are of image and PDF).
+  if (id === GUIDES_HUB_ID) return [texts.guides.h1, seal];
   return [texts[id as PlainId].h1, seal];
 }
 
@@ -104,6 +108,8 @@ function toolOf(id: RouteId): OgTool | undefined {
     const tool = FILE_GUIDES[id].tool;
     return { icon: isPdfPage(tool) ? PDF_PAGES[tool].icon : IMAGE_PAGES[tool].icon, category: FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image' };
   }
+  // F11: the guides hub has no category colour; the book of its Menu entry, on the brand-soft of its band.
+  if (id === GUIDES_HUB_ID) return { icon: 'book', category: 'guide' };
   return undefined;
 }
 

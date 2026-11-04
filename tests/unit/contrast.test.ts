@@ -41,6 +41,10 @@ const PAIRS: readonly Pair[] = [
   { fg: 'stroke', bg: 'bg', use: 'ui' },
   { fg: 'stroke', bg: 'surface', use: 'ui' },
   { fg: 'stroke', bg: 'surface-sunken', use: 'ui' },
+  // F11 (UX01-5; DECISOES § 388): the 2 px trace of the Menu row of the page's section, and of the language in use, on
+  // its brand-soft (3.20:1 in the dark theme, the lowest of the header). The trace on the sheet (surface), the name
+  // (ink) and the count (ink-muted) on brand-soft are pairs above.
+  { fg: 'stroke', bg: 'brand-soft', use: 'ui' },
   { fg: 'sun', bg: 'deep', use: 'ui' },
 ];
 
@@ -123,5 +127,45 @@ describe('contraste dos pares do site (claro e escuro)', () => {
     const rows = PAIRS.map((pair) => `| ${label(pair)} | ${pair.use} | ${formatRatio(ratioOf(pair, 'light'))} | ${formatRatio(ratioOf(pair, 'dark'))} |`);
     console.log(['| par | uso | claro | escuro |', '| --- | --- | --- | --- |', ...rows].join('\n'));
     expect(rows).toHaveLength(PAIRS.length);
+  });
+});
+
+// F11 (decision 10; DECISOES § 395): the guide card and the band of the guides hub, read from the site's CSS. No token is
+// new; the pairs that are new to the screen are UX02-1 (ink on brand-soft, the band), UX02-2 (ink-muted on brand-soft, the
+// category of the marked search result) and UX02-3 (brand on surface, the file and table icons of the card), with the
+// values of the contrast table of docs/propostas/ux-v2/README.md (section 9).
+describe('contraste do cartão de guia e do hub de guias (F11)', () => {
+  const css = readFileSync('src/styles/components.css', 'utf8');
+  const has = (fg: string, bg: string, use: Use) => PAIRS.some((pair) => pair.fg === fg && pair.bg === bg && pair.use === use);
+
+  it('has a pair for every colour of the guide card, on its surface, and every one passes in both themes', () => {
+    const rules = [...css.matchAll(/(\.fo-guidecard[^{]*)\{([^}]*)\}/g)];
+    expect(rules.length, 'as regras .fo-guidecard do components.css').toBeGreaterThan(5);
+    // The card is a surface with the 2 px stroke; its text and icons are ink, ink-muted and brand.
+    expect(css).toMatch(/\.fo-guidecard \{[^}]*background: var\(--surface\);/);
+    expect(css).toMatch(/\.fo-guidecard \{[^}]*border: var\(--stroke-2\) solid var\(--stroke\);/);
+    const colors = [...new Set(rules.flatMap(([, , body = '']) => [...body.matchAll(/(?:^|;)\s*color:\s*var\(--([\w-]+)\)/g)].map((match) => match[1] ?? '')))].sort();
+    expect(colors).toEqual(['brand', 'ink', 'ink-muted']);
+    for (const fg of colors) expect(has(fg, 'surface', 'text') || has(fg, 'surface', 'icon'), `${fg} sobre surface`).toBe(true);
+    expect(has('stroke', 'surface', 'ui')).toBe(true);
+    // The tool's circle at the foot: on-cat on the colour of each category of a tool in a guide.
+    for (const bg of ['turquesa', 'coral', 'alga']) expect(has('on-cat', bg, 'text'), `on-cat sobre ${bg}`).toBe(true);
+  });
+
+  it('keeps the three new pairs of the UX-02 at the values of the proposal, above the minimum in both themes', () => {
+    expect(css).toMatch(/\.fo-cat--guide \{ --fo-cat-soft: var\(--brand-soft\); \}/);
+    const want: [string, string, Use, number, number][] = [
+      ['ink', 'brand-soft', 'text', 14.76, 11.99],
+      ['ink-muted', 'brand-soft', 'text', 5.98, 6.17],
+      ['brand', 'surface', 'icon', 5.09, 6.11],
+    ];
+    for (const [fg, bg, use, light, dark] of want) {
+      const pair = { fg, bg, use };
+      expect(has(fg, bg, use) || (use === 'icon' && has(fg, bg, 'text')), `${label(pair)} na lista`).toBe(true);
+      // The proposal rounds to two decimals; formatRatio cuts (14,75 for 14.758).
+      expect(ratioOf(pair, 'light'), `${label(pair)} claro`).toBeCloseTo(light, 2);
+      expect(ratioOf(pair, 'dark'), `${label(pair)} escuro`).toBeCloseTo(dark, 2);
+      for (const theme of THEMES) expect(ratioOf(pair, theme), `${label(pair)} ${theme}`).toBeGreaterThanOrEqual(MIN_RATIO[use]);
+    }
   });
 });

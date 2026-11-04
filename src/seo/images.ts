@@ -23,6 +23,8 @@ const ALGA = '#2FBF71';
 const VIOLETA = '#6C47F5';
 const ON_VIOLETA = '#FFFFFF';
 const LIMA = '#9BD84A';
+// F11: the guides hub has no category colour; its tile takes the brand-soft of its band, with the ink icon.
+const BRAND_SOFT = '#E3EEFE';
 const WATER_DEEP = '#14407E';
 
 const designAsset = (...parts: string[]): string => readFileSync(join(process.cwd(), 'docs', 'design', 'assets', ...parts), 'utf8').trim();
@@ -86,6 +88,7 @@ const TILE: Record<OgTool['category'], { fill: string; ink: string }> = {
   money: { fill: ALGA, ink: ON_CAT },
   home: { fill: VIOLETA, ink: ON_VIOLETA },
   util: { fill: LIMA, ink: ON_CAT },
+  guide: { fill: BRAND_SOFT, ink: ON_CAT },
 };
 
 type Node = { type: string; props: Record<string, unknown> };
@@ -146,7 +149,8 @@ function toolTile(tool: OgTool): Node {
 /** The tool icon beside the Oli: the name of an icon of the design system and the category colour of its tile. */
 export interface OgTool {
   icon: string;
-  category: 'image' | 'pdf' | 'money' | 'home' | 'util';
+  /** 'guide': the guides hub (F11), in the brand-soft of its band; the others are the colours of the categories. */
+  category: 'image' | 'pdf' | 'money' | 'home' | 'util' | 'guide';
 }
 
 export async function ogPng(title: string, subtitle: string, options: { tool?: OgTool } = {}): Promise<Buffer> {

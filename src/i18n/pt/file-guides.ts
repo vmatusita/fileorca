@@ -31,7 +31,6 @@ const texts: FileGuidesSharedTexts & { names: string[] } = {
     'gen-paginas-mistas.pdf': 'PDF com páginas de tamanhos diferentes',
     'gen-xref-estragada.pdf': 'PDF com o índice danificado',
   },
-  guideLink: 'Leia o guia: {title}',
   hubGuidesHeading: 'Guias',
   numbers: {
     masculine: ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze'],
