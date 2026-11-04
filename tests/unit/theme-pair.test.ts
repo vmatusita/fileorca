@@ -16,6 +16,8 @@ interface StyleRule {
   declarations: Map<string, string>;
   /** The colour scheme of the @media this rule sits in, if any. */
   scheme: 'dark' | 'light' | null;
+  /** The preludes of the @media blocks around the rule, outermost first (review F11 C-1). */
+  media: string[];
 }
 
 const stripComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -46,7 +48,7 @@ function blockEnd(css: string, open: number): number {
 }
 
 /** Every style rule of a stylesheet, at any depth of @media, @supports and @layer, with the colour scheme it depends on. */
-export function styleRules(source: string, scheme: StyleRule['scheme'] = null): StyleRule[] {
+export function styleRules(source: string, scheme: StyleRule['scheme'] = null, media: string[] = []): StyleRule[] {
   const css = stripComments(source);
   const rules: StyleRule[] = [];
   let index = 0;
@@ -64,10 +66,12 @@ export function styleRules(source: string, scheme: StyleRule['scheme'] = null): 
     const body = css.slice(open + 1, close);
     if (prelude.startsWith('@')) {
       const match = /prefers-color-scheme\s*:\s*(dark|light)/.exec(prelude);
-      if (/^@(media|supports|layer|container)\b/.test(prelude)) rules.push(...styleRules(body, match ? (match[1] as 'dark' | 'light') : scheme));
+      if (/^@(media|supports|layer|container)\b/.test(prelude)) {
+        rules.push(...styleRules(body, match ? (match[1] as 'dark' | 'light') : scheme, prelude.startsWith('@media') ? [...media, prelude.replace(/\s+/g, ' ')] : media));
+      }
       // @font-face, @keyframes and the like hold no selector of the theme.
     } else if (prelude) {
-      rules.push({ selectors: prelude.split(',').map(normalizeSelector), declarations: declarationsOf(body), scheme });
+      rules.push({ selectors: prelude.split(',').map(normalizeSelector), declarations: declarationsOf(body), scheme, media });
     }
     index = close + 1;
   }
@@ -109,6 +113,23 @@ export function themePairProblems(css: string, file = 'css'): string[] {
     }
   }
   return problems;
+}
+
+/** A declaration that paints: a variable of the theme, the color-scheme of the page or a colour of its own. */
+const PAINTS = (property: string) => property.startsWith('--') || ['color-scheme', 'color', 'background', 'background-color'].includes(property);
+const ON_SCREEN = /^@media (only )?screen\b|^@media not print\b/;
+
+/**
+ * The dark rules that would reach paper (review F11 C-1; DECISOES § 404): a rule in prefers-color-scheme: dark, or under
+ * [data-theme="dark"], that sets a colour must sit in @media screen. Paper is white and the browser prints no background
+ * by default, so the dark theme on paper is pale text on white; the print is always the light theme.
+ */
+export function darkOnPaperProblems(css: string, file = 'css'): string[] {
+  return styleRules(css)
+    .filter((rule) => rule.scheme === 'dark' || rule.selectors.some((selector) => selector.includes('[data-theme="dark"]')))
+    .filter((rule) => [...rule.declarations.keys()].some(PAINTS))
+    .filter((rule) => !rule.media.some((prelude) => ON_SCREEN.test(prelude)))
+    .map((rule) => `${file}: "${rule.selectors.join(', ')}" pinta o tema escuro fora de @media screen (a impressão sairia com o texto claro no papel branco)`);
 }
 
 const FILES = [
@@ -156,5 +177,27 @@ describe('o par prefers-color-scheme e data-theme no CSS do site', () => {
       @font-face { font-family: X; src: url(x.woff2); } @keyframes k { to { opacity: 1; } }`;
     expect(styleRules(css).map((rule) => [rule.selectors, rule.scheme])).toEqual([[['.y'], 'dark']]);
     expect(themePairProblems(css).join('\n')).toMatch(/sem a guarda/);
+  });
+});
+
+describe('o tema escuro só na tela: a impressão sai no tema claro (revisão F11 C-1)', () => {
+  it('keeps every dark colour of the site CSS and the tokens in @media screen, and finds the dark rules of tokens.css and global.css', () => {
+    for (const file of FILES) expect(darkOnPaperProblems(readFileSync(file, 'utf8'), file), file).toEqual([]);
+    // The check reads the rules it guards: the 28 dark variables twice (System and Dark) and the color-scheme of <html>.
+    const dark = (file: string) => styleRules(readFileSync(file, 'utf8')).filter((rule) => rule.scheme === 'dark' || rule.selectors.some((selector) => selector.includes('[data-theme="dark"]')));
+    expect(dark('docs/design/tokens.css').filter((rule) => rule.media.some((prelude) => ON_SCREEN.test(prelude))).length).toBeGreaterThanOrEqual(2);
+    expect(dark('src/styles/global.css').filter((rule) => rule.media.some((prelude) => ON_SCREEN.test(prelude))).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('reports a dark rule that reaches paper, and leaves alone the light theme and a dark rule that paints nothing (negative controls)', () => {
+    const screen = `:root, [data-theme="light"] { --ink: #000; }
+      @media screen { [data-theme="dark"] { --ink: #fff; } }
+      @media screen and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #fff; } }
+      html[data-theme="dark"] .x { display: inline-flex; }`;
+    expect(darkOnPaperProblems(screen)).toEqual([]);
+    expect(darkOnPaperProblems(screen.replace('@media screen { [data-theme="dark"] { --ink: #fff; } }', '[data-theme="dark"] { --ink: #fff; }')).join('\n')).toMatch(/"\[data-theme="dark"\]" pinta o tema escuro/);
+    expect(darkOnPaperProblems(screen.replace('@media screen and (prefers-color-scheme: dark)', '@media (prefers-color-scheme: dark)')).join('\n')).toMatch(/:root:not\(\[data-theme="light"\]\)" pinta o tema escuro/);
+    expect(darkOnPaperProblems('@media not print { html[data-theme="dark"] { color-scheme: dark; } }')).toEqual([]);
+    expect(darkOnPaperProblems('html[data-theme="dark"] { color-scheme: dark; }')).toHaveLength(1);
   });
 });

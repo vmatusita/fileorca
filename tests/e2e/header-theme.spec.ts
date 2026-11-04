@@ -132,6 +132,34 @@ test('a page forced to light on a dark system has the colours of the light page,
   expect((await painting(page)).bg).toBe(background('dark'));
 });
 
+// Review F11 C-1 (DECISOES § 404): Dark stored, or a dark system, reached the print, and the browser prints no background
+// by default: pale text on white paper. The dark theme is on screen only, so the print has the text of the light page.
+test('the print is in the light theme, with Dark stored and with a dark system, and the screen stays dark', async ({ page }) => {
+  const look = () => page.evaluate(() => ({ ink: getComputedStyle(document.body).color, bg: getComputedStyle(document.body).backgroundColor, scheme: getComputedStyle(document.documentElement).colorScheme }));
+  await page.emulateMedia({ media: 'screen', colorScheme: 'light' });
+  await page.goto('/mortgage-calculator/');
+  const light = await look();
+  expect(light.bg).toBe(background('light'));
+  await themeButton(page).click();
+  await themeButton(page).click();
+  expect(await painting(page)).toEqual({ bg: background('dark'), theme: 'dark', meta: 'dark', key: 'dark' });
+  const dark = await look();
+  expect(dark.ink, 'the screen is dark').not.toBe(light.ink);
+
+  await page.emulateMedia({ media: 'print' });
+  expect(await look(), 'Dark stored, on paper').toEqual(light);
+  await page.emulateMedia({ media: 'screen' });
+  expect(await look(), 'Dark stored, back on screen').toEqual(dark);
+
+  // System on a dark system: dark on screen, light on paper.
+  await page.evaluate(() => localStorage.removeItem('fo-theme'));
+  await page.emulateMedia({ media: 'screen', colorScheme: 'dark' });
+  await page.reload();
+  expect(await painting(page)).toEqual({ bg: background('dark'), theme: null, meta: 'light dark', key: null });
+  await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
+  expect(await look(), 'System on a dark system, on paper').toEqual(light);
+});
+
 test('the button says its state in each language, and the status region says the new name', async ({ page }) => {
   for (const lang of LANGS) {
     await page.goto(pathFor('home', lang));

@@ -4395,3 +4395,49 @@ Sobre o build do merge (`cc008df`), na máquina local:
   - WebKit em 13 partes, de 119 e 120;
   - os specs `guides-*` e `header-*` caem nas partes leves (Chromium 3, WebKit 7 e 8);
   - o `design.spec.ts` e o `image-matrix.spec.ts` seguem em partes diferentes.
+
+## § 404 · As correções da revisão adversarial (F11)
+
+Depois dos céticos, a revisão adversarial da F11 deixou de pé oito achados, todos baixos: o B-1 e o D-1 chegaram como médios, e os céticos os rebaixaram. Quatro foram corrigidos aqui. Cada um tem um teste que reprova sem a correção, provado no commit do teste, sobre o build de antes (`ca91a85`). Os outros quatro foram para o PENDENCIAS.
+
+- **B-1, a marca da seção e do idioma com cores forçadas.**
+  - **O defeito:** com cores forçadas, o fundo e as bordas de toda linha do Menu ficam iguais. A seção atual e o idioma em uso só se distinguiam pelo peso, 700 contra 600. O item atual do menu de idioma do computador (uma regra da F1b) não tinha marca nenhuma.
+  - **A correção:** em `@media (forced-colors: active)`, um sublinhado de 3 px (`stroke-3`, a 4 px do texto) no nome da linha atual, no idioma em uso do Menu e no item atual do menu de idioma, como na opção escolhida do OptionGroup (§ 280). Nenhuma cor entra, porque o sublinhado segue a cor forçada, e o peso 700 continua. O README do Header e a região do Header no `bundle.css` dizem o mesmo.
+  - **O teste:** `header-menu.spec.ts`, "with forced colours the section and the language in use are underlined too…".
+    - No Chromium, com `forcedColors: 'active'`, ele exige `underline` na linha atual e no idioma em uso a 360 px e no item atual do menu de idioma a 1280 px, e `none` nos outros.
+    - No WebKit, que não emula cores forçadas, exige `none` em todos.
+    - No commit `922cf1d`, o Chromium reprovou: esperava `underline` e recebeu `none`.
+- **C-1, a impressão com o Escuro.**
+  - **O defeito:** o bloco `[data-theme="dark"]` do `tokens.css` e o `color-scheme` escuro do `<html>` valiam em toda mídia. Com o Escuro guardado, ou com Sistema num sistema escuro, a impressão saía com o texto claro sobre o papel branco, porque o navegador não imprime o fundo por padrão. O cético mediu, no PDF do Chromium, o texto clareado para rgb(165, 167, 169), 2,41:1 sobre o branco.
+  - **A correção:** as quatro regras do escuro ficam em `@media screen`: no `tokens.css`, as variáveis em `[data-theme="dark"]` e em `prefers-color-scheme: dark`; no `global.css`, as duas de `color-scheme`. A impressão sai sempre no tema claro. Nenhum token nem valor mudou, e o par da § 386 continua. A linha do tema do `docs/design/README.md` diz isso.
+  - **Os testes:**
+    - `theme-pair.test.ts`, um `describe` novo com dois testes. Toda regra do escuro que pinta (uma variável, o `color-scheme`, `color` ou `background`) tem de estar em `@media screen`, em todo CSS do `src/styles/` e no `tokens.css`, e os controles negativos mostram que a checagem acusa a regra fora da tela. O `styleRules` passou a guardar as `@media` em volta de cada regra (o campo `media`), sem mudar as asserções que já existiam. No commit `60e4840`, reprovou com as duas regras do `global.css`.
+    - `header-theme.spec.ts`, "the print is in the light theme…". Com o Escuro guardado, e depois com Sistema num sistema escuro, o `emulateMedia({ media: 'print' })` dá o texto, o fundo e o `color-scheme` da página clara, e na tela a página continua escura. No mesmo commit, reprovou nos dois navegadores, com o texto rgb(247, 250, 253), o fundo rgb(11, 21, 36) e o `color-scheme` dark.
+- **D-1, a folha do Menu a 146,5 px do anúncio, de 390 a 767 px.**
+  - **O defeito:** abaixo de 768 px, a folha tem a mesma altura em toda largura, mas o 1º AdSlot do Merge PDF e do Unlock PDF em inglês sobe de y 796 para y 776 a partir de 390 px. Com as linhas de 52 px, a folha terminava em y 629,5, a 146,5 px dele, nos dois navegadores. O `ads.spec.ts` media só 360 e 1280 px, e a frase da § 388 ("todo AdSlot das 178 páginas … a 166,5 px ou mais") só valia até 384 px.
+  - **A correção:** as linhas da folha passam a ter 48 px, o `tap-min` de todo controle e dos idiomas (`min-height: var(--tap-min)` e padding vertical 0; o nome e a contagem, 38 px, ficam centrados). É um desvio da especificação (`header-a.html`), que pedia 52 px.
+    - A folha em inglês termina em y 597,5 (antes, 629,5), e a de português e espanhol em y 497,5 (antes, 521,5).
+    - Abaixo de 768 px, todo AdSlot fica a 178,5 px ou mais da folha aberta; de 320 a 384 px, a 198,5 px ou mais.
+    - A 1280 px, a folha fica 32 px mais baixa em inglês e 24 px em português e espanhol.
+    - O README do Header, a região do Header no `bundle.css`, o comentário do CSS e o `docs/claude/anuncios.md` dizem as medidas novas.
+  - **O teste:** o bloco do cabeçalho do `ads.spec.ts` mede também 767 px (360, 767 e 1280). Abaixo de 768 px, a folha não muda de altura e o anúncio só sobe com a largura, então 767 px é onde os dois mais se aproximam. No commit `333fec8`, os blocos do `/merge-pdf/` e do `/unlock-pdf/` reprovaram nos dois navegadores, com 146,5 px a 767 px. Depois da correção, os 24 blocos passam.
+  - **As alternativas:**
+    - 48 px de altura mínima com o padding de 4 px: as linhas ficavam com 50 px, e o vão com 162,5 px;
+    - medir 390 e 412 px em vez de 767: uma largura a mais, sem pegar o ponto mais perto;
+    - a solução da raiz, o 1º anúncio dos moldes de PDF abaixo de y 880, continua com a F12 (UX-07).
+- **D-2, o tempo dos blocos do cabeçalho.**
+  - **O defeito:** cada bloco abre 15 páginas e, em cada largura, abre e fecha os menus. No WebKit, com a máquina carregada, estourava os 60 s do padrão sem nenhuma asserção de vão falhar.
+  - **A correção:** `test.setTimeout(120_000)` no teste do bloco, como nos testes longos das calculadoras. Nenhuma asserção mudou.
+  - **A prova:** com o tempo global baixado para 5 s (`--timeout=5000`, um runner muito mais lento), os 12 blocos do Chromium reprovaram no commit `333fec8` com "Test timeout of 5000ms exceeded". No `7b39ad6`, os 12 passaram em 17,3 s, porque o bloco tem o tempo dele.
+- **O teste antigo que mudou (no formato da § 341).** No `tests/e2e/header-menu.spec.ts`, o teste de cada molde fixava as linhas da folha com 52 px ou mais, a altura da especificação. Agora fixa 48 px ou mais, porque o D-1 passou as linhas a 48 px. A proteção continua: toda linha é um alvo de 48 px, como os idiomas e os controles, e o vão da folha aos anúncios, que a altura servia, está no `ads.spec.ts`, agora também a 767 px.
+- **Só acrescentados,** sem nenhuma asserção mudada: o teste do sublinhado no `header-menu.spec.ts`, o da impressão no `header-theme.spec.ts`, o `describe` da impressão e o campo `media` no `theme-pair.test.ts`, e a largura de 767 px e o tempo de 120 s no bloco do cabeçalho do `ads.spec.ts`.
+- **As pegadinhas novas:**
+  - no `docs/claude/design-e-oli.md`, o clique que fecha um popover segue para o que está embaixo (B-2);
+  - no `docs/claude/anuncios.md`, o 1º AdSlot que sobe com a largura (D-1);
+  - no `docs/claude/playwright.md`, o WebKit recusa a porta 4190, que está na lista de portas restritas: todo `page.goto` fica parado até o tempo do teste acabar.
+- **Os que foram para o PENDENCIAS, sem correção:**
+  - B-2: é o comportamento padrão do popover, e engolir o clique pediria um script; a pegadinha ficou escrita;
+  - B-3: o README do sistema e o `bundle.css`, junto do F11 g-2, na run que regenerar o design system;
+  - C-2: o tema não é relido ao voltar do bfcache, e a correção é JS novo em toda página, fora desta revisão;
+  - E-1: o Menu diz 14 calculadoras de dinheiro, e a Sobre e os Termos em inglês e espanhol dizem 18. As duas páginas estão fora do diff da F11, e o 18 é decisão da § 321.
+- **As contagens:** o Vitest tem 109 arquivos e 1.832 testes (+2, os do `theme-pair.test.ts`), e o `--list` do Playwright, 1.558 testes por navegador (+2, o do sublinhado e o da impressão).
