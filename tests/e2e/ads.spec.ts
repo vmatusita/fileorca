@@ -106,8 +106,8 @@ function distance(a: Box, b: Box): number {
   return Math.hypot(dx, dy);
 }
 
-async function expectClearance(page: Page, label: string, selector = TARGETS): Promise<number> {
-  const ads = await boxes(page, '.fo-ad');
+async function expectClearance(page: Page, label: string, selector = TARGETS, adSelector = '.fo-ad'): Promise<number> {
+  const ads = await boxes(page, adSelector);
   const targets = await boxes(page, selector);
   expect(ads.length, `${label}: nenhum AdSlot visível`).toBeGreaterThan(0);
   expect(targets.length).toBeGreaterThan(0);
@@ -338,8 +338,11 @@ test('the AdSlot shows the accepted label per language, reserves its height and 
 // theme, Menu) and every open menu (the Menu sheet and the language menu) is 150 px or more from every AdSlot, at 360,
 // 767 and 1280 px, on every page that has AdSlots (the route map: each route with an ad area, in each of its languages), in blocks
 // of pages. On the phone the sheet opens at the top of the page and the first AdSlot of each mold sits under it (the
-// nearest, Merge PDF and Unlock PDF in English, at y 796); at 1280 px the header follows the grid of the frame, so its
-// last control and the open sheet end where the tool column ends, 150 px from the rail.
+// nearest, Merge PDF and Unlock PDF in English, at y 796).
+// Header width adjustment (DECISOES § 409): from 1280 px the header runs over the rail, as the footer does, and the rail
+// starts 150 px under the header, so every control stays 150 px or more from its AdSlot. An open menu covers the top of
+// the rail: it keeps the 150 px from every other AdSlot, and while it is open the rail takes no pointer (the click that
+// closes it lands on the body; review F11 B-2), which the test checks against a control with the menus closed.
 // Review F11 D-1 (DECISOES § 404): 767 px too. Under 768 px the sheet keeps its height at every width, while the first
 // AdSlot rises as the text of the page wraps less (Merge PDF and Unlock PDF in English: y 796 up to 384 px, y 776 from
 // 390 px), so 767 px is where the open sheet and the first AdSlot of the phone layout come closest.
@@ -347,6 +350,13 @@ const HEADER_CONTROLS = '.fo-header > a, .fo-header > button';
 const HEADER_AD_PAGES = ROUTES.filter((route) => route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
 const HEADER_AD_BLOCK = 15;
 const HEADER_VIEWPORTS = [VIEWPORTS[0], { width: 767, height: 800 }, VIEWPORTS[1]] as const;
+/** Whether a click on the AdSlot of the rail, 20 px under its top, reaches it (no rail on screen: no). */
+const railTakesPointer = (page: Page) => page.evaluate(() => {
+  const ad = document.querySelector('.fo-ad--rail');
+  const rect = ad?.getBoundingClientRect();
+  if (!ad || !rect || rect.width === 0) return false;
+  return ad.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + 20));
+});
 test.describe('the header and its open menus stay 150px from every AdSlot, at 360, 767 and 1280px', () => {
   for (let start = 0; start < HEADER_AD_PAGES.length; start += HEADER_AD_BLOCK) {
     const block = HEADER_AD_PAGES.slice(start, start + HEADER_AD_BLOCK);
@@ -361,16 +371,22 @@ test.describe('the header and its open menus stay 150px from every AdSlot, at 36
           await page.evaluate(() => scrollTo(0, 0));
           const label = `${path} ${viewport.width}px`;
           await expectClearance(page, `${label}, o cabeçalho`, HEADER_CONTROLS);
+          // The rail is on screen from 1280 px, and with the menus closed a click reaches it (polled: the sheet that holds
+          // the page after a menu closes stays 400 ms).
+          const rail = viewport.width >= 1280 && (await page.locator('.fo-ad--rail').count()) > 0;
+          await expect.poll(() => railTakesPointer(page), `${label}: a lateral recebe o clique com os menus fechados`).toBe(rail);
           await page.locator('.fo-header__menu').click();
           await expect(page.locator('#fo-menu')).toBeVisible();
-          await expectClearance(page, `${label}, o Menu aberto`, `#fo-menu, ${HEADER_CONTROLS}`);
+          await expectClearance(page, `${label}, o Menu aberto`, `#fo-menu, ${HEADER_CONTROLS}`, '.fo-ad:not(.fo-ad--rail)');
+          expect(await railTakesPointer(page), `${label}: a lateral recebe o clique com o Menu aberto`).toBe(false);
           await page.keyboard.press('Escape');
           await expect(page.locator('#fo-menu')).toBeHidden();
           // The language menu has its button from 768 px; under it, the languages are in the Menu, measured above.
           if (viewport.width >= 768) {
             await page.locator('.fo-header__lang').click();
             await expect(page.locator('#fo-langmenu')).toBeVisible();
-            await expectClearance(page, `${label}, o menu de idioma aberto`, `#fo-langmenu, ${HEADER_CONTROLS}`);
+            await expectClearance(page, `${label}, o menu de idioma aberto`, `#fo-langmenu, ${HEADER_CONTROLS}`, '.fo-ad:not(.fo-ad--rail)');
+            expect(await railTakesPointer(page), `${label}: a lateral recebe o clique com o menu de idioma aberto`).toBe(false);
             await page.keyboard.press('Escape');
             await expect(page.locator('#fo-langmenu')).toBeHidden();
           }

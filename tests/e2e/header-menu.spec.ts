@@ -3,8 +3,9 @@
 // guides hub and to each category hub of the language, under 768 px the language at the end of the sheet leads to the
 // equivalent page, Esc closes it and gives the focus back to the button, the header keeps 64 px and one line. Then the
 // measures of criterion 7: 64 px and one line at 320, 360, 390, 412, 768, 1024 and 1280 px in the three languages, with
-// Figtree held and released; at 1280 px the last control and the open sheet 150 px or more from the rail and the logo on
-// the column; the 48 px targets. The measures are printed ([header] lines) for the table of the report.
+// Figtree held and released; at 1280 px the controls 150 px or more from the rail, which starts 150 px under the header;
+// the 48 px targets. The measures are printed ([header] lines) for the table of the report. Last, the header and the
+// footer share their edges at every width, on a page with the rail and on one without (DECISOES § 409).
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { LANGS, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
@@ -328,21 +329,21 @@ test.describe('the header measured in the three languages, with Figtree held and
         // Every text of the header is in Figtree Steady, which keeps the face of the first paint: nothing moves.
         expect(await measure('Figtree solta'), `${lang} ${width}: the header does not move when Figtree arrives`).toEqual(held);
         if (width === 1280) {
-          // On a page with the rail: the logo on the tool column, the last control where the column ends, and the controls
-          // and the open sheet 150 px or more from the rail.
+          // On a page with the rail, the header runs over it, as the footer does (DECISOES § 409): the rail starts 150 px
+          // under the header, so every control is 150 px or more from its AdSlot. The open sheet covers the top of the
+          // rail, and the page under it, the rail with it, takes no pointer while it is open (review F11 B-2).
           const grid = await page.evaluate(() => {
             const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect() ?? null;
             const controls = [...document.querySelectorAll<HTMLElement>('.fo-header > a, .fo-header > button')].map((element) => element.getBoundingClientRect()).filter((r) => r.width > 0);
-            return { main: rect('main.fo-main'), rail: rect('.fo-rail .fo-ad'), logo: rect('.fo-header__logo'), last: Math.max(...controls.map((r) => r.right)) };
+            return { header: rect('.fo-header'), rail: rect('.fo-rail .fo-ad'), logo: rect('.fo-header__logo'), last: Math.max(...controls.map((r) => r.right)), low: Math.max(...controls.map((r) => r.bottom)) };
           });
-          expect(grid.main && grid.logo && Math.abs(grid.logo.left - grid.main.left), 'the logo starts where the column starts').toBeLessThanOrEqual(1);
-          expect(grid.main && Math.abs(grid.last - grid.main.right), 'the last control ends where the column ends').toBeLessThanOrEqual(2);
-          expect(grid.rail && grid.rail.left - grid.last, 'the controls are 150 px or more from the rail').toBeGreaterThanOrEqual(150);
+          expect(grid.rail && grid.header && grid.rail.top - grid.header.bottom, 'the rail starts 150 px under the header').toBeGreaterThanOrEqual(150);
+          expect(grid.rail && grid.rail.top - grid.low, 'the controls are 150 px or more from the rail').toBeGreaterThanOrEqual(150);
           await menuButton(page).click();
           await expect(sheet(page)).toBeVisible();
           const open = await sheet(page).boundingBox();
-          expect(grid.rail && open && grid.rail.left - (open.x + open.width), 'the open sheet is 150 px or more from the rail').toBeGreaterThanOrEqual(150);
-          lines.push(`[header] ${browserName} ${lang} 1280: logo em x ${grid.logo?.left.toFixed(1)} (coluna em ${grid.main?.left.toFixed(1)}), último controle até x ${grid.last.toFixed(1)} (coluna até ${grid.main?.right.toFixed(1)}), lateral em x ${grid.rail?.left.toFixed(1)}, folha de x ${open?.x.toFixed(1)} a ${open ? (open.x + open.width).toFixed(1) : '?'} e ${open?.height.toFixed(1)} px de altura`);
+          expect(await page.evaluate(() => getComputedStyle(document.querySelector('.fo-frame') as Element).pointerEvents), 'the page under the open sheet takes no pointer').toBe('none');
+          lines.push(`[header] ${browserName} ${lang} 1280: logo em x ${grid.logo?.left.toFixed(1)}, último controle até x ${grid.last.toFixed(1)}, lateral em x ${grid.rail?.left.toFixed(1)} e y ${grid.rail?.top.toFixed(1)}, folha de x ${open?.x.toFixed(1)} a ${open ? (open.x + open.width).toFixed(1) : '?'} e ${open?.height.toFixed(1)} px de altura`);
         }
         console.log(lines.join('\n'));
         await close();
@@ -350,3 +351,39 @@ test.describe('the header measured in the three languages, with Figtree held and
     }
   }
 });
+
+// The header and the footer share their edges (DECISOES § 409): the first control of the header starts where the
+// footer's columns and its base line start, and the last one ends where they end, at every width from 320 to 1920 px, on
+// a page with the rail and on two without. The open sheet keeps to the same edges under 768 px, and to the right one from
+// there. Before, from 1280 px the header ended where the tool column ends (x 794 at 1280, the footer at x 1256), and from
+// 360 to 1279 px it was 8 px wider than the footer on each side.
+const EDGE_WIDTHS = [320, 359, 360, 390, 767, 768, 1024, 1279, 1280, 1288, 1440, 1920] as const;
+for (const path of ['/compress-image/', '/pt/guias/', '/es/']) {
+  test(`${path}: the header and the footer share their edges at every width, and the open sheet keeps to them`, async ({ page }) => {
+    expect((await page.goto(path))?.status(), path).toBe(200);
+    for (const width of EDGE_WIDTHS) {
+      await page.setViewportSize({ width, height: 800 });
+      const label = `${path} a ${width} px`;
+      const box = await expectOneLine(page, label);
+      const first = Math.min(...box.controls.map((control) => control.left));
+      const last = Math.max(...box.controls.map((control) => control.right));
+      const footer = await page.evaluate(() => [...document.querySelectorAll('.fo-footer__cols, .fo-footer__base')].map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      }));
+      expect(footer, label).toHaveLength(2);
+      for (const edges of footer) {
+        expect(Math.abs(first - edges.left), `${label}: o cabeçalho começa em x ${first.toFixed(1)}, o rodapé em x ${edges.left.toFixed(1)}`).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(last - edges.right), `${label}: o cabeçalho termina em x ${last.toFixed(1)}, o rodapé em x ${edges.right.toFixed(1)}`).toBeLessThanOrEqual(0.5);
+      }
+      await menuButton(page).click();
+      await expect(sheet(page)).toBeVisible();
+      const open = await sheet(page).boundingBox();
+      expect(open, label).not.toBeNull();
+      if (width < 768) expect(Math.abs((open?.x ?? NaN) - first), `${label}: a folha começa na borda do cabeçalho`).toBeLessThanOrEqual(0.5);
+      expect(Math.abs((open ? open.x + open.width : NaN) - last), `${label}: a folha termina na borda do cabeçalho`).toBeLessThanOrEqual(0.5);
+      await page.keyboard.press('Escape');
+      await expect(sheet(page)).toBeHidden();
+    }
+  });
+}

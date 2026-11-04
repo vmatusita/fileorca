@@ -67,7 +67,9 @@ main :where(p, li, td) a:not([class]):hover, .fo-cookie a:hover { text-decoratio
 @media (min-width: 1280px) {
   /* The column gap is the ad clearance itself, so the rail never comes closer than 150px. */
   .fo-frame--rail { display: grid; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; align-items: start; }
-  .fo-rail { display: block; padding-top: var(--space-5); }
+  /* The header runs over the rail (DECISOES § 409), so the rail starts 150px under it: every control of the header
+     (48px tall in its 64px) is 158px from the AdSlot of the rail. */
+  .fo-rail { display: block; padding-top: var(--ad-clearance); }
 }
 .fo-prose { max-width: var(--fo-measure); }
 .fo-prose > h1 { margin-bottom: var(--space-4); }
