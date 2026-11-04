@@ -3,14 +3,14 @@ import { parse, type HTMLElement } from 'node-html-parser';
 import { describe, expect, it } from 'vitest';
 import { LANGS, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfTool, type FileGuideTool } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfTool, isFileGuide, type FileGuideTool } from '../../src/tools/guides/registry.ts';
 import { guideCardData } from '../../src/tools/guides/card.ts';
 import { CALC_PAGES, GUIDE_IDS, guidePathIn, isBrCalc, isCalcPage, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { HUB_GROUPS, hubGroup } from '../../src/tools/guides/hub.ts';
 import { routeById } from '../../src/i18n/routes.ts';
-import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
+import { DIST, allPages, fileForPath, listFiles } from '../../scripts/lib/dist.ts';
 
 // The entries of the guides (F11, decision 7; DECISOES § 396), read from the built pages in dist/ (run `pnpm build` first,
 // as for guides-hub-route.test.ts): what every page of a language carries, and where the guides hub leads from.
@@ -126,4 +126,68 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
     // in English and Spanish (12): read from the registries above, checked here against the counts of the specification.
     expect([pages, cards]).toEqual([27 + 12, 30 + 12]);
   }, 60_000);
+});
+
+// F11 (decision 7; the F5b F-12): a guide is never drawn with the ToolCard, on any page of the site, and every guide in the
+// related grid of a guide is a GuideCard (with its foot: the tool it embeds).
+describe('no guide with the ToolCard, on any page of dist/', () => {
+  /** Every path of a guide, in every language that has it. */
+  const GUIDE_PATHS = new Set([...FILE_GUIDE_IDS.flatMap((id) => LANGS.map((lang) => FILE_GUIDES[id].paths[lang])), ...GUIDE_IDS.flatMap((id) => LANGS.flatMap((lang) => guidePathIn(id, lang) ?? []))]);
+  const HTML_FILES = listFiles(DIST).filter((file) => file.endsWith('.html'));
+
+  it('reads the 40 guide pages and every HTML file of dist/', () => {
+    expect(GUIDE_PATHS.size).toBe(40);
+    expect(HTML_FILES.length).toBeGreaterThanOrEqual(211);
+  });
+
+  it('finds no a.fo-tool that leads to a guide, and no card that leads to a guide without being a GuideCard', () => {
+    const wrong: string[] = [];
+    let guideCards = 0;
+    for (const file of HTML_FILES) {
+      const html = readFileSync(file, 'utf8');
+      if (!html.includes('fo-tool') && !html.includes('fo-guidecard')) continue;
+      const main = parse(html).querySelector('main');
+      for (const card of main?.querySelectorAll('a.fo-tool') ?? []) {
+        if (GUIDE_PATHS.has(card.getAttribute('href') ?? '')) wrong.push(`${file}: ToolCard de ${card.getAttribute('href')}`);
+      }
+      for (const card of main?.querySelectorAll('.fo-grid > li > a, .fo-guidecards > li > a') ?? []) {
+        const href = card.getAttribute('href') ?? '';
+        if (GUIDE_PATHS.has(href) && !card.classList.contains('fo-guidecard')) wrong.push(`${file}: cartão de ${href} sem a classe fo-guidecard`);
+        if (card.classList.contains('fo-guidecard')) guideCards += 1;
+      }
+    }
+    expect(wrong).toEqual([]);
+    expect(guideCards).toBeGreaterThan(0);
+  }, 60_000);
+
+  it('draws each guide of the related grid of a guide with the GuideCard and its foot, in the order of the registry', () => {
+    let total = 0;
+    for (const id of FILE_GUIDE_IDS) {
+      for (const lang of LANGS) {
+        const path = FILE_GUIDES[id].paths[lang];
+        const section = parse(read(path)).querySelector('main section[data-content="related"]');
+        const links = section?.querySelectorAll('ul.fo-grid > li > a') ?? [];
+        const related = FILE_GUIDES[id].related.slice(0, 6);
+        expect(links.length, path).toBe(related.length);
+        for (const [index, target] of related.entries()) {
+          const link = links[index];
+          if (!isFileGuide(target)) {
+            expect(link?.classList.contains('fo-tool'), `${path}: ${target}`).toBe(true);
+            continue;
+          }
+          total += 1;
+          const data = guideCardData(target, lang);
+          expect(link?.getAttribute('href'), `${path}: ${target}`).toBe(data.href);
+          expect(link?.classList.value, `${path}: ${target}`).toEqual(['fo-guidecard', 'fo-dogear', `fo-cat--${data.category}`]);
+          expect(link?.querySelector('h3.fo-guidecard__name')?.text, `${path}: ${target}`).toBe(data.name);
+          expect(link?.querySelector('.fo-guidecard__proof')?.text.trim(), `${path}: ${target}`).toBe(data.proof);
+          expect(link?.querySelector('.fo-guidecard__tool > span:last-child > span:last-child')?.text, `${path}: ${target}`).toBe(data.tool.name);
+          // One link per card: the gate counts the related links, six at most.
+          expect(link?.querySelectorAll('a'), `${path}: ${target}`).toHaveLength(0);
+        }
+      }
+    }
+    // 18 guides in the related grids of each language (§ 189), now drawn as guides.
+    expect(total).toBe(18 * LANGS.length);
+  });
 });
