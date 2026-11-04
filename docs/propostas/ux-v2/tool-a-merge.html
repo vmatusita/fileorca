@@ -183,7 +183,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
 
           <section class="tm-panel" aria-labelledby="tm-count" data-when="reading list removed">
             <div class="tm-panel__head">
-              <p class="tm-count" id="tm-count"><span data-when="list"><span data-t="l.count">2 PDFs ready</span> <span class="tm-count__pages" data-t="l.pages">· 3 pages</span></span><span data-when="reading" data-t="l.reading">Reading 2 PDFs…</span><span data-when="removed"><span data-t="l.countOne">1 PDF ready</span> <span class="tm-count__pages" data-t="l.pagesOne">· 2 pages</span></span></p>
+              <p class="tm-count" id="tm-count" role="status"><span data-when="list"><span data-t="l.count">2 PDFs ready</span> <span class="tm-count__pages" data-t="l.pages">· 3 pages</span></span><span data-when="reading" data-t="l.reading">Reading 2 PDFs…</span><span data-when="removed"><span data-t="l.countOne">1 PDF ready</span> <span class="tm-count__pages" data-t="l.pagesOne">· 2 pages</span></span></p>
             </div>
             <div class="tm-actions">
               <button type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" data-when="list" data-t="l.merge">Merge PDFs</button>
@@ -258,7 +258,7 @@ html[data-visit="first"] [data-when-visit]:not([data-when-visit~="first"]) { dis
           </div>
         </div>
 
-        <div class="tl-band ta-band tm-band" data-when="list processing result next">
+        <div class="tl-band ta-band tm-band" data-when="reading list removed processing result next">
           <nav class="fo-next tl-next" aria-labelledby="tm-next-label" data-when="result next">
             <span class="fo-next__label" id="tm-next-label" data-t="n.label">Next:</span>
             <a class="fo-chip fo-cat--pdf" href="#"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M10.5 11.5 9.5 18"/><path d="M14.5 11.5l-1 6.5"/><path d="M8.5 13.5h7"/><path d="M8 16h7"/></svg></span><span data-t="n.numbers">Add page numbers</span><svg class="fo-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>

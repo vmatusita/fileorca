@@ -3977,3 +3977,12 @@ A revisão (quatro lentes Sonnet e os céticos, sobre `4d8e946`) deu 34 achados:
 - **d-12:** o UX-05 diz que o card em pt com um botão só é desvio da seção C, e os dois botões ficam como alternativa nas "Decisões avulsas".
 
 Os scripts novos desta revisão, em `.cache/f10/`: `densidade768.mjs`, `revisao-proto-ads.mjs`, `revisao-reflow.mjs`, `revisao-ux04.mjs` e os `revisao-patch-*.mjs` de cada correção.
+
+**A segunda passada** (sobre o diff `4d8e946..d5f8fed`) concordou com as correções e achou 1 problema médio e 9 baixos criados por elas. O agente principal corrigiu os dez:
+- **N1 (médio):** no `tool-a-merge.html`, a faixa de altura fixa sumia nos estados novos de leitura e de remoção, e o conteúdo abaixo pulava 268 px, contra o "CLS 0" da especificação. Agora a faixa vale em todos os estados, e as duas capturas foram regravadas.
+- **N2 e N3:** os números do rodapé no UX-17 batem com o `pages.html`: 753, 633 e 633 px (−61, −54 e −55 %), e 42 links.
+- **N4:** a home B mostra 3 caixas a 1280. A lateral 2 só entra com 600 palavras ou mais (a regra do UX-07), e o protótipo a desenha para mostrar onde ela entraria.
+- **N5 e N6:** a lista dos D-NN do UX-04 está certa, e os estados novos têm link.
+- **N7 e N8:** o `ESCOLHAS.md` diz onde está cada mudança de regra e que, na F11 e na F12, um item sem marca aceita a mudança da recomendada.
+- **N9:** o "(notas)" saiu dos G-NN e U-NN.
+- **N10:** a contagem do juntar ("Lendo 2 PDFs…" e depois "2 PDFs prontos") ganhou `role="status"`.

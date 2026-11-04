@@ -7,7 +7,7 @@ Como marcar:
 - Um item sem nenhuma marca:
   - na F11 e na F12, vale a alternativa com "(recomendado)", porque o protótipo recomendado é a especificação que elas seguem quando você não escolher (decisão 4 da ficha da F10). A exceção é a pose: sem marca no UX-08, a parede usa a `oops`, como a ficha da F12 manda;
   - na F13, não entra. A ficha da F13 constrói "o que você escolheu" e deixa de fora "item não escolhido". Vale também para as pendências e para as decisões avulsas da F13: marque o que a F13 deve fazer.
-- O porquê diz "muda regra" quando a alternativa recomendada muda uma regra do design system: marcar o item é aceitar a mudança.
+- Quando uma alternativa muda uma regra do design system, a linha dela ou o porquê do item diz isso (a lista completa está no Resumo do README). Marcar a alternativa é aceitar a mudança. Na F11 e na F12, um item sem marca vale a recomendada, inclusive a mudança de regra que ela traz (o menu do UX-01, que a Mudança 6 já manda, e o `fo-btn--brand` da parede no UX-06); para não aceitar, marque "Nenhuma" ou a outra alternativa.
 - "Nenhuma" ou "Não fazer" tira o item da run.
 - Cada item aponta para o README ([README.md](README.md)) e para o protótipo. Abra o [index.html](index.html) para ver todos nos dois temas.
 - A lista marcada vai colada nas conversas da F11, da F12 e da F13, junto com as seções "Para o docs/claude/" e "Para o PENDENCIAS" do relatório da F10 (`docs/relatorios/fase-10.md`).
