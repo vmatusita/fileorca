@@ -783,3 +783,5 @@
 .fo-prose .fo-guidecard :is(p, span) { margin: 0; }
 .fo-guidehere { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
 @media (prefers-reduced-motion: reduce) { .fo-guidecard:hover { transform: none; } }
+/* The Guides block of the footer sits under Utilities, in the same column: an eighth column does not fit at 1280 px. */
+.fo-footer__more { margin-top: var(--space-6); }

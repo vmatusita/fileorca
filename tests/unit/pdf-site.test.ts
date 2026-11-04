@@ -119,7 +119,9 @@ describe('footer', () => {
     expect(links.map((link) => link.text)).toEqual([enCommon.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => enCommon.pdf[id].name)]);
     // The columns, in the order of the site: image, PDF, money, FileOrca.
     // F7 (decision 9; DECISOES § 259): in English, the Home, Health and Utilities columns come before FileOrca.
-    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'Home', 'Health', 'Utilities', 'FileOrca']);
+    // F11 (decision 7; DECISOES § 396 and § 400): the Guides block sits under Utilities, in the same column.
+    expect(page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text)).toEqual(['Image', 'PDF', 'Money', 'Home', 'Health', 'Utilities', 'Guides', 'FileOrca']);
+    expect(page.querySelectorAll('footer .fo-footer__cols > div')).toHaveLength(7);
   });
 
   it('has, in English, a Home and a Health column with the hub and every calculator of it, and a Utilities column with the QR code, so no F7 page is an orphan', async () => {
@@ -129,7 +131,8 @@ describe('footer', () => {
       expect(links.map((link) => link.getAttribute('href')), hub).toEqual([routeById(LIFE_HUB_ROUTE[hub]).paths.en, ...LIFE_HUB_IDS[hub].map((id) => routeById(id).paths.en)]);
       expect(links.map((link) => link.text), hub).toEqual([name, ...LIFE_HUB_IDS[hub].map((id) => enCommon.calcs[id].name)]);
     }
-    const utility = column(page, enCommon.footer.utilityColumn)?.querySelectorAll('li a') ?? [];
+    // The first list of the column is the utilities one (F11: the Guides block follows it in the same column).
+    const utility = column(page, enCommon.footer.utilityColumn)?.querySelector('ul')?.querySelectorAll('li a') ?? [];
     expect(utility.map((link) => link.getAttribute('href'))).toEqual([routeById(QR_ID).paths.en]);
     expect(utility.map((link) => link.text)).toEqual([enCommon.qr.name]);
     // Every one of the 14 F7 pages is linked from the English footer.
@@ -147,8 +150,9 @@ describe('footer', () => {
       // The columns in the order of the site: image, PDF, money (where the language has a money hub), the utilities with the
       // QR code generator of the language (since the languages adjustment), FileOrca.
       const titles = page.querySelectorAll('footer .fo-footer__cols > div h2').map((h2) => h2.text);
-      expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.utilityColumn, common.footer.siteColumn]);
-      const utility = column(page, common.footer.utilityColumn ?? '')?.querySelectorAll('li a') ?? [];
+      // F11: and the Guides block under the utilities, in the same column (DECISOES § 400).
+      expect(titles, lang).toEqual([common.footer.imageColumn, common.footer.pdfColumn, ...(pagePath(moneyHubId(lang), lang) ? [common.footer.moneyColumn] : []), common.footer.utilityColumn, common.guidesHub, common.footer.siteColumn]);
+      const utility = column(page, common.footer.utilityColumn ?? '')?.querySelector('ul')?.querySelectorAll('li a') ?? [];
       expect(utility.map((link) => link.getAttribute('href')), lang).toEqual([routeById(QR_ID).paths[lang]]);
       expect(utility.map((link) => link.text), lang).toEqual([common.qr?.name]);
       // No footer link to an English PDF page.

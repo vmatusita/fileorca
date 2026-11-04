@@ -4,16 +4,22 @@
 // lists the language's money hub and its five credit calculators (DECISOES § 118; F6: the Brazilian hub and calculators
 // in Portuguese, the Spanish ones in Spanish). The PDF column lists the hub and the first six PDF tools in hub order (F5a,
 // DECISOES § 160): every PDF page is one click from the hub, so none is an orphan. In English, the Home and Health columns
-// list their hub and every calculator of it, and the Utilities column the QR code generator (F7, decision 9). Never an ad inside the footer. With the AdSense
-// anchor on the page, 96px of room at the bottom on the phone.
-import type { Lang } from '../i18n/routes.ts';
+// list their hub and every calculator of it, and the Utilities column the QR code generator (F7, decision 9). Under
+// Utilities, in the same column, the Guides block (F11, decision 7; DECISOES § 396): "All guides", the guides hub of the
+// language, and its groups that have guides in the language (#image, #pdf and #money on the hub; no money in pt). On the hub
+// itself, "All guides" is the current page. An eighth column would not fit at 1280 px. Never an ad inside the footer. With
+// the AdSense anchor on the page, 96px of room at the bottom on the phone.
+import type { Lang, RouteId } from '../i18n/routes.ts';
 import { QR_ID, moneyHubId, pagePath, pathFor, routeById } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
 import type { CommonTexts } from '../i18n/types.ts';
 import { fmt } from '../i18n/format.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, type LifeHub } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
+import { HUB_GROUPS, hubGroup } from '../tools/guides/hub.ts';
 import Icon from './Icon.astro';
 
 /** How many PDF tools the footer column lists after the hub: the six of the highest search volume. */
@@ -24,8 +30,10 @@ interface Props {
   t: CommonTexts;
   /** The page loads AdSense (so the anchor may cover the bottom of the screen). */
   anchor: boolean;
+  /** The route of the page: on the guides hub, "All guides" is the current page. */
+  current?: RouteId;
 }
-const { lang, t, anchor } = Astro.props;
+const { lang, t, anchor, current } = Astro.props;
 const year = new Date().getUTCFullYear();
 const hub = routeById('image-tools').paths[lang];
 const image = [
@@ -76,6 +84,17 @@ const life = (hubId: LifeHub, name: string | undefined, title: string | undefine
 const lifeColumns = [life('house', t.homeCalculators, t.footer.homeColumn), life('health', t.healthCalculators, t.footer.healthColumn)].filter((column) => column !== null);
 const qrPath = pagePath(QR_ID, lang);
 const utility = qrPath && t.qr && t.footer.utilityColumn ? { title: t.footer.utilityColumn, links: [{ label: t.qr.name, href: qrPath }] } : null;
+/** The Guides block: the hub of the language, then each group of the hub that has a guide in the language. */
+const guidesHub = pagePath(GUIDES_HUB_ID, lang);
+const guides = guidesHub
+  ? {
+      title: t.guidesHub,
+      links: [
+        { label: t.footer.guidesAll, href: guidesHub, here: current === GUIDES_HUB_ID },
+        ...HUB_GROUPS.filter((group) => hubGroup(group, lang).length > 0).map((group) => ({ label: TEXTS[lang].guides.groups[group].heading, href: `${guidesHub}#${group}`, here: false })),
+      ],
+    }
+  : null;
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },
@@ -108,10 +127,20 @@ const site = [
         <ul>{column.links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
       </div>
     ))}
-    {utility && (
+    {(utility || guides) && (
       <div>
-        <h2>{utility.title}</h2>
-        <ul>{utility.links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+        {utility && (
+          <>
+            <h2>{utility.title}</h2>
+            <ul>{utility.links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+          </>
+        )}
+        {guides && (
+          <div class="fo-footer__more">
+            <h2>{guides.title}</h2>
+            <ul>{guides.links.map((link) => <li><a href={link.href} aria-current={link.here ? 'page' : undefined}>{link.label}</a></li>)}</ul>
+          </div>
+        )}
       </div>
     )}
     <div>
