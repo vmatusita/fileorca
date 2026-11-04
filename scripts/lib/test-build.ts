@@ -48,7 +48,17 @@ export type Variant = keyof typeof VARIANTS;
 const EMPTY = { PUBLIC_ADSENSE_CLIENT: '', PUBLIC_ADSENSE_SLOTS: '', PUBLIC_ADS_ENABLED: 'false', PUBLIC_ADBLOCK_WALL: '' };
 /** Where a new, untracked file can change the build (a changed tracked file anywhere makes the tree dirty). */
 const BUILD_INPUTS = ['src/', 'public/', 'docs/design/', 'scripts/', 'astro.config.', 'package.json', 'pnpm-lock.yaml', 'tsconfig.'];
-const LOCK_STALE_MS = 15 * 60_000;
+/*
+ * The lock (review E-3; DECISOES § 453). The holder writes its PID in the lock and renews it every LOCK_BEAT_MS while it
+ * builds (the build is a child process, so the event loop is free). A lock is left over when its process is gone (a
+ * Ctrl-C, a killed webServer) or when it was not renewed for LOCK_STALE_MS (a frozen holder, a PID used again, or a lock
+ * of before § 453, with no PID): far below the 600 s the specs wait for the build (tests/e2e/lib/test-build.ts), and
+ * never while a live holder builds, however long the build takes.
+ */
+export const LOCK_STALE_MS = 60_000;
+const LOCK_BEAT_MS = 10_000;
+/** The file of the lock with the PID of the holder; its time is the last renewal. */
+const LOCK_OWNER = 'pid';
 
 export interface BuildResult {
   name: Variant;
@@ -88,16 +98,88 @@ function keyOf(name: Variant): Key {
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-async function lock(path: string): Promise<() => void> {
+/** Whether a process is running (EPERM: it runs, as another user). */
+function running(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === 'EPERM';
+  }
+}
+
+/** The time of a file in ms, or null when it is not there. */
+function mtimeOf(path: string): number | null {
+  try {
+    return statSync(path).mtimeMs;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+/**
+ * The state of a lock another process made: "free" when it is gone (released between our mkdir and this look), "stale"
+ * when its process is gone or it was not renewed for staleMs, "held" otherwise.
+ */
+export function lockState(path: string, staleMs = LOCK_STALE_MS, now = Date.now()): 'free' | 'stale' | 'held' {
+  const owner = join(path, LOCK_OWNER);
+  let pid = Number.NaN;
+  try {
+    pid = Number.parseInt(readFileSync(owner, 'utf8'), 10);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  if (Number.isInteger(pid) && pid > 0 && !running(pid)) return 'stale';
+  // The time of the last renewal; with no PID yet (the holder is between its mkdir and its write), that of the lock.
+  const renewed = mtimeOf(owner) ?? mtimeOf(path);
+  if (renewed === null) return 'free';
+  return now - renewed > staleMs ? 'stale' : 'held';
+}
+
+export interface LockOptions {
+  staleMs?: number;
+  beatMs?: number;
+  pollMs?: number;
+  /** Where the line about the wait goes (once per wait). */
+  log?: (line: string) => void;
+}
+
+/** Takes the lock directory at path, waiting for a live holder and taking over a stale one; returns its release. */
+export async function lock(path: string, options: LockOptions = {}): Promise<() => void> {
+  const { staleMs = LOCK_STALE_MS, beatMs = LOCK_BEAT_MS, pollMs = 500, log = (line: string) => console.warn(line) } = options;
+  let told = false;
   for (;;) {
     try {
       mkdirSync(path);
-      return () => rmSync(path, { recursive: true, force: true });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-      if (Date.now() - statSync(path).mtimeMs > LOCK_STALE_MS) rmSync(path, { recursive: true, force: true });
-      else await sleep(500);
+      const state = lockState(path, staleMs);
+      if (state === 'stale') rmSync(path, { recursive: true, force: true });
+      else if (state === 'held') {
+        if (!told) {
+          log(`[test-build] esperando a trava ${path}, de outro processo (fica velha se o processo some ou passa ${staleMs / 1000} s sem renová-la)`);
+          told = true;
+        }
+        await sleep(pollMs);
+      }
+      continue;
     }
+    const owner = join(path, LOCK_OWNER);
+    const renew = () => {
+      try {
+        writeFileSync(owner, String(process.pid));
+      } catch {
+        // Released meanwhile: nothing to renew.
+      }
+    };
+    renew();
+    const beat = setInterval(renew, beatMs);
+    beat.unref();
+    return () => {
+      clearInterval(beat);
+      rmSync(path, { recursive: true, force: true });
+    };
   }
 }
 

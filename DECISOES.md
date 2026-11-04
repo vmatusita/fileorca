@@ -4992,3 +4992,17 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
 
   Alternativa recusada: o teste no `wall.test.ts`, que teria de importar o `english-leak.test.ts` e rodaria os testes dele de novo.
 - **Nenhum teste antigo mudou:** o `wall.test.ts` não fixa as frases trocadas.
+
+## § 453 · A trava do build de teste: o PID, a renovação e o ENOENT (F12, revisão E-3)
+
+- **O achado:** a trava de `scripts/lib/test-build.ts` (§ 414) era um diretório tratado como velho só depois de 15 min, mais que os 600 s que o `beforeAll` dos specs espera o build. Um processo morto no meio do build (um Ctrl-C, ou o Playwright derrubando o `webServer`) deixava a trava, e o próximo processo esperava em silêncio até o spec estourar o tempo. Além disso, o `statSync` da trava, dentro do `catch` do `EEXIST`, lançava `ENOENT` se ela fosse liberada entre o `mkdir` e a olhada.
+- **A escolha:** quem pega a trava grava o PID num arquivo dela (`pid`) e o renova a cada 10 s enquanto constrói. O build é um processo filho, e o laço de eventos fica livre. A trava fica velha em dois casos: na hora, quando o processo do PID não existe mais; ou quando passa 60 s sem renovação (um processo travado, um PID reaproveitado, ou uma trava de antes deste §, sem PID). Um processo vivo que renova nunca perde a trava, por mais que o build demore. A trava que some entre o `mkdir` e a olhada conta como livre. Enquanto espera, o processo diz uma vez, no stderr, o caminho da trava e quando ela fica velha. O `lockState` e o `lock` são exportados para o teste.
+  - Alternativas recusadas: só baixar o prazo para uns 5 min, como a revisão sugeria (numa máquina lenta, um build de mais de 5 min perderia a trava viva, e dois processos construiriam na mesma pasta); só o PID, sem renovação (um PID reaproveitado pelo sistema prenderia a trava para sempre).
+- **O teste:** `tests/unit/test-build-lock.test.ts` (6 testes), numa pasta temporária, sem build:
+  - a trava de um processo que acabou é tomada na hora;
+  - a trava sem PID e sem renovação há mais de 60 s também;
+  - um dono vivo é esperado, com uma linha só, que traz o caminho, e a trava passa quando ele a solta;
+  - um dono que renova não perde a trava, nem com três vezes o prazo;
+  - uma trava que não existe é livre, sem erro;
+  - o prazo fica abaixo da metade dos 600 s.
+- **Reprova sem a correção.** A trava de antes (as linhas 51 e 91 a 102 do `0379389`, copiadas para um script no `.cache/`) ainda esperava depois de 3 s, sem dizer nada, com a trava de um processo que acabou e com a de 10 minutos atrás, e o `statSync` da trava liberada lançava `ENOENT`. Sem o `lock` e o `lockState` exportados, o teste novo nem importa.
