@@ -98,12 +98,14 @@ function guidePage(options: { words?: number; tool?: string; toolPath?: string; 
     <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
     ${options.tool ?? '<div id="fo-tool-root" data-props="{}"><div class="fo-tool-island"></div></div>'}
     <p class="fo-guide__open"><a href="${options.toolPath ?? '/heic-to-jpg/'}">Open the HEIC to JPG tool</a></p>
-    <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p></section>
+    <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p>
     <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
+    <p>Even more text.</p></section>
     <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
     <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p></section>
     <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
+    <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
   </main></body></html>`;
   return options.edit ? options.edit(html) : html;
 }
@@ -1131,11 +1133,25 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want).join()).toMatch(/o link da ferramenta leva a \/png-to-jpg\//);
   });
 
-  it('fails a guide whose AdSlot comes before the tool, or that has a third AdSlot', () => {
-    const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(/<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements<\/span><\/div>/, '') });
+  // F12 (decision 3; DECISOES § F12-M6): the ads of the map in a guide. Before, "two AdSlots at most"; now the first one
+  // after the tool with a paragraph between them, five content ads at most, one multiplex as the last block, none in the
+  // tool and none beside "What we measured".
+  it('fails a guide whose first AdSlot comes before the tool or with no paragraph after it, and one with more ads than the map', () => {
+    const box = '<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>';
+    const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(box, '') });
     expect(checkFileGuide(early, want).join()).toMatch(/a ferramenta embutida vem antes de o AdSlot de conteúdo|o AdSlot de conteúdo vem antes|vem antes de/);
-    const three = guidePage({ edit: (html) => html.replace('<section data-content="sources">', '<div class="fo-ad"></div><div class="fo-ad"></div><section data-content="sources">') });
-    expect(checkFileGuide(three, want)).toContain('3 AdSlots (no máximo 2)');
+    const glued = guidePage({ edit: (html) => html.replace(box, '').replace('<section data-guide-text><h2>More</h2>', `${box}<section data-guide-text><h2>More</h2>`) });
+    expect(checkFileGuide(glued, want)).toEqual(['o 1º AdSlot sem um parágrafo entre a ferramenta e ele']);
+    const six = guidePage({ edit: (html) => html.replace('<p>Even more text.</p>', `${`<p>Text.</p>${box}`.repeat(5)}<p>Even more text.</p>`) });
+    expect(checkFileGuide(six, want)).toEqual(['6 AdSlots de conteúdo (no máximo 5)']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('<p>Even more text.</p>', `${`<p>Text.</p>${box}`.repeat(4)}<p>Even more text.</p>`) }), want)).toEqual([]);
+    const multiplex = '<div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>';
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(multiplex, '').replace('<section data-content="related">', `${multiplex}<section data-content="related">`) }), want)).toEqual(['o multiplex não é o último bloco do <main>']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('</main>', `${multiplex}</main>`) }), want)).toEqual(['2 multiplex (no máximo 1)']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('<div class="fo-tool-island"></div>', `<div class="fo-tool-island"></div>${box}`) }), want)).toContain('um AdSlot dentro da ferramenta');
+    for (const at of ['<section data-content="measured">', '<section data-content="sources">']) {
+      expect(checkFileGuide(guidePage({ edit: (html) => html.replace(at, `${box}${at}`) }), want), at).toContain('um AdSlot ao lado de "What we measured"');
+    }
   });
 
   it('fails a guide whose measured table, date or sources are missing, and one with more than six related cards', () => {
