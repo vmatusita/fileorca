@@ -532,7 +532,7 @@ export interface FileGuideTexts extends PageMeta {
   intro: string[];
   toolHeading: string;
   toolIntro: string;
-  /** The sections; the content AdSlot goes after the first `half` of them. */
+  /** The sections. The content AdSlot went after the first `half` of them until the F12; the ad map places the ads now. */
   sections: Section[];
   half: number;
   measuredHeading: string;

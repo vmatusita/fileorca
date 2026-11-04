@@ -1,18 +1,25 @@
 ---
 // Faq (docs/design/components/Faq): native <details>, first question open. No FAQPage schema.
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): with `breaks`, a page with ads marks the boundary between two
+// questions as a place a content ad may go (never inside a question, never before the first one).
 import Icon from './Icon.astro';
 import RichText from './RichText.astro';
+import AdBreak from '../ads/AdBreak.astro';
 
 interface Props {
   items: { q: string; a: string }[];
+  breaks?: boolean;
 }
-const { items } = Astro.props;
+const { items, breaks = false } = Astro.props;
 ---
 <div class="fo-faq">
   {items.map((item, index) => (
-    <details open={index === 0}>
-      <summary>{item.q}<Icon name="chevron-down" /></summary>
-      <div><p><RichText text={item.a} /></p></div>
-    </details>
+    <>
+      {breaks && index > 0 && <AdBreak />}
+      <details open={index === 0}>
+        <summary>{item.q}<Icon name="chevron-down" /></summary>
+        <div><p><RichText text={item.a} /></p></div>
+      </details>
+    </>
   ))}
 </div>

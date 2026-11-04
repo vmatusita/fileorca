@@ -493,6 +493,25 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-ad--content { min-height: 300px; width: 100%; }
 .fo-ad--rail { width: var(--rail); min-height: 644px; margin-block: 0; }
 .fo-ad ins { display: block; width: 100%; }
+/* F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1 and § F12-M2). Plan B of the help of Google (§ 415): no unit is
+   hidden by CSS, since no box has an <ins> in the HTML. Each box says the width it is for (data-ad-media) and shows only
+   there, reserving its room from the first paint (no CLS); on fileorca.com the push script gives the <ins> only to the box
+   whose width matches on load and takes the attribute away, so that box stays visible at any width after (and the one that
+   does not match leaves the DOM). The 2nd content ad on, only under 768 px; the multiplex, the last block of <main>, from
+   768 px, with the height its unit takes there (floor(column × 0.6), the column at most --tool-max, plus the label and
+   the padding); the lateral-2 absolute in the rail, 1,200 px under the 1st, edge to edge, and only where the script sees
+   the room for it. No rail sticks. */
+.fo-ad[hidden] { display: none; }
+@media (min-width: 768px) { .fo-ad[data-ad-media="(max-width: 767px)"] { display: none; } }
+@media (max-width: 767px) { .fo-ad[data-ad-media="(min-width: 768px)"] { display: none; } }
+.fo-ad--multiplex { width: 100%; min-height: calc(min(100vw - 2 * var(--space-4), var(--tool-max)) * 0.6 + 44px); }
+/* The cookie notice of the first visit, open at scroll 0, keeps 150 px from the first content ad (F10 p-12; § F12-M2): from
+   768 px the panel of a short calculator ends in the first screen, so its first ad goes down, never the notice. */
+@media (min-width: 768px) { .fo-calc-island ~ .fo-ad[data-ad-unit="conteudo"] { margin-top: calc(var(--ad-clearance) + var(--space-24)); } }
+@media (min-width: 1280px) {
+  .fo-frame--rail > .fo-rail { position: relative; align-self: stretch; }
+  .fo-ad--rail2 { position: absolute; top: calc(var(--ad-clearance) + 644px + 1200px); right: 0; }
+}
 
 /* ---------- Faq ---------- */
 .fo-faq { border-top: var(--stroke-2) solid var(--stroke); }

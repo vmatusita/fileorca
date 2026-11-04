@@ -8,13 +8,17 @@
 // GuideCard of that guide (--here) at the end of "How to", right after the schedule, which takes nothing inside (F11,
 // decision 7; DECISOES § 396): before, a line "Read the guide" sat in the "how it works" block. It serves the English pages, their
 // Spanish versions and the Brazilian calculators, each in its language; the presets and guides only in English (F6).
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad stays after the panel (fields, result,
+// chips) and before the schedule, never between the fields nor inside the schedule; the next ones only at the marks of
+// "How it works" (between its blocks and its paragraphs, never after a heading nor against a table) and between the
+// questions and the last blocks; the layout puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import GuideCard from '../../components/GuideCard.astro';
-import AdSlot from '../../ads/AdSlot.astro';
+import AdBreak from '../../ads/AdBreak.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, personLd, webApplicationLd } from '../../seo/meta.ts';
@@ -59,6 +63,7 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   title={t.title}
   description={t.description}
   withAds
+  adArea={adArea}
   oli={poses}
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, appCategory), personLd()]}
 >
@@ -70,7 +75,7 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
     <PrivacySeal text={shared.seal} />
   </div>
   <CalcIsland data={data} />
-  <AdSlot area={adArea} variant="content" label={common.adLabel} />
+  <AdBreak first />
   <CalcScheduleRoot data={data} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
@@ -82,21 +87,27 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
     )}
   </section>
   {t.own?.map((block, index) => (
-    <section class="fo-section fo-prose" data-content="own" aria-labelledby={`own-${index}`}>
-      <h2 id={`own-${index}`}>{block.heading}</h2>
-      {block.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
-    </section>
+    <>
+      <AdBreak />
+      <section class="fo-section fo-prose" data-content="own" aria-labelledby={`own-${index}`}>
+        <h2 id={`own-${index}`}>{block.heading}</h2>
+        {block.paragraphs.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
+      </section>
+    </>
   ))}
+  <AdBreak />
   <section class="fo-section fo-prose" data-content="works" aria-labelledby="works">
     <h2 id="works">{t.worksHeading}</h2>
     <div data-ymyl="formula">
       <h3 class="fo-h3">{t.formulaHeading}</h3>
-      {t.formula.map((paragraph) => <p>{paragraph}</p>)}
+      {t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{paragraph}</p></>)}
     </div>
+    <AdBreak />
     <div data-ymyl="premises">
       <h3 class="fo-h3">{t.premisesHeading}</h3>
       <ul>{t.panel.premises.map((premise) => <li>{premise}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="example">
       <h3 class="fo-h3">{t.exampleHeading}</h3>
       <p>{t.exampleIntro}</p>
@@ -110,15 +121,18 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
       </div>
       <p>{example.sentence}</p>
     </div>
+    <AdBreak />
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
     </div>
+    <AdBreak />
     <div data-ymyl="disclaimer">
       <h3 class="fo-h3">{shared.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>
   </section>
+  <AdBreak />
   {t.presets && presets.length > 0 && (
     <section class="fo-section fo-prose" aria-labelledby="presets">
       <h2 id="presets">{t.presets.heading}</h2>
@@ -131,12 +145,14 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   )}
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
-    <Faq items={t.faq} />
+    <Faq items={t.faq} breaks />
   </section>
+  <AdBreak />
   <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
     <h2 id="privacy-note">{t.privacyHeading}</h2>
     <p>{t.privacyNote}</p>
   </section>
+  <AdBreak />
   <section class="fo-section" data-content="related" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
@@ -145,5 +161,4 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area={adArea} variant="rail" label={common.adLabel} />
 </BaseLayout>

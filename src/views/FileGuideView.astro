@@ -9,11 +9,15 @@
 // Schema: Article (author Person, datePublished, dateModified), BreadcrumbList and Person. The text blocks carry
 // data-guide-text, which gate:conteudo counts (800 to 1,500 words). Since the languages adjustment the same view serves the
 // guides in Portuguese and Spanish, each with the tool page of its language and the numbers written in that language.
+// F12 · o mapa de anúncios (decision 3; DECISOES § F12-M1): the first content ad goes into the text after the tool, with a
+// paragraph between them (after the first paragraph of the first part), and the next ones only at the marks between the
+// paragraphs, the lists and the parts, never beside "What we measured"; the layout puts each box and the rails
+// (src/ads/map.ts). The text is one run of parts now (the `half` that split it around the one AdSlot is not read).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import GuideCard from '../components/GuideCard.astro';
-import AdSlot from '../ads/AdSlot.astro';
+import AdBreak from '../ads/AdBreak.astro';
 import PdfIsland from '../tools/pdf/PdfIsland.astro';
 import Reviewed from '../tools/guides/Reviewed.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
@@ -44,8 +48,10 @@ const tool = toolInfo(def.tool, lang);
 const tables = guideTables(id, shared, t, undefined, lang);
 const related = relatedFor(id, lang);
 const common = TEXTS[lang].common;
-const before = t.sections.slice(0, t.half);
-const after = t.sections.slice(t.half);
+// The blocks of each part (its paragraphs, then its list) and the mark between two of them: the first ad after the first
+// block of the first part when it has another one, or else after that part.
+const blocksOf = (section: (typeof t.sections)[number]): number => section.paragraphs.length + (section.list ? 1 : 0);
+const firstInside = t.sections[0] !== undefined && blocksOf(t.sections[0]) > 1;
 const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
 ---
 <BaseLayout
@@ -54,6 +60,7 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
   title={t.title}
   description={t.description}
   withAds
+  adArea="arquivos"
   oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, GUIDE_PUBLISHED_ON[lang], GUIDE_REVIEWED_ON[lang], id), personLd()]}
 >
@@ -70,20 +77,20 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
   </section>
   {tool.pdf ? <PdfIsland data={pdfPanelData(def.tool as PdfToolId, lang)} /> : <slot name="tool" />}
   <p class="fo-guide__open"><a href={tool.path}>{fmt(shared.openTool, { name: tool.name })}</a></p>
-  {before.map((section, index) => (
-    <section class="fo-section fo-prose" aria-labelledby={`part-${index}`} data-guide-text>
-      <h2 id={`part-${index}`}>{section.heading}</h2>
-      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
-      {section.list && <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>}
-    </section>
-  ))}
-  <AdSlot area="arquivos" variant="content" label={common.adLabel} />
-  {after.map((section, index) => (
-    <section class="fo-section fo-prose" aria-labelledby={`part-${index + before.length}`} data-guide-text>
-      <h2 id={`part-${index + before.length}`}>{section.heading}</h2>
-      {section.paragraphs.map((paragraph) => <p>{fill(paragraph)}</p>)}
-      {section.list && <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>}
-    </section>
+  {t.sections.map((section, index) => (
+    <>
+      {index > 0 && <AdBreak first={index === 1 && !firstInside} />}
+      <section class="fo-section fo-prose" aria-labelledby={`part-${index}`} data-guide-text>
+        <h2 id={`part-${index}`}>{section.heading}</h2>
+        {section.paragraphs.map((paragraph, at) => <>{at > 0 && <AdBreak first={index === 0 && at === 1} />}<p>{fill(paragraph)}</p></>)}
+        {section.list && (
+          <>
+            {section.paragraphs.length > 0 && <AdBreak first={index === 0 && section.paragraphs.length === 1} />}
+            <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>
+          </>
+        )}
+      </section>
+    </>
   ))}
   <section class="fo-section fo-prose" aria-labelledby="measured" data-content="measured">
     <h2 id="measured">{t.measuredHeading}</h2>
@@ -106,6 +113,7 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
     <h2 id="sources">{t.sourcesHeading}</h2>
     <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={source.read}>{longDate(source.read, lang)}</time>{readAfter}</li>)}</ul>
   </section>
+  <AdBreak />
   <section class="fo-section" aria-labelledby="related" data-content="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
@@ -120,5 +128,4 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area="arquivos" variant="rail" label={common.adLabel} />
 </BaseLayout>

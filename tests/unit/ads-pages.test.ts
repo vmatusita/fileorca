@@ -19,7 +19,10 @@ import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 // Whole pages in the three states of the build variables: the meta tag goes on every page once
 // the client exists; the loader and the units only on tool pages, and only with all three.
 const CLIENT = 'ca-pub-1234567890123456';
-const SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' } });
+// F12 (DECISOES § F12-M5): the area "geral" of the home and of the guides hub, with the same two units.
+const SLOTS = JSON.stringify({ arquivos: { conteudo: '1111111111', lateral: '2222222222' }, geral: { conteudo: '3333333333', lateral: '4444444444' } });
+/** The one push script of a page with a box (src/ads/map.ts). */
+const PUSH_SCRIPT = 'if(location.hostname==="fileorca.com"){document.querySelectorAll(".fo-ad[data-ad-id]")';
 const STATES = {
   none: {},
   client: { PUBLIC_ADSENSE_CLIENT: CLIENT },
@@ -56,9 +59,12 @@ const NO_ADS = [
   ['contact', ContactView, {}],
   ['licenses', LicensesView, {}],
   ['support', SupportView, {}],
-  ['home', HomeView, {}],
   ['404', NotFoundView, {}],
-  // F11 (decision 5): the guides hub is born with no AdSlot and no ad area (the area "geral" is of the F12).
+] as const;
+// F12 (decision 3; DECISOES § F12-M5): the home and the guides hub (born with no AdSlot in the F11) have the ads of the map
+// now, in the area "geral".
+const GERAL = [
+  ['home', HomeView, {}],
   ['guides', GuidesHubView, {}],
 ] as const;
 
@@ -82,8 +88,12 @@ describe('anúncio por página nos três estados', () => {
         const tool = await container.renderToString(Page, { props });
         expect(tool.includes(`<meta name="google-adsense-account" content="${CLIENT}">`), page).toBe(state !== 'none');
         expect(tool.includes('adsbygoogle.js?client='), page).toBe(state === 'all');
-        expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
-        // F12, Mudança 10 (DECISOES § 413 and § 418): the box exists only with the unit id of its position.
+        // F12, the ad map (plan B, DECISOES § 415 and § F12-M5): no <ins> in the HTML in any state; the units come from the
+        // one push script of the page, there only with a box.
+        expect((tool.match(/class="adsbygoogle"/g) ?? []).length, page).toBe(0);
+        expect(tool.split(PUSH_SCRIPT).length - 1, page).toBe(state === 'all' ? 1 : 0);
+        // F12, Mudança 10 (DECISOES § 413 and § 418): the box exists only with the unit id of its position (here the first
+        // content ad and the rail, the two units of the area in SLOTS).
         expect((tool.match(/class="fo-ad fo-ad--/g) ?? []).length, page).toBe(state === 'all' ? 2 : 0);
       }
       for (const lang of ['en', 'pt', 'es'] as const) {
@@ -93,6 +103,14 @@ describe('anúncio por página nos três estados', () => {
           expect(html, `${name} ${lang}`).not.toContain('adsbygoogle.js');
           expect(html, `${name} ${lang}`).not.toContain('class="adsbygoogle"');
           expect(html, `${name} ${lang}`).not.toContain('class="fo-ad');
+          expect(html, `${name} ${lang}`).not.toContain(PUSH_SCRIPT);
+        }
+        for (const [name, View, props] of GERAL) {
+          const html = await container.renderToString(View, { props: { lang, ...props } });
+          expect(html.includes('google-adsense-account'), `${name} ${lang}`).toBe(state !== 'none');
+          expect(html.includes('adsbygoogle.js?client='), `${name} ${lang}`).toBe(state === 'all');
+          expect((html.match(/class="fo-ad fo-ad--[^"]*" data-ad-area="geral"/g) ?? []).length, `${name} ${lang}`).toBe(state === 'all' ? 2 : 0);
+          expect(html.split(PUSH_SCRIPT).length - 1, `${name} ${lang}`).toBe(state === 'all' ? 1 : 0);
         }
       }
     }, 60_000);

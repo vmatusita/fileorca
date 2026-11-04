@@ -1,8 +1,9 @@
 ---
 // The QR code generator page (prompt F7, decision 8), on the tool page mold of the image tools (ImageToolPage.astro)
-// without what is about files: breadcrumb Home › QR code generator (no hub), H1 + PrivacySeal, the island, the first
-// AdSlot (150 px clearance built in), the blocks the content gate checks (data-content: how, specs, faq, privacy,
-// related) and the rail AdSlot from 1280 px. The <script> that imports mount.ts lives here and only here: a second
+// without what is about files: breadcrumb Home › QR code generator (no hub), H1 + PrivacySeal, the island, the blocks the
+// content gate checks (data-content: how, specs, faq, privacy, related) with the ads of the map (F12, decision 3; DECISOES
+// § F12-M1: the first content ad after the "How to" block, the next ones at the marks between the questions and between
+// the last blocks; the layout puts each box and the rails). The <script> that imports mount.ts lives here and only here: a second
 // <script> with the same module would make a third JS file (DECISOES § 184). It serves the page of each language (en, and
 // pt and es since the languages adjustment), with the texts of that language.
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -11,7 +12,7 @@ import PrivacySeal from '../../components/PrivacySeal.astro';
 import Faq from '../../components/Faq.astro';
 import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
-import AdSlot from '../../ads/AdSlot.astro';
+import AdBreak from '../../ads/AdBreak.astro';
 import { QR_ID, routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
@@ -43,6 +44,7 @@ const panel: QrPanelData = { lang, t: t.panel };
   title={t.title}
   description={t.description}
   withAds
+  adArea={area}
   oli={PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(name, t.description, path, lang, 'UtilitiesApplication')]}
 >
@@ -52,11 +54,11 @@ const panel: QrPanelData = { lang, t: t.panel };
     <PrivacySeal text={t.seal} />
   </div>
   <div id="fo-tool-root" data-props={JSON.stringify(panel)}><QrPanel {...panel} /></div>
-  <AdSlot area={area} variant="content" label={common.adLabel} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>
   </section>
+  <AdBreak first />
   <section class="fo-section fo-prose" data-content="specs" aria-labelledby="specs">
     <h2 id="specs">{t.specsHeading}</h2>
     <table class="fo-table">
@@ -69,12 +71,14 @@ const panel: QrPanelData = { lang, t: t.panel };
   </section>
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>
-    <Faq items={t.faq} />
+    <Faq items={t.faq} breaks />
   </section>
+  <AdBreak />
   <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
     <h2 id="privacy-note">{t.privacyHeading}</h2>
     <p>{t.privacyNote}</p>
   </section>
+  <AdBreak />
   <section class="fo-section" data-content="related" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">
@@ -83,7 +87,6 @@ const panel: QrPanelData = { lang, t: t.panel };
       ))}
     </ul>
   </section>
-  <AdSlot slot="rail" area={area} variant="rail" label={common.adLabel} />
   <script>
     import './mount.ts';
   </script>
