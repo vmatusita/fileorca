@@ -378,6 +378,39 @@ test.describe('a cara', () => {
     }
   });
 
+  test('the card sits 16 px from the edges of the phone, in the middle of the height, and on the tool column from 1280 px', async ({ page, context }) => {
+    await serveAsProduction(context, { recovery: googlefcStub(STATUS.EXTENSION) });
+    // Without the entrance (the card rises 24 px), so the box is where it rests.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    for (const [width, height] of [[360, 740], [1280, 800]] as const) {
+      await page.setViewportSize({ width, height });
+      expect((await page.goto(WALL_TOOL))?.status()).toBe(200);
+      await expectWallOpen(page, 'bloqueio');
+      const at = await page.evaluate(() => {
+        const card = (document.getElementById('fo-wall') as HTMLElement).getBoundingClientRect();
+        const main = (document.querySelector('main') as HTMLElement).getBoundingClientRect();
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;top:0;left:-200px;width:100px;height:50px;overflow:hidden;scrollbar-gutter:stable';
+        document.body.append(probe);
+        const gutter = probe.offsetWidth - probe.clientWidth;
+        probe.remove();
+        return { left: card.left, right: card.right, top: card.top, bottom: card.bottom, middle: (card.left + card.right) / 2, column: main.left + main.width / 2, gutter, inner: innerWidth };
+      });
+      // In the middle of the height: as much room above the card as under it.
+      expect(Math.abs(at.top - (height - at.bottom)), `${width}px`).toBeLessThanOrEqual(1);
+      if (width === 360) {
+        // 100vw minus 16 px on each side, centred in the room the scrollbar leaves (all of it on a phone, where the
+        // scrollbar takes none: 16 px each side; the headless browser keeps a hidden gutter under the open wall).
+        expect(at.right - at.left, `${width}px`).toBeCloseTo(at.inner - 32, 0);
+        expect(at.left, `${width}px`).toBeCloseTo((at.inner - at.gutter - (at.right - at.left)) / 2, 0);
+      } else {
+        // On the tool column (the headless browser reserves a hidden gutter under the open wall, which moves the page by half).
+        expect(Math.abs(at.middle - at.column), `${width}px`).toBeLessThanOrEqual(at.gutter / 2 + 1);
+        expect(at.right - at.left, `${width}px`).toBeCloseTo(600, 0);
+      }
+    }
+  });
+
   test('nothing sun, no ad, no link inside; the sea over the page; the scroll locked without a shift; the Oli of the page hidden', async ({ page, context }) => {
     await hideBait(page);
     await openAsProduction(page, context, { recovery: 'error', loader: 'error' });

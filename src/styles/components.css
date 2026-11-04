@@ -922,6 +922,8 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   width: calc(100vw - 2 * var(--space-4));
   max-width: none;
   max-height: calc(100dvh - 2 * var(--space-4));
+  /* The preflight of the site zeroes every margin, the auto of the browser's :modal included: the card centres again. */
+  margin: auto;
   padding: 0;
   border: var(--stroke-2) solid var(--stroke);
   border-radius: var(--radius-xl);
