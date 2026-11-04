@@ -351,6 +351,9 @@ test.describe('the header and its open menus stay 150px from every AdSlot, at 36
   for (let start = 0; start < HEADER_AD_PAGES.length; start += HEADER_AD_BLOCK) {
     const block = HEADER_AD_PAGES.slice(start, start + HEADER_AD_BLOCK);
     test(`pages ${start + 1} to ${start + block.length} of ${HEADER_AD_PAGES.length} (${block[0]} and on)`, async ({ page }) => {
+      // 15 pages, each opened and measured at three widths with the menus opened and closed: a budget of its own, as the
+      // long tests of the calculators have, so a loaded runner does not end it at the default 60 s (review F11 D-2).
+      test.setTimeout(120_000);
       for (const path of block) {
         expect((await page.goto(path))?.status(), path).toBe(200);
         for (const viewport of HEADER_VIEWPORTS) {
