@@ -53,6 +53,7 @@ export default {
   },
   imageTools: 'Ferramentas de imagem',
   pdfTools: 'Ferramentas de PDF',
+  guidesHub: 'Guias',
   moneyCalculators: 'Calculadoras financeiras',
   calcSeal: 'Seus números ficam no seu aparelho',
   tools: {

@@ -11,6 +11,7 @@ import LicensesView from '../../src/views/LicensesView.astro';
 import SupportView from '../../src/views/SupportView.astro';
 import HomeView from '../../src/views/HomeView.astro';
 import NotFoundView from '../../src/views/NotFoundView.astro';
+import GuidesHubView from '../../src/views/GuidesHubView.astro';
 import PdfToolPage from '../../src/tools/pdf/PdfToolPage.astro';
 import PdfToolsView from '../../src/views/PdfToolsView.astro';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
@@ -57,6 +58,8 @@ const NO_ADS = [
   ['support', SupportView, {}],
   ['home', HomeView, {}],
   ['404', NotFoundView, {}],
+  // F11 (decision 5): the guides hub is born with no AdSlot and no ad area (the area "geral" is of the F12).
+  ['guides', GuidesHubView, {}],
 ] as const;
 
 let container: AstroContainer;

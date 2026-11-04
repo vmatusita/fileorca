@@ -753,3 +753,10 @@
 .fo-grid > li[hidden], .fo-openwith [data-group][hidden] { display: none; }
 .fo-tool__takes { font: 600 14px/20px var(--fo-font-text); color: var(--ink); }
 .fo-tool__takes:empty { display: none; }
+
+/* F11: the guides hub (UX-02 A; DECISOES § 364). It has no category colour of its own: its band uses brand-soft, with
+   the text in ink as in every hub band. The shortcuts to the three groups are chips (48 px); the note of a group with no
+   guide in the language (the money group in pt) keeps the measure of a paragraph. */
+.fo-cat--guide { --fo-cat-soft: var(--brand-soft); }
+.fo-jump ul { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-section__note { margin: 0; max-width: var(--fo-measure); }

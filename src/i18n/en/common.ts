@@ -63,6 +63,7 @@ export default {
     synonyms: ['qr', 'qr code', 'qr generator', 'qr maker', 'link to qr', 'url to qr', 'barcode'],
   },
   pdfTools: 'PDF tools',
+  guidesHub: 'Guides',
   pdf: {
     'merge-pdf': {
       name: 'Merge PDF',

@@ -4,7 +4,7 @@
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { QR_ID, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 
@@ -73,9 +73,9 @@ export const FILE_GUIDE_PAGE_IDS: readonly string[] = [...FILE_GUIDE_IDS];
  * The pages gate:seo finds in the sitemap of each language their route has, and in no other, by registry rather than by
  * the route map alone: the image pages and hub, the money pages, the PDF pages, the file guides, the home and health pages,
  * and since the languages adjustment the QR code generator (in en, pt and es). The Brazilian pages are added by the gate
- * once their rows are in the map.
+ * once their rows are in the map. F11: the guides hub, in its three languages.
  */
-export const SITEMAP_REGISTRY_IDS: readonly string[] = [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...LIFE_PAGE_IDS, QR_ID];
+export const SITEMAP_REGISTRY_IDS: readonly string[] = [...IMAGE_PAGE_IDS, HUB_ID, ...MONEY_PAGE_IDS, ...PDF_PAGE_IDS, ...FILE_GUIDE_PAGE_IDS, ...LIFE_PAGE_IDS, QR_ID, GUIDES_HUB_ID];
 
 /** A tool page or a preset page of the image tools. */
 export function isImagePage(routeId: string): boolean {
@@ -106,6 +106,8 @@ export function requiredSchemaTypes(routeId: string): string[] {
   if (Object.hasOwn(GUIDES, routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
   // A file guide (F5b, decision 4) is an Article by the author, like a money guide.
   if (isFileGuide(routeId)) return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
+  // The guides hub (F11, decision 5): a CollectionPage of the guides, like the PDF hub, with no author node.
+  if (routeId === GUIDES_HUB_ID) return ['Organization', 'BreadcrumbList', 'CollectionPage'];
   return ['Organization'];
 }
 
@@ -129,7 +131,8 @@ export interface LdNode {
 /** The WebApplication of a tool or preset and the BreadcrumbList of a tool, preset or hub end at the page itself (its canonical). */
 export function schemaProblems(routeId: string, nodes: readonly LdNode[], canonical: string): string[] {
   const tool = isImagePage(routeId) || isAnyCalcPage(routeId) || isPdfPage(routeId) || isQrPage(routeId);
-  if (!tool && routeId !== HUB_ID && !MONEY_PAGE_IDS.includes(routeId) && !LIFE_PAGE_IDS.includes(routeId) && routeId !== BR_HUB_ID && routeId !== PDF_HUB_ID && !isFileGuide(routeId)) return [];
+  const hub = routeId === HUB_ID || routeId === BR_HUB_ID || routeId === PDF_HUB_ID || routeId === GUIDES_HUB_ID;
+  if (!tool && !hub && !MONEY_PAGE_IDS.includes(routeId) && !LIFE_PAGE_IDS.includes(routeId) && !isFileGuide(routeId)) return [];
   const problems: string[] = [];
   const app = nodes.find((node) => node['@type'] === 'WebApplication');
   if (tool && app && app.url !== canonical) problems.push(`WebApplication aponta ${app.url ?? 'para nada'} em vez de ${canonical}`);

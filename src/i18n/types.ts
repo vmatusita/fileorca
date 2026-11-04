@@ -98,6 +98,8 @@ export interface CommonTexts {
   pdf: Record<PdfToolId, ToolBlurb>;
   /** The cards of the file guides (the three languages since the languages adjustment). */
   fileGuides?: Record<FileGuideId, ToolBlurb>;
+  /** Name of the guides hub (F11): the second step of its breadcrumb and of the guides' breadcrumbs ("Guides"). */
+  guidesHub: string;
 }
 
 /** What every language has since the languages adjustment: the QR code card, its footer column and search category, and the file guides. */
@@ -985,4 +987,35 @@ export interface PdfToolsTexts extends PageMeta {
   guideOutro: string;
   privacyHeading: string;
   privacy: string[];
+}
+
+/** A group of the guides hub (F11): the text of its shortcut chip and the heading of its section. */
+export interface GuidesHubGroupTexts {
+  /** The shortcut chip at the top of the hub ("Image"), which leads to the section. */
+  jump: string;
+  /** The H2 of the section ("Image guides"; in pt the money group is only "Dinheiro", the section of the note). */
+  heading: string;
+}
+
+/**
+ * The guides hub /guides/ (F11, decision 5; DECISOES § 364), with the texts of the specification
+ * (docs/propostas/ux-v2/guides-hub.html, alternative A). In the description and the line of the band, {n} is the number of
+ * guides of the language, read from the registries, never written by hand.
+ */
+export interface GuidesHubTexts extends PageMeta {
+  eyebrow: string;
+  h1: string;
+  /** The line of the band, with {n}. */
+  intro: string;
+  /** The name of the nav of the shortcuts (aria-label). */
+  jumpLabel: string;
+  groups: Record<'image' | 'pdf' | 'money', GuidesHubGroupTexts>;
+  /**
+   * Only in a language with no money guide (pt): the note of the money group, which says why and leads to the money hub of
+   * the language (the text before the link, the link, the text after it).
+   */
+  moneyNote?: { before: string; link: string; after: string };
+  /** "How these guides are made", at the end. */
+  howHeading: string;
+  how: string;
 }
