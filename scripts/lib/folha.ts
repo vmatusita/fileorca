@@ -1,4 +1,5 @@
-// Renders docs/oli/folha.html, the Oli sheet (F1b, decision 8): the nine poses at 32, 64 and 512 px
+// Renders docs/oli/folha.html, the Oli sheet (F1b, decision 8): every pose of the closed list (ten since the F12, with the
+// sad of the ad-block wall) at 32, 64 and 512 px
 // and the app icon at 16 and 32 px, on a light and a dark background. Pure and deterministic; the
 // page is standalone (inline style, the sprite once, the icon as a data URI) and opens from file://.
 import { POSES, type Pose } from '../../src/oli/poses.ts';

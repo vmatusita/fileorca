@@ -48,7 +48,7 @@ export const MIN_WORDS_PER_AD = 150;
 /**
  * F12 (decision 4; DECISOES § 421): the boxes are counted at the widths a person sees them, not all at once. A box of the
  * ad map says the width it shows at (data-ad-media); the gate counts, at each of these widths, the boxes that show there,
- * and asks 150 words of <main> for each: on a phone the content ads (the 2nd on show only under 768 px), on a computer the
+ * and asks 150 words of <main> for each: on a phone the content ads (the 2nd on only up to 459 px, § 445), on a computer the
  * first content ad, the rails (the 2nd only on a page of 600 words or more) and the multiplex. A box with no width shows at
  * every width (the first content ad, and the boxes of before the map).
  */

@@ -43,7 +43,7 @@ import {
   type LifeCalcId,
 } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
-import { adBoxHtml } from '../../src/ads/map.ts';
+import { AD_MEDIA, adBoxHtml } from '../../src/ads/map.ts';
 import type { AdUnit } from '../../src/ads/config.ts';
 
 // gate:prontidao proven on small fake sites written to a temporary folder: one that passes every item, then
@@ -497,9 +497,11 @@ describe('gate:prontidao, as caixas por largura (F12)', () => {
 
   it('reads the width of each box', () => {
     expect([showsAt(null, 360), showsAt(null, 1280)]).toEqual([true, true]);
-    expect(AD_WIDTHS.map((width) => showsAt('(max-width: 767px)', width))).toEqual([true, false, false]);
-    expect(AD_WIDTHS.map((width) => showsAt('(min-width: 768px)', width))).toEqual([false, true, true]);
-    expect(AD_WIDTHS.map((width) => showsAt('(min-width: 1280px)', width))).toEqual([false, false, true]);
+    // Review A-3 (§ 454): the queries the map writes (src/ads/map.ts), the 2nd content ad up to 459 px since § 445.
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.phone, width))).toEqual([true, false, false]);
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.wide, width))).toEqual([false, true, true]);
+    expect(AD_WIDTHS.map((width) => showsAt(AD_MEDIA.rail, width))).toEqual([false, false, true]);
+    expect(AD_MEDIA.phone).toBe('(max-width: 459px)');
     const html = [...PHONE_MAP, 'lateral', 'lateral-2'].map((unit) => box(unit as AdUnit)).join('');
     expect(boxesAtWidths(html)).toEqual({ slots: 7, atWidth: { 360: 4, 768: 2, 1280: 4 } });
   });

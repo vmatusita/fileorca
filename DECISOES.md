@@ -5006,3 +5006,23 @@ A ficha manda mudar o teste que fixa o que a run muda junto com o código que el
   - uma trava que não existe é livre, sem erro;
   - o prazo fica abaixo da metade dos 600 s.
 - **Reprova sem a correção.** A trava de antes (as linhas 51 e 91 a 102 do `0379389`, copiadas para um script no `.cache/`) ainda esperava depois de 3 s, sem dizer nada, com a trava de um processo que acabou e com a de 10 minutos atrás, e o `statSync` da trava liberada lançava `ENOENT`. Sem o `lock` e o `lockState` exportados, o teste novo nem importa.
+
+## § 454 · A documentação da revisão: o roteiro na UE, o design system e o 2º anúncio (F12, revisão A-2, A-3, C-2, C-3 e d-2)
+
+- **O roteiro de teste na UE (C-2; `docs/OPERACAO.md`, passo 7 de "Depois da F12").** A VPN muda o IP, não o fuso que a parede lê.
+  - Antes: "com uma VPN da UE: a tela vira aviso e fecha (no X ou com Esc)".
+  - Depois: a parede lê o `__tcfapi`, que só existe com a mensagem de consentimento do Google publicada e a tag chegando, ou o fuso do aparelho; para ver o aviso com o uBlock ligado, mude o fuso do sistema para um da Europa.
+  - E um passo novo: na UE, com a mensagem publicada e sem bloqueador, conferir no `dataLayer` que o Aceitar do aviso do site leva só o `analytics_storage` (a F12 p-6).
+- **As pegadinhas (C-3):**
+  - o `docs/claude/anuncios.md` ganhou, no fim da seção F12, o Aceitar que depende do fuso (todo spec que lê o payload fixa o `timezoneId`, e a CI em UTC conta como fora), o nome canônico do fuso e a VPN;
+  - o `design-e-oli.md` ganhou o foco posto por script e a prova da cor de um tema;
+  - o `playwright.md` ganhou a trava do build de teste.
+- **O design system (d-2 e A-2),** com o texto de antes e o de depois:
+  - `docs/design/README.md`, "Oli". Antes: "Nove poses, lista fechada: … `peek`." Depois: "Dez poses, lista fechada: … `peek` e `sad` (só na parede do bloqueador, o AdblockWall; F12).", como o `src/oli/poses.ts`, o README da Oli e a decisão 9 (§ 417);
+  - `docs/design/README.md`, "Layout e anúncios". Antes: "o aviso de cookies aberto fica a 150px ou mais do 1º anúncio de conteúdo." Depois: "o aviso de cookies aberto, na primeira visita e na rolagem 0, fica a 150px ou mais do 1º anúncio de conteúdo a 360×740 e a 1280×800 (as duas larguras que o teste do mapa mede; as outras estão no grupo 21 do `docs/PENDENCIAS.md`)." A regra afirmava mais do que o teste mede: a revisão achou o aviso a menos de 150 px do 1º anúncio em outras janelas (1440 × 900, 1920 × 1080 e os tablets em pé). A ficha só pede as duas larguras, e o resto vai para o grupo 21 (A-2);
+  - a galeria do `docs/design/components/Oli/preview.html` ganhou a `sad` ("só na parede"), com o desenho do preview do AdblockWall. O `docs/design/index.html` ganhou o AdblockWall em Monetização, e o `components/README.md` diz isso;
+  - o comentário do `scripts/lib/folha.ts` dizia "the nine poses" e agora diz "every pose of the closed list (ten since the F12…)". A saída da folha não muda.
+- **O 2º anúncio do celular (A-3).** O comentário do `scripts/lib/prontidao.ts` dizia "the 2nd on show only under 768 px"; agora diz "only up to 459 px, § 445". O teste antigo que mudou (formato da § 341) é `tests/unit/prontidao.test.ts`, "reads the width of each box":
+  - antes, ele lia o analisador de largura com `'(max-width: 767px)'`, a consulta de antes da § 445;
+  - agora, ele lê as três consultas do `AD_MEDIA` do `src/ads/map.ts` (o 2º anúncio em `(max-width: 459px)`, o multiplex e as laterais), com o mesmo resultado nas três larguras do portão, e fixa o `AD_MEDIA.phone`;
+  - a proteção continua: o analisador lê cada consulta, e o `boxesAtWidths` com o `adBoxHtml` trava a regra real (`{360: 4, 768: 2, 1280: 4}`), que não mudou.
