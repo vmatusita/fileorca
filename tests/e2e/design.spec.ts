@@ -7,7 +7,7 @@ import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatc
 // the Oli never is the largest contentful paint. Markup contract: DECISOES § 19 (the [data-oli]
 // selector) and the F1b sprite (one <symbol id="oli-<pose>"> per pose, used through <svg><use>).
 
-const POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek'];
+const POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek', 'sad'];
 const VIEWPORTS = [
   { width: 360, height: 740 },
   { width: 1280, height: 800 },

@@ -97,7 +97,7 @@ export function renderFolha(input: FolhaInput): string {
     '<header>',
     '<div class="miolo">',
     '<h1>Folha da Oli</h1>',
-    '<p>As nove poses da Oli lado a lado, em 32, 64 e 512 px, e o ícone do app em 16 e 32 px, sobre fundo claro e escuro. Abra esta folha antes da F2 e faça a busca reversa no Google Lens com um print de cada pose, para ver se alguma lembra demais um personagem que já existe. Qualquer ajuste de desenho vai para a run 1c.</p>',
+    '<p>As dez poses da Oli lado a lado, em 32, 64 e 512 px, e o ícone do app em 16 e 32 px, sobre fundo claro e escuro. Abra esta folha antes da F2 e faça a busca reversa no Google Lens com um print de cada pose, para ver se alguma lembra demais um personagem que já existe. Qualquer ajuste de desenho vai para a run 1c.</p>',
     '<p class="nota">Gerada por <code>node scripts/design/folha.ts</code> a partir do mesmo sprite do site. Não edite à mão: rode o script de novo.</p>',
     '</div>',
     '</header>',

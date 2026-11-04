@@ -18,6 +18,8 @@ requireDist();
 
 /** Poses every page needs (the search dialog is on every page) and the ones the tool panel swaps in the client. */
 const PAGE_POSES = ['peek'];
+/** F12 (DECISOES § 417): sad is only on the ad-block wall, which the default build (this dist/) never has. */
+const WALL_ONLY = ['sad'];
 const TOOL_POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
 
 const webPath = (file: string): string => `/${relative(DIST, file).split('\\').join('/')}`;
@@ -60,12 +62,13 @@ report(
   perPage((page) =>
     // F7 (decision 5): the health calculators never cheer a result, so their sprite has every tool pose but cheer.
     HEALTH_PATHS.has(page.path)
-      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer'] })
+      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer', ...WALL_ONLY] })
       : checkSprite(page.html, {
           requiredPoses: page.html.includes('id="fo-tool-root"')
             ? // F8: the image and PDF panels (their drop zone) also have the offline line in buoy (DECISOES § 292).
               [...PAGE_POSES, ...TOOL_POSES, ...(page.html.includes('class="fo-drop"') ? ['buoy'] : [])]
             : PAGE_POSES,
+          forbiddenPoses: WALL_ONLY,
         }),
   ),
   `${pages.length} páginas, ids únicos, um oli-clip, poses da lista fechada e caixas [data-oli] com o próprio símbolo`,

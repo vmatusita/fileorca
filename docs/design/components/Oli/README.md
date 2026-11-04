@@ -6,7 +6,9 @@ A mascote: uma orca de feijão com o olho dentro da mancha branca, bochecha rosa
 
 ## Poses (lista fechada)
 
-`wave` (topo, repouso), `gulp` (arquivo sobre a DropZone), `swim` (processando), `cheer` (pronto), `oops` (erro), `buoy` (offline), `lost` (404), `coffee` (apoio), `peek` (busca sem resultado). Pose nova só com decisão registrada no DECISOES.md.
+`wave` (topo, repouso), `gulp` (arquivo sobre a DropZone), `swim` (processando), `cheer` (pronto), `oops` (erro), `buoy` (offline), `lost` (404), `coffee` (apoio), `peek` (busca sem resultado), `sad` (só na parede do bloqueador de anúncios, à direita do título, olhando para ele; F12, DECISOES § 417). Pose nova só com decisão registrada no DECISOES.md.
+
+A `sad` só na parede: ela fala triste, sem culpa e sem pedir clique, e nunca aparece no build sem a parede ligada. A pose da parede é uma constante só (`WALL_POSE`, em `src/oli/poses.ts`), para a troca pela `oops` ser uma linha.
 
 ## Como usar
 
