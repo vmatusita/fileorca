@@ -76,11 +76,13 @@ for (const lang of LANGS) {
     const first = page.locator('main a.fo-guidecard .fo-guidecard__name').first();
     const box = await first.boundingBox();
     expect((box?.y ?? 9999) + (box?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra`).toBeLessThanOrEqual(740);
-    // And with one more line in the H1: the Spanish title fills 278.5 of its 280 px in the Chromium of Windows and took a
-    // third line in the Chromium of the CI's Linux (DECISOES § 408), so the fold holds for a title one line longer too.
-    const extra = await page.addStyleTag({ content: '.fo-hubband .fo-h1::after { content: ""; display: block; height: 34px; }' });
+    // And with the H1 in three lines: the Spanish title fills 278.5 of its 280 px in the Chromium of Windows and takes a
+    // third line in the Chromium of the CI's Linux (DECISOES § 408), so the fold holds for a title of three lines (34 px
+    // each) wherever it is drawn, and the lines it lacks here are added under it.
+    const lacking = Math.max(0, 3 * 34 - ((await page.locator('.fo-hubband .fo-h1').boundingBox())?.height ?? 0));
+    const extra = await page.addStyleTag({ content: `.fo-hubband .fo-h1::after { content: ""; display: block; height: ${lacking}px; }` });
     const taller = await first.boundingBox();
-    expect((taller?.y ?? 9999) + (taller?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra, com uma linha a mais no H1`).toBeLessThanOrEqual(740);
+    expect((taller?.y ?? 9999) + (taller?.height ?? 0), `${lang}: o título do primeiro cartão acima da dobra, com o H1 em três linhas`).toBeLessThanOrEqual(740);
     await extra.evaluate((style) => (style as Element).remove());
     for (const width of [360, 1280]) {
       await page.setViewportSize({ width, height: 800 });
