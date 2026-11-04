@@ -4418,7 +4418,7 @@ Depois dos céticos, a revisão adversarial da F11 deixou de pé oito achados, t
   - **A correção:** as linhas da folha passam a ter 48 px, o `tap-min` de todo controle e dos idiomas (`min-height: var(--tap-min)` e padding vertical 0; o nome e a contagem, 38 px, ficam centrados). É um desvio da especificação (`header-a.html`), que pedia 52 px.
     - A folha em inglês termina em y 597,5 (antes, 629,5), e a de português e espanhol em y 497,5 (antes, 521,5).
     - Abaixo de 768 px, todo AdSlot fica a 178,5 px ou mais da folha aberta; de 320 a 384 px, a 198,5 px ou mais.
-    - A 1280 px, a folha fica 32 px mais baixa em inglês e 24 px em português e espanhol.
+    - A 1280 px, a folha fica 32 px mais curta em inglês e 24 px em português e espanhol.
     - O README do Header, a região do Header no `bundle.css`, o comentário do CSS e o `docs/claude/anuncios.md` dizem as medidas novas.
   - **O teste:** o bloco do cabeçalho do `ads.spec.ts` mede também 767 px (360, 767 e 1280). Abaixo de 768 px, a folha não muda de altura e o anúncio só sobe com a largura, então 767 px é onde os dois mais se aproximam. No commit `333fec8`, os blocos do `/merge-pdf/` e do `/unlock-pdf/` reprovaram nos dois navegadores, com 146,5 px a 767 px. Depois da correção, os 24 blocos passam.
   - **As alternativas:**
@@ -4432,12 +4432,35 @@ Depois dos céticos, a revisão adversarial da F11 deixou de pé oito achados, t
 - **O teste antigo que mudou (no formato da § 341).** No `tests/e2e/header-menu.spec.ts`, o teste de cada molde fixava as linhas da folha com 52 px ou mais, a altura da especificação. Agora fixa 48 px ou mais, porque o D-1 passou as linhas a 48 px. A proteção continua: toda linha é um alvo de 48 px, como os idiomas e os controles, e o vão da folha aos anúncios, que a altura servia, está no `ads.spec.ts`, agora também a 767 px.
 - **Só acrescentados,** sem nenhuma asserção mudada: o teste do sublinhado no `header-menu.spec.ts`, o da impressão no `header-theme.spec.ts`, o `describe` da impressão e o campo `media` no `theme-pair.test.ts`, e a largura de 767 px e o tempo de 120 s no bloco do cabeçalho do `ads.spec.ts`.
 - **As pegadinhas novas:**
-  - no `docs/claude/design-e-oli.md`, o clique que fecha um popover segue para o que está embaixo (B-2);
+  - no `docs/claude/design-e-oli.md`, o clique que fecha um popover segue para o que está embaixo (B-2; a correção só com CSS, da § 405, está no mesmo bullet);
   - no `docs/claude/anuncios.md`, o 1º AdSlot que sobe com a largura (D-1);
   - no `docs/claude/playwright.md`, o WebKit recusa a porta 4190, que está na lista de portas restritas: todo `page.goto` fica parado até o tempo do teste acabar.
 - **Os que foram para o PENDENCIAS, sem correção:**
-  - B-2: é o comportamento padrão do popover, e engolir o clique pediria um script; a pegadinha ficou escrita;
+  - B-2: é o comportamento padrão do popover, e engolir o clique pediria um script; a pegadinha ficou escrita. A segunda passada mostrou que basta CSS, e o B-2 foi corrigido na § 405;
   - B-3: o README do sistema e o `bundle.css`, junto do F11 g-2, na run que regenerar o design system;
   - C-2: o tema não é relido ao voltar do bfcache, e a correção é JS novo em toda página, fora desta revisão;
   - E-1: o Menu diz 14 calculadoras de dinheiro, e a Sobre e os Termos em inglês e espanhol dizem 18. As duas páginas estão fora do diff da F11, e o 18 é decisão da § 321.
 - **As contagens:** o Vitest tem 109 arquivos e 1.832 testes (+2, os do `theme-pair.test.ts`), e o `--list` do Playwright, 1.558 testes por navegador (+2, o do sublinhado e o da impressão).
+
+## § 405 · A segunda passada da revisão adversarial e a causa da F11 p-2 (F11)
+
+A segunda passada revisou o diff das correções da § 404 (o merge `68aa102`) e confirmou as quatro: cada teste novo reprova sem a sua correção. Ela deixou três achados, e o agente principal corrigiu os três.
+
+- **S2-1 (médio), o B-2 se corrige só com CSS.** A § 404 deixava o B-2 no PENDENCIAS porque "engolir o clique pediria um script". A segunda passada mostrou que não: com `body:has(:popover-open) main { pointer-events: none; }`, o clique que fecha o menu cai no `body` e não chega à ferramenta.
+  - **A correção**, no `src/styles/components.css`, ao lado do menu de idioma:
+    - com o Menu ou o menu de idioma aberto, o `.fo-frame` (o `main` e a lateral) fica com `pointer-events: none`. É o `.fo-frame` e não só o `main`, para o clique de fechar também não cair num anúncio da lateral;
+    - no WebKit, o clique de um toque chega depois de o menu fechar, e a regra sozinha não bastava: com o `hasTouch`, o toque de fechar marcava o rádio do Rotate image. Por isso, uma folha que nunca se pinta (`body::after`, fixa, `z-index: 10`) cobre a página enquanto um menu está aberto e 400 ms depois, e sai por `scale` com `transition-delay`. O cabeçalho ganhou `position: relative` e `z-index: 11`, para ficar acima dela e continuar clicável (abrir um menu fecha o outro). O aviso de cookies, com `z-index: 20`, também fica acima;
+    - o atraso não move nada na tela, então vale também com movimento reduzido: o `transition: none !important` do `global.css` ganhou, só para esta folha, a exceção com `!important`;
+    - sem `:has()`, as regras caem e a página fica como antes.
+  - **O que não serviu:** uma transição de `pointer-events` no `.fo-frame` (`allow-discrete` com atraso) segurava o toque nos dois navegadores, mas o `gate:design` só aceita transição de `transform`, `opacity`, `translate`, `scale` e `rotate`, e afrouxar o portão é proibido. No caminho, o minificador pôs o `transition-behavior` antes do atalho `transition`, que o zerou; a pegadinha foi para o `docs/claude/design-e-oli.md`.
+  - **Os testes**, no `header-menu.spec.ts`, cada um commitado antes da correção:
+    - "the click that closes a menu does not reach the page under it…": a 1280 px, no `/compress-image/`, o clique no meio da DropZone com o Menu e depois com o menu de idioma abertos fecha o menu e não abre o seletor; com a página livre, o mesmo clique abre. A 390 px, um rádio do Rotate image logo abaixo da folha continua sem marca. No commit `1c56c0b`, sobre o build de antes, reprovou nos dois navegadores, com 2 seletores abertos;
+    - "the tap that closes the Menu on a touch screen…", com `hasTouch`, com e sem movimento reduzido. No commit `304c4d5`, sobre o build só com o `pointer-events: none`, reprovou no WebKit: o toque de fechar marcou o rádio;
+    - os dois clicam por coordenada (`page.mouse`, `page.touchscreen`) e esperam a página voltar a receber o ponteiro (`takesPointer`) antes do clique de controle;
+    - depois da correção, os dois passaram 3 vezes em cada navegador.
+  - O README do Header diz que o clique fora da folha só fecha o menu. O bullet da pegadinha do B-2 no `docs/claude/design-e-oli.md`, desta run, foi corrigido.
+- **S2-2 (baixo), o `bundle.css`.** As duas regras de `color-scheme` escuro do `docs/design/components/bundle.css` foram para `@media screen`, como no `global.css`. O `theme-pair.test.ts` ganhou um teste que lê o `bundle.css` com o `darkOnPaperProblems`; no commit dele, reprovou com as duas regras.
+- **S2-3 (baixo), os números velhos.** No `docs/claude/anuncios.md`, a folha termina em y 597,5 (629,5 com as linhas de 52 px). Na § 404, a folha fica "mais curta", não "mais baixa". A linha F11 t-2 do PENDENCIAS diz 198,5 px a 360 px e 178,5 px de 390 a 767 px.
+- **A causa da F11 p-2.** Numa execução com 6 workers, o axe do cabeçalho do `/merge-pdf/` no Chromium reprovou no tema escuro (contraste em todo texto) e passou ao rodar de novo. O console do trace mostra `Failed to load resource: net::ERR_NO_BUFFER_SPACE` na folha `island.*.css`: o Windows recusou o socket, com a máquina carregada. Uma sonda com a requisição da folha abortada dá o mesmo quadro da p-2: `document.styleSheets` com uma folha vazia e o fundo do `body` em `rgba(0, 0, 0, 0)`. A p-2 é isso, não um piscar do tema. A linha F11 p-2 ficou com a causa, e a pegadinha foi para o `docs/claude/playwright.md`.
+- **O que mais a revisão somou ao grupo 20:** a A-1 (o exemplo em espanhol) à g-1, a E-5 (os outros textos com `{n}`) à g-3, a A-2 (o teste do QR code) à g-4, e as linhas novas F11 R-B-3, R-C-2 e R-E-1. O grupo 20 tem 12 linhas, e o PENDENCIAS, 216.
+- **As contagens:** o Vitest tem 109 arquivos e 1.833 testes (+1, o do `bundle.css`), e o `--list` do Playwright, 1.560 testes por navegador (+2, o do clique e o do toque).
