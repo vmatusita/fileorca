@@ -39,8 +39,8 @@ export default {
     signature: 'Made by {name} in {city}',
   },
   cookie: {
-    title: 'Cookies, quickly.',
-    body: 'We use Google Analytics to see which tools help, and ads to keep FileOrca free. Your files never leave your device either way.',
+    title: 'Cookies',
+    body: 'for Google Analytics and ads.',
     privacyLink: 'Privacy',
     accept: 'Accept',
     decline: 'Decline',

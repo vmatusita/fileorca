@@ -111,6 +111,7 @@ Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plur
 | Position · Top left · Top center · Bottom right… | Posición · Arriba a la izquierda · Arriba al centro · Abajo a la derecha… |
 | Format · Page 1 · Page 1 of 12 · 1 of 12 | Formato · Página 1 · Página 1 de 12 · 1 de 12 |
 | First number · Skip the first page | Primer número · Omitir la primera página |
+| First page: Number it · Skip it (F13a, a opção no lugar da caixa) | Primera página: Numerar · Omitir |
 | Watermark text · CONFIDENTIAL · Size · Opacity · Light · Direction | Texto de la marca de agua · CONFIDENCIAL · Tamaño · Opacidad · Suave · Dirección |
 | Signature · Draw · Upload · Type · Clear | Firma · Dibujar · Imagen · Escribir · Borrar |
 | Password · Confirm password · Remove password | Contraseña · Confirma la contraseña · Quitar la contraseña |
@@ -282,6 +283,7 @@ Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espan
 | mode (Comprimir PDF) | nivel | "la compresión Recomendada" |
 | N times as heavy | N veces el peso | nunca "N veces más", que é ambíguo |
 | merged file · attachment | archivo unido · archivo adjunto | |
+| Change (coluna, e a mudança de tamanho no cartão do resultado) | Cambio | F13a, revisão e-4 |
 | preset | ajuste predefinido | |
 
 Rótulos de sistema, como as páginas de suporte em espanhol escrevem (lidas em 3/nov/2026): Alta eficiencia, Más compatible, Mantener originales, Localización (manual da Apple es-us), app Vista Previa, Insertar desde archivo, app Archivos, mantén presionada, Manual de uso del iPhone (Apple); Guardar ubicación, Más parámetros de configuración, Agregar (Google); Extensiones de imagen HEIF, Extensiones de vídeo HEVC (nome do produto), Explorador de archivos, Microsoft Print To PDF (Microsoft). Fonte sem versão em espanhol leva "(en inglés)" no rótulo.

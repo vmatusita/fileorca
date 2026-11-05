@@ -1,7 +1,7 @@
 // pnpm lancamento:imagens: the images of the Product Hunt kit (prompt F5b, decision 8), written to
 // docs/lancamento/product-hunt/ and listed, with their size, weight and caption, in docs/lancamento/product-hunt.md.
 //  - thumbnail.png and thumbnail.gif, 240 × 240: the Oli on the deep sea, drawn from docs/design/ (the SVG of the pose, the
-//    token colours) by resvg. The GIF's frames come from the Oli's own animations in src/styles/components.css (fo-float
+//    token colours) by resvg. The GIF's frames come from the Oli's own animations in src/styles/components.css (fo-hello
 //    for wave, fo-cheer for cheer) with the durations and easings of docs/design/tokens.json, computed frame by frame, so
 //    the same files come out on every run; gifenc (MIT) writes the GIF.
 //  - gallery-1.png to gallery-5.png, 1270 × 760: real states of the site's dist/, served as Cloudflare serves it and
@@ -76,15 +76,16 @@ function poseOf(transform: string): Pose {
   return { ty: number(/translateY\((-?[\d.]+)px\)/, 0), rotate: number(/rotate\((-?[\d.]+)deg\)/, 0), scale: number(/scale\((-?[\d.]+)\)/, 1) };
 }
 
-/** The stops of a @keyframes rule of src/styles/components.css, as fractions of the duration. */
+/** The stops of a @keyframes rule of src/styles/components.css, as fractions of the duration. A selector may list several
+ *  stops ("0%, 100%", the greeting of the F13a that starts and ends on the drawn pose; DECISOES § 460). */
 function keyframes(name: string): { at: number; pose: Pose }[] {
   const css = readFileSync('src/styles/components.css', 'utf8');
   const rule = new RegExp(`@keyframes ${name} \\{(.*?)\\}\\s*\\}`, 's').exec(css)?.[1];
   if (!rule) throw new Error(`no @keyframes ${name}`);
-  return [...rule.matchAll(/(from|to|\d+%)\s*\{\s*transform:\s*([^;]+);/g)].map((match) => ({
-    at: match[1] === 'from' ? 0 : match[1] === 'to' ? 1 : Number.parseFloat(match[1] as string) / 100,
-    pose: poseOf(match[2] as string),
-  }));
+  const at = (stop: string): number => (stop === 'from' ? 0 : stop === 'to' ? 1 : Number.parseFloat(stop) / 100);
+  return [...rule.matchAll(/((?:from|to|\d+%)(?:\s*,\s*(?:from|to|\d+%))*)\s*\{\s*transform:\s*([^;]+);/g)]
+    .flatMap((match) => (match[1] as string).split(',').map((stop) => ({ at: at(stop.trim()), pose: poseOf(match[2] as string) })))
+    .sort((a, b) => a.at - b.at);
 }
 
 /** The pose at fraction t of an animation, eased segment by segment as CSS does. */
@@ -129,18 +130,18 @@ function render(svg: string): { png: Buffer; rgba: Uint8Array } {
 }
 
 function thumbnailGif(): Uint8Array {
-  const floatStops = keyframes('fo-float');
+  // F13a (DECISOES § 460): the wave greets once (fo-hello, 3 s, back on the drawn pose); the float that looped is gone.
+  const helloStops = keyframes('fo-hello');
   const cheerStops = keyframes('fo-cheer');
-  const floatEase = bezier(token('ease-in-out'));
+  const helloEase = bezier(token('ease-in-out'));
   const cheerEase = bezier(token('ease-spring'));
-  const floatMs = ms(token('dur-float'));
+  const helloMs = ms(token('dur-float'));
   const cheerMs = ms(token('dur-cheer'));
   const frames: { rgba: Uint8Array; delay: number }[] = [];
-  // Wave, floating up and back down (alternate), a frame every 150 ms.
+  // Wave, the greeting once, a frame every 150 ms.
   const step = 150;
-  for (let time = 0; time < floatMs * 2; time += step) {
-    const phase = time < floatMs ? time / floatMs : 2 - time / floatMs;
-    frames.push({ rgba: render(thumbnailSvg('wave', poseAt(floatStops, phase, floatEase))).rgba, delay: step });
+  for (let time = 0; time < helloMs; time += step) {
+    frames.push({ rgba: render(thumbnailSvg('wave', poseAt(helloStops, time / helloMs, helloEase))).rgba, delay: step });
   }
   // Cheer: the jump of the result card, a frame every 50 ms, then a rest on the last pose.
   const jump = 50;

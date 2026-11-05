@@ -4,7 +4,7 @@ import { CALC_PAGES as CALC_PAGES_OF, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, HEALTH_H
 import { routeById } from '../../src/i18n/routes.ts';
 import { BUNDLE_RECORD, type BundleRecord } from '../../src/platform/bundle-record.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { chooseImage, dismissCookies, hydrated } from './lib/page.ts';
+import { chooseImage, dismissCookies, hydrated, startOver } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 import imagesTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
@@ -161,6 +161,28 @@ test('Image to PDF writes its PDF in the shared worker and fetches neither qpdf 
   console.log(`/image-to-pdf/ com o arquivo: ${urls.size} URLs (${[...urls].join(', ')})`);
   expect([...urls].some((url) => WORKER_FILE.test(url)), 'o PDF saiu do worker compartilhado').toBe(true);
   expect([...urls].filter((url) => QPDF_FILE.test(url) || PDFJS_FILE.test(url)), 'nem qpdf nem PDF.js').toEqual([]);
+});
+
+// F13a (DECISOES § 534): the warm-up of the codecs is for before the first file. After it, the pointer that enters the
+// rectangle (to click Download) and the focus that Start over gives to Choose fetch nothing: each codec comes when a file
+// needs it. Compress image is the tool that warms three codecs (JPEG, PNG and WebP) and uses one per photo.
+test('Compress image warms its codecs only before the first file', async ({ page, baseURL }) => {
+  const urls = trackAll(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin);
+  const { settled } = settler(page);
+  expect((await page.goto('/compress-image/'))?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  // The file arrives with the pointer away from the tool, as when it is dropped anywhere on the page (UX-18 A) or pasted.
+  await page.mouse.move(0, 0);
+  await chooseImage(page);
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 45_000 });
+  await settled();
+  const first = new Set(urls);
+  await page.locator('#fo-tool-root .fo-slot').hover();
+  await startOver(page);
+  await expect(page.locator('#fo-tool-root .fo-drop .fo-btn--brand')).toBeFocused();
+  await settled();
+  expect([...urls].filter((url) => url.startsWith('/') && !first.has(url)), 'nada aquecido depois do primeiro arquivo').toEqual([]);
 });
 
 test('the PDF of a calculator is written in the shared worker and fetches neither qpdf nor PDF.js', async ({ page, baseURL }) => {

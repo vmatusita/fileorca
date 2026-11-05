@@ -84,7 +84,7 @@ const texts: PdfToolTexts<SignTexts> = {
       placeLegend: 'Posição',
       boxLabel: 'Posição da assinatura',
       boxValue: '{x}% da esquerda, {y}% do topo, {width}% de largura',
-      keyboardHelp: 'Arraste a caixa na prévia. No teclado, as setas movem a caixa, + aumenta e − diminui.',
+      keyboardHelp: 'Arraste a caixa na prévia. No teclado, as setas movem a caixa (com Shift, 10 vezes mais longe), + ou = aumenta e − diminui.',
       x: 'Da esquerda',
       y: 'Do topo',
       width: 'Largura',

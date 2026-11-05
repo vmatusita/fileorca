@@ -71,8 +71,8 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
     suffix: 'rotado',
     note: 'Archivos PDF, todos los que quieras',
     progressLabel: 'Rotando los PDF',
-    done: '¡Listo! Oli giró tu PDF.',
-    doneMany: '¡Listo! Oli giró tus {count} PDF.',
+    done: '¡Listo! Oli giró las {pages} páginas de tu PDF {turn}.',
+    doneMany: '¡Listo! Oli giró tus {count} PDF {turn}.',
     options: {
       turnLegend: 'Rotar',
       right: '90° a la derecha',
@@ -83,6 +83,11 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
       pick: 'Página por página',
       pickHelp: 'Usa el botón de girar de una miniatura para girar esa página.',
       batchNote: 'Página por página funciona con un solo archivo. Con varios archivos, Oli gira todas las páginas de cada uno.',
+      doneOne: '¡Listo! Oli giró la página de tu PDF {turn}.',
+      donePicked: '¡Listo! Oli giró {count} de las {pages} páginas.',
+      rightTurn: '90° a la derecha',
+      halfTurn: '180°',
+      leftTurn: '90° a la izquierda',
     },
   },
 };

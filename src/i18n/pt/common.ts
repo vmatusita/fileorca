@@ -39,8 +39,8 @@ export default {
     signature: 'Feito por {name} em {city}',
   },
   cookie: {
-    title: 'Cookies, rapidinho.',
-    body: 'Usamos o Google Analytics para ver quais ferramentas ajudam e anúncios para manter o site grátis. Aceitando ou não, seu arquivo nem sai do aparelho.',
+    title: 'Cookies',
+    body: 'do Google Analytics e de anúncios.',
     privacyLink: 'Privacidade',
     accept: 'Aceitar',
     decline: 'Recusar',

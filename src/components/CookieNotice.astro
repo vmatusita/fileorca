@@ -11,6 +11,22 @@
 // - F3 f-06 (§ 429): the resize listener and the ResizeObserver are on before the early return of a stored choice, so
 //   the room follows the width also for the notice opened again by "Change my cookie choice" (with the notice hidden and
 //   no anchor, reserve() clears it all).
+// F13a · o aviso compacto (UX-09; DECISOES § 458): two lines at 360px (the small style, 14/20), "Cookies" in bold, what
+// they are for, then the seal of the page itself (files, numbers or text: the page passes it through the BaseLayout) and
+// the Privacy link. keep(): with the notice open, a ResizeObserver on <main> moves out from under it the focused element
+// that moved without the focus changing (the DropZone error: Preact reuses the same <button>, and focusin never fires).
+// F13a, revisão b-1 (DECISOES § 514): focusin and keep() move only a control out from under the notice. idle() leaves
+// in place the WaterLevel (a progressbar with tabindex -1, the tool's rectangle itself, which took the focus of the Choose
+// button and scrolled the page 10 to 32 px on a first visit), any other element with tabindex -1 that is no control, and
+// whatever is taller than the room above the notice (lifting it would push its top out of the screen). A row of a list
+// (role="listitem") that took the focus of its button is still lifted.
+// F13a, revisão d-1 (DECISOES § 517): lower() decides before the fonts arrive on a first visit with an empty cache,
+// and the swap of the fallback faces for Figtree and Fredoka raised the ad (a two-line number of a calculator
+// goes to one line; up to 92 px in Chromium and 120 px in WebKit in the pages of the test): it takes the ad down when its
+// top is less than 150 + 160 px under the notice, and down to there.
+// F13a, revisão d-2 (§ 518): hide() no longer moves the ad. A click on Accept or Decline gives it back its place
+// (unlower(), in the click: recent input, out of the CLS); the notice that Google's CMP hides (tcf()) after the first paint
+// leaves it where it is until the next page, and before the first paint (drawn still 0) it gives it back at once.
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
 import { COFFEE_KEY } from '../tools/image/coffee.ts';
@@ -18,8 +34,10 @@ import { COFFEE_KEY } from '../tools/image/coffee.ts';
 interface Props {
   t: CommonTexts;
   privacyHref: string;
+  /** The seal of the page (PrivacySeal text, no final period): files, numbers or text; common.seal where there is none. */
+  seal: string;
 }
-const { t, privacyHref } = Astro.props;
+const { t, privacyHref, seal } = Astro.props;
 const script = `(function(){
 var K=${JSON.stringify(CONSENT_STORAGE_KEY)},C=${JSON.stringify(COFFEE_KEY)},box=document.getElementById('fo-cookie'),anchor=0,keys=false;if(!box)return;
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
@@ -36,20 +54,34 @@ function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedSt
 // WebKit does not always honour that scroll-padding when it reveals the focus, so a focused element is moved
 // out from under the notice, or the anchor when the notice is gone, before the browser reveals it (DECISOES § 36).
 // At the end of the page there is nothing left to scroll: the notice's room opens under the footer first (§ 106).
-document.addEventListener('focusin',function(e){var t=e.target,end;if(!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;if(!box.hidden)end=box.getBoundingClientRect().top-8;else if(anchor)end=innerHeight-anchor-8;else return;var r=t.getBoundingClientRect(),d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(!d)return;if(d>0&&!box.hidden&&!keys&&scrollY+innerHeight+d>document.documentElement.scrollHeight-1){keys=true;reserve();}scrollBy(0,d);});
+// Only a control comes out (idle(): § 514).
+function idle(t,r,end){if(t.getAttribute('role')==='progressbar'||r.height>end-8)return true;return t.tabIndex<0&&!t.matches('a,button,input,select,textarea,summary,[role=listitem]');}
+document.addEventListener('focusin',function(e){var t=e.target,end;if(!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;if(!box.hidden)end=box.getBoundingClientRect().top-8;else if(anchor)end=innerHeight-anchor-8;else return;var r=t.getBoundingClientRect(),d=0;if(idle(t,r,end))return;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(!d)return;if(d>0&&!box.hidden&&!keys&&scrollY+innerHeight+d>document.documentElement.scrollHeight-1){keys=true;reserve();}scrollBy(0,d);});
+// At scroll 0 the open notice keeps 150px from the first content ad that shows, in any window (F12 R-A-2): where it would
+// not, the ad goes down below the notice (with 160px to spare for the fonts, § 517), never the notice, and back up
+// once a click hides the notice. Run before the first paint and on resize, never after a change of the content, so it adds
+// no layout shift (§ 459). The notice that Google's CMP hides after the paint leaves the ad where it is (§ 518).
+var low=null,drawn=0;function unlower(){if(low){low.style.marginTop='';low=null;}}
+function lower(){if(box.hidden)return;unlower();var l=document.querySelectorAll('main .fo-ad--content'),a=null;for(var i=0;i<l.length&&!a;i++)if(l[i].offsetHeight)a=l[i];if(!a)return;var n=box.getBoundingClientRect(),r=a.getBoundingClientRect(),y=scrollY,dx=Math.max(0,n.left-r.right,r.left-n.right);if(dx>=150)return;var need=Math.sqrt(22500-dx*dx),top=r.top+y,bottom=r.bottom+y;if(bottom<=n.top-need||top>=n.bottom+need+160)return;a.style.marginTop=Math.ceil(parseFloat(getComputedStyle(a).marginTop)+n.bottom+need+160-top)+'px';low=a;}
 function hide(){box.hidden=true;keys=false;reserve();}
-function show(){box.hidden=false;reserve();}
-function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
+function show(){box.hidden=false;reserve();lower();}
+function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true){hide();if(!drawn)unlower();}});}catch(e){}return true;}
 // After a choice in a notice opened again by "Change my cookie choice", the focus goes back to that button (WCAG 2.4.3).
 var opener=null;
-box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent'),back=opener;opener=null;save(v);apply(v);if(v==='denied')forget();hide();if(back&&document.contains(back))back.focus();});
+box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]');if(!b)return;var v=b.getAttribute('data-consent'),back=opener;opener=null;save(v);apply(v);if(v==='denied')forget();hide();unlower();if(back&&document.contains(back))back.focus();});
 // "Change my cookie choice" opens the notice again; the choice kept so far holds until a new one is made (§ 101).
 document.addEventListener('click',function(e){var c=e.target.closest('[data-consent-change]');if(c){opener=c;show();var f=box.querySelector('button');if(f)f.focus();}});
 function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}anchor=h;box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
-addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+addEventListener('resize',reserve);addEventListener('resize',lower);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+// The focus that moved without changing (the panel swapped state under the same button) leaves the notice's band too.
+// <main> may keep its size when the panel changes (the tool rectangle has a fixed height), so a change of its DOM calls
+// keep() as well, once per frame, after the layout (DECISOES § 458).
+var main=document.getElementById('main'),kf=0;function keep(){kf=0;if(box.hidden)return;var t=document.activeElement;if(!t||t===document.body||box.contains(t)||!main.contains(t))return;var end=box.getBoundingClientRect().top-8,r=t.getBoundingClientRect();if(idle(t,r,end))return;if(r.bottom>end&&r.top>0)scrollBy(0,Math.min(r.bottom-end,r.top-8));}
+function later(){if(!kf&&!box.hidden)kf=requestAnimationFrame(keep);}
+if(main){if(window.ResizeObserver)new ResizeObserver(later).observe(main);new MutationObserver(later).observe(main,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-state','hidden']});}
 if(stored()==='granted'||stored()==='denied')return;
-show();
+show();requestAnimationFrame(function(){drawn=1;});
 // Google's CMP comes with the AdSense loader, often after the load event: look for it at once, at the load event
 // (where it usually is by then), and every 500 ms for up to 30 s, until it answers or the notice is gone (§ 101, § 104).
 var tries=0,found=false;function look(){if(found||box.hidden)return;if(tcf()){found=true;return;}if(++tries<=60)setTimeout(look,500);}
@@ -57,7 +89,7 @@ look();addEventListener('load',function(){if(!found&&!box.hidden&&tcf())found=tr
 })();`;
 ---
 <div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>
-  <p id="fo-cookie-text"><b>{t.cookie.title}</b> {t.cookie.body} <a href={privacyHref}>{t.cookie.privacyLink}</a></p>
+  <p id="fo-cookie-text"><b>{t.cookie.title}</b> {t.cookie.body} {seal}. <a href={privacyHref}>{t.cookie.privacyLink}</a></p>
   <div class="fo-cookie__actions">
     <button type="button" class="fo-btn" data-consent="denied">{t.cookie.decline}</button>
     <button type="button" class="fo-btn" data-consent="granted">{t.cookie.accept}</button>

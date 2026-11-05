@@ -37,12 +37,13 @@ const texts: PdfPanelTexts = {
     moveEarlier: 'Move {name} up',
     moveLater: 'Move {name} down',
     moved: '{name} is now number {position} of {total}.',
-    pickUp: 'Pick up {name}',
-    picked: '{name} picked up. Use the arrow keys to move it, then Space to drop it.',
-    dropped: '{name} dropped at number {position} of {total}.',
     unchanged: 'Already optimized',
     ready: '{count} PDFs ready',
     readyOne: '1 PDF ready',
+    readingCount: 'Reading {count} PDFs…',
+    readingOne: 'Reading 1 PDF…',
+    out: '{name} is out of the list.',
+    undo: 'Undo',
   },
   grid: {
     label: 'Pages of {name}',
@@ -60,7 +61,7 @@ const texts: PdfPanelTexts = {
     turn: 'Turn page {n}',
     turned: 'Page {n} turned to {degrees}°.',
     help: 'Arrow keys move between pages; Space picks a page.',
-    helpOrder: 'Drag a page, or use its arrows. With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.',
+    helpKeys: 'With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.',
     rangeLabel: 'Pick pages by number',
     rangeApply: 'Pick these',
     rangeHelp: 'For example 1-3, 5, 8-10',
@@ -101,6 +102,9 @@ const texts: PdfPanelTexts = {
     pages: 'Pages',
     unchanged: 'This PDF was already optimized, so Oli gave it back as it was.',
     unchangedMany: 'These PDFs were already optimized, so Oli gave them back as they were.',
+    filesCount: '{count} files',
+    adjust: 'Adjust',
+    adjustHelp: 'Changing an option redoes the file right away.',
     notes: {
       repaired: "One file had a damaged index; Oli rebuilt it while reading the pages.",
       xfaRemoved: 'The XFA form layer, which only a few desktop apps read, was removed; the regular form fields still work.',
@@ -116,6 +120,22 @@ const texts: PdfPanelTexts = {
     },
   },
   next: { label: 'Next', moreTools: 'More tools' },
+  // F13a · UX-14 (DECISOES § 496): the chip that takes the result to the next tool, and the arrival there.
+  carry: {
+    line: 'Oli takes the PDF to the next tool. It never leaves your device.',
+    lineMany: 'Oli takes the PDFs to the next tool. They never leave your device.',
+    from: 'Oli brought this PDF from {tool}.',
+    fromMany: 'Oli brought these {count} PDFs from {tool}.',
+    lostTitle: "Oli couldn't bring the PDF here",
+    lostTitleMany: "Oli couldn't bring the PDFs here",
+    lostHelp: 'Nothing left your device. Choose the PDF again, or go back to {tool} and download it there.',
+    lostHelpMany: 'Nothing left your device. Choose the PDFs again, or go back to {tool} and download them there.',
+    back: 'Back to {tool}',
+    chips: {
+      'compress-pdf': { one: 'Compress this PDF', many: 'Compress these {count} PDFs' },
+      'add-page-numbers-to-pdf': { one: 'Number the pages of this PDF', many: 'Number the pages of these {count} PDFs' },
+    },
+  },
 };
 
 export default texts;

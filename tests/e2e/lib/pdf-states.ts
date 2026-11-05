@@ -17,13 +17,14 @@ import { PDF_ORACLE, choosePdfs, openTool, pdfFile } from './pdf-tools.ts';
  *  - rest: the drop zone, nothing chosen;
  *  - processing: a file chosen with the engine held back, so the panel is the WaterLevel (only when the walk holds it);
  *  - ready: the file is read and the options wait for the button;
- *  - list: the Merge list with its move buttons;
+ *  - list: the Merge list with its move buttons (F13a: in the rectangle, with the remove button of each row);
+ *  - removed: the Merge list with a row taken out, the line that says so and its Undo in its place (F13a, D-21);
  *  - grid: the page grid open (with a selection, a turn or a move made);
  *  - password: a password field showing its error (Protect: the two do not match; Unlock: the password is wrong);
  *  - signature: the signature area of Sign PDF (draw, upload, type);
  *  - result: the result card with Download.
  */
-export type PdfState = 'rest' | 'processing' | 'ready' | 'list' | 'grid' | 'password' | 'signature' | 'result';
+export type PdfState = 'rest' | 'processing' | 'ready' | 'list' | 'removed' | 'grid' | 'password' | 'signature' | 'result';
 
 /** Called on each state with a short note of what was done to reach it (it shows in the failure messages). */
 export type VisitPdf = (state: PdfState, note: string) => Promise<void>;
@@ -67,7 +68,8 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
     await visit(state, note);
   };
   const root = page.locator('#fo-tool-root');
-  const ready = root.locator('.fo-ready');
+  // F13a (UX-04 A): the ready card is the reading card too (.fo-ready--reading), and the Merge list is a panel of its own.
+  const ready = root.locator('.fo-ready:not(.fo-ready--reading), .fo-merge-panel:not([data-state="reading"])');
   const action = ready.locator('.fo-btn--brand');
   const download = root.locator('.fo-btn--download');
   const cells = root.locator('.fo-pages__grid .fo-page');
@@ -96,7 +98,13 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await enter([MIXED, SECOND]);
       await waitReady();
       await expect(root.locator('.fo-merge .fo-filelist__row')).toHaveCount(2);
+      await expect(action).toBeVisible({ timeout: 30_000 });
       await seen('list', 'two files in the Merge list');
+      await root.getByRole('button', { name: fmt(PDF_PANEL_TEXTS[lang].queue.remove, { name: SECOND }), exact: true }).click();
+      await expect(root.locator('.fo-merge__undo')).toBeVisible();
+      await seen('removed', 'the second file taken out, with Undo');
+      await root.locator('.fo-merge__undo .fo-btn').click();
+      await expect(root.locator('.fo-merge .fo-filelist__row')).toHaveCount(2);
       await action.click();
       await result('merged');
       break;
@@ -129,6 +137,9 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
     case 'rotate-pdf': {
       await enter([MIXED]);
       await result('every page turned');
+      // F13a (UX-04 A): after the result the options of a tool that runs by itself fold under "Adjust".
+      await root.locator('.fo-adjust > summary').click();
+      await seen('result', 'every page turned, with Adjust open');
       await option(page, labels['pick'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);
       await waitReady();
@@ -167,7 +178,7 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await typed.blur();
       await expect(root.locator('.fo-sign__box')).toBeVisible({ timeout: 30_000 });
       // The preview of the page (the box holds the signature's own picture, which is another img).
-      await expect(root.locator('.fo-sign__page > img')).toBeVisible({ timeout: 30_000 });
+      await expect(root.locator('.fo-sign__sheet > img')).toBeVisible({ timeout: 30_000 });
       await seen('signature', 'type: the name on the preview of the page');
       await option(page, labels['pickPages'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);

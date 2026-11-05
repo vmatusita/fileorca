@@ -38,12 +38,13 @@ const texts: PdfPanelTexts = {
     moveEarlier: 'Mover {name} hacia arriba',
     moveLater: 'Mover {name} hacia abajo',
     moved: '{name} ahora es el número {position} de {total}.',
-    pickUp: 'Tomar {name}',
-    picked: 'Tomaste {name}. Muévelo con las flechas del teclado y suéltalo con Espacio.',
-    dropped: 'Soltaste {name} en el número {position} de {total}.',
     unchanged: 'Ya optimizado',
     ready: '{count} PDF listos',
     readyOne: '1 PDF listo',
+    readingCount: 'Leyendo {count} PDF…',
+    readingOne: 'Leyendo 1 PDF…',
+    out: '{name} salió de la lista.',
+    undo: 'Deshacer',
   },
   grid: {
     label: 'Páginas de {name}',
@@ -61,7 +62,7 @@ const texts: PdfPanelTexts = {
     turn: 'Girar la página {n}',
     turned: 'La página {n} quedó girada a {degrees}°.',
     help: 'Las flechas del teclado pasan de una página a otra; Espacio elige una página.',
-    helpOrder: 'Arrastra una página o usa sus flechas. Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
+    helpKeys: 'Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
     rangeLabel: 'Elegir páginas por número',
     rangeApply: 'Elegir estas',
     rangeHelp: 'Por ejemplo 1-3, 5, 8-10',
@@ -102,6 +103,9 @@ const texts: PdfPanelTexts = {
     pages: 'Páginas',
     unchanged: 'Este PDF ya estaba optimizado, así que Oli te lo devolvió tal como estaba.',
     unchangedMany: 'Estos PDF ya estaban optimizados, así que Oli te los devolvió tal como estaban.',
+    filesCount: '{count} archivos',
+    adjust: 'Ajustar',
+    adjustHelp: 'Cambiar una opción rehace el archivo al momento.',
     notes: {
       repaired: 'Un archivo tenía el índice dañado; Oli lo reconstruyó al leer las páginas.',
       xfaRemoved: 'Se quitó la capa de formulario XFA, que solo leen algunas aplicaciones de escritorio; los campos de formulario normales siguen funcionando.',
@@ -117,6 +121,22 @@ const texts: PdfPanelTexts = {
     },
   },
   next: { label: 'Siguiente', moreTools: 'Más herramientas' },
+  // F13a · UX-14 (DECISOES § 496): el chip que lleva el resultado a la siguiente herramienta, y la llegada allí.
+  carry: {
+    line: 'Oli lleva el PDF a la siguiente herramienta. Nunca sale de tu dispositivo.',
+    lineMany: 'Oli lleva los PDF a la siguiente herramienta. Nunca salen de tu dispositivo.',
+    from: 'Oli trajo este PDF desde {tool}.',
+    fromMany: 'Oli trajo estos {count} PDF desde {tool}.',
+    lostTitle: 'Oli no pudo traer el PDF',
+    lostTitleMany: 'Oli no pudo traer los PDF',
+    lostHelp: 'Nada salió de tu dispositivo. Elige el PDF de nuevo, o vuelve a {tool} y descárgalo allí.',
+    lostHelpMany: 'Nada salió de tu dispositivo. Elige los PDF de nuevo, o vuelve a {tool} y descárgalos allí.',
+    back: 'Volver a {tool}',
+    chips: {
+      'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estos {count} PDF' },
+      'add-page-numbers-to-pdf': { one: 'Numerar las páginas de este PDF', many: 'Numerar las páginas de estos {count} PDF' },
+    },
+  },
 };
 
 export default texts;

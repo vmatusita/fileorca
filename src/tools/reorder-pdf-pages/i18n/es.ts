@@ -67,6 +67,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
     options: {
       help: 'Arrastra una página a su nuevo lugar o usa las flechas de cada página.',
       reverse: 'Invertir el orden',
+      reversed: 'Páginas invertidas.',
       unchanged: 'Mueve una página para guardar un nuevo orden.',
     },
   },

@@ -14,7 +14,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 ## Princípios de UX
 
 1. **Resultado primeiro, ajuste depois.** Soltou o arquivo, a ferramenta já processa com o padrão recomendado. As opções reprocessam na hora. Não existe botão "Aplicar" nem "Calcular".
-2. **Um lugar só.** DropZone, WaterLevel e ResultCard ocupam o mesmo retângulo, do mesmo tamanho. A página não pula e o olho não procura.
+2. **Um lugar só.** DropZone, WaterLevel e ResultCard ocupam o mesmo retângulo, da mesma altura em todos os estados (356px no celular, 340px a partir de 768px), e a faixa de baixo, com as opções antes do resultado e os chips e o "Ajustar" depois, também tem altura fixa. Nada cresce sem um gesto da pessoa. A página não pula e o olho não procura (F13a, DECISOES § 463 e § 466).
 3. **Uma ação amarela.** Em cada tela, só o Baixar é `sun`. O resto é neutro ou ghost.
 4. **Diga com números.** "2.4 MB → 780 KB", "−68%", "you'll pay $382,637 in interest". Nunca "Optimized!" sem número.
 5. **Privacidade que dá para conferir.** "Your files never leave your device" no PrivacySeal, e o FAQ ensina a abrir a aba Rede.
@@ -71,14 +71,15 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 
 ## Movimento
 
-- Só `transform` e `opacity`, nada em JavaScript. Entrada com `ease-out`; a Oli e a Placa com `ease-spring`; loops com `ease-in-out`.
-- Durações pelo nome: `dur-instant` (toque), `dur-quick` (hover, foco), `dur-base` (abrir, trocar estado), `dur-cheer` (o salto da Oli, uma vez), `dur-float` (flutuar), `dur-wave` (a onda).
+- Só `transform` e `opacity`, nada em JavaScript. Entrada com `ease-out`; a Oli e a Placa com `ease-spring`; ida e volta com `ease-in-out`.
+- **Movimento que começa sozinho termina antes de 5 s e deixa a Oli parada na pose desenhada; só o progresso (a `swim`, a onda e o spinner) dura o trabalho** (F13a, DECISOES § 460; antes, "loops com `ease-in-out`"). Cada estado da Oli tem um movimento curto: o aceno da `wave` uma vez, e um aceno curto no ponteiro ou no foco da DropZone; a `gulp`, a `cheer`, a `oops`, a `buoy`, a `lost` e a `peek` uma vez; o vapor do `coffee` assenta à vista em 3,12 s; a `sad` fica parada. O `gate:design` aceita `infinite` só nos seletores do progresso.
+- Durações pelo nome: `dur-instant` (toque), `dur-quick` (hover, foco), `dur-base` (abrir, trocar estado), `dur-cheer` (o salto da Oli, uma vez), `dur-float` (o aceno da `wave` e a procura da `lost`, uma vez), `dur-wave` (a onda).
 - Com `prefers-reduced-motion: reduce`, nada anima sozinho: a Oli fica parada, a água sobe sem onda, a Placa aparece pronta.
 
 ## Oli
 
 - Dez poses, lista fechada: `wave`, `gulp`, `swim`, `cheer`, `oops`, `buoy`, `lost`, `coffee`, `peek` e `sad` (só na parede do bloqueador, o AdblockWall; F12). Pose nova só com decisão registrada.
-- Ela olha para a esquerda, para o conteúdo; no logo, espelhada, para a palavra. Na página de ferramenta, ela senta na borda de cima da DropZone, à direita do H1, e reage ali: `gulp` com o arquivo em cima, `swim` na água, `cheer` no ResultCard.
+- Ela olha para a esquerda, para o conteúdo; no logo, espelhada, para a palavra. Na página de ferramenta, ela fica no canto de cima à direita do retângulo em todos os estados, olhando para a fala, e reage ali: `wave` em repouso, `gulp` com o arquivo em cima, `swim` enquanto a água sobe, `cheer` no ResultCard (segurando a placa) e `oops` no erro; o H1 usa a largura toda, e só a linha do selo abre espaço para ela (F13a, DECISOES § 465; antes, "ela senta na borda de cima da DropZone, à direita do H1").
 - O contorno é preto-orca nos dois temas, e o aro branco por trás da silhueta fica sempre: some no claro e vira adesivo no escuro e sobre `deep`.
 - A Oli inteira vai de 32px para cima; abaixo disso, o ícone do app (o rosto de frente), que lê bem a partir de 16px.
 - Decorativa (`aria-hidden`): o estado é sempre dito em texto ao lado.
@@ -89,15 +90,15 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - Desenho próprio em grade de 24px, traço 2px, pontas e cantos redondos, em `currentColor` (grupo Icons). Os ícones de arquivo têm o canto dobrado.
 - Tamanhos `icon` (24px) e `icon-sm` (20px); `fo-icon--inline` (1em) dentro de texto. Ícone que carrega sentido passa de 3:1 contra o chão.
 - Ícone sozinho só em ação de linha (remover, baixar um arquivo do lote), sempre com `aria-label`. Em todo o resto, ícone acompanha palavra.
-- Sem emoji, sem pacote de ícones genérico misturado. Ferramenta que pede um ícone que não existe (assinar, marca d'água, carro, cartão, porcentagem…) ganha um desenhado na mesma grade e no mesmo traço, que entra em `assets/Icons/` com decisão registrada no DECISOES.md.
+- Sem emoji, sem pacote de ícones genérico misturado. Ferramenta que pede um ícone que não existe (como foram o assinar, a marca d'água e, na F13a, o carro, o cartão, a porcentagem e os outros 24 do UX-16) ganha um desenhado na mesma grade e no mesmo traço, que entra em `assets/Icons/` com decisão registrada no DECISOES.md.
 
 ## Layout e anúncios
 
 - Celular primeiro, a 360px. Coluna da ferramenta até `tool-max`; texto até `measure`; página até `page-max`; a partir de 1280px entra a coluna `rail` com o anúncio 300×600, que não gruda.
-- O AdSlot é neutro (`ad-ground`, rótulo `caption`), com altura reservada e `ad-clearance` (150px) de qualquer Baixar, campo, painel, menu, Oli ou linha do café. O rótulo é "Advertisements" / "Publicidade" / "Anuncios": as únicas palavras que o AdSense aceita em cada idioma, além de "Sponsored Links" e equivalentes.
+- O AdSlot é neutro (`ad-ground`, rótulo `caption`), com altura reservada e `ad-clearance` (150px) de qualquer Baixar, campo, painel, menu, Oli, linha do café, faixa de baixo da ferramenta, "Ajustar", chip ou controle da lista do juntar (F13a, DECISOES § 473 e § 488). O rótulo é "Advertisements" / "Publicidade" / "Anuncios": as únicas palavras que o AdSense aceita em cada idioma, além de "Sponsored Links" e equivalentes.
 - **O mapa (UX-07 A, F12).** O 1º anúncio de conteúdo tem lugar fixo em cada molde: na home, depois da 1ª seção de cards (nunca na primeira tela); nos hubs, depois da 1ª grade (no de dinheiro, a de crédito); no hub de guias, depois da 1ª grade de guias; na ferramenta, depois do "Como usar"; na calculadora, depois do painel e antes do cronograma; no guia, no texto, depois da ferramenta e de um parágrafo. Os seguintes só até 459px (o celular em pé), a **1.110px** ou mais um do outro, de borda a borda, só em fronteira de bloco (entre seções, parágrafos, listas e perguntas), nunca logo depois de um título nem colados numa tabela. A partir de 768px, o conteúdo 1 e o multiplex no fim do `<main>`; a partir de 1280px, duas laterais, a 2ª a 1.200px da 1ª. Sem o ID da unidade, a posição não aparece.
 - **A densidade fica em até 30 %** a 360×740 (a leitura conservadora da § 351: as caixas da coluna mais 100px de âncora, contada uma vez, sobre o `<main>` sem as relacionadas, com a ferramenta em repouso), e também a 768×1024 e a 812×375. O teste do mapa mede cada página com anúncio.
-- Nunca há anúncio acima da ferramenta no celular, dentro do painel, ao lado do Baixar, no WaterLevel, entre campos, dentro do cronograma ou nas páginas livres (as jurídicas, Sobre, Contato, Licenças, Apoie, 404, offline e "Abrir com"). O único fixo é a âncora do AdSense, e nada do site a cobre (nem o CookieNotice); o aviso de cookies aberto, na primeira visita e na rolagem 0, fica a 150px ou mais do 1º anúncio de conteúdo a 360×740 e a 1280×800 (as duas larguras que o teste do mapa mede; as outras estão no grupo 21 do `docs/PENDENCIAS.md`).
+- Nunca há anúncio acima da ferramenta no celular, dentro do painel, ao lado do Baixar, no WaterLevel, entre campos, dentro do cronograma ou nas páginas livres (as jurídicas, Sobre, Contato, Licenças, Apoie, 404, offline e "Abrir com"). O único fixo é a âncora do AdSense, e nada do site a cobre (nem o CookieNotice); o aviso de cookies aberto, na primeira visita e na rolagem 0, fica a 150px ou mais do 1º anúncio de conteúdo em sete janelas (360×740, 1280×800, 1440×900, 1920×950, 1920×1080, 768×1024 e 1024×1366, as que o teste do mapa mede): onde faltaria, o anúncio desce, nunca o aviso (F13a, DECISOES § 459).
 - O pedido de café nunca encosta num anúncio e nunca imita o anúncio ou o Baixar.
 
 ## Acessibilidade

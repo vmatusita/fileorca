@@ -180,7 +180,8 @@ test('a tool kept without its engine says so offline, in buoy, and works again w
   const zone = page.locator('.fo-drop[data-state="offline"]');
   await expect(zone).toBeVisible({ timeout: 30_000 });
   await expect(zone.locator('[role="status"]')).toContainText(imageTexts.errors.offline);
-  await expect(zone.locator('[data-oli="buoy"]')).toHaveCount(1);
+  // F13a (UX-04 A; DECISOES § 465): the one Oli of the island sits in the corner of the rectangle, not in the zone.
+  await expect(page.locator('.fo-slot > .fo-slot__oli[data-oli="buoy"]')).toHaveCount(1);
   await expect(page.locator('#fo-tool-root')).not.toContainText('reload the page');
   expect(await violationIds(page), 'axe on the offline line of the tool').toEqual([]);
 

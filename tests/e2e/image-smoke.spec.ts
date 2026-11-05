@@ -7,7 +7,7 @@ import { EVENT_PARAMS } from '../../src/analytics/events.ts';
 import { comparePixels, type Reference } from './lib/matrix.ts';
 import { parsePdf } from './lib/pdf.ts';
 import { readZip } from './lib/zip.ts';
-import { dataLayer, dismissCookies, downloadBytes, hydrated, type TestFile } from './lib/page.ts';
+import { dataLayer, dismissCookies, downloadBytes, hydrated, openAdjust, type TestFile } from './lib/page.ts';
 
 // What the options of the Tools phase do when they CHANGE after a result is on screen (the batch is
 // processed again at once), the crop editor by pointer and by keyboard, the Resize fields, axe on those
@@ -41,6 +41,9 @@ async function give(page: Page, names: string[]): Promise<void> {
 async function ready(page: Page): Promise<void> {
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 55_000 });
   await expect(page.locator('.fo-btn--download')).toBeVisible();
+  // F13a (UX-04 A; DECISOES § 466): after the result the options are folded under "Adjust" in the band under the
+  // card; every test here changes one, so it opens it, as a person does.
+  await openAdjust(page);
 }
 
 interface Out {
@@ -244,6 +247,7 @@ test.describe('heic-to-jpg', () => {
     await open(page, '/heic-to-jpg/');
     await give(page, [HEIC_08]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 55_000 });
+    await openAdjust(page);
     // JPG is the default (the matrix has all ten); the option re-processes at once and the name changes with the format.
     await choose(page, 'PNG');
     await expectOutputs(page, ['heic-08-iphone13pro-paisagem-hdr-ios17.png:png:1512x850']);

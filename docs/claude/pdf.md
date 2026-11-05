@@ -54,3 +54,19 @@ Pegadinhas que a F6 achou:
 Pegadinhas que o ajuste achou:
 
 - **O painel de PDF leva o foco à ação um quadro depois de mostrar a grade** (§ 240). Teste que dá foco a uma página da grade ou a um campo logo depois de abrir um arquivo espera antes o foco na ação; senão o movimento chega depois e tira o foco, só no runner lento (§ 322).
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- **O Preact reaproveita filhos sem `key` pelo tipo, em outra posição.** Quando a linha de espera (`<p>`) virava o Juntar (`<button>`), o Preact usou o `<p>` velho como o `<p>` da ajuda e o botão do "Add more" como o Juntar; o Chromium mediu isso como deslocamento (CLS 0,07 a 0,19 no juntar). Painel cujos filhos trocam de tipo leva `key` em cada filho (`count`, `hold`, `action`, `help`, `list`, `add`, `restart`). (a ilha de PDF)
+- **Um `<details>` fechado ainda faz o layout do conteúdo** (content-visibility): `getBoundingClientRect` dos campos escondidos devolve caixas de verdade, e o `boxes()` do `ads.spec.ts` os conta como alvos (72 a 124 px do anúncio nos guias do Comprimir e do PDF para JPG). O corpo do "Adjust" e do "Order" só entra no DOM aberto. (a ilha de PDF)
+- **Depois do resultado, as opções das ferramentas automáticas ficam no "Adjust" fechado:** teste que muda uma opção com o resultado na tela abre antes `#fo-tool-root .fo-adjust > summary` (o Girar página por página é o caso). Antes do resultado, mude a opção antes do arquivo. (a ilha de PDF)
+- **A região da ilha é o `p.fo-sr[role="status"]`:** o Juntar tem a da contagem (`.fo-count`), que vem antes no DOM; um `[role="status"]` sem escopo pega a contagem. As linhas do Juntar continuam com a classe `fo-filelist__row` (os specs de privacidade, da matriz e dos eventos a leem). (a ilha de PDF)
+- **A regra da linha de sucesso (`SUCCESS_LINE`) do `scripts/lib/design-checks.ts` é repetida no `tests/unit/routes.test.ts`:** frase de sucesso com chave nova muda as duas. (a ilha de PDF)
+- **O cache das miniaturas é por (índice, largura):** a grade pede 240 px, a prévia da Assinar pede `min(1080, largura × DPR)` arredondada a 60 px; o `drop` precisa da mesma largura do `get`. (a ilha de PDF)
+- **A ilha de PDF guarda as saídas da última execução em `m.outs`** (os bytes e os nomes do Baixar) para o chip que leva, e monta os `Blob` só no clique. A linha `.fo-carry` da faixa entra com os chips sempre que algum pode levar, escondida (`.fo-next--kept`, `aria-hidden`) quando nenhum leva agora: o seletor da linha à vista é `.fo-carry:not(.fo-next--kept)`. Os chips do Protect PDF nunca levam (o PDF sai cifrado), nem os que vão para uma ferramenta com ação. (o chip que leva)
+- **Marca de foco do modelo só se gasta quando o alvo existe.** O efeito pendente da renderização anterior roda no começo da seguinte (o Preact roda os efeitos pendentes antes de renderizar de novo): quando o motor responde dentro de um quadro, ele vê a marca nova (`focusWrong`) com o DOM velho, e uma marca gasta nessa hora nunca põe o foco. O D-11 do Unlock reprovava assim no WebKit; a marca agora espera o campo com `aria-invalid` (DECISOES § 510). Para achar esse tipo de coisa, troque `HTMLElement.prototype.focus` e `Element.prototype.querySelector` num `addInitScript` por versões que anotam a hora e o alvo. (a ilha de PDF)
+- **Abaixo de 480 px a linha do Juntar ocupa duas linhas** (DECISOES § 515): em cima, o card na largura da lista; embaixo, as setas e a lixeira numa linha de 48 px, com `--fo-row-h` de 154 px.
+  - Um teste que compara um controle com o card usa o `y` (embaixo do card), não o `x` (ao lado dele).
+  - O card pronto não tem a trilha das ações (`.fo-file__actions:empty` some).

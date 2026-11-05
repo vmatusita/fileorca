@@ -37,6 +37,11 @@ export interface ImagePageDef {
   beforeAfter: 'always' | 'lossy' | 'never';
   /** One PDF with the whole batch instead of one file per image. */
   pdf?: true;
+  /**
+   * F13a (D-17; DECISOES § 469): a refused format that another tool of the site takes, and that tool. The error of
+   * one such file says so, and the band under the rectangle shows the chip to it in place of the options.
+   */
+  elsewhere?: { format: ImageFormat; tool: ImageToolId };
 }
 
 const PHOTO: readonly ImageFormat[] = ['jpeg', 'png', 'webp'];
@@ -77,15 +82,16 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
   'heic-to-jpg': {
     id: 'heic-to-jpg',
     accepts: ['heic'],
-    icon: 'convert',
+    icon: 'phone-photo',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'png-to-jpg', 'crop-image'],
     beforeAfter: 'lossy',
+    elsewhere: { format: 'png', tool: 'png-to-jpg' },
   },
   'webp-to-jpg': {
     id: 'webp-to-jpg',
     accepts: ['webp'],
-    icon: 'convert',
+    icon: 'browser-image',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['png-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
     beforeAfter: 'lossy',

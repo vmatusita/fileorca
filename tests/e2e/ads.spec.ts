@@ -10,7 +10,8 @@ import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts
 import { LANGS, QR_ID, ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
-import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
+import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, generatedJpeg, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
+import { INBOX_CACHE, INBOX_TOOL_KEY, inboxEntryPath } from '../../src/sw/shared.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 import { DEFAULT_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
 
@@ -30,13 +31,36 @@ const RAIL = '.fo-ad--rail:not(.fo-ad--rail2)';
 // F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
 // frames, labels and help lines), the comparison, the crop editor with its box and corner handles and the
 // next-step chips are measured too.
+// F13a (UX-04 A, decision 10; DECISOES § 473): the band under the rectangle, the "Adjust" disclosure, the chips (also
+// the chip of PNG to JPG in the error of a PNG on HEIC to JPG) and the row of Start over and "Before and after".
 const TARGETS = [
   '.fo-btn--download', 'input:not([type="file"])', 'select', 'textarea', '.fo-seg', 'fieldset',
   '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
   '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more',
   '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
+  '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
+  // F13a (UX-14, decision 10; DECISOES § 506): the line under the chips that take the result along (its room in the
+  // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
+  '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
 ].join(', ');
+
+/**
+ * F13a (UX-04 A): the comparison and the options open only when the person asks. The result states open both (what a
+ * person can put on screen), so the 150px are measured against them and not against their absence.
+ */
+async function openOnScreen(page: Page): Promise<void> {
+  const compare = page.locator('.fo-result__more button[aria-controls="fo-compare"][aria-expanded="false"]');
+  if (await compare.count()) {
+    await compare.click();
+    await expect(page.locator('#fo-compare .fo-ba')).toBeVisible();
+  }
+  const adjust = page.locator('details.fo-adjust:not([open]) > summary');
+  if (await adjust.count()) {
+    await adjust.click();
+    await expect(page.locator('details.fo-adjust .fo-adjust__body')).toBeVisible();
+  }
+}
 // The tool pages and presets that exist. A tool adds its path here when its page is built.
 const TOOL_PAGES = [
   '/compress-image/',
@@ -98,15 +122,21 @@ async function smallFiles(page: Page, path: string, count: number): Promise<Test
 
 interface Box { kind: string; x: number; y: number; w: number; h: number }
 
+// F13a, revisão a-2 (decision 4 of the run; DECISOES § 513): the box of the Oli counts inflated by 12 px on every
+// side (x - 12, y - 12, w + 24, h + 24), the room of her moves (8 px and 6°), so the 150 px hold while she waves.
+const OLI_GROWTH = 12;
+
 async function boxes(page: Page, selector: string): Promise<Box[]> {
-  return page.locator(selector).evaluateAll((nodes) =>
+  return page.locator(selector).evaluateAll((nodes, grow) =>
     nodes
       .map((node) => {
         const rect = node.getBoundingClientRect();
-        return { kind: node.className || node.tagName, x: rect.left + scrollX, y: rect.top + scrollY, w: rect.width, h: rect.height };
+        const box = { kind: node.className || node.tagName, x: rect.left + scrollX, y: rect.top + scrollY, w: rect.width, h: rect.height };
+        if (box.w <= 0 || box.h <= 0 || !node.matches('[data-oli]')) return box;
+        return { ...box, x: box.x - grow, y: box.y - grow, w: box.w + 2 * grow, h: box.h + 2 * grow };
       })
       .filter((box) => box.w > 0 && box.h > 0),
-  );
+  OLI_GROWTH);
 }
 
 function distance(a: Box, b: Box): number {
@@ -199,7 +229,11 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
 
       // The result of one file.
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-      await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+      // F13a (UX-04 A): the one Oli of the island sits in the corner of the rectangle; the comparison and the options open
+      // only when asked, so the result opens both before the clearance is measured (they are on screen, as a person makes
+      // them be; § 473).
+      await expect(page.locator('#fo-tool-root [data-oli]')).toHaveCount(1);
+      await openOnScreen(page);
       await atBothWidths('resultado', async () => {
         for (const selector of ON_SCREEN[english(path)] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
         await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
@@ -211,6 +245,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
+      await openOnScreen(page);
       await atBothWidths('fila', async () => {
         for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[english(path)] ?? [])]) {
           expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
@@ -261,12 +296,24 @@ for (const viewport of VIEWPORTS) {
       await measure(page, 'erro');
     });
 
+    // F13a (D-17; decision 10; DECISOES § 473): the error of a PNG on HEIC to JPG puts the chip to PNG to JPG in the
+    // band, in place of the options: the chip keeps the 150px too.
+    test('with the error of a PNG on HEIC to JPG: the chip to PNG to JPG in the band', async ({ page }) => {
+      await page.goto('/heic-to-jpg/');
+      await hydrated(page);
+      await dismissCookies(page);
+      await chooseImages(page, [{ name: 'notes.png', mimeType: 'image/png', buffer: readFileSync(resolve('fixtures/images', 'gen-png-transparente.png')) }]);
+      await expect(page.locator('.fo-band .fo-next a.fo-chip')).toBeVisible({ timeout: 30_000 });
+      await measure(page, 'erro do PNG no HEIC');
+    });
+
     test('with a batch: the queue, the error row, the comparison and the chips', async ({ page }) => {
       await dismissCookies(page);
       const photos = await jpegBatch(page, 8);
       await chooseImages(page, [...photos.slice(0, 2), { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }, ...photos.slice(2)]);
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(6);
+      await openOnScreen(page);
       await expect(page.locator('.fo-ba')).toHaveCount(1);
       await expect(page.locator('.fo-next')).toBeVisible();
       await measure(page, 'lote com a fila, o comparador e os atalhos');
@@ -277,6 +324,45 @@ for (const viewport of VIEWPORTS) {
     test('with the result and the coffee line', async ({ page }) => {
       await coffeeLineInOneUse(page);
       await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
+    });
+
+    // F13a (UX-14, decision 10; DECISOES § 506): a next-step chip sent files here. With them in the inbox the result
+    // comes at once with the note of where they came from; with the note in the tab and no inbox, the empty box. Both are
+    // written in the page as the chip of Resize image writes them, and the page is opened again.
+    const CHOICE = JSON.stringify({ tool: 'compress-image', order: [0], from: 'resize-image' });
+
+    test.describe(() => {
+      // The Cache Storage of the WebKit of Playwright does not outlive a reload while service workers are blocked (the
+      // default of the config), and a chip only carries with a worker anyway: this state runs with them allowed.
+      test.use({ serviceWorkers: 'allow' });
+
+      test('with the arrival of a file a chip brought: the note of where it came from', async ({ page }) => {
+        await dismissCookies(page);
+        const photo = (await generatedJpeg(page)).toString('base64');
+        await page.evaluate(
+          async ([base64, cache, entry, key, choice]) => {
+            const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+            const headers = { 'Content-Type': 'image/jpeg', 'X-FileOrca-Name': 'photo.jpg', 'X-FileOrca-Stored': String(Date.now()) };
+            await (await caches.open(cache)).put(new Request(new URL(entry, location.origin).href), new Response(new Blob([bytes], { type: 'image/jpeg' }), { headers }));
+            sessionStorage.setItem(key, choice);
+          },
+          [photo, INBOX_CACHE, inboxEntryPath(0), INBOX_TOOL_KEY, CHOICE] as const,
+        );
+        await page.reload();
+        await hydrated(page);
+        await expect(page.locator('.fo-result__from')).toBeVisible({ timeout: 30_000 });
+        await openOnScreen(page);
+        await measure(page, 'chegada com a nota de origem');
+      });
+    });
+
+    test('with the empty box: the note of a chip and no file', async ({ page }) => {
+      await dismissCookies(page);
+      await page.evaluate(([key, choice]) => sessionStorage.setItem(key, choice), [INBOX_TOOL_KEY, CHOICE] as const);
+      await page.reload();
+      await hydrated(page);
+      await expect(page.locator('.fo-drop[data-state="lost"]')).toBeVisible();
+      await measure(page, 'caixa vazia');
     });
 
     // With the dialog open the page behind it is untouched. The dialog itself sits 24px from the
@@ -674,18 +760,23 @@ const PDF_TARGETS = [
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-fields--stack',
   '.fo-pages', '.fo-pages__bar', '.fo-pages__count', '.fo-pages__grid', '.fo-page', '.fo-page__main', '.fo-page__moves',
   '.fo-pass', '.fo-pass__toggle', '.fo-field__error',
-  '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box', '.fo-sign__notice',
+  '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box',
   '.fo-merge', '.fo-merge__moves',
+  // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle (its Undo, its remove buttons and its
+  // "Add more PDFs"), the band under the rectangle with the "Order" and the "Adjust" of the result, and the note.
+  '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
 ].join(', ');
 // What a state must put on screen besides the card, so the clearance is measured against it and not against its absence.
 const PDF_ON_SCREEN: Record<PdfState, string[]> = {
   rest: ['.fo-drop'],
   processing: ['.fo-level'],
   ready: ['.fo-ready'],
-  list: ['.fo-ready', '.fo-merge', '.fo-merge__move'],
+  list: ['.fo-merge-panel', '.fo-merge', '.fo-merge__move', '.fo-merge__remove', '.fo-merge__add'],
+  removed: ['.fo-merge-panel', '.fo-merge__undo'],
   grid: ['.fo-pages', '.fo-pages__grid', '.fo-page', '.fo-page[data-selected="true"], .fo-page__moves, .fo-page__badge'],
   password: ['.fo-pass', '.fo-pass__toggle', '.fo-pass .fo-field__error'],
-  signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign__notice'],
+  // F13a (UX-11 A, F-10): the honest line of Sign PDF is the note of the design system.
+  signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign .fo-note'],
   result: ['.fo-result', '.fo-btn--download'],
 };
 
@@ -813,6 +904,7 @@ test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 128
           const toolPath = routeById(guide.tool).paths.en ?? '/';
           await chooseImages(page, await smallFiles(page, toolPath, 1));
           await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+          await openOnScreen(page);
           for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
           gaps.push(`resultado: ${(await guideSpots(page, 'resultado', adCount, TARGETS)).toFixed(0)}`);
         }

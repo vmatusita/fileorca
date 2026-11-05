@@ -82,7 +82,9 @@ const texts: PdfToolTexts<NumbersTexts> = {
       ofWord: 'de',
       startLabel: 'Primer número',
       startError: 'Escribe un número entero de 1 a 9,999.',
-      skipFirst: 'Omitir la primera página',
+      firstLegend: 'Primera página',
+      numberIt: 'Numerar',
+      skipIt: 'Omitir',
     },
   },
 };

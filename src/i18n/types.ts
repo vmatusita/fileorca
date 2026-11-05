@@ -679,6 +679,12 @@ export interface ImagePanelTexts {
     some: string;
     /** Several files, none readable (under the DropZone error title; the list below says why): "{count}" */
     all: string;
+    /**
+     * F13a (D-06, F10 p-14; DECISOES § 468): the name ends in an image extension and the bytes are no image: "{name}
+     * ends in .{extension}, but it isn't an image inside. Save it again as {formats}." It never offers the same format as
+     * the way out of a file that already says it is one.
+     */
+    mismatch: string;
   };
   result: {
     download: string;
@@ -714,6 +720,8 @@ export interface ImagePanelTexts {
     metadata: string;
     /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */
     coffee: { text: string; button: string; hide: string; done: string };
+    /** F13a (F10 p-13): hidden name of the signed change of size in the line "2.6 MB → 717 KB" ("Change"). */
+    change: string;
   };
   compare: {
     /** Name of the range control: "Compare before and after". */
@@ -722,10 +730,52 @@ export interface ImagePanelTexts {
     before: string;
     /** "After · {size}" */
     after: string;
+    /** F13a (UX-04 A): the button that opens the comparison, which only opens when the person asks ("Before and after"). */
+    open: string;
+  };
+  /** F13a (UX-04 A): the options folded under one line after the result ("Adjust · Recommended"). */
+  adjust: {
+    /** "Adjust", before the value the tool has now. */
+    label: string;
+    /** "Changing an option redoes the file right away." */
+    help: string;
   };
   next: { label: string; moreTools: string };
+  /** F13a · UX-14 (DECISOES § 496): the result that goes along to the next tool, and its arrival there. */
+  carry: CarryTexts & {
+    /** What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images"). */
+    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf', CarryLabel>;
+  };
   /** Format names as the site writes them. */
   formats: { jpeg: string; png: string; webp: string; heic: string; avif: string; gif: string };
+}
+
+/** F13a · UX-14 (DECISOES § 496): a chip that takes the result along says so, for one file and for several ({count}). */
+export interface CarryLabel {
+  one: string;
+  many: string;
+}
+
+/**
+ * F13a · UX-14 (DECISOES § 496 to § 499): the line under the chips that take the result along, the first note of
+ * the result at the arrival ({tool} is the name of the page it came from, {count} how many files), and the empty box, when
+ * the files did not arrive (the DropZone in the state lost).
+ */
+export interface CarryTexts {
+  /** "Oli takes the image to the next tool. It never leaves your device." */
+  line: string;
+  lineMany: string;
+  /** "Oli brought this image from {tool}." */
+  from: string;
+  fromMany: string;
+  /** "Oli couldn't bring the image here" */
+  lostTitle: string;
+  lostTitleMany: string;
+  /** "Nothing left your device. Choose the image again, or go back to {tool} and download it there." */
+  lostHelp: string;
+  lostHelpMany: string;
+  /** "Back to {tool}" */
+  back: string;
 }
 
 /**
@@ -742,6 +792,13 @@ export interface ImageToolPanelTexts<O = Record<string, never>> {
   doneMany: string;
   /** Label of the Placard under the number (compression only: "lighter"). */
   placardLabel?: string;
+  /** F13a (UX-04 A): the help inside "Adjust" when the tool says it better than the shared line (Compress: "the level"). */
+  adjustHelp?: string;
+  /**
+   * F13a (D-17): a file of a format that another tool of the site takes (a PNG on HEIC to JPG): the reason, with {name} and
+   * {tool}, and the name of the row with the chip to that tool, in the band under the rectangle ("For a PNG:").
+   */
+  elsewhere?: { reason: string; label: string };
   options: O;
 }
 
@@ -893,17 +950,19 @@ export interface PdfPanelTexts {
     moveEarlier: string;
     moveLater: string;
     moved: string;
-    /**
-     * Merge list, keyboard (criterion 10): the handle of a row that Space picks up ("Pick up {name}"), what the status
-     * region says when it is picked up, and when it is dropped ("{name} dropped at number {position} of {total}.").
-     */
-    pickUp: string;
-    picked: string;
-    dropped: string;
     unchanged: string;
     /** In the slot before the action: "{count} PDFs ready" and "1 PDF ready". */
     ready: string;
     readyOne: string;
+    /**
+     * F13a (UX-04 A, D-27; DECISOES § 480): while the files are read the rectangle is already the list (or the
+     * ready card), and its count says so: "Reading {count} PDFs…" and "Reading 1 PDF…".
+     */
+    readingCount: string;
+    readingOne: string;
+    /** F13a (D-21): the row that left the Merge list, in its place until the next action: "{name} is out of the list." and "Undo". */
+    out: string;
+    undo: string;
   };
   grid: {
     /** Name of the grid: "Pages of {name}". */
@@ -925,9 +984,9 @@ export interface PdfPanelTexts {
     dropped: string;
     turn: string;
     turned: string;
-    /** Keyboard help under the grid. */
+    /** Keyboard help under the grid; in the order mode, the keys only (F13a, F-14: the bar above already says to drag). */
     help: string;
-    helpOrder: string;
+    helpKeys: string;
     /** "Pick pages by number" field. */
     rangeLabel: string;
     rangeApply: string;
@@ -978,12 +1037,25 @@ export interface PdfPanelTexts {
     pages: string;
     unchanged: string;
     unchangedMany: string;
+    /** F13a (UX-04 A; DECISOES § 482): the count of the line of numbers, "246 KB · 4 files". */
+    filesCount: string;
+    /**
+     * F13a (UX-04 A; DECISOES § 483): the options of a tool that runs by itself fold under "Adjust" after the
+     * result, and the line inside says that a change redoes the file at once.
+     */
+    adjust: string;
+    adjustHelp: string;
     /** One line per engine note (src/engine/pdf/types.ts PdfNote). */
     notes: { repaired: string; xfaRemoved: string; formLost: string; textFlattened: string; downscaled: string };
     /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */
     coffee: { text: string; button: string; hide: string; done: string };
   };
   next: { label: string; moreTools: string };
+  /** F13a · UX-14 (DECISOES § 496): the PDFs that go along to the next tool, and their arrival there. */
+  carry: CarryTexts & {
+    /** What a chip says when it takes the PDFs along, per destination ("Compress this PDF", "Compress these {count} PDFs"). */
+    chips: Record<'compress-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+  };
 }
 
 /** The panel bits of one PDF tool: the progress name, the Oli's success lines, the action button and its options. */

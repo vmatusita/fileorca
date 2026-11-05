@@ -98,8 +98,8 @@ export async function jpegBatch(page: Page, names: number | string[]): Promise<T
   return list.map((name) => ({ name, mimeType: 'image/jpeg', buffer }));
 }
 
-/** A DataTransfer in the page holding these files, for a paste or a drop. */
-async function transferOf(page: Page, files: TestFile[]) {
+/** A DataTransfer in the page holding these files, for a paste or a drop. F13a (UX-18 A): exported for drop-anywhere.spec.ts. */
+export async function transferOf(page: Page, files: TestFile[]) {
   return page.evaluateHandle((entries) => {
     const transfer = new DataTransfer();
     for (const entry of entries) {
@@ -143,6 +143,31 @@ export async function dropFiles(page: Page, selector: string, files: TestFile[])
   );
 }
 
+/**
+ * F13a · UX-18 A (DECISOES § 501): what a person does when they drag files from the file manager and let go on an
+ * element: dragenter, dragover and drop on it, one DataTransfer built in the page with the bytes (setInputFiles fires none
+ * of them). Returns whether the page took the dragover and the drop over (preventDefault) and the dropEffect it left.
+ */
+export async function dropOn(page: Page, selector: string, files: TestFile[]): Promise<{ taken: boolean; effect: string }> {
+  const transfer = await transferOf(page, files);
+  return page.evaluate(
+    ([target, data]) => {
+      const element = document.querySelector(target as string) ?? document.body;
+      const fire = (type: string) => {
+        const event = new DragEvent(type, { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true });
+        element.dispatchEvent(event);
+        return event;
+      };
+      fire('dragenter');
+      const over = fire('dragover');
+      const effect = (data as DataTransfer).dropEffect;
+      const drop = fire('drop');
+      return { taken: over.defaultPrevented && drop.defaultPrevented, effect };
+    },
+    [selector, transfer] as const,
+  );
+}
+
 /** One full use: a generated JPEG goes in and the result card shows with Download focused. */
 export async function useImage(page: Page, name?: string): Promise<void> {
   await chooseImage(page, name);
@@ -156,10 +181,40 @@ export async function useBadFile(page: Page): Promise<void> {
   await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
 }
 
-/** "Start over" on the result card; waits for the drop zone to come back. */
+/**
+ * "Start over" on the result card; waits for the drop zone to come back. F13a (UX-04 A): on the image card it is the first
+ * ghost button of the row under the Download (.fo-result__more), next to "Before and after"; the PDF card keeps it in its
+ * row of actions.
+ */
 export async function startOver(page: Page): Promise<void> {
-  await page.locator('.fo-result__actions button').click();
+  await page.locator('.fo-result__more > button:first-child, .fo-result__actions > button').first().click();
   await expect(page.locator('.fo-drop')).toBeVisible();
+}
+
+/**
+ * F13a (UX-04 A; DECISOES § 466): after a result, the options of the tool are folded under "Adjust" in the band under
+ * the card. This opens it (once) and waits for the options inside it, the way a person does before changing one.
+ */
+export async function openAdjust(page: Page): Promise<void> {
+  const adjust = page.locator('details.fo-adjust');
+  await expect(adjust).toHaveCount(1, { timeout: 30_000 });
+  if (!(await adjust.evaluate((node) => (node as HTMLDetailsElement).open))) {
+    const summary = adjust.locator('summary');
+    // The WebKit gives no focus on a click: the keyboard opens it the same way in both browsers.
+    await summary.focus();
+    await page.keyboard.press('Enter');
+  }
+  await expect(adjust).toHaveJSProperty('open', true);
+  await expect(adjust.locator('.fo-adjust__body')).toBeVisible();
+}
+
+/** F13a (UX-04 A): "Before and after" on the result card opens the comparison, which starts closed. */
+export async function openCompare(page: Page): Promise<void> {
+  const button = page.locator('.fo-result__more button[aria-controls="fo-compare"]');
+  await expect(button).toHaveAttribute('aria-expanded', 'false', { timeout: 30_000 });
+  await button.click();
+  await expect(button).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#fo-compare .fo-ba')).toBeVisible();
 }
 
 /** startOver, then a new use: the next file reaches the result card. */

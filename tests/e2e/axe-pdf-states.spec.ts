@@ -14,7 +14,8 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 // F8 (DECISOES § 307): these 36 walks are the heaviest tests of the axe pass (10 to 21 s each on the CI runner). In
 // a11y.spec.ts they all fell in the first part of each browser, which went over the 700 s target; in a file of their own,
 // right after ads.spec.ts, the split by count puts them in the lighter parts.
-const PDF_AXE_STATES: ReadonlySet<PdfState> = new Set<PdfState>(['rest', 'list', 'grid', 'password', 'signature', 'result']);
+// F13a (UX-04 A, D-21): the Merge list with a row taken out, the Undo in its place.
+const PDF_AXE_STATES: ReadonlySet<PdfState> = new Set<PdfState>(['rest', 'list', 'removed', 'grid', 'password', 'signature', 'result']);
 const TRANSLATED = ['pt', 'es'] as const;
 
 test.describe('axe nos estados das ferramentas de PDF, a 360 e 1280px, nos temas escuro e claro', () => {

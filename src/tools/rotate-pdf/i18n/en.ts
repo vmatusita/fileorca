@@ -70,8 +70,8 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
     suffix: 'rotated',
     note: 'PDF files, as many as you like',
     progressLabel: 'Rotating PDFs',
-    done: 'Done! Oli turned your PDF.',
-    doneMany: 'Done! Oli turned your {count} PDFs.',
+    done: 'Done! Oli turned the {pages} pages of your PDF {turn}.',
+    doneMany: 'Done! Oli turned your {count} PDFs {turn}.',
     options: {
       turnLegend: 'Turn',
       right: '90° right',
@@ -82,6 +82,11 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
       pick: 'Page by page',
       pickHelp: 'Use the turn button on a thumbnail to turn that page.',
       batchNote: 'Page by page works on one file. With several files, Oli turns every page of each one.',
+      doneOne: 'Done! Oli turned the page of your PDF {turn}.',
+      donePicked: 'Done! Oli turned {count} of the {pages} pages.',
+      rightTurn: '90° to the right',
+      halfTurn: '180°',
+      leftTurn: '90° to the left',
     },
   },
 };

@@ -38,12 +38,13 @@ const texts: PdfPanelTexts = {
     moveEarlier: 'Subir {name}',
     moveLater: 'Descer {name}',
     moved: '{name} agora está na posição {position} de {total}.',
-    pickUp: 'Pegar {name}',
-    picked: 'Você pegou {name}. Use as setas para mover e Espaço para soltar.',
-    dropped: '{name} ficou na posição {position} de {total}.',
     unchanged: 'Já otimizado',
     ready: '{count} PDFs prontos',
     readyOne: '1 PDF pronto',
+    readingCount: 'Lendo {count} PDFs…',
+    readingOne: 'Lendo 1 PDF…',
+    out: '{name} saiu da lista.',
+    undo: 'Desfazer',
   },
   grid: {
     label: 'Páginas de {name}',
@@ -61,7 +62,7 @@ const texts: PdfPanelTexts = {
     turn: 'Girar a página {n}',
     turned: 'A página {n} agora está girada {degrees}°.',
     help: 'As setas andam entre as páginas, e a tecla Espaço marca uma página.',
-    helpOrder: 'Arraste uma página ou use as setas dela. No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
+    helpKeys: 'No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
     rangeLabel: 'Marcar páginas pelo número',
     rangeApply: 'Marcar estas',
     rangeHelp: 'Por exemplo, 1-3, 5, 8-10',
@@ -102,6 +103,9 @@ const texts: PdfPanelTexts = {
     pages: 'Páginas',
     unchanged: 'Este PDF já estava otimizado, então a Oli devolveu o arquivo como ele era.',
     unchangedMany: 'Estes PDFs já estavam otimizados, então a Oli devolveu os arquivos como eles eram.',
+    filesCount: '{count} arquivos',
+    adjust: 'Ajustar',
+    adjustHelp: 'Mudar uma opção refaz o arquivo na hora.',
     notes: {
       repaired: 'Um arquivo estava com o índice danificado; a Oli refez o índice enquanto lia as páginas.',
       xfaRemoved: 'A camada de formulário XFA, que só alguns programas de computador leem, saiu; os campos de formulário comuns continuam funcionando.',
@@ -117,6 +121,22 @@ const texts: PdfPanelTexts = {
     },
   },
   next: { label: 'A seguir', moreTools: 'Mais ferramentas' },
+  // F13a · UX-14 (DECISOES § 496): o chip que leva o resultado para a próxima ferramenta, e a chegada lá.
+  carry: {
+    line: 'A Oli leva o PDF para a próxima ferramenta. Ele não sai do seu aparelho.',
+    lineMany: 'A Oli leva os PDFs para a próxima ferramenta. Eles não saem do seu aparelho.',
+    from: 'A Oli trouxe este PDF de {tool}.',
+    fromMany: 'A Oli trouxe estes {count} PDFs de {tool}.',
+    lostTitle: 'A Oli não conseguiu trazer o PDF',
+    lostTitleMany: 'A Oli não conseguiu trazer os PDFs',
+    lostHelp: 'Nada saiu do seu aparelho. Escolha o PDF de novo, ou volte para {tool} e baixe de lá.',
+    lostHelpMany: 'Nada saiu do seu aparelho. Escolha os PDFs de novo, ou volte para {tool} e baixe de lá.',
+    back: 'Voltar para {tool}',
+    chips: {
+      'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estes {count} PDFs' },
+      'add-page-numbers-to-pdf': { one: 'Numerar as páginas deste PDF', many: 'Numerar as páginas destes {count} PDFs' },
+    },
+  },
 };
 
 export default texts;

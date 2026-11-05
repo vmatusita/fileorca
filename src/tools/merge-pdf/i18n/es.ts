@@ -12,7 +12,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   howHeading: 'Cómo funciona',
   howSteps: [
     'Suelta dos o más PDF en el cuadro, elígelos o pégalos, y usa Agregar más PDF para sumar archivos a la lista.',
-    'Pon los archivos en el orden que quieras: arrastra una fila, presiona sus botones de flecha o muévela con el teclado.',
+    'Pon los archivos en el orden que quieras: arrastra una fila o presiona sus botones de flecha (también funcionan con el teclado).',
     'Presiona Unir PDF y Oli junta los archivos en tu navegador, en el orden de la lista.',
     'Descarga el PDF unido; tus archivos originales no se tocan.',
   ],
@@ -37,7 +37,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   faq: [
     {
       q: '¿Cómo cambio el orden de los archivos?',
-      a: 'Arrastra una fila a otro lugar o presiona sus botones de flecha para subirla o bajarla. También puedes mover una fila con el teclado. Oli junta los archivos en el orden que muestra la lista cuando presionas Unir PDF.',
+      a: 'Arrastra una fila a otro lugar o presiona sus botones de flecha para subirla o bajarla; también funcionan con el teclado. Oli junta los archivos en el orden que muestra la lista cuando presionas Unir PDF.',
     },
     {
       q: '¿Los campos de formulario, los marcadores y los enlaces siguen funcionando después de unir?',
@@ -68,8 +68,11 @@ const texts: PdfToolTexts<MergeTexts> = {
     action: 'Unir PDF',
     options: {
       add: 'Agregar más PDF',
-      help: 'Arrastra una fila para moverla o usa sus botones de flecha. Con el teclado, Espacio toma una fila, las flechas la mueven y Espacio la suelta. Los archivos se juntan en el orden de esta lista.',
+      help: 'Oli los une de arriba abajo. Las flechas cambian el orden.',
       needMore: 'Agrega al menos un PDF más para unir.',
+      listLabel: 'Archivos, en el orden en que se unen',
+      order: 'Orden · {count} archivos',
+      orderHelp: 'Cambiar el orden los une de nuevo al momento.',
     },
   },
 };

@@ -189,6 +189,32 @@ export function checkMotion(css: string): string[] {
   return problems;
 }
 
+/**
+ * F13a · a Oli por estado (UX-10; DECISOES § 460): a move that starts on its own ends in under 5 s and leaves the page
+ * still (WCAG 2.2.2); only the progress lasts the work. So an animation with `infinite` iterations may only sit on the
+ * selectors of the progress, a closed list: the swim of the WaterLevel, the moving water and the water under a file held
+ * over the DropZone, and the spinner. Every selector of the rule must hold one of them (quotes and spaces don't count).
+ */
+export const LOOP_SELECTORS: readonly string[] = ['[data-oli="swim"]', '.fo-water--moving', '.fo-drop[data-state="over"] .fo-water', '.fo-spin'];
+
+const looseSelector = (selector: string): string => selector.replace(/['"]/g, '').replace(/\s+/g, ' ').trim();
+
+export function checkLoops(css: string): string[] {
+  const clean = stripUrls(stripComments(css));
+  const allowed = LOOP_SELECTORS.map(looseSelector);
+  const problems: string[] = [];
+  for (const { value, index } of declarations(clean, '(?:-[a-z]+-)?animation(?:-iteration-count)?')) {
+    if (!/(?:^|[\s,])infinite(?:$|[\s,])/i.test(withoutImportant(value))) continue;
+    const open = clean.lastIndexOf('{', index);
+    const start = Math.max(clean.lastIndexOf('}', open), clean.lastIndexOf(';', open), clean.lastIndexOf('{', open - 1)) + 1;
+    for (const selector of splitTop(clean.slice(start, open), ',')) {
+      const loose = looseSelector(selector);
+      if (!allowed.some((fragment) => loose.includes(fragment))) problems.push(`animação sem fim em "${loose}": "infinite" só no progresso (${LOOP_SELECTORS.join(', ')})`);
+    }
+  }
+  return problems;
+}
+
 // ---------------------------------------------------------------------------------------------
 // d) fonts
 
@@ -417,8 +443,11 @@ export const FORBIDDEN_WORDS_BY_LANG: Record<Lang, RegExp | null> = {
   pt: /(?<![\p{L}\p{N}])(?:revolucion[áa]ri\p{L}*|turbinad\p{L}*|sem esfor[çc]o|com IA|movid[oa]s? (?:a|por) IA)(?![\p{L}\p{N}])/iu,
   es: /(?<![\p{L}\p{N}])(?:revolucionari\p{L}*|sin esfuerzo|con IA|impulsad[oa]s? por IA)(?![\p{L}\p{N}])/iu,
 };
-/** The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. */
-const SUCCESS_LINE = /\.(?:done|doneMany)$/;
+/**
+ * The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. F13a (D-10): Rotate PDF
+ * has two more success lines, `doneOne` (one page) and `donePicked` (some pages picked on the grid).
+ */
+const SUCCESS_LINE = /\.done(?:Many|One|Picked)?$/;
 
 function stringsOf(value: unknown, path: string, out: [string, string][] = []): [string, string][] {
   if (typeof value === 'string') out.push([path, value]);

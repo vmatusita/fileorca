@@ -5,7 +5,7 @@ export default {
   description:
     'How FileOrca handles your data: files never leave your device, what Google Analytics, AdSense and Cloudflare process, and your GDPR and LGPD rights.',
   h1: 'Privacy policy',
-  updated: 'Last updated: November 4, 2026',
+  updated: 'Last updated: November 5, 2026',
   intro:
     'This page explains what happens to your data on fileorca.com. The short version: your files never leave your device, and the theme you pick in the header stays in your browser. Below you will find who is responsible, what is collected, by whom, and what rights you have.',
   sections: [
@@ -36,6 +36,8 @@ export default {
         'Your files and your numbers never go into this copy. It keeps only files of fileorca.com, at addresses without the part after the ? or the #, so what you type, open or save stays out of it.',
         'To delete the copy, clear the site data of fileorca.com in the settings of your browser, or uninstall the FileOrca app if you installed it.',
         'On Android, when you share images or PDFs with the installed FileOrca app, they wait on your device until you choose a tool, in a place of the browser storage of their own, apart from the copy of the pages. They are deleted when the tool takes them; if you choose none, they are deleted the next time you open FileOrca after an hour. This works because your browser keeps the offline part of the site, which it gets on your first visit with internet. If you clear the site data, open fileorca.com once before you share again. Without that part, Android sends the shared files to fileorca.com, which refuses them and does not keep them. When you pick a tool, the page notes in this tab which tool you chose, and nothing else.',
+        // F13a · UX-14 (DECISOES § 504): the result that a next-step chip takes along.
+        'When you tap a next-step suggestion that takes your result along, such as Resize this image, the result goes to that tool through the same place of the browser storage as the shared files: it stays on your device, is deleted when the tool takes it, and, if it never arrives, the next time you open FileOrca after an hour. The page notes in this tab which tool you chose and which tool the file came from, and nothing else.',
       ],
     },
     {
@@ -135,7 +137,7 @@ export default {
         'Theme choice: the fo-theme key stays in your browser until you set the theme back to System or clear the site data.',
         "“Continue just this once” on Oli's notice: the time you used it stays in your browser until you clear the site data.",
         'E-mails: kept only as long as needed to answer you.',
-        'Offline copy: stays in your browser until you clear the site data or uninstall the app. Files shared with the app are deleted when a tool takes them, or the next time you open FileOrca after an hour.',
+        'Offline copy: stays in your browser until you clear the site data or uninstall the app. Files shared with the app are deleted when a tool takes them, or the next time you open FileOrca after an hour. Results taken along to the next tool are deleted when that tool takes them, or the next time you open FileOrca after an hour.',
       ],
     },
     {

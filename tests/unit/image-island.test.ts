@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { EngineOutput } from '../../src/engine/image/types.ts';
-import { EXTENSION, PDF_BATCH_NAME, ZIP_NAME, baseName, uniqueNames } from '../../src/tools/image/names.ts';
+import { EXTENSION, PDF_BATCH_NAME, ZIP_NAME, baseName, imageExtensionOf, uniqueNames } from '../../src/tools/image/names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from '../../src/tools/image/paste.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from '../../src/tools/image/summary.ts';
 import { TYPING_PAUSE_MS, parseWhole } from '../../src/tools/image/NumberField.tsx';
@@ -30,6 +30,15 @@ describe('names of the files a batch gives back', () => {
     expect(baseName('a/b\\c:d*e?.png')).toBe('a_b_c_d_e_');
     expect(baseName('noextension')).toBe('noextension');
     expect(baseName('.hidden')).toBe('.hidden');
+  });
+
+  // F13a (D-06; DECISOES § 468): the error of a file whose bytes are no image tells a name that promises a picture
+  // ("notes.png") from one that does not ("notes.txt"), and says the extension as the name spells it.
+  it('knows the extension of a name that promises a picture, as the name spells it', () => {
+    expect(imageExtensionOf('notes.png')).toBe('png');
+    expect(imageExtensionOf('IMG_2041.HEIC')).toBe('HEIC');
+    for (const name of ['a.jpg', 'a.jpeg', 'a.jfif', 'a.webp', 'a.heif', 'a.avif', 'a.gif']) expect(imageExtensionOf(name), name).not.toBeNull();
+    for (const name of ['notes.txt', 'archive.zip', 'noextension', '.png', 'photo.', 'png', '']) expect(imageExtensionOf(name), name).toBeNull();
   });
 
   it('names the ZIP and the PDF in English, and knows the extension of every output', () => {

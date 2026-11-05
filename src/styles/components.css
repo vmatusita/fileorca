@@ -11,20 +11,34 @@
 /* ---------- Oli (sprite symbols through <use>, § 43 and § 44) ---------- */
 [data-oli] { flex: none; }
 [data-oli] > svg { display: block; width: 100%; height: 100%; overflow: visible; }
-[data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
-[data-oli="gulp"] > svg { scale: 1.05; }
-[data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
-/* F12 · o café (DECISOES § 439): the steam of the coffee pose rises twice and rests, visible and still, by 4.8 s
-   (WCAG 2.2.2; it looped every 1.8 s). The first wisp rises from 0 to 3.6 s and settles by 4.2 s; the second, 0.6 s
-   behind, settles by 4.8 s. "backwards" keeps the second one clear through its delay. The selector hangs on no section:
-   inside a <use> the animation targets the element of the <symbol> (docs/claude/design-e-oli.md). */
-.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
-.oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
-@keyframes fo-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
-@keyframes fo-bob { to { transform: translateY(-4px) rotate(-3deg); } }
+/* F13a · a Oli por estado (UX-10; DECISOES § 460): one short move per state, only transform and opacity, the time and the
+   curve by token name. A move that starts on its own ends in under 5 s and leaves her still on the drawn pose, the frame
+   reduced motion shows (WCAG 2.2.2); only the swim loops, because it is the progress and lasts the work. The move goes on
+   the <svg> child, never on the [data-oli] box (CLS 0), and never toward an ad (the 150px are checked with the box inflated
+   by 12px: ads.spec.ts and tests/e2e/lib/ad-map.ts, DECISOES § 513). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
+   second animation of the list, so the 3 s one never starts again. Reduced motion: global.css stops everything. */
+[data-oli="wave"] > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1; }
+:is(.fo-drop:is(:hover, :focus-within) [data-oli="wave"], .fo-slot:has(.fo-drop:is(:hover, :focus-within)) > [data-oli="wave"]) > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1, fo-nod var(--dur-cheer) var(--ease-spring) 1; }
+[data-oli="gulp"] > svg { scale: 1.06; translate: 0 4px; }
+[data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }
+[data-oli="oops"] > svg { animation: fo-oops var(--dur-cheer) var(--ease-spring) 1; }
+[data-oli="buoy"] > svg { animation: fo-buoy calc(var(--dur-float) / 4) var(--ease-in-out) 4 alternate; }
+[data-oli="lost"] > svg { animation: fo-lost var(--dur-float) var(--ease-in-out) 1; }
+[data-oli="peek"] > svg { animation: fo-peek var(--dur-base) var(--ease-out) 1 backwards; }
+/* The coffee steam (it rested by 4.8 s since the F12, § 439) rises 1.4 cycles and ends on the 40 % frame, visible and
+   still, the steam as drawn: 3.12 s with the second wisp 0.6 s behind ("backwards" keeps it clear through its delay). The
+   selector hangs on no section: inside a <use> the animation targets the element of the <symbol>. */
+.oli-steam path { animation: fo-steam calc(var(--dur-cheer) * 3) var(--ease-in-out) 1.4 backwards; }
+.oli-steam path:last-child { animation-delay: var(--dur-cheer); }
+@keyframes fo-hello { 0%, 100% { transform: none; } 20% { transform: translateY(-6px) rotate(-4deg); } 40% { transform: translateY(-6px) rotate(1deg); } 60% { transform: translateY(-5px) rotate(-3deg); } 80% { transform: translateY(-2px) rotate(0deg); } }
+@keyframes fo-nod { 50% { transform: translateY(-4px) rotate(-5deg); } }
+@keyframes fo-bob { to { transform: translate(-3px, -4px) rotate(-3deg); } }
+@keyframes fo-oops { 30% { transform: translateX(4px) rotate(4deg); } }
+@keyframes fo-buoy { to { transform: translateY(-3px) rotate(2deg); } }
+@keyframes fo-lost { 0%, 100% { transform: none; } 30% { transform: translateX(-4px) rotate(-6deg); } 65% { transform: translateX(2px) rotate(3deg); } }
+@keyframes fo-peek { from { opacity: 0; transform: translateY(8px); } }
 @keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
-@keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
-@keyframes fo-steam-rest { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-5px); } }
 
 /* ---------- Dog-ear: the folded file corner (Oli's fin tip) and the category colours ---------- */
 .fo-dogear { position: relative; border-top-right-radius: 0 !important; }
@@ -219,6 +233,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-crumbs [aria-current] { color: var(--ink); font-weight: 600; }
 .fo-top { display: grid; gap: var(--space-2); padding-right: 96px; }
 @media (min-width: 768px) { .fo-top { padding-right: 136px; } }
+/* F13a (UX-04 A; F4-F7 f-2; DECISOES § 463): on the tool pages the H1 takes the whole measure, and only the seal row leaves
+   room for the Oli on the top border of the rectangle. */
+.fo-top--tool { padding-right: 0; }
+.fo-top__seal { display: grid; padding-right: 96px; }
+@media (min-width: 768px) { .fo-top__seal { padding-right: 136px; } }
+/* On a phone the Oli reaches 78px above the rectangle: the seal row keeps the room of two lines, so the H1 above it ends out
+   of her reach also where the seal fits one line (390 to 767px; DECISOES § 465). */
+@media (max-width: 767px) { .fo-top--tool .fo-top__seal { min-height: 52px; align-content: start; } }
 .fo-seal { justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px var(--space-3) 6px var(--space-2); border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--ink); font: 600 14px/20px var(--fo-font-text); }
 .fo-seal .fo-icon { color: var(--brand); width: 20px; height: 20px; }
 
@@ -235,14 +257,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 /* ---------- Tool panel slot: DropZone, WaterLevel and ResultCard share it, so the page does not jump ---------- */
 .fo-tool-island { display: grid; gap: var(--space-4); }
-.fo-slot { display: grid; min-height: 380px; margin-top: var(--space-2); }
-@media (min-width: 768px) { .fo-slot { min-height: 340px; } }
+/* F13a (UX-04 A; DECISOES § 463): 356px on the phone and 340px from 768px, or the height an island locks (--fo-lock). */
+.fo-slot { position: relative; display: grid; min-height: var(--fo-lock, var(--slot-h, 356px)); margin-top: var(--space-2); }
 
 /* ---------- DropZone ---------- */
 .fo-drop { position: relative; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); text-align: center;
   min-height: 300px; padding: var(--space-8) var(--space-6) var(--space-10); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); cursor: pointer; }
 .fo-drop__sea { position: absolute; inset: 0; border-radius: calc(var(--radius-xl) - var(--stroke-2)); overflow: hidden; pointer-events: none; }
-.fo-drop > :not(.fo-drop__sea):not(.fo-drop__oli) { position: relative; }
+.fo-drop > :not(.fo-drop__sea) { position: relative; }
 .fo-drop:hover { border-color: var(--brand); }
 .fo-drop[data-state="over"] { border-style: solid; border-color: var(--brand); --level: 38%; }
 .fo-drop[data-state="error"] { border-style: solid; border-color: var(--danger); border-width: var(--stroke-3); }
@@ -255,22 +277,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-drop__message { display: grid; gap: var(--space-2); }
 /* A long file name in the error breaks instead of widening the page (reflow at 320px). */
 .fo-drop__message, .fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
-/* The Oli sits on the top edge, to the right of the H1 (ToolPage mold), box sizes of § 19. */
-.fo-drop__oli { position: absolute; top: -86px; right: 0; width: 88px; height: 88px; pointer-events: none; }
-.fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring); }
 @media (min-width: 768px) {
   .fo-drop, .fo-level { min-height: 340px; }
-  .fo-drop__oli { width: 112px; height: 112px; top: -76px; right: var(--space-4); }
 }
 
-/* ---------- WaterLevel (progress): the Oli swims on the water, so she rises with it ---------- */
+/* ---------- WaterLevel (progress): the water rises to the Oli, who swims in the corner of the rectangle (F13a) ---------- */
 .fo-level { position: relative; box-sizing: border-box; min-height: 300px; border: var(--stroke-2) solid var(--brand); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); display: grid; place-items: center; text-align: center; overflow: hidden; }
 .fo-level__text { position: relative; display: grid; gap: var(--space-1); z-index: 1; }
 .fo-level__pct { font: 600 40px/44px var(--fo-font-display); }
 .fo-level__msg { font: 500 20px/26px var(--fo-font-display); }
 .fo-level__count { font-size: 15px; color: var(--ink-muted); }
 .fo-level__msg--busy { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
-.fo-level__oli { position: absolute; left: 50%; top: -62px; width: 72px; height: 72px; translate: 40px 0; }
 .fo-bar { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
 .fo-bar > i { position: absolute; inset: 0; border-radius: inherit; background: var(--brand); transform-origin: left center; transform: scaleX(var(--value, 0)); transition: transform var(--dur-base) var(--ease-out); }
 
@@ -278,13 +295,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-deep { background: var(--deep); color: var(--on-deep); }
 .fo-result { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: center; }
 .fo-result__head { display: flex; align-items: center; gap: var(--space-3); min-height: 72px; }
-.fo-result__oli { width: 72px; height: 72px; }
-.fo-result__oli > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
 .fo-result__says { margin: 0; font: 500 18px/24px var(--fo-font-display); flex: 1 1 0; min-width: 0; }
-.fo-result__stats { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; }
-.fo-result__stat dt { font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
-.fo-result__stat dd { margin: 0; font: 600 24px/28px var(--fo-font-display); }
-.fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
 .fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
 .fo-result__actions .fo-btn--download { display: flex; width: 100%; }
 /* "Download all · ZIP 1.4 MB" is wider than the card on a phone (reflow, WCAG 1.4.10): the icon and the label stay
@@ -304,17 +315,134 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
 /* F12 · o café (DECISOES § 436): after "Don't show this again", one quiet sentence in the same place (role="status"). */
 .fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
-@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
 .fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+/* F13a, revisão c-1 (DECISOES § 516): in the image island the notes run as one paragraph, one sentence after the
+   other, so a photo of a phone (the reduction, the size and the metadata) keeps the result in the rectangle of 356/340 px
+   and in the room of the coffee line; the note of where the files came from keeps its own line. */
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes { display: block; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > .fo-result__from { margin-bottom: var(--space-1); }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) { display: inline; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) + li::before { content: " "; }
 @media (min-width: 768px) {
   .fo-result { padding: var(--space-6); gap: var(--space-5); }
   .fo-result__head { min-height: 96px; }
-  .fo-result__oli { width: 96px; height: 96px; margin: -8px 0 -8px -8px; }
   .fo-result__says { font-size: 20px; line-height: 26px; }
   .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-items: start; }
   .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
 }
+
+/* ---------- F13a · a página de ferramenta (UX-04 A; DECISOES § 463): one place, firmer ----------
+   The rectangle (.fo-slot) has one height in every state, 356px on the phone and 340px from 768px. A family that needs
+   more room (the list of the merge, the grid of pages, the signature box) takes the height of its content when the work
+   starts and keeps it until the result: the island sets --fo-lock on the slot. Nothing else grows by itself; a taller
+   state (the comparison, the Adjust disclosure, more files) only grows after a gesture of the person. The band under the
+   rectangle (.fo-band) keeps its height too, 196px and 120px: the options before the result, the chips and the options
+   folded under "Adjust" after it. */
+.fo-tool-island { --slot-h: 356px; --band-h: 196px; --coffee-h: 300px; }
+@media (min-width: 768px) { .fo-tool-island { --slot-h: 340px; --band-h: 120px; --coffee-h: 130px; } }
+.fo-slot > :is(.fo-drop, .fo-level, .fo-result) { min-height: var(--fo-lock, var(--slot-h)); }
+/* F13a (DECISOES § 470): the 3rd use is known when its batch starts, so the image island takes the room of the coffee
+   line from then on (data-coffee), and the result that brings the line pushes nothing down; Start over gives it back. */
+.fo-slot[data-coffee] { --fo-lock: calc(var(--slot-h) + var(--coffee-h)); }
+/* The room is water under the zone: the words, the seal and the button keep the place they have in a zone of --slot-h. */
+.fo-slot[data-coffee] > .fo-drop { padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-4) + var(--coffee-h)); }
+.fo-slot[data-coffee] > .fo-drop[data-state="over"] { padding-bottom: calc(var(--slot-h) * 0.6 - var(--space-12) + var(--coffee-h)); }
+@media (min-width: 768px) { .fo-slot[data-coffee] > .fo-drop:not([data-state="over"]) { padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-2) + var(--coffee-h)); } }
+/* The band keeps the height it had when the batch started (--fo-band-lock, set by the image island; § 466): a tool
+   whose options are taller than the band (Resize) never pulls the page up when the shorter row of the result comes. */
+.fo-band { display: grid; align-content: start; gap: var(--space-3); min-height: max(var(--band-h), var(--fo-band-lock, 0px)); }
+.fo-band .fo-next { min-height: var(--tap-min); }
+/* The image island draws the row on screen and a hidden copy of the result's row (the chips and the "Adjust" line) in the
+   same cell (§ 466): the band is as tall as the taller of the two from the first paint. */
+.fo-band__now, .fo-band__ghost { grid-area: 1 / 1; display: grid; align-content: start; gap: var(--space-3); min-width: 0; }
+.fo-band__ghost { visibility: hidden; pointer-events: none; }
+.fo-band__chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-height: var(--tap-min); }
+.fo-band__room { min-height: calc(var(--tap-min) + 2 * var(--stroke-2)); }
+
+/* The Oli never leaves the top-right corner of the rectangle, in every state (wave, gulp, swim, cheer, oops, lost),
+   looking left at the words; 88px and 112px, the boxes of § 19. She holds the placard of the result. */
+.fo-slot__oli { position: absolute; z-index: 3; top: -78px; right: 0; width: 88px; height: 88px; pointer-events: none; }
+@media (min-width: 768px) { .fo-slot__oli { top: -76px; right: var(--space-4); width: 112px; height: 112px; } }
+.fo-slot__oli > svg { transition: scale var(--dur-quick) var(--ease-spring), translate var(--dur-quick) var(--ease-spring); }
+.fo-slot__oli[data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+
+/* The zone: the water rests at 30 % and rises to 60 % with a file held over it; the button sits in the dry part, above
+   the water and above the cookie notice. The error loses the round seal: the sentence with the alert icon, the reason
+   that says the case, and the way out right under them (D-06, D-17). */
+.fo-slot > .fo-drop { --level: 30%; justify-content: center; padding: var(--space-6) var(--space-6) calc(var(--slot-h) * 0.3 + var(--space-4)); }
+/* The seal stays in the over state (the decision 8 of the run keeps it, with the download icon), so the three lines sit
+   lower than the prototype's two: the words ride on the surface of the water that rose, and the zone keeps its height in
+   the three languages, also with the two lines of "Pode soltar, a Oli está pronta" on a phone (§ 464). */
+.fo-slot > .fo-drop[data-state="over"] { --level: 60%; gap: var(--space-2); padding-bottom: calc(var(--slot-h) * 0.6 - var(--space-12)); justify-content: flex-end; }
+.fo-slot > .fo-drop[data-state="error"] { justify-content: flex-start; gap: var(--space-4); text-align: left; align-items: stretch; }
+@media (min-width: 768px) {
+  /* From 768px the title of the zone shows too, over the seal and the button: the lines close up to 8px and the dry part
+     ends 8px above the water, so the zone keeps its 340px (§ 464). */
+  .fo-slot > .fo-drop { gap: var(--space-2); padding-top: var(--space-5); padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-2)); }
+  .fo-slot > .fo-drop[data-state="error"] { padding-inline: var(--space-8); gap: var(--space-4); }
+  .fo-slot > .fo-drop[data-state="error"] .fo-btn { align-self: flex-start; }
+}
+/* The way out may wrap: at 320px "Escolher outros arquivos" does not fit one line inside the zone (WCAG 1.4.10). */
+.fo-slot > .fo-drop[data-state="error"] .fo-btn { min-width: 0; max-width: 100%; white-space: normal; }
+.fo-drop__error { display: grid; gap: var(--space-2); }
+.fo-drop__error-title { display: flex; gap: var(--space-2); align-items: flex-start; margin: 0; font: 600 20px/26px var(--fo-font-display); color: var(--ink); }
+.fo-drop__error-title .fo-icon { flex: none; margin-top: 1px; color: var(--danger); }
+.fo-drop__why { margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+
+/* The result is the water that rose: a band of water at the top with the wave on its edge, the deep sea below it. The
+   placard floats at the surface, in front of the Oli that holds it, at every width (aria-hidden: it repeats the number
+   of the sentence), and the sentence wraps around it. */
+.fo-result:has(> .fo-result__sea) { --fo-surf: 20px; align-content: start; gap: var(--space-2); padding: calc(var(--fo-surf) + var(--space-3)) var(--space-4) var(--space-3); background: var(--water); }
+@media (min-width: 768px) { .fo-result:has(> .fo-result__sea) { --fo-surf: 24px; gap: var(--space-4); padding: calc(var(--fo-surf) + var(--space-4)) var(--space-6) var(--space-6); } }
+/* The deep layer starts under the band of water and ends with the card: it is placed, not slid (a slid layer as tall as the
+   card ran 20 px past its bottom), and the clip keeps the crest of the wave inside the card's sides. */
+.fo-result__sea { inset: var(--fo-surf) 0 0; transform: none; background: var(--deep); transition: none; border-radius: 0 0 calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)); clip-path: inset(-12px 0 0 0); }
+.fo-result:has(> .fo-result__sea) > :not(.fo-result__sea) { position: relative; }
+.fo-result:has(> .fo-result__sea) .fo-result__head { display: flow-root; min-height: 0; }
+.fo-result:has(> .fo-result__sea) .fo-result__says { margin: 0; }
+@media (min-width: 768px) { .fo-result:has(> .fo-result__sea) .fo-result__says { padding-top: var(--space-2); } }
+/* The placard hangs 30px over the top of the card and takes the room of one line of the sentence, no more, so the card
+   keeps its height in the three languages (§ 464). */
+.fo-result:has(> .fo-result__sea) .fo-placard { display: inline-grid; float: right; margin: -62px var(--space-1) 0 var(--space-3); }
+@media (min-width: 768px) { .fo-result:has(> .fo-result__sea) .fo-placard { margin: -60px var(--space-16) 0 var(--space-4); } }
+.fo-result:has(> .fo-result__sea) .fo-result__actions { display: grid; gap: var(--space-1); }
+.fo-result:has(> .fo-result__sea) .fo-result__actions .fo-btn--download { display: flex; width: 100%; }
+/* Start over and Before and after: ghost buttons of 48px, 15px text and 6px sides on a phone, so both fit one line in the
+   three languages. */
+.fo-result__more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-2); }
+.fo-result__more .fo-btn { min-height: var(--tap-min); }
+@media (max-width: 767px) { .fo-result__more .fo-btn--ghost { padding: 0 6px; font-size: 15px; } }
+@media (min-width: 768px) {
+  .fo-result:has(> .fo-result__sea) .fo-result__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+  .fo-result:has(> .fo-result__sea) .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
+}
+
+/* "2.6 MB → 717 KB" (Principle 4): before struck through, the arrow icon with a hidden "to" for screen readers (the font
+   has no arrow, so no → in the text; design-checks checkArrows). */
+.fo-numbers { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); margin: 0; font: 600 24px/28px var(--fo-font-display); }
+.fo-numbers > div { display: flex; align-items: baseline; gap: var(--space-2); }
+.fo-numbers dd { margin: 0; display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-numbers .fo-icon--inline { align-self: center; width: 20px; height: 20px; }
+.fo-numbers__before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
+/* F10 p-13 (DECISOES § 472): the change of size with its sign, where no placard says it ("+66%"). */
+.fo-numbers__change dd { font-size: 20px; color: var(--on-deep-muted); }
+
+/* The comparison opens only when the person asks (UX-04 A), inside the card; [hidden] has to win over the grid. */
+.fo-result__compare { display: grid; }
+.fo-result__compare[hidden] { display: none; }
+
+/* The Adjust disclosure: the options folded under one 48px line after the result; changing one redoes the file at once. */
+.fo-adjust { border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.fo-adjust > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: var(--tap-min); padding: 0 var(--space-4); border-radius: var(--radius-lg); font: 600 15px/20px var(--fo-font-text); cursor: pointer; list-style: none; }
+.fo-adjust > summary::-webkit-details-marker { display: none; }
+.fo-adjust > summary .fo-icon { transition: transform var(--dur-quick) var(--ease-out); }
+.fo-adjust[open] > summary .fo-icon { transform: rotate(180deg); }
+.fo-adjust__now { color: var(--ink-muted); font-weight: 500; }
+.fo-adjust__body { display: grid; gap: var(--space-3); padding: 0 var(--space-4) var(--space-4); }
+
+/* The two arrows of the BeforeAfter handle (D-09): it drags both ways; the control is the range under it. */
+.fo-ba__knob .fo-icon { width: 20px; height: 20px; }
 
 /* ---------- FileCard (ready for the F2 queue; no page uses it yet) ---------- */
 .fo-file { --fo-ground: var(--bg); box-sizing: border-box; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
@@ -327,6 +455,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-file__actions .fo-btn { margin-bottom: 0; }
 .fo-file[data-state="error"] { background: var(--danger-soft); border-color: var(--danger); }
 .fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
+/* F13a (UX-11 A, F-6 and F-7; DECISOES § 485): a PDF with no picture shows the pdf icon in ink on the soft colour of its
+   category (coral-soft) instead of an empty square; in the ready card, on the surface, the fold cuts with the surface. */
+.fo-cat--pdf:not([data-state="error"]) > .fo-file__thumb { background: var(--fo-cat-soft); color: var(--ink); }
+.fo-ready .fo-file { --fo-ground: var(--surface); }
 .fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: flex-start; gap: var(--space-1); }
 .fo-file__err .fo-icon { width: 16px; height: 16px; margin-top: 2px; }
 /* The link to the tool that opens the file (HEIC to JPG): the brand blue is 4.3:1 on the soft red of the row, under the
@@ -547,6 +679,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hero__text { display: grid; gap: var(--space-3); }
 .fo-hero__oli { width: 96px; height: 96px; }
 @media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
+/* F13a, revisão a-2 (DECISOES § 513): the 150 px to an ad count the Oli's box inflated by 12 px (her wave). On the
+   home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
+   she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
+@media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 
 /* ---------- SupportCard ---------- */
 /* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the
@@ -627,12 +763,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
 /* The notice of the first visit keeps the font of its first paint, and so its height (DECISOES § 305): every text inside
    it that asks for --fo-font-text gets the Figtree that never swaps. */
-.fo-cookie { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-text); position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
+/* F13a · o aviso compacto (UX-09; DECISOES § 458): two lines of the small style (14/20) at 360px in the three languages, in
+   Figtree Steady and in its fallback alike, so 128px tall (2 + 12 + 40 + 8 + 52 + 4 + 8 + 2) and 148px with three lines (pt
+   and es at 320px); 360px wide from 768px. The two equal buttons are the plain fo-btn of 52px with the lip. The sides keep
+   8px (the specification asked 12): with 12, the longest texts filled 313 of 316px in Chromium and wrapped to a third line
+   in WebKit with the fallback font; 8 gives them room for the wider fonts of the CI on Linux. */
+.fo-cookie { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-text); position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-3) var(--space-2) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-2); }
 .fo-cookie[hidden] { display: none; }
-@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 440px; } }
-.fo-cookie p { margin: 0; font-size: 15px; line-height: 22px; }
+@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 360px; } }
+.fo-cookie p { margin: 0; font-size: 14px; line-height: 20px; }
 .fo-cookie a { font-weight: 600; }
-.fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 
 /* ---------- ToolSearch: native <dialog>, code and index loaded on first use (§ 15) ---------- */
 .fo-search-dialog { width: min(560px, calc(100% - 2 * var(--space-4))); margin: 10vh auto auto; padding: 0; border: 0; background: transparent; color: var(--ink); overflow: visible; }
@@ -816,8 +957,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-ready__count { margin: 0; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
 .fo-seg--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: var(--radius-lg); }
 .fo-seg--grid .fo-seg__opt { border-radius: var(--radius-md); }
-.fo-check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font: 600 15px/20px var(--fo-font-text); color: var(--ink); align-self: end; }
-.fo-check input { width: 20px; height: 20px; accent-color: var(--brand); }
+/* F13a (UX-11 A, F-11): the only check box of the PDF tools ("Skip the first page") is now a rail of two; under 480 px it
+   takes the row of the fields. */
+@media (max-width: 479px) { .fo-fields > .fo-options { grid-column: 1 / -1; } }
 
 /* Password field: the NumberField box with a text button inside it. */
 .fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--fo-font-text); cursor: pointer; }
@@ -832,28 +974,69 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-pages__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-3); }
 .fo-page { --fo-ground: var(--bg); display: grid; gap: var(--space-1); padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
 .fo-page[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-2) - 1px); }
+/* F13a (UX-11 A, D-7 and F-8): the picked page has the check in a brand circle before its number (shape, not only the colour
+   of the border), and its fold follows the border of 3 px (at -3 px, never past the corner). */
+.fo-page[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
 .fo-page[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
 .fo-page__main { position: relative; display: grid; gap: var(--space-1); justify-items: center; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/18px var(--fo-font-text); }
 .fo-page__main:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
 .fo-page__sheet { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--surface-sunken); overflow: hidden; }
 .fo-page__sheet img { max-width: 100%; max-height: 100%; object-fit: contain; background: var(--surface); }
-.fo-page__n { font-variant-numeric: tabular-nums; }
+.fo-page__n { display: inline-flex; align-items: center; gap: var(--space-2); font-variant-numeric: tabular-nums; }
+.fo-page__check { box-sizing: border-box; display: inline-grid; place-items: center; width: 24px; height: 24px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--on-brand); }
+.fo-page__check .fo-icon { width: 16px; height: 16px; stroke-width: 3; visibility: hidden; }
+.fo-page[data-selected="true"] .fo-page__check { background: var(--brand); border-color: var(--brand-edge); }
+.fo-page[data-selected="true"] .fo-page__check .fo-icon { visibility: visible; }
 .fo-page__badge { position: absolute; top: var(--space-1); left: var(--space-1); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
-.fo-page__moves { display: flex; justify-content: space-between; }
-.fo-page__move--back .fo-icon, .fo-merge__move--up .fo-icon { rotate: 180deg; }
-.fo-merge .fo-filelist__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
-.fo-merge .fo-filelist__row[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
-.fo-merge__grab[aria-pressed="true"] { background: var(--brand-soft); }
-.fo-merge__moves { display: flex; flex-direction: column; }
+/* F13a (UX-11 A, D-23): the arrows that move a page are buttons with the stroke and the lip (a disabled one has the look of
+   the disabled Button); the lip needs room. */
+.fo-page__moves { display: flex; justify-content: space-between; gap: var(--space-1); }
+.fo-page__move--back .fo-icon { rotate: 180deg; }
+/* F13a (UX-04 A, tool-a-merge; DECISOES § 479): a row of the Merge list is the card, the arrows that can move (an
+   empty place of 48 px where one cannot, D-23: never a disabled arrow drawn heavier than the live one) and the remove
+   button (D-21). The handle is gone: the arrows of the row do it by keyboard and by touch (WCAG 2.5.7), and the mouse still
+   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. From 480 to
+   767 px the two arrows stack beside the remove button; under 480 px they go with it to a row under the card (§ 515),
+   so the name keeps a column of 140 px or more; every row (and the line that says a row
+   left, D-21) has the height of a row with its arrows, so nothing moves when the reading ends or a row leaves. A refused
+   row keeps its card with the reason and its own remove button, the width of the list (DECISOES § 181). */
+.fo-merge { --fo-row-h: 76px; display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-merge__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-2); align-items: center; min-height: var(--fo-row-h); }
+.fo-merge__row[data-state="error"] { grid-template-columns: minmax(0, 1fr); }
+.fo-merge__row .fo-file { --fo-ground: var(--surface); grid-template-columns: 32px minmax(0, 1fr) auto; padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3); }
+.fo-merge__row[data-state="error"] .fo-file { grid-template-columns: 32px minmax(0, 1fr) auto; padding: var(--space-3); }
+.fo-merge__row .fo-file__thumb { width: 32px; height: 32px; }
+.fo-merge__row .fo-file__thumb .fo-icon { width: 20px; height: 20px; }
+.fo-merge__row[draggable="true"] > .fo-file { cursor: grab; }
+/* F13a (UX-11 A, D-8): the name of a file of the Merge list takes up to two lines before it is cut (a refused row keeps one:
+   its reason says the name again). */
+.fo-merge__row:not([data-state="error"]) .fo-file__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; overflow-wrap: anywhere; }
+.fo-merge__n { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--deep); color: var(--on-deep); font: 600 16px/1 var(--fo-font-display); }
+.fo-merge__moves { display: flex; gap: var(--space-1); }
+.fo-merge__none { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }
+.fo-merge__move .fo-icon, .fo-merge__remove .fo-icon { width: 20px; height: 20px; }
 .fo-merge__move .fo-icon { rotate: 90deg; }
 .fo-merge__move--up .fo-icon { rotate: -90deg; }
-/* Below 480 px a row of the Merge list takes two lines: the card on its own, the handle and the arrows under it, so a
-   refused file's sentence keeps the width of the list instead of one word per line (DECISOES § 181). */
+.fo-merge__undo { box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); min-height: var(--fo-row-h); margin: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+.fo-merge__undo .fo-btn { flex: none; min-height: var(--tap-min); }
+@media (max-width: 767px) {
+  .fo-merge { --fo-row-h: 108px; }
+  .fo-merge__moves { flex-direction: column; }
+  .fo-merge__row { align-items: stretch; }
+  .fo-merge__row > .fo-file { align-content: center; }
+  .fo-merge__row > .fo-merge__remove { align-self: center; }
+}
+/* F13a, revisão b-2 (DECISOES § 515): a done card has no action of its own, so its empty third track (and the gap
+   before it) goes; under 480 px the arrows and the remove button go to a row of 48 px under the card, which takes the
+   width of the list again (the § 181 of the F5a): the name had 84 px at 360 and 44 px at 320 beside them. */
+.fo-merge__row .fo-file:has(> .fo-file__actions:empty) { grid-template-columns: 32px minmax(0, 1fr); }
+.fo-merge__row .fo-file__actions:empty { display: none; }
 @media (max-width: 479px) {
-  .fo-merge .fo-filelist__row { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "card card" "grab moves"; row-gap: var(--space-1); }
-  .fo-merge .fo-filelist__row > .fo-file { grid-area: card; }
-  .fo-merge__grab { grid-area: grab; }
-  .fo-merge__moves { grid-area: moves; flex-direction: row; justify-self: end; }
+  .fo-merge { --fo-row-h: 154px; }
+  .fo-merge__row:not([data-state="error"]) { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "card card card" ". moves remove"; row-gap: var(--space-2); }
+  .fo-merge__row:not([data-state="error"]) > .fo-file { grid-area: card; }
+  .fo-merge__row > .fo-merge__moves { grid-area: moves; flex-direction: row; gap: var(--space-2); }
+  .fo-merge__row > :is(.fo-merge__remove, .fo-merge__none) { grid-area: remove; }
 }
 
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
@@ -868,12 +1051,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-sign__file:focus-visible + .fo-sign__choose { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-sign__chosen { min-width: 0; font: 500 15px/20px var(--fo-font-text); color: var(--ink-muted); overflow-wrap: anywhere; }
 .fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
-.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
+/* F13a (UX-11 A, D-9): the frame no longer clips (the focus ring of the box shows whole at every edge); the picture and the
+   box are on a sheet that is light in both themes, as a page of PDF is. */
+.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: visible; }
+.fo-sign__sheet { position: absolute; inset: 0; border-radius: calc(var(--radius-xs) - var(--stroke-2)); background: var(--surface); }
+.fo-sign__sheet > img { border-radius: inherit; }
 .fo-sign__page img { width: 100%; height: 100%; object-fit: fill; }
 .fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
 .fo-sign__box img { display: block; width: 100%; height: auto; }
 .fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
-.fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
 /* A rail of three choices with a help line each does not fit 320 px: below 480 px it wraps, and with help lines it stacks. */
 .fo-pdf-island .fo-seg { flex-wrap: wrap; }
 .fo-pdf-island .fo-seg__opt { flex: 1 0 auto; }
@@ -1030,4 +1216,112 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .fo-wall[open], .fo-wall::backdrop { animation: none; }
   .fo-wall__toggle .fo-icon { transition: none; }
+}
+
+/* ---------- F13a · o juntar e as peças de PDF (UX-04 A e UX-11 A; DECISOES § 478 a § 486) ----------
+   The PDF island on the base of the tool page (§ 463). The ready card and the Merge list are panels of the rectangle like
+   the DropZone, the WaterLevel and the result: the same height in every state, 356/340 px or what the island locks
+   (--fo-lock, the height of the Merge list, set by the island from the reading to the result). */
+.fo-pdf-island .fo-slot > :is(.fo-ready, .fo-merge-panel) { box-sizing: border-box; min-height: var(--fo-lock, var(--slot-h)); }
+/* The DropZone keeps the round seal at rest and with a file over it (§ 456), which the base (§ 463) was not measured with:
+   at rest from 768 px (seal, title, button and help) it took 362 px, and with a file over it 396 to 426 px at 360 px and
+   386 at 1280, above the water of 60 %. Here the rest closes its gaps to 8 px and its top to 12 px from 768 px, and with a file over it the words
+   sit in the middle of the rectangle, on the water that rises (ink on water: 13.68:1 light, 9.71:1 dark), so the
+   rectangle keeps 356/340 px in both states (§ 478). */
+.fo-pdf-island .fo-slot > .fo-drop[data-state="over"] { justify-content: center; padding-block: var(--space-4); }
+@media (min-width: 768px) { .fo-pdf-island .fo-slot > .fo-drop:is(:not([data-state]), [data-state="offline"]) { gap: var(--space-2); padding-top: var(--space-3); } }
+.fo-pdf-island .fo-slot > .fo-ready { align-content: start; }
+/* The line that holds the place of the action while the files are read (D-27): the height of the button and its lip, so
+   nothing moves when the button comes. With one PDF in the Merge list, the same place says what is missing (D-21). */
+.fo-merge__hold { display: flex; align-items: center; box-sizing: border-box; min-height: calc(var(--button-lg) + var(--lip)); margin: 0; font: 600 16px/22px var(--fo-font-text); color: var(--ink); }
+.fo-merge__hold--need { color: var(--ink-muted); font-weight: 500; }
+.fo-merge__hold:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+.fo-pdf-island .fo-ready .fo-merge__hold { justify-content: center; }
+
+/* The Merge list in the rectangle (tool-a-merge): the count, the Merge button where the Choose button was (D-22), the
+   order help in view above the rows (D-26), the rows, "Add more PDFs" (a small DropZone: dashed, a little water, a real
+   button that also takes a dropped file) and Start over at the foot, never where the Choose button was. */
+/* Under 480 px the panel keeps 12 px of side, so the sentence of a refused row keeps the width it had under the list. */
+.fo-merge-panel { --fo-merge-pad: var(--space-4); position: relative; display: grid; align-content: start; gap: var(--space-3); padding: var(--fo-merge-pad); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
+@media (max-width: 479px) { .fo-merge-panel { --fo-merge-pad: var(--space-3); } }
+@media (min-width: 768px) { .fo-merge-panel { --fo-merge-pad: var(--space-6); } }
+.fo-count { margin: 0; padding-right: 72px; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
+@media (min-width: 768px) { .fo-count { padding-right: 112px; } }
+.fo-count__pages { color: var(--ink-muted); font-weight: 500; }
+/* D-22, under 768 px: the count takes the room above the Merge button, so the button sits where the Choose button was at
+   rest (the island measures it: --fo-merge-at); the text of the count stays right above the button. */
+@media (max-width: 767px) {
+  .fo-merge-panel > .fo-count { display: flex; flex-wrap: wrap; align-content: flex-end; column-gap: 0.25em; min-height: max(24px, calc(var(--fo-merge-at, 0px) - var(--fo-merge-pad) - var(--stroke-2) - var(--space-3))); }
+}
+@media (min-width: 768px) { .fo-merge-panel > .fo-btn--brand { justify-self: start; } }
+.fo-merge-panel > .fo-btn { margin-bottom: 0; }
+.fo-merge-panel > .fo-merge__hold { min-height: var(--button-lg); }
+.fo-merge__help { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+/* While the files are read the help keeps its room, unseen (the arrows already work: DECISOES § 168). */
+.fo-merge-panel[data-state="reading"] .fo-merge__help { visibility: hidden; }
+.fo-merge__add { position: relative; overflow: hidden; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; min-height: 56px; margin: 0; padding: 0 var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 700 16px/20px var(--fo-font-text); cursor: pointer; }
+.fo-merge__add:hover { border-color: var(--brand); }
+.fo-merge__add:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-merge__add > .fo-water { --level: 20%; }
+.fo-merge__add > :not(.fo-water) { position: relative; }
+.fo-merge__restart { justify-self: center; min-height: var(--tap-min); }
+
+/* The band under the rectangle in the PDF tools (§ 483): the options before the result; after it the chips, then the
+   options folded under "Adjust" (the tools that run by themselves) or still in view (the ones with an action). The room
+   of the chips (and of the closed "Order" of the Merge) is kept, unseen, from the gesture that asks for the result. */
+.fo-pdf-island .fo-band { gap: var(--space-4); }
+.fo-pdf-island .fo-band > :is(.fo-options-stack, .fo-fields--stack) { margin-top: 0; }
+.fo-next--kept, .fo-merge__order--kept { visibility: hidden; }
+.fo-merge__order .fo-adjust__body .fo-merge { --fo-row-h: auto; }
+
+/* The numbers of the result: "2.6 MB → 717 KB", or "246 KB · 3 pages" (the dot is only seen). */
+.fo-pdf-island .fo-numbers dd { display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-numbers__count::before { content: "·"; content: "·" / ""; color: var(--on-deep-muted); }
+
+/* The coffee line (§ 436) on the 3rd use: the island knows it before the result, and the rectangle keeps the room of the
+   line from the gesture that asks for the result (the drop of a tool that runs by itself, the press of the action), so
+   the result never moves what is under it (§ 484). The room is the most the line takes at that width in the three
+   languages, measured in dist/. */
+.fo-pdf-island { --fo-coffee-h: 248px; }
+@media (min-width: 768px) { .fo-pdf-island { --fo-coffee-h: 160px; } }
+.fo-pdf-island .fo-slot[data-coffee] { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
+.fo-pdf-island .fo-slot[data-coffee] > :is(.fo-drop, .fo-level, .fo-result, .fo-ready, .fo-merge-panel) { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
+
+/* The note of the design system (UX-11 A, F-10; the rule of "Cor" of docs/design/README): brand-soft with the info icon in
+   brand and the text in ink. The honest line of Sign PDF and the warning of Strong in Compress PDF (the fieldset points at
+   it). It took the place of .fo-sign__notice. */
+.fo-note { margin: 0; display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
+.fo-note > .fo-icon { flex: none; margin-top: -1px; color: var(--brand); }
+
+/* UX-11 A, F-14: under 480 px the bar of the grid has the count on its own line and the two buttons side by side, and a rail
+   of choices with no help line is one row of equal columns (56 px), not a wrap with one choice alone on a second line. */
+@media (max-width: 479px) {
+  .fo-pages__count { flex-basis: 100%; }
+  .fo-pages__count ~ .fo-btn { flex: 1 1 0; }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
+}
+
+/* ---------- F13a · o chip que leva e o soltar (UX-14 e UX-18 A; DECISOES § 496 a § 502) ----------
+   The chips that take the result along to the next tool say so ("Resize this image"), and one line under them says the
+   files never leave the device (the shield in brand, the muted ink of the band). At the arrival, the first note of the card
+   says where the files came from (the ink of the card, on deep). The empty box is the DropZone in a status state, like the
+   offline line (§ 292): the Oli lost in the corner, the seal with the info icon from 768px, what happened and two ways out.
+   The drop anywhere (UX-18 A) writes no CSS: the zone goes to its over state of always. */
+.fo-carry { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-carry .fo-icon--inline { margin-top: 2px; flex: none; width: 16px; height: 16px; color: var(--brand); }
+.fo-result__from { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--on-deep); font-weight: 600; }
+.fo-result__from .fo-icon--inline { margin-top: 2px; flex: none; width: 16px; height: 16px; }
+.fo-slot > .fo-drop[data-state="lost"] { justify-content: center; gap: var(--space-3); padding: var(--space-6) var(--space-5); }
+.fo-drop[data-state="lost"] .fo-drop__message { max-width: 34em; }
+.fo-drop[data-state="lost"] .fo-drop__title { font-size: 20px; line-height: 26px; }
+.fo-drop__actions { display: grid; gap: var(--space-2); justify-items: center; width: 100%; }
+@media (max-width: 767px) {
+  /* On a phone the round seal gives its room to the words (the Oli lost in the corner says the state): the box keeps 356px. */
+  .fo-drop[data-state="lost"] .fo-drop__badge { display: none; }
+  .fo-drop__actions .fo-btn { width: 100%; min-width: 0; white-space: normal; }
+}
+@media (min-width: 768px) {
+  .fo-slot > .fo-drop[data-state="lost"] { gap: var(--space-2); padding: var(--space-5) var(--space-8); }
+  .fo-drop__actions { display: flex; flex-wrap: wrap; justify-content: center; margin-top: var(--space-2); }
 }

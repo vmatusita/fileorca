@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readZip } from './lib/zip.ts';
-import { chooseImages, dataLayer, dismissCookies, downloadBytes, dropFiles, hydrated, jpegBatch, slowEngine, type TestFile } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, downloadBytes, dropFiles, hydrated, jpegBatch, openAdjust, openCompare, slowEngine, type TestFile } from './lib/page.ts';
 
 // The shared island (src/tools/image/ImagePanel.tsx) through the Compress image page: the queue while
 // it works, a batch where every file fails, the options, drop, the events and the comparison. What a
@@ -102,6 +102,8 @@ test.describe('a batch', () => {
       (window as unknown as { __said: string[] }).__said = said;
       if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
     });
+    // F13a (UX-04 A): after the result the level is folded under "Adjust"; it stays the same node while the batch runs again.
+    await openAdjust(page);
     await page.locator('input[name="ci-level"][value="recommended"]').focus();
     await page.keyboard.press('ArrowRight');
     await expect
@@ -152,6 +154,7 @@ test.describe('events', () => {
     // The option runs the batch again, and the card stays on screen for the first 400 ms of it: wait for the new
     // ZIP (its size changes with Strong) so the row's Download is not clicked while the row is redrawn (DECISOES § 99).
     const zip = (await page.locator('.fo-btn--download').textContent()) ?? '';
+    await openAdjust(page);
     await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
     await expect(page.locator('.fo-btn--download')).not.toHaveText(zip, { timeout: 30_000 });
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
@@ -172,9 +175,19 @@ test.describe('events', () => {
 });
 
 test.describe('the comparison', () => {
-  test('appears with the card, is named, starts at 50 and moves with the arrow keys', async ({ page }) => {
+  // F13a (UX-04 A; DECISOES § 467): the comparison opens only when the person asks, behind "Before and after"
+  // (aria-expanded, aria-controls); before the click there is no slider and no picture is decoded. Then, as before: named,
+  // at 50, moved by the arrow keys.
+  test('opens only when asked, is named, starts at 50 and moves with the arrow keys', async ({ page }) => {
     await chooseImages(page, await jpegBatch(page, ['one.jpg', 'two.jpg']));
     await done(page);
+    const open = page.getByRole('button', { name: 'Before and after', exact: true });
+    await expect(open).toHaveAttribute('aria-expanded', 'false');
+    await expect(open).toHaveAttribute('aria-controls', 'fo-compare');
+    await expect(page.locator('#fo-compare')).toBeHidden();
+    await expect(page.locator('.fo-ba')).toHaveCount(0);
+    await expect(page.getByRole('slider', { name: 'Compare before and after' })).toHaveCount(0);
+    await openCompare(page);
     const slider = page.getByRole('slider', { name: 'Compare before and after' });
     await expect(slider).toBeVisible();
     await expect(slider).toHaveValue('50');
@@ -186,15 +199,20 @@ test.describe('the comparison', () => {
     expect(await page.locator('.fo-ba').evaluate((element) => element.style.getPropertyValue('--pos'))).toBe('51%');
   });
 
-  test('sits inside the card from 768px and under it on the phone, without moving the Download', async ({ page }) => {
+  // F13a (UX-04 A): it took the place of "sits inside the card from 768px and under it on the phone, without moving the
+  // Download". The comparison lives in the card at every width now (useWide is gone), the one Oli is in the corner of the
+  // rectangle, and the pictures that load still never move the Download.
+  test('sits inside the card at every width, with the one Oli in the corner, without moving the Download', async ({ page }) => {
     await chooseImages(page, await jpegBatch(page, 1));
     await done(page);
+    await openCompare(page);
     const download = page.locator('.fo-btn--download');
-    for (const [width, inside] of [[1280, true], [360, false]] as const) {
+    for (const width of [1280, 360]) {
       await page.setViewportSize({ width, height: 800 });
       await expect(page.locator('.fo-ba')).toHaveCount(1);
-      await expect(page.locator('.fo-result .fo-ba')).toHaveCount(inside ? 1 : 0);
-      await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+      await expect(page.locator('.fo-result .fo-ba')).toHaveCount(1);
+      await expect(page.locator('#fo-tool-root [data-oli]')).toHaveCount(1);
+      await expect(page.locator('.fo-slot > .fo-slot__oli[data-oli="cheer"]')).toHaveCount(1);
       const box = await download.boundingBox();
       await page.waitForTimeout(400); // the pictures load: the box has its shape already
       expect(await download.boundingBox()).toEqual(box);

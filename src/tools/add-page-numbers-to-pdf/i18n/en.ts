@@ -82,7 +82,9 @@ const texts: PdfToolTexts<NumbersTexts> = {
       ofWord: 'of',
       startLabel: 'First number',
       startError: 'Type a whole number from 1 to 9999.',
-      skipFirst: 'Skip the first page',
+      firstLegend: 'First page',
+      numberIt: 'Number it',
+      skipIt: 'Skip it',
     },
   },
 };

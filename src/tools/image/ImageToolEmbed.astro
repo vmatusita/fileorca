@@ -4,6 +4,7 @@
 // ImageToolPage when it gets `embed`, so the <script> of its mount.ts stays in that component and the guide loads the
 // same entry file as the tool page, plus the shared island chunk.
 import type { Lang } from '../../i18n/routes.ts';
+import { COFFEE_AHEAD_SCRIPT } from './coffee.ts';
 import type { ImagePageId } from './registry.ts';
 import type { ImagePanelData } from './types.ts';
 
@@ -16,4 +17,6 @@ interface Props {
 const { panel } = Astro.props;
 ---
 <div id="fo-tool-root" data-props={JSON.stringify(panel)}><slot name="panel" /></div>
+{/* F13a (DECISOES § 470): the room of the coffee line, before the first paint, when the next use shows it. */}
+<script is:inline set:html={COFFEE_AHEAD_SCRIPT} />
 <slot />

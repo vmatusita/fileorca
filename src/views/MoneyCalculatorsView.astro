@@ -59,6 +59,7 @@ const read = datesOf('money', lang).read;
   description={t.description}
   withAds
   adArea="dinheiro"
+  seal={common.calcSeal}
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />

@@ -101,6 +101,7 @@ export const TOOL: ImageTool<State, CropOptionsTexts> = {
   },
   selectable: true,
   Options,
+  now: (state, texts) => texts[state.ratio],
 };
 
 export default function CropPanel(props: ImagePanelData<CropOptionsTexts>) {

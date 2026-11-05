@@ -11,7 +11,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop two or more PDFs on the box, choose them, or paste them. Use Add more PDFs to put more files in the list.',
-    'Put the files in the order you want: drag a row, press the arrow buttons on it, or move it with the keyboard.',
+    'Put the files in the order you want: drag a row, or press the arrow buttons on it (they work with the keyboard too).',
     'Press Merge PDFs. Oli joins the files in your browser, in the order of the list.',
     'Download the merged PDF. Your original files stay untouched.',
   ],
@@ -36,7 +36,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   faq: [
     {
       q: 'How do I change the order of the files?',
-      a: 'Drag a row to a new place, or press the arrow buttons on the row to move it up or down. You can also move a row with the keyboard. Oli joins the files in the order the list shows when you press Merge PDFs.',
+      a: 'Drag a row to a new place, or press the arrow buttons on the row to move it up or down; they work with the keyboard too. Oli joins the files in the order the list shows when you press Merge PDFs.',
     },
     {
       q: 'Will form fields, bookmarks and links still work after merging?',
@@ -68,8 +68,11 @@ const texts: PdfToolTexts<MergeTexts> = {
     action: 'Merge PDFs',
     options: {
       add: 'Add more PDFs',
-      help: 'Drag a row to move it, or use the arrow buttons on the row. With the keyboard, Space picks a row up, the arrow keys move it, and Space drops it. The files join in the order of this list.',
+      help: 'Oli joins them from top to bottom. The arrows change the order.',
       needMore: 'Add at least one more PDF to merge.',
+      listLabel: 'Files, in the order they join',
+      order: 'Order · {count} files',
+      orderHelp: 'Changing the order merges again right away.',
     },
   },
 };

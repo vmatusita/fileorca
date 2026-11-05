@@ -60,9 +60,17 @@ export const MAP_TARGETS = [
   '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
   '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more', '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
+  // F13a (UX-04 A, decision 10; DECISOES § 473): the band under the rectangle, "Adjust", the chips (the chip of PNG to
+  // JPG in the error of a PNG on HEIC to JPG too) and the row of Start over and "Before and after".
+  '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
   '.fo-rhero', '.fo-export .fo-btn', '.fo-compare', '.fo-calc-schedule', '.fo-amort-wrap', '.fo-debt',
   '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
+  // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle and the band under it.
+  '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
+  // F13a (UX-14; DECISOES § 506): the line under the chips that take the result along, the note of where the files
+  // came from and the empty box.
+  '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
   '.fo-result__support', '.fo-footer__coffee', '.fo-guidecard--here',
   '.fo-header > a', '.fo-header > button',
 ].join(', ');
@@ -132,6 +140,12 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
       const rect = (element: Element) => {
         const box = element.getBoundingClientRect();
         return { x: box.left + scrollX, y: box.top + scrollY, w: box.width, h: box.height };
+      };
+      // F13a, revisão a-2 (DECISOES § 513): the target box of the Oli counts inflated by 12 px on every side, the
+      // room of her moves (decision 4 of the run).
+      const target = (element: Element) => {
+        const box = rect(element);
+        return element.matches('[data-oli]') ? { x: box.x - 12, y: box.y - 12, w: box.w + 24, h: box.h + 24 } : box;
       };
       const shown = (element: Element) => {
         const box = element.getBoundingClientRect();
@@ -206,7 +220,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
       let gridBlock: Element | null | undefined = firstGrid;
       while (gridBlock && gridBlock.parentElement !== main) gridBlock = gridBlock.parentElement;
       const groupRects: Record<string, { x: number; y: number; w: number; h: number }[]> = {};
-      for (const [name, selector] of Object.entries(groups)) groupRects[name] = [...document.querySelectorAll(selector)].filter((element) => shown(element) && !element.closest('.fo-ad')).map(rect);
+      for (const [name, selector] of Object.entries(groups)) groupRects[name] = [...document.querySelectorAll(selector)].filter((element) => shown(element) && !element.closest('.fo-ad')).map(target);
       return {
         width: innerWidth,
         height: innerHeight,
@@ -217,7 +231,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
         tool: tool && shown(tool) ? rect(tool) : null,
         header: header ? rect(header) : null,
         notice: notice && !notice.hidden && shown(notice) ? rect(notice) : null,
-        targets: [...document.querySelectorAll(targets)].filter((element) => shown(element) && !element.closest('.fo-ad')).map((element) => ({ ...rect(element), kind: describe(element) })),
+        targets: [...document.querySelectorAll(targets)].filter((element) => shown(element) && !element.closest('.fo-ad')).map((element) => ({ ...target(element), kind: describe(element) })),
         grids: [...(main?.querySelectorAll('.fo-grid, .fo-guidecards') ?? [])].filter(shown).map(rect),
         groups: groupRects,
         first,

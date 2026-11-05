@@ -20,6 +20,20 @@ export interface ChipData {
   icon: string;
   /** Colour of the chip dot; the home chip has none (brand-soft). */
   category: 'image' | 'pdf' | 'none';
+  /** F13a · UX-14 (DECISOES § 496): the chip can take the result along to its tool; only a link without this. */
+  carry?: ChipCarry;
+}
+
+/**
+ * F13a · UX-14 (DECISOES § 496 and § 497): what a chip needs to take the result along: what its tool takes (the
+ * formats of its registry, an image format or "pdf") and whether it takes one file at a time, the rule of takes() in
+ * src/share/logic.ts, and the label it shows when it does (one file, or several with {count}).
+ */
+export interface ChipCarry {
+  accepts: string[];
+  single: boolean;
+  one: string;
+  many: string;
 }
 
 export interface ConverterLink {
@@ -41,8 +55,23 @@ export interface ImagePanelData<O = object> {
   chips: ChipData[];
   /** Where a HEIC or an AVIF can go instead, for the "open it in …" link of a refused file (CONVERTER_FOR: a format with no converter has no entry). */
   converters: { heic?: ConverterLink; avif?: ConverterLink };
+  /**
+   * F13a (D-17; DECISOES § 469): a format another tool of the site takes better (a PNG on HEIC to JPG) and the chip to
+   * it, which the band under the rectangle shows in place of the options when the one file refused is of that format.
+   */
+  elsewhere?: { format: ImageFormat; chip: ChipData };
   /** Where the coffee line leads: Ko-fi, or the Pix of the support page in Portuguese (F6). */
   coffeeHref: string;
+  /**
+   * F13a · UX-14 (DECISOES § 498): the pages that can send their result here with a chip, by id, with their name in the
+   * language: the note of the arrival and the empty box say it, and a choice that names another page is not believed.
+   */
+  origins: Record<string, string>;
+  /**
+   * F13a · UX-14: inner markup of the icons only the result that goes along uses (the info of the empty box, the shield of
+   * the line under the chips), read at build like the icons of the PDF island: a ?raw import would grow the shared chunk.
+   */
+  carryIcons: { info: string; shield: string };
   /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
   initial?: Record<string, unknown>;
 }
@@ -92,6 +121,14 @@ export interface ImageTool<S extends object, O = object> {
   pdfSize?: (state: S) => PdfPageSize;
   /** Show the pick toggle on every ready row (Crop uses it to choose the box to adjust). */
   selectable?: boolean;
-  /** The option fields, drawn between the card and the list of files. */
+  /**
+   * The option fields, in the band under the rectangle: at sight before the result, folded under "Adjust" after it (F13a,
+   * UX-04 A; DECISOES § 466).
+   */
   Options?: ComponentType<OptionsProps<S, O>>;
+  /**
+   * What the options are now, said after "Adjust ·" ("Recommended", "50%", "Square"). A tool without it has nothing to
+   * adjust (PNG to JPG and the presets: one sentence), and its sentence stays at sight under the chips.
+   */
+  now?: (state: S, texts: O, lang: Lang) => string;
 }

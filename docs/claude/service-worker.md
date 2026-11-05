@@ -30,3 +30,10 @@ Pegadinhas que a F8 achou:
 - **Teste do worker começa com `if (await workerOff(page, server)) return;`** antes do primeiro `controlled()` (§ 307): com `SW_ENABLED` em `false`, ele confere o estado desligado e termina. Teste novo do worker segue o mesmo molde, e um teste que lê o manifest ou o `/sw.js` compara com o `SW_ENABLED`.
 - **Página que mostra um estado depois de ler algo no navegador nasce sem ele** (a "Abrir com", § 307): o estado vazio visível no HTML afirmava "nada para abrir" sobre arquivos compartilhados. Ele começa com `hidden`, o script o mostra quando a leitura termina vazia, e um `<noscript>` cobre quem não roda script.
 - **O `pnpm screenshots` abre as páginas com `serviceWorkers: 'block'`,** como os testes: fora do runner, o Playwright libera o worker, e o `page.route` deixa de ver o que ele responde (o nível d'água, que segura o `engine-client`, nunca aparecia). O bloco da F8, que fotografa o offline e a "Abrir com", cria o próprio contexto com `allow`.
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- **As ilhas gravam a caixa do compartilhar também** (o chip que leva, F13a): com as constantes de `src/sw/shared.ts`, as entradas em `INBOX_ENTRY_PREFIX + n` e o `X-FileOrca-Stored` em todas, para a limpeza de 1 h do worker cobrir; o `src/sw/` não mudou (DECISOES § 505). A escolha da aba ganhou o `from` (só um id de página), que a "Abrir com" não grava, e o `takeInbox` devolve `{files, from, lost, count}`. O chip só leva com `navigator.serviceWorker.controller`. (o chip que leva)
+- **O `takeInbox` não precisa do worker no controle para ler:** um spec que quer a chegada sem passar pelo chip grava a entrada com `caches.open(...).put(...)` e a escolha no `sessionStorage` por `page.evaluate`, e reabre a página (o `ads.spec.ts` faz assim, com os workers liberados por causa do WebKit: a pegadinha do `playwright.md`). (o chip que leva)

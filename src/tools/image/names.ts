@@ -20,6 +20,20 @@ export function baseName(name: string): string {
   return base.replace(UNSAFE, '_').trim();
 }
 
+/** Extensions that promise a picture: the formats the site reads, and the ones people give pictures (D-06). */
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'jpe', 'jfif', 'png', 'webp', 'heic', 'heif', 'avif', 'gif']);
+
+/**
+ * F13a (D-06; DECISOES § 468): the extension of a name that says it is a picture, as the name spells it ("PNG" in
+ * "notes.PNG"), or null. The error of a file whose bytes are no image says that the name and the content disagree.
+ */
+export function imageExtensionOf(name: string): string | null {
+  const dot = name.lastIndexOf('.');
+  if (dot <= 0 || dot === name.length - 1) return null;
+  const extension = name.slice(dot + 1);
+  return IMAGE_EXTENSIONS.has(extension.toLowerCase()) ? extension : null;
+}
+
 export interface NameEntry {
   /** The name the file came with (may be empty). */
   name: string;

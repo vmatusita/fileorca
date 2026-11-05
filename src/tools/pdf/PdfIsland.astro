@@ -2,7 +2,11 @@
 // The PDF tool island, server-rendered from the same data-props the browser hydrates from (DECISOES § 23). This is the
 // only component with the PDF <script>, so the 12 PDF pages load one entry (src/tools/pdf/mount.ts) next to the shared
 // island chunk: two JS files (F5a, decision 5; the model of the calculators, § 110).
+// F13a (DECISOES § 495): a tool that runs by itself gets, right after its markup, the inline peek of the image tools
+// (COFFEE_AHEAD_SCRIPT, § 470), so the rectangle keeps the room of the coffee line from the first paint on the use that
+// shows it, and the drop that asks for the result moves nothing.
 import PdfPanel from './PdfPanel.tsx';
+import { COFFEE_AHEAD_SCRIPT } from '../image/coffee.ts';
 import type { PdfPanelData } from './types.ts';
 
 interface Props {
@@ -11,6 +15,7 @@ interface Props {
 const { data } = Astro.props;
 ---
 <div id="fo-tool-root" data-props={JSON.stringify(data)}><PdfPanel {...data} /></div>
+{data.run === 'auto' && <script is:inline set:html={COFFEE_AHEAD_SCRIPT} />}
 <script>
   import './mount.ts';
 </script>
