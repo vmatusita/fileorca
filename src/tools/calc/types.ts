@@ -127,6 +127,13 @@ export interface CalcView {
   /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
   more?: string;
   /** The schedule, built only when the person opens it or exports. */
+  /** The other system in the card, under the Download (the SAC × PRICE: "Na PRICE: R$ 4.534,12 por mês"; F13b, DECISOES § C-6). */
+  versus?: Part[];
+  /**
+   * Two bars on one scale, in place of the split (the SplitChart, pair variant; the SAC × PRICE): the same principal and the
+   * interest of each system. `name` is the name of the chart, `interest` the line of its legend for the interest.
+   */
+  pair?: { name: string; principal: { label: string; cents: number }; interest: Part[]; rows: { name: string; cents: number }[] };
   table: () => Table;
   /** The results, for the PDF. */
   summary: [label: string, value: string][];

@@ -983,6 +983,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (max-width: 767px) { .fo-calc__result .fo-export .fo-btn { padding-inline: var(--space-4); } }
 .fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
 .fo-copied .fo-icon { width: 18px; height: 18px; }
+/* F13b · the SplitChart, pair variant (D-38; DECISOES § C-6): one bar per system on one scale, each named in 13 px
+   on-deep-muted at its left; and the other system's payment in the card, under the Download. */
+.fo-split__pair { display: grid; gap: var(--space-2); }
+.fo-split__row { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--space-2); }
+.fo-split__name { font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.04em; color: var(--on-deep-muted); }
+.fo-rhero__versus { margin: 0; font: 600 17px/26px var(--fo-font-text); color: var(--on-deep); }
+.fo-rhero__versus b { font: 600 20px/26px var(--fo-font-display); white-space: nowrap; }
 
 .fo-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .fo-scn { box-sizing: border-box; min-width: 0; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); padding: var(--space-4); display: grid; gap: var(--space-3); align-content: start; }
@@ -993,9 +1000,12 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-scn dd { margin: 0; font: 600 24px/28px var(--fo-font-display); overflow-wrap: anywhere; }
 .fo-diff { grid-column: 1 / -1; margin: 0; display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 600 16px/22px var(--fo-font-text); }
 .fo-diff .fo-icon { flex: 0 0 auto; color: var(--brand); }
-@media (max-width: 371px) {
-  .fo-compare { grid-template-columns: 1fr; }
-  .fo-diff { order: -1; }
+/* F13b (D-38; DECISOES § C-6): the two scenarios stay side by side down to 320 px (they stacked under 340 px of column),
+   with the number in 20/24 and a tighter card below 480 px; the line of the difference stays under them. */
+@media (max-width: 479px) {
+  .fo-compare { gap: var(--space-2); }
+  .fo-scn { padding: var(--space-3); gap: var(--space-2); }
+  .fo-scn dd { font-size: 20px; line-height: 24px; }
 }
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }

@@ -3,6 +3,8 @@
 // a diagonal hatch, so the two parts read apart without colour and in black and white. The bar is
 // role="img" with both values and shares in its name, and the legend repeats them in text. No axis, no
 // grid, no entrance animation. One chart per page, so its pattern and clip ids are fixed.
+import type { ComponentChildren } from 'preact';
+
 export interface SplitPart {
   label: string;
   cents: number;
@@ -16,6 +18,61 @@ export function shares(a: number, b: number): [number, number] {
   if (total <= 0) return [100, 0];
   const first = Math.round((a / total) * 100);
   return [first, 100 - first];
+}
+
+/**
+ * The pair variant (F13b, D-38; DECISOES § C-6): where the account compares two systems on the same loan (the SAC × PRICE),
+ * one bar per system on one scale, so the longer bar is the one that pays more interest. Each bar is the same principal (in
+ * brand-on-deep) and the interest of its system (coral with the hatch); the widest is the whole width. The pair is role="img"
+ * with both totals in its name, and the legend says them in text. Each bar has its own clip and pattern ids.
+ */
+export function PairChart({ name, principal, interest, rows }: { name: string; principal: SplitPart; interest: ComponentChildren; rows: { name: string; cents: number }[] }) {
+  const widest = Math.max(1, ...rows.map((row) => principal.cents + row.cents));
+  return (
+    <div class="fo-split fo-split--pair">
+      <div class="fo-split__pair" role="img" aria-label={name}>
+        {rows.map((row, index) => {
+          const total = principal.cents + row.cents;
+          const [pa, pb] = shares(principal.cents, row.cents);
+          return (
+            <div class="fo-split__row" key={row.name}>
+              <span class="fo-split__name" aria-hidden="true">
+                {row.name}
+              </span>
+              <svg class="fo-split__bar" width={`${Math.round((total / widest) * 1000) / 10}%`} height="20" aria-hidden="true">
+                <defs>
+                  <clipPath id={`fo-split-clip-${index}`}>
+                    <rect width="100%" height="20" rx="10" />
+                  </clipPath>
+                  <pattern id={`fo-split-hatch-${index}`} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect class="fo-split__coral" width="8" height="8" />
+                    <rect class="fo-split__hatch" width="2" height="8" />
+                  </pattern>
+                </defs>
+                <g clip-path={`url(#fo-split-clip-${index})`}>
+                  <rect class="fo-split__principal" width={`${pa}%`} height="20" />
+                  <rect x={`${pa}%`} width={`${pb}%`} height="20" fill={`url(#fo-split-hatch-${index})`} />
+                  {pa > 0 && pb > 0 && <line class="fo-split__gap" x1={`${pa}%`} x2={`${pa}%`} y1="0" y2="20" />}
+                </g>
+              </svg>
+            </div>
+          );
+        })}
+      </div>
+      <ul class="fo-split__legend">
+        <li>
+          <i class="fo-split__key fo-split__key--a" />
+          <span>
+            {principal.label} <b>{principal.text}</b>
+          </span>
+        </li>
+        <li>
+          <i class="fo-split__key fo-split__key--b" />
+          <span>{interest}</span>
+        </li>
+      </ul>
+    </div>
+  );
 }
 
 /** `percent` writes a share as the page's language does: 68% (en, pt), 68 % (es). */

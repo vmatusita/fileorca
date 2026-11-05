@@ -13,7 +13,7 @@ import Icon from '../../icons/Icon.tsx';
 import Oli from '../image/Oli.tsx';
 import type { Pose } from '../../oli/poses.ts';
 import { HERO_ERROR_ID } from './CalcField.tsx';
-import SplitChart from './SplitChart.tsx';
+import SplitChart, { PairChart } from './SplitChart.tsx';
 import type { CalcView, Part } from './types.ts';
 
 export const SPEAK_AFTER_MS = 500;
@@ -161,6 +161,12 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
           </button>
         )}
       </div>
+      {/* The other system of the account, under the Download (the SAC × PRICE; DECISOES § C-6). */}
+      {view.versus && (
+        <p class="fo-rhero__versus">
+          <Sentence parts={view.versus} />
+        </p>
+      )}
       {/* The sentence and the last result share one cell: the sentence keeps its height, hidden, while there is an error. */}
       <div class="fo-rhero__said" data-reserve={reserve}>
         <p class="fo-rhero__sentence">
@@ -168,7 +174,15 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
         </p>
         {error !== undefined && <p class="fo-rhero__stale">{last}</p>}
       </div>
-      {view.split && (
+      {view.pair && (
+        <PairChart
+          name={view.pair.name}
+          principal={{ label: view.pair.principal.label, cents: view.pair.principal.cents, text: money(view.pair.principal.cents) }}
+          interest={<Sentence parts={view.pair.interest} />}
+          rows={view.pair.rows}
+        />
+      )}
+      {view.split && !view.pair && (
         <SplitChart
           name={splitName(view)}
           percent={percent}

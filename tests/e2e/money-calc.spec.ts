@@ -406,8 +406,9 @@ test.describe('review F4 regressions', () => {
     await expect.poll(covered).toBe(false);
   });
 
-  test('the two scenarios stay side by side from 340px of column (DES-9)', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 800 });
+  // F13b (D-38; DECISOES § C-6): side by side down to 320 px (it was from 340 px of column, at 375 px).
+  test('the two scenarios stay side by side down to 320px (DES-9)', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
     await open(page, 'mortgage-calculator-15-vs-30-year');
     expect(await page.locator('.fo-compare').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length)).toBe(2);
   });

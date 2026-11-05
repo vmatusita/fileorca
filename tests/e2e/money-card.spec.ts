@@ -472,3 +472,36 @@ for (const block of blocks(CALC_PATHS)) {
     expect(wrong).toEqual([]);
   });
 }
+
+// SAC × PRICE (D-38; DECISOES § C-6): the PRICE is in the card, under the Download, with the first payment the account gives
+// (the B card of the scenarios says the same number, never typed in a text); the two bars are on one scale, the PRICE's the
+// widest, with both totals in the name of the chart and in its legend; and the two scenarios stay side by side down to 320 px.
+test('/pt/simulador-sac-price/: the PRICE is in the card, with two bars on one scale, and the scenarios side by side at 320 px', async ({ page }) => {
+  const path = moneyPage('br-sac-price', 'pt')?.path ?? '';
+  await openAt(page, path, 360, 740);
+  await hydrated(page);
+  const price = (await page.locator('.fo-scn').nth(1).locator('dd').first().textContent()) ?? '';
+  expect(price).toMatch(/^R\$\s[\d.]+,\d\d$/);
+  const versus = page.locator('.fo-rhero .fo-rhero__versus');
+  await expect(versus).toHaveText(`Na PRICE: ${price} por mês`);
+  // Under the Download, in the card, above the sentence.
+  expect(await page.evaluate(() => {
+    const get = document.querySelector('.fo-rhero__get')!.getBoundingClientRect();
+    const line = document.querySelector('.fo-rhero__versus')!.getBoundingClientRect();
+    const said = document.querySelector('.fo-rhero__said')!.getBoundingClientRect();
+    return line.top >= get.bottom && line.bottom <= said.top;
+  })).toBe(true);
+  const chart = page.locator('.fo-rhero .fo-split--pair [role="img"]');
+  await expect(chart).toHaveAttribute('aria-label', /^Valor financiado de R\$\s[\d.]+ nos dois sistemas\. Juros de R\$\s[\d.]+ no SAC e de R\$\s[\d.]+ na PRICE\.$/);
+  const bars = await page.locator('.fo-rhero .fo-split__row svg').evaluateAll((svgs) => svgs.map((svg) => svg.getBoundingClientRect().width));
+  expect(bars).toHaveLength(2);
+  expect(bars[0]).toBeLessThan(bars[1] ?? 0);
+  const row = await page.locator('.fo-rhero .fo-split__row').last().evaluate((node) => node.getBoundingClientRect().width - 56 - 8);
+  expect(Math.abs((bars[1] ?? 0) - row)).toBeLessThanOrEqual(1);
+  await expect(page.locator('.fo-rhero .fo-split__legend li').nth(1)).toHaveText(/^Juros: SAC R\$\s[\d.]+ · PRICE R\$\s[\d.]+$/);
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.locator('.fo-compare').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length)).toBe(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  const inside = await page.locator('.fo-scn dd').evaluateAll((dds) => dds.every((dd) => dd.scrollWidth <= dd.clientWidth + 1));
+  expect(inside).toBe(true);
+});
