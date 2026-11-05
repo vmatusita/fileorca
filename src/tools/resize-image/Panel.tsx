@@ -6,7 +6,7 @@
 // the fields show into the box, so nothing is processed twice and nothing the person did not choose is
 // kept. The typed numbers stay in this component: they are never written to the URL or to an event.
 import type { ResizeOptionsTexts } from '../../i18n/types.ts';
-import { fmt, groupDigits } from '../../i18n/format.ts';
+import { fmt, groupDigits, percent } from '../../i18n/format.ts';
 import ImagePanel from '../image/ImagePanel.tsx';
 import NumberField from '../image/NumberField.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
@@ -117,6 +117,11 @@ export const TOOL: ImageTool<State, ResizeOptionsTexts> = {
     return { kind: 'resize', mode: 'size', width: state.width, height: state.height };
   },
   Options,
+  // "Adjust · 50%" until the person chooses a box, then "Adjust · 960 × 540 px" (the numbers in the format of the language).
+  now: (state, texts, lang) =>
+    state.mode === 'size' && state.width !== null && state.height !== null
+      ? `${groupDigits(state.width, lang)} × ${groupDigits(state.height, lang)} ${texts.px}`
+      : percent(state.mode === 'percent' ? state.percent : START_PERCENT, lang),
 };
 
 export default function ResizePanel(props: ImagePanelData<ResizeOptionsTexts>) {

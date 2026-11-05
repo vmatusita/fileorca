@@ -34,6 +34,7 @@ const TOOL: ImageTool<State, CompressOptionsTexts> = {
   initial: { level: 'recommended' },
   operation: (state) => ({ kind: 'compress', level: state.level }),
   Options,
+  now: (state, texts) => texts[state.level],
 };
 
 export default function CompressPanel(props: ImagePanelData<CompressOptionsTexts>) {

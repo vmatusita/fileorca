@@ -78,6 +78,7 @@ export default {
     done: '¡Listo! Tu imagen quedó un {percent} más ligera.',
     doneMany: '¡Listo! Tus {count} imágenes quedaron un {percent} más ligeras.',
     placardLabel: 'más ligera',
+    adjustHelp: 'Cambiar el nivel rehace la imagen al momento.',
     options: {
       legend: 'Compresión',
       recommended: 'Recomendada',

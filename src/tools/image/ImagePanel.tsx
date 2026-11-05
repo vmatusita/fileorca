@@ -5,6 +5,14 @@
 // re-process the whole batch at once (no Apply button, the focus stays where it is). Markup and classes
 // follow docs/design/components (v1.1). The Oli boxes draw from the page sprite (§ 44).
 //
+// F13a · a página de ferramenta "um lugar só" (UX-04 A; DECISOES § 463 and § F13A-I-01 to § F13A-I-09): the rectangle
+// (.fo-slot) has one height in every state, and the one Oli sits in its top-right corner (wave, gulp, swim, cheer, oops,
+// buoy). The result is the water that rose: the sentence, the placard that floats (aria-hidden), the line "2.6 MB → 717 KB",
+// the Download, Start over and "Before and after" (it opens only when asked), the notes and the coffee line. The band under
+// the rectangle (.fo-band) keeps its height: the options before the result; the chips and the options folded under
+// "Adjust" after it. Nothing grows without a gesture of the person: the band keeps the height it had when the batch
+// started, and the rectangle keeps the room of the coffee line from the start of the batch that will show it.
+//
 // State lives in one mutable model (the run loop is async and must see the latest values); every change
 // calls render(). Outputs are kept as Blobs, object URLs are revoked when replaced and at "Start over".
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -13,18 +21,20 @@ import type { ImagePanelTexts } from '../../i18n/types.ts';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track } from '../../analytics/events.ts';
 import type { EngineFailure, EngineOutput, EngineResult, Note, Operation, Sniffed } from '../../engine/image/types.ts';
+import type { Pose } from '../../oli/poses.ts';
 import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import BeforeAfter from './BeforeAfter.tsx';
 import Oli from './Oli.tsx';
-import { countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from './coffee.ts';
-import { EXTENSION, uniqueNames } from './names.ts';
+import { coffeeAhead, countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from './coffee.ts';
+import { EXTENSION, imageExtensionOf, uniqueNames } from './names.ts';
 import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
 import { takeInbox } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
-import type { FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
+import type { ChipData, FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
+import chevronDownIcon from '../../../docs/design/assets/Icons/chevron-down.svg?raw';
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import imageIcon from '../../../docs/design/assets/Icons/image.svg?raw';
@@ -118,35 +128,31 @@ interface Model {
   rowFocus: number | null;
   /** The focus was inside the slot (drop zone, WaterLevel or card) when the last render was asked for. */
   slotFocus: boolean;
+  /** The focus was inside the band (the options, the chips, Adjust) when the last render was asked for. */
+  bandFocus: boolean;
   /** Rows that take the focus when the row that had it is gone: the next one, then the previous one. */
   successors: number[];
   /** A row that takes the focus once it is on screen (the first one that "Show N more" reveals). */
   focusRowId: number | null;
+  /** F13a (UX-04 A): the comparison is open, because the person asked; it starts closed with every batch. */
+  compareOpen: boolean;
+  /** F13a (DECISOES § F13A-I-07): the rectangle keeps the room of the coffee line, from the start of the batch that shows it. */
+  coffeeRoom: boolean;
+  /** F13a (DECISOES § F13A-I-03): the band keeps the height it had when the batch started, until Start over. */
+  bandLock: number | null;
 }
 
 function newModel(): Model {
   return {
     items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, hadCard: false, bundle: null,
     selected: null, expanded: false, announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
-    rowFocus: null, slotFocus: false, successors: [], focusRowId: null,
+    rowFocus: null, slotFocus: false, bandFocus: false, successors: [], focusRowId: null, compareOpen: false, coffeeRoom: false, bandLock: null,
   };
 }
 
 /** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
 function offlineNow(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
-}
-
-function useWide(): boolean {
-  const [wide, setWide] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia('(min-width: 768px)');
-    const update = () => setWide(query.matches);
-    update();
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
-  return wide;
 }
 
 function revoke(url: string | null): void {
@@ -168,8 +174,28 @@ function release(item: Item): void {
 
 const infoOf = (item: Item): FileInfo => ({ id: item.id, name: item.file.name, size: item.file.size, width: item.width, height: item.height });
 
+/** A row of chips under a label (NextStepChips): the next steps after a result, or the right tool after a refusal. */
+function ChipRow({ id, label, chips, onPick }: { id: string; label: string; chips: ChipData[]; onPick?: (chip: ChipData) => void }) {
+  return (
+    <nav class="fo-next" aria-labelledby={id}>
+      <span class="fo-next__label" id={id}>
+        {label}
+      </span>
+      {chips.map((chip) => (
+        <a key={chip.href} class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`} href={chip.href} onClick={onPick ? () => onPick(chip) : undefined}>
+          <span class="fo-chip__dot" aria-hidden="true">
+            <Icon inner={chip.icon} />
+          </span>
+          {chip.name}
+          <Icon raw={arrowIcon} />
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S, O>) {
-  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, coffeeHref, tool, initial } = props;
+  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, elsewhere, coffeeHref, tool, initial } = props;
   const { Options } = tool;
   const model = useRef<Model>(newModel());
   const m = model.current;
@@ -177,15 +203,16 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const [over, setOver] = useState(0);
   const [state, setState] = useState<S>(() => (initial ? { ...tool.initial, ...(initial as Partial<S>) } : tool.initial));
   const stateRef = useRef<S>(state);
-  const wide = useWide();
   const rootRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const startOverRef = useRef<HTMLButtonElement>(null);
   const levelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const summaryRef = useRef<HTMLElement>(null);
 
   /**
    * Every change goes through here. Before the page is drawn again it notes where the focus is, because a control
@@ -198,6 +225,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       const row = active.closest<HTMLElement>('[data-row]');
       if (row) m.rowFocus = Number(row.dataset['row']);
       else if (slotRef.current?.contains(active)) m.slotFocus = true;
+      else if (bandRef.current?.contains(active)) m.bandFocus = true;
     }
     setTick((tick) => tick + 1);
   };
@@ -414,6 +442,14 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.completeSent = false;
     m.newUse = true;
     m.coffee = '';
+    m.compareOpen = false;
+    // The 3rd use is known before its result (DECISOES § F13A-I-07): the page gave the rectangle the room of the coffee
+    // line before its first paint, or Start over did; here is the last chance, for a batch dropped on a result. The band
+    // keeps the height it has now, so the shorter row of the result never pulls the page up (§ F13A-I-03). Neither
+    // shrinks before a click on Start over.
+    m.coffeeRoom = m.coffeeRoom || coffeeAhead();
+    const band = bandRef.current?.offsetHeight ?? 0;
+    if (band > 0) m.bandLock = Math.max(m.bandLock ?? 0, band);
     m.announce = texts.progressLabel; // the status region speaks while the batch runs, then says how it ended
     m.focusDownload = true;
     m.broken = new Set();
@@ -442,6 +478,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.coffee = '';
     m.selected = null;
     m.zipping = false;
+    m.compareOpen = false;
+    // Start over is a click: the rectangle may change here. It keeps the room of the coffee line when the next use is the
+    // one that shows it (the 2nd use was just done), and gives it back otherwise (DECISOES § F13A-I-07).
+    m.coffeeRoom = coffeeAhead();
+    m.bandLock = null;
     setOver(0);
     render();
     window.setTimeout(() => chooseRef.current?.focus(), 0);
@@ -502,6 +543,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
   }
 
+  /** D-17 (DECISOES § F13A-I-06): the file is of the format another tool of the site takes (a PNG on HEIC to JPG). */
+  const goesElsewhere = (item: Item): boolean =>
+    elsewhere !== undefined && texts.elsewhere !== undefined && item.failure?.reason === 'wrong-tool' && item.failure.source === elsewhere.format;
+
   function reasonOf(item: Item): ComponentChildren {
     const failure = item.failure;
     if (!failure) return '';
@@ -509,17 +554,27 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const errors = t.errors;
     switch (failure.reason) {
       case 'empty': return fmt(errors.empty, { name });
-      case 'unsupported': return fmt(errors.unsupported, { name, formats: texts.formats });
+      case 'unsupported': {
+        // D-06 (DECISOES § F13A-I-05): a name that promises a picture over bytes that are none hears that the two
+        // disagree, and how to make a real one, never "try PNG" for a file that already says it is a PNG.
+        const extension = failure.source === 'unknown' ? imageExtensionOf(name) : null;
+        if (extension) return fmt(errors.mismatch, { name, extension, formats: texts.formats });
+        return fmt(errors.unsupported, { name, formats: texts.formats });
+      }
       case 'truncated': return fmt(errors.truncated, { name });
       case 'decode': return fmt(errors.decode, { name });
       case 'encode': return fmt(errors.encode, { name });
       case 'too-large': return fmt(errors.tooLarge, { name });
       case 'load': return fmt(offlineNow() ? errors.offlineRow : errors.load, { name });
       case 'wrong-tool': {
+        // The sentence is split before the file name goes in, so a name that holds "{tool}" cannot move anything.
+        if (goesElsewhere(item) && elsewhere && texts.elsewhere) {
+          const [before = '', after = ''] = texts.elsewhere.reason.split('{tool}').map((part) => fmt(part, { name }));
+          return `${before}${elsewhere.chip.name}${after}`;
+        }
         const link = failure.source === 'heic' ? converters.heic : failure.source === 'avif' ? converters.avif : undefined;
         const format = formatName(failure.source);
         if (!link) return fmt(errors.wrongFormat, { name, format, formats: texts.formats });
-        // The sentence is split before the file name goes in, so a name that holds "{tool}" cannot move the link.
         const [before = '', after = ''] = errors.wrongTool.split('{tool}').map((part) => fmt(part, { name, format }));
         return (
           <>
@@ -540,7 +595,18 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     void import('./engine-client.ts').then((engine) => engine.warm(tool.warm)).catch(() => {});
   }
 
-  useEffect(() => forgetWithoutConsent(), []);
+  useEffect(() => {
+    forgetWithoutConsent();
+    // The inline script of the page (COFFEE_AHEAD_SCRIPT) may have given the rectangle the room of the coffee line before
+    // the first paint, which hydration keeps as it is: the model takes the same answer, so the attribute is the island's
+    // from now on (and goes away at Start over, a click). DECISOES § F13A-I-07.
+    const ahead = coffeeAhead();
+    if (!ahead) slotRef.current?.removeAttribute('data-coffee');
+    if (ahead !== m.coffeeRoom) {
+      m.coffeeRoom = ahead;
+      render();
+    }
+  }, []);
 
   /** A row of the queue takes the focus: its first button, or the row itself when it has none (a finished row of Image to PDF). */
   function focusRow(id: number): boolean {
@@ -560,7 +626,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       m.focusRowId = null;
     }
     // The control that had the focus is gone and the page has it: the same row if it is still there (its Cancel gave
-    // way to its Download), else the next row, the previous one, and last the control the panel shows now.
+    // way to its Download), else the next row, the previous one, and last the control the panel shows now. In the band,
+    // the options that gave way to the result's row come back folded: the focus goes to "Adjust".
     const active = document.activeElement;
     if (!active || active === document.body || active === document.documentElement) {
       if (m.rowFocus !== null) {
@@ -568,10 +635,13 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         if (!wanted.some(focusRow)) (levelRef.current ?? startOverRef.current ?? chooseRef.current ?? downloadRef.current)?.focus();
       } else if (m.slotFocus) {
         (levelRef.current ?? downloadRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+      } else if (m.bandFocus) {
+        (summaryRef.current ?? bandRef.current?.querySelector<HTMLElement>('input, button, a[href], summary'))?.focus();
       }
     }
     m.rowFocus = null;
     m.slotFocus = false;
+    m.bandFocus = false;
     m.successors = [];
   });
 
@@ -641,31 +711,16 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
   const names = outputNames(ready());
   const nameFor = new Map(ready().map((item, index) => [item.id, names[index] ?? '']));
+  const single = m.items.length === 1 ? m.items[0] : undefined;
 
   /** The picture the comparison needs: original (or a decoded copy) against the result of the picked file. */
   const picked = rows.find((row) => row.item.id === m.selected) ?? rows[0] ?? null;
   const selectable = tool.selectable ?? beforeAfter !== 'never';
-  const comparison = (() => {
+  const comparable = (() => {
     if (!showCard || beforeAfter === 'never' || !picked || picked.output.outcome !== 'new') return null;
     if (beforeAfter === 'lossy' && !isLossy(picked.output.format)) return null;
     if (!picked.item.outUrl || m.broken.has(`${picked.item.id}:${picked.item.outUrl}`)) return null;
-    const before = picked.item.previewUrl ?? originalUrl(picked.item);
-    return (
-      <BeforeAfter
-        key={`${picked.item.id}:${picked.item.outUrl}`}
-        label={t.compare.label}
-        beforeUrl={before}
-        afterUrl={picked.item.outUrl}
-        beforeTag={fmt(t.compare.before, { size: fileSize(picked.item.file.size, lang) })}
-        afterTag={fmt(t.compare.after, { size: fileSize(picked.output.blob.size, lang) })}
-        width={picked.output.width}
-        height={picked.output.height}
-        onBroken={() => {
-          m.broken.add(`${picked.item.id}:${picked.item.outUrl}`);
-          render();
-        }}
-      />
-    );
+    return { item: picked.item, output: picked.output, outUrl: picked.item.outUrl };
   })();
 
   const deliverable = (() => {
@@ -674,10 +729,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return only?.item.outUrl ? { url: only.item.outUrl, name: nameFor.get(only.item.id) ?? '', size: only.output.blob.size } : null;
   })();
 
-  const oliPose = dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
-  const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : dropState === 'error' ? alertIcon : uploadIcon;
+  // The one Oli of the rectangle, in its corner, says the state (UX-04 A; DECISOES § F13A-I-02).
+  const pose: Pose = showProgress ? 'swim' : showCard ? 'cheer' : dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
+  const islandState = m.phase === 'processing' && !showCard ? 'working' : showCard ? 'done' : dropState === 'over' ? 'over' : dropState ? 'error' : 'rest';
+  const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : uploadIcon;
   const [helpBefore = '', helpAfter = ''] = fmt(t.drop.helpDesktop, { formats: texts.formats }).split('{kbd}');
-  const single = m.items.length === 1 ? m.items[0] : undefined;
 
   let panel: JSX.Element;
   if (showProgress) {
@@ -697,9 +753,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         aria-busy={m.zipping ? 'true' : undefined}
         style={`--level:${progress}%`}
       >
-        <div class="fo-water fo-water--moving">
-          <Oli pose="swim" class="fo-level__oli" />
-        </div>
+        <div class="fo-water fo-water--moving" />
         <div class="fo-level__text">
           <span class="fo-level__pct">{progress}%</span>
           {m.zipping ? (
@@ -721,35 +775,46 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const counted = more || pdf;
     const lead = more ? fmt(t.result.downloadZip, { size: fileSize(deliverable?.size ?? 0, lang) }) : '';
     const [zipHead = '', ...zipTail] = lead.split(' · ');
+    // F10 p-13 (DECISOES § F13A-I-09): a tool with no placard says the change of size with its sign, "+66%" when the file
+    // grew (a HEIC that becomes a JPG), so no line of the card says it got lighter when it did not.
+    const change = tot.before > 0 ? ((afterBytes - tot.before) / tot.before) * 100 : 0;
+    const showChange = !compression && worthSaying(Math.abs(change));
     // No aria-live on the card: the status region below says the Oli's sentence once, with the final numbers. With
-    // both, a batch was read N + 1 times, with "Done!" and figures that were not final yet (DECISOES § 102).
+    // both, a batch was read N + 1 times, with "Done!" and figures that were not final yet (DECISOES § 102 and § F13A-I-04).
     panel = (
-      <section class="fo-result fo-deep">
+      <section class="fo-result fo-deep" aria-labelledby="fo-says">
+        <div class="fo-water fo-result__sea" />
         <div class="fo-result__head">
-          <Oli pose="cheer" class="fo-result__oli" />
-          <p class="fo-result__says">{saysFor(rows)}</p>
           {compression && tot.anyNew && worthSaying(tot.saved) && (
-            <div class="fo-placard fo-pop">
+            // The placard floats at the surface, held by the Oli; it repeats the number of the sentence (aria-hidden).
+            <div class="fo-placard fo-pop" aria-hidden="true">
               <span class="fo-placard__n">{MINUS + savedText}</span>
               <span class="fo-placard__l">{texts.placardLabel}</span>
             </div>
           )}
+          <p class="fo-result__says" id="fo-says">
+            {saysFor(rows)}
+          </p>
         </div>
-        <dl class="fo-result__stats">
-          {afterBytes < tot.before && (
-            <div class="fo-result__stat fo-result__stat--before">
-              <dt>{t.result.before}</dt>
-              <dd>{fileSize(tot.before, lang)}</dd>
+        <dl class="fo-numbers">
+          <div class="fo-numbers__before">
+            <dt class="fo-sr">{t.result.before}</dt>
+            <dd>{fileSize(tot.before, lang)}</dd>
+          </div>
+          <div>
+            <dt class="fo-sr">{t.result.after}</dt>
+            <dd>
+              <Icon raw={arrowIcon} class="fo-icon--inline" />
+              <span class="fo-sr">{t.queue.to} </span>
+              {fileSize(afterBytes, lang)}
+            </dd>
+          </div>
+          {showChange && (
+            <div class="fo-numbers__change">
+              <dt class="fo-sr">{t.result.change}</dt>
+              <dd>{(change > 0 ? '+' : MINUS) + percent(Math.abs(change), lang)}</dd>
             </div>
           )}
-          <div class="fo-result__stat">
-            <dt>{t.result.after}</dt>
-            <dd>{fileSize(afterBytes, lang)}</dd>
-          </div>
-          <div class="fo-result__stat">
-            <dt>{counted ? t.result.files : t.result.size}</dt>
-            <dd>{counted ? tot.count : `${rows[0]?.output.width} × ${rows[0]?.output.height}`}</dd>
-          </div>
         </dl>
         <div class="fo-result__actions">
           {deliverable && (
@@ -765,17 +830,57 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
               <span class="fo-btn__meta">{more && !pdf ? `· ${zipTail.join(' · ')}` : `· ${fileSize(deliverable.size, lang)}`}</span>
             </a>
           )}
-          <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
-            {t.result.startOver}
-          </button>
+          <div class="fo-result__more">
+            <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
+              {t.result.startOver}
+            </button>
+            {comparable && (
+              <button
+                type="button"
+                class="fo-btn fo-btn--ghost"
+                aria-expanded={m.compareOpen ? 'true' : 'false'}
+                aria-controls="fo-compare"
+                onClick={() => {
+                  m.compareOpen = !m.compareOpen;
+                  render();
+                }}
+              >
+                {t.compare.open}
+              </button>
+            )}
+          </div>
         </div>
+        {comparable && (
+          // The comparison opens only when the person asks (UX-04 A): its pictures are not even decoded before.
+          <div class="fo-result__compare" id="fo-compare" hidden={!m.compareOpen}>
+            {m.compareOpen && (
+              <BeforeAfter
+                key={`${comparable.item.id}:${comparable.outUrl}`}
+                label={t.compare.label}
+                beforeUrl={comparable.item.previewUrl ?? originalUrl(comparable.item)}
+                afterUrl={comparable.outUrl}
+                beforeTag={fmt(t.compare.before, { size: fileSize(comparable.item.file.size, lang) })}
+                afterTag={fmt(t.compare.after, { size: fileSize(comparable.output.blob.size, lang) })}
+                width={comparable.output.width}
+                height={comparable.output.height}
+                onBroken={() => {
+                  m.broken.add(`${comparable.item.id}:${comparable.outUrl}`);
+                  render();
+                }}
+              />
+            )}
+          </div>
+        )}
         <ul class="fo-result__notes">
           {tot.notes.map((note) => (
             <li key={note}>{noteText(note, rows)}</li>
           ))}
+          {!counted && rows[0] && (
+            // The size in pixels of one picture, from 768 px (UX-04 A): on a phone the card keeps its height for the rest.
+            <li class="fo-desktop-only">{`${t.result.size}: ${rows[0].output.width} × ${rows[0].output.height} px`}</li>
+          )}
           <li>{t.result.metadata}</li>
         </ul>
-        {wide && comparison}
         {m.coffee && m.phase === 'done' && (m.coffee === 'done' ? (
           // "Don't show this again" leaves one quiet sentence in the same place, read once (DECISOES § 436).
           <p class="fo-result__support--done" role="status">{t.result.coffee.done}</p>
@@ -806,63 +911,65 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     );
   } else {
     const several = m.items.length > 1;
+    const error = dropState === 'error';
+    const button = dropState !== 'over';
+    // The children keep their places in every state (a hole where a state has none), so the button of the rest is the
+    // same node as the "Choose other files" of the error and of the offline line: Preact never moves it, the focus stays on
+    // it (a moved node loses the focus), and the cookie notice's keep() lifts it when it comes under the notice (D-01).
     panel = (
       <div class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
-        <Oli pose={oliPose} class="fo-drop__oli" />
-        <div class="fo-drop__badge" aria-hidden="true">
-          <Icon raw={badge} />
-        </div>
-        {dropState === 'over' ? (
-          <>
-            <p class="fo-drop__title">{t.drop.over}</p>
-            <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
-          </>
-        ) : dropState === 'offline' ? (
-          <>
-            <div role="status" class="fo-drop__message">
-              <p class="fo-drop__title">{t.errors.offline}</p>
-              <p class="fo-drop__help">{t.errors.offlineHelp}</p>
-            </div>
-            <button ref={chooseRef} type="button" class="fo-btn" onClick={openPicker}>
-              {t.errors.chooseAnother}
-            </button>
-          </>
-        ) : dropState === 'error' ? (
-          <>
-            <div role="alert" class="fo-drop__message">
-              <p class="fo-drop__title">{t.errors.title}</p>
-              <p class="fo-drop__help">{several || !single ? fmt(t.errors.all, { count: m.items.length }) : reasonOf(single)}</p>
-            </div>
-            <button ref={chooseRef} type="button" class="fo-btn" onClick={openPicker}>
-              {t.errors.chooseAnother}
-            </button>
-          </>
-        ) : (
-          <>
-            <p class="fo-drop__title fo-desktop-only">{t.drop.title}</p>
-            <button
-              ref={chooseRef}
-              type="button"
-              class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile"
-              aria-describedby="fo-drop-help"
-              onClick={openPicker}
-              onFocus={warmOnce}
-            >
-              <Icon raw={imageIcon} />
-              {t.drop.choose}
-            </button>
-            <p class="fo-drop__help" id="fo-drop-help">
-              <span class="fo-desktop-only">
-                {helpBefore}
-                <span class="fo-kbd">{t.drop.pasteKey}</span>
-                {helpAfter}
-              </span>
-              <span class="fo-mobile-only">{fmt(t.drop.help, { formats: texts.formats })}</span>
+        {error ? null : (
+          <div class="fo-drop__badge" aria-hidden="true">
+            <Icon raw={badge} />
+          </div>
+        )}
+        {error ? (
+          // The error loses the round seal (UX-04 A): the sentence with the alert icon, the reason that says the case, and the
+          // way out right under them (DECISOES § F13A-I-05).
+          <div role="alert" class="fo-drop__error">
+            <p class="fo-drop__error-title">
+              <Icon raw={alertIcon} />
+              {t.errors.title}
             </p>
-          </>
+            <p class="fo-drop__why">{several || !single ? fmt(t.errors.all, { count: m.items.length }) : reasonOf(single)}</p>
+          </div>
+        ) : dropState === 'offline' ? (
+          <div role="status" class="fo-drop__message">
+            <p class="fo-drop__title">{t.errors.offline}</p>
+            <p class="fo-drop__help">{t.errors.offlineHelp}</p>
+          </div>
+        ) : dropState === 'over' ? (
+          <p class="fo-drop__title">{t.drop.over}</p>
+        ) : (
+          <p class="fo-drop__title fo-desktop-only">{t.drop.title}</p>
+        )}
+        {button ? (
+          <button
+            ref={chooseRef}
+            type="button"
+            class={dropState ? 'fo-btn' : 'fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile'}
+            aria-describedby={dropState ? undefined : 'fo-drop-help'}
+            onClick={openPicker}
+            onFocus={warmOnce}
+          >
+            {dropState ? null : <Icon raw={imageIcon} />}
+            {dropState ? t.errors.chooseAnother : t.drop.choose}
+          </button>
+        ) : (
+          <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
+        )}
+        {dropState ? null : (
+          <p class="fo-drop__help" id="fo-drop-help">
+            <span class="fo-desktop-only">
+              {helpBefore}
+              <span class="fo-kbd">{t.drop.pasteKey}</span>
+              {helpAfter}
+            </span>
+            <span class="fo-mobile-only">{fmt(t.drop.help, { formats: texts.formats })}</span>
+          </p>
         )}
       </div>
     );
@@ -932,60 +1039,90 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     </div>
   );
 
-  // --- options and chips ---------------------------------------------------------------------------
+  // --- the band: options before the result, chips and "Adjust" after it ----------------------------------
 
   const selectedFile: SelectedFile | null = (() => {
     if (!tool.selectable || !picked) return null;
     return { ...infoOf(picked.item), url: picked.item.previewUrl ?? originalUrl(picked.item) };
   })();
 
+  const options = Options && (
+    <Options
+      state={state}
+      update={update}
+      texts={texts.options}
+      panel={t}
+      lang={lang}
+      files={m.items.map(infoOf)}
+      selected={selectedFile}
+      select={(id) => {
+        m.selected = id;
+        render();
+      }}
+      busy={m.phase === 'processing'}
+    />
+  );
+  // The band shows one of three rows (DECISOES § F13A-I-03 and § F13A-I-06). After a result of this batch (also while an
+  // option runs it again) it is the chips and "Adjust", in the same nodes, so the focus on an option survives the re-run.
+  const elsewhereError = m.phase === 'error' && !offline && single !== undefined && goesElsewhere(single);
+  const band = m.hadCard ? 'after' : elsewhereError ? 'elsewhere' : 'options';
+
   return (
-    <div class="fo-tool-island" ref={rootRef}>
-      <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce}>
+    <div class="fo-tool-island" ref={rootRef} data-state={islandState}>
+      <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce} data-coffee={m.coffeeRoom ? '' : undefined}>
+        <Oli pose={pose} class="fo-slot__oli" />
         {panel}
       </div>
       <p class="fo-sr" role="status">
         {m.announce}
       </p>
-      {!wide && comparison}
-      {Options && (
-        <Options
-          state={state}
-          update={update}
-          texts={texts.options}
-          panel={t}
-          lang={lang}
-          files={m.items.map(infoOf)}
-          selected={selectedFile}
-          select={(id) => {
-            m.selected = id;
-            render();
-          }}
-          busy={m.phase === 'processing'}
-        />
-      )}
+      <div class="fo-band" ref={bandRef} style={m.bandLock ? `--fo-band-lock:${m.bandLock}px` : undefined}>
+        <div class="fo-band__now">
+          {band === 'options' && options}
+          {band === 'elsewhere' && elsewhere && texts.elsewhere && <ChipRow id="fo-elsewhere-label" label={texts.elsewhere.label} chips={[elsewhere.chip]} />}
+          {band === 'after' && chips.length > 0 && (
+            <ChipRow id="fo-next-label" label={t.next.label} chips={chips} onPick={(chip) => track('next_step_click', { ...tracked, target: chip.target })} />
+          )}
+          {band === 'after' &&
+            (tool.now ? (
+              <details class="fo-adjust">
+                <summary ref={summaryRef}>
+                  <span>
+                    {t.adjust.label} <span class="fo-adjust__now">· {tool.now(state, texts.options, lang)}</span>
+                  </span>
+                  <Icon raw={chevronDownIcon} />
+                </summary>
+                <div class="fo-adjust__body">
+                  <p class="fo-field__help">{texts.adjustHelp ?? t.adjust.help}</p>
+                  {options}
+                </div>
+              </details>
+            ) : (
+              options
+            ))}
+        </div>
+        {chips.length > 0 && (
+          // The room of the result's row, kept from the first paint (DECISOES § F13A-I-03): a hidden copy of the chips and
+          // of the "Adjust" line in the same cell as the row on screen, so the band is as tall as the taller of the two in
+          // every state, in every language, and the chips that wrap to three lines on a phone push nothing down.
+          <div class="fo-band__ghost" aria-hidden="true">
+            <div class="fo-band__chips">
+              <span class="fo-next__label">{t.next.label}</span>
+              {chips.map((chip) => (
+                <span key={chip.href} class="fo-chip">
+                  <span class="fo-chip__dot">
+                    <Icon inner={chip.icon} />
+                  </span>
+                  {chip.name}
+                  <Icon raw={arrowIcon} />
+                </span>
+              ))}
+            </div>
+            {tool.now ? <div class="fo-band__room" /> : options}
+          </div>
+        )}
+      </div>
       {queue}
-      {showCard && m.phase === 'done' && chips.length > 0 && (
-        <nav class="fo-next" aria-labelledby="fo-next-label">
-          <span class="fo-next__label" id="fo-next-label">
-            {t.next.label}
-          </span>
-          {chips.map((chip) => (
-            <a
-              key={chip.href}
-              class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`}
-              href={chip.href}
-              onClick={() => track('next_step_click', { ...tracked, target: chip.target })}
-            >
-              <span class="fo-chip__dot" aria-hidden="true">
-                <Icon inner={chip.icon} />
-              </span>
-              {chip.name}
-              <Icon raw={arrowIcon} />
-            </a>
-          ))}
-        </nav>
-      )}
       <input
         ref={inputRef}
         type="file"

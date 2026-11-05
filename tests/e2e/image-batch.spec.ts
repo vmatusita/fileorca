@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { sniff } from './lib/images.ts';
 import { fixtureFile, watchRequests } from './lib/matrix.ts';
 import { readZip } from './lib/zip.ts';
-import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch, pasteFiles, type TestFile } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch, openAdjust, pasteFiles, type TestFile } from './lib/page.ts';
 
 // Batches on the shared island (criteria 5 and 6), through Compress image: files that cannot be read
 // in the middle of a batch, N files and N outputs, the ZIP and its names, every row against the ZIP,
@@ -63,12 +63,16 @@ test.describe('files that cannot be read, in the middle of a batch', () => {
     await expect(errors.nth(0)).toContainText("gen-jpg-corrompido.jpg is damaged, so Oli can't read it. Try another copy of the file.");
     await expect(errors.nth(1)).toContainText('gen-jpg-truncado.jpg stops before its end, so part of the image is missing.');
     await expect(errors.nth(2)).toContainText('gen-vazio.jpg is empty, so there is nothing to read.');
-    await expect(errors.nth(3)).toContainText("gen-texto-extensao-png.png isn't an image Oli can read. Try JPG, PNG or WebP.");
+    // F13a (D-06, F10 p-14; DECISOES § F13A-I-05): a .png with no image inside hears that the name and the content
+    // disagree, and how to make a real one; never "Try JPG, PNG or WebP" for a file that already says it is a PNG.
+    await expect(errors.nth(3)).toContainText("gen-texto-extensao-png.png ends in .png, but it isn't an image inside. Save it again as JPG, PNG or WebP.");
     await expect(page.getByRole('alert')).toHaveCount(0);
     await expect(page.locator('#fo-tool-root').getByRole('status')).toContainText("4 files couldn't be read; the rest are ready.");
     expect(readZip(await downloadBytes(page)).map((entry) => entry.name)).toEqual(['one.jpg', 'two.jpg']);
 
     // An option changed afterwards processes the good files again and does not try the lost ones, nor report them twice.
+    // F13a: after the result the options are folded under "Adjust".
+    await openAdjust(page);
     await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
     await expect(errors).toHaveCount(4);
@@ -95,7 +99,9 @@ test.describe('N files, N outputs', () => {
     await expect(download).toHaveText(/Download all\s*· ZIP \d/);
     await expect(download).toHaveAttribute('download', 'fileorca-images.zip');
     await expect(page.locator('.fo-result__says')).toContainText(/Done! Your 4 images are \d+% lighter\./);
-    await expect(page.locator('.fo-result__stat').last()).toContainText('4');
+    // F13a (UX-04 A): the card has no "Images 4" figure any more; the sentence above says the 4, and the line "1.5 MB → …"
+    // says the whole batch (3 × 417,455 + 262,648 bytes of the four inputs).
+    await expect(page.locator('.fo-numbers__before')).toContainText('1.5 MB');
 
     const entries = readZip(await downloadBytes(page));
     expect(entries.map((entry) => entry.name), 'repeated names get (2), (3) and the ZIP opens').toEqual([

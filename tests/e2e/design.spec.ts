@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
-import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
+import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatch, openAdjust, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
 
 // F1b criteria 6 (the Oli boxes), 8 (reduced motion) and 9 (fonts), plus the LCP rule of criterion 3:
 // the Oli never is the largest contentful paint. Markup contract: DECISOES § 19 (the [data-oli]
@@ -159,32 +159,34 @@ for (const viewport of VIEWPORTS) {
       });
 
       test('idle: wave', async ({ page }) => {
-        await expectOlis(page, 'idle', { pose: 'wave', selector: '.fo-drop__oli' });
+        // F13a (UX-04 A; DECISOES § F13A-I-02): one Oli, in the top-right corner of the rectangle, in every state.
+        await expectOlis(page, 'idle', { pose: 'wave', selector: '.fo-slot > .fo-slot__oli' });
       });
 
       test('a file over the drop zone: gulp', async ({ page }) => {
         await dragOver(page);
-        await expectOlis(page, 'over', { pose: 'gulp', selector: '.fo-drop__oli' });
+        await expectOlis(page, 'over', { pose: 'gulp', selector: '.fo-slot > .fo-slot__oli' });
       });
 
       test('processing: swim', async ({ page }) => {
         const engine = await slowEngine(page);
         await chooseImage(page);
         await expect(page.locator('.fo-level')).toBeVisible();
-        await expectOlis(page, 'processing', { pose: 'swim', selector: '.fo-level__oli' });
+        await expectOlis(page, 'processing', { pose: 'swim', selector: '.fo-slot > .fo-slot__oli' });
         engine.release();
         await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
       });
 
-      test('result: cheer, and only one Oli inside the card', async ({ page }) => {
+      test('result: cheer, and the one Oli of the rectangle in its corner, none inside the card', async ({ page }) => {
         await useImage(page);
-        await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
-        await expectOlis(page, 'result', { pose: 'cheer', selector: '.fo-result__oli' });
+        await expect(page.locator('#fo-tool-root [data-oli]')).toHaveCount(1);
+        await expect(page.locator('.fo-result [data-oli]')).toHaveCount(0);
+        await expectOlis(page, 'result', { pose: 'cheer', selector: '.fo-slot > .fo-slot__oli' });
       });
 
       test('error: oops', async ({ page }) => {
         await useBadFile(page);
-        await expectOlis(page, 'error', { pose: 'oops', selector: '.fo-drop__oli' });
+        await expectOlis(page, 'error', { pose: 'oops', selector: '.fo-slot > .fo-slot__oli' });
       });
 
       test('search without a result: the peek shows, and only then', async ({ page }) => {
@@ -521,9 +523,12 @@ test.describe('review regressions', () => {
     await dismissCookies(page);
     await page.setInputFiles('input[type="file"]', 'fixtures/images/gen-jpg-01-orientacao6.jpg');
     await expect(page.locator('.fo-crop__img')).toHaveAttribute('width', '1200', { timeout: 30_000 });
+    // F13a (UX-04 A): after the result the editor is folded under "Adjust"; open, it is on screen to be measured.
+    await openAdjust(page);
     wide.push(...(await sidewaysAt(page, 'crop editor, portrait photo, Square', [320, 360, 390])));
     await page.setInputFiles('input[type="file"]', 'fixtures/images/gen-jpg-02-orientacao8.jpg');
     await expect(page.locator('.fo-crop__img')).toHaveAttribute('width', '1600', { timeout: 30_000 });
+    await openAdjust(page);
     await page.locator('label.fo-seg__opt:has(input[name="cr-ratio"][value="wide"])').click();
     await expect(page.locator('input[name="cr-ratio"][value="wide"]')).toBeChecked();
     wide.push(...(await sidewaysAt(page, 'crop editor, landscape photo, 16:9', [360, 320, 390])));

@@ -679,6 +679,12 @@ export interface ImagePanelTexts {
     some: string;
     /** Several files, none readable (under the DropZone error title; the list below says why): "{count}" */
     all: string;
+    /**
+     * F13a (D-06, F10 p-14; DECISOES § F13A-I-05): the name ends in an image extension and the bytes are no image: "{name}
+     * ends in .{extension}, but it isn't an image inside. Save it again as {formats}." It never offers the same format as
+     * the way out of a file that already says it is one.
+     */
+    mismatch: string;
   };
   result: {
     download: string;
@@ -714,6 +720,8 @@ export interface ImagePanelTexts {
     metadata: string;
     /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */
     coffee: { text: string; button: string; hide: string; done: string };
+    /** F13a (F10 p-13): hidden name of the signed change of size in the line "2.6 MB → 717 KB" ("Change"). */
+    change: string;
   };
   compare: {
     /** Name of the range control: "Compare before and after". */
@@ -722,6 +730,15 @@ export interface ImagePanelTexts {
     before: string;
     /** "After · {size}" */
     after: string;
+    /** F13a (UX-04 A): the button that opens the comparison, which only opens when the person asks ("Before and after"). */
+    open: string;
+  };
+  /** F13a (UX-04 A): the options folded under one line after the result ("Adjust · Recommended"). */
+  adjust: {
+    /** "Adjust", before the value the tool has now. */
+    label: string;
+    /** "Changing an option redoes the file right away." */
+    help: string;
   };
   next: { label: string; moreTools: string };
   /** Format names as the site writes them. */
@@ -742,6 +759,13 @@ export interface ImageToolPanelTexts<O = Record<string, never>> {
   doneMany: string;
   /** Label of the Placard under the number (compression only: "lighter"). */
   placardLabel?: string;
+  /** F13a (UX-04 A): the help inside "Adjust" when the tool says it better than the shared line (Compress: "the level"). */
+  adjustHelp?: string;
+  /**
+   * F13a (D-17): a file of a format that another tool of the site takes (a PNG on HEIC to JPG): the reason, with {name} and
+   * {tool}, and the name of the row with the chip to that tool, in the band under the rectangle ("For a PNG:").
+   */
+  elsewhere?: { reason: string; label: string };
   options: O;
 }
 

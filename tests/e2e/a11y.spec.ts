@@ -11,7 +11,7 @@ import { CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalc
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { violationsEverywhere } from './lib/axe.ts';
-import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
+import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, openAdjust, openCompare, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 import { walkPdfTool } from './lib/pdf-states.ts';
 
 // axe-core (WCAG 2.2 AA and best practices, tests/e2e/lib/axe.ts) on every page, at 360 and 1280px, in both
@@ -135,6 +135,9 @@ test.describe('axe com um lote na tela, a 360 e 1280px, nos temas escuro e claro
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('button', { name: 'Show 2 more' })).toBeVisible();
     await expect(page.locator('.fo-file[data-state="error"]')).toHaveCount(1);
+    // F13a (UX-04 A): the comparison and the options open only when asked; both are open here, so axe reads them.
+    await openCompare(page);
+    await openAdjust(page);
     await expect(page.locator('.fo-ba')).toHaveCount(1);
     await animationsDone(page);
     expect(await violationsEverywhere(page)).toEqual([]);
@@ -174,7 +177,8 @@ test.describe('axe com arquivo recusado, a 360 e 1280px, nos temas escuro e clar
     // Every file refused: the error takes the drop zone, with the Oli line, the file and the link.
     await chooseImages(page, [heic]);
     await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
-    await expect(page.locator('.fo-drop__message a')).toHaveAttribute('href', '/heic-to-jpg/');
+    // F13a (UX-04 A): the reason of the error is the paragraph under the sentence with the alert icon.
+    await expect(page.locator('.fo-drop__why a')).toHaveAttribute('href', '/heic-to-jpg/');
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'drop zone error').toEqual([]);
     // One refused among good ones: the error is the row, the result is for the rest.

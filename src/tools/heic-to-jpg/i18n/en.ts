@@ -62,11 +62,15 @@ export default {
     progressLabel: 'Converting images',
     done: 'Done! Your photo is converted.',
     doneMany: 'Done! Your {count} photos are converted.',
+    elsewhere: {
+      reason: '{name} is a PNG, not a HEIC photo. To get a JPG from it, use {tool}.',
+      label: 'For a PNG:',
+    },
     options: {
       legend: 'Save as',
       jpg: 'JPG',
       png: 'PNG',
-      help: 'JPG is lighter and opens everywhere. PNG adds no further loss, but the file is much bigger.',
+      help: 'JPG opens everywhere, and it can come out bigger than the HEIC. PNG adds no further loss, but the file is much bigger.',
     },
   },
 } satisfies ImageToolTexts<SaveAsOptionsTexts>;

@@ -41,6 +41,11 @@ export interface ImagePanelData<O = object> {
   chips: ChipData[];
   /** Where a HEIC or an AVIF can go instead, for the "open it in …" link of a refused file (CONVERTER_FOR: a format with no converter has no entry). */
   converters: { heic?: ConverterLink; avif?: ConverterLink };
+  /**
+   * F13a (D-17; DECISOES § F13A-I-06): a format another tool of the site takes better (a PNG on HEIC to JPG) and the chip to
+   * it, which the band under the rectangle shows in place of the options when the one file refused is of that format.
+   */
+  elsewhere?: { format: ImageFormat; chip: ChipData };
   /** Where the coffee line leads: Ko-fi, or the Pix of the support page in Portuguese (F6). */
   coffeeHref: string;
   /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
@@ -92,6 +97,14 @@ export interface ImageTool<S extends object, O = object> {
   pdfSize?: (state: S) => PdfPageSize;
   /** Show the pick toggle on every ready row (Crop uses it to choose the box to adjust). */
   selectable?: boolean;
-  /** The option fields, drawn between the card and the list of files. */
+  /**
+   * The option fields, in the band under the rectangle: at sight before the result, folded under "Adjust" after it (F13a,
+   * UX-04 A; DECISOES § F13A-I-03).
+   */
   Options?: ComponentType<OptionsProps<S, O>>;
+  /**
+   * What the options are now, said after "Adjust ·" ("Recommended", "50%", "Square"). A tool without it has nothing to
+   * adjust (PNG to JPG and the presets: one sentence), and its sentence stays at sight under the chips.
+   */
+  now?: (state: S, texts: O, lang: Lang) => string;
 }

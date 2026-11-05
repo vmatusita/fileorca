@@ -47,6 +47,7 @@ export const TOOL: ImageTool<State, RotateOptionsTexts> = {
   initial: { turn: 'right', flip: 'none' },
   operation: (state) => ({ kind: 'rotate', turn: state.turn, flip: state.flip }),
   Options,
+  now: (state, texts) => (state.flip === 'none' ? texts[state.turn] : `${texts[state.turn]} · ${texts[state.flip]}`),
 };
 
 export default function RotatePanel(props: ImagePanelData<RotateOptionsTexts>) {

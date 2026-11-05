@@ -50,6 +50,7 @@ export default {
     chooseAnother: 'Choose other files',
     some: "{count} files couldn't be read; the rest are ready.",
     all: "Oli couldn't read any of these {count} files. The list below says why.",
+    mismatch: "{name} ends in .{extension}, but it isn't an image inside. Save it again as {formats}.",
   },
   result: {
     download: 'Download',
@@ -79,11 +80,17 @@ export default {
       hide: "Don't show this again",
       done: "Got it, I won't ask here again. The coffee link stays in the footer.",
     },
+    change: 'Change',
   },
   compare: {
     label: 'Compare before and after',
     before: 'Before · {size}',
     after: 'After · {size}',
+    open: 'Before and after',
+  },
+  adjust: {
+    label: 'Adjust',
+    help: 'Changing an option redoes the file right away.',
   },
   next: { label: 'Next:', moreTools: 'More tools' },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },

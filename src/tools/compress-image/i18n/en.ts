@@ -77,6 +77,7 @@ export default {
     done: 'Done! Your image is {percent} lighter.',
     doneMany: 'Done! Your {count} images are {percent} lighter.',
     placardLabel: 'lighter',
+    adjustHelp: 'Changing the level redoes the image right away.',
     options: {
       legend: 'Compression',
       recommended: 'Recommended',

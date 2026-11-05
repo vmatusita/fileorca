@@ -64,10 +64,23 @@ function convertersFor(lang: Lang): ImagePanelData['converters'] {
   return links;
 }
 
+/** F13a (D-17): the chip to the tool that takes a refused format better, when the page has one and it exists in the language. */
+function elsewhereFor(id: ImagePageId, lang: Lang): ImagePanelData['elsewhere'] {
+  const other = IMAGE_PAGES[id].elsewhere;
+  if (!other || !existsIn(other.tool, lang)) return undefined;
+  const blurb = blurbOf(other.tool, lang);
+  if (!blurb) return undefined;
+  return {
+    format: other.format,
+    chip: { href: pathFor(other.tool, lang), name: blurb.name, target: other.tool, icon: ICONS[IMAGE_PAGES[other.tool].icon], category: categoryOf(other.tool) },
+  };
+}
+
 /** The plain data of the island for a page, in a language. */
 export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Record<string, unknown>): ImagePanelData<O> {
   const def = IMAGE_PAGES[id];
   const texts = imageToolTexts(id, lang);
+  const elsewhere = elsewhereFor(id, lang);
   return {
     lang,
     page: id,
@@ -78,6 +91,7 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Rec
     pdf: def.pdf === true,
     chips: chipsFor(id, lang),
     converters: convertersFor(lang),
+    ...(elsewhere ? { elsewhere } : {}),
     // In Portuguese the coffee line leads to the Pix of the support page (PLANO "Doações"; F6, decision 8).
     coffeeHref: lang === 'pt' ? `${pathFor('support', lang)}#pix` : KOFI_URL,
     ...(initial ? { initial } : {}),

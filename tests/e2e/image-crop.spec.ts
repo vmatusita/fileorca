@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { imageSize } from './lib/images.ts';
-import { chooseImages, dismissCookies, downloadBytes, generatedJpeg, hydrated, type TestFile } from './lib/page.ts';
+import { chooseImages, dismissCookies, downloadBytes, generatedJpeg, hydrated, openAdjust, type TestFile } from './lib/page.ts';
 import { meanAbsDiff, thumbnail } from './lib/pixels.ts';
 import { readZip } from './lib/zip.ts';
 
@@ -99,6 +99,8 @@ test.describe('crop-image with the keyboard only', () => {
     const wide: TestFile = { name: 'a.jpg', mimeType: 'image/jpeg', buffer: source };
     await chooseImages(page, [wide]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    // F13a (UX-04 A; DECISOES § F13A-I-03): after the result the editor and the fields are folded under "Adjust".
+    await openAdjust(page);
     let region: Region = { x: 80, y: 0, width: 480, height: 480 };
 
     await test.step('opens on Square, centred: the fields, the box on screen and the result agree', async () => {
@@ -114,8 +116,9 @@ test.describe('crop-image with the keyboard only', () => {
         await page.keyboard.press('Tab');
         await expect(page.locator(stop), `Tab reaches ${stop}`).toBeFocused();
       }
-      // After the last field the focus leaves the editor for the next-step chips. WebKit does not Tab to links (as Safari
-      // does not by default), so the claim is only that it moves on, and that Shift+Tab comes back to the field.
+      // After the last field the focus leaves the editor (F13a: the chips come before "Adjust" now, so it goes on to what
+      // follows the band). WebKit does not Tab to links (as Safari does not by default), so the claim is only that it moves
+      // on, and that Shift+Tab comes back to the field.
       await page.keyboard.press('Tab');
       const left = await page.evaluate(() => {
         const active = document.activeElement;
@@ -250,6 +253,7 @@ test.describe('crop-image with the keyboard only', () => {
       await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
       await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await openAdjust(page);
       await expectFields(page, { x: 80, y: 0, width: 480, height: 480 });
 
       await page.locator(BOX).focus();
@@ -326,6 +330,8 @@ test.describe('crop-image with the keyboard only', () => {
     const source = await generatedJpeg(page);
     await chooseImages(page, [{ name: 'a.jpg', mimeType: 'image/jpeg', buffer: source }]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
+    // F13a (UX-04 A; DECISOES § F13A-I-03): after the result the editor and the fields are folded under "Adjust".
+    await openAdjust(page);
     const box = page.locator(BOX);
     await expect(box).toHaveAccessibleName('Crop area, 480 by 480 pixels, at 80, 0');
     await box.focus();

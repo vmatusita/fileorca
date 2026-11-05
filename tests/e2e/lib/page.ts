@@ -156,10 +156,40 @@ export async function useBadFile(page: Page): Promise<void> {
   await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible();
 }
 
-/** "Start over" on the result card; waits for the drop zone to come back. */
+/**
+ * "Start over" on the result card; waits for the drop zone to come back. F13a (UX-04 A): on the image card it is the first
+ * ghost button of the row under the Download (.fo-result__more), next to "Before and after"; the PDF card keeps it in its
+ * row of actions.
+ */
 export async function startOver(page: Page): Promise<void> {
-  await page.locator('.fo-result__actions button').click();
+  await page.locator('.fo-result__more > button:first-child, .fo-result__actions > button').first().click();
   await expect(page.locator('.fo-drop')).toBeVisible();
+}
+
+/**
+ * F13a (UX-04 A; DECISOES § F13A-I-03): after a result, the options of the tool are folded under "Adjust" in the band under
+ * the card. This opens it (once) and waits for the options inside it, the way a person does before changing one.
+ */
+export async function openAdjust(page: Page): Promise<void> {
+  const adjust = page.locator('details.fo-adjust');
+  await expect(adjust).toHaveCount(1, { timeout: 30_000 });
+  if (!(await adjust.evaluate((node) => (node as HTMLDetailsElement).open))) {
+    const summary = adjust.locator('summary');
+    // The WebKit gives no focus on a click: the keyboard opens it the same way in both browsers.
+    await summary.focus();
+    await page.keyboard.press('Enter');
+  }
+  await expect(adjust).toHaveJSProperty('open', true);
+  await expect(adjust.locator('.fo-adjust__body')).toBeVisible();
+}
+
+/** F13a (UX-04 A): "Before and after" on the result card opens the comparison, which starts closed. */
+export async function openCompare(page: Page): Promise<void> {
+  const button = page.locator('.fo-result__more button[aria-controls="fo-compare"]');
+  await expect(button).toHaveAttribute('aria-expanded', 'false', { timeout: 30_000 });
+  await button.click();
+  await expect(button).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#fo-compare .fo-ba')).toBeVisible();
 }
 
 /** startOver, then a new use: the next file reaches the result card. */
