@@ -55,9 +55,10 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top">
+  {/* F13a (UX-04 A; F4-F7 f-2; DECISOES § 463): the H1 takes the whole measure; only the seal row leaves room for the Oli. */}
+  <div class="fo-top fo-top--tool">
     <h1 class="fo-h1">{t.h1}</h1>
-    <PrivacySeal text={common.seal} />
+    <div class="fo-top__seal"><PrivacySeal text={common.seal} /></div>
   </div>
   <PdfIsland data={data} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
