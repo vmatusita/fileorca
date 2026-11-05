@@ -672,6 +672,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hero__text { display: grid; gap: var(--space-3); }
 .fo-hero__oli { width: 96px; height: 96px; }
 @media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
+/* F13a, revisão a-2 (DECISOES § F13A-R-01): the 150 px to an ad count the Oli's box inflated by 12 px (her wave). On the
+   home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
+   she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
+@media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 
 /* ---------- SupportCard ---------- */
 /* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the
@@ -679,10 +683,6 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    out of the card, from 768 px. */
 .fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
 .fo-support__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
-/* F13a, revisão a-2 (DECISOES § F13A-R-01): the 150 px to an ad count the Oli's box inflated by 12 px (her wave). On the
-   home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
-   she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
-@media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 .fo-support__oli { width: 96px; height: 96px; }
 .fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-2); font: 600 28px/34px var(--fo-font-display); }
 .fo-support__head > :is(h1, h2, h3) { flex: 1 1 0; min-width: 0; margin: 0; }
