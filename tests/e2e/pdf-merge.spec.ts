@@ -4,7 +4,8 @@ import { routeById, type Lang } from '../../src/i18n/routes.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import type { MergeTexts } from '../../src/tools/pdf/option-texts.ts';
 import { violationsEverywhere } from './lib/axe.ts';
-import { hydrated, slowEngine } from './lib/page.ts';
+import { dragOver, hydrated, slowEngine } from './lib/page.ts';
+import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 
 // F13a (UX-04 A, tool-a-merge; DECISOES § F13A-P-02 and § F13A-P-12): the Merge list lives in the rectangle. Its tests:
@@ -186,6 +187,36 @@ test('D-27: a reading held past 400 ms (the CPU 6 times slower) shows the WaterL
   held.release();
   await expect(mergeButton(page)).toBeVisible({ timeout: 30_000 });
 });
+
+// UX-04 A: the rectangle of every PDF tool is 356 px on the phone and 340 px from 768 px at rest, with a file over it and in
+// the error, in the three languages (with the round seal of the ficha, § 456; DECISOES § F13A-P-01).
+for (const viewport of [PHONE, { width: 1280, height: 800 }]) {
+  test(`the rectangle of the PDF tools has one height at rest, with a file over it and in the error, at ${viewport.width} px`, async ({ page }) => {
+    test.slow();
+    await page.setViewportSize(viewport);
+    const wanted = viewport.width < 768 ? 356 : 340;
+    const wrong: string[] = [];
+    for (const lang of LANGS) {
+      for (const id of PDF_TOOL_IDS) {
+        expect((await page.goto(routeById(id).paths[lang] ?? ''))?.status()).toBe(200);
+        await hydrated(page);
+        const slot = page.locator('#fo-tool-root .fo-slot');
+        const rest = (await slot.boundingBox())?.height ?? 0;
+        await dragOver(page);
+        const over = (await slot.boundingBox())?.height ?? 0;
+        for (const [state, height] of [['rest', rest], ['over', over]] as const) if (Math.abs(height - wanted) > 1) wrong.push(`${lang}/${id} ${state}: ${height}`);
+        if (id === 'split-pdf') {
+          await page.locator('#fo-tool-root .fo-drop').dispatchEvent('dragleave');
+          await choosePdfs(page, [{ name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf at all') }]);
+          await expect(page.locator('#fo-tool-root .fo-drop[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+          const error = (await slot.boundingBox())?.height ?? 0;
+          if (Math.abs(error - wanted) > 1) wrong.push(`${lang}/${id} error: ${error}`);
+        }
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+}
 
 test('the rectangle keeps the height of the list from the reading to the result, and the island keeps its height at the result', async ({ page }) => {
   await consent(page, 'denied');

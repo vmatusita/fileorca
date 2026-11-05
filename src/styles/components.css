@@ -1180,6 +1180,13 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
    the DropZone, the WaterLevel and the result: the same height in every state, 356/340 px or what the island locks
    (--fo-lock, the height of the Merge list, set by the island from the reading to the result). */
 .fo-pdf-island .fo-slot > :is(.fo-ready, .fo-merge-panel) { box-sizing: border-box; min-height: var(--fo-lock, var(--slot-h)); }
+/* The DropZone keeps the round seal at rest and with a file over it (§ 456), which the base (§ 463) was not measured with:
+   at rest from 768 px (seal, title, button and help) it took 362 px, and with a file over it 396 to 426 px at 360 px and
+   386 at 1280, above the water of 60 %. Here the rest closes its gaps to 8 px and its top to 12 px from 768 px, and with a file over it the words
+   sit in the middle of the rectangle, on the water that rises (ink on water: 13.68:1 light, 9.71:1 dark), so the
+   rectangle keeps 356/340 px in both states (§ F13A-P-01). */
+.fo-pdf-island .fo-slot > .fo-drop[data-state="over"] { justify-content: center; padding-block: var(--space-4); }
+@media (min-width: 768px) { .fo-pdf-island .fo-slot > .fo-drop:is(:not([data-state]), [data-state="offline"]) { gap: var(--space-2); padding-top: var(--space-3); } }
 .fo-pdf-island .fo-slot > .fo-ready { align-content: start; }
 /* The line that holds the place of the action while the files are read (D-27): the height of the button and its lip, so
    nothing moves when the button comes. With one PDF in the Merge list, the same place says what is missing (D-21). */
