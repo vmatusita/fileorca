@@ -90,7 +90,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - Desenho próprio em grade de 24px, traço 2px, pontas e cantos redondos, em `currentColor` (grupo Icons). Os ícones de arquivo têm o canto dobrado.
 - Tamanhos `icon` (24px) e `icon-sm` (20px); `fo-icon--inline` (1em) dentro de texto. Ícone que carrega sentido passa de 3:1 contra o chão.
 - Ícone sozinho só em ação de linha (remover, baixar um arquivo do lote), sempre com `aria-label`. Em todo o resto, ícone acompanha palavra.
-- Sem emoji, sem pacote de ícones genérico misturado. Ferramenta que pede um ícone que não existe (assinar, marca d'água, carro, cartão, porcentagem…) ganha um desenhado na mesma grade e no mesmo traço, que entra em `assets/Icons/` com decisão registrada no DECISOES.md.
+- Sem emoji, sem pacote de ícones genérico misturado. Ferramenta que pede um ícone que não existe (como foram o assinar, a marca d'água e, na F13a, o carro, o cartão, a porcentagem e os outros 24 do UX-16) ganha um desenhado na mesma grade e no mesmo traço, que entra em `assets/Icons/` com decisão registrada no DECISOES.md.
 
 ## Layout e anúncios
 
