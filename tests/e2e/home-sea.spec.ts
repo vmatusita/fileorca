@@ -10,7 +10,7 @@
 //     under water on the right; no move of the band loops or lasts 5 s, and none with reduced motion; the first card of the
 //     image hub in English ends above the fold of 360 × 740.
 //   - Both: in the dark theme the band is surface and the colour of the category stays on the wave (G-21).
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from '@playwright/test';
 import { LANGS, moneyHubId, pagePath, type Lang } from '../../src/i18n/routes.ts';
 import { HEALTH_HUB_ID, HOUSE_HUB_ID } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
@@ -32,6 +32,14 @@ async function rectOf(page: Page, selector: string): Promise<Box> {
   const box = await page.locator(selector).first().boundingBox();
   expect(box, selector).not.toBeNull();
   return { x: box?.x ?? 0, y: box?.y ?? 0, w: box?.width ?? 0, h: box?.height ?? 0 };
+}
+
+/** Whether the browser reports a PerformanceObserver entry type (the LCP and the layout shift are Chromium's today). */
+async function supports(browser: Browser, type: string): Promise<boolean> {
+  const page = await browser.newPage();
+  const found = await page.evaluate((name) => PerformanceObserver.supportedEntryTypes.includes(name), type);
+  await page.close();
+  return found;
 }
 
 async function open(page: Page, path: string): Promise<void> {
@@ -93,7 +101,11 @@ test.describe('the home', () => {
   });
 
   test('the H1 is the largest contentful paint from 768 px, and never the Oli or an svg on a phone (Chromium)', async ({ browser, browserName }) => {
-    test.skip(browserName !== 'chromium', 'Only Chromium reports the largest contentful paint.');
+    // Only Chromium reports the LCP; WebKit joins the check on its own the day it ships the entry type (as design.spec.ts).
+    if (!(await supports(browser, 'largest-contentful-paint'))) {
+      expect(browserName, 'o Chromium mede o LCP').not.toBe('chromium');
+      return;
+    }
     for (const lang of LANGS) {
       for (const viewport of [PHONE, { width: 412, height: 823 }, { width: 768, height: 1024 }, DESKTOP, { width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
         const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
@@ -126,7 +138,11 @@ test.describe('the home', () => {
   });
 
   test('the load moves nothing: Figtree held until the first paint, no layout shift from 320 to 1280 px (Chromium)', async ({ browser, browserName }) => {
-    test.skip(browserName !== 'chromium', 'Only Chromium reports layout shifts.');
+    // Only Chromium reports layout shifts; WebKit joins the check on its own the day it ships the entry type.
+    if (!(await supports(browser, 'layout-shift'))) {
+      expect(browserName, 'o Chromium mede o deslocamento').not.toBe('chromium');
+      return;
+    }
     test.setTimeout(120_000);
     const shifts: string[] = [];
     for (const lang of LANGS) {
