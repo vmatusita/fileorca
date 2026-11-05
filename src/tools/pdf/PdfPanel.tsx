@@ -562,7 +562,8 @@ export default function PdfPanel(props: PdfPanelData) {
   function unlock(): void {
     m.lock = 0;
     m.bandHold = 0;
-    m.coffeeSoon = false;
+    // A tool that runs by itself keeps the room of a coffee line that is still due, so the next drop grows nothing (§ 495).
+    m.coffeeSoon = runMode === 'auto' && coffeeDue();
     m.redo = false;
     m.adjustOpen = false;
     m.orderOpen = false;
@@ -739,7 +740,19 @@ export default function PdfPanel(props: PdfPanelData) {
     void client().then((engine) => engine.warm([...tool.warm])).catch(() => {});
   }
 
-  useEffect(() => forgetWithoutConsent(), []);
+  useEffect(() => {
+    forgetWithoutConsent();
+    // A tool that runs by itself: the inline script of PdfIsland.astro (COFFEE_AHEAD_SCRIPT) gave the rectangle the room of the
+    // coffee line before the first paint when the next use shows it, which hydration keeps as it is. The model takes the same
+    // answer, so the drop that asks for the result grows nothing (the file picker is no recent input; DECISOES § 495).
+    if (runMode !== 'auto') return;
+    const due = coffeeDue();
+    if (!due) slotRef.current?.removeAttribute('data-coffee');
+    if (due !== m.coffeeSoon) {
+      m.coffeeSoon = due;
+      render();
+    }
+  }, []);
 
   useEffect(() => {
     if (m.phase === 'done' && m.focusDownload && downloadRef.current) {
@@ -1048,7 +1061,7 @@ export default function PdfPanel(props: PdfPanelData) {
     const notes = [...new Set(m.notes)].map((note) => NOTE_KEY[note]).filter((key): key is NonNullable<typeof key> => key !== null);
     const size = fileSize(m.bundle ? m.bundle.blob.size : after, lang);
     panel = (
-      <section class="fo-result fo-deep" aria-labelledby="fo-says">
+      <section key="result" class="fo-result fo-deep" aria-labelledby="fo-says">
         <div class="fo-water fo-result__sea" />
         <div class="fo-result__head">
           {gained && (
@@ -1189,7 +1202,7 @@ export default function PdfPanel(props: PdfPanelData) {
     const first = one ? (reading ? m.items.find((item) => !item.removed && !item.failure) : ready[0]) : undefined;
     const cardLabels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
     panel = (
-      <div class={reading ? 'fo-ready fo-ready--reading' : 'fo-ready'}>
+      <div key="ready" class={reading ? 'fo-ready fo-ready--reading' : 'fo-ready'}>
         {first ? (
           reading ? (
             <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} icon={icons.pdf} state="waiting" status={t.queue.reading} onCancel={() => removeItem(first)} />
@@ -1219,7 +1232,7 @@ export default function PdfPanel(props: PdfPanelData) {
   } else {
     const single = m.items.length === 1 ? m.items[0] : undefined;
     panel = (
-      <div class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
+      <div key="drop" class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>

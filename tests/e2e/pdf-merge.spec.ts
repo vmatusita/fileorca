@@ -323,6 +323,37 @@ for (const use of ['1st', '3rd'] as const) {
   });
 }
 
+// F13a (DECISOES § 495): the PDF tools that run by themselves, from the drop to the Download and 1.5 s more, in the 1st use
+// and in the 3rd (the coffee line). The file picker is no recent input, so what the drop moves counts: before, the drop
+// turned the DropZone's node into the reading card (0.035) and, on the 3rd use, grew the rectangle (0.232).
+for (const use of ['1st', '3rd'] as const) {
+  test(`the PDF tools that run by themselves move nothing from the drop to the result at 360 × 740, ${use} use`, async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'the layout-shift API is only in Chromium');
+    test.slow();
+    await consent(page, use === '3rd' ? 'granted' : 'denied', use === '3rd' ? 2 : 0);
+    await openShifts(page);
+    await page.setViewportSize(PHONE);
+    const found: string[] = [];
+    for (const [id, file] of [['compress-pdf', 'gen-fotos.pdf'], ['rotate-pdf', 'gen-paginas-mistas.pdf'], ['pdf-to-jpg', 'gen-fotos.pdf'], ['add-page-numbers-to-pdf', 'gen-paginas-mistas.pdf']] as const) {
+      // A use of its own per tool: the coffee count of the 3rd use is set once per tab (sessionStorage), so a new page each time.
+      await page.evaluate(() => sessionStorage.removeItem('fo-test-coffee')).catch(() => {});
+      expect((await page.goto(routeById(id).paths.en ?? '/'))?.status()).toBe(200);
+      await hydrated(page);
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(500);
+      await page.evaluate(() => ((window as unknown as { __measure: boolean }).__measure = true));
+      await choosePdfs(page, [pdfFile(file)]);
+      await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 60_000 });
+      if (use === '3rd') await expect(page.locator('#fo-tool-root .fo-result__support')).toBeVisible();
+      await page.waitForTimeout(1_500);
+      const [cls, shifts] = await page.evaluate(() => [(window as unknown as { __cls: number }).__cls, (window as unknown as { __shifts: unknown[] }).__shifts] as const);
+      console.log(`[CLS] ${id} ${use} use: ${cls.toFixed(4)} ${JSON.stringify(shifts)}`);
+      if (cls > 0.05) found.push(`${id}: ${cls.toFixed(3)}`);
+    }
+    expect(found).toEqual([]);
+  });
+}
+
 // The reading list for axe: the WaterLevel of the reading comes at 400 ms, before axe ends, so the test holds the timer of
 // 400 ms of the page (and only it) while axe reads the list; the engine is held too, so the files stay "Reading…".
 test('axe: the Merge list while the files are read, at 360 and 1280 px in both themes', async ({ page }) => {
