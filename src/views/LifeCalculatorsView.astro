@@ -8,6 +8,8 @@
 // ones only at the marks of "How these calculators work", never against the table of the example; the layout puts each box
 // and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
+// F13b (decision 7; UX-15 A; DECISOES § H-9): the sea at the foot of the band.
+import HubSea from '../components/HubSea.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
@@ -43,6 +45,7 @@ const read = datesOf(hub, lang).read;
 ---
 <BaseLayout
   lang={lang}
+  oli={['swim']}
   route={route}
   title={t.title}
   description={t.description}
@@ -52,11 +55,12 @@ const read = datesOf(hub, lang).read;
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-hubband fo-cat--home">
+  <div class="fo-hubband fo-hubband--sea fo-cat--home">
     <span class="fo-eyebrow">{t.eyebrow}</span>
     <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
     <p class="fo-muted">{t.intro}</p>
     <Reviewed lang={lang} of={hub} />
+    <HubSea />
   </div>
   <section class="fo-section" aria-labelledby="calcs">
     <h2 id="calcs">{t.listHeading}</h2>

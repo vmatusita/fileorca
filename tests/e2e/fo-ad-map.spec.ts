@@ -223,6 +223,49 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
   });
 }
 
+// ---- The sea of the home and of the category hubs (F13b) ---------------------------------------------------------------
+
+// F13b (decisions 6, 7 and 10; UX-03 B and UX-15 A; DECISOES § H-7): the Oli that swims at the top of the home and in the
+// band of a category hub keeps 150 px from every ad that shows, with her box inflated by 12 px (§ 513), and so do the sea,
+// the water and the bands of the home; from 1280 px the Oli of the home keeps 12 px or more from the edge of the column, on
+// the side of the rail (the pitfall of the F13a in docs/claude/design-e-oli.md).
+const SEA_PAGES = AD_PAGES.filter((page) => page.mold === 'home' || page.mold === 'hub-arquivos' || page.mold === 'hub-dinheiro' || page.mold === 'hub-casa-saude');
+
+test('the sea of the home and of the category hubs keeps 150 px from every ad, the Oli inflated, and 12 px from the column at 1280', async ({ page }) => {
+  test.setTimeout(180_000);
+  const problems: string[] = [];
+  expect(SEA_PAGES.filter((one) => one.mold === 'home')).toHaveLength(3);
+  expect(SEA_PAGES).toHaveLength(3 + 11);
+  await page.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+  for (const adPage of SEA_PAGES) {
+    for (const viewport of [PHONE, DESKTOP]) {
+      await page.setViewportSize(viewport);
+      expect((await page.goto(adPage.path))?.status(), adPage.path).toBe(200);
+      await frames(page);
+      const measure = await measureMap(page, '.fo-home-sea [data-oli], .fo-hubband__oli, .fo-home-sea, .fo-hubband__sea, .fo-hubband__water, .fo-catband, .fo-catband .fo-chip');
+      const olis = measure.targets.filter((target) => target.kind.includes('oli'));
+      if (olis.length !== 1) problems.push(`${adPage.path} a ${viewport.width}: ${olis.length} Olis do mar`);
+      for (const box of measure.boxes) {
+        for (const target of measure.targets) {
+          const gap = distance(box, target);
+          if (gap < CLEARANCE) problems.push(`${adPage.path} a ${viewport.width}: ${box.unit} a ${gap.toFixed(0)} px de ${target.kind}`);
+        }
+      }
+      if (adPage.mold === 'home' && viewport.width >= 1280) {
+        // The raw box of the Oli (the inflated one is 12 px larger on each side) and the right edge of the column.
+        const room = await page.evaluate(() => {
+          const oli = document.querySelector('.fo-home-sea [data-oli]')?.getBoundingClientRect();
+          const main = document.querySelector('main')?.getBoundingClientRect();
+          return oli && main ? main.right - oli.right : -1;
+        });
+        if (room < 12) problems.push(`${adPage.path} a ${viewport.width}: a Oli a ${room.toFixed(0)} px da borda da coluna`);
+        if (!measure.boxes.some((box) => box.kind === 'rail')) problems.push(`${adPage.path} a ${viewport.width}: sem a lateral`);
+      }
+    }
+  }
+  expect(problems, problems.join('\n')).toEqual([]);
+});
+
 // ---- A cold first visit: the notice and the first ad once the fonts arrive ---------------------------------------------
 
 // F13a, revisão d-1 (DECISOES § 517): the blocks above open each page at 360 × 740 and then turn the window, so the

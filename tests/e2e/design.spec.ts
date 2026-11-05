@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath } from '../../src/i18n/routes.ts';
+import { HEALTH_HUB_ID, HOUSE_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatch, openAdjust, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
 
 // F1b criteria 6 (the Oli boxes), 8 (reduced motion) and 9 (fonts), plus the LCP rule of criterion 3:
@@ -13,6 +15,9 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
 ];
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
+// F13b (UX-15 A; DECISOES § H-9): the category hubs with the sea, in every language they exist in, and one of each view.
+const SEA_HUBS = LANGS.flatMap((lang) => (['image-tools', PDF_HUB_ID, moneyHubId(lang), HOUSE_HUB_ID, HEALTH_HUB_ID] as const).flatMap((id) => pagePath(id, lang) ?? []));
+const ONE_HUB_A_VIEW = ['/image-tools/', pagePath(PDF_HUB_ID, 'en') ?? '', pagePath('money-calculators', 'en') ?? '', pagePath(HOUSE_HUB_ID, 'en') ?? ''];
 
 /** The widths (px) at which the page, as it is now, scrolls sideways; the label says which state was measured. */
 async function sidewaysAt(page: Page, label: string, widths: number[]): Promise<string[]> {
@@ -210,6 +215,7 @@ for (const viewport of VIEWPORTS) {
         // F13b (UX-03 B and UX-15 A; DECISOES § H-1 and § H-9): the Oli of the home swims in the sea of the top, the one of
         // a category hub in the sea at the foot of its band.
         { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'swim', selector: '.fo-home-sea__oli' },
+        { name: 'hub', paths: SEA_HUBS, pose: 'swim', selector: '.fo-hubband__oli' },
         { name: '404', paths: ['/404.html', '/pt/404.html', '/es/404.html'], pose: 'lost', selector: '[data-oli="lost"]' },
         { name: 'support', paths: ['/support/', '/pt/apoie/', '/es/apoyo/'], pose: 'coffee', selector: '.fo-support__oli' },
       ];
@@ -302,7 +308,8 @@ test.describe('prefers-reduced-motion: reduce', () => {
   }
 
   // F13a · a Oli por estado (UX-10; DECISOES § 460): the other pages where a move starts on its own stay still too.
-  for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/']) {
+  // F13b (DECISOES § H-9): and a category hub of each view, with the sea and its Oli.
+  for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', ...ONE_HUB_A_VIEW]) {
     test(`${path}: nothing moves`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
@@ -332,7 +339,7 @@ test.describe('motion without the preference', () => {
   // water are no progress: nothing is left out there, the Oli bobs for 4.8 s, and none runs 5.2 s after opening.
   const MOTION_PAGES: { path: string; sea: boolean }[] = [
     ...['/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/'].map((path) => ({ path, sea: false })),
-    ...['/'].map((path) => ({ path, sea: true })),
+    ...['/', ...ONE_HUB_A_VIEW].map((path) => ({ path, sea: true })),
   ];
   for (const { path, sea } of MOTION_PAGES) {
     test(`${path}: every move that starts on its own ends by 5 s, none runs ${sea ? '5.2' : '3.2'} s after opening`, async ({ page }) => {
