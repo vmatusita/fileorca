@@ -145,9 +145,13 @@ for (const block of blocks(CALC_PATHS)) {
         await hydrated(page);
         const example = await card(page);
         const lines = await sentenceHeight(page);
+        // The fields after the result (the block of costs, where there is one): their top never moves on the first key.
+        const moreTop = () => page.evaluate(() => Math.round((document.querySelector('.fo-calc__more')?.getBoundingClientRect().top ?? 0) + window.scrollY));
+        const more = await moreTop();
         const value = await firstKey(page);
         const key = await card(page);
         const keyLines = await sentenceHeight(page);
+        const moreKey = await moreTop();
         await firstField(page).fill(value);
         await frames(page);
         const result = await card(page);
@@ -157,7 +161,10 @@ for (const block of blocks(CALC_PATHS)) {
           if (Math.abs(now.height - from.height) > 1) wrong.push(`${path} a ${width}, ${state}: ${from.height} → ${now.height} px`);
           if (now.top !== from.top) wrong.push(`${path} a ${width}, ${state}: o topo foi de ${from.top} a ${now.top}`);
         };
-        if (keyLines === lines) same('1ª tecla', example, key);
+        if (keyLines === lines) {
+          same('1ª tecla', example, key);
+          if (moreKey !== more) wrong.push(`${path} a ${width}, 1ª tecla: os campos depois do resultado foram de ${more} a ${moreKey}`);
+        }
         same('resultado', example, result);
         same('erro', result, error);
       }
@@ -340,3 +347,58 @@ for (const scheme of ['light', 'dark'] as const) {
     }
   });
 }
+
+// The block of costs that folds (D-32 and D-33; DECISOES § C-4): the taxes, insurance and fees of the mortgage and of its
+// presets (en, es) and the TR, insurance and fees of the SAC × PRICE, closed when the page opens, with their total in the
+// title, a heading in Fredoka. The fields are in the page only while it is open; the name of its button (the title and the
+// total) is the same open and closed, only aria-expanded changes; and on a phone the open block ends in the echo of the
+// result, with the number of the card (from 768 px the card is beside the fields and the echo goes).
+const FOLDS = [
+  { path: CALC_PAGES['mortgage-calculator'].path, title: 'Taxes, insurance and fees', meta: '$500.00 a month in your payment', fields: ['tx', 'in', 'pmi', 'hoa'] },
+  { path: CALC_PAGES['mortgage-calculator-biweekly'].path, title: 'Taxes, insurance and fees', meta: '$500.00 a month in your payment', fields: ['tx', 'in', 'pmi', 'hoa'] },
+  { path: CALC_PAGES['mortgage-calculator-extra-payments'].path, title: 'Taxes, insurance and fees', meta: '$500.00 a month in your payment', fields: ['tx', 'in', 'pmi', 'hoa'] },
+  { path: moneyPage('mortgage-calculator', 'es')?.path ?? '', title: 'Impuestos, seguros y cuotas', meta: '$500.00 al mes en tu pago', fields: ['tx', 'in', 'pmi', 'hoa'] },
+  { path: moneyPage('mortgage-calculator-extra-payments', 'es')?.path ?? '', title: 'Impuestos, seguros y cuotas', meta: '$500.00 al mes en tu pago', fields: ['tx', 'in', 'pmi', 'hoa'] },
+  { path: moneyPage('br-sac-price', 'pt')?.path ?? '', title: 'TR, seguros e taxas', meta: 'R$ 150,00 por mês na parcela, TR em 0%', fields: ['tr', 'f'] },
+];
+for (const { path, title, meta, fields } of FOLDS) {
+  test(`${path}: the costs fold into a closed block with their total in the title, and the echo of the result on a phone`, async ({ page }) => {
+    for (const width of [360, 1280]) {
+      await openAt(page, path, width, 900);
+      await hydrated(page);
+      const button = page.locator('#fo-tool-root .fo-calc__more h2.fo-disclose > button[aria-controls="fo-calc-more-fields"]');
+      await expect(button).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.locator('#fo-calc-more-fields')).toBeHidden();
+      for (const key of fields) await expect(page.locator(`#fo-calc-${key}`), `#fo-calc-${key} fechado`).toHaveCount(0);
+      await expect(button.locator('.fo-disclose__title')).toHaveText(title);
+      await expect(button.locator('.fo-disclose__meta')).toHaveText(meta);
+      expect(await button.locator('.fo-disclose__title').evaluate((node) => getComputedStyle(node).fontFamily)).toMatch(/^"?Fredoka/);
+      const name = await button.evaluate((node) => node.textContent?.replace(/\s+/g, ' ').trim());
+      await button.click();
+      await expect(button).toHaveAttribute('aria-expanded', 'true');
+      for (const key of fields) await expect(page.locator(`#fo-calc-${key}`), `#fo-calc-${key} aberto`).toBeVisible();
+      expect(await button.evaluate((node) => node.textContent?.replace(/\s+/g, ' ').trim())).toBe(name);
+      await expect(button).toHaveAccessibleName(`${title} ${meta}`);
+      const echo = page.locator('#fo-calc-more-fields .fo-calc__echo');
+      if (width < 768) {
+        await expect(echo).toBeVisible();
+        await expect(echo).toHaveAttribute('aria-hidden', 'true');
+        expect((await echo.locator('b').textContent()) ?? '').toBe((await page.locator('.fo-rhero__num > span').first().textContent()) ?? '-');
+      } else await expect(echo).toBeHidden();
+      await button.click();
+      await expect(button).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.locator(`#fo-calc-${fields[0]}`)).toHaveCount(0);
+    }
+  });
+}
+
+// Every H2 of the island is in Fredoka 24/30, like every H2 of the site (D-46, G-19): the heading of the fields after the
+// result too, which was the Figtree 18 of an H3.
+test('the headings of the island are in Fredoka', async ({ page }) => {
+  for (const path of [CALC_PAGES['mortgage-calculator-extra-payments'].path, CALC_PAGES['refinance-calculator'].path, moneyPage('br-sac-price', 'pt')?.path ?? '']) {
+    await openAt(page, path, 360, 740);
+    const fonts = await page.locator('#fo-tool-root h2').evaluateAll((headings) => headings.map((heading) => getComputedStyle(heading.querySelector('.fo-disclose__title') ?? heading).fontFamily));
+    expect(fonts.length, path).toBeGreaterThan(0);
+    for (const font of fonts) expect(font, path).toMatch(/^"?Fredoka/);
+  }
+});

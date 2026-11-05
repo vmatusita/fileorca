@@ -94,6 +94,8 @@ export function sacPriceInput(values: Values): SacPriceInput {
 
 export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
   id: 'br-sac-price',
+  // The TR and the insurance and fees fold into a block after the result (F13b, DECISOES § C-4).
+  disclose: ['tr', 'f'],
   fields: [
     money('p', 10_000, 20_000_000, { main: true, half: true }),
     { kind: 'down', key: 'd', percentKey: 'dp', unitKey: 'du', of: 'p', max: 2_000_000_000, main: true, half: true },
@@ -137,6 +139,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
         ],
       },
       placard: { n: dollars(first(r.sac), ln), l: text(v, 'placard') },
+      more: fmt(text(v, 'moreMeta'), { fees: cash(fees, ln), tr: ratePercent(tr, ln) }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestSac'), cents: r.sac.totalInterest } },
       compare: { a: { name: text(v, 'sac'), rows: scenario(r.sac) }, b: { name: text(v, 'price'), rows: scenario(r.price) }, diff },
       table: () =>

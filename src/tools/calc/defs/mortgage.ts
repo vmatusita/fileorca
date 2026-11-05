@@ -19,9 +19,13 @@ export function mortgageInput(values: Values): MortgageInput {
   };
 }
 
+/** The costs of a home loan that fold into a block after the result (F13b, DECISOES § C-4). */
+export const HOME_COSTS = ['tx', 'in', 'pmi', 'hoa'] as const;
+
 export const mortgageDef: CalcDef<MortgageInput, MortgageResult> = {
   id: 'mortgage-calculator',
   fields: homeFields(),
+  disclose: HOME_COSTS,
   initial: HOME_EXAMPLE,
   toInput: mortgageInput,
   compute: mortgage,
@@ -43,6 +47,7 @@ export const mortgageDef: CalcDef<MortgageInput, MortgageResult> = {
     return {
       hero: { label: text(v, 'label'), value: cash(r.monthlyTotal, l), unit: text(v, 'unit'), sentence },
       placard: { n: dollars(r.monthlyTotal, l), l: text(v, 'placard') },
+      more: fmt(text(v, 'moreMeta'), { extras: cash(extras, l) }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interest'), cents: r.totalInterest } },
       table: () => loanTable(r.rows, 12, s, text(v, 'caption')),
       summary: [

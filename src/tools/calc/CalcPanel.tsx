@@ -80,6 +80,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const lang = data.lang as NumberLang;
   const [busy, setBusy] = useState(false);
   const [pdfFailed, setPdfFailed] = useState(false);
+  const [costsOpen, setCostsOpen] = useState(false);
   const set = (next: Values) => {
     store.set(next, true);
     if (!completeSent && Object.keys(store.get().problems).length === 0) {
@@ -108,6 +109,10 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const pose: Pose = error !== undefined ? 'oops' : cheer ? 'cheer' : 'wave';
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
+  // The fields that fold into the block of costs (CalcDef.disclose), and the others after the result.
+  const folded = more.filter((spec) => def.disclose?.includes(spec.key));
+  const open = more.filter((spec) => !def.disclose?.includes(spec.key));
+  const shown = view.problem !== undefined ? good.view : view;
   // A list whose Add button comes after the result (F7: the areas of the square footage).
   const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
@@ -149,7 +154,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       </div>
       <div class="fo-calc__result">
         <ResultHero
-          view={view.problem !== undefined ? good.view : view}
+          view={shown}
           error={error}
           last={last}
           reserve={reserveOf(def, data, good)}
@@ -179,11 +184,43 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       </div>
       {(more.length > 0 || addBelow.length > 0) && (
         <div class="fo-calc__fields fo-calc__more">
-          {data.texts.moreHeading && <h2 class="fo-h3 fo-calc__moreheading">{data.texts.moreHeading}</h2>}
+          {data.texts.moreHeading && (open.length > 0 || addBelow.length > 0) && <h2 class="fo-calc__moreheading">{data.texts.moreHeading}</h2>}
           {addBelow.map((spec) => (
             <AddRow {...fieldProps} key={spec.key} specs={[]} spec={spec} />
           ))}
-          <Fields {...fieldProps} specs={more} />
+          <Fields {...fieldProps} specs={open} />
+          {folded.length > 0 && (
+            // F13b (UX-12 A, D-32 and D-33; DECISOES § C-4): the costs fold into a block, closed when the page opens, with their
+            // total in its title; its fields are in the page only while it is open, and on a phone it ends in the echo of the
+            // result, since the card is above the screen while the person types there.
+            <div class="fo-calc__fold">
+              <h2 class="fo-disclose">
+                <button type="button" class="fo-disclose__btn" aria-expanded={costsOpen} aria-controls="fo-calc-more-fields" onClick={() => setCostsOpen(!costsOpen)}>
+                  <span class="fo-disclose__text">
+                    <span class="fo-disclose__title">{data.texts.disclose ?? data.texts.moreHeading}</span>
+                    {shown.more && <span class="fo-disclose__meta">{shown.more}</span>}
+                  </span>
+                  <span class="fo-disclose__icon" aria-hidden="true">
+                    <Icon inner={data.icons.down} />
+                  </span>
+                </button>
+              </h2>
+              <div id="fo-calc-more-fields" class="fo-calc__fields fo-disclose__panel" hidden={!costsOpen}>
+                {costsOpen && (
+                  <>
+                    <Fields {...fieldProps} specs={folded} />
+                    <p class="fo-calc__echo" aria-hidden="true">
+                      <span>{shown.hero.label}</span>
+                      <span class="fo-calc__echo-n">
+                        <b>{shown.hero.value}</b>
+                        {shown.hero.unit && <small>{shown.hero.unit}</small>}
+                      </span>
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
       {view.compare && !view.problem && (

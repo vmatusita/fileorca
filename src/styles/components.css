@@ -842,15 +842,38 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (max-width: 359px) {
   .fo-calc--home .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
 }
-.fo-calc__moreheading { margin: var(--space-2) 0 0; }
+/* F13b (D-46, G-19; DECISOES § C-4): the H2 of the island are in Fredoka 24/30, like every H2 of the site. */
+.fo-calc__moreheading { margin: var(--space-2) 0 0; font: 600 24px/30px var(--fo-font-display); }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
 .fo-calc__compare, .fo-calc__next { grid-column: 1 / -1; }
+/* F13b (D-36; DECISOES § C-4): from 768 px the first row is the main fields' own height and the second takes what the
+   card needs beyond it (1fr): the card can grow, the fields after the result never move down. */
 @media (min-width: 768px) {
-  .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); }
+  .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: var(--space-8); }
   .fo-calc__main { grid-column: 1; grid-row: 1; }
-  .fo-calc__more { grid-column: 1; grid-row: 2; }
+  .fo-calc__more { grid-column: 1; grid-row: 2; align-self: start; }
   .fo-calc__result { grid-column: 2; grid-row: 1 / span 2; }
 }
+/* F13b · the block of costs that folds (UX-12 A, D-32 and D-33; DECISOES § C-4), in the vocabulary of the Faq: a stroke
+   above, a hairline under, the round chevron of 32 px that turns (brand-soft when open), the title in Fredoka 24/30 and the
+   total in small ink-muted. Only aria-expanded changes; the name is the title and the total, open or closed. On a phone the
+   open block ends in the echo of the result, a strip of the same sea (aria-hidden: the region of the card says it). */
+.fo-calc__fields > .fo-calc__fold, .fo-calc__fields > .fo-calc__echo { grid-row: auto; }
+.fo-disclose { margin: 0; }
+.fo-disclose__btn { box-sizing: border-box; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; margin: 0; padding: var(--space-3) 0; border: 0; border-top: var(--stroke-2) solid var(--stroke); border-bottom: var(--stroke-hair) solid var(--hairline); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.fo-disclose__text { display: grid; gap: 2px; min-width: 0; }
+.fo-disclose__title { font: 600 24px/30px var(--fo-font-display); overflow-wrap: anywhere; }
+.fo-disclose__meta { font: 400 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-disclose__icon { flex: none; box-sizing: border-box; display: grid; place-items: center; width: 32px; height: 32px; border: var(--stroke-2) solid var(--stroke); border-radius: 50%; transition: transform var(--dur-base) var(--ease-out); }
+.fo-disclose__icon .fo-icon { width: 20px; height: 20px; }
+.fo-disclose__btn[aria-expanded="true"] .fo-disclose__icon { transform: rotate(180deg); background: var(--brand-soft); }
+.fo-disclose__panel { padding-top: var(--space-4); }
+.fo-disclose__panel[hidden] { display: none; }
+.fo-calc__echo { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); margin: 0; padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--deep); color: var(--on-deep); font: 600 15px/20px var(--fo-font-text); }
+.fo-calc__echo b { font: 600 24px/28px var(--fo-font-display); }
+.fo-calc__echo small { font: 600 15px/20px var(--fo-font-display); color: var(--on-deep-muted); }
+.fo-calc__echo-n { display: inline-flex; align-items: baseline; gap: var(--space-1); white-space: nowrap; }
+@media (min-width: 768px) { .fo-calc__echo { display: none; } }
 .fo-input .fo-input__unit { flex: 0 0 auto; width: auto; min-width: 64px; padding: 0 var(--space-3); align-self: stretch; background: var(--surface-sunken); color: var(--ink-muted); border-left: var(--stroke-hair) solid var(--hairline); font: 600 16px/20px var(--fo-font-text); }
 .fo-reviewed { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's

@@ -134,6 +134,8 @@ for (const { id, lang } of PAGES) {
     await hydrated(page);
     await dismissCookies(page);
 
+    // F13b (DECISOES § C-4): the costs that fold into a block are in the page once it is open.
+    for (const fold of await page.locator('#fo-tool-root [aria-controls="fo-calc-more-fields"][aria-expanded="false"]').all()) await fold.click();
     const def = DEFS[id];
     const typed: { text: string; kind: NumberSpec['kind'] }[] = [];
     const values: Values = { ...def.initial };

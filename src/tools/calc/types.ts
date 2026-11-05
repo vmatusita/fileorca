@@ -124,6 +124,8 @@ export interface CalcView {
   /** Principal against interest, or deposits against interest (cents). */
   split?: { a: { label: string; cents: number }; b: { label: string; cents: number } };
   compare?: { a: Scenario; b: Scenario; diff: Part[] };
+  /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
+  more?: string;
   /** The schedule, built only when the person opens it or exports. */
   table: () => Table;
   /** The results, for the PDF. */
@@ -150,6 +152,8 @@ export interface CalcPanelTexts {
   options?: Record<string, Record<string, string>>;
   /** Heading of the fields that come after the result on a phone. */
   moreHeading?: string;
+  /** Title of the block that folds (CalcDef.disclose), when it is not the moreHeading (F13b, DECISOES § C-4). */
+  disclose?: string;
   /** Strings the definition's view fills in ({placeholders}). */
   view: Record<string, string>;
   /** Premises in force, for the PDF. */
@@ -224,14 +228,20 @@ export interface CalcPanelData {
   cheer: boolean;
   /** The colour of the chips: the money category or the home and health one (violet fill, F7). */
   cat: 'money' | 'home';
-  /** Icons the island draws, read at build: pdf, table, link, check, info, chevron, alert, trash, arrow. */
-  icons: Record<'pdf' | 'table' | 'link' | 'check' | 'info' | 'chevron' | 'alert' | 'trash' | 'arrow', string>;
+  /** Icons the island draws, read at build: pdf, table, link, check, info, chevron, down (the chevron of a block), alert, trash, arrow. */
+  icons: Record<'pdf' | 'table' | 'link' | 'check' | 'info' | 'chevron' | 'down' | 'alert' | 'trash' | 'arrow', string>;
 }
 
 /** The behaviour of one calculator (never serialised). */
 export interface CalcDef<I = unknown, R = unknown> {
   id: AnyCalcId;
   fields: FieldSpec[];
+  /**
+   * The fields that fold into a block after the result, closed when the page opens, with their total in its title (the
+   * taxes, insurance and fees of the mortgage and its presets, the TR of the SAC × PRICE; F13b, DECISOES § C-4). Their
+   * boxes are in the page only while the block is open.
+   */
+  disclose?: readonly string[];
   /** The example the page starts with: `toInput(initial)` is the page-example case of the oracle. */
   initial: Values;
   /**

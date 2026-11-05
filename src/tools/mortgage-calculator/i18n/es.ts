@@ -38,6 +38,7 @@ export default {
       placard: 'al mes',
       sentence: 'En {years} al {rate}, pagarás {total} por el préstamo, de los cuales {interest} son intereses.',
       extras: 'Los impuestos, los seguros y las cuotas suman {extras} al mes.',
+      moreMeta: '{extras} al mes en tu pago',
       noLoan: 'Sin préstamo que pagar, pagas {extras} al mes de impuestos, seguros y cuotas.',
       principal: 'Capital',
       interest: 'Intereses',

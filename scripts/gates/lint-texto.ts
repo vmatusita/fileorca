@@ -167,6 +167,8 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       base: '30 años',
       label: 'Tasa',
       value: '6.5 %',
+      // F13b (DECISOES § C-4): the total of the costs in the title of the block that folds.
+      extras: '$500.00',
     },
     fallback: '$1,234.56',
   },

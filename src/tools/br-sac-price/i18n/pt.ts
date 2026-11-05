@@ -19,6 +19,7 @@ export default {
     moreHeading: 'TR, seguros e taxas',
     view: {
       label: 'Primeira parcela no SAC',
+      moreMeta: '{fees} por mês na parcela, TR em {tr}',
       unit: '/mês',
       placard: 'na 1ª parcela do SAC',
       sentence: 'No SAC a parcela vai de {sacFirst} a {sacLast}. Na PRICE ela começa em {price} e fica quase igual nos {months}.',

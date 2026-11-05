@@ -195,6 +195,8 @@ test('the scenario link is read once, invalid values are ignored, and the page n
   await expect(page.locator('#fo-calc-r')).toHaveValue('6.5');
   await expect(page.locator('#fo-calc-t')).toHaveValue('15');
   await page.locator('#fo-calc-p').fill('410000');
+  // F13b (DECISOES § C-4): the costs fold into a block; their fields are in the page once it is open.
+  await page.locator('[aria-controls="fo-calc-more-fields"]').click();
   await page.locator('#fo-calc-tx').fill('5000');
   await expect(heroNumber(page)).toBeVisible();
   expect(new URL(page.url()).hash).toBe(hash);
@@ -245,6 +247,8 @@ test('two fields side by side keep their inputs on one line, also next to a fiel
   for (const width of [360, 1280]) {
     await page.setViewportSize({ width, height: 800 });
     await open(page, 'mortgage-calculator');
+    // F13b (DECISOES § C-4): the costs are in the block that folds, opened here.
+    await page.locator('[aria-controls="fo-calc-more-fields"]').click();
     const top = (id: string) => page.locator(`#fo-calc-${id}`).evaluate((node) => Math.round(node.getBoundingClientRect().top));
     // PMI has a line of help under its input; HOA, next to it, has none.
     for (const [left, right] of [['p', 'd'], ['r', 't'], ['tx', 'in'], ['pmi', 'hoa']] as const) expect(await top(right), `${left} e ${right} a ${width}px`).toBe(await top(left));
