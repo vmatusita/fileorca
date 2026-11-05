@@ -9,3 +9,7 @@ O campo das calculadoras: grande, com prefixo ou sufixo de unidade, número no f
 - Taxa é sempre digitada: o valor inicial é um exemplo e leva a etiqueta `fo-tag` "example" / "exemplo". Nunca "today's rate".
 - Recalcula a cada tecla (sem botão Calcular). Valor inválido não apaga o resultado anterior: mostra o erro (`data-state="error"`, traço `danger` de 3px, `aria-invalid`, mensagem com ícone ligada por `aria-describedby`) e mantém o último resultado válido.
 - Entre campos não há anúncio, nem ao lado de `<select>`.
+
+## Mudança de regra (F13b, DECISOES § C-2; F4 ACE-11)
+
+- **O erro de um campo de calculadora.** Antes: "mostra o erro (`data-state="error"`, traço `danger` de 3px, `aria-invalid`, mensagem com ícone ligada por `aria-describedby`)", com a mensagem embaixo do campo, num `role="alert"`, e a borda de 3 px que crescia o campo 2 px. Depois: o traço de 3 px é a borda de 2 px mais 1 px de `box-shadow` por fora (o campo fica com os 52 px), o ícone `alert` fica dentro da caixa, antes da unidade, e a mensagem fica no ResultHero, no lugar do Baixar (`#fo-rhero-error`), para onde o `aria-describedby` do campo aponta; a voz é a região viva do card. O campo que um problema da conta aponta (o pagamento que não cobre os juros) ganha o mesmo `aria-invalid`. Fora das calculadoras (Redimensionar, Recortar, o QR), o campo segue como antes.
