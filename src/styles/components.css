@@ -15,7 +15,7 @@
    curve by token name. A move that starts on its own ends in under 5 s and leaves her still on the drawn pose, the frame
    reduced motion shows (WCAG 2.2.2); only the swim loops, because it is the progress and lasts the work. The move goes on
    the <svg> child, never on the [data-oli] box (CLS 0), and never toward an ad (the 150px are checked with the box inflated
-   by 12px). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
+   by 12px: ads.spec.ts and tests/e2e/lib/ad-map.ts, DECISOES § F13A-R-01). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
    second animation of the list, so the 3 s one never starts again. Reduced motion: global.css stops everything. */
 [data-oli="wave"] > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1; }
 :is(.fo-drop:is(:hover, :focus-within) [data-oli="wave"], .fo-slot:has(.fo-drop:is(:hover, :focus-within)) > [data-oli="wave"]) > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1, fo-nod var(--dur-cheer) var(--ease-spring) 1; }
@@ -679,6 +679,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    out of the card, from 768 px. */
 .fo-support { box-sizing: border-box; display: block; min-width: 0; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); max-width: var(--tool-max); }
 .fo-support__head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+/* F13a, revisão a-2 (DECISOES § F13A-R-01): the 150 px to an ad count the Oli's box inflated by 12 px (her wave). On the
+   home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
+   she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
+@media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 .fo-support__oli { width: 96px; height: 96px; }
 .fo-support :is(h1, h2, h3) { margin: 0 0 var(--space-2); font: 600 28px/34px var(--fo-font-display); }
 .fo-support__head > :is(h1, h2, h3) { flex: 1 1 0; min-width: 0; margin: 0; }
