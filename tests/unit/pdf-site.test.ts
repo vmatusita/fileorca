@@ -11,6 +11,8 @@ import { LANGS, LANG_TAG, QR_ID, moneyHubId, pagePath, routeById, type Lang, typ
 import { HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
+import { fmt } from '../../src/i18n/format.ts';
+import { countValues } from '../../src/components/tool-count.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { ogImagePath } from '../../src/seo/meta.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
@@ -333,7 +335,8 @@ describe('Privacy, Terms and About in the three languages (decision 10)', () => 
     expect(TEXTS.en.terms.sections.flatMap((section) => section.paragraphs).join(' ')).toMatch(/PDF tools \(merge, split, compress, rotate, number, sign, protect and more\)/);
     expect(TEXTS.pt.terms.sections.flatMap((section) => section.paragraphs).join(' ')).toMatch(/ferramentas de PDF, como juntar, dividir, comprimir, numerar, assinar e proteger/);
     expect(TEXTS.es.terms.sections.flatMap((section) => section.paragraphs).join(' ')).toMatch(/herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger/);
-    expect(TEXTS.en.about.intro.join(' ')).toContain(`${PDF_TOOL_IDS.length} PDF tools`);
+    // F13b (DECISOES § 541): the count comes from the registries through {pdf}, filled as the About view fills it.
+    expect(fmt(TEXTS.en.about.intro.join(' '), countValues('en'))).toContain(`${PDF_TOOL_IDS.length} PDF tools`);
     expect(TEXTS.pt.about.intro.join(' ')).toContain('as de PDF');
     expect(TEXTS.es.about.intro.join(' ')).toContain('las de PDF');
   });

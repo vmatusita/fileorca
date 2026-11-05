@@ -5,6 +5,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
+import { fmt } from '../i18n/format.ts';
+import { countValues } from '../components/tool-count.ts';
 import { AUTHOR } from '../platform/site.ts';
 import { breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
 
@@ -15,6 +17,8 @@ const { lang } = Astro.props;
 const route = routeById('about');
 const t = TEXTS[lang].about;
 const common = TEXTS[lang].common;
+// The counts of the intro come from the registries (F13b; DECISOES § 540), never typed in the text.
+const counts = countValues(lang);
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
@@ -25,7 +29,7 @@ const aboutPage = { '@type': 'AboutPage', name: t.h1, mainEntity: { '@id': 'http
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <article class="fo-prose">
     <h1 class="fo-h1">{t.h1}</h1>
-    {t.intro.map((paragraph) => <p>{paragraph}</p>)}
+    {t.intro.map((paragraph) => <p>{fmt(paragraph, counts)}</p>)}
     <h2>{t.whyHeading}</h2>
     {t.why.map((paragraph) => <p>{paragraph}</p>)}
     <h2>{t.orcaHeading}</h2>

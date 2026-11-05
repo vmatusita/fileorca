@@ -31,6 +31,17 @@ const SAMPLES_BY_LANG: Record<string, Record<string, string>> = {
   es: { ...SAMPLES, percent: '68\u00a0%', query: 'comprimir' },
 };
 const samplesOf = (file: string): Record<string, string> => SAMPLES_BY_LANG[textFileLang(file) ?? 'en'] ?? SAMPLES;
+/**
+ * F13b: the About and Terms pages count the tools through placeholders that the views fill from
+ * src/components/tool-count.ts (DECISOES § 540). The samples are the counts of that module in each language, and
+ * tests/unit/tool-count.test.ts checks that they still are.
+ */
+export const COUNT_SAMPLES: Record<string, Record<string, string>> = {
+  en: { image: '8', pdf: '12', money: '14', life: '11', total: '46', brazil: '8', spanish: '14' },
+  pt: { image: '8', pdf: '12', money: '8', life: '0', total: '29', brazil: '8', spanish: '14' },
+  es: { image: '8', pdf: '12', money: '14', life: '0', total: '35', brazil: '8', spanish: '14' },
+};
+const isCountText = (file: string): boolean => /[\\/](about|terms)\.ts$/.test(file);
 const CHUNK = 15_000;
 
 function git(args: string[]): string {
@@ -321,6 +332,10 @@ export async function fillFor(file: string): Promise<Fill> {
   if (isQrText(file)) {
     const qr = QR_SAMPLES_BY_LANG[lang] ?? {};
     return (name) => qr[name] ?? samples[name] ?? name;
+  }
+  if (isCountText(file)) {
+    const counts = COUNT_SAMPLES[lang] ?? {};
+    return (name) => counts[name] ?? samples[name] ?? name;
   }
   if (!isMoneyText(file)) return (name) => samples[name] ?? name;
   const money = MONEY_SAMPLES_BY_LANG[lang] ?? { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT };
