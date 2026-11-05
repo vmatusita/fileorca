@@ -57,7 +57,8 @@ export function statsItems(lang: Lang): { kind: StatKind; value: number }[] {
 /**
  * The placeholders of the texts that count tools (the About and Terms pages), as the language writes the numbers:
  * {image}, {pdf}, {money}, {life} and {total} of the page's language, {brazil} (the money calculators made for Brazil,
- * in Portuguese) and {spanish} (the money calculators in Spanish).
+ * in Portuguese), {spanish} (the money calculators in Spanish) and {languages} (the languages of the site; F13b, G-14,
+ * DECISOES § I-4).
  */
 export function countValues(lang: Lang): Record<string, string> {
   const here = toolCounts(lang);
@@ -70,5 +71,6 @@ export function countValues(lang: Lang): Record<string, string> {
     total: n(here.total),
     brazil: n(toolCounts('pt').money),
     spanish: n(toolCounts('es').money),
+    languages: n(LANGS.length),
   };
 }
