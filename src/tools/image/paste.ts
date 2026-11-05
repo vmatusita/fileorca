@@ -43,10 +43,24 @@ export interface DropHandlers {
  */
 export function catchDrops(on: DropHandlers): { stop: () => void; reset: () => void } {
   let depth = 0;
+  // F13a, revisão c-2 (DECISOES § F13A-R-07): the nodes a drag of files came in over. The zone in "over" takes the Choose
+  // button and the words of the help out of the DOM, and Chromium sends no dragleave to a node that is gone: a node that
+  // left the DOM stops counting at the next dragenter or dragleave, or the zone stayed in "over" after the drag left.
+  const entered = new Set<EventTarget>();
+  const prune = () => {
+    for (const node of entered) {
+      if (typeof Node !== 'undefined' && node instanceof Node && !node.isConnected) {
+        entered.delete(node);
+        depth = Math.max(0, depth - 1);
+      }
+    }
+  };
   const enter = (event: DragEvent) => {
     if (!carriesFiles(event.dataTransfer)) return;
     event.preventDefault();
+    prune();
     depth += 1;
+    if (event.target) entered.add(event.target);
     on.enter(dragCount(event.dataTransfer));
   };
   const over = (event: DragEvent) => {
@@ -57,12 +71,15 @@ export function catchDrops(on: DropHandlers): { stop: () => void; reset: () => v
   };
   // Any dragleave counts down (a drag that left says so even when its event carries no list of types); the count never goes
   // under zero, so the leave of a drag of text, which never counted up, changes nothing.
-  const leave = () => {
+  const leave = (event: DragEvent) => {
+    if (event.target) entered.delete(event.target);
     depth = Math.max(0, depth - 1);
+    prune();
     if (depth === 0) on.leave();
   };
   const end = () => {
     depth = 0;
+    entered.clear();
     on.leave();
   };
   const drop = (event: DragEvent) => {
@@ -79,6 +96,7 @@ export function catchDrops(on: DropHandlers): { stop: () => void; reset: () => v
     },
     reset: () => {
       depth = 0;
+      entered.clear();
     },
   };
 }
