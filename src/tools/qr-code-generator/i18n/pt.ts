@@ -85,7 +85,7 @@ export default {
       empty: 'Seu QR code aparece aqui enquanto você digita.',
       ready: 'Seu QR code está pronto para baixar.',
     },
-    download: { png: 'Baixar PNG', svg: 'Baixar SVG', pngMeta: '{side} × {side} px' },
+    download: { png: 'Baixar PNG', svg: 'Baixar SVG', pngMeta: '{side} × {side} px', wait: 'Ainda não há o que baixar: digite um link ou um texto.' },
     errors: {
       empty: 'Ops, ainda não há nada para pôr no código. Digite um link ou um texto.',
       long: 'Ops, esse texto passou de {max} caracteres, o máximo de um QR code. Cada letra com acento (como á, ç ou õ) conta como 2, e cada emoji conta como 4. Encurte o texto para continuar.',

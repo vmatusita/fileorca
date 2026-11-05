@@ -35,8 +35,10 @@ export interface QrPanelTexts {
   download: {
     png: string;
     svg: string;
-    /** After "Download PNG": the real side, {side}. */
+    /** After "Download PNG", on its second line: the real side, {side}. */
     pngMeta: string;
+    /** In the place of the two buttons while there is no code (F13b, F7 f-10; DECISOES § C-8). */
+    wait: string;
   };
   errors: {
     /** Nothing but white space in the box. */

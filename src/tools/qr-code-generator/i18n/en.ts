@@ -85,7 +85,7 @@ export default {
       empty: 'Your QR code shows up here as you type.',
       ready: 'Your QR code is ready to download.',
     },
-    download: { png: 'Download PNG', svg: 'Download SVG', pngMeta: '{side} × {side} px' },
+    download: { png: 'Download PNG', svg: 'Download SVG', pngMeta: '{side} × {side} px', wait: 'Nothing to download yet: type a link or some text.' },
     errors: {
       empty: 'Oops, there is nothing to put in the code yet. Type a link or some text.',
       long: "Oops, that's too long for one QR code, which holds up to {max} characters. A letter with an accent counts as 2 and an emoji as 4.",
