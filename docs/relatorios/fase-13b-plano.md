@@ -26,7 +26,7 @@ A F13b é a segunda run da fase "UX/UI: implementação" do `PLANO-MELHORIAS.md`
 
 ## 2. Os § reservados
 
-O próximo § livre era o 535. A fatia 1 (o agente principal) usa os números de 535 a 542. As frentes escrevem os § delas com um marcador próprio (`§ C-1`, `§ G-1`, `§ H-1`, `§ I-1`...), no `DECISOES.md` e nos comentários do código, e a junção troca cada marcador por um número, na ordem das frentes: C, G, H, depois os do agente principal na fatia 4 (marcador `§ M-n`) e, por último, os do I.
+O próximo § livre era o 535. A fatia 1 (o agente principal) usa os números de 535 a 543. As frentes escrevem os § delas com um marcador próprio (`§ C-1`, `§ G-1`, `§ H-1`, `§ I-1`...), no `DECISOES.md` e nos comentários do código, e a junção troca cada marcador por um número, na ordem das frentes: C, G, H, depois os do agente principal na fatia 4 (marcador `§ M-n`) e, por último, os do I.
 
 | § | Assunto |
 | --- | --- |
@@ -38,7 +38,8 @@ O próximo § livre era o 535. A fatia 1 (o agente principal) usa os números de
 | 540 | A contagem sem os presets (`src/components/tool-count.ts`), ao lado da § 321 |
 | 541 | Os testes antigos que mudaram na fatia 1 (formato da § 341) e a data dos Termos |
 | 542 | O rótulo `ci` não existe: a conferência no Linux do meio sai (decisão 13) |
-| C-n, G-n, H-n | As decisões e os testes antigos de cada frente, renumerados na junção a partir do 543 |
+| 543 | A data curta e a data média (`shortDate` e `mediumDate`), escritas à mão |
+| C-n, G-n, H-n | As decisões e os testes antigos de cada frente, renumerados na junção a partir do 544 |
 | M-n | O agente principal na fatia 4 (grupo 22, documentação, textos) |
 | I-n | A frente I (UX-17 A), renumerada por último |
 

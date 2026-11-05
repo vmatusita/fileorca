@@ -5704,3 +5704,9 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
 - **O fato:** `gh label list` (5/nov) não tem o rótulo `ci`, como na F12 e na F13a (§ 448 e § 461). Criá-lo é do Victor (o `CLAUDE.md` proíbe o `gh label` nas runs).
 - **A decisão:** a conferência no Linux depois da junção das frentes sai, e a execução completa depois do `gh pr ready` faz o papel dela. O atalho do `gh pr ready` seguido do `--undo` não se usa: o job `merge` decide pelo rascunho do payload do evento e, com o `ci-ok` verde, tentaria mesclar a PR pela metade (§ 401 e F11 p-1).
 - **O que isso pede:** as pegadinhas do Linux (o WebKit e as fontes de lá, § 305) ficam para a execução final. Se ela falhar, a sequência da decisão 13 (`gh pr ready --undo`, correção, push, a execução leve e o `gh pr ready` de novo) vai para o relatório.
+
+## § 543 · A data curta e a data média, escritas à mão (F13b, decisões 4 e 5; G-23)
+
+- **O que pede:** a assinatura de uma linha da calculadora e do guia ("Reviewed by Victor Yuki Matusita · Nov 5, 2026", G-23) e a linha do histórico do guia. A especificação diz `Intl.DateTimeFormat` com `dateStyle`, e a § 112 escreve as datas à mão para o build e todo navegador escreverem o mesmo.
+- **A decisão:** o `src/i18n/dates.ts` ganha `shortDate` (en "Nov 5, 2026", pt "05/11/2026", es "5/11/2026") e `mediumDate` (en "Nov 5, 2026", pt "5 de nov. de 2026", es "5 nov 2026"), à mão, com as abreviações do CLDR (es "sept"). O agente principal as escreveu antes das frentes, para a C e a G usarem a mesma.
+- **A prova:** o `tests/unit/dates-short.test.ts` compara as duas com o `Intl` do Node em todos os dias de 2026 e 2027 (en `dateStyle: 'medium'`, pt `dateStyle: 'short'` e `'medium'`, es dia, mês e ano numéricos e `dateStyle: 'medium'`).
