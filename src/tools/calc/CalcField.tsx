@@ -118,7 +118,8 @@ export default function CalcField(props: CalcFieldProps) {
   // the card is above the screen there; for the field the card names, it is only drawn (aria-hidden): the card says it.
   const said = message ?? (flagged ? flagMessage : undefined);
   const msgId = `${id}-error`;
-  const own = message !== undefined && !named;
+  // A field a problem of the account points to has the problem as its message (second pass of the review, s-2; § 600).
+  const own = said !== undefined && !named;
   const described = [desc ? descId : null, prefix ? prefixId : null, affix, marked ? (own ? msgId : HERO_ERROR_ID) : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
     <div class={half ? (wide ? 'fo-field fo-field--half fo-field--wide' : 'fo-field fo-field--half') : 'fo-field'} data-state={marked ? 'error' : undefined}>

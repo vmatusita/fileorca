@@ -343,6 +343,31 @@ test('/mortgage-calculator/: with two fields in error, each is described by its 
   await expect(page.locator('#fo-calc-r-error')).toHaveAttribute('aria-hidden', 'true');
 });
 
+// Second pass of the review F13b, s-2 (DECISOES § 600): the field a problem of the account points to (ACE-11) with another
+// field in error at the same time. The card says the other field (a field's range comes first), so the payment is described
+// by the problem, its own message, and never by the balance's range. Before, it pointed to the card and was described by the
+// balance's message.
+test('/credit-card-payoff-calculator/: a payment that does not cover the interest, with the balance wrong too, is described by the problem', async ({ page }) => {
+  await openAt(page, CALC_PAGES['credit-card-payoff-calculator'].path, 1280, 900);
+  await hydrated(page);
+  await page.locator('#fo-calc-pay').fill('10');
+  await page.locator('#fo-calc-b').fill('abc');
+  await page.waitForTimeout(1000);
+  await expect(page.locator('#fo-rhero-error')).toHaveText('Enter a balance from $1 to $1,000,000.');
+  const payment = page.locator('#fo-calc-pay');
+  await expect(payment).toHaveAttribute('aria-invalid', 'true');
+  await expect(payment).not.toHaveAttribute('aria-describedby', /fo-rhero-error/);
+  await expect(payment).toHaveAccessibleDescription(/doesn't cover the interest of the first month/);
+  await expect(payment).not.toHaveAccessibleDescription(/balance from/);
+  await expect(page.locator('#fo-calc-b')).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+  await expect(page.locator('#fo-tool-root [aria-live]')).toHaveCount(1);
+  // The balance fixed, the card says the problem again, and the payment is described by the card.
+  await page.locator('#fo-calc-b').fill('5000');
+  await page.waitForTimeout(1000);
+  await expect(page.locator('#fo-rhero-error')).toContainText("doesn't cover the interest");
+  await expect(payment).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+});
+
 // Review F13b f-2 (DECISOES § 594): on a phone the card is above the screen while the person types in a field after it, so the
 // message of that field (or the problem the card says about it) shows right under the field while it has the focus, on
 // screen, on top of what comes next: nothing moves, not even 800 ms after the key (layout-shift with no recent input, 0 in
