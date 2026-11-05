@@ -54,3 +54,14 @@ Pegadinhas que a F6 achou:
 Pegadinhas que o ajuste achou:
 
 - **O painel de PDF leva o foco à ação um quadro depois de mostrar a grade** (§ 240). Teste que dá foco a uma página da grade ou a um campo logo depois de abrir um arquivo espera antes o foco na ação; senão o movimento chega depois e tira o foco, só no runner lento (§ 322).
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- **O Preact reaproveita filhos sem `key` pelo tipo, em outra posição.** Quando a linha de espera (`<p>`) virava o Juntar (`<button>`), o Preact usou o `<p>` velho como o `<p>` da ajuda e o botão do "Add more" como o Juntar; o Chromium mediu isso como deslocamento (CLS 0,07 a 0,19 no juntar). Painel cujos filhos trocam de tipo leva `key` em cada filho (`count`, `hold`, `action`, `help`, `list`, `add`, `restart`). (a ilha de PDF)
+- **Um `<details>` fechado ainda faz o layout do conteúdo** (content-visibility): `getBoundingClientRect` dos campos escondidos devolve caixas de verdade, e o `boxes()` do `ads.spec.ts` os conta como alvos (72 a 124 px do anúncio nos guias do Comprimir e do PDF para JPG). O corpo do "Adjust" e do "Order" só entra no DOM aberto. (a ilha de PDF)
+- **Depois do resultado, as opções das ferramentas automáticas ficam no "Adjust" fechado:** teste que muda uma opção com o resultado na tela abre antes `#fo-tool-root .fo-adjust > summary` (o Girar página por página é o caso). Antes do resultado, mude a opção antes do arquivo. (a ilha de PDF)
+- **A região da ilha é o `p.fo-sr[role="status"]`:** o Juntar tem a da contagem (`.fo-count`), que vem antes no DOM; um `[role="status"]` sem escopo pega a contagem. As linhas do Juntar continuam com a classe `fo-filelist__row` (os specs de privacidade, da matriz e dos eventos a leem). (a ilha de PDF)
+- **A regra da linha de sucesso (`SUCCESS_LINE`) do `scripts/lib/design-checks.ts` é repetida no `tests/unit/routes.test.ts`:** frase de sucesso com chave nova muda as duas. (a ilha de PDF)
+- **O cache das miniaturas é por (índice, largura):** a grade pede 240 px, a prévia da Assinar pede `min(1080, largura × DPR)` arredondada a 60 px; o `drop` precisa da mesma largura do `get`. (a ilha de PDF)
