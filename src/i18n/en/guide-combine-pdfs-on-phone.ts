@@ -4,7 +4,7 @@ const texts: FileGuideTexts = {
   title: 'How to Combine PDFs on a Phone, iPhone or Android',
   description: 'The ways to put several PDFs into one on an iPhone or an Android phone, what the merged file weighs, and what it keeps from each PDF.',
   h1: 'How to combine PDFs on a phone',
-  lead: 'You have a few PDFs on your phone and need to send them as one. Here are the ways to do it there, without a computer, and what to expect from the result.',
+  lead: 'You have a few PDFs on your phone and need to send them as one. Here is how to do it there, and what to expect.',
   changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',

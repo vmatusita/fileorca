@@ -127,7 +127,9 @@ const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
       </section>
     </>
   ))}
-  <section class="fo-section fo-prose" aria-labelledby="measured" data-content="measured">
+  {/* Not a landmark of its own (no aria-labelledby): the frame of its table is the region named by its heading, and two
+      landmarks with one name would repeat it (axe landmark-unique; DECISOES § G-3). */}
+  <section class="fo-section fo-prose" data-content="measured">
     <h2 id="measured">{t.tableHeading}</h2>
     <p data-guide-text>{fill(t.measuredIntro)}</p>
     {t.tables.map((table, index) => {

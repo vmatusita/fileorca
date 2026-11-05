@@ -892,14 +892,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-sheet__list { grid-column: 1 / 3; column-gap: var(--space-6); }
   .fo-sheet__sample { align-self: end; }
 }
-/* The tool comes right after the sheet, one gap of the column below it: its heading keeps the room of the Oli on the
-   right (above). She rises 78px over the panel (76px from 768px); the heading ends 24px over the panel (the gap of the
-   column and the top of the island), so a heading of one line (30px) and the 16px gap above it keep her box 8px clear of
-   the sheet on a phone (and 22px from 768px, with the 16px margin there). Its paragraph goes under the island, in the
-   muted text of a caption (above it, it pushed the panel past the fold of a phone; DECISOES § G-5), and the introduction
-   starts after it. The 24 and 40px over the heading of the specification, measured again in the site, put the panel of 20
-   of the 30 guides under the fold of a 360 x 740 phone and the Choose button of 5 under 800px at 1280 (DECISOES § G-8). */
-.fo-sheet + .fo-guide__tool { margin-top: 0; }
+/* The tool comes right after the sheet: its heading keeps the room of the Oli on the right (above). She rises 78px over
+   the panel (76px from 768px), and the heading ends 24px over it (the gap of the column and the top of the island), so a
+   heading of one line (30px), the 16px gap of the column and 8px more above it keep her box clear of the sheet on a phone
+   (by 22px from 768px, with 16px there). Its paragraph goes under the island, in the muted text of a caption (above it, it
+   pushed the panel past the fold of a phone; DECISOES § G-5), and the introduction starts after it. The 24 and 40px over
+   the heading of the specification, measured again in the site, put the panel of 20 of the 30 guides under the fold of a
+   360 x 740 phone and the Choose button of 5 under 800px at 1280 (DECISOES § G-8). */
+.fo-sheet + .fo-guide__tool { margin-top: var(--space-2); }
 @media (min-width: 768px) { .fo-sheet + .fo-guide__tool { margin-top: var(--space-4); } }
 .fo-sheet + .fo-guide__tool > h2 { margin-bottom: 0; }
 .fo-guide__toolintro { margin: 0; max-width: var(--fo-measure); font-size: 15px; line-height: 22px; color: var(--ink-muted); }

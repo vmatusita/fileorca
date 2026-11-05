@@ -10,7 +10,7 @@ const texts: FileGuideTexts = {
     'WebP es un formato de imagen que Google creó para la web. Los sitios web lo usan porque pesa poco y las páginas cargan más rápido, y por eso una imagen que guardas desde el navegador puede llegar como archivo .webp en lugar de JPG o PNG.',
     'El navegador desde el que la guardaste la muestra sin problema. El problema empieza cuando el archivo sale del navegador: un editor de fotos antiguo, un formulario que pide un JPG o una tienda de impresión pueden rechazarlo. Guardarlo como JPG hace que se abra casi en cualquier lugar, pero no lo mejora ni lo hace más pequeño.',
   ],
-  toolHeading: 'Guarda tus imágenes WebP como JPG aquí',
+  toolHeading: 'Guarda tu WebP como JPG',
   toolIntro: 'Suelta un WebP o todo un lote. Cada uno se vuelve JPG en esta pestaña del navegador, así que nada se sube, y un lote llega en un solo ZIP. Si necesitas conservar la transparencia, puedes elegir PNG.',
   sections: [
     {
@@ -61,7 +61,7 @@ const texts: FileGuideTexts = {
   sheet: {
     stats: [
       { label: 'El JPG hecho a partir del WebP', value: '{backRatioChromium_times}', from: '{webpTotal}', to: '{backTotalChromium}' },
-      { label: 'Frente a los originales de la cámara', value: '{backVsOriginalChromium}', sub: '{backTotalChromium} de {jpgTotal}' },
+      { label: 'Frente a los originales', value: '{backVsOriginalChromium}', sub: '{backTotalChromium} de {jpgTotal}' },
     ],
     sample: '{photos} fotos de celular, guardadas como WebP y de vuelta como JPG.',
     link: 'Mira la tabla',

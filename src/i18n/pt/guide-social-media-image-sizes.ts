@@ -4,7 +4,7 @@ const texts: FileGuideTexts = {
   title: 'Tamanhos de imagem para redes sociais, segundo a ajuda de cada rede',
   description: 'Os tamanhos de imagem que Instagram, Facebook, X, LinkedIn, YouTube e Pinterest publicam, e como ficam e quanto pesam fotos redimensionadas para eles.',
   h1: 'Tamanhos de imagem para redes sociais',
-  lead: 'Cada rede publica os tamanhos que quer e redimensiona o que não cabe. Aqui estão os tamanhos das páginas de ajuda delas e o que uma foto vira em cada um.',
+  lead: 'Cada rede publica os tamanhos que quer e redimensiona o que não cabe. Veja esses tamanhos e o que uma foto vira em cada um.',
   changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}. As páginas de ajuda foram lidas na data indicada em cada fonte.',
   intro: [
     'Toda rede social pega a foto, encaixa no próprio quadro e comprime de novo. Se a foto é muito maior que o quadro, a rede joga pixels fora com os ajustes dela. Se o formato está errado, a rede corta onde quiser. Mandar uma foto que já tem o tamanho e o formato certos deixa essas decisões nas suas mãos.',

@@ -4,13 +4,13 @@ const texts: FileGuideTexts = {
   title: 'Qual resolução escolher ao converter PDF para JPG, com os pixels e os tamanhos',
   description: 'O que a resolução muda ao converter PDF para JPG, medido nos nossos PDFs de teste: os pixels da página, o peso do arquivo e quando escolher JPG ou PNG.',
   h1: 'Qual resolução escolher ao converter PDF para JPG',
-  lead: 'Uma página de PDF não tem pixels até que algo a desenhe. A resolução que você escolhe decide quantos ela ganha, e quanto as imagens vão pesar.',
+  lead: 'Uma página de PDF só ganha pixels ao ser desenhada. A resolução decide quantos, e quanto a imagem pesa.',
   changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'Texto e desenhos num PDF são guardados como formas, não como pontos. Para transformar uma página em JPG, um programa desenha a página numa grade de pixels, e a resolução, em pixels por polegada, define o quão fina é essa grade. Peça mais e cada letra ganha mais pixels, e o arquivo cresce junto.',
     'A ferramenta PDF para JPG oferece {lowPpi} para a tela, {mediumPpi} para uso geral e {highPpi} para imprimir. Veja o que cada opção deu em {files_word} dos nossos PDFs de teste, para você escolher a menor que resolve o seu caso.',
   ],
-  toolHeading: 'Seu PDF em imagens',
+  toolHeading: 'PDF em imagens',
   toolIntro: 'Solte um PDF e cada página vira um JPG a {mediumPpi}, nesta aba do navegador, sem nada ser enviado. Mude a resolução ou o formato e as imagens são feitas de novo; várias páginas vêm juntas num ZIP só.',
   sections: [
     {

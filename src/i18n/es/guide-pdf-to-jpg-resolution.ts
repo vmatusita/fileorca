@@ -4,7 +4,7 @@ const texts: FileGuideTexts = {
   title: 'Qué resolución elegir para pasar un PDF a JPG: píxeles y tamaños',
   description: 'Lo que cambia la resolución al pasar un PDF a JPG, medido en nuestros PDF de prueba: los píxeles de cada página, el peso del archivo y cuándo conviene JPG o PNG.',
   h1: 'Qué resolución elegir para pasar un PDF a JPG',
-  lead: 'Una página de PDF no tiene píxeles hasta que algo la dibuja. La resolución que eliges decide cuántos recibe y cuánto van a pesar las imágenes.',
+  lead: 'Una página de PDF solo tiene píxeles al dibujarse. La resolución decide cuántos, y cuánto pesa la imagen.',
   changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'El texto y los dibujos de un PDF se guardan como formas, no como puntos. Para convertir una página en un JPG, un programa dibuja la página sobre una cuadrícula de píxeles, y la resolución, en píxeles por pulgada, define qué tan fina es esa cuadrícula. Si pides más, cada letra recibe más píxeles y el archivo crece.',

@@ -10,7 +10,7 @@ const texts: FileGuideTexts = {
     'Text and drawings in a PDF are stored as shapes, not as dots. To turn a page into a JPG, a program draws the page onto a grid of pixels, and the resolution, in pixels per inch, sets how fine that grid is. Ask for more and every letter gets more pixels, and the file gets bigger.',
     'PDF to JPG offers {lowPpi} for the screen, {mediumPpi} for general use and {highPpi} for printing. Here is what each one gave on {files_word} of our test PDFs, so you can pick the smallest that does the job.',
   ],
-  toolHeading: 'Turn your PDF pages into images here',
+  toolHeading: 'Turn PDF pages into images',
   toolIntro: 'Drop a PDF and each page becomes a JPG at {mediumPpi}, in this browser tab, with nothing uploaded. Change the resolution or the format and the images are made again; several pages come back as one ZIP.',
   sections: [
     {
