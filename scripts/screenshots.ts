@@ -241,7 +241,8 @@ async function main(): Promise<void> {
       await page.close();
 
       page = await open(browser, theme, 360, '/404.html');
-      await shot(page.locator('.fo-hero'), `not-found-hero-${theme}-360`);
+      // F13b (UX-17 A; DECISOES § I-2): the 404 has no hero any more; its view (the text, the sea and the search) is the shot.
+      await shot(page.locator('.fo-view--404'), `not-found-hero-${theme}-360`);
       await page.close();
 
       page = await open(browser, theme, 360, '/support/');
