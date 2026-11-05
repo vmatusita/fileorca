@@ -59,7 +59,7 @@ export default {
   panel: {
     formats: 'JPG, PNG ou WebP',
     progressLabel: 'Comprimindo as imagens',
-    done: 'Prontinho! Sua imagem ficou {percent} mais leve e cabe em 1 MB.',
+    done: 'Prontinho! Ficou {percent} mais leve e cabe em 1 MB.',
     doneMany: 'Prontinho! Suas {count} imagens ficaram com até 1 MB cada.',
     placardLabel: 'mais leve',
     options: {

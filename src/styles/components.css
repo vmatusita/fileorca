@@ -231,6 +231,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .fo-crumbs .fo-icon { width: 16px; height: 16px; }
 .fo-crumbs [aria-current] { color: var(--ink); font-weight: 600; }
+/* F13b (group 22, F13a R-c-3; DECISOES § M-3): the image presets at 320 px. Their trail of four steps took three rows, and
+   at 320 x 640 the Choose button went up to 25px under the cookie notice (35px with the fallback). Under 360 px the hub
+   step leaves the trail, which keeps two rows. */
+@media (max-width: 359.98px) { .fo-crumbs--skip-hub > li:nth-child(2) { display: none; } }
 .fo-top { display: grid; gap: var(--space-2); padding-right: 96px; }
 @media (min-width: 768px) { .fo-top { padding-right: 136px; } }
 /* F13a (UX-04 A; F4-F7 f-2; DECISOES § 463): on the tool pages the H1 takes the whole measure, and only the seal row leaves
@@ -427,6 +431,22 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-2); }
 .fo-result__more .fo-btn { min-height: var(--tap-min); }
 @media (max-width: 767px) { .fo-result__more .fo-btn--ghost { padding: 0 6px; font-size: 15px; } }
+/* F13b · the result at 320 px (group 22; DECISOES § M-1 and § M-2).
+   R-a-6: from 340 to 440 px the seal of the page wraps to two lines, and the top corner of the placard (turned -4°) went
+   up to 3.9px into its box. The placard loses 6px at its top (padding and the line of the number) and hangs 6px less, so
+   its bottom, and the one line of the sentence it takes, stay where they were.
+   R-c-1: under 340 px the placard took the first two lines of the sentence and the two ghost buttons went to two rows in
+   pt and es, so the result of a phone photo grew past the rectangle (418px for 356 in "para 100 KB"). There the
+   placard leaves the sentence (the sentence says the same number, and the placard is aria-hidden), and the buttons keep
+   one row with 14px text and 2px sides. */
+@media (max-width: 440px) {
+  .fo-result:has(> .fo-result__sea) .fo-placard { margin-top: -56px; padding-top: 4px; }
+  .fo-result:has(> .fo-result__sea) .fo-placard__n { line-height: 42px; }
+}
+@media (max-width: 339.98px) {
+  .fo-result:has(> .fo-result__sea) .fo-placard { display: none; }
+  .fo-result__more .fo-btn--ghost { padding: 0 2px; font-size: 14px; }
+}
 @media (min-width: 768px) {
   .fo-result:has(> .fo-result__sea) .fo-result__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
   .fo-result:has(> .fo-result__sea) .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
