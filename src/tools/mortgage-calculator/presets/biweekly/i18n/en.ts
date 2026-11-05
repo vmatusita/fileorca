@@ -10,6 +10,7 @@ export default {
     ...homePanel,
     view: {
       label: 'Interest saved',
+      moreMeta: '{extras} a month in your payment',
       placard: 'interest saved',
       sentence: 'Paying {half} every two weeks instead of {payment} a month ends the loan in {time} instead of {base}, and saves {interest} of interest.',
       principal: 'Principal',

@@ -40,3 +40,8 @@ O elemento (`<button>` para ação, `<a>` para navegação ou download com `href
 | Um `sun` por tela | Amarelo em qualquer outra coisa (aviso, destaque, card de café) |
 | Deixar o Baixar a 150px de qualquer AdSlot | Botão com cara de anúncio, ou anúncio com cara de botão |
 | Ghost para sair | Dois botões primários lado a lado |
+
+## Mudanças de regra (F13b, DECISOES § C-8; F7 f-9 e f-10)
+
+- **O tamanho no Baixar.** Antes (Texto): "O tamanho entra depois de um ponto médio: Download · 780 KB." Depois: quando o tamanho não cabe na linha do Baixar, ele vai sempre na segunda linha, sem o ponto médio, no botão de 60 px (hoje, só o Baixar PNG do QR: "Download PNG" e, embaixo, "481 × 481 px").
+- **O Baixar que some.** O "Baixar nunca aparece desabilitado" (Estados) passa a valer também no QR e nas calculadoras: sem código ou sem resultado válido, o Baixar não aparece, e o lugar dele guarda a altura e diz por quê ("Nothing to download yet: type a link or some text."; na calculadora, a mensagem do erro no card). Antes: o Baixar do QR e o PDF da calculadora ficavam desligados e cinza.

@@ -154,6 +154,7 @@ export function panelData(id: AnyCalcId, lang: Lang, options: { initial?: Values
       check: ICONS.check,
       info: ICONS.info,
       chevron: ICONS['chevron-right'],
+      down: ICONS['chevron-down'],
       alert: ICONS.alert,
       trash: ICONS.trash,
       arrow: ICONS['arrow-right'],

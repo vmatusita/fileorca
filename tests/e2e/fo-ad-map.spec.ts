@@ -120,7 +120,9 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
       break;
     case 'calc-dinheiro':
     case 'calc-casa-saude':
-      if (!before.startsWith('div#fo-tool-root') || !first.after.startsWith('div#fo-calc-schedule')) fail(`o 1º da calculadora entre ${before} e ${first.after}`);
+      // F13b (DECISOES § C-5): the schedule is part of the island, before the chips; the first ad comes right after the island,
+      // before "How to use" (before, it sat between the island and the schedule's own root).
+      if (!before.startsWith('div#fo-tool-root') || !first.after.includes('[data-content=how]')) fail(`o 1º da calculadora entre ${before} e ${first.after}`);
       break;
     case 'guide-arquivos':
     case 'guide-dinheiro':

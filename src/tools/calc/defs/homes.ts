@@ -21,7 +21,7 @@ import {
   type RefinanceResult,
 } from '../../../calc/loans.ts';
 import { duration, loanTable } from '../view.ts';
-import { mortgageInput } from './mortgage.ts';
+import { HOME_COSTS, mortgageInput } from './mortgage.ts';
 import { HOME_EXAMPLE, count, downOf, homeFields, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, Part, Table, Values } from '../types.ts';
 
@@ -178,6 +178,7 @@ function extraInput(v: Values): ExtraPaymentsInput {
 
 export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> = {
   id: 'mortgage-calculator-extra-payments',
+  disclose: HOME_COSTS,
   fields: [
     ...homeFields().slice(0, 3),
     money('em', 0, 1_000_000, { main: true, half: true }),
@@ -211,6 +212,7 @@ export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> 
         }),
       },
       placard: { n: dollars(r.interestSaved, l), l: text(v, 'placard') },
+      more: fmt(text(v, 'moreMeta'), { extras: cash(r.monthlyTotal - r.payment, l) }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestPart'), cents: r.extra.totalInterest } },
       compare: {
         a: { name: text(v, 'without'), rows: scenario(r.base) },
@@ -234,6 +236,7 @@ export const extraPaymentsDef: CalcDef<ExtraPaymentsInput, ExtraPaymentsResult> 
 export const biweeklyDef: CalcDef<MortgageInput, BiweeklyResult> = {
   id: 'mortgage-calculator-biweekly',
   fields: homeFields(),
+  disclose: HOME_COSTS,
   initial: HOME_EXAMPLE,
   toInput: mortgageInput,
   compute: mortgageBiweekly,
@@ -258,6 +261,7 @@ export const biweeklyDef: CalcDef<MortgageInput, BiweeklyResult> = {
         }),
       },
       placard: { n: dollars(r.interestSaved, l), l: text(v, 'placard') },
+      more: fmt(text(v, 'moreMeta'), { extras: cash(r.monthlyTotal - r.payment, l) }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestPart'), cents: r.biweekly.totalInterest } },
       compare: {
         a: { name: text(v, 'monthlyName'), rows: scenario(r.payment, r.monthly, r.monthly.count) },

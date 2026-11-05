@@ -18,6 +18,8 @@ interface FieldBase {
   main?: boolean;
   /** Half a row on a phone, next to the other half (two short fields side by side). */
   half?: boolean;
+  /** Below 360 px a half field whose label and tag do not fit half a row takes the whole row (F13b, F7 obs 3; § C-7). */
+  wide?: boolean;
 }
 
 /**
@@ -95,7 +97,7 @@ export interface Scenario {
  * A cell of the schedule: money (cents), a measure (a whole number of 10^-decimals, F7), or plain text. The CSV writes cents
  * as 1896.20 and a measure with its decimals, never with a thousands separator.
  */
-export type Cell = { cents: number } | { text: string } | { scaled: number; decimals: number };
+export type Cell = { cents: number } | { text: string; short?: string } | { scaled: number; decimals: number };
 
 export interface Table {
   caption: string;
@@ -103,6 +105,8 @@ export interface Table {
   rows: Cell[][];
   /** Rows grouped by loan year: the year rows are buttons, the first year starts open. */
   groups?: { label: string; end: Cell; from: number; to: number }[];
+  /** Fixed columns, the first at 30 % (the dates of the ovulation; F13b, F7 obs 2). */
+  even?: boolean;
   /** The column of the balance, where a year row shows the balance at its end; the last one when not given (DECISOES § 256). */
   endColumn?: number;
 }
@@ -112,13 +116,29 @@ export interface CalcView {
   hero: { label: string; value: string; unit?: string; sentence: Part[] };
   /** The account cannot be done (a payment that does not cover the interest): said in the hero. */
   problem?: string;
+  /**
+   * The field the problem points to, by its key (the payment that does not cover the interest): it is marked like a field
+   * out of its range, with aria-invalid and the card's message in its description (F4 ACE-11; F13b, DECISOES § C-2).
+   */
+  problemField?: string;
   /** The one number the Oli's placard shows. */
   placard: { n: string; l: string };
   /** The rows of the table are the result itself (the areas, the cycles, the dates): shown open, with no Show button (F7). */
   open?: boolean;
   /** Principal against interest, or deposits against interest (cents). */
   split?: { a: { label: string; cents: number }; b: { label: string; cents: number } };
+  /** The other system in the card, under the Download (the SAC × PRICE: "Na PRICE: R$ 4.534,12 por mês"; F13b, DECISOES § C-6). */
+  versus?: Part[];
+  /**
+   * Two bars on one scale, in place of the split (the SplitChart, pair variant; the SAC × PRICE): the same principal and the
+   * interest of each system. `name` is the name of the chart, `interest` the line of its legend for the interest.
+   */
+  pair?: { name: string; principal: { label: string; cents: number }; interest: Part[]; rows: { name: string; cents: number }[] };
   compare?: { a: Scenario; b: Scenario; diff: Part[] };
+  /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
+  more?: string;
+  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § C-5). */
+  scheduleMeta?: string;
   /** The schedule, built only when the person opens it or exports. */
   table: () => Table;
   /** The results, for the PDF. */
@@ -130,6 +150,8 @@ export interface CalcView {
 export interface FieldTexts {
   label: string;
   help?: string;
+  /** Said to a screen reader only, as the field's description, when the short label leaves out a word (F13b, Idiomas R2-03). */
+  desc?: string;
   /** The range in words, shown for any value outside it: "Enter a rate from 0 to 40%." */
   error: string;
   /** Shown when the value passes the field it depends on: "Can't be more than the home price." */
@@ -145,6 +167,8 @@ export interface CalcPanelTexts {
   options?: Record<string, Record<string, string>>;
   /** Heading of the fields that come after the result on a phone. */
   moreHeading?: string;
+  /** Title of the block that folds (CalcDef.disclose), when it is not the moreHeading (F13b, DECISOES § C-4). */
+  disclose?: string;
   /** Strings the definition's view fills in ({placeholders}). */
   view: Record<string, string>;
   /** Premises in force, for the PDF. */
@@ -165,12 +189,12 @@ export interface CalcSharedTexts {
   exportOffline: string;
   /** Shown while a field is wrong: the result stays the last one that worked. */
   stale: string;
+  /** In the card while a field is wrong (F13b): the field and its value in the last result, "Last result that worked: Rate 6.5%." */
+  lastWorked: string;
   /** Added to a field's error when what is typed is not a number of the page's language: how it writes decimals. */
   decimalHint: string;
   nextLabel: string;
   scheduleHeading: string;
-  showSchedule: string;
-  hideSchedule: string;
   /** "Year {n}" (a loan year, never a calendar year) and "{n}" for a payment number. */
   year: string;
   /** Column heads of a loan schedule. */
@@ -217,14 +241,20 @@ export interface CalcPanelData {
   cheer: boolean;
   /** The colour of the chips: the money category or the home and health one (violet fill, F7). */
   cat: 'money' | 'home';
-  /** Icons the island draws, read at build: pdf, table, link, check, info, chevron, alert, trash, arrow. */
-  icons: Record<'pdf' | 'table' | 'link' | 'check' | 'info' | 'chevron' | 'alert' | 'trash' | 'arrow', string>;
+  /** Icons the island draws, read at build: pdf, table, link, check, info, chevron, down (the chevron of a block), alert, trash, arrow. */
+  icons: Record<'pdf' | 'table' | 'link' | 'check' | 'info' | 'chevron' | 'down' | 'alert' | 'trash' | 'arrow', string>;
 }
 
 /** The behaviour of one calculator (never serialised). */
 export interface CalcDef<I = unknown, R = unknown> {
   id: AnyCalcId;
   fields: FieldSpec[];
+  /**
+   * The fields that fold into a block after the result, closed when the page opens, with their total in its title (the
+   * taxes, insurance and fees of the mortgage and its presets, the TR of the SAC × PRICE; F13b, DECISOES § C-4). Their
+   * boxes are in the page only while the block is open.
+   */
+  disclose?: readonly string[];
   /** The example the page starts with: `toInput(initial)` is the page-example case of the oracle. */
   initial: Values;
   /**

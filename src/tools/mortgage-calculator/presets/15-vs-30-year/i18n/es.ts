@@ -11,8 +11,9 @@ export default {
       p: homePanel.fields['p']!,
       d: homePanel.fields['d']!,
       dp: homePanel.fields['dp']!,
-      r15: { label: 'Tasa a 15', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
-      r30: { label: 'Tasa a 30', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
+      // F13b (Idiomas R2-03; DECISOES § C-7): the years in the accessible description, not in the label (§ 124).
+      r15: { label: 'Tasa a 15', desc: 'Tasa a 15 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
+      r30: { label: 'Tasa a 30', desc: 'Tasa a 30 años', suffix: '%', error: 'Escribe una tasa de 0 a 40 %.' },
     },
     view: {
       label: 'Pago a 15 años',

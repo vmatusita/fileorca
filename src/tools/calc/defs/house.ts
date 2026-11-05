@@ -238,9 +238,11 @@ export const paintDef: CalcDef<PaintInput, PaintResult> = {
     measure('ar', 2, 100, 2_000_000, { main: true, half: true, when: { key: 'mo', is: 'area' } }),
     count('cv', 100, 1_000, { half: true, example: true }),
     count('dr', 0, 50, { half: true }),
-    measure('da', 2, 100, 10_000, { half: true, example: true }),
-    count('wi', 0, 100, { half: true }),
-    measure('wn', 2, 100, 10_000, { half: true, example: true }),
+    // F13b (F7 obs 3 with the F10 p-3; DECISOES § C-7): below 360 px the door area, the windows and the window area take the
+    // whole row, so "Door area" and "Window area" stay on one line with their tag.
+    measure('da', 2, 100, 10_000, { half: true, example: true, wide: true }),
+    count('wi', 0, 100, { half: true, wide: true }),
+    measure('wn', 2, 100, 10_000, { half: true, example: true, wide: true }),
   ],
   initial: PAINT_EXAMPLE,
   toInput: (values) => ({
@@ -353,7 +355,8 @@ export const btuDef: CalcDef<BtuInput, BtuResult> = {
     measure('ar', 2, 10_000, 250_000, { main: true, half: true }),
     count('pe', 1, 20, { main: true, half: true }),
     { kind: 'choice', key: 'su', options: ['normal', 'shade', 'sun'], main: true },
-    { kind: 'select', key: 'ki', options: ['no', 'yes'], main: true, half: true },
+    // F13b (F7 f-13; DECISOES § C-7): the kitchen goes after the result, so the note of the sunlight fits above the fold.
+    { kind: 'select', key: 'ki', options: ['no', 'yes'], half: true },
   ],
   initial: BTU_EXAMPLE,
   toInput: (values) => ({

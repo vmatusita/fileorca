@@ -5,6 +5,10 @@
 // half-second pause, unlike the image tools' field); a value outside the field's fixed range shows the
 // range in words (aria-invalid, aria-describedby, the alert icon) and the last result stays. Leaving the
 // field writes the number back in the page's format. The typed number never goes to the URL or an event.
+// F13b (UX-12 A; DECISOES § C-2): the message no longer sits under the field. The field keeps its stroke (2 px of border
+// and 1 px of box-shadow, so it never grows) and the alert icon before its label, and the message is said in the card
+// (ResultHero, #fo-rhero-error), which aria-describedby points to; the card's live region is the one voice (§ 102). The alert
+// icon is inside the box, before the unit: before the label it took a second line on 40 labels at 360 px and moved the card.
 // The label and the body (the box, the help, the error) are the two rows the calculator grid shares between
 // two fields side by side, so their boxes line up whatever is above or under them (DECISOES § 137).
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -13,7 +17,11 @@ import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import { parseScaled, type NumberLang } from '../../calc/parse.ts';
 import { SETTLE_MS, decimalsOf, display, inRange } from './form.ts';
+import type { FieldError } from './store.ts';
 import type { NumberSpec } from './types.ts';
+
+/** The id of the card's message, which a field in error is described by (ResultHero). */
+export const HERO_ERROR_ID = 'fo-rhero-error';
 
 export interface CalcFieldProps {
   id: string;
@@ -29,6 +37,8 @@ export interface CalcFieldProps {
   lang: NumberLang;
   label: string;
   help?: string | undefined;
+  /** A description for the screen reader only: the words a short label leaves out ("Tasa a 15 años"; Idiomas R2-03). */
+  desc?: string | undefined;
   /** The range in words. */
   error: string;
   /** The value passes the field it depends on: this text is shown while it does. */
@@ -40,14 +50,18 @@ export interface CalcFieldProps {
   /** The "example" tag of a typed rate. */
   tag?: string | undefined;
   half?: boolean | undefined;
+  /** Takes the whole row below 360 px (FieldBase.wide). */
+  wide?: boolean | undefined;
   /** Replaces the suffix: the unit menu of the down payment. */
   unit?: ComponentChildren;
-  /** Tells the calculator whether the field shows its range error: the result on screen is then stale (§ 116). */
-  report?: ((id: string, wrong: boolean) => void) | undefined;
+  /** Tells the calculator the error the field shows, or null: the result on screen is then stale (§ 116) and the card says it. */
+  report?: ((id: string, error: FieldError | null) => void) | undefined;
+  /** A problem of the account points to this field (F4 ACE-11): marked as in error, with no message of its own. */
+  flagged?: boolean | undefined;
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit, report } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
@@ -64,13 +78,6 @@ export default function CalcField(props: CalcFieldProps) {
     }
   }, [value, kind, lang, decimals]);
 
-  // A range error marks the result as the last one, with the line under it and the PDF and the CSV off (DECISOES § 116;
-  // review F7, g-1: an age under the minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276).
-  useEffect(() => {
-    report?.(id, wrong);
-    return () => report?.(id, false);
-  }, [report, id, wrong]);
-
   const read = (text: string): number | null => {
     const parsed = parseScaled(text, lang, places, negative);
     return parsed !== null && inRange({ min, max }, parsed) ? parsed : null;
@@ -83,19 +90,31 @@ export default function CalcField(props: CalcFieldProps) {
   const unreadable =
     wrong && hint !== undefined && places > 0 && parseScaled(draft, lang, places, negative) === null && parseScaled(swapped, lang, places, negative) !== null;
   const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
-  const errorId = `${id}-error`;
+  // An error marks the result as the last one, with no PDF and the CSV off (DECISOES § 116; review F7, g-1: an age under the
+  // minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276), and the card says it (F13b).
+  useEffect(() => {
+    report?.(id, message ? { message, label } : null);
+    return () => report?.(id, null);
+  }, [report, id, message, label]);
+  const marked = message !== undefined || flagged;
   const helpId = `${id}-help`;
   // The unit is part of what the field is: a screen reader says "Thickness, in" and not only "Thickness" (review F7, d-1; DECISOES § 279).
   const prefixId = `${id}-prefix`;
   const suffixId = `${id}-unit`;
   const affix = !unit && suffix ? suffixId : null;
-  const described = [prefix ? prefixId : null, affix, message ? errorId : null, help ? helpId : null].filter(Boolean).join(' ');
+  const descId = `${id}-desc`;
+  const described = [desc ? descId : null, prefix ? prefixId : null, affix, marked ? HERO_ERROR_ID : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
-    <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={message ? 'error' : undefined}>
+    <div class={half ? (wide ? 'fo-field fo-field--half fo-field--wide' : 'fo-field fo-field--half') : 'fo-field'} data-state={marked ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
         <span>{label}</span>
         {tag && <span class="fo-tag">{tag}</span>}
       </label>
+      {desc && (
+        <span class="fo-sr" id={descId}>
+          {desc}
+        </span>
+      )}
       <div class="fo-field__body">
         <div class="fo-input">
           {prefix && (
@@ -111,7 +130,7 @@ export default function CalcField(props: CalcFieldProps) {
             autocomplete="off"
             spellcheck={false}
             value={draft}
-            aria-invalid={message ? 'true' : undefined}
+            aria-invalid={marked ? 'true' : undefined}
             aria-describedby={described || undefined}
             onInput={(event) => {
               const text = event.currentTarget.value;
@@ -130,6 +149,12 @@ export default function CalcField(props: CalcFieldProps) {
               if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />
+          {/* The alert icon inside the box, before the unit: never the colour alone, and no label goes to a second line (§ C-2). */}
+          {marked && (
+            <span class="fo-input__flag" aria-hidden="true">
+              <Icon raw={alertIcon} />
+            </span>
+          )}
           {unit ??
             (suffix && (
               <span class="fo-input__affix" id={suffixId}>
@@ -140,12 +165,6 @@ export default function CalcField(props: CalcFieldProps) {
         {help && (
           <p class="fo-field__help" id={helpId}>
             {help}
-          </p>
-        )}
-        {message && (
-          <p class="fo-field__error" id={errorId} role="alert">
-            <Icon raw={alertIcon} />
-            {message}
           </p>
         )}
       </div>

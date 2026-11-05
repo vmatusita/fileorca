@@ -9,11 +9,11 @@ export default {
     fields: {
       ar: { label: 'Room area', suffix: 'sq ft', error: 'Enter an area from 100 to 2,500 sq ft, the range of the Energy Star table.' },
       pe: { label: 'People in the room', error: 'Enter from 1 to 20 people.' },
-      su: { label: 'Sunlight', error: '' },
+      su: { label: 'Sunlight', help: "Shade takes 10% off the table's size; sun adds 10%.", error: '' },
       ki: { label: 'In a kitchen', error: '' },
     },
     options: {
-      su: { normal: 'Normal', shade: 'Heavy shade', sun: 'Very sunny' },
+      su: { normal: 'Normal', shade: 'Shade', sun: 'Sun' },
       ki: { no: 'No', yes: 'Yes' },
     },
     view: {

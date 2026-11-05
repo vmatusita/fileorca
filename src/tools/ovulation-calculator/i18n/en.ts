@@ -14,6 +14,7 @@ export default {
       label: 'Estimated ovulation',
       sentence: 'Your fertile window is about {from} to {to}, and your next period about {next}. The next six cycles are in the table below.',
       window: '{from} to {to}',
+      rangeTo: 'to',
       fertile: 'Fertile window',
       next: 'Next period',
       scheduleHeading: 'Your next six cycles',

@@ -134,10 +134,14 @@ for (const { id, lang } of PAGES) {
     await hydrated(page);
     await dismissCookies(page);
 
+    // F13b (DECISOES § C-4): the costs that fold into a block are in the page once it is open.
+    for (const fold of await page.locator('#fo-tool-root [aria-controls="fo-calc-more-fields"][aria-expanded="false"]').all()) await fold.click();
     const def = DEFS[id];
     const typed: { text: string; kind: NumberSpec['kind'] }[] = [];
     const values: Values = { ...def.initial };
-    const download = page.locator('.fo-export .fo-btn--download');
+    // F13b (DECISOES § C-2): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
+    const download = page.locator('.fo-rhero .fo-btn--download');
+    const frames = () => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     /** The sentinels left in the fields, the ones the copied link carries. */
     const kept: { text: string; kind: NumberSpec['kind'] }[] = [];
     for (const field of numberFields(def.fields, values)) {
@@ -154,7 +158,8 @@ for (const { id, lang } of PAGES) {
         typed.push({ text, kind: field.spec.kind });
         // Later limits (a balloon month and the term) read the values already typed.
         values[field.spec.key] = Math.round(Number(text) * SCALE[field.spec.kind]);
-        if (await download.isEnabled()) {
+        await frames();
+        if ((await download.count()) > 0) {
           left = text;
           break;
         }
@@ -172,16 +177,17 @@ for (const { id, lang } of PAGES) {
       seen.push(JSON.stringify(await dataLayer(page)), await everywhere(page));
     };
 
-    await page.getByRole('button', { name: new RegExp(escape(SHARED[lang].island.showSchedule), 'i') }).click();
+    // F13b (DECISOES § C-5): the schedule is a block of the island, named by its heading.
+    await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     await expect(page.locator('#fo-schedule-table table')).toBeVisible();
     const names: string[] = [];
-    for (const button of [page.locator('.fo-export .fo-btn').nth(1), page.locator('.fo-export .fo-btn--download')]) {
+    for (const button of [page.locator('.fo-export .fo-btn').nth(0), download]) {
       const download = page.waitForEvent('download');
       await button.click();
       names.push((await download).suggestedFilename());
     }
     expect(names).toEqual([`${own.file}.csv`, `${own.file}.pdf`]);
-    await page.locator('.fo-export .fo-btn').nth(2).click();
+    await page.locator('.fo-export .fo-btn').nth(1).click();
     await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText(new RegExp(escape(SHARED[lang].island.copied), 'i'));
     const copied = await page.evaluate(() => (window as unknown as { foCopied?: string }).foCopied ?? (document.querySelector<HTMLInputElement>('#fo-calc-link')?.value ?? ''));
     expect(copied).toMatch(/#v=1&/);

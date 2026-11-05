@@ -85,7 +85,7 @@ export default {
       empty: 'Tu código QR aparece aquí mientras escribes.',
       ready: 'Tu código QR está listo para descargar.',
     },
-    download: { png: 'Descargar PNG', svg: 'Descargar SVG', pngMeta: '{side} × {side} px' },
+    download: { png: 'Descargar PNG', svg: 'Descargar SVG', pngMeta: '{side} × {side} px', wait: 'Todavía no hay nada para descargar: escribe un enlace o un texto.' },
     errors: {
       empty: 'Uy, todavía no hay nada para poner en el código. Escribe un enlace o un texto.',
       long: 'Uy, este texto pasa de {max} caracteres, el máximo de un código QR. Cada letra con acento o tilde (como á, é o ñ) cuenta como 2, y cada emoji cuenta como 4. Acorta el texto para seguir.',

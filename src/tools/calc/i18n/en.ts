@@ -4,6 +4,8 @@ import type { CalcSharedTexts } from '../types.ts';
 export interface CalcPageShared {
   seal: string;
   reviewed: string;
+  /** The one-line signature of a calculator page (F13b, G-23): the name and the short date. */
+  signed: string;
   firstPublished: string;
   readOn: string;
   exampleInputs: string;
@@ -19,7 +21,7 @@ export default {
   island: {
     example: 'example',
     pdf: 'Download PDF',
-    csv: 'CSV',
+    csv: 'Download CSV',
     copyLink: 'Copy link',
     copied: 'Link copied',
     decimalHint: 'Use a dot for the decimals, like 6.5.',
@@ -27,10 +29,9 @@ export default {
     exportFailed: "Oli couldn't load the PDF maker. Reload the page and try again.",
     exportOffline: "No internet, and the PDF maker isn't saved yet. Download a PDF once with internet and it works offline too.",
     stale: 'Fix the highlighted field to update the result.',
+    lastWorked: 'Last result that worked: {label} {value}.',
     nextLabel: 'Next step',
     scheduleHeading: 'Payment schedule',
-    showSchedule: 'Show the full schedule',
-    hideSchedule: 'Hide the schedule',
     year: 'Year {n}',
     columns: { number: 'Payment', payment: 'Amount', principal: 'Principal', interest: 'Interest', balance: 'Balance' },
     duration: { year: '1 year', years: '{n} years', month: '1 month', months: '{n} months', join: ' ', none: 'no time' },
@@ -52,6 +53,7 @@ export default {
   page: {
     seal: 'Your numbers stay on your device',
     reviewed: 'Reviewed by {name} on {date}.',
+    signed: 'Reviewed by {name} · {date}',
     firstPublished: 'First published {date}.',
     readOn: 'Read on {date}.',
     exampleInputs: 'You enter',

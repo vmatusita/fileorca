@@ -15,9 +15,11 @@ export default {
       eo: { label: 'One extra payment', prefix: '$', error: 'Enter an extra payment from $0 to $100,000,000.' },
       eom: { label: 'With payment number', error: 'Enter a payment number from 1 to 480.', over: "Can't come after the last payment of the term." },
     },
-    moreHeading: 'Loan term, more extra payments and costs',
+    moreHeading: 'Loan term and more extra payments',
+    disclose: 'Taxes, insurance and fees',
     view: {
       label: 'Interest saved',
+      moreMeta: '{extras} a month in your payment',
       placard: 'interest saved',
       sentence: 'With the extra payments the loan is paid off in {time} instead of {base}, {saved} sooner, and you save {interest} of interest.',
       same: 'Without an extra payment the loan runs its {base}. Add an extra payment to see what it saves.',

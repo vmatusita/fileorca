@@ -115,6 +115,8 @@ export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
       return {
         hero: { label: text(v, 'labelTime'), value: '-', sentence: [] },
         problem,
+        // A deposit that never reaches the goal is the field to change (F4 ACE-11; F13b, DECISOES § C-2).
+        ...(r.error === 'too-long' ? { problemField: 'dep' } : {}),
         placard: { n: '-', l: text(v, 'placardTime') },
         table: () => ({ caption: text(v, 'caption'), head: [text(v, 'month')], rows: [] }),
         summary: [[text(v, 'labelTime'), problem]],

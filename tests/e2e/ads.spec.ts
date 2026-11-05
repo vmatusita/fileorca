@@ -514,7 +514,10 @@ test.describe('the header stays 150px from every AdSlot and its open menus from 
 // schedule closed and with one year open. Measured on top of TARGETS: the ResultHero, the three ExportBar buttons,
 // the ScenarioCompare, the schedule section and its table. No AdSlot above the tool on a phone, inside the island,
 // between the fields or inside the schedule; on a phone the result sits above the fold, right under the main fields.
-const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-export .fo-btn, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
+// F13b (UX-12 A, decision 10; DECISOES § C-2, § C-4 and § C-11): the card with the Download PDF in it and the message of an
+// error in its place, the row of Download CSV and Copy link under it, the block of costs that folds (its button and, open, the
+// echo of the result), and the schedule, now in the island before the chips.
+const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-rhero__get, .fo-rhero__error, .fo-export .fo-btn, .fo-calc__fold, .fo-disclose, .fo-calc__echo, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
 // F6: the Spanish calculators and the Brazilian ones too, read from the registry, with the result above the fold.
 // Languages adjustment (decision 4): every calculator and preset in Spanish (moneyPage(id, 'es'), the 18 of the English
 // list) and the five money guides in Spanish; the result of each Spanish calculator is held above the fold at 360×740 too.
@@ -561,6 +564,13 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
         expect((number?.y ?? 999) + (number?.height ?? 0), 'número do resultado acima da dobra a 360×740').toBeLessThanOrEqual(740);
       }
       await measure('cronograma fechado');
+      // F13b (DECISOES § C-11): the block of costs open, where the page has one, with its fields and the echo of the result.
+      const fold = page.locator('[aria-controls="fo-calc-more-fields"]');
+      if (await fold.count()) {
+        await fold.click();
+        await expect(page.locator('#fo-calc-more-fields input').first()).toBeVisible();
+        await measure('bloco de custos aberto');
+      }
       await page.locator('#fo-calc-schedule button[aria-controls]').click();
       await expect(page.locator('.fo-amort tbody tr').first()).toBeVisible();
       await measure('um ano aberto');
@@ -661,7 +671,9 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
       if (first) {
         const field = first.kind === 'list' ? `#fo-calc-${first.key}0${first.item[0]?.key ?? ''}` : `#fo-calc-${first.key}`;
         await page.locator(field).fill(outOfRange(first.kind === 'list' ? (first.item[0] ?? first) : first));
-        await expect(page.locator(`${field}-error`)).toBeVisible();
+        // F13b (DECISOES § C-2): the words are in the card, in the place of the Download.
+        await expect(page.locator(field)).toHaveAttribute('aria-invalid', 'true');
+        await expect(page.locator('#fo-rhero-error')).toBeVisible();
         await measure('campo fora da faixa');
       }
       // The other unit system, as its link opens it.

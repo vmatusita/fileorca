@@ -6,7 +6,7 @@ export default {
   island: {
     example: 'exemplo',
     pdf: 'Baixar PDF',
-    csv: 'CSV',
+    csv: 'Baixar CSV',
     copyLink: 'Copiar link',
     copied: 'Link copiado',
     decimalHint: 'Use vírgula nos decimais, como 11,5.',
@@ -14,10 +14,9 @@ export default {
     exportFailed: 'A Oli não conseguiu carregar o gerador de PDF. Recarregue a página e tente de novo.',
     exportOffline: 'Sem internet, e o gerador de PDF ainda não foi guardado. Baixe um PDF uma vez com internet e ele passa a funcionar offline também.',
     stale: 'Corrija o campo destacado para atualizar o resultado.',
+    lastWorked: 'Último resultado que valeu: {label} {value}.',
     nextLabel: 'Próximo passo',
     scheduleHeading: 'Cronograma de parcelas',
-    showSchedule: 'Ver o cronograma completo',
-    hideSchedule: 'Esconder o cronograma',
     year: 'Ano {n}',
     columns: { number: 'Nº', payment: 'Parcela', principal: 'Amortização', interest: 'Juros', balance: 'Saldo devedor' },
     duration: { year: '1 ano', years: '{n} anos', month: '1 mês', months: '{n} meses', join: ' e ', none: 'nenhum tempo' },
@@ -39,6 +38,7 @@ export default {
   page: {
     seal: 'Seus números ficam no seu aparelho',
     reviewed: 'Revisado por {name} em {date}.',
+    signed: 'Revisado por {name} · {date}',
     firstPublished: 'Publicado pela primeira vez em {date}.',
     readOn: 'Lido em {date}.',
     exampleInputs: 'Você digita',

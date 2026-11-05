@@ -192,16 +192,17 @@ test.describe('the calculator events', () => {
     await page.goto('/mortgage-calculator/biweekly/');
     await hydrated(page);
     await dismissCookies(page);
+    // F13b (DECISOES § C-2): Download CSV and Copy link under the card; the Download PDF in it.
     const buttons = page.locator('.fo-export .fo-btn');
     const csv = page.waitForEvent('download');
-    await buttons.nth(1).click();
+    await buttons.nth(0).click();
     await csv;
     expect(await lastEvent(page, 'export_click')).toEqual(['event', 'export_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', format: 'csv' }]);
     const pdf = page.waitForEvent('download');
-    await buttons.nth(0).click();
+    await page.locator('.fo-rhero .fo-btn--download').click();
     await pdf;
     expect(await lastEvent(page, 'export_click')).toEqual(['event', 'export_click', { tool: 'mortgage-calculator-biweekly', lang: 'en', format: 'pdf' }]);
-    await buttons.nth(2).click();
+    await buttons.nth(1).click();
     expect(await lastEvent(page, 'share_click')).toEqual(['event', 'share_click', { tool: 'mortgage-calculator-biweekly', lang: 'en' }]);
     const chip = page.locator('.fo-calc__next a.fo-chip').first();
     const href = (await chip.getAttribute('href')) ?? '';
@@ -236,12 +237,12 @@ test.describe('the home and health calculator events', () => {
   /** Saves the CSV and the PDF, copies the link and clicks the first chip (its link held back), as a person would. */
   async function exportShareAndChip(page: Page): Promise<string> {
     const buttons = page.locator('.fo-export .fo-btn');
-    for (const button of [buttons.nth(1), buttons.nth(0)]) {
+    for (const button of [buttons.nth(0), page.locator('.fo-rhero .fo-btn--download')]) {
       const saved = page.waitForEvent('download');
       await button.click();
       await saved;
     }
-    await buttons.nth(2).click();
+    await buttons.nth(1).click();
     const chip = page.locator('.fo-calc__next a.fo-chip').first();
     const href = (await chip.getAttribute('href')) ?? '';
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
@@ -259,7 +260,7 @@ test.describe('the home and health calculator events', () => {
     expect(await sent(page), 'nada no carregamento').toEqual([]);
     // Out of the range (0.01 to 300 ft): the field says so, the result stays, nothing is sent.
     await page.locator('#fo-calc-a0x').fill('987.65');
-    await expect(page.locator('#fo-calc-a0x-error')).toBeVisible();
+    await expect(page.locator('#fo-rhero-error')).toBeVisible();
     expect(await sent(page), 'nada com um valor fora da faixa').toEqual([]);
     for (const [field, value] of [['#fo-calc-a0x', '287.53'], ['#fo-calc-a0y', '263.41'], ['#fo-calc-a0x', '241.87']] as const) await page.locator(field).fill(value);
     expect(await sent(page)).toEqual([['calc_complete', { tool: id, lang: 'en' }]]);
@@ -290,10 +291,10 @@ test.describe('the home and health calculator events', () => {
     // A day out of the field's fixed range (2000 to 2099): the error, the last result, no event.
     const date = page.locator('#fo-calc-d');
     await date.fill('1999-12-31');
-    await expect(page.locator('#fo-calc-d-error')).toBeVisible();
+    await expect(page.locator('#fo-rhero-error')).toBeVisible();
     expect(await sent(page), 'nada com um dia fora da faixa').toEqual([]);
     await date.fill('2026-03-17');
-    await expect(page.locator('#fo-calc-d-error')).toHaveCount(0);
+    await expect(page.locator('#fo-rhero-error')).toHaveCount(0);
     await page.locator('#fo-calc-m').selectOption('ivf5');
     await date.fill('2026-04-09');
     expect(await sent(page)).toEqual([['calc_complete', { tool: id, lang: 'en' }]]);

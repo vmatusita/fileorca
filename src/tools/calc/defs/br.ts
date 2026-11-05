@@ -38,11 +38,15 @@ import type { CalcDef, CalcPanelTexts, CalcSharedTexts, CalcView, Cell, Part, Ta
 
 const l = (lang: string): NumberLang => lang as NumberLang;
 
-/** The view of an account that cannot be done: the problem said in the hero, the rest empty. */
-function problemView(label: string, problem: string, premises: string[]): CalcView {
+/**
+ * The view of an account that cannot be done: the problem said in the hero, the rest empty. `field` is the field it points
+ * to, marked in the form (F4 ACE-11; F13b, DECISOES § C-2).
+ */
+function problemView(label: string, problem: string, premises: string[], field?: string): CalcView {
   return {
     hero: { label, value: '-', sentence: [] },
     problem,
+    ...(field ? { problemField: field } : {}),
     placard: { n: '-', l: label },
     table: () => ({ caption: label, head: [label], rows: [] }),
     summary: [[label, problem]],
@@ -90,6 +94,8 @@ export function sacPriceInput(values: Values): SacPriceInput {
 
 export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
   id: 'br-sac-price',
+  // The TR and the insurance and fees fold into a block after the result (F13b, DECISOES § C-4).
+  disclose: ['tr', 'f'],
   fields: [
     money('p', 10_000, 20_000_000, { main: true, half: true }),
     { kind: 'down', key: 'd', percentKey: 'dp', unitKey: 'du', of: 'p', max: 2_000_000_000, main: true, half: true },
@@ -105,7 +111,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
     const ln = l(lang);
     const v = t.view;
     const fees = num(values, 'f');
-    if (r.loan === 0) return problemView(text(v, 'label'), text(v, 'noLoan'), t.premises);
+    if (r.loan === 0) return problemView(text(v, 'label'), text(v, 'noLoan'), t.premises, 'd');
     const first = (plan: SystemResult) => plan.firstPayment + fees;
     const last = (plan: SystemResult) => plan.lastPayment + fees;
     const scenario = (plan: SystemResult): [string, string][] => [
@@ -117,6 +123,10 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
     const diffKey = r.interestDiff > 0 ? 'priceMore' : r.interestDiff < 0 ? 'priceLess' : 'same';
     const diff = say(text(v, diffKey), { x: dollars(Math.abs(r.interestDiff), ln) });
     const tr = num(values, 'tr');
+    // F13b (D-38; DECISOES § C-6): the PRICE is in the card, under the Download, and the sentence says where the SAC ends and
+    // how much more interest the PRICE pays; the two bars put both systems on one scale.
+    const sentenceDiff = r.interestDiff > 0 ? 'sentenceMore' : r.interestDiff < 0 ? 'sentenceLess' : 'sentenceSame';
+    const interests = { loan: dollars(r.loan, ln), sac: dollars(r.sac.totalInterest, ln), price: dollars(r.price.totalInterest, ln) };
     return {
       hero: {
         label: text(v, 'label'),
@@ -124,15 +134,27 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
         unit: text(v, 'unit'),
         sentence: [
           ...say(text(v, 'sentence'), {
-            sacFirst: cash(first(r.sac), ln),
             sacLast: cash(last(r.sac), ln),
-            price: cash(first(r.price), ln),
             months: duration(num(values, 'n'), s),
           }),
+          ' ',
+          ...say(text(v, sentenceDiff), { x: dollars(Math.abs(r.interestDiff), ln) }),
           ...(tr > 0 ? [' ', ...say(text(v, 'withTr'), { tr: ratePercent(tr, ln) })] : []),
         ],
       },
+      versus: say(text(v, 'versus'), { price: cash(first(r.price), ln) }),
+      pair: {
+        name: fmt(text(v, 'pairName'), interests),
+        principal: { label: text(v, 'principal'), cents: r.loan },
+        interest: say(text(v, 'pairInterest'), { sac: interests.sac, price: interests.price }),
+        rows: [
+          { name: text(v, 'sac'), cents: r.sac.totalInterest },
+          { name: text(v, 'price'), cents: r.price.totalInterest },
+        ],
+      },
       placard: { n: dollars(first(r.sac), ln), l: text(v, 'placard') },
+      more: fmt(text(v, 'moreMeta'), { fees: cash(fees, ln), tr: ratePercent(tr, ln) }),
+      scheduleMeta: fmt(text(v, 'scheduleMeta'), { n: num(values, 'n') }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestSac'), cents: r.sac.totalInterest } },
       compare: { a: { name: text(v, 'sac'), rows: scenario(r.sac) }, b: { name: text(v, 'price'), rows: scenario(r.price) }, diff },
       table: () =>

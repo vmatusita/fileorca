@@ -592,8 +592,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-qr__code svg { display: block; width: 100%; height: 100%; }
 .fo-qr__empty { margin: 0; padding: var(--space-6); text-align: center; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
 .fo-qr__status { margin: 0; min-height: 20px; text-align: center; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
-.fo-qr__actions { display: grid; gap: var(--space-2); }
-.fo-qr__actions .fo-btn { width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: var(--space-2); white-space: normal; text-align: center; }
+/* F13b (F7 f-9 and f-10, saída A; DECISOES § C-8): the place of the two downloads keeps their height (the PNG of 60 px, the SVG
+   and their lips) with or without a code; with no code it says why, and no Download is ever turned off. The PNG says its
+   size on a second line of its own, with no middle dot, in its 60 px. */
+.fo-qr__actions { display: grid; gap: var(--space-2); align-content: start; min-height: calc(var(--button-lg) + var(--control-h) + 2 * var(--lip) + var(--space-2)); }
+.fo-qr__actions .fo-btn { width: 100%; }
+.fo-qr__png { gap: var(--space-3); padding-inline: var(--space-6); text-align: left; }
+.fo-qr__name { display: grid; justify-items: start; }
+.fo-qr__name .fo-btn__meta { font: 500 14px/16px var(--fo-font-text); }
+.fo-qr__wait { margin: 0; display: grid; place-items: center; min-height: inherit; padding: 0 var(--space-4); text-align: center; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
 @media (min-width: 768px) {
   .fo-qr { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); padding: var(--space-6); }
   .fo-qr__oli { width: 112px; height: 112px; top: -76px; right: var(--space-4); }
@@ -855,28 +862,69 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The "example" tag centred in the label row: on its baseline it made the row 21px, one more than its neighbour's. */
 /* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
 .fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
+/* F13b (Idiomas E-2, F7 obs 3; DECISOES § C-7): below 400 px the "example" tag is compact, 6 px from the label, 4 px of side
+   padding and less letter-spacing (about 12 px less): "Tasa nueva" with its tag fits half a row with the fallback font too. */
+@media (max-width: 399px) {
+  .fo-calc__fields .fo-field__label { column-gap: 6px; }
+  .fo-calc__fields .fo-tag { padding: 0 var(--space-1); letter-spacing: 0.02em; }
+}
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
 /* Below 360 px a menu or a date of a home or health calculator takes the whole row: half a row cut "Last period" and the
    year of the day (review F7, d-3, f-4 and f-6; DECISOES § 277). The money pages keep their half rows there, the down
    payment with its unit menu among them (second pass, s-1; § 282). The result above the fold is measured at 360 px (§ 124). */
 @media (max-width: 359px) {
   .fo-calc--home .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
+  /* F13b (F7 obs 3; DECISOES § C-7): a half field marked wide takes the whole row (the Paint's door and window areas). */
+  .fo-calc__fields > .fo-field--half.fo-field--wide { grid-column: 1 / -1; }
 }
-.fo-calc__moreheading { margin: var(--space-2) 0 0; }
+/* F13b (D-46, G-19; DECISOES § C-4): the H2 of the island are in Fredoka 24/30, like every H2 of the site. */
+.fo-calc__moreheading { margin: var(--space-2) 0 0; font: 600 24px/30px var(--fo-font-display); }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
-.fo-calc__stale { margin: 0; }
 .fo-calc__compare, .fo-calc__next { grid-column: 1 / -1; }
+/* F13b (D-36; DECISOES § C-4): from 768 px the first row is the main fields' own height and the second takes what the
+   card needs beyond it (1fr): the card can grow, the fields after the result never move down. */
 @media (min-width: 768px) {
-  .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); }
+  .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: var(--space-8); }
   .fo-calc__main { grid-column: 1; grid-row: 1; }
-  .fo-calc__more { grid-column: 1; grid-row: 2; }
+  .fo-calc__more { grid-column: 1; grid-row: 2; align-self: start; }
   .fo-calc__result { grid-column: 2; grid-row: 1 / span 2; }
 }
+/* F13b · the block of costs that folds (UX-12 A, D-32 and D-33; DECISOES § C-4), in the vocabulary of the Faq: a stroke
+   above, a hairline under, the round chevron of 32 px that turns (brand-soft when open), the title in Fredoka 24/30 and the
+   total in small ink-muted. Only aria-expanded changes; the name is the title and the total, open or closed. On a phone the
+   open block ends in the echo of the result, a strip of the same sea (aria-hidden: the region of the card says it). */
+.fo-calc__fields > .fo-calc__fold, .fo-calc__fields > .fo-calc__echo { grid-row: auto; }
+.fo-disclose { margin: 0; }
+.fo-disclose__btn { box-sizing: border-box; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; margin: 0; padding: var(--space-3) 0; border: 0; border-top: var(--stroke-2) solid var(--stroke); border-bottom: var(--stroke-hair) solid var(--hairline); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.fo-disclose__text { display: grid; gap: 2px; min-width: 0; }
+.fo-disclose__title { font: 600 24px/30px var(--fo-font-display); overflow-wrap: anywhere; }
+.fo-disclose__meta { font: 400 14px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-disclose__icon { flex: none; box-sizing: border-box; display: grid; place-items: center; width: 32px; height: 32px; border: var(--stroke-2) solid var(--stroke); border-radius: 50%; transition: transform var(--dur-base) var(--ease-out); }
+.fo-disclose__icon .fo-icon { width: 20px; height: 20px; }
+.fo-disclose__btn[aria-expanded="true"] .fo-disclose__icon { transform: rotate(180deg); background: var(--brand-soft); }
+.fo-disclose__panel { padding-top: var(--space-4); }
+.fo-disclose__panel[hidden] { display: none; }
+.fo-calc__echo { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); margin: 0; padding: var(--space-3) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--deep); color: var(--on-deep); font: 600 15px/20px var(--fo-font-text); }
+.fo-calc__echo b { font: 600 24px/28px var(--fo-font-display); }
+.fo-calc__echo small { font: 600 15px/20px var(--fo-font-display); color: var(--on-deep-muted); }
+.fo-calc__echo-n { display: inline-flex; align-items: baseline; gap: var(--space-1); white-space: nowrap; }
+@media (min-width: 768px) { .fo-calc__echo { display: none; } }
 .fo-input .fo-input__unit { flex: 0 0 auto; width: auto; min-width: 64px; padding: 0 var(--space-3); align-self: stretch; background: var(--surface-sunken); color: var(--ink-muted); border-left: var(--stroke-hair) solid var(--hairline); font: 600 16px/20px var(--fo-font-text); }
 .fo-reviewed { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
+/* F13b · the top of a calculator page (UX-12 A, F10 p-19; DECISOES § C-1). The number of the ResultHero ends above 596 px
+   at 360 x 740, clear of the cookie notice of the first visit (it starts at 604 px). The signature takes one line (14/20,
+   the short date), and below 768 px the top is tighter: 4 px between its lines, the lead in the body size (16/24, two
+   lines), and the crumb of the page itself only for the screen reader, since the H1 right under it says the same (the
+   Spanish and Brazilian trails went to two lines). The guides keep their top. */
+@media (max-width: 767px) {
+  .fo-top--calcpage { gap: var(--space-1); }
+  .fo-top--calcpage .fo-lead { font-size: 16px; line-height: 24px; }
+  nav:has(+ .fo-top--calcpage) li:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  nav:has(+ .fo-top--calcpage) li:nth-last-child(2) > .fo-icon { display: none; }
+}
 /* A file guide puts its heading and a paragraph right above the embedded tool, where a tool page has its H1: they keep
    the same room on the right for the DropZone's Oli, so she never covers a word (DECISOES § 206 and § 212). The box is
    border-box, so the room comes out of the measure: from 768px this heading and paragraph are 561px wide against the
@@ -900,16 +948,51 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
 .fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
 .fo-rhero__sentence b { font-weight: 700; }
-/* A long placard (a 7-digit result) wraps and shrinks instead of widening the card past the column (review F4,
-   ANU-1 and ACE-10). */
-.fo-rhero__oli { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; gap: var(--space-2); min-width: 0; }
-.fo-rhero__oli .fo-placard { margin-left: 0; max-width: 100%; min-width: 0; box-sizing: border-box; }
-.fo-rhero__oli .fo-placard__n { overflow-wrap: anywhere; }
-.fo-rhero__orca { width: 72px; height: 72px; }
 @media (min-width: 768px) {
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
   .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
 }
+/* F13b · the card is the one place of the result, the Download PDF and the error (UX-12 A; DECISOES § C-2). 8 px between
+   its parts (12 from 768 px), the spec's gap; the respiro stays 20 px on the phone (§ 140), where the waterline of the deep
+   cards (.fo-sea-top, § 539) has its 16 px of air and the crest. The Oli sits on the top edge at the right, looking at the
+   number, from the first paint: 64 px on the phone, 80 from 768 px, above the waterline (z-index 1); the label keeps her
+   room. Her pose changes in the same box: wave still on the example (the greeting of the F13a would move the card's corner
+   on every load), cheer once on the first result, oops on an error. */
+.fo-rhero { gap: var(--space-2); }
+.fo-rhero__label { padding-right: 64px; }
+.fo-rhero__oli { position: absolute; z-index: 1; top: calc(-1 * var(--space-4)); right: var(--space-3); width: 64px; height: 64px; pointer-events: none; }
+.fo-rhero__oli[data-oli="wave"] > svg { animation: none; }
+.fo-rhero__oli[data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+/* The Download PDF right under the number, in block on the phone, on the sea (shadow-lip-on-deep): its slot keeps the height
+   of the button and its lip, so the message of an error takes its place and nothing moves (F7 f-10, saída A; § 139, § 276). */
+.fo-rhero__get { display: grid; align-items: center; min-height: calc(var(--button-lg) + var(--lip)); }
+.fo-rhero__get .fo-btn--download { margin-bottom: var(--lip); }
+@media (max-width: 767px) { .fo-rhero__get .fo-btn--download { display: flex; width: 100%; } }
+@media (min-width: 768px) { .fo-rhero__get { justify-items: start; } }
+.fo-rhero__error { margin: 0; display: flex; gap: var(--space-2); align-items: center; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep); }
+/* The alert icon on the deep sea: the danger of the light theme has 2.45:1 there, --danger-on-deep 6.04:1 (§ 538). */
+.fo-rhero__alert { flex: none; display: inline-flex; color: var(--danger-on-deep); }
+.fo-rhero__alert .fo-icon { width: 20px; height: 20px; }
+/* The sentence and the last result share one cell: the card keeps the sentence's height in the error state (D-35, D-41). */
+.fo-rhero__said { display: grid; }
+.fo-rhero__said > *, .fo-rhero__said::after { grid-area: 1 / 1; }
+/* The room of the longest line an error may bring, from the first paint: the reserve is an attribute, drawn hidden. */
+.fo-rhero__said::after { content: attr(data-reserve); visibility: hidden; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
+.fo-rhero__stale { margin: 0; align-self: start; font-size: 17px; line-height: 26px; color: var(--on-deep); overflow-wrap: anywhere; }
+.fo-rhero[data-state="error"] .fo-rhero__sentence { visibility: hidden; }
+.fo-rhero[data-state="error"] .fo-rhero__num, .fo-rhero[data-state="error"] .fo-rhero__num small { color: var(--on-deep-muted); }
+@media (min-width: 768px) {
+  .fo-rhero { gap: var(--space-3); }
+  .fo-rhero__label { padding-right: 80px; }
+  .fo-rhero__oli { width: 80px; height: 80px; top: calc(-1 * var(--space-5)); right: var(--space-4); }
+}
+/* A field in error: the 3 px danger stroke is the 2 px border and 1 px of box-shadow outside it, so the field keeps its
+   52 px and moves nothing (it grew 2 px with the 3 px border), and the alert icon is inside the box, before the unit: never
+   the colour alone (before the label, as the spec draws it, it sent 40 labels to a second line at 360 px). The words are
+   said in the card (#fo-rhero-error), which the field's aria-describedby points to. */
+.fo-calc .fo-field[data-state="error"] .fo-input { border-width: var(--stroke-2); box-shadow: 0 0 0 calc(var(--stroke-3) - var(--stroke-2)) var(--danger); }
+.fo-input__flag { flex: none; display: inline-flex; padding-right: var(--space-2); color: var(--danger); }
+.fo-input__flag .fo-icon { width: 18px; height: 18px; }
 .fo-split { display: grid; gap: var(--space-2); }
 .fo-split__bar { display: block; height: 20px; }
 .fo-split__principal { fill: var(--brand); }
@@ -927,9 +1010,19 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-split__key--a { background: var(--brand); }
 .fo-deep .fo-split__key--a { background: var(--brand-on-deep); }
 .fo-split__key--b { background: var(--coral); background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--on-cat) 22%, transparent) 6px 8px); }
+/* F13b · the SplitChart, pair variant (D-38; DECISOES § C-6): one bar per system on one scale, each named in 13 px
+   on-deep-muted at its left; and the other system's payment in the card, under the Download. */
+.fo-split__pair { display: grid; gap: var(--space-2); }
+.fo-split__row { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--space-2); }
+.fo-split__name { font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.04em; color: var(--on-deep-muted); }
+.fo-rhero__versus { margin: 0; font: 600 17px/26px var(--fo-font-text); color: var(--on-deep); }
+.fo-rhero__versus b { font: 600 20px/26px var(--fo-font-display); white-space: nowrap; }
 
 .fo-export-wrap { display: grid; gap: var(--space-3); }
 .fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+/* F13b (F4 ACE-8; DECISOES § C-2): Download CSV and Copy link share one row on the phone in en and pt (two in es), with
+   16 px of side padding instead of 24. */
+@media (max-width: 767px) { .fo-calc__result .fo-export .fo-btn { padding-inline: var(--space-4); } }
 .fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
 .fo-copied .fo-icon { width: 18px; height: 18px; }
 
@@ -942,13 +1035,21 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-scn dd { margin: 0; font: 600 24px/28px var(--fo-font-display); overflow-wrap: anywhere; }
 .fo-diff { grid-column: 1 / -1; margin: 0; display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 600 16px/22px var(--fo-font-text); }
 .fo-diff .fo-icon { flex: 0 0 auto; color: var(--brand); }
-@media (max-width: 371px) {
-  .fo-compare { grid-template-columns: 1fr; }
-  .fo-diff { order: -1; }
+/* F13b (D-38; DECISOES § C-6): the two scenarios stay side by side down to 320 px (they stacked under 340 px of column),
+   with the number in 20/24 and a tighter card below 480 px; the line of the difference stays under them. */
+@media (max-width: 479px) {
+  .fo-compare { gap: var(--space-2); }
+  .fo-scn { padding: var(--space-3); gap: var(--space-2); }
+  .fo-scn dd { font-size: 20px; line-height: 24px; }
 }
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-calc-schedule > div { width: 100%; }
+/* F13b (D-43; DECISOES § C-5): the schedule is a block of the island, before the chips, on the whole width; its heading (or
+   the button of its block) is its name, and the table comes right under it. */
+.fo-calc__schedule { grid-column: 1 / -1; min-width: 0; justify-items: stretch; }
+.fo-calc__schedule > .fo-calc__moreheading { margin: 0; }
+.fo-calc__schedule > .fo-disclose__panel { padding-top: 0; }
 /* scroll-padding-top: a year button reached with Shift+Tab stops under the sticky header, not behind it. */
 .fo-amort-wrap { box-sizing: border-box; width: 0; min-width: 100%; max-height: 70vh; overflow: auto; scroll-padding-top: var(--tap-min); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
 .fo-amort-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
@@ -970,6 +1071,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (max-width: 479px) {
   .fo-amort--flat th, .fo-amort--flat td { padding-inline: var(--space-2); }
 }
+/* F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of a row of data is its header (th
+   scope="row"), drawn like the cell it replaces: no sticky of the head of the table, the type and colour of the table, the
+   zebra of its row. */
+.fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
+.fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
+@media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
+/* F13b (F7 obs 2; DECISOES § C-7): the dates of the ovulation in fixed columns, the range at 30 % and each date at 35 %:
+   at 360 px a date takes one line and a range two, and at 320 px a date breaks only after its comma (its month and day are
+   glued by a no-break space), with no sideways scroll. */
+.fo-amort--even { table-layout: fixed; }
+.fo-amort--even thead th:first-child { width: 30%; }
 .fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
 .fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }
