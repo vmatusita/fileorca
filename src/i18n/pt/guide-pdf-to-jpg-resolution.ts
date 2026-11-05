@@ -4,13 +4,13 @@ const texts: FileGuideTexts = {
   title: 'Qual resolução escolher ao converter PDF para JPG, com os pixels e os tamanhos',
   description: 'O que a resolução muda ao converter PDF para JPG, medido nos nossos PDFs de teste: os pixels da página, o peso do arquivo e quando escolher JPG ou PNG.',
   h1: 'Qual resolução escolher ao converter PDF para JPG',
-  lead: 'Uma página de PDF não tem pixels até que algo a desenhe. A resolução que você escolhe decide quantos ela ganha, e quanto as imagens vão pesar.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  lead: 'Uma página de PDF só ganha pixels ao ser desenhada. A resolução decide quantos, e quanto a imagem pesa.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'Texto e desenhos num PDF são guardados como formas, não como pontos. Para transformar uma página em JPG, um programa desenha a página numa grade de pixels, e a resolução, em pixels por polegada, define o quão fina é essa grade. Peça mais e cada letra ganha mais pixels, e o arquivo cresce junto.',
     'A ferramenta PDF para JPG oferece {lowPpi} para a tela, {mediumPpi} para uso geral e {highPpi} para imprimir. Veja o que cada opção deu em {files_word} dos nossos PDFs de teste, para você escolher a menor que resolve o seu caso.',
   ],
-  toolHeading: 'Transforme as páginas do seu PDF em imagens aqui',
+  toolHeading: 'PDF em imagens',
   toolIntro: 'Solte um PDF e cada página vira um JPG a {mediumPpi}, nesta aba do navegador, sem nada ser enviado. Mude a resolução ou o formato e as imagens são feitas de novo; várias páginas vêm juntas num ZIP só.',
   sections: [
     {
@@ -58,6 +58,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'JPG de uma página: {mediumPpi} a {highPpi}', value: '{formJpg300vs150Chromium_times}', from: '{formJpg150Chromium}', to: '{formJpg300Chromium}' },
+      { label: 'Pixels nessa página', value: '{formPixels300vs150_times}' },
+    ],
+    sample: 'Numa página só, a primeira do Formulário 1040 do IRS.',
+    link: 'Veja os {files} PDFs na tabela',
+  },
+  tableHeading: 'Arquivo por arquivo',
   measuredIntro: 'A primeira página de cada PDF em cada resolução da ferramenta, em JPG e em PNG. As medidas em pixels vêm em largura por altura.',
   measuredNote: 'Medido em {date} pela página PDF para JPG deste site, no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, na primeira e na segunda página de {files_word} PDFs dos nossos testes: os documentos reais e um PDF feito de fotos (o livro escaneado tem uma página só). Os pixels foram os mesmos em ambos os navegadores; a tabela mostra os arquivos do Chromium.',
   tables: [

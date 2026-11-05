@@ -4,13 +4,13 @@ const texts: FileGuideTexts = {
   title: 'How to Remove Location Data From Photos Before You Share Them',
   description: 'Where a photo keeps the place it was taken, how to stop or hide it on iPhone and Android, and the way to strip it from the file without changing a pixel.',
   h1: 'How to remove location data from photos before you share them',
-  lead: 'A photo from a phone can carry the exact place it was taken. Here is where that data lives, how to keep it out, and how to remove it from a file you already have.',
-  changed: 'First version, with the measurements of {date}.',
+  lead: 'A phone photo can carry the exact place it was taken. Here is how to keep it out of the photos you share.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'Phones write facts about each photo into the file itself: the camera, the date and time, and, when location is on, the GPS coordinates of where you stood. Apple puts it plainly: the coordinates are embedded into each photo and video. Anyone who gets the original file can read them, and a few clicks put them on a map.',
     'Some apps strip this data when you post, and some do not. Email, file transfers, cloud folders and many chat apps send the file as it is. If a photo shows your home, your child’s school or anywhere you would rather not pin, remove the location before the file leaves your hands.',
   ],
-  toolHeading: 'Strip the metadata from your photos here',
+  toolHeading: 'Strip the metadata',
   toolIntro: 'This is Resize image, set to {winnerOption}: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
   sections: [
     {
@@ -64,6 +64,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'Photos with GPS left', value: '{resizeImageGpsChromium} of {photos}' },
+      { label: 'Photos with the same pixels', value: '{resizeImageIdenticalChromium} of {photos}', sub: '{resizeImageRatioChromium_off} lighter' },
+    ],
+    sample: '{photos} phone photos, through the Resize image above.',
+    link: 'See the table',
+  },
+  tableHeading: 'Tool by tool',
   measuredIntro: 'Our {photos_word} real phone photos through each image tool that takes a JPG, each with the option that changes the photo least. The share is the size after against the originals, and pixels compares each copy with the original on the worst of the photos.',
   measuredNote: 'Measured on {date} through the tool pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The two browsers wrote files of the same size with {browsersSameSize_word} of the {candidates_word} tools; with {browsersDiffer}, the sizes differed. The metadata and the pixels were read in Node, with the same decoder for the original and the copy. The table shows Chromium.',
   tables: [
@@ -71,6 +80,7 @@ const texts: FileGuideTexts = {
       heading: 'Each tool on our photos',
       caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, how close the pixels are on the worst photo, and how many photos kept GPS data',
       head: ['Tool', 'Size after', 'Format', 'Same frame', 'Pixels, worst photo', 'Photos with GPS left'],
+      constant: 'No tool left GPS data in any photo.',
     },
   ],
   sourcesHeading: 'Sources',

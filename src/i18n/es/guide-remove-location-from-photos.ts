@@ -4,13 +4,13 @@ const texts: FileGuideTexts = {
   title: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
   description: 'Dónde guarda una foto el lugar en que se tomó, cómo evitarlo u ocultarlo en iPhone y Android, y cómo quitarlo del archivo sin cambiar un solo píxel.',
   h1: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
-  lead: 'Una foto tomada con el celular puede llevar el lugar exacto donde se tomó. Aquí ves dónde están esos datos, cómo evitar que se guarden y cómo quitarlos de un archivo que ya tienes.',
-  changed: 'Primera versión, con las mediciones del {date}.',
+  lead: 'Una foto del celular puede llevar el lugar exacto donde se tomó. Aquí ves cómo quitar ese dato antes de compartirla.',
+  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'Los teléfonos escriben datos de cada foto dentro del propio archivo: la cámara, la fecha y la hora y, si la ubicación está activada, las coordenadas GPS del lugar donde estabas. Apple lo dice con claridad: las coordenadas se incrustan en cada foto y video. Cualquiera que reciba el archivo original puede leerlas, y con unos pocos clics las pone en un mapa.',
     'Algunas apps quitan estos datos cuando publicas, y otras no. El correo, las transferencias de archivos, las carpetas en la nube y muchas apps de chat envían el archivo tal como está. Si una foto muestra tu casa, la escuela de tus hijos o cualquier lugar que prefieras no marcar en un mapa, quita la ubicación antes de que el archivo salga de tus manos.',
   ],
-  toolHeading: 'Quita los metadatos de tus fotos aquí',
+  toolHeading: 'Quita los metadatos',
   toolIntro: 'Es Redimensionar imagen con la opción {winnerOption}: cada foto conserva todos sus píxeles y vuelve sin su ubicación, su cámara ni su fecha. Funciona en esta pestaña del navegador, así que las fotos nunca se suben.',
   sections: [
     {
@@ -64,6 +64,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'Lo que medimos',
+  sheet: {
+    stats: [
+      { label: 'Fotos que aún tienen GPS', value: '{resizeImageGpsChromium} de {photos}' },
+      { label: 'Fotos con los mismos píxeles', value: '{resizeImageIdenticalChromium} de {photos}', sub: '{resizeImageRatioChromium_off} más ligeras' },
+    ],
+    sample: '{photos} fotos de celular, con el Redimensionar imagen de arriba.',
+    link: 'Mira la tabla',
+  },
+  tableHeading: 'Herramienta por herramienta',
   measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, pasadas por cada herramienta de imagen que acepta JPG, cada una con la opción que menos cambia la foto. El porcentaje es el tamaño después frente a los originales, y la columna de píxeles compara cada copia con el original en la peor de las fotos.',
   measuredNote: 'Medido el {date} con las herramientas de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}. Los dos navegadores escribieron archivos del mismo tamaño con {browsersSameSize_wordf} de las {candidates_wordf} herramientas; con {browsersDiffer}, los tamaños fueron distintos. Los metadatos y los píxeles se leyeron en Node, con el mismo decodificador para el original y la copia. La tabla muestra Chromium.',
   tables: [
@@ -71,6 +80,7 @@ const texts: FileGuideTexts = {
       heading: 'Cada herramienta con nuestras fotos',
       caption: 'Cada herramienta de imagen que acepta JPG: el tamaño después, el formato, si el encuadre queda igual, cuánto se parecen los píxeles en la peor foto y cuántas fotos conservaron datos GPS',
       head: ['Herramienta', 'Tamaño después', 'Formato', 'Mismo encuadre', 'Píxeles, peor foto', 'Fotos que conservaron GPS'],
+      constant: 'Ninguna herramienta dejó datos GPS en ninguna foto.',
     },
   ],
   sourcesHeading: 'Fuentes',

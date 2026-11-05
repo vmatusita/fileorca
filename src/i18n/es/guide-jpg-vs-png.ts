@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Cuándo guardar en JPG y cuándo en PNG, con los tamaños que medimos en las mismas fotos en los dos formatos y lo que le pasa a una imagen transparente.',
   h1: 'JPG o PNG: cuál usar',
   lead: 'Los dos formatos se abren en todas partes, así que la elección depende de lo que muestra la imagen. Aquí está la regla y lo que medimos cuando las mismas fotos hicieron el viaje de ida y vuelta.',
-  changed: 'Primera versión, con las mediciones del {date}.',
+  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'La respuesta corta: las fotos van en JPG y los gráficos van en PNG. Las capturas de pantalla, los logotipos, los diagramas, el texto y todo lo que tenga fondo transparente son gráficos. Una foto de una cámara o de un teléfono es una foto, aunque muestre un documento.',
     'La respuesta larga tiene que ver con lo que guarda cada formato. Uno se mantiene pequeño porque descarta detalle que casi no vas a notar; el otro conserva cada píxel tal cual y lo paga en tamaño. Cuál te conviene depende de la imagen y de lo que vaya a pasar con ella después.',
@@ -63,6 +63,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'Lo que medimos',
+  sheet: {
+    stats: [
+      { label: 'Nuestras fotos en PNG, en total', value: '{pngRatioChromium_times}', from: '{jpgTotal}', to: '{pngTotalChromium}' },
+      { label: 'PNG con los mismos píxeles que el JPG', value: '{pngIdenticalChromium} de {photos}' },
+    ],
+    sample: '{photos} fotos de celular, de JPG a PNG y de vuelta.',
+    link: 'Mira la tabla',
+  },
+  tableHeading: 'Foto por foto',
   measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, del JPG de la cámara a PNG con la herramienta de arriba, y de vuelta a JPG. La última columna compara el JPG final con los píxeles originales.',
   measuredNote: 'Medido el {date} con la herramienta PNG a JPG de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}. Los píxeles se compararon en Node, con el mismo decodificador para el original y la copia. Los tamaños de vuelta a JPG fueron iguales en los dos navegadores.',
   tables: [

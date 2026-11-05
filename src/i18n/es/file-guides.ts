@@ -2,9 +2,9 @@ import type { FileGuidesSharedTexts } from '../types.ts';
 
 /** Lo que comparten todas las guías de archivos en español. Los nombres de las fixtures son como las tablas llaman a cada archivo de prueba. */
 const texts: FileGuidesSharedTexts & { names: string[] } = {
-  reviewed: 'Revisado por {name} el {date}.',
-  firstPublished: 'Publicado por primera vez el {date}.',
-  openTool: 'Abrir la herramienta {name}',
+  reviewed: 'Revisado por {name} · {date}',
+  toolLink: 'El panel de arriba de esta guía es la misma herramienta que nuestra página {link}, que también responde las preguntas más comunes.',
+  hint: 'Desplázate hacia el lado para ver las {n} columnas',
   readOn: 'Leído el {date}.',
   samePixels: 'Mismos píxeles',
   yes: 'Sí',

@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Why Windows will not open your iPhone photos, the settings that avoid HEIC, and what changes in size and location when the photos become JPGs.',
   h1: 'How to convert HEIC to JPG on Windows',
   lead: 'Your iPhone saved the photo as HEIC, and Windows will not open it, or a website will not take it. Here is why, and how to end up with a JPG.',
-  changed: 'First version, with the measurements of {date}.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'HEIC is the file Apple writes when an iPhone or iPad saves photos in its High Efficiency format, which is built on HEIF. The picture is the same as in a JPG, but it is packed more tightly, so the phone keeps more photos in the same space. The catch is everywhere else: Windows needs extra software to show it, and many upload forms still ask for a JPG.',
     'You can fix this in different places. You can teach Windows to read HEIC, you can tell the iPhone to stop writing it, or you can convert the files you already have. Each one solves a different part of the problem, and the last one is the only one that gives you JPG files to send anywhere.',
@@ -66,13 +66,23 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'Size as JPG, all together', value: '{ratioTotalChromium_change}', from: '{heicTotal}', to: '{jpgTotalChromium}' },
+      { label: 'JPGs that kept the GPS location', value: '{gpsAfterChromium} of {files}' },
+    ],
+    sample: '{files} HEIC test photos from {cameras} cameras.',
+    link: 'See each one in the table',
+  },
+  tableHeading: 'Photo by photo',
   measuredIntro: 'Every HEIC test photo of this site, converted with the defaults of the tool above. Change is the JPG against the HEIC.',
-  measuredNote: 'Measured on {date} in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, through the HEIC to JPG page of this site, on our {files} HEIC test photos. The table shows Chromium; WebKit gave the same bytes for {identicalBrowsers_word} of the {files} photos.',
+  measuredNote: 'Measured on {date} in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, through the HEIC to JPG page of this site, on our {files} HEIC test photos. The table shows Chromium; WebKit gave the same bytes for all {files} photos.',
   tables: [
     {
       heading: 'Our HEIC photos as JPG',
       caption: 'Each HEIC test photo: its camera, its size as HEIC and as JPG, the change, its size in pixels, and its GPS before and after',
       head: ['Camera', 'HEIC', 'JPG', 'Change', 'Pixels', 'GPS before', 'GPS after'],
+      constant: 'No JPG kept any GPS data.',
     },
   ],
   sourcesHeading: 'Sources',

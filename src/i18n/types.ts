@@ -516,6 +516,34 @@ export interface FileGuideTableTexts {
   head: string[];
   /** Row labels, where the rows are steps rather than files. */
   labels?: string[];
+  /**
+   * F13b (F5b F-13; DECISOES § G-3): the sentence of the note that says what a column with one value in every row said,
+   * since the page leaves that column out ("No JPG kept any GPS data."). There if and only if a column of the table is
+   * left out: tests/unit/guide-page.test.ts ties the two.
+   */
+  constant?: string;
+}
+
+/** A number of the sheet "What we measured" under the H1 of a file guide (F13b, UX-13 A; DECISOES § G-4). */
+export interface FileGuideSheetStat {
+  /** What the number is, in small text above it. */
+  label: string;
+  /** The number, in number-md: measured placeholders only ("{ratioTotalChromium_change}", "{gpsAfterChromium} of {files}"). */
+  value: string;
+  /** Under the number, before and after, with the arrow icon and a hidden "to" between them. */
+  from?: string;
+  to?: string;
+  /** Under the number, a plain line instead ("{scanImages} of {scanTotal}"). */
+  sub?: string;
+}
+
+/** The sheet "What we measured" of a file guide: two numbers of its measurement, the sample and the link to the table. */
+export interface FileGuideSheetTexts {
+  stats: [FileGuideSheetStat, FileGuideSheetStat];
+  /** The sample the two numbers rest on, one sentence. */
+  sample: string;
+  /** The link to the table, after the sample ("See each one in the table"). */
+  link: string;
 }
 
 /**
@@ -527,15 +555,25 @@ export interface FileGuideTexts extends PageMeta {
   h1: string;
   /** The question the guide answers, in one line under the H1. */
   lead: string;
-  /** What the last review changed, after the "Reviewed" line. */
+  /**
+   * The history line at the end of "What we measured" (F13b, G-23; DECISOES § G-1): when the guide was first published
+   * ({published}) and with which measurements ({measured}), and what each review changed. Until the F13b it followed the
+   * "Reviewed" line at the top.
+   */
   changed: string;
   intro: string[];
   toolHeading: string;
+  /** The paragraph about the embedded tool, right under it since the F13b (DECISOES § G-5; above it before). */
   toolIntro: string;
   /** The sections. The content AdSlot went after the first `half` of them until the F12; the ad map places the ads now. */
   sections: Section[];
   half: number;
+  /** The title of the sheet under the H1 (F13b; until then, the heading of the section with the tables). */
   measuredHeading: string;
+  /** The sheet "What we measured" under the H1 (F13b, G-17; DECISOES § G-4). Not `facts`, which are the official figures. */
+  sheet: FileGuideSheetTexts;
+  /** The heading of the section with the tables ("Photo by photo"), which names their scrolling frames (F13b, F5b F-13). */
+  tableHeading: string;
   measuredIntro: string;
   /** Says when, in what and on which files it was measured ("{date}", "{chromiumVersion}"…). */
   measuredNote: string;
@@ -554,12 +592,23 @@ export interface FileGuideTexts extends PageMeta {
 
 /** Texts every file guide shares (src/i18n/en/file-guides.ts). */
 export interface FileGuidesSharedTexts {
-  /** "Reviewed by {name} on {date}." */
+  /**
+   * The signature under the H1, one line (F13b, G-23; DECISOES § G-1): "Reviewed by {name} · {date}", with the short date.
+   * Until the F13b it was a sentence with the long date, followed by the first publication ("First published {date}."),
+   * which went to the history line at the end of "What we measured".
+   */
   reviewed: string;
-  /** "First published {date}." */
-  firstPublished: string;
-  /** "Open the {name} tool" */
-  openTool: string;
+  /**
+   * The sentence of the text that links to the tool's own page (F13b, D-54; DECISOES § G-6): {link} is the link, whose
+   * words are the name of the tool ("the same tool as our {link} page"). Until the F13b the link was a line of its own
+   * under the panel ("Open the {name} tool").
+   */
+  toolLink: string;
+  /**
+   * The line over a measured table that is wider than its frame, under 768 px (F13b, F5b F-2; DECISOES § G-7): "Scroll
+   * sideways to see the {n} columns", with {n} counted from the table the page draws.
+   */
+  hint: string;
   /** "Read on {date}" after a source. */
   readOn: string;
   /** A table cell of identical pixels. */
