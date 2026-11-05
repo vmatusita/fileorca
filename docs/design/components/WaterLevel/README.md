@@ -9,4 +9,5 @@ O progresso da FileOrca é água subindo: a mesma água do fundo da DropZone enc
 - A altura da água é `--level` igual à porcentagem. A onda anda (`fo-water--moving`, `dur-wave`); com movimento reduzido, a água sobe sem onda.
 - Só aparece se o trabalho passar de 400ms. Antes disso, nada pisca na tela.
 - Nunca há anúncio sobre ou ao lado do WaterLevel: tela de espera com anúncio derruba a conta.
+- A mesma água (`.fo-water`) sobe da DropZone para o topo da home, no nível 100%, como o chão da Oli (F13b, UX-03 B; DECISOES § H-1): ali ela não é progresso, então não leva a `fo-water--moving` e fica parada.
 - `fo-bar` é a versão compacta, dentro de cada FileCard do lote, em `brand` sobre `surface-sunken`. Com `role="progressbar"`, leva o nome do arquivo no `aria-label`.
