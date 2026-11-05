@@ -819,7 +819,13 @@ export default function PdfPanel(props: PdfPanelData) {
       rootRef.current?.querySelector<HTMLElement>(`[data-row="${id}"] .fo-merge__remove`)?.focus();
     }
     const active = document.activeElement;
-    if ((!active || active === document.body) && m.slotFocus) (levelRef.current ?? downloadRef.current ?? actionRef.current ?? holdRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+    if ((!active || active === document.body) && m.slotFocus) {
+      // The WaterLevel takes the focus without scrolling: it is the rectangle itself, already in view, and on a first
+      // visit the browser scrolled its foot over the cookie notice (DECISOES § F13A-R-02).
+      const level = levelRef.current;
+      if (level) level.focus({ preventScroll: true });
+      else (downloadRef.current ?? actionRef.current ?? holdRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+    }
     m.slotFocus = false;
   });
 

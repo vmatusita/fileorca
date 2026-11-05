@@ -147,6 +147,40 @@ for (const lang of LANGS) {
   });
 }
 
+// F13a, revisão b-1 (DECISOES § F13A-R-02): the test above has the engine warm, so the work ends before the 400 ms of the
+// WaterLevel. On a real first visit (a cold engine, a big photo, a PDF) the WaterLevel comes, the focus that left the Choose
+// button goes to it (tabindex -1, 356px tall), and the browser and the notice's focusin used to scroll the page to bring
+// its foot over the notice: 10 px in en and 32 px in pt and es at 360 × 740. The engine is held here past the 400 ms, the
+// person has the focus on the Choose button (a tap), and the page stays at scroll 0 from the drop to the Download.
+const FIRST_VISIT_TOOLS = [
+  { id: 'compress-image', file: async (page: Page): Promise<TestFile> => ({ name: 'photo.jpg', mimeType: 'image/jpeg', buffer: await generatedJpeg(page) }) },
+  { id: 'compress-pdf', file: async (): Promise<TestFile> => ({ name: 'photos.pdf', mimeType: 'application/pdf', buffer: readFileSync(resolve('fixtures/pdf', 'gen-fotos.pdf')) }) },
+] as const;
+for (const lang of LANGS) {
+  for (const tool of FIRST_VISIT_TOOLS) {
+    test(`first visit at 360 × 740 (${lang}), the engine held past the 400 ms of the WaterLevel: ${tool.id} keeps the page at scroll 0 from the drop to the Download`, async ({ page }) => {
+      await page.setViewportSize(PHONE);
+      const engine = await slowEngine(page);
+      await open(page, routeById(tool.id).paths[lang] ?? '/');
+      await expect(page.locator('#fo-cookie')).toBeVisible();
+      await page.evaluate(() => {
+        const seen = window as unknown as { __foMaxScroll: number };
+        seen.__foMaxScroll = scrollY;
+        addEventListener('scroll', () => void (seen.__foMaxScroll = Math.max(seen.__foMaxScroll, scrollY)), { passive: true });
+      });
+      await page.locator('#fo-tool-root .fo-drop .fo-btn--brand').focus();
+      await page.setInputFiles('#fo-tool-root input[type="file"]', await tool.file(page));
+      await expect(page.locator('#fo-tool-root .fo-level')).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(300);
+      engine.release();
+      await expect(page.locator('.fo-btn--download')).toBeFocused({ timeout: 60_000 });
+      await page.waitForTimeout(300);
+      const scrolled = await page.evaluate(() => ({ now: scrollY, max: (window as unknown as { __foMaxScroll: number }).__foMaxScroll }));
+      expect(scrolled, 'the page scrolled between the drop and the Download').toEqual({ now: 0, max: 0 });
+    });
+  }
+}
+
 // D-05, D-11 and D-49 of the F10: the chips sit right under the rectangle, at most 220px under the Download.
 test('the chips are at most 220px under the Download, at 360 and 1280px', async ({ page }) => {
   for (const viewport of [PHONE, WIDE]) {
