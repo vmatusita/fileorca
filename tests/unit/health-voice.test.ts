@@ -14,7 +14,7 @@ import { fileForPath } from '../../scripts/lib/dist.ts';
 import { HEALTH_CALC_IDS, HEALTH_HUB_ID, HOUSE_CALC_IDS, LIFE_CALC_PAGES, calcAreaOf } from '../../src/tools/calc/registry.ts';
 import { routeById } from '../../src/i18n/routes.ts';
 import { panelData } from '../../src/tools/calc/page.ts';
-import { PANEL_POSES } from '../../src/tools/image/Oli.tsx';
+import { CALC_POSES } from '../../src/oli/poses.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import enHome from '../../src/i18n/en/home.ts';
 import sharedCalc from '../../src/tools/calc/i18n/en.ts';
@@ -100,17 +100,18 @@ describe('the Oli never cheers a health result (F7, decision 5)', () => {
   it('keeps the cheer off in the island of every health calculator, and on in the home ones', () => {
     for (const id of HEALTH_CALC_IDS) expect(panelData(id, 'en').cheer, id).toBe(false);
     for (const id of HOUSE_CALC_IDS) expect(panelData(id, 'en').cheer, id).toBe(true);
-    // The poses the calculator mold hands the layout come from the panel poses, which have the cheer: the health pages drop it.
-    expect(PANEL_POSES).toContain('cheer');
+    // The poses the calculator mold hands the layout come from the poses of the card (F13b; DECISOES § C-10), which have the
+    // cheer: the health pages drop it.
+    expect(CALC_POSES).toContain('cheer');
   });
 
   it('leaves the cheer pose out of the sprite of each health page, and keeps it in the home calculators (control)', () => {
-    const panel = [...PANEL_POSES].sort();
+    const panel = [...CALC_POSES].sort();
     for (const id of HEALTH_CALC_IDS) {
       expect(LIFE_CALC_PAGES[id].hub, id).toBe('health');
       const poses = sprite(id);
       expect(poses, id).not.toContain('cheer');
-      // Every other panel pose is still there (the island swaps them), and the peek of the layout.
+      // Every other pose of the card is still there (the island swaps them), and the peek of the layout.
       expect(poses, id).toEqual([...panel.filter((pose) => pose !== 'cheer'), 'peek'].sort());
     }
     for (const id of HOUSE_CALC_IDS) expect(sprite(id), id).toContain('cheer');
