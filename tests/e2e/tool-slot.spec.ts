@@ -507,3 +507,53 @@ test.describe('the interaction moves nothing at 360 × 740', () => {
     await context.close();
   });
 });
+
+// F13a, revisão c-1 (DECISOES § F13A-R-04): the tests above use a JPEG drawn in the page (640 × 480, no metadata). A photo
+// of a phone brings the note of the reduction ("Oli also reduced the dimensions to …") on the 100 KB preset, and the
+// metadata note says the GPS: with three notes, the card of the preset grew from 356 to 374 px in pt and es at 360 px, and
+// from 470 to 483 px on the 3rd use at 1280 px (the room of the coffee line). The notes now run as one paragraph.
+const PHOTO = (): TestFile => fixture('jpg-02-iphone6-paisagem-gps.jpg', 'photo.jpg');
+const PRESETS = ['compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail'] as const;
+
+test.describe('a photo of a phone, with its metadata: the result keeps the rectangle', () => {
+  for (const lang of LANGS) {
+    test(`the presets in ${lang}: the result of a phone photo keeps 356 px at 360 and 340 px at 1280`, async ({ page }) => {
+      test.setTimeout(120_000);
+      await page.setViewportSize(PHONE);
+      const found: string[] = [];
+      for (const id of PRESETS) {
+        await open(page, pathOf(id, lang));
+        await dismissCookies(page);
+        await page.setInputFiles('input[type="file"]', PHOTO());
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 55_000 });
+        await slotAtBothWidths(page, `${pathOf(id, lang)} resultado`, found);
+      }
+      expect(found, 'o retângulo mudou de altura com a foto').toEqual([]);
+    });
+
+    test(`the 3rd use in ${lang}, with the coffee line: the result of a phone photo stays in the room kept for it, at 360 and 1280 px`, async ({ browser }) => {
+      test.setTimeout(120_000);
+      const found: string[] = [];
+      for (const id of ['compress-image', 'compress-image-to-100kb'] as const) {
+        for (const viewport of [PHONE, WIDE]) {
+          const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+          await context.addInitScript(() => {
+            localStorage.setItem('fo-consent', 'granted');
+            localStorage.setItem('fo-coffee', JSON.stringify({ uses: 2 }));
+          });
+          const page = await context.newPage();
+          await open(page, pathOf(id, lang));
+          await page.setInputFiles('input[type="file"]', PHOTO());
+          await expect(page.locator('.fo-result .fo-result__support')).toBeVisible({ timeout: 55_000 });
+          const fits = await page.evaluate(() => {
+            const slot = document.querySelector('.fo-slot') as HTMLElement;
+            return { height: slot.getBoundingClientRect().height, room: parseFloat(getComputedStyle(slot).minHeight) };
+          });
+          if (fits.height > fits.room + 1) found.push(`${pathOf(id, lang)} a ${viewport.width}px: ${fits.height.toFixed(1)}px na reserva de ${fits.room}px`);
+          await context.close();
+        }
+      }
+      expect(found, 'o resultado passou da reserva do café').toEqual([]);
+    });
+  }
+});

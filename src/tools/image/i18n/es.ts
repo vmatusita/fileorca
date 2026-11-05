@@ -68,7 +68,7 @@ export default {
       flattened: 'Las zonas transparentes quedaron blancas, porque el JPG no tiene transparencia.',
       firstFrame: 'La animación pasó a ser una imagen fija: Oli guardó el primer fotograma.',
       notEnlarged: 'Pediste más píxeles de los que tiene la foto, así que Oli mantuvo el tamaño original.',
-      downscaled: 'Para entrar en el límite de tamaño, Oli también redujo las dimensiones a {width} × {height} px.',
+      downscaled: 'Oli también redujo las dimensiones a {width} × {height} px.',
       centerCropped: 'Oli recortó desde el centro para llenar el encuadre.',
       enlarged: 'La foto tiene menos píxeles de los que pide el encuadre, así que Oli la amplió y puede verse menos nítida.',
     },

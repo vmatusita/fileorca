@@ -317,6 +317,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
 .fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+/* F13a, revisão c-1 (DECISOES § F13A-R-04): in the image island the notes run as one paragraph, one sentence after the
+   other, so a photo of a phone (the reduction, the size and the metadata) keeps the result in the rectangle of 356/340 px
+   and in the room of the coffee line; the note of where the files came from keeps its own line. */
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes { display: block; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > .fo-result__from { margin-bottom: var(--space-1); }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) { display: inline; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) + li::before { content: " "; }
 @media (min-width: 768px) {
   .fo-result { padding: var(--space-6); gap: var(--space-5); }
   .fo-result__head { min-height: 96px; }

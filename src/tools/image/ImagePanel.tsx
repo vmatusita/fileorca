@@ -970,7 +970,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           ))}
           {!counted && rows[0] && (
             // The size in pixels of one picture, from 768 px (UX-04 A): on a phone the card keeps its height for the rest.
-            <li class="fo-desktop-only">{`${t.result.size}: ${rows[0].output.width} × ${rows[0].output.height} px`}</li>
+            // The notes run as one paragraph (DECISOES § F13A-R-04), so this one ends with a period like the others.
+            <li class="fo-desktop-only">{`${t.result.size}: ${rows[0].output.width} × ${rows[0].output.height} px.`}</li>
           )}
           <li>{t.result.metadata}</li>
         </ul>

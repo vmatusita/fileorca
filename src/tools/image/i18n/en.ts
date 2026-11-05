@@ -69,7 +69,7 @@ export default {
       flattened: 'Transparent areas became white, because JPG has no transparency.',
       firstFrame: 'This animation became a still image: Oli kept the first frame.',
       notEnlarged: 'You asked for more pixels than the photo has, so Oli kept the original size.',
-      downscaled: 'To fit the size limit, Oli also reduced the dimensions to {width} × {height} px.',
+      downscaled: 'Oli also reduced the dimensions to {width} × {height} px.',
       centerCropped: 'Oli cropped from the center to fill the frame.',
       enlarged: 'The photo has fewer pixels than the frame needs, so Oli enlarged it and it may look softer.',
     },
