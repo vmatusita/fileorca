@@ -66,10 +66,10 @@ Tudo abaixo foi medido no estado final (`c4e2c18`, o código igual ao do commit 
 8. **Os anúncios,** no build de teste: `fo-ad-map.spec.ts`, `ads.spec.ts` e `ads-coffee.spec.ts` verdes nos dois navegadores, com os alvos novos (a faixa, o "Ajustar", os chips, a linha `.fo-carry`, a nota de origem, o estado `lost`, os controles do juntar e a Oli com a caixa inflada em 12 px); a tabela por molde está abaixo.
 9. **A acessibilidade.** O axe zero violação nos dois temas e nos dois navegadores no aviso aberto, nos estados da ilha de imagem (`tool-slot-axe.spec.ts`), no juntar lendo, com a lista e com uma linha tirada, nas peças de PDF (`axe-pdf-states.spec.ts`, `pdf-merge.spec.ts`) e na caixa vazia (`handoff.spec.ts`); todo botão visível do `#fo-tool-root` com 48 px ou mais a 360 e a 1280 (`tool-slot.spec.ts` e o D-12 do `pdf-pieces.spec.ts`); o contraste de todo par novo nos README do DropZone, do ResultCard, do ToolPage, do FileCard, do OptionGroup e do CookieNotice.
 10. **Os arquivos que saem não mudam.** `image-matrix.spec.ts`, `image-presets.spec.ts` e `pdf-matrix.spec.ts` verdes com o mesmo esperado; `git diff --stat 14341bc -- fixtures/ scripts/oracle/ scripts/guides/` sai vazio.
-11. **O orçamento.** Tabela abaixo: as 183 páginas que o `budgets.spec.ts` e o `i18n-budgets.spec.ts` medem têm os mesmos arquivos JS e as mesmas requisições do ponto de partida; a lista dos 66 nomes de `dist/_astro/*.js` sem o hash é a mesma; o JS inicial máximo é de 56,0 KB com gzip (57,7 no build de teste). A ilha de imagem cresceu 2.685 B e a de PDF 3.090 B com gzip (a § 511 diz por quê).
+11. **O orçamento.** Tabela abaixo: as 183 páginas que o `budgets.spec.ts` e o `i18n-budgets.spec.ts` medem têm os mesmos arquivos JS e as mesmas requisições do ponto de partida; a lista dos 66 nomes de `dist/_astro/*.js` sem o hash é a mesma; o JS inicial máximo é de 56,0 KB com gzip (57,7 no build de teste). A ilha de imagem cresceu 2.688 B e a de PDF 3.086 B com gzip (a § 511 diz por quê).
 12. **O CLS e o Lighthouse.** O `layout-shift.spec.ts` verde de 320 a 412 px nos dois builds. O Lighthouse (celular), nas 10 URLs do `lighthouserc.json`: desempenho de 99 a 100 e CLS de 0,000 a 0,001 (abaixo).
 13. **Os textos.** `pnpm lint:texto` no `verificar`: 36 arquivos, 2.899 textos, 0 erro de gramática (954 avisos, quase todos "Oli", "FileOrca" e os placeholders, como a F11 g-3 registra); o `english-leak.test.ts` e o `glossary.test.ts` verdes no Vitest.
-14. **A documentação.** O `docs/design/` (as mudanças de regra de cada componente, com o antes e o depois e o §, e o contraste), o `docs/claude/` (a seção "## F13a: página de ferramenta" em oito arquivos de tema: todos menos o das calculadoras e o dos idiomas, que a F13a não tocou) e o `docs/PENDENCIAS.md` (as 25 pendências em "Já corrigidos", a F7 e-1 descartada, o grupo 22 com 14 linhas, o Resumo e o Total) em dia; o `pendencias.test.ts` verde; os § vão de 456 a 533.
+14. **A documentação.** O `docs/design/` (as mudanças de regra de cada componente, com o antes e o depois e o §, e o contraste), o `docs/claude/` (a seção "## F13a: página de ferramenta" em oito arquivos de tema: todos menos o das calculadoras e o dos idiomas, que a F13a não tocou) e o `docs/PENDENCIAS.md` (as 25 pendências em "Já corrigidos", a F7 e-1 descartada, o grupo 22 com 14 linhas, o Resumo e o Total) em dia; o `pendencias.test.ts` verde; os § vão de 456 a 534.
 15. **Os testes.** Os números abaixo só cresceram; cada teste antigo que mudou está num § no formato da § 341; cada teste novo de comportamento reprovou contra o ponto de partida (ou, para os da revisão, contra o `411502b`), com a contagem em cada §.
 16. **O `pnpm verificar --partes`.** Verde nas 21 partes, a maior com 392 s (o Lighthouse), nenhuma acima de 700 s (abaixo).
 17. **A revisão.** `docs/relatorios/REVISAO-F13a.md`: nenhum achado crítico, alto ou médio aberto.
@@ -319,10 +319,12 @@ O script inline de cada página cresceu cerca de 1 KB com gzip (na página Sobre
 
 | Arquivo | Antes | Depois | Diferença |
 | --- | ---: | ---: | ---: |
-| `island.js` (a ilha de imagem e o pedaço comum) | 18.523 B | 21.208 B | +2.685 B |
-| `PdfIsland…_lang.js` (a ilha de PDF) | 16.781 B | 19.871 B | +3.090 B (§ 511) |
-| `CalcIsland…_lang.js` | 30.751 B | 30.661 B | −90 B |
-| As entradas de cada página de imagem | 223 a 2.686 B | 225 a 2.693 B | +1 a +65 B |
+| `island.js` (a ilha de imagem e o pedaço comum) | 18.523 B | 21.211 B | +2.688 B |
+| `PdfIsland…_lang.js` (a ilha de PDF) | 16.781 B | 19.867 B | +3.086 B (§ 511) |
+| `CalcIsland…_lang.js` | 30.751 B | 30.744 B | −7 B |
+| As entradas de cada página de imagem | 223 a 2.686 B | 224 a 2.691 B | −1 a +64 B |
+
+Medido no build final, com a correção da § 534 (`node .cache/f13a/js-compare.mjs`, gzip nível 9). A versão anterior desta tabela tinha o `CalcIsland` e as entradas de um build intermediário.
 
 ### O Lighthouse (celular), no `pnpm verificar --partes`
 
@@ -378,11 +380,11 @@ Todas estão em "Já corrigidos depois da revisão" do `docs/PENDENCIAS.md`, com
 | | Antes | Depois |
 | --- | ---: | ---: |
 | Vitest | 115 arquivos, 1.909 testes | 120 arquivos, 1.963 testes |
-| `playwright test --list`, por navegador | 54 arquivos, 1.693 testes | 61 arquivos, 1.902 testes |
+| `playwright test --list`, por navegador | 54 arquivos, 1.693 testes | 61 arquivos, 1.903 testes |
 
 Os specs novos: `cookie-notice`, `tool-slot`, `tool-slot-axe`, `pdf-merge`, `pdf-pieces`, `handoff` e `drop-anywhere` (Playwright); `cookie-seal`, `hub-icons`, `pdf-pieces-texts`, `handoff` e `inbox-store` (Vitest). Nas partes do CI: o `design.spec.ts` cai nas partes 2 e 3 do Chromium e na 6 do WebKit, e o `image-matrix.spec.ts` na 4 do Chromium e na 9 do WebKit (partes diferentes); os specs novos pesados ficam nas partes 3 e 5 do Chromium e de 5 a 13 do WebKit (§ 474, § 489 e § 508).
 
-**Os testes antigos que mudaram,** cada um com o seu § no formato da § 341 (o que protegia e como a proteção continua): § 462 (o aceno e o vapor do `design.spec.ts`, as sete janelas do `fo-ad-map.spec.ts` e o `pendencias.test.ts`), § 475 (a frente de imagem: o antes e depois aberto e a Oli do cartão no `island.spec.ts`, as opções depois do resultado em vários specs, a razão do D-06 no `image-batch.spec.ts` e no `lib/matrix.ts`, o `startOver`, o `a11y.spec.ts`, o `ads.spec.ts`), § 487 (a frente de PDF: a alça e as setas do juntar no `pdf-tool.spec.ts`, o "Adjust" do girar, o `pdf-states.ts`, a regra da linha de sucesso), § 492 (o `icons.test.ts`), § 507 (o `privacy-share.test.ts`, a data da Privacidade no `calc-defs.test.ts`, os alvos do mapa), § 533 (os da revisão). O teste do D-27 do juntar (novo nesta run) ganhou um retrato sem corrida (§ 512).
+**Os testes antigos que mudaram,** cada um com o seu § no formato da § 341 (o que protegia e como a proteção continua): § 462 (o aceno e o vapor do `design.spec.ts`, as sete janelas do `fo-ad-map.spec.ts` e o `pendencias.test.ts`), § 475 (a frente de imagem: o antes e depois aberto e a Oli do cartão no `island.spec.ts`, as opções depois do resultado em vários specs, a razão do D-06 no `image-batch.spec.ts` e no `lib/matrix.ts`, o `startOver`, o `a11y.spec.ts`, o `ads.spec.ts`), § 487 (a frente de PDF: a alça e as setas do juntar no `pdf-tool.spec.ts`, o "Adjust" do girar, o `pdf-states.ts`, a regra da linha de sucesso), § 492 (o `icons.test.ts`), § 507 (o `privacy-share.test.ts`, a data da Privacidade no `calc-defs.test.ts`, os alvos do mapa), § 533 (os da revisão), § 534 (o offline do `launch-claims.spec.ts`, que tira o ponteiro da ferramenta, depois da execução completa do CI). O teste do D-27 do juntar (novo nesta run) ganhou um retrato sem corrida (§ 512).
 
 ## O `pnpm verificar --partes`
 
@@ -422,6 +424,12 @@ Antes dele, duas execuções inteiras do Playwright na mesma máquina, com a má
 
 A última execução do CI antes do relatório (a leve, do push de `0ab0aa0`, `pnpm ci:custo 41973712053`): classe leve, 5 minutos cobrados, 3,0 min de parede, 3 jobs (o `verificar (leve)` com 141 s, o `classificar` e o `ci-ok`). O custo da execução completa, depois do `gh pr ready`, vai na descrição da PR.
 
+## A execução completa do CI: a falha e a correção
+
+- **A 1ª execução completa** (42010675663, no `42bc835`, depois de a leve terminar verde) reprovou numa parte só, a "chromium 4 de 5": 379 testes passaram e 1 falhou, o `launch-claims.spec.ts` "/compress-image/: no byte of the file leaves the browser, and the tool keeps working offline". Com a rede desligada, a página pediu o `png-*.js`, o `webp-*.js`, o `mozjpeg_dec-*.js` e o `mozjpeg_dec.wasm`. O segundo arquivo saiu certo, e nenhum byte saiu: os pedidos eram do aquecimento dos codecs.
+- **A causa** (§ 534): o aquecimento da Compress (JPEG, PNG e WebP) corria na 1ª vez que o ponteiro entrava no retângulo, mesmo depois do 1º arquivo. No teste, o clique no Baixar levava o ponteiro para dentro do retângulo, e o aquecimento corria contra o `setOffline(true)`: no Windows os pedidos saíam antes de a rede cair, no runner do Linux, depois. Na página, o mesmo caminho baixava 7 arquivos de codec que a foto não usava, e com o soltar em qualquer lugar (UX-18 A) o 1º arquivo chega sem o ponteiro passar pelo retângulo. Uma sonda no Chromium local mostrou a ordem: o arquivo, o resultado, o ponteiro sobre o Baixar e, 15 ms depois, os pedidos.
+- **A correção:** o `gh pr ready --undo` voltou a PR ao rascunho. O aquecimento passou a ser só antes do 1º arquivo (o `startBatch()` o dá por feito), o `launch-claims.spec.ts` tira o ponteiro da ferramenta depois do aviso, e o `budgets.spec.ts` ganhou "Compress image warms its codecs only before the first file", que reprova no Chromium sem a mudança (os 7 arquivos) e passa com ela. Com a correção, passaram 482 testes nos dois navegadores (`launch-claims`, `engine-paths`, `image-privacy`, `budgets`, `island`, `tool-slot`, `handoff`, `drop-anywhere`, `sw-offline`) e outros 670 numa segunda rodada (`budgets`, `launch-claims` e `ads`), além do `pnpm verificar --leve`. Em seguida vieram o commit, o push, a execução leve e o `gh pr ready` de novo. O resultado da execução completa nova e o custo dela ficam na descrição da PR.
+
 ## A conferência no Linux
 
 Não houve: o rótulo `ci` não existe no repositório (§ 461), e a run não o cria. A execução completa do fim faz o papel dela. O que a run fez para não depender só dela: o card do aviso ganhou folga para as fontes mais largas do Linux (§ 458), e a regra do 1º anúncio, 160 px de folga para a troca das fontes (§ 517).
@@ -446,14 +454,14 @@ Em `docs/relatorios/fase-13a/`, 36 imagens em JPEG (qualidade 80, escala 1, de 2
 
 ## As decisões novas
 
-Os § 456 a § 533 do `DECISOES.md`:
+Os § 456 a § 534 do `DECISOES.md`:
 
 - **A fatia 1:** § 456 (a especificação é o contrato), § 457 (a divisão da F13), § 458 (o aviso compacto, com os dois desvios registrados), § 459 (o aviso e o 1º anúncio nas sete janelas), § 460 (a Oli por estado), § 461 (o rótulo `ci`), § 462 (os testes antigos da fatia 1), § 463 (a base da página de ferramenta).
 - **A frente de imagem:** § 464 a § 477 (o retângulo, a Oli e o selo, a faixa e o "Ajustar", o antes e depois e a região viva, os erros, o 3º uso do café, o puxador, o arquivo que cresce, os alvos dos anúncios, as partes do CI, os testes antigos, os itens do molde do `PLANO-FILEORCA.md` que a ficha substitui, os textos).
 - **A frente de PDF:** § 478 a § 489 (o retângulo, o juntar, as palavras novas, como cada família guarda a altura, os números, o "Adjust", o café, as peças em dois commits, os testes antigos, os alvos, as partes).
 - **A frente dos ícones:** § 490 a § 492; **a junção:** § 493 (o selo `file-drop`) e § 494; **a correção da junção:** § 495 (o CLS das ferramentas de PDF automáticas).
 - **A frente do chip e do soltar:** § 496 a § 510 (o caminho do clique à chegada, quais destinos levam, a chegada, a caixa vazia, a faixa, o soltar, o contador, o `dropEffect`, a Privacidade, o service worker que não muda, os alvos, os testes, as partes, o orçamento, o foco da senha errada).
-- **O fim:** § 511 (a ilha de PDF passou de 3 KB), § 512 (o Playwright inteiro e o D-27), § 513 a § 533 (as correções e os registros da revisão).
+- **O fim:** § 511 (a ilha de PDF passou de 3 KB), § 512 (o Playwright inteiro e o D-27), § 513 a § 533 (as correções e os registros da revisão), § 534 (o aquecimento dos codecs só antes do 1º arquivo, a correção da execução completa do CI).
 
 ## A válvula de estouro
 
