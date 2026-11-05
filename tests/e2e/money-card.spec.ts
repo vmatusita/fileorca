@@ -6,9 +6,13 @@
 // The name puts it right after money-calc.spec.ts, among the money specs of the light parts (DECISOES § 142).
 import { expect, test, type Page } from '@playwright/test';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage } from '../../src/tools/calc/registry.ts';
+import enShared from '../../src/tools/calc/i18n/en.ts';
+import esShared from '../../src/tools/calc/i18n/es.ts';
+import ptShared from '../../src/tools/calc/i18n/pt.ts';
+import { dismissCookies, hydrated } from './lib/page.ts';
 
 /** Every calculator page, in the languages it exists in. */
-export const CALC_PATHS: string[] = [
+const CALC_PATHS: string[] = [
   ...CALC_PAGE_IDS.map((id) => CALC_PAGES[id].path),
   ...CALC_PAGE_IDS.map((id) => moneyPage(id, 'es')?.path ?? `(${id} sem página em es)`),
   ...BR_CALC_IDS.map((id) => moneyPage(id, 'pt')?.path ?? `(${id} sem página em pt)`),
@@ -50,5 +54,289 @@ for (const block of blocks(CALC_PATHS)) {
       if ((await page.locator('[data-ymyl="source"] .fo-reviewed time[datetime]').count()) !== 1) wrong.push(`${path}: a primeira publicação não está nas fontes`);
     }
     expect(wrong).toEqual([]);
+  });
+}
+
+/** Two frames: Preact has drawn the last change. */
+const frames = (page: Page) => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+
+/** The card: its top and height in the page, and the Download PDF in it (null while there is none). */
+async function card(page: Page): Promise<{ top: number; height: number; download: { bottom: number; width: number } | null; inner: number }> {
+  return page.evaluate(() => {
+    const hero = document.querySelector<HTMLElement>('.fo-rhero');
+    if (!hero) throw new Error('no ResultHero');
+    const box = hero.getBoundingClientRect();
+    const style = getComputedStyle(hero);
+    const button = hero.querySelector('.fo-btn--download')?.getBoundingClientRect();
+    return {
+      top: Math.round(box.top + window.scrollY),
+      height: Math.round(box.height * 10) / 10,
+      download: button ? { bottom: button.bottom + window.scrollY, width: button.width } : null,
+      inner: hero.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+    };
+  });
+}
+
+/** The first field of the main fields, a number or a day: the one the person types in first. */
+const firstField = (page: Page) => page.locator('.fo-calc__main :is(input[inputmode], input[type="date"])').first();
+
+/** A value of the same length with its last digit changed: "375,000" → "375,001", "2026-09-07" → "2026-09-01". */
+const nudged = (value: string): string => `${value.slice(0, -1)}${value.endsWith('1') ? '2' : '1'}`;
+
+/** The first key: the last digit of the first field changes (the visit's first result, and the Oli's cheer). */
+async function firstKey(page: Page): Promise<string> {
+  const field = firstField(page);
+  const value = await field.inputValue();
+  await field.fill(nudged(value));
+  await frames(page);
+  return value;
+}
+
+/** A value the first field cannot take: letters in a number, a day before 2000 in a date. */
+async function breakField(page: Page): Promise<void> {
+  const field = firstField(page);
+  await field.fill((await field.getAttribute('type')) === 'date' ? '1999-12-31' : 'abc');
+  await field.blur();
+  await expect(page.locator('#fo-rhero-error')).toBeVisible();
+}
+
+/** The height of the sentence of the card (a result with more digits may take a line more). */
+const sentenceHeight = (page: Page) => page.locator('.fo-rhero__sentence').evaluate((node) => node.getBoundingClientRect().height);
+
+// "Dobra": after the first key, the Download PDF of every calculator ends above the fold, 740 px at 360 x 740 and 800 px at
+// 1280 x 800, and on the phone it takes the width of the card's content (in block). Before, it was under the card, in the
+// ExportBar, from 878 to 1,094 px at 360.
+for (const block of blocks(CALC_PATHS)) {
+  test(`the Download PDF is in the card and above the fold at 360 x 740 and 1280 x 800 (${block.name})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const wrong: string[] = [];
+    for (const [width, height] of [[360, 740], [1280, 800]] as const) {
+      for (const path of block.paths) {
+        await openAt(page, path, width, height);
+        await hydrated(page);
+        await firstKey(page);
+        const now = await card(page);
+        if (!now.download) {
+          wrong.push(`${path} a ${width}: sem o Baixar no card`);
+          continue;
+        }
+        if (now.download.bottom > height) wrong.push(`${path} a ${width}: o Baixar termina em ${Math.round(now.download.bottom)}`);
+        if (width < 768 && Math.abs(now.download.width - now.inner) > 1) wrong.push(`${path} a ${width}: o Baixar tem ${now.download.width} de ${now.inner} px`);
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+}
+
+// "Sem salto" and the four states of the card, at 360 and 1280 px: the example; the first key (the last digit of the first
+// field, the visit's first result, and the Oli's cheer); a result (the example's value typed back); and an error (a value the
+// field cannot take). The card keeps its height (1 px of tolerance) and its top: the Oli changes her pose in her box, the
+// Download leaves its place to the message and the last result takes the cell of the sentence. The first key is compared
+// with the example when its sentence keeps its lines (another number may take a line more), and the error with the result
+// it stands on. Before, the first key brought the Oli and the Placard under the chart (+96 to +100 px) and an error pushed a
+// line under the card (+50 px).
+for (const block of blocks(CALC_PATHS)) {
+  test(`the card keeps its height in the example, after the first key, in a result and in an error (${block.name})`, async ({ page }) => {
+    test.setTimeout(180_000);
+    const wrong: string[] = [];
+    for (const width of [360, 1280]) {
+      for (const path of block.paths) {
+        await openAt(page, path, width, 900);
+        await hydrated(page);
+        const example = await card(page);
+        const lines = await sentenceHeight(page);
+        const value = await firstKey(page);
+        const key = await card(page);
+        const keyLines = await sentenceHeight(page);
+        await firstField(page).fill(value);
+        await frames(page);
+        const result = await card(page);
+        await breakField(page);
+        const error = await card(page);
+        const same = (state: string, from: { top: number; height: number }, now: { top: number; height: number }) => {
+          if (Math.abs(now.height - from.height) > 1) wrong.push(`${path} a ${width}, ${state}: ${from.height} → ${now.height} px`);
+          if (now.top !== from.top) wrong.push(`${path} a ${width}, ${state}: o topo foi de ${from.top} a ${now.top}`);
+        };
+        if (keyLines === lines) same('1ª tecla', example, key);
+        same('resultado', example, result);
+        same('erro', result, error);
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+}
+
+// "Erro" (spec; F4 ACE-11): 99 in the rate of the mortgage (en, es) and 5 months in the SAC × PRICE, and a wait of 900 ms
+// (the range error waits 800 ms for the last key, § 305). The card stays where it was, nothing moved without a key
+// (layout-shift with no recent input), the card says the message and the last result that worked, the field is
+// aria-invalid and described by the message of the card, and no Download is ever there turned off.
+const ERRORS = [
+  { path: CALC_PAGES['mortgage-calculator'].path, field: 'r', value: '99', message: 'Enter a rate from 0 to 40%.', last: 'Last result that worked: Rate 6.5%.', stale: enShared.island.stale },
+  { path: moneyPage('mortgage-calculator', 'es')?.path ?? '', field: 'r', value: '99', message: 'Escribe una tasa de 0 a 40 %.', last: 'Último resultado válido: Tasa 6.5 %.', stale: esShared.island.stale },
+  { path: moneyPage('br-sac-price', 'pt')?.path ?? '', field: 'n', value: '5', message: 'Digite um prazo de 12 a 420 meses.', last: 'Último resultado que valeu: Prazo 360 meses.', stale: ptShared.island.stale },
+];
+for (const { path, field, value, message, last, stale } of ERRORS) {
+  test(`${path}: an error is said in the card, with the last result that worked, and nothing moves`, async ({ page, browserName }) => {
+    await page.addInitScript(() => {
+      const shifts = { cls: 0 };
+      (window as unknown as { __shifts: typeof shifts }).__shifts = shifts;
+      if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) if (!entry.hadRecentInput) shifts.cls += entry.value;
+      }).observe({ type: 'layout-shift', buffered: false });
+    });
+    await openAt(page, path, 360, 740);
+    await hydrated(page);
+    await frames(page);
+    // What the load moved (the fonts) is not the error's: the count starts at the key.
+    await page.evaluate(() => ((window as unknown as { __shifts: { cls: number } }).__shifts.cls = 0));
+    const before = await card(page);
+    const input = page.locator(`#fo-calc-${field}`);
+    await input.fill(value);
+    await page.waitForTimeout(900);
+    const error = page.locator('.fo-rhero #fo-rhero-error');
+    await expect(error).toBeVisible();
+    if (message) await expect(error).toHaveText(message);
+    await expect(page.locator('.fo-rhero__stale')).toHaveText(`${last} ${stale}`);
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+    await expect(page.locator('button.fo-btn--download[disabled]')).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__oli')).toHaveAttribute('data-oli', 'oops');
+    const after = await card(page);
+    expect(after.top).toBe(before.top);
+    expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1);
+    if (browserName === 'chromium') expect(await page.evaluate(() => (window as unknown as { __shifts: { cls: number } }).__shifts.cls)).toBe(0);
+    // The region of the card says it, half a second after: the one voice of the result (§ 102).
+    await expect(page.locator('.fo-rhero [aria-live="polite"]')).toContainText(last, { timeout: 2_000 });
+  });
+}
+
+// F10 p-19: on the first visit (no choice of cookies yet), at 360 x 740, the number of the mortgage (en, es) and of the
+// SAC × PRICE ends above 596 px, clear of the cookie notice, which starts at 604 px; after Accept, the Download PDF is whole
+// above 740 px, in the width of the card. Before: 636 (en) and 678 px (es, pt), covered by 32 and 52 px of the notice.
+for (const path of [CALC_PAGES['mortgage-calculator'].path, moneyPage('mortgage-calculator', 'es')?.path ?? '', moneyPage('br-sac-price', 'pt')?.path ?? '']) {
+  test(`${path}: the number ends above the cookie notice at 360 x 740, and after Accept the Download is above the fold`, async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 360, height: 740 }, serviceWorkers: 'block' });
+    const page = await context.newPage();
+    expect((await page.goto(path))?.status()).toBe(200);
+    await page.evaluate(() => document.fonts.ready);
+    await hydrated(page);
+    const seen = await page.evaluate(() => {
+      const number = document.querySelector('.fo-rhero__num')!.getBoundingClientRect();
+      const notice = document.getElementById('fo-cookie');
+      const box = notice && !notice.hidden ? notice.getBoundingClientRect() : null;
+      return { bottom: number.bottom, top: number.top, notice: box ? { top: box.top, bottom: box.bottom } : null };
+    });
+    expect(seen.notice, 'o aviso da primeira visita').not.toBeNull();
+    expect(seen.bottom).toBeLessThanOrEqual(596);
+    expect(Math.max(0, Math.min(seen.bottom, seen.notice?.bottom ?? 0) - Math.max(seen.top, seen.notice?.top ?? 0))).toBe(0);
+    await dismissCookies(page, 'granted');
+    const now = await card(page);
+    expect(now.download?.bottom ?? 999).toBeLessThanOrEqual(740);
+    expect(Math.abs((now.download?.width ?? 0) - now.inner)).toBeLessThanOrEqual(1);
+    await context.close();
+  });
+}
+
+// F4 ACE-11: a problem of the account that points to a field marks that field as an error of its range does, with
+// aria-invalid and the card's message as its description (never the message repeated next to it): the payment that does not
+// cover the interest of the credit card, the extra of the debt payoff, the payment of a debt to consolidate, and the down
+// payment of the SAC × PRICE that leaves nothing to finance.
+const PROBLEMS = [
+  { path: CALC_PAGES['credit-card-payoff-calculator'].path, fill: [['pay', '10']], field: 'pay' },
+  { path: CALC_PAGES['debt-payoff-calculator'].path, fill: [['d0m', '0'], ['d1m', '0'], ['d2m', '0'], ['d3m', '0'], ['x', '0']], field: 'x' },
+  { path: CALC_PAGES['debt-consolidation-calculator'].path, fill: [['d0p', '1']], field: 'd0p' },
+  { path: moneyPage('br-sac-price', 'pt')?.path ?? '', fill: [['d', '100']], field: 'd' },
+] as const;
+for (const { path, fill, field } of PROBLEMS) {
+  test(`${path}: the field a problem points to is aria-invalid and described by the card (ACE-11)`, async ({ page }) => {
+    await openAt(page, path, 360, 740);
+    await hydrated(page);
+    for (const [key, text] of fill) await page.locator(`#fo-calc-${key}`).fill(text);
+    const input = page.locator(`#fo-calc-${field}`);
+    await expect(page.locator('#fo-rhero-error')).toBeVisible();
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+    // The words are in the card only: nothing under the field repeats them.
+    await expect(page.locator('#fo-tool-root .fo-field__error')).toHaveCount(0);
+    await expect(page.locator('#fo-tool-root [role="alert"]')).toHaveCount(0);
+  });
+}
+
+// The Oli of the card (§ 375): in the HTML of the page, so on the first paint, aria-hidden, sitting on the top edge of the
+// card at its right (64 px on the phone, 80 from 768 px); still in wave on the example, cheer once on the first result of
+// the visit, oops on an error, and wave after it, in the same box. Never cheer on a health page.
+test('the Oli is in the card from the first paint, cheers once, says oops on an error and waves after it', async ({ page, request }) => {
+  const path = CALC_PAGES['auto-loan-calculator'].path;
+  const html = await (await request.get(path)).text();
+  expect(html).toMatch(/<div class="fo-rhero__oli" data-oli="wave" aria-hidden="true">/);
+  for (const [width, size] of [[360, 64], [1280, 80]] as const) {
+    await openAt(page, path, width, 800);
+    const box = await page.evaluate(() => {
+      const oli = document.querySelector('.fo-rhero__oli')!.getBoundingClientRect();
+      const hero = document.querySelector('.fo-rhero')!.getBoundingClientRect();
+      return { width: oli.width, top: oli.top - hero.top, right: hero.right - oli.right };
+    });
+    expect(box.width, `${width}px`).toBe(size);
+    expect(box.top, `${width}px: acima da borda de cima`).toBeLessThan(0);
+    expect(box.right, `${width}px: à direita`).toBeLessThanOrEqual(24);
+  }
+  await hydrated(page);
+  const oli = page.locator('.fo-rhero__oli');
+  const handle = await oli.elementHandle();
+  await expect(oli).toHaveAttribute('data-oli', 'wave');
+  expect(await oli.evaluate((node) => getComputedStyle(node.querySelector('svg')!).animationName)).toBe('none');
+  await firstKey(page);
+  await expect(oli).toHaveAttribute('data-oli', 'cheer');
+  await breakField(page);
+  await expect(oli).toHaveAttribute('data-oli', 'oops');
+  await firstField(page).fill('33000');
+  await expect(oli).toHaveAttribute('data-oli', 'wave');
+  // The same element all along: the pose changes in the box.
+  expect(await oli.evaluate((node, first) => node === first, handle)).toBe(true);
+});
+
+test('a health page never cheers: the Oli of the card waves on a result and says oops on an error', async ({ page }) => {
+  await openAt(page, LIFE_CALC_PAGES['bmi-calculator'].path, 360, 740);
+  await hydrated(page);
+  const oli = page.locator('.fo-rhero__oli');
+  await page.locator('#fo-calc-lb').fill('170');
+  await frames(page);
+  await expect(oli).toHaveAttribute('data-oli', 'wave');
+  await page.locator('#fo-calc-lb').fill('abc');
+  await page.locator('#fo-calc-lb').blur();
+  await expect(oli).toHaveAttribute('data-oli', 'oops');
+  await expect(page.locator('symbol#oli-cheer')).toHaveCount(0);
+});
+
+// The waterline of the deep sea (§ 539, night-sea.html ?alt=a) on the card, in both themes: the ::after is the air (the mask of
+// the wave, in surface), the ::before the crest (stroke), the Oli above them, and the card keeps its height without them.
+for (const scheme of ['light', 'dark'] as const) {
+  test(`the card has the waterline of the deep sea in the ${scheme} theme, and its height does not depend on it`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    for (const width of [360, 1280]) {
+      await openAt(page, CALC_PAGES['mortgage-calculator'].path, width, 900);
+      const seen = await page.evaluate(() => {
+        const hero = document.querySelector('.fo-rhero')!;
+        const after = getComputedStyle(hero, '::after');
+        const before = getComputedStyle(hero, '::before');
+        const probe = document.createElement('i');
+        document.body.append(probe);
+        const color = (token: string) => {
+          probe.style.color = `var(${token})`;
+          return getComputedStyle(probe).color;
+        };
+        const tokens = { surface: color('--surface'), stroke: color('--stroke') };
+        probe.remove();
+        const mask = after.maskImage || after.getPropertyValue('-webkit-mask-image');
+        return { air: after.backgroundColor, crest: before.backgroundColor, mask, tokens, oli: getComputedStyle(hero.querySelector('.fo-rhero__oli')!).zIndex, height: hero.getBoundingClientRect().height };
+      });
+      expect(seen.mask, `${width}px`).toContain('svg');
+      expect(seen.air).toBe(seen.tokens.surface);
+      expect(seen.crest).toBe(seen.tokens.stroke);
+      expect(seen.oli).toBe('1');
+      await page.addStyleTag({ content: '.fo-rhero::before, .fo-rhero::after { display: none !important; }' });
+      expect(await page.locator('.fo-rhero').evaluate((node) => node.getBoundingClientRect().height)).toBe(seen.height);
+    }
   });
 }

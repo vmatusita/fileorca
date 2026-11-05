@@ -1,9 +1,10 @@
-// ExportBar (docs/design/components/ExportBar): Download PDF (the only yellow), CSV and Copy link, in that
-// order, on the bg floor under the ResultHero. Copy link builds the address with the numbers after the #
-// and puts it on the clipboard: the button turns into "Link copied" for 2 s and a role="status" region of
-// its own says so. Without a clipboard, the link shows in a read-only field, which follows the numbers as they
-// change. While the result is a problem (a payment under the interest) there is no PDF or CSV to make: the two
-// buttons are off and the hero says why. No number goes to an event.
+// ExportBar (docs/design/components/ExportBar): Download CSV and Copy link, in that order, on the bg floor under the
+// ResultHero. Since the F13b (UX-12 A; DECISOES § C-2) the Download PDF, the only yellow, lives in the card, right under the
+// number; the CSV took a verb ("Download CSV", F4 ACE-8) and shares its row with Copy link. Copy link builds the address
+// with the numbers after the # and puts it on the clipboard: the button turns into "Link copied" for 2 s and a role="status"
+// region of its own says so. Without a clipboard, the link shows in a read-only field, which follows the numbers as they
+// change. While the result is a problem or stale there is no CSV to make: the button is off (it is secondary; the card says
+// why). When the PDF maker cannot load, the alert of the card's Download is said here. No number goes to an event.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
@@ -17,21 +18,19 @@ interface Props {
   page: AnyCalcId;
   lang: Lang;
   t: CalcSharedTexts;
-  icons: { pdf: string; table: string; link: string; check: string; alert: string };
-  /** The result is a problem: nothing to export. */
+  icons: { table: string; link: string; check: string; alert: string };
+  /** The result is a problem or stale: nothing to export. */
   off: boolean;
-  /** Builds and saves the PDF; rejects when the PDF maker cannot load. */
-  pdf: () => Promise<void>;
+  /** The card's Download PDF could not load the PDF maker. */
+  pdfFailed: boolean;
   csv: () => void;
   /** The address to copy, built at the moment of the click. */
   link: () => string;
 }
 
-export default function ExportBar({ page, lang, t, icons, off, pdf, csv, link }: Props) {
+export default function ExportBar({ page, lang, t, icons, off, pdfFailed, csv, link }: Props) {
   const [copied, setCopied] = useState(false);
   const [shown, setShown] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const field = useRef<HTMLInputElement>(null);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -57,28 +56,6 @@ export default function ExportBar({ page, lang, t, icons, off, pdf, csv, link }:
   return (
     <div class="fo-export-wrap">
       <div class="fo-export">
-        <button
-          type="button"
-          class="fo-btn fo-btn--download"
-          disabled={off}
-          aria-busy={busy ? 'true' : undefined}
-          onClick={async () => {
-            if (busy) return;
-            track('export_click', { tool: page, lang, format: 'pdf' });
-            setBusy(true);
-            setFailed(false);
-            try {
-              await pdf();
-            } catch {
-              setFailed(true);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          <Icon inner={icons.pdf} />
-          {t.pdf}
-        </button>
         <button
           type="button"
           class="fo-btn"
@@ -118,7 +95,7 @@ export default function ExportBar({ page, lang, t, icons, off, pdf, csv, link }:
           </div>
         </div>
       )}
-      {failed && (
+      {pdfFailed && (
         <p class="fo-field__error" role="alert">
           <Icon inner={icons.alert} />
           {typeof navigator !== 'undefined' && navigator.onLine === false ? t.exportOffline : t.exportFailed}

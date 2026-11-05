@@ -318,17 +318,19 @@ test('a day out of the range says the range in words and keeps the last result',
   for (const id of ['due-date-calculator', 'ovulation-calculator'] as const) {
     await openCalc(page, id);
     const field = page.locator('#fo-calc-d');
-    const error = page.locator('#fo-calc-d-error');
+    // F13b (DECISOES § C-2): the words of the day out of the range are said in the card, which the field points to.
+    const error = page.locator('#fo-rhero-error');
     const before = (await heroNumber(page).textContent()) ?? '';
     const sentence = (await page.locator('.fo-rhero__sentence').textContent()) ?? '';
     for (const day of ['1999-12-31', '2100-01-01']) {
       await field.fill(day);
       await expect(field, `${id} ${day}`).toHaveAttribute('aria-invalid', 'true');
       await expect(error, `${id} ${day}`).toHaveText('Enter a day from January 1, 2000 to December 31, 2099.');
-      await expect(error).toHaveAttribute('role', 'alert');
-      await expect(field).toHaveAttribute('aria-describedby', /fo-calc-d-error/);
+      await expect(field).toHaveAttribute('aria-describedby', /fo-rhero-error/);
       await expect(heroNumber(page)).toHaveText(before);
+      // The sentence keeps its place and its words, hidden, under the last result that worked.
       await expect(page.locator('.fo-rhero__sentence')).toHaveText(sentence);
+      await expect(page.locator('.fo-rhero__stale')).toContainText('Last result that worked: ');
     }
     await field.fill('2026-09-14');
     await expect(error).toHaveCount(0);
@@ -426,8 +428,9 @@ test.describe('US and metric units', () => {
 });
 
 // Decision 5: the Oli never cheers a health result. The sprite of a health page has no cheer pose at all, and a change of
-// a field neither shows her nor marks the visit.
-test('no health page cheers: no cheer pose in the sprite, no Oli after a change', async ({ page }) => {
+// a field neither makes her cheer nor marks the visit. F13b (DECISOES § C-2): she is in the card from the first paint and
+// keeps waving.
+test('no health page cheers: no cheer pose in the sprite, the Oli of the card keeps waving after a change', async ({ page }) => {
   await today(page, '2026-11-02');
   const change: Record<HealthCalcId, [string, string]> = {
     'bmi-calculator': ['lb', '170'],
@@ -445,7 +448,7 @@ test('no health page cheers: no cheer pose in the sprite, no Oli after a change'
     await type(page, key, value);
     await expect(heroNumber(page), id).not.toHaveText(before);
     await settle(page);
-    await expect(page.locator('.fo-rhero__oli'), id).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__oli'), id).toHaveAttribute('data-oli', 'wave');
     await expect(page.locator('[data-oli="cheer"], use[href="#oli-cheer"]'), id).toHaveCount(0);
     expect(await page.evaluate(() => sessionStorage.getItem('fo-calc-cheer')), id).toBeNull();
   }

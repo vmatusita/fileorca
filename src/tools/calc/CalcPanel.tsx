@@ -1,31 +1,33 @@
 // The money calculator island (DECISOES § 110), shared by the 18 calculators and the guides: the main
-// fields, the result (ResultHero, SplitChart, ExportBar), the other fields, the two scenarios where the
-// account compares, and the next-step chips. There is no Calculate button: every valid key press runs the
-// account at once (the engines are small and synchronous). On a phone the result sits right under the main
+// fields, the result (ResultHero with its Download PDF, the SplitChart, then Download CSV and Copy link), the other fields,
+// the two scenarios where the account compares, and the next-step chips. There is no Calculate button: every valid key
+// press runs the account at once (the engines are small and synchronous). On a phone the result sits right under the main
 // fields; on a computer the fields and the result stand side by side.
-import { useMemo } from 'preact/hooks';
+// F13b (UX-12 A; DECISOES § C-2): the card is the one place of the result, of the Download PDF and of the error.
+import { useMemo, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
 import { dollars, type NumberLang } from '../../calc/parse.ts';
-import { percent } from '../../i18n/format.ts';
+import { fmt, percent } from '../../i18n/format.ts';
+import type { Pose } from '../../oli/poses.ts';
 import { shares } from './SplitChart.tsx';
 import { DEFS } from './defs/index.ts';
 import Fields, { AddRow } from './Fields.tsx';
 import ResultHero from './ResultHero.tsx';
 import ExportBar from './ExportBar.tsx';
 import ScenarioCompare from './ScenarioCompare.tsx';
-import { createStore, useCalc, type CalcStore } from './store.ts';
-import { linkHash } from './form.ts';
+import { createStore, firstError, useCalc, type CalcStore } from './store.ts';
+import { linkHash, visible } from './form.ts';
 import { csvText, reportInput, reportPdf, save } from './exports.ts';
-import { cellText, inputRows } from './view.ts';
-import type { CalcPanelData, Values } from './types.ts';
+import { cellText, fieldText, inputRows } from './view.ts';
+import type { CalcDef, CalcPanelData, CalcView, Values } from './types.ts';
 
 /** The Oli cheers once per visit; the mark kept for that is a yes, never a number. */
 export const CHEER_KEY = 'fo-calc-cheer';
 
 export interface CalcIslandProps {
   data: CalcPanelData;
-  /** The store the two islands share (the mount passes it; the server makes its own). */
+  /** The store the island's parts share (the mount passes it; the server makes its own). */
   store?: CalcStore;
 }
 
@@ -35,6 +37,28 @@ export function startValues(data: CalcPanelData): Values {
 
 let completeSent = false;
 let cheerChecked: boolean | null = null;
+/** The cheer of the visit was shown and an error came after it: from then on the Oli waves (DECISOES § C-2). */
+let cheerSpent = false;
+
+/**
+ * The longest line the card may say in the place of the sentence: "Last result that worked: {label} {value}." of any field of
+ * the form (and "Fix the highlighted field…"), or of the result itself (a problem with no field). The card keeps its room
+ * from the first paint, so an error never grows it (DECISOES § C-2).
+ */
+function reserveOf(def: CalcDef, data: CalcPanelData, good: { view: CalcView; values: Values }): string {
+  const say = (label: string, value: string) => fmt(data.t.lastWorked, { label, value });
+  const lines = [say(good.view.hero.label, `${good.view.hero.value}${good.view.hero.unit ?? ''}`)];
+  for (const spec of def.fields) {
+    if (!visible(spec, good.values) || spec.kind === 'choice' || spec.kind === 'select') continue;
+    const keys = spec.kind === 'list' ? spec.item.map((item) => [`${spec.key}0${item.key}`, item.key] as const) : [[spec.key, spec.key] as const];
+    for (const [name, key] of keys) {
+      const label = data.texts.fields[key]?.label;
+      const value = fieldText(def.fields, good.values, name, data);
+      if (label && value !== null) lines.push(`${say(label, value)} ${data.t.stale}`);
+    }
+  }
+  return lines.reduce((longest, line) => (line.length > longest.length ? line : longest), '');
+}
 
 /** Whether this is the visit's first result: a sessionStorage yes/no that may be missing or blocked. */
 function firstCheer(): boolean {
@@ -52,8 +76,10 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const def = DEFS[data.page];
   const store = useMemo(() => shared ?? createStore(def, data, startValues(data)), [shared, def, data]);
   const state = useCalc(store);
-  const { values, view } = state;
+  const { values, view, good } = state;
   const lang = data.lang as NumberLang;
+  const [busy, setBusy] = useState(false);
+  const [pdfFailed, setPdfFailed] = useState(false);
   const set = (next: Values) => {
     store.set(next, true);
     if (!completeSent && Object.keys(store.get().problems).length === 0) {
@@ -61,14 +87,60 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       track('calc_complete', { tool: data.page, lang: data.lang });
     }
   };
-  // The visit's one cheer waits for a result: a problem (a payment under the interest) shows no Oli and keeps it.
-  const cheer = data.cheer && state.touched && !view.problem && typeof window !== 'undefined' && firstCheer();
+  // The card says the first field of the form that shows an error, else the problem of the account (DECISOES § C-2).
+  const wrongField = firstError(state.errors);
+  const error = wrongField?.[1].message ?? view.problem;
+  const fixField = wrongField !== undefined || (view.problem !== undefined && view.problemField !== undefined);
+  // "Last result that worked": the field in error (or the one the problem points to) with its value in the last result;
+  // with no field, the last result itself. The example until the person has another one.
+  let last: string | undefined;
+  if (error !== undefined) {
+    const key = wrongField ? wrongField[0].replace(/^fo-calc-/, '') : view.problemField;
+    const label = wrongField ? wrongField[1].label : key ? data.texts.fields[key]?.label : undefined;
+    const value = key ? fieldText(def.fields, good.values, key, data) : null;
+    const said = label && value !== null ? { label, value } : { label: good.view.hero.label, value: `${good.view.hero.value}${good.view.hero.unit ?? ''}` };
+    last = `${fmt(data.t.lastWorked, said)}${fixField ? ` ${data.t.stale}` : ''}`;
+  }
+  // The Oli: wave on the example, cheer once on the first result of the visit (never on a health page, and a re-render
+  // never starts it again), oops on an error, and wave after it.
+  if (error !== undefined && cheerChecked) cheerSpent = true;
+  const cheer = data.cheer && state.touched && error === undefined && !cheerSpent && typeof window !== 'undefined' && firstCheer();
+  const pose: Pose = error !== undefined ? 'oops' : cheer ? 'cheer' : 'wave';
   const main = def.fields.filter((spec) => spec.main);
   const more = def.fields.filter((spec) => !spec.main);
   // A list whose Add button comes after the result (F7: the areas of the square footage).
   const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
-  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined };
+  const off = view.problem !== undefined || state.stale;
+
+  const pdf = async () => {
+    if (busy) return;
+    track('export_click', { tool: data.page, lang: data.lang, format: 'pdf' });
+    setBusy(true);
+    setPdfFailed(false);
+    try {
+      const input = reportInput(
+        {
+          title: data.name,
+          inputs: inputRows(def.fields, values, data),
+          results: view.summary,
+          premises: view.premises,
+          table: view.table(),
+          tableHeading: data.texts.view['scheduleHeading'],
+          notice: data.notice,
+          cell,
+        },
+        data.t,
+        lang,
+      );
+      save(await reportPdf(input), `${data.file}.pdf`);
+    } catch {
+      setPdfFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div class={data.cat === 'home' ? 'fo-calc fo-calc--home' : 'fo-calc'}>
@@ -77,9 +149,14 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       </div>
       <div class="fo-calc__result">
         <ResultHero
-          view={view}
+          view={view.problem !== undefined ? good.view : view}
+          error={error}
+          last={last}
+          reserve={reserveOf(def, data, good)}
           touched={state.touched}
-          cheer={cheer}
+          pose={pose}
+          download={{ label: data.t.pdf, icon: data.icons.pdf, busy, onClick: () => void pdf() }}
+          alert={data.icons.alert}
           money={(cents) => dollars(cents, lang)}
           percent={(value) => percent(value, lang)}
           splitName={(v) => {
@@ -89,31 +166,14 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
             return `${v.split.a.label} ${dollars(v.split.a.cents, lang)}, ${percent(pa, lang)}. ${v.split.b.label} ${dollars(v.split.b.cents, lang)}, ${percent(pb, lang)}.`;
           }}
         />
-        {state.stale && <p class="fo-field__help fo-calc__stale">{data.t.stale}</p>}
         <ExportBar
           page={data.page}
           lang={data.lang}
           t={data.t}
           icons={data.icons}
-          off={view.problem !== undefined || state.stale}
+          off={off}
+          pdfFailed={pdfFailed}
           csv={() => save(new Blob([csvText(view.table(), data.t.year.replace(/\s*\{n\}/, ''), lang)], { type: 'text/csv;charset=utf-8' }), `${data.file}.csv`)}
-          pdf={async () => {
-            const input = reportInput(
-              {
-                title: data.name,
-                inputs: inputRows(def.fields, values, data),
-                results: view.summary,
-                premises: view.premises,
-                table: view.table(),
-                tableHeading: data.texts.view['scheduleHeading'],
-                notice: data.notice,
-                cell,
-              },
-              data.t,
-              lang,
-            );
-            save(await reportPdf(input), `${data.file}.pdf`);
-          }}
           link={() => `${window.location.origin}${data.linkPath}${linkHash(def.fields, values)}`}
         />
       </div>

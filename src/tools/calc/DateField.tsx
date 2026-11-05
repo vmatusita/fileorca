@@ -1,12 +1,15 @@
 // The date field of the pregnancy and cycle calculators (F7, decision 6; DECISOES § 262): the browser's own
 // <input type="date">, which gives a calendar on the phone and the day as "2026-09-07" whatever the language of the
 // device, with the min and max of the field's fixed range. It is built like the NumberField (label, box, the FieldError
-// with the alert icon and role="alert") and only from tokens. An empty, half-typed or out-of-range day shows the
-// range in words and the last result stays; nothing typed here ever reaches the URL or an event.
+// with the alert icon) and only from tokens. An empty, half-typed or out-of-range day shows the range in words and the last
+// result stays; nothing typed here ever reaches the URL or an event. F13b (DECISOES § C-2): the words are said in the card, as
+// for the NumberField; the field keeps its stroke and shows the alert icon inside its box.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
+import { HERO_ERROR_ID } from './CalcField.tsx';
 import { SETTLE_MS, dayInRange } from './form.ts';
+import type { FieldError } from './store.ts';
 
 export interface DateFieldProps {
   id: string;
@@ -19,8 +22,8 @@ export interface DateFieldProps {
   /** The range in words. */
   error: string;
   half?: boolean | undefined;
-  /** Tells the calculator whether the field shows its range error (§ 116, as in the CalcField). */
-  report?: ((id: string, wrong: boolean) => void) | undefined;
+  /** Tells the calculator the error the field shows, or null (§ 116, as in the CalcField). */
+  report?: ((id: string, error: FieldError | null) => void) | undefined;
 }
 
 export default function DateField({ id, value, min, max, onValue, label, error, half, report }: DateFieldProps) {
@@ -39,9 +42,9 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
   }, [value]);
 
   useEffect(() => {
-    report?.(id, wrong);
-    return () => report?.(id, false);
-  }, [report, id, wrong]);
+    report?.(id, wrong ? { message: error, label } : null);
+    return () => report?.(id, null);
+  }, [report, id, wrong, error, label]);
 
   // As in the CalcField: a day out of the range (or half typed) is said after a pause or on leaving (DECISOES § 305).
   const read = (text: string, now = false) => {
@@ -52,7 +55,6 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
     else settle.current = window.setTimeout(() => setWrong(true), SETTLE_MS);
     if (ok && text !== value) onValue(text);
   };
-  const errorId = `${id}-error`;
   return (
     <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={wrong ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
@@ -69,18 +71,17 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
             autocomplete="off"
             value={draft}
             aria-invalid={wrong ? 'true' : undefined}
-            aria-describedby={wrong ? errorId : undefined}
+            aria-describedby={wrong ? HERO_ERROR_ID : undefined}
             onInput={(event) => read(event.currentTarget.value)}
             onChange={(event) => read(event.currentTarget.value)}
             onBlur={(event) => read(event.currentTarget.value, true)}
           />
+          {wrong && (
+            <span class="fo-input__flag" aria-hidden="true">
+              <Icon raw={alertIcon} />
+            </span>
+          )}
         </div>
-        {wrong && (
-          <p class="fo-field__error" id={errorId} role="alert">
-            <Icon raw={alertIcon} />
-            {error}
-          </p>
-        )}
       </div>
     </div>
   );

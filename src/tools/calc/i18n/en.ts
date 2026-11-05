@@ -21,7 +21,7 @@ export default {
   island: {
     example: 'example',
     pdf: 'Download PDF',
-    csv: 'CSV',
+    csv: 'Download CSV',
     copyLink: 'Copy link',
     copied: 'Link copied',
     decimalHint: 'Use a dot for the decimals, like 6.5.',
@@ -29,6 +29,7 @@ export default {
     exportFailed: "Oli couldn't load the PDF maker. Reload the page and try again.",
     exportOffline: "No internet, and the PDF maker isn't saved yet. Download a PDF once with internet and it works offline too.",
     stale: 'Fix the highlighted field to update the result.',
+    lastWorked: 'Last result that worked: {label} {value}.',
     nextLabel: 'Next step',
     scheduleHeading: 'Payment schedule',
     showSchedule: 'Show the full schedule',

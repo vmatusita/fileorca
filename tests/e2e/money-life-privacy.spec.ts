@@ -221,7 +221,9 @@ for (const id of LIFE_CALC_IDS) {
 
     const def = DEFS[id];
     const values: Values = structuredClone(def.initial);
-    const download = page.locator('.fo-export .fo-btn--download');
+    // F13b (DECISOES § C-2): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
+    const download = page.locator('.fo-rhero .fo-btn--download');
+    const frames = () => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     await expect(download, 'o exemplo da página tem resultado').toBeEnabled();
     /** Every form of every sentinel typed, with the field it went into (for the failure message). */
     const typed: { field: string; forms: string[] }[] = [];
@@ -295,7 +297,8 @@ for (const id of LIFE_CALC_IDS) {
           await input.blur();
           typed.push({ field: field.id, forms: numberForms(value, decimals) });
           field.write(values, value);
-          if (await download.isEnabled()) {
+          await frames();
+          if ((await download.count()) > 0) {
             left = value;
             break;
           }
@@ -311,7 +314,7 @@ for (const id of LIFE_CALC_IDS) {
       // The table is the result on these pages: open, with no Show button (CalcView.open, F7).
       await expect(page.locator('#fo-schedule-table table')).toBeVisible();
       await expect(page.locator('#fo-calc-schedule button[aria-controls]')).toHaveCount(0);
-      for (const button of [page.locator('.fo-export .fo-btn').nth(1), download]) {
+      for (const button of [page.locator('.fo-export .fo-btn').nth(0), download]) {
         const saved = page.waitForEvent('download');
         await button.click();
         names.push((await saved).suggestedFilename());
@@ -321,7 +324,7 @@ for (const id of LIFE_CALC_IDS) {
     expect(typed.length, 'sentinelas digitadas').toBeGreaterThan(0);
     expect(names).toEqual(Array.from({ length: phases }, () => [`${own.file}.csv`, `${own.file}.pdf`]).flat());
 
-    await page.locator('.fo-export .fo-btn').nth(2).click();
+    await page.locator('.fo-export .fo-btn').nth(1).click();
     await expect(page.locator('.fo-export-wrap [role="status"]')).toHaveText(enShared.island.copied);
     const copied = await page.evaluate(() => (window as unknown as { foCopied?: string }).foCopied ?? (document.querySelector<HTMLInputElement>('#fo-calc-link')?.value ?? ''));
     expect(copied).toMatch(/#v=1&/);

@@ -129,7 +129,7 @@ async function openMoney(page: Page, id: AnyCalcId, lang: 'en' | 'pt' | 'es'): P
   return path;
 }
 
-test('a field out of its range marks the result stale and turns the PDF and the CSV off (g-1, s-2, DECISOES § 116)', async ({ page }) => {
+test('a field out of its range marks the result stale, puts no PDF and turns the CSV off (g-1, s-2, DECISOES § 116)', async ({ page }) => {
   const cases: [AnyCalcId, 'en' | 'pt' | 'es', string, string, string][] = [
     ['bmi-calculator', 'en', 'ag', '19', '35'],
     ['calorie-calculator', 'en', 'ag', '80', '35'],
@@ -147,11 +147,12 @@ test('a field out of its range marks the result stale and turns the PDF and the 
     const field = page.locator(`#fo-calc-${key}`);
     await field.fill(wrong);
     await expect(field, `${id} ${wrong}`).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('.fo-calc__stale'), id).toHaveText(STALE[lang]);
-    await expect(pdfButton(page), id).toBeDisabled();
+    // F13b (DECISOES § C-2): the line is in the card, after the last result that worked, and the Download leaves its place.
+    await expect(page.locator('.fo-rhero__stale'), id).toContainText(STALE[lang]);
+    await expect(pdfButton(page), id).toHaveCount(0);
     await expect(csvButton(page), id).toBeDisabled();
     await field.fill(right);
-    await expect(page.locator('.fo-calc__stale'), id).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__stale'), id).toHaveCount(0);
     await expect(pdfButton(page), id).toBeEnabled();
     await expect(csvButton(page), id).toBeEnabled();
   }
@@ -200,7 +201,9 @@ test('a menu keeps its height when the field beside it shows an error (f-5)', as
   const box = page.locator('.fo-field:has(#fo-calc-mo) .fo-input');
   const before = (await box.boundingBox())?.height ?? 0;
   await page.locator('#fo-calc-co').fill('9');
-  await expect(page.locator('#fo-calc-co-error')).toBeVisible();
+  // F13b (DECISOES § C-2): the words are in the card; the field shows its stroke.
+  await expect(page.locator('#fo-calc-co')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#fo-rhero-error')).toBeVisible();
   expect((await box.boundingBox())?.height).toBe(before);
 });
 
@@ -257,7 +260,8 @@ test('a valid number typed key by key never shows the range error on the way, an
     new MutationObserver((records) => {
       for (const record of records) {
         if (record.type === 'attributes' && (record.target as Element).getAttribute('aria-invalid') === 'true') seen.invalid += 1;
-        for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"]') || node.querySelector('[role="alert"]'))) seen.alerts += 1;
+        // F13b (DECISOES § C-2): the words of an error are the card's message (#fo-rhero-error), no longer an alert of the field.
+        for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"], #fo-rhero-error') || node.querySelector('[role="alert"], #fo-rhero-error'))) seen.alerts += 1;
       }
     }).observe(document.getElementById('fo-tool-root') as HTMLElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-invalid'] });
   });
@@ -269,7 +273,7 @@ test('a valid number typed key by key never shows the range error on the way, an
   expect(await page.evaluate(() => (window as unknown as { __seen: { alerts: number; invalid: number } }).__seen)).toEqual({ alerts: 0, invalid: 0 });
   // A value that stays out of the range is said, after the pause or when the field is left.
   await field.fill('42');
-  await expect(page.locator('#fo-tool-root [role="alert"]')).toBeVisible();
+  await expect(page.locator('#fo-tool-root #fo-rhero-error')).toBeVisible();
   await expect(field).toHaveAttribute('aria-invalid', 'true');
 });
 

@@ -48,6 +48,29 @@ function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: 
   return suffix ? (suffix === '%' ? `${number}%` : `${number} ${suffix}`) : number;
 }
 
+/**
+ * The value of one field as the PDF lists it, by its key in the link (a row's field as "d0b"): what "Last result that worked:
+ * Rate 6.5%." says of the field in error (F13b; DECISOES § C-2). Null for a field the values do not have.
+ */
+export function fieldText(specs: readonly FieldSpec[], values: Values, keyName: string, data: CalcPanelData): string | null {
+  const lang = data.lang as NumberLang;
+  for (const spec of specs) {
+    if (spec.kind === 'list') {
+      const match = new RegExp(`^${spec.key}(\\d+)(\\w+)$`).exec(keyName);
+      const row = match ? (values[spec.key] as Record<string, number>[] | undefined)?.[Number(match[1])] : undefined;
+      const item = match ? spec.item.find((entry) => entry.key === match[2]) : undefined;
+      if (row && item) return valueText(item.kind, row[item.key] ?? 0, lang, data.texts.fields[item.key]?.suffix, item.decimals);
+      continue;
+    }
+    if (spec.key !== keyName) continue;
+    if (spec.kind === 'down') return values[spec.unitKey] === 'percent' ? ratePercent(Number(values[spec.percentKey]), lang) : money(Number(values[spec.key]), lang);
+    if (spec.kind === 'date') return longDate(String(values[spec.key]), data.lang);
+    if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' || spec.kind === 'dec') return valueText(spec.kind, Number(values[spec.key]), lang, data.texts.fields[spec.key]?.suffix, spec.decimals);
+    return data.texts.options?.[spec.key]?.[String(values[spec.key])] ?? String(values[spec.key]);
+  }
+  return null;
+}
+
 /** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */
 const rowName = (data: CalcPanelData): string => data.texts.view['row'] ?? data.t.row;
 

@@ -9,6 +9,7 @@ import type { NumberLang } from '../../calc/parse.ts';
 import CalcField from './CalcField.tsx';
 import DateField from './DateField.tsx';
 import { visible, type Problems } from './form.ts';
+import type { FieldError } from './store.ts';
 import type { CalcPanelData, FieldSpec, ListSpec, NumberSpec, Values } from './types.ts';
 
 interface Props {
@@ -17,8 +18,10 @@ interface Props {
   problems: Problems;
   data: CalcPanelData;
   set: (values: Values) => void;
-  /** The store's record of the fields that show their range error (DECISOES § 116 and § 276). */
-  report?: ((id: string, wrong: boolean) => void) | undefined;
+  /** The store's record of the fields that show an error (DECISOES § 116 and § 276; the message goes to the card, F13b). */
+  report?: ((id: string, error: FieldError | null) => void) | undefined;
+  /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
+  flagged?: string | undefined;
 }
 
 const fieldId = (key: string): string => `fo-calc-${key}`;
@@ -62,6 +65,7 @@ function NumberInput(props: Props & {
       tag={spec.example ? data.t.example : undefined}
       half={spec.half}
       report={props.report}
+      flagged={props.flagged === keyName}
     />
   );
 }
@@ -248,6 +252,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           half={spec.half}
           unit={unit}
           report={props.report}
+          flagged={props.flagged === spec.key}
         />
       );
     }

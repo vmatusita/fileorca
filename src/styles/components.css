@@ -844,7 +844,6 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 }
 .fo-calc__moreheading { margin: var(--space-2) 0 0; }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
-.fo-calc__stale { margin: 0; }
 .fo-calc__compare, .fo-calc__next { grid-column: 1 / -1; }
 @media (min-width: 768px) {
   .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-8); }
@@ -891,16 +890,51 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-rhero__num small { font: 600 20px/24px var(--fo-font-display); color: var(--on-deep-muted); }
 .fo-rhero__sentence { margin: 0; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
 .fo-rhero__sentence b { font-weight: 700; }
-/* A long placard (a 7-digit result) wraps and shrinks instead of widening the card past the column (review F4,
-   ANU-1 and ACE-10). */
-.fo-rhero__oli { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; gap: var(--space-2); min-width: 0; }
-.fo-rhero__oli .fo-placard { margin-left: 0; max-width: 100%; min-width: 0; box-sizing: border-box; }
-.fo-rhero__oli .fo-placard__n { overflow-wrap: anywhere; }
-.fo-rhero__orca { width: 72px; height: 72px; }
 @media (min-width: 768px) {
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
   .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
 }
+/* F13b · the card is the one place of the result, the Download PDF and the error (UX-12 A; DECISOES § C-2). 8 px between
+   its parts (12 from 768 px), the spec's gap; the respiro stays 20 px on the phone (§ 140), where the waterline of the deep
+   cards (.fo-sea-top, § 539) has its 16 px of air and the crest. The Oli sits on the top edge at the right, looking at the
+   number, from the first paint: 64 px on the phone, 80 from 768 px, above the waterline (z-index 1); the label keeps her
+   room. Her pose changes in the same box: wave still on the example (the greeting of the F13a would move the card's corner
+   on every load), cheer once on the first result, oops on an error. */
+.fo-rhero { gap: var(--space-2); }
+.fo-rhero__label { padding-right: 64px; }
+.fo-rhero__oli { position: absolute; z-index: 1; top: calc(-1 * var(--space-4)); right: var(--space-3); width: 64px; height: 64px; pointer-events: none; }
+.fo-rhero__oli[data-oli="wave"] > svg { animation: none; }
+.fo-rhero__oli[data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
+/* The Download PDF right under the number, in block on the phone, on the sea (shadow-lip-on-deep): its slot keeps the height
+   of the button and its lip, so the message of an error takes its place and nothing moves (F7 f-10, saída A; § 139, § 276). */
+.fo-rhero__get { display: grid; align-items: center; min-height: calc(var(--button-lg) + var(--lip)); }
+.fo-rhero__get .fo-btn--download { margin-bottom: var(--lip); }
+@media (max-width: 767px) { .fo-rhero__get .fo-btn--download { display: flex; width: 100%; } }
+@media (min-width: 768px) { .fo-rhero__get { justify-items: start; } }
+.fo-rhero__error { margin: 0; display: flex; gap: var(--space-2); align-items: center; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep); }
+/* The alert icon on the deep sea: the danger of the light theme has 2.45:1 there, --danger-on-deep 6.04:1 (§ 538). */
+.fo-rhero__alert { flex: none; display: inline-flex; color: var(--danger-on-deep); }
+.fo-rhero__alert .fo-icon { width: 20px; height: 20px; }
+/* The sentence and the last result share one cell: the card keeps the sentence's height in the error state (D-35, D-41). */
+.fo-rhero__said { display: grid; }
+.fo-rhero__said > *, .fo-rhero__said::after { grid-area: 1 / 1; }
+/* The room of the longest line an error may bring, from the first paint: the reserve is an attribute, drawn hidden. */
+.fo-rhero__said::after { content: attr(data-reserve); visibility: hidden; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
+.fo-rhero__stale { margin: 0; align-self: start; font-size: 17px; line-height: 26px; color: var(--on-deep); overflow-wrap: anywhere; }
+.fo-rhero[data-state="error"] .fo-rhero__sentence { visibility: hidden; }
+.fo-rhero[data-state="error"] .fo-rhero__num, .fo-rhero[data-state="error"] .fo-rhero__num small { color: var(--on-deep-muted); }
+@media (min-width: 768px) {
+  .fo-rhero { gap: var(--space-3); }
+  .fo-rhero__label { padding-right: 80px; }
+  .fo-rhero__oli { width: 80px; height: 80px; top: calc(-1 * var(--space-5)); right: var(--space-4); }
+}
+/* A field in error: the 3 px danger stroke is the 2 px border and 1 px of box-shadow outside it, so the field keeps its
+   52 px and moves nothing (it grew 2 px with the 3 px border), and the alert icon is inside the box, before the unit: never
+   the colour alone (before the label, as the spec draws it, it sent 40 labels to a second line at 360 px). The words are
+   said in the card (#fo-rhero-error), which the field's aria-describedby points to. */
+.fo-calc .fo-field[data-state="error"] .fo-input { border-width: var(--stroke-2); box-shadow: 0 0 0 calc(var(--stroke-3) - var(--stroke-2)) var(--danger); }
+.fo-input__flag { flex: none; display: inline-flex; padding-right: var(--space-2); color: var(--danger); }
+.fo-input__flag .fo-icon { width: 18px; height: 18px; }
 .fo-split { display: grid; gap: var(--space-2); }
 .fo-split__bar { display: block; height: 20px; }
 .fo-split__principal { fill: var(--brand); }
@@ -921,6 +955,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 .fo-export-wrap { display: grid; gap: var(--space-3); }
 .fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+/* F13b (F4 ACE-8; DECISOES § C-2): Download CSV and Copy link share one row on the phone in en and pt (two in es), with
+   16 px of side padding instead of 24. */
+@media (max-width: 767px) { .fo-calc__result .fo-export .fo-btn { padding-inline: var(--space-4); } }
 .fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
 .fo-copied .fo-icon { width: 18px; height: 18px; }
 

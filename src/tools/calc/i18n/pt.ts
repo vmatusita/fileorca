@@ -6,7 +6,7 @@ export default {
   island: {
     example: 'exemplo',
     pdf: 'Baixar PDF',
-    csv: 'CSV',
+    csv: 'Baixar CSV',
     copyLink: 'Copiar link',
     copied: 'Link copiado',
     decimalHint: 'Use vírgula nos decimais, como 11,5.',
@@ -14,6 +14,7 @@ export default {
     exportFailed: 'A Oli não conseguiu carregar o gerador de PDF. Recarregue a página e tente de novo.',
     exportOffline: 'Sem internet, e o gerador de PDF ainda não foi guardado. Baixe um PDF uma vez com internet e ele passa a funcionar offline também.',
     stale: 'Corrija o campo destacado para atualizar o resultado.',
+    lastWorked: 'Último resultado que valeu: {label} {value}.',
     nextLabel: 'Próximo passo',
     scheduleHeading: 'Cronograma de parcelas',
     showSchedule: 'Ver o cronograma completo',

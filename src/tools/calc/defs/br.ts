@@ -38,11 +38,15 @@ import type { CalcDef, CalcPanelTexts, CalcSharedTexts, CalcView, Cell, Part, Ta
 
 const l = (lang: string): NumberLang => lang as NumberLang;
 
-/** The view of an account that cannot be done: the problem said in the hero, the rest empty. */
-function problemView(label: string, problem: string, premises: string[]): CalcView {
+/**
+ * The view of an account that cannot be done: the problem said in the hero, the rest empty. `field` is the field it points
+ * to, marked in the form (F4 ACE-11; F13b, DECISOES § C-2).
+ */
+function problemView(label: string, problem: string, premises: string[], field?: string): CalcView {
   return {
     hero: { label, value: '-', sentence: [] },
     problem,
+    ...(field ? { problemField: field } : {}),
     placard: { n: '-', l: label },
     table: () => ({ caption: label, head: [label], rows: [] }),
     summary: [[label, problem]],
@@ -105,7 +109,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
     const ln = l(lang);
     const v = t.view;
     const fees = num(values, 'f');
-    if (r.loan === 0) return problemView(text(v, 'label'), text(v, 'noLoan'), t.premises);
+    if (r.loan === 0) return problemView(text(v, 'label'), text(v, 'noLoan'), t.premises, 'd');
     const first = (plan: SystemResult) => plan.firstPayment + fees;
     const last = (plan: SystemResult) => plan.lastPayment + fees;
     const scenario = (plan: SystemResult): [string, string][] => [

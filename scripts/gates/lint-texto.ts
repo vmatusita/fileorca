@@ -99,6 +99,9 @@ export const MONEY_SAMPLES: Record<string, string> = {
   interestEffect: 'saves $212,238 of interest',
   interestPart: 'pays $484 less interest',
   timePart: 'is done 1 month sooner',
+  // F13b (DECISOES § C-2): the field of "Last result that worked: {label} {value}." and its value in the last result.
+  label: 'Rate',
+  value: '6.5%',
 };
 const MONEY_DEFAULT = '$1,234';
 
@@ -129,6 +132,8 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       interestPart: 'paga R$ 484 a menos de juros',
       timePart: 'termina 1 mês antes',
       amount: '5',
+      label: 'Juros a.a.',
+      value: '11%',
     },
     fallback: 'R$ 1.234,56',
   },
@@ -160,6 +165,8 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       timePart: 'termina 1 mes antes',
       // Biweekly and extra payments: the term of the loan without the change.
       base: '30 años',
+      label: 'Tasa',
+      value: '6.5 %',
     },
     fallback: '$1,234.56',
   },

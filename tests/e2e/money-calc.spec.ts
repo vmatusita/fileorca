@@ -44,9 +44,10 @@ async function saved(page: Page, button: Locator): Promise<{ name: string; bytes
   return { name: file.suggestedFilename(), bytes: readFileSync((await file.path()) ?? '') };
 }
 
-const pdfButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(0);
-const csvButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(1);
-const linkButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(2);
+// F13b (DECISOES § C-2): the Download PDF is in the card; Download CSV and Copy link share the row under it.
+const pdfButton = (page: Page) => page.locator('.fo-rhero .fo-btn--download');
+const csvButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(0);
+const linkButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(1);
 const heroNumber = (page: Page) => page.locator('.fo-rhero__num');
 
 // The calculators whose result is a payment schedule; their example is in the oracle with every row.
@@ -104,9 +105,10 @@ test('a value out of range says the range in words and keeps the last result', a
   const before = await heroNumber(page).textContent();
   await rate.fill('99');
   await expect(rate).toHaveAttribute('aria-invalid', 'true');
-  const error = page.locator('#fo-calc-r-error');
+  // F13b (DECISOES § C-2): the words are in the card, in the place of the Download, and the field points to them.
+  const error = page.locator('.fo-rhero #fo-rhero-error');
   await expect(error).toHaveText('Enter a rate from 0 to 40%.');
-  await expect(rate).toHaveAttribute('aria-describedby', /fo-calc-r-error/);
+  await expect(rate).toHaveAttribute('aria-describedby', /fo-rhero-error/);
   await expect(heroNumber(page)).toHaveText(before ?? '');
   await rate.fill('7');
   await expect(error).toHaveCount(0);
@@ -206,20 +208,24 @@ test('the scenario link is read once, invalid values are ignored, and the page n
 test('the Oli cheers on the first result of the visit only, and the visit keeps a yes, never a number', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await open(page, 'personal-loan-calculator');
-  const cheer = page.locator('.fo-rhero__oli');
-  await expect(cheer).toHaveCount(0);
+  // F13b (DECISOES § C-2): the Oli is in the card from the first paint, waving; the first result of the visit makes her
+  // cheer in the same box, and nothing moves.
+  const oli = page.locator('.fo-rhero__oli');
+  await expect(oli).toHaveAttribute('data-oli', 'wave');
   const top = () => heroNumber(page).evaluate((node) => Math.round(node.getBoundingClientRect().top + window.scrollY));
   const before = await top();
   await page.locator('#fo-calc-a').fill('16000');
-  await expect(cheer).toHaveCount(1);
-  // The cheer comes in under the chart: the number does not move, and on a phone it stays above the fold.
+  await expect(oli).toHaveAttribute('data-oli', 'cheer');
+  await expect(oli.locator('use')).toHaveAttribute('href', '#oli-cheer');
+  // The cheer is in the same box: the number does not move, and on a phone it stays above the fold.
   expect(await top()).toBe(before);
   expect(await heroNumber(page).evaluate((node) => node.getBoundingClientRect().bottom + window.scrollY)).toBeLessThanOrEqual(740);
   expect(await page.evaluate(() => sessionStorage.getItem('fo-calc-cheer'))).toBe('1');
   await open(page, 'auto-loan-calculator');
   await page.locator('#fo-calc-p').fill('33000');
   await expect(heroNumber(page)).toBeVisible();
-  await expect(cheer).toHaveCount(0);
+  await expect(oli).toHaveCount(1);
+  await expect(oli).toHaveAttribute('data-oli', 'wave');
 });
 
 test('a PDF maker that cannot load says to reload the page, and the calculator keeps working', async ({ page }) => {
@@ -245,11 +251,14 @@ test('two fields side by side keep their inputs on one line, also next to a fiel
   }
 });
 
-test('the ExportBar is PDF in yellow, then CSV, then Copy link, and the chips lead to calculators', async ({ page }) => {
+test('the Download PDF in yellow is in the card, then Download CSV and Copy link, and the chips lead to calculators', async ({ page }) => {
   await open(page, 'mortgage-calculator');
+  // F13b (DECISOES § C-2; F4 ACE-8): the PDF under the number, in the card; the CSV with its verb, next to Copy link.
+  await expect(page.locator('.fo-rhero .fo-btn')).toHaveText(['Download PDF']);
+  await expect(pdfButton(page)).toHaveClass(/fo-btn--download/);
   const buttons = page.locator('.fo-export .fo-btn');
-  await expect(buttons).toHaveText(['Download PDF', 'CSV', 'Copy link']);
-  await expect(buttons.nth(0)).toHaveClass(/fo-btn--download/);
+  await expect(buttons).toHaveText(['Download CSV', 'Copy link']);
+  await expect(page.locator('.fo-export .fo-btn--download')).toHaveCount(0);
   for (const href of await page.locator('.fo-calc__next a').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))) {
     expect(Object.values(CALC_PAGES).some((entry) => entry.path === href), href).toBe(true);
   }
@@ -258,21 +267,23 @@ test('the ExportBar is PDF in yellow, then CSV, then Copy link, and the chips le
 // ---- regressions of the review F4 (docs/relatorios/REVISAO-F4.md; DECISOES § 139) --------------------------
 
 test.describe('review F4 regressions', () => {
-  test('a problem shows no Oli and turns the PDF and CSV off; the cheer waits for a result (DES-2, COR-3)', async ({ page }) => {
+  test('a problem makes the Oli say oops, puts no Download and turns the CSV off; the cheer waits for a result (DES-2, COR-3)', async ({ page }) => {
     await open(page, 'credit-card-payoff-calculator');
     await page.locator('#fo-calc-pay').fill('10');
-    await expect(page.locator('.fo-rhero__sentence')).toContainText("doesn't cover the interest");
-    await expect(page.locator('.fo-rhero__oli')).toHaveCount(0);
-    await expect(pdfButton(page)).toBeDisabled();
+    // F13b (DECISOES § C-2): the problem is said in the card, in the place of the Download, with the last result that worked;
+    // the Oli is in the card in every state, and says oops.
+    await expect(page.locator('#fo-rhero-error')).toContainText("doesn't cover the interest");
+    await expect(page.locator('.fo-rhero__oli')).toHaveAttribute('data-oli', 'oops');
+    await expect(pdfButton(page)).toHaveCount(0);
+    await expect(page.locator('button.fo-btn--download[disabled]')).toHaveCount(0);
     await expect(csvButton(page)).toBeDisabled();
     await expect(linkButton(page)).toBeEnabled();
     await page.locator('#fo-calc-pay').fill('300');
-    await expect(page.locator('.fo-rhero__oli')).toHaveCount(1);
-    await expect(page.locator('.fo-rhero__oli .fo-placard')).toHaveClass(/fo-pop/);
+    await expect(page.locator('.fo-rhero__oli')).toHaveAttribute('data-oli', 'cheer');
     await expect(pdfButton(page)).toBeEnabled();
   });
 
-  test('a long result with the cheer stays in its column and never scrolls the page sideways (ANU-1, ACE-10)', async ({ page }) => {
+  test('a long result stays in its column and never scrolls the page sideways (ANU-1, ACE-10)', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     await open(page, 'home-affordability-calculator');
     await page.locator('#fo-calc-i').fill('800000');
@@ -286,18 +297,16 @@ test.describe('review F4 regressions', () => {
       return { hero: Math.round(hero.right), column: Math.round(column.right) };
     });
     expect(edge.hero).toBeLessThanOrEqual(edge.column);
-    // At 320px a key press brings the cheer with a 13-character placard ($9,999,999,900) and a 10-digit amount in
-    // the chart's legend: both wrap inside the card (second pass of the review: the steps above did not reach the
-    // placard's own rules).
-    // A new tab is a new visit for the session mark, so the cheer comes again.
+    // At 320px a 10-digit amount in the chart's legend and the Download wrap inside the card (second pass of the review;
+    // F13b, DECISOES § C-2: the placard that also had to wrap left the card).
     const fresh = await page.context().newPage();
     await fresh.setViewportSize({ width: 320, height: 700 });
     await open(fresh, 'simple-interest-calculator', '#v=1&pr=10000000000&r=1000000&u=years&ty=100');
     await fresh.locator('#fo-calc-pr').fill('99999999');
-    await expect(fresh.locator('.fo-rhero__oli .fo-placard__n')).toHaveText('$9,999,999,900');
+    await expect(fresh.locator('.fo-split__legend')).toContainText('$9,999,999,900');
     const inside = await fresh.evaluate(() => {
       const card = document.querySelector('.fo-rhero')!.getBoundingClientRect();
-      const parts = [...document.querySelectorAll('.fo-rhero__oli .fo-placard, .fo-split__legend li > span')].map((node) => node.getBoundingClientRect());
+      const parts = [...document.querySelectorAll('.fo-rhero .fo-btn--download, .fo-split__legend li > span')].map((node) => node.getBoundingClientRect());
       return parts.every((box) => box.left >= card.left - 1 && box.right <= card.right + 1) && document.documentElement.scrollWidth <= 320;
     });
     expect(inside).toBe(true);
@@ -443,16 +452,17 @@ test.describe('review F4 regressions', () => {
 // ---- second pass of the review F4 (docs/relatorios/REVISAO-F4.md) ------------------------------------------
 
 test.describe('second pass of the review F4', () => {
-  test('a stale result (a field to fix) turns the PDF and CSV off, so new inputs never go with an old result', async ({ page }) => {
+  test('a stale result (a field to fix) puts no PDF and turns the CSV off, so new inputs never go with an old result', async ({ page }) => {
     await open(page, 'mortgage-calculator-extra-payments');
     await page.locator('#fo-calc-eo').fill('5000');
     await page.locator('#fo-calc-eom').fill('300');
     await page.locator('#fo-calc-t').fill('10');
-    await expect(page.locator('.fo-calc__stale')).toHaveText('Fix the highlighted field to update the result.');
-    await expect(pdfButton(page)).toBeDisabled();
+    // F13b (DECISOES § C-2): the line is in the card, after the last result that worked, and the Download is not there.
+    await expect(page.locator('.fo-rhero__stale')).toContainText('Fix the highlighted field to update the result.');
+    await expect(pdfButton(page)).toHaveCount(0);
     await expect(csvButton(page)).toBeDisabled();
     await page.locator('#fo-calc-eom').fill('100');
-    await expect(page.locator('.fo-calc__stale')).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__stale')).toHaveCount(0);
     await expect(pdfButton(page)).toBeEnabled();
   });
 
@@ -677,7 +687,8 @@ test('a decimal written the way of another language gets the range and how to wr
     await dismissCookies(page);
     const hint = { en: enShared, pt: ptShared, es: esShared }[lang].island.decimalHint;
     const field = page.locator('#fo-calc-r');
-    const error = page.locator('#fo-calc-r-error');
+    // F13b (DECISOES § C-2): the words of the field in error are said in the card.
+    const error = page.locator('#fo-rhero-error');
     await field.fill(wrong);
     await expect(error, `${lang} ${wrong}`).toContainText(hint);
     await field.fill(out);
@@ -692,9 +703,9 @@ test('a decimal written the way of another language gets the range and how to wr
     await field.fill(lang === 'pt' ? '11,5' : '6.5');
     const term = page.locator('#fo-calc-n, #fo-calc-t').first();
     await term.fill(lang === 'pt' ? '12,5' : '30.5');
-    const termError = page.locator('#fo-calc-n-error, #fo-calc-t-error').first();
-    await expect(termError, `${lang} prazo`).toBeVisible();
-    await expect(termError, `${lang} prazo`).not.toContainText(hint);
+    await expect(term, `${lang} prazo`).toHaveAttribute('aria-invalid', 'true');
+    await expect(error, `${lang} prazo`).toBeVisible();
+    await expect(error, `${lang} prazo`).not.toContainText(hint);
   }
 });
 

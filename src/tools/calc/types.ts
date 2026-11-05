@@ -112,6 +112,11 @@ export interface CalcView {
   hero: { label: string; value: string; unit?: string; sentence: Part[] };
   /** The account cannot be done (a payment that does not cover the interest): said in the hero. */
   problem?: string;
+  /**
+   * The field the problem points to, by its key (the payment that does not cover the interest): it is marked like a field
+   * out of its range, with aria-invalid and the card's message in its description (F4 ACE-11; F13b, DECISOES § C-2).
+   */
+  problemField?: string;
   /** The one number the Oli's placard shows. */
   placard: { n: string; l: string };
   /** The rows of the table are the result itself (the areas, the cycles, the dates): shown open, with no Show button (F7). */
@@ -165,6 +170,8 @@ export interface CalcSharedTexts {
   exportOffline: string;
   /** Shown while a field is wrong: the result stays the last one that worked. */
   stale: string;
+  /** In the card while a field is wrong (F13b): the field and its value in the last result, "Last result that worked: Rate 6.5%." */
+  lastWorked: string;
   /** Added to a field's error when what is typed is not a number of the page's language: how it writes decimals. */
   decimalHint: string;
   nextLabel: string;

@@ -64,6 +64,8 @@ export const MAP_TARGETS = [
   // JPG in the error of a PNG on HEIC to JPG too) and the row of Start over and "Before and after".
   '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
   '.fo-rhero', '.fo-export .fo-btn', '.fo-compare', '.fo-calc-schedule', '.fo-amort-wrap', '.fo-debt',
+  // F13b (UX-12 A, decision 10; DECISOES § C-2): the slot of the Download PDF in the card and the message that takes its place.
+  '.fo-rhero__get', '.fo-rhero__error',
   '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
   // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle and the band under it.
