@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'Como abrir imagens WebP e salvar como JPG',
   description: 'O que é um arquivo WebP, onde ele abre sem programa extra e o que muda no tamanho, na animação e na localização quando você o salva como JPG.',
   h1: 'Como abrir imagens WebP e salvar como JPG',
-  lead: 'Você salvou uma imagem de um site e recebeu um arquivo .webp que os seus outros apps não aceitam. Veja o que ele é, onde abre e como transformá-lo em JPG.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  lead: 'Você salvou uma imagem de um site e recebeu um .webp que seus outros apps não aceitam. Veja onde ele abre e como virar JPG.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'WebP é um formato de imagem criado pelo Google para a web. Os sites usam esse formato porque ele é leve, e as páginas carregam mais rápido. É por isso que uma imagem salva do navegador pode chegar como um arquivo .webp, e não como JPG ou PNG.',
     'O navegador de onde você salvou mostra a imagem sem problema. O problema começa quando o arquivo sai do navegador: um editor de fotos mais antigo, um formulário que pede JPG ou uma gráfica podem recusar o arquivo. Salvar como JPG faz a imagem abrir em quase qualquer lugar, mas não a deixa melhor nem menor.',
@@ -58,6 +58,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'O JPG feito a partir do WebP', value: '{backRatioChromium_times}', from: '{webpTotal}', to: '{backTotalChromium}' },
+      { label: 'Comparado aos originais da câmera', value: '{backVsOriginalChromium}', sub: '{backTotalChromium} de {jpgTotal}' },
+    ],
+    sample: '{photos} fotos de celular, salvas como WebP e de volta como JPG.',
+    link: 'Veja a tabela',
+  },
+  tableHeading: 'Foto a foto',
   measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, salvas como WebP pelo motor deste site e depois salvas como JPG com a ferramenta acima. A porcentagem entre parênteses compara com o JPG original da câmera.',
   measuredNote: 'Medido em {date}. As cópias em WebP foram gravadas no Node com o codificador WebP do motor deste site; os JPGs foram feitos pela página WebP para JPG no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, que deram os mesmos tamanhos. A tabela mostra o Chromium.',
   tables: [

@@ -863,6 +863,47 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    697px of the rest of the prose, which is what keeps them clear of her at 768 and at 1280px too. */
 .fo-guide__tool { padding-right: 96px; }
 @media (min-width: 768px) { .fo-guide__tool { padding-right: 136px; } }
+/* F13b · a página de guia: a assinatura, a ficha e a ferramenta antes da prosa (DECISOES § G-1, § G-4 e § G-5)
+   The signature is one line of small text at 360px (20px, G-23), in Figtree Steady, the face of the first paint, so it
+   never wraps again when Figtree arrives; the date never breaks. */
+.fo-sig { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-sig time { white-space: nowrap; }
+/* The sheet "What we measured" (G-17): a paper with the fold in the colour of the guide's hub, the title in the caption
+   style, two numbers in number-md over a subgrid, so they sit on one line whatever their labels wrap to, the sample and
+   a text link to the table. Its words are in Figtree Steady too: a label that wraps again when Figtree arrives would push
+   the tool down. No Oli. */
+/* On a phone its rows are 8px apart instead of the 12px of the specification, so the panel of the guides with a long H1,
+   lead and trail still starts above the fold (DECISOES § G-8); the padding is the space-4 of every card. */
+.fo-sheet { --fo-ground: var(--bg); --fo-font-text: var(--fo-font-steady); position: relative; display: grid; gap: var(--space-2); margin: 0; padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); font-family: var(--fo-font-steady); }
+.fo-sheet__title { margin: 0; padding-right: calc(var(--dogear) + var(--space-2)); font: 600 12px/16px var(--fo-font-steady); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-sheet__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); column-gap: var(--space-4); margin: 0; }
+.fo-sheet__stat { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: var(--space-1); align-content: start; }
+.fo-sheet__stat dt { align-self: end; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-sheet__stat dd { margin: 0; }
+.fo-sheet__n { font: 600 24px/28px var(--fo-font-display); color: var(--ink); }
+.fo-sheet__sub { font: 600 14px/20px var(--fo-font-steady); font-variant-numeric: tabular-nums; color: var(--ink); }
+.fo-sheet__sub:has(.fo-icon) { white-space: nowrap; }
+.fo-sheet__sub .fo-icon--inline { margin: 0 var(--space-1); vertical-align: -0.15em; color: var(--ink-muted); }
+.fo-sheet__sample { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-sheet__sample a { font-weight: 600; }
+@media (min-width: 768px) {
+  .fo-sheet { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--space-3) var(--space-6); padding: var(--space-5) var(--space-6); }
+  .fo-sheet__title { grid-column: 1 / -1; }
+  .fo-sheet__list { grid-column: 1 / 3; column-gap: var(--space-6); }
+  .fo-sheet__sample { align-self: end; }
+}
+/* The tool comes right after the sheet, one gap of the column below it: its heading keeps the room of the Oli on the
+   right (above). She rises 78px over the panel (76px from 768px); the heading ends 24px over the panel (the gap of the
+   column and the top of the island), so a heading of one line (30px) and the 16px gap above it keep her box 8px clear of
+   the sheet on a phone (and 22px from 768px, with the 16px margin there). Its paragraph goes under the island, in the
+   muted text of a caption (above it, it pushed the panel past the fold of a phone; DECISOES § G-5), and the introduction
+   starts after it. The 24 and 40px over the heading of the specification, measured again in the site, put the panel of 20
+   of the 30 guides under the fold of a 360 x 740 phone and the Choose button of 5 under 800px at 1280 (DECISOES § G-8). */
+.fo-sheet + .fo-guide__tool { margin-top: 0; }
+@media (min-width: 768px) { .fo-sheet + .fo-guide__tool { margin-top: var(--space-4); } }
+.fo-sheet + .fo-guide__tool > h2 { margin-bottom: 0; }
+.fo-guide__toolintro { margin: 0; max-width: var(--fo-measure); font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.fo-guide__toolintro + .fo-guide { margin-top: var(--space-4); }
 .fo-debts { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-debt { box-sizing: border-box; width: 100%; margin: 0; padding: var(--space-4); border: var(--stroke-2) solid var(--hairline); border-radius: var(--radius-lg); display: grid; gap: var(--space-3); }
 .fo-debt__name { padding: 0; font: 700 15px/20px var(--fo-font-text); }
@@ -968,6 +1009,34 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
+/* F13b · a tabela do guia: a pista de rolagem, o agrupamento e a frase (DECISOES § G-3 e § G-7; F5b F-2 e F-13)
+   The edge cue, CSS only: on each side where the table continues, the dashed line of the DropZone (stroke-2 in stroke,
+   8px dash and 6px gap) on a 12px band of surface-sunken, like the edge of a long paper. The two `local` layers are covers
+   in the ground colour that travel with the table and hide the cue on a side that is fully shown; the `scroll` layers are
+   the cue, fixed to the frame. Hard stops only (no fade, no blur, no shadow): gradients of tokens drawn by CSS, not an
+   image file. Nothing shows when the table fits. Only the frames of the file guides: the money guides keep theirs. */
+.fo-guide__frame {
+  --fo-cover: var(--bg); --fo-edge: var(--stroke); --fo-band: var(--surface-sunken);
+  display: grid; grid-template-columns: minmax(100%, max-content);
+  container-type: inline-size; container-type: inline-size scroll-state;
+  background:
+    linear-gradient(var(--fo-cover), var(--fo-cover)) left / 20px 100% no-repeat local,
+    linear-gradient(var(--fo-cover), var(--fo-cover)) right / 20px 100% no-repeat local,
+    repeating-linear-gradient(to bottom, var(--fo-edge) 0 8px, transparent 8px 14px) left / var(--stroke-2) 100% no-repeat scroll,
+    repeating-linear-gradient(to bottom, var(--fo-edge) 0 8px, transparent 8px 14px) right / var(--stroke-2) 100% no-repeat scroll,
+    linear-gradient(var(--fo-band), var(--fo-band)) left / 12px 100% no-repeat scroll,
+    linear-gradient(var(--fo-band), var(--fo-band)) right / 12px 100% no-repeat scroll;
+}
+/* The line under 768px: it stays at the left edge of the frame while the table scrolls under it (the grid track is as
+   wide as the table, so the sticky line can travel), and it hides when the table fits its frame, where the browser has
+   scroll-state queries (Chromium); elsewhere it shows under 768px, as in the specification. */
+.fo-guide__frame > .fo-guide__hint { position: sticky; left: 0; display: flex; align-items: center; gap: var(--space-2); box-sizing: border-box; width: fit-content; max-width: 100cqi; margin: 0 0 var(--space-2); font: 500 14px/20px var(--fo-font-steady); color: var(--ink-muted); overflow-wrap: normal; }
+.fo-guide__hint .fo-icon--inline { flex: none; width: 18px; height: 18px; color: var(--ink); }
+@container not scroll-state(scrollable: inline) { .fo-guide__frame > .fo-guide__hint { display: none; } }
+/* The rows of one value of the first column share one row-group header; the cell that tells them apart is the row
+   header and reads like the other cells (F4 ACE-9, the half of the guides). */
+.fo-guide__frame .fo-guide__group { padding-right: var(--space-4); }
+.fo-guide__frame .fo-guide__key { font-weight: 500; }
 
 /* ---- F5a: the PDF island (DECISOES § 152) ----------------------------------------------------------------------
    The pieces the design system does not have, built only from its tokens and the look of FileCard, ToolCard,

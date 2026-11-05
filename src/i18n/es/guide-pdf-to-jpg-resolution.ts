@@ -5,12 +5,12 @@ const texts: FileGuideTexts = {
   description: 'Lo que cambia la resolución al pasar un PDF a JPG, medido en nuestros PDF de prueba: los píxeles de cada página, el peso del archivo y cuándo conviene JPG o PNG.',
   h1: 'Qué resolución elegir para pasar un PDF a JPG',
   lead: 'Una página de PDF no tiene píxeles hasta que algo la dibuja. La resolución que eliges decide cuántos recibe y cuánto van a pesar las imágenes.',
-  changed: 'Primera versión, con las mediciones del {date}.',
+  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'El texto y los dibujos de un PDF se guardan como formas, no como puntos. Para convertir una página en un JPG, un programa dibuja la página sobre una cuadrícula de píxeles, y la resolución, en píxeles por pulgada, define qué tan fina es esa cuadrícula. Si pides más, cada letra recibe más píxeles y el archivo crece.',
     'PDF a JPG ofrece {lowPpi} para pantalla, {mediumPpi} para uso general y {highPpi} para imprimir. Aquí está lo que dio cada opción en {files_word} PDF de nuestras pruebas, para que elijas la más baja que te sirva.',
   ],
-  toolHeading: 'Convierte aquí las páginas de tu PDF en imágenes',
+  toolHeading: 'Convierte tu PDF en imágenes aquí',
   toolIntro: 'Suelta un PDF y cada página se convierte en un JPG a {mediumPpi}, en esta pestaña del navegador, sin subir nada. Cambia la resolución o el formato y las imágenes se crean de nuevo; si son varias páginas, llegan juntas en un ZIP.',
   sections: [
     {
@@ -58,6 +58,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'Lo que medimos',
+  sheet: {
+    stats: [
+      { label: 'JPG de una página: {mediumPpi} a {highPpi}', value: '{formJpg300vs150Chromium_times}', from: '{formJpg150Chromium}', to: '{formJpg300Chromium}' },
+      { label: 'Píxeles en esa página', value: '{formPixels300vs150_times}' },
+    ],
+    sample: 'En una sola página, la primera del Formulario 1040 del IRS.',
+    link: 'Mira los {files} PDF en la tabla',
+  },
+  tableHeading: 'Archivo por archivo',
   measuredIntro: 'La primera página de cada PDF en cada resolución de la herramienta, en JPG y en PNG. Las medidas en píxeles van en ancho por alto.',
   measuredNote: 'Medido el {date} en la página PDF a JPG de este sitio, en Chromium {chromiumVersion} y en WebKit {webkitVersion}, con {system}, sobre la primera y la segunda página de {files_word} PDF de nuestras pruebas: los documentos reales y un PDF de fotos (el libro escaneado tiene una sola página). Los píxeles fueron los mismos en ambos navegadores; la tabla muestra los archivos de Chromium.',
   tables: [

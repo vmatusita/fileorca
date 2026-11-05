@@ -4,13 +4,13 @@ const texts: FileGuideTexts = {
   title: 'Como transformar fotos em um único PDF leve o bastante para mandar',
   description: 'Como pôr várias fotos num único PDF, no celular ou no computador, quanto o PDF pesa e o que muda quando você comprime as fotos antes.',
   h1: 'Como transformar fotos em um único PDF',
-  lead: 'Recibos, páginas de um contrato, algumas fotos para um formulário: um PDF só é mais fácil de mandar e de imprimir que um monte de imagens. Veja como fazer e quanto ele pesa.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  lead: 'Recibos, um contrato, fotos para um formulário: um PDF só é mais fácil de mandar e de imprimir. Veja como fazer e quanto ele pesa.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'Um PDF de fotos mantém a ordem, imprime cada foto na própria página e abre em qualquer computador ou celular. Muitos formulários e escritórios também pedem exatamente isso: um PDF, e não um conjunto de imagens.',
     'O problema é o tamanho. Postas num PDF só, as nossas {photos_wordf} fotos de celular viraram um arquivo com {pdfRatioChromium} do peso das próprias fotos. Medimos o que acontece com o tamanho, com e sem comprimir as fotos antes.',
   ],
-  toolHeading: 'Transforme suas fotos em um único PDF aqui',
+  toolHeading: 'Junte suas fotos num PDF aqui',
   toolIntro: 'Solte as fotos na ordem que você quer, ou arraste para pôr em ordem. Cada uma vira uma página, o PDF é feito nesta aba do navegador e nada é enviado.',
   sections: [
     {
@@ -70,6 +70,15 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'Um PDF das fotos', value: '{pdfRatioChromium_change}', from: '{photosTotal}', to: '{pdfChromium}' },
+      { label: 'Um PDF depois da Comprimir imagem', value: '{pdfAfterRatioChromium_change}', from: '{photosTotal}', to: '{pdfAfterChromium}' },
+    ],
+    sample: '{photos} fotos de celular, como saíram e depois da Comprimir imagem.',
+    link: 'Veja a tabela',
+  },
+  tableHeading: 'Passo a passo',
   measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, direto num PDF só, e de novo depois da Comprimir imagem. A porcentagem compara com as fotos originais.',
   measuredNote: 'Medido em {date} pela página Imagem para PDF e pela página Comprimir imagem deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, que deram os mesmos tamanhos, nas nossas fotos de celular de verdade, com os ajustes padrão. As imagens dentro do PDF foram contadas com o pdf-lib.',
   tables: [

@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Las formas de juntar varios PDF en uno solo en un iPhone o en un celular Android, cuánto pesa el archivo unido y qué conserva de cada PDF.',
   h1: 'Cómo unir PDF en el celular',
   lead: 'Tienes algunos PDF en el celular y necesitas enviarlos como uno solo. Estas son las formas de hacerlo ahí mismo, sin computadora, y lo que puedes esperar del resultado.',
-  changed: 'Primera versión, con las mediciones del {date}.',
+  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'Formularios, recibos, una página firmada y el escaneo de una identificación pueden llegar como PDF separados, y el lugar al que tienes que enviarlos acepta un solo archivo. En una computadora hay muchas formas de juntarlos. En un celular hay menos, y dependen del teléfono.',
     'Esta guía cubre la forma que Apple documenta para el iPhone, la forma que funciona en el navegador de cualquier celular y lo que medimos al unir {pairs_word} pares de nuestros PDF de prueba.',
@@ -65,6 +65,15 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'Lo que medimos',
+  sheet: {
+    stats: [
+      { label: 'Pares que quedaron más pequeños', value: '{smaller} de {pairs}' },
+      { label: 'La página escaneada con el formulario', value: '{scanFormRatio_change}', from: '{scanFormInputs}', to: '{scanFormMerged}' },
+    ],
+    sample: '{pairs} pares hechos con {pdfs} de nuestros PDF de prueba.',
+    link: 'Mira la tabla',
+  },
+  tableHeading: 'Par por par',
   measuredIntro: 'Unimos {pairs_word} pares formados con {pdfs_word} PDF de nuestras pruebas, en el orden que se muestra. El cambio compara el archivo unido con los dos archivos juntos.',
   measuredNote: 'Medido el {date} en Node con el motor de este sitio, que da los mismos bytes que el navegador, sobre pares de los PDF de nuestras pruebas.',
   tables: [

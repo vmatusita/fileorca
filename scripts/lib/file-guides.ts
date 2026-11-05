@@ -118,16 +118,18 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   const main = root.querySelector('main');
   if (!main) return ['sem <main>'];
   const problems: string[] = [];
-  // The blocks of decision 4, in this order.
+  // The blocks in this order. F13b (UX-13 A, decision 5; DECISOES § 376 and § G-9): the signature, the sheet "What we
+  // measured" and the tool before the introduction. Before, the introduction came before the tool, and the link to the
+  // tool's page was a line of its own right under it (.fo-guide__open).
   const order: [string, string][] = [
     ['nav ol.fo-crumbs', 'o breadcrumb'],
     ['h1', 'o H1'],
     ['.fo-top .fo-reviewed', 'a linha "Reviewed"'],
-    ['.fo-guide', 'a introdução'],
+    ['[data-content="facts"]', 'a ficha "What we measured"'],
     ['#fo-tool-root', 'a ferramenta embutida'],
-    ['.fo-guide__open', 'o link para a página da ferramenta'],
+    ['.fo-guide', 'a introdução'],
     ['.fo-ad--content', 'o AdSlot de conteúdo'],
-    ['[data-content="measured"]', 'a seção "What we measured"'],
+    ['[data-content="measured"]', 'a seção das medidas'],
     ['[data-content="sources"]', 'as fontes'],
     ['[data-content="related"]', 'as relacionadas'],
   ];
@@ -147,10 +149,15 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   if (main.querySelectorAll('h1').length !== 1) problems.push('mais de um H1');
   const lead = main.querySelector('.fo-top .fo-lead');
   if (!lead || lead.text.trim() === '') problems.push('sem a linha da pergunta (.fo-lead)');
+  // F13b (G-23, F5b F-13): the signature is one line with one date, the review; the first publication went to the history
+  // line at the end of the measured section, so the two dates are still on the page. Before, the "Reviewed" line held both.
   const reviewed = main.querySelector('.fo-top .fo-reviewed');
-  if (reviewed && reviewed.querySelectorAll('time[datetime]').length < 2) problems.push('a linha "Reviewed" sem as duas datas');
-  const open = main.querySelector('.fo-guide__open a');
-  if (open && open.getAttribute('href') !== want.toolPath) problems.push(`o link da ferramenta leva a ${open.getAttribute('href') ?? 'nada'} em vez de ${want.toolPath}`);
+  const reviewDates = reviewed?.querySelectorAll('time[datetime]').length ?? 0;
+  if (reviewed && reviewDates !== 1) problems.push(`a linha "Reviewed" com ${reviewDates} datas (pede 1, a da revisão)`);
+  // F13b (D-54): the link to the tool's own page is in the text of the guide, never a line of its own under the panel.
+  if (main.querySelector('.fo-guide__open')) problems.push('o link "Open the tool" embaixo do painel (.fo-guide__open): o link da ferramenta vai no texto');
+  const linked = main.querySelectorAll('[data-guide-text] a[href]').some((link) => link.getAttribute('href') === want.toolPath);
+  if (!linked) problems.push(`sem o link para a página da ferramenta (${want.toolPath}) no texto do guia`);
   // What we measured: a table in its scrolling frame (DECISOES § 129), with rows, and a note with the date.
   const measured = main.querySelector('[data-content="measured"]');
   if (measured) {
@@ -158,6 +165,7 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
     if (tables.length === 0) problems.push('a seção medida sem tabela em .fo-table-wrap');
     if (tables.some((table) => table.querySelectorAll('tbody tr').length === 0)) problems.push('uma tabela medida sem linha');
     if (!MEASURED_DATE[lang].test(measured.text)) problems.push('a seção medida sem a data da medida');
+    if (measured.querySelectorAll('time[datetime]').length === 0) problems.push('a seção medida sem o histórico (a data da primeira publicação)');
   }
   const sources = main.querySelector('[data-content="sources"]');
   if (sources) {
@@ -190,8 +198,8 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   const tool = main.querySelector('#fo-tool-root');
   if (first && tool) {
     const html = main.toString();
-    const from = html.indexOf(main.querySelector('.fo-guide__open')?.toString() ?? tool.toString());
-    const between = html.slice(from, html.indexOf(first.toString())).replace(/<p class="fo-guide__open">[\s\S]*?<\/p>/, '');
+    const from = html.indexOf(tool.toString()) + tool.toString().length;
+    const between = html.slice(from, html.indexOf(first.toString()));
     if (!/<p[\s>]/.test(between)) problems.push('o 1º AdSlot sem um parágrafo entre a ferramenta e ele');
   }
   const measuredBlock = main.querySelector('[data-content="measured"]');

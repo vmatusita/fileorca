@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'The image sizes Instagram, Facebook, X, LinkedIn, YouTube and Pinterest publish, and what real photos look like and weigh when resized to them.',
   h1: 'Social media image sizes',
   lead: 'Each network publishes the sizes it wants, and resizes whatever does not fit. Here are the sizes from their own help pages, and what a photo becomes at each one.',
-  changed: 'First version, with the measurements of {date}. The help pages were read on the date given with each source.',
+  changed: 'First version of this guide, published on {published} with these measurements. The help pages were read on the date given with each source.',
   intro: [
     'Every social network takes a photo, fits it to its own frame and compresses it again. If the photo is far bigger than the frame, the network throws pixels away with its own settings. If it has the wrong shape, the network crops it where it chooses. Uploading a photo that already has the right size and shape keeps those decisions in your hands.',
     'The sizes below come only from each network’s own help or developer pages, read on the date at the bottom of this page. Where a network publishes a figure only for ads, the table says so. TikTok is not in the table: its help pages we read give no size for photos.',
@@ -53,6 +53,15 @@ const texts: FileGuideTexts = {
   ],
   half: 2,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'At the exact size the network names', value: '{exactFrames} of {outputs}' },
+      { label: 'Under the published limit', value: '{underLimit} of {withLimit}', sub: 'Largest file: {largestOutput}' },
+    ],
+    sample: '{photos} phone photos resized to {sizes} official sizes.',
+    link: 'See the table',
+  },
+  tableHeading: 'Size by size',
   measuredIntro: 'Each size published on the networks’ own pages, the sizes our {photos_word} phone photos came out at with Resize image, and the largest file at each size. The YouTube thumbnail row gives the size YouTube recommends, and the size the YouTube thumbnail preset made.',
   measuredNote: 'Measured on {date} in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, through the Resize image page of this site (By size) and its YouTube thumbnail preset, on our real phone photos, in portrait and in landscape. The table shows Chromium; WebKit wrote slightly larger files at the same sizes.',
   tables: [

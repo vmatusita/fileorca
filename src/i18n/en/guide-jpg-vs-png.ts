@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'When to save as JPG and when as PNG, with the sizes we measured on the same photos in both formats and what happens to a transparent image.',
   h1: 'JPG or PNG: which one to use',
   lead: 'Both formats open everywhere, so the choice is about what the picture is. Here is the rule, and what we measured when the same photos went both ways.',
-  changed: 'First version, with the measurements of {date}.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'The short answer: photos go in JPG, and graphics go in PNG. Screenshots, logos, charts, text and anything with a transparent background are graphics. A photo from a camera or a phone is a photo, even if it shows a document.',
     'The longer answer is about what each format keeps. One stays small by throwing away detail you will hardly notice; the other keeps every pixel exactly and pays for it in size. Which trade is right depends on the picture, and on what happens to it next.',
@@ -63,6 +63,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'Our photos as PNG, all together', value: '{pngRatioChromium_times}', from: '{jpgTotal}', to: '{pngTotalChromium}' },
+      { label: 'PNGs with the same pixels as the JPG', value: '{pngIdenticalChromium} of {photos}' },
+    ],
+    sample: '{photos} phone photos, from JPG to PNG and back.',
+    link: 'See the table',
+  },
+  tableHeading: 'Photo by photo',
   measuredIntro: 'Our {photos_word} real phone photos, from the camera JPG to PNG with the tool above, and back to JPG. The last column compares the final JPG with the original pixels.',
   measuredNote: 'Measured on {date} through the PNG to JPG page of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. Pixels were compared in Node, with the same decoder for the original and the copy. The back to JPG sizes were the same in both browsers.',
   tables: [
