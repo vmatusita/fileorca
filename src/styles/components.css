@@ -461,6 +461,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-file__actions .fo-btn { margin-bottom: 0; }
 .fo-file[data-state="error"] { background: var(--danger-soft); border-color: var(--danger); }
 .fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
+/* F13a (UX-11 A, F-6 and F-7; DECISOES § F13A-P-08): a PDF with no picture shows the pdf icon in ink on the soft colour of its
+   category (coral-soft) instead of an empty square; in the ready card, on the surface, the fold cuts with the surface. */
+.fo-cat--pdf:not([data-state="error"]) > .fo-file__thumb { background: var(--fo-cat-soft); color: var(--ink); }
+.fo-ready .fo-file { --fo-ground: var(--surface); }
 .fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: flex-start; gap: var(--space-1); }
 .fo-file__err .fo-icon { width: 16px; height: 16px; margin-top: 2px; }
 /* The link to the tool that opens the file (HEIC to JPG): the brand blue is 4.3:1 on the soft red of the row, under the
@@ -955,8 +959,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-ready__count { margin: 0; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
 .fo-seg--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: var(--radius-lg); }
 .fo-seg--grid .fo-seg__opt { border-radius: var(--radius-md); }
-.fo-check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font: 600 15px/20px var(--fo-font-text); color: var(--ink); align-self: end; }
-.fo-check input { width: 20px; height: 20px; accent-color: var(--brand); }
+/* F13a (UX-11 A, F-11): the only check box of the PDF tools ("Skip the first page") is now a rail of two; under 480 px it
+   takes the row of the fields. */
+@media (max-width: 479px) { .fo-fields > .fo-options { grid-column: 1 / -1; } }
 
 /* Password field: the NumberField box with a text button inside it. */
 .fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--fo-font-text); cursor: pointer; }
@@ -971,28 +976,60 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-pages__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-3); }
 .fo-page { --fo-ground: var(--bg); display: grid; gap: var(--space-1); padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
 .fo-page[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-2) - 1px); }
+/* F13a (UX-11 A, D-7 and F-8): the picked page has the check in a brand circle before its number (shape, not only the colour
+   of the border), and its fold follows the border of 3 px (at -3 px, never past the corner). */
+.fo-page[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
 .fo-page[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
 .fo-page__main { position: relative; display: grid; gap: var(--space-1); justify-items: center; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/18px var(--fo-font-text); }
 .fo-page__main:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
 .fo-page__sheet { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--surface-sunken); overflow: hidden; }
 .fo-page__sheet img { max-width: 100%; max-height: 100%; object-fit: contain; background: var(--surface); }
-.fo-page__n { font-variant-numeric: tabular-nums; }
+.fo-page__n { display: inline-flex; align-items: center; gap: var(--space-2); font-variant-numeric: tabular-nums; }
+.fo-page__check { box-sizing: border-box; display: inline-grid; place-items: center; width: 24px; height: 24px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--on-brand); }
+.fo-page__check .fo-icon { width: 16px; height: 16px; stroke-width: 3; visibility: hidden; }
+.fo-page[data-selected="true"] .fo-page__check { background: var(--brand); border-color: var(--brand-edge); }
+.fo-page[data-selected="true"] .fo-page__check .fo-icon { visibility: visible; }
 .fo-page__badge { position: absolute; top: var(--space-1); left: var(--space-1); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
-.fo-page__moves { display: flex; justify-content: space-between; }
-.fo-page__move--back .fo-icon, .fo-merge__move--up .fo-icon { rotate: 180deg; }
-.fo-merge .fo-filelist__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
-.fo-merge .fo-filelist__row[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
-.fo-merge__grab[aria-pressed="true"] { background: var(--brand-soft); }
-.fo-merge__moves { display: flex; flex-direction: column; }
+/* F13a (UX-11 A, D-23): the arrows that move a page are buttons with the stroke and the lip (a disabled one has the look of
+   the disabled Button); the lip needs room. */
+.fo-page__moves { display: flex; justify-content: space-between; gap: var(--space-1); }
+.fo-page__move--back .fo-icon { rotate: 180deg; }
+/* F13a (UX-04 A, tool-a-merge; DECISOES § F13A-P-02): a row of the Merge list is the card, the arrows that can move (an
+   empty place of 48 px where one cannot, D-23: never a disabled arrow drawn heavier than the live one) and the remove
+   button (D-21). The handle is gone: the arrows of the row do it by keyboard and by touch (WCAG 2.5.7), and the mouse still
+   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. Under 768 px
+   the two arrows stack so the name keeps its width beside the remove button; every row (and the line that says a row
+   left, D-21) has the height of a row with its arrows, so nothing moves when the reading ends or a row leaves. A refused
+   row keeps its card with the reason and its own remove button, the width of the list (DECISOES § 181). */
+.fo-merge { --fo-row-h: 76px; display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-merge__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-2); align-items: center; min-height: var(--fo-row-h); }
+.fo-merge__row[data-state="error"] { grid-template-columns: minmax(0, 1fr); }
+.fo-merge__row .fo-file { --fo-ground: var(--surface); grid-template-columns: 32px minmax(0, 1fr) auto; padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3); }
+.fo-merge__row[data-state="error"] .fo-file { grid-template-columns: 32px minmax(0, 1fr) auto; padding: var(--space-3); }
+.fo-merge__row .fo-file__thumb { width: 32px; height: 32px; }
+.fo-merge__row .fo-file__thumb .fo-icon { width: 20px; height: 20px; }
+.fo-merge__row[draggable="true"] > .fo-file { cursor: grab; }
+/* F13a (UX-11 A, D-8): the name of a file of the Merge list takes up to two lines before it is cut (a refused row keeps one:
+   its reason says the name again). */
+.fo-merge__row:not([data-state="error"]) .fo-file__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; overflow-wrap: anywhere; }
+.fo-merge__n { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--deep); color: var(--on-deep); font: 600 16px/1 var(--fo-font-display); }
+.fo-merge__moves { display: flex; gap: var(--space-1); }
+.fo-merge__none { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }
+.fo-merge__move .fo-icon, .fo-merge__remove .fo-icon { width: 20px; height: 20px; }
 .fo-merge__move .fo-icon { rotate: 90deg; }
 .fo-merge__move--up .fo-icon { rotate: -90deg; }
-/* Below 480 px a row of the Merge list takes two lines: the card on its own, the handle and the arrows under it, so a
-   refused file's sentence keeps the width of the list instead of one word per line (DECISOES § 181). */
+.fo-merge__undo { box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); min-height: var(--fo-row-h); margin: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+.fo-merge__undo .fo-btn { flex: none; min-height: var(--tap-min); }
+@media (max-width: 767px) {
+  .fo-merge { --fo-row-h: 108px; }
+  .fo-merge__moves { flex-direction: column; }
+  .fo-merge__row { align-items: stretch; }
+  .fo-merge__row > .fo-file { align-content: center; }
+  .fo-merge__row > .fo-merge__remove { align-self: center; }
+}
 @media (max-width: 479px) {
-  .fo-merge .fo-filelist__row { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "card card" "grab moves"; row-gap: var(--space-1); }
-  .fo-merge .fo-filelist__row > .fo-file { grid-area: card; }
-  .fo-merge__grab { grid-area: grab; }
-  .fo-merge__moves { grid-area: moves; flex-direction: row; justify-self: end; }
+  .fo-merge { --fo-row-h: 112px; }
+  .fo-merge__moves { gap: var(--space-2); }
 }
 
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
@@ -1007,12 +1044,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-sign__file:focus-visible + .fo-sign__choose { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-sign__chosen { min-width: 0; font: 500 15px/20px var(--fo-font-text); color: var(--ink-muted); overflow-wrap: anywhere; }
 .fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
-.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
+/* F13a (UX-11 A, D-9): the frame no longer clips (the focus ring of the box shows whole at every edge); the picture and the
+   box are on a sheet that is light in both themes, as a page of PDF is. */
+.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: visible; }
+.fo-sign__sheet { position: absolute; inset: 0; border-radius: calc(var(--radius-xs) - var(--stroke-2)); background: var(--surface); }
+.fo-sign__sheet > img { border-radius: inherit; }
 .fo-sign__page img { width: 100%; height: 100%; object-fit: fill; }
 .fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
 .fo-sign__box img { display: block; width: 100%; height: auto; }
 .fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
-.fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
 /* A rail of three choices with a help line each does not fit 320 px: below 480 px it wraps, and with help lines it stacks. */
 .fo-pdf-island .fo-seg { flex-wrap: wrap; }
 .fo-pdf-island .fo-seg__opt { flex: 1 0 auto; }
@@ -1169,4 +1209,88 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .fo-wall[open], .fo-wall::backdrop { animation: none; }
   .fo-wall__toggle .fo-icon { transition: none; }
+}
+
+/* ---------- F13a · o juntar e as peças de PDF (UX-04 A e UX-11 A; DECISOES § F13A-P-01 a § F13A-P-09) ----------
+   The PDF island on the base of the tool page (§ 463). The ready card and the Merge list are panels of the rectangle like
+   the DropZone, the WaterLevel and the result: the same height in every state, 356/340 px or what the island locks
+   (--fo-lock, the height of the Merge list, set by the island from the reading to the result). */
+.fo-pdf-island .fo-slot > :is(.fo-ready, .fo-merge-panel) { box-sizing: border-box; min-height: var(--fo-lock, var(--slot-h)); }
+/* The DropZone keeps the round seal at rest and with a file over it (§ 456), which the base (§ 463) was not measured with:
+   at rest from 768 px (seal, title, button and help) it took 362 px, and with a file over it 396 to 426 px at 360 px and
+   386 at 1280, above the water of 60 %. Here the rest closes its gaps to 8 px and its top to 12 px from 768 px, and with a file over it the words
+   sit in the middle of the rectangle, on the water that rises (ink on water: 13.68:1 light, 9.71:1 dark), so the
+   rectangle keeps 356/340 px in both states (§ F13A-P-01). */
+.fo-pdf-island .fo-slot > .fo-drop[data-state="over"] { justify-content: center; padding-block: var(--space-4); }
+@media (min-width: 768px) { .fo-pdf-island .fo-slot > .fo-drop:is(:not([data-state]), [data-state="offline"]) { gap: var(--space-2); padding-top: var(--space-3); } }
+.fo-pdf-island .fo-slot > .fo-ready { align-content: start; }
+/* The line that holds the place of the action while the files are read (D-27): the height of the button and its lip, so
+   nothing moves when the button comes. With one PDF in the Merge list, the same place says what is missing (D-21). */
+.fo-merge__hold { display: flex; align-items: center; box-sizing: border-box; min-height: calc(var(--button-lg) + var(--lip)); margin: 0; font: 600 16px/22px var(--fo-font-text); color: var(--ink); }
+.fo-merge__hold--need { color: var(--ink-muted); font-weight: 500; }
+.fo-merge__hold:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+.fo-pdf-island .fo-ready .fo-merge__hold { justify-content: center; }
+
+/* The Merge list in the rectangle (tool-a-merge): the count, the Merge button where the Choose button was (D-22), the
+   order help in view above the rows (D-26), the rows, "Add more PDFs" (a small DropZone: dashed, a little water, a real
+   button that also takes a dropped file) and Start over at the foot, never where the Choose button was. */
+/* Under 480 px the panel keeps 12 px of side, so the sentence of a refused row keeps the width it had under the list. */
+.fo-merge-panel { --fo-merge-pad: var(--space-4); position: relative; display: grid; align-content: start; gap: var(--space-3); padding: var(--fo-merge-pad); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
+@media (max-width: 479px) { .fo-merge-panel { --fo-merge-pad: var(--space-3); } }
+@media (min-width: 768px) { .fo-merge-panel { --fo-merge-pad: var(--space-6); } }
+.fo-count { margin: 0; padding-right: 72px; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
+@media (min-width: 768px) { .fo-count { padding-right: 112px; } }
+.fo-count__pages { color: var(--ink-muted); font-weight: 500; }
+/* D-22, under 768 px: the count takes the room above the Merge button, so the button sits where the Choose button was at
+   rest (the island measures it: --fo-merge-at); the text of the count stays right above the button. */
+@media (max-width: 767px) {
+  .fo-merge-panel > .fo-count { display: flex; flex-wrap: wrap; align-content: flex-end; column-gap: 0.25em; min-height: max(24px, calc(var(--fo-merge-at, 0px) - var(--fo-merge-pad) - var(--stroke-2) - var(--space-3))); }
+}
+@media (min-width: 768px) { .fo-merge-panel > .fo-btn--brand { justify-self: start; } }
+.fo-merge-panel > .fo-btn { margin-bottom: 0; }
+.fo-merge-panel > .fo-merge__hold { min-height: var(--button-lg); }
+.fo-merge__help { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+/* While the files are read the help keeps its room, unseen (the arrows already work: DECISOES § 168). */
+.fo-merge-panel[data-state="reading"] .fo-merge__help { visibility: hidden; }
+.fo-merge__add { position: relative; overflow: hidden; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; min-height: 56px; margin: 0; padding: 0 var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 700 16px/20px var(--fo-font-text); cursor: pointer; }
+.fo-merge__add:hover { border-color: var(--brand); }
+.fo-merge__add:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
+.fo-merge__add > .fo-water { --level: 20%; }
+.fo-merge__add > :not(.fo-water) { position: relative; }
+.fo-merge__restart { justify-self: center; min-height: var(--tap-min); }
+
+/* The band under the rectangle in the PDF tools (§ F13A-P-06): the options before the result; after it the chips, then the
+   options folded under "Adjust" (the tools that run by themselves) or still in view (the ones with an action). The room
+   of the chips (and of the closed "Order" of the Merge) is kept, unseen, from the gesture that asks for the result. */
+.fo-pdf-island .fo-band { gap: var(--space-4); }
+.fo-pdf-island .fo-band > :is(.fo-options-stack, .fo-fields--stack) { margin-top: 0; }
+.fo-next--kept, .fo-merge__order--kept { visibility: hidden; }
+.fo-merge__order .fo-adjust__body .fo-merge { --fo-row-h: auto; }
+
+/* The numbers of the result: "2.6 MB → 717 KB", or "246 KB · 3 pages" (the dot is only seen). */
+.fo-pdf-island .fo-numbers dd { display: inline-flex; align-items: center; gap: var(--space-2); }
+.fo-numbers__count::before { content: "·"; content: "·" / ""; color: var(--on-deep-muted); }
+
+/* The coffee line (§ 436) on the 3rd use: the island knows it before the result, and the rectangle keeps the room of the
+   line from the gesture that asks for the result (the drop of a tool that runs by itself, the press of the action), so
+   the result never moves what is under it (§ F13A-P-07). The room is the most the line takes at that width in the three
+   languages, measured in dist/. */
+.fo-pdf-island { --fo-coffee-h: 248px; }
+@media (min-width: 768px) { .fo-pdf-island { --fo-coffee-h: 160px; } }
+.fo-pdf-island .fo-slot[data-coffee] { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
+.fo-pdf-island .fo-slot[data-coffee] > :is(.fo-drop, .fo-level, .fo-result, .fo-ready, .fo-merge-panel) { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
+
+/* The note of the design system (UX-11 A, F-10; the rule of "Cor" of docs/design/README): brand-soft with the info icon in
+   brand and the text in ink. The honest line of Sign PDF and the warning of Strong in Compress PDF (the fieldset points at
+   it). It took the place of .fo-sign__notice. */
+.fo-note { margin: 0; display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
+.fo-note > .fo-icon { flex: none; margin-top: -1px; color: var(--brand); }
+
+/* UX-11 A, F-14: under 480 px the bar of the grid has the count on its own line and the two buttons side by side, and a rail
+   of choices with no help line is one row of equal columns (56 px), not a wrap with one choice alone on a second line. */
+@media (max-width: 479px) {
+  .fo-pages__count { flex-basis: 100%; }
+  .fo-pages__count ~ .fo-btn { flex: 1 1 0; }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
 }

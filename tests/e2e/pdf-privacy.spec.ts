@@ -537,6 +537,9 @@ const DRAWS: Draws[] = [
     drawn: 'grid',
     gives: 'pdf',
     after: async (page) => {
+      // F13a (UX-04 A; DECISOES § F13A-P-10): Rotate runs when the file is read, and its options fold under "Adjust" then.
+      await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 45_000 });
+      await page.locator('#fo-tool-root .fo-adjust > summary').click();
       await option(page, rotateTexts.panel.options.pick);
       await gridDrawn(page);
       await page.getByRole('button', { name: /^Turn page 1 \(/ }).click();

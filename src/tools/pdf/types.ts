@@ -28,8 +28,10 @@ export interface PdfIcons {
   trash: string;
   chevron: string;
   plus: string;
-  /** The handle of a row of the Merge list: Space picks it up, the arrow keys move it. */
-  reorder: string;
+  /** The chevron of the "Adjust" and "Order" disclosures after the result (F13a, UX-04 A). */
+  down: string;
+  /** The icon of a note of the design system (F13a, F-10): brand-soft with the info icon. */
+  info: string;
 }
 
 export interface PdfPanelData<O = object> {
@@ -60,10 +62,13 @@ export interface PdfFileView {
 
 /** Thumbnails of the pages of the file a single-file tool works on. */
 export interface Thumbnails {
-  /** Object URL of a small JPEG of page `index`, or null. Draws it on first ask. */
-  get(index: number): Promise<string | null>;
+  /**
+   * Object URL of a small JPEG of page `index`, or null. Draws it on first ask. `width` is the width of the picture in
+   * pixels, 240 for the grid by default; the Sign preview asks for its own (F13a, F-5).
+   */
+  get(index: number, width?: number): Promise<string | null>;
   /** The cell left the screen: its picture can go. */
-  drop(index: number): void;
+  drop(index: number, width?: number): void;
 }
 
 export interface PdfOptionsProps<S, O> {
@@ -98,6 +103,8 @@ export interface PdfToolDef<S extends object, O = object> {
   operation: (state: S, file: PdfFileView, files: readonly PdfFileView[]) => PdfOperation | null;
   /** The text of the action button for this state, when the tool has one. */
   actionLabel?: (state: S, texts: O, file: PdfFileView | null, fallback: string) => string;
+  /** What the options are set to, in a few words: the "Adjust · …" line after the result of a tool that runs by itself. */
+  summary?: (state: S, texts: O) => string;
   /** Thumbnails of the pages are drawn (a single-file tool with a page grid). */
   grid?: (state: S) => boolean;
   /**

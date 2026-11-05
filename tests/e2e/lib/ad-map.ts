@@ -66,6 +66,8 @@ export const MAP_TARGETS = [
   '.fo-rhero', '.fo-export .fo-btn', '.fo-compare', '.fo-calc-schedule', '.fo-amort-wrap', '.fo-debt',
   '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
+  // F13a (UX-04 A and UX-11 A; DECISOES § F13A-P-11): the Merge list in the rectangle and the band under it.
+  '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
   '.fo-result__support', '.fo-footer__coffee', '.fo-guidecard--here',
   '.fo-header > a', '.fo-header > button',
 ].join(', ');

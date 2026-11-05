@@ -4,10 +4,15 @@
 export interface MergeTexts {
   /** "Add more PDFs" (adds to the list instead of starting over). */
   add: string;
-  /** Under the list: how to change the order. */
+  /** Above the rows, in view (F13a, D-26): the order of the list is the order of the file, and the arrows change it. */
   help: string;
   /** With one PDF in the list: "Add at least one more PDF to merge." */
   needMore: string;
+  /** The name of the list: "Files, in the order they join". */
+  listLabel: string;
+  /** After the result, the order folded in the band (F13a): "Order · {count} files", and the line inside it. */
+  order: string;
+  orderHelp: string;
 }
 
 export interface SplitTexts {
@@ -65,6 +70,16 @@ export interface RotatePdfTexts {
   pickHelp: string;
   /** With two files or more: page by page works on one file. */
   batchNote: string;
+  /**
+   * F13a (D-10): the success line says what was turned and how: one page ({turn}), and some pages picked on the grid
+   * ({count} of {pages}); the line of all the pages and the one of several PDFs are the panel's done and doneMany. {turn}
+   * is one of the three words below, by the turn chosen.
+   */
+  doneOne: string;
+  donePicked: string;
+  rightTurn: string;
+  halfTurn: string;
+  leftTurn: string;
 }
 
 export interface DeleteTexts {
@@ -96,12 +111,17 @@ export interface NumbersTexts {
   ofWord: string;
   startLabel: string;
   startError: string;
-  skipFirst: string;
+  /** F13a (F-11): "First page: Number it / Skip it", a rail of two instead of the native check box. */
+  firstLegend: string;
+  numberIt: string;
+  skipIt: string;
 }
 
 export interface ReorderTexts {
   help: string;
   reverse: string;
+  /** F13a (D-10): what the status region says after Reverse order: "Pages reversed." */
+  reversed: string;
   /** Nothing moved yet: "Move a page to save a new order." */
   unchanged: string;
 }

@@ -443,8 +443,11 @@ export const FORBIDDEN_WORDS_BY_LANG: Record<Lang, RegExp | null> = {
   pt: /(?<![\p{L}\p{N}])(?:revolucion[áa]ri\p{L}*|turbinad\p{L}*|sem esfor[çc]o|com IA|movid[oa]s? (?:a|por) IA)(?![\p{L}\p{N}])/iu,
   es: /(?<![\p{L}\p{N}])(?:revolucionari\p{L}*|sin esfuerzo|con IA|impulsad[oa]s? por IA)(?![\p{L}\p{N}])/iu,
 };
-/** The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. */
-const SUCCESS_LINE = /\.(?:done|doneMany)$/;
+/**
+ * The one place an exclamation mark may be: the success line of a tool (`done`, `doneMany`), once. F13a (D-10): Rotate PDF
+ * has two more success lines, `doneOne` (one page) and `donePicked` (some pages picked on the grid).
+ */
+const SUCCESS_LINE = /\.done(?:Many|One|Picked)?$/;
 
 function stringsOf(value: unknown, path: string, out: [string, string][] = []): [string, string][] {
   if (typeof value === 'string') out.push([path, value]);

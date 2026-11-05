@@ -917,17 +917,19 @@ export interface PdfPanelTexts {
     moveEarlier: string;
     moveLater: string;
     moved: string;
-    /**
-     * Merge list, keyboard (criterion 10): the handle of a row that Space picks up ("Pick up {name}"), what the status
-     * region says when it is picked up, and when it is dropped ("{name} dropped at number {position} of {total}.").
-     */
-    pickUp: string;
-    picked: string;
-    dropped: string;
     unchanged: string;
     /** In the slot before the action: "{count} PDFs ready" and "1 PDF ready". */
     ready: string;
     readyOne: string;
+    /**
+     * F13a (UX-04 A, D-27; DECISOES § F13A-P-03): while the files are read the rectangle is already the list (or the
+     * ready card), and its count says so: "Reading {count} PDFs…" and "Reading 1 PDF…".
+     */
+    readingCount: string;
+    readingOne: string;
+    /** F13a (D-21): the row that left the Merge list, in its place until the next action: "{name} is out of the list." and "Undo". */
+    out: string;
+    undo: string;
   };
   grid: {
     /** Name of the grid: "Pages of {name}". */
@@ -949,9 +951,9 @@ export interface PdfPanelTexts {
     dropped: string;
     turn: string;
     turned: string;
-    /** Keyboard help under the grid. */
+    /** Keyboard help under the grid; in the order mode, the keys only (F13a, F-14: the bar above already says to drag). */
     help: string;
-    helpOrder: string;
+    helpKeys: string;
     /** "Pick pages by number" field. */
     rangeLabel: string;
     rangeApply: string;
@@ -1002,6 +1004,14 @@ export interface PdfPanelTexts {
     pages: string;
     unchanged: string;
     unchangedMany: string;
+    /** F13a (UX-04 A; DECISOES § F13A-P-05): the count of the line of numbers, "246 KB · 4 files". */
+    filesCount: string;
+    /**
+     * F13a (UX-04 A; DECISOES § F13A-P-06): the options of a tool that runs by itself fold under "Adjust" after the
+     * result, and the line inside says that a change makes the file again at once.
+     */
+    adjust: string;
+    adjustHelp: string;
     /** One line per engine note (src/engine/pdf/types.ts PdfNote). */
     notes: { repaired: string; xfaRemoved: string; formLost: string; textFlattened: string; downscaled: string };
     /** The coffee line (PLANO-MELHORIAS, section C) and the sentence that replaces it after "don't show again" (§ 436). */

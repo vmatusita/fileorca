@@ -448,7 +448,8 @@ test('Unlock PDF: a wrong password said, then the right one; RC4 too; the owner-
   rows.push({ tool: 'unlock-pdf', fixture: 'gen-cifrado-dono.pdf', browser: browserName, result: 'ok: restrictions removed without a password' });
   await startOver(page);
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
-  expect(await page.locator('.fo-drop__help').innerText()).toMatch(/nothing to remove/);
+  // F13a (UX-04 A; DECISOES § F13A-P-10): the reason of the error is the line under the sentence (.fo-drop__why).
+  expect(await page.locator('#fo-tool-root .fo-drop__why').innerText()).toMatch(/nothing to remove/);
   rows.push({ tool: 'unlock-pdf', fixture: 'gen-paginas-mistas.pdf', browser: browserName, result: 'refused: no password or restrictions' });
   recordMatrix(`unlock-${browserName}`, rows);
 });
@@ -484,6 +485,10 @@ for (const fixture of BIG) {
 test('Rotate PDF: page by page on the grid of one file', async ({ page, browserName }) => {
   await openTool(page, '/rotate-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+  // F13a (UX-04 A; DECISOES § F13A-P-10): Rotate runs as soon as the file is read, and after the result its options fold
+  // under "Adjust"; the same choices are made there.
+  await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  await page.locator('#fo-tool-root .fo-adjust > summary').click();
   await option(page, rotateTexts.panel.options.pick);
   await page.getByRole('button', { name: /^Turn page 1 \(/ }).click();
   await page.getByRole('button', { name: /^Turn page 1 \(/ }).click();

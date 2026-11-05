@@ -8,24 +8,31 @@
 //  - "auto" tools run as soon as the files are read and again when an option changes; the others wait for the action
 //    button, which says what is missing instead of being disabled;
 //  - DropZone, WaterLevel and ResultCard share one slot; refusals stay on the row of their file, with the Oli line.
+// F13a (UX-04 A; DECISOES § F13A-P-01): the slot is one rectangle of one height in every state (356 px on the phone,
+// 340 px from 768 px), with the one Oli in its top right corner; the result is the water that rose; the band under it
+// shows the options before the result and the chips after it. The Merge list lives in the rectangle (§ F13A-P-02).
 // State lives in one mutable model (the run loop is async and must see the latest values); every change calls
 // render(). Object URLs are revoked when replaced and at "Start over"; the grid's thumbnails go when they leave the
 // screen. Nothing typed (password, text, ranges, numbers) leaves this component except in the request to the worker.
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { ComponentChildren, JSX, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import type { ComponentChildren, JSX, TargetedMouseEvent } from 'preact';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track, type Codec, type ErrorReason, type Outcome } from '../../analytics/events.ts';
+import { CONSENT_STORAGE_KEY } from '../../analytics/consent.ts';
 import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
-import { countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from '../image/coffee.ts';
+import { COFFEE_KEY, countUse, decideCoffee, dontShowAgain, forgetWithoutConsent, parseCoffee, type CoffeeLine } from '../image/coffee.ts';
 import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
 import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
+import { THUMB_WIDTH } from './PageGrid.tsx';
+import type { Pose } from '../../oli/poses.ts';
 import type { PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts } from '../../i18n/types.ts';
+import type { MergeTexts } from './option-texts.ts';
 import type { PdfFileView, PdfPanelData, Thumbnails } from './types.ts';
 import type * as ClientModule from './client.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
@@ -86,6 +93,8 @@ interface Model {
   total: number;
   zipping: boolean;
   showLevel: boolean;
+  /** The WaterLevel of the reading, only once it has lasted 400 ms (F13a, D-27): before that the rectangle is the list. */
+  readingLevel: boolean;
   bundle: Bundle | null;
   /** Download of a single output: its object URL and name. */
   single: Bundle | null;
@@ -99,13 +108,29 @@ interface Model {
   showErrors: boolean;
   expanded: boolean;
   slotFocus: boolean;
-  /** Merge list, keyboard: the id of the row Space picked up (the arrow keys move it), or null. */
-  grabbed: number | null;
+  /** The work runs again after a change made with the result on screen: the result stays until the new one (§ F13A-P-06). */
+  redo: boolean;
+  /** The next result will carry the coffee line: the rectangle keeps its room from the gesture (§ F13A-P-07). */
+  coffeeSoon: boolean;
+  /** The height of the Merge list, kept by the rectangle from the reading to the result (§ F13A-P-02). */
+  lock: number;
+  /** The band under the rectangle keeps the height of the options when they fold under "Adjust" (§ F13A-P-06). */
+  bandHold: number;
+  adjustOpen: boolean;
+  orderOpen: boolean;
+  /** Merge (D-21): the row taken out of the list, in its place until the next action; `said` puts its sentence in the region. */
+  undo: { item: Item; position: number; said: boolean } | null;
+  focusUndo: boolean;
+  /** The row whose remove button takes the focus back after Undo. */
+  focusRow: number | null;
+  /** F13a (D-11): a password was wrong, so its field takes the focus with the text selected. */
+  focusWrong: boolean;
 }
 
 const newModel = (): Model => ({
-  items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, bundle: null, single: null, notes: [],
-  announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false, grabbed: null,
+  items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, readingLevel: false, bundle: null, single: null, notes: [],
+  announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
+  redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null, focusWrong: false,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -120,6 +145,20 @@ const NOTE_KEY: Record<PdfNote, keyof PdfPanelData['t']['result']['notes'] | nul
 /** Offline right now, as the browser says: a failed engine load then gets the offline line (F8; DECISOES § 292). */
 function offlineNow(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
+
+/**
+ * Whether the next delivered result is the use that asks for the coffee: the same rule as countUse, read without counting,
+ * so the rectangle can keep the room of the line from the gesture that asks for the result (§ F13A-P-07).
+ */
+function coffeeDue(): boolean {
+  try {
+    const store = window.localStorage;
+    if (store.getItem(CONSENT_STORAGE_KEY) !== 'granted') return false;
+    return decideCoffee(parseCoffee(store.getItem(COFFEE_KEY)), { now: Date.now(), consent: true }).show;
+  } catch {
+    return false;
+  }
 }
 
 /** The tag of a part of a split, in the words of the page: the page of "each page", the part of the ranges, "selected". */
@@ -154,17 +193,31 @@ export default function PdfPanel(props: PdfPanelData) {
   const stateRef = useRef<object>(state);
   const rootRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
+  const mergeRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
+  const holdRef = useRef<HTMLParagraphElement>(null);
+  const undoRef = useRef<HTMLButtonElement>(null);
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const startOverRef = useRef<HTMLButtonElement>(null);
   const levelRef = useRef<HTMLDivElement>(null);
   const warmed = useRef(false);
   const appending = useRef(false);
   const dragging = useRef<number | null>(null);
+  /** D-22: where the top of the Choose button is in the rectangle at rest, so the Merge button takes that place. */
+  const chooseAt = useRef(0);
+  /** The height of the band while the options are in it, and whether the last render showed the result. */
+  const bandHeight = useRef(0);
+  const slotHeight = useRef(0);
+  const resultBefore = useRef(false);
   const tracked = { tool: page, lang } as const;
   const one = mode === 'single';
+  const merging = mode === 'merge';
+  /** The tools that run by themselves fold their options under "Adjust" after the result (§ F13A-P-06). */
+  const adjustable = runMode === 'auto' && Boolean(Options);
+  const mergeTexts = texts.options as unknown as MergeTexts;
 
   const render = () => {
     const active = document.activeElement;
@@ -234,11 +287,12 @@ export default function PdfPanel(props: PdfPanelData) {
 
   /** "2 PDFs ready" under the action, or what Merge still needs; the same words on screen and in the status. */
   function readyCount(count: number): string {
-    if (mode === 'merge' && count < 2) return (texts.options as { needMore?: string }).needMore ?? '';
+    if (merging && count < 2) return mergeTexts.needMore ?? '';
     return count === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count });
   }
 
   function afterReading(): void {
+    m.readingLevel = false;
     const ready = m.items.filter(usable);
     if (ready.length === 0) {
       m.phase = 'error';
@@ -257,9 +311,10 @@ export default function PdfPanel(props: PdfPanelData) {
       // (review F4-F7 d-1; DECISOES § 305).
       const refused = m.items.length - ready.length;
       // Merge with one PDF left after the refusals also says what it still needs, as the screen does (second pass, s-3).
-      const needs = mode === 'merge' && ready.length < 2;
+      const needs = merging && ready.length < 2;
       const some = fmt(t.errors.some, { count: refused });
-      m.announce = refused === 0 ? readyCount(ready.length) : needs ? `${some} ${readyCount(ready.length)}` : some;
+      // Merge: the count of the list says "2 PDFs ready" in its own region (role="status"), so this one says only the refusals.
+      m.announce = refused === 0 ? (merging ? '' : readyCount(ready.length)) : needs ? `${some} ${readyCount(ready.length)}` : some;
       render();
     }
   }
@@ -274,7 +329,7 @@ export default function PdfPanel(props: PdfPanelData) {
   function plan(): { requests: { items: Item[]; op: PdfOperation; key: string }[]; skipped: Item[] } | null {
     const views = m.items.filter(usable).map(viewOf);
     const ready = m.items.filter(usable);
-    if (mode === 'merge') {
+    if (merging) {
       const first = ready[0];
       const op = first ? tool.operation(stateRef.current, viewOf(first), views) : null;
       return op ? { requests: [{ items: ready, op, key: keyOf(op) + ready.map((item) => item.id).join(',') }], skipped: [] } : null;
@@ -298,13 +353,20 @@ export default function PdfPanel(props: PdfPanelData) {
         render();
       } else if (m.phase !== 'processing') {
         m.phase = 'ready';
+        m.redo = false;
         render();
       }
       return;
     }
     // The press of the action is the person asking for the result: the focus goes to Download when it comes, whatever
     // was picked, moved or changed before (DECISOES § 176).
-    if (fromButton) m.focusDownload = true;
+    if (fromButton) {
+      m.focusDownload = true;
+      // The press is the next action after a row left the Merge list: the Undo goes (D-21).
+      m.undo = null;
+      // The coffee line of the result is known before it: its room is kept from this press (§ F13A-P-07).
+      if (m.newUse && !m.coffeeSoon && coffeeDue()) m.coffeeSoon = true;
+    }
     const { requests, skipped } = planned;
     // A skipped file that had outputs leaves the download: it is made again without them.
     const dropped = skipped.some((item) => item.outputs);
@@ -316,10 +378,14 @@ export default function PdfPanel(props: PdfPanelData) {
     const work = requests.filter((request) => !(request.items.every((item) => item.op === request.key && item.outputs)));
     if (work.length === 0 && !dropped && (m.bundle || m.single)) {
       m.phase = 'done';
+      m.redo = false;
       render();
       return;
     }
     const id = ++m.runId;
+    // A change made with the result on screen (an option under "Adjust", the order of the Merge) keeps the result until
+    // the new one, or the WaterLevel after 400 ms: the rectangle never shows the ready card in between (§ F13A-P-06).
+    m.redo = !fromButton && (m.phase === 'done' || m.redo) && Boolean(m.bundle ?? m.single);
     // A WaterLevel already on screen (the reading, before an auto tool's run) stays for the run: no other state flashes
     // between the two (DECISOES § 176).
     const levelShown = Boolean(levelRef.current?.isConnected);
@@ -366,6 +432,7 @@ export default function PdfPanel(props: PdfPanelData) {
             refuse(item, { reason: result.reason, ...(result.source ? { source: result.source } : {}) });
             item.outputs = null;
             item.op = null;
+            if (result.reason === 'wrong-password') m.focusWrong = true;
           } else {
             item.failure = null;
             item.status = 'done';
@@ -427,6 +494,7 @@ export default function PdfPanel(props: PdfPanelData) {
     const done = m.items.filter((item) => item.status === 'done' && item.outputs);
     const failed = m.items.filter((item) => item.failure !== null).length;
     m.zipping = false;
+    m.redo = false;
     const delivered = m.single ?? m.bundle;
     m.phase = delivered ? 'done' : m.items.some(usable) ? 'ready' : 'error';
     const unchanged = done.length > 0 && done.every((item) => item.outcome === 'unchanged');
@@ -444,13 +512,26 @@ export default function PdfPanel(props: PdfPanelData) {
   }
 
   function totals(done: Item[]): { before: number; after: number } {
-    const before = done.reduce((sum, item) => sum + item.file.size, 0) + (mode === 'merge' ? m.items.filter((item) => usable(item) && !done.includes(item)).reduce((sum, item) => sum + item.file.size, 0) : 0);
+    const before = done.reduce((sum, item) => sum + item.file.size, 0) + (merging ? m.items.filter((item) => usable(item) && !done.includes(item)).reduce((sum, item) => sum + item.file.size, 0) : 0);
     const after = done.reduce((sum, item) => sum + (item.outputs ?? []).reduce((inner, output) => inner + output.bytes.length, 0), 0);
     return { before, after };
   }
 
   function says(done: Item[]): string {
     const many = done.length > 1;
+    // F13a (D-10): Rotate says how many pages turned and which way.
+    if (page === 'rotate-pdf') {
+      const state = stateRef.current as { turn?: number; scope?: string; turns?: Record<number, number> };
+      const words = texts.options as unknown as { doneOne: string; donePicked: string; rightTurn: string; halfTurn: string; leftTurn: string };
+      const turn = state.turn === 2 ? words.halfTurn : state.turn === 3 ? words.leftTurn : words.rightTurn;
+      const pages = done[0]?.info?.pages ?? 1;
+      if (many) return fmt(texts.doneMany, { count: done.length, turn });
+      if (state.scope === 'pick' && m.items.filter(usable).length === 1) {
+        const count = Object.values(state.turns ?? {}).filter((quarter) => quarter % 4 !== 0).length;
+        return fmt(words.donePicked, { count, pages });
+      }
+      return pages === 1 ? fmt(words.doneOne, { turn }) : fmt(texts.done, { pages, turn });
+    }
     if (page === 'compress-pdf') {
       const { before, after } = totals(done);
       const saved = before > 0 ? (1 - after / before) * 100 : 0;
@@ -460,7 +541,7 @@ export default function PdfPanel(props: PdfPanelData) {
     // {count} counts what came out: one output per file in a batch, the parts of a Split, the images of PDF to JPG (for one
     // PDF of many pages it was the images said as PDFs, DECISOES § 178). The Merge says how many files went into its one
     // PDF (DECISOES § 183).
-    const count = mode === 'merge' ? done.length : done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
+    const count = merging ? done.length : done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
     return fmt(count > 1 ? texts.doneMany : texts.done, { count, percent: '' });
   }
 
@@ -469,11 +550,21 @@ export default function PdfPanel(props: PdfPanelData) {
   function teardown(): void {
     for (const item of m.items) item.removed = true;
     m.items = [];
-    m.grabbed = null;
+    m.undo = null;
     revoke(m.bundle);
     revoke(m.single);
     m.bundle = null;
     m.single = null;
+  }
+
+  /** The room of the rectangle and of the band goes back to its own: a gesture (a new batch, Start over) asks for it. */
+  function unlock(): void {
+    m.lock = 0;
+    m.bandHold = 0;
+    m.coffeeSoon = false;
+    m.redo = false;
+    m.adjustOpen = false;
+    m.orderOpen = false;
   }
 
   function newItem(file: File, failure: Failure | null = null): Item {
@@ -482,16 +573,21 @@ export default function PdfPanel(props: PdfPanelData) {
 
   function addFiles(files: File[]): void {
     if (files.length === 0) return;
-    const append = mode === 'merge' && (appending.current || (m.items.length > 0 && m.phase !== 'done'));
+    const append = merging && (appending.current || (m.items.length > 0 && m.phase !== 'done'));
     appending.current = false;
+    // Adding is the next action after a row left the Merge list: the Undo goes (D-21).
+    m.undo = null;
     if (!append) {
       m.runId += 1;
       teardown();
+      unlock();
       m.completeSent = false;
       m.newUse = true;
       m.coffee = '';
       m.expanded = false;
       m.focusDownload = true;
+      // A tool that runs by itself gives its result with no other gesture: the drop is the one that asks for it.
+      m.coffeeSoon = runMode === 'auto' && coffeeDue();
       if (one) {
         const fresh = { ...tool.initial, ...(tool.start?.(texts.options as never) ?? {}) };
         stateRef.current = fresh;
@@ -515,9 +611,19 @@ export default function PdfPanel(props: PdfPanelData) {
     const taken = one && m.items.some((item) => !item.removed);
     m.items.push(...files.map((file, i) => (one && (taken || i > 0) ? newItem(file, { reason: 'one-at-a-time' }) : newItem(file))));
     m.phase = 'reading';
+    m.readingLevel = false;
     m.showErrors = false;
-    m.announce = t.progress.reading;
+    // Merge: the count of the list says "Reading 2 PDFs…" in its own region, so the panel's region says nothing more.
+    m.announce = merging ? '' : t.progress.reading;
     setOver(0);
+    // D-27: the reading is the list (or the ready card) at once; its WaterLevel only after 400 ms, as the processing's.
+    const id = m.runId;
+    window.setTimeout(() => {
+      if (m.runId === id && m.phase === 'reading') {
+        m.readingLevel = true;
+        render();
+      }
+    }, SHOW_PROGRESS_AFTER_MS);
     render();
     void readAll(m.runId);
   }
@@ -540,6 +646,7 @@ export default function PdfPanel(props: PdfPanelData) {
   function startOver(): void {
     m.runId += 1;
     teardown();
+    unlock();
     m.phase = 'idle';
     m.announce = '';
     m.coffee = '';
@@ -552,9 +659,10 @@ export default function PdfPanel(props: PdfPanelData) {
     window.setTimeout(() => chooseRef.current?.focus(), 0);
   }
 
+  /** Takes a file out for good: the × of a row being read, the remove button of a refused row. */
   function removeItem(item: Item): void {
     item.removed = true;
-    if (m.grabbed === item.id) m.grabbed = null;
+    m.undo = null;
     m.items = m.items.filter((other) => other !== item);
     if (m.items.length === 0) {
       startOver();
@@ -572,53 +680,54 @@ export default function PdfPanel(props: PdfPanelData) {
   }
 
   /**
-   * `focus` is the control of the moved row that keeps the focus: the arrow button that was pressed (the other one when
-   * the row reached the end and it became disabled, DECISOES § 177), the handle for the keyboard.
+   * The remove button of a row of the Merge list (D-21): the row leaves, and in its place a line says so with Undo, at the
+   * same height, until the next action (Merge, Add, another remove). No timer (WCAG 2.2.1). The focus goes to Undo.
    */
-  function moveItem(from: number, to: number, focus = '.fo-merge__move:not([disabled])'): void {
+  function removeRow(item: Item, position: number): void {
+    removeItem(item);
+    if (m.items.length === 0) return;
+    m.undo = { item, position, said: false };
+    m.focusUndo = true;
+    render();
+    const undo = m.undo;
+    // The sentence goes into the region after the line is on screen, so a screen reader says it (an element born with
+    // its text is not said).
+    window.setTimeout(() => {
+      if (m.undo !== undo) return;
+      undo.said = true;
+      render();
+    }, 50);
+  }
+
+  /** Undo: the row comes back to its place, and the focus to its remove button. */
+  function undoRemove(): void {
+    const undo = m.undo;
+    if (!undo) return;
+    m.undo = null;
+    undo.item.removed = false;
+    m.items.splice(Math.min(undo.position, m.items.length), 0, undo.item);
+    m.focusRow = undo.item.id;
+    render();
+  }
+
+  /**
+   * `focus` is the control of the moved row that keeps the focus: the arrow button that was pressed, or the other one when
+   * the row reached the end and the pressed one gave its place to the empty one (DECISOES § 177; F13a, D-23).
+   */
+  function moveItem(from: number, to: number, focus = '.fo-merge__move'): void {
     if (to < 0 || to >= m.items.length || from === to) return;
     const [item] = m.items.splice(from, 1);
     if (!item) return;
     m.items.splice(to, 0, item);
-    if (m.phase === 'done') m.phase = 'ready';
+    // A move is an action too: the Undo of a row that left would put it back in the wrong place.
+    m.undo = null;
     say(fmt(t.queue.moved, { name: item.file.name || t.fileFallback, position: to + 1, total: m.items.length }));
+    // After the result the order is under "Order" in the band, and a change merges again at once (§ F13A-P-02).
+    if (m.phase === 'done' || (m.phase === 'processing' && m.redo)) void run(false);
     window.setTimeout(() => {
       const row = rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"]`);
-      (row?.querySelector<HTMLElement>(focus) ?? row?.querySelector<HTMLElement>('.fo-merge__move:not([disabled])'))?.focus();
+      (row?.querySelector<HTMLElement>(focus) ?? row?.querySelector<HTMLElement>('.fo-merge__move'))?.focus();
     }, 0);
-  }
-
-  /** Space or Enter on a row's handle: picks the row up, or drops it where it is. Each is said once (WCAG 4.1.3). */
-  function toggleGrab(item: Item, position: number): void {
-    const name = item.file.name || t.fileFallback;
-    if (m.grabbed === item.id) {
-      m.grabbed = null;
-      say(fmt(t.queue.dropped, { name, position: position + 1, total: m.items.length }));
-    } else {
-      m.grabbed = item.id;
-      say(fmt(t.queue.picked, { name }));
-    }
-  }
-
-  /**
-   * Arrow keys on a handle (the keyboard alternative to dragging a row, WCAG 2.5.7): while a row is picked up they move
-   * it; otherwise they go to the handle of the next or previous row. Home and End go to the ends. Escape lets go.
-   */
-  function onGrabKey(event: TargetedKeyboardEvent<HTMLButtonElement>, item: Item, position: number): void {
-    const last = m.items.length - 1;
-    const target = event.key === 'ArrowUp' ? position - 1 : event.key === 'ArrowDown' ? position + 1 : event.key === 'Home' ? 0 : event.key === 'End' ? last : null;
-    if (target !== null) {
-      event.preventDefault();
-      const to = Math.min(last, Math.max(0, target));
-      if (m.grabbed === item.id) moveItem(position, to, '.fo-merge__grab');
-      else {
-        const other = m.items[to];
-        if (other) rootRef.current?.querySelector<HTMLElement>(`[data-row="${other.id}"] .fo-merge__grab`)?.focus();
-      }
-    } else if (event.key === 'Escape' && m.grabbed === item.id) {
-      m.grabbed = null;
-      render();
-    }
   }
 
   // --- events from the page -----------------------------------------------------------------------------------------
@@ -638,12 +747,34 @@ export default function PdfPanel(props: PdfPanelData) {
     }
     if (m.phase === 'ready' && m.focusAction && actionRef.current) {
       m.focusAction = false;
+      const active = document.activeElement;
+      const lost = !active || active === document.body;
       // The options come with the ready card, a frame before this effect: a person already typing in one of their fields
-      // keeps it, and the keys never go to the action (DECISOES § 240).
-      if (!typingIn(rootRef.current)) actionRef.current.focus();
+      // keeps it, and the keys never go to the action (DECISOES § 240). Merge (D-27): the button takes the place of the
+      // reading line, so only a focus left on nothing goes to it; a person on a row or on Add more stays there.
+      if (merging ? lost : !typingIn(rootRef.current)) actionRef.current.focus();
+    }
+    // D-11 (§ 177 and § 240): after a wrong password the focus goes back to the field, with what was typed selected, so a
+    // new try replaces it; the error is on the field (role="alert").
+    if (m.focusWrong) {
+      m.focusWrong = false;
+      const field = rootRef.current?.querySelector<HTMLInputElement>('.fo-pass input[aria-invalid="true"]');
+      if (field) {
+        field.focus();
+        field.select();
+      }
+    }
+    if (m.focusUndo && undoRef.current) {
+      m.focusUndo = false;
+      undoRef.current.focus();
+    }
+    if (m.focusRow !== null) {
+      const id = m.focusRow;
+      m.focusRow = null;
+      rootRef.current?.querySelector<HTMLElement>(`[data-row="${id}"] .fo-merge__remove`)?.focus();
     }
     const active = document.activeElement;
-    if ((!active || active === document.body) && m.slotFocus) (levelRef.current ?? downloadRef.current ?? actionRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+    if ((!active || active === document.body) && m.slotFocus) (levelRef.current ?? downloadRef.current ?? actionRef.current ?? holdRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
     m.slotFocus = false;
   });
 
@@ -695,16 +826,16 @@ export default function PdfPanel(props: PdfPanelData) {
       done: (value: string | null) => void;
       users: number;
     }
-    const cache = new Map<number, Entry>();
-    const waiting: { index: number; entry: Entry }[] = [];
+    const cache = new Map<string, Entry>();
+    const waiting: { index: number; width: number; entry: Entry }[] = [];
     let drawing = 0;
     const key = `f${subject.id}`;
     const boxes = subject.info.boxes;
-    const draw = async (index: number): Promise<string | null> => {
+    const draw = async (index: number, width: number): Promise<string | null> => {
       const box = boxes[index];
       const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
       try {
-        const blob = await (await client()).thumbnail(key, subject.file, index, 240, shownWidth);
+        const blob = await (await client()).thumbnail(key, subject.file, index, width, shownWidth);
         return blob ? URL.createObjectURL(blob) : null;
       } catch {
         return null;
@@ -719,7 +850,7 @@ export default function PdfPanel(props: PdfPanelData) {
           continue;
         }
         drawing += 1;
-        void draw(next.index).then((value) => {
+        void draw(next.index, next.width).then((value) => {
           drawing -= 1;
           next.entry.done(value);
           pump();
@@ -727,28 +858,30 @@ export default function PdfPanel(props: PdfPanelData) {
       }
     };
     return {
-      get(index) {
-        let entry = cache.get(index);
+      get(index, width = THUMB_WIDTH) {
+        const id = `${index}:${width}`;
+        let entry = cache.get(id);
         if (!entry) {
           let done: (value: string | null) => void = () => {};
           const url = new Promise<string | null>((resolve) => {
             done = resolve;
           });
           entry = { url, done, users: 0 };
-          cache.set(index, entry);
-          waiting.push({ index, entry });
+          cache.set(id, entry);
+          waiting.push({ index, width, entry });
         }
         entry.users += 1;
         const url = entry.url;
         pump();
         return url;
       },
-      drop(index) {
-        const entry = cache.get(index);
+      drop(index, width = THUMB_WIDTH) {
+        const id = `${index}:${width}`;
+        const entry = cache.get(id);
         if (!entry) return;
         entry.users -= 1;
         if (entry.users > 0) return;
-        cache.delete(index);
+        cache.delete(id);
         void entry.url.then((value) => value && URL.revokeObjectURL(value));
       },
     };
@@ -821,14 +954,56 @@ export default function PdfPanel(props: PdfPanelData) {
   const pagesLabel = (info: PdfInspect | null) => (info ? (info.pages === 1 ? t.queue.page : fmt(t.queue.pages, { count: info.pages })) : '');
   const done = m.items.filter((item) => item.status === 'done' && item.outputs);
   const delivered = m.single ?? m.bundle;
+  const reading = m.phase === 'reading';
   // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
   const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
   const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
-  const showLevel = (m.phase === 'processing' && m.showLevel) || (m.phase === 'reading' && m.items.length > 0);
-  const progress = m.zipping ? 100 : m.phase === 'reading' ? 0 : batchPercent(m.finished, m.total, 0);
+  const showLevel = (m.phase === 'processing' && m.showLevel) || (reading && m.readingLevel && m.items.length > 0);
+  /** The result is on screen: done, or a new one on its way after a change made with it on screen (§ F13A-P-06). */
+  const resultOnScreen = Boolean(delivered) && !showLevel && (m.phase === 'done' || (m.phase === 'processing' && m.redo));
+  const listOnScreen = merging && !showLevel && !resultOnScreen && m.items.length > 0 && m.phase !== 'error' && m.phase !== 'idle';
+  const progress = m.zipping ? 100 : reading ? 0 : batchPercent(m.finished, m.total, 0);
   const actionText = texts.action ? (tool.actionLabel?.(state, texts.options as never, subject ? viewOf(subject) : null, texts.action) ?? texts.action) : '';
-  const many = m.items.length > 1 || mode === 'merge';
+  const many = m.items.length > 1 || merging;
   const [helpBefore = '', helpAfter = ''] = fmt(t.drop.helpDesktop, { note: texts.note }).split('{kbd}');
+  const ready = m.items.filter(usable);
+  const labels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
+  const pose: Pose = dropState === 'over' ? 'gulp' : showLevel ? 'swim' : resultOnScreen ? 'cheer' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
+
+  // F13a (§ F13A-P-02 and § F13A-P-07): what the rectangle and the band keep, set before the frame is painted, so a state
+  // that comes with no gesture (the Merge button after the reading, the result) never moves what is under it.
+  useLayoutEffect(() => {
+    const slot = slotRef.current;
+    if (!slot) return;
+    const choose = chooseRef.current;
+    if (choose && m.phase === 'idle' && !dropState) chooseAt.current = Math.round(choose.getBoundingClientRect().top - slot.getBoundingClientRect().top);
+    const panel = mergeRef.current;
+    if (panel && listOnScreen) m.lock = Math.max(m.lock, Math.ceil(panel.getBoundingClientRect().height));
+    // At the first frame of the result the rectangle goes back to its own height and the band under it takes the room
+    // the list left, so the island keeps its height (nothing under it moves) and the chips come right under the
+    // Download (§ F13A-P-02).
+    const firstResult = resultOnScreen && !resultBefore.current;
+    if (firstResult) m.lock = 0;
+    if (m.lock > 0) {
+      slot.style.setProperty('--fo-lock', `${m.lock}px`);
+      slot.dataset['lock'] = 'list';
+    } else {
+      slot.style.removeProperty('--fo-lock');
+      delete slot.dataset['lock'];
+    }
+    const band = bandRef.current;
+    if (band) {
+      if (!resultOnScreen) {
+        bandHeight.current = band.getBoundingClientRect().height;
+        slotHeight.current = slot.getBoundingClientRect().height;
+      } else if (firstResult) {
+        const freed = Math.max(0, slotHeight.current - slot.getBoundingClientRect().height);
+        if (adjustable || freed > 0) m.bandHold = bandHeight.current + freed;
+      }
+      band.style.minHeight = m.bandHold > 0 ? `${m.bandHold}px` : '';
+    }
+    resultBefore.current = resultOnScreen;
+  });
 
   let panel: JSX.Element;
   if (showLevel) {
@@ -840,20 +1015,18 @@ export default function PdfPanel(props: PdfPanelData) {
         tabindex={-1}
         class="fo-level"
         role="progressbar"
-        aria-label={m.phase === 'reading' ? t.progress.reading : texts.progressLabel}
+        aria-label={reading ? t.progress.reading : texts.progressLabel}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={progress}
         aria-valuetext={m.total >= 2 ? fmt(t.progress.valueText, { percent: percent(progress, lang), done: value, total }) : percent(progress, lang)}
-        aria-busy={m.zipping || m.phase === 'reading' ? 'true' : undefined}
+        aria-busy={m.zipping || reading ? 'true' : undefined}
         style={`--level:${progress}%`}
       >
-        <div class="fo-water fo-water--moving">
-          <Oli pose="swim" class="fo-level__oli" />
-        </div>
+        <div class="fo-water fo-water--moving" />
         <div class="fo-level__text">
           <span class="fo-level__pct">{progress}%</span>
-          {m.zipping || m.phase === 'reading' ? (
+          {m.zipping || reading ? (
             <span class="fo-level__msg fo-level__msg--busy">
               <span class="fo-spin" aria-hidden="true" />
               {m.zipping ? fmt(t.result.zipping, { count: done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0) }) : t.progress.reading}
@@ -865,40 +1038,59 @@ export default function PdfPanel(props: PdfPanelData) {
         </div>
       </div>
     );
-  } else if (m.phase === 'done' && delivered) {
+  } else if (resultOnScreen && delivered) {
     const { before, after } = totals(done);
     const saved = before > 0 ? (1 - after / before) * 100 : 0;
     const gained = page === 'compress-pdf' && done.some((item) => item.outcome === 'new') && worthSaying(saved);
     const outputs = done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
-    const pages = done.reduce((sum, item) => sum + (item.outputs ?? []).reduce((inner, output) => inner + (output.pages ?? 0), 0), 0);
+    const pages = done.reduce((sum, item) => sum + (item.outputs ?? []).reduce((inner, output) => inner + (output.pages ?? 0), 0), 0) || (done[0]?.info?.pages ?? 1);
     const notes = [...new Set(m.notes)].map((note) => NOTE_KEY[note]).filter((key): key is NonNullable<typeof key> => key !== null);
+    const size = fileSize(m.bundle ? m.bundle.blob.size : after, lang);
     panel = (
-      <section class="fo-result fo-deep">
+      <section class="fo-result fo-deep" aria-labelledby="fo-says">
+        <div class="fo-water fo-result__sea" />
         <div class="fo-result__head">
-          <Oli pose="cheer" class="fo-result__oli" />
-          <p class="fo-result__says">{says(done)}</p>
           {gained && (
-            <div class="fo-placard fo-pop">
+            // The placard repeats the number of the sentence, which is read: it is only seen (UX-04 A).
+            <div class="fo-placard fo-pop" aria-hidden="true">
               <span class="fo-placard__n">{MINUS + percent(saved, lang)}</span>
               <span class="fo-placard__l">{texts.placardLabel}</span>
             </div>
           )}
+          <p class="fo-result__says" id="fo-says">
+            {says(done)}
+          </p>
         </div>
-        <dl class="fo-result__stats">
-          {page === 'compress-pdf' && after < before && (
-            <div class="fo-result__stat fo-result__stat--before">
-              <dt>{t.result.before}</dt>
-              <dd>{fileSize(before, lang)}</dd>
-            </div>
+        {/* "2.6 MB → 717 KB" when Compress made the file lighter; "246 KB · 3 pages" otherwise (Principle 4). The arrow is
+            the icon, with the hidden word for screen readers (the fonts have no →; design-checks checkArrows). */}
+        <dl class="fo-numbers">
+          {gained ? (
+            <>
+              <div class="fo-numbers__before">
+                <dt class="fo-sr">{t.result.before}</dt>
+                <dd>{fileSize(before, lang)}</dd>
+              </div>
+              <div>
+                <dt class="fo-sr">{t.result.after}</dt>
+                <dd>
+                  <Icon raw={arrowIcon} class="fo-icon--inline" />
+                  <span class="fo-sr">{t.queue.to} </span>
+                  {size}
+                </dd>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <dt class="fo-sr">{t.result.after}</dt>
+                <dd>{size}</dd>
+              </div>
+              <div class="fo-numbers__count">
+                <dt class="fo-sr">{outputs > 1 ? t.result.files : t.result.pages}</dt>
+                <dd>{outputs > 1 ? fmt(t.result.filesCount, { count: outputs }) : pages === 1 ? t.queue.page : fmt(t.queue.pages, { count: pages })}</dd>
+              </div>
+            </>
           )}
-          <div class="fo-result__stat">
-            <dt>{t.result.after}</dt>
-            <dd>{fileSize(m.bundle ? m.bundle.blob.size : after, lang)}</dd>
-          </div>
-          <div class="fo-result__stat">
-            <dt>{outputs > 1 ? t.result.files : t.result.pages}</dt>
-            <dd>{outputs > 1 ? outputs : pages || (done[0]?.info?.pages ?? 1)}</dd>
-          </div>
         </dl>
         <div class="fo-result__actions">
           <a
@@ -912,9 +1104,11 @@ export default function PdfPanel(props: PdfPanelData) {
             {m.bundle ? fmt(t.result.downloadZip, { size: fileSize(m.bundle.blob.size, lang) }).split(' · ')[0] : t.result.download}{' '}
             <span class="fo-btn__meta">{m.bundle ? `· ${fmt(t.result.downloadZip, { size: fileSize(m.bundle.blob.size, lang) }).split(' · ').slice(1).join(' · ')}` : `· ${fileSize(delivered.blob.size, lang)}`}</span>
           </a>
-          <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
-            {t.result.startOver}
-          </button>
+          <div class="fo-result__more">
+            <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
+              {t.result.startOver}
+            </button>
+          </div>
         </div>
         {notes.length > 0 && (
           <ul class="fo-result__notes">
@@ -951,31 +1145,71 @@ export default function PdfPanel(props: PdfPanelData) {
         ))}
       </section>
     );
-  } else if (m.phase === 'ready' || m.phase === 'processing' || (m.phase === 'done' && !delivered)) {
-    // While Oli works and before the WaterLevel shows (400 ms), the ready card stays: the action that was pressed keeps
-    // the focus, and the empty DropZone never flashes in the slot (DECISOES § 176).
-    const ready = m.items.filter(usable);
-    const only = ready[0];
+  } else if (listOnScreen) {
+    // The Merge list lives in the rectangle (UX-04 A, tool-a-merge; § F13A-P-02): the count, the Merge button where the
+    // Choose button was (D-22), the order help in view (D-26), the rows, "Add more PDFs" and Start over at the foot.
+    const pages = ready.reduce((sum, item) => sum + (item.info?.pages ?? 0), 0);
+    const count = reading ? (m.items.length === 1 ? t.queue.readingOne : fmt(t.queue.readingCount, { count: m.items.length })) : ready.length === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count: ready.length });
     panel = (
-      <div class="fo-ready">
-        {one && only ? (
-          <FileCard name={nameOf(only)} category="pdf" labels={{ to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove }} state="done" before={fileSize(only.file.size, lang)} note={pagesLabel(only.info)} />
+      <section ref={mergeRef} class="fo-merge-panel" aria-labelledby="fo-count" data-state={reading ? 'reading' : undefined} style={chooseAt.current > 0 ? `--fo-merge-at:${chooseAt.current}px` : undefined}>
+        <p key="count" class="fo-count" id="fo-count" role="status">
+          {count}
+          {!reading && pages > 0 && <span class="fo-count__pages"> · {pages === 1 ? t.queue.page : fmt(t.queue.pages, { count: pages })}</span>}
+        </p>
+        {reading || ready.length < 2 ? (
+          <p key="hold" ref={holdRef} tabindex={-1} class={reading ? 'fo-merge__hold' : 'fo-merge__hold fo-merge__hold--need'}>
+            {reading ? t.progress.reading : mergeTexts.needMore}
+          </p>
         ) : (
-          <p class="fo-ready__count">{readyCount(ready.length)}</p>
+          <button key="action" ref={actionRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" onClick={() => void run(true)}>
+            {actionText}
+          </button>
+        )}
+        <p key="help" class="fo-merge__help" id="fo-merge-help">
+          {mergeTexts.help}
+        </p>
+        <ol key="list" class="fo-merge" aria-label={mergeTexts.listLabel} aria-describedby="fo-merge-help">
+          {mergeRows(true)}
+        </ol>
+        <button key="add" type="button" class="fo-merge__add" onClick={() => openPicker(true)}>
+          <span class="fo-water" aria-hidden="true" />
+          <Icon inner={icons.plus} />
+          <span>{mergeTexts.add}</span>
+        </button>
+        <button key="restart" ref={startOverRef} type="button" class="fo-btn fo-btn--ghost fo-merge__restart" onClick={startOver}>
+          {t.result.startOver}
+        </button>
+      </section>
+    );
+  } else if (reading || m.phase === 'ready' || m.phase === 'processing' || (m.phase === 'done' && !delivered)) {
+    // While Oli works and before the WaterLevel shows (400 ms), the ready card stays: the action that was pressed keeps
+    // the focus, and the empty DropZone never flashes in the slot (DECISOES § 176). F13a (D-27): the reading is this card
+    // too, with the file "Reading…" and, in the place of the action, the line of the same height.
+    const first = one ? (reading ? m.items.find((item) => !item.removed && !item.failure) : ready[0]) : undefined;
+    const cardLabels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
+    panel = (
+      <div class={reading ? 'fo-ready fo-ready--reading' : 'fo-ready'}>
+        {first ? (
+          reading ? (
+            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} icon={icons.pdf} state="waiting" status={t.queue.reading} onCancel={() => removeItem(first)} />
+          ) : (
+            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} icon={icons.pdf} state="done" before={fileSize(first.file.size, lang)} note={pagesLabel(first.info)} />
+          )
+        ) : (
+          <p class="fo-ready__count">{reading ? (m.items.length === 1 ? t.queue.readingOne : fmt(t.queue.readingCount, { count: m.items.length })) : readyCount(ready.length)}</p>
         )}
         <div class="fo-result__actions">
-          {texts.action && (
-            <button ref={actionRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg" onClick={() => void run(true)}>
-              {actionText}
-            </button>
-          )}
-          {mode === 'merge' && (
-            <button type="button" class="fo-btn" onClick={() => openPicker(true)}>
-              <Icon inner={icons.plus} />
-              {(texts.options as { add?: string }).add}
-            </button>
-          )}
-          <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
+          {texts.action &&
+            (reading ? (
+              <p key="hold" ref={holdRef} tabindex={-1} class="fo-merge__hold">
+                {t.progress.reading}
+              </p>
+            ) : (
+              <button key="action" ref={actionRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg" onClick={() => void run(true)}>
+                {actionText}
+              </button>
+            ))}
+          <button key="restart" ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
             {t.result.startOver}
           </button>
         </div>
@@ -988,30 +1222,15 @@ export default function PdfPanel(props: PdfPanelData) {
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
-        <Oli pose={dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave'} class="fo-drop__oli" />
-        <div class="fo-drop__badge" aria-hidden="true">
-          <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : dropState === 'error' ? alertIcon : uploadIcon} />
-        </div>
-        {dropState === 'over' ? (
+        {dropState === 'error' ? (
+          // The error has no round seal (UX-04 A): the sentence with the alert icon, the reason, and the way out right under them.
           <>
-            <p class="fo-drop__title">{t.drop.over}</p>
-            <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
-          </>
-        ) : dropState === 'offline' ? (
-          <>
-            <div role="status" class="fo-drop__message">
-              <p class="fo-drop__title">{t.errors.offline}</p>
-              <p class="fo-drop__help">{t.errors.offlineHelp}</p>
-            </div>
-            <button ref={chooseRef} type="button" class="fo-btn" onClick={() => openPicker()}>
-              {t.errors.chooseAnother}
-            </button>
-          </>
-        ) : dropState === 'error' ? (
-          <>
-            <div role="alert" class="fo-drop__message">
-              <p class="fo-drop__title">{t.errors.title}</p>
-              <p class="fo-drop__help">{m.items.length > 1 || !single ? fmt(t.errors.all, { count: m.items.length }) : reasonOf(single)}</p>
+            <div role="alert" class="fo-drop__error">
+              <p class="fo-drop__error-title">
+                <Icon raw={alertIcon} />
+                {t.errors.title}
+              </p>
+              <p class="fo-drop__why">{m.items.length > 1 || !single ? fmt(t.errors.all, { count: m.items.length }) : reasonOf(single)}</p>
             </div>
             <button ref={chooseRef} type="button" class="fo-btn" onClick={() => openPicker()}>
               {t.errors.chooseAnother}
@@ -1019,31 +1238,52 @@ export default function PdfPanel(props: PdfPanelData) {
           </>
         ) : (
           <>
-            <p class="fo-drop__title fo-desktop-only">{one ? t.drop.titleOne : t.drop.titleMany}</p>
-            <button ref={chooseRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" aria-describedby="fo-drop-help" onClick={() => openPicker()} onFocus={warmOnce}>
-              <Icon inner={icons.pdf} />
-              {one ? t.drop.chooseOne : t.drop.chooseMany}
-            </button>
-            <p class="fo-drop__help" id="fo-drop-help">
-              <span class="fo-desktop-only">
-                {helpBefore}
-                <span class="fo-kbd">{t.drop.pasteKey}</span>
-                {helpAfter}
-              </span>
-              <span class="fo-mobile-only">{texts.note}</span>
-            </p>
+            <div class="fo-drop__badge" aria-hidden="true">
+              <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : uploadIcon} />
+            </div>
+            {dropState === 'over' ? (
+              <>
+                <p class="fo-drop__title">{t.drop.over}</p>
+                <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
+              </>
+            ) : dropState === 'offline' ? (
+              <>
+                <div role="status" class="fo-drop__message">
+                  <p class="fo-drop__title">{t.errors.offline}</p>
+                  <p class="fo-drop__help">{t.errors.offlineHelp}</p>
+                </div>
+                <button ref={chooseRef} type="button" class="fo-btn" onClick={() => openPicker()}>
+                  {t.errors.chooseAnother}
+                </button>
+              </>
+            ) : (
+              <>
+                <p class="fo-drop__title fo-desktop-only">{one ? t.drop.titleOne : t.drop.titleMany}</p>
+                <button ref={chooseRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg fo-btn--block-mobile" aria-describedby="fo-drop-help" onClick={() => openPicker()} onFocus={warmOnce}>
+                  <Icon inner={icons.pdf} />
+                  {one ? t.drop.chooseOne : t.drop.chooseMany}
+                </button>
+                <p class="fo-drop__help" id="fo-drop-help">
+                  <span class="fo-desktop-only">
+                    {helpBefore}
+                    <span class="fo-kbd">{t.drop.pasteKey}</span>
+                    {helpAfter}
+                  </span>
+                  <span class="fo-mobile-only">{texts.note}</span>
+                </p>
+              </>
+            )}
           </>
         )}
       </div>
     );
   }
 
-  // --- the queue: rows of every file; the merge list moves ---------------------------------------------------------
+  // --- the rows: the queue of a batch, and the Merge list ------------------------------------------------------------
 
-  const labels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
   function rowProps(item: Item): FileCardProps {
     const name = nameOf(item);
-    const base = { name, category: 'pdf' as const, labels };
+    const base = { name, category: 'pdf' as const, labels, icon: icons.pdf };
     if (item.status === 'reading') return { ...base, state: 'waiting', status: t.queue.reading, onCancel: () => removeItem(item) };
     if (item.status === 'error' && item.failure && !(item.failure.reason === 'wrong-password' && item.info)) return { ...base, state: 'error', reason: reasonOf(item), onRemove: () => removeItem(item) };
     if (item.status === 'working') return { ...base, state: 'working', status: t.queue.working, progress: 0.5, onCancel: () => removeItem(item) };
@@ -1055,65 +1295,111 @@ export default function PdfPanel(props: PdfPanelData) {
     return { ...base, state: 'done', before: fileSize(item.file.size, lang), note: pagesLabel(item.info) };
   }
 
-  const shown = m.expanded || mode === 'merge' ? m.items : m.items.slice(0, VISIBLE_ROWS);
-  const hidden = m.items.length - shown.length;
-  const queue =
-    m.items.length > 0 && (many || m.items.some((item) => item.failure)) ? (
-      <div class="fo-queue">
-        <div class={mode === 'merge' ? 'fo-filelist fo-merge' : 'fo-filelist'} role="list" aria-label={t.queue.label}>
-          {shown.map((item, position) => (
-            <div
-              role="listitem"
-              key={item.id}
-              class="fo-filelist__row"
-              data-row={item.id}
-              data-grabbed={m.grabbed === item.id ? 'true' : undefined}
-              draggable={mode === 'merge'}
-              onDragStart={() => {
-                dragging.current = position;
-              }}
-              onDragOver={(event) => {
-                if (dragging.current !== null) event.preventDefault();
-              }}
-              onDrop={(event) => {
-                if (dragging.current === null) return;
-                event.preventDefault();
-                moveItem(dragging.current, position);
-                dragging.current = null;
-              }}
-            >
-              {mode === 'merge' && (
-                <button
-                  type="button"
-                  class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__grab"
-                  aria-pressed={m.grabbed === item.id}
-                  aria-label={fmt(t.queue.pickUp, { name: nameOf(item) })}
-                  aria-describedby="fo-merge-help"
-                  onClick={() => toggleGrab(item, position)}
-                  onKeyDown={(event) => onGrabKey(event, item, position)}
-                >
-                  <Icon inner={icons.reorder} class="fo-icon--sm" />
+  /**
+   * The rows of the Merge list (in the rectangle, or under "Order" after the result): the number of the place in a deep
+   * circle, the arrows that can move (an empty place of 48 px where one cannot, D-23), and the remove button (D-21) on
+   * the rows that are read, in the rectangle only. A row being read keeps its × and its arrows (the order can change while
+   * the files are read; DECISOES § 168); a refused row has its reason and its own remove button.
+   */
+  function mergeRows(removable: boolean): JSX.Element[] {
+    const last = m.items.length - 1;
+    let order = 0;
+    const rows = m.items.map((item, position) => {
+      const refused = item.status === 'error' && item.failure !== null;
+      if (!refused) order += 1;
+      const card: FileCardProps = refused
+        ? { name: nameOf(item), category: 'pdf', labels, state: 'error', reason: reasonOf(item), onRemove: () => removeItem(item) }
+        : item.status === 'reading'
+          ? { name: nameOf(item), category: 'pdf', labels, order, state: 'waiting', status: t.queue.reading, onCancel: () => removeItem(item) }
+          : { name: nameOf(item), category: 'pdf', labels, order, state: 'done', before: fileSize(item.file.size, lang), note: pagesLabel(item.info) };
+      return (
+        <li
+          key={item.id}
+          class="fo-merge__row fo-filelist__row"
+          data-row={item.id}
+          data-state={refused ? 'error' : item.status === 'reading' ? 'reading' : undefined}
+          draggable={!refused}
+          onDragStart={(event) => {
+            dragging.current = position;
+            event.dataTransfer?.setData('text/plain', nameOf(item));
+          }}
+          onDragOver={(event) => {
+            if (dragging.current !== null) event.preventDefault();
+          }}
+          onDrop={(event) => {
+            if (dragging.current === null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moveItem(dragging.current, position);
+            dragging.current = null;
+          }}
+          onDragEnd={() => {
+            dragging.current = null;
+          }}
+        >
+          <FileCard {...card} />
+          {!refused && (
+            <span class="fo-merge__moves">
+              {position > 0 ? (
+                <button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--up" aria-label={fmt(t.queue.moveEarlier, { name: nameOf(item) })} onClick={() => moveItem(position, position - 1, '.fo-merge__move--up')}>
+                  <Icon inner={icons.chevron} class="fo-icon--sm" />
                 </button>
+              ) : (
+                <span class="fo-merge__none" aria-hidden="true" />
               )}
+              {position < last ? (
+                <button type="button" class="fo-btn fo-btn--icon fo-merge__move fo-merge__move--down" aria-label={fmt(t.queue.moveLater, { name: nameOf(item) })} onClick={() => moveItem(position, position + 1, '.fo-merge__move--down')}>
+                  <Icon inner={icons.chevron} class="fo-icon--sm" />
+                </button>
+              ) : (
+                <span class="fo-merge__none" aria-hidden="true" />
+              )}
+            </span>
+          )}
+          {removable &&
+            !refused &&
+            (item.status === 'reading' ? (
+              // The place of the remove button while the file is read (its × is in the card): the arrows do not move when it comes.
+              <span class="fo-merge__none" aria-hidden="true" />
+            ) : (
+              <button type="button" class="fo-btn fo-btn--icon fo-merge__remove" aria-label={fmt(t.queue.remove, { name: nameOf(item) })} onClick={() => removeRow(item, position)}>
+                <Icon inner={icons.trash} />
+              </button>
+            ))}
+        </li>
+      );
+    });
+    const undo = m.undo;
+    if (removable && undo) {
+      rows.splice(
+        Math.min(undo.position, rows.length),
+        0,
+        <li key={`out-${undo.item.id}`} class="fo-merge__undo">
+          <span role="status">{undo.said ? fmt(t.queue.out, { name: nameOf(undo.item) }) : ''}</span>
+          <button ref={undoRef} type="button" class="fo-btn fo-btn--ghost" onClick={undoRemove}>
+            {t.queue.undo}
+          </button>
+        </li>,
+      );
+    }
+    return rows;
+  }
+
+  const shown = m.expanded ? m.items : m.items.slice(0, VISIBLE_ROWS);
+  const hidden = m.items.length - shown.length;
+  // The queue of a batch (one row per file), under the band. Merge has its rows in the rectangle; when every file was
+  // refused, the rectangle is the error and the rows with their reasons come here.
+  const queue =
+    // F13a (F-13): a file refused only because its password was wrong is still the file of the card above: no second card.
+    m.items.length > 0 && (merging ? m.phase === 'error' : many || m.items.some((item) => item.failure && !(item.failure.reason === 'wrong-password' && item.info))) ? (
+      <div class="fo-queue">
+        <div class="fo-filelist" role="list" aria-label={t.queue.label}>
+          {shown.map((item) => (
+            <div role="listitem" key={item.id} class="fo-filelist__row" data-row={item.id}>
               <FileCard {...rowProps(item)} />
-              {mode === 'merge' && (
-                <span class="fo-merge__moves">
-                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--up" aria-label={fmt(t.queue.moveEarlier, { name: nameOf(item) })} disabled={position === 0} onClick={() => moveItem(position, position - 1, '.fo-merge__move--up:not([disabled])')}>
-                    <Icon inner={icons.chevron} class="fo-icon--sm" />
-                  </button>
-                  <button type="button" class="fo-btn fo-btn--icon fo-btn--ghost fo-merge__move fo-merge__move--down" aria-label={fmt(t.queue.moveLater, { name: nameOf(item) })} disabled={position === m.items.length - 1} onClick={() => moveItem(position, position + 1, '.fo-merge__move--down:not([disabled])')}>
-                    <Icon inner={icons.chevron} class="fo-icon--sm" />
-                  </button>
-                </span>
-              )}
             </div>
           ))}
         </div>
-        {mode === 'merge' && (
-          <p class="fo-field__help" id="fo-merge-help">
-            {(texts.options as { help?: string }).help}
-          </p>
-        )}
         {hidden > 0 && (
           <button
             type="button"
@@ -1130,49 +1416,126 @@ export default function PdfPanel(props: PdfPanelData) {
       </div>
     ) : null;
 
+  // --- the band under the rectangle (§ F13A-P-06) --------------------------------------------------------------------
+  // Before the result: the options. After it: the chips, then the options folded under "Adjust" (the tools that run by
+  // themselves) or still in view (the ones with an action: a change brings the action back to the rectangle). The room of
+  // the chips is kept from the gesture that asks for the result: the press of the action, and for Merge the whole time the
+  // list is in the rectangle (the band is reserved, empty: the chips and the closed "Order" are there, not seen).
+  const chipsSeen = resultOnScreen && chips.length > 0;
+  const chipsKept = !chipsSeen && chips.length > 0 && ((runMode === 'action' && m.phase === 'processing') || listOnScreen);
+  const orderSeen = merging && resultOnScreen;
+  const orderKept = merging && listOnScreen;
   const failureOfSubject = subject?.failure?.reason ?? null;
+  const options = Options ? (
+    <Options
+      state={state}
+      update={update}
+      texts={texts.options}
+      panel={t}
+      icons={icons}
+      ink={ink}
+      file={subject ? viewOf(subject) : null}
+      files={m.items.filter(usable).map(viewOf)}
+      thumbnails={thumbnails}
+      busy={m.phase === 'processing'}
+      showErrors={m.showErrors}
+      failure={failureOfSubject}
+      announce={say}
+    />
+  ) : null;
+  const summary = tool.summary?.(state, texts.options as never);
+  // The Merge has no options: its band is there at rest too, empty, so the list growing in the rectangle (a gesture: the
+  // files) never moves into view what is under the island (§ F13A-P-02).
+  const band =
+    options || merging || chipsSeen || chipsKept ? (
+      <div class="fo-band" ref={bandRef}>
+        {(chipsSeen || chipsKept) && (
+          <nav class={chipsKept ? 'fo-next fo-next--kept' : 'fo-next'} aria-labelledby="fo-next-label" inert={chipsKept} aria-hidden={chipsKept ? 'true' : undefined}>
+            <span class="fo-next__label" id="fo-next-label">
+              {t.next.label}
+            </span>
+            {chips.map((chip) => (
+              <a key={chip.href} class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`} href={chip.href} onClick={() => track('next_step_click', { ...tracked, target: chip.target })}>
+                <span class="fo-chip__dot" aria-hidden="true">
+                  <Icon inner={chip.icon} />
+                </span>
+                {chip.name}
+                <Icon raw={arrowIcon} />
+              </a>
+            ))}
+          </nav>
+        )}
+        {(orderSeen || orderKept) && (
+          <details
+            class={orderKept ? 'fo-adjust fo-merge__order fo-merge__order--kept' : 'fo-adjust fo-merge__order'}
+            open={orderSeen && m.orderOpen}
+            inert={orderKept}
+            aria-hidden={orderKept ? 'true' : undefined}
+            onToggle={(event) => {
+              m.orderOpen = (event.currentTarget as HTMLDetailsElement).open;
+              render();
+            }}
+          >
+            <summary>
+              <span>{fmt(mergeTexts.order, { count: ready.length })}</span>
+              <Icon inner={icons.down} class="fo-icon--sm" />
+            </summary>
+            {orderSeen && m.orderOpen && (
+              <div class="fo-adjust__body">
+                <p class="fo-field__help" id="fo-order-help">
+                  {mergeTexts.orderHelp}
+                </p>
+                <ol class="fo-merge" aria-label={mergeTexts.listLabel} aria-describedby="fo-order-help">
+                  {mergeRows(false)}
+                </ol>
+              </div>
+            )}
+          </details>
+        )}
+        {options &&
+          (adjustable && resultOnScreen ? (
+            <details
+              class="fo-adjust"
+              open={m.adjustOpen}
+              onToggle={(event) => {
+                m.adjustOpen = (event.currentTarget as HTMLDetailsElement).open;
+                render();
+              }}
+            >
+              <summary>
+                <span>
+                  {t.result.adjust}
+                  {summary && <span class="fo-adjust__now"> · {summary}</span>}
+                </span>
+                <Icon inner={icons.down} class="fo-icon--sm" />
+              </summary>
+              {/* The fields are in the page only while "Adjust" is open: closed, a browser still lays out the content of a
+                  details (content-visibility), and fields nobody sees would count as fields near an ad (§ F13A-P-06). */}
+              {m.adjustOpen && (
+                <div class="fo-adjust__body">
+                  <p class="fo-field__help">{t.result.adjustHelp}</p>
+                  {options}
+                </div>
+              )}
+            </details>
+          ) : (
+            options
+          ))}
+      </div>
+    ) : null;
+
   return (
     <div class="fo-tool-island fo-pdf-island" ref={rootRef}>
-      <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce}>
+      <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce} data-coffee={m.coffeeSoon ? 'soon' : undefined}>
+        {/* One Oli, in the top right corner of the rectangle in every state, looking at the words (UX-04 A). */}
+        <Oli pose={pose} class="fo-slot__oli" />
         {panel}
       </div>
       <p class="fo-sr" role="status">
         {m.announce}
       </p>
-      {Options && (
-        <Options
-          state={state}
-          update={update}
-          texts={texts.options}
-          panel={t}
-          icons={icons}
-          ink={ink}
-          file={subject ? viewOf(subject) : null}
-          files={m.items.filter(usable).map(viewOf)}
-          thumbnails={thumbnails}
-          busy={m.phase === 'processing'}
-          showErrors={m.showErrors}
-          failure={failureOfSubject}
-          announce={say}
-        />
-      )}
+      {band}
       {queue}
-      {m.phase === 'done' && delivered && chips.length > 0 && (
-        <nav class="fo-next" aria-labelledby="fo-next-label">
-          <span class="fo-next__label" id="fo-next-label">
-            {t.next.label}
-          </span>
-          {chips.map((chip) => (
-            <a key={chip.href} class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`} href={chip.href} onClick={() => track('next_step_click', { ...tracked, target: chip.target })}>
-              <span class="fo-chip__dot" aria-hidden="true">
-                <Icon inner={chip.icon} />
-              </span>
-              {chip.name}
-              <Icon raw={arrowIcon} />
-            </a>
-          ))}
-        </nav>
-      )}
       <input
         ref={inputRef}
         type="file"
