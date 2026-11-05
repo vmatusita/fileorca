@@ -11,3 +11,12 @@ O molde da página de ferramenta no celular (360px), antes e depois do arquivo. 
 5. Como usar, tabela de presets, Faq, ToolCards relacionadas, Footer.
 
 No computador (≥1280px) a coluna da ferramenta vai até `tool-max` e a coluna lateral (`rail`) recebe o AdSlot 300×600, que não gruda e começa 150px (`ad-clearance`) abaixo do cabeçalho, porque o cabeçalho, com as bordas do rodapé, passa por cima dela (DECISOES § 409).
+
+## Contraste dos pares novos (F13a)
+
+Os pares novos da faixa de baixo (F13a, DECISOES § 466). Nenhum token novo.
+
+| Par | Claro | Escuro |
+| --- | ---: | ---: |
+| `ink-muted` (o valor atual no "Ajustar", `.fo-adjust__now`) sobre `surface` | 7,01:1 | 7,83:1 |
+| `stroke` (a borda do "Ajustar", 1.4.11) sobre `surface` | 17,28:1 | 4,07:1 |

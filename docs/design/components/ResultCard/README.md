@@ -20,3 +20,13 @@ O momento em que a Oli devolve o arquivo: o mar que subiu (F13a, UX-04 A). Uma f
 - O card tem a altura do retângulo (356px e 340px). Ele não cresce sozinho: o comparador cresce depois do toque no botão, e a linha do café do 3º uso tem a altura guardada desde antes do resultado (F13a, DECISOES § 470).
 - O primeiro AdSlot da ferramenta fica depois do "Como usar", longe do Baixar e da linha do café (F12, DECISOES § 419); nada de anúncio dentro do card nem a menos de `ad-clearance` dele.
 - Sem ganho real: a Oli diz "This file was already optimized" e o Baixar entrega o original, nunca um arquivo maior.
+
+## Contraste dos pares novos (F13a)
+
+Os pares novos do resultado como o mar que subiu (F13a, DECISOES § 464 e § 472). Nenhum token novo.
+
+| Par | Claro | Escuro |
+| --- | ---: | ---: |
+| `on-deep` (a fala, os números, Start over, Before and after) sobre `deep` | 13,16:1 | 13,16:1 |
+| `on-deep-muted` (o antes riscado, a mudança com sinal, as notas) sobre `deep` | 7,71:1 | 7,71:1 |
+| `water` (a faixa da onda, decoração: nada mora nela) sobre `deep` | 10,92:1 | 1,36:1 |

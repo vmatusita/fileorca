@@ -19,3 +19,15 @@ Uma linha por arquivo no lote: miniatura, nome, tamanho antes → depois e a aç
 - **O chão:** num painel em `surface` (o cartão de pronto, a lista do Juntar), `--fo-ground: var(--surface)`, para a dobra recortar com a cor do painel (F-7). Antes, a dobra recortava sempre com `bg`.
 - **No Juntar** a miniatura dá lugar ao número da posição na ordem, num círculo `deep` de 32 px (`.fo-merge__n`, o desenho do ScenarioCompare, `aria-hidden`: a lista `<ol>` já diz "1 de 2"), pela prop `order`. O nome vai até duas linhas antes das reticências (D-8); a linha recusada fica com uma, porque a razão repete o nome. Contraste: `on-deep` sobre `deep` 13,16:1.
 - **A remoção no Juntar** fica fora do card: as setas que andam e a lixeira (`fo-btn--icon` com traço e lábio, "Remove form.pdf") vão ao lado dele, na linha (`.fo-merge__row`). O card de erro mantém a lixeira dele.
+
+## Contraste dos pares novos (F13a)
+
+Os pares novos das peças de PDF e da linha do Juntar (F13a, DECISOES § 479 e § 485). Nenhum token novo.
+
+| Par | Claro | Escuro |
+| --- | ---: | ---: |
+| `ink` (o ícone `pdf` sem miniatura) sobre `coral-soft` | 14,06:1 | 12,77:1 |
+| `on-deep` (o número da ordem) sobre `deep` | 13,16:1 | 13,16:1 |
+| `stroke` (o círculo vazio, o tracejado do "Add more PDFs" e da linha do Desfazer) sobre `surface` | 17,28:1 | 4,07:1 |
+| `on-brand` (o check da página escolhida na grade) sobre `brand` | 5,09:1 | 7,02:1 |
+| `brand-edge` (a borda da página escolhida) sobre `surface` | 17,28:1 | 6,11:1 |

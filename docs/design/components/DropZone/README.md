@@ -28,3 +28,14 @@ O painel-herói de toda ferramenta de arquivo: uma área grande, de traço trace
 - A ajuda diz os formatos aceitos. Lote não tem limite (é promessa do site), então a ajuda não inventa número; se um formato tiver limite real, a ajuda diz qual. Arquivo que não serve é recusado com a fala da Oli, nunca em silêncio.
 - Nada de borda em gradiente animado: o traço tracejado e a água são a assinatura.
 - O anúncio mais próximo fica a `ad-clearance` (150px) da borda do painel e da Oli.
+
+## Contraste dos pares novos (F13a)
+
+Os pares novos da página de ferramenta "um lugar só" e do selo (F13a, DECISOES § 464, § 468 e § 493). Nenhum token novo.
+
+| Par | Claro | Escuro |
+| --- | ---: | ---: |
+| `ink` (as palavras do "over", na superfície da água) sobre `water` | 13,68:1 | 9,71:1 |
+| `ink-muted` (a ajuda do "over") sobre `water` | 5,55:1 | 5,00:1 |
+| `danger` (o ícone `alert` do erro, gráfico) sobre `surface` | 5,62:1 | 6,98:1 |
+| `brand` (o ícone `file-drop` do selo, gráfico) sobre `brand-soft` | 4,34:1 | 4,81:1 |
