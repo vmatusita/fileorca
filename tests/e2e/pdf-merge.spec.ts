@@ -137,16 +137,26 @@ for (const lang of LANGS) {
 async function watchReading(page: Page): Promise<void> {
   await page.evaluate(() => {
     const start = performance.now();
-    const seen: { level: number | null; ready: number | null } = { level: null, ready: null };
+    const seen: { level: number | null; ready: number | null; panel: { rows: number; hold: string; count: string } | null } = { level: null, ready: null, panel: null };
     (window as unknown as { __reading: typeof seen }).__reading = seen;
     const look = () => {
       if (seen.level === null && document.querySelector('#fo-tool-root .fo-level')) seen.level = performance.now() - start;
       if (seen.ready === null && document.querySelector('#fo-tool-root .fo-merge-panel .fo-btn--brand')) seen.ready = performance.now() - start;
+      // The last picture of the reading panel before the WaterLevel takes its place: a test that read it live raced the
+      // 400 ms on a busy machine (the panel was gone by the time the assertion ran).
+      const panel = document.querySelector('#fo-tool-root .fo-merge-panel[data-state="reading"]');
+      if (panel && seen.level === null) {
+        seen.panel = {
+          rows: panel.querySelectorAll('.fo-merge__row').length,
+          hold: panel.querySelector('.fo-merge__hold')?.textContent?.trim() ?? '',
+          count: panel.querySelector('.fo-count')?.textContent?.trim() ?? '',
+        };
+      }
     };
     new MutationObserver(look).observe(document.getElementById('fo-tool-root') as Node, { childList: true, subtree: true, attributes: true });
   });
 }
-const reading = (page: Page) => page.evaluate(() => (window as unknown as { __reading: { level: number | null; ready: number | null } }).__reading);
+const reading = (page: Page) => page.evaluate(() => (window as unknown as { __reading: { level: number | null; ready: number | null; panel: { rows: number; hold: string; count: string } | null } }).__reading);
 
 test('D-27: a reading under 400 ms never shows the WaterLevel; the list shows at once, with Reading and the line in the place of Merge', async ({ page }) => {
   await openTool(page, '/merge-pdf/');
@@ -176,12 +186,14 @@ test('D-27: a reading held past 400 ms (the CPU 6 times slower) shows the WaterL
   }
   await watchReading(page);
   await choosePdfs(page, TWO());
-  await expect(page.locator('#fo-tool-root .fo-merge-panel[data-state="reading"]')).toBeVisible();
-  await expect(page.locator('#fo-tool-root .fo-merge-panel .fo-merge__row')).toHaveCount(2);
-  await expect(page.locator('#fo-tool-root .fo-merge__hold')).toHaveText(PDF_PANEL_TEXTS.en.progress.reading);
-  await expect(page.locator('#fo-tool-root .fo-count')).toHaveText(fmt(PDF_PANEL_TEXTS.en.queue.readingCount, { count: 2 }));
   await expect(page.locator('#fo-tool-root .fo-level')).toBeVisible({ timeout: 10_000 });
   const times = await reading(page);
+  // What the reading showed in its 400 ms, read from the observer of the page (DECISOES § 512).
+  expect(times.panel, 'the reading panel showed before the WaterLevel').toEqual({
+    rows: 2,
+    hold: PDF_PANEL_TEXTS.en.progress.reading,
+    count: fmt(PDF_PANEL_TEXTS.en.queue.readingCount, { count: 2 }),
+  });
   console.log(`[D-27] WaterLevel after ${times.level?.toFixed(0)} ms (${browserName})`);
   expect(times.level).toBeGreaterThanOrEqual(395);
   held.release();
