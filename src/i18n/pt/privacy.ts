@@ -5,7 +5,7 @@ export default {
   description:
     'Como o FileOrca trata seus dados: os arquivos ficam no aparelho, o que Google Analytics, AdSense e Cloudflare processam e seus direitos na LGPD e no GDPR.',
   h1: 'Política de privacidade',
-  updated: 'Última atualização: 4 de novembro de 2026',
+  updated: 'Última atualização: 5 de novembro de 2026',
   intro:
     'Esta página explica o que acontece com seus dados no fileorca.com. Em resumo: seus arquivos nunca saem do seu aparelho, e o tema que você escolhe no cabeçalho fica no seu navegador. Abaixo você vê quem é o responsável, o que é coletado, por quem e quais são os seus direitos.',
   sections: [
@@ -36,6 +36,8 @@ export default {
         'Os seus arquivos e os seus números nunca entram nessa cópia. Ela guarda só arquivos de fileorca.com, em endereços sem a parte depois do ? ou do #, então o que você digita, abre ou salva fica de fora.',
         'Para apagar a cópia, limpe os dados do site fileorca.com nas configurações do navegador, ou desinstale o app do FileOrca, se você o instalou.',
         'No Android, quando você compartilha imagens ou PDFs com o app do FileOrca instalado, eles esperam no seu aparelho até você escolher uma ferramenta, num lugar próprio do armazenamento do navegador, separado da cópia das páginas. Eles são apagados quando a ferramenta os recebe; se você não escolher nenhuma, eles são apagados na próxima vez que você abrir o FileOrca depois de uma hora. Isso funciona porque o navegador guarda a parte offline do site, que ele recebe na sua primeira visita com internet. Se você limpar os dados do site, abra o fileorca.com uma vez antes de compartilhar de novo. Sem essa parte, o Android envia os arquivos compartilhados ao fileorca.com, que os recusa e não os guarda. Quando você escolhe uma ferramenta, a página anota nesta aba qual foi a escolhida, e nada mais.',
+        // F13a · UX-14 (DECISOES § F13A-H-09): o resultado que um chip de próximo passo leva junto.
+        'Quando você toca numa sugestão de próximo passo que leva o resultado junto, como Redimensionar esta imagem, o resultado vai para essa ferramenta pelo mesmo lugar do armazenamento do navegador que os arquivos compartilhados: ele fica no seu aparelho, é apagado quando a ferramenta o recebe e, se não chegar, na próxima vez que você abrir o FileOrca depois de uma hora. A página anota nesta aba qual ferramenta você escolheu e de qual ferramenta o arquivo veio, e nada mais.',
       ],
     },
     {
@@ -135,7 +137,7 @@ export default {
         'Escolha do tema: a chave fo-theme fica no seu navegador até você voltar o tema para Sistema ou limpar os dados do site.',
         'O “Usar só desta vez” do aviso da Oli: a hora em que você o usou fica no seu navegador até você limpar os dados do site.',
         'E-mails: guardados só pelo tempo necessário para responder a você.',
-        'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora.',
+        'Cópia offline: fica no navegador até você limpar os dados do site ou desinstalar o app. Os arquivos compartilhados com o app são apagados quando uma ferramenta os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora. Os resultados levados para a próxima ferramenta são apagados quando ela os recebe, ou na próxima vez que você abrir o FileOrca depois de uma hora.',
       ],
     },
     {

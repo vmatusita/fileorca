@@ -741,8 +741,41 @@ export interface ImagePanelTexts {
     help: string;
   };
   next: { label: string; moreTools: string };
+  /** F13a · UX-14 (DECISOES § F13A-H-01): the result that goes along to the next tool, and its arrival there. */
+  carry: CarryTexts & {
+    /** What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images"). */
+    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf', CarryLabel>;
+  };
   /** Format names as the site writes them. */
   formats: { jpeg: string; png: string; webp: string; heic: string; avif: string; gif: string };
+}
+
+/** F13a · UX-14 (DECISOES § F13A-H-01): a chip that takes the result along says so, for one file and for several ({count}). */
+export interface CarryLabel {
+  one: string;
+  many: string;
+}
+
+/**
+ * F13a · UX-14 (DECISOES § F13A-H-01 to § F13A-H-04): the line under the chips that take the result along, the first note of
+ * the result at the arrival ({tool} is the name of the page it came from, {count} how many files), and the empty box, when
+ * the files did not arrive (the DropZone in the state lost).
+ */
+export interface CarryTexts {
+  /** "Oli takes the image to the next tool. It never leaves your device." */
+  line: string;
+  lineMany: string;
+  /** "Oli brought this image from {tool}." */
+  from: string;
+  fromMany: string;
+  /** "Oli couldn't bring the image here" */
+  lostTitle: string;
+  lostTitleMany: string;
+  /** "Nothing left your device. Choose the image again, or go back to {tool} and download it there." */
+  lostHelp: string;
+  lostHelpMany: string;
+  /** "Back to {tool}" */
+  back: string;
 }
 
 /**
@@ -1018,6 +1051,11 @@ export interface PdfPanelTexts {
     coffee: { text: string; button: string; hide: string; done: string };
   };
   next: { label: string; moreTools: string };
+  /** F13a · UX-14 (DECISOES § F13A-H-01): the PDFs that go along to the next tool, and their arrival there. */
+  carry: CarryTexts & {
+    /** What a chip says when it takes the PDFs along, per destination ("Compress this PDF", "Compress these {count} PDFs"). */
+    chips: Record<'compress-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+  };
 }
 
 /** The panel bits of one PDF tool: the progress name, the Oli's success lines, the action button and its options. */

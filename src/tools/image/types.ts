@@ -20,6 +20,20 @@ export interface ChipData {
   icon: string;
   /** Colour of the chip dot; the home chip has none (brand-soft). */
   category: 'image' | 'pdf' | 'none';
+  /** F13a · UX-14 (DECISOES § F13A-H-01): the chip can take the result along to its tool; only a link without this. */
+  carry?: ChipCarry;
+}
+
+/**
+ * F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): what a chip needs to take the result along: what its tool takes (the
+ * formats of its registry, an image format or "pdf") and whether it takes one file at a time, the rule of takes() in
+ * src/share/logic.ts, and the label it shows when it does (one file, or several with {count}).
+ */
+export interface ChipCarry {
+  accepts: string[];
+  single: boolean;
+  one: string;
+  many: string;
 }
 
 export interface ConverterLink {
@@ -48,6 +62,16 @@ export interface ImagePanelData<O = object> {
   elsewhere?: { format: ImageFormat; chip: ChipData };
   /** Where the coffee line leads: Ko-fi, or the Pix of the support page in Portuguese (F6). */
   coffeeHref: string;
+  /**
+   * F13a · UX-14 (DECISOES § F13A-H-03): the pages that can send their result here with a chip, by id, with their name in the
+   * language: the note of the arrival and the empty box say it, and a choice that names another page is not believed.
+   */
+  origins: Record<string, string>;
+  /**
+   * F13a · UX-14: inner markup of the icons only the result that goes along uses (the info of the empty box, the shield of
+   * the line under the chips), read at build like the icons of the PDF island: a ?raw import would grow the shared chunk.
+   */
+  carryIcons: { info: string; shield: string };
   /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
   initial?: Record<string, unknown>;
 }

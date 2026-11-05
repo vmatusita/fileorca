@@ -10,7 +10,8 @@ import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts
 import { LANGS, QR_ID, ROUTES, moneyHubId, routeById } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import type { PdfToolId } from '../../src/tools/pdf/registry.ts';
-import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
+import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver, generatedJpeg, hydrated, jpegBatch, searchWithoutResult, slowEngine, useBadFile, type TestFile } from './lib/page.ts';
+import { INBOX_CACHE, INBOX_TOOL_KEY, inboxEntryPath } from '../../src/sw/shared.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 import { DEFAULT_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
 
@@ -39,6 +40,9 @@ const TARGETS = [
   '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
   '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
+  // F13a (UX-14, decision 10; DECISOES § F13A-H-11): the line under the chips that take the result along (its room in the
+  // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
+  '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
 ].join(', ');
 
 /**
@@ -314,6 +318,39 @@ for (const viewport of VIEWPORTS) {
     test('with the result and the coffee line', async ({ page }) => {
       await coffeeLineInOneUse(page);
       await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
+    });
+
+    // F13a (UX-14, decision 10; DECISOES § F13A-H-11): a next-step chip sent files here. With them in the inbox the result
+    // comes at once with the note of where they came from; with the note in the tab and no inbox, the empty box. Both are
+    // written in the page as the chip of Resize image writes them, and the page is opened again.
+    const CHOICE = JSON.stringify({ tool: 'compress-image', order: [0], from: 'resize-image' });
+
+    test('with the arrival of a file a chip brought: the note of where it came from', async ({ page }) => {
+      await dismissCookies(page);
+      const photo = (await generatedJpeg(page)).toString('base64');
+      await page.evaluate(
+        async ([base64, cache, entry, key, choice]) => {
+          const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+          const headers = { 'Content-Type': 'image/jpeg', 'X-FileOrca-Name': 'photo.jpg', 'X-FileOrca-Stored': String(Date.now()) };
+          await (await caches.open(cache)).put(new Request(new URL(entry, location.origin).href), new Response(new Blob([bytes], { type: 'image/jpeg' }), { headers }));
+          sessionStorage.setItem(key, choice);
+        },
+        [photo, INBOX_CACHE, inboxEntryPath(0), INBOX_TOOL_KEY, CHOICE] as const,
+      );
+      await page.reload();
+      await hydrated(page);
+      await expect(page.locator('.fo-result__from')).toBeVisible({ timeout: 30_000 });
+      await openOnScreen(page);
+      await measure(page, 'chegada com a nota de origem');
+    });
+
+    test('with the empty box: the note of a chip and no file', async ({ page }) => {
+      await dismissCookies(page);
+      await page.evaluate(([key, choice]) => sessionStorage.setItem(key, choice), [INBOX_TOOL_KEY, CHOICE] as const);
+      await page.reload();
+      await hydrated(page);
+      await expect(page.locator('.fo-drop[data-state="lost"]')).toBeVisible();
+      await measure(page, 'caixa vazia');
     });
 
     // With the dialog open the page behind it is untouched. The dialog itself sits 24px from the

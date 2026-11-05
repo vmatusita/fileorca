@@ -5,7 +5,7 @@ export default {
   description:
     'Cómo trata FileOrca tus datos: tus archivos no salen del dispositivo, qué procesan Google Analytics, AdSense y Cloudflare, y tus derechos (LGPD y RGPD).',
   h1: 'Política de privacidad',
-  updated: 'Última actualización: 4 de noviembre de 2026',
+  updated: 'Última actualización: 5 de noviembre de 2026',
   intro:
     'Esta página explica qué pasa con tus datos en fileorca.com. En resumen: tus archivos nunca salen de tu dispositivo, y el tema que eliges en el encabezado se queda en tu navegador. Más abajo ves quién es el responsable, qué se recopila, quién lo recopila y cuáles son tus derechos.',
   sections: [
@@ -36,6 +36,8 @@ export default {
         'Tus archivos y tus números nunca entran en esa copia. Solo guarda archivos de fileorca.com, en direcciones sin la parte después del ? o del #, así que lo que escribes, abres o guardas queda fuera.',
         'Para borrar la copia, borra los datos del sitio fileorca.com en la configuración del navegador, o desinstala la app de FileOrca si la instalaste.',
         'En Android, cuando compartes imágenes o PDF con la app de FileOrca instalada, esperan en tu dispositivo hasta que eliges una herramienta, en un lugar propio del almacenamiento del navegador, aparte de la copia de las páginas. Se borran cuando la herramienta los recibe; si no eliges ninguna, se borran la próxima vez que abras FileOrca después de una hora. Esto funciona porque el navegador guarda la parte del sitio para usarlo sin conexión, que recibe en tu primera visita con internet. Si borras los datos del sitio, abre fileorca.com una vez antes de volver a compartir. Sin esa parte, Android envía los archivos compartidos a fileorca.com, que los rechaza y no los guarda. Cuando eliges una herramienta, la página anota en esta pestaña cuál elegiste, y nada más.',
+        // F13a · UX-14 (DECISOES § F13A-H-09): el resultado que un chip de siguiente paso lleva consigo.
+        'Cuando tocas una sugerencia de siguiente paso que lleva tu resultado, como Redimensionar esta imagen, el resultado va a esa herramienta por el mismo lugar del almacenamiento del navegador que los archivos compartidos: se queda en tu dispositivo, se borra cuando la herramienta lo recibe y, si no llega, la próxima vez que abras FileOrca después de una hora. La página anota en esta pestaña qué herramienta elegiste y de qué herramienta vino el archivo, y nada más.',
       ],
     },
     {
@@ -135,7 +137,7 @@ export default {
         'Elección del tema: la clave fo-theme se queda en tu navegador hasta que vuelvas el tema a Sistema o borres los datos del sitio.',
         '“Seguir solo esta vez” del aviso de Oli: la hora en que lo usaste se queda en tu navegador hasta que borres los datos del sitio.',
         'Correos electrónicos: se conservan solo el tiempo necesario para responderte.',
-        'Copia sin conexión: se queda en el navegador hasta que borres los datos del sitio o desinstales la app. Los archivos compartidos con la app se borran cuando una herramienta los recibe, o la próxima vez que abras FileOrca después de una hora.',
+        'Copia sin conexión: se queda en el navegador hasta que borres los datos del sitio o desinstales la app. Los archivos compartidos con la app se borran cuando una herramienta los recibe, o la próxima vez que abras FileOrca después de una hora. Los resultados llevados a la siguiente herramienta se borran cuando esa herramienta los recibe, o la próxima vez que abras FileOrca después de una hora.',
       ],
     },
     {
