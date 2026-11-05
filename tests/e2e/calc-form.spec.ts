@@ -48,8 +48,19 @@ async function menuProblems(page: Page): Promise<string[]> {
       const context = document.createElement('canvas').getContext('2d');
       if (!context) return ['sem canvas'];
       context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      // The native arrow takes about 26 px at the right of the text (measured in both browsers).
-      const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 26;
+      // F13b (F7 obs 3; DECISOES § C-7): the native arrow is measured in this browser, not supposed (it was 26 px): a menu of
+      // the same style with one option, as wide as it asks to be, less that option's text, paddings and borders.
+      const probe = select.cloneNode(false) as HTMLSelectElement;
+      probe.removeAttribute('id');
+      probe.style.cssText = 'width: auto; min-width: 0; flex: none; position: absolute; visibility: hidden;';
+      const sample = document.createElement('option');
+      sample.text = 'MMMM';
+      probe.append(sample);
+      select.parentElement?.append(probe);
+      const own = getComputedStyle(probe);
+      const arrow = probe.getBoundingClientRect().width - context.measureText(sample.text).width - parseFloat(own.paddingLeft) - parseFloat(own.paddingRight) - parseFloat(own.borderLeftWidth) - parseFloat(own.borderRightWidth);
+      probe.remove();
+      const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - arrow;
       return [...select.options].flatMap((option) => {
         const need = context.measureText(option.text).width;
         return need > room ? [`#${select.id} "${option.text}" pede ${Math.ceil(need)} px e tem ${Math.floor(room)}`] : [];

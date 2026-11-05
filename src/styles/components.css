@@ -835,12 +835,20 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The "example" tag centred in the label row: on its baseline it made the row 21px, one more than its neighbour's. */
 /* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
 .fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
+/* F13b (Idiomas E-2, F7 obs 3; DECISOES § C-7): below 400 px the "example" tag is compact, 6 px from the label, 4 px of side
+   padding and less letter-spacing (about 12 px less): "Tasa nueva" with its tag fits half a row with the fallback font too. */
+@media (max-width: 399px) {
+  .fo-calc__fields .fo-field__label { column-gap: 6px; }
+  .fo-calc__fields .fo-tag { padding: 0 var(--space-1); letter-spacing: 0.02em; }
+}
 .fo-calc__fields > .fo-field--half { grid-column: auto; }
 /* Below 360 px a menu or a date of a home or health calculator takes the whole row: half a row cut "Last period" and the
    year of the day (review F7, d-3, f-4 and f-6; DECISOES § 277). The money pages keep their half rows there, the down
    payment with its unit menu among them (second pass, s-1; § 282). The result above the fold is measured at 360 px (§ 124). */
 @media (max-width: 359px) {
   .fo-calc--home .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
+  /* F13b (F7 obs 3; DECISOES § C-7): a half field marked wide takes the whole row (the Paint's door and window areas). */
+  .fo-calc__fields > .fo-field--half.fo-field--wide { grid-column: 1 / -1; }
 }
 /* F13b (D-46, G-19; DECISOES § C-4): the H2 of the island are in Fredoka 24/30, like every H2 of the site. */
 .fo-calc__moreheading { margin: var(--space-2) 0 0; font: 600 24px/30px var(--fo-font-display); }
@@ -1042,6 +1050,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
 .fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
 @media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
+/* F13b (F7 obs 2; DECISOES § C-7): the dates of the ovulation in fixed columns, the range at 30 % and each date at 35 %:
+   at 360 px a date takes one line and a range two, and at 320 px a date breaks only after its comma (its month and day are
+   glued by a no-break space), with no sideways scroll. */
+.fo-amort--even { table-layout: fixed; }
+.fo-amort--even thead th:first-child { width: 30%; }
 .fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
 .fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }

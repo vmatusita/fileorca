@@ -5,7 +5,7 @@
 // never cheers a health result (the island's `cheer` is off on these pages).
 import { fmt } from '../../../i18n/format.ts';
 import { formatScaled, type NumberLang } from '../../../calc/parse.ts';
-import { longDate } from '../../../i18n/dates.ts';
+import { longDate, tableDate, tableRange } from '../../../i18n/dates.ts';
 import {
   bmi,
   bodyFat,
@@ -167,11 +167,18 @@ export const ovulationDef: CalcDef<OvulationInput, OvulationResult> = {
       placard: { n: first ? day(first.ovulation) : '', l: text(v, 'label') },
       open: true,
       // Three columns, so the table fits a 320 px phone: a cycle starts on the previous row's next period, and the first
-      // one on the day typed in (review F7, f-2; DECISOES § 275).
+      // one on the day typed in (review F7, f-2; DECISOES § 275). F13b (F7 obs 2; DECISOES § C-7): fixed columns, and the
+      // screen writes the short dates ("Oct 26 to 31, 2026"), which never break between the month and the day; the CSV and
+      // the PDF keep the long ones.
       table: () => ({
         caption: text(v, 'caption'),
         head: [text(v, 'colWindow'), text(v, 'colOvulation'), text(v, 'colNext')],
-        rows: r.cycles.map((cycle) => [plain(window(cycle)), plain(day(cycle.ovulation)), plain(day(cycle.nextPeriod))]),
+        rows: r.cycles.map((cycle) => [
+          { text: window(cycle), short: tableRange(cycle.fertileStart, cycle.ovulation, lang, text(v, 'rangeTo')) },
+          { text: day(cycle.ovulation), short: tableDate(cycle.ovulation, lang) },
+          { text: day(cycle.nextPeriod), short: tableDate(cycle.nextPeriod, lang) },
+        ]),
+        even: true,
       }),
       summary: first
         ? [

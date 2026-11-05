@@ -57,6 +57,7 @@ function NumberInput(props: Props & {
       lang={data.lang as NumberLang}
       label={label ?? texts.label}
       help={texts.help}
+      desc={texts.desc}
       error={texts.error}
       over={problems[keyName] === 'over' ? texts.over : undefined}
       hint={data.t.decimalHint}
@@ -64,6 +65,7 @@ function NumberInput(props: Props & {
       suffix={texts.suffix}
       tag={spec.example ? data.t.example : undefined}
       half={spec.half}
+      wide={spec.wide}
       report={props.report}
       flagged={props.flagged === keyName}
     />
@@ -266,6 +268,8 @@ export function Field(props: Props & { spec: FieldSpec }) {
           value={String(values[spec.key])}
           choices={spec.options.map((option) => ({ value: option, label: labels[option] ?? option }))}
           onChange={(value) => set({ ...values, [spec.key]: value })}
+          // F13b (F7 f-13; DECISOES § C-7): what each option changes, under the rail and in its description.
+          {...(texts?.help ? { note: texts.help, noteId: `${fieldId(spec.key)}-note` } : {})}
         />
       );
     }

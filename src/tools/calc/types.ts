@@ -18,6 +18,8 @@ interface FieldBase {
   main?: boolean;
   /** Half a row on a phone, next to the other half (two short fields side by side). */
   half?: boolean;
+  /** Below 360 px a half field whose label and tag do not fit half a row takes the whole row (F13b, F7 obs 3; § C-7). */
+  wide?: boolean;
 }
 
 /**
@@ -95,7 +97,7 @@ export interface Scenario {
  * A cell of the schedule: money (cents), a measure (a whole number of 10^-decimals, F7), or plain text. The CSV writes cents
  * as 1896.20 and a measure with its decimals, never with a thousands separator.
  */
-export type Cell = { cents: number } | { text: string } | { scaled: number; decimals: number };
+export type Cell = { cents: number } | { text: string; short?: string } | { scaled: number; decimals: number };
 
 export interface Table {
   caption: string;
@@ -103,6 +105,8 @@ export interface Table {
   rows: Cell[][];
   /** Rows grouped by loan year: the year rows are buttons, the first year starts open. */
   groups?: { label: string; end: Cell; from: number; to: number }[];
+  /** Fixed columns, the first at 30 % (the dates of the ovulation; F13b, F7 obs 2). */
+  even?: boolean;
   /** The column of the balance, where a year row shows the balance at its end; the last one when not given (DECISOES § 256). */
   endColumn?: number;
 }
@@ -146,6 +150,8 @@ export interface CalcView {
 export interface FieldTexts {
   label: string;
   help?: string;
+  /** Said to a screen reader only, as the field's description, when the short label leaves out a word (F13b, Idiomas R2-03). */
+  desc?: string;
   /** The range in words, shown for any value outside it: "Enter a rate from 0 to 40%." */
   error: string;
   /** Shown when the value passes the field it depends on: "Can't be more than the home price." */

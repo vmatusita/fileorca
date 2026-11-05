@@ -37,6 +37,8 @@ export interface CalcFieldProps {
   lang: NumberLang;
   label: string;
   help?: string | undefined;
+  /** A description for the screen reader only: the words a short label leaves out ("Tasa a 15 años"; Idiomas R2-03). */
+  desc?: string | undefined;
   /** The range in words. */
   error: string;
   /** The value passes the field it depends on: this text is shown while it does. */
@@ -48,6 +50,8 @@ export interface CalcFieldProps {
   /** The "example" tag of a typed rate. */
   tag?: string | undefined;
   half?: boolean | undefined;
+  /** Takes the whole row below 360 px (FieldBase.wide). */
+  wide?: boolean | undefined;
   /** Replaces the suffix: the unit menu of the down payment. */
   unit?: ComponentChildren;
   /** Tells the calculator the error the field shows, or null: the result on screen is then stale (§ 116) and the card says it. */
@@ -57,7 +61,7 @@ export interface CalcFieldProps {
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, error, over, hint, prefix, suffix, tag, half, unit, report, flagged = false } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
@@ -98,13 +102,19 @@ export default function CalcField(props: CalcFieldProps) {
   const prefixId = `${id}-prefix`;
   const suffixId = `${id}-unit`;
   const affix = !unit && suffix ? suffixId : null;
-  const described = [prefix ? prefixId : null, affix, marked ? HERO_ERROR_ID : null, help ? helpId : null].filter(Boolean).join(' ');
+  const descId = `${id}-desc`;
+  const described = [desc ? descId : null, prefix ? prefixId : null, affix, marked ? HERO_ERROR_ID : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
-    <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={marked ? 'error' : undefined}>
+    <div class={half ? (wide ? 'fo-field fo-field--half fo-field--wide' : 'fo-field fo-field--half') : 'fo-field'} data-state={marked ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
         <span>{label}</span>
         {tag && <span class="fo-tag">{tag}</span>}
       </label>
+      {desc && (
+        <span class="fo-sr" id={descId}>
+          {desc}
+        </span>
+      )}
       <div class="fo-field__body">
         <div class="fo-input">
           {prefix && (

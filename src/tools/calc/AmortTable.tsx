@@ -54,7 +54,7 @@ export default function AmortTable({ table, cell, chevron, labelledBy }: { table
     : table.rows.map((cells, index) => row(cells, index));
   return (
     <div class="fo-amort-wrap" tabIndex={0} role="region" aria-labelledby={labelledBy}>
-      <table class={table.groups ? 'fo-amort' : 'fo-amort fo-amort--flat'}>
+      <table class={table.groups ? 'fo-amort' : table.even ? 'fo-amort fo-amort--flat fo-amort--even' : 'fo-amort fo-amort--flat'}>
         <caption class="fo-sr">{table.caption}</caption>
         <thead>
           <tr>

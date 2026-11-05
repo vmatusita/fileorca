@@ -11,14 +11,16 @@ import Icon from '../../icons/Icon.tsx';
 import type { NumberLang } from '../../calc/parse.ts';
 import AmortTable from './AmortTable.tsx';
 import { cellText } from './view.ts';
-import type { CalcPanelData, CalcView } from './types.ts';
+import type { CalcPanelData, CalcView, Cell } from './types.ts';
 
 export const SCHEDULE_HEADING_ID = 'fo-schedule-heading';
 
 export default function CalcSchedule({ data, view }: { data: CalcPanelData; view: CalcView }) {
   const [open, setOpen] = useState(false);
   const heading = data.texts.view['scheduleHeading'] ?? data.t.scheduleHeading;
-  const cell = cellText(data.lang as NumberLang);
+  // A text cell may carry a shorter form for the screen (the dates of the ovulation; the CSV and the PDF keep the long one).
+  const long = cellText(data.lang as NumberLang);
+  const cell = (value: Cell) => ('text' in value && value.short !== undefined ? value.short : long(value));
   if (view.open) {
     return (
       <section id="fo-calc-schedule" class="fo-calc-schedule fo-calc__schedule">

@@ -41,6 +41,23 @@ interface Result {
   hero: string;
   sentence: string;
   rows: Cell[][];
+  /** The rows the screen writes, when they are shorter than the CSV's (the ovulation's dates; F13b, DECISOES § C-7). */
+  screen?: Cell[][];
+}
+
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** A day as the narrow table writes it, by hand: "2027-06-14" → "Jun 14, 2027", the month glued to its day. */
+function shortDay(iso: string): string {
+  const [year, month, day] = iso.split('-');
+  return `${SHORT_MONTHS[Number(month) - 1]} ${Number(day)}, ${year}`;
+}
+/** Two days as one range of the narrow table: the year once, the month once when both are in it. */
+function shortRange(from: string, to: string): string {
+  const [y1, m1, d1] = from.split('-').map(Number);
+  const [y2, m2, d2] = to.split('-').map(Number);
+  if (y1 !== y2) return `${shortDay(from)} to ${shortDay(to)}`;
+  const start = `${SHORT_MONTHS[(m1 ?? 1) - 1]} ${d1}`;
+  return m1 === m2 ? `${start} to ${d2}, ${y1}` : `${start} to ${SHORT_MONTHS[(m2 ?? 1) - 1]} ${d2}, ${y1}`;
 }
 
 interface Health<I, E> {
@@ -143,6 +160,8 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
         longDay(cycle.ovulation),
         longDay(cycle.nextPeriod),
       ]),
+      // F13b (F7 obs 2; DECISOES § C-7): the screen writes the short dates; the CSV keeps the long ones.
+      screen: expected.cycles.map((cycle) => [shortRange(cycle.fertileStart, cycle.ovulation), shortDay(cycle.ovulation), shortDay(cycle.nextPeriod)]),
     };
   },
 };
@@ -243,9 +262,9 @@ async function today(page: Page, day: string): Promise<void> {
 }
 
 async function expectResult<I, E>(page: Page, calc: Health<I, E>, input: I, expected: E): Promise<void> {
-  const { hero, sentence, rows } = calc.result(input, expected);
+  const { hero, sentence, rows, screen } = calc.result(input, expected);
   await expectHero(page, hero, sentence);
-  await expectTable(page, calc.head, rows);
+  await expectTable(page, calc.head, screen ?? rows);
   await expectCsv(page, calc.id, calc.head, rows);
 }
 
@@ -304,7 +323,7 @@ test('the ovulation table across a year, a leap day and 2100: six cycles each, a
     const kase = oracleCase<OvulationInput, OvulationResult>('ovulation-calculator', id);
     await ovulation.fill(page, kase.input);
     await expectResult(page, ovulation, kase.input, kase.expected);
-    if (id === 'grid-022') await expect(page.locator('#fo-calc-schedule tbody tr').first()).toContainText('February 29, 2028 to March 5, 2028');
+    if (id === 'grid-022') await expect(page.locator('#fo-calc-schedule tbody tr').first()).toContainText('Feb 29 to Mar 5, 2028');
   }
   // The oracle on the days the fixture has no case for: December 25, 2027 and February 29, 2028 typed.
   for (const { input, expected } of ORACLE_CYCLES) {

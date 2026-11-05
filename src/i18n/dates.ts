@@ -51,3 +51,27 @@ export function mediumDate(iso: string, lang: Lang): string {
   if (lang === 'en') return `${name} ${day}, ${year}`;
   return lang === 'pt' ? `${day} de ${name} de ${year}` : `${day} ${name} ${year}`;
 }
+
+// F13b (F7 obs 2; DECISOES § C-7): the dates of a narrow table on the screen (the ovulation's), by hand as above. The month is
+// abbreviated and kept with its day by a no-break space, so a narrow column breaks a date only after its comma ("Nov 1," and
+// "2026"), never inside "Nov 1". A range says its year once: "Oct 26 to 31, 2026", "Oct 26 to Nov 1, 2026", "Dec 30, 2026 to
+// Jan 4, 2027", what Intl.DateTimeFormat#formatRange gives in Node with the month short, with the word of the page for the
+// dash (the test compares them). The CSV and the PDF keep the long date.
+const NBSP = ' ';
+
+/** A day of a narrow table: "Oct 31, 2026" (the medium date with the month glued to its day). */
+export function tableDate(iso: string, lang: Lang): string {
+  const [year, month, day] = isoParts(iso);
+  const name = SHORT_MONTHS[lang][month - 1] ?? '';
+  if (lang === 'en') return `${name}${NBSP}${day}, ${year}`;
+  return lang === 'pt' ? `${day}${NBSP}de ${name} de ${year}` : `${day}${NBSP}${name} ${year}`;
+}
+
+/** Two days of a narrow table as one range, with `to` between them ("to", "a"): the year once when both are in it. */
+export function tableRange(from: string, to: string, lang: Lang, join: string): string {
+  const [y1, m1, d1] = isoParts(from);
+  const [y2, m2, d2] = isoParts(to);
+  if (lang !== 'en' || y1 !== y2) return `${tableDate(from, lang)} ${join} ${tableDate(to, lang)}`;
+  const name = (month: number) => SHORT_MONTHS.en[month - 1] ?? '';
+  return m1 === m2 ? `${name(m1)}${NBSP}${d1} ${join} ${d2}, ${y1}` : `${name(m1)}${NBSP}${d1} ${join} ${name(m2)}${NBSP}${d2}, ${y1}`;
+}
