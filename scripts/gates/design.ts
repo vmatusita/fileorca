@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse } from 'node-html-parser';
 import { DIST, Problems, listFiles, requireDist } from '../lib/dist.ts';
-import { checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkThemeVars } from '../lib/design-checks.ts';
+import { checkArrows, checkFonts, checkLoops, checkMotion, checkSingleStylesheet, checkSprite, checkThemeVars } from '../lib/design-checks.ts';
 import { tokenNames } from '../lib/theme.ts';
 import { fileGuideVoicePages, newVoicePages, pageVoiceProblems, pdfVoicePages, type VoicePage } from '../lib/voice-pages.ts';
 import { languagesOf, routeById } from '../../src/i18n/routes.ts';
@@ -136,12 +136,14 @@ for (const [href, users] of sheets) {
   const css = readFileSync(join(DIST, decodeURI(href.split('?')[0] ?? href)), 'utf8');
   for (const problem of checkThemeVars(css, names)) themeProblems.add(`${href}: ${problem}`);
   for (const problem of checkMotion(css)) motionProblems.add(`${href}: ${problem}`);
+  // F13a · a Oli por estado (DECISOES § 460): "infinite" only on the selectors of the progress.
+  for (const problem of checkLoops(css)) motionProblems.add(`${href}: ${problem}`);
   const usingPages = pages.filter((page) => users.includes(page.path));
   // Page messages already start with the page path; the ones about the CSS or the files get the CSS name.
   for (const problem of checkFonts({ css, pages: usingPages, woff2Files })) fontProblems.add(problem.startsWith('/') ? problem : `${href}: ${problem}`);
 }
 report('variáveis do tema', themeProblems, `${sheets.size} CSS, todo --color-*, --radius-*, --shadow-* e --font-* é token`);
-report('movimento', motionProblems, `${sheets.size} CSS, @keyframes e transition só com transform, opacity, translate, scale e rotate`);
+report('movimento', motionProblems, `${sheets.size} CSS, @keyframes e transition só com transform, opacity, translate, scale e rotate, e laço sem fim só no progresso`);
 report('fontes', fontProblems, `${woff2Files.length} .woff2 (Fredoka e Figtree latinas), preload só da Fredoka com a URL do @font-face`);
 
 if (failures.length) {

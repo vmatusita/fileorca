@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FORBIDDEN_WORDS, FORBIDDEN_WORDS_BY_LANG, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
+import { FORBIDDEN_WORDS, FORBIDDEN_WORDS_BY_LANG, LOOP_SELECTORS, OLI_POSES, TOOL_NAME, checkArrows, checkFonts, checkLoops, checkMotion, checkSingleStylesheet, checkSprite, checkTextColors, checkThemeVars, checkVoice } from '../../scripts/lib/design-checks.ts';
 import { tokenNames } from '../../scripts/lib/theme.ts';
 import { F6_ES_CALC_IDS, fileGuideVoicePages, newVoicePages, pageVoiceProblems, pdfVoicePages } from '../../scripts/lib/voice-pages.ts';
 import { LANGS, QR_ID, routeById } from '../../src/i18n/routes.ts';
@@ -132,6 +132,46 @@ describe('movimento: só transform, opacity, translate, scale e rotate', () => {
   it('applies to the site CSS', () => {
     expect(siteStyles.length).toBeGreaterThan(0);
     for (const { file, css } of siteStyles) expect(checkMotion(css), file).toEqual([]);
+  });
+});
+
+// F13a · a Oli por estado (UX-10; DECISOES § 460): "infinite" only on the closed list of the progress selectors.
+describe('laço só no progresso', () => {
+  it('accepts the progress loops and every finite animation', () => {
+    const good = [
+      '[data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }',
+      ".fo-water--moving::before, .fo-drop[data-state='over'] .fo-water::before { animation: fo-wave var(--dur-wave) linear infinite; }",
+      '.fo-spin { width: 18px; animation: fo-spin 700ms linear infinite; }',
+      '[data-oli="wave"] > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1; }',
+      '.oli-steam path { animation: fo-steam calc(var(--dur-cheer) * 3) var(--ease-in-out) 1.4 backwards; }',
+      '[data-oli=buoy] > svg { animation-iteration-count: 4; }',
+      '.fo-infinite-scroll { animation: fo-pop 1s; }',
+    ];
+    for (const css of good) expect(checkLoops(css), css).toEqual([]);
+    expect(LOOP_SELECTORS).toHaveLength(4);
+  });
+
+  it('reports a loop outside the progress, once per selector of the rule', () => {
+    // The two loops of the CSS of the starting point (14341bc, src/styles/components.css:14 and the steam before the F12).
+    const before = [
+      '[data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }',
+      '.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) infinite; }',
+      '.a, [data-oli="swim"] > svg { animation-iteration-count: INFINITE !important; }',
+      '@media (min-width: 768px) { .fo-drop__oli > svg { -webkit-animation: fo-x 1s infinite; } }',
+    ];
+    for (const css of before) {
+      const problems = checkLoops(css);
+      expect(problems, css).toHaveLength(1);
+      expect(problems[0], css).toMatch(/infinite/);
+    }
+    expect(checkLoops('.a, .b { animation: fo-x 1s infinite, fo-y 1s 1; }')).toHaveLength(2);
+  });
+
+  it('fails the components.css of the starting point and passes the site CSS', () => {
+    // The wave of the starting point looped with no end (F3 d-02): the excerpt below is its line 14, as it was.
+    expect(checkLoops('[data-oli] > svg { display: block; } [data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }')).toHaveLength(1);
+    expect(siteStyles.length).toBeGreaterThan(0);
+    for (const { file, css } of siteStyles) expect(checkLoops(css), file).toEqual([]);
   });
 });
 

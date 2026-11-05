@@ -11,20 +11,34 @@
 /* ---------- Oli (sprite symbols through <use>, § 43 and § 44) ---------- */
 [data-oli] { flex: none; }
 [data-oli] > svg { display: block; width: 100%; height: 100%; overflow: visible; }
-[data-oli="wave"] > svg { animation: fo-float var(--dur-float) var(--ease-in-out) infinite alternate; }
-[data-oli="gulp"] > svg { scale: 1.05; }
-[data-oli="swim"] > svg { animation: fo-bob 1600ms var(--ease-in-out) infinite alternate; }
-/* F12 · o café (DECISOES § 439): the steam of the coffee pose rises twice and rests, visible and still, by 4.8 s
-   (WCAG 2.2.2; it looped every 1.8 s). The first wisp rises from 0 to 3.6 s and settles by 4.2 s; the second, 0.6 s
-   behind, settles by 4.8 s. "backwards" keeps the second one clear through its delay. The selector hangs on no section:
-   inside a <use> the animation targets the element of the <symbol> (docs/claude/design-e-oli.md). */
-.oli-steam path { animation: fo-steam 1800ms var(--ease-in-out) 0ms 2 backwards, fo-steam-rest 600ms var(--ease-out) 3600ms 1 forwards; }
-.oli-steam path:last-child { animation-delay: 600ms, 4200ms; }
-@keyframes fo-float { from { transform: translateY(0) rotate(0); } to { transform: translateY(-6px) rotate(-2deg); } }
-@keyframes fo-bob { to { transform: translateY(-4px) rotate(-3deg); } }
+/* F13a · a Oli por estado (UX-10; DECISOES § 460): one short move per state, only transform and opacity, the time and the
+   curve by token name. A move that starts on its own ends in under 5 s and leaves her still on the drawn pose, the frame
+   reduced motion shows (WCAG 2.2.2); only the swim loops, because it is the progress and lasts the work. The move goes on
+   the <svg> child, never on the [data-oli] box (CLS 0), and never toward an ad (the 150px are checked with the box inflated
+   by 12px). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
+   second animation of the list, so the 3 s one never starts again. Reduced motion: global.css stops everything. */
+[data-oli="wave"] > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1; }
+:is(.fo-drop:is(:hover, :focus-within) [data-oli="wave"], .fo-slot:has(.fo-drop:is(:hover, :focus-within)) > [data-oli="wave"]) > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1, fo-nod var(--dur-cheer) var(--ease-spring) 1; }
+[data-oli="gulp"] > svg { scale: 1.06; translate: 0 4px; }
+[data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-float) / 2) var(--ease-in-out) infinite alternate; }
+[data-oli="oops"] > svg { animation: fo-oops var(--dur-cheer) var(--ease-spring) 1; }
+[data-oli="buoy"] > svg { animation: fo-buoy calc(var(--dur-float) / 4) var(--ease-in-out) 4 alternate; }
+[data-oli="lost"] > svg { animation: fo-lost var(--dur-float) var(--ease-in-out) 1; }
+[data-oli="peek"] > svg { animation: fo-peek var(--dur-base) var(--ease-out) 1 backwards; }
+/* The coffee steam (it rested by 4.8 s since the F12, § 439) rises 1.4 cycles and ends on the 40 % frame, visible and
+   still, the steam as drawn: 3.12 s with the second wisp 0.6 s behind ("backwards" keeps it clear through its delay). The
+   selector hangs on no section: inside a <use> the animation targets the element of the <symbol>. */
+.oli-steam path { animation: fo-steam calc(var(--dur-cheer) * 3) var(--ease-in-out) 1.4 backwards; }
+.oli-steam path:last-child { animation-delay: var(--dur-cheer); }
+@keyframes fo-hello { 0%, 100% { transform: none; } 20% { transform: translateY(-6px) rotate(-4deg); } 40% { transform: translateY(-6px) rotate(1deg); } 60% { transform: translateY(-5px) rotate(-3deg); } 80% { transform: translateY(-2px) rotate(0deg); } }
+@keyframes fo-nod { 50% { transform: translateY(-4px) rotate(-5deg); } }
+@keyframes fo-bob { to { transform: translate(-3px, -4px) rotate(-3deg); } }
+@keyframes fo-oops { 30% { transform: translateX(4px) rotate(4deg); } }
+@keyframes fo-buoy { to { transform: translateY(-3px) rotate(2deg); } }
+@keyframes fo-lost { 0%, 100% { transform: none; } 30% { transform: translateX(-4px) rotate(-6deg); } 65% { transform: translateX(2px) rotate(3deg); } }
+@keyframes fo-peek { from { opacity: 0; transform: translateY(8px); } }
 @keyframes fo-cheer { 0% { transform: translateY(12px) scale(0.9); } 55% { transform: translateY(-10px) rotate(-6deg); } 100% { transform: none; } }
-@keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-5px); } }
-@keyframes fo-steam-rest { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes fo-steam { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-5px); } }
 
 /* ---------- Dog-ear: the folded file corner (Oli's fin tip) and the category colours ---------- */
 .fo-dogear { position: relative; border-top-right-radius: 0 !important; }
@@ -257,7 +271,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-drop__message, .fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
 /* The Oli sits on the top edge, to the right of the H1 (ToolPage mold), box sizes of § 19. */
 .fo-drop__oli { position: absolute; top: -86px; right: 0; width: 88px; height: 88px; pointer-events: none; }
-.fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring); }
+.fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring), translate var(--dur-quick) var(--ease-spring); }
 @media (min-width: 768px) {
   .fo-drop, .fo-level { min-height: 340px; }
   .fo-drop__oli { width: 112px; height: 112px; top: -76px; right: var(--space-4); }

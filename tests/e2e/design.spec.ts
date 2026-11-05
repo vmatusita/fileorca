@@ -296,18 +296,61 @@ test.describe('prefers-reduced-motion: reduce', () => {
       expect(await animations(page)).toEqual([]);
     });
   }
+
+  // F13a · a Oli por estado (UX-10; DECISOES § 460): the other pages where a move starts on its own stay still too.
+  for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/']) {
+    test(`${path}: nothing moves`, async ({ page }) => {
+      const response = await page.goto(path);
+      expect(response?.status(), path).toBe(200);
+      await settle(page);
+      expect(await animations(page)).toEqual([]);
+    });
+  }
 });
 
 // The same pages without the preference do animate, so the checks above are not vacuous.
 test.describe('motion without the preference', () => {
   test.use({ reducedMotion: 'no-preference' });
 
-  test('idle: the wave floats in a loop', async ({ page }) => {
+  // F13a · a Oli por estado (UX-10; DECISOES § 460): the wave greets once (3 s) and rests on the drawn pose; it looped with
+  // no end before (F3 d-02). It still moves at first, so the reduced-motion checks above are not vacuous.
+  test('idle: the wave greets once, then rests', async ({ page }) => {
     await page.goto('/compress-image/');
     await hydrated(page);
     await dismissCookies(page);
     await expect.poll(() => running(page)).toBeGreaterThan(0);
+    await expect.poll(() => running(page), { timeout: 10_000 }).toBe(0);
   });
+
+  // F13a (UX-10; DECISOES § 460): every move that starts on its own has a finite count and ends by 5 s (WCAG 2.2.2), and
+  // 3.2 s after the page opens none runs; only the progress (.fo-level, .fo-water, .fo-spin) may loop, and none shows here.
+  for (const path of ['/', '/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/']) {
+    test(`${path}: every move that starts on its own ends by 5 s, none runs 3.2 s after opening`, async ({ page }) => {
+      const response = await page.goto(path);
+      expect(response?.status(), path).toBe(200);
+      const timings = () =>
+        page.evaluate(() =>
+          document
+            .getAnimations()
+            .filter((animation) => {
+              const target = (animation.effect as KeyframeEffect | null)?.target;
+              return !(target instanceof Element && target.closest('.fo-level, .fo-water, .fo-spin'));
+            })
+            .map((animation) => {
+              const timing = animation.effect?.getComputedTiming();
+              const name = animation instanceof CSSAnimation ? animation.animationName : animation instanceof CSSTransition ? animation.transitionProperty : animation.id;
+              return { name, iterations: Number(timing?.iterations), end: Number(timing?.endTime), state: animation.playState };
+            }),
+        );
+      await expect.poll(async () => (await timings()).length, { message: `${path}: something moves at first` }).toBeGreaterThan(0);
+      for (const timing of await timings()) {
+        expect(Number.isFinite(timing.iterations), `${path}: ${timing.name} has a finite count`).toBe(true);
+        expect(timing.end, `${path}: ${timing.name} ends by 5 s`).toBeLessThanOrEqual(5000);
+      }
+      await page.waitForTimeout(3200);
+      expect((await timings()).filter((timing) => timing.state === 'running'), `${path}: still running 3.2 s after opening`).toEqual([]);
+    });
+  }
 
   test('processing: the swim loops', async ({ page }) => {
     await page.goto('/compress-image/');
@@ -324,7 +367,8 @@ test.describe('motion without the preference', () => {
   // F12 (decision 7; DECISOES § 439): the steam of the coffee pose rises, then rests by itself, still and visible, by
   // 4.8 s (WCAG 2.2.2; it looped every 1.8 s, F3 d-02). It still moves at first, so this check is not vacuous. A finished
   // animation with "forwards" stays in getAnimations(): what is counted is the playState "running".
-  test('support page: the coffee steam rises, then rests, still and visible, by 4.8 s', async ({ page }) => {
+  // F13a (UX-10; DECISOES § 460): 1.4 cycles that end on the 40 % frame, visible and still, by 3.12 s (it was 4.8 s).
+  test('support page: the coffee steam rises, then rests, still and visible, by 3.2 s', async ({ page }) => {
     await page.goto('/support/');
     await expect.poll(() => running(page)).toBeGreaterThan(0);
     const steam = () =>
@@ -336,9 +380,10 @@ test.describe('motion without the preference', () => {
       );
     const timings = await steam();
     expect(timings.length, 'the steam animates').toBeGreaterThan(0);
-    for (const timing of timings) expect(timing.end, `${timing.name} ends`).toBeLessThanOrEqual(4800);
+    for (const timing of timings) expect(timing.end, `${timing.name} ends`).toBeLessThanOrEqual(3200);
     console.log(`[café] vapor: ${timings.length} animações, a última termina em ${Math.max(...timings.map((timing) => timing.end))} ms`);
-    // On the clock too: after the 4.8 s nothing on the page runs, and the two wisps rest in place, fully visible.
+    // On the clock too: after the 3.12 s nothing on the page runs, and the two wisps rest in place, fully visible (without
+    // "forwards" a finished animation leaves getAnimations(), and the drawn steam is the frame it ends on).
     await expect.poll(() => running(page), { timeout: 10_000 }).toBe(0);
     expect((await steam()).every((timing) => timing.state === 'finished')).toBe(true);
     const wisps = await page.evaluate(() =>
