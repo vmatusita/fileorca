@@ -293,6 +293,20 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 /* ---------- ResultCard + Placard, on the deep sea ---------- */
 .fo-deep { background: var(--deep); color: var(--on-deep); }
+/* F13b · the waterline (UX-15 A, night-sea.html ?alt=a; DECISOES § 378 and § 539). A deep card shows where the sea starts
+   by its shape, in both themes, not by the luminance (G-07): inside the border, in the top padding, 16px of air in surface
+   that ends on the wave of the footer (120x16, the mask filled above the curve), and under it a crest of 2px in stroke.
+   Only pseudo-elements, in the padding the card already has (20px, 24px from 768px), so the card keeps its height; what
+   sits at the top edge (the Oli of the ResultHero) takes z-index 1. The .fo-result of the tool page needs none: its
+   waterline is the water band of the F13a (§ 463), and a second wave is never painted. */
+.fo-sea-top::before, .fo-sea-top::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 16px; pointer-events: none;
+  border-radius: calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)) 0 0;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V0 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V0 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+}
+.fo-sea-top::before { top: 2px; background: var(--stroke); }
+.fo-sea-top::after { background: var(--surface); }
 .fo-result { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: center; }
 .fo-result__head { display: flex; align-items: center; gap: var(--space-3); min-height: 72px; }
 .fo-result__says { margin: 0; font: 500 18px/24px var(--fo-font-display); flex: 1 1 0; min-width: 0; }
@@ -739,8 +753,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    need in --fo-bottom-room on <html>, and the footer takes it at its end: the page still ends on the deep sea
    (DECISOES § 36, § 91 and § 101). */
 .fo-footer { position: relative; margin-top: var(--space-16); padding: var(--space-10) var(--fo-edge) calc(var(--space-6) + var(--fo-bottom-room, 0px)); }
+/* F13b (DECISOES § 539): the wave of the footer keeps its crest of 2px in stroke, as the deep cards do: ::after is the same
+   wave 2px higher, under the deep one. */
+.fo-footer::after {
+  content: ""; position: absolute; left: 0; right: 0; top: -17px; height: 16px; z-index: 0; background: var(--stroke); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+}
 .fo-footer::before {
-  content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: var(--deep);
+  content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; z-index: 1; background: var(--deep);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
 }
