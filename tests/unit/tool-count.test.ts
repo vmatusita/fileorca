@@ -70,4 +70,11 @@ describe.runIf(BUILT)('the built pages say the number of the module', () => {
       }
     }
   });
+
+  it('the H1 of the home of each language starts with the total of the module', () => {
+    for (const lang of LANGS) {
+      const h1 = /<h1\b[^>]*>([\s\S]*?)<\/h1>/.exec(main(html(pagePath('home', lang) ?? '/')))?.[1] ?? '';
+      expect(h1.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(), lang).toMatch(new RegExp(`^${toolCount(lang)} \\S`));
+    }
+  });
 });
