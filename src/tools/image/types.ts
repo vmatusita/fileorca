@@ -20,12 +20,12 @@ export interface ChipData {
   icon: string;
   /** Colour of the chip dot; the home chip has none (brand-soft). */
   category: 'image' | 'pdf' | 'none';
-  /** F13a · UX-14 (DECISOES § F13A-H-01): the chip can take the result along to its tool; only a link without this. */
+  /** F13a · UX-14 (DECISOES § 496): the chip can take the result along to its tool; only a link without this. */
   carry?: ChipCarry;
 }
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): what a chip needs to take the result along: what its tool takes (the
+ * F13a · UX-14 (DECISOES § 496 and § 497): what a chip needs to take the result along: what its tool takes (the
  * formats of its registry, an image format or "pdf") and whether it takes one file at a time, the rule of takes() in
  * src/share/logic.ts, and the label it shows when it does (one file, or several with {count}).
  */
@@ -63,7 +63,7 @@ export interface ImagePanelData<O = object> {
   /** Where the coffee line leads: Ko-fi, or the Pix of the support page in Portuguese (F6). */
   coffeeHref: string;
   /**
-   * F13a · UX-14 (DECISOES § F13A-H-03): the pages that can send their result here with a chip, by id, with their name in the
+   * F13a · UX-14 (DECISOES § 498): the pages that can send their result here with a chip, by id, with their name in the
    * language: the note of the arrival and the empty box say it, and a choice that names another page is not believed.
    */
   origins: Record<string, string>;

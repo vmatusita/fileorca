@@ -40,7 +40,7 @@ describe('the Privacy page on files shared with the app', () => {
       expect(share).toMatch(SAYS[lang].cleared);
       expect(share).toMatch(SAYS[lang].sent);
       expect(share).not.toMatch(SAYS[lang].never);
-      // F13a (UX-14; DECISOES § F13A-H-09 and § F13A-H-10): the paragraph of the result a next-step chip takes along says the
+      // F13a (UX-14; DECISOES § 504 and § 505): the paragraph of the result a next-step chip takes along says the
       // same hour, so there are three: the share, the chip and the line of how long data is kept (which says both, in one
       // string). The chip's paragraph is its own: it names the example chip and the note of where the file came from.
       const retention = paragraphs.filter((text) => SAYS[lang].next.test(text));

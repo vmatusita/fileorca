@@ -144,7 +144,7 @@ export async function dropFiles(page: Page, selector: string, files: TestFile[])
 }
 
 /**
- * F13a · UX-18 A (DECISOES § F13A-H-06): what a person does when they drag files from the file manager and let go on an
+ * F13a · UX-18 A (DECISOES § 501): what a person does when they drag files from the file manager and let go on an
  * element: dragenter, dragover and drop on it, one DataTransfer built in the page with the bytes (setInputFiles fires none
  * of them). Returns whether the page took the dragover and the drop over (preventDefault) and the dropEffect it left.
  */

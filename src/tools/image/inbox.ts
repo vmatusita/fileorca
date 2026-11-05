@@ -3,7 +3,7 @@
 // that tool, and only it, takes the files the service worker kept from the share and deletes the inbox. The files
 // then go the way of a drop or a paste. In the island chunk (astro.config.ts): no file is added to the tool pages.
 //
-// F13a · UX-14 (DECISOES § F13A-H-01 to § F13A-H-05): the islands write the same inbox too. A next-step chip whose tool
+// F13a · UX-14 (DECISOES § 496 to § 500): the islands write the same inbox too. A next-step chip whose tool
 // takes the result puts the files that came out in it (the same entries, headers and hour as a share, so the clean-up of
 // the hour that the service worker does on every visit covers them; src/sw/ does not change), notes in the tab
 // {tool, order, from} (ids of pages only, never a file name) and goes to the tool, which takes them by the way of a drop
@@ -106,7 +106,7 @@ export async function takeInbox(tool: string): Promise<Arrival> {
 /**
  * How many of the files a tool takes: the ones in its formats, and one at most for a one-file tool. A copy of takes() of
  * src/share/logic.ts, which the island cannot import (it imports the sniffers of the engines and would leave this chunk);
- * tests/unit/handoff.test.ts holds the two equal on a grid (DECISOES § F13A-H-02).
+ * tests/unit/handoff.test.ts holds the two equal on a grid (DECISOES § 497).
  */
 export function carries(accepts: readonly string[], single: boolean, formats: readonly string[]): number {
   const count = formats.filter((format) => accepts.includes(format)).length;

@@ -35,11 +35,12 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 16. Revisão das F4 a F7 (F8) | 18 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
 | 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
-| 19. O que a F10 deixou | 9 | A run F13 e o Victor |
+| 19. O que a F10 deixou | 8 | A run F13 e o Victor |
 | 20. O que a F11 deixou | 10 | O Victor e runs de ajuste |
 | 21. O que a F12 deixou | 6 | O Victor, a run F13 e runs de ajuste |
+| 22. O que a F13a deixou | 6 | O Victor, a run F13b e runs de ajuste |
 
-Total: 187 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
+Total: 192 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 5, 2 e 3 (oráculo antes), 6, 7, 8, 9, 10, 12.
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -339,7 +340,6 @@ O que a F10 (a proposta de UX/UI, só documentação) achou e não era dela reso
 | F10 p-3 | DECISOES § 365 | baixo | A F7 obs 3 fala da Mulch, mas os rótulos que empurram a etiqueta "example" são os da Paint ("Coverage per gallon", "Area of a door", "Area of a window"); a Mulch só quebra o "Bag size" a 320 px | Corrigir o texto da linha | Run F13 |
 | F10 p-7 | DECISOES § 361; `docs/propostas/ux-v2/ad-map.html` | médio | Os "gatilhos adicionais" da vinheta do AdSense (botão Voltar, 30 s parado, volta à aba, fim do artigo) vêm ligados por padrão desde 9/mar/2026 e podem pôr uma vinheta durante o processamento | Desligar em Anúncios automáticos → Vinheta, antes de ligar os anúncios | Victor |
 | F10 p-9 | DECISOES § 369 | baixo | O "Usar só desta vez" guarda a data no `localStorage` sem o Aceitar, pelo precedente da § 49; a leitura do art. 5(3) da ePrivacy é jurídica | Conferir a leitura antes de ligar a parede na UE (lá ela é só aviso) | Victor |
-| F10 p-11 | DECISOES § 377; UX-18 | baixo | O `dragover` do documento promete "copiar" na página inteira, e o `drop` fora da ilha some em silêncio (`ImagePanel.tsx:587-596`, `PdfPanel.tsx:658-666`), contra o README da DropZone | `dropEffect = 'none'` fora da ilha, com um teste, qualquer que seja a escolha do UX-18 | Run F13 |
 | F10 p-15 | UX-12 (notas) | baixo | Com a fonte de reserva no WebKit, o rótulo "Window area" ainda quebra (163 de 158 px), o mesmo caso do F8 s-2 | Calibrar a `Figtree Fallback` também para o peso 600 | Run F13 |
 | F10 p-16 | DECISOES § 370 | baixo | O número "2,6 MB → 717 KB" da faixa de imagem da home B vem do diagnóstico da F10, que está fora do Git | Gravar o número numa fixture ou no texto da ferramenta antes de usá-lo na home | Run F13 |
 | F10 p-17 | DECISOES § 370 | baixo | A contagem do H1 da home (50, 29 e 39) e as 4 variantes de hipoteca e de saldo final do `HUB_MONEY_IDS`, que são presets, não estão decididas | Decidir a conta num §, lida dos registros no build | Run F13 |
@@ -374,6 +374,19 @@ O que a F12 (monetização: o mapa de anúncios, a parede do bloqueador e o caf�
 | F12 p-4 | DECISOES § 417 | baixo | O núcleo do `CLAUDE.md` ainda diz que a Oli tem nove poses fechadas; desde a F12 são dez (a `sad`, só na parede; Mudança 12), e a F12 não podia mexer no núcleo | Na próxima run que puder mexer no núcleo, trocar por "dez poses fechadas (a `sad` só na parede)" | Run (a que puder mexer no núcleo do CLAUDE.md) |
 | F12 p-5 | DECISOES § 416 e § 430 | baixo | A forma da tag de recuperação veio de cópias públicas do código da aba Tagging do AdSense, e a API do Google não promete que o `AD_BLOCK_DATA_READY` dispare com a mensagem em Rascunho | Conferir a tag na aba Tagging e o sinal do Google em produção, nos passos da seção "Anúncios e parede do bloqueador" do `docs/OPERACAO.md` | Victor |
 | F12 p-6 | DECISOES § 428 | baixo | A c-04 pela saída A lê a região pelo fuso do aparelho: quem mora na UE com o aparelho em outro fuso tem os `ad_*` reaplicados pelo aviso próprio antes de a mensagem do Google perguntar | Conferir na UE com a mensagem de consentimento publicada, como a c-04 pedia; se for preciso, somar o `gdprApplies` do `__tcfapi` quando ele existir | Victor confere ao ligar os anúncios na UE |
+
+## 22. O que a F13a deixou
+
+O que a F13a (a página de ferramenta, o aviso de cookies, a Oli, as peças de PDF, o chip que leva o arquivo, os ícones e o soltar em qualquer lugar) deixou para depois: as linhas vêm das notas das quatro frentes e do agente principal (`i-` imagem, `p-` PDF, `h-` o chip e o soltar, `t-` testes) e da revisão adversarial (`R-`, `docs/relatorios/REVISAO-F13a.md`).
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F13a i-1 | DECISOES § 464 | baixo | Na miniatura do YouTube em pt e em es, com uma foto menor que 1280 × 720, o resultado traz as duas notas do motor (cortou e ampliou) e passa da altura do retângulo a 360 px (415 e 391 px): só nesse caso a faixa de baixo desce sem um gesto | Juntar as duas notas numa frase só, ou reservar a altura de duas notas na miniatura, e medir no `tool-slot.spec.ts` com uma foto pequena | Run de ajuste de layout |
+| F13a i-2 | DECISOES § 466 | baixo | Depois do resultado, o editor do Cortar e os campos do Redimensionar ficam no "Ajustar" fechado, como as opções das outras ferramentas: mudar o corte ou o tamanho pede um toque a mais | Medir com pessoas e decidir se o "Ajustar" dessas duas abre sozinho depois do resultado (sem mover nada sem gesto) | Victor decide |
+| F13a p-1 | DECISOES § 481 | baixo | Um resultado de PDF com várias notas longas (o formulário XFA, os campos que saem) pode passar de 356 px a 360 px e mover a faixa de baixo sem um gesto; não apareceu nas fixtures dos testes | Medir com as fixtures de formulário e reservar a altura das notas, ou encurtá-las | Run de ajuste de PDF |
+| F13a h-1 | DECISOES § 497 | baixo | O chip que leva o arquivo só leva para as ferramentas que mostram o resultado na hora; para as que esperam uma ação (proteger, juntar, dividir, reorganizar) ele só abre a página, e a pessoa escolhe o arquivo de novo | Construir a chegada nessas ferramentas (o arquivo na lista, esperando a ação) e os rótulos dos chips nos três idiomas | Run de ajuste de PDF |
+| F13a h-2 | DECISOES § 499 | baixo | A caixa vazia (o arquivo que não chegou) não mostra o selo redondo no celular: com ele, o retângulo passaria dos 356 px | Decidir entre o selo (o retângulo cresce nesse estado, sem gesto) e o retângulo fixo de hoje | Victor decide |
+| F13a t-1 | REVISAO das frentes da F13a | baixo | O teste "checks the ten file guides of the registry…" do `tests/unit/conteudo.test.ts` roda o portão num processo filho e estoura os 5 s quando o Vitest roda ao lado do `pnpm tipos` ou de outro trabalho pesado na máquina (aconteceu três vezes na F13a, e passou sozinho nas três) | Dar ao teste um tempo próprio maior, ou rodar o portão no próprio processo | Run de ajuste de testes |
 
 ## Registrados (escolhas, não defeitos)
 
@@ -436,3 +449,4 @@ O que a F12 (monetização: o mapa de anúncios, a parede do bloqueador e o caf�
 | F4-F7 f-2: a zona de soltar abaixo da dobra no pt | F13a, § 463 e § 465: o H1 na largura toda, e só a linha do selo guarda o espaço da Oli; `tests/e2e/tool-slot.spec.ts`, "the rectangle ends above the fold of a 360 × 740 phone" (toda página de ferramenta e de preset de imagem, nos três idiomas, com e sem a fonte) |
 | F10 p-13: o JPG maior que o HEIC | F13a, § 472: o cartão diz a mudança com o sinal ("+66%"), e nenhum texto da página do HEIC diz que o JPG fica mais leve; `tests/e2e/tool-slot.spec.ts`, "F10 p-13: …" |
 | F10 p-14: o erro que manda tentar PNG para um `.png` que não é imagem (D-06) e o PNG no HEIC (D-17) | F13a, § 468 e § 469: a razão diz o caso ("ends in .png, but it isn't an image inside") e, no HEIC, o chip "PNG to JPG" na faixa de baixo; `tests/e2e/tool-slot.spec.ts`, "D-06 (en, pt, es)" e "D-17 (en, pt, es)" |
+| F10 p-11: o `dragover` do documento que prometia copiar onde nada recebe o arquivo | F13a, § 503: nas páginas sem ferramenta de arquivo, um script inline pequeno da `BaseLayout` (decidido no build) responde ao `dragover` de arquivos com `dropEffect = 'none'` e recusa o soltar; nas páginas com ferramenta, o arquivo solto em qualquer lugar vai para ela (UX-18 A, § 501); `tests/e2e/drop-anywhere.spec.ts`, nos dois navegadores |

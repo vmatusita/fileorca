@@ -15,7 +15,7 @@ export interface PdfChip {
   /** Inner markup of the icon, read at build. */
   icon: string;
   category: 'image' | 'pdf' | 'none';
-  /** F13a · UX-14 (DECISOES § F13A-H-01): the chip can take the result along to its tool; only a link without this. */
+  /** F13a · UX-14 (DECISOES § 496): the chip can take the result along to its tool; only a link without this. */
   carry?: ChipCarry;
 }
 
@@ -35,7 +35,7 @@ export interface PdfIcons {
   down: string;
   /** The icon of a note of the design system (F13a, F-10): brand-soft with the info icon. */
   info: string;
-  /** F13a · UX-14 (DECISOES § F13A-H-01): the shield of the line under the chips that take the result along. */
+  /** F13a · UX-14 (DECISOES § 496): the shield of the line under the chips that take the result along. */
   shield: string;
 }
 
@@ -54,7 +54,7 @@ export interface PdfPanelData<O = object> {
   /** The ink of the light theme (the "ink" token), for the signature: it lands on a white page in any theme. */
   ink: string;
   coffeeHref: string;
-  /** F13a · UX-14 (DECISOES § F13A-H-03): the pages that can send their result here with a chip, by id, with their name. */
+  /** F13a · UX-14 (DECISOES § 498): the pages that can send their result here with a chip, by id, with their name. */
   origins: Record<string, string>;
   /** F13a · UX-14: the line under the chips that take the result along, in the words of what this page makes (PDFs, or images). */
   carryLine: CarryLabel;

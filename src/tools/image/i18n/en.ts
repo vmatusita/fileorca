@@ -93,7 +93,7 @@ export default {
     help: 'Changing an option redoes the file right away.',
   },
   next: { label: 'Next:', moreTools: 'More tools' },
-  // F13a · UX-14 (DECISOES § F13A-H-01): the chip that takes the result to the next tool, and the arrival there.
+  // F13a · UX-14 (DECISOES § 496): the chip that takes the result to the next tool, and the arrival there.
   carry: {
     line: 'Oli takes the image to the next tool. It never leaves your device.',
     lineMany: 'Oli takes the images to the next tool. They never leave your device.',

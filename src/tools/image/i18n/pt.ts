@@ -92,7 +92,7 @@ export default {
     help: 'Mudar uma opção refaz o arquivo na hora.',
   },
   next: { label: 'A seguir:', moreTools: 'Mais ferramentas' },
-  // F13a · UX-14 (DECISOES § F13A-H-01): o chip que leva o resultado para a próxima ferramenta, e a chegada lá.
+  // F13a · UX-14 (DECISOES § 496): o chip que leva o resultado para a próxima ferramenta, e a chegada lá.
   carry: {
     line: 'A Oli leva a imagem para a próxima ferramenta. Ela não sai do seu aparelho.',
     lineMany: 'A Oli leva as imagens para a próxima ferramenta. Elas não saem do seu aparelho.',

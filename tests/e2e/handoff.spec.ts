@@ -1,5 +1,5 @@
-// F13a · UX-14, the chip that takes the result to the next tool (decision 7 and criterion 5 of the run; DECISOES § F13A-H-01
-// to § F13A-H-05). With a service worker in control, a plain click on "Resize this image" puts the compressed file in the
+// F13a · UX-14, the chip that takes the result to the next tool (decision 7 and criterion 5 of the run; DECISOES § 496
+// to § 500). With a service worker in control, a plain click on "Resize this image" puts the compressed file in the
 // inbox of the device (the Cache Storage of the share, § 290), notes {tool, order, from} in the tab and goes to Resize
 // image, which takes it the way of a drop: the result at once, with the note of where it came from, and the focus on
 // Download. The inbox and the note are gone after the arrival. Nothing leaves the device: no request but a GET of the own

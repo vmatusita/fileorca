@@ -1,5 +1,5 @@
-// F13a · UX-14, the chip that takes the result to the next tool (decision 7 and criterion 5 of the run; DECISOES § F13A-H-01
-// to § F13A-H-05): what decides, without a browser, whether a chip takes the files along or only links. The island cannot
+// F13a · UX-14, the chip that takes the result to the next tool (decision 7 and criterion 5 of the run; DECISOES § 496
+// to § 500): what decides, without a browser, whether a chip takes the files along or only links. The island cannot
 // import takes() of src/share/logic.ts (it imports the sniffers of the engines and would leave the island chunk), so it
 // has a copy, carries() in src/tools/image/inbox.ts, held equal to takes() on a grid here, as sizeLabel() is held to
 // fileSize() in open-with.test.ts. Then the chips the pages build: which destinations carry (the ones that run by themselves
@@ -144,7 +144,7 @@ describe('the chips the pages build', () => {
   });
 });
 
-// The pose of the empty box (DECISOES § F13A-H-04): the page has to have its symbol before the island needs it, so the
+// The pose of the empty box (DECISOES § 499): the page has to have its symbol before the island needs it, so the
 // sprite of every page with a drop zone (tools, presets, guides with the tool) carries it, and the gate:design asks for it
 // next to the buoy (scripts/gates/design.ts). Read from dist/ (run `pnpm build` first, as `pnpm verificar` does).
 const BUILT = existsSync(join('dist', 'index.html'));

@@ -73,7 +73,7 @@ const ads = withAds && adArea ? layOutAds(rawMain, { area: adArea, label: common
 const mainHtml = ads ? ads.main : withoutMarks(rawMain);
 const hasRail = adPage;
 const railHtml = ads?.rail ?? '';
-// F13a · UX-18 A and F10 p-11 (DECISOES § F13A-H-08): on a page with no file tool (the home, the hubs, the legal pages, the
+// F13a · UX-18 A and F10 p-11 (DECISOES § 503): on a page with no file tool (the home, the hubs, the legal pages, the
 // 404, the calculators, the QR code), a file dragged over the page gets the "no" cursor, and its drop is refused, so the
 // browser never opens it in the tab: the cursor never promises what the page does not do. A page with the image or the PDF
 // island (a tool page, a preset, a guide with the tool) takes the drop anywhere instead (src/tools/image/paste.ts), and has

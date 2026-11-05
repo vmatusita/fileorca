@@ -32,7 +32,7 @@ const iconOf = (id: Target) => (isPdf(id) ? PDF_PAGES[id].icon : IMAGE_PAGES[id]
 const categoryOf = (id: Target): 'pdf' | 'image' => (isPdf(id) || id === 'image-to-pdf' ? 'pdf' : 'image');
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-02): what each PDF tool makes, for the chips that take it along. PDF to JPG makes images;
+ * F13a · UX-14 (DECISOES § 497): what each PDF tool makes, for the chips that take it along. PDF to JPG makes images;
  * Protect PDF makes a PDF that needs a password, which no tool it points at opens (it would be refused there), so its chips
  * only link; the others make PDFs.
  */
@@ -41,7 +41,7 @@ type CarryPdf = keyof PdfPanelTexts['carry']['chips'];
 type CarryImage = keyof ImagePanelTexts['carry']['chips'];
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-02): the chip from `source` to `target` takes the result along when the target runs by
+ * F13a · UX-14 (DECISOES § 497): the chip from `source` to `target` takes the result along when the target runs by
  * itself (it shows the result at once, with the note of where it came from) and takes what the source makes; the target's
  * formats and the label go to the island, which decides with the formats of the result itself (takes() of src/share).
  */
@@ -63,7 +63,7 @@ export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
   });
 }
 
-/** F13a · UX-14 (DECISOES § F13A-H-03): the PDF tools whose chip takes their result to `target`, with their name. */
+/** F13a · UX-14 (DECISOES § 498): the PDF tools whose chip takes their result to `target`, with their name. */
 export function pdfOriginsOf(target: string, lang: Lang = 'en'): Record<string, string> {
   const origins: Record<string, string> = {};
   for (const source of PDF_TOOL_IDS) if (chipsFor(source, lang).some((chip) => chip.target === target && chip.carry)) origins[source] = blurbOf(source, lang).name;

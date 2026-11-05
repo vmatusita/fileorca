@@ -36,7 +36,7 @@ export default {
         'Your files and your numbers never go into this copy. It keeps only files of fileorca.com, at addresses without the part after the ? or the #, so what you type, open or save stays out of it.',
         'To delete the copy, clear the site data of fileorca.com in the settings of your browser, or uninstall the FileOrca app if you installed it.',
         'On Android, when you share images or PDFs with the installed FileOrca app, they wait on your device until you choose a tool, in a place of the browser storage of their own, apart from the copy of the pages. They are deleted when the tool takes them; if you choose none, they are deleted the next time you open FileOrca after an hour. This works because your browser keeps the offline part of the site, which it gets on your first visit with internet. If you clear the site data, open fileorca.com once before you share again. Without that part, Android sends the shared files to fileorca.com, which refuses them and does not keep them. When you pick a tool, the page notes in this tab which tool you chose, and nothing else.',
-        // F13a · UX-14 (DECISOES § F13A-H-09): the result that a next-step chip takes along.
+        // F13a · UX-14 (DECISOES § 504): the result that a next-step chip takes along.
         'When you tap a next-step suggestion that takes your result along, such as Resize this image, the result goes to that tool through the same place of the browser storage as the shared files: it stays on your device, is deleted when the tool takes it, and, if it never arrives, the next time you open FileOrca after an hour. The page notes in this tab which tool you chose and which tool the file came from, and nothing else.',
       ],
     },

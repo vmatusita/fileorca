@@ -121,7 +121,7 @@ const texts: PdfPanelTexts = {
     },
   },
   next: { label: 'A seguir', moreTools: 'Mais ferramentas' },
-  // F13a · UX-14 (DECISOES § F13A-H-01): o chip que leva o resultado para a próxima ferramenta, e a chegada lá.
+  // F13a · UX-14 (DECISOES § 496): o chip que leva o resultado para a próxima ferramenta, e a chegada lá.
   carry: {
     line: 'A Oli leva o PDF para a próxima ferramenta. Ele não sai do seu aparelho.',
     lineMany: 'A Oli leva os PDFs para a próxima ferramenta. Eles não saem do seu aparelho.',

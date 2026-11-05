@@ -40,7 +40,7 @@ const TARGETS = [
   '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
   '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
-  // F13a (UX-14, decision 10; DECISOES § F13A-H-11): the line under the chips that take the result along (its room in the
+  // F13a (UX-14, decision 10; DECISOES § 506): the line under the chips that take the result along (its room in the
   // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
 ].join(', ');
@@ -320,7 +320,7 @@ for (const viewport of VIEWPORTS) {
       await measure(page, 'resultado com a linha do café', TARGETS_WITH_COFFEE);
     });
 
-    // F13a (UX-14, decision 10; DECISOES § F13A-H-11): a next-step chip sent files here. With them in the inbox the result
+    // F13a (UX-14, decision 10; DECISOES § 506): a next-step chip sent files here. With them in the inbox the result
     // comes at once with the note of where they came from; with the note in the tab and no inbox, the empty box. Both are
     // written in the page as the chip of Resize image writes them, and the page is opened again.
     const CHOICE = JSON.stringify({ tool: 'compress-image', order: [0], from: 'resize-image' });

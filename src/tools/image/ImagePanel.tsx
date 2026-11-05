@@ -141,9 +141,9 @@ interface Model {
   coffeeRoom: boolean;
   /** F13a (DECISOES § 466): the band keeps the height it had when the batch started, until Start over. */
   bandLock: number | null;
-  /** F13a · UX-14 (DECISOES § F13A-H-03): the id of the page whose chip brought this batch, for its note; null otherwise. */
+  /** F13a · UX-14 (DECISOES § 498): the id of the page whose chip brought this batch, for its note; null otherwise. */
   from: string | null;
-  /** F13a · UX-14 (DECISOES § F13A-H-04): a chip sent files here and none arrived: the empty box, until files come. */
+  /** F13a · UX-14 (DECISOES § 499): a chip sent files here and none arrived: the empty box, until files come. */
   lost: { from: string; count: number } | null;
   /** F13a · UX-14: a chip is writing the inbox; a second click waits for the first. */
   carrying: boolean;
@@ -184,7 +184,7 @@ const infoOf = (item: Item): FileInfo => ({ id: item.id, name: item.file.name, s
 
 /**
  * A row of chips under a label (NextStepChips): the next steps after a result, or the right tool after a refusal. F13a ·
- * UX-14 (DECISOES § F13A-H-01): a chip that takes the files along says so ("Resize this image", data-carry), and the line
+ * UX-14 (DECISOES § 496): a chip that takes the files along says so ("Resize this image", data-carry), and the line
  * under the row says they never leave the device; the label is decided here, after hydration, never by the server.
  */
 function ChipRow({ id, label, chips, takes, line, onFollow }: {
@@ -229,7 +229,7 @@ function ChipRow({ id, label, chips, takes, line, onFollow }: {
 }
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-01): the line under the chips that take the files along, and its room in the hidden copy.
+ * F13a · UX-14 (DECISOES § 496): the line under the chips that take the files along, and its room in the hidden copy.
  * The shield comes in the data of the page, as the icons of the PDF island do: a ?raw import would grow the shared chunk.
  */
 function CarryLine({ text, icon }: { text: string; icon: string }) {
@@ -477,7 +477,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     render();
   }
 
-  /** F13a · UX-14 (DECISOES § F13A-H-03): "Oli brought this image from Compress image.", for a batch a chip brought. */
+  /** F13a · UX-14 (DECISOES § 498): "Oli brought this image from Compress image.", for a batch a chip brought. */
   function fromNote(count: number): string {
     const name = m.from ? origins[m.from] : undefined;
     if (!name) return '';
@@ -708,7 +708,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   });
 
   useEffect(() => {
-    // F13a · UX-18 A (DECISOES § F13A-H-06): files dragged anywhere on the page light the zone where it is, and a drop
+    // F13a · UX-18 A (DECISOES § 501): files dragged anywhere on the page light the zone where it is, and a drop
     // anywhere (the text, the H1, the crumbs, the footer, the result card) starts a new batch, with the panel brought into
     // view. Over an ad the drag is the frame's: the page hears a dragleave and the zone goes back to rest.
     drops.current = catchDrops({
@@ -732,7 +732,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     document.addEventListener('paste', onPaste);
     // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290), or the result
     // a next-step chip brought (F13a · UX-14): they come the way of a drop. A chip's choice that finds nothing is the empty
-    // box; a `from` this page does not know is not believed (DECISOES § F13A-H-03 and § F13A-H-04).
+    // box; a `from` this page does not know is not believed (DECISOES § 498 and § 499).
     void takeInbox(page).then((arrival) => {
       const from = arrival.from !== null && arrival.from in origins ? arrival.from : null;
       if (arrival.files.length > 0) startBatch(arrival.files, from);
@@ -756,7 +756,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   };
 
   /**
-   * F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): a plain click on a chip that takes the files writes them into the
+   * F13a · UX-14 (DECISOES § 496 and § 497): a plain click on a chip that takes the files writes them into the
    * inbox, notes the choice and goes; a click with a key held, the middle button or a new tab only links. The event of
    * the click is the next_step_click of always (the D-17 chip sends none, as before).
    */
@@ -785,7 +785,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const showCard = rows.length > 0 && m.hadCard && (m.phase === 'done' || (m.phase === 'processing' && !m.showLevel));
   // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
   const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
-  // F13a · UX-14 (DECISOES § F13A-H-04): the empty box, until files come (any way) or a file is dragged over it.
+  // F13a · UX-14 (DECISOES § 499): the empty box, until files come (any way) or a file is dragged over it.
   const lost = m.lost && m.phase === 'idle' && m.items.length === 0 ? m.lost : null;
   const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : lost ? 'lost' : undefined;
   const names = outputNames(ready());
@@ -952,7 +952,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         )}
         <ul class="fo-result__notes">
           {fromNote(rows.length) && (
-            // F13a · UX-14 (DECISOES § F13A-H-03): where a batch brought by a chip came from, the first note of the card.
+            // F13a · UX-14 (DECISOES § 498): where a batch brought by a chip came from, the first note of the card.
             <li class="fo-result__from">
               <Icon raw={arrowIcon} class="fo-icon--inline" />
               {fromNote(rows.length)}
@@ -1003,7 +1003,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     // The children keep their places in every state (a hole where a state has none), so the button of the rest is the
     // same node as the "Choose other files" of the error and of the offline line: Preact never moves it, the focus stays on
     // it (a moved node loses the focus), and the cookie notice's keep() lifts it when it comes under the notice (D-01).
-    // F13a · UX-14 (DECISOES § F13A-H-04): the empty box keeps the same places too: its seal (info) where the seal is, its
+    // F13a · UX-14 (DECISOES § 499): the empty box keeps the same places too: its seal (info) where the seal is, its
     // message where the title is, and its two ways out where the button is, "Choose images" first (the first stop of Tab in
     // the panel; nothing calls focus()). UX-18 A: the drag of files is heard by the document (catchDrops), not by the zone.
     panel = (
@@ -1173,7 +1173,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const elsewhereError = m.phase === 'error' && !offline && single !== undefined && goesElsewhere(single);
   const band = m.hadCard ? 'after' : elsewhereError ? 'elsewhere' : 'options';
 
-  // F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): what each chip would take along, decided here in the client: the
+  // F13a · UX-14 (DECISOES § 496 and § 497): what each chip would take along, decided here in the client: the
   // files that came out (not the ZIP), in the order of the list, and a service worker in control. The D-17 chip takes
   // the refused file itself, as it was chosen.
   const controlled = workerControls();
@@ -1247,7 +1247,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           // The room of the result's row, kept from the first paint (DECISOES § 466): a hidden copy of the chips and
           // of the "Adjust" line in the same cell as the row on screen, so the band is as tall as the taller of the two in
           // every state, in every language, and the chips that wrap to three lines on a phone push nothing down.
-          // F13a · UX-14 (DECISOES § F13A-H-05): a chip that can take the files along keeps the room of its longest label (a
+          // F13a · UX-14 (DECISOES § 500): a chip that can take the files along keeps the room of its longest label (a
           // batch of 10) and of the line under the row from the first paint, so the row that says "Resize these 3 images"
           // and the line after a result move nothing; the server never knows whether a service worker will be there.
           <div class="fo-band__ghost" aria-hidden="true">

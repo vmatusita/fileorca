@@ -1282,7 +1282,7 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
   .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
 }
 
-/* ---------- F13a · o chip que leva e o soltar (UX-14 e UX-18 A; DECISOES § F13A-H-01 a § F13A-H-07) ----------
+/* ---------- F13a · o chip que leva e o soltar (UX-14 e UX-18 A; DECISOES § 496 a § 502) ----------
    The chips that take the result along to the next tool say so ("Resize this image"), and one line under them says the
    files never leave the device (the shield in brand, the muted ink of the band). At the arrival, the first note of the card
    says where the files came from (the ink of the card, on deep). The empty box is the DropZone in a status state, like the

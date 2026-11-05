@@ -33,7 +33,7 @@ export function existsIn(id: ImagePageId, lang: Lang): boolean {
 const categoryOf = (id: ImageToolId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 'pdf' : 'image');
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-02): the chip to `target` takes the result along when this page makes images (Image to
+ * F13a · UX-14 (DECISOES § 497): the chip to `target` takes the result along when this page makes images (Image to
  * PDF makes a PDF, which no image tool takes) and the target has the label "this image" in the language; every image tool
  * runs by itself. The island decides with the formats of the result itself (takes() of src/share).
  */
@@ -91,7 +91,7 @@ function elsewhereFor(id: ImagePageId, lang: Lang): ImagePanelData['elsewhere'] 
       target: other.tool,
       icon: ICONS[IMAGE_PAGES[other.tool].icon],
       category: categoryOf(other.tool),
-      // F13a · D-17 and UX-14 (DECISOES § F13A-H-02): the chip takes the refused file to the tool that takes it, and keeps
+      // F13a · D-17 and UX-14 (DECISOES § 497): the chip takes the refused file to the tool that takes it, and keeps
       // its name ("For a PNG: PNG to JPG"): the row already says which file goes.
       carry: { accepts: [...IMAGE_PAGES[other.tool].accepts], single: false, one: blurb.name, many: blurb.name },
     },
@@ -99,7 +99,7 @@ function elsewhereFor(id: ImagePageId, lang: Lang): ImagePanelData['elsewhere'] 
 }
 
 /**
- * F13a · UX-14 (DECISOES § F13A-H-03): the pages whose chip takes their result here, with their name in the language: the
+ * F13a · UX-14 (DECISOES § 498): the pages whose chip takes their result here, with their name in the language: the
  * image tools and presets (their next steps, and the chip of a refused format), and the PDF tools that make images.
  */
 export function originsOf(id: ImagePageId, lang: Lang): Record<string, string> {

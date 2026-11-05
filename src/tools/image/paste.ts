@@ -35,7 +35,7 @@ export interface DropHandlers {
 }
 
 /**
- * F13a · UX-18 A (DECISOES § F13A-H-06 and § F13A-H-07): a drag of files anywhere on the page is the tool's, in both islands.
+ * F13a · UX-18 A (DECISOES § 501 and § 502): a drag of files anywhere on the page is the tool's, in both islands.
  * The document listens; a counter of dragenter (+1) and dragleave (−1) says when the drag left the window or went over an
  * ad, instead of the relatedTarget, which Safari leaves null on every dragleave; drop and dragend set it to zero. A drag
  * of text or of a page of the grid (no "Files" in it) is never touched. Returns what stops listening, and a reset for a

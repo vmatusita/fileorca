@@ -7,7 +7,7 @@ import type { Pose } from '../../oli/poses.ts';
 export const PANEL_POSES: Pose[] = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
 /**
  * The image and PDF panels also say, in buoy, that the tool was kept without its engine (F8; DECISOES § 292), and, in lost,
- * that the files a next-step chip sent did not arrive (F13a · UX-14, the empty box; DECISOES § F13A-H-04).
+ * that the files a next-step chip sent did not arrive (F13a · UX-14, the empty box; DECISOES § 499).
  */
 export const FILE_PANEL_POSES: Pose[] = [...PANEL_POSES, 'buoy', 'lost'];
 

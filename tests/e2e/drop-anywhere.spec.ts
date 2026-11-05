@@ -1,4 +1,4 @@
-// F13a · UX-18 A, the drop anywhere on the page (decision 9 and criterion 7 of the run; DECISOES § F13A-H-06 to § F13A-H-08).
+// F13a · UX-18 A, the drop anywhere on the page (decision 9 and criterion 7 of the run; DECISOES § 501 to § 503).
 // On a page with a file tool, files dragged into the window light the DropZone where it is, and a drop anywhere (the H1 of a
 // guide, far from the zone) goes to the tool, with the panel brought into view; a drag that leaves the window (or goes over
 // an ad, a frame of another origin) gives the zone back its rest. On a page with no file tool, the cursor never promises a
