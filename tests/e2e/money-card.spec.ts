@@ -219,6 +219,39 @@ for (const { path, field, value, message, last, stale } of ERRORS) {
   });
 }
 
+// Review F13b b-2 (DECISOES § 593): with two fields in error, the card says the first one of the form (§ 545), and only that
+// field is described by the card; the other is described by its own message, with its own range, and no role or live
+// region repeats it (the card stays the one voice). Before, both pointed to the card, and the rate was described by the
+// message of the home price.
+test('/mortgage-calculator/: with two fields in error, each is described by its own range, and only the first by the card', async ({ page }) => {
+  await openAt(page, CALC_PAGES['mortgage-calculator'].path, 1280, 900);
+  await hydrated(page);
+  await page.locator('#fo-calc-p').fill('abc');
+  await page.locator('#fo-calc-r').fill('99');
+  await page.waitForTimeout(900);
+  await expect(page.locator('#fo-rhero-error')).toHaveText('Enter a home price from $10,000 to $20,000,000.');
+  const price = page.locator('#fo-calc-p');
+  const rate = page.locator('#fo-calc-r');
+  await expect(price).toHaveAttribute('aria-invalid', 'true');
+  await expect(rate).toHaveAttribute('aria-invalid', 'true');
+  await expect(price).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+  await expect(rate).not.toHaveAttribute('aria-describedby', /fo-rhero-error/);
+  await expect(price).toHaveAccessibleDescription(/Enter a home price from \$10,000 to \$20,000,000\./);
+  await expect(rate).toHaveAccessibleDescription(/Enter a rate from 0 to 40%\./);
+  await expect(rate).not.toHaveAccessibleDescription(/home price/);
+  // The rate's own message has no role and no live region: the card's region is the one voice.
+  const own = page.locator('#fo-calc-r-error');
+  await expect(own).toHaveText('Enter a rate from 0 to 40%.');
+  expect(await own.evaluate((node) => [node.getAttribute('role'), node.closest('[aria-live]')?.getAttribute('aria-live') ?? null])).toEqual([null, null]);
+  await expect(page.locator('#fo-tool-root [aria-live]')).toHaveCount(1);
+  // The price fixed, the card says the rate, and the rate is described by the card.
+  await price.fill('375000');
+  await page.waitForTimeout(900);
+  await expect(page.locator('#fo-rhero-error')).toHaveText('Enter a rate from 0 to 40%.');
+  await expect(rate).toHaveAttribute('aria-describedby', /(^| )fo-rhero-error( |$)/);
+  await expect(page.locator('#fo-calc-r-error')).toHaveAttribute('aria-hidden', 'true');
+});
+
 // F10 p-19: on the first visit (no choice of cookies yet), at 360 x 740, the number of the mortgage (en, es) and of the
 // SAC × PRICE ends above 596 px, clear of the cookie notice, which starts at 604 px; after Accept, the Download PDF is whole
 // above 740 px, in the width of the card. Before: 636 (en) and 678 px (es, pt), covered by 32 and 52 px of the notice.

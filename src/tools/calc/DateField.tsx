@@ -24,9 +24,11 @@ export interface DateFieldProps {
   half?: boolean | undefined;
   /** Tells the calculator the error the field shows, or null (§ 116, as in the CalcField). */
   report?: ((id: string, error: FieldError | null) => void) | undefined;
+  /** The card says this field's error: its aria-describedby points to the card; else to its own message (review F13b b-2). */
+  named?: boolean | undefined;
 }
 
-export default function DateField({ id, value, min, max, onValue, label, error, half, report }: DateFieldProps) {
+export default function DateField({ id, value, min, max, onValue, label, error, half, report, named = false }: DateFieldProps) {
   const [draft, setDraft] = useState(value);
   const [wrong, setWrong] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -55,6 +57,8 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
     else settle.current = window.setTimeout(() => setWrong(true), SETTLE_MS);
     if (ok && text !== value) onValue(text);
   };
+  // As in the CalcField (review F13b b-2; DECISOES § 593): described by the card when it says this field, else by its own message.
+  const msgId = `${id}-error`;
   return (
     <div class={half ? 'fo-field fo-field--half' : 'fo-field'} data-state={wrong ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
@@ -71,7 +75,7 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
             autocomplete="off"
             value={draft}
             aria-invalid={wrong ? 'true' : undefined}
-            aria-describedby={wrong ? HERO_ERROR_ID : undefined}
+            aria-describedby={wrong ? (named ? HERO_ERROR_ID : msgId) : undefined}
             onInput={(event) => read(event.currentTarget.value)}
             onChange={(event) => read(event.currentTarget.value)}
             onBlur={(event) => read(event.currentTarget.value, true)}
@@ -82,6 +86,11 @@ export default function DateField({ id, value, min, max, onValue, label, error, 
             </span>
           )}
         </div>
+        {wrong && (
+          <p class="fo-field__msg" id={msgId} aria-hidden={named ? 'true' : undefined}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

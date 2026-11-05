@@ -117,7 +117,9 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   // A list whose Add button comes after the result (F7: the areas of the square footage).
   const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
-  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, latest: () => store.get().values };
+  // The field the card speaks for (review F13b b-2; DECISOES § 593): the first in error, else the one a problem points to.
+  const named = wrongField?.[0] ?? (view.problem !== undefined && view.problemField !== undefined ? `fo-calc-${view.problemField}` : undefined);
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, named, latest: () => store.get().values };
   const off = view.problem !== undefined || state.stale;
 
   const pdf = async () => {

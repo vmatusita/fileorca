@@ -1228,6 +1228,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    the colour alone (before the label, as the spec draws it, it sent 40 labels to a second line at 360 px). The words are
    said in the card (#fo-rhero-error), which the field's aria-describedby points to. */
 .fo-calc .fo-field[data-state="error"] .fo-input { border-width: var(--stroke-2); box-shadow: 0 0 0 calc(var(--stroke-3) - var(--stroke-2)) var(--danger); }
+/* Review F13b b-2 (DECISOES § 593): a field in error the card does not name is described by its own message, for the screen
+   reader only (no role, no live region: the card is the one voice). */
+.fo-field__msg { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
 .fo-input__flag { flex: none; display: inline-flex; padding-right: var(--space-2); color: var(--danger); }
 .fo-input__flag .fo-icon { width: 18px; height: 18px; }
 .fo-split { display: grid; gap: var(--space-2); }

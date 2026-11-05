@@ -22,6 +22,8 @@ interface Props {
   report?: ((id: string, error: FieldError | null) => void) | undefined;
   /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
   flagged?: string | undefined;
+  /** The id of the field whose error the card says (the first in error, or the one a problem points to; review F13b b-2). */
+  named?: string | undefined;
   /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § 552). */
   latest?: (() => Values) | undefined;
 }
@@ -70,6 +72,7 @@ function NumberInput(props: Props & {
       wide={spec.wide}
       report={props.report}
       flagged={props.flagged === keyName}
+      named={props.named === fieldId(keyName)}
     />
   );
 }
@@ -280,6 +283,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           unit={unit}
           report={props.report}
           flagged={props.flagged === spec.key}
+          named={props.named === fieldId(spec.key)}
         />
       );
     }
@@ -337,6 +341,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           error={texts.error}
           half={spec.half}
           report={props.report}
+          named={props.named === fieldId(spec.key)}
         />
       );
     }
