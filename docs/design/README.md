@@ -49,6 +49,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - `deep` é o fundo do mar, igual nos dois temas: ResultCard, ResultHero e rodapé. Texto sobre ele em `on-deep` e `on-deep-muted`.
 - `sun` é só do Baixar. Nada mais é amarelo: nem aviso, nem destaque, nem o card de café. Aviso é `brand-soft` com o ícone `info`.
 - As cores de categoria (`turquesa` imagem, `coral` PDF, `alga` dinheiro, `violeta` casa e saúde, `lima` utilidades) são só preenchimento: dobra, círculo de chip, ícone de ToolCard, faixa de hub em `*-soft`. Texto sobre elas em `on-cat` (`on-violeta` na violeta), nunca `ink`, que vira branco no escuro.
+- A faixa de cada categoria da home e a faixa dos hubs de categoria são `*-soft` no claro e `surface` no escuro, com a onda na cor cheia da categoria (F13b; DECISOES § 575).
 - Gráficos: principal em `brand` (em `brand-on-deep` quando o gráfico está sobre `deep`, como no ResultHero), juros em `coral` com hachura. Azul × coral se distinguem sem vermelho e verde, e a legenda sempre diz o valor.
 - Erro é `danger` com ícone `alert` e a fala da Oli; nunca só a cor. `coral` não é erro.
 - Sobre `deep` (o erro dentro do ResultHero), o ícone `alert` é `danger-on-deep` (`#FF8A80`, igual nos dois temas, como o `brand-on-deep`): 6,04:1 contra `deep` no claro e no escuro, onde o `danger` do claro daria 2,45:1. O texto do erro no card continua `on-deep` (F13b; DECISOES § 538).
@@ -60,6 +61,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - Corpo em `body` 16px; campo de formulário nunca abaixo de 16px. Tabelas em `table`, com `font-variant-numeric: tabular-nums` (a Figtree tem; a Fredoka não, então número em Fredoka fica alinhado à esquerda).
 - O subconjunto latino das duas fontes tem − (U+2212), ×, … e · , mas não tem → nem ↔. Em "2.4 MB → 780 KB", a seta é o ícone `arrow-right` em `fo-icon--inline`, com "to" / "para" / "a" escondido para leitor de tela. Em nome de ferramenta, escreva por extenso ("PNG to JPG").
 - A reserva da Figtree (`Figtree Fallback`, a Arial calibrada) tem uma face para o texto regular e duas para o negrito, uma em 600 e outra em 700 a 900, medidas sobre a Arial Bold: o rótulo em 600 tem a mesma largura com a reserva e com a Figtree, nos dois navegadores (F13b; DECISOES § 537).
+- O H1 da home, em `display`, é o maior texto da primeira tela a partir de 768px (o LCP). Abaixo disso, a linha do topo, com três linhas, tem mais área que o `h1-mobile` de 28px e continua sendo o LCP, como antes da F13b (DECISOES § 574). O topo e as faixas da home e a faixa do mar dos hubs usam a `Figtree Steady`, que não troca de fonte quando a Figtree chega (§ 578).
 - Caixa alta só no `caption` (rótulo do AdSlot, sobretítulo de hub, título de coluna do rodapé), com 0,08em de espaçamento.
 
 ## Forma
@@ -70,6 +72,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - **Raio:** `radius-pill` em botão, chip e trilho; `radius-xl` (24px) no painel, no ResultCard e nas faixas; `radius-lg` em cards; `radius-md` em campos; `radius-xs` no AdSlot e em miniaturas.
 - **Mar:** a água (`water`) com borda de onda aparece no fundo da DropZone, sobe no WaterLevel e a onda volta no topo do rodapé em `deep`. Nenhuma imagem de fundo no site.
 - **Linha d'água (F13b; DECISOES § 539):** o fundo do mar se lê pela forma, nos dois temas, não pela luminância. Antes: o `deep` dos cartões e do rodapé era só uma cor, e no escuro ele quase some contra o chão. Depois: o ResultHero leva por dentro da borda, no padding de cima, 16 px de ar em `surface` que terminam na onda do rodapé (120 × 16), com uma crista de 2 px em `stroke` (a classe `fo-sea-top`, só pseudo-elementos: a altura do cartão não muda); o rodapé ganha a mesma crista sobre a onda dele. O ResultCard da página de ferramenta não leva outra onda: a linha d'água dele é a faixa de água que subiu da F13a (§ 463). Pares: `stroke` sobre `surface` (a crista do cartão) 17,28:1 no claro e 4,07:1 no escuro; `stroke` sobre `bg` (a crista do rodapé) 16,50:1 e 4,67:1.
+- **O mar fora da ferramenta (F13b; DECISOES § 567 e § 575):** antes, a água só aparecia na DropZone, no WaterLevel e no rodapé. Depois, ela sobe também para o topo da home (a `water` parada, com o selo sobre ela e a Oli nadando) e para o pé da faixa dos hubs de categoria (a água, uma crista de 3px e a Oli meio submersa). Tudo `aria-hidden`, sem receber clique, e a onda é a do rodapé como máscara de um elemento.
 - **Espaço:** passos de 4px (`space-1` a `space-24`). Card com `space-4` no celular e `space-6` no computador; seções a `space-12`.
 
 ## Movimento
@@ -78,6 +81,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - **Movimento que começa sozinho termina antes de 5 s e deixa a Oli parada na pose desenhada; só o progresso (a `swim`, a onda e o spinner) dura o trabalho** (F13a, DECISOES § 460; antes, "loops com `ease-in-out`"). Cada estado da Oli tem um movimento curto: o aceno da `wave` uma vez, e um aceno curto no ponteiro ou no foco da DropZone; a `gulp`, a `cheer`, a `oops`, a `buoy`, a `lost` e a `peek` uma vez; o vapor do `coffee` assenta à vista em 3,12 s; a `sad` fica parada. O `gate:design` aceita `infinite` só nos seletores do progresso.
 - Durações pelo nome: `dur-instant` (toque), `dur-quick` (hover, foco), `dur-base` (abrir, trocar estado), `dur-cheer` (o salto da Oli, uma vez), `dur-float` (o aceno da `wave` e a procura da `lost`, uma vez), `dur-wave` (a onda).
 - Com `prefers-reduced-motion: reduce`, nada anima sozinho: a Oli fica parada, a água sobe sem onda, a Placa aparece pronta.
+- Fora da ferramenta, a `swim` não é progresso: no mar da home e no pé da faixa dos hubs de categoria ela balança três vezes (`fo-bob`, seis meias-voltas de `dur-wave` / 3, 4,8 s ao todo) e para na pose desenhada, e a água fica parada (F13b; DECISOES § 577). No card da calculadora, a `wave` fica parada no exemplo, sem o aceno da F13a, para o canto do card não se mexer em toda carga (DECISOES § 545).
 
 ## Oli
 
@@ -86,6 +90,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - O contorno é preto-orca nos dois temas, e o aro branco por trás da silhueta fica sempre: some no claro e vira adesivo no escuro e sobre `deep`.
 - A Oli inteira vai de 32px para cima; abaixo disso, o ícone do app (o rosto de frente), que lê bem a partir de 16px.
 - Decorativa (`aria-hidden`): o estado é sempre dito em texto ao lado.
+- Os lugares que a F13b acrescentou: no card da calculadora (o ResultHero), desde a primeira pintura, `wave` no exemplo, `cheer` uma vez por visita no primeiro resultado e `oops` no erro, e na saúde nunca `cheer` (DECISOES § 545; o sprite das calculadoras leva só essas três, § 553); no mar do topo da home, a `swim` de 128px no celular e 152px a partir de 768px, à direita do H1 (§ 567); no pé da faixa dos hubs de categoria, a `swim` de 72px meio submersa (§ 575). A ficha "What we measured" do guia de arquivo não tem Oli (§ 560).
 - Nunca a menos de `ad-clearance` de um anúncio, nunca olhando ou apontando para ele, nunca no botão Baixar.
 
 ## Ícones
