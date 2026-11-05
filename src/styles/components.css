@@ -1240,6 +1240,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-rhero__stale { margin: 0; align-self: start; font-size: 17px; line-height: 26px; color: var(--on-deep); overflow-wrap: anywhere; }
 .fo-rhero[data-state="error"] .fo-rhero__sentence { visibility: hidden; }
 .fo-rhero[data-state="error"] .fo-rhero__num, .fo-rhero[data-state="error"] .fo-rhero__num small { color: var(--on-deep-muted); }
+/* Review F13b f-1 and f-3 (DECISOES § 598): every number of the last result leaves the full contrast with the big one, so none
+   reads as the result of now: the PRICE line, the legend of the chart and, on a phone, the echo at the end of the block. */
+.fo-rhero[data-state="error"] .fo-rhero__versus, .fo-rhero[data-state="error"] .fo-rhero__versus b, .fo-rhero[data-state="error"] .fo-split__legend { color: var(--on-deep-muted); }
+.fo-calc__echo[data-state="error"] b, .fo-calc__echo[data-state="error"] small { color: var(--on-deep-muted); }
 @media (min-width: 768px) {
   .fo-rhero { gap: var(--space-3); }
   .fo-rhero__label { padding-right: 80px; }

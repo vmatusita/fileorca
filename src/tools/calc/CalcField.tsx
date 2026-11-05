@@ -65,10 +65,12 @@ export interface CalcFieldProps {
   named?: boolean | undefined;
   /** The problem of the account the card says, when it points to this field: shown near it on a phone (review F13b f-2). */
   flagMessage?: string | undefined;
+  /** The name the card gives the field, when the label alone does not say which: a row of a list, "Debt 2 APR" (review F13b f-4). */
+  cardLabel?: string | undefined;
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false, named = false, flagMessage } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false, named = false, flagMessage, cardLabel } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
@@ -100,9 +102,9 @@ export default function CalcField(props: CalcFieldProps) {
   // An error marks the result as the last one, with no PDF and the CSV off (DECISOES § 116; review F7, g-1: an age under the
   // minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276), and the card says it (F13b).
   useEffect(() => {
-    report?.(id, message ? { message, label } : null);
+    report?.(id, message ? { message, label: cardLabel ?? label } : null);
     return () => report?.(id, null);
-  }, [report, id, message, label]);
+  }, [report, id, message, label, cardLabel]);
   const marked = message !== undefined || flagged;
   const helpId = `${id}-help`;
   // The unit is part of what the field is: a screen reader says "Thickness, in" and not only "Thickness" (review F7, d-1; DECISOES § 279).

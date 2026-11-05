@@ -409,6 +409,44 @@ for (const { path, open, fill, field, message } of AFTER_CARD) {
   });
 }
 
+// Review F13b f-4 (DECISOES § 598): in a list (the debts, the areas), the card says which row the field in error is in, before
+// its label: "Last result that worked: Debt 2 APR 19.99%." Before, it said only "APR 19.99%".
+test('in a list, the last result that worked says the row of the field in error', async ({ page }) => {
+  for (const [path, field, value, said] of [
+    [CALC_PAGES['debt-payoff-calculator'].path, 'd1r', '99', 'Last result that worked: Debt 2 APR 19.99%.'],
+    [LIFE_CALC_PAGES['square-footage-calculator'].path, 'a0x', '0', 'Last result that worked: Area 1 Length '],
+  ] as const) {
+    await openAt(page, path, 360, 900);
+    await hydrated(page);
+    await page.locator(`#fo-calc-${field}`).fill(value);
+    await page.locator(`#fo-calc-${field}`).blur();
+    await expect(page.locator('.fo-rhero__stale'), path).toContainText(said);
+  }
+});
+
+// Review F13b f-1 and f-3 (DECISOES § 598): in an error every number of the last result leaves the full contrast with the big
+// one (on-deep-muted), so none reads as the result of now: the PRICE line and the legend of the SAC × PRICE, the legend of the
+// mortgage, and the echo at the end of the block of costs on a phone. Before, they stayed in on-deep.
+test('in an error, the PRICE line, the legend and the echo of the costs leave the full contrast with the number', async ({ page }) => {
+  const color = (selector: string) => page.locator(selector).first().evaluate((node) => getComputedStyle(node).color);
+  await openAt(page, moneyPage('br-sac-price', 'pt')?.path ?? '', 360, 900);
+  await hydrated(page);
+  const full = await color('.fo-rhero__versus');
+  await page.locator('#fo-calc-r').fill('500');
+  await page.locator('#fo-calc-r').blur();
+  await expect(page.locator('#fo-rhero-error')).toBeVisible();
+  const muted = await color('.fo-rhero__num');
+  expect(muted).not.toBe(full);
+  for (const selector of ['.fo-rhero__versus', '.fo-rhero__versus b', '.fo-rhero .fo-split__legend li']) expect(await color(selector), selector).toBe(muted);
+  await openAt(page, CALC_PAGES['mortgage-calculator'].path, 360, 900);
+  await hydrated(page);
+  await page.locator('[aria-controls="fo-calc-more-fields"]').click();
+  await page.locator('#fo-calc-tx').fill('99999999');
+  await page.locator('#fo-calc-tx').blur();
+  await expect(page.locator('#fo-rhero-error')).toBeVisible();
+  for (const selector of ['.fo-rhero .fo-split__legend li', '.fo-calc__echo b', '.fo-calc__echo small']) expect(await color(selector), selector).toBe(await color('.fo-rhero__num'));
+});
+
 // F10 p-19: on the first visit (no choice of cookies yet), at 360 x 740, the number of the mortgage (en, es) and of the
 // SAC × PRICE ends above 596 px, clear of the cookie notice, which starts at 604 px; after Accept, the Download PDF is whole
 // above 740 px, in the width of the card. Before: 636 (en) and 678 px (es, pt), covered by 32 and 52 px of the notice.

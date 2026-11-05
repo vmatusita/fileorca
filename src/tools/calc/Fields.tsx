@@ -46,8 +46,10 @@ function NumberInput(props: Props & {
   label?: string;
   /** The texts of the field when they depend on a row's menu ("x-circle"), else the spec's key. */
   textKey?: string;
+  /** The name of the row of a list, which the card says before the label (review F13b f-4). */
+  row?: string;
 }) {
-  const { spec, problems, data, keyName, value, onValue, label, textKey } = props;
+  const { spec, problems, data, keyName, value, onValue, label, textKey, row } = props;
   const texts = (textKey ? data.texts.fields[textKey] : undefined) ?? data.texts.fields[spec.key];
   if (!texts) throw new Error(`no texts for field ${spec.key}`);
   return (
@@ -76,6 +78,7 @@ function NumberInput(props: Props & {
       flagged={props.flagged === keyName}
       named={props.named === fieldId(keyName)}
       flagMessage={props.flagged === keyName ? props.flagMessage : undefined}
+      cardLabel={row ? `${row} ${label ?? texts.label}` : undefined}
     />
   );
 }
@@ -183,6 +186,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
                   spec={item}
                   keyName={`${spec.key}${index}${item.key}`}
                   textKey={chosen ? `${item.key}-${chosen}` : item.key}
+                  row={fmt(listText(data, 'row'), { n: index + 1 })}
                   value={row[item.key] ?? 0}
                   onValue={(value) => update(index, item.key, value)}
                 />

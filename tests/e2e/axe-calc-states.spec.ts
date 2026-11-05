@@ -26,14 +26,16 @@ async function check(page: Page, state: string, found: string[]): Promise<void> 
   for (const violation of await violationsEverywhere(page)) found.push(`${state}: ${violation}`);
 }
 
+// Review F13b b-5 (DECISOES § 598): which of them has the block of costs and the schedule that folds is said here, so a
+// renamed control fails the test instead of skipping its state in silence.
 const CALCS = [
-  { path: CALC_PAGES['mortgage-calculator'].path, field: 'r', wrong: '99' },
-  { path: moneyPage('mortgage-calculator', 'es')?.path ?? '', field: 'r', wrong: '99' },
-  { path: moneyPage('br-sac-price', 'pt')?.path ?? '', field: 'n', wrong: '5' },
-  { path: CALC_PAGES['credit-card-payoff-calculator'].path, field: 'pay', wrong: '10' },
-  { path: LIFE_CALC_PAGES['bmi-calculator'].path, field: 'lb', wrong: 'abc' },
+  { path: CALC_PAGES['mortgage-calculator'].path, field: 'r', wrong: '99', costs: true, folds: true },
+  { path: moneyPage('mortgage-calculator', 'es')?.path ?? '', field: 'r', wrong: '99', costs: true, folds: true },
+  { path: moneyPage('br-sac-price', 'pt')?.path ?? '', field: 'n', wrong: '5', costs: true, folds: true },
+  { path: CALC_PAGES['credit-card-payoff-calculator'].path, field: 'pay', wrong: '10', costs: false, folds: true },
+  { path: LIFE_CALC_PAGES['bmi-calculator'].path, field: 'lb', wrong: 'abc', costs: false, folds: false },
 ];
-for (const { path, field, wrong } of CALCS) {
+for (const { path, field, wrong, costs, folds } of CALCS) {
   test(`${path}: the example, an error in the card, the block of costs open and the schedule open`, async ({ page }) => {
     test.setTimeout(120_000);
     const found: string[] = [];
@@ -47,13 +49,15 @@ for (const { path, field, wrong } of CALCS) {
     await page.goto('about:blank');
     await open(page, path);
     const fold = page.locator('[aria-controls="fo-calc-more-fields"]');
-    if (await fold.count()) {
+    await expect(fold).toHaveCount(costs ? 1 : 0);
+    if (costs) {
       await fold.click();
       await expect(page.locator('#fo-calc-more-fields input').first()).toBeVisible();
       await check(page, 'bloco de custos aberto', found);
     }
     const schedule = page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]');
-    if (await schedule.count()) {
+    await expect(schedule).toHaveCount(folds ? 1 : 0);
+    if (folds) {
       await schedule.click();
       const years = page.locator('#fo-calc-schedule tr.fo-amort__year');
       if ((await years.count()) > 1) await years.nth(1).getByRole('button').click();

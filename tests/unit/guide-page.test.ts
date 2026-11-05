@@ -122,6 +122,25 @@ describe('the texts of the sheet, the history and the columns left out', () => {
     });
   }
 
+  // Review F13b e-1 (DECISOES § 598): the caption is the name of the table for a screen reader, so it names only the columns the
+  // page shows: the column the same in every row left out (§ 559) leaves the caption too.
+  it('name in the caption of a table only the columns the page shows (the GPS after, the photos that kept GPS)', () => {
+    const left: Partial<Record<FileGuideId, RegExp>> = {
+      'guides-heic-to-jpg-on-windows': /\b(before and after|antes e depois|antes y después)\b/i,
+      'guides-remove-location-from-photos': /\bGPS\b/,
+    };
+    for (const lang of LANGS) {
+      for (const [id, words] of Object.entries(left) as [FileGuideId, RegExp][]) {
+        const t = guideTexts(id, lang);
+        const tables = pageTables(id, GUIDE_SHARED[lang], t, MEASURED, lang);
+        expect(tables.some((table) => table.dropped.length > 0), `${id} ${lang}`).toBe(true);
+        tables.forEach((table, index) => {
+          if (table.dropped.length > 0) expect(t.tables[index]?.caption ?? '', `${id} ${lang} table ${index}`).not.toMatch(words);
+        });
+      }
+    }
+  });
+
   it('say "all" the HEIC photos in the note only while WebKit gave the same bytes for every one (F5b F-13)', () => {
     const numbers = MEASURED.guides['guides-heic-to-jpg-on-windows'].numbers;
     expect(numbers['identicalBrowsers']?.value).toBe(numbers['files']?.value);

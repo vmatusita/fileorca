@@ -184,8 +184,11 @@ export default function QrPanel({ lang, t }: QrPanelData) {
               </button>
             </>
           ) : (
+            // Review F13b e-4 (DECISOES § 598): the line says why only while no error does; with the error of an empty box or of
+            // a text too long, the place keeps its height and says nothing ("type a link or some text" twice, or to whoever
+            // typed too much).
             <p class="fo-qr__wait" key="wait">
-              {t.download.wait}
+              {problem ? null : t.download.wait}
             </p>
           )}
         </div>

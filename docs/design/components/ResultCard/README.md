@@ -31,3 +31,7 @@ Os pares novos do resultado como o mar que subiu (F13a, DECISOES § 464 e § 472
 | `on-deep` (a fala, os números, Start over, Before and after) sobre `deep` | 13,16:1 | 13,16:1 |
 | `on-deep-muted` (o antes riscado, a mudança com sinal, as notas) sobre `deep` | 7,71:1 | 7,71:1 |
 | `water` (a faixa da onda, decoração: nada mora nela) sobre `deep` | 10,92:1 | 1,36:1 |
+
+## Mudança de regra (F13b, DECISOES § 580)
+
+- **Os ghosts do resultado abaixo de 340px.** Antes: "'Start over' e 'Before and after' em ghost de 48px (15px de texto e 6px de lado no celular)". Depois: abaixo de 340px eles ficam numa linha, com 14px de texto e 2px de lado (48px de altura, como antes), e a Placa sai (README da Placard): em pt e es os dois passavam dos 252px da coluna e iam a duas linhas.

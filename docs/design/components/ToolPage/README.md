@@ -47,3 +47,7 @@ Os pares novos da faixa de baixo (F13a, DECISOES § 466). Nenhum token novo.
 | --- | ---: | ---: |
 | `ink-muted` (o valor atual no "Ajustar", `.fo-adjust__now`) sobre `surface` | 7,01:1 | 7,83:1 |
 | `stroke` (a borda do "Ajustar", 1.4.11) sobre `surface` | 17,28:1 | 4,07:1 |
+
+## Mudança de regra: o topo da calculadora (F13b, DECISOES § 544)
+
+- **O topo da calculadora no celular (F13b, UX-12 A; DECISOES § 544).** Antes: o topo da página de calculadora era o de toda página, com 8px entre as linhas, o lead em 18/28 e a trilha inteira. Depois: abaixo de 768px (`.fo-top--calcpage`), 4px entre as linhas, o lead em 16/24, a assinatura "Revisado" numa linha com a data curta (14/20) e o item da própria página na trilha só para o leitor de tela (README do Breadcrumb): o número da hipoteca e do SAC × PRICE termina em 592px a 360 × 740, acima do aviso de cookies (604px). Os guias mantêm o topo deles.

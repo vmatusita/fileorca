@@ -63,7 +63,7 @@ export default {
   howSteps: [
     'Digite o valor do imóvel e a entrada, em reais ou em porcentagem do valor.',
     'Digite o prazo em meses e os juros ao ano da proposta do banco.',
-    'Se quiser, preencha a TR ao mês e os seguros e taxas, que aparecem depois do resultado.',
+    'Se quiser, abra "TR, seguros e taxas" e preencha a TR ao mês e os seguros e taxas.',
     'Compare as duas colunas e abra o cronograma, ou baixe em PDF e CSV.',
   ],
   worksHeading: 'Como o SAC e a PRICE são calculados',

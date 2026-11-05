@@ -151,10 +151,12 @@ export function heroReserves(def: CalcDef, data: CalcPanelData, start: Values): 
   for (const spec of def.fields) {
     if (!visible(spec, start) || spec.kind === 'choice' || spec.kind === 'select') continue;
     const keys = spec.kind === 'list' ? spec.item.map((item) => [`${spec.key}0${item.key}`, item.key] as const) : [[spec.key, spec.key] as const];
+    // A row of a list is named before its label, with the number of its last row (review F13b f-4).
+    const row = spec.kind === 'list' ? `${fmt(data.texts.view['row'] ?? data.t.row, { n: spec.max })} ` : '';
     for (const [name, key] of keys) {
       const label = data.texts.fields[key]?.label;
       const value = fieldText(def.fields, start, name, data);
-      if (label && value !== null) stale.push(`${say(label, value)} ${data.t.stale}`);
+      if (label && value !== null) stale.push(`${say(`${row}${label}`, value)} ${data.t.stale}`);
     }
   }
   const line = (index: 0 | 1) => widen(longest(legend.map((pair) => pair[index]), lineWidth), lang);
@@ -314,7 +316,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
                 {costsOpen && (
                   <>
                     <Fields {...fieldProps} specs={folded} />
-                    <p class="fo-calc__echo" aria-hidden="true">
+                    <p class="fo-calc__echo" aria-hidden="true" data-state={error !== undefined ? 'error' : undefined}>
                       <span>{shown.hero.label}</span>
                       <span class="fo-calc__echo-n">
                         <b>{shown.hero.value}</b>

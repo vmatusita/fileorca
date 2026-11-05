@@ -59,7 +59,7 @@ export default {
   howSteps: [
     'Escribe el precio de la vivienda y tu pago inicial, en dólares o como porcentaje del precio.',
     'Escribe la tasa de interés que te dio tu prestamista y el plazo del préstamo en años.',
-    'Agrega los impuestos sobre la propiedad y el seguro de cada año, y el seguro hipotecario privado (PMI) o la cuota de la asociación de propietarios (HOA) si los tienes, para ver el pago mensual completo.',
+    'Abre "Impuestos, seguros y cuotas" y agrega los impuestos sobre la propiedad y el seguro de cada año, y el seguro hipotecario privado (PMI) o la cuota de la asociación de propietarios (HOA) si los tienes, para ver el pago mensual completo.',
     'Abre la tabla para ver cada pago, o guárdala en PDF o CSV.',
   ],
   worksHeading: 'Cómo se calcula el pago de la hipoteca',
