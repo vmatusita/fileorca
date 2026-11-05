@@ -1045,6 +1045,12 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    ScenarioCompare and AmortTable (docs/design/components). The ResultHero is .fo-rhero because .fo-hero is
    the hero of the home. On a phone the result comes right after the main fields; from 768px they stand side by side. ---------- */
 .fo-calc { display: grid; gap: var(--space-5); }
+/* Review F13b c-2 (DECISOES § 597): the text of the island (the sentence of the card, its error and the room it keeps, the
+   labels, the notes and the help of the fields) keeps the face of its first paint, Figtree Steady, as the trail, the
+   signature of a guide, the home and the 404 do (§ 305, § 578): with the card and the tool higher on the screen since the
+   F13b, a sentence or a label that wrapped again when Figtree arrived moved the page (load CLS up to 0.051). The numbers and
+   headings in Fredoka keep theirs. */
+.fo-calc { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 /* Every item of the calculator grid takes two rows, and a field lays its label and its body (box, help, error) on
    them with subgrid: two fields side by side share the label row, so their boxes line up when one label wraps or
    one field has help under it (DECISOES § 137). */
@@ -1110,6 +1116,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
+/* Review F13b c-2 (DECISOES § 597): the lead and the lines of the top of a calculator and of a guide, in the face of the first
+   paint too (the H1 is Fredoka): the lead of 16/24 went from two lines to three when Figtree arrived and pushed the tool. */
+.fo-top--calc { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 /* F13b · the top of a calculator page (UX-12 A, F10 p-19; DECISOES § 544). The number of the ResultHero ends above 596 px
    at 360 x 740, clear of the cookie notice of the first visit (it starts at 604 px). The signature takes one line (14/20,
    the short date), and below 768 px the top is tighter: 4 px between its lines, the lead in the body size (16/24, two
