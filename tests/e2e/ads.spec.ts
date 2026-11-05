@@ -325,23 +325,29 @@ for (const viewport of VIEWPORTS) {
     // written in the page as the chip of Resize image writes them, and the page is opened again.
     const CHOICE = JSON.stringify({ tool: 'compress-image', order: [0], from: 'resize-image' });
 
-    test('with the arrival of a file a chip brought: the note of where it came from', async ({ page }) => {
-      await dismissCookies(page);
-      const photo = (await generatedJpeg(page)).toString('base64');
-      await page.evaluate(
-        async ([base64, cache, entry, key, choice]) => {
-          const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
-          const headers = { 'Content-Type': 'image/jpeg', 'X-FileOrca-Name': 'photo.jpg', 'X-FileOrca-Stored': String(Date.now()) };
-          await (await caches.open(cache)).put(new Request(new URL(entry, location.origin).href), new Response(new Blob([bytes], { type: 'image/jpeg' }), { headers }));
-          sessionStorage.setItem(key, choice);
-        },
-        [photo, INBOX_CACHE, inboxEntryPath(0), INBOX_TOOL_KEY, CHOICE] as const,
-      );
-      await page.reload();
-      await hydrated(page);
-      await expect(page.locator('.fo-result__from')).toBeVisible({ timeout: 30_000 });
-      await openOnScreen(page);
-      await measure(page, 'chegada com a nota de origem');
+    test.describe(() => {
+      // The Cache Storage of the WebKit of Playwright does not outlive a reload while service workers are blocked (the
+      // default of the config), and a chip only carries with a worker anyway: this state runs with them allowed.
+      test.use({ serviceWorkers: 'allow' });
+
+      test('with the arrival of a file a chip brought: the note of where it came from', async ({ page }) => {
+        await dismissCookies(page);
+        const photo = (await generatedJpeg(page)).toString('base64');
+        await page.evaluate(
+          async ([base64, cache, entry, key, choice]) => {
+            const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+            const headers = { 'Content-Type': 'image/jpeg', 'X-FileOrca-Name': 'photo.jpg', 'X-FileOrca-Stored': String(Date.now()) };
+            await (await caches.open(cache)).put(new Request(new URL(entry, location.origin).href), new Response(new Blob([bytes], { type: 'image/jpeg' }), { headers }));
+            sessionStorage.setItem(key, choice);
+          },
+          [photo, INBOX_CACHE, inboxEntryPath(0), INBOX_TOOL_KEY, CHOICE] as const,
+        );
+        await page.reload();
+        await hydrated(page);
+        await expect(page.locator('.fo-result__from')).toBeVisible({ timeout: 30_000 });
+        await openOnScreen(page);
+        await measure(page, 'chegada com a nota de origem');
+      });
     });
 
     test('with the empty box: the note of a chip and no file', async ({ page }) => {
