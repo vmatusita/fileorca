@@ -30,4 +30,6 @@ Os pares novos das peças de PDF e da linha do Juntar (F13a, DECISOES § 479 e �
 | `on-deep` (o número da ordem) sobre `deep` | 13,16:1 | 13,16:1 |
 | `stroke` (o círculo vazio, o tracejado do "Add more PDFs" e da linha do Desfazer) sobre `surface` | 17,28:1 | 4,07:1 |
 | `on-brand` (o check da página escolhida na grade) sobre `brand` | 5,09:1 | 7,02:1 |
-| `brand-edge` (a borda da página escolhida) sobre `surface` | 17,28:1 | 6,11:1 |
+| `brand-edge` (a borda do círculo do check da página escolhida; antes este README dizia "a borda da página escolhida", F13a, revisão a-3) sobre `surface` | 17,28:1 | 6,11:1 |
+| `brand` (o preenchimento do círculo marcado e a borda da página escolhida na grade; UX11-2) sobre `surface` | 5,09:1 | 6,11:1 |
+| `focus` do tema claro (o anel e o tracejado `brand` da caixa da assinatura, que fica no papel claro, `data-theme="light"`) sobre `surface` do claro, e sobre o `surface` do escuro quando o anel sai da moldura (UX11-7) | 5,09:1 | 3,13:1 (passa 3:1, o mínimo de um contorno, WCAG 1.4.11) |
