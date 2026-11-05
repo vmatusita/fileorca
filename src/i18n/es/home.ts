@@ -30,7 +30,7 @@ export default {
     count: '{n} calculadoras',
     num: '{payment} al mes',
     say: 'La hipoteca del ejemplo, todo incluido: una casa de {price} con {down} de pago inicial, al {rate} a {years} años.',
-    more: 'Cada calculadora muestra el pago, los intereses y la tabla completa, y los números que escribes se quedan en tu dispositivo.',
+    more: 'Cada calculadora explica su resultado, que puedes descargar en PDF o CSV, y lo que escribes se queda en tu dispositivo.',
     all: 'Las {n} calculadoras financieras',
   },
   qr: {

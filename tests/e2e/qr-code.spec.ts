@@ -325,6 +325,26 @@ test.describe('QR code generator', () => {
     await expect(page.locator('#fo-qr-count')).toHaveText('1,273 of 1,273');
   });
 
+  // Review F13b e-4 (DECISOES § 598): the line in the place of the buttons says why there is nothing to download only while
+  // no error says it: with the error of a text too long or of an empty box, it says nothing (it told whoever typed too much to
+  // type, and repeated the error of the empty box), and the place keeps its height.
+  test('the place of the buttons says nothing under the error of a text too long or of an empty box, and keeps its height', async ({ page }) => {
+    await open(page);
+    const actions = page.locator('.fo-qr__actions');
+    const wait = actions.locator('.fo-qr__wait');
+    const height = () => actions.evaluate((node) => node.getBoundingClientRect().height);
+    await expect(wait).toHaveText(en.download.wait);
+    const before = await height();
+    await box(page).fill('é'.repeat(637));
+    await expect(page.locator('#fo-qr-error')).toHaveText(/too long for one QR code/);
+    await expect(wait).toHaveText('');
+    expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+    await box(page).fill('');
+    await expect(page.locator('#fo-qr-error')).toHaveText(/nothing to put in the code yet/);
+    await expect(wait).toHaveText('');
+    expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+  });
+
   // F7 f-9 (DECISOES § 551): the size of the PNG is always on the second line of its Download, with no middle dot, in the
   // button of 60 px (button-lg), at 1280, 360 and 320 px, in the three languages. Before, it followed a "·" on the same line and
   // went under it on a narrow phone, leaving the dot at the start of the line.

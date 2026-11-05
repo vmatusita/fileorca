@@ -80,7 +80,7 @@ const texts: FileGuideTexts = {
   tables: [
     {
       heading: 'Our HEIC photos as JPG',
-      caption: 'Each HEIC test photo: its camera, its size as HEIC and as JPG, the change, its size in pixels, and its GPS before and after',
+      caption: 'Each HEIC test photo: its camera, its size as HEIC and as JPG, the change, its size in pixels, and its GPS before the conversion',
       head: ['Camera', 'HEIC', 'JPG', 'Change', 'Pixels', 'GPS before', 'GPS after'],
       constant: 'No JPG kept any GPS data.',
     },

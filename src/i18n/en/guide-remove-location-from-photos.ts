@@ -78,7 +78,7 @@ const texts: FileGuideTexts = {
   tables: [
     {
       heading: 'Each tool on our photos',
-      caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, how close the pixels are on the worst photo, and how many photos kept GPS data',
+      caption: 'Each image tool that takes a JPG: the size after, the format, whether the frame stays the same, and how close the pixels are on the worst photo',
       head: ['Tool', 'Size after', 'Format', 'Same frame', 'Pixels, worst photo', 'Photos with GPS left'],
       constant: 'No tool left GPS data in any photo.',
     },

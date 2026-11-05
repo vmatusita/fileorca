@@ -16,7 +16,7 @@ import { dollars, formatScaled, money, ratePercent } from '../../src/calc/parse.
 import { MAX_BYTES } from '../../src/tools/qr-code-generator/qr.ts';
 import { wordsOf } from '../../src/ads/html.ts';
 import { HOME_BAND_MONEY_IDS, homeBands } from '../../src/components/home-bands.ts';
-import { BR_CALC_IDS, HOME_MONEY_IDS, HEALTH_CALC_IDS, HOUSE_CALC_IDS } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, HOME_MONEY_IDS, HEALTH_CALC_IDS, HOUSE_CALC_IDS, HUB_MONEY_IDS, moneyPage } from '../../src/tools/calc/registry.ts';
 import { IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
@@ -186,6 +186,31 @@ describe.runIf(BUILT)('the built home of each language', () => {
         expect(section?.querySelectorAll('.fo-catband__links a').map((link) => link.getAttribute('href')), `${lang} ${band.id}`).toEqual(band.hubs);
       }
     }
+  });
+
+  // Review F13b e-2 and f-6 (DECISOES § 591): the sentence more of the money band speaks for every calculator of the hub, so it
+  // says only what each of them does (its sentence, the Download PDF of the card and the Download CSV under it), never a result
+  // some lack (the payment and the schedule of a loan, the CET of two of the eight in pt); and the paint example is said with
+  // the doors and windows it takes off (the 1.9 gallons are after them).
+  it('says in the money band only what every money calculator of the language does, and the paint example after its doors and windows', () => {
+    const never: Record<Lang, RegExp> = { en: /\b(payment|interest|schedule)\b/i, pt: /\b(CET|parcela|juros|cronograma)\b/i, es: /\b(pago|intereses|tabla)\b/i };
+    for (const lang of LANGS) {
+      const more = read(page(lang).querySelector('main > section[aria-labelledby="money-home"] .fo-catband__more'));
+      expect(more, lang).toMatch(/\bPDF\b.*\bCSV\b/);
+      expect(more, lang).not.toMatch(never[lang]);
+      const csv = { en: 'Download CSV', pt: 'Baixar CSV', es: 'Descargar CSV' }[lang];
+      for (const id of HUB_MONEY_IDS[lang]) {
+        const path = moneyPage(id, lang)?.path ?? `/(${id})/`;
+        const html = readFileSync(join(DIST, path, 'index.html'), 'utf8');
+        expect(html, `${lang} ${path}: o Baixar PDF do card`).toMatch(/class="fo-btn fo-btn--download[^"]*"/);
+        expect(html, `${lang} ${path}: o ${csv}`).toContain(csv);
+      }
+    }
+    expect(Number(paint.input['doors'])).toBeGreaterThan(0);
+    expect(Number(paint.input['windows'])).toBeGreaterThan(0);
+    expect(read(page('en').querySelector('main > section[aria-labelledby="life-home"] .fo-catband__say'))).toMatch(/\bafter the doors and windows\b/);
+    // Review F13b e-3: the PRICE is feminine in the rest of the site ("a tabela PRICE", "Na PRICE: …").
+    expect(read(page('pt').querySelector('main > section[aria-labelledby="money-home"] .fo-catband__say'))).toMatch(/\bna PRICE\b/);
   });
 
   it('has the words of the 3 ads by width in <main>: 450 or more, under the 595 of the lateral-2, 75 to 105 of them in the sentences more', () => {

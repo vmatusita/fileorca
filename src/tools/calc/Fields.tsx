@@ -22,6 +22,10 @@ interface Props {
   report?: ((id: string, error: FieldError | null) => void) | undefined;
   /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
   flagged?: string | undefined;
+  /** The id of the field whose error the card says (the first in error, or the one a problem points to; review F13b b-2). */
+  named?: string | undefined;
+  /** The problem of the account the card says, shown near the field it points to on a phone (review F13b f-2). */
+  flagMessage?: string | undefined;
   /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § 552). */
   latest?: (() => Values) | undefined;
 }
@@ -42,8 +46,10 @@ function NumberInput(props: Props & {
   label?: string;
   /** The texts of the field when they depend on a row's menu ("x-circle"), else the spec's key. */
   textKey?: string;
+  /** The name of the row of a list, which the card says before the label (review F13b f-4). */
+  row?: string;
 }) {
-  const { spec, problems, data, keyName, value, onValue, label, textKey } = props;
+  const { spec, problems, data, keyName, value, onValue, label, textKey, row } = props;
   const texts = (textKey ? data.texts.fields[textKey] : undefined) ?? data.texts.fields[spec.key];
   if (!texts) throw new Error(`no texts for field ${spec.key}`);
   return (
@@ -70,6 +76,9 @@ function NumberInput(props: Props & {
       wide={spec.wide}
       report={props.report}
       flagged={props.flagged === keyName}
+      named={props.named === fieldId(keyName)}
+      flagMessage={props.flagged === keyName ? props.flagMessage : undefined}
+      cardLabel={row ? `${row} ${label ?? texts.label}` : undefined}
     />
   );
 }
@@ -177,6 +186,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
                   spec={item}
                   keyName={`${spec.key}${index}${item.key}`}
                   textKey={chosen ? `${item.key}-${chosen}` : item.key}
+                  row={fmt(listText(data, 'row'), { n: index + 1 })}
                   value={row[item.key] ?? 0}
                   onValue={(value) => update(index, item.key, value)}
                 />
@@ -280,6 +290,8 @@ export function Field(props: Props & { spec: FieldSpec }) {
           unit={unit}
           report={props.report}
           flagged={props.flagged === spec.key}
+          named={props.named === fieldId(spec.key)}
+          flagMessage={props.flagged === spec.key ? props.flagMessage : undefined}
         />
       );
     }
@@ -337,6 +349,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           error={texts.error}
           half={spec.half}
           report={props.report}
+          named={props.named === fieldId(spec.key)}
         />
       );
     }

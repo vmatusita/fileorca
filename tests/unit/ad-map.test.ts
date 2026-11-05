@@ -35,6 +35,10 @@ describe('the marks of a view', () => {
       [`<div id="fo-tool-root"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div#fo-tool-root/],
       [`<div id="fo-calc-schedule"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div#fo-calc-schedule/],
       [`<div class="fo-hubband"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div\.fo-hubband/],
+      // Review F13b d-2 (DECISOES § 596): a band of the home, its top and its sea, as the e2e map refuses them (§ 573).
+      [`${section(P)}<section class="fo-catband"><h2>Money</h2>${P}${FIRST}<p>b</p></section>${section(P)}`, /dentro de section\.fo-catband/],
+      [`<div class="fo-home-top"><p>a</p>${FIRST}<p>b</p></div>${section(P)}`, /dentro de div\.fo-home-top/],
+      [`${section(P)}<div class="fo-home-sea"><p>a</p>${FIRST}<p>b</p></div>${section(P)}`, /dentro de div\.fo-home-sea/],
       [`<section><h2>A</h2>${FIRST}${P}</section>`, /logo depois de um título/],
       [`<section><h2>A</h2><table><tr><td>1</td></tr></table></section>${FIRST}${section(P)}`, /colada no fim de uma tabela/],
       [`${section(P)}${FIRST}<div class="fo-table-wrap"><table><tr><td>1</td></tr></table></div>`, /colada no começo de uma tabela/],

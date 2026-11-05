@@ -71,6 +71,31 @@ export function fieldText(specs: readonly FieldSpec[], values: Values, keyName: 
   return null;
 }
 
+/**
+ * Every number of a text as wide as its digits may draw (review F13b a-1; DECISOES § 595): each digit as a "0", the widest
+ * one of Figtree (10.9 px at 17 px, wider than any bold digit but the bold 0, 11.0), and `more` digits more, with the grouping
+ * of the language. widen("$2,396.20", 'en') → "$0,000.00"; widen("R$ 284.596", 'pt', 1) → "R$ 0.000.000". Only for the room
+ * the card keeps (a reserve drawn hidden), never for a text that is read.
+ */
+export function widen(text: string, lang: NumberLang, more = 0): string {
+  const point = lang === 'pt' ? ',' : '.';
+  const group = lang === 'pt' ? '.' : ',';
+  return text.replace(/\d(?:[\d.,]*\d)?/g, (run) => {
+    const at = run.lastIndexOf(point);
+    const whole = (at >= 0 ? run.slice(0, at) : run).replace(/\D/g, '');
+    const part = at >= 0 ? run.slice(at + 1).replace(/\d/g, '0') : '';
+    const grouped = '0'.repeat(whole.length + more).replace(/\B(?=(\d{3})+(?!\d))/g, group);
+    return at >= 0 ? `${grouped}${point}${part}` : grouped;
+  });
+}
+
+/** A rough width of a line of the sentence at 17 px, to pick the longest of several (the 0, a capital, a letter, a space). */
+export function lineWidth(text: string): number {
+  let width = 0;
+  for (const char of text) width += /\d/.test(char) ? 10.9 : /[A-ZÀ-Ý]/.test(char) ? 12 : /[a-zß-ÿ]/.test(char) ? 8.4 : char === ' ' ? 4.2 : /[.,;:]/.test(char) ? 3.8 : 9;
+  return width;
+}
+
 /** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */
 const rowName = (data: CalcPanelData): string => data.texts.view['row'] ?? data.t.row;
 

@@ -36,6 +36,7 @@ function problemView(label: string, problem: string, premises: string[], field?:
 
 export const creditCardDef: CalcDef<CardInput, CardResult> = {
   id: 'credit-card-payoff-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     money('b', 1, 1_000_000, { main: true, half: true }),
     rate('r', 0, 60, { main: true, half: true, example: true }),
@@ -92,6 +93,7 @@ function orderText(plan: PayoffPlan, s: CalcSharedTexts): string {
 
 export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
   id: 'debt-payoff-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     money('x', 0, 1_000_000, { main: true }),
     { kind: 'list', key: 'd', min: 1, max: 10, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60, { example: true }), money('m', 0, 100_000)] },
@@ -165,6 +167,7 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
 
 export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> = {
   id: 'debt-consolidation-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nm', 1, 120, { main: true, half: true }),

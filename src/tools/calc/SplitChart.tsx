@@ -12,6 +12,12 @@ export interface SplitPart {
   text: string;
 }
 
+/**
+ * The room each line of the legend keeps in the card, drawn hidden (review F13b a-1; DECISOES § 595): the line with the widest
+ * numbers the card may show, so other numbers never wrap it again.
+ */
+export type Reserve = readonly [string, string];
+
 /** Whole-percent shares of a and b that add up to 100 (b gets the remainder). */
 export function shares(a: number, b: number): [number, number] {
   const total = a + b;
@@ -26,7 +32,7 @@ export function shares(a: number, b: number): [number, number] {
  * brand-on-deep) and the interest of its system (coral with the hatch); the widest is the whole width. The pair is role="img"
  * with both totals in its name, and the legend says them in text. Each bar has its own clip and pattern ids.
  */
-export function PairChart({ name, principal, interest, rows }: { name: string; principal: SplitPart; interest: ComponentChildren; rows: { name: string; cents: number }[] }) {
+export function PairChart({ name, principal, interest, rows, reserve }: { name: string; principal: SplitPart; interest: ComponentChildren; rows: { name: string; cents: number }[]; reserve?: Reserve | undefined }) {
   const widest = Math.max(1, ...rows.map((row) => principal.cents + row.cents));
   return (
     <div class="fo-split fo-split--pair">
@@ -62,13 +68,17 @@ export function PairChart({ name, principal, interest, rows }: { name: string; p
       <ul class="fo-split__legend">
         <li>
           <i class="fo-split__key fo-split__key--a" />
-          <span>
-            {principal.label} <b>{principal.text}</b>
+          <span data-reserve={reserve?.[0]}>
+            <span>
+              {principal.label} <b>{principal.text}</b>
+            </span>
           </span>
         </li>
         <li>
           <i class="fo-split__key fo-split__key--b" />
-          <span>{interest}</span>
+          <span data-reserve={reserve?.[1]}>
+            <span>{interest}</span>
+          </span>
         </li>
       </ul>
     </div>
@@ -76,7 +86,7 @@ export function PairChart({ name, principal, interest, rows }: { name: string; p
 }
 
 /** `percent` writes a share as the page's language does: 68% (en, pt), 68 % (es). */
-export default function SplitChart({ a, b, name, percent }: { a: SplitPart; b: SplitPart; name: string; percent: (value: number) => string }) {
+export default function SplitChart({ a, b, name, percent, reserve }: { a: SplitPart; b: SplitPart; name: string; percent: (value: number) => string; reserve?: Reserve | undefined }) {
   const [pa, pb] = shares(a.cents, b.cents);
   return (
     <div class="fo-split">
@@ -101,14 +111,18 @@ export default function SplitChart({ a, b, name, percent }: { a: SplitPart; b: S
       <ul class="fo-split__legend">
         <li>
           <i class="fo-split__key fo-split__key--a" />
-          <span>
-            {a.label} <b>{a.text}</b>{` · ${percent(pa)}`}
+          <span data-reserve={reserve?.[0]}>
+            <span>
+              {a.label} <b>{a.text}</b>{` · ${percent(pa)}`}
+            </span>
           </span>
         </li>
         <li>
           <i class="fo-split__key fo-split__key--b" />
-          <span>
-            {b.label} <b>{b.text}</b>{` · ${percent(pb)}`}
+          <span data-reserve={reserve?.[1]}>
+            <span>
+              {b.label} <b>{b.text}</b>{` · ${percent(pb)}`}
+            </span>
           </span>
         </li>
       </ul>

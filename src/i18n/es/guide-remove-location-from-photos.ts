@@ -78,7 +78,7 @@ const texts: FileGuideTexts = {
   tables: [
     {
       heading: 'Cada herramienta con nuestras fotos',
-      caption: 'Cada herramienta de imagen que acepta JPG: el tamaño después, el formato, si el encuadre queda igual, cuánto se parecen los píxeles en la peor foto y cuántas fotos conservaron datos GPS',
+      caption: 'Cada herramienta de imagen que acepta JPG: el tamaño después, el formato, si el encuadre queda igual y cuánto se parecen los píxeles en la peor foto',
       head: ['Herramienta', 'Tamaño después', 'Formato', 'Mismo encuadre', 'Píxeles, peor foto', 'Fotos que conservaron GPS'],
       constant: 'Ninguna herramienta dejó datos GPS en ninguna foto.',
     },

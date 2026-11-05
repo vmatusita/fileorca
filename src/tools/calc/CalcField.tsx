@@ -58,10 +58,19 @@ export interface CalcFieldProps {
   report?: ((id: string, error: FieldError | null) => void) | undefined;
   /** A problem of the account points to this field (F4 ACE-11): marked as in error, with no message of its own. */
   flagged?: boolean | undefined;
+  /**
+   * The card says this field's error (the first field in error of the form, or the field a problem points to): its
+   * aria-describedby points to the card. Another field in error is described by its own message (review F13b b-2).
+   */
+  named?: boolean | undefined;
+  /** The problem of the account the card says, when it points to this field: shown near it on a phone (review F13b f-2). */
+  flagMessage?: string | undefined;
+  /** The name the card gives the field, when the label alone does not say which: a row of a list, "Debt 2 APR" (review F13b f-4). */
+  cardLabel?: string | undefined;
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false, named = false, flagMessage, cardLabel } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
@@ -93,9 +102,9 @@ export default function CalcField(props: CalcFieldProps) {
   // An error marks the result as the last one, with no PDF and the CSV off (DECISOES § 116; review F7, g-1: an age under the
   // minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276), and the card says it (F13b).
   useEffect(() => {
-    report?.(id, message ? { message, label } : null);
+    report?.(id, message ? { message, label: cardLabel ?? label } : null);
     return () => report?.(id, null);
-  }, [report, id, message, label]);
+  }, [report, id, message, label, cardLabel]);
   const marked = message !== undefined || flagged;
   const helpId = `${id}-help`;
   // The unit is part of what the field is: a screen reader says "Thickness, in" and not only "Thickness" (review F7, d-1; DECISOES § 279).
@@ -103,7 +112,14 @@ export default function CalcField(props: CalcFieldProps) {
   const suffixId = `${id}-unit`;
   const affix = !unit && suffix ? suffixId : null;
   const descId = `${id}-desc`;
-  const described = [desc ? descId : null, prefix ? prefixId : null, affix, marked ? HERO_ERROR_ID : null, help ? helpId : null].filter(Boolean).join(' ');
+  // Review F13b b-2 and f-2 (DECISOES § 593 and § 594): the card says one field's error, the first of the form. That field is
+  // described by the card; another field in error, by its own message, which no role and no live region repeat (the card is
+  // the one voice, § 102). On a phone, the message of a field after the card shows under it while it has the focus (f-2), since
+  // the card is above the screen there; for the field the card names, it is only drawn (aria-hidden): the card says it.
+  const said = message ?? (flagged ? flagMessage : undefined);
+  const msgId = `${id}-error`;
+  const own = message !== undefined && !named;
+  const described = [desc ? descId : null, prefix ? prefixId : null, affix, marked ? (own ? msgId : HERO_ERROR_ID) : null, help ? helpId : null].filter(Boolean).join(' ');
   return (
     <div class={half ? (wide ? 'fo-field fo-field--half fo-field--wide' : 'fo-field fo-field--half') : 'fo-field'} data-state={marked ? 'error' : undefined}>
       <label class="fo-field__label" for={id}>
@@ -165,6 +181,11 @@ export default function CalcField(props: CalcFieldProps) {
         {help && (
           <p class="fo-field__help" id={helpId}>
             {help}
+          </p>
+        )}
+        {said !== undefined && (
+          <p class="fo-field__msg" id={msgId} aria-hidden={own ? undefined : 'true'}>
+            {said}
           </p>
         )}
       </div>

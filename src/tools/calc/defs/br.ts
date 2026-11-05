@@ -94,6 +94,7 @@ export function sacPriceInput(values: Values): SacPriceInput {
 
 export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
   id: 'br-sac-price',
+  problems: ['noLoan'],
   // The TR and the insurance and fees fold into a block after the result (F13b, DECISOES § 547).
   disclose: ['tr', 'f'],
   fields: [
@@ -224,6 +225,7 @@ const costsOf = (v: Values) => ({ months: num(v, 'n'), rate: num(v, 'r'), iof: n
 
 export const brVehicleLoanDef: CalcDef<VehicleLoanInput, CreditResult> = {
   id: 'br-vehicle-loan',
+  problems: ['noLoan', 'costsTooHigh', 'cetTooHigh'],
   fields: [
     money('p', 1_000, 5_000_000, { main: true, half: true }),
     money('e', 0, 5_000_000, { main: true, half: true, atMost: 'p' }),
@@ -239,6 +241,7 @@ export const brVehicleLoanDef: CalcDef<VehicleLoanInput, CreditResult> = {
 
 export const brPersonalLoanDef: CalcDef<BrPersonalLoanInput, CreditResult> = {
   id: 'br-personal-loan',
+  problems: ['noLoan', 'costsTooHigh', 'cetTooHigh'],
   fields: [money('a', 100, 1_000_000, { main: true }), count('n', 1, 120, { main: true, half: true }), rate('r', 0, 20, { main: true, half: true, example: true }), ...costFields()],
   initial: { a: 1_000_000, n: 24, r: 25_000, iof: 30_000, tf: 0, c: 'financed' },
   toInput: (v) => ({ amount: num(v, 'a'), ...costsOf(v) }),
@@ -380,6 +383,7 @@ export const brCreditCardDef: CalcDef<CreditCardInput, CreditCardResult> = {
 
 export const brDebtPayoffDef: CalcDef<BrDebtPayoffInput, DebtPayoffResult> = {
   id: 'br-debt-payoff',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     money('x', 0, 1_000_000, { main: true }),
     {
@@ -409,6 +413,7 @@ export const brDebtPayoffDef: CalcDef<BrDebtPayoffInput, DebtPayoffResult> = {
 
 export const brCompoundDef: CalcDef<BrCompoundInput, BrCompoundResult> = {
   id: 'br-compound-interest',
+  problems: ['tooLarge'],
   fields: [
     money('i', 0, 10_000_000, { main: true, half: true }),
     money('a', 0, 1_000_000, { main: true, half: true }),

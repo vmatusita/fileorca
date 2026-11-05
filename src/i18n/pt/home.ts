@@ -29,8 +29,8 @@ export default {
     heading: 'Dinheiro',
     count: '{n} calculadoras',
     num: '{diff} a menos',
-    say: 'de juros no SAC do que no PRICE, no exemplo do simulador: {loan} em {months} meses, a {rate} ao ano.',
-    more: 'Cada simulador mostra a parcela, os juros, o CET e o cronograma inteiro, e os números que você digita ficam no seu aparelho.',
+    say: 'de juros no SAC do que na PRICE, no exemplo do simulador: {loan} em {months} meses, a {rate} ao ano.',
+    more: 'Cada calculadora explica o resultado, que você pode baixar em PDF ou CSV, e os números que você digita ficam no seu aparelho.',
     all: 'As {n} calculadoras financeiras',
   },
   qr: {
