@@ -336,6 +336,16 @@ test('F10 p-13: a JPG bigger than its HEIC says "+N%", and no text of the HEIC p
   expect(await page.locator('main').innerText(), 'the page with the result and the options open').not.toMatch(LIGHTER.en);
 });
 
+// F13a, revisão e-2 (DECISOES § F13A-R-09): the p-13 holds on WebP to JPG too. A WebP is usually smaller than its JPG (the
+// FAQ and the guide of the page say so) and the card says "+94%", so the help of "Save as" no longer says the JPG is lighter.
+test('e-2: no text of the WebP to JPG page says the JPG is lighter, in the three languages', async ({ page }) => {
+  for (const lang of LANGS) {
+    await open(page, pathOf('webp-to-jpg', lang));
+    await dismissCookies(page);
+    expect(await page.locator('main').innerText(), `${lang}: the page at rest`).not.toMatch(LIGHTER[lang]);
+  }
+});
+
 // Every button of the island is 48px tall or more, at 360 and at 1280px: at rest, with the result (the comparison, "Adjust"
 // and the coffee line of the 3rd use open) and with the error. The new controls are in the list.
 test('every visible button of the island is at least 48px tall, at 360 and 1280px', async ({ page, context }) => {

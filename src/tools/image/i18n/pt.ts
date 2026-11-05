@@ -79,7 +79,7 @@ export default {
       hide: 'Não mostrar de novo',
       done: 'Combinado, não peço mais aqui. O link do café fica no rodapé.',
     },
-    change: 'Diferença',
+    change: 'Variação',
   },
   compare: {
     label: 'Comparar antes e depois',

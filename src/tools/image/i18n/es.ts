@@ -79,7 +79,7 @@ export default {
       hide: 'No mostrar de nuevo',
       done: 'Entendido, no vuelvo a pedirlo aquí. El enlace del café queda en el pie de página.',
     },
-    change: 'Diferencia',
+    change: 'Cambio',
   },
   compare: {
     label: 'Comparar antes y después',

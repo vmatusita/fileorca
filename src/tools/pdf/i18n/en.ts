@@ -104,7 +104,7 @@ const texts: PdfPanelTexts = {
     unchangedMany: 'These PDFs were already optimized, so Oli gave them back as they were.',
     filesCount: '{count} files',
     adjust: 'Adjust',
-    adjustHelp: 'Changing an option makes the file again right away.',
+    adjustHelp: 'Changing an option redoes the file right away.',
     notes: {
       repaired: "One file had a damaged index; Oli rebuilt it while reading the pages.",
       xfaRemoved: 'The XFA form layer, which only a few desktop apps read, was removed; the regular form fields still work.',

@@ -11,7 +11,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte dois ou mais PDFs na caixa, escolha os arquivos ou cole; com Adicionar mais PDFs, outros arquivos entram na lista.',
-    'Deixe os arquivos na ordem que você quer: arraste uma linha, use as setas dela ou mova a linha pelo teclado.',
+    'Deixe os arquivos na ordem que você quer: arraste uma linha ou use as setas dela (elas funcionam pelo teclado também).',
     'Aperte Juntar PDFs, e a Oli junta os arquivos no seu navegador, na ordem da lista.',
     'Baixe o PDF juntado, e os seus arquivos originais continuam intactos.',
   ],
@@ -36,7 +36,7 @@ const texts: PdfToolTexts<MergeTexts> = {
   faq: [
     {
       q: 'Como mudo a ordem dos arquivos?',
-      a: 'Arraste uma linha para outro lugar ou aperte as setas da linha para subir ou descer. Também dá para mover a linha pelo teclado. A Oli junta os arquivos na ordem que a lista mostra quando você aperta Juntar PDFs.',
+      a: 'Arraste uma linha para outro lugar ou aperte as setas da linha para subir ou descer; elas funcionam pelo teclado também. A Oli junta os arquivos na ordem que a lista mostra quando você aperta Juntar PDFs.',
     },
     {
       q: 'Os campos de formulário, os marcadores e os links continuam funcionando depois de juntar?',

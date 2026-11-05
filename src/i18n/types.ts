@@ -1041,7 +1041,7 @@ export interface PdfPanelTexts {
     filesCount: string;
     /**
      * F13a (UX-04 A; DECISOES § 483): the options of a tool that runs by itself fold under "Adjust" after the
-     * result, and the line inside says that a change makes the file again at once.
+     * result, and the line inside says that a change redoes the file at once.
      */
     adjust: string;
     adjustHelp: string;
