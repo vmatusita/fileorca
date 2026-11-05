@@ -4,6 +4,8 @@ import type { CalcSharedTexts } from '../types.ts';
 export interface CalcPageShared {
   seal: string;
   reviewed: string;
+  /** The one-line signature of a calculator page (F13b, G-23): the name and the short date. */
+  signed: string;
   firstPublished: string;
   readOn: string;
   exampleInputs: string;
@@ -52,6 +54,7 @@ export default {
   page: {
     seal: 'Your numbers stay on your device',
     reviewed: 'Reviewed by {name} on {date}.',
+    signed: 'Reviewed by {name} · {date}',
     firstPublished: 'First published {date}.',
     readOn: 'Read on {date}.',
     exampleInputs: 'You enter',

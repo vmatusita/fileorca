@@ -39,6 +39,7 @@ export default {
   page: {
     seal: 'Tus números se quedan en tu dispositivo',
     reviewed: 'Revisado por {name} el {date}.',
+    signed: 'Revisado por {name} · {date}',
     firstPublished: 'Publicado por primera vez el {date}.',
     readOn: 'Leído el {date}.',
     exampleInputs: 'Lo que escribes',

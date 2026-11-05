@@ -38,7 +38,8 @@ const { id, lang } = Astro.props;
 const route = routeById(id);
 const t = calcTexts(id, lang);
 const shared = SHARED_BY_LANG[lang].page;
-const read = datesOf(id, lang).read;
+const dates = datesOf(id, lang);
+const read = dates.read;
 // The area of the page (F7): the ad area, the category colour, the schema and the Oli's poses (no cheer on health).
 const area = calcAreaOf(id);
 const adArea = area === 'money' ? 'dinheiro' : 'casa-saude';
@@ -56,6 +57,7 @@ const guideId = isCalcPage(id) ? CALC_PAGES[id].guide : undefined;
 const guide = guideId && guidePathIn(guideId, lang) !== null ? guideCardData(guideId, lang) : null;
 const example = workedExample(id, lang);
 const [readBefore, readAfter] = shared.readOn.split('{date}');
+const [firstBefore, firstAfter] = shared.firstPublished.split('{date}');
 ---
 <BaseLayout
   lang={lang}
@@ -69,10 +71,10 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, appCategory), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top fo-top--calc">
+  <div class="fo-top fo-top--calc fo-top--calcpage">
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
-    <Reviewed lang={lang} of={id} />
+    <Reviewed lang={lang} of={id} line />
     <PrivacySeal text={shared.seal} />
   </div>
   <CalcIsland data={data} />
@@ -126,6 +128,8 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
+      {/* F13b (G-23; DECISOES § C-1): the first publication, which the one-line signature of the top leaves out. */}
+      <p class="fo-reviewed">{firstBefore}<time datetime={dates.first}>{longDate(dates.first, lang)}</time>{firstAfter}</p>
     </div>
     <AdBreak />
     <div data-ymyl="disclaimer">

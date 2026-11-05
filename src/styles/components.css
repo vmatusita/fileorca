@@ -857,6 +857,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
+/* F13b · the top of a calculator page (UX-12 A, F10 p-19; DECISOES § C-1). The number of the ResultHero ends above 596 px
+   at 360 x 740, clear of the cookie notice of the first visit (it starts at 604 px). The signature takes one line (14/20,
+   the short date), and below 768 px the top is tighter: 4 px between its lines, the lead in the body size (16/24, two
+   lines), and the crumb of the page itself only for the screen reader, since the H1 right under it says the same (the
+   Spanish and Brazilian trails went to two lines). The guides keep their top. */
+@media (max-width: 767px) {
+  .fo-top--calcpage { gap: var(--space-1); }
+  .fo-top--calcpage .fo-lead { font-size: 16px; line-height: 24px; }
+  nav:has(+ .fo-top--calcpage) li:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  nav:has(+ .fo-top--calcpage) li:nth-last-child(2) > .fo-icon { display: none; }
+}
 /* A file guide puts its heading and a paragraph right above the embedded tool, where a tool page has its H1: they keep
    the same room on the right for the DropZone's Oli, so she never covers a word (DECISOES § 206 and § 212). The box is
    border-box, so the room comes out of the measure: from 768px this heading and paragraph are 561px wide against the
