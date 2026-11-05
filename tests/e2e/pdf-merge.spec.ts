@@ -392,3 +392,32 @@ test('axe: the Merge list while the files are read, at 360 and 1280 px in both t
   held.release();
   await expect(mergeButton(page)).toBeVisible({ timeout: 30_000 });
 });
+
+// F13a, revisão b-2 (DECISOES § F13A-R-03): beside the two stacked arrows and the remove button, the column of the name had
+// 84 px at 360 and 44 px at 320 (224 and 184 before the F13a, when the arrows went under the card: § 181 of the F5a), so a
+// long name showed some 14 characters in its two lines. Under 480 px the arrows and the remove button go to a row of 48 px
+// under the card, and the name keeps a column of 140 px or more, with each target of 48 px.
+for (const width of [320, 360] as const) {
+  test(`D-8 at ${width} px: the name of a row of the Merge list has a column of 140 px or more, with the arrows and the remove button under the card`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 740 });
+    await openTool(page, '/merge-pdf/');
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf', 'contratoassinado2025versaofinal-revisada.pdf'), pdfFile('gen-ja-otimizado.pdf')]);
+    await expect(mergeButton(page)).toBeVisible({ timeout: 30_000 });
+    const rows = page.locator('#fo-tool-root .fo-merge-panel .fo-merge__row');
+    await expect(rows).toHaveCount(2);
+    for (const row of await rows.all()) {
+      const name = await row.locator('.fo-file__name').evaluate((element) => element.getBoundingClientRect().width);
+      expect(name, `${width} px: the column of the name`).toBeGreaterThanOrEqual(140);
+      const card = await row.locator('.fo-file').boundingBox();
+      for (const control of await row.locator(':scope > .fo-merge__moves > *, :scope > .fo-merge__remove').all()) {
+        const box = await control.boundingBox();
+        expect(box?.height ?? 0, `${width} px: a target of 48 px`).toBeGreaterThanOrEqual(48);
+        expect(box?.y ?? 0, `${width} px: the arrows and the remove button under the card`).toBeGreaterThanOrEqual((card?.y ?? 0) + (card?.height ?? 0) - 1);
+      }
+    }
+    // Every row has the height of a row with its arrows (nothing moves when the reading ends or a row leaves).
+    const heights = await rows.evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().height)));
+    expect(new Set(heights).size, `${width} px: one height for every row (${heights.join(', ')})`).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}

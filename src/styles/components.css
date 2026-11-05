@@ -988,8 +988,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* F13a (UX-04 A, tool-a-merge; DECISOES § 479): a row of the Merge list is the card, the arrows that can move (an
    empty place of 48 px where one cannot, D-23: never a disabled arrow drawn heavier than the live one) and the remove
    button (D-21). The handle is gone: the arrows of the row do it by keyboard and by touch (WCAG 2.5.7), and the mouse still
-   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. Under 768 px
-   the two arrows stack so the name keeps its width beside the remove button; every row (and the line that says a row
+   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. From 480 to
+   767 px the two arrows stack beside the remove button; under 480 px they go with it to a row under the card (§ F13A-R-03),
+   so the name keeps a column of 140 px or more; every row (and the line that says a row
    left, D-21) has the height of a row with its arrows, so nothing moves when the reading ends or a row leaves. A refused
    row keeps its card with the reason and its own remove button, the width of the list (DECISOES § 181). */
 .fo-merge { --fo-row-h: 76px; display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
@@ -1018,9 +1019,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-merge__row > .fo-file { align-content: center; }
   .fo-merge__row > .fo-merge__remove { align-self: center; }
 }
+/* F13a, revisão b-2 (DECISOES § F13A-R-03): a done card has no action of its own, so its empty third track (and the gap
+   before it) goes; under 480 px the arrows and the remove button go to a row of 48 px under the card, which takes the
+   width of the list again (the § 181 of the F5a): the name had 84 px at 360 and 44 px at 320 beside them. */
+.fo-merge__row .fo-file:has(> .fo-file__actions:empty) { grid-template-columns: 32px minmax(0, 1fr); }
+.fo-merge__row .fo-file__actions:empty { display: none; }
 @media (max-width: 479px) {
-  .fo-merge { --fo-row-h: 112px; }
-  .fo-merge__moves { gap: var(--space-2); }
+  .fo-merge { --fo-row-h: 154px; }
+  .fo-merge__row:not([data-state="error"]) { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "card card card" ". moves remove"; row-gap: var(--space-2); }
+  .fo-merge__row:not([data-state="error"]) > .fo-file { grid-area: card; }
+  .fo-merge__row > .fo-merge__moves { grid-area: moves; flex-direction: row; gap: var(--space-2); }
+  .fo-merge__row > :is(.fo-merge__remove, .fo-merge__none) { grid-area: remove; }
 }
 
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */
