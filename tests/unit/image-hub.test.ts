@@ -69,7 +69,7 @@ describe('home', () => {
 });
 
 describe('footer', () => {
-  // F13b (UX-17 A; DECISOES § I-5 and § I-8): the hub left the list; it is the main link of the column, and the eight
+  // F13b (UX-17 A; DECISOES § 587 and § 590): the hub left the list; it is the main link of the column, and the eight
   // tools are in the disclosure of the column. The links of the column are the same, in the same order.
   const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child a');
 

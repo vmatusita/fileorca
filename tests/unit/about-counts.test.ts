@@ -49,7 +49,7 @@ describe('the Portuguese and Spanish pages that count the tools', () => {
     expect(text).toContain(`${IMAGE_TOOL_IDS.length} ferramentas de imagem`);
     expect(text).toContain(`${PDF_TOOL_IDS.length} de PDF`);
     expect(text).toContain(`${BR_CALC_IDS.length} calculadoras de dinheiro feitas para o Brasil`);
-    // F13b (G-14; DECISOES § I-4): the languages of the site in digits too, from LANGS.
+    // F13b (G-14; DECISOES § 586): the languages of the site in digits too, from LANGS.
     expect(text).toContain(`nos ${LANGS.length} idiomas do site`);
     expect(text).not.toMatch(/\b(oito|doze|três)\b/);
     expect(text).not.toMatch(/\{\w+\}/);

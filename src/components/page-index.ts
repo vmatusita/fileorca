@@ -1,4 +1,4 @@
-// The "On this page" index of the legal pages and of the Licenses (F13b, decision 8; UX-17 A, pages.html; DECISOES § I-3):
+// The "On this page" index of the legal pages and of the Licenses (F13b, decision 8; UX-17 A, pages.html; DECISOES § 585):
 // each H2 gets an id made from its own text at build time, and the index in the right column links to it. The text of the
 // heading never changes (the Privacy keeps every word and its date): only the id is new. Node only, like header-menu.ts
 // and tool-count.ts (the views render it in the build, and the tests read it in Node): no island ever imports it.

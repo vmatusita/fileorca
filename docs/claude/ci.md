@@ -194,3 +194,4 @@ Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de ar
 
 - **O `src/components/home-numbers.ts` importa o `qr.ts`, que importa o `qrcode` e um `?raw`:** ele serve ao Astro e ao Vitest, não a um script do Node puro. Um script que precise dos números da home lê as fontes direto (o `data/guides-measured.json`, as fixtures e o `MAX_BYTES`), como o `home-numbers.test.ts`.
 - **O Vitest inteiro com as outras frentes rodando na máquina** estourou os 5 s em 8 testes (o `conteudo.test.ts` e três de PDF); os quatro arquivos passam sozinhos (170 testes). É carga da máquina, não regressão.
+- **O `gate:links` confere os `#` (§ 585):** todo link para uma parte de página (`#id` na mesma página ou `/guides/#image` em outra) precisa achar o id na página de destino (929 links em 211 páginas na F13b). Um id gerado a partir de texto que mudar quebra o portão, não só o teste.

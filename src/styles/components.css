@@ -802,7 +802,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-catband__all { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap-min); color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .fo-catband__all .fo-icon { width: 18px; height: 18px; }
 
-/* F13b · as páginas sem anúncio e a coluna da direita (UX-17 A, pages.html; DECISOES § I-1). The view of the 404, the About,
+/* F13b · as páginas sem anúncio e a coluna da direita (UX-17 A, pages.html; DECISOES § 583). The view of the 404, the About,
    the Contact, the legal pages and the Licenses: the tool column (tool-max) in a <main> made wide by the BaseLayout (`wide`,
    § 572). From 1280 px it keeps the grid of a page with ads, 760 + 150 + 300 px, and the right column holds a piece of the
    page (.fo-side: the sea of the 404, the card of numbers, the index), the same markup as on the phone, put there by the
@@ -847,7 +847,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-view--404 .fo-sea > .fo-water { --level: 38%; }
   .fo-view--404 .fo-sea__oli { right: 50%; bottom: 30%; margin-right: -80px; }
 }
-/* The card "FileOrca in numbers" (G-14; DECISOES § I-4): a paper with the brand fold (fo-dogear on the ground of the page),
+/* The card "FileOrca in numbers" (G-14; DECISOES § 586): a paper with the brand fold (fo-dogear on the ground of the page),
    the four counts in number-md (Fredoka 600 24/28) and ink, their labels in ink-muted, and the zero with the PrivacySeal
    on a hairline. Two counts a row on the phone, four from 768 px, and from 1280 the right column, sticky. The Contact
    shows it only there (--side). */
@@ -870,7 +870,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-orca { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
 .fo-orca__oli { width: 96px; height: 96px; }
 @media (min-width: 768px) { .fo-orca__oli { width: 128px; height: 128px; } }
-/* The index "On this page" of the legal pages and of the Licenses (G-06; DECISOES § I-3): only from 1280 px, sticky; the
+/* The index "On this page" of the legal pages and of the Licenses (G-06; DECISOES § 585): only from 1280 px, sticky; the
    title in h3, the links in ink 15/20 (brand and underlined on hover), the number of each H2 in ink-muted, tabular. Each
    link is a 48 px target (the 4 px padding of the specification gave 28; the brief asks 48 of every new control), with no
    gap between them: the 15 sections of the Privacy take 762 px, inside a window of 800; a shorter window scrolls the index
@@ -968,7 +968,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer .fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); font-size: 16px; line-height: 22px; font-weight: 700; }
 .fo-footer .fo-footer__coffee:hover { text-decoration-thickness: 2px; }
 .fo-footer__coffee .fo-icon { width: 24px; height: 24px; }
-/* F13b · o rodapé no celular (UX-17 A, pages.html; DECISOES § I-5). Each category column shows its hub as its main link
+/* F13b · o rodapé no celular (UX-17 A, pages.html; DECISOES § 587). Each category column shows its hub as its main link
    and its tools in a <details> (fo-footer__tools; fo-footer__more is the Guides block of the F11). Below 768 px: two
    columns; the links always in sight (the hub of each category, the QR code, "All guides", the FileOrca links and the
    coffee line; the groups of the Guides block go in a disclosure too) are 48 px tall, the summary is a 48 px pill (hairline in
@@ -1036,7 +1036,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-search__empty p { margin: 0; }
 .fo-search__peek { width: 120px; height: 75px; margin-top: var(--space-2); }
 .fo-search-inline { max-width: 560px; }
-/* F13b (G-13; DECISOES § I-2): the search of the 404 sits in the page, it does not float: only the stroke, no shadow-pop.
+/* F13b (G-13; DECISOES § 584): the search of the 404 sits in the page, it does not float: only the stroke, no shadow-pop.
    The search of the dialog keeps it. */
 .fo-search-inline .fo-search { box-shadow: none; }
 .fo-search-close { display: flex; justify-content: center; margin-top: var(--space-2); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }

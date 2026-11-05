@@ -57,7 +57,7 @@ describe('the Guides block of the footer, on every page of each language', () =>
         // In the column of the utilities, right after its list (the QR code generator).
         expect(block?.parentNode.querySelector('h2')?.text, page.path).toBe(common.footer.utilityColumn);
         expect(block?.querySelector('h2')?.text, page.path).toBe(common.guidesHub);
-        // F13b (UX-17 A; DECISOES § I-5 and § I-8): "All guides" left the list (the link in sight) and the groups are in
+        // F13b (UX-17 A; DECISOES § 587 and § 590): "All guides" left the list (the link in sight) and the groups are in
         // the disclosure of the block; the links are the same, in the same order.
         const links = block?.querySelectorAll('a') ?? [];
         expect(links[0]?.classList.contains('fo-footer__hub'), page.path).toBe(true);

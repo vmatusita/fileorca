@@ -8,7 +8,7 @@ import { GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { describedViolations } from './lib/axe.ts';
 import { dismissCookies } from './lib/page.ts';
 
-// F13b · o rodapé no celular (decision 8 of the run; UX-17 A, pages.html; DECISOES § I-5 and § I-7). Below 768 px the footer
+// F13b · o rodapé no celular (decision 8 of the run; UX-17 A, pages.html; DECISOES § 587 and § 589). Below 768 px the footer
 // has two columns, each category with its hub in sight and its tools in a <details>; from 768 px it is the footer of
 // before. At 360 px it is at most half the height of the starting point in the three languages, its links in sight (the
 // coffee line, the hubs, "All guides", the QR code and the FileOrca links) and its summaries have 48 px, and the tools of an

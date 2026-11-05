@@ -22,7 +22,7 @@ export function orphanPaths(pages: PageLinks[], indexable: Set<string>): string[
 }
 
 /**
- * F13b (DECISOES § I-3): the links to a part of a page ("#id" on the same page, "/guides/#image" on another) whose page
+ * F13b (DECISOES § 585): the links to a part of a page ("#id" on the same page, "/guides/#image" on another) whose page
  * has no element with that id. `ids` holds the ids of every page of the dist by path; a target page the map does not know
  * is left to the check of the paths. Returns the href of each link that misses.
  */

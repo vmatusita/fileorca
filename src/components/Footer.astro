@@ -12,7 +12,7 @@
 // F12 · o café (decision 7; DECISOES § 437): the coffee line opens the footer, the first link of it, with a 48 px target.
 // At the base it sat 24 to 46 px from the AdSense anchor with the page scrolled to the end; at the top, the columns lie
 // between them. The base keeps only the signature.
-// F13b · o rodapé no celular (decision 8; UX-17 A, pages.html; DECISOES § I-5): below 768 px two columns; each category
+// F13b · o rodapé no celular (decision 8; UX-17 A, pages.html; DECISOES § 587): below 768 px two columns; each category
 // keeps its hub in sight as its main link (48 px) and puts its tools in a <details> (fo-footer__tools; fo-footer__more is the
 // Guides block of the F11), whose links keep the 32 px line of before (the exception b-04 of § 381). The Guides block does
 // the same: "All guides" in sight, its groups in a disclosure. The QR code under Utilities and the FileOrca column (in one
@@ -94,7 +94,7 @@ const life = (hubId: LifeHub, name: string | undefined, title: string | undefine
 };
 const lifeColumns = [life('house', t.homeCalculators, t.footer.homeColumn), life('health', t.healthCalculators, t.footer.healthColumn)].filter((column) => column !== null);
 /**
- * F13b (UX-17 A; DECISOES § I-5): the category columns. Each keeps its hub (the first link) in sight and puts its tools in
+ * F13b (UX-17 A; DECISOES § 587): the category columns. Each keeps its hub (the first link) in sight and puts its tools in
  * a disclosure below 768 px. Its summary says "All 8" when the list holds every tool of the category in the language (the
  * count of the Menu, src/components/tool-count.ts) and "6 popular" when it holds some, and the screen reader hears the
  * rest ("All 8 image tools"). From 768 px the summary goes away and the list shows as before (::details-content).
@@ -128,7 +128,7 @@ const guides = guidesHub
       ],
     }
   : null;
-/** F13b (UX-17 A; DECISOES § I-5): the Guides block the same way, "All guides" in sight and the groups in a disclosure. */
+/** F13b (UX-17 A; DECISOES § 587): the Guides block the same way, "All guides" in sight and the groups in a disclosure. */
 const guidesBlock = guides
   ? (() => {
       const [hub, ...groups] = guides.links;

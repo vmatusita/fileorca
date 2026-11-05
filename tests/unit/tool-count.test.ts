@@ -43,7 +43,7 @@ describe('the count of tools of a language', () => {
     }
   });
 
-  it('gives the card "FileOrca in numbers" its four counts (F13b; DECISOES § I-4)', () => {
+  it('gives the card "FileOrca in numbers" its four counts (F13b; DECISOES § 586)', () => {
     expect(statsItems('en')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
     expect(statsItems('pt')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
     expect(statsItems('es')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
@@ -84,7 +84,7 @@ describe.runIf(BUILT)('the built pages say the number of the module', () => {
     }
   });
 
-  // F13b (decision 8; DECISOES § I-4): the card "FileOrca in numbers" of the About page reads the same module
+  // F13b (decision 8; DECISOES § 586): the card "FileOrca in numbers" of the About page reads the same module
   // (statsItems), whose fourth count is the home and health calculators in English and the languages elsewhere.
   it('the card "FileOrca in numbers" of the About page says the counts of the module (8 · 12 · 14 · 11, 8 · 12 · 8 · 3, 8 · 12 · 14 · 3)', () => {
     const want: Record<Lang, string[]> = { en: ['8', '12', '14', '11', '0'], pt: ['8', '12', '8', '3', '0'], es: ['8', '12', '14', '3', '0'] };

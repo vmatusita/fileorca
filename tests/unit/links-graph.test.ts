@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { missingFragments, orphanPaths, type PageLinks } from '../../scripts/lib/links-graph.ts';
 
-// F13b (DECISOES § I-3): the gate also checks the links to a part of a page (the index "On this page" of the legal pages,
+// F13b (DECISOES § 585): the gate also checks the links to a part of a page (the index "On this page" of the legal pages,
 // the groups of the guides hub in the footer).
 describe('links to a part of a page', () => {
   const ids = new Map([

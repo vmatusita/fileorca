@@ -1,4 +1,4 @@
-// The footer of the F13b on the phone (decision 8; UX-17 A, pages.html; DECISOES § I-5), read in the built home of each
+// The footer of the F13b on the phone (decision 8; UX-17 A, pages.html; DECISOES § 587), read in the built home of each
 // language: every category keeps its hub out of the disclosure and puts its tools in one <details>, closed in the HTML,
 // whose summary says "All 8" when it holds every tool of the category in the language and "6 popular" when some (the
 // count of the Menu, src/components/tool-count.ts), and whose name goes on with the category for a screen reader; the
@@ -20,7 +20,7 @@ const page = (path: string) => parse(readFileSync(join(DIST, ...path.split('/').
 /** The text of an element, its spaces folded. */
 const text = (element: HTMLElement | null | undefined) => (element?.textContent ?? '').replace(/\s+/g, ' ').trim();
 
-describe.runIf(BUILT)('the footer below 768 px: the hub in sight and the tools in a disclosure (DECISOES § I-5)', () => {
+describe.runIf(BUILT)('the footer below 768 px: the hub in sight and the tools in a disclosure (DECISOES § 587)', () => {
   for (const lang of LANGS) {
     it(`${lang}: every category has its hub out of the disclosure, and its summary counts the list it opens`, () => {
       const root = page(pagePath('home', lang) ?? '/');

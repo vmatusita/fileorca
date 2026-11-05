@@ -39,9 +39,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 20. O que a F11 deixou | 9 | O Victor e runs de ajuste |
 | 21. O que a F12 deixou | 6 | O Victor, a run F13 e runs de ajuste |
 | 22. O que a F13a deixou | 11 | O Victor, a run F13b e runs de ajuste |
-| 23. O que a F13b deixou | 10 | O Victor e runs de ajuste |
+| 23. O que a F13b deixou | 12 | O Victor e runs de ajuste |
 
-Total: 186 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
+Total: 188 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -387,6 +387,8 @@ O que a F13b (o card das calculadoras e o QR, o guia de arquivo, a home e os hub
 | F13b h-1 | DECISOES § 574 | baixo | Abaixo de 768 px o H1 da home não é o LCP: a linha de três linhas tem mais área que o H1 de 28 px (`h1-mobile`); no ponto de partida também não era. A partir de 768 px o H1 é o LCP | Mudar a regra "abaixo de 768 px, toda página usa `h1-mobile`" para a home, ou aceitar | Victor decide |
 | F13b h-2 | DECISOES § 574 | baixo | A home e os hubs de dinheiro, casa e saúde não estão no `lighthouserc.json`: o Lighthouse CI não mede a home nova | Pôr as quatro páginas no `lighthouserc.json`, medindo o tempo a mais da parte | Run de ajuste de desempenho |
 | F13b m-1 | DECISOES § 582 | baixo | A 320 × 640, na 1ª visita, o Escolher ainda fica 0,6 px sob o aviso no Eliminar, no Numerar e no Ordenar páginas de PDF em es e nas presets de pt com a fonte de reserva (o botão continua clicável, e a página rola) | Ganhar 1 px no topo dessas páginas a 320 px, ou aceitar | Run de ajuste de layout |
+| F13b h-3 | DECISOES § 567 e § 584 | baixo | As regras do `.fo-hero` (a grade, o texto, a Oli de 96 e 128px e o recuo de 16px da § 513) ficaram sem uso: a home e a 404 da F13b não usam mais o bloco, e só o `src/ads/map.ts` e o `tests/e2e/lib/ad-map.ts` ainda citam o nome | Tirar as regras e a citação, com o mapa de anúncios verde | Run de ajuste de layout |
+| F13b i-1 | DECISOES § 584 | baixo | Na 404 a 360 × 740, em pt o link da home fica abaixo da dobra (748–796px) e em es o 3º chip também (598–758px): o H1 tem duas linhas nos dois idiomas. A especificação pede a dobra só em en, que cabe | Aceitar, ou baixar a faixa do mar a 144px abaixo de 400px | Victor decide |
 
 ## Registrados (escolhas, não defeitos)
 

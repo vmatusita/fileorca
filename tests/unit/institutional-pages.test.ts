@@ -1,4 +1,4 @@
-// The pages without ads of the F13b (decision 8; UX-17 A, pages.html; DECISOES § I-1 to § I-4), read in the built pages:
+// The pages without ads of the F13b (decision 8; UX-17 A, pages.html; DECISOES § 583 to § 586), read in the built pages:
 // the right column of the 404, the About, the Contact, the legal pages and the Licenses (one piece of the page, never an
 // ad), the card "FileOrca in numbers" (the counts of the module), the index "On this page" made from the H2 (each link
 // leads to an H2 that exists) and the three chips of the 404 (the first tool of each hub of the language, from the
@@ -52,7 +52,7 @@ const SIDE: { id: RouteId; piece: string }[] = [
   { id: 'licenses', piece: 'nav.fo-toc' },
 ];
 
-describe.runIf(BUILT)('the pages without ads use the right column from 1280 px (DECISOES § I-1)', () => {
+describe.runIf(BUILT)('the pages without ads use the right column from 1280 px (DECISOES § 583)', () => {
   for (const { id, piece } of SIDE) {
     for (const { lang, path } of paths(id)) {
       it(`${path}: <main> on the page width, the view with its piece in the column, and no ad`, () => {
@@ -83,7 +83,7 @@ describe.runIf(BUILT)('the pages without ads use the right column from 1280 px (
   }
 });
 
-describe.runIf(BUILT)('the index "On this page" leads to the H2 of the page (DECISOES § I-3)', () => {
+describe.runIf(BUILT)('the index "On this page" leads to the H2 of the page (DECISOES § 585)', () => {
   const headingsOf = (id: RouteId, lang: Lang): string[] => {
     if (id === 'licenses') {
       const t = TEXTS[lang].licenses;
@@ -123,7 +123,7 @@ describe.runIf(BUILT)('the index "On this page" leads to the H2 of the page (DEC
   });
 });
 
-describe.runIf(BUILT)('the 404 (DECISOES § I-2)', () => {
+describe.runIf(BUILT)('the 404 (DECISOES § 584)', () => {
   for (const { lang, path } of paths('not-found')) {
     it(`${path}: the Oli lost in the water, the search without shadow, and the first tool of each hub of the language as a chip`, () => {
       const root = page(path);

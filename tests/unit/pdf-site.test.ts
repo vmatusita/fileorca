@@ -114,7 +114,7 @@ describe('home', () => {
 });
 
 describe('footer', () => {
-  // F13b (UX-17 A; DECISOES § I-5 and § I-8): the hub of a category left its list (it is the link in sight, and the tools
+  // F13b (UX-17 A; DECISOES § 587 and § 590): the hub of a category left its list (it is the link in sight, and the tools
   // are in the disclosure of the column), so a column's links are read as every `a` of it, in the same order as before.
   const column = (page: ReturnType<typeof parse>, title: string) =>
     page.querySelectorAll('footer .fo-footer__cols > div').find((div) => div.querySelector('h2')?.text === title);

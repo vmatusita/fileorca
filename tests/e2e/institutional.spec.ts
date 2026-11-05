@@ -6,7 +6,7 @@ import { IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { dismissCookies } from './lib/page.ts';
 
-// F13b · as páginas institucionais (decision 8 of the run; UX-17 A, pages.html; DECISOES § I-1 to § I-4 and § I-7).
+// F13b · as páginas institucionais (decision 8 of the run; UX-17 A, pages.html; DECISOES § 583 to § 586 and § 589).
 // - The 404 in the three languages: the status 404 of a missing address (and of a missing address deep in a language,
 //   which the server answers with the 404 of that language), the Oli lost in the band of water, the search with no
 //   shadow, the first tool of each hub of the language as a chip (read from the registries), above the fold at 360 × 740

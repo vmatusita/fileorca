@@ -1,6 +1,6 @@
 // Gate: internal links and orphan pages. Every same-site href or src in dist/*.html must resolve
 // to a file (or a directory index) in dist; every indexable page must be linked by an <a> on a
-// page of another route (its own translations do not count; scripts/lib/links-graph.ts). F13b (DECISOES § I-3): every
+// page of another route (its own translations do not count; scripts/lib/links-graph.ts). F13b (DECISOES § 585): every
 // link to a part of a page (#id, on the same page or on another of the site) leads to an id that the page has.
 import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -33,7 +33,7 @@ function sameSite(ref: string, from: string): string | null {
 
 let checked = 0;
 const graph: PageLinks[] = [];
-// F13b (DECISOES § I-3): the ids of every page, so a link to a part of a page ("#id", the index of the legal pages, the
+// F13b (DECISOES § 585): the ids of every page, so a link to a part of a page ("#id", the index of the legal pages, the
 // groups of the guides hub) leads to an element that exists.
 const roots = new Map(htmlFiles.map((file) => [pagePathOf(file), parse(readFileSync(file, 'utf8'))]));
 const ids = new Map([...roots].map(([path, root]) => [path, new Set(root.querySelectorAll('[id]').map((node) => node.id))]));

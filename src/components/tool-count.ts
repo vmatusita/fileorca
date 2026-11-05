@@ -36,7 +36,7 @@ export function toolCount(lang: Lang): number {
   return toolCounts(lang).total;
 }
 
-/** A count of the card "FileOrca in numbers" (F13b, decision 8; DECISOES § I-4). */
+/** A count of the card "FileOrca in numbers" (F13b, decision 8; DECISOES § 586). */
 export type StatKind = 'image' | 'pdf' | 'money' | 'life' | 'languages';
 
 /**
@@ -58,7 +58,7 @@ export function statsItems(lang: Lang): { kind: StatKind; value: number }[] {
  * The placeholders of the texts that count tools (the About and Terms pages), as the language writes the numbers:
  * {image}, {pdf}, {money}, {life} and {total} of the page's language, {brazil} (the money calculators made for Brazil,
  * in Portuguese), {spanish} (the money calculators in Spanish) and {languages} (the languages of the site; F13b, G-14,
- * DECISOES § I-4).
+ * DECISOES § 586).
  */
 export function countValues(lang: Lang): Record<string, string> {
   const here = toolCounts(lang);
