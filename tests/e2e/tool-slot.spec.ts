@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { LANGS, ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { dismissCookies, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, type TestFile } from './lib/page.ts';
+import { dismissCookies, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
 // § F13A-I-01 to § F13A-I-11). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
@@ -86,7 +86,7 @@ test.describe('the rectangle keeps one height in the five states of the first us
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 55_000 });
       await slotAtBothWidths(page, 'resultado', found);
 
-      await page.locator('.fo-result__more > button').first().click();
+      await startOver(page);
       await page.setInputFiles('input[type="file"]', NOT_AN_IMAGE());
       await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible({ timeout: 30_000 });
       await slotAtBothWidths(page, 'erro', found);
