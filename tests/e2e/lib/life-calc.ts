@@ -77,14 +77,14 @@ export async function expectHero(page: Page, value: string, sentence?: string): 
   if (sentence !== undefined) await expect(heroSentence(page)).toHaveText(sentence);
 }
 
-/** The table of the result shows open under the first ad, with no button to show it (F7, CalcView.open). */
+/** The table of the result shows open in the island (before the chips since the F13b), with no button to show it (F7, CalcView.open). */
 export async function expectTable(page: Page, head: readonly string[], rows: readonly (readonly Cell[])[]): Promise<void> {
   const section = page.locator('#fo-calc-schedule');
   await expect(section.locator('button')).toHaveCount(0);
   const table = section.locator('.fo-amort');
   await expect(table.locator('thead th')).toHaveText([...head]);
   await expect
-    .poll(() => table.locator('tbody tr').evaluateAll((trs) => trs.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent ?? ''))))
+    .poll(() => table.locator('tbody tr').evaluateAll((trs) => trs.map((tr) => [...tr.querySelectorAll('th, td')].map((td) => td.textContent ?? ''))))
     .toEqual(rows.map((row) => row.map(screenCell)));
 }
 

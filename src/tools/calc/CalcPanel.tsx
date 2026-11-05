@@ -1,6 +1,6 @@
 // The money calculator island (DECISOES § 110), shared by the 18 calculators and the guides: the main
 // fields, the result (ResultHero with its Download PDF, the SplitChart, then Download CSV and Copy link), the other fields,
-// the two scenarios where the account compares, and the next-step chips. There is no Calculate button: every valid key
+// the two scenarios where the account compares, the schedule (F13b) and the next-step chips. There is no Calculate button: every valid key
 // press runs the account at once (the engines are small and synchronous). On a phone the result sits right under the main
 // fields; on a computer the fields and the result stand side by side.
 // F13b (UX-12 A; DECISOES § C-2): the card is the one place of the result, of the Download PDF and of the error.
@@ -16,6 +16,7 @@ import Fields, { AddRow } from './Fields.tsx';
 import ResultHero from './ResultHero.tsx';
 import ExportBar from './ExportBar.tsx';
 import ScenarioCompare from './ScenarioCompare.tsx';
+import CalcSchedule from './CalcSchedule.tsx';
 import { createStore, firstError, useCalc, type CalcStore } from './store.ts';
 import { linkHash, visible } from './form.ts';
 import { csvText, reportInput, reportPdf, save } from './exports.ts';
@@ -228,6 +229,8 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           <ScenarioCompare compare={view.compare} info={data.icons.info} label={data.texts.view['compareLabel'] ?? ''} />
         </div>
       )}
+      {/* F13b (D-43; DECISOES § C-5): the schedule is part of the island, before the chips; the first ad stays after them. */}
+      <CalcSchedule data={data} view={shown} />
       {data.chips.length > 0 && (
         <nav class="fo-next fo-calc__next" aria-labelledby="fo-next-label">
           <span class="fo-next__label" id="fo-next-label">

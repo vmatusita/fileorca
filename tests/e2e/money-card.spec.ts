@@ -402,3 +402,73 @@ test('the headings of the island are in Fredoka', async ({ page }) => {
     for (const font of fonts) expect(font, path).toMatch(/^"?Fredoka/);
   }
 });
+
+// "Ordem e blocos" (D-43; F4 ACE-8): the island goes card, costs, scenarios, schedule, chips, in the order of the DOM (the
+// order of the phone); the schedule is a block of the island with a fixed name, closed when the page opens, whose button
+// keeps its name open and closed (only aria-expanded changes) and whose chevron turns; the CSV says what it does.
+test('the island goes card, costs, scenarios, schedule and chips, and the schedule keeps its name open and closed (ACE-8)', async ({ page }) => {
+  for (const [path, schedule, csv] of [
+    [CALC_PAGES['mortgage-calculator-extra-payments'].path, 'Schedule with extra payments', 'Download CSV'],
+    [moneyPage('br-sac-price', 'pt')?.path ?? '', 'Cronograma de parcelas', 'Baixar CSV'],
+    [moneyPage('mortgage-calculator', 'es')?.path ?? '', 'Tabla de amortización', 'Descargar CSV'],
+  ] as const) {
+    await openAt(page, path, 360, 740);
+    await hydrated(page);
+    const order = await page.evaluate(() => {
+      const island = document.querySelector('#fo-tool-root .fo-calc')!;
+      const at = (selector: string) => [...island.children].findIndex((child) => child.matches(selector) || child.querySelector(selector) !== null);
+      return [at('.fo-rhero'), at('.fo-calc__more'), at('.fo-calc__compare'), at('#fo-calc-schedule'), at('.fo-calc__next')];
+    });
+    const present = order.filter((index) => index >= 0);
+    expect(present, path).toEqual([...present].sort((a, b) => a - b));
+    expect(order[3], `${path}: o cronograma na ilha`).toBeGreaterThan(order[0] ?? 99);
+    expect(order[3], `${path}: o cronograma antes dos chips`).toBeLessThan(order[4] ?? -1);
+    await expect(page.locator('.fo-export .fo-btn').first()).toHaveText(csv);
+    const button = page.locator('#fo-calc-schedule h2.fo-disclose > button[aria-controls="fo-schedule-table"]');
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#fo-calc-schedule tr')).toHaveCount(0);
+    await expect(button.locator('.fo-disclose__title')).toHaveText(schedule);
+    const name = (await button.textContent())?.trim();
+    const turned = () => button.locator('.fo-disclose__icon').evaluate((node) => getComputedStyle(node).transform);
+    const before = await turned();
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#fo-calc-schedule .fo-amort tbody tr').first()).toBeVisible();
+    expect((await button.textContent())?.trim()).toBe(name);
+    await expect.poll(turned).not.toBe(before);
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect((await button.textContent())?.trim()).toBe(name);
+  }
+});
+
+// F4 ACE-9 (the half of the calculators; DECISOES § C-5): every table of a calculator, open, has a row header (th scope="row")
+// on each row of data, with no sticky (position static), and its scrolling frame is a region named by the heading of its
+// section, not by the caption of the table.
+for (const block of blocks(CALC_PATHS)) {
+  test(`every table of a calculator has a row header with no sticky, and a region named apart from the table (${block.name})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const wrong: string[] = [];
+    for (const path of block.paths) {
+      await openAt(page, path, 360, 740);
+      await hydrated(page);
+      const button = page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]');
+      if (await button.count()) await button.click();
+      await expect(page.locator('#fo-calc-schedule .fo-amort tbody tr').first(), path).toBeVisible();
+      const seen = await page.evaluate(() => {
+        const wrap = document.querySelector('#fo-calc-schedule .fo-amort-wrap')!;
+        const rows = [...wrap.querySelectorAll('tbody tr:not(.fo-amort__year)')];
+        const headed = rows.filter((row) => row.firstElementChild?.matches('th[scope="row"]'));
+        const sticky = headed.filter((row) => getComputedStyle(row.firstElementChild!).position !== 'static');
+        const label = (wrap.getAttribute('aria-labelledby') ?? '').split(/\s+/).map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ');
+        return { rows: rows.length, headed: headed.length, sticky: sticky.length, role: wrap.getAttribute('role'), label, caption: wrap.querySelector('caption')?.textContent?.trim() ?? '' };
+      });
+      if (seen.rows === 0) wrong.push(`${path}: sem linhas`);
+      if (seen.headed !== seen.rows) wrong.push(`${path}: ${seen.headed} de ${seen.rows} linhas com th[scope=row]`);
+      if (seen.sticky) wrong.push(`${path}: ${seen.sticky} cabeçalhos de linha fixos`);
+      if (seen.role !== 'region' || !seen.label) wrong.push(`${path}: a moldura sem nome de região`);
+      if (seen.label === seen.caption) wrong.push(`${path}: a região e a tabela com o mesmo nome "${seen.label}"`);
+    }
+    expect(wrong).toEqual([]);
+  });
+}

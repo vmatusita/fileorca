@@ -32,8 +32,6 @@ export default {
     lastWorked: 'Last result that worked: {label} {value}.',
     nextLabel: 'Next step',
     scheduleHeading: 'Payment schedule',
-    showSchedule: 'Show the full schedule',
-    hideSchedule: 'Hide the schedule',
     year: 'Year {n}',
     columns: { number: 'Payment', payment: 'Amount', principal: 'Principal', interest: 'Interest', balance: 'Balance' },
     duration: { year: '1 year', years: '{n} years', month: '1 month', months: '{n} months', join: ' ', none: 'no time' },

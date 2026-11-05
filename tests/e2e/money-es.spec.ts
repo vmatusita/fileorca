@@ -190,7 +190,7 @@ async function shown(page: Page, path: string): Promise<{ hero: string; table: n
   const open = page.locator('.fo-calc-schedule button[aria-controls="fo-schedule-table"]');
   if (await open.count()) await open.click();
   await expect(page.locator('#fo-schedule-table table'), path).toBeVisible();
-  const cells = await page.locator('#fo-schedule-table tbody tr').evaluateAll((rows) => rows.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')));
+  const cells = await page.locator('#fo-schedule-table tbody tr').evaluateAll((rows) => rows.map((row) => [...row.querySelectorAll('th, td')].map((cell) => cell.textContent ?? '')));
   return { hero, table: cells.map((row) => row.flatMap(numbersIn)) };
 }
 

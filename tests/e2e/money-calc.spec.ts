@@ -163,7 +163,7 @@ test('the schedule is built only when opened, by year, with the first year open'
   await open(page, 'mortgage-calculator');
   const schedule = page.locator('#fo-calc-schedule');
   await expect(schedule.locator('tr')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Show the full schedule' }).click();
+  await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
   const years = schedule.locator('tr.fo-amort__year');
   await expect(years).toHaveCount(30);
   const months = schedule.locator('tbody tr:not(.fo-amort__year)');
@@ -385,7 +385,7 @@ test.describe('review F4 regressions', () => {
   test('on a phone the balance of each year stays in the frame of the schedule, and the header never hides a year (DES-10, ACE-5)', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     await open(page, 'mortgage-calculator');
-    await page.getByRole('button', { name: 'Show the full schedule' }).click();
+    await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     const inside = await page.evaluate(() => {
       const frame = document.querySelector('.fo-amort-wrap')!.getBoundingClientRect();
       const cell = document.querySelector('.fo-amort__year td:last-child')!.getBoundingClientRect();
@@ -495,7 +495,7 @@ test.describe('second pass of the review F4', () => {
   test('on a phone the Balance heading stays over the balance of the year', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     await open(page, 'mortgage-calculator');
-    await page.getByRole('button', { name: 'Show the full schedule' }).click();
+    await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     const column = await page.evaluate(() => {
       const heading = document.querySelector('.fo-amort th:last-child')!.getBoundingClientRect();
       const cell = document.querySelector('.fo-amort__year td:last-child')!.getBoundingClientRect();
@@ -720,7 +720,7 @@ test('the year rows of the SAC × PRICE schedule put the balance under its colum
   expect((await page.goto(pt?.path ?? ''))?.status()).toBe(200);
   await hydrated(page);
   await dismissCookies(page);
-  await page.getByRole('button', { name: ptShared.island.showSchedule }).click();
+  await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
   await expect(page.locator('.fo-amort tr.fo-amort__year').first()).toBeVisible();
   const columns = await page.locator('.fo-amort').evaluate((table) => {
     const head = [...table.querySelectorAll('thead th')].map((th) => th.textContent?.trim() ?? '');

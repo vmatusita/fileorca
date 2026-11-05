@@ -154,6 +154,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
         [`${text(v, 'sac')}: ${text(v, 'interest')}`, cash(r.sac.totalInterest, ln)],
         [`${text(v, 'sac')}: ${text(v, 'paid')}`, cash(r.sac.totalWithFees, ln)],
         [`${text(v, 'price')}: ${text(v, 'first')}`, cash(first(r.price), ln)],
+      scheduleMeta: fmt(text(v, 'scheduleMeta'), { n: num(values, 'n') }),
         [`${text(v, 'price')}: ${text(v, 'last')}`, cash(last(r.price), ln)],
         [`${text(v, 'price')}: ${text(v, 'interest')}`, cash(r.price.totalInterest, ln)],
         [`${text(v, 'price')}: ${text(v, 'paid')}`, cash(r.price.totalWithFees, ln)],

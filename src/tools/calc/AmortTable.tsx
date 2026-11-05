@@ -3,17 +3,26 @@
 // opening it shows its payments. The first year starts open. Tabular figures, numbers to the right, the
 // header stays on top while the table scrolls inside its own box (WCAG 1.4.10: the page never scrolls
 // sideways). The schedule runs by payment number and loan year, never by calendar date. No ad inside.
+// F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of every row of data is its header (th
+// scope="row"), drawn like the cell it replaces (no sticky), and the region of the frame is named by the heading of its
+// section, not by the caption of the table, which says the rest.
 import { useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import type { Cell, Table } from './types.ts';
 
-export default function AmortTable({ table, cell, chevron }: { table: Table; cell: (value: Cell) => string; chevron: string }) {
+export default function AmortTable({ table, cell, chevron, labelledBy }: { table: Table; cell: (value: Cell) => string; chevron: string; labelledBy: string }) {
   const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set([0]));
   const row = (cells: Cell[], key: number) => (
     <tr key={key}>
-      {cells.map((value, index) => (
-        <td key={index}>{cell(value)}</td>
-      ))}
+      {cells.map((value, index) =>
+        index === 0 ? (
+          <th scope="row" key={index}>
+            {cell(value)}
+          </th>
+        ) : (
+          <td key={index}>{cell(value)}</td>
+        ),
+      )}
     </tr>
   );
   const body = table.groups
@@ -44,7 +53,7 @@ export default function AmortTable({ table, cell, chevron }: { table: Table; cel
       })
     : table.rows.map((cells, index) => row(cells, index));
   return (
-    <div class="fo-amort-wrap" tabIndex={0} role="region" aria-label={table.caption}>
+    <div class="fo-amort-wrap" tabIndex={0} role="region" aria-labelledby={labelledBy}>
       <table class={table.groups ? 'fo-amort' : 'fo-amort fo-amort--flat'}>
         <caption class="fo-sr">{table.caption}</caption>
         <thead>

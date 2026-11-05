@@ -1,15 +1,15 @@
 ---
 // The calculator page mold (PLANO "Molde da página de calculadora"; DECISOES § 117), shared by the 14
 // calculators and the 4 presets: breadcrumb; H1, the line it answers and "Reviewed by" (data-ymyl
-// "reviewed"); the island (fields, result, ExportBar, scenarios, chips); the first AdSlot, 150 px from the
-// chips; the schedule island; how to use; how it works (formula, assumptions, worked example from the
+// "reviewed"); the island (fields, result, ExportBar, scenarios, the schedule since the F13b, chips); the first AdSlot,
+// 150 px from the chips; how to use; how it works (formula, assumptions, worked example from the
 // engine, official sources, educational notice: the data-ymyl blocks of gate:dinheiro-saude); the presets
 // table; the questions; the privacy note; the related grid; the rail AdSlot. The calculator that a guide embeds shows the
-// GuideCard of that guide (--here) at the end of "How to", right after the schedule, which takes nothing inside (F11,
+// GuideCard of that guide (--here) at the end of "How to", right after the first ad (the schedule takes nothing inside; F11,
 // decision 7; DECISOES § 396): before, a line "Read the guide" sat in the "how it works" block. It serves the English pages, their
 // Spanish versions and the Brazilian calculators, each in its language; the presets and guides only in English (F6).
 // F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad stays after the panel (fields, result,
-// chips) and before the schedule, never between the fields nor inside the schedule; the next ones only at the marks of
+// the schedule and chips; F13b, DECISOES § C-5), never between the fields nor inside the schedule; the next ones only at the marks of
 // "How it works" (between its blocks and its paragraphs, never after a heading nor against a table) and between the
 // questions and the last blocks; the layout puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -24,7 +24,6 @@ import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, personLd, webApplicationLd } from '../../seo/meta.ts';
 import { PANEL_POSES } from '../image/Oli.tsx';
 import CalcIsland from './CalcIsland.astro';
-import CalcScheduleRoot from './CalcScheduleRoot.astro';
 import Reviewed from './Reviewed.astro';
 import { SHARED_BY_LANG, calcTexts, crumbsFor, datesOf, longDate, panelData, presetRows, relatedFor, workedExample } from './page.ts';
 import { CALC_PAGES, calcAreaOf, guidePathIn, isCalcPage, type AnyCalcId } from './registry.ts';
@@ -79,7 +78,6 @@ const [firstBefore, firstAfter] = shared.firstPublished.split('{date}');
   </div>
   <CalcIsland data={data} />
   <AdBreak first />
-  <CalcScheduleRoot data={data} />
   <section class="fo-section fo-prose" data-content="how" aria-labelledby="how">
     <h2 id="how">{t.howHeading}</h2>
     <ol class="fo-steps">{t.howSteps.map((step) => <li>{step}</li>)}</ol>

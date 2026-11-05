@@ -18,7 +18,6 @@ import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import CalcIsland from '../tools/calc/CalcIsland.astro';
-import CalcScheduleRoot from '../tools/calc/CalcScheduleRoot.astro';
 import { pathFor, routeById } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -84,7 +83,6 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   </section>
   <CalcIsland data={data} />
   <p class="fo-guide__open"><a href={calcPath}>{fmt(shared.openCalc, { name: calcLabel })}</a></p>
-  <CalcScheduleRoot data={data} />
   {t.sections.map((section, index) => (
     <>
       {index > 0 && <AdBreak first={index === 1 && !firstInside} />}

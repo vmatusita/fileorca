@@ -39,6 +39,7 @@ export default {
       sentence: "Over {years} at {rate} you'll pay {total} on the loan, of which {interest} is interest.",
       extras: 'Taxes, insurance and fees add {extras} a month.',
       moreMeta: '{extras} a month in your payment',
+      scheduleMeta: '{n} payments, by loan year',
       noLoan: 'With no loan to repay, you pay {extras} a month in taxes, insurance and fees.',
       principal: 'Principal',
       interest: 'Interest',

@@ -177,7 +177,8 @@ for (const { id, lang } of PAGES) {
       seen.push(JSON.stringify(await dataLayer(page)), await everywhere(page));
     };
 
-    await page.getByRole('button', { name: new RegExp(escape(SHARED[lang].island.showSchedule), 'i') }).click();
+    // F13b (DECISOES § C-5): the schedule is a block of the island, named by its heading.
+    await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     await expect(page.locator('#fo-schedule-table table')).toBeVisible();
     const names: string[] = [];
     for (const button of [page.locator('.fo-export .fo-btn').nth(0), download]) {

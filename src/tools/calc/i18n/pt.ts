@@ -17,8 +17,6 @@ export default {
     lastWorked: 'Último resultado que valeu: {label} {value}.',
     nextLabel: 'Próximo passo',
     scheduleHeading: 'Cronograma de parcelas',
-    showSchedule: 'Ver o cronograma completo',
-    hideSchedule: 'Esconder o cronograma',
     year: 'Ano {n}',
     columns: { number: 'Nº', payment: 'Parcela', principal: 'Amortização', interest: 'Juros', balance: 'Saldo devedor' },
     duration: { year: '1 ano', years: '{n} anos', month: '1 mês', months: '{n} meses', join: ' e ', none: 'nenhum tempo' },

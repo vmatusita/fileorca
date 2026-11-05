@@ -1016,6 +1016,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* A table that is the result itself (F7: no year groups, CalcView.open) has no sticky column: its last heading stood over
    another column at 360 px. Its words wrap, so it fits the frame at 320 px with no sideways scroll (review F7, f-1 and
    f-2; DECISOES § 275). */
+/* F13b (D-43; DECISOES § C-5): the schedule is a block of the island, before the chips, on the whole width; its heading (or
+   the button of its block) is its name, and the table comes right under it. */
+.fo-calc__schedule { grid-column: 1 / -1; min-width: 0; justify-items: stretch; }
+.fo-calc__schedule > .fo-calc__moreheading { margin: 0; }
+.fo-calc__schedule > .fo-disclose__panel { padding-top: 0; }
 .fo-amort--flat th:last-child { right: auto; }
 .fo-amort--flat th, .fo-amort--flat td { white-space: normal; }
 @media (max-width: 479px) {
@@ -1037,6 +1042,12 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* width 0 and min-width 100%: the table scrolls inside its frame and its no-wrap cells never widen the page
    column (the guides scrolled sideways at 320px). */
 .fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
+/* F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of a row of data is its header (th
+   scope="row"), drawn like the cell it replaces: no sticky of the head of the table, the type and colour of the table, the
+   zebra of its row. */
+.fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
+.fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
+@media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
 

@@ -135,6 +135,8 @@ export interface CalcView {
 }
 
 export interface FieldTexts {
+  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § C-5). */
+  scheduleMeta?: string;
   label: string;
   help?: string;
   /** The range in words, shown for any value outside it: "Enter a rate from 0 to 40%." */
@@ -180,8 +182,6 @@ export interface CalcSharedTexts {
   decimalHint: string;
   nextLabel: string;
   scheduleHeading: string;
-  showSchedule: string;
-  hideSchedule: string;
   /** "Year {n}" (a loan year, never a calendar year) and "{n}" for a payment number. */
   year: string;
   /** Column heads of a loan schedule. */

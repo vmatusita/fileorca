@@ -48,6 +48,7 @@ export const mortgageDef: CalcDef<MortgageInput, MortgageResult> = {
       hero: { label: text(v, 'label'), value: cash(r.monthlyTotal, l), unit: text(v, 'unit'), sentence },
       placard: { n: dollars(r.monthlyTotal, l), l: text(v, 'placard') },
       more: fmt(text(v, 'moreMeta'), { extras: cash(extras, l) }),
+      scheduleMeta: fmt(text(v, 'scheduleMeta'), { n: r.count }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interest'), cents: r.totalInterest } },
       table: () => loanTable(r.rows, 12, s, text(v, 'caption')),
       summary: [

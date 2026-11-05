@@ -17,8 +17,6 @@ export default {
     lastWorked: 'Último resultado válido: {label} {value}.',
     nextLabel: 'Siguiente paso',
     scheduleHeading: 'Tabla de amortización',
-    showSchedule: 'Ver la tabla completa',
-    hideSchedule: 'Ocultar la tabla',
     year: 'Año {n}',
     columns: { number: 'Pago', payment: 'Monto', principal: 'Capital', interest: 'Intereses', balance: 'Saldo' },
     duration: { year: '1 año', years: '{n} años', month: '1 mes', months: '{n} meses', join: ' y ', none: '0 meses' },
