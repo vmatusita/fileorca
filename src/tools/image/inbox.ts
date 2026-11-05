@@ -145,15 +145,24 @@ export const CARRY_LIMIT_MS = 3000;
 export async function storeForNext(files: readonly Outgoing[], tool: string, from: string, limit = CARRY_LIMIT_MS): Promise<boolean> {
   if (typeof caches === 'undefined' || files.length === 0) return false;
   let late = false;
+  // F13a, revisão d-3 (DECISOES § F13A-R-08): past the time, the write goes on by itself; it stops at the next step, and
+  // what it made after the deadline (the open creates the inbox) is deleted, so no file stays for nobody.
+  const drop = async (): Promise<boolean> => {
+    await caches.delete(INBOX_CACHE).catch(() => false);
+    return false;
+  };
   const write = async (): Promise<boolean> => {
     await caches.delete(INBOX_CACHE);
+    if (late) return false;
     const inbox = await caches.open(INBOX_CACHE);
+    if (late) return drop();
     const stored = String(Date.now());
     for (const [index, file] of files.entries()) {
+      if (late) return drop();
       const headers = { 'Content-Type': file.blob.type || 'application/octet-stream', [INBOX_NAME_HEADER]: encodeURIComponent(file.name), [INBOX_TIME_HEADER]: stored };
       await inbox.put(new Request(new URL(inboxEntryPath(index), location.origin).href), new Response(file.blob, { headers }));
     }
-    if (late) return false;
+    if (late) return drop();
     sessionStorage.setItem(INBOX_TOOL_KEY, JSON.stringify({ tool, order: files.map((_, index) => index), from }));
     return true;
   };
