@@ -6147,3 +6147,26 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
 - **A PRICE no feminino (e-3):** "de juros no SAC do que na PRICE", como o resto do site ("Na PRICE: …", "a tabela PRICE").
 - **A conta das palavras:** as frases a mais somam 104 em en, 88 em pt e 88 em es (antes, as mesmas), dentro dos 75 a 105; o `<main>` da home tem 565 palavras em en (560 antes: as 5 da tinta), 512 em pt e 524 em es, dentro de 450 a 594. O `lint:texto` dá 0 erro.
 - **O teste:** `tests/unit/home-numbers.test.ts`, "says in the money band only what every money calculator of the language does, and the paint example after its doors and windows": a frase da faixa de dinheiro diz PDF e CSV e nenhum resultado que só algumas têm (en "payment", "interest", "schedule"; pt "CET", "parcela", "juros", "cronograma"; es "pago", "intereses", "tabla"); cada calculadora do hub do idioma tem, no `dist/`, o Baixar PDF do card e o Baixar CSV; o exemplo da tinta tem porta e janelas no oráculo e a frase as diz; e a pt diz "na PRICE". Contra o `dist/` da revisão (`FO_HOME_DIST`), ele reprova ("expected 'Each calculator shows the payment, th…' to match /PDF.*CSV/").
+
+## § 592 · O fim do `ads.spec.ts` vai para o `clearance.spec.ts`, numa parte mais leve do CI (F13b, revisão c-3; critério 16, § 589 e o `ci.md`)
+
+- **O achado:** a F13b somou 280 testes por navegador, todos em arquivos que vêm depois de `ads` na ordem, e a fronteira do `--shard` andou: a parte "chromium 1 de 5" passou de 388 testes (o `a11y` e 126 do `ads`) a 469 (o `a11y` inteiro, os 207 do `ads` e o `ads-coffee`). Projetada com os tempos de cada teste da última execução completa do CI (a 42016872253, da F13a), ela soma 1.541 s de teste, 771 s por worker, e passaria dos 700 s do critério 16 e talvez dos 900 s do `verificar`.
+- **Por que o `--list` local dá a parte do CI:** o Playwright divide em partes por grupos de testes, e um spec com `beforeAll` (o `useTestBuild` do build de teste) vira grupos de `ceil(n / partes)` testes seguidos (42 no Chromium, 16 no WebKit), cada grupo num worker só. A conta não depende dos workers da máquina, então o `--list` local é o do CI (ele deu os 388 da F13a).
+- **A mudança:** os testes do fim do `ads.spec.ts`, os mais pesados no CI (o cabeçalho a 360, 767 e 1280 px, as ferramentas de PDF e o hub de PDF, os 30 guias de arquivo e o cartão do guia, 83 testes e 645 s no Chromium da F13a), passam, com o texto igual, para `tests/e2e/clearance.spec.ts` (o nome é o da regra, `ad-clearance`, e cai entre `calc-labels` e `coffee`, na parte 2 do Chromium e na 4 do WebKit, as mais leves). Os ajudantes que os dois specs usam (os alvos, o `boxes()` com a Oli inflada, o `expectClearance()`, o `smallFiles()`, as larguras) foram, com o texto igual, para `tests/e2e/lib/ad-clearance.ts`. O `ads.spec.ts` fica com as páginas de ferramenta, os hubs, as páginas livres e as calculadoras (124 testes). Nenhum teste saiu nem mudou: 207 = 124 + 83 em cada navegador, e o total do `--list` é o mesmo (2.183 por navegador).
+- **As partes, antes e depois** (testes; soma do tempo de teste; por worker, a soma sobre 2; o projetado é isso mais 33 s, a conta do `ci.md`, e mais 25 s na parte que passa a montar o build de teste; os specs novos da F13b, sem tempo no CI, levam o tempo por teste medido na máquina, que bateu com o do CI nos specs que existiam, ou 3 s):
+
+  | Parte | Antes | Depois |
+  | --- | --- | --- |
+  | chromium 1 | 469; 1.541 s; 771 s (~804) | 437 (`a11y` 261, `ads` 124, `ads-coffee` 1, `axe-calc-states` 8, `axe-pdf-states` 36, `budgets` 7); 1.180 s; 590 s (~623) |
+  | chromium 2 | 405; 718 s; 359 s | 437 (com o `clearance` 83); 1.080 s; 540 s (~598) |
+  | chromium 3 | 437; 1.067 s; 533 s | igual (~566) |
+  | chromium 4 | 436; 851 s; 426 s | igual (~459) |
+  | chromium 5 | 436; 1.207 s; 603 s | igual (~636) |
+  | webkit 2 | 174; 928 s; 464 s | 174; 707 s; 354 s (~387) |
+  | webkit 3 | 162; 944 s; 472 s | 162; 656 s; 328 s (~361) |
+  | webkit 4 | 168; 468 s; 234 s | 168 (com o `clearance` 83); 977 s; 489 s (~547) |
+  | webkit 6, a maior | 169; 994 s; 497 s | igual (~530) |
+
+  Nenhuma parte passa de 650 s projetados. O `design.spec.ts` fica nas partes 2 e 3 do Chromium e 5 e 6 do WebKit, e o `image-matrix.spec.ts` na 4 do Chromium e na 9 do WebKit: em partes diferentes, como antes.
+- **O que fica de medida:** a projeção usa os tempos da F13a; a primeira execução completa da F13b é a medida que vale. A parte 5 do Chromium não mudou com isto e fica a uns 14 s dos 650.
+- **Os testes antigos que mudaram (no formato da § 341):** os 83 testes do `ads.spec.ts` ("the header stays 150px from every AdSlot…", "distância dos anúncios nas ferramentas de PDF…", "the PDF hub keeps its first content AdSlot…", "distância dos anúncios nos guias de arquivo…" e "the guide card of each tool and calculator a guide embeds…") estão no `clearance.spec.ts`, com o mesmo texto, os mesmos alvos e os mesmos limites, no mesmo build de teste (`useTestBuild`). Protegiam os 150 px do cabeçalho, das ferramentas de PDF e dos guias, e protegem o mesmo. O `ads.spec.ts` lê os mesmos ajudantes do `lib/ad-clearance.ts`.
