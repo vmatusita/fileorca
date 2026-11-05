@@ -14,7 +14,12 @@ const rows = DOC.split('\n')
 describe('docs/PENDENCIAS.md', () => {
   it('has the items the decision 3 of the F8 names', () => {
     const ids = rows.map((cells) => cells[0]);
-    for (const id of ['F2 2b', '§ 283', 'F7 e-1', 'Worktrees', 'Fontes', 'F3 d-02', 'F3 b-07', 'F3 e-05']) expect(ids, id).toContain(id);
+    for (const id of ['F2 2b', '§ 283', 'Worktrees', 'Fontes', 'F3 b-07', 'F3 e-05']) expect(ids, id).toContain(id);
+    // The F13a closed the F3 d-02 (the Oli by state, DECISOES § 460) and dropped the F7 e-1 (§ 457, the § 305 solved it):
+    // they left the open rows for the table of what was fixed, and never disappear from the list (DECISOES § 341).
+    for (const id of ['F3 d-02', 'F7 e-1']) expect(ids, id).not.toContain(id);
+    expect(DOC).toMatch(/^\| F3 d-02: .+ \| F13a, § 460: .+ \|$/m);
+    expect(DOC).toMatch(/^\| F7 e-1: .+ \| Descartada na F13a \(§ 457\).+ \|$/m);
     // The F12 closed the F3 c-04 (DECISOES § 428) and the F3 c-08 (§ 435): they left the open rows for the table of what was
     // fixed, and never disappear from the list (DECISOES § 341 and § 447).
     for (const id of ['F3 c-04', 'F3 c-08']) expect(ids, id).not.toContain(id);
