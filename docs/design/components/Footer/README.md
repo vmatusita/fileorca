@@ -4,6 +4,8 @@ Navegação · FileOrca design system v1.1. Estilo em `../bundle.css`; marcaçã
 
 O rodapé é o fundo do mar: `deep`, com uma onda em SVG na borda de cima. Nenhuma imagem de fundo.
 
+**A crista (F13b, UX-15 A; DECISOES § 539).** Antes: a onda de cima era só `deep`. Depois: uma crista de 2 px em `stroke` corre sobre ela (o `::after` do rodapé, a mesma onda de 120 × 16 px 2 px acima e embaixo da onda `deep`), como a linha d'água do ResultHero, para o fundo do mar se ler pela forma também no escuro. Par: `stroke` sobre `bg`, 16,50:1 no claro e 4,67:1 no escuro.
+
 - As bordas são as do cabeçalho (Header, DECISOES § 409): 24px da janela e, a partir de 1288px, os 1240px da página (`page-max`), no centro. Abaixo de 340px, 16px.
 - Colunas de links por categoria e a coluna FileOrca (About, Privacy, Terms, Licenses, Contact). Embaixo de Utilities, na mesma coluna, o bloco Guides (F11, DECISOES § 396): "All guides" e os grupos do hub que têm guia no idioma; no hub, "All guides" leva `aria-current="page"`. Títulos em `caption` `on-deep-muted`, links em `on-deep`. Os títulos são `<h2>` (pular de H1 ou H2 para H4 reprova no `heading-order`).
 - No topo, a linha do café (`fo-footer__coffee-row`, F12, DECISOES § 437): o link de apoio ("Help keep FileOrca free: buy me a coffee" / "Me ajude a manter o FileOrca grátis: paga um café?" / "Ayúdame a mantener FileOrca gratis: invítame un café"), o primeiro link do rodapé, com o ícone `coffee` de 24px e alvo de 48px, nas bordas das colunas e com um fio `on-deep-muted` a 30% embaixo. Fica a 150px (`ad-clearance`) ou mais da âncora do AdSense: entre as duas ficam as colunas. Ela leva à página de apoio do idioma, com `donate_click` e o lugar `footer`.

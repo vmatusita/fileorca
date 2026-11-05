@@ -51,6 +51,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - As cores de categoria (`turquesa` imagem, `coral` PDF, `alga` dinheiro, `violeta` casa e saúde, `lima` utilidades) são só preenchimento: dobra, círculo de chip, ícone de ToolCard, faixa de hub em `*-soft`. Texto sobre elas em `on-cat` (`on-violeta` na violeta), nunca `ink`, que vira branco no escuro.
 - Gráficos: principal em `brand` (em `brand-on-deep` quando o gráfico está sobre `deep`, como no ResultHero), juros em `coral` com hachura. Azul × coral se distinguem sem vermelho e verde, e a legenda sempre diz o valor.
 - Erro é `danger` com ícone `alert` e a fala da Oli; nunca só a cor. `coral` não é erro.
+- Sobre `deep` (o erro dentro do ResultHero), o ícone `alert` é `danger-on-deep` (`#FF8A80`, igual nos dois temas, como o `brand-on-deep`): 6,04:1 contra `deep` no claro e no escuro, onde o `danger` do claro daria 2,45:1. O texto do erro no card continua `on-deep` (F13b; DECISOES § 538).
 
 ## Tipografia
 
@@ -58,6 +59,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - Use os estilos pelo nome: `display` na home e nos hubs, `h1` nas ferramentas e calculadoras; abaixo de 768px, toda página usa `h1-mobile`. `h2` nas seções, `h3` em Figtree 700. Números: `number-xl` no ResultHero, `number-lg` na Placa, `number-md` nas estatísticas. A fala da Oli em `oli`.
 - Corpo em `body` 16px; campo de formulário nunca abaixo de 16px. Tabelas em `table`, com `font-variant-numeric: tabular-nums` (a Figtree tem; a Fredoka não, então número em Fredoka fica alinhado à esquerda).
 - O subconjunto latino das duas fontes tem − (U+2212), ×, … e · , mas não tem → nem ↔. Em "2.4 MB → 780 KB", a seta é o ícone `arrow-right` em `fo-icon--inline`, com "to" / "para" / "a" escondido para leitor de tela. Em nome de ferramenta, escreva por extenso ("PNG to JPG").
+- A reserva da Figtree (`Figtree Fallback`, a Arial calibrada) tem uma face para o texto regular e duas para o negrito, uma em 600 e outra em 700 a 900, medidas sobre a Arial Bold: o rótulo em 600 tem a mesma largura com a reserva e com a Figtree, nos dois navegadores (F13b; DECISOES § 537).
 - Caixa alta só no `caption` (rótulo do AdSlot, sobretítulo de hub, título de coluna do rodapé), com 0,08em de espaçamento.
 
 ## Forma
@@ -67,6 +69,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 - **Dobra:** papéis (FileCard, ToolCard) têm o canto de cima à direita dobrado, de lado `dogear`, na cor da categoria. É o mesmo canto da barbatana da Oli.
 - **Raio:** `radius-pill` em botão, chip e trilho; `radius-xl` (24px) no painel, no ResultCard e nas faixas; `radius-lg` em cards; `radius-md` em campos; `radius-xs` no AdSlot e em miniaturas.
 - **Mar:** a água (`water`) com borda de onda aparece no fundo da DropZone, sobe no WaterLevel e a onda volta no topo do rodapé em `deep`. Nenhuma imagem de fundo no site.
+- **Linha d'água (F13b; DECISOES § 539):** o fundo do mar se lê pela forma, nos dois temas, não pela luminância. Antes: o `deep` dos cartões e do rodapé era só uma cor, e no escuro ele quase some contra o chão. Depois: o ResultHero leva por dentro da borda, no padding de cima, 16 px de ar em `surface` que terminam na onda do rodapé (120 × 16), com uma crista de 2 px em `stroke` (a classe `fo-sea-top`, só pseudo-elementos: a altura do cartão não muda); o rodapé ganha a mesma crista sobre a onda dele. O ResultCard da página de ferramenta não leva outra onda: a linha d'água dele é a faixa de água que subiu da F13a (§ 463). Pares: `stroke` sobre `surface` (a crista do cartão) 17,28:1 no claro e 4,07:1 no escuro; `stroke` sobre `bg` (a crista do rodapé) 16,50:1 e 4,67:1.
 - **Espaço:** passos de 4px (`space-1` a `space-24`). Card com `space-4` no celular e `space-6` no computador; seções a `space-12`.
 
 ## Movimento
