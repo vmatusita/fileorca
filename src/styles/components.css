@@ -264,7 +264,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-drop { position: relative; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); text-align: center;
   min-height: 300px; padding: var(--space-8) var(--space-6) var(--space-10); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); cursor: pointer; }
 .fo-drop__sea { position: absolute; inset: 0; border-radius: calc(var(--radius-xl) - var(--stroke-2)); overflow: hidden; pointer-events: none; }
-.fo-drop > :not(.fo-drop__sea):not(.fo-drop__oli) { position: relative; }
+.fo-drop > :not(.fo-drop__sea) { position: relative; }
 .fo-drop:hover { border-color: var(--brand); }
 .fo-drop[data-state="over"] { border-style: solid; border-color: var(--brand); --level: 38%; }
 .fo-drop[data-state="error"] { border-style: solid; border-color: var(--danger); border-width: var(--stroke-3); }
@@ -277,22 +277,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-drop__message { display: grid; gap: var(--space-2); }
 /* A long file name in the error breaks instead of widening the page (reflow at 320px). */
 .fo-drop__message, .fo-drop__help { max-width: 100%; overflow-wrap: anywhere; }
-/* The Oli sits on the top edge, to the right of the H1 (ToolPage mold), box sizes of § 19. */
-.fo-drop__oli { position: absolute; top: -86px; right: 0; width: 88px; height: 88px; pointer-events: none; }
-.fo-drop__oli > svg { transition: scale var(--dur-quick) var(--ease-spring), translate var(--dur-quick) var(--ease-spring); }
 @media (min-width: 768px) {
   .fo-drop, .fo-level { min-height: 340px; }
-  .fo-drop__oli { width: 112px; height: 112px; top: -76px; right: var(--space-4); }
 }
 
-/* ---------- WaterLevel (progress): the Oli swims on the water, so she rises with it ---------- */
+/* ---------- WaterLevel (progress): the water rises to the Oli, who swims in the corner of the rectangle (F13a) ---------- */
 .fo-level { position: relative; box-sizing: border-box; min-height: 300px; border: var(--stroke-2) solid var(--brand); border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); display: grid; place-items: center; text-align: center; overflow: hidden; }
 .fo-level__text { position: relative; display: grid; gap: var(--space-1); z-index: 1; }
 .fo-level__pct { font: 600 40px/44px var(--fo-font-display); }
 .fo-level__msg { font: 500 20px/26px var(--fo-font-display); }
 .fo-level__count { font-size: 15px; color: var(--ink-muted); }
 .fo-level__msg--busy { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
-.fo-level__oli { position: absolute; left: 50%; top: -62px; width: 72px; height: 72px; translate: 40px 0; }
 .fo-bar { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); overflow: hidden; }
 .fo-bar > i { position: absolute; inset: 0; border-radius: inherit; background: var(--brand); transform-origin: left center; transform: scaleX(var(--value, 0)); transition: transform var(--dur-base) var(--ease-out); }
 
@@ -300,13 +295,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-deep { background: var(--deep); color: var(--on-deep); }
 .fo-result { position: relative; box-sizing: border-box; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xl); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: center; }
 .fo-result__head { display: flex; align-items: center; gap: var(--space-3); min-height: 72px; }
-.fo-result__oli { width: 72px; height: 72px; }
-.fo-result__oli > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
 .fo-result__says { margin: 0; font: 500 18px/24px var(--fo-font-display); flex: 1 1 0; min-width: 0; }
-.fo-result__stats { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; }
-.fo-result__stat dt { font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
-.fo-result__stat dd { margin: 0; font: 600 24px/28px var(--fo-font-display); }
-.fo-result__stat--before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
 .fo-result__actions { display: grid; gap: var(--space-2); justify-items: center; }
 .fo-result__actions .fo-btn--download { display: flex; width: 100%; }
 /* "Download all · ZIP 1.4 MB" is wider than the card on a phone (reflow, WCAG 1.4.10): the icon and the label stay
@@ -326,13 +315,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support .fo-btn--ghost { margin-bottom: 0; font-weight: 600; }
 /* F12 · o café (DECISOES § 436): after "Don't show this again", one quiet sentence in the same place (role="status"). */
 .fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
-@media (max-width: 767px) { .fo-result .fo-placard { display: none; } }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
 .fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
 @media (min-width: 768px) {
   .fo-result { padding: var(--space-6); gap: var(--space-5); }
   .fo-result__head { min-height: 96px; }
-  .fo-result__oli { width: 96px; height: 96px; margin: -8px 0 -8px -8px; }
   .fo-result__says { font-size: 20px; line-height: 26px; }
   .fo-result__actions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-items: start; }
   .fo-result__actions .fo-btn--download { display: inline-flex; width: auto; }
