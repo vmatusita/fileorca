@@ -43,6 +43,8 @@ const TARGETS = [
   // F13a (UX-14, decision 10; DECISOES § 506): the line under the chips that take the result along (its room in the
   // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
+  // F13b (UX-13 A, decision 10; DECISOES § G-9): the sheet "What we measured" of a file guide and the frame of its tables.
+  '[data-content="facts"]', '.fo-guide__frame',
 ].join(', ');
 
 /**

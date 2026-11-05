@@ -73,6 +73,8 @@ export const MAP_TARGETS = [
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
   '.fo-result__support', '.fo-footer__coffee', '.fo-guidecard--here',
   '.fo-header > a', '.fo-header > button',
+  // F13b (UX-13 A, decision 10; DECISOES § G-9): the sheet "What we measured" of a file guide and the frame of its tables.
+  '[data-content="facts"]', '.fo-guide__frame',
 ].join(', ');
 /** The groups of targets of the report's table of the shortest distances. */
 export const TARGET_GROUPS: Record<string, string> = {
@@ -84,6 +86,9 @@ export const TARGET_GROUPS: Record<string, string> = {
   cafe: '.fo-result__support, .fo-footer__coffee',
   cronograma: '.fo-calc-schedule, .fo-amort-wrap',
   grade: '.fo-grid, .fo-guidecards',
+  // F13b (DECISOES § G-9): the sheet of a file guide and the frame of its tables.
+  ficha: '[data-content="facts"]',
+  tabela: '.fo-guide__frame',
 };
 
 export interface Rect {
