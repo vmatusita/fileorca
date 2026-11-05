@@ -39,7 +39,8 @@ import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
-import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
+// F13a · UX-16 (DECISOES § 493): the seal of the DropZone at rest is the file that goes into the water (file-drop).
+import fileDropIcon from '../../../docs/design/assets/Icons/file-drop.svg?raw';
 import offlineIcon from '../../../docs/design/assets/Icons/offline.svg?raw';
 
 const SHOW_PROGRESS_AFTER_MS = 400;
@@ -1239,7 +1240,7 @@ export default function PdfPanel(props: PdfPanelData) {
         ) : (
           <>
             <div class="fo-drop__badge" aria-hidden="true">
-              <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : uploadIcon} />
+              <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : fileDropIcon} />
             </div>
             {dropState === 'over' ? (
               <>

@@ -38,7 +38,8 @@ import chevronDownIcon from '../../../docs/design/assets/Icons/chevron-down.svg?
 import coffeeIcon from '../../../docs/design/assets/Icons/coffee.svg?raw';
 import downloadIcon from '../../../docs/design/assets/Icons/download.svg?raw';
 import imageIcon from '../../../docs/design/assets/Icons/image.svg?raw';
-import uploadIcon from '../../../docs/design/assets/Icons/upload.svg?raw';
+// F13a · UX-16 (DECISOES § 493): the seal of the DropZone at rest is the file that goes into the water (file-drop).
+import fileDropIcon from '../../../docs/design/assets/Icons/file-drop.svg?raw';
 import offlineIcon from '../../../docs/design/assets/Icons/offline.svg?raw';
 
 export interface ImagePanelProps<S extends object, O> extends ImagePanelData<O> {
@@ -732,7 +733,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   // The one Oli of the rectangle, in its corner, says the state (UX-04 A; DECISOES § 465).
   const pose: Pose = showProgress ? 'swim' : showCard ? 'cheer' : dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
   const islandState = m.phase === 'processing' && !showCard ? 'working' : showCard ? 'done' : dropState === 'over' ? 'over' : dropState ? 'error' : 'rest';
-  const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : uploadIcon;
+  const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : fileDropIcon;
   const [helpBefore = '', helpAfter = ''] = fmt(t.drop.helpDesktop, { formats: texts.formats }).split('{kbd}');
 
   let panel: JSX.Element;

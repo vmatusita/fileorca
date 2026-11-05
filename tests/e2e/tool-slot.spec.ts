@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { LANGS, ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { dismissCookies, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
+import { iconInner } from '../../src/icons/svg.ts';
+import { dismissCookies, dragOver, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
 // § 464 to § 474). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
@@ -256,6 +257,26 @@ test('D-09: the handle of the comparison draws two arrows', async ({ page }) => 
   const paths = page.locator('.fo-ba__knob svg path');
   await expect(paths).toHaveCount(2);
   expect(await paths.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('d')))).toEqual(['m9 7-4 5 4 5', 'm15 7 4 5-4 5']);
+});
+
+// F13a · UX-16 (decision 8; DECISOES § 493): the round seal of the DropZone at rest is the file-drop (a file that goes into the
+// water), in both islands; with a file over the zone it is still the download. Before, the seal at rest was the upload arrow.
+test('the seal of the DropZone is the file-drop at rest and the download with a file over it, in both islands', async ({ page }) => {
+  // The file's drawing, serialized by the browser as the inline icon is (the file closes its paths with "/>").
+  const inner = (name: string): Promise<string> =>
+    page.evaluate((raw) => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.innerHTML = raw;
+      return svg.innerHTML.replace(/\s+/g, ' ').trim();
+    }, iconInner(readFileSync(resolve('docs/design/assets/Icons', `${name}.svg`), 'utf8')));
+  const drawn = () => page.locator('.fo-drop__badge svg').first().evaluate((svg) => svg.innerHTML.replace(/\s+/g, ' ').trim());
+  for (const path of ['/compress-image/', '/pt/juntar-pdf/', '/es/heic-a-jpg/', '/merge-pdf/']) {
+    await open(page, path);
+    await dismissCookies(page);
+    expect(await drawn(), `${path} at rest`).toBe(await inner('file-drop'));
+    await dragOver(page);
+    expect(await drawn(), `${path} with a file over it`).toBe(await inner('download'));
+  }
 });
 
 // F10 p-13: a HEIC whose JPG comes out bigger says the change with its sign, and nothing on the HEIC page says the JPG is lighter.
