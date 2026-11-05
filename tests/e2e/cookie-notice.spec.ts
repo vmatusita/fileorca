@@ -183,3 +183,40 @@ test.describe('at the end of a page at 1280px', () => {
     });
   }
 });
+
+// The nine texts (three languages × the seals of files, numbers and text) stay two lines at 360 px and in the 360 px card of
+// a computer, in Figtree and in the fallback a slow first visit keeps (the notice uses Figtree Steady, font-display optional),
+// so the card is as tall with either font and the notice adds no layout shift when Figtree arrives (§ 305).
+test.describe('two lines in Figtree and in its fallback', () => {
+  const NINE = [
+    '/compress-image/', '/pt/comprimir-imagem/', '/es/comprimir-imagen/',
+    '/mortgage-calculator/', '/pt/simulador-sac-price/', '/es/calculadora-de-hipoteca/',
+    '/qr-code-generator/', '/pt/gerador-de-qr-code/', '/es/generador-de-codigo-qr/',
+  ];
+  for (const path of NINE) {
+    test(`${path}: the same height with either font, at 360 and at 1280 px`, async ({ browser }) => {
+      const heights: Record<string, number> = {};
+      for (const font of ['fallback', 'Figtree'] as const) {
+        for (const viewport of [{ width: 360, height: 740 }, { width: 1280, height: 800 }]) {
+          const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+          const page = await context.newPage();
+          if (font === 'fallback') await page.route(/figtree[^/]*\.woff2$/, (route) => route.abort());
+          const response = await page.goto(path);
+          expect(response?.status(), path).toBe(200);
+          // An optional face settles at the first paint: with Figtree in the cache, a second load paints with it.
+          if (font === 'Figtree') {
+            await page.evaluate(() => document.fonts.ready);
+            await page.reload();
+            expect(await page.evaluate(() => document.fonts.check('14px "Figtree Steady"')), `${path}: Figtree Steady in use`).toBe(true);
+          }
+          await expect(page.locator('#fo-cookie')).toBeVisible();
+          heights[`${font} ${viewport.width}`] = Math.round((await page.locator('#fo-cookie').boundingBox())!.height);
+          await context.close();
+        }
+      }
+      for (const [at, height] of Object.entries(heights)) expect(height, `${path} ${at}`).toBeLessThanOrEqual(130);
+      expect(heights['fallback 360'], `${path} at 360`).toBe(heights['Figtree 360']);
+      expect(heights['fallback 1280'], `${path} at 1280`).toBe(heights['Figtree 1280']);
+    });
+  }
+});
