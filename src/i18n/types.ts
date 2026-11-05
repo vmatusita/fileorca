@@ -66,6 +66,29 @@ export interface CommonTexts {
      * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
      */
     guidesAll: string;
+    /**
+     * F13b (UX-17 A; DECISOES § I-5): below 768 px each category shows its hub and puts its tools in a disclosure. The
+     * summary shows `all` ("All {n}") when the list holds every tool of the category in the language, `popular` ("{n}
+     * popular") when it holds some; {n} is the length of the list. The rest of its name is said only to a screen reader,
+     * after the visible words (WCAG 2.5.3): the noun of the category after `all`, and `popularRest` ("{noun}", "entre as
+     * {noun}") after `popular`.
+     */
+    tools: {
+      all: string;
+      popular: string;
+      popularRest: string;
+      image: string;
+      pdf: string;
+      money: string;
+      home?: string;
+      health?: string;
+    };
+    /**
+     * The disclosure of the Guides block below 768 px (DECISOES § I-5): "All guides" stays in sight and the groups of the
+     * hub go in it. The summary shows "{n} topics" ({n} the groups of the language) and a screen reader hears the rest.
+     */
+    guidesTopics: string;
+    guidesTopicsRest: string;
     /** The coffee line at the top of the footer (PLANO-MELHORIAS, section C; DECISOES § 437). */
     coffee: string;
     /** "Made by {name} in {city}" */

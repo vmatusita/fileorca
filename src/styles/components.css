@@ -968,6 +968,38 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer .fo-footer__coffee { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); padding-inline: var(--space-1); border-radius: var(--radius-sm); font-size: 16px; line-height: 22px; font-weight: 700; }
 .fo-footer .fo-footer__coffee:hover { text-decoration-thickness: 2px; }
 .fo-footer__coffee .fo-icon { width: 24px; height: 24px; }
+/* F13b · o rodapé no celular (UX-17 A, pages.html; DECISOES § I-5). Each category column shows its hub as its main link
+   and its tools in a <details> (fo-footer__tools; fo-footer__more is the Guides block of the F11). Below 768 px: two
+   columns; the links always in sight (the hub of each category, the QR code, "All guides", the FileOrca links and the
+   coffee line; the groups of the Guides block go in a disclosure too) are 48 px tall, the summary is a 48 px pill (hairline in
+   on-deep-muted, text on-deep, the chevron-down turning on open; hover brand-soft and ink, as the chip), and the tool links
+   inside an open list keep the 32 px line of today (the exception b-04 of § 381; WCAG 2.5.8 asks 24 px). From 768 px,
+   where the browser styles ::details-content, the summary goes away and the list shows: the footer of before, the hub on
+   the 32 px line and 2 px gap it had as the first item of the list. Where it cannot, the disclosure stays (one tap more)
+   and nothing is lost. No script: the HTML ships closed. */
+.fo-footer__col { min-width: 0; }
+.fo-footer__hub { display: block; margin-bottom: 2px; }
+.fo-footer__tools > summary { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: var(--tap-min); margin-top: var(--space-1); padding: 0 var(--space-2) 0 var(--space-3); border: var(--stroke-hair) solid var(--on-deep-muted); border-radius: var(--radius-pill); color: var(--on-deep); font: 600 15px/20px var(--fo-font-text); list-style: none; cursor: pointer; }
+.fo-footer__tools > summary::-webkit-details-marker { display: none; }
+.fo-footer__tools > summary .fo-icon { color: var(--on-deep-muted); transition: transform var(--dur-quick) var(--ease-out); }
+.fo-footer__tools[open] > summary .fo-icon { transform: rotate(180deg); }
+.fo-footer__tools > summary:hover { background: var(--brand-soft); color: var(--ink); }
+.fo-footer__tools > summary:hover .fo-icon { color: var(--ink); }
+.fo-footer__tools > ul { margin-top: var(--space-1); }
+@media (max-width: 767px) {
+  .fo-footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-4); }
+  .fo-footer__col > h2, .fo-footer__more > h2 { margin-bottom: var(--space-1); }
+  .fo-footer .fo-footer__hub, .fo-footer .fo-footer__solo a, .fo-footer .fo-footer__col--site a { display: flex; align-items: center; min-height: var(--tap-min); margin-bottom: 0; line-height: 20px; }
+  .fo-footer__col--site { grid-column: 1 / -1; }
+  .fo-footer__col--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-5); }
+}
+@supports selector(::details-content) {
+  @media (min-width: 768px) {
+    .fo-footer__tools > summary { display: none; }
+    .fo-footer__tools::details-content { content-visibility: visible; }
+    .fo-footer__tools > ul { margin-top: 0; }
+  }
+}
 
 /* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
 /* The notice of the first visit keeps the font of its first paint, and so its height (DECISOES § 305): every text inside

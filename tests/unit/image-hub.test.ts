@@ -69,12 +69,19 @@ describe('home', () => {
 });
 
 describe('footer', () => {
-  const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child li a');
+  // F13b (UX-17 A; DECISOES § I-5 and § I-8): the hub left the list; it is the main link of the column, and the eight
+  // tools are in the disclosure of the column. The links of the column are the same, in the same order.
+  const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child a');
 
   it('lists the hub first and then the eight tools in English', async () => {
-    const links = imageColumn(await render(HomeView, 'en'));
+    const page = await render(HomeView, 'en');
+    const links = imageColumn(page);
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/image-tools/', ...toolPaths('en')]);
     expect(links.map((link) => link.text).slice(0, 3)).toEqual(['Image tools', 'Compress image', 'Resize image']);
+    // The hub in sight, the tools in the disclosure.
+    expect(links[0]?.classList.contains('fo-footer__hub')).toBe(true);
+    const tools = page.querySelectorAll('footer .fo-footer__cols > div:first-child details.fo-footer__tools li a');
+    expect(tools.map((link) => link.getAttribute('href'))).toEqual(toolPaths('en'));
   });
 
   it('lists the hub first and then the eight tools in Portuguese and Spanish too (F6; only Compress image before)', async () => {
