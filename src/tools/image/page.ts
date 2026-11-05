@@ -12,7 +12,8 @@ import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
 import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId } from './registry.ts';
 import { IMAGE_PANEL_TEXTS, imageToolTexts } from './texts.ts';
-import type { ChipData, ConverterLink, ImagePanelData } from './types.ts';
+import type { ChipCarry, ChipData, ConverterLink, ImagePanelData } from './types.ts';
+import { pdfOriginsOf } from '../pdf/page.ts';
 
 /** Most chips under a result (the design: 2 to 4). */
 const MAX_CHIPS = 4;
@@ -31,6 +32,17 @@ export function existsIn(id: ImagePageId, lang: Lang): boolean {
 
 const categoryOf = (id: ImageToolId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 'pdf' : 'image');
 
+/**
+ * F13a · UX-14 (DECISOES § F13A-H-02): the chip to `target` takes the result along when this page makes images (Image to
+ * PDF makes a PDF, which no image tool takes) and the target has the label "this image" in the language; every image tool
+ * runs by itself. The island decides with the formats of the result itself (takes() of src/share).
+ */
+function carryTo(source: ImagePageId, target: ImageToolId, lang: Lang): ChipCarry | undefined {
+  const labels = IMAGE_PANEL_TEXTS[lang].carry.chips;
+  if (IMAGE_PAGES[source].pdf || !(target in labels)) return undefined;
+  return { accepts: [...IMAGE_PAGES[target].accepts], single: false, ...labels[target as keyof typeof labels] };
+}
+
 /** The next-step chips under a result; the home chip stands in when no other tool exists in the language. */
 export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
   const chips = IMAGE_PAGES[id].next
@@ -38,7 +50,8 @@ export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
     .slice(0, MAX_CHIPS)
     .flatMap((tool): ChipData[] => {
       const blurb = blurbOf(tool, lang);
-      return blurb ? [{ href: pathFor(tool, lang), name: blurb.name, target: tool, icon: ICONS[IMAGE_PAGES[tool].icon], category: categoryOf(tool) }] : [];
+      const carry = carryTo(id, tool, lang);
+      return blurb ? [{ href: pathFor(tool, lang), name: blurb.name, target: tool, icon: ICONS[IMAGE_PAGES[tool].icon], category: categoryOf(tool), ...(carry ? { carry } : {}) }] : [];
     });
   if (chips.length > 0) return chips;
   return [{ href: homePath(lang), name: IMAGE_PANEL_TEXTS[lang].next.moreTools, target: 'home', icon: ICONS.home, category: 'none' }];
@@ -72,8 +85,32 @@ function elsewhereFor(id: ImagePageId, lang: Lang): ImagePanelData['elsewhere'] 
   if (!blurb) return undefined;
   return {
     format: other.format,
-    chip: { href: pathFor(other.tool, lang), name: blurb.name, target: other.tool, icon: ICONS[IMAGE_PAGES[other.tool].icon], category: categoryOf(other.tool) },
+    chip: {
+      href: pathFor(other.tool, lang),
+      name: blurb.name,
+      target: other.tool,
+      icon: ICONS[IMAGE_PAGES[other.tool].icon],
+      category: categoryOf(other.tool),
+      // F13a · D-17 and UX-14 (DECISOES § F13A-H-02): the chip takes the refused file to the tool that takes it, and keeps
+      // its name ("For a PNG: PNG to JPG"): the row already says which file goes.
+      carry: { accepts: [...IMAGE_PAGES[other.tool].accepts], single: false, one: blurb.name, many: blurb.name },
+    },
   };
+}
+
+/**
+ * F13a · UX-14 (DECISOES § F13A-H-03): the pages whose chip takes their result here, with their name in the language: the
+ * image tools and presets (their next steps, and the chip of a refused format), and the PDF tools that make images.
+ */
+export function originsOf(id: ImagePageId, lang: Lang): Record<string, string> {
+  const origins: Record<string, string> = {};
+  for (const source of Object.keys(IMAGE_PAGES) as ImagePageId[]) {
+    if (!existsIn(source, lang)) continue;
+    const other = elsewhereFor(source, lang)?.chip;
+    const chips = other ? [...chipsFor(source, lang), other] : chipsFor(source, lang);
+    if (chips.some((chip) => chip.target === id && chip.carry)) origins[source] = blurbOf(source, lang)?.name ?? imageToolTexts(source, lang).h1;
+  }
+  return { ...origins, ...pdfOriginsOf(id, lang) };
 }
 
 /** The plain data of the island for a page, in a language. */
@@ -94,6 +131,8 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Rec
     ...(elsewhere ? { elsewhere } : {}),
     // In Portuguese the coffee line leads to the Pix of the support page (PLANO "Doações"; F6, decision 8).
     coffeeHref: lang === 'pt' ? `${pathFor('support', lang)}#pix` : KOFI_URL,
+    origins: originsOf(id, lang),
+    carryIcons: { info: ICONS.info, shield: ICONS.shield },
     ...(initial ? { initial } : {}),
   };
 }

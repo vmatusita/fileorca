@@ -68,6 +68,9 @@ export const MAP_TARGETS = [
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
   // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle and the band under it.
   '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
+  // F13a (UX-14; DECISOES § F13A-H-11): the line under the chips that take the result along, the note of where the files
+  // came from and the empty box.
+  '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
   '.fo-result__support', '.fo-footer__coffee', '.fo-guidecard--here',
   '.fo-header > a', '.fo-header > button',
 ].join(', ');

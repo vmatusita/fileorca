@@ -98,8 +98,8 @@ export async function jpegBatch(page: Page, names: number | string[]): Promise<T
   return list.map((name) => ({ name, mimeType: 'image/jpeg', buffer }));
 }
 
-/** A DataTransfer in the page holding these files, for a paste or a drop. */
-async function transferOf(page: Page, files: TestFile[]) {
+/** A DataTransfer in the page holding these files, for a paste or a drop. F13a (UX-18 A): exported for drop-anywhere.spec.ts. */
+export async function transferOf(page: Page, files: TestFile[]) {
   return page.evaluateHandle((entries) => {
     const transfer = new DataTransfer();
     for (const entry of entries) {
@@ -138,6 +138,31 @@ export async function dropFiles(page: Page, selector: string, files: TestFile[])
       const drop = new DragEvent('drop', { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true });
       document.querySelector(target as string)?.dispatchEvent(drop);
       return over.defaultPrevented && drop.defaultPrevented;
+    },
+    [selector, transfer] as const,
+  );
+}
+
+/**
+ * F13a · UX-18 A (DECISOES § F13A-H-06): what a person does when they drag files from the file manager and let go on an
+ * element: dragenter, dragover and drop on it, one DataTransfer built in the page with the bytes (setInputFiles fires none
+ * of them). Returns whether the page took the dragover and the drop over (preventDefault) and the dropEffect it left.
+ */
+export async function dropOn(page: Page, selector: string, files: TestFile[]): Promise<{ taken: boolean; effect: string }> {
+  const transfer = await transferOf(page, files);
+  return page.evaluate(
+    ([target, data]) => {
+      const element = document.querySelector(target as string) ?? document.body;
+      const fire = (type: string) => {
+        const event = new DragEvent(type, { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true });
+        element.dispatchEvent(event);
+        return event;
+      };
+      fire('dragenter');
+      const over = fire('dragover');
+      const effect = (data as DataTransfer).dropEffect;
+      const drop = fire('drop');
+      return { taken: over.defaultPrevented && drop.defaultPrevented, effect };
     },
     [selector, transfer] as const,
   );

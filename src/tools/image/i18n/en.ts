@@ -93,5 +93,24 @@ export default {
     help: 'Changing an option redoes the file right away.',
   },
   next: { label: 'Next:', moreTools: 'More tools' },
+  // F13a · UX-14 (DECISOES § F13A-H-01): the chip that takes the result to the next tool, and the arrival there.
+  carry: {
+    line: 'Oli takes the image to the next tool. It never leaves your device.',
+    lineMany: 'Oli takes the images to the next tool. They never leave your device.',
+    from: 'Oli brought this image from {tool}.',
+    fromMany: 'Oli brought these {count} images from {tool}.',
+    lostTitle: "Oli couldn't bring the image here",
+    lostTitleMany: "Oli couldn't bring the images here",
+    lostHelp: 'Nothing left your device. Choose the image again, or go back to {tool} and download it there.',
+    lostHelpMany: 'Nothing left your device. Choose the images again, or go back to {tool} and download them there.',
+    back: 'Back to {tool}',
+    chips: {
+      'compress-image': { one: 'Compress this image', many: 'Compress these {count} images' },
+      'resize-image': { one: 'Resize this image', many: 'Resize these {count} images' },
+      'crop-image': { one: 'Crop this image', many: 'Crop these {count} images' },
+      'rotate-image': { one: 'Rotate this image', many: 'Rotate these {count} images' },
+      'image-to-pdf': { one: 'Turn this image into a PDF', many: 'Turn these {count} images into a PDF' },
+    },
+  },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },
 } satisfies ImagePanelTexts;

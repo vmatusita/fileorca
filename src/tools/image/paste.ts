@@ -24,7 +24,73 @@ export function dragCount(transfer: DataTransfer | null | undefined): number {
   return Array.from(transfer.items ?? []).filter((item) => item.kind === 'file').length;
 }
 
-const TEXT_INPUT_TYPES = new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number', '']);
+/** What a page with a file tool does with a drag of files anywhere on it (UX-18 A). */
+export interface DropHandlers {
+  /** Files came into the window (the count of a drag that says it, else 0): the DropZone goes to "over" where it is. */
+  enter(count: number): void;
+  /** They left the window, or went over an ad (a frame of another origin gets the drag): the zone goes back to rest. */
+  leave(): void;
+  /** They were let go anywhere on the page: the tool takes them. */
+  drop(files: File[]): void;
+}
+
+/**
+ * F13a · UX-18 A (DECISOES § F13A-H-06 and § F13A-H-07): a drag of files anywhere on the page is the tool's, in both islands.
+ * The document listens; a counter of dragenter (+1) and dragleave (−1) says when the drag left the window or went over an
+ * ad, instead of the relatedTarget, which Safari leaves null on every dragleave; drop and dragend set it to zero. A drag
+ * of text or of a page of the grid (no "Files" in it) is never touched. Returns what stops listening, and a reset for a
+ * batch that starts with no drop (the picker, a paste).
+ */
+export function catchDrops(on: DropHandlers): { stop: () => void; reset: () => void } {
+  let depth = 0;
+  const enter = (event: DragEvent) => {
+    if (!carriesFiles(event.dataTransfer)) return;
+    event.preventDefault();
+    depth += 1;
+    on.enter(dragCount(event.dataTransfer));
+  };
+  const over = (event: DragEvent) => {
+    if (!carriesFiles(event.dataTransfer)) return;
+    // The cursor says "copy" only where the page takes the file (F10 p-11): here, the whole page does.
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+  };
+  // Any dragleave counts down (a drag that left says so even when its event carries no list of types); the count never goes
+  // under zero, so the leave of a drag of text, which never counted up, changes nothing.
+  const leave = () => {
+    depth = Math.max(0, depth - 1);
+    if (depth === 0) on.leave();
+  };
+  const end = () => {
+    depth = 0;
+    on.leave();
+  };
+  const drop = (event: DragEvent) => {
+    if (!carriesFiles(event.dataTransfer)) return;
+    event.preventDefault();
+    end();
+    on.drop(filesOf(event.dataTransfer?.files));
+  };
+  const pairs = [['dragenter', enter], ['dragover', over], ['dragleave', leave], ['drop', drop], ['dragend', end]] as const;
+  for (const [type, listener] of pairs) document.addEventListener(type, listener as EventListener);
+  return {
+    stop: () => {
+      for (const [type, listener] of pairs) document.removeEventListener(type, listener as EventListener);
+    },
+    reset: () => {
+      depth = 0;
+    },
+  };
+}
+
+/** Brings the panel into view after a drop away from it, at once when the person asked for less motion. */
+export function bringIntoView(element: HTMLElement | null): void {
+  if (!element) return;
+  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  element.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+}
+
+const TEXT_INPUT_TYPES =new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number', '']);
 const DIALOGS = 'dialog[open], [role="dialog"], .fo-search, #fo-search-dialog';
 const FIELDS = 'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
 

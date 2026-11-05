@@ -23,8 +23,8 @@ import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
 import { COFFEE_KEY, countUse, decideCoffee, dontShowAgain, forgetWithoutConsent, parseCoffee, type CoffeeLine } from '../image/coffee.ts';
-import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
-import { takeInbox } from '../image/inbox.ts';
+import { bringIntoView, catchDrops, filesOf, pasteBelongsToElement } from '../image/paste.ts';
+import { carries, plainClick, storeForNext, takeInbox, workerControls, type Outgoing } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
@@ -33,7 +33,7 @@ import type { Pose } from '../../oli/poses.ts';
 import type { PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts } from '../../i18n/types.ts';
 import type { MergeTexts } from './option-texts.ts';
-import type { PdfFileView, PdfPanelData, Thumbnails } from './types.ts';
+import type { PdfChip, PdfFileView, PdfPanelData, Thumbnails } from './types.ts';
 import type * as ClientModule from './client.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
@@ -126,12 +126,20 @@ interface Model {
   focusRow: number | null;
   /** F13a (D-11): a password was wrong, so its field takes the focus with the text selected. */
   focusWrong: boolean;
+  /** F13a · UX-14 (DECISOES § F13A-H-03): the id of the page whose chip brought these files, for its note; null otherwise. */
+  from: string | null;
+  /** F13a · UX-14 (DECISOES § F13A-H-04): a chip sent files here and none arrived: the empty box, until files come. */
+  lost: { from: string; count: number } | null;
+  /** F13a · UX-14: what came out of the last run, named, in order: what a chip takes along (not the ZIP). */
+  outs: { format: PdfOutput['kind']; name: string; bytes: Uint8Array }[];
+  carrying: boolean;
 }
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, readingLevel: false, bundle: null, single: null, notes: [],
   announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
   redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null, focusWrong: false,
+  from: null, lost: null, outs: [], carrying: false,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -183,7 +191,7 @@ const codecOf = (failure: Failure | null): Codec => {
 type Client = typeof ClientModule;
 
 export default function PdfPanel(props: PdfPanelData) {
-  const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref } = props;
+  const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref, origins, carryLine } = props;
   const tool = PDF_TOOLS[page];
   const { Options } = tool;
   const model = useRef<Model>(newModel());
@@ -206,6 +214,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const levelRef = useRef<HTMLDivElement>(null);
   const warmed = useRef(false);
   const appending = useRef(false);
+  const drops = useRef<ReturnType<typeof catchDrops> | null>(null);
   const dragging = useRef<number | null>(null);
   /** D-22: where the top of the Choose button is in the rectangle at rest, so the Merge button takes that place. */
   const chooseAt = useRef(0);
@@ -471,6 +480,8 @@ export default function PdfPanel(props: PdfPanelData) {
     revoke(m.single);
     m.bundle = null;
     m.single = null;
+    // F13a · UX-14: the files a chip takes along are these, one by one with their names, never the ZIP.
+    m.outs = entries.map((entry, i) => ({ format: entry.output.kind, name: names[i] ?? '', bytes: entry.output.bytes }));
     if (entries.length === 1 && entries[0]) {
       const output = entries[0].output;
       const type = output.kind === 'pdf' ? 'application/pdf' : output.kind === 'png' ? 'image/png' : 'image/jpeg';
@@ -508,8 +519,17 @@ export default function PdfPanel(props: PdfPanelData) {
       m.newUse = false;
       m.coffee = countUse() ? 'ask' : '';
     }
-    m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : ''].filter(Boolean).join(' ') : '';
+    // F13a · UX-14: a batch a chip brought also says where it came from.
+    m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote()].filter(Boolean).join(' ') : '';
     render();
+  }
+
+  /** F13a · UX-14 (DECISOES § F13A-H-03): "Oli brought this PDF from Merge PDF.", for files a chip brought. */
+  function fromNote(): string {
+    const name = m.from ? origins[m.from] : undefined;
+    if (!name) return '';
+    const count = m.items.filter(usable).length;
+    return fmt(count > 1 ? t.carry.fromMany : t.carry.from, { tool: name, count });
   }
 
   function totals(done: Item[]): { before: number; after: number } {
@@ -551,6 +571,8 @@ export default function PdfPanel(props: PdfPanelData) {
   function teardown(): void {
     for (const item of m.items) item.removed = true;
     m.items = [];
+    m.outs = [];
+    m.focusWrong = false;
     m.undo = null;
     revoke(m.bundle);
     revoke(m.single);
@@ -573,10 +595,14 @@ export default function PdfPanel(props: PdfPanelData) {
     return { id: m.nextId++, file, status: failure ? 'error' : 'reading', info: null, failure, outputs: null, outcome: null, op: null, reported: false, removed: false };
   }
 
-  function addFiles(files: File[]): void {
+  /** `from`: the page whose chip brought these files (UX-14), checked against the origins of this page. */
+  function addFiles(files: File[], from: string | null = null): void {
     if (files.length === 0) return;
     const append = merging && (appending.current || (m.items.length > 0 && m.phase !== 'done'));
     appending.current = false;
+    m.lost = null;
+    drops.current?.reset();
+    if (!append) m.from = from;
     // Adding is the next action after a row left the Merge list: the Undo goes (D-21).
     m.undo = null;
     if (!append) {
@@ -649,6 +675,8 @@ export default function PdfPanel(props: PdfPanelData) {
     m.runId += 1;
     teardown();
     unlock();
+    m.from = null;
+    m.lost = null;
     m.phase = 'idle';
     m.announce = '';
     m.coffee = '';
@@ -770,10 +798,13 @@ export default function PdfPanel(props: PdfPanelData) {
     }
     // D-11 (§ 177 and § 240): after a wrong password the focus goes back to the field, with what was typed selected, so a
     // new try replaces it; the error is on the field (role="alert").
+    // F13a (DECISOES § F13A-H-15): the mark waits for the field to say the error. The effect of the render that showed the
+    // work can run at the start of the next render (Preact runs the pending effects first), with the mark already set and
+    // the field not yet marked: consumed there, the focus never came (WebKit, when the engine answers within a frame).
     if (m.focusWrong) {
-      m.focusWrong = false;
       const field = rootRef.current?.querySelector<HTMLInputElement>('.fo-pass input[aria-invalid="true"]');
       if (field) {
+        m.focusWrong = false;
         field.focus();
         field.select();
       }
@@ -793,16 +824,20 @@ export default function PdfPanel(props: PdfPanelData) {
   });
 
   useEffect(() => {
-    const onDragOver = (event: DragEvent) => {
-      if (carriesFiles(event.dataTransfer)) event.preventDefault();
-    };
-    const onDrop = (event: DragEvent) => {
-      if (!carriesFiles(event.dataTransfer)) return;
-      event.preventDefault();
-      setOver(0);
-      const root = rootRef.current;
-      if (root && event.target instanceof Node && root.contains(event.target)) addFiles(filesOf(event.dataTransfer?.files));
-    };
+    // F13a · UX-18 A (DECISOES § F13A-H-06): files dragged anywhere on the page light the zone where it is, and a drop
+    // anywhere goes to the tool (the Merge list adds them), with the panel brought into view. The drag of a row of the
+    // list or of a page of the grid carries no files and is left to them.
+    drops.current = catchDrops({
+      enter: (count) => {
+        if (m.phase !== 'processing') setOver(Math.max(1, count));
+      },
+      leave: () => setOver(0),
+      drop: (files) => {
+        if (files.length === 0) return;
+        addFiles(files);
+        bringIntoView(slotRef.current);
+      },
+    });
     const onPaste = (event: ClipboardEvent) => {
       if (pasteBelongsToElement(event.target)) return;
       const files = filesOf(event.clipboardData?.files);
@@ -810,21 +845,52 @@ export default function PdfPanel(props: PdfPanelData) {
       event.preventDefault();
       addFiles(files);
     };
-    document.addEventListener('dragover', onDragOver);
-    document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
-    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
-    void takeInbox(page).then((files) => {
-      if (files.length > 0) addFiles(files);
+    // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290), or the result
+    // a next-step chip brought (F13a · UX-14; § F13A-H-03 and § F13A-H-04).
+    void takeInbox(page).then((arrival) => {
+      const from = arrival.from !== null && arrival.from in origins ? arrival.from : null;
+      if (arrival.files.length > 0) addFiles(arrival.files, from);
+      else if (arrival.lost && from && m.items.length === 0) {
+        m.lost = { from, count: arrival.count };
+        render();
+      }
     });
     return () => {
-      document.removeEventListener('dragover', onDragOver);
-      document.removeEventListener('drop', onDrop);
+      drops.current?.stop();
       document.removeEventListener('paste', onPaste);
       m.runId += 1;
       teardown();
     };
   }, []);
+
+  /**
+   * F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): a plain click on a chip that takes the files writes them into the
+   * inbox, notes the choice and goes; anything else only links, as before. The event is the next_step_click of always.
+   */
+  function follow(event: TargetedMouseEvent<HTMLAnchorElement>, chip: PdfChip): void {
+    track('next_step_click', { ...tracked, target: chip.target });
+    const files = carriedBy(chip);
+    if (!chip.carry || files.length === 0 || !plainClick(event) || !workerControls()) return;
+    event.preventDefault();
+    if (m.carrying) return;
+    m.carrying = true;
+    const href = chip.href;
+    // Written or not (a failure, or 3 s), the page goes: without the choice the tool opens empty, as the link of before.
+    void storeForNext(files, chip.target, page).then(() => {
+      m.carrying = false;
+      location.assign(href);
+    });
+  }
+
+  /** The files a chip would take along: the outputs its tool takes, in order, one at most for a one-file tool. */
+  function carriedBy(chip: PdfChip): Outgoing[] {
+    const carry = chip.carry;
+    if (!carry) return [];
+    const typeOf = (kind: PdfOutput['kind']) => (kind === 'pdf' ? 'application/pdf' : kind === 'png' ? 'image/png' : 'image/jpeg');
+    const taken = m.outs.filter((out) => carry.accepts.includes(out.format));
+    return (carry.single ? taken.slice(0, 1) : taken).map((out) => ({ name: out.name, blob: new Blob([out.bytes as BlobPart], { type: typeOf(out.format) }) }));
+  }
 
   // --- thumbnails of the file of a single-file tool -------------------------------------------------------------
 
@@ -918,18 +984,6 @@ export default function PdfPanel(props: PdfPanelData) {
     if ((event.target as HTMLElement).closest('button, a, input')) return;
     openPicker();
   };
-  const dragHandlers = {
-    onDragEnter: (event: DragEvent) => {
-      event.preventDefault();
-      if (m.phase !== 'processing') setOver(Math.max(1, dragCount(event.dataTransfer)));
-    },
-    onDragOver: (event: DragEvent) => event.preventDefault(),
-    onDragLeave: (event: DragEvent) => {
-      const zone = event.currentTarget as HTMLElement;
-      if (!zone.contains(event.relatedTarget as Node | null)) setOver(0);
-    },
-  };
-
   const nameOf = (item: Item) => item.file.name || t.fileFallback;
 
   function linked(sentence: string, name: string, link: { href: string; name: string }): ComponentChildren {
@@ -971,7 +1025,9 @@ export default function PdfPanel(props: PdfPanelData) {
   const reading = m.phase === 'reading';
   // Every file failed to load the engine while the device is offline: the tool was kept without its engine (F8).
   const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
-  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
+  // F13a · UX-14 (DECISOES § F13A-H-04): the empty box, until files come (any way) or a file is dragged over it.
+  const lost = m.lost && m.phase === 'idle' && m.items.length === 0 ? m.lost : null;
+  const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : lost ? 'lost' : undefined;
   const showLevel = (m.phase === 'processing' && m.showLevel) || (reading && m.readingLevel && m.items.length > 0);
   /** The result is on screen: done, or a new one on its way after a change made with it on screen (§ 483). */
   const resultOnScreen = Boolean(delivered) && !showLevel && (m.phase === 'done' || (m.phase === 'processing' && m.redo));
@@ -982,7 +1038,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const [helpBefore = '', helpAfter = ''] = fmt(t.drop.helpDesktop, { note: texts.note }).split('{kbd}');
   const ready = m.items.filter(usable);
   const labels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
-  const pose: Pose = dropState === 'over' ? 'gulp' : showLevel ? 'swim' : resultOnScreen ? 'cheer' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
+  const pose: Pose = dropState === 'over' ? 'gulp' : showLevel ? 'swim' : resultOnScreen ? 'cheer' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : dropState === 'lost' ? 'lost' : 'wave';
 
   // F13a (§ 479 and § 484): what the rectangle and the band keep, set before the frame is painted, so a state
   // that comes with no gesture (the Merge button after the reading, the result) never moves what is under it.
@@ -1124,8 +1180,15 @@ export default function PdfPanel(props: PdfPanelData) {
             </button>
           </div>
         </div>
-        {notes.length > 0 && (
+        {(notes.length > 0 || fromNote()) && (
           <ul class="fo-result__notes">
+            {fromNote() && (
+              // F13a · UX-14 (DECISOES § F13A-H-03): where files brought by a chip came from, the first note of the card.
+              <li class="fo-result__from">
+                <Icon raw={arrowIcon} class="fo-icon--inline" />
+                {fromNote()}
+              </li>
+            )}
             {notes.map((key) => (
               <li key={key}>{t.result.notes[key]}</li>
             ))}
@@ -1231,8 +1294,10 @@ export default function PdfPanel(props: PdfPanelData) {
     );
   } else {
     const single = m.items.length === 1 ? m.items[0] : undefined;
+    const lostFrom = lost ? (origins[lost.from] ?? '') : '';
+    // UX-18 A: the drag of files is heard by the document (catchDrops), not by the zone.
     panel = (
-      <div key="drop" class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
+      <div key="drop" class="fo-drop" data-state={dropState} onClick={onZoneClick}>
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
@@ -1253,9 +1318,28 @@ export default function PdfPanel(props: PdfPanelData) {
         ) : (
           <>
             <div class="fo-drop__badge" aria-hidden="true">
-              <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : fileDropIcon} />
+              {dropState === 'lost' ? <Icon inner={icons.info} /> : <Icon raw={dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : fileDropIcon} />}
             </div>
-            {dropState === 'over' ? (
+            {lost ? (
+              // F13a · UX-14 (DECISOES § F13A-H-04): the empty box: what happened, "Choose PDFs" (the first stop of Tab in the
+              // panel; nothing calls focus()) and the way back to the page the files came from.
+              <>
+                <div role="status" class="fo-drop__message">
+                  <p class="fo-drop__title">{lost.count > 1 ? t.carry.lostTitleMany : t.carry.lostTitle}</p>
+                  <p class="fo-drop__help">{fmt(lost.count > 1 ? t.carry.lostHelpMany : t.carry.lostHelp, { tool: lostFrom })}</p>
+                </div>
+                <div class="fo-drop__actions">
+                  <button ref={chooseRef} type="button" class="fo-btn fo-btn--brand fo-btn--lg" onClick={() => openPicker()} onFocus={warmOnce}>
+                    <Icon inner={icons.pdf} />
+                    {one ? t.drop.chooseOne : t.drop.chooseMany}
+                  </button>
+                  {/* history.back(): the back cache of the browser usually brings the result back as it was. */}
+                  <button type="button" class="fo-btn" onClick={() => history.back()}>
+                    {fmt(t.carry.back, { tool: lostFrom })}
+                  </button>
+                </div>
+              </>
+            ) : dropState === 'over' ? (
               <>
                 <p class="fo-drop__title">{t.drop.over}</p>
                 <p class="fo-drop__help">{over > 1 ? fmt(t.drop.overCount, { count: over }) : t.drop.overHelp}</p>
@@ -1436,6 +1520,12 @@ export default function PdfPanel(props: PdfPanelData) {
   // the chips is kept from the gesture that asks for the result: the press of the action, and for Merge the whole time the
   // list is in the rectangle (the band is reserved, empty: the chips and the closed "Order" are there, not seen).
   const chipsSeen = resultOnScreen && chips.length > 0;
+  // F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-02): what each chip takes along, decided here in the client, with the
+  // formats of what came out and a service worker in control.
+  const controlled = workerControls();
+  const formats = chipsSeen ? m.outs.map((out) => out.format) : [];
+  const takes = (chip: PdfChip): number => (chip.carry && controlled ? carries(chip.carry.accepts, chip.carry.single, formats) : 0);
+  const carryingNow = chipsSeen && chips.some((chip) => takes(chip) > 0);
   const chipsKept = !chipsSeen && chips.length > 0 && ((runMode === 'action' && m.phase === 'processing') || listOnScreen);
   const orderSeen = merging && resultOnScreen;
   const orderKept = merging && listOnScreen;
@@ -1468,16 +1558,34 @@ export default function PdfPanel(props: PdfPanelData) {
             <span class="fo-next__label" id="fo-next-label">
               {t.next.label}
             </span>
-            {chips.map((chip) => (
-              <a key={chip.href} class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`} href={chip.href} onClick={() => track('next_step_click', { ...tracked, target: chip.target })}>
-                <span class="fo-chip__dot" aria-hidden="true">
-                  <Icon inner={chip.icon} />
-                </span>
-                {chip.name}
-                <Icon raw={arrowIcon} />
-              </a>
-            ))}
+            {chips.map((chip) => {
+              const count = takes(chip);
+              return (
+                <a
+                  key={chip.href}
+                  class={chip.category === 'none' ? 'fo-chip' : `fo-chip fo-cat--${chip.category}`}
+                  href={chip.href}
+                  data-carry={count > 0 ? '' : undefined}
+                  onClick={(event) => follow(event, chip)}
+                >
+                  <span class="fo-chip__dot" aria-hidden="true">
+                    <Icon inner={chip.icon} />
+                  </span>
+                  {count > 0 && chip.carry ? (count === 1 ? chip.carry.one : fmt(chip.carry.many, { count })) : chip.name}
+                  <Icon raw={arrowIcon} />
+                </a>
+              );
+            })}
           </nav>
+        )}
+        {(chipsSeen || chipsKept) && chips.some((chip) => chip.carry) && (
+          // F13a · UX-14 (DECISOES § F13A-H-01 and § F13A-H-05): the files the chips take along never leave the device. Where a
+          // chip could take them, the line keeps its room with the chips (hidden when none takes them now: no service worker,
+          // or a format the tools do not take), so the band never grows or shrinks when the result comes.
+          <p class={carryingNow ? 'fo-carry' : 'fo-carry fo-next--kept'} aria-hidden={carryingNow ? undefined : 'true'}>
+            <Icon inner={icons.shield} class="fo-icon--inline" />
+            {carryingNow && formats.length === 1 ? carryLine.one : carryLine.many}
+          </p>
         )}
         {(orderSeen || orderKept) && (
           <details

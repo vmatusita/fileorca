@@ -92,5 +92,24 @@ export default {
     help: 'Cambiar una opción rehace el archivo al momento.',
   },
   next: { label: 'Siguiente:', moreTools: 'Más herramientas' },
+  // F13a · UX-14 (DECISOES § F13A-H-01): el chip que lleva el resultado a la siguiente herramienta, y la llegada allí.
+  carry: {
+    line: 'Oli lleva la imagen a la siguiente herramienta. Nunca sale de tu dispositivo.',
+    lineMany: 'Oli lleva las imágenes a la siguiente herramienta. Nunca salen de tu dispositivo.',
+    from: 'Oli trajo esta imagen desde {tool}.',
+    fromMany: 'Oli trajo estas {count} imágenes desde {tool}.',
+    lostTitle: 'Oli no pudo traer la imagen',
+    lostTitleMany: 'Oli no pudo traer las imágenes',
+    lostHelp: 'Nada salió de tu dispositivo. Elige la imagen de nuevo, o vuelve a {tool} y descárgala allí.',
+    lostHelpMany: 'Nada salió de tu dispositivo. Elige las imágenes de nuevo, o vuelve a {tool} y descárgalas allí.',
+    back: 'Volver a {tool}',
+    chips: {
+      'compress-image': { one: 'Comprimir esta imagen', many: 'Comprimir estas {count} imágenes' },
+      'resize-image': { one: 'Redimensionar esta imagen', many: 'Redimensionar estas {count} imágenes' },
+      'crop-image': { one: 'Recortar esta imagen', many: 'Recortar estas {count} imágenes' },
+      'rotate-image': { one: 'Rotar esta imagen', many: 'Rotar estas {count} imágenes' },
+      'image-to-pdf': { one: 'Pasar esta imagen a PDF', many: 'Pasar estas {count} imágenes a PDF' },
+    },
+  },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },
 } satisfies ImagePanelTexts;

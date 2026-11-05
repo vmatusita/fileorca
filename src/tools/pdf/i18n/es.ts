@@ -121,6 +121,22 @@ const texts: PdfPanelTexts = {
     },
   },
   next: { label: 'Siguiente', moreTools: 'Más herramientas' },
+  // F13a · UX-14 (DECISOES § F13A-H-01): el chip que lleva el resultado a la siguiente herramienta, y la llegada allí.
+  carry: {
+    line: 'Oli lleva el PDF a la siguiente herramienta. Nunca sale de tu dispositivo.',
+    lineMany: 'Oli lleva los PDF a la siguiente herramienta. Nunca salen de tu dispositivo.',
+    from: 'Oli trajo este PDF desde {tool}.',
+    fromMany: 'Oli trajo estos {count} PDF desde {tool}.',
+    lostTitle: 'Oli no pudo traer el PDF',
+    lostTitleMany: 'Oli no pudo traer los PDF',
+    lostHelp: 'Nada salió de tu dispositivo. Elige el PDF de nuevo, o vuelve a {tool} y descárgalo allí.',
+    lostHelpMany: 'Nada salió de tu dispositivo. Elige los PDF de nuevo, o vuelve a {tool} y descárgalos allí.',
+    back: 'Volver a {tool}',
+    chips: {
+      'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estos {count} PDF' },
+      'add-page-numbers-to-pdf': { one: 'Numerar las páginas de este PDF', many: 'Numerar las páginas de estos {count} PDF' },
+    },
+  },
 };
 
 export default texts;

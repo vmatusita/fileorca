@@ -65,8 +65,9 @@ report(
       ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer', ...WALL_ONLY] })
       : checkSprite(page.html, {
           requiredPoses: page.html.includes('id="fo-tool-root"')
-            ? // F8: the image and PDF panels (their drop zone) also have the offline line in buoy (DECISOES § 292).
-              [...PAGE_POSES, ...TOOL_POSES, ...(page.html.includes('class="fo-drop"') ? ['buoy'] : [])]
+            ? // F8: the image and PDF panels (their drop zone) also have the offline line in buoy (DECISOES § 292), and F13a ·
+              // UX-14 the empty box in lost, when the files of a next-step chip did not arrive (DECISOES § F13A-H-04).
+              [...PAGE_POSES, ...TOOL_POSES, ...(page.html.includes('class="fo-drop"') ? ['buoy', 'lost'] : [])]
             : PAGE_POSES,
           forbiddenPoses: WALL_ONLY,
         }),
