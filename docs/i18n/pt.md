@@ -113,6 +113,7 @@ Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O arti
 | Position · Top left · Top center · Bottom right… | Posição · Em cima à esquerda · Em cima no centro · Embaixo à direita… |
 | Format · Page 1 · Page 1 of 12 · 1 of 12 | Formato · Página 1 · Página 1 de 12 · 1 de 12 |
 | First number · Skip the first page | Primeiro número · Pular a primeira página |
+| First page: Number it · Skip it (F13a, a opção no lugar da caixa) | Primeira página: Numerar · Pular |
 | Watermark text · CONFIDENTIAL · Size · Opacity · Light · Direction · Diagonal | Texto da marca d'água · CONFIDENCIAL · Tamanho · Opacidade · Clara · Direção · Diagonal |
 | Signature · Draw · Upload · Type · Clear | Assinatura · Desenhar · Imagem · Digitar · Limpar |
 | Password · Confirm password · Remove password | Senha · Confirme a senha · Tirar a senha |

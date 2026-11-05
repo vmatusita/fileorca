@@ -111,6 +111,7 @@ Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plur
 | Position · Top left · Top center · Bottom right… | Posición · Arriba a la izquierda · Arriba al centro · Abajo a la derecha… |
 | Format · Page 1 · Page 1 of 12 · 1 of 12 | Formato · Página 1 · Página 1 de 12 · 1 de 12 |
 | First number · Skip the first page | Primer número · Omitir la primera página |
+| First page: Number it · Skip it (F13a, a opção no lugar da caixa) | Primera página: Numerar · Omitir |
 | Watermark text · CONFIDENTIAL · Size · Opacity · Light · Direction | Texto de la marca de agua · CONFIDENCIAL · Tamaño · Opacidad · Suave · Dirección |
 | Signature · Draw · Upload · Type · Clear | Firma · Dibujar · Imagen · Escribir · Borrar |
 | Password · Confirm password · Remove password | Contraseña · Confirma la contraseña · Quitar la contraseña |
