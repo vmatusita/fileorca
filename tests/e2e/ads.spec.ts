@@ -674,7 +674,7 @@ const PDF_TARGETS = [
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-fields--stack',
   '.fo-pages', '.fo-pages__bar', '.fo-pages__count', '.fo-pages__grid', '.fo-page', '.fo-page__main', '.fo-page__moves',
   '.fo-pass', '.fo-pass__toggle', '.fo-field__error',
-  '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box', '.fo-sign__notice',
+  '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box',
   '.fo-merge', '.fo-merge__moves',
   // F13a (UX-04 A and UX-11 A; DECISOES § F13A-P-11): the Merge list in the rectangle (its Undo, its remove buttons and its
   // "Add more PDFs"), the band under the rectangle with the "Order" and the "Adjust" of the result, and the note.
@@ -689,7 +689,8 @@ const PDF_ON_SCREEN: Record<PdfState, string[]> = {
   removed: ['.fo-merge-panel', '.fo-merge__undo'],
   grid: ['.fo-pages', '.fo-pages__grid', '.fo-page', '.fo-page[data-selected="true"], .fo-page__moves, .fo-page__badge'],
   password: ['.fo-pass', '.fo-pass__toggle', '.fo-pass .fo-field__error'],
-  signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign__notice'],
+  // F13a (UX-11 A, F-10): the honest line of Sign PDF is the note of the design system.
+  signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign .fo-note'],
   result: ['.fo-result', '.fo-btn--download'],
 };
 

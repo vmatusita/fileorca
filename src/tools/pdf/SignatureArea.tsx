@@ -44,6 +44,8 @@ export interface SignatureAreaProps {
   pageUrl: string | null;
   pageRatio: number;
   showErrors: boolean;
+  /** Inner markup of the info icon of the note (F13a, F-10). */
+  noteIcon: string;
 }
 
 type Mode = 'draw' | 'upload' | 'type';
@@ -168,7 +170,7 @@ export function fitBox(box: SignatureBox, ratio: number, pageRatio: number): Sig
 }
 
 export default function SignatureArea(props: SignatureAreaProps) {
-  const { id, texts, ink, image, onImage, box, onBox, pageUrl, pageRatio, showErrors } = props;
+  const { id, texts, ink, image, onImage, box, onBox, pageUrl, pageRatio, showErrors, noteIcon } = props;
   const [mode, setMode] = useState<Mode>('draw');
   const [typed, setTyped] = useState('');
   const [uploadError, setUploadError] = useState(false);
@@ -315,7 +317,7 @@ export default function SignatureArea(props: SignatureAreaProps) {
           </p>
           <button
             type="button"
-            class="fo-btn fo-btn--sm fo-btn--ghost"
+            class="fo-btn fo-btn--ghost"
             onClick={() => {
               strokes.current = [];
               repaint();
@@ -408,7 +410,11 @@ export default function SignatureArea(props: SignatureAreaProps) {
           <NumberField id={`${id}-w`} label={texts.width} value={Math.round(shown.width * 100)} min={5} max={100} suffix={texts.pct} error={texts.invalid} onCommit={(width) => onBox(fitBox({ ...shown, width: width / 100 }, ratio, pageRatio))} />
         </div>
       </fieldset>
-      <p class="fo-sign__notice">{texts.notice}</p>
+      {/* F13a (F-10): the honest line is a note of the design system, brand-soft with the info icon. */}
+      <p class="fo-note">
+        <Icon inner={noteIcon} />
+        <span>{texts.notice}</span>
+      </p>
     </div>
   );
 }

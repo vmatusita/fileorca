@@ -427,6 +427,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-file__actions .fo-btn { margin-bottom: 0; }
 .fo-file[data-state="error"] { background: var(--danger-soft); border-color: var(--danger); }
 .fo-file[data-state="error"] .fo-file__thumb { color: var(--danger); }
+/* F13a (UX-11 A, F-6 and F-7; DECISOES § F13A-P-08): a PDF with no picture shows the pdf icon in ink on the soft colour of its
+   category (coral-soft) instead of an empty square; in the ready card, on the surface, the fold cuts with the surface. */
+.fo-cat--pdf:not([data-state="error"]) > .fo-file__thumb { background: var(--fo-cat-soft); color: var(--ink); }
+.fo-ready .fo-file { --fo-ground: var(--surface); }
 .fo-file__err { color: var(--danger); font-weight: 600; display: inline-flex; align-items: flex-start; gap: var(--space-1); }
 .fo-file__err .fo-icon { width: 16px; height: 16px; margin-top: 2px; }
 /* The link to the tool that opens the file (HEIC to JPG): the brand blue is 4.3:1 on the soft red of the row, under the
@@ -919,8 +923,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-ready__count { margin: 0; font: 600 20px/24px var(--fo-font-display); color: var(--ink); }
 .fo-seg--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: var(--radius-lg); }
 .fo-seg--grid .fo-seg__opt { border-radius: var(--radius-md); }
-.fo-check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font: 600 15px/20px var(--fo-font-text); color: var(--ink); align-self: end; }
-.fo-check input { width: 20px; height: 20px; accent-color: var(--brand); }
+/* F13a (UX-11 A, F-11): the only check box of the PDF tools ("Skip the first page") is now a rail of two; under 480 px it
+   takes the row of the fields. */
+@media (max-width: 479px) { .fo-fields > .fo-options { grid-column: 1 / -1; } }
 
 /* Password field: the NumberField box with a text button inside it. */
 .fo-pass__toggle { align-self: stretch; min-width: var(--tap-min); padding: 0 var(--space-4); border: 0; border-left: var(--stroke-hair) solid var(--hairline); background: var(--surface-sunken); color: var(--ink); font: 600 15px/20px var(--fo-font-text); cursor: pointer; }
@@ -935,14 +940,23 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-pages__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-3); }
 .fo-page { --fo-ground: var(--bg); display: grid; gap: var(--space-1); padding: var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); }
 .fo-page[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-2) - 1px); }
+/* F13a (UX-11 A, D-7 and F-8): the picked page has the check in a brand circle before its number (shape, not only the colour
+   of the border), and its fold follows the border of 3 px (at -3 px, never past the corner). */
+.fo-page[data-selected="true"]::after { top: calc(-1 * var(--stroke-3)); right: calc(-1 * var(--stroke-3)); }
 .fo-page[data-grabbed="true"] { box-shadow: var(--shadow-pop); }
 .fo-page__main { position: relative; display: grid; gap: var(--space-1); justify-items: center; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; font: 600 14px/18px var(--fo-font-text); }
 .fo-page__main:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
 .fo-page__sheet { display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--surface-sunken); overflow: hidden; }
 .fo-page__sheet img { max-width: 100%; max-height: 100%; object-fit: contain; background: var(--surface); }
-.fo-page__n { font-variant-numeric: tabular-nums; }
+.fo-page__n { display: inline-flex; align-items: center; gap: var(--space-2); font-variant-numeric: tabular-nums; }
+.fo-page__check { box-sizing: border-box; display: inline-grid; place-items: center; width: 24px; height: 24px; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-pill); background: var(--surface); color: var(--on-brand); }
+.fo-page__check .fo-icon { width: 16px; height: 16px; stroke-width: 3; visibility: hidden; }
+.fo-page[data-selected="true"] .fo-page__check { background: var(--brand); border-color: var(--brand-edge); }
+.fo-page[data-selected="true"] .fo-page__check .fo-icon { visibility: visible; }
 .fo-page__badge { position: absolute; top: var(--space-1); left: var(--space-1); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); border: var(--stroke-2) solid var(--stroke); }
-.fo-page__moves { display: flex; justify-content: space-between; }
+/* F13a (UX-11 A, D-23): the arrows that move a page are buttons with the stroke and the lip (a disabled one has the look of
+   the disabled Button); the lip needs room. */
+.fo-page__moves { display: flex; justify-content: space-between; gap: var(--space-1); }
 .fo-page__move--back .fo-icon { rotate: 180deg; }
 /* F13a (UX-04 A, tool-a-merge; DECISOES § F13A-P-02): a row of the Merge list is the card, the arrows that can move (an
    empty place of 48 px where one cannot, D-23: never a disabled arrow drawn heavier than the live one) and the remove
@@ -959,6 +973,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-merge__row .fo-file__thumb { width: 32px; height: 32px; }
 .fo-merge__row .fo-file__thumb .fo-icon { width: 20px; height: 20px; }
 .fo-merge__row[draggable="true"] > .fo-file { cursor: grab; }
+/* F13a (UX-11 A, D-8): the name of a file of the Merge list takes up to two lines before it is cut (a refused row keeps one:
+   its reason says the name again). */
+.fo-merge__row:not([data-state="error"]) .fo-file__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; overflow-wrap: anywhere; }
 .fo-merge__n { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--deep); color: var(--on-deep); font: 600 16px/1 var(--fo-font-display); }
 .fo-merge__moves { display: flex; gap: var(--space-1); }
 .fo-merge__none { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }
@@ -996,7 +1013,6 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
 .fo-sign__box img { display: block; width: 100%; height: auto; }
 .fo-sign__box:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
-.fo-sign__notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
 /* A rail of three choices with a help line each does not fit 320 px: below 480 px it wraps, and with help lines it stacks. */
 .fo-pdf-island .fo-seg { flex-wrap: wrap; }
 .fo-pdf-island .fo-seg__opt { flex: 1 0 auto; }
@@ -1216,3 +1232,18 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 @media (min-width: 768px) { .fo-pdf-island { --fo-coffee-h: 160px; } }
 .fo-pdf-island .fo-slot[data-coffee] { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
 .fo-pdf-island .fo-slot[data-coffee] > :is(.fo-drop, .fo-level, .fo-result, .fo-ready, .fo-merge-panel) { min-height: max(var(--fo-lock, 0px), calc(var(--slot-h) + var(--fo-coffee-h))); }
+
+/* The note of the design system (UX-11 A, F-10; the rule of "Cor" of docs/design/README): brand-soft with the info icon in
+   brand and the text in ink. The honest line of Sign PDF and the warning of Strong in Compress PDF (the fieldset points at
+   it). It took the place of .fo-sign__notice. */
+.fo-note { margin: 0; display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 500 15px/22px var(--fo-font-text); }
+.fo-note > .fo-icon { flex: none; margin-top: -1px; color: var(--brand); }
+
+/* UX-11 A, F-14: under 480 px the bar of the grid has the count on its own line and the two buttons side by side, and a rail
+   of choices with no help line is one row of equal columns (56 px), not a wrap with one choice alone on a second line. */
+@media (max-width: 479px) {
+  .fo-pages__count { flex-basis: 100%; }
+  .fo-pages__count ~ .fo-btn { flex: 1 1 0; }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-radius: var(--radius-lg); }
+  .fo-pdf-island .fo-seg:not(:has(small)):not(.fo-seg--grid) .fo-seg__opt { border-radius: var(--radius-md); padding-inline: var(--space-2); }
+}

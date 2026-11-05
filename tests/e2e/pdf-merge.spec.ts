@@ -65,7 +65,7 @@ test('D-21: a row taken out leaves its place to a line with Undo, until Undo put
   await page.waitForTimeout(1_500);
   await expect(undo).toBeVisible();
   // With one PDF, the place of the Merge button says what is missing.
-  await expect(page.locator('#fo-tool-root .fo-merge__hold')).toHaveText(PDF_TOOL_TEXTS.en['merge-pdf'].panel.options.needMore);
+  await expect(page.locator('#fo-tool-root .fo-merge__hold')).toHaveText(mergeTexts('en').options.needMore);
   // Undo: the two rows again, in the same order, and the focus on the remove button of the row that came back.
   await page.keyboard.press('Enter');
   await expect(rows).toHaveCount(2);

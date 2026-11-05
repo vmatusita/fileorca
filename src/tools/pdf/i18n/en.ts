@@ -61,7 +61,7 @@ const texts: PdfPanelTexts = {
     turn: 'Turn page {n}',
     turned: 'Page {n} turned to {degrees}°.',
     help: 'Arrow keys move between pages; Space picks a page.',
-    helpOrder: 'Drag a page, or use its arrows. With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.',
+    helpKeys: 'With the keyboard: Space picks a page up, the arrow keys move it, Space drops it.',
     rangeLabel: 'Pick pages by number',
     rangeApply: 'Pick these',
     rangeHelp: 'For example 1-3, 5, 8-10',

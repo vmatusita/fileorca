@@ -927,9 +927,9 @@ export interface PdfPanelTexts {
     dropped: string;
     turn: string;
     turned: string;
-    /** Keyboard help under the grid. */
+    /** Keyboard help under the grid; in the order mode, the keys only (F13a, F-14: the bar above already says to drag). */
     help: string;
-    helpOrder: string;
+    helpKeys: string;
     /** "Pick pages by number" field. */
     rangeLabel: string;
     rangeApply: string;

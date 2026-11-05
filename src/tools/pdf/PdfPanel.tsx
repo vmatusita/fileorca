@@ -1162,9 +1162,9 @@ export default function PdfPanel(props: PdfPanelData) {
       <div class={reading ? 'fo-ready fo-ready--reading' : 'fo-ready'}>
         {first ? (
           reading ? (
-            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} state="waiting" status={t.queue.reading} onCancel={() => removeItem(first)} />
+            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} icon={icons.pdf} state="waiting" status={t.queue.reading} onCancel={() => removeItem(first)} />
           ) : (
-            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} state="done" before={fileSize(first.file.size, lang)} note={pagesLabel(first.info)} />
+            <FileCard name={nameOf(first)} category="pdf" labels={cardLabels} icon={icons.pdf} state="done" before={fileSize(first.file.size, lang)} note={pagesLabel(first.info)} />
           )
         ) : (
           <p class="fo-ready__count">{reading ? (m.items.length === 1 ? t.queue.readingOne : fmt(t.queue.readingCount, { count: m.items.length })) : readyCount(ready.length)}</p>
@@ -1254,7 +1254,7 @@ export default function PdfPanel(props: PdfPanelData) {
 
   function rowProps(item: Item): FileCardProps {
     const name = nameOf(item);
-    const base = { name, category: 'pdf' as const, labels };
+    const base = { name, category: 'pdf' as const, labels, icon: icons.pdf };
     if (item.status === 'reading') return { ...base, state: 'waiting', status: t.queue.reading, onCancel: () => removeItem(item) };
     if (item.status === 'error' && item.failure && !(item.failure.reason === 'wrong-password' && item.info)) return { ...base, state: 'error', reason: reasonOf(item), onRemove: () => removeItem(item) };
     if (item.status === 'working') return { ...base, state: 'working', status: t.queue.working, progress: 0.5, onCancel: () => removeItem(item) };

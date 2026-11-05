@@ -62,7 +62,7 @@ const texts: PdfPanelTexts = {
     turn: 'Girar a página {n}',
     turned: 'A página {n} agora está girada {degrees}°.',
     help: 'As setas andam entre as páginas, e a tecla Espaço marca uma página.',
-    helpOrder: 'Arraste uma página ou use as setas dela. No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
+    helpKeys: 'No teclado: Espaço pega a página, as setas a movem e Espaço a solta.',
     rangeLabel: 'Marcar páginas pelo número',
     rangeApply: 'Marcar estas',
     rangeHelp: 'Por exemplo, 1-3, 5, 8-10',

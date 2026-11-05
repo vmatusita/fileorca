@@ -30,6 +30,8 @@ export interface PdfIcons {
   plus: string;
   /** The chevron of the "Adjust" and "Order" disclosures after the result (F13a, UX-04 A). */
   down: string;
+  /** The icon of a note of the design system (F13a, F-10): brand-soft with the info icon. */
+  info: string;
 }
 
 export interface PdfPanelData<O = object> {

@@ -101,7 +101,10 @@ export interface NumbersTexts {
   ofWord: string;
   startLabel: string;
   startError: string;
-  skipFirst: string;
+  /** F13a (F-11): "First page: Number it / Skip it", a rail of two instead of the native check box. */
+  firstLegend: string;
+  numberIt: string;
+  skipIt: string;
 }
 
 export interface ReorderTexts {

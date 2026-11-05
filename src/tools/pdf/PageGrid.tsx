@@ -14,6 +14,7 @@ import type { PdfPanelTexts } from '../../i18n/types.ts';
 import { fmt } from '../../i18n/format.ts';
 import Icon from '../../icons/Icon.tsx';
 import type { PdfIcons, Thumbnails } from './types.ts';
+import checkIcon from '../../../docs/design/assets/Icons/check.svg?raw';
 
 export interface PageGridProps {
   /** Prefix of the element ids. */
@@ -200,10 +201,10 @@ export default function PageGrid(props: PageGridProps) {
       {mode === 'select' && (
         <div class="fo-pages__bar">
           <p class="fo-pages__count">{fmt(texts.selectedCount, { count: selected?.size ?? 0, total })}</p>
-          <button type="button" class="fo-btn fo-btn--sm fo-btn--ghost" onClick={props.onSelectAll}>
+          <button type="button" class="fo-btn fo-btn--ghost" onClick={props.onSelectAll}>
             {texts.selectAll}
           </button>
-          <button type="button" class="fo-btn fo-btn--sm fo-btn--ghost" onClick={props.onSelectNone}>
+          <button type="button" class="fo-btn fo-btn--ghost" onClick={props.onSelectNone}>
             {texts.selectNone}
           </button>
         </div>
@@ -252,7 +253,13 @@ export default function PageGrid(props: PageGridProps) {
                 onFocus={() => setActive(position)}
               >
                 <Thumb index={index} thumbnails={thumbnails} turn={turns?.[index] ?? 0} />
+                {/* F13a (D-7): a picked page has the check in a brand circle before its number, not only the colour of its border. */}
                 <span class="fo-page__n" aria-hidden="true">
+                  {mode === 'select' && (
+                    <span class="fo-page__check">
+                      <Icon raw={checkIcon} />
+                    </span>
+                  )}
                   {index + 1}
                 </span>
                 {mode === 'rotate' && (
@@ -265,7 +272,7 @@ export default function PageGrid(props: PageGridProps) {
                 <span class="fo-page__moves">
                   <button
                     type="button"
-                    class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move fo-page__move--back"
+                    class="fo-btn fo-btn--icon fo-page__move fo-page__move--back"
                     tabindex={isActive ? 0 : -1}
                     aria-label={fmt(texts.moveEarlier, { n: index + 1 })}
                     disabled={position === 0}
@@ -275,7 +282,7 @@ export default function PageGrid(props: PageGridProps) {
                   </button>
                   <button
                     type="button"
-                    class="fo-btn fo-btn--icon fo-btn--ghost fo-page__move"
+                    class="fo-btn fo-btn--icon fo-page__move"
                     tabindex={isActive ? 0 : -1}
                     aria-label={fmt(texts.moveLater, { n: index + 1 })}
                     disabled={position === sequence.length - 1}
@@ -290,7 +297,7 @@ export default function PageGrid(props: PageGridProps) {
         })}
       </ul>
       <p class="fo-field__help" id={helpId}>
-        {mode === 'order' ? texts.helpOrder : texts.help}
+        {mode === 'order' ? texts.helpKeys : texts.help}
       </p>
     </div>
   );

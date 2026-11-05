@@ -62,7 +62,7 @@ const texts: PdfPanelTexts = {
     turn: 'Girar la página {n}',
     turned: 'La página {n} quedó girada a {degrees}°.',
     help: 'Las flechas del teclado pasan de una página a otra; Espacio elige una página.',
-    helpOrder: 'Arrastra una página o usa sus flechas. Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
+    helpKeys: 'Con el teclado: Espacio toma una página, las flechas la mueven y Espacio la suelta.',
     rangeLabel: 'Elegir páginas por número',
     rangeApply: 'Elegir estas',
     rangeHelp: 'Por ejemplo 1-3, 5, 8-10',

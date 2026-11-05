@@ -5,7 +5,8 @@ import { useEffect, useState } from 'preact/hooks';
 import { fmt } from '../../i18n/format.ts';
 import NumberField from '../image/NumberField.tsx';
 import FieldError from './FieldError.tsx';
-import OptionGroup from '../image/OptionGroup.tsx';
+import Icon from '../../icons/Icon.tsx';
+import OptionGroup, { type OptionGroupProps } from '../image/OptionGroup.tsx';
 import PageGrid from './PageGrid.tsx';
 import PasswordField from './PasswordField.tsx';
 import SignatureArea, { fitBox, type SignatureBox, type SignatureImage } from './SignatureArea.tsx';
@@ -199,14 +200,41 @@ interface CompressState {
   mode: CompressMode;
 }
 
-function CompressOptions({ state, update, texts }: PdfOptionsProps<CompressState, CompressPdfTexts>) {
+/**
+ * The OptionGroup with its note in the note of the design system (F13a, F-10): brand-soft with the info icon, the line the
+ * fieldset points at with aria-describedby. The OptionGroup of the image tools has no such note (src/tools/image is not
+ * this island's; DECISOES § F13A-P-08), so the PDF island draws the same rail with it.
+ */
+function NotedOptionGroup<V extends string>({ name, legend, value, choices, onChange, note, noteId, noteIcon }: OptionGroupProps<V> & { note: string; noteId: string; noteIcon: string }) {
   return (
-    <OptionGroup
+    <fieldset class="fo-field fo-options" aria-describedby={noteId}>
+      <legend class="fo-field__label">{legend}</legend>
+      <div class="fo-seg">
+        {choices.map((choice) => (
+          <label class="fo-seg__opt" key={choice.value}>
+            <input type="radio" name={name} value={choice.value} checked={value === choice.value} onChange={() => onChange(choice.value)} />
+            {choice.label}
+            {choice.help && <small>{choice.help}</small>}
+          </label>
+        ))}
+      </div>
+      <p class="fo-note" id={noteId}>
+        <Icon inner={noteIcon} />
+        <span>{note}</span>
+      </p>
+    </fieldset>
+  );
+}
+
+function CompressOptions({ state, update, texts, icons }: PdfOptionsProps<CompressState, CompressPdfTexts>) {
+  return (
+    <NotedOptionGroup
       name="fo-compress-mode"
       legend={texts.legend}
       value={state.mode}
       note={texts.strongWarning}
       noteId="fo-compress-warning"
+      noteIcon={icons.info}
       choices={[
         { value: 'lossless', label: texts.lossless, help: texts.losslessHelp },
         { value: 'recommended', label: texts.recommended, help: texts.recommendedHelp },
@@ -401,10 +429,17 @@ function NumbersOptions({ state, update, texts }: PdfOptionsProps<NumbersState, 
       />
       <div class="fo-fields">
         <NumberField id="fo-numbers-start" label={texts.startLabel} value={state.start} min={1} max={9999} error={texts.startError} onCommit={(start) => update({ start })} />
-        <label class="fo-check">
-          <input type="checkbox" checked={state.skipFirst} onChange={(event) => update({ skipFirst: event.currentTarget.checked })} />
-          {texts.skipFirst}
-        </label>
+        {/* F13a (F-11): a choice of two in the rail of the site, not the native check box; the state and the engine do not change. */}
+        <OptionGroup
+          name="fo-numbers-first"
+          legend={texts.firstLegend}
+          value={state.skipFirst ? 'skip' : 'number'}
+          choices={[
+            { value: 'number', label: texts.numberIt },
+            { value: 'skip', label: texts.skipIt },
+          ]}
+          onChange={(first) => update({ skipFirst: first === 'skip' })}
+        />
       </div>
     </div>
   );
@@ -456,7 +491,7 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
   const ink = props.ink;
   return (
     <div class="fo-options-stack">
-      <SignatureArea id="fo-sign" texts={texts} ink={ink} image={state.image} onImage={(image) => update({ image })} box={state.box} onBox={(next) => update({ box: next })} pageUrl={pageUrl} pageRatio={ratio} showErrors={props.showErrors} />
+      <SignatureArea id="fo-sign" texts={texts} ink={ink} noteIcon={props.icons.info} image={state.image} onImage={(image) => update({ image })} box={state.box} onBox={(next) => update({ box: next })} pageUrl={pageUrl} pageRatio={ratio} showErrors={props.showErrors} />
       {file?.info && (
         <>
           <OptionGroup
@@ -611,7 +646,7 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
         <p class="fo-field__help">{texts.help}</p>
         <button
           type="button"
-          class="fo-btn fo-btn--sm"
+          class="fo-btn"
           onClick={() => {
             update({ order: [...order].reverse() });
             props.announce(texts.reverse);

@@ -41,6 +41,12 @@ export type FileCardProps = {
    * (the ScenarioCompare pattern, aria-hidden: the list says "1 of 2") takes the place of the empty thumbnail.
    */
   order?: number;
+  /**
+   * Inner markup of an icon for the thumbnail of a file with no picture (F13a, F-6; DECISOES § F13A-P-08): the PDF icon in
+   * the category's soft colour instead of an empty square. The page hands it in (read at build), so the image chunk does
+   * not carry it.
+   */
+  icon?: string;
 } & (
   | {
       state: 'done';
@@ -65,7 +71,7 @@ export type FileCardProps = {
 const named = (label: string, name: string) => label.replace('{name}', () => name);
 
 export default function FileCard(props: FileCardProps) {
-  const { name, category, labels, thumb, order } = props;
+  const { name, category, labels, thumb, order, icon } = props;
   const picture =
     props.state === 'error' ? (
       <div class="fo-file__thumb">
@@ -78,7 +84,7 @@ export default function FileCard(props: FileCardProps) {
     ) : thumb ? (
       <img class="fo-file__thumb" src={thumb} alt="" width={52} height={52} />
     ) : (
-      <div class="fo-file__thumb" />
+      <div class="fo-file__thumb">{icon !== undefined && <Icon inner={icon} />}</div>
     );
   return (
     <div
