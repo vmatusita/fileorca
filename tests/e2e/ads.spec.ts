@@ -43,7 +43,12 @@ const TARGETS = [
   // F13a (UX-14, decision 10; DECISOES § 506): the line under the chips that take the result along (its room in the
   // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
+  // F13b (decision 10; DECISOES § H-7): the bands and the sea of the home, and the sea and the water of the category hubs
+  // (their Oli is [data-oli], above).
+  '.fo-catband', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
 ].join(', ');
+/** F13b (DECISOES § H-7): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
+const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';
 
 /**
  * F13a (UX-04 A): the comparison and the options open only when the person asks. The result states open both (what a
@@ -417,6 +422,8 @@ test('the hub keeps its first content AdSlot right after the grid of tools and e
       for (const oli of await boxes(page, '[data-oli]')) {
         for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${path} ${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
       }
+      // F13b (DECISOES § H-7): the sea of the band and the cards, as on the other hubs.
+      await expectClearance(page, `${path} a ${viewport.width}px`, HUB_TARGETS);
     }
   }
 });
@@ -582,7 +589,7 @@ test('the money hub keeps its first content AdSlot right after the grid of credi
       const ads = await boxes(page, '.fo-ad--content');
       expect(credit && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
       for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade de crédito`).toBeGreaterThanOrEqual(credit!.y + credit!.h);
-      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+      await expectClearance(page, `${path} a ${viewport.width}px`, HUB_TARGETS);
     }
   }
 });
@@ -743,7 +750,7 @@ test('the home and health hubs keep their first content AdSlot right after the g
       const ads = await boxes(page, '.fo-ad--content');
       expect(grid && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
       for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.h);
-      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+      await expectClearance(page, `${path} a ${viewport.width}px`, HUB_TARGETS);
     }
   }
 });
@@ -838,7 +845,7 @@ test('the PDF hub keeps its first content AdSlot right after the grid of tools a
       const ads = await boxes(page, '.fo-ad--content');
       expect(grid && ads.length > 0, `${path} ${viewport.width}px: a grade e o AdSlot na tela`).toBeTruthy();
       for (const ad of ads) expect(ad.y, `${path} ${viewport.width}px: AdSlot acima da grade`).toBeGreaterThanOrEqual(grid!.y + grid!.height);
-      await expectClearance(page, `${path} a ${viewport.width}px`, '.fo-grid, .fo-tool, [data-oli]');
+      await expectClearance(page, `${path} a ${viewport.width}px`, HUB_TARGETS);
     }
   }
 });

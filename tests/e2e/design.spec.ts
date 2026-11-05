@@ -207,7 +207,9 @@ for (const viewport of VIEWPORTS) {
 
     test.describe('other pages', () => {
       const CASES = [
-        { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'wave', selector: '[data-oli="wave"]' },
+        // F13b (UX-03 B and UX-15 A; DECISOES § H-1 and § H-9): the Oli of the home swims in the sea of the top, the one of
+        // a category hub in the sea at the foot of its band.
+        { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'swim', selector: '.fo-home-sea__oli' },
         { name: '404', paths: ['/404.html', '/pt/404.html', '/es/404.html'], pose: 'lost', selector: '[data-oli="lost"]' },
         { name: 'support', paths: ['/support/', '/pt/apoie/', '/es/apoyo/'], pose: 'coffee', selector: '.fo-support__oli' },
       ];
@@ -326,31 +328,37 @@ test.describe('motion without the preference', () => {
 
   // F13a (UX-10; DECISOES § 460): every move that starts on its own has a finite count and ends by 5 s (WCAG 2.2.2), and
   // 3.2 s after the page opens none runs; only the progress (.fo-level, .fo-water, .fo-spin) may loop, and none shows here.
-  for (const path of ['/', '/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/']) {
-    test(`${path}: every move that starts on its own ends by 5 s, none runs 3.2 s after opening`, async ({ page }) => {
+  // F13b (UX-03 B and UX-15 A; DECISOES § H-8 and § H-11): on the home and on a category hub of each view the swim and the
+  // water are no progress: nothing is left out there, the Oli bobs for 4.8 s, and none runs 5.2 s after opening.
+  const MOTION_PAGES: { path: string; sea: boolean }[] = [
+    ...['/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/'].map((path) => ({ path, sea: false })),
+    ...['/'].map((path) => ({ path, sea: true })),
+  ];
+  for (const { path, sea } of MOTION_PAGES) {
+    test(`${path}: every move that starts on its own ends by 5 s, none runs ${sea ? '5.2' : '3.2'} s after opening`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
       const timings = () =>
-        page.evaluate(() =>
+        page.evaluate((sea) =>
           document
             .getAnimations()
             .filter((animation) => {
               const target = (animation.effect as KeyframeEffect | null)?.target;
-              return !(target instanceof Element && target.closest('.fo-level, .fo-water, .fo-spin'));
+              return sea || !(target instanceof Element && target.closest('.fo-level, .fo-water, .fo-spin'));
             })
             .map((animation) => {
               const timing = animation.effect?.getComputedTiming();
               const name = animation instanceof CSSAnimation ? animation.animationName : animation instanceof CSSTransition ? animation.transitionProperty : animation.id;
               return { name, iterations: Number(timing?.iterations), end: Number(timing?.endTime), state: animation.playState };
             }),
-        );
+        sea);
       await expect.poll(async () => (await timings()).length, { message: `${path}: something moves at first` }).toBeGreaterThan(0);
       for (const timing of await timings()) {
         expect(Number.isFinite(timing.iterations), `${path}: ${timing.name} has a finite count`).toBe(true);
         expect(timing.end, `${path}: ${timing.name} ends by 5 s`).toBeLessThanOrEqual(5000);
       }
-      await page.waitForTimeout(3200);
-      expect((await timings()).filter((timing) => timing.state === 'running'), `${path}: still running 3.2 s after opening`).toEqual([]);
+      await page.waitForTimeout(sea ? 5200 : 3200);
+      expect((await timings()).filter((timing) => timing.state === 'running'), `${path}: still running ${sea ? '5.2' : '3.2'} s after opening`).toEqual([]);
     });
   }
 

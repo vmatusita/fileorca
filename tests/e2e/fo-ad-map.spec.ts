@@ -96,11 +96,19 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
   const before = first.before;
   switch (page.mold) {
     case 'home': {
-      if (!before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}`);
+      // F13b (decision 6; UX-03 B; DECISOES § H-7): the home is the sea by category. The first ad comes after the first
+      // band (the image one, still labelled by "tools"), its top off the first screen of a phone and of a computer, and the
+      // home has the 3 ads by width of home-b.html: the 3 content ads at 360 px, and from 1280 px the content one, the
+      // multiplex and the rail (its 2nd unit only with 600 words, which the home does not reach).
+      if (!before.startsWith('section.fo-catband') || !before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}, e não da faixa de imagem`);
       const top = phone.boxes.find((box) => box.unit === 'conteudo');
       const wide = desktop.boxes.find((box) => box.unit === 'conteudo');
       if (!top || top.y < PHONE.height) fail(`o 1º da home na primeira tela do celular (topo ${top?.y.toFixed(0)})`);
       if (!wide || wide.y < DESKTOP.height) fail(`o 1º da home na primeira tela do computador (topo ${wide?.y.toFixed(0)})`);
+      const phoneContent = phone.boxes.filter((box) => box.kind === 'content').length;
+      if (phoneContent !== 3) fail(`${phoneContent} anúncios de conteúdo a 360 px (a home pede 3)`);
+      const desktopUnits = desktop.boxes.map((box) => box.unit).filter((unit) => unit !== 'lateral-2');
+      if (desktopUnits.sort().join(' ') !== 'conteudo lateral multiplex') fail(`a 1280 px a home tem ${desktopUnits.join(', ')} (pede o conteúdo, o multiplex e a lateral)`);
       break;
     }
     case 'guides-hub':

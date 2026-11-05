@@ -14,7 +14,6 @@ import {
   BR_CALC_IDS,
   CALC_PAGE_IDS,
   GUIDE_IDS,
-  HOME_MONEY_IDS,
   HUB_MONEY_IDS,
   LIFE_CALC_IDS,
   LIFE_HUB_IDS,
@@ -25,10 +24,14 @@ import {
 } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { HOME_BAND_MONEY_IDS } from '../../src/components/home-bands.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
 import { listFiles } from './dist.ts';
 import { headerBlocks, patternApplies } from './headers-file.ts';
 import { robotsProblems, validateSitemap } from './seo-checks.ts';
+
+/** The links to the tools a home or a hub lists: the cards of a hub and, since the F13b, the chips of the home's bands. */
+export const TOOL_LINKS = 'main a.fo-tool, main .fo-catband__chips a.fo-chip';
 
 /** The publisher id of the readiness build: the zeros of the example in the AdSense help. */
 export const TEST_CLIENT = 'ca-pub-0000000000000000';
@@ -139,7 +142,8 @@ function row(item: string, how: string, problems: string[]): Row {
 /**
  * The real site: every page of the route map, the tools of the registry. F6 (decision 7): the cards of each language from
  * the registries and the map, so the home, the money hub and the PDF hub of Portuguese and Spanish are held to what exists
- * there: the home lists the money calculators of HOME_MONEY_IDS[lang] (when the language has a money hub, moneyHubId) and
+ * there: the home lists the money calculators of its money band (HOME_BAND_MONEY_IDS[lang] since the F13b, DECISOES § H-4;
+ * HOME_MONEY_IDS before; when the language has a money hub, moneyHubId) and
  * the PDF tools of the language; each money hub lists HUB_MONEY_IDS[lang]; the PDF hub of each language its 12 tools and
  * Image to PDF.
  */
@@ -162,7 +166,7 @@ export function realSite(dir: string): Site {
     // F7 (decision 9): then the home and the health calculators and the QR code generator, where they exist (English only).
     const qr = pagePath(QR_ID, lang);
     const life = [...lifePaths('house', lang), ...lifePaths('health', lang), ...(qr ? [qr] : [])];
-    if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang), ...life] };
+    if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_BAND_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang), ...life] };
     if (hasMoneyHub) cards[hub] = { ...cards[hub], [lang]: moneyPaths(HUB_MONEY_IDS[lang], lang) };
     // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.
     const image = pagePath('image-to-pdf', lang);
@@ -381,7 +385,8 @@ export function checkNothingUnfinished(site: Site): Row[] {
   for (const page of site.pages.filter((candidate) => listing.has(candidate.id))) {
     const html = read(site.dir, page.path);
     if (html === null) continue;
-    const cards = parse(html).querySelectorAll('main a.fo-tool').map((card) => card.getAttribute('href') ?? '');
+    // F13b (UX-03 B; DECISOES § H-10): the home shows its tools as the chips of its bands; a hub, as cards.
+    const cards = parse(html).querySelectorAll(TOOL_LINKS).map((card) => card.getAttribute('href') ?? '');
     for (const href of cards) if (!exists(site.dir, href)) catalog.push(`${page.path}: cartão para ${href}, que não existe`);
     const own = page.id === 'home' || page.id === 'image-tools' ? site.tools[page.lang] : [];
     const want = [...own, ...(site.cards?.[page.id]?.[page.lang] ?? [])];
