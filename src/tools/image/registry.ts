@@ -77,7 +77,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
   'heic-to-jpg': {
     id: 'heic-to-jpg',
     accepts: ['heic'],
-    icon: 'convert',
+    icon: 'phone-photo',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'png-to-jpg', 'crop-image'],
     beforeAfter: 'lossy',
@@ -85,7 +85,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
   'webp-to-jpg': {
     id: 'webp-to-jpg',
     accepts: ['webp'],
-    icon: 'convert',
+    icon: 'browser-image',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['png-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
     beforeAfter: 'lossy',
