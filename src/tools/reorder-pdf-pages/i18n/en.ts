@@ -67,6 +67,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
     options: {
       help: 'Drag a page to its new place, or use the arrows on each page.',
       reverse: 'Reverse order',
+      reversed: 'Pages reversed.',
       unchanged: 'Move a page to save a new order.',
     },
   },

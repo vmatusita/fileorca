@@ -1008,7 +1008,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-sign__file:focus-visible + .fo-sign__choose { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-sign__chosen { min-width: 0; font: 500 15px/20px var(--fo-font-text); color: var(--ink-muted); overflow-wrap: anywhere; }
 .fo-sign__place { position: relative; display: grid; gap: var(--space-3); }
-.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: hidden; }
+/* F13a (UX-11 A, D-9): the frame no longer clips (the focus ring of the box shows whole at every edge); the picture and the
+   box are on a sheet that is light in both themes, as a page of PDF is. */
+.fo-sign__page { position: relative; width: min(100%, 360px); aspect-ratio: var(--page-ratio, 0.77); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-xs); background: var(--surface); overflow: visible; }
+.fo-sign__sheet { position: absolute; inset: 0; border-radius: calc(var(--radius-xs) - var(--stroke-2)); background: var(--surface); }
+.fo-sign__sheet > img { border-radius: inherit; }
 .fo-sign__page img { width: 100%; height: 100%; object-fit: fill; }
 .fo-sign__box { position: absolute; top: var(--y); left: var(--x); width: var(--w); box-sizing: border-box; border: var(--stroke-2) dashed var(--brand); border-radius: var(--radius-xs); cursor: grab; touch-action: none; }
 .fo-sign__box img { display: block; width: 100%; height: auto; }

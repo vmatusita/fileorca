@@ -28,6 +28,7 @@ import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
+import { THUMB_WIDTH } from './PageGrid.tsx';
 import type { Pose } from '../../oli/poses.ts';
 import type { PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts } from '../../i18n/types.ts';
@@ -122,12 +123,14 @@ interface Model {
   focusUndo: boolean;
   /** The row whose remove button takes the focus back after Undo. */
   focusRow: number | null;
+  /** F13a (D-11): a password was wrong, so its field takes the focus with the text selected. */
+  focusWrong: boolean;
 }
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, readingLevel: false, bundle: null, single: null, notes: [],
   announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
-  redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null,
+  redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null, focusWrong: false,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -429,6 +432,7 @@ export default function PdfPanel(props: PdfPanelData) {
             refuse(item, { reason: result.reason, ...(result.source ? { source: result.source } : {}) });
             item.outputs = null;
             item.op = null;
+            if (result.reason === 'wrong-password') m.focusWrong = true;
           } else {
             item.failure = null;
             item.status = 'done';
@@ -515,6 +519,19 @@ export default function PdfPanel(props: PdfPanelData) {
 
   function says(done: Item[]): string {
     const many = done.length > 1;
+    // F13a (D-10): Rotate says how many pages turned and which way.
+    if (page === 'rotate-pdf') {
+      const state = stateRef.current as { turn?: number; scope?: string; turns?: Record<number, number> };
+      const words = texts.options as unknown as { doneOne: string; donePicked: string; rightTurn: string; halfTurn: string; leftTurn: string };
+      const turn = state.turn === 2 ? words.halfTurn : state.turn === 3 ? words.leftTurn : words.rightTurn;
+      const pages = done[0]?.info?.pages ?? 1;
+      if (many) return fmt(texts.doneMany, { count: done.length, turn });
+      if (state.scope === 'pick' && m.items.filter(usable).length === 1) {
+        const count = Object.values(state.turns ?? {}).filter((quarter) => quarter % 4 !== 0).length;
+        return fmt(words.donePicked, { count, pages });
+      }
+      return pages === 1 ? fmt(words.doneOne, { turn }) : fmt(texts.done, { pages, turn });
+    }
     if (page === 'compress-pdf') {
       const { before, after } = totals(done);
       const saved = before > 0 ? (1 - after / before) * 100 : 0;
@@ -737,6 +754,16 @@ export default function PdfPanel(props: PdfPanelData) {
       // reading line, so only a focus left on nothing goes to it; a person on a row or on Add more stays there.
       if (merging ? lost : !typingIn(rootRef.current)) actionRef.current.focus();
     }
+    // D-11 (§ 177 and § 240): after a wrong password the focus goes back to the field, with what was typed selected, so a
+    // new try replaces it; the error is on the field (role="alert").
+    if (m.focusWrong) {
+      m.focusWrong = false;
+      const field = rootRef.current?.querySelector<HTMLInputElement>('.fo-pass input[aria-invalid="true"]');
+      if (field) {
+        field.focus();
+        field.select();
+      }
+    }
     if (m.focusUndo && undoRef.current) {
       m.focusUndo = false;
       undoRef.current.focus();
@@ -799,16 +826,16 @@ export default function PdfPanel(props: PdfPanelData) {
       done: (value: string | null) => void;
       users: number;
     }
-    const cache = new Map<number, Entry>();
-    const waiting: { index: number; entry: Entry }[] = [];
+    const cache = new Map<string, Entry>();
+    const waiting: { index: number; width: number; entry: Entry }[] = [];
     let drawing = 0;
     const key = `f${subject.id}`;
     const boxes = subject.info.boxes;
-    const draw = async (index: number): Promise<string | null> => {
+    const draw = async (index: number, width: number): Promise<string | null> => {
       const box = boxes[index];
       const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
       try {
-        const blob = await (await client()).thumbnail(key, subject.file, index, 240, shownWidth);
+        const blob = await (await client()).thumbnail(key, subject.file, index, width, shownWidth);
         return blob ? URL.createObjectURL(blob) : null;
       } catch {
         return null;
@@ -823,7 +850,7 @@ export default function PdfPanel(props: PdfPanelData) {
           continue;
         }
         drawing += 1;
-        void draw(next.index).then((value) => {
+        void draw(next.index, next.width).then((value) => {
           drawing -= 1;
           next.entry.done(value);
           pump();
@@ -831,28 +858,30 @@ export default function PdfPanel(props: PdfPanelData) {
       }
     };
     return {
-      get(index) {
-        let entry = cache.get(index);
+      get(index, width = THUMB_WIDTH) {
+        const id = `${index}:${width}`;
+        let entry = cache.get(id);
         if (!entry) {
           let done: (value: string | null) => void = () => {};
           const url = new Promise<string | null>((resolve) => {
             done = resolve;
           });
           entry = { url, done, users: 0 };
-          cache.set(index, entry);
-          waiting.push({ index, entry });
+          cache.set(id, entry);
+          waiting.push({ index, width, entry });
         }
         entry.users += 1;
         const url = entry.url;
         pump();
         return url;
       },
-      drop(index) {
-        const entry = cache.get(index);
+      drop(index, width = THUMB_WIDTH) {
+        const id = `${index}:${width}`;
+        const entry = cache.get(id);
         if (!entry) return;
         entry.users -= 1;
         if (entry.users > 0) return;
-        cache.delete(index);
+        cache.delete(id);
         void entry.url.then((value) => value && URL.revokeObjectURL(value));
       },
     };
@@ -1361,7 +1390,8 @@ export default function PdfPanel(props: PdfPanelData) {
   // The queue of a batch (one row per file), under the band. Merge has its rows in the rectangle; when every file was
   // refused, the rectangle is the error and the rows with their reasons come here.
   const queue =
-    m.items.length > 0 && (merging ? m.phase === 'error' : many || m.items.some((item) => item.failure)) ? (
+    // F13a (F-13): a file refused only because its password was wrong is still the file of the card above: no second card.
+    m.items.length > 0 && (merging ? m.phase === 'error' : many || m.items.some((item) => item.failure && !(item.failure.reason === 'wrong-password' && item.info))) ? (
       <div class="fo-queue">
         <div class="fo-filelist" role="list" aria-label={t.queue.label}>
           {shown.map((item) => (

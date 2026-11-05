@@ -178,7 +178,7 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await typed.blur();
       await expect(root.locator('.fo-sign__box')).toBeVisible({ timeout: 30_000 });
       // The preview of the page (the box holds the signature's own picture, which is another img).
-      await expect(root.locator('.fo-sign__page > img')).toBeVisible({ timeout: 30_000 });
+      await expect(root.locator('.fo-sign__sheet > img')).toBeVisible({ timeout: 30_000 });
       await seen('signature', 'type: the name on the preview of the page');
       await option(page, labels['pickPages'] ?? '');
       await expect(cells).toHaveCount(MIXED_PAGES);

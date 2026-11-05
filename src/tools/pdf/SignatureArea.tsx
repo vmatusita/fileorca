@@ -46,6 +46,8 @@ export interface SignatureAreaProps {
   showErrors: boolean;
   /** Inner markup of the info icon of the note (F13a, F-10). */
   noteIcon: string;
+  /** Told the width of the preview frame, in CSS pixels, when it is known and when it changes (F13a, F-5). */
+  onFrameWidth?: (width: number) => void;
 }
 
 type Mode = 'draw' | 'upload' | 'type';
@@ -55,6 +57,8 @@ interface Point {
 }
 
 const PAD_WIDTH = 600;
+/** The position is said once, this long after the last key (F13a, D-9; the pause of the ResultHero's region). */
+const SPEAK_AFTER_MS = 400;
 const PAD_HEIGHT = 200;
 const MIN_WIDTH = 0.05;
 
@@ -170,7 +174,7 @@ export function fitBox(box: SignatureBox, ratio: number, pageRatio: number): Sig
 }
 
 export default function SignatureArea(props: SignatureAreaProps) {
-  const { id, texts, ink, image, onImage, box, onBox, pageUrl, pageRatio, showErrors, noteIcon } = props;
+  const { id, texts, ink, image, onImage, box, onBox, pageUrl, pageRatio, showErrors, noteIcon, onFrameWidth } = props;
   const [mode, setMode] = useState<Mode>('draw');
   const [typed, setTyped] = useState('');
   const [uploadError, setUploadError] = useState(false);
@@ -180,6 +184,10 @@ export default function SignatureArea(props: SignatureAreaProps) {
   const drawing = useRef<number | null>(null);
   const frame = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointer: number; startX: number; startY: number; box: SignatureBox } | null>(null);
+  /** D-9: what the region says about the box, and the timer of the pause after the last key. */
+  const [said, setSaid] = useState('');
+  const speak = useRef(0);
+  const position = useRef('');
   const ratio = image?.ratio ?? 1 / 3;
   /** The last signature this area made, so it can tell its own clearing from the tool's (Start over). */
   const own = useRef<SignatureImage | null>(null);
@@ -236,29 +244,49 @@ export default function SignatureArea(props: SignatureAreaProps) {
     setMode('draw');
   }, [image]);
 
+  // F-5: the preview is drawn at the width of its frame times the pixel ratio; the frame says its width when it changes.
+  useEffect(() => {
+    const element = frame.current;
+    if (!element || !onFrameWidth) return undefined;
+    onFrameWidth(element.clientWidth);
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(() => onFrameWidth(element.clientWidth));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => () => window.clearTimeout(speak.current), []);
+
   const shown = fitBox(box, ratio, pageRatio);
   const move = (dx: number, dy: number, grow = 0) => onBox(fitBox({ x: shown.x + dx, y: shown.y + dy, width: shown.width + grow }, ratio, pageRatio));
 
   function onBoxKey(event: TargetedKeyboardEvent<HTMLDivElement>): void {
-    const step = event.shiftKey ? 0.1 : 0.01;
+    // F13a (D-6): Shift makes the arrows go ten times further; + and = grow the box by 1 % and - and _ shrink it by 1 %,
+    // with or without Shift (the + and the _ are Shift on most keyboards, and a step of 10 % was a surprise).
+    const arrow = event.shiftKey ? 0.1 : 0.01;
+    const grow = 0.01;
     const keys: Record<string, [number, number, number]> = {
-      ArrowLeft: [-step, 0, 0],
-      ArrowRight: [step, 0, 0],
-      ArrowUp: [0, -step, 0],
-      ArrowDown: [0, step, 0],
-      '+': [0, 0, step],
-      '=': [0, 0, step],
-      '-': [0, 0, -step],
-      '_': [0, 0, -step],
+      ArrowLeft: [-arrow, 0, 0],
+      ArrowRight: [arrow, 0, 0],
+      ArrowUp: [0, -arrow, 0],
+      ArrowDown: [0, arrow, 0],
+      '+': [0, 0, grow],
+      '=': [0, 0, grow],
+      '-': [0, 0, -grow],
+      '_': [0, 0, -grow],
     };
     const change = keys[event.key];
     if (!change) return;
     event.preventDefault();
     move(...change);
+    // D-9: the region is emptied at each key and says the new position once, 400 ms after the last one (WCAG 4.1.3).
+    setSaid('');
+    window.clearTimeout(speak.current);
+    speak.current = window.setTimeout(() => setSaid(`${texts.boxLabel}: ${position.current}`), SPEAK_AFTER_MS);
   }
 
   const helpId = `${id}-box-help`;
   const value = fmt(texts.boxValue, { x: Math.round(shown.x * 100), y: Math.round(shown.y * 100), width: Math.round(shown.width * 100) });
+  position.current = value;
   return (
     <div class="fo-sign">
       <OptionGroup<Mode>
@@ -367,7 +395,10 @@ export default function SignatureArea(props: SignatureAreaProps) {
       {showErrors && !image && <FieldError>{texts.missing}</FieldError>}
       <fieldset class="fo-field fo-sign__place">
         <legend class="fo-field__label">{texts.placeLegend}</legend>
+        {/* F13a (D-9): the picture and the box sit on a sheet of paper, light in both themes (the page of a PDF is white), and
+            the frame no longer clips, so the focus ring of the box shows whole at every edge of the page. */}
         <div class="fo-sign__page" ref={frame} style={`--page-ratio:${pageRatio.toFixed(4)}`}>
+          <div class="fo-sign__sheet" data-theme="light">
           {pageUrl && <img src={pageUrl} alt={texts.previewLabel} draggable={false} />}
         {image && (
           <div
@@ -400,9 +431,13 @@ export default function SignatureArea(props: SignatureAreaProps) {
             <img src={image.url} alt="" draggable={false} />
           </div>
         )}
+          </div>
         </div>
         <p class="fo-field__help" id={helpId}>
           {texts.keyboardHelp}
+        </p>
+        <p class="fo-sr" role="status" id={`${id}-box-status`}>
+          {said}
         </p>
         <div class="fo-fields">
           <NumberField id={`${id}-x`} label={texts.x} value={Math.round(shown.x * 100)} min={0} max={100} suffix={texts.pct} error={texts.invalid} onCommit={(x) => onBox(fitBox({ ...shown, x: x / 100 }, ratio, pageRatio))} />

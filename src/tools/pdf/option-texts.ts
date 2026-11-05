@@ -70,6 +70,16 @@ export interface RotatePdfTexts {
   pickHelp: string;
   /** With two files or more: page by page works on one file. */
   batchNote: string;
+  /**
+   * F13a (D-10): the success line says what was turned and how: one page ({turn}), and some pages picked on the grid
+   * ({count} of {pages}); the line of all the pages and the one of several PDFs are the panel's done and doneMany. {turn}
+   * is one of the three words below, by the turn chosen.
+   */
+  doneOne: string;
+  donePicked: string;
+  rightTurn: string;
+  halfTurn: string;
+  leftTurn: string;
 }
 
 export interface DeleteTexts {
@@ -110,6 +120,8 @@ export interface NumbersTexts {
 export interface ReorderTexts {
   help: string;
   reverse: string;
+  /** F13a (D-10): what the status region says after Reverse order: "Pages reversed." */
+  reversed: string;
   /** Nothing moved yet: "Move a page to save a new order." */
   unchanged: string;
 }

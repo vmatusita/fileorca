@@ -62,10 +62,13 @@ export interface PdfFileView {
 
 /** Thumbnails of the pages of the file a single-file tool works on. */
 export interface Thumbnails {
-  /** Object URL of a small JPEG of page `index`, or null. Draws it on first ask. */
-  get(index: number): Promise<string | null>;
+  /**
+   * Object URL of a small JPEG of page `index`, or null. Draws it on first ask. `width` is the width of the picture in
+   * pixels, 240 for the grid by default; the Sign preview asks for its own (F13a, F-5).
+   */
+  get(index: number, width?: number): Promise<string | null>;
   /** The cell left the screen: its picture can go. */
-  drop(index: number): void;
+  drop(index: number, width?: number): void;
 }
 
 export interface PdfOptionsProps<S, O> {

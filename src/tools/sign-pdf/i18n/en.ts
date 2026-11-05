@@ -84,7 +84,7 @@ const texts: PdfToolTexts<SignTexts> = {
       placeLegend: 'Position',
       boxLabel: 'Signature position',
       boxValue: '{x}% from the left, {y}% from the top, {width}% wide',
-      keyboardHelp: 'Drag the box on the preview. With the keyboard, the arrow keys move it, + makes it bigger and − makes it smaller.',
+      keyboardHelp: 'Drag the box on the preview. With the keyboard, the arrow keys move it (with Shift, 10 times further), + or = makes it bigger and − makes it smaller.',
       x: 'From the left',
       y: 'From the top',
       width: 'Width',

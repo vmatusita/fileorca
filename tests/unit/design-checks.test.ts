@@ -405,6 +405,9 @@ describe('voz dos textos (F5a)', () => {
     expect(checkVoice({ panel: { note: '¡Listo!' } })).toEqual(['texto.panel.note: exclamação fora da fala de sucesso']);
     expect(checkVoice({ panel: { done: 'Done! Oli did it!' } })).toEqual(['texto.panel.done: a fala de sucesso tem de ter uma exclamação só']);
     expect(checkVoice({ panel: { doneMany: '¡Listo! Oli juntó tus PDFs.' } })).toEqual([]);
+    // F13a (D-10): the two success lines of Rotate PDF, and nothing else that starts with "done".
+    expect(checkVoice({ options: { doneOne: 'Done! Oli turned the page.', donePicked: 'Done! Oli turned 2 of the 8 pages.' } })).toEqual([]);
+    expect(checkVoice({ options: { doneSoon: 'Done!' } })).toEqual(['texto.options.doneSoon: exclamação fora da fala de sucesso']);
     // The path names the string, so a deep one is found.
     expect(checkVoice({ faq: [{ q: 'Is it free?', a: 'Yes! It is.' }] }, 'texts')).toEqual(['texts.faq.0.a: exclamação fora da fala de sucesso']);
   });

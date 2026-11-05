@@ -84,7 +84,7 @@ const texts: PdfToolTexts<SignTexts> = {
       placeLegend: 'Posición',
       boxLabel: 'Posición de la firma',
       boxValue: '{x} % desde la izquierda, {y} % desde arriba, {width} % de ancho',
-      keyboardHelp: 'Arrastra el recuadro sobre la vista previa. Con el teclado, las flechas lo mueven, + lo agranda y − lo achica.',
+      keyboardHelp: 'Arrastra el recuadro sobre la vista previa. Con el teclado, las flechas lo mueven (con Mayús, 10 veces más lejos), + o = lo agranda y − lo achica.',
       x: 'Desde la izquierda',
       y: 'Desde arriba',
       width: 'Ancho',

@@ -251,6 +251,13 @@ export default function PageGrid(props: PageGridProps) {
                 onClick={() => activate(index, position)}
                 onKeyDown={(event) => onKey(event, position)}
                 onFocus={() => setActive(position)}
+                onBlur={() => {
+                  // F13a (D-11): the focus left the page picked up (Tab, Shift+Tab, a click elsewhere), so it is let go where it
+                  // is; not while a move by the keyboard waits for the page in its new place (the focus passes by the body).
+                  if (grabbed !== index || focusAfter.current) return;
+                  setGrabbed(null);
+                  announce(fmt(texts.dropped, { n: index + 1, position: position + 1 }));
+                }}
               >
                 <Thumb index={index} thumbnails={thumbnails} turn={turns?.[index] ?? 0} />
                 {/* F13a (D-7): a picked page has the check in a brand circle before its number, not only the colour of its border. */}

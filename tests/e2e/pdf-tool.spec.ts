@@ -268,7 +268,7 @@ test('Sign PDF: moving the signature does not draw the page preview again', asyn
   await page.getByLabel('Type your name').fill('Orca Signer');
   await page.getByLabel('Type your name').blur();
   const box = page.locator('#fo-tool-root .fo-sign__box');
-  const preview = page.locator('#fo-tool-root .fo-sign__page > img');
+  const preview = page.locator('#fo-tool-root .fo-sign__sheet > img');
   await expect(box).toBeVisible({ timeout: 30_000 });
   await expect(preview).toBeVisible({ timeout: 30_000 });
   // Every picture the preview shows from now on, however briefly (the redraw is asynchronous).

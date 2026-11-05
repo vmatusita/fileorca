@@ -469,29 +469,34 @@ interface SignState {
 function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
   const { state, update, texts, panel, file, thumbnails } = props;
   const [pageUrl, setPageUrl] = useState<string | null>(null);
+  // F13a (F-5): the preview is drawn at the width of its frame times the pixel ratio (up to 1080 px), rounded up to 60 px
+  // so a frame that changes by a pixel does not draw it again; the grid keeps its 240 px pictures.
+  const [frameWidth, setFrameWidth] = useState(0);
+  const previewWidth = frameWidth > 0 ? Math.min(1080, Math.ceil((frameWidth * (window.devicePixelRatio || 1)) / 60) * 60) : 0;
   const total = pageCount(props);
   const box = file?.info?.boxes[state.page];
   const ratio = box ? ((box.rotate === 90 || box.rotate === 270 ? box.height / box.width : box.width / box.height)) : 0.77;
   // The file view is made again on every render of the panel: the preview follows the file and its reading, not the view
   // object, or every move of the box would let the picture go and draw it again (DECISOES § 183).
   useEffect(() => {
-    if (!thumbnails || !file?.info) return undefined;
+    if (!thumbnails || !file?.info || previewWidth === 0) return undefined;
     let alive = true;
     const shown = state.page;
-    void thumbnails.get(shown).then((url) => {
+    const width = previewWidth;
+    void thumbnails.get(shown, width).then((url) => {
       if (alive) setPageUrl(url);
     });
     // The preview holds its page's picture like a grid cell does, so a cell of the same page leaving the screen no
-    // longer lets it go under the preview (DECISOES § 180).
+    // longer lets it go under the preview (DECISOES § 180); the picture of the preview is its own, let go with its page.
     return () => {
       alive = false;
-      thumbnails.drop(shown);
+      thumbnails.drop(shown, width);
     };
-  }, [thumbnails, file?.id, Boolean(file?.info), state.page]);
+  }, [thumbnails, file?.id, Boolean(file?.info), state.page, previewWidth]);
   const ink = props.ink;
   return (
     <div class="fo-options-stack">
-      <SignatureArea id="fo-sign" texts={texts} ink={ink} noteIcon={props.icons.info} image={state.image} onImage={(image) => update({ image })} box={state.box} onBox={(next) => update({ box: next })} pageUrl={pageUrl} pageRatio={ratio} showErrors={props.showErrors} />
+      <SignatureArea id="fo-sign" texts={texts} ink={ink} noteIcon={props.icons.info} onFrameWidth={setFrameWidth} image={state.image} onImage={(image) => update({ image })} box={state.box} onBox={(next) => update({ box: next })} pageUrl={pageUrl} pageRatio={ratio} showErrors={props.showErrors} />
       {file?.info && (
         <>
           <OptionGroup
@@ -649,7 +654,8 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
           class="fo-btn"
           onClick={() => {
             update({ order: [...order].reverse() });
-            props.announce(texts.reverse);
+            // F13a (D-10): what happened, not the name of the button.
+            props.announce(texts.reversed);
           }}
         >
           {texts.reverse}
