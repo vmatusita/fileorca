@@ -65,7 +65,7 @@ export async function openCalc(page: Page, id: LifeCalcId, hash = ''): Promise<v
 
 export const heroNumber = (page: Page): Locator => page.locator('.fo-rhero__num');
 export const heroSentence = (page: Page): Locator => page.locator('.fo-rhero__sentence');
-// F13b (DECISOES § C-2): the Download PDF is in the card; Download CSV and Copy link share the row under it.
+// F13b (DECISOES § 545): the Download PDF is in the card; Download CSV and Copy link share the row under it.
 export const pdfButton = (page: Page): Locator => page.locator('.fo-rhero .fo-btn--download');
 export const csvButton = (page: Page): Locator => page.locator('.fo-export .fo-btn').nth(0);
 

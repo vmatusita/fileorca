@@ -1,4 +1,4 @@
-// F13b · a página de guia (UX-13 A, decision 5; DECISOES § 376 and § G-1 to § G-9). The tables of the "What we
+// F13b · a página de guia (UX-13 A, decision 5; DECISOES § 376 and § 557 to § 565). The tables of the "What we
 // measured" section without the columns that hold one value in every row, grouped by the first column where it repeats
 // (F5b F-13 and the guides half of F4 ACE-9); the sheet under the H1 with two numbers of the measurement (G-17); the
 // signature in one line and the history line (G-23); the link to the tool's page in the text (D-54); the hint of a table

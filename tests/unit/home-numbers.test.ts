@@ -1,9 +1,9 @@
-// The home as the sea by category (F13b, decision 6; UX-03 B; F10 p-16 and p-17; DECISOES § H-1 to § H-5), read in the
+// The home as the sea by category (F13b, decision 6; UX-03 B; F10 p-16 and p-17; DECISOES § 567 to § 571), read in the
 // built home of each language: the H1 says the count of the site (46, 29 and 35, without the presets; § 540), and every
 // number of the bands says what its source says, read here on its own: the measured ones from data/guides-measured.json,
 // the examples from the page-example case of fixtures/calc/ (the oracle, never the engine), the exact one from qr.ts.
 // No digit is typed in the texts of the home (each number is a {placeholder}); the chips are the registries'; and <main>
-// has the words of the 3 ads by width (450 or more, and under the 595 where the lateral-2 comes near: § 361 and § H-5).
+// has the words of the 3 ads by width (450 or more, and under the 595 where the lateral-2 comes near: § 361 and § 571).
 // Run `pnpm build` first; FO_HOME_DIST=<folder> reads another build (the proof against the starting point).
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

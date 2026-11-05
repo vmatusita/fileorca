@@ -329,7 +329,7 @@ test('a home calculator: the Oli cheers on the first change of the visit only (D
   await page.setViewportSize({ width: 360, height: 740 });
   await openCalc(page, 'concrete-calculator');
   const cheer = page.locator('.fo-rhero__oli');
-  // The home pages carry the cheer pose in their sprite; it shows only after a change. F13b (DECISOES § C-2): the Oli is in
+  // The home pages carry the cheer pose in their sprite; it shows only after a change. F13b (DECISOES § 545): the Oli is in
   // the card from the first paint, waving, and cheers in the same box.
   await expect(page.locator('symbol#oli-cheer')).toHaveCount(1);
   await settle(page);

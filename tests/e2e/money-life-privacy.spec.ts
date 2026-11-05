@@ -221,7 +221,7 @@ for (const id of LIFE_CALC_IDS) {
 
     const def = DEFS[id];
     const values: Values = structuredClone(def.initial);
-    // F13b (DECISOES § C-2): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
+    // F13b (DECISOES § 545): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
     const download = page.locator('.fo-rhero .fo-btn--download');
     const frames = () => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     await expect(download, 'o exemplo da página tem resultado').toBeEnabled();

@@ -1,4 +1,4 @@
-// The numbers of the home's bands (F13b, decision 6; UX-03 B; F10 p-16; DECISOES § H-2 and § H-3), read at build time from
+// The numbers of the home's bands (F13b, decision 6; UX-03 B; F10 p-16; DECISOES § 568 and § 569), read at build time from
 // their source, never typed in a text: the page passes each one to a {placeholder} of src/i18n/<lang>/home.ts. Three kinds
 // of source, as the specification of home-b.html says:
 //   - measured: data/guides-measured.json (pnpm guias:medir). The image band uses the 3 real phone photos of the

@@ -22,7 +22,7 @@ const PAGE_POSES = ['peek'];
 const WALL_ONLY = ['sad'];
 const TOOL_POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
 /**
- * F13b (§ 375; DECISOES § C-10): the Oli of a calculator's card waves on the example, cheers once and says oops on an error; the
+ * F13b (§ 375; DECISOES § 553): the Oli of a calculator's card waves on the example, cheers once and says oops on an error; the
  * calculator pages (and the money guides, with the same island) carry exactly those, with no cheer on a health page.
  */
 const CALC_POSES = ['wave', 'cheer', 'oops'];

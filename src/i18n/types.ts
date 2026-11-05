@@ -170,8 +170,8 @@ export interface Section {
 }
 
 /**
- * One band of the home (F13b, UX-03 B; DECISOES § H-1): the H2, the count under it, the number of the band and the line
- * that says where it comes from, one sentence more (the words of § H-5), and the link to the hub. Every number is a
+ * One band of the home (F13b, UX-03 B; DECISOES § 567): the H2, the count under it, the number of the band and the line
+ * that says where it comes from, one sentence more (the words of § 571), and the link to the hub. Every number is a
  * {placeholder} the build fills from its source (src/components/home-numbers.ts), never a digit typed here.
  */
 export interface HomeBandTexts {
@@ -538,14 +538,14 @@ export interface FileGuideTableTexts {
   /** Row labels, where the rows are steps rather than files. */
   labels?: string[];
   /**
-   * F13b (F5b F-13; DECISOES § G-3): the sentence of the note that says what a column with one value in every row said,
+   * F13b (F5b F-13; DECISOES § 559): the sentence of the note that says what a column with one value in every row said,
    * since the page leaves that column out ("No JPG kept any GPS data."). There if and only if a column of the table is
    * left out: tests/unit/guide-page.test.ts ties the two.
    */
   constant?: string;
 }
 
-/** A number of the sheet "What we measured" under the H1 of a file guide (F13b, UX-13 A; DECISOES § G-4). */
+/** A number of the sheet "What we measured" under the H1 of a file guide (F13b, UX-13 A; DECISOES § 560). */
 export interface FileGuideSheetStat {
   /** What the number is, in small text above it. */
   label: string;
@@ -577,21 +577,21 @@ export interface FileGuideTexts extends PageMeta {
   /** The question the guide answers, in one line under the H1. */
   lead: string;
   /**
-   * The history line at the end of "What we measured" (F13b, G-23; DECISOES § G-1): when the guide was first published
+   * The history line at the end of "What we measured" (F13b, G-23; DECISOES § 557): when the guide was first published
    * ({published}) and with which measurements ({measured}), and what each review changed. Until the F13b it followed the
    * "Reviewed" line at the top.
    */
   changed: string;
   intro: string[];
   toolHeading: string;
-  /** The paragraph about the embedded tool, right under it since the F13b (DECISOES § G-5; above it before). */
+  /** The paragraph about the embedded tool, right under it since the F13b (DECISOES § 561; above it before). */
   toolIntro: string;
   /** The sections. The content AdSlot went after the first `half` of them until the F12; the ad map places the ads now. */
   sections: Section[];
   half: number;
   /** The title of the sheet under the H1 (F13b; until then, the heading of the section with the tables). */
   measuredHeading: string;
-  /** The sheet "What we measured" under the H1 (F13b, G-17; DECISOES § G-4). Not `facts`, which are the official figures. */
+  /** The sheet "What we measured" under the H1 (F13b, G-17; DECISOES § 560). Not `facts`, which are the official figures. */
   sheet: FileGuideSheetTexts;
   /** The heading of the section with the tables ("Photo by photo"), which names their scrolling frames (F13b, F5b F-13). */
   tableHeading: string;
@@ -614,19 +614,19 @@ export interface FileGuideTexts extends PageMeta {
 /** Texts every file guide shares (src/i18n/en/file-guides.ts). */
 export interface FileGuidesSharedTexts {
   /**
-   * The signature under the H1, one line (F13b, G-23; DECISOES § G-1): "Reviewed by {name} · {date}", with the short date.
+   * The signature under the H1, one line (F13b, G-23; DECISOES § 557): "Reviewed by {name} · {date}", with the short date.
    * Until the F13b it was a sentence with the long date, followed by the first publication ("First published {date}."),
    * which went to the history line at the end of "What we measured".
    */
   reviewed: string;
   /**
-   * The sentence of the text that links to the tool's own page (F13b, D-54; DECISOES § G-6): {link} is the link, whose
+   * The sentence of the text that links to the tool's own page (F13b, D-54; DECISOES § 562): {link} is the link, whose
    * words are the name of the tool ("the same tool as our {link} page"). Until the F13b the link was a line of its own
    * under the panel ("Open the {name} tool").
    */
   toolLink: string;
   /**
-   * The line over a measured table that is wider than its frame, under 768 px (F13b, F5b F-2; DECISOES § G-7): "Scroll
+   * The line over a measured table that is wider than its frame, under 768 px (F13b, F5b F-2; DECISOES § 563): "Scroll
    * sideways to see the {n} columns", with {n} counted from the table the page draws.
    */
   hint: string;

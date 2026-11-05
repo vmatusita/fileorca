@@ -52,7 +52,7 @@ export function mediumDate(iso: string, lang: Lang): string {
   return lang === 'pt' ? `${day} de ${name} de ${year}` : `${day} ${name} ${year}`;
 }
 
-// F13b (F7 obs 2; DECISOES § C-7): the dates of a narrow table on the screen (the ovulation's), by hand as above. The month is
+// F13b (F7 obs 2; DECISOES § 550): the dates of a narrow table on the screen (the ovulation's), by hand as above. The month is
 // abbreviated and kept with its day by a no-break space, so a narrow column breaks a date only after its comma ("Nov 1," and
 // "2026"), never inside "Nov 1". A range says its year once: "Oct 26 to 31, 2026", "Oct 26 to Nov 1, 2026", "Dec 30, 2026 to
 // Jan 4, 2027", what Intl.DateTimeFormat#formatRange gives in Node with the month short, with the word of the page for the

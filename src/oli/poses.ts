@@ -12,7 +12,7 @@ export type Pose = (typeof POSES)[number];
 export const WALL_POSE: Pose = 'sad';
 
 /**
- * The poses of the Oli of a calculator's card (F13b, § 375; DECISOES § C-10): still in wave on the example, cheer once on the
+ * The poses of the Oli of a calculator's card (F13b, § 375; DECISOES § 553): still in wave on the example, cheer once on the
  * first result of the visit, oops on an error. A health page leaves the cheer out. The sprite of a calculator page carries
  * these and no other pose of a panel; the gate:design asks for them there.
  */

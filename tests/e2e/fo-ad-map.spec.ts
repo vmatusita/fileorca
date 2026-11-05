@@ -96,7 +96,7 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
   const before = first.before;
   switch (page.mold) {
     case 'home': {
-      // F13b (decision 6; UX-03 B; DECISOES § H-7): the home is the sea by category. The first ad comes after the first
+      // F13b (decision 6; UX-03 B; DECISOES § 573): the home is the sea by category. The first ad comes after the first
       // band (the image one, still labelled by "tools"), its top off the first screen of a phone and of a computer, and the
       // home has the 3 ads by width of home-b.html: the 3 content ads at 360 px, and from 1280 px the content one, the
       // multiplex and the rail (its 2nd unit only with 600 words, which the home does not reach).
@@ -128,7 +128,7 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
       break;
     case 'calc-dinheiro':
     case 'calc-casa-saude':
-      // F13b (DECISOES § C-5): the schedule is part of the island, before the chips; the first ad comes right after the island,
+      // F13b (DECISOES § 548): the schedule is part of the island, before the chips; the first ad comes right after the island,
       // before "How to use" (before, it sat between the island and the schedule's own root).
       if (!before.startsWith('div#fo-tool-root') || !first.after.includes('[data-content=how]')) fail(`o 1º da calculadora entre ${before} e ${first.after}`);
       break;
@@ -227,7 +227,7 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
 
 // ---- The sea of the home and of the category hubs (F13b) ---------------------------------------------------------------
 
-// F13b (decisions 6, 7 and 10; UX-03 B and UX-15 A; DECISOES § H-7): the Oli that swims at the top of the home and in the
+// F13b (decisions 6, 7 and 10; UX-03 B and UX-15 A; DECISOES § 573): the Oli that swims at the top of the home and in the
 // band of a category hub keeps 150 px from every ad that shows, with her box inflated by 12 px (§ 513), and so do the sea,
 // the water and the bands of the home; from 1280 px the Oli of the home keeps 12 px or more from the edge of the column, on
 // the side of the rail (the pitfall of the F13a in docs/claude/design-e-oli.md).

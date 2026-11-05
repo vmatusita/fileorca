@@ -2,7 +2,7 @@
 
 Navegação · FileOrca design system v1.1. Estilo em `../bundle.css`; marcação de referência em [`preview.html`](preview.html) (abra com `?theme=dark` para o tema escuro).
 
-O card de ferramenta nas grades dos hubs e das relacionadas: um papel com o canto dobrado na cor da categoria. Desde a F13b a home mostra as ferramentas como chips nas faixas das categorias (UX-03 B; DECISOES § H-1; antes, "nas grades da home, dos hubs e das relacionadas"); ver a seção "A faixa da categoria na home", abaixo.
+O card de ferramenta nas grades dos hubs e das relacionadas: um papel com o canto dobrado na cor da categoria. Desde a F13b a home mostra as ferramentas como chips nas faixas das categorias (UX-03 B; DECISOES § 567; antes, "nas grades da home, dos hubs e das relacionadas"); ver a seção "A faixa da categoria na home", abaixo.
 
 - `<a>` inteiro clicável, com `fo-dogear` e `fo-cat--*`. Ícone num quadrado de 48px na cor cheia da categoria, com o ícone em `on-cat` (`on-violeta` na de casa e saúde).
 - Nome em `h3` (Figtree 700 18px), descrição de uma linha em `ink-muted` que diz o ganho concreto ("up to 80% lighter"), não um adjetivo.
@@ -10,13 +10,13 @@ O card de ferramenta nas grades dos hubs e das relacionadas: um papel com o cant
 - Grade `.fo-grid` com colunas de no mínimo 220px. Nas relacionadas, no máximo 6 cards.
 - `fo-hubband`: a faixa do topo do hub, com sobretítulo `caption`, H1 e uma linha (e o "Reviewed by" nos hubs de dinheiro, casa e saúde). O tom é só preenchimento: texto sempre `ink`.
   - **Antes (até a F13a):** "a faixa do topo do hub, em `*-soft` da categoria, com sobretítulo `caption`, H1 e uma linha", nos dois temas.
-  - **Depois (F13b, UX-15 A, hub-sea.html ?alt=a; DECISOES § 378 e § H-9):** nos quatro hubs de categoria, `.fo-hubband--sea` é o aquário da categoria. No pé da faixa, um `div.fo-hubband__sea[aria-hidden="true"]` com `pointer-events: none`, sem nada focável e sem texto: a água (`water`, 40px a 360 e 48px a partir de 768) com a onda do rodapé (120 × 16px, máscara de um elemento, nunca imagem de fundo), uma crista de 3px em `--fo-cat` (a mesma onda 3px acima, sob a água) e a Oli `swim` de 72px à direita (16px da borda; 24px a partir de 768), meio submersa, olhando para o H1. A faixa cresce 56px a 360 e 64px a partir de 768 no padding de baixo (80px e 88px), e nasce com a altura final. No claro, `*-soft`; no escuro, `surface`, e a cor da categoria fica só na crista (G-21). A Oli balança três vezes (`fo-bob`, 6 meias-voltas de 800ms, 4,8s) e para; com movimento reduzido, nada. A faixa usa a `Figtree Steady`, como a do hub de guias (CLS 0). O hub de guias (`.fo-cat--guide`) não tem o mar.
+  - **Depois (F13b, UX-15 A, hub-sea.html ?alt=a; DECISOES § 378 e § 575):** nos quatro hubs de categoria, `.fo-hubband--sea` é o aquário da categoria. No pé da faixa, um `div.fo-hubband__sea[aria-hidden="true"]` com `pointer-events: none`, sem nada focável e sem texto: a água (`water`, 40px a 360 e 48px a partir de 768) com a onda do rodapé (120 × 16px, máscara de um elemento, nunca imagem de fundo), uma crista de 3px em `--fo-cat` (a mesma onda 3px acima, sob a água) e a Oli `swim` de 72px à direita (16px da borda; 24px a partir de 768), meio submersa, olhando para o H1. A faixa cresce 56px a 360 e 64px a partir de 768 no padding de baixo (80px e 88px), e nasce com a altura final. No claro, `*-soft`; no escuro, `surface`, e a cor da categoria fica só na crista (G-21). A Oli balança três vezes (`fo-bob`, 6 meias-voltas de 800ms, 4,8s) e para; com movimento reduzido, nada. A faixa usa a `Figtree Steady`, como a do hub de guias (CLS 0). O hub de guias (`.fo-cat--guide`) não tem o mar.
 
-## A faixa da categoria na home (F13b, UX-03 B; DECISOES § 370 e § H-1)
+## A faixa da categoria na home (F13b, UX-03 B; DECISOES § 370 e § 567)
 
 - `section.fo-catband.fo-cat--<categoria>`: `*-soft` no claro e `surface` no escuro, raio `radius-xl`, padding `space-5`/`space-4`/`space-10` (`space-6`/`space-6`/`space-12` a partir de 768px), com a onda do rodapé (16px) na cor cheia da categoria na borda de baixo.
 - Dentro: o H2 (Fredoka 600 24/30) e a contagem em `caption` `ink-muted`; o número em `number-md` (24/28; 28/32 a partir de 768) `ink`, com a seta `arrow-right` e o "to"/"para"/"a" em `fo-sr`; a frase da fonte (15/22 `ink-muted`); uma frase a mais (15/22 `ink`); as ferramentas como chips (o `.fo-chip` do NextStepChips, sem a seta, com o círculo da categoria; a ferramenta de outra categoria leva a classe dela) e o link do hub em `ink`, sublinhado, com 48px de altura (o `brand` sobre `*-soft` não chega a 4,5:1).
-- Todo número tem fonte no repositório e é lido no build (`src/components/home-numbers.ts`; § H-2).
+- Todo número tem fonte no repositório e é lido no build (`src/components/home-numbers.ts`; § 568).
 
 ## Contraste dos pares novos (F13b; valores da seção 9 da proposta `docs/propostas/ux-v2/README.md`)
 

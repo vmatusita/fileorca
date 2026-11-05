@@ -231,7 +231,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-crumbs__link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .fo-crumbs .fo-icon { width: 16px; height: 16px; }
 .fo-crumbs [aria-current] { color: var(--ink); font-weight: 600; }
-/* F13b (group 22, F13a R-c-3; DECISOES § M-3): the image presets at 320 px. Their trail of four steps took three rows, and
+/* F13b (group 22, F13a R-c-3; DECISOES § 582): the image presets at 320 px. Their trail of four steps took three rows, and
    at 320 x 640 the Choose button went up to 25px under the cookie notice (35px with the fallback). Under 360 px the hub
    step leaves the trail, which keeps two rows. */
 @media (max-width: 359.98px) { .fo-crumbs--skip-hub > li:nth-child(2) { display: none; } }
@@ -431,7 +431,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--space-2); }
 .fo-result__more .fo-btn { min-height: var(--tap-min); }
 @media (max-width: 767px) { .fo-result__more .fo-btn--ghost { padding: 0 6px; font-size: 15px; } }
-/* F13b · the result at 320 px (group 22; DECISOES § M-1 and § M-2).
+/* F13b · the result at 320 px (group 22; DECISOES § 580 and § 581).
    R-a-6: from 340 to 440 px the seal of the page wraps to two lines, and the top corner of the placard (turned -4°) went
    up to 3.9px into its box. The placard loses 6px at its top (padding and the line of the number) and hangs 6px less, so
    its bottom, and the one line of the sentence it takes, stay where they were.
@@ -592,7 +592,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-qr__code svg { display: block; width: 100%; height: 100%; }
 .fo-qr__empty { margin: 0; padding: var(--space-6); text-align: center; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
 .fo-qr__status { margin: 0; min-height: 20px; text-align: center; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
-/* F13b (F7 f-9 and f-10, saída A; DECISOES § C-8): the place of the two downloads keeps their height (the PNG of 60 px, the SVG
+/* F13b (F7 f-9 and f-10, saída A; DECISOES § 551): the place of the two downloads keeps their height (the PNG of 60 px, the SVG
    and their lips) with or without a code; with no code it says why, and no Download is ever turned off. The PNG says its
    size on a second line of its own, with no middle dot, in its 60 px. */
 .fo-qr__actions { display: grid; gap: var(--space-2); align-content: start; min-height: calc(var(--button-lg) + var(--control-h) + 2 * var(--lip) + var(--space-2)); }
@@ -654,7 +654,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hubband .fo-muted { color: var(--ink); }
 .fo-eyebrow { font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
 .fo-hubband .fo-eyebrow { color: var(--ink); }
-/* F13b · o mar nos hubs (UX-15 A, hub-sea.html ?alt=a; DECISOES § 378 and § H-9). Only the four category hubs carry the
+/* F13b · o mar nos hubs (UX-15 A, hub-sea.html ?alt=a; DECISOES § 378 and § 575). Only the four category hubs carry the
    modifier (the guides hub keeps its band). At the foot of the band, the water with the footer's wave (120 × 16 px, a mask
    on one element, never a background image), a crest of 3 px in the full colour of the category (the same wave 3 px higher,
    under the water), and the Oli swim, 72 px, half under water on the right, looking left at the H1. The sea is one
@@ -750,7 +750,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
 @media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 
-/* F13b · a home como o mar por categoria (UX-03 B, home-b.html; DECISOES § 370 and § H-1 to § H-8). The top: the H1 on the
+/* F13b · a home como o mar por categoria (UX-03 B, home-b.html; DECISOES § 370 and § 567 to § 574). The top: the H1 on the
    full width, its promise kept on one line, the line, and the sea: the water of the DropZone (.fo-water at full level, still,
    its wave on top, clipped to the sides) with the seal on it and the Oli swim on the right, looking left at the H1, 128 px
    and 152 px from 768 px. Outside the tool the swim is no progress: she bobs three times and stops (4.8 s), as on the hubs.
@@ -761,9 +761,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The first visit keeps the Figtree of the first paint in the top and in the bands (the Steady face, as the band of the
    guides hub; § 305 and § 393): with the fallback font the line and the band texts took another number of rows from 393 to
    412 px, and the bands moved when Figtree arrived (CLS 0.026 in Chromium). The line and the band texts stay 32rem wide at
-   most, so the H1 stays the largest text of the first screen of a computer (its LCP; § H-8). */
+   most, so the H1 stays the largest text of the first screen of a computer (its LCP; § 574). */
 .fo-home-top, .fo-catband { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
-/* The dark band (G-21; DECISOES § H-9): --fo-band-dark is a private variable on <html>, as the --fo-wall-sea of the wall
+/* The dark band (G-21; DECISOES § 575): --fo-band-dark is a private variable on <html>, as the --fo-wall-sea of the wall
    (§ 386 and § 404). Light: initial, so a band takes the fallback, the soft colour of its own category; dark: surface. The
    bands of the home and the band of a category hub read it. */
 :root { --fo-band-dark: initial; }
@@ -939,7 +939,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The "example" tag centred in the label row: on its baseline it made the row 21px, one more than its neighbour's. */
 /* The example tag goes under a label word that leaves it no room beside (a Portuguese word at 320px; F6). */
 .fo-calc__fields .fo-field__label { align-items: center; flex-wrap: wrap; }
-/* F13b (Idiomas E-2, F7 obs 3; DECISOES § C-7): below 400 px the "example" tag is compact, 6 px from the label, 4 px of side
+/* F13b (Idiomas E-2, F7 obs 3; DECISOES § 550): below 400 px the "example" tag is compact, 6 px from the label, 4 px of side
    padding and less letter-spacing (about 12 px less): "Tasa nueva" with its tag fits half a row with the fallback font too. */
 @media (max-width: 399px) {
   .fo-calc__fields .fo-field__label { column-gap: 6px; }
@@ -951,14 +951,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    payment with its unit menu among them (second pass, s-1; § 282). The result above the fold is measured at 360 px (§ 124). */
 @media (max-width: 359px) {
   .fo-calc--home .fo-calc__fields > .fo-field--half:has(select, input[type="date"]) { grid-column: 1 / -1; }
-  /* F13b (F7 obs 3; DECISOES § C-7): a half field marked wide takes the whole row (the Paint's door and window areas). */
+  /* F13b (F7 obs 3; DECISOES § 550): a half field marked wide takes the whole row (the Paint's door and window areas). */
   .fo-calc__fields > .fo-field--half.fo-field--wide { grid-column: 1 / -1; }
 }
-/* F13b (D-46, G-19; DECISOES § C-4): the H2 of the island are in Fredoka 24/30, like every H2 of the site. */
+/* F13b (D-46, G-19; DECISOES § 547): the H2 of the island are in Fredoka 24/30, like every H2 of the site. */
 .fo-calc__moreheading { margin: var(--space-2) 0 0; font: 600 24px/30px var(--fo-font-display); }
 .fo-calc__result { display: grid; gap: var(--space-4); align-content: start; }
 .fo-calc__compare, .fo-calc__next { grid-column: 1 / -1; }
-/* F13b (D-36; DECISOES § C-4): from 768 px the first row is the main fields' own height and the second takes what the
+/* F13b (D-36; DECISOES § 547): from 768 px the first row is the main fields' own height and the second takes what the
    card needs beyond it (1fr): the card can grow, the fields after the result never move down. */
 @media (min-width: 768px) {
   .fo-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: var(--space-8); }
@@ -966,7 +966,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-calc__more { grid-column: 1; grid-row: 2; align-self: start; }
   .fo-calc__result { grid-column: 2; grid-row: 1 / span 2; }
 }
-/* F13b · the block of costs that folds (UX-12 A, D-32 and D-33; DECISOES § C-4), in the vocabulary of the Faq: a stroke
+/* F13b · the block of costs that folds (UX-12 A, D-32 and D-33; DECISOES § 547), in the vocabulary of the Faq: a stroke
    above, a hairline under, the round chevron of 32 px that turns (brand-soft when open), the title in Fredoka 24/30 and the
    total in small ink-muted. Only aria-expanded changes; the name is the title and the total, open or closed. On a phone the
    open block ends in the echo of the result, a strip of the same sea (aria-hidden: the region of the card says it). */
@@ -991,7 +991,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The 96px on the right of .fo-top is the room of the DropZone's Oli; a calculator has no Oli on the island's
    top edge (hers is in the ResultHero), so its top takes the whole width and the result stays above the fold. */
 .fo-top.fo-top--calc { padding-right: 0; }
-/* F13b · the top of a calculator page (UX-12 A, F10 p-19; DECISOES § C-1). The number of the ResultHero ends above 596 px
+/* F13b · the top of a calculator page (UX-12 A, F10 p-19; DECISOES § 544). The number of the ResultHero ends above 596 px
    at 360 x 740, clear of the cookie notice of the first visit (it starts at 604 px). The signature takes one line (14/20,
    the short date), and below 768 px the top is tighter: 4 px between its lines, the lead in the body size (16/24, two
    lines), and the crumb of the page itself only for the screen reader, since the H1 right under it says the same (the
@@ -1008,7 +1008,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    697px of the rest of the prose, which is what keeps them clear of her at 768 and at 1280px too. */
 .fo-guide__tool { padding-right: 96px; }
 @media (min-width: 768px) { .fo-guide__tool { padding-right: 136px; } }
-/* F13b · a página de guia: a assinatura, a ficha e a ferramenta antes da prosa (DECISOES § G-1, § G-4 e § G-5)
+/* F13b · a página de guia: a assinatura, a ficha e a ferramenta antes da prosa (DECISOES § 557, § 560 e § 561)
    The signature is one line of small text at 360px (20px, G-23), in Figtree Steady, the face of the first paint, so it
    never wraps again when Figtree arrives; the date never breaks. */
 .fo-sig { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
@@ -1018,7 +1018,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    a text link to the table. Its words are in Figtree Steady too: a label that wraps again when Figtree arrives would push
    the tool down. No Oli. */
 /* On a phone its rows are 8px apart instead of the 12px of the specification, so the panel of the guides with a long H1,
-   lead and trail still starts above the fold (DECISOES § G-8); the padding is the space-4 of every card. */
+   lead and trail still starts above the fold (DECISOES § 564); the padding is the space-4 of every card. */
 .fo-sheet { --fo-ground: var(--bg); --fo-font-text: var(--fo-font-steady); position: relative; display: grid; gap: var(--space-2); margin: 0; padding: var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); font-family: var(--fo-font-steady); }
 .fo-sheet__title { margin: 0; padding-right: calc(var(--dogear) + var(--space-2)); font: 600 12px/16px var(--fo-font-steady); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
 .fo-sheet__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); column-gap: var(--space-4); margin: 0; }
@@ -1041,9 +1041,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    the panel (76px from 768px), and the heading ends 24px over it (the gap of the column and the top of the island), so a
    heading of one line (30px), the 16px gap of the column and 8px more above it keep her box clear of the sheet on a phone
    (by 22px from 768px, with 16px there). Its paragraph goes under the island, in the muted text of a caption (above it, it
-   pushed the panel past the fold of a phone; DECISOES § G-5), and the introduction starts after it. The 24 and 40px over
+   pushed the panel past the fold of a phone; DECISOES § 561), and the introduction starts after it. The 24 and 40px over
    the heading of the specification, measured again in the site, put the panel of 20 of the 30 guides under the fold of a
-   360 x 740 phone and the Choose button of 5 under 800px at 1280 (DECISOES § G-8). */
+   360 x 740 phone and the Choose button of 5 under 800px at 1280 (DECISOES § 564). */
 .fo-sheet + .fo-guide__tool { margin-top: var(--space-2); }
 @media (min-width: 768px) { .fo-sheet + .fo-guide__tool { margin-top: var(--space-4); } }
 .fo-sheet + .fo-guide__tool > h2 { margin-bottom: 0; }
@@ -1070,7 +1070,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-rhero { padding: var(--space-6); gap: var(--space-4); }
   .fo-rhero__num { font-size: min(60px, calc((100cqi - var(--fo-num-px, 0px)) / var(--fo-num-em, 5))); line-height: 64px; }
 }
-/* F13b · the card is the one place of the result, the Download PDF and the error (UX-12 A; DECISOES § C-2). 8 px between
+/* F13b · the card is the one place of the result, the Download PDF and the error (UX-12 A; DECISOES § 545). 8 px between
    its parts (12 from 768 px), the spec's gap; the respiro stays 20 px on the phone (§ 140), where the waterline of the deep
    cards (.fo-sea-top, § 539) has its 16 px of air and the crest. The Oli sits on the top edge at the right, looking at the
    number, from the first paint: 64 px on the phone, 80 from 768 px, above the waterline (z-index 1); the label keeps her
@@ -1128,7 +1128,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-split__key--a { background: var(--brand); }
 .fo-deep .fo-split__key--a { background: var(--brand-on-deep); }
 .fo-split__key--b { background: var(--coral); background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--on-cat) 22%, transparent) 6px 8px); }
-/* F13b · the SplitChart, pair variant (D-38; DECISOES § C-6): one bar per system on one scale, each named in 13 px
+/* F13b · the SplitChart, pair variant (D-38; DECISOES § 549): one bar per system on one scale, each named in 13 px
    on-deep-muted at its left; and the other system's payment in the card, under the Download. */
 .fo-split__pair { display: grid; gap: var(--space-2); }
 .fo-split__row { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--space-2); }
@@ -1138,7 +1138,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 .fo-export-wrap { display: grid; gap: var(--space-3); }
 .fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
-/* F13b (F4 ACE-8; DECISOES § C-2): Download CSV and Copy link share one row on the phone in en and pt (two in es), with
+/* F13b (F4 ACE-8; DECISOES § 545): Download CSV and Copy link share one row on the phone in en and pt (two in es), with
    16 px of side padding instead of 24. */
 @media (max-width: 767px) { .fo-calc__result .fo-export .fo-btn { padding-inline: var(--space-4); } }
 .fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
@@ -1153,7 +1153,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-scn dd { margin: 0; font: 600 24px/28px var(--fo-font-display); overflow-wrap: anywhere; }
 .fo-diff { grid-column: 1 / -1; margin: 0; display: flex; gap: var(--space-2); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--ink); font: 600 16px/22px var(--fo-font-text); }
 .fo-diff .fo-icon { flex: 0 0 auto; color: var(--brand); }
-/* F13b (D-38; DECISOES § C-6): the two scenarios stay side by side down to 320 px (they stacked under 340 px of column),
+/* F13b (D-38; DECISOES § 549): the two scenarios stay side by side down to 320 px (they stacked under 340 px of column),
    with the number in 20/24 and a tighter card below 480 px; the line of the difference stays under them. */
 @media (max-width: 479px) {
   .fo-compare { gap: var(--space-2); }
@@ -1163,7 +1163,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-calc-schedule > div { width: 100%; }
-/* F13b (D-43; DECISOES § C-5): the schedule is a block of the island, before the chips, on the whole width; its heading (or
+/* F13b (D-43; DECISOES § 548): the schedule is a block of the island, before the chips, on the whole width; its heading (or
    the button of its block) is its name, and the table comes right under it. */
 .fo-calc__schedule { grid-column: 1 / -1; min-width: 0; justify-items: stretch; }
 .fo-calc__schedule > .fo-calc__moreheading { margin: 0; }
@@ -1189,13 +1189,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (max-width: 479px) {
   .fo-amort--flat th, .fo-amort--flat td { padding-inline: var(--space-2); }
 }
-/* F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of a row of data is its header (th
+/* F13b (F4 ACE-9, the half of the calculators; DECISOES § 548): the first cell of a row of data is its header (th
    scope="row"), drawn like the cell it replaces: no sticky of the head of the table, the type and colour of the table, the
    zebra of its row. */
 .fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
 .fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
 @media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
-/* F13b (F7 obs 2; DECISOES § C-7): the dates of the ovulation in fixed columns, the range at 30 % and each date at 35 %:
+/* F13b (F7 obs 2; DECISOES § 550): the dates of the ovulation in fixed columns, the range at 30 % and each date at 35 %:
    at 360 px a date takes one line and a range two, and at 320 px a date breaks only after its comma (its month and day are
    glued by a no-break space), with no sideways scroll. */
 .fo-amort--even { table-layout: fixed; }
@@ -1218,7 +1218,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
-/* F13b · a tabela do guia: a pista de rolagem, o agrupamento e a frase (DECISOES § G-3 e § G-7; F5b F-2 e F-13)
+/* F13b · a tabela do guia: a pista de rolagem, o agrupamento e a frase (DECISOES § 559 e § 563; F5b F-2 e F-13)
    The edge cue, CSS only: on each side where the table continues, the dashed line of the DropZone (stroke-2 in stroke,
    8px dash and 6px gap) on a 12px band of surface-sunken, like the edge of a long paper. The two `local` layers are covers
    in the ground colour that travel with the table and hide the cue on a side that is fully shown; the `scroll` layers are

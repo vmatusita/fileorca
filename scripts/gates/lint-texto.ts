@@ -99,7 +99,7 @@ export const MONEY_SAMPLES: Record<string, string> = {
   interestEffect: 'saves $212,238 of interest',
   interestPart: 'pays $484 less interest',
   timePart: 'is done 1 month sooner',
-  // F13b (DECISOES § C-2): the field of "Last result that worked: {label} {value}." and its value in the last result.
+  // F13b (DECISOES § 545): the field of "Last result that worked: {label} {value}." and its value in the last result.
   label: 'Rate',
   value: '6.5%',
 };
@@ -167,7 +167,7 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       base: '30 años',
       label: 'Tasa',
       value: '6.5 %',
-      // F13b (DECISOES § C-4): the total of the costs in the title of the block that folds.
+      // F13b (DECISOES § 547): the total of the costs in the title of the block that folds.
       extras: '$500.00',
     },
     fallback: '$1,234.56',

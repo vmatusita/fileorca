@@ -1,4 +1,4 @@
-// F13b (§ 375; DECISOES § C-10): the sprite of every page with the calculator island carries the poses of the Oli of its card
+// F13b (§ 375; DECISOES § 553): the sprite of every page with the calculator island carries the poses of the Oli of its card
 // (wave, cheer, oops; no cheer on a health page) and the peek of the layout, and no other pose of a panel (gulp, swim, buoy,
 // lost). Read from the HTML of dist/ (the build runs before the Vitest in pnpm verificar): the money calculators in their three
 // languages, the home and health ones and the money guides that embed the island.

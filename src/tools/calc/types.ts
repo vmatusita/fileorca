@@ -18,7 +18,7 @@ interface FieldBase {
   main?: boolean;
   /** Half a row on a phone, next to the other half (two short fields side by side). */
   half?: boolean;
-  /** Below 360 px a half field whose label and tag do not fit half a row takes the whole row (F13b, F7 obs 3; § C-7). */
+  /** Below 360 px a half field whose label and tag do not fit half a row takes the whole row (F13b, F7 obs 3; § 550). */
   wide?: boolean;
 }
 
@@ -118,7 +118,7 @@ export interface CalcView {
   problem?: string;
   /**
    * The field the problem points to, by its key (the payment that does not cover the interest): it is marked like a field
-   * out of its range, with aria-invalid and the card's message in its description (F4 ACE-11; F13b, DECISOES § C-2).
+   * out of its range, with aria-invalid and the card's message in its description (F4 ACE-11; F13b, DECISOES § 545).
    */
   problemField?: string;
   /** The one number the Oli's placard shows. */
@@ -127,7 +127,7 @@ export interface CalcView {
   open?: boolean;
   /** Principal against interest, or deposits against interest (cents). */
   split?: { a: { label: string; cents: number }; b: { label: string; cents: number } };
-  /** The other system in the card, under the Download (the SAC × PRICE: "Na PRICE: R$ 4.534,12 por mês"; F13b, DECISOES § C-6). */
+  /** The other system in the card, under the Download (the SAC × PRICE: "Na PRICE: R$ 4.534,12 por mês"; F13b, DECISOES § 549). */
   versus?: Part[];
   /**
    * Two bars on one scale, in place of the split (the SplitChart, pair variant; the SAC × PRICE): the same principal and the
@@ -137,7 +137,7 @@ export interface CalcView {
   compare?: { a: Scenario; b: Scenario; diff: Part[] };
   /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
   more?: string;
-  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § C-5). */
+  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § 548). */
   scheduleMeta?: string;
   /** The schedule, built only when the person opens it or exports. */
   table: () => Table;
@@ -167,7 +167,7 @@ export interface CalcPanelTexts {
   options?: Record<string, Record<string, string>>;
   /** Heading of the fields that come after the result on a phone. */
   moreHeading?: string;
-  /** Title of the block that folds (CalcDef.disclose), when it is not the moreHeading (F13b, DECISOES § C-4). */
+  /** Title of the block that folds (CalcDef.disclose), when it is not the moreHeading (F13b, DECISOES § 547). */
   disclose?: string;
   /** Strings the definition's view fills in ({placeholders}). */
   view: Record<string, string>;
@@ -251,7 +251,7 @@ export interface CalcDef<I = unknown, R = unknown> {
   fields: FieldSpec[];
   /**
    * The fields that fold into a block after the result, closed when the page opens, with their total in its title (the
-   * taxes, insurance and fees of the mortgage and its presets, the TR of the SAC × PRICE; F13b, DECISOES § C-4). Their
+   * taxes, insurance and fees of the mortgage and its presets, the TR of the SAC × PRICE; F13b, DECISOES § 547). Their
    * boxes are in the page only while the block is open.
    */
   disclose?: readonly string[];

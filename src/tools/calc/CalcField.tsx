@@ -5,7 +5,7 @@
 // half-second pause, unlike the image tools' field); a value outside the field's fixed range shows the
 // range in words (aria-invalid, aria-describedby, the alert icon) and the last result stays. Leaving the
 // field writes the number back in the page's format. The typed number never goes to the URL or an event.
-// F13b (UX-12 A; DECISOES § C-2): the message no longer sits under the field. The field keeps its stroke (2 px of border
+// F13b (UX-12 A; DECISOES § 545): the message no longer sits under the field. The field keeps its stroke (2 px of border
 // and 1 px of box-shadow, so it never grows) and the alert icon before its label, and the message is said in the card
 // (ResultHero, #fo-rhero-error), which aria-describedby points to; the card's live region is the one voice (§ 102). The alert
 // icon is inside the box, before the unit: before the label it took a second line on 40 labels at 360 px and moved the card.
@@ -149,7 +149,7 @@ export default function CalcField(props: CalcFieldProps) {
               if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />
-          {/* The alert icon inside the box, before the unit: never the colour alone, and no label goes to a second line (§ C-2). */}
+          {/* The alert icon inside the box, before the unit: never the colour alone, and no label goes to a second line (§ 545). */}
           {marked && (
             <span class="fo-input__flag" aria-hidden="true">
               <Icon raw={alertIcon} />

@@ -1,11 +1,11 @@
-// The bands of the home (F13b, decision 6; UX-03 B, home-b.html; DECISOES § H-1 and § H-4): one band per category of the
+// The bands of the home (F13b, decision 6; UX-03 B, home-b.html; DECISOES § 567 and § 570): one band per category of the
 // language, in the order of the page, each with its tools as chips, read from the registries at build time. A page with no
 // path in the language gets no chip. Node only (the home has no island): HomeView.astro renders the bands, gate:prontidao
 // (scripts/lib/prontidao.ts) and the tests read the same lists.
 //   - image: the 8 image tools (Image to PDF in the colour of PDF, as on the image hub);
 //   - PDF: the 12 PDF tools;
 //   - money: in English and Spanish the 6 most used credit calculators (the 5 of HOME_MONEY_IDS and Credit card payoff,
-//     as the specification asks; § H-4), in Portuguese the 8 made for Brazil;
+//     as the specification asks; § 570), in Portuguese the 8 made for Brazil;
 //   - home and health (English only): the 6 home and the 5 health calculators;
 //   - QR code: the generator.
 import { QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../i18n/routes.ts';
@@ -18,7 +18,7 @@ import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 export type BandId = 'image' | 'pdf' | 'money' | 'life' | 'qr';
 export type ChipCategory = 'image' | 'pdf' | 'money' | 'home' | 'util';
 
-/** The money calculators of the home's money band, per language (§ H-4): the specification's 6 in en and es, the 8 in pt. */
+/** The money calculators of the home's money band, per language (§ 570): the specification's 6 in en and es, the 8 in pt. */
 export const HOME_BAND_MONEY_IDS: Record<Lang, readonly MoneyPageId[]> = {
   en: [...HOME_MONEY_IDS.en, 'credit-card-payoff-calculator'],
   pt: BR_CALC_IDS,

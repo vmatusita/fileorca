@@ -118,7 +118,7 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   const main = root.querySelector('main');
   if (!main) return ['sem <main>'];
   const problems: string[] = [];
-  // The blocks in this order. F13b (UX-13 A, decision 5; DECISOES § 376 and § G-9): the signature, the sheet "What we
+  // The blocks in this order. F13b (UX-13 A, decision 5; DECISOES § 376 and § 565): the signature, the sheet "What we
   // measured" and the tool before the introduction. Before, the introduction came before the tool, and the link to the
   // tool's page was a line of its own right under it (.fo-guide__open).
   const order: [string, string][] = [

@@ -1,5 +1,5 @@
 // The home as the sea by category and the sea of the category hubs (F13b, decisions 6 and 7; UX-03 B, home-b.html, and
-// UX-15 A, hub-sea.html ?alt=a; DECISOES § 370, § 378 and § H-1 to § H-11), on the default build (no ad: the distances to
+// UX-15 A, hub-sea.html ?alt=a; DECISOES § 370, § 378 and § 567 to § 577), on the default build (no ad: the distances to
 // the ads are measured on the test build by fo-ad-map.spec.ts). The name puts this spec in a light part of the CI, after
 // header-theme-offline.spec.ts.
 //   - The home: the H1 on the full width with the count; the Oli swim, 128 px on a phone and 152 from 768, aria-hidden, in
@@ -130,7 +130,7 @@ test.describe('the home', () => {
         expect(last, label).toBeTruthy();
         expect(last?.inSea, label).toBe(false);
         // Below 768 px the H1 is 28 px (h1-mobile) and the line under it is larger: the LCP stays a text of the page, as
-        // before the F13b (§ H-8). From 768 px the display H1 is the largest.
+        // before the F13b (§ 574). From 768 px the display H1 is the largest.
         if (viewport.width >= 768) expect(last?.inH1, label).toBe(true);
         await context.close();
       }

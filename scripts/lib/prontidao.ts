@@ -142,7 +142,7 @@ function row(item: string, how: string, problems: string[]): Row {
 /**
  * The real site: every page of the route map, the tools of the registry. F6 (decision 7): the cards of each language from
  * the registries and the map, so the home, the money hub and the PDF hub of Portuguese and Spanish are held to what exists
- * there: the home lists the money calculators of its money band (HOME_BAND_MONEY_IDS[lang] since the F13b, DECISOES § H-4;
+ * there: the home lists the money calculators of its money band (HOME_BAND_MONEY_IDS[lang] since the F13b, DECISOES § 570;
  * HOME_MONEY_IDS before; when the language has a money hub, moneyHubId) and
  * the PDF tools of the language; each money hub lists HUB_MONEY_IDS[lang]; the PDF hub of each language its 12 tools and
  * Image to PDF.
@@ -385,7 +385,7 @@ export function checkNothingUnfinished(site: Site): Row[] {
   for (const page of site.pages.filter((candidate) => listing.has(candidate.id))) {
     const html = read(site.dir, page.path);
     if (html === null) continue;
-    // F13b (UX-03 B; DECISOES § H-10): the home shows its tools as the chips of its bands; a hub, as cards.
+    // F13b (UX-03 B; DECISOES § 576): the home shows its tools as the chips of its bands; a hub, as cards.
     const cards = parse(html).querySelectorAll(TOOL_LINKS).map((card) => card.getAttribute('href') ?? '');
     for (const href of cards) if (!exists(site.dir, href)) catalog.push(`${page.path}: cartão para ${href}, que não existe`);
     const own = page.id === 'home' || page.id === 'image-tools' ? site.tools[page.lang] : [];

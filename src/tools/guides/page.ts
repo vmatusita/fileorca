@@ -19,7 +19,7 @@ import { guideCardData, type GuideCardData } from './card.ts';
 
 /**
  * The days the guides were reviewed and first published, in each language (prompt F5b, DECISOES § 207 and § 223). They
- * live in the registry since the F13b (DECISOES § G-2), plain data that src/tools/guides/measured.ts reads in Node too.
+ * live in the registry since the F13b (DECISOES § 558), plain data that src/tools/guides/measured.ts reads in Node too.
  */
 export { GUIDE_PUBLISHED, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED, GUIDE_REVIEWED_ON } from './registry.ts';
 

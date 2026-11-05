@@ -43,13 +43,13 @@ const TARGETS = [
   // F13a (UX-14, decision 10; DECISOES § 506): the line under the chips that take the result along (its room in the
   // hidden copy of the band counts, in the same place), the note of where the files came from and the empty box.
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
-  // F13b (UX-13 A, decision 10; DECISOES § G-9): the sheet "What we measured" of a file guide and the frame of its tables.
+  // F13b (UX-13 A, decision 10; DECISOES § 565): the sheet "What we measured" of a file guide and the frame of its tables.
   '[data-content="facts"]', '.fo-guide__frame',
-  // F13b (decision 10; DECISOES § H-7): the bands and the sea of the home, and the sea and the water of the category hubs
+  // F13b (decision 10; DECISOES § 573): the bands and the sea of the home, and the sea and the water of the category hubs
   // (their Oli is [data-oli], above).
   '.fo-catband', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
 ].join(', ');
-/** F13b (DECISOES § H-7): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
+/** F13b (DECISOES § 573): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
 const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';
 
 /**
@@ -424,7 +424,7 @@ test('the hub keeps its first content AdSlot right after the grid of tools and e
       for (const oli of await boxes(page, '[data-oli]')) {
         for (const slot of await boxes(page, '.fo-ad')) expect(distance(slot, oli), `${path} ${viewport.width}px: AdSlot perto da Oli`).toBeGreaterThanOrEqual(CLEARANCE);
       }
-      // F13b (DECISOES § H-7): the sea of the band and the cards, as on the other hubs.
+      // F13b (DECISOES § 573): the sea of the band and the cards, as on the other hubs.
       await expectClearance(page, `${path} a ${viewport.width}px`, HUB_TARGETS);
     }
   }
@@ -523,7 +523,7 @@ test.describe('the header stays 150px from every AdSlot and its open menus from 
 // schedule closed and with one year open. Measured on top of TARGETS: the ResultHero, the three ExportBar buttons,
 // the ScenarioCompare, the schedule section and its table. No AdSlot above the tool on a phone, inside the island,
 // between the fields or inside the schedule; on a phone the result sits above the fold, right under the main fields.
-// F13b (UX-12 A, decision 10; DECISOES § C-2, § C-4 and § C-11): the card with the Download PDF in it and the message of an
+// F13b (UX-12 A, decision 10; DECISOES § 545, § 547 and § 554): the card with the Download PDF in it and the message of an
 // error in its place, the row of Download CSV and Copy link under it, the block of costs that folds (its button and, open, the
 // echo of the result), and the schedule, now in the island before the chips.
 const CALC_TARGETS = `${TARGETS}, .fo-rhero, .fo-rhero__get, .fo-rhero__error, .fo-export .fo-btn, .fo-calc__fold, .fo-disclose, .fo-calc__echo, .fo-compare, .fo-calc-schedule, .fo-amort-wrap, .fo-debt`;
@@ -573,7 +573,7 @@ test.describe('distância dos anúncios nas calculadoras, a 360×740 e a 1280×8
         expect((number?.y ?? 999) + (number?.height ?? 0), 'número do resultado acima da dobra a 360×740').toBeLessThanOrEqual(740);
       }
       await measure('cronograma fechado');
-      // F13b (DECISOES § C-11): the block of costs open, where the page has one, with its fields and the echo of the result.
+      // F13b (DECISOES § 554): the block of costs open, where the page has one, with its fields and the echo of the result.
       const fold = page.locator('[aria-controls="fo-calc-more-fields"]');
       if (await fold.count()) {
         await fold.click();
@@ -680,7 +680,7 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
       if (first) {
         const field = first.kind === 'list' ? `#fo-calc-${first.key}0${first.item[0]?.key ?? ''}` : `#fo-calc-${first.key}`;
         await page.locator(field).fill(outOfRange(first.kind === 'list' ? (first.item[0] ?? first) : first));
-        // F13b (DECISOES § C-2): the words are in the card, in the place of the Download.
+        // F13b (DECISOES § 545): the words are in the card, in the place of the Download.
         await expect(page.locator(field)).toHaveAttribute('aria-invalid', 'true');
         await expect(page.locator('#fo-rhero-error')).toBeVisible();
         await measure('campo fora da faixa');

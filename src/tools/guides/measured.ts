@@ -89,7 +89,7 @@ export type Variant = keyof typeof VARIANTS;
 
 /**
  * The placeholders every guide may use besides its numbers: the date and the browsers of the measurement. Since the F13b
- * (DECISOES § G-2) also the two dates of the history line at the end of "What we measured", in the medium form
+ * (DECISOES § 558) also the two dates of the history line at the end of "What we measured", in the medium form
  * ("Nov 2, 2026", "3 de nov. de 2026", "3 nov 2026"): {published}, the first publication of the guide in its language,
  * and {measured}, the day of the measurement. The page writes them as <time datetime> (GUIDE_DATES in page.ts).
  */
@@ -349,7 +349,7 @@ export function guideTables(id: FileGuideId, shared: FileGuidesSharedTexts, text
 }
 
 /**
- * A measured table as the page draws it (F13b, UX-13 A; F5b F-13 and the guides half of F4 ACE-9; DECISOES § G-3): the
+ * A measured table as the page draws it (F13b, UX-13 A; F5b F-13 and the guides half of F4 ACE-9; DECISOES § 559): the
  * columns that hold one value in every row are left out (the page says that value in a sentence of the note instead), and
  * when the first column repeats, the rows go in groups, one per value of it, in the order each value first appears.
  */

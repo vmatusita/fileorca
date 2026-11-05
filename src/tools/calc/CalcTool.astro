@@ -9,7 +9,7 @@
 // decision 7; DECISOES § 396): before, a line "Read the guide" sat in the "how it works" block. It serves the English pages, their
 // Spanish versions and the Brazilian calculators, each in its language; the presets and guides only in English (F6).
 // F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad stays after the panel (fields, result,
-// the schedule and chips; F13b, DECISOES § C-5), never between the fields nor inside the schedule; the next ones only at the marks of
+// the schedule and chips; F13b, DECISOES § 548), never between the fields nor inside the schedule; the next ones only at the marks of
 // "How it works" (between its blocks and its paragraphs, never after a heading nor against a table) and between the
 // questions and the last blocks; the layout puts each box and the rails (src/ads/map.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -126,7 +126,7 @@ const [firstBefore, firstAfter] = shared.firstPublished.split('{date}');
     <div data-ymyl="source">
       <h3 class="fo-h3">{t.sourcesHeading}</h3>
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={read}>{longDate(read, lang)}</time>{readAfter}</li>)}</ul>
-      {/* F13b (G-23; DECISOES § C-1): the first publication, which the one-line signature of the top leaves out. */}
+      {/* F13b (G-23; DECISOES § 544): the first publication, which the one-line signature of the top leaves out. */}
       <p class="fo-reviewed">{firstBefore}<time datetime={dates.first}>{longDate(dates.first, lang)}</time>{firstAfter}</p>
     </div>
     <AdBreak />

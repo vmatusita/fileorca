@@ -3,7 +3,7 @@
 // opening it shows its payments. The first year starts open. Tabular figures, numbers to the right, the
 // header stays on top while the table scrolls inside its own box (WCAG 1.4.10: the page never scrolls
 // sideways). The schedule runs by payment number and loan year, never by calendar date. No ad inside.
-// F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of every row of data is its header (th
+// F13b (F4 ACE-9, the half of the calculators; DECISOES § 548): the first cell of every row of data is its header (th
 // scope="row"), drawn like the cell it replaces (no sticky), and the region of the frame is named by the heading of its
 // section, not by the caption of the table, which says the rest.
 import { useState } from 'preact/hooks';

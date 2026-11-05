@@ -1,4 +1,4 @@
-// F13b (UX-12 A, decision 4; DECISOES § C-7): the labels and the narrow tables of the calculators, in both browsers, with
+// F13b (UX-12 A, decision 4; DECISOES § 550): the labels and the narrow tables of the calculators, in both browsers, with
 // Figtree and with the fallback font of the first visit (the Figtree files blocked, so the calibrated "Figtree Fallback" of
 // fonts.css draws, § 305 and § 537): the BTU rail (Normal, Shade, Sun) and the Paint labels (Coverage, Door area, Window area)
 // on one line at 360 and 320 px, with the "example" tag where they have it (F7 f-13, obs 3 with the F10 p-3); the compact tag

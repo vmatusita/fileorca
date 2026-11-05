@@ -1,5 +1,5 @@
 // The state of one calculator island: the form, the result and, since the F13b, the schedule, which moved into the island
-// (DECISOES § C-4). A key press runs the account once and every part repaints.
+// (DECISOES § 547). A key press runs the account once and every part repaints.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { problems, type Problems } from './form.ts';
 import type { CalcDef, CalcPanelData, CalcView, Values } from './types.ts';
@@ -20,7 +20,7 @@ export interface CalcState {
   /**
    * The last view that was a result, not a problem, and the values it was made from: while the values on screen make none,
    * the card keeps its number and says which value of the field it was ("Last result that worked: Rate 6.5%."); the
-   * example until the person has another result (F13b; DECISOES § C-2).
+   * example until the person has another result (F13b; DECISOES § 545).
    */
   good: { view: CalcView; values: Values };
   /** The fields that show an error now, by id, in the order they came (the card says the first one of the form). */

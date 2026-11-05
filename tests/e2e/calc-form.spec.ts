@@ -48,7 +48,7 @@ async function menuProblems(page: Page): Promise<string[]> {
       const context = document.createElement('canvas').getContext('2d');
       if (!context) return ['sem canvas'];
       context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      // F13b (F7 obs 3; DECISOES § C-7): the native arrow is measured in this browser, not supposed (it was 26 px): a menu of
+      // F13b (F7 obs 3; DECISOES § 550): the native arrow is measured in this browser, not supposed (it was 26 px): a menu of
       // the same style with one option, as wide as it asks to be, less that option's text, paddings and borders.
       const probe = select.cloneNode(false) as HTMLSelectElement;
       probe.removeAttribute('id');
@@ -158,7 +158,7 @@ test('a field out of its range marks the result stale, puts no PDF and turns the
     const field = page.locator(`#fo-calc-${key}`);
     await field.fill(wrong);
     await expect(field, `${id} ${wrong}`).toHaveAttribute('aria-invalid', 'true');
-    // F13b (DECISOES § C-2): the line is in the card, after the last result that worked, and the Download leaves its place.
+    // F13b (DECISOES § 545): the line is in the card, after the last result that worked, and the Download leaves its place.
     await expect(page.locator('.fo-rhero__stale'), id).toContainText(STALE[lang]);
     await expect(pdfButton(page), id).toHaveCount(0);
     await expect(csvButton(page), id).toBeDisabled();
@@ -196,7 +196,7 @@ for (let start = 0; start < MONEY_PAGES.length; start += MONEY_BLOCK) {
   });
 }
 
-// F7 obs 1 (F13b; DECISOES § C-9): a key in a row and Enter on the Remove of the next row in the same moment (under 16 ms, in
+// F7 obs 1 (F13b; DECISOES § 552): a key in a row and Enter on the Remove of the next row in the same moment (under 16 ms, in
 // one task of the page, as only a script can), twenty times: the key reaches the store (the value typed in the first row
 // stays), and the focus goes to the Remove of the row that took the removed one's place, found by its stable key
 // (data-row), not by the index of the render before.
@@ -251,7 +251,7 @@ test('a menu keeps its height when the field beside it shows an error (f-5)', as
   const box = page.locator('.fo-field:has(#fo-calc-mo) .fo-input');
   const before = (await box.boundingBox())?.height ?? 0;
   await page.locator('#fo-calc-co').fill('9');
-  // F13b (DECISOES § C-2): the words are in the card; the field shows its stroke.
+  // F13b (DECISOES § 545): the words are in the card; the field shows its stroke.
   await expect(page.locator('#fo-calc-co')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('#fo-rhero-error')).toBeVisible();
   expect((await box.boundingBox())?.height).toBe(before);
@@ -310,7 +310,7 @@ test('a valid number typed key by key never shows the range error on the way, an
     new MutationObserver((records) => {
       for (const record of records) {
         if (record.type === 'attributes' && (record.target as Element).getAttribute('aria-invalid') === 'true') seen.invalid += 1;
-        // F13b (DECISOES § C-2): the words of an error are the card's message (#fo-rhero-error), no longer an alert of the field.
+        // F13b (DECISOES § 545): the words of an error are the card's message (#fo-rhero-error), no longer an alert of the field.
         for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"], #fo-rhero-error') || node.querySelector('[role="alert"], #fo-rhero-error'))) seen.alerts += 1;
       }
     }).observe(document.getElementById('fo-tool-root') as HTMLElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-invalid'] });

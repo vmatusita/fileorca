@@ -30,7 +30,7 @@ export const GUIDES_HUB_ID = 'guides';
 /**
  * The day the ten English guides were reviewed, and when they were first published (prompt F5b). In UTC, like the date
  * pnpm guias:medir stamps, and never before it (DECISOES § 207): the last measurement and the merge fall on this day.
- * Plain data here since the F13b (DECISOES § G-2), so src/tools/guides/measured.ts can give the history line of a guide
+ * Plain data here since the F13b (DECISOES § 558), so src/tools/guides/measured.ts can give the history line of a guide
  * its dates in Node too (the lint:texto); src/tools/guides/page.ts gives them to the pages as before.
  */
 export const GUIDE_REVIEWED = '2026-11-02';
@@ -61,7 +61,7 @@ export interface FileGuideDef {
   related: readonly FileGuideRelated[];
   /**
    * The part of the text (the index of `sections` in the guide's texts) that ends with the sentence linking to the tool's
-   * own page (F13b, D-54; DECISOES § G-6): the link left the line under the panel for the part that talks about the tool.
+   * own page (F13b, D-54; DECISOES § 562): the link left the line under the panel for the part that talks about the tool.
    */
   toolSection: number;
 }
@@ -83,7 +83,7 @@ const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
 };
 
 /**
- * The part of each guide that ends with the link to the tool's page (F13b, D-54; DECISOES § G-6): the part that talks
+ * The part of each guide that ends with the link to the tool's page (F13b, D-54; DECISOES § 562): the part that talks
  * about the tool the guide embeds (its modes, what it did to our files, how to use it), the same in the three languages.
  */
 const TOOL_SECTION: Record<FileGuideId, number> = {

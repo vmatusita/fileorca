@@ -349,7 +349,7 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
   });
 
-  // F13b (UX-03 B; DECISOES § H-10): the home shows its tools as the chips of its bands, and the gate reads them as its
+  // F13b (UX-03 B; DECISOES § 576): the home shows its tools as the chips of its bands, and the gate reads them as its
   // cards (TOOL_LINKS); a chip of a band to a page that does not exist, or that the registry does not ask of the home, fails.
   it('reads the chips of the bands of the home as its cards (F13b)', () => {
     const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
@@ -372,7 +372,7 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     const site = realSite('dist');
     // F5a: the home also lists the 12 PDF tools of the PDF registry, after the five credit calculators.
     // F7 (decision 9; DECISOES § 259): and, after them, the 6 home and the 5 health calculators and the QR code generator.
-    // F13b (UX-03 B; DECISOES § H-4 and § H-10): the money band of the home has the 6 credit calculators of the specification
+    // F13b (UX-03 B; DECISOES § 570 and § 576): the money band of the home has the 6 credit calculators of the specification
     // (the five and Credit card payoff), and the home lists its chips.
     expect(site.cards?.['home']?.en).toEqual([
       '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/', '/credit-card-payoff-calculator/',

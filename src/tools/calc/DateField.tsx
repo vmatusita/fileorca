@@ -2,7 +2,7 @@
 // <input type="date">, which gives a calendar on the phone and the day as "2026-09-07" whatever the language of the
 // device, with the min and max of the field's fixed range. It is built like the NumberField (label, box, the FieldError
 // with the alert icon) and only from tokens. An empty, half-typed or out-of-range day shows the range in words and the last
-// result stays; nothing typed here ever reaches the URL or an event. F13b (DECISOES § C-2): the words are said in the card, as
+// result stays; nothing typed here ever reaches the URL or an event. F13b (DECISOES § 545): the words are said in the card, as
 // for the NumberField; the field keeps its stroke and shows the alert icon inside its box.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';

@@ -1,4 +1,4 @@
-// The schedule section of a calculator. F13b (UX-12 A, D-43 and F4 ACE-8; DECISOES § C-5): it is part of the island, before
+// The schedule section of a calculator. F13b (UX-12 A, D-43 and F4 ACE-8; DECISOES § 548): it is part of the island, before
 // the next-step chips, as a block that folds, closed when the page opens, with a fixed name (its heading, the same open and
 // closed) and the round chevron of the Faq that turns with aria-expanded; the first ad stays after the chips, never inside
 // it. Before, it was an island of its own after the first ad, and its button said "Show the full schedule" or "Hide the

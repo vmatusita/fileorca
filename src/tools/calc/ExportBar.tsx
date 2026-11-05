@@ -1,5 +1,5 @@
 // ExportBar (docs/design/components/ExportBar): Download CSV and Copy link, in that order, on the bg floor under the
-// ResultHero. Since the F13b (UX-12 A; DECISOES § C-2) the Download PDF, the only yellow, lives in the card, right under the
+// ResultHero. Since the F13b (UX-12 A; DECISOES § 545) the Download PDF, the only yellow, lives in the card, right under the
 // number; the CSV took a verb ("Download CSV", F4 ACE-8) and shares its row with Copy link. Copy link builds the address
 // with the numbers after the # and puts it on the clipboard: the button turns into "Link copied" for 2 s and a role="status"
 // region of its own says so. Without a clipboard, the link shows in a read-only field, which follows the numbers as they

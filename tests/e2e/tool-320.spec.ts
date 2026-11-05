@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { hydrated } from './lib/page.ts';
 
-// F13b · the tool page at 320 px (decision 9 of the run; the group 22 rows the F13a left; DECISOES § M-1 and § M-2).
+// F13b · the tool page at 320 px (decision 9 of the run; the group 22 rows the F13a left; DECISOES § 580 and § 581).
 // - F13a R-c-1: with a photo of a phone (EXIF and GPS), the result of the presets and of the compressor grew past the
 //   rectangle at 320 px (418px for 356 in "para 100 KB" in pt and es; 378 and 395 elsewhere): the placard took two lines
 //   of the sentence and the ghost buttons went to two rows. Under 340 px the placard leaves the sentence, the buttons

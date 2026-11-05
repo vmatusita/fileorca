@@ -289,7 +289,7 @@ test.describe('QR code generator', () => {
   test('an empty box and a text over the limit show the error, with no code and no download', async ({ page }) => {
     await open(page);
     const alert = page.locator('#fo-qr-error');
-    // Nothing typed yet: no error, no code, and no download (F13b, F7 f-10 saída A; DECISOES § C-8: the place of the two
+    // Nothing typed yet: no error, no code, and no download (F13b, F7 f-10 saída A; DECISOES § 551: the place of the two
     // buttons says why, where they were turned off before).
     const wait = page.locator('.fo-qr__actions .fo-qr__wait');
     await expect(alert).toHaveCount(0);
@@ -325,7 +325,7 @@ test.describe('QR code generator', () => {
     await expect(page.locator('#fo-qr-count')).toHaveText('1,273 of 1,273');
   });
 
-  // F7 f-9 (DECISOES § C-8): the size of the PNG is always on the second line of its Download, with no middle dot, in the
+  // F7 f-9 (DECISOES § 551): the size of the PNG is always on the second line of its Download, with no middle dot, in the
   // button of 60 px (button-lg), at 1280, 360 and 320 px, in the three languages. Before, it followed a "·" on the same line and
   // went under it on a narrow phone, leaving the dot at the start of the line.
   for (const lang of LANGS) {
@@ -349,7 +349,7 @@ test.describe('QR code generator', () => {
     });
   }
 
-  // F7 f-10, saída A (DECISOES § C-8; § 139 and § 276): no Download is ever turned off. Before there is a code the place of the
+  // F7 f-10, saída A (DECISOES § 551; § 139 and § 276): no Download is ever turned off. Before there is a code the place of the
   // two buttons says why, and it keeps their height, so nothing moves when the code comes; with a code, the two buttons.
   for (const width of [360, 1280]) {
     test(`no Download is turned off, and the place of the two buttons keeps its height before and after the code, at ${width} px (f-10)`, async ({ page }) => {

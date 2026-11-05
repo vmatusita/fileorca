@@ -1,6 +1,6 @@
 ---
 // A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184). Since the F13b (UX-13 A, decision 5; DECISOES
-// § 376 and § G-1 to § G-9) the page leads with what we measured and the tool, then the text: the breadcrumb Home ›
+// § 376 and § 557 to § 565) the page leads with what we measured and the tool, then the text: the breadcrumb Home ›
 // Guides › H1 (F11); the H1, the question it answers and the signature in one line (the author and the short date of the
 // review); the sheet "What we measured", two numbers of the measurement with the sample and a link to the table, on a
 // paper with the fold in the colour of the guide's hub; the embedded tool, the same island and entry as the tool's own
@@ -63,9 +63,9 @@ const sheetCategory = def.hub === 'pdf-tools' ? 'pdf' : 'image';
 const blocksOf = (section: (typeof t.sections)[number]): number => section.paragraphs.length + (section.list ? 1 : 0);
 const firstInside = t.sections[0] !== undefined && blocksOf(t.sections[0]) > 1;
 const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
-// The sentence that links to the tool's own page, at the end of the part the registry names (D-54; DECISOES § G-6).
+// The sentence that links to the tool's own page, at the end of the part the registry names (D-54; DECISOES § 562).
 const [linkBefore, linkAfter = ''] = shared.toolLink.split('{link}');
-// The history line: its two dates are <time datetime> (DECISOES § G-1), the rest is filled like any text of the guide.
+// The history line: its two dates are <time datetime> (DECISOES § 557), the rest is filled like any text of the guide.
 const DATES: Record<string, string> = { published: GUIDE_PUBLISHED_ON[lang], measured: MEASURED.measuredOn };
 const history = t.changed.split(/(\{(?:published|measured)\})/).filter((part) => part !== '');
 const dateOf = (part: string): string | undefined => DATES[part.slice(1, -1)];
@@ -128,7 +128,7 @@ const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
     </>
   ))}
   {/* Not a landmark of its own (no aria-labelledby): the frame of its table is the region named by its heading, and two
-      landmarks with one name would repeat it (axe landmark-unique; DECISOES § G-3). */}
+      landmarks with one name would repeat it (axe landmark-unique; DECISOES § 559). */}
   <section class="fo-section fo-prose" data-content="measured">
     <h2 id="measured">{t.tableHeading}</h2>
     <p data-guide-text>{fill(t.measuredIntro)}</p>

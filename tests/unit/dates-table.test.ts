@@ -1,4 +1,4 @@
-// F13b (F7 obs 2; DECISOES § C-7): the dates of the ovulation's table, written by hand (§ 112), against the Intl of Node: a day
+// F13b (F7 obs 2; DECISOES § 550): the dates of the ovulation's table, written by hand (§ 112), against the Intl of Node: a day
 // is the medium date with its month glued to its day by a no-break space, and a range is what formatRange gives with the
 // month short, with "to" for its dash. Every day of 2026 and 2027, and every range of six days, the length of a fertile window.
 import { describe, expect, it } from 'vitest';

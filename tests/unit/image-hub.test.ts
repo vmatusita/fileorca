@@ -25,9 +25,9 @@ const render = async (View: typeof HomeView | typeof ImageToolsView, lang: Lang)
 const toolPaths = (lang: Lang) => IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? []);
 
 describe('home', () => {
-  // F13b (UX-03 B; DECISOES § H-10): the home is the sea by category, and the image band (still labelled by "tools") shows
+  // F13b (UX-03 B; DECISOES § 576): the home is the sea by category, and the image band (still labelled by "tools") shows
   // the eight tools as chips, with the link to the hub under them; the money band the 6 credit calculators of the
-  // specification (§ H-4). The rule is the same: the catalogue order, the hub, no preset, no AdSlot in the default build.
+  // specification (§ 570). The rule is the same: the catalogue order, the hub, no preset, no AdSlot in the default build.
   it('shows the eight image tools in English, in catalogue order, with a link to the hub under the chips', async () => {
     const page = await render(HomeView, 'en');
     // The image band is the first one; the money band of the F4 comes after the PDF one (DECISOES § 118).

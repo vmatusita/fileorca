@@ -19,7 +19,7 @@ export function mortgageInput(values: Values): MortgageInput {
   };
 }
 
-/** The costs of a home loan that fold into a block after the result (F13b, DECISOES § C-4). */
+/** The costs of a home loan that fold into a block after the result (F13b, DECISOES § 547). */
 export const HOME_COSTS = ['tx', 'in', 'pmi', 'hoa'] as const;
 
 export const mortgageDef: CalcDef<MortgageInput, MortgageResult> = {

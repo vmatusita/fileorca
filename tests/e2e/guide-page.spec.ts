@@ -6,7 +6,7 @@ import { fixtureFile } from './lib/matrix.ts';
 import { hydrated, type TestFile } from './lib/page.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
 
-// F13b · a página de guia (UX-13 A, decision 5 of the run; DECISOES § 376 and § G-1 to § G-9), the tests of the
+// F13b · a página de guia (UX-13 A, decision 5 of the run; DECISOES § 376 and § 557 to § 565), the tests of the
 // specification (docs/propostas/ux-v2/guide-page.html, "Testes que a F13 escreve") on the 30 file guides, in both
 // browsers: the panel starts above the fold of a 360 × 740 phone and the Choose button ends above 800px at 1280 × 800
 // (D-47); the signature is one line (G-23); using the tool moves nothing below it, a layout shift of 0.05 at most at 360
@@ -181,7 +181,7 @@ test.describe('the edge cue of a table wider than its frame, CSS only (F5b F-2)'
 });
 
 // D-50 and D-49: the use, with the Choose button brought into view the way a tap brings it (a shift counts only on the
-// screen; DECISOES § G-5). A PerformanceObserver of layout-shift, opened before the files are chosen, adds every shift
+// screen; DECISOES § 561). A PerformanceObserver of layout-shift, opened before the files are chosen, adds every shift
 // without a recent input until 1.5 s after the Download (Chromium; WebKit has no such API, and there the paragraph under the
 // tool keeps its place whenever it was on the screen); the click of a tool's button is a recent input. Then, at 360, the
 // first chip ends at most one screen below the top of the Download. The control puts the panel at the top of the screen,

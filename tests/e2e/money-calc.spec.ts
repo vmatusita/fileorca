@@ -44,7 +44,7 @@ async function saved(page: Page, button: Locator): Promise<{ name: string; bytes
   return { name: file.suggestedFilename(), bytes: readFileSync((await file.path()) ?? '') };
 }
 
-// F13b (DECISOES § C-2): the Download PDF is in the card; Download CSV and Copy link share the row under it.
+// F13b (DECISOES § 545): the Download PDF is in the card; Download CSV and Copy link share the row under it.
 const pdfButton = (page: Page) => page.locator('.fo-rhero .fo-btn--download');
 const csvButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(0);
 const linkButton = (page: Page) => page.locator('.fo-export .fo-btn').nth(1);
@@ -105,7 +105,7 @@ test('a value out of range says the range in words and keeps the last result', a
   const before = await heroNumber(page).textContent();
   await rate.fill('99');
   await expect(rate).toHaveAttribute('aria-invalid', 'true');
-  // F13b (DECISOES § C-2): the words are in the card, in the place of the Download, and the field points to them.
+  // F13b (DECISOES § 545): the words are in the card, in the place of the Download, and the field points to them.
   const error = page.locator('.fo-rhero #fo-rhero-error');
   await expect(error).toHaveText('Enter a rate from 0 to 40%.');
   await expect(rate).toHaveAttribute('aria-describedby', /fo-rhero-error/);
@@ -195,7 +195,7 @@ test('the scenario link is read once, invalid values are ignored, and the page n
   await expect(page.locator('#fo-calc-r')).toHaveValue('6.5');
   await expect(page.locator('#fo-calc-t')).toHaveValue('15');
   await page.locator('#fo-calc-p').fill('410000');
-  // F13b (DECISOES § C-4): the costs fold into a block; their fields are in the page once it is open.
+  // F13b (DECISOES § 547): the costs fold into a block; their fields are in the page once it is open.
   await page.locator('[aria-controls="fo-calc-more-fields"]').click();
   await page.locator('#fo-calc-tx').fill('5000');
   await expect(heroNumber(page)).toBeVisible();
@@ -210,7 +210,7 @@ test('the scenario link is read once, invalid values are ignored, and the page n
 test('the Oli cheers on the first result of the visit only, and the visit keeps a yes, never a number', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await open(page, 'personal-loan-calculator');
-  // F13b (DECISOES § C-2): the Oli is in the card from the first paint, waving; the first result of the visit makes her
+  // F13b (DECISOES § 545): the Oli is in the card from the first paint, waving; the first result of the visit makes her
   // cheer in the same box, and nothing moves.
   const oli = page.locator('.fo-rhero__oli');
   await expect(oli).toHaveAttribute('data-oli', 'wave');
@@ -247,7 +247,7 @@ test('two fields side by side keep their inputs on one line, also next to a fiel
   for (const width of [360, 1280]) {
     await page.setViewportSize({ width, height: 800 });
     await open(page, 'mortgage-calculator');
-    // F13b (DECISOES § C-4): the costs are in the block that folds, opened here.
+    // F13b (DECISOES § 547): the costs are in the block that folds, opened here.
     await page.locator('[aria-controls="fo-calc-more-fields"]').click();
     const top = (id: string) => page.locator(`#fo-calc-${id}`).evaluate((node) => Math.round(node.getBoundingClientRect().top));
     // PMI has a line of help under its input; HOA, next to it, has none.
@@ -257,7 +257,7 @@ test('two fields side by side keep their inputs on one line, also next to a fiel
 
 test('the Download PDF in yellow is in the card, then Download CSV and Copy link, and the chips lead to calculators', async ({ page }) => {
   await open(page, 'mortgage-calculator');
-  // F13b (DECISOES § C-2; F4 ACE-8): the PDF under the number, in the card; the CSV with its verb, next to Copy link.
+  // F13b (DECISOES § 545; F4 ACE-8): the PDF under the number, in the card; the CSV with its verb, next to Copy link.
   await expect(page.locator('.fo-rhero .fo-btn')).toHaveText(['Download PDF']);
   await expect(pdfButton(page)).toHaveClass(/fo-btn--download/);
   const buttons = page.locator('.fo-export .fo-btn');
@@ -274,7 +274,7 @@ test.describe('review F4 regressions', () => {
   test('a problem makes the Oli say oops, puts no Download and turns the CSV off; the cheer waits for a result (DES-2, COR-3)', async ({ page }) => {
     await open(page, 'credit-card-payoff-calculator');
     await page.locator('#fo-calc-pay').fill('10');
-    // F13b (DECISOES § C-2): the problem is said in the card, in the place of the Download, with the last result that worked;
+    // F13b (DECISOES § 545): the problem is said in the card, in the place of the Download, with the last result that worked;
     // the Oli is in the card in every state, and says oops.
     await expect(page.locator('#fo-rhero-error')).toContainText("doesn't cover the interest");
     await expect(page.locator('.fo-rhero__oli')).toHaveAttribute('data-oli', 'oops');
@@ -302,7 +302,7 @@ test.describe('review F4 regressions', () => {
     });
     expect(edge.hero).toBeLessThanOrEqual(edge.column);
     // At 320px a 10-digit amount in the chart's legend and the Download wrap inside the card (second pass of the review;
-    // F13b, DECISOES § C-2: the placard that also had to wrap left the card).
+    // F13b, DECISOES § 545: the placard that also had to wrap left the card).
     const fresh = await page.context().newPage();
     await fresh.setViewportSize({ width: 320, height: 700 });
     await open(fresh, 'simple-interest-calculator', '#v=1&pr=10000000000&r=1000000&u=years&ty=100');
@@ -406,7 +406,7 @@ test.describe('review F4 regressions', () => {
     await expect.poll(covered).toBe(false);
   });
 
-  // F13b (D-38; DECISOES § C-6): side by side down to 320 px (it was from 340 px of column, at 375 px).
+  // F13b (D-38; DECISOES § 549): side by side down to 320 px (it was from 340 px of column, at 375 px).
   test('the two scenarios stay side by side down to 320px (DES-9)', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 800 });
     await open(page, 'mortgage-calculator-15-vs-30-year');
@@ -462,7 +462,7 @@ test.describe('second pass of the review F4', () => {
     await page.locator('#fo-calc-eo').fill('5000');
     await page.locator('#fo-calc-eom').fill('300');
     await page.locator('#fo-calc-t').fill('10');
-    // F13b (DECISOES § C-2): the line is in the card, after the last result that worked, and the Download is not there.
+    // F13b (DECISOES § 545): the line is in the card, after the last result that worked, and the Download is not there.
     await expect(page.locator('.fo-rhero__stale')).toContainText('Fix the highlighted field to update the result.');
     await expect(pdfButton(page)).toHaveCount(0);
     await expect(csvButton(page)).toBeDisabled();
@@ -692,7 +692,7 @@ test('a decimal written the way of another language gets the range and how to wr
     await dismissCookies(page);
     const hint = { en: enShared, pt: ptShared, es: esShared }[lang].island.decimalHint;
     const field = page.locator('#fo-calc-r');
-    // F13b (DECISOES § C-2): the words of the field in error are said in the card.
+    // F13b (DECISOES § 545): the words of the field in error are said in the card.
     const error = page.locator('#fo-rhero-error');
     await field.fill(wrong);
     await expect(error, `${lang} ${wrong}`).toContainText(hint);

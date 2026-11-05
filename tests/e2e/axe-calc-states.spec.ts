@@ -1,4 +1,4 @@
-// F13b (UX-12 A, decision 4; DECISOES § C-12): the new states of the calculators and of the QR code generator that the
+// F13b (UX-12 A, decision 4; DECISOES § 555): the new states of the calculators and of the QR code generator that the
 // page-by-page pass of a11y.spec.ts does not reach, at 360 and 1280 px and in both themes (violationsEverywhere): the example
 // with the Oli in the card; an error said in the card (the field marked, the Download replaced by the message, the last result
 // that worked); the block of costs open with the echo of the result; the schedule open in the island, with a second year open;

@@ -221,7 +221,7 @@ test.describe('two lines in Figtree and in its fallback', () => {
   }
 });
 
-// F13b (group 22, F13a R-c-3; DECISOES § M-3). At 320 × 640 on a first visit, the Choose button of the image presets went
+// F13b (group 22, F13a R-c-3; DECISOES § 582). At 320 × 640 on a first visit, the Choose button of the image presets went
 // up to 25px under the notice (35px with the fallback font), and 1px in three PDF tools in Spanish. Under 360 px the
 // trail of a preset leaves out its hub, so it takes two rows: with Figtree the Choose of every preset is now entirely
 // above the notice. What is left, fixed here: 1px at most under it in those three PDF tools in Spanish, and in the

@@ -1,6 +1,6 @@
 import type { HomeTexts } from '../types.ts';
 
-// F13b (UX-03 B, home-b.html; DECISOES § H-1 a § H-5): a home como o mar por categoria. Todo número é um {placeholder}
+// F13b (UX-03 B, home-b.html; DECISOES § 567 a § 571): a home como o mar por categoria. Todo número é um {placeholder}
 // que o build preenche da fonte (src/components/home-numbers.ts e src/components/tool-count.ts).
 export default {
   title: 'FileOrca: ferramentas grátis que nunca enviam seus arquivos',

@@ -37,7 +37,7 @@ export interface QrPanelTexts {
     svg: string;
     /** After "Download PNG", on its second line: the real side, {side}. */
     pngMeta: string;
-    /** In the place of the two buttons while there is no code (F13b, F7 f-10; DECISOES § C-8). */
+    /** In the place of the two buttons while there is no code (F13b, F7 f-10; DECISOES § 551). */
     wait: string;
   };
   errors: {

@@ -3,7 +3,7 @@
 // cards with the same drawing are a repeat, whatever the field says. The pages are read from dist/ (run `pnpm build`
 // first, as `pnpm verificar` does). The homes mix the categories: there, only the verbs that image and PDF share
 // (compress and rotate) may repeat, once each (icons.html: 35 icons on the 37 cards of the English home). F13b (UX-03 B;
-// DECISOES § H-10): the home shows the tools as chips in the bands of the categories, each with its icon in the circle,
+// DECISOES § 576): the home shows the tools as chips in the bands of the categories, each with its icon in the circle,
 // so the home is read by its chips, with the same rule.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

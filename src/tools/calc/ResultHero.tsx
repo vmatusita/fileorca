@@ -2,7 +2,7 @@
 // Download PDF right under it, the sentence that says it with its numbers in bold, and the SplitChart. It changes on every
 // key press, but only a hidden polite region speaks, half a second after the last change, so a screen reader does not read
 // every digit (DECISOES § 102: one voice for the result).
-// F13b (UX-12 A, decision 4; DECISOES § C-2): the card is the one place of the result, of its Download and of its error. The
+// F13b (UX-12 A, decision 4; DECISOES § 545): the card is the one place of the result, of its Download and of its error. The
 // Oli sits on its top edge from the first paint (wave on the example, cheer once on the first result of the visit, oops on
 // an error), and her pose changes in the same box. While a field is wrong (or the account cannot be done), the card keeps
 // the number of the last result in on-deep-muted, the message takes the place of the Download, and "Last result that
@@ -135,7 +135,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
   const fit = numberFit(view.hero.value, view.hero.unit);
   return (
     <section ref={section} class="fo-rhero fo-deep fo-sea-top" aria-labelledby="fo-rhero-label" data-state={error !== undefined ? 'error' : undefined}>
-      {/* The same box in every state: only data-oli and the symbol change, so nothing moves (DECISOES § C-2). */}
+      {/* The same box in every state: only data-oli and the symbol change, so nothing moves (DECISOES § 545). */}
       <Oli pose={pose} class="fo-rhero__oli" />
       <p class="fo-rhero__label" id="fo-rhero-label">
         {view.hero.label}
@@ -161,7 +161,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
           </button>
         )}
       </div>
-      {/* The other system of the account, under the Download (the SAC × PRICE; DECISOES § C-6). */}
+      {/* The other system of the account, under the Download (the SAC × PRICE; DECISOES § 549). */}
       {view.versus && (
         <p class="fo-rhero__versus">
           <Sentence parts={view.versus} />

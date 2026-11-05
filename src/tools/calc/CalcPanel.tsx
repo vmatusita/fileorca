@@ -3,7 +3,7 @@
 // the two scenarios where the account compares, the schedule (F13b) and the next-step chips. There is no Calculate button: every valid key
 // press runs the account at once (the engines are small and synchronous). On a phone the result sits right under the main
 // fields; on a computer the fields and the result stand side by side.
-// F13b (UX-12 A; DECISOES § C-2): the card is the one place of the result, of the Download PDF and of the error.
+// F13b (UX-12 A; DECISOES § 545): the card is the one place of the result, of the Download PDF and of the error.
 import { useMemo, useState } from 'preact/hooks';
 import Icon from '../../icons/Icon.tsx';
 import { track } from '../../analytics/events.ts';
@@ -38,13 +38,13 @@ export function startValues(data: CalcPanelData): Values {
 
 let completeSent = false;
 let cheerChecked: boolean | null = null;
-/** The cheer of the visit was shown and an error came after it: from then on the Oli waves (DECISOES § C-2). */
+/** The cheer of the visit was shown and an error came after it: from then on the Oli waves (DECISOES § 545). */
 let cheerSpent = false;
 
 /**
  * The longest line the card may say in the place of the sentence: "Last result that worked: {label} {value}." of any field of
  * the form (and "Fix the highlighted field…"), or of the result itself (a problem with no field). The card keeps its room
- * from the first paint, so an error never grows it (DECISOES § C-2).
+ * from the first paint, so an error never grows it (DECISOES § 545).
  */
 function reserveOf(def: CalcDef, data: CalcPanelData, good: { view: CalcView; values: Values }): string {
   const say = (label: string, value: string) => fmt(data.t.lastWorked, { label, value });
@@ -89,7 +89,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
       track('calc_complete', { tool: data.page, lang: data.lang });
     }
   };
-  // The card says the first field of the form that shows an error, else the problem of the account (DECISOES § C-2).
+  // The card says the first field of the form that shows an error, else the problem of the account (DECISOES § 545).
   const wrongField = firstError(state.errors);
   const error = wrongField?.[1].message ?? view.problem;
   const fixField = wrongField !== undefined || (view.problem !== undefined && view.problemField !== undefined);
@@ -191,7 +191,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           ))}
           <Fields {...fieldProps} specs={open} />
           {folded.length > 0 && (
-            // F13b (UX-12 A, D-32 and D-33; DECISOES § C-4): the costs fold into a block, closed when the page opens, with their
+            // F13b (UX-12 A, D-32 and D-33; DECISOES § 547): the costs fold into a block, closed when the page opens, with their
             // total in its title; its fields are in the page only while it is open, and on a phone it ends in the echo of the
             // result, since the card is above the screen while the person types there.
             <div class="fo-calc__fold">
@@ -229,7 +229,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           <ScenarioCompare compare={view.compare} info={data.icons.info} label={data.texts.view['compareLabel'] ?? ''} />
         </div>
       )}
-      {/* F13b (D-43; DECISOES § C-5): the schedule is part of the island, before the chips; the first ad stays after them. */}
+      {/* F13b (D-43; DECISOES § 548): the schedule is part of the island, before the chips; the first ad stays after them. */}
       <CalcSchedule data={data} view={shown} />
       {data.chips.length > 0 && (
         <nav class="fo-next fo-calc__next" aria-labelledby="fo-next-label">

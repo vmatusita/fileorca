@@ -41,7 +41,7 @@ interface Result {
   hero: string;
   sentence: string;
   rows: Cell[][];
-  /** The rows the screen writes, when they are shorter than the CSV's (the ovulation's dates; F13b, DECISOES § C-7). */
+  /** The rows the screen writes, when they are shorter than the CSV's (the ovulation's dates; F13b, DECISOES § 550). */
   screen?: Cell[][];
 }
 
@@ -160,7 +160,7 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
         longDay(cycle.ovulation),
         longDay(cycle.nextPeriod),
       ]),
-      // F13b (F7 obs 2; DECISOES § C-7): the screen writes the short dates; the CSV keeps the long ones.
+      // F13b (F7 obs 2; DECISOES § 550): the screen writes the short dates; the CSV keeps the long ones.
       screen: expected.cycles.map((cycle) => [shortRange(cycle.fertileStart, cycle.ovulation), shortDay(cycle.ovulation), shortDay(cycle.nextPeriod)]),
     };
   },
@@ -337,7 +337,7 @@ test('a day out of the range says the range in words and keeps the last result',
   for (const id of ['due-date-calculator', 'ovulation-calculator'] as const) {
     await openCalc(page, id);
     const field = page.locator('#fo-calc-d');
-    // F13b (DECISOES § C-2): the words of the day out of the range are said in the card, which the field points to.
+    // F13b (DECISOES § 545): the words of the day out of the range are said in the card, which the field points to.
     const error = page.locator('#fo-rhero-error');
     const before = (await heroNumber(page).textContent()) ?? '';
     const sentence = (await page.locator('.fo-rhero__sentence').textContent()) ?? '';
@@ -447,7 +447,7 @@ test.describe('US and metric units', () => {
 });
 
 // Decision 5: the Oli never cheers a health result. The sprite of a health page has no cheer pose at all, and a change of
-// a field neither makes her cheer nor marks the visit. F13b (DECISOES § C-2): she is in the card from the first paint and
+// a field neither makes her cheer nor marks the visit. F13b (DECISOES § 545): she is in the card from the first paint and
 // keeps waving.
 test('no health page cheers: no cheer pose in the sprite, the Oli of the card keeps waving after a change', async ({ page }) => {
   await today(page, '2026-11-02');

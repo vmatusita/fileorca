@@ -22,7 +22,7 @@ interface Props {
   report?: ((id: string, error: FieldError | null) => void) | undefined;
   /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
   flagged?: string | undefined;
-  /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § C-9). */
+  /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § 552). */
   latest?: (() => Values) | undefined;
 }
 
@@ -89,7 +89,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
   const nextKey = useRef(0);
   /**
    * Where the focus goes after the next render, by the stable key of a row, never by its index (F7 obs 1; F13b, DECISOES
-   * § C-9): the Remove button of a row, the first control of a row, or the Add button. With less than 16 ms between a key in
+   * § 552): the Remove button of a row, the first control of a row, or the Add button. With less than 16 ms between a key in
    * a field and Enter on Remove, the index of the render before was another row's.
    */
   const focusNext = useRef<{ row: number; on: 'remove' | 'first' } | 'add' | null>(null);
@@ -293,7 +293,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           value={String(values[spec.key])}
           choices={spec.options.map((option) => ({ value: option, label: labels[option] ?? option }))}
           onChange={(value) => set({ ...values, [spec.key]: value })}
-          // F13b (F7 f-13; DECISOES § C-7): what each option changes, under the rail and in its description.
+          // F13b (F7 f-13; DECISOES § 550): what each option changes, under the rail and in its description.
           {...(texts?.help ? { note: texts.help, noteId: `${fieldId(spec.key)}-note` } : {})}
         />
       );

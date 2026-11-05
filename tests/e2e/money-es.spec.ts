@@ -217,7 +217,7 @@ for (let start = 0; start < CALC_PAGE_IDS.length; start += BLOCK) {
       expect(sum(spanish.table), `${id}: a soma da tabela`).toBe(sum(english.table));
 
       // The CSV, read back, is the oracle's.
-      // F13b (DECISOES § C-2): Download CSV first under the card; the Download PDF in the card.
+      // F13b (DECISOES § 545): Download CSV first under the card; the Download PDF in the card.
       const csv = await saved(page, page.locator('.fo-export .fo-btn').nth(0));
       expect(csv.name, id).toBe(`${es.file}.csv`);
       const text = csv.bytes.toString('utf8');

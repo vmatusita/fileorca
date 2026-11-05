@@ -47,7 +47,7 @@ interface Props {
   /** F13a · o aviso compacto (DECISOES § 458): the seal the cookie notice repeats, the page's own (numbers, text);
    *  common.seal (files) where the page passes none. */
   seal?: string;
-  /** F13b (decision 6, G-06; DECISOES § H-6): without the rail of ads (the default build, or a page with no ad), <main>
+  /** F13b (decision 6, G-06; DECISOES § 572): without the rail of ads (the default build, or a page with no ad), <main>
    *  takes the width of the page instead of the tool column. With the rail, the grid of § 413 stays as it is. */
   wide?: boolean;
 }
@@ -75,7 +75,7 @@ if (markErrors.length) throw new Error(`mapa de anúncios em ${path}: ${markErro
 const ads = withAds && adArea ? layOutAds(rawMain, { area: adArea, label: common.adLabel, config: adsConfig }) : null;
 const mainHtml = ads ? ads.main : withoutMarks(rawMain);
 const railHtml = ads?.rail ?? '';
-// F13b (§ H-6): a wide page keeps the rail column only when the rail has a box; the others keep it empty (§ 413).
+// F13b (§ 572): a wide page keeps the rail column only when the rail has a box; the others keep it empty (§ 413).
 const hasRail = adPage && (!wide || railHtml !== '');
 const wideMain = wide && railHtml === '';
 // F13a · UX-18 A and F10 p-11 (DECISOES § 503): on a page with no file tool (the home, the hubs, the legal pages, the

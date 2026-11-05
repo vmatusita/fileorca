@@ -1,4 +1,4 @@
-// F13b (UX-12 A, decision 4; docs/propostas/ux-v2/calc.html, "Os testes da F13"; DECISOES § C-1 and the next ones): the
+// F13b (UX-12 A, decision 4; docs/propostas/ux-v2/calc.html, "Os testes da F13"; DECISOES § 544 and the next ones): the
 // calculator page with the result, the Download PDF and the error in one card. Every calculator page in the languages it has
 // (the 18 money pages in English and in Spanish, the 8 of Brazil, the 11 home and health pages): the signature in one line,
 // the number above the cookie notice and the Download PDF above the fold at 360 x 740, the card that never changes its height,
@@ -349,7 +349,7 @@ for (const scheme of ['light', 'dark'] as const) {
   });
 }
 
-// The block of costs that folds (D-32 and D-33; DECISOES § C-4): the taxes, insurance and fees of the mortgage and of its
+// The block of costs that folds (D-32 and D-33; DECISOES § 547): the taxes, insurance and fees of the mortgage and of its
 // presets (en, es) and the TR, insurance and fees of the SAC × PRICE, closed when the page opens, with their total in the
 // title, a heading in Fredoka. The fields are in the page only while it is open; the name of its button (the title and the
 // total) is the same open and closed, only aria-expanded changes; and on a phone the open block ends in the echo of the
@@ -443,7 +443,7 @@ test('the island goes card, costs, scenarios, schedule and chips, and the schedu
   }
 });
 
-// F4 ACE-9 (the half of the calculators; DECISOES § C-5): every table of a calculator, open, has a row header (th scope="row")
+// F4 ACE-9 (the half of the calculators; DECISOES § 548): every table of a calculator, open, has a row header (th scope="row")
 // on each row of data, with no sticky (position static), and its scrolling frame is a region named by the heading of its
 // section, not by the caption of the table.
 for (const block of blocks(CALC_PATHS)) {
@@ -474,7 +474,7 @@ for (const block of blocks(CALC_PATHS)) {
   });
 }
 
-// SAC × PRICE (D-38; DECISOES § C-6): the PRICE is in the card, under the Download, with the first payment the account gives
+// SAC × PRICE (D-38; DECISOES § 549): the PRICE is in the card, under the Download, with the first payment the account gives
 // (the B card of the scenarios says the same number, never typed in a text); the two bars are on one scale, the PRICE's the
 // widest, with both totals in the name of the chart and in its legend; and the two scenarios stay side by side down to 320 px.
 test('/pt/simulador-sac-price/: the PRICE is in the card, with two bars on one scale, and the scenarios side by side at 320 px', async ({ page }) => {
@@ -562,7 +562,7 @@ test('the new and changed controls of the calculators and of the QR are 48 px or
   expect(small).toEqual([]);
 });
 
-// F4 ACE-7, accepted (DECISOES § C-12): the order of the DOM is the phone's, so at 1280 px the Tab goes from the main fields
+// F4 ACE-7, accepted (DECISOES § 555): the order of the DOM is the phone's, so at 1280 px the Tab goes from the main fields
 // to the column of the result (the Download PDF, Download CSV, Copy link) and back to the left column, now to one button,
 // the block of costs (before, to its four fields). WebKit's Tab skips links and buttons, as Safari does by default: there the
 // walk is Option+Tab, the key that reaches them (docs/claude/playwright.md).

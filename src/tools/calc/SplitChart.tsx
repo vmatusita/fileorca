@@ -21,7 +21,7 @@ export function shares(a: number, b: number): [number, number] {
 }
 
 /**
- * The pair variant (F13b, D-38; DECISOES § C-6): where the account compares two systems on the same loan (the SAC × PRICE),
+ * The pair variant (F13b, D-38; DECISOES § 549): where the account compares two systems on the same loan (the SAC × PRICE),
  * one bar per system on one scale, so the longer bar is the one that pays more interest. Each bar is the same principal (in
  * brand-on-deep) and the interest of its system (coral with the hatch); the widest is the whole width. The pair is role="img"
  * with both totals in its name, and the legend says them in text. Each bar has its own clip and pattern ids.

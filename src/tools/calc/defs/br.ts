@@ -40,7 +40,7 @@ const l = (lang: string): NumberLang => lang as NumberLang;
 
 /**
  * The view of an account that cannot be done: the problem said in the hero, the rest empty. `field` is the field it points
- * to, marked in the form (F4 ACE-11; F13b, DECISOES § C-2).
+ * to, marked in the form (F4 ACE-11; F13b, DECISOES § 545).
  */
 function problemView(label: string, problem: string, premises: string[], field?: string): CalcView {
   return {
@@ -94,7 +94,7 @@ export function sacPriceInput(values: Values): SacPriceInput {
 
 export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
   id: 'br-sac-price',
-  // The TR and the insurance and fees fold into a block after the result (F13b, DECISOES § C-4).
+  // The TR and the insurance and fees fold into a block after the result (F13b, DECISOES § 547).
   disclose: ['tr', 'f'],
   fields: [
     money('p', 10_000, 20_000_000, { main: true, half: true }),
@@ -123,7 +123,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
     const diffKey = r.interestDiff > 0 ? 'priceMore' : r.interestDiff < 0 ? 'priceLess' : 'same';
     const diff = say(text(v, diffKey), { x: dollars(Math.abs(r.interestDiff), ln) });
     const tr = num(values, 'tr');
-    // F13b (D-38; DECISOES § C-6): the PRICE is in the card, under the Download, and the sentence says where the SAC ends and
+    // F13b (D-38; DECISOES § 549): the PRICE is in the card, under the Download, and the sentence says where the SAC ends and
     // how much more interest the PRICE pays; the two bars put both systems on one scale.
     const sentenceDiff = r.interestDiff > 0 ? 'sentenceMore' : r.interestDiff < 0 ? 'sentenceLess' : 'sentenceSame';
     const interests = { loan: dollars(r.loan, ln), sac: dollars(r.sac.totalInterest, ln), price: dollars(r.price.totalInterest, ln) };

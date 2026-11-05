@@ -88,7 +88,7 @@ const MEASURED_NOTE: Record<Lang, string> = {
   pt: `Medido em ${longDate('2026-11-01', 'pt')}.`,
   es: `Medido el ${longDate('2026-11-01', 'es')}.`,
 };
-// F13b (UX-13 A; DECISOES § 376 and § G-9): the order of the page is the trail, the H1, the signature in one line, the
+// F13b (UX-13 A; DECISOES § 376 and § 565): the order of the page is the trail, the H1, the signature in one line, the
 // sheet "What we measured", the tool, the introduction, the text with the ads and the link to the tool's page, the
 // measurements with the history line, the sources and the related pages. `oldGuidePage` is the page as it was before.
 function guidePage(options: { words?: number; tool?: string; toolPath?: string; extra?: string; lang?: Lang; edit?: (html: string) => string } = {}): string {
@@ -1152,7 +1152,7 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(guidePage({ words: MAX_GUIDE_WORDS + 200 }), want).join()).toMatch(/palavras de texto/);
   });
 
-  // F13b (D-54; DECISOES § G-9): the link to the tool's page is looked for in the text of the guide. Before, the line
+  // F13b (D-54; DECISOES § 565): the link to the tool's page is looked for in the text of the guide. Before, the line
   // under the panel (.fo-guide__open) had to lead to it ("o link da ferramenta leva a X em vez de Y").
   it('fails a guide without the tool, with two tools, or whose text does not link to its tool', () => {
     expect(checkFileGuide(guidePage({ tool: '' }), want)).toContain('sem a ferramenta embutida (#fo-tool-root)');
@@ -1164,7 +1164,7 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(inSheet, want)).toEqual(['sem o link para a página da ferramenta (/heic-to-jpg/) no texto do guia']);
   });
 
-  // F13b (UX-13 A, decision 5; DECISOES § 376 and § G-9): the order of before the F13b fails, with each thing it lacks.
+  // F13b (UX-13 A, decision 5; DECISOES § 376 and § 565): the order of before the F13b fails, with each thing it lacks.
   it('fails the page of before the F13b: the introduction before the tool, no sheet, two dates on the signature and the link under the panel', () => {
     const problems = checkFileGuide(oldGuidePage(), want);
     expect(problems).toContain('sem a ficha "What we measured" ([data-content="facts"])');
@@ -1273,7 +1273,7 @@ describe('portão de conteúdo: os guias de arquivo em português e espanhol', (
     expect(checkFileGuide(guidePage({ lang: 'es' }), { toolPath: '/heic-to-jpg/', lang: 'pt' })).toContain('a seção medida sem a data da medida');
   });
 
-  // F13b (DECISOES § G-9): the link is looked for in the text; before, "o link da ferramenta leva a X em vez de Y".
+  // F13b (DECISOES § 565): the link is looked for in the text; before, "o link da ferramenta leva a X em vez de Y".
   it('fails a guide of a language that links to the tool page of another language', () => {
     expect(checkFileGuide(guidePage({ lang: 'pt' }), { toolPath: toolPath.pt, lang: 'pt' })).toEqual(['sem o link para a página da ferramenta (/pt/heic-para-jpg/) no texto do guia']);
   });

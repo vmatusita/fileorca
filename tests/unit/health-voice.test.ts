@@ -59,7 +59,7 @@ describe('the voice of the health pages (F7)', () => {
     // What else a health page or its cards show: the cards of the five (home, hub, search), the home section and the
     // texts every calculator shares.
     for (const id of HEALTH_CALC_IDS) strings(enCommon.calcs[id], `common.calcs.${id}`, all);
-    // F13b (UX-03 B; DECISOES § H-10): the home and health calculators share one band of the home (life).
+    // F13b (UX-03 B; DECISOES § 576): the home and health calculators share one band of the home (life).
     strings(enHome.life, 'home.life', all);
     strings(sharedCalc, 'src/tools/calc/i18n/en.ts', all);
     expect(all.length).toBeGreaterThan(200);
@@ -101,7 +101,7 @@ describe('the Oli never cheers a health result (F7, decision 5)', () => {
   it('keeps the cheer off in the island of every health calculator, and on in the home ones', () => {
     for (const id of HEALTH_CALC_IDS) expect(panelData(id, 'en').cheer, id).toBe(false);
     for (const id of HOUSE_CALC_IDS) expect(panelData(id, 'en').cheer, id).toBe(true);
-    // The poses the calculator mold hands the layout come from the poses of the card (F13b; DECISOES § C-10), which have the
+    // The poses the calculator mold hands the layout come from the poses of the card (F13b; DECISOES § 553), which have the
     // cheer: the health pages drop it.
     expect(CALC_POSES).toContain('cheer');
   });

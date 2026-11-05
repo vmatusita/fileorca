@@ -167,7 +167,7 @@ export default function QrPanel({ lang, t }: QrPanelData) {
         <p class="fo-qr__status" role="status">
           {svg ? t.preview.ready : ''}
         </p>
-        {/* F13b (F7 f-9 and f-10, saída A; DECISOES § C-8): no Download turned off. Before there is a code, the place of the two
+        {/* F13b (F7 f-9 and f-10, saída A; DECISOES § 551): no Download turned off. Before there is a code, the place of the two
             buttons says why, at the same height; with a code, the PNG says its size on a second line of its own, with no dot. */}
         <div class="fo-qr__actions">
           {svg ? (

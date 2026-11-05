@@ -192,7 +192,7 @@ test.describe('the calculator events', () => {
     await page.goto('/mortgage-calculator/biweekly/');
     await hydrated(page);
     await dismissCookies(page);
-    // F13b (DECISOES § C-2): Download CSV and Copy link under the card; the Download PDF in it.
+    // F13b (DECISOES § 545): Download CSV and Copy link under the card; the Download PDF in it.
     const buttons = page.locator('.fo-export .fo-btn');
     const csv = page.waitForEvent('download');
     await buttons.nth(0).click();

@@ -167,7 +167,7 @@ export const ovulationDef: CalcDef<OvulationInput, OvulationResult> = {
       placard: { n: first ? day(first.ovulation) : '', l: text(v, 'label') },
       open: true,
       // Three columns, so the table fits a 320 px phone: a cycle starts on the previous row's next period, and the first
-      // one on the day typed in (review F7, f-2; DECISOES § 275). F13b (F7 obs 2; DECISOES § C-7): fixed columns, and the
+      // one on the day typed in (review F7, f-2; DECISOES § 275). F13b (F7 obs 2; DECISOES § 550): fixed columns, and the
       // screen writes the short dates ("Oct 26 to 31, 2026"), which never break between the month and the day; the CSV and
       // the PDF keep the long ones.
       table: () => ({

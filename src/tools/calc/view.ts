@@ -50,7 +50,7 @@ function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: 
 
 /**
  * The value of one field as the PDF lists it, by its key in the link (a row's field as "d0b"): what "Last result that worked:
- * Rate 6.5%." says of the field in error (F13b; DECISOES § C-2). Null for a field the values do not have.
+ * Rate 6.5%." says of the field in error (F13b; DECISOES § 545). Null for a field the values do not have.
  */
 export function fieldText(specs: readonly FieldSpec[], values: Values, keyName: string, data: CalcPanelData): string | null {
   const lang = data.lang as NumberLang;

@@ -20,7 +20,7 @@ import type { CalcDef, CalcSharedTexts, CalcView, Part, Table, Values } from '..
 
 /**
  * The view of an account that cannot be done: the problem said in the hero, the rest empty. `field` is the field it points
- * to, marked in the form (F4 ACE-11; F13b, DECISOES § C-2).
+ * to, marked in the form (F4 ACE-11; F13b, DECISOES § 545).
  */
 function problemView(label: string, problem: string, premises: string[], field?: string): CalcView {
   return {

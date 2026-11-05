@@ -211,7 +211,7 @@ test.describe('axe nos estados da calculadora, a 360 e 1280px, nos temas escuro 
     await animationsDone(page);
     expect(await violationsEverywhere(page), 'field in error and the cheer').toEqual([]);
     await page.locator('#fo-calc-r').fill('6.5');
-    // F13b (DECISOES § C-5): the schedule is a block of the island, its button named by its heading.
+    // F13b (DECISOES § 548): the schedule is a block of the island, its button named by its heading.
     await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     await page.locator('#fo-calc-schedule tr.fo-amort__year').nth(1).getByRole('button').click();
     await expect(page.locator('#fo-calc-schedule tbody tr:not(.fo-amort__year)')).toHaveCount(24);

@@ -10,7 +10,7 @@ O cronograma completo, recolhido por ano, sem paginação.
 - Nunca há anúncio dentro da tabela, nem entre anos.
 - Exporta igual ao que mostra (ExportBar: PDF e CSV com BOM e ponto e vírgula em pt e es).
 
-## Mudanças de regra (F13b, DECISOES § C-5 e § C-7; D-43, F4 ACE-8, ACE-9 e F7 obs 2)
+## Mudanças de regra (F13b, DECISOES § 548 e § 550; D-43, F4 ACE-8, ACE-9 e F7 obs 2)
 
 - **O lugar.** Antes: o cronograma vinha depois do 1º anúncio, numa ilha própria, com o botão "Show the full schedule" que mudava para "Hide the schedule". Depois: o cronograma é parte da ilha da calculadora, antes dos chips, como um bloco que dobra (o vocabulário do Faq), fechado ao abrir a página, com o nome fixo (o título da seção) e o círculo do chevron que gira; só o `aria-expanded` muda. O 1º anúncio continua depois dos chips.
 - **O cabeçalho de linha.** Antes: toda célula de dados era `<td>`. Depois: a primeira célula de cada linha de dados é `<th scope="row">`, desenhada como a célula que substitui (sem o `sticky` do cabeçalho da tabela, a fonte e a cor da tabela, a zebra da linha).

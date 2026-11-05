@@ -134,12 +134,12 @@ for (const { id, lang } of PAGES) {
     await hydrated(page);
     await dismissCookies(page);
 
-    // F13b (DECISOES § C-4): the costs that fold into a block are in the page once it is open.
+    // F13b (DECISOES § 547): the costs that fold into a block are in the page once it is open.
     for (const fold of await page.locator('#fo-tool-root [aria-controls="fo-calc-more-fields"][aria-expanded="false"]').all()) await fold.click();
     const def = DEFS[id];
     const typed: { text: string; kind: NumberSpec['kind'] }[] = [];
     const values: Values = { ...def.initial };
-    // F13b (DECISOES § C-2): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
+    // F13b (DECISOES § 545): the Download PDF is in the card, and only while there is a result to save (F7 f-10).
     const download = page.locator('.fo-rhero .fo-btn--download');
     const frames = () => page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     /** The sentinels left in the fields, the ones the copied link carries. */
@@ -177,7 +177,7 @@ for (const { id, lang } of PAGES) {
       seen.push(JSON.stringify(await dataLayer(page)), await everywhere(page));
     };
 
-    // F13b (DECISOES § C-5): the schedule is a block of the island, named by its heading.
+    // F13b (DECISOES § 548): the schedule is a block of the island, named by its heading.
     await page.locator('#fo-calc-schedule button[aria-controls="fo-schedule-table"]').click();
     await expect(page.locator('#fo-schedule-table table')).toBeVisible();
     const names: string[] = [];

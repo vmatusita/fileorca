@@ -15,7 +15,7 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
 ];
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
-// F13b (UX-15 A; DECISOES § H-9): the category hubs with the sea, in every language they exist in, and one of each view.
+// F13b (UX-15 A; DECISOES § 575): the category hubs with the sea, in every language they exist in, and one of each view.
 const SEA_HUBS = LANGS.flatMap((lang) => (['image-tools', PDF_HUB_ID, moneyHubId(lang), HOUSE_HUB_ID, HEALTH_HUB_ID] as const).flatMap((id) => pagePath(id, lang) ?? []));
 const ONE_HUB_A_VIEW = ['/image-tools/', pagePath(PDF_HUB_ID, 'en') ?? '', pagePath('money-calculators', 'en') ?? '', pagePath(HOUSE_HUB_ID, 'en') ?? ''];
 
@@ -212,7 +212,7 @@ for (const viewport of VIEWPORTS) {
 
     test.describe('other pages', () => {
       const CASES = [
-        // F13b (UX-03 B and UX-15 A; DECISOES § H-1 and § H-9): the Oli of the home swims in the sea of the top, the one of
+        // F13b (UX-03 B and UX-15 A; DECISOES § 567 and § 575): the Oli of the home swims in the sea of the top, the one of
         // a category hub in the sea at the foot of its band.
         { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'swim', selector: '.fo-home-sea__oli' },
         { name: 'hub', paths: SEA_HUBS, pose: 'swim', selector: '.fo-hubband__oli' },
@@ -308,7 +308,7 @@ test.describe('prefers-reduced-motion: reduce', () => {
   }
 
   // F13a · a Oli por estado (UX-10; DECISOES § 460): the other pages where a move starts on its own stay still too.
-  // F13b (DECISOES § H-9): and a category hub of each view, with the sea and its Oli.
+  // F13b (DECISOES § 575): and a category hub of each view, with the sea and its Oli.
   for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', ...ONE_HUB_A_VIEW]) {
     test(`${path}: nothing moves`, async ({ page }) => {
       const response = await page.goto(path);
@@ -335,7 +335,7 @@ test.describe('motion without the preference', () => {
 
   // F13a (UX-10; DECISOES § 460): every move that starts on its own has a finite count and ends by 5 s (WCAG 2.2.2), and
   // 3.2 s after the page opens none runs; only the progress (.fo-level, .fo-water, .fo-spin) may loop, and none shows here.
-  // F13b (UX-03 B and UX-15 A; DECISOES § H-8 and § H-11): on the home and on a category hub of each view the swim and the
+  // F13b (UX-03 B and UX-15 A; DECISOES § 574 and § 577): on the home and on a category hub of each view the swim and the
   // water are no progress: nothing is left out there, the Oli bobs for 4.8 s, and none runs 5.2 s after opening.
   const MOTION_PAGES: { path: string; sea: boolean }[] = [
     ...['/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/'].map((path) => ({ path, sea: false })),

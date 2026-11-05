@@ -35,7 +35,7 @@ async function compress(page: Page, name: string): Promise<void> {
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 60_000 });
 }
 
-/** 0 is the Download PDF of the card, 1 the Download CSV under it (F13b, DECISOES § C-2). */
+/** 0 is the Download PDF of the card, 1 the Download CSV under it (F13b, DECISOES § 545). */
 async function saved(page: Page, index: number): Promise<{ name: string; bytes: Buffer }> {
   const download = page.waitForEvent('download');
   await page.locator('.fo-rhero .fo-btn--download, .fo-export .fo-btn').nth(index).click();

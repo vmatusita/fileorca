@@ -40,7 +40,7 @@ beforeAll(async () => {
 const render = async (View: typeof HomeView, lang: Lang) => parse(await container.renderToString(View, { props: { lang } }));
 
 describe('home', () => {
-  // F13b (UX-03 B; DECISOES § H-10): the home is the sea by category. Each section is a band (.fo-catband) with the tools as
+  // F13b (UX-03 B; DECISOES § 576): the home is the sea by category. Each section is a band (.fo-catband) with the tools as
   // chips in the circle of their category and the hub link under them; the home and health calculators share one band
   // (life-home) with a link to each hub; the Oli swims in the sea of the top. The rules are the same: every tool of the
   // registry in its order, the hubs, the order of the sections, no AdSlot in the default build.

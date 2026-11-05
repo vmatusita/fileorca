@@ -1,5 +1,5 @@
 // Hydrates the money calculator island (DECISOES § 23 and § 110): the form, the result and, since the F13b, the schedule
-// (#fo-calc-schedule is part of the island, DECISOES § C-5; before, it was a second root of the same entry). On a calculator
+// (#fo-calc-schedule is part of the island, DECISOES § 548; before, it was a second root of the same entry). On a calculator
 // page the #v=1 link is read once, after hydration, so the server HTML and the first client render are the same; the page
 // never writes to the URL. A guide fills the form from its props only.
 import { h, hydrate } from 'preact';

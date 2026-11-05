@@ -9,6 +9,6 @@ Dois cenários lado a lado (15 × 30 anos, com e sem pagamento extra) e uma fras
 - No celular os dois cards ficam lado a lado até 340px de largura útil; abaixo disso, empilham e a frase da diferença sobe para o topo.
 - Cada cenário tem o próprio link de cenário (ExportBar).
 
-## Mudança de regra (F13b, DECISOES § C-6; D-38)
+## Mudança de regra (F13b, DECISOES § 549; D-38)
 
 - Antes: "No celular os dois cards ficam lado a lado até 340px de largura útil; abaixo disso, empilham e a frase da diferença sobe para o topo." Depois: os dois cards ficam lado a lado até 320 px de tela (288 px de coluna), com o número em 20/24 px e o card mais justo (respiro `space-3`) abaixo de 480 px; a frase da diferença fica embaixo deles.

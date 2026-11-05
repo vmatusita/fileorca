@@ -2,7 +2,7 @@
 
 Calculadoras · FileOrca design system v1.1. Estilo em `../bundle.css`; marcação de referência em [`preview.html`](preview.html) (abra com `?theme=dark` para o tema escuro).
 
-O resultado da calculadora: o número principal enorme, o Baixar PDF logo abaixo dele, uma frase que explica o número e a barra de principal × juros. Mora no fundo `deep`, como o ResultCard das ferramentas, e é o lugar só do resultado, do Baixar e do erro (F13b, DECISOES § C-2).
+O resultado da calculadora: o número principal enorme, o Baixar PDF logo abaixo dele, uma frase que explica o número e a barra de principal × juros. Mora no fundo `deep`, como o ResultCard das ferramentas, e é o lugar só do resultado, do Baixar e do erro (F13b, DECISOES § 545).
 
 - Rótulo em `on-deep-muted`, número em `number-xl` com a unidade menor ao lado ("/mo"), frase em 17px com os números em negrito.
 - A frase é o resultado dito em português claro, não uma tabela: "Over 30 years at 6.5% you'll pay $682,637, of which $382,637 is interest."
@@ -22,7 +22,7 @@ O resultado da calculadora: o número principal enorme, o Baixar PDF logo abaixo
 | `danger` sobre `deep` (o que ele substitui no card) | 2,45:1 | 6,04:1 |
 | `on-deep` sobre `deep`, o texto do erro | o mesmo de toda frase do card | o mesmo |
 
-## Mudanças de regra (F13b, DECISOES § C-2)
+## Mudanças de regra (F13b, DECISOES § 545)
 
 - **A Oli.** Antes: "A Oli aparece em `cheer` sem salto, segurando a Placa com o número, só no primeiro resultado da visita." Depois: a Oli fica no card desde o começo, na borda de cima à direita, em `wave`; faz `cheer` uma vez no primeiro resultado da visita e `oops` no erro; a calculadora não usa a Placa.
 - **As ações.** Antes: "As ações (ExportBar) ficam fora do card, logo abaixo, no chão `bg`." Depois: o Baixar PDF fica dentro do card, logo abaixo do número; o CSV e o Copiar link continuam fora, no chão `bg`. A ordem PDF, CSV, link não muda.
