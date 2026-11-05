@@ -147,7 +147,7 @@ for (const lang of LANGS) {
   });
 }
 
-// F13a, revisão b-1 (DECISOES § F13A-R-02): the test above has the engine warm, so the work ends before the 400 ms of the
+// F13a, revisão b-1 (DECISOES § 514): the test above has the engine warm, so the work ends before the 400 ms of the
 // WaterLevel. On a real first visit (a cold engine, a big photo, a PDF) the WaterLevel comes, the focus that left the Choose
 // button goes to it (tabindex -1, 356px tall), and the browser and the notice's focusin used to scroll the page to bring
 // its foot over the notice: 10 px in en and 32 px in pt and es at 360 × 740. The engine is held here past the 400 ms, the
@@ -336,7 +336,7 @@ test('F10 p-13: a JPG bigger than its HEIC says "+N%", and no text of the HEIC p
   expect(await page.locator('main').innerText(), 'the page with the result and the options open').not.toMatch(LIGHTER.en);
 });
 
-// F13a, revisão e-2 (DECISOES § F13A-R-09): the p-13 holds on WebP to JPG too. A WebP is usually smaller than its JPG (the
+// F13a, revisão e-2 (DECISOES § 521): the p-13 holds on WebP to JPG too. A WebP is usually smaller than its JPG (the
 // FAQ and the guide of the page say so) and the card says "+94%", so the help of "Save as" no longer says the JPG is lighter.
 test('e-2: no text of the WebP to JPG page says the JPG is lighter, in the three languages', async ({ page }) => {
   for (const lang of LANGS) {
@@ -518,7 +518,7 @@ test.describe('the interaction moves nothing at 360 × 740', () => {
   });
 });
 
-// F13a, revisão c-1 (DECISOES § F13A-R-04): the tests above use a JPEG drawn in the page (640 × 480, no metadata). A photo
+// F13a, revisão c-1 (DECISOES § 516): the tests above use a JPEG drawn in the page (640 × 480, no metadata). A photo
 // of a phone brings the note of the reduction ("Oli also reduced the dimensions to …") on the 100 KB preset, and the
 // metadata note says the GPS: with three notes, the card of the preset grew from 356 to 374 px in pt and es at 360 px, and
 // from 470 to 483 px on the 3rd use at 1280 px (the room of the coffee line). The notes now run as one paragraph.

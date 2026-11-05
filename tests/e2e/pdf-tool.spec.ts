@@ -180,7 +180,7 @@ test('Merge PDF at 360 px: a refused file keeps a card the width of the list, it
     expect((await row.getByRole('button', { name: `Remove ${name}`, exact: true }).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
   }
   // The row that is read has its arrows and its remove button, each a full target, under the card that takes the width of
-  // the list (under 480 px, as the § 181 of the F5a had it; F13a, revisão b-2, DECISOES § F13A-R-03).
+  // the list (under 480 px, as the § 181 of the F5a had it; F13a, revisão b-2, DECISOES § 515).
   const read = page.locator('.fo-merge .fo-filelist__row').filter({ hasText: 'gen-paginas-mistas.pdf' });
   const [readRow, card] = await Promise.all([read.boundingBox(), read.locator('.fo-file').boundingBox()]);
   expect(card?.width ?? 0, 'the card of the row that is read takes the row').toBeGreaterThanOrEqual((readRow?.width ?? 0) - 1);

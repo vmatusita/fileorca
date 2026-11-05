@@ -393,7 +393,7 @@ test('axe: the Merge list while the files are read, at 360 and 1280 px in both t
   await expect(mergeButton(page)).toBeVisible({ timeout: 30_000 });
 });
 
-// F13a, revisão b-2 (DECISOES § F13A-R-03): beside the two stacked arrows and the remove button, the column of the name had
+// F13a, revisão b-2 (DECISOES § 515): beside the two stacked arrows and the remove button, the column of the name had
 // 84 px at 360 and 44 px at 320 (224 and 184 before the F13a, when the arrows went under the card: § 181 of the F5a), so a
 // long name showed some 14 characters in its two lines. Under 480 px the arrows and the remove button go to a row of 48 px
 // under the card, and the name keeps a column of 140 px or more, with each target of 48 px.

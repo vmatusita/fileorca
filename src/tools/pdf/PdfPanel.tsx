@@ -821,7 +821,7 @@ export default function PdfPanel(props: PdfPanelData) {
     const active = document.activeElement;
     if ((!active || active === document.body) && m.slotFocus) {
       // The WaterLevel takes the focus without scrolling: it is the rectangle itself, already in view, and on a first
-      // visit the browser scrolled its foot over the cookie notice (DECISOES § F13A-R-02).
+      // visit the browser scrolled its foot over the cookie notice (DECISOES § 514).
       const level = levelRef.current;
       if (level) level.focus({ preventScroll: true });
       else (downloadRef.current ?? actionRef.current ?? holdRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();

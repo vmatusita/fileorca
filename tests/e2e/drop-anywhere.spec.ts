@@ -80,7 +80,7 @@ test.describe('a page with a file tool takes the drop anywhere', () => {
     await expect(zone).not.toHaveAttribute('data-state', 'over');
   });
 
-  // F13a, revisão c-2 (DECISOES § F13A-R-07): the drag that comes into the window over the Choose button or the help of
+  // F13a, revisão c-2 (DECISOES § 519): the drag that comes into the window over the Choose button or the help of
   // the zone flips it to "over", and those nodes leave the DOM; Chromium sends no dragleave to a node that is gone, so the
   // counter kept one and the zone stayed in "over" (with no button) after the drag left the window. The same events here:
   // dragenter on the node, dragenter on the H1, and the last dragleave on the H1. A node that left the DOM no longer counts.

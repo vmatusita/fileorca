@@ -122,7 +122,7 @@ async function smallFiles(page: Page, path: string, count: number): Promise<Test
 
 interface Box { kind: string; x: number; y: number; w: number; h: number }
 
-// F13a, revisão a-2 (decision 4 of the run; DECISOES § F13A-R-01): the box of the Oli counts inflated by 12 px on every
+// F13a, revisão a-2 (decision 4 of the run; DECISOES § 513): the box of the Oli counts inflated by 12 px on every
 // side (x - 12, y - 12, w + 24, h + 24), the room of her moves (8 px and 6°), so the 150 px hold while she waves.
 const OLI_GROWTH = 12;
 

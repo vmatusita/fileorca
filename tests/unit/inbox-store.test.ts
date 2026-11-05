@@ -1,4 +1,4 @@
-// F13a, revisão d-3 (DECISOES § F13A-R-08): storeForNext(), the chip that takes the files along (§ 496), when the inbox is
+// F13a, revisão d-3 (DECISOES § 520): storeForNext(), the chip that takes the files along (§ 496), when the inbox is
 // not written within its time (3 s) or fails half way: it says false, the navigation goes on without the choice in the tab,
 // and nothing it wrote stays in the inbox. The Cache Storage of a browser runs its operations in the order they are asked
 // (a queue), so the fake here is a queue too: an operation starts when the one before it ends, after its own delay.

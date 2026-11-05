@@ -51,7 +51,7 @@ describe('the new keys of the PDF pieces and of the Merge list', () => {
   }
 });
 
-// F13a, revisão e-1 (DECISOES § F13A-R-11): the help inside "Adjust" of the PDF tools said "makes the file again", a calque
+// F13a, revisão e-1 (DECISOES § 523): the help inside "Adjust" of the PDF tools said "makes the file again", a calque
 // of the Portuguese; it says what the image island says, and pt and es keep theirs ("refaz", "rehace").
 describe('e-1: the help inside "Adjust" of the PDF tools', () => {
   it('says that a change redoes the file, the words of the image island', () => {
@@ -61,7 +61,7 @@ describe('e-1: the help inside "Adjust" of the PDF tools', () => {
   });
 });
 
-// F13a, revisão e-5 (DECISOES § F13A-R-12): the handle that picked a row up with Space and moved it with the arrow keys left
+// F13a, revisão e-5 (DECISOES § 524): the handle that picked a row up with Space and moved it with the arrow keys left
 // with the F13a (§ 479); the step and the question of Merge PDF still offered the keyboard as a third way. The arrow buttons
 // are the keyboard way now, and the texts say so.
 describe('e-5: the step and the question of Merge PDF', () => {

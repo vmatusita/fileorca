@@ -217,7 +217,7 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
 
 // ---- A cold first visit: the notice and the first ad once the fonts arrive ---------------------------------------------
 
-// F13a, revisão d-1 (DECISOES § F13A-R-05): the blocks above open each page at 360 × 740 and then turn the window, so the
+// F13a, revisão d-1 (DECISOES § 517): the blocks above open each page at 360 × 740 and then turn the window, so the
 // resize runs the notice's lower() again on a settled layout. Whoever arrives for the first time has the window from the
 // start and an empty cache: the inline script decides on the layout of the fallback faces, and the fonts come after it (a
 // two-line number of a calculator goes to one line, the ad rises up to 68 px). Here every page opens in a new context

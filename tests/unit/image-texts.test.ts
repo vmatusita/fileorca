@@ -148,7 +148,7 @@ describe('what the page hands to the island', () => {
   });
 });
 
-// F13a, revisão e-4 (DECISOES § F13A-R-10): the hidden label of the change of size on the result card ("+66%") says the word
+// F13a, revisão e-4 (DECISOES § 522): the hidden label of the change of size on the result card ("+66%") says the word
 // of the glossary, the one of the column of the guides for the same thing: "Variação" (docs/i18n/pt.md) and "Cambio" (es.md).
 describe('the words of the result card', () => {
   it('names the change of size with the word of the glossary', () => {

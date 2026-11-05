@@ -115,3 +115,12 @@ Pegadinhas que a F12 achou no Git Bash, nas worktrees e na junção das três fr
 - **Heredoc com crase, barra invertida ou apóstrofo continua estragando o texto,** também no `node - <<'EOF'`: um `\s` virou `s` e um `\/` virou `/` dentro de expressões regulares. Para trocar trechos com barra invertida, use a ferramenta de edição.
 - **A prova de "reprova sem a mudança" sem worktree nova:** `git archive <commit>` extraído em `.cache/`, com `pnpm install --frozen-lockfile --prefer-offline` (uns 11 s). Sem o `.git` ali, o build de teste sempre refaz.
 - **O verificador da worktree recusa comandos com `|`, colchetes ou variáveis dentro de argumentos** (`-g "a|b"`, `apo[iy]`, um `for`). Rode um `--grep` simples por comando.
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- **`git apply --cached --unidiff-zero` põe o hunk pelo número de linha novo.** Com um patch que leva só alguns hunks de um `git diff -U0`, um hunk que vem depois de outro deixado de fora cai fora do lugar: a regra da Oli da home foi parar no bloco do SupportCard. Para pôr no índice só parte de um arquivo sem o `git add -p`:
+  - aplique os hunks escolhidos, pelo número de linha antigo, sobre o `git show :arquivo`;
+  - grave o resultado com `git hash-object -w --stdin` e depois `git update-index --cacheinfo 100644,<sha>,<arquivo>`.
+- **O Bash de uma worktree isolada recusa dois tipos de comando:** um `|` dentro de uma expressão entre aspas (o `--grep "a|b"` do Playwright) e um heredoc com crase. Chame um script que recebe o padrão como argumento, e escreva o arquivo com a ferramenta de escrita.

@@ -141,7 +141,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
         const box = element.getBoundingClientRect();
         return { x: box.left + scrollX, y: box.top + scrollY, w: box.width, h: box.height };
       };
-      // F13a, revisão a-2 (DECISOES § F13A-R-01): the target box of the Oli counts inflated by 12 px on every side, the
+      // F13a, revisão a-2 (DECISOES § 513): the target box of the Oli counts inflated by 12 px on every side, the
       // room of her moves (decision 4 of the run).
       const target = (element: Element) => {
         const box = rect(element);

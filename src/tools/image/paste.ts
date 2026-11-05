@@ -43,7 +43,7 @@ export interface DropHandlers {
  */
 export function catchDrops(on: DropHandlers): { stop: () => void; reset: () => void } {
   let depth = 0;
-  // F13a, revisão c-2 (DECISOES § F13A-R-07): the nodes a drag of files came in over. The zone in "over" takes the Choose
+  // F13a, revisão c-2 (DECISOES § 519): the nodes a drag of files came in over. The zone in "over" takes the Choose
   // button and the words of the help out of the DOM, and Chromium sends no dragleave to a node that is gone: a node that
   // left the DOM stops counting at the next dragenter or dragleave, or the zone stayed in "over" after the drag left.
   const entered = new Set<EventTarget>();

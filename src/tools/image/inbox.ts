@@ -145,7 +145,7 @@ export const CARRY_LIMIT_MS = 3000;
 export async function storeForNext(files: readonly Outgoing[], tool: string, from: string, limit = CARRY_LIMIT_MS): Promise<boolean> {
   if (typeof caches === 'undefined' || files.length === 0) return false;
   let late = false;
-  // F13a, revisão d-3 (DECISOES § F13A-R-08): past the time, the write goes on by itself; it stops at the next step, and
+  // F13a, revisão d-3 (DECISOES § 520): past the time, the write goes on by itself; it stops at the next step, and
   // what it made after the deadline (the open creates the inbox) is deleted, so no file stays for nobody.
   const drop = async (): Promise<boolean> => {
     await caches.delete(INBOX_CACHE).catch(() => false);
