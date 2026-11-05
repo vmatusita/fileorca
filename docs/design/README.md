@@ -14,7 +14,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 ## Princípios de UX
 
 1. **Resultado primeiro, ajuste depois.** Soltou o arquivo, a ferramenta já processa com o padrão recomendado. As opções reprocessam na hora. Não existe botão "Aplicar" nem "Calcular".
-2. **Um lugar só.** DropZone, WaterLevel e ResultCard ocupam o mesmo retângulo, do mesmo tamanho. A página não pula e o olho não procura.
+2. **Um lugar só.** DropZone, WaterLevel e ResultCard ocupam o mesmo retângulo, da mesma altura em todos os estados (356px no celular, 340px a partir de 768px), e a faixa de baixo, com as opções antes do resultado e os chips e o "Ajustar" depois, também tem altura fixa. Nada cresce sem um gesto da pessoa. A página não pula e o olho não procura (F13a, DECISOES § 463 e § 466).
 3. **Uma ação amarela.** Em cada tela, só o Baixar é `sun`. O resto é neutro ou ghost.
 4. **Diga com números.** "2.4 MB → 780 KB", "−68%", "you'll pay $382,637 in interest". Nunca "Optimized!" sem número.
 5. **Privacidade que dá para conferir.** "Your files never leave your device" no PrivacySeal, e o FAQ ensina a abrir a aba Rede.
@@ -79,7 +79,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 ## Oli
 
 - Dez poses, lista fechada: `wave`, `gulp`, `swim`, `cheer`, `oops`, `buoy`, `lost`, `coffee`, `peek` e `sad` (só na parede do bloqueador, o AdblockWall; F12). Pose nova só com decisão registrada.
-- Ela olha para a esquerda, para o conteúdo; no logo, espelhada, para a palavra. Na página de ferramenta, ela senta na borda de cima da DropZone, à direita do H1, e reage ali: `gulp` com o arquivo em cima, `swim` na água, `cheer` no ResultCard.
+- Ela olha para a esquerda, para o conteúdo; no logo, espelhada, para a palavra. Na página de ferramenta, ela fica no canto de cima à direita do retângulo em todos os estados, olhando para a fala, e reage ali: `wave` em repouso, `gulp` com o arquivo em cima, `swim` enquanto a água sobe, `cheer` no ResultCard (segurando a placa) e `oops` no erro; o H1 usa a largura toda, e só a linha do selo abre espaço para ela (F13a, DECISOES § 465; antes, "ela senta na borda de cima da DropZone, à direita do H1").
 - O contorno é preto-orca nos dois temas, e o aro branco por trás da silhueta fica sempre: some no claro e vira adesivo no escuro e sobre `deep`.
 - A Oli inteira vai de 32px para cima; abaixo disso, o ícone do app (o rosto de frente), que lê bem a partir de 16px.
 - Decorativa (`aria-hidden`): o estado é sempre dito em texto ao lado.
@@ -95,7 +95,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 ## Layout e anúncios
 
 - Celular primeiro, a 360px. Coluna da ferramenta até `tool-max`; texto até `measure`; página até `page-max`; a partir de 1280px entra a coluna `rail` com o anúncio 300×600, que não gruda.
-- O AdSlot é neutro (`ad-ground`, rótulo `caption`), com altura reservada e `ad-clearance` (150px) de qualquer Baixar, campo, painel, menu, Oli ou linha do café. O rótulo é "Advertisements" / "Publicidade" / "Anuncios": as únicas palavras que o AdSense aceita em cada idioma, além de "Sponsored Links" e equivalentes.
+- O AdSlot é neutro (`ad-ground`, rótulo `caption`), com altura reservada e `ad-clearance` (150px) de qualquer Baixar, campo, painel, menu, Oli, linha do café, faixa de baixo da ferramenta, "Ajustar", chip ou controle da lista do juntar (F13a, DECISOES § 473 e § 488). O rótulo é "Advertisements" / "Publicidade" / "Anuncios": as únicas palavras que o AdSense aceita em cada idioma, além de "Sponsored Links" e equivalentes.
 - **O mapa (UX-07 A, F12).** O 1º anúncio de conteúdo tem lugar fixo em cada molde: na home, depois da 1ª seção de cards (nunca na primeira tela); nos hubs, depois da 1ª grade (no de dinheiro, a de crédito); no hub de guias, depois da 1ª grade de guias; na ferramenta, depois do "Como usar"; na calculadora, depois do painel e antes do cronograma; no guia, no texto, depois da ferramenta e de um parágrafo. Os seguintes só até 459px (o celular em pé), a **1.110px** ou mais um do outro, de borda a borda, só em fronteira de bloco (entre seções, parágrafos, listas e perguntas), nunca logo depois de um título nem colados numa tabela. A partir de 768px, o conteúdo 1 e o multiplex no fim do `<main>`; a partir de 1280px, duas laterais, a 2ª a 1.200px da 1ª. Sem o ID da unidade, a posição não aparece.
 - **A densidade fica em até 30 %** a 360×740 (a leitura conservadora da § 351: as caixas da coluna mais 100px de âncora, contada uma vez, sobre o `<main>` sem as relacionadas, com a ferramenta em repouso), e também a 768×1024 e a 812×375. O teste do mapa mede cada página com anúncio.
 - Nunca há anúncio acima da ferramenta no celular, dentro do painel, ao lado do Baixar, no WaterLevel, entre campos, dentro do cronograma ou nas páginas livres (as jurídicas, Sobre, Contato, Licenças, Apoie, 404, offline e "Abrir com"). O único fixo é a âncora do AdSense, e nada do site a cobre (nem o CookieNotice); o aviso de cookies aberto, na primeira visita e na rolagem 0, fica a 150px ou mais do 1º anúncio de conteúdo em sete janelas (360×740, 1280×800, 1440×900, 1920×950, 1920×1080, 768×1024 e 1024×1366, as que o teste do mapa mede): onde faltaria, o anúncio desce, nunca o aviso (F13a, DECISOES § 459).
