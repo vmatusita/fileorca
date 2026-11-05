@@ -7,6 +7,8 @@
 // at the marks of the guide text and between its last sections, never against the table of the presets; the layout puts
 // each box and the rails (src/ads/map.ts).
 import BaseLayout from '../layouts/BaseLayout.astro';
+// F13b (decision 7; UX-15 A; DECISOES § H-9): the sea at the foot of the band.
+import HubSea from '../components/HubSea.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
@@ -45,6 +47,7 @@ const shared = GUIDE_SHARED[lang];
 ---
 <BaseLayout
   lang={lang}
+  oli={['swim']}
   route={route}
   title={t.title}
   description={t.description}
@@ -53,10 +56,11 @@ const shared = GUIDE_SHARED[lang];
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list)]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-hubband fo-cat--image">
+  <div class="fo-hubband fo-hubband--sea fo-cat--image">
     <span class="fo-eyebrow">{t.eyebrow}</span>
     <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
     <p class="fo-muted">{t.intro}</p>
+    <HubSea />
   </div>
   <section class="fo-section" aria-labelledby="tools">
     <h2 id="tools">{t.toolsHeading}</h2>

@@ -169,22 +169,43 @@ export interface Section {
   action?: 'consent-choice';
 }
 
+/**
+ * One band of the home (F13b, UX-03 B; DECISOES § H-1): the H2, the count under it, the number of the band and the line
+ * that says where it comes from, one sentence more (the words of § H-5), and the link to the hub. Every number is a
+ * {placeholder} the build fills from its source (src/components/home-numbers.ts), never a digit typed here.
+ */
+export interface HomeBandTexts {
+  heading: string;
+  /** "{n} tools", "{n} calculators": {n} from the count of src/components/tool-count.ts. */
+  count: string;
+  /** The number of the band, when it is one value ("{payment} a month"); the image and PDF bands write "{from} → {to}". */
+  num?: string;
+  /** The line after the number, with its own placeholders. */
+  say: string;
+  /** One sentence more (decision 6 of the brief: 75 to 105 words in <main>, one sentence a band). */
+  more: string;
+  /** The link to the hub of the band (the QR code band has no hub: its one chip is the tool). */
+  all?: string;
+}
+
 export interface HomeTexts extends PageMeta {
+  /** F13b (UX-03 B): "{n} tools." with the count of the site, then the promise, kept on one line ("0 uploads."). */
   h1: string;
+  h1Promise: string;
   intro: string;
+  /** The link of the image tool pages back to the home ("Choose a tool"). */
   toolsHeading: string;
   privacyHeading: string;
   privacyBody: string;
-  /** Link under the tool grid to the image hub. */
-  hubLink: string;
-  /** The money section: heading, line and the hub link. */
-  money: { heading: string; intro: string; hubLink: string };
-  /** The PDF section: heading, line and the hub link. */
-  pdf: { heading: string; intro: string; hubLink: string };
-  /** The home and health sections (English only, F7, decision 9) and the QR code section (every language). */
-  house?: { heading: string; intro: string; hubLink: string };
-  health?: { heading: string; intro: string; hubLink: string };
-  qr?: { heading: string; intro: string };
+  /** What a screen reader says for the arrow icon of "9.3 MB → 2.5 MB" (" to ", " para ", " a "). */
+  to: string;
+  /** The bands, in the order of the page: image, PDF, money, home and health (English only) and the QR code. */
+  image: HomeBandTexts;
+  pdf: HomeBandTexts;
+  money: HomeBandTexts;
+  /** The home and health band (English only, F7): two links, one to each hub. */
+  life?: HomeBandTexts & { allHealth: string };
+  qr?: HomeBandTexts;
   /**
    * The "Read a guide" section (F11, decision 7): the heading, the line and the link to the guides hub, whose {n} is the
    * number of guides of the language, read from the registries. The four cards are those of HOME_GUIDES.
@@ -192,9 +213,9 @@ export interface HomeTexts extends PageMeta {
   guides: { heading: string; intro: string; hubLink: string };
 }
 
-/** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
+/** The home of Portuguese and Spanish (languages adjustment): with the QR code band. */
 export interface TranslatedHomeTexts extends HomeTexts {
-  qr: { heading: string; intro: string };
+  qr: HomeBandTexts;
 }
 
 export interface LegalTexts extends PageMeta {

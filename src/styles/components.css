@@ -654,6 +654,31 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hubband .fo-muted { color: var(--ink); }
 .fo-eyebrow { font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
 .fo-hubband .fo-eyebrow { color: var(--ink); }
+/* F13b · o mar nos hubs (UX-15 A, hub-sea.html ?alt=a; DECISOES § 378 and § H-9). Only the four category hubs carry the
+   modifier (the guides hub keeps its band). At the foot of the band, the water with the footer's wave (120 × 16 px, a mask
+   on one element, never a background image), a crest of 3 px in the full colour of the category (the same wave 3 px higher,
+   under the water), and the Oli swim, 72 px, half under water on the right, looking left at the H1. The sea is one
+   aria-hidden block with no pointer events, under the text: the band grows by its room in the padding (56 px at 360, 64
+   from 768), so it has its final height at the first paint (CLS 0). In the dark theme the band is surface, not the muddy
+   soft colour, and the colour of the category stays in the crest (G-21), by the --fo-band-dark of the home's bands
+   (below). Outside the tool the swim is no progress: three bobs (6 half-swings of 800 ms, a third of --dur-wave), 4.8 s,
+   and she stops on the drawn pose (WCAG 2.2.2); reduced motion stops it all. */
+.fo-hubband--sea { --sea-h: 40px; position: relative; overflow: hidden; padding-bottom: 80px; background: var(--fo-band-dark, var(--fo-cat-soft)); }
+/* The band keeps the Figtree of the first paint, as the guides hub's (the Steady face; § 393): on the money hub at 1280 px
+   the line "Reviewed by" took another row with the fallback font, and the sea and the cards moved when Figtree arrived. */
+.fo-hubband--sea { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+@media (min-width: 768px) { .fo-hubband--sea { --sea-h: 48px; padding-bottom: 88px; } }
+.fo-hubband__sea { position: absolute; left: 0; right: 0; bottom: 0; height: var(--sea-h); pointer-events: none; }
+.fo-hubband__crest { position: absolute; left: 0; right: 0; bottom: calc(var(--sea-h) + 2px); height: 16px; background: var(--fo-cat); }
+.fo-hubband__water { position: absolute; inset: 0; background: var(--water); }
+.fo-hubband__water::before { content: ""; position: absolute; left: 0; right: 0; top: -15px; height: 16px; background: inherit; }
+.fo-hubband__crest, .fo-hubband__water::before {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+}
+.fo-hubband__oli { position: absolute; right: var(--space-4); bottom: calc(var(--sea-h) - 34px); width: 72px; height: 72px; }
+@media (min-width: 768px) { .fo-hubband__oli { right: var(--space-6); } }
+.fo-hubband__sea [data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-wave) / 3) var(--ease-in-out) 6 alternate; }
 
 /* ---------- NextStepChips ---------- */
 .fo-next { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
@@ -724,6 +749,58 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
    she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
 @media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
+
+/* F13b · a home como o mar por categoria (UX-03 B, home-b.html; DECISOES § 370 and § H-1 to § H-8). The top: the H1 on the
+   full width, its promise kept on one line, the line, and the sea: the water of the DropZone (.fo-water at full level, still,
+   its wave on top, clipped to the sides) with the seal on it and the Oli swim on the right, looking left at the H1, 128 px
+   and 152 px from 768 px. Outside the tool the swim is no progress: she bobs three times and stops (4.8 s), as on the hubs.
+   From 1280 px with the rail she stays 32 px inside the column (20 px with her box inflated by 12 px; § 513). Then one band
+   per category: the soft colour of the category in the light theme and surface in the dark one (G-21), with the footer's wave in the full colour of the category along its foot; the H2 and its count, the number of
+   the band, the line that says its source, one sentence more, the tools as chips (the chip of NextStepChips without the
+   arrow) and the link to the hub, in ink and underlined (brand on a soft colour stays under 4.5:1). */
+/* The first visit keeps the Figtree of the first paint in the top and in the bands (the Steady face, as the band of the
+   guides hub; § 305 and § 393): with the fallback font the line and the band texts took another number of rows from 393 to
+   412 px, and the bands moved when Figtree arrived (CLS 0.026 in Chromium). The line and the band texts stay 32rem wide at
+   most, so the H1 stays the largest text of the first screen of a computer (its LCP; § H-8). */
+.fo-home-top, .fo-catband { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+/* The dark band (G-21; DECISOES § H-9): --fo-band-dark is a private variable on <html>, as the --fo-wall-sea of the wall
+   (§ 386 and § 404). Light: initial, so a band takes the fallback, the soft colour of its own category; dark: surface. The
+   bands of the home and the band of a category hub read it. */
+:root { --fo-band-dark: initial; }
+@media screen { html[data-theme="dark"] { --fo-band-dark: var(--surface); } }
+@media screen and (prefers-color-scheme: dark) { html:not([data-theme="light"]) { --fo-band-dark: var(--surface); } }
+.fo-home-top { display: grid; gap: var(--space-3); }
+.fo-home-top__promise { white-space: nowrap; }
+.fo-home-top__lead { max-width: 28rem; }
+.fo-home-sea { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; min-height: 208px; margin-top: var(--space-3); padding: var(--space-4); box-sizing: border-box; }
+.fo-home-sea > .fo-water { --level: 100%; border-radius: 0 0 var(--radius-xl) var(--radius-xl); clip-path: inset(-10px 0 0 0 round 0 0 var(--radius-xl) var(--radius-xl)); }
+.fo-home-sea > .fo-seal { position: relative; z-index: 1; background: var(--surface); }
+.fo-home-sea__oli { position: absolute; z-index: 1; right: var(--space-4); top: var(--space-2); width: 128px; height: 128px; pointer-events: none; }
+.fo-home-sea [data-oli="swim"] > svg { animation: fo-bob calc(var(--dur-wave) / 3) var(--ease-in-out) 6 alternate; }
+@media (min-width: 768px) {
+  .fo-home-sea { min-height: 184px; justify-content: center; padding: var(--space-6) 220px var(--space-6) var(--space-6); }
+  .fo-home-sea__oli { top: auto; bottom: var(--space-3); right: var(--space-8); width: 152px; height: 152px; }
+}
+.fo-catband { position: relative; display: grid; gap: var(--space-3); margin-top: var(--space-2); padding: var(--space-5) var(--space-4) var(--space-10); border-radius: var(--radius-xl); background: var(--fo-band-dark, var(--fo-cat-soft)); color: var(--ink); overflow: hidden; }
+@media (min-width: 768px) { .fo-catband { padding: var(--space-6) var(--space-6) var(--space-12); } }
+.fo-catband::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 16px; background: var(--fo-cat); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M0 10 C20 2 40 2 60 10 S100 18 120 10 V16 H0Z'/%3E%3C/svg%3E") repeat-x 0 0 / 120px 16px;
+}
+.fo-catband__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
+.fo-catband__title { margin: 0; font: 600 24px/30px var(--fo-font-display); }
+.fo-catband__count { font: 600 12px/16px var(--fo-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.fo-catband__fact { display: grid; gap: 2px; margin: 0; max-width: var(--fo-measure); }
+.fo-catband__num { font: 600 24px/28px var(--fo-font-display); color: var(--ink); }
+@media (min-width: 768px) { .fo-catband__num { font-size: 28px; line-height: 32px; } }
+.fo-catband__num .fo-icon--inline { width: 0.8em; height: 0.8em; vertical-align: -0.05em; }
+.fo-catband__say { max-width: 32rem; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.fo-catband__more { margin: 0; max-width: 32rem; color: var(--ink); font-size: 15px; line-height: 22px; }
+.fo-catband__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.fo-catband__links { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); margin: 0; }
+.fo-catband__all { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap-min); color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.fo-catband__all .fo-icon { width: 18px; height: 18px; }
 
 /* ---------- SupportCard ---------- */
 /* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the

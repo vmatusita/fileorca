@@ -1,29 +1,31 @@
 ---
-// Home: the image tools that exist in the language, with the Oli waving next to the H1, and a link to the image hub;
-// the 12 PDF tools and a link to the PDF hub (F5a, DECISOES § 160); the language's credit calculators and a link to its
-// money hub (F4, DECISOES § 118; F6: the Brazilian ones in Portuguese, the five translated ones in Spanish); in English, the
-// home and health calculators with links to their hubs and the QR code generator (F7, decision 9); then the four guides of
-// HOME_GUIDES as GuideCards, with the link to the guides hub (F11, decision 7; DECISOES § 398). The cards come from the
-// route map and the registries: a page gets a card only with a path in this language.
-// F12 · o mapa de anúncios (decision 3; DECISOES § 419): the home has ads now, in the area "geral" and with the rail
-// column: the first content ad after the first section of cards (its top never on the first screen of a phone), the next
-// ones only at the marks between the sections; the layout puts each box and the rails (src/ads/map.ts).
+// Home (F13b, decision 6; UX-03 B, home-b.html; DECISOES § 370 and § H-1 to § H-8): the sea by category. The top: the H1
+// with the count of the site (src/components/tool-count.ts, § 540), the line, and the sea where the Oli swims, with the
+// privacy seal on the water. Then one band per category of the language (src/components/home-bands.ts), each with its
+// count, a number from its source (src/components/home-numbers.ts: measured, exact or the calculator's example; F10 p-16),
+// the line that says where the number comes from, one sentence more (the words of the 3 ads by width, § H-5), the tools as
+// chips and the link to the hub; then the four guides of HOME_GUIDES (F11, § 398) and the privacy section.
+// The ads (F12, § 419; decision 10 of the brief): marks between the blocks, the first after the image band (its top never
+// on the first screen of a phone); the layout puts each box by the estimate (src/ads/map.ts). `wide`: without the rail of
+// ads (the default build), <main> takes the width of the page (G-06; § H-6).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import Oli from '../components/Oli.astro';
-import ToolCard from '../components/ToolCard.astro';
+import Icon from '../components/Icon.astro';
+import PrivacySeal from '../components/PrivacySeal.astro';
 import GuideCard from '../components/GuideCard.astro';
-import { QR_ID, moneyHubId, pagePath, routeById, type Lang } from '../i18n/routes.ts';
+import { pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
+import type { HomeBandTexts } from '../i18n/types.ts';
 import { SITE_ORIGIN, SITE_NAME } from '../platform/site.ts';
 import { absolute } from '../seo/meta.ts';
-import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, moneyPage, type LifeHub } from '../tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
 import { HOME_GUIDES, hubGuides } from '../tools/guides/hub.ts';
 import { guideCardData } from '../tools/guides/card.ts';
 import { fmt, groupDigits } from '../i18n/format.ts';
+import { toolCounts } from '../components/tool-count.ts';
+import { homeBands, type BandId } from '../components/home-bands.ts';
+import { homeNumbers } from '../components/home-numbers.ts';
 
 interface Props {
   lang: Lang;
@@ -32,44 +34,23 @@ const { lang } = Astro.props;
 const route = routeById('home');
 const t = TEXTS[lang].home;
 const common = TEXTS[lang].common;
-const hub = routeById('image-tools').paths[lang];
-const cards = IMAGE_TOOL_IDS.flatMap((id) => {
-  const href = routeById(id).paths[lang];
-  const blurb = common.tools[id];
-  if (!href || !blurb) return [];
-  return [{ id, href, blurb, icon: IMAGE_PAGES[id].icon, category: IMAGE_PAGES[id].pdf ? ('pdf' as const) : ('image' as const) }];
+const counts = toolCounts(lang);
+const numbers = homeNumbers(lang);
+const n = (value: number) => groupDigits(value, lang);
+/** What each band says: its texts, its count and the placeholders of its number. */
+const bandTexts: Record<BandId, { texts: HomeBandTexts | undefined; count: number; values: Record<string, string> }> = {
+  image: { texts: t.image, count: counts.image, values: numbers.image },
+  pdf: { texts: t.pdf, count: counts.pdf, values: numbers.pdf },
+  money: { texts: t.money, count: counts.money, values: numbers.money },
+  life: { texts: t.life, count: counts.life, values: numbers.life },
+  qr: { texts: t.qr, count: counts.qr, values: numbers.qr },
+};
+const bands = homeBands(lang, common).flatMap((band) => {
+  const { texts, count, values } = bandTexts[band.id];
+  if (!texts) return [];
+  const links = band.id === 'life' && t.life ? [t.life.all, t.life.allHealth] : texts.all ? [texts.all] : [];
+  return [{ ...band, texts, count: fmt(texts.count, { n: n(count) }), values, links: band.hubs.flatMap((href, index) => (links[index] ? [{ href, text: fmt(links[index], { n: n(count) }) }] : [])) }];
 });
-const pdfHub = routeById(PDF_HUB_ID).paths[lang];
-const pdfCards =
-  pdfHub && t.pdf && common.pdf
-    ? PDF_TOOL_IDS.flatMap((id) => {
-        const href = routeById(id).paths[lang];
-        const blurb = common.pdf?.[id];
-        return href && blurb ? [{ id, href, blurb, icon: PDF_PAGES[id].icon }] : [];
-      })
-    : [];
-const moneyHub = pagePath(moneyHubId(lang), lang);
-const moneyCards = moneyHub
-  ? HOME_MONEY_IDS[lang].flatMap((id) => {
-      const page = moneyPage(id, lang);
-      const href = pagePath(id, lang);
-      const blurb = common.calcs[id];
-      return page && href && blurb ? [{ href, blurb, icon: page.icon }] : [];
-    })
-  : [];
-/** The home and the health sections: the calculators of each hub that exist in the language (English only). */
-const lifeSections = (['house', 'health'] as LifeHub[]).flatMap((hubId) => {
-  const texts = hubId === 'house' ? t.house : t.health;
-  const href = pagePath(LIFE_HUB_ROUTE[hubId], lang);
-  const cards = LIFE_HUB_IDS[hubId].flatMap((id) => {
-    const page = moneyPage(id, lang);
-    const blurb = common.calcs[id];
-    return page && blurb ? [{ href: page.path, blurb, icon: page.icon }] : [];
-  });
-  return texts && href && cards.length > 0 ? [{ id: hubId, texts, href, cards }] : [];
-});
-const qrPath = pagePath(QR_ID, lang);
-const qr = qrPath && t.qr && common.qr ? { href: qrPath, texts: t.qr, blurb: common.qr } : null;
 // The "Read a guide" section: the four guides of the language, and the guides hub with the number of its guides.
 const guidesHub = pagePath(GUIDES_HUB_ID, lang);
 const guideCards = HOME_GUIDES[lang].map((id) => guideCardData(id, lang));
@@ -81,78 +62,45 @@ const website = {
   publisher: { '@id': `${SITE_ORIGIN}/#organization` },
 };
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]} oli={['wave']} withAds adArea="geral">
-  <div class="fo-hero">
-    <div class="fo-hero__text">
-      <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
-      <p class="fo-lead fo-prose">{t.intro}</p>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[website]} oli={['swim']} withAds adArea="geral" wide>
+  <div class="fo-home-top">
+    <h1 class="fo-h1 fo-h1--display">{fmt(t.h1, { n: n(counts.total) })} <span class="fo-home-top__promise">{t.h1Promise}</span></h1>
+    <p class="fo-lead fo-home-top__lead">{t.intro}</p>
+    <div class="fo-home-sea">
+      <div class="fo-water" aria-hidden="true"></div>
+      <PrivacySeal text={common.seal} />
+      <Oli pose="swim" class="fo-home-sea__oli" />
     </div>
-    <Oli pose="wave" class="fo-hero__oli" />
   </div>
-  <section class="fo-section" aria-labelledby="tools">
-    <h2 id="tools">{t.toolsHeading}</h2>
-    <ul class="fo-grid">
-      {cards.map((card) => (
-        <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category={card.category} icon={card.icon} /></li>
-      ))}
-    </ul>
-    {hub && t.hubLink && <p class="fo-more"><a href={hub}>{t.hubLink}</a></p>}
-  </section>
-  <AdBreak first />
-  {pdfHub && t.pdf && pdfCards.length > 0 && (
-    <section class="fo-section" aria-labelledby="pdf-home">
-      <h2 id="pdf-home">{t.pdf.heading}</h2>
-      <p class="fo-prose">{t.pdf.intro}</p>
-      <ul class="fo-grid">
-        {pdfCards.map((card) => (
-          <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category="pdf" icon={card.icon} /></li>
-        ))}
-      </ul>
-      <p class="fo-more"><a href={pdfHub}>{t.pdf.hubLink}</a></p>
-    </section>
-  )}
-  {moneyHub && t.money && moneyCards.length > 0 && (
+  {bands.map((band, index) => (
     <>
-    <AdBreak />
-    <section class="fo-section" aria-labelledby="money-home">
-      <h2 id="money-home">{t.money.heading}</h2>
-      <p class="fo-prose">{t.money.intro}</p>
-      <ul class="fo-grid">
-        {moneyCards.map((card) => (
-          <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category="money" icon={card.icon} /></li>
-        ))}
-      </ul>
-      <p class="fo-more"><a href={moneyHub}>{t.money.hubLink}</a></p>
-    </section>
-    </>
-  )}
-  {lifeSections.map((section) => (
-    <>
-    <AdBreak />
-    <section class="fo-section" aria-labelledby={`${section.id}-home`}>
-      <h2 id={`${section.id}-home`}>{section.texts.heading}</h2>
-      <p class="fo-prose">{section.texts.intro}</p>
-      <ul class="fo-grid">
-        {section.cards.map((card) => (
-          <li><ToolCard href={card.href} name={card.blurb.name} description={card.blurb.description} category="home" icon={card.icon} /></li>
-        ))}
-      </ul>
-      <p class="fo-more"><a href={section.href}>{section.texts.hubLink}</a></p>
-    </section>
+      {index === 1 && <AdBreak first />}
+      {index > 1 && <AdBreak />}
+      <section class={`fo-catband fo-cat--${band.category}`} aria-labelledby={band.headingId}>
+        <div class="fo-catband__head">
+          <h2 class="fo-catband__title" id={band.headingId}>{band.texts.heading}</h2>
+          <span class="fo-catband__count">{band.count}</span>
+        </div>
+        <p class="fo-catband__fact">
+          {band.texts.num
+            ? <span class="fo-catband__num">{fmt(band.texts.num, band.values)}</span>
+            : <span class="fo-catband__num">{band.values['from']} <Icon name="arrow-right" class="fo-icon--inline" /><span class="fo-sr">{t.to}</span> {band.values['to']}</span>}
+          {' '}<span class="fo-catband__say">{fmt(band.texts.say, band.values)}</span>
+        </p>
+        <p class="fo-catband__more">{band.texts.more}</p>
+        <ul class="fo-catband__chips">
+          {band.chips.map((chip) => (
+            <li><a class={`fo-chip fo-cat--${chip.category}`} href={chip.href}><span class="fo-chip__dot" aria-hidden="true"><Icon name={chip.icon} /></span><span>{chip.name}</span></a></li>
+          ))}
+        </ul>
+        {band.links.length > 0 && (
+          <p class="fo-catband__links">
+            {band.links.map((link) => <a class="fo-catband__all" href={link.href}>{link.text}<Icon name="chevron-right" /></a>)}
+          </p>
+        )}
+      </section>
     </>
   ))}
-  {qr && (
-    <>
-    <AdBreak />
-    <section class="fo-section" aria-labelledby="qr-home">
-      <h2 id="qr-home">{qr.texts.heading}</h2>
-      <p class="fo-prose">{qr.texts.intro}</p>
-      <ul class="fo-grid">
-        <li><ToolCard href={qr.href} name={qr.blurb.name} description={qr.blurb.description} category="util" icon="qr" /></li>
-      </ul>
-    </section>
-    </>
-  )}
   {guidesHub && guideCards.length > 0 && (
     <>
     <AdBreak />

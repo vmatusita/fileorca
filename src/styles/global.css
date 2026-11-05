@@ -66,6 +66,8 @@ main[tabindex="-1"]:focus { outline: none; }
 .fo-frame { box-sizing: border-box; width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 0 var(--space-4) var(--space-16); }
 .fo-main { display: grid; gap: var(--space-4); padding-top: var(--space-5); min-width: 0; }
 .fo-content { max-width: var(--tool-max); min-width: 0; }
+/* F13b (decision 6, G-06; DECISOES § H-6): a wide page without the rail of ads (BaseLayout `wide`) uses the page width. */
+.fo-content--wide { max-width: none; }
 .fo-rail { display: none; }
 @media (min-width: 1280px) {
   /* The column gap is the ad clearance itself, so the rail never comes closer than 150px. */

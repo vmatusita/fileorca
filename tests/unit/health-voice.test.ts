@@ -59,7 +59,8 @@ describe('the voice of the health pages (F7)', () => {
     // What else a health page or its cards show: the cards of the five (home, hub, search), the home section and the
     // texts every calculator shares.
     for (const id of HEALTH_CALC_IDS) strings(enCommon.calcs[id], `common.calcs.${id}`, all);
-    strings(enHome.health, 'home.health', all);
+    // F13b (UX-03 B; DECISOES § H-10): the home and health calculators share one band of the home (life).
+    strings(enHome.life, 'home.life', all);
     strings(sharedCalc, 'src/tools/calc/i18n/en.ts', all);
     expect(all.length).toBeGreaterThan(200);
     for (const [path, text] of all) {
