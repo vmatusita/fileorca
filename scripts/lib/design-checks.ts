@@ -8,7 +8,7 @@ import type { Lang } from '../../src/i18n/routes.ts';
 export const OLI_POSES: readonly string[] = ['wave', 'gulp', 'swim', 'cheer', 'oops', 'buoy', 'lost', 'coffee', 'peek', 'sad'];
 
 /** Colour tokens a `color:` declaration may use. `on-*` only on the fill they name (contrast.test.ts). */
-export const TEXT_COLOR_TOKENS: readonly string[] = ['ink', 'ink-muted', 'brand', 'danger', 'success', 'on-brand', 'on-sun', 'on-deep', 'on-deep-muted', 'on-cat', 'on-violeta'];
+export const TEXT_COLOR_TOKENS: readonly string[] = ['ink', 'ink-muted', 'brand', 'danger', 'danger-on-deep', 'success', 'on-brand', 'on-sun', 'on-deep', 'on-deep-muted', 'on-cat', 'on-violeta'];
 
 const MOTION_PROPERTIES: ReadonlySet<string> = new Set(['transform', 'opacity', 'translate', 'scale', 'rotate']);
 const KEYFRAME_PROPERTIES: ReadonlySet<string> = new Set([...MOTION_PROPERTIES, 'animation-timing-function']);
