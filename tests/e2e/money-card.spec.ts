@@ -252,6 +252,72 @@ test('/mortgage-calculator/: with two fields in error, each is described by its 
   await expect(page.locator('#fo-calc-r-error')).toHaveAttribute('aria-hidden', 'true');
 });
 
+// Review F13b f-2 (DECISOES § 594): on a phone the card is above the screen while the person types in a field after it, so the
+// message of that field (or the problem the card says about it) shows right under the field while it has the focus, on
+// screen, on top of what comes next: nothing moves, not even 800 ms after the key (layout-shift with no recent input, 0 in
+// Chromium), and the message leaves with the focus. From 768 px the card stands beside the fields and the message stays in
+// it. Before, the field after the card had only its stroke and icon, and the words were in the card, off the screen.
+const AFTER_CARD = [
+  { path: CALC_PAGES['home-affordability-calculator'].path, open: false, fill: [['fr', '500']], field: 'fr', message: 'Enter a limit from 1 to 100% of income.' },
+  { path: CALC_PAGES['debt-consolidation-calculator'].path, open: false, fill: [['d1r', '99']], field: 'd1r', message: 'Enter an APR from 0 to 60%.' },
+  { path: CALC_PAGES['debt-consolidation-calculator'].path, open: false, fill: [['d0p', '1']], field: 'd0p', message: /^The payment on debt 1 doesn't cover its interest\./ },
+  { path: CALC_PAGES['mortgage-calculator'].path, open: true, fill: [['tx', '99999999']], field: 'tx', message: 'Enter a property tax from $0 to $1,000,000.' },
+] as const;
+for (const { path, open, fill, field, message } of AFTER_CARD) {
+  test(`${path} (#fo-calc-${field}): on a phone, the message of a field after the card shows under it while it has the focus, and nothing moves`, async ({ page, browserName }) => {
+    await page.addInitScript(() => {
+      const shifts = { cls: 0 };
+      (window as unknown as { __shifts: typeof shifts }).__shifts = shifts;
+      if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) if (!entry.hadRecentInput) shifts.cls += entry.value;
+      }).observe({ type: 'layout-shift', buffered: false });
+    });
+    await openAt(page, path, 360, 740);
+    await hydrated(page);
+    if (open) await page.locator('[aria-controls="fo-calc-more-fields"]').click();
+    const input = page.locator(`#fo-calc-${field}`);
+    await input.evaluate((node) => node.scrollIntoView({ block: 'center' }));
+    await frames(page);
+    const tops = () => page.evaluate(() => [...document.querySelectorAll('#fo-tool-root .fo-calc__more .fo-field, #fo-tool-root .fo-calc__next, #fo-calc-schedule')].map((node) => Math.round(node.getBoundingClientRect().top + window.scrollY)));
+    const before = await tops();
+    await page.evaluate(() => ((window as unknown as { __shifts: { cls: number } }).__shifts.cls = 0));
+    for (const [key, text] of fill) await page.locator(`#fo-calc-${key}`).fill(text);
+    await page.waitForTimeout(900);
+    await expect(input).toBeFocused();
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    const said = page.locator(`#fo-calc-${field}-error`);
+    /** The height of the message: the 1 px of the screen reader's copy, or the lines under the field. */
+    const height = () => said.evaluate((node) => node.getBoundingClientRect().height);
+    await expect.poll(height).toBeGreaterThanOrEqual(20);
+    await expect(said).toHaveText(message);
+    // Under the field, and on the screen with it; the card is above the screen.
+    const where = await page.evaluate((id) => {
+      const box = document.getElementById(id)!.getBoundingClientRect();
+      const words = document.getElementById(`${id}-error`)!.getBoundingClientRect();
+      return { gap: words.top - box.bottom, top: words.top, bottom: words.bottom };
+    }, `fo-calc-${field}`);
+    expect(where.gap).toBeGreaterThanOrEqual(0);
+    expect(where.top).toBeGreaterThanOrEqual(0);
+    expect(where.bottom).toBeLessThanOrEqual(740);
+    const shown = await tops();
+    // A range error comes 800 ms after the key and moves nothing; a problem of the account comes on the key (the scenarios
+    // leave with it, a change the key made), so its page is compared with the message and without it, below.
+    if (typeof message === 'string') expect(shown).toEqual(before);
+    if (browserName === 'chromium') expect(await page.evaluate(() => (window as unknown as { __shifts: { cls: number } }).__shifts.cls)).toBe(0);
+    // The focus leaves: the message leaves with it, and the card keeps it.
+    await page.locator('.fo-rhero__label').click();
+    await expect.poll(height).toBeLessThanOrEqual(1);
+    expect(await tops(), 'a mensagem embaixo do campo não empurra nada').toEqual(shown);
+    await expect(page.locator('#fo-rhero-error')).toBeVisible();
+    // From 768 px the card is beside the fields: the message stays in it, never under the field.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await input.focus();
+    await expect(input).toBeFocused();
+    expect(await height()).toBeLessThanOrEqual(1);
+  });
+}
+
 // F10 p-19: on the first visit (no choice of cookies yet), at 360 x 740, the number of the mortgage (en, es) and of the
 // SAC × PRICE ends above 596 px, clear of the cookie notice, which starts at 604 px; after Accept, the Download PDF is whole
 // above 740 px, in the width of the card. Before: 636 (en) and 678 px (es, pt), covered by 32 and 52 px of the notice.

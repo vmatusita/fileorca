@@ -119,7 +119,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const cell = cellText(lang);
   // The field the card speaks for (review F13b b-2; DECISOES § 593): the first in error, else the one a problem points to.
   const named = wrongField?.[0] ?? (view.problem !== undefined && view.problemField !== undefined ? `fo-calc-${view.problemField}` : undefined);
-  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, named, latest: () => store.get().values };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, flagMessage: view.problem, named, latest: () => store.get().values };
   const off = view.problem !== undefined || state.stale;
 
   const pdf = async () => {

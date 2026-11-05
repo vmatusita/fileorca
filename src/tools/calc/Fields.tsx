@@ -24,6 +24,8 @@ interface Props {
   flagged?: string | undefined;
   /** The id of the field whose error the card says (the first in error, or the one a problem points to; review F13b b-2). */
   named?: string | undefined;
+  /** The problem of the account the card says, shown near the field it points to on a phone (review F13b f-2). */
+  flagMessage?: string | undefined;
   /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § 552). */
   latest?: (() => Values) | undefined;
 }
@@ -73,6 +75,7 @@ function NumberInput(props: Props & {
       report={props.report}
       flagged={props.flagged === keyName}
       named={props.named === fieldId(keyName)}
+      flagMessage={props.flagged === keyName ? props.flagMessage : undefined}
     />
   );
 }
@@ -284,6 +287,7 @@ export function Field(props: Props & { spec: FieldSpec }) {
           report={props.report}
           flagged={props.flagged === spec.key}
           named={props.named === fieldId(spec.key)}
+          flagMessage={props.flagged === spec.key ? props.flagMessage : undefined}
         />
       );
     }
