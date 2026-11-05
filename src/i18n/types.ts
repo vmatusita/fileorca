@@ -44,6 +44,8 @@ export interface CommonTexts {
     supportMeta: string;
   };
   breadcrumb: { label: string; home: string };
+  /** The index of the H2 of a legal page and of the Licenses, in the right column from 1280 px (F13b, UX-17 A; DECISOES § I-3). */
+  pageIndex: string;
   seal: string;
   footer: {
     imageColumn: string;
@@ -64,6 +66,29 @@ export interface CommonTexts {
      * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
      */
     guidesAll: string;
+    /**
+     * F13b (UX-17 A; DECISOES § I-5): below 768 px each category shows its hub and puts its tools in a disclosure. The
+     * summary shows `all` ("All {n}") when the list holds every tool of the category in the language, `popular` ("{n}
+     * popular") when it holds some; {n} is the length of the list. The rest of its name is said only to a screen reader,
+     * after the visible words (WCAG 2.5.3): the noun of the category after `all`, and `popularRest` ("{noun}", "entre as
+     * {noun}") after `popular`.
+     */
+    tools: {
+      all: string;
+      popular: string;
+      popularRest: string;
+      image: string;
+      pdf: string;
+      money: string;
+      home?: string;
+      health?: string;
+    };
+    /**
+     * The disclosure of the Guides block below 768 px (DECISOES § I-5): "All guides" stays in sight and the groups of the
+     * hub go in it. The summary shows "{n} topics" ({n} the groups of the language) and a screen reader hears the rest.
+     */
+    guidesTopics: string;
+    guidesTopicsRest: string;
     /** The coffee line at the top of the footer (PLANO-MELHORIAS, section C; DECISOES § 437). */
     coffee: string;
     /** "Made by {name} in {city}" */
@@ -236,6 +261,22 @@ export interface AboutTexts extends PageMeta {
   linksHeading: string;
   websiteLabel: string;
   linkedinLabel: string;
+  /**
+   * The card "FileOrca in numbers" (F13b, UX-17 A; DECISOES § I-4), on the About page and, from 1280 px, on the Contact
+   * page: four counts and the zero. These are the labels; the numbers come from src/components/tool-count.ts and LANGS,
+   * never typed here. The fourth count is the home and health calculators where the language has them (`life`, English),
+   * and the languages of the site where it has none (`languages`).
+   */
+  stats: {
+    heading: string;
+    image: string;
+    pdf: string;
+    money: string;
+    life?: string;
+    languages?: string;
+    /** The label of the "0" (no file is ever uploaded), shown with the PrivacySeal. */
+    zero: string;
+  };
 }
 
 export interface ContactTexts extends PageMeta {
@@ -322,6 +363,8 @@ export interface NotFoundTexts extends PageMeta {
   body: string;
   searchLabel: string;
   homeLink: string;
+  /** The heading of the three chips, the first tool of each hub of the language (F13b, UX-17 A; DECISOES § I-2). */
+  toolsHeading: string;
 }
 
 /** The offline page (F8, decision 8; DECISOES § 289): what the service worker shows for a page it did not keep. */

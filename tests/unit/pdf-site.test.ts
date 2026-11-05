@@ -114,13 +114,15 @@ describe('home', () => {
 });
 
 describe('footer', () => {
+  // F13b (UX-17 A; DECISOES § I-5 and § I-8): the hub of a category left its list (it is the link in sight, and the tools
+  // are in the disclosure of the column), so a column's links are read as every `a` of it, in the same order as before.
   const column = (page: ReturnType<typeof parse>, title: string) =>
     page.querySelectorAll('footer .fo-footer__cols > div').find((div) => div.querySelector('h2')?.text === title);
 
   it('has a PDF column in English: the hub first, then the first six tools in hub order, only pages that exist', async () => {
     const page = await render(HomeView, 'en');
     const pdf = column(page, enCommon.footer.pdfColumn);
-    const links = pdf?.querySelectorAll('li a') ?? [];
+    const links = pdf?.querySelectorAll('a') ?? [];
     expect(links.map((link) => link.getAttribute('href'))).toEqual([hubPath, ...PDF_TOOL_IDS.slice(0, 6).map(toolPath)]);
     expect(links.map((link) => link.text)).toEqual([enCommon.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => enCommon.pdf[id].name)]);
     // The columns, in the order of the site: image, PDF, money, FileOrca.
@@ -133,7 +135,7 @@ describe('footer', () => {
   it('has, in English, a Home and a Health column with the hub and every calculator of it, and a Utilities column with the QR code, so no F7 page is an orphan', async () => {
     const page = await render(HomeView, 'en');
     for (const [hub, title, name] of [['house', enCommon.footer.homeColumn, enCommon.homeCalculators], ['health', enCommon.footer.healthColumn, enCommon.healthCalculators]] as const) {
-      const links = column(page, title)?.querySelectorAll('li a') ?? [];
+      const links = column(page, title)?.querySelectorAll('a') ?? [];
       expect(links.map((link) => link.getAttribute('href')), hub).toEqual([routeById(LIFE_HUB_ROUTE[hub]).paths.en, ...LIFE_HUB_IDS[hub].map((id) => routeById(id).paths.en)]);
       expect(links.map((link) => link.text), hub).toEqual([name, ...LIFE_HUB_IDS[hub].map((id) => enCommon.calcs[id].name)]);
     }
@@ -150,7 +152,7 @@ describe('footer', () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
       const common = TEXTS[lang].common;
-      const links = column(page, common.footer.pdfColumn)?.querySelectorAll('li a') ?? [];
+      const links = column(page, common.footer.pdfColumn)?.querySelectorAll('a') ?? [];
       expect(links.map((link) => link.getAttribute('href')), lang).toEqual([hubPathIn(lang), ...PDF_TOOL_IDS.slice(0, 6).map((id) => toolPathIn(id, lang))]);
       expect(links.map((link) => link.text), lang).toEqual([common.pdfTools, ...PDF_TOOL_IDS.slice(0, 6).map((id) => common.pdf[id].name)]);
       // The columns in the order of the site: image, PDF, money (where the language has a money hub), the utilities with the

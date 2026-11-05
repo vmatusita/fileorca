@@ -1,8 +1,14 @@
 ---
 // About: who makes the site (Person schema), why it exists and the orca fact. No photo yet:
 // the photo is a pending item for Victor (public/about/victor.jpg), never a placeholder image.
+// F13b (decision 8; UX-17 A, pages.html; DECISOES § I-1 and § I-4): the card "FileOrca in numbers" after the first
+// paragraph (outside the prose, whose list and paragraph rules would win inside it), in the right column from 1280 px,
+// sticky; and the Oli wave beside the section "Orcas are dolphins", 96 px and 128 px from 768 px, looking left at the text.
+// She greets once and rests (the move of the wave, § 460), and the page has no ad.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Oli from '../components/Oli.astro';
+import StatsCard from '../components/StatsCard.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { fmt } from '../i18n/format.ts';
@@ -19,25 +25,37 @@ const t = TEXTS[lang].about;
 const common = TEXTS[lang].common;
 // The counts of the intro come from the registries (F13b; DECISOES § 540), never typed in the text.
 const counts = countValues(lang);
+const [first, ...rest] = t.intro;
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
 const aboutPage = { '@type': 'AboutPage', name: t.h1, mainEntity: { '@id': 'https://fileorca.com/#victor' } };
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), personLd(), aboutPage]}>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), personLd(), aboutPage]} oli={['wave']} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <article class="fo-prose">
-    <h1 class="fo-h1">{t.h1}</h1>
-    {t.intro.map((paragraph) => <p>{fmt(paragraph, counts)}</p>)}
-    <h2>{t.whyHeading}</h2>
-    {t.why.map((paragraph) => <p>{paragraph}</p>)}
-    <h2>{t.orcaHeading}</h2>
-    <p>{t.orca}</p>
-    <h2>{t.linksHeading}</h2>
-    <ul>
-      <li><a href={AUTHOR.website} rel="me">{t.websiteLabel}</a></li>
-      <li><a href={AUTHOR.linkedin} rel="me">{t.linkedinLabel}</a></li>
-    </ul>
+  <article class="fo-view fo-view--stack fo-view--side fo-view--about">
+    <div class="fo-prose">
+      <h1 class="fo-h1">{t.h1}</h1>
+      {first && <p>{fmt(first, counts)}</p>}
+    </div>
+    <StatsCard lang={lang} />
+    <div class="fo-prose">
+      {rest.map((paragraph) => <p>{fmt(paragraph, counts)}</p>)}
+      <h2>{t.whyHeading}</h2>
+      {t.why.map((paragraph) => <p>{paragraph}</p>)}
+      <section class="fo-orca" aria-labelledby="orca-title">
+        <div>
+          <h2 id="orca-title">{t.orcaHeading}</h2>
+          <p>{t.orca}</p>
+        </div>
+        <Oli pose="wave" class="fo-orca__oli" />
+      </section>
+      <h2>{t.linksHeading}</h2>
+      <ul>
+        <li><a href={AUTHOR.website} rel="me">{t.websiteLabel}</a></li>
+        <li><a href={AUTHOR.linkedin} rel="me">{t.linkedinLabel}</a></li>
+      </ul>
+    </div>
   </article>
 </BaseLayout>

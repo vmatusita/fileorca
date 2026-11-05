@@ -6,7 +6,7 @@
 // and health calculators where they exist, and the QR code generator. The 3 image presets and the 4 money presets
 // never count: 46 tools in English, 29 in Portuguese and 35 in Spanish.
 import { groupDigits } from '../i18n/format.ts';
-import { QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
+import { LANGS, QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
 import { sectionCount } from './header-menu.ts';
 
 export interface ToolCounts {
@@ -36,10 +36,29 @@ export function toolCount(lang: Lang): number {
   return toolCounts(lang).total;
 }
 
+/** A count of the card "FileOrca in numbers" (F13b, decision 8; DECISOES § I-4). */
+export type StatKind = 'image' | 'pdf' | 'money' | 'life' | 'languages';
+
+/**
+ * The four counts of the card "FileOrca in numbers" in a language, in order: the image tools, the PDF tools, the money
+ * calculators of the hub, and the home and health calculators where the language has them (8 · 12 · 14 · 11 in English)
+ * or the languages of the site where it has none (8 · 12 · 8 · 3 in Portuguese, 8 · 12 · 14 · 3 in Spanish).
+ */
+export function statsItems(lang: Lang): { kind: StatKind; value: number }[] {
+  const here = toolCounts(lang);
+  return [
+    { kind: 'image', value: here.image },
+    { kind: 'pdf', value: here.pdf },
+    { kind: 'money', value: here.money },
+    here.life > 0 ? { kind: 'life', value: here.life } : { kind: 'languages', value: LANGS.length },
+  ];
+}
+
 /**
  * The placeholders of the texts that count tools (the About and Terms pages), as the language writes the numbers:
  * {image}, {pdf}, {money}, {life} and {total} of the page's language, {brazil} (the money calculators made for Brazil,
- * in Portuguese) and {spanish} (the money calculators in Spanish).
+ * in Portuguese), {spanish} (the money calculators in Spanish) and {languages} (the languages of the site; F13b, G-14,
+ * DECISOES § I-4).
  */
 export function countValues(lang: Lang): Record<string, string> {
   const here = toolCounts(lang);
@@ -52,5 +71,6 @@ export function countValues(lang: Lang): Record<string, string> {
     total: n(here.total),
     brazil: n(toolCounts('pt').money),
     spanish: n(toolCounts('es').money),
+    languages: n(LANGS.length),
   };
 }

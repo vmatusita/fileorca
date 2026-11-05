@@ -19,4 +19,12 @@ export default {
   linksHeading: 'Find Victor online',
   websiteLabel: "Victor's website",
   linkedinLabel: 'Victor on LinkedIn',
+  stats: {
+    heading: 'FileOrca in numbers',
+    image: 'image tools',
+    pdf: 'PDF tools',
+    money: 'money calculators',
+    life: 'home and health calculators',
+    zero: 'uploads',
+  },
 } satisfies AboutTexts;

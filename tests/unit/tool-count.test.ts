@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { countValues, toolCount, toolCounts } from '../../src/components/tool-count.ts';
+import { countValues, statsItems, toolCount, toolCounts } from '../../src/components/tool-count.ts';
 import { COUNT_SAMPLES } from '../../scripts/gates/lint-texto.ts';
 import { sectionCount } from '../../src/components/header-menu.ts';
 import { LANGS, QR_ID, pagePath, type Lang } from '../../src/i18n/routes.ts';
@@ -43,6 +43,12 @@ describe('the count of tools of a language', () => {
     }
   });
 
+  it('gives the card "FileOrca in numbers" its four counts (F13b; DECISOES § I-4)', () => {
+    expect(statsItems('en')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
+    expect(statsItems('pt')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
+    expect(statsItems('es')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
+  });
+
   it('counts the money calculators as the Menu does (14 in English and Spanish)', () => {
     for (const lang of LANGS) expect(toolCounts(lang).money, lang).toBe(sectionCount('money', lang));
     expect(sectionCount('money', 'en')).toBe(14);
@@ -75,6 +81,20 @@ describe.runIf(BUILT)('the built pages say the number of the module', () => {
     for (const lang of LANGS) {
       const h1 = /<h1\b[^>]*>([\s\S]*?)<\/h1>/.exec(main(html(pagePath('home', lang) ?? '/')))?.[1] ?? '';
       expect(h1.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(), lang).toMatch(new RegExp(`^${toolCount(lang)} \\S`));
+    }
+  });
+
+  // F13b (decision 8; DECISOES § I-4): the card "FileOrca in numbers" of the About page reads the same module
+  // (statsItems), whose fourth count is the home and health calculators in English and the languages elsewhere.
+  it('the card "FileOrca in numbers" of the About page says the counts of the module (8 · 12 · 14 · 11, 8 · 12 · 8 · 3, 8 · 12 · 14 · 3)', () => {
+    const want: Record<Lang, string[]> = { en: ['8', '12', '14', '11', '0'], pt: ['8', '12', '8', '3', '0'], es: ['8', '12', '14', '3', '0'] };
+    for (const lang of LANGS) {
+      const counts = toolCounts(lang);
+      const card = /<section class="fo-stats[\s\S]*?<\/section>/.exec(main(html(pagePath('about', lang) ?? '/')))?.[0] ?? '';
+      const numbers = [...card.matchAll(/<span class="fo-stats__num">([^<]*)<\/span>/g)].map((match) => match[1]);
+      expect(numbers, lang).toEqual(want[lang]);
+      expect(numbers.slice(0, 3), lang).toEqual([counts.image, counts.pdf, counts.money].map(String));
+      expect(numbers[3], lang).toBe(String(lang === 'en' ? counts.life : LANGS.length));
     }
   });
 });

@@ -37,9 +37,9 @@ const samplesOf = (file: string): Record<string, string> => SAMPLES_BY_LANG[text
  * tests/unit/tool-count.test.ts checks that they still are.
  */
 export const COUNT_SAMPLES: Record<string, Record<string, string>> = {
-  en: { image: '8', pdf: '12', money: '14', life: '11', total: '46', brazil: '8', spanish: '14' },
-  pt: { image: '8', pdf: '12', money: '8', life: '0', total: '29', brazil: '8', spanish: '14' },
-  es: { image: '8', pdf: '12', money: '14', life: '0', total: '35', brazil: '8', spanish: '14' },
+  en: { image: '8', pdf: '12', money: '14', life: '11', total: '46', brazil: '8', spanish: '14', languages: '3' },
+  pt: { image: '8', pdf: '12', money: '8', life: '0', total: '29', brazil: '8', spanish: '14', languages: '3' },
+  es: { image: '8', pdf: '12', money: '14', life: '0', total: '35', brazil: '8', spanish: '14', languages: '3' },
 };
 const isCountText = (file: string): boolean => /[\\/](about|terms)\.ts$/.test(file);
 const CHUNK = 15_000;

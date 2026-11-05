@@ -20,3 +20,17 @@ export function orphanPaths(pages: PageLinks[], indexable: Set<string>): string[
   }
   return pages.filter((page) => indexable.has(page.path) && !linked.has(page.path)).map((page) => page.path);
 }
+
+/**
+ * F13b (DECISOES § I-3): the links to a part of a page ("#id" on the same page, "/guides/#image" on another) whose page
+ * has no element with that id. `ids` holds the ids of every page of the dist by path; a target page the map does not know
+ * is left to the check of the paths. Returns the href of each link that misses.
+ */
+export function missingFragments(from: string, hrefs: readonly string[], ids: ReadonlyMap<string, ReadonlySet<string>>): string[] {
+  return hrefs.filter((href) => {
+    const hash = href.indexOf('#');
+    if (hash < 0 || hash === href.length - 1) return false;
+    const target = ids.get(hash === 0 ? from : href.slice(0, hash));
+    return target !== undefined && !target.has(decodeURIComponent(href.slice(hash + 1)));
+  });
+}
