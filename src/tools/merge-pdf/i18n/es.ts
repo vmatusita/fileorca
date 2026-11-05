@@ -68,8 +68,11 @@ const texts: PdfToolTexts<MergeTexts> = {
     action: 'Unir PDF',
     options: {
       add: 'Agregar más PDF',
-      help: 'Arrastra una fila para moverla o usa sus botones de flecha. Con el teclado, Espacio toma una fila, las flechas la mueven y Espacio la suelta. Los archivos se juntan en el orden de esta lista.',
+      help: 'Oli los une de arriba abajo. Las flechas cambian el orden.',
       needMore: 'Agrega al menos un PDF más para unir.',
+      listLabel: 'Archivos, en el orden en que se unen',
+      order: 'Orden · {count} archivos',
+      orderHelp: 'Cambiar el orden los une de nuevo al momento.',
     },
   },
 };

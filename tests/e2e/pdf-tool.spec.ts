@@ -66,6 +66,8 @@ test('Rotate PDF: the pages turned one by one in a file are not turned in the ne
   await openTool(page, '/rotate-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
   await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  // F13a (UX-04 A; DECISOES § F13A-P-10): after the result the options of a tool that runs by itself fold under "Adjust".
+  await page.locator('#fo-tool-root .fo-adjust > summary').click();
   await option(page, 'Page by page');
   const cells = page.locator('.fo-pages__grid > li .fo-page__main');
   await expect(cells).toHaveCount(8, { timeout: 30_000 });
@@ -172,12 +174,18 @@ test('Merge PDF at 360 px: a refused file keeps a card the width of the list, it
     expect(textBox?.width ?? 0, `${name}: the text column`).toBeGreaterThanOrEqual(150);
     // The same card in the list of Compress PDF, which has no handle or arrows, is 152 px tall; it was 412 px here.
     expect(cardBox?.height ?? 999, `${name}: the card height`).toBeLessThan(160);
-    // The handle and the two arrows stay, under the card, with their full target size.
-    for (const control of [row.locator('.fo-merge__grab'), ...(await row.locator('.fo-merge__move').all())]) {
-      const box = await control.boundingBox();
-      expect(box?.height ?? 0).toBeGreaterThanOrEqual(48);
-      expect(box?.y ?? 0).toBeGreaterThanOrEqual((cardBox?.y ?? 0) + (cardBox?.height ?? 0) - 1);
-    }
+    // F13a (UX-04 A; DECISOES § F13A-P-10): a refused row has no handle and no arrows (it is not in the order); its own
+    // remove button, in the card, keeps the full target size.
+    await expect(row.locator('.fo-merge__grab, .fo-merge__move, .fo-merge__none')).toHaveCount(0);
+    expect((await row.getByRole('button', { name: `Remove ${name}`, exact: true }).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
+  }
+  // The row that is read has its arrows and its remove button, each a full target beside the card.
+  const read = page.locator('.fo-merge .fo-filelist__row').filter({ hasText: 'gen-paginas-mistas.pdf' });
+  const card = await read.locator('.fo-file').boundingBox();
+  for (const control of await read.locator(':scope > .fo-merge__moves > .fo-btn, :scope > .fo-merge__remove').all()) {
+    const box = await control.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(48);
+    expect(box?.x ?? 0).toBeGreaterThanOrEqual((card?.x ?? 0) + (card?.width ?? 0) - 1);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
@@ -346,10 +354,13 @@ test('Sign PDF, Upload: the control that opens the picker is a button of the sit
 // (WCAG 2.5.7) and with the keyboard (Space picks up, the arrow keys move, Space drops). The three outputs list the pages
 // in the same order, read with PDF.js in Node, and the status region says each move once, in the order it happened.
 
-/** Records every sentence the status region takes, from now on (a sentence said twice in a row is recorded twice). */
+/**
+ * Records every sentence the status region of the panel takes, from now on (a sentence said twice in a row is recorded
+ * twice). F13a: the region of the panel is the hidden paragraph (p.fo-sr); the count of the Merge list has its own.
+ */
 async function recordStatus(page: Page): Promise<void> {
   await page.evaluate(() => {
-    const region = document.querySelector('#fo-tool-root [role="status"]');
+    const region = document.querySelector('#fo-tool-root p.fo-sr[role="status"]');
     if (!region) throw new Error('no status region');
     const log: string[] = [];
     (window as unknown as { __status: string[] }).__status = log;
@@ -362,7 +373,7 @@ async function recordStatus(page: Page): Promise<void> {
 
 /** What the status region said since recordStatus, once the last sentence has been set. */
 async function said(page: Page, last: string): Promise<string[]> {
-  await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(last);
+  await expect(page.locator('#fo-tool-root p.fo-sr[role="status"]')).toHaveText(last);
   // A beat for a second, wrong sentence to show (the region sets a sentence 50 ms after it is cleared).
   await page.waitForTimeout(150);
   return page.evaluate(() => (window as unknown as { __status: string[] }).__status.slice());
@@ -552,7 +563,8 @@ test('Merge PDF: "Move down" keeps the focus on the same button of the moved row
   await expect(down).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(row(2).locator('.fo-file__name')).toHaveText(names[0]);
-  // At the bottom "down" is disabled: the focus goes to "up" of the same row, never to the body.
+  // At the bottom "down" gives its place to an empty one (F13a, D-23): the focus goes to "up" of the same row, never to the body.
+  await expect(row(2).locator('.fo-merge__none')).toHaveCount(1);
   await expect(page.getByRole('button', { name: fmt(panel.queue.moveEarlier, { name: names[0] }) })).toBeFocused();
 });
 
@@ -676,7 +688,6 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   const q = panel.queue;
   const moved = (position: number) => fmt(q.moved, { name: last, position, total: 3 });
   const row = (position: number) => page.locator('.fo-merge .fo-filelist__row').nth(position);
-  const handle = (position: number) => row(position).locator('.fo-merge__grab');
 
   await openTool(page, '/merge-pdf/');
   await recordStatus(page);
@@ -715,24 +726,22 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   expect(await said(page, moved(1))).toEqual([moved(2), moved(1)]);
   expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 
-  // 3. Keyboard: Space on the handle picks the row up, the arrow keys move it, Space drops it. The focus follows the row.
+  // 3. Keyboard. F13a (UX-04 A; DECISOES § F13A-P-10): the handle is gone, and the arrows of the row do what it did: Enter
+  // on "Move up" twice, the focus following the row on the same arrow, then on the other one when the row reaches the top
+  // and "up" gives its place to the empty one. Each move is said once.
   await again();
-  await handle(2).focus();
-  await page.keyboard.press('Space');
-  await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(fmt(q.picked, { name: last }));
-  await expect(handle(2)).toHaveAttribute('aria-pressed', 'true');
-  // The list with a row in the hand: the handle has a name, a pressed state and a target big enough (WCAG 2.5.8).
-  expect(await violationIds(page), 'axe on the Merge list with a row picked up').toEqual([]);
-  for (const position of [2, 1]) {
-    await page.keyboard.press('ArrowUp');
-    await expect(page.locator('#fo-tool-root [role="status"]')).toHaveText(moved(position));
-    await focused(handle(position - 1));
-  }
-  await page.keyboard.press('Space');
-  const dropped = fmt(q.dropped, { name: last, position: 1, total: 3 });
-  expect(await said(page, dropped)).toEqual([fmt(q.picked, { name: last }), moved(2), moved(1), dropped]);
-  await focused(handle(0));
-  await expect(handle(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#fo-tool-root .fo-merge__grab')).toHaveCount(0);
+  const up = page.getByRole('button', { name: fmt(q.moveEarlier, { name: last }), exact: true });
+  await up.focus();
+  await page.keyboard.press('Enter');
+  await expect(row(1).locator('.fo-file__name')).toHaveText(last);
+  await focused(up);
+  // The list as the keyboard leaves it: every arrow named, a target big enough (WCAG 2.5.8), no disabled control.
+  expect(await violationIds(page), 'axe on the Merge list after a move by the keyboard').toEqual([]);
+  await page.keyboard.press('Enter');
+  await expect(row(0).locator('.fo-file__name')).toHaveText(last);
+  await focused(page.getByRole('button', { name: fmt(q.moveLater, { name: last }), exact: true }));
+  expect(await said(page, moved(1))).toEqual([moved(2), moved(1)]);
   expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 });
 

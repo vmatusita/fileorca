@@ -4,10 +4,15 @@
 export interface MergeTexts {
   /** "Add more PDFs" (adds to the list instead of starting over). */
   add: string;
-  /** Under the list: how to change the order. */
+  /** Above the rows, in view (F13a, D-26): the order of the list is the order of the file, and the arrows change it. */
   help: string;
   /** With one PDF in the list: "Add at least one more PDF to merge." */
   needMore: string;
+  /** The name of the list: "Files, in the order they join". */
+  listLabel: string;
+  /** After the result, the order folded in the band (F13a): "Order · {count} files", and the line inside it. */
+  order: string;
+  orderHelp: string;
 }
 
 export interface SplitTexts {

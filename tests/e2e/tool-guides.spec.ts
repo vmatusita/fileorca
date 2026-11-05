@@ -164,7 +164,8 @@ async function expectToolWorks(page: Page, id: FileGuideId, lang: Lang): Promise
   const files = kase.files();
   await page.setInputFiles('#fo-tool-root input[type="file"]', files);
   if (kase.action) {
-    const ready = page.locator('#fo-tool-root .fo-ready');
+    // F13a (UX-04 A; DECISOES § F13A-P-10): the Merge has its list in the rectangle instead of the ready card.
+    const ready = page.locator('#fo-tool-root :is(.fo-ready, .fo-merge-panel)');
     await expect(ready).toBeVisible({ timeout: 30_000 });
     await ready.locator('.fo-btn--brand').click();
   }

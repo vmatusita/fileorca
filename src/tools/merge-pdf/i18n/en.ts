@@ -68,8 +68,11 @@ const texts: PdfToolTexts<MergeTexts> = {
     action: 'Merge PDFs',
     options: {
       add: 'Add more PDFs',
-      help: 'Drag a row to move it, or use the arrow buttons on the row. With the keyboard, Space picks a row up, the arrow keys move it, and Space drops it. The files join in the order of this list.',
+      help: 'Oli joins them from top to bottom. The arrows change the order.',
       needMore: 'Add at least one more PDF to merge.',
+      listLabel: 'Files, in the order they join',
+      order: 'Order · {count} files',
+      orderHelp: 'Changing the order merges again right away.',
     },
   },
 };

@@ -189,6 +189,7 @@ const images: PdfToolDef<ImagesState, ImagesTexts> = {
     const pages = rangeFor(state.range, file.info?.pages ?? 0);
     return pages ? { kind: 'images', format: state.format, ppi: state.ppi, pages } : null;
   },
+  summary: (state, texts) => `${state.format === 'png' ? texts.png : texts.jpg} · ${state.ppi === 72 ? texts.low : state.ppi === 300 ? texts.high : texts.medium}`,
   Options: ImagesOptions,
 };
 
@@ -221,6 +222,7 @@ const compress: PdfToolDef<CompressState, CompressPdfTexts> = {
   success: 'smaller',
   warm: ['qpdf'],
   operation: (state) => ({ kind: 'compress', mode: state.mode }),
+  summary: (state, texts) => texts[state.mode],
   Options: CompressOptions,
 };
 
@@ -291,6 +293,7 @@ const rotate: PdfToolDef<RotateState, RotatePdfTexts> = {
     if (files.length > 1 || state.scope === 'all') return { kind: 'rotate', all: state.turn, pages: {} };
     return Object.values(state.turns).some((turn) => turn % 4 !== 0) ? { kind: 'rotate', all: 0, pages: state.turns } : null;
   },
+  summary: (state, texts) => (state.scope === 'pick' ? texts.pick : state.turn === 2 ? texts.half : state.turn === 3 ? texts.left : texts.right),
   Options: RotateOptions,
 };
 
@@ -353,6 +356,15 @@ interface NumbersState {
   of?: string;
 }
 
+const POSITION_KEY: Record<Position, 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight'> = {
+  'top-left': 'topLeft',
+  'top-center': 'topCenter',
+  'top-right': 'topRight',
+  'bottom-left': 'bottomLeft',
+  'bottom-center': 'bottomCenter',
+  'bottom-right': 'bottomRight',
+};
+
 function NumbersOptions({ state, update, texts }: PdfOptionsProps<NumbersState, NumbersTexts>) {
   const positions: { value: Position; label: string }[] = [
     { value: 'top-left', label: texts.topLeft },
@@ -405,6 +417,7 @@ const numbers: PdfToolDef<NumbersState, NumbersTexts> = {
   // The words of the numbers come from the page (F6, decision 4); the English ones give the bytes of before.
   start: (texts) => ({ page: texts.pageWord, of: texts.ofWord }),
   operation: (state) => ({ kind: 'numbers', ...state }),
+  summary: (state, texts) => texts[POSITION_KEY[state.position]],
   Options: NumbersOptions,
 };
 

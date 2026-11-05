@@ -68,8 +68,11 @@ const texts: PdfToolTexts<MergeTexts> = {
     action: 'Juntar PDFs',
     options: {
       add: 'Adicionar mais PDFs',
-      help: 'Arraste uma linha para mover, ou use as setas dela. No teclado, a tecla Espaço pega a linha, as setas a movem e a tecla Espaço a solta. Os arquivos são juntados na ordem desta lista.',
+      help: 'A Oli junta de cima para baixo. As setas mudam a ordem.',
       needMore: 'Adicione pelo menos mais um PDF para juntar.',
+      listLabel: 'Arquivos, na ordem em que se juntam',
+      order: 'Ordem · {count} arquivos',
+      orderHelp: 'Mudar a ordem junta de novo na hora.',
     },
   },
 };

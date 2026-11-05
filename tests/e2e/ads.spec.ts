@@ -676,13 +676,17 @@ const PDF_TARGETS = [
   '.fo-pass', '.fo-pass__toggle', '.fo-field__error',
   '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box', '.fo-sign__notice',
   '.fo-merge', '.fo-merge__moves',
+  // F13a (UX-04 A and UX-11 A; DECISOES § F13A-P-11): the Merge list in the rectangle (its Undo, its remove buttons and its
+  // "Add more PDFs"), the band under the rectangle with the "Order" and the "Adjust" of the result, and the note.
+  '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
 ].join(', ');
 // What a state must put on screen besides the card, so the clearance is measured against it and not against its absence.
 const PDF_ON_SCREEN: Record<PdfState, string[]> = {
   rest: ['.fo-drop'],
   processing: ['.fo-level'],
   ready: ['.fo-ready'],
-  list: ['.fo-ready', '.fo-merge', '.fo-merge__move'],
+  list: ['.fo-merge-panel', '.fo-merge', '.fo-merge__move', '.fo-merge__remove', '.fo-merge__add'],
+  removed: ['.fo-merge-panel', '.fo-merge__undo'],
   grid: ['.fo-pages', '.fo-pages__grid', '.fo-page', '.fo-page[data-selected="true"], .fo-page__moves, .fo-page__badge'],
   password: ['.fo-pass', '.fo-pass__toggle', '.fo-pass .fo-field__error'],
   signature: ['.fo-sign', '.fo-sign__place', '.fo-sign__page', '.fo-sign__notice'],

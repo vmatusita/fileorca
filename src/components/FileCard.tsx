@@ -36,6 +36,11 @@ export type FileCardProps = {
   /** The file the comparison or the crop box shows; only rows with `onSelect` are toggles. */
   selected?: boolean;
   onSelect?: () => void;
+  /**
+   * The place of the file in the order of the Merge list (F13a, UX-04 A; DECISOES § F13A-P-02): a numbered circle in deep
+   * (the ScenarioCompare pattern, aria-hidden: the list says "1 of 2") takes the place of the empty thumbnail.
+   */
+  order?: number;
 } & (
   | {
       state: 'done';
@@ -60,12 +65,16 @@ export type FileCardProps = {
 const named = (label: string, name: string) => label.replace('{name}', () => name);
 
 export default function FileCard(props: FileCardProps) {
-  const { name, category, labels, thumb } = props;
+  const { name, category, labels, thumb, order } = props;
   const picture =
     props.state === 'error' ? (
       <div class="fo-file__thumb">
         <Icon raw={fileIcon} />
       </div>
+    ) : order !== undefined ? (
+      <span class="fo-merge__n" aria-hidden="true">
+        {order}
+      </span>
     ) : thumb ? (
       <img class="fo-file__thumb" src={thumb} alt="" width={52} height={52} />
     ) : (

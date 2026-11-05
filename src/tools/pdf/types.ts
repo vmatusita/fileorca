@@ -28,8 +28,8 @@ export interface PdfIcons {
   trash: string;
   chevron: string;
   plus: string;
-  /** The handle of a row of the Merge list: Space picks it up, the arrow keys move it. */
-  reorder: string;
+  /** The chevron of the "Adjust" and "Order" disclosures after the result (F13a, UX-04 A). */
+  down: string;
 }
 
 export interface PdfPanelData<O = object> {
@@ -98,6 +98,8 @@ export interface PdfToolDef<S extends object, O = object> {
   operation: (state: S, file: PdfFileView, files: readonly PdfFileView[]) => PdfOperation | null;
   /** The text of the action button for this state, when the tool has one. */
   actionLabel?: (state: S, texts: O, file: PdfFileView | null, fallback: string) => string;
+  /** What the options are set to, in a few words: the "Adjust · …" line after the result of a tool that runs by itself. */
+  summary?: (state: S, texts: O) => string;
   /** Thumbnails of the pages are drawn (a single-file tool with a page grid). */
   grid?: (state: S) => boolean;
   /**
