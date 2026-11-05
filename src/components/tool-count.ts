@@ -6,7 +6,7 @@
 // and health calculators where they exist, and the QR code generator. The 3 image presets and the 4 money presets
 // never count: 46 tools in English, 29 in Portuguese and 35 in Spanish.
 import { groupDigits } from '../i18n/format.ts';
-import { QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
+import { LANGS, QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
 import { sectionCount } from './header-menu.ts';
 
 export interface ToolCounts {
@@ -34,6 +34,24 @@ export function toolCounts(lang: Lang): ToolCounts {
 /** The number of tools of the site in a language, without the presets. */
 export function toolCount(lang: Lang): number {
   return toolCounts(lang).total;
+}
+
+/** A count of the card "FileOrca in numbers" (F13b, decision 8; DECISOES § I-4). */
+export type StatKind = 'image' | 'pdf' | 'money' | 'life' | 'languages';
+
+/**
+ * The four counts of the card "FileOrca in numbers" in a language, in order: the image tools, the PDF tools, the money
+ * calculators of the hub, and the home and health calculators where the language has them (8 · 12 · 14 · 11 in English)
+ * or the languages of the site where it has none (8 · 12 · 8 · 3 in Portuguese, 8 · 12 · 14 · 3 in Spanish).
+ */
+export function statsItems(lang: Lang): { kind: StatKind; value: number }[] {
+  const here = toolCounts(lang);
+  return [
+    { kind: 'image', value: here.image },
+    { kind: 'pdf', value: here.pdf },
+    { kind: 'money', value: here.money },
+    here.life > 0 ? { kind: 'life', value: here.life } : { kind: 'languages', value: LANGS.length },
+  ];
 }
 
 /**

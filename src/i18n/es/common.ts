@@ -22,6 +22,7 @@ export default {
     supportMeta: 'Ko-fi',
   },
   breadcrumb: { label: 'Ruta de navegación', home: 'Inicio' },
+  pageIndex: 'En esta página',
   seal: 'Tus archivos nunca salen de tu dispositivo',
   footer: {
     imageColumn: 'Imagen',

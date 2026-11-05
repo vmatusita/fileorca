@@ -20,6 +20,7 @@ export default {
     supportMeta: 'Ko-fi',
   },
   breadcrumb: { label: 'Breadcrumb', home: 'Home' },
+  pageIndex: 'On this page',
   seal: 'Your files never leave your device',
   footer: {
     imageColumn: 'Image',

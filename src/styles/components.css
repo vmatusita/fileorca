@@ -802,6 +802,90 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-catband__all { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap-min); color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .fo-catband__all .fo-icon { width: 18px; height: 18px; }
 
+/* F13b · as páginas sem anúncio e a coluna da direita (UX-17 A, pages.html; DECISOES § I-1). The view of the 404, the About,
+   the Contact, the legal pages and the Licenses: the tool column (tool-max) in a <main> made wide by the BaseLayout (`wide`,
+   § 572). From 1280 px it keeps the grid of a page with ads, 760 + 150 + 300 px, and the right column holds a piece of the
+   page (.fo-side: the sea of the 404, the card of numbers, the index), the same markup as on the phone, put there by the
+   grid; never an ad nor an aside.fo-rail: the column is content. Below 1280 a view is a block (the page of before) or, with
+   --stack, a grid of 16 px gaps; the card of the Contact and the index exist only in the column. */
+.fo-view { min-width: 0; max-width: var(--tool-max); }
+.fo-view--stack { display: grid; gap: var(--space-4); align-content: start; }
+.fo-view--stack > * { min-width: 0; }
+.fo-view--stack > .fo-prose > :last-child { margin-bottom: 0; }
+.fo-view__part { display: grid; gap: var(--space-4); min-width: 0; align-content: start; }
+@media (min-width: 1280px) {
+  .fo-view--side { display: grid; max-width: none; grid-template-columns: minmax(0, var(--tool-max)) var(--rail); column-gap: var(--ad-clearance); justify-content: space-between; align-items: start; }
+  .fo-view--side > * { grid-column: 1; min-width: 0; }
+  .fo-view--side > .fo-side { grid-column: 2; grid-row: 1 / -1; }
+  .fo-view--side > .fo-prose:not(:last-child) > :last-child { margin-bottom: 0; }
+  .fo-view--about, .fo-view--legal, .fo-view--licenses { grid-template-rows: auto 1fr; }
+}
+/* The 404 (G-13): the Oli lost, 128 px (160 from 768), floats in a band of water, the .fo-water of the DropZone at 44 %,
+   still (never --moving: outside the tool the water is no progress), on surface-sunken, 176 px tall (208 from 768); the
+   water is in front of her, and she looks left at the H1. From 1280 the band is the right column, as tall as the column
+   (400 px at least), with the water at 38 % and the Oli in the middle. The chips keep the Figtree of the first paint (the
+   Steady face, as the band of the home and the jumps of the guides hub, § 305), so their rows never change when Figtree
+   arrives. */
+.fo-view--404 { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-404__text { display: grid; gap: var(--space-3); }
+.fo-sea { position: relative; height: 176px; border-radius: var(--radius-xl); background: var(--surface-sunken); overflow: hidden; }
+.fo-sea > .fo-water { --level: 44%; z-index: 1; }
+.fo-sea__oli { position: absolute; z-index: 0; right: 14%; bottom: 20%; width: 128px; height: 128px; }
+@media (min-width: 768px) {
+  .fo-sea { height: 208px; }
+  .fo-sea__oli { width: 160px; height: 160px; right: 16%; bottom: 18%; }
+}
+.fo-404__tools { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.fo-404__tools > h2 { margin: 0; font: 700 18px/26px var(--fo-font-text); }
+.fo-404__tools > .fo-next { margin: 0; padding: 0; list-style: none; }
+/* The link to the home sits alone in its row: a 48 px target, like every control of the new page. */
+.fo-404__home { margin: 0; }
+.fo-404__home > a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+@media (min-width: 1280px) {
+  .fo-view--404 { grid-template-rows: auto auto auto 1fr; }
+  .fo-view--404 > .fo-sea { height: auto; min-height: 400px; align-self: stretch; }
+  .fo-view--404 .fo-sea > .fo-water { --level: 38%; }
+  .fo-view--404 .fo-sea__oli { right: 50%; bottom: 30%; margin-right: -80px; }
+}
+/* The card "FileOrca in numbers" (G-14; DECISOES § I-4): a paper with the brand fold (fo-dogear on the ground of the page),
+   the four counts in number-md (Fredoka 600 24/28) and ink, their labels in ink-muted, and the zero with the PrivacySeal
+   on a hairline. Two counts a row on the phone, four from 768 px, and from 1280 the right column, sticky. The Contact
+   shows it only there (--side). */
+.fo-stats { --fo-ground: var(--bg); box-sizing: border-box; display: grid; gap: var(--space-4); align-content: start; padding: var(--space-5) var(--space-4) var(--space-4); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
+.fo-stats__title { margin: 0; padding-right: var(--dogear); font: 700 18px/26px var(--fo-font-text); }
+.fo-stats__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); margin: 0; padding: 0; list-style: none; }
+.fo-stats__item { display: grid; align-content: start; gap: 2px; }
+.fo-stats__num { font: 600 24px/28px var(--fo-font-display); color: var(--ink); }
+.fo-stats__label { font: 500 15px/20px var(--fo-font-text); color: var(--ink-muted); }
+.fo-stats__zero { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--space-3); row-gap: var(--space-2); padding-top: var(--space-4); border-top: var(--stroke-hair) solid var(--hairline); }
+.fo-stats__zero > .fo-seal { grid-column: 1 / -1; justify-self: start; }
+.fo-stats--side { display: none; }
+@media (min-width: 768px) and (max-width: 1279px) { .fo-stats__list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1280px) {
+  .fo-view--side > .fo-stats { position: sticky; top: var(--space-5); }
+  .fo-stats--side { display: grid; }
+}
+/* The Oli wave beside "Orcas are dolphins" (G-14): 96 px and 128 px from 768 px, looking left at the text; she greets once
+   and rests (the move of the wave, § 460). */
+.fo-orca { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
+.fo-orca__oli { width: 96px; height: 96px; }
+@media (min-width: 768px) { .fo-orca__oli { width: 128px; height: 128px; } }
+/* The index "On this page" of the legal pages and of the Licenses (G-06; DECISOES § I-3): only from 1280 px, sticky; the
+   title in h3, the links in ink 15/20 (brand and underlined on hover), the number of each H2 in ink-muted, tabular. Each
+   link is a 48 px target (the 4 px padding of the specification gave 28; the brief asks 48 of every new control), with no
+   gap between them: the 15 sections of the Privacy take 762 px, inside a window of 800; a shorter window scrolls the index
+   in itself, never past the screen. */
+.fo-toc { display: none; }
+@media (min-width: 1280px) {
+  .fo-toc { display: block; position: sticky; top: var(--space-5); max-height: calc(100vh - 2 * var(--space-5)); overflow-y: auto; overscroll-behavior: contain; padding-top: var(--space-2); }
+  .fo-toc > h2 { margin: 0 0 var(--space-2); font: 700 18px/26px var(--fo-font-text); }
+  .fo-toc ol { display: grid; margin: 0; padding: 0; list-style: none; counter-reset: fo-toc; }
+  .fo-toc li { counter-increment: fo-toc; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; }
+  .fo-toc li::before { content: counter(fo-toc); color: var(--ink-muted); font: 600 13px/20px var(--fo-font-text); font-variant-numeric: tabular-nums; }
+  .fo-toc__link { box-sizing: border-box; display: flex; align-items: center; min-height: var(--tap-min); padding: 4px 0; color: var(--ink); font: 500 15px/20px var(--fo-font-text); text-decoration: none; }
+  .fo-toc__link:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+}
+
 /* ---------- SupportCard ---------- */
 /* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the
    text, 96 px and 128 px from 768 px; before, she sat above the title on the phone and in a column of her own, looking
@@ -920,6 +1004,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-search__empty p { margin: 0; }
 .fo-search__peek { width: 120px; height: 75px; margin-top: var(--space-2); }
 .fo-search-inline { max-width: 560px; }
+/* F13b (G-13; DECISOES § I-2): the search of the 404 sits in the page, it does not float: only the stroke, no shadow-pop.
+   The search of the dialog keeps it. */
+.fo-search-inline .fo-search { box-shadow: none; }
 .fo-search-close { display: flex; justify-content: center; margin-top: var(--space-2); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }
 
 /* ---------- Money calculators (F4; DECISOES § 117): the island, ResultHero, SplitChart, ExportBar,

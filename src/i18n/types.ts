@@ -44,6 +44,8 @@ export interface CommonTexts {
     supportMeta: string;
   };
   breadcrumb: { label: string; home: string };
+  /** The index of the H2 of a legal page and of the Licenses, in the right column from 1280 px (F13b, UX-17 A; DECISOES § I-3). */
+  pageIndex: string;
   seal: string;
   footer: {
     imageColumn: string;
@@ -236,6 +238,22 @@ export interface AboutTexts extends PageMeta {
   linksHeading: string;
   websiteLabel: string;
   linkedinLabel: string;
+  /**
+   * The card "FileOrca in numbers" (F13b, UX-17 A; DECISOES § I-4), on the About page and, from 1280 px, on the Contact
+   * page: four counts and the zero. These are the labels; the numbers come from src/components/tool-count.ts and LANGS,
+   * never typed here. The fourth count is the home and health calculators where the language has them (`life`, English),
+   * and the languages of the site where it has none (`languages`).
+   */
+  stats: {
+    heading: string;
+    image: string;
+    pdf: string;
+    money: string;
+    life?: string;
+    languages?: string;
+    /** The label of the "0" (no file is ever uploaded), shown with the PrivacySeal. */
+    zero: string;
+  };
 }
 
 export interface ContactTexts extends PageMeta {
@@ -322,6 +340,8 @@ export interface NotFoundTexts extends PageMeta {
   body: string;
   searchLabel: string;
   homeLink: string;
+  /** The heading of the three chips, the first tool of each hub of the language (F13b, UX-17 A; DECISOES § I-2). */
+  toolsHeading: string;
 }
 
 /** The offline page (F8, decision 8; DECISOES § 289): what the service worker shows for a page it did not keep. */

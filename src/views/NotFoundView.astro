@@ -1,12 +1,23 @@
 ---
 // 404 with tool search (PLANO: "404 com busca de ferramentas"), with the Oli in mask and snorkel ("This
 // page swam away."). Out of sitemap and hreflang.
+// F13b (decision 8; UX-17 A, pages.html; DECISOES § I-1 and § I-2): the Oli lost floats in a band of water (the .fo-water
+// of the DropZone on surface-sunken), looking left at the H1; the search keeps only its stroke (it does not float, so no
+// shadow-pop); three chips lead to real tools, the first of each hub of the language, read from the registries (Compress
+// image, Merge PDF and the first money calculator of the hub: Mortgage calculator, or Simulador SAC × PRICE in pt); then
+// the link to the home. From 1280 px the band of water is the right column of the page: the same markup, put there by the
+// grid (two copies would be two Olis lost). No ad: the 404 is a free page, and the server answers it with the status 404.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Oli from '../components/Oli.astro';
+import Icon from '../components/Icon.astro';
 import SearchBox from '../components/SearchBox.astro';
-import { routeById, type Lang } from '../i18n/routes.ts';
+import { pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { homePath } from '../seo/meta.ts';
+import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
+import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { HUB_MONEY_IDS, moneyPage } from '../tools/calc/registry.ts';
+import type { IconName } from '../icons/svg.ts';
 
 interface Props {
   lang: Lang;
@@ -15,17 +26,40 @@ const { lang } = Astro.props;
 const route = routeById('not-found');
 const t = TEXTS[lang]['not-found'];
 const common = TEXTS[lang].common;
+/** The three chips: the first tool of the image, the PDF and the money hub of the language, where it has a page. */
+const image = IMAGE_TOOL_IDS[0];
+const pdf = PDF_TOOL_IDS[0];
+const money = HUB_MONEY_IDS[lang][0];
+const moneyDef = money ? moneyPage(money, lang) : null;
+const chips: { href: string; name: string; icon: IconName; category: 'image' | 'pdf' | 'money' }[] = [
+  ...(image && pagePath(image, lang) && common.tools[image] ? [{ href: pagePath(image, lang) ?? '', name: common.tools[image].name, icon: IMAGE_PAGES[image].icon, category: 'image' as const }] : []),
+  ...(pdf && pagePath(pdf, lang) && common.pdf?.[pdf] ? [{ href: pagePath(pdf, lang) ?? '', name: common.pdf[pdf].name, icon: PDF_PAGES[pdf].icon, category: 'pdf' as const }] : []),
+  ...(money && moneyDef && pagePath(money, lang) && common.calcs[money] ? [{ href: pagePath(money, lang) ?? '', name: common.calcs[money].name, icon: moneyDef.icon, category: 'money' as const }] : []),
+];
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} oli={['lost']}>
-  <div class="fo-hero">
-    <div class="fo-hero__text">
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} oli={['lost']} wide>
+  <div class="fo-view fo-view--stack fo-view--side fo-view--404">
+    <div class="fo-404__text">
       <h1 class="fo-h1">{t.h1}</h1>
       <p class="fo-prose">{t.body}</p>
     </div>
-    <Oli pose="lost" class="fo-hero__oli" />
+    <div class="fo-sea fo-side" aria-hidden="true">
+      <Oli pose="lost" class="fo-sea__oli" />
+      <div class="fo-water"></div>
+    </div>
+    <section class="fo-search-inline" aria-label={t.searchLabel} data-search-inline>
+      <SearchBox t={common} id="fo-404-search" />
+    </section>
+    {chips.length > 0 && (
+      <nav class="fo-404__tools" aria-labelledby="nf-tools">
+        <h2 id="nf-tools">{t.toolsHeading}</h2>
+        <ul class="fo-next">
+          {chips.map((chip) => (
+            <li><a class={`fo-chip fo-cat--${chip.category}`} href={chip.href}><span class="fo-chip__dot" aria-hidden="true"><Icon name={chip.icon} /></span><span>{chip.name}</span><Icon name="arrow-right" /></a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+    <p class="fo-404__home"><a href={homePath(lang)}>{t.homeLink}</a></p>
   </div>
-  <section class="fo-section fo-search-inline" aria-label={t.searchLabel} data-search-inline>
-    <SearchBox t={common} id="fo-404-search" />
-  </section>
-  <p><a href={homePath(lang)}>{t.homeLink}</a></p>
 </BaseLayout>

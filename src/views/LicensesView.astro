@@ -1,8 +1,13 @@
 ---
 // /licenses, generated at build: the `dependencies`, the packages that come inside them and the fonts,
 // each with the license texts it requires, plus the LGPL notice for libheif (DECISOES § 13).
+// F13b (decision 8; UX-17 A, pages.html; DECISOES § I-1 and § I-3): the H2 get ids made from their texts at build time,
+// and from 1280 px the right column is the index "On this page" of them, sticky. Below 1280 the page is the one of before:
+// the head and the body are grids with the 16 px gaps <main> gave the same blocks.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import PageIndex from '../components/PageIndex.astro';
+import { pageIndex } from '../components/page-index.ts';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { bundledPackages, browserPackages, isSeparateFileOnly, lgplSources, type PackageLicense } from '../platform/licenses.ts';
@@ -28,56 +33,67 @@ const crumbs = [
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
 const anchor = (item: PackageLicense) => `pkg-${item.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}`;
+/** The H2 of the page in order (the LGPL notice first, where there is one), and their ids, unique among the ids of the page. */
+const headings = [...(lgpl ? [t.lgplHeading] : []), ...groups.map((group) => group.heading)];
+const index = pageIndex(headings, ['main', 'toc-title', 'lgpl', ...direct.map(anchor), ...bundledPackages().map(anchor)]);
+const idOf = (heading: string) => index[headings.indexOf(heading)]?.id;
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <h1 class="fo-h1">{t.h1}</h1>
-  <p class="fo-prose">{t.intro}</p>
-  {lgpl && (
-    <section class="fo-section fo-prose" id="lgpl" data-license-notice="lgpl">
-      <h2>{t.lgplHeading}</h2>
-      <p>{t.lgplWhat}</p>
-      <p>{t.lgplSeparate}</p>
-      <p>{t.lgplReplace}</p>
-      <h3 class="fo-h3">{t.lgplSourceHeading}</h3>
-      <ul>
-        {lgplLinks.map((link) => (
-          <li><a href={link.url} rel="noopener">{`${link.name} ${link.version}`}</a>: {t.lgplRoles[link.id]}</li>
-        ))}
-      </ul>
-      <p>{t.lgplTexts} <a href={`#${anchor(lgpl)}`}>{lgpl.name}</a></p>
-    </section>
-  )}
-  {groups.map((group) => (
-    <section class="fo-section">
-      <h2>{group.heading}</h2>
-      {group.intro && <p class="fo-prose">{group.intro}</p>}
-      {group.items.length === 0 ? <p>{group.empty}</p> : (
-        <table class="fo-table">
-          <thead><tr><th scope="col">{t.packageColumn}</th><th scope="col">{t.versionColumn}</th><th scope="col">{t.licenseColumn}</th></tr></thead>
-          <tbody>
-            {group.items.map((item) => (
-              <tr id={anchor(item)}>
-                <td>
-                  {item.repository ? <a href={item.repository} rel="noopener">{item.name}</a> : item.name}
-                  {item.via && <div class="fo-muted">{t.viaLabel} {item.via}</div>}
-                </td>
-                <td>{item.version}</td>
-                <td>
-                  {item.license}
-                  {item.texts.map((entry) => (
-                    <details>
-                      <summary>{entry.label ? `${t.showTextOf} ${entry.label}` : t.showText}</summary>
-                      {entry.source && <p class="fo-muted">{t.copiedFrom} <a href={entry.source} rel="noopener">{entry.source.replace(/^https:\/\//, '')}</a></p>}
-                      <pre tabindex="0" lang={lang === 'en' ? undefined : 'en'}>{entry.text}</pre>
-                    </details>
-                  ))}
-                </td>
-              </tr>
+  <div class="fo-view fo-view--stack fo-view--side fo-view--licenses">
+    <div class="fo-view__part">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p class="fo-prose">{t.intro}</p>
+    </div>
+    <PageIndex label={common.pageIndex} entries={index} />
+    <div class="fo-view__part">
+      {lgpl && (
+        <section class="fo-section fo-prose" id="lgpl" data-license-notice="lgpl">
+          <h2 id={idOf(t.lgplHeading)}>{t.lgplHeading}</h2>
+          <p>{t.lgplWhat}</p>
+          <p>{t.lgplSeparate}</p>
+          <p>{t.lgplReplace}</p>
+          <h3 class="fo-h3">{t.lgplSourceHeading}</h3>
+          <ul>
+            {lgplLinks.map((link) => (
+              <li><a href={link.url} rel="noopener">{`${link.name} ${link.version}`}</a>: {t.lgplRoles[link.id]}</li>
             ))}
-          </tbody>
-        </table>
+          </ul>
+          <p>{t.lgplTexts} <a href={`#${anchor(lgpl)}`}>{lgpl.name}</a></p>
+        </section>
       )}
-    </section>
-  ))}
+      {groups.map((group) => (
+        <section class="fo-section">
+          <h2 id={idOf(group.heading)}>{group.heading}</h2>
+          {group.intro && <p class="fo-prose">{group.intro}</p>}
+          {group.items.length === 0 ? <p>{group.empty}</p> : (
+            <table class="fo-table">
+              <thead><tr><th scope="col">{t.packageColumn}</th><th scope="col">{t.versionColumn}</th><th scope="col">{t.licenseColumn}</th></tr></thead>
+              <tbody>
+                {group.items.map((item) => (
+                  <tr id={anchor(item)}>
+                    <td>
+                      {item.repository ? <a href={item.repository} rel="noopener">{item.name}</a> : item.name}
+                      {item.via && <div class="fo-muted">{t.viaLabel} {item.via}</div>}
+                    </td>
+                    <td>{item.version}</td>
+                    <td>
+                      {item.license}
+                      {item.texts.map((entry) => (
+                        <details>
+                          <summary>{entry.label ? `${t.showTextOf} ${entry.label}` : t.showText}</summary>
+                          {entry.source && <p class="fo-muted">{t.copiedFrom} <a href={entry.source} rel="noopener">{entry.source.replace(/^https:\/\//, '')}</a></p>}
+                          <pre tabindex="0" lang={lang === 'en' ? undefined : 'en'}>{entry.text}</pre>
+                        </details>
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
 </BaseLayout>

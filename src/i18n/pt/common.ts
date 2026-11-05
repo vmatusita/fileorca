@@ -22,6 +22,7 @@ export default {
     supportMeta: 'Ko-fi ou Pix',
   },
   breadcrumb: { label: 'Trilha de navegação', home: 'Início' },
+  pageIndex: 'Nesta página',
   seal: 'Seu arquivo nem sai do aparelho',
   footer: {
     imageColumn: 'Imagem',

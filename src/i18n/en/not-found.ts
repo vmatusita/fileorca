@@ -8,4 +8,5 @@ export default {
   body: 'The link may be old, or the address may have a typo. Search for a tool or go back to the home page.',
   searchLabel: 'Search for a tool',
   homeLink: 'Go to the home page',
+  toolsHeading: 'Or go straight to a tool',
 } satisfies NotFoundTexts;

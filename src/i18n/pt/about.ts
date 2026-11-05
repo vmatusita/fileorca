@@ -19,4 +19,12 @@ export default {
   linksHeading: 'Encontre o Victor na internet',
   websiteLabel: 'Site do Victor',
   linkedinLabel: 'Victor no LinkedIn',
+  stats: {
+    heading: 'O FileOrca em números',
+    image: 'ferramentas de imagem',
+    pdf: 'ferramentas de PDF',
+    money: 'calculadoras feitas para o Brasil',
+    languages: 'idiomas',
+    zero: 'uploads',
+  },
 } satisfies AboutTexts;

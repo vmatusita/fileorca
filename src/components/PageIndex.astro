@@ -1,0 +1,17 @@
+---
+// The "On this page" index of a legal page and of the Licenses (F13b, decision 8; UX-17 A, pages.html; DECISOES § I-1
+// and § I-3): a nav named by its own H2, an ordered list of links to the H2 of the page, made at build time from their
+// texts (src/components/page-index.ts). From 1280 px it is the right column of a page without ads, sticky; below 1280 it
+// is display: none, so it is neither on screen nor in the accessibility tree. Never an ad: the column is content.
+import type { PageIndexEntry } from './page-index.ts';
+
+interface Props {
+  label: string;
+  entries: readonly PageIndexEntry[];
+}
+const { label, entries } = Astro.props;
+---
+<nav class="fo-toc fo-side" aria-labelledby="toc-title">
+  <h2 id="toc-title">{label}</h2>
+  <ol>{entries.map((entry) => <li><a class="fo-toc__link" href={`#${entry.id}`}>{entry.text}</a></li>)}</ol>
+</nav>
