@@ -487,6 +487,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   /** `from`: the page whose chip brought these files (UX-14), checked against the origins of this page. */
   function startBatch(files: File[], from: string | null = null): void {
     if (files.length === 0) return;
+    // The warm-up is for before the first file: from here each codec comes when a file needs it, and the pointer that
+    // later enters the rectangle (to click Download) or the focus on Choose after Start over fetches nothing (DECISOES § 534).
+    warmed.current = true;
     m.from = from;
     m.lost = null;
     drops.current?.reset();

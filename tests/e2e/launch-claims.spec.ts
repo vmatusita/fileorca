@@ -92,6 +92,10 @@ for (const { path, first, second, magic, load = fixtureFile, setup, act } of CAS
     expect(response?.status()).toBe(200);
     await hydrated(page);
     await dismissCookies(page);
+    // The pointer leaves the tool: nothing warms the codecs before the first file, as when a file is dropped anywhere on
+    // the page (UX-18 A) or pasted. Where the click on the notice left it depended on the fonts of each system (F13a,
+    // DECISOES § 534).
+    await page.mouse.move(0, 0);
     const origin = new URL(page.url()).origin;
 
     await setup?.(page);
