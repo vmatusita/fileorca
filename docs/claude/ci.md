@@ -187,3 +187,10 @@ Pegadinhas que a F11 achou (no cabeçalho com o Menu, no tema claro e escuro, no
 Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
 
 - **O `tests/unit/conteudo.test.ts`, "checks the ten file guides of the registry, and fails when one loses its tool or is missing (F5b)"**, roda o portão num processo filho e reprovou uma vez por tempo quando rodou com o `pnpm tipos` ao mesmo tempo na máquina. Passou nas duas vezes seguintes, sem mudança. Não rode o Vitest inteiro ao lado do `astro check`. (os ícones)
+
+## F13b: calculadoras, guia, home, hubs e institucionais
+
+Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de arquivo, na home e nos hubs, nas páginas institucionais e no rodapé, no resultado a 320 px e na fonte de reserva (DECISOES § 535 em diante):
+
+- **O `src/components/home-numbers.ts` importa o `qr.ts`, que importa o `qrcode` e um `?raw`:** ele serve ao Astro e ao Vitest, não a um script do Node puro. Um script que precise dos números da home lê as fontes direto (o `data/guides-measured.json`, as fixtures e o `MAX_BYTES`), como o `home-numbers.test.ts`.
+- **O Vitest inteiro com as outras frentes rodando na máquina** estourou os 5 s em 8 testes (o `conteudo.test.ts` e três de PDF); os quatro arquivos passam sozinhos (170 testes). É carga da máquina, não regressão.
