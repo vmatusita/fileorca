@@ -1,0 +1,684 @@
+ultracode
+
+# Missão
+
+Rode a F13a do FileOrca, a primeira das duas runs da fase "UX/UI: implementação" do `PLANO-MELHORIAS.md`. Construa o que o Victor escolheu na F10 para as páginas de ferramenta e para o site inteiro, na ordem da lista dele:
+
+1. o aviso de cookies compacto (UX-09);
+2. a Oli por estado, com laço curto (UX-10);
+3. a página de ferramenta "um lugar só", nas ferramentas de imagem e de PDF (UX-04 A);
+4. as peças das ferramentas de PDF (UX-11 A);
+5. o resultado que vai direto para a próxima ferramenta (UX-14);
+6. os ícones próprios por ferramenta (UX-16);
+7. o soltar em qualquer lugar da página (UX-18 A).
+
+Junto deles vêm as 25 pendências de design e acessibilidade da lista da decisão 2. A Oli fica no centro, e nenhum orçamento piora.
+
+Ao terminar:
+
+- na primeira visita a 360 × 740, o aviso de cookies tem no máximo 130 px de altura, fala do selo da própria página e não cobre o Escolher, a saída do erro nem o Baixar das ferramentas;
+- nenhum movimento da Oli que começa sozinho passa de 5 s, e só o progresso é laço;
+- nas ferramentas de imagem (com as presets) e de PDF:
+  - o painel é um retângulo de altura fixa, com a Oli num canto só;
+  - o resultado é a água que subiu, e a página não pula do soltar ao resultado;
+  - os chips ficam perto do Baixar, e o erro diz o caso e a ferramenta certa;
+  - no juntar, a lista mora no retângulo, com a lixeira e o desfazer;
+- as peças de PDF fecham as 15 pendências da F5a;
+- o chip de próximo passo leva o arquivo para a ferramenta seguinte, sem nada sair do aparelho;
+- cada cartão de um hub tem o seu ícone, e a DropZone usa o `file-drop`;
+- soltar um arquivo em qualquer parte do conteúdo de uma página com ferramenta manda o arquivo para ela;
+- o mapa de anúncios da F12 continua verde no build de teste, e o aviso compacto fica a 150 px ou mais do 1º anúncio também nas janelas da F12 R-A-2;
+- o `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão em dia, e o relatório lista o que é da F13b;
+- o relatório está em `docs/relatorios/fase-13a.md` e a revisão em `docs/relatorios/REVISAO-F13a.md`;
+- a PR da branch `fase-13a` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `14341bc` (a F12 mesclada) ou num commit mais novo. Confira com `git log --oneline -5`. Guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+O que mudou desde que o plano foi escrito:
+
+- **A F12 está na main** (§ 410 a § 455):
+  - o mapa de anúncios tem 37 unidades e é medido num build de teste (`scripts/lib/test-build.ts`), servido como fileorca.com nos testes (`tests/e2e/lib/production.ts`). O build padrão não tem caixa de anúncio (Mudança 10);
+  - o 1º anúncio da ferramenta já vem depois do "Como usar". É a parte do UX-04 A que a F12 fez (§ 419 a § 423);
+  - a linha do café mora no ResultCard, depois do Baixar, do Começar de novo e das notas (§ 436), e o `ads-coffee.spec.ts` mede os 150 px dela até os anúncios;
+  - o vapor da caneca já para em 4,8 s (§ 439). Da F3 d-02, falta a `wave`;
+  - a F3 f-06 saiu na F12 (§ 429): o `resize` e o ResizeObserver já valem no aviso reaberto, e o teste dela está no `cookie-footer.spec.ts`;
+  - a Oli tem dez poses, e a `sad` só aparece na parede (§ 417).
+- **As escolhas do Victor.** A lista `ESCOLHAS.md` marcada está em `.cache/ESCOLHAS-marcado.md`, fora do Git. Ele ficou com a recomendada em tudo. Na F13 ele marcou, nesta ordem:
+  - os itens UX-09, UX-10, UX-04 A, UX-12 A, UX-13 A, UX-11 A, UX-03 B, UX-14, UX-16, UX-15 A, UX-17 A e UX-18 A;
+  - a decisão avulsa do texto da home B;
+  - as 37 pendências de design e acessibilidade: 35 para corrigir, a F7 e-1 para descartar e a F4 ACE-7 para aceitar e registrar. A F3 f-06 e a F5b F-12 já saíram, na F12 e na F11.
+- **A divisão da F13 é por área,** escolhida pelo Victor em 4/nov (decisão 2). Esta run faz a F13a: as páginas de ferramenta e o que vale no site inteiro. A F13b faz as calculadoras, o guia, a home, os hubs e as páginas institucionais. Não toque no que é da F13b.
+- **O rótulo `ci` pode não existir.** Na F12 ele não existia (§ 448), e criá-lo é do Victor. A decisão 13 diz o que fazer.
+- **O CI roda por classe** (F9, `scripts/ci/classificar.ts`):
+  - a PR em rascunho sem o rótulo `ci` roda o job `leve` (tipos, lint, build e Vitest);
+  - a PR pronta roda tudo: o build uma vez, os portões, o Playwright em partes (5 no Chromium e 13 no WebKit) e o Lighthouse;
+  - depois, o `merge` mescla sozinho a PR do dono que não mexe em `.github/`. Esta PR cai na classe completa.
+- **O repositório é público** (§ 338). Tudo o que você commita, a PR, os logs e os artefatos do Actions ficam públicos.
+- **O próximo § livre do `DECISOES.md` é o 456,** se nada entrou depois da F12. Reserve os números no plano e escreva os § na ordem: um § citado antes de ser escrito prende a numeração.
+- **A linha de base da F12:** o Vitest tem 115 arquivos e 1.909 testes; o `--list` do Playwright tem 1.693 testes por navegador, em 54 arquivos. Confira os números no ponto de partida.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **Este prompt.** Ele faz o papel da ficha da F13a e vence o resto.
+2. **O `PLANO-MELHORIAS.md`:**
+   - "Mudanças no contrato" (sobretudo a 12 e a 13), o parágrafo "O que não muda" e "Regras novas de toda run";
+   - a ficha da F13 e o "Depois da F13".
+3. **O `PLANO-FILEORCA.md`:** "Decisões fechadas", "Orçamento de desempenho", "A mascote: Oli, a orca", "Molde da página de ferramenta" e "Execução por IA".
+4. **O `CLAUDE.md` e, de `docs/claude/`:**
+   - o `imagem.md`, o `pdf.md`, o `design-e-oli.md`, o `playwright.md`, o `service-worker.md` e o `windows-git-bash.md`, inteiros;
+   - do `anuncios.md`, as seções da F10, da F11 e da F12;
+   - do `idiomas.md`, o que fala do `lint:texto` e do glossário;
+   - do `ci.md`, as pegadinhas gerais da F1a e as seções da F9, da F11 e da F12.
+5. **A proposta da F10** (`docs/propostas/ux-v2/`):
+   - no `README.md`, os itens UX-04, UX-09, UX-10, UX-11, UX-14, UX-16 e UX-18, a seção 6 (as pendências) e, da seção 9, as linhas de contraste desses itens. O README tem 300 KB: leia buscando o título de cada item;
+   - a área "Especificação" (o `<section>` com o `#spec-title`) de `cookie.html`, `oli-motion.html`, `tool-a.html`, `tool-a-merge.html`, `pdf-pieces.html`, `handoff.html`, `drop-anywhere.html` e `icons.html`, e a pasta `icons/` com os 27 SVG;
+   - do `DECISOES.md`, as § 365, § 366, § 371 a § 374, § 377, § 379 (a parte dos ícones) e § 381, e o que elas citam.
+6. **O `docs/design/`:**
+   - o `README.md`, sobretudo os "Princípios de UX", "Movimento", "Cor", "Layout e anúncios", "Oli" e a lista "Nunca";
+   - o `tokens.css`;
+   - os README da DropZone, do WaterLevel, do ResultCard, do BeforeAfter, do Placard, do NextStepChips, do FileCard, do OptionGroup, do OliMessage, do Button, do CookieNotice, da Oli, do ToolPage e do AdSlot;
+   - o `assets/Icons/README.md` e o `assets/Oli/README.md`.
+7. **Do `docs/PENDENCIAS.md`:** "Como ler", o Resumo, as linhas da lista da decisão 2 (nos grupos 5, 6, 14, 16, 19 e 21) e "Já corrigidos depois da revisão".
+8. **O `DECISOES.md`, só buscando o §** (são 820 KB, nunca inteiro). Comece pelas § 20, § 36, § 44, § 49, § 57, § 91, § 102, § 103, § 106, § 177, § 184, § 240, § 290, § 305, § 306, § 341, § 401, § 409, § 413, § 414, § 419 a § 423, § 429, § 436, § 439, § 445, § 448 e § 454, e siga pelas que você precisar.
+9. **O código que a run toca:**
+   - o aviso e o layout: `src/components/CookieNotice.astro` (com o script inline), `src/layouts/BaseLayout.astro`, `src/styles/global.css` e `src/styles/components.css`, e os `common.ts` de `src/i18n/<lang>/`;
+   - a Oli: `src/oli/`, `src/tools/image/Oli.tsx`, `scripts/lib/design-checks.ts` e `scripts/gates/design.ts`;
+   - as ilhas de imagem: `src/tools/image/` (o `ImagePanel.tsx`, o `BeforeAfter.tsx`, o `OptionGroup.tsx`, o `ImageToolPage.astro`, o `ImageToolEmbed.astro`, o `inbox.ts`, o `mount.ts` e os textos em `i18n/`);
+   - as ilhas de PDF: `src/tools/pdf/` (o `PdfPanel.tsx`, o `PageGrid.tsx`, o `SignatureArea.tsx`, o `tools.tsx`, o `PasswordField.tsx`, o `PdfToolPage.astro`, o `client.ts` e os textos em `i18n/`);
+   - as peças comuns: `src/components/FileCard.tsx`, `src/share/logic.ts` e `src/share/tools.ts`;
+   - os ícones: `docs/design/assets/Icons/`, `src/icons/`, a lista `ICON_NAMES` e o campo `icon` dos registros;
+   - os testes: em `tests/e2e/`, o `island.spec.ts`, o `tool.spec.ts`, o `tool-guides.spec.ts`, o `tool-i18n.spec.ts`, os `image-*.spec.ts`, os `pdf-*.spec.ts`, o `axe-pdf-states.spec.ts`, o `share-target.spec.ts`, os `sw-*.spec.ts`, o `cookie-footer.spec.ts`, os `consent*.spec.ts`, o `design.spec.ts`, o `a11y.spec.ts`, o `layout-shift.spec.ts`, o `budgets.spec.ts`, o `i18n-budgets.spec.ts`, o `ads.spec.ts`, o `fo-ad-map.spec.ts`, o `ads-coffee.spec.ts`, o `coffee.spec.ts` e o `events.spec.ts`; em `tests/unit/`, o `icons.test.ts`, o `design-checks.test.ts`, o `pendencias.test.ts` e os testes de texto (`glossary.test.ts` e `english-leak.test.ts`).
+
+# Escopo
+
+Dentro:
+
+1. A divisão da F13 e a especificação (decisões 1 e 2).
+2. O aviso de cookies compacto, com a F4-F7 f-1, o ajuste-aviso-espaco e a F12 R-A-2 (decisão 3).
+3. A Oli por estado, com a F3 d-02 (decisão 4).
+4. A página de ferramenta nas ferramentas de imagem, nas presets, na ferramenta embutida dos guias e nas ferramentas de PDF, com o juntar, a F4-F7 e-2, a f-2 e as F10 p-13 e p-14 (decisão 5).
+5. As peças de PDF, com as 15 pendências da F5a (decisão 6).
+6. O chip que leva o arquivo (decisão 7).
+7. Os ícones (decisão 8).
+8. O soltar em qualquer lugar, com a F10 p-11 (decisão 9).
+9. O mapa de anúncios verde com a página nova (decisão 10).
+10. Os textos, o `docs/design/`, o `docs/claude/`, o `docs/PENDENCIAS.md`, os testes, os §, as imagens, a revisão adversarial e o relatório (decisões 11 e 12).
+
+Fora (não toque):
+
+- **O que é da F13b:**
+  - as calculadoras e o QR (UX-12);
+  - a página de guia (UX-13), menos o que a ilha nova muda sozinha na ferramenta embutida;
+  - a home (UX-03 B, com as 75 a 105 palavras a mais);
+  - o mar nos hubs e no escuro (UX-15 A);
+  - as páginas institucionais e o rodapé (UX-17 A);
+  - as pendências F4 ACE-7, ACE-8, ACE-9 e ACE-11, F7 obs 1, obs 2, obs 3, f-9, f-10 e f-13, Idiomas E-2 e R2-03, F5b F-2 e F-13, e F10 p-2, p-3, p-15, p-16, p-17 e p-19.
+
+  Nos registros das calculadoras e dos hubs, só o campo `icon` muda (decisão 8). O texto do aviso de cookies também vale nas calculadoras e no QR, porque o aviso é um só (decisão 3).
+- **O que a F12 trava nos anúncios:** o `src/ads/` (a configuração, o AdSlot, o AdsenseHead, o mapa e a parede), as unidades, os formatos, o push único e as regras de "O que não muda". A única mudança permitida é a da decisão 10: a estimativa de altura ou uma fronteira, quando um teste do mapa reprovar por causa da página nova.
+- **O café:** os textos, as regras e o gatilho. A linha só muda de lugar dentro do resultado novo, como manda a decisão 5.
+- **Item não escolhido e alternativa não escolhida:** a B de cada item, as cenas de fundo, o "mar à noite", o véu do UX-18 B e os itens descartados da lista "para avaliar".
+- **Dependência nova,** inclusive um `pnpm dlx` ou `npx` de pacote fora do lockfile. Arquivo JS novo por página. Requisição nova. Cor nova: nenhum token novo (os pares novos usam tokens que já existem).
+- **Evento novo do GA4.** Nenhum protótipo da F13a pede um. Se algum parecer necessário, ele fica de fora e vira linha no grupo 22 do `docs/PENDENCIAS.md`.
+- **Arquivos fora da run:** `.github/`, o `CLAUDE.md`, os dois PLANOs, `docs/adr/`, `docs/propostas/` (o registro da F10) e `.cache/ESCOLHAS-marcado.md` (só leitura).
+- **Código fora da run:**
+  - o motor e o que ele grava: nenhuma fixture, nenhum oráculo e nenhum byte de saída mudam;
+  - as contas das calculadoras;
+  - o `scripts/guides/`, nem num comentário (o `guides-measured.test.ts` confere o SHA-256);
+  - o service worker (`src/sw/`), menos o caso da decisão 7.
+- **O `pnpm screenshots`,** que apaga e regrava `docs/relatorios/fase-03/componentes/`, e o `pnpm design:gerar` (nenhuma pose muda).
+- **Qualquer coisa no Cloudflare, no AdSense, no GA4 ou no Search Console,** e no GitHub fora da PR desta run.
+- **Os IDs reais do AdSense** nunca entram no repositório. Os testes usam o `ca-pub-0000000000000000` e os IDs falsos do build de teste.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 456)
+
+1. **A especificação.**
+   - A área "Especificação" de cada protótipo é o contrato, junto com as § 371 a § 374, § 377, § 379 e § 381. Ela traz a marcação, as classes, os tokens, os estados, os textos nos três idiomas, o teclado, o nome acessível, as medidas e a lista "Testes que a F13 escreve".
+   - Onde ela e este prompt divergem, vale este prompt.
+   - Os protótipos estão sobre o `bundle.css` do `docs/design/`, que não é o CSS do site. Construa sobre o `components.css` e o `global.css`, e confira cada medida no `dist/`.
+   - As medidas dos protótipos foram tiradas com o aviso de cookies de antes e o cabeçalho de antes da F11. Meça de novo no site, com o aviso compacto e o cabeçalho de hoje.
+   - O site não importa nada de `docs/propostas/`. O script dos previews (`?state=`, `?lang=`, `?theme=`, `?error=`) e o controle de protótipo não vão para o site.
+
+2. **A divisão da F13 e a ordem.** Registre num § a divisão, a ordem e as duas listas abaixo.
+   - **A F13a constrói,** na ordem da lista do Victor: UX-09, UX-10, UX-04 A, UX-11 A, UX-14, UX-16 e UX-18 A.
+   - **As 25 pendências da F13a:**
+     - F3 d-02 (pela saída A, no UX-10);
+     - F4-F7 e-2, F4-F7 f-2 e as F10 p-13 e p-14 (no UX-04);
+     - F4-F7 f-1 (saída a), ajuste-aviso-espaco e F12 R-A-2 (no UX-09);
+     - F5a D-6, D-7, D-8, D-9, D-10, D-11 e D-12, e F5a F-5, F-6, F-7, F-8, F-10, F-11, F-13 e F-14 (no UX-11);
+     - F10 p-11 (no UX-18);
+     - F7 e-1, para descartar: ela sai do `PENDENCIAS.md` citando a § 305, e o `layout-shift.spec.ts` já prova.
+   - **A F13b faz o resto:** UX-12 A, UX-13 A, UX-03 B (com a decisão avulsa do texto), UX-15 A e UX-17 A, e as 20 pendências da lista "Fora". O relatório lista isso, para o prompt da F13b.
+   - **A F10 p-19** (o número das calculadoras coberto pelo aviso a 360) fica para a F13b, com o UX-12. O aviso compacto já diminui a parte coberta, e nada piora.
+
+3. **O aviso de cookies compacto** (UX-09; `cookie.html` e § 372).
+   - **O card:**
+     - fica no mesmo canto e não bloqueia a página;
+     - tem o texto no estilo `small` (14/20), em duas linhas a 360 px nos três idiomas, com a Figtree e com a Figtree Fallback;
+     - tem 128 px de altura a 360 × 740 (até 148 px no pt e no es a 320 px) e 360 px de largura a partir de 768 px;
+     - tem os dois botões iguais lado a lado, com 52 px e o Recusar primeiro, sem `brand` e sem `sun`.
+   - **O texto:** "Cookies for Google Analytics and ads." e o equivalente em pt e es (o da especificação), seguido do selo da própria página e do link da Privacidade. O selo é o do arquivo, o dos números ou o do texto do QR, e na home o `common.seal`. A página passa o selo ao CookieNotice pela `BaseLayout`.
+   - **O `keep()`:** com o aviso aberto, um ResizeObserver no `<main>` tira de baixo dele o elemento focado que se mexeu sem o foco mudar. É o caso do erro: o Preact reaproveita o mesmo `<button>`, e o `focusin` não dispara.
+   - **Continua igual:**
+     - o aviso não reserva espaço no fim da página (§ 91 e § 106);
+     - ele usa a `Figtree Steady` e fica acima da âncora;
+     - o consentimento não muda em nada: as chaves, o Consent Mode, as regiões da c-04 e o `fo-consent`;
+     - o teste da f-06 da F12 continua verde.
+   - **A mudança de regra** que o Victor aceitou vai para o README do CookieNotice: "lembra que o arquivo não sai do aparelho" passa a "repete o selo da página".
+   - **A F4-F7 f-1,** pela saída (a): a 360 × 740, o aviso não cobre o Escolher nem o Escolher outros arquivos, nos três idiomas. A 320 × 640, o Escolher do pt e do es depende da página nova (decisão 5).
+   - **O ajuste-aviso-espaco:** a 1280 px, o card de 360 × 128 cobre no máximo 2 links do rodapé.
+   - **A F12 R-A-2:**
+     - no build de teste, na rolagem 0, com o aviso aberto, o 1º anúncio de conteúdo fica a 150 px ou mais dele também a 1440 × 900, a 1920 × 950, a 1920 × 1080, a 768 × 1024 e a 1024 × 1366, além das duas janelas da F12;
+     - o `fo-ad-map.spec.ts` ganha essas janelas;
+     - onde faltar distância, o anúncio desce, nunca o aviso, como a regra da calculadora (`.fo-calc-island ~ .fo-ad[data-ad-unit="conteudo"]`, `anuncios.md`). Na home, a regra mínima que passar: a home nova é da F13b, e ela mede de novo.
+
+4. **A Oli por estado, com laço curto** (UX-10 A; `oli-motion.html` e § 373).
+   - **O CSS:** troque as animações de hoje da Oli no `components.css` pelo CSS da especificação. Só `transform` e `opacity`, com a duração e a curva pelo nome do token.
+   - **Os estados:**
+     - `wave`: um aceno de 3 s; no `:hover` da DropZone ou no foco do botão dela, um aceno curto de 0,6 s, como segunda animação da lista (o aceno de 3 s não recomeça);
+     - `gulp`: cresce 6 % e inclina 4 px para a água, em 0,16 s;
+     - `swim`: braçadas enquanto o trabalho dura. É o único laço, porque é o progresso;
+     - `cheer`: 0,6 s, uma vez;
+     - `oops`: recua e volta, uma vez, em 0,6 s;
+     - `buoy`: balança duas vezes, 3 s ao todo;
+     - `coffee`: a Oli parada, e o vapor sobe 1,4 ciclo e assenta visível (3,12 s);
+     - `lost`: procura uma vez, em 3 s;
+     - `peek`: sobe de trás da borda, em 0,24 s;
+     - `sad`: parada.
+   - **As regras:**
+     - todo movimento acaba na pose desenhada, que é o quadro do movimento reduzido;
+     - o movimento vai no `<svg>` filho de `[data-oli]`, e a caixa não se mexe (CLS 0);
+     - a rotação máxima é de 6° e o deslocamento novo de 8 px, nunca na direção de um anúncio;
+     - os 150 px até os anúncios são conferidos com a caixa da Oli inflada em 12 px;
+     - com o movimento reduzido, nenhuma animação.
+   - **A mudança de regra** vai para a seção "Movimento" do `docs/design/README.md` e para o README da Oli: "movimento que começa sozinho termina antes de 5 s e deixa a Oli parada; só o progresso dura o trabalho". O § fica ao lado da § 103.
+   - **A F3 d-02 sai pela saída A.**
+
+5. **A página de ferramenta** (UX-04 A; `tool-a.html`, `tool-a-merge.html` e § 371).
+   - **Onde:** em toda página com zona de soltar, nos três idiomas. São as ferramentas de imagem, as presets delas e as ferramentas de PDF, que o README conta em 69 páginas. A ilha é a mesma na ferramenta embutida dos guias de arquivo (`ImageToolEmbed.astro`), e o molde do guia é da F13b.
+   - **O retângulo:**
+     - tem a mesma altura em todos os estados: 356 px no celular e 340 px a partir de 768 px. Ela nunca muda sem um gesto da pessoa;
+     - a Oli fica no canto de cima à direita em todos os estados, olhando para a fala: `wave`, `gulp`, `swim`, `cheer` e `oops`;
+     - a água fica a 30 % em repouso, a 60 % com o arquivo em cima e marca o progresso no WaterLevel, que só entra depois de 400 ms;
+     - o resultado é o mar que subiu: a faixa de água com a onda e o `deep` embaixo, e a placa boia na superfície, presa pela Oli, também a 360 px. A placa é `aria-hidden`, porque repete a fala;
+     - o número fica como "2.6 MB → 717 KB", no formato de cada idioma.
+   - **A faixa de baixo:**
+     - tem altura fixa: 196 px no celular e 120 px a partir de 768 px;
+     - antes do resultado, mostra as opções;
+     - depois, mostra os chips e as opções recolhidas num "Ajustar" (`details`), e mudar o nível refaz na hora.
+   - **O antes e depois** abre só quando a pessoa pede (o botão com `aria-expanded`), e o puxador tem as duas setas (D-09).
+   - **O molde:**
+     - o H1 usa a largura toda, e só a linha do selo abre espaço para a Oli (F4-F7 f-2);
+     - o 1º anúncio continua depois do "Como usar", como a F12 deixou.
+   - **O erro:**
+     - perde o selo redondo, e o Escolher outros arquivos sobe para logo depois da frase;
+     - a razão diz o caso. Um arquivo com extensão de imagem e conteúdo que não é imagem ouve que o conteúdo não bate com a extensão (D-06, F10 p-14);
+     - um PNG na página do HEIC ouve que é um PNG e ganha, na faixa de baixo, o chip "PNG para JPG", com 48 px, que leva o arquivo pelo caminho da decisão 7 (D-17).
+   - **Quando o arquivo cresce** (F10 p-13): no HEIC para JPG, quando o JPG sai maior, o card diz a mudança com o sinal ("+66 %") e nenhum texto da página diz que o JPG fica mais leve. A dica do "Save as" muda junto, nos três idiomas.
+   - **O juntar** (`tool-a-merge.html`):
+     - a lista mora no retângulo: a contagem, o Juntar PDFs logo abaixo dela, a ajuda da ordem à vista, as linhas e um "Adicionar mais PDFs" tracejado, com água;
+     - a ordem fica num círculo `deep` no lugar da miniatura em branco;
+     - onde a seta não anda, fica um lugar vazio de 48 px, e a alça sai: as setas cobrem o teclado e a WCAG 2.5.7;
+     - cada linha tem a lixeira de 48 px. Ao tirar, a linha vira "scan.pdf saiu da lista." com Desfazer no mesmo lugar, até a próxima ação, sem tempo marcado (D-21);
+     - a leitura já é a lista, com "Lendo…", a barra e o × de cada arquivo (D-27);
+     - o ponto onde estava o Escolher passa a ser o Juntar PDFs, e o Começar de novo vai para o pé do retângulo (D-22);
+     - as contagens "Lendo 2 PDFs…" e "2 PDFs prontos" têm `role="status"`;
+     - o retângulo guarda a altura da lista da leitura até o resultado. Depois, a ordem vira um "Ordem" recolhido, que junta de novo na hora.
+   - **As outras ferramentas de PDF** seguem o `tool-a.html`, com as peças da decisão 6. Quando o conteúdo não cabe nos 356 ou 340 px (a grade de páginas, a caixa da assinatura), vale a regra do juntar: o retângulo toma a altura do conteúdo quando a leitura começa e a guarda até o resultado. Registre num § como cada família de ferramenta guarda a altura.
+   - **A linha do café da F12:**
+     - fica no mar do resultado, depois do Baixar, do Começar de novo e das notas (§ 436);
+     - o resultado nunca move o que está embaixo sem um gesto, nem no 3º uso, quando a linha aparece. Se ela não couber na altura do resultado, o retângulo reserva a altura dela quando a linha vai aparecer (o 3º uso é sabido antes do resultado);
+     - escolha a saída mais simples que deixe verde o teste do CLS no 3º uso, e registre num §;
+     - os 150 px até os anúncios continuam (`ads-coffee.spec.ts`).
+   - **Na 1ª visita a 360 × 740,** o foco no Baixar não rola a página.
+   - **As mudanças de regra** que o Victor aceitou vão para os README da DropZone, do WaterLevel, do ResultCard e do BeforeAfter, cada uma com o texto de antes e o de depois num §. O molde da página de ferramenta do `PLANO-FILEORCA.md` não é editado: um § diz quais itens dele este prompt substitui, com o texto de antes e o de depois.
+
+6. **As peças de PDF** (UX-11 A; `pdf-pieces.html` e § 374). Faça em dois commits, como a recomendação do item:
+   - **Primeiro, o que é só CSS e marcação:**
+     - D-7 e F-8: a página marcada ganha um selo de check antes do número, e a borda dela fica a −3 px, sem passar da dobra;
+     - F-6 e F-7: o FileCard de PDF ganha o ícone `pdf` em `coral-soft`, e a dobra do cartão pronto ganha a cor do cartão;
+     - D-8: o nome do arquivo no Juntar ocupa até duas linhas;
+     - D-12: nenhum `fo-btn--sm` nas peças de PDF, e todo botão com 52 px;
+     - D-23: as setas de mover do Organizar viram botão com traço e lábio, e a desativada segue o estado desabilitado do README do Button. No Juntar, vale a linha da decisão 5;
+     - F-14: a barra da grade com o contador numa linha e os dois botões lado a lado, e o trilho de três escolhas em três colunas iguais abaixo de 480 px (até 56 px);
+     - F-10: o aviso da Assinar e o do Forte do Comprimir viram a nota do design system (`brand-soft` com o ícone `info`), e o fieldset do Comprimir aponta para ela no `aria-describedby`. A linha do README do OptionGroup "avisa antes, em OliMessage `info`" passa a "avisa antes, numa nota";
+     - F-11: "Primeira página: Numerar / Pular" num OptionGroup, no lugar da caixa nativa. O "Pular" pula a primeira página no PDF, e o teste de motor de hoje passa pela opção nova.
+   - **Depois, o comportamento, com os testes:**
+     - D-6: na caixa da assinatura, as teclas `+`, `=`, `-` e `_` têm passo fixo, o Shift só vale nas setas, e a ajuda diz isso;
+     - D-9: a caixa ganha o anel do sistema inteiro (a moldura deixa de cortar) e uma região viva que diz a posição nova uma vez, 400 ms depois da última tecla;
+     - D-10: as frases do Inverter e da Rotate dizem o que aconteceu ("Pages reversed.", e a Rotate com as páginas e o giro), nos três idiomas;
+     - D-11: a pegada se solta no `focusout`, e na Unlock com a senha errada o foco volta ao campo, com o texto selecionado (§ 177 e § 240);
+     - F-13: a Unlock mostra um cartão só, com o erro no campo;
+     - F-5: a prévia da Assinar é desenhada na largura da caixa vezes o DPR, até 1.080 px. Só o tamanho da prévia que o PDF.js desenha muda: o PDF que sai é o mesmo (a matriz de PDF prova).
+   - **A pegadinha da § 374:** o `.fo-page` do `bundle.css` colide com a célula da grade de páginas. Ela vale só no protótipo; no site, construa sobre o `components.css`.
+
+7. **O chip que leva o arquivo** (UX-14; `handoff.html` e § 377).
+   - **Quando leva:** no clique simples num chip cujo destino aceita o formato do resultado, pela regra `takes()` de `src/share/logic.ts`. A ilha grava os arquivos que saíram na caixa `fileorca-inbox` (Cache Storage, no aparelho), anota no `sessionStorage` da aba `{tool, order, from}` e navega. No `sessionStorage` só vão ids de página, nunca nome de arquivo.
+   - **Quando só linka,** como hoje:
+     - Ctrl-clique, clique do meio ou nova aba;
+     - destino que não aceita o formato, como o Image to PDF para o Compress image;
+     - página sem service worker no controle.
+   - **A chegada:**
+     - o `takeInbox` passa a devolver `{files, from, lost}`;
+     - os arquivos chegam pelo caminho do soltar, e a ferramenta já mostra o resultado;
+     - a nota de origem diz "Oli brought this image from Compress image." e o equivalente em pt e es, no `role="status"`;
+     - o foco vai ao Baixar, como num soltar.
+   - **O chip** diz "Resize this image" ("these 3 images" no lote) e o equivalente em pt e es. Uma linha embaixo dos chips diz que o arquivo não sai do aparelho.
+   - **A caixa vazia** (um worker novo a apagou, o prazo de 1 h passou ou os dados do site foram limpos):
+     - a DropZone vira um aviso (`data-state="lost"`, `role="status"`), com a Oli `lost`;
+     - os botões são "Choose images" e "Back to Compress image" (`history.back()`);
+     - o primeiro Tab do painel cai no Escolher.
+     Esse estado ganha uma linha no README da DropZone.
+   - **A privacidade:**
+     - nada sai do aparelho, e a caixa é apagada na entrega ou depois de 1 h;
+     - a Privacidade ganha o parágrafo da especificação nos três idiomas;
+     - o GA4 não muda: só o `next_step_click` de sempre, sem nome, tamanho nem quantidade.
+   - **O service worker:** o `src/sw/` só muda se a limpeza de 1 h de hoje não cobrir o que a página grava. Nesse caso, com um § e um teste num `sw-*.spec.ts`.
+   - **O orçamento:** nenhum arquivo novo. O código fica no chunk `island` e na ilha de PDF.
+
+8. **Os ícones** (UX-16; `icons.html` e § 379).
+   - **Os 27 ícones** de `docs/propostas/ux-v2/icons/` entram em `docs/design/assets/Icons/`, no formato dos de hoje: a grade de 24 px, o traço de 2 px, as pontas redondas e o `stroke="#0F1B2D"` no `<svg>` raiz, que o `tests/unit/icons.test.ts` confere. Os nomes entram na `ICON_NAMES`.
+   - **As 33 trocas** de ícone nos registros seguem o mapa do `icons.html`: 2 de imagem, 14 de dinheiro em en e es, 7 de dinheiro em pt, 6 de casa e 4 de saúde. O PDF e o QR não mudam. Nos registros, só o campo `icon` muda.
+   - **A DropZone** em repouso troca o selo `upload` pelo `file-drop`, e o `over` continua com o `download`. A mudança de regra vai para o item 4 da anatomia do README da DropZone.
+   - **O README dos ícones** ganha os 27 nomes, com um §, como ele já prevê.
+
+9. **O soltar em qualquer lugar** (UX-18 A; `drop-anywhere.html` e § 377).
+   - **Nas páginas com ferramenta** (as da decisão 5 e os guias com a ferramenta embutida):
+     - quando um arquivo entra na janela, a DropZone vai ao estado `over` onde estiver;
+     - soltar no texto, no H1, na trilha ou no rodapé manda o arquivo para a ferramenta, e a página traz o painel à vista com `scrollIntoView` (instantâneo com o movimento reduzido);
+     - sobre um anúncio, a página recebe um `dragleave`, a zona volta ao repouso, e o soltar segue com o iframe, como hoje;
+     - nenhum texto convida a soltar "em qualquer lugar", e nada muda no contêiner do anúncio, nem o `pointer-events`.
+   - **Nas páginas sem ferramenta,** o `dropEffect = 'none'`: o cursor nunca promete o que não faz (F10 p-11).
+   - **O orçamento:** menos de 0,5 KB com gzip, no chunk que já existe.
+
+10. **O mapa de anúncios com a página nova.**
+    - O mapa da F12 é contrato. A página nova muda alturas, então rode o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` no build de teste depois de cada fatia que mexe na ilha.
+    - Se um deles reprovar por causa da altura nova, corrija a estimativa (`src/ads/estimate.ts`) ou a fronteira, nunca o limite, e registre num §.
+    - **Os alvos novos dos 150 px** entram nas listas dos dois specs: a faixa de baixo, o "Ajustar", os chips e a linha de privacidade deles, o Desfazer, a lixeira, o "Adicionar mais PDFs", o chip do "PNG para JPG" e o estado `lost`.
+    - Continua valendo:
+      - a densidade conservadora em até 30 % a 360 × 740;
+      - os 1.110 px entre anúncios de conteúdo;
+      - nada acima da ferramenta no celular;
+      - o 1º anúncio da ferramenta depois do "Como usar";
+      - as 27 páginas livres sem anúncio.
+
+11. **Os textos, a documentação e os testes.**
+    - **Os textos novos:**
+      - entram em inglês, português e espanhol, nos arquivos de tradução de cada idioma, com as mesmas chaves e os mesmos `{placeholders}`;
+      - são o aviso, os erros, o "Ajustar", o antes e depois, a lista do juntar, o Desfazer, as frases das peças de PDF, os chips que levam, a nota de origem, a caixa vazia e o parágrafo da Privacidade;
+      - seguem a especificação de cada protótipo;
+      - passam pelo glossário (`docs/i18n/pt.md` e `es.md`, com os termos novos que o `glossary.test.ts` pedir), pelo `lint:texto` e pelo `english-leak.test.ts`;
+      - os botões começam com verbo, e os números ficam no formato do idioma. Se a Privacidade mudar de data, mude também os testes que a fixam.
+    - **O `docs/design/`:** cada mudança de regra das decisões 3 a 9 tem um §, com o texto de antes e o de depois, no README do componente.
+      - O `bundle.css` e o `preview.html` de um componente só mudam se o `gate:design` ou um teste pedir.
+      - A regeneração do design system inteiro (F11 g-2 e R-B-3) fica fora.
+      - Todo par novo de tokens tem o contraste calculado, nos dois temas, no README do componente. A seção 9 do README da proposta tem os pares do UX-04, do UX-11 e do UX-16.
+    - **O `docs/claude/`:** as pegadinhas novas vão no fim do arquivo de tema (`imagem.md`, `pdf.md`, `design-e-oli.md`, `playwright.md`, `service-worker.md` ou `anuncios.md`), numa seção "## F13a: página de ferramenta". O `CLAUDE.md` não muda.
+    - **O `docs/PENDENCIAS.md`:**
+      - as 25 pendências da decisão 2 vão para "Já corrigidos depois da revisão", com o § da F13a. A F7 e-1 vai como descartada, citando a § 305;
+      - um grupo "22. O que a F13a deixou" recebe o que a run e a revisão deixarem;
+      - o Resumo e o Total ficam em dia.
+
+      Nada some sem rastro: o `tests/unit/pendencias.test.ts` procura os ids no arquivo inteiro.
+    - **Os testes:**
+      - cada item ganha os testes da lista "Testes que a F13 escreve" da especificação, e cada pendência corrigida ganha um teste;
+      - cada teste novo reprova sem a mudança. Prove com o `dist/` do ponto de partida (o `git archive` da `windows-git-bash.md`), nunca com `git checkout -- arquivo` sobre mudança não commitada;
+      - o teste antigo que fixa o que esta run muda muda no mesmo commit que o código que ele protege. Exemplos: o antes e depois aberto e o anúncio depois dos chips no `island.spec.ts`, no `a11y.spec.ts` e no `ads.spec.ts`; os laços da `wave` e do vapor no `design.spec.ts`; as alturas do aviso no `cookie-footer.spec.ts`; a alça, as setas desativadas e a caixa nativa nos specs de PDF; o ícone `upload` da DropZone;
+      - cada teste antigo que mudou entra num §, no formato da § 341: o que ele protegia e como a proteção continua;
+      - nenhum teste sai, nenhum é pulado e nenhum limite afrouxa. O número de testes do Vitest e o do `--list` do Playwright só crescem, e o antes e o depois vão no relatório.
+    - **A divisão nas partes:**
+      - um spec novo pesado vai num arquivo cujo nome caia numa parte leve, e um spec que usa o build de teste fica perto dos outros que o usam;
+      - rode o `--list` de cada parte (`docs/claude/playwright.md` e a seção da F9 do `ci.md`);
+      - confira que o `design.spec.ts` e o `image-matrix.spec.ts` continuam em partes diferentes.
+
+12. **As imagens do relatório.**
+    - **O quê:** o antes e o depois de cada item visual, em `docs/relatorios/fase-13a/`, com até 40 imagens:
+      - o aviso a 360 px, no comprimir em pt e numa calculadora em en;
+      - o comprimir a 360 px em repouso, no resultado e no erro, e a 1280 px no resultado;
+      - o erro do PNG no HEIC, depois;
+      - o juntar a 360 px com a lista e, depois, com uma linha tirada;
+      - as peças de PDF: a grade com a página marcada, a caixa da assinatura, o FileCard, o erro da Unlock e o trilho de três escolhas a 360 px;
+      - o chip que leva, a chegada e a caixa vazia;
+      - um hub a 1280 px e o selo da DropZone, antes e depois;
+      - o guia do HEIC a 1280 px com o arquivo sendo arrastado sobre o H1;
+      - duas no tema escuro: o resultado e a lista do juntar.
+
+      O "antes" sai do `dist/` do ponto de partida.
+    - **Como:** JPEG de qualidade 80 ou PNG, escala 1, até 300 KB cada uma e 10 MB no total, com nome em inglês.
+    - **Onde:** nada de imagem fora de `docs/relatorios/`, porque o checkout esparso do CI só pula essa pasta.
+    - **O que nunca aparece:** coordenada, metadado ou nome de arquivo com dado pessoal. Use as fixtures `gen-*` nas capturas.
+
+13. **A PR e o CI.**
+    - **A PR abre em rascunho** logo depois do primeiro push, e cada push roda o job leve.
+    - **Uma conferência no Linux, no meio da run,** depois da junção das frentes (a fatia 3 de "Como trabalhar"). O WebKit e as fontes de lá diferem do Windows (§ 305), e a página nova mexe no CLS e nas medidas. Faça o push, espere a execução leve terminar e rode `gh pr edit <n> --add-label ci`:
+      - **se o rótulo existir,** acompanhe a execução completa, leia os logs, corrija o que só falhou lá e tire o rótulo depois (`gh pr edit <n> --remove-label ci`). Com a PR em rascunho, o `merge` não roda;
+      - **se não existir,** pule esta conferência e registre num §: a execução final é a conferência no Linux. Nunca use como atalho o `gh pr ready` seguido do `--undo`: o job `merge` decide pelo rascunho do payload do evento, e com o `ci-ok` verde ele tentaria mesclar a PR pela metade (§ 401 e F11 p-1).
+    - **No fim,** com tudo commitado (o relatório, a revisão e as imagens):
+      1. faça o push e espere a execução leve terminar verde;
+      2. só então rode o `gh pr ready`;
+      3. acompanhe a execução completa até o fim.
+
+      Se ela falhar: `gh pr ready --undo`, corrija, commite, faça o push, espere a leve e rode o `gh pr ready` de novo. A falha e a correção vão no relatório.
+    - **O custo:** o `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit <n> --body-file <arquivo>`), mesmo depois do merge.
+
+# Armadilhas conhecidas
+
+- **A ilha é uma só em três lugares:** a página de ferramenta, a preset e a ferramenta embutida dos guias. O `tool-guides.spec.ts`, o `gate:conteudo` e o mapa dos guias ("nunca dentro da ferramenta embutida") pegam o que a ilha nova muda nos guias. As ilhas são o chunk `island` (imagem) e a ilha de PDF (`PdfIsland`), hidratadas pelo `mount.ts`. Espere o `#fo-tool-root[data-hydrated="true"]` antes de medir.
+- **O CLS da interação:**
+  - a API `layout-shift` só existe no Chromium, e o deslocamento com `hadRecentInput` não conta. O que conta é o que acontece sem toque, como o resultado chegando do worker;
+  - abra o `PerformanceObserver` antes do `setInputFiles`, com o `fo-consent` gravado, e meça até o Baixar mais 1,5 s;
+  - meça antes de qualquer captura `fullPage`, que faz um relayout com a fonte já carregada;
+  - o CLS de texto com a fonte atrasada muda entre Windows e Linux (§ 305), e no WebKit um hub não pinta enquanto a Figtree está segura.
+- **O soltar nos testes:** o `setInputFiles` não dispara `dragenter` nem `drop`. Monte um `DataTransfer` na página com os bytes da fixture (`page.evaluateHandle`) e despache `dragenter`, `dragover` e `drop` no alvo, nos dois navegadores.
+- **O service worker nos testes:** o padrão é `serviceWorkers: 'block'`, e com ele o chip só linka (decisão 7). O spec do chip que leva liga o worker com `test.use({ serviceWorkers: 'allow' })`, sobe o próprio servidor (`tests/e2e/lib/sw-server.ts`) e começa com `if (await workerOff(page, server)) return;` (§ 307).
+- **O Cache Storage:** o `caches.open()` cria o cache que falta. Para provar que a caixa foi apagada, use `caches.has('fileorca-inbox')`.
+- **O movimento:**
+  - o `endTime` do `getComputedTiming()` é `Infinity` num laço. Prove o fim pelo `endTime` e pelas animações com `playState === 'running'`;
+  - com `forwards`, o `transform` do fim sai como `matrix(1, 0, 0, 1, 0, 0)`, não `none`;
+  - a animação do vapor e das peças da Oli mira o elemento do `<symbol>` dentro do sprite, então o seletor pendura num ancestral do sprite (`html` ou `body`), nunca numa seção;
+  - trocar a lista `animation` de [a] para [a, b] preserva a `a` e só começa a `b`;
+  - o movimento reduzido não chega ao `::backdrop` sem linha própria.
+- **O foco:**
+  - o WebKit não dá foco a um botão por clique;
+  - o foco posto por script depois de um fechar pelo teclado é `:focus-visible`;
+  - o Preact reaproveita o mesmo `<button>` entre estados, e o `focusin` não dispara (a causa do D-01, que o `keep()` resolve).
+- **O build de teste e o mapa** (as pegadinhas da F12 no `anuncios.md` e no `playwright.md`):
+  - use `useTestBuild(test)` no topo do spec, e abra `https://fileorca.com/...` depois do `serveAsProduction(context, …)`;
+  - o ajudante refaz o build com a árvore suja, uns 35 s por variante;
+  - a margem de 150 px da `.fo-ad` não colapsa no `gap` da grade do `.fo-main`;
+  - para medir a densidade, grave o `fo-consent` e meça a ferramenta em repouso;
+  - o `boundingBox()` dá coordenadas da janela, não do documento, e o Chromium headless no Windows tem a barra de rolagem clássica, que muda as larguras;
+  - dois Playwright na mesma pasta apagam o `test-results/` um do outro e disputam o servidor do build de teste.
+- **O café:** a `.fo-result__support a` pinta de branco também o botão da linha.
+- **O `serve-dist` devolve o 404 mais próximo** para rota que falta: confira o status 200 antes de afirmar uma página.
+- **As portas:** cada worktree usa o próprio `FO_PORT`, de 4174 a 4189, e o servidor do build de teste usa o `FO_PORT` + 100.
+- **O Astro e o TypeScript:**
+  - o `build.format` é `preserve`, então toda página é um `.../index.astro`;
+  - o tsconfig usa `exactOptionalPropertyTypes`: espalhe um objeto condicional, nunca passe `undefined`;
+  - o `pnpm tipos` confere também os specs. Rode-o antes do push.
+- **Os moldes e os hubs recebem `lang` com o padrão `'en'`.** Escreva `.map((id) => cardOf(id, lang))`, nunca `.map(cardOf)`.
+- **O `lint:texto`:**
+  - no português, ele reprova nome de opção depois de vírgula e lê "for" como verbo num nome inglês;
+  - ele lê o `{n}` como "n" (F11 g-3, só aviso);
+  - os módulos que ele importa usam import estático.
+- **O `name:` do Playwright casa por pedaço de texto,** sem diferença de maiúscula. Use `exact: true` ou um escopo.
+- **O Git Bash:**
+  - heredoc e `node -e` com crase, barra invertida ou apóstrofo estragam o texto: escreva arquivo pela ferramenta de escrita;
+  - argumento que começa com "/" vira caminho do Windows (`MSYS_NO_PATHCONV=1`);
+  - o `git push` e o `gh pr create --base main` vão em comandos separados;
+  - no Node, `String.replace(a, b)` interpreta `$` em `b`: use `s.replace(a, () => b)`.
+- **Nunca `git add -A` nem `git add .`:** a pasta `Claude outputs/` está na raiz, sem rastreio, e nunca entra. Adicione por caminho.
+- **Os agentes em worktree:**
+  - eles nascem da `main`: o primeiro passo de cada um é `git merge --ff-only fase-13a`;
+  - todo commit de merge leva o trailer `Co-Authored-By`, com a mensagem num arquivo (`git merge --no-ff -F <arquivo>`);
+  - um agente que escreve código usa `model: 'opus'`;
+  - um agente em worktree não escreve no checkout principal. Ele lê o `.cache/` do principal pelo caminho absoluto, mas grava no `.cache/` da própria worktree, e o agente principal copia o que precisa antes do `git worktree remove`;
+  - dois agentes que mexem no mesmo arquivo (o `components.css`, os `common.ts`, o `privacy.ts`, o `FileCard.tsx`, o `OptionGroup.tsx` e os registros) dão conflito no merge: junte as duas partes e rode o `pnpm tipos`;
+  - cada frente escreve os § dela com um marcador próprio, e a junção troca os marcadores por números, a partir do 456, na ordem das frentes (a pegadinha da F12 no `windows-git-bash.md`).
+- **O repositório é público:** nenhum dado pessoal, ID real do AdSense ou segredo no que você commita, nem no relatório, na revisão ou nas imagens.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. **O aviso compacto.**
+   - Sem `fo-consent`, a 360 × 740, no comprimir, no HEIC, no juntar, na hipoteca e no SAC × PRICE, nos idiomas que existem: o `#fo-cookie` tem no máximo 130 px de altura (150 px no pt e no es a 320 × 640), e o Escolher ou o primeiro campo fica inteiro acima dele.
+   - A partir de 768 px, ele tem 360 px de largura.
+   - O texto dele contém o texto do selo da página: na ferramenta de imagem, no PDF, na calculadora e no QR, e o `common.seal` na home.
+   - No erro, a 360 × 740 e a 320 × 640, nos três idiomas, com o `gen-texto-extensao-png.png`: o foco está no Escolher outros arquivos, e o fundo dele fica 8 px ou mais acima do topo do aviso.
+   - A 1280 px, com a página rolada até o fim, o card cobre no máximo 2 links do rodapé.
+   - No build de teste, na rolagem 0, o aviso aberto fica a 150 px ou mais do 1º anúncio de conteúdo nas sete janelas da decisão 3.
+   - O teste da f-06 continua verde.
+2. **A Oli.**
+   - No `design.spec.ts`, nos dois navegadores, em `/`, `/compress-image/`, `/merge-pdf/`, `/qr-code-generator/`, `/open-with/` e `/support/`: toda animação de `document.getAnimations()` fora de `.fo-level`, `.fo-water` e `.fo-spin` tem `iterations` finito e `endTime` de até 5.000 ms, e 3,2 s depois de abrir nenhuma está `running`.
+   - O `design-checks.test.ts` tem a regra nova: `infinite` só nos seletores do progresso, numa lista fechada. A regra reprova o `components.css` do ponto de partida.
+   - Com o movimento reduzido, o `getAnimations()` fica vazio.
+3. **A página de ferramenta.**
+   - No 1º uso, o retângulo tem a mesma altura (356 px a 360 px e 340 px a 1280 px, com 1 px de tolerância) em repouso, com o arquivo em cima, processando, no resultado e no erro, nas ferramentas de imagem.
+   - O CLS da interação fica em até 0,05 no comprimir, no HEIC para JPG, no WebP para JPG, no redimensionar e no juntar PDF, a 360 × 740, no Chromium. Ele vale também no 3º uso, com a linha do café.
+   - A base do retângulo fica em até 740 px a 360 × 740 em toda página de ferramenta e de preset, com e sem a fonte.
+   - Na 1ª visita a 360 × 740, nos três idiomas, a interseção do aviso com o Escolher e com o Escolher outros arquivos é zero, e o foco no Baixar não muda o `scrollY`.
+   - Os chips ficam a até 220 px do Baixar no comprimir, a 360 e a 1280 px, e a até 400 px no juntar, a 360 px.
+   - Os testes do D-06, do D-17, do D-09, da F10 p-13 e do juntar (D-21, D-22, D-26 e D-27) passam nos dois navegadores.
+4. **As peças de PDF:** os 13 testes da tabela "Testes da F13" do `pdf-pieces.html` passam, nos navegadores que ela diz.
+5. **O chip que leva:** os quatro testes do `handoff.html` passam, e a rede não leva os bytes nem o nome do arquivo.
+6. **Os ícones.**
+   - O `icons.test.ts` passa com os 27 ícones novos.
+   - Nenhum hub repete um ícone entre os cartões dele (um teste no `dist/`).
+   - A DropZone em repouso mostra o `file-drop`.
+7. **O soltar:**
+   - os três testes do `drop-anywhere.html` passam nos dois navegadores;
+   - numa página sem ferramenta, o `dragover` do documento dá `dropEffect` igual a `'none'`.
+8. **Os anúncios,** no build de teste:
+   - o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` passam nos dois navegadores, com os alvos novos da decisão 10;
+   - a densidade conservadora fica em até 30 % a 360 × 740 em toda página com anúncio;
+   - o relatório traz a tabela por molde, com a densidade máxima e a mediana e as menores distâncias até os alvos novos.
+9. **A acessibilidade.**
+   - O axe dá zero violação nos dois temas e nos dois navegadores:
+     - no aviso aberto;
+     - em cada estado da ilha: repouso, arquivo em cima, processando, resultado, resultado com o antes e depois e o "Ajustar" abertos, e os três erros;
+     - no juntar lendo, com a lista e com uma linha tirada;
+     - nas peças de PDF;
+     - na caixa vazia.
+   - Todo botão visível do `#fo-tool-root` tem 48 px ou mais, a 360 e a 1280 px.
+   - Todo par novo de tokens tem o contraste calculado no `docs/design/`.
+10. **Os arquivos que saem não mudam:**
+    - o `image-matrix.spec.ts`, o `image-presets.spec.ts` e o `pdf-matrix.spec.ts` passam com o mesmo esperado;
+    - o `git diff --stat <ponto de partida> -- fixtures/ scripts/oracle/ scripts/guides/` sai vazio.
+11. **O orçamento.**
+    - No build padrão, cada página que o `budgets.spec.ts` e o `i18n-budgets.spec.ts` medem tem os mesmos arquivos JS e as mesmas requisições do ponto de partida, e a lista dos nomes dos JS de `dist/_astro/`, sem o hash, é a mesma.
+    - O JS inicial fica em até 80 KB com gzip.
+    - O relatório traz o tamanho de cada ilha com gzip, antes e depois. Se uma ilha crescer mais de 3 KB, um § diz por quê.
+12. **O CLS e o Lighthouse.**
+    - O `layout-shift.spec.ts` fica verde de 320 a 412 px, nos dois builds.
+    - O desempenho fica em 90 ou mais (a mediana) e o CLS em até 0,05 em toda URL do `lighthouserc.json`.
+13. **Os textos.** O `lint:texto`, o `english-leak.test.ts` e o `glossary.test.ts` passam com os textos novos.
+14. **A documentação.**
+    - O `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão como a decisão 11 pede.
+    - O `pendencias.test.ts` passa, e os § começam no 456.
+15. **Os testes.**
+    - O número de testes do Vitest e o do `--list` do Playwright só cresceram.
+    - Todo teste antigo que mudou tem o seu §.
+    - Cada teste novo de comportamento reprovou contra o ponto de partida, e o relatório diz como.
+16. **O `pnpm verificar`.** O `pnpm verificar --partes` passa na máquina local, com o total de cada parte e a soma no relatório. Nenhuma parte passa de 700 s, nem no CI.
+17. **A revisão.** O `docs/relatorios/REVISAO-F13a.md` não tem achado crítico, alto nem médio aberto.
+18. **O CI.** A execução depois do `gh pr ready` termina verde, com o `ci-ok` verde, e o `merge` mescla a PR, ou o relatório diz por que não.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código.** No ponto de partida:
+  - rode `pnpm install --frozen-lockfile` e `pnpm build`;
+  - rode o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com a saída em `.cache/f13a/antes/`;
+  - guarde o número de testes do Vitest e o do `pnpm exec playwright test --list` de cada navegador, a lista dos JS de `dist/_astro/` e o tamanho de cada ilha com gzip;
+  - guarde uma cópia desse `dist/` para as provas de "reprova sem a mudança" e para as imagens do "antes".
+- **Em cada fatia:**
+  - rode o `pnpm tipos`, o `pnpm lint`, o Vitest, os specs que a fatia toca nos dois navegadores e os portões que ela toca;
+  - depois de mexer na ilha, rode também o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` no build de teste;
+  - leia a saída, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o deste prompt e o do projeto.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit, com a máquina livre. Se uma parte falhar:
+  - rode a mesma parte no ponto de partida, numa worktree;
+  - se falhar igual, a falha não é desta run: registre num §, ponha no relatório e siga;
+  - se não falhar igual, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`.
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. A especificação dos protótipos e as § 365, § 366, § 371 a § 374, § 377, § 379 e § 381.
+3. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, `docs/claude/` e `docs/design/`.
+4. O `DECISOES.md` e o código.
+5. Na dúvida, a opção mais simples e a mais reversível, que não piore orçamento, acessibilidade nem anúncio.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos:
+
+- como cada família de ferramenta de PDF guarda a altura do retângulo;
+- onde fica a linha do café no resultado novo;
+- a regra mínima que afasta o 1º anúncio do aviso nas janelas da R-A-2;
+- o nome de cada spec novo e a parte em que ele cai;
+- cada correção da estimativa do mapa;
+- cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run. Siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- o rótulo `ci` não existe: a conferência do meio sai, e a execução final faz o papel dela (decisão 13);
+- uma medida do protótipo não se repete no site (por exemplo, os chips a mais de 220 px numa ferramenta): ache a causa; se ela vier do cabeçalho de hoje ou do conteúdo da ferramenta e não da ilha, registre num §, com a medida real, e siga;
+- a main muda as partes no meio da run: faça `git fetch` e `git merge origin/main` na branch, e confira o `--list`;
+- o Lighthouse oscila numa URL: rode a parte de novo uma vez e registre; se cair de novo, ache a causa.
+
+Válvula de estouro, se o tempo ou o limite apertar: os itens saem do fim da lista da F13a para a F13b, nesta ordem: o UX-18, o UX-16, o UX-14 e o UX-11. Cada um sai com um § e uma linha no grupo 22 do `docs/PENDENCIAS.md`, e as pendências dele vão junto. Se o UX-18 sair, o `dropEffect = 'none'` da F10 p-11 fica, com o teste.
+
+Nunca corte:
+
+- o UX-09, com a f-1, o ajuste-aviso-espaco e a R-A-2;
+- o UX-10, com a d-02;
+- o UX-04 inteiro: imagem, presets, PDF e juntar;
+- os testes da decisão 11 e o mapa verde (decisão 10);
+- a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo:**
+  - rode `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, `docs/prompts/prompt-fase-13a.md`, `docs/prompts/prompt-fase-13a.txt` e a pasta `Claude outputs/`. Se o `PLANO-FILEORCA.md` aparecer modificado, deixe-o como está e fora dos commits. Qualquer outra coisa: não mexa, não commite e registre;
+  - crie a branch com `git switch -c fase-13a`. O primeiro commit leva os dois arquivos do prompt, sem edição;
+  - se os arquivos do prompt não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-13a.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Cada item tem pelo menos um commit próprio, com os testes dele.
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-13a`. O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-13a-fileorca.vmatusita.workers.dev/`). A prévia é o build padrão: ela mostra a página nova, mas nunca anúncio.
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **As worktrees** dos agentes e da revisão são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:**
+  - o push da branch;
+  - na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` só depois de uma execução final vermelha (decisão 13);
+  - leitura (`gh run`, `gh pr checks`, `gh pr view` e `gh api` sem método);
+  - um `gh run rerun` por falha que pareça instável, registrado.
+- **Na web, nada.** Esta run não precisa de nenhuma página de fora.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh label`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`;
+  - postar, enviar formulário, criar conta ou subir arquivo para qualquer serviço;
+  - `wrangler deploy` em qualquer forma.
+
+  O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) as regras desta run, num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) a ilha de imagem de hoje: o `ImagePanel.tsx` (os estados, o resultado, as opções, os chips, a linha do café e o erro), o `BeforeAfter.tsx`, o `ImageToolPage.astro`, o `ImageToolEmbed.astro`, o CSS da DropZone, do WaterLevel, do ResultCard e da faixa de opções, e os testes que fixam o desenho de hoje;
+   - (c) a ilha de PDF: o `PdfPanel.tsx` (o juntar e as outras ferramentas), o `PageGrid.tsx`, o `SignatureArea.tsx` (com a prévia que o PDF.js desenha), o `tools.tsx`, o `PasswordField.tsx`, o `FileCard.tsx` e os specs de PDF;
+   - (d) o aviso de cookies e a Oli: o `CookieNotice.astro` e o script inline (o `reserve()`, o `focusin`, a f-06 da F12, § 36, § 91 e § 106), o selo de cada tipo de página, as animações da Oli no `components.css`, o `design-checks.ts`, o `design.spec.ts` e o `cookie-footer.spec.ts`;
+   - (e) a caixa e o soltar: o `inbox.ts`, o `src/share/logic.ts` (o `takes()`), a limpeza da caixa no `src/sw/`, os chips, os ouvintes de `dragover` e `drop` do documento, o `share-target.spec.ts` e os `sw-*.spec.ts`; e os ícones: o `docs/design/assets/Icons/`, a `ICON_NAMES`, o `icons.test.ts` e o campo `icon` de cada registro;
+   - (f) a especificação dos oito protótipos, separando o que é contrato do que é só do `bundle.css`, com a lista "Testes que a F13 escreve" de cada um, os pares de contraste da seção 9 do README e a divisão das partes (`--list`).
+2. **A linha de base** (seção "Verificação").
+3. **Planejar.** Escreva `docs/relatorios/fase-13a-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz:
+   - o ponto de partida e a linha de base;
+   - os § reservados e o marcador de cada frente;
+   - quem faz o quê e a ordem das fatias;
+   - cada critério ligado a um teste ou comando;
+   - a lista do que é da F13b.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. o agente principal faz o UX-09 (decisão 3) e o UX-10 (decisão 4), e a base comum do UX-04:
+      - o CSS do retângulo, da faixa, da água e do resultado no `components.css`;
+      - o canto da Oli;
+      - o H1 nos dois moldes (`ImageToolPage.astro` e `PdfToolPage.astro`).
+
+      Commit, push e a PR em rascunho;
+   2. a partir desse commit, três agentes `opus` trabalham ao mesmo tempo, cada um na sua worktree:
+      - I: o UX-04 nas ferramentas de imagem, nas presets e na ferramenta embutida, com a linha do café, a e-2, a f-2, a p-13, a p-14, o D-06, o D-17, o D-09 e os testes (decisão 5);
+      - P: o UX-04 no juntar e nas outras ferramentas de PDF, e o UX-11 inteiro, com os testes (decisões 5 e 6);
+      - U: o UX-16 nos ícones e nos registros, sem o selo da DropZone, com os testes (decisão 8);
+   3. o agente principal junta as três, resolve os conflitos, deixa o `pnpm tipos` verde, troca o selo da DropZone pelo `file-drop` nas duas ilhas, roda os specs do mapa e faz a conferência no Linux (decisão 13);
+   4. a partir da junção, um agente `opus` (H) faz o UX-14 e o UX-18 nas duas ilhas, com a Privacidade e os testes (decisões 7 e 9). Ao mesmo tempo, o agente principal faz o `docs/design/`, o `docs/claude/`, os textos que faltarem, os § e o `docs/PENDENCIAS.md` (decisão 11), sem tocar nos arquivos do H;
+   5. o agente principal junta o H, roda as verificações completas e monta as tabelas e as imagens.
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`):
+   - sobre um commit fixo e registrado da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile`, o próprio `pnpm build` e o próprio build de teste;
+   - contra este prompt e o plano;
+   - cada lente com o próprio `FO_PORT` e escrevendo só no `.cache/lente-<x>/` da worktree.
+
+   A F13a mexe em interface, em texto, em privacidade (a caixa do UX-14) e no entorno dos anúncios: são cinco lentes Sonnet em contexto limpo (regra 3):
+   - (a) **design system e Oli:**
+     - cada item contra a especificação;
+     - os tokens, a lista "Nunca", nada em `sun` fora do Baixar e nenhuma cor nova;
+     - a Oli no canto, as poses certas, `aria-hidden`, a 150 px dos anúncios e o movimento de até 5 s;
+     - as mudanças de regra registradas, com o texto de antes e o de depois;
+   - (b) **acessibilidade:**
+     - o 2.4.11 do aviso com o `keep()`;
+     - o 2.2.2 da Oli;
+     - o 1.4.1 e o 1.4.11 da grade de páginas, o 2.4.7 e o 4.1.3 da assinatura;
+     - o 2.5.7 e o 2.5.8 do juntar;
+     - o foco no Baixar, no Desfazer, na senha e na chegada pelo chip;
+     - as regiões vivas que falam uma vez, o axe nos dois temas e os 48 px;
+   - (c) **comportamento, CLS e desempenho:**
+     - o retângulo em todos os estados e em todas as famílias de ferramenta, e o CLS da interação, também no 3º uso;
+     - a dobra, o juntar, os erros e as peças de PDF;
+     - o chip que leva e o soltar em qualquer lugar;
+     - os arquivos que saem iguais (a matriz);
+     - o JS, as requisições, as ilhas, o CLS de carga, o Lighthouse e as partes do CI;
+   - (d) **privacidade e anúncios:**
+     - a caixa e o `sessionStorage` só com ids, apagados na entrega, e nada saindo do aparelho;
+     - a Privacidade nos três idiomas, e nenhum evento novo do GA4;
+     - o consentimento igual;
+     - o mapa verde, com os alvos novos, a densidade e o aviso nas sete janelas;
+     - o soltar sem tocar no anúncio;
+   - (e) **textos e idiomas:**
+     - os textos novos nos três idiomas, contra a especificação;
+     - o glossário, o `lint:texto` e o `english-leak`;
+     - a voz (o botão com verbo, o erro que diz o caso e a saída) e o formato de número de cada idioma.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo; os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada revisa o diff delas. Os baixos que sobrarem vão para o grupo 22 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F13a.md`. Remova a worktree no fim.
+6. **Fechar:** o relatório, o `pnpm verificar --partes` e a sequência de fim da decisão 13.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-13a.md` em português, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que muda para a pessoa nas ferramentas e no site, em cinco linhas;
+- o que entrou, por item, apontando os arquivos e os §;
+- a evidência de cada critério, com a saída real dos comandos e dos specs;
+- as tabelas:
+  - o antes e o depois de cada item, medido: a altura do aviso e o que ele cobre, o CLS da interação, a distância dos chips ao Baixar, a base do retângulo e a dobra;
+  - o mapa por molde, no build de teste: a densidade máxima e a mediana a 360 × 740, as menores distâncias até os alvos novos e o aviso nas sete janelas;
+  - o orçamento: antes e depois, por página, nos dois builds, e o tamanho de cada ilha com gzip;
+  - as 25 pendências, cada uma com o teste e o §;
+- o número de testes do Vitest e do `--list`, antes e depois, e a lista dos testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o total de cada parte e a soma;
+- o custo (regra 5 de toda run): o `pnpm ci:custo` da última execução antes do relatório. O da execução final vai na descrição da PR;
+- o que a conferência no Linux achou;
+- o resumo da revisão, apontando para o `REVISAO-F13a.md`;
+- as imagens de `docs/relatorios/fase-13a/`;
+- o link da prévia (`https://fase-13a-fileorca.vmatusita.workers.dev/`);
+- as decisões novas, apontando os §;
+- o que a válvula cortou, se cortou;
+- **"O que fica para a F13b":** os itens (UX-12 A, UX-13 A, UX-03 B com o texto, UX-15 A e UX-17 A), as 20 pendências da lista "Fora", o que a válvula mandou e o que a F13a viu e é da área deles. É a entrada do prompt da F13b;
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e conferir na prévia, ou no fileorca.com depois do deploy, no celular e no computador:
+     - o aviso de cookies menor, na primeira visita (aba anônima);
+     - o comprimir, o HEIC para JPG e o juntar, do soltar ao resultado;
+     - o chip que leva a imagem para a próxima ferramenta;
+     - um arquivo solto sobre o título de um guia;
+     - os ícones novos nos hubs.
+  2. Ler os textos novos em português: o aviso, os erros, o juntar, os chips e o parágrafo novo da Privacidade.
+  3. Conferir com o NVDA e o VoiceOver as regiões vivas novas (a posição da assinatura, a linha tirada do juntar e a nota de chegada), junto da F11 t-1 e da F12 p-2.
+  4. Criar o rótulo `ci` (Issues → Labels), se ainda não existir, para a F13b conferir no Linux no meio dela.
+  5. Gerar o prompt da F13b com a skill: a ficha da F13, o SHA da main, a lista marcada (`.cache/ESCOLHAS-marcado.md`) e a seção "O que fica para a F13b" deste relatório, com o grupo 22 do `docs/PENDENCIAS.md`.
+
+Termine a resposta final com:
+
+- um resumo de cinco linhas em português;
+- o link da PR e o estado do CI (mesclada ou esperando, e por quê);
+- os passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, os README do `docs/design/`, o `docs/claude/` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.
