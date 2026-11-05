@@ -68,7 +68,7 @@ export default {
       flattened: 'As áreas transparentes ficaram brancas, porque o JPG não tem transparência.',
       firstFrame: 'A animação virou uma imagem parada: a Oli guardou o primeiro quadro.',
       notEnlarged: 'Você pediu mais pixels do que a foto tem, então a Oli manteve o tamanho original.',
-      downscaled: 'Para caber no limite de tamanho, a Oli também reduziu as dimensões para {width} × {height} px.',
+      downscaled: 'A Oli também reduziu as dimensões para {width} × {height} px.',
       centerCropped: 'A Oli cortou a partir do centro para preencher o quadro.',
       enlarged: 'A foto tem menos pixels do que o quadro pede, então a Oli a ampliou e ela pode ficar menos nítida.',
     },
@@ -79,7 +79,7 @@ export default {
       hide: 'Não mostrar de novo',
       done: 'Combinado, não peço mais aqui. O link do café fica no rodapé.',
     },
-    change: 'Diferença',
+    change: 'Variação',
   },
   compare: {
     label: 'Comparar antes e depois',

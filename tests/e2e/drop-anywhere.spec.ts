@@ -80,6 +80,36 @@ test.describe('a page with a file tool takes the drop anywhere', () => {
     await expect(zone).not.toHaveAttribute('data-state', 'over');
   });
 
+  // F13a, revisão c-2 (DECISOES § F13A-R-07): the drag that comes into the window over the Choose button or the help of
+  // the zone flips it to "over", and those nodes leave the DOM; Chromium sends no dragleave to a node that is gone, so the
+  // counter kept one and the zone stayed in "over" (with no button) after the drag left the window. The same events here:
+  // dragenter on the node, dragenter on the H1, and the last dragleave on the H1. A node that left the DOM no longer counts.
+  for (const [path, entered] of [['/compress-image/', '.fo-btn--brand'], ['/compress-image/', '.fo-drop__help > span'], ['/compress-pdf/', '.fo-btn--brand']] as const) {
+    test(`${path}: a drag that comes in over ${entered === '.fo-btn--brand' ? 'the Choose button' : 'the words of the help'} and leaves the window gives the zone back its rest`, async ({ page }) => {
+      await page.goto(path);
+      await hydrated(page);
+      await dismissCookies(page);
+      const zone = page.locator('#fo-tool-root .fo-drop');
+      const transfer = await transferOf(page, [path.includes('pdf') ? pdfFile('gen-paginas-mistas.pdf') : HEIC]);
+      await page.evaluate(([data, selector]) => {
+        const node = document.querySelector(`#fo-tool-root .fo-drop ${selector}`);
+        (window as unknown as { __foEntered: Element | null }).__foEntered = node;
+        node?.dispatchEvent(new DragEvent('dragenter', { dataTransfer: data as DataTransfer, bubbles: true, cancelable: true }));
+      }, [transfer, entered] as const);
+      await expect(zone).toHaveAttribute('data-state', 'over');
+      expect(await page.evaluate(() => (window as unknown as { __foEntered: Element | null }).__foEntered?.isConnected), 'the node the drag came in over left the DOM').toBe(false);
+      await page.evaluate((data) => {
+        document.querySelector('h1')?.dispatchEvent(new DragEvent('dragenter', { dataTransfer: data, bubbles: true, cancelable: true }));
+      }, transfer);
+      await expect(zone).toHaveAttribute('data-state', 'over');
+      await page.evaluate((data) => {
+        document.querySelector('h1')?.dispatchEvent(new DragEvent('dragleave', { dataTransfer: data, bubbles: true, cancelable: true }));
+      }, transfer);
+      await expect(zone).not.toHaveAttribute('data-state', 'over');
+      await expect(page.locator('#fo-tool-root .fo-drop .fo-btn--brand')).toBeVisible();
+    });
+  }
+
   test('Merge PDF: two PDFs let go on the H1 both go into the list', async ({ page }) => {
     await page.goto('/merge-pdf/');
     await hydrated(page);

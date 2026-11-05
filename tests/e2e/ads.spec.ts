@@ -122,15 +122,21 @@ async function smallFiles(page: Page, path: string, count: number): Promise<Test
 
 interface Box { kind: string; x: number; y: number; w: number; h: number }
 
+// F13a, revisão a-2 (decision 4 of the run; DECISOES § F13A-R-01): the box of the Oli counts inflated by 12 px on every
+// side (x - 12, y - 12, w + 24, h + 24), the room of her moves (8 px and 6°), so the 150 px hold while she waves.
+const OLI_GROWTH = 12;
+
 async function boxes(page: Page, selector: string): Promise<Box[]> {
-  return page.locator(selector).evaluateAll((nodes) =>
+  return page.locator(selector).evaluateAll((nodes, grow) =>
     nodes
       .map((node) => {
         const rect = node.getBoundingClientRect();
-        return { kind: node.className || node.tagName, x: rect.left + scrollX, y: rect.top + scrollY, w: rect.width, h: rect.height };
+        const box = { kind: node.className || node.tagName, x: rect.left + scrollX, y: rect.top + scrollY, w: rect.width, h: rect.height };
+        if (box.w <= 0 || box.h <= 0 || !node.matches('[data-oli]')) return box;
+        return { ...box, x: box.x - grow, y: box.y - grow, w: box.w + 2 * grow, h: box.h + 2 * grow };
       })
       .filter((box) => box.w > 0 && box.h > 0),
-  );
+  OLI_GROWTH);
 }
 
 function distance(a: Box, b: Box): number {

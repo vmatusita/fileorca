@@ -147,6 +147,40 @@ for (const lang of LANGS) {
   });
 }
 
+// F13a, revisão b-1 (DECISOES § F13A-R-02): the test above has the engine warm, so the work ends before the 400 ms of the
+// WaterLevel. On a real first visit (a cold engine, a big photo, a PDF) the WaterLevel comes, the focus that left the Choose
+// button goes to it (tabindex -1, 356px tall), and the browser and the notice's focusin used to scroll the page to bring
+// its foot over the notice: 10 px in en and 32 px in pt and es at 360 × 740. The engine is held here past the 400 ms, the
+// person has the focus on the Choose button (a tap), and the page stays at scroll 0 from the drop to the Download.
+const FIRST_VISIT_TOOLS = [
+  { id: 'compress-image', file: async (page: Page): Promise<TestFile> => ({ name: 'photo.jpg', mimeType: 'image/jpeg', buffer: await generatedJpeg(page) }) },
+  { id: 'compress-pdf', file: async (): Promise<TestFile> => ({ name: 'photos.pdf', mimeType: 'application/pdf', buffer: readFileSync(resolve('fixtures/pdf', 'gen-fotos.pdf')) }) },
+] as const;
+for (const lang of LANGS) {
+  for (const tool of FIRST_VISIT_TOOLS) {
+    test(`first visit at 360 × 740 (${lang}), the engine held past the 400 ms of the WaterLevel: ${tool.id} keeps the page at scroll 0 from the drop to the Download`, async ({ page }) => {
+      await page.setViewportSize(PHONE);
+      const engine = await slowEngine(page);
+      await open(page, routeById(tool.id).paths[lang] ?? '/');
+      await expect(page.locator('#fo-cookie')).toBeVisible();
+      await page.evaluate(() => {
+        const seen = window as unknown as { __foMaxScroll: number };
+        seen.__foMaxScroll = scrollY;
+        addEventListener('scroll', () => void (seen.__foMaxScroll = Math.max(seen.__foMaxScroll, scrollY)), { passive: true });
+      });
+      await page.locator('#fo-tool-root .fo-drop .fo-btn--brand').focus();
+      await page.setInputFiles('#fo-tool-root input[type="file"]', await tool.file(page));
+      await expect(page.locator('#fo-tool-root .fo-level')).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(300);
+      engine.release();
+      await expect(page.locator('.fo-btn--download')).toBeFocused({ timeout: 60_000 });
+      await page.waitForTimeout(300);
+      const scrolled = await page.evaluate(() => ({ now: scrollY, max: (window as unknown as { __foMaxScroll: number }).__foMaxScroll }));
+      expect(scrolled, 'the page scrolled between the drop and the Download').toEqual({ now: 0, max: 0 });
+    });
+  }
+}
+
 // D-05, D-11 and D-49 of the F10: the chips sit right under the rectangle, at most 220px under the Download.
 test('the chips are at most 220px under the Download, at 360 and 1280px', async ({ page }) => {
   for (const viewport of [PHONE, WIDE]) {
@@ -300,6 +334,16 @@ test('F10 p-13: a JPG bigger than its HEIC says "+N%", and no text of the HEIC p
   expect(Number((await change.textContent())?.replace(/\D/g, ''))).toBeGreaterThan(20);
   await openAdjust(page);
   expect(await page.locator('main').innerText(), 'the page with the result and the options open').not.toMatch(LIGHTER.en);
+});
+
+// F13a, revisão e-2 (DECISOES § F13A-R-09): the p-13 holds on WebP to JPG too. A WebP is usually smaller than its JPG (the
+// FAQ and the guide of the page say so) and the card says "+94%", so the help of "Save as" no longer says the JPG is lighter.
+test('e-2: no text of the WebP to JPG page says the JPG is lighter, in the three languages', async ({ page }) => {
+  for (const lang of LANGS) {
+    await open(page, pathOf('webp-to-jpg', lang));
+    await dismissCookies(page);
+    expect(await page.locator('main').innerText(), `${lang}: the page at rest`).not.toMatch(LIGHTER[lang]);
+  }
 });
 
 // Every button of the island is 48px tall or more, at 360 and at 1280px: at rest, with the result (the comparison, "Adjust"
@@ -472,4 +516,54 @@ test.describe('the interaction moves nothing at 360 × 740', () => {
     expect(fits.height, 'the room kept holds the line').toBeLessThanOrEqual(fits.room + 1);
     await context.close();
   });
+});
+
+// F13a, revisão c-1 (DECISOES § F13A-R-04): the tests above use a JPEG drawn in the page (640 × 480, no metadata). A photo
+// of a phone brings the note of the reduction ("Oli also reduced the dimensions to …") on the 100 KB preset, and the
+// metadata note says the GPS: with three notes, the card of the preset grew from 356 to 374 px in pt and es at 360 px, and
+// from 470 to 483 px on the 3rd use at 1280 px (the room of the coffee line). The notes now run as one paragraph.
+const PHOTO = (): TestFile => fixture('jpg-02-iphone6-paisagem-gps.jpg', 'photo.jpg');
+const PRESETS = ['compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail'] as const;
+
+test.describe('a photo of a phone, with its metadata: the result keeps the rectangle', () => {
+  for (const lang of LANGS) {
+    test(`the presets in ${lang}: the result of a phone photo keeps 356 px at 360 and 340 px at 1280`, async ({ page }) => {
+      test.setTimeout(120_000);
+      await page.setViewportSize(PHONE);
+      const found: string[] = [];
+      for (const id of PRESETS) {
+        await open(page, pathOf(id, lang));
+        await dismissCookies(page);
+        await page.setInputFiles('input[type="file"]', PHOTO());
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 55_000 });
+        await slotAtBothWidths(page, `${pathOf(id, lang)} resultado`, found);
+      }
+      expect(found, 'o retângulo mudou de altura com a foto').toEqual([]);
+    });
+
+    test(`the 3rd use in ${lang}, with the coffee line: the result of a phone photo stays in the room kept for it, at 360 and 1280 px`, async ({ browser }) => {
+      test.setTimeout(120_000);
+      const found: string[] = [];
+      for (const id of ['compress-image', 'compress-image-to-100kb'] as const) {
+        for (const viewport of [PHONE, WIDE]) {
+          const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+          await context.addInitScript(() => {
+            localStorage.setItem('fo-consent', 'granted');
+            localStorage.setItem('fo-coffee', JSON.stringify({ uses: 2 }));
+          });
+          const page = await context.newPage();
+          await open(page, pathOf(id, lang));
+          await page.setInputFiles('input[type="file"]', PHOTO());
+          await expect(page.locator('.fo-result .fo-result__support')).toBeVisible({ timeout: 55_000 });
+          const fits = await page.evaluate(() => {
+            const slot = document.querySelector('.fo-slot') as HTMLElement;
+            return { height: slot.getBoundingClientRect().height, room: parseFloat(getComputedStyle(slot).minHeight) };
+          });
+          if (fits.height > fits.room + 1) found.push(`${pathOf(id, lang)} a ${viewport.width}px: ${fits.height.toFixed(1)}px na reserva de ${fits.room}px`);
+          await context.close();
+        }
+      }
+      expect(found, 'o resultado passou da reserva do café').toEqual([]);
+    });
+  }
 });

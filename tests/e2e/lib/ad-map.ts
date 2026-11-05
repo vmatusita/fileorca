@@ -141,6 +141,12 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
         const box = element.getBoundingClientRect();
         return { x: box.left + scrollX, y: box.top + scrollY, w: box.width, h: box.height };
       };
+      // F13a, revisão a-2 (DECISOES § F13A-R-01): the target box of the Oli counts inflated by 12 px on every side, the
+      // room of her moves (decision 4 of the run).
+      const target = (element: Element) => {
+        const box = rect(element);
+        return element.matches('[data-oli]') ? { x: box.x - 12, y: box.y - 12, w: box.w + 24, h: box.h + 24 } : box;
+      };
       const shown = (element: Element) => {
         const box = element.getBoundingClientRect();
         return box.width > 0 && box.height > 0;
@@ -214,7 +220,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
       let gridBlock: Element | null | undefined = firstGrid;
       while (gridBlock && gridBlock.parentElement !== main) gridBlock = gridBlock.parentElement;
       const groupRects: Record<string, { x: number; y: number; w: number; h: number }[]> = {};
-      for (const [name, selector] of Object.entries(groups)) groupRects[name] = [...document.querySelectorAll(selector)].filter((element) => shown(element) && !element.closest('.fo-ad')).map(rect);
+      for (const [name, selector] of Object.entries(groups)) groupRects[name] = [...document.querySelectorAll(selector)].filter((element) => shown(element) && !element.closest('.fo-ad')).map(target);
       return {
         width: innerWidth,
         height: innerHeight,
@@ -225,7 +231,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
         tool: tool && shown(tool) ? rect(tool) : null,
         header: header ? rect(header) : null,
         notice: notice && !notice.hidden && shown(notice) ? rect(notice) : null,
-        targets: [...document.querySelectorAll(targets)].filter((element) => shown(element) && !element.closest('.fo-ad')).map((element) => ({ ...rect(element), kind: describe(element) })),
+        targets: [...document.querySelectorAll(targets)].filter((element) => shown(element) && !element.closest('.fo-ad')).map((element) => ({ ...target(element), kind: describe(element) })),
         grids: [...(main?.querySelectorAll('.fo-grid, .fo-guidecards') ?? [])].filter(shown).map(rect),
         groups: groupRects,
         first,

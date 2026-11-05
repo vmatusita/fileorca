@@ -65,7 +65,7 @@ export default {
       legend: 'Salvar como',
       jpg: 'JPG',
       png: 'PNG',
-      help: 'O JPG é mais leve, e a transparência fica branca. O PNG mantém a transparência, mas o arquivo fica maior.',
+      help: 'O JPG abre em todo lugar e pode sair maior que o WebP. A transparência fica branca. O PNG mantém a transparência, mas o arquivo fica maior.',
     },
   },
 } satisfies ImageToolTexts<SaveAsOptionsTexts>;

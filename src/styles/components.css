@@ -15,7 +15,7 @@
    curve by token name. A move that starts on its own ends in under 5 s and leaves her still on the drawn pose, the frame
    reduced motion shows (WCAG 2.2.2); only the swim loops, because it is the progress and lasts the work. The move goes on
    the <svg> child, never on the [data-oli] box (CLS 0), and never toward an ad (the 150px are checked with the box inflated
-   by 12px). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
+   by 12px: ads.spec.ts and tests/e2e/lib/ad-map.ts, DECISOES § F13A-R-01). The wave greets once (3 s); a pointer over the DropZone or the focus on its button adds a short nod (0.6 s) as a
    second animation of the list, so the 3 s one never starts again. Reduced motion: global.css stops everything. */
 [data-oli="wave"] > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1; }
 :is(.fo-drop:is(:hover, :focus-within) [data-oli="wave"], .fo-slot:has(.fo-drop:is(:hover, :focus-within)) > [data-oli="wave"]) > svg { animation: fo-hello var(--dur-float) var(--ease-in-out) 1, fo-nod var(--dur-cheer) var(--ease-spring) 1; }
@@ -317,6 +317,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-result__support--done { margin: 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 35%, transparent); font-size: 15px; line-height: 22px; color: var(--on-deep-muted); }
 /* What the engine did that the person should know (flattened, first frame, cropped...), then the metadata line. */
 .fo-result__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); font-size: 14px; line-height: 20px; color: var(--on-deep-muted); }
+/* F13a, revisão c-1 (DECISOES § F13A-R-04): in the image island the notes run as one paragraph, one sentence after the
+   other, so a photo of a phone (the reduction, the size and the metadata) keeps the result in the rectangle of 356/340 px
+   and in the room of the coffee line; the note of where the files came from keeps its own line. */
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes { display: block; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > .fo-result__from { margin-bottom: var(--space-1); }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) { display: inline; }
+.fo-tool-island:not(.fo-pdf-island) .fo-result__notes > li:not(.fo-result__from) + li::before { content: " "; }
 @media (min-width: 768px) {
   .fo-result { padding: var(--space-6); gap: var(--space-5); }
   .fo-result__head { min-height: 96px; }
@@ -672,6 +679,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-hero__text { display: grid; gap: var(--space-3); }
 .fo-hero__oli { width: 96px; height: 96px; }
 @media (min-width: 768px) { .fo-hero__oli { width: 128px; height: 128px; } }
+/* F13a, revisão a-2 (DECISOES § F13A-R-01): the 150 px to an ad count the Oli's box inflated by 12 px (her wave). On the
+   home, from 1280 px, the Oli of the hero sat at the edge of the column, 150 px from the rail (138 with the box inflated):
+   she keeps 16 px from that edge. Of the heroes only the home's has the rail (the 404 has no ad). */
+@media (min-width: 1280px) { .fo-frame--rail .fo-hero__oli { margin-inline-end: var(--space-4); } }
 
 /* ---------- SupportCard ---------- */
 /* F12 · o café (DECISOES § 438): one column. The head row puts the Oli to the right of the title, looking left at the
@@ -984,8 +995,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* F13a (UX-04 A, tool-a-merge; DECISOES § 479): a row of the Merge list is the card, the arrows that can move (an
    empty place of 48 px where one cannot, D-23: never a disabled arrow drawn heavier than the live one) and the remove
    button (D-21). The handle is gone: the arrows of the row do it by keyboard and by touch (WCAG 2.5.7), and the mouse still
-   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. Under 768 px
-   the two arrows stack so the name keeps its width beside the remove button; every row (and the line that says a row
+   drags the whole row. The card shows the place in the order in a deep circle instead of an empty thumbnail. From 480 to
+   767 px the two arrows stack beside the remove button; under 480 px they go with it to a row under the card (§ F13A-R-03),
+   so the name keeps a column of 140 px or more; every row (and the line that says a row
    left, D-21) has the height of a row with its arrows, so nothing moves when the reading ends or a row leaves. A refused
    row keeps its card with the reason and its own remove button, the width of the list (DECISOES § 181). */
 .fo-merge { --fo-row-h: 76px; display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
@@ -1014,9 +1026,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-merge__row > .fo-file { align-content: center; }
   .fo-merge__row > .fo-merge__remove { align-self: center; }
 }
+/* F13a, revisão b-2 (DECISOES § F13A-R-03): a done card has no action of its own, so its empty third track (and the gap
+   before it) goes; under 480 px the arrows and the remove button go to a row of 48 px under the card, which takes the
+   width of the list again (the § 181 of the F5a): the name had 84 px at 360 and 44 px at 320 beside them. */
+.fo-merge__row .fo-file:has(> .fo-file__actions:empty) { grid-template-columns: 32px minmax(0, 1fr); }
+.fo-merge__row .fo-file__actions:empty { display: none; }
 @media (max-width: 479px) {
-  .fo-merge { --fo-row-h: 112px; }
-  .fo-merge__moves { gap: var(--space-2); }
+  .fo-merge { --fo-row-h: 154px; }
+  .fo-merge__row:not([data-state="error"]) { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "card card card" ". moves remove"; row-gap: var(--space-2); }
+  .fo-merge__row:not([data-state="error"]) > .fo-file { grid-area: card; }
+  .fo-merge__row > .fo-merge__moves { grid-area: moves; flex-direction: row; gap: var(--space-2); }
+  .fo-merge__row > :is(.fo-merge__remove, .fo-merge__none) { grid-area: remove; }
 }
 
 /* Signature area: a pad, a preview of the page and the movable box (the crop box of Crop image). */

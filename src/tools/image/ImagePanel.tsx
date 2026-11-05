@@ -690,13 +690,20 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     // The control that had the focus is gone and the page has it: the same row if it is still there (its Cancel gave
     // way to its Download), else the next row, the previous one, and last the control the panel shows now. In the band,
     // the options that gave way to the result's row come back folded: the focus goes to "Adjust".
+    // The WaterLevel takes the focus without scrolling: it is the rectangle itself, 356px tall, already in view, and on a
+    // first visit the browser scrolled its foot over the cookie notice (DECISOES § F13A-R-02).
+    const level = levelRef.current;
     const active = document.activeElement;
     if (!active || active === document.body || active === document.documentElement) {
       if (m.rowFocus !== null) {
         const wanted = [m.rowFocus, ...m.successors];
-        if (!wanted.some(focusRow)) (levelRef.current ?? startOverRef.current ?? chooseRef.current ?? downloadRef.current)?.focus();
+        if (!wanted.some(focusRow)) {
+          if (level) level.focus({ preventScroll: true });
+          else (startOverRef.current ?? chooseRef.current ?? downloadRef.current)?.focus();
+        }
       } else if (m.slotFocus) {
-        (levelRef.current ?? downloadRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
+        if (level) level.focus({ preventScroll: true });
+        else (downloadRef.current ?? startOverRef.current ?? chooseRef.current)?.focus();
       } else if (m.bandFocus) {
         (summaryRef.current ?? bandRef.current?.querySelector<HTMLElement>('input, button, a[href], summary'))?.focus();
       }
@@ -963,7 +970,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           ))}
           {!counted && rows[0] && (
             // The size in pixels of one picture, from 768 px (UX-04 A): on a phone the card keeps its height for the rest.
-            <li class="fo-desktop-only">{`${t.result.size}: ${rows[0].output.width} × ${rows[0].output.height} px`}</li>
+            // The notes run as one paragraph (DECISOES § F13A-R-04), so this one ends with a period like the others.
+            <li class="fo-desktop-only">{`${t.result.size}: ${rows[0].output.width} × ${rows[0].output.height} px.`}</li>
           )}
           <li>{t.result.metadata}</li>
         </ul>

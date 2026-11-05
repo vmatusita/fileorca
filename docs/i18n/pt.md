@@ -231,6 +231,7 @@ Os 10 guias em `/pt/guias/<slug>/`. O número de cada guia sai do código no for
 | mode (da Comprimir PDF) | nível | "a compressão Sem perda", "a Recomendada", "a Forte" |
 | merged file | arquivo juntado | |
 | Change (coluna) | Variação | |
+| Change (a mudança de tamanho no cartão do resultado) | Variação | F13a, revisão e-4: a mesma grandeza da coluna dos guias |
 | object streams | fluxos de objetos | |
 | post · header photo · channel banner · thumbnail | publicação · foto de capa · banner do canal · miniatura | |
 | preset | ajuste pronto | |

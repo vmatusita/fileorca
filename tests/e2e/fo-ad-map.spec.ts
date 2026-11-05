@@ -215,6 +215,54 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
   });
 }
 
+// ---- A cold first visit: the notice and the first ad once the fonts arrive ---------------------------------------------
+
+// F13a, revisão d-1 (DECISOES § F13A-R-05): the blocks above open each page at 360 × 740 and then turn the window, so the
+// resize runs the notice's lower() again on a settled layout. Whoever arrives for the first time has the window from the
+// start and an empty cache: the inline script decides on the layout of the fallback faces, and the fonts come after it (a
+// two-line number of a calculator goes to one line, the ad rises up to 68 px). Here every page opens in a new context
+// with the window set before the goto and the font files held 600 ms (they arrive by themselves, after the script), and
+// the notice keeps 150 px from the first content ad once they are in, at 768 × 1024, 1024 × 1366 and 1920 × 1080: the
+// pages the review measured under 150 px.
+const COLD_PAGES = [
+  '/loan-amortization-calculator/balloon-payment/',
+  '/pt/amortizacao-antecipada/',
+  '/es/calculadora-de-amortizacion-de-prestamos/pago-global/',
+  '/pt/comprimir-imagem/para-1mb/',
+  '/es/calculadora-de-meta-de-ahorro/',
+];
+const COLD_WINDOWS = [TABLET, { width: 1024, height: 1366 }, { width: 1920, height: 1080 }];
+const FONT_FILES = /(figtree|fredoka)[^/]*\.woff2$/i;
+
+test('a cold first visit: the open notice keeps 150 px from the first content ad once the fonts arrive after the inline script', async ({ browser }) => {
+  test.setTimeout(240_000);
+  const problems: string[] = [];
+  const seen: string[] = [];
+  for (const path of COLD_PAGES) {
+    const adPage = AD_PAGES.find((one) => one.path === path);
+    expect(adPage, `${path} é uma página com anúncio`).toBeTruthy();
+    for (const viewport of COLD_WINDOWS) {
+      const context = await browser.newContext({ viewport, baseURL: TEST_BUILD_ORIGIN, serviceWorkers: 'block' });
+      await context.route(FONT_FILES, async (route) => {
+        await new Promise((done) => setTimeout(done, 600));
+        await route.continue();
+      });
+      const page = await context.newPage();
+      expect((await page.goto(path))?.status(), path).toBe(200);
+      await page.waitForFunction(() => document.fonts.status === 'loaded' && [...document.fonts].some((face) => face.status === 'loaded') && [...document.fonts].every((face) => face.status !== 'loading'), undefined, { timeout: 15_000 });
+      await frames(page);
+      const measure = await measureMap(page);
+      checkNotice(problems, adPage as AdPage, measure);
+      const first = measure.boxes.filter((box) => box.kind === 'content').sort((a, b) => a.y - b.y)[0];
+      const lowered = await page.evaluate(() => (document.querySelector('main .fo-ad--content') as HTMLElement | null)?.style.marginTop || 'sem margem');
+      seen.push(`${path} ${viewport.width}×${viewport.height}: ${first && measure.notice ? Math.round(distance(first, measure.notice)) : '-'} px (${lowered})`);
+      await context.close();
+    }
+  }
+  console.log(seen.join('\n'));
+  expect(problems, problems.join('\n')).toEqual([]);
+});
+
 // ---- On fileorca.com: the one push script --------------------------------------------------------------------------
 
 /** The first page of each mold (English), and the home and a tool in Portuguese and Spanish. */
