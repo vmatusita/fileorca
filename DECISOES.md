@@ -6201,3 +6201,9 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
   - `tests/unit/calc-reserves.test.ts` (3 testes): o `widen`, os textos de cada problema declarado em cada página, e a reserva do Baixar pelo menos tão longa quanto cada mensagem.
   - **O teste antigo que mudou (no formato da § 341):** "the card keeps its height in the example, after the first key, in a result and in an error" pulava a comparação da 1ª tecla quando a frase mudava de linhas (`if (keyLines === lines)`); agora compara sempre. Ele protegia a altura nos quatro estados e protege o mesmo, sem a exceção; os outros três estados não mudaram.
 - **O README do ResultHero** diz o que o card guarda, com o antes e o depois.
+
+## § 596 · A trava do build não deixa marca de anúncio nas faixas da home (F13b, revisão d-2; § 573)
+
+- **O achado:** a § 573 pôs as faixas e o topo da home no `FORBIDDEN` do mapa do e2e (`tests/e2e/lib/ad-map.ts`), mas a trava do build (`markProblems`, `NEVER_INSIDE_CLASSES` do `src/ads/map.ts`) não as conhecia: uma marca dentro de `section.fo-catband`, de `div.fo-home-top` ou de `div.fo-home-sea` passava sem erro, e só o e2e a pegaria.
+- **A mudança:** `fo-catband`, `fo-home-top` e `fo-home-sea` entram no `NEVER_INSIDE_CLASSES`, ao lado do `fo-hubband`. A home de hoje põe as marcas entre as faixas, e o build passa igual.
+- **O teste:** `tests/unit/ad-map.test.ts`, "refuses a mark inside a grid, a list, …", ganhou os três casos (uma marca dentro da faixa, do topo e do mar da home reprova). Contra a trava de antes (uma cópia do `map.ts` do commit anterior, `.cache/f13b-fix/d2-proof.test.ts`), os três casos não dão erro nenhum. O teste antigo só ganhou casos; o que ele conferia não mudou.
