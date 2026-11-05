@@ -975,6 +975,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-split__key--a { background: var(--brand); }
 .fo-deep .fo-split__key--a { background: var(--brand-on-deep); }
 .fo-split__key--b { background: var(--coral); background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--on-cat) 22%, transparent) 6px 8px); }
+/* F13b · the SplitChart, pair variant (D-38; DECISOES § C-6): one bar per system on one scale, each named in 13 px
+   on-deep-muted at its left; and the other system's payment in the card, under the Download. */
+.fo-split__pair { display: grid; gap: var(--space-2); }
+.fo-split__row { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--space-2); }
+.fo-split__name { font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.04em; color: var(--on-deep-muted); }
+.fo-rhero__versus { margin: 0; font: 600 17px/26px var(--fo-font-text); color: var(--on-deep); }
+.fo-rhero__versus b { font: 600 20px/26px var(--fo-font-display); white-space: nowrap; }
 
 .fo-export-wrap { display: grid; gap: var(--space-3); }
 .fo-export { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
@@ -983,13 +990,6 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 @media (max-width: 767px) { .fo-calc__result .fo-export .fo-btn { padding-inline: var(--space-4); } }
 .fo-copied { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--success); font: 700 15px/20px var(--fo-font-text); }
 .fo-copied .fo-icon { width: 18px; height: 18px; }
-/* F13b · the SplitChart, pair variant (D-38; DECISOES § C-6): one bar per system on one scale, each named in 13 px
-   on-deep-muted at its left; and the other system's payment in the card, under the Download. */
-.fo-split__pair { display: grid; gap: var(--space-2); }
-.fo-split__row { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: var(--space-2); }
-.fo-split__name { font: 700 13px/18px var(--fo-font-text); letter-spacing: 0.04em; color: var(--on-deep-muted); }
-.fo-rhero__versus { margin: 0; font: 600 17px/26px var(--fo-font-text); color: var(--on-deep); }
-.fo-rhero__versus b { font: 600 20px/26px var(--fo-font-display); white-space: nowrap; }
 
 .fo-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .fo-scn { box-sizing: border-box; min-width: 0; border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); padding: var(--space-4); display: grid; gap: var(--space-3); align-content: start; }
@@ -1010,6 +1010,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 
 .fo-calc-schedule { display: grid; gap: var(--space-4); justify-items: start; }
 .fo-calc-schedule > div { width: 100%; }
+/* F13b (D-43; DECISOES § C-5): the schedule is a block of the island, before the chips, on the whole width; its heading (or
+   the button of its block) is its name, and the table comes right under it. */
+.fo-calc__schedule { grid-column: 1 / -1; min-width: 0; justify-items: stretch; }
+.fo-calc__schedule > .fo-calc__moreheading { margin: 0; }
+.fo-calc__schedule > .fo-disclose__panel { padding-top: 0; }
 /* scroll-padding-top: a year button reached with Shift+Tab stops under the sticky header, not behind it. */
 .fo-amort-wrap { box-sizing: border-box; width: 0; min-width: 100%; max-height: 70vh; overflow: auto; scroll-padding-top: var(--tap-min); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); }
 .fo-amort-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
@@ -1026,16 +1031,17 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* A table that is the result itself (F7: no year groups, CalcView.open) has no sticky column: its last heading stood over
    another column at 360 px. Its words wrap, so it fits the frame at 320 px with no sideways scroll (review F7, f-1 and
    f-2; DECISOES § 275). */
-/* F13b (D-43; DECISOES § C-5): the schedule is a block of the island, before the chips, on the whole width; its heading (or
-   the button of its block) is its name, and the table comes right under it. */
-.fo-calc__schedule { grid-column: 1 / -1; min-width: 0; justify-items: stretch; }
-.fo-calc__schedule > .fo-calc__moreheading { margin: 0; }
-.fo-calc__schedule > .fo-disclose__panel { padding-top: 0; }
 .fo-amort--flat th:last-child { right: auto; }
 .fo-amort--flat th, .fo-amort--flat td { white-space: normal; }
 @media (max-width: 479px) {
   .fo-amort--flat th, .fo-amort--flat td { padding-inline: var(--space-2); }
 }
+/* F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of a row of data is its header (th
+   scope="row"), drawn like the cell it replaces: no sticky of the head of the table, the type and colour of the table, the
+   zebra of its row. */
+.fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
+.fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
+@media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
 .fo-amort .fo-amort__year button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap-min); font-weight: 700; }
 .fo-amort .fo-amort__year button .fo-icon { width: 18px; height: 18px; transition: transform var(--dur-quick) var(--ease-out); }
 .fo-amort .fo-amort__year button[aria-expanded="true"] .fo-icon { transform: rotate(90deg); }
@@ -1052,12 +1058,6 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* width 0 and min-width 100%: the table scrolls inside its frame and its no-wrap cells never widen the page
    column (the guides scrolled sideways at 320px). */
 .fo-table-wrap { overflow-x: auto; width: 0; min-width: 100%; }
-/* F13b (F4 ACE-9, the half of the calculators; DECISOES § C-5): the first cell of a row of data is its header (th
-   scope="row"), drawn like the cell it replaces: no sticky of the head of the table, the type and colour of the table, the
-   zebra of its row. */
-.fo-amort tbody th[scope="row"] { position: static; z-index: auto; top: auto; text-align: left; font: 500 15px/22px var(--fo-font-text); color: var(--ink); background: transparent; padding: var(--space-2) var(--space-4); border-bottom: var(--stroke-hair) solid var(--hairline); }
-.fo-amort tbody tr:nth-child(even) > th[scope="row"] { background: var(--surface-sunken); }
-@media (max-width: 479px) { .fo-amort--flat tbody th[scope="row"] { padding-inline: var(--space-2); } }
 .fo-table-wrap:focus-visible { outline: var(--stroke-3) solid var(--focus); outline-offset: 2px; }
 .fo-table-wrap .fo-table th, .fo-table-wrap .fo-table td { white-space: nowrap; }
 

@@ -154,6 +154,7 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
       },
       placard: { n: dollars(first(r.sac), ln), l: text(v, 'placard') },
       more: fmt(text(v, 'moreMeta'), { fees: cash(fees, ln), tr: ratePercent(tr, ln) }),
+      scheduleMeta: fmt(text(v, 'scheduleMeta'), { n: num(values, 'n') }),
       split: { a: { label: text(v, 'principal'), cents: r.loan }, b: { label: text(v, 'interestSac'), cents: r.sac.totalInterest } },
       compare: { a: { name: text(v, 'sac'), rows: scenario(r.sac) }, b: { name: text(v, 'price'), rows: scenario(r.price) }, diff },
       table: () =>
@@ -168,7 +169,6 @@ export const brSacPriceDef: CalcDef<SacPriceInput, SacPriceResult> = {
         [`${text(v, 'sac')}: ${text(v, 'interest')}`, cash(r.sac.totalInterest, ln)],
         [`${text(v, 'sac')}: ${text(v, 'paid')}`, cash(r.sac.totalWithFees, ln)],
         [`${text(v, 'price')}: ${text(v, 'first')}`, cash(first(r.price), ln)],
-      scheduleMeta: fmt(text(v, 'scheduleMeta'), { n: num(values, 'n') }),
         [`${text(v, 'price')}: ${text(v, 'last')}`, cash(last(r.price), ln)],
         [`${text(v, 'price')}: ${text(v, 'interest')}`, cash(r.price.totalInterest, ln)],
         [`${text(v, 'price')}: ${text(v, 'paid')}`, cash(r.price.totalWithFees, ln)],

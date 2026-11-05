@@ -123,10 +123,6 @@ export interface CalcView {
   open?: boolean;
   /** Principal against interest, or deposits against interest (cents). */
   split?: { a: { label: string; cents: number }; b: { label: string; cents: number } };
-  compare?: { a: Scenario; b: Scenario; diff: Part[] };
-  /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
-  more?: string;
-  /** The schedule, built only when the person opens it or exports. */
   /** The other system in the card, under the Download (the SAC × PRICE: "Na PRICE: R$ 4.534,12 por mês"; F13b, DECISOES § C-6). */
   versus?: Part[];
   /**
@@ -134,6 +130,12 @@ export interface CalcView {
    * interest of each system. `name` is the name of the chart, `interest` the line of its legend for the interest.
    */
   pair?: { name: string; principal: { label: string; cents: number }; interest: Part[]; rows: { name: string; cents: number }[] };
+  compare?: { a: Scenario; b: Scenario; diff: Part[] };
+  /** The total of the fields of the block that folds (CalcDef.disclose), said in its title: "$500.00 a month in your payment". */
+  more?: string;
+  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § C-5). */
+  scheduleMeta?: string;
+  /** The schedule, built only when the person opens it or exports. */
   table: () => Table;
   /** The results, for the PDF. */
   summary: [label: string, value: string][];
@@ -142,8 +144,6 @@ export interface CalcView {
 }
 
 export interface FieldTexts {
-  /** Under the name of the schedule's block: "360 payments, by loan year" (the mortgage and the SAC × PRICE; F13b, § C-5). */
-  scheduleMeta?: string;
   label: string;
   help?: string;
   /** The range in words, shown for any value outside it: "Enter a rate from 0 to 40%." */
