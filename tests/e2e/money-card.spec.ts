@@ -6,6 +6,7 @@
 // The name puts it right after money-calc.spec.ts, among the money specs of the light parts (DECISOES § 142).
 import { expect, test, type Page } from '@playwright/test';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage } from '../../src/tools/calc/registry.ts';
+import { QR_ID, routeById } from '../../src/i18n/routes.ts';
 import enShared from '../../src/tools/calc/i18n/en.ts';
 import esShared from '../../src/tools/calc/i18n/es.ts';
 import ptShared from '../../src/tools/calc/i18n/pt.ts';
@@ -504,4 +505,78 @@ test('/pt/simulador-sac-price/: the PRICE is in the card, with two bars on one s
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   const inside = await page.locator('.fo-scn dd').evaluateAll((dds) => dds.every((dd) => dd.scrollWidth <= dd.clientWidth + 1));
   expect(inside).toBe(true);
+});
+
+// The CLS of the interaction (§ 375; F10 p-19): at 360 x 740, in Chromium (the layout-shift API), with the choice of cookies
+// stored and the observer open before the first key, on the mortgage and the SAC × PRICE: the first key (the cheer comes in
+// the same box, the card keeps its height) moves nothing it did not touch, up to 0.05. The error, 800 ms after the key, moves
+// nothing at all: the test "an error is said in the card…" above asks for 0. Before, the first key grew the card 96 to 100 px.
+for (const path of [CALC_PAGES['mortgage-calculator'].path, moneyPage('br-sac-price', 'pt')?.path ?? '']) {
+  test(`${path}: the first key shifts the layout by 0.05 at most, at 360 x 740`, async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'the layout-shift API is only in Chromium');
+    await page.addInitScript(() => {
+      const shifts = { cls: 0 };
+      (window as unknown as { __shifts: typeof shifts }).__shifts = shifts;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) if (!entry.hadRecentInput) shifts.cls += entry.value;
+      }).observe({ type: 'layout-shift', buffered: false });
+    });
+    await openAt(page, path, 360, 740);
+    await hydrated(page);
+    await frames(page);
+    await page.evaluate(() => ((window as unknown as { __shifts: { cls: number } }).__shifts.cls = 0));
+    await firstKey(page);
+    await expect(page.locator('.fo-rhero__oli')).toHaveAttribute('data-oli', 'cheer');
+    // Past the half second of the voice and the 800 ms of an error: anything that would come on its own has come.
+    await page.waitForTimeout(1_200);
+    expect(await page.evaluate(() => (window as unknown as { __shifts: { cls: number } }).__shifts.cls)).toBeLessThanOrEqual(0.05);
+  });
+}
+
+// Every control this run made or changed is 48 px or more on both sides (tap-min), at 360 and 1280 px: the Download PDF of the
+// card (60 px), Download CSV and Copy link, the button of the block of costs and of the schedule, and the two downloads of the
+// QR code generator.
+test('the new and changed controls of the calculators and of the QR are 48 px or more, at 360 and 1280 px', async ({ page }) => {
+  const small: string[] = [];
+  /** Each selector must find its controls (a measure of none proves nothing), and each control must be 48 px or more. */
+  const measure = async (where: string, selectors: string[]) => {
+    for (const selector of selectors) {
+      const boxes = await page.locator(selector).evaluateAll((nodes) => nodes.map((node) => ({ name: node.textContent?.trim().slice(0, 30) ?? '', ...node.getBoundingClientRect().toJSON() })));
+      if (!boxes.length) small.push(`${where}: nenhum ${selector}`);
+      for (const box of boxes) if (box.width < 48 || box.height < 48) small.push(`${where}: "${box.name}" ${Math.round(box.width)}×${Math.round(box.height)}`);
+    }
+  };
+  for (const width of [360, 1280]) {
+    for (const path of [CALC_PAGES['mortgage-calculator'].path, moneyPage('br-sac-price', 'pt')?.path ?? '', moneyPage('mortgage-calculator', 'es')?.path ?? '']) {
+      await openAt(page, path, width, 900);
+      await hydrated(page);
+      await measure(`${path} a ${width}`, ['.fo-rhero .fo-btn--download', '.fo-export .fo-btn', '[aria-controls="fo-calc-more-fields"]', '#fo-calc-schedule button[aria-controls="fo-schedule-table"]']);
+    }
+    const qr = routeById(QR_ID).paths.en ?? '';
+    await openAt(page, qr, width, 900);
+    await hydrated(page);
+    await page.locator('#fo-tool-root textarea').fill('https://fileorca.com/');
+    await expect(page.locator('.fo-qr__actions .fo-btn')).toHaveCount(2);
+    await measure(`${qr} a ${width}`, ['.fo-qr__actions .fo-btn']);
+  }
+  expect(small).toEqual([]);
+});
+
+// F4 ACE-7, accepted (DECISOES § C-12): the order of the DOM is the phone's, so at 1280 px the Tab goes from the main fields
+// to the column of the result (the Download PDF, Download CSV, Copy link) and back to the left column, now to one button,
+// the block of costs (before, to its four fields). WebKit's Tab skips links and buttons, as Safari does by default: there the
+// walk is Option+Tab, the key that reaches them (docs/claude/playwright.md).
+test('at 1280 px the Tab goes from the main fields to the Download, the CSV, the link and the one button of the costs (ACE-7)', async ({ page, browserName }) => {
+  await openAt(page, CALC_PAGES['mortgage-calculator'].path, 1280, 900);
+  await hydrated(page);
+  await page.locator('#fo-calc-t').focus();
+  const order: string[] = [];
+  for (let step = 0; step < 5; step += 1) {
+    await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
+    order.push(await page.evaluate(() => {
+      const node = document.activeElement as HTMLElement;
+      return node.classList.contains('fo-btn--download') ? 'pdf' : node.closest('.fo-export') ? (node.textContent ?? '').trim() : node.getAttribute('aria-controls') ?? node.id;
+    }));
+  }
+  expect(order).toEqual(['pdf', 'Download CSV', 'Copy link', 'fo-calc-more-fields', 'fo-schedule-table']);
 });
