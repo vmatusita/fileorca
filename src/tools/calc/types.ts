@@ -255,6 +255,12 @@ export interface CalcDef<I = unknown, R = unknown> {
    * boxes are in the page only while the block is open.
    */
   disclose?: readonly string[];
+  /**
+   * The view texts of the problems the account may say in the card, in the place of the Download (the payment that does not
+   * cover the interest, the doors and windows larger than the walls): the room of the Download keeps the longest of them
+   * and of the fields' messages from the first paint, so the card never grows on an error (review F13b a-1; DECISOES § 595).
+   */
+  problems?: readonly string[];
   /** The example the page starts with: `toInput(initial)` is the page-example case of the oracle. */
   initial: Values;
   /**

@@ -105,6 +105,7 @@ export const refinanceDef: CalcDef<RefinanceInput, RefinanceResult> = {
 
 export const affordabilityDef: CalcDef<AffordabilityInput, AffordabilityResult> = {
   id: 'home-affordability-calculator',
+  problems: ['noRoom'],
   fields: [
     money('i', 1_000, 100_000_000, { main: true, half: true }),
     money('dt', 0, 1_000_000, { main: true, half: true }),

@@ -230,6 +230,7 @@ export const PAINT_EXAMPLE: Values = { mo: 'walls', pe: 4800, he: 800, ar: 38_40
 
 export const paintDef: CalcDef<PaintInput, PaintResult> = {
   id: 'paint-calculator',
+  problems: ['noArea'],
   fields: [
     { kind: 'select', key: 'mo', options: ['walls', 'area'], main: true, half: true },
     count('co', 1, 3, { main: true, half: true }),

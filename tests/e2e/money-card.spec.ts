@@ -101,9 +101,6 @@ async function breakField(page: Page): Promise<void> {
   await expect(page.locator('#fo-rhero-error')).toBeVisible();
 }
 
-/** The height of the sentence of the card (a result with more digits may take a line more). */
-const sentenceHeight = (page: Page) => page.locator('.fo-rhero__sentence').evaluate((node) => node.getBoundingClientRect().height);
-
 // "Dobra": after the first key, the Download PDF of every calculator ends above the fold, 740 px at 360 x 740 and 800 px at
 // 1280 x 800, and on the phone it takes the width of the card's content (in block). Before, it was under the card, in the
 // ExportBar, from 878 to 1,094 px at 360.
@@ -133,8 +130,8 @@ for (const block of blocks(CALC_PATHS)) {
 // field, the visit's first result, and the Oli's cheer); a result (the example's value typed back); and an error (a value the
 // field cannot take). The card keeps its height (1 px of tolerance) and its top: the Oli changes her pose in her box, the
 // Download leaves its place to the message and the last result takes the cell of the sentence. The first key is compared
-// with the example when its sentence keeps its lines (another number may take a line more), and the error with the result
-// it stands on. Before, the first key brought the Oli and the Placard under the chart (+96 to +100 px) and an error pushed a
+// with the example (review F13b c-4, DECISOES § 595: the card keeps the room of the sentence with other numbers, so the
+// comparison is no longer skipped when the sentence changes its lines), and the error with the result it stands on. Before, the first key brought the Oli and the Placard under the chart (+96 to +100 px) and an error pushed a
 // line under the card (+50 px).
 for (const block of blocks(CALC_PATHS)) {
   test(`the card keeps its height in the example, after the first key, in a result and in an error (${block.name})`, async ({ page }) => {
@@ -145,13 +142,11 @@ for (const block of blocks(CALC_PATHS)) {
         await openAt(page, path, width, 900);
         await hydrated(page);
         const example = await card(page);
-        const lines = await sentenceHeight(page);
         // The fields after the result (the block of costs, where there is one): their top never moves on the first key.
         const moreTop = () => page.evaluate(() => Math.round((document.querySelector('.fo-calc__more')?.getBoundingClientRect().top ?? 0) + window.scrollY));
         const more = await moreTop();
         const value = await firstKey(page);
         const key = await card(page);
-        const keyLines = await sentenceHeight(page);
         const moreKey = await moreTop();
         await firstField(page).fill(value);
         await frames(page);
@@ -162,12 +157,108 @@ for (const block of blocks(CALC_PATHS)) {
           if (Math.abs(now.height - from.height) > 1) wrong.push(`${path} a ${width}, ${state}: ${from.height} → ${now.height} px`);
           if (now.top !== from.top) wrong.push(`${path} a ${width}, ${state}: o topo foi de ${from.top} a ${now.top}`);
         };
-        if (keyLines === lines) {
-          same('1ª tecla', example, key);
-          if (moreKey !== more) wrong.push(`${path} a ${width}, 1ª tecla: os campos depois do resultado foram de ${more} a ${moreKey}`);
-        }
+        same('1ª tecla', example, key);
+        if (moreKey !== more) wrong.push(`${path} a ${width}, 1ª tecla: os campos depois do resultado foram de ${more} a ${moreKey}`);
         same('resultado', example, result);
         same('erro', result, error);
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+}
+
+// Review F13b a-1, c-1, c-4 and f-7 (DECISOES § 595): the card keeps its height with any real value, not only the example's
+// first key and the letters of an error. Each number field before the card takes one zero more and one digit less, as a
+// person types them (then the field is left, which says an error at once); each calculator with a problem of the account
+// is driven into it; and the mortgage takes every rate from 3.0 to 9.0. In every state the height of the card and the top of
+// what comes after it are the example's (1 px), at 320, 360 and 1280 px on the same load (the layout is CSS). Before, a
+// four-line problem grew the card 16 px (36 at 320), a sentence of other numbers a line (26 px; the mortgage at 15 of the 61
+// rates), and the legend of the chart 22 px.
+const SWEEP_WIDTHS = [320, 360, 1280] as const;
+const SWEEP_PROBLEMS: Record<string, string[][][]> = {
+  [CALC_PAGES['credit-card-payoff-calculator'].path]: [[['pay', '10']]],
+  [moneyPage('credit-card-payoff-calculator', 'es')?.path ?? '']: [[['pay', '10']]],
+  [CALC_PAGES['debt-payoff-calculator'].path]: [[['d0m', '0'], ['d1m', '0'], ['d2m', '0'], ['d3m', '0'], ['x', '0']]],
+  [moneyPage('debt-payoff-calculator', 'es')?.path ?? '']: [[['d0m', '0'], ['d1m', '0'], ['d2m', '0'], ['d3m', '0'], ['x', '0']]],
+  [moneyPage('br-debt-payoff', 'pt')?.path ?? '']: [[['d0m', '0'], ['d1m', '0'], ['d2m', '0'], ['x', '0']]],
+  [CALC_PAGES['debt-consolidation-calculator'].path]: [[['d0p', '1']]],
+  [moneyPage('debt-consolidation-calculator', 'es')?.path ?? '']: [[['d0p', '1']]],
+  [moneyPage('br-sac-price', 'pt')?.path ?? '']: [[['d', '100']]],
+  [CALC_PAGES['savings-goal-calculator'].path]: [[['md', 'deposit'], ['dep', '0'], ['r', '0']]],
+  [moneyPage('savings-goal-calculator', 'es')?.path ?? '']: [[['md', 'deposit'], ['dep', '0'], ['r', '0']]],
+  [CALC_PAGES['home-affordability-calculator'].path]: [[['dt', '100000']]],
+  [moneyPage('home-affordability-calculator', 'es')?.path ?? '']: [[['dt', '100000']]],
+  [LIFE_CALC_PAGES['paint-calculator'].path]: [[['dr', '50']]],
+  [LIFE_CALC_PAGES['body-fat-calculator'].path]: [[['nk', '30'], ['wa', '15']]],
+};
+const SWEEP_RATES = [CALC_PAGES['mortgage-calculator'].path, moneyPage('mortgage-calculator', 'es')?.path ?? ''];
+for (const block of blocks(CALC_PATHS)) {
+  test(`the card keeps its height with other values: a zero more and a digit less, the problems of the account and the rates (${block.name})`, async ({ page }) => {
+    test.setTimeout(240_000);
+    const wrong: string[] = [];
+    /** The card and the top of what comes after it, at each width, on the same load. */
+    const measure = async () => {
+      const out: Record<number, { height: number; next: number }> = {};
+      for (const width of SWEEP_WIDTHS) {
+        await page.setViewportSize({ width, height: 900 });
+        // WebKit lays the hidden reserves of the card (a pseudo-element with attr()) out for the width before after a resize, one
+        // step behind, until something else changes the card: wait for the new width and lay the card out again.
+        await page.waitForFunction((now) => window.innerWidth === now, width);
+        await page.evaluate(() => {
+          const hero = document.querySelector<HTMLElement>('.fo-rhero')!;
+          hero.style.display = 'none';
+          void hero.offsetHeight;
+          hero.style.display = '';
+        });
+        await frames(page);
+        out[width] = await page.evaluate(() => {
+          const hero = document.querySelector('.fo-rhero')!;
+          const next = hero.nextElementSibling ?? hero.parentElement!.nextElementSibling!;
+          return { height: Math.round(hero.getBoundingClientRect().height * 10) / 10, next: Math.round(next.getBoundingClientRect().top - hero.getBoundingClientRect().top) };
+        });
+      }
+      return out;
+    };
+    for (const path of block.paths) {
+      await openAt(page, path, 360, 900);
+      await hydrated(page);
+      const example = await measure();
+      const same = async (state: string) => {
+        const now = await measure();
+        for (const width of SWEEP_WIDTHS) {
+          const [from, to] = [example[width]!, now[width]!];
+          if (Math.abs(to.height - from.height) > 1 || Math.abs(to.next - from.next) > 1) wrong.push(`${path} a ${width}, ${state}: ${from.height} → ${to.height} px`);
+        }
+      };
+      const fields = await page.locator('.fo-calc__main input[inputmode]').evaluateAll((inputs) => inputs.map((input) => ({ id: input.id, value: (input as HTMLInputElement).value })));
+      for (const { id, value } of fields) {
+        const field = page.locator(`#${id}`);
+        for (const [name, typed] of [['a zero more', `${value}0`], ['a digit less', value.slice(0, -1)]] as const) {
+          if (!typed) continue;
+          await field.fill(typed);
+          await field.blur();
+          await same(`#${id} ${name} (${typed})`);
+          await field.fill(value);
+          await field.blur();
+        }
+      }
+      for (const fills of SWEEP_PROBLEMS[path] ?? []) {
+        for (const [key, text] of fills) {
+          const field = page.locator(`#fo-calc-${key}`);
+          if ((await field.evaluate((node) => node.tagName)) === 'SELECT') await field.selectOption(text ?? '');
+          else await field.fill(text ?? '');
+        }
+        await expect(page.locator('#fo-rhero-error'), `${path}: o problema`).toBeVisible();
+        await same(`o problema ${fills.map((pair) => pair.join(' = ')).join(', ')}`);
+        await openAt(page, path, 360, 900);
+        await hydrated(page);
+      }
+      if (SWEEP_RATES.includes(path)) {
+        const rate = page.locator('#fo-calc-r');
+        for (let tenths = 30; tenths <= 90; tenths += 1) {
+          await rate.fill((tenths / 10).toFixed(1));
+          await same(`a taxa ${(tenths / 10).toFixed(1)}`);
+        }
       }
     }
     expect(wrong).toEqual([]);

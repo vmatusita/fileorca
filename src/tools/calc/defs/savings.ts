@@ -28,6 +28,7 @@ function compoundingWord(t: CalcPanelTexts, value: string): string {
 
 export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
   id: 'compound-interest-calculator',
+  problems: ['tooLarge'],
   fields: [
     money('i', 0, 10_000_000, { main: true, half: true }),
     money('m', 0, 1_000_000, { main: true, half: true }),
@@ -92,6 +93,7 @@ export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
 
 export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
   id: 'savings-goal-calculator',
+  problems: ['tooLarge', 'tooLong'],
   fields: [
     money('g', 1, 100_000_000, { main: true, half: true }),
     money('s', 0, 100_000_000, { main: true, half: true }),

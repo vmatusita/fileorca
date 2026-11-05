@@ -1197,13 +1197,23 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    on every load), cheer once on the first result, oops on an error. */
 .fo-rhero { gap: var(--space-2); }
 .fo-rhero__label { padding-right: 64px; }
+/* Review F13b a-1 (DECISOES § 595): the label keeps the room of the longest one the card may say (another value may change it). */
+.fo-rhero__label { display: grid; grid-template-columns: minmax(0, 1fr); }
+.fo-rhero__label > span, .fo-rhero__label::after { grid-area: 1 / 1; min-width: 0; }
+.fo-rhero__label::after { content: attr(data-reserve); visibility: hidden; }
 .fo-rhero__oli { position: absolute; z-index: 1; top: calc(-1 * var(--space-4)); right: var(--space-3); width: 64px; height: 64px; pointer-events: none; }
 .fo-rhero__oli[data-oli="wave"] > svg { animation: none; }
 .fo-rhero__oli[data-oli="cheer"] > svg { animation: fo-cheer var(--dur-cheer) var(--ease-spring) 1 both; }
 /* The Download PDF right under the number, in block on the phone, on the sea (shadow-lip-on-deep): its slot keeps the height
    of the button and its lip, so the message of an error takes its place and nothing moves (F7 f-10, saída A; § 139, § 276). */
-.fo-rhero__get { display: grid; align-items: center; min-height: calc(var(--button-lg) + var(--lip)); }
+.fo-rhero__get { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; min-height: calc(var(--button-lg) + var(--lip)); }
 .fo-rhero__get .fo-btn--download { margin-bottom: var(--lip); }
+/* Review F13b a-1 (DECISOES § 595): the slot keeps, from the first paint, the room of the longest message the card may put
+   there (a range, or a problem of the account of four lines), drawn hidden in the same cell with the message's type and the
+   room of its icon; the Download keeps its place at the top of the slot. */
+.fo-rhero__get > *, .fo-rhero__get::after { grid-area: 1 / 1; }
+.fo-rhero__get::after { content: attr(data-reserve); visibility: hidden; padding-left: calc(20px + var(--space-2)); font: 600 15px/20px var(--fo-font-text); overflow-wrap: anywhere; }
+.fo-rhero__get .fo-btn--download { align-self: start; }
 @media (max-width: 767px) { .fo-rhero__get .fo-btn--download { display: flex; width: 100%; } }
 @media (min-width: 768px) { .fo-rhero__get { justify-items: start; } }
 .fo-rhero__error { margin: 0; display: flex; gap: var(--space-2); align-items: center; font: 600 15px/20px var(--fo-font-text); color: var(--on-deep); }
@@ -1211,10 +1221,13 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-rhero__alert { flex: none; display: inline-flex; color: var(--danger-on-deep); }
 .fo-rhero__alert .fo-icon { width: 20px; height: 20px; }
 /* The sentence and the last result share one cell: the card keeps the sentence's height in the error state (D-35, D-41). */
-.fo-rhero__said { display: grid; }
+.fo-rhero__said { display: grid; grid-template-columns: minmax(0, 1fr); }
 .fo-rhero__said > *, .fo-rhero__said::after { grid-area: 1 / 1; }
 /* The room of the longest line an error may bring, from the first paint: the reserve is an attribute, drawn hidden. */
 .fo-rhero__said::after { content: attr(data-reserve); visibility: hidden; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
+/* Review F13b a-1, c-4 and f-7 (DECISOES § 595): and the room of the sentence with other numbers (every number a digit wider,
+   in its widest digit, and the bold words in capitals), so another value never gives it a line more. */
+.fo-rhero__said::before { content: attr(data-sentence); grid-area: 1 / 1; visibility: hidden; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
 .fo-rhero__stale { margin: 0; align-self: start; font-size: 17px; line-height: 26px; color: var(--on-deep); overflow-wrap: anywhere; }
 .fo-rhero[data-state="error"] .fo-rhero__sentence { visibility: hidden; }
 .fo-rhero[data-state="error"] .fo-rhero__num, .fo-rhero[data-state="error"] .fo-rhero__num small { color: var(--on-deep-muted); }
@@ -1252,7 +1265,16 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-deep .fo-split__gap { stroke: var(--deep); }
 .fo-split__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 22px; }
 .fo-split__legend li { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+/* Review F13b a-1 (DECISOES § 595): on a phone each line of the legend has a row of its own, so a total of other digits never
+   brings the second line up beside the first or sends it under it (the card moved 22 px with a term of 3 years). */
+@media (max-width: 767px) { .fo-split__legend { flex-direction: column; } }
 .fo-split__legend li > span { min-width: 0; overflow-wrap: anywhere; }
+/* Review F13b a-1 (DECISOES § 595): each line keeps, hidden in its cell, the room of the line with the widest numbers the card
+   may show (a total of other digits wrapped it again and moved the card 22 px). The two lines of the pair are rows of their own. */
+.fo-split__legend li > span { display: grid; grid-template-columns: minmax(0, 1fr); }
+.fo-split__legend li > span > span, .fo-split__legend li > span::after { grid-area: 1 / 1; min-width: 0; overflow-wrap: anywhere; }
+.fo-split__legend li > span::after { content: attr(data-reserve); visibility: hidden; }
+.fo-split--pair .fo-split__legend { flex-direction: column; }
 .fo-split__legend .fo-split__key { flex: none; align-self: center; }
 .fo-split__legend b { font-variant-numeric: tabular-nums; }
 .fo-split__key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }

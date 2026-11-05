@@ -15,6 +15,7 @@ import type { Pose } from '../../oli/poses.ts';
 import { HERO_ERROR_ID } from './CalcField.tsx';
 import SplitChart, { PairChart } from './SplitChart.tsx';
 import type { CalcView, Part } from './types.ts';
+import type { HeroReserves } from './CalcPanel.tsx';
 
 export const SPEAK_AFTER_MS = 500;
 
@@ -82,11 +83,13 @@ interface Props {
   /** In the place of the sentence while there is an error: "Last result that worked: Rate 6.5%. Fix the highlighted field…" */
   last?: string | undefined;
   /**
-   * The longest of those lines the card may have to say, kept as the room of the cell from the first paint (an attribute
-   * drawn by a hidden pseudo-element, never text of the page): a short sentence (two lines) under a three-line error grew
-   * the card 26 px and moved everything under it.
+   * The room the card keeps from the first paint (CalcPanel's heroReserves; DECISOES § 545 and § 595), each an attribute
+   * drawn by a hidden pseudo-element, never text of the page: the longest message in the place of the Download (`get`), the
+   * sentence as wide as another value may make it (`sentence`), and the longest "Last result that worked" (`stale`). Without
+   * them a short sentence under a three-line error grew the card 26 px, a four-line problem 16 px, and a sentence of other
+   * numbers a line.
    */
-  reserve: string;
+  reserves: HeroReserves;
   /** The person changed something: the region may speak. */
   touched: boolean;
   pose: Pose;
@@ -98,7 +101,7 @@ interface Props {
   percent: (value: number) => string;
 }
 
-export default function ResultHero({ view, error, last, reserve, touched, pose, download, alert, splitName, money, percent }: Props) {
+export default function ResultHero({ view, error, last, reserves, touched, pose, download, alert, splitName, money, percent }: Props) {
   const [spoken, setSpoken] = useState('');
   const timer = useRef<number | undefined>(undefined);
   const section = useRef<HTMLElement>(null);
@@ -137,8 +140,8 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
     <section ref={section} class="fo-rhero fo-deep fo-sea-top" aria-labelledby="fo-rhero-label" data-state={error !== undefined ? 'error' : undefined}>
       {/* The same box in every state: only data-oli and the symbol change, so nothing moves (DECISOES § 545). */}
       <Oli pose={pose} class="fo-rhero__oli" />
-      <p class="fo-rhero__label" id="fo-rhero-label">
-        {view.hero.label}
+      <p class="fo-rhero__label" id="fo-rhero-label" data-reserve={reserves.label}>
+        <span>{view.hero.label}</span>
       </p>
       {/* The width of the number sizes it to its card, so it never breaks in the middle (DECISOES § 246 and § 253). */}
       <p class="fo-rhero__num" style={`--fo-num-em: ${fit.em}; --fo-num-px: ${fit.px}px`}>
@@ -146,7 +149,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
         {view.hero.unit && <small>{view.hero.unit}</small>}
       </p>
       {/* The slot keeps the height of the Download: with no result to save, the message stands in its place (F7 f-10, § 139). */}
-      <div class="fo-rhero__get">
+      <div class="fo-rhero__get" data-reserve={reserves.get}>
         {error !== undefined ? (
           <p class="fo-rhero__error" id={HERO_ERROR_ID} key="error">
             <span class="fo-rhero__alert">
@@ -168,7 +171,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
         </p>
       )}
       {/* The sentence and the last result share one cell: the sentence keeps its height, hidden, while there is an error. */}
-      <div class="fo-rhero__said" data-reserve={reserve}>
+      <div class="fo-rhero__said" data-reserve={reserves.stale} data-sentence={reserves.sentence}>
         <p class="fo-rhero__sentence">
           <Sentence parts={view.hero.sentence} />
         </p>
@@ -180,6 +183,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
           principal={{ label: view.pair.principal.label, cents: view.pair.principal.cents, text: money(view.pair.principal.cents) }}
           interest={<Sentence parts={view.pair.interest} />}
           rows={view.pair.rows}
+          reserve={reserves.legend}
         />
       )}
       {view.split && !view.pair && (
@@ -188,6 +192,7 @@ export default function ResultHero({ view, error, last, reserve, touched, pose, 
           percent={percent}
           a={{ label: view.split.a.label, cents: view.split.a.cents, text: money(view.split.a.cents) }}
           b={{ label: view.split.b.label, cents: view.split.b.cents, text: money(view.split.b.cents) }}
+          reserve={reserves.legend}
         />
       )}
       <p class="fo-sr" aria-live="polite">

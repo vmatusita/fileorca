@@ -201,6 +201,7 @@ const METRIC = { key: 'u', is: 'metric' };
 
 export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
   id: 'body-fat-calculator',
+  problems: ['domainMale', 'domainFemale', 'range'],
   fields: [
     { kind: 'choice', key: 'u', options: ['us', 'metric'], main: true },
     count('ft', 3, 8, { main: true, half: true, when: US }),
