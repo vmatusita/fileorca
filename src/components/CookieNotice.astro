@@ -11,6 +11,10 @@
 // - F3 f-06 (§ 429): the resize listener and the ResizeObserver are on before the early return of a stored choice, so
 //   the room follows the width also for the notice opened again by "Change my cookie choice" (with the notice hidden and
 //   no anchor, reserve() clears it all).
+// F13a · o aviso compacto (UX-09; DECISOES § 458): two lines at 360px (the small style, 14/20), "Cookies" in bold, what
+// they are for, then the seal of the page itself (files, numbers or text: the page passes it through the BaseLayout) and
+// the Privacy link. keep(): with the notice open, a ResizeObserver on <main> moves out from under it the focused element
+// that moved without the focus changing (the DropZone error: Preact reuses the same <button>, and focusin never fires).
 import type { CommonTexts } from '../i18n/types.ts';
 import { CONSENT_STORAGE_KEY } from '../analytics/consent.ts';
 import { COFFEE_KEY } from '../tools/image/coffee.ts';
@@ -18,8 +22,10 @@ import { COFFEE_KEY } from '../tools/image/coffee.ts';
 interface Props {
   t: CommonTexts;
   privacyHref: string;
+  /** The seal of the page (PrivacySeal text, no final period): files, numbers or text; common.seal where there is none. */
+  seal: string;
 }
-const { t, privacyHref } = Astro.props;
+const { t, privacyHref, seal } = Astro.props;
 const script = `(function(){
 var K=${JSON.stringify(CONSENT_STORAGE_KEY)},C=${JSON.stringify(COFFEE_KEY)},box=document.getElementById('fo-cookie'),anchor=0,keys=false;if(!box)return;
 function stored(){try{return localStorage.getItem(K);}catch(e){return null;}}
@@ -48,6 +54,12 @@ document.addEventListener('click',function(e){var c=e.target.closest('[data-cons
 function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}anchor=h;box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
 addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+// The focus that moved without changing (the panel swapped state under the same button) leaves the notice's band too.
+// <main> may keep its size when the panel changes (the tool rectangle has a fixed height), so a change of its DOM calls
+// keep() as well, once per frame, after the layout (DECISOES § 458).
+var main=document.getElementById('main'),kf=0;function keep(){kf=0;if(box.hidden)return;var t=document.activeElement;if(!t||t===document.body||box.contains(t)||!main.contains(t))return;var end=box.getBoundingClientRect().top-8,r=t.getBoundingClientRect();if(r.bottom>end&&r.top>0)scrollBy(0,Math.min(r.bottom-end,r.top-8));}
+function later(){if(!kf&&!box.hidden)kf=requestAnimationFrame(keep);}
+if(main){if(window.ResizeObserver)new ResizeObserver(later).observe(main);new MutationObserver(later).observe(main,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-state','hidden']});}
 if(stored()==='granted'||stored()==='denied')return;
 show();
 // Google's CMP comes with the AdSense loader, often after the load event: look for it at once, at the load event
@@ -57,7 +69,7 @@ look();addEventListener('load',function(){if(!found&&!box.hidden&&tcf())found=tr
 })();`;
 ---
 <div id="fo-cookie" class="fo-cookie" role="dialog" aria-labelledby="fo-cookie-text" hidden>
-  <p id="fo-cookie-text"><b>{t.cookie.title}</b> {t.cookie.body} <a href={privacyHref}>{t.cookie.privacyLink}</a></p>
+  <p id="fo-cookie-text"><b>{t.cookie.title}</b> {t.cookie.body} {seal}. <a href={privacyHref}>{t.cookie.privacyLink}</a></p>
   <div class="fo-cookie__actions">
     <button type="button" class="fo-btn" data-consent="denied">{t.cookie.decline}</button>
     <button type="button" class="fo-btn" data-consent="granted">{t.cookie.accept}</button>

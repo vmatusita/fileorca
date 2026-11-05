@@ -641,12 +641,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* ---------- CookieNotice: floats, never blocks the page (§ 35, § 36) ---------- */
 /* The notice of the first visit keeps the font of its first paint, and so its height (DECISOES § 305): every text inside
    it that asks for --fo-font-text gets the Figtree that never swaps. */
-.fo-cookie { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-text); position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-5); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-3); }
+/* F13a · o aviso compacto (UX-09; DECISOES § 458): two lines of the small style (14/20) at 360px in the three languages, in
+   Figtree Steady and in its fallback alike, so 128px tall (2 + 12 + 40 + 8 + 52 + 4 + 8 + 2) and 148px with three lines (pt
+   and es at 320px); 360px wide from 768px. The two equal buttons are the plain fo-btn of 52px with the lip. */
+.fo-cookie { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-text); position: fixed; z-index: 20; left: var(--space-2); right: var(--space-2); bottom: calc(var(--space-2) + var(--fo-anchor, 0px)); box-sizing: border-box; padding: var(--space-3) var(--space-3) var(--space-2); border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-pop); display: grid; gap: var(--space-2); }
 .fo-cookie[hidden] { display: none; }
-@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 440px; } }
-.fo-cookie p { margin: 0; font-size: 15px; line-height: 22px; }
+@media (min-width: 768px) { .fo-cookie { right: auto; left: var(--space-4); bottom: calc(var(--space-4) + var(--fo-anchor, 0px)); max-width: 360px; } }
+.fo-cookie p { margin: 0; font-size: 14px; line-height: 20px; }
 .fo-cookie a { font-weight: 600; }
-.fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.fo-cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 
 /* ---------- ToolSearch: native <dialog>, code and index loaded on first use (§ 15) ---------- */
 .fo-search-dialog { width: min(560px, calc(100% - 2 * var(--space-4))); margin: 10vh auto auto; padding: 0; border: 0; background: transparent; color: var(--ink); overflow: visible; }

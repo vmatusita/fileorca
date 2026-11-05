@@ -44,8 +44,11 @@ interface Props {
   adArea?: AdArea;
   /** Oli poses the page shows, client states included; the search peek is always added. */
   oli?: readonly Pose[];
+  /** F13a · o aviso compacto (DECISOES § 458): the seal the cookie notice repeats, the page's own (numbers, text);
+   *  common.seal (files) where the page passes none. */
+  seal?: string;
 }
-const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [] } = Astro.props;
+const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [], seal } = Astro.props;
 const adsConfig = buildAdsConfig();
 /* F12 · a parede do bloqueador (§ 426): only on a page with ads and with the wall on; its pose joins the sprite there. */
 const wall = withAds ? wallModeOf(adsConfig) : 'desligado';
@@ -112,7 +115,7 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
     </div>
     {ads?.push && <script is:inline set:html={ads.push} />}
     <Footer lang={lang} t={common} anchor={anchor} current={route.id} />
-    <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} />
+    <CookieNotice t={common} privacyHref={pathFor('privacy', lang)} seal={seal ?? common.seal} />
     <SearchDialog t={common} />
     {wall !== 'desligado' && <AdblockWall lang={lang} mode={wall} />}
     <script is:inline set:html={trackScript} />

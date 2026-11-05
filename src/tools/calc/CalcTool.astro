@@ -65,6 +65,7 @@ const [readBefore, readAfter] = shared.readOn.split('{date}');
   withAds
   adArea={adArea}
   oli={poses}
+  seal={shared.seal}
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang, appCategory), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
