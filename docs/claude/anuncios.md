@@ -77,3 +77,11 @@ Pegadinhas que a F12 achou no mapa de anúncios, na parede do bloqueador, no caf
 - **O Aceitar do aviso próprio depende do fuso do aparelho** (`src/platform/region.ts`, § 428 e § 449): todo spec que leia o payload do Aceitar, ou o modo da parede sem `__tcfapi`, fixa o `timezoneId` (`America/Sao_Paulo` para as quatro chaves e a parede em `bloqueio`; um `Europe/*` ou `Asia/Nicosia` para só o `analytics_storage` e o `aviso`). A CI roda em UTC e esta máquina em `America/Sao_Paulo`, os dois fora da lista: um spec sem o fuso passa aqui e falha num aparelho na Europa.
 - **O navegador devolve o nome canônico do fuso, não o do sistema:** o Chipre é `Asia/Nicosia` (nunca `Europe/Nicosia`), e o Chromium e o Node dão `Atlantic/Faeroe` para `Atlantic/Faroe` (o WebKit, não). Fuso novo na lista entra no oráculo (`tests/e2e/lib/region-zones.ts`), que o `region.test.ts` e o `consent.spec.ts` passam pelo `Intl` do Node e dos dois navegadores.
 - **Para ver o aviso da parede na UE, a VPN não basta:** ela muda o IP, e a parede lê o `__tcfapi` (que o bloqueador costuma barrar) ou o fuso do aparelho. O roteiro do `docs/OPERACAO.md` (passo 7) manda mudar o fuso do sistema.
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- A F12 R-A-2 não se resolve só com o aviso compacto: no build de teste, com o card de 360 × 128, faltavam distância exatamente as mesmas 307 medidas da revisão da F12 (19 a 1440, 108 a 1920, 60 a 768 × 1024, 120 a 1024 × 1366), porque nas janelas altas o 1º anúncio cai no fim da primeira tela, por baixo do canto do aviso. A regra é o `lower()` do script do aviso (§ 459): desce o 1º anúncio de conteúdo para baixo do aviso, mais 24 px, e o devolve quando o aviso some.
+- O `lower()` roda antes da primeira pintura (o script inline espera a folha de estilo) e no `resize`, nunca depois de uma mudança do conteúdo: mexer no anúncio depois da pintura desloca tudo embaixo dele (CLS). O teste do mapa troca a janela com `setViewportSize` na mesma página, e o `resize` recalcula.
+- A distância de 1.200 px entre o conteúdo 1 e o multiplex, a densidade e os vãos são medidos depois da escolha, com o anúncio de volta ao lugar.

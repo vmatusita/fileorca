@@ -105,3 +105,10 @@ Pegadinhas que a F12 achou nos specs do build de teste, da parede e do café (DE
 - **Não feche a página logo depois do `expectInitialBudget`:** um script pedido depois do segundo de silêncio perde o corpo e o teste cai com "Target page… closed". Deixe as páginas abertas até o fim do teste.
 - **Dois Playwright na mesma pasta** apagam o `test-results/` um do outro (falha com `ENOENT` no trace) e disputam o servidor do build de teste. Um por vez em cada checkout.
 - **A trava do build de teste** (`.cache/builds/<nome>.lock`) guarda o PID de quem constrói e é renovada a cada 10 s: um Ctrl-C no meio do build a deixa para trás, e o próximo processo a toma na hora (o PID não existe mais) ou depois de 60 s sem renovação (§ 453). Enquanto espera, ele diz o caminho da trava uma vez, no stderr.
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- A prova de "reprova sem a mudança" sem worktree: `node .cache/f13a/serve-base.ts <porta> <pasta do dist antigo>` em segundo plano e `FO_PORT=<porta> pnpm exec playwright test …`: o Playwright reaproveita o servidor (`reuseExistingServer`). O build de teste continua sendo o da árvore atual.
+- O teste do foco no erro precisa do `focus()` no Escolher antes do `setInputFiles`: o WebKit não dá foco por clique, e sem foco no botão o `keep()` não tem o que levantar. A 320 × 640, o `focusin` antigo já tirava o botão de baixo do aviso (o card de 222 px cobria o Escolher, e o `focus()` rolava a página): os 6 testes do erro a 320 passam também no ponto de partida; os de 360 reprovam lá.

@@ -100,3 +100,13 @@ Pegadinhas que a F12 achou na pose `sad`, na parede e no café (DECISOES § 417,
 - **O vapor da caneca para em 4,8 s:** `fo-steam` roda duas vezes e o `fo-steam-rest` termina com `forwards`, e a segunda nuvem só atrasa. O seletor continua pendurado num ancestral do sprite, nunca numa seção (F1b).
 - **O foco posto por script depois de um fechar pelo teclado é `:focus-visible`:** o `<main>` que recebe o foco quando a parede fecha com Esc ganhava o anel de 3 px em volta da página inteira. O `<main>` com `tabindex="-1"` não é controle e fica sem o anel (`global.css`, § 450); um controle que recebe foco assim continua com ele.
 - **Prove a cor de um tema pelos tokens do tema na tela:** um teste que só confere a opacidade (o "0,92" do mar) passa com qualquer cor. O teste do mar (§ 451) compara o `::backdrop` com o `color-mix` da `water` e do `deep` lidos na página, nas seis combinações do esquema do sistema com o `data-theme`.
+
+## F13a: página de ferramenta
+
+Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de ferramenta "um lugar só", nas peças de PDF, no chip que leva o arquivo, nos ícones e no soltar em qualquer lugar (DECISOES § 456 em diante).
+
+- O `keep()` do aviso com só um `ResizeObserver` no `<main>` não dispara no erro da DropZone: o painel tem altura mínima (e, com o UX-04, fixa), e o `<main>` não muda de tamanho. Um `MutationObserver` no `<main>` (filhos, texto, `data-state` e `hidden`) chama o `keep()` num `requestAnimationFrame`, depois do layout (§ 458).
+- O vapor sem `forwards` sai do `getAnimations()` quando acaba: o `every(state === 'finished')` passa vazio, e a prova do fim é o estilo dos dois `<path>` do `#oli-coffee`. O `backwards` do 2º fio fica de propósito (sem ele o fio aparece parado no atraso e some de uma vez).
+- A regra do laço (`checkLoops`) é função à parte do `checkMotion` (o teste antigo do `checkMotion` usa um laço infinito como exemplo bom) e lê o CSS minificado do `dist/`, onde as aspas dos atributos somem (`[data-oli=swim]>svg`): ela compara sem aspas e sem espaços.
+- O `pnpm lancamento:imagens` lê os `@keyframes` direto do `components.css` (o GIF da miniatura): tirar ou renomear um `@keyframes` da Oli quebra o script, que fica fora do `verificar`. Ele lê agora o `fo-hello` e entende `0%, 100%`.
+- A Oli do canto do retângulo é irmã da `.fo-drop` dentro do `.fo-slot`: o aceno curto do `:hover` e do `:focus-within` casa por `.fo-slot:has(.fo-drop:is(:hover, :focus-within)) > [data-oli="wave"]`.
