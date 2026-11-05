@@ -30,13 +30,33 @@ const RAIL = '.fo-ad--rail:not(.fo-ad--rail2)';
 // F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
 // frames, labels and help lines), the comparison, the crop editor with its box and corner handles and the
 // next-step chips are measured too.
+// F13a (UX-04 A, decision 10; DECISOES § F13A-I-10): the band under the rectangle, the "Adjust" disclosure, the chips (also
+// the chip of PNG to JPG in the error of a PNG on HEIC to JPG) and the row of Start over and "Before and after".
 const TARGETS = [
   '.fo-btn--download', 'input:not([type="file"])', 'select', 'textarea', '.fo-seg', 'fieldset',
   '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
   '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more',
   '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
+  '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
 ].join(', ');
+
+/**
+ * F13a (UX-04 A): the comparison and the options open only when the person asks. The result states open both (what a
+ * person can put on screen), so the 150px are measured against them and not against their absence.
+ */
+async function openOnScreen(page: Page): Promise<void> {
+  const compare = page.locator('.fo-result__more button[aria-controls="fo-compare"][aria-expanded="false"]');
+  if (await compare.count()) {
+    await compare.click();
+    await expect(page.locator('#fo-compare .fo-ba')).toBeVisible();
+  }
+  const adjust = page.locator('details.fo-adjust:not([open]) > summary');
+  if (await adjust.count()) {
+    await adjust.click();
+    await expect(page.locator('details.fo-adjust .fo-adjust__body')).toBeVisible();
+  }
+}
 // The tool pages and presets that exist. A tool adds its path here when its page is built.
 const TOOL_PAGES = [
   '/compress-image/',
@@ -199,7 +219,11 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
 
       // The result of one file.
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-      await expect(page.locator('.fo-result [data-oli]')).toHaveCount(1);
+      // F13a (UX-04 A): the one Oli of the island sits in the corner of the rectangle; the comparison and the options open
+      // only when asked, so the result opens both before the clearance is measured (they are on screen, as a person makes
+      // them be; § F13A-I-10).
+      await expect(page.locator('#fo-tool-root [data-oli]')).toHaveCount(1);
+      await openOnScreen(page);
       await atBothWidths('resultado', async () => {
         for (const selector of ON_SCREEN[english(path)] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
         await expectAdsOutsideThePanel(page, 'com o resultado', adCount);
@@ -211,6 +235,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(2);
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-filelist .fo-bar')).toHaveCount(0);
+      await openOnScreen(page);
       await atBothWidths('fila', async () => {
         for (const selector of ['.fo-filelist', '.fo-filelist .fo-file', ...(ON_SCREEN[english(path)] ?? [])]) {
           expect((await boxes(page, selector)).length, `${selector} na tela com a fila`).toBeGreaterThan(0);
@@ -261,12 +286,24 @@ for (const viewport of VIEWPORTS) {
       await measure(page, 'erro');
     });
 
+    // F13a (D-17; decision 10; DECISOES § F13A-I-10): the error of a PNG on HEIC to JPG puts the chip to PNG to JPG in the
+    // band, in place of the options: the chip keeps the 150px too.
+    test('with the error of a PNG on HEIC to JPG: the chip to PNG to JPG in the band', async ({ page }) => {
+      await page.goto('/heic-to-jpg/');
+      await hydrated(page);
+      await dismissCookies(page);
+      await chooseImages(page, [{ name: 'notes.png', mimeType: 'image/png', buffer: readFileSync(resolve('fixtures/images', 'gen-png-transparente.png')) }]);
+      await expect(page.locator('.fo-band .fo-next a.fo-chip')).toBeVisible({ timeout: 30_000 });
+      await measure(page, 'erro do PNG no HEIC');
+    });
+
     test('with a batch: the queue, the error row, the comparison and the chips', async ({ page }) => {
       await dismissCookies(page);
       const photos = await jpegBatch(page, 8);
       await chooseImages(page, [...photos.slice(0, 2), { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }, ...photos.slice(2)]);
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       await expect(page.locator('.fo-filelist .fo-file')).toHaveCount(6);
+      await openOnScreen(page);
       await expect(page.locator('.fo-ba')).toHaveCount(1);
       await expect(page.locator('.fo-next')).toBeVisible();
       await measure(page, 'lote com a fila, o comparador e os atalhos');
@@ -813,6 +850,7 @@ test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 128
           const toolPath = routeById(guide.tool).paths.en ?? '/';
           await chooseImages(page, await smallFiles(page, toolPath, 1));
           await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+          await openOnScreen(page);
           for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
           gaps.push(`resultado: ${(await guideSpots(page, 'resultado', adCount, TARGETS)).toFixed(0)}`);
         }

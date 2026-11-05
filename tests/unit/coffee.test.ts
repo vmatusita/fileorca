@@ -62,6 +62,39 @@ describe('linha do café (DECISOES § 49)', () => {
     expect(coffee.countUse.length, 'countUse(now?)').toBe(0);
   });
 
+  // F13a (UX-04 A; DECISOES § F13A-I-07): the 3rd use is known before its result. The page asks before the first paint (an
+  // inline script) and the island when a batch starts and at Start over; both answer what decideCoffee would show, and
+  // neither writes. Before the F13a there was no peek: the line was only known in finish(), with the card already drawn.
+  it('peeks at the next use without writing, in the island and in the inline script of the page, as decideCoffee decides', () => {
+    expect(Object.keys(coffee)).toContain('coffeeAhead');
+    const states: (Record<string, unknown> | string | null)[] = [
+      null, 'not json', {}, { uses: 0 }, { uses: 1 }, { uses: 2 }, { uses: 3 }, { uses: 9 }, { uses: 2, never: true }, { uses: 2.5 }, { uses: -2 },
+      { uses: 5, shownAt: NOW - WEEK_MS + 1 }, { uses: 5, shownAt: NOW - WEEK_MS }, { uses: 2, shownAt: 'x' }, { uses: 4, shownAt: NOW - 10 * WEEK_MS },
+    ];
+    for (const consent of ['granted', 'denied', null]) {
+      for (const state of states) {
+        const raw = state === null ? null : typeof state === 'string' ? state : JSON.stringify(state);
+        const items = new Map<string, string>();
+        if (raw !== null) items.set('fo-coffee', raw);
+        if (consent !== null) items.set('fo-consent', consent);
+        const before = JSON.stringify([...items]);
+        const storage = { getItem: (key: string) => items.get(key) ?? null, setItem: (key: string, value: string) => void items.set(key, value), removeItem: (key: string) => void items.delete(key) };
+        const want = decideCoffee(parseCoffee(raw), { now: NOW, consent: consent === 'granted' }).show;
+        // The island: coffeeAhead reads the same storage.
+        const window = { localStorage: storage };
+        (globalThis as unknown as { window: unknown }).window = window;
+        expect(coffee.coffeeAhead(NOW), `${consent} ${raw}`).toBe(want);
+        // The page: the inline script marks the rectangle, with the same clock.
+        const slot = { marked: false, setAttribute: () => (slot.marked = true) };
+        const document = { querySelector: (selector: string) => (selector === '#fo-tool-root .fo-slot' ? slot : null) };
+        new Function('localStorage', 'document', 'Date', coffee.COFFEE_AHEAD_SCRIPT)(storage, document, { now: () => NOW });
+        expect(slot.marked, `inline ${consent} ${raw}`).toBe(want);
+        expect(JSON.stringify([...items]), 'nothing written').toBe(before);
+      }
+    }
+    delete (globalThis as unknown as { window?: unknown }).window;
+  });
+
   it('reads a damaged or foreign value as a fresh start', () => {
     expect(parseCoffee(null)).toEqual({ uses: 0 });
     expect(parseCoffee('not json')).toEqual({ uses: 0 });

@@ -38,6 +38,7 @@ export const TOOL: ImageTool<State, PdfOptionsTexts> = {
   operation: () => ({ kind: 'pdf-page' }),
   pdfSize: (state) => state.size,
   Options,
+  now: (state, texts) => texts[state.size],
 };
 
 export default function ImageToPdfPanel(props: ImagePanelData<PdfOptionsTexts>) {

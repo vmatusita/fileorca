@@ -3,7 +3,7 @@ import { expect, test, type Worker } from '@playwright/test';
 import { ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { exifBlock, hasGps, segments as segmentsOf } from './lib/jpeg.ts';
-import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, downloadBytes, hydrated, jpegBatch, openAdjust } from './lib/page.ts';
 
 const GPS_PHOTO = 'fixtures/images/jpg-02-iphone6-paisagem-gps.jpg';
 
@@ -61,6 +61,8 @@ test.describe('Compress image (shared island)', () => {
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('.fo-btn--download')).toBeFocused();
     const recommended = (await downloadBytes(page)).length;
+    // F13a (UX-04 A): after the result the options are folded under "Adjust"; changing one there redoes the image at once.
+    await openAdjust(page);
     await page.locator('input[name="ci-level"][value="recommended"]').focus();
     await page.keyboard.press('ArrowRight');
     await expect(page.locator('input[name="ci-level"][value="strong"]')).toBeChecked();
@@ -207,6 +209,7 @@ test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new
     (window as unknown as { __said: string[] }).__said = said;
     if (region) new MutationObserver(() => said.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
   });
+  await openAdjust(page);
   await page.locator('label.fo-seg__opt:has(input[name="pd-size"][value="letter"])').click();
   await expect(page.locator('input[name="pd-size"][value="letter"]')).toBeChecked();
   await expect.poll(() => page.evaluate(() => (window as unknown as { __said: string[] }).__said.at(-1) ?? ''), { timeout: 30_000 }).toBe(sentence);

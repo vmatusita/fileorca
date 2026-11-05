@@ -238,6 +238,9 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-top--tool { padding-right: 0; }
 .fo-top__seal { display: grid; padding-right: 96px; }
 @media (min-width: 768px) { .fo-top__seal { padding-right: 136px; } }
+/* On a phone the Oli reaches 78px above the rectangle: the seal row keeps the room of two lines, so the H1 above it ends out
+   of her reach also where the seal fits one line (390 to 767px; DECISOES § F13A-I-02). */
+@media (max-width: 767px) { .fo-top--tool .fo-top__seal { min-height: 52px; align-content: start; } }
 .fo-seal { justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px var(--space-3) 6px var(--space-2); border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--ink); font: 600 14px/20px var(--fo-font-text); }
 .fo-seal .fo-icon { color: var(--brand); width: 20px; height: 20px; }
 
@@ -342,11 +345,26 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    state (the comparison, the Adjust disclosure, more files) only grows after a gesture of the person. The band under the
    rectangle (.fo-band) keeps its height too, 196px and 120px: the options before the result, the chips and the options
    folded under "Adjust" after it. */
-.fo-tool-island { --slot-h: 356px; --band-h: 196px; }
-@media (min-width: 768px) { .fo-tool-island { --slot-h: 340px; --band-h: 120px; } }
+.fo-tool-island { --slot-h: 356px; --band-h: 196px; --coffee-h: 300px; }
+@media (min-width: 768px) { .fo-tool-island { --slot-h: 340px; --band-h: 120px; --coffee-h: 130px; } }
 .fo-slot > :is(.fo-drop, .fo-level, .fo-result) { min-height: var(--fo-lock, var(--slot-h)); }
-.fo-band { display: grid; align-content: start; gap: var(--space-3); min-height: var(--band-h); }
+/* F13a (DECISOES § F13A-I-07): the 3rd use is known when its batch starts, so the image island takes the room of the coffee
+   line from then on (data-coffee), and the result that brings the line pushes nothing down; Start over gives it back. */
+.fo-slot[data-coffee] { --fo-lock: calc(var(--slot-h) + var(--coffee-h)); }
+/* The room is water under the zone: the words, the seal and the button keep the place they have in a zone of --slot-h. */
+.fo-slot[data-coffee] > .fo-drop { padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-4) + var(--coffee-h)); }
+.fo-slot[data-coffee] > .fo-drop[data-state="over"] { padding-bottom: calc(var(--slot-h) * 0.6 - var(--space-12) + var(--coffee-h)); }
+@media (min-width: 768px) { .fo-slot[data-coffee] > .fo-drop:not([data-state="over"]) { padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-2) + var(--coffee-h)); } }
+/* The band keeps the height it had when the batch started (--fo-band-lock, set by the image island; § F13A-I-03): a tool
+   whose options are taller than the band (Resize) never pulls the page up when the shorter row of the result comes. */
+.fo-band { display: grid; align-content: start; gap: var(--space-3); min-height: max(var(--band-h), var(--fo-band-lock, 0px)); }
 .fo-band .fo-next { min-height: var(--tap-min); }
+/* The image island draws the row on screen and a hidden copy of the result's row (the chips and the "Adjust" line) in the
+   same cell (§ F13A-I-03): the band is as tall as the taller of the two from the first paint. */
+.fo-band__now, .fo-band__ghost { grid-area: 1 / 1; display: grid; align-content: start; gap: var(--space-3); min-width: 0; }
+.fo-band__ghost { visibility: hidden; pointer-events: none; }
+.fo-band__chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-height: var(--tap-min); }
+.fo-band__room { min-height: calc(var(--tap-min) + 2 * var(--stroke-2)); }
 
 /* The Oli never leaves the top-right corner of the rectangle, in every state (wave, gulp, swim, cheer, oops, lost),
    looking left at the words; 88px and 112px, the boxes of § 19. She holds the placard of the result. */
@@ -359,10 +377,16 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    the water and above the cookie notice. The error loses the round seal: the sentence with the alert icon, the reason
    that says the case, and the way out right under them (D-06, D-17). */
 .fo-slot > .fo-drop { --level: 30%; justify-content: center; padding: var(--space-6) var(--space-6) calc(var(--slot-h) * 0.3 + var(--space-4)); }
-.fo-slot > .fo-drop[data-state="over"] { --level: 60%; padding-bottom: calc(var(--slot-h) * 0.6 + var(--space-4)); justify-content: flex-end; }
+/* The seal stays in the over state (the decision 8 of the run keeps it, with the download icon), so the three lines sit
+   lower than the prototype's two: the words ride on the surface of the water that rose, and the zone keeps its height in
+   the three languages, also with the two lines of "Pode soltar, a Oli está pronta" on a phone (§ F13A-I-01). */
+.fo-slot > .fo-drop[data-state="over"] { --level: 60%; gap: var(--space-2); padding-bottom: calc(var(--slot-h) * 0.6 - var(--space-12)); justify-content: flex-end; }
 .fo-slot > .fo-drop[data-state="error"] { justify-content: flex-start; gap: var(--space-4); text-align: left; align-items: stretch; }
 @media (min-width: 768px) {
-  .fo-slot > .fo-drop[data-state="error"] { padding-inline: var(--space-8); }
+  /* From 768px the title of the zone shows too, over the seal and the button: the lines close up to 8px and the dry part
+     ends 8px above the water, so the zone keeps its 340px (§ F13A-I-01). */
+  .fo-slot > .fo-drop { gap: var(--space-2); padding-top: var(--space-5); padding-bottom: calc(var(--slot-h) * 0.3 + var(--space-2)); }
+  .fo-slot > .fo-drop[data-state="error"] { padding-inline: var(--space-8); gap: var(--space-4); }
   .fo-slot > .fo-drop[data-state="error"] .fo-btn { align-self: flex-start; }
 }
 /* The way out may wrap: at 320px "Escolher outros arquivos" does not fit one line inside the zone (WCAG 1.4.10). */
@@ -377,12 +401,16 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    of the sentence), and the sentence wraps around it. */
 .fo-result:has(> .fo-result__sea) { --fo-surf: 20px; align-content: start; gap: var(--space-2); padding: calc(var(--fo-surf) + var(--space-3)) var(--space-4) var(--space-3); background: var(--water); }
 @media (min-width: 768px) { .fo-result:has(> .fo-result__sea) { --fo-surf: 24px; gap: var(--space-4); padding: calc(var(--fo-surf) + var(--space-4)) var(--space-6) var(--space-6); } }
-.fo-result__sea { --level: calc(100% - var(--fo-surf)); background: var(--deep); transition: none; border-radius: 0 0 calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)); }
+/* The deep layer starts under the band of water and ends with the card: it is placed, not slid (a slid layer as tall as the
+   card ran 20 px past its bottom), and the clip keeps the crest of the wave inside the card's sides. */
+.fo-result__sea { inset: var(--fo-surf) 0 0; transform: none; background: var(--deep); transition: none; border-radius: 0 0 calc(var(--radius-xl) - var(--stroke-2)) calc(var(--radius-xl) - var(--stroke-2)); clip-path: inset(-12px 0 0 0); }
 .fo-result:has(> .fo-result__sea) > :not(.fo-result__sea) { position: relative; }
 .fo-result:has(> .fo-result__sea) .fo-result__head { display: flow-root; min-height: 0; }
 .fo-result:has(> .fo-result__sea) .fo-result__says { margin: 0; }
 @media (min-width: 768px) { .fo-result:has(> .fo-result__sea) .fo-result__says { padding-top: var(--space-2); } }
-.fo-result:has(> .fo-result__sea) .fo-placard { display: inline-grid; float: right; margin: -54px var(--space-1) var(--space-1) var(--space-3); }
+/* The placard hangs 30px over the top of the card and takes the room of one line of the sentence, no more, so the card
+   keeps its height in the three languages (§ F13A-I-01). */
+.fo-result:has(> .fo-result__sea) .fo-placard { display: inline-grid; float: right; margin: -62px var(--space-1) 0 var(--space-3); }
 @media (min-width: 768px) { .fo-result:has(> .fo-result__sea) .fo-placard { margin: -60px var(--space-16) 0 var(--space-4); } }
 .fo-result:has(> .fo-result__sea) .fo-result__actions { display: grid; gap: var(--space-1); }
 .fo-result:has(> .fo-result__sea) .fo-result__actions .fo-btn--download { display: flex; width: 100%; }
@@ -400,9 +428,15 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    has no arrow, so no → in the text; design-checks checkArrows). */
 .fo-numbers { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); margin: 0; font: 600 24px/28px var(--fo-font-display); }
 .fo-numbers > div { display: flex; align-items: baseline; gap: var(--space-2); }
-.fo-numbers dd { margin: 0; }
+.fo-numbers dd { margin: 0; display: inline-flex; align-items: center; gap: var(--space-2); }
 .fo-numbers .fo-icon--inline { align-self: center; width: 20px; height: 20px; }
 .fo-numbers__before dd { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--on-deep-muted); }
+/* F10 p-13 (DECISOES § F13A-I-09): the change of size with its sign, where no placard says it ("+66%"). */
+.fo-numbers__change dd { font-size: 20px; color: var(--on-deep-muted); }
+
+/* The comparison opens only when the person asks (UX-04 A), inside the card; [hidden] has to win over the grid. */
+.fo-result__compare { display: grid; }
+.fo-result__compare[hidden] { display: none; }
 
 /* The Adjust disclosure: the options folded under one 48px line after the result; changing one redoes the file at once. */
 .fo-adjust { border: var(--stroke-2) solid var(--stroke); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); }

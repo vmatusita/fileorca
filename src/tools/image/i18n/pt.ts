@@ -49,6 +49,7 @@ export default {
     chooseAnother: 'Escolher outros arquivos',
     some: '{count} arquivos não puderam ser lidos; o resto está pronto.',
     all: 'A Oli não conseguiu ler nenhum destes {count} arquivos. A lista abaixo diz o motivo.',
+    mismatch: '{name} termina em .{extension}, mas por dentro não é uma imagem. Salve de novo como {formats}.',
   },
   result: {
     download: 'Baixar',
@@ -78,11 +79,17 @@ export default {
       hide: 'Não mostrar de novo',
       done: 'Combinado, não peço mais aqui. O link do café fica no rodapé.',
     },
+    change: 'Diferença',
   },
   compare: {
     label: 'Comparar antes e depois',
     before: 'Antes · {size}',
     after: 'Depois · {size}',
+    open: 'Antes e depois',
+  },
+  adjust: {
+    label: 'Ajustar',
+    help: 'Mudar uma opção refaz o arquivo na hora.',
   },
   next: { label: 'A seguir:', moreTools: 'Mais ferramentas' },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },

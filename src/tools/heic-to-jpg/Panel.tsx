@@ -34,6 +34,7 @@ export const TOOL: ImageTool<State, SaveAsOptionsTexts> = {
   initial: { to: 'jpeg' },
   operation: (state) => ({ kind: 'convert', to: state.to }),
   Options,
+  now: (state, texts) => (state.to === 'jpeg' ? texts.jpg : texts.png),
 };
 
 export default function HeicToJpgPanel(props: ImagePanelData<SaveAsOptionsTexts>) {

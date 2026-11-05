@@ -60,6 +60,9 @@ export const MAP_TARGETS = [
   '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
   '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more', '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
+  // F13a (UX-04 A, decision 10; DECISOES § F13A-I-10): the band under the rectangle, "Adjust", the chips (the chip of PNG to
+  // JPG in the error of a PNG on HEIC to JPG too) and the row of Start over and "Before and after".
+  '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
   '.fo-rhero', '.fo-export .fo-btn', '.fo-compare', '.fo-calc-schedule', '.fo-amort-wrap', '.fo-debt',
   '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',

@@ -7,7 +7,7 @@ import esCommon from '../../src/i18n/es/common.ts';
 import ptCommon from '../../src/i18n/pt/common.ts';
 import ptPdfPanel from '../../src/tools/pdf/i18n/pt.ts';
 import { violationsEverywhere } from './lib/axe.ts';
-import { chooseImages, dataLayer, dismissCookies, hydrated, jpegBatch, nextUse, reachCoffeeLine, settle, useBadFile, useImage } from './lib/page.ts';
+import { chooseImages, dataLayer, dismissCookies, hydrated, jpegBatch, nextUse, openAdjust, reachCoffeeLine, settle, useBadFile, useImage } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 
 // F1b criterion 12: the coffee line of the ResultCard and the support page.
@@ -135,7 +135,8 @@ test.describe('coffee line rules (English)', () => {
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('.fo-btn--download')).toBeFocused();
     expect(await coffee(page)).toEqual({ uses: 1 });
-    // The level changes and the whole batch is processed again: the same use.
+    // The level changes and the whole batch is processed again: the same use. F13a: the level is folded under "Adjust".
+    await openAdjust(page);
     await page.locator('label.fo-seg__opt', { has: page.locator('input[value="strong"]') }).click();
     await settle(page, 1500);
     await expect(page.locator('.fo-result')).toBeVisible();

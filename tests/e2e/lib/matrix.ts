@@ -127,9 +127,11 @@ export type Outcome = Expect | Refuse;
 export const isRefusal = (outcome: Outcome): outcome is Refuse => 'refuse' in outcome;
 
 /** The line each reason shows in the row of the file (src/tools/image/i18n/en.ts, errors). */
+// F13a (D-06 and D-17; DECISOES § F13A-I-05 and § F13A-I-06): a name with an image extension over bytes that are no image
+// hears that the two disagree ("ends in .png, but it isn't an image inside"), and a PNG on HEIC to JPG hears that it is a PNG.
 const REASON_TEXT: Record<Refusal, RegExp> = {
-  'wrong-tool': /is (a HEIC file\.|in (AVIF|JPG|PNG|WebP|GIF) format, which this tool doesn't take\.)/,
-  unsupported: /isn't an image Oli can read\./,
+  'wrong-tool': /is (a HEIC file\.|in (AVIF|JPG|PNG|WebP|GIF) format, which this tool doesn't take\.|a PNG, not a HEIC photo\.)/,
+  unsupported: /isn't an image Oli can read\.|ends in \.\w+, but it isn't an image inside\./,
   truncated: /stops before its end/,
   decode: /is damaged/,
   empty: /is empty/,
@@ -160,6 +162,9 @@ const FORMAT_NAME: Partial<Record<Format, string>> = { jpeg: 'JPG', png: 'PNG', 
 export function wrongTool(name: string, takes: string): Refuse {
   const format = oracle(name).format;
   if (format === 'heic') return { refuse: 'wrong-tool', link: HEIC_LINK };
+  // F13a (D-17): HEIC to JPG says a PNG is a PNG and names the tool that makes a JPG of it; the row carries no link (the
+  // chip to PNG to JPG is in the band under the rectangle, when the PNG is the one file).
+  if (format === 'png' && takes === 'HEIC or HEIF') return { refuse: 'wrong-tool', plain: /is a PNG, not a HEIC photo\. To get a JPG from it, use PNG to JPG\./ };
   const spelled = FORMAT_NAME[format];
   if (!spelled) throw new Error(`no spelling for ${format}`);
   return { refuse: 'wrong-tool', plain: new RegExp(`is in ${spelled} format, which this tool doesn't take\\. Try ${takes}\\.`) };

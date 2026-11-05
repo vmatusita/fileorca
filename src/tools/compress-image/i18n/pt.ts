@@ -78,6 +78,7 @@ export default {
     done: 'Prontinho! Sua imagem ficou {percent} mais leve.',
     doneMany: 'Prontinho! Suas {count} imagens ficaram {percent} mais leves.',
     placardLabel: 'mais leve',
+    adjustHelp: 'Mudar o nível refaz a imagem na hora.',
     options: {
       legend: 'Compressão',
       recommended: 'Recomendada',

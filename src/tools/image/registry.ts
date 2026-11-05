@@ -37,6 +37,11 @@ export interface ImagePageDef {
   beforeAfter: 'always' | 'lossy' | 'never';
   /** One PDF with the whole batch instead of one file per image. */
   pdf?: true;
+  /**
+   * F13a (D-17; DECISOES § F13A-I-06): a refused format that another tool of the site takes, and that tool. The error of
+   * one such file says so, and the band under the rectangle shows the chip to it in place of the options.
+   */
+  elsewhere?: { format: ImageFormat; tool: ImageToolId };
 }
 
 const PHOTO: readonly ImageFormat[] = ['jpeg', 'png', 'webp'];
@@ -81,6 +86,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'png-to-jpg', 'crop-image'],
     beforeAfter: 'lossy',
+    elsewhere: { format: 'png', tool: 'png-to-jpg' },
   },
   'webp-to-jpg': {
     id: 'webp-to-jpg',
