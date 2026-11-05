@@ -43,8 +43,12 @@ function reserve(){var h=box.hidden?0:box.offsetHeight+(parseFloat(getComputedSt
 // out from under the notice, or the anchor when the notice is gone, before the browser reveals it (DECISOES § 36).
 // At the end of the page there is nothing left to scroll: the notice's room opens under the footer first (§ 106).
 document.addEventListener('focusin',function(e){var t=e.target,end;if(!t||!t.getBoundingClientRect||box.contains(t)||t.closest('dialog'))return;if(!box.hidden)end=box.getBoundingClientRect().top-8;else if(anchor)end=innerHeight-anchor-8;else return;var r=t.getBoundingClientRect(),d=0;if(r.bottom>end)d=Math.min(r.bottom-end,r.top-8);else if(r.top<0)d=r.top-8;if(!d)return;if(d>0&&!box.hidden&&!keys&&scrollY+innerHeight+d>document.documentElement.scrollHeight-1){keys=true;reserve();}scrollBy(0,d);});
-function hide(){box.hidden=true;keys=false;reserve();}
-function show(){box.hidden=false;reserve();}
+// At scroll 0 the open notice keeps 150px from the first content ad that shows, in any window (F12 R-A-2): where it would
+// not, the ad goes down below the notice (with 24px to spare for the fonts), never the notice, and back up once the notice
+// is gone. Run before the first paint and on resize, never after a change of the content, so it adds no layout shift (§ 459).
+var low=null;function lower(){if(low){low.style.marginTop='';low=null;}if(box.hidden)return;var l=document.querySelectorAll('main .fo-ad--content'),a=null;for(var i=0;i<l.length&&!a;i++)if(l[i].offsetHeight)a=l[i];if(!a)return;var n=box.getBoundingClientRect(),r=a.getBoundingClientRect(),y=scrollY,dx=Math.max(0,n.left-r.right,r.left-n.right);if(dx>=150)return;var need=Math.sqrt(22500-dx*dx),top=r.top+y,bottom=r.bottom+y;if(bottom<=n.top-need||top>=n.bottom+need)return;a.style.marginTop=Math.ceil(parseFloat(getComputedStyle(a).marginTop)+n.bottom+need+24-top)+'px';low=a;}
+function hide(){box.hidden=true;keys=false;reserve();lower();}
+function show(){box.hidden=false;reserve();lower();}
 function tcf(){if(typeof window.__tcfapi!=='function')return false;try{window.__tcfapi('addEventListener',2,function(d,ok){if(ok&&d&&d.gdprApplies===true)hide();});}catch(e){}return true;}
 // After a choice in a notice opened again by "Change my cookie choice", the focus goes back to that button (WCAG 2.4.3).
 var opener=null;
@@ -53,7 +57,7 @@ box.addEventListener('click',function(e){var b=e.target.closest('[data-consent]'
 document.addEventListener('click',function(e){var c=e.target.closest('[data-consent-change]');if(c){opener=c;show();var f=box.querySelector('button');if(f)f.focus();}});
 function lift(){var a=document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"]'),h=0;if(a){var r=a.getBoundingClientRect();if(r.height>0&&r.bottom>=innerHeight-2)h=Math.ceil(r.height);}anchor=h;box.style.setProperty('--fo-anchor',h+'px');reserve();}
 if(window.adsbygoogle||document.querySelector('script[src*="adsbygoogle"]')){new MutationObserver(lift).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-anchor-status','style']});addEventListener('resize',lift);}
-addEventListener('resize',reserve);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
+addEventListener('resize',reserve);addEventListener('resize',lower);if(window.ResizeObserver)new ResizeObserver(reserve).observe(box);
 // The focus that moved without changing (the panel swapped state under the same button) leaves the notice's band too.
 // <main> may keep its size when the panel changes (the tool rectangle has a fixed height), so a change of its DOM calls
 // keep() as well, once per frame, after the layout (DECISOES § 458).

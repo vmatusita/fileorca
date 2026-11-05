@@ -4,7 +4,8 @@
 //   - The 184 pages, in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
 //     content ads edge to edge, 150 px from every target, nothing above the tool, the first ad after the piece of its mold,
 //     no box in a grid, a table, a list, a question, a form, the panel, the schedule or a band, none against a table or a
-//     heading; the cookie notice open 150 px or more from the first content box at 360 × 740 and 1280 × 800; at 768 × 1024
+//     heading; the cookie notice open 150 px or more from the first content box at 360 × 740 and 1280 × 800 (and, since the
+//     F13a, at 1440 × 900, 1920 × 950, 1920 × 1080, 768 × 1024 and 1024 × 1366: F12 R-A-2); at 768 × 1024
 //     and 812 × 375 the same density, with the first content ad and the multiplex only; from 1280 px, the rails; at every
 //     width only the boxes of that width; and the initial JS of the page with the inline push in the 80 KB of budgets.ts.
 //   - On fileorca.com (production.ts, the AdSense loader as an empty stub): one push per box that shows, once; the box of
@@ -36,6 +37,9 @@ const TABLET = { width: 768, height: 1024 };
 const LANDSCAPE = { width: 812, height: 375 };
 const DESKTOP = { width: 1280, height: 800 };
 const BLOCK = 6;
+// F13a · o aviso compacto (UX-09; F12 R-A-2; DECISOES § 459): the open notice of a first visit keeps 150 px from the first
+// content ad also in the common windows past the two of the F12: a laptop, two desktops, a tablet upright and a big tablet.
+const NOTICE_WINDOWS = [PHONE, DESKTOP, { width: 1440, height: 900 }, { width: 1920, height: 950 }, { width: 1920, height: 1080 }, TABLET, { width: 1024, height: 1366 }];
 
 test('the map reads the 184 pages with ads of the route map', () => {
   expect(AD_PAGES).toHaveLength(184);
@@ -141,7 +145,7 @@ interface Row {
   landscape: number;
   desktop: { boxes: string[]; multiplexFromFirst: number | null };
   shortest: Record<string, number | null>;
-  notice: Record<number, number | null>;
+  notice: Record<string, number | null>;
 }
 
 function shortestTo(measure: MapMeasure, group: string): number | null {
@@ -166,14 +170,14 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
       if (browserName === 'chromium') await expectInitialBudget(page, TEST_BUILD_ORIGIN, adPage.path, { files: 'at most 2' });
       else expect((await page.goto(adPage.path))?.status(), adPage.path).toBe(200);
       if (await page.locator('#fo-tool-root').count()) await hydrated(page);
-      const notice: Record<number, number | null> = {};
-      for (const viewport of [PHONE, DESKTOP]) {
+      const notice: Record<string, number | null> = {};
+      for (const viewport of NOTICE_WINDOWS) {
         await page.setViewportSize(viewport);
         await frames(page);
         const measure = await measureMap(page);
         checkNotice(problems, adPage, measure);
         const first = measure.boxes.filter((box) => box.kind === 'content').sort((a, b) => a.y - b.y)[0];
-        notice[viewport.width] = first && measure.notice ? Math.round(distance(first, measure.notice)) : null;
+        notice[`${viewport.width}×${viewport.height}`] = first && measure.notice ? Math.round(distance(first, measure.notice)) : null;
       }
       await dismissCookies(page);
       const at: Record<string, MapMeasure> = {};
