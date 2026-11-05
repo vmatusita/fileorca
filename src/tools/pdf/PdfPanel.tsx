@@ -1443,13 +1443,14 @@ export default function PdfPanel(props: PdfPanelData) {
             aria-hidden={orderKept ? 'true' : undefined}
             onToggle={(event) => {
               m.orderOpen = (event.currentTarget as HTMLDetailsElement).open;
+              render();
             }}
           >
             <summary>
               <span>{fmt(mergeTexts.order, { count: ready.length })}</span>
               <Icon inner={icons.down} class="fo-icon--sm" />
             </summary>
-            {orderSeen && (
+            {orderSeen && m.orderOpen && (
               <div class="fo-adjust__body">
                 <p class="fo-field__help" id="fo-order-help">
                   {mergeTexts.orderHelp}
@@ -1468,6 +1469,7 @@ export default function PdfPanel(props: PdfPanelData) {
               open={m.adjustOpen}
               onToggle={(event) => {
                 m.adjustOpen = (event.currentTarget as HTMLDetailsElement).open;
+                render();
               }}
             >
               <summary>
@@ -1477,10 +1479,14 @@ export default function PdfPanel(props: PdfPanelData) {
                 </span>
                 <Icon inner={icons.down} class="fo-icon--sm" />
               </summary>
-              <div class="fo-adjust__body">
-                <p class="fo-field__help">{t.result.adjustHelp}</p>
-                {options}
-              </div>
+              {/* The fields are in the page only while "Adjust" is open: closed, a browser still lays out the content of a
+                  details (content-visibility), and fields nobody sees would count as fields near an ad (§ F13A-P-06). */}
+              {m.adjustOpen && (
+                <div class="fo-adjust__body">
+                  <p class="fo-field__help">{t.result.adjustHelp}</p>
+                  {options}
+                </div>
+              )}
             </details>
           ) : (
             options
