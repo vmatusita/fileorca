@@ -8,7 +8,7 @@
 // The name puts this file before the design spec, in a light part of the WebKit (DECISOES § 142 and § 274).
 import { expect, test, type Page } from '@playwright/test';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import { csvButton, openCalc, pdfButton, scaled } from './lib/life-calc.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
 
@@ -192,6 +192,45 @@ for (let start = 0; start < MONEY_PAGES.length; start += MONEY_BLOCK) {
         }),
       );
       expect.soft(wide, path).toEqual([]);
+    }
+  });
+}
+
+// F7 obs 1 (F13b; DECISOES § C-9): a key in a row and Enter on the Remove of the next row in the same moment (under 16 ms, in
+// one task of the page, as only a script can), twenty times: the key reaches the store (the value typed in the first row
+// stays), and the focus goes to the Remove of the row that took the removed one's place, found by its stable key
+// (data-row), not by the index of the render before.
+for (const [path, list, item, base] of [
+  [moneyPage('debt-payoff-calculator', 'en')?.path ?? '', 'd', 'm', 100],
+  [LIFE_CALC_PAGES['square-footage-calculator'].path, 'a', 'x', 10],
+] as const) {
+  test(`${path}: a key and Enter on Remove in the same moment keep the value and put the focus on the next row (obs 1)`, async ({ page }) => {
+    await page.goto(path);
+    await hydrated(page);
+    await dismissCookies(page);
+    const add = page.locator(`#fo-calc-${list}-add`);
+    for (let round = 0; round < 20; round += 1) {
+      while ((await page.locator('#fo-tool-root fieldset.fo-debt').count()) < 3) await add.click();
+      const before = await page.locator('#fo-tool-root fieldset.fo-debt').evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row')));
+      expect(before.every((key) => key !== null), 'cada linha com a chave estável').toBe(true);
+      const text = String(base + round + 1);
+      await page.evaluate(
+        ({ field, remove, text }) => {
+          const input = document.getElementById(field) as HTMLInputElement;
+          input.focus();
+          input.value = text;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          const button = document.getElementById(remove) as HTMLButtonElement;
+          button.focus();
+          button.click();
+        },
+        { field: `fo-calc-${list}0${item}`, remove: `fo-calc-${list}1-remove`, text },
+      );
+      await frames(page);
+      await expect(page.locator('#fo-tool-root fieldset.fo-debt')).toHaveCount(before.length - 1);
+      const focused = await page.evaluate(() => [document.activeElement?.closest('[data-row]')?.getAttribute('data-row') ?? null, document.activeElement?.classList.contains('fo-debt__remove') ?? false] as const);
+      expect(focused, `rodada ${round}`).toEqual([before[2], true]);
+      await expect(page.locator(`#fo-calc-${list}0${item}`), `rodada ${round}`).toHaveValue(text);
     }
   });
 }

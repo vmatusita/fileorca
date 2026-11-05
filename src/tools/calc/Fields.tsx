@@ -22,6 +22,8 @@ interface Props {
   report?: ((id: string, error: FieldError | null) => void) | undefined;
   /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
   flagged?: string | undefined;
+  /** The values the store has now, which may be newer than the render's (F7 obs 1; F13b, DECISOES § C-9). */
+  latest?: (() => Values) | undefined;
 }
 
 const fieldId = (key: string): string => `fo-calc-${key}`;
@@ -85,40 +87,62 @@ function DebtList(props: Props & { spec: ListSpec }) {
   const rows = values[spec.key] as Record<string, number>[];
   const keys = useRef<number[]>([]);
   const nextKey = useRef(0);
-  const focusNext = useRef<string | null>(null);
+  /**
+   * Where the focus goes after the next render, by the stable key of a row, never by its index (F7 obs 1; F13b, DECISOES
+   * § C-9): the Remove button of a row, the first control of a row, or the Add button. With less than 16 ms between a key in
+   * a field and Enter on Remove, the index of the render before was another row's.
+   */
+  const focusNext = useRef<{ row: number; on: 'remove' | 'first' } | 'add' | null>(null);
+  const addId = fieldId(`${spec.key}-add`);
   while (keys.current.length < rows.length) keys.current.push(nextKey.current++);
   keys.current.length = rows.length;
   // A row added by the Add button below the result (addBelow) takes the focus to its first control too.
   const length = useRef(rows.length);
+  const list = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (focusNext.current === null && addedBelow === spec.key && rows.length > length.current) focusNext.current = fieldId(`${spec.key}${rows.length - 1}${spec.pick?.key ?? spec.item[0]?.key ?? ''}`);
+    if (focusNext.current === null && addedBelow === spec.key && rows.length > length.current) focusNext.current = { row: keys.current[rows.length - 1] ?? -1, on: 'first' };
     if (addedBelow === spec.key) addedBelow = null;
     length.current = rows.length;
-    if (focusNext.current === null) return;
-    document.getElementById(focusNext.current)?.focus();
+    const target = focusNext.current;
+    if (target === null) return;
     focusNext.current = null;
+    if (target === 'add') {
+      document.getElementById(addId)?.focus();
+      return;
+    }
+    const row = list.current?.querySelector(`[data-row="${target.row}"]`);
+    const control = target.on === 'remove' ? row?.querySelector<HTMLElement>('.fo-debt__remove') : row?.querySelector<HTMLElement>('select, input');
+    control?.focus();
   });
-  const update = (index: number, key: string, value: number) =>
-    set({ ...values, [spec.key]: rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)) });
+  // The values the store has now: a key typed in a row a moment before reaches them before this list renders again.
+  const now = (): Record<string, number>[] => ((props.latest?.() ?? values)[spec.key] as Record<string, number>[] | undefined) ?? rows;
+  const update = (index: number, key: string, value: number) => {
+    const latest = props.latest?.() ?? values;
+    set({ ...latest, [spec.key]: now().map((row, i) => (i === index ? { ...row, [key]: value } : row)) });
+  };
   const removeId = (index: number) => fieldId(`${spec.key}${index}-remove`);
-  const addId = fieldId(`${spec.key}-add`);
   const remove = (index: number) => {
-    const left = rows.length - 1;
+    const current = now();
+    const removed = keys.current[index];
+    const rest = keys.current.filter((key) => key !== removed);
     keys.current.splice(index, 1);
-    focusNext.current = left > spec.min ? removeId(Math.min(index, left - 1)) : addId;
-    set({ ...values, [spec.key]: rows.filter((_, i) => i !== index) });
+    // The row that takes its place (or the one before, at the end) keeps the focus on its Remove; with none left, Add.
+    const next = rest[Math.min(index, rest.length - 1)];
+    focusNext.current = rest.length > spec.min && next !== undefined ? { row: next, on: 'remove' } : 'add';
+    set({ ...(props.latest?.() ?? values), [spec.key]: current.filter((_, i) => i !== index) });
   };
   const add = () => {
-    focusNext.current = fieldId(`${spec.key}${rows.length}${spec.pick?.key ?? spec.item[0]?.key ?? ''}`);
-    set({ ...values, [spec.key]: [...rows, { ...spec.blank }] });
+    const current = now();
+    focusNext.current = { row: nextKey.current, on: 'first' };
+    set({ ...(props.latest?.() ?? values), [spec.key]: [...current, { ...spec.blank }] });
   };
   const pick = spec.pick;
   const pickTexts = pick ? data.texts.fields[pick.key] : undefined;
   const pickLabels = pick ? (data.texts.options?.[pick.key] ?? {}) : {};
   return (
-    <div class="fo-debts">
+    <div class="fo-debts" ref={list}>
       {rows.map((row, index) => (
-        <fieldset class="fo-debt" key={keys.current[index]}>
+        <fieldset class="fo-debt" key={keys.current[index]} data-row={keys.current[index]}>
           <legend class="fo-debt__name">{fmt(listText(data, 'row'), { n: index + 1 })}</legend>
           <div class="fo-debt__fields">
             {pick && (
@@ -177,7 +201,7 @@ function DebtList(props: Props & { spec: ListSpec }) {
 }
 
 /** The Add button of a list whose rows come before the result and whose button comes after it (ListSpec.addBelow). */
-export function AddRow({ spec, values, data, set }: Props & { spec: ListSpec }) {
+export function AddRow({ spec, values, data, set, latest }: Props & { spec: ListSpec }) {
   const rows = values[spec.key] as Record<string, number>[];
   if (rows.length >= spec.max) return null;
   return (
@@ -187,7 +211,8 @@ export function AddRow({ spec, values, data, set }: Props & { spec: ListSpec }) 
       class="fo-btn"
       onClick={() => {
         addedBelow = spec.key;
-        set({ ...values, [spec.key]: [...rows, { ...spec.blank }] });
+        const now = latest?.() ?? values;
+        set({ ...now, [spec.key]: [...((now[spec.key] as Record<string, number>[] | undefined) ?? rows), { ...spec.blank }] });
       }}
     >
       {listText(data, 'addRow')}

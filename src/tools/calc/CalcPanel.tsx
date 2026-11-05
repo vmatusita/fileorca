@@ -117,7 +117,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   // A list whose Add button comes after the result (F7: the areas of the square footage).
   const addBelow = main.flatMap((spec) => (spec.kind === 'list' && spec.addBelow ? [spec] : []));
   const cell = cellText(lang);
-  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, latest: () => store.get().values };
   const off = view.problem !== undefined || state.stale;
 
   const pdf = async () => {
