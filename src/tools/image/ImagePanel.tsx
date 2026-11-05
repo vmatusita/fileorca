@@ -28,7 +28,7 @@ import BeforeAfter from './BeforeAfter.tsx';
 import Oli from './Oli.tsx';
 import { coffeeAhead, countUse, dontShowAgain, forgetWithoutConsent, type CoffeeLine } from './coffee.ts';
 import { EXTENSION, imageExtensionOf, uniqueNames } from './names.ts';
-import { carriesFiles, dragCount, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
+import { bringIntoView, catchDrops, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
 import { takeInbox } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
 import type { ChipData, FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
@@ -214,6 +214,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const levelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLElement>(null);
+  const drops = useRef<ReturnType<typeof catchDrops> | null>(null);
 
   /**
    * Every change goes through here. Before the page is drawn again it notes where the focus is, because a control
@@ -431,6 +432,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   function startBatch(files: File[]): void {
     if (files.length === 0) return;
+    drops.current?.reset();
     m.runId += 1; // any run still going stops at its next step
     teardown();
     m.items = files.map((file) => ({
@@ -647,17 +649,20 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   });
 
   useEffect(() => {
-    // The drop anywhere on the panel starts a new batch; anywhere else the browser must not open the file in the tab.
-    const onDragOver = (event: DragEvent) => {
-      if (carriesFiles(event.dataTransfer)) event.preventDefault();
-    };
-    const onDrop = (event: DragEvent) => {
-      if (!carriesFiles(event.dataTransfer)) return;
-      event.preventDefault();
-      setOver(0);
-      const root = rootRef.current;
-      if (root && event.target instanceof Node && root.contains(event.target)) startBatch(filesOf(event.dataTransfer?.files));
-    };
+    // F13a · UX-18 A (DECISOES § F13A-H-06): files dragged anywhere on the page light the zone where it is, and a drop
+    // anywhere (the text, the H1, the crumbs, the footer, the result card) starts a new batch, with the panel brought into
+    // view. Over an ad the drag is the frame's: the page hears a dragleave and the zone goes back to rest.
+    drops.current = catchDrops({
+      enter: (count) => {
+        if (m.phase !== 'processing') setOver(Math.max(1, count));
+      },
+      leave: () => setOver(0),
+      drop: (files) => {
+        if (files.length === 0) return;
+        startBatch(files);
+        bringIntoView(slotRef.current);
+      },
+    });
     const onPaste = (event: ClipboardEvent) => {
       if (pasteBelongsToElement(event.target)) return;
       const files = imageFilesOf(event.clipboardData?.files);
@@ -665,16 +670,13 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       event.preventDefault();
       startBatch(files);
     };
-    document.addEventListener('dragover', onDragOver);
-    document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
     // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
     void takeInbox(page).then((files) => {
       if (files.length > 0) startBatch(files);
     });
     return () => {
-      document.removeEventListener('dragover', onDragOver);
-      document.removeEventListener('drop', onDrop);
+      drops.current?.stop();
       document.removeEventListener('paste', onPaste);
       m.runId += 1;
       teardown();
@@ -685,17 +687,6 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const onZoneClick = (event: TargetedMouseEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest('button, a, input')) return;
     openPicker();
-  };
-  const dragHandlers = {
-    onDragEnter: (event: DragEvent) => {
-      event.preventDefault();
-      if (m.phase !== 'processing') setOver(Math.max(1, dragCount(event.dataTransfer)));
-    },
-    onDragOver: (event: DragEvent) => event.preventDefault(),
-    onDragLeave: (event: DragEvent) => {
-      const zone = event.currentTarget as HTMLElement;
-      if (!zone.contains(event.relatedTarget as Node | null)) setOver(0);
-    },
   };
 
   // --- what is on screen -----------------------------------------------------------------------
@@ -917,8 +908,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     // The children keep their places in every state (a hole where a state has none), so the button of the rest is the
     // same node as the "Choose other files" of the error and of the offline line: Preact never moves it, the focus stays on
     // it (a moved node loses the focus), and the cookie notice's keep() lifts it when it comes under the notice (D-01).
+    // UX-18 A: the drag of files is heard by the document (catchDrops), not by the zone.
     panel = (
-      <div class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
+      <div class="fo-drop" data-state={dropState} onClick={onZoneClick}>
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>

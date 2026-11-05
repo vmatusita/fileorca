@@ -23,7 +23,7 @@ import Icon from '../../icons/Icon.tsx';
 import FileCard, { type FileCardProps } from '../../components/FileCard.tsx';
 import Oli from '../image/Oli.tsx';
 import { COFFEE_KEY, countUse, decideCoffee, dontShowAgain, forgetWithoutConsent, parseCoffee, type CoffeeLine } from '../image/coffee.ts';
-import { carriesFiles, dragCount, filesOf, pasteBelongsToElement } from '../image/paste.ts';
+import { bringIntoView, catchDrops, filesOf, pasteBelongsToElement } from '../image/paste.ts';
 import { takeInbox } from '../image/inbox.ts';
 import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
@@ -206,6 +206,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const levelRef = useRef<HTMLDivElement>(null);
   const warmed = useRef(false);
   const appending = useRef(false);
+  const drops = useRef<ReturnType<typeof catchDrops> | null>(null);
   const dragging = useRef<number | null>(null);
   /** D-22: where the top of the Choose button is in the rectangle at rest, so the Merge button takes that place. */
   const chooseAt = useRef(0);
@@ -576,6 +577,7 @@ export default function PdfPanel(props: PdfPanelData) {
     if (files.length === 0) return;
     const append = merging && (appending.current || (m.items.length > 0 && m.phase !== 'done'));
     appending.current = false;
+    drops.current?.reset();
     // Adding is the next action after a row left the Merge list: the Undo goes (D-21).
     m.undo = null;
     if (!append) {
@@ -780,16 +782,20 @@ export default function PdfPanel(props: PdfPanelData) {
   });
 
   useEffect(() => {
-    const onDragOver = (event: DragEvent) => {
-      if (carriesFiles(event.dataTransfer)) event.preventDefault();
-    };
-    const onDrop = (event: DragEvent) => {
-      if (!carriesFiles(event.dataTransfer)) return;
-      event.preventDefault();
-      setOver(0);
-      const root = rootRef.current;
-      if (root && event.target instanceof Node && root.contains(event.target)) addFiles(filesOf(event.dataTransfer?.files));
-    };
+    // F13a · UX-18 A (DECISOES § F13A-H-06): files dragged anywhere on the page light the zone where it is, and a drop
+    // anywhere goes to the tool (the Merge list adds them), with the panel brought into view. The drag of a row of the
+    // list or of a page of the grid carries no files and is left to them.
+    drops.current = catchDrops({
+      enter: (count) => {
+        if (m.phase !== 'processing') setOver(Math.max(1, count));
+      },
+      leave: () => setOver(0),
+      drop: (files) => {
+        if (files.length === 0) return;
+        addFiles(files);
+        bringIntoView(slotRef.current);
+      },
+    });
     const onPaste = (event: ClipboardEvent) => {
       if (pasteBelongsToElement(event.target)) return;
       const files = filesOf(event.clipboardData?.files);
@@ -797,16 +803,13 @@ export default function PdfPanel(props: PdfPanelData) {
       event.preventDefault();
       addFiles(files);
     };
-    document.addEventListener('dragover', onDragOver);
-    document.addEventListener('drop', onDrop);
     document.addEventListener('paste', onPaste);
     // The files shared with the installed app, when the "Open with" page sent them here (F8; DECISOES § 290).
     void takeInbox(page).then((files) => {
       if (files.length > 0) addFiles(files);
     });
     return () => {
-      document.removeEventListener('dragover', onDragOver);
-      document.removeEventListener('drop', onDrop);
+      drops.current?.stop();
       document.removeEventListener('paste', onPaste);
       m.runId += 1;
       teardown();
@@ -905,18 +908,6 @@ export default function PdfPanel(props: PdfPanelData) {
     if ((event.target as HTMLElement).closest('button, a, input')) return;
     openPicker();
   };
-  const dragHandlers = {
-    onDragEnter: (event: DragEvent) => {
-      event.preventDefault();
-      if (m.phase !== 'processing') setOver(Math.max(1, dragCount(event.dataTransfer)));
-    },
-    onDragOver: (event: DragEvent) => event.preventDefault(),
-    onDragLeave: (event: DragEvent) => {
-      const zone = event.currentTarget as HTMLElement;
-      if (!zone.contains(event.relatedTarget as Node | null)) setOver(0);
-    },
-  };
-
   const nameOf = (item: Item) => item.file.name || t.fileFallback;
 
   function linked(sentence: string, name: string, link: { href: string; name: string }): ComponentChildren {
@@ -1218,8 +1209,9 @@ export default function PdfPanel(props: PdfPanelData) {
     );
   } else {
     const single = m.items.length === 1 ? m.items[0] : undefined;
+    // UX-18 A: the drag of files is heard by the document (catchDrops), not by the zone.
     panel = (
-      <div class="fo-drop" data-state={dropState} onClick={onZoneClick} {...dragHandlers}>
+      <div class="fo-drop" data-state={dropState} onClick={onZoneClick}>
         <div class="fo-drop__sea">
           <div class="fo-water" />
         </div>
