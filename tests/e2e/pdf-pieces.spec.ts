@@ -8,7 +8,7 @@ import { PDF_WALKS, walkPdfTool } from './lib/pdf-states.ts';
 import { choosePdfs, filesOf, openTool, pdfFile, takePdfDownload } from './lib/pdf-tools.ts';
 import { readWithPdfjs } from './lib/pdfjs-read.ts';
 
-// F13a (UX-11 A, pdf-pieces; DECISOES § F13A-P-08 and § F13A-P-09): the pieces the 12 PDF tools share, one test per row of
+// F13a (UX-11 A, pdf-pieces; DECISOES § 485 and § 486): the pieces the 12 PDF tools share, one test per row of
 // the table "Testes da F13" of the specification (F5a D-6, D-7, D-8, D-9, D-10, D-11, D-12, F-5, F-6, F-7, F-8, F-10, F-11,
 // F-13, F-14 and D-23). The Vitest half of D-10 is tests/unit/pdf-pieces-texts.test.ts.
 

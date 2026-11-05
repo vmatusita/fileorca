@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import type { MergeTexts, NumbersTexts, ReorderTexts, RotatePdfTexts } from '../../src/tools/pdf/option-texts.ts';
 
-// F13a (UX-11 A and UX-04 A; DECISOES § F13A-P-08 and § F13A-P-09): the texts of the PDF pieces in the three languages. The
+// F13a (UX-11 A and UX-04 A; DECISOES § 485 and § 486): the texts of the PDF pieces in the three languages. The
 // D-10 half of the table "Testes da F13" of pdf-pieces: the lines of Rotate PDF say what turned and which way, and the one of
 // Reverse order says what happened. The rest are the new keys of the slice, with the same placeholders in the three.
 

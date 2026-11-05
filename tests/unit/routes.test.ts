@@ -203,7 +203,7 @@ describe('mapa de rotas', () => {
         expect(text.replace(/[©®™]/g, ''), path).not.toMatch(/\p{Extended_Pictographic}/u);
         if (/[!¡]/.test(text)) {
           successLines += 1;
-          // F13a (D-10; DECISOES § F13A-P-09): Rotate PDF has two success lines more, doneOne and donePicked.
+          // F13a (D-10; DECISOES § 486): Rotate PDF has two success lines more, doneOne and donePicked.
           expect(path, `${path}: exclamação fora da fala de sucesso`).toMatch(/\.done(?:Many|One|Picked)?$/);
           expect(text.match(/!/g)?.length, path).toBe(1);
         }

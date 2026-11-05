@@ -159,7 +159,7 @@ for (const viewport of VIEWPORTS) {
       });
 
       test('idle: wave', async ({ page }) => {
-        // F13a (UX-04 A; DECISOES § F13A-I-02): one Oli, in the top-right corner of the rectangle, in every state.
+        // F13a (UX-04 A; DECISOES § 465): one Oli, in the top-right corner of the rectangle, in every state.
         await expectOlis(page, 'idle', { pose: 'wave', selector: '.fo-slot > .fo-slot__oli' });
       });
 

@@ -41,7 +41,7 @@ async function give(page: Page, names: string[]): Promise<void> {
 async function ready(page: Page): Promise<void> {
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 55_000 });
   await expect(page.locator('.fo-btn--download')).toBeVisible();
-  // F13a (UX-04 A; DECISOES § F13A-I-03): after the result the options are folded under "Adjust" in the band under the
+  // F13a (UX-04 A; DECISOES § 466): after the result the options are folded under "Adjust" in the band under the
   // card; every test here changes one, so it opens it, as a person does.
   await openAdjust(page);
 }

@@ -5,7 +5,7 @@
 // re-process the whole batch at once (no Apply button, the focus stays where it is). Markup and classes
 // follow docs/design/components (v1.1). The Oli boxes draw from the page sprite (§ 44).
 //
-// F13a · a página de ferramenta "um lugar só" (UX-04 A; DECISOES § 463 and § F13A-I-01 to § F13A-I-09): the rectangle
+// F13a · a página de ferramenta "um lugar só" (UX-04 A; DECISOES § 463 and § 464 to § 472): the rectangle
 // (.fo-slot) has one height in every state, and the one Oli sits in its top-right corner (wave, gulp, swim, cheer, oops,
 // buoy). The result is the water that rose: the sentence, the placard that floats (aria-hidden), the line "2.6 MB → 717 KB",
 // the Download, Start over and "Before and after" (it opens only when asked), the notes and the coffee line. The band under
@@ -136,9 +136,9 @@ interface Model {
   focusRowId: number | null;
   /** F13a (UX-04 A): the comparison is open, because the person asked; it starts closed with every batch. */
   compareOpen: boolean;
-  /** F13a (DECISOES § F13A-I-07): the rectangle keeps the room of the coffee line, from the start of the batch that shows it. */
+  /** F13a (DECISOES § 470): the rectangle keeps the room of the coffee line, from the start of the batch that shows it. */
   coffeeRoom: boolean;
-  /** F13a (DECISOES § F13A-I-03): the band keeps the height it had when the batch started, until Start over. */
+  /** F13a (DECISOES § 466): the band keeps the height it had when the batch started, until Start over. */
   bandLock: number | null;
 }
 
@@ -443,9 +443,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.newUse = true;
     m.coffee = '';
     m.compareOpen = false;
-    // The 3rd use is known before its result (DECISOES § F13A-I-07): the page gave the rectangle the room of the coffee
+    // The 3rd use is known before its result (DECISOES § 470): the page gave the rectangle the room of the coffee
     // line before its first paint, or Start over did; here is the last chance, for a batch dropped on a result. The band
-    // keeps the height it has now, so the shorter row of the result never pulls the page up (§ F13A-I-03). Neither
+    // keeps the height it has now, so the shorter row of the result never pulls the page up (§ 466). Neither
     // shrinks before a click on Start over.
     m.coffeeRoom = m.coffeeRoom || coffeeAhead();
     const band = bandRef.current?.offsetHeight ?? 0;
@@ -480,7 +480,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.zipping = false;
     m.compareOpen = false;
     // Start over is a click: the rectangle may change here. It keeps the room of the coffee line when the next use is the
-    // one that shows it (the 2nd use was just done), and gives it back otherwise (DECISOES § F13A-I-07).
+    // one that shows it (the 2nd use was just done), and gives it back otherwise (DECISOES § 470).
     m.coffeeRoom = coffeeAhead();
     m.bandLock = null;
     setOver(0);
@@ -543,7 +543,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
   }
 
-  /** D-17 (DECISOES § F13A-I-06): the file is of the format another tool of the site takes (a PNG on HEIC to JPG). */
+  /** D-17 (DECISOES § 469): the file is of the format another tool of the site takes (a PNG on HEIC to JPG). */
   const goesElsewhere = (item: Item): boolean =>
     elsewhere !== undefined && texts.elsewhere !== undefined && item.failure?.reason === 'wrong-tool' && item.failure.source === elsewhere.format;
 
@@ -555,7 +555,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     switch (failure.reason) {
       case 'empty': return fmt(errors.empty, { name });
       case 'unsupported': {
-        // D-06 (DECISOES § F13A-I-05): a name that promises a picture over bytes that are none hears that the two
+        // D-06 (DECISOES § 468): a name that promises a picture over bytes that are none hears that the two
         // disagree, and how to make a real one, never "try PNG" for a file that already says it is a PNG.
         const extension = failure.source === 'unknown' ? imageExtensionOf(name) : null;
         if (extension) return fmt(errors.mismatch, { name, extension, formats: texts.formats });
@@ -599,7 +599,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     forgetWithoutConsent();
     // The inline script of the page (COFFEE_AHEAD_SCRIPT) may have given the rectangle the room of the coffee line before
     // the first paint, which hydration keeps as it is: the model takes the same answer, so the attribute is the island's
-    // from now on (and goes away at Start over, a click). DECISOES § F13A-I-07.
+    // from now on (and goes away at Start over, a click). DECISOES § 470.
     const ahead = coffeeAhead();
     if (!ahead) slotRef.current?.removeAttribute('data-coffee');
     if (ahead !== m.coffeeRoom) {
@@ -729,7 +729,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return only?.item.outUrl ? { url: only.item.outUrl, name: nameFor.get(only.item.id) ?? '', size: only.output.blob.size } : null;
   })();
 
-  // The one Oli of the rectangle, in its corner, says the state (UX-04 A; DECISOES § F13A-I-02).
+  // The one Oli of the rectangle, in its corner, says the state (UX-04 A; DECISOES § 465).
   const pose: Pose = showProgress ? 'swim' : showCard ? 'cheer' : dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
   const islandState = m.phase === 'processing' && !showCard ? 'working' : showCard ? 'done' : dropState === 'over' ? 'over' : dropState ? 'error' : 'rest';
   const badge = dropState === 'over' ? downloadIcon : dropState === 'offline' ? offlineIcon : uploadIcon;
@@ -775,12 +775,12 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const counted = more || pdf;
     const lead = more ? fmt(t.result.downloadZip, { size: fileSize(deliverable?.size ?? 0, lang) }) : '';
     const [zipHead = '', ...zipTail] = lead.split(' · ');
-    // F10 p-13 (DECISOES § F13A-I-09): a tool with no placard says the change of size with its sign, "+66%" when the file
+    // F10 p-13 (DECISOES § 472): a tool with no placard says the change of size with its sign, "+66%" when the file
     // grew (a HEIC that becomes a JPG), so no line of the card says it got lighter when it did not.
     const change = tot.before > 0 ? ((afterBytes - tot.before) / tot.before) * 100 : 0;
     const showChange = !compression && worthSaying(Math.abs(change));
     // No aria-live on the card: the status region below says the Oli's sentence once, with the final numbers. With
-    // both, a batch was read N + 1 times, with "Done!" and figures that were not final yet (DECISOES § 102 and § F13A-I-04).
+    // both, a batch was read N + 1 times, with "Done!" and figures that were not final yet (DECISOES § 102 and § 467).
     panel = (
       <section class="fo-result fo-deep" aria-labelledby="fo-says">
         <div class="fo-water fo-result__sea" />
@@ -928,7 +928,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         )}
         {error ? (
           // The error loses the round seal (UX-04 A): the sentence with the alert icon, the reason that says the case, and the
-          // way out right under them (DECISOES § F13A-I-05).
+          // way out right under them (DECISOES § 468).
           <div role="alert" class="fo-drop__error">
             <p class="fo-drop__error-title">
               <Icon raw={alertIcon} />
@@ -1062,7 +1062,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       busy={m.phase === 'processing'}
     />
   );
-  // The band shows one of three rows (DECISOES § F13A-I-03 and § F13A-I-06). After a result of this batch (also while an
+  // The band shows one of three rows (DECISOES § 466 and § 469). After a result of this batch (also while an
   // option runs it again) it is the chips and "Adjust", in the same nodes, so the focus on an option survives the re-run.
   const elsewhereError = m.phase === 'error' && !offline && single !== undefined && goesElsewhere(single);
   const band = m.hadCard ? 'after' : elsewhereError ? 'elsewhere' : 'options';
@@ -1102,7 +1102,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
             ))}
         </div>
         {chips.length > 0 && (
-          // The room of the result's row, kept from the first paint (DECISOES § F13A-I-03): a hidden copy of the chips and
+          // The room of the result's row, kept from the first paint (DECISOES § 466): a hidden copy of the chips and
           // of the "Adjust" line in the same cell as the row on screen, so the band is as tall as the taller of the two in
           // every state, in every language, and the chips that wrap to three lines on a phone push nothing down.
           <div class="fo-band__ghost" aria-hidden="true">

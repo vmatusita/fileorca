@@ -6,7 +6,7 @@ import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts
 import { dismissCookies, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
-// § F13A-I-01 to § F13A-I-11). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
+// § 464 to § 474). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
 // 768px) and never changes without a gesture; the one Oli sits in its corner; the result is the sea that rose; the band
 // under it keeps its height; the comparison and the options open only when asked; the error says the case (D-06, D-17);
 // the handle of the comparison has two arrows (D-09); a HEIC that grows says so (F10 p-13); the interaction does not move
@@ -27,7 +27,7 @@ const fixture = (name: string, as = name, mimeType = 'image/jpeg'): TestFile => 
 const INPUT: Partial<Record<ImagePageId, () => TestFile>> = {
   'heic-to-jpg': () => fixture('heic-08-iphone13pro-paisagem-hdr-ios17.heic', 'photo.heic', 'image/heic'),
   'webp-to-jpg': () => fixture('gen-webp-exif-gps.webp', 'photo.webp', 'image/webp'),
-  // 1600 × 1200: cut to 16:9, not enlarged. A photo smaller than 1280 × 720 adds a second note (DECISOES § F13A-I-01).
+  // 1600 × 1200: cut to 16:9, not enlarged. A photo smaller than 1280 × 720 adds a second note (DECISOES § 464).
   'resize-image-youtube-thumbnail': () => fixture('gen-jpg-02-orientacao8.jpg', 'photo.jpg'),
 };
 async function inputFor(page: Page, id: ImagePageId): Promise<TestFile> {
@@ -425,7 +425,7 @@ test.describe('the interaction moves nothing at 360 × 740', () => {
   });
 
   // The 3rd use shows the coffee line (DECISOES § 49 and § 436). It is known when the batch starts, so the rectangle takes
-  // its room then (DECISOES § F13A-I-07), and the result pushes nothing down.
+  // its room then (DECISOES § 470), and the result pushes nothing down.
   test('the 3rd use, with the coffee line: the layout shift of the use is 0.05 at most', async ({ browser, browserName }) => {
     const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'block' });
     await context.addInitScript(() => {

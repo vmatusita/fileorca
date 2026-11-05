@@ -175,7 +175,7 @@ test.describe('events', () => {
 });
 
 test.describe('the comparison', () => {
-  // F13a (UX-04 A; DECISOES § F13A-I-04): the comparison opens only when the person asks, behind "Before and after"
+  // F13a (UX-04 A; DECISOES § 467): the comparison opens only when the person asks, behind "Before and after"
   // (aria-expanded, aria-controls); before the click there is no slider and no picture is decoded. Then, as before: named,
   // at 50, moved by the arrow keys.
   test('opens only when asked, is named, starts at 50 and moves with the arrow keys', async ({ page }) => {

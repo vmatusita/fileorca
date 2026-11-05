@@ -680,7 +680,7 @@ export interface ImagePanelTexts {
     /** Several files, none readable (under the DropZone error title; the list below says why): "{count}" */
     all: string;
     /**
-     * F13a (D-06, F10 p-14; DECISOES § F13A-I-05): the name ends in an image extension and the bytes are no image: "{name}
+     * F13a (D-06, F10 p-14; DECISOES § 468): the name ends in an image extension and the bytes are no image: "{name}
      * ends in .{extension}, but it isn't an image inside. Save it again as {formats}." It never offers the same format as
      * the way out of a file that already says it is one.
      */
@@ -922,7 +922,7 @@ export interface PdfPanelTexts {
     ready: string;
     readyOne: string;
     /**
-     * F13a (UX-04 A, D-27; DECISOES § F13A-P-03): while the files are read the rectangle is already the list (or the
+     * F13a (UX-04 A, D-27; DECISOES § 480): while the files are read the rectangle is already the list (or the
      * ready card), and its count says so: "Reading {count} PDFs…" and "Reading 1 PDF…".
      */
     readingCount: string;
@@ -1004,10 +1004,10 @@ export interface PdfPanelTexts {
     pages: string;
     unchanged: string;
     unchangedMany: string;
-    /** F13a (UX-04 A; DECISOES § F13A-P-05): the count of the line of numbers, "246 KB · 4 files". */
+    /** F13a (UX-04 A; DECISOES § 482): the count of the line of numbers, "246 KB · 4 files". */
     filesCount: string;
     /**
-     * F13a (UX-04 A; DECISOES § F13A-P-06): the options of a tool that runs by itself fold under "Adjust" after the
+     * F13a (UX-04 A; DECISOES § 483): the options of a tool that runs by itself fold under "Adjust" after the
      * result, and the line inside says that a change makes the file again at once.
      */
     adjust: string;

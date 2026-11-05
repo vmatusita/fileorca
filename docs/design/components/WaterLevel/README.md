@@ -2,7 +2,7 @@
 
 Arquivos · FileOrca design system v1.1. Estilo em `../bundle.css`; marcação de referência em [`preview.html`](preview.html) (abra com `?theme=dark` para o tema escuro).
 
-O progresso da FileOrca é água subindo: a mesma água do fundo da DropZone enche o painel até a porcentagem, e a Oli nada no canto de cima à direita do retângulo (`.fo-slot__oli`, `swim`), onde ela está em todos os estados; a água sobe até ela (F13a, DECISOES § F13A-I-02; antes, "e a Oli nada na superfície").
+O progresso da FileOrca é água subindo: a mesma água do fundo da DropZone enche o painel até a porcentagem, e a Oli nada no canto de cima à direita do retângulo (`.fo-slot__oli`, `swim`), onde ela está em todos os estados; a água sobe até ela (F13a, DECISOES § 465; antes, "e a Oli nada na superfície").
 
 - Ocupa o lugar exato da DropZone, com o mesmo tamanho: a página não pula.
 - `role="progressbar"` com nome (`aria-label`, o que está acontecendo: "Compressing images"), `aria-valuenow` e um `aria-valuetext` que diz a contagem ("48%, 5 of 12 images"). Sem o nome, o axe reprova (`aria-progressbar-name`). O texto visível repete a porcentagem (Fredoka `number-lg`), a fala ("Oli is on it…") e a contagem.

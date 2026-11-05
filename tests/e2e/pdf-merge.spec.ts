@@ -8,7 +8,7 @@ import { dragOver, hydrated, slowEngine } from './lib/page.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 
-// F13a (UX-04 A, tool-a-merge; DECISOES § F13A-P-02 and § F13A-P-12): the Merge list lives in the rectangle. Its tests:
+// F13a (UX-04 A, tool-a-merge; DECISOES § 479 and § 489): the Merge list lives in the rectangle. Its tests:
 // the row that leaves with its Undo (D-21), the Merge button where the Choose button was (D-22), the order help in view
 // (D-26), the reading that is already the list (D-27), the rectangle that keeps the height of the list, the interaction
 // that moves nothing (CLS, also on the 3rd use with the coffee line) and the chips near the Download.
@@ -189,7 +189,7 @@ test('D-27: a reading held past 400 ms (the CPU 6 times slower) shows the WaterL
 });
 
 // UX-04 A: the rectangle of every PDF tool is 356 px on the phone and 340 px from 768 px at rest, with a file over it and in
-// the error, in the three languages (with the round seal of the ficha, § 456; DECISOES § F13A-P-01).
+// the error, in the three languages (with the round seal of the ficha, § 456; DECISOES § 478).
 for (const viewport of [PHONE, { width: 1280, height: 800 }]) {
   test(`the rectangle of the PDF tools has one height at rest, with a file over it and in the error, at ${viewport.width} px`, async ({ page }) => {
     test.slow();

@@ -24,7 +24,7 @@ export function baseName(name: string): string {
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'jpe', 'jfif', 'png', 'webp', 'heic', 'heif', 'avif', 'gif']);
 
 /**
- * F13a (D-06; DECISOES § F13A-I-05): the extension of a name that says it is a picture, as the name spells it ("PNG" in
+ * F13a (D-06; DECISOES § 468): the extension of a name that says it is a picture, as the name spells it ("PNG" in
  * "notes.PNG"), or null. The error of a file whose bytes are no image says that the name and the content disagree.
  */
 export function imageExtensionOf(name: string): string | null {

@@ -63,7 +63,7 @@ test.describe('files that cannot be read, in the middle of a batch', () => {
     await expect(errors.nth(0)).toContainText("gen-jpg-corrompido.jpg is damaged, so Oli can't read it. Try another copy of the file.");
     await expect(errors.nth(1)).toContainText('gen-jpg-truncado.jpg stops before its end, so part of the image is missing.');
     await expect(errors.nth(2)).toContainText('gen-vazio.jpg is empty, so there is nothing to read.');
-    // F13a (D-06, F10 p-14; DECISOES § F13A-I-05): a .png with no image inside hears that the name and the content
+    // F13a (D-06, F10 p-14; DECISOES § 468): a .png with no image inside hears that the name and the content
     // disagree, and how to make a real one; never "Try JPG, PNG or WebP" for a file that already says it is a PNG.
     await expect(errors.nth(3)).toContainText("gen-texto-extensao-png.png ends in .png, but it isn't an image inside. Save it again as JPG, PNG or WebP.");
     await expect(page.getByRole('alert')).toHaveCount(0);

@@ -127,7 +127,7 @@ export type Outcome = Expect | Refuse;
 export const isRefusal = (outcome: Outcome): outcome is Refuse => 'refuse' in outcome;
 
 /** The line each reason shows in the row of the file (src/tools/image/i18n/en.ts, errors). */
-// F13a (D-06 and D-17; DECISOES § F13A-I-05 and § F13A-I-06): a name with an image extension over bytes that are no image
+// F13a (D-06 and D-17; DECISOES § 468 and § 469): a name with an image extension over bytes that are no image
 // hears that the two disagree ("ends in .png, but it isn't an image inside"), and a PNG on HEIC to JPG hears that it is a PNG.
 const REASON_TEXT: Record<Refusal, RegExp> = {
   'wrong-tool': /is (a HEIC file\.|in (AVIF|JPG|PNG|WebP|GIF) format, which this tool doesn't take\.|a PNG, not a HEIC photo\.)/,

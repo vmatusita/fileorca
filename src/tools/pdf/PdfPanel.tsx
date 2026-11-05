@@ -8,9 +8,9 @@
 //  - "auto" tools run as soon as the files are read and again when an option changes; the others wait for the action
 //    button, which says what is missing instead of being disabled;
 //  - DropZone, WaterLevel and ResultCard share one slot; refusals stay on the row of their file, with the Oli line.
-// F13a (UX-04 A; DECISOES § F13A-P-01): the slot is one rectangle of one height in every state (356 px on the phone,
+// F13a (UX-04 A; DECISOES § 478): the slot is one rectangle of one height in every state (356 px on the phone,
 // 340 px from 768 px), with the one Oli in its top right corner; the result is the water that rose; the band under it
-// shows the options before the result and the chips after it. The Merge list lives in the rectangle (§ F13A-P-02).
+// shows the options before the result and the chips after it. The Merge list lives in the rectangle (§ 479).
 // State lives in one mutable model (the run loop is async and must see the latest values); every change calls
 // render(). Object URLs are revoked when replaced and at "Start over"; the grid's thumbnails go when they leave the
 // screen. Nothing typed (password, text, ranges, numbers) leaves this component except in the request to the worker.
@@ -108,13 +108,13 @@ interface Model {
   showErrors: boolean;
   expanded: boolean;
   slotFocus: boolean;
-  /** The work runs again after a change made with the result on screen: the result stays until the new one (§ F13A-P-06). */
+  /** The work runs again after a change made with the result on screen: the result stays until the new one (§ 483). */
   redo: boolean;
-  /** The next result will carry the coffee line: the rectangle keeps its room from the gesture (§ F13A-P-07). */
+  /** The next result will carry the coffee line: the rectangle keeps its room from the gesture (§ 484). */
   coffeeSoon: boolean;
-  /** The height of the Merge list, kept by the rectangle from the reading to the result (§ F13A-P-02). */
+  /** The height of the Merge list, kept by the rectangle from the reading to the result (§ 479). */
   lock: number;
-  /** The band under the rectangle keeps the height of the options when they fold under "Adjust" (§ F13A-P-06). */
+  /** The band under the rectangle keeps the height of the options when they fold under "Adjust" (§ 483). */
   bandHold: number;
   adjustOpen: boolean;
   orderOpen: boolean;
@@ -149,7 +149,7 @@ function offlineNow(): boolean {
 
 /**
  * Whether the next delivered result is the use that asks for the coffee: the same rule as countUse, read without counting,
- * so the rectangle can keep the room of the line from the gesture that asks for the result (§ F13A-P-07).
+ * so the rectangle can keep the room of the line from the gesture that asks for the result (§ 484).
  */
 function coffeeDue(): boolean {
   try {
@@ -215,7 +215,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const tracked = { tool: page, lang } as const;
   const one = mode === 'single';
   const merging = mode === 'merge';
-  /** The tools that run by themselves fold their options under "Adjust" after the result (§ F13A-P-06). */
+  /** The tools that run by themselves fold their options under "Adjust" after the result (§ 483). */
   const adjustable = runMode === 'auto' && Boolean(Options);
   const mergeTexts = texts.options as unknown as MergeTexts;
 
@@ -364,7 +364,7 @@ export default function PdfPanel(props: PdfPanelData) {
       m.focusDownload = true;
       // The press is the next action after a row left the Merge list: the Undo goes (D-21).
       m.undo = null;
-      // The coffee line of the result is known before it: its room is kept from this press (§ F13A-P-07).
+      // The coffee line of the result is known before it: its room is kept from this press (§ 484).
       if (m.newUse && !m.coffeeSoon && coffeeDue()) m.coffeeSoon = true;
     }
     const { requests, skipped } = planned;
@@ -384,7 +384,7 @@ export default function PdfPanel(props: PdfPanelData) {
     }
     const id = ++m.runId;
     // A change made with the result on screen (an option under "Adjust", the order of the Merge) keeps the result until
-    // the new one, or the WaterLevel after 400 ms: the rectangle never shows the ready card in between (§ F13A-P-06).
+    // the new one, or the WaterLevel after 400 ms: the rectangle never shows the ready card in between (§ 483).
     m.redo = !fromButton && (m.phase === 'done' || m.redo) && Boolean(m.bundle ?? m.single);
     // A WaterLevel already on screen (the reading, before an auto tool's run) stays for the run: no other state flashes
     // between the two (DECISOES § 176).
@@ -722,7 +722,7 @@ export default function PdfPanel(props: PdfPanelData) {
     // A move is an action too: the Undo of a row that left would put it back in the wrong place.
     m.undo = null;
     say(fmt(t.queue.moved, { name: item.file.name || t.fileFallback, position: to + 1, total: m.items.length }));
-    // After the result the order is under "Order" in the band, and a change merges again at once (§ F13A-P-02).
+    // After the result the order is under "Order" in the band, and a change merges again at once (§ 479).
     if (m.phase === 'done' || (m.phase === 'processing' && m.redo)) void run(false);
     window.setTimeout(() => {
       const row = rootRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"]`);
@@ -959,7 +959,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const offline = m.phase === 'error' && m.items.length > 0 && m.items.every((item) => item.failure?.reason === 'load') && offlineNow();
   const dropState = over > 0 && m.phase !== 'processing' ? 'over' : offline ? 'offline' : m.phase === 'error' ? 'error' : undefined;
   const showLevel = (m.phase === 'processing' && m.showLevel) || (reading && m.readingLevel && m.items.length > 0);
-  /** The result is on screen: done, or a new one on its way after a change made with it on screen (§ F13A-P-06). */
+  /** The result is on screen: done, or a new one on its way after a change made with it on screen (§ 483). */
   const resultOnScreen = Boolean(delivered) && !showLevel && (m.phase === 'done' || (m.phase === 'processing' && m.redo));
   const listOnScreen = merging && !showLevel && !resultOnScreen && m.items.length > 0 && m.phase !== 'error' && m.phase !== 'idle';
   const progress = m.zipping ? 100 : reading ? 0 : batchPercent(m.finished, m.total, 0);
@@ -970,7 +970,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const labels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove };
   const pose: Pose = dropState === 'over' ? 'gulp' : showLevel ? 'swim' : resultOnScreen ? 'cheer' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : 'wave';
 
-  // F13a (§ F13A-P-02 and § F13A-P-07): what the rectangle and the band keep, set before the frame is painted, so a state
+  // F13a (§ 479 and § 484): what the rectangle and the band keep, set before the frame is painted, so a state
   // that comes with no gesture (the Merge button after the reading, the result) never moves what is under it.
   useLayoutEffect(() => {
     const slot = slotRef.current;
@@ -981,7 +981,7 @@ export default function PdfPanel(props: PdfPanelData) {
     if (panel && listOnScreen) m.lock = Math.max(m.lock, Math.ceil(panel.getBoundingClientRect().height));
     // At the first frame of the result the rectangle goes back to its own height and the band under it takes the room
     // the list left, so the island keeps its height (nothing under it moves) and the chips come right under the
-    // Download (§ F13A-P-02).
+    // Download (§ 479).
     const firstResult = resultOnScreen && !resultBefore.current;
     if (firstResult) m.lock = 0;
     if (m.lock > 0) {
@@ -1146,7 +1146,7 @@ export default function PdfPanel(props: PdfPanelData) {
       </section>
     );
   } else if (listOnScreen) {
-    // The Merge list lives in the rectangle (UX-04 A, tool-a-merge; § F13A-P-02): the count, the Merge button where the
+    // The Merge list lives in the rectangle (UX-04 A, tool-a-merge; § 479): the count, the Merge button where the
     // Choose button was (D-22), the order help in view (D-26), the rows, "Add more PDFs" and Start over at the foot.
     const pages = ready.reduce((sum, item) => sum + (item.info?.pages ?? 0), 0);
     const count = reading ? (m.items.length === 1 ? t.queue.readingOne : fmt(t.queue.readingCount, { count: m.items.length })) : ready.length === 1 ? t.queue.readyOne : fmt(t.queue.ready, { count: ready.length });
@@ -1416,7 +1416,7 @@ export default function PdfPanel(props: PdfPanelData) {
       </div>
     ) : null;
 
-  // --- the band under the rectangle (§ F13A-P-06) --------------------------------------------------------------------
+  // --- the band under the rectangle (§ 483) --------------------------------------------------------------------
   // Before the result: the options. After it: the chips, then the options folded under "Adjust" (the tools that run by
   // themselves) or still in view (the ones with an action: a change brings the action back to the rectangle). The room of
   // the chips is kept from the gesture that asks for the result: the press of the action, and for Merge the whole time the
@@ -1445,7 +1445,7 @@ export default function PdfPanel(props: PdfPanelData) {
   ) : null;
   const summary = tool.summary?.(state, texts.options as never);
   // The Merge has no options: its band is there at rest too, empty, so the list growing in the rectangle (a gesture: the
-  // files) never moves into view what is under the island (§ F13A-P-02).
+  // files) never moves into view what is under the island (§ 479).
   const band =
     options || merging || chipsSeen || chipsKept ? (
       <div class="fo-band" ref={bandRef}>
@@ -1510,7 +1510,7 @@ export default function PdfPanel(props: PdfPanelData) {
                 <Icon inner={icons.down} class="fo-icon--sm" />
               </summary>
               {/* The fields are in the page only while "Adjust" is open: closed, a browser still lays out the content of a
-                  details (content-visibility), and fields nobody sees would count as fields near an ad (§ F13A-P-06). */}
+                  details (content-visibility), and fields nobody sees would count as fields near an ad (§ 483). */}
               {m.adjustOpen && (
                 <div class="fo-adjust__body">
                   <p class="fo-field__help">{t.result.adjustHelp}</p>

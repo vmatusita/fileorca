@@ -5,7 +5,7 @@ import { violationsEverywhere } from './lib/axe.ts';
 import { animationsDone, dismissCookies, dragOver, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine } from './lib/page.ts';
 
 // F13a · axe in every state of the image island of the UX-04 A (decision 5 and criterion 9 of the run; DECISOES
-// § F13A-I-11): at rest, with a file over the rectangle, processing, with the result, with the result and the comparison and
+// § 474): at rest, with a file over the rectangle, processing, with the result, with the result and the comparison and
 // "Adjust" open, and in the three errors (a file that is no image, a .png whose content is no image, a PNG on HEIC to JPG),
 // in both themes at 360 and 1280px, in both browsers. The behaviour of the same states is in tool-slot.spec.ts. This file
 // carries the heavy axe runs on its own, in a light part of the CI (the name puts it there; the § says which).

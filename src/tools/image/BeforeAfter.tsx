@@ -42,7 +42,7 @@ export default function BeforeAfter({ label, beforeUrl, afterUrl, beforeTag, aft
       />
       <span class="fo-ba__line" />
       <span class="fo-ba__knob">
-        {/* The two arrows of the handle (D-09; DECISOES § F13A-I-08): no icon file draws them, so they are inline. */}
+        {/* The two arrows of the handle (D-09; DECISOES § 471): no icon file draws them, so they are inline. */}
         <svg class="fo-icon fo-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m9 7-4 5 4 5" />
           <path d="m15 7 4 5-4 5" />

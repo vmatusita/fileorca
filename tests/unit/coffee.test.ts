@@ -62,7 +62,7 @@ describe('linha do café (DECISOES § 49)', () => {
     expect(coffee.countUse.length, 'countUse(now?)').toBe(0);
   });
 
-  // F13a (UX-04 A; DECISOES § F13A-I-07): the 3rd use is known before its result. The page asks before the first paint (an
+  // F13a (UX-04 A; DECISOES § 470): the 3rd use is known before its result. The page asks before the first paint (an
   // inline script) and the island when a batch starts and at Start over; both answer what decideCoffee would show, and
   // neither writes. Before the F13a there was no peek: the line was only known in finish(), with the card already drawn.
   it('peeks at the next use without writing, in the island and in the inline script of the page, as decideCoffee decides', () => {

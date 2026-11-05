@@ -38,7 +38,7 @@ export interface ImagePageDef {
   /** One PDF with the whole batch instead of one file per image. */
   pdf?: true;
   /**
-   * F13a (D-17; DECISOES § F13A-I-06): a refused format that another tool of the site takes, and that tool. The error of
+   * F13a (D-17; DECISOES § 469): a refused format that another tool of the site takes, and that tool. The error of
    * one such file says so, and the band under the rectangle shows the chip to it in place of the options.
    */
   elsewhere?: { format: ImageFormat; tool: ImageToolId };

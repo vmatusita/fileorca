@@ -99,7 +99,7 @@ test.describe('crop-image with the keyboard only', () => {
     const wide: TestFile = { name: 'a.jpg', mimeType: 'image/jpeg', buffer: source };
     await chooseImages(page, [wide]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
-    // F13a (UX-04 A; DECISOES § F13A-I-03): after the result the editor and the fields are folded under "Adjust".
+    // F13a (UX-04 A; DECISOES § 466): after the result the editor and the fields are folded under "Adjust".
     await openAdjust(page);
     let region: Region = { x: 80, y: 0, width: 480, height: 480 };
 
@@ -330,7 +330,7 @@ test.describe('crop-image with the keyboard only', () => {
     const source = await generatedJpeg(page);
     await chooseImages(page, [{ name: 'a.jpg', mimeType: 'image/jpeg', buffer: source }]);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
-    // F13a (UX-04 A; DECISOES § F13A-I-03): after the result the editor and the fields are folded under "Adjust".
+    // F13a (UX-04 A; DECISOES § 466): after the result the editor and the fields are folded under "Adjust".
     await openAdjust(page);
     const box = page.locator(BOX);
     await expect(box).toHaveAccessibleName('Crop area, 480 by 480 pixels, at 80, 0');

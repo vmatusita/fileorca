@@ -60,13 +60,13 @@ export const MAP_TARGETS = [
   '.fo-tool-island', '.fo-slot', '.fo-drop', '.fo-level', '.fo-result', '[data-oli]',
   '.fo-queue', '.fo-filelist', '.fo-file', '.fo-queue__more', '.fo-fields', '.fo-field', '.fo-input', '.fo-field__help',
   '.fo-ba', '.fo-crop', '.fo-crop__stage', '.fo-crop__box', '.fo-crop__handle', '.fo-next',
-  // F13a (UX-04 A, decision 10; DECISOES § F13A-I-10): the band under the rectangle, "Adjust", the chips (the chip of PNG to
+  // F13a (UX-04 A, decision 10; DECISOES § 473): the band under the rectangle, "Adjust", the chips (the chip of PNG to
   // JPG in the error of a PNG on HEIC to JPG too) and the row of Start over and "Before and after".
   '.fo-band', '.fo-adjust', '.fo-chip', '.fo-result__more',
   '.fo-rhero', '.fo-export .fo-btn', '.fo-compare', '.fo-calc-schedule', '.fo-amort-wrap', '.fo-debt',
   '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
-  // F13a (UX-04 A and UX-11 A; DECISOES § F13A-P-11): the Merge list in the rectangle and the band under it.
+  // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle and the band under it.
   '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
   '.fo-result__support', '.fo-footer__coffee', '.fo-guidecard--here',
   '.fo-header > a', '.fo-header > button',

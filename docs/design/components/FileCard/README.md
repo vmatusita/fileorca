@@ -13,7 +13,7 @@ Uma linha por arquivo no lote: miniatura, nome, tamanho antes → depois e a aç
 - O lote inteiro baixa pelo Baixar do ResultCard ("Download all · ZIP"). O botão de cada linha é secundário.
 - Lista em `.fo-filelist` (gap de 8px). Com mais de 6 arquivos, mostre 6 e "Show 14 more".
 
-## F13a: o arquivo sem miniatura e a linha do Juntar (UX-11 A e UX-04 A; DECISOES § F13A-P-08 e § F13A-P-02)
+## F13a: o arquivo sem miniatura e a linha do Juntar (UX-11 A e UX-04 A; DECISOES § 485 e § 479)
 
 - **Sem miniatura** (um PDF): antes, "um quadrado vazio em `surface-sunken`"; depois, o ícone da categoria (`pdf`) em `ink` sobre `--fo-cat-soft` (`coral-soft`), passado pela prop `icon` (a marcação do ícone, lida no build: o pedaço das ferramentas de imagem não cresce). O erro continua como era: o ícone `file` em `danger` sobre `danger-soft`. Contraste: `ink` sobre `coral-soft` 14,06:1 no claro e 12,77:1 no escuro.
 - **O chão:** num painel em `surface` (o cartão de pronto, a lista do Juntar), `--fo-ground: var(--surface)`, para a dobra recortar com a cor do painel (F-7). Antes, a dobra recortava sempre com `bg`.

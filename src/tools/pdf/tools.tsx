@@ -203,7 +203,7 @@ interface CompressState {
 /**
  * The OptionGroup with its note in the note of the design system (F13a, F-10): brand-soft with the info icon, the line the
  * fieldset points at with aria-describedby. The OptionGroup of the image tools has no such note (src/tools/image is not
- * this island's; DECISOES § F13A-P-08), so the PDF island draws the same rail with it.
+ * this island's; DECISOES § 485), so the PDF island draws the same rail with it.
  */
 function NotedOptionGroup<V extends string>({ name, legend, value, choices, onChange, note, noteId, noteIcon }: OptionGroupProps<V> & { note: string; noteId: string; noteIcon: string }) {
   return (

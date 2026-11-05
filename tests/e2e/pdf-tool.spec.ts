@@ -66,7 +66,7 @@ test('Rotate PDF: the pages turned one by one in a file are not turned in the ne
   await openTool(page, '/rotate-pdf/');
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
   await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
-  // F13a (UX-04 A; DECISOES § F13A-P-10): after the result the options of a tool that runs by itself fold under "Adjust".
+  // F13a (UX-04 A; DECISOES § 487): after the result the options of a tool that runs by itself fold under "Adjust".
   await page.locator('#fo-tool-root .fo-adjust > summary').click();
   await option(page, 'Page by page');
   const cells = page.locator('.fo-pages__grid > li .fo-page__main');
@@ -174,7 +174,7 @@ test('Merge PDF at 360 px: a refused file keeps a card the width of the list, it
     expect(textBox?.width ?? 0, `${name}: the text column`).toBeGreaterThanOrEqual(150);
     // The same card in the list of Compress PDF, which has no handle or arrows, is 152 px tall; it was 412 px here.
     expect(cardBox?.height ?? 999, `${name}: the card height`).toBeLessThan(160);
-    // F13a (UX-04 A; DECISOES § F13A-P-10): a refused row has no handle and no arrows (it is not in the order); its own
+    // F13a (UX-04 A; DECISOES § 487): a refused row has no handle and no arrows (it is not in the order); its own
     // remove button, in the card, keeps the full target size.
     await expect(row.locator('.fo-merge__grab, .fo-merge__move, .fo-merge__none')).toHaveCount(0);
     expect((await row.getByRole('button', { name: `Remove ${name}`, exact: true }).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
@@ -726,7 +726,7 @@ test('Merge PDF: the same new order by drag, by the buttons and by the keyboard'
   expect(await said(page, moved(1))).toEqual([moved(2), moved(1)]);
   expect(await merge()).toEqual({ name: 'gen-acoes-merged.pdf', markers: expected });
 
-  // 3. Keyboard. F13a (UX-04 A; DECISOES § F13A-P-10): the handle is gone, and the arrows of the row do what it did: Enter
+  // 3. Keyboard. F13a (UX-04 A; DECISOES § 487): the handle is gone, and the arrows of the row do what it did: Enter
   // on "Move up" twice, the focus following the row on the same arrow, then on the other one when the row reaches the top
   // and "up" gives its place to the empty one. Each move is said once.
   await again();

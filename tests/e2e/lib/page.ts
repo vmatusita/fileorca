@@ -167,7 +167,7 @@ export async function startOver(page: Page): Promise<void> {
 }
 
 /**
- * F13a (UX-04 A; DECISOES § F13A-I-03): after a result, the options of the tool are folded under "Adjust" in the band under
+ * F13a (UX-04 A; DECISOES § 466): after a result, the options of the tool are folded under "Adjust" in the band under
  * the card. This opens it (once) and waits for the options inside it, the way a person does before changing one.
  */
 export async function openAdjust(page: Page): Promise<void> {

@@ -37,12 +37,12 @@ export type FileCardProps = {
   selected?: boolean;
   onSelect?: () => void;
   /**
-   * The place of the file in the order of the Merge list (F13a, UX-04 A; DECISOES § F13A-P-02): a numbered circle in deep
+   * The place of the file in the order of the Merge list (F13a, UX-04 A; DECISOES § 479): a numbered circle in deep
    * (the ScenarioCompare pattern, aria-hidden: the list says "1 of 2") takes the place of the empty thumbnail.
    */
   order?: number;
   /**
-   * Inner markup of an icon for the thumbnail of a file with no picture (F13a, F-6; DECISOES § F13A-P-08): the PDF icon in
+   * Inner markup of an icon for the thumbnail of a file with no picture (F13a, F-6; DECISOES § 485): the PDF icon in
    * the category's soft colour instead of an empty square. The page hands it in (read at build), so the image chunk does
    * not carry it.
    */

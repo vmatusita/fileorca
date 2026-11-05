@@ -30,7 +30,7 @@ const RAIL = '.fo-ad--rail:not(.fo-ad--rail2)';
 // F2: the panel (the slot and the island around it), the queue of files, the number fields (the inputs, their
 // frames, labels and help lines), the comparison, the crop editor with its box and corner handles and the
 // next-step chips are measured too.
-// F13a (UX-04 A, decision 10; DECISOES § F13A-I-10): the band under the rectangle, the "Adjust" disclosure, the chips (also
+// F13a (UX-04 A, decision 10; DECISOES § 473): the band under the rectangle, the "Adjust" disclosure, the chips (also
 // the chip of PNG to JPG in the error of a PNG on HEIC to JPG) and the row of Start over and "Before and after".
 const TARGETS = [
   '.fo-btn--download', 'input:not([type="file"])', 'select', 'textarea', '.fo-seg', 'fieldset',
@@ -221,7 +221,7 @@ test.describe('distância dos anúncios a 360×740 e a 1280×800', () => {
       await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
       // F13a (UX-04 A): the one Oli of the island sits in the corner of the rectangle; the comparison and the options open
       // only when asked, so the result opens both before the clearance is measured (they are on screen, as a person makes
-      // them be; § F13A-I-10).
+      // them be; § 473).
       await expect(page.locator('#fo-tool-root [data-oli]')).toHaveCount(1);
       await openOnScreen(page);
       await atBothWidths('resultado', async () => {
@@ -286,7 +286,7 @@ for (const viewport of VIEWPORTS) {
       await measure(page, 'erro');
     });
 
-    // F13a (D-17; decision 10; DECISOES § F13A-I-10): the error of a PNG on HEIC to JPG puts the chip to PNG to JPG in the
+    // F13a (D-17; decision 10; DECISOES § 473): the error of a PNG on HEIC to JPG puts the chip to PNG to JPG in the
     // band, in place of the options: the chip keeps the 150px too.
     test('with the error of a PNG on HEIC to JPG: the chip to PNG to JPG in the band', async ({ page }) => {
       await page.goto('/heic-to-jpg/');
@@ -713,7 +713,7 @@ const PDF_TARGETS = [
   '.fo-pass', '.fo-pass__toggle', '.fo-field__error',
   '.fo-sign', '.fo-sign__pad', '.fo-sign__file', '.fo-sign__place', '.fo-sign__page', '.fo-sign__box',
   '.fo-merge', '.fo-merge__moves',
-  // F13a (UX-04 A and UX-11 A; DECISOES § F13A-P-11): the Merge list in the rectangle (its Undo, its remove buttons and its
+  // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle (its Undo, its remove buttons and its
   // "Add more PDFs"), the band under the rectangle with the "Order" and the "Adjust" of the result, and the note.
   '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
 ].join(', ');

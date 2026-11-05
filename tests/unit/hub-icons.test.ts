@@ -1,4 +1,4 @@
-// One icon per tool (F13a, decision 8 and criterion 6; UX-16, DECISOES § 379 and § F13A-U-01): no hub repeats an
+// One icon per tool (F13a, decision 8 and criterion 6; UX-16, DECISOES § 379 and § 490): no hub repeats an
 // icon among its cards. The drawing inside the <svg> of each card's .fo-tool__icon is what the person sees, so two
 // cards with the same drawing are a repeat, whatever the field says. The pages are read from dist/ (run `pnpm build`
 // first, as `pnpm verificar` does). The homes mix the categories: there, only the verbs that image and PDF share

@@ -94,7 +94,7 @@ export function countUse(now = Date.now()): boolean {
 }
 
 /**
- * F13a (UX-04 A; DECISOES § F13A-I-07): whether the next successful use would show the coffee line, read from what is
+ * F13a (UX-04 A; DECISOES § 470): whether the next successful use would show the coffee line, read from what is
  * stored, with nothing written. The island asks it when a batch starts, so the rectangle keeps the room of the line from
  * then on and the result never pushes the page down; countUse still counts the use in finish(), with the same rule.
  */
@@ -110,7 +110,7 @@ export function coffeeAhead(now = Date.now()): boolean {
 }
 
 /**
- * The same peek as coffeeAhead, as an inline script for the tool page (DECISOES § F13A-I-07): it runs while the page is
+ * The same peek as coffeeAhead, as an inline script for the tool page (DECISOES § 470): it runs while the page is
  * parsed, right after the island's markup, and gives the rectangle the room of the coffee line before the first paint when
  * the next use is the one that shows it, so neither the load nor the result moves the page. Self-contained (no import
  * reaches it); tests/unit/coffee.test.ts runs it against decideCoffee, state by state.

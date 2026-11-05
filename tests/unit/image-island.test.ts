@@ -32,7 +32,7 @@ describe('names of the files a batch gives back', () => {
     expect(baseName('.hidden')).toBe('.hidden');
   });
 
-  // F13a (D-06; DECISOES § F13A-I-05): the error of a file whose bytes are no image tells a name that promises a picture
+  // F13a (D-06; DECISOES § 468): the error of a file whose bytes are no image tells a name that promises a picture
   // ("notes.png") from one that does not ("notes.txt"), and says the extension as the name spells it.
   it('knows the extension of a name that promises a picture, as the name spells it', () => {
     expect(imageExtensionOf('notes.png')).toBe('png');
