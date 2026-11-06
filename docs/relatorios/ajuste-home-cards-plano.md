@@ -62,6 +62,7 @@ Escritos na ordem, um por decisão da ficha:
 
 1. `tests/unit/home.test.ts`: nos três idiomas, cada seção de categoria tem um `a.fo-tool` por item da lista de `home-bands.ts`, com o H3 do nome, a descrição e o ícone, e o `<main>` não tem `.fo-catband`, `.fo-chip` nem `.fo-catband__num`.
 2. `tests/e2e/home-sea.spec.ts`: a 360 e a 1280, os cards de cada linha da grade têm a mesma altura e nenhum card passa da coluna nem deixa o texto vazar, nos três idiomas, no Chromium e no WebKit.
+3. Depois da revisão (b-1, § 607): `tests/e2e/home-sea.spec.ts`, com a Figtree segurada 1,5 s, nenhuma seção de categoria muda de altura quando ela chega, também abaixo da dobra (as seções passaram à `Figtree Steady`).
 
 ## A verificação de ponta a ponta
 

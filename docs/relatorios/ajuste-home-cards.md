@@ -81,11 +81,21 @@ O `fo-ad-map.spec.ts` inteiro passou nos dois navegadores (106 testes): os 150 p
 
 ## O `pnpm verificar --partes`
 
-PENDENTE: roda uma vez, sobre o código final, antes do `gh pr ready`.
+Uma vez, sobre o `a5fb3bb` (o código final; depois dele só mudaram documentos), na máquina Windows, das 13:49 às 14:44. As 21 partes passaram:
+
+| Parte | O que roda | Tempo |
+| --- | --- | ---: |
+| 1 | build | 34,1 s |
+| 2 | portões: tipos 11,8 s, lint 5,3 s, Vitest 37,9 s (130 arquivos, 2.066 testes), conteúdo 35,4 s, prontidão 36,7 s, licenças 7,5 s, `lint:texto` 6,3 s e os outros sete, todos `ok` | 147,4 s |
+| 3 | Lighthouse CI | 395,2 s |
+| 4 a 8 | Playwright no Chromium, partes 1 a 5 (441, 441, 441, 441 e 440 testes) | 181,8, 272,4, 211,0, 197,4 e 159,8 s |
+| 9 a 21 | Playwright no WebKit, partes 1 a 13 (170, 172, 168, 170, 170, 171 e 1 pulado, 169, 168, 169 e 2 pulados, 167, 169 e 4 pulados, 165 e 169 testes) | 70,0, 132,7, 126,0, 387,9, 32,0, 178,9, 100,5, 82,6, 83,0, 181,1, 110,3, 78,7 e 103,5 s |
+
+A soma das partes é 3.266,5 s (54,4 min), e a maior é a do Lighthouse, com 395,2 s, abaixo dos 900 s. São 2.204 testes do Playwright em cada navegador, todos verdes, sem `flaky`. Os 7 pulados do WebKit são os testes de CLS de interação que só o Chromium mede (`guide-page`, `money-card` e `pdf-merge`, com `test.skip(browserName !== 'chromium')`), que a run não tocou.
 
 ## O custo
 
-PENDENTE: o `pnpm ci:custo` da última execução do CI antes do `gh pr ready`.
+A última execução do CI antes deste relatório foi a leve do `a5fb3bb` (`pnpm ci:custo 42255054065`): 4 minutos cobrados, 2,5 min de parede e 3 jobs rodados (7 pulados). O `verificar --leve` levou 94,1 s. A execução completa sai do `gh pr ready`, depois deste commit, e o custo dela vai para a descrição da PR.
 
 ## A revisão
 
@@ -94,7 +104,7 @@ Cinco lentes Sonnet em contexto limpo, sobre o commit `edbf7ad` numa worktree s�
 - **Nenhum alto nem médio.** As lentes acharam 4 baixos, e o cético refutou os 4.
 - **Dois refutados foram corrigidos mesmo assim,** porque apontavam algo real: as seções mudavam de altura abaixo da dobra quando a Figtree chegava (b-1; as seções passaram à `Figtree Steady`, § 607, com um teste novo), e o teste da grade não pegava o texto que sai por baixo do card (d-1; reforçado, § 613).
 - **Os outros dois ficam:** as seções "PENDENTE" do relatório eram o estado esperado do commit revisado (e-1), e a fixture do `prontidao.test.ts` com a marcação da F13b é de propósito (e-2, § 610).
-- **A segunda passada:** PENDENTE.
+- **A segunda passada:** as lentes (b) e (d), em contexto limpo, leram o diff das correções (`edbf7ad..a5fb3bb`) e não acharam defeito: as duas correções reprovam nos mutantes (as seções de volta na Figtree; o card de 100 px) e passam no código, nos dois navegadores.
 
 ## As decisões novas
 

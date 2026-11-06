@@ -44,4 +44,7 @@ Nenhum achado sobreviveu ao cético. Dois dos refutados apontavam algo real, e a
 
 ## A segunda passada
 
-PENDENTE: as lentes (b) e (d), em contexto limpo, sobre o diff das correções.
+As lentes (b) e (d), de novo em Sonnet e em contexto limpo, leram o diff das correções (`edbf7ad..a5fb3bb`) na mesma worktree, avançada ao `a5fb3bb` e com builds novos, em 245 s e 38 chamadas de ferramenta. Nenhuma achou defeito:
+
+- **(b) layout e fontes:** com a Figtree segurada 1,5 s, nenhuma seção muda de altura a 320, 360, 768 e 1280 px nos três idiomas, no Chromium e no WebKit; o teste novo passa nos dois; o CLS de carga, o LCP, o `<main>` largo e a grade continuam verdes; as capturas a 360 e 1280, no claro e no escuro, não mostram vazamento nem linha desigual. Uma cópia do `dist/` com a regra da Steady tirada das seções reprova o teste novo nos dois navegadores, com os mesmos 8 deslocamentos ("/es/ a 320, seção 2: 2602 → 2576 px"). A regra fica só na home: nos hubs, a fonte do nome dos cards e a altura da página são as do ponto de partida.
+- **(d) integridade dos testes:** o único teste que mudou foi o `home-sea.spec.ts`, e a linha que saiu (o filtro do vazamento) virou uma estritamente mais forte; nenhum `skip`, `only` ou tolerância maior. O mutante do card de 100 px reprova o teste da grade a 360 e 1280 ("/ a 360 tools … Expected: 0 Received: 1"), e o `dist/` certo passa nos dois navegadores. As duas condições do teste da Steady estão certas: a lista de faces exclui a `Figtree Fallback` (local), a primeira medida é de antes da Figtree e a última de depois. As § 607 e § 613, o relatório e esta revisão dizem as correções e os controles com as mensagens que a lente reproduziu.
