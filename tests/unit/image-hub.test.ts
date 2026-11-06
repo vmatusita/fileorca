@@ -25,27 +25,28 @@ const render = async (View: typeof HomeView | typeof ImageToolsView, lang: Lang)
 const toolPaths = (lang: Lang) => IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? []);
 
 describe('home', () => {
-  // F13b (UX-03 B; DECISOES § 576): the home is the sea by category, and the image band (still labelled by "tools") shows
-  // the eight tools as chips, with the link to the hub under them; the money band the 6 credit calculators of the
-  // specification (§ 570). The rule is the same: the catalogue order, the hub, no preset, no AdSlot in the default build.
-  it('shows the eight image tools in English, in catalogue order, with a link to the hub under the chips', async () => {
+  // F13b (UX-03 B; DECISOES § 576) and ajuste-home-cards (§ 612): the image section of the home (still labelled by "tools")
+  // shows the eight tools as ToolCards again, as in the F13a, with the link to the hub under the grid; the money section the
+  // 6 credit calculators of the specification (§ 570). The rule is the same: the catalogue order, the hub, no preset, no
+  // AdSlot in the default build.
+  it('shows the eight image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
     const page = await render(HomeView, 'en');
-    // The image band is the first one; the money band of the F4 comes after the PDF one (DECISOES § 118).
+    // The image section is the first one; the money section of the F4 comes after the PDF one (DECISOES § 118).
     const tools = page.querySelector('main section[aria-labelledby="tools"]');
-    expect(tools?.querySelectorAll('.fo-catband__chips a.fo-chip').map((chip) => chip.getAttribute('href'))).toEqual(toolPaths('en'));
+    expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
     expect(toolPaths('en')).toHaveLength(8);
-    expect(tools?.querySelectorAll('.fo-chip > span:last-child')).toHaveLength(8);
-    const more = tools?.querySelector('.fo-catband__links a');
+    expect(tools?.querySelectorAll('.fo-tool h3')).toHaveLength(8);
+    const more = tools?.querySelector('.fo-more a');
     expect(more?.getAttribute('href')).toBe('/image-tools/');
     expect(more?.text).toBe('All image tools and common sizes');
     // The presets are not tools: they are linked from the hub and their parent page, not from the home grid.
     for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths.en}"]`)).toBeNull();
-    // The money band: the five credit calculators and Credit card payoff, and the money hub, and no AdSlot on the home.
+    // The money section: the five credit calculators and Credit card payoff, and the money hub, and no AdSlot on the home.
     const money = page.querySelector('main section[aria-labelledby="money-home"]');
-    expect(money?.querySelectorAll('a.fo-chip').map((chip) => chip.getAttribute('href'))).toEqual([
+    expect(money?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual([
       '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/', '/credit-card-payoff-calculator/',
     ]);
-    expect(money?.querySelector('.fo-catband__links a')?.getAttribute('href')).toBe('/money-calculators/');
+    expect(money?.querySelector('.fo-more a')?.getAttribute('href')).toBe('/money-calculators/');
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
@@ -53,10 +54,10 @@ describe('home', () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
       const tools = page.querySelector('main section[aria-labelledby="tools"]');
-      expect(tools?.querySelectorAll('.fo-catband__chips a.fo-chip').map((chip) => chip.getAttribute('href')), lang).toEqual(toolPaths(lang));
+      expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(toolPaths(lang));
       expect(toolPaths(lang), lang).toHaveLength(IMAGE_TOOL_IDS.length);
-      expect(tools?.querySelector('.fo-catband__links a')?.getAttribute('href'), lang).toBe(routeById('image-tools').paths[lang]);
-      expect(tools?.querySelector('.fo-catband__links a')?.text, lang).toBe(TEXTS[lang].home.image.all);
+      expect(tools?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(routeById('image-tools').paths[lang]);
+      expect(tools?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.image.all);
       for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths[lang]}"]`), `${lang} ${id}`).toBeNull();
       // § 6: every link of the page (the language menu aside, which leads to the other languages) is a page of this language.
       const own = new Set(ROUTES.flatMap((route) => route.paths[lang] ?? []));

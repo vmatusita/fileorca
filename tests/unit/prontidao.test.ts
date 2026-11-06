@@ -349,21 +349,27 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
   });
 
-  // F13b (UX-03 B; DECISOES § 576): the home shows its tools as the chips of its bands, and the gate reads them as its
-  // cards (TOOL_LINKS); a chip of a band to a page that does not exist, or that the registry does not ask of the home, fails.
-  it('reads the chips of the bands of the home as its cards (F13b)', () => {
+  // F13b (UX-03 B; DECISOES § 576) and ajuste-home-cards (§ 610 and § 612): the home shows its tools as the ToolCards of
+  // its category sections again, and the gate reads them (TOOL_LINKS, `main a.fo-tool`); a card of a section to a page
+  // that does not exist, or that the registry does not ask of the home, fails; and a tool shown only as a chip (the band
+  // of the F13b) is no card: the home misses it.
+  it('reads the cards of the category sections of the home, never a chip (ajuste-home-cards)', () => {
     const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
     const CALC = '/mortgage-calculator/';
+    const cards = (paths: string[]) => `<section class="fo-section fo-section--cat" aria-labelledby="money-home"><h2 id="money-home">Money</h2><ul class="fo-grid">${paths.map((path) => `<li><a class="fo-tool fo-dogear fo-cat--money" href="${path}"><span class="fo-tool__icon" aria-hidden="true"></span><h3 class="fo-tool__name">x</h3><p class="fo-tool__desc">y</p></a></li>`).join('')}</ul></section>`;
     const chips = (paths: string[]) => `<section class="fo-catband"><ul class="fo-catband__chips">${paths.map((path) => `<li><a class="fo-chip fo-cat--money" href="${path}"><span class="fo-chip__dot" aria-hidden="true"></span><span>x</span></a></li>`).join('')}</ul></section>`;
     const calcPage = (dir: string) => write(dir, CALC, pageHtml({ id: 'mortgage-calculator', lang: 'en', path: CALC, indexable: true, ads: true }));
-    // The base fake home lists the image tool as a card; the chips of the band add to it.
-    const listed = { ...makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${chips([CALC])}`)); }), cards: { home: { en: [CALC] } } };
+    // The base fake home lists the image tool as a card; the cards of the section add to it.
+    const listed = { ...makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${cards([CALC])}`)); }), cards: { home: { en: [CALC] } } };
     expect(failing(checkNothingUnfinished(listed))).toEqual([]);
-    const gone = makeSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}${chips(['/convert-to-webp/'])}`)));
+    const gone = makeSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}${cards(['/convert-to-webp/'])}`)));
     expect(failing(checkNothingUnfinished(gone)).join('\n')).toMatch(/cartão para \/convert-to-webp\/, que não existe[\s\S]*fora do registro/);
-    const extra = makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${chips([CALC])}`)); });
+    const extra = makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${cards([CALC])}`)); });
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
-    // A chip outside a band (the next-step chips of a tool page) is not a card of the catalogue.
+    // The tool the registry asks for, shown only as a chip of a band (the home of the F13b): its card is missing.
+    const asChip = { ...makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${chips([CALC])}`)); }), cards: { home: { en: [CALC] } } };
+    expect(failing(checkNothingUnfinished(asChip)).join('\n')).toMatch(/faltam os cartões de \/mortgage-calculator\//);
+    // A chip outside a section (the next-step chips of a tool page) is not a card of the catalogue either.
     const nextStep = makeSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}<nav class="fo-next"><a class="fo-chip" href="/convert-to-webp/">x</a></nav>`)));
     expect(failing(checkNothingUnfinished(nextStep))).toEqual([]);
   });
@@ -372,8 +378,8 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     const site = realSite('dist');
     // F5a: the home also lists the 12 PDF tools of the PDF registry, after the five credit calculators.
     // F7 (decision 9; DECISOES § 259): and, after them, the 6 home and the 5 health calculators and the QR code generator.
-    // F13b (UX-03 B; DECISOES § 570 and § 576): the money band of the home has the 6 credit calculators of the specification
-    // (the five and Credit card payoff), and the home lists its chips.
+    // F13b (UX-03 B; DECISOES § 570 and § 576): the money section of the home has the 6 credit calculators of the
+    // specification (the five and Credit card payoff); since the ajuste-home-cards (§ 610) the home lists them as cards.
     expect(site.cards?.['home']?.en).toEqual([
       '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/', '/credit-card-payoff-calculator/',
       ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),

@@ -224,8 +224,8 @@ async function main(): Promise<void> {
         await page.close();
       }
 
-      // F13b (UX-03 B; DECISOES § 567): the top of the home is .fo-home-top, and its tools are chips; the ToolCard is the
-      // first card of the image hub.
+      // F13b (UX-03 B; DECISOES § 567): the top of the home is .fo-home-top. The ToolCard is the first card of the image
+      // hub (the home shows the same card again since the ajuste-home-cards, § 603).
       page = await open(browser, theme, 360, '/image-tools/');
       await shot(page.locator('.fo-tool').first(), `tool-card-${theme}-360`, { top: 8 });
       await page.close();

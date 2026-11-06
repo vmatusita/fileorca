@@ -1,7 +1,8 @@
 import type { HomeTexts } from '../types.ts';
 
-// F13b (UX-03 B, home-b.html; DECISOES § 567 a § 571): la home como el mar por categoría. Cada número es un {placeholder}
-// que el build llena desde su fuente (src/components/home-numbers.ts y src/components/tool-count.ts).
+// F13b (UX-03 B; DECISOES § 567 y § 568) y ajuste-home-cards (§ 602 a § 604): la parte de arriba de la home y, después, una
+// sección por categoría con su título, su frase, los ToolCards de src/components/home-bands.ts y el enlace a su hub. Cada
+// número es un {placeholder} que el build llena desde los registros (src/components/tool-count.ts y las guías).
 export default {
   title: 'FileOrca: herramientas gratis que nunca suben tus archivos',
   description:
@@ -10,34 +11,23 @@ export default {
   h1Promise: '0 subidas.',
   intro: 'Herramientas de imagen, PDF y dinero que hacen el trabajo en tu dispositivo, sin cuenta.',
   toolsHeading: 'Elige una herramienta',
-  to: ' a ',
   image: {
     heading: 'Imagen',
-    count: '{n} herramientas',
-    say: '{photos} fotos de celular en Comprimir imagen: un {percent} más ligeras, con el ajuste por defecto.',
     more: 'Cada herramienta de imagen abre el archivo en esta pestaña, hace el trabajo en tu dispositivo y te da una copia nueva para guardar.',
     all: 'Todas las herramientas de imagen y los tamaños comunes',
   },
   pdf: {
     heading: 'PDF',
-    count: '{n} herramientas',
-    say: 'Un PDF de fotos en Comprimir PDF: un {percent} más ligero en el nivel recomendado.',
     more: 'Unir, dividir y firmar ocurren en la misma pestaña, y la contraseña que escribes para un PDF nunca sale de ella.',
     all: 'Todas las herramientas PDF',
   },
   money: {
     heading: 'Dinero',
-    count: '{n} calculadoras',
-    num: '{payment} al mes',
-    say: 'La hipoteca del ejemplo, todo incluido: una casa de {price} con {down} de pago inicial, al {rate} a {years} años.',
     more: 'Cada calculadora explica su resultado, que puedes descargar en PDF o CSV, y lo que escribes se queda en tu dispositivo.',
     all: 'Las {n} calculadoras financieras',
   },
   qr: {
     heading: 'Código QR',
-    count: '{n} herramienta',
-    num: '{max} caracteres',
-    say: 'en un solo código, con Oli en el centro, con corrección de errores H.',
     more: 'Escribe un enlace o un texto corto y guarda el código en PNG o SVG, con el texto guardado en tu dispositivo.',
   },
   privacyHeading: 'Tus archivos se quedan contigo',

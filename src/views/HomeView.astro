@@ -1,17 +1,17 @@
 ---
-// Home (F13b, decision 6; UX-03 B, home-b.html; DECISOES § 370 and § 567 to § 574): the sea by category. The top: the H1
-// with the count of the site (src/components/tool-count.ts, § 540), the line, and the sea where the Oli swims, with the
-// privacy seal on the water. Then one band per category of the language (src/components/home-bands.ts), each with its
-// count, a number from its source (src/components/home-numbers.ts: measured, exact or the calculator's example; F10 p-16),
-// the line that says where the number comes from, one sentence more (the words of the 3 ads by width, § 571), the tools as
-// chips and the link to the hub; then the four guides of HOME_GUIDES (F11, § 398) and the privacy section.
-// The ads (F12, § 419; decision 10 of the brief): marks between the blocks, the first after the image band (its top never
-// on the first screen of a phone); the layout puts each box by the estimate (src/ads/map.ts). `wide`: without the rail of
-// ads (the default build), <main> takes the width of the page (G-06; § 572).
+// Home (F13b, decision 6; UX-03 B, home-b.html; DECISOES § 370 and § 567 to § 574; ajuste-home-cards, § 602 to § 605).
+// The top: the H1 with the count of the site (src/components/tool-count.ts, § 540), the line, and the sea where the Oli
+// swims, with the privacy seal on the water. Then one section per category of the language (src/components/home-bands.ts),
+// as in the F13a: the H2, its one sentence, the grid with one ToolCard per tool (icon, name and description) and the link
+// to the hub (two in the home and health section, none in the QR code one); then the four guides of HOME_GUIDES (F11,
+// § 398) and the privacy section.
+// The ads (F12, § 419; decision 10 of the brief): marks between the blocks, the first after the image section (its top
+// never on the first screen of a phone); the layout puts each box by the estimate (src/ads/map.ts). `wide`: without the
+// rail of ads (the default build), <main> takes the width of the page (G-06; § 572), and the grid takes more columns.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import Oli from '../components/Oli.astro';
-import Icon from '../components/Icon.astro';
+import ToolCard from '../components/ToolCard.astro';
 import PrivacySeal from '../components/PrivacySeal.astro';
 import GuideCard from '../components/GuideCard.astro';
 import { pagePath, routeById, type Lang } from '../i18n/routes.ts';
@@ -25,7 +25,6 @@ import { guideCardData } from '../tools/guides/card.ts';
 import { fmt, groupDigits } from '../i18n/format.ts';
 import { toolCounts } from '../components/tool-count.ts';
 import { homeBands, type BandId } from '../components/home-bands.ts';
-import { homeNumbers } from '../components/home-numbers.ts';
 
 interface Props {
   lang: Lang;
@@ -35,21 +34,20 @@ const route = routeById('home');
 const t = TEXTS[lang].home;
 const common = TEXTS[lang].common;
 const counts = toolCounts(lang);
-const numbers = homeNumbers(lang);
 const n = (value: number) => groupDigits(value, lang);
-/** What each band says: its texts, its count and the placeholders of its number. */
-const bandTexts: Record<BandId, { texts: HomeBandTexts | undefined; count: number; values: Record<string, string> }> = {
-  image: { texts: t.image, count: counts.image, values: numbers.image },
-  pdf: { texts: t.pdf, count: counts.pdf, values: numbers.pdf },
-  money: { texts: t.money, count: counts.money, values: numbers.money },
-  life: { texts: t.life, count: counts.life, values: numbers.life },
-  qr: { texts: t.qr, count: counts.qr, values: numbers.qr },
+/** What each section says, and the count its hub link may say ("All {n} money calculators"). */
+const bandTexts: Record<BandId, { texts: HomeBandTexts | undefined; count: number }> = {
+  image: { texts: t.image, count: counts.image },
+  pdf: { texts: t.pdf, count: counts.pdf },
+  money: { texts: t.money, count: counts.money },
+  life: { texts: t.life, count: counts.life },
+  qr: { texts: t.qr, count: counts.qr },
 };
 const bands = homeBands(lang, common).flatMap((band) => {
-  const { texts, count, values } = bandTexts[band.id];
+  const { texts, count } = bandTexts[band.id];
   if (!texts) return [];
   const links = band.id === 'life' && t.life ? [t.life.all, t.life.allHealth] : texts.all ? [texts.all] : [];
-  return [{ ...band, texts, count: fmt(texts.count, { n: n(count) }), values, links: band.hubs.flatMap((href, index) => (links[index] ? [{ href, text: fmt(links[index], { n: n(count) }) }] : [])) }];
+  return [{ ...band, texts, links: band.hubs.flatMap((href, index) => (links[index] ? [{ href, text: fmt(links[index], { n: n(count) }) }] : [])) }];
 });
 // The "Read a guide" section: the four guides of the language, and the guides hub with the number of its guides.
 const guidesHub = pagePath(GUIDES_HUB_ID, lang);
@@ -76,28 +74,15 @@ const website = {
     <>
       {index === 1 && <AdBreak first />}
       {index > 1 && <AdBreak />}
-      <section class={`fo-catband fo-cat--${band.category}`} aria-labelledby={band.headingId}>
-        <div class="fo-catband__head">
-          <h2 class="fo-catband__title" id={band.headingId}>{band.texts.heading}</h2>
-          <span class="fo-catband__count">{band.count}</span>
-        </div>
-        <p class="fo-catband__fact">
-          {band.texts.num
-            ? <span class="fo-catband__num">{fmt(band.texts.num, band.values)}</span>
-            : <span class="fo-catband__num">{band.values['from']} <Icon name="arrow-right" class="fo-icon--inline" /><span class="fo-sr">{t.to}</span> {band.values['to']}</span>}
-          {' '}<span class="fo-catband__say">{fmt(band.texts.say, band.values)}</span>
-        </p>
-        <p class="fo-catband__more">{band.texts.more}</p>
-        <ul class="fo-catband__chips">
-          {band.chips.map((chip) => (
-            <li><a class={`fo-chip fo-cat--${chip.category}`} href={chip.href}><span class="fo-chip__dot" aria-hidden="true"><Icon name={chip.icon} /></span><span>{chip.name}</span></a></li>
+      <section class="fo-section fo-section--cat" aria-labelledby={band.headingId}>
+        <h2 id={band.headingId}>{band.texts.heading}</h2>
+        <p class="fo-prose">{band.texts.more}</p>
+        <ul class="fo-grid">
+          {band.cards.map((card) => (
+            <li><ToolCard href={card.href} name={card.name} description={card.description} category={card.category} icon={card.icon} /></li>
           ))}
         </ul>
-        {band.links.length > 0 && (
-          <p class="fo-catband__links">
-            {band.links.map((link) => <a class="fo-catband__all" href={link.href}>{link.text}<Icon name="chevron-right" /></a>)}
-          </p>
-        )}
+        {band.links.map((link) => <p class="fo-more"><a href={link.href}>{link.text}</a></p>)}
       </section>
     </>
   ))}

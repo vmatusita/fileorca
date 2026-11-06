@@ -78,10 +78,10 @@ export const MAP_TARGETS = [
   '.fo-header > a', '.fo-header > button',
   // F13b (UX-13 A, decision 10; DECISOES § 565): the sheet "What we measured" of a file guide and the frame of its tables.
   '[data-content="facts"]', '.fo-guide__frame',
-  // F13b (decision 10 of the run; DECISOES § 573): on the home, the bands of the categories (their chips are .fo-chip,
-  // above) and the sea of the top; on the category hubs, the sea at the foot of the band (the water; the Oli is
-  // [data-oli]).
-  '.fo-catband', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
+  // F13b (decision 10 of the run; DECISOES § 573): on the home, the sea of the top; on the category hubs, the sea at the
+  // foot of the band (the water; the Oli is [data-oli]). Ajuste-home-cards (§ 609): on the home, the category sections
+  // and their cards, in the place of the bands and their chips.
+  '.fo-section--cat', '.fo-section--cat .fo-grid', '.fo-section--cat .fo-tool', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
 ].join(', ');
 /** The groups of targets of the report's table of the shortest distances. */
 export const TARGET_GROUPS: Record<string, string> = {
@@ -98,9 +98,10 @@ export const TARGET_GROUPS: Record<string, string> = {
   // F13b (DECISOES § 565): the sheet of a file guide and the frame of its tables.
   ficha: '[data-content="facts"]',
   tabela: '.fo-guide__frame',
-  // F13b (DECISOES § 573): the bands of the home, their chips, and the sea of the home and of the hubs.
-  faixas: '.fo-catband',
-  chips: '.fo-catband .fo-chip',
+  // Ajuste-home-cards (DECISOES § 609): the category sections of the home and their cards, in the place of the bands and
+  // the chips of the F13b (§ 573); the sea of the home and of the hubs.
+  secoes: '.fo-section--cat',
+  ferramentas: '.fo-section--cat .fo-tool',
   mar: '.fo-home-sea, .fo-hubband__sea',
 };
 
@@ -193,7 +194,7 @@ export async function measureMap(page: Page, targets: string = MAP_TARGETS, grou
         return found;
       };
       const measured = (element: Element | null) => Boolean(element && (element.getAttribute('data-content') === 'measured' || element.getAttribute('aria-labelledby') === 'measured'));
-      const FORBIDDEN = '#fo-tool-root, #fo-calc-schedule, .fo-grid, .fo-guidecards, .fo-guidehere, table, .fo-table-wrap, ul, ol, li, details, summary, form, fieldset, nav, h1, h2, h3, h4, h5, h6, p, .fo-hubband, .fo-hero, .fo-top, .fo-example, .fo-catband, .fo-home-top, [data-content="measured"], [aria-labelledby="measured"]';
+      const FORBIDDEN = '#fo-tool-root, #fo-calc-schedule, .fo-grid, .fo-guidecards, .fo-guidehere, table, .fo-table-wrap, ul, ol, li, details, summary, form, fieldset, nav, h1, h2, h3, h4, h5, h6, p, .fo-hubband, .fo-hero, .fo-top, .fo-example, .fo-section--cat, .fo-home-top, [data-content="measured"], [aria-labelledby="measured"]';
       const main = document.querySelector('main');
       const all = [...document.querySelectorAll('.fo-ad')];
       const boxes = all.filter(shown).map((box) => {

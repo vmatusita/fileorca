@@ -33,9 +33,10 @@ export const TARGETS = [
   '.fo-carry', '.fo-result__from', '.fo-drop[data-state="lost"]',
   // F13b (UX-13 A, decision 10; DECISOES § 565): the sheet "What we measured" of a file guide and the frame of its tables.
   '[data-content="facts"]', '.fo-guide__frame',
-  // F13b (decision 10; DECISOES § 573): the bands and the sea of the home, and the sea and the water of the category hubs
-  // (their Oli is [data-oli], above).
-  '.fo-catband', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
+  // F13b (decision 10; DECISOES § 573): the sea of the home, and the sea and the water of the category hubs (their Oli is
+  // [data-oli], above); since the ajuste-home-cards (§ 609), the category sections of the home and their cards, in the
+  // place of its bands.
+  '.fo-section--cat', '.fo-section--cat .fo-grid', '.fo-section--cat .fo-tool', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
 ].join(', ');
 /** F13b (DECISOES § 573): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
 export const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';

@@ -6253,3 +6253,150 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
 - **A causa, medida:** o tamanho do número sai da conta da § 253, (largura do card − palavras) / largura dos algarismos em em, com uns 1,3 % de folga nos algarismos. A unidade, porém, fica estreita na conta: "/mo" desenha 35 px e a conta dá 33. A 320 px, "$2,222.24/mo" ficava com 0,5 px de sobra no Windows, e as taxas 4,4, 4,5, 5,5 e 8,1 com 0,6 a 1,9 px. No Linux, onde a Fredoka desenha um pouco mais larga, o "/mo" foi para uma linha própria (32 px). As reservas da § 595 cobrem a frase, a legenda e as mensagens, não o número.
 - **A decisão:** abaixo de 768 px o número guarda 3 px da borda na própria conta do CSS (`calc((100cqi - var(--fo-num-px) - 3px) / var(--fo-num-em))` no `.fo-rhero__num`). 3 px é o máximo que deixa o exemplo da hipoteca em inglês nos 48 px a 320 (ele tem 3,3 px de folga), como o teste da § 246 e da § 253 exige. A partir de 768 px nada muda, porque lá o pagamento final ("$182,295.35") cairia de 60 para 59,7 px e o CI não reprovou ali. A alternativa de pôr a margem no `numberFit` reprovou por isso.
 - **O teste:** `tests/e2e/money-card.spec.ts`, "/mortgage-calculator/ at 320 px: the number keeps 2px from the edge of the card with every rate from 3.0 to 9.0". Contra o `dist/` de antes, reprova no Windows: 4,4, 4,5, 5,5, 5,6 e 8,1, com 0,5 a 1,9 px. Depois passa nos dois navegadores, junto com o `money-card.spec.ts` e o `money-calc.spec.ts` inteiros (194 testes) e com o `calc-form`, o `calc-labels`, o `money-es`, o `money-health`, o `money-home` e o `layout-shift` (210 testes).
+
+## § 602 · A escolha do Victor: a home volta à grade de cards da F13a (ajuste-home-cards, decisão 1; muda partes das § 567 a § 571, § 573, § 578 e § 591)
+
+- **O pedido (6/nov/2026), nas palavras dele:** "to achando que o estilo anterior da pagina inicial estava mais bonito, digo isso na parte dos cards onde tinha um para cada ferramenta, ele assim como se fosse um card só por categoria ficou feio".
+- **A pergunta e a resposta:** perguntado como cada categoria deveria ficar, ele escolheu "igual à F13a": o título, uma frase, a grade de cards e o link do hub, no fundo da página, sem o bloco colorido, sem a contagem e sem o número de destaque. O topo da F13b fica.
+- **O que deixa de valer:**
+  - § 567: a faixa por categoria (`section.fo-catband.fo-cat--<categoria>`), os chips e os campos `count`, `num` e `say`; a "alternativa recusada" dela (o ToolCard por ferramenta, que mantinha a home longa) passa a ser a escolha;
+  - § 568 e § 569: os números das faixas, o `src/components/home-numbers.ts` e as frases com número; da tabela da § 568 fica só a linha "Contagens e H1" (o `tool-count.ts`, que o H1 e o link do hub de dinheiro usam);
+  - § 570: só a palavra "chips" (a lista de dinheiro continua, agora de cards; § 605);
+  - § 571: a conta de 450 a 594 palavras no `<main>` e de 75 a 105 nas frases a mais, que calibrava os 3 anúncios das faixas; as frases `more` ficam, como a frase de cada seção;
+  - § 573: "a `AdBreak first` depois da primeira faixa", o "3 caixas por largura" e os alvos e grupos `faixas` e `chips` (§ 609);
+  - § 578: a `Figtree Steady` nas faixas, que passa às seções de categoria (§ 607);
+  - § 591: a frase da tinta e a da PRICE, que eram do `say` e saíram; a regra da frase do dinheiro continua.
+- **O que continua:** o topo (o H1 com a contagem, a linha, o mar com o selo e a Oli `swim`, o movimento dela e a `Figtree Steady` do topo, agora também nas seções; § 607), o `wide` (§ 572), as listas e o `home-bands.ts` (§ 570), os ids das seções, o lugar das marcas de anúncio, a seção de guias e a da privacidade, a regra de nenhum dígito digitado nos textos da home (§ 568), a regra do LCP (§ 574) e a do CLS de carga (§ 578).
+- **Os planos não mudam:** a escolha muda a parte das faixas do UX-03 B (F10) que a F13b construiu, e a ficha manda não editar o `PLANO-MELHORIAS.md` nem o `PLANO-FILEORCA.md`; este § é o registro.
+
+## § 603 · As seções de categoria da home (ajuste-home-cards, decisão 2)
+
+- **A marcação:** cada faixa vira `section.fo-section.fo-section--cat`, com o mesmo `aria-labelledby` e o mesmo id de H2 de antes (`tools`, `pdf-home`, `money-home`, `life-home` e `qr-home`), na mesma ordem. Dentro, nesta ordem: o H2 com o `heading` da faixa; a frase `more` num `p.fo-prose`, sem mudar uma palavra; a `ul.fo-grid` com um `li > ToolCard` por ferramenta, na ordem de `home-bands.ts`, com o nome, a descrição e o ícone dos textos comuns e dos registros e a categoria de antes ("Image to PDF" em `pdf`, a casa e a saúde em `home`, o QR em `util`); e o link do hub num `p.fo-more`.
+- **O modificador** `fo-section--cat` é o que os alvos de anúncio, a lista de onde uma marca não entra e os testes leem (§ 609). Ele só tem a regra da frase (§ 608); a grade é a de sempre (§ 606).
+- **Os links:** um `p.fo-more` por link, como na F13a: o `all` na seção de imagem, de PDF e de dinheiro (o `{n}` do dinheiro continua a contagem do hub, § 540); na de casa e saúde, dois `p.fo-more` seguidos, o `all` e o `allHealth`, cada um com o seu hub; a do QR não tem link, como antes. O link volta ao `.fo-more` (600, `brand`), sem a seta e o sublinhado da faixa, que existiam porque o `brand` sobre `*-soft` não chegava a 4,5:1.
+  - **Alternativa recusada:** os dois links da casa e saúde num `p.fo-more` só, lado a lado: pediria uma regra de espaçamento só da home.
+- **O topo não muda:** o HTML do `.fo-home-top` é idêntico ao do ponto de partida nos três idiomas (802, 804 e 815 caracteres; `.cache/home-cards/static.ts`, fora do Git).
+- **As listas** são as da F13b: 8 de imagem, 12 de PDF, 6 de dinheiro em en e es e as 8 do Brasil em pt (§ 570), as 11 de casa e saúde numa seção só (en) e o gerador de QR. São 38 cards em en, 29 em pt e 27 em es.
+
+## § 604 · O que sai: a faixa, os chips, a contagem, o número e a frase da fonte (ajuste-home-cards, decisão 3)
+
+- **Do código:** o `src/components/home-numbers.ts` inteiro (só a home o lia); da `HomeView.astro`, a faixa, o `Icon` e os números; dos textos, os campos `count`, `num`, `say` e `to` dos três `home.ts` e do tipo (`HomeBandTexts` fica com `heading`, `more` e `all`; o `HomeTexts` perde o `to`). O comentário do topo de cada `home.ts` diz a home de agora.
+- **Do CSS:** o bloco `.fo-catband*` do `components.css` (o fundo, os cantos, o padding, a onda do `::after`, o título, a contagem, o número com o ícone, a frase da fonte, a frase a mais, a lista de chips e os links com o ícone deles); na regra da `Figtree Steady`, a `.fo-catband` deu lugar à `.fo-section--cat` (§ 607). O `grep` em `src/`, `scripts/` e `tests/` confirmou, antes de apagar, que nenhuma outra página usava essas classes. O design system não tinha espelho delas (o `bundle.css` nunca teve o `.fo-catband`).
+- **Ficam:** o `.fo-chip` (o NextStepChips, a busca, a 404, os guias), a `--fo-band-dark` com o `@media screen` (a faixa dos hubs a usa; o comentário dela diz agora só os hubs, e o do bloco dos hubs deixou de citar "the home's bands") e todo o topo.
+- **Dos testes:** o que só protegia isso, com a § 612.
+
+## § 605 · O `home-bands.ts` continua a fonte das listas, agora de cards (ajuste-home-cards, decisão 4)
+
+- **Uma fonte só:** a home, o `gate:prontidao` (o `HOME_BAND_MONEY_IDS`) e os testes leem o mesmo módulo, e nenhuma lista mudou.
+- **Cada item ganha a descrição**, lida dos textos comuns como o nome (`common.tools`, `common.pdf`, `common.calcs` e `common.qr`). Sem os textos (o portão roda no Node, sem o `TEXTS`), o nome e a descrição ficam vazios e o caminho é o mesmo; com eles, um item sem texto no idioma não entra, como antes.
+- **Os nomes que mentiriam:** `HomeChip` → `HomeCard`, `chips` → `cards`, `ChipCategory` → `CardCategory` e `homeChipPaths` → `homeCardPaths`. O módulo, o `homeBands`, o `HomeBand`, o `BandId` e o `HOME_BAND_MONEY_IDS` ficam com o nome: no módulo, "band" passa a ser o nome de uma seção de categoria (o comentário do topo diz isso), e trocá-lo mexeria no portão e nos testes sem mudar nada.
+- **O `homeCardPaths`** não tinha consumidor (o `homeChipPaths` também não): o `tests/unit/home.test.ts` passa a lê-lo, contra a ordem dos cards de todo o `<main>`, então ele não fica como código morto.
+
+## § 606 · A grade é a `.fo-grid` de hoje (ajuste-home-cards, decisão 5)
+
+- **Nenhuma regra nova para a grade.** Com o `<main>` largo do build padrão (1.208 px a 1280), ela dá 5 cards de 229 px por linha; com a lateral do build de teste, 3 de 242 px na coluna de 760 px. A 360, uma coluna de 328 px.
+- **A medida a 1280** (Chromium, build padrão, `.cache/home-cards/measure.ts`): nenhuma descrição cortada nem vazando do card, e a mais longa em 4 linhas (en: a de casa e saúde; pt: a de PDF e a de dinheiro; es: a de imagem e a de dinheiro). A ficha pede CSS só acima de 4 linhas, então nenhum. Os cards têm de 180 a 250 px de altura a 1280 e de 158 a 226 px a 360, onde a descrição tem até 3 linhas.
+- **Os cards de cada linha têm a mesma altura:** a `li` é `display: grid` e o card estica nela. O teste novo confere (§ 613).
+
+## § 607 · A fonte das seções: a `Figtree Steady`, como o topo (ajuste-home-cards, decisão 6; revisão b-1; § 578)
+
+- **A primeira medida:** o "the load moves nothing" do `home-sea.spec.ts` (Chromium, Figtree segurada 600 ms, a 320, 360, 393, 412, 768 e 1280 px, nos três idiomas), com as seções na Figtree: CLS de carga 0 nas 18 combinações. A primeira versão da run deixou as seções na Figtree, como os cards dos hubs.
+- **O que a revisão mostrou (b-1):** aquele teste só vê a primeira tela, onde fica o topo (na Steady). Abaixo da dobra, o nome e a descrição dos cards mudavam de número de linhas quando a Figtree chegava: com ela segurada 1,5 s, seções inteiras mudavam de altura (em es a 320, a de PDF ia de 2.602 a 2.576 px; a página, de 22 a 88 px), e com a seção de PDF rolada para a tela durante a espera o CLS foi 0,026 em es a 320. O cético refutou o achado (a ficha nomeia o teste de carga como a medida), mas a condição da decisão 6 é "se as seções novas se moverem quando a Figtree chega", e elas se moviam.
+- **A decisão:** as seções de categoria usam a `Figtree Steady` (`.fo-home-top, .fo-section--cat { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }`), como o topo e como as faixas da F13b (§ 578). O H2 continua na Fredoka, com preload. A face `optional` pinta a Figtree quando ela já está no cache e a de reserva ajustada (`Figtree Fallback`) na primeira visita fria; nos dois casos nada muda de tamanho depois da primeira pintura.
+- **O teste novo** (§ 613), "the category sections keep their size when Figtree arrives late, below the fold too", segura a Figtree 1,5 s e compara a altura de cada seção antes e depois de ela chegar, a 320, 360, 768 e 1280 px, nos três idiomas e nos dois navegadores; ele confere que a primeira medida é de antes da Figtree e a última de depois. Contra o `dist/` do commit revisado (`edbf7ad`, as seções na Figtree), reprova nos dois navegadores: "/es/ a 320, seção 2: 2602 → 2576 px" e mais sete. O "the load moves nothing" continua igual e passa.
+
+## § 608 · O LCP com os cards (ajuste-home-cards, decisão 7; § 574)
+
+- **A medida** (Chromium, `PerformanceObserver` de `largest-contentful-paint`, `.cache/home-cards/lcp.ts`): com a frase da seção na largura do `<main>` largo, a frase da seção de imagem em en (duas linhas, a primeira de 573 px) passava o H1 a partir de 768 px: 29.835 contra 27.663 px², e o "the H1 is the largest contentful paint from 768 px…" reprovou a 768 × 1024. Nenhuma descrição de card chegou perto (a maior, 13.304 px², em es).
+- **A correção, pelo CSS da seção, como a § 574:** `.fo-section--cat > .fo-prose { max-width: 28rem }`, a medida da linha do topo. Depois, de 768 a 1920 px o LCP é o H1 nos três idiomas (27.720, 38.556 e 39.249 px²), e a frase fica em 18.959, 31.081 e 30.885 px².
+  - **Alternativas recusadas:** 32rem, a medida das frases das faixas (em es a frase fica a poucos px de uma terceira linha, uns 40.000 px², acima do H1); a frase em 15/22, como na faixa (mudaria o tipo do `p.fo-prose` só na home).
+- **No celular continua a § 574:** o LCP é um texto da página, nunca a Oli, a água ou um `svg`. Em en e pt é a linha do topo, como no ponto de partida; em es, a 360 e 412, a frase da seção de imagem (31.137 e 26.909 px²), onde antes era a linha do topo a 360 (24.648) e a frase a mais da faixa de imagem a 412 (20.956).
+
+## § 609 · Os anúncios da home com os cards (ajuste-home-cards, decisão 8; § 419 a § 421 e § 573)
+
+- **As marcas não mudaram de lugar:** a `AdBreak first` depois da seção de imagem e uma `AdBreak` antes de cada seção seguinte, da de guias e da de privacidade; nenhuma dentro de seção ou de grade.
+- **O que o mapa dá agora** (build de teste, Chromium, `.cache/home-cards/measure.ts`; antes → depois):
+
+  | Medida | en | pt | es |
+  | --- | --- | --- | --- |
+  | Palavras do `<main>` | 565 → 909 | 512 → 765 | 524 → 756 |
+  | Caixas de conteúdo a 360, 412 e 459 px | 3 → 5 | 3 → 4 | 3 → 4 |
+  | De 600 px | o 1º | o 1º | o 1º |
+  | A 768 px | o 1º e o multiplex | igual | igual |
+  | A 1280 e 1440 px | o 1º, o multiplex e a lateral | igual | igual |
+  | Lateral 2 no HTML | não → sim | não → sim | não → sim |
+  | Topo do 1º anúncio a 360 / a 1280 | 1.402 → 2.336 / 1.008 → 1.366 | 1.440 → 2.462 / 1.064 → 1.414 | 1.462 → 2.444 / 1.086 → 1.458 |
+  | Menor vão entre dois de conteúdo a 360 (a 459) | 1.950 (1.836) → 1.714 (1.688) | 1.926 (1.818) → 1.964 (1.892) | 1.632 (1.544) → 1.784 (1.714) |
+
+- **A lateral 2:** com mais de 600 palavras (`RAIL2_WORDS`), ela entra no HTML da home nos três idiomas, como na F13a; aparece só em fileorca.com, quando a coluna tem a altura (o script de push). É consequência da escolha, não defeito.
+- **O `gate:prontidao`** (150 palavras por caixa à vista): a 360, 5 caixas pedem 750 em en (909) e 4 pedem 600 em pt e es (765 e 756); a 1280, o 1º, o multiplex, a lateral e a lateral 2 pedem 600.
+- **Os testes que pediam o número da F13b** pedem o medido: o caso `home` do `fo-ad-map.spec.ts` pede o 1º anúncio depois de `section.fo-section.fo-section--cat[aria-labelledby=tools]`, as caixas de conteúdo a 360 do `HOME_CONTENT_ADS` (5, 4 e 4) e, a 1280, o 1º, o multiplex e a lateral. Toda outra regra continua: os 150 px de todo alvo, nada no topo, nada dentro de seção ou grade, só âncora e vinheta como formatos automáticos.
+- **Os alvos dos 150 px não encolheram:** onde estavam a faixa e os chips da home entram a seção de categoria e os cards dela: o `MAP_TARGETS` e o `TARGETS` do `tests/e2e/lib/ad-clearance.ts` ganham `.fo-section--cat`, `.fo-section--cat .fo-grid` e `.fo-section--cat .fo-tool`; o `FORBIDDEN` e o `NEVER_INSIDE_CLASSES` do `src/ads/map.ts`, o `fo-section--cat`; o teste do mar, a seção, a grade e os cards. Os grupos `faixas` e `chips` da tabela do mapa viram `secoes` e `ferramentas`. Os seletores ficam presos à seção (`.fo-section--cat .fo-tool`, e não um `.fo-tool` de toda página): o alvo de antes era só da home, e os cards dos hubs já são alvo pelo `HUB_TARGETS`.
+- **O `tests/unit/ad-map.test.ts`** prova que o mapa recusa uma marca dentro da seção de categoria, entre a frase e a grade, como provava para a faixa. Contra o `src/ads/map.ts` do ponto de partida ele reprova (`expected '' to match /dentro de section\.fo-section\.fo-sec…/`).
+- **Nada mudou** no `src/ads/estimate.ts`, na lógica do mapa nem no `PUBLIC_ADSENSE_SLOTS`. A estimativa do ToolCard (158 px, o menor) acerta ou erra para menos, como na F13a.
+
+## § 610 · O `gate:prontidao` lê os cards (ajuste-home-cards, decisão 9)
+
+- **O `TOOL_LINKS`** volta a `main a.fo-tool`: a metade `main .fo-catband__chips a.fo-chip` só casava com a home (nenhuma outra página com área de anúncio tem faixa; os chips da 404, do hub de guias e do NextStepChips nunca contaram). A lista que o portão pede à home continua a do `home-bands.ts` (o `HOME_BAND_MONEY_IDS`, os 12 de PDF, a casa e a saúde e o QR; § 570).
+- **O teste:** o `tests/unit/prontidao.test.ts`, "reads the cards of the category sections of the home, never a chip (ajuste-home-cards)", prova que o card de uma seção para uma página que não existe ou fora do registro reprova, que o card listado passa e que a ferramenta mostrada só como chip de uma faixa da F13b deixa o card faltando ("faltam os cartões de /mortgage-calculator/"). Contra o `scripts/lib/prontidao.ts` do ponto de partida ele reprova nesse caso (`expected '' to match /faltam os cartões…/`).
+- **A fixture desse caso é a marcação da F13b** (`section.fo-catband` e `ul.fo-catband__chips`): é o único `fo-catband` que fica em `tests/` fora do teste que confere que a home não o tem, e fica de propósito, porque é a marcação que o portão de antes contava e o de agora não pode contar.
+
+## § 611 · Os textos: só saem campos (ajuste-home-cards, decisão 10)
+
+- **Nenhuma frase nova e nenhuma reescrita:** saíram o `to`, o `count`, o `num` e o `say`; ficaram, com as mesmas palavras, o H1, a linha, cada `heading`, `more`, `all` e `allHealth`, a privacidade e os guias. O comentário do topo dos três `home.ts` foi reescrito (é comentário, não texto do site).
+- **Nenhum dígito digitado nos textos da home:** o "0" do H1 continua a única exceção, e o teste continua no `tests/unit/home.test.ts`.
+
+## § 612 · Os testes antigos que mudaram (ajuste-home-cards, decisão 11; no formato da § 341)
+
+A escolha do Victor (§ 602) muda o que alguns testes protegiam. Cada um, com o que pedia, o que pede agora e o que continua protegido:
+
+- **`tests/unit/home-numbers.test.ts`, que vira `tests/unit/home.test.ts`** (`git mv`; o nome dizia os números, que saíram):
+  - **saem**, com a § 602: "measure the same 3 phone photos twice…" e "take the examples of the oracle…" (as fontes dos números das faixas), "says in every band the count, the number and the line of its source" e "has the words of the 3 ads by width in <main>: 450 or more, under the 595 of the lateral-2, 75 to 105 of them in the sentences more" (calibrava os 3 anúncios das faixas, § 571; a regra das 150 palavras por caixa continua no `gate:prontidao`);
+  - **ficam iguais:** "leave no digit typed in the texts of the home…" e "says the count of the site in the H1: 46 tools in English, 29 in Portuguese and 35 in Spanish";
+  - "give the bands the registries…" vira "give the sections the registries…": conta os `cards` no lugar dos `chips`, com as mesmas listas, e confere que com os textos todo card tem nome e descrição e os mesmos caminhos de sem eles;
+  - "links each chip to a tool of the registries, in the order of the band, and the bands to their hubs" vira "links each card to a page of the language in the order of its list, never to a preset, and each section to its hubs": lê a grade (`.fo-grid a.fo-tool`) e o `p.fo-more a`, confere a ordem de todo o `<main>` contra o `homeCardPaths`, e ganha "nenhum preset" e "nenhum link de outro idioma" em toda seção (a regra da § 6, que o `image-hub.test.ts` conferia só na de imagem);
+  - "says in the money band only what every money calculator of the language does, and the paint example after its doors and windows" vira "says in the money section only what every money calculator of the language does": lê o `p.fo-prose` da seção. Saem a frase da tinta e a da PRICE, que eram do `say`; a regra da § 591 (PDF e CSV, nenhum resultado que só algumas têm, o Baixar PDF do card e o CSV em cada calculadora do hub) continua.
+- **`tests/unit/image-hub.test.ts`, "home"** (dois testes): liam os chips da faixa `tools` (`.fo-catband__chips a.fo-chip`, `.fo-chip > span:last-child`) e o `.fo-catband__links a`; leem a grade (`.fo-grid a.fo-tool`, `.fo-tool h3`) e o `.fo-more a`, como na F13a. O texto do link continua o `image.all`, e a seção de dinheiro em en os 6 da § 570. A ordem do catálogo, nenhum preset, nenhum link de outro idioma e nenhuma `.fo-ad` no build padrão continuam.
+- **`tests/unit/pdf-site.test.ts`, "home"** (três testes): os chips viram os cards (`a.fo-tool`, `a.fo-tool h3`, `a.fo-tool.fo-cat--pdf`, `--home` e `--util`) e o `.fo-catband__links a` vira o `.fo-more a` (dois na casa e saúde; nenhum `.fo-more` na do QR); "band" vira "section" nos títulos. A ordem das seções, a Oli `swim` única no `<main>` e nenhuma `.fo-ad` continuam.
+- **`tests/unit/hub-icons.test.ts`, "the home … repeats only compress and rotate, once each"**: lia o ícone do círculo de cada chip (`chipIcons`); lê o ícone dos cards (`cardIcons`), como antes da F13b. O `chipIcons` e o controle dele saíram. A regra (só o `compress` e o `rotate` se repetem, uma vez cada) e o mínimo de 20 ícones continuam.
+- **`tests/unit/prontidao.test.ts`, "reads the chips of the bands of the home as its cards (F13b)"** vira "reads the cards of the category sections of the home, never a chip (ajuste-home-cards)": os três casos de antes (o listado passa; o que leva a uma página que não existe e o que está fora do registro reprovam) usam a marcação da seção; o caso novo é a ferramenta só como chip de faixa, que agora deixa o card faltando; o chip solto do NextStepChips continua sem contar (§ 610). "builds the real site…" não mudou (só o comentário).
+- **`tests/unit/ad-map.test.ts`, "refuses a mark inside a grid, … or a band…"**: o caso da `section.fo-catband` vira o da `section.fo-section.fo-section--cat`, com a marca entre a frase e a grade (§ 609). Os casos do topo e do mar da home continuam.
+- **`tests/e2e/home-sea.spec.ts`, "the bands in the dark theme"** (quatro testes): a home (`/`) saiu da lista; ficam o hub de imagem e o de PDF, e a regra (no escuro a faixa é `surface`, no claro o `*-soft` da categoria, e a onda na cor cheia) continua neles. O ramo que lia o `::after` da `.fo-catband` saiu.
+- **`tests/e2e/fo-ad-map.spec.ts`**: o caso `home` do `checkFirst` pedia o 1º anúncio depois de `section.fo-catband…[aria-labelledby=tools]` e 3 caixas de conteúdo a 360; pede depois de `section.fo-section.fo-section--cat[aria-labelledby=tools]` e as caixas medidas (5, 4 e 4; § 609). O 1º fora da primeira tela do celular e do computador, o 1º, o multiplex e a lateral a 1280 e todas as regras do `check()` continuam. O teste do mar mede a seção, a grade e os cards no lugar da faixa e dos chips.
+- **`tests/e2e/lib/ad-map.ts` e `tests/e2e/lib/ad-clearance.ts`**: trocam a faixa e os chips da home pela seção, a grade e os cards (§ 609); nada encolheu.
+- **`tests/unit/health-voice.test.ts`** e o `scripts/screenshots.ts`: só o comentário ("band" e "chips").
+- **Nenhum teste foi pulado, e nenhum limite ou tempo mudou** fora do que a escolha muda. Os números estão no relatório (`docs/relatorios/ajuste-home-cards.md`, "Os testes").
+
+## § 613 · Os testes novos e os controles negativos (ajuste-home-cards, decisão 12)
+
+- **`tests/unit/home.test.ts`, "shows in each category section one ToolCard per tool of its list, with the H3 of the name, the description and the icon, and no band, chip or number of the F13b in <main>"**: nos três idiomas, as seções `section.fo-section.fo-section--cat` são as de `homeBands`, na ordem; cada uma tem, nesta ordem, o H2, um `p.fo-prose`, a `ul.fo-grid` e um `p.fo-more` por hub; cada item da lista é um `a.fo-tool` com um `h3.fo-tool__name` do nome, o `p.fo-tool__desc` da descrição, o ícone `aria-hidden` com o desenho do registro (lido pelo parser dos dois lados) e a classe da categoria; e o `<main>` não tem `.fo-catband`, `.fo-chip` nem `.fo-catband__num` (nem o texto "fo-catband"). Contra o `dist/` do ponto de partida (`FO_HOME_DIST=.claude/worktrees/home-cards-base/dist`), ele reprova: `AssertionError: en: expected [] to deeply equal [ 'tools', 'pdf-home', …(3) ]`.
+- **`tests/e2e/home-sea.spec.ts`, "at 360 px: the cards of each category section have one height per row and stay in the column"** e o mesmo a 1280: nos três idiomas, cada linha da grade de cada seção tem os cards com a mesma altura (0,5 px de folga), e nenhum card passa da grade nem do `<main>`, tem largura diferente da célula ou deixa o nome ou a descrição vazar. Contra o ponto de partida (o `dist/` dele servido na porta 4380, `FO_PORT=4380`), os 4 (Chromium e WebKit, 360 e 1280) reprovam: `Error: / a 360 … expect(received).toEqual(expected) … - Array [ "tools", "pdf-home", … + Array []`.
+- **`tests/e2e/home-sea.spec.ts`, "the category sections keep their size when Figtree arrives late, below the fold too"** (revisão b-1; § 607): com a Figtree segurada 1,5 s, nenhuma seção de categoria muda de altura quando ela chega, a 320, 360, 768 e 1280 px, nos três idiomas e nos dois navegadores. Contra o `dist/` do commit revisado (`edbf7ad`), reprova nos dois: "/ a 320, seção 1: 1726 → 1704 px", "/es/ a 320, seção 2: 2602 → 2576 px" e mais seis. Contra o ponto de partida ele também reprova, pelo tempo: lá não há seção de categoria, e a espera por ela estoura os 180 s do teste ("page.waitForFunction: Test ended").
+- **O teste da grade foi reforçado pela revisão (d-1):** ele comparava o nome e a descrição só com a própria caixa, e um card mais baixo que o texto (o mutante da lente, `.fo-tool { height: 100px; display: block }`) passava, com o texto saindo por baixo. Agora um texto cuja caixa passa a borda do card também conta como vazamento; contra o mesmo mutante, servido num `dist/` copiado, ele reprova a 360 e a 1280 ("/ a 360 tools … Expected: 0 Received: 1").
+- **Os testes que mudaram e também provam a mudança contra o ponto de partida:** o caso novo do `prontidao.test.ts` (§ 610) e o do `ad-map.test.ts` (§ 609), rodados contra o código do ponto de partida (na worktree dele), reprovam.
+
+## § 614 · A altura da home em telas (ajuste-home-cards, decisão 13)
+
+- **A medida** (Chromium, build padrão, 360 × 740, a altura do documento dividida por 740, depois de recarregar a página com a Figtree no cache, para a face `optional` pintá-la; `.cache/home-cards/measure.ts`). Sem recarregar, a faixa da F13b em pt saía na fonte de reserva, com 4.942 px de `<main>` (o número do relatório da F13b):
+
+  | Idioma | Antes (F13b) | Depois | `<main>` antes → depois |
+  | --- | --- | --- | --- |
+  | en | 6.754 px, 9,1 telas | 11.490 px, 15,5 telas | 5.682 → 10.418 px |
+  | pt | 5.838 px, 7,9 telas | 9.542 px, 12,9 telas | 4.886 → 8.590 px |
+  | es | 5.800 px, 7,8 telas | 9.182 px, 12,4 telas | 4.848 → 8.230 px |
+
+- **Contra a F13a:** a F10 G-02 media 10.981 px (14,8 telas) em en. A home de agora tem 0,7 tela a mais: o topo da F13b é mais alto que o herói da F13a, a seção de dinheiro tem 6 cards (5 na F13a) e a frase de cada seção guarda 12 px da grade (§ 616).
+- **Registrado no `docs/PENDENCIAS.md`,** em "Registrados (escolhas, não defeitos)": o Victor escolheu os cards sabendo que a home fica mais longa.
+
+## § 615 · Os documentos (ajuste-home-cards, decisão 14)
+
+- **`docs/design/components/ToolCard/README.md`:** o parágrafo de abertura volta a dizer "nas grades da home, dos hubs e das relacionadas"; a seção "A faixa da categoria na home" vira "A grade nas seções de categoria da home", com o que a home usa agora e o "Antes (F13b)"; a tabela de contraste perde as duas linhas que só a faixa da home usava (`ink-muted` e `stroke` sobre os `*-soft`), e as que valem também para a faixa do hub ou para os cartões `deep` (UX15-W1 e `ink` sobre os `*-soft`) ficam, com o texto sem a home.
+- **`NextStepChips/README.md`:** o item "Na home" diz que a home não tem chip, com o "Antes". **`AdSlot/README.md`:** os 150 px valem para as seções de categoria da home e os cards delas, no lugar das faixas. **`docs/design/README.md`:** a cor da faixa é só a dos hubs; o topo da home é o único da home na `Figtree Steady` (as seções na Figtree, § 607, e a frase em 28rem, § 608); a home `wide` tem a lateral quando a lateral tem ID, e a lateral 2 com os cards. O `Oli/README.md` não muda: ele fala do topo, que ficou.
+- **`docs/claude/`:** uma seção nova no fim do `design-e-oli.md` e do `anuncios.md` ("Ajuste: a home com um card por ferramenta"); as seções antigas não mudam.
+- **`docs/PENDENCIAS.md`:** a altura da home em "Registrados" (§ 614).
+
+## § 616 · A frase da seção guarda 12 px da grade (ajuste-home-cards; § 603, § 606 e § 608)
+
+- **O que se viu:** nas imagens do relatório, a última linha da frase de cada seção encostava nos cards. O `p.fo-prose` não tem margem: as margens da prosa (`.fo-prose p`) valem para o parágrafo de dentro de uma `.fo-prose`, não para o próprio `p.fo-prose`. Era assim também na F13a.
+- **A decisão:** a `.fo-section--cat > .fo-prose` ganha `margin-bottom: var(--space-3)`, os 12 px de um parágrafo da prosa, na mesma regra do `max-width` (§ 608). A estimativa do mapa já dava esses 12 px a um `p.fo-prose` (o `PROSE_MARGIN` de `src/ads/estimate.ts`), então as caixas escolhidas não mudam.
+- **Alternativa recusada:** deixar a frase colada, como na F13a. O que o Victor escolheu é a estrutura da F13a (o título, uma frase, a grade e o link), e a frase encostada nos cards é um defeito de espaçamento, não parte dela. Nenhuma regra nova entrou na grade.

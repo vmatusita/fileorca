@@ -40,6 +40,9 @@ const BLOCK = 6;
 // F13a · o aviso compacto (UX-09; F12 R-A-2; DECISOES § 459): the open notice of a first visit keeps 150 px from the first
 // content ad also in the common windows past the two of the F12: a laptop, two desktops, a tablet upright and a big tablet.
 const NOTICE_WINDOWS = [PHONE, DESKTOP, { width: 1440, height: 900 }, { width: 1920, height: 950 }, { width: 1920, height: 1080 }, TABLET, { width: 1024, height: 1366 }];
+// Ajuste-home-cards (decision 8; DECISOES § 609): the content ads of the home at 360 × 740, as the map gives them on the
+// test build with one ToolCard per tool (the F13b bands gave 3 in each language).
+const HOME_CONTENT_ADS: Record<string, number> = { '/': 5, '/pt/': 4, '/es/': 4 };
 
 test('the map reads the 184 pages with ads of the route map', () => {
   expect(AD_PAGES).toHaveLength(184);
@@ -96,17 +99,20 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
   const before = first.before;
   switch (page.mold) {
     case 'home': {
-      // F13b (decision 6; UX-03 B; DECISOES § 573): the home is the sea by category. The first ad comes after the first
-      // band (the image one, still labelled by "tools"), its top off the first screen of a phone and of a computer, and the
-      // home has the 3 ads by width of home-b.html: the 3 content ads at 360 px, and from 1280 px the content one, the
-      // multiplex and the rail (its 2nd unit only with 600 words, which the home does not reach).
-      if (!before.startsWith('section.fo-catband') || !before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}, e não da faixa de imagem`);
+      // F13b (decision 6; UX-03 B; DECISOES § 573) and ajuste-home-cards (decision 8; § 609): under the sea of the top, one
+      // section of ToolCards per category. The first ad comes after the first section (the image one, still labelled by
+      // "tools"), its top off the first screen of a phone and of a computer. With the descriptions of the cards the home
+      // has the content ads the map gives it at 360 px, measured on the test build (5 in English, 4 in Portuguese and in
+      // Spanish; the F13b bands gave 3), and from 1280 px the content one, the multiplex and the rail; the lateral-2 is in
+      // the HTML (600 words or more) and shows only on fileorca.com, where the column has its room.
+      if (!before.startsWith('section.fo-section.fo-section--cat') || !before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}, e não da seção de imagem`);
       const top = phone.boxes.find((box) => box.unit === 'conteudo');
       const wide = desktop.boxes.find((box) => box.unit === 'conteudo');
       if (!top || top.y < PHONE.height) fail(`o 1º da home na primeira tela do celular (topo ${top?.y.toFixed(0)})`);
       if (!wide || wide.y < DESKTOP.height) fail(`o 1º da home na primeira tela do computador (topo ${wide?.y.toFixed(0)})`);
       const phoneContent = phone.boxes.filter((box) => box.kind === 'content').length;
-      if (phoneContent !== 3) fail(`${phoneContent} anúncios de conteúdo a 360 px (a home pede 3)`);
+      const want = HOME_CONTENT_ADS[page.path] ?? 0;
+      if (phoneContent !== want) fail(`${phoneContent} anúncios de conteúdo a 360 px (a home pede ${want})`);
       const desktopUnits = desktop.boxes.map((box) => box.unit).filter((unit) => unit !== 'lateral-2');
       if (desktopUnits.sort().join(' ') !== 'conteudo lateral multiplex') fail(`a 1280 px a home tem ${desktopUnits.join(', ')} (pede o conteúdo, o multiplex e a lateral)`);
       break;
@@ -229,8 +235,9 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
 
 // F13b (decisions 6, 7 and 10; UX-03 B and UX-15 A; DECISOES § 573): the Oli that swims at the top of the home and in the
 // band of a category hub keeps 150 px from every ad that shows, with her box inflated by 12 px (§ 513), and so do the sea,
-// the water and the bands of the home; from 1280 px the Oli of the home keeps 12 px or more from the edge of the column, on
-// the side of the rail (the pitfall of the F13a in docs/claude/design-e-oli.md).
+// the water and, since the ajuste-home-cards (§ 609), the category sections of the home and their cards (the bands and
+// their chips before); from 1280 px the Oli of the home keeps 12 px or more from the edge of the column, on the side of
+// the rail (the pitfall of the F13a in docs/claude/design-e-oli.md).
 const SEA_PAGES = AD_PAGES.filter((page) => page.mold === 'home' || page.mold === 'hub-arquivos' || page.mold === 'hub-dinheiro' || page.mold === 'hub-casa-saude');
 
 test('the sea of the home and of the category hubs keeps 150 px from every ad, the Oli inflated, and 12 px from the column at 1280', async ({ page }) => {
@@ -244,7 +251,7 @@ test('the sea of the home and of the category hubs keeps 150 px from every ad, t
       await page.setViewportSize(viewport);
       expect((await page.goto(adPage.path))?.status(), adPage.path).toBe(200);
       await frames(page);
-      const measure = await measureMap(page, '.fo-home-sea [data-oli], .fo-hubband__oli, .fo-home-sea, .fo-hubband__sea, .fo-hubband__water, .fo-catband, .fo-catband .fo-chip');
+      const measure = await measureMap(page, '.fo-home-sea [data-oli], .fo-hubband__oli, .fo-home-sea, .fo-hubband__sea, .fo-hubband__water, .fo-section--cat, .fo-section--cat .fo-grid, .fo-section--cat .fo-tool');
       const olis = measure.targets.filter((target) => target.kind.includes('oli'));
       if (olis.length !== 1) problems.push(`${adPage.path} a ${viewport.width}: ${olis.length} Olis do mar`);
       for (const box of measure.boxes) {
