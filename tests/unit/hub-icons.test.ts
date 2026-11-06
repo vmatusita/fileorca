@@ -2,9 +2,9 @@
 // icon among its cards. The drawing inside the <svg> of each card's .fo-tool__icon is what the person sees, so two
 // cards with the same drawing are a repeat, whatever the field says. The pages are read from dist/ (run `pnpm build`
 // first, as `pnpm verificar` does). The homes mix the categories: there, only the verbs that image and PDF share
-// (compress and rotate) may repeat, once each (icons.html: 35 icons on the 37 cards of the English home). F13b (UX-03 B;
-// DECISOES § 576): the home shows the tools as chips in the bands of the categories, each with its icon in the circle,
-// so the home is read by its chips, with the same rule.
+// (compress and rotate) may repeat, once each (icons.html: 35 icons on the 37 cards of the English home). The F13b
+// (DECISOES § 576) read the home by the chips of its bands; since the ajuste-home-cards (§ 612) the home shows one
+// ToolCard per tool again, and it is read by its cards, with the same rule.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -37,11 +37,6 @@ const NAME_OF = new Map(Object.entries(ICONS).map(([name, inner]) => [inner, nam
 /** The drawing of each tool card of a page, in order (the inner markup of the card's icon). */
 function cardIcons(html: string): string[] {
   return [...html.matchAll(/<a class="fo-tool\b[\s\S]*?<span class="fo-tool__icon"[^>]*><svg\b[^>]*>([\s\S]*?)<\/svg>/g)].map((match) => (match[1] ?? '').trim());
-}
-
-/** The drawing of each chip of the home's bands, in order (the inner markup of the chip's circle; F13b). */
-function chipIcons(html: string): string[] {
-  return [...html.matchAll(/<a class="fo-chip\b[^"]*" href="[^"]*"><span class="fo-chip__dot"[^>]*><svg\b[^>]*>([\s\S]*?)<\/svg>/g)].map((match) => (match[1] ?? '').trim());
 }
 
 /** The drawings a page shows more than once, by name when it is one of ours, with the count. */
@@ -83,7 +78,7 @@ describe.runIf(BUILT)('one icon per tool card (UX-16)', () => {
   for (const lang of LANGS) {
     const path = lang === 'en' ? '/' : `/${lang}/`;
     it(`the home ${path} repeats only compress and rotate, once each (image and PDF)`, () => {
-      const icons = chipIcons(read(path));
+      const icons = cardIcons(read(path));
       expect(icons.length, path).toBeGreaterThanOrEqual(IMAGE_TOOL_IDS.length + PDF_TOOL_IDS.length);
       expect(repeats(icons).sort(), path).toEqual(SHARED_VERBS.map((name) => `${name} ×2`));
     });
@@ -95,10 +90,5 @@ describe.runIf(BUILT)('one icon per tool card (UX-16)', () => {
     expect(cardIcons(card('car', '/a/') + card('card', '/b/'))).toHaveLength(2);
     expect(repeats(cardIcons(card('car', '/a/') + card('card', '/b/')))).toEqual([]);
     expect(repeats(cardIcons(card('home', '/a/') + card('key', '/b/') + card('home', '/c/')))).toEqual(['home ×2']);
-    // The chips of the home (F13b).
-    const chip = (name: IconName, href: string): string =>
-      `<a class="fo-chip fo-cat--money" href="${href}"><span class="fo-chip__dot" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24">${ICONS[name]}</svg></span><span>x</span></a>`;
-    expect(chipIcons(chip('car', '/a/') + chip('card', '/b/'))).toHaveLength(2);
-    expect(repeats(chipIcons(chip('home', '/a/') + chip('key', '/b/') + chip('home', '/c/')))).toEqual(['home ×2']);
   });
 });

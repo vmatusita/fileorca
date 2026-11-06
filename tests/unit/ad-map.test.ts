@@ -35,8 +35,9 @@ describe('the marks of a view', () => {
       [`<div id="fo-tool-root"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div#fo-tool-root/],
       [`<div id="fo-calc-schedule"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div#fo-calc-schedule/],
       [`<div class="fo-hubband"><p>a</p>${FIRST}<p>b</p></div>`, /dentro de div\.fo-hubband/],
-      // Review F13b d-2 (DECISOES § 596): a band of the home, its top and its sea, as the e2e map refuses them (§ 573).
-      [`${section(P)}<section class="fo-catband"><h2>Money</h2>${P}${FIRST}<p>b</p></section>${section(P)}`, /dentro de section\.fo-catband/],
+      // Review F13b d-2 (DECISOES § 596): the top and the sea of the home, as the e2e map refuses them (§ 573); and, since
+      // the ajuste-home-cards (§ 609), a category section of the home, between its sentence and its cards.
+      [`${section(P)}<section class="fo-section fo-section--cat" aria-labelledby="money-home"><h2 id="money-home">Money</h2>${P}${FIRST}<ul class="fo-grid"><li>card</li></ul></section>${section(P)}`, /dentro de section\.fo-section\.fo-section--cat\[aria-labelledby=money-home\]/],
       [`<div class="fo-home-top"><p>a</p>${FIRST}<p>b</p></div>${section(P)}`, /dentro de div\.fo-home-top/],
       [`${section(P)}<div class="fo-home-sea"><p>a</p>${FIRST}<p>b</p></div>${section(P)}`, /dentro de div\.fo-home-sea/],
       [`<section><h2>A</h2>${FIRST}${P}</section>`, /logo depois de um título/],

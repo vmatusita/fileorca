@@ -195,21 +195,14 @@ export interface Section {
 }
 
 /**
- * One band of the home (F13b, UX-03 B; DECISOES § 567): the H2, the count under it, the number of the band and the line
- * that says where it comes from, one sentence more (the words of § 571), and the link to the hub. Every number is a
- * {placeholder} the build fills from its source (src/components/home-numbers.ts), never a digit typed here.
+ * One category section of the home (F13b, UX-03 B, DECISOES § 567; ajuste-home-cards, § 602 and § 604): the H2, its one
+ * sentence and the link to the hub. The cards under the sentence are the registries' (src/components/home-bands.ts).
  */
 export interface HomeBandTexts {
   heading: string;
-  /** "{n} tools", "{n} calculators": {n} from the count of src/components/tool-count.ts. */
-  count: string;
-  /** The number of the band, when it is one value ("{payment} a month"); the image and PDF bands write "{from} → {to}". */
-  num?: string;
-  /** The line after the number, with its own placeholders. */
-  say: string;
-  /** One sentence more (decision 6 of the brief: 75 to 105 words in <main>, one sentence a band). */
+  /** The one sentence of the section, in a p.fo-prose between the H2 and the cards. */
   more: string;
-  /** The link to the hub of the band (the QR code band has no hub: its one chip is the tool). */
+  /** The link to the hub of the section (the QR code section has no hub: its one card is the tool). */
   all?: string;
 }
 
@@ -222,13 +215,11 @@ export interface HomeTexts extends PageMeta {
   toolsHeading: string;
   privacyHeading: string;
   privacyBody: string;
-  /** What a screen reader says for the arrow icon of "9.3 MB → 2.5 MB" (" to ", " para ", " a "). */
-  to: string;
-  /** The bands, in the order of the page: image, PDF, money, home and health (English only) and the QR code. */
+  /** The category sections, in the order of the page: image, PDF, money, home and health (English only) and the QR code. */
   image: HomeBandTexts;
   pdf: HomeBandTexts;
   money: HomeBandTexts;
-  /** The home and health band (English only, F7): two links, one to each hub. */
+  /** The home and health section (English only, F7): two links, one to each hub. */
   life?: HomeBandTexts & { allHealth: string };
   qr?: HomeBandTexts;
   /**
@@ -238,7 +229,7 @@ export interface HomeTexts extends PageMeta {
   guides: { heading: string; intro: string; hubLink: string };
 }
 
-/** The home of Portuguese and Spanish (languages adjustment): with the QR code band. */
+/** The home of Portuguese and Spanish (languages adjustment): with the QR code section. */
 export interface TranslatedHomeTexts extends HomeTexts {
   qr: HomeBandTexts;
 }

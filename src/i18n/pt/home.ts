@@ -1,7 +1,8 @@
 import type { HomeTexts } from '../types.ts';
 
-// F13b (UX-03 B, home-b.html; DECISOES § 567 a § 571): a home como o mar por categoria. Todo número é um {placeholder}
-// que o build preenche da fonte (src/components/home-numbers.ts e src/components/tool-count.ts).
+// F13b (UX-03 B; DECISOES § 567 e § 568) e ajuste-home-cards (§ 602 a § 604): o topo da home e, depois, uma seção por
+// categoria com o título, a frase, os ToolCards de src/components/home-bands.ts e o link do hub. Todo número é um
+// {placeholder} que o build preenche dos registros (src/components/tool-count.ts e os guias).
 export default {
   title: 'FileOrca: ferramentas grátis que nunca enviam seus arquivos',
   description:
@@ -10,34 +11,23 @@ export default {
   h1Promise: '0 uploads.',
   intro: 'Ferramentas de imagem, PDF e dinheiro que fazem o trabalho no seu aparelho, sem cadastro.',
   toolsHeading: 'Escolha uma ferramenta',
-  to: ' para ',
   image: {
     heading: 'Imagem',
-    count: '{n} ferramentas',
-    say: '{photos} fotos de celular na Comprimir imagem: {percent} mais leves, no ajuste padrão.',
     more: 'Cada ferramenta de imagem abre o arquivo nesta aba, faz o trabalho no seu aparelho e entrega uma cópia nova para você salvar.',
     all: 'Todas as ferramentas de imagem e os tamanhos comuns',
   },
   pdf: {
     heading: 'PDF',
-    count: '{n} ferramentas',
-    say: 'Um PDF de fotos na Comprimir PDF: {percent} mais leve no nível recomendado.',
     more: 'Juntar, dividir e assinar acontecem na mesma aba, e a senha que você digita para um PDF nunca sai dela.',
     all: 'Todas as ferramentas de PDF',
   },
   money: {
     heading: 'Dinheiro',
-    count: '{n} calculadoras',
-    num: '{diff} a menos',
-    say: 'de juros no SAC do que na PRICE, no exemplo do simulador: {loan} em {months} meses, a {rate} ao ano.',
     more: 'Cada calculadora explica o resultado, que você pode baixar em PDF ou CSV, e os números que você digita ficam no seu aparelho.',
     all: 'As {n} calculadoras financeiras',
   },
   qr: {
     heading: 'QR code',
-    count: '{n} ferramenta',
-    num: '{max} caracteres',
-    say: 'num código só, com a Oli no meio, na correção de erro H.',
     more: 'Digite um link ou um texto curto e salve o código em PNG ou SVG, com o texto guardado no seu aparelho.',
   },
   privacyHeading: 'Seus arquivos ficam com você',

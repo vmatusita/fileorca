@@ -1,15 +1,17 @@
-// The home as the sea by category and the sea of the category hubs (F13b, decisions 6 and 7; UX-03 B, home-b.html, and
-// UX-15 A, hub-sea.html ?alt=a; DECISOES § 370, § 378 and § 567 to § 577), on the default build (no ad: the distances to
-// the ads are measured on the test build by fo-ad-map.spec.ts). The name puts this spec in a light part of the CI, after
-// header-theme-offline.spec.ts.
+// The top of the home with its sea, and the sea of the category hubs (F13b, decisions 6 and 7; UX-03 B, home-b.html, and
+// UX-15 A, hub-sea.html ?alt=a; DECISOES § 370, § 378 and § 567 to § 577; ajuste-home-cards, § 602 to § 613), on the
+// default build (no ad: the distances to the ads are measured on the test build by fo-ad-map.spec.ts). The name puts this
+// spec in a light part of the CI, after header-theme-offline.spec.ts.
 //   - The home: the H1 on the full width with the count; the Oli swim, 128 px on a phone and 152 from 768, aria-hidden, in
 //     the sea, right of the H1 (she looks left, at it); without the rail of ads <main> takes the width of the page at 1280
-//     (G-06); the H1 is the LCP from 768 px; the load moves nothing (CLS 0) with Figtree held until the first paint.
+//     (G-06); the H1 is the LCP from 768 px; the load moves nothing (CLS 0) with Figtree held until the first paint; the
+//     ToolCards of the category sections keep one height in each row of the grid and stay in the column.
 //   - The hubs, in the four views and every language: the sea is one aria-hidden block with no pointer events and nothing
 //     to focus; no text of the band crosses the water; the band grows 56 px at 360 and 64 from 768; the Oli, 72 px, half
 //     under water on the right; no move of the band loops or lasts 5 s, and none with reduced motion; the first card of the
 //     image hub in English ends above the fold of 360 × 740.
-//   - Both: in the dark theme the band is surface and the colour of the category stays on the wave (G-21).
+//   - The hubs: in the dark theme the band is surface and the colour of the category stays on the wave (G-21). The bands
+//     of the home left with the ajuste-home-cards (§ 604).
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { LANGS, moneyHubId, pagePath, type Lang } from '../../src/i18n/routes.ts';
 import { HEALTH_HUB_ID, HOUSE_HUB_ID } from '../../src/tools/calc/registry.ts';
@@ -136,6 +138,49 @@ test.describe('the home', () => {
       }
     }
   });
+
+  // Ajuste-home-cards (decision 12; DECISOES § 613): the grid of each category section is the .fo-grid of the hubs, one
+  // ToolCard per tool. In a row of the grid every card has the height of the tallest (the li and the card stretch), and no
+  // card passes the column of <main>, nor lets its name or its description out of it. On the dist/ of the starting point
+  // it fails: the home had no card (the bands of the F13b).
+  for (const viewport of [PHONE, DESKTOP]) {
+    test(`at ${viewport.width} px: the cards of each category section have one height per row and stay in the column`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      for (const lang of LANGS) {
+        await open(page, HOMES[lang]);
+        const label = `${HOMES[lang]} a ${viewport.width}`;
+        const sections = await page.evaluate(() =>
+          [...document.querySelectorAll('main > section.fo-section--cat')].map((section) => {
+            const main = (document.querySelector('main') as HTMLElement).getBoundingClientRect();
+            const grid = (section.querySelector(':scope > ul.fo-grid') as HTMLElement | null)?.getBoundingClientRect() ?? null;
+            const cards = [...section.querySelectorAll('ul.fo-grid > li > a.fo-tool')].map((card) => {
+              const box = card.getBoundingClientRect();
+              const spill = [...card.querySelectorAll('.fo-tool__name, .fo-tool__desc')].filter((text) => text.scrollWidth > text.clientWidth + 1 || text.scrollHeight > text.clientHeight + 1).length;
+              return { top: Math.round(box.top), left: box.left, right: box.right, height: box.height, li: (card.parentElement as HTMLElement).getBoundingClientRect().width, width: box.width, spill };
+            });
+            return { id: section.getAttribute('aria-labelledby'), main: { left: main.left, right: main.right }, grid: grid && { left: grid.left, right: grid.right }, cards };
+          }),
+        );
+        expect(sections.map((section) => section.id), label).toEqual(['tools', 'pdf-home', 'money-home', ...(lang === 'en' ? ['life-home'] : []), 'qr-home']);
+        for (const section of sections) {
+          const where = `${label} ${section.id}`;
+          expect(section.cards.length, where).toBeGreaterThan(0);
+          expect(section.grid, where).not.toBeNull();
+          const rows = new Map<number, number[]>();
+          for (const card of section.cards) {
+            rows.set(card.top, [...(rows.get(card.top) ?? []), card.height]);
+            // In the column: inside the grid and <main>, as wide as its cell, nothing of its text out of it.
+            expect(card.left, where).toBeGreaterThanOrEqual((section.grid?.left ?? 0) - 0.5);
+            expect(card.right, where).toBeLessThanOrEqual((section.grid?.right ?? 0) + 0.5);
+            expect(card.right, where).toBeLessThanOrEqual(section.main.right + 0.5);
+            expect(Math.abs(card.width - card.li), where).toBeLessThanOrEqual(0.5);
+            expect(card.spill, where).toBe(0);
+          }
+          for (const [top, heights] of rows) expect(Math.max(...heights) - Math.min(...heights), `${where}: a linha em ${top}`).toBeLessThanOrEqual(0.5);
+        }
+      }
+    });
+  }
 
   test('the load moves nothing: Figtree held until the first paint, no layout shift from 320 to 1280 px (Chromium)', async ({ browser, browserName }) => {
     // Only Chromium reports layout shifts; WebKit joins the check on its own the day it ships the entry type.
@@ -273,7 +318,7 @@ test.describe('the bands in the dark theme', () => {
         if (value) localStorage.setItem('fo-theme', value);
       }, stored);
       const page = await context.newPage();
-      for (const path of ['/', '/image-tools/', pagePath(PDF_HUB_ID, 'en') ?? '']) {
+      for (const path of ['/image-tools/', pagePath(PDF_HUB_ID, 'en') ?? '']) {
         expect((await page.goto(path))?.status(), path).toBe(200);
         const colors = await page.evaluate(() => {
           const probe = (value: string) => {
@@ -284,9 +329,9 @@ test.describe('the bands in the dark theme', () => {
             node.remove();
             return color;
           };
-          const band = document.querySelector('main .fo-catband, main .fo-hubband--sea') as HTMLElement;
+          const band = document.querySelector('main .fo-hubband--sea') as HTMLElement;
           const style = getComputedStyle(band);
-          const wave = band.classList.contains('fo-catband') ? getComputedStyle(band, '::after').backgroundColor : getComputedStyle(band.querySelector('.fo-hubband__crest') as Element).backgroundColor;
+          const wave = getComputedStyle(band.querySelector('.fo-hubband__crest') as Element).backgroundColor;
           return {
             band: style.backgroundColor,
             surface: probe(getComputedStyle(document.documentElement).getPropertyValue('--surface')),
