@@ -1,0 +1,259 @@
+# Ajuste: a home com um card por ferramenta
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode o ajuste `ajuste-home-cards` do FileOrca: a home dos três idiomas volta a mostrar **um card por ferramenta** (o `ToolCard`, a grade da F13a) no lugar das faixas coloridas com chips da F13b. O pedido do Victor, em 6/nov/2026:
+
+> to achando que o estilo anterior da pagina inicial estava mais bonito, digo isso na parte dos cards onde tinha um para cada ferramenta, ele assim como se fosse um card só por categoria ficou feio
+
+Perguntado, ele escolheu: cada categoria "igual à F13a" (o título, uma frase, a grade de cards e o link do hub, no fundo da página), sem o bloco colorido, sem a contagem e sem o número de destaque. O topo da F13b fica.
+
+Ao terminar:
+
+- em `/`, `/pt/` e `/es/`, cada categoria é uma seção com o H2, uma frase, a grade `.fo-grid` com um `ToolCard` por ferramenta (ícone, nome e descrição) e o link do hub;
+- o topo da F13b não mudou: o H1 com a contagem (46, 29 e 35), a linha, o mar com o selo e a Oli `swim`;
+- nenhum `.fo-catband`, nenhum chip e nenhum número de faixa sobra no `<main>` da home, e o código, os textos e o CSS que só serviam a eles saíram do repositório;
+- todas as regras de anúncio continuam verdes no build de teste, com as seções e os cards da home como alvos dos 150 px no lugar das faixas e dos chips;
+- o CLS de carga da home continua 0 de 320 a 1280 px, e o H1 continua o LCP a partir de 768 px;
+- o `pnpm verificar --partes` passou na máquina, o relatório está em `docs/relatorios/ajuste-home-cards.md` e a revisão em `docs/relatorios/REVISAO-ajuste-home-cards.md`;
+- a PR da branch `ajuste-home-cards` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `2bd851c` (a F13b mesclada, PR 27) ou num commit mais novo: confira com `git log --oneline -5` e guarde no plano o SHA da `origin/main` do começo da run, o "ponto de partida". Os arquivos `docs/prompts/prompt-ajuste-home-cards.md` e `.txt` já estão no clone, sem commit: eles entram no primeiro commit da run.
+
+O que você precisa saber antes de planejar:
+
+- **A home de hoje** (`src/views/HomeView.astro`, F13b, DECISOES § 567 a § 579 e § 591): o topo (`.fo-home-top`, com o mar `.fo-home-sea`), depois uma `section.fo-catband.fo-cat--<categoria>` por categoria, com o H2 e a contagem, o número (`home-numbers.ts`), a frase da fonte (`say`), a frase a mais (`more`), os chips (`.fo-catband__chips a.fo-chip`) e os links do hub; depois os guias (F11) e a privacidade. As listas de cada faixa vêm de `src/components/home-bands.ts`. A página usa `wide` (§ 572).
+- **A home da F13a**, a referência da marcação dos cards: `git show bd844ca:src/views/HomeView.astro`. Cada seção era `section.fo-section[aria-labelledby=<id>]` com o `h2`, um `p.fo-prose`, a `ul.fo-grid` de `li > ToolCard` e o `p.fo-more` com o link do hub. Os testes da F13a que liam a grade estão no mesmo commit (`git show bd844ca:tests/unit/image-hub.test.ts`, e o mesmo para `pdf-site.test.ts`, `hub-icons.test.ts` e `prontidao.test.ts`): a § 576 diz o que a F13b mudou em cada um.
+- **O `ToolCard`** (`src/components/ToolCard.astro`) pede `href`, `name`, `description`, `category` e `icon`. As descrições estão nos textos comuns de cada idioma (`common.tools`, `common.pdf`, `common.calcs` e `common.qr`), como a F13a e os hubs já usam.
+- **A grade** `.fo-grid` é `repeat(auto-fill, minmax(220px, 1fr))`. Com o `<main>` largo (o build padrão, sem a lateral), a 1280 px ela dá 5 cards de uns 229 px por linha; com a lateral (o build de teste), a coluna de 760 px dá 3 cards de 242 px, como na F13a. É o mesmo card nos dois casos.
+- **O próximo § livre do `DECISOES.md` é o 602,** se nada entrou depois da F13b. Escreva os § na ordem.
+- **A linha de base:** o relatório da F13b dá o Vitest com 130 arquivos e 2.069 testes e o `--list` do Playwright com 2.200 testes por navegador. Confira os números no ponto de partida e use os seus.
+- **O repositório é público** (§ 338): tudo o que você commita, a PR, os logs e os artefatos ficam públicos.
+- **O CI roda por classe** (F9): a PR em rascunho roda o job leve; a PR pronta roda tudo e, como não mexe em `.github/`, é mesclada sozinha.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **Este prompt.** Ele faz o papel da ficha do ajuste e vence o resto. A escolha do Victor muda a parte das faixas do UX-03 B (F10) que a F13b construiu; não edite o `PLANO-MELHORIAS.md` nem o `PLANO-FILEORCA.md`: o § novo registra a mudança.
+2. **O `CLAUDE.md`,** inteiro.
+3. **De `docs/claude/`:** o `windows-git-bash.md` e o `playwright.md` inteiros; do `design-e-oli.md` e do `anuncios.md`, as pegadinhas gerais e as seções da F12, da F13a e da F13b; do `ci.md`, as pegadinhas gerais da F1a e a seção da F13b; do `idiomas.md`, o que fala do `lint:texto`.
+4. **Do `DECISOES.md`, só buscando o §:** § 341 (o formato de "teste antigo que mudou"), § 398, § 413, § 419 a § 421, § 540, § 567 a § 579, § 591 e o que elas citarem.
+5. **Do `docs/relatorios/fase-13b.md` e do `REVISAO-F13b.md`,** só o que fala da home (busque "home", "faixa" e "chip").
+6. **Do `docs/design/`:** os README do `ToolCard`, do `NextStepChips`, da `Oli` e do `AdSlot`, e as seções "Layout e anúncios" e "Mar" do `README.md`.
+
+# Escopo
+
+Dentro:
+
+- `src/views/HomeView.astro`, `src/components/home-bands.ts`, `src/components/home-numbers.ts` (sai), os textos `src/i18n/{en,pt,es}/home.ts` e o tipo deles em `src/i18n/types.ts`;
+- o CSS da home em `src/styles/components.css` (o bloco "F13b · a home como o mar por categoria") e o espelho dele no design system, se houver;
+- o que lê as faixas e os chips da home: `scripts/lib/prontidao.ts`, `src/ads/map.ts` (só a lista de onde anúncio não entra), `tests/e2e/lib/ad-map.ts`, `tests/e2e/lib/ad-clearance.ts`, `tests/e2e/ads.spec.ts`, `tests/e2e/fo-ad-map.spec.ts`, `tests/e2e/home-sea.spec.ts`, `tests/e2e/design.spec.ts` e os testes de unidade `home-numbers`, `image-hub`, `pdf-site`, `hub-icons`, `prontidao` e `ad-map`. A lista vem de um `grep` por `catband|homeBands|homeChipPaths|home-bands|homeNumbers|home-numbers|HOME_BAND_MONEY_IDS|life-home` e pode ter mais; refaça o `grep` no começo;
+- os documentos: os README do design system que descrevem a faixa da home, seções novas no fim de `docs/claude/design-e-oli.md` e `docs/claude/anuncios.md`, o `docs/PENDENCIAS.md`, o `DECISOES.md`, o relatório e a revisão.
+
+Fora (não toque):
+
+- o topo da home (`.fo-home-top`, `.fo-home-sea`, o H1, a linha, o selo, a Oli `swim`, o movimento dela, a fonte Steady do topo) e a propriedade `wide`;
+- os hubs de categoria, o mar dos hubs, a variável `--fo-band-dark` (os hubs a usam), a 404, o rodapé, as páginas de ferramenta, as calculadoras, os guias, as páginas institucionais e jurídicas;
+- a seção de guias e a de privacidade da home;
+- `src/ads/estimate.ts` e a lógica do mapa da F12; nenhuma posição nova no `PUBLIC_ADSENSE_SLOTS`;
+- o `tool-count.ts` e as contagens do site;
+- `.github/`, o `.githooks/`, o `.claude/settings.json`, os planos, o `lighthouserc.json`;
+- os § antigos do `DECISOES.md` e as seções antigas de `docs/claude/`: só se acrescenta, nunca se apaga nem se reescreve (regra do `CLAUDE.md`).
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 602)
+
+1. **A escolha do Victor (6/nov/2026).** A home volta à grade de cards da F13a nas categorias. O § cita o pedido dele com as palavras dele, a pergunta e a resposta, e diz quais partes das § 567, § 568, § 569, § 570, § 571, § 573, § 578 e § 591 deixam de valer, e quais continuam (o topo, as listas, os ids, as marcas de anúncio).
+2. **As seções.** Cada faixa vira uma `section.fo-section` com um modificador próprio (por exemplo `fo-section--cat`; o nome é seu), com o mesmo `aria-labelledby` e o mesmo id de H2 de hoje (`tools`, `pdf-home`, `money-home`, `life-home` e `qr-home`), na mesma ordem, e dentro dela:
+   - o H2 com o `heading` da faixa ("Image", "PDF", "Money", "Home and health", "QR code" e os de pt e es);
+   - a frase `more` da faixa num `p.fo-prose`, sem mudar uma palavra;
+   - a `ul.fo-grid` com um `li > ToolCard` por ferramenta, na ordem de `home-bands.ts`, com o nome, a descrição e o ícone dos textos comuns e dos registros, e a categoria de hoje (o "Image to PDF" na cor do PDF, a casa e a saúde em `home`, o QR em `util`);
+   - o `p.fo-more` com o link do hub (`all`); na seção de casa e saúde, os dois links (`all` e `allHealth`); a do QR não tem link, como hoje.
+   As listas não mudam: 8 de imagem, 12 de PDF, 6 de dinheiro em en e es e as 8 do Brasil em pt (§ 570), as 11 de casa e saúde numa seção só (en) e o gerador de QR.
+3. **O que sai.** O bloco colorido (fundo, cantos, padding e a onda da faixa), os chips da home, a contagem (`count`), o número (`num` e o `{from} → {to}`), a frase da fonte (`say`) e o `to`. O que fica sem uso sai do repositório, sem código morto "para depois": o `src/components/home-numbers.ts`, os campos do `HomeBandTexts` e dos três `home.ts` (o comentário do topo de cada um passa a dizer o que a home é agora), as regras `.fo-catband*` do CSS e do espelho do design system, e os testes que só protegiam isso. Antes de apagar uma regra de CSS ou um módulo, confirme com `grep` que nenhuma outra página o usa. O `.fo-chip` fica: o NextStepChips, a busca e a 404 o usam.
+4. **O `home-bands.ts` continua a fonte única das listas** (a home, o `gate:prontidao` e os testes leem). Cada item ganha a descrição. Troque "chip" por "card" nos nomes onde o nome passaria a mentir (`HomeChip`, `chips`, `homeChipPaths`, `ChipCategory`), sem mudar lista nenhuma; o comentário do topo do módulo diz a home de agora.
+5. **A grade é a `.fo-grid` de hoje,** sem regra nova só para a home. Com o `<main>` largo ela ganha colunas sozinha. Se a 1280 px algum card ficar com a descrição cortada ou em mais de 4 linhas, registre e corrija com o mínimo de CSS, nunca com texto novo.
+6. **A fonte.** Meça antes de decidir: o teste "the load moves nothing" do `home-sea.spec.ts` (Figtree segurada, 320 a 1280 px, três idiomas). Se as seções novas se moverem quando a Figtree chega, elas usam a `Figtree Steady`, como o topo (§ 578). Nunca afrouxe o teste.
+7. **O LCP** (§ 574): o H1 continua o LCP a partir de 768 px, e no celular o LCP nunca é a Oli, a água ou um `svg`. Se uma descrição de card passar a área do H1, corrija pelo CSS da seção, como a § 574 fez com as frases das faixas.
+8. **Os anúncios.** As marcas não mudam de lugar: a `AdBreak first` depois da seção de imagem e uma `AdBreak` antes de cada seção seguinte, da de guias e da de privacidade; nenhuma marca dentro de seção ou de grade. O mapa da F12 escolhe as caixas pela estimativa:
+   - com os cards, cada um traz a descrição, e a home volta perto das 920, 723 e 751 palavras da F13a. A lateral 2 (`RAIL2_WORDS = 600`) pode voltar a 1280, e o número de caixas de conteúdo a 360 pode mudar. Isso é consequência da escolha, não defeito: meça no build de teste o que o mapa dá para a página nova, nos três idiomas, a 360 e a 1280;
+   - os testes que pediam o número da F13b (3 de conteúdo a 360; o conteúdo, o multiplex e a lateral a 1280; o 1º depois de `section.fo-catband…[aria-labelledby=tools]`) passam a pedir o que você mediu, com o 1º depois da seção de imagem. Toda outra regra de anúncio continua e tem de passar: os 150 px de todo alvo, nada no topo, nada dentro de seção ou grade, só âncora e vinheta como formatos automáticos;
+   - **os alvos dos 150 px não encolhem.** Onde a F13b tinha a faixa e os chips da home (o `MAP_TARGETS`, o `TARGET_GROUPS` com `faixas` e `chips`, o `FORBIDDEN`, o `TARGETS` do `ads.spec.ts`, o `ad-clearance.ts` e o `NEVER_INSIDE_CLASSES` do `src/ads/map.ts`), entram a seção de categoria da home (pelo modificador da decisão 2) e os cards dela (`.fo-grid` e `.fo-tool`, como o `HUB_TARGETS` já faz nos hubs). Os grupos do relatório do mapa trocam de nome se o nome mentir. O `ad-map.test.ts` prova que o mapa recusa uma marca dentro da seção de categoria, como provava para a faixa.
+9. **O `gate:prontidao`.** O `TOOL_LINKS` volta a ler os cards (`main a.fo-tool`), se nenhuma outra página com área de anúncio usa os chips das faixas; a lista que ele pede à home continua a de `home-bands.ts`. O `prontidao.test.ts` prova que o portão lê os cards da home.
+10. **Os textos.** Nenhuma frase nova e nenhuma frase reescrita: só saem campos. O `lint:texto` roda contra a `origin/main` e não pode ter erro. Nenhum dígito digitado nos textos da home (a regra da § 568 continua, com o "0" do H1 como única exceção).
+11. **Os testes antigos que mudam** vão num § no formato da § 341 (o que pedia, o que pede, por quê, o que continua protegido):
+    - **saem**, com o §, os que só protegiam o que saiu: o número de cada faixa contra a fonte, a frase da fonte, a faixa `*-soft` no claro e `surface` no escuro **na home** (nos hubs fica), a conta de 450 a 594 palavras e de 75 a 105 nas frases a mais (ela calibrava os 3 anúncios das faixas);
+    - **ficam, lendo os cards,** os que protegem regra que continua: o H1 com o total da contagem; as listas de cada seção iguais às dos registros, sem preset e sem link de outro idioma; a ordem do catálogo; só o `compress` e o `rotate` repetem ícone na home; a frase da seção de dinheiro diz só o que toda calculadora faz (§ 591); a Oli `swim` única no `<main>`; nenhuma `.fo-ad` no build padrão;
+    - se o `home-numbers.test.ts` ficar só com o que não é número, renomeie-o para o que ele confere (por exemplo `home.test.ts`), com o `git mv`.
+12. **Os testes novos,** cada um reprovando contra o `dist/` do ponto de partida (o controle negativo vai no relatório, com a mensagem de erro):
+    - nos três idiomas, cada seção de categoria tem um `a.fo-tool` por item da lista de `home-bands.ts`, com o H3 do nome, a descrição e o ícone, e o `<main>` da home não tem `.fo-catband`, `.fo-chip` nem `.fo-catband__num`;
+    - a 360 e a 1280 px, os cards da home têm a mesma altura dentro de cada linha da grade e nenhum card estoura a largura da coluna (nos três idiomas, Chromium e WebKit).
+13. **A medida da página.** Meça a altura da home a 360 × 740 em telas, nos três idiomas, no ponto de partida e depois (a F10 G-02 media 14,8 telas na F13a, em en). Vai no relatório e no `docs/PENDENCIAS.md`, em "Registrados (escolhas, não defeitos)": o Victor escolheu os cards sabendo que a home fica mais longa.
+14. **Os documentos.** O README do `ToolCard`: a seção "A faixa da categoria na home" vira o que a home usa agora (a grade nas seções de categoria), e a tabela de contraste perde só as linhas que só a faixa da home usava (as que valem também para a faixa do hub ficam, com o texto sem a home). Os README do `NextStepChips` e da `Oli`, onde citam a faixa da home. Em `docs/claude/`, uma seção nova no fim do `design-e-oli.md` e do `anuncios.md` ("Ajuste: a home com um card por ferramenta"), com o que a próxima run precisa saber; as seções antigas não mudam.
+
+# Armadilhas conhecidas
+
+- **O `build.format` do Astro** faz de toda página um `.../index.astro`, e o `exactOptionalPropertyTypes` do TypeScript pega campo opcional removido pela metade: rode o `pnpm tipos` cedo (ele confere também os specs).
+- **Os testes de unidade da home leem o `dist/`:** rode o `pnpm build` antes deles.
+- **O `fo-ad-map.spec.ts` monta o build de teste** (com IDs falsos); o build padrão não tem anúncio. As medidas de anúncio só valem no build de teste.
+- **A `--fo-band-dark` pinta as faixas dos hubs:** ao tirar as regras da faixa da home, não tire a variável nem o `@media screen` dela.
+- **O `pnpm screenshots`** tem pegadinhas no `design-e-oli.md`, no `service-worker.md` e no `pdf.md`: leia antes de usar.
+- **O ponto de partida para o "antes":** monte o `dist/` da `origin/main` numa worktree à parte (`dist-base`), nunca trocando a branch do clone principal.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. A home dos três idiomas tem as seções da decisão 2, com os cards na ordem das listas, e o topo igual ao do ponto de partida (o HTML do `.fo-home-top` comparado no relatório: idêntico, ou cada diferença explicada).
+2. Nenhum `.fo-catband`, `.fo-catband__*`, chip ou número de faixa no `<main>` da home; o `home-numbers.ts` e os campos `count`, `num`, `say` e `to` não existem mais; nenhum seletor `.fo-catband` sobra em `src/`, `scripts/` e `tests/`, fora do teste novo que confere que ele não existe.
+3. O CLS de carga da home é 0 de 320 a 1280 px nos três idiomas, e o H1 é o LCP a partir de 768 px (os testes do `home-sea.spec.ts`).
+4. No build de teste, o mapa de anúncios passa nos três idiomas, a 360 e a 1280, com as seções e os cards como alvos; o relatório traz a tabela de caixas por largura, antes e depois, e as palavras do `<main>`.
+5. O `gate:prontidao` passa e lê os cards da home.
+6. Os testes novos da decisão 12 reprovam contra o ponto de partida e passam depois, nos dois navegadores.
+7. Os testes antigos que mudaram estão num §, um por um; nenhum teste foi pulado, desligado ou afrouxado além do que a escolha muda.
+8. O `pnpm verificar --partes` passou na máquina, com a saída real no relatório, e o CI completo está verde.
+9. O `lint:texto` dá 0 erro, e o axe passa na home nos três idiomas, no claro e no escuro.
+10. As imagens de antes e depois estão em `docs/relatorios/ajuste-home-cards/` (veja o relatório).
+11. A revisão adversarial está em `docs/relatorios/REVISAO-ajuste-home-cards.md`, sem achado alto ou médio aberto.
+
+# Verificação: rode de verdade
+
+Enquanto corrige, rode o alvo (regra 2 do `CLAUDE.md`):
+
+- `pnpm tipos` e `pnpm lint`;
+- `pnpm build` e então `pnpm exec vitest run` nos testes de unidade que você mexeu;
+- `pnpm exec playwright test tests/e2e/home-sea.spec.ts tests/e2e/design.spec.ts tests/e2e/layout-shift.spec.ts tests/e2e/a11y.spec.ts`, nos dois projetos (`--project=chromium` e `--project=webkit`);
+- `pnpm exec playwright test tests/e2e/fo-ad-map.spec.ts` e os blocos da home do `ads.spec.ts`, nos dois navegadores;
+- `pnpm gate:prontidao` e `pnpm lint:texto`.
+
+Rode, leia a falha, corrija a causa e repita até passar. Desligar, pular ou afrouxar teste é proibido; mudar um teste só vale quando a escolha do Victor muda o que ele protege, e aí vai o § da decisão 11. Antes do `gh pr ready`, rode uma vez o `pnpm verificar --partes` completo e guarde a saída para o relatório. Ao final, o `pnpm ci:custo <id>` da execução completa do CI vai no relatório (regra 5).
+
+# Autonomia e decisões
+
+Você está rodando de forma autônoma; ninguém vai responder perguntas. Não pare para perguntar nem espere confirmação em nenhuma hipótese. A régua: (1) este prompt; (2) o `CLAUDE.md`, o `docs/claude/` e o código existente; (3) a opção mais simples e reversível, registrada num § do `DECISOES.md` com as alternativas e o porquê.
+
+- Se uma regra de anúncio só passar mexendo na lógica do mapa ou na estimativa, não mexa: afaste a marca o mínimo que a regra pede pelo CSS da seção, registre e siga. Se nem isso bastar, deixe a marca sem caixa nesse ponto, registre e ponha a pendência no relatório.
+- Se o `home-bands.ts` tiver um uso fora da home que você não previu, mantenha o que esse uso precisa e registre.
+- Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+- Bloqueio real (o CI fora, a prévia sem subir) não para a run: siga com o resto e registre a pendência.
+- Válvula: nada deste ajuste se corta. Se o limite apertar, a ordem é: a home certa nos três idiomas com os testes verdes; os anúncios; os documentos; as imagens.
+
+# Git e segurança
+
+As regras do `CLAUDE.md` valem inteiras:
+
+- trabalhe na branch `ajuste-home-cards`, com commits pequenos e mensagens em inglês;
+- o primeiro commit leva os dois arquivos do prompt (`docs/prompts/prompt-ajuste-home-cards.md` e `.txt`);
+- adicione por caminho, nunca `git add -A`; a pasta `Claude outputs/` fica fora;
+- abra a PR em rascunho logo depois do primeiro push (`gh pr create --draft`, num comando separado do push), com o título "Ajuste: a home com um card por ferramenta";
+- o rótulo `ci`: siga as notas da regra 1 do `CLAUDE.md` (sem o rótulo, o `gh pr ready` e o `gh pr ready --undo`); nunca crie o rótulo;
+- no fim, com tudo commitado, o `gh pr ready` do jeito das notas da regra 1, para não deixar `ci-ok` vermelho de execução cancelada;
+- **nunca**: `gh pr merge`, push na main, force push, `git reset --hard`, `--amend` em commit alheio, `--no-verify`, mexer em `core.hooksPath` ou no `.githooks/`, deploy com wrangler.
+
+# Como trabalhar
+
+1. **Explorar** com subagentes Sonnet em paralelo, cada um voltando só com um resumo: (a) a home de hoje, o `home-bands.ts`, os textos e o CSS da faixa; (b) tudo o que lê a faixa e os chips da home nos testes, nos portões e no mapa de anúncios; (c) a home da F13a no `bd844ca` e os testes de então.
+2. **Planejar** em `docs/relatorios/ajuste-home-cards-plano.md`: o ponto de partida, os arquivos e o que muda em cada um, os § reservados, os testes que mudam e os novos, e a verificação de ponta a ponta. O plano é o gabarito da revisão.
+3. **Medir o ponto de partida** no `dist-base`: as palavras do `<main>`, a altura em telas, as caixas do mapa por largura no build de teste, as imagens de antes.
+4. **Implementar** em fatias, cada uma verde antes da próxima: a home e os textos; o CSS e a fonte; os portões e os alvos de anúncio; os testes antigos; os testes novos (com o controle negativo); os documentos.
+5. **Revisar** (regra 3: o ajuste mexe nos alvos de anúncio): cinco lentes Sonnet em contexto limpo, sobre o diff da branch contra o ponto de partida, com este prompt e o plano como gabarito, apontando só lacunas de correção ou de requisito, nunca preferência de estilo:
+   - (a) anúncios: os 150 px, os alvos que não encolheram, as marcas, o mapa no build de teste;
+   - (b) layout e visual: 320, 360, 768, 1024, 1280 e 1440 px, claro e escuro, os três idiomas, o CLS e o LCP;
+   - (c) acessibilidade e semântica: um H2 por seção, os H3 dos cards, os links, o axe;
+   - (d) integridade dos testes: nada afrouxado além da escolha, cada teste novo reprovando contra o ponto de partida;
+   - (e) textos e documentos: os §, os README, as seções novas do `docs/claude/`, o `PENDENCIAS.md` e o relatório.
+   Um cético Sonnet para cada achado médio ou acima e um para todos os baixos, com a regra "na dúvida, refutado". Corrija os confirmados e passe de novo as lentes dos achados corrigidos.
+
+# Relatório final
+
+Em `docs/relatorios/ajuste-home-cards.md`, em português, no formato do `ajuste-header-width.md`:
+
+- o pedido, com as palavras do Victor, a pergunta e a escolha;
+- o resumo em até 5 itens;
+- o que mudou, por arquivo, e os § novos;
+- as medidas, antes e depois, nos três idiomas: as palavras do `<main>`, a altura da home em telas a 360 × 740, as caixas de anúncio por largura no build de teste, o CLS de carga e o LCP;
+- os testes: os que mudaram (com o §), os novos, os controles negativos com a mensagem de erro, e os números do Vitest e do `--list` do Playwright antes e depois;
+- as imagens em `docs/relatorios/ajuste-home-cards/`, JPG como na F13b, tiradas do `dist/` com o Chromium do Playwright, a 1x e com movimento reduzido: `home-en-360`, `home-en-1280`, `home-en-360-dark`, `home-pt-360` e `home-es-360`, cada uma com `-antes` e `-depois`;
+- a saída real do `pnpm verificar --partes` e o `pnpm ci:custo` da execução completa;
+- o link da prévia (`https://ajuste-home-cards-fileorca.vmatusita.workers.dev/`);
+- a lista do que sobrou para o Victor fazer.
+
+A revisão vai em `docs/relatorios/REVISAO-ajuste-home-cards.md`, no formato do `REVISAO-ajuste-header-width.md`. Termine a resposta final com um resumo de 5 linhas em português: o que mudou, o número da PR, o estado do CI e as pendências.
+
+# Idioma
+
+Narrativa, plano, relatório, revisão, § e documentos em português. Código, nomes de arquivo, identificadores e commits em inglês. Os textos do site ficam nos arquivos de tradução de cada idioma, e nenhum é escrito de novo nesta run.
+```
+
+## Como executar
+
+São quatro etapas: o pré-voo, a run, o acompanhamento e a volta.
+
+### 1. Pré-voo (uns 5 min)
+
+Os arquivos `prompt-ajuste-home-cards.md` e `prompt-ajuste-home-cards.txt` já estão em `docs\prompts\` no seu clone, sem commit. A run os põe no primeiro commit dela.
+
+No PowerShell:
+
+```powershell
+cd C:\Users\vmatusita\projetos\fileorca
+git switch main
+git pull --ff-only
+git log -1 --oneline        # 2bd851c (a F13b) ou mais novo
+git status                  # sem rastreio: os dois arquivos do prompt e "Claude outputs\"
+git config core.hooksPath   # tem que responder .githooks
+gh auth status              # logado
+claude --version            # o modo auto pede 2.1.83 ou mais
+```
+
+A energia: `powercfg /change standby-timeout-ac 0` (volte ao normal depois).
+
+### 2. Rodar
+
+```powershell
+claude --model opus --permission-mode auto -n ajuste-home-cards
+```
+
+Cole o conteúdo inteiro de `docs\prompts\prompt-ajuste-home-cards.txt`, que começa por `ultracode`, e deixe rodar.
+
+Opcional, logo depois de colar:
+
+```text
+/goal a home dos três idiomas com um card por ferramenta nas seções de categoria e o topo da F13b intacto, o mapa de anúncios verde no build de teste, o pnpm verificar --partes verde, docs/relatorios/REVISAO-ajuste-home-cards.md sem achado alto ou médio aberto e a PR da ajuste-home-cards pronta, com o ci-ok verde
+```
+
+Se cair ou o limite acabar, retome com `claude --resume ajuste-home-cards` e mande: "continue de onde parou: leia docs/relatorios/ajuste-home-cards-plano.md, o git log da branch ajuste-home-cards e o estado da PR, e siga".
+
+**Por que o modo `auto`.** A run builda o site e o build de teste, roda o Playwright, monta a worktree do ponto de partida, faz push da branch, abre a PR em rascunho e a marca como pronta. O `auto` deixa isso passar e barra o que parece arriscado. As regras `deny` do `.claude/settings.json` valem em qualquer modo (push na main, `gh pr merge`, reset, amend, `wrangler deploy`), e o prompt não pede nada disso. A run não usa a web.
+
+**O tamanho.** Bem menor que uma fase, mas maior que o ajuste do cabeçalho: mexe em uns 20 arquivos de teste, refaz as medidas de anúncio no build de teste e tem a revisão de cinco lentes (o ajuste mexe nos alvos de anúncio, regra 3). O `pnpm verificar --partes` local leva uns 40 min, como na F12 e na F13a.
+
+### 3. Acompanhar
+
+- **Não mexa no clone durante a run.** Ela está na branch `ajuste-home-cards` dessa pasta.
+- **A PR aparece cedo, em rascunho.** Cada push roda só o job leve.
+- **A prévia** (`https://ajuste-home-cards-fileorca.vmatusita.workers.dev/`) é o build padrão: mostra a home nova, mas nunca anúncio.
+- **Não marque a PR como pronta.** O `gh pr ready` é o último passo da run; depois dele, o CI roda tudo e mescla sozinho.
+
+### 4. Ao voltar
+
+1. **Atualize a main:** `git switch main` e `git pull --ff-only`. Se a PR não foi mesclada, o relatório e a resposta final dizem por quê.
+2. **Veja a home no celular e no computador** (na prévia ou no fileorca.com depois do deploy): os cards em en, pt e es, o topo igual ao de hoje e o tema escuro.
+3. **Leia `docs\relatorios\ajuste-home-cards.md`** e confira as evidências: a altura da home em telas, as caixas de anúncio por largura (antes e depois), o CLS e o LCP, os testes que mudaram (cada um com o seu §), os controles negativos e o `pnpm verificar --partes` verde.
+4. **Olhe as imagens** de `docs\relatorios\ajuste-home-cards\`, sobretudo `home-en-1280-depois.jpg`.
+
+Se o resultado vier errado: depois de duas correções que não resolvem, não emende. Peça um prompt novo de run curta, com o que aprendeu.
+
+## Suposições que fiz
+
+- **O topo da F13b fica:** o H1 "46 tools. 0 uploads.", a linha, o mar com o selo e a Oli nadando. Você só reclamou dos cards.
+- **As seções e as listas são as de hoje, não as da F13a.** A casa e a saúde ficam numa seção só, com 11 cards e os dois links (na F13a eram duas seções). O dinheiro tem 6 cards em en e es (a F13a tinha 5) e os 8 do Brasil em pt.
+- **A frase de cada seção é a de hoje** ("Each image tool opens the file in this tab…"), sem texto novo. A seção de imagem se chama "Image", e o "Choose a tool" não volta.
+- **A 1280 px, a grade mostra 5 cards por linha,** porque desde a F13b a home usa a largura toda quando não há anúncio na lateral. O card tem quase o mesmo tamanho dos 3 por linha da F13a (229 contra 242 px de largura). Se você preferir 3 por linha, me diga antes de rodar.
+- **A home fica mais longa e com mais texto,** e o mapa de anúncios pode voltar a pôr mais caixas, como na F13a. A run mede e registra, sem mexer na lógica do mapa.
+- **Os números das faixas saem de vez:** o `home-numbers.ts` sai do repositório. O git guarda, se um dia você quiser eles de volta.
+- **A revisão tem cinco lentes,** pela regra 3, porque o ajuste mexe nos alvos de anúncio.
+- **O merge é automático:** a PR não mexe em `.github/`.
