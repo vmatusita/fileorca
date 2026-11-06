@@ -155,7 +155,13 @@ test.describe('the home', () => {
             const grid = (section.querySelector(':scope > ul.fo-grid') as HTMLElement | null)?.getBoundingClientRect() ?? null;
             const cards = [...section.querySelectorAll('ul.fo-grid > li > a.fo-tool')].map((card) => {
               const box = card.getBoundingClientRect();
-              const spill = [...card.querySelectorAll('.fo-tool__name, .fo-tool__desc')].filter((text) => text.scrollWidth > text.clientWidth + 1 || text.scrollHeight > text.clientHeight + 1).length;
+              // A name or a description spills when it overflows its own box, or when its box passes the edge of the card
+              // (review d-1: a card shorter than its text kept every text box whole and let it out at the bottom).
+              const spill = [...card.querySelectorAll('.fo-tool__name, .fo-tool__desc')].filter((text) => {
+                const edge = text.getBoundingClientRect();
+                const out = edge.left < box.left - 0.5 || edge.right > box.right + 0.5 || edge.top < box.top - 0.5 || edge.bottom > box.bottom + 0.5;
+                return out || text.scrollWidth > text.clientWidth + 1 || text.scrollHeight > text.clientHeight + 1;
+              }).length;
               return { top: Math.round(box.top), left: box.left, right: box.right, height: box.height, li: (card.parentElement as HTMLElement).getBoundingClientRect().width, width: box.width, spill };
             });
             return { id: section.getAttribute('aria-labelledby'), main: { left: main.left, right: main.right }, grid: grid && { left: grid.left, right: grid.right }, cards };
@@ -181,6 +187,51 @@ test.describe('the home', () => {
       }
     });
   }
+
+  // Ajuste-home-cards (review b-1; DECISOES § 607 and § 613): the sections of cards are in Figtree Steady, as the top, so
+  // they keep the size of their first paint even below the fold, where the load CLS does not look: with Figtree held
+  // 1,500 ms, no section changes height when it arrives. With the sections in Figtree (the first version of the run) the
+  // names and the descriptions took another number of rows (a section of 2,602 px went to 2,576 at 320 px in Spanish).
+  test('the category sections keep their size when Figtree arrives late, below the fold too', async ({ browser }) => {
+    test.setTimeout(180_000);
+    const moved: string[] = [];
+    for (const lang of LANGS) {
+      for (const width of [320, 360, 768, 1280]) {
+        const context = await browser.newContext({ viewport: { width, height: width < 768 ? 740 : 800 }, serviceWorkers: 'block' });
+        await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+        await context.route(/figtree[^/]*\.woff2$/i, async (route) => {
+          await new Promise((done) => setTimeout(done, 1500));
+          await route.continue();
+        });
+        const page = await context.newPage();
+        expect((await page.goto(HOMES[lang], { waitUntil: 'domcontentloaded' }))?.status(), HOMES[lang]).toBe(200);
+        // The CSS is on (the 48 px above a section) and the cards are there.
+        await page.waitForFunction(() => {
+          const section = document.querySelector('main > section.fo-section--cat');
+          return section !== null && section.querySelector('a.fo-tool') !== null && getComputedStyle(section).marginTop === '48px';
+        });
+        const sizes = () =>
+          page.evaluate(() => ({
+            figtree: [...document.fonts].some((face) => ['Figtree', 'Figtree Steady'].includes(face.family.replace(/"/g, '')) && face.status === 'loaded'),
+            sections: [...document.querySelectorAll('main > section.fo-section--cat')].map((section) => Math.round(section.getBoundingClientRect().height)),
+          }));
+        const first = await sizes();
+        await page.waitForFunction(() => document.fonts.status === 'loaded' && [...document.fonts].every((face) => face.status !== 'loading'), undefined, { timeout: 15_000 });
+        await page.waitForTimeout(300);
+        const last = await sizes();
+        const label = `${HOMES[lang]} a ${width}`;
+        // The first measure is before Figtree, the last after it (the controls of the measure).
+        expect(first.figtree, `${label}: a Figtree chegou antes da 1ª medida`).toBe(false);
+        expect(last.figtree, `${label}: a Figtree não chegou`).toBe(true);
+        expect(first.sections.length, label).toBeGreaterThan(0);
+        first.sections.forEach((height, index) => {
+          if (Math.abs(height - (last.sections[index] ?? 0)) > 1) moved.push(`${label}, seção ${index + 1}: ${height} → ${last.sections[index]} px`);
+        });
+        await context.close();
+      }
+    }
+    expect(moved).toEqual([]);
+  });
 
   test('the load moves nothing: Figtree held until the first paint, no layout shift from 320 to 1280 px (Chromium)', async ({ browser, browserName }) => {
     // Only Chromium reports layout shifts; WebKit joins the check on its own the day it ships the entry type.

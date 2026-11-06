@@ -761,8 +761,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The first visit keeps the Figtree of the first paint in the top (the Steady face, as the band of the guides hub; § 305
    and § 393): with the fallback font the line took another number of rows from 393 to 412 px, and what came under it moved
    when Figtree arrived (CLS 0.026 in Chromium). The line stays 28rem wide at most, so the H1 stays the largest text of the
-   first screen of a computer (its LCP; § 574). */
-.fo-home-top { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+   first screen of a computer (its LCP; § 574). The category sections too (ajuste-home-cards, review b-1; DECISOES § 607):
+   on the first screen nothing of them moved, but below it the names and the descriptions of the cards took another number
+   of rows when Figtree arrived, and a section that the person had scrolled to moved (CLS 0.026 at 320 px in Spanish). */
+.fo-home-top, .fo-section--cat { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 /* The dark band (G-21; DECISOES § 575): --fo-band-dark is a private variable on <html>, as the --fo-wall-sea of the wall
    (§ 386 and § 404). Light: initial, so a band takes the fallback, the soft colour of its own category; dark: surface. The
    band of a category hub reads it (the bands of the home left with the ajuste-home-cards, § 604). */

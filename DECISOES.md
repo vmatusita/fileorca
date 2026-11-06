@@ -6264,9 +6264,9 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
   - § 570: só a palavra "chips" (a lista de dinheiro continua, agora de cards; § 605);
   - § 571: a conta de 450 a 594 palavras no `<main>` e de 75 a 105 nas frases a mais, que calibrava os 3 anúncios das faixas; as frases `more` ficam, como a frase de cada seção;
   - § 573: "a `AdBreak first` depois da primeira faixa", o "3 caixas por largura" e os alvos e grupos `faixas` e `chips` (§ 609);
-  - § 578: a `Figtree Steady` nas faixas (o topo continua nela; § 607);
+  - § 578: a `Figtree Steady` nas faixas, que passa às seções de categoria (§ 607);
   - § 591: a frase da tinta e a da PRICE, que eram do `say` e saíram; a regra da frase do dinheiro continua.
-- **O que continua:** o topo (o H1 com a contagem, a linha, o mar com o selo e a Oli `swim`, o movimento dela e a `Figtree Steady` do topo), o `wide` (§ 572), as listas e o `home-bands.ts` (§ 570), os ids das seções, o lugar das marcas de anúncio, a seção de guias e a da privacidade, a regra de nenhum dígito digitado nos textos da home (§ 568), a regra do LCP (§ 574) e a do CLS de carga (§ 578).
+- **O que continua:** o topo (o H1 com a contagem, a linha, o mar com o selo e a Oli `swim`, o movimento dela e a `Figtree Steady` do topo, agora também nas seções; § 607), o `wide` (§ 572), as listas e o `home-bands.ts` (§ 570), os ids das seções, o lugar das marcas de anúncio, a seção de guias e a da privacidade, a regra de nenhum dígito digitado nos textos da home (§ 568), a regra do LCP (§ 574) e a do CLS de carga (§ 578).
 - **Os planos não mudam:** a escolha muda a parte das faixas do UX-03 B (F10) que a F13b construiu, e a ficha manda não editar o `PLANO-MELHORIAS.md` nem o `PLANO-FILEORCA.md`; este § é o registro.
 
 ## § 603 · As seções de categoria da home (ajuste-home-cards, decisão 2)
@@ -6281,7 +6281,7 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
 ## § 604 · O que sai: a faixa, os chips, a contagem, o número e a frase da fonte (ajuste-home-cards, decisão 3)
 
 - **Do código:** o `src/components/home-numbers.ts` inteiro (só a home o lia); da `HomeView.astro`, a faixa, o `Icon` e os números; dos textos, os campos `count`, `num`, `say` e `to` dos três `home.ts` e do tipo (`HomeBandTexts` fica com `heading`, `more` e `all`; o `HomeTexts` perde o `to`). O comentário do topo de cada `home.ts` diz a home de agora.
-- **Do CSS:** o bloco `.fo-catband*` do `components.css` (o fundo, os cantos, o padding, a onda do `::after`, o título, a contagem, o número com o ícone, a frase da fonte, a frase a mais, a lista de chips e os links com o ícone deles) e a `.fo-catband` na regra da `Figtree Steady`. O `grep` em `src/`, `scripts/` e `tests/` confirmou, antes de apagar, que nenhuma outra página usava essas classes. O design system não tinha espelho delas (o `bundle.css` nunca teve o `.fo-catband`).
+- **Do CSS:** o bloco `.fo-catband*` do `components.css` (o fundo, os cantos, o padding, a onda do `::after`, o título, a contagem, o número com o ícone, a frase da fonte, a frase a mais, a lista de chips e os links com o ícone deles); na regra da `Figtree Steady`, a `.fo-catband` deu lugar à `.fo-section--cat` (§ 607). O `grep` em `src/`, `scripts/` e `tests/` confirmou, antes de apagar, que nenhuma outra página usava essas classes. O design system não tinha espelho delas (o `bundle.css` nunca teve o `.fo-catband`).
 - **Ficam:** o `.fo-chip` (o NextStepChips, a busca, a 404, os guias), a `--fo-band-dark` com o `@media screen` (a faixa dos hubs a usa; o comentário dela diz agora só os hubs, e o do bloco dos hubs deixou de citar "the home's bands") e todo o topo.
 - **Dos testes:** o que só protegia isso, com a § 612.
 
@@ -6298,11 +6298,12 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
 - **A medida a 1280** (Chromium, build padrão, `.cache/home-cards/measure.ts`): nenhuma descrição cortada nem vazando do card, e a mais longa em 4 linhas (en: a de casa e saúde; pt: a de PDF e a de dinheiro; es: a de imagem e a de dinheiro). A ficha pede CSS só acima de 4 linhas, então nenhum. Os cards têm de 180 a 250 px de altura a 1280 e de 158 a 226 px a 360, onde a descrição tem até 3 linhas.
 - **Os cards de cada linha têm a mesma altura:** a `li` é `display: grid` e o card estica nela. O teste novo confere (§ 613).
 
-## § 607 · A fonte das seções, medida (ajuste-home-cards, decisão 6)
+## § 607 · A fonte das seções: a `Figtree Steady`, como o topo (ajuste-home-cards, decisão 6; revisão b-1; § 578)
 
-- **A medida antes de decidir:** o "the load moves nothing" do `home-sea.spec.ts` (Chromium, Figtree segurada 600 ms, a 320, 360, 393, 412, 768 e 1280 px, nos três idiomas), com as seções na Figtree, sem a Steady: CLS de carga 0 nas 18 combinações.
-- **A decisão:** as seções de cards ficam na Figtree, como os cards dos hubs; só o topo continua na `Figtree Steady` (§ 578). Pôr a Steady nas seções seria uma regra sem uma medida que a pedisse.
-- **O teste continua o mesmo,** sem afrouxar: se um texto novo fizer a grade se mover quando a Figtree chega, ele reprova, e a saída é a da § 578.
+- **A primeira medida:** o "the load moves nothing" do `home-sea.spec.ts` (Chromium, Figtree segurada 600 ms, a 320, 360, 393, 412, 768 e 1280 px, nos três idiomas), com as seções na Figtree: CLS de carga 0 nas 18 combinações. A primeira versão da run deixou as seções na Figtree, como os cards dos hubs.
+- **O que a revisão mostrou (b-1):** aquele teste só vê a primeira tela, onde fica o topo (na Steady). Abaixo da dobra, o nome e a descrição dos cards mudavam de número de linhas quando a Figtree chegava: com ela segurada 1,5 s, seções inteiras mudavam de altura (em es a 320, a de PDF ia de 2.602 a 2.576 px; a página, de 22 a 88 px), e com a seção de PDF rolada para a tela durante a espera o CLS foi 0,026 em es a 320. O cético refutou o achado (a ficha nomeia o teste de carga como a medida), mas a condição da decisão 6 é "se as seções novas se moverem quando a Figtree chega", e elas se moviam.
+- **A decisão:** as seções de categoria usam a `Figtree Steady` (`.fo-home-top, .fo-section--cat { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }`), como o topo e como as faixas da F13b (§ 578). O H2 continua na Fredoka, com preload. A face `optional` pinta a Figtree quando ela já está no cache e a de reserva ajustada (`Figtree Fallback`) na primeira visita fria; nos dois casos nada muda de tamanho depois da primeira pintura.
+- **O teste novo** (§ 613), "the category sections keep their size when Figtree arrives late, below the fold too", segura a Figtree 1,5 s e compara a altura de cada seção antes e depois de ela chegar, a 320, 360, 768 e 1280 px, nos três idiomas e nos dois navegadores; ele confere que a primeira medida é de antes da Figtree e a última de depois. Contra o `dist/` do commit revisado (`edbf7ad`, as seções na Figtree), reprova nos dois navegadores: "/es/ a 320, seção 2: 2602 → 2576 px" e mais sete. O "the load moves nothing" continua igual e passa.
 
 ## § 608 · O LCP com os cards (ajuste-home-cards, decisão 7; § 574)
 
@@ -6325,7 +6326,7 @@ No formato da § 341: o que cada teste protegia e como a proteção continua.
   | A 1280 e 1440 px | o 1º, o multiplex e a lateral | igual | igual |
   | Lateral 2 no HTML | não → sim | não → sim | não → sim |
   | Topo do 1º anúncio a 360 / a 1280 | 1.402 → 2.336 / 1.008 → 1.366 | 1.440 → 2.462 / 1.064 → 1.414 | 1.462 → 2.444 / 1.086 → 1.458 |
-  | Menor vão entre dois de conteúdo a 360 (a 459) | 1.950 (1.836) → 1.714 (1.688) | 1.926 (1.836) → 1.964 (1.892) | 1.632 (1.544) → 1.784 (1.714) |
+  | Menor vão entre dois de conteúdo a 360 (a 459) | 1.950 (1.836) → 1.714 (1.688) | 1.926 (1.818) → 1.964 (1.892) | 1.632 (1.544) → 1.784 (1.714) |
 
 - **A lateral 2:** com mais de 600 palavras (`RAIL2_WORDS`), ela entra no HTML da home nos três idiomas, como na F13a; aparece só em fileorca.com, quando a coluna tem a altura (o script de push). É consequência da escolha, não defeito.
 - **O `gate:prontidao`** (150 palavras por caixa à vista): a 360, 5 caixas pedem 750 em en (909) e 4 pedem 600 em pt e es (765 e 756); a 1280, o 1º, o multiplex, a lateral e a lateral 2 pedem 600.
@@ -6370,16 +6371,18 @@ A escolha do Victor (§ 602) muda o que alguns testes protegiam. Cada um, com o 
 
 - **`tests/unit/home.test.ts`, "shows in each category section one ToolCard per tool of its list, with the H3 of the name, the description and the icon, and no band, chip or number of the F13b in <main>"**: nos três idiomas, as seções `section.fo-section.fo-section--cat` são as de `homeBands`, na ordem; cada uma tem, nesta ordem, o H2, um `p.fo-prose`, a `ul.fo-grid` e um `p.fo-more` por hub; cada item da lista é um `a.fo-tool` com um `h3.fo-tool__name` do nome, o `p.fo-tool__desc` da descrição, o ícone `aria-hidden` com o desenho do registro (lido pelo parser dos dois lados) e a classe da categoria; e o `<main>` não tem `.fo-catband`, `.fo-chip` nem `.fo-catband__num` (nem o texto "fo-catband"). Contra o `dist/` do ponto de partida (`FO_HOME_DIST=.claude/worktrees/home-cards-base/dist`), ele reprova: `AssertionError: en: expected [] to deeply equal [ 'tools', 'pdf-home', …(3) ]`.
 - **`tests/e2e/home-sea.spec.ts`, "at 360 px: the cards of each category section have one height per row and stay in the column"** e o mesmo a 1280: nos três idiomas, cada linha da grade de cada seção tem os cards com a mesma altura (0,5 px de folga), e nenhum card passa da grade nem do `<main>`, tem largura diferente da célula ou deixa o nome ou a descrição vazar. Contra o ponto de partida (o `dist/` dele servido na porta 4380, `FO_PORT=4380`), os 4 (Chromium e WebKit, 360 e 1280) reprovam: `Error: / a 360 … expect(received).toEqual(expected) … - Array [ "tools", "pdf-home", … + Array []`.
+- **`tests/e2e/home-sea.spec.ts`, "the category sections keep their size when Figtree arrives late, below the fold too"** (revisão b-1; § 607): com a Figtree segurada 1,5 s, nenhuma seção de categoria muda de altura quando ela chega, a 320, 360, 768 e 1280 px, nos três idiomas e nos dois navegadores. Contra o `dist/` do commit revisado (`edbf7ad`), reprova nos dois: "/ a 320, seção 1: 1726 → 1704 px", "/es/ a 320, seção 2: 2602 → 2576 px" e mais seis. Contra o ponto de partida ele também reprova, pelo tempo: lá não há seção de categoria, e a espera por ela estoura os 180 s do teste ("page.waitForFunction: Test ended").
+- **O teste da grade foi reforçado pela revisão (d-1):** ele comparava o nome e a descrição só com a própria caixa, e um card mais baixo que o texto (o mutante da lente, `.fo-tool { height: 100px; display: block }`) passava, com o texto saindo por baixo. Agora um texto cuja caixa passa a borda do card também conta como vazamento; contra o mesmo mutante, servido num `dist/` copiado, ele reprova a 360 e a 1280 ("/ a 360 tools … Expected: 0 Received: 1").
 - **Os testes que mudaram e também provam a mudança contra o ponto de partida:** o caso novo do `prontidao.test.ts` (§ 610) e o do `ad-map.test.ts` (§ 609), rodados contra o código do ponto de partida (na worktree dele), reprovam.
 
 ## § 614 · A altura da home em telas (ajuste-home-cards, decisão 13)
 
-- **A medida** (Chromium, build padrão, 360 × 740, a altura do documento dividida por 740; `.cache/home-cards/measure.ts`):
+- **A medida** (Chromium, build padrão, 360 × 740, a altura do documento dividida por 740, depois de recarregar a página com a Figtree no cache, para a face `optional` pintá-la; `.cache/home-cards/measure.ts`). Sem recarregar, a faixa da F13b em pt saía na fonte de reserva, com 4.942 px de `<main>` (o número do relatório da F13b):
 
   | Idioma | Antes (F13b) | Depois | `<main>` antes → depois |
   | --- | --- | --- | --- |
   | en | 6.754 px, 9,1 telas | 11.490 px, 15,5 telas | 5.682 → 10.418 px |
-  | pt | 5.894 px, 8,0 telas | 9.542 px, 12,9 telas | 4.942 → 8.590 px |
+  | pt | 5.838 px, 7,9 telas | 9.542 px, 12,9 telas | 4.886 → 8.590 px |
   | es | 5.800 px, 7,8 telas | 9.182 px, 12,4 telas | 4.848 → 8.230 px |
 
 - **Contra a F13a:** a F10 G-02 media 10.981 px (14,8 telas) em en. A home de agora tem 0,7 tela a mais: o topo da F13b é mais alto que o herói da F13a, a seção de dinheiro tem 6 cards (5 na F13a) e a frase de cada seção guarda 12 px da grade (§ 616).

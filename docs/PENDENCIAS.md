@@ -401,7 +401,7 @@ O que a F13b (o card das calculadoras e o QR, o guia de arquivo, a home e os hub
 | F6 s-6 (§ 129) | O cronograma rola de lado a 1280 px dentro da moldura. |
 | F11 t-3 (§ 446) | Abaixo de 768 px, o idioma em uso no fim do Menu fica sem o ícone check, que não cabe numa linha de três alvos; ele fica marcado pelo fundo, pelo traço, pelo peso 700, pelo `aria-current` e, com cores forçadas, pelo sublinhado. A F12 não mudou a folha, e a falta do check é de largura, não do anúncio. |
 | F4 ACE-7 (§ 555) | No computador a tabulação vai aos campos principais, à coluna do resultado (o Baixar, o CSV, o link e o botão dos custos) e volta aos opcionais. É a ordem do HTML que o molde fixa, e a F13b a aceitou: o bloco que dobra junta os opcionais num botão só, e `tests/e2e/money-card.spec.ts`, "at 1280 px the Tab goes from the main fields to the Download, the CSV, the link and the one button of the costs (ACE-7)", fixa a ordem. |
-| ajuste-home-cards (§ 602 e § 614) | A home com um card por ferramenta é mais longa que a das faixas da F13b: a 360 × 740, 15,5 telas em en (9,1 antes; a F10 G-02 media 14,8 na F13a), 12,9 em pt (8,0 antes) e 12,4 em es (7,8 antes). O Victor escolheu os cards sabendo disso, em 6/nov/2026. |
+| ajuste-home-cards (§ 602 e § 614) | A home com um card por ferramenta é mais longa que a das faixas da F13b: a 360 × 740, 15,5 telas em en (9,1 antes; a F10 G-02 media 14,8 na F13a), 12,9 em pt (7,9 antes) e 12,4 em es (7,8 antes). O Victor escolheu os cards sabendo disso, em 6/nov/2026. |
 
 ## Já corrigidos depois da revisão (fora das tabelas)
 
