@@ -7,7 +7,7 @@ A segunda run da fase "UX/UI: implementação" do `PLANO-MELHORIAS.md`. A ficha 
 - A F13b construiu as escolhas do Victor na ordem dele: o card das calculadoras e o QR (UX-12 A), a página de guia de arquivo (UX-13 A), a home como o mar por categoria (UX-03 B), o mar nos hubs e a linha d'água do escuro (UX-15 A), e as páginas institucionais com o rodapé no celular (UX-17 A).
 - Junto foram as 20 pendências da decisão 2, a F11 R-E-1 (a contagem sem os presets: 46, 29 e 35) e as três linhas do grupo 22 (a página de ferramenta a 320 px). Das 24 linhas, 23 estão em "Já corrigidos", com o § e o teste, e a F4 ACE-7 está em "Registrados".
 - O trabalho correu em quatro frentes Opus, cada uma na sua worktree (C, G e H ao mesmo tempo, I depois da junção), e o agente principal fez a base comum (a fonte de reserva no negrito, o token `--danger-on-deep`, a linha d'água, a contagem e as datas curtas), o grupo 22, a junção, a documentação e as tabelas.
-- A revisão adversarial de seis lentes achou 6 médios e 17 baixos (8 refutados): os 6 médios e 15 baixos foram corrigidos, e a segunda passada achou mais três, também corrigidos. Os §§ 535 a 600 registram as decisões.
+- A revisão adversarial de seis lentes achou 6 médios e 17 baixos (8 refutados): os 6 médios e 15 baixos foram corrigidos, e a segunda passada achou mais três, também corrigidos. Os §§ 535 a 601 registram as decisões.
 - O `pnpm verificar --partes` passou nas 21 partes na máquina (soma de 3.374 s; a maior, 406 s). As 183 páginas do orçamento têm os mesmos JS e requisições; o Lighthouse dá de 99 a 100 com CLS 0,000; o mapa de anúncios fica em até 18,4 % de densidade, com o aviso a 310 px ou mais do 1º anúncio. A execução completa do CI roda depois deste relatório, com o `gh pr ready`.
 
 ## O que entrou, por item
@@ -75,11 +75,11 @@ A segunda run da fase "UX/UI: implementação" do `PLANO-MELHORIAS.md`. A ficha 
 | 11. O orçamento | A lista dos nomes de `dist/_astro/` sem o hash é a mesma (66). O JS inicial da hipoteca vai de 55,9 para 59,4 KB com gzip (limite de 80). O `CalcIsland` cresceu 3.535 B com gzip, e a § 600 diz por quê. As 183 páginas do `budgets.spec.ts` e do `i18n-budgets.spec.ts` têm os mesmos arquivos JS e as mesmas requisições do ponto de partida. |
 | 12. O CLS e o Lighthouse | O `layout-shift.spec.ts` verde de 320 a 412 px, nos dois builds, e julgando as 22 combinações que a revisão achou (§ 597); a varredura das 208 páginas não acha nenhuma pior que o ponto de partida. O Lighthouse (celular): desempenho de 99 a 100 e CLS 0,000 nas 11 URLs do `lighthouserc.json`. |
 | 13. Os textos | O `lint:texto` com 0 erro de gramática (4.509 textos em 68 arquivos), e o `english-leak.test.ts`, o `glossary.test.ts`, o `text-punctuation.test.ts` e o `health-voice.test.ts` verdes no Vitest. |
-| 14. A documentação | O `docs/design/` (o README do design system e os README de 19 componentes, com o antes e o depois), o `docs/claude/` (uma seção "F13b" em oito arquivos de tema), o `docs/PENDENCIAS.md` (as 24 linhas fechadas, o grupo 23 com 14 linhas, o Resumo e o Total) e os §§ 535 a 600. O `pendencias.test.ts` passa. |
+| 14. A documentação | O `docs/design/` (o README do design system e os README de 19 componentes, com o antes e o depois), o `docs/claude/` (uma seção "F13b" em oito arquivos de tema), o `docs/PENDENCIAS.md` (as 24 linhas fechadas, o grupo 23 com 14 linhas, o Resumo e o Total) e os §§ 535 a 601. O `pendencias.test.ts` passa. |
 | 15. Os testes | O Vitest foi de 1.963 para 2.069 testes, e o `--list` do Playwright, de 1.903 para 2.200 por navegador. Os testes antigos que mudaram estão nas §§ 541, 546, 566, 576, 590 e 599. Cada teste novo de comportamento reprovou contra o ponto de partida, e a seção "Os testes" diz como. |
 | 16. O `pnpm verificar` | O `pnpm verificar --partes` passa nas 21 partes, com a soma de 3.374,1 s e a maior parte com 406,2 s; a tabela e o registro das três tentativas estão abaixo. No CI, a projeção da maior parte é de cerca de 625 s (§ 592). |
 | 17. A revisão | O `docs/relatorios/REVISAO-F13b.md` não tem achado crítico, alto nem médio aberto. |
-| 18. O CI | A execução completa roda depois deste commit, com o `gh pr ready`. O resultado e o custo dela (`pnpm ci:custo`) vão no corpo da PR. |
+| 18. O CI | A 1ª execução completa reprovou numa parte do Chromium (o número do card a 320 px no Linux; § 601) e em duas do WebKit, por um espelho lento do `apt`; a seção "A execução completa do CI" conta a correção. O resultado e o custo da 2ª execução vão no corpo da PR. |
 
 ## As tabelas
 
@@ -254,6 +254,15 @@ O CI tem 5 partes do Chromium e 13 do WebKit, e as 21 partes acima são as dele 
 
 A última execução do CI antes deste relatório (a leve, do push de `6091422`; `pnpm ci:custo 42081714640`): classe leve, 5 minutos cobrados, 3,7 min de parede, 3 jobs (o `verificar (leve)` com 148 s, o `classificar` e o `ci-ok`). As execuções leves dos pushes anteriores da run (`a77cc09`, `44813da`, `aed6def`) também passaram. O custo da execução completa, a do `gh pr ready`, vai no corpo da PR, porque ela roda depois deste commit.
 
+## A execução completa do CI: a falha e a correção
+
+A 1ª execução completa, depois do `gh pr ready` sobre o `bf975f9` (`42221259414`), reprovou em três partes:
+
+- **A "chromium 4 de 5"** reprovou num teste. No `money-card.spec.ts`, "the card keeps its height with other values…" (§ 595), a hipoteca a 320 px com a taxa 5,6 levava o card de 418 para 450 px no Linux. No Windows o teste passava: o número "$2,222.24/mo" ficava com 0,5 px de sobra, e no Linux a Fredoka desenha um pouco mais larga, então o "/mo" foi para uma linha própria. A correção (§ 601): abaixo de 768 px, o número guarda 3 px da borda na conta do CSS. Um teste novo reprova sem ela também no Windows, e o `money-card.spec.ts`, o `money-calc.spec.ts`, o `calc-form`, o `calc-labels`, o `money-es`, o `money-health`, o `money-home` e o `layout-shift` passam nos dois navegadores (404 testes).
+- **A "webkit 6 de 13" e a "webkit 7 de 13"** caíram no passo "Wait for the browser", na instalação dos pacotes pelo `apt` de um espelho lento do Ubuntu, antes de qualquer teste. Não houve o que corrigir no código.
+
+A PR voltou a rascunho (`gh pr ready --undo`), a correção subiu, a execução leve dela passou, e o `gh pr ready` rodou de novo. O resultado da 2ª execução completa e o custo dela estão no corpo da PR.
+
 ## A conferência no Linux
 
 O rótulo `ci` não existe no repositório (só o Victor cria rótulos), então a conferência no Linux do meio da run saiu (§ 542): a execução completa depois do `gh pr ready` fez esse papel.
@@ -277,7 +286,7 @@ Em `docs/relatorios/fase-13b/`, 50 imagens em JPEG (qualidade 80, escala 1, de 2
 
 ## As decisões novas
 
-Os §§ 535 a 600 do `DECISOES.md`:
+Os §§ 535 a 601 do `DECISOES.md`:
 
 - § 535: A especificação dos seis protótipos é contrato, com o que vence e o que fica de fora
 - § 536: A divisão, a ordem e as pendências da F13b
@@ -345,6 +354,7 @@ Os §§ 535 a 600 do `DECISOES.md`:
 - § 598: Os achados baixos da revisão que se corrigem barato
 - § 599: Os testes antigos que mudaram nas correções da revisão
 - § 600: A ilha das calculadoras cresce 3.535 B com gzip, e as duas sobras da segunda passada da revisão
+- § 601: O número do card guarda 3 px da borda abaixo de 768 px: a 1ª execução completa do CI
 
 ## A válvula de estouro
 

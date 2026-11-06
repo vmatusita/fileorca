@@ -343,6 +343,32 @@ test('/mortgage-calculator/: with two fields in error, each is described by its 
   await expect(page.locator('#fo-calc-r-error')).toHaveAttribute('aria-hidden', 'true');
 });
 
+// The full CI of the F13b (DECISOES § 601): at 320 px "$2,222.24/mo" (the rate 5.6) was sized to fit with 0.5px left on
+// Windows, and on the Linux of the CI, where Fredoka draws a little wider, its unit went to a line of its own and the card
+// grew 32px. The number keeps 2px or more from the edge of the card with every rate, so it never depends on that half pixel.
+test('/mortgage-calculator/ at 320 px: the number keeps 2px from the edge of the card with every rate from 3.0 to 9.0', async ({ page }) => {
+  test.setTimeout(120_000);
+  await openAt(page, CALC_PAGES['mortgage-calculator'].path, 320, 900);
+  await hydrated(page);
+  const tight: string[] = [];
+  const rate = page.locator('#fo-calc-r');
+  for (let tenths = 30; tenths <= 90; tenths += 1) {
+    await rate.fill((tenths / 10).toFixed(1));
+    await rate.blur();
+    await frames(page);
+    const got = await page.evaluate(() => {
+      const num = document.querySelector<HTMLElement>('.fo-rhero__num')!;
+      const hero = num.closest<HTMLElement>('.fo-rhero')!;
+      const edge = hero.getBoundingClientRect().right - parseFloat(getComputedStyle(hero).paddingRight) - parseFloat(getComputedStyle(hero).borderRightWidth);
+      const right = Math.max(...[...num.children].map((child) => child.getBoundingClientRect().right));
+      const lines = Math.round(num.getBoundingClientRect().height / parseFloat(getComputedStyle(num).lineHeight));
+      return { text: num.textContent, room: Math.round((edge - right) * 10) / 10, lines };
+    });
+    if (got.room < 2 || got.lines !== 1) tight.push(`${(tenths / 10).toFixed(1)}: ${got.text} ${got.room}px, ${got.lines} line(s)`);
+  }
+  expect(tight).toEqual([]);
+});
+
 // Second pass of the review F13b, s-2 (DECISOES § 600): the field a problem of the account points to (ACE-11) with another
 // field in error at the same time. The card says the other field (a field's range comes first), so the payment is described
 // by the problem, its own message, and never by the balance's range. Before, it pointed to the card and was described by the
