@@ -775,8 +775,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* Ajuste-home-cards (DECISOES § 608): the one sentence of a category section stays 28rem wide at most, as the line of the
    top, so the H1 stays the largest text of the first screen from 768 px (its LCP, § 574). At the full width of the wide
    <main> the sentence of the image section in English took two lines of 573 px and passed the H1 (29,835 against 27,663
-   px²); at 28rem it is two lines of at most 448 px. */
-.fo-section--cat > .fo-prose { max-width: 28rem; }
+   px²); at 28rem it is two lines of at most 448 px. It keeps the 12 px of a paragraph of the prose under it (§ 616), the
+   room the estimate of the ad map already gives a p.fo-prose: with none, its last line touched the cards of the grid, as
+   on the F13a home. */
+.fo-section--cat > .fo-prose { max-width: 28rem; margin-bottom: var(--space-3); }
 .fo-home-sea { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; min-height: 208px; margin-top: var(--space-3); padding: var(--space-4); box-sizing: border-box; }
 .fo-home-sea > .fo-water { --level: 100%; border-radius: 0 0 var(--radius-xl) var(--radius-xl); clip-path: inset(-10px 0 0 0 round 0 0 var(--radius-xl) var(--radius-xl)); }
 .fo-home-sea > .fo-seal { position: relative; z-index: 1; background: var(--surface); }
