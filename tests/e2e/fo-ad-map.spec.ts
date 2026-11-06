@@ -96,11 +96,19 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
   const before = first.before;
   switch (page.mold) {
     case 'home': {
-      if (!before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}`);
+      // F13b (decision 6; UX-03 B; DECISOES § 573): the home is the sea by category. The first ad comes after the first
+      // band (the image one, still labelled by "tools"), its top off the first screen of a phone and of a computer, and the
+      // home has the 3 ads by width of home-b.html: the 3 content ads at 360 px, and from 1280 px the content one, the
+      // multiplex and the rail (its 2nd unit only with 600 words, which the home does not reach).
+      if (!before.startsWith('section.fo-catband') || !before.includes('[aria-labelledby=tools]')) fail(`o 1º da home depois de ${before}, e não da faixa de imagem`);
       const top = phone.boxes.find((box) => box.unit === 'conteudo');
       const wide = desktop.boxes.find((box) => box.unit === 'conteudo');
       if (!top || top.y < PHONE.height) fail(`o 1º da home na primeira tela do celular (topo ${top?.y.toFixed(0)})`);
       if (!wide || wide.y < DESKTOP.height) fail(`o 1º da home na primeira tela do computador (topo ${wide?.y.toFixed(0)})`);
+      const phoneContent = phone.boxes.filter((box) => box.kind === 'content').length;
+      if (phoneContent !== 3) fail(`${phoneContent} anúncios de conteúdo a 360 px (a home pede 3)`);
+      const desktopUnits = desktop.boxes.map((box) => box.unit).filter((unit) => unit !== 'lateral-2');
+      if (desktopUnits.sort().join(' ') !== 'conteudo lateral multiplex') fail(`a 1280 px a home tem ${desktopUnits.join(', ')} (pede o conteúdo, o multiplex e a lateral)`);
       break;
     }
     case 'guides-hub':
@@ -120,7 +128,9 @@ function checkFirst(problems: string[], page: AdPage, phone: MapMeasure, desktop
       break;
     case 'calc-dinheiro':
     case 'calc-casa-saude':
-      if (!before.startsWith('div#fo-tool-root') || !first.after.startsWith('div#fo-calc-schedule')) fail(`o 1º da calculadora entre ${before} e ${first.after}`);
+      // F13b (DECISOES § 548): the schedule is part of the island, before the chips; the first ad comes right after the island,
+      // before "How to use" (before, it sat between the island and the schedule's own root).
+      if (!before.startsWith('div#fo-tool-root') || !first.after.includes('[data-content=how]')) fail(`o 1º da calculadora entre ${before} e ${first.after}`);
       break;
     case 'guide-arquivos':
     case 'guide-dinheiro':
@@ -214,6 +224,49 @@ for (let start = 0; start < AD_PAGES.length; start += BLOCK) {
     expect(problems, problems.join('\n')).toEqual([]);
   });
 }
+
+// ---- The sea of the home and of the category hubs (F13b) ---------------------------------------------------------------
+
+// F13b (decisions 6, 7 and 10; UX-03 B and UX-15 A; DECISOES § 573): the Oli that swims at the top of the home and in the
+// band of a category hub keeps 150 px from every ad that shows, with her box inflated by 12 px (§ 513), and so do the sea,
+// the water and the bands of the home; from 1280 px the Oli of the home keeps 12 px or more from the edge of the column, on
+// the side of the rail (the pitfall of the F13a in docs/claude/design-e-oli.md).
+const SEA_PAGES = AD_PAGES.filter((page) => page.mold === 'home' || page.mold === 'hub-arquivos' || page.mold === 'hub-dinheiro' || page.mold === 'hub-casa-saude');
+
+test('the sea of the home and of the category hubs keeps 150 px from every ad, the Oli inflated, and 12 px from the column at 1280', async ({ page }) => {
+  test.setTimeout(180_000);
+  const problems: string[] = [];
+  expect(SEA_PAGES.filter((one) => one.mold === 'home')).toHaveLength(3);
+  expect(SEA_PAGES).toHaveLength(3 + 11);
+  await page.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+  for (const adPage of SEA_PAGES) {
+    for (const viewport of [PHONE, DESKTOP]) {
+      await page.setViewportSize(viewport);
+      expect((await page.goto(adPage.path))?.status(), adPage.path).toBe(200);
+      await frames(page);
+      const measure = await measureMap(page, '.fo-home-sea [data-oli], .fo-hubband__oli, .fo-home-sea, .fo-hubband__sea, .fo-hubband__water, .fo-catband, .fo-catband .fo-chip');
+      const olis = measure.targets.filter((target) => target.kind.includes('oli'));
+      if (olis.length !== 1) problems.push(`${adPage.path} a ${viewport.width}: ${olis.length} Olis do mar`);
+      for (const box of measure.boxes) {
+        for (const target of measure.targets) {
+          const gap = distance(box, target);
+          if (gap < CLEARANCE) problems.push(`${adPage.path} a ${viewport.width}: ${box.unit} a ${gap.toFixed(0)} px de ${target.kind}`);
+        }
+      }
+      if (adPage.mold === 'home' && viewport.width >= 1280) {
+        // The raw box of the Oli (the inflated one is 12 px larger on each side) and the right edge of the column.
+        const room = await page.evaluate(() => {
+          const oli = document.querySelector('.fo-home-sea [data-oli]')?.getBoundingClientRect();
+          const main = document.querySelector('main')?.getBoundingClientRect();
+          return oli && main ? main.right - oli.right : -1;
+        });
+        if (room < 12) problems.push(`${adPage.path} a ${viewport.width}: a Oli a ${room.toFixed(0)} px da borda da coluna`);
+        if (!measure.boxes.some((box) => box.kind === 'rail')) problems.push(`${adPage.path} a ${viewport.width}: sem a lateral`);
+      }
+    }
+  }
+  expect(problems, problems.join('\n')).toEqual([]);
+});
 
 // ---- A cold first visit: the notice and the first ad once the fonts arrive ---------------------------------------------
 

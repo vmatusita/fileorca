@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'How to Turn Photos Into One PDF, and Keep It Small Enough to Send',
   description: 'How to put several photos into one PDF on a phone or a computer, what the PDF weighs, and what compressing the photos first does to it.',
   h1: 'How to turn photos into one PDF',
-  lead: 'Receipts, pages of a contract, a few photos for a form: one PDF is easier to send and to print than a pile of images. Here is how to make it, and how heavy it gets.',
-  changed: 'First version, with the measurements of {date}.',
+  lead: 'Receipts, a contract, photos for a form: one PDF is easier to send and to print than a pile of images. Here is how, and how heavy it gets.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'A PDF of photos keeps them in order, prints each one on its own page and opens on any computer or phone. Many forms and offices also ask for exactly that: one PDF, not a set of images.',
     'The catch is size. Put into one PDF, our {photos_word} phone photos made a file {pdfRatioChromium} as heavy as the photos themselves. We measured what happens to the size, with and without compressing the photos first.',
@@ -70,6 +70,15 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'One PDF of the photos', value: '{pdfRatioChromium_change}', from: '{photosTotal}', to: '{pdfChromium}' },
+      { label: 'One PDF after Compress image', value: '{pdfAfterRatioChromium_change}', from: '{photosTotal}', to: '{pdfAfterChromium}' },
+    ],
+    sample: '{photos} phone photos, as they are and after Compress image.',
+    link: 'See the table',
+  },
+  tableHeading: 'Step by step',
   measuredIntro: 'Our {photos_word} real phone photos, straight into one PDF, and again after Compress image. The share is against the original photos.',
   measuredNote: 'Measured on {date} through the Image to PDF and Compress image pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes, on our real phone photos at the default settings. The pictures inside the PDF were counted with pdf-lib.',
   tables: [

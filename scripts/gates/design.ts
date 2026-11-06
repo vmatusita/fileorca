@@ -21,6 +21,12 @@ const PAGE_POSES = ['peek'];
 /** F12 (DECISOES § 417): sad is only on the ad-block wall, which the default build (this dist/) never has. */
 const WALL_ONLY = ['sad'];
 const TOOL_POSES = ['wave', 'gulp', 'swim', 'cheer', 'oops'];
+/**
+ * F13b (§ 375; DECISOES § 553): the Oli of a calculator's card waves on the example, cheers once and says oops on an error; the
+ * calculator pages (and the money guides, with the same island) carry exactly those, with no cheer on a health page.
+ */
+const CALC_POSES = ['wave', 'cheer', 'oops'];
+const NOT_IN_CALC = ['gulp', 'swim', 'buoy', 'lost'];
 
 const webPath = (file: string): string => `/${relative(DIST, file).split('\\').join('/')}`;
 const pagePath = (file: string): string => webPath(file).replace(/index\.html$/, '');
@@ -62,7 +68,9 @@ report(
   perPage((page) =>
     // F7 (decision 5): the health calculators never cheer a result, so their sprite has every tool pose but cheer.
     HEALTH_PATHS.has(page.path)
-      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...TOOL_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer', ...WALL_ONLY] })
+      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...CALC_POSES.filter((pose) => pose !== 'cheer')], forbiddenPoses: ['cheer', ...NOT_IN_CALC, ...WALL_ONLY] })
+      : page.html.includes('class="fo-rhero ')
+      ? checkSprite(page.html, { requiredPoses: [...PAGE_POSES, ...CALC_POSES], forbiddenPoses: [...NOT_IN_CALC, ...WALL_ONLY] })
       : checkSprite(page.html, {
           requiredPoses: page.html.includes('id="fo-tool-root"')
             ? // F8: the image and PDF panels (their drop zone) also have the offline line in buoy (DECISOES § 292), and F13a ·

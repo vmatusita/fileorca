@@ -32,6 +32,11 @@ const PAIRS: readonly Pair[] = [
   { fg: 'on-deep', bg: 'deep', use: 'text' },
   { fg: 'on-deep-muted', bg: 'deep', use: 'text' },
   { fg: 'brand-on-deep', bg: 'deep', use: 'icon' },
+  // F13b (UX12-1; DECISOES § 538): the alert icon of the error inside the ResultHero, on the deep sea (6.04:1 in both
+  // themes; the light danger would give 2.45:1 there).
+  { fg: 'danger-on-deep', bg: 'deep', use: 'icon' },
+  // The icon takes its colour from `color` (currentColor), so the token is a text colour of the CSS too.
+  { fg: 'danger-on-deep', bg: 'deep', use: 'text' },
   { fg: 'brand', bg: 'brand-soft', use: 'icon' },
   { fg: 'danger', bg: 'danger-soft', use: 'icon' },
   { fg: 'focus', bg: 'bg', use: 'ui' },
@@ -83,7 +88,7 @@ describe('fórmula de contraste da WCAG', () => {
 
 describe('tokens de cor', () => {
   it('uses the same value in both themes for a plain string', () => {
-    for (const name of ['deep', 'on-deep', 'sun', 'on-cat', 'on-violeta', 'brand-on-deep']) expect(colorValue(tokens, name, 'light'), name).toBe(colorValue(tokens, name, 'dark'));
+    for (const name of ['deep', 'on-deep', 'sun', 'on-cat', 'on-violeta', 'brand-on-deep', 'danger-on-deep']) expect(colorValue(tokens, name, 'light'), name).toBe(colorValue(tokens, name, 'dark'));
   });
 
   it('keeps the two themes apart for a themed token', () => {

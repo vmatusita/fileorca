@@ -1,20 +1,28 @@
 ---
-// A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184): breadcrumb Home › Guides › H1 (F11; before,
-// Home › Image tools or PDF tools › H1); the H1, the question it answers and the "Reviewed" line; the introduction; the embedded tool, the same island and
-// entry as the tool's own page (an image tool comes in through the "tool" slot from the page file; a PDF tool is the
-// PdfIsland of the 12 PDF pages), with the link to the tool's page; the first half of the text; one content AdSlot,
-// only after the tool; the second half; "What we measured", every cell from data/guides-measured.json, with the date,
-// the sample and the method; the sources, with the day they were read; the related pages (F11, decision 7: a guide among
-// them is a GuideCard, never a ToolCard, which closes the F5b F-12); the rail AdSlot.
+// A file guide /guides/<slug>/ (prompt F5b, decision 4; DECISOES § 184). Since the F13b (UX-13 A, decision 5; DECISOES
+// § 376 and § 557 to § 565) the page leads with what we measured and the tool, then the text: the breadcrumb Home ›
+// Guides › H1 (F11); the H1, the question it answers and the signature in one line (the author and the short date of the
+// review); the sheet "What we measured", two numbers of the measurement with the sample and a link to the table, on a
+// paper with the fold in the colour of the guide's hub; the embedded tool, the same island and entry as the tool's own
+// page (an image tool comes in through the "tool" slot from the page file; a PDF tool is the PdfIsland of the 12 PDF
+// pages), its heading above it and its paragraph under it; the introduction and the parts of the text, one of which ends
+// with the sentence that links to the tool's own page (D-54; until the F13b a line of its own under the panel, the
+// .fo-guide__open the money guides keep); the tables, every cell from data/guides-measured.json, without the columns
+// that hold one value in every row, grouped by the first column where it repeats, in a frame named by the heading of the
+// section that hints, in CSS only, when the table is wider than the frame; the note with the date of the measurement and
+// the history line (the first publication and what changed); the sources, with the day they were read; the related pages
+// (F11, decision 7: a guide among them is a GuideCard). Before the F13b the introduction came before the tool, and the
+// tool after the long "Reviewed" line, which put the Choose button 1.5 screens down on a phone.
 // Schema: Article (author Person, datePublished, dateModified), BreadcrumbList and Person. The text blocks carry
-// data-guide-text, which gate:conteudo counts (800 to 1,500 words). Since the languages adjustment the same view serves the
-// guides in Portuguese and Spanish, each with the tool page of its language and the numbers written in that language.
+// data-guide-text, which gate:conteudo counts (800 to 1,500 words). The same view serves the guides in Portuguese and
+// Spanish, each with the tool page of its language and the numbers written in that language.
 // F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad goes into the text after the tool, with a
 // paragraph between them (after the first paragraph of the first part), and the next ones only at the marks between the
 // paragraphs, the lists and the parts, never beside "What we measured"; the layout puts each box and the rails
-// (src/ads/map.ts). The text is one run of parts now (the `half` that split it around the one AdSlot is not read).
+// (src/ads/map.ts). The sheet and the tool come before every mark, so no ad is ever above the tool or beside the sheet.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Icon from '../components/Icon.astro';
 import ToolCard from '../components/ToolCard.astro';
 import GuideCard from '../components/GuideCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
@@ -28,7 +36,7 @@ import { FILE_PANEL_POSES } from '../tools/image/Oli.tsx';
 import { panelData as pdfPanelData } from '../tools/pdf/page.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, type FileGuideId } from '../tools/guides/registry.ts';
-import { fillValues, guideTables, longDate, placeholdersIn } from '../tools/guides/measured.ts';
+import { MEASURED, fillValues, longDate, pageTables, placeholdersIn } from '../tools/guides/measured.ts';
 import { GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, GUIDE_SHARED, crumbsFor, guidePath, guideTexts, relatedFor, toolInfo } from '../tools/guides/page.ts';
 
 interface Props {
@@ -45,14 +53,25 @@ const values = fillValues(id, t, [...placeholdersIn(t)], undefined, { lang, shar
 const fill = (text: string): string => fmt(text, values);
 const crumbs = crumbsFor(id, lang);
 const tool = toolInfo(def.tool, lang);
-const tables = guideTables(id, shared, t, undefined, lang);
+const tables = pageTables(id, shared, t, undefined, lang);
 const related = relatedFor(id, lang);
 const common = TEXTS[lang].common;
+// The sheet: a paper with the fold in the colour of the guide's hub (turquesa for image, coral for PDF), as its GuideCard.
+const sheetCategory = def.hub === 'pdf-tools' ? 'pdf' : 'image';
 // The blocks of each part (its paragraphs, then its list) and the mark between two of them: the first ad after the first
 // block of the first part when it has another one, or else after that part.
 const blocksOf = (section: (typeof t.sections)[number]): number => section.paragraphs.length + (section.list ? 1 : 0);
 const firstInside = t.sections[0] !== undefined && blocksOf(t.sections[0]) > 1;
 const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
+// The sentence that links to the tool's own page, at the end of the part the registry names (D-54; DECISOES § 562).
+const [linkBefore, linkAfter = ''] = shared.toolLink.split('{link}');
+// The history line: its two dates are <time datetime> (DECISOES § 557), the rest is filled like any text of the guide.
+const DATES: Record<string, string> = { published: GUIDE_PUBLISHED_ON[lang], measured: MEASURED.measuredOn };
+const history = t.changed.split(/(\{(?:published|measured)\})/).filter((part) => part !== '');
+const dateOf = (part: string): string | undefined => DATES[part.slice(1, -1)];
+// What the columns left out said, after the note (F5b F-13): only for a table that leaves one out.
+const constants = t.tables.flatMap((table, index) => ((tables[index]?.dropped.length ?? 0) > 0 && table.constant ? [table.constant] : []));
+const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
 ---
 <BaseLayout
   lang={lang}
@@ -68,15 +87,30 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
   <div class="fo-top fo-top--calc" data-guide-text>
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{fill(t.lead)}</p>
-    <Reviewed changed={fill(t.changed)} lang={lang} />
+    <Reviewed lang={lang} />
   </div>
-  <div class="fo-prose fo-guide" data-guide-text>{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+  <section class={`fo-sheet fo-dogear fo-cat--${sheetCategory}`} aria-labelledby="fo-sheet-title" data-content="facts">
+    <h2 class="fo-sheet__title" id="fo-sheet-title">{t.measuredHeading}</h2>
+    <dl class="fo-sheet__list">
+      {t.sheet.stats.map((stat) => (
+        <div class="fo-sheet__stat">
+          <dt>{fill(stat.label)}</dt>
+          <dd class="fo-sheet__n">{fill(stat.value)}</dd>
+          {stat.from !== undefined && stat.to !== undefined && (
+            <dd class="fo-sheet__sub">{fill(stat.from)}<Icon name="arrow-right" class="fo-icon--inline" /><span class="fo-sr">{` ${shared.becomes} `}</span>{fill(stat.to)}</dd>
+          )}
+          {stat.sub !== undefined && <dd class="fo-sheet__sub">{fill(stat.sub)}</dd>}
+        </div>
+      ))}
+    </dl>
+    <p class="fo-sheet__sample">{fill(t.sheet.sample)} <a href="#measured">{fill(t.sheet.link)}</a>.</p>
+  </section>
   <section class="fo-section fo-prose fo-guide__tool" aria-labelledby="guide-tool" data-guide-text>
     <h2 id="guide-tool">{t.toolHeading}</h2>
-    <p>{fill(t.toolIntro)}</p>
   </section>
   {tool.pdf ? <PdfIsland data={pdfPanelData(def.tool as PdfToolId, lang)} /> : <slot name="tool" />}
-  <p class="fo-guide__open"><a href={tool.path}>{fmt(shared.openTool, { name: tool.name })}</a></p>
+  <p class="fo-guide__toolintro" data-guide-text>{fill(t.toolIntro)}</p>
+  <div class="fo-prose fo-guide" data-guide-text>{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
   {t.sections.map((section, index) => (
     <>
       {index > 0 && <AdBreak first={index === 1 && !firstInside} />}
@@ -89,25 +123,59 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
             <ul>{section.list.map((item) => <li>{fill(item)}</li>)}</ul>
           </>
         )}
+        {index === def.toolSection && <p class="fo-guide__link">{linkBefore}<a href={tool.path}>{tool.name}</a>{linkAfter}</p>}
       </section>
     </>
   ))}
-  <section class="fo-section fo-prose" aria-labelledby="measured" data-content="measured">
-    <h2 id="measured">{t.measuredHeading}</h2>
+  {/* Not a landmark of its own (no aria-labelledby): the frame of its table is the region named by its heading, and two
+      landmarks with one name would repeat it (axe landmark-unique; DECISOES § 559). */}
+  <section class="fo-section fo-prose" data-content="measured">
+    <h2 id="measured">{t.tableHeading}</h2>
     <p data-guide-text>{fill(t.measuredIntro)}</p>
-    {t.tables.map((table, index) => (
-      <>
-        {t.tables.length > 1 && <h3 class="fo-h3" id={`measured-${index}`}>{table.heading}</h3>}
-        <div class="fo-table-wrap" tabindex="0" role="region" aria-label={table.caption}>
-          <table class="fo-table">
-            <caption class="fo-sr">{table.caption}</caption>
-            <thead><tr>{table.head.map((heading) => <th scope="col">{heading}</th>)}</tr></thead>
-            <tbody>{(tables[index] ?? []).map((row) => <tr>{row.map((cell, column) => (column === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}</tr>)}</tbody>
-          </table>
-        </div>
-      </>
-    ))}
-    <p class="fo-reviewed" data-guide-text>{fill(t.measuredNote)}</p>
+    {t.tables.map((table, index) => {
+      const drawn = tables[index];
+      if (!drawn) return null;
+      // One table: the frame is named by the heading of the section; two: by the heading of each table. Never by the
+      // caption, which names the table (F5b F-13).
+      const name = t.tables.length > 1 ? `measured-${index}` : 'measured';
+      return (
+        <>
+          {t.tables.length > 1 && <h3 class="fo-h3" id={`measured-${index}`}>{table.heading}</h3>}
+          <div class="fo-table-wrap fo-guide__frame" tabindex="0" role="region" aria-labelledby={name}>
+            <p class="fo-guide__hint fo-mobile-only"><Icon name="arrow-right" class="fo-icon--inline" />{fmt(shared.hint, { n: drawn.head.length })}</p>
+            <table class="fo-table">
+              <caption class="fo-sr">{table.caption}</caption>
+              <thead><tr>{drawn.head.map((heading) => <th scope="col">{heading}</th>)}</tr></thead>
+              {drawn.groups.map((group) => (
+                <tbody>
+                  {group.map((row, at) => (
+                    <tr>
+                      {drawn.grouped ? (
+                        <>
+                          {at === 0 && <th scope="rowgroup" class="fo-guide__group" {...(group.length > 1 ? { rowspan: group.length } : {})}>{row[0]}</th>}
+                          <th scope="row" class="fo-guide__key">{row[1]}</th>
+                          {row.slice(2).map((cell) => <td>{cell}</td>)}
+                        </>
+                      ) : (
+                        <>
+                          <th scope="row">{row[0]}</th>
+                          {row.slice(1).map((cell) => <td>{cell}</td>)}
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
+            </table>
+          </div>
+        </>
+      );
+    })}
+    <p class="fo-reviewed" data-guide-text>{note}</p>
+    <p class="fo-reviewed fo-guide__history" data-guide-text>{history.map((part) => {
+      const iso = dateOf(part);
+      return iso ? <time datetime={iso}>{values[part.slice(1, -1)]}</time> : fill(part);
+    })}</p>
   </section>
   <section class="fo-section fo-prose" aria-labelledby="sources" data-content="sources">
     <h2 id="sources">{t.sourcesHeading}</h2>

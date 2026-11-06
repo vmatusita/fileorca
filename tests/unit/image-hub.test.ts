@@ -25,24 +25,27 @@ const render = async (View: typeof HomeView | typeof ImageToolsView, lang: Lang)
 const toolPaths = (lang: Lang) => IMAGE_TOOL_IDS.flatMap((id) => routeById(id).paths[lang] ?? []);
 
 describe('home', () => {
-  it('shows the eight image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
+  // F13b (UX-03 B; DECISOES § 576): the home is the sea by category, and the image band (still labelled by "tools") shows
+  // the eight tools as chips, with the link to the hub under them; the money band the 6 credit calculators of the
+  // specification (§ 570). The rule is the same: the catalogue order, the hub, no preset, no AdSlot in the default build.
+  it('shows the eight image tools in English, in catalogue order, with a link to the hub under the chips', async () => {
     const page = await render(HomeView, 'en');
-    // The image section is the one under "Choose a tool"; the money section of the F4 follows it (DECISOES § 118).
+    // The image band is the first one; the money band of the F4 comes after the PDF one (DECISOES § 118).
     const tools = page.querySelector('main section[aria-labelledby="tools"]');
-    expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
+    expect(tools?.querySelectorAll('.fo-catband__chips a.fo-chip').map((chip) => chip.getAttribute('href'))).toEqual(toolPaths('en'));
     expect(toolPaths('en')).toHaveLength(8);
-    expect(tools?.querySelectorAll('.fo-tool h3')).toHaveLength(8);
-    const more = tools?.querySelector('.fo-more a');
+    expect(tools?.querySelectorAll('.fo-chip > span:last-child')).toHaveLength(8);
+    const more = tools?.querySelector('.fo-catband__links a');
     expect(more?.getAttribute('href')).toBe('/image-tools/');
-    expect(more?.text).toBe('See all image tools and common sizes');
+    expect(more?.text).toBe('All image tools and common sizes');
     // The presets are not tools: they are linked from the hub and their parent page, not from the home grid.
     for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths.en}"]`)).toBeNull();
-    // The money section: the five credit calculators and the money hub, and no AdSlot on the home.
+    // The money band: the five credit calculators and Credit card payoff, and the money hub, and no AdSlot on the home.
     const money = page.querySelector('main section[aria-labelledby="money-home"]');
-    expect(money?.querySelectorAll('a.fo-tool').map((card) => card.getAttribute('href'))).toEqual([
-      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/',
+    expect(money?.querySelectorAll('a.fo-chip').map((chip) => chip.getAttribute('href'))).toEqual([
+      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/', '/credit-card-payoff-calculator/',
     ]);
-    expect(money?.querySelector('.fo-more a')?.getAttribute('href')).toBe('/money-calculators/');
+    expect(money?.querySelector('.fo-catband__links a')?.getAttribute('href')).toBe('/money-calculators/');
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
@@ -50,10 +53,10 @@ describe('home', () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
       const tools = page.querySelector('main section[aria-labelledby="tools"]');
-      expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href')), lang).toEqual(toolPaths(lang));
+      expect(tools?.querySelectorAll('.fo-catband__chips a.fo-chip').map((chip) => chip.getAttribute('href')), lang).toEqual(toolPaths(lang));
       expect(toolPaths(lang), lang).toHaveLength(IMAGE_TOOL_IDS.length);
-      expect(tools?.querySelector('.fo-more a')?.getAttribute('href'), lang).toBe(routeById('image-tools').paths[lang]);
-      expect(tools?.querySelector('.fo-more a')?.text, lang).toBe(TEXTS[lang].home.hubLink);
+      expect(tools?.querySelector('.fo-catband__links a')?.getAttribute('href'), lang).toBe(routeById('image-tools').paths[lang]);
+      expect(tools?.querySelector('.fo-catband__links a')?.text, lang).toBe(TEXTS[lang].home.image.all);
       for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths[lang]}"]`), `${lang} ${id}`).toBeNull();
       // § 6: every link of the page (the language menu aside, which leads to the other languages) is a page of this language.
       const own = new Set(ROUTES.flatMap((route) => route.paths[lang] ?? []));
@@ -66,12 +69,19 @@ describe('home', () => {
 });
 
 describe('footer', () => {
-  const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child li a');
+  // F13b (UX-17 A; DECISOES § 587 and § 590): the hub left the list; it is the main link of the column, and the eight
+  // tools are in the disclosure of the column. The links of the column are the same, in the same order.
+  const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child a');
 
   it('lists the hub first and then the eight tools in English', async () => {
-    const links = imageColumn(await render(HomeView, 'en'));
+    const page = await render(HomeView, 'en');
+    const links = imageColumn(page);
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/image-tools/', ...toolPaths('en')]);
     expect(links.map((link) => link.text).slice(0, 3)).toEqual(['Image tools', 'Compress image', 'Resize image']);
+    // The hub in sight, the tools in the disclosure.
+    expect(links[0]?.classList.contains('fo-footer__hub')).toBe(true);
+    const tools = page.querySelectorAll('footer .fo-footer__cols > div:first-child details.fo-footer__tools li a');
+    expect(tools.map((link) => link.getAttribute('href'))).toEqual(toolPaths('en'));
   });
 
   it('lists the hub first and then the eight tools in Portuguese and Spanish too (F6; only Compress image before)', async () => {

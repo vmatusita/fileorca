@@ -220,3 +220,39 @@ test.describe('two lines in Figtree and in its fallback', () => {
     });
   }
 });
+
+// F13b (group 22, F13a R-c-3; DECISOES § 582). At 320 × 640 on a first visit, the Choose button of the image presets went
+// up to 25px under the notice (35px with the fallback font), and 1px in three PDF tools in Spanish. Under 360 px the
+// trail of a preset leaves out its hub, so it takes two rows: with Figtree the Choose of every preset is now entirely
+// above the notice. What is left, fixed here: 1px at most under it in those three PDF tools in Spanish, and in the
+// presets of pt with the fallback font (the notice in three lines). The button stays clickable, and the page scrolls.
+test.describe('first visit at 320 × 640: the Choose button of the presets', () => {
+  const PRESETS = [
+    '/compress-image/to-100kb/', '/pt/comprimir-imagem/para-100kb/', '/es/comprimir-imagen/a-100kb/',
+    '/compress-image/to-1mb/', '/pt/comprimir-imagem/para-1mb/', '/es/comprimir-imagen/a-1mb/',
+    '/resize-image/youtube-thumbnail/', '/pt/redimensionar-imagem/miniatura-youtube/', '/es/redimensionar-imagen/miniatura-youtube/',
+  ];
+  const LEFT = ['/es/eliminar-paginas-pdf/', '/es/numerar-paginas-pdf/', '/es/ordenar-paginas-pdf/'];
+  for (const font of ['Figtree', 'fallback'] as const) {
+    for (const path of [...PRESETS, ...LEFT]) {
+      test(`${font}: ${path}`, async ({ browser }) => {
+        const context = await browser.newContext({ viewport: { width: 320, height: 640 }, serviceWorkers: 'block' });
+        const page = await context.newPage();
+        if (font === 'fallback') await page.route(/figtree[^/]*\.woff2$/, (route) => route.abort());
+        expect((await page.goto(path))?.status(), path).toBe(200);
+        // An optional face settles at the first paint: with Figtree in the cache, a second load paints with it.
+        if (font === 'Figtree') {
+          await page.evaluate(() => document.fonts.ready);
+          await page.reload();
+        }
+        await expect(page.locator('#fo-cookie')).toBeVisible();
+        const { notice, target } = await boxes(page, '.fo-drop .fo-btn--brand');
+        expect(notice && target, path).toBeTruthy();
+        const under = Math.max(0, (target?.bottom ?? 0) - (notice?.top ?? 0));
+        const most = font === 'Figtree' && PRESETS.includes(path) ? 0 : 1;
+        expect(under, `${path}: px of the Choose button under the notice`).toBeLessThanOrEqual(most);
+        await context.close();
+      });
+    }
+  }
+});

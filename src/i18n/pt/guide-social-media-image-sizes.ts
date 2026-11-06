@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'Tamanhos de imagem para redes sociais, segundo a ajuda de cada rede',
   description: 'Os tamanhos de imagem que Instagram, Facebook, X, LinkedIn, YouTube e Pinterest publicam, e como ficam e quanto pesam fotos redimensionadas para eles.',
   h1: 'Tamanhos de imagem para redes sociais',
-  lead: 'Cada rede publica os tamanhos que quer e redimensiona o que não cabe. Aqui estão os tamanhos tirados das páginas de ajuda de cada uma, e o que uma foto vira em cada um deles.',
-  changed: 'Primeira versão, com as medidas de {date}. As páginas de ajuda foram lidas na data indicada em cada fonte.',
+  lead: 'Cada rede publica os tamanhos que quer e redimensiona o que não cabe. Veja esses tamanhos e o que uma foto vira em cada um.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}. As páginas de ajuda foram lidas na data indicada em cada fonte.',
   intro: [
     'Toda rede social pega a foto, encaixa no próprio quadro e comprime de novo. Se a foto é muito maior que o quadro, a rede joga pixels fora com os ajustes dela. Se o formato está errado, a rede corta onde quiser. Mandar uma foto que já tem o tamanho e o formato certos deixa essas decisões nas suas mãos.',
     'Os tamanhos abaixo vêm só das páginas de ajuda ou de desenvolvedores de cada rede, lidas na data que aparece no fim desta página. Quando uma rede publica um número só para anúncios, a tabela avisa. O TikTok não está na tabela: as páginas de ajuda dele que lemos não dão tamanho para fotos.',
@@ -53,6 +53,15 @@ const texts: FileGuideTexts = {
   ],
   half: 2,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'No tamanho exato que a rede pede', value: '{exactFrames} de {outputs}' },
+      { label: 'Abaixo do limite publicado', value: '{underLimit} de {withLimit}', sub: 'Maior arquivo: {largestOutput}' },
+    ],
+    sample: '{photos} fotos de celular redimensionadas para {sizes} tamanhos oficiais.',
+    link: 'Veja a tabela',
+  },
+  tableHeading: 'Tamanho por tamanho',
   measuredIntro: 'Cada tamanho publicado nas páginas das próprias redes, os tamanhos em que as nossas {photos_wordf} fotos de celular saíram na Redimensionar imagem e o maior arquivo em cada tamanho. A linha da miniatura do YouTube traz o tamanho que o YouTube recomenda e o tamanho que o ajuste pronto Miniatura do YouTube fez.',
   measuredNote: 'Medido em {date} no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}, pela página Redimensionar imagem deste site (Por tamanho) e pelo ajuste pronto Miniatura do YouTube, nas nossas fotos de celular de verdade, em retrato e em paisagem. A tabela mostra o Chromium; o WebKit gravou arquivos um pouco maiores nos mesmos tamanhos.',
   tables: [

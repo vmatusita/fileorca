@@ -5,13 +5,13 @@
 // percent sign, the words of a count with their gender and a no-break space before a unit in Portuguese and Spanish.
 import measuredJson from '../../../data/guides-measured.json' with { type: 'json' };
 import { fileSize, fmt, groupDigits, percent } from '../../i18n/format.ts';
-import { longDate as writtenDate } from '../../i18n/dates.ts';
+import { mediumDate, longDate as writtenDate } from '../../i18n/dates.ts';
 import type { Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import enShared from '../../i18n/en/file-guides.ts';
 import type { FileGuidesSharedTexts, FileGuideTexts } from '../../i18n/types.ts';
 import type { Cell, MeasuredFile, MeasuredNumber, MeasuredTable } from './measured-types.ts';
-import type { FileGuideId } from './registry.ts';
+import { GUIDE_PUBLISHED_ON, type FileGuideId } from './registry.ts';
 
 export const MEASURED = measuredJson as unknown as MeasuredFile;
 
@@ -87,13 +87,20 @@ export const VARIANTS = {
 } as const;
 export type Variant = keyof typeof VARIANTS;
 
-/** The placeholders every guide may use besides its numbers: the date and the browsers of the measurement. */
+/**
+ * The placeholders every guide may use besides its numbers: the date and the browsers of the measurement. Since the F13b
+ * (DECISOES § 558) also the two dates of the history line at the end of "What we measured", in the medium form
+ * ("Nov 2, 2026", "3 de nov. de 2026", "3 nov 2026"): {published}, the first publication of the guide in its language,
+ * and {measured}, the day of the measurement. The page writes them as <time datetime> (GUIDE_DATES in page.ts).
+ */
 export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en'): Record<string, string> {
   return {
     date: longDate(file.measuredOn, lang),
     chromiumVersion: file.environment.browsers.chromium.split('.')[0] ?? '',
     webkitVersion: file.environment.browsers.webkit,
     system: file.environment.os.split(' ')[0] ?? '',
+    published: mediumDate(GUIDE_PUBLISHED_ON[lang], lang),
+    measured: mediumDate(file.measuredOn, lang),
   };
 }
 
@@ -339,4 +346,50 @@ export function guideTables(id: FileGuideId, shared: FileGuidesSharedTexts, text
     for (const row of rows) if (row.length !== width) throw new Error(`${id}: a row of ${row.length} cells under ${width} headings`);
   });
   return tables;
+}
+
+/**
+ * A measured table as the page draws it (F13b, UX-13 A; F5b F-13 and the guides half of F4 ACE-9; DECISOES § 559): the
+ * columns that hold one value in every row are left out (the page says that value in a sentence of the note instead), and
+ * when the first column repeats, the rows go in groups, one per value of it, in the order each value first appears.
+ */
+export interface PageTable {
+  /** The column heads that stay. */
+  head: string[];
+  /** One <tbody> per group: the rows of one value of the first column when it repeats, or every row in one group. */
+  groups: TableRows[];
+  /**
+   * The first column repeats: it is the header of its group (th scope="rowgroup", once per group), and the second column,
+   * the cell that tells the rows of a group apart, is the header of each row (th scope="row"). Otherwise the first column
+   * is the header of each row, as before.
+   */
+  grouped: boolean;
+  /** The columns left out, with the one value each held in every row. */
+  dropped: { head: string; value: string }[];
+}
+
+/** The page table of one table of rows under its heads (pure: the tests feed it rows of their own). */
+export function pageTable(rows: TableRows, head: readonly string[]): PageTable {
+  // A column with one value in every row says nothing row by row. The first column, which names the rows, always stays.
+  const keep = head.map((_, column) => column === 0 || rows.length < 2 || rows.some((row) => row[column] !== rows[0]?.[column]));
+  const dropped = head.flatMap((name, column) => (keep[column] ? [] : [{ head: name, value: rows[0]?.[column] ?? '' }]));
+  const cut = (row: readonly string[]): string[] => row.filter((_, column) => keep[column]);
+  const kept = rows.map(cut);
+  const firsts = kept.map((row) => row[0] ?? '');
+  const grouped = new Set(firsts).size < firsts.length;
+  // The social media guide lists its sizes in the order of the official pages, so the two YouTube rows are apart: a group
+  // takes every row of its value, in the order the value first appears.
+  const groups = grouped ? [...new Set(firsts)].map((value) => kept.filter((row) => row[0] === value)) : [kept];
+  if (grouped) {
+    for (const group of groups) {
+      const keys = group.map((row) => row[1] ?? '');
+      if (new Set(keys).size !== keys.length) throw new Error(`the rows of "${group[0]?.[0] ?? ''}" share a row header (${keys.join(', ')}): a group needs a second column that tells its rows apart`);
+    }
+  }
+  return { head: cut(head), groups, grouped, dropped };
+}
+
+/** The tables of a guide as its page draws them, in the order of its texts. */
+export function pageTables(id: FileGuideId, shared: FileGuidesSharedTexts, texts: FileGuideTexts, file: MeasuredFile = MEASURED, lang: Lang = 'en'): PageTable[] {
+  return guideTables(id, shared, texts, file, lang).map((rows, index) => pageTable(rows, texts.tables[index]?.head ?? []));
 }

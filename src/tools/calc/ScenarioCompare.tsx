@@ -1,6 +1,7 @@
 // ScenarioCompare (docs/design/components/ScenarioCompare): two scenarios side by side with the same rows,
 // named A and B in deep circles, and one line that says the difference on both sides without naming a
-// winner: the tool is educational. Below 340 px of width the cards stack and the line moves to the top.
+// winner: the tool is educational. Side by side down to 320 px, with the number in 20 px below 480 px (F13b, D-38; DECISOES
+// § 549: they stacked under 340 px of column, with the line on top).
 import Icon from '../../icons/Icon.tsx';
 import { Sentence } from './ResultHero.tsx';
 import type { CalcView } from './types.ts';

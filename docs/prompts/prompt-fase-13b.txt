@@ -1,0 +1,758 @@
+ultracode
+
+# Missão
+
+Rode a F13b do FileOrca, a segunda das duas runs da fase "UX/UI: implementação" do `PLANO-MELHORIAS.md`. Construa o que o Victor escolheu na F10 para as calculadoras, o guia, a home, os hubs e as páginas institucionais, na ordem da lista dele:
+
+1. as calculadoras e o QR: o resultado, as tabelas, o erro e os rótulos (UX-12 A);
+2. a página de guia: o que medimos e a ferramenta antes da prosa (UX-13 A);
+3. a home como o mar por categoria, com o texto a mais para os 3 anúncios por largura (UX-03 B);
+4. o mar nos hubs e no tema escuro (UX-15 A);
+5. as páginas institucionais e o rodapé (UX-17 A).
+
+Junto deles vêm as 20 pendências da lista da decisão 2, a contagem de ferramentas que o Victor escolheu (sem os presets) e as três linhas do grupo 22 do `docs/PENDENCIAS.md` que a F13a deixou para esta run. A Oli fica no centro, e nenhum orçamento piora.
+
+Ao terminar:
+
+- nas calculadoras de dinheiro, de casa e de saúde, nos idiomas em que existem:
+  - o número e o Baixar PDF moram no ResultHero. A 360 × 740, o número termina acima de 596 px, fora do aviso de cookies, e o Baixar fica acima da dobra;
+  - a Oli senta na borda do card desde a primeira pintura, e o card não muda de altura na 1ª tecla nem no erro;
+  - o erro mora no card e diz qual foi o último resultado que valeu;
+  - no SAC × PRICE, a PRICE está no card, e o cronograma vem antes dos chips, com nome fixo;
+  - os rótulos, as tabelas e o QR das pendências estão consertados;
+- nos 10 guias de arquivo, nos três idiomas, a ficha "What we measured" fica logo abaixo do H1, a ferramenta vem antes da prosa, a assinatura cabe numa linha e a tabela tem a pista de rolagem;
+- a home dos três idiomas é o mar por categoria:
+  - o H1 tem a contagem (46, 29 e 35);
+  - a Oli nada na água;
+  - cada categoria tem uma faixa, com números que têm fonte no repositório;
+  - no build de teste, há 3 anúncios `geral` por largura;
+- os hubs de categoria abrem com o aquário (a água, a crista da categoria e a Oli `swim`), e no escuro o resultado e o rodapé se leem como o fundo do mar;
+- a 404, a Sobre, a Contato e as páginas jurídicas usam o espaço que sobrava a 1280, e o rodapé no celular tem um `details` por categoria;
+- o mapa de anúncios da F12 continua verde no build de teste, com os moldes novos;
+- o `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão em dia;
+- o relatório está em `docs/relatorios/fase-13b.md` e a revisão em `docs/relatorios/REVISAO-F13b.md`;
+- a PR da branch `fase-13b` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `bd844ca` (a F13a mesclada) ou num commit mais novo. Confira com `git log --oneline -5`. Guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+O que mudou desde que o plano foi escrito:
+
+- **A F13a está na main** (§ 456 a § 534):
+  - o aviso de cookies tem 128 px a 360 e repete o selo da própria página (§ 458). Onde o 1º anúncio de conteúdo ficaria perto dele, o `lower()` do script do aviso o desce, com 160 px de folga para a troca das fontes (§ 459 e § 517). Isso vale também nas calculadoras, nas janelas altas;
+  - a Oli faz um movimento curto por estado, e só o progresso é laço. A regra `checkLoops` do `gate:design` reprova `infinite` fora de uma lista fechada de seletores do progresso (§ 460);
+  - a página de ferramenta é "um lugar só" (§ 463 a § 484):
+    - o resultado é o mar que subiu, com a onda no topo do `.fo-result` (§ 463);
+    - a faixa de baixo tem a cópia escondida da linha do resultado (§ 466);
+    - a ferramenta embutida dos 10 guias de arquivo já usa essa ilha;
+  - o conjunto tem 71 ícones, e o campo `icon` dos registros das calculadoras e dos hubs já mudou (§ 490 a § 493);
+  - o soltar vale em qualquer lugar, e as páginas sem ferramenta têm o `dropEffect = 'none'` (§ 501 a § 503);
+  - os 150 px até os anúncios contam a caixa da Oli inflada em 12 px (§ 513).
+- **As escolhas do Victor.** Ele ficou com a recomendada em tudo. A lista marcada pode estar em `.cache/ESCOLHAS-marcado.md`, fora do Git: se estiver, é só leitura, e este prompt já traz o que vale. Na F13b:
+  - UX-12 A, UX-13 A, UX-15 A (sem as duas alternativas B) e UX-17 A (nas duas metades: o rodapé com `details` e a coluna da direita com uma peça da página);
+  - UX-03 B, com a decisão avulsa do texto da home: a F13b escreve de 75 a 105 palavras a mais no `<main>` da home, uma frase por faixa, para os 3 anúncios por largura;
+  - as pendências da decisão 2, com o destino recomendado de cada uma.
+- **A contagem de ferramentas** (escolha do Victor em 5/nov; F10 p-17 e F11 R-E-1): o site conta sem os presets. O H1 da home diz 46 em en, 29 em pt e 35 em es, e a Sobre e os Termos de en e es passam de 18 para 14 calculadoras de dinheiro, como o Menu e os hubs já dizem. A decisão 3 diz como.
+- **O grupo 22 do `docs/PENDENCIAS.md`** tem três linhas com "Run F13b" no "Quem resolve": a F13a R-c-1, a R-a-6 e a R-c-3. Elas medem a página de ferramenta a 320 px (decisão 9).
+- **O rótulo `ci` pode não existir.** Na F12 e na F13a ele não existia (§ 448 e § 461), e criá-lo é do Victor. A decisão 13 diz o que fazer.
+- **O CI roda por classe** (F9, `scripts/ci/classificar.ts`):
+  - a PR em rascunho sem o rótulo `ci` roda o job `leve` (tipos, lint, build e Vitest);
+  - a PR pronta roda tudo: o build uma vez, os portões, o Playwright em partes (5 no Chromium e 13 no WebKit) e o Lighthouse;
+  - depois, o `merge` mescla sozinho a PR do dono que não mexe em `.github/`. Esta PR cai na classe completa.
+- **O repositório é público** (§ 338). Tudo o que você commita, a PR, os logs e os artefatos do Actions ficam públicos.
+- **O próximo § livre do `DECISOES.md` é o 535,** se nada entrou depois da F13a. Reserve os números no plano e escreva os § na ordem: um § citado antes de ser escrito prende a numeração.
+- **A linha de base da F13a:** o Vitest tem 120 arquivos e 1.963 testes; o `--list` do Playwright tem 1.903 testes por navegador, em 61 arquivos; o `pnpm verificar --partes` somou 2.511 s, com 21 partes. Confira os números no ponto de partida.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **Este prompt.** Ele faz o papel da ficha da F13b e vence o resto.
+2. **O `PLANO-MELHORIAS.md`:**
+   - "Mudanças no contrato" (sobretudo a 8, a 9, a 12 e a 14), o parágrafo "O que não muda" e "Regras novas de toda run";
+   - a seção B (o mapa de anúncios: home, calculadora e guia);
+   - a ficha da F13 e o "Depois da F13".
+3. **O `PLANO-FILEORCA.md`:** "Decisões fechadas", "Regra das calculadoras", "Orçamento de desempenho", "A mascote: Oli, a orca", "Molde da página de calculadora", "Confiança em dinheiro e saúde", "Regra da página programática", "Conteúdo de apoio" e "Execução por IA".
+4. **O `CLAUDE.md` e, de `docs/claude/`:**
+   - o `calculadoras.md`, o `design-e-oli.md`, o `anuncios.md`, o `playwright.md` e o `windows-git-bash.md`, inteiros;
+   - do `idiomas.md`, o que fala do `lint:texto`, do glossário, dos guias de arquivo e do `guias:medir`;
+   - do `ci.md`, as pegadinhas gerais da F1a e as seções da F9, da F11, da F12 e da F13a;
+   - do `imagem.md` e do `pdf.md`, só a seção da F13a (a ilha que os guias embutem e as linhas do grupo 22).
+5. **A proposta da F10** (`docs/propostas/ux-v2/`):
+   - no `README.md`, os itens UX-03, UX-12, UX-13, UX-15 e UX-17, a seção 6 (as pendências), a seção 8 (o mapa de anúncios da home, da calculadora e do guia) e, da seção 9, as linhas de contraste desses itens. O README tem 300 KB: leia buscando o título de cada item;
+   - a área "Especificação" (o `<section>` com o `#spec-title`) de `calc.html`, `guide-page.html`, `home-b.html`, `hub-sea.html`, `night-sea.html` e `pages.html`;
+   - do `DECISOES.md`, as § 365, § 366, § 370, § 375, § 376, § 378, § 379 e § 381, e o que elas citam.
+6. **O `docs/design/`:**
+   - o `README.md`, sobretudo os "Princípios de UX", "Movimento", "Cor", "Tipografia", "Layout e anúncios", "Mar", "Oli", "Voz" e a lista "Nunca";
+   - o `tokens.css` e o `tokens.json`;
+   - os README do ResultHero, do Placard, do ExportBar, do AmortTable, do ScenarioCompare, do SplitChart, do NumberField, do Button, do OliMessage, da Oli, do ToolCard, do GuideCard, do Footer, do Breadcrumb, do PrivacySeal, do ResultCard, do WaterLevel, do AdSlot e do CookieNotice;
+   - o `assets/Oli/README.md`.
+7. **Do `docs/PENDENCIAS.md`:** "Como ler", o Resumo, as linhas da lista da decisão 2 (nos grupos 5, 6, 14, 16, 19 e 20), o grupo 22, "Registrados (escolhas, não defeitos)" e "Já corrigidos depois da revisão".
+8. **O `DECISOES.md`, só buscando o §** (nunca inteiro). Comece pelas § 20, § 49, § 91, § 102, § 103, § 106, § 117, § 124, § 139, § 184, § 275, § 276, § 277, § 305, § 321, § 341, § 343, § 361, § 389, § 393 a § 398, § 401, § 419, § 436, § 448, § 456 a § 460, § 463, § 466, § 513, § 516, § 517, § 518, § 527 e § 531, e siga pelas que você precisar.
+9. **O código que a run toca:**
+   - as calculadoras: `src/tools/calc/` (o `ResultHero.tsx`, o `ExportBar.tsx`, o `CalcPanel.tsx`, o `CalcField.tsx`, o `Fields.tsx`, o `DateField.tsx`, o `CalcSchedule.tsx`, o `CalcScheduleRoot.astro`, o `AmortTable.tsx`, o `ScenarioCompare.tsx`, o `SplitChart.tsx`, o `Reviewed.astro`, o `CalcTool.astro`, o `CalcIsland.astro`, o `mount.ts`, o `view.ts`, os `defs/` e os `i18n/`), os presets em `src/tools/<calculadora>/presets/` e o `src/views/GuideView.astro`, que embute a calculadora nos guias de dinheiro;
+   - o QR: `src/tools/qr-code-generator/` (o `QrPanel.tsx`, o `QrTool.astro` e os `i18n/`);
+   - o guia: `src/views/FileGuideView.astro`, `src/tools/guides/` (o `registry.ts`, o `page.ts`, o `measured.ts`, o `measured-types.ts` e o `Reviewed.astro`), os `file-guides.ts` e `guide-*.ts` de `src/i18n/<lang>/`, o `data/guides-measured.json` (só leitura) e o `checkFileGuide` de `scripts/gates/conteudo.ts`;
+   - a home e os hubs: `src/views/HomeView.astro`, os `home.ts`, o `HOME_GUIDES` de `src/tools/guides/hub.ts`, o `ImageToolsView.astro`, o `PdfToolsView.astro`, o `MoneyCalculatorsView.astro`, o `LifeCalculatorsView.astro`, o `ToolCard.astro`, o `OliSprite.astro` e `src/oli/`;
+   - as institucionais: `src/views/NotFoundView.astro`, `AboutView.astro`, `ContactView.astro`, `LegalView.astro` e `LicensesView.astro`, `src/components/Footer.astro`, `SearchBox.astro` e `PrivacySeal.astro`, e os `about.ts`, `not-found.ts`, `contact.ts`, `terms.ts`, `licenses.ts`, `privacy.ts` (só a estrutura dos H2) e `common.ts` de cada idioma;
+   - o layout e os estilos: `src/layouts/BaseLayout.astro`, `src/styles/fonts.css` (a `Figtree Fallback`), `src/styles/global.css` e `src/styles/components.css`;
+   - os registros e as contas de página: `src/tools/image/registry.ts`, `src/tools/pdf/registry.ts`, `src/tools/calc/registry.ts` (o `HUB_MONEY_IDS` e o resto) e `src/components/header-menu.ts` (o `sectionCount`, que já conta sem os presets);
+   - os portões: `scripts/gates/design.ts`, `scripts/lib/design-checks.ts`, `scripts/gates/prontidao.ts` (só leitura) e `scripts/gates/dinheiro-saude.ts` (só leitura);
+   - os testes: em `tests/e2e/`, o `money-calc.spec.ts`, o `calc-form.spec.ts`, o `money-es.spec.ts`, o `money-health.spec.ts`, o `money-home.spec.ts`, o `money-speed.spec.ts`, os `money-*privacy.spec.ts`, o `qr-code.spec.ts`, o `tool-guides.spec.ts`, o `guides-hub.spec.ts`, o `navigation.spec.ts`, o `header-links.spec.ts`, o `design.spec.ts`, o `a11y.spec.ts`, o `layout-shift.spec.ts`, o `budgets.spec.ts`, o `i18n-budgets.spec.ts`, o `ads.spec.ts`, o `fo-ad-map.spec.ts`, o `ads-coffee.spec.ts`, o `cookie-notice.spec.ts`, o `cookie-footer.spec.ts`, o `events.spec.ts` e o `tool-slot.spec.ts`; em `tests/unit/`, o `about-counts.test.ts`, o `conteudo.test.ts`, os `guides-*.test.ts`, os `calc-*.test.ts`, o `ymyl.test.ts`, o `health-voice.test.ts`, o `contrast.test.ts`, o `theme-pair.test.ts`, o `sprite.test.ts`, o `design-checks.test.ts`, o `prontidao.test.ts`, o `ad-map.test.ts`, o `ads-pages.test.ts`, o `seo-pages.test.ts`, o `links-graph.test.ts`, o `hub-icons.test.ts`, o `cookie-seal.test.ts`, o `pendencias.test.ts` e os testes de texto (`glossary.test.ts`, `english-leak.test.ts`, `lint-texto-money.test.ts` e `text-punctuation.test.ts`).
+
+# Escopo
+
+Dentro:
+
+1. A especificação e a divisão (decisões 1 e 2).
+2. A base comum: a fonte de reserva no peso 600, o token `--danger-on-deep`, a linha d'água do escuro e a contagem (decisão 3).
+3. As calculadoras e o QR, com 14 pendências (decisão 4).
+4. A página de guia, com 3 pendências (decisão 5).
+5. A home, com o texto a mais e os números com fonte (decisão 6).
+6. O mar nos hubs (decisão 7).
+7. As páginas institucionais e o rodapé (decisão 8).
+8. As três linhas do grupo 22 (decisão 9).
+9. O mapa de anúncios verde com os moldes novos (decisão 10).
+10. Os textos, o `docs/design/`, o `docs/claude/`, o `docs/PENDENCIAS.md`, os testes, os §, as imagens, a revisão adversarial e o relatório (decisões 11 e 12).
+
+Fora (não toque):
+
+- **O que a F13a fez:** as ilhas de imagem e de PDF, o aviso de cookies, a Oli por estado, o chip que leva, os ícones e o soltar. Eles só mudam por dois caminhos: as três linhas do grupo 22 (decisão 9) e a linha d'água do `.fo-result`, se ela pedir (decisão 3).
+- **O que a F12 trava nos anúncios:** o `src/ads/` (a configuração, o AdSlot, o AdsenseHead, o mapa e a parede), as unidades, os formatos, o push único e as regras de "O que não muda". A única mudança permitida é a da decisão 10.
+- **O café:** os textos, as regras, o gatilho, o card, a linha do rodapé e a página de apoio (UX-05).
+- **O cabeçalho e o Menu** (UX-01) e **o hub de guias** (UX-02): o aquário não entra no hub de guias, e o Menu continua com 14, que já é a conta sem presets.
+- **Item não escolhido e alternativa não escolhida:**
+  - a A da home (a zona "solte qualquer arquivo");
+  - as duas B do UX-15 (a cena por categoria e o mar à noite, com os tokens `--proposta-mar-noite` e `--proposta-crista`);
+  - a B do UX-12, a do UX-13 e a do UX-17.
+- **Dependência nova,** inclusive um `pnpm dlx` ou `npx` de pacote fora do lockfile. Arquivo JS novo por página. Requisição nova. Imagem de fundo. Token novo além do `--danger-on-deep`.
+- **Evento novo do GA4.** Nenhum protótipo da F13b pede um. Se algum parecer necessário, ele fica de fora e vira linha no grupo 23 do `docs/PENDENCIAS.md`.
+- **Arquivos fora da run:** `.github/`, o `CLAUDE.md`, os dois PLANOs, `docs/adr/`, `docs/propostas/` (o registro da F10) e `.cache/ESCOLHAS-marcado.md` (só leitura).
+- **Código fora da run:**
+  - o motor e as contas das calculadoras: nenhum valor muda, e nenhuma fixture nem oráculo muda (`fixtures/` e `scripts/oracle/`);
+  - o `scripts/guides/`, nem num comentário (o `guides-measured.test.ts` confere o SHA-256), e o `data/guides-measured.json`, que só se lê;
+  - o service worker (`src/sw/`).
+- **A Privacidade:** nenhum texto dela muda, nem a data. O índice da coluna da direita (decisão 8) é navegação montada no build, não texto.
+- **O `pnpm screenshots`,** que apaga e regrava `docs/relatorios/fase-03/componentes/`, o `pnpm design:gerar` (nenhuma pose muda) e o `pnpm guias:medir`.
+- **Qualquer coisa no Cloudflare, no AdSense, no GA4 ou no Search Console,** e no GitHub fora da PR desta run.
+- **Os IDs reais do AdSense** nunca entram no repositório. Os testes usam o `ca-pub-0000000000000000` e os IDs falsos do build de teste.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 535)
+
+1. **A especificação.**
+   - A área "Especificação" de cada protótipo é o contrato, junto com as § 370, § 375, § 376, § 378, § 379 e § 381. Ela traz a marcação, as classes, os tokens, os estados, os textos nos três idiomas, as medidas e, onde houver, a lista "Testes que a F13 escreve".
+   - Onde ela e este prompt divergem, vale este prompt.
+   - Os protótipos estão sobre o `bundle.css` do `docs/design/`, que não é o CSS do site. Construa sobre o `components.css` e o `global.css`, e confira cada medida no `dist/`.
+   - As medidas dos protótipos foram tiradas com o aviso de cookies de antes, o cabeçalho de antes da F11 e a página de ferramenta de antes da F13a. Meça de novo no site.
+   - O site não importa nada de `docs/propostas/`. O script dos previews (`?state=`, `?lang=`, `?theme=`, `?alt=`, `?view=`, `?ads=`) e o controle de protótipo não vão para o site. Nenhum nome `--proposta-*` vai para o site: o `--proposta-danger-on-deep` vira `--danger-on-deep` (decisão 3).
+
+2. **A divisão e a ordem.** Registre num § a ordem e as listas abaixo.
+   - **A F13b constrói,** na ordem da lista do Victor: UX-12 A, UX-13 A, UX-03 B, UX-15 A e UX-17 A.
+   - **As 20 pendências da F13b:**
+     - no UX-12, 14: F4 ACE-7 (aceitar e registrar), F4 ACE-8, a metade das calculadoras da F4 ACE-9, F4 ACE-11, F7 obs 1, F7 obs 2, F7 obs 3, F7 f-9, F7 f-10 (pela saída A), F7 f-13, Idiomas E-2, Idiomas R2-03, F10 p-19 e a F10 p-3, que corrige o texto da F7 obs 3 (os rótulos que empurram a etiqueta são os da Paint, e a Mulch só quebra o "Bag size" a 320 px) e sai junto com ela;
+     - na base comum, 1: F10 p-15 (decisão 3);
+     - no UX-13, 3: F5b F-2, F5b F-13 e a metade dos guias da F4 ACE-9 (a ACE-9 conta nos dois itens: os ids são 20);
+     - no UX-03, 2: F10 p-16 e F10 p-17;
+     - e a F10 p-2, que divide a F4 ACE-9 entre o UX-12 e o UX-13: ela fecha quando as duas metades fecham.
+   - **Mais quatro linhas:** a F11 R-E-1, fechada pela escolha do Victor (decisão 3), e as F13a R-c-1, R-a-6 e R-c-3 (decisão 9).
+   - **O que a F13b não faz:** a F12 p-4 (o núcleo do `CLAUDE.md`, fora desta run) e o resto dos grupos 19 a 22, que são do Victor ou de runs de ajuste.
+
+3. **A base comum** (a fatia 1, do agente principal).
+   - **A fonte de reserva no peso 600** (F10 p-15):
+     - calibre a `Figtree Fallback` (`src/styles/fonts.css`) também para o peso 600, do mesmo jeito da face de hoje (o caso da F8 s-2);
+     - a prova vem depois da junção, porque os rótulos novos da Paint são da frente C: na Paint em en, a 360 px, no WebKit, com a Figtree segurada, "Window area" fica numa linha;
+     - o CLS de carga do `layout-shift.spec.ts` (320 a 412 px) não piora em nenhuma página;
+     - a fonte muda medidas no site inteiro. Depois dela, rode o `cookie-notice.spec.ts` (as duas linhas do aviso com a reserva), o `tool-slot.spec.ts`, o `layout-shift.spec.ts` e o `calc-form.spec.ts`, nos dois navegadores.
+   - **O token `--danger-on-deep`** (UX-12; § 375):
+     - `#FF8A80`, para o ícone de alerta sobre o `deep`, onde o `danger` tem só 2,45:1 no claro;
+     - entra no `docs/design/tokens.css` e no `tokens.json` (os dois temas, com o valor do escuro da especificação, ou o mesmo se ela não der outro);
+     - o contraste contra o `deep` fica calculado nos dois temas, no README do ResultHero e no do design system (Cor). O `theme-pair.test.ts` e o `contrast.test.ts` passam.
+   - **A linha d'água do escuro** (UX-15 A; `night-sea.html` com `?alt=a` e § 378). O fundo do mar se lê pela forma, nos dois temas, não pela luminância (G-07):
+     - os cartões `deep` ganham por dentro da borda, no padding de cima, 16 px de `surface` que terminam na onda (a mesma máscara do rodapé), com a crista de 2 px em `stroke`;
+     - o rodapé ganha a mesma crista sobre a onda que já tem;
+     - só pseudo-elementos: nenhum HTML novo nos cartões, nenhuma cor nova, e a altura do cartão não muda;
+     - **o `.fo-result` da página de ferramenta já tem a onda da F13a** (o mar que subiu, § 463). Construa uma vez só, como a § 378 manda: se a faixa da F13a já desenha a superfície nos dois temas, a linha d'água do `.fo-result` é ela, e o teste do `night-sea.html` se escreve sobre a estrutura dela. Registre num §. Nunca pinte uma segunda onda;
+     - **o `.fo-rhero` é da frente C** (decisão 4), porque a Oli senta na borda dele. A fatia 1 deixa a regra pronta no CSS, e a frente C a aplica;
+     - a frente I (decisão 8) mexe na marcação do rodapé no celular, não na onda nem na crista.
+   - **A contagem** (escolha do Victor; F10 p-17 e F11 R-E-1):
+     - uma conta só no site, sem os presets, lida dos registros no build: as ferramentas de imagem com página no idioma (8), as de PDF (12), as de dinheiro do hub do idioma (`HUB_MONEY_IDS[lang]`: 14 em en e es, 8 em pt), as de casa (6) e as de saúde (5) onde existem, e o QR (1). Dá 46 em en, 29 em pt e 35 em es. Os 3 presets de imagem e os 4 de dinheiro nunca contam;
+     - um módulo só, no Node e sem JS no cliente (como o `header-menu.ts`), dá a conta à home (decisão 6), ao cartão da Sobre (decisão 8) e ao texto da Sobre e dos Termos;
+     - a Sobre e os Termos de en e es passam de 18 para 14 calculadoras de dinheiro, e "all 18 in Spanish" passa a 14. Use o texto mais simples que o `about-counts.test.ts` novo aceite (os 4 presets podem aparecer à parte). Um § fica ao lado da § 321, que contava os presets, e diz o que muda;
+     - os Termos mudam de data nos idiomas em que o texto muda. Os testes que fixam a data mudam no mesmo commit, com um § no formato da § 341;
+     - o Menu (14) não muda;
+     - o `about-counts.test.ts` passa a conferir a conta nova. Um teste novo confere que o H1 da home, o cartão da Sobre, a Sobre e os Termos dizem o número do módulo, nos três idiomas.
+
+4. **As calculadoras e o QR** (UX-12 A; `calc.html` e § 375).
+   - **Onde:** toda página de calculadora (dinheiro, casa, saúde, os presets e as 8 do Brasil), nos idiomas em que existe, e a calculadora embutida nos guias de dinheiro (`GuideView.astro`, a mesma ilha). O molde dos guias de dinheiro não muda.
+   - **O ResultHero é o lugar do resultado, do Baixar e do erro, na mesma caixa:**
+     - o Baixar PDF fica dentro do card, logo abaixo do número, em bloco no celular. Na hipoteca (en e es) e no SAC × PRICE (pt), a 360 × 740, ele fica acima da dobra (o protótipo mede de 638 a 702 px), e o número termina acima de 596 px (F10 p-19). Nas outras calculadoras, o relatório traz a medida, e nenhuma fica pior que no ponto de partida;
+     - o CSV ganha verbo ("Download CSV", "Baixar CSV", "Descargar CSV") e divide a linha com o Copiar link, fora do card (F4 ACE-8);
+     - a Oli fica no card desde a primeira pintura, sem a Placa, e o card não cresce: a altura é a mesma no exemplo, na 1ª tecla, no resultado e no erro (D-36 e D-40);
+     - **o erro mora no card:**
+       - a mensagem do campo fica no lugar do Baixar;
+       - "Last result that worked: Rate 6.5%." (e o equivalente em pt e es, da especificação) fica no lugar da frase;
+       - o número passa a `on-deep-muted`;
+       - o campo ganha o traço e o ícone sem crescer (borda de 2 px mais 1 px de `box-shadow`);
+       - a altura não muda, e nada é empurrado sem toque (D-34, D-35 e D-41);
+     - **a F4 ACE-11:** o campo culpado, inclusive o pagamento do Credit card payoff que não cobre os juros, ganha `aria-invalid` e um `aria-describedby` para a frase do card, sem repetir a frase. O leitor de tela ouve o erro pela região viva do card, uma voz só (§ 102);
+     - o ícone de alerta sobre o `deep` usa o `--danger-on-deep`.
+   - **Os campos de impostos e de TR** ficam num bloco recolhível, com o total no título. No celular, o bloco termina no eco do resultado (D-32 e D-33). Os campos de dentro só entram no DOM com o bloco aberto (a pegadinha do `<details>` da F13a no `anuncios.md`).
+   - **A 1280,** a grade usa `grid-template-rows: auto 1fr`.
+   - **O SAC × PRICE:** a PRICE entra no card ("Na PRICE: R$ 4.534,12 por mês", com o número do exemplo, e duas barras na mesma escala, a variante nova do SplitChart), e os cartões A e B ficam lado a lado até 320 px, no ScenarioCompare (D-38).
+   - **O cronograma** entra na ilha, antes dos chips, com o nome fixo e o chevron que gira com o `aria-expanded` (D-43 e F4 ACE-8).
+     - O 1º anúncio continua depois dos chips.
+     - Se a ilha do cronograma (`CalcScheduleRoot.astro`) virar parte da principal, um nome some da lista de JS de `dist/_astro/`. Pode sumir; nunca entra um nome novo.
+   - **Os H2** ficam em Fredoka (D-46).
+   - **O "Reviewed by"** cabe numa linha, com a data curta (G-23). O bloco `[data-ymyl="reviewed"]` continua, e o `gate:dinheiro-saude` e o `ymyl.test.ts` passam.
+   - **As tabelas** (a metade das calculadoras da F4 ACE-9): `th scope="row"` na primeira célula de cada linha, sem o `sticky` herdado do `.fo-amort th`, e a região com o nome do título, diferente do nome da tabela.
+   - **Os rótulos** (o `?view=parts` do protótipo):
+     - a BTU (F7 f-13): "Normal", "Shade" e "Sun", com a nota do que cada um muda;
+     - a Paint (F7 obs 3, com a p-3): "Coverage", "Door area" e "Window area". O teste dos menus do `calc-form.spec.ts` (§ 277) passa a medir a seta do navegador em vez de supor 26 px;
+     - a etiqueta "example" fica compacta abaixo de 400 px;
+     - a Idiomas E-2, pela folga da etiqueta: em es, "Tasa nueva", "Plazo nuevo" e "Tasa anual" ficam numa linha com a fonte de reserva, e a ferramenta não sobe quando a Figtree chega;
+     - a Ovulation (F7 obs 2): a data curta, em colunas fixas, nunca quebra entre o mês e o dia a 320 px, e a tabela não rola de lado;
+     - a Idiomas R2-03: no preset 15 vs 30 em es, uma descrição escondida (`aria-describedby` para um `fo-sr`) dá os anos aos campos de taxa, sem mudar o rótulo visível nem a dobra (§ 124).
+   - **O QR:**
+     - a F7 f-9: o tamanho fica sempre na 2ª linha do Baixar, sem o "·", com o botão de 60 px;
+     - a F7 f-10, pela saída A: sem código, o Baixar não aparece, e o lugar dele guarda a altura. A mesma regra vale para o Baixar PDF da calculadora sem resultado válido (§ 139 e § 276).
+   - **A F7 obs 1:** o foco da lista de áreas e da de dívidas volta pelo id estável da linha depois do re-render. O teste aperta o Enter no "Remove" a menos de 16 ms da tecla.
+   - **A F4 ACE-7:** aceita e registrada num §, sem mudar a ordem do DOM (a ordem do DOM é a do celular, e o Tab volta a um botão só). Ela vai para "Registrados (escolhas, não defeitos)".
+   - **A Oli** (§ 375 e a especificação):
+     - mora no ResultHero desde a primeira pintura, sentada na borda de cima à direita (64 px no celular e 80 a partir de 768), olhando para o número;
+     - fica parada em `wave` no exemplo, faz `cheer` uma vez no primeiro resultado da visita e `oops` no erro. A pose troca na mesma caixa, então nada se move;
+     - na saúde, nunca faz `cheer` (o `health-voice.test.ts`);
+     - é `aria-hidden` e fica a 150 px ou mais de todo anúncio, com a caixa inflada em 12 px (§ 513);
+     - o sprite das páginas de calculadora leva as poses que ela usa, e o `gate:design` passa a exigi-las nessas páginas, como faz com a `FILE_PANEL_POSES`.
+   - **A linha d'água do escuro** no `.fo-rhero` (decisão 3), sem cobrir a Oli nem o número.
+   - **A medida dos 16 ms por tecla continua** (`money-speed.spec.ts`).
+   - **As mudanças de regra** que o Victor aceitou vão para os README, cada uma com o texto de antes e o de depois num §:
+     - o ResultHero, o Placard e o ExportBar: o Baixar no card e a Oli sem a Placa;
+     - o ScenarioCompare: lado a lado até 320 px;
+     - o SplitChart: a variante de duas barras;
+     - o Button: o tamanho na 2ª linha, sem o ponto, e o Baixar que some sem resultado.
+
+     O molde da calculadora do `PLANO-FILEORCA.md` (itens 5 a 7) e a § 117 não são editados: um § diz o que este prompt substitui, com o texto de antes e o de depois.
+   - **Nenhum número das contas muda:** o `calc-oracle.test.ts`, as fixtures e o `money-calc.spec.ts` passam com os mesmos esperados.
+
+5. **A página de guia** (UX-13 A; `guide-page.html` e § 376).
+   - **Onde:** os 10 guias de arquivo, nos três idiomas (30 páginas, `FileGuideView.astro`). Os guias de dinheiro não mudam de molde: a calculadora embutida deles muda pela decisão 4.
+   - **A ordem nova:** trilha, H1, assinatura, a ficha "What we measured", a ferramenta, a introdução, o anúncio, as medidas, as fontes e as relacionadas (§ 376).
+   - **A assinatura** (F5b F-13 e G-23):
+     - cabe numa linha, com o nome e a data curta. A 360, ela tem até 20 px de altura;
+     - a primeira publicação e o que mudou vão para um histórico no fim da seção das medidas.
+   - **A ficha:**
+     - um papel com a dobra turquesa, logo abaixo do H1, com dois números em `number-md` e um link para a tabela. No HEIC: +25 % em JPG, com 18,8 MB → 23,6 MB, e 0 de 10 JPGs com GPS;
+     - cada número sai, no build, do `data/guides-measured.json`, nunca digitado no texto. A ficha de cada guia escolhe os dois números da medida dele, nos três idiomas: registre num § a escolha de cada guia;
+     - nenhuma Oli na ficha.
+   - **A ferramenta antes da prosa:** nos 30 guias, a 360 × 740 o topo do painel fica acima de 740 px, e a 1280 × 800 o Escolher termina acima de 800 px.
+   - **O resultado não empurra o texto:**
+     - a ilha é a da F13a, com o retângulo, a faixa e a cópia escondida. O CLS do uso fica em até 0,05 a 360 e a 1280;
+     - no resultado, com o Baixar no topo da tela, o 1º chip fica inteiro na tela a 360 × 740;
+     - o "Comparar" é o da ilha;
+     - se a especificação pedir da ilha algo que a F13a não fez, registre num § e meça o que a ilha dá: a ilha não muda nesta decisão.
+   - **O link "Open the tool"** (`.fo-guide__open`) sai de baixo do painel e entra numa frase da prosa (D-54).
+   - **A tabela "Photo by photo"** (F5b F-2 e a metade dos guias da F4 ACE-9):
+     - a pista de rolagem em CSS puro: o traço tracejado da DropZone na borda onde ainda há coluna e, abaixo de 768 px, a frase "Scroll sideways to see the 6 columns" (e o equivalente em pt e es, da especificação), só quando a tabela é mais larga que a moldura;
+     - sem a coluna que é igual nas 10 linhas;
+     - a câmera como cabeçalho do grupo (um `tbody` por valor repetido, com `th scope="rowgroup"`) e o tamanho em HEIC como cabeçalho da linha (`th scope="row"`);
+     - a região com o nome do título da seção, diferente do da tabela.
+   - **O `gate:conteudo`** (§ 184): o `checkFileGuide` passa a pedir a ordem nova e procura o link da ferramenta no texto do guia. Nenhum limite afrouxa.
+   - **Os anúncios** pelo mapa (decisão 10): nunca dentro da ferramenta embutida nem colados na tabela.
+   - **A Oli** é a de sempre da ilha, no canto do retângulo. Nenhuma Oli nova no guia.
+
+6. **A home** (UX-03 B; `home-b.html` e § 370).
+   - **Onde:** a home dos três idiomas (`HomeView.astro` e os `home.ts`).
+   - **O topo:**
+     - o H1 com a contagem do módulo da decisão 3, na largura toda ("46 tools. 0 uploads." e o equivalente em pt e es, o texto da especificação com o número do módulo);
+     - a Oli `swim`, com 128 px ou mais (128 no celular e 152 a partir de 768), nada numa faixa de água (a mesma `.fo-water` da DropZone), com o selo de privacidade, olhando para o H1;
+     - o H1 continua sendo o LCP.
+   - **Uma faixa por categoria,** como a especificação: `*-soft` no claro e `surface` no escuro, com a onda do rodapé na cor cheia da categoria na borda de baixo. Cada faixa traz a contagem, um número medido e as ferramentas como chips com o círculo da categoria.
+   - **Os números** (F10 p-16):
+     - todo número das faixas e das descrições tem fonte no repositório e é lido no build: o medido (`data/guides-measured.json`), o exato (o preset de 1280 × 720, o AES-256 do Proteger PDF) ou o exemplo (o da calculadora, conferido em `fixtures/calc/`, como "$2,396.20 a month" e "R$ 284.596 a menos");
+     - o "2.6 MB → 717 KB" do comprimir vem do diagnóstico da F10, fora do Git. Use um número de imagem que já tenha fonte no repositório, nunca uma fixture nova (`fixtures/` fica intacta), e registre num §;
+     - um teste no `dist/` confere cada número da home contra a fonte, nos três idiomas.
+   - **A seção de guias da F11** (§ 398 e o `HOME_GUIDES`) fica, com o número que cada guia mediu.
+   - **O texto a mais** (a decisão avulsa): de 75 a 105 palavras a mais no `<main>`, uma frase por faixa, nos três idiomas, para o `gate:prontidao` dar 3 anúncios de conteúdo por largura. Confira a conta do portão (§ 361) em cada idioma.
+   - **Os anúncios `geral`** (decisão 10):
+     - o 1º fica depois da primeira seção (o topo a 1.336 px ou mais a 360), nunca na primeira tela do celular, e os seguintes a 1.110 px ou mais um do outro;
+     - a partir de 768 px, só o conteúdo 1 e o multiplex no fim;
+     - a lateral entra a partir de 1280 px, e a 2ª unidade dela só com 600 palavras ou mais no `<main>`;
+     - as caixas que só valem numa largura usam o `fo-mobile-only` e o `fo-desktop-only`, como a F12 faz;
+     - sem anúncio (o build padrão), o `<main>` ocupa a largura da página a 1280 (G-06).
+   - **A Oli do topo,** a partir de 1280 px, guarda 12 px ou mais da borda da coluna da lateral (a pegadinha da F13a no `design-e-oli.md`) e fica a 150 px ou mais de todo anúncio, com a caixa inflada.
+   - **O movimento:** a `swim` e a água da home não são progresso. A Oli balança e para antes de 5 s, a água não anda em laço, e nada anima com o movimento reduzido (as armadilhas).
+   - **O orçamento:** nenhum JS novo. A home continua sem ilha, com as mesmas requisições do ponto de partida, ou menos, e o JS inline igual ou menor. O CLS de carga fica em 0.
+
+7. **O mar nos hubs** (UX-15 A; `hub-sea.html` com `?alt=a` e § 378).
+   - **Onde:** os hubs de categoria (imagem, PDF, dinheiro em en e es, o dinheiro do Brasil em pt, casa e saúde), em todos os idiomas em que existem. O hub de guias (`GuidesHubView.astro`) fica como está: se a classe `fo-hubband` for comum, a regra nova se prende aos hubs de categoria.
+   - **A faixa vira o aquário da categoria:**
+     - no pé dela, a água (`water`) com a onda do rodapé (120 × 16 px, máscara de um elemento, nunca imagem de fundo) e uma crista de 3 px na cor cheia da categoria;
+     - a Oli `swim` de 72 px nada à direita, meio submersa (o olho acima da linha), olhando para o H1;
+     - no escuro, a faixa passa de `*-soft` para `surface`, e a cor da categoria fica só na crista (G-21).
+   - **Tudo do mar** fica num `div aria-hidden="true"` com `pointer-events: none` (o `.fo-hubband__sea`), sem nada focável e sem texto debaixo da água.
+   - **O movimento:** a Oli balança três vezes ao abrir (`fo-bob`, 4,8 s ao todo) e para. Com o movimento reduzido, nada.
+   - **O layout:**
+     - a faixa nasce com a altura final (CLS 0);
+     - ela cresce 56 px a 360 e 64 a partir de 768, e o 1º cartão do hub de imagem em en a 360 fica acima da dobra de 740.
+   - **A Oli** fica a 150 px ou mais da lateral e de todo anúncio, com a caixa inflada, e olha para o lado oposto ao da lateral.
+   - **O `gate:prontidao`** conta os mesmos cartões por hub (a faixa não tem link).
+   - **A mudança** vai para o README do ToolCard (a `fo-hubband`), com §, e os pares UX15-H1, UX15-H2, UX15-W1 e UX15-W2 vão para o README com o contraste nos dois temas.
+
+8. **As páginas institucionais e o rodapé** (UX-17 A; `pages.html` e § 379).
+   - **A 404** (`NotFoundView.astro`, nos três idiomas):
+     - a Oli `lost`, com 128 px (160 a partir de 768), boia numa faixa de água (`fo-water` sobre `surface-sunken`, 176 px de altura), olhando para o H1;
+     - a busca fica só com o traço, sem `shadow-pop`;
+     - três chips de ferramentas reais, a primeira de cada hub no idioma, lidas dos registros (Compress image, Merge PDF e Mortgage calculator; em pt, Simulador SAC × PRICE), e o link da home;
+     - a 1280, a faixa vira a coluna da direita;
+     - a página continua sem anúncio e com o status 404.
+   - **A Sobre** (`AboutView.astro`):
+     - o cartão "FileOrca in numbers" (um papel com a dobra) traz os números em `number-md`, lidos do módulo da decisão 3: 8 · 12 · 14 · 11 em en; 8 · 12 · 8 · 3 idiomas em pt; 8 · 12 · 14 · 3 idiomas em es; e "0 uploads" com o PrivacySeal;
+     - todo número do texto da Sobre vira algarismo (G-14);
+     - a Oli `wave` (96 px, 128 a partir de 768) entra ao lado da seção "Orcas are dolphins" e para depois de 4,8 s;
+     - a Sobre entra na lista de lugares da Oli (o README da Oli e o `docs/design/README.md`).
+   - **A coluna da direita a 1280,** nas páginas sem anúncio:
+     - a 404 (a faixa do mar), a Sobre e a Contato (o cartão dos números) e a Privacidade, os Termos e as Licenças (o índice "On this page", "Nesta página" e "En esta página", montado no build a partir dos H2);
+     - as classes da especificação (`fo-side`, `fo-sea`, `fo-stats` e `fo-toc`);
+     - nenhum AdSlot nessas páginas. A coluna é conteúdo, não a lateral de anúncio.
+   - **O rodapé no celular** (`Footer.astro`, abaixo de 768 px):
+     - duas colunas, com o hub de cada categoria à vista como link principal e as ferramentas da categoria num `<details>`;
+     - o link do hub, a linha institucional e a do café com 48 px. Os links das ferramentas dentro do `details` aberto ficam com os 32 px de hoje, a exceção da especificação (§ 381, b-04);
+     - a partir de 768 px, o rodapé de hoje, com os mesmos links na mesma ordem;
+     - a especificação usa o `::details-content`. Se ele não valer no WebKit do Playwright, use a saída mais simples, sem JS e sem duplicar links, que dê o rodapé de hoje a partir de 768 px, e registre num §;
+     - o link "Guias" (F11), a linha do café (F12) e a crista da decisão 3 continuam, e o rodapé fica sem Oli;
+     - a classe `.fo-footer__more` já existe desde a F11: não a confunda com as peças novas.
+   - **As mudanças de regra** vão para o README do Footer (abaixo de 768 px, o hub e um `details` por categoria) e para "Layout e anúncios" do `docs/design/README.md` (o que fica na coluna `rail` sem anúncio), cada uma num §.
+
+9. **As três linhas do grupo 22** (a página de ferramenta a 320 px). Meça de novo depois da junção da fatia 3, já com a fonte da decisão 3:
+   - **F13a R-c-1:** a 320 px, com uma foto de celular, o retângulo cresce no resultado das presets em pt e es e no comprimir. Se continuar, encurte a fala das presets ou tire a placa da 1ª linha da fala a 320 px;
+   - **F13a R-a-6:** a placa do resultado roça o selo da página de 320 a 440 px. Desça a placa sem cobrir a 2ª linha da fala, ou dê ao selo a altura que ela pede, medindo a dobra a 360 × 740;
+   - **F13a R-c-3:** a 320 × 640, na 1ª visita, o Escolher fica em parte sob o aviso em 8 páginas. Se continuar, ponha o H1 ou a trilha das presets em duas linhas a 320 px, e uma linha no `cookie-notice.spec.ts` fixa o que sobrar.
+
+   Cada uma ganha o teste que reprova sem a correção. Se a medida nova já passar, o teste prova isso, e a linha vai para "Já corrigidos" com o §. Nada aqui muda a ilha além do que a linha pede.
+
+10. **O mapa de anúncios com os moldes novos.**
+    - O mapa da F12 é contrato. Os moldes novos mudam alturas, então rode o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` no build de teste depois de cada fatia.
+    - Se um deles reprovar por causa da altura nova, corrija a estimativa (`src/ads/estimate.ts`) ou a fronteira, nunca o limite, e registre num §.
+    - **As caixas dos moldes novos** usam o AdSlot de hoje e as posições que a F12 já criou para a área de cada página (`geral` na home). O `PUBLIC_ADSENSE_SLOTS` não ganha posição. Se um molde pedir uma posição que não existe, a caixa fica de fora, com um § e uma linha no grupo 23: criar unidade é do Victor.
+    - **Os alvos novos dos 150 px** entram nas listas dos specs:
+      - nas calculadoras: o card com o Baixar dentro, a Oli do card, o bloco recolhível, o "Download CSV" e o Copiar link, o cronograma e os chips;
+      - no guia: a ficha e a moldura da tabela;
+      - na home: as faixas, os chips e a Oli;
+      - nos hubs: a Oli e a água.
+    - **Continua valendo:**
+      - a densidade conservadora em até 30 % a 360 × 740;
+      - os 1.110 px entre anúncios de conteúdo;
+      - nada acima da ferramenta no celular;
+      - na calculadora, o 1º anúncio depois dos chips, nunca entre os campos nem dentro do cronograma;
+      - no guia, nada dentro da ferramenta embutida nem colado na tabela;
+      - na home, nada na primeira tela do celular;
+      - as páginas livres sem anúncio;
+      - o `lower()` do aviso (§ 459 e § 517) nas sete janelas, com os moldes novos;
+      - o `gate:prontidao`, pela conta por largura (§ 361), em toda página.
+
+11. **Os textos, a documentação e os testes.**
+    - **Os textos novos:**
+      - entram em inglês, português e espanhol, nos arquivos de tradução de cada idioma, com as mesmas chaves e os mesmos `{placeholders}`;
+      - são os da calculadora (o erro, o último resultado que valeu, o CSV, o cronograma, a PRICE no card, os rótulos), do QR, da ficha, da pista e do histórico do guia, da home (o H1, as faixas e as frases a mais), da 404, da Sobre, da coluna da direita e do rodapé;
+      - seguem a especificação de cada protótipo;
+      - passam pelo glossário (`docs/i18n/pt.md` e `es.md`, com os termos novos que o `glossary.test.ts` pedir), pelo `lint:texto`, pelo `english-leak.test.ts` e pelo `text-punctuation.test.ts`;
+      - os botões começam com verbo, e o erro diz o caso e a saída;
+      - os números saem no formato do idioma, e o dinheiro do espanhol fica no formato dos EUA (a escolha da F6). Número que muda com o registro ou a medida entra pelo `{placeholder}`, nunca digitado no texto.
+    - **O `docs/design/`:** cada mudança de regra das decisões 3 a 8 tem um §, com o texto de antes e o de depois, no README do componente.
+      - O `bundle.css` e o `preview.html` de um componente só mudam se o `gate:design` ou um teste pedir.
+      - A regeneração do design system inteiro (F11 g-2 e R-B-3) fica fora.
+      - Todo par novo de tokens tem o contraste calculado, nos dois temas, no README do componente, a partir da seção 9 da proposta.
+    - **O `docs/claude/`:** as pegadinhas novas vão no fim do arquivo de tema (`calculadoras.md`, `idiomas.md`, `design-e-oli.md`, `anuncios.md`, `playwright.md`, `ci.md` ou `windows-git-bash.md`), numa seção "## F13b: calculadoras, guia, home, hubs e institucionais". O `CLAUDE.md` não muda.
+    - **O `docs/PENDENCIAS.md`:**
+      - as 20 pendências da decisão 2, a F11 R-E-1 e as três linhas do grupo 22 vão para "Já corrigidos depois da revisão", com o § e o teste da F13b. A F4 ACE-7 vai para "Registrados (escolhas, não defeitos)", com o §;
+      - um grupo "23. O que a F13b deixou" recebe o que a run e a revisão deixarem;
+      - o Resumo e o Total ficam em dia.
+
+      Nada some sem rastro: o `tests/unit/pendencias.test.ts` procura os ids no arquivo inteiro.
+    - **Os testes:**
+      - cada item ganha os testes da especificação, e cada pendência corrigida ganha um teste;
+      - cada teste novo reprova sem a mudança. Prove com o `dist/` do ponto de partida (o `serve-base.ts` do `playwright.md` ou o `git archive` do `windows-git-bash.md`), nunca com `git checkout -- arquivo` sobre mudança não commitada;
+      - o teste antigo que fixa o que esta run muda muda no mesmo commit que o código que ele protege. Exemplos: o "Show the full schedule" e o "CSV" no `money-calc.spec.ts` e no `a11y.spec.ts`; o card que cresce na 1ª tecla e a Placa; o Baixar desligado no `qr-code.spec.ts`; a ordem do guia e o `.fo-guide__open` no `conteudo.test.ts` e no `tool-guides.spec.ts`; a grade de cartões da home no `gate:prontidao`, no `hub-icons.test.ts` e nos specs da home; o 18 no `about-counts.test.ts`; a data dos Termos; o rodapé no `navigation.spec.ts` e no `header-links.spec.ts`;
+      - cada teste antigo que mudou entra num §, no formato da § 341: o que ele protegia e como a proteção continua;
+      - nenhum teste sai, nenhum é pulado e nenhum limite afrouxa. O número de testes do Vitest e o do `--list` do Playwright só crescem, e o antes e o depois vão no relatório.
+    - **A divisão nas partes:**
+      - um spec novo pesado vai num arquivo cujo nome caia numa parte leve, e um spec que usa o build de teste fica perto dos outros que o usam;
+      - rode o `--list` de cada parte (`docs/claude/playwright.md` e a seção da F9 do `ci.md`);
+      - confira que o `design.spec.ts` e o `image-matrix.spec.ts` continuam em partes diferentes.
+
+12. **As imagens do relatório.**
+    - **O quê:** o antes e o depois de cada item visual, em `docs/relatorios/fase-13b/`, com até 44 imagens:
+      - a hipoteca em en a 360 no exemplo, no resultado e no erro, e a 1280 no resultado;
+      - o SAC × PRICE em pt a 360, com a PRICE no card, e o cronograma aberto;
+      - os rótulos: a Paint a 360, a BTU a 320, a Ovulation a 320 e a refinanciamiento em es a 360 com a fonte segurada;
+      - o QR a 360, sem código e com código;
+      - o guia do HEIC em en a 360 (a primeira tela) e a 1280, e a tabela com a pista a 360;
+      - a home em en a 360 (a primeira tela e a faixa de dinheiro) e a 1280, e a home em pt a 360;
+      - um hub a 360 e a 1280, no claro e no escuro;
+      - no escuro: o resultado de uma calculadora, o de uma ferramenta e o rodapé;
+      - a 404 a 360 e a 1280, a Sobre a 1280, a Privacidade a 1280 com o índice, e o rodapé a 360;
+      - as linhas do grupo 22 que mudaram, a 320 px.
+
+      O "antes" sai do `dist/` do ponto de partida.
+    - **Como:** JPEG de qualidade 80 ou PNG, escala 1, até 300 KB cada uma e 10 MB no total, com nome em inglês.
+    - **Onde:** nada de imagem fora de `docs/relatorios/`, porque o checkout esparso do CI só pula essa pasta.
+    - **O que nunca aparece:** coordenada, metadado ou nome de arquivo com dado pessoal. Use as fixtures `gen-*` nas capturas.
+
+13. **A PR e o CI.**
+    - **A PR abre em rascunho** logo depois do primeiro push, e cada push roda o job leve.
+    - **Uma conferência no Linux, no meio da run,** depois da junção das frentes (a fatia 3 de "Como trabalhar"). O WebKit e as fontes de lá diferem do Windows (§ 305), e os moldes novos mexem no CLS, nas medidas e no mapa. Faça o push, espere a execução leve terminar e rode `gh pr edit <n> --add-label ci`:
+      - **se o rótulo existir,** acompanhe a execução completa, leia os logs, corrija o que só falhou lá e tire o rótulo depois (`gh pr edit <n> --remove-label ci`). Com a PR em rascunho, o `merge` não roda;
+      - **se não existir,** pule esta conferência e registre num §: a execução final é a conferência no Linux. Nunca use como atalho o `gh pr ready` seguido do `--undo`: o job `merge` decide pelo rascunho do payload do evento, e com o `ci-ok` verde ele tentaria mesclar a PR pela metade (§ 401 e F11 p-1).
+    - **No fim,** com tudo commitado (o relatório, a revisão e as imagens):
+      1. faça o push e espere a execução leve terminar verde;
+      2. só então rode o `gh pr ready`;
+      3. acompanhe a execução completa até o fim.
+
+      Se ela falhar: `gh pr ready --undo`, corrija, commite, faça o push, espere a leve e rode o `gh pr ready` de novo. A falha e a correção vão no relatório.
+    - **O custo:** o `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit <n> --body-file <arquivo>`), mesmo depois do merge.
+
+# Armadilhas conhecidas
+
+- **A Oli que nada fora da ferramenta não é progresso.** A `checkLoops` (§ 460) deixa `infinite` só nos seletores do progresso, e o `[data-oli="swim"] > svg` da ferramenta é um deles.
+  - Na home e nos hubs, a `swim` é decoração: prenda o movimento dela num seletor próprio (dentro do `.fo-hubband__sea` e da faixa da home), com iterações finitas, que vença o da ferramenta.
+  - O mesmo vale para a `.fo-water` decorativa: o teste "motion without the preference" do `design.spec.ts` exclui `.fo-level`, `.fo-water` e `.fo-spin` porque, na ferramenta, eles são progresso. Na home, nos hubs e na 404, a água não anda em laço, e o teste dessas páginas não a exclui.
+  - Ponha a home, um hub de cada view, a 404 e a Sobre na lista de páginas desse teste: nada `running` depois de 5 s, e o `getAnimations()` vazio com o movimento reduzido.
+- **O `<details>` fechado ainda faz o layout do conteúdo:** o `boxes()` do `ads.spec.ts` conta campo escondido como alvo. Os campos do bloco recolhível da calculadora entram no DOM só com o bloco aberto (`anuncios.md`, F13a).
+- **Os números vêm da fonte, no build:** o texto leva o `{placeholder}`, e o build põe o número no formato do idioma (o `groupDigits` e as regras de `docs/i18n/`). Um número digitado num arquivo de tradução fica velho na próxima medida.
+- **A conta do `gate:prontidao` é por largura** (§ 361): as caixas `fo-mobile-only` e `fo-desktop-only` contam só na largura em que aparecem, e 3 caixas pedem 450 palavras no `<main>`. A home de hoje é contada pelos `a.fo-tool` (§ 398): com os chips, a conta da home muda, e o teste muda no mesmo commit.
+- **O ResultHero troca a pose na mesma caixa:** o `data-oli` muda, e a caixa fica. A `cheer` sai uma vez por visita, e um re-render não pode repeti-la.
+- **O `lower()` do aviso e as calculadoras:** o aviso desce o 1º anúncio das calculadoras nas janelas altas (§ 459 e § 517). Com o card novo, meça de novo nas sete janelas do `fo-ad-map.spec.ts`, com a fonte segurada na primeira visita fria (`playwright.md`, F13a).
+- **O índice "On this page" sai dos H2 no build.** Os H2 das páginas jurídicas precisam de ids estáveis: se faltar, gere-os no build a partir do texto, sem mudar o texto. O `gate:links` confere os `#`.
+- **A 404 e o `serve-dist`:** o servidor devolve a 404 mais próxima para rota que falta. Confira o status antes de afirmar uma página, e confira o 404 da 404.
+- **O CLS da interação:**
+  - a API `layout-shift` só existe no Chromium, e o deslocamento com `hadRecentInput` não conta. O que conta é o que acontece sem toque, como a mensagem de erro 800 ms depois da tecla ou o resultado chegando do worker;
+  - abra o `PerformanceObserver` antes da primeira tecla ou do `setInputFiles`, com o `fo-consent` gravado;
+  - meça antes de qualquer captura `fullPage`, que faz um relayout com a fonte já carregada;
+  - o CLS de texto com a fonte atrasada muda entre Windows e Linux (§ 305), e no WebKit um hub não pinta enquanto a Figtree está segura.
+- **O foco:**
+  - o WebKit não dá foco a um botão por clique;
+  - o foco posto por script depois de um fechar pelo teclado é `:focus-visible`;
+  - o Preact reaproveita filhos sem `key` pelo tipo, em outra posição, e mover o nó focado tira o foco dele. Peça que troca de estado no card (o Baixar, a mensagem de erro, a Oli) fica no mesmo lugar em todos os estados, com `key` onde o tipo muda (`imagem.md` e `pdf.md`, F13a).
+- **O movimento:**
+  - o `endTime` do `getComputedTiming()` é `Infinity` num laço. Prove o fim pelo `endTime` e pelas animações com `playState === 'running'`;
+  - com `forwards`, o `transform` do fim sai como `matrix(1, 0, 0, 1, 0, 0)`, não `none`;
+  - a animação das peças da Oli mira o elemento do `<symbol>` dentro do sprite, então o seletor pendura num ancestral do sprite (`html` ou `body`), nunca numa seção;
+  - o `pnpm lancamento:imagens` lê os `@keyframes` da Oli do `components.css`: não renomeie nem tire um.
+- **O build de teste e o mapa** (as pegadinhas da F12 e da F13a no `anuncios.md` e no `playwright.md`):
+  - use `useTestBuild(test)` no topo do spec, e abra `https://fileorca.com/...` depois do `serveAsProduction(context, …)`;
+  - o ajudante refaz o build com a árvore suja, uns 35 s por variante;
+  - a margem de 150 px da `.fo-ad` não colapsa no `gap` da grade do `.fo-main`;
+  - para medir a densidade, grave o `fo-consent` e meça a página em repouso;
+  - o `boundingBox()` dá coordenadas da janela, não do documento, e o Chromium headless no Windows tem a barra de rolagem clássica, que muda as larguras;
+  - o `boxes()` infla só o `[data-oli]`, em 12 px;
+  - dois Playwright na mesma pasta apagam o `test-results/` um do outro e disputam o servidor do build de teste.
+- **As portas:** cada worktree usa o próprio `FO_PORT`, de 4174 a 4189, e o servidor do build de teste usa o `FO_PORT` + 100.
+- **O Astro e o TypeScript:**
+  - o `build.format` é `preserve`, então toda página é um `.../index.astro`;
+  - o tsconfig usa `exactOptionalPropertyTypes`: espalhe um objeto condicional, nunca passe `undefined`;
+  - o `pnpm tipos` confere também os specs. Rode-o antes do push, e nunca ao mesmo tempo que o Vitest inteiro (o `conteudo.test.ts` estoura o tempo; `ci.md`, F13a).
+- **Os moldes e os hubs recebem `lang` com o padrão `'en'`.** Escreva `.map((id) => cardOf(id, lang))`, nunca `.map(cardOf)`.
+- **O `lint:texto`:**
+  - no português, ele reprova nome de opção depois de vírgula e lê "for" como verbo num nome inglês;
+  - ele lê o `{n}` como "n" (F11 g-3, só aviso);
+  - ele tem uma pegadinha nos placeholders dos textos de dinheiro (`calculadoras.md`);
+  - os módulos que ele importa usam import estático.
+- **O `name:` do Playwright casa por pedaço de texto,** sem diferença de maiúscula. Use `exact: true` ou um escopo.
+- **O Git Bash:**
+  - heredoc e `node -e` com crase, barra invertida ou apóstrofo estragam o texto: escreva arquivo pela ferramenta de escrita;
+  - argumento que começa com "/" vira caminho do Windows (`MSYS_NO_PATHCONV=1`);
+  - o `git push` e o `gh pr create --base main` vão em comandos separados;
+  - no Node, `String.replace(a, b)` interpreta `$` em `b`: use `s.replace(a, () => b)`;
+  - o `uv` do oráculo está fora do PATH (`windows-git-bash.md`). Esta run não roda oráculo, só lê as fixtures.
+- **Nunca `git add -A` nem `git add .`:** a pasta `Claude outputs/` está na raiz, sem rastreio, e nunca entra. Adicione por caminho.
+- **Os agentes em worktree:**
+  - eles nascem da `main`: o primeiro passo de cada um é `git merge --ff-only fase-13b`;
+  - todo commit de merge leva o trailer `Co-Authored-By`, com a mensagem num arquivo (`git merge --no-ff -F <arquivo>`);
+  - um agente que escreve código usa `model: 'opus'`;
+  - um agente em worktree não escreve no checkout principal. Ele lê o `.cache/` do principal pelo caminho absoluto, mas grava no `.cache/` da própria worktree, e o agente principal copia o que precisa antes do `git worktree remove`;
+  - o `components.css` é de todas as frentes: cada uma escreve o CSS dela num bloco ao lado da seção que já existe do componente dela (calculadora, guia, home, hubs, rodapé), nunca no fim do arquivo, para o merge não colidir. Os `common.ts`, os registros e os arquivos de tradução também dão conflito: junte as duas partes e rode o `pnpm tipos`;
+  - cada frente escreve os § dela com um marcador próprio, e a junção troca os marcadores por números, a partir do 535, na ordem das frentes (a pegadinha da F12 no `windows-git-bash.md`).
+- **O repositório é público:** nenhum dado pessoal, ID real do AdSense ou segredo no que você commita, nem no relatório, na revisão ou nas imagens.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. **A base comum.**
+   - Na Paint em en, a 360 px, no WebKit, com a Figtree segurada, "Window area" fica numa linha. O `layout-shift.spec.ts` fica verde de 320 a 412 px.
+   - O `--danger-on-deep` está nos dois temas dos tokens, com o contraste calculado, e o `theme-pair.test.ts` e o `contrast.test.ts` passam.
+   - No escuro e no claro, o resultado da ferramenta, o ResultHero e o rodapé têm a linha d'água da especificação, e a altura do card é a mesma com e sem ela (os testes do `night-sea.html`, sobre a estrutura que a decisão 3 registrar).
+   - O módulo da contagem dá 46, 29 e 35. O H1 da home, o cartão da Sobre, a Sobre e os Termos dizem o mesmo número nos três idiomas (teste novo), e o Menu continua com 14.
+2. **As calculadoras.**
+   - Sem `fo-consent`, a 360 × 740, na hipoteca (en e es) e no SAC × PRICE (pt): o número termina acima de 596 px, e a interseção dele com o aviso é zero. Depois do Aceitar, o Baixar PDF fica inteiro acima de 740 px, na largura da coluna. Numa de casa e numa de saúde, o fim do número e o Baixar vão na tabela, e nenhum fica mais baixo que no ponto de partida.
+   - A altura do card é a mesma, com 1 px de tolerância, no exemplo, depois da 1ª tecla, no resultado e no erro, a 360 e a 1280.
+   - O CLS da interação fica em até 0,05 (0 no erro) a 360 × 740, no Chromium, na hipoteca e no SAC × PRICE, com a 1ª tecla e com um valor fora da faixa.
+   - No erro, a mensagem fica no card, o último resultado que valeu aparece com o valor, e o campo culpado tem `aria-invalid` e `aria-describedby` para a frase do card, também no pagamento do Credit card payoff.
+   - O cronograma vem antes dos chips, com o mesmo nome nos dois estados e o `aria-expanded` mudando. No build de teste, o 1º anúncio fica depois dos chips.
+   - O botão do CSV diz "Download CSV", "Baixar CSV" e "Descargar CSV".
+   - Toda tabela aberta tem `th[scope=row]`, sem `position: sticky` nele, e a região tem nome diferente do da tabela.
+   - Os rótulos da BTU e da Paint ficam numa linha a 360 e a 320 px, com a Figtree e com a reserva, nos dois navegadores. A Ovulation não quebra data a 320 px. Em es, a refinanciamiento e a consolidación não sobem quando a Figtree chega (CLS de carga com a fonte segurada). No 15 vs 30 em es, o nome acessível dos campos de taxa tem os anos, e o resultado fica acima de 740 px.
+   - No QR, sem código não há Baixar visível e a altura fica guardada. Com código, o tamanho fica na 2ª linha, sem o "·", e o botão tem 60 px.
+   - O teste da F7 obs 1 passa nos dois navegadores.
+   - A Oli está no card desde a primeira pintura, faz `cheer` uma vez, nunca na saúde, e `oops` no erro. Ela é `aria-hidden` e fica a 150 px ou mais dos anúncios, inflada.
+   - O p95 dos 16 ms por tecla do `money-speed.spec.ts` continua dentro do limite.
+   - A distância dos chips ao Baixar, a 360, antes e depois, vai na tabela do relatório e não cresce em nenhuma calculadora medida.
+3. **O guia.** Os testes da especificação do `guide-page.html` passam nos 30 guias, nos dois navegadores:
+   - a dobra (o painel a 360 × 740 e o Escolher a 1280 × 800);
+   - a assinatura numa linha;
+   - o CLS do uso em até 0,05 (ele reprova sem a ilha da F13a);
+   - o 1º chip na tela;
+   - a tabela, sem região com o mesmo nome da tabela, com os `th[scope=row]` diferentes em cada `tbody` e sem coluna igual em todas as linhas;
+   - nenhum `.fo-guide__open`, e o link da ferramenta no texto;
+   - a pista visível a 360 quando a tabela é mais larga que a moldura, e ausente a 1280 onde ela cabe.
+
+   Além disso, cada número da ficha bate com o `data/guides-measured.json` (teste no `dist/`), e o `gate:conteudo` reprova a ordem antiga num teste.
+4. **A home.**
+   - O H1 diz 46, 29 e 35. Cada número das faixas e das descrições bate com a fonte (teste no `dist/`).
+   - No build de teste, a 360 e a 1280, a home tem as 3 caixas por largura do protótipo, e o `gate:prontidao` passa com elas. Nada fica na primeira tela a 360, os anúncios de conteúdo ficam a 1.110 px ou mais um do outro e a densidade fica em até 30 %.
+   - No build padrão, a 1280, o `<main>` ocupa a largura da página. A altura do `<main>` a 360 em en, antes e depois, vai no relatório.
+   - A Oli tem 128 px ou mais, é `aria-hidden`, fica a 150 px ou mais dos anúncios (inflada) e a 12 px ou mais da borda da coluna a 1280. Nada fica `running` depois de 5 s.
+   - JS e requisições iguais ou menos que no ponto de partida, CLS de carga 0 e o H1 como LCP no Lighthouse.
+5. **Os hubs.** Os testes do `hub-sea.html` passam nas quatro views de hub, a 360 e a 1280: o mar é `aria-hidden`, nenhum texto da faixa cruza a água, a Oli fica a 150 px ou mais da `.fo-ad` mais próxima, nenhuma animação da faixa tem `iterations: Infinity` ou duração total de 5 s ou mais, e com o movimento reduzido não há nenhuma. O 1º cartão do hub de imagem em en a 360 fica acima de 740 px, e o `gate:prontidao` conta os mesmos cartões.
+6. **As institucionais e o rodapé.**
+   - A 404 tem a Oli `lost` na água, três chips que batem com a primeira ferramenta de cada hub do idioma (lida dos registros), a busca sem a sombra e o status 404.
+   - O cartão da Sobre bate com o módulo da contagem, e a Oli da Sobre para antes de 5 s.
+   - A 1280, as seis páginas da decisão 8 têm a peça delas na coluna da direita e nenhum AdSlot, e os links do índice levam a H2 que existem.
+   - A 360, o rodapé tem no máximo metade da altura do ponto de partida em en, em pt e em es. O link do hub de cada categoria, a linha institucional e a do café têm 48 px; os links das ferramentas dentro de um `details` aberto ficam com os 32 px de hoje, a exceção da especificação (§ 381, b-04). A partir de 768 px, o rodapé tem os mesmos links, na mesma ordem, do ponto de partida.
+7. **As três linhas do grupo 22:** cada uma com o teste que prova, a medida antes e depois e o §.
+8. **Os anúncios,** no build de teste:
+   - o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` passam nos dois navegadores, com os alvos novos da decisão 10;
+   - a densidade conservadora fica em até 30 % a 360 × 740 em toda página com anúncio;
+   - as páginas livres continuam sem anúncio;
+   - o relatório traz a tabela por molde, com a densidade máxima e a mediana e as menores distâncias até os alvos novos.
+9. **A acessibilidade.**
+   - O axe dá zero violação nos dois temas e nos dois navegadores:
+     - na calculadora: no exemplo, no erro, com o cronograma aberto e com o bloco recolhível aberto;
+     - no QR, sem código e com código;
+     - no guia, em repouso e no resultado;
+     - na home, nos hubs, na 404, na Sobre e na Privacidade com o índice;
+     - no rodapé a 360, com um `details` aberto e fechado.
+   - Todo controle novo ou mudado nesta run tem 48 px ou mais, a 360 e a 1280. As exceções são as da especificação: o link de texto dentro de uma frase (o da ficha do guia, WCAG 2.5.8) e os links das ferramentas no `details` do rodapé.
+   - Todo par novo de tokens tem o contraste calculado no `docs/design/`.
+10. **Nada que sai muda:**
+    - o `money-calc.spec.ts`, o `calc-oracle.test.ts`, o `image-matrix.spec.ts` e o `pdf-matrix.spec.ts` passam com o mesmo esperado;
+    - o `git diff --stat <ponto de partida> -- fixtures/ scripts/oracle/ scripts/guides/ data/` sai vazio.
+11. **O orçamento.**
+    - No build padrão, cada página que o `budgets.spec.ts` e o `i18n-budgets.spec.ts` medem tem os mesmos arquivos JS, ou menos, e as mesmas requisições, ou menos, que no ponto de partida. A lista dos nomes dos JS de `dist/_astro/`, sem o hash, não ganha nome (pode perder o do cronograma).
+    - O JS inicial fica em até 80 KB com gzip.
+    - O relatório traz o tamanho de cada ilha com gzip, antes e depois. Se uma ilha crescer mais de 3 KB, um § diz por quê.
+12. **O CLS e o Lighthouse.**
+    - O `layout-shift.spec.ts` fica verde de 320 a 412 px, nos dois builds.
+    - O desempenho fica em 90 ou mais (a mediana) e o CLS em até 0,05 em toda URL do `lighthouserc.json`.
+13. **Os textos.** O `lint:texto`, o `english-leak.test.ts`, o `glossary.test.ts`, o `text-punctuation.test.ts` e o `health-voice.test.ts` passam com os textos novos.
+14. **A documentação.**
+    - O `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão como a decisão 11 pede.
+    - O `pendencias.test.ts` passa, e os § começam no 535.
+15. **Os testes.**
+    - O número de testes do Vitest e o do `--list` do Playwright só cresceram.
+    - Todo teste antigo que mudou tem o seu §.
+    - Cada teste novo de comportamento reprovou contra o ponto de partida, e o relatório diz como.
+16. **O `pnpm verificar`.** O `pnpm verificar --partes` passa na máquina local, com o total de cada parte e a soma no relatório. Nenhuma parte passa de 700 s, nem no CI.
+17. **A revisão.** O `docs/relatorios/REVISAO-F13b.md` não tem achado crítico, alto nem médio aberto.
+18. **O CI.** A execução depois do `gh pr ready` termina verde, com o `ci-ok` verde, e o `merge` mescla a PR, ou o relatório diz por que não.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código.** No ponto de partida:
+  - rode `pnpm install --frozen-lockfile` e `pnpm build`;
+  - rode o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com a saída em `.cache/f13b/antes/`;
+  - guarde o número de testes do Vitest e o do `pnpm exec playwright test --list` de cada navegador, a lista dos JS de `dist/_astro/`, o tamanho de cada ilha com gzip, a altura do `<main>` da home e do rodapé a 360 nos três idiomas, e a distância dos chips ao Baixar nas calculadoras do critério 2;
+  - guarde uma cópia desse `dist/` para as provas de "reprova sem a mudança" e para as imagens do "antes".
+- **Em cada fatia:**
+  - rode o `pnpm tipos`, o `pnpm lint`, o Vitest, os specs que a fatia toca nos dois navegadores e os portões que ela toca;
+  - depois de mexer num molde, rode também o `fo-ad-map.spec.ts`, o `ads.spec.ts` e o `ads-coffee.spec.ts` no build de teste;
+  - leia a saída, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o deste prompt e o do projeto.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit, com a máquina livre. Se uma parte falhar:
+  - rode a mesma parte no ponto de partida, numa worktree;
+  - se falhar igual, a falha não é desta run: registre num §, ponha no relatório e siga;
+  - se não falhar igual, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`.
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. A especificação dos protótipos e as § 370, § 375, § 376, § 378, § 379 e § 381.
+3. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, `docs/claude/` e `docs/design/`.
+4. O `DECISOES.md` e o código.
+5. Na dúvida, a opção mais simples e a mais reversível, que não piore orçamento, acessibilidade nem anúncio.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos:
+
+- os dois números da ficha de cada guia;
+- o número de imagem que a home usa no lugar do "2.6 MB → 717 KB";
+- a frase nova da Sobre e dos Termos com o 14;
+- a posição de anúncio que cada caixa nova dos moldes usa;
+- a saída do rodapé se o `::details-content` não valer no WebKit;
+- como a linha d'água do `.fo-result` reaproveita a onda da F13a;
+- o nome de cada spec novo e a parte em que ele cai;
+- cada correção da estimativa do mapa;
+- cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run. Siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- o rótulo `ci` não existe: a conferência do meio sai, e a execução final faz o papel dela (decisão 13);
+- uma medida do protótipo não se repete no site: ache a causa; se ela vier do cabeçalho, do aviso ou da ilha de hoje e não do molde novo, registre num §, com a medida real, e siga;
+- um molde pede uma posição de anúncio que não existe: a caixa fica de fora (decisão 10);
+- a main muda as partes no meio da run: faça `git fetch` e `git merge origin/main` na branch, e confira o `--list`;
+- o Lighthouse oscila numa URL: rode a parte de novo uma vez e registre; se cair de novo, ache a causa.
+
+Válvula de estouro, se o tempo ou o limite apertar. O que sai vai para uma run F13c, nesta ordem:
+
+1. as três linhas do grupo 22 (decisão 9);
+2. a coluna da direita do UX-17 (ficam a 404, a Sobre e o rodapé);
+3. o resto do UX-17 (a 404, a Sobre e o rodapé);
+4. o UX-15 A (os hubs e a linha d'água; o `.fo-rhero` sem ela).
+
+Cada um sai com um § e uma linha no grupo 23 do `docs/PENDENCIAS.md`, e as pendências dele vão junto.
+
+Nunca corte:
+
+- a base comum (decisão 3), menos a linha d'água, que sai com o UX-15;
+- o UX-12 A inteiro, com as 14 pendências dele;
+- o UX-13 A inteiro, com as 3 pendências dele;
+- o UX-03 B, com o texto a mais, a contagem e os números com fonte;
+- os testes da decisão 11 e o mapa verde (decisão 10);
+- a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo:**
+  - rode `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, `docs/prompts/prompt-fase-13b.md`, `docs/prompts/prompt-fase-13b.txt` e a pasta `Claude outputs/`. Se o `PLANO-FILEORCA.md` aparecer modificado, deixe-o como está e fora dos commits. Qualquer outra coisa: não mexa, não commite e registre;
+  - crie a branch com `git switch -c fase-13b`. O primeiro commit leva os dois arquivos do prompt, sem edição;
+  - se os arquivos do prompt não estiverem lá, grave este prompt, exatamente como você o recebeu, em `docs/prompts/prompt-fase-13b.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main (Conventional Commits). Cada item tem pelo menos um commit próprio, com os testes dele.
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-13b`. O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-13b-fileorca.vmatusita.workers.dev/`). A prévia é o build padrão: ela mostra os moldes novos, mas nunca anúncio.
+- **Se a main andar durante a run,** faça `git fetch` e `git merge origin/main` na branch, nunca rebase. Renumere os § se colidirem e registre.
+- **As worktrees** dos agentes e da revisão são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:**
+  - o push da branch;
+  - na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` só depois de uma execução final vermelha (decisão 13);
+  - leitura (`gh run`, `gh pr checks`, `gh pr view` e `gh api` sem método);
+  - um `gh run rerun` por falha que pareça instável, registrado.
+- **Na web, nada.** Esta run não precisa de nenhuma página de fora.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`;
+  - mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh label`, `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`;
+  - postar, enviar formulário, criar conta ou subir arquivo para qualquer serviço;
+  - `wrangler deploy` em qualquer forma.
+
+  O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) as regras desta run, num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) as calculadoras e o QR: o ResultHero (com a Placa), o ExportBar, o CalcSchedule e a ilha dele, o ScenarioCompare, o SplitChart, o AmortTable, o CalcPanel e os campos, o `Reviewed.astro`, o QrPanel, as regras de anúncio das calculadoras (`.fo-calc-island ~ .fo-ad`) e os testes que fixam o desenho de hoje;
+   - (c) o guia: o `FileGuideView.astro`, o registro e a medida dos guias, o `checkFileGuide`, o `tool-guides.spec.ts` e os `guides-*.test.ts`, e a ilha embutida (só leitura);
+   - (d) a home e os hubs: o `HomeView.astro`, os `home.ts`, as quatro views de hub, o `ToolCard.astro`, o CSS da `fo-hubband`, as poses do sprite por tipo de página, a conta da home no `gate:prontidao`, o `hub-icons.test.ts`, as caixas `geral` que a F12 pôs na home e a lista de páginas do teste do movimento;
+   - (e) as institucionais e o rodapé: a 404, a Sobre, a Contato, a view das jurídicas, as Licenças, o `Footer.astro` (com o `.fo-footer__more`), o `SearchBox.astro`, o `about-counts.test.ts`, os testes que fixam a data dos Termos e os specs do rodapé;
+   - (f) a especificação dos seis protótipos, separando o que é contrato do que é só do `bundle.css`, com os testes de cada um, os pares de contraste da seção 9 do README e a divisão das partes (`--list`).
+2. **A linha de base** (seção "Verificação").
+3. **Planejar.** Escreva `docs/relatorios/fase-13b-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz:
+   - o ponto de partida e a linha de base;
+   - os § reservados e o marcador de cada frente;
+   - quem faz o quê e a ordem das fatias;
+   - cada critério ligado a um teste ou comando.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. o agente principal faz a base comum (decisão 3): a fonte de reserva no 600, o `--danger-on-deep`, a linha d'água do `.fo-result` e do rodapé e a regra pronta para o `.fo-rhero`, o módulo da contagem, e a Sobre e os Termos com o 14. Commit, push e a PR em rascunho;
+   2. a partir desse commit, três agentes `opus` trabalham ao mesmo tempo, cada um na sua worktree:
+      - C: o UX-12 A nas calculadoras, nos presets, no QR e na calculadora embutida dos guias de dinheiro, com as 14 pendências, a Oli do card, a linha d'água do `.fo-rhero` e os testes (decisão 4);
+      - G: o UX-13 A nos 30 guias de arquivo, com o `checkFileGuide`, as 3 pendências e os testes (decisão 5);
+      - H: o UX-03 B na home dos três idiomas, com os textos, os números com fonte e os anúncios `geral`, e o UX-15 A nos hubs, com os testes (decisões 6 e 7);
+   3. o agente principal junta as três, resolve os conflitos, deixa o `pnpm tipos` verde, roda os specs do mapa e faz a conferência no Linux (decisão 13);
+   4. a partir da junção, um agente `opus` (I) faz o UX-17 A, com os testes (decisão 8). Ao mesmo tempo, o agente principal faz as três linhas do grupo 22 (decisão 9), o `docs/design/`, o `docs/claude/`, os textos que faltarem, os § e o `docs/PENDENCIAS.md` (decisão 11), sem tocar nos arquivos do I;
+   5. o agente principal junta o I, roda as verificações completas e monta as tabelas e as imagens.
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`):
+   - sobre um commit fixo e registrado da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile`, o próprio `pnpm build` e o próprio build de teste;
+   - contra este prompt e o plano;
+   - cada lente com o próprio `FO_PORT` e escrevendo só no `.cache/lente-<x>/` da worktree.
+
+   A F13b mexe em interface, em texto, nas páginas de dinheiro e de saúde e no entorno dos anúncios: são seis lentes Sonnet em contexto limpo (regra 3):
+   - (a) **design system e Oli:**
+     - cada item contra a especificação;
+     - os tokens (o `--danger-on-deep` com o contraste), a lista "Nunca", nada em `sun` fora do Baixar, nenhuma imagem de fundo e nenhuma cor nova;
+     - a Oli no card, na home, nos hubs, na 404 e na Sobre: as poses certas, `aria-hidden`, a 150 px dos anúncios e o movimento de até 5 s fora do progresso;
+     - as mudanças de regra registradas, com o texto de antes e o de depois;
+   - (b) **acessibilidade:**
+     - o erro no card (a região viva com uma voz só, o `aria-invalid` e o `aria-describedby`);
+     - as tabelas (`row`, `rowgroup` e os nomes das regiões), a pista e a moldura com foco;
+     - o cronograma com o nome fixo, o bloco recolhível e o rodapé com `details`;
+     - o índice da coluna da direita, o axe nos dois temas e os 48 px;
+   - (c) **comportamento, CLS e desempenho:**
+     - o card sem crescer, o CLS da interação nas calculadoras e no guia, e a dobra de cada molde;
+     - a fonte de reserva no 600 e o CLS de carga;
+     - o JS, as requisições, as ilhas, o Lighthouse e as partes do CI;
+   - (d) **anúncios:**
+     - o mapa verde nos moldes novos, com os alvos novos, a densidade e os 1.110 px;
+     - a home com 3 caixas por largura e o `gate:prontidao`;
+     - o `lower()` nas sete janelas e as páginas livres sem anúncio;
+   - (e) **textos e idiomas:**
+     - os textos novos nos três idiomas, contra a especificação;
+     - o glossário, o `lint:texto` e o `english-leak`;
+     - a voz (o botão com verbo, o erro que diz o caso e a saída) e o formato de número de cada idioma;
+   - (f) **dinheiro e saúde (YMYL):**
+     - nenhum valor de conta mudou, e os números da home e da ficha têm fonte;
+     - o "Reviewed by" numa linha, com o bloco `[data-ymyl="reviewed"]` e o `gate:dinheiro-saude`;
+     - a saúde sem `cheer` e a "Regra das calculadoras" do PLANO;
+     - a contagem igual na home, na Sobre e nos Termos, com a data nova dos Termos.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo; os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada revisa o diff delas. Os baixos que sobrarem vão para o grupo 23 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F13b.md`. Remova a worktree no fim.
+6. **Fechar:** o relatório, o `pnpm verificar --partes` e a sequência de fim da decisão 13.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-13b.md` em português, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que muda para a pessoa nas calculadoras, no guia, na home, nos hubs e nas institucionais, em cinco linhas;
+- o que entrou, por item, apontando os arquivos e os §;
+- a evidência de cada critério, com a saída real dos comandos e dos specs;
+- as tabelas:
+  - o antes e o depois de cada item, medido: o fim do número e o Baixar das calculadoras a 360, a altura do card nos quatro estados, o CLS da interação, a distância dos chips ao Baixar, a dobra do guia, a altura do `<main>` da home e a do rodapé a 360;
+  - o mapa por molde, no build de teste: a densidade máxima e a mediana a 360 × 740, as menores distâncias até os alvos novos e o aviso nas sete janelas;
+  - o orçamento: antes e depois, por página, nos dois builds, e o tamanho de cada ilha com gzip;
+  - as pendências fechadas, cada uma com o teste e o §;
+- o número de testes do Vitest e do `--list`, antes e depois, e a lista dos testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o total de cada parte e a soma;
+- o custo (regra 5 de toda run): o `pnpm ci:custo` da última execução antes do relatório. O da execução final vai na descrição da PR;
+- o que a conferência no Linux achou;
+- o resumo da revisão, apontando para o `REVISAO-F13b.md`;
+- as imagens de `docs/relatorios/fase-13b/`;
+- o link da prévia (`https://fase-13b-fileorca.vmatusita.workers.dev/`);
+- as decisões novas, apontando os §;
+- o que a válvula cortou, se cortou, numa seção "O que fica para a F13c" (vazia se nada saiu);
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e conferir na prévia, ou no fileorca.com depois do deploy, no celular e no computador:
+     - a hipoteca e o SAC × PRICE: o número e o Baixar PDF na primeira tela do celular, e um valor errado num campo;
+     - o guia do HEIC: a ficha e a ferramenta na primeira tela;
+     - a home nos três idiomas;
+     - um hub no claro e no escuro;
+     - a 404 (abra um endereço que não existe), a Sobre e o rodapé no celular.
+  2. Ler os textos novos em português: o erro e o último resultado que valeu, a ficha do guia, a home, a 404, a Sobre e a frase nova da Sobre e dos Termos com o 14.
+  3. Conferir com o NVDA e o VoiceOver a região viva do card da calculadora (uma voz só), a tabela com os grupos e o `details` do rodapé, junto da F11 t-1, da F12 p-2 e da F13a R-b-4.
+  4. Pedir no Search Console a reindexação da home dos três idiomas, porque o H1 mudou.
+  5. Acompanhar por 2 semanas, no GA4, a conclusão das ferramentas (tool_complete sobre tool_start) e as páginas por sessão, como manda o "Depois da F13".
+  6. Se a válvula cortou algo, gerar o prompt da F13c com a skill, a partir da seção "O que fica para a F13c" e do grupo 23 do `docs/PENDENCIAS.md`.
+
+Termine a resposta final com:
+
+- um resumo de cinco linhas em português;
+- o link da PR e o estado do CI (mesclada ou esperando, e por quê);
+- os passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, os README do `docs/design/`, o `docs/claude/` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.

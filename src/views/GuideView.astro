@@ -18,12 +18,11 @@ import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
 import CalcIsland from '../tools/calc/CalcIsland.astro';
-import CalcScheduleRoot from '../tools/calc/CalcScheduleRoot.astro';
 import { pathFor, routeById } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
-import { PANEL_POSES } from '../tools/image/Oli.tsx';
+import { CALC_POSES } from '../oli/poses.ts';
 import { GUIDES, guidePathIn, moneyPage, type GuideId } from '../tools/calc/registry.ts';
 import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
 import { SHARED_BY_LANG, calcTexts, cardOf, datesOf, longDate, panelData } from '../tools/calc/page.ts';
@@ -68,7 +67,7 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   description={t.description}
   withAds
   adArea="dinheiro"
-  oli={PANEL_POSES}
+  oli={[...CALC_POSES]}
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED, id), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -84,7 +83,6 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   </section>
   <CalcIsland data={data} />
   <p class="fo-guide__open"><a href={calcPath}>{fmt(shared.openCalc, { name: calcLabel })}</a></p>
-  <CalcScheduleRoot data={data} />
   {t.sections.map((section, index) => (
     <>
       {index > 0 && <AdBreak first={index === 1 && !firstInside} />}

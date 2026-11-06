@@ -53,3 +53,27 @@
   descent-override: 25%;
   line-gap-override: 0%;
 }
+/* The bold text (labels, chips, buttons) gets faces of its own (F10 p-15; DECISOES § 537). With the single face above,
+   Chromium drew weight 600 as a synthetic bold of Arial with the width of the regular, and WebKit took the Arial Bold of
+   the family, 6.6% wider: "Window area" needed 163 px where Figtree needs 155. These faces ask for the bold file
+   first (WebKit matches local() by family, so it ends on Arial at the bold weight too), scaled to Figtree at 600 and at
+   700 (94.6% and 95.7% of Arial Bold over the same sample; 100.0% of Figtree in both browsers). The overrides keep the
+   ascent and descent of the face above (95.1% and 25% of 101.2%, over the new size-adjust). */
+@font-face {
+  font-family: "Figtree Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"), local("Liberation Sans Bold"), local("LiberationSans-Bold"), local("Roboto Bold"), local("Roboto-Bold"), local("Arial"), local("Helvetica"), local("Liberation Sans"), local("Roboto");
+  font-weight: 600;
+  size-adjust: 94.6%;
+  ascent-override: 101.73%;
+  descent-override: 26.74%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Figtree Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"), local("Liberation Sans Bold"), local("LiberationSans-Bold"), local("Roboto Bold"), local("Roboto-Bold"), local("Arial"), local("Helvetica"), local("Liberation Sans"), local("Roboto");
+  font-weight: 700 900;
+  size-adjust: 95.7%;
+  ascent-override: 100.57%;
+  descent-override: 26.44%;
+  line-gap-override: 0%;
+}

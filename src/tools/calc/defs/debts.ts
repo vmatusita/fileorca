@@ -18,11 +18,15 @@ import { duration, loanTable } from '../view.ts';
 import { count, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, CalcSharedTexts, CalcView, Part, Table, Values } from '../types.ts';
 
-/** The view of an account that cannot be done: the problem said in the hero, the rest empty. */
-function problemView(label: string, problem: string, premises: string[]): CalcView {
+/**
+ * The view of an account that cannot be done: the problem said in the hero, the rest empty. `field` is the field it points
+ * to, marked in the form (F4 ACE-11; F13b, DECISOES § 545).
+ */
+function problemView(label: string, problem: string, premises: string[], field?: string): CalcView {
   return {
     hero: { label, value: '-', sentence: [] },
     problem,
+    ...(field ? { problemField: field } : {}),
     placard: { n: '-', l: label },
     table: () => ({ caption: label, head: [label], rows: [] }),
     summary: [[label, problem]],
@@ -32,6 +36,7 @@ function problemView(label: string, problem: string, premises: string[]): CalcVi
 
 export const creditCardDef: CalcDef<CardInput, CardResult> = {
   id: 'credit-card-payoff-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     money('b', 1, 1_000_000, { main: true, half: true }),
     rate('r', 0, 60, { main: true, half: true, example: true }),
@@ -53,7 +58,7 @@ export const creditCardDef: CalcDef<CardInput, CardResult> = {
         r.error === 'too-low'
           ? fmt(text(v, 'tooLow'), { payment: cash(num(values, 'pay'), l), minimum: cash(r.minimum, l) })
           : fmt(text(v, 'tooLong'), { payment: cash(num(values, 'pay'), l) });
-      return problemView(text(v, 'labelTime'), problem, t.premises);
+      return problemView(text(v, 'labelTime'), problem, t.premises, 'pay');
     }
     const byPayment = values['md'] !== 'months';
     const facts = { payment: cash(r.payment, l), balance: dollars(num(values, 'b'), l), interest: dollars(r.totalInterest, l), time: duration(r.months, s), count: String(r.months) };
@@ -88,6 +93,7 @@ function orderText(plan: PayoffPlan, s: CalcSharedTexts): string {
 
 export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
   id: 'debt-payoff-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     money('x', 0, 1_000_000, { main: true }),
     { kind: 'list', key: 'd', min: 1, max: 10, blank: { ...DEBT_ITEM, b: 100_000, r: 200_000, m: 2_500 }, item: [money('b', 1, 1_000_000), rate('r', 0, 60, { example: true }), money('m', 0, 100_000)] },
@@ -111,7 +117,7 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
         r.error === 'too-low'
           ? fmt(text(v, 'tooLow'), { budget: cash(r.budget, l), minimum: cash(r.minimum, l) })
           : fmt(text(v, 'tooLong'), { budget: cash(r.budget, l) });
-      return problemView(text(v, 'label'), problem, t.premises);
+      return problemView(text(v, 'label'), problem, t.premises, 'x');
     }
     const plan = (p: PayoffPlan): [string, string][] => [
       [text(v, 'free'), duration(p.months, s)],
@@ -161,6 +167,7 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
 
 export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> = {
   id: 'debt-consolidation-calculator',
+  problems: ['tooLow', 'tooLong'],
   fields: [
     rate('nr', 0, 40, { main: true, half: true, example: true }),
     count('nm', 1, 120, { main: true, half: true }),
@@ -192,7 +199,7 @@ export const consolidationDef: CalcDef<ConsolidationInput, ConsolidationResult> 
         n: r.debt + 1,
         minimum: r.error === 'too-low' ? cash(r.minimum, l) : '',
       });
-      return problemView(text(v, 'label'), problem, t.premises);
+      return problemView(text(v, 'label'), problem, t.premises, `d${r.debt}p`);
     }
     const side = (payment: number, interest: number, paid: number, months: number): [string, string][] => [
       [text(v, 'payment'), dollars(payment, l)],

@@ -1,10 +1,17 @@
 ---
 // Privacy and terms. Legal pages never carry an AdSlot.
+// F13b (decision 8; UX-17 A, pages.html; DECISOES § 583 and § 585): every H2 gets an id made from its text at build time
+// (src/components/page-index.ts), and from 1280 px the right column is the index "On this page" of those H2, sticky. The
+// text and the date never change (the Privacy keeps every word); below 1280 the page is the one of before.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import PageIndex from '../components/PageIndex.astro';
 import RichText from '../components/RichText.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
+import { fmt } from '../i18n/format.ts';
+import { countValues } from '../components/tool-count.ts';
+import { pageIndex } from '../components/page-index.ts';
 import { breadcrumbLd, homePath } from '../seo/meta.ts';
 
 interface Props {
@@ -15,26 +22,34 @@ const { lang, page } = Astro.props;
 const route = routeById(page);
 const t = TEXTS[lang][page];
 const common = TEXTS[lang].common;
+// The Terms count the tools from the registries (F13b; DECISOES § 540); fmt leaves a text without placeholders as it is.
+const counts = countValues(lang);
+const index = pageIndex(t.sections.map((section) => section.heading), ['main', 'toc-title']);
 const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <article class="fo-prose">
-    <h1 class="fo-h1">{t.h1}</h1>
-    <p class="fo-muted">{t.updated}</p>
-    <p><RichText text={t.intro} /></p>
-    {t.sections.map((section) => (
-      <section>
-        <h2>{section.heading}</h2>
-        {section.paragraphs.map((paragraph) => <p><RichText text={paragraph} /></p>)}
-        {section.list && <ul>{section.list.map((item) => <li><RichText text={item} /></li>)}</ul>}
-        {section.action === 'consent-choice' && (
-          <p><button type="button" class="fo-btn" data-consent-change>{common.cookie.change}</button></p>
-        )}
-      </section>
-    ))}
+  <article class="fo-view fo-view--side fo-view--legal">
+    <div class="fo-prose">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p class="fo-muted">{t.updated}</p>
+      <p><RichText text={t.intro} /></p>
+    </div>
+    <PageIndex label={common.pageIndex} entries={index} />
+    <div class="fo-prose">
+      {t.sections.map((section, position) => (
+        <section>
+          <h2 id={index[position]?.id}>{section.heading}</h2>
+          {section.paragraphs.map((paragraph) => <p><RichText text={fmt(paragraph, counts)} /></p>)}
+          {section.list && <ul>{section.list.map((item) => <li><RichText text={item} /></li>)}</ul>}
+          {section.action === 'consent-choice' && (
+            <p><button type="button" class="fo-btn" data-consent-change>{common.cookie.change}</button></p>
+          )}
+        </section>
+      ))}
+    </div>
   </article>
 </BaseLayout>

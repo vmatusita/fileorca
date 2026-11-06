@@ -1,7 +1,10 @@
 ---
 // Contact: contato@fileorca.com. No form (nothing to submit, nothing to store).
+// F13b (decision 8; UX-17 A, pages.html; DECISOES § 583 and § 586): from 1280 px the right column holds the card "FileOrca
+// in numbers", the same as the About page's; below 1280 the page is the one of before (the card is not there).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import StatsCard from '../components/StatsCard.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { CONTACT_EMAIL } from '../platform/site.ts';
@@ -19,12 +22,15 @@ const crumbs = [
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
 ---
-<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]}>
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <article class="fo-prose">
-    <h1 class="fo-h1">{t.h1}</h1>
-    <p>{t.intro}</p>
-    <p><strong>{t.emailLabel}:</strong> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
-    <ul>{t.notes.map((note) => <li>{note}</li>)}</ul>
+  <article class="fo-view fo-view--side fo-view--contact">
+    <div class="fo-prose">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p>{t.intro}</p>
+      <p><strong>{t.emailLabel}:</strong> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+      <ul>{t.notes.map((note) => <li>{note}</li>)}</ul>
+    </div>
+    <StatsCard lang={lang} sideOnly />
   </article>
 </BaseLayout>

@@ -8,7 +8,7 @@
 // The name puts this file before the design spec, in a light part of the WebKit (DECISOES § 142 and § 274).
 import { expect, test, type Page } from '@playwright/test';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, moneyPage, type AnyCalcId } from '../../src/tools/calc/registry.ts';
 import { csvButton, openCalc, pdfButton, scaled } from './lib/life-calc.ts';
 import { dismissCookies, hydrated } from './lib/page.ts';
 
@@ -48,8 +48,19 @@ async function menuProblems(page: Page): Promise<string[]> {
       const context = document.createElement('canvas').getContext('2d');
       if (!context) return ['sem canvas'];
       context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      // The native arrow takes about 26 px at the right of the text (measured in both browsers).
-      const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 26;
+      // F13b (F7 obs 3; DECISOES § 550): the native arrow is measured in this browser, not supposed (it was 26 px): a menu of
+      // the same style with one option, as wide as it asks to be, less that option's text, paddings and borders.
+      const probe = select.cloneNode(false) as HTMLSelectElement;
+      probe.removeAttribute('id');
+      probe.style.cssText = 'width: auto; min-width: 0; flex: none; position: absolute; visibility: hidden;';
+      const sample = document.createElement('option');
+      sample.text = 'MMMM';
+      probe.append(sample);
+      select.parentElement?.append(probe);
+      const own = getComputedStyle(probe);
+      const arrow = probe.getBoundingClientRect().width - context.measureText(sample.text).width - parseFloat(own.paddingLeft) - parseFloat(own.paddingRight) - parseFloat(own.borderLeftWidth) - parseFloat(own.borderRightWidth);
+      probe.remove();
+      const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - arrow;
       return [...select.options].flatMap((option) => {
         const need = context.measureText(option.text).width;
         return need > room ? [`#${select.id} "${option.text}" pede ${Math.ceil(need)} px e tem ${Math.floor(room)}`] : [];
@@ -129,7 +140,7 @@ async function openMoney(page: Page, id: AnyCalcId, lang: 'en' | 'pt' | 'es'): P
   return path;
 }
 
-test('a field out of its range marks the result stale and turns the PDF and the CSV off (g-1, s-2, DECISOES § 116)', async ({ page }) => {
+test('a field out of its range marks the result stale, puts no PDF and turns the CSV off (g-1, s-2, DECISOES § 116)', async ({ page }) => {
   const cases: [AnyCalcId, 'en' | 'pt' | 'es', string, string, string][] = [
     ['bmi-calculator', 'en', 'ag', '19', '35'],
     ['calorie-calculator', 'en', 'ag', '80', '35'],
@@ -147,11 +158,12 @@ test('a field out of its range marks the result stale and turns the PDF and the 
     const field = page.locator(`#fo-calc-${key}`);
     await field.fill(wrong);
     await expect(field, `${id} ${wrong}`).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('.fo-calc__stale'), id).toHaveText(STALE[lang]);
-    await expect(pdfButton(page), id).toBeDisabled();
+    // F13b (DECISOES § 545): the line is in the card, after the last result that worked, and the Download leaves its place.
+    await expect(page.locator('.fo-rhero__stale'), id).toContainText(STALE[lang]);
+    await expect(pdfButton(page), id).toHaveCount(0);
     await expect(csvButton(page), id).toBeDisabled();
     await field.fill(right);
-    await expect(page.locator('.fo-calc__stale'), id).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__stale'), id).toHaveCount(0);
     await expect(pdfButton(page), id).toBeEnabled();
     await expect(csvButton(page), id).toBeEnabled();
   }
@@ -184,6 +196,45 @@ for (let start = 0; start < MONEY_PAGES.length; start += MONEY_BLOCK) {
   });
 }
 
+// F7 obs 1 (F13b; DECISOES § 552): a key in a row and Enter on the Remove of the next row in the same moment (under 16 ms, in
+// one task of the page, as only a script can), twenty times: the key reaches the store (the value typed in the first row
+// stays), and the focus goes to the Remove of the row that took the removed one's place, found by its stable key
+// (data-row), not by the index of the render before.
+for (const [path, list, item, base] of [
+  [moneyPage('debt-payoff-calculator', 'en')?.path ?? '', 'd', 'm', 100],
+  [LIFE_CALC_PAGES['square-footage-calculator'].path, 'a', 'x', 10],
+] as const) {
+  test(`${path}: a key and Enter on Remove in the same moment keep the value and put the focus on the next row (obs 1)`, async ({ page }) => {
+    await page.goto(path);
+    await hydrated(page);
+    await dismissCookies(page);
+    const add = page.locator(`#fo-calc-${list}-add`);
+    for (let round = 0; round < 20; round += 1) {
+      while ((await page.locator('#fo-tool-root fieldset.fo-debt').count()) < 3) await add.click();
+      const before = await page.locator('#fo-tool-root fieldset.fo-debt').evaluateAll((rows) => rows.map((row) => row.getAttribute('data-row')));
+      expect(before.every((key) => key !== null), 'cada linha com a chave estável').toBe(true);
+      const text = String(base + round + 1);
+      await page.evaluate(
+        ({ field, remove, text }) => {
+          const input = document.getElementById(field) as HTMLInputElement;
+          input.focus();
+          input.value = text;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          const button = document.getElementById(remove) as HTMLButtonElement;
+          button.focus();
+          button.click();
+        },
+        { field: `fo-calc-${list}0${item}`, remove: `fo-calc-${list}1-remove`, text },
+      );
+      await frames(page);
+      await expect(page.locator('#fo-tool-root fieldset.fo-debt')).toHaveCount(before.length - 1);
+      const focused = await page.evaluate(() => [document.activeElement?.closest('[data-row]')?.getAttribute('data-row') ?? null, document.activeElement?.classList.contains('fo-debt__remove') ?? false] as const);
+      expect(focused, `rodada ${round}`).toEqual([before[2], true]);
+      await expect(page.locator(`#fo-calc-${list}0${item}`), `rodada ${round}`).toHaveValue(text);
+    }
+  });
+}
+
 test('a scenario link with three areas leaves the focus and the scroll alone; Add an area takes the focus (a-1)', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await openCalc(page, 'square-footage-calculator', '#v=1&a0s=0&a0x=1000&a0y=500&a1s=1&a1x=1725&a1y=850&a2s=2&a2x=2450&a2y=1000');
@@ -200,7 +251,9 @@ test('a menu keeps its height when the field beside it shows an error (f-5)', as
   const box = page.locator('.fo-field:has(#fo-calc-mo) .fo-input');
   const before = (await box.boundingBox())?.height ?? 0;
   await page.locator('#fo-calc-co').fill('9');
-  await expect(page.locator('#fo-calc-co-error')).toBeVisible();
+  // F13b (DECISOES § 545): the words are in the card; the field shows its stroke.
+  await expect(page.locator('#fo-calc-co')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#fo-rhero-error')).toBeVisible();
   expect((await box.boundingBox())?.height).toBe(before);
 });
 
@@ -257,7 +310,8 @@ test('a valid number typed key by key never shows the range error on the way, an
     new MutationObserver((records) => {
       for (const record of records) {
         if (record.type === 'attributes' && (record.target as Element).getAttribute('aria-invalid') === 'true') seen.invalid += 1;
-        for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"]') || node.querySelector('[role="alert"]'))) seen.alerts += 1;
+        // F13b (DECISOES § 545): the words of an error are the card's message (#fo-rhero-error), no longer an alert of the field.
+        for (const node of record.addedNodes) if (node instanceof Element && (node.matches('[role="alert"], #fo-rhero-error') || node.querySelector('[role="alert"], #fo-rhero-error'))) seen.alerts += 1;
       }
     }).observe(document.getElementById('fo-tool-root') as HTMLElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-invalid'] });
   });
@@ -269,7 +323,7 @@ test('a valid number typed key by key never shows the range error on the way, an
   expect(await page.evaluate(() => (window as unknown as { __seen: { alerts: number; invalid: number } }).__seen)).toEqual({ alerts: 0, invalid: 0 });
   // A value that stays out of the range is said, after the pause or when the field is left.
   await field.fill('42');
-  await expect(page.locator('#fo-tool-root [role="alert"]')).toBeVisible();
+  await expect(page.locator('#fo-tool-root #fo-rhero-error')).toBeVisible();
   await expect(field).toHaveAttribute('aria-invalid', 'true');
 });
 

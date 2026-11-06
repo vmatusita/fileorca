@@ -114,7 +114,8 @@ export function pushScript(client: string): string {
 /** Where no ad may go: inside these (decision 3; ad-map.html "Onde um anúncio pode entrar"). */
 const NEVER_INSIDE_TAGS = new Set(['ul', 'ol', 'li', 'table', 'details', 'summary', 'form', 'fieldset', 'nav', 'header', 'footer', 'p', 'a', 'button', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'figure', 'blockquote', 'dl']);
 const NEVER_INSIDE_IDS = new Set(['fo-tool-root', 'fo-calc-schedule']);
-const NEVER_INSIDE_CLASSES = new Set(['fo-grid', 'fo-guidecards', 'fo-guidehere', 'fo-hubband', 'fo-hero', 'fo-top', 'fo-table-wrap', 'fo-crumbs', 'fo-jump', 'fo-example', 'fo-guide__tool', 'fo-steps']);
+// Review F13b d-2 (DECISOES § 596): the bands, the top and the sea of the home too, as the e2e map (§ 573) already refused.
+const NEVER_INSIDE_CLASSES = new Set(['fo-grid', 'fo-guidecards', 'fo-guidehere', 'fo-hubband', 'fo-hero', 'fo-top', 'fo-table-wrap', 'fo-crumbs', 'fo-jump', 'fo-example', 'fo-guide__tool', 'fo-steps', 'fo-catband', 'fo-home-top', 'fo-home-sea']);
 const HEADING = /^h[1-6]$/;
 const isTable = (element: Element): boolean => element.tag === 'table' || classesOf(element).includes('fo-table-wrap');
 const isMeasured = (element: Element): boolean => element.attrs['data-content'] === 'measured' || element.attrs['aria-labelledby'] === 'measured';

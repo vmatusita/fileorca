@@ -1,0 +1,30 @@
+---
+// The card "FileOrca in numbers" (F13b, decision 8; UX-17 A, pages.html; DECISOES § 586): a paper with the brand fold, the
+// four counts of the language in number-md and the zero with the PrivacySeal. The counts come from the registries at
+// build time (src/components/tool-count.ts, § 540; the languages from LANGS), never typed: en 8 · 12 · 14 · 11, pt 8 · 12
+// · 8 · 3 languages, es 8 · 12 · 14 · 3 languages. Each item reads as one phrase ("8 image tools"). The About page shows
+// it after the first paragraph, and in the right column from 1280 px; the Contact page only in the right column, from
+// 1280 px (`sideOnly`). Never an ad near it: both pages have none.
+import PrivacySeal from './PrivacySeal.astro';
+import type { Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { groupDigits } from '../i18n/format.ts';
+import { statsItems, type StatKind } from './tool-count.ts';
+
+interface Props {
+  lang: Lang;
+  /** Only in the right column, from 1280 px (the Contact page). */
+  sideOnly?: boolean;
+}
+const { lang, sideOnly = false } = Astro.props;
+const t = TEXTS[lang].about.stats;
+const items = statsItems(lang);
+const labels: Record<StatKind, string | undefined> = { image: t.image, pdf: t.pdf, money: t.money, life: t.life, languages: t.languages };
+---
+<section class:list={['fo-stats fo-dogear fo-side', { 'fo-stats--side': sideOnly }]} aria-labelledby="stats-title">
+  <h2 class="fo-stats__title" id="stats-title">{t.heading}</h2>
+  <ul class="fo-stats__list">
+    {items.map((item) => <li class="fo-stats__item" data-stat={item.kind}><span class="fo-stats__num">{groupDigits(item.value, lang)}</span> <span class="fo-stats__label">{labels[item.kind]}</span></li>)}
+    <li class="fo-stats__item fo-stats__zero" data-stat="zero"><span class="fo-stats__num">{groupDigits(0, lang)}</span> <span class="fo-stats__label">{t.zero}</span> <PrivacySeal text={TEXTS[lang].common.seal} /></li>
+  </ul>
+</section>

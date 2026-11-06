@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { ROUTES, languagesOf } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, languagesOf, moneyHubId, pagePath } from '../../src/i18n/routes.ts';
+import { HEALTH_HUB_ID, HOUSE_HUB_ID } from '../../src/tools/calc/registry.ts';
+import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, chooseImages, dismissCookies, dragOver, hydrated, jpegBatch, openAdjust, searchWithoutResult, settle, slowEngine, startOver, useBadFile, useImage } from './lib/page.ts';
 
 // F1b criteria 6 (the Oli boxes), 8 (reduced motion) and 9 (fonts), plus the LCP rule of criterion 3:
@@ -13,6 +15,9 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
 ];
 const PAGES = ROUTES.flatMap((route) => languagesOf(route).map((lang) => route.paths[lang] ?? '/'));
+// F13b (UX-15 A; DECISOES § 575): the category hubs with the sea, in every language they exist in, and one of each view.
+const SEA_HUBS = LANGS.flatMap((lang) => (['image-tools', PDF_HUB_ID, moneyHubId(lang), HOUSE_HUB_ID, HEALTH_HUB_ID] as const).flatMap((id) => pagePath(id, lang) ?? []));
+const ONE_HUB_A_VIEW = ['/image-tools/', pagePath(PDF_HUB_ID, 'en') ?? '', pagePath('money-calculators', 'en') ?? '', pagePath(HOUSE_HUB_ID, 'en') ?? ''];
 
 /** The widths (px) at which the page, as it is now, scrolls sideways; the label says which state was measured. */
 async function sidewaysAt(page: Page, label: string, widths: number[]): Promise<string[]> {
@@ -207,8 +212,14 @@ for (const viewport of VIEWPORTS) {
 
     test.describe('other pages', () => {
       const CASES = [
-        { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'wave', selector: '[data-oli="wave"]' },
-        { name: '404', paths: ['/404.html', '/pt/404.html', '/es/404.html'], pose: 'lost', selector: '[data-oli="lost"]' },
+        // F13b (UX-03 B and UX-15 A; DECISOES § 567 and § 575): the Oli of the home swims in the sea of the top, the one of
+        // a category hub in the sea at the foot of its band.
+        { name: 'home', paths: ['/', '/pt/', '/es/'], pose: 'swim', selector: '.fo-home-sea__oli' },
+        { name: 'hub', paths: SEA_HUBS, pose: 'swim', selector: '.fo-hubband__oli' },
+        // F13b (UX-17 A; DECISOES § 584 and § 586): the Oli lost floats in the sea band of the 404, and the About has the
+        // Oli wave beside "Orcas are dolphins".
+        { name: '404', paths: ['/404.html', '/pt/404.html', '/es/404.html'], pose: 'lost', selector: '.fo-sea > [data-oli="lost"]' },
+        { name: 'about', paths: ['/about/', '/pt/sobre/', '/es/acerca-de/'], pose: 'wave', selector: '.fo-orca__oli' },
         { name: 'support', paths: ['/support/', '/pt/apoie/', '/es/apoyo/'], pose: 'coffee', selector: '.fo-support__oli' },
       ];
       for (const { name, paths, pose, selector } of CASES) {
@@ -300,7 +311,9 @@ test.describe('prefers-reduced-motion: reduce', () => {
   }
 
   // F13a · a Oli por estado (UX-10; DECISOES § 460): the other pages where a move starts on its own stay still too.
-  for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/']) {
+  // F13b (DECISOES § 575): and a category hub of each view, with the sea and its Oli.
+  // F13b (UX-17 A; DECISOES § 588): and the About, with its Oli wave.
+  for (const path of ['/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', ...ONE_HUB_A_VIEW, '/about/']) {
     test(`${path}: nothing moves`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
@@ -326,31 +339,39 @@ test.describe('motion without the preference', () => {
 
   // F13a (UX-10; DECISOES § 460): every move that starts on its own has a finite count and ends by 5 s (WCAG 2.2.2), and
   // 3.2 s after the page opens none runs; only the progress (.fo-level, .fo-water, .fo-spin) may loop, and none shows here.
-  for (const path of ['/', '/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/']) {
-    test(`${path}: every move that starts on its own ends by 5 s, none runs 3.2 s after opening`, async ({ page }) => {
+  // F13b (UX-03 B and UX-15 A; DECISOES § 574 and § 577): on the home and on a category hub of each view the swim and the
+  // water are no progress: nothing is left out there, the Oli bobs for 4.8 s, and none runs 5.2 s after opening.
+  // F13b (UX-17 A; DECISOES § 588): the 404 (the Oli lost in its band of water) and the About (the Oli wave) are pages of the
+  // sea too: the water of the 404 is no progress and is not left out, and nothing runs 5.2 s after opening.
+  const MOTION_PAGES: { path: string; sea: boolean }[] = [
+    ...['/compress-image/', '/merge-pdf/', '/qr-code-generator/', '/open-with/', '/support/'].map((path) => ({ path, sea: false })),
+    ...['/', ...ONE_HUB_A_VIEW, '/404.html', '/about/'].map((path) => ({ path, sea: true })),
+  ];
+  for (const { path, sea } of MOTION_PAGES) {
+    test(`${path}: every move that starts on its own ends by 5 s, none runs ${sea ? '5.2' : '3.2'} s after opening`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
       const timings = () =>
-        page.evaluate(() =>
+        page.evaluate((sea) =>
           document
             .getAnimations()
             .filter((animation) => {
               const target = (animation.effect as KeyframeEffect | null)?.target;
-              return !(target instanceof Element && target.closest('.fo-level, .fo-water, .fo-spin'));
+              return sea || !(target instanceof Element && target.closest('.fo-level, .fo-water, .fo-spin'));
             })
             .map((animation) => {
               const timing = animation.effect?.getComputedTiming();
               const name = animation instanceof CSSAnimation ? animation.animationName : animation instanceof CSSTransition ? animation.transitionProperty : animation.id;
               return { name, iterations: Number(timing?.iterations), end: Number(timing?.endTime), state: animation.playState };
             }),
-        );
+        sea);
       await expect.poll(async () => (await timings()).length, { message: `${path}: something moves at first` }).toBeGreaterThan(0);
       for (const timing of await timings()) {
         expect(Number.isFinite(timing.iterations), `${path}: ${timing.name} has a finite count`).toBe(true);
         expect(timing.end, `${path}: ${timing.name} ends by 5 s`).toBeLessThanOrEqual(5000);
       }
-      await page.waitForTimeout(3200);
-      expect((await timings()).filter((timing) => timing.state === 'running'), `${path}: still running 3.2 s after opening`).toEqual([]);
+      await page.waitForTimeout(sea ? 5200 : 3200);
+      expect((await timings()).filter((timing) => timing.state === 'running'), `${path}: still running ${sea ? '5.2' : '3.2'} s after opening`).toEqual([]);
     });
   }
 
@@ -546,11 +567,14 @@ test.describe('review regressions', () => {
     const figtreeLoaded = () => page.evaluate(() => [...document.fonts].some((face) => face.family.includes('Figtree') && !face.family.includes('Fallback') && face.status === 'loaded'));
     await page.goto('/es/privacidad/', { waitUntil: 'domcontentloaded' });
     expect(await figtreeLoaded()).toBe(false);
-    const before = await page.locator('article.fo-prose').evaluate((article) => article.getBoundingClientRect().width);
+    // F13b (UX-17 A; DECISOES § 583 and § 590): the article is the view of the page now (the index beside it from 1280 px),
+    // and its prose is the body of the sections, the last block of the article.
+    const prose = page.locator('article.fo-view--legal > .fo-prose:last-child');
+    const before = await prose.evaluate((article) => article.getBoundingClientRect().width);
     release();
     await expect.poll(figtreeLoaded).toBe(true);
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const after = await page.locator('article.fo-prose').evaluate((article) => article.getBoundingClientRect().width);
+    const after = await prose.evaluate((article) => article.getBoundingClientRect().width);
     expect(after).toBe(before);
   });
 

@@ -167,15 +167,30 @@ export default function QrPanel({ lang, t }: QrPanelData) {
         <p class="fo-qr__status" role="status">
           {svg ? t.preview.ready : ''}
         </p>
+        {/* F13b (F7 f-9 and f-10, saída A; DECISOES § 551): no Download turned off. Before there is a code, the place of the two
+            buttons says why, at the same height; with a code, the PNG says its size on a second line of its own, with no dot. */}
         <div class="fo-qr__actions">
-          <button type="button" class="fo-btn fo-btn--download fo-btn--lg" disabled={!svg} aria-busy={busy ? 'true' : undefined} onClick={downloadPng}>
-            <Icon raw={downloadIcon} />
-            {t.download.png}
-            {svg && <span class="fo-btn__meta">· {fmt(t.download.pngMeta, { side: groupDigits(sideOf(size), lang) })}</span>}
-          </button>
-          <button type="button" class="fo-btn" disabled={!svg} onClick={downloadSvg}>
-            {t.download.svg}
-          </button>
+          {svg ? (
+            <>
+              <button type="button" class="fo-btn fo-btn--download fo-btn--lg fo-qr__png" key="png" aria-busy={busy ? 'true' : undefined} onClick={downloadPng}>
+                <Icon raw={downloadIcon} />
+                <span class="fo-qr__name">
+                  <span>{t.download.png}</span>
+                  <span class="fo-btn__meta">{fmt(t.download.pngMeta, { side: groupDigits(sideOf(size), lang) })}</span>
+                </span>
+              </button>
+              <button type="button" class="fo-btn" key="svg" onClick={downloadSvg}>
+                {t.download.svg}
+              </button>
+            </>
+          ) : (
+            // Review F13b e-4 (DECISOES § 598): the line says why only while no error does; with the error of an empty box or of
+            // a text too long, the place keeps its height and says nothing ("type a link or some text" twice, or to whoever
+            // typed too much).
+            <p class="fo-qr__wait" key="wait">
+              {problem ? null : t.download.wait}
+            </p>
+          )}
         </div>
         {pngFailed && (
           <p class="fo-field__error" role="alert">

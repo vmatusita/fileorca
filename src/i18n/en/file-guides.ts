@@ -2,9 +2,9 @@ import type { FileGuidesSharedTexts } from '../types.ts';
 
 /** What every file guide shares (F5b). The fixture names are what the tables call each test file. */
 const texts: FileGuidesSharedTexts & { names: string[] } = {
-  reviewed: 'Reviewed by {name} on {date}.',
-  firstPublished: 'First published {date}.',
-  openTool: 'Open the {name} tool',
+  reviewed: 'Reviewed by {name} · {date}',
+  toolLink: 'The panel at the top of this guide is the same tool as our {link} page, which also answers the common questions.',
+  hint: 'Scroll sideways to see the {n} columns',
   readOn: 'Read on {date}.',
   samePixels: 'Same pixels',
   yes: 'Yes',

@@ -41,6 +41,23 @@ interface Result {
   hero: string;
   sentence: string;
   rows: Cell[][];
+  /** The rows the screen writes, when they are shorter than the CSV's (the ovulation's dates; F13b, DECISOES § 550). */
+  screen?: Cell[][];
+}
+
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** A day as the narrow table writes it, by hand: "2027-06-14" → "Jun 14, 2027", the month glued to its day. */
+function shortDay(iso: string): string {
+  const [year, month, day] = iso.split('-');
+  return `${SHORT_MONTHS[Number(month) - 1]} ${Number(day)}, ${year}`;
+}
+/** Two days as one range of the narrow table: the year once, the month once when both are in it. */
+function shortRange(from: string, to: string): string {
+  const [y1, m1, d1] = from.split('-').map(Number);
+  const [y2, m2, d2] = to.split('-').map(Number);
+  if (y1 !== y2) return `${shortDay(from)} to ${shortDay(to)}`;
+  const start = `${SHORT_MONTHS[(m1 ?? 1) - 1]} ${d1}`;
+  return m1 === m2 ? `${start} to ${d2}, ${y1}` : `${start} to ${SHORT_MONTHS[(m2 ?? 1) - 1]} ${d2}, ${y1}`;
 }
 
 interface Health<I, E> {
@@ -143,6 +160,8 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
         longDay(cycle.ovulation),
         longDay(cycle.nextPeriod),
       ]),
+      // F13b (F7 obs 2; DECISOES § 550): the screen writes the short dates; the CSV keeps the long ones.
+      screen: expected.cycles.map((cycle) => [shortRange(cycle.fertileStart, cycle.ovulation), shortDay(cycle.ovulation), shortDay(cycle.nextPeriod)]),
     };
   },
 };
@@ -243,9 +262,9 @@ async function today(page: Page, day: string): Promise<void> {
 }
 
 async function expectResult<I, E>(page: Page, calc: Health<I, E>, input: I, expected: E): Promise<void> {
-  const { hero, sentence, rows } = calc.result(input, expected);
+  const { hero, sentence, rows, screen } = calc.result(input, expected);
   await expectHero(page, hero, sentence);
-  await expectTable(page, calc.head, rows);
+  await expectTable(page, calc.head, screen ?? rows);
   await expectCsv(page, calc.id, calc.head, rows);
 }
 
@@ -304,7 +323,7 @@ test('the ovulation table across a year, a leap day and 2100: six cycles each, a
     const kase = oracleCase<OvulationInput, OvulationResult>('ovulation-calculator', id);
     await ovulation.fill(page, kase.input);
     await expectResult(page, ovulation, kase.input, kase.expected);
-    if (id === 'grid-022') await expect(page.locator('#fo-calc-schedule tbody tr').first()).toContainText('February 29, 2028 to March 5, 2028');
+    if (id === 'grid-022') await expect(page.locator('#fo-calc-schedule tbody tr').first()).toContainText('Feb 29 to Mar 5, 2028');
   }
   // The oracle on the days the fixture has no case for: December 25, 2027 and February 29, 2028 typed.
   for (const { input, expected } of ORACLE_CYCLES) {
@@ -318,17 +337,19 @@ test('a day out of the range says the range in words and keeps the last result',
   for (const id of ['due-date-calculator', 'ovulation-calculator'] as const) {
     await openCalc(page, id);
     const field = page.locator('#fo-calc-d');
-    const error = page.locator('#fo-calc-d-error');
+    // F13b (DECISOES § 545): the words of the day out of the range are said in the card, which the field points to.
+    const error = page.locator('#fo-rhero-error');
     const before = (await heroNumber(page).textContent()) ?? '';
     const sentence = (await page.locator('.fo-rhero__sentence').textContent()) ?? '';
     for (const day of ['1999-12-31', '2100-01-01']) {
       await field.fill(day);
       await expect(field, `${id} ${day}`).toHaveAttribute('aria-invalid', 'true');
       await expect(error, `${id} ${day}`).toHaveText('Enter a day from January 1, 2000 to December 31, 2099.');
-      await expect(error).toHaveAttribute('role', 'alert');
-      await expect(field).toHaveAttribute('aria-describedby', /fo-calc-d-error/);
+      await expect(field).toHaveAttribute('aria-describedby', /fo-rhero-error/);
       await expect(heroNumber(page)).toHaveText(before);
+      // The sentence keeps its place and its words, hidden, under the last result that worked.
       await expect(page.locator('.fo-rhero__sentence')).toHaveText(sentence);
+      await expect(page.locator('.fo-rhero__stale')).toContainText('Last result that worked: ');
     }
     await field.fill('2026-09-14');
     await expect(error).toHaveCount(0);
@@ -426,8 +447,9 @@ test.describe('US and metric units', () => {
 });
 
 // Decision 5: the Oli never cheers a health result. The sprite of a health page has no cheer pose at all, and a change of
-// a field neither shows her nor marks the visit.
-test('no health page cheers: no cheer pose in the sprite, no Oli after a change', async ({ page }) => {
+// a field neither makes her cheer nor marks the visit. F13b (DECISOES § 545): she is in the card from the first paint and
+// keeps waving.
+test('no health page cheers: no cheer pose in the sprite, the Oli of the card keeps waving after a change', async ({ page }) => {
   await today(page, '2026-11-02');
   const change: Record<HealthCalcId, [string, string]> = {
     'bmi-calculator': ['lb', '170'],
@@ -445,7 +467,7 @@ test('no health page cheers: no cheer pose in the sprite, no Oli after a change'
     await type(page, key, value);
     await expect(heroNumber(page), id).not.toHaveText(before);
     await settle(page);
-    await expect(page.locator('.fo-rhero__oli'), id).toHaveCount(0);
+    await expect(page.locator('.fo-rhero__oli'), id).toHaveAttribute('data-oli', 'wave');
     await expect(page.locator('[data-oli="cheer"], use[href="#oli-cheer"]'), id).toHaveCount(0);
     expect(await page.evaluate(() => sessionStorage.getItem('fo-calc-cheer')), id).toBeNull();
   }

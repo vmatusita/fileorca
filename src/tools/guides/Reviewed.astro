@@ -1,23 +1,20 @@
 ---
-// The "Reviewed" line of a file guide (prompt F5b, decision 4; PLANO "Conteúdo de apoio"): the author, the date of the
-// review and of first publication as <time datetime>, and what the review changed. No data-ymyl: the file guides are in
-// the ad area "arquivos", outside gate:dinheiro-saude.
+// The signature of a file guide, one line under the lead (prompt F5b, decision 4; PLANO "Conteúdo de apoio"; F13b, G-23
+// and F5b F-13, DECISOES § 557): the author and the short date of the review, as <time datetime>. Until the F13b it was
+// two sentences with the long dates of the review and of the first publication and what the review changed; the first
+// publication and what changed went to the history line at the end of "What we measured" (FileGuideView). No data-ymyl:
+// the file guides are in the ad area "arquivos", outside gate:dinheiro-saude.
 import type { Lang } from '../../i18n/routes.ts';
+import { fmt } from '../../i18n/format.ts';
+import { shortDate } from '../../i18n/dates.ts';
 import { AUTHOR } from '../../platform/site.ts';
-import { longDate } from './measured.ts';
-import { GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, GUIDE_SHARED } from './page.ts';
+import { GUIDE_REVIEWED_ON, GUIDE_SHARED } from './page.ts';
 
 interface Props {
-  changed: string;
   lang?: Lang;
 }
-const { changed, lang = 'en' } = Astro.props;
-const shared = GUIDE_SHARED[lang];
+const { lang = 'en' } = Astro.props;
 const reviewed = GUIDE_REVIEWED_ON[lang];
-const published = GUIDE_PUBLISHED_ON[lang];
-const [byBefore, byAfter = ''] = shared.reviewed.split('{date}');
-const [firstBefore, firstAfter = ''] = shared.firstPublished.split('{date}');
+const [before, after = ''] = fmt(GUIDE_SHARED[lang].reviewed, { name: AUTHOR.name }).split('{date}');
 ---
-<p class="fo-reviewed">
-  {(byBefore ?? '').replace('{name}', AUTHOR.name)}<time datetime={reviewed}>{longDate(reviewed, lang)}</time>{`${byAfter} `}{firstBefore}<time datetime={published}>{longDate(published, lang)}</time>{`${firstAfter} ${changed}`}
-</p>
+<p class="fo-reviewed fo-sig">{before}<time datetime={reviewed}>{shortDate(reviewed, lang)}</time>{after}</p>

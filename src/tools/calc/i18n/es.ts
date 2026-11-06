@@ -6,7 +6,7 @@ export default {
   island: {
     example: 'ejemplo',
     pdf: 'Descargar PDF',
-    csv: 'CSV',
+    csv: 'Descargar CSV',
     copyLink: 'Copiar enlace',
     copied: 'Enlace copiado',
     decimalHint: 'Usa punto en los decimales, como 6.5.',
@@ -14,10 +14,9 @@ export default {
     exportFailed: 'Oli no pudo cargar el generador de PDF. Recarga la página e inténtalo de nuevo.',
     exportOffline: 'Sin conexión, y el generador de PDF aún no está guardado. Descarga un PDF una vez con internet y también funcionará sin conexión.',
     stale: 'Corrige el campo marcado para actualizar el resultado.',
+    lastWorked: 'Último resultado válido: {label} {value}.',
     nextLabel: 'Siguiente paso',
     scheduleHeading: 'Tabla de amortización',
-    showSchedule: 'Ver la tabla completa',
-    hideSchedule: 'Ocultar la tabla',
     year: 'Año {n}',
     columns: { number: 'Pago', payment: 'Monto', principal: 'Capital', interest: 'Intereses', balance: 'Saldo' },
     duration: { year: '1 año', years: '{n} años', month: '1 mes', months: '{n} meses', join: ' y ', none: '0 meses' },
@@ -39,6 +38,7 @@ export default {
   page: {
     seal: 'Tus números se quedan en tu dispositivo',
     reviewed: 'Revisado por {name} el {date}.',
+    signed: 'Revisado por {name} · {date}',
     firstPublished: 'Publicado por primera vez el {date}.',
     readOn: 'Leído el {date}.',
     exampleInputs: 'Lo que escribes',

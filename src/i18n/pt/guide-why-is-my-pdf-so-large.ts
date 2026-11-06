@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'O que ocupa espaço dentro de um PDF, medido nos nossos PDFs de teste, e o que cada nível da Comprimir PDF fez com eles, até quando o arquivo voltou igual.',
   h1: 'Por que meu PDF está tão grande?',
   lead: 'Um PDF é um recipiente, e o tamanho depende do que foi colocado nele. Descubra qual parte pesa antes de tentar diminuir o arquivo.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'Um PDF pesa o que foi colocado nele. Nos {spaceFiles_word} PDFs de teste cujo conteúdo pesamos, os mais pesados devem a maior parte do peso às imagens, e um documento escaneado também é imagem, uma por página. Depois vêm as fontes. O guia da Adobe aponta as mesmas duas causas: diz que a resolução e a profundidade de bits de uma imagem podem afetar diretamente o tamanho do arquivo, e que adicionar uma fonte pode aumentar esse tamanho de forma significativa.',
     'O e-mail é um dos limites em que você pode esbarrar. Uma conta pessoal do Gmail envia anexos de até {gmailLimit}, e o Outlook.com aceita anexos de até {outlookLimit}. Acima disso, o arquivo precisa ficar menor, ser dividido ou ir como link.',
@@ -60,6 +60,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'A imagem da página escaneada', value: '{scanImagesShare}', sub: '{scanImages} de {scanTotal}' },
+      { label: 'A Recomendada no nosso PDF de fotos', value: '{photosRecommendedRatio_change}', from: '{photosTotal}', to: '{photosRecommended}' },
+    ],
+    sample: '{spaceFiles} PDFs de teste abertos e {accepted} comprimidos.',
+    link: 'Veja as tabelas',
+  },
+  tableHeading: 'Arquivo por arquivo',
   measuredIntro: 'Primeiro, quanto pesa cada tipo de conteúdo em {spaceFiles_word} dos nossos PDFs de teste. Depois, cada nível da Comprimir PDF nos {accepted} PDFs dos nossos testes que a ferramenta aceita, com a parte do tamanho original que sobra.',
   measuredNote: 'Medido em {date}. As páginas escaneadas, o relatório da NASA, o formulário do IRS e as notas de aula são documentos reais; os outros PDFs de teste foram escritos pelo nosso próprio script de teste. O que ocupa espaço foi lido com a pdf-lib, a biblioteca com que o motor abre os arquivos. A Sem perda e a Recomendada rodaram no Node com o motor deste site, que dá os mesmos bytes que o navegador; a Forte desenha as páginas no canvas, então foi medida pela página da Comprimir PDF no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}. A tabela mostra o Chromium.',
   tables: [

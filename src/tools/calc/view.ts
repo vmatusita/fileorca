@@ -48,6 +48,54 @@ function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: 
   return suffix ? (suffix === '%' ? `${number}%` : `${number} ${suffix}`) : number;
 }
 
+/**
+ * The value of one field as the PDF lists it, by its key in the link (a row's field as "d0b"): what "Last result that worked:
+ * Rate 6.5%." says of the field in error (F13b; DECISOES § 545). Null for a field the values do not have.
+ */
+export function fieldText(specs: readonly FieldSpec[], values: Values, keyName: string, data: CalcPanelData): string | null {
+  const lang = data.lang as NumberLang;
+  for (const spec of specs) {
+    if (spec.kind === 'list') {
+      const match = new RegExp(`^${spec.key}(\\d+)(\\w+)$`).exec(keyName);
+      const row = match ? (values[spec.key] as Record<string, number>[] | undefined)?.[Number(match[1])] : undefined;
+      const item = match ? spec.item.find((entry) => entry.key === match[2]) : undefined;
+      if (row && item) return valueText(item.kind, row[item.key] ?? 0, lang, data.texts.fields[item.key]?.suffix, item.decimals);
+      continue;
+    }
+    if (spec.key !== keyName) continue;
+    if (spec.kind === 'down') return values[spec.unitKey] === 'percent' ? ratePercent(Number(values[spec.percentKey]), lang) : money(Number(values[spec.key]), lang);
+    if (spec.kind === 'date') return longDate(String(values[spec.key]), data.lang);
+    if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' || spec.kind === 'dec') return valueText(spec.kind, Number(values[spec.key]), lang, data.texts.fields[spec.key]?.suffix, spec.decimals);
+    return data.texts.options?.[spec.key]?.[String(values[spec.key])] ?? String(values[spec.key]);
+  }
+  return null;
+}
+
+/**
+ * Every number of a text as wide as its digits may draw (review F13b a-1; DECISOES § 595): each digit as a "0", the widest
+ * one of Figtree (10.9 px at 17 px, wider than any bold digit but the bold 0, 11.0), and `more` digits more, with the grouping
+ * of the language. widen("$2,396.20", 'en') → "$0,000.00"; widen("R$ 284.596", 'pt', 1) → "R$ 0.000.000". Only for the room
+ * the card keeps (a reserve drawn hidden), never for a text that is read.
+ */
+export function widen(text: string, lang: NumberLang, more = 0): string {
+  const point = lang === 'pt' ? ',' : '.';
+  const group = lang === 'pt' ? '.' : ',';
+  return text.replace(/\d(?:[\d.,]*\d)?/g, (run) => {
+    const at = run.lastIndexOf(point);
+    const whole = (at >= 0 ? run.slice(0, at) : run).replace(/\D/g, '');
+    const part = at >= 0 ? run.slice(at + 1).replace(/\d/g, '0') : '';
+    const grouped = '0'.repeat(whole.length + more).replace(/\B(?=(\d{3})+(?!\d))/g, group);
+    return at >= 0 ? `${grouped}${point}${part}` : grouped;
+  });
+}
+
+/** A rough width of a line of the sentence at 17 px, to pick the longest of several (the 0, a capital, a letter, a space). */
+export function lineWidth(text: string): number {
+  let width = 0;
+  for (const char of text) width += /\d/.test(char) ? 10.9 : /[A-ZÀ-Ý]/.test(char) ? 12 : /[a-zß-ÿ]/.test(char) ? 8.4 : char === ' ' ? 4.2 : /[.,;:]/.test(char) ? 3.8 : 9;
+  return width;
+}
+
 /** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */
 const rowName = (data: CalcPanelData): string => data.texts.view['row'] ?? data.t.row;
 

@@ -124,3 +124,13 @@ Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de 
   - aplique os hunks escolhidos, pelo número de linha antigo, sobre o `git show :arquivo`;
   - grave o resultado com `git hash-object -w --stdin` e depois `git update-index --cacheinfo 100644,<sha>,<arquivo>`.
 - **O Bash de uma worktree isolada recusa dois tipos de comando:** um `|` dentro de uma expressão entre aspas (o `--grep "a|b"` do Playwright) e um heredoc com crase. Chame um script que recebe o padrão como argumento, e escreva o arquivo com a ferramenta de escrita.
+
+## F13b: calculadoras, guia, home, hubs e institucionais
+
+Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de arquivo, na home e nos hubs, nas páginas institucionais e no rodapé, no resultado a 320 px e na fonte de reserva (DECISOES § 535 em diante):
+
+- **Não monte um commit hunk a hunk com `git diff -U0` e `git apply --cached --unidiff-zero`** quando os hunks do mesmo arquivo se cruzam: sem contexto, um bloco inserido perto de outro foi parar uma posição antes (o `scheduleMeta` da `CalcView` caiu na `FieldTexts`, e uma linha do SAC × PRICE dentro do `summary`), e o commit não compilava. Faça um item por vez e commite antes de começar o próximo; se precisar separar, copie o arquivo inteiro, tire o que não entra, adicione, commite e devolva a cópia.
+- **`net::ERR_NO_BUFFER_SPACE` no Playwright:** com os dois navegadores e 4 workers ao mesmo tempo (o `design.spec.ts` e o `layout-shift.spec.ts` juntos, com o build de teste), um `page.goto` caiu com esse erro do Windows (os soquetes da máquina acabaram; outras frentes rodavam Playwright também). Não é do teste: rode de novo com `--project` e `--workers=2`.
+- **Commit de um item quando dois itens dividem um arquivo** (o `components.css`, o `design.spec.ts`): escreva a versão só do primeiro item num arquivo do `.cache`, `git hash-object -w <arquivo>` e `git update-index --cacheinfo 100644,<sha>,<caminho>`; o arquivo da árvore fica inteiro para o commit seguinte. Sem `git add -p` (interativo) e sem mexer na árvore.
+- **A proteção da worktree recusa** um `node -e` com programa montado em tempo de execução, um laço do shell com `gzip $f` e um comando com `git` no meio de `;`: escreva um script `.mjs` no `.cache/<frente>/` e rode-o num comando simples.
+- **Commit de parte de um arquivo sem o `git add -p`:** o `git diff -- <arquivo>` separado em hunks por um script que recalcula o `+início` dos hunks que ficam e o `git apply --cached <patch>` põem no índice só os hunks de um item; o resto fica na árvore para o commit seguinte. Serve quando dois itens mexem no mesmo `components.css`, `types.ts` ou `common.ts` em lugares diferentes.

@@ -5,7 +5,7 @@ export default {
   description:
     'Los términos para usar FileOrca, herramientas gratis en tu navegador: tus archivos, resultados, calculadoras, anuncios, donaciones y responsabilidad.',
   h1: 'Términos de uso',
-  updated: 'Última actualización: 3 de noviembre de 2026',
+  updated: 'Última actualización: 5 de noviembre de 2026',
   intro:
     'Estos términos explican cómo puedes usar FileOrca. Al usar el sitio, los aceptas. Si no estás de acuerdo, por favor no uses el sitio.',
   sections: [
@@ -19,7 +19,7 @@ export default {
     {
       heading: 'Qué es FileOrca',
       paragraphs: [
-        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, redimensionar, recortar, rotar, convertir y pasar imágenes a un PDF; herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, entre otras; y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. En español están todas las herramientas de imagen y de PDF, las 18 calculadoras de dinero con sus guías, el generador de códigos QR y las guías sobre archivos de imagen y PDF. Solo en inglés, el sitio también tiene calculadoras para la casa, que estiman materiales como concreto, pintura y baldosas, y calculadoras de salud, como las del IMC y de la fecha probable de parto.',
+        'FileOrca es un sitio con herramientas gratis que funcionan en tu navegador. Está pensado para imágenes, PDF y calculadoras. Hoy el sitio tiene herramientas de imagen, como comprimir, redimensionar, recortar, rotar, convertir y pasar imágenes a un PDF; herramientas de PDF, como unir, dividir, comprimir, numerar, firmar y proteger, entre otras; y calculadoras de dinero para préstamos, hipotecas, deudas y ahorro. En español están todas las herramientas de imagen y de PDF, las {money} calculadoras de dinero con sus guías, el generador de códigos QR y las guías sobre archivos de imagen y PDF. Solo en inglés, el sitio también tiene calculadoras para la casa, que estiman materiales como concreto, pintura y baldosas, y calculadoras de salud, como las del IMC y de la fecha probable de parto.',
         'No necesitas una cuenta. Tus archivos se procesan en tu dispositivo, no en un servidor, y nunca se suben.',
       ],
     },

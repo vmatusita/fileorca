@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'How to Open WebP Images and Save Them as JPG',
   description: 'What a WebP file is, where it opens without extra software, and what changes in size, animation and location when you save it as a JPG.',
   h1: 'How to open WebP images and save them as JPG',
-  lead: 'You saved an image from a website and got a .webp file that your other apps will not take. Here is what it is, where it opens, and how to turn it into a JPG.',
-  changed: 'First version, with the measurements of {date}.',
+  lead: 'You saved an image from a website as a .webp file, and your other apps will not take it. Here is how to get a JPG.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'WebP is an image format made by Google for the web. Websites use it because it is small, so pages load faster, and that is why a picture you save from a browser can arrive as a .webp file instead of a JPG or a PNG.',
     'The browser you saved it from shows it without trouble. The trouble starts when the file leaves the browser: an older photo editor, an upload form that asks for a JPG, or a print shop may refuse it. Saving it as a JPG makes it open almost anywhere, but it does not make it better, and it does not make it smaller.',
@@ -58,6 +58,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'The JPG made from the WebP', value: '{backRatioChromium_times}', from: '{webpTotal}', to: '{backTotalChromium}' },
+      { label: 'Against the camera originals', value: '{backVsOriginalChromium}', sub: '{backTotalChromium} of {jpgTotal}' },
+    ],
+    sample: '{photos} phone photos, saved as WebP, then back as JPG.',
+    link: 'See the table',
+  },
+  tableHeading: 'Photo by photo',
   measuredIntro: 'Our {photos_word} real phone photos, saved as WebP by the engine of this site, then saved as JPG with the tool above. The share in brackets is against the original camera JPG.',
   measuredNote: 'Measured on {date}. The WebP copies were written in Node with the WebP encoder of this site’s engine; the JPGs were made through the WebP to JPG page in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}, which gave the same sizes. The table shows Chromium.',
   tables: [

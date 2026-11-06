@@ -10,6 +10,8 @@
 // (before, after both grids), the next ones only at the marks between the sections and in "How these calculators work",
 // never against the table of the presets nor the one of the example; the layout puts each box and the rails.
 import BaseLayout from '../layouts/BaseLayout.astro';
+// F13b (decision 7; UX-15 A; DECISOES § 575): the sea at the foot of the band.
+import HubSea from '../components/HubSea.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
@@ -54,6 +56,7 @@ const read = datesOf('money', lang).read;
 ---
 <BaseLayout
   lang={lang}
+  oli={['swim']}
   route={route}
   title={t.title}
   description={t.description}
@@ -63,11 +66,12 @@ const read = datesOf('money', lang).read;
   schema={[breadcrumbLd(crumbs), collectionPageLd(t.h1, t.description, path, lang, list), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-hubband fo-cat--money">
+  <div class="fo-hubband fo-hubband--sea fo-cat--money">
     <span class="fo-eyebrow">{t.eyebrow}</span>
     <h1 class="fo-h1 fo-h1--display">{t.h1}</h1>
     <p class="fo-muted">{t.intro}</p>
     <Reviewed lang={lang} />
+    <HubSea />
   </div>
   {groups.map((group, index) => (
     <>

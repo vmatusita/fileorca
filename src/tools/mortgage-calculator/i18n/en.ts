@@ -38,6 +38,8 @@ export default {
       placard: 'per month',
       sentence: "Over {years} at {rate} you'll pay {total} on the loan, of which {interest} is interest.",
       extras: 'Taxes, insurance and fees add {extras} a month.',
+      moreMeta: '{extras} a month in your payment',
+      scheduleMeta: '{n} payments, by loan year',
       noLoan: 'With no loan to repay, you pay {extras} a month in taxes, insurance and fees.',
       principal: 'Principal',
       interest: 'Interest',
@@ -57,7 +59,7 @@ export default {
   howSteps: [
     'Enter the home price and your down payment, in dollars or as a percent of the price.',
     'Type the interest rate your lender quoted and the loan term in years.',
-    'Add the yearly property tax and insurance, and any PMI or HOA dues, to see the whole monthly payment.',
+    'Open "Taxes, insurance and fees" and add the yearly property tax and insurance, and any PMI or HOA dues, to see the whole monthly payment.',
     'Open the schedule to see every payment, or save it as a PDF or a CSV.',
   ],
   worksHeading: 'How the mortgage payment is worked out',

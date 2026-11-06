@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'Como dividir um PDF e por que as partes podem pesar mais que o todo',
   description: 'Por que as partes de um PDF dividido podem somar bem mais que o original, medido nos nossos PDFs de teste, e como dividir para isso não acontecer.',
   h1: 'Como dividir um PDF e por que as partes podem pesar mais que o todo',
-  lead: 'Você divide um PDF grande para enviar em pedaços, e os pedaços somam mais que o arquivo do começo. Veja por que isso acontece, e quando não acontece.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  lead: 'Ao dividir um PDF grande, as partes podem somar mais que o arquivo. Veja por que, e quando isso não acontece.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'Dividir um PDF parece cortar papel: as páginas vão para pilhas separadas e nada é acrescentado. Um PDF não funciona assim. Cada parte precisa ser um PDF completo, que abre em qualquer lugar, então leva tudo de que as páginas dela precisam para aparecer certo, e a Dividir PDF ainda dá a cada parte uma cópia da descrição do documento original.',
     'O quanto isso acrescenta depende do arquivo. Dividimos {files_word} PDFs dos nossos testes, uma parte por página, e somamos as partes. As partes de {bigger_word} deles pesaram mais que o todo: as das notas de aula somaram {bookRatio_times} o original, as do relatório da NASA escaneado ficaram {reportRatio_more} acima dele, e as do PDF de fotos, {photosGrowth_exact} acima.',
@@ -58,6 +58,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'As notas de aula, uma parte por página', value: '{bookRatio_times}', from: '{bookTotal}', to: '{bookSum}' },
+      { label: 'PDFs cujas partes pesaram mais', value: '{bigger} de {files}' },
+    ],
+    sample: '{files} PDFs de teste, cada um dividido em uma parte por página.',
+    link: 'Veja a tabela',
+  },
+  tableHeading: 'Arquivo por arquivo',
   measuredIntro: 'Cada PDF dividido em uma parte por página, o padrão da Dividir PDF. A variação compara todas as partes com o arquivo inteiro; a coluna das fontes mostra os dados de fonte do arquivo inteiro e, depois, os de todas as partes juntas.',
   measuredNote: 'Medido em {date} no Node com o motor deste site, que dá os mesmos bytes que o navegador, em {files_word} PDFs dos nossos testes: os documentos reais e um PDF feito de fotos. As fontes, as imagens e os metadados foram contados com a pdf-lib, a biblioteca com que o motor abre os arquivos.',
   tables: [

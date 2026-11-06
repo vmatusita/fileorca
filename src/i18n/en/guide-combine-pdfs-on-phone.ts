@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'How to Combine PDFs on a Phone, iPhone or Android',
   description: 'The ways to put several PDFs into one on an iPhone or an Android phone, what the merged file weighs, and what it keeps from each PDF.',
   h1: 'How to combine PDFs on a phone',
-  lead: 'You have a few PDFs on your phone and need to send them as one. Here are the ways to do it there, without a computer, and what to expect from the result.',
-  changed: 'First version, with the measurements of {date}.',
+  lead: 'You have a few PDFs on your phone and need to send them as one. Here is how to do it there, and what to expect.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'Forms, receipts, a signed page and a scan of an ID can arrive as separate PDFs, and the place you need to send them takes a single file. On a computer there are plenty of ways to join them. On a phone there are fewer, and they depend on the phone.',
     'This guide covers the way Apple documents for the iPhone, the way that works in a browser on any phone, and what we measured when we merged {pairs_word} pairs of our test PDFs.',
@@ -65,6 +65,15 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'Pairs that came out smaller', value: '{smaller} of {pairs}' },
+      { label: 'The scanned page with the IRS form', value: '{scanFormRatio_change}', from: '{scanFormInputs}', to: '{scanFormMerged}' },
+    ],
+    sample: '{pairs} pairs made from {pdfs} of our test PDFs.',
+    link: 'See the table',
+  },
+  tableHeading: 'Pair by pair',
   measuredIntro: 'We merged {pairs_word} pairs made from {pdfs_word} of our test PDFs, in the order shown. Change is the merged file against the two files together.',
   measuredNote: 'Measured on {date} in Node with the engine of this site, which gives the same bytes as the browser, on pairs of the PDFs of our tests.',
   tables: [

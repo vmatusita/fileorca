@@ -7,7 +7,7 @@ export default {
   h1: 'About FileOrca',
   intro: [
     'FileOrca is made and run by one person: Victor Yuki Matusita, a developer in Curitiba, Paraná, Brazil.',
-    'It is a set of free tools that run in your browser: eight image tools, 12 PDF tools, 18 money calculators, 11 home and health calculators and a QR code generator in English. The image and PDF tools, the QR code generator and the guides about files are in Portuguese and Spanish too, with eight money calculators made for Brazil in Portuguese and all 18 in Spanish, with their guides.',
+    'It is a set of free tools that run in your browser: {image} image tools, {pdf} PDF tools, {money} money calculators, {life} home and health calculators and a QR code generator in English. The image and PDF tools, the QR code generator and the guides about files are in Portuguese and Spanish too, with {brazil} money calculators made for Brazil in Portuguese and all {spanish} in Spanish, with their guides.',
   ],
   whyHeading: 'Why this site exists',
   why: [
@@ -19,4 +19,12 @@ export default {
   linksHeading: 'Find Victor online',
   websiteLabel: "Victor's website",
   linkedinLabel: 'Victor on LinkedIn',
+  stats: {
+    heading: 'FileOrca in numbers',
+    image: 'image tools',
+    pdf: 'PDF tools',
+    money: 'money calculators',
+    life: 'home and health calculators',
+    zero: 'uploads',
+  },
 } satisfies AboutTexts;

@@ -47,8 +47,11 @@ interface Props {
   /** F13a · o aviso compacto (DECISOES § 458): the seal the cookie notice repeats, the page's own (numbers, text);
    *  common.seal (files) where the page passes none. */
   seal?: string;
+  /** F13b (decision 6, G-06; DECISOES § 572): without the rail of ads (the default build, or a page with no ad), <main>
+   *  takes the width of the page instead of the tool column. With the rail, the grid of § 413 stays as it is. */
+  wide?: boolean;
 }
-const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [], seal } = Astro.props;
+const { lang, route, title, description, schema = [], withAds = false, adArea, oli = [], seal, wide = false } = Astro.props;
 const adsConfig = buildAdsConfig();
 /* F12 · a parede do bloqueador (§ 426): only on a page with ads and with the wall on; its pose joins the sprite there. */
 const wall = withAds ? wallModeOf(adsConfig) : 'desligado';
@@ -71,8 +74,10 @@ const markErrors = adPage ? [] : markProblems(rawMain, false);
 if (markErrors.length) throw new Error(`mapa de anúncios em ${path}: ${markErrors.join('; ')}`);
 const ads = withAds && adArea ? layOutAds(rawMain, { area: adArea, label: common.adLabel, config: adsConfig }) : null;
 const mainHtml = ads ? ads.main : withoutMarks(rawMain);
-const hasRail = adPage;
 const railHtml = ads?.rail ?? '';
+// F13b (§ 572): a wide page keeps the rail column only when the rail has a box; the others keep it empty (§ 413).
+const hasRail = adPage && (!wide || railHtml !== '');
+const wideMain = wide && railHtml === '';
 // F13a · UX-18 A and F10 p-11 (DECISOES § 503): on a page with no file tool (the home, the hubs, the legal pages, the
 // 404, the calculators, the QR code), a file dragged over the page gets the "no" cursor, and its drop is refused, so the
 // browser never opens it in the tab: the cursor never promises what the page does not do. A page with the image or the PDF
@@ -120,7 +125,7 @@ const trackScript = `document.addEventListener('click',function(e){var a=e.targe
     <a class="fo-skip" href="#main">{common.skipToContent}</a>
     <Header lang={lang} route={route} t={common} />
     <div class:list={['fo-frame', { 'fo-frame--rail': hasRail }]}>
-      <main id="main" class="fo-main fo-content"><Fragment set:html={mainHtml} /></main>
+      <main id="main" class:list={['fo-main', 'fo-content', { 'fo-content--wide': wideMain }]}><Fragment set:html={mainHtml} /></main>
       {railHtml && <aside class="fo-rail" aria-label={common.adLabel}><Fragment set:html={railHtml} /></aside>}
     </div>
     {ads?.push && <script is:inline set:html={ads.push} />}

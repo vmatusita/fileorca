@@ -88,26 +88,52 @@ const MEASURED_NOTE: Record<Lang, string> = {
   pt: `Medido em ${longDate('2026-11-01', 'pt')}.`,
   es: `Medido el ${longDate('2026-11-01', 'es')}.`,
 };
+// F13b (UX-13 A; DECISOES § 376 and § 565): the order of the page is the trail, the H1, the signature in one line, the
+// sheet "What we measured", the tool, the introduction, the text with the ads and the link to the tool's page, the
+// measurements with the history line, the sources and the related pages. `oldGuidePage` is the page as it was before.
 function guidePage(options: { words?: number; tool?: string; toolPath?: string; extra?: string; lang?: Lang; edit?: (html: string) => string } = {}): string {
   const sentences = Math.ceil((options.words ?? 900) / 13);
   const text = Array.from({ length: sentences }, () => GUIDE_SENTENCE).join(' ');
   const html = `<!doctype html><html><head><title>A guide | FileOrca</title><meta name="description" content="A guide to a tool."></head><body><main>
     <nav aria-label="Breadcrumb"><ol class="fo-crumbs"><li><a href="/">Home</a></li><li><span aria-current="page">A guide</span></li></ol></nav>
     <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">A guide</h1><p class="fo-lead">What does the tool do?</p>
-    <p class="fo-reviewed">Reviewed by Victor on <time datetime="2026-11-01">November 1, 2026</time>. First published <time datetime="2026-11-01">November 1, 2026</time>.</p></div>
-    <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
+    <p class="fo-reviewed fo-sig">Reviewed by Victor · <time datetime="2026-11-01">Nov 1, 2026</time></p></div>
+    <section class="fo-sheet" data-content="facts"><h2 class="fo-sheet__title">What we measured</h2><dl class="fo-sheet__list"><div class="fo-sheet__stat"><dt>Size</dt><dd class="fo-sheet__n">+25%</dd></div></dl><p class="fo-sheet__sample">10 photos. <a href="#measured">See the table</a>.</p></section>
+    <section class="fo-section fo-prose fo-guide__tool" data-guide-text><h2 id="guide-tool">Use the tool here</h2></section>
     ${options.tool ?? '<div id="fo-tool-root" data-props="{}"><div class="fo-tool-island"></div></div>'}
-    <p class="fo-guide__open"><a href="${options.toolPath ?? '/heic-to-jpg/'}">Open the HEIC to JPG tool</a></p>
+    <p class="fo-guide__toolintro" data-guide-text>Drop a photo and it comes back lighter.</p>
+    <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
     <section data-guide-text><h2>More</h2><p>${options.extra ?? 'More text.'}</p>
     <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
-    <p>Even more text.</p></section>
-    <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
-    <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p></section>
+    <p>Even more text.</p><p class="fo-guide__link">The panel above is the same tool as our <a href="${options.toolPath ?? '/heic-to-jpg/'}">HEIC to JPG page</a>.</p></section>
+    <section data-content="measured"><h2 id="measured">Photo by photo</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
+    <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p><p class="fo-reviewed fo-guide__history">First version, published on <time datetime="2026-11-01">Nov 1, 2026</time>.</p></section>
     <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
     <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
   </main></body></html>`;
   return options.edit ? options.edit(html) : html;
+}
+
+/** A guide built the way FileGuideView rendered one before the F13b (the test of the old order). */
+function oldGuidePage(): string {
+  const text = Array.from({ length: Math.ceil(900 / 13) }, () => GUIDE_SENTENCE).join(' ');
+  return `<!doctype html><html><head><title>A guide | FileOrca</title></head><body><main>
+    <nav aria-label="Breadcrumb"><ol class="fo-crumbs"><li><a href="/">Home</a></li><li><span aria-current="page">A guide</span></li></ol></nav>
+    <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">A guide</h1><p class="fo-lead">What does the tool do?</p>
+    <p class="fo-reviewed">Reviewed by Victor on <time datetime="2026-11-01">November 1, 2026</time>. First published <time datetime="2026-11-01">November 1, 2026</time>.</p></div>
+    <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
+    <div id="fo-tool-root" data-props="{}"><div class="fo-tool-island"></div></div>
+    <p class="fo-guide__open"><a href="/heic-to-jpg/">Open the HEIC to JPG tool</a></p>
+    <section data-guide-text><h2>More</h2><p>More text.</p>
+    <div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>
+    <p>Even more text.</p></section>
+    <section data-content="measured"><h2>What we measured</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
+    <p class="fo-reviewed">${MEASURED_NOTE.en}</p></section>
+    <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
+    <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
+    <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
+  </main></body></html>`;
 }
 
 describe('portão de conteúdo: blocos das páginas de ferramenta', () => {
@@ -1126,11 +1152,35 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     expect(checkFileGuide(guidePage({ words: MAX_GUIDE_WORDS + 200 }), want).join()).toMatch(/palavras de texto/);
   });
 
-  it('fails a guide without the tool, with two tools, or with a link to another tool', () => {
+  // F13b (D-54; DECISOES § 565): the link to the tool's page is looked for in the text of the guide. Before, the line
+  // under the panel (.fo-guide__open) had to lead to it ("o link da ferramenta leva a X em vez de Y").
+  it('fails a guide without the tool, with two tools, or whose text does not link to its tool', () => {
     expect(checkFileGuide(guidePage({ tool: '' }), want)).toContain('sem a ferramenta embutida (#fo-tool-root)');
     const twice = '<div id="fo-tool-root" data-props="{}"></div><div id="fo-tool-root" data-props="{}"></div>';
     expect(checkFileGuide(guidePage({ tool: twice }), want)).toContain('2 raízes de ferramenta (pede 1)');
-    expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want).join()).toMatch(/o link da ferramenta leva a \/png-to-jpg\//);
+    expect(checkFileGuide(guidePage({ toolPath: '/png-to-jpg/' }), want)).toEqual(['sem o link para a página da ferramenta (/heic-to-jpg/) no texto do guia']);
+    // A link to the tool outside the text of the guide (in the sheet, which is not data-guide-text) does not count.
+    const inSheet = guidePage({ toolPath: '/png-to-jpg/', edit: (html) => html.replace('<a href="#measured">', '<a href="/heic-to-jpg/">') });
+    expect(checkFileGuide(inSheet, want)).toEqual(['sem o link para a página da ferramenta (/heic-to-jpg/) no texto do guia']);
+  });
+
+  // F13b (UX-13 A, decision 5; DECISOES § 376 and § 565): the order of before the F13b fails, with each thing it lacks.
+  it('fails the page of before the F13b: the introduction before the tool, no sheet, two dates on the signature and the link under the panel', () => {
+    const problems = checkFileGuide(oldGuidePage(), want);
+    expect(problems).toContain('sem a ficha "What we measured" ([data-content="facts"])');
+    expect(problems).toContain('a introdução vem antes de a ferramenta embutida');
+    expect(problems).toContain('a linha "Reviewed" com 2 datas (pede 1, a da revisão)');
+    expect(problems).toContain('o link "Open the tool" embaixo do painel (.fo-guide__open): o link da ferramenta vai no texto');
+    expect(problems).toContain('sem o link para a página da ferramenta (/heic-to-jpg/) no texto do guia');
+    expect(problems).toContain('a seção medida sem o histórico (a data da primeira publicação)');
+  });
+
+  it('fails a sheet after the tool, a signature with no date and a measured section with no history line', () => {
+    const sheet = /<section class="fo-sheet"[\s\S]*?<\/section>/;
+    const late = guidePage({ edit: (html) => html.replace(sheet, '').replace('<p class="fo-guide__toolintro"', `${sheet.exec(html)?.[0] ?? ''}<p class="fo-guide__toolintro"`) });
+    expect(checkFileGuide(late, want)).toContain('a ferramenta embutida vem antes de a ficha "What we measured"');
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace('<time datetime="2026-11-01">Nov 1, 2026</time></p></div>', 'Nov 1, 2026</p></div>') }), want)).toEqual(['a linha "Reviewed" com 0 datas (pede 1, a da revisão)']);
+    expect(checkFileGuide(guidePage({ edit: (html) => html.replace(/<p class="fo-reviewed fo-guide__history">.*?<\/p>/, '') }), want)).toEqual(['a seção medida sem o histórico (a data da primeira publicação)']);
   });
 
   // F12 (decision 3; DECISOES § 424): the ads of the map in a guide. Before, "two AdSlots at most"; now the first one
@@ -1140,7 +1190,16 @@ describe('portão de conteúdo: os guias de arquivo (F5b, DECISOES § 188)', () 
     const box = '<div class="fo-ad fo-ad--content"><span class="fo-ad__label">Advertisements</span></div>';
     const early = guidePage({ edit: (html) => html.replace('<div id="fo-tool-root"', '<div class="fo-ad fo-ad--content"></div><div id="fo-tool-root"').replace(box, '') });
     expect(checkFileGuide(early, want).join()).toMatch(/a ferramenta embutida vem antes de o AdSlot de conteúdo|o AdSlot de conteúdo vem antes|vem antes de/);
-    const glued = guidePage({ edit: (html) => html.replace(box, '').replace('<section data-guide-text><h2>More</h2>', `${box}<section data-guide-text><h2>More</h2>`) });
+    // F13b: the introduction and the paragraph of the tool come after the tool now, so the glued box has a list between
+    // them and no paragraph (before, the box went right before the part, after the link under the panel).
+    const glued = guidePage({
+      edit: (html) =>
+        html
+          .replace(box, '')
+          .replace(/<p class="fo-guide__toolintro"[^>]*>.*?<\/p>/, '')
+          .replace(/<div class="fo-prose fo-guide" data-guide-text><p>(.*?)<\/p><\/div>/s, (_, words: string) => `<div class="fo-prose fo-guide" data-guide-text><ul><li>${words}</li></ul></div>`)
+          .replace('<section data-guide-text><h2>More</h2>', `${box}<section data-guide-text><h2>More</h2>`),
+    });
     expect(checkFileGuide(glued, want)).toEqual(['o 1º AdSlot sem um parágrafo entre a ferramenta e ele']);
     const six = guidePage({ edit: (html) => html.replace('<p>Even more text.</p>', `${`<p>Text.</p>${box}`.repeat(5)}<p>Even more text.</p>`) });
     expect(checkFileGuide(six, want)).toEqual(['6 AdSlots de conteúdo (no máximo 5)']);
@@ -1214,8 +1273,9 @@ describe('portão de conteúdo: os guias de arquivo em português e espanhol', (
     expect(checkFileGuide(guidePage({ lang: 'es' }), { toolPath: '/heic-to-jpg/', lang: 'pt' })).toContain('a seção medida sem a data da medida');
   });
 
+  // F13b (DECISOES § 565): the link is looked for in the text; before, "o link da ferramenta leva a X em vez de Y".
   it('fails a guide of a language that links to the tool page of another language', () => {
-    expect(checkFileGuide(guidePage({ lang: 'pt' }), { toolPath: toolPath.pt, lang: 'pt' }).join()).toMatch(/o link da ferramenta leva a \/heic-to-jpg\/ em vez de \/pt\/heic-para-jpg\//);
+    expect(checkFileGuide(guidePage({ lang: 'pt' }), { toolPath: toolPath.pt, lang: 'pt' })).toEqual(['sem o link para a página da ferramenta (/pt/heic-para-jpg/) no texto do guia']);
   });
 
   it('keeps the limit of 800 to 1,500 words in every language', () => {
@@ -1483,7 +1543,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.output).toContain(`${jpgPng.paths.pt}: a seção medida sem a data da medida`);
-    expect(result.output).toContain(`${jpgPng.paths.es}: o link da ferramenta leva a ${pngToJpg.paths.en} em vez de ${pngToJpg.paths.es}`);
+    expect(result.output).toContain(`${jpgPng.paths.es}: sem o link para a página da ferramenta (${pngToJpg.paths.es}) no texto do guia`);
     expect(result.output).toContain(`${heic.paths.es}: frase de enchimento: "cabe destacar"`);
     expect(result.output).toContain(`${heic.paths.pt}: a página não existe no dist`);
     // The English guides of the same site still pass: no English guide is named.

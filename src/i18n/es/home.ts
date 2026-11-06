@@ -1,30 +1,48 @@
 import type { HomeTexts } from '../types.ts';
 
+// F13b (UX-03 B, home-b.html; DECISOES § 567 a § 571): la home como el mar por categoría. Cada número es un {placeholder}
+// que el build llena desde su fuente (src/components/home-numbers.ts y src/components/tool-count.ts).
 export default {
   title: 'FileOrca: herramientas gratis que nunca suben tus archivos',
   description:
     'Herramientas gratis que funcionan en tu navegador, sin cuenta y sin subidas. Tus archivos se quedan en tu dispositivo y puedes comprobarlo en la pestaña Red.',
-  h1: 'Herramientas gratis que funcionan en tu navegador',
-  intro: 'Sin cuenta, sin subidas y sin procesamiento en un servidor. Elige una herramienta y el trabajo ocurre en tu dispositivo.',
+  h1: '{n} herramientas.',
+  h1Promise: '0 subidas.',
+  intro: 'Herramientas de imagen, PDF y dinero que hacen el trabajo en tu dispositivo, sin cuenta.',
   toolsHeading: 'Elige una herramienta',
-  hubLink: 'Ver todas las herramientas de imagen y los tamaños más comunes',
+  to: ' a ',
+  image: {
+    heading: 'Imagen',
+    count: '{n} herramientas',
+    say: '{photos} fotos de celular en Comprimir imagen: un {percent} más ligeras, con el ajuste por defecto.',
+    more: 'Cada herramienta de imagen abre el archivo en esta pestaña, hace el trabajo en tu dispositivo y te da una copia nueva para guardar.',
+    all: 'Todas las herramientas de imagen y los tamaños comunes',
+  },
   pdf: {
-    heading: 'Trabaja con un PDF',
-    intro: 'Une, divide, comprime, rota, protege y firma PDF, o convierte sus páginas en imágenes. El PDF se lee y se escribe en tu dispositivo, y una contraseña nunca sale de él.',
-    hubLink: 'Ver todas las herramientas PDF',
+    heading: 'PDF',
+    count: '{n} herramientas',
+    say: 'Un PDF de fotos en Comprimir PDF: un {percent} más ligero en el nivel recomendado.',
+    more: 'Unir, dividir y firmar ocurren en la misma pestaña, y la contraseña que escribes para un PDF nunca sale de ella.',
+    all: 'Todas las herramientas PDF',
   },
   money: {
-    heading: 'Calcula un préstamo',
-    intro: 'Hipoteca, refinanciamiento, préstamos para auto y personales, y cuánta casa puedes pagar: el pago, los intereses y la tabla completa. Tus números se quedan en tu dispositivo.',
-    hubLink: 'Ver todas las calculadoras financieras',
+    heading: 'Dinero',
+    count: '{n} calculadoras',
+    num: '{payment} al mes',
+    say: 'La hipoteca del ejemplo, todo incluido: una casa de {price} con {down} de pago inicial, al {rate} a {years} años.',
+    more: 'Cada calculadora explica su resultado, que puedes descargar en PDF o CSV, y lo que escribes se queda en tu dispositivo.',
+    all: 'Las {n} calculadoras financieras',
+  },
+  qr: {
+    heading: 'Código QR',
+    count: '{n} herramienta',
+    num: '{max} caracteres',
+    say: 'en un solo código, con Oli en el centro, con corrección de errores H.',
+    more: 'Escribe un enlace o un texto corto y guarda el código en PNG o SVG, con el texto guardado en tu dispositivo.',
   },
   privacyHeading: 'Tus archivos se quedan contigo',
   privacyBody:
     'Tus archivos nunca salen de tu dispositivo. FileOrca hace el trabajo en tu navegador, y puedes comprobarlo tú mismo: abre la pestaña Red del navegador mientras usas una herramienta y verás que ninguna solicitud lleva tu archivo.',
-  qr: {
-    heading: 'Crea un código QR',
-    intro: 'Convierte un enlace o un texto corto en un código QR con Oli en el centro y descárgalo en PNG o SVG. El texto se queda en tu dispositivo.',
-  },
   // F11 (decisión 7): la sección "Lee una guía"; {n} es el número de guías del idioma, leído de los registros.
   guides: {
     heading: 'Lee una guía',

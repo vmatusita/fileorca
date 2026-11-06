@@ -1,5 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { orphanPaths, type PageLinks } from '../../scripts/lib/links-graph.ts';
+import { missingFragments, orphanPaths, type PageLinks } from '../../scripts/lib/links-graph.ts';
+
+// F13b (DECISOES § 585): the gate also checks the links to a part of a page (the index "On this page" of the legal pages,
+// the groups of the guides hub in the footer).
+describe('links to a part of a page', () => {
+  const ids = new Map([
+    ['/privacy/', new Set(['main', 'toc-title', 'who-is-responsible'])],
+    ['/guides/', new Set(['main', 'image', 'pdf'])],
+  ]);
+
+  it('accept an id the page has, on the same page or on another', () => {
+    expect(missingFragments('/privacy/', ['#who-is-responsible', '#main', '/guides/#image', '/guides/#pdf', '/guides/', '#'], ids)).toEqual([]);
+  });
+
+  it('flag an id the page does not have', () => {
+    expect(missingFragments('/privacy/', ['#who-is-in-charge', '/guides/#money'], ids)).toEqual(['#who-is-in-charge', '/guides/#money']);
+  });
+
+  it('leave a page the map does not know to the check of the paths', () => {
+    expect(missingFragments('/privacy/', ['/missing/#x'], ids)).toEqual([]);
+  });
+});
 
 const page = (path: string, routeId: string, anchors: string[]): PageLinks => ({ path, routeId, anchors });
 

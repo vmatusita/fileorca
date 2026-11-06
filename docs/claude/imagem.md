@@ -75,3 +75,10 @@ Pegadinhas que a F13a achou no aviso compacto, na Oli por estado, na página de 
 - **As notas do resultado da ilha de imagem correm num parágrafo** (os `li` em linha; DECISOES § 516). Toda nota termina com ponto, e um teste que lê `.fo-result__notes li` continua recebendo um texto por nota. A nota de onde os arquivos vieram (`.fo-result__from`) fica numa linha só dela.
 - **Meça o retângulo com uma foto de celular** (`jpg-02-iphone6-paisagem-gps.jpg`, com EXIF e GPS), não só com o JPEG gerado na página. Nas presets de tamanho, a foto traz a nota da redução, e a fala de pt e es ocupa três linhas.
 - **O aquecimento (`warmOnce`) é só antes do 1º arquivo:** o `startBatch()` o dá por feito (DECISOES § 534). Sem isso, o ponteiro que entra no retângulo para clicar no Baixar, ou o foco que o Start over dá ao Escolher, aquecia depois do 1º uso os codecs que a foto não usou (7 arquivos na Compress), e com a rede desligada eles viravam pedidos que o `launch-claims.spec.ts` acusa. Gatilho novo de aquecimento respeita o mesmo `warmed`. (a ilha de imagem)
+
+## F13b: calculadoras, guia, home, hubs e institucionais
+
+Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de arquivo, na home e nos hubs, nas páginas institucionais e no rodapé, no resultado a 320 px e na fonte de reserva (DECISOES § 535 em diante):
+
+- **O resultado a 320 px (§ 580 e § 581):** abaixo de 340 px a placa do resultado não aparece, e os botões fantasmas ficam numa linha com 14 px de texto; até 440 px a placa pende 6 px menos. A medida da placa girada (−4°) precisa dos quatro cantos: a caixa do `getBoundingClientRect()` de um elemento girado é a caixa envolvente e dá o dobro da invasão real (8,5 px contra 3,6). A sonda é `.cache/f13b/g22-probe.mjs`, e o teste, `tests/e2e/tool-320.spec.ts`.
+- **A trilha das presets (§ 582):** o `Breadcrumb.astro` com `skipHub` esconde o 2º passo de uma trilha de quatro abaixo de 360 px; o `BreadcrumbList` continua com os quatro. Só o `ImageToolPage.astro` usa a opção.

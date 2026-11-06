@@ -329,25 +329,26 @@ test('a home calculator: the Oli cheers on the first change of the visit only (D
   await page.setViewportSize({ width: 360, height: 740 });
   await openCalc(page, 'concrete-calculator');
   const cheer = page.locator('.fo-rhero__oli');
-  // The home pages carry the cheer pose in their sprite; it shows only after a change.
+  // The home pages carry the cheer pose in their sprite; it shows only after a change. F13b (DECISOES § 545): the Oli is in
+  // the card from the first paint, waving, and cheers in the same box.
   await expect(page.locator('symbol#oli-cheer')).toHaveCount(1);
   await settle(page);
-  await expect(cheer).toHaveCount(0);
+  await expect(cheer).toHaveAttribute('data-oli', 'wave');
   await type(page, 'l', '12');
-  await expect(cheer).toHaveCount(1);
+  await expect(cheer).toHaveAttribute('data-oli', 'cheer');
   await expect(cheer.locator('use')).toHaveAttribute('href', '#oli-cheer');
-  // On a phone the number stays above the fold with the cheer under it.
+  // On a phone the number stays above the fold, the cheer in the same box.
   expect(await heroNumber(page).evaluate((node) => node.getBoundingClientRect().bottom + window.scrollY)).toBeLessThanOrEqual(740);
   expect(await page.evaluate(() => sessionStorage.getItem('fo-calc-cheer'))).toBe('1');
   await type(page, 'l', '14');
-  await expect(cheer).toHaveCount(1);
+  await expect(cheer).toHaveAttribute('data-oli', 'cheer');
   // Another page of the same visit: no second cheer.
   await openCalc(page, 'tile-calculator');
   const before = (await heroNumber(page).textContent()) ?? '';
   await type(page, 'ar', '150');
   await expect(heroNumber(page)).not.toHaveText(before);
   await settle(page);
-  await expect(cheer).toHaveCount(0);
+  await expect(cheer).toHaveAttribute('data-oli', 'wave');
 });
 
 // The number of the ResultHero, with its unit, stays on one line from 320 to 1280px (DECISOES § 246 and § 253), on the

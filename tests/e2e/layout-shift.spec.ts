@@ -116,8 +116,17 @@ async function top(page: Page): Promise<{ crumbs: number; h1: number; over: numb
   });
 }
 
+/** Review F13b c-2: where the tool and the card of a calculator (or the tool of a guide) start, and how tall the card is. */
+async function toolTop(page: Page): Promise<number[]> {
+  return page.evaluate(() => [
+    Math.round(document.querySelector('#fo-tool-root')?.getBoundingClientRect().top ?? -1),
+    Math.round(document.querySelector('.fo-rhero')?.getBoundingClientRect().top ?? -1),
+    Math.round(document.querySelector('.fo-rhero')?.getBoundingClientRect().height ?? -1),
+  ]);
+}
+
 /** A first visit (a context of its own, nothing in memory, no choice of cookies yet), with Figtree held until the page has painted. */
-async function firstVisit(browser: Browser, browserName: string, path: string, width: number): Promise<{ before: Awaited<ReturnType<typeof top>>; after: Awaited<ReturnType<typeof top>>; cls: number; moved: string[] }> {
+async function firstVisit(browser: Browser, browserName: string, path: string, width: number): Promise<{ before: Awaited<ReturnType<typeof top>>; after: Awaited<ReturnType<typeof top>>; cls: number; moved: string[]; tool: { before: number[]; after: number[] } }> {
   const context = await browser.newContext({ viewport: { width, height: 800 }, deviceScaleFactor: 2.625, reducedMotion: 'reduce', serviceWorkers: 'block' });
   await context.addInitScript(() => {
     const shifts = { cls: 0, moved: [] as string[] };
@@ -149,6 +158,7 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
   expect(response?.status(), `${path} existe`).toBe(200);
   await painted(page);
   const before = await top(page);
+  const toolBefore = await toolTop(page);
   // Chromium settles an optional face at the first paint. WebKit still takes the file in the 100 ms block period after
   // asking for it (the trail then moves, as with swap), and keeps the fallback once that period is over (§ 305).
   if (browserName !== 'chromium') await page.waitForTimeout(150);
@@ -157,9 +167,10 @@ async function firstVisit(browser: Browser, browserName: string, path: string, w
   await painted(page);
   await page.waitForTimeout(200);
   const after = await top(page);
+  const toolAfter = await toolTop(page);
   const { cls, moved } = await page.evaluate(() => (window as unknown as { __shifts: { cls: number; moved: string[] } }).__shifts);
   await context.close();
-  return { before, after, cls, moved };
+  return { before, after, cls, moved, tool: { before: toolBefore, after: toolAfter } };
 }
 
 /** The tests of every width, in chunks of pages; `build` names the build in the title and in the printed line. */
@@ -182,6 +193,42 @@ function firstVisits(build: string): void {
 }
 
 firstVisits('padrão');
+
+// Review F13b c-2 (DECISOES § 597): the calculators and the guides whose load got worse in the F13b, at the width where the
+// review measured them (every page of the site, Figtree held 600 ms, in Chromium): the sentence of the card, the lead of the
+// top and the labels of the fields wrapped again when Figtree arrived (the card and the tool are higher on the screen since
+// the F13b), up to 0.051. This one judges: in Chromium, the load CLS of each stays at the starting point's (with 0.001 for
+// the rounding of the measure) and never passes 0.05; in both browsers, the trail, the H1 and the notice (as above), the tool
+// and the card stay where the first paint put them, and the card keeps its height.
+const REVIEWED: Record<number, [path: string, start: number][]> = {
+  320: [
+    [moneyPage('compound-interest-calculator', 'es')?.path ?? '', 0], [moneyPage('simple-interest-calculator', 'es')?.path ?? '', 0], [guideIn('guides-split-pdf-file-size', 'es'), 0],
+    ['/mortgage-calculator/biweekly/', 0], [moneyPage('br-rent-or-buy', 'pt')?.path ?? '', 0], [moneyPage('br-personal-loan', 'pt')?.path ?? '', 0.003],
+  ],
+  360: [
+    ['/btu-calculator/', 0], ['/credit-card-payoff-calculator/', 0], ['/debt-consolidation-calculator/', 0], [moneyPage('loan-amortization-calculator-balloon-payment', 'es')?.path ?? '', 0.001],
+    ['/mulch-calculator/', 0], ['/refinance-calculator/', 0.005],
+  ],
+  393: [
+    ['/compound-interest-calculator/', 0], ['/debt-consolidation-calculator/', 0.001], [moneyPage('loan-amortization-calculator', 'es')?.path ?? '', 0.003], ['/mortgage-calculator/', 0],
+    [moneyPage('br-early-payoff', 'pt')?.path ?? '', 0.002], [guideIn('guides-social-media-image-sizes', 'pt'), 0], ['/savings-goal-calculator/', 0],
+  ],
+  412: [['/credit-card-payoff-calculator/', 0], [guideIn('guides-photos-to-one-pdf', 'es'), 0], ['/personal-loan-calculator/', 0.001]],
+};
+for (const [width, pages] of Object.entries(REVIEWED)) {
+  test(`the load CLS of the calculators and guides the review measured stays at the starting point's, at ${width} px`, async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    const wrong: string[] = [];
+    for (const [path, start] of pages) {
+      const visit = await firstVisit(browser, browserName, path, Number(width));
+      const limit = Math.min(0.05, start + 0.001);
+      if (browserName === 'chromium' && visit.cls > limit) wrong.push(`${path}: CLS ${visit.cls.toFixed(3)}, o ponto de partida ${start} (${visit.moved.join('; ')})`);
+      if (JSON.stringify(visit.after) !== JSON.stringify(visit.before)) wrong.push(`${path}: a trilha, o H1 ou o aviso saíram do lugar`);
+      if (JSON.stringify(visit.tool.after) !== JSON.stringify(visit.tool.before)) wrong.push(`${path}: a ferramenta ou o card foram de ${visit.tool.before.join(', ')} a ${visit.tool.after.join(', ')}`);
+    }
+    expect(wrong).toEqual([]);
+  });
+}
 
 // F12 (decision 11 and criterion 11; DECISOES § 422): the same first visits on the test build, with the boxes of the ad
 // map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves

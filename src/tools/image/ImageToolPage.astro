@@ -65,7 +65,7 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
   oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(name, t.description, path, lang)]}
 >
-  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} skipHub />
   {/* F13a (UX-04 A; F4-F7 f-2; DECISOES § 463): the H1 takes the whole measure; only the seal row leaves room for the Oli. */}
   <div class="fo-top fo-top--tool">
     <h1 class="fo-h1">{t.h1}</h1>

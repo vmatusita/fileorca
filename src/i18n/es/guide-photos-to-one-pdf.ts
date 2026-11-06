@@ -4,8 +4,8 @@ const texts: FileGuideTexts = {
   title: 'Cómo convertir fotos en un solo PDF que pese poco para enviarlo',
   description: 'Cómo juntar varias fotos en un solo PDF en el celular o en la computadora, cuánto pesa ese PDF y qué cambia si comprimes las fotos antes.',
   h1: 'Cómo convertir fotos en un solo PDF',
-  lead: 'Recibos, páginas de un contrato, unas fotos para un formulario: un solo PDF es más fácil de enviar y de imprimir que un montón de imágenes. Aquí ves cómo hacerlo y cuánto llega a pesar.',
-  changed: 'Primera versión, con las mediciones del {date}.',
+  lead: 'Recibos, un contrato, fotos para un formulario: un solo PDF es más fácil de enviar y de imprimir. Aquí ves cómo hacerlo y cuánto pesa.',
+  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
   intro: [
     'Un PDF de fotos las mantiene en orden, imprime cada una en su propia página y se abre en cualquier computadora o teléfono. Muchos formularios y oficinas piden justo eso: un solo PDF, no un grupo de imágenes.',
     'El problema es el tamaño. En un solo PDF, nuestras {photos_wordf} fotos de celular dieron un archivo que pesaba el {pdfRatioChromium} de lo que pesaban las propias fotos. Medimos qué pasa con el tamaño, con y sin comprimir antes las fotos.',
@@ -70,6 +70,15 @@ const texts: FileGuideTexts = {
   ],
   half: 4,
   measuredHeading: 'Lo que medimos',
+  sheet: {
+    stats: [
+      { label: 'Un PDF de las fotos', value: '{pdfRatioChromium_change}', from: '{photosTotal}', to: '{pdfChromium}' },
+      { label: 'Un PDF después de Comprimir imagen', value: '{pdfAfterRatioChromium_change}', from: '{photosTotal}', to: '{pdfAfterChromium}' },
+    ],
+    sample: '{photos} fotos de celular, tal como salieron y después de Comprimir imagen.',
+    link: 'Mira la tabla',
+  },
+  tableHeading: 'Paso a paso',
   measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, directo a un solo PDF, y otra vez después de Comprimir imagen. El porcentaje es frente a las fotos originales.',
   measuredNote: 'Medido el {date} con las herramientas Imagen a PDF y Comprimir imagen de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}, que dieron los mismos tamaños, sobre nuestras fotos reales de celular con los ajustes predeterminados. Las imágenes dentro del PDF se contaron con pdf-lib.',
   tables: [

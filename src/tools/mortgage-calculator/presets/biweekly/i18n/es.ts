@@ -10,6 +10,7 @@ export default {
     ...homePanel,
     view: {
       label: 'Intereses ahorrados',
+      moreMeta: '{extras} al mes en tu pago',
       placard: 'intereses ahorrados',
       sentence: 'Pagar {half} cada dos semanas en lugar de {payment} al mes termina el préstamo en {time} en lugar de {base}, y ahorra {interest} de intereses.',
       principal: 'Capital',

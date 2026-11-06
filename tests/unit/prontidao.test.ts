@@ -33,7 +33,6 @@ import {
   BR_HUB_ID,
   CALC_TOOL_IDS,
   HEALTH_HUB_ID,
-  HOME_MONEY_IDS,
   HOUSE_HUB_ID,
   HUB_MONEY_IDS,
   LIFE_CALC_IDS,
@@ -42,6 +41,7 @@ import {
   LIFE_HUB_ROUTE,
   type LifeCalcId,
 } from '../../src/tools/calc/registry.ts';
+import { HOME_BAND_MONEY_IDS } from '../../src/components/home-bands.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { AD_MEDIA, adBoxHtml } from '../../src/ads/map.ts';
 import type { AdUnit } from '../../src/ads/config.ts';
@@ -349,25 +349,46 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
   });
 
+  // F13b (UX-03 B; DECISOES § 576): the home shows its tools as the chips of its bands, and the gate reads them as its
+  // cards (TOOL_LINKS); a chip of a band to a page that does not exist, or that the registry does not ask of the home, fails.
+  it('reads the chips of the bands of the home as its cards (F13b)', () => {
+    const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
+    const CALC = '/mortgage-calculator/';
+    const chips = (paths: string[]) => `<section class="fo-catband"><ul class="fo-catband__chips">${paths.map((path) => `<li><a class="fo-chip fo-cat--money" href="${path}"><span class="fo-chip__dot" aria-hidden="true"></span><span>x</span></a></li>`).join('')}</ul></section>`;
+    const calcPage = (dir: string) => write(dir, CALC, pageHtml({ id: 'mortgage-calculator', lang: 'en', path: CALC, indexable: true, ads: true }));
+    // The base fake home lists the image tool as a card; the chips of the band add to it.
+    const listed = { ...makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${chips([CALC])}`)); }), cards: { home: { en: [CALC] } } };
+    expect(failing(checkNothingUnfinished(listed))).toEqual([]);
+    const gone = makeSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}${chips(['/convert-to-webp/'])}`)));
+    expect(failing(checkNothingUnfinished(gone)).join('\n')).toMatch(/cartão para \/convert-to-webp\/, que não existe[\s\S]*fora do registro/);
+    const extra = makeSite((dir) => { calcPage(dir); write(dir, '/', pageHtml(home, (main) => `${main}${chips([CALC])}`)); });
+    expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/cartões fora do registro: \/mortgage-calculator\//);
+    // A chip outside a band (the next-step chips of a tool page) is not a card of the catalogue.
+    const nextStep = makeSite((dir) => write(dir, '/', pageHtml(home, (main) => `${main}<nav class="fo-next"><a class="fo-chip" href="/convert-to-webp/">x</a></nav>`)));
+    expect(failing(checkNothingUnfinished(nextStep))).toEqual([]);
+  });
+
   it('builds the real site with the image, money and PDF cards and the search of the three registries', () => {
     const site = realSite('dist');
     // F5a: the home also lists the 12 PDF tools of the PDF registry, after the five credit calculators.
     // F7 (decision 9; DECISOES § 259): and, after them, the 6 home and the 5 health calculators and the QR code generator.
+    // F13b (UX-03 B; DECISOES § 570 and § 576): the money band of the home has the 6 credit calculators of the specification
+    // (the five and Credit card payoff), and the home lists its chips.
     expect(site.cards?.['home']?.en).toEqual([
-      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/',
+      '/mortgage-calculator/', '/refinance-calculator/', '/auto-loan-calculator/', '/personal-loan-calculator/', '/home-affordability-calculator/', '/credit-card-payoff-calculator/',
       ...PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path),
       ...LIFE_HUB_IDS.house.map((id) => LIFE_CALC_PAGES[id].path),
       ...LIFE_HUB_IDS.health.map((id) => LIFE_CALC_PAGES[id].path),
       '/qr-code-generator/',
     ]);
     expect(site.cards?.['money-calculators']?.en).toHaveLength(14);
-    // F6 (decision 7): the home of each language lists its money calculators (HOME_MONEY_IDS, when the language has its money
+    // F6 (decision 7): the home of each language lists its money calculators (HOME_BAND_MONEY_IDS since the F13b, when the language has its money
     // hub) and its 12 PDF tools, all with the paths of the language; the Spanish money hub lists the five Spanish
     // calculators; the Brazilian hub its own once its row is in the map. Before the F6 only English had cards to check.
     // The languages adjustment (decision 6): and the QR code generator of the language, last, as in English.
     for (const lang of ['pt', 'es'] as const) {
       const hub = moneyHubId(lang);
-      const money = pagePath(hub, lang) ? HOME_MONEY_IDS[lang].map((id) => pagePath(id, lang)) : [];
+      const money = pagePath(hub, lang) ? HOME_BAND_MONEY_IDS[lang].map((id) => pagePath(id, lang)) : [];
       expect(site.cards?.['home']?.[lang], lang).toEqual([...money, ...PDF_TOOL_IDS.map((id) => pagePath(id, lang)), pagePath(QR_ID, lang)]);
       for (const path of site.cards?.['home']?.[lang] ?? []) expect(path.startsWith(`/${lang}/`), path).toBe(true);
       if (pagePath(hub, lang)) expect(site.cards?.[hub]?.[lang], lang).toEqual(HUB_MONEY_IDS[lang].map((id) => pagePath(id, lang)));

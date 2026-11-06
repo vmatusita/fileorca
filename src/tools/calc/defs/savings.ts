@@ -28,6 +28,7 @@ function compoundingWord(t: CalcPanelTexts, value: string): string {
 
 export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
   id: 'compound-interest-calculator',
+  problems: ['tooLarge'],
   fields: [
     money('i', 0, 10_000_000, { main: true, half: true }),
     money('m', 0, 1_000_000, { main: true, half: true }),
@@ -92,6 +93,7 @@ export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
 
 export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
   id: 'savings-goal-calculator',
+  problems: ['tooLarge', 'tooLong'],
   fields: [
     money('g', 1, 100_000_000, { main: true, half: true }),
     money('s', 0, 100_000_000, { main: true, half: true }),
@@ -115,6 +117,8 @@ export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
       return {
         hero: { label: text(v, 'labelTime'), value: '-', sentence: [] },
         problem,
+        // A deposit that never reaches the goal is the field to change (F4 ACE-11; F13b, DECISOES § 545).
+        ...(r.error === 'too-long' ? { problemField: 'dep' } : {}),
         placard: { n: '-', l: text(v, 'placardTime') },
         table: () => ({ caption: text(v, 'caption'), head: [text(v, 'month')], rows: [] }),
         summary: [[text(v, 'labelTime'), problem]],

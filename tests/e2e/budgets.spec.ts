@@ -193,7 +193,7 @@ test('the PDF of a calculator is written in the shared worker and fetches neithe
   await dismissCookies(page);
   // The page opens with its example already worked out: the PDF button is on.
   const saved = page.waitForEvent('download');
-  await page.locator('.fo-export .fo-btn--download').click();
+  await page.locator('.fo-rhero .fo-btn--download').click();
   expect((await saved).suggestedFilename()).toMatch(/\.pdf$/);
   await settled();
   console.log(`/mortgage-calculator/ com o PDF: ${urls.size} URLs (${[...urls].join(', ')})`);

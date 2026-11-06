@@ -15,9 +15,11 @@ export default {
       eo: { label: 'Pago adicional único', prefix: '$', error: 'Escribe un pago adicional de $0 a $100,000,000.' },
       eom: { label: 'Con el pago número', error: 'Escribe un número de pago de 1 a 480.', over: 'No puede ser después del último pago del plazo.' },
     },
-    moreHeading: 'Plazo del préstamo, más pagos adicionales y costos',
+    moreHeading: 'Plazo del préstamo y más pagos adicionales',
+    disclose: 'Impuestos, seguros y cuotas',
     view: {
       label: 'Intereses ahorrados',
+      moreMeta: '{extras} al mes en tu pago',
       placard: 'intereses ahorrados',
       sentence: 'Con los pagos adicionales, el préstamo se termina de pagar en {time} en lugar de {base}, {saved} antes, y ahorras {interest} de intereses.',
       same: 'Sin un pago adicional, el préstamo dura sus {base}. Agrega un pago adicional para ver cuánto ahorra.',

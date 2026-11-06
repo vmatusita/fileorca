@@ -7,12 +7,17 @@ import Icon from './Icon.astro';
 interface Props {
   label: string;
   crumbs: Crumb[];
+  /**
+   * F13b (group 22, F13a R-c-3; DECISOES § 582): under 360 px a trail of four steps leaves out its second one (the hub),
+   * so it takes two rows; the parent tool and Home stay, and the BreadcrumbList of the page keeps the four.
+   */
+  skipHub?: boolean;
 }
-const { label, crumbs } = Astro.props;
+const { label, crumbs, skipHub = false } = Astro.props;
 const last = crumbs.length - 1;
 ---
 <nav aria-label={label}>
-  <ol class="fo-crumbs">
+  <ol class:list={['fo-crumbs', { 'fo-crumbs--skip-hub': skipHub && crumbs.length === 4 }]}>
     {crumbs.map((crumb, index) => (
       <li>{index === last ? <span aria-current="page">{crumb.name}</span> : <><a class="fo-crumbs__link" href={crumb.path}>{crumb.name}</a><Icon name="chevron-right" /></>}</li>
     ))}

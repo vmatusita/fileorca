@@ -27,6 +27,22 @@ export type FileGuideId = (typeof FILE_GUIDE_IDS)[number];
  */
 export const GUIDES_HUB_ID = 'guides';
 
+/**
+ * The day the ten English guides were reviewed, and when they were first published (prompt F5b). In UTC, like the date
+ * pnpm guias:medir stamps, and never before it (DECISOES § 207): the last measurement and the merge fall on this day.
+ * Plain data here since the F13b (DECISOES § 558), so src/tools/guides/measured.ts can give the history line of a guide
+ * its dates in Node too (the lint:texto); src/tools/guides/page.ts gives them to the pages as before.
+ */
+export const GUIDE_REVIEWED = '2026-11-02';
+export const GUIDE_PUBLISHED = '2026-11-02';
+
+/**
+ * Per language: the day the guides were reviewed and first published. The Portuguese and Spanish guides were written in
+ * the languages adjustment, on the day in Brasília of the run (DECISOES § 223), never before the measurement (§ 207).
+ */
+export const GUIDE_REVIEWED_ON: Record<Lang, string> = { en: GUIDE_REVIEWED, pt: '2026-11-03', es: '2026-11-03' };
+export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-03', es: '2026-11-03' };
+
 export type FileGuideHub = 'image-tools' | 'pdf-tools';
 export type FileGuideTool = ImageToolId | PdfToolId;
 export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | FileGuideId;
@@ -43,6 +59,11 @@ export interface FileGuideDef {
   hub: FileGuideHub;
   /** Up to 6 pages that exist: tools, presets or other guides. */
   related: readonly FileGuideRelated[];
+  /**
+   * The part of the text (the index of `sections` in the guide's texts) that ends with the sentence linking to the tool's
+   * own page (F13b, D-54; DECISOES § 562): the link left the line under the panel for the part that talks about the tool.
+   */
+  toolSection: number;
 }
 
 const path = (id: FileGuideId): string => `/guides/${id.replace(/^guides-/, '')}/`;
@@ -61,6 +82,23 @@ const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
   'guides-photos-to-one-pdf': { pt: 'fotos-em-um-pdf', es: 'fotos-en-un-solo-pdf' },
 };
 
+/**
+ * The part of each guide that ends with the link to the tool's page (F13b, D-54; DECISOES § 562): the part that talks
+ * about the tool the guide embeds (its modes, what it did to our files, how to use it), the same in the three languages.
+ */
+const TOOL_SECTION: Record<FileGuideId, number> = {
+  'guides-heic-to-jpg-on-windows': 3, // Convert the files you already have
+  'guides-why-is-my-pdf-so-large': 3, // What each mode of Compress PDF did
+  'guides-social-media-image-sizes': 1, // Fit inside, or fill the frame
+  'guides-open-webp-save-as-jpg': 2, // What we did to test it
+  'guides-jpg-vs-png': 3, // Back to JPG: close, but not the same
+  'guides-remove-location-from-photos': 3, // Strip it from the file without changing the photo
+  'guides-pdf-to-jpg-resolution': 5, // A quick way to choose
+  'guides-split-pdf-file-size': 4, // How to split without the extra weight
+  'guides-combine-pdfs-on-phone': 2, // On any phone, in the browser
+  'guides-photos-to-one-pdf': 2, // What the tool does with each photo
+};
+
 const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({
   id,
   path: path(id),
@@ -68,6 +106,7 @@ const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: r
   tool,
   hub,
   related,
+  toolSection: TOOL_SECTION[id],
 });
 
 export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {

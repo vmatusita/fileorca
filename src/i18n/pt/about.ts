@@ -7,7 +7,7 @@ export default {
   h1: 'Sobre o FileOrca',
   intro: [
     'O FileOrca é feito e mantido por uma pessoa só: Victor Yuki Matusita, dev em Curitiba, no Paraná.',
-    'É um conjunto de ferramentas grátis que rodam no seu navegador: oito ferramentas de imagem, 12 de PDF, oito calculadoras de dinheiro feitas para o Brasil e um gerador de QR code, além de guias sobre arquivos de imagem e PDF. As de imagem e as de PDF, o gerador de QR code e os guias são os mesmos nos três idiomas do site.',
+    'É um conjunto de ferramentas grátis que rodam no seu navegador: {image} ferramentas de imagem, {pdf} de PDF, {money} calculadoras de dinheiro feitas para o Brasil e um gerador de QR code, além de guias sobre arquivos de imagem e PDF. As de imagem e as de PDF, o gerador de QR code e os guias são os mesmos nos {languages} idiomas do site.',
   ],
   whyHeading: 'Por que este site existe',
   why: [
@@ -19,4 +19,12 @@ export default {
   linksHeading: 'Encontre o Victor na internet',
   websiteLabel: 'Site do Victor',
   linkedinLabel: 'Victor no LinkedIn',
+  stats: {
+    heading: 'O FileOrca em números',
+    image: 'ferramentas de imagem',
+    pdf: 'ferramentas de PDF',
+    money: 'calculadoras feitas para o Brasil',
+    languages: 'idiomas',
+    zero: 'uploads',
+  },
 } satisfies AboutTexts;

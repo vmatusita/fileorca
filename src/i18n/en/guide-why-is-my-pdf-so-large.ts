@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'What takes the space inside a PDF, measured on our test PDFs, and what each mode of Compress PDF did to them, including when the file came back the same.',
   h1: 'Why is my PDF so large?',
   lead: 'A PDF is a container, and the size depends on what went into it. Find out which part is heavy before you try to shrink it.',
-  changed: 'First version, with the measurements of {date}.',
+  changed: 'First version of this guide, published on {published} with these measurements.',
   intro: [
     'A PDF is as heavy as what went into it. In the {spaceFiles_word} test PDFs whose contents we weighed, the heaviest owe most of their weight to pictures, and a scan is pictures too, one per page. Fonts come next. Adobe’s guide names the same two causes: it says the resolution and the bit depth of an image can directly affect the size of the file, and that adding a single font can sometimes increase it substantially.',
     'Email is one limit you can run into. A personal Gmail account sends attachments up to {gmailLimit}, and Outlook.com takes attachments up to {outlookLimit}. Above that, the file needs to get smaller, be split, or travel as a link.',
@@ -60,6 +60,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'What we measured',
+  sheet: {
+    stats: [
+      { label: 'The picture in our scanned page', value: '{scanImagesShare}', sub: '{scanImages} of {scanTotal}' },
+      { label: 'Recommended on our PDF of photos', value: '{photosRecommendedRatio_change}', from: '{photosTotal}', to: '{photosRecommended}' },
+    ],
+    sample: '{spaceFiles} test PDFs taken apart and {accepted} compressed.',
+    link: 'See the tables',
+  },
+  tableHeading: 'File by file',
   measuredIntro: 'First, what each kind of content weighs in {spaceFiles_word} of our test PDFs. Then each mode of Compress PDF on the {accepted} PDFs of our tests the tool takes, with the share of the original size that is left.',
   measuredNote: 'Measured on {date}. The scanned pages, the NASA report, the IRS form and the lecture notes are real documents; the other test PDFs were written by our own test script. What takes the space was read with pdf-lib, the library the engine opens files with. Lossless and Recommended ran in Node with the engine of this site, which gives the same bytes as the browser; Strong draws the pages on the canvas, so it was measured through the Compress PDF page in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The table shows Chromium.',
   tables: [

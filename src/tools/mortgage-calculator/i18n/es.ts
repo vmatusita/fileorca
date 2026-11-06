@@ -38,6 +38,8 @@ export default {
       placard: 'al mes',
       sentence: 'En {years} al {rate}, pagarás {total} por el préstamo, de los cuales {interest} son intereses.',
       extras: 'Los impuestos, los seguros y las cuotas suman {extras} al mes.',
+      moreMeta: '{extras} al mes en tu pago',
+      scheduleMeta: '{n} pagos, por año del préstamo',
       noLoan: 'Sin préstamo que pagar, pagas {extras} al mes de impuestos, seguros y cuotas.',
       principal: 'Capital',
       interest: 'Intereses',
@@ -57,7 +59,7 @@ export default {
   howSteps: [
     'Escribe el precio de la vivienda y tu pago inicial, en dólares o como porcentaje del precio.',
     'Escribe la tasa de interés que te dio tu prestamista y el plazo del préstamo en años.',
-    'Agrega los impuestos sobre la propiedad y el seguro de cada año, y el seguro hipotecario privado (PMI) o la cuota de la asociación de propietarios (HOA) si los tienes, para ver el pago mensual completo.',
+    'Abre "Impuestos, seguros y cuotas" y agrega los impuestos sobre la propiedad y el seguro de cada año, y el seguro hipotecario privado (PMI) o la cuota de la asociación de propietarios (HOA) si los tienes, para ver el pago mensual completo.',
     'Abre la tabla para ver cada pago, o guárdala en PDF o CSV.',
   ],
   worksHeading: 'Cómo se calcula el pago de la hipoteca',

@@ -18,18 +18,10 @@ import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId, type FileGui
 import { guideCardData, type GuideCardData } from './card.ts';
 
 /**
- * The day the ten English guides were reviewed, and when they were first published (prompt F5b). In UTC, like the date
- * pnpm guias:medir stamps, and never before it (DECISOES § 207): the last measurement and the merge fall on this day.
+ * The days the guides were reviewed and first published, in each language (prompt F5b, DECISOES § 207 and § 223). They
+ * live in the registry since the F13b (DECISOES § 558), plain data that src/tools/guides/measured.ts reads in Node too.
  */
-export const GUIDE_REVIEWED = '2026-11-02';
-export const GUIDE_PUBLISHED = '2026-11-02';
-
-/**
- * Per language: the day the guides were reviewed and first published. The Portuguese and Spanish guides were written in
- * the languages adjustment, on the day in Brasília of the run (DECISOES § 223), never before the measurement (§ 207).
- */
-export const GUIDE_REVIEWED_ON: Record<Lang, string> = { en: GUIDE_REVIEWED, pt: '2026-11-03', es: '2026-11-03' };
-export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-03', es: '2026-11-03' };
+export { GUIDE_PUBLISHED, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED, GUIDE_REVIEWED_ON } from './registry.ts';
 
 /** What every guide of a language shares: the "Reviewed" line, the table words, the fixture names, the counts in words. */
 export const GUIDE_SHARED: Record<Lang, FileGuidesSharedTexts> = { en: enShared, pt: ptShared, es: esShared };

@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Quando salvar em JPG e quando em PNG, com os tamanhos que medimos nas mesmas fotos nos dois formatos e o que acontece com uma imagem transparente.',
   h1: 'JPG ou PNG: qual usar',
   lead: 'Os dois formatos abrem em qualquer lugar, então a escolha depende do que a imagem é. Veja a regra e o que medimos quando as mesmas fotos foram de um formato para o outro.',
-  changed: 'Primeira versão, com as medidas de {date}.',
+  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
   intro: [
     'A resposta curta: foto vai em JPG, e imagem gráfica vai em PNG. Capturas de tela, logos, gráficos, textos e qualquer imagem com fundo transparente são imagens gráficas. Uma foto tirada com câmera ou celular é foto, mesmo que mostre um documento.',
     'A resposta longa fala do que cada formato guarda. Um fica pequeno jogando fora detalhes que você mal percebe; o outro guarda cada pixel exatamente e paga por isso em tamanho. A troca certa depende da imagem e do que vai acontecer com ela depois.',
@@ -63,6 +63,15 @@ const texts: FileGuideTexts = {
   ],
   half: 3,
   measuredHeading: 'O que medimos',
+  sheet: {
+    stats: [
+      { label: 'Nossas fotos em PNG, no total', value: '{pngRatioChromium_times}', from: '{jpgTotal}', to: '{pngTotalChromium}' },
+      { label: 'PNGs com os mesmos pixels do JPG', value: '{pngIdenticalChromium} de {photos}' },
+    ],
+    sample: '{photos} fotos de celular, de JPG para PNG e de volta.',
+    link: 'Veja a tabela',
+  },
+  tableHeading: 'Foto a foto',
   measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade, do JPG da câmera para PNG com a ferramenta acima, e de volta para JPG. A última coluna compara o JPG final com os pixels originais.',
   measuredNote: 'Medido em {date} pela página PNG para JPG deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}. Os pixels foram comparados no Node, com o mesmo decodificador para o original e para a cópia. Os tamanhos de volta em JPG foram iguais nos dois navegadores.',
   tables: [

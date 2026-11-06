@@ -31,6 +31,17 @@ const SAMPLES_BY_LANG: Record<string, Record<string, string>> = {
   es: { ...SAMPLES, percent: '68\u00a0%', query: 'comprimir' },
 };
 const samplesOf = (file: string): Record<string, string> => SAMPLES_BY_LANG[textFileLang(file) ?? 'en'] ?? SAMPLES;
+/**
+ * F13b: the About and Terms pages count the tools through placeholders that the views fill from
+ * src/components/tool-count.ts (DECISOES § 540). The samples are the counts of that module in each language, and
+ * tests/unit/tool-count.test.ts checks that they still are.
+ */
+export const COUNT_SAMPLES: Record<string, Record<string, string>> = {
+  en: { image: '8', pdf: '12', money: '14', life: '11', total: '46', brazil: '8', spanish: '14', languages: '3' },
+  pt: { image: '8', pdf: '12', money: '8', life: '0', total: '29', brazil: '8', spanish: '14', languages: '3' },
+  es: { image: '8', pdf: '12', money: '14', life: '0', total: '35', brazil: '8', spanish: '14', languages: '3' },
+};
+const isCountText = (file: string): boolean => /[\\/](about|terms)\.ts$/.test(file);
 const CHUNK = 15_000;
 
 function git(args: string[]): string {
@@ -88,6 +99,9 @@ export const MONEY_SAMPLES: Record<string, string> = {
   interestEffect: 'saves $212,238 of interest',
   interestPart: 'pays $484 less interest',
   timePart: 'is done 1 month sooner',
+  // F13b (DECISOES § 545): the field of "Last result that worked: {label} {value}." and its value in the last result.
+  label: 'Rate',
+  value: '6.5%',
 };
 const MONEY_DEFAULT = '$1,234';
 
@@ -118,6 +132,8 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       interestPart: 'paga R$ 484 a menos de juros',
       timePart: 'termina 1 mês antes',
       amount: '5',
+      label: 'Juros a.a.',
+      value: '11%',
     },
     fallback: 'R$ 1.234,56',
   },
@@ -149,6 +165,10 @@ export const MONEY_SAMPLES_BY_LANG: Record<string, { samples: Record<string, str
       timePart: 'termina 1 mes antes',
       // Biweekly and extra payments: the term of the loan without the change.
       base: '30 años',
+      label: 'Tasa',
+      value: '6.5 %',
+      // F13b (DECISOES § 547): the total of the costs in the title of the block that folds.
+      extras: '$500.00',
     },
     fallback: '$1,234.56',
   },
@@ -321,6 +341,10 @@ export async function fillFor(file: string): Promise<Fill> {
   if (isQrText(file)) {
     const qr = QR_SAMPLES_BY_LANG[lang] ?? {};
     return (name) => qr[name] ?? samples[name] ?? name;
+  }
+  if (isCountText(file)) {
+    const counts = COUNT_SAMPLES[lang] ?? {};
+    return (name) => counts[name] ?? samples[name] ?? name;
   }
   if (!isMoneyText(file)) return (name) => samples[name] ?? name;
   const money = MONEY_SAMPLES_BY_LANG[lang] ?? { samples: MONEY_SAMPLES, fallback: MONEY_DEFAULT };

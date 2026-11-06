@@ -190,7 +190,7 @@ async function shown(page: Page, path: string): Promise<{ hero: string; table: n
   const open = page.locator('.fo-calc-schedule button[aria-controls="fo-schedule-table"]');
   if (await open.count()) await open.click();
   await expect(page.locator('#fo-schedule-table table'), path).toBeVisible();
-  const cells = await page.locator('#fo-schedule-table tbody tr').evaluateAll((rows) => rows.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')));
+  const cells = await page.locator('#fo-schedule-table tbody tr').evaluateAll((rows) => rows.map((row) => [...row.querySelectorAll('th, td')].map((cell) => cell.textContent ?? '')));
   return { hero, table: cells.map((row) => row.flatMap(numbersIn)) };
 }
 
@@ -217,7 +217,8 @@ for (let start = 0; start < CALC_PAGE_IDS.length; start += BLOCK) {
       expect(sum(spanish.table), `${id}: a soma da tabela`).toBe(sum(english.table));
 
       // The CSV, read back, is the oracle's.
-      const csv = await saved(page, page.locator('.fo-export .fo-btn').nth(1));
+      // F13b (DECISOES § 545): Download CSV first under the card; the Download PDF in the card.
+      const csv = await saved(page, page.locator('.fo-export .fo-btn').nth(0));
       expect(csv.name, id).toBe(`${es.file}.csv`);
       const text = csv.bytes.toString('utf8');
       expect(text.startsWith('﻿'), `${id}: BOM UTF-8`).toBe(true);
@@ -241,7 +242,7 @@ for (let start = 0; start < CALC_PAGE_IDS.length; start += BLOCK) {
       oracle.check?.(numbers);
 
       // The PDF is Letter, in Spanish.
-      const pdf = await saved(page, page.locator('.fo-export .fo-btn--download'));
+      const pdf = await saved(page, page.locator('.fo-rhero .fo-btn--download'));
       expect(pdf.name, id).toBe(`${es.file}.pdf`);
       const sheets = parsePdf(new Uint8Array(pdf.bytes)).pages;
       expect(sheets.length, id).toBeGreaterThan(0);

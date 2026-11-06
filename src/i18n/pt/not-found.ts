@@ -8,4 +8,5 @@ export default {
   body: 'O link pode estar antigo, ou o endereço pode ter um erro de digitação. Busque uma ferramenta ou volte para a página inicial.',
   searchLabel: 'Buscar uma ferramenta',
   homeLink: 'Ir para a página inicial',
+  toolsHeading: 'Ou vá direto para uma ferramenta',
 } satisfies NotFoundTexts;

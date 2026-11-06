@@ -1,36 +1,53 @@
 import type { HomeTexts } from '../types.ts';
 
+// F13b (UX-03 B, home-b.html; DECISOES § 567 to § 571): the home as the sea by category. Every number is a {placeholder}
+// the build fills from its source (src/components/home-numbers.ts and src/components/tool-count.ts).
 export default {
   title: 'FileOrca: free tools that never upload your files',
   description:
     'Free tools that run in your browser, with no account and no upload. Your files stay on your device, and you can check it yourself in the Network tab.',
-  h1: 'Free tools that run in your browser',
-  intro: 'No account, no upload and no server processing. Pick a tool and the work happens on your device.',
+  h1: '{n} tools.',
+  h1Promise: '0 uploads.',
+  intro: 'Image, PDF, money, home and health tools that do the work on your device, with no account.',
   toolsHeading: 'Choose a tool',
-  hubLink: 'See all image tools and common sizes',
+  to: ' to ',
+  image: {
+    heading: 'Image',
+    count: '{n} tools',
+    say: '{photos} phone photos in Compress image: {percent} lighter, with the default setting.',
+    more: 'Each image tool opens the file in this tab, does the work on your device and gives you a new copy to save.',
+    all: 'All image tools and common sizes',
+  },
   pdf: {
-    heading: 'Work on a PDF',
-    intro: 'Merge, split, compress, rotate, protect and sign PDFs, or turn their pages into images. The PDF is read and written on your device, and a password never leaves it.',
-    hubLink: 'See all PDF tools',
+    heading: 'PDF',
+    count: '{n} tools',
+    say: 'A PDF of photos in Compress PDF: {percent} lighter in the recommended mode.',
+    more: 'Merging, splitting and signing happen in the same tab, and a password you type for a PDF never leaves it.',
+    all: 'All PDF tools',
   },
   money: {
-    heading: 'Work out a loan',
-    intro: 'Mortgages, refinancing, car and personal loans: the payment, the interest and the whole schedule. Your numbers stay on your device.',
-    hubLink: 'See all money calculators',
+    heading: 'Money',
+    count: '{n} calculators',
+    num: '{payment} a month',
+    say: 'The example mortgage, all in: a {price} home with {down} down, at {rate} for {years} years.',
+    more: 'Each calculator explains its result, ready to download as PDF or CSV, and what you type stays on your device.',
+    all: 'All {n} money calculators',
   },
-  house: {
-    heading: 'Plan a home project',
-    intro: 'Square feet, cubic yards of concrete or mulch, gallons of paint, tiles and the size of an air conditioner, in US units.',
-    hubLink: 'See all home calculators',
-  },
-  health: {
-    heading: 'Check a health number',
-    intro: 'BMI, daily calories, ovulation, body fat and due date, by the published formulas they cite. For adults.',
-    hubLink: 'See all health calculators',
+  life: {
+    heading: 'Home and health',
+    count: '{n} calculators',
+    num: '{gallons} gallons',
+    say: 'of paint for {coats} coats on a room {perimeter} ft around and {height} ft high, after the doors and windows, in the example of the paint calculator.',
+    more: 'The home calculators work in US units, and the health ones follow the published formulas they cite, for adults.',
+    all: 'All home calculators',
+    allHealth: 'All health calculators',
   },
   qr: {
-    heading: 'Make a QR code',
-    intro: 'Turn a link or a short text into a QR code with Oli in the middle, and save it as PNG or SVG. The text stays on your device.',
+    heading: 'QR code',
+    count: '{n} tool',
+    num: '{max} characters',
+    say: 'in a single code, with Oli in the middle, at error correction H.',
+    more: 'Type a link or a short text, and save the code as PNG or SVG while the text stays on your device.',
   },
   privacyHeading: 'Your files stay with you',
   privacyBody:

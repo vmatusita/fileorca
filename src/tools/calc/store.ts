@@ -1,17 +1,30 @@
-// The state one calculator's two islands share: the form and result (#fo-tool-root) and the schedule
-// (#fo-calc-schedule), which sits after the first AdSlot as the page mold asks. Both are hydrated by the
-// same mount entry and read this store, so a key press runs the account once and both repaint.
+// The state of one calculator island: the form, the result and, since the F13b, the schedule, which moved into the island
+// (DECISOES § 547). A key press runs the account once and every part repaints.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { problems, type Problems } from './form.ts';
 import type { CalcDef, CalcPanelData, CalcView, Values } from './types.ts';
 
+/** A field that shows an error now: its message (the range, or the field it passes) and its label. */
+export interface FieldError {
+  message: string;
+  label: string;
+}
+
 export interface CalcState {
   values: Values;
-  /** The person changed something (the first change sends calc_complete and may bring the Oli). */
+  /** The person changed something (the first change sends calc_complete and may bring the Oli's cheer). */
   touched: boolean;
   problems: Problems;
-  /** The view of the last values that made an account: a wrong field keeps it on screen. */
+  /** The view of the last values that made an account: a wrong field keeps it on screen. It may be a problem. */
   view: CalcView;
+  /**
+   * The last view that was a result, not a problem, and the values it was made from: while the values on screen make none,
+   * the card keeps its number and says which value of the field it was ("Last result that worked: Rate 6.5%."); the
+   * example until the person has another result (F13b; DECISOES § 545).
+   */
+  good: { view: CalcView; values: Values };
+  /** The fields that show an error now, by id, in the order they came (the card says the first one of the form). */
+  errors: ReadonlyMap<string, FieldError>;
   /** The values on screen are not the ones the view was made from: a problem between fields, or a field that shows its range
    * error (DECISOES § 116; until the review F7 the range error left the line out and the PDF on, § 276). */
   stale: boolean;
@@ -22,8 +35,8 @@ export interface CalcStore {
   /** New values; `byPerson` is false for the scenario link read at load. */
   set(values: Values, byPerson: boolean): void;
   subscribe(listener: () => void): () => void;
-  /** The field with this id shows its range error, or no longer does. */
-  wrong(id: string, is: boolean): void;
+  /** The field with this id shows an error (its message and label), or no longer does (null). */
+  wrong(id: string, error: FieldError | null): void;
 }
 
 export function viewOf(def: CalcDef, data: CalcPanelData, values: Values): CalcView {
@@ -31,9 +44,17 @@ export function viewOf(def: CalcDef, data: CalcPanelData, values: Values): CalcV
 }
 
 export function createStore(def: CalcDef, data: CalcPanelData, initial: Values): CalcStore {
-  let state: CalcState = { values: initial, touched: false, problems: problems(def.fields, initial), view: viewOf(def, data, initial), stale: false };
+  const first = viewOf(def, data, initial);
+  let state: CalcState = {
+    values: initial,
+    touched: false,
+    problems: problems(def.fields, initial),
+    view: first,
+    good: { view: first, values: initial },
+    errors: new Map(),
+    stale: false,
+  };
   const listeners = new Set<() => void>();
-  const wrongIds = new Set<string>();
   const notify = () => {
     for (const listener of listeners) listener();
   };
@@ -42,20 +63,26 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
     set(values, byPerson) {
       const found = problems(def.fields, values);
       const ok = Object.keys(found).length === 0;
+      const view = ok ? viewOf(def, data, values) : state.view;
       state = {
+        ...state,
         values,
         touched: state.touched || byPerson,
         problems: found,
-        view: ok ? viewOf(def, data, values) : state.view,
-        stale: !ok || wrongIds.size > 0,
+        view,
+        good: ok && !view.problem ? { view, values } : state.good,
+        stale: !ok || state.errors.size > 0,
       };
       notify();
     },
-    wrong(id, is) {
-      if (wrongIds.has(id) === is) return;
-      if (is) wrongIds.add(id);
-      else wrongIds.delete(id);
-      state = { ...state, stale: Object.keys(state.problems).length > 0 || wrongIds.size > 0 };
+    wrong(id, error) {
+      const now = state.errors.get(id);
+      if (now?.message === error?.message && now?.label === error?.label) return;
+      const errors = new Map(state.errors);
+      if (error) errors.set(id, error);
+      else errors.delete(id);
+      // An error shows only after the person typed or left the field: the card may say it (its region speaks when touched).
+      state = { ...state, errors, touched: state.touched || error !== null, stale: Object.keys(state.problems).length > 0 || errors.size > 0 };
       notify();
     },
     subscribe(listener) {
@@ -63,6 +90,18 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
       return () => listeners.delete(listener);
     },
   };
+}
+
+/** The first field of the form, in the order of the page, that shows an error now (the card says its message). */
+export function firstError(errors: ReadonlyMap<string, FieldError>): [string, FieldError] | undefined {
+  const entries = [...errors];
+  if (entries.length < 2 || typeof document === 'undefined') return entries[0];
+  return entries.sort(([a], [b]) => {
+    const x = document.getElementById(a);
+    const y = document.getElementById(b);
+    if (!x || !y) return 0;
+    return x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+  })[0];
 }
 
 /** The store's state, repainting the component on every change. */

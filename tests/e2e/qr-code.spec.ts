@@ -122,7 +122,7 @@ function readSvg(bytes: Buffer): number[] | undefined {
 }
 
 /**
- * The side the page says for the PNG of the chosen size ("· 481 × 481 px" after "Download PNG"): the first number of the
+ * The side the page says for the PNG of the chosen size ("481 × 481 px" under "Download PNG", F13b): the first number of the
  * line, with the thousands separator of any language taken out ("2,048" in English and Spanish, "2.048" in Portuguese).
  */
 async function shownSide(page: Page, t: QrPanelTexts): Promise<number> {
@@ -289,11 +289,14 @@ test.describe('QR code generator', () => {
   test('an empty box and a text over the limit show the error, with no code and no download', async ({ page }) => {
     await open(page);
     const alert = page.locator('#fo-qr-error');
-    // Nothing typed yet: no error, no code, both downloads off.
+    // Nothing typed yet: no error, no code, and no download (F13b, F7 f-10 saída A; DECISOES § 551: the place of the two
+    // buttons says why, where they were turned off before).
+    const wait = page.locator('.fo-qr__actions .fo-qr__wait');
     await expect(alert).toHaveCount(0);
     await expect(preview(page)).toHaveCount(0);
-    await expect(pngButton(page, en)).toBeDisabled();
-    await expect(svgButton(page, en)).toBeDisabled();
+    await expect(pngButton(page, en)).toHaveCount(0);
+    await expect(svgButton(page, en)).toHaveCount(0);
+    await expect(wait).toHaveText(en.download.wait);
     await expect(page.locator('#fo-qr-count')).toHaveText('0 of 1,273');
 
     const noCode = async (message: RegExp): Promise<void> => {
@@ -301,8 +304,9 @@ test.describe('QR code generator', () => {
       await expect(alert).toHaveText(message);
       await expect(box(page)).toHaveAttribute('aria-invalid', 'true');
       await expect(preview(page)).toHaveCount(0);
-      await expect(pngButton(page, en)).toBeDisabled();
-      await expect(svgButton(page, en)).toBeDisabled();
+      await expect(pngButton(page, en)).toHaveCount(0);
+      await expect(svgButton(page, en)).toHaveCount(0);
+      await expect(wait).toBeVisible();
     };
     await type(page, 'abc');
     await box(page).fill('');
@@ -320,4 +324,69 @@ test.describe('QR code generator', () => {
     await expect(pngButton(page, en)).toBeEnabled();
     await expect(page.locator('#fo-qr-count')).toHaveText('1,273 of 1,273');
   });
+
+  // Review F13b e-4 (DECISOES § 598): the line in the place of the buttons says why there is nothing to download only while
+  // no error says it: with the error of a text too long or of an empty box, it says nothing (it told whoever typed too much to
+  // type, and repeated the error of the empty box), and the place keeps its height.
+  test('the place of the buttons says nothing under the error of a text too long or of an empty box, and keeps its height', async ({ page }) => {
+    await open(page);
+    const actions = page.locator('.fo-qr__actions');
+    const wait = actions.locator('.fo-qr__wait');
+    const height = () => actions.evaluate((node) => node.getBoundingClientRect().height);
+    await expect(wait).toHaveText(en.download.wait);
+    const before = await height();
+    await box(page).fill('é'.repeat(637));
+    await expect(page.locator('#fo-qr-error')).toHaveText(/too long for one QR code/);
+    await expect(wait).toHaveText('');
+    expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+    await box(page).fill('');
+    await expect(page.locator('#fo-qr-error')).toHaveText(/nothing to put in the code yet/);
+    await expect(wait).toHaveText('');
+    expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+  });
+
+  // F7 f-9 (DECISOES § 551): the size of the PNG is always on the second line of its Download, with no middle dot, in the
+  // button of 60 px (button-lg), at 1280, 360 and 320 px, in the three languages. Before, it followed a "·" on the same line and
+  // went under it on a narrow phone, leaving the dot at the start of the line.
+  for (const lang of LANGS) {
+    test(`${pathOf(lang)}: the size of the PNG is on the second line of its button, with no dot, at 1280, 360 and 320 px (f-9)`, async ({ page }) => {
+      const t = panelOf(lang);
+      await open(page, lang);
+      await type(page, 'https://fileorca.com/');
+      for (const width of [1280, 360, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        const button = pngButton(page, t);
+        const seen = await button.evaluate((node) => {
+          const name = node.querySelector('.fo-qr__name > span:first-child')!.getBoundingClientRect();
+          const meta = node.querySelector('.fo-btn__meta')!.getBoundingClientRect();
+          return { height: node.getBoundingClientRect().height, below: meta.top >= name.bottom - 1, text: node.querySelector('.fo-btn__meta')!.textContent ?? '' };
+        });
+        expect(seen.height, `${width} px`).toBe(60);
+        expect(seen.below, `${width} px: o tamanho na segunda linha`).toBe(true);
+        expect(seen.text, `${width} px`).not.toMatch(/^\s*·/);
+        expect(seen.text, `${width} px`).toMatch(/^\d[\d.,]* × \d[\d.,]* px$/);
+      }
+    });
+  }
+
+  // F7 f-10, saída A (DECISOES § 551; § 139 and § 276): no Download is ever turned off. Before there is a code the place of the
+  // two buttons says why, and it keeps their height, so nothing moves when the code comes; with a code, the two buttons.
+  for (const width of [360, 1280]) {
+    test(`no Download is turned off, and the place of the two buttons keeps its height before and after the code, at ${width} px (f-10)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await open(page);
+      const actions = page.locator('.fo-qr__actions');
+      const height = () => actions.evaluate((node) => node.getBoundingClientRect().height);
+      await expect(page.locator('button.fo-btn--download[disabled], #fo-tool-root button[disabled]')).toHaveCount(0);
+      await expect(actions.locator('.fo-qr__wait')).toHaveText(en.download.wait);
+      const before = await height();
+      await type(page, 'https://fileorca.com/');
+      await expect(pngButton(page, en)).toBeVisible();
+      expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+      await expect(page.locator('button.fo-btn--download[disabled]')).toHaveCount(0);
+      await box(page).fill('');
+      await expect(actions.locator('.fo-qr__wait')).toBeVisible();
+      expect(Math.abs((await height()) - before)).toBeLessThanOrEqual(1);
+    });
+  }
 });

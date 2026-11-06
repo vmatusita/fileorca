@@ -224,9 +224,13 @@ async function main(): Promise<void> {
         await page.close();
       }
 
-      page = await open(browser, theme, 360, '/');
-      await shot(page.locator('.fo-hero'), `home-hero-${theme}-360`);
+      // F13b (UX-03 B; DECISOES § 567): the top of the home is .fo-home-top, and its tools are chips; the ToolCard is the
+      // first card of the image hub.
+      page = await open(browser, theme, 360, '/image-tools/');
       await shot(page.locator('.fo-tool').first(), `tool-card-${theme}-360`, { top: 8 });
+      await page.close();
+      page = await open(browser, theme, 360, '/');
+      await shot(page.locator('.fo-home-top'), `home-hero-${theme}-360`);
       await page.getByRole('button', { name: /Search tools/ }).click();
       await page.locator('#fo-search-dialog input').fill('compress');
       await page.locator('#fo-search-dialog [role="option"]').first().waitFor();
@@ -237,7 +241,8 @@ async function main(): Promise<void> {
       await page.close();
 
       page = await open(browser, theme, 360, '/404.html');
-      await shot(page.locator('.fo-hero'), `not-found-hero-${theme}-360`);
+      // F13b (UX-17 A; DECISOES § 584): the 404 has no hero any more; its view (the text, the sea and the search) is the shot.
+      await shot(page.locator('.fo-view--404'), `not-found-hero-${theme}-360`);
       await page.close();
 
       page = await open(browser, theme, 360, '/support/');
