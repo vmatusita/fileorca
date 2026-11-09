@@ -135,10 +135,14 @@ test('a thumbnail asked just before the release of its file gives nothing and op
   const before = (await pdfjsWorkers(page)).length;
   const late = await page.evaluate(async (base64) => {
     const scripts = performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => /\/_astro\/client\.[\w-]+\.js$/.test(name));
-    let client: { thumbnail: (...args: unknown[]) => Promise<Blob | null>; release: (id: string) => Promise<void> } | null = null;
+    interface Door {
+      thumbnail: (id: string, file: File, index: number, width: number, shownWidth: number) => Promise<Blob | null>;
+      release: (id: string) => Promise<void>;
+    }
+    let client: Door | null = null;
     for (const url of scripts) {
-      const module = (await import(/* @vite-ignore */ url)) as Partial<NonNullable<typeof client>>;
-      if (module.thumbnail && module.release) client = module as NonNullable<typeof client>;
+      const module = (await import(/* @vite-ignore */ url)) as Partial<Door>;
+      if (module.thumbnail && module.release) client = module as Door;
     }
     if (!client) throw new Error('the PDF client of the island was not found');
     const file = new File([Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))], 'race.pdf', { type: 'application/pdf' });
