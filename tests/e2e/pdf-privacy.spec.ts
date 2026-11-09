@@ -23,6 +23,10 @@ import numbersTexts from '../../src/tools/add-page-numbers-to-pdf/i18n/en.ts';
 import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
+import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
+import enCommon from '../../src/i18n/en/common.ts';
+import { fmt } from '../../src/i18n/format.ts';
+import { arriveFrom, inboxGone } from './lib/inbox.ts';
 
 // Privacy and security of the PDF tools in the browser (F5a, decision 8, criteria 6 and 7; DECISOES § 166).
 //
@@ -720,4 +724,86 @@ test('qpdf and PDF.js work on a page that is not cross-origin isolated, with the
   expect(requests.outside(), 'nothing left the own origin').toEqual([]);
   expect(requests.writes, 'nothing was written to anywhere').toEqual([]);
   recordPrivacy(`wasm-${browserName}`, { browser: browserName, wasm: wasm.map((entry) => ({ file: entry.url.replace(/^https?:\/\/[^/]+/, ''), sha256: entry.hash, type: entry.type })) });
+});
+
+// ---- the arrival of a chip at a tool with an action (F15) -----------------------------------------------------------
+
+// F15 (decision 6 and criterion 4 of the run; DECISOES § 655): a next-step chip takes the PDFs to Merge PDF and Protect PDF
+// too now, where they wait for the action. The rest of this file runs with the service workers blocked, where a chip only
+// links; here the inbox is written in the page as the chip writes it (tests/e2e/lib/inbox.ts) with the files of the
+// sentinels, the page is opened again, the PDFs wait (the region says where they came from), the action runs with the typed
+// password, and the same search as above finds nothing of the sentinels anywhere, the names and keys of the caches included,
+// and the inbox is gone. The Cache Storage of the WebKit of Playwright does not outlive a reload while service workers are
+// blocked (docs/claude/playwright.md, F13a): this block allows them.
+const pdfCarry = PDF_PANEL_TEXTS.en.carry;
+const ARRIVALS: { slug: string; from: string; note: string; files: () => Promise<TestFile[]>; act: (page: Page) => Promise<void>; proves: (outs: Download[]) => Promise<string> }[] = [
+  {
+    slug: 'merge-pdf',
+    from: 'compress-pdf',
+    note: fmt(pdfCarry.fromMany, { count: 2, tool: enCommon.pdf['compress-pdf'].name }),
+    files: async () => [pdf(FILE, await markerPdf()), pdf(SECOND, pdfBytes('gen-paginas-mistas.pdf'))],
+    act: (page) => page.getByRole('button', { name: actionOf(mergeTexts) }).click(),
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name)).toEqual([`${STEM}-merged.pdf`]);
+      const read = await readWithPdfjs(outs[0]?.bytes as Uint8Array);
+      expect(read.pages, 'both files are in it').toHaveLength(PAGES + 8);
+      expect(read.pages.slice(0, PAGES).map((p) => p.marker), 'in the order they came').toEqual(markers(PAGES));
+      return `the ${PAGES} pages that came first, then the 8 of the second file`;
+    },
+  },
+  {
+    slug: 'protect-pdf',
+    from: 'watermark-pdf',
+    note: fmt(pdfCarry.from, { tool: enCommon.pdf['watermark-pdf'].name }),
+    files: one,
+    act: async (page) => {
+      await page.getByLabel(protectTexts.panel.options.passwordLabel, { exact: true }).fill(PASSWORD);
+      await page.getByLabel(protectTexts.panel.options.confirmLabel, { exact: true }).fill(PASSWORD);
+      await page.getByRole('button', { name: actionOf(protectTexts) }).click();
+    },
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name)).toEqual([`${STEM}-protected.pdf`]);
+      const bytes = outs[0]?.bytes as Uint8Array;
+      expect(await opensWithoutPassword(bytes), 'it asks for the password').toBe(false);
+      expect((await readWithPdfjs(bytes, PASSWORD)).pages).toHaveLength(PAGES);
+      expect(bytesHold(bytes, SENTINELS.password), 'the file holds the password').toBeNull();
+      return 'it asks for the typed password, which is in no form in the bytes';
+    },
+  },
+];
+
+test.describe('the PDFs a chip brings to a tool with an action wait for it, and leave nothing of the sentinels anywhere', () => {
+  test.use({ serviceWorkers: 'allow' });
+  for (const arrival of ARRIVALS) {
+    test(`/${arrival.slug}/: the PDFs a chip brought wait for the action, and nothing of the sentinels leaves the device`, async ({ page, context, browserName }) => {
+      const seen = watch(context, page);
+      await openTool(page, `/${arrival.slug}/`);
+      const origin = new URL(page.url()).origin;
+      await arriveFrom(page, arrival.slug, arrival.from, await arrival.files());
+      const region = page.locator('#fo-tool-root .fo-pdf-island > p.fo-sr[role="status"]');
+      await expect(region, 'the region says where the PDFs came from').toContainText(arrival.note, { timeout: 30_000 });
+      await expect(page.locator('.fo-result'), 'nothing ran by itself').toHaveCount(0);
+      expect(await inboxGone(page), 'the tool took the inbox and deleted it').toEqual({ inbox: false, choice: null });
+      await arrival.act(page);
+      await expect(page.locator('.fo-result__from')).toHaveText(arrival.note, { timeout: 45_000 });
+      const delivered = await takeDownload(page);
+      const outs = filesOf(delivered);
+      const proof = await arrival.proves(outs);
+
+      const surfaces: Surface[] = await holdings(page, context, 'the tool page');
+      const keys = await page.evaluate(async () => {
+        const all: string[] = [];
+        for (const name of await caches.keys()) if (await caches.has(name)) all.push(name, ...(await (await caches.open(name)).keys()).map((request) => request.url));
+        return all.join('\n');
+      });
+      surfaces.push({ where: 'the names and the keys of the caches', text: keys });
+      const events = (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => entry[1]);
+      expect(events, 'the arrival is a drop, then the action and the download').toEqual(['tool_start', 'tool_complete', 'download']);
+      expect(seen.dialogs, 'no dialog').toEqual([]);
+      expect(brokenRequests(seen.requests, origin), 'only a GET of the own origin without a body or a query string').toEqual([]);
+      expect(leaksIn([...requestSurfaces(seen), ...surfaces, ...consoleSurfaces(seen)]), 'a sentinel reached a request, the page, a store, a cache or the console').toEqual([]);
+      expect(leaksIn(nameSurfaces(delivered, outs), NAME_MAY_CARRY), 'nothing typed is in the name of a download').toEqual([]);
+      recordPrivacy(`arrival-${arrival.slug}-${browserName}`, { tool: arrival.slug, from: arrival.from, browser: browserName, proved: proof, requests: seen.requests.length, events });
+    });
+  }
 });
