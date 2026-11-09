@@ -6678,3 +6678,10 @@ Reserva da frente M não usada.
 ## § 646 · Reserva não usada (F14, frente M)
 
 Reserva da frente M não usada.
+
+## § 647 · A revisão adversarial da F14 (F14, "Como trabalhar", passo 5; regra 3 de toda run)
+
+- **O método:** cinco lentes Sonnet em contexto limpo sobre o commit fixo `3fbafc1`, numa worktree só de leitura com o próprio install e o próprio build ((a) design system e visual, (b) acessibilidade, (c) comportamento, desempenho e memória, (d) privacidade e anúncios, (e) textos, idiomas e documentos), um cético por achado médio ou acima e um por lente para os baixos, com a regra "na dúvida, refutado"; as correções num agente só (o principal) e a segunda passada das lentes c, d e e sobre o diff delas. O registro inteiro está em `docs/relatorios/REVISAO-F14.md`.
+- **O resultado:** 8 achados, nenhum crítico nem alto; 6 refutados e 2 que sobreviveram, os dois corrigidos: o e-1 (médio: os § 632 a 642 citados e ainda fora do `DECISOES.md`) e o c-2 (baixo: o teste do E-4 da vista do resultado voltava antes da nova execução). A segunda passada fechou os dois.
+- **Um refutado aplicado mesmo assim:** o d-1 (o `pdf-privacy`, o `events` e o `launch-claims` não passavam pela vista), refutado pelo cético porque o comportamento estava certo e o critério 5 do prompt pede só que os specs passem. A frase do critério ("passam, com a vista e o 'Ver o PDF novo' no caminho") pede a vista no caminho deles; vale o mais rigoroso: a vista entrou no fluxo do Excluir do `pdf-privacy` e no da Marca d'água do `events` (§ 636). O `launch-claims` ficou como estava: ele confere o que sai para a rede, e abrir a vista offline numa ferramenta que nunca carregou o PDF.js pediria arquivos que o teste não tem como dar sem o service worker.
+- **Nenhum baixo sobrou para o grupo 24.** Os refutados a-1 (a vista a 320 × 640) e b-1 (a ordem do Tab da barra de baixo abaixo de 480 px) ficam registrados na revisão, como escolhas que uma run de ajuste pode rever.
