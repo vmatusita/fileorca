@@ -6701,3 +6701,190 @@ Reserva da frente M não usada.
 - **O teste antigo que mudou** (no formato da § 341): o `tests/unit/verificar.test.ts`, "reads the parts of ci.yml…", fixava 5 partes do Chromium e 13 do WebKit, e "covers the whole of pnpm verificar…", 18 execuções do `pnpm run e2e`. Agora fixa 8 e 14, e 22 execuções. A proteção continua: as partes juntas são o `verificar` inteiro, o build uma vez, cada portão uma vez, e toda parte do Playwright com o `dist/` pronto.
 - **Alternativas recusadas:** aceitar as duas partes acima do alvo (o critério 9 não deixa); dividir o `clearance.spec.ts` em dois arquivos nesta PR (refaz um teste de anúncio pesado por causa do tempo, com risco maior que mexer na matriz); 6 ou 7 partes no Chromium (a projeção ainda passava de 700 s).
 - **A medida** (a execução completa desta PR, `pnpm ci:custo 42688966415`, verde): as 8 partes do Chromium deram de 277,8 a 487,8 s (a pior era 766,4 s), e as partes do WebKit com os `island-pdf-*` (a 9 e a 10 de 14), 319,6 e 342,2 s. A parte do `layout-shift` (a 11 de 14) deu 655,1 s. A parte 4 de 14, a do `clearance.spec.ts`, deu 782,4 s: nessa execução os testes do WebKit rodaram uns 23 % mais devagar que na da F14 (o `clearance` somou 911,9 s de teste, eram 739,5 s), e a mesma parte, com 13 partes, tinha dado 640,1 s. O `clearance.spec.ts` é um spec antigo (§ 592): de 13 a 17 partes ele cai inteiro numa parte só, e a parte dele depende da velocidade do runner. A correção é dividi-lo em dois arquivos de nomes que caiam em partes diferentes, numa run de ajuste (F14 m-5 no `docs/PENDENCIAS.md`).
+
+## § 649 · A especificação da F15 (F15, decisão 1 do prompt; PLANO-UX-QV, seções C e D)
+
+- **O contrato:** as seções C e D do `PLANO-UX-QV.md`, palavra por palavra (os rótulos, os limites, o valor inicial e o que cada gesto faz), e os textos do pt que o prompt da F15 fixa (as decisões 3, 6 e 7). O que nenhum dos dois diz, a run decide pela régua do prompt, com um §.
+- **"Recomendado" ou "Recomendada":** a seção D escreve "Recomendado", e o site diz "Recomendada" desde a F6 (a compressão, no feminino: `src/tools/compress-image/i18n/pt.ts`, e o glossário, "Compressão · Recomendada · Forte"). É a mesma escolha; vale o texto do site, e nada nele muda.
+- **Onde o prompt é mais rigoroso que a ficha, vale o prompt:** o critério 6 (as caixas do painel do QR a 0,5 px a 768 e a 1280, com e sem código, nos dois navegadores, e a captura sem pixel diferente, onde a ficha pede "o screenshot igual a 1280"); o critério 1 (o espião de `Worker` que conta as mensagens, onde a ficha pede "contador no teste"); o mínimo do tamanho medido em duas fotos nos dois motores e arredondado para cima em 5 KB; e o limite de 8 KB com gzip por ilha.
+- **O que a ficha e o prompt dizem de jeitos diferentes, sem conflito:** "numa volta (sem o aviso de cookies)" e "o aviso de cookies respondido antes" (o teste grava a resposta antes da carga); "a lixeira em toda linha pronta" e "em todo lote de dois arquivos ou mais, nunca na última linha que resta" (a ficha já diz que com um arquivo só não há lixeira).
+
+## § 650 · Os planos, o `PLANO-FILEORCA.md` e o prompt da F15 (F15, decisão 2)
+
+- **O `PLANO-FILEORCA.md`:** o `git diff -- PLANO-FILEORCA.md` do começo da run não mostrou diferença: a linha do F14 m-1 ainda não foi posta. O arquivo ficou como estava, fora dos commits, e o F14 m-1 continua aberto no grupo 24 do `docs/PENDENCIAS.md` (a linha a pôr está lá).
+- **O prompt:** os arquivos `docs/prompts/prompt-fase-15.md` e `.txt` não estavam no clone. O texto recebido foi gravado em `docs/prompts/prompt-fase-15.txt`, como o prompt manda nesse caso, e entrou no primeiro commit da branch. Não há o `.md` com o bloco para copiar: só o Victor o gera, com a skill.
+- **Nenhum plano muda:** o `PLANO-UX-QV.md`, o `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md` e o `CLAUDE.md` ficam como estão. Achado que desminta um plano vai num § (o QR a 360 × 740, § 658).
+
+## § 651 · A lista da Imagem para PDF: a ordem, as setas, o arrastar e a lixeira (F15, decisão 3; seção C; D7)
+
+- **A marcação:** na Imagem para PDF, a lista é ordenada, porque a ordem é a das páginas: `ol.fo-filelist`, com as linhas `li.fo-filelist__row` (a classe de hoje, que os specs de privacidade, das matrizes e dos eventos leem). Nas outras ferramentas de imagem a lista continua um `div[role="list"]`.
+- **Cada linha:** o card, e fora dele, na linha, como no Juntar (o README do FileCard): as setas que andam (`.fo-filelist__move--up` e `--down`, o ícone `chevron`), com o lugar vazio de 48 px (`.fo-filelist__none`) onde a seta não anda, e a lixeira na linha pronta (`.fo-filelist__remove`). A linha que espera ou trabalha guarda o lugar da lixeira desde o começo (o × dela fica no card), para nada andar quando a foto fica pronta. Abaixo de 480 px, as setas e a lixeira vão na linha de 48 px embaixo do card (§ 515). A miniatura continua a da foto.
+- **As palavras** são as do Juntar em cada idioma, copiadas para os textos da ilha de imagem com chaves próprias (`queue.moveEarlier`, `moveLater`, `moved`, `out` e `undo`; o `remove` já existia, igual ao do Juntar). A ilha de imagem não importa os textos da ilha de PDF.
+- **O teclado, o toque e o mouse:** cada seta move uma posição, e o foco segue a linha movida, na mesma seta, ou na outra quando a linha chega à ponta. O mouse arrasta a linha inteira (o arrastar nativo, como o Juntar); as setas fazem o mesmo pelo toque e pelo teclado (WCAG 2.5.7).
+- **A ordem pode mudar enquanto as fotos ainda são preparadas** (como no Juntar, § 168): o PDF sai na ordem da lista no momento em que é montado, nunca numa ordem velha.
+- **"Show N more":** mover a 6ª linha para depois, ou uma linha escondida, abre a lista inteira, e o foco segue a linha.
+- **A chave do pacote** passa a levar o tamanho de página e a ordem dos ids das linhas prontas. Mudar a ordem, tirar ou devolver uma foto depois do resultado refaz só o PDF, com o resultado na tela até o novo; o worker `fileorca-image` não recebe nenhum pedido.
+- **A FAQ "Como mudo a ordem das páginas?"** e o passo do "Como funciona" passam a dizer como mudar a ordem (as setas, o arrastar e a lixeira), nos três idiomas (§ 660).
+
+## § 652 · Tirar um arquivo pronto de qualquer lote de imagem, com Desfazer (F15, decisão 4; D9)
+
+- **Onde:** em toda ferramenta e preset de imagem com dois arquivos ou mais no lote, a linha pronta ganha a lixeira de fora do card (a mesma de 48 px da § 651), com o nome "Remover {name}". A linha que espera ou trabalha guarda o lugar dela desde o começo. A linha de erro mantém a lixeira de hoje, no card. Com um arquivo só desde o começo, não há lista nem lixeira (o Começar de novo já faz isso), e a última linha que resta nunca tem lixeira.
+- **O Desfazer,** como o D-21 do Juntar: a linha vira, no mesmo lugar e na mesma altura, a frase "{name} saiu da lista." com o Desfazer ghost de 48 px, sem tempo marcado (WCAG 2.2.1). Ele fica até a próxima ação que muda o lote: outra remoção, mover uma linha, mudar uma opção, arquivos novos por qualquer caminho e o Começar de novo; Baixar não conta. O foco vai ao Desfazer; o Desfazer devolve a linha ao mesmo índice e o foco à lixeira dela. A frase entra 50 ms depois de a linha aparecer, como no Juntar (§ 659).
+- **O item tirado não é liberado** enquanto o Desfazer espera: a saída, a miniatura e o `outUrl` dele voltam com a linha. A próxima ação o libera.
+- **O pacote:** o ZIP é refeito só com as saídas que ficaram, sem codificar nada de novo, e o Baixar mostra o tamanho novo; na Imagem para PDF, o PDF é refeito sem a foto.
+- **De dois para um:** a lista fica à vista enquanto o Desfazer espera, e o Baixar entrega o arquivo que ficou como ele é (um arquivo só nunca vai em ZIP; na Imagem para PDF, o PDF de uma página). Na próxima ação, com um arquivo só, a ilha volta ao card de um arquivo.
+- **Nas ferramentas com um arquivo escolhido** (o Cortar, `selectable`): tirar o escolhido passa a escolha à linha seguinte, ou à anterior quando era a última.
+- **Nenhum evento novo:** a remoção, o Desfazer e a ordem não mandam nada ao GA4; o `tool_complete` (uma vez por lote) e o `download` continuam como hoje.
+
+## § 653 · Os chips da Imagem para PDF levam o PDF (F15, decisão 5; D8)
+
+- **O `next` da Imagem para PDF** passa a ser Comprimir PDF, Juntar PDF e Numerar páginas, nessa ordem. O tipo do `next` das imagens aceita essas vizinhas por um tipo próprio, `PdfNeighbour` (`src/tools/image/registry.ts`), como o `ImageNeighbour` faz do outro lado; o `ChipData.target` também. O `related` não muda.
+- **O chip leva o PDF** quando o destino aceita (a regra da § 654): o Comprimir PDF e o Numerar páginas rodam sozinhos e mostram o resultado; o Juntar recebe o PDF na lista e espera a ação. A Imagem para PDF sempre faz um PDF só: os chips dizem "Comprimir este PDF", "Juntar este PDF com outros" e "Numerar as páginas deste PDF". Os rótulos ficam nos textos da ilha de imagem com chaves próprias, com as palavras da ilha de PDF (§ 660).
+- **As origens:** a Imagem para PDF entra no mapa `origins` das três páginas, nos três idiomas: a chegada diz "A Oli trouxe este PDF de Imagem para PDF." (o nome da página no idioma).
+- **A linha de levar:** embaixo dos chips da Imagem para PDF, a linha `.fo-carry` diz as palavras do PDF ("A Oli leva o PDF para a próxima ferramenta. Ele não sai do seu aparelho.", a chave nova `carry.linePdf` dos textos da ilha de imagem), e a cópia escondida da faixa (§ 500) guarda a altura dela desde a primeira pintura, sem deslocamento sem gesto.
+
+## § 654 · A regra nova de levar: o chip leva também para quem espera uma ação (F15, decisão 6; F13a h-1; D11). Substitui a regra "só linkam" da § 497
+
+- **A regra:** o chip leva o resultado quando o destino aceita o que a página faz (a regra `takes()` de `src/share/logic.ts` com os `accepts` dos registros; no cliente, o `carries()` com os formatos do resultado de agora), **rode ele sozinho ou espere a ação**. O arquivo que chega a um destino com ação entra pelo caminho do soltar e espera a ação (§ 655). A § 497 não muda; esta substitui o trecho "Só linkam: os destinos que esperam a ação (Protect, Merge, Split, Reorder)".
+- **O que continua sem levar:** qualquer chip do Proteger (o PDF dele sai cifrado, e o destino o recusaria com "precisa de senha"); a Imagem para PDF para uma ferramenta de imagem (um PDF não é imagem); o Juntar para a Imagem para PDF (idem). O destino de um arquivo só (`files: 'single'`: o Dividir e o Organizar páginas) recebe um, como a regra `single` já faz.
+- **Os pares novos** pelos `next` de hoje: o Juntar (vindo do Dividir, do Comprimir PDF, do Girar, do Desbloquear e da Imagem para PDF), o Dividir (do Desbloquear), o Organizar páginas (do Excluir) e o Proteger (do Comprimir PDF, do Numerar páginas, do Assinar e da Marca d'água); e, da Imagem para PDF, o Comprimir PDF e o Numerar páginas, que rodam sozinhos. Nenhum par a mais nem a menos que o D11.
+- **Onde se decide:** no build, o `carryOf` (`src/tools/pdf/page.ts`) e o `carryTo` (`src/tools/image/page.ts`) deixam de exigir `run: 'auto'` do destino; o rótulo do chip tem de existir nos textos do idioma (sem rótulo, o chip só linka). No cliente, nada muda: o `carries()` decide com os formatos do resultado e o worker no controle (§ 496). O `tests/unit/handoff.test.ts` continua comparando o `carries()` com o `takes()` na grade inteira.
+- **Os rótulos** dos destinos novos, nos três idiomas, estão na § 660.
+- **Alternativas recusadas:** levar o PDF cifrado do Proteger (o destino o recusa; o link é melhor); rodar a ação sozinha na chegada (a pessoa ainda digita a senha, escolhe as partes ou arruma a ordem: rodar sem ela desfaz o propósito da ação); uma caixa nova para a chegada com ação (a de hoje cobre, § 505).
+
+## § 655 · A chegada nas ferramentas com ação: o arquivo espera (F15, decisão 6)
+
+- **O caminho:** os arquivos entram pelo caminho do soltar (`addFiles`), na lista do Juntar ou no painel do Dividir, do Organizar páginas e do Proteger, e esperam a ação: nada roda sozinho, e o foco vai aonde um soltar comum o leva hoje nessa ferramenta.
+- **A fala:** a região da ilha diz a frase da chegada uma vez ("A Oli trouxe este PDF de Comprimir PDF.", e o plural da § 498), quando os arquivos ficam prontos para a ação; o resultado da ação não a repete (o card mostra a nota). Um PDF só no Juntar continua com a frase de hoje de quem precisa de mais um arquivo.
+- **A nota de origem** no card do resultado segue a § 498: fica enquanto o lote é o que chegou e sai com outro lote. No Juntar, somar ou tirar um arquivo muda o lote (a nota sai); mudar a ordem, não.
+- **A caixa vazia** (`lost`) vale também nesses destinos, quando a escolha da aba nomeia uma origem que a página conhece e nada chega.
+- **A privacidade:** os arquivos vão pela caixa de hoje (as entradas `INBOX_ENTRY_PREFIX` com o `X-FileOrca-Stored`, a escolha da aba com ids de página, nunca um nome), e a limpeza de 1 h do worker cobre tudo; o `src/sw/` não muda (§ 505).
+
+## § 656 · Comprimir "até um tamanho" (F15, decisão 7; seção D; D10)
+
+- **O segmento** ganha a terceira escolha, "Até um tamanho", depois de "Recomendada" e "Forte", com uma ajuda curta no `small` ("limite em KB"), como as outras.
+- **O campo "Tamanho máximo"** aparece só com a terceira escolha: o `NumberField` de hoje, com o sufixo "KB", de 20 a 10.000, começando em 200. Ele aceita número inteiro sem separador de milhar, como o Redimensionar (o `parseWhole`: "10000" passa, "10.000" e "10,000" não); a mensagem de erro diz a faixa no formato do idioma ("de 20 a 10.000" no pt e no es, "from 20 to 10,000" no en). A ferramenta só refaz o lote com um valor válido, depois da pausa da digitação ou ao sair do campo.
+- **A operação:** `{ kind: 'target', maxBytes: valor × 1000 }`, a mesma das presets (1 KB = 1.000 bytes). A ajuda do campo diz que a foto sai em JPG e que a transparência fica branca (a nota `flattened` do motor); uma foto que já cabe volta só sem os metadados, como nas presets.
+- **O resumo do "Ajustar"** diz "Até 200 KB", com o número no formato do idioma. O "Antes e depois" continua.
+- **O valor digitado** vive só na memória da página: nada na URL, no `dataLayer`, no `localStorage` ou no `sessionStorage`.
+- **Os textos da página** que falam só de "Recomendada" e "Forte" (o "Como funciona", a especificação, a seção das presets e a FAQ) passam a citar a escolha nova, nos três idiomas (§ 660).
+
+## § 657 · O mínimo do "Tamanho máximo" (F15, decisão 7; seção D)
+
+- **A regra:** o mínimo é 20 KB se o motor chega a 20 KB, nos dois navegadores, com a `jpg-01-pixel2-retrato-gps.jpg` (12 MP, 3024 × 4032) e a `gen-grande-4100x4100.jpg` (16,8 MP). Se não chegar em alguma, o mínimo sobe para o menor valor que ele alcança em todas, arredondado para cima em 5 KB.
+
+## § 658 · O QR code no celular: o código logo abaixo do campo (F15, decisão 8; D12)
+
+- **A ordem do DOM** passa a ser o campo, a saída (a prévia, a frase e os dois Baixar) e as opções. Abaixo de 768 px, a prévia tem até 240 px de lado.
+- **A partir de 768 px,** áreas de grade mantêm na tela o desenho de hoje: o campo e as opções na coluna da esquerda, a saída na da direita, nas duas linhas; a segunda linha leva o que sobrar e as opções ficam no topo dela. Os espaços entre o campo e as opções são os de hoje.
+- **A ordem de Tab nova** (o campo, a saída e as opções) vale também no computador: é a ordem do DOM, e a pessoa que digita chega aos Baixar logo depois do campo. Antes, o Tab passava pelas cinco escolhas das opções antes do Baixar.
+- **O achado que o plano não previa:** a 360 × 740, só mudar a ordem não basta. No ponto de partida, o campo com a ajuda termina em 507 px no en e em 527 px no pt e no es; com o vão de hoje (20 px) e a prévia de 240 px, o código terminaria em 787 px no pt, 47 px abaixo da dobra de 740. O critério 6 da ficha (o código inteiro acima da dobra nos três idiomas) pede uns 50 px a menos abaixo de 768 px, mais uma folga para uma linha a mais da fonte do Linux do CI. O que muda abaixo de 768 px para isso, e a medida, vêm da frente Q.
+- A Oli, os textos, os tamanhos do PNG, o `export_click` e o resto do painel não mudam.
+
+## § 659 · As falas: uma por gesto (F15, decisão 9)
+
+- **Mover uma linha** diz "{name} agora está na posição {position} de {total}." pela região da ilha (`p.fo-sr[role="status"]`), limpa antes e preenchida 50 ms depois, como o `say()` da ilha de PDF.
+- **Tirar uma linha** diz "{name} saiu da lista." pela linha do Desfazer, como no Juntar: o `span[role="status"]` da própria linha, preenchido 50 ms depois de ela aparecer. A decisão 9 do prompt diz "tudo pela região" e, no mesmo item, "pela linha do Desfazer, como no Juntar"; vale a forma do Juntar, que o leitor de tela já conhece no site, e a região da ilha fica calada nesse gesto.
+- **Depois do resultado,** o PDF ou o ZIP que um desses gestos refaz não repete a fala de sucesso da Oli: o gesto já falou (a mesma ideia do `hush` da ilha de PDF, § 629). O card troca os números em silêncio.
+- **A chegada** diz a frase dela uma vez (§ 655).
+- **O erro do campo de tamanho** fala pelo campo, como o `NumberField` de hoje: `aria-invalid`, `aria-describedby` e a linha do erro com o ícone, um `p[role="alert"]` dentro do campo, nunca pela região da ilha.
+- **A prova:** os testes contam as mudanças de texto da região (e da linha do Desfazer, onde ela existe) com um `MutationObserver`: uma fala por gesto.
+
+## § 660 · Os textos novos da F15 nos três idiomas (F15, decisão 10; glossário de `docs/i18n/`)
+
+Os do pt são os das seções C e D e das decisões 3, 6 e 7 do prompt, sem mudar uma palavra; os que nenhum dos dois traz (a ajuda curta da terceira escolha, a ajuda do campo e o erro) foram escritos no registro do site. Os de en e es seguem os nomes de ferramenta do glossário e as palavras que o site já usa (o Juntar, as presets, o Redimensionar).
+
+**As linhas do lote** (`queue`, ilha de imagem; as palavras do Juntar):
+
+| Chave | en | pt | es |
+| --- | --- | --- | --- |
+| `moveEarlier` | Move {name} up | Subir {name} | Mover {name} hacia arriba |
+| `moveLater` | Move {name} down | Descer {name} | Mover {name} hacia abajo |
+| `moved` | {name} is now number {position} of {total}. | {name} agora está na posição {position} de {total}. | {name} ahora es el número {position} de {total}. |
+| `remove` (já existia) | Remove {name} | Remover {name} | Quitar {name} |
+| `out` | {name} is out of the list. | {name} saiu da lista. | {name} salió de la lista. |
+| `undo` | Undo | Desfazer | Deshacer |
+
+**Os chips que levam o PDF** (`carry.chips`; `one` e `many`). Na ilha de imagem, só os três da Imagem para PDF; na ilha de PDF, os quatro destinos com ação:
+
+| Destino | en | pt | es |
+| --- | --- | --- | --- |
+| Comprimir PDF (ilha de imagem; já na de PDF) | Compress this PDF · Compress these {count} PDFs | Comprimir este PDF · Comprimir estes {count} PDFs | Comprimir este PDF · Comprimir estos {count} PDF |
+| Numerar páginas (ilha de imagem; já na de PDF) | Number the pages of this PDF · … of these {count} PDFs | Numerar as páginas deste PDF · … destes {count} PDFs | Numerar las páginas de este PDF · … de estos {count} PDF |
+| Juntar PDF | Merge this PDF with others · Merge these {count} PDFs | Juntar este PDF com outros · Juntar estes {count} PDFs | Unir este PDF con otros · Unir estos {count} PDF |
+| Dividir PDF | Split this PDF · Split these {count} PDFs | Dividir este PDF · Dividir estes {count} PDFs | Dividir este PDF · Dividir estos {count} PDF |
+| Organizar páginas | Reorder the pages of this PDF · … of these {count} PDFs | Organizar as páginas deste PDF · … destes {count} PDFs | Ordenar las páginas de este PDF · … de estos {count} PDF |
+| Proteger PDF | Protect this PDF with a password · Protect these {count} PDFs with a password | Proteger este PDF com senha · Proteger estes {count} PDFs com senha | Proteger este PDF con contraseña · Proteger estos {count} PDF con contraseña |
+
+- O es mantém o plural de PDF invariável, como no resto do site (§ 498). Os verbos seguem os nomes do glossário: Merge/Juntar/Unir, Split/Dividir/Dividir, Reorder/Organizar/Ordenar, Protect/Proteger/Proteger.
+
+**A linha de levar da Imagem para PDF** (`carry.linePdf`, as palavras da ilha de PDF): "Oli takes the PDF to the next tool. It never leaves your device." · "A Oli leva o PDF para a próxima ferramenta. Ele não sai do seu aparelho." · "Oli lleva el PDF a la siguiente herramienta. Nunca sale de tu dispositivo."
+
+**A terceira escolha do Comprimir** (`panel.options` do Comprimir imagem):
+
+| Chave | en | pt | es |
+| --- | --- | --- | --- |
+| `size` | Up to a size | Até um tamanho | Hasta un tamaño |
+| `sizeHelp` (o `small`) | limit in KB | limite em KB | límite en KB |
+| `maxLabel` | Maximum size | Tamanho máximo | Tamaño máximo |
+| `kb` (o sufixo) | KB | KB | KB |
+| `maxHelp` | Each image comes out as a JPG of that size or less, and transparency turns white. An image that already fits comes back the same, only without the photo metadata. | Cada imagem sai como um JPG desse tamanho ou menos, e a transparência fica branca. Uma imagem que já cabe volta igual, só sem os metadados da foto. | Cada imagen sale como un JPG de ese tamaño o menos, y la transparencia queda blanca. Si una imagen ya cabe, vuelve igual, solo sin los metadatos de la foto. |
+| `maxInvalid` | Type a whole number from {min} to {max}. | Digite um número inteiro de {min} a {max}. | Escribe un número entero de {min} a {max}. |
+| `upTo` (o resumo do "Ajustar") | Up to {n} KB | Até {n} KB | Hasta {n} KB |
+
+- A ajuda do campo segue a nota das presets ("Cada imagem sai como um JPG de até 100 KB. A transparência fica branca."); o erro segue o do Redimensionar ("Digite um número inteiro de 1 a {max}."), com o mínimo no lugar do 1. O `{n}`, o `{min}` e o `{max}` saem com o separador de milhar do idioma (`groupDigits`).
+
+## § 661 · O orçamento da F15 (F15, decisão 11)
+
+- **A regra:** as páginas de imagem, de PDF e do QR carregam os mesmos arquivos JS e as mesmas requisições do ponto de partida (o `budgets.spec.ts` e o `i18n-budgets.spec.ts`, sem mudar número nenhum), medido arquivo a arquivo contra o `dist-base` (`node .cache/f15/gzip-sizes.mjs`); o JS inicial nunca passa de 80 KB com gzip; e cada ilha cresce no máximo 8 KB com gzip antes de a run tirar código. No ponto de partida: a ilha de imagem com 21.215 B, a de PDF com 23.759 B e o QR com 10.796 B, com gzip.
+
+## § 662 · Os anúncios e o CLS da F15 (F15, decisão 12)
+
+- **A regra:** todo controle novo (as setas, a lixeira, o Desfazer, o campo de tamanho, a terceira escolha) entra nas listas de alvos dos 150 px (`tests/e2e/lib/ad-clearance.ts`, `tests/e2e/lib/ad-map.ts` e o `QR_TARGETS` do `ads.spec.ts`), e os alvos de hoje não encolhem. O `ads.spec.ts` mede, no build de teste, a 360 × 740 e a 1280 × 800, a lista da Imagem para PDF com as setas, a lixeira e uma linha do Desfazer, o Comprimir com o campo aberto e o QR com um código. O `fo-ad-map.spec.ts`, o `ads-coffee.spec.ts` e o `clearance.spec.ts` continuam verdes, sem teste novo no `clearance.spec.ts` (F14 m-5).
+- **O CLS sem gesto** continua 0 na carga e na interação (o `tool-slot.spec.ts`, com as peças novas), e o `layout-shift.spec.ts` não muda de número. O guia das fotos num PDF embute a Imagem para PDF: o uso com o painel no topo da tela (F13b g-1) é medido no `dist-base` e no novo, e não piora.
+
+## § 663 · Os specs novos da F15: os nomes e as partes (F15, decisão 13)
+
+- **A regra do `--shard`:** o CI corta cada projeto por contagem de testes na ordem dos nomes dos arquivos (8 partes no Chromium, 14 no WebKit, § 648); o nome de um spec novo decide a parte dele. Os nomes foram escolhidos pelos tempos de teste da execução completa `42688966415` (`.cache/f14/ci-durations-30.json`), para cair em partes com folga do alvo de 700 s:
+  - `handoff-action.spec.ts` (o critério 4; o `-` vem antes do `.`, então ele fica antes do `handoff.spec.ts`): a parte 4 do Chromium e a 7 do WebKit;
+  - `image-list.spec.ts` (os critérios 1 e 2; entre o `image-crop` e o `image-matrix`): a parte 6 do Chromium e a 9 do WebKit;
+  - `image-target.spec.ts` (o critério 5; entre o `image-smoke` e o `institutional`): a parte 6 do Chromium e a 10 do WebKit;
+  - `qr-layout.spec.ts` (o critério 6; depois do `qr-code`): a parte 8 do Chromium e a 13 do WebKit;
+  - os blocos novos de CLS, de axe e de anúncio vão no `tool-slot.spec.ts`, no `tool-slot-axe.spec.ts` e no `ads.spec.ts`, que já pagam o que precisam (o build de teste só no `ads.spec.ts`).
+- **A parte 4 do WebKit** (a do `clearance.spec.ts`) já passava de 700 s no ponto de partida (782,4 s na `42688966415`; F14 m-5): não é efeito desta run, e a correção dela (dividir o `clearance.spec.ts`) é de uma run de ajuste.
+
+## § 664 · Os testes antigos que mudaram na F15 (F15, decisão 13; o formato da § 341)
+
+- **`tests/unit/handoff.test.ts`, "carry from every image page that makes images to every image tool…" (fatia 1).** Indexava `IMAGE_PAGES[chip.target]`; com o `ChipData.target` que agora aceita uma vizinha de PDF (§ 653), o `astro check` reprova o índice. Agora indexa `IMAGE_PAGES[chip.target as ImageToolId]`, só no tipo: o teste confere o mesmo (a fatia 1 não mudou o `next` de nenhuma página). A reescrita da regra vem com a frente C, abaixo.
+
+## § 665 · O design system da F15: os README, antes e depois (F15, decisão 14)
+
+- **A regra:** nenhum componente, ícone ou token novo. As setas são as do Juntar (o `chevron`), a lixeira é a de hoje (`trash`) e o Desfazer é texto (`fo-btn--ghost`). Os README mudam só onde a F15 os desmentir, com o texto de antes e o de depois aqui.
+
+## § 666 · A conferência no Linux no meio da run não houve: o rótulo `ci` não existe (F15, decisão 18; § 638)
+
+- O `gh label list` do começo da run não mostrou o rótulo `ci` (só os nove de fábrica e `accessibility`). Criá-lo é só do Victor, e a run nunca usa o `gh pr ready` seguido do `--undo` como atalho. A execução completa final faz o papel da conferência no Linux; o que ela achar vai no relatório. O rótulo continua no passo 4 da lista do Victor.
+
+## § 667 · Reservado (F15, frente L)
+
+## § 668 · Reservado (F15, frente L)
+
+## § 669 · Reservado (F15, frente L)
+
+## § 670 · Reservado (F15, frente L)
+
+## § 671 · Reservado (F15, frente C)
+
+## § 672 · Reservado (F15, frente C)
+
+## § 673 · Reservado (F15, frente C)
+
+## § 674 · Reservado (F15, frente C)
+
+## § 675 · Reservado (F15, frente Q)
+
+## § 676 · Reservado (F15, frente Q)
+
+## § 677 · Reservado (F15, frente Q)
+
+## § 678 · Reservado (F15, frente Q)

@@ -12,7 +12,7 @@ import { FILE_PANEL_POSES } from '../../src/tools/image/Oli.tsx';
 import { takes } from '../../src/share/logic.ts';
 import { carries, plainClick, readChoice } from '../../src/tools/image/inbox.ts';
 import { chipsFor as imageChips, originsOf, panelData as imagePanelData } from '../../src/tools/image/page.ts';
-import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
+import { IMAGE_PAGES, type ImagePageId, type ImageToolId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
 import { chipsFor as pdfChips, panelData as pdfPanelData } from '../../src/tools/pdf/page.ts';
 import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
@@ -86,7 +86,7 @@ describe('the chips the pages build', () => {
             continue;
           }
           const label = IMAGE_PANEL_TEXTS[lang].carry.chips[chip.target as keyof (typeof IMAGE_PANEL_TEXTS)['en']['carry']['chips']];
-          expect(chip.carry, `${id} to ${chip.target} (${lang})`).toEqual({ accepts: [...IMAGE_PAGES[chip.target].accepts], single: false, one: label.one, many: label.many });
+          expect(chip.carry, `${id} to ${chip.target} (${lang})`).toEqual({ accepts: [...IMAGE_PAGES[chip.target as ImageToolId].accepts], single: false, one: label.one, many: label.many });
           // The chip keeps the name of the tool it links to (image-texts.test.ts): the label that carries is its own field.
           expect(chip.name).not.toBe(label.one);
         }

@@ -8,14 +8,14 @@ import type { Lang } from '../../i18n/routes.ts';
 import type { ImagePanelTexts, ImageToolPanelTexts } from '../../i18n/types.ts';
 import type { ImageFormat, Operation, WarmKind } from '../../engine/image/types.ts';
 import type { PdfPageSize } from '../../engine/pdf/build.ts';
-import type { ImagePageId, ImageToolId } from './registry.ts';
+import type { ImagePageId, ImageToolId, PdfNeighbour } from './registry.ts';
 import type { Success } from './summary.ts';
 
 /** A next-step chip: a link to another tool that exists in this language (or to the home). */
 export interface ChipData {
   href: string;
   name: string;
-  target: ImageToolId | 'home';
+  target: ImageToolId | PdfNeighbour | 'home';
   /** Inner markup of the icon (docs/design/assets/Icons), read at build. */
   icon: string;
   /** Colour of the chip dot; the home chip has none (brand-soft). */
@@ -72,6 +72,11 @@ export interface ImagePanelData<O = object> {
    * the line under the chips), read at build like the icons of the PDF island: a ?raw import would grow the shared chunk.
    */
   carryIcons: { info: string; shield: string };
+  /**
+   * F15 (DECISOES § 651 and § 652): inner markup of the arrows and of the bin outside the card in the rows of a batch, read at
+   * build like carryIcons (the card has its own bin; a second ?raw import of it would grow the shared chunk).
+   */
+  listIcons: { chevron: string; trash: string };
   /** Options the page starts the tool with, over the tool's own (a guide, by property of the page; never the URL). */
   initial?: Record<string, unknown>;
 }

@@ -86,6 +86,14 @@ export default {
       strong: 'Fuerte',
       strongHelp: 'archivo más pequeño',
       pngNote: 'El PNG se guarda sin pérdida, así que el nivel solo cambia JPG y WebP.',
+      // F15 (PLANO-UX-QV, sección D; DECISOES § 656 y § 660): la tercera opción y su campo.
+      size: 'Hasta un tamaño',
+      sizeHelp: 'límite en KB',
+      maxLabel: 'Tamaño máximo',
+      kb: 'KB',
+      maxHelp: 'Cada imagen sale como un JPG de ese tamaño o menos, y la transparencia queda blanca. Si una imagen ya cabe, vuelve igual, solo sin los metadatos de la foto.',
+      maxInvalid: 'Escribe un número entero de {min} a {max}.',
+      upTo: 'Hasta {n} KB',
     },
   },
 } satisfies ImageToolTexts<CompressOptionsTexts>;

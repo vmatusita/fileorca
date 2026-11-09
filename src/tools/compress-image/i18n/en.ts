@@ -85,6 +85,14 @@ export default {
       strong: 'Strong',
       strongHelp: 'smallest',
       pngNote: 'PNG is saved without loss, so the level only changes JPG and WebP.',
+      // F15 (PLANO-UX-QV, section D; DECISOES § 656 and § 660): the third choice and its field.
+      size: 'Up to a size',
+      sizeHelp: 'limit in KB',
+      maxLabel: 'Maximum size',
+      kb: 'KB',
+      maxHelp: 'Each image comes out as a JPG of that size or less, and transparency turns white. An image that already fits comes back the same, only without the photo metadata.',
+      maxInvalid: 'Type a whole number from {min} to {max}.',
+      upTo: 'Up to {n} KB',
     },
   },
 } satisfies ImageToolTexts<CompressOptionsTexts>;

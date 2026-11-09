@@ -22,6 +22,12 @@ export type ImagePresetId = (typeof IMAGE_PRESET_IDS)[number];
 
 export type ImagePageId = ImageToolId | ImagePresetId;
 
+/**
+ * F15 (D8; DECISOES § 653): the PDF tools an image page may lead to with a chip, as ImageNeighbour does the other way
+ * (src/tools/pdf/registry.ts): after Image to PDF, the next step is a PDF tool, never an image one.
+ */
+export type PdfNeighbour = 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf';
+
 export interface ImagePageDef {
   id: ImagePageId;
   /** The tool a preset belongs to. */
@@ -29,8 +35,8 @@ export interface ImagePageDef {
   /** Real formats taken; anything else is refused with the Oli line, file by file. */
   accepts: readonly ImageFormat[];
   icon: IconName;
-  /** Next-step chips: 2 to 4 tools that exist, chosen by what the person just did. */
-  next: readonly ImageToolId[];
+  /** Next-step chips: 2 to 4 tools that exist, chosen by what the person just did (a PDF tool after a PDF, F15). */
+  next: readonly (ImageToolId | PdfNeighbour)[];
   /** Related grid at the end of the page: up to 6 tools that exist. */
   related: readonly ImageToolId[];
   /** BeforeAfter only where the output loses quality (compression and lossy conversions). */
