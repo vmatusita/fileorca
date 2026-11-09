@@ -11,7 +11,7 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte seus PDFs na caixa, escolha os arquivos ou cole, quantos quiser.',
-    'Escolha um giro (90° à direita, 180° ou 90° à esquerda) ou, com um arquivo só, gire página por página pelo botão de cada miniatura.',
+    'Escolha um giro (90° à direita, 180° ou 90° à esquerda) ou, com um arquivo só, gire página por página pelo botão de cada miniatura, e a lupa abre a página em tamanho grande.',
     'Baixe o PDF girado ou todos juntos num ZIP, e os seus arquivos originais continuam intactos.',
   ],
   specsHeading: 'O que entra e o que sai',

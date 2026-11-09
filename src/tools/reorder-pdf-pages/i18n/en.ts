@@ -10,7 +10,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
   h1: 'Reorder PDF pages',
   howHeading: 'How it works',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page.',
+    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page; the magnifier on a page opens it large.',
     'Drag a page to its new place, use the arrows on each page, or use the keyboard: Space picks a page up, the arrow keys move it, Space drops it. Reverse order flips the whole PDF.',
     'Press Save new order, then download the new PDF. Your original file stays untouched.',
   ],

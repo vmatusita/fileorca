@@ -11,7 +11,7 @@ const texts: PdfToolTexts<SplitTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte um PDF na caixa, escolha o arquivo ou cole.',
-    'Escolha como dividir: cada página num arquivo, intervalos de páginas como 1-3, 5, 8-10, ou as páginas que você marcar na grade de miniaturas.',
+    'Escolha como dividir: cada página num arquivo, intervalos de páginas como 1-3, 5, 8-10, ou as páginas que você marcar na grade de miniaturas, onde a lupa abre cada página em tamanho grande.',
     'Aperte Dividir PDF, e a Oli corta o arquivo no seu navegador.',
     'Baixe o resultado: um arquivo sai sozinho, e vários arquivos vêm juntos num ZIP.',
   ],

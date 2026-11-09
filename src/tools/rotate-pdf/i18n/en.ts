@@ -11,7 +11,7 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop your PDF files on the box, choose them, or paste them. Add as many as you like.',
-    'Pick a turn: 90° right, 180° or 90° left. With one file you can also turn page by page, using the button on each thumbnail.',
+    'Pick a turn: 90° right, 180° or 90° left. With one file you can also turn page by page, using the button on each thumbnail; the magnifier opens a page large.',
     'Download the turned PDF, or all of them together in a ZIP. Your original files stay untouched.',
   ],
   specsHeading: 'What goes in and what comes out',

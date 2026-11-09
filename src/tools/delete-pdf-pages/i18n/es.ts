@@ -12,7 +12,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'Cómo funciona',
   howSteps: [
     'Suelta un PDF en el cuadro, elígelo o pégalo.',
-    'Elige en la cuadrícula de miniaturas las páginas que quieres eliminar o escribe sus números, como 1-3, 5.',
+    'Elige en la cuadrícula de miniaturas las páginas que quieres eliminar o escribe sus números, como 1-3, 5. La lupa de cada página la abre en tamaño grande, para que la revises antes.',
     'Presiona Eliminar páginas y Oli crea un PDF nuevo con las páginas que quedan.',
     'Descarga el PDF nuevo; tu archivo original no se toca.',
   ],
@@ -51,7 +51,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
     },
     {
       q: '¿Puedo deshacerlo si elimino las páginas equivocadas?',
-      a: 'Tu archivo original nunca cambia, porque Oli escribe un PDF nuevo. Si el nuevo no es lo que querías, presiona Empezar de nuevo, vuelve a elegir el original y marca otras páginas.',
+      a: 'Tu archivo original nunca cambia, porque Oli escribe un PDF nuevo. Después del resultado, las páginas siguen a la vista: elige o desmarca otras, y el botón para eliminarlas vuelve, listo para crear otro PDF. Presiona Empezar de nuevo solo para elegir otro archivo.',
     },
     {
       q: '¿Los formularios, los enlaces y los marcadores sobreviven?',

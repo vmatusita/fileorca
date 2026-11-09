@@ -14,7 +14,7 @@ const texts: PdfToolTexts<SignTexts> = {
   howSteps: [
     'Suelta tu PDF en el cuadro o elígelo; aquí Oli trabaja con un PDF a la vez.',
     'Dibuja tu firma, elige una imagen de ella o escribe tu nombre, y arrastra el recuadro al lugar donde debe ir.',
-    'Elige las páginas que la llevan y presiona Firmar PDF para que Oli dibuje la firma en ellas, en tu navegador.',
+    'Elige las páginas que la llevan (la lupa de cada página la abre en tamaño grande) y presiona Firmar PDF para que Oli dibuje la firma en ellas, en tu navegador.',
     'Descarga tu PDF; tu archivo original no se toca.',
   ],
   specsHeading: 'Qué entra y qué sale',

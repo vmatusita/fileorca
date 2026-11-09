@@ -11,7 +11,7 @@ const texts: PdfToolTexts<SplitTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop one PDF on the box, choose it, or paste it.',
-    'Pick how to split it: every page in its own file, page ranges like 1-3, 5, 8-10, or the pages you pick in the grid of thumbnails.',
+    'Pick how to split it: every page in its own file, page ranges like 1-3, 5, 8-10, or the pages you pick in the grid of thumbnails, where the magnifier opens each page large.',
     'Press Split PDF. Oli cuts the file in your browser.',
     'Download the result. One file downloads on its own, and several files come together in a ZIP.',
   ],
