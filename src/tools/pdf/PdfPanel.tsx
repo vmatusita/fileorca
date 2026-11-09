@@ -141,13 +141,15 @@ interface Model {
   views: number;
   /** The button that opened the view takes the focus back, once it is there (§ 510). */
   focusBack: string | null;
+  /** F14 (d-8, DECISOES § 629): the run whose "Done!" is not said, since the gesture that started it said its own sentence. */
+  hush: number;
 }
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, readingLevel: false, bundle: null, single: null, notes: [],
   announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
   redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null, focusWrong: false,
-  from: null, lost: null, outs: [], carrying: false, sealed: false, view: null, views: 0, focusBack: null,
+  from: null, lost: null, outs: [], carrying: false, sealed: false, view: null, views: 0, focusBack: null, hush: 0,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -327,6 +329,9 @@ export default function PdfPanel(props: PdfPanelData) {
   };
   const say = (message: string) => {
     m.announce = '';
+    // F14 (d-8, § 629): a sentence said while a run that a change started is going (a turn of a page in Rotate, in the
+    // grid or in the page view) is that gesture's one sentence: the run adds no "Done!" of its own.
+    if (runMode === 'auto' && m.phase === 'processing' && !m.focusDownload) m.hush = m.runId;
     setTick((tick) => tick + 1);
     window.setTimeout(() => {
       m.announce = message;
@@ -617,7 +622,7 @@ export default function PdfPanel(props: PdfPanelData) {
       m.coffee = countUse() ? 'ask' : '';
     }
     // F13a · UX-14: a batch a chip brought also says where it came from.
-    m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote()].filter(Boolean).join(' ') : '';
+    if (!(delivered && m.hush === m.runId)) m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote()].filter(Boolean).join(' ') : '';
     render();
   }
 

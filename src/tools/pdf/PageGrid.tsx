@@ -19,7 +19,7 @@ import { fmt } from '../../i18n/format.ts';
 import OptionGroup from '../image/OptionGroup.tsx';
 import PageCell, { type CellActions } from './PageCell.tsx';
 import PageView, { type Held, type ViewAction } from './PageView.tsx';
-import { THUMB_CAP, askWidth, quarters, samePages, sheetRatio } from './grid-math.ts';
+import { THUMB_CAP, askWidth, countOf, inverted, quarters, samePages, sheetRatio, span, spanned } from './grid-math.ts';
 import type { PdfIcons, Thumbnails } from './types.ts';
 
 export interface PageGridProps {
@@ -32,7 +32,10 @@ export interface PageGridProps {
   icons: PdfIcons;
   thumbnails: Thumbnails | null;
   announce: (message: string) => void;
-  /** The picked pages (select mode). */
+  /**
+   * The picked pages (select mode): the same Set while the list of picks is the same (`setOf(state.picked)` of
+   * grid-math.ts), so a new list the grid did not hand out, even of the same pages, drops the anchor (§ 628).
+   */
   selected?: ReadonlySet<number>;
   /** F14 (§ 622): the grid works out every pick (one, all, none, the span of Shift+click) and hands the new list here. */
   onSelect?: (pages: number[]) => void;
@@ -102,12 +105,15 @@ export default function PageGrid(props: PageGridProps) {
   /** The page whose magnifier takes the focus back when the view closes, spent only once it is there (§ 510). */
   const back = useRef<number | null>(null);
   const picked = useMemo(() => [...(selected ?? [])], [selected]);
-  const seen = useRef<number[]>(picked);
-  if (!samePages(seen.current, picked)) {
+  // F14 (§ 628): a new list of picks is told by its Set (`setOf`), so a typed range of the very pages already picked
+  // drops the anchor too; a list the grid handed out itself keeps it.
+  const seen = useRef(selected);
+  if (seen.current !== selected) {
     if (!handed.current || !samePages(handed.current, picked)) anchor.current = null;
-    seen.current = picked;
+    seen.current = selected;
     handed.current = null;
   }
+  const removes = props.removes ?? false;
 
   useEffect(() => {
     const wanted = focusAfter.current;
@@ -162,7 +168,8 @@ export default function PageGrid(props: PageGridProps) {
     const turn = quarters(boxes[index], turns?.[index] ?? 0) * 90;
     let label = fmt(texts.page, { n: index + 1, total });
     if (turn) label += fmt(texts.rotated, { degrees: turn });
-    if (selected?.has(index)) label += texts.selected;
+    // F14 (item 4, § 627): in Delete a picked page is one that comes out, and its name says so.
+    if (selected?.has(index)) label += removes ? texts.leaving : texts.selected;
     return mode === 'rotate' ? `${fmt(texts.turn, { n: index + 1 })} (${label})` : label;
   };
 
@@ -191,15 +198,33 @@ export default function PageGrid(props: PageGridProps) {
     hand(next);
   }
 
-  function selectAll(): void {
-    anchor.current = null;
-    hand(Array.from({ length: total }, (_, i) => i));
+  /**
+   * Shift+click and Shift+Space (§ 628): from the anchor to the page, every page takes the new state of the page, said
+   * once (§ 629). Without an anchor, or on the anchor itself, it is a plain press. The page becomes the anchor.
+   */
+  function extend(index: number): void {
+    const from = anchor.current;
+    if (from === null || from === index) {
+      pick(index);
+      return;
+    }
+    const on = !selected?.has(index);
+    const pages = span(from, index);
+    anchor.current = index;
+    hand(spanned(picked, from, index, on));
+    announce(fmt(on ? texts.spanOn : texts.spanOff, { from: (pages[0] ?? 0) + 1, to: (pages[pages.length - 1] ?? 0) + 1 }));
   }
 
-  function selectNone(): void {
+  /** Pick all, Pick none and Invert selection: no anchor after them, and the count said once (d-2, § 629). */
+  function handAll(pages: number[]): void {
     anchor.current = null;
-    hand([]);
+    hand(pages);
+    announce(countOf(texts, pages.length, total, removes));
   }
+
+  const selectAll = () => handAll(Array.from({ length: total }, (_, i) => i));
+  const selectNone = () => handAll([]);
+  const invert = () => handAll(inverted(picked, total));
 
   function move(from: number, to: number): void {
     if (to < 0 || to >= sequence.length || from === to) return;
@@ -227,18 +252,28 @@ export default function PageGrid(props: PageGridProps) {
 
   // The cells' one door to the grid (§ 620): made once, it reads the latest render through `latest`, so a cell's props
   // never change because of it.
-  const latest = useRef({ sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts, thumbnails, width });
-  latest.current = { sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts, thumbnails, width };
+  const latest = useRef({ sequence, mode, grabbed, pick, extend, turn, move, go, columns, announce, texts, thumbnails, width });
+  latest.current = { sequence, mode, grabbed, pick, extend, turn, move, go, columns, announce, texts, thumbnails, width };
   const actions = useMemo<CellActions>(
     () => ({
-      press(index, position) {
+      press(index, position, event) {
         const now = latest.current;
         setActive(position);
-        if (now.mode === 'select') now.pick(index);
+        if (now.mode === 'select') {
+          if (event.shiftKey) now.extend(index);
+          else now.pick(index);
+        }
         if (now.mode === 'rotate') now.turn(index);
       },
-      key(event, _index, position) {
+      key(event, index, position) {
         const now = latest.current;
+        // F14 (§ 628): Shift+Space is Shift+click by the keyboard. Its default is kept from the button, which would
+        // press the page once more on the key's release; a held key does it once.
+        if (event.key === ' ' && event.shiftKey && now.mode === 'select') {
+          event.preventDefault();
+          if (!event.repeat) now.extend(index);
+          return;
+        }
         const step: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -now.columns(), ArrowDown: now.columns() };
         if (event.key in step) {
           event.preventDefault();
@@ -337,7 +372,7 @@ export default function PageGrid(props: PageGridProps) {
       }
       const count = picked.length + (selected?.has(open.index) ? -1 : 1);
       pick(open.index);
-      announce(fmt(texts.selectedCount, { count, total }));
+      announce(countOf(texts, count, total, removes));
     };
     return (
       <div class="fo-pages" data-mode={mode}>
@@ -388,12 +423,15 @@ export default function PageGrid(props: PageGridProps) {
       />
       {mode === 'select' && (
         <div key="bar" class="fo-pages__bar">
-          <p class="fo-pages__count">{fmt(texts.selectedCount, { count: selected?.size ?? 0, total })}</p>
+          <p class="fo-pages__count">{countOf(texts, selected?.size ?? 0, total, removes)}</p>
           <button type="button" class="fo-btn fo-btn--ghost" onClick={selectAll}>
             {texts.selectAll}
           </button>
           <button type="button" class="fo-btn fo-btn--ghost" onClick={selectNone}>
             {texts.selectNone}
+          </button>
+          <button type="button" class="fo-btn fo-btn--ghost" onClick={invert}>
+            {texts.invert}
           </button>
         </div>
       )}
@@ -406,7 +444,7 @@ export default function PageGrid(props: PageGridProps) {
             mode={mode}
             label={labelOf(index)}
             selected={selected?.has(index) ?? false}
-            removes={props.removes ?? false}
+            removes={removes}
             turn={mode === 'rotate' ? (turns?.[index] ?? 0) : 0}
             ratio={sheetRatio(boxes[index], mode === 'rotate' ? (turns?.[index] ?? 0) : 0)}
             active={position === activePosition}

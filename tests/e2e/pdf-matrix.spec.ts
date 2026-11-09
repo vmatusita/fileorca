@@ -32,6 +32,8 @@ import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import deleteTexts from '../../src/tools/delete-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
+import panelTexts from '../../src/tools/pdf/i18n/en.ts';
+import { leavingCount } from '../../src/tools/pdf/grid-math.ts';
 
 // The fixture matrix of the PDF tools (F5a, decision 12): every tool, every fixture it takes, both browsers, with the
 // refused files in the middle of the batch. Every output is downloaded and read in Node by readers that are not the
@@ -505,10 +507,13 @@ test('Rotate PDF: page by page on the grid of one file', async ({ page, browserN
 /** Picks pages by number and deletes them: the pages left are the others, in order. A one-page file can lose none. */
 async function deletePages(page: Page, fixture: string, typed: string, gone: readonly number[], timeout?: number): Promise<string> {
   await ready(page, deleteTexts, timeout);
-  await expect(page.getByText(`0 of ${pages(fixture)} pages picked`)).toBeVisible();
+  // F14 (item 4, DECISOES § 627): Delete counts what comes out and what the new PDF keeps; the typed range also says it in
+  // the panel's region (d-2), so the count is read in the bar.
+  const count = page.locator('#fo-tool-root .fo-pages__count');
+  await expect(count).toHaveText(leavingCount(panelTexts.grid, 0, pages(fixture)));
   await page.getByLabel('Pick pages by number').fill(typed);
   await page.getByRole('button', { name: 'Pick these' }).click();
-  await expect(page.getByText(`${gone.length} of ${pages(fixture)} pages picked`)).toBeVisible();
+  await expect(count).toHaveText(leavingCount(panelTexts.grid, gone.length, pages(fixture)));
   if (gone.length === pages(fixture)) {
     await expect(page.getByText(deleteTexts.panel.options.allPicked)).toBeVisible();
     return 'ok: its only page picked, "needs at least one page" said, nothing deleted';

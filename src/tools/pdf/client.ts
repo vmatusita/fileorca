@@ -105,9 +105,19 @@ export async function processFiles(op: PdfOperation, files: File[]): Promise<Pdf
   return call(async (api) => (await api.process(op, files)) as PdfResult);
 }
 
+/**
+ * F14 (E-4, DECISOES § 630): one epoch per id, moved on by each `release()`. A thumbnail asked before a release and still
+ * waiting when it comes would open the file again (a document, and on the page path a PDF.js worker) that nobody lets go:
+ * it gives null instead.
+ */
+const epochs = new Map<string, number>();
+
 /** A JPEG thumbnail of page `index`, `width` pixels wide (the page is `shownWidth` points wide on screen); null when it cannot be drawn. */
 export async function thumbnail(id: string, file: File, index: number, width: number, shownWidth: number): Promise<Blob | null> {
-  if (await start().canvas) return call((api) => api.thumbnail(id, file, index, width));
+  const epoch = epochs.get(id) ?? 0;
+  const inWorker = await start().canvas;
+  if ((epochs.get(id) ?? 0) !== epoch) return null;
+  if (inWorker) return call((api) => api.thumbnail(id, file, index, width));
   const handles = pageHandles.get(id) ?? (async () => (await onPage())(await bytesOf(file)))();
   pageHandles.set(id, handles);
   try {
@@ -121,8 +131,12 @@ export async function thumbnail(id: string, file: File, index: number, width: nu
 
 const pageHandles = new Map<string, Promise<Awaited<ReturnType<OpenRenderer>>>>();
 
-/** The grid is done with a file. */
+/**
+ * The grid is done with a file: its document closes, and on the page path its PDF.js worker ends with it (F14, E-4;
+ * DECISOES § 630).
+ */
 export async function release(id: string): Promise<void> {
+  epochs.set(id, (epochs.get(id) ?? 0) + 1);
   const handle = pageHandles.get(id);
   pageHandles.delete(id);
   await handle?.then((renderer) => renderer.close()).catch(() => {});

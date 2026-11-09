@@ -114,13 +114,14 @@ export default class PageCell extends Component<PageCellProps> {
   }
 
   override render() {
-    const { index, position, mode, label, selected, turn, ratio, active, grabbed, first, last, width, thumbnails, texts, icons, actions } = this.props;
+    const { index, position, mode, label, selected, removes, turn, ratio, active, grabbed, first, last, width, thumbnails, texts, icons, actions } = this.props;
     return (
       <li
         class="fo-page fo-dogear fo-cat--pdf"
         data-position={position}
         data-page={index}
         data-selected={selected ? 'true' : undefined}
+        data-leaving={removes && selected ? 'true' : undefined}
         data-grabbed={grabbed ? 'true' : undefined}
         draggable={mode === 'order'}
         onDragStart={(event) => actions.dragStart(index, position, event)}
@@ -146,13 +147,10 @@ export default class PageCell extends Component<PageCellProps> {
               </span>
             )}
           </Thumb>
-          {/* F13a (D-7): a picked page has the check in a brand circle before its number, not only the colour of its border. */}
+          {/* F13a (D-7): a picked page has the check in a brand circle before its number, not only the colour of its border.
+              F14 (item 4, § 627): in Delete the circle has the trash, since a picked page comes out. */}
           <span class="fo-page__n" aria-hidden="true">
-            {mode === 'select' && (
-              <span class="fo-page__check">
-                <Icon raw={checkIcon} />
-              </span>
-            )}
+            {mode === 'select' && <span class="fo-page__check">{removes ? <Icon inner={icons.trash} /> : <Icon raw={checkIcon} />}</span>}
             {index + 1}
           </span>
         </button>
