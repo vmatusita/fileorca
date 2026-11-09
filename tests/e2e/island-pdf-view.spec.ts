@@ -93,10 +93,10 @@ async function said(page: Page, last: string): Promise<string[]> {
   });
 }
 
-/** A swipe with the pointer on the page of the view, from its middle. */
+/** A swipe with the pointer on the page of the view, from the middle of what is seen of it (the frame). */
 async function swipe(page: Page, dx: number, dy: number): Promise<void> {
-  const box = await view(page).locator('.fo-pview__sheet').boundingBox();
-  if (!box) throw new Error('no sheet');
+  const box = await view(page).locator('.fo-pview__frame').boundingBox();
+  if (!box) throw new Error('no frame');
   const x = box.x + box.width / 2;
   const y = box.y + Math.min(box.height / 2, 200);
   await page.mouse.move(x, y);
@@ -199,11 +199,11 @@ test.describe('criterion 2: the view opens from the magnifier of each grid tool'
     await toGrid(page, 'split-pdf');
     await openView(page, 0);
     const title = (n: number) => fmt(v.title, { n, total: 8 });
-    await swipe(page, -80, 8);
+    await swipe(page, -50, 8);
     await expect(heading(page)).toHaveText(title(2));
     await swipe(page, 60, -10);
     await expect(heading(page)).toHaveText(title(1));
-    await swipe(page, -30, 0);
+    await swipe(page, -44, 0);
     await swipe(page, -60, 45);
     await page.waitForTimeout(200);
     await expect(heading(page)).toHaveText(title(1));
