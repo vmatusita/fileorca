@@ -1792,3 +1792,49 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 .fo-pages__grid[data-size="large"] { grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); }
 .fo-page__sheet img:is([data-turn="1"], [data-turn="3"]) { inset: auto; left: 50%; top: 50%; width: calc(100% / var(--sheet-ratio, 1)); max-width: none; height: calc(100% * var(--sheet-ratio, 1)); max-height: none; translate: -50% -50%; }
 .fo-page__zoom { grid-area: 1 / 1; align-self: end; justify-self: end; z-index: 1; }
+
+/* ---------- F14 · a vista da página (PLANO-UX-QV.md, seção A; DECISOES § 624 a § 626) ----------
+   The page view takes the place of the grid (or comes first in the band, from the result and from a row of the Merge
+   list). It is in the flow of the page, never fixed or over it. The frame has the shape of the page (--view-ratio, from
+   the boxes the reading gave, with the person's turns), so the large picture that arrives changes nothing. "Fit" is the
+   column, never higher than 100dvh - 260px, so the two bars stay on screen with it; "Enlarge" is twice the column, up to
+   1,600 px, scrolling both ways inside a frame of at most 75dvh. The swipe is ours only in "Fit" (pan-y and the pinch stay
+   the browser's); enlarged, the finger scrolls the frame. Under 480 px the action takes the first row of the bottom bar,
+   Previous and Next the second. The chevron of Previous and of "Back to the pages" is chevron-right turned. */
+.fo-pview { display: grid; gap: var(--space-3); min-width: 0; }
+.fo-pview__top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.fo-pview__title { flex: 1 0 auto; margin: 0; font: 600 18px/24px var(--fo-font-display); }
+.fo-pview .fo-btn { padding-inline: var(--space-4); }
+.fo-pview__back .fo-icon, .fo-pview__prev .fo-icon { rotate: 180deg; }
+.fo-pview__frame { justify-self: center; box-sizing: border-box; width: min(100%, max(10rem, calc((100vh - 260px) * var(--view-ratio, 0.7727)))); width: min(100%, max(10rem, calc((100dvh - 260px) * var(--view-ratio, 0.7727)))); border-radius: var(--radius-xs); touch-action: pan-y pinch-zoom; }
+.fo-pview__frame[data-zoom] { width: 100%; max-height: 75vh; max-height: 75dvh; overflow: auto; overscroll-behavior: contain; touch-action: auto; box-shadow: 0 0 0 var(--stroke-hair) var(--hairline); }
+.fo-pview__sheet { position: relative; display: block; width: 100%; aspect-ratio: var(--view-ratio, 0.7727); overflow: hidden; border-radius: inherit; background: var(--surface-sunken); box-shadow: 0 0 0 var(--stroke-hair) var(--hairline); }
+.fo-pview__frame[data-zoom] .fo-pview__sheet { width: min(200%, 1600px); border-radius: 0; box-shadow: none; }
+.fo-pview__sheet img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: contain; user-select: none; -webkit-user-select: none; }
+.fo-pview__sheet img:is([data-turn="1"], [data-turn="3"]) { inset: auto; left: 50%; top: 50%; width: calc(100% / var(--view-ratio, 1)); height: calc(100% * var(--view-ratio, 1)); max-height: none; translate: -50% -50%; }
+.fo-pview__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-2); }
+.fo-pview__bar--two { grid-template-columns: 1fr 1fr; }
+.fo-pview__prev { justify-self: start; }
+.fo-pview__next { justify-self: end; }
+.fo-pview__act[aria-pressed="true"] { background: var(--brand-soft); border-color: var(--brand); }
+@media (max-width: 479px) {
+  .fo-pview__title { flex-basis: 100%; }
+  .fo-pview__top { justify-content: space-between; }
+  .fo-pview__bar { grid-template-columns: 1fr 1fr; }
+  .fo-pview__act { grid-column: 1 / -1; grid-row: 1; }
+  .fo-pview__prev, .fo-pview__next { justify-self: stretch; }
+}
+/* F14 (§ 626): "View pages of {name}" is the last action of a row of the Merge list, 48 px, after the arrows and the remove
+   button (its place is kept, empty, while the file is read). The row lays its actions in a line of columns, so the list
+   with no remove button (under "Order", after the result) has no empty one; under 480 px it goes to the row of 48 px under
+   the card. The height of the rows and of the list does not change. */
+.fo-merge__row:not([data-state="error"]) { grid-auto-flow: column; }
+.fo-merge__view .fo-icon { width: 20px; height: 20px; }
+.fo-merge__gap { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }
+@media (max-width: 767px) {
+  .fo-merge__row > :is(.fo-merge__view, .fo-merge__gap) { align-self: center; }
+}
+@media (max-width: 479px) {
+  .fo-merge__row:not([data-state="error"]) { grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "card card card card" ". moves remove view"; }
+  .fo-merge__row > :is(.fo-merge__view, .fo-merge__gap) { grid-area: view; }
+}

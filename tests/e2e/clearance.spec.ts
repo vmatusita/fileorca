@@ -99,6 +99,9 @@ const PDF_TARGETS = [
   // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle (its Undo, its remove buttons and its
   // "Add more PDFs"), the band under the rectangle with the "Order" and the "Adjust" of the result, and the note.
   '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
+  // F14 (decision 14; DECISOES § 634): the magnifier of each cell, "View the new PDF", "View pages of {name}" and the page
+  // view with every control of it (TARGETS has them too; the open view is measured by ads.spec.ts).
+  '.fo-page__zoom', '.fo-result__view', '.fo-merge__view', '.fo-pview', '.fo-pview .fo-btn', '.fo-pview__frame', '.fo-pview__frame:not([data-zoom]) .fo-pview__img',
 ].join(', ');
 // What a state must put on screen besides the card, so the clearance is measured against it and not against its absence.
 const PDF_ON_SCREEN: Record<PdfState, string[]> = {
