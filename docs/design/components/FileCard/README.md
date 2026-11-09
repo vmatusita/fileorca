@@ -33,3 +33,8 @@ Os pares novos das peças de PDF e da linha do Juntar (F13a, DECISOES § 479 e �
 | `brand-edge` (a borda do círculo do check da página escolhida; antes este README dizia "a borda da página escolhida", F13a, revisão a-3) sobre `surface` | 17,28:1 | 6,11:1 |
 | `brand` (o preenchimento do círculo marcado e a borda da página escolhida na grade; UX11-2) sobre `surface` | 5,09:1 | 6,11:1 |
 | `focus` do tema claro (o anel e o tracejado `brand` da caixa da assinatura, que fica no papel claro, `data-theme="light"`) sobre `surface` do claro, e sobre o `surface` do escuro quando o anel sai da moldura (UX11-7) | 5,09:1 | 3,13:1 (passa 3:1, o mínimo de um contorno, WCAG 1.4.11) |
+
+## F14: "Ver páginas" na linha do Juntar (DECISOES § 626)
+
+- **A linha do Juntar** ganha a última ação, depois das setas e da lixeira: um `fo-btn--icon` de 48px com a lupa (`zoom`) e o nome "View pages of form.pdf", que abre a vista da página daquele arquivo (README do PageView), só para ver. Enquanto o arquivo é lido, um vazio de 48px guarda o lugar dele; a linha recusada não o tem. Abaixo de 480px ele vai na linha de 48px embaixo do card, com as setas e a lixeira (§ 515). A altura das linhas (76, 108 e 154px) não muda.
+- **O card continua sem miniatura** (o ícone `pdf`): o botão mostra as páginas só quando a pessoa pede, sem desenhar nada antes (PLANO-UX-QV.md, "O que não entra").

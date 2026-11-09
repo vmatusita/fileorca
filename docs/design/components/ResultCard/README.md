@@ -35,3 +35,8 @@ Os pares novos do resultado como o mar que subiu (F13a, DECISOES § 464 e § 472
 ## Mudança de regra (F13b, DECISOES § 580)
 
 - **Os ghosts do resultado abaixo de 340px.** Antes: "'Start over' e 'Before and after' em ghost de 48px (15px de texto e 6px de lado no celular)". Depois: abaixo de 340px eles ficam numa linha, com 14px de texto e 2px de lado (48px de altura, como antes), e a Placa sai (README da Placard): em pt e es os dois passavam dos 252px da coluna e iam a duas linhas.
+
+## F14: "Ver o PDF novo" (DECISOES § 625)
+
+- **O botão:** no resultado das ferramentas de PDF que é um PDF só e sem senha (o Proteger, o PDF para JPG e todo ZIP nunca o têm; o Dividir com uma parte só tem), um ghost "View the new PDF" ("Ver o PDF novo", "Ver el PDF nuevo") vem depois do "Start over", na mesma linha (`.fo-result__more`), como o "Before and after" das imagens, com `aria-expanded`. Ele abre a vista da página (README do PageView) sobre o PDF novo, como o primeiro item da faixa de baixo, só para ver.
+- **O retângulo não muda:** 356px a 320 e a 360 e 340px a 1280, nos três idiomas, com a linha numa linha só (a 320, o espanhol usa 251 dos 252px) e também quebrada em duas. A faixa de baixo, o plano B da especificação, não foi preciso.
