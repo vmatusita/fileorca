@@ -212,9 +212,11 @@ test('D-7 and F-8: a picked page has the check before its number, and its fold s
   await expect(picked.locator('.fo-page__check .fo-icon')).toBeVisible();
   await expect(cells.nth(0).locator('.fo-page__check .fo-icon')).toBeHidden();
   expect(await picked.evaluate((cell) => getComputedStyle(cell, '::after').top)).toBe('-3px');
-  // The circle is in the number, which is only seen: the name of the cell says "picked".
+  // The circle is in the number, which is only seen: the name of the cell says it. F14 (item 4, DECISOES § 627): in Delete
+  // a picked page comes out, so its circle has the trash and its name ends in ", comes out" (Split and Sign keep the check
+  // and ", picked": island-pdf-marking.spec.ts).
   await expect(picked.locator('.fo-page__n')).toHaveAttribute('aria-hidden', 'true');
-  await expect(picked.locator('.fo-page__main')).toHaveAttribute('aria-label', /, picked$/);
+  await expect(picked.locator('.fo-page__main')).toHaveAttribute('aria-label', new RegExp(`${panel.grid.leaving}$`));
 });
 
 for (const scheme of ['light', 'dark'] as const) {

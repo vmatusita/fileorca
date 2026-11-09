@@ -1789,6 +1789,9 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
    of their numbers (§ 618). The picture fills the sheet; a picture turned a quarter has its box the other way round, so
    once turned it covers the sheet. "Small" is 128 px or more a column, "Large" 232 px or more (§ 619). The magnifier is
    a sibling of the page's button, on the line of the number, on the right, never over the picture (§ 621). */
+/* F14 (item 4; DECISOES § 627): in Delete a picked page comes out: the trash in the circle and the picture at 40 %. The
+   circle, the number and the border keep their colours, so their contrast is today's. */
+.fo-page[data-leaving="true"] .fo-page__sheet img { opacity: 0.4; }
 .fo-pages__grid[data-size="large"] { grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); }
 .fo-page__sheet img:is([data-turn="1"], [data-turn="3"]) { inset: auto; left: 50%; top: 50%; width: calc(100% / var(--sheet-ratio, 1)); max-width: none; height: calc(100% * var(--sheet-ratio, 1)); max-height: none; translate: -50% -50%; }
 .fo-page__zoom { grid-area: 1 / 1; align-self: end; justify-self: end; z-index: 1; }
