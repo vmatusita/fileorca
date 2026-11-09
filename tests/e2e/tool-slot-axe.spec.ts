@@ -62,3 +62,20 @@ test('the three errors (no image, a .png with no image inside, a PNG on HEIC to 
     expect(await violationsEverywhere(page), label).toEqual([]);
   }
 });
+
+// F15 (frente L; DECISOES § 651 and § 652): the list of Image to PDF with the arrows and the bin outside each card, then the
+// line a row leaves with its Undo, in both themes at 360 and 1280px.
+test('the list of Image to PDF with its arrows and bins, and the line of a row that left: no axe violation', async ({ page }) => {
+  await page.goto('/image-to-pdf/');
+  await hydrated(page);
+  await dismissCookies(page);
+  const photo = await generatedJpeg(page);
+  await page.setInputFiles('input[type="file"]', ['photo-1.jpg', 'photo-2.jpg', 'photo-3.jpg'].map((name) => ({ name, mimeType: 'image/jpeg', buffer: photo })));
+  await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('.fo-filelist .fo-filelist__remove')).toHaveCount(3);
+  await animationsDone(page);
+  expect(await violationsEverywhere(page), 'a lista com as setas e as lixeiras').toEqual([]);
+  await page.getByRole('button', { name: 'Remove photo-2.jpg', exact: true }).click();
+  await expect(page.locator('.fo-filelist__undo [role="status"]')).toHaveText('photo-2.jpg is out of the list.');
+  expect(await violationsEverywhere(page), 'a linha do Desfazer').toEqual([]);
+});
