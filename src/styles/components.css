@@ -530,6 +530,14 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-seg__opt:has(input:checked) { text-decoration-line: underline; text-decoration-thickness: var(--stroke-3); text-underline-offset: 4px; }
 }
 .fo-seg__opt small { display: block; font-weight: 500; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+/* F15 (DECISOES § 675): the rail of Compress image has three choices with a help line each ("Up to a size"), and they do
+   not fit side by side below 480 px in any of the three languages ("Recommended" alone is wider than a third of the rail
+   at 360 px): there it stacks, in every language, as the rail of the PDF tools with help lines does. Only this rail
+   carries the class; the rails of the QR code, Resize and the PDF island do not change. */
+@media (max-width: 479px) {
+  .fo-seg--stack { flex-direction: column; border-radius: var(--radius-lg); }
+  .fo-seg--stack .fo-seg__opt { border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+}
 
 /* ---------- OliMessage (no page uses it yet: notices and the offline screen of later phases) ---------- */
 .fo-says { display: flex; align-items: flex-end; gap: var(--space-2); }
