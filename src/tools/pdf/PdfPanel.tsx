@@ -120,8 +120,11 @@ interface Model {
   bandHold: number;
   adjustOpen: boolean;
   orderOpen: boolean;
-  /** Merge (D-21): the row taken out of the list, in its place until the next action; `said` puts its sentence in the region. */
-  undo: { item: Item; position: number; said: boolean } | null;
+  /**
+   * Merge (D-21): the row taken out of the list, in its place until the next action; `said` puts its sentence in the region.
+   * F15 (DECISOES § 655): `from` is the page the list came from before the row left, which Undo gives back.
+   */
+  undo: { item: Item; position: number; said: boolean; from: string | null } | null;
   focusUndo: boolean;
   /** The row whose remove button takes the focus back after Undo. */
   focusRow: number | null;
@@ -420,7 +423,12 @@ export default function PdfPanel(props: PdfPanelData) {
       const needs = merging && ready.length < 2;
       const some = fmt(t.errors.some, { count: refused });
       // Merge: the count of the list says "2 PDFs ready" in its own region (role="status"), so this one says only the refusals.
-      m.announce = refused === 0 ? (merging ? '' : readyCount(ready.length)) : needs ? `${some} ${readyCount(ready.length)}` : some;
+      const found = refused === 0 ? (merging ? '' : readyCount(ready.length)) : needs ? `${some} ${readyCount(ready.length)}` : some;
+      // F15 (DECISOES § 655 and § 659): files a chip brought wait for the action, and the region says where they came from
+      // once, here, when they are ready ("Oli brought this PDF from Compress PDF."); the result of the action does not say
+      // it again (finish), the card shows the note. In Merge the count of the list keeps its own region and words ("Add at
+      // least one more PDF to merge." with one PDF), and this region says only the arrival (and the refusals, if any).
+      m.announce = [found, fromNote()].filter(Boolean).join(' ');
       render();
     }
   }
@@ -621,8 +629,10 @@ export default function PdfPanel(props: PdfPanelData) {
       m.newUse = false;
       m.coffee = countUse() ? 'ask' : '';
     }
-    // F13a · UX-14: a batch a chip brought also says where it came from.
-    if (!(delivered && m.hush === m.runId)) m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote()].filter(Boolean).join(' ') : '';
+    // F13a · UX-14: a batch a chip brought also says where it came from. F15 (DECISOES § 655): a tool with an action said it
+    // when the files were ready (afterReading), so its result does not say it again; the card keeps the note.
+    const arrival = runMode === 'auto' ? fromNote() : '';
+    if (!(delivered && m.hush === m.runId)) m.announce = delivered ? [says(done), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', arrival].filter(Boolean).join(' ') : '';
     render();
   }
 
@@ -705,7 +715,8 @@ export default function PdfPanel(props: PdfPanelData) {
     appending.current = false;
     m.lost = null;
     drops.current?.reset();
-    if (!append) m.from = from;
+    // F15 (DECISOES § 655): a PDF added to the Merge list makes it another batch than the one a chip brought: its note goes.
+    m.from = append ? null : from;
     // Adding is the next action after a row left the Merge list: the Undo goes (D-21).
     m.undo = null;
     if (!append) {
@@ -800,6 +811,9 @@ export default function PdfPanel(props: PdfPanelData) {
     if (m.view && (m.view.from === item.id || m.view.from === 'result')) shut();
     item.removed = true;
     m.undo = null;
+    // F15 (DECISOES § 655): a file taken out of the Merge list makes it another batch than the one a chip brought (Undo
+    // gives the note back with the row: removeRow keeps it).
+    if (merging) m.from = null;
     m.items = m.items.filter((other) => other !== item);
     if (m.items.length === 0) {
       startOver();
@@ -821,9 +835,10 @@ export default function PdfPanel(props: PdfPanelData) {
    * same height, until the next action (Merge, Add, another remove). No timer (WCAG 2.2.1). The focus goes to Undo.
    */
   function removeRow(item: Item, position: number): void {
+    const from = m.from;
     removeItem(item);
     if (m.items.length === 0) return;
-    m.undo = { item, position, said: false };
+    m.undo = { item, position, said: false, from };
     m.focusUndo = true;
     render();
     const undo = m.undo;
@@ -843,6 +858,8 @@ export default function PdfPanel(props: PdfPanelData) {
     m.undo = null;
     undo.item.removed = false;
     m.items.splice(Math.min(undo.position, m.items.length), 0, undo.item);
+    // F15 (DECISOES § 655): the row back makes the list the batch that came again, with its note.
+    m.from = undo.from;
     m.focusRow = undo.item.id;
     render();
   }
