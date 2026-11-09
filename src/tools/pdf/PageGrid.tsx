@@ -18,6 +18,7 @@ import type { PdfPanelTexts } from '../../i18n/types.ts';
 import { fmt } from '../../i18n/format.ts';
 import OptionGroup from '../image/OptionGroup.tsx';
 import PageCell, { type CellActions } from './PageCell.tsx';
+import PageView, { type Held, type ViewAction } from './PageView.tsx';
 import { THUMB_CAP, askWidth, quarters, samePages, sheetRatio } from './grid-math.ts';
 import type { PdfIcons, Thumbnails } from './types.ts';
 
@@ -43,6 +44,8 @@ export interface PageGridProps {
   /** Quarter turns added to each page (rotate mode). */
   turns?: Readonly<Record<number, number>>;
   onTurn?: (index: number) => void;
+  /** F14 (DECISOES § 624): the page view the magnifier opens, with its words and the action of the tool (none in Reorder). */
+  view: { texts: PdfPanelTexts['view']; action?: ViewAction };
 }
 
 /**
@@ -57,6 +60,12 @@ export type GridSize = 'small' | 'large';
  * (Rotate's "Adjust" opened again, Sign's "Pick pages" chosen again) keeps the person's choice.
  */
 let remembered: GridSize = 'small';
+/**
+ * F14 (§ 624): the page on view, while the page is open. A grid drawn again in another place (the first turn of Rotate
+ * brings the result, and the grid goes under "Adjust") is a new grid: with the same cache (the same file), it opens the
+ * view where it was. Back to the pages forgets it; the cache is held weakly, so an old file is never kept alive by it.
+ */
+let kept: { thumbnails: WeakRef<Thumbnails>; index: number } | null = null;
 
 /** The device pixel ratio, 1 where the page cannot tell. */
 const pixelRatio = (): number => (typeof window !== 'undefined' && window.devicePixelRatio > 0 ? window.devicePixelRatio : 1);
@@ -82,6 +91,16 @@ export default function PageGrid(props: PageGridProps) {
   const anchor = useRef<number | null>(null);
   /** The last selection the grid handed out, and the one the last render was given. */
   const handed = useRef<number[] | null>(null);
+  /**
+   * F14 (§ 624): the page on view, with the cache it was opened on (a new file has a new one: the view closes) and the
+   * small picture the grid held for it before its cell left.
+   */
+  const [viewing, setViewing] = useState<{ index: number; thumbnails: Thumbnails; held: Held | null; resume?: boolean } | null>(() =>
+    kept && thumbnails && kept.thumbnails.deref() === thumbnails ? { index: kept.index, thumbnails, held: null, resume: true } : null,
+  );
+  const open = viewing && viewing.thumbnails === thumbnails && viewing.index < total ? viewing : null;
+  /** The page whose magnifier takes the focus back when the view closes, spent only once it is there (§ 510). */
+  const back = useRef<number | null>(null);
   const picked = useMemo(() => [...(selected ?? [])], [selected]);
   const seen = useRef<number[]>(picked);
   if (!samePages(seen.current, picked)) {
@@ -109,6 +128,17 @@ export default function PageGrid(props: PageGridProps) {
     focusAfter.current = null;
   });
 
+  // F14 (§ 624): back from the view, the cell of the page that was on view comes on screen and its magnifier takes the focus.
+  useLayoutEffect(() => {
+    if (back.current === null || open) return;
+    const cell = list.current?.querySelector<HTMLElement>(`[data-page="${back.current}"]`);
+    const zoom = cell?.querySelector<HTMLElement>('.fo-page__zoom');
+    if (!cell || !zoom) return;
+    back.current = null;
+    cell.scrollIntoView({ block: 'nearest' });
+    zoom.focus({ preventScroll: true });
+  });
+
   // The width of a sheet, measured before the first paint and again when the grid's width changes (§ 619): every cell has
   // the same column, so the first sheet tells. The pictures are asked at that width times the pixel ratio.
   useLayoutEffect(() => {
@@ -124,7 +154,8 @@ export default function PageGrid(props: PageGridProps) {
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [size, total > 0]);
+    // F14: the list is a new element when the grid comes back from the view.
+  }, [size, total > 0, open === null]);
   const width = sheet > 0 ? askWidth(sheet, pixelRatio(), THUMB_CAP) : 0;
 
   const labelOf = (index: number): string => {
@@ -196,8 +227,8 @@ export default function PageGrid(props: PageGridProps) {
 
   // The cells' one door to the grid (§ 620): made once, it reads the latest render through `latest`, so a cell's props
   // never change because of it.
-  const latest = useRef({ sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts });
-  latest.current = { sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts };
+  const latest = useRef({ sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts, thumbnails, width });
+  latest.current = { sequence, mode, grabbed, pick, turn, move, go, columns, announce, texts, thumbnails, width };
   const actions = useMemo<CellActions>(
     () => ({
       press(index, position) {
@@ -250,9 +281,15 @@ export default function PageGrid(props: PageGridProps) {
       move(from, to) {
         latest.current.move(from, to);
       },
-      zoom(_index, position) {
-        // The page view opens here (section A of PLANO-UX-QV.md); until then the magnifier's cell is the active one.
+      zoom(index, position) {
+        // F14 (§ 624): the page view opens in the place of the grid. The cell leaves with it and lets its picture go, so
+        // the grid holds that picture first and hands it to the view, which shows it until the large one comes.
+        const now = latest.current;
         setActive(position);
+        if (!now.thumbnails) return;
+        const held = now.width > 0 ? { index, width: now.width, url: now.thumbnails.get(index, now.width) } : null;
+        kept = { thumbnails: new WeakRef(now.thumbnails), index };
+        setViewing({ index, thumbnails: now.thumbnails, held });
       },
       dragStart(index, position, event) {
         dragging.current = position;
@@ -281,9 +318,65 @@ export default function PageGrid(props: PageGridProps) {
 
   const helpId = `${id}-help`;
   const activePosition = Math.min(active, sequence.length - 1);
+  if (open) {
+    const action = props.view.action;
+    /** What the page on view is now, said after its heading when the page changes (section A). */
+    const stateOf = (index: number): string => {
+      if (mode === 'rotate') {
+        const degrees = quarters(boxes[index], turns?.[index] ?? 0) * 90;
+        return degrees ? fmt(texts.rotated, { degrees }) : '';
+      }
+      return mode === 'select' && selected?.has(index) ? (props.removes ? texts.leaving : texts.selected) : '';
+    };
+    // The action of the view goes the way of the cell's (the anchor of Shift+click included), so the grid, the count and
+    // the operation change together; a pick says the count, as the batch buttons do, and a turn says its own sentence.
+    const act = (): void => {
+      if (action === 'turn') {
+        turn(open.index);
+        return;
+      }
+      const count = picked.length + (selected?.has(open.index) ? -1 : 1);
+      pick(open.index);
+      announce(fmt(texts.selectedCount, { count, total }));
+    };
+    return (
+      <div class="fo-pages" data-mode={mode}>
+        <PageView
+          key="view"
+          boxes={boxes}
+          sequence={sequence}
+          index={open.index}
+          thumbnails={open.thumbnails}
+          held={open.held}
+          small={open.held?.width ?? (width || THUMB_WIDTH)}
+          texts={props.view.texts}
+          icons={icons}
+          order={mode === 'order'}
+          turns={mode === 'rotate' ? turns : undefined}
+          action={action}
+          pressed={selected?.has(open.index)}
+          onAct={act}
+          state={stateOf}
+          announce={announce}
+          resume={open.resume}
+          onGo={(index) => {
+            kept = { thumbnails: new WeakRef(open.thumbnails), index };
+            setViewing((now) => now && { ...now, index });
+          }}
+          onBack={() => {
+            kept = null;
+            back.current = open.index;
+            setActive(Math.max(0, sequence.indexOf(open.index)));
+            setViewing(null);
+          }}
+        />
+      </div>
+    );
+  }
   return (
     <div class="fo-pages" data-mode={mode}>
       <OptionGroup
+        key="size"
         name={`${id}-size`}
         legend={texts.sizeLegend}
         value={size}
@@ -294,7 +387,7 @@ export default function PageGrid(props: PageGridProps) {
         onChange={chooseSize}
       />
       {mode === 'select' && (
-        <div class="fo-pages__bar">
+        <div key="bar" class="fo-pages__bar">
           <p class="fo-pages__count">{fmt(texts.selectedCount, { count: selected?.size ?? 0, total })}</p>
           <button type="button" class="fo-btn fo-btn--ghost" onClick={selectAll}>
             {texts.selectAll}
@@ -304,7 +397,7 @@ export default function PageGrid(props: PageGridProps) {
           </button>
         </div>
       )}
-      <ul class="fo-pages__grid" ref={list} data-size={size} aria-label={fmt(texts.label, { name })} aria-describedby={helpId}>
+      <ul key="list" class="fo-pages__grid" ref={list} data-size={size} aria-label={fmt(texts.label, { name })} aria-describedby={helpId}>
         {sequence.map((index, position) => (
           <PageCell
             key={index}
@@ -328,7 +421,7 @@ export default function PageGrid(props: PageGridProps) {
           />
         ))}
       </ul>
-      <p class="fo-field__help" id={helpId}>
+      <p key="help" class="fo-field__help" id={helpId}>
         {mode === 'order' ? texts.helpKeys : texts.help}
       </p>
     </div>

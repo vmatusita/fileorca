@@ -97,6 +97,7 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
           <RangePicker id="fo-split-pick" total={total} panel={panel} onPick={(picked) => update({ picked })} />
           <PageGrid
             id="fo-split-grid"
+            view={{ texts: panel.view, action: 'mark' }}
             name={file.name}
             boxes={file.info.boxes}
             mode="select"
@@ -293,6 +294,7 @@ function RotateOptions(props: PdfOptionsProps<RotateState, RotatePdfTexts>) {
       {single && state.scope === 'pick' && file?.info && (
         <PageGrid
           id="fo-rotate-grid"
+          view={{ texts: panel.view, action: 'turn' }}
           name={file.name}
           boxes={file.info.boxes}
           mode="rotate"
@@ -339,6 +341,7 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
       <RangePicker id="fo-delete-pick" total={total} panel={panel} onPick={(picked) => update({ picked })} />
       <PageGrid
         id="fo-delete-grid"
+        view={{ texts: panel.view, action: 'remove' }}
         name={file.name}
         boxes={file.info.boxes}
         mode="select"
@@ -511,6 +514,7 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
           {state.scope === 'pick' && (
             <PageGrid
               id="fo-sign-grid"
+              view={{ texts: panel.view, action: 'sign' }}
               name={file.name}
               boxes={file.info.boxes}
               mode="select"
@@ -658,6 +662,7 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
       </div>
       <PageGrid
         id="fo-reorder-grid"
+        view={{ texts: panel.view }}
         name={file.name}
         boxes={file.info.boxes}
         mode="order"

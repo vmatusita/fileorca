@@ -29,8 +29,9 @@ import { batchPercent, worthSaying } from '../image/summary.ts';
 import { pdfOutputNames } from './names.ts';
 import { PDF_TOOLS } from './tools.tsx';
 import { THUMB_WIDTH } from './PageGrid.tsx';
+import PageView from './PageView.tsx';
 import type { Pose } from '../../oli/poses.ts';
-import type { PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
+import type { PageBox, PdfInspect, PdfNote, PdfOperation, PdfOutput, PdfReason, PdfSniffed } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts } from '../../i18n/types.ts';
 import type { MergeTexts } from './option-texts.ts';
 import type { PdfChip, PdfFileView, PdfPanelData, Thumbnails } from './types.ts';
@@ -133,13 +134,20 @@ interface Model {
   /** F13a · UX-14: what came out of the last run, named, in order: what a chip takes along (not the ZIP). */
   outs: { format: PdfOutput['kind']; name: string; bytes: Uint8Array }[];
   carrying: boolean;
+  /** F14 (§ 625): the last run asked for a password on its output (Protect): no "View the new PDF". */
+  sealed: boolean;
+  /** F14 (§ 625 and § 626): the page view open in the band, and a count that gives each one a key of its own. */
+  view: BandView | null;
+  views: number;
+  /** The button that opened the view takes the focus back, once it is there (§ 510). */
+  focusBack: string | null;
 }
 
 const newModel = (): Model => ({
   items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, readingLevel: false, bundle: null, single: null, notes: [],
   announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, focusAction: false, showErrors: false, expanded: false, slotFocus: false,
   redo: false, coffeeSoon: false, lock: 0, bandHold: 0, adjustOpen: false, orderOpen: false, undo: null, focusUndo: false, focusRow: null, focusWrong: false,
-  from: null, lost: null, outs: [], carrying: false,
+  from: null, lost: null, outs: [], carrying: false, sealed: false, view: null, views: 0, focusBack: null,
 });
 
 const revoke = (bundle: Bundle | null) => bundle && URL.revokeObjectURL(bundle.url);
@@ -189,6 +197,89 @@ const codecOf = (failure: Failure | null): Codec => {
 };
 
 type Client = typeof ClientModule;
+
+/**
+ * The pictures of the pages of one file, by (page, width), drawn by the engine under `key` (the key its `release` lets go).
+ * One picture per page and width, shared by whoever shows it (a grid cell, the Sign preview, the page view) and let go when
+ * the last one does. Pictures are drawn THUMBS_AT_ONCE at a time, in the order asked; one whose cells all left before its
+ * turn is never drawn, so a fast sweep does not leave the worker drawing every page it passed (DECISOES § 180). F14 (§ 625
+ * and § 626): the views of the result and of a row of the Merge list have one of their own, with keys of their own.
+ */
+function pictures(key: string, file: File, boxes: readonly PageBox[], client: () => Promise<Client>): Thumbnails {
+  interface Entry {
+    url: Promise<string | null>;
+    done: (value: string | null) => void;
+    users: number;
+  }
+  const cache = new Map<string, Entry>();
+  const waiting: { index: number; width: number; entry: Entry }[] = [];
+  let drawing = 0;
+  const draw = async (index: number, width: number): Promise<string | null> => {
+    const box = boxes[index];
+    const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
+    try {
+      const blob = await (await client()).thumbnail(key, file, index, width, shownWidth);
+      return blob ? URL.createObjectURL(blob) : null;
+    } catch {
+      return null;
+    }
+  };
+  const pump = (): void => {
+    while (drawing < THUMBS_AT_ONCE && waiting.length > 0) {
+      const next = waiting.shift();
+      if (!next) break;
+      if (next.entry.users === 0) {
+        next.entry.done(null);
+        continue;
+      }
+      drawing += 1;
+      void draw(next.index, next.width).then((value) => {
+        drawing -= 1;
+        next.entry.done(value);
+        pump();
+      });
+    }
+  };
+  return {
+    get(index, width = THUMB_WIDTH) {
+      const id = `${index}:${width}`;
+      let entry = cache.get(id);
+      if (!entry) {
+        let done: (value: string | null) => void = () => {};
+        const url = new Promise<string | null>((resolve) => {
+          done = resolve;
+        });
+        entry = { url, done, users: 0 };
+        cache.set(id, entry);
+        waiting.push({ index, width, entry });
+      }
+      entry.users += 1;
+      const url = entry.url;
+      pump();
+      return url;
+    },
+    drop(index, width = THUMB_WIDTH) {
+      const id = `${index}:${width}`;
+      const entry = cache.get(id);
+      if (!entry) return;
+      entry.users -= 1;
+      if (entry.users > 0) return;
+      cache.delete(id);
+      void entry.url.then((value) => value && URL.revokeObjectURL(value));
+    },
+  };
+}
+
+/** F14 (§ 625 and § 626): the page view open in the band, from the result or from a row of the Merge list. */
+interface BandView {
+  /** The key of its pictures in the engine, its own (`r<n>` for the result, `m<n>` for a file of the list). */
+  key: string;
+  boxes: readonly PageBox[];
+  pictures: Thumbnails;
+  index: number;
+  /** What opened it: the result, or the id of the row of the Merge list. */
+  from: 'result' | number;
+}
 
 export default function PdfPanel(props: PdfPanelData) {
   const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref, origins, carryLine } = props;
@@ -378,6 +469,10 @@ export default function PdfPanel(props: PdfPanelData) {
       if (m.newUse && !m.coffeeSoon && coffeeDue()) m.coffeeSoon = true;
     }
     const { requests, skipped } = planned;
+    // F14 (§ 625): what the run asks says whether its output has a password (the rule reads the operation, not the tool).
+    m.sealed = requests.some((request) => request.op.kind === 'protect');
+    // The press of the action closes a view of the band (a file of the Merge list): the result takes its place.
+    if (fromButton) shut();
     // A skipped file that had outputs leaves the download: it is made again without them.
     const dropped = skipped.some((item) => item.outputs);
     for (const item of skipped) {
@@ -393,6 +488,8 @@ export default function PdfPanel(props: PdfPanelData) {
       return;
     }
     const id = ++m.runId;
+    // F14 (§ 625; item 8, E-4): a new run lets the view of the last result go, and its document with it.
+    if (m.view?.from === 'result') shut();
     // A change made with the result on screen (an option under "Adjust", the order of the Merge) keeps the result until
     // the new one, or the WaterLevel after 400 ms: the rectangle never shows the ready card in between (§ 483).
     m.redo = !fromButton && (m.phase === 'done' || m.redo) && Boolean(m.bundle ?? m.single);
@@ -569,6 +666,7 @@ export default function PdfPanel(props: PdfPanelData) {
   // --- the batch ----------------------------------------------------------------------------------------------------
 
   function teardown(): void {
+    letGo();
     for (const item of m.items) item.removed = true;
     m.items = [];
     m.outs = [];
@@ -657,6 +755,8 @@ export default function PdfPanel(props: PdfPanelData) {
   }
 
   function update(patch: object): void {
+    // F14 (§ 625): a change of the options makes the result on view an old one: its view goes.
+    if (m.view?.from === 'result') shut();
     const next = { ...stateRef.current, ...patch };
     stateRef.current = next;
     setState(next);
@@ -691,6 +791,8 @@ export default function PdfPanel(props: PdfPanelData) {
 
   /** Takes a file out for good: the × of a row being read, the remove button of a refused row. */
   function removeItem(item: Item): void {
+    // F14 (§ 626): the view of the row that leaves goes with it, its document let go at once; so does a view of the result.
+    if (m.view && (m.view.from === item.id || m.view.from === 'result')) shut();
     item.removed = true;
     m.undo = null;
     m.items = m.items.filter((other) => other !== item);
@@ -760,6 +862,56 @@ export default function PdfPanel(props: PdfPanelData) {
     }, 0);
   }
 
+  // --- the page view in the band (F14; § 625 and § 626) ------------------------------------------------------------
+
+  /** The view of the band goes, and the engine lets its document go (never the file of the grid: its key is its own). */
+  function letGo(): void {
+    const view = m.view;
+    m.view = null;
+    m.focusBack = null;
+    if (view) void client().then((engine) => engine.release(view.key)).catch(() => {});
+  }
+
+  /** Closes the view of the band; `back`: the button that opened it takes the focus again. */
+  function shut(back = false): void {
+    const view = m.view;
+    if (!view) return;
+    letGo();
+    if (back) m.focusBack = view.from === 'result' ? '.fo-result__view' : `[data-row="${view.from}"] .fo-merge__view`;
+    render();
+  }
+
+  function openView(file: File, boxes: readonly PageBox[], from: BandView['from']): void {
+    letGo();
+    m.views += 1;
+    const key = `${from === 'result' ? 'r' : 'm'}${m.views}`;
+    m.view = { key, boxes, pictures: pictures(key, file, boxes, client), index: 0, from };
+    render();
+  }
+
+  /** "View the new PDF": the output is read again for its pages and boxes, and only its pages on view are drawn. */
+  async function viewResult(): Promise<void> {
+    if (m.view?.from === 'result') return shut(true);
+    const out = m.outs[0];
+    if (!out) return;
+    const id = m.runId;
+    const file = new File([out.bytes as BlobPart], out.name, { type: 'application/pdf' });
+    let found: Awaited<ReturnType<Client['inspect']>> | null = null;
+    try {
+      found = await (await client()).inspect(file);
+    } catch {
+      found = null;
+    }
+    if (m.runId !== id || m.outs[0] !== out || !found?.ok || found.boxes.length === 0) return;
+    openView(file, found.boxes, 'result');
+  }
+
+  /** "View pages of {name}" in a row of the Merge list: the boxes the reading gave, the pages drawn as they are seen. */
+  function viewRow(item: Item): void {
+    if (m.view?.from === item.id) return shut(true);
+    if (item.info) openView(item.file, item.info.boxes, item.id);
+  }
+
   // --- events from the page -----------------------------------------------------------------------------------------
 
   function warmOnce(): void {
@@ -794,7 +946,9 @@ export default function PdfPanel(props: PdfPanelData) {
       // The options come with the ready card, a frame before this effect: a person already typing in one of their fields
       // keeps it, and the keys never go to the action (DECISOES § 240). Merge (D-27): the button takes the place of the
       // reading line, so only a focus left on nothing goes to it; a person on a row or on Add more stays there.
-      if (merging ? lost : !typingIn(rootRef.current)) actionRef.current.focus();
+      // F14 (§ 624): a page view opened in that frame keeps the focus on its heading.
+      const viewing = active instanceof HTMLElement && active.closest('.fo-pview') !== null;
+      if (merging ? lost : !typingIn(rootRef.current) && !viewing) actionRef.current.focus();
     }
     // D-11 (§ 177 and § 240): after a wrong password the focus goes back to the field, with what was typed selected, so a
     // new try replaces it; the error is on the field (role="alert").
@@ -817,6 +971,14 @@ export default function PdfPanel(props: PdfPanelData) {
       const id = m.focusRow;
       m.focusRow = null;
       rootRef.current?.querySelector<HTMLElement>(`[data-row="${id}"] .fo-merge__remove`)?.focus();
+    }
+    // F14 (§ 625 and § 626): back from a view of the band, the button that opened it (the mark waits for it, § 510).
+    if (m.focusBack) {
+      const target = rootRef.current?.querySelector<HTMLElement>(m.focusBack);
+      if (target) {
+        m.focusBack = null;
+        target.focus();
+      }
     }
     const active = document.activeElement;
     if ((!active || active === document.body) && m.slotFocus) {
@@ -902,76 +1064,7 @@ export default function PdfPanel(props: PdfPanelData) {
 
   const subject = one ? (m.items.find((item) => usable(item)) ?? null) : mode === 'batch' && m.items.filter(usable).length === 1 ? (m.items.find(usable) ?? null) : null;
   const wantsGrid = Boolean(subject && tool.grid?.(state));
-  const thumbnails = useMemo<Thumbnails | null>(() => {
-    if (!subject?.info || !wantsGrid) return null;
-    // One picture per page, shared by whoever shows it (a grid cell, the Sign preview) and let go when the last one does.
-    // Pictures are drawn THUMBS_AT_ONCE at a time, in the order asked; one whose cells all left before its turn is never
-    // drawn, so a fast sweep does not leave the worker drawing every page it passed (DECISOES § 180).
-    interface Entry {
-      url: Promise<string | null>;
-      done: (value: string | null) => void;
-      users: number;
-    }
-    const cache = new Map<string, Entry>();
-    const waiting: { index: number; width: number; entry: Entry }[] = [];
-    let drawing = 0;
-    const key = `f${subject.id}`;
-    const boxes = subject.info.boxes;
-    const draw = async (index: number, width: number): Promise<string | null> => {
-      const box = boxes[index];
-      const shownWidth = box ? (box.rotate === 90 || box.rotate === 270 ? box.height : box.width) : 612;
-      try {
-        const blob = await (await client()).thumbnail(key, subject.file, index, width, shownWidth);
-        return blob ? URL.createObjectURL(blob) : null;
-      } catch {
-        return null;
-      }
-    };
-    const pump = (): void => {
-      while (drawing < THUMBS_AT_ONCE && waiting.length > 0) {
-        const next = waiting.shift();
-        if (!next) break;
-        if (next.entry.users === 0) {
-          next.entry.done(null);
-          continue;
-        }
-        drawing += 1;
-        void draw(next.index, next.width).then((value) => {
-          drawing -= 1;
-          next.entry.done(value);
-          pump();
-        });
-      }
-    };
-    return {
-      get(index, width = THUMB_WIDTH) {
-        const id = `${index}:${width}`;
-        let entry = cache.get(id);
-        if (!entry) {
-          let done: (value: string | null) => void = () => {};
-          const url = new Promise<string | null>((resolve) => {
-            done = resolve;
-          });
-          entry = { url, done, users: 0 };
-          cache.set(id, entry);
-          waiting.push({ index, width, entry });
-        }
-        entry.users += 1;
-        const url = entry.url;
-        pump();
-        return url;
-      },
-      drop(index, width = THUMB_WIDTH) {
-        const id = `${index}:${width}`;
-        const entry = cache.get(id);
-        if (!entry) return;
-        entry.users -= 1;
-        if (entry.users > 0) return;
-        cache.delete(id);
-        void entry.url.then((value) => value && URL.revokeObjectURL(value));
-      },
-    };
-  }, [subject?.id, subject?.info, wantsGrid]);
+  const thumbnails = useMemo<Thumbnails | null>(() => (subject?.info && wantsGrid ? pictures(`f${subject.id}`, subject.file, subject.info.boxes, client) : null), [subject?.id, subject?.info, wantsGrid]);
   useEffect(() => {
     if (!subject) return undefined;
     const key = `f${subject.id}`;
@@ -1122,6 +1215,7 @@ export default function PdfPanel(props: PdfPanelData) {
     const pages = done.reduce((sum, item) => sum + (item.outputs ?? []).reduce((inner, output) => inner + (output.pages ?? 0), 0), 0) || (done[0]?.info?.pages ?? 1);
     const notes = [...new Set(m.notes)].map((note) => NOTE_KEY[note]).filter((key): key is NonNullable<typeof key> => key !== null);
     const size = fileSize(m.bundle ? m.bundle.blob.size : after, lang);
+    const viewable = Boolean(m.single) && m.outs.length === 1 && m.outs[0]?.format === 'pdf' && !m.sealed;
     panel = (
       <section key="result" class="fo-result fo-deep" aria-labelledby="fo-says">
         <div class="fo-water fo-result__sea" />
@@ -1184,6 +1278,13 @@ export default function PdfPanel(props: PdfPanelData) {
             <button ref={startOverRef} type="button" class="fo-btn fo-btn--ghost" onClick={startOver}>
               {t.result.startOver}
             </button>
+            {/* F14 (§ 625): one PDF with no password came out (Split with one part too; never a ZIP, the images of PDF to
+                JPG or a protected PDF): its pages open first in the band, after Start over in the row (as "Before and after"). */}
+            {viewable && (
+              <button type="button" class="fo-btn fo-btn--ghost fo-result__view" aria-expanded={m.view?.from === 'result' ? 'true' : 'false'} onClick={() => void viewResult()}>
+                {t.view.openResult}
+              </button>
+            )}
           </div>
         </div>
         {(notes.length > 0 || fromNote()) && (
@@ -1470,6 +1571,15 @@ export default function PdfPanel(props: PdfPanelData) {
                 <Icon inner={icons.trash} />
               </button>
             ))}
+          {/* F14 (§ 626): "View pages of {name}", the last action of the row; its place is kept while the file is read. */}
+          {!refused &&
+            (item.info ? (
+              <button type="button" class="fo-btn fo-btn--icon fo-merge__view" aria-label={fmt(t.view.openFile, { name: nameOf(item) })} aria-expanded={m.view?.from === item.id ? 'true' : 'false'} onClick={() => viewRow(item)}>
+                <Icon inner={icons.zoom} />
+              </button>
+            ) : (
+              <span class="fo-merge__gap" aria-hidden="true" />
+            ))}
         </li>
       );
     });
@@ -1538,6 +1648,7 @@ export default function PdfPanel(props: PdfPanelData) {
   const failureOfSubject = subject?.failure?.reason ?? null;
   const options = Options ? (
     <Options
+      key="options"
       state={state}
       update={update}
       texts={texts.options}
@@ -1554,13 +1665,34 @@ export default function PdfPanel(props: PdfPanelData) {
     />
   ) : null;
   const summary = tool.summary?.(state, texts.options as never);
+  // F14 (§ 625 and § 626): the view of the result or of a file of the Merge list, the first item of the band, only to see.
+  const view = m.view;
+  const bandView = view ? (
+    <PageView
+      key={view.key}
+      boxes={view.boxes}
+      sequence={view.boxes.map((_, i) => i)}
+      index={view.index}
+      thumbnails={view.pictures}
+      small={THUMB_WIDTH}
+      texts={t.view}
+      icons={icons}
+      announce={say}
+      onGo={(index) => {
+        view.index = index;
+        render();
+      }}
+      onBack={() => shut(true)}
+    />
+  ) : null;
   // The Merge has no options: its band is there at rest too, empty, so the list growing in the rectangle (a gesture: the
   // files) never moves into view what is under the island (§ 479).
   const band =
-    options || merging || chipsSeen || chipsKept ? (
+    options || merging || chipsSeen || chipsKept || bandView ? (
       <div class="fo-band" ref={bandRef}>
+        {bandView}
         {(chipsSeen || chipsKept) && (
-          <nav class={chipsKept ? 'fo-next fo-next--kept' : 'fo-next'} aria-labelledby="fo-next-label" inert={chipsKept} aria-hidden={chipsKept ? 'true' : undefined}>
+          <nav key="next" class={chipsKept ? 'fo-next fo-next--kept' : 'fo-next'} aria-labelledby="fo-next-label" inert={chipsKept} aria-hidden={chipsKept ? 'true' : undefined}>
             <span class="fo-next__label" id="fo-next-label">
               {t.next.label}
             </span>
@@ -1588,13 +1720,14 @@ export default function PdfPanel(props: PdfPanelData) {
           // F13a · UX-14 (DECISOES § 496 and § 500): the files the chips take along never leave the device. Where a
           // chip could take them, the line keeps its room with the chips (hidden when none takes them now: no service worker,
           // or a format the tools do not take), so the band never grows or shrinks when the result comes.
-          <p class={carryingNow ? 'fo-carry' : 'fo-carry fo-next--kept'} aria-hidden={carryingNow ? undefined : 'true'}>
+          <p key="carry" class={carryingNow ? 'fo-carry' : 'fo-carry fo-next--kept'} aria-hidden={carryingNow ? undefined : 'true'}>
             <Icon inner={icons.shield} class="fo-icon--inline" />
             {carryingNow && formats.length === 1 ? carryLine.one : carryLine.many}
           </p>
         )}
         {(orderSeen || orderKept) && (
           <details
+            key="order"
             class={orderKept ? 'fo-adjust fo-merge__order fo-merge__order--kept' : 'fo-adjust fo-merge__order'}
             open={orderSeen && m.orderOpen}
             inert={orderKept}
@@ -1623,6 +1756,7 @@ export default function PdfPanel(props: PdfPanelData) {
         {options &&
           (adjustable && resultOnScreen ? (
             <details
+              key="adjust"
               class="fo-adjust"
               open={m.adjustOpen}
               onToggle={(event) => {
