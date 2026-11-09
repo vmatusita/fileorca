@@ -245,5 +245,6 @@ test('the result view: going back, a new run and Start over end the PDF.js worke
   await viewDrawn(page);
   await startOver(page);
   await expectViewEnded(page, before, 'after Start over with the view open');
-  expect(await alive(page)).toBe(0);
+  // The grid lets its file go too, a moment later (the effect of the panel, then the client).
+  await expect.poll(() => alive(page), { message: 'no PDF.js worker left after Start over', timeout: 15_000 }).toBe(0);
 });
