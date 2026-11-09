@@ -43,6 +43,9 @@ export const TARGETS = [
   // is the frame (ads.spec.ts measures that part of the picture on its own).
   '.fo-pview', '.fo-pview__top', '.fo-pview .fo-btn', '.fo-pview__frame', '.fo-pview__frame:not([data-zoom]) :is(.fo-pview__sheet, .fo-pview__img, .fo-pview__under)', '.fo-pview__bar',
   '.fo-page__zoom', '.fo-result__view', '.fo-merge__view',
+  // F15, frente Q (decision 12; DECISOES § 662): the error line of a field (the "Maximum size" of Compress image; the third
+  // choice and the field itself are already .fo-seg, .fo-field, .fo-input and input).
+  '.fo-field__error',
 ].join(', ');
 /** F13b (DECISOES § 573): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
 export const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';
