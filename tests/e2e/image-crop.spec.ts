@@ -272,6 +272,9 @@ test.describe('crop-image with the keyboard only', () => {
       await expect(pickA).toHaveAttribute('aria-pressed', 'true');
       await page.keyboard.press('Tab');
       await expect(page.getByRole('button', { name: 'Download a.jpg' })).toBeFocused();
+      // F15 (DECISOES § 652 and § 664): a ready row of a batch of two has the bin outside its card, after the card.
+      await page.keyboard.press('Tab');
+      await expect(page.getByRole('button', { name: 'Remove a.jpg', exact: true })).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(pickB).toBeFocused();
       await page.keyboard.press('Enter');
@@ -279,6 +282,7 @@ test.describe('crop-image with the keyboard only', () => {
       await expect(pickA).toHaveAttribute('aria-pressed', 'false');
       await expectFields(page, { x: 200, y: 0, width: 1200, height: 1200 });
       await expect(pickB, 'picking keeps the focus on the row').toBeFocused();
+      await page.keyboard.press('Shift+Tab');
       await page.keyboard.press('Shift+Tab');
       await page.keyboard.press('Shift+Tab');
       await expect(pickA).toBeFocused();

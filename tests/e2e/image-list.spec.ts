@@ -330,7 +330,10 @@ test.describe('a ready file goes out of any batch, with Undo (criterion 2)', () 
         await startOver(page);
       }
       await expect(line).toHaveCount(0);
-      expect((await eventNames(page)).filter((name) => !BATCH_EVENTS.includes(name)), 'no new event').toEqual([]);
+      const sent = await eventNames(page);
+      expect(sent, 'the events of the batch are there').toEqual(expect.arrayContaining(['tool_start', 'tool_complete', 'download']));
+      expect(sent.filter((name) => !BATCH_EVENTS.includes(name)), 'no new event').toEqual([]);
+      expect(sent.filter((name) => name === 'tool_complete'), 'tool_complete once for the batch').toHaveLength(1);
     });
   }
 
