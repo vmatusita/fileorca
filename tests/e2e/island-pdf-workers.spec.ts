@@ -125,6 +125,33 @@ test('a file changed before its pictures came leaves no PDF.js worker behind (a 
   expect(await alive(page), 'one PDF.js worker, the one of the file on screen').toBe(1);
 });
 
+test('a thumbnail asked just before the release of its file gives nothing and opens no PDF.js worker (one epoch per id)', async ({ page }) => {
+  // The grid's own timing rarely lets a picture be asked after its file is let go, so the race is made at the door of
+  // the engine the island uses: the page's own client module (the same instance, imported by its address).
+  await openTool(page, '/delete-pdf-pages/');
+  await choosePdfs(page, [pdfFile(MIXED)]);
+  await expect(cells(page)).toHaveCount(8, { timeout: 30_000 });
+  await firstDrawn(page);
+  const before = (await pdfjsWorkers(page)).length;
+  const late = await page.evaluate(async (base64) => {
+    const scripts = performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => /\/_astro\/client\.[\w-]+\.js$/.test(name));
+    let client: { thumbnail: (...args: unknown[]) => Promise<Blob | null>; release: (id: string) => Promise<void> } | null = null;
+    for (const url of scripts) {
+      const module = (await import(/* @vite-ignore */ url)) as Partial<NonNullable<typeof client>>;
+      if (module.thumbnail && module.release) client = module as NonNullable<typeof client>;
+    }
+    if (!client) throw new Error('the PDF client of the island was not found');
+    const file = new File([Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))], 'race.pdf', { type: 'application/pdf' });
+    const asked = client.thumbnail('race', file, 0, 120, 612);
+    await client.release('race');
+    return (await asked) === null;
+  }, pdfFile(OTHER).buffer.toString('base64'));
+  expect(late, 'the picture asked before the release comes back empty').toBe(true);
+  await page.waitForTimeout(1_000);
+  expect((await pdfjsWorkers(page)).slice(before), 'no PDF.js worker was made for the released file').toEqual([]);
+  expect(await alive(page), 'only the worker of the file on screen').toBe(1);
+});
+
 test('PDF to JPG on the page path: the run ends the PDF.js worker it opened', async ({ page }) => {
   await openTool(page, '/pdf-to-jpg/');
   await choosePdfs(page, [pdfFile(MIXED)]);
