@@ -422,7 +422,8 @@ export interface ToolPageContent extends PageMeta {
   privacyNote: string;
   relatedHeading: string;
   /** Parent tools only: the table of their presets (one row per preset, with its link). */
-  presets?: { heading: string; caption: string; head: [string, string] };
+  /** F15 (DECISOES § 656): `lead`, a line under the heading before the table (Compress image: the third choice for any other size). */
+  presets?: { heading: string; caption: string; head: [string, string]; lead?: string };
 }
 
 /** The image hub /image-tools/ (fo-hubband: eyebrow, H1 and one line). */

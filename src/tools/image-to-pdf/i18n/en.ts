@@ -8,7 +8,7 @@ export default {
   howHeading: 'How to turn images into a PDF',
   howSteps: [
     'Drop your images on the box, choose them, or paste them with Ctrl V.',
-    'Pick Image size, Letter or A4 for the pages, and check that the list is in the order you want.',
+    'Pick Image size, Letter or A4 for the pages, and put the list in the order you want: drag a row, or press its arrow buttons (they work with the keyboard too).',
     'Download your PDF.',
   ],
   specsHeading: 'Specifications',
@@ -38,7 +38,7 @@ export default {
     },
     {
       q: 'How do I change the order of the pages?',
-      a: 'The pages follow the order of the list on screen. If a page is in the wrong place, press Start over and add the files again in the order you want.',
+      a: 'The pages follow the order of the list on screen. Drag a row to a new place, or press the arrow buttons on the row to move it up or down; they work with the keyboard too. The trash button on a row takes that image out, and Undo brings it back. If the PDF is already made, Oli makes it again in the new order without preparing the images again.',
     },
     {
       q: 'Will my photos lose quality in the PDF?',

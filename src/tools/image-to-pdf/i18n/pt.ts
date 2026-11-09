@@ -8,7 +8,7 @@ export default {
   howHeading: 'Como transformar imagens em PDF',
   howSteps: [
     'Solte as imagens na caixa, escolha os arquivos ou cole com Ctrl V.',
-    'Escolha "Tamanho da imagem", "Carta" ou "A4" para as páginas e confira se a lista está na ordem que você quer.',
+    'Escolha "Tamanho da imagem", "Carta" ou "A4" para as páginas e deixe a lista na ordem que você quer: arraste uma linha ou use as setas dela (elas funcionam pelo teclado também).',
     'Baixe o seu PDF.',
   ],
   specsHeading: 'Especificações',
@@ -38,7 +38,7 @@ export default {
     },
     {
       q: 'Como mudo a ordem das páginas?',
-      a: 'As páginas seguem a ordem da lista na tela. Se uma página estiver no lugar errado, aperte Começar de novo e adicione os arquivos outra vez na ordem que você quer.',
+      a: 'As páginas seguem a ordem da lista na tela. Arraste uma linha para outro lugar ou aperte as setas da linha para subir ou descer; elas funcionam pelo teclado também. A lixeira de uma linha tira essa imagem da lista, e o Desfazer a devolve. Se o PDF já estiver pronto, a Oli o refaz na ordem nova, sem preparar as imagens de novo.',
     },
     {
       q: 'Minhas fotos perdem qualidade no PDF?',

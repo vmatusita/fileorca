@@ -12,7 +12,7 @@ export default {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte as imagens JPG, PNG ou WebP na caixa, escolha os arquivos ou cole as imagens. Quantas quiser.',
-    'Escolha Recomendada ou Forte. A Oli comprime cada imagem no seu navegador, uma depois da outra, e refaz o lote se você mudar o nível.',
+    'Escolha Recomendada ou Forte, ou "Até um tamanho" com o máximo em KB. A Oli comprime cada imagem no seu navegador, uma depois da outra, e refaz o lote se você mudar o nível.',
     'Baixe uma imagem ou todas juntas num ZIP. Os arquivos originais continuam intactos.',
   ],
   specsHeading: 'O que entra e o que sai',
@@ -22,10 +22,11 @@ export default {
     rows: [
       ['Formatos aceitos', 'JPG, PNG e WebP. A Oli confere o que há dentro do arquivo, não o nome dele.'],
       ['JPG', 'Salvo de novo com o MozJPEG, um codificador feito para gerar JPGs menores.'],
-      ['PNG', 'Otimizado com o OxiPNG, sem perder qualidade. O nível que você escolhe não muda o PNG.'],
-      ['WebP', 'Salvo de novo como WebP, na qualidade do nível escolhido.'],
+      ['PNG', 'Otimizado com o OxiPNG, sem perder qualidade. Recomendada e Forte não mudam o PNG; "Até um tamanho" o transforma em JPG.'],
+      ['WebP', 'Salvo de novo como WebP, na qualidade de Recomendada ou Forte; "Até um tamanho" o transforma em JPG.'],
       ['Recomendada', 'JPG e WebP com qualidade 75: o melhor equilíbrio entre tamanho e aparência.'],
       ['Forte', 'JPG e WebP com qualidade 55: o menor arquivo, com alguma perda nos detalhes finos.'],
+      ['Até um tamanho', 'Cada imagem sai como um JPG do tamanho que você digitar ou menos (1 KB = 1.000 bytes), de 20 a 10.000 KB. A Oli baixa a qualidade primeiro, e as dimensões só se precisar. A transparência fica branca.'],
       ['Lote', 'Sem limite de imagens. Várias imagens são baixadas juntas num só ZIP.'],
       ['Já está pequeno', 'Se a cópia nova não ficar menor, você recebe o original de volta, sem os metadados da foto.'],
       ['Metadados da foto', 'Modelo da câmera, data e localização GPS saem de todos os arquivos.'],
@@ -34,6 +35,7 @@ export default {
   },
   presets: {
     heading: 'Comprimir para um tamanho certo',
+    lead: 'Para qualquer outro limite, escolha "Até um tamanho" acima e digite o máximo em KB, de 20 a 10.000.',
     caption: 'Ajustes prontos da Comprimir imagem e o que cada um faz',
     head: ['Ajuste pronto', 'O que faz'],
   },
@@ -42,6 +44,10 @@ export default {
     {
       q: 'Comprimir diminui a qualidade da imagem?',
       a: 'No JPG e no WebP um pouco de detalhe se perde, porque o arquivo é salvo de novo com parte da informação de fora. Na compressão Recomendada a diferença é difícil de notar no tamanho normal, e a Forte troca mais detalhe pelo menor arquivo possível. O PNG não perde nada, porque a Oli o salva sem perda. O arquivo original nunca é alterado, então dá para voltar a ele sempre que quiser.',
+    },
+    {
+      q: 'Como deixo uma imagem dentro de um limite, como 200 KB?',
+      a: 'Escolha "Até um tamanho" e digite o limite no campo "Tamanho máximo", em KB. A Oli deixa cada imagem desse tamanho ou menos, em JPG. Um formulário que conta 1 KB como 1.024 bytes também a aceita, porque a Oli conta 1 KB como 1.000 bytes, a leitura menor. Um PNG com transparência ganha fundo branco.',
     },
     {
       q: 'Por que meu PNG quase não diminui?',

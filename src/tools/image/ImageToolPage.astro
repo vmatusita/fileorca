@@ -97,6 +97,7 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
     {t.presets && presets.length > 0 && (
       <>
         <h3 class="fo-h3" id="presets">{t.presets.heading}</h3>
+        {t.presets.lead && <p>{t.presets.lead}</p>}
         <table class="fo-table">
           <caption class="fo-sr">{t.presets.caption}</caption>
           <thead><tr><th scope="col">{t.presets.head[0]}</th><th scope="col">{t.presets.head[1]}</th></tr></thead>
