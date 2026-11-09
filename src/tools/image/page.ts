@@ -13,7 +13,7 @@ import { homePath, type Crumb } from '../../seo/meta.ts';
 import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId, type PdfNeighbour } from './registry.ts';
 import { IMAGE_PANEL_TEXTS, imageToolTexts } from './texts.ts';
 import type { ChipCarry, ChipData, ConverterLink, ImagePanelData } from './types.ts';
-import { blurbOf as pdfBlurbOf, pdfOriginsOf } from '../pdf/page.ts';
+import { blurbOf as pdfBlurbOf, carryOfImage, pdfOriginsOf } from '../pdf/page.ts';
 import { PDF_PAGES } from '../pdf/registry.ts';
 
 /** Most chips under a result (the design: 2 to 4). */
@@ -37,11 +37,12 @@ const categoryOf = (id: ImageToolId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 
  * F13a · UX-14 (DECISOES § 497): the chip to `target` takes the result along when this page makes images (Image to
  * PDF makes a PDF, which no image tool takes) and the target has the label "this image" in the language; every image tool
  * runs by itself. The island decides with the formats of the result itself (takes() of src/share).
+ * F15 (DECISOES § 653 and § 654): the chip to a PDF tool takes the PDF along when this page makes one (Image to PDF), by
+ * the rule of the PDF side (carryOfImage): { accepts: ['pdf'], single: the tool takes one file at a time, its label }.
  */
 function carryTo(source: ImagePageId, target: ImageToolId | PdfNeighbour, lang: Lang): ChipCarry | undefined {
+  if (isPdfNeighbour(target)) return carryOfImage(source, target, lang);
   const labels = IMAGE_PANEL_TEXTS[lang].carry.chips;
-  // F15 (DECISOES § 653 and § 654): the chips of Image to PDF to a PDF tool are the work of the front C; until then they link.
-  if (isPdfNeighbour(target)) return undefined;
   if (IMAGE_PAGES[source].pdf || !(target in labels)) return undefined;
   return { accepts: [...IMAGE_PAGES[target].accepts], single: false, ...labels[target as keyof typeof labels] };
 }

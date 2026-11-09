@@ -114,7 +114,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     id: 'image-to-pdf',
     accepts: PHOTO,
     icon: 'pdf',
-    next: ['compress-image', 'resize-image'],
+    // F15 (D8; DECISOES § 653): after a PDF, the PDF tools; their chips take the PDF along (§ 654).
+    next: ['compress-pdf', 'merge-pdf', 'add-page-numbers-to-pdf'],
     related: ['compress-image', 'resize-image', 'rotate-image', 'crop-image', 'heic-to-jpg', 'png-to-jpg'],
     beforeAfter: 'never',
     pdf: true,
