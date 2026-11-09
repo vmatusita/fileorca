@@ -2,7 +2,8 @@
 // enters the drop zone), so Comlink and the worker stay out of the initial JS of the tool pages.
 // The worker is created on first use. When it has no OffscreenCanvas (Safari before 16.4, and the
 // WebKit of Playwright on Windows), the same engine runs on the page with a <canvas> (DECISOES § 22);
-// the ZIP and the codecs warm-up still go to the worker. Calls never reject for a bad file: that comes
+// the ZIP and the codecs warm-up still go to the worker (a ZIP made again after a row left is made on the page, F15).
+// Calls never reject for a bad file: that comes
 // back as { ok: false, reason }. Only a worker that cannot start is turned into the page path.
 //
 // This is the only place that knows the bundler: the engine imports no .wasm (so it is the same code in the exported
@@ -90,6 +91,14 @@ export async function zipFiles(entries: readonly ZipEntry[]): Promise<Blob> {
       // the worker could not start: the page builds it
     }
   }
+  return zipHere(entries);
+}
+
+/**
+ * The same stored ZIP, built on the page (the chunk of the fallback above, no file of its own). F15 (DECISOES § 652 and
+ * § 667): a batch that only lost a file or got one back is packed again here, without a message to the image worker.
+ */
+export async function zipHere(entries: readonly ZipEntry[]): Promise<Blob> {
   const { zipStored } = await import('../../engine/image/zip.ts');
   return zipStored(entries);
 }

@@ -504,6 +504,34 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    the file the comparison or the crop box shows; the picked row gets the thick brand border (shape, not colour alone). */
 .fo-queue { display: grid; gap: var(--space-3); }
 .fo-queue__more { justify-self: center; }
+/* F15 (DECISOES § 651, § 652 and § 668): the rows of an image batch of two files or more, as the rows of Merge PDF. The
+   card, and outside it, in the row, the arrows of Image to PDF (an empty place of 48 px where one cannot move) and the bin
+   of a ready row; a row that waits or works keeps the place of the bin. Every card has the height of a card that works
+   (the bar under the name), so nothing moves when a photo is ready, and the line a row leaves (Undo) has the height of a
+   row. From 480 px the controls sit beside the card; under 480 px they go to a row of 48 px (and the lip of the buttons)
+   under it, which keeps the name of the file its whole column (§ 515: beside the card, the name had 80 px at 320 and 120 px
+   at 360). A refused row has its card with the reason and its own bin, the width of the list.
+   The list of the PDF island has rows of the same name: these rules are for the image list only (fo-filelist--image). */
+.fo-filelist--image { --fo-card-h: 86px; --fo-row-h: var(--fo-card-h); margin: 0; padding: 0; list-style: none; }
+.fo-filelist--image > .fo-filelist__row { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: column; gap: var(--space-2); align-items: center; }
+.fo-filelist--image > .fo-filelist__row > .fo-file { min-height: var(--fo-card-h); }
+.fo-filelist--image > .fo-filelist__row[draggable="true"] > .fo-file { cursor: grab; }
+/* The thumbnail is a picture the browser would drag by itself (as a file): the drag is the row's. */
+.fo-filelist--image > .fo-filelist__row[draggable="true"] .fo-file__thumb { pointer-events: none; }
+.fo-filelist__moves { display: flex; gap: var(--space-1); }
+.fo-filelist__none { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }
+.fo-filelist__move .fo-icon, .fo-filelist__remove .fo-icon { width: 20px; height: 20px; }
+.fo-filelist__move .fo-icon { rotate: 90deg; }
+.fo-filelist__move--up .fo-icon { rotate: -90deg; }
+.fo-filelist__undo { box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-2); min-height: var(--fo-row-h); margin: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border: var(--stroke-2) dashed var(--stroke); border-radius: var(--radius-md); color: var(--ink-muted); font-size: 15px; line-height: 22px; overflow-wrap: anywhere; }
+.fo-filelist__undo .fo-btn { flex: none; min-height: var(--tap-min); }
+@media (max-width: 479px) {
+  .fo-filelist--image { --fo-row-h: calc(var(--fo-card-h) + var(--space-2) + var(--tap-min) + var(--lip)); }
+  .fo-filelist--image > .fo-filelist__row:not([data-state="error"]) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "card card card" ". moves bin"; }
+  .fo-filelist--image > .fo-filelist__row:not([data-state="error"]) > .fo-file { grid-area: card; }
+  .fo-filelist--image > .fo-filelist__row > .fo-filelist__moves { grid-area: moves; }
+  .fo-filelist--image > .fo-filelist__row > :is(.fo-filelist__remove, .fo-filelist__none) { grid-area: bin; }
+}
 .fo-file__pick { appearance: none; box-sizing: border-box; display: block; width: 52px; height: 52px; padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
 .fo-file__pick .fo-file__thumb { display: grid; }
 .fo-file[data-selected="true"] { border-color: var(--brand); border-width: var(--stroke-3); padding: calc(var(--space-3) - 1px); }
