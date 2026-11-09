@@ -371,6 +371,14 @@ test.describe('the PDF tool events', () => {
     await page.getByLabel(watermarkTexts.panel.options.textLabel).blur();
     await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf', `${NAME}.pdf`)]);
     await page.getByRole('button', { name: must(watermarkTexts.panel.action) }).click();
+    // F14 (criterion 5 of the prompt; review F14 d-1): the page view of the new PDF opens and closes on the way, and sends
+    // no event of its own (the list below stays the four).
+    const viewButton = page.locator('#fo-tool-root .fo-result__view');
+    await expect(viewButton).toBeVisible({ timeout: 60_000 });
+    await viewButton.click();
+    await expect(page.locator('#fo-tool-root .fo-pview .fo-pview__img')).toBeVisible({ timeout: 30_000 });
+    await page.locator('#fo-tool-root .fo-pview__back').click();
+    await expect(viewButton).toBeFocused();
     await takePdfDownload(page);
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
     await page.locator('#fo-tool-root .fo-btn--download').click();

@@ -230,15 +230,17 @@ test('the result view: going back, a new run and Start over end the PDF.js worke
   // The grid of the file chosen keeps its own worker: the views let go of their documents only.
   expect((await pdfjsWorkers(page)).slice(0, grid).filter((made) => !made.ended).length, 'the worker of the file on the grid').toBe(1);
 
-  // A new run: the document of the result before is let go.
+  // A change of the options with the result view open (review F14 c-2): the result on screen is old, the view closes and
+  // the document of that result is let go at once, before the new run.
   before = (await pdfjsWorkers(page)).length;
   await button.click();
   await viewDrawn(page);
-  await root(page).locator('.fo-pview').getByRole('button', { name: view.back, exact: true }).click();
   await cells(page).nth(2).locator('.fo-page__main').click();
+  await expect(root(page).locator('.fo-pview')).toHaveCount(0);
+  await expectViewEnded(page, before, 'after an option change with the result view open');
   await root(page).getByRole('button', { name: /^Delete/ }).first().click();
   await expect(button).toBeVisible({ timeout: 60_000 });
-  await expectViewEnded(page, before, 'after a new run');
+  await expectViewEnded(page, before, 'after the new run');
 
   before = (await pdfjsWorkers(page)).length;
   await button.click();

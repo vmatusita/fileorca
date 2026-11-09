@@ -225,7 +225,17 @@ const TOOLS: Tool[] = [
     after: async (page) => {
       await page.getByLabel('Pick pages by number').fill(SENTINELS.rangeDelete);
       await page.getByRole('button', { name: 'Pick these' }).click();
+      // F14 (criterion 5 of the prompt; review F14 d-1): the page view, from the magnifier of a page and from "View the
+      // new PDF", is on the way: what is searched below includes what it may have left anywhere.
+      await page.locator('#fo-tool-root .fo-page__zoom').first().click();
+      await expect(page.locator('#fo-tool-root .fo-pview .fo-pview__img')).toBeVisible({ timeout: 30_000 });
+      await page.locator('#fo-tool-root .fo-pview__back').click();
       await page.getByRole('button', { name: /^Delete/ }).first().click();
+      const view = page.locator('#fo-tool-root .fo-result__view');
+      await expect(view).toBeVisible({ timeout: 45_000 });
+      await view.click();
+      await expect(page.locator('#fo-tool-root .fo-pview .fo-pview__img')).toBeVisible({ timeout: 30_000 });
+      await page.locator('#fo-tool-root .fo-pview__back').click();
     },
     proves: async (outs) => {
       expect(outs.map((out) => out.name)).toEqual([`${STEM}-edited.pdf`]);
