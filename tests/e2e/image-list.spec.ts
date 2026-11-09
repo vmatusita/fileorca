@@ -110,6 +110,7 @@ test.describe('Image to PDF: the order of the list is the order of the pages (cr
       expect(await names(page)).toEqual(WANTED);
       expect(texts(await saidAfter(page, sentences.at(-1) ?? '')), `${how}: one sentence per move, no "Done!" after it`).toEqual(sentences.map((text) => `region: ${text}`));
       const after = await imageIslandMessages(page);
+      console.log(`[mensagens] ${test.info().project.name} ${how}: fileorca-image ${before.image}→${after.image}, fileorca-pdf ${before.pdf}→${after.pdf}; páginas ${(await pdfPages(page)).join(', ')}`);
       expect(after.image - before.image, `${how}: messages to the image worker after the gesture`).toBe(0);
       expect(after.pdf - before.pdf, `${how}: messages to the PDF worker after the gesture`).toBeGreaterThan(0);
     }
@@ -244,6 +245,7 @@ test.describe('Image to PDF: the order of the list is the order of the pages (cr
     expect(texts(await saidAfter(page, out)), 'the line says it; the region of the island says nothing').toEqual([`line: ${out}`]);
     await expect.poll(() => pdfPages(page), { timeout: 30_000 }).toEqual([WEBP, ROT6].map((name) => PAGE_OF[name]));
     let after = await imageIslandMessages(page);
+    console.log(`[mensagens] ${test.info().project.name} lixeira na Imagem para PDF: fileorca-image ${before.image}→${after.image}, fileorca-pdf ${before.pdf}→${after.pdf}`);
     expect(after.image - before.image, 'messages to the image worker after the bin').toBe(0);
     expect(after.pdf - before.pdf, 'messages to the PDF worker after the bin').toBeGreaterThan(0);
     // Waiting has no timer (WCAG 2.2.1).
@@ -256,6 +258,7 @@ test.describe('Image to PDF: the order of the list is the order of the pages (cr
     await expect(button(page, fmt(q.remove, { name: PNG })), 'the focus on the bin of the row that came back').toBeFocused();
     await expect.poll(() => pdfPages(page), { timeout: 30_000 }).toEqual(GIVEN.map((name) => PAGE_OF[name]));
     after = await imageIslandMessages(page);
+    console.log(`[mensagens] ${test.info().project.name} Desfazer na Imagem para PDF: fileorca-image ${before.image}→${after.image}, fileorca-pdf ${before.pdf}→${after.pdf}`);
     expect(after.image - before.image, 'messages to the image worker after Undo').toBe(0);
     expect((await saidSoFar(page)).filter((said) => said.where === 'region'), 'no "Done!" after the PDF made again').toEqual([]);
   });
@@ -301,6 +304,7 @@ test.describe('a ready file goes out of any batch, with Undo (criterion 2)', () 
       expect(await delivered(page), 'the ZIP with the two files that stay').toEqual({ name: 'fileorca-images.zip', inside: ['photo-1.jpg', 'photo-3.jpg'] });
       await expect(download(page), 'the Download says the new size').not.toHaveText(label ?? '');
       let after = await imageIslandMessages(page);
+      console.log(`[mensagens] ${test.info().project.name} lixeira em ${path}: fileorca-image ${before.image}→${after.image}`);
       expect(after.image - before.image, 'messages to the image worker after the bin').toBe(0);
 
       // The Download is no action that changes the batch: the Undo waits. Undo: the row in its place, the focus on its
@@ -312,6 +316,7 @@ test.describe('a ready file goes out of any batch, with Undo (criterion 2)', () 
       await expect(button(page, fmt(q.remove, { name: 'photo-2.jpg' }))).toBeFocused();
       expect(await delivered(page)).toEqual({ name: 'fileorca-images.zip', inside: ['photo-1.jpg', 'photo-2.jpg', 'photo-3.jpg'] });
       after = await imageIslandMessages(page);
+      console.log(`[mensagens] ${test.info().project.name} Desfazer em ${path}: fileorca-image ${before.image}→${after.image}`);
       expect(after.image - before.image, 'messages to the image worker after Undo').toBe(0);
       expect((await saidSoFar(page)).filter((said) => said.where === 'region'), 'the region of the island said nothing').toEqual([]);
 
@@ -336,6 +341,32 @@ test.describe('a ready file goes out of any batch, with Undo (criterion 2)', () 
       expect(sent.filter((name) => name === 'tool_complete'), 'tool_complete once for the batch').toHaveLength(1);
     });
   }
+
+  // DECISOES § 668: beside the card, the bin left the name 80 px at 320 and 120 px at 360 (the card's own Download takes
+  // its place too): under 480 px it goes to a row under the card, as the arrows of Image to PDF and the rows of Merge PDF
+  // (§ 515). The sizes of a photo of a phone take two lines there, and the line of Undo keeps the height of that row.
+  test('at 320 px the bin is under the card, and the line has the height of the row it replaces when its sizes take two lines', async ({ browser }) => {
+    test.setTimeout(90_000);
+    const context = await browser.newContext({ viewport: { width: 320, height: 640 }, serviceWorkers: 'block' });
+    const page = await context.newPage();
+    await spyOnWorkers(page);
+    await open(page, '/compress-image/');
+    await page.setInputFiles('input[type="file"]', ['jpg-02-iphone6-paisagem-gps.jpg', WEBP, PNG].map(fixture));
+    await expect(download(page)).toBeVisible({ timeout: 60_000 });
+    await expect(root(page).locator('.fo-filelist__remove')).toHaveCount(3);
+    const placed = await rows(page).nth(1).evaluate((row) => {
+      const card = (row.querySelector('.fo-file') as HTMLElement).getBoundingClientRect();
+      const bin = (row.querySelector(':scope > .fo-filelist__remove') as HTMLElement).getBoundingClientRect();
+      const name = (row.querySelector('.fo-file__name') as HTMLElement).getBoundingClientRect();
+      return { under: bin.top >= card.bottom, name: name.width };
+    });
+    expect(placed.under, 'the bin in the row under the card').toBe(true);
+    expect(placed.name, 'the name keeps the column it had before the bin').toBeGreaterThanOrEqual(130);
+    const row = await boxOf(rows(page).nth(1));
+    await button(page, fmt(q.remove, { name: WEBP })).click();
+    expect(await boxOf(root(page).locator('.fo-filelist__undo')), 'the line has the place and the height of the row').toEqual(row);
+    await context.close();
+  });
 
   test('from two files to one: the list stays while Undo waits, the Download hands out the file that stayed, and the next action brings the card of one file', async ({ page }) => {
     test.setTimeout(90_000);
