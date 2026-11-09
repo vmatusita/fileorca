@@ -239,60 +239,72 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - part: chromium 1 de 5
+          - part: chromium 1 de 8
             browser: chromium
-            args: --playwright=chromium --shard=1/5
-          - part: chromium 2 de 5
+            args: --playwright=chromium --shard=1/8
+          - part: chromium 2 de 8
             browser: chromium
-            args: --playwright=chromium --shard=2/5
-          - part: chromium 3 de 5
+            args: --playwright=chromium --shard=2/8
+          - part: chromium 3 de 8
             browser: chromium
-            args: --playwright=chromium --shard=3/5
-          - part: chromium 4 de 5
+            args: --playwright=chromium --shard=3/8
+          - part: chromium 4 de 8
             browser: chromium
-            args: --playwright=chromium --shard=4/5
-          - part: chromium 5 de 5
+            args: --playwright=chromium --shard=4/8
+          - part: chromium 5 de 8
             browser: chromium
-            args: --playwright=chromium --shard=5/5
-          - part: webkit 1 de 13
+            args: --playwright=chromium --shard=5/8
+          - part: chromium 6 de 8
+            browser: chromium
+            args: --playwright=chromium --shard=6/8
+          - part: chromium 7 de 8
+            browser: chromium
+            args: --playwright=chromium --shard=7/8
+          - part: chromium 8 de 8
+            browser: chromium
+            args: --playwright=chromium --shard=8/8
+          - part: webkit 1 de 14
             browser: webkit
-            args: --playwright=webkit --shard=1/13
-          - part: webkit 2 de 13
+            args: --playwright=webkit --shard=1/14
+          - part: webkit 2 de 14
             browser: webkit
-            args: --playwright=webkit --shard=2/13
-          - part: webkit 3 de 13
+            args: --playwright=webkit --shard=2/14
+          - part: webkit 3 de 14
             browser: webkit
-            args: --playwright=webkit --shard=3/13
-          - part: webkit 4 de 13
+            args: --playwright=webkit --shard=3/14
+          - part: webkit 4 de 14
             browser: webkit
-            args: --playwright=webkit --shard=4/13
-          - part: webkit 5 de 13
+            args: --playwright=webkit --shard=4/14
+          - part: webkit 5 de 14
             browser: webkit
-            args: --playwright=webkit --shard=5/13
-          - part: webkit 6 de 13
+            args: --playwright=webkit --shard=5/14
+          - part: webkit 6 de 14
             browser: webkit
-            args: --playwright=webkit --shard=6/13
-          - part: webkit 7 de 13
+            args: --playwright=webkit --shard=6/14
+          - part: webkit 7 de 14
             browser: webkit
-            args: --playwright=webkit --shard=7/13
-          - part: webkit 8 de 13
+            args: --playwright=webkit --shard=7/14
+          - part: webkit 8 de 14
             browser: webkit
-            args: --playwright=webkit --shard=8/13
-          - part: webkit 9 de 13
+            args: --playwright=webkit --shard=8/14
+          - part: webkit 9 de 14
             browser: webkit
-            args: --playwright=webkit --shard=9/13
-          - part: webkit 10 de 13
+            args: --playwright=webkit --shard=9/14
+          - part: webkit 10 de 14
             browser: webkit
-            args: --playwright=webkit --shard=10/13
-          - part: webkit 11 de 13
+            args: --playwright=webkit --shard=10/14
+          - part: webkit 11 de 14
             browser: webkit
-            args: --playwright=webkit --shard=11/13
-          - part: webkit 12 de 13
+            args: --playwright=webkit --shard=11/14
+          - part: webkit 12 de 14
             browser: webkit
-            args: --playwright=webkit --shard=12/13
-          - part: webkit 13 de 13
+            args: --playwright=webkit --shard=12/14
+          - part: webkit 13 de 14
             browser: webkit
-            args: --playwright=webkit --shard=13/13
+            args: --playwright=webkit --shard=13/14
+          - part: webkit 14 de 14
+            browser: webkit
+            args: --playwright=webkit --shard=14/14
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
