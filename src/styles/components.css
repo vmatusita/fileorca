@@ -518,7 +518,7 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 /* The words of the card keep the room of the bar from the start: the name stays where it is when the bar comes and goes. */
 .fo-filelist--image > .fo-filelist__row > .fo-file > div:not([class]) { min-height: calc(var(--fo-card-h) - 2 * var(--space-3) - 2 * var(--stroke-2)); }
 .fo-filelist--image > .fo-filelist__row[draggable="true"] > .fo-file { cursor: grab; }
-/* The thumbnail is a picture the browser would drag by itself (as a file): the drag is the row's. */
+/* The thumbnail starts no drag of its own (a picture drags as a picture, with its address): the drag is the row's. */
 .fo-filelist--image > .fo-filelist__row[draggable="true"] .fo-file__thumb { pointer-events: none; }
 .fo-filelist__moves { display: flex; gap: var(--space-1); }
 .fo-filelist__none { display: block; flex: none; width: var(--tap-min); height: var(--tap-min); }

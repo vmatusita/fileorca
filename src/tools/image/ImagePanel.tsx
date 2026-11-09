@@ -160,11 +160,14 @@ interface Model {
   carrying: boolean;
   /**
    * F15 (DECISOES § 652): the ready row that went out by its bin, where it was, and whether its line said so. It is not let
-   * go (its output, thumbnail and URLs come back with Undo) until the next action that changes the batch.
+   * go (its output, thumbnail and URLs come back with Undo) until the next action that changes the batch. `height`: the
+   * height the row had (its sizes may take two lines on a phone), which its line keeps.
    */
-  undo: { item: Item; position: number; said: boolean } | null;
-  /** F15: marks the effect spends only once their target is on screen (§ 510): the Undo of the line, the bin of the row
-   * that came back, and the arrow of the row that moved (on the list as the model has it, not a list drawn before). */
+  undo: { item: Item; position: number; said: boolean; height: number } | null;
+  /**
+   * F15: marks the effect spends only once their target is on screen (§ 510): the Undo of the line, the bin of the row
+   * that came back, and the arrow of the row that moved (on the list as the model has it, not a list drawn before).
+   */
   focusUndo: boolean;
   focusBin: number | null;
   focusMove: { id: number; control: string } | null;
@@ -713,9 +716,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       const pickedId = m.selected !== null && ids.includes(m.selected) ? m.selected : ids[0];
       if (pickedId === item.id) m.selected = successor(ids, ids.indexOf(item.id));
     }
+    // The line keeps the height of the row it replaces (the sizes of a row may take two lines in a narrow column).
+    const height = listRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"]`)?.getBoundingClientRect().height ?? 0;
     item.removed = true;
     m.items = m.items.filter((other) => other !== item);
-    const undo = { item, position: at, said: false };
+    const undo = { item, position: at, said: false, height };
     m.undo = undo;
     m.focusUndo = true;
     m.focusMove = null;
@@ -1465,8 +1470,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const queueRows = shown.map((item, position) => queueRow(item, position, m.items.length - 1));
   const undo = m.undo;
   if (undo) {
-    // F15 (D-21 of Merge PDF): the line of the row that left, in its place, with its own key; its region says so 50 ms
-    // after it is on screen.
+    // F15 (D-21 of Merge PDF): the line of the row that left, in its place and at its height, with its own key; its region
+    // says so 50 ms after it is on screen.
     const out = fmt(t.queue.out, { name: nameOf(undo.item) });
     const said = <span role="status">{undo.said ? out : ''}</span>;
     const button = (
@@ -1474,16 +1479,17 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         {t.queue.undo}
       </button>
     );
+    const style = undo.height > 0 ? `min-height:${undo.height}px` : undefined;
     queueRows.splice(
       Math.min(undo.position, queueRows.length),
       0,
       pdf ? (
-        <li key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id}>
+        <li key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id} style={style}>
           {said}
           {button}
         </li>
       ) : (
-        <div role="listitem" key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id}>
+        <div role="listitem" key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id} style={style}>
           {said}
           {button}
         </div>
