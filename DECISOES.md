@@ -6580,3 +6580,101 @@ Tudo pela região do painel (`p.fo-sr[role="status"]`, pelo `announce`, que é o
 - **O que o código faz,** conferido no ponto de partida e sem mudança de comportamento nesta run: o `drawPage` chama `page.cleanup()` logo depois de desenhar, e o canvas é zerado pelo `freeCanvas` (`width` e `height` a 0). No ponto de partida eram as linhas 196 e 210 a 213 de `src/engine/pdf/pdfjs.ts`; com o `close()` do E-4 (§ 630) acima delas, são as linhas 206 e 220 a 223 no fim da F14. O `freeCanvas` é chamado no `finally` do `render.ts` (linha 21, o caminho da página) e no do `worker.ts` (linha 100, a miniatura no worker); a fábrica de canvas do worker também zera o canvas que o PDF.js solta (`OffscreenFactory.destroy`, linha 68). A ficha citava as linhas 196 e 211 do ponto de partida; a 211 era a primeira linha do corpo do `freeCanvas`.
 - **Um resto:** se o desenho falha no meio, o `cleanup()` e o canvas zerado não correm (o erro sai antes), e o canvas fica para o GC. É raro (uma página que o PDF.js não desenha) e não cresce com o número de páginas; não entrou como pendência.
 - **No `docs/PENDENCIAS.md`:** o F5a E-5 foi para "Já corrigidos", com este §.
+
+## § 632 · A medida do E-2 (F14, item 8, decisão 12; critério 8; § 620)
+
+- **Como:** o script `.cache/f14/e2.ts` (fora do Git) abre três páginas no mesmo Chromium, a 1280 × 800 e com DPR 1: o Excluir do `dist-base` (servido na porta 4181), o do `dist/` da F14 (4182) e um segundo do `dist-base` (o controle de ruído). Em cada uma, a `gen-paginas-300` com a grade na tela e as figuras à vista desenhadas, e um segundo de silêncio. Os toques alternam entre as três (base, nova, base 2, base, nova…), 20 em cada uma, em páginas à vista, cada página duas vezes seguidas (marca e desmarca), mandados pelo CDP (`Input.dispatchMouseEvent`), para nenhum script do Playwright correr na página durante a medida. Cada toque é o `ScriptDuration` do `Performance.getMetrics` antes dele e 600 ms depois (o painel já desenhou de novo).
+- **O resultado** (ms de script da thread principal por toque, 9/nov/2026, na máquina da run):
+
+| Rodada | Base: média (desvio) | Nova: média (desvio) | Base 2: média (desvio) | Nova ÷ base | Base 2 ÷ base |
+|---|---:|---:|---:|---:|---:|
+| 1 | 3,671 (1,217) | 1,162 (0,370) | 3,563 (1,468) | 0,317 | 0,971 |
+| 2 | 3,692 (1,891) | 1,069 (0,358) | 3,694 (1,323) | 0,289 | 1,001 |
+
+- **As 20 medidas da rodada 1:** base 5,724 · 3,919 · 4,472 · 3,125 · 4,422 · 3,869 · 5,621 · 2,064 · 4,991 · 2,710 · 3,526 · 1,939 · 4,886 · 2,014 · 3,416 · 3,503 · 3,408 · 1,846 · 5,060 · 2,901; nova 1,565 · 1,568 · 1,747 · 0,738 · 1,095 · 0,908 · 1,807 · 0,695 · 1,233 · 0,850 · 1,252 · 0,632 · 1,242 · 1,124 · 1,653 · 1,281 · 1,226 · 0,582 · 1,115 · 0,935; base 2 5,684 · 3,297 · 7,012 · 3,944 · 3,599 · 3,391 · 5,590 · 2,399 · 4,100 · 1,847 · 5,290 · 2,291 · 3,295 · 1,877 · 3,213 · 2,832 · 4,739 · 1,900 · 3,153 · 1,803.
+- **O critério 8 (E-2) se cumpre:** o script por toque caiu para 0,29 a 0,32 do ponto de partida, abaixo da metade, com o controle de ruído a 3 % de 1. Na página da F14 cabem 15 páginas na tela contra 30 no ponto de partida (as folhas têm a altura da página); os toques caem nas dez primeiras dos dois lados.
+- **Onde o tempo foi:** no ponto de partida, cada toque desenhava de novo as 300 células (o `Thumb` com os ganchos, o ícone e os textos de cada uma); agora só a célula tocada, a barra da contagem e o painel. O que sobra é o painel (o cartão pronto com o rótulo da ação, a faixa) e as 300 comparações do `shouldComponentUpdate`.
+
+## § 633 · O orçamento (F14, decisão 13; critério 10)
+
+- **Arquivo a arquivo** (`node .cache/f14/gzip-sizes.mjs`, gzip nível 9, contra o `dist-base`): as páginas de PDF carregam os mesmos 3 arquivos do ponto de partida; o `PdfIsland…js` passou de 19.867 para 23.759 B (+3.892 B: a célula, a vista, a marcação e o E-4), o `island…js` (o pedaço compartilhado das ilhas) de 21.211 para 21.215 B (+4 B) e o `entry…js` ficou com 1.432 B. O JS inicial de cada página de PDF passou de 42.510 para 46.406 B, **+3.896 B**, abaixo dos 8 KB (8.000 B, a leitura mais estrita). O build tem os mesmos 66 arquivos JS, nenhum novo e nenhum a menos.
+- **Pelo `budgets.spec.ts` e pelo `i18n-budgets.spec.ts`** (Chromium, sem mudar número nenhum): 2 arquivos e 6 requisições em cada página de PDF, como no ponto de partida, e o JS inicial (com o inline) de 45,1–45,3 KB para 48,9–49,1 KB, longe dos 80 KB.
+- **Nada foi cortado:** a medida ficou abaixo do limite, então a regra "primeiro tire código" não precisou correr, e nenhuma pendência de orçamento entrou no grupo 24.
+
+## § 634 · Os anúncios com a vista aberta (F14, decisão 14; § 35, § 473, § 488 e § 592)
+
+- **O bloco novo do `ads.spec.ts`** (no build de teste, 8 testes por navegador): as cinco ferramentas em en e o Excluir em pt e es, mais o Juntar. Em cada um: a grade (a lupa e o segmento de tamanho); a vista em "Ajustar" e em "Ampliar", a 360 × 740 e a 1280 × 800; no Excluir, o resultado com o "Ver o PDF novo" e a vista dele; no Juntar, as linhas com o "Ver páginas" e a vista de um arquivo. Em cada estado: nenhum anúncio de conteúdo acima da ferramenta, a lateral visível a 1280, nenhum anúncio dentro da ilha e o mesmo número de anúncios, e 150 px de todo alvo.
+- **Os alvos:** a lista `TARGETS` (`tests/e2e/lib/ad-clearance.ts`) e a `PDF_TARGETS` (`clearance.spec.ts`) ganharam, no fim, `.fo-pview`, a barra de cima, `.fo-pview .fo-btn`, a moldura, a folha e as imagens, a barra de baixo, `.fo-page__zoom`, `.fo-result__view` e `.fo-merge__view`; nada saiu. A folha e as imagens entram só em "Ajustar" (`.fo-pview__frame:not([data-zoom]) …`): em "Ampliar" a folha tem o dobro da coluna dentro de uma moldura que rola, a caixa dela passa da moldura (o `getBoundingClientRect` não corta), e a medida dava 0 px da lateral para uma parte que não está na tela. O que se vê da página ampliada é a interseção da imagem com a moldura, e o teste mede essa parte à parte, contra cada anúncio. A `MAP_TARGETS` não mudou: nenhuma classe nova aparece em repouso.
+- **A âncora:** o teste põe um `ins.adsbygoogle[data-anchor-status="displayed"]` fixo embaixo, de 100 px, sem `z-index` (como no `cookie-footer.spec.ts`), e traz para baixo dela, uma de cada vez, a barra de baixo, a moldura e a barra de cima da vista. Em 40 pontos da área dela (10 colunas por 4 linhas), o `elementFromPoint` devolve a âncora, nunca o `<main>` nem a ilha. Sem `z-index` a prova é a mais dura: um elemento do site com `z-index` passaria por cima.
+- **As menores distâncias** (o menor valor entre o Chromium e o WebKit do Windows, nas oito páginas): a 360 × 740, os botões da vista ficam a 528 px ou mais do anúncio mais perto (no Girar) e a moldura e a parte vista da imagem, a 644 px ou mais, nos dois modos; a 1280 × 800, os botões ficam a 150 px da lateral (a borda da coluna, como a ilha inteira), a moldura a 320 px em "Ajustar" e a 150 px em "Ampliar" (ela ocupa a coluna), e a parte vista da imagem também a 320 e a 150 px. A lupa fica a 590 px ou mais a 360 e a 182 px ou mais a 1280; o segmento de tamanho, a 150 px a 1280 (a borda da coluna); o "Ver o PDF novo", a 2.270 px ou mais a 360 e a 293 px ou mais a 1280; o "Ver páginas", a 1.224 px a 360 e a 176 px a 1280. O log inteiro está nas notas.
+
+## § 635 · Os specs novos: os nomes e as partes (F14, decisão 15; § 142, § 307 e § 592)
+
+- **Os nomes:** os specs da F14 se chamam `island-pdf-grid`, `island-pdf-marking`, `island-pdf-result`, `island-pdf-view`, `island-pdf-view-axe` e `island-pdf-workers` (`.spec.ts`). Na ordem dos nomes do Playwright (`-` antes de `.`), eles caem entre o `i18n-budgets` e o `island.spec.ts`, a faixa das partes mais leves: a 4 do Chromium (projetada em uns 526 s na F13b) e a 9 e a 10 do WebKit (a 9 tinha 83 s na máquina). Os nomes `pdf-*` cairiam na parte 5 do Chromium, a mais cheia, e `axe-pdf-view` na 1, a do axe pesado (§ 307). Nenhum deles usa o build de teste; o bloco da vista com anúncios ficou no `ads.spec.ts` (decisão 14), que já paga o build na parte 1 do Chromium e na 2 e na 3 do WebKit.
+- **A divisão, pelo `--list --shard`** (`.cache/f14/parts.mjs`): 2.316 testes por navegador (eram 2.204). No Chromium, 464, 463, 463, 463 e 463 por parte, com os 104 `island-pdf-*` na parte 4 (que perdeu 59 do `i18n-budgets` para a 3 e o rabo dos `money-*` para a 5); no WebKit, de 175 a 182 por parte, com 69 dos novos na 9 e 35 na 10. O `design.spec.ts` (nas partes 2 e 3 do Chromium e 5 e 6 do WebKit) e o `image-matrix.spec.ts` (4 e 9) continuam em partes diferentes (§ 142).
+- **O tempo dos specs novos** (a soma dos testes, com 2 workers, na máquina da run): no Chromium, `island-pdf-result` 185,2 s, `island-pdf-marking` 25,2 s, `island-pdf-view-axe` 16,9 s, `island-pdf-view` 16,0 s, `island-pdf-grid` 14,6 s e `island-pdf-workers` 8,1 s (266 s); no WebKit, 204,2, 43,5, 27,0, 24,6, 33,5 e 13,5 s (346 s). Com 2 workers, isso soma uns 133 s à parte 4 do Chromium, menos o que saiu dela; a medida real de cada parte está no `pnpm verificar --partes` do relatório e na execução completa do CI.
+- **Nenhuma mudança em `.github/workflows/`:** a matriz das partes continua a mesma. Se uma parte do CI passar de 700 s, a correção é dar outro nome a um spec (mover testes de faixa), como na § 592, ou redividir a matriz numa PR separada, de merge do Victor.
+
+## § 636 · Os testes antigos que mudaram (F14, decisão 15; no formato da § 341)
+
+A ficha manda mudar um teste que fixa o desenho de hoje junto com o que ele protege, e mostrar que a proteção continua.
+
+- **`tests/unit/icons.test.ts`,** "lists exactly the 71 icons…". Fixava 71 ícones e a origem deles no título. Agora fixa 72, e o título cita o `zoom` da F14 (§ 621). A proteção continua: a lista igual à da pasta, a ordem alfabética, o LF único no fim, a raiz e o desenho sem cor própria.
+- **`tests/e2e/engine-paths.spec.ts`,** "The page grid without OffscreenCanvas in the worker: the page draws the thumbnails of every page". Pedia que cada figura tivesse 240 px de largura (± 2) e a altura da página nessa largura, sem rolar a página. Agora pede a largura que a folha pede (`ceil60(min(720, largura da folha × DPR))`, ± 2) e a altura nessa largura, e traz a grade para a tela antes de contar as figuras. Por quê: a largura pedida passou a ser a da folha (§ 619), e as células passaram a ter a altura da página (§ 618), então a segunda linha da grade ficava fora dos 300 px da tela onde as figuras são desenhadas. A proteção continua: no caminho da página, toda página é desenhada, na largura pedida, com a proporção dela (o `/Rotate` aplicado) e com marcas escuras sobre a folha clara.
+- **`tests/e2e/pdf-pieces.spec.ts`, "F-5: the page preview is drawn at least as wide as its frame times the pixel ratio".** Pedia, no fim, que a figura da grade do Assinar tivesse 240 px ou menos (com DPR 2). Agora pede a largura que a folha pede (± 2) e nunca mais de 720 px. A proteção continua: a prévia da página do Assinar na largura da caixa vezes o DPR, e a grade sem figura maior do que a folha mostra.
+- **`tests/e2e/pdf-pieces.spec.ts`, "D-7 and F-8: a picked page has the check before its number…"** (no Excluir). Pedia o nome da página marcada terminando em ", picked". Agora pede ", comes out" (`grid.leaving`), porque no Excluir a página marcada sai (§ 627). A proteção continua: o círculo com o ícone à vista na página marcada e escondido na outra (agora a lixeira), o número `aria-hidden`, a dobra em -3 px; o ", picked" do Dividir e do Assinar passou a ser provado pelo `island-pdf-marking.spec.ts`.
+- **`tests/e2e/pdf-matrix.spec.ts`, o `deletePages`** (os testes do Excluir que o usam). Pedia `getByText('0 of N pages picked')` e, depois do intervalo digitado, `getByText('K of N pages picked')`. Agora pede a barra da grade (`.fo-pages__count`) com a forma do Excluir ("K of N come out · the new PDF keeps L pages", `leavingCount`). Por quê: a contagem do Excluir diz o que sai (§ 627), e o intervalo digitado agora também a diz na região do painel (§ 629), então um `getByText` acharia dois elementos. A proteção continua: o intervalo digitado marca as páginas certas, o erro quando todas saem e as páginas que ficam, na ordem, contra o `expected.json`; nenhum byte de saída mudou.
+- **Só acrescentados, sem nenhuma asserção mudada:** a lista `TARGETS` de `tests/e2e/lib/ad-clearance.ts` e a `PDF_TARGETS` do `tests/e2e/clearance.spec.ts` (os controles da vista, a lupa, o "Ver o PDF novo" e o "Ver páginas", no fim das listas; § 634) e um bloco novo no fim do `tests/e2e/ads.spec.ts`. A `MAP_TARGETS` não mudou.
+- **Só acrescentados, pela revisão (§ 647):** no `tests/e2e/pdf-privacy.spec.ts`, o fluxo do Excluir abre a vista pela lupa de uma página e pelo "Ver o PDF novo" antes do Baixar; no `tests/e2e/events.spec.ts`, o fluxo da Marca d'água abre e fecha a vista do resultado antes do Baixar, e a lista dos quatro eventos continua a mesma. Nenhuma asserção deles mudou: as procuras de sempre agora cobrem também o que a vista poderia deixar.
+- **As contagens:** o Vitest tem 131 arquivos e 2.083 testes (+1 arquivo e +17 testes, o `pdf-grid-math.test.ts`), e o `--list` do Playwright, 2.316 testes por navegador em 77 arquivos (+112 testes e 6 arquivos: os `island-pdf-*` e o bloco do `ads.spec.ts`).
+
+## § 637 · O design system: o PageView, a regra do ícone sozinho e os ícones (F14, item 11, decisão 16)
+
+- **O PageView** entra em `docs/design/components/PageView/` (o README com a anatomia de cima para baixo, os estados, o teclado e o toque, o foco, as falas, as larguras medidas, a regra de anúncio, o que a vista nunca faz e os contrastes; o `preview.html` no padrão dos outros, só com tokens, com o CSS da vista no próprio arquivo e classes `pv-` na grade de demonstração, que não encontram o `.fo-page` do bundle). O `docs/design/components/README.md` e o `docs/design/index.html` o listam em Arquivos.
+- **A regra "Ícone sozinho só em ação de linha"** do `docs/design/README.md`, a mudança de regra que a ficha nomeia. Antes: "Ícone sozinho só em ação de linha (remover, baixar um arquivo do lote), sempre com `aria-label`. Em todo o resto, ícone acompanha palavra." Depois: "Ícone sozinho só em ação de linha (remover, baixar um arquivo do lote) ou de item da grade de páginas (a lupa que abre a página em tamanho grande, F14, DECISOES § 637), sempre com `aria-label`. Em todo o resto, ícone acompanha palavra." O README dos ícones e a variante `fo-btn--icon` do README do Button repetem a mesma regra e mudaram junto, com o mesmo sentido (eles seriam desmentidos pela lupa).
+- **Os ícones:** o README diz 72 e põe o `zoom` na linha "Interface", com o desenho (§ 621).
+- **O que mudou porque a F14 desmentiria:** o README do ResultCard ganhou "F14: Ver o PDF novo" (o ghost depois do "Start over" e o retângulo que não muda) e o do FileCard, "F14: Ver páginas na linha do Juntar" (o card continua sem miniatura). Nenhuma outra regra do design system mudou; nenhum token novo.
+
+## § 638 · A conferência no Linux não houve: o rótulo `ci` não existe (F14, decisão 20; § 542)
+
+- **O que a decisão 20 pede:** depois da junção das frentes, um push, a execução leve e `gh pr edit 29 --add-label ci`, para a execução completa rodar no Linux no meio da run.
+- **O que havia:** `gh label list` (só leitura) mostrou só os rótulos padrão do GitHub (`accessibility`, `bug`, `documentation`, `duplicate`, `enhancement`, `help`, `good`, `invalid`, `question`, `wontfix`); o `ci` não existe, como na F12, na F13a e na F13b (§ 542). Criá-lo é do Victor.
+- **A decisão:** a conferência no meio da run saiu; a execução completa depois do `gh pr ready` faz esse papel. O atalho `gh pr ready` seguido do `--undo` não foi usado. A linha "criar o rótulo `ci`" continua na lista do Victor do relatório.
+
+## § 639 · O título da vista é um h2 (F14, decisões 1 e 7; critério 11)
+
+- **O conflito:** a seção A pede "um `h3` com `tabindex="-1"`". Na página de ferramenta, o único título antes da ilha é o `h1`, e o primeiro `h2` ("Como funciona") vem depois dela; o axe (`heading-order`, das boas práticas que o site roda) reprovou o `h3` nas cinco ferramentas, no resultado e no Juntar, nos dois navegadores, nos dois temas e nas duas larguras. Vale o mais rigoroso (decisão 1 do prompt): o critério 11 pede axe sem violação.
+- **A decisão:** o título é um `h2` com a classe `.fo-pview__title` (18 px, `fo-font-display`, o mesmo desenho que o `h3` teria). Nos guias que embutem a ferramenta, ele vem depois de um `h2` da página, o que também é uma ordem válida.
+- **Alternativa recusada:** calcular o nível pelo título de antes. Seria código para um caso que o `h2` já resolve nos dois lugares onde a ilha aparece.
+
+## § 640 · A vista que volta depois do primeiro giro do Girar (F14, decisão 7; § 483)
+
+- **O que acontecia:** no Girar página por página, o primeiro giro faz o resultado chegar, e as opções vão para dentro do "Ajustar". O `PageGrid` passa a outro lugar da árvore e o Preact o monta de novo: o estado da vista se perdia, e a vista fechava no meio do uso, com o foco no `body`.
+- **A decisão:** uma memória do módulo (`kept`, como o `remembered` do tamanho da § 619), com uma referência fraca (`WeakRef`) ao cache do arquivo e a página à vista. Uma grade nova com o mesmo cache abre a vista onde ela estava; o "Voltar às páginas" (e o Esc) a esquece; um arquivo novo tem outro cache, e ela não volta. A vista que volta assim (`resume`) não rola a página e só leva o foco à ação dela (o "Girar 90°" que a pessoa apertou) se o foco tiver caído no `body` no caminho; um foco que está em outro lugar fica. A referência fraca deixa o arquivo velho ser coletado.
+- **O que fica igual:** sem a vista aberta, o primeiro giro na grade leva a grade para dentro do "Ajustar" como antes (F13a).
+
+## § 641 · O critério 5 no caminho da página, com a CPU 20 vezes mais lenta (F14, decisão 15; critério 5)
+
+- **O que se mediu:** com o `Emulation.setCPUThrottlingRate` de 6× no Chromium, a imagem grande chegou 235 ms depois do toque na lupa: o desenho é do worker do PDF, que o CDP da página não desacelera. Pelo caminho da página (o worker servido sem `OffscreenCanvas`, como no `engine-paths.spec.ts`, que é o caminho do WebKit do Windows), com 6×, chegou de 226 a 297 ms, com uma página de foto (`gen-fotos.pdf`); com 20×, de 773 a 1.690 ms, depois dos 500 ms que o `hadRecentInput` desculpa.
+- **A decisão:** o teste usa o caminho da página, a `gen-fotos.pdf` e 20×, e afirma que a imagem chegou mais de 500 ms depois do toque (senão ele não provaria nada) e que nenhum `layout-shift` sem entrada recente foi visto. A hora do toque e a da chegada vêm de ouvintes do próprio teste (`pointerdown` e `load` na captura, num `addInitScript`): nenhum gancho no código do site.
+
+## § 642 · As setas em "Ampliar" e o arrasto do mouse (F14, decisão 7; § 624)
+
+- **As setas:** em "Ampliar", a moldura que rola recebe o foco (`tabindex="0"`) para a pessoa do teclado poder rolar a página ampliada (WCAG 2.1.1, e o `scrollable-region-focusable` do axe). Com o foco nela, ← e → rolam a moldura, como em qualquer região que rola; de qualquer outro controle da vista, eles trocam a página, e Home, End e Esc valem como sempre. A seção A diz "com o foco dentro da vista"; a exceção é a única forma de as setas rolarem a página ampliada sem gesto próprio.
+- **O arrasto:** em "Ampliar", o dedo rola a moldura (o `touch-action` do navegador). O mouse rola com a roda e as barras; arrastar com o mouse para rolar seria um gesto próprio, que a seção A deixa de fora. Em "Ajustar", o arrasto lateral troca a página com qualquer ponteiro (o teste usa o mouse do Playwright).
+
+## § 643 · Reserva não usada (F14, frente M)
+
+Reserva da frente M não usada.
+
+## § 644 · Reserva não usada (F14, frente M)
+
+Reserva da frente M não usada.
+
+## § 645 · Reserva não usada (F14, frente M)
+
+Reserva da frente M não usada.
+
+## § 646 · Reserva não usada (F14, frente M)
+
+Reserva da frente M não usada.
