@@ -21,6 +21,7 @@ import splitTexts from '../../src/tools/split-pdf/i18n/en.ts';
 import protectTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
 import { dataLayer, generatedJpeg, hydrated } from './lib/page.ts';
+import { arriveFrom } from './lib/inbox.ts';
 import { actionOf } from './lib/pdf-privacy.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
 import { brokenRequests, holds, leaksIn, requestText, SENTINELS, type SeenRequest } from './lib/sentinels.ts';
@@ -185,6 +186,29 @@ test('Image to PDF takes its PDF to Merge PDF: one PDF waits for another, and a 
   await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
   await expect(page.locator('.fo-result__from')).toHaveCount(0);
   expect(await timesSaid(page, sentence)).toBe(1);
+});
+
+// DECISOES § 655 and § 673: in Merge, a PDF taken out of the list that came makes it another batch (the note goes), and Undo
+// gives the list that came back, with its note. The PDFs are written in the inbox as a chip writes them (lib/inbox.ts).
+test('Merge PDF: a PDF taken out of the list a chip brought takes the note away, and Undo gives it back', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  const three = [pdfFile('gen-paginas-mistas.pdf', 'a.pdf'), pdfFile('gen-acoes.pdf', 'b.pdf'), pdfFile('gen-ja-otimizado.pdf', 'c.pdf')];
+  const note = fromMany(common.pdf['compress-pdf'].name, 3);
+  const action = page.locator('#fo-tool-root .fo-merge-panel .fo-btn--brand');
+  const queue = PDF_PANEL_TEXTS.en.queue;
+  for (const undo of [true, false]) {
+    await visit(page, server, '/merge-pdf/');
+    await arriveFrom(page, 'merge-pdf', 'compress-pdf', three);
+    await expect(region(page)).toHaveText(note, { timeout: 30_000 });
+    await expect(action).toBeVisible();
+    await page.getByRole('button', { name: fmt(queue.remove, { name: 'c.pdf' }), exact: true }).click();
+    if (undo) await page.getByRole('button', { name: queue.undo, exact: true }).click();
+    await expect(page.locator('#fo-tool-root .fo-merge .fo-filelist__row')).toHaveCount(undo ? 3 : 2);
+    await action.click();
+    await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+    if (undo) await expect(page.locator('.fo-result__from'), 'Undo: the list that came, with its note').toHaveText(note);
+    else await expect(page.locator('.fo-result__from'), 'a PDF out: another batch, with no note').toHaveCount(0);
+  }
 });
 
 test('Unlock PDF, then "Split this PDF": the PDF waits in Split for the button, and Split gives the parts with the note', async ({ page }) => {
