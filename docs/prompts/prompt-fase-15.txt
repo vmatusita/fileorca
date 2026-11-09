@@ -1,0 +1,360 @@
+ultracode
+
+# Missão
+
+Rode a F15 do FileOrca, "Imagem, QR e o caminho entre ferramentas", a segunda das cinco runs do `PLANO-UX-QV.md`. Tire os recomeços desnecessários das ferramentas de maior volume do `data/keywords.csv` (Imagem para PDF, Comprimir imagem e QR code, todas de 100K a 1M buscas por mês): ordem e lixeira no lote, o próximo passo certo, o tamanho que o formulário pede e o QR code à vista enquanto a pessoa digita.
+
+Ao terminar:
+
+- na Imagem para PDF, cada linha da lista tem as setas "antes" e "depois" (pelo toque e pelo teclado, com o foco que segue a linha movida), o arrastar com o mouse e a lixeira com Desfazer; o PDF sai na ordem da lista, e mudar a ordem ou tirar uma foto depois do resultado refaz só o PDF, sem codificar nenhuma foto de novo;
+- em todo lote de imagem, uma linha pronta sai pela lixeira com Desfazer, e o ZIP é refeito sem codificar nada de novo;
+- depois de criar um PDF, os chips oferecem Comprimir PDF, Juntar PDF e Numerar páginas, e levam o PDF;
+- o chip que leva o arquivo leva também para as ferramentas que esperam uma ação (Juntar, Dividir, Organizar páginas e Proteger): o arquivo chega e espera a ação, e o Proteger continua sem levar nada para fora;
+- o Comprimir imagem tem a terceira escolha, "Até um tamanho", com o campo "Tamanho máximo" em KB;
+- no celular, o QR code nasce logo abaixo do campo, à vista com o teclado aberto, e a partir de 768 px o desenho na tela é o de hoje;
+- nada sai do aparelho, nada vai para a URL, o histórico, o storage ou o GA4, nenhum anúncio chega a menos de 150 px do que é novo, e o CLS sem gesto continua 0;
+- o `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão em dia;
+- o relatório está em `docs/relatorios/fase-15.md` e a revisão em `docs/relatorios/REVISAO-F15.md`;
+- a PR da branch `fase-15` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `16b9b9b` (as partes do CI depois da F14, PR 30, logo depois da F14, PR 29) ou num commit mais novo. Confira com `git log --oneline -5` e guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+No clone, sem commit:
+
+- `docs/prompts/prompt-fase-15.md` e `docs/prompts/prompt-fase-15.txt` (este prompt);
+- talvez o `PLANO-FILEORCA.md` modificado com uma linha só, posta pelo Victor antes da run (decisão 2);
+- a pasta `Claude outputs/`, que fica fora de tudo.
+
+O que você precisa saber antes de planejar:
+
+- **A ficha da F15** está no `PLANO-UX-QV.md`, em "Fichas para a prompt-ultracode" → "F15 · Imagem, QR e o caminho entre ferramentas": a missão, as entradas, os 6 itens de "Dentro", o "Fora", os 7 critérios, a válvula e o destino. Ela cita a seção C (a lista da Imagem para PDF) e a seção D (Comprimir "até um tamanho"), e o diagnóstico (D7 a D12) diz o que foi medido e onde. Leia as quatro partes inteiras, e também "O que não entra, e por quê" e "Regras de todas as runs deste plano".
+- **O que mudou desde o plano.** Ele foi escrito em 9/nov/2026, antes da F14. A F14 mexeu na ilha de PDF (a grade, a vista da página, "Ver o PDF novo" e "Ver páginas" em cada linha do Juntar, com a lupa) e não tocou na ilha de imagem, no QR nem no `src/share/`. As linhas do diagnóstico D7 a D12 continuam valendo; confira cada uma no código do ponto de partida antes de planejar e registre no plano o que achar diferente.
+- **A ilha de imagem de hoje** (`src/tools/image/`):
+  - `ImagePanel.tsx`: o lote (`m.items`, cada um com `status`, `output` e `removed`), o `startBatch` (um lote novo substitui o de antes), o `run`, o `assemble` (o ZIP ou o PDF, com o `m.bundle` e a `key` dele, que hoje é só o tamanho de página da Imagem para PDF), o `rowProps` (o `onRemove` só no estado `error`), a lista (`.fo-queue`, `.fo-filelist[role="list"]`, as linhas `.fo-filelist__row`, 6 à vista e o resto atrás de "Show N more", `VISIBLE_ROWS`), a faixa de baixo (`band`: opções, ou chips e "Ajustar", pelo `hadCard`) e a região `p.fo-sr[role="status"]` (o `m.announce`);
+  - `registry.ts`: o `next` de cada página (o tipo só aceita ferramenta de imagem) e o `pdf: true` da Imagem para PDF;
+  - `page.ts`: o `chipsFor` e o `carryTo` (que hoje devolve nada quando a página faz PDF) e o mapa `origins`;
+  - `inbox.ts`: a caixa do compartilhar lida pela ilha, o `carries()` (cópia do `takes()` de `src/share/logic.ts`, comparada pelo `tests/unit/handoff.test.ts`);
+  - `types.ts` (o `ImageTool`, com `operation`, `now` e `pdfSize`), `pdf-client.ts` (o worker `fileorca-pdf`, que monta o PDF das fotos) e `engine-client.ts` (o worker `fileorca-image`, que codifica cada foto, e o `zipFiles`);
+  - os textos da ilha em `src/tools/image/i18n/{en,pt,es}.ts`, com o tipo `ImagePanelTexts` em `src/i18n/types.ts`.
+- **O Juntar PDF é o modelo da lista** (§ 479, § 480, § 515 e o D-21): `src/tools/pdf/PdfPanel.tsx`, o `mergeRows` (as setas que andam e o lugar vazio `.fo-merge__none` onde a seta não anda, a lixeira, o `li.fo-merge__undo` com o Desfazer até a próxima ação e sem tempo marcado, o arrastar de linha com o mouse) e o `moveItem`, o `removeRow` e o `undoRemove`. As palavras dele estão em `src/tools/pdf/i18n/{en,pt,es}.ts` (`queue.moveEarlier`, `moveLater`, `moved`, `remove`, `out` e `undo`).
+- **O chip que leva** (F13a, § 496 a § 500 e § 505): o caminho do clique à chegada; o `carryOf` de `src/tools/pdf/page.ts` (hoje só leva para destino de `run: 'auto'`); o `pdfOriginsOf`; os rótulos em `carry.chips` dos textos das duas ilhas; a chegada pelo caminho do soltar (`startBatch` na imagem, `addFiles` no PDF); a caixa vazia (`lost`); o `src/sw/`, que não mudou na F13a.
+- **O Comprimir imagem:** `src/tools/compress-image/Panel.tsx` (o segmento `level`, com "Recomendada" e "Forte" no pt do site), as presets em `src/tools/compress-image/presets/` (a operação `{ kind: 'target', maxBytes }`) e o motor em `src/engine/image/target.ts`. O campo de número da ilha é o `src/tools/image/NumberField.tsx` (o do Redimensionar e do Cortar).
+- **O QR code:** `src/tools/qr-code-generator/QrPanel.tsx` (hoje `.fo-qr__form`, com o campo e as duas opções, e depois `.fo-qr__out`, com a prévia, a frase e os dois Baixar) e o CSS `.fo-qr*` em `src/styles/components.css` (a prévia com `max-width: 320px`; a partir de 768 px, duas colunas). As páginas: `/qr-code-generator/`, `/pt/gerador-de-qr-code/` e `/es/generador-de-codigo-qr/`.
+- **As fixtures que a ficha pede já existem,** em `fixtures/images/`: a foto de 12 MP (`jpg-01-pixel2-retrato-gps.jpg`, 3024 × 4032), a de 16,8 MP (`gen-grande-4100x4100.jpg`), o PNG com transparência (`gen-png-transparente.png`) e as fotos de celular. Não crie fixture nova: ela mudaria o `fixtures/ORIGEM.md` e as matrizes.
+- **O próximo § livre do `DECISOES.md` é o 649.** Escreva os § na ordem. O grupo novo do `docs/PENDENCIAS.md` é o 25.
+- **A linha de base,** do relatório da F14: o Vitest com 131 arquivos e 2.083 testes; o `--list` do Playwright com 2.316 testes por navegador, em 77 arquivos. As partes do CI são agora 8 no Chromium e 14 no WebKit (§ 648), então o `pnpm verificar --partes` lê mais partes do que as 21 da F14. Confira tudo no ponto de partida e use os seus números.
+- **O tempo das partes no CI não é o da máquina** (§ 648 e a seção F14 do `docs/claude/ci.md`): a execução completa da PR 30 (`42688966415`) tem os tempos de teste de hoje. Os scripts `.cache/f14/ci-durations.mjs` e `.cache/f14/part-files.mjs` estão no `.cache/` do clone, fora do Git; se não estiverem, refaça os dois pela descrição do `docs/claude/ci.md`.
+- **O rótulo `ci` não existia na F14** (§ 638), e criá-lo é só do Victor. As notas da regra 1 do `CLAUDE.md` e a decisão 18 dizem o que fazer nos dois casos.
+- **O repositório é público** (§ 338): tudo o que você commita, a PR, os logs e os artefatos ficam públicos.
+- **O CI roda por classe** (F9): a PR em rascunho roda o job leve; a PR pronta roda tudo e, como esta run não mexe em `.github/`, é mesclada sozinha.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **A ficha da F15 e este prompt.** Os dois juntos são a ficha da run: este prompt detalha e fecha o que a ficha deixa aberto, e nunca afrouxa um critério dela. Se parecerem conflitar, vale o mais rigoroso, com um §.
+2. **O `PLANO-UX-QV.md`** (as seções que a ficha cita e as regras de todas as runs), o `PLANO-MELHORIAS.md` (as regras de toda run) e o `PLANO-FILEORCA.md` ("Execução por IA" e as "Decisões fechadas").
+3. **O `CLAUDE.md`,** inteiro.
+4. **De `docs/claude/`:** o `imagem.md`, o `service-worker.md`, o `playwright.md` e o `windows-git-bash.md` inteiros; do `pdf.md`, as pegadinhas gerais e as seções da F13a e da F14; do `design-e-oli.md` e do `anuncios.md`, as pegadinhas gerais e as seções da F12, da F13a, da F13b e da F14; do `ci.md`, as pegadinhas gerais da F1a e as seções da F9 e da F14; do `idiomas.md`, o que fala do `lint:texto` e do glossário.
+5. **Do `DECISOES.md`, só buscando o §:** § 35, § 114, § 168, § 240, § 290, § 341, § 466, § 468, § 470, § 479, § 480, § 483, § 496 a § 501, § 505, § 510, § 515, § 529, § 530, § 534, § 551, § 629, § 648 e o que elas citarem.
+6. **Do `docs/design/`:** no `README.md`, "Layout e anúncios"; os README do FileCard, do NextStepChips, do OptionGroup, do NumberField, do ResultCard e do DropZone.
+7. **Do `docs/PENDENCIAS.md`:** "Como ler", o Resumo, os grupos 22, 23 e 24, "Registrados" e "Já corrigidos"; e o `tests/unit/pendencias.test.ts`, que confere o arquivo.
+8. **Do `docs/i18n/`:** o glossário de pt e o de es.
+
+# Escopo
+
+Dentro: os 6 itens da ficha, com estes arquivos:
+
+- a ilha de imagem (`src/tools/image/`): a lista, as setas, o arrastar, a lixeira e o Desfazer, a chave do pacote, o `next` e o `carryTo` da Imagem para PDF, o mapa `origins`;
+- a ilha de PDF (`src/tools/pdf/`): a chegada nas ferramentas com ação, o `carryOf`, o `pdfOriginsOf` e os rótulos novos dos chips;
+- `src/tools/compress-image/Panel.tsx` e os textos dele; `src/tools/qr-code-generator/QrPanel.tsx`; o CSS da lista, das linhas, do segmento e do QR em `src/styles/components.css`;
+- os textos: `src/tools/image/i18n/{en,pt,es}.ts`, `src/tools/pdf/i18n/{en,pt,es}.ts`, o tipo em `src/i18n/types.ts`, os `src/tools/<ferramenta>/i18n/{en,pt,es}.ts` da Imagem para PDF, do Comprimir imagem e de qualquer outra página cujo texto o comportamento novo desminta, e os guias (`src/i18n/{en,pt,es}/guide-*.ts`) que o comportamento novo desminta;
+- os testes: specs novos; os specs que fixam o desenho de hoje da lista, dos chips, da chegada, do Comprimir e do QR; o `tests/unit/handoff.test.ts`; as listas de alvos de anúncio (`tests/e2e/ads.spec.ts`, `tests/e2e/lib/ad-clearance.ts`, `tests/e2e/lib/ad-map.ts` e, se for preciso, as listas de `src/ads/map.ts`);
+- os documentos: os README do `docs/design/` que a F15 desmentir, uma seção nova no fim do `docs/claude/imagem.md` e do `docs/claude/pdf.md` (e do `playwright.md`, do `anuncios.md` ou do `service-worker.md`, se houver pegadinha deles), o `docs/PENDENCIAS.md` e o `DECISOES.md`.
+
+Fora (não toque): o "Fora" da ficha inteiro, e mais:
+
+- codificar de novo uma foto pronta por causa da ordem, da lixeira ou do Desfazer: só o PDF ou o ZIP se refazem;
+- somar fotos a uma lista pronta: um lote novo continua substituindo o de antes, como hoje;
+- `src/engine/` inteiro: nenhuma operação, nenhum codec, nenhuma fixture e nenhum byte de saída muda (as matrizes de imagem e de PDF continuam iguais); a operação `target` é usada como está;
+- `src/sw/` (como na F13a, § 505): a chegada usa a caixa, as constantes e a limpeza de hoje;
+- `<dialog>`, popover, `position: fixed` ou `sticky` em qualquer peça nova; `history.pushState`, `replaceState`, hash ou parâmetro na URL;
+- chave nova no `localStorage`, no `sessionStorage` (além da escolha da aba que o chip já grava) ou no IndexedDB; evento ou parâmetro novo no GA4; dependência nova; `import()` novo que crie arquivo JS;
+- o desenho do QR na tela a partir de 768 px (só a ordem do DOM e a de Tab mudam), o texto dele e as opções dele;
+- as presets de 100 KB e de 1 MB (continuam como estão) e o resto das ferramentas de imagem além da lixeira do item 2;
+- a grade de páginas, a vista e o resto da ilha de PDF além da chegada e dos chips; o F14 m-3 (as duas falas do Juntar depois do resultado) e o F14 m-2 continuam com a run de acessibilidade;
+- chip novo para o Excluir, o Assinar ou a Marca d'água (nenhum `next` leva a eles);
+- a busca (o D16 é do Victor), a home, os hubs, as calculadoras e as páginas institucionais (menos uma frase que o comportamento novo desminta);
+- `.github/`, o `.githooks/`, o `.claude/settings.json`, o `lighthouserc.json` e as fixtures; nenhum teste novo no `clearance.spec.ts` (F14 m-5);
+- o `PLANO-FILEORCA.md` (decisão 2), o `PLANO-MELHORIAS.md`, o `PLANO-UX-QV.md` e o `CLAUDE.md`;
+- os § antigos do `DECISOES.md` e as seções antigas de `docs/claude/`: só se acrescenta, nunca se apaga nem se reescreve.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 649)
+
+1. **A especificação.** As seções C e D do `PLANO-UX-QV.md` são contrato, palavra por palavra: os rótulos, os limites, o valor inicial e o que cada gesto faz. Os textos do pt que este prompt fixa também são contrato. O que nenhum dos dois diz, você decide pela régua de "Autonomia e decisões", com um §.
+
+2. **Os planos e a linha do `PLANO-FILEORCA.md`.**
+   - Nenhum plano muda. Achado que desminta o plano vai num §, nunca no texto dele.
+   - A linha que a F14 deixou como "Victor faz" (F14 m-1 no grupo 24) pode ter sido posta pelo Victor antes desta run. **Não edite o arquivo por nenhum caminho** (ferramenta de edição, shell, script ou `git apply`): o `.claude/settings.json` nega. No começo, rode `git diff -- PLANO-FILEORCA.md`:
+     - se a diferença for só a linha do F14 m-1 acrescentada (com, no máximo, uma linha em branco junto), ela entra no primeiro commit, ao lado do prompt, e o F14 m-1 vai para "Já corrigidos", com o §;
+     - se não houver diferença, siga sem ela; o F14 m-1 continua aberto;
+     - se houver qualquer outra diferença, deixe o arquivo como está e fora dos commits, e registre.
+   - O `CLAUDE.md` não muda nesta run.
+
+3. **A lista da Imagem para PDF (item 1, seção C).**
+   - **A marcação:** na Imagem para PDF, a lista é ordenada (`ol`, a ordem é a das páginas), com as linhas `li` e as classes de hoje (`fo-filelist__row`, que os specs de privacidade, das matrizes e dos eventos leem). Nas outras ferramentas de imagem a lista continua como está.
+   - **Cada linha** tem, fora do card e na linha, como no Juntar (README do FileCard): as setas que andam, com um lugar vazio de 48 px onde a seta não anda, e a lixeira na linha pronta. A linha que espera ou trabalha guarda o lugar da lixeira desde o começo (o × dela fica no card), para nada andar quando a foto fica pronta. Abaixo de 480 px, as setas e a lixeira vão na linha de 48 px embaixo do card (§ 515). A miniatura continua sendo a da foto.
+   - **As palavras** são as do Juntar em cada idioma, copiadas para os textos da ilha de imagem, com chaves próprias: no pt, "Subir {name}", "Descer {name}", "{name} agora está na posição {position} de {total}.", "Remover {name}", "{name} saiu da lista." e "Desfazer". A ilha de imagem não importa os textos da ilha de PDF.
+   - **O teclado e o toque:** as setas movem uma posição; o foco segue a linha movida, na mesma seta, ou na outra quando a linha chega à ponta. O mouse arrasta a linha inteira (o arrastar nativo, como o Juntar), e as setas fazem o mesmo pelo toque e pelo teclado (WCAG 2.5.7).
+   - **A ordem pode mudar enquanto as fotos ainda são preparadas** (como no Juntar, § 168): o PDF sai na ordem da lista no momento em que é montado, nunca numa ordem velha.
+   - **"Show N more":** mover a 6ª linha para depois, ou uma linha escondida, abre a lista inteira, e o foco segue a linha.
+   - **A chave do pacote** passa a levar a ordem dos ids e o tamanho de página. Mudar a ordem, tirar ou devolver uma foto depois do resultado refaz só o PDF, com o resultado na tela até o novo; o worker `fileorca-image` não recebe nenhum pedido.
+   - **A FAQ "Como mudo a ordem das páginas?"** e o passo do "Como funciona" passam a dizer como mudar a ordem (as setas, o arrastar e a lixeira), nos três idiomas.
+
+4. **Tirar um arquivo pronto de qualquer lote (item 2).**
+   - **Onde:** em toda ferramenta e preset de imagem com dois arquivos ou mais no lote, a linha pronta ganha a lixeira (a mesma de 48 px, fora do card), com o nome "Remover {name}". A linha que espera ou trabalha guarda o lugar dela desde o começo. Ela fica ao lado do card se couber a 320 px nos três idiomas, com o nome do arquivo ainda legível; senão, abaixo de 480 px ela vai para a linha embaixo do card, como na decisão 3. A medida e a escolha vão num §. A linha de erro mantém a lixeira de hoje. Com um arquivo só desde o começo, não há lixeira: o Começar de novo já faz isso. A última linha que resta nunca tem lixeira.
+   - **O Desfazer,** como o D-21 do Juntar: a linha vira, no mesmo lugar e na mesma altura, a frase "{name} saiu da lista." com o Desfazer ghost de 48 px, sem tempo marcado (WCAG 2.2.1). Ele fica até a próxima ação que muda o lote: outra remoção, mover uma linha, mudar uma opção, arquivos novos (por qualquer caminho) e o Começar de novo. Baixar não é uma dessas ações. O foco vai ao Desfazer; o Desfazer devolve a linha ao mesmo índice e o foco à lixeira dela. A frase entra na região 50 ms depois de a linha aparecer, como no Juntar.
+   - **O pacote:** o ZIP é refeito só com as saídas que ficaram, sem codificar nada de novo, e o Baixar mostra o tamanho novo. Na Imagem para PDF, o PDF é refeito sem a foto.
+   - **De dois para um:** a lista fica à vista enquanto o Desfazer espera, e o Baixar entrega o arquivo que ficou como ele é (um arquivo só nunca vai em ZIP, como hoje; na Imagem para PDF, o PDF de uma página). Na próxima ação, com um arquivo só, a ilha volta ao card de um arquivo.
+   - **Nas ferramentas com um arquivo escolhido** (o Cortar, `selectable`): tirar o escolhido passa a escolha à linha seguinte, ou à anterior quando era a última.
+   - **Nenhum evento novo:** a remoção não manda nada ao GA4; o `tool_complete` e o `download` continuam como hoje.
+
+5. **Os chips da Imagem para PDF (item 3).**
+   - O `next` dela passa a ser Comprimir PDF, Juntar PDF e Numerar páginas, nessa ordem. O tipo do `next` das imagens aceita essas vizinhas de PDF por um tipo próprio (por exemplo, `PdfNeighbour`), como o `ImageNeighbour` faz do outro lado; o `related` não muda.
+   - Os chips levam o PDF quando o destino aceita: o Comprimir PDF e o Numerar páginas pela regra da F13a (rodam sozinhos), o Juntar pela do item 4 (se a válvula cortar o item 4, o chip do Juntar só linka). Os rótulos do Comprimir PDF e do Numerar páginas já existem nos textos da ilha de PDF; os da ilha de imagem ganham as mesmas palavras, com chaves próprias.
+   - A Imagem para PDF entra no mapa `origins` dessas três páginas, nos três idiomas: a chegada diz "A Oli trouxe este PDF de Imagem para PDF." (o nome da página no idioma).
+   - A linha embaixo dos chips (`.fo-carry`) e a cópia escondida da faixa (§ 500) passam a valer para a Imagem para PDF, com as palavras do PDF ("A Oli leva o PDF para a próxima ferramenta. Ele não sai do seu aparelho."), sem deslocamento sem gesto.
+
+6. **A chegada nas ferramentas com ação (item 4; PENDENCIAS F13a h-1).**
+   - **A regra nova,** num § que substitui a regra "só linkam" da § 497 (a § 497 não muda; o § novo diz que a substitui): o chip leva quando o destino aceita o que a página faz (`takes()` com os `accepts` dos registros, e o `carries()` com os formatos do resultado de agora), rode ele sozinho ou espere a ação. O Proteger continua sem levar nada para fora (o PDF dele sai cifrado). O `handoff.test.ts` continua comparando o `carries()` com o `takes()` na grade inteira.
+   - **Os destinos novos,** pelos `next` de hoje: o Juntar (vindo do Dividir, do Comprimir PDF, do Girar, do Desbloquear e da Imagem para PDF), o Dividir (do Desbloquear), o Organizar páginas (do Excluir) e o Proteger (do Comprimir PDF, do Numerar páginas, do Assinar e da Marca d'água). Um destino de um arquivo só (o Dividir e o Organizar páginas) recebe um, como a regra `single` já faz.
+   - **Os rótulos no pt,** como contrato: Juntar, "Juntar este PDF com outros" e "Juntar estes {count} PDFs"; Dividir, "Dividir este PDF" e "Dividir estes {count} PDFs"; Organizar páginas, "Organizar as páginas deste PDF" e "Organizar as páginas destes {count} PDFs"; Proteger, "Proteger este PDF com senha" e "Proteger estes {count} PDFs com senha". Os de en e es saem pelo glossário e vão num § com os três idiomas lado a lado.
+   - **A chegada:** os arquivos entram pelo caminho do soltar (`addFiles`), na lista do Juntar ou no painel do Dividir, do Organizar páginas e do Proteger, e esperam a ação: nada roda sozinho, e o foco vai aonde um soltar comum o leva hoje nessa ferramenta. A região diz a frase da chegada uma vez ("A Oli trouxe este PDF de Comprimir PDF.", com a forma do plural da § 498). Um PDF só no Juntar fica com a frase de hoje de quem precisa de mais um arquivo.
+   - **A nota de origem no card do resultado** segue a § 498: fica enquanto o lote é o que chegou e sai com outro lote. No Juntar, somar ou tirar um arquivo muda o lote; mudar a ordem, não.
+   - **A caixa vazia** (`lost`) vale também nesses destinos, quando a escolha nomeia uma origem que a página conhece e nada chega.
+   - **A privacidade:** os arquivos vão pela caixa de hoje (as entradas `INBOX_ENTRY_PREFIX` com o `X-FileOrca-Stored`, a escolha da aba com ids de página, nunca um nome), e a limpeza de 1 h do worker cobre tudo. O `pdf-privacy.spec.ts`, o `launch-claims.spec.ts` e o `handoff.spec.ts` passam pelo caminho novo.
+
+7. **Comprimir "até um tamanho" (item 5, seção D).**
+   - **O segmento** ganha a terceira escolha, "Até um tamanho", depois de "Recomendada" e "Forte", com uma ajuda curta no `small`, como as outras. Se a 320 px as três não couberem lado a lado em algum idioma, o segmento empilha nos três idiomas nessa largura, com a medida e a escolha num §.
+   - **O campo "Tamanho máximo"** aparece só com a terceira escolha: o `NumberField` de hoje, com o sufixo "KB", de 20 a 10.000, começando em 200. Ele aceita número inteiro sem separador de milhar, como o Redimensionar (registre num §); a mensagem de erro diz a faixa no formato do idioma. A ferramenta só refaz o lote com um valor válido, depois da pausa da digitação ou ao sair do campo.
+   - **A operação:** `{ kind: 'target', maxBytes: valor × 1000 }`, a mesma das presets. A ajuda diz que a foto sai em JPG e que a transparência vira fundo branco (a nota `flattened` do motor); uma foto que já cabe volta só sem os metadados, como nas presets.
+   - **O resumo do "Ajustar"** diz "Até 200 KB", com o número no formato do idioma. O "Antes e depois" continua.
+   - **O mínimo:** meça no navegador, nos dois motores, com a `jpg-01-pixel2-retrato-gps.jpg` e a `gen-grande-4100x4100.jpg`, se o motor chega a 20 KB. Se não chegar em alguma, o mínimo sobe para o menor valor que ele alcança em todas, arredondado para cima em 5 KB, com a medida num §.
+   - **O valor digitado** vive só na memória da página: nada na URL, no `dataLayer`, no `localStorage` ou no `sessionStorage`.
+   - Os textos da página do Comprimir imagem que falam só de "Recomendada" e "Forte" (o "Como funciona", a especificação, a seção "Comprimir para um tamanho certo", a FAQ) passam a citar a escolha nova, nos três idiomas.
+
+8. **O QR code no celular (item 6).**
+   - **A ordem do DOM** passa a ser o campo, a saída (a prévia, a frase e os dois Baixar) e as opções. Abaixo de 768 px, a prévia tem até 240 px de lado.
+   - **A partir de 768 px,** áreas de grade mantêm na tela o desenho de hoje: o campo e as opções na coluna da esquerda, a saída na da direita, nas duas linhas. A coluna da direita ocupa as duas linhas, e a segunda linha leva o que sobrar (por exemplo, `grid-template-rows: auto 1fr` e as opções com `align-self: start`): senão as opções descem quando a saída é mais alta que o campo. Os espaços entre o campo e as opções são os de hoje.
+   - **A ordem de Tab nova** (campo, saída, opções) vale também no computador e vai num §.
+   - A Oli, os textos, os tamanhos do PNG, o `export_click` e o resto do painel não mudam.
+
+9. **As falas.** Tudo pela região de cada ilha (`p.fo-sr[role="status"]`), uma fala por gesto:
+   - mover uma linha diz "{name} agora está na posição {position} de {total}.", e tirar diz "{name} saiu da lista." (pela linha do Desfazer, como no Juntar);
+   - depois do resultado, o PDF ou o ZIP que um desses gestos refaz não repete a fala de sucesso da Oli: o gesto já falou (a mesma ideia do `hush` da ilha de PDF, § 629);
+   - a chegada diz a frase dela uma vez;
+   - o erro do campo de tamanho fala pelo campo (`aria-invalid`, `aria-describedby` e o ícone), como o `NumberField` de hoje, e não pela região.
+
+   Os testes contam as mudanças da região com um `MutationObserver`: uma por gesto.
+
+10. **Os textos.** Os do pt são os das seções C e D e os das decisões 3, 6 e 7, sem mudar uma palavra. Os que nenhum dos dois traz (a ajuda curta do segmento, a ajuda do campo, o erro do campo) você escreve no pt, no registro do site. Os de en e es saem pelo glossário de `docs/i18n/` e vão num § com os três idiomas lado a lado. Procure com `grep` nos textos das ferramentas de imagem, das 12 de PDF, dos guias de arquivo e das páginas institucionais toda frase que o comportamento novo desminta ("aperte Começar de novo e adicione os arquivos outra vez", "Escolha Recomendada ou Forte", o chip que "só abre a página"), e corrija nos três idiomas. Uma frase que o comportamento novo torna verdadeira (o guia das fotos num PDF já diz "arraste para pôr em ordem") fica como está, com a conferência no relatório. O `lint:texto` dá 0 erro, e o `english-leak.test.ts`, o `glossary.test.ts`, o `image-texts.test.ts` e o `gate:conteudo` passam.
+
+11. **O orçamento.** As páginas de imagem, de PDF e do QR carregam os mesmos arquivos JS e as mesmas requisições do ponto de partida (o `budgets.spec.ts` e o `i18n-budgets.spec.ts`, sem mudar número nenhum), medido arquivo a arquivo contra o `dist-base`. O limite de 80 KB com gzip do JS inicial nunca passa. Se a ilha de imagem ou a de PDF crescer mais de 8 KB com gzip, tire código primeiro; o que sobrar vai num § e numa pendência do grupo 25, sem cortar os itens 1, 3, 5 e 6.
+
+12. **Os anúncios e o CLS.**
+    - O `ads.spec.ts` mede, no build de teste, a 360 × 740 e a 1280 × 800: a lista da Imagem para PDF com as setas, a lixeira e uma linha do Desfazer; o Comprimir com o campo de tamanho aberto; e o QR com um código, no mínimo em en, e no pt e no es a 360. Todo controle novo (as setas, a lixeira, o Desfazer, o campo, a terceira escolha) entra nas listas de alvos dos 150 px, e os alvos de hoje não encolhem.
+    - O `fo-ad-map.spec.ts`, o `ads-coffee.spec.ts` e o `clearance.spec.ts` continuam verdes, sem teste novo no `clearance.spec.ts` (F14 m-5).
+    - O CLS sem gesto continua 0 na carga e na interação: o `tool-slot.spec.ts` com a lista da Imagem para PDF (a foto que fica pronta não aumenta a linha), com o Comprimir em "Até um tamanho", com a chegada no Juntar e no Proteger, e com o QR; o `layout-shift.spec.ts` sem mudança de número. Nos chips novos da Imagem para PDF, a cópia escondida da faixa guarda a altura da linha de levar (§ 500).
+    - O guia das fotos num PDF embute a Imagem para PDF, e o F13b g-1 (o CLS do uso com o painel no topo da tela) continua registrado: meça o mesmo uso no `dist-base` e no novo, e não o piore.
+
+13. **Os testes.** Cada critério da ficha tem um teste ou uma medida com evidência, e cada teste que mede algo que já existia reprova no `dist-base` (o controle negativo vai no relatório, com a mensagem de erro):
+    - critério 1: três fotos de tamanhos diferentes, fora de ordem (por exemplo, a `gen-jpg-01-orientacao6.jpg`, 1200 × 1600 na tela; a `gen-webp-exif-gps.webp`, 1600 × 1200; e o `gen-png-transparente.png`, 800 × 600); as setas pelo toque e pelo teclado e o arrastar com o mouse (como o `pdf-tool.spec.ts` prova o arrastar das linhas do Juntar, com `dragTo`) põem na ordem; o PDF sai na ordem da lista, lido no Node com o PDF.js: com o tamanho de página "Tamanho da imagem", a página tem o tamanho da foto, e a ordem se confere pelo tamanho de cada página; depois do resultado, mover e tirar refazem só o PDF: o espião de `Worker` da F14 (`class Spy extends Worker` num `addInitScript`) conta zero mensagens ao worker `fileorca-image` depois do gesto, e pelo menos uma ao `fileorca-pdf`;
+    - critério 2: num lote de três no Comprimir imagem e no Redimensionar, a lixeira com Desfazer em toda linha pronta, o ZIP refeito com dois arquivos (lido no Node) e zero mensagens ao `fileorca-image`; de dois para um, a passagem da decisão 4; o Desfazer devolve a linha ao mesmo lugar e o foco à lixeira dela;
+    - critério 3: um Vitest sobre o registro e as rotas: os chips da Imagem para PDF levam a ferramentas de PDF que existem em en, pt e es;
+    - critério 4: o `handoff.spec.ts` ganha a chegada no Juntar, no Dividir, no Organizar páginas e no Proteger, nos dois navegadores, com o arquivo esperando a ação e a ação dando o resultado; o Proteger não leva para fora; o `pdf-privacy.spec.ts` e o `launch-claims.spec.ts` cobrem o caminho novo;
+    - critério 5: "Até 200 KB" com a `jpg-01-pixel2-retrato-gps.jpg` e a `gen-png-transparente.png`: o arquivo sai com no máximo 200.000 bytes, em JPG, com a nota de fundo branco no PNG; um valor de tamanho que não aparece em mais nada da página (por exemplo, 217) não aparece na URL, no `dataLayer`, no `localStorage` nem no `sessionStorage`;
+    - critério 6: a 360 × 740, numa volta (o aviso de cookies respondido antes), depois de digitar um link: o código inteiro fica acima da dobra em en, pt e es, e o Baixar PNG fica a no máximo 200 px abaixo dela; com a janela de 360 × 420 e o campo rolado até o topo da janela, a metade de cima do código fica à vista. A 768 × 1024 e a 1280 × 800, com e sem código, a caixa de cada peça do painel (o campo, as opções, a prévia e os dois Baixar) fica onde estava no `dist-base`, a 0,5 px, num spec que roda nos dois navegadores; e um script em `.cache/f15/` compara a captura do painel no `dist-base` e no novo, na mesma máquina e na mesma rodada, sem nenhum pixel diferente (o comparador do Playwright, com a captura do `dist-base` como referência e `maxDiffPixels: 0`), com as duas imagens no relatório;
+    - a lógica pura (mover e tirar da lista, a chave do pacote, a regra de levar com a tabela dos pares de origem e destino, o mínimo e o máximo do tamanho, o resumo "Até {n} KB" nos três idiomas) ganha Vitest.
+
+    Cada spec novo tem nome e parte escolhidos pelos tempos de teste da execução completa de hoje (a `42688966415`, pelos scripts de `.cache/f14/` ou refeitos) e pelas partes do `.github/workflows/ci.yml` (`docs/claude/playwright.md` e `docs/claude/ci.md`), com o alvo de 700 s por parte. Se for preciso redividir as partes, a mudança em `.github/workflows/` vai numa PR separada, de merge do Victor, e esta run segue sem ela. Os testes antigos que mudam vão num § no formato da § 341: o que pedia, o que pede, por quê e o que continua protegido.
+
+14. **O design system.** Nenhum componente, ícone ou token novo é preciso: as setas são as do Juntar (o `chevron`), a lixeira é a de hoje e o Desfazer é texto. Se a run precisar de um, ele entra em `docs/design/` com § e o contraste calculado. Os README mudam só onde a F15 os desmentir, com o texto de antes e o de depois no §: o do FileCard (as setas e a lixeira fora do card também nas listas de imagem; a lixeira na linha pronta), o do NextStepChips (a regra nova de levar), o do OptionGroup (o segmento de três) e o do NumberField (o sufixo KB), e o índice dos componentes. Nenhuma regra do design system muda.
+
+15. **O `docs/claude/`.** Uma seção nova no fim do `imagem.md`, "F15: imagem, QR e o caminho entre ferramentas" (a lista ordenada, o Desfazer, a chave do pacote, o "até um tamanho", a ordem do QR e as pegadinhas que você achar), e uma no fim do `pdf.md` (a chegada nas ferramentas com ação e a regra nova de levar). Pegadinha de Playwright, de anúncio ou da caixa do compartilhar vai numa seção nova no fim do `playwright.md`, do `anuncios.md` ou do `service-worker.md`. As seções antigas não mudam.
+
+16. **O `docs/PENDENCIAS.md`.**
+    - Saem das tabelas abertas para "Já corrigidos", com a run e o § (no formato `| F3 c-04: … | F12, § 428: … |`): o F13a h-1 (se o item 4 entrar); o F14 m-4 (a PR 30 redividiu as partes, e a execução completa dela as mediu, § 648); e o F14 m-1, só no caso que a decisão 2 permite. Nenhum id some do arquivo: o `pendencias.test.ts` procura os baixos das revisões (§ 341 e § 447).
+    - Entra o grupo novo "## 25. O que a F15 deixou", no formato dos grupos 22 a 24 (seis colunas), com o que a run deixar: os itens 2 e 4, se a válvula os cortar ("Run F15b"); a linha da lista de imagem que repete o F13a R-b-4 (a linha do Desfazer conta como item da lista), apontando para ele; o orçamento, se passar; os baixos que a revisão deixar.
+    - O Resumo e o Total acompanham.
+
+17. **As imagens.** JPG de qualidade 80 em `docs/relatorios/fase-15/`, tiradas do `dist/` com o Chromium do Playwright, a 1x e com movimento reduzido, por um script em `.cache/f15/` (o `pnpm screenshots` quebra nas calculadoras, F13b c-1):
+    - `imagem-pdf-lista-360-antes` e `imagem-pdf-lista-360-depois` (três fotos), e `imagem-pdf-lista-1280`;
+    - `lote-desfazer-360` (uma linha que saiu, com o Desfazer) e `imagem-pdf-chips-360` (o resultado, com os três chips de PDF e a linha de levar);
+    - `juntar-chegada-360` e `proteger-chegada-360` (o arquivo que chegou, esperando a ação);
+    - `comprimir-ate-360` (o campo aberto) e `comprimir-ate-1280-escuro`;
+    - `qr-360-antes` e `qr-360-depois` (com um link digitado), `qr-360x420-depois` (o teclado aberto), e `qr-1280-antes` e `qr-1280-depois`.
+
+18. **A PR e o CI.**
+    - **A PR abre em rascunho** logo depois do primeiro push, e cada push roda o job leve.
+    - **Uma conferência no Linux, no meio da run,** depois da junção das frentes (fatia 3 de "Como trabalhar"): o WebKit e as fontes de lá diferem do Windows (§ 305), e esta run mexe em medidas de layout e no CLS. Faça o push, espere a execução leve terminar e rode `gh pr edit <n> --add-label ci`:
+      - se o rótulo existir, acompanhe a execução completa, leia os logs, corrija o que só falhou lá e tire o rótulo (`gh pr edit <n> --remove-label ci`);
+      - se não existir, pule a conferência e registre num §: a execução final faz esse papel. Nunca use como atalho o `gh pr ready` seguido do `--undo` com o `ci-ok` a caminho do verde.
+    - **No fim,** com tudo commitado (o relatório, a revisão e as imagens): faça o push, espere a execução leve terminar verde, e só então rode o `gh pr ready`; acompanhe a execução completa até o fim. Se ela falhar: `gh pr ready --undo`, corrija, commite, faça o push, espere a leve e rode o `gh pr ready` de novo. A falha e a correção vão no relatório.
+    - **As partes:** se a execução completa mostrar uma parte acima de 700 s por causa dos specs desta run, faça como a F14 (§ 648): projete a divisão com os tempos dessa execução e abra a PR separada; o merge dela é do Victor.
+    - **O custo:** o `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit <n> --body-file <arquivo>`), mesmo depois do merge.
+
+# Armadilhas conhecidas
+
+- **O `build.format` do Astro** faz de toda página um `.../index.astro`, e o `exactOptionalPropertyTypes` pega campo opcional pela metade: rode o `pnpm tipos` cedo (ele confere também os specs).
+- **Um nó que o Preact move perde o foco** (`docs/claude/imagem.md`, F13a): as linhas têm `key` pelo id do item, e a linha do Desfazer tem uma `key` própria; a zona da ilha mantém os filhos no mesmo lugar em todo estado (§ 468).
+- **O `useEffect` do Preact roda depois da pintura:** a marca de foco só se gasta quando o alvo existe (§ 510), também no foco que segue a linha movida, no Desfazer e na lixeira devolvida.
+- **A faixa de baixo escolhe a linha pelo lote** (`hadCard`), não pelo cartão: uma reexecução que a remoção ou a ordem disparam mantém os chips e o "Ajustar" nos mesmos nós.
+- **Depois do resultado, as opções moram no "Ajustar" fechado:** spec que muda opção depois do resultado chama `openAdjust(page)` de `tests/e2e/lib/page.ts`; o `startOver(page)` está lá também.
+- **O rótulo do chip que leva só existe no cliente,** com um service worker no controle: o `handoff.spec.ts` usa `serviceWorkers: 'allow'`. Um spec que quer a chegada sem passar pelo chip grava a entrada com `caches.open(...).put(...)` e a escolha no `sessionStorage` por `page.evaluate`, e reabre a página (`docs/claude/service-worker.md`, F13a).
+- **A ilha não pode importar `src/share/logic.ts`** (ele sairia do chunk `island`, e a lista de JS de `dist/_astro/` tem de ficar a mesma): o `carries()` de `inbox.ts` é a cópia, e o `handoff.test.ts` compara as duas.
+- **Um ícone `?raw` usado em dois lugares sai duas vezes no chunk:** ícone que só uma peça usa vem no `data-props`.
+- **O soltar é do documento** (`catchDrops` de `paste.ts`): um lote que começa por outro caminho chama o `reset()` dele.
+- **O aquecimento (`warmOnce`) é só antes do 1º arquivo** (§ 534): nenhum gatilho novo aquece codec depois do 1º uso.
+- **As opções em segmento escondem o rádio:** no teste, clique no rótulo `.fo-seg__opt`.
+- **A região da ilha de imagem** é `#fo-tool-root .fo-tool-island > p.fo-sr[role="status"]`; a da ilha de PDF, `#fo-tool-root .fo-pdf-island > p.fo-sr[role="status"]` (o Juntar tem a da contagem, `.fo-count`, antes no DOM, e o Assinar tem uma segunda dentro da faixa).
+- **Uma prova de "uma frase por gesto" numa ferramenta automática espera a execução acabar** (o `href` do Baixar muda) antes de ler a região (`docs/claude/playwright.md`, F14).
+- **No WebKit, o clique num botão tira o foco de onde ele estava** e o deixa no `body`: o teste que clica e depois usa o teclado dá `focus()` antes.
+- **O espião de `Worker`:** `class Spy extends Worker` num `addInitScript` funciona nos dois navegadores; os workers da ilha de imagem se chamam `fileorca-image` e `fileorca-pdf`. O `astro check` confere os specs e pede `override` no que for sobrescrito.
+- **Meça o retângulo com uma foto de celular** (`jpg-02-iphone6-paisagem-gps.jpg`), não só com o JPEG gerado na página.
+- **Abaixo de 480 px, a linha com setas ocupa duas linhas** (§ 515): um teste que compara um controle com o card usa o `y`, não o `x`.
+- **A máquina não mostra o tempo do CI:** use os tempos de teste da execução completa para pôr um spec numa parte (`docs/claude/ci.md`, F14). Os specs pesados vêm juntos na ordem dos nomes.
+- **As medidas de anúncio só valem no build de teste,** e cada parte do CI que roda um spec com ele paga um build (`docs/claude/playwright.md`, F12). Os blocos novos de anúncio vão no `ads.spec.ts`, que já paga o build.
+- **O Playwright do Windows pode não sair depois do último teste** (`docs/claude/playwright.md`, "Ajuste da largura do cabeçalho"): veja o que fazer lá.
+- **A regra da linha de sucesso (`SUCCESS_LINE`) do `scripts/lib/design-checks.ts` é repetida no `tests/unit/routes.test.ts`:** frase de sucesso nova muda as duas.
+- **O "antes":** monte o `dist/` da `origin/main` numa worktree à parte (`dist-base`), nunca trocando a branch do clone principal.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. Os 7 critérios da ficha da F15, um por um, com a saída real do teste ou da medida, e nenhum afrouxado.
+2. Os 6 itens de "Dentro" feitos; os itens 2 e 4, se a válvula os cortar, com o § e a linha "Run F15b".
+3. Nenhum item do "Fora" da ficha ou deste prompt foi tocado; as matrizes de imagem e de PDF e as saídas de todas as ferramentas iguais às do ponto de partida (as presets de 100 KB e de 1 MB inclusive).
+4. O CLS sem gesto continua 0 nas páginas tocadas, na carga e na interação, com as peças novas (decisão 12).
+5. Nada sai do aparelho, e nada vai para a URL, o histórico, o storage ou o GA4: o `image-privacy.spec.ts`, o `pdf-privacy.spec.ts`, o `launch-claims.spec.ts`, o `handoff.spec.ts` e o `events.spec.ts` passam, com a lista, a chegada e o campo de tamanho no caminho.
+6. O `lint:texto` dá 0 erro; o `gate:conteudo`, o `english-leak.test.ts`, o `glossary.test.ts`, o `image-texts.test.ts`, o `claude-md.test.ts` e o `pendencias.test.ts` passam.
+7. Os documentos das decisões 14 e 15 e o `PENDENCIAS.md` da 16 estão em dia.
+8. Os testes antigos que mudaram estão num §, um por um; nenhum teste foi pulado, desligado ou afrouxado.
+9. O `pnpm verificar --partes` passou na máquina, com a saída real no relatório; os specs novos não levam nenhuma parte do CI acima de 700 s (ou a PR separada da decisão 18 está aberta); o CI completo está verde.
+10. A revisão adversarial está em `docs/relatorios/REVISAO-F15.md`, sem achado alto ou médio aberto.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código.** No `dist-base`:
+  - `pnpm install --frozen-lockfile` e `pnpm build`;
+  - o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com a saída em `.cache/f15/antes/`;
+  - o número de testes do Vitest e o `pnpm exec playwright test --list` de cada navegador, a lista dos JS de `dist/_astro/` e o tamanho de cada ilha com gzip;
+  - as medidas do D12 (o fim do campo, o topo e o fim do QR e o topo do Baixar PNG a 375 × 812 e a 360 × 740, em en, pt e es), que viram o controle negativo do critério 6, e as caixas do painel do QR a 768 e a 1280;
+  - as imagens do "antes".
+- **Em cada fatia:** `pnpm tipos`, `pnpm lint`, `pnpm build`, o Vitest dos arquivos tocados e os specs que a fatia toca, nos dois projetos (`--project=chromium` e `--project=webkit`): no mínimo o `image-batch.spec.ts`, o `image-presets.spec.ts`, o `image-privacy.spec.ts`, o `handoff.spec.ts`, o `pdf-merge.spec.ts`, o `pdf-tool.spec.ts`, o `qr-code.spec.ts`, o `tool-slot.spec.ts`, o `tool-slot-axe.spec.ts`, o `tool-320.spec.ts` e os specs novos. Depois de mexer na faixa, na lista ou no QR, rode também o `ads.spec.ts`, o `fo-ad-map.spec.ts` e o `ads-coffee.spec.ts` no build de teste. Leia a falha, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o da ficha, o deste prompt e o do projeto.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit de código, com a máquina livre. Se uma parte falhar: rode a mesma parte no ponto de partida, numa worktree. Se falhar igual, a falha não é desta run: registre num § e no relatório, e siga. Se não, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`. O `pnpm ci:custo <id>` da última execução vai no relatório (regra 5).
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. A ficha da F15 e este prompt.
+2. As seções C e D, o diagnóstico e as regras de todas as runs do `PLANO-UX-QV.md`.
+3. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, `docs/claude/` e `docs/design/`.
+4. O `DECISOES.md` e o código (o Juntar é o modelo de tudo o que a lista faz).
+5. Na dúvida, a opção mais simples e mais reversível que não piore o orçamento, a acessibilidade nem o anúncio.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos: o segmento de três a 320 px; o mínimo do tamanho, se mudar; o lugar do foco quando a última linha visível sai; a frase de chegada num destino que já tinha arquivos; o nome e a parte de cada spec novo; cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos: o rótulo `ci` não existe (decisão 18); a main muda no meio da run (`git fetch` e `git merge origin/main` na branch, nunca rebase, renumerando os § se colidirem); o Lighthouse oscila numa URL (rode a parte de novo uma vez; se cair de novo, ache a causa).
+
+Válvula de estouro, se o tempo ou o limite apertar: só os itens 2 (a lixeira em todo lote) e 4 (a chegada nas ferramentas com ação) podem sair, para uma F15b, cada um com um § e a linha "Run F15b" no grupo 25. Se o item 4 sair, o chip da Imagem para PDF para o Juntar só linka, e o F13a h-1 continua aberto. A lixeira da Imagem para PDF é do item 1 e nunca sai. Nunca corte os itens 1, 3, 5 e 6, os testes dos critérios nem a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo:**
+  - `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, os dois arquivos do prompt e a pasta `Claude outputs/`, e, modificado, o `PLANO-FILEORCA.md` (decisão 2). Qualquer outra coisa: não mexa, não commite e registre;
+  - `git switch -c fase-15`. O primeiro commit leva os dois arquivos do prompt e o `PLANO-FILEORCA.md` só no caso que a decisão 2 permite;
+  - se os arquivos do prompt não estiverem lá, grave este prompt, exatamente como o recebeu, em `docs/prompts/prompt-fase-15.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main. Adicione por caminho, nunca `git add -A`.
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-15`, com o título "F15: imagem, QR e o caminho entre ferramentas". O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-15-fileorca.vmatusita.workers.dev/`), que é o build padrão: mostra a lista, os chips, o Comprimir e o QR, nunca anúncio.
+- **Agentes em worktree** (regra 6 do `CLAUDE.md`): o primeiro passo de cada um é `git merge --ff-only fase-15`, e todo merge de volta leva o trailer `Co-Authored-By` (`git merge --no-ff -F <arquivo>`). As worktrees são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:** o push da branch; na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` só depois de uma execução final vermelha; leitura (`gh run`, `gh pr checks`, `gh pr view`, `gh label list` e `gh api` sem método); um `gh run rerun` por falha que pareça instável, registrado; e, só se a decisão 18 pedir, a PR separada das partes do CI.
+- **Na web, nada.** Esta run não precisa de página de fora.
+- **Nunca:** push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`; mexer em `core.hooksPath` ou em `.githooks/`; `gh pr merge`, `gh label` (além do `list`), `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`; editar o `PLANO-FILEORCA.md` por qualquer caminho; postar, criar conta ou subir arquivo para qualquer serviço; `wrangler deploy` em qualquer forma. O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) a ficha, as seções C e D e este prompt num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) a ilha de imagem: o `ImagePanel.tsx` (o lote, o `run`, o `assemble` e a chave do pacote, o `rowProps`, a lista e o "Show N more", a faixa, a região e o foco), o `registry.ts`, o `page.ts`, o `inbox.ts` e o `types.ts`, e o Juntar do `PdfPanel.tsx` como modelo (o `mergeRows`, o `moveItem`, o `removeRow`, o `undoRemove` e o CSS `.fo-merge*`);
+   - (c) o chip que leva: o `carryTo`, o `carryOf`, o `pdfOriginsOf`, o `takes()` e o `carries()`, o caminho da chegada no `PdfPanel.tsx` (`addFiles`, a caixa vazia, a nota de origem), as ferramentas com ação (Juntar, Dividir, Organizar páginas e Proteger) e o que cada uma faz quando um arquivo é solto;
+   - (d) o Comprimir, as presets, o `NumberField` e o `target.ts`; o `QrPanel.tsx` e o CSS `.fo-qr*`;
+   - (e) os testes que fixam o desenho de hoje (`image-batch`, `image-presets`, `image-privacy`, `image-matrix`, `handoff` e `handoff.test.ts`, `pdf-merge`, `pdf-tool`, `pdf-privacy`, `qr-code`, `tool-slot`, `tool-320`, `layout-shift`, `launch-claims`, `events`, `budgets`), com o que cada um lê;
+   - (f) os anúncios, o orçamento e as partes do CI: as listas de alvos do `ads.spec.ts`, do `ad-clearance.ts` e do `ad-map.ts`, as medidas do `budgets.spec.ts`, o `.github/workflows/ci.yml`, o `--list` e os tempos da execução `42688966415`;
+   - (g) os textos e os documentos: os `i18n` da Imagem para PDF, do Comprimir e das ferramentas de PDF com ação, os textos das duas ilhas, os guias de arquivo, o glossário, os README do `docs/design/` da decisão 14 e o formato do `PENDENCIAS.md`.
+2. **A linha de base** (seção "Verificação").
+3. **Planejar.** Escreva `docs/relatorios/fase-15-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz: o ponto de partida e a linha de base; os § reservados; a interface que as frentes dividem (as chaves dos textos, o tipo do `next`, a forma do item removido e do Desfazer, a regra de levar); quem faz o quê, a ordem das fatias e os arquivos de cada frente; e cada critério ligado a um teste ou comando.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. **O agente principal:** o primeiro commit, o push e a PR em rascunho; depois, a base: todas as chaves de texto novas nos tipos e nos três idiomas (as das decisões 3, 4, 6 e 7), o tipo do `next` com as vizinhas de PDF e o § da regra nova de levar. Commit e push.
+   2. **Três frentes ao mesmo tempo,** cada uma num agente `opus` na sua worktree, a partir desse commit:
+      - **L (a lista e o lote):** os itens 1 e 2 na ilha de imagem (a lista ordenada, as setas, o arrastar, a lixeira, o Desfazer, a chave do pacote, de dois para um, o Cortar), com os testes dos critérios 1 e 2 e a parte da lista nos critérios de CLS e de anúncio;
+      - **C (o caminho entre ferramentas):** os itens 3 e 4 (os chips da Imagem para PDF, a regra nova de levar, a chegada no Juntar, no Dividir, no Organizar páginas e no Proteger, a caixa vazia e o mapa `origins`), com os testes dos critérios 3 e 4 e o `handoff.test.ts`;
+      - **Q (o Comprimir e o QR):** os itens 5 e 6, com os testes dos critérios 5 e 6, a medida do mínimo e a comparação das capturas do QR.
+
+      A L e a C tocam o `ImagePanel.tsx` (a C só na parte dos chips e da linha de levar do resultado em PDF): o plano diz quem é dono de cada parte, e a junção resolve o resto. Ao mesmo tempo, o agente principal faz o que não colide com elas: os textos das páginas (as FAQs, os "Como funciona", as frases desmentidas nos guias e nas institucionais), os README do `docs/design/`, o `docs/claude/`, o `PENDENCIAS.md` e os §.
+   3. **O agente principal junta L, C e Q,** resolve os conflitos, deixa o `pnpm tipos` verde, roda os specs das três frentes nos dois navegadores e os de anúncio no build de teste, e faz a conferência no Linux (decisão 18).
+   4. **O agente principal fecha:** o orçamento contra o `dist-base`, o CLS do guia das fotos num PDF, as imagens e as tabelas do relatório.
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`): sobre um commit fixo e registrado da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile`, o próprio `pnpm build` e o próprio build de teste, contra a ficha, este prompt e o plano; cada lente com o próprio `FO_PORT`, escrevendo só no `.cache/lente-<x>/` da worktree. A F15 mexe em interface, em texto, na caixa do compartilhar e no entorno dos anúncios: são cinco lentes Sonnet em contexto limpo (regra 3), apontando só lacunas de correção ou de requisito, nunca preferência de estilo:
+   - (a) **design system e visual:** a lista e as linhas de 320 a 1440 px, as setas e a lixeira fora do card, a linha do Desfazer na mesma altura, o segmento de três e o campo KB, o QR abaixo e a partir de 768 px, os tokens, nada em `sun` fora do Baixar, os dois temas;
+   - (b) **acessibilidade:** os nomes acessíveis; o foco que segue a linha, o do Desfazer e o da lixeira devolvida, nunca no `body`; o arrastar com alternativa por botão; a ordem de Tab do QR; uma fala por gesto; o erro do campo; o axe nos dois temas e nos dois navegadores;
+   - (c) **comportamento e desempenho:** nenhuma foto codificada de novo; a chave do pacote; o PDF na ordem da lista também com a ordem mudada durante o preparo; o ZIP e o PDF refeitos; de dois para um; o Cortar; a chegada esperando a ação; o `carries()` contra o `takes()`; o tamanho máximo nas fotos grandes; as matrizes iguais; o orçamento e as partes do CI;
+   - (d) **privacidade e anúncios:** nada sai do aparelho; a caixa do compartilhar com ids de página, nunca um nome, e a limpeza de 1 h; o Proteger que não leva; o valor do tamanho fora da URL, do `dataLayer` e do storage; os 150 px das peças novas; o CLS; nada sobre a âncora;
+   - (e) **textos, idiomas e documentos:** os textos contra as seções C e D e as decisões; en e es pelo glossário; as FAQs, os "Como funciona" e as frases desmentidas; o `lint:texto`; os README, o `docs/claude/`, o `PENDENCIAS.md` e os §.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo, com a regra "na dúvida, refutado"; os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada das lentes dos achados corrigidos revisa o diff delas. Os baixos que sobrarem vão para o grupo 25 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F15.md`.
+6. **Fechar:** o `pnpm verificar --partes`, o relatório e a sequência de fim da decisão 18.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-15.md` em português, no formato do `fase-14.md`, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que muda para a pessoa na Imagem para PDF, nos lotes, nos chips, no Comprimir e no QR, em até cinco linhas;
+- o que entrou, por item da ficha, com os arquivos e os §;
+- a evidência de cada um dos 7 critérios, com a saída real dos comandos e dos specs, e os controles negativos com a mensagem de erro;
+- as tabelas:
+  - a lista: as mensagens ao `fileorca-image` e ao `fileorca-pdf` antes e depois de cada gesto, e a ordem das páginas do PDF lida no Node;
+  - os chips e a chegada: cada par de origem e destino, se leva, o que chega e o que espera;
+  - o tamanho máximo: o tamanho de saída de cada fixture com 200 KB e com o mínimo, nos dois navegadores;
+  - o QR: as medidas do D12 antes e depois a 375 × 812 e a 360 × 740, nos três idiomas, a medida com a janela de 360 × 420, e as caixas do painel a 768 e a 1280;
+  - o orçamento: os JS e as requisições de cada página tocada, antes e depois, e o tamanho de cada ilha com gzip;
+  - os anúncios: a menor distância de cada controle novo até um anúncio, por largura;
+- o número de testes do Vitest e do `--list` de cada navegador, antes e depois, e os testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o tempo de cada parte e a soma;
+- o custo (regra 5): o `pnpm ci:custo` da última execução antes do relatório; o da execução final vai na descrição da PR;
+- o que a conferência no Linux achou, ou o § que diz por que ela não houve;
+- o resumo da revisão, apontando para o `REVISAO-F15.md`;
+- as imagens de `docs/relatorios/fase-15/`;
+- o link da prévia (`https://fase-15-fileorca.vmatusita.workers.dev/`);
+- as decisões novas, apontando os §, e o que a válvula cortou, se cortou;
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e, no Android (na prévia ou no fileorca.com depois do deploy): montar um PDF com 5 fotos fora de ordem e consertar a ordem; tirar uma foto da lista e desfazer; comprimir uma foto "até 300 KB"; digitar um link no QR com o teclado aberto e ver o código aparecer.
+  2. Num lote de PDFs, tocar em "Proteger estes PDFs com senha" e conferir que os arquivos chegam esperando a senha.
+  3. Se a linha do `PLANO-FILEORCA.md` ainda faltar, pô-la (o texto está no grupo 24, F14 m-1).
+  4. Criar o rótulo `ci` (Issues → Labels), se ainda não existir.
+  5. Se a decisão 18 abriu a PR das partes do CI, mesclá-la depois da execução completa dela.
+  6. Gerar o prompt da F16 com a skill, com o SHA da main e o grupo 25 do `docs/PENDENCIAS.md`.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR, o estado do CI (mesclada ou esperando, e por quê) e os passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, os README do `docs/design/`, o `docs/claude/` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.
