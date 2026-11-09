@@ -37,6 +37,8 @@ export interface PdfIcons {
   info: string;
   /** F13a · UX-14 (DECISOES § 496): the shield of the line under the chips that take the result along. */
   shield: string;
+  /** F14 (DECISOES § 621): the magnifier with a plus of each cell of the page grid. */
+  zoom: string;
 }
 
 export interface PdfPanelData<O = object> {

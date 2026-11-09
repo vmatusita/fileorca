@@ -123,7 +123,7 @@ export function panelData(id: PdfToolId, lang: Lang = 'en'): PdfPanelData {
       unlock: { href: pathFor('unlock-pdf', lang), name: blurbOf('unlock-pdf', lang).name },
       imageToPdf: { href: pathFor('image-to-pdf', lang), name: blurbOf('image-to-pdf', lang).name },
     },
-    icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload, down: ICONS['chevron-down'], info: ICONS.info, shield: ICONS.shield },
+    icons: { pdf: ICONS.pdf, rotate: ICONS.rotate, trash: ICONS.trash, chevron: ICONS['chevron-right'], plus: ICONS.upload, down: ICONS['chevron-down'], info: ICONS.info, shield: ICONS.shield, zoom: ICONS.zoom },
     ink: lightInk(),
     coffeeHref: coffeeHrefFor(lang),
     origins: pdfOriginsOf(id, lang),

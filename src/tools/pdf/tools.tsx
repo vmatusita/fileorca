@@ -105,9 +105,7 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
             thumbnails={props.thumbnails}
             announce={props.announce}
             selected={new Set(state.picked)}
-            onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-            onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-            onSelectNone={() => update({ picked: [] })}
+            onSelect={(picked) => update({ picked })}
           />
           {props.showErrors && state.picked.length === 0 && <FieldError>{texts.pickNone}</FieldError>}
         </>
@@ -349,9 +347,8 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
         thumbnails={props.thumbnails}
         announce={props.announce}
         selected={new Set(state.picked)}
-        onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-        onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-        onSelectNone={() => update({ picked: [] })}
+        onSelect={(picked) => update({ picked })}
+        removes
       />
       {state.picked.length >= total && total > 0 && <FieldError>{texts.allPicked}</FieldError>}
       {props.showErrors && state.picked.length === 0 && <FieldError>{texts.nonePicked}</FieldError>}
@@ -522,9 +519,7 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
               thumbnails={thumbnails}
               announce={props.announce}
               selected={new Set(state.picked)}
-              onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-              onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-              onSelectNone={() => update({ picked: [] })}
+              onSelect={(picked) => update({ picked })}
             />
           )}
         </>
