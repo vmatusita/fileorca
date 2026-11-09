@@ -1,6 +1,10 @@
 // F14 (DECISOES § 618, § 619 and § 622): the arithmetic of the page grid and of the page view.
 import { describe, expect, it } from 'vitest';
 import { THUMB_CAP, VIEW_FIT_CAP, VIEW_ZOOM_CAP, askWidth, pageRatio, quarters, samePages, sheetRatio, span } from '../../src/tools/pdf/grid-math.ts';
+import { countOf, inverted, leavingCount, setOf, spanned } from '../../src/tools/pdf/grid-math.ts';
+import enPanel from '../../src/tools/pdf/i18n/en.ts';
+import esPanel from '../../src/tools/pdf/i18n/es.ts';
+import ptPanel from '../../src/tools/pdf/i18n/pt.ts';
 
 const letter = { width: 612, height: 792, rotate: 0 as const };
 const landscape = { width: 792, height: 612, rotate: 0 as const };
@@ -79,5 +83,65 @@ describe('the span of Shift+click (§ 622)', () => {
     expect(samePages([1, 2], [1, 2, 3])).toBe(false);
     expect(samePages([], [])).toBe(true);
     expect(samePages([1, 4], [1, 2])).toBe(false);
+  });
+});
+
+// F14 (items 4, 5 and 9; DECISOES § 627 to § 629): the picks of Invert and of Shift, and the sentence of the count.
+describe('the picks of Invert selection and of Shift (§ 628)', () => {
+  it('inverts to every page that was not picked, in page order', () => {
+    expect(inverted([4, 0, 2], 6)).toEqual([1, 3, 5]);
+    expect(inverted([], 3)).toEqual([0, 1, 2]);
+    expect(inverted([0, 1, 2], 3)).toEqual([]);
+    expect(inverted([], 0)).toEqual([]);
+  });
+
+  it('gives every page from the anchor to the page the new state of the page, keeping the picks outside the span', () => {
+    // On: the pages picked before keep their order, the new ones come after in page order.
+    expect(spanned([7, 1], 2, 5, true)).toEqual([7, 1, 2, 3, 4, 5]);
+    expect(spanned([3], 5, 2, true)).toEqual([3, 2, 4, 5]);
+    // Off: the span goes, the rest stays.
+    expect(spanned([0, 2, 3, 4, 9], 2, 4, false)).toEqual([0, 9]);
+    expect(spanned([0, 2, 3, 4, 9], 4, 2, false)).toEqual([0, 9]);
+    expect(spanned([], 1, 3, false)).toEqual([]);
+  });
+
+  it('gives one Set per list of picks: the same list, the same Set; a new list of the same pages, a new one', () => {
+    const list = [2, 5];
+    expect(setOf(list)).toBe(setOf(list));
+    expect(setOf([2, 5])).not.toBe(setOf(list));
+    expect([...setOf(list)]).toEqual([2, 5]);
+    expect(setOf(list).has(5)).toBe(true);
+  });
+});
+
+describe("the sentence of the count, and Delete's that says what comes out (§ 627 and § 629)", () => {
+  const forms = { en: enPanel.grid, pt: ptPanel.grid, es: esPanel.grid };
+
+  it('says how many of how many pages come out and what the new PDF keeps, in en, pt and es', () => {
+    expect(leavingCount(forms.en, 3, 12)).toBe('3 of 12 come out · the new PDF keeps 9 pages');
+    expect(leavingCount(forms.pt, 3, 12)).toBe('3 de 12 saem · o PDF novo fica com 9 páginas');
+    expect(leavingCount(forms.es, 3, 12)).toBe('3 de 12 salen · el PDF nuevo queda con 9 páginas');
+  });
+
+  it('has the forms of one, on both sides (section B: "1 de 12 sai" and "fica com 1 página")', () => {
+    expect(leavingCount(forms.pt, 1, 12)).toBe('1 de 12 sai · o PDF novo fica com 11 páginas');
+    expect(leavingCount(forms.pt, 11, 12)).toBe('11 de 12 saem · o PDF novo fica com 1 página');
+    expect(leavingCount(forms.pt, 1, 2)).toBe('1 de 2 sai · o PDF novo fica com 1 página');
+    expect(leavingCount(forms.en, 1, 12)).toBe('1 of 12 comes out · the new PDF keeps 11 pages');
+    expect(leavingCount(forms.en, 11, 12)).toBe('11 of 12 come out · the new PDF keeps 1 page');
+    expect(leavingCount(forms.es, 1, 2)).toBe('1 de 2 sale · el PDF nuevo queda con 1 página');
+  });
+
+  it('counts none and every page as they are, never below zero', () => {
+    expect(leavingCount(forms.pt, 0, 12)).toBe('0 de 12 saem · o PDF novo fica com 12 páginas');
+    expect(leavingCount(forms.pt, 12, 12)).toBe('12 de 12 saem · o PDF novo fica com 0 páginas');
+    expect(leavingCount(forms.en, 13, 12)).toBe('13 of 12 come out · the new PDF keeps 0 pages');
+  });
+
+  it("is Delete's form only where a picked page comes out; Split and Sign say the pages picked", () => {
+    expect(countOf(forms.en, 3, 12, true)).toBe(leavingCount(forms.en, 3, 12));
+    expect(countOf(forms.en, 3, 12, false)).toBe('3 of 12 pages picked');
+    expect(countOf(forms.pt, 1, 12, false)).toBe('1 de 12 páginas marcadas');
+    expect(countOf(forms.es, 0, 8, false)).toBe('0 de 8 páginas elegidas');
   });
 });
