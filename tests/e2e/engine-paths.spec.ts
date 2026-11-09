@@ -250,10 +250,19 @@ test('The page grid without OffscreenCanvas in the worker: the page draws the th
   await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
   const oracle = pdfOracle('gen-paginas-mistas.pdf');
   const total = oracle.pages ?? 0;
+  // F14 (DECISOES § 618): the cells have the height of their pages, so the grid is brought on screen, as a person
+  // scrolls to it, for every cell to draw (pictures are drawn only near the screen, § 152).
+  await expect(page.locator('.fo-pages__grid > li')).toHaveCount(total, { timeout: 60_000 });
+  await page.locator('.fo-pages__grid > li').last().scrollIntoViewIfNeeded();
   await expect(page.locator('.fo-page__sheet img')).toHaveCount(total, { timeout: 60_000 });
   expectPagePath(seen);
-  // Every picture is decoded, as wide as the grid asks (240 px), as tall as its page is (the turn of the page applied),
-  // and has dark marks on a light sheet: a page, not an empty canvas.
+  // Every picture is decoded, as wide as the grid asks (F14, DECISOES § 619: the width of its sheet times the pixel
+  // ratio, rounded up to 60 px, at most 720), as tall as its page is (the turn of the page applied), and has dark marks on
+  // a light sheet: a page, not an empty canvas.
+  const asked = await page
+    .locator('.fo-page__sheet')
+    .first()
+    .evaluate((sheet) => Math.max(60, Math.ceil(Math.min(720, sheet.getBoundingClientRect().width * devicePixelRatio) / 60) * 60));
   const pictures = await page.locator('.fo-page__sheet img').evaluateAll((images) =>
     Promise.all(
       (images as HTMLImageElement[]).map(async (image) => {
@@ -279,8 +288,8 @@ test('The page grid without OffscreenCanvas in the worker: the page draws the th
   for (const [i, picture] of pictures.entries()) {
     const [w = 1, h = 1] = oracle.sizes?.[i] ?? [];
     const turned = oracle.rotate?.[i] === 90 || oracle.rotate?.[i] === 270;
-    expect(Math.abs(picture.width - 240), `page ${i + 1} width`).toBeLessThanOrEqual(2);
-    expect(Math.abs(picture.height - (240 * (turned ? w : h)) / (turned ? h : w)), `page ${i + 1} height`).toBeLessThanOrEqual(2);
+    expect(Math.abs(picture.width - asked), `page ${i + 1} width`).toBeLessThanOrEqual(2);
+    expect(Math.abs(picture.height - (asked * (turned ? w : h)) / (turned ? h : w)), `page ${i + 1} height`).toBeLessThanOrEqual(2);
     expect(picture.dark, `page ${i + 1} has marks`).toBeGreaterThan(0);
     expect(picture.light, `page ${i + 1} has a light sheet`).toBeGreaterThan(picture.width * picture.height * 0.5);
   }
