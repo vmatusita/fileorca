@@ -515,6 +515,8 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-filelist--image { --fo-card-h: 86px; --fo-row-h: var(--fo-card-h); margin: 0; padding: 0; list-style: none; }
 .fo-filelist--image > .fo-filelist__row { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: column; gap: var(--space-2); align-items: center; }
 .fo-filelist--image > .fo-filelist__row > .fo-file { min-height: var(--fo-card-h); }
+/* The words of the card keep the room of the bar from the start: the name stays where it is when the bar comes and goes. */
+.fo-filelist--image > .fo-filelist__row > .fo-file > div:not([class]) { min-height: calc(var(--fo-card-h) - 2 * var(--space-3) - 2 * var(--stroke-2)); }
 .fo-filelist--image > .fo-filelist__row[draggable="true"] > .fo-file { cursor: grab; }
 /* The thumbnail is a picture the browser would drag by itself (as a file): the drag is the row's. */
 .fo-filelist--image > .fo-filelist__row[draggable="true"] .fo-file__thumb { pointer-events: none; }
