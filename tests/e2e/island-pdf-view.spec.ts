@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { countOf } from '../../src/tools/pdf/grid-math.ts';
 import { fmt } from '../../src/i18n/format.ts';
 import panel from '../../src/tools/pdf/i18n/en.ts';
 import { PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
@@ -280,7 +281,8 @@ test.describe('criterion 3: the action of the view goes the way of the cell', ()
       const action = view(page).getByRole('button', { name: ACTIONS[id]?.name ?? '', exact: true });
       await action.click();
       await expect(action).toHaveAttribute('aria-pressed', 'true');
-      const sentences = await said(page, fmt(panel.grid.selectedCount, { count: 1, total: 8 }));
+      // The count of the batch buttons, in Delete's form where the page comes out (DECISOES § 627 and § 629).
+      const sentences = await said(page, countOf(panel.grid, 1, 8, id === 'delete-pdf-pages'));
       expect(sentences).toHaveLength(1);
       if (id === 'delete-pdf-pages') await expect(root(page).locator('.fo-ready .fo-btn--brand')).toHaveText(optionsOf(id)['actionOne'] ?? '');
       await view(page).getByRole('button', { name: v.back, exact: true }).click();
@@ -308,11 +310,10 @@ test.describe('criterion 3: the action of the view goes the way of the cell', ()
     await turn.click();
     await expect(big(page)).toHaveAttribute('data-turn', '1');
     await expect(root(page).locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
-    // The view says the turn once. The "Done!" of the run the turn starts is the panel's (d-8, front M, DECISOES § 629).
-    const done = (await root(page).locator('#fo-says').textContent()) ?? '';
+    // The view says the turn once, and the run the turn starts says no "Done!" after it (d-8, DECISOES § 629).
     await page.waitForTimeout(300);
     const first = await page.evaluate(() => (window as unknown as { __status: string[] }).__status.splice(0));
-    expect(first.filter((sentence) => sentence !== done.trim())).toEqual([turned(90)]);
+    expect(first).toEqual([turned(90)]);
     await turn.click();
     await expect(big(page)).toHaveAttribute('data-turn', '2');
     expect(await big(page).evaluate((img) => getComputedStyle(img).rotate)).toBe('180deg');

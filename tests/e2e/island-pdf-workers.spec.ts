@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import { fmt } from '../../src/i18n/format.ts';
+import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { dropOn, startOver } from './lib/page.ts';
 import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 
@@ -8,8 +10,8 @@ import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 // destroy a PDFWorker handed to it, and PDFWorker.destroy() does not end its port. Now closing the document ends it.
 // The Worker constructor is a spy (an init script) that writes down every worker made and every terminate.
 //
-// The Merge case (taking a row out of the list ends the worker of that file's view) belongs to the page view of the
-// Merge: it is added here with `pdfjsWorkers`, `expectEnded` and `alive`, the same way, once the view is in.
+// The views of the Merge rows and of the result (F14, DECISOES § 625 and § 626) open the file they show on their own
+// key: going back, taking the row out of the list, Start over and a new run end the worker of that view.
 
 const MIXED = 'gen-paginas-mistas.pdf';
 const OTHER = 'pdf-escaneado-01-pagina-livro-cor.pdf';
@@ -168,4 +170,80 @@ test('PDF to JPG on the page path: the run ends the PDF.js worker it opened', as
   await choosePdfs(page, [pdfFile(OTHER)]);
   await expect(root(page).locator('.fo-btn--download')).toBeVisible({ timeout: 90_000 });
   await expectEnded(page, (await pdfjsWorkers(page)).length, 'after the second run');
+});
+
+/** The PDF.js workers made from `from` on (the ones a view opened) are all ended. */
+async function expectViewEnded(page: Page, from: number, label: string): Promise<void> {
+  await expect
+    .poll(async () => (await pdfjsWorkers(page)).slice(from).filter((made) => !made.ended).length, { message: `${label}: the PDF.js workers of the view are terminated`, timeout: 15_000 })
+    .toBe(0);
+}
+
+/** The large picture of the open page view is drawn (on the page path, by a PDF.js worker of the file it shows). */
+async function viewDrawn(page: Page): Promise<void> {
+  const img = root(page).locator('.fo-pview .fo-pview__img');
+  await expect.poll(() => img.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0).catch(() => false), { timeout: 30_000 }).toBe(true);
+}
+
+const view = PDF_PANEL_TEXTS.en.view;
+
+test('the Merge views: going back and taking the row out of the list end the PDF.js worker of that file', async ({ page }) => {
+  await openTool(page, '/merge-pdf/');
+  await choosePdfs(page, [pdfFile(MIXED), pdfFile(OTHER)]);
+  const open = (name: string) => root(page).getByRole('button', { name: fmt(view.openFile, { name }), exact: true });
+  await expect(open(MIXED)).toBeVisible({ timeout: 30_000 });
+  // The list reads the files with no PDF.js worker: none is made before a view opens.
+  expect(await alive(page)).toBe(0);
+  let before = (await pdfjsWorkers(page)).length;
+  await open(MIXED).click();
+  await viewDrawn(page);
+  expect((await pdfjsWorkers(page)).length, 'the view drew its page with a PDF.js worker').toBeGreaterThan(before);
+  await root(page).locator('.fo-pview').getByRole('button', { name: view.back, exact: true }).click();
+  await expectViewEnded(page, before, 'back from the view of the first row');
+
+  before = (await pdfjsWorkers(page)).length;
+  await open(OTHER).click();
+  await viewDrawn(page);
+  expect(await alive(page)).toBeGreaterThan(0);
+  await root(page).getByRole('button', { name: fmt(PDF_PANEL_TEXTS.en.queue.remove, { name: OTHER }), exact: true }).click();
+  await expectViewEnded(page, before, 'after the row left the list');
+  expect(await alive(page)).toBe(0);
+});
+
+test('the result view: going back, a new run and Start over end the PDF.js worker of the new PDF', async ({ page }) => {
+  await openTool(page, '/delete-pdf-pages/');
+  await choosePdfs(page, [pdfFile(MIXED)]);
+  await expect(cells(page)).toHaveCount(8, { timeout: 30_000 });
+  await firstDrawn(page);
+  const grid = (await pdfjsWorkers(page)).length;
+  await cells(page).nth(1).locator('.fo-page__main').click();
+  await root(page).getByRole('button', { name: /^Delete/ }).first().click();
+  const button = root(page).getByRole('button', { name: view.openResult, exact: true });
+  await expect(button).toBeVisible({ timeout: 60_000 });
+
+  let before = (await pdfjsWorkers(page)).length;
+  await button.click();
+  await viewDrawn(page);
+  expect((await pdfjsWorkers(page)).length, 'the result view drew its page with a PDF.js worker').toBeGreaterThan(before);
+  await root(page).locator('.fo-pview').getByRole('button', { name: view.back, exact: true }).click();
+  await expectViewEnded(page, before, 'back from the result view');
+  // The grid of the file chosen keeps its own worker: the views let go of their documents only.
+  expect((await pdfjsWorkers(page)).slice(0, grid).filter((made) => !made.ended).length, 'the worker of the file on the grid').toBe(1);
+
+  // A new run: the document of the result before is let go.
+  before = (await pdfjsWorkers(page)).length;
+  await button.click();
+  await viewDrawn(page);
+  await root(page).locator('.fo-pview').getByRole('button', { name: view.back, exact: true }).click();
+  await cells(page).nth(2).locator('.fo-page__main').click();
+  await root(page).getByRole('button', { name: /^Delete/ }).first().click();
+  await expect(button).toBeVisible({ timeout: 60_000 });
+  await expectViewEnded(page, before, 'after a new run');
+
+  before = (await pdfjsWorkers(page)).length;
+  await button.click();
+  await viewDrawn(page);
+  await startOver(page);
+  await expectViewEnded(page, before, 'after Start over with the view open');
+  expect(await alive(page)).toBe(0);
 });
