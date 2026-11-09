@@ -175,6 +175,8 @@ interface Model {
   hush: number;
   /** F15: Download was pressed while its bundle was being made again; the new one is handed out when it comes. */
   wantDownload: boolean;
+  /** F15 (DECISOES § 667): a chip of Image to PDF was pressed while the PDF was being made again; it takes the new one. */
+  wantFollow: ChipData | null;
 }
 
 function newModel(): Model {
@@ -183,6 +185,7 @@ function newModel(): Model {
     selected: null, expanded: false, announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
     rowFocus: null, slotFocus: false, bandFocus: false, successors: [], focusRowId: null, compareOpen: false, coffeeRoom: false, bandLock: null,
     from: null, lost: null, carrying: false, undo: null, focusUndo: false, focusBin: null, focusMove: null, hush: 0, wantDownload: false,
+    wantFollow: null,
   };
 }
 
@@ -375,6 +378,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.focusMove = null;
     m.focusBin = null;
     m.wantDownload = false;
+    m.wantFollow = null;
     dropBundle();
   }
 
@@ -605,6 +609,12 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
         hand(m.bundle.url, m.bundle.name);
         track('download', tracked);
       }
+    }
+    // F15 (DECISOES § 667): a chip pressed while the PDF was being made again takes the new PDF, never the old one.
+    if (m.wantFollow) {
+      const chip = m.wantFollow;
+      m.wantFollow = null;
+      if (m.phase === 'done' && m.bundle?.kind === 'pdf') carryAway(chip, [{ name: m.bundle.name, blob: m.bundle.blob }]);
     }
   }
 
@@ -1015,6 +1025,17 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     if (counted) track('next_step_click', { ...tracked, target: chip.target });
     if (!chip.carry || files.length === 0 || !plainClick(event) || !workerControls()) return;
     event.preventDefault();
+    if (m.carrying) return;
+    // F15 (DECISOES § 667): the PDF on screen is the one from before a gesture or a new sheet; the chip waits for the new one.
+    // Read from the model at the press, not from the render: the press may come before the render of the gesture.
+    if (pdf && m.bundle !== null && (m.phase === 'processing' || m.bundle.key !== keyNow())) {
+      m.wantFollow = chip;
+      return;
+    }
+    carryAway(chip, files);
+  }
+
+  function carryAway(chip: ChipData, files: Outgoing[]): void {
     if (m.carrying) return;
     m.carrying = true;
     const href = chip.href;

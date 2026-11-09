@@ -10,6 +10,8 @@
 //
 // The default of the Playwright config blocks service workers: this spec allows them, with a server of its own per test (a
 // clean origin), as handoff.spec.ts does. Its name puts it right before handoff.spec.ts (DECISOES § 663).
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { INBOX_CACHE, INBOX_TOOL_KEY } from '../../src/sw/shared.ts';
 import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
@@ -24,6 +26,7 @@ import { dataLayer, generatedJpeg, hydrated } from './lib/page.ts';
 import { arriveFrom } from './lib/inbox.ts';
 import { actionOf } from './lib/pdf-privacy.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
+import { readWithPdfjs } from './lib/pdfjs-read.ts';
 import { brokenRequests, holds, leaksIn, requestText, SENTINELS, type SeenRequest } from './lib/sentinels.ts';
 import { startSwServer, type SwServer } from './lib/sw-server.ts';
 import { controlled, visit, workerOff } from './lib/sw.ts';
@@ -159,6 +162,39 @@ test('Image to PDF takes its PDF to Compress PDF, which runs by itself and says 
   await expect(region(page)).toContainText(sentence);
   expect(await timesSaid(page, sentence)).toBe(1);
   expect(await inboxState(page)).toEqual({ inbox: false, choice: null });
+});
+
+// F15 (DECISOES § 667): after the result, a move makes only the PDF again, and until it is ready the PDF in the model is the
+// one of the old order. A chip pressed in that time waits and takes the new PDF, as the Download does. The move and the press
+// go in the same task of the page (the press comes before the render of the move); Compress PDF, which runs by itself, gives
+// the PDF that came, and its pages (each photo has its own size) are in the new order.
+test('Image to PDF: a chip pressed while the PDF is made again after a move takes the PDF in the new order', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await underTheWorker(page);
+  await visit(page, server, '/image-to-pdf/');
+  const photo = (name: string, mimeType: string) => ({ name, mimeType, buffer: readFileSync(resolve('fixtures/images', name)) });
+  // 1600 × 1200, 800 × 600 and 1200 × 1600 (Orientation 6): with "Image size", the size of a page says which photo it is.
+  await page.setInputFiles('#fo-tool-root input[type="file"]', [
+    photo('gen-webp-exif-gps.webp', 'image/webp'),
+    photo('gen-png-transparente.png', 'image/png'),
+    photo('gen-jpg-01-orientacao6.jpg', 'image/jpeg'),
+  ]);
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  await expect(chipOf(page, '/compress-pdf/')).toHaveAttribute('data-carry', '');
+  const pressed = await page.evaluate((label) => {
+    const arrow = [...document.querySelectorAll<HTMLButtonElement>('#fo-tool-root .fo-filelist__move')].find((control) => control.getAttribute('aria-label') === label);
+    arrow?.click();
+    document.querySelector<HTMLAnchorElement>('nav.fo-next a.fo-chip[href="/compress-pdf/"]')?.click();
+    return { moved: arrow !== undefined, at: location.pathname };
+  }, fmt(IMAGE_PANEL_TEXTS.en.queue.moveEarlier, { name: 'gen-jpg-01-orientacao6.jpg' }));
+  expect(pressed, 'the arrow was there, and the press did not go at once').toEqual({ moved: true, at: '/image-to-pdf/' });
+  await page.waitForURL('**/compress-pdf/');
+  await hydrated(page);
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  const pending = page.waitForEvent('download');
+  await page.locator('.fo-result .fo-btn--download').click();
+  const read = await readWithPdfjs(new Uint8Array(readFileSync(await (await pending).path())));
+  expect(read.pages.map((sheet) => `${Math.round(sheet.shown.width)}x${Math.round(sheet.shown.height)}`), 'the PDF that came is the one of the new order').toEqual(['1600x1200', '1200x1600', '800x600']);
 });
 
 test('Image to PDF takes its PDF to Merge PDF: one PDF waits for another, and a PDF added makes it another batch, with no note', async ({ page }) => {
