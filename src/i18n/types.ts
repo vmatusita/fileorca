@@ -1096,6 +1096,54 @@ export interface PdfPanelTexts {
     rangeApply: string;
     rangeHelp: string;
     rangeError: string;
+    /** F14 (section B of PLANO-UX-QV.md; DECISOES § 619): "Page size: Small · Large", the segment above the grid. */
+    sizeLegend: string;
+    sizeSmall: string;
+    sizeLarge: string;
+    /** F14 (DECISOES § 628): the third batch button, beside "Pick all" and "Pick none". */
+    invert: string;
+    /** F14 (DECISOES § 621): the name of the magnifier of a cell, "View page {n} enlarged" (never starting with "Page"). */
+    zoom: string;
+    /** F14, Delete (DECISOES § 627): the end of the name of a page that will go, ", comes out". */
+    leaving: string;
+    /**
+     * F14, Delete: the count of the grid, "{count} of {total} come out · the new PDF keeps {left} pages", in two halves
+     * with the forms of one ("1 of {total} comes out", "the new PDF keeps 1 page").
+     */
+    leavingCount: string;
+    leavingOne: string;
+    keptCount: string;
+    keptOne: string;
+    /** F14 (DECISOES § 628): what Shift+click says, "Pages {from} to {to} picked" (or "unpicked"). */
+    spanOn: string;
+    spanOff: string;
+  };
+  /**
+   * F14 (section A of PLANO-UX-QV.md; DECISOES § 624 to § 626): the page view, the large page inside the tool, with its
+   * bars, the action of each tool and the buttons that open it from the result and from the Merge list.
+   */
+  view: {
+    /** "Back to the pages", with the icon. */
+    back: string;
+    previous: string;
+    next: string;
+    /** The toggle of the frame: "Enlarge" (twice the column, scrolling) and "Fit" (the column). */
+    enlarge: string;
+    fit: string;
+    /** The heading: "Page {n} of {total}"; in Reorder, "Page {n} · position {p} of {total}". */
+    title: string;
+    titleOrder: string;
+    /** The action of each tool: Delete, Split (pick), Sign (pick) and Rotate (page by page). */
+    remove: string;
+    mark: string;
+    sign: string;
+    turn: string;
+    /** The ghost button of a result that is one PDF with no password, "View the new PDF". */
+    openResult: string;
+    /** The button of a row of the Merge list, "View pages of {name}". */
+    openFile: string;
+    /** The name of the frame of the large page, "Page {n}, large". */
+    frame: string;
   };
   /**
    * The toggle of a password field (DECISOES § 177): its visible text, and the name of each field's toggle, which starts
