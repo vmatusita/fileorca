@@ -268,6 +268,12 @@ test.describe('item 5 and criterion 9: Shift+click from the anchor to the page',
     await main(page, 6).click({ modifiers: ['Shift'] });
     expect(await said(page, spanOn(4, 7))).toEqual([spanOn(4, 7)]);
     expect(await pickedPages(page)).toEqual([4, 5, 6, 7]);
+    // Page 7 is the anchor now: Shift on the anchor itself is a plain press ("Pages 7 to 7" is no span).
+    await hush(page);
+    await main(page, 6).click({ modifiers: ['Shift'] });
+    await expect(cells(page).nth(6)).not.toHaveAttribute('data-selected', 'true');
+    expect(await pickedPages(page)).toEqual([4, 5, 6]);
+    expect(await silence(page)).toEqual([]);
   });
 
   for (const gesture of ['Pick all', 'Pick none', 'Invert selection', 'a typed range', 'a typed range of the same pages'] as const) {
