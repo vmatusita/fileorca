@@ -40,9 +40,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 21. O que a F12 deixou | 6 | O Victor, a run F13 e runs de ajuste |
 | 22. O que a F13a deixou | 11 | O Victor, a run F13b e runs de ajuste |
 | 23. O que a F13b deixou | 14 | O Victor e runs de ajuste |
-| 24. O que a F14 deixou | 5 | O Victor e runs de ajuste |
+| 24. O que a F14 deixou | 6 | O Victor e runs de ajuste |
 
-Total: 190 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
+Total: 191 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -399,6 +399,7 @@ O que a F14 (as páginas de PDF à vista: a folha na proporção da página, a l
 | F14 m-1 | DECISOES § 617 | baixo | A linha que aponta o PLANO-UX-QV.md no topo do PLANO-FILEORCA.md não entrou: o `.claude/settings.json` nega a edição do arquivo à run, e ele não tinha a linha no começo da F14 | Pôr no topo do PLANO-FILEORCA.md a linha: **Plano de UX e qualidade de vida (9/nov/2026):** as fichas da F14 à F18 estão no PLANO-UX-QV.md. Até a F17 ele não muda nada deste plano; a única mudança no contrato (a linha 15, o catálogo) entra na F18, pela tabela "Mudanças no contrato" do PLANO-MELHORIAS.md. | Victor faz |
 | F14 m-2 | DECISOES § 640 | baixo | No Girar página por página, sem a vista aberta, o primeiro giro na grade traz o resultado, as opções vão para dentro do "Ajustar", a grade nasce de novo em outro lugar da árvore e o foco cai no `body` (vem da F13a; a F14 resolveu só com a vista aberta) | Levar o foco à mesma página da grade nova (ou à ação dela) quando a grade volta dentro do "Ajustar", como a vista faz com a memória do módulo | Run de ajuste de acessibilidade |
 | F14 m-3 | DECISOES § 629 | baixo | No Juntar, mover uma linha depois do resultado diz duas frases: a da linha movida e o "Done!" do PDF feito de novo. O d-8 da ficha era só do Girar, e a F14 calou só a execução que o giro dispara | Calar o "Done!" da execução que um gesto com frase própria dispara também no Juntar (o mesmo `hush` do `PdfPanel`) | Run de ajuste de acessibilidade |
+| F14 m-4 | DECISOES § 648 | baixo | Na execução completa do CI da F14, a parte 4 do Chromium (766 s) e a 10 do WebKit (744 s) passaram do alvo de 700 s, com os 104 testes `island-pdf-*` por navegador; nenhuma chegou ao limite de 900 s | Mesclar a PR separada que redivide o Chromium em 8 partes e o WebKit em 14 (a branch `ajuste-ci-partes-f14`), e conferir as partes na execução completa dela | Victor faz |
 
 ## Registrados (escolhas, não defeitos)
 

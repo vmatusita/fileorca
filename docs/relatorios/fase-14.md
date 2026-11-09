@@ -321,3 +321,7 @@ Não foi usada: o item 7 (o Juntar) entrou.
 5. Pôr a linha do `PLANO-FILEORCA.md`, que faltou (o texto está no grupo 24, F14 m-1).
 6. Criar o rótulo `ci` (Issues → Labels), que ainda não existe.
 7. Gerar o prompt da F15 com a skill, com o SHA da main e o grupo 24 do `docs/PENDENCIAS.md`.
+
+## A execução completa do CI e as partes acima do alvo (adendo, depois do merge)
+
+A execução completa (`pnpm ci:custo 42683371171`, o commit `a549b86`) passou em todos os 25 jobs, e o CI mesclou a PR às 19:42 UTC de 9/nov/2026 (o commit `c867342` na `main`), com a conferência do pós-deploy verde: 188 minutos cobrados e 18,1 min de parede. Duas partes, porém, passaram do alvo de 700 s: a 4 do Chromium (766,4 s de `verificar`) e a 10 do WebKit (743,5 s), as duas com os specs `island-pdf-*`; nenhuma chegou ao limite de 900 s. O `verificar --partes` da máquina (186,1 e 158,8 s nessas partes) não mostrava isso. Pelo critério 9 do prompt (nenhuma parte acima de 700 s, ou a PR separada da decisão 15 aberta), a run abriu a PR separada que redivide as partes: o Chromium em 8 e o WebKit em 14, projetadas com os tempos de teste desta execução para ficar abaixo de 650 s (§ 648); o merge dela é do Victor. Nesta execução, as partes do Chromium deram 651,5, 643,4, 595,0, 766,4 e 618,3 s; as do WebKit, de 128,5 a 743,5 s.
