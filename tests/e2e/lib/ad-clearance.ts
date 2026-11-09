@@ -37,6 +37,12 @@ export const TARGETS = [
   // [data-oli], above); since the ajuste-home-cards (§ 609), the category sections of the home and their cards, in the
   // place of its bands.
   '.fo-section--cat', '.fo-section--cat .fo-grid', '.fo-section--cat .fo-tool', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
+  // F14 (decision 14; DECISOES § 634): the page view and every control of it (its bars, its buttons, the frame and the
+  // pictures), the magnifier of a cell, "View the new PDF" and "View pages of {name}" (the size choice is a .fo-seg).
+  // "Enlarged", the page is twice the column inside a frame that scrolls: its box passes the frame, and what is seen of it
+  // is the frame (ads.spec.ts measures that part of the picture on its own).
+  '.fo-pview', '.fo-pview__top', '.fo-pview .fo-btn', '.fo-pview__frame', '.fo-pview__frame:not([data-zoom]) :is(.fo-pview__sheet, .fo-pview__img, .fo-pview__under)', '.fo-pview__bar',
+  '.fo-page__zoom', '.fo-result__view', '.fo-merge__view',
 ].join(', ');
 /** F13b (DECISOES § 573): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
 export const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';

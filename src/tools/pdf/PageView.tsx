@@ -223,9 +223,10 @@ export default function PageView(props: PageViewProps) {
   return (
     <div ref={root} class="fo-pview" onKeyDown={key}>
       <div class="fo-pview__top">
-        <h3 ref={heading} class="fo-pview__title" tabindex={-1}>
+        {/* An h2 (§ 624): the tool page has only its h1 before the island, and an h3 there skips a level (axe heading-order). */}
+        <h2 ref={heading} class="fo-pview__title" tabindex={-1}>
           {title(index, position)}
-        </h3>
+        </h2>
         <button type="button" class="fo-btn fo-pview__size" onClick={() => setZoomed(!zoomed)}>
           {zoomed ? texts.fit : texts.enlarge}
         </button>
