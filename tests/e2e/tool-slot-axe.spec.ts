@@ -3,6 +3,10 @@ import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { violationsEverywhere } from './lib/axe.ts';
 import { animationsDone, dismissCookies, dragOver, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine } from './lib/page.ts';
+import { SW_ENABLED } from '../../src/platform/site.ts';
+import { arriveFrom } from './lib/inbox.ts';
+import { pdfFile } from './lib/pdf-tools.ts';
+import { controlled } from './lib/sw.ts';
 
 // F13a · axe in every state of the image island of the UX-04 A (decision 5 and criterion 9 of the run; DECISOES
 // § 474): at rest, with a file over the rectangle, processing, with the result, with the result and the comparison and
@@ -61,4 +65,45 @@ test('the three errors (no image, a .png with no image inside, a PNG on HEIC to 
     await animationsDone(page);
     expect(await violationsEverywhere(page), label).toEqual([]);
   }
+});
+
+// F15 (decision 13 of the run; DECISOES § 655): the PDFs a next-step chip brought wait for the action in Merge PDF (the list,
+// the count and the button) and in Protect PDF (the ready card and the fields of the password), and the result of Image to
+// PDF shows the three chips that take the PDF along with the PDF line under them (a service worker in control). The inbox is
+// written in the page as a chip writes it (tests/e2e/lib/inbox.ts), with service workers allowed (the Cache Storage of the
+// WebKit of Playwright does not outlive a reload otherwise).
+test.describe('the chip that takes the PDF along and its arrival at a tool with an action', () => {
+  test.use({ serviceWorkers: 'allow' });
+
+  test('the PDFs that came wait in Merge PDF and in Protect PDF: no axe violation', async ({ page }) => {
+    for (const [tool, files, ready] of [
+      ['merge-pdf', [pdfFile('gen-paginas-mistas.pdf', 'first.pdf'), pdfFile('gen-acoes.pdf', 'second.pdf')], '#fo-tool-root .fo-merge-panel .fo-btn--brand'],
+      ['protect-pdf', [pdfFile('gen-paginas-mistas.pdf', 'pages.pdf')], '#fo-tool-root .fo-ready .fo-btn--brand'],
+    ] as const) {
+      await page.goto(`/${tool}/`);
+      await hydrated(page);
+      await dismissCookies(page);
+      await arriveFrom(page, tool, 'compress-pdf', files);
+      await expect(page.locator(ready)).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('#fo-tool-root .fo-pdf-island > p.fo-sr[role="status"]')).toContainText('Compress PDF');
+      await animationsDone(page);
+      expect(await violationsEverywhere(page), `a chegada no ${tool}`).toEqual([]);
+    }
+  });
+
+  test('the result of Image to PDF with the chips that take the PDF and the PDF line: no axe violation', async ({ page }) => {
+    test.skip(!SW_ENABLED, 'the kill switch is on: a chip only links (handoff.spec.ts proves the worker is gone)');
+    await page.goto('/image-to-pdf/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await controlled(page);
+    await page.reload();
+    await hydrated(page);
+    await page.setInputFiles('input[type="file"]', { name: 'photo.jpg', mimeType: 'image/jpeg', buffer: await generatedJpeg(page) });
+    await expect(page.locator('.fo-btn--download')).toBeFocused({ timeout: 30_000 });
+    await expect(page.locator('nav.fo-next a.fo-chip[data-carry]')).toHaveCount(3);
+    await expect(page.locator('.fo-band__now .fo-carry')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'os chips da Imagem para PDF que levam o PDF').toEqual([]);
+  });
 });

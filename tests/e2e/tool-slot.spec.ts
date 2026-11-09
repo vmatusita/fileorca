@@ -5,6 +5,11 @@ import { LANGS, ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { iconInner } from '../../src/icons/svg.ts';
 import { dismissCookies, dragOver, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
+import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
+import { SW_ENABLED } from '../../src/platform/site.ts';
+import { arriveFrom } from './lib/inbox.ts';
+import { pdfFile } from './lib/pdf-tools.ts';
+import { controlled } from './lib/sw.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
 // § 464 to § 474). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
@@ -566,4 +571,67 @@ test.describe('a photo of a phone, with its metadata: the result keeps the recta
       expect(found, 'o resultado passou da reserva do café').toEqual([]);
     });
   }
+});
+
+// F15 (decision 12 of the run; DECISOES § 655 and § 662): a next-step chip takes the PDFs to Merge PDF and Protect PDF too,
+// where they wait for the action. They come with the load of the page, in the way of a drop, with no gesture of the person:
+// from the start of that load to 1.5 s after the action is ready, nothing moves. And the band of Image to PDF, whose chips
+// take the PDF along under a service worker: the hidden copy keeps the room of the PDF line from the first paint (§ 500), so
+// the result, with the three chips that take the PDF and the line under them, moves nothing, and the band keeps its height.
+// The inbox is written in the page as a chip writes it (tests/e2e/lib/inbox.ts), with service workers allowed: the Cache
+// Storage of the WebKit of Playwright does not outlive a reload otherwise, and a chip only takes a file under a worker.
+test.describe('the arrival at a tool with an action and the chips of Image to PDF move nothing at 360 × 740', () => {
+  for (const kase of [
+    { tool: 'merge-pdf', files: () => [pdfFile('gen-paginas-mistas.pdf', 'first.pdf'), pdfFile('gen-acoes.pdf', 'second.pdf')], ready: '#fo-tool-root .fo-merge-panel .fo-btn--brand' },
+    { tool: 'protect-pdf', files: () => [pdfFile('gen-paginas-mistas.pdf', 'pages.pdf')], ready: '#fo-tool-root .fo-ready .fo-btn--brand' },
+  ]) {
+    test(`the arrival at /${kase.tool}/ from Compress PDF: from the load to the PDFs waiting for the action, the layout shift is 0.05 at most`, async ({ browser, browserName }) => {
+      const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'allow' });
+      await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+      await watchShifts(context);
+      // The arrival is the load of the page itself: its shifts count from the start.
+      await context.addInitScript(() => {
+        (window as unknown as { __shifts: { from: number } }).__shifts.from = 0;
+      });
+      const page = await context.newPage();
+      await open(page, `/${kase.tool}/`);
+      const slotTop = () => page.evaluate(() => Math.round(document.querySelector('.fo-slot')?.getBoundingClientRect().top ?? -1));
+      const before = await slotTop();
+      await arriveFrom(page, kase.tool, 'compress-pdf', kase.files());
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator(kase.ready), 'the PDFs wait for the action').toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('#fo-tool-root .fo-pdf-island > p.fo-sr[role="status"]'), 'they came from Compress PDF').toContainText('Compress PDF');
+      await page.waitForTimeout(1500);
+      await expect(page.locator('#fo-tool-root .fo-result'), 'nothing ran by itself').toHaveCount(0);
+      const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+      console.log(`[cls da chegada] ${browserName} ${kase.tool}: ${shifts.cls.toFixed(3)}${shifts.moved.length ? ` (${shifts.moved.slice(0, 4).join('; ')})` : ''}`);
+      if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+      expect(await slotTop(), 'the rectangle keeps its place').toBe(before);
+      await context.close();
+    });
+  }
+
+  test('Image to PDF under a service worker: the result with the chips that take the PDF and the PDF line moves nothing, and the band keeps its height', async ({ browser, browserName }) => {
+    test.skip(!SW_ENABLED, 'the kill switch is on: a chip only links (handoff.spec.ts proves the worker is gone)');
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'allow' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    await open(page, '/image-to-pdf/');
+    // The worker controls the next pages of the tab: there the chips can take the PDF along.
+    await controlled(page);
+    const file = await inputFor(page, 'image-to-pdf');
+    await open(page, '/image-to-pdf/');
+    await frames(page);
+    const band = () => page.evaluate(() => Math.round(document.querySelector('.fo-band')?.getBoundingClientRect().height ?? -1));
+    const bandBefore = await band();
+    const { shifts, before, after } = await oneUse(page, '/image-to-pdf/', file);
+    await expect(page.locator('nav.fo-next a.fo-chip[data-carry]'), 'the three chips take the PDF along').toHaveCount(3);
+    await expect(page.locator('.fo-band__now .fo-carry')).toHaveText(IMAGE_PANEL_TEXTS.en.carry.linePdf);
+    console.log(`[cls da interação] ${browserName} imagem para PDF com os chips que levam: ${shifts.cls.toFixed(3)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+    expect(after, 'the band and the rectangle keep their place').toEqual(before);
+    expect(await band(), 'the band keeps the height it had from the first paint').toBe(bandBefore);
+    await context.close();
+  });
 });
