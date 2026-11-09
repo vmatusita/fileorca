@@ -131,7 +131,13 @@ const inWorker = (): boolean => typeof document === 'undefined';
  * when one was given); anything else PDF.js cannot read is 'corrupted'.
  */
 export async function openForDrawing(bytes: Uint8Array, options: PdfJsOpen = {}): Promise<PdfJsHandle> {
-  const pdfjs = await pdfjsLibrary();
+  // F14 (E-4, DECISOES § 630): the parser worker of the page path belongs to this one document, and closing the document
+  // ends it, on every way out. PDF.js destroys only a worker it made itself (`task.destroy()` leaves a PDFWorker handed to
+  // it), and `PDFWorker.destroy()` never ends the Worker of its port: one `pdfjs-core` worker stayed alive per file.
+  const pdfjs = await pdfjsLibrary().catch((error: unknown) => {
+    options.port?.terminate();
+    throw error;
+  });
   const data = asset('pdfjsData');
   const worker = options.port ? new pdfjs.PDFWorker({ port: options.port as never }) : undefined;
   const task = pdfjs.getDocument({
@@ -152,12 +158,16 @@ export async function openForDrawing(bytes: Uint8Array, options: PdfJsOpen = {})
     BinaryDataFactory: SiteDataFactory,
     ...(inWorker() ? { CanvasFactory: OffscreenFactory, FilterFactory: NoFilterFactory, isOffscreenCanvasSupported: true } : {}),
   } as Parameters<PdfJsModule['getDocument']>[0]);
-  try {
-    const doc = await task.promise;
-    return { pages: doc.numPages, doc, destroy: () => task.destroy() };
-  } catch (error) {
+  const close = async (): Promise<void> => {
     await task.destroy().catch(() => {});
     worker?.destroy();
+    options.port?.terminate();
+  };
+  try {
+    const doc = await task.promise;
+    return { pages: doc.numPages, doc, destroy: close };
+  } catch (error) {
+    await close();
     const named = error as { name?: string; code?: number };
     if (named?.name === 'PasswordException') throw new PdfEngineError(named.code === 2 ? 'wrong-password' : 'needs-password');
     throw new PdfEngineError('corrupted');
