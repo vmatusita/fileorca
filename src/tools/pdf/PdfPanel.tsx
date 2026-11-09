@@ -425,10 +425,11 @@ export default function PdfPanel(props: PdfPanelData) {
       // Merge: the count of the list says "2 PDFs ready" in its own region (role="status"), so this one says only the refusals.
       const found = refused === 0 ? (merging ? '' : readyCount(ready.length)) : needs ? `${some} ${readyCount(ready.length)}` : some;
       // F15 (DECISOES § 655 and § 659): files a chip brought wait for the action, and the region says where they came from
-      // once, here, when they are ready ("Oli brought this PDF from Compress PDF."); the result of the action does not say
-      // it again (finish), the card shows the note. In Merge the count of the list keeps its own region and words ("Add at
-      // least one more PDF to merge." with one PDF), and this region says only the arrival (and the refusals, if any).
-      m.announce = [found, fromNote()].filter(Boolean).join(' ');
+      // once, here, when they are ready, before what the reading found ("Oli brought this PDF from Compress PDF. 1 PDF
+      // ready": the sentence ends with its period, the count has none); the result of the action does not say it again
+      // (finish), the card shows the note. In Merge the count of the list keeps its own region and words ("Add at least one
+      // more PDF to merge." with one PDF), and this region says only the arrival (and the refusals, if any).
+      m.announce = [fromNote(), found].filter(Boolean).join(' ');
       render();
     }
   }

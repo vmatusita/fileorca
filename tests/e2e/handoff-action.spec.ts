@@ -223,7 +223,7 @@ test('Unlock PDF, then "Split this PDF": the PDF waits in Split for the button, 
   await split.click();
   const sentence = fromOne(common.pdf['unlock-pdf'].name);
   await waiting(page, '/split-pdf/', sentence);
-  await expect(region(page)).toHaveText(`${pdfTexts.queue.readyOne} ${sentence}`);
+  await expect(region(page)).toHaveText(`${sentence} ${pdfTexts.queue.readyOne}`);
   const action = page.getByRole('button', { name: actionOf(splitTexts), exact: true });
   await expect(action).toBeFocused();
   await action.click();
@@ -264,7 +264,7 @@ test('Compress PDF, then "Protect this PDF with a password": the PDF waits for t
   await protect.click();
   const sentence = fromOne(common.pdf['compress-pdf'].name);
   await waiting(page, '/protect-pdf/', sentence);
-  await expect(region(page)).toHaveText(`${pdfTexts.queue.readyOne} ${sentence}`);
+  await expect(region(page)).toHaveText(`${sentence} ${pdfTexts.queue.readyOne}`);
   // A drop on Protect PDF puts the focus on its button (nobody is typing yet); the fields of the password are under it.
   const action = page.getByRole('button', { name: actionOf(protectTexts), exact: true });
   await expect(action).toBeFocused();
