@@ -26,7 +26,7 @@ export default {
       ['WebP', 'Se guarda de nuevo como WebP, con la calidad de Recomendada o Fuerte; Hasta un tamaño lo convierte en JPG.'],
       ['Recomendada', 'JPG y WebP con calidad 75: el mejor equilibrio entre tamaño y aspecto.'],
       ['Fuerte', 'JPG y WebP con calidad 55: el archivo más pequeño, con algo de pérdida en los detalles finos.'],
-      ['Hasta un tamaño', 'Cada imagen sale como un JPG del tamaño que escribas o menos (1 KB = 1.000 bytes), de 20 a 10.000 KB. Oli baja primero la calidad, y las dimensiones solo si hace falta. La transparencia queda blanca.'],
+      ['Hasta un tamaño', 'Cada imagen sale como un JPG del tamaño que escribas o menos (1 KB = 1,000 bytes), de 20 a 10,000 KB. Oli baja primero la calidad, y las dimensiones solo si hace falta. La transparencia queda blanca.'],
       ['Lote', 'Sin límite de imágenes. Varias imágenes se descargan juntas en un solo ZIP.'],
       ['Ya es pequeño', 'Si la copia nueva no queda más pequeña, recibes el original de vuelta, sin los metadatos de la foto.'],
       ['Metadatos de la foto', 'El modelo de la cámara, la fecha y la ubicación GPS se quitan de todos los archivos.'],
@@ -35,7 +35,7 @@ export default {
   },
   presets: {
     heading: 'Comprimir a un tamaño objetivo',
-    lead: 'Para cualquier otro límite, elige Hasta un tamaño arriba y escribe el máximo en KB, de 20 a 10.000.',
+    lead: 'Para cualquier otro límite, elige Hasta un tamaño arriba y escribe el máximo en KB, de 20 a 10,000.',
     caption: 'Ajustes predefinidos de Comprimir imagen y qué hace cada uno',
     head: ['Ajuste predefinido', 'Qué hace'],
   },
@@ -47,7 +47,7 @@ export default {
     },
     {
       q: '¿Cómo dejo una imagen dentro de un límite, como 200 KB?',
-      a: 'Elige Hasta un tamaño y escribe el límite en el campo Tamaño máximo, en KB. Oli deja cada imagen de ese tamaño o menos, en JPG. Un formulario que cuenta 1 KB como 1.024 bytes también la acepta, porque Oli cuenta 1 KB como 1.000 bytes, la lectura menor. Un PNG con transparencia queda con fondo blanco.',
+      a: 'Elige Hasta un tamaño y escribe el límite en el campo Tamaño máximo, en KB. Oli deja cada imagen de ese tamaño o menos, en JPG. Un formulario que cuenta 1 KB como 1,024 bytes también la acepta, porque Oli cuenta 1 KB como 1,000 bytes, la lectura menor. Un PNG con transparencia queda con fondo blanco.',
     },
     {
       q: '¿Por qué mi PNG casi no se reduce?',
