@@ -9,7 +9,7 @@ export const ICON_NAMES = [
   'key', 'link', 'lock', 'menu', 'merge', 'moon', 'offline', 'page-number', 'paint', 'paste', 'pdf', 'percent',
   'phone-photo', 'piggy', 'qr', 'refinance', 'reorder', 'resize', 'rotate', 'search', 'shield', 'shovel', 'sign',
   'sparkline', 'split', 'stroller', 'sun', 'table', 'tape', 'theme-system', 'thermometer', 'tile', 'trash',
-  'trend-down', 'unlock', 'upload', 'wallet', 'watermark', 'weight',
+  'trend-down', 'unlock', 'upload', 'wallet', 'watermark', 'weight', 'zoom',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
