@@ -10,6 +10,7 @@ import { SW_ENABLED } from '../../src/platform/site.ts';
 import { arriveFrom } from './lib/inbox.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
 import { controlled } from './lib/sw.ts';
+import { recordShifts, shiftsFromNow, shiftsSoFar } from './lib/shifts.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
 // § 464 to § 474). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
@@ -712,4 +713,92 @@ test.describe('the arrival at a tool with an action and the chips of Image to PD
     expect(await band(), 'the band keeps the height it had from the first paint').toBe(bandBefore);
     await context.close();
   });
+});
+
+// F15, frente Q (DECISOES § 662, § 676 and § 677): what is new moves nothing without a gesture, at 360 × 740 and 1280 × 800.
+// Compress image in "Up to a size": the field opens by the click on the third choice (a gesture); from 600 ms after it, the
+// batch, its result and then a typed limit (committed when the field is left) run again with nothing moving. The QR code: the
+// preview has its place from the load, so a typed link moves no piece of the panel. The CLS is Chromium's; in the WebKit the
+// boxes that keep their place say the same.
+test.describe('F15: Compress "Up to a size" and the QR code move nothing without a gesture', () => {
+  const placeOf = (page: Page, selectors: string[]): Promise<number[][]> =>
+    page.evaluate(
+      (list) =>
+        list.map((selector) => {
+          const rect = document.querySelector(selector)?.getBoundingClientRect();
+          return rect ? [rect.x, rect.y + scrollY, rect.width, rect.height].map(Math.round) : [-1];
+        }),
+      selectors,
+    );
+
+  for (const viewport of [PHONE, WIDE]) {
+    test(`Compress image at ${viewport.width}px: "Up to a size", its batch and a typed limit move nothing without a gesture`, async ({ browser, browserName }) => {
+      test.setTimeout(120_000);
+      const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+      await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+      await recordShifts(context);
+      const page = await context.newPage();
+      await open(page, '/compress-image/');
+      await frames(page);
+      await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+      await expect(page.locator('#ci-max')).toBeVisible();
+      await page.waitForTimeout(600);
+      const place = ['.fo-slot', '.fo-band'];
+      const before = await placeOf(page, place);
+      await shiftsFromNow(page);
+      await page.setInputFiles('input[type="file"]', PHOTO());
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 55_000 });
+      await page.waitForTimeout(1500);
+      const batch = await shiftsSoFar(page);
+      expect(await placeOf(page, place), 'the rectangle and the band keep their place').toEqual(before);
+      await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 200 KB$/);
+
+      // A typed limit after the result: "Adjust" opens (a gesture), then the field commits on blur and the batch runs again.
+      await openAdjust(page);
+      await page.waitForTimeout(600);
+      const href = await page.locator('.fo-btn--download').getAttribute('href');
+      const adjusted = await placeOf(page, [...place, '#ci-max', '.fo-result']);
+      await shiftsFromNow(page);
+      await page.locator('#ci-max').fill('150');
+      await page.locator('#ci-max').blur();
+      await expect(page.locator('.fo-btn--download')).not.toHaveAttribute('href', href ?? '', { timeout: 55_000 });
+      await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 150 KB$/);
+      await page.waitForTimeout(1500);
+      const typed = await shiftsSoFar(page);
+      expect(await placeOf(page, [...place, '#ci-max', '.fo-result']), 'the rectangle, the band, the field and the card keep their place').toEqual(adjusted);
+      console.log(`[cls F15] ${browserName} ${viewport.width}px até um tamanho: lote ${batch.cls.toFixed(3)}, limite digitado ${typed.cls.toFixed(3)} ${[...batch.moved, ...typed.moved].slice(0, 4).join('; ')}`);
+      if (browserName === 'chromium') {
+        expect(batch.cls, batch.moved.join('; ')).toBeLessThanOrEqual(0.05);
+        expect(typed.cls, typed.moved.join('; ')).toBeLessThanOrEqual(0.05);
+      }
+      await context.close();
+    });
+
+    test(`the QR code at ${viewport.width}px: the preview has its place from the load, and a typed link moves nothing`, async ({ browser, browserName }) => {
+      const found: string[] = [];
+      for (const lang of LANGS) {
+        const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+        await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+        await recordShifts(context);
+        const page = await context.newPage();
+        await open(page, routeById('qr-code-generator').paths[lang] ?? '/');
+        await frames(page);
+        const pieces = ['.fo-qr', '.fo-qr .fo-field:not(.fo-options)', '.fo-qr__out', '.fo-qr__preview', '.fo-qr__actions', '.fo-qr__options'];
+        const before = await placeOf(page, pieces);
+        // Typed key by key, as a person types (each key is a recent input for 500 ms: the count of bytes and the sizes of the
+        // PNG change their text, and their right edges move, while the keys go); from the last key on, nothing may move.
+        await page.locator('#fo-qr-text').focus();
+        await shiftsFromNow(page);
+        await page.keyboard.type('https://fileorca.com/', { delay: 20 });
+        await expect(page.locator('.fo-qr__code > svg')).toBeVisible();
+        await page.waitForTimeout(1000);
+        const after = await placeOf(page, pieces);
+        const { cls, moved } = await shiftsSoFar(page);
+        if (JSON.stringify(after) !== JSON.stringify(before)) found.push(`${lang}: ${JSON.stringify(before)} → ${JSON.stringify(after)}`);
+        if (browserName === 'chromium' && cls > 0) found.push(`${lang}: CLS ${cls.toFixed(4)} (${moved.join('; ')})`);
+        await context.close();
+      }
+      expect(found, 'a piece of the panel moved').toEqual([]);
+    });
+  }
 });

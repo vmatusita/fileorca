@@ -1,5 +1,5 @@
-// The QR code generator's island (prompt F7, decision 8): a text box, the two options, the preview that follows the typing,
-// and the two downloads. Everything happens on the page: the code is drawn from the text in memory, the PNG on a canvas of
+// The QR code generator's island (prompt F7, decision 8): a text box, the preview that follows the typing, the two
+// downloads and the two options (in this order since F15, § 658). Everything happens on the page: the code is drawn from the text in memory, the PNG on a canvas of
 // the page (no worker: the WebKit of Windows has no OffscreenCanvas in one) and the SVG as a string. The text never leaves
 // the component's state: not the URL, not an event, not a storage, not the file name; and the page never fetches it.
 import { useMemo, useState } from 'preact/hooks';
@@ -104,57 +104,40 @@ export default function QrPanel({ lang, t }: QrPanelData) {
   return (
     <div class="fo-qr">
       <Oli pose={problem || pngFailed ? 'oops' : 'wave'} class="fo-qr__oli" />
-      <div class="fo-qr__form">
-        <div class="fo-field" data-state={problem ? 'error' : undefined}>
-          <div class="fo-field__label">
-            <label for="fo-qr-text">{t.field.label}</label>
-            <span class="fo-qr__count" id="fo-qr-count">
-              {fmt(t.field.count, { count: groupDigits(encoded.bytes, lang), max })}
-            </span>
-          </div>
-          <div class="fo-input fo-input--area">
-            <textarea
-              id="fo-qr-text"
-              rows={4}
-              value={text}
-              placeholder={t.field.placeholder}
-              autocomplete="off"
-              autocapitalize="off"
-              spellcheck={false}
-              aria-invalid={problem ? 'true' : undefined}
-              aria-describedby={describedBy}
-              onInput={onInput}
-            />
-          </div>
-          <p class="fo-field__help" id="fo-qr-help">
-            {fmt(t.field.help, { max })}
-          </p>
-          {problem && (
-            <p class="fo-field__error" id="fo-qr-error" role="alert">
-              <Icon raw={alertIcon} />
-              {fmt(problem === 'long' ? t.errors.long : t.errors.empty, { max })}
-            </p>
-          )}
+      {/* F15 (DECISOES § 658): the DOM goes field, output, options. On a phone the code is born right under the box, in view
+          with the keyboard open; on every screen the Tab goes from the box to the two downloads before the options. From
+          768 px the grid areas of .fo-qr keep the drawing of before: the field and the options on the left, the output on
+          the right over both rows. */}
+      <div class="fo-field fo-qr__field" data-state={problem ? 'error' : undefined}>
+        <div class="fo-field__label">
+          <label for="fo-qr-text">{t.field.label}</label>
+          <span class="fo-qr__count" id="fo-qr-count">
+            {fmt(t.field.count, { count: groupDigits(encoded.bytes, lang), max })}
+          </span>
         </div>
-        <OptionGroup
-          name="fo-qr-oli"
-          legend={t.oli.legend}
-          value={oli ? 'on' : 'off'}
-          choices={[
-            { value: 'on', label: t.oli.on },
-            { value: 'off', label: t.oli.off },
-          ]}
-          onChange={(value) => setOli(value === 'on')}
-        />
-        <OptionGroup
-          name="fo-qr-size"
-          legend={t.size.legend}
-          value={size}
-          choices={PNG_SIZES.map((choice) => ({ value: choice, label: t.size[choice], help: pxOf(choice) }))}
-          onChange={setSize}
-          note={t.size.note}
-          noteId="fo-qr-size-note"
-        />
+        <div class="fo-input fo-input--area">
+          <textarea
+            id="fo-qr-text"
+            rows={4}
+            value={text}
+            placeholder={t.field.placeholder}
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck={false}
+            aria-invalid={problem ? 'true' : undefined}
+            aria-describedby={describedBy}
+            onInput={onInput}
+          />
+        </div>
+        <p class="fo-field__help" id="fo-qr-help">
+          {fmt(t.field.help, { max })}
+        </p>
+        {problem && (
+          <p class="fo-field__error" id="fo-qr-error" role="alert">
+            <Icon raw={alertIcon} />
+            {fmt(problem === 'long' ? t.errors.long : t.errors.empty, { max })}
+          </p>
+        )}
       </div>
       <div class="fo-qr__out">
         <div class="fo-qr__preview" data-state={svg ? 'ready' : 'empty'}>
@@ -198,6 +181,27 @@ export default function QrPanel({ lang, t }: QrPanelData) {
             {t.errors.png}
           </p>
         )}
+      </div>
+      <div class="fo-qr__options">
+        <OptionGroup
+          name="fo-qr-oli"
+          legend={t.oli.legend}
+          value={oli ? 'on' : 'off'}
+          choices={[
+            { value: 'on', label: t.oli.on },
+            { value: 'off', label: t.oli.off },
+          ]}
+          onChange={(value) => setOli(value === 'on')}
+        />
+        <OptionGroup
+          name="fo-qr-size"
+          legend={t.size.legend}
+          value={size}
+          choices={PNG_SIZES.map((choice) => ({ value: choice, label: t.size[choice], help: pxOf(choice) }))}
+          onChange={setSize}
+          note={t.size.note}
+          noteId="fo-qr-size-note"
+        />
       </div>
     </div>
   );

@@ -46,6 +46,9 @@ export const TARGETS = [
   // F15 (frente L; decision 12; DECISOES § 662): the rows of an image batch, the arrows of Image to PDF and their empty
   // places, the bin outside the card and the line a row leaves with its Undo.
   '.fo-filelist__row', '.fo-filelist__moves', '.fo-filelist__move', '.fo-filelist__none', '.fo-filelist__remove', '.fo-filelist__undo',
+  // F15, frente Q (decision 12; DECISOES § 662): the error line of a field (the "Maximum size" of Compress image; the third
+  // choice and the field itself are already .fo-seg, .fo-field, .fo-input and input).
+  '.fo-field__error',
 ].join(', ');
 /** F13b (DECISOES § 573): what of a category hub stays 150 px from every ad: the cards, the Oli and the sea of the band. */
 export const HUB_TARGETS = '.fo-grid, .fo-tool, [data-oli], .fo-hubband__sea, .fo-hubband__water';

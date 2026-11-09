@@ -124,3 +124,40 @@ test.describe('the chip that takes the PDF along and its arrival at a tool with 
     expect(await violationsEverywhere(page), 'os chips da Imagem para PDF que levam o PDF').toEqual([]);
   });
 });
+
+// F15, frente Q (DECISOES § 656, § 658 and § 659): Compress image with "Up to a size" and its field open (before the result,
+// and in "Adjust" after it), and with the error of the field; the QR code with the new order of the panel (the field, the
+// output, the options), with and without a code. Both themes, 360 and 1280 px.
+test.describe('F15: Compress "Up to a size" and the QR code in the new order: no axe violation', () => {
+  test('Compress image with the field "Maximum size" open, in "Adjust" and with its error', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/compress-image/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+    await expect(page.locator('#ci-max')).toBeVisible();
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'o campo aberto antes do arquivo').toEqual([]);
+    await page.setInputFiles('input[type="file"]', { name: 'photo.jpg', mimeType: 'image/jpeg', buffer: await generatedJpeg(page) });
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+    await openAdjust(page);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'o campo no Ajustar').toEqual([]);
+    await page.locator('#ci-max').fill('5');
+    await page.locator('#ci-max').blur();
+    await expect(page.locator('#ci-max')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#ci-max-error')).toBeVisible();
+    expect(await violationsEverywhere(page), 'o erro do campo').toEqual([]);
+  });
+
+  test('the QR code, field, output and options, without a code and with one', async ({ page }) => {
+    await page.goto('/qr-code-generator/');
+    await hydrated(page);
+    await dismissCookies(page);
+    await animationsDone(page);
+    expect(await violationsEverywhere(page), 'sem código').toEqual([]);
+    await page.locator('#fo-qr-text').fill('https://fileorca.com/');
+    await expect(page.locator('.fo-qr__code > svg')).toBeVisible();
+    expect(await violationsEverywhere(page), 'com código').toEqual([]);
+  });
+});
