@@ -7,7 +7,7 @@ import { TEXTS } from '../../i18n/texts.ts';
 import { ICONS } from '../../icons/icons.ts';
 import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
-import { IMAGE_PAGES } from '../image/registry.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../image/registry.ts';
 import { IMAGE_PANEL_TEXTS } from '../image/texts.ts';
 import type { ChipCarry } from '../image/types.ts';
 import type { ImagePanelTexts, PdfPanelTexts } from '../../i18n/types.ts';
@@ -41,19 +41,34 @@ type CarryPdf = keyof PdfPanelTexts['carry']['chips'];
 type CarryImage = keyof ImagePanelTexts['carry']['chips'];
 
 /**
- * F13a · UX-14 (DECISOES § 497): the chip from `source` to `target` takes the result along when the target runs by
- * itself (it shows the result at once, with the note of where it came from) and takes what the source makes; the target's
- * formats and the label go to the island, which decides with the formats of the result itself (takes() of src/share).
+ * F13a · UX-14 (DECISOES § 497): the chip from `source` to `target` takes the result along when the target takes what the
+ * source makes; the target's formats and the label go to the island, which decides with the formats of the result itself
+ * (takes() of src/share). F15 (DECISOES § 654, which replaces the "only link" of the tools with an action in § 497): the
+ * target may run by itself (the result at once) or wait for its action (Merge, Split, Reorder pages, Protect: the files
+ * arrive and wait, § 655); a target with no label in the language only links. Protect PDF still takes nothing along: its
+ * PDF needs a password, which every tool it points at would refuse.
  */
 export function carryOf(source: PdfToolId, target: Target, lang: Lang = 'en'): ChipCarry | undefined {
   const makes = MAKES[source];
   if (makes === 'locked') return undefined;
   if (isPdf(target)) {
-    if (makes === 'images' || PDF_PAGES[target].run !== 'auto' || !(target in PDF_PANEL_TEXTS[lang].carry.chips)) return undefined;
+    if (makes === 'images' || !(target in PDF_PANEL_TEXTS[lang].carry.chips)) return undefined;
     return { accepts: ['pdf'], single: PDF_PAGES[target].files === 'single', ...PDF_PANEL_TEXTS[lang].carry.chips[target as CarryPdf] };
   }
   if (makes !== 'images' || !(target in IMAGE_PANEL_TEXTS[lang].carry.chips)) return undefined;
   return { accepts: [...IMAGE_PAGES[target].accepts], single: false, ...IMAGE_PANEL_TEXTS[lang].carry.chips[target as CarryImage] };
+}
+
+/**
+ * F15 (DECISOES § 653 and § 654): the chip from an image page to a PDF tool takes the PDF along when the page makes one
+ * (Image to PDF, `pdf: true`; an image is no PDF) and the tool has its label in the texts of the image island ("Compress
+ * this PDF"). The rule of carryOf, with the labels of the other island. It lives here, not in image/page.ts, because
+ * pdfOriginsOf needs it too, and image/page.ts already imports this file: the other way round would be an import cycle.
+ */
+export function carryOfImage(source: ImagePageId, target: PdfToolId, lang: Lang = 'en'): ChipCarry | undefined {
+  const labels = IMAGE_PANEL_TEXTS[lang].carry.chips;
+  if (!IMAGE_PAGES[source].pdf || !(target in labels)) return undefined;
+  return { accepts: ['pdf'], single: PDF_PAGES[target].files === 'single', ...labels[target as CarryImage] };
 }
 
 export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
@@ -63,10 +78,20 @@ export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
   });
 }
 
-/** F13a · UX-14 (DECISOES § 498): the PDF tools whose chip takes their result to `target`, with their name. */
+/**
+ * F13a · UX-14 (DECISOES § 498): the PDF tools whose chip takes their result to `target`, with their name. F15 (DECISOES
+ * § 653): and, for a PDF tool, the image pages whose chip takes their PDF to it (Image to PDF, to Compress PDF, Merge PDF and
+ * Add page numbers), by the same next-step list and the same rule as the chips of the image pages (carryOfImage).
+ */
 export function pdfOriginsOf(target: string, lang: Lang = 'en'): Record<string, string> {
   const origins: Record<string, string> = {};
   for (const source of PDF_TOOL_IDS) if (chipsFor(source, lang).some((chip) => chip.target === target && chip.carry)) origins[source] = blurbOf(source, lang).name;
+  if (target in PDF_PAGES) {
+    for (const source of Object.keys(IMAGE_PAGES) as ImagePageId[]) {
+      const leads = (IMAGE_PAGES[source].next as readonly string[]).slice(0, MAX_CHIPS).includes(target);
+      if (leads && carryOfImage(source, target as PdfToolId, lang)) origins[source] = TEXTS[lang].common.tools[source].name;
+    }
+  }
   return origins;
 }
 

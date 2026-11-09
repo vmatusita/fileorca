@@ -4,6 +4,8 @@ import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS, imageToolTexts } from '../../src/tools/image/texts.ts';
 import { blurbOf, chipsFor, crumbsFor, panelData, presetRows, relatedFor } from '../../src/tools/image/page.ts';
+import { PDF_PAGES, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { TEXTS } from '../../src/i18n/texts.ts';
 
 const IMAGE_PAGE_IDS = Object.keys(IMAGE_PAGES) as ImagePageId[];
 
@@ -62,7 +64,9 @@ describe('what the page hands to the island', () => {
         for (const chip of chips) {
           expect(chip.href, `${id} ${lang}`).toBe(routeById(chip.target as ImagePageId).paths[lang]);
           expect(chip.href.startsWith(`/${lang}/`), chip.href).toBe(true);
-          expect(chip.name, `${id} ${lang}`).toBe(blurbOf(chip.target as ImagePageId, lang)?.name);
+          // F15 (DECISOES § 653): the chips of Image to PDF lead to PDF tools, named by the PDF side of the common texts.
+          const name = chip.target in PDF_PAGES ? TEXTS[lang].common.pdf[chip.target as PdfToolId].name : blurbOf(chip.target as ImagePageId, lang)?.name;
+          expect(chip.name, `${id} ${lang}`).toBe(name);
         }
       }
     }

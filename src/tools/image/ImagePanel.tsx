@@ -1556,13 +1556,15 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   // F13a · UX-14 (DECISOES § 496 and § 497): what each chip would take along, decided here in the client: the
   // files that came out (not the ZIP), in the order of the list, and a service worker in control. The D-17 chip takes
-  // the refused file itself, as it was chosen.
+  // the refused file itself, as it was chosen. F15 (DECISOES § 653): Image to PDF takes the PDF of the batch (the one
+  // Download hands out), and its line says so in the words of the PDF; the hidden copy keeps that line and the label of
+  // one PDF (always one: "Merge this PDF with others" is longer than "Merge these 10 PDFs").
   const controlled = workerControls();
   const outgoing: { format: string; file: Outgoing }[] =
     band === 'elsewhere' && single?.failure?.reason === 'wrong-tool'
       ? [{ format: single.failure.source ?? 'unknown', file: { name: single.file.name, blob: single.file } }]
       : pdf
-        ? []
+        ? m.bundle?.kind === 'pdf' ? [{ format: 'pdf', file: { name: m.bundle.name, blob: m.bundle.blob } }] : []
         : rows.map((row) => ({ format: row.output.format, file: { name: nameFor.get(row.item.id) ?? '', blob: row.output.blob } }));
   const formats = outgoing.map((entry) => entry.format);
   const takes = (chip: ChipData): number => (chip.carry && controlled ? carries(chip.carry.accepts, chip.carry.single, formats) : 0);
@@ -1572,7 +1574,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const taken = outgoing.filter((entry) => carry.accepts.includes(entry.format)).map((entry) => entry.file);
     return carry.single ? taken.slice(0, 1) : taken;
   };
-  const carryLine = formats.length > 1 ? t.carry.lineMany : t.carry.line;
+  const carryLine = pdf ? t.carry.linePdf : formats.length > 1 ? t.carry.lineMany : t.carry.line;
+  const roomLabel = (carry: NonNullable<ChipData['carry']>): string => (pdf ? carry.one : fmt(carry.many, { count: 10 }));
 
   return (
     <div class="fo-tool-island" ref={rootRef} data-state={islandState}>
@@ -1639,12 +1642,12 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
                   <span class="fo-chip__dot">
                     <Icon inner={chip.icon} />
                   </span>
-                  {chip.carry ? fmt(chip.carry.many, { count: 10 }) : chip.name}
+                  {chip.carry ? roomLabel(chip.carry) : chip.name}
                   <Icon raw={arrowIcon} />
                 </span>
               ))}
             </div>
-            {chips.some((chip) => chip.carry) && <CarryLine text={t.carry.lineMany} icon={carryIcons.shield} />}
+            {chips.some((chip) => chip.carry) && <CarryLine text={pdf ? t.carry.linePdf : t.carry.lineMany} icon={carryIcons.shield} />}
             {tool.now ? <div class="fo-band__room" /> : options}
           </div>
         )}
