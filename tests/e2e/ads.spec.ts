@@ -750,3 +750,28 @@ test.describe('distância dos anúncios com a vista da página aberta, a 360×74
     console.log(`/merge-pdf/ menor vão com a vista: ${gaps.join(' | ')}`);
   });
 });
+
+// F15 (frente L; decision 12; DECISOES § 662 and § 668): the list of Image to PDF with three photos, the arrows and the bin
+// outside each card, then the line a row leaves with its Undo, at 360 × 740 and at 1280 × 800: 150 px from every ad, no
+// ad in the island, and the shortest distance of each new control for the report.
+test.describe('distância dos anúncios da lista da Imagem para PDF, a 360×740 e a 1280×800', () => {
+  test('/image-to-pdf/: the arrows, the bins and the line of Undo of the list, 150px from every ad', async ({ page }) => {
+    test.setTimeout(120_000);
+    const gaps: string[] = [];
+    await page.setViewportSize(VIEWPORTS[0]);
+    expect((await page.goto('/image-to-pdf/'))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const adCount = await page.locator('.fo-ad').count();
+    expect(adCount, 'AdSlots da página').toBeGreaterThan(0);
+    await chooseImages(page, await jpegBatch(page, 3));
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('#fo-tool-root .fo-filelist__remove')).toHaveCount(3);
+    const list = ['.fo-filelist__row', '.fo-filelist__move', '.fo-filelist__none', '.fo-filelist__remove'];
+    await measureNow(page, '/image-to-pdf/ lista', adCount, gaps, list);
+    await page.getByRole('button', { name: 'Remove photo-2.jpg', exact: true }).click();
+    await expect(page.locator('#fo-tool-root .fo-filelist__undo')).toBeVisible();
+    await measureNow(page, '/image-to-pdf/ linha do Desfazer', adCount, gaps, ['.fo-filelist__undo', ...list]);
+    console.log(`/image-to-pdf/ menor vão da lista: ${gaps.join(' | ')}`);
+  });
+});

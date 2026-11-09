@@ -567,3 +567,81 @@ test.describe('a photo of a phone, with its metadata: the result keeps the recta
     });
   }
 });
+
+// F15 (frente L; DECISOES § 651, § 662 and § 668): the list of Image to PDF with three photos at 360 × 740. Every row keeps
+// its height from the first paint to the result: the card has the height of a card that works (the bar under the name),
+// and the arrows and the bin outside it keep their places (a row that waits keeps the place of the bin), so a photo that is
+// ready grows no row. The photos are held until the list is on screen (the first row at the top of the window, as for a
+// person who looks at it), so a row that moved would count in the layout shift.
+const LIST_PHOTOS = ['gen-jpg-01-orientacao6.jpg', 'gen-webp-exif-gps.webp', 'gen-png-transparente.png'].map((name) =>
+  fixture(name, name, name.endsWith('.png') ? 'image/png' : name.endsWith('.webp') ? 'image/webp' : 'image/jpeg'),
+);
+
+test.describe('the list of Image to PDF at 360 × 740: a photo that is ready grows no row', () => {
+  test('three photos, the list on screen: every row keeps its place and its height, and the use moves nothing', async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'block' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    const engine = await slowEngine(page);
+    await open(page, '/image-to-pdf/');
+    await page.setInputFiles('input[type="file"]', LIST_PHOTOS);
+    await expect(page.locator('.fo-filelist__row')).toHaveCount(3);
+    await page.evaluate(() => {
+      document.querySelector('.fo-queue')?.scrollIntoView({ block: 'start' });
+      // Every frame from now on: the place and the height of each row, in the page.
+      const seen: string[] = [];
+      (window as unknown as { __rows: string[] }).__rows = seen;
+      const look = () => {
+        seen.push(
+          [...document.querySelectorAll('.fo-filelist__row')]
+            .map((row) => {
+              const box = row.getBoundingClientRect();
+              return `${Math.round((box.top + scrollY) * 10) / 10}:${Math.round(box.height * 10) / 10}`;
+            })
+            .join(' | '),
+        );
+        if (!(window as unknown as { __stop?: boolean }).__stop) requestAnimationFrame(look);
+      };
+      look();
+      (window as unknown as { __shifts: { from: number } }).__shifts.from = performance.now();
+    });
+    engine.release();
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await page.waitForTimeout(1500);
+    const rows = await page.evaluate(() => {
+      (window as unknown as { __stop: boolean }).__stop = true;
+      return [...new Set((window as unknown as { __rows: string[] }).__rows)];
+    });
+    const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+    console.log(`[lista da Imagem para PDF] ${browserName}: ${rows.length} desenho(s) das linhas (${rows.join(' / ')}); cls ${shifts.cls.toFixed(4)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    expect(rows, 'the rows keep their place and their height while the photos are made and when they are ready').toHaveLength(1);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBe(0);
+    await context.close();
+  });
+
+  test('three photos, the page at the top: the layout shift of the use is 0.05 at most, and the band and the rectangle keep their place', async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'block' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    await open(page, '/image-to-pdf/');
+    await frames(page);
+    const place = () =>
+      page.evaluate(() => [document.querySelector('.fo-band')?.getBoundingClientRect().top ?? -1, document.querySelector('.fo-slot')?.getBoundingClientRect().height ?? -1].map(Math.round));
+    const before = await place();
+    await page.evaluate(() => {
+      (window as unknown as { __shifts: { from: number } }).__shifts.from = performance.now();
+    });
+    await page.setInputFiles('input[type="file"]', LIST_PHOTOS);
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await page.waitForTimeout(1500);
+    const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+    console.log(`[cls da interação] ${browserName} imagem para PDF com 3 fotos: ${shifts.cls.toFixed(3)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+    expect(await place(), 'the band and the rectangle keep their place').toEqual(before);
+    await context.close();
+  });
+});
