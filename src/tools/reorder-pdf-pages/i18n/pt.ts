@@ -11,7 +11,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
   h1: 'Organizar páginas do PDF',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte um PDF na caixa, escolha o arquivo ou cole: a Oli trabalha com um PDF por vez e mostra uma miniatura de cada página.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole: a Oli trabalha com um PDF por vez e mostra uma miniatura de cada página, com uma lupa que abre a página em tamanho grande.',
     'Arraste uma página para o novo lugar, use as setas dela ou o teclado (a tecla Espaço pega, as setas movem e a tecla Espaço solta), ou aperte Inverter a ordem para virar o PDF inteiro.',
     'Aperte Salvar a nova ordem e baixe o PDF novo, enquanto o seu arquivo original continua intacto.',
   ],

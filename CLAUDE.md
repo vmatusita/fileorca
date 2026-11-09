@@ -21,6 +21,8 @@ Regras para toda run do Claude Code neste repositório. Valem junto com a ficha 
 
 Na dúvida, a opção mais simples e reversível, registrada no DECISOES.md.
 
+O PLANO-UX-QV.md traz as fichas da F14 à F18; a ficha de cada run continua sendo a fonte nº 1, e a mudança no contrato dele entra pela linha 15 do PLANO-MELHORIAS.md.
+
 ## Arquitetura é fixa
 
 Host, framework, estrutura do repositório e pipeline não mudam numa run. Se a run achar que precisa mudar, escreve uma ADR nova com status "Proposta" em docs/adr/, deixa a mudança de fora e registra a pendência no relatório.

@@ -128,11 +128,17 @@ test.describe('F-5: the preview of Sign PDF at the pixel ratio of the screen', (
     await expect
       .poll(() => preview.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth >= Math.ceil(img.clientWidth * devicePixelRatio)), { timeout: 30_000 })
       .toBe(true);
-    // The grid of the pages keeps its small pictures (240 px).
+    // The grid of the pages keeps its small pictures: since the F14 (DECISOES § 619) each one is as wide as its sheet
+    // shows at the pixel ratio, rounded up to 60 px, never more than 720 px.
     await option(page, signTexts.panel.options.pickPages);
     const cell = page.locator('#fo-tool-root .fo-pages__grid .fo-page__sheet img').first();
     await expect(cell).toBeVisible({ timeout: 30_000 });
-    expect(await cell.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeLessThanOrEqual(240);
+    const { natural, asked } = await cell.evaluate((img: HTMLImageElement) => {
+      const sheet = (img.parentElement as HTMLElement).getBoundingClientRect().width;
+      return { natural: img.naturalWidth, asked: Math.max(60, Math.ceil(Math.min(720, sheet * devicePixelRatio) / 60) * 60) };
+    });
+    expect(Math.abs(natural - asked)).toBeLessThanOrEqual(2);
+    expect(natural).toBeLessThanOrEqual(720);
   });
 });
 
@@ -206,9 +212,11 @@ test('D-7 and F-8: a picked page has the check before its number, and its fold s
   await expect(picked.locator('.fo-page__check .fo-icon')).toBeVisible();
   await expect(cells.nth(0).locator('.fo-page__check .fo-icon')).toBeHidden();
   expect(await picked.evaluate((cell) => getComputedStyle(cell, '::after').top)).toBe('-3px');
-  // The circle is in the number, which is only seen: the name of the cell says "picked".
+  // The circle is in the number, which is only seen: the name of the cell says it. F14 (item 4, DECISOES § 627): in Delete
+  // a picked page comes out, so its circle has the trash and its name ends in ", comes out" (Split and Sign keep the check
+  // and ", picked": island-pdf-marking.spec.ts).
   await expect(picked.locator('.fo-page__n')).toHaveAttribute('aria-hidden', 'true');
-  await expect(picked.locator('.fo-page__main')).toHaveAttribute('aria-label', /, picked$/);
+  await expect(picked.locator('.fo-page__main')).toHaveAttribute('aria-label', new RegExp(`${panel.grid.leaving}$`));
 });
 
 for (const scheme of ['light', 'dark'] as const) {

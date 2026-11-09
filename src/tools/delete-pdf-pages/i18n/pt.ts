@@ -12,7 +12,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte um PDF na caixa, escolha o arquivo ou cole.',
-    'Marque as páginas que vão sair na grade de miniaturas, ou digite os números delas, como 1-3, 5.',
+    'Marque as páginas que vão sair na grade de miniaturas, ou digite os números delas, como 1-3, 5. A lupa de cada página abre a página em tamanho grande, para você conferir antes.',
     'Aperte Excluir páginas, e a Oli monta um PDF novo com as páginas que sobraram.',
     'Baixe o PDF novo, e o seu arquivo original continua intacto.',
   ],
@@ -51,7 +51,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
     },
     {
       q: 'Dá para desfazer se eu excluir as páginas erradas?',
-      a: 'O seu arquivo original nunca muda, porque a Oli grava um PDF novo. Se o novo não ficou como você queria, aperte Começar de novo, escolha o original outra vez e marque outras páginas.',
+      a: 'O seu arquivo original nunca muda, porque a Oli grava um PDF novo. Depois do resultado, as páginas continuam à vista: marque ou desmarque outras, e o botão para excluir volta, pronto para fazer outro PDF. Só aperte Começar de novo para escolher outro arquivo.',
     },
     {
       q: 'Os formulários, os links e os marcadores continuam?',

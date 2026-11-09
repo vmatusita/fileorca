@@ -12,6 +12,8 @@ import { chooseImage, chooseImages, coffeeLineInOneUse, dismissCookies, dragOver
 import { INBOX_CACHE, INBOX_TOOL_KEY, inboxEntryPath } from '../../src/sw/shared.ts';
 import { DEFAULT_BUILD_ORIGIN, useTestBuild } from './lib/test-build.ts';
 import { CLEARANCE, HUB_TARGETS, RAIL, TARGETS, TRANSLATED, VIEWPORTS, boxes, distance, english, expectAdsOutsideThePanel, expectClearance, openOnScreen, smallFiles } from './lib/ad-clearance.ts';
+import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
+import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 
 // Review F13b c-3 (DECISOES § 592): the header, the PDF tools and the file guides are in clearance.spec.ts, a name that falls
 // in a lighter part of the CI; the helpers of both are in tests/e2e/lib/ad-clearance.ts.
@@ -585,3 +587,166 @@ test('the home and health hubs keep their first content AdSlot right after the g
 
 // F5a (prompt decision 12; DECISOES § 170): every PDF tool page, at 360x740 and 1280x800 on one load, in each
 // state the page reaches (tests/e2e/lib/pdf-states.ts): at rest, while the file is read (the engine held back, so the
+
+// F14 (criterion 4, decision 14; DECISOES § 634): the page view of the PDF tools, open in "Fit" and in "Enlarge", at
+// 360 × 740 and at 1280 × 800, in the five grid tools in English and in Delete in Portuguese and Spanish, with the result
+// of Delete ("View the new PDF") and the Merge list ("View pages of {name}"). Every control of the view (its buttons, the
+// frame and the pictures), the magnifier, "View the new PDF", "View pages" and the size choice stay 150 px from every ad
+// (they are in TARGETS), no ad is inside the island, and nothing of the site is over a simulated AdSense anchor (fixed at
+// the foot, 100 px, as in cookie-footer.spec.ts): at every point of it, elementFromPoint gives the anchor, never the
+// <main> or the island, with the bar and with the page of the view under it.
+type ViewTool = 'delete-pdf-pages' | 'split-pdf' | 'rotate-pdf' | 'sign-pdf' | 'reorder-pdf-pages';
+const VIEW_CASES: { id: ViewTool; lang: 'en' | 'pt' | 'es' }[] = [
+  ...(['delete-pdf-pages', 'split-pdf', 'rotate-pdf', 'sign-pdf', 'reorder-pdf-pages'] as const).map((id) => ({ id, lang: 'en' as const })),
+  { id: 'delete-pdf-pages', lang: 'pt' },
+  { id: 'delete-pdf-pages', lang: 'es' },
+];
+const VIEW_TARGETS = `${TARGETS}, .fo-pdf-island, .fo-ready, .fo-pages, .fo-pages__grid, .fo-page, .fo-page__main, .fo-merge-panel, .fo-merge, .fo-merge__remove`;
+
+/** Nothing of the site over the anchor: every point of it gives the anchor, with each part of the view brought under it. */
+async function expectAnchorOnTop(page: Page, label: string): Promise<void> {
+  await page.evaluate(() => {
+    const anchor = document.createElement('ins');
+    anchor.className = 'adsbygoogle';
+    anchor.id = 'fo-test-anchor';
+    anchor.setAttribute('data-anchor-status', 'displayed');
+    anchor.style.cssText = 'position:fixed;left:0;right:0;bottom:0;height:100px;display:block';
+    document.body.append(anchor);
+  });
+  for (const part of ['.fo-pview__bar', '.fo-pview__frame', '.fo-pview__top']) {
+    const covered = await page.evaluate((selector) => {
+      const element = document.querySelector(`#fo-tool-root ${selector}`);
+      const anchor = document.getElementById('fo-test-anchor');
+      if (!element || !anchor) return ['missing'];
+      const box = element.getBoundingClientRect();
+      // The middle of the part 50 px above the foot of the window, in the band of the anchor.
+      window.scrollBy(0, box.top + Math.min(box.height / 2, 60) - (innerHeight - 50));
+      const found: string[] = [];
+      for (let x = innerWidth * 0.05; x < innerWidth; x += innerWidth * 0.1) {
+        for (let y = innerHeight - 95; y < innerHeight; y += 30) {
+          const hit = document.elementFromPoint(x, y);
+          if (hit !== anchor || hit.closest('main, #fo-tool-root')) found.push(`${Math.round(x)},${Math.round(y)} ${hit ? `${hit.tagName}.${hit.className}` : 'nothing'}`);
+        }
+      }
+      return found;
+    }, part);
+    expect(covered, `${label}: o site por cima da âncora, com ${part} embaixo dela`).toEqual([]);
+  }
+  await page.evaluate(() => document.getElementById('fo-test-anchor')?.remove());
+}
+
+/** The 150 px, the ads outside the island and the anchor, in "Fit" and "Enlarge", at both sizes of window. */
+async function measureView(page: Page, label: string, adCount: number, gaps: string[], enlarge: string, fit: string): Promise<void> {
+  const view = page.locator('#fo-tool-root .fo-pview');
+  for (const mode of ['Fit', 'Enlarge'] as const) {
+    if (mode === 'Enlarge') await view.getByRole('button', { name: enlarge, exact: true }).click();
+    await expect(view.locator('.fo-pview__img')).toBeVisible({ timeout: 30_000 });
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+      const at = `${label}, ${mode}, ${viewport.width}px`;
+      await view.scrollIntoViewIfNeeded();
+      const tool = (await boxes(page, '#fo-tool-root'))[0];
+      for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${at}: AdSlot acima da ferramenta`).toBeGreaterThan((tool?.y ?? 0) + (tool?.h ?? 0));
+      if (viewport.width >= 1280) await expect(page.locator(RAIL)).toBeVisible();
+      await expectAdsOutsideThePanel(page, at, adCount);
+      const least = await expectClearance(page, at, VIEW_TARGETS);
+      // The picture as seen: enlarged, its box passes the frame that scrolls, and the part on screen is inside the frame.
+      const seen = await view.evaluate((element) => {
+        const frame = (element.querySelector('.fo-pview__frame') as HTMLElement).getBoundingClientRect();
+        const img = (element.querySelector('.fo-pview__img') as HTMLElement).getBoundingClientRect();
+        const left = Math.max(frame.left, img.left);
+        const top = Math.max(frame.top, img.top);
+        return { kind: 'fo-pview__img (seen)', x: left + scrollX, y: top + scrollY, w: Math.min(frame.right, img.right) - left, h: Math.min(frame.bottom, img.bottom) - top };
+      });
+      expect(seen.w * seen.h, `${at}: the picture on screen`).toBeGreaterThan(0);
+      const ads = await boxes(page, '.fo-ad');
+      for (const ad of ads) expect(distance(ad, seen), `${at}: AdSlot a ${distance(ad, seen).toFixed(0)}px da página vista`).toBeGreaterThanOrEqual(CLEARANCE);
+      const picture = Math.min(...ads.map((ad) => distance(ad, seen)));
+      gaps.push(`${mode} ${viewport.width}px ${least.toFixed(0)} (${await nearest(page, ['.fo-pview .fo-btn', '.fo-pview__frame'])}, the picture seen ${picture.toFixed(0)})`);
+      await expectAnchorOnTop(page, at);
+    }
+  }
+  await view.getByRole('button', { name: fit, exact: true }).click();
+  await page.setViewportSize(VIEWPORTS[0]);
+}
+
+/** The 150 px of what is on screen without the view (the magnifiers and the size choice, a button of the result or a row). */
+async function measureNow(page: Page, label: string, adCount: number, gaps: string[], selectors: string[]): Promise<void> {
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize(viewport);
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+    for (const selector of selectors) expect((await boxes(page, selector)).length, `${label} ${viewport.width}px: ${selector} na tela`).toBeGreaterThan(0);
+    await expectAdsOutsideThePanel(page, `${label} ${viewport.width}px`, adCount);
+    const least = await expectClearance(page, `${label} a ${viewport.width}px`, VIEW_TARGETS);
+    gaps.push(`${viewport.width}px ${least.toFixed(0)} (${await nearest(page, selectors)})`);
+  }
+  await page.setViewportSize(VIEWPORTS[0]);
+}
+
+/** The smallest distance from each control to an ad, for the report (DECISOES § 634). */
+async function nearest(page: Page, selectors: string[]): Promise<string> {
+  const ads = await boxes(page, '.fo-ad');
+  const parts: string[] = [];
+  for (const selector of selectors) {
+    const found = await boxes(page, selector);
+    if (found.length > 0) parts.push(`${selector} ${Math.min(...found.flatMap((box) => ads.map((ad) => distance(ad, box)))).toFixed(0)}`);
+  }
+  return parts.join(', ');
+}
+
+test.describe('distância dos anúncios com a vista da página aberta, a 360×740 e a 1280×800', () => {
+  for (const { id, lang } of VIEW_CASES) {
+    const path = routeById(id).paths[lang] ?? '';
+    test(`${path}: the magnifier, the size choice and the page view in "Fit" and "Enlarge", 150px from every ad and under the anchor`, async ({ page }) => {
+      test.setTimeout(120_000);
+      const words = PDF_PANEL_TEXTS[lang];
+      const options = (PDF_TOOL_TEXTS[lang][id].panel as unknown as { options: Record<string, string> }).options;
+      const gaps: string[] = [];
+      await page.setViewportSize(VIEWPORTS[0]);
+      await openTool(page, path);
+      const adCount = await page.locator('.fo-ad').count();
+      expect(adCount, 'AdSlots da página').toBeGreaterThan(0);
+      const root = page.locator('#fo-tool-root');
+      await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
+      if (id === 'rotate-pdf') {
+        await expect(root.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+        await root.locator('.fo-adjust > summary').click();
+      } else await expect(root.locator('.fo-ready:not(.fo-ready--reading)')).toBeVisible({ timeout: 30_000 });
+      const pick = id === 'split-pdf' || id === 'rotate-pdf' ? options['pick'] : id === 'sign-pdf' ? options['pickPages'] : undefined;
+      if (pick) await root.locator('.fo-seg__opt').filter({ hasText: pick }).first().click();
+      const cells = root.locator('.fo-pages__grid > li');
+      await expect(cells).toHaveCount(8, { timeout: 30_000 });
+      await measureNow(page, `${path} grade`, adCount, gaps, ['.fo-page__zoom', '.fo-pages .fo-seg']);
+      await cells.nth(0).locator('.fo-page__zoom').click();
+      await measureView(page, `${path} vista`, adCount, gaps, words.view.enlarge, words.view.fit);
+      if (id === 'delete-pdf-pages') {
+        await root.locator('.fo-pview').getByRole('button', { name: words.view.back, exact: true }).click();
+        await cells.nth(1).locator('.fo-page__main').click();
+        await root.locator('.fo-ready .fo-btn--brand').click();
+        const view = root.getByRole('button', { name: words.view.openResult, exact: true });
+        await expect(view).toBeVisible({ timeout: 60_000 });
+        await measureNow(page, `${path} resultado`, adCount, gaps, ['.fo-result__view']);
+        await view.click();
+        await measureView(page, `${path} vista do resultado`, adCount, gaps, words.view.enlarge, words.view.fit);
+      }
+      console.log(`${path} menor vão com a vista: ${gaps.join(' | ')}`);
+    });
+  }
+
+  test('/merge-pdf/: "View pages of {name}" on each row and the view of a file, 150px from every ad and under the anchor', async ({ page }) => {
+    test.setTimeout(120_000);
+    const words = PDF_PANEL_TEXTS.en;
+    const gaps: string[] = [];
+    await page.setViewportSize(VIEWPORTS[0]);
+    await openTool(page, '/merge-pdf/');
+    const adCount = await page.locator('.fo-ad').count();
+    const root = page.locator('#fo-tool-root');
+    await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-ja-otimizado.pdf')]);
+    await expect(root.locator('.fo-merge-panel .fo-btn--brand')).toBeVisible({ timeout: 30_000 });
+    await measureNow(page, '/merge-pdf/ lista', adCount, gaps, ['.fo-merge__view']);
+    await root.locator('.fo-merge__view').nth(1).click();
+    await measureView(page, '/merge-pdf/ vista de um arquivo', adCount, gaps, words.view.enlarge, words.view.fit);
+    console.log(`/merge-pdf/ menor vão com a vista: ${gaps.join(' | ')}`);
+  });
+});

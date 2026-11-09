@@ -352,6 +352,25 @@ Da seção C do PLANO-MELHORIAS (F12, DECISOES § 441), que trocou a tabela "Doa
 | Texto de la página de apoyo | FileOrca es gratis, sin registros ni límites, y lo hace una sola persona en Curitiba, Brasil. Los anuncios cubren los costos; cada café se convierte en la próxima herramienta. |
 | Ruta de navegación de la página de apoyo | Apoya a Oli |
 
+## La cuadrícula y la vista de la página (F14)
+
+Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): o espanhol segue o registro deste arquivo ("tú", botão no infinitivo sem ponto, "elegir" para "pick", "presionar", nunca "pulsar"); o português está na ficha.
+
+| Lugar (inglês) | Español |
+| --- | --- |
+| Page size · Small · Large | Tamaño de las páginas · Pequeñas · Grandes |
+| Pick all · Pick none · Invert selection | Elegir todas · Desmarcar todas · Invertir selección |
+| View page {n} enlarged (la lupa) | Ver la página {n} en tamaño grande |
+| Back to the pages · Previous · Next | Volver a las páginas · Anterior · Siguiente |
+| Enlarge · Fit | Ampliar · Ajustar |
+| View the new PDF · View pages of {name} | Ver el PDF nuevo · Ver páginas de {name} |
+| Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posición {p} de {total} |
+| Take this page out · Pick this page · Sign this page · Turn 90° | Quitar esta página · Elegir esta página · Firmar esta página · Girar 90° |
+| (Eliminar) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} salen · el PDF nuevo queda con {left} páginas ("1 de 12 sale", "queda con 1 página") |
+| (Eliminar, el nombre de la página) …, comes out | …, sale |
+| Pages {from} to {to} picked · unpicked | Páginas {from} a {to} elegidas · desmarcadas |
+| magnifier · page view | lupa · vista de la página |
+
 ## Nunca
 
 Cada linha da tabela é um termo proibido nos textos em espanhol e nas páginas `/es/`. A comparação ignora maiúsculas e só casa a palavra inteira.

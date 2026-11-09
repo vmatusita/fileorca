@@ -8,6 +8,7 @@ import FieldError from './FieldError.tsx';
 import Icon from '../../icons/Icon.tsx';
 import OptionGroup, { type OptionGroupProps } from '../image/OptionGroup.tsx';
 import PageGrid from './PageGrid.tsx';
+import { countOf, setOf } from './grid-math.ts';
 import PasswordField from './PasswordField.tsx';
 import SignatureArea, { fitBox, type SignatureBox, type SignatureImage } from './SignatureArea.tsx';
 import TextField from './TextField.tsx';
@@ -32,14 +33,20 @@ import type { PdfOptionsProps, PdfToolDef } from './types.ts';
 
 const pageCount = (props: { file: { info: { pages: number } | null } | null }): number => props.file?.info?.pages ?? 0;
 
-/** The "pick pages by number" field above a grid: it sets the grid's selection. */
-function RangePicker({ id, total, onPick, panel }: { id: string; total: number; onPick: (pages: number[]) => void; panel: PdfOptionsProps<unknown, unknown>['panel'] }) {
+/**
+ * The "pick pages by number" field above a grid: it sets the grid's selection and says the count once, in Delete's
+ * form where a picked page comes out (F14, d-2; DECISOES § 629). The grid keeps no anchor after it (§ 628).
+ */
+function RangePicker({ id, total, onPick, panel, announce, removes = false }: { id: string; total: number; onPick: (pages: number[]) => void; panel: PdfOptionsProps<unknown, unknown>['panel']; announce: (message: string) => void; removes?: boolean }) {
   const [text, setText] = useState('');
   const [wrong, setWrong] = useState(false);
   const apply = (value: string) => {
     const ranges = parseRanges(value, total);
     setWrong(ranges === null);
-    if (ranges) onPick(pagesOf(ranges));
+    if (!ranges) return;
+    const pages = pagesOf(ranges);
+    onPick(pages);
+    announce(countOf(panel.grid, pages.length, total, removes));
   };
   return (
     <TextField
@@ -94,9 +101,10 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
       )}
       {state.mode === 'pick' && file?.info && (
         <>
-          <RangePicker id="fo-split-pick" total={total} panel={panel} onPick={(picked) => update({ picked })} />
+          <RangePicker id="fo-split-pick" total={total} panel={panel} announce={props.announce} onPick={(picked) => update({ picked })} />
           <PageGrid
             id="fo-split-grid"
+            view={{ texts: panel.view, action: 'mark' }}
             name={file.name}
             boxes={file.info.boxes}
             mode="select"
@@ -104,10 +112,8 @@ function SplitOptions(props: PdfOptionsProps<SplitState, SplitTexts>) {
             icons={props.icons}
             thumbnails={props.thumbnails}
             announce={props.announce}
-            selected={new Set(state.picked)}
-            onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-            onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-            onSelectNone={() => update({ picked: [] })}
+            selected={setOf(state.picked)}
+            onSelect={(picked) => update({ picked })}
           />
           {props.showErrors && state.picked.length === 0 && <FieldError>{texts.pickNone}</FieldError>}
         </>
@@ -295,6 +301,7 @@ function RotateOptions(props: PdfOptionsProps<RotateState, RotatePdfTexts>) {
       {single && state.scope === 'pick' && file?.info && (
         <PageGrid
           id="fo-rotate-grid"
+          view={{ texts: panel.view, action: 'turn' }}
           name={file.name}
           boxes={file.info.boxes}
           mode="rotate"
@@ -338,9 +345,10 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
   return (
     <div class="fo-options-stack">
       <p class="fo-field__help">{texts.help}</p>
-      <RangePicker id="fo-delete-pick" total={total} panel={panel} onPick={(picked) => update({ picked })} />
+      <RangePicker id="fo-delete-pick" total={total} panel={panel} announce={props.announce} removes onPick={(picked) => update({ picked })} />
       <PageGrid
         id="fo-delete-grid"
+        view={{ texts: panel.view, action: 'remove' }}
         name={file.name}
         boxes={file.info.boxes}
         mode="select"
@@ -348,10 +356,9 @@ function DeleteOptions(props: PdfOptionsProps<PickState, DeleteTexts>) {
         icons={props.icons}
         thumbnails={props.thumbnails}
         announce={props.announce}
-        selected={new Set(state.picked)}
-        onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-        onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-        onSelectNone={() => update({ picked: [] })}
+        selected={setOf(state.picked)}
+        onSelect={(picked) => update({ picked })}
+        removes
       />
       {state.picked.length >= total && total > 0 && <FieldError>{texts.allPicked}</FieldError>}
       {props.showErrors && state.picked.length === 0 && <FieldError>{texts.nonePicked}</FieldError>}
@@ -514,6 +521,7 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
           {state.scope === 'pick' && (
             <PageGrid
               id="fo-sign-grid"
+              view={{ texts: panel.view, action: 'sign' }}
               name={file.name}
               boxes={file.info.boxes}
               mode="select"
@@ -521,10 +529,8 @@ function SignOptions(props: PdfOptionsProps<SignState, SignTexts>) {
               icons={props.icons}
               thumbnails={thumbnails}
               announce={props.announce}
-              selected={new Set(state.picked)}
-              onToggle={(index) => update({ picked: state.picked.includes(index) ? state.picked.filter((page) => page !== index) : [...state.picked, index] })}
-              onSelectAll={() => update({ picked: Array.from({ length: total }, (_, i) => i) })}
-              onSelectNone={() => update({ picked: [] })}
+              selected={setOf(state.picked)}
+              onSelect={(picked) => update({ picked })}
             />
           )}
         </>
@@ -663,6 +669,7 @@ function ReorderOptions(props: PdfOptionsProps<ReorderState, ReorderTexts>) {
       </div>
       <PageGrid
         id="fo-reorder-grid"
+        view={{ texts: panel.view }}
         name={file.name}
         boxes={file.info.boxes}
         mode="order"

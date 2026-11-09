@@ -304,6 +304,25 @@ Da seção C do PLANO-MELHORIAS (F12, DECISOES § 441), que trocou a tabela "Doa
 | Recebedor | Em nome de Victor Yuki Matusita |
 | "copia e cola" | Pix copia e cola |
 
+## A grade e a vista da página (F14)
+
+Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): os textos de pt são os da ficha, sem mudar uma palavra; o inglês é a fonte do site, e o espanhol está no glossário de lá.
+
+| Lugar (inglês) | Português |
+| --- | --- |
+| Page size · Small · Large | Tamanho das páginas · Pequenas · Grandes |
+| Pick all · Pick none · Invert selection | Marcar todas · Desmarcar todas · Inverter seleção |
+| View page {n} enlarged (a lupa) | Ver a página {n} em tamanho grande |
+| Back to the pages · Previous · Next | Voltar às páginas · Anterior · Próxima |
+| Enlarge · Fit | Ampliar · Ajustar |
+| View the new PDF · View pages of {name} | Ver o PDF novo · Ver páginas de {name} |
+| Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posição {p} de {total} |
+| Take this page out · Pick this page · Sign this page · Turn 90° | Tirar esta página · Marcar esta página · Assinar esta página · Girar 90° |
+| (Excluir) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} saem · o PDF novo fica com {left} páginas ("1 de 12 sai", "fica com 1 página") |
+| (Excluir, o nome da página) …, comes out | …, sai |
+| Pages {from} to {to} picked · unpicked | Páginas {from} a {to} marcadas · desmarcadas |
+| magnifier · page view | lupa · vista da página (nos textos de ajuda; a ficha não usa "zoom" para a pessoa) |
+
 ## Nunca
 
 Cada linha da tabela é um termo proibido nos textos em português e nas páginas `/pt/`. A comparação ignora maiúsculas e só casa a palavra inteira.

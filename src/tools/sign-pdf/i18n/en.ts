@@ -13,7 +13,7 @@ const texts: PdfToolTexts<SignTexts> = {
   howSteps: [
     'Drop your PDF on the box or choose it. Oli works on one PDF at a time here.',
     'Draw your signature, upload an image of it or type your name, then drag the box to the spot where it should go.',
-    'Pick the pages that get it and press Sign PDF. Oli draws the signature on them in your browser.',
+    'Pick the pages that get it (the magnifier on a page opens it large) and press Sign PDF. Oli draws the signature on them in your browser.',
     'Download your PDF. Your original file stays untouched.',
   ],
   specsHeading: 'What goes in and what comes out',

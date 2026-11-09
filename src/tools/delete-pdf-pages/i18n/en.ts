@@ -12,7 +12,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop a PDF on the box, choose one, or paste it.',
-    'Pick the pages to delete in the grid of thumbnails, or type their numbers, like 1-3, 5.',
+    'Pick the pages to delete in the grid of thumbnails, or type their numbers, like 1-3, 5. The magnifier on each page opens it large, so you can check it first.',
     'Press Delete pages. Oli makes a new PDF with the pages that are left.',
     'Download the new PDF. Your original file stays untouched.',
   ],
@@ -51,7 +51,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
     },
     {
       q: 'Can I undo it if I delete the wrong pages?',
-      a: 'Your original file is never changed, because Oli writes a new PDF. If the new one is not what you wanted, press Start over, choose the original again and pick other pages.',
+      a: 'Your original file is never changed, because Oli writes a new PDF. After the result the pages stay on screen: pick or unpick others, and the button to delete them comes back to make another PDF. Press Start over only to choose another file.',
     },
     {
       q: 'Will forms, links and bookmarks survive?',

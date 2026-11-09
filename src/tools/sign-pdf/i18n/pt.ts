@@ -13,7 +13,7 @@ const texts: PdfToolTexts<SignTexts> = {
   howSteps: [
     'Solte seu PDF na caixa ou escolha o arquivo, porque aqui a Oli trabalha com um PDF por vez.',
     'Desenhe sua assinatura, escolha uma imagem dela ou digite seu nome, e arraste a caixa até o lugar onde ela deve ficar.',
-    'Escolha as páginas que recebem a assinatura e aperte Assinar PDF: a Oli desenha a assinatura nelas no seu navegador.',
+    'Escolha as páginas que recebem a assinatura (a lupa de cada página abre a página em tamanho grande) e aperte Assinar PDF: a Oli desenha a assinatura nelas no seu navegador.',
     'Baixe o seu PDF, e o seu arquivo original continua intacto.',
   ],
   specsHeading: 'O que entra e o que sai',
