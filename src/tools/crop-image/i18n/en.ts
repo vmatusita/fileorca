@@ -16,7 +16,7 @@ export default {
     caption: 'Crop image: formats taken, output and limits',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files are not accepted.'],
+      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
       ['Shapes', 'Square, which is the default, 4:5, 16:9 or Free. The box opens centered, so a result is ready as soon as you drop an image.'],
       ['Moving the box', 'Drag the box or its corners, or focus it and use the arrow keys. Shift with the arrow keys changes its size.'],
       ['Exact values', 'Type the x, y, width and height of the box in pixels of the image, which is the way to crop without a pointer.'],

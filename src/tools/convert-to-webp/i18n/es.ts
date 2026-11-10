@@ -16,7 +16,7 @@ export default {
     caption: 'Convertir a WebP: formatos que acepta, resultado y límites',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG y PNG, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan primero por HEIC a JPG, y los archivos AVIF por AVIF a JPG.'],
+      ['Acepta', 'JPG y PNG, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Resultado', 'WebP, que es la opción predeterminada, o AVIF. Sale un archivo por cada imagen.'],
       ['Compresión', 'La Recomendada equilibra tamaño y aspecto, y la Fuerte da el archivo más pequeño.'],
       ['Transparencia', 'Se conserva, tanto en WebP como en AVIF.'],

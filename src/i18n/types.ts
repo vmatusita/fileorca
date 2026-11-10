@@ -775,9 +775,13 @@ export interface ImagePanelTexts {
     /** One sentence per reason, with {name}. */
     empty: string;
     unsupported: string;
-    /** A format another tool opens: "{name} is a {format} file. Open it in {tool}." ({tool} becomes a link). */
-    wrongTool: string;
-    /** A format this tool does not take and no converter here opens (AVIF, GIF): "{name} is in {format} format, which this tool doesn't take. Try {formats}." No link, no article before the format name. */
+    /**
+     * A format that a converter here opens (CONVERTER_FOR), one sentence per format with the format written in it, so the
+     * article is the text's and the lint:texto reads the real sentence (F17, decision 7): "{name} is a HEIC file. Open it in
+     * {tool}." and "{name} is an AVIF file. Open it in {tool}." ({tool} becomes a link).
+     */
+    wrongTool: { heic: string; avif: string };
+    /** A format this tool does not take and no converter here opens (GIF, or a JPG in AVIF to JPG): "{name} is in {format} format, which this tool doesn't take. Try {formats}." No link, no article before the format name. */
     wrongFormat: string;
     truncated: string;
     decode: string;

@@ -881,10 +881,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
           const [before = '', after = ''] = texts.elsewhere.reason.split('{tool}').map((part) => fmt(part, { name }));
           return `${before}${elsewhere.chip.name}${after}`;
         }
-        const link = failure.source === 'heic' ? converters.heic : failure.source === 'avif' ? converters.avif : undefined;
-        const format = formatName(failure.source);
-        if (!link) return fmt(errors.wrongFormat, { name, format, formats: texts.formats });
-        const [before = '', after = ''] = errors.wrongTool.split('{tool}').map((part) => fmt(part, { name, format }));
+        // One sentence per converted format, with the format and its article written in the text (F17, decision 7).
+        const source = failure.source === 'heic' || failure.source === 'avif' ? failure.source : undefined;
+        const link = source && converters[source];
+        if (!source || !link) return fmt(errors.wrongFormat, { name, format: formatName(failure.source), formats: texts.formats });
+        const [before = '', after = ''] = errors.wrongTool[source].split('{tool}').map((part) => fmt(part, { name }));
         return (
           <>
             {before}

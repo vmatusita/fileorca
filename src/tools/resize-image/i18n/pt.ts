@@ -16,7 +16,7 @@ export default {
     caption: 'Redimensionar imagem: formatos aceitos, saída e limites',
     head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF não são aceitos.'],
+      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
       ['Por tamanho', 'Você digita a largura e a altura em pixels. A proporção fica travada, e cada imagem cabe dentro dessa caixa.'],
       ['Por porcentagem', 'Você digita uma porcentagem da largura e da altura atuais, a mesma para todas as imagens do lote.'],
       ['Nunca amplia', 'Se você pedir mais pixels do que a imagem tem, ela fica no tamanho original, e o resultado avisa.'],

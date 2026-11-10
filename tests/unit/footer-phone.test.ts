@@ -1,6 +1,6 @@
 // The footer of the F13b on the phone (decision 8; UX-17 A, pages.html; DECISOES § 587), read in the built home of each
 // language: every category keeps its hub out of the disclosure and puts its tools in one <details>, closed in the HTML,
-// whose summary says "All 8" when it holds every tool of the category in the language and "6 popular" when some (the
+// whose summary says "All 10" when it holds every tool of the category in the language and "6 popular" when some (the
 // count of the Menu, src/components/tool-count.ts), and whose name goes on with the category for a screen reader; the
 // Guides block does the same with its groups; no link is twice in the footer. FO_PAGES_DIST points the test at another
 // build (the proof against the dist of the starting point). The heights and the 48 px are in tests/e2e/footer-phone.spec.ts.
@@ -48,7 +48,7 @@ describe.runIf(BUILT)('the footer below 768 px: the hub in sight and the tools i
         // The name starts with the visible words (WCAG 2.5.3) and says the category.
         expect(text(summary), `${lang} ${title} name`).toBe(`${visible} ${all ? noun : fmt(t.tools.popularRest, { noun })}`);
       }
-      // The image list holds every image tool ("All 8"), the PDF one six of twelve ("6 popular").
+      // The image list holds every image tool ("All 10"), the PDF one six of twelve ("6 popular").
       expect(text(columns[0]?.querySelector('summary > span')), lang).toContain(groupDigits(counts.image, lang));
       // The Guides block the same way, and no link twice in the footer.
       const guides = footer?.querySelector('.fo-footer__more');

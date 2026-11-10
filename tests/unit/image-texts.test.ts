@@ -79,31 +79,62 @@ describe('what the page hands to the island', () => {
     expect(chips.find((chip) => chip.target === 'resize-image')?.category).toBe('image');
   });
 
-  it('sends a refused HEIC to the converter of the page language, and gives a refused AVIF no link at all', () => {
-    expect(panelData('compress-image', 'en').converters.heic).toEqual({ href: '/heic-to-jpg/', name: 'HEIC to JPG' });
-    // F6: HEIC to JPG exists in Portuguese and Spanish, so the translated pages send there (to the English page before).
-    expect(panelData('compress-image', 'pt').converters.heic).toEqual({ href: '/pt/heic-para-jpg/', name: 'HEIC para JPG' });
-    expect(panelData('compress-image', 'es').converters.heic).toEqual({ href: '/es/heic-a-jpg/', name: 'HEIC a JPG' });
-    for (const lang of ['en', 'pt', 'es'] as const) expect(panelData('compress-image', lang).converters.avif, lang).toBeUndefined();
+  // F17 (decision 7): AVIF to JPG exists in the three languages, so a refused AVIF goes there like a refused HEIC goes to
+  // HEIC to JPG (F6). Until the F17 the island had no link for AVIF, and the row said what the tool takes instead.
+  it('sends a refused HEIC and a refused AVIF to the converter of the page language, on every page', () => {
+    const converters = {
+      en: { heic: { href: '/heic-to-jpg/', name: 'HEIC to JPG' }, avif: { href: '/avif-to-jpg/', name: 'AVIF to JPG' } },
+      pt: { heic: { href: '/pt/heic-para-jpg/', name: 'HEIC para JPG' }, avif: { href: '/pt/avif-para-jpg/', name: 'AVIF para JPG' } },
+      es: { heic: { href: '/es/heic-a-jpg/', name: 'HEIC a JPG' }, avif: { href: '/es/avif-a-jpg/', name: 'AVIF a JPG' } },
+    } as const;
+    for (const id of IMAGE_PAGE_IDS) for (const lang of languagesOf(routeById(id))) expect(panelData(id, lang).converters, `${id} ${lang}`).toEqual(converters[lang]);
   });
 
-  it('refuses an AVIF with the line that names what the tool takes, in every language the page exists in, and links to no page', () => {
+  // F17 (decision 7; DECISOES § 708): one sentence per converted format, with the format and its article written in the
+  // text, so English says "an AVIF file" and "a HEIC file" and the lint:texto reads the sentence a person reads. The island
+  // splits the sentence at {tool} before the file name goes in and puts the link there; this builds it the same way.
+  it('refuses a HEIC or an AVIF with the exact sentence of the language and the converter in it, on every page that does not take it', () => {
     const expected = {
-      en: "photo.avif is in AVIF format, which this tool doesn't take. Try JPG, PNG or WebP.",
-      pt: 'photo.avif é um arquivo AVIF. Tente um arquivo JPG, PNG ou WebP.',
-      es: 'photo.avif es un archivo AVIF. Prueba con un archivo JPG, PNG o WebP.',
+      en: { heic: 'photo.heic is a HEIC file. Open it in HEIC to JPG.', avif: 'photo.avif is an AVIF file. Open it in AVIF to JPG.' },
+      pt: { heic: 'photo.heic é um arquivo HEIC. Abra-o em HEIC para JPG.', avif: 'photo.avif é um arquivo AVIF. Abra-o em AVIF para JPG.' },
+      es: { heic: 'photo.heic es un archivo HEIC. Ábrelo en HEIC a JPG.', avif: 'photo.avif es un archivo AVIF. Ábrelo en AVIF a JPG.' },
+    } as const;
+    let checked = 0;
+    for (const id of IMAGE_PAGE_IDS) {
+      for (const lang of languagesOf(routeById(id))) {
+        const panel = IMAGE_PANEL_TEXTS[lang];
+        for (const format of ['heic', 'avif'] as const) {
+          const template = panel.errors.wrongTool[format];
+          expect(template.split('{tool}'), `${lang} ${format}`).toHaveLength(2);
+          expect(template, `${lang} ${format}`).not.toContain('{format}');
+          if (IMAGE_PAGES[id].accepts.includes(format)) continue;
+          const link = panelData(id, lang).converters[format];
+          const [before = '', after = ''] = template.split('{tool}').map((part) => fmt(part, { name: `photo.${format}` }));
+          expect(`${before}${link?.name}${after}`, `${id} ${lang} ${format}`).toBe(expected[lang][format]);
+          checked += 1;
+        }
+      }
+    }
+    // Every page but the two converters refuses both formats; HEIC to JPG refuses the AVIF and AVIF to JPG the HEIC.
+    expect(checked).toBe((IMAGE_PAGE_IDS.length * 2 - 2) * 3);
+  });
+
+  it('refuses a format no converter here opens (GIF) with the line that names what the tool takes, and links to no page', () => {
+    const expected = {
+      en: "photo.gif is in GIF format, which this tool doesn't take. Try JPG, PNG or WebP.",
+      pt: 'photo.gif é um arquivo GIF. Tente um arquivo JPG, PNG ou WebP.',
+      es: 'photo.gif es un archivo GIF. Prueba con un archivo JPG, PNG o WebP.',
     } as const;
     for (const id of IMAGE_PAGE_IDS) {
       for (const lang of languagesOf(routeById(id))) {
         const panel = IMAGE_PANEL_TEXTS[lang];
         const { formats } = imageToolTexts(id, lang).panel;
-        const line = fmt(panel.errors.wrongFormat, { name: 'photo.avif', format: panel.formats.avif, formats });
-        expect(line, `${id} ${lang}`).toContain('photo.avif');
+        const line = fmt(panel.errors.wrongFormat, { name: 'photo.gif', format: panel.formats.gif, formats });
+        expect(line, `${id} ${lang}`).toContain('photo.gif');
         expect(line, `${id} ${lang}`).toContain(formats);
         expect(line, `${id} ${lang}`).not.toMatch(/[{}]/);
         if (id === 'compress-image') expect(line, lang).toBe(expected[lang]);
-        // No converter for AVIF in this release: the island is given no link for it, on any page.
-        expect(panelData(id, lang).converters.avif, `${id} ${lang}`).toBeUndefined();
+        expect(Object.keys(panelData(id, lang).converters), `${id} ${lang}`).not.toContain('gif');
       }
     }
   });

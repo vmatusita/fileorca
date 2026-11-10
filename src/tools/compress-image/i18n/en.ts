@@ -29,7 +29,7 @@ export default {
       ['Batch', 'No limit on the number of images. Several images download together as one ZIP.'],
       ['Already small', 'If the new copy would not be smaller, you get the original back, without its photo metadata.'],
       ['Photo metadata', 'Camera model, date and GPS location are removed from every file.'],
-      ['HEIC and AVIF', 'Not compressed here. Turn a HEIC into a JPG first with HEIC to JPG. AVIF files are not accepted.'],
+      ['HEIC and AVIF', 'Not compressed here. Turn a HEIC into a JPG first with HEIC to JPG, and an AVIF with AVIF to JPG.'],
     ],
   },
   presets: {

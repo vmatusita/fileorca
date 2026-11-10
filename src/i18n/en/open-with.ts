@@ -11,7 +11,7 @@ export default {
   takesThis: 'Takes this file',
   takesAll: 'Takes all {total} files',
   takesSome: 'Takes {count} of {total} files',
-  noTool: 'No tool here opens these files. FileOrca works with JPG, PNG, WebP, HEIC and PDF.',
+  noTool: 'No tool here opens these files. FileOrca works with JPG, PNG, WebP, HEIC, AVIF and PDF.',
   emptySays: 'Nothing to open here yet.',
   emptyDetail: 'Share images or PDFs with FileOrca from your phone, or pick a tool.',
   unknown: 'unknown format',
