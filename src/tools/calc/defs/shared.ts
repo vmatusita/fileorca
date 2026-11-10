@@ -2,7 +2,8 @@
 // calculators use (price, down payment, rate, term, the monthly costs of a home) with their fixed ranges
 // (DECISOES § 116), and the down payment as the engine takes it.
 import type { Down } from '../../../calc/loans.ts';
-import type { FieldSpec, NumberSpec, Part, Values } from '../types.ts';
+import type { CalcPanelTexts, CsvValue, FieldSpec, NumberSpec, Part, Values } from '../types.ts';
+import { headed } from '../view.ts';
 
 /** A template's {placeholders} as bold parts: say('You pay {total}.', { total: '$9' }) → ['You pay ', { b: '$9' }, '.']. */
 export function say(template: string, values: Record<string, string>): Part[] {
@@ -25,6 +26,19 @@ export function text(view: Record<string, string>, key: string): string {
   if (value === undefined) throw new Error(`missing view text ${key}`);
   return value;
 }
+
+/** The unit a field writes after its number ("sq ft"), or an error that names the field. */
+export function unitOf(t: CalcPanelTexts, key: string): string {
+  const value = t.fields[key]?.suffix;
+  if (value === undefined) throw new Error(`missing field suffix ${key}`);
+  return value;
+}
+
+/** A field's label with its unit, the header of a CSV column of its values: "Room area (sq ft)" (F16, DECISOES § 688). */
+export const fieldHead = (t: CalcPanelTexts, key: string): string => headed(t.fields[key]?.label ?? key, unitOf(t, key));
+
+/** A number the CSV writes with its decimals (a measure, a count with none; F16). */
+export const csvNumber = (scaled: number, decimals = 2): CsvValue => ({ scaled, decimals });
 
 const DOLLAR = 100;
 export const RATE_PCT = 10_000;

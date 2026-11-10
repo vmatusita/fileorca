@@ -6,13 +6,45 @@ import { formatScaled, money, ratePercent, type NumberLang } from '../../calc/pa
 import { longDate } from '../../i18n/dates.ts';
 import type { Row } from '../../calc/money.ts';
 import { display, visible } from './form.ts';
-import type { CalcPanelData, CalcSharedTexts, Cell, FieldSpec, Table, Values } from './types.ts';
+import type { CalcPanelData, CalcSharedTexts, Cell, CsvColumn, CsvKind, CsvValue, FieldSpec, Table, Values } from './types.ts';
 
 /** A cell as the screen and the PDF write it: money with cents, a measure with its decimals (F7), or the text. */
 export const cellText =
   (lang: NumberLang) =>
   (cell: Cell): string =>
     'cents' in cell ? money(cell.cents, lang) : 'scaled' in cell ? formatScaled(cell.scaled, cell.decimals, lang, { min: cell.decimals }) : cell.text;
+
+/** The CSV columns of a table whose CSV header is the screen's, all of one kind (the money tables: numbers; F16, § 687). */
+export const columns = (head: readonly string[], kind: CsvKind = 'number'): CsvColumn[] => head.map((one) => ({ head: one, kind }));
+
+/** A CSV header with the unit of its numbers: "Area (sq ft)" (F16, § 688). */
+export const headed = (label: string, unit: string): string => `${label} (${unit})`;
+
+/** A line of a table of items (the item and its amount, F7), with what its amount writes in the CSV (F16, § 688). */
+export interface ItemLine {
+  item: string;
+  amount: string;
+  /** The values of the CSV columns after the item; the columns past them are empty. */
+  csv: readonly CsvValue[];
+  /** The item's name in the CSV, when the screen's carries a number with a unit ("Bags of 2 cu ft"). */
+  name?: string;
+}
+
+/**
+ * A table of items, two columns on the screen and in the PDF (the item and its amount), and in the CSV the item and the
+ * columns its amounts unfold into (F16, § 688): the number, its unit when the column mixes them, the measure a line carries.
+ */
+export function itemTable(caption: string, head: readonly [string, string], lines: readonly ItemLine[], after: readonly CsvColumn[]): Table {
+  return {
+    caption,
+    head: [...head],
+    rows: lines.map(({ item, amount, csv, name }): Cell[] => [name === undefined ? { text: item } : { text: item, csv: [{ text: name }] }, { text: amount, csv: after.map((_, at) => csv[at] ?? null) }]),
+    csv: [{ head: head[0], kind: 'text' }, ...after],
+  };
+}
+
+/** The lines of a table of items as the PDF lists them among the results. */
+export const itemPairs = (lines: readonly ItemLine[]): [string, string][] => lines.map(({ item, amount }) => [item, amount]);
 
 /** The schedule of a loan: one row per payment, grouped by loan year (`perYear` payments a year). */
 export function loanTable(rows: readonly Row[], perYear: number, s: CalcSharedTexts, caption: string, numberHead = s.columns.number): Table {
@@ -21,11 +53,13 @@ export function loanTable(rows: readonly Row[], perYear: number, s: CalcSharedTe
     const to = Math.min(from + perYear, rows.length);
     groups.push({ label: fmt(s.year, { n: year }), end: { cents: rows[to - 1]![4] }, from, to });
   }
+  const head = [numberHead, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance];
   return {
     caption,
-    head: [numberHead, s.columns.payment, s.columns.principal, s.columns.interest, s.columns.balance],
+    head,
     rows: rows.map((row) => [{ text: String(row[0]) }, { cents: row[1] }, { cents: row[3] }, { cents: row[2] }, { cents: row[4] }]),
     groups,
+    csv: columns(head),
   };
 }
 

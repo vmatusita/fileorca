@@ -37,6 +37,9 @@ export default {
       colShape: 'Shape',
       colSize: 'Size',
       colSqft: 'Square feet',
+      // The two measures of the size in the CSV, a number each (F16, DECISOES § 688).
+      csvX: 'Length, base or diameter',
+      csvY: 'Width or height',
     },
     premises: [
       'A rectangle is length × width and a triangle is base × height ÷ 2, the way Energy Star measures a room; a circle is pi × diameter² ÷ 4, from NIST.',

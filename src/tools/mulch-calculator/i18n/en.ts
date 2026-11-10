@@ -50,6 +50,8 @@ export default {
       caption: 'The area, the volume and what to buy',
       colItem: 'Item',
       colAmount: 'Amount',
+      // The bags' line in the CSV, with the bag size in a column of its own (F16, DECISOES § 688).
+      bagsName: 'Bags',
     },
     premises: [
       'Cubic feet = area in square feet × depth in inches ÷ 12; 27 cubic feet make 1 cubic yard.',

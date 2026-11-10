@@ -31,6 +31,8 @@ export default {
       caption: 'The Energy Star table and each adjustment, in BTU per hour',
       colStep: 'Step',
       colBtu: 'BTU per hour',
+      // The table's line in the CSV, with the room area in a column of its own (F16, DECISOES § 688).
+      baseName: 'Energy Star table',
     },
     premises: [
       'The base is the Energy Star table for a room air conditioner: each row runs from its first area up to the next one, without it, and the last row includes 2,500 sq ft.',

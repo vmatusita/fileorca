@@ -4,6 +4,7 @@ import { dollars, money as cash, type NumberLang } from '../../../calc/parse.ts'
 import { rentVsBuy, type RentVsBuyInput, type RentVsBuyResult } from '../../../calc/rent-vs-buy.ts';
 import { count, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, Table } from '../types.ts';
+import { columns } from '../view.ts';
 
 export const rentVsBuyDef: CalcDef<RentVsBuyInput, RentVsBuyResult> = {
   id: 'rent-vs-buy-calculator',
@@ -46,10 +47,12 @@ export const rentVsBuyDef: CalcDef<RentVsBuyInput, RentVsBuyResult> = {
     const v = t.view;
     const years = num(values, 'y');
     const gap = r.buyerFinal - r.renterFinal;
+    const head = [text(v, 'year'), text(v, 'buying'), text(v, 'renting')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'buying'), text(v, 'renting')],
+      head,
       rows: r.buyer.map((buyer, index) => [{ text: String(index + 1) }, { cents: buyer }, { cents: r.renter[index] ?? 0 }]),
+      csv: columns(head),
     });
     const side = (net: number, paid: number, paidLabel: string): [string, string][] => [
       [fmt(text(v, 'netAfter'), { n: years }), dollars(net, l)],

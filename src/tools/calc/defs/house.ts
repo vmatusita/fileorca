@@ -25,19 +25,23 @@ import {
   type TileInput,
   type TileResult,
 } from '../../../calc/home.ts';
-import { count, measure, num, say, text } from './shared.ts';
-import type { CalcDef, Cell, Table, Values } from '../types.ts';
+import { count, csvNumber as n, fieldHead, measure, num, say, text, unitOf } from './shared.ts';
+import { headed, itemPairs, itemTable, type ItemLine } from '../view.ts';
+import type { CalcDef, CalcSharedTexts, Cell, CsvColumn, CsvValue, Values } from '../types.ts';
 
 /** A measure of 2 decimals as the page writes it: 1,234.5 (trailing zeros cut) or 1,234.50 (`min` 2). */
 const m2 = (value: number, l: NumberLang, min = 0): string => formatScaled(value, 2, l, { min });
 const whole = (value: number, l: NumberLang): string => formatScaled(value, 0, l);
 const scaled = (value: number): Cell => ({ scaled: value, decimals: 2 });
 const plain = (value: string): Cell => ({ text: value });
+/** A unit in the CSV's own column of units (F16, DECISOES § 688). */
+const unit = (value: string): CsvValue => ({ text: value });
 
-/** A two-column table of what was worked out (the item and its amount), the same lines the PDF lists as results. */
-function twoColumns(caption: string, head: [string, string], lines: readonly [string, string][]): Table {
-  return { caption, head: [...head], rows: lines.map(([item, amount]) => [plain(item), plain(amount)]) };
-}
+/** The CSV columns of an amount that mixes units: the number, then its unit (F16, DECISOES § 688). */
+const amountColumns = (head: string, s: CalcSharedTexts): CsvColumn[] => [
+  { head, kind: 'number' },
+  { head: s.csvUnit, kind: 'text' },
+];
 
 // --- square footage -------------------------------------------------------------------------------------------------
 
@@ -76,10 +80,23 @@ export const squareFootageDef: CalcDef<SquareFootageInput, SquareFootageResult> 
       hero: { label: text(v, 'label'), value: total, unit: text(v, 'unit'), sentence: say(text(v, 'sentence'), { yards: m2(r.sqyd, l, 2), n: whole(rows.length, l) }) },
       placard: { n: m2(r.sqft, l), l: text(v, 'placard') },
       open: true,
+      // The CSV unfolds the size into its two measures, in feet: the length, base or diameter, and the width or height, empty
+      // for a circle (F16, DECISOES § 688); the shape says which ones they are.
       table: () => ({
         caption: text(v, 'caption'),
         head: [text(v, 'colArea'), text(v, 'colShape'), text(v, 'colSize'), text(v, 'colSqft')],
-        rows: r.items.map((item, index) => [plain(fmt(text(v, 'row'), { n: index + 1 })), plain(shapeName(rows[index] ?? {})), plain(sizeOf(rows[index] ?? {})), scaled(item.sqft)]),
+        rows: r.items.map((item, index) => {
+          const row = rows[index] ?? {};
+          const size: Cell = { text: sizeOf(row), csv: [n(row['x'] ?? 0), (row['s'] ?? 0) === 2 ? null : n(row['y'] ?? 0)] };
+          return [plain(fmt(text(v, 'row'), { n: index + 1 })), plain(shapeName(row)), size, scaled(item.sqft)];
+        }),
+        csv: [
+          { head: text(v, 'colArea'), kind: 'text' },
+          { head: text(v, 'colShape'), kind: 'text' },
+          { head: headed(text(v, 'csvX'), unitOf(t, 'x')), kind: 'number' },
+          { head: headed(text(v, 'csvY'), unitOf(t, 'y')), kind: 'number' },
+          { head: text(v, 'colSqft'), kind: 'number' },
+        ],
       }),
       summary: [
         [text(v, 'label'), `${total} ${text(v, 'unit')}`],
@@ -138,15 +155,25 @@ export const concreteDef: CalcDef<ConcreteInput, ConcreteResult> = {
       },
       placard: { n: yards, l: text(v, 'placard') },
       open: true,
-      table: () => ({
-        caption: text(v, 'caption'),
-        head: [text(v, 'colBag'), text(v, 'colYield'), text(v, 'colBags')],
-        rows: [
-          [plain(text(v, 'bag40')), scaled(num(values, 'y4')), plain(whole(r.bags.b40, l))],
-          [plain(text(v, 'bag60')), scaled(num(values, 'y6')), plain(whole(r.bags.b60, l))],
-          [plain(text(v, 'bag80')), scaled(num(values, 'y8')), plain(whole(r.bags.b80, l))],
-        ],
-      }),
+      // The CSV writes the bag by its weight in pounds, a number under "Bag weight (lb)", and the bags with no thousands
+      // separator (F16, DECISOES § 688).
+      table: () => {
+        const bag = (key: string, pounds: number, yieldKey: string, bags: number): Cell[] => [
+          { text: text(v, key), csv: [n(pounds, 0)] },
+          scaled(num(values, yieldKey)),
+          { text: whole(bags, l), csv: [n(bags, 0)] },
+        ];
+        return {
+          caption: text(v, 'caption'),
+          head: [text(v, 'colBag'), text(v, 'colYield'), text(v, 'colBags')],
+          rows: [bag('bag40', 40, 'y4', r.bags.b40), bag('bag60', 60, 'y6', r.bags.b60), bag('bag80', 80, 'y8', r.bags.b80)],
+          csv: [
+            { head: headed(text(v, 'colWeight'), text(v, 'weightUnit')), kind: 'number' },
+            { head: text(v, 'colYield'), kind: 'number' },
+            { head: text(v, 'colBags'), kind: 'number' },
+          ],
+        };
+      },
       summary: [
         [text(v, 'label'), `${yards} ${text(v, 'unit')}`],
         [text(v, 'feet'), `${m2(r.total.cuft, l, 2)} ${text(v, 'feetUnit')}`],
@@ -194,31 +221,39 @@ export const mulchDef: CalcDef<MulchInput, MulchResult> = {
     };
   },
   compute: mulch,
-  view(r, values, t, _s, lang) {
+  view(r, values, t, s, lang) {
     const l = lang as NumberLang;
     const v = t.view;
     const gravel = values['m'] === 'gravel';
+    const bagKey = gravel ? 'bg' : 'bm';
     const yards = m2(r.cuyd, l, 2);
-    const bag = m2(num(values, gravel ? 'bg' : 'bm'), l);
+    const bag = m2(num(values, bagKey), l);
     const sentence = say(text(v, gravel ? 'sentenceGravel' : 'sentence'), {
       feet: m2(r.cuft, l, 2),
       bags: whole(r.bags, l),
       bag,
       tons: m2(r.tons ?? 0, l, 2),
     });
-    const lines: [string, string][] = [
-      [text(v, 'area'), `${m2(r.sqft, l, 2)} ${text(v, 'areaUnit')}`],
-      [text(v, 'label'), `${yards} ${text(v, 'unit')}`],
-      [text(v, 'feet'), `${m2(r.cuft, l, 2)} ${text(v, 'feetUnit')}`],
-      [fmt(text(v, 'bags'), { bag }), whole(r.bags, l)],
-      ...(gravel && r.tons !== null ? [[text(v, 'tons'), m2(r.tons, l, 2)] as [string, string]] : []),
+    // In the CSV, a number and its unit in two columns, and the bags by their own name with the bag size in a column of its
+    // own (F16, DECISOES § 688).
+    const measured = (item: string, value: number, unitKey: string): ItemLine => ({ item, amount: `${m2(value, l, 2)} ${text(v, unitKey)}`, csv: [n(value), unit(text(v, unitKey))] });
+    const lines: ItemLine[] = [
+      measured(text(v, 'area'), r.sqft, 'areaUnit'),
+      measured(text(v, 'label'), r.cuyd, 'unit'),
+      measured(text(v, 'feet'), r.cuft, 'feetUnit'),
+      { item: fmt(text(v, 'bags'), { bag }), amount: whole(r.bags, l), csv: [n(r.bags, 0), null, n(num(values, bagKey))], name: text(v, 'bagsName') },
+      ...(gravel && r.tons !== null ? [{ item: text(v, 'tons'), amount: m2(r.tons, l, 2), csv: [n(r.tons)] }] : []),
     ];
     return {
       hero: { label: text(v, 'label'), value: yards, unit: text(v, 'unit'), sentence },
       placard: { n: yards, l: text(v, 'placard') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),
-      summary: lines,
+      table: () =>
+        itemTable(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines, [
+          ...amountColumns(text(v, 'colAmount'), s),
+          { head: fieldHead(t, bagKey), kind: 'number' },
+        ]),
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
@@ -259,33 +294,28 @@ export const paintDef: CalcDef<PaintInput, PaintResult> = {
     coverage: num(values, 'cv'),
   }),
   compute: paint,
-  view(r, values, t, _s, lang) {
+  view(r, values, t, s, lang) {
     const l = lang as NumberLang;
     const v = t.view;
-    const sqft = text(v, 'areaUnit');
-    const lines: [string, string][] = [
-      [text(v, 'wall'), `${m2(r.wall, l, 2)} ${sqft}`],
-      [text(v, 'openings'), `${m2(r.openings, l, 2)} ${sqft}`],
-    ];
+    // In the CSV, a number and its unit in two columns (F16, DECISOES § 688).
+    const measured = (item: string, value: number, unitKey: string): ItemLine => ({ item, amount: `${m2(value, l, 2)} ${text(v, unitKey)}`, csv: [n(value), unit(text(v, unitKey))] });
+    const counted = (item: string, value: number): ItemLine => ({ item, amount: whole(value, l), csv: [n(value, 0)] });
+    const lines: ItemLine[] = [measured(text(v, 'wall'), r.wall, 'areaUnit'), measured(text(v, 'openings'), r.openings, 'areaUnit')];
     const head: [string, string] = [text(v, 'colItem'), text(v, 'colAmount')];
+    const table = () => itemTable(text(v, 'caption'), head, lines, amountColumns(head[1], s));
     if ('error' in r) {
       return {
         hero: { label: text(v, 'label'), value: '0', unit: text(v, 'unit'), sentence: [] },
         problem: text(v, 'noArea'),
         placard: { n: '0', l: text(v, 'placard') },
         open: true,
-        table: () => twoColumns(text(v, 'caption'), head, lines),
-        summary: lines,
+        table,
+        summary: itemPairs(lines),
         premises: t.premises,
       };
     }
     const gallons = m2(r.gallons, l, 2);
-    lines.push(
-      [text(v, 'paintable'), `${m2(r.paintable, l, 2)} ${sqft}`],
-      [text(v, 'coats'), whole(num(values, 'co'), l)],
-      [text(v, 'label'), `${gallons} ${text(v, 'unit')}`],
-      [text(v, 'buy'), whole(r.buy, l)],
-    );
+    lines.push(measured(text(v, 'paintable'), r.paintable, 'areaUnit'), counted(text(v, 'coats'), num(values, 'co')), measured(text(v, 'label'), r.gallons, 'unit'), counted(text(v, 'buy'), r.buy));
     return {
       hero: {
         label: text(v, 'label'),
@@ -295,8 +325,8 @@ export const paintDef: CalcDef<PaintInput, PaintResult> = {
       },
       placard: { n: whole(r.buy, l), l: text(v, 'placard') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), head, lines),
-      summary: lines,
+      table,
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
@@ -318,17 +348,19 @@ export const tileDef: CalcDef<TileInput, TileResult> = {
   initial: TILE_EXAMPLE,
   toInput: (values) => ({ area: num(values, 'ar'), length: num(values, 'tl'), width: num(values, 'tw'), waste: num(values, 'wa'), perBox: num(values, 'pb') }),
   compute: tile,
-  view(r, values, t, _s, lang) {
+  view(r, values, t, s, lang) {
     const l = lang as NumberLang;
     const v = t.view;
     const tiles = whole(r.tiles, l);
     const size = fmt(text(v, 'size'), { x: m2(num(values, 'tl'), l), y: m2(num(values, 'tw'), l) });
-    const lines: [string, string][] = [
-      [text(v, 'area'), `${m2(num(values, 'ar'), l, 2)} ${text(v, 'areaUnit')}`],
-      [text(v, 'tile'), size],
-      [text(v, 'waste'), `${whole(num(values, 'wa'), l)}%`],
-      [text(v, 'label'), tiles],
-      [text(v, 'boxes'), r.boxes === null ? text(v, 'noBox') : whole(r.boxes, l)],
+    // In the CSV, the area's number and unit in two columns, the tile size in the columns of its length and width, the extra
+    // as a percent, and boxes not counted as an empty cell, like the "—" of other tables (F16, DECISOES § 688).
+    const lines: ItemLine[] = [
+      { item: text(v, 'area'), amount: `${m2(num(values, 'ar'), l, 2)} ${text(v, 'areaUnit')}`, csv: [n(num(values, 'ar')), unit(text(v, 'areaUnit'))] },
+      { item: text(v, 'tile'), amount: size, csv: [null, null, n(num(values, 'tl')), n(num(values, 'tw'))] },
+      { item: text(v, 'waste'), amount: `${whole(num(values, 'wa'), l)}%`, csv: [{ scaled: num(values, 'wa'), decimals: 0, percent: true }] },
+      { item: text(v, 'label'), amount: tiles, csv: [n(r.tiles, 0)] },
+      { item: text(v, 'boxes'), amount: r.boxes === null ? text(v, 'noBox') : whole(r.boxes, l), csv: r.boxes === null ? [] : [n(r.boxes, 0)] },
     ];
     return {
       hero: {
@@ -339,8 +371,13 @@ export const tileDef: CalcDef<TileInput, TileResult> = {
       },
       placard: { n: tiles, l: text(v, 'placard') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),
-      summary: lines,
+      table: () =>
+        itemTable(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines, [
+          ...amountColumns(text(v, 'colAmount'), s),
+          { head: fieldHead(t, 'tl'), kind: 'number' },
+          { head: fieldHead(t, 'tw'), kind: 'number' },
+        ]),
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
@@ -371,20 +408,27 @@ export const btuDef: CalcDef<BtuInput, BtuResult> = {
     const l = lang as NumberLang;
     const v = t.view;
     const total = whole(r.btu, l);
-    const signed = (n: number) => (n < 0 ? `−${whole(-n, l)}` : `+${whole(n, l)}`);
-    const lines: [string, string][] = [
-      [fmt(text(v, 'base'), { area: m2(num(values, 'ar'), l, 2) }), whole(r.base, l)],
-      [text(v, values['su'] === 'shade' ? 'shade' : values['su'] === 'sun' ? 'sunny' : 'normal'), signed(r.sun)],
-      [text(v, 'people'), signed(r.people)],
-      [text(v, 'kitchen'), signed(r.kitchen)],
-      [text(v, 'label'), total],
+    const signed = (value: number) => (value < 0 ? `−${whole(-value, l)}` : `+${whole(value, l)}`);
+    // In the CSV, every step as a number with no thousands separator, an ASCII minus and no "+" (the "+" is how the screen
+    // says a step adds), and the table's area in a column of its own, so the step's name has no number (F16, DECISOES § 688).
+    const step = (item: string, value: number): ItemLine => ({ item, amount: signed(value), csv: [n(value, 0)] });
+    const lines: ItemLine[] = [
+      { item: fmt(text(v, 'base'), { area: m2(num(values, 'ar'), l, 2) }), amount: whole(r.base, l), csv: [n(r.base, 0), n(num(values, 'ar'))], name: text(v, 'baseName') },
+      step(text(v, values['su'] === 'shade' ? 'shade' : values['su'] === 'sun' ? 'sunny' : 'normal'), r.sun),
+      step(text(v, 'people'), r.people),
+      step(text(v, 'kitchen'), r.kitchen),
+      { item: text(v, 'label'), amount: total, csv: [n(r.btu, 0)] },
     ];
     return {
       hero: { label: text(v, 'label'), value: total, unit: text(v, 'unit'), sentence: say(text(v, 'sentence'), { base: whole(r.base, l) }) },
       placard: { n: total, l: text(v, 'placard') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colStep'), text(v, 'colBtu')], lines),
-      summary: lines,
+      table: () =>
+        itemTable(text(v, 'caption'), [text(v, 'colStep'), text(v, 'colBtu')], lines, [
+          { head: text(v, 'colBtu'), kind: 'number' },
+          { head: fieldHead(t, 'ar'), kind: 'number' },
+        ]),
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
