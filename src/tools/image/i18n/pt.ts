@@ -42,7 +42,7 @@ export default {
     title: 'Ops, a Oli não conseguiu ler esse arquivo',
     empty: '{name} está vazio, então não há nada para ler. Escolha um arquivo que tenha uma imagem.',
     unsupported: '{name} não é uma imagem que a Oli consiga ler. Tente um arquivo {formats}.',
-    wrongTool: '{name} é um arquivo {format}. Abra-o em {tool}.',
+    wrongTool: { heic: '{name} é um arquivo HEIC. Abra-o em {tool}.', avif: '{name} é um arquivo AVIF. Abra-o em {tool}.' },
     wrongFormat: '{name} é um arquivo {format}. Tente um arquivo {formats}.',
     truncated: '{name} termina antes da hora, então falta parte da imagem. Baixe ou exporte o arquivo de novo e tente outra vez.',
     decode: '{name} está danificado e a Oli não consegue lê-lo. Tente outra cópia do arquivo.',
