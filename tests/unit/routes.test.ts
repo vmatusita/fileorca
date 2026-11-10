@@ -55,7 +55,8 @@ describe('mapa de rotas', () => {
     // The Brazilian rows are left out of the order: they join the map in a later step of the F6, all nine at once.
     expect(ROUTES.map((route) => route.id).filter((id) => !isBrPage(id))).toEqual([
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
-      'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      // F17 (decision 3; DECISOES § 716): AVIF to JPG and Convert to WebP back where the F2 had them, before Image to PDF.
+      'avif-to-jpg', 'convert-to-webp', 'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
       PDF_HUB_ID, ...PDF_TOOL_IDS,
       // F11 (decision 5): the guides hub, right before the file guides, as each hub comes before its pages.
@@ -245,7 +246,8 @@ describe('tool search', () => {
     // last, after the file guides (the hubs are not searchable pages, as the money hub is not).
     const br = BR_CALC_IDS.filter((id) => brRoutes().some((route) => route.id === id));
     expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
-    expect(index).toHaveLength(11 + PDF_TOOL_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
+    // F17: 13 image pages (10 tools and 3 presets; 11 before).
+    expect(index).toHaveLength(13 + PDF_TOOL_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -341,10 +343,20 @@ describe('tool search', () => {
       ['100kb', ['compress-image-to-100kb']],
       ['1280x720', ['resize-image-youtube-thumbnail']],
       ['mirror', ['rotate-image']],
+      // F17 (decision 9; DECISOES § 716): the AVIF pages of the F2 are back. "avif" finds AVIF to JPG (its name) and then
+      // Convert to WebP (a synonym: it makes AVIF too), as before the 3812f49; it found nothing from the F2 to the F16.
+      ['avif', ['avif-to-jpg', 'convert-to-webp']],
+      ['convert to avif', ['convert-to-webp', 'avif-to-jpg']],
     ];
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
-    // No AVIF page exists in this release (AVIF to JPG and Convert to WebP are run 2b), so the search must not offer one.
-    expect(filterEntries(index, 'avif')).toEqual([]);
+    // In each language, "avif" finds the two, each at the page of that language.
+    for (const lang of LANGS) {
+      const avif = filterEntries(index, 'avif', lang);
+      expect(ids(avif), lang).toEqual(['avif-to-jpg', 'convert-to-webp']);
+      expect(avif.map((entry) => entry.href[lang]), lang).toEqual([routeById('avif-to-jpg').paths[lang], routeById('convert-to-webp').paths[lang]]);
+      // The WebP pages: Convert to WebP joins the tools that take or make a WebP.
+      expect(ids(filterEntries(index, 'webp', lang)), lang).toContain('convert-to-webp');
+    }
   });
 
   it('puts first the tool whose name is the query, where Enter goes, before the neighbours that only share its words (DECISOES § 180)', () => {
@@ -355,6 +367,15 @@ describe('tool search', () => {
     for (const query of ['merge pdf', 'Merge PDF', 'merge', 'combine', 'combine pdf']) expect(first(query), query).toBe('merge-pdf');
     for (const query of ['pdf to jpg', 'PDF to JPG', 'pdf to jpeg', 'pdf to image']) expect(first(query), query).toBe('pdf-to-jpg');
     for (const query of ['jpg to pdf', 'image to pdf', 'merge images', 'combine images']) expect(first(query), query).toBe('image-to-pdf');
+    // F17: the two tools of the run 2b, by their names in each language; WebP to JPG, whose words "Convert to WebP"
+    // shares, stays one arrow away.
+    for (const lang of LANGS) {
+      for (const id of ['avif-to-jpg', 'convert-to-webp'] as const) {
+        const name = TEXTS[lang].common.tools[id].name;
+        expect(ids(filterEntries(index, name, lang))[0], `${name} ${lang}`).toBe(id);
+      }
+    }
+    expect(ids(filterEntries(index, 'convert to webp'))).toEqual(['convert-to-webp', 'webp-to-jpg']);
     // Each one still finds the other as its neighbour, one arrow away.
     // F5b: the guide on PDF to JPG resolution says "pdf to jpg" in its name, so it comes before Image to PDF (DECISOES § 190).
     expect(ids(filterEntries(index, 'pdf to jpg'))).toEqual(['pdf-to-jpg', 'guides-pdf-to-jpg-resolution', 'image-to-pdf']);
@@ -367,8 +388,9 @@ describe('tool search', () => {
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
     const index = searchIndex();
-    // English has all eleven image pages, the 12 PDF tools (F5a) and the 23 money pages. F6: Portuguese and Spanish have
-    // the eleven image pages and the 12 PDF tools too (only Compress image before), and Portuguese the Brazilian ones.
+    // English has all thirteen image pages (eleven before the F17), the 12 PDF tools (F5a) and the 23 money pages. F6:
+    // Portuguese and Spanish have the image pages and the 12 PDF tools too (only Compress image before), and Portuguese the
+    // Brazilian ones.
     // F7 (decision 9; DECISOES § 259): English ends with the 11 home and health calculators and the QR code generator.
     // The languages adjustment: Spanish has the 18 calculator pages and the 5 money guides; Portuguese and Spanish have the
     // 10 file guides and the QR code generator; the home and health pages stay out of both.

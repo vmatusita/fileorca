@@ -407,8 +407,8 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     // calculators once their rows are in the map.
     const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
     expect([0, BR_CALC_IDS.length]).toContain(brazilian.length);
-    // F7 (decision 9; DECISOES § 259): and the 11 home and health calculators and the QR code generator. F17: the image
-    // pages are 13 (the 10 tools and the 3 presets; 11 before AVIF to JPG and Convert to WebP).
+    // F7 (decision 9; DECISOES § 259): and the 11 home and health calculators and the QR code generator.
+    // F17 (DECISOES § 716): 13 image pages, with AVIF to JPG and Convert to WebP (11 before).
     expect(site.searchIds).toHaveLength(13 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
   });
 
