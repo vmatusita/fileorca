@@ -59,8 +59,9 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     id: 'compress-image',
     accepts: PHOTO,
     icon: 'compress',
-    next: ['resize-image', 'image-to-pdf'],
-    related: ['resize-image', 'crop-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg', 'image-to-pdf'],
+    // F17 (decision 5; DECISOES § 707): the lists of the F2 again, with Convert to WebP (3812f49 took it out).
+    next: ['resize-image', 'image-to-pdf', 'convert-to-webp'],
+    related: ['resize-image', 'crop-image', 'convert-to-webp', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
     beforeAfter: 'always',
   },
   'resize-image': {
@@ -68,7 +69,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: PHOTO,
     icon: 'resize',
     next: ['compress-image', 'crop-image', 'image-to-pdf'],
-    related: ['compress-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
+    related: ['compress-image', 'crop-image', 'rotate-image', 'convert-to-webp', 'heic-to-jpg', 'image-to-pdf'],
     beforeAfter: 'never',
   },
   'crop-image': {
@@ -92,7 +93,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['heic'],
     icon: 'phone-photo',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'png-to-jpg', 'crop-image'],
+    related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg'],
     beforeAfter: 'lossy',
     elsewhere: { format: 'png', tool: 'png-to-jpg' },
   },
@@ -101,7 +102,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['webp'],
     icon: 'browser-image',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['png-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
+    related: ['png-to-jpg', 'avif-to-jpg', 'heic-to-jpg', 'convert-to-webp', 'compress-image', 'resize-image'],
     beforeAfter: 'lossy',
   },
   'png-to-jpg': {
@@ -109,13 +110,15 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['png', 'jpeg'],
     icon: 'convert',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['webp-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
+    related: ['webp-to-jpg', 'heic-to-jpg', 'avif-to-jpg', 'convert-to-webp', 'compress-image', 'image-to-pdf'],
     beforeAfter: 'lossy',
   },
   'avif-to-jpg': {
     id: 'avif-to-jpg',
     accepts: ['avif'],
-    icon: 'convert',
+    // F17 (decision 6; DECISOES § 706): drawn for it; no hub nor home repeats a drawing (§ 491).
+    icon: 'image-stack',
+    // The tools that open a JPG, as the other converters (decision 5; DECISOES § 707).
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['webp-to-jpg', 'heic-to-jpg', 'png-to-jpg', 'convert-to-webp', 'compress-image', 'resize-image'],
     beforeAfter: 'lossy',
@@ -123,7 +126,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
   'convert-to-webp': {
     id: 'convert-to-webp',
     accepts: ['jpeg', 'png'],
-    icon: 'convert',
+    icon: 'image-fast',
     next: ['resize-image', 'compress-image'],
     related: ['compress-image', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg', 'resize-image', 'heic-to-jpg'],
     beforeAfter: 'lossy',
@@ -152,7 +155,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     parent: 'compress-image',
     accepts: PHOTO,
     icon: 'compress',
-    next: ['resize-image', 'image-to-pdf'],
+    next: ['resize-image', 'image-to-pdf', 'convert-to-webp'],
     related: ['compress-image', 'resize-image', 'crop-image', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
     beforeAfter: 'always',
   },

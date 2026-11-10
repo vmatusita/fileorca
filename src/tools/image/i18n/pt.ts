@@ -115,6 +115,8 @@ export default {
       'resize-image': { one: 'Redimensionar esta imagem', many: 'Redimensionar estas {count} imagens' },
       'crop-image': { one: 'Cortar esta imagem', many: 'Cortar estas {count} imagens' },
       'rotate-image': { one: 'Girar esta imagem', many: 'Girar estas {count} imagens' },
+      // F17 (DECISOES § 707): o Converter para WebP depois do Comprimir; ele leva um resultado JPG ou PNG, nunca um WebP.
+      'convert-to-webp': { one: 'Converter esta imagem para WebP', many: 'Converter estas {count} imagens para WebP' },
       'image-to-pdf': { one: 'Pôr esta imagem num PDF', many: 'Pôr estas {count} imagens num PDF' },
       // F15 (DECISOES § 653): as ferramentas de PDF depois da Imagem para PDF, com as palavras da ilha de PDF.
       'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estes {count} PDFs' },

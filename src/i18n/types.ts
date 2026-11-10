@@ -862,8 +862,9 @@ export interface ImagePanelTexts {
     /**
      * What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images").
      * F15 (DECISOES § 653): the PDF tools Image to PDF leads to, with the words of the PDF island ("Compress this PDF").
+     * F17 (decision 5; DECISOES § 707): Convert to WebP, a chip of Compress again; it takes a JPG or a PNG result along.
      */
-    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf' | 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'convert-to-webp' | 'image-to-pdf' | 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
     /** F15 (DECISOES § 653): the line under the chips of Image to PDF, with the words of the PDF ("Oli takes the PDF to …"). */
     linePdf: string;
   };

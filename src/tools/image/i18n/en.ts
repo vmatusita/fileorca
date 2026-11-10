@@ -116,6 +116,8 @@ export default {
       'resize-image': { one: 'Resize this image', many: 'Resize these {count} images' },
       'crop-image': { one: 'Crop this image', many: 'Crop these {count} images' },
       'rotate-image': { one: 'Rotate this image', many: 'Rotate these {count} images' },
+      // F17 (DECISOES § 707): Convert to WebP after Compress; it takes a JPG or a PNG result, never a WebP.
+      'convert-to-webp': { one: 'Convert this image to WebP', many: 'Convert these {count} images to WebP' },
       'image-to-pdf': { one: 'Turn this image into a PDF', many: 'Turn these {count} images into a PDF' },
       // F15 (DECISOES § 653): the PDF tools after Image to PDF, with the words of the PDF island.
       'compress-pdf': { one: 'Compress this PDF', many: 'Compress these {count} PDFs' },
