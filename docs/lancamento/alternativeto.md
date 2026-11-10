@@ -36,7 +36,7 @@ Depois da aprovação, quem é dono do app pode pedir acesso de desenvolvedor pa
 | Descrição curta | **Até 150 caracteres** | Adotado por cautela (não publicado) |
 | Descrição longa | **Até cerca de 1.000 caracteres** | Adotado por cautela (não publicado) |
 
-Se o formulário mostrar outro limite, ele vale. Os textos abaixo têm 140 caracteres (curta) e 705 (longa, três parágrafos).
+Se o formulário mostrar outro limite, ele vale. Os textos abaixo têm 146 caracteres (curta) e 748 (longa, três parágrafos).
 
 Regra do Victor: só em inglês, sem emoji, sem exclamação, sem as palavras vetadas.
 
@@ -60,25 +60,21 @@ Regra do Victor: só em inglês, sem emoji, sem exclamação, sem as palavras ve
 
 **Capturas de tela (se o formulário pedir):** duas ou três, em inglês: Compress image com o Antes/Depois, o hub `/image-tools/` e HEIC to JPG. Tire você mesmo no dia, com as contagens certas.
 
-### Descrição curta (140 caracteres)
+### Descrição curta (146 caracteres)
 
 ```
-Free image tools that run in your browser: compress, resize, crop, rotate, convert HEIC, WebP and PNG, and make PDFs. No account, no upload.
+Free image tools that run in your browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF, and make PDFs. No account, no upload.
 ```
 
-<!-- muda com a 2b: a lista de ações (entra a conversão para WebP e AVIF e o AVIF para JPG). Reconte para ficar em até 150 caracteres. -->
-
-### Descrição longa (705 caracteres)
+### Descrição longa (748 caracteres)
 
 ```
-FileOrca is a set of free image tools that run in your web browser. You can compress, resize, crop and rotate JPG, PNG and WebP files, turn HEIC, WebP and PNG into JPG, and put images into one PDF. There are also presets for common limits: 100 KB, 1 MB and a YouTube thumbnail.
+FileOrca is a set of free image tools that run in your web browser. You can compress, resize, crop and rotate JPG, PNG and WebP files, turn HEIC, WebP, PNG and AVIF into JPG, convert JPG and PNG to WebP or AVIF, and put images into one PDF. There are also presets for common limits: 100 KB, 1 MB and a YouTube thumbnail.
 
 Your files are processed on your device and are not uploaded. There is no account and no limit on how many images you add at once. You can paste images with Ctrl+V and download the results one by one or as a ZIP file. Results come out without photo metadata such as GPS, Exif, XMP and IPTC.
 
 FileOrca is made by one developer in Curitiba, Brazil. Compress image and the site pages are also available in Portuguese and Spanish.
 ```
-
-<!-- muda com a 2b: o primeiro parágrafo (a lista de ferramentas). -->
 
 Notas sobre o texto:
 
@@ -116,6 +112,8 @@ Como adicionar depois da aprovação: na página do app (por exemplo TinyPNG), "
 | iMazing HEIC Converter | <https://alternativeto.net/software/imazing-heic-converter/> | Página existe. Atualizada em 23/out/2026. 15 alternativas. Página não mostra licença do app. |
 | CopyTrans HEIC for Windows | <https://alternativeto.net/software/copytrans-heic-for-windows/> | Página existe. Atualizada em 21/jul/2026. 12 alternativas visíveis. Página não mostra licença do app. |
 
+Com o AVIF to JPG (F17), os conversores de AVIF que existirem no AlternativeTo passam a caber nesta lista. Nenhum foi aberto na F17, que não acessou o AlternativeTo: abra e confira a página de cada um no dia, como as da tabela, antes de sugerir o FileOrca.
+
 ### O que o FileOrca substitui e o que não substitui
 
 Os itens sobre o concorrente vêm do conhecimento geral e **não foram verificados hoje**. Confira no site de cada um antes de escrever qualquer comparação em público. No AlternativeTo, o voto "Good alternative?" é do leitor, não seu.
@@ -123,11 +121,11 @@ Os itens sobre o concorrente vêm do conhecimento geral e **não foram verificad
 **TinyPNG**
 
 - Substitui: comprimir JPG, PNG e WebP no navegador, sem conta e sem enviar o arquivo, em lote sem limite, com download em ZIP.
-- Não substitui: os plugins de Photoshop e WordPress e a API. O FileOrca ainda não faz AVIF (run 2b). A qualidade final não foi comparada; não afirme que é igual ou melhor.
+- Não substitui: os plugins de Photoshop e WordPress e a API. Desde a F17, o FileOrca converte JPG e PNG para AVIF e AVIF para JPG, mas não comprime um AVIF (a Compress image não aceita AVIF). A qualidade final não foi comparada; não afirme que é igual ou melhor.
 
 **Squoosh**
 
-- Substitui: comprimir e converter para JPG, PNG e WebP no navegador, também com processamento local.
+- Substitui: comprimir e converter para JPG, PNG, WebP e AVIF no navegador, também com processamento local.
 - Não substitui: quem quer ajustar cada codec à mão e comparar lado a lado (a Squoosh é feita para isso). O FileOrca faz lote, ZIP, HEIC e PDF numa só página, com presets (100 KB, 1 MB). A Squoosh é código aberto; o FileOrca não afirma nada sobre isso.
 
 **iLoveIMG**
@@ -159,6 +157,8 @@ Nas listas de alternativas apareceram o **Caesium Image Compressor** (grátis, c
 **iLovePDF** e **Smallpdf** entram na lista de "alternativa a" só depois da F5 (ferramentas de PDF). Hoje o FileOrca só faz "Image to PDF". Não os adicione agora.
 
 ## Linhas que mudam com a 2b
+
+A F17 (10/nov/2026) mudou estas linhas: a descrição curta, o primeiro parágrafo da longa, as notas de TinyPNG e Squoosh e o parágrafo sobre os conversores de AVIF, logo depois da tabela de "Alternativa a". Os comentários "muda com a 2b" saíram do arquivo. A lista abaixo fica como registro.
 
 - A descrição curta e o primeiro parágrafo da longa (lista de ações).
 - A linha "O FileOrca ainda não faz AVIF" nas notas de TinyPNG e Squoosh.

@@ -9,7 +9,7 @@ Os textos que vão para fora estão em inglês. As explicações estão em portu
 1. **O Hacker News proíbe texto gerado.** As diretrizes pedem para não pôr texto gerado nos posts e não postar texto gerado ou editado por IA nos comentários. Este arquivo foi redigido com ajuda de IA. Use o primeiro comentário como **roteiro de fatos** e reescreva com as suas palavras antes de postar. O mesmo vale para o título: escolha uma das opções e ajuste a redação como você falaria.
 2. **O texto só afirma o que a run prova.** Há três afirmações técnicas permitidas (seção "Provas"). Se a prova de alguma não passar, a frase sai do comentário.
 3. **Não pergunte nem peça voto.** Nem a amigos, nem em rede social, nem por mensagem. O Show HN proíbe pedir a amigos que votem ou comentem.
-4. **As linhas marcadas com `<!-- muda com a 2b -->`** mudam quando a run "2b" entrar (contagens e listas de ferramentas). Quando você copiar o texto, o comentário HTML não vai junto: confira a lista a olho.
+4. **A run "2b" entrou na F17 (10/nov/2026):** as listas de ferramentas e as contagens deste arquivo já trazem o AVIF to JPG e a conversão para WebP e AVIF, e os comentários `<!-- muda com a 2b -->` saíram. Confira a lista a olho no dia do post.
 
 ## Regras que importam (resumo em português)
 
@@ -58,7 +58,7 @@ Variações:
 
 Por que o principal: diz o que é ("image tools"), onde roda ("in your browser") e a diferença ("no uploads"), sem adjetivo. A segunda e a terceira trocam a categoria pelas ações mais buscadas (comprimir, redimensionar, HEIC). Nenhuma usa "free", "best" nem número. O nome do produto no título é o padrão do Show HN. O que as diretrizes mandam tirar é o nome do site como sufixo, porque o HN mostra o domínio sozinho.
 
-<!-- muda com a 2b: se a 2b entrar antes do post, o título principal continua valendo. A segunda variação fica incompleta (faltam WebP e AVIF), mas segue verdadeira. -->
+Com a 2b no ar (F17), os quatro títulos continuam verdadeiros: "convert" cobre a conversão para WebP e AVIF e o AVIF to JPG.
 
 ## URL a enviar
 
@@ -66,7 +66,7 @@ Por que o principal: diz o que é ("image tools"), onde roda ("in your browser")
 
 Por quê:
 
-- O título fala de "image tools", e o hub `/image-tools/` é exatamente isso: as oito ferramentas e os três presets, cada um com link direto. Quem clica já escolhe e usa.
+- O título fala de "image tools", e o hub `/image-tools/` é exatamente isso: as dez ferramentas e os três presets, cada um com link direto. Quem clica já escolhe e usa.
 - A home (`/`) hoje é quase o mesmo hub, mas tem blocos de texto de apresentação ("Your files stay with you") e vai crescer com as calculadoras (F4) e o PDF (F5). O Show HN rejeita landing page, e a home tende a parecer uma.
 - Guardar a home deixa a URL livre para um segundo Show HN quando as calculadoras ou o PDF forem uma reformulação grande de verdade.
 
@@ -89,23 +89,20 @@ What is there today:
 
 - Compress, resize, crop and rotate (and mirror) for JPG, PNG and WebP.
 - HEIC to JPG or PNG, WebP to JPG or PNG, and PNG to JPG or JPG to PNG.
+- AVIF to JPG, and JPG or PNG to WebP or AVIF, with the transparency kept.
 - Image to PDF, one image per page.
 - Presets for common limits: 100 KB, 1 MB and a YouTube thumbnail size.
 
 There is no account and no limit on batch size. You can paste images with Ctrl+V and download the results one by one or as a ZIP.
 
-How it works: the site is static, built with Astro, with Preact islands for the tool panels. The image work runs in a Web Worker, and the page talks to it through Comlink. In a browser whose workers have no OffscreenCanvas, it falls back to the page. The codecs are WebAssembly and load the first time you need them: MozJPEG, OxiPNG and WebP from the jSquash packages, and libheif-js for HEIC. I use libheif-js unmodified, and its LGPL code stays in a separate file. ZIP files come from fflate and PDFs from pdf-lib (the @cantoo fork). It is hosted on Cloudflare Workers, serving static files only. There is no server code.
+How it works: the site is static, built with Astro, with Preact islands for the tool panels. The image work runs in a Web Worker, and the page talks to it through Comlink. In a browser whose workers have no OffscreenCanvas, it falls back to the page. The codecs are WebAssembly and load the first time you need them: MozJPEG, OxiPNG, WebP and AVIF from the jSquash packages, and libheif-js for HEIC. I use libheif-js unmodified, and its LGPL code stays in a separate file. ZIP files come from fflate and PDFs from pdf-lib (the @cantoo fork). It is hosted on Cloudflare Workers, serving static files only. There is no server code.
 
 How to check it: no byte of your file leaves your browser. Open the Network tab in DevTools, use a tool, and watch: nothing is uploaded. Also, after the page and the codec load, the tool keeps working offline. Load the page, process one image, turn off your Wi-Fi, and process another one.
 
 About tracking and money: the only third-party traffic is Google Analytics, with Consent Mode, and only on fileorca.com. There is a cookie notice with Accept and Decline. Ads are not on yet. When they are, Google AdSense will pay the costs, and it will add its own requests to the page. There is also an optional Ko-fi link.
 
-What comes next: converters to WebP and AVIF and from AVIF to JPG, then calculators and PDF tools.
-
 I'm here to answer questions. If a file fails, tell me the browser, the device and the format, and I will look at it.
 ```
-
-<!-- muda com a 2b: a lista "What is there today" (nenhuma linha muda, mas entram as de WebP/AVIF) e o parágrafo "What comes next" (sai a parte de WebP e AVIF e do AVIF para JPG, e a 2b vira "what is there"). -->
 
 Notas sobre o texto:
 
