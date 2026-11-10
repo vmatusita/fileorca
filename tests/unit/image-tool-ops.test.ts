@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Operation } from '../../src/engine/image/types.ts';
+import { LANGS } from '../../src/i18n/routes.ts';
+import type { ConvertToOptionsTexts } from '../../src/i18n/types.ts';
 import type { FileInfo } from '../../src/tools/image/types.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
+import { imageToolTexts } from '../../src/tools/image/texts.ts';
+import { TOOL as avif } from '../../src/tools/avif-to-jpg/Panel.tsx';
+import { TOOL as convert } from '../../src/tools/convert-to-webp/Panel.tsx';
 import { TOOL as crop } from '../../src/tools/crop-image/Panel.tsx';
 import { TOOL as heic } from '../../src/tools/heic-to-jpg/Panel.tsx';
 import { TOOL as pdf } from '../../src/tools/image-to-pdf/Panel.tsx';
@@ -83,12 +88,34 @@ describe('the converters', () => {
     expect(heic.warm).toEqual(['heic']);
   });
 
-  it('PNG to JPG lets the file decide the direction', () => {
+  // F17 (decision 5; DECISOES § 707): the two tools of the F2 come back with the operations of the F2 (3812f49 took
+  // these lines out with them); neither warms a codec at load (§ 705).
+  it('PNG to JPG lets the file decide the direction, and AVIF to JPG always gives a JPG', () => {
     expect(opOf(png)).toEqual({ kind: 'convert', to: 'swap' });
+    expect(opOf(avif)).toEqual({ kind: 'convert', to: 'jpeg' });
+    expect(avif.warm).toEqual([]);
+    expect(avif.now).toBeUndefined();
+  });
+
+  it('Convert to WebP starts on WebP at Recommended, and AVIF and Strong are choices', () => {
+    expect(opOf(convert)).toEqual({ kind: 'convert', to: 'webp', level: 'recommended' });
+    expect(opOf(convert, { to: 'avif', level: 'strong' })).toEqual({ kind: 'convert', to: 'avif', level: 'strong' });
+    expect(opOf(convert, { to: 'avif' })).toEqual({ kind: 'convert', to: 'avif', level: 'recommended' });
+    expect(convert.warm).toEqual([]);
+  });
+
+  it('Convert to WebP says the format and the level under Adjust ("WebP · Recommended"), in every language', () => {
+    const en = imageToolTexts('convert-to-webp', 'en').panel.options as ConvertToOptionsTexts;
+    expect(convert.now?.(convert.initial, en, 'en')).toBe('WebP · Recommended');
+    expect(convert.now?.({ to: 'avif', level: 'strong' }, en, 'en')).toBe('AVIF · Strong');
+    for (const lang of LANGS) {
+      const texts = imageToolTexts('convert-to-webp', lang).panel.options as ConvertToOptionsTexts;
+      expect(convert.now?.({ to: 'avif', level: 'strong' }, texts, lang), lang).toBe(`${texts.avif} · ${texts.strong}`);
+    }
   });
 
   it('every converter calls its success "converted"', () => {
-    for (const tool of [heic, webp, png]) expect(tool.success).toBe('converted');
+    for (const tool of [heic, webp, png, avif, convert]) expect(tool.success).toBe('converted');
   });
 });
 

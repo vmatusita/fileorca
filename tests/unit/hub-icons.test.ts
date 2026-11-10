@@ -84,6 +84,20 @@ describe.runIf(BUILT)('one icon per tool card (UX-16)', () => {
     });
   }
 
+  // F17 (decision 6; DECISOES § 706): AVIF to JPG and Convert to WebP wear the two drawings made for them, on the hub of
+  // image and on the home of each language; with the convert of PNG to JPG, the hubs had "convert ×3" (as before the F13a).
+  it('shows image-stack on AVIF to JPG and image-fast on Convert to WebP, on the image hub and the home of each language', () => {
+    const iconOf = (html: string, href: string): string | undefined =>
+      new RegExp(`<a class="fo-tool\\b[^>]*href="${href}"[^>]*>[\\s\\S]*?<span class="fo-tool__icon"[^>]*><svg\\b[^>]*>([\\s\\S]*?)</svg>`).exec(html)?.[1]?.trim();
+    const wanted: [RouteId, IconName][] = [['avif-to-jpg', 'image-stack'], ['convert-to-webp', 'image-fast']];
+    for (const lang of LANGS) {
+      for (const page of [pagePath('image-tools', lang), lang === 'en' ? '/' : `/${lang}/`]) {
+        const html = read(page ?? '');
+        for (const [id, icon] of wanted) expect(iconOf(html, pagePath(id, lang) ?? ''), `${page} ${id}`).toBe(ICONS[icon]);
+      }
+    }
+  });
+
   it('catches a repeat (control)', () => {
     const card = (name: IconName, href: string): string =>
       `<a class="fo-tool fo-dogear fo-cat--money" href="${href}"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24">${ICONS[name]}</svg></span><h3 class="fo-tool__name">x</h3></a>`;

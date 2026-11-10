@@ -1091,14 +1091,16 @@ describe('portão de conteúdo: as páginas de PDF em português e espanhol (F6)
 });
 
 describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
-  it('knows the 11 pages of the registry and nothing else', () => {
-    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(11);
+  // F17 (DECISOES § 716): AVIF to JPG and Convert to WebP make 13 (10 tools and 3 presets; 11 before).
+  it('knows the 13 pages of the registry and nothing else', () => {
+    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(13);
     for (const id of Object.keys(IMAGE_PAGES)) expect(isImagePage(id), id).toBe(true);
     for (const id of ['home', 'image-tools', 'privacy', 'not-found', 'constructor', 'toString']) expect(isImagePage(id), id).toBe(false);
   });
 
   it('finds every page of the registry in the route map, each in the three languages (F6; before, only Compress image)', () => {
-    // 11 pages × 3 languages: the gate reads 33 image pages (13 before the F6: 11 in English and Compress image in pt and es).
+    // 13 pages × 3 languages since the F17: the gate reads 39 image pages (33 before; 13 before the F6: 11 in English and
+    // Compress image in pt and es).
     const found = allPages().filter((entry) => isImagePage(entry.route.id));
     expect(found).toHaveLength(Object.keys(IMAGE_PAGES).length * LANGS.length);
     for (const id of Object.keys(IMAGE_PAGES)) {
@@ -1410,7 +1412,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     return { status: result.status, output: `${result.stdout}${result.stderr}` };
   }
 
-  // The counts of the summary line, read from the route map (F6): 33 image pages (11 × 3; 13 before), the calculators in
+  // The counts of the summary line, read from the route map (F6): 39 image pages (13 × 3 since the F17; 11 × 3 before), the calculators in
   // each of their languages (18 in English, 5 in Spanish and the Brazilian ones once their rows are in the map; 18 before)
   // and the PDF pages (13 × 3; 13 before).
   const imageCount = allPages().filter((entry) => isImagePage(entry.route.id)).length;
@@ -1422,7 +1424,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   const qrCount = allPages().filter((entry) => entry.route.id === QR_ID).length;
 
   it('passes on a complete site, whose 404 pages repeat a title and hold placeholder wording', () => {
-    expect(imageCount).toBe(11 * 3);
+    expect(imageCount).toBe(13 * 3);
     expect(calcCount).toBeGreaterThanOrEqual(18 + 5);
     expect(pdfCount).toBe(13 * 3);
     const dir = join(root, 'site');

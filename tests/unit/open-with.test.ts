@@ -27,10 +27,23 @@ describe('the tools of the share target', () => {
     }
   });
 
-  it('accept every type and extension some tool takes, HEIC included, and the PDF', () => {
+  // F17 (decision 9; DECISOES § 710 and § 716): AVIF to JPG takes AVIF, so the accept of the manifests gains image/avif
+  // and .avif, from the registry and with no line of src/share changed (it had the 13 entries of JPG, PNG, WebP, HEIC and
+  // the PDF from the F8 to the F16).
+  it('accept every type and extension some tool takes, HEIC and AVIF included, and the PDF', () => {
     expect(shareAccept().sort()).toEqual(
-      ['image/jpeg', '.jpg', '.jpeg', 'image/png', '.png', 'image/webp', '.webp', 'image/heic', 'image/heif', '.heic', '.heif', 'application/pdf', '.pdf'].sort(),
+      ['image/jpeg', '.jpg', '.jpeg', 'image/png', '.png', 'image/webp', '.webp', 'image/heic', 'image/heif', '.heic', '.heif', 'image/avif', '.avif', 'application/pdf', '.pdf'].sort(),
     );
+    expect(new Set(shareAccept()).size).toBe(shareAccept().length);
+  });
+
+  it('open a shared AVIF in AVIF to JPG alone, and a JPG or a PNG in Convert to WebP too (F17)', () => {
+    const open = (format: string) => SHARE_TOOLS.filter((tool) => takes(tool.accepts, tool.single, [format]) > 0).map((tool) => tool.id);
+    expect(open('avif')).toEqual(['avif-to-jpg']);
+    expect(open('jpeg')).toContain('convert-to-webp');
+    expect(open('png')).toContain('convert-to-webp');
+    expect(open('webp')).not.toContain('convert-to-webp');
+    expect(open('heic')).toEqual(['heic-to-jpg']);
   });
 });
 
@@ -68,6 +81,9 @@ describe('the "Open with" page', () => {
     expect(formatOfBytes(new TextEncoder().encode('hello'))).toBe('unknown');
     expect(formatOfBytes(new Uint8Array())).toBe('unknown');
     expect(FORMAT_LABEL['jpeg']).toBe('JPG');
+    // F17: an AVIF (the ftyp box with the avif brand) is read as AVIF, the format AVIF to JPG takes.
+    expect(formatOfBytes(bytes(0, 0, 0, 0x1c, ...new TextEncoder().encode('ftypavif'), 0, 0, 0, 0, ...new TextEncoder().encode('avifmif1miaf')))).toBe('avif');
+    expect(FORMAT_LABEL['avif']).toBe('AVIF');
   });
 
   it('counts what each tool takes, one at most for a one-file tool, and gives it those first', () => {
