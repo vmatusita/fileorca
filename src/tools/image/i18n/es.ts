@@ -31,6 +31,12 @@ export default {
     remove: 'Quitar {name}',
     select: 'Mostrar {name}',
     unchanged: 'Ya optimizada',
+    // F15 (DECISOES § 651 y § 652): las palabras de las filas de Unir PDF (src/tools/pdf/i18n/es.ts), con claves propias.
+    moveEarlier: 'Mover {name} hacia arriba',
+    moveLater: 'Mover {name} hacia abajo',
+    moved: '{name} ahora es el número {position} de {total}.',
+    out: '{name} salió de la lista.',
+    undo: 'Deshacer',
   },
   errors: {
     title: 'Uy, Oli no pudo leer este archivo',
@@ -103,12 +109,17 @@ export default {
     lostHelp: 'Nada salió de tu dispositivo. Elige la imagen de nuevo, o vuelve a {tool} y descárgala allí.',
     lostHelpMany: 'Nada salió de tu dispositivo. Elige las imágenes de nuevo, o vuelve a {tool} y descárgalas allí.',
     back: 'Volver a {tool}',
+    linePdf: 'Oli lleva el PDF a la siguiente herramienta. Nunca sale de tu dispositivo.',
     chips: {
       'compress-image': { one: 'Comprimir esta imagen', many: 'Comprimir estas {count} imágenes' },
       'resize-image': { one: 'Redimensionar esta imagen', many: 'Redimensionar estas {count} imágenes' },
       'crop-image': { one: 'Recortar esta imagen', many: 'Recortar estas {count} imágenes' },
       'rotate-image': { one: 'Rotar esta imagen', many: 'Rotar estas {count} imágenes' },
       'image-to-pdf': { one: 'Pasar esta imagen a PDF', many: 'Pasar estas {count} imágenes a PDF' },
+      // F15 (DECISOES § 653): las herramientas de PDF después de Imagen a PDF, con las palabras de la isla de PDF.
+      'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estos {count} PDF' },
+      'merge-pdf': { one: 'Unir este PDF con otros', many: 'Unir estos {count} PDF' },
+      'add-page-numbers-to-pdf': { one: 'Numerar las páginas de este PDF', many: 'Numerar las páginas de estos {count} PDF' },
     },
   },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },

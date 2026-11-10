@@ -516,7 +516,9 @@ test.describe('distância dos anúncios nas calculadoras de casa e saúde, a 360
 // F7 (decision 8): the QR code generator, in the ad area "utilidades": no AdSlot above the tool on a phone or inside the
 // island, the rail from 1280px, and 150px from the text box, the preview with the Oli, the options and the two Download
 // buttons, at rest, with a code made and with the error of a text over the limit.
-const QR_TARGETS = `${TARGETS}, .fo-qr, .fo-qr__form, .fo-qr__preview, .fo-qr__code, .fo-qr__oli, .fo-qr__actions, .fo-qr__out, .fo-btn, .fo-field__error`;
+// F15 (DECISOES § 658): the panel goes field, output, options; the old .fo-qr__form (the field and the options) is now the
+// field (.fo-qr__field) and the node of the options (.fo-qr__options).
+const QR_TARGETS = `${TARGETS}, .fo-qr, .fo-qr__field, .fo-qr__options, .fo-qr__preview, .fo-qr__code, .fo-qr__oli, .fo-qr__actions, .fo-qr__out, .fo-btn, .fo-field__error`;
 
 // Languages adjustment (decision 3): the same page in Portuguese and Spanish, with the same states and targets.
 for (const lang of LANGS) {
@@ -749,4 +751,76 @@ test.describe('distância dos anúncios com a vista da página aberta, a 360×74
     await measureView(page, '/merge-pdf/ vista de um arquivo', adCount, gaps, words.view.enlarge, words.view.fit);
     console.log(`/merge-pdf/ menor vão com a vista: ${gaps.join(' | ')}`);
   });
+});
+
+// F15 (frente L; decision 12; DECISOES § 662 and § 668): the list of Image to PDF with three photos, the arrows and the bin
+// outside each card, then the line a row leaves with its Undo, at 360 × 740 and at 1280 × 800: 150 px from every ad, no
+// ad in the island, and the shortest distance of each new control for the report.
+test.describe('distância dos anúncios da lista da Imagem para PDF, a 360×740 e a 1280×800', () => {
+  test('/image-to-pdf/: the arrows, the bins and the line of Undo of the list, 150px from every ad', async ({ page }) => {
+    test.setTimeout(120_000);
+    const gaps: string[] = [];
+    await page.setViewportSize(VIEWPORTS[0]);
+    expect((await page.goto('/image-to-pdf/'))?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const adCount = await page.locator('.fo-ad').count();
+    expect(adCount, 'AdSlots da página').toBeGreaterThan(0);
+    await chooseImages(page, await jpegBatch(page, 3));
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('#fo-tool-root .fo-filelist__remove')).toHaveCount(3);
+    const list = ['.fo-filelist__row', '.fo-filelist__move', '.fo-filelist__none', '.fo-filelist__remove'];
+    await measureNow(page, '/image-to-pdf/ lista', adCount, gaps, list);
+    await page.getByRole('button', { name: 'Remove photo-2.jpg', exact: true }).click();
+    await expect(page.locator('#fo-tool-root .fo-filelist__undo')).toBeVisible();
+    await measureNow(page, '/image-to-pdf/ linha do Desfazer', adCount, gaps, ['.fo-filelist__undo', ...list]);
+    console.log(`/image-to-pdf/ menor vão da lista: ${gaps.join(' | ')}`);
+  });
+});
+
+// F15, frente Q (decision 12; DECISOES § 662): Compress image with "Up to a size" chosen and the field "Maximum size" open,
+// before the result (in the band), with the result (in "Adjust", with the comparison open) and with the error of the field,
+// at 360 × 740 and 1280 × 800, in the three languages: 150 px from every ad, no ad in the panel. The third choice and the
+// field are in TARGETS (.fo-seg, .fo-field, .fo-input, input, .fo-field__help, .fo-field__error).
+test.describe('distância dos anúncios com o "Até um tamanho" do Comprimir, a 360×740 e a 1280×800', () => {
+  for (const lang of LANGS) {
+    const path = routeById('compress-image').paths[lang] ?? '';
+    test(`${path}: "Up to a size" with its field, before the result, in "Adjust" and with the error, 150px from every ad`, async ({ page }) => {
+      test.setTimeout(120_000);
+      const gaps: string[] = [];
+      const atBothWidths = async (state: string): Promise<void> => {
+        const smallest: string[] = [];
+        for (const viewport of VIEWPORTS) {
+          await page.setViewportSize(viewport);
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
+          const label = `${path} ${state} a ${viewport.width}px`;
+          expect((await boxes(page, '#ci-max')).length, `${label}: o campo na tela`).toBe(1);
+          const panel = (await boxes(page, '#fo-tool-root'))[0];
+          for (const ad of await boxes(page, '.fo-ad--content')) expect(ad.y, `${label}: AdSlot acima da ferramenta`).toBeGreaterThan((panel?.y ?? 0) + (panel?.h ?? 0));
+          await expectAdsOutsideThePanel(page, label, adCount);
+          smallest.push(`${viewport.width}px ${(await expectClearance(page, label)).toFixed(0)}`);
+        }
+        gaps.push(`${state}: ${smallest.join(', ')}`);
+      };
+      await page.setViewportSize(VIEWPORTS[0]);
+      expect((await page.goto(path))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      const adCount = await page.locator('.fo-ad').count();
+      expect(adCount).toBeGreaterThan(0);
+      await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+      await expect(page.locator('#ci-max')).toBeVisible();
+      await atBothWidths('campo aberto');
+      await chooseImage(page);
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+      await openOnScreen(page);
+      await expect(page.locator('details.fo-adjust #ci-max')).toBeVisible();
+      await atBothWidths('com o resultado e o Ajustar');
+      await page.locator('#ci-max').fill('5');
+      await page.locator('#ci-max').blur();
+      await expect(page.locator('#ci-max-error')).toBeVisible();
+      await atBothWidths('com o erro do campo');
+      console.log(`${path} menor vão com o "Até um tamanho": ${gaps.join(' | ')}`);
+    });
+  }
 });

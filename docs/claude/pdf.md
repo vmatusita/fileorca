@@ -91,3 +91,11 @@ O que a próxima run precisa saber da grade de páginas, da lupa, da vista da p�
 - **O PDF.js não destrói um `PDFWorker` que recebeu de fora, e o `PDFWorker.destroy()` não termina a porta:** no caminho da página, quem cria o `new Worker(pdfjs-core)` é quem o termina, no `close()` do `openForDrawing`, também no ramo de erro (§ 630).
 - **Um `release(id)` avança a época do id:** um `thumbnail()` que esperava o `start().canvas` quando o `release` chegou devolve `null` e não abre o arquivo de novo (§ 630).
 - **O "Done!" de uma execução automática e a frase do gesto:** a execução pode acabar dentro dos 50 ms do `say`, e aí a região diria o "Done!" antes da frase do gesto. O `hush` do `PdfPanel` cala a execução que um gesto com frase disparou (o giro, § 629); uma frase nova dita junto de um `update()` numa ferramenta automática segue a mesma regra.
+
+## F15: o caminho entre ferramentas
+
+O que a próxima run precisa saber da chegada de um chip a uma ferramenta de PDF com ação (DECISOES § 653 a § 655 e § 671 a § 674).
+
+- **A fala da chegada nas ferramentas com ação sai no `afterReading`,** com a origem antes da contagem; o `finish` só junta a origem ao "Pronto!" quando `runMode === 'auto'` (§ 671). Teste que conta a frase da chegada lê a região desde a carga (um `addInitScript` com um `MutationObserver` no `document`), porque a chegada acontece no efeito de montagem, antes de qualquer linha do teste.
+- **No Juntar, o `m.from` sai no `addFiles` com `append` e no `removeItem`;** o Desfazer o devolve pelo `m.undo.from`. Quem mexer no Desfazer do Juntar leva o `from` junto (§ 673).
+- **A regra de levar da imagem para o PDF mora no lado do PDF** (`carryOfImage`, em `src/tools/pdf/page.ts`): o `image/page.ts` já importa o `pdf/page.ts`, e o contrário seria um ciclo (§ 674).

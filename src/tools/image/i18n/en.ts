@@ -32,6 +32,12 @@ export default {
     remove: 'Remove {name}',
     select: 'Show {name}',
     unchanged: 'Already optimized',
+    // F15 (DECISOES § 651 and § 652): the words of the rows of Merge PDF (src/tools/pdf/i18n/en.ts), with keys of their own.
+    moveEarlier: 'Move {name} up',
+    moveLater: 'Move {name} down',
+    moved: '{name} is now number {position} of {total}.',
+    out: '{name} is out of the list.',
+    undo: 'Undo',
   },
   errors: {
     title: "Oops, Oli couldn't read this file",
@@ -104,12 +110,17 @@ export default {
     lostHelp: 'Nothing left your device. Choose the image again, or go back to {tool} and download it there.',
     lostHelpMany: 'Nothing left your device. Choose the images again, or go back to {tool} and download them there.',
     back: 'Back to {tool}',
+    linePdf: 'Oli takes the PDF to the next tool. It never leaves your device.',
     chips: {
       'compress-image': { one: 'Compress this image', many: 'Compress these {count} images' },
       'resize-image': { one: 'Resize this image', many: 'Resize these {count} images' },
       'crop-image': { one: 'Crop this image', many: 'Crop these {count} images' },
       'rotate-image': { one: 'Rotate this image', many: 'Rotate these {count} images' },
       'image-to-pdf': { one: 'Turn this image into a PDF', many: 'Turn these {count} images into a PDF' },
+      // F15 (DECISOES § 653): the PDF tools after Image to PDF, with the words of the PDF island.
+      'compress-pdf': { one: 'Compress this PDF', many: 'Compress these {count} PDFs' },
+      'merge-pdf': { one: 'Merge this PDF with others', many: 'Merge these {count} PDFs' },
+      'add-page-numbers-to-pdf': { one: 'Number the pages of this PDF', many: 'Number the pages of these {count} PDFs' },
     },
   },
   formats: { jpeg: 'JPG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF', gif: 'GIF' },

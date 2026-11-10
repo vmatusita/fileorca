@@ -67,7 +67,8 @@ export const MAP_TARGETS = [
   // F13b (UX-12 A, decision 10; DECISOES § 545, § 547 and § 554): the slot of the Download PDF in the card and the message
   // that takes its place, and the block of costs that folds with the echo of the result.
   '.fo-rhero__get', '.fo-rhero__error', '.fo-calc__fold', '.fo-disclose', '.fo-calc__echo',
-  '.fo-qr', '.fo-qr__form', '.fo-qr__preview', '.fo-qr__actions',
+  // F15 (DECISOES § 658): the old .fo-qr__form is now the field and the node of the options, with the output between them.
+  '.fo-qr', '.fo-qr__field', '.fo-qr__options', '.fo-qr__out', '.fo-qr__preview', '.fo-qr__actions',
   '.fo-pdf-island', '.fo-ready', '.fo-options-stack', '.fo-pages',
   // F13a (UX-04 A and UX-11 A; DECISOES § 488): the Merge list in the rectangle and the band under it.
   '.fo-merge-panel', '.fo-merge__undo', '.fo-merge__remove', '.fo-merge__add', '.fo-band', '.fo-merge__order', '.fo-adjust', '.fo-note',
@@ -82,6 +83,9 @@ export const MAP_TARGETS = [
   // foot of the band (the water; the Oli is [data-oli]). Ajuste-home-cards (§ 609): on the home, the category sections
   // and their cards, in the place of the bands and their chips.
   '.fo-section--cat', '.fo-section--cat .fo-grid', '.fo-section--cat .fo-tool', '.fo-home-sea', '.fo-hubband__sea', '.fo-hubband__water',
+  // F15 (frente L; decision 12; DECISOES § 662): the rows of an image batch, the arrows of Image to PDF and their empty
+  // places, the bin outside the card and the line a row leaves with its Undo.
+  '.fo-filelist__row', '.fo-filelist__moves', '.fo-filelist__move', '.fo-filelist__none', '.fo-filelist__remove', '.fo-filelist__undo',
 ].join(', ');
 /** The groups of targets of the report's table of the shortest distances. */
 export const TARGET_GROUPS: Record<string, string> = {

@@ -170,3 +170,43 @@ test('Resize image: a picture above the canvas limit takes the path without a ca
   expect(await page.evaluate(() => crossOriginIsolated)).toBe(false);
   expect(requests.outside()).toEqual([]);
 });
+
+// F15 (criterion 5 of the run; DECISOES § 652, § 656 and § 679): the list of Image to PDF and the field of Compress image in
+// the path of this spec. Three photos in Image to PDF, a row moved up, one taken out and given back, then the PDF; Compress
+// image with "Up to a size" and a typed limit, then the ZIP. No request leaves the page origin and none writes (every one is
+// a GET), and the typed limit is in no request, in the address, in the storage or in the dataLayer. The limit is 9,137 KB:
+// a whole number that no time stamp (the gtag 'js' entry) or port (127.0.0.1:4173) of the page can hold by chance.
+test('the list of Image to PDF and the field of Compress image in the path: nothing leaves the browser', async ({ page }) => {
+  test.setTimeout(120_000);
+  const requests = watchRequests(page);
+  await page.goto('/image-to-pdf/');
+  await hydrated(page);
+  await dismissCookies(page);
+  const photos = ['gen-webp-exif-gps.webp', 'gen-png-transparente.png', 'gen-jpg-01-orientacao6.jpg'].map((name) => fixtureFile(name));
+  await page.setInputFiles('input[type="file"]', photos);
+  const download = page.locator('.fo-btn--download');
+  await expect(download).toBeVisible({ timeout: 60_000 });
+  await page.getByRole('button', { name: 'Move gen-jpg-01-orientacao6.jpg up', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove gen-png-transparente.png', exact: true }).click();
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remove gen-png-transparente.png', exact: true })).toBeFocused();
+  await expect(download).not.toHaveAttribute('aria-busy', 'true', { timeout: 30_000 });
+  expect(sniff((await takeDownload(page)).bytes), 'the PDF of the list').toBe('pdf');
+
+  await page.goto('/compress-image/');
+  await hydrated(page);
+  await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+  await page.locator('#ci-max').fill('9137');
+  await page.locator('#ci-max').blur();
+  await page.setInputFiles('input[type="file"]', [fixtureFile('gen-jpg-01-orientacao6.jpg'), fixtureFile('gen-webp-exif-gps.webp')]);
+  await expect(download).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 9,137 KB$/);
+  expect((await takeDownload(page)).name, 'the ZIP of the batch').toMatch(/\.zip$/);
+
+  expect(requests.outside(), 'no request leaves the page origin').toEqual([]);
+  expect(requests.writes, 'every request is a GET').toEqual([]);
+  expect(requests.urls.filter((url) => /^https?:/.test(url) && new URL(url).search !== ''), 'no request has a query string (the limit could only go there, with every request a GET)').toEqual([]);
+  expect(page.url(), 'the address has no query').not.toContain('?');
+  const kept = await page.evaluate(() => JSON.stringify([{ ...localStorage }, { ...sessionStorage }, (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? []]));
+  expect(kept, 'the storage and the dataLayer never have the limit').not.toMatch(/(^|\D)9,?137(\D|$)/);
+});

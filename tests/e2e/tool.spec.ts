@@ -185,9 +185,10 @@ test('the tool works in Portuguese and Spanish too', async ({ page }) => {
   }
 });
 
-// Image to PDF: the rows of a finished PDF have no button (the batch is one file), so "Show more" cannot hand the
-// focus to a button, and a new page size gives the same sentence again, which a live region only speaks when it has
-// been emptied in between.
+// Image to PDF: "Show more" hands the focus to the first new row, and a new page size gives the same sentence again,
+// which a live region only speaks when it has been emptied in between. F15 (DECISOES § 651 and § 664): the rows of the
+// PDF have the arrows and the bin of the list outside their cards (before, a finished row had no button, and the row
+// itself took the focus); the first new row gives it to its first control, "Move photo-7.jpg up".
 test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new sheet is announced again', async ({ page }) => {
   await page.goto('/image-to-pdf/');
   await hydrated(page);
@@ -196,10 +197,13 @@ test('Image to PDF: "Show 1 more" puts the focus on the first new row, and a new
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('.fo-btn--download')).toBeFocused();
   await expect(page.locator('.fo-filelist [data-row]')).toHaveCount(6);
-  await expect(page.locator('.fo-filelist button')).toHaveCount(0);
+  // Six rows of seven on screen: the first one moves only down, the others both ways; every ready row has its bin.
+  await expect(page.locator('.fo-filelist .fo-filelist__move')).toHaveCount(11);
+  await expect(page.locator('.fo-filelist .fo-filelist__remove')).toHaveCount(6);
   await page.getByRole('button', { name: 'Show 1 more' }).focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('listitem', { name: 'photo-7.jpg' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Move photo-7.jpg up', exact: true })).toBeFocused();
+  await expect(page.getByRole('listitem', { name: 'photo-7.jpg' })).toBeVisible();
 
   const sentence = 'Done! Your PDF with 7 pages is ready.';
   await expect(page.locator('#fo-tool-root').getByRole('status')).toHaveText(sentence);

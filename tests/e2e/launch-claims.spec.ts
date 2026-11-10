@@ -3,7 +3,9 @@ import { fixtureFile, takeDownload } from './lib/matrix.ts';
 import { dismissCookies, hydrated, startOver, type TestFile } from './lib/page.ts';
 import { actionOf } from './lib/pdf-privacy.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
+import { arriveFrom, inboxGone } from './lib/inbox.ts';
 import compressPdfTexts from '../../src/tools/compress-pdf/i18n/en.ts';
+import mergePdfTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import imagesPdfTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
 import protectPdfTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 
@@ -127,3 +129,38 @@ for (const { path, first, second, magic, load = fixtureFile, setup, act } of CAS
     await context.setOffline(false);
   });
 }
+
+// F15 (decision 6 and criterion 4 of the run; DECISOES § 655): the PDFs a next-step chip takes to a tool with an action
+// (here Compress PDF to Merge PDF) go through the inbox of the device and wait for the action; from the page that receives
+// them to the merged PDF, nothing goes to another origin, with a body or with a query string. The inbox is written in the
+// page as the chip writes it (tests/e2e/lib/inbox.ts); the Cache Storage of the WebKit of Playwright does not outlive a
+// reload while service workers are blocked (docs/claude/playwright.md, F13a), so this test allows them.
+test.describe(() => {
+  test.use({ serviceWorkers: 'allow' });
+
+  test('/merge-pdf/ reached by a chip: the PDFs wait for the action, and no byte of them leaves the browser', async ({ page, context }) => {
+    const requests: { url: string; method: string; body: number }[] = [];
+    context.on('request', (request) => requests.push({ url: request.url(), method: request.method(), body: request.postDataBuffer()?.length ?? 0 }));
+    const response = await page.goto('/merge-pdf/');
+    expect(response?.status()).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    await page.mouse.move(0, 0);
+    const origin = new URL(page.url()).origin;
+    await arriveFrom(page, 'merge-pdf', 'compress-pdf', [pdfFile('gen-paginas-mistas.pdf', 'first.pdf'), pdfFile('gen-acoes.pdf', 'second.pdf')]);
+    const merge = page.getByRole('button', { name: actionOf(mergePdfTexts) });
+    await expect(merge, 'the PDFs wait for the action').toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.fo-result')).toHaveCount(0);
+    await merge.click();
+    await expect(page.locator('.fo-result__from'), 'the note of where they came from').toBeVisible({ timeout: 45_000 });
+    const merged = await takeDownload(page);
+    expect([...merged.bytes.subarray(0, PDF.length)], 'a real result').toEqual([...PDF]);
+    expect(await inboxGone(page), 'the inbox is gone').toEqual({ inbox: false, choice: null });
+
+    const sent = requests.filter((request) => !/^(blob|data|about):/.test(request.url));
+    expect(sent.length, 'the page, its scripts and the PDF worker were requested').toBeGreaterThan(2);
+    expect(sent.filter((request) => new URL(request.url).origin !== origin), 'nothing goes to another origin').toEqual([]);
+    expect(sent.filter((request) => request.method !== 'GET' || request.body > 0), 'nothing is sent with a body').toEqual([]);
+    expect(sent.filter((request) => new URL(request.url).search !== ''), 'nothing is sent in a query string').toEqual([]);
+  });
+});

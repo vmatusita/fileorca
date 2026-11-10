@@ -13,6 +13,13 @@
 // "Adjust" after it. Nothing grows without a gesture of the person: the band keeps the height it had when the batch
 // started, and the rectangle keeps the room of the coffee line from the start of the batch that will show it.
 //
+// F15 (DECISOES § 651, § 652 and § 667 to § 670): the list is the Merge list of the PDF island for photos. In Image to PDF
+// it is ordered (ol), and each row has the arrows that move it (by touch and keyboard) and the native drag of the whole
+// row (by mouse); in every batch of two files or more a ready row goes out by the bin outside its card, leaving a line with
+// Undo in its place until the next action that changes the batch. A move, a row that left and an Undo pack the outputs
+// again (the PDF, or the ZIP) under a key made of the order of the ready rows, without encoding any photo again; the
+// result stays on screen until the new bundle, and the Download never hands out an old one (aria-busy until it comes).
+//
 // State lives in one mutable model (the run loop is async and must see the latest values); every change
 // calls render(). Outputs are kept as Blobs, object URLs are revoked when replaced and at "Start over".
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -31,6 +38,7 @@ import { EXTENSION, imageExtensionOf, uniqueNames } from './names.ts';
 import { bringIntoView, catchDrops, filesOf, imageFilesOf, pasteBelongsToElement } from './paste.ts';
 import { carries, plainClick, storeForNext, takeInbox, workerControls, type Outgoing } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
+import { bundleKey, moved, putBack, successor } from './batch.ts';
 import type { ChipData, FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
@@ -100,7 +108,10 @@ interface Bundle {
   blob: Blob;
   url: string;
   name: string;
-  /** What it was built from: the PDF sheet, so a size change is told from "nothing changed". */
+  /**
+   * What it was built from: the PDF sheet and the order of the ids of its pages, or the order of the ids in the ZIP
+   * (F15, batch.ts bundleKey), so a new size, a move, a row that left or came back is told from "nothing changed".
+   */
   key: string;
 }
 
@@ -147,6 +158,25 @@ interface Model {
   lost: { from: string; count: number } | null;
   /** F13a · UX-14: a chip is writing the inbox; a second click waits for the first. */
   carrying: boolean;
+  /**
+   * F15 (DECISOES § 652): the ready row that went out by its bin, where it was, and whether its line said so. It is not let
+   * go (its output, thumbnail and URLs come back with Undo) until the next action that changes the batch. `height`: the
+   * height the row had (its sizes may take two lines on a phone), which its line keeps.
+   */
+  undo: { item: Item; position: number; said: boolean; height: number } | null;
+  /**
+   * F15: marks the effect spends only once their target is on screen (§ 510): the Undo of the line, the bin of the row
+   * that came back, and the arrow of the row that moved (on the list as the model has it, not a list drawn before).
+   */
+  focusUndo: boolean;
+  focusBin: number | null;
+  focusMove: { id: number; control: string } | null;
+  /** F15 (DECISOES § 659): the run whose end says nothing, because the gesture that started it already spoke (§ 629). */
+  hush: number;
+  /** F15: Download was pressed while its bundle was being made again; the new one is handed out when it comes. */
+  wantDownload: boolean;
+  /** F15 (DECISOES § 667): a chip of Image to PDF was pressed while the PDF was being made again; it takes the new one. */
+  wantFollow: ChipData | null;
 }
 
 function newModel(): Model {
@@ -154,7 +184,8 @@ function newModel(): Model {
     items: [], phase: 'idle', runId: 0, nextId: 1, finished: 0, total: 0, zipping: false, showLevel: false, hadCard: false, bundle: null,
     selected: null, expanded: false, announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
     rowFocus: null, slotFocus: false, bandFocus: false, successors: [], focusRowId: null, compareOpen: false, coffeeRoom: false, bandLock: null,
-    from: null, lost: null, carrying: false,
+    from: null, lost: null, carrying: false, undo: null, focusUndo: false, focusBin: null, focusMove: null, hush: 0, wantDownload: false,
+    wantFollow: null,
   };
 }
 
@@ -242,7 +273,7 @@ function CarryLine({ text, icon }: { text: string; icon: string }) {
 }
 
 export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S, O>) {
-  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, elsewhere, coffeeHref, origins, carryIcons, tool, initial } = props;
+  const { lang, page, t, texts, accepts, beforeAfter, pdf, chips, converters, elsewhere, coffeeHref, origins, carryIcons, listIcons, tool, initial } = props;
   const { Options } = tool;
   const model = useRef<Model>(newModel());
   const m = model.current;
@@ -258,9 +289,15 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const startOverRef = useRef<HTMLButtonElement>(null);
   const levelRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  // The list is an ol in Image to PDF and a div with the list role elsewhere (F15): a callback keeps either one here.
+  const listRef = useRef<HTMLElement | null>(null);
+  const holdList = (element: HTMLElement | null) => {
+    listRef.current = element;
+  };
   const summaryRef = useRef<HTMLElement>(null);
   const drops = useRef<ReturnType<typeof catchDrops> | null>(null);
+  /** F15: the place of the row being dragged by the mouse (the native drag of Merge PDF), null when no row is. */
+  const dragging = useRef<number | null>(null);
 
   /**
    * Every change goes through here. Before the page is drawn again it notes where the focus is, because a control
@@ -277,10 +314,26 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
     setTick((tick) => tick + 1);
   };
+  /**
+   * F15 (DECISOES § 659): a gesture of the list says its sentence through the status region, emptied first and set 50 ms
+   * later (a live region speaks only when its text changes), as say() of the PDF island. A run that a change started
+   * after the result (an option) adds no "Done!" of its own when a move speaks during it (§ 629).
+   */
+  const say = (message: string) => {
+    m.announce = '';
+    if (m.phase === 'processing' && m.hadCard) m.hush = m.runId;
+    setTick((tick) => tick + 1);
+    window.setTimeout(() => {
+      m.announce = message;
+      setTick((tick) => tick + 1);
+    }, 50);
+  };
   const warmed = useRef(false);
   const formatName = (format: Sniffed | undefined): string => (format && format in t.formats ? t.formats[format as keyof ImagePanelTexts['formats']] : '');
   const nameOf = (item: Item) => item.file.name || t.fileFallback;
   const tracked = { tool: page, lang } as const;
+  /** The tool picks one file of the batch (the comparison, the crop box): a ready row that leaves passes the pick on. */
+  const selectable = tool.selectable ?? beforeAfter !== 'never';
 
   // --- queue bookkeeping ---------------------------------------------------------------------
 
@@ -301,9 +354,31 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.bundle = null;
   }
 
+  /** F15: the sheet of the PDF the options ask for now ('' outside Image to PDF). */
+  const sheetOf = (state: S): string => (pdf ? (tool.pdfSize?.(state) ?? 'image') : '');
+  /** F15 (DECISOES § 667): the key of the bundle the ready rows make now, in the order of the list; null when none is due. */
+  const keyNow = (): string | null =>
+    bundleKey(
+      pdf ? 'pdf' : 'zip',
+      ready().map((item) => item.id),
+      sheetOf(stateRef.current),
+    );
+
+  /** F15 (DECISOES § 652): the next action that changes the batch ends the Undo, and only then lets the row that left go. */
+  function clearUndo(): void {
+    if (m.undo) release(m.undo.item);
+    m.undo = null;
+    m.focusUndo = false;
+  }
+
   function teardown(): void {
+    clearUndo();
     for (const item of m.items) release(item);
     m.items = [];
+    m.focusMove = null;
+    m.focusBin = null;
+    m.wantDownload = false;
+    m.wantFollow = null;
     dropBundle();
   }
 
@@ -338,8 +413,12 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
   }
 
-  /** The ZIP or the PDF of the outputs; null for a single file (it downloads as it is). Touches nothing of the model. */
-  async function assemble(items: Item[], pdfKey: string): Promise<Omit<Bundle, 'url'> | null> {
+  /**
+   * The ZIP or the PDF of the outputs, under `key` (the caller asks only when one is due: a ZIP has two files or more).
+   * Touches nothing of the model. `here`: the ZIP is made on the page, with no message to the image worker (F15: a
+   * bundle made again after a gesture; the first ZIP of a batch is still the worker's).
+   */
+  async function assemble(items: Item[], sheet: string, key: string, here: boolean): Promise<Omit<Bundle, 'url'>> {
     const names = outputNames(items);
     if (pdf) {
       const { buildPdf } = await import('./pdf-client.ts').catch(() => {
@@ -348,20 +427,71 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       const pages = items.flatMap((item) =>
         item.output ? [{ blob: item.output.blob, format: item.output.format === 'png' ? ('png' as const) : ('jpeg' as const), width: item.output.width, height: item.output.height }] : [],
       );
-      const blob = await buildPdf(pages, pdfKey as 'image' | 'letter' | 'a4');
-      return { kind: 'pdf', blob, name: items.length === 1 ? names[0] ?? `${t.files.pdf}.pdf` : `${t.files.pdf}.pdf`, key: pdfKey };
+      const blob = await buildPdf(pages, sheet as 'image' | 'letter' | 'a4');
+      return { kind: 'pdf', blob, name: items.length === 1 ? names[0] ?? `${t.files.pdf}.pdf` : `${t.files.pdf}.pdf`, key };
     }
-    if (items.length < 2) return null;
-    const { zipFiles } = await import('./engine-client.ts').catch(() => {
+    const engine = await import('./engine-client.ts').catch(() => {
       throw unavailable();
     });
-    const blob = await zipFiles(items.flatMap((item, index) => (item.output ? [{ name: names[index] ?? `${index}.bin`, blob: item.output.blob }] : [])));
-    return { kind: 'zip', blob, name: `${t.files.zip}.zip`, key: '' };
+    const entries = items.flatMap((item, index) => (item.output ? [{ name: names[index] ?? `${index}.bin`, blob: item.output.blob }] : []));
+    const blob = await (here ? engine.zipHere(entries) : engine.zipFiles(entries));
+    return { kind: 'zip', blob, name: `${t.files.zip}.zip`, key };
+  }
+
+  /**
+   * F15 (DECISOES § 651 and § 667): the bundle of the ready rows as the list has them when it is made, made again while
+   * the list changed under it (a row moved, left or came back while the PDF or the ZIP was being made): the PDF never comes
+   * out in an old order. Undefined when a newer run took over; null when none is due, or it could not be made (the rows
+   * then carry the failure).
+   */
+  async function pack(id: number, here: boolean): Promise<Omit<Bundle, 'url'> | null | undefined> {
+    for (let again = here; ; again = true) {
+      const items = ready();
+      const key = keyNow();
+      if (key === null) return null;
+      let built: Omit<Bundle, 'url'>;
+      try {
+        built = await assemble(items, sheetOf(stateRef.current), key, again);
+      } catch (error) {
+        if (m.runId !== id) return undefined;
+        // A PDF worker or a ZIP chunk that never arrived is a load failure; anything else is the browser failing to write.
+        const failure: RunResult = error instanceof Error && error.name === UNAVAILABLE ? LOAD_FAILED : { ok: false, reason: 'encode' };
+        for (const item of items) settle(item, failure, '');
+        return null;
+      }
+      if (m.runId !== id) return undefined;
+      if (keyNow() === key) return built;
+    }
+  }
+
+  /**
+   * F15 (DECISOES § 667): only the bundle is made again (a move, a row that left or came back, a new sheet): no photo goes
+   * to the engine. The result stays on screen (no WaterLevel, the band by `hadCard`), and the Download says it is busy
+   * until the new bundle comes. `quiet`: the gesture already spoke, so the end does not say "Done!" again (§ 659).
+   */
+  async function repack(quiet: boolean): Promise<void> {
+    const want = keyNow();
+    if (want === null || want === m.bundle?.key) {
+      // Nothing to pack again (a ZIP down to one file downloads as it is). A batch whose other rows all failed while a row
+      // was out gets its result back with it.
+      if (m.phase === 'error' && ready().length > 0) {
+        if (quiet) m.hush = m.runId;
+        finish();
+      }
+      return;
+    }
+    const id = ++m.runId;
+    if (quiet) m.hush = id;
+    render();
+    const built = await pack(id, true);
+    if (built === undefined) return;
+    dropBundle();
+    if (built) m.bundle = { ...built, url: URL.createObjectURL(built.blob) };
+    finish();
   }
 
   async function run(): Promise<void> {
     const state = stateRef.current;
-    const pdfKey = pdf ? (tool.pdfSize?.(state) ?? 'image') : '';
     const work: Item[] = [];
     for (const item of m.items) {
       const op = tool.operation(state, infoOf(item));
@@ -371,8 +501,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       item.next = settled || hopeless ? null : { op, key };
       if (item.next) work.push(item);
     }
-    const rebuild = work.length > 0 || (pdf && ready().length > 0 && m.bundle?.key !== pdfKey);
-    if (!rebuild) return;
+    // Every photo is as the options want it: only the bundle may be due again (a new sheet of the PDF).
+    if (work.length === 0) {
+      await repack(false);
+      return;
+    }
 
     const id = ++m.runId;
     m.phase = 'processing';
@@ -392,7 +525,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       }
     }, SHOW_PROGRESS_AFTER_MS);
     try {
-      const engine = work.length > 0 ? await import('./engine-client.ts').catch(() => null) : null;
+      const engine = await import('./engine-client.ts').catch(() => null);
       for (const item of work) {
         if (m.runId !== id) return;
         if (item.removed || !item.next) {
@@ -435,16 +568,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       if (done.length > 0) {
         m.zipping = pdf || done.length >= 2;
         render();
-        let built: Omit<Bundle, 'url'> | null = null;
-        try {
-          built = await assemble(done, pdfKey);
-        } catch (error) {
-          // A PDF worker or a ZIP chunk that never arrived is a load failure; anything else is the browser failing to write.
-          const failure: RunResult = error instanceof Error && error.name === UNAVAILABLE ? LOAD_FAILED : { ok: false, reason: 'encode' };
-          for (const item of done) settle(item, failure, '');
-        }
-        // A newer run may have started while this one zipped: its own bundle replaces whatever this one made.
-        if (m.runId !== id) return;
+        // The order is read when the bundle is made, and made again if it changed meanwhile (F15). A newer run may have
+        // started while this one zipped: its own bundle replaces whatever this one made.
+        const built = await pack(id, false);
+        if (built === undefined) return;
         dropBundle();
         if (built) m.bundle = { ...built, url: URL.createObjectURL(built.blob) };
       } else {
@@ -472,9 +599,23 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
       m.coffee = countUse() ? 'ask' : '';
     }
     // The error box announces itself (role="alert"); the status region speaks when something came out, and says where a
-    // batch brought by a chip came from (UX-14).
-    m.announce = rows.length > 0 ? [saysFor(rows), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote(rows.length)].filter(Boolean).join(' ') : '';
+    // batch brought by a chip came from (UX-14). F15 (DECISOES § 659): a bundle a gesture made again says nothing more.
+    if (m.hush !== m.runId) m.announce = rows.length > 0 ? [saysFor(rows), failed > 0 ? fmt(t.errors.some, { count: failed }) : '', fromNote(rows.length)].filter(Boolean).join(' ') : '';
     render();
+    // F15: the Download pressed while its bundle was being made again hands out the new one, never the old one.
+    if (m.wantDownload) {
+      m.wantDownload = false;
+      if (m.phase === 'done' && m.bundle) {
+        hand(m.bundle.url, m.bundle.name);
+        track('download', tracked);
+      }
+    }
+    // F15 (DECISOES § 667): a chip pressed while the PDF was being made again takes the new PDF, never the old one.
+    if (m.wantFollow) {
+      const chip = m.wantFollow;
+      m.wantFollow = null;
+      if (m.phase === 'done' && m.bundle?.kind === 'pdf') carryAway(chip, [{ name: m.bundle.name, blob: m.bundle.blob }]);
+    }
   }
 
   /** F13a · UX-14 (DECISOES § 498): "Oli brought this image from Compress image.", for a batch a chip brought. */
@@ -525,6 +666,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const next = { ...stateRef.current, ...patch };
     stateRef.current = next;
     setState(next);
+    clearUndo(); // F15 (DECISOES § 652): an option is an action that changes the batch
     m.focusDownload = false; // an option changed: the focus stays on it
     if (m.items.length > 0) {
       m.announce = ''; // a live region speaks only when its text changes: the same sentence needs an empty one before it
@@ -553,7 +695,9 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     window.setTimeout(() => chooseRef.current?.focus(), 0);
   }
 
+  /** Takes a file out for good: the × of a row that waits or works, the bin of a refused row. */
   function removeItem(item: Item): void {
+    clearUndo(); // F15: another removal is an action that changes the batch
     const at = m.items.indexOf(item);
     m.successors = [m.items[at + 1]?.id, m.items[at - 1]?.id].filter((id): id is number => id !== undefined);
     item.removed = true;
@@ -567,14 +711,90 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     render();
   }
 
-  function downloadItem(item: Item, name: string): void {
-    if (!item.outUrl) return;
+  /**
+   * F15 (DECISOES § 652; D-21 of Merge PDF): the bin outside the card of a ready row. The row leaves, and in its place a
+   * line says so with Undo, at the same height, until the next action that changes the batch; no timer (WCAG 2.2.1). The
+   * focus goes to Undo, the picked file of Crop passes to the next ready row (or the one before), and the bundle is made
+   * again from the outputs that stay. The row is not let go: Undo brings it back as it was.
+   */
+  function removeRow(item: Item): void {
+    const at = m.items.indexOf(item);
+    if (at < 0) return;
+    clearUndo();
+    if (selectable) {
+      const ids = ready().map((other) => other.id);
+      const pickedId = m.selected !== null && ids.includes(m.selected) ? m.selected : ids[0];
+      if (pickedId === item.id) m.selected = successor(ids, ids.indexOf(item.id));
+    }
+    // The line keeps the height of the row it replaces (the sizes of a row may take two lines in a narrow column).
+    const height = listRef.current?.querySelector<HTMLElement>(`[data-row="${item.id}"]`)?.getBoundingClientRect().height ?? 0;
+    item.removed = true;
+    m.items = m.items.filter((other) => other !== item);
+    const undo = { item, position: at, said: false, height };
+    m.undo = undo;
+    m.focusUndo = true;
+    m.focusMove = null;
+    m.focusBin = null;
+    m.focusDownload = false;
+    render();
+    // The sentence goes into the line's region after the line is on screen, so a screen reader says it (an element born
+    // with its text is not said). The status region of the island stays quiet: one sentence per gesture (§ 659).
+    window.setTimeout(() => {
+      if (m.undo !== undo) return;
+      undo.said = true;
+      setTick((tick) => tick + 1);
+    }, 50);
+    if (m.phase !== 'processing') void repack(true);
+  }
+
+  /** F15: Undo. The row comes back to its place as it was, and the focus to its bin; the bundle is made again with it. */
+  function undoRemove(): void {
+    const undo = m.undo;
+    if (!undo) return;
+    m.undo = null;
+    m.focusUndo = false;
+    undo.item.removed = false;
+    m.items = putBack(m.items, undo.item, undo.position);
+    m.focusBin = undo.item.id;
+    render();
+    if (m.phase !== 'processing') void repack(true);
+  }
+
+  /**
+   * F15 (DECISOES § 651): a row of Image to PDF moves from `from` to `to` (an arrow moves it one place, the mouse drags it
+   * anywhere). `control` keeps the focus on the moved row: the arrow that was pressed, or the other one when the row reached
+   * an end and the pressed one gave its place to the empty one. A move to or from a row under "Show N more" opens the whole
+   * list. While the photos are prepared, the run that is going reads the new order when it makes the PDF; after the result,
+   * only the PDF is made again.
+   */
+  function moveItem(from: number, to: number, control = '.fo-filelist__move'): void {
+    const item = m.items[from];
+    const next = moved(m.items, from, to);
+    if (!item || !next) return;
+    clearUndo(); // a move is an action too: the Undo of a row that left would put it back in the wrong place
+    m.items = next;
+    if (from >= VISIBLE_ROWS || to >= VISIBLE_ROWS) m.expanded = true;
+    m.focusMove = { id: item.id, control };
+    m.focusBin = null;
+    m.focusDownload = false;
+    say(fmt(t.queue.moved, { name: nameOf(item), position: to + 1, total: m.items.length }));
+    render();
+    if (m.phase !== 'processing') void repack(true);
+  }
+
+  /** A file handed to the browser to save, as a click on a link with `download` does. */
+  function hand(url: string, name: string): void {
     const link = document.createElement('a');
-    link.href = item.outUrl;
+    link.href = url;
     link.download = name;
     document.body.append(link);
     link.click();
     link.remove();
+  }
+
+  function downloadItem(item: Item, name: string): void {
+    if (!item.outUrl) return;
+    hand(item.outUrl, name);
     track('download', tracked);
   }
 
@@ -673,7 +893,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     }
   }, []);
 
-  /** A row of the queue takes the focus: its first button, or the row itself when it has none (a finished row of Image to PDF). */
+  /** A row of the queue takes the focus: its first button, or the row itself when it has none (the one row left while Undo waits). */
   function focusRow(id: number): boolean {
     const row = listRef.current?.querySelector<HTMLElement>(`[data-row="${id}"]`);
     const target = row?.querySelector<HTMLElement>('button, a[href]') ?? row;
@@ -681,15 +901,46 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return Boolean(target);
   }
 
+  /**
+   * F15: the rows on screen are the ones the model shows now, in its order. A pending effect of an earlier render can run
+   * at the start of the next one (§ 510), on the list as it was: a focus given there is lost when the row moves.
+   */
+  function listIsDrawn(list: HTMLElement): boolean {
+    const want = (m.expanded ? m.items : m.items.slice(0, VISIBLE_ROWS)).map((item) => String(item.id));
+    const have = [...list.querySelectorAll<HTMLElement>(':scope > [data-row]')].map((row) => row.dataset['row']);
+    return want.length === have.length && want.every((id, index) => id === have[index]);
+  }
+
   useEffect(() => {
     if (m.phase === 'done' && m.focusDownload && downloadRef.current) {
       m.focusDownload = false;
       downloadRef.current.focus();
     }
-    if (m.focusRowId !== null) {
-      focusRow(m.focusRowId);
-      m.focusRowId = null;
+    // F15 (DECISOES § 651 and § 652): each mark is spent only when its target is on screen (§ 510).
+    const list = listRef.current;
+    if (m.focusUndo && m.undo) {
+      const button = list?.querySelector<HTMLElement>(`[data-out="${m.undo.item.id}"] button`);
+      if (button) {
+        m.focusUndo = false;
+        button.focus();
+      }
     }
+    if (m.focusBin !== null) {
+      const bin = list?.querySelector<HTMLElement>(`[data-row="${m.focusBin}"] .fo-filelist__remove`);
+      if (bin) {
+        m.focusBin = null;
+        bin.focus();
+      }
+    }
+    if (m.focusMove && list && listIsDrawn(list)) {
+      const row = list.querySelector<HTMLElement>(`[data-row="${m.focusMove.id}"]`);
+      const target = row?.querySelector<HTMLElement>(m.focusMove.control) ?? row?.querySelector<HTMLElement>('.fo-filelist__move');
+      if (target) {
+        m.focusMove = null;
+        target.focus();
+      }
+    }
+    if (m.focusRowId !== null && focusRow(m.focusRowId)) m.focusRowId = null;
     // The control that had the focus is gone and the page has it: the same row if it is still there (its Cancel gave
     // way to its Download), else the next row, the previous one, and last the control the panel shows now. In the band,
     // the options that gave way to the result's row come back folded: the focus goes to "Adjust".
@@ -775,6 +1026,17 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     if (!chip.carry || files.length === 0 || !plainClick(event) || !workerControls()) return;
     event.preventDefault();
     if (m.carrying) return;
+    // F15 (DECISOES § 667): the PDF on screen is the one from before a gesture or a new sheet; the chip waits for the new one.
+    // Read from the model at the press, not from the render: the press may come before the render of the gesture.
+    if (pdf && m.bundle !== null && (m.phase === 'processing' || m.bundle.key !== keyNow())) {
+      m.wantFollow = chip;
+      return;
+    }
+    carryAway(chip, files);
+  }
+
+  function carryAway(chip: ChipData, files: Outgoing[]): void {
+    if (m.carrying) return;
     m.carrying = true;
     const href = chip.href;
     // Written or not (a failure, or 3 s), the page goes: without the choice the tool opens empty, as the link of before.
@@ -804,7 +1066,6 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   /** The picture the comparison needs: original (or a decoded copy) against the result of the picked file. */
   const picked = rows.find((row) => row.item.id === m.selected) ?? rows[0] ?? null;
-  const selectable = tool.selectable ?? beforeAfter !== 'never';
   const comparable = (() => {
     if (!showCard || beforeAfter === 'never' || !picked || picked.output.outcome !== 'new') return null;
     if (beforeAfter === 'lossy' && !isLossy(picked.output.format)) return null;
@@ -812,11 +1073,15 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return { item: picked.item, output: picked.output, outUrl: picked.item.outUrl };
   })();
 
+  const bundled = pdf || rows.length >= 2;
   const deliverable = (() => {
-    if (pdf || rows.length >= 2) return m.bundle ? { url: m.bundle.url, name: m.bundle.name, size: m.bundle.blob.size } : null;
+    if (bundled) return m.bundle ? { url: m.bundle.url, name: m.bundle.name, size: m.bundle.blob.size } : null;
     const only = rows[0];
     return only?.item.outUrl ? { url: only.item.outUrl, name: nameFor.get(only.item.id) ?? '', size: only.output.blob.size } : null;
   })();
+  // F15 (DECISOES § 667): the bundle on screen is no longer the one the list makes (a move, a row that left or came back,
+  // a new sheet) or a run is making it again: the Download says it is busy, and a press waits for the new one.
+  const busy = bundled && deliverable !== null && (m.phase === 'processing' || m.bundle?.key !== keyNow());
 
   // The one Oli of the rectangle, in its corner, says the state (UX-04 A; DECISOES § 465).
   const pose: Pose = showProgress ? 'swim' : showCard ? 'cheer' : dropState === 'over' ? 'gulp' : dropState === 'offline' ? 'buoy' : dropState === 'error' ? 'oops' : dropState === 'lost' ? 'lost' : 'wave';
@@ -912,7 +1177,15 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
               class="fo-btn fo-btn--download fo-btn--lg"
               href={deliverable.url}
               download={deliverable.name}
-              onClick={() => track('download', tracked)}
+              aria-busy={busy ? 'true' : undefined}
+              onClick={(event) => {
+                if (busy) {
+                  event.preventDefault();
+                  m.wantDownload = true;
+                  return;
+                }
+                track('download', tracked);
+              }}
             >
               <Icon raw={downloadIcon} />
               {more && !pdf ? zipHead : t.result.download}{' '}
@@ -1097,7 +1370,10 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const shown = m.expanded ? m.items : m.items.slice(0, VISIBLE_ROWS);
   const hidden = m.items.length - shown.length;
   const labels = { to: t.queue.to, download: t.queue.download, cancel: t.queue.cancel, remove: t.queue.remove, select: t.queue.select };
-  const showQueue = m.items.length >= 2;
+  // F15 (DECISOES § 652): from two files to one, the list stays while Undo waits; the next action brings the card of one file.
+  const showQueue = m.items.length >= 2 || (m.undo !== null && m.items.length > 0);
+  /** A row with nothing to give (a refused file): its card has its own bin and takes the width of the list. */
+  const refusedRow = (item: Item): boolean => item.status !== 'waiting' && item.status !== 'working' && !item.output;
 
   function rowProps(item: Item): FileCardProps {
     const name = nameOf(item);
@@ -1130,15 +1406,130 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     };
   }
 
+  /**
+   * F15 (DECISOES § 651 and § 652; the rows of Merge PDF): the card, and outside it, in the row, the arrows that can move
+   * (Image to PDF; an empty place of 48 px where one cannot) and the bin of a ready row. A row that waits or works keeps the
+   * place of the bin from the start (its × is in the card), so nothing moves when the photo is ready; the last row that
+   * remains has none. In Image to PDF the mouse drags the whole row (the native drag of Merge PDF).
+   */
+  function queueRow(item: Item, position: number, last: number): JSX.Element {
+    const name = nameOf(item);
+    const refused = refusedRow(item);
+    const card = <FileCard {...rowProps(item)} />;
+    const none = () => <span class="fo-filelist__none" aria-hidden="true" />;
+    const moves = pdf && !refused && (
+      <span class="fo-filelist__moves">
+        {position > 0 ? (
+          <button type="button" class="fo-btn fo-btn--icon fo-filelist__move fo-filelist__move--up" aria-label={fmt(t.queue.moveEarlier, { name })} onClick={() => moveItem(position, position - 1, '.fo-filelist__move--up')}>
+            <Icon inner={listIcons.chevron} class="fo-icon--sm" />
+          </button>
+        ) : (
+          none()
+        )}
+        {position < last ? (
+          <button type="button" class="fo-btn fo-btn--icon fo-filelist__move fo-filelist__move--down" aria-label={fmt(t.queue.moveLater, { name })} onClick={() => moveItem(position, position + 1, '.fo-filelist__move--down')}>
+            <Icon inner={listIcons.chevron} class="fo-icon--sm" />
+          </button>
+        ) : (
+          none()
+        )}
+      </span>
+    );
+    // The bin on a ready row while another row can still give a file (a waiting one may yet): the batch never loses its
+    // last output this way, and Start over is the way out of one file.
+    const bin = refused ? null : item.status === 'done' && m.items.some((other) => other !== item && !refusedRow(other)) ? (
+      <button type="button" class="fo-btn fo-btn--icon fo-filelist__remove" aria-label={fmt(t.queue.remove, { name })} onClick={() => removeRow(item)}>
+        <Icon inner={listIcons.trash} />
+      </button>
+    ) : (
+      none()
+    );
+    const state = refused ? 'error' : undefined;
+    if (!pdf) {
+      return (
+        <div role="listitem" key={item.id} class="fo-filelist__row" data-row={item.id} data-state={state} tabindex={-1} aria-label={name}>
+          {card}
+          {bin}
+        </div>
+      );
+    }
+    return (
+      <li
+        key={item.id}
+        class="fo-filelist__row"
+        data-row={item.id}
+        data-state={state}
+        tabindex={-1}
+        aria-label={name}
+        draggable={!refused}
+        onDragStart={(event) => {
+          dragging.current = position;
+          event.dataTransfer?.setData('text/plain', name);
+        }}
+        onDragOver={(event) => {
+          if (dragging.current !== null) event.preventDefault();
+        }}
+        onDrop={(event) => {
+          // A drag of files from outside is not a row: it goes on to the document, which starts a new batch.
+          if (dragging.current === null) return;
+          event.preventDefault();
+          event.stopPropagation();
+          moveItem(dragging.current, position);
+          dragging.current = null;
+        }}
+        onDragEnd={() => {
+          dragging.current = null;
+        }}
+      >
+        {card}
+        {moves}
+        {bin}
+      </li>
+    );
+  }
+
+  const queueRows = shown.map((item, position) => queueRow(item, position, m.items.length - 1));
+  const undo = m.undo;
+  if (undo) {
+    // F15 (D-21 of Merge PDF): the line of the row that left, in its place and at its height, with its own key; its region
+    // says so 50 ms after it is on screen.
+    const out = fmt(t.queue.out, { name: nameOf(undo.item) });
+    const said = <span role="status">{undo.said ? out : ''}</span>;
+    const button = (
+      <button type="button" class="fo-btn fo-btn--ghost" onClick={undoRemove}>
+        {t.queue.undo}
+      </button>
+    );
+    const style = undo.height > 0 ? `min-height:${undo.height}px` : undefined;
+    queueRows.splice(
+      Math.min(undo.position, queueRows.length),
+      0,
+      pdf ? (
+        <li key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id} style={style}>
+          {said}
+          {button}
+        </li>
+      ) : (
+        <div role="listitem" key={`out-${undo.item.id}`} class="fo-filelist__undo" data-out={undo.item.id} style={style}>
+          {said}
+          {button}
+        </div>
+      ),
+    );
+  }
+
   const queue = showQueue && (
     <div class="fo-queue">
-      <div class="fo-filelist" role="list" aria-label={t.queue.label} ref={listRef}>
-        {shown.map((item) => (
-          <div role="listitem" key={item.id} class="fo-filelist__row" data-row={item.id} tabindex={-1} aria-label={nameOf(item)}>
-            <FileCard {...rowProps(item)} />
-          </div>
-        ))}
-      </div>
+      {pdf ? (
+        // Image to PDF: the order of the list is the order of the pages.
+        <ol class="fo-filelist fo-filelist--image" aria-label={t.queue.label} ref={holdList}>
+          {queueRows}
+        </ol>
+      ) : (
+        <div class="fo-filelist fo-filelist--image" role="list" aria-label={t.queue.label} ref={holdList}>
+          {queueRows}
+        </div>
+      )}
       {hidden > 0 && (
         <button
           type="button"
@@ -1186,13 +1577,15 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
 
   // F13a · UX-14 (DECISOES § 496 and § 497): what each chip would take along, decided here in the client: the
   // files that came out (not the ZIP), in the order of the list, and a service worker in control. The D-17 chip takes
-  // the refused file itself, as it was chosen.
+  // the refused file itself, as it was chosen. F15 (DECISOES § 653): Image to PDF takes the PDF of the batch (the one
+  // Download hands out), and its line says so in the words of the PDF; the hidden copy keeps that line and the label of
+  // one PDF (always one: "Merge this PDF with others" is longer than "Merge these 10 PDFs").
   const controlled = workerControls();
   const outgoing: { format: string; file: Outgoing }[] =
     band === 'elsewhere' && single?.failure?.reason === 'wrong-tool'
       ? [{ format: single.failure.source ?? 'unknown', file: { name: single.file.name, blob: single.file } }]
       : pdf
-        ? []
+        ? m.bundle?.kind === 'pdf' ? [{ format: 'pdf', file: { name: m.bundle.name, blob: m.bundle.blob } }] : []
         : rows.map((row) => ({ format: row.output.format, file: { name: nameFor.get(row.item.id) ?? '', blob: row.output.blob } }));
   const formats = outgoing.map((entry) => entry.format);
   const takes = (chip: ChipData): number => (chip.carry && controlled ? carries(chip.carry.accepts, chip.carry.single, formats) : 0);
@@ -1202,7 +1595,8 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     const taken = outgoing.filter((entry) => carry.accepts.includes(entry.format)).map((entry) => entry.file);
     return carry.single ? taken.slice(0, 1) : taken;
   };
-  const carryLine = formats.length > 1 ? t.carry.lineMany : t.carry.line;
+  const carryLine = pdf ? t.carry.linePdf : formats.length > 1 ? t.carry.lineMany : t.carry.line;
+  const roomLabel = (carry: NonNullable<ChipData['carry']>): string => (pdf ? carry.one : fmt(carry.many, { count: 10 }));
 
   return (
     <div class="fo-tool-island" ref={rootRef} data-state={islandState}>
@@ -1269,12 +1663,12 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
                   <span class="fo-chip__dot">
                     <Icon inner={chip.icon} />
                   </span>
-                  {chip.carry ? fmt(chip.carry.many, { count: 10 }) : chip.name}
+                  {chip.carry ? roomLabel(chip.carry) : chip.name}
                   <Icon raw={arrowIcon} />
                 </span>
               ))}
             </div>
-            {chips.some((chip) => chip.carry) && <CarryLine text={t.carry.lineMany} icon={carryIcons.shield} />}
+            {chips.some((chip) => chip.carry) && <CarryLine text={pdf ? t.carry.linePdf : t.carry.lineMany} icon={carryIcons.shield} />}
             {tool.now ? <div class="fo-band__room" /> : options}
           </div>
         )}

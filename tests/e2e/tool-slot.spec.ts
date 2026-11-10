@@ -5,6 +5,12 @@ import { LANGS, ROUTES, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { iconInner } from '../../src/icons/svg.ts';
 import { dismissCookies, dragOver, generatedJpeg, hydrated, openAdjust, openCompare, slowEngine, startOver, type TestFile } from './lib/page.ts';
+import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
+import { SW_ENABLED } from '../../src/platform/site.ts';
+import { arriveFrom } from './lib/inbox.ts';
+import { pdfFile } from './lib/pdf-tools.ts';
+import { controlled } from './lib/sw.ts';
+import { recordShifts, shiftsFromNow, shiftsSoFar } from './lib/shifts.ts';
 
 // F13a · a página de ferramenta "um lugar só" nas ferramentas de imagem (UX-04 A; decision 5 of the run; DECISOES § 463 and
 // § 464 to § 474). The rectangle (.fo-slot) has one height in every state (356px on a phone, 340px from
@@ -564,6 +570,235 @@ test.describe('a photo of a phone, with its metadata: the result keeps the recta
         }
       }
       expect(found, 'o resultado passou da reserva do café').toEqual([]);
+    });
+  }
+});
+
+// F15 (frente L; DECISOES § 651, § 662 and § 668): the list of Image to PDF with three photos at 360 × 740. Every row keeps
+// its height from the first paint to the result: the card has the height of a card that works (the bar under the name),
+// and the arrows and the bin outside it keep their places (a row that waits keeps the place of the bin), so a photo that is
+// ready grows no row. The photos are held until the list is on screen (the first row at the top of the window, as for a
+// person who looks at it), so a row that moved would count in the layout shift.
+const LIST_PHOTOS = ['gen-jpg-01-orientacao6.jpg', 'gen-webp-exif-gps.webp', 'gen-png-transparente.png'].map((name) =>
+  fixture(name, name, name.endsWith('.png') ? 'image/png' : name.endsWith('.webp') ? 'image/webp' : 'image/jpeg'),
+);
+
+test.describe('the list of Image to PDF at 360 × 740: a photo that is ready grows no row', () => {
+  test('three photos, the list on screen: every row keeps its place and its height, and the use moves nothing', async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'block' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    const engine = await slowEngine(page);
+    await open(page, '/image-to-pdf/');
+    await page.setInputFiles('input[type="file"]', LIST_PHOTOS);
+    await expect(page.locator('.fo-filelist__row')).toHaveCount(3);
+    await page.evaluate(() => {
+      document.querySelector('.fo-queue')?.scrollIntoView({ block: 'start' });
+      // Every frame from now on: the place and the height of each row, in the page.
+      const seen: string[] = [];
+      (window as unknown as { __rows: string[] }).__rows = seen;
+      const look = () => {
+        seen.push(
+          [...document.querySelectorAll('.fo-filelist__row')]
+            .map((row) => {
+              const box = row.getBoundingClientRect();
+              return `${Math.round((box.top + scrollY) * 10) / 10}:${Math.round(box.height * 10) / 10}`;
+            })
+            .join(' | '),
+        );
+        if (!(window as unknown as { __stop?: boolean }).__stop) requestAnimationFrame(look);
+      };
+      look();
+      (window as unknown as { __shifts: { from: number } }).__shifts.from = performance.now();
+    });
+    engine.release();
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await page.waitForTimeout(1500);
+    const rows = await page.evaluate(() => {
+      (window as unknown as { __stop: boolean }).__stop = true;
+      return [...new Set((window as unknown as { __rows: string[] }).__rows)];
+    });
+    const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+    console.log(`[lista da Imagem para PDF] ${browserName}: ${rows.length} desenho(s) das linhas (${rows.join(' / ')}); cls ${shifts.cls.toFixed(4)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    expect(rows, 'the rows keep their place and their height while the photos are made and when they are ready').toHaveLength(1);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBe(0);
+    await context.close();
+  });
+
+  test('three photos, the page at the top: the layout shift of the use is 0.05 at most, and the band and the rectangle keep their place', async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'block' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    await open(page, '/image-to-pdf/');
+    await frames(page);
+    const place = () =>
+      page.evaluate(() => [document.querySelector('.fo-band')?.getBoundingClientRect().top ?? -1, document.querySelector('.fo-slot')?.getBoundingClientRect().height ?? -1].map(Math.round));
+    const before = await place();
+    await page.evaluate(() => {
+      (window as unknown as { __shifts: { from: number } }).__shifts.from = performance.now();
+    });
+    await page.setInputFiles('input[type="file"]', LIST_PHOTOS);
+    await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+    await page.waitForTimeout(1500);
+    const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+    console.log(`[cls da interação] ${browserName} imagem para PDF com 3 fotos: ${shifts.cls.toFixed(3)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+    expect(await place(), 'the band and the rectangle keep their place').toEqual(before);
+    await context.close();
+  });
+});
+
+// F15 (decision 12 of the run; DECISOES § 655 and § 662): a next-step chip takes the PDFs to Merge PDF and Protect PDF too,
+// where they wait for the action. They come with the load of the page, in the way of a drop, with no gesture of the person:
+// from the start of that load to 1.5 s after the action is ready, nothing moves. And the band of Image to PDF, whose chips
+// take the PDF along under a service worker: the hidden copy keeps the room of the PDF line from the first paint (§ 500), so
+// the result, with the three chips that take the PDF and the line under them, moves nothing, and the band keeps its height.
+// The inbox is written in the page as a chip writes it (tests/e2e/lib/inbox.ts), with service workers allowed: the Cache
+// Storage of the WebKit of Playwright does not outlive a reload otherwise, and a chip only takes a file under a worker.
+test.describe('the arrival at a tool with an action and the chips of Image to PDF move nothing at 360 × 740', () => {
+  for (const kase of [
+    { tool: 'merge-pdf', files: () => [pdfFile('gen-paginas-mistas.pdf', 'first.pdf'), pdfFile('gen-acoes.pdf', 'second.pdf')], ready: '#fo-tool-root .fo-merge-panel .fo-btn--brand' },
+    { tool: 'protect-pdf', files: () => [pdfFile('gen-paginas-mistas.pdf', 'pages.pdf')], ready: '#fo-tool-root .fo-ready .fo-btn--brand' },
+  ]) {
+    test(`the arrival at /${kase.tool}/ from Compress PDF: from the load to the PDFs waiting for the action, the layout shift is 0.05 at most`, async ({ browser, browserName }) => {
+      const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'allow' });
+      await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+      await watchShifts(context);
+      // The arrival is the load of the page itself: its shifts count from the start.
+      await context.addInitScript(() => {
+        (window as unknown as { __shifts: { from: number } }).__shifts.from = 0;
+      });
+      const page = await context.newPage();
+      await open(page, `/${kase.tool}/`);
+      const slotTop = () => page.evaluate(() => Math.round(document.querySelector('.fo-slot')?.getBoundingClientRect().top ?? -1));
+      const before = await slotTop();
+      await arriveFrom(page, kase.tool, 'compress-pdf', kase.files());
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator(kase.ready), 'the PDFs wait for the action').toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('#fo-tool-root .fo-pdf-island > p.fo-sr[role="status"]'), 'they came from Compress PDF').toContainText('Compress PDF');
+      await page.waitForTimeout(1500);
+      await expect(page.locator('#fo-tool-root .fo-result'), 'nothing ran by itself').toHaveCount(0);
+      const shifts = await page.evaluate(() => (window as unknown as { __shifts: Shifts }).__shifts);
+      console.log(`[cls da chegada] ${browserName} ${kase.tool}: ${shifts.cls.toFixed(3)}${shifts.moved.length ? ` (${shifts.moved.slice(0, 4).join('; ')})` : ''}`);
+      if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+      expect(await slotTop(), 'the rectangle keeps its place').toBe(before);
+      await context.close();
+    });
+  }
+
+  test('Image to PDF under a service worker: the result with the chips that take the PDF and the PDF line moves nothing, and the band keeps its height', async ({ browser, browserName }) => {
+    test.skip(!SW_ENABLED, 'the kill switch is on: a chip only links (handoff.spec.ts proves the worker is gone)');
+    const context = await browser.newContext({ viewport: PHONE, serviceWorkers: 'allow' });
+    await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+    await watchShifts(context);
+    const page = await context.newPage();
+    await open(page, '/image-to-pdf/');
+    // The worker controls the next pages of the tab: there the chips can take the PDF along.
+    await controlled(page);
+    const file = await inputFor(page, 'image-to-pdf');
+    await open(page, '/image-to-pdf/');
+    await frames(page);
+    const band = () => page.evaluate(() => Math.round(document.querySelector('.fo-band')?.getBoundingClientRect().height ?? -1));
+    const bandBefore = await band();
+    const { shifts, before, after } = await oneUse(page, '/image-to-pdf/', file);
+    await expect(page.locator('nav.fo-next a.fo-chip[data-carry]'), 'the three chips take the PDF along').toHaveCount(3);
+    await expect(page.locator('.fo-band__now .fo-carry')).toHaveText(IMAGE_PANEL_TEXTS.en.carry.linePdf);
+    console.log(`[cls da interação] ${browserName} imagem para PDF com os chips que levam: ${shifts.cls.toFixed(3)} ${shifts.moved.slice(0, 4).join('; ')}`);
+    if (browserName === 'chromium') expect(shifts.cls, shifts.moved.join('; ')).toBeLessThanOrEqual(0.05);
+    expect(after, 'the band and the rectangle keep their place').toEqual(before);
+    expect(await band(), 'the band keeps the height it had from the first paint').toBe(bandBefore);
+    await context.close();
+  });
+});
+
+// F15, frente Q (DECISOES § 662, § 676 and § 677): what is new moves nothing without a gesture, at 360 × 740 and 1280 × 800.
+// Compress image in "Up to a size": the field opens by the click on the third choice (a gesture); from 600 ms after it, the
+// batch, its result and then a typed limit (committed when the field is left) run again with nothing moving. The QR code: the
+// preview has its place from the load, so a typed link moves no piece of the panel. The CLS is Chromium's; in the WebKit the
+// boxes that keep their place say the same.
+test.describe('F15: Compress "Up to a size" and the QR code move nothing without a gesture', () => {
+  const placeOf = (page: Page, selectors: string[]): Promise<number[][]> =>
+    page.evaluate(
+      (list) =>
+        list.map((selector) => {
+          const rect = document.querySelector(selector)?.getBoundingClientRect();
+          return rect ? [rect.x, rect.y + scrollY, rect.width, rect.height].map(Math.round) : [-1];
+        }),
+      selectors,
+    );
+
+  for (const viewport of [PHONE, WIDE]) {
+    test(`Compress image at ${viewport.width}px: "Up to a size", its batch and a typed limit move nothing without a gesture`, async ({ browser, browserName }) => {
+      test.setTimeout(120_000);
+      const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+      await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+      await recordShifts(context);
+      const page = await context.newPage();
+      await open(page, '/compress-image/');
+      await frames(page);
+      await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+      await expect(page.locator('#ci-max')).toBeVisible();
+      await page.waitForTimeout(600);
+      const place = ['.fo-slot', '.fo-band'];
+      const before = await placeOf(page, place);
+      await shiftsFromNow(page);
+      await page.setInputFiles('input[type="file"]', PHOTO());
+      await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 55_000 });
+      await page.waitForTimeout(1500);
+      const batch = await shiftsSoFar(page);
+      expect(await placeOf(page, place), 'the rectangle and the band keep their place').toEqual(before);
+      await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 200 KB$/);
+
+      // A typed limit after the result: "Adjust" opens (a gesture), then the field commits on blur and the batch runs again.
+      await openAdjust(page);
+      await page.waitForTimeout(600);
+      const href = await page.locator('.fo-btn--download').getAttribute('href');
+      const adjusted = await placeOf(page, [...place, '#ci-max', '.fo-result']);
+      await shiftsFromNow(page);
+      await page.locator('#ci-max').fill('150');
+      await page.locator('#ci-max').blur();
+      await expect(page.locator('.fo-btn--download')).not.toHaveAttribute('href', href ?? '', { timeout: 55_000 });
+      await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 150 KB$/);
+      await page.waitForTimeout(1500);
+      const typed = await shiftsSoFar(page);
+      expect(await placeOf(page, [...place, '#ci-max', '.fo-result']), 'the rectangle, the band, the field and the card keep their place').toEqual(adjusted);
+      console.log(`[cls F15] ${browserName} ${viewport.width}px até um tamanho: lote ${batch.cls.toFixed(3)}, limite digitado ${typed.cls.toFixed(3)} ${[...batch.moved, ...typed.moved].slice(0, 4).join('; ')}`);
+      if (browserName === 'chromium') {
+        expect(batch.cls, batch.moved.join('; ')).toBeLessThanOrEqual(0.05);
+        expect(typed.cls, typed.moved.join('; ')).toBeLessThanOrEqual(0.05);
+      }
+      await context.close();
+    });
+
+    test(`the QR code at ${viewport.width}px: the preview has its place from the load, and a typed link moves nothing`, async ({ browser, browserName }) => {
+      const found: string[] = [];
+      for (const lang of LANGS) {
+        const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+        await context.addInitScript(() => localStorage.setItem('fo-consent', 'denied'));
+        await recordShifts(context);
+        const page = await context.newPage();
+        await open(page, routeById('qr-code-generator').paths[lang] ?? '/');
+        await frames(page);
+        const pieces = ['.fo-qr', '.fo-qr .fo-field:not(.fo-options)', '.fo-qr__out', '.fo-qr__preview', '.fo-qr__actions', '.fo-qr__options'];
+        const before = await placeOf(page, pieces);
+        // Typed key by key, as a person types (each key is a recent input for 500 ms: the count of bytes and the sizes of the
+        // PNG change their text, and their right edges move, while the keys go); from the last key on, nothing may move.
+        await page.locator('#fo-qr-text').focus();
+        await shiftsFromNow(page);
+        await page.keyboard.type('https://fileorca.com/', { delay: 20 });
+        await expect(page.locator('.fo-qr__code > svg')).toBeVisible();
+        await page.waitForTimeout(1000);
+        const after = await placeOf(page, pieces);
+        const { cls, moved } = await shiftsSoFar(page);
+        if (JSON.stringify(after) !== JSON.stringify(before)) found.push(`${lang}: ${JSON.stringify(before)} → ${JSON.stringify(after)}`);
+        if (browserName === 'chromium' && cls > 0) found.push(`${lang}: CLS ${cls.toFixed(4)} (${moved.join('; ')})`);
+        await context.close();
+      }
+      expect(found, 'a piece of the panel moved').toEqual([]);
     });
   }
 });

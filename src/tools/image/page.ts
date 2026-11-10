@@ -10,10 +10,11 @@ import enCommon from '../../i18n/en/common.ts';
 import { ICONS } from '../../icons/icons.ts';
 import { KOFI_URL } from '../../platform/site.ts';
 import { homePath, type Crumb } from '../../seo/meta.ts';
-import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId } from './registry.ts';
+import { CONVERTER_FOR, IMAGE_PAGES, presetsOf, type ImagePageId, type ImageToolId, type PdfNeighbour } from './registry.ts';
 import { IMAGE_PANEL_TEXTS, imageToolTexts } from './texts.ts';
 import type { ChipCarry, ChipData, ConverterLink, ImagePanelData } from './types.ts';
-import { pdfOriginsOf } from '../pdf/page.ts';
+import { blurbOf as pdfBlurbOf, carryOfImage, pdfOriginsOf } from '../pdf/page.ts';
+import { PDF_PAGES } from '../pdf/registry.ts';
 
 /** Most chips under a result (the design: 2 to 4). */
 const MAX_CHIPS = 4;
@@ -26,7 +27,7 @@ export function blurbOf(id: ImagePageId, lang: Lang): ToolBlurb | undefined {
 }
 
 /** Whether the page exists in this language. */
-export function existsIn(id: ImagePageId, lang: Lang): boolean {
+export function existsIn(id: ImagePageId | PdfNeighbour, lang: Lang): boolean {
   return languagesOf(routeById(id)).includes(lang);
 }
 
@@ -36,12 +37,18 @@ const categoryOf = (id: ImageToolId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 
  * F13a · UX-14 (DECISOES § 497): the chip to `target` takes the result along when this page makes images (Image to
  * PDF makes a PDF, which no image tool takes) and the target has the label "this image" in the language; every image tool
  * runs by itself. The island decides with the formats of the result itself (takes() of src/share).
+ * F15 (DECISOES § 653 and § 654): the chip to a PDF tool takes the PDF along when this page makes one (Image to PDF), by
+ * the rule of the PDF side (carryOfImage): { accepts: ['pdf'], single: the tool takes one file at a time, its label }.
  */
-function carryTo(source: ImagePageId, target: ImageToolId, lang: Lang): ChipCarry | undefined {
+function carryTo(source: ImagePageId, target: ImageToolId | PdfNeighbour, lang: Lang): ChipCarry | undefined {
+  if (isPdfNeighbour(target)) return carryOfImage(source, target, lang);
   const labels = IMAGE_PANEL_TEXTS[lang].carry.chips;
   if (IMAGE_PAGES[source].pdf || !(target in labels)) return undefined;
   return { accepts: [...IMAGE_PAGES[target].accepts], single: false, ...labels[target as keyof typeof labels] };
 }
+
+/** F15 (DECISOES § 653): a chip of an image page that leads to a PDF tool (after Image to PDF). */
+const isPdfNeighbour = (tool: ImageToolId | PdfNeighbour): tool is PdfNeighbour => tool in PDF_PAGES;
 
 /** The next-step chips under a result; the home chip stands in when no other tool exists in the language. */
 export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
@@ -49,8 +56,12 @@ export function chipsFor(id: ImagePageId, lang: Lang): ChipData[] {
     .filter((tool) => existsIn(tool, lang))
     .slice(0, MAX_CHIPS)
     .flatMap((tool): ChipData[] => {
-      const blurb = blurbOf(tool, lang);
       const carry = carryTo(id, tool, lang);
+      if (isPdfNeighbour(tool)) {
+        // The name, the icon and the colour of a PDF tool come from the PDF side (the registry and the common texts).
+        return [{ href: pathFor(tool, lang), name: pdfBlurbOf(tool, lang).name, target: tool, icon: ICONS[PDF_PAGES[tool].icon], category: 'pdf', ...(carry ? { carry } : {}) }];
+      }
+      const blurb = blurbOf(tool, lang);
       return blurb ? [{ href: pathFor(tool, lang), name: blurb.name, target: tool, icon: ICONS[IMAGE_PAGES[tool].icon], category: categoryOf(tool), ...(carry ? { carry } : {}) }] : [];
     });
   if (chips.length > 0) return chips;
@@ -133,6 +144,7 @@ export function panelData<O = object>(id: ImagePageId, lang: Lang, initial?: Rec
     coffeeHref: lang === 'pt' ? `${pathFor('support', lang)}#pix` : KOFI_URL,
     origins: originsOf(id, lang),
     carryIcons: { info: ICONS.info, shield: ICONS.shield },
+    listIcons: { chevron: ICONS['chevron-right'], trash: ICONS.trash },
     ...(initial ? { initial } : {}),
   };
 }

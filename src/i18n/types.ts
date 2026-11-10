@@ -422,7 +422,8 @@ export interface ToolPageContent extends PageMeta {
   privacyNote: string;
   relatedHeading: string;
   /** Parent tools only: the table of their presets (one row per preset, with its link). */
-  presets?: { heading: string; caption: string; head: [string, string] };
+  /** F15 (DECISOES § 656): `lead`, a line under the heading before the table (Compress image: the third choice for any other size). */
+  presets?: { heading: string; caption: string; head: [string, string]; lead?: string };
 }
 
 /** The image hub /image-tools/ (fo-hubband: eyebrow, H1 and one line). */
@@ -756,6 +757,17 @@ export interface ImagePanelTexts {
     select: string;
     /** No gain: "Already optimized". */
     unchanged: string;
+    /**
+     * F15 (DECISOES § 651 and § 652): the rows of a batch move and go out as the rows of Merge PDF do, with its words in each
+     * language and keys of their own (the image island never imports the texts of the PDF island). The arrows: "Move {name}
+     * up", "Move {name} down"; what the moved row says: "{name} is now number {position} of {total}."; the line a row that
+     * went out leaves, "{name} is out of the list.", with its "Undo".
+     */
+    moveEarlier: string;
+    moveLater: string;
+    moved: string;
+    out: string;
+    undo: string;
   };
   errors: {
     /** "Oops, Oli couldn't read this file" (fixed line, without the advice). */
@@ -847,8 +859,13 @@ export interface ImagePanelTexts {
   next: { label: string; moreTools: string };
   /** F13a · UX-14 (DECISOES § 496): the result that goes along to the next tool, and its arrival there. */
   carry: CarryTexts & {
-    /** What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images"). */
-    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf', CarryLabel>;
+    /**
+     * What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images").
+     * F15 (DECISOES § 653): the PDF tools Image to PDF leads to, with the words of the PDF island ("Compress this PDF").
+     */
+    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf' | 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+    /** F15 (DECISOES § 653): the line under the chips of Image to PDF, with the words of the PDF ("Oli takes the PDF to …"). */
+    linePdf: string;
   };
   /** Format names as the site writes them. */
   formats: { jpeg: string; png: string; webp: string; heic: string; avif: string; gif: string };
@@ -917,6 +934,19 @@ export interface CompressOptionsTexts {
   strongHelp: string;
   /** PNG is saved without loss: the level only changes JPG and WebP. */
   pngNote: string;
+  /**
+   * F15 (PLANO-UX-QV, section D; DECISOES § 656): the third choice, "Up to a size", with its short help; the field
+   * "Maximum size" in KB (20 to 10,000, 200 at first) and its help, its error ("Type a whole number from {min} to {max}.")
+   * and the summary of "Adjust" ("Up to {n} KB").
+   */
+  size: string;
+  sizeHelp: string;
+  maxLabel: string;
+  /** The suffix of the field: "KB". */
+  kb: string;
+  maxHelp: string;
+  maxInvalid: string;
+  upTo: string;
 }
 
 /** Presets with no choice to make: one line that says what comes out. */
@@ -1206,7 +1236,7 @@ export interface PdfPanelTexts {
   /** F13a · UX-14 (DECISOES § 496): the PDFs that go along to the next tool, and their arrival there. */
   carry: CarryTexts & {
     /** What a chip says when it takes the PDFs along, per destination ("Compress this PDF", "Compress these {count} PDFs"). */
-    chips: Record<'compress-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+    chips: Record<'compress-pdf' | 'add-page-numbers-to-pdf' | 'merge-pdf' | 'split-pdf' | 'reorder-pdf-pages' | 'protect-pdf', CarryLabel>;
   };
 }
 

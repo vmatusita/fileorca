@@ -163,6 +163,11 @@ const texts: PdfPanelTexts = {
     chips: {
       'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estos {count} PDF' },
       'add-page-numbers-to-pdf': { one: 'Numerar las páginas de este PDF', many: 'Numerar las páginas de estos {count} PDF' },
+      // F15 (DECISOES § 654 y § 655): las herramientas que esperan una acción también llevan el PDF, y él la espera allí.
+      'merge-pdf': { one: 'Unir este PDF con otros', many: 'Unir estos {count} PDF' },
+      'split-pdf': { one: 'Dividir este PDF', many: 'Dividir estos {count} PDF' },
+      'reorder-pdf-pages': { one: 'Ordenar las páginas de este PDF', many: 'Ordenar las páginas de estos {count} PDF' },
+      'protect-pdf': { one: 'Proteger este PDF con contraseña', many: 'Proteger estos {count} PDF con contraseña' },
     },
   },
 };

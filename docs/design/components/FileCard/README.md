@@ -38,3 +38,12 @@ Os pares novos das peças de PDF e da linha do Juntar (F13a, DECISOES § 479 e �
 
 - **A linha do Juntar** ganha a última ação, depois das setas e da lixeira: um `fo-btn--icon` de 48px com a lupa (`zoom`) e o nome "View pages of form.pdf", que abre a vista da página daquele arquivo (README do PageView), só para ver. Enquanto o arquivo é lido, um vazio de 48px guarda o lugar dele; a linha recusada não o tem. Abaixo de 480px ele vai na linha de 48px embaixo do card, com as setas e a lixeira (§ 515). A altura das linhas (76, 108 e 154px) não muda.
 - **O card continua sem miniatura** (o ícone `pdf`): o botão mostra as páginas só quando a pessoa pede, sem desenhar nada antes (PLANO-UX-QV.md, "O que não entra").
+
+## F15: as setas e a lixeira fora do card nas listas de imagem (DECISOES § 651 e § 652)
+
+- **Antes:** "A remoção no Juntar fica fora do card", e só lá: nas listas de imagem, a linha pronta não tinha botão (a lixeira só no card de erro). **Depois:** a linha das listas de imagem segue a do Juntar.
+- **Na Imagem para PDF** a lista é ordenada (`ol.fo-filelist`, a ordem é a das páginas), e cada linha (`li.fo-filelist__row`) tem, fora do card, as setas que andam (`.fo-filelist__move--up` e `--down`, `fo-btn--icon` com o `chevron`), com o lugar vazio de 48 px (`.fo-filelist__none`) onde a seta não anda, e a lixeira (`.fo-filelist__remove`, "Remove photo.jpg") na linha pronta. A miniatura continua a da foto (não o número da posição, como no Juntar). O mouse arrasta a linha inteira; as setas fazem o mesmo pelo toque e pelo teclado.
+- **Em todo lote de imagem com dois arquivos ou mais,** a linha pronta ganha a mesma lixeira de fora do card; a linha que espera ou trabalha guarda o lugar dela desde o começo (o × de cancelar continua no card), para nada andar quando o arquivo fica pronto. O card de erro mantém a lixeira dele. Com um arquivo só não há lista, e a última linha que resta nunca tem lixeira.
+- **A linha que saiu** vira, no mesmo lugar e na mesma altura, a frase "photo.jpg is out of the list." com o Desfazer `fo-btn--ghost` de 48 px (`.fo-filelist__undo`, o D-21 do Juntar), sem tempo marcado, até a próxima ação que muda o lote.
+- Abaixo de 480 px, as setas e a lixeira vão numa linha de 48 px embaixo do card, como no Juntar (DECISOES § 515).
+- Nenhum par novo de cores: o `fo-btn--icon`, o `fo-btn--ghost` e a caixa tracejada da linha do Desfazer são os do Juntar.
