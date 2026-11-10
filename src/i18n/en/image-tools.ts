@@ -1,12 +1,12 @@
 import type { ImageToolsTexts } from '../types.ts';
 
 export default {
-  title: 'Image tools: eight free tools, no upload',
+  title: 'Image tools: ten free tools, no upload',
   description:
-    'Compress, resize, crop, rotate, convert and turn images into a PDF. Eight free image tools that run in your browser, with no upload and no account.',
+    'Compress, resize, crop, rotate, convert and turn images into a PDF. Ten free image tools that run in your browser, with no upload and no account.',
   eyebrow: 'Image tools',
-  h1: 'Eight image tools, zero uploads',
-  intro: 'Eight tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
+  h1: 'Ten image tools, zero uploads',
+  intro: 'Ten tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
   toolsHeading: 'All image tools',
   presetsHeading: 'Common sizes and limits',
   presetsCaption: 'Ready-made settings for common sizes and file limits',
@@ -22,6 +22,8 @@ export default {
     { before: 'An iPhone photo does not open on your computer:', tool: 'heic-to-jpg', after: 'turns the HEIC file into a JPG or a PNG.' },
     { before: 'A WebP image has to be a JPG or a PNG:', tool: 'webp-to-jpg', after: 'converts it.' },
     { before: 'A PNG has to be a JPG, or a JPG a PNG:', tool: 'png-to-jpg', after: 'converts it either way.' },
+    { before: 'An image saved from a website came as AVIF:', tool: 'avif-to-jpg', after: 'turns it into a JPG.' },
+    { before: 'A web page needs lighter images:', tool: 'convert-to-webp', after: 'turns JPG and PNG into smaller WebP or AVIF files.' },
     { before: 'Several pictures have to go as one document:', tool: 'image-to-pdf', after: 'puts them in one PDF, one image per page.' },
   ],
   guideOutro:

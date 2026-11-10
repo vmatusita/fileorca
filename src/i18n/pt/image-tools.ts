@@ -1,12 +1,12 @@
 import type { ImageToolsTexts } from '../types.ts';
 
 export default {
-  title: 'Ferramentas de imagem: oito ferramentas grátis, sem upload',
+  title: 'Ferramentas de imagem: dez ferramentas grátis, sem upload',
   description:
-    'Comprima, redimensione, corte, gire, converta e transforme imagens em PDF. Oito ferramentas de imagem grátis que rodam no navegador, sem upload e sem conta.',
+    'Comprima, redimensione, corte, gire, converta e transforme imagens em PDF. Dez ferramentas de imagem grátis que rodam no navegador, sem upload e sem conta.',
   eyebrow: 'Ferramentas de imagem',
-  h1: 'Oito ferramentas de imagem, sem upload',
-  intro: 'Oito ferramentas para comprimir, redimensionar, cortar, girar, converter e juntar imagens, tudo no navegador, sem enviar nada.',
+  h1: 'Dez ferramentas de imagem, sem upload',
+  intro: 'Dez ferramentas para comprimir, redimensionar, cortar, girar, converter e juntar imagens, tudo no navegador, sem enviar nada.',
   toolsHeading: 'Todas as ferramentas de imagem',
   presetsHeading: 'Tamanhos e limites comuns',
   presetsCaption: 'Ajustes prontos para tamanhos e limites de arquivo comuns',
@@ -22,6 +22,8 @@ export default {
     { before: 'Uma foto do iPhone não abre no computador:', tool: 'heic-to-jpg', after: 'transforma o arquivo HEIC em JPG ou PNG.' },
     { before: 'Uma imagem WebP precisa virar JPG ou PNG:', tool: 'webp-to-jpg', after: 'faz a conversão.' },
     { before: 'Um PNG precisa virar JPG, ou um JPG virar PNG:', tool: 'png-to-jpg', after: 'converte nos dois sentidos.' },
+    { before: 'Uma imagem salva de um site veio em AVIF:', tool: 'avif-to-jpg', after: 'transforma o arquivo em JPG.' },
+    { before: 'Uma página precisa de imagens mais leves:', tool: 'convert-to-webp', after: 'transforma JPG e PNG em arquivos WebP ou AVIF menores.' },
     { before: 'Várias fotos precisam ir num documento só:', tool: 'image-to-pdf', after: 'junta todas num PDF, uma imagem por página.' },
   ],
   guideOutro:

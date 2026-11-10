@@ -1,5 +1,5 @@
 // The home (F13b, decision 6; UX-03 B; DECISOES § 567 and § 570; ajuste-home-cards, § 602 to § 613), read in the built
-// home of each language: the H1 says the count of the site (46, 29 and 35, without the presets; § 540); under the top,
+// home of each language: the H1 says the count of the site (48, 31 and 37, without the presets; § 540); under the top,
 // each category is a section with one ToolCard per tool of its list in src/components/home-bands.ts (the name in an H3,
 // the description and the icon of the registries) and the link to its hub, as in the F13a; nothing of the bands of the
 // F13b (the band, its chips, its number) is left in <main>; no digit is typed in the texts of the home; and the sentence of
@@ -50,14 +50,14 @@ describe('the lists and the texts of the home', () => {
     }
   });
 
-  it('give the sections the registries: 8 image, 12 PDF, the 6 credit calculators of the specification in en and es, the 8 of Brazil in pt, 11 home and health, 1 QR', () => {
+  it('give the sections the registries: 10 image, 12 PDF, the 6 credit calculators of the specification in en and es, the 8 of Brazil in pt, 11 home and health, 1 QR', () => {
     expect(HOME_BAND_MONEY_IDS.en).toEqual([...HOME_MONEY_IDS.en, 'credit-card-payoff-calculator']);
     expect(HOME_BAND_MONEY_IDS.es).toEqual(HOME_BAND_MONEY_IDS.en);
     expect(HOME_BAND_MONEY_IDS.pt).toEqual(BR_CALC_IDS);
     const sizes = (lang: Lang) => Object.fromEntries(homeBands(lang).map((band) => [band.id, band.cards.length]));
     expect(sizes('en')).toEqual({ image: IMAGE_TOOL_IDS.length, pdf: PDF_TOOL_IDS.length, money: 6, life: HOUSE_CALC_IDS.length + HEALTH_CALC_IDS.length, qr: 1 });
-    expect(sizes('pt')).toEqual({ image: 8, pdf: 12, money: 8, qr: 1 });
-    expect(sizes('es')).toEqual({ image: 8, pdf: 12, money: 6, qr: 1 });
+    expect(sizes('pt')).toEqual({ image: 10, pdf: 12, money: 8, qr: 1 });
+    expect(sizes('es')).toEqual({ image: 10, pdf: 12, money: 6, qr: 1 });
     // With the texts of the language every card has its words; without them (gate:prontidao) the same paths.
     for (const lang of LANGS) {
       const named = homeBands(lang, TEXTS[lang].common);
@@ -71,8 +71,8 @@ describe('the lists and the texts of the home', () => {
 });
 
 describe.runIf(BUILT)('the built home of each language', () => {
-  it('says the count of the site in the H1: 46 tools in English, 29 in Portuguese and 35 in Spanish', () => {
-    const h1 = { en: '46 tools. 0 uploads.', pt: '29 ferramentas. 0 uploads.', es: '35 herramientas. 0 subidas.' };
+  it('says the count of the site in the H1: 48 tools in English, 31 in Portuguese and 37 in Spanish (46, 29 and 35 before the F17)', () => {
+    const h1 = { en: '48 tools. 0 uploads.', pt: '31 ferramentas. 0 uploads.', es: '37 herramientas. 0 subidas.' };
     for (const lang of LANGS) {
       const root = page(lang);
       expect(root.querySelectorAll('h1'), lang).toHaveLength(1);
