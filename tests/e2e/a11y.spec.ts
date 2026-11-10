@@ -387,7 +387,49 @@ const IMAGE_FILE: Partial<Record<ImagePageId, { fixture: string; mimeType: strin
   'heic-to-jpg': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' },
   'webp-to-jpg': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' },
   'png-to-jpg': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' },
+  // F17 (decision 13): AVIF to JPG takes AVIF only; Convert to WebP takes the JPEG drawn in the page, as the others.
+  'avif-to-jpg': { fixture: 'gen-avif.avif', mimeType: 'image/avif' },
 };
+
+// F17 (decision 13; DECISOES § 715): the six pages of AVIF to JPG and Convert to WebP in the states the passes above do not
+// read on them: the result with the comparison open (both lose quality on purpose) and, on Convert to WebP, the "Adjust"
+// with its two choices; then a refused file, which takes the drop zone with the Oli line. Convert to WebP refuses an AVIF
+// with the link to AVIF to JPG of the page's language; AVIF to JPG refuses a JPG with the line that names what it takes.
+const REFUSED_ON: Record<'avif-to-jpg' | 'convert-to-webp', { fixture: string; mimeType: string }> = {
+  'avif-to-jpg': { fixture: 'gen-jpg-02-orientacao8.jpg', mimeType: 'image/jpeg' },
+  'convert-to-webp': { fixture: 'gen-avif.avif', mimeType: 'image/avif' },
+};
+const fixtureFile = (own: { fixture: string; mimeType: string }): TestFile => ({ name: own.fixture, mimeType: own.mimeType, buffer: readFileSync(resolve('fixtures/images', own.fixture)) });
+
+test.describe('axe nas páginas da F17 com o resultado, o antes e depois e a recusa, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const id of ['avif-to-jpg', 'convert-to-webp'] as const) {
+    for (const lang of ['en', ...TRANSLATED] as const) {
+      const path = routeById(id).paths[lang] ?? '';
+      test(`${path}: the result with the before and after open, then a refused file`, async ({ page }) => {
+        expect((await page.goto(path))?.status(), path).toBe(200);
+        await hydrated(page);
+        await dismissCookies(page);
+        const own = IMAGE_FILE[id];
+        await chooseImages(page, own ? [fixtureFile(own)] : await jpegBatch(page, 1));
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        await openCompare(page);
+        if (id === 'convert-to-webp') await openAdjust(page);
+        await animationsDone(page);
+        expect(await violationsEverywhere(page), 'the result with the before and after').toEqual([]);
+
+        await chooseImages(page, [fixtureFile(REFUSED_ON[id])]);
+        await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+        const link = page.locator('.fo-drop__why a');
+        if (id === 'convert-to-webp') await expect(link, 'the link to AVIF to JPG of the page language').toHaveAttribute('href', routeById('avif-to-jpg').paths[lang] ?? '');
+        else await expect(link, 'a JPG has no converter to point to').toHaveCount(0);
+        await animationsDone(page);
+        expect(await violationsEverywhere(page), 'the refused file').toEqual([]);
+      });
+    }
+  }
+});
 
 test.describe('axe nas ferramentas de imagem em pt e es com o resultado, a 360 e 1280px, nos temas escuro e claro', () => {
   test.use({ reducedMotion: 'reduce' });

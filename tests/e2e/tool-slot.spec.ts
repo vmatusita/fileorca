@@ -34,6 +34,8 @@ const fixture = (name: string, as = name, mimeType = 'image/jpeg'): TestFile => 
 const INPUT: Partial<Record<ImagePageId, () => TestFile>> = {
   'heic-to-jpg': () => fixture('heic-08-iphone13pro-paisagem-hdr-ios17.heic', 'photo.heic', 'image/heic'),
   'webp-to-jpg': () => fixture('gen-webp-exif-gps.webp', 'photo.webp', 'image/webp'),
+  // F17 (decision 13): AVIF to JPG takes AVIF only; Convert to WebP takes the JPEG drawn in the page, as the others.
+  'avif-to-jpg': () => fixture('gen-avif.avif', 'photo.avif', 'image/avif'),
   // 1600 × 1200: cut to 16:9, not enlarged. A photo smaller than 1280 × 720 adds a second note (DECISOES § 464).
   'resize-image-youtube-thumbnail': () => fixture('gen-jpg-02-orientacao8.jpg', 'photo.jpg'),
 };
