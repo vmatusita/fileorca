@@ -681,7 +681,15 @@ for (const block of moneyBlocks(MONEY_PATHS)) {
 
 // Review F6 (d-1; DECISOES § 251): text that is not a number of the page's language gets the range and how the page writes
 // decimals (WCAG 3.3.3); a number out of the range gets the range alone, in the three languages.
-test('a decimal written the way of another language gets the range and how to write it', async ({ page }) => {
+// F16 (items 1 and 2; DECISOES § 683, § 684 and § 696): a thousands separator and two digits at the end of the price gets the
+// hint too ("3,755,00"), and a number written right with more decimals than the field keeps gets how many it keeps, alone:
+// four in the rate, two in the price, none in the term (until the F16 the term said its range).
+const DECIMALS_SAID = {
+  en: { rate: 'Use up to 4 decimal places.', price: 'Use up to 2 decimal places.', term: 'Use a whole number.' },
+  pt: { rate: 'Use até 4 casas decimais.', price: 'Use até 2 casas decimais.', term: 'Use um número inteiro.' },
+  es: { rate: 'Usa hasta 4 decimales.', price: 'Usa hasta 2 decimales.', term: 'Usa un número entero.' },
+};
+test('a decimal written the way of another language gets the range and how to write it, and too many decimals how many', async ({ page }) => {
   for (const [lang, path, wrong, out] of [
     ['pt', moneyPage('br-sac-price', 'pt')?.path ?? '', '11.5', '99'],
     ['es', moneyPage('mortgage-calculator', 'es')?.path ?? '', '6,5', '99'],
@@ -705,11 +713,23 @@ test('a decimal written the way of another language gets the range and how to wr
       await expect(error, `${lang} "${text}"`).toBeVisible();
       await expect(error, `${lang} "${text}"`).not.toContainText(hint);
     }
+    // F16: a number written right with five decimals in the rate gets the four the rate keeps, with no range and no hint.
+    await field.fill(lang === 'pt' ? '6,55555' : '6.55555');
+    await expect(error, `${lang} taxa com 5 casas`).toHaveText(DECIMALS_SAID[lang].rate);
     await field.fill(lang === 'pt' ? '11,5' : '6.5');
+    await expect(error, `${lang} taxa certa`).toHaveCount(0);
+    // F16: the price, with three decimals, and with a separator and two digits at its end (the hint, as "6,5" in the rate).
+    const price = page.locator('#fo-calc-p');
+    await price.fill(lang === 'pt' ? '500.000,555' : '375,000.555');
+    await expect(error, `${lang} preço com 3 casas`).toHaveText(DECIMALS_SAID[lang].price);
+    await price.fill(lang === 'pt' ? '5.005.00' : '3,755,00');
+    await expect(error, `${lang} preço com o separador`).toContainText(hint);
+    await price.fill(lang === 'pt' ? '500.000' : '375,000');
+    await expect(error, `${lang} preço certo`).toHaveCount(0);
     const term = page.locator('#fo-calc-n, #fo-calc-t').first();
     await term.fill(lang === 'pt' ? '12,5' : '30.5');
     await expect(term, `${lang} prazo`).toHaveAttribute('aria-invalid', 'true');
-    await expect(error, `${lang} prazo`).toBeVisible();
+    await expect(error, `${lang} prazo`).toHaveText(DECIMALS_SAID[lang].term);
     await expect(error, `${lang} prazo`).not.toContainText(hint);
   }
 });
